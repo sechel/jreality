@@ -10,8 +10,6 @@ import java.util.logging.Level;
 
 import javax.swing.JFrame;
 
-import com.jme.util.LoggingSystem;
-
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.scene.Camera;
 import de.jreality.scene.PointLight;
