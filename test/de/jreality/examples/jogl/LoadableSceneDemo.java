@@ -33,9 +33,19 @@ public class LoadableSceneDemo extends InteractiveViewerDemo {
 		else iv.loadScene(null);
     }
     String root = "de.jreality.worlds.";
-    String[] loadableScenes = {"AnimationDemo","Cell120","DebugLattice",
-    		"FunnyRuledSurface","HopfFibration","Icosahedra","ImplodedTori",
-    				"JOGLSkyBox","StandardDemo","TestSphereDrawing","TestTubes","SoccerBall"};
+    String[] loadableScenes = {"de.jreality.worlds.AnimationDemo",
+ 			"de.jreality.worlds.DebugLattice",
+    			"de.jreality.worlds.FunnyRuledSurface",
+			"de.jreality.worlds.HopfFibration",
+			"de.jreality.worlds.ElephantTrunk",
+			"de.jreality.worlds.Icosahedra",
+			"de.jreality.worlds.ImplodedTori",
+    			"de.jreality.worlds.JOGLSkyBox",
+			"de.jreality.worlds.StandardDemo",
+			"de.jreality.worlds.TestSphereDrawing",
+			"de.jreality.worlds.TestTubes",
+   			"discreteGroup.demo.Cell120",
+			"discreteGroup.demo.SoccerBall"};
    
     Class c;
     public void lookupClasses()	{
@@ -62,7 +72,7 @@ public class LoadableSceneDemo extends InteractiveViewerDemo {
 			jm.addActionListener( new ActionListener() {
 				public void actionPerformed(ActionEvent e)	{
 					unloadScene();
-					loadScene(root+loadableScenes[j]);
+					loadScene(loadableScenes[j]);
 					viewer.render();
 					viewer.getViewingComponent().requestFocus();
 				}

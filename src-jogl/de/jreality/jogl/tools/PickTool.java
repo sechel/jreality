@@ -37,7 +37,7 @@ public class PickTool extends AbstractMouseTool {
 		if (!super.startTrackingAt(e)) return false;
 
 		newPickPoint = null;
-		pickAction.setPickPoint(current);
+		pickAction.setPickPoint(current[0], current[1]);
 		List picks = (List) pickAction.visit();			
 		if (picks!= null && (picks.size() > 0))	{
 			newPickPoint = (PickPoint) picks.get(0);
@@ -50,11 +50,11 @@ public class PickTool extends AbstractMouseTool {
 		if (!super.track(e)) return false;
 
 		newPickPoint = null;
-		pickAction.setPickPoint(current);
-		long begin = System.currentTimeMillis();
+		pickAction.setPickPoint(current[0], current[1]);
+		//long begin = System.currentTimeMillis();
 		List picks = (List) pickAction.visit();			
-		long end = System.currentTimeMillis();
-		System.out.println("Pick took "+(end-begin)+" ms");
+		//long end = System.currentTimeMillis();
+		//System.out.println("Pick took "+(end-begin)+" ms");
 		if (picks!= null && (picks.size() > 0))	{
 			newPickPoint = (PickPoint) picks.get(0);
 		} 
