@@ -46,27 +46,9 @@ public class PointSet extends de.jreality.scene.proxy.rmi.PointSet implements
 
         public void setVertices(ByteBufferWrapper data, int vertexSize) {
             System.out.println("PointSet.setVertices()");
-            if (vertices == null || data.getDoubleLength() != vertices.length) {
-                WritableDataList dl = new WritableDataList(StorageModel.DOUBLE_ARRAY.inlined(vertexSize), data);
-                vertices = (double[]) dl.getData();
-                setVertexCountAndAttributes(Attribute.COORDINATES, dl);
-            } else {
-                nodeLock.writeLock();
-                data.getReadBuffer().asDoubleBuffer().get(vertices);
-                nodeLock.writeUnlock();
-            }
         }
         
         public void setVertexNormals(ByteBufferWrapper data, int normalSize) {
             System.out.println("PointSet.setVertexNormals()");
-            if (vertexNormals == null || data.getDoubleLength() != vertexNormals.length) {
-                WritableDataList dl = new WritableDataList(StorageModel.DOUBLE_ARRAY.inlined(normalSize), data);
-                vertexNormals = (double[]) dl.getData();
-                setVertexCountAndAttributes(Attribute.NORMALS, dl);
-            } else {
-                nodeLock.writeLock();
-                data.getReadBuffer().asDoubleBuffer().get(vertexNormals);
-                nodeLock.writeUnlock();
-            }
         }
 }

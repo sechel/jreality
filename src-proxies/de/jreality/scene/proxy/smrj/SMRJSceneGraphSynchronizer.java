@@ -22,6 +22,7 @@
  */
 package de.jreality.scene.proxy.smrj;
 
+import java.nio.ByteBuffer;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -144,7 +145,10 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
                 if (a == Attribute.COORDINATES || a == Attribute.NORMALS) {
                     DoubleArray da = dl.toDoubleArray(); 
                     ByteBufferWrapper bbw = ByteBufferWrapper.getInstance();
-                    da.toNativeByteBuffer(bbw.createWriteBuffer(da.getLength()*8));
+                    ByteBuffer bb = bbw.createWriteBuffer(da.getLength()*8);
+                    da.toNativeByteBuffer(bb);
+                    if (bb.remaining()>0) throw new RuntimeException("not all read! "+bb);
+                    if (bbw.getDoubleLength() != da.getLength()) throw new RuntimeException("length differs!");
                     if (a == Attribute.COORDINATES) ((RemotePointSet) dst).setVertices(bbw, dl.toDoubleArrayArray().getLengthAt(0));
                     else ((RemotePointSet) dst).setVertexNormals(bbw, dl.toDoubleArrayArray().getLengthAt(0));
                 } else {

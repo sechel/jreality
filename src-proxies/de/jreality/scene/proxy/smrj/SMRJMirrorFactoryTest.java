@@ -71,8 +71,8 @@ public class SMRJMirrorFactoryTest extends TestCase {
             for (int i = 0; i < localClients; i++) {
                 rec[2*i] = new TCPReceiverIO(HOST, 8868);
                 rec[2*i].start();
-                rec[2*i+1] = new TCPReceiverNIO(HOST, 8868);
-                rec[2*i+1].start();
+//                rec[2*i+1] = new TCPReceiverNIO(HOST, 8868);
+//                rec[2*i+1].start();
             }
             try {
                 Thread.sleep(1000);
@@ -111,26 +111,32 @@ public class SMRJMirrorFactoryTest extends TestCase {
         assertEquals(data, rec);
     }
     
-    public void testVisitIndexedFaceSet() throws IOException {
+    public void testVisitIndexedFaceSet() throws Exception {
         proxyScene = new SMRJMirrorScene(rf);
-        ch = new CatenoidHelicoid(3);
+        ch = new CatenoidHelicoid(302);
         ch.buildEdgesFromFaces();
         long l = System.currentTimeMillis();
         Object proxy = proxyScene.createProxyScene(ch);
         System.out.println("proxy: "+(Arrays.asList(proxy.getClass().getInterfaces())));
-        System.out.println(proxy);
+        //System.out.println(proxy);
         RemoteKey key = rf.getProxyKey(proxy);
         System.out
                 .println("visit: " + (System.currentTimeMillis() - l) + " ms");
+        Thread.sleep(300);
         IndexedFaceSet copy = (IndexedFaceSet) rec[0].getClientFactory().getLocal(key);
-        System.out.println("copy: "+copy);
+        //System.out.println("copy: "+copy);
         assertEquals(ch.getVertexAttributes(), copy.getVertexAttributes());
         assertEquals(ch.getEdgeAttributes(), copy.getEdgeAttributes());
         assertEquals(ch.getFaceAttributes(), copy.getFaceAttributes());
-        ch.setAlpha(1.2);
-        assertEquals(ch.getVertexAttributes(), copy.getVertexAttributes());
-        ch.setAlpha(1.4);
-        assertEquals(ch.getVertexAttributes(), copy.getVertexAttributes());
+//        ch.setAlpha(1.2);
+//        assertEquals(ch.getVertexAttributes(), copy.getVertexAttributes());
+//        ch.setAlpha(1.4);
+//        assertEquals(ch.getVertexAttributes(), copy.getVertexAttributes());
+        for (int i =0; i < 10; i++) { 
+        	System.out.println(i+". mal");
+        	ch.setAlpha(i*0.1);
+        	assertEquals(ch.getVertexAttributes(), copy.getVertexAttributes());
+        }
     }
 
     public static void assertEquals(DataListSet arg0, DataListSet arg1) {

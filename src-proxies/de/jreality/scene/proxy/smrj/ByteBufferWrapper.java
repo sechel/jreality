@@ -38,7 +38,10 @@ import java.nio.channels.Channels;
 public class ByteBufferWrapper implements Serializable {
 
 
+	private static final Object outLock = new Object();
     private static ByteBuffer bufferOUT;
+    
+	private static final Object inLock = new Object();
     private static ByteBuffer bufferIN;
     private transient int length;
     
@@ -65,18 +68,26 @@ public class ByteBufferWrapper implements Serializable {
     }
     
     private void writeObject(ObjectOutputStream out) throws IOException {
+    	synchronized(outLock) {
         out.writeInt(length);
         bufferOUT.position(0).limit(length);
-        int wrote = Channels.newChannel(out).write(bufferOUT);
+        int wrote = 0;
+        while ((wrote +=Channels.newChannel(out).write(bufferOUT)) < length) ;
+        //if (wrote < length) throw new Error();
+    	}
     }
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    	synchronized(inLock) {
         length = in.readInt();
         if (bufferIN == null || bufferIN.capacity() < length) {
             bufferIN = ByteBuffer.allocateDirect(length).order(ByteOrder.nativeOrder());
         }
         bufferIN.position(0).limit(length);
-        int read = Channels.newChannel(in).read(bufferIN);
+        int read=0;
+        while ((read +=Channels.newChannel(in).read(bufferIN))< length) ;
+        //if (read < length) throw new Error();
         bufferIN.flip();
+    	}
     }
     public int getLength() {
         return length;
