@@ -49,7 +49,7 @@ public class SnowClipper extends InteractiveViewerDemo {
 	public SnowClipper()	{
 		super();
 	}
-	SceneGraphPath toClipPlane, toClipPlane2, toSculpture, selectionList[];
+	SceneGraphPath toClipPlane, toClipPlane2, toSculpture;
 	SceneGraphComponent snowSculpture, clipPlaneJiggler, clipPlaneJiggler2, whiteframe, redframe ;
 	InfoOverlay iolay;
 	Vector infoStrings;
@@ -151,11 +151,15 @@ public class SnowClipper extends InteractiveViewerDemo {
 //		toClipPlane.push(cp);
 		toClipPlane2.push(clipPlaneJiggler2);
 		
-		selectionList = new SceneGraphPath[4];
-		selectionList[0] = toWorld;
-		selectionList[1] = toSculpture;
-		selectionList[2] = toClipPlane;
-		selectionList[3] = toClipPlane2;
+		viewer.getSelectionManager().addSelection(toWorld);
+		viewer.getSelectionManager().addSelection(toSculpture);
+		viewer.getSelectionManager().addSelection(toClipPlane);
+		viewer.getSelectionManager().addSelection(toClipPlane2);
+//		selectionList = new SceneGraphPath[4];
+//		selectionList[0] = toWorld;
+//		selectionList[1] = toSculpture;
+//		selectionList[2] = toClipPlane;
+//		selectionList[3] = toClipPlane2;
 		
 		calculateClippingPlanes();
 		whiteframe = SceneGraphUtilities.createFullSceneGraphComponent("whiteframe");
@@ -204,9 +208,9 @@ public class SnowClipper extends InteractiveViewerDemo {
 					break;
 
 				case KeyEvent.VK_0:		// cycle through selection
-					selection = (selection + 1) % selectionList.length;
-				 	viewer.getSelectionManager().setSelection(selectionList[selection]);
-				 	System.out.println("Cycling selection");
+//					selection = (selection + 1) % selectionList.length;
+				 	viewer.getSelectionManager().cycleSelectionPaths();
+//				 	System.out.println("Cycling selection");
 				 	viewer.render();
 					break;
 					

@@ -22,6 +22,8 @@ import de.jreality.scene.pick.PickPoint;
 public class UserTool extends PickTool {
 
 	List listeners;
+	double[] pointNDC = new double[3];
+	
 	public UserTool()	{
 		super();
 		listeners = new Vector();
@@ -29,25 +31,10 @@ public class UserTool extends PickTool {
 	public boolean attachToViewer(InteractiveViewer v) {
 		return super.attachToViewer(v);
 	}
-	public boolean endTracking(MouseEvent e) {
-		//if (!super.endTracking(e)) return false;
-		if (!listeners.isEmpty())	{
-			for (int i = 0; i<listeners.size(); ++i)	{
-				UserToolInterface l = (UserToolInterface) listeners.get(i);
-				l.endTracking(this);
-			}
-		}
-		return true;
-	}
-	
 	public boolean startTrackingAt(MouseEvent e) {
 		if (!super.startTrackingAt(e)) return false;
-		if (newPickPoint == null) {
-			newPickPoint = new PickPoint();
-			double[] ndc4 = {current[0], current[1], 0.0, 1.0};
-			newPickPoint.setPointNDC(ndc4);
-			System.out.println("Failed to hit");
-		}
+		pointNDC = new double[] {current[0], current[1], 0.0, 1.0};
+		//if (newPickPoint != null) newPickPoint.setPointNDC(pointNDC);
 		if (!listeners.isEmpty())	{
 			for (int i = 0; i<listeners.size(); ++i)	{
 				UserToolInterface l = (UserToolInterface) listeners.get(i);
@@ -59,11 +46,8 @@ public class UserTool extends PickTool {
 	
 	public boolean track(MouseEvent e) {
 		if (!super.track(e)) return false;
-		if (newPickPoint == null) {
-			newPickPoint = new PickPoint();
-			double[] ndc4 = {current[0], current[1], 0.0, 1.0};
-			newPickPoint.setPointNDC(ndc4);
-		}
+			
+		pointNDC = new double[] {current[0], current[1], 0.0, 1.0};
 		//System.out.println("Object coordinates: "+Rn.toString(newPickPoint.getPointObject()));
 		if (!listeners.isEmpty())	{
 			for (int i = 0; i<listeners.size(); ++i)	{
@@ -74,10 +58,25 @@ public class UserTool extends PickTool {
 		return true;
 	}
 	
+	public boolean endTracking(MouseEvent e) {
+		//if (!super.endTracking(e)) return false;
+		if (!listeners.isEmpty())	{
+			for (int i = 0; i<listeners.size(); ++i)	{
+				UserToolInterface l = (UserToolInterface) listeners.get(i);
+				l.endTracking(this);
+			}
+		}
+		return true;
+	}
+	
 	public PickPoint getPickPoint()	{
 		return newPickPoint;
 	}
 	
+	public double[] getPointNDC()	{
+		if (newPickPoint == null) return pointNDC;
+		return newPickPoint.getPointNDC();
+	}
 	public int getButton() {
 		return button;
 	}

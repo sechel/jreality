@@ -38,6 +38,8 @@ import de.jreality.util.SceneGraphUtilities;
 public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 	private SceneGraphPath defaultSelection;
 	private SceneGraphPath theSelection;
+	private SceneGraphPath currentCycleSelection;
+	private Vector selectionList;
 	private PickPoint pickPoint;
 	private boolean renderSelection = false, renderPick = false;
 	private boolean selectionEditable = false;
@@ -47,11 +49,13 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 	private Appearance selectedAppearance;
 	private double pickPointSize = .02;
 	private boolean useSphere = true;
+	private boolean firstTime = true;
 	/**
 	 * 
 	 */
 	public SelectionManager() {
 		super();
+		selectionList = new Vector();
 		boundKit = SceneGraphUtilities.createFullSceneGraphComponent("boundKit");
 		boundAppearance = boundKit.getAppearance();
 		boundAppearance.setAttribute(CommonAttributes.EDGE_DRAW,true);
@@ -101,7 +105,11 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 	 * @param path
 	 */
 	public void setSelection(SceneGraphPath path) {
-		// TODO add SelectionChanged event and listener support, etc
+		setSelection(path, false);
+	}
+
+	public void setSelection(SceneGraphPath path, boolean cycling) {
+// TODO add SelectionChanged event and listener support, etc
 		if (path == null)	{
 			theSelection = defaultSelection;
 			System.out.println("Default sel: "+theSelection.toString());
@@ -116,10 +124,10 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 			if (tail instanceof SceneGraphComponent)	{
 				Transformation t =  ((SceneGraphComponent) tail).getTransformation();
 				if (t != null && t.getIsEditable())	{
-					if (debug) System.err.println("SceneGraphComponent is editable");
+					if (debug) System.err.println("Transformation is editable");
 					selectionEditable = true;
 				} else {
-					if (debug) System.err.println("SceneGraphComponent is not editable");
+					if (debug) System.err.println("Transformation is not editable");
 					selectionEditable = false;
 					} 
 			}
@@ -129,6 +137,7 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 				} 
 		} 
 		else if (debug) System.err.println("SelectionManager: empty selection");
+		
 			
 		if (theSelection != null)	{
 			selectedAppearance = null;
@@ -143,8 +152,10 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 				}
 			}
 		}
-		
-		
+		if (!cycling) {
+			previousFullSelection = (SceneGraphPath) theSelection.clone();
+			truncatedSelection = null;
+		}
 		broadcastChange();
 	}
 
@@ -337,4 +348,33 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 	public Appearance getPickPointAppearance() {
 		return pickPointAppearance;
 	}
+	
+	SceneGraphPath truncatedSelection = null, previousFullSelection;
+	public void cycleSelection()	{
+		if (truncatedSelection == null || truncatedSelection.getLength()<=2) truncatedSelection = (SceneGraphPath) previousFullSelection.clone();
+		else truncatedSelection.pop();
+		setSelection(truncatedSelection, true);
+	}
+	
+	public void addSelection(SceneGraphPath p)	{
+		if (selectionList.indexOf(p) == -1) selectionList.add(p);
+	}
+		
+	public void removeSelection(SceneGraphPath p)	{
+		selectionList.remove(p);
+	}
+		
+	public void cycleSelectionPaths()	{
+		int target = 0;
+		if (selectionList == null || selectionList.size() == 0)		return;
+		if (currentCycleSelection != null) {
+			int which = selectionList.indexOf(currentCycleSelection);
+			if (which != -1)  {
+				target = (which + 1) % selectionList.size();
+			}
+		}
+		currentCycleSelection = (SceneGraphPath) selectionList.get(target);
+		setSelection(currentCycleSelection);
+	}
+	
 }

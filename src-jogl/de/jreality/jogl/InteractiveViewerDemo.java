@@ -75,10 +75,10 @@ public class InteractiveViewerDemo extends JFrame{
 	Box hack;
 	boolean fullScreen = false;
 	
-	protected static String resourceDir = ".";
+	protected static String resourceDir = ".", saveResourceDir = ".";
 	static {
 		String foo = System.getProperty("jreality.jogl.resourceDir");
-		if (foo != null) resourceDir = foo;
+		if (foo != null) saveResourceDir = resourceDir = foo; 
 	}
 	/**
 	 * 
@@ -278,6 +278,7 @@ public class InteractiveViewerDemo extends JFrame{
 			sgc = readFile(file);
 			parent.addChild(sgc);
 			sgp.push(sgc);
+			resourceDir = file.getAbsolutePath();
 		} else {
 			System.out.println("Unable to open file");
 			return;
@@ -287,13 +288,14 @@ public class InteractiveViewerDemo extends JFrame{
 	}
 	protected void saveToFile() {
 		SceneGraphComponent parent= null;
-		JFileChooser fc = new JFileChooser(resourceDir);
+		JFileChooser fc = new JFileChooser(saveResourceDir);
 		//System.out.println("FCI resource dir is: "+resourceDir);
 		int result = fc.showSaveDialog(this);
 		SceneGraphComponent sgc = null;
 		if (result == JFileChooser.APPROVE_OPTION)	{
 			File file = fc.getSelectedFile();
 			viewer.getRenderer().saveScreenShot(file);
+			saveResourceDir = file.getAbsolutePath();
 		} else {
 			System.out.println("Unable to open file");
 			return;

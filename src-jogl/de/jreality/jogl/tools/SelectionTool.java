@@ -22,7 +22,7 @@ public class SelectionTool extends PickTool  {
 	int			depth; 
 	SelectionManager		selectionManager;
 	SceneGraphPath	previousFullSelection, truncatedSelection, newSelection;
-	boolean mouseMoved;
+	boolean mouseMoved, firstTime;
 	/**
 	 * 
 	 */
@@ -38,6 +38,7 @@ public class SelectionTool extends PickTool  {
 		// TODO Auto-generated method stub
 		if (!super.attachToViewer(v)) return false;
 		selectionManager = v.getSelectionManager();
+		firstTime = true;
 		return true;
 	}
 
@@ -95,11 +96,8 @@ public class SelectionTool extends PickTool  {
 		track(e);
 
 		// cycle through the path as long as the full selection path remains the same
-		if (previousFullSelection != null && truncatedSelection != null && truncatedSelection.getLength() > 1  && previousFullSelection.isEqual(newSelection) ) {
-			truncatedSelection.pop();
-			selectionManager.setPickPoint(newPickPoint);
-			selectionManager.setSelection(truncatedSelection);
-			//System.err.println("3");
+		if (previousFullSelection != null &&  previousFullSelection.isEqual(newSelection) ) {
+			selectionManager.cycleSelection();
 			return true;	
 		} // else {    // renew selection
 		// To be here means we have selected a different full path than the previous one
@@ -107,9 +105,12 @@ public class SelectionTool extends PickTool  {
 		// notify the selection manager
 		selectionManager.setPickPoint(newPickPoint);
 		selectionManager.setSelection(newSelection);
+		if (firstTime)	{
+			selectionManager.setRenderSelection(true);
+			firstTime = false;
+		}
 		newPickPoint = null;
 		newSelection = null;
-		truncatedSelection = (SceneGraphPath) previousFullSelection.clone();
 		theViewer.render();
 		return true;
 	}

@@ -41,6 +41,7 @@ public class TranslateShapeTool extends ShapeTool {
 		if (button == 1)	{
 			mat = P3.makeTranslationMatrix(null, anchorV, currentV, theEditedTransform.getSignature());
 		} else {
+			// TODO Figure out why this doesn't work as planned: too slow (sometimes)
 			double[] o = {0,0};
 			double[] oV = new double[4];
 			double[] zV = new double[4];

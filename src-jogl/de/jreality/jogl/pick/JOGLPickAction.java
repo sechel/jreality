@@ -139,7 +139,7 @@ public class JOGLPickAction extends PickAction  {
 				double x[] = new double[2];
 				x[0] = (-b + d)/(2 * a);
 				x[1] = (-b - d)/(2 * a);
-
+	
 				double[][] opt = new double[2][];
 				double[][] ndcpt = new double[2][];
 				double[] o2ndc = Rn.inverse(null, ndc2o);
