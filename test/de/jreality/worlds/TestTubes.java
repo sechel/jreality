@@ -13,6 +13,7 @@ import de.jreality.geometry.Primitives;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.DiscreteSpaceCurve;
+import de.jreality.jogl.LevelOfDetailComponent;
 import de.jreality.jogl.shader.DefaultVertexShader;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
@@ -68,6 +69,7 @@ public class TestTubes extends AbstractLoadableScene {
 	static double[][] otherDirection	= {{1,0,0,0},{0,0,1,0},{0,0,2,0},{1,0,3,0}};
 	
 	static double[][][] patch;
+	static double[] lodLevels = {.1,.2, .4, .8};
 	static 
 	{
 		patch = new double[circle.length][otherDirection.length][4];
@@ -139,7 +141,7 @@ public class TestTubes extends AbstractLoadableScene {
 		   		mysection[i][2] = 0.0;
 		   }
 		   IndexedLineSet ils = torus1;
-		   colorByAngle(ils, new double[] {1,0,0,1}, new double[] {0,1,0,1});
+		   colorByAngle(ils, new double[] {1,0,0}, new double[] {0,1,0});
 		   double[][] tpts = torus1.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 		   //QuadMeshShape torus1Tubes = TubeUtility.makeTubeAsIFS(tpts, .04, null, TubeUtility.PARALLEL, true, Pn.EUCLIDEAN);
 		   QuadMeshShape torus1Tubes = TubeUtility.makeTubeAsIFS(torus1, 0, true, .04, mysection, TubeUtility.PARALLEL, true, Pn.EUCLIDEAN, 6);
@@ -170,7 +172,9 @@ public class TestTubes extends AbstractLoadableScene {
 		   globeNode.addChild(globeNode2);
 	   }
 	   
-	   SceneGraphComponent globeNode4= SceneGraphUtilities.createFullSceneGraphComponent("patch");
+	   //SceneGraphComponent globeNode4= SceneGraphUtilities.createFullSceneGraphComponent("patch");
+	   SceneGraphComponent globeNode4 = SceneGraphUtilities.createFullSceneGraphComponent("a node ");
+	   globeNode4.setTransformation(new Transformation());
 	   Appearance ap1 = new Appearance();
 	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.BLUE);
 	   ap1.setAttribute(CommonAttributes.SPECULAR_EXPONENT, 100.0);
@@ -181,11 +185,17 @@ public class TestTubes extends AbstractLoadableScene {
 	   globeNode4.setAppearance(ap1);
 	   
 	   if (doBez)	{
-		   double[][][] tubePoints = TubeUtility.makeTubeAsBezierPatchMesh(form, .2, circle, TubeUtility.PARALLEL,true, Pn.EUCLIDEAN);
-		   BezierPatchMesh bpm = new BezierPatchMesh(2, 3, tubePoints);
-		   for (int i = 0; i<3; ++i)	{ bpm.refine();}
-		   QuadMeshShape qmpatch = GeometryUtility.representBezierPatchMeshAsQuadMesh(bpm);	   
-		   globeNode4.setGeometry(qmpatch);	   	
+		   	double[][][] tubePoints = TubeUtility.makeTubeAsBezierPatchMesh(form, .2, circle, TubeUtility.PARALLEL,true, Pn.EUCLIDEAN);
+	   		SceneGraphComponent parent = new LevelOfDetailComponent(lodLevels);
+	   		for (int i = 0; i<4; ++i)	{ 
+	   			BezierPatchMesh bpm = new BezierPatchMesh(2, 3, tubePoints);
+		   		for (int j = 1; j<= i; ++j)	bpm.refine();
+		   		QuadMeshShape qmpatch = GeometryUtility.representBezierPatchMeshAsQuadMesh(bpm);	   
+		   		SceneGraphComponent sgc = SceneGraphUtilities.createFullSceneGraphComponent("selection child "+i);
+		   		sgc.setGeometry(qmpatch);	   
+		   		parent.addChild(sgc);
+	   		}
+	   		globeNode4.addChild(parent);
 	   }
 
 	   if (doIco)	{
@@ -204,7 +214,7 @@ public class TestTubes extends AbstractLoadableScene {
 	   globeNode.addChild(globeNode4);
 	  return root;
 	}
-	 
+	
 	public void setConfiguration(ConfigurationAttributes config) {
 	}
 

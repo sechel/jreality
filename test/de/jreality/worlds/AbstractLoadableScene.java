@@ -21,6 +21,9 @@ import de.jreality.util.Pn;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 public abstract class AbstractLoadableScene implements LoadableScene {
+	
+	public void dispose() {}
+	
 	ConfigurationAttributes config = null;
 
 	public void customize(JMenuBar menuBar, Viewer viewer) { return; }
