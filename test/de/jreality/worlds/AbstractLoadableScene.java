@@ -28,9 +28,7 @@ public abstract class AbstractLoadableScene implements LoadableScene {
 	public int getSignature() {
 		return Pn.EUCLIDEAN;
 	}
-	public SceneGraphComponent makeWorld() {
-		return null;
-	}
+	public abstract SceneGraphComponent makeWorld();
 	
 	public void setConfiguration(ConfigurationAttributes config) {
 		this.config = config;
