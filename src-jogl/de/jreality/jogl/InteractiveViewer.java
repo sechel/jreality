@@ -178,7 +178,7 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 	}
 	public void setCameraPath(SceneGraphPath pp) {
 		SceneGraphPath p = pp;
-		if (!CameraUtility.isCameraPathValid(pp) || cameraPath.getFirstElement() != sceneRoot) {
+		if (pp == null || !CameraUtility.isCameraPathValid(pp) || cameraPath.getFirstElement() != sceneRoot) {
 			System.err.println("Invalid camera path, adding new camera.");
 			Camera c = new Camera();
 			SceneGraphComponent sgc = new SceneGraphComponent();
