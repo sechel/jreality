@@ -15,11 +15,11 @@ import javax.swing.KeyStroke;
 import de.jreality.geometry.Primitives;
 import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InteractiveViewer;
-import de.jreality.jogl.pick.PickPoint;
 import de.jreality.scene.*;
 import de.jreality.scene.SceneGraphPath.PathMatrixChanged;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.*;
 
 

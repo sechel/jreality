@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Vector;
 
 import de.jreality.jogl.InteractiveViewer;
-import de.jreality.jogl.pick.PickPoint;
+import de.jreality.scene.pick.PickPoint;
 
 /**
  * @author gunn

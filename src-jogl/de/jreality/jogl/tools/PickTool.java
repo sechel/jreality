@@ -10,8 +10,8 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 
 import de.jreality.jogl.InteractiveViewer;
-import de.jreality.jogl.pick.PickAction;
-import de.jreality.jogl.pick.PickPoint;
+import de.jreality.jogl.pick.JOGLPickAction;
+import de.jreality.scene.pick.PickPoint;
 
 /**
  * @author gunn
@@ -22,14 +22,15 @@ import de.jreality.jogl.pick.PickPoint;
 public class PickTool extends AbstractMouseTool {
 
 	protected PickPoint newPickPoint;
-	protected PickAction pickAction;
+	protected JOGLPickAction pickAction;
 	PickPoint[] hits;
 	static boolean debug = true;
 
 
 	public boolean attachToViewer(InteractiveViewer v) {
 		if (!super.attachToViewer(v)) return false;
-		pickAction = new PickAction(theViewer);
+		pickAction = new JOGLPickAction(theViewer);
+		pickAction.setUseOpenGL(false);
 		return true;
 	}
 	
