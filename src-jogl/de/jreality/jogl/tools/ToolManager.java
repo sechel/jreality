@@ -13,6 +13,7 @@ import java.util.TimerTask;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JToolBar;
 
 import de.jreality.jogl.InteractiveViewer;
@@ -38,6 +39,15 @@ public class ToolManager {
 	protected ScaleShapeTool scaleTool;
 	protected TranslateShapeTool transTool;
 	protected StereoCameraTool stereoTool;
+	
+	final public static int SELECTION_TOOL = 1;
+	final public static int ROTATION_TOOL = 10;
+	final public static int STRETCH_TOOL = 11;
+	final public static int TRANSLATION_TOOL = 12;
+	final public static int CAMERA_ZOOM_TOOL = 20;
+	final public static int CAMERA_FLY_TOOL = 21;
+	final public static int CAMERA_STEREO_TOOL = 22;
+	final public static int USER_TOOL = 30;
 	/**
 	 * 
 	 */
@@ -59,24 +69,41 @@ public class ToolManager {
 		currentTool.attachToViewer(viewer);
 	}
 
+	public void activateTool(int which)	{
+		MouseTool whichTool = null;
+		switch(which)	{
+		case SELECTION_TOOL:	whichTool = selTool; break;
+		case ROTATION_TOOL:	whichTool = rotTool; break;
+		case STRETCH_TOOL:	whichTool = scaleTool; break;
+		case TRANSLATION_TOOL:	whichTool = transTool; break;
+		case CAMERA_ZOOM_TOOL:	whichTool = zoomTool; break;
+		case CAMERA_FLY_TOOL: 	whichTool = pointTool; break;
+		case CAMERA_STEREO_TOOL:	whichTool = stereoTool; break;
+		default:					whichTool = selTool; break;
+		}
+		activateTool(whichTool);
+	}
+	
 	int userToolPosition = 1;
 	JToolBar tb;
+	ToolAction[] actions = null;
 	public JToolBar getToolbar()	{
 		if (tb == null) tb = new JToolBar();
 		else tb.removeAll();
-		tb.add(new ToolAction("X",selTool,"Selection tool"));
+		if (actions == null) actions = new ToolAction[7];
+		tb.add(actions[0] = new ToolAction("X",selTool,"Selection tool"));
 		//tb.add(new ToolAction("U",userTool,"User tool"));
 		// new user tools go here
 		tb.addSeparator();
 		tb.addSeparator();
-		tb.add(new ToolAction("R",rotTool,"Rotate tool"));
-		tb.add(new ToolAction("S",scaleTool,"Scale tool"));
-		tb.add(new ToolAction("T",transTool,"Translate tool"));
+		tb.add(actions[1] = new ToolAction("R",rotTool,"Rotate tool"));
+		tb.add(actions[2] = new ToolAction("S",scaleTool,"Scale tool"));
+		tb.add(actions[3] = new ToolAction("T",transTool,"Translate tool"));
 		tb.addSeparator();
 		tb.addSeparator();
-		tb.add(new ToolAction("Z",zoomTool,"Camera zoom tool"));
-		tb.add(new ToolAction("F",pointTool,"Camera fly tool"));
-		tb.add(new ToolAction("2",stereoTool,"Stereo camera tool"));
+		tb.add(actions[4] = new ToolAction("Z",zoomTool,"Camera zoom tool"));
+		tb.add(actions[5] = new ToolAction("F",pointTool,"Camera fly tool"));
+		tb.add(actions[6] = new ToolAction("2",stereoTool,"Stereo camera tool"));
 		//tb.add(new ToolAction("F",flyTool,"Camera fly tool"));
 		tb.addSeparator();
 		tb.addSeparator();
@@ -88,14 +115,11 @@ public class ToolManager {
 		public ToolAction(String name, MouseTool t, String tooltip)	{
 			super(name);
 			tool = t;
-			putValue(AbstractAction.SHORT_DESCRIPTION,tooltip);
+			putValue(Action.SHORT_DESCRIPTION,tooltip);
 		}
 		public void actionPerformed(ActionEvent e)	{
 			if (currentTool == tool) return;
-			if (currentTool != null) currentTool.detachFromViewer();
-			currentTool = tool;
-			currentTool.attachToViewer(viewer);
-			broadcastChange();
+			activateTool(tool);
 		}
 	}
 	public static class Changed extends java.util.EventObject	{
@@ -108,6 +132,15 @@ public class ToolManager {
 		}
 	}
 	
+	/**
+	 * 
+	 */
+	private void activateTool(MouseTool tool) {
+		if (currentTool != null) currentTool.detachFromViewer();
+		currentTool = tool;
+		currentTool.attachToViewer(viewer);
+		broadcastChange();
+	}
 	Vector listeners;
 	
 	public interface Listener extends java.util.EventListener	{
@@ -158,5 +191,6 @@ public class ToolManager {
 	public MouseTool getCurrentTool() {
 		return currentTool;
 	}
+
 
 }

@@ -549,7 +549,6 @@ public class JOGLRendererHelper {
 				
 			}	else {
 		for (int i = 0; i< sg.getNumFaces(); ++i)	{
-			IntArray tf = sg.getFaceAttributes(Attribute.INDICES).item(i).toIntArray();
 			if (colorBind == ElementBinding.PER_FACE) 		{					
 				da = faceColors.item(i).toDoubleArray();
 				if (colorLength == 3) 	{
@@ -561,11 +560,12 @@ public class JOGLRendererHelper {
 			if (pickMode) {
 				//System.out.print("+G"+i+"\n");
 				gl.glPushName( i);
-		}
+			}
 			if (normalBind == ElementBinding.PER_FACE) {
 				da = faceNormals.item(i).toDoubleArray();
 				gl.glNormal3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 			} 
+			IntArray tf = sg.getFaceAttributes(Attribute.INDICES).item(i).toIntArray();
 			gl.glBegin(GL.GL_POLYGON);
 			for (int j = 0; j<tf.getLength(); ++j)	{
 				int k = tf.getValueAt(j);

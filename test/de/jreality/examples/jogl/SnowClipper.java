@@ -48,21 +48,29 @@ public class SnowClipper extends InteractiveViewerDemo {
 	public SnowClipper()	{
 		super();
 	}
-	SceneGraphPath toClipPlane, toClipPlane2, toSculpture;
+	SceneGraphPath toClipPlane, toClipPlane2, toSculpture, selectionList[];
 	SceneGraphComponent snowSculpture, clipPlaneJiggler, clipPlaneJiggler2 ;
 	InfoOverlay iolay;
 	Vector infoStrings;
 	double[] clippingPlane, clippingPlane2, pickPoint;
-	
+	static String fileToLoad = "/homes/geometer/gunn/Documents/Models/snowSculpture/taperedscu.off";
+	static double snowSculptureScale = 25.0;
+	static {
+		String foo = System.getProperty("snowSculptureFile");
+		if (foo != null) fileToLoad = foo;
+		foo = System.getProperty("snowSculptureScale");
+		if (foo != null) snowSculptureScale = Double.parseDouble(foo);
+	}
 	public SceneGraphComponent makeWorld() {
 		SceneGraphComponent world = SceneGraphUtilities.createFullSceneGraphComponent("snowClipperWorld");
 		OOGLReader or = new OOGLReader();
 		SceneGraphComponent manipulator = SceneGraphUtilities.createFullSceneGraphComponent();
 		world.addChild(manipulator);
-		snowSculpture = or.readFromFile("/homes/geometer/gunn/Documents/Models/SplitKnot.off");
+		snowSculpture = or.readFromFile(fileToLoad);
+		snowSculpture.setName("snowSculptureModel");
 		manipulator.addChild(snowSculpture);
 		snowSculpture.setTransformation(new Transformation());
-		snowSculpture.getTransformation().setStretch(300);		// (-.2,.2) -> (-60, 60)" 
+		snowSculpture.getTransformation().setStretch(snowSculptureScale);		// (-.2,.2) -> (-60, 60)" 
 		snowSculpture.getTransformation().setTranslation(0,0,72);
 		snowSculpture.getTransformation().setIsEditable(false);
 		
@@ -115,14 +123,17 @@ public class SnowClipper extends InteractiveViewerDemo {
 		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{0,0,1,-144}));
 		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{0,0,-1,-4}));
 		
-		SceneGraphComponent tetra = SceneGraphUtilities.createFullSceneGraphComponent("tetra");
-		tetra.getTransformation().setStretch(59,59,71);
-		tetra.getTransformation().setTranslation(0,0,72);
+		SceneGraphComponent frame = SceneGraphUtilities.createFullSceneGraphComponent("frame");
+		frame.getTransformation().setStretch(59,59,71);
+		frame.getTransformation().setTranslation(0,0,72);
 		IndexedFaceSet tet = Primitives.cube();
-		tetra.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,Color.WHITE);
-		tetra.addChild(TubeUtility.ballAndStick(tet,.01,.01, null, null));
-		world.addChild(tetra);
+		frame.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,Color.WHITE);
+		frame.addChild(TubeUtility.ballAndStick(tet,.01,.01, null, null));
+		manipulator.addChild(frame);
 
+		SceneGraphPath toWorld = new SceneGraphPath();
+		toWorld.push(viewer.getSceneRoot());
+		toWorld.push(world);
 
 		toSculpture = new SceneGraphPath();
 		toSculpture.push(viewer.getSceneRoot());
@@ -140,13 +151,20 @@ public class SnowClipper extends InteractiveViewerDemo {
 //		toClipPlane.push(cp);
 		toClipPlane2.push(clipPlaneJiggler2);
 		
+		selectionList = new SceneGraphPath[4];
+		selectionList[0] = toWorld;
+		selectionList[1] = toSculpture;
+		selectionList[2] = toClipPlane;
+		selectionList[3] = toClipPlane2;
+		
 		viewer.getSceneRoot().getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR, new java.awt.Color(60, 60, 60));
 		viewer.getSelectionManager().getPickPointAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, .005);
 		viewer.getSelectionManager().setRenderSelection(true);
 		viewer.getViewingComponent().addKeyListener(new KeyAdapter()	{
 			
 		    double scaleFactor = .005;
-			public void keyPressed(KeyEvent e)	{
+		    int selection = 0;
+			public void keyPressed(KeyEvent e)	{ 
 				switch(e.getKeyCode())	{
 					
 				case KeyEvent.VK_H:
@@ -155,10 +173,18 @@ public class SnowClipper extends InteractiveViewerDemo {
 					System.out.println("shift-7:  decrease plane movement increment");
 					System.out.println("	8:  dump plane info to stdout");
 					System.out.println("	9:  dump pickpoint info to stdout");
+					System.out.println("	0:  cycle through selection list");
 					System.out.println("	up/down arrows: move white plane ");
 					System.out.println("	left/right arrows: move red plane ");
 					break;
 
+				case KeyEvent.VK_0:		// cycle through selection
+					selection = (selection + 1) % selectionList.length;
+				 	viewer.getSelectionManager().setSelection(selectionList[selection]);
+				 	System.out.println("Cycling selection");
+				 	viewer.render();
+					break;
+					
 				case KeyEvent.VK_6:
 					iolay.setVisible(!iolay.isVisible());
 			        break;
@@ -166,7 +192,7 @@ public class SnowClipper extends InteractiveViewerDemo {
 				case KeyEvent.VK_7:
 					if (e.isShiftDown()) scaleFactor *= .75;
 					else scaleFactor *= 1.3333;
-				System.out.println("Plane movement increment is "+scaleFactor);
+					System.out.println("Plane movement increment is "+scaleFactor);
 			        break;
 					
 				case KeyEvent.VK_8:
@@ -180,22 +206,22 @@ public class SnowClipper extends InteractiveViewerDemo {
 
 				
 				case KeyEvent.VK_UP:
-	    			moveZPlane(1, clipPlaneJiggler);
-	    			break;
+		    			moveZPlane(1, clipPlaneJiggler);
+		    			break;
 	    			
-		    case KeyEvent.VK_DOWN:
-	    			moveZPlane(-1, clipPlaneJiggler);
-	    			break;
-		   
-		    case KeyEvent.VK_LEFT:
-    				moveZPlane(-1, clipPlaneJiggler2);
-    				break;
-    			
-	    
-		    case KeyEvent.VK_RIGHT:
-    				moveZPlane(1, clipPlaneJiggler2);
-    				break;
-				}
+			    case KeyEvent.VK_DOWN:
+		    			moveZPlane(-1, clipPlaneJiggler);
+		    			break;
+			   
+			    case KeyEvent.VK_LEFT:
+	    				moveZPlane(-1, clipPlaneJiggler2);
+	    				break;
+	    			
+		    
+			    case KeyEvent.VK_RIGHT:
+	    				moveZPlane(1, clipPlaneJiggler2);
+	    				break;
+					}
 			}
 			/**
 			 * @param shift
@@ -211,13 +237,13 @@ public class SnowClipper extends InteractiveViewerDemo {
 			}
 
 		});
-			iolay = new InfoOverlay((InteractiveViewer) viewer);
-			iolay.setVisible(true);
- 			if ((viewer.getViewingComponent() instanceof GLCanvas))
- 				((GLDrawable) viewer.getViewingComponent()).addGLEventListener(iolay);	 		
-	 		infoStrings = new Vector();
-	 		iolay.setInfoStrings(infoStrings);
-		
+		iolay = new InfoOverlay((InteractiveViewer) viewer);
+		iolay.setVisible(true);
+		if ((viewer.getViewingComponent() instanceof GLCanvas))
+			((GLDrawable) viewer.getViewingComponent()).addGLEventListener(iolay);	 		
+ 		infoStrings = new Vector();
+ 		iolay.setInfoStrings(infoStrings);
+	
 		javax.swing.Timer followTimer = new javax.swing.Timer(200, new ActionListener()	{
 			public void actionPerformed(ActionEvent e) {updateInfoOverlay(); }
 		} ) ;

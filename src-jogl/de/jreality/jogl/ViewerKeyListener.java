@@ -18,6 +18,7 @@ import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
 import net.java.games.jogl.GLDrawable;
 import net.java.games.jogl.GLU;
+import de.jreality.jogl.tools.ToolManager;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.CommonAttributes;
@@ -32,7 +33,6 @@ import de.jreality.util.SceneGraphUtilities;
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class ViewerKeyListener extends KeyAdapter {
-	private boolean showHelp = false;
 	InteractiveViewer viewer;
 	boolean motionToggle = false;
 	boolean fullScreenToggle = false;
@@ -49,30 +49,33 @@ public class ViewerKeyListener extends KeyAdapter {
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_3,0), "Cycle stereo modes");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_3,0), "Toggle perspective/orthographic camera");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_4,0), "Print frame rate");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_A,0), "Toggle antialiasing");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_A,0), "Increase alpha (1-transparency)");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_A,InputEvent.SHIFT_DOWN_MASK), "Decrease alpha");
+		//helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_A,0), "Toggle antialiasing");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_B,0), "Toggle backplane display");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_B,InputEvent.SHIFT_DOWN_MASK), "Toggle selection bound display");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_C,0), "Set polygon diffuse color in selected appearance");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_C,InputEvent.SHIFT_DOWN_MASK), "Set background color");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_D,0), "Toggle force display lists");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_E,0), "Toggle edge drawing");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_E,InputEvent.SHIFT_DOWN_MASK), "Encompass");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_F,0), "Toggle face drawing");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_E,0), "Encompass");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_E,InputEvent.SHIFT_DOWN_MASK), "Toggle edge drawing");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_F,0), "Activate fly tool");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_F,InputEvent.SHIFT_DOWN_MASK), "Toggle face drawing");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_H,0), "Toggle display help");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_J,0), "Increase sphere radius");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_J,InputEvent.SHIFT_DOWN_MASK), "Decrease sphere radius");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_L,0), "Toggle lighting enabled");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_N,0), "Toggle normals drawing");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_M,0), "Reset Matrices to default");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_M,InputEvent.SHIFT_DOWN_MASK), "Set default Matrices with current state");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_P,0), "Toggle perspective/orthographic view");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_Q,0), "Force render");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_R,0), "Reset matrices to default");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_R,InputEvent.SHIFT_DOWN_MASK), "Set default matrices with current state");
+//		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_Q,0), "Force render");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_R,0), "Activate rotation tool");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_S,0), "Toggle smooth shading");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_S,InputEvent.SHIFT_DOWN_MASK), "Toggle sphere drawing");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_T,0), "Increase transparency");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_T,InputEvent.SHIFT_DOWN_MASK), "Decrease transparency");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_T,0), "Activate translation tool");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_V,0), "Toggle vertex drawing");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_X,0), "Toggle transparency enabled");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_Y,0), "Activate selection tool");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_QUOTE,0), "Toggle fullscreen mode");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0), "Quit");
 		if ((viewer.getViewingComponent() instanceof GLCanvas))
@@ -142,10 +145,14 @@ public class ViewerKeyListener extends KeyAdapter {
 					else viewer.getMotionManager().stopMotions();
 					break;
 				
-				case KeyEvent.VK_A:		//antialiasing
-					if (e.isShiftDown()) break;
-					toggleValue(CommonAttributes.ANTIALIASING_ENABLED);
+				case KeyEvent.VK_A:		// transparency
+					modulateValueAdditive(CommonAttributes.TRANSPARENCY,  0.5, .05, 0.0, 1.0, e.isShiftDown());
 					break;
+
+//				case KeyEvent.VK_A:		//antialiasing
+//					if (e.isShiftDown()) break;
+//					toggleValue(CommonAttributes.ANTIALIASING_ENABLED);
+//					break;
 
 				case KeyEvent.VK_B:		// toggle backplane
 					if (e.isShiftDown()) {
@@ -173,7 +180,7 @@ public class ViewerKeyListener extends KeyAdapter {
 					break;
 
 				case KeyEvent.VK_E:		
-					if (e.isShiftDown()) {		//encompass
+					if (!e.isShiftDown()) {		//encompass
 						CameraUtility.encompass2(viewer);
 //						MouseTool mt = new MouseTool(viewer);
 //						mt.encompass();
@@ -183,14 +190,13 @@ public class ViewerKeyListener extends KeyAdapter {
 					break;
 
 				case KeyEvent.VK_F:		// toggle face drawing
-					if (e.isShiftDown()) break;
-					toggleValue(CommonAttributes.FACE_DRAW);
+					if (e.isShiftDown())		toggleValue(CommonAttributes.FACE_DRAW);
+					viewer.getToolManager().activateTool(ToolManager.CAMERA_FLY_TOOL);
 					break;
 
 				case KeyEvent.VK_H:		// toggle help
 					if (e.isShiftDown()) break;
-					showHelp = !showHelp;
-					helpOverlay.setVisible(showHelp);
+					helpOverlay.setVisible(!helpOverlay.isVisible());
 					viewer.render();
 					break;
 
@@ -203,10 +209,14 @@ public class ViewerKeyListener extends KeyAdapter {
 					toggleValue(CommonAttributes.LIGHTING_ENABLED);
 					break;
 
-				case KeyEvent.VK_N:		// toggle lighting
-					if (e.isShiftDown()) break;
-					toggleValue(CommonAttributes.POINT_SHADER+"."+CommonAttributes.NORMALS_DRAW);
+				case KeyEvent.VK_M:		// reset matrices
+					if (e.isShiftDown()) SceneGraphUtilities.setDefaultMatrix(viewer.getSceneRoot());
+					else  SceneGraphUtilities.resetMatrix(viewer.getSceneRoot());
+					viewer.render();
 					break;
+
+//				case KeyEvent.VK_N:		
+//					break;
 
 				case KeyEvent.VK_P:		// toggle perspective
 					if (e.isShiftDown()) break;
@@ -215,30 +225,25 @@ public class ViewerKeyListener extends KeyAdapter {
 					viewer.render();
 					break;
 
-				case KeyEvent.VK_R:		// reset matrices
-					if (e.isShiftDown()) SceneGraphUtilities.setDefaultMatrix(viewer.getSceneRoot());
-					else  SceneGraphUtilities.resetMatrix(viewer.getSceneRoot());
-					viewer.render();
-					break;
-
-				case KeyEvent.VK_Q:		// reset matrices
+				case KeyEvent.VK_Q:		
 					if (e.isShiftDown()) break;
-					((GLCanvas) viewer.getViewingComponent()).setNoAutoRedrawMode(false);
-					viewer.render();
+//					((GLCanvas) viewer.getViewingComponent()).setNoAutoRedrawMode(false);
+//					viewer.render();
 					break;
 
+				case KeyEvent.VK_R:		// activate translation tool
+					viewer.getToolManager().activateTool(ToolManager.ROTATION_TOOL);
+					break;
+				
 				case KeyEvent.VK_S:		//smooth shading
 					if (e.isShiftDown()) toggleValue(CommonAttributes.POINT_SHADER+"."+CommonAttributes.SPHERES_DRAW);
 					else toggleValue(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING);
 					break;
 
-				case KeyEvent.VK_T:		// transparency
-					//if (e.isShiftDown())					
-					modulateValueAdditive(CommonAttributes.TRANSPARENCY,  0.5, .05, 0.0, 1.0, !e.isShiftDown());
-
-					//toggleValue(CommonAttributes.TRANSPARENCY_ENABLED);
+				case KeyEvent.VK_T:		// activate translation tool
+					viewer.getToolManager().activateTool(ToolManager.TRANSLATION_TOOL);
 					break;
-
+				
 				case KeyEvent.VK_V:		// draw vertices
 					if (e.isShiftDown()) break;
 					toggleValue(CommonAttributes.VERTEX_DRAW);
@@ -271,6 +276,10 @@ public class ViewerKeyListener extends KeyAdapter {
 //					viewer.render();
 					break;
 					
+				case KeyEvent.VK_Y:		// activate translation tool
+					viewer.getToolManager().activateTool(ToolManager.SELECTION_TOOL);
+					break;
+				
 				
 				case KeyEvent.VK_ESCAPE:		// toggle lighting
 					if (e.isShiftDown()) break;
