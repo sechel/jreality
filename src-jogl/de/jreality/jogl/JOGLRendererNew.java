@@ -140,8 +140,10 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 		public void visit(SceneGraphComponent c) {
 			sgp.push(c);
 			JOGLPeerComponent peer = new JOGLPeerComponent(sgp, myParent);
+			// we don't add the top-level node here to its parent; 
+			// that has to be done carefully using a childLock by the caller
 			if (topLevel) thePeerRoot = peer;
-			if (myParent != null) myParent.children.add(peer);
+			else if (myParent != null) myParent.children.add(peer);
 		  	c.childrenAccept(new ConstructPeerGraphVisitor(this, peer));
 		  	sgp.pop();
 		}
@@ -803,8 +805,10 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 		RenderingHintsShader renderingHints;
 		DefaultGeometryShader geometryShader;
 		
+		Object childLock = new Object();		
 		
-		boolean appearanceIsDirty,
+		boolean appearanceChanged,
+			appearanceIsDirty,
 			geometryIsDirty,
 			boundIsDirty,
 			object2WorldDirty;
@@ -817,6 +821,7 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 				pathToHere = sgp;
 				originalComponent = sgp.getLastComponent();
 				name = "JOGLPeer:"+originalComponent.getName();
+				appearanceChanged = false;
 				appearanceIsDirty = true;
 				geometryIsDirty = true;
 				boundIsDirty = true;
@@ -840,17 +845,18 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 			originalComponent.removeSceneContainerListener(this);
 			originalComponent.removeSceneTreeListener(this);
 			if (originalComponent.getAppearance() != null) originalComponent.getAppearance().removeAppearanceListener(this);
-			//if (jpg != null)		jpg.dispose();
+			if (jpg != null)		jpg.dispose();
 	
-			int n = children.size();
-			for (int i = n-1; i>=0; --i)	{
-				JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
-				child.dispose();
-			}
+			//synchronized(childLock)	{
+				int n = children.size();
+				for (int i = n-1; i>=0; --i)	{
+					JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
+					child.dispose();
+				}				
+			//}
 
 		}
 		public void render()		{
-			int n = children.size();
 			//System.out.println("Rendering "+originalComponent.getName());
 			if (!originalComponent.isVisible()) return;
 						
@@ -877,6 +883,7 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 			else isReflection = isR;		// should depend on camera transformation ...
 			globalGL.glFrontFace(isReflection? GL.GL_CW : GL.GL_CCW);
 
+			if (appearanceChanged)  	propagateAppearanceChanged();
 			if (appearanceIsDirty)	updateAppearance();
 			gc.setEffectiveAppearance(eAp);
 			
@@ -885,14 +892,17 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 				jpg.render(this);
 			}
 			
-			// render the children
-			for (int i = 0; i<n; ++i)	{		
-				JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
-				
-				if (pickMode)	globalGL.glPushName(getIndexofPeerChild(i));
-				child.render();
-				if (pickMode)	globalGL.glPopName();
-			}
+			//synchronized(childLock)	{
+				// render the children
+				int n = children.size();
+				for (int i = 0; i<n; ++i)	{		
+					JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
+					
+					if (pickMode)	globalGL.glPushName(getIndexofPeerChild(i));
+					child.render();
+					if (pickMode)	globalGL.glPopName();
+				}				
+			//}
 			
 			if (thisT != null)	{
 				if (stackDepth <= MAX_STACK_DEPTH) globalGL.glPopMatrix();
@@ -908,7 +918,7 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 		private int getIndexofPeerChild(int which) {
 			JOGLPeerComponent child = (JOGLPeerComponent) children.get(which);
 			for (int i = 0; i<children.size(); ++i)	{
-				if (originalComponent.getChildComponent(i) == child.originalComponent)	{
+				if (i < originalComponent.getChildComponentCount() && originalComponent.getChildComponent(i) == child.originalComponent)	{
 					return i;
 				}
 			} 
@@ -918,11 +928,13 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 
 		private void setDisplayListDirty(boolean b)	{
 			dlInfo.setDisplayListsDirty();
-			int n = children.size();
-			for (int i = 0; i<n; ++i)	{		
-				JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
-				child.setDisplayListDirty(b);
-			}
+			//synchronized(childLock)	{
+				int n = children.size();
+				for (int i = 0; i<n; ++i)	{		
+					JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
+					child.setDisplayListDirty(b);
+				}				
+			//}
 		}
 		
 		private void updateAppearance()	{
@@ -976,12 +988,17 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 					SceneGraphComponent sgc = (SceneGraphComponent) ev.getNewChildElement();
 					ConstructPeerGraphVisitor pv = new ConstructPeerGraphVisitor(sgc, this);
 					JOGLPeerComponent pc = (JOGLPeerComponent) pv.visit();
-					children.add(pc);
-					//pc.updateAppearance();
+					synchronized(childLock)	{
+				    //System.out.println("Before adding child count is "+children.size());
+						children.add(pc);						
+					  
+					//System.out.println("After adding child count is "+children.size());
+					}
 					break;
 				case SceneContainerEvent.CHILD_TYPE_GEOMETRY:
 					if (jpg != null)	{
-						jpg.refCount--;
+						jpg.dispose();
+						geometryRemoved = true;
 						System.out.println("Warning: Adding geometry while old one still valid");
 						jpg=null;
 					}
@@ -1000,16 +1017,21 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 				case SceneContainerEvent.CHILD_TYPE_COMPONENT:
 					SceneGraphComponent sgc = (SceneGraphComponent) ev.getOldChildElement();
 				    JOGLPeerComponent jpc = getPeerForChildComponent(sgc);
-				    //System.out.println("removing peer "+jpc.getName());
-				    children.remove(jpc);
+				    if (jpc == null) return;
+				    System.out.println("removing peer "+jpc.getName());
+				    //System.out.println("Before removal child count is "+children.size());
+					synchronized(childLock)	{
+					    children.remove(jpc);						
+					}
+					//System.out.println("After removal child count is "+children.size());
 				    jpc.dispose();		// there are no other references to this child
 					break;
 				case SceneContainerEvent.CHILD_TYPE_GEOMETRY:
 					if (jpg != null) {
 						jpg.dispose();		// really decreases reference count
 						jpg = null;
+						geometryRemoved = true;
 					}
-					geometryRemoved = true;
 					break;
 			
 		}
@@ -1019,7 +1041,7 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 			//System.out.println("Container Child replaced at: "+originalComponent.getName());
 			switch(ev.getChildType())	{
 				case SceneContainerEvent.CHILD_TYPE_APPEARANCE:
-					setAppearanceDirty();
+					appearanceChanged = true;
 					break;
 				case SceneContainerEvent.CHILD_TYPE_GEOMETRY:
 					if (jpg != null && jpg.originalGeometry == originalComponent.getGeometry()) break;		// no change, really
@@ -1057,17 +1079,18 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 		
 		public void appearanceChanged(AppearanceEvent ev) {
 			//System.out.println("Appearance change "+originalComponent.getName());
-			setAppearanceDirty();
+			appearanceChanged = true;
 		}
 		
-		private void setAppearanceDirty()	{
-			appearanceIsDirty = true;
+		private void propagateAppearanceChanged()	{
+			appearanceIsDirty = true;	
 			dlInfo.setDisplayListsDirty();
 			int n = children.size();
 			for (int i = 0; i<n; ++i)	{		
 				JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
-				child.setAppearanceDirty();
+				child.propagateAppearanceChanged();
 			}
+			appearanceChanged = false;
 		}
 		
 		public SceneGraphComponent getOriginalComponent() {
