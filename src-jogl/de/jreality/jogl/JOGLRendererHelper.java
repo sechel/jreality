@@ -7,14 +7,21 @@
 package de.jreality.jogl;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.acl.LastOwnerException;
 import java.util.Hashtable;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
+import net.java.games.jogl.GLDrawable;
+import net.java.games.jogl.util.BufferUtils;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.RegularDomainQuadMesh;
@@ -726,6 +733,73 @@ public class JOGLRendererHelper {
 			else System.out.println("Invalid clipplane class "+cp.getClass().toString());
 			globalGL.glPopMatrix();
 		}
+	}
+	/**
+	 * @param globalGL
+	 * @param file
+	 */
+	public static void saveScreenShot(GLDrawable drawable, File file) {
+			 
+			int width = drawable.getSize().width; 
+			int height = drawable.getSize().height; 
+			//TODO figure out why channels = 4 doesn't work: transparency getting written into fb even
+			// though transparency disabled.
+			 int channels = 3;
+			ByteBuffer pixelsRGBA = BufferUtils.newByteBuffer(width * height * channels); 
+			 
+			GL gl = drawable.getGL(); 
+			
+			gl.glReadBuffer(GL.GL_BACK); 
+			gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1); 
+			
+			gl.glReadPixels(0, 	// GLint x 
+					0, // GLint y 
+			width,// GLsizei width 
+			height, // GLsizei height 
+			channels == 3 ? GL.GL_RGB : GL.GL_RGBA, // GLenum format 
+			GL.GL_UNSIGNED_BYTE, // GLenum type 
+			pixelsRGBA); // GLvoid *pixels 
+			
+			int[] pixelInts = new int[width * height]; 
+			
+			// Convert RGB bytes to ARGB ints with no transparency. Flip image vertically by reading the 
+			// rows of pixels in the byte buffer in reverse - (0,0) is at bottom left in OpenGL. 
+	
+		int p = width * height * channels; // Points to first byte (red) in each row. 
+			int q;   // Index into ByteBuffer 
+			int i = 0;   // Index into target int[] 
+			int w3 = width*channels;    // Number of bytes in each row 
+			
+			for (int row = 0; row < height; row++) { 
+			p -= w3; 
+			q = p; 
+			for (int col = 0; col < width; col++) { 
+			 int iR = pixelsRGBA.get(q++); 
+			int iG = pixelsRGBA.get(q++); 
+			int iB = pixelsRGBA.get(q++); 
+			int iA = (channels == 3) ? 0xff : pixelsRGBA.get(q++); 
+			
+			   pixelInts[i++] =  
+			      ((iA & 0x000000FF) << 24) 
+			     | ((iR & 0x000000FF) << 16) 
+			     | ((iG & 0x000000FF) << 8) 
+			     | (iB & 0x000000FF); 
+			  } 
+			 
+			 } 
+			 
+			 BufferedImage bufferedImage = 
+			  new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB); 
+			 
+			 bufferedImage.setRGB(0, 0, width, height, pixelInts, 0, width); 
+			 
+			 try { 
+			  ImageIO.write(bufferedImage, "PNG", file); 
+			 } catch (IOException e) { 
+			  e.printStackTrace(); 
+			 } 
+			 
+		System.out.println("Screenshot saved to "+file.getName());
 	}
 
 }

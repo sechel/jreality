@@ -40,7 +40,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	SceneGraphComponent cameraNode;
 	Camera camera;
 	GLCanvas canvas;
-	JOGLRendererInterface renderer;
+	JOGLRenderer renderer;
 	int signature;
 	static String OSName = null;
 	static boolean multiSample = true;
@@ -245,7 +245,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	/**
 	 * @return
 	 */
-	public JOGLRendererInterface getRenderer() {
+	public JOGLRenderer getRenderer() {
 		return renderer;
 	}
 	

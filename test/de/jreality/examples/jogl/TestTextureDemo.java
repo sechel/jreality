@@ -225,8 +225,8 @@ public class TestTextureDemo extends InteractiveViewerDemo {
 		sl.setConeAngle(Math.PI/6.0 );
 		sl.setConeDeltaAngle(Math.PI/20.0);
  		sl.setDistribution(2.0);
- 		sl.setIntensity(2.0);
- 		double[] atten = {0.5, 0.0,0.0};
+ 		sl.setIntensity(1.0);
+ 		double[] atten = {0.5, 0.5,0.0};
  		sl.setFalloff(atten);
  		spot.getTransformation().setRotation(Math.PI, 1.0, 0.0, 0.0);
  		//spot.getTransformation().setTranslation(.25, .5, .25);

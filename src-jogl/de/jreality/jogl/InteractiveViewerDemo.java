@@ -239,6 +239,13 @@ public class InteractiveViewerDemo extends JFrame{
 				viewer.render();
 			}
 		});
+		jcc = new JMenuItem("Save Screen...");
+		fileM.add(jcc);
+		jcc.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent e)	{
+				saveToFile();
+			}
+		});
 		theMenuBar.add(fileM);
 		JMenu testM = new JMenu("Windows");
 		jcc = new JCheckBoxMenuItem("Camera Path Inspector...");
@@ -276,6 +283,21 @@ public class InteractiveViewerDemo extends JFrame{
 			return;
 		}
 		viewer.getSelectionManager().setSelection(sgp);
+		viewer.render();
+	}
+	protected void saveToFile() {
+		SceneGraphComponent parent= null;
+		JFileChooser fc = new JFileChooser(resourceDir);
+		//System.out.println("FCI resource dir is: "+resourceDir);
+		int result = fc.showSaveDialog(this);
+		SceneGraphComponent sgc = null;
+		if (result == JFileChooser.APPROVE_OPTION)	{
+			File file = fc.getSelectedFile();
+			viewer.getRenderer().saveScreenShot(file);
+		} else {
+			System.out.println("Unable to open file");
+			return;
+		}
 		viewer.render();
 	}
 	/**

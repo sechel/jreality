@@ -9,6 +9,7 @@ package de.jreality.jogl;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
+import java.io.File;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -106,6 +107,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 	Transformation pickT = new Transformation();
 	PickPoint[] hits;
 
+	boolean screenShot = false;
 	double framerate;
 	int lightCount = 0;
 	int nodeCount = 0;
@@ -360,7 +362,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 			theCamera.setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
 			globalGL.glViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
 			if (!pickMode)	visit();
-			else		{
+			if (pickMode)	{
 				// set up the "pick transformation"
 				IntBuffer selectBuffer = BufferUtils.newIntBuffer(bufsize);
 				
@@ -385,6 +387,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 				display(drawable);
 			}
 		}
+		if (screenShot)   JOGLRendererHelper.saveScreenShot(theCanvas, screenShotFile);
 		if (++frameCount % 100 == 0) {
 			long time = System.currentTimeMillis();
 			//theLog.log(Level.FINER,"Frame rate:\t"+(1000000.0/(time-otime)));
@@ -1339,5 +1342,14 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 	public GLCanvas getCanvas()	{
 		return theCanvas;
 	}
-
+	/**
+	 * @param file
+	 */
+	File screenShotFile = null;
+	public void saveScreenShot(File file)	{
+		screenShot = true;
+		screenShotFile = file;
+		theCanvas.display();
+		screenShot = false;
+	}
 }

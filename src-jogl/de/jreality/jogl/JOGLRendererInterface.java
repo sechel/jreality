@@ -6,6 +6,8 @@
  */
 package de.jreality.jogl;
 
+import java.io.File;
+
 import net.java.games.jogl.GLEventListener;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.pick.PickPoint;

@@ -4,12 +4,10 @@
     </description>
 
 	<!-- the following should belong to core... -->
-	<property name="ui" location="src/de/jreality/ui" />
 	<property name="scene" location="src/de/jreality/scene" />
 	<property name="reader" location="src/de/jreality/reader" />
 	<property name="util" location="src/de/jreality/util" />
 	<property name="geometry" location="src/de/jreality/geometry" />
-	<property name="beans" location="src/de/jreality/beans" />
 
 	<!-- backends (dependencies from top to bottom) -->
 	<property name="soft" location="src-soft" />
@@ -42,7 +40,7 @@
 	<!-- all the core classes will be build here - all beackends depend on it-->
 	<target name="core" depends="init" description="compile the source ">
 		<mkdir dir="${build}/core" />
-		<javac excludesfile="excludes.txt" srcdir="${ui}:${util}:${scene}:${geometry}:${reader}:${beans}" destdir="${build}/core" debug="true">
+		<javac excludesfile="excludes.txt" srcdir="${util}:${scene}:${geometry}:${reader}" destdir="${build}/core" debug="true">
 			<compilerarg line="-source 1.4" />
 		</javac>
 		<jar jarfile="${dist}/jReality-core.jar" basedir="${build}/core" />
@@ -129,11 +127,9 @@
 		<javadoc destdir="${javadoc}" author="true" version="true" use="true" windowtitle="jReality API" source="1.4">
 
 			<fileset dir="src" defaultexcludes="yes">
-				<include name="de/jreality/beans/**" />
 				<include name="de/jreality/geometry/**" />
 				<include name="de/jreality/reader/**" />
 				<include name="de/jreality/scene/**" />
-				<include name="de/jreality/ui/**" />
 				<include name="de/jreality/util/**" />
 				<exclude name="**/doc-files/**" />
 				<exclude name="**/*.html" />
