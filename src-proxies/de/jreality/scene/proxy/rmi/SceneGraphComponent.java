@@ -65,16 +65,10 @@ public class SceneGraphComponent extends de.jreality.scene.SceneGraphComponent
   {
     return (RemoteGeometry)super.getGeometry();
   }
-//  public void add(RemoteSceneGraphNode newChild) {
-//        new SgAdd().add(this, (de.jreality.scene.SceneGraphNode) RemoteSceneGraphElementsFactoryImpl.getLocal(newChild));
-//    }
-//    public void remove(RemoteSceneGraphNode newChild) {
-//        new SgRemove().remove(this, (de.jreality.scene.SceneGraphNode) RemoteSceneGraphElementsFactoryImpl.getLocal(newChild));
-//    }
-    public void add(RemoteSceneGraphNode newChild) {
-        new SgAdd().add(this, (SceneGraphNode) newChild);
-      }
-      public void remove(RemoteSceneGraphNode newChild) {
-        new SgRemove().remove(this, (SceneGraphNode) newChild);
-      }
+  public void add(RemoteSceneGraphNode newChild) {
+        new SgAdd().add(this, (de.jreality.scene.SceneGraphNode) RemoteSceneGraphElementsFactoryImpl.getLocal(newChild));
+    }
+    public void remove(RemoteSceneGraphNode newChild) {
+        new SgRemove().remove(this, (de.jreality.scene.SceneGraphNode) RemoteSceneGraphElementsFactoryImpl.getLocal(newChild));
+    }
 }
