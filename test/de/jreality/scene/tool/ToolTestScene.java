@@ -9,6 +9,7 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 
+import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.scene.Camera;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
@@ -55,9 +56,9 @@ public class ToolTestScene {
 		viewer.setCameraPath(camPath);
 		new InputDeviceHandler(viewer);
 		camNode.addTool(new EgoShooterTool());
-		frame.setSize(800, 600);
 		frame.setVisible(true);
 		frame.getContentPane().add(viewer.getViewingComponent());
+		frame.setSize(800, 600);
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent arg0) {
 				System.exit(0);
