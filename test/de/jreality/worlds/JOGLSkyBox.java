@@ -74,7 +74,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	 */
 	public void setConfiguration(ConfigurationAttributes config) {
 		File f = new File(configResourceDir+"test/de/jreality/worlds/JOGLSkyBox.props");
-		this.config = new ConfigurationAttributes(f, config);
+		//this.config = new ConfigurationAttributes(f, config);
 		String foo = this.config.getProperty("resourceDir", resourceDir);
 		resourceDir = foo;
 	}

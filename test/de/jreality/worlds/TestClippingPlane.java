@@ -10,6 +10,8 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,6 +27,7 @@ import de.jreality.geometry.SphereHelper;
 import de.jreality.jogl.FramedCurve;
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.jogl.InteractiveViewerDemo;
+import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.CommonAttributes;
@@ -127,9 +130,9 @@ public class TestClippingPlane extends AbstractLoadableScene {
 			ap1.setAttribute(CommonAttributes.SPECULAR_COEFFICIENT, 0.0);
 			Texture2D tex2d = null;
 			try {
-				tex2d = new Texture2D("/homes/geometer/gunn/Pictures/grabs/arch-solids.jpg");
+				tex2d = new Texture2D(Readers.resolveDataInput("textures/arch-solids.jpg"));
 				ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"texture2d",tex2d);
-			} catch (MalformedURLException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 			double[][] vv = {{0,-1,0},{0,1,0},{1,1,0},{1,-1,0}};
