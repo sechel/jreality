@@ -100,7 +100,7 @@ public class SMRJMirrorFactory extends ProxyFactory {
         copyAttr(l, (RemotePointLight)created);
     }
 
-    public void visit(de.jreality.scene.Transformation t) {
+    public void visit(de.jreality.scene.SimpleTransformation t) {
         created=createRemote(Transformation.class);
         copyAttr(t, (RemoteTransformation)created);
     }
