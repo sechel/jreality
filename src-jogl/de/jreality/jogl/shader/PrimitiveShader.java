@@ -7,6 +7,7 @@
 package de.jreality.jogl.shader;
 
 import net.java.games.jogl.GL;
+import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.Geometry;
 
 /**
@@ -17,5 +18,5 @@ import de.jreality.scene.Geometry;
  */
 public interface PrimitiveShader extends Shader {
 	public boolean providesProxyGeometry();
-	public int proxyGeometryFor(Geometry original, GL gl, int signature);
+	public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int signature);
 }

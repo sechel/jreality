@@ -42,7 +42,7 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 		//System.out.println("Imploding with factor of "+implodeFactor);
 		int implodeDL = gl.glGenLists(1);
 		gl.glNewList(implodeDL, GL.GL_COMPILE);
-		JOGLRendererHelper.drawFaces(ifs, gl, false, true, 1.0);
+		JOGLRendererHelper.drawFaces(ifs, gl,  true, 1.0);
 		gl.glEndList();
 		return implodeDL;
 	}

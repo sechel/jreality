@@ -15,6 +15,7 @@ import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
+import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
@@ -38,6 +39,7 @@ public class DefaultLineShader implements LineShader  {
 	double	tubeRadius = 0.05,
 		 	lineWidth = 1.0,
 			depthFudgeFactor = 0.9999d;			// in pixels
+	boolean smoothShading = false;
 	int	lineFactor = 1;
 	int 	lineStipplePattern = 0x1c47; 
 	 
@@ -59,6 +61,7 @@ public class DefaultLineShader implements LineShader  {
 		tubeRadius = eap.getAttribute(NameSpace.name(name,CommonAttributes.TUBE_RADIUS),CommonAttributes.TUBE_RADIUS_DEFAULT);
 		tubeStyle = eap.getAttribute(NameSpace.name(name,CommonAttributes.TUBE_STYLE),CommonAttributes.TUBE_STYLE_DEFAULT);
 		depthFudgeFactor = eap.getAttribute(NameSpace.name(name,CommonAttributes.DEPTH_FUDGE_FACTOR), depthFudgeFactor);
+		smoothShading = eap.getAttribute(NameSpace.name(name,CommonAttributes.INTERPOLATE_VERTEX_COLORS), CommonAttributes.INTERPOLATE_VERTEX_COLORS_DEFAULT);
 		lineStipple = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_STIPPLE), lineStipple);
 		lineWidth = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_WIDTH), CommonAttributes.LINE_WIDTH_DEFAULT);
 		lineFactor = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_FACTOR),lineFactor);
@@ -67,6 +70,8 @@ public class DefaultLineShader implements LineShader  {
 		double transp = eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
 		setDiffuseColor( ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transp));
 		polygonShader = ShaderLookup.getPolygonShaderAttr(eap, name, "polygonShader");
+		//System.out.println("Line shader is smooth: "+smoothShading);
+		//System.out.println("Line shader's polygon shader is smooth: "+(polygonShader.isSmoothShading() ? "true" : "false"));
 		//polygonShader.setDiffuseColor(diffuseColor);
 	}
 
@@ -148,10 +153,10 @@ public class DefaultLineShader implements LineShader  {
 			gl.glLineStipple(getLineFactor(), (short) getLineStipplePattern());
 		} 
 		else gl.glDisable(GL.GL_LINE_STIPPLE);
-		//TODO set this correctly when tube-drawing is supported
 		if (tubeDraw) {
 			polygonShader.render(jr);
-			gl.glEnable(GL.GL_LIGHTING);
+			//gl.glEnable(GL.GL_LIGHTING);
+			//System.out.println("polygon shader is smooth: "+(polygonShader.isSmoothShading() ? "true" : "false"));
 		}
 		else gl.glDisable(GL.GL_LIGHTING);
 		gl.glDepthRange(0.0d, depthFudgeFactor);
@@ -162,12 +167,12 @@ public class DefaultLineShader implements LineShader  {
 		return false;
 	}
 	
-	public int proxyGeometryFor(Geometry original, GL gl, int sig) {
-		// TODO handle quadmesh differently
+	public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig) {
+		GL gl = jr.globalGL;
 		if ( !(original instanceof IndexedLineSet)) return -1;
 		if (tubeDraw && original instanceof IndexedLineSet)	{
-			int dlist =  createTubesOnEdgesAsDL((IndexedLineSet) original, tubeRadius, 1.0, gl, sig);
-			System.out.println("Creating tubes with radius "+tubeRadius);
+			int dlist =  createTubesOnEdgesAsDL((IndexedLineSet) original, tubeRadius, 1.0, gl, sig, jr.isPickMode());
+			//System.out.println("Creating tubes with radius "+tubeRadius);
 			return dlist;
 		}
 		return -1;
@@ -175,44 +180,29 @@ public class DefaultLineShader implements LineShader  {
 	
 	// TOOD figure out how to share this code with TubeUtility
 	static double[][] xSection = {{1,0,0}, {.707, .707, 0}, {0,1,0},{-.707, .707, 0},{-1,0,0},{-.707, -.707, 0},{0,-1,0},{.707, -.707, 0}};
-	private static double[][] urTubeVerts;
-	static QuadMeshShape urTube;
-	static int urTubeLength;
-	static {
-	    int n = xSection.length;
-		urTube = new QuadMeshShape(n, 2, true, false);
-		urTubeLength = n;
-		urTubeVerts = new  double[2*n][3];
-		for (int i = 0; i<2; ++i){
-			for (int j = 0; j<n; ++j)	{
-			    int q = n - j - 1;
-			    System.arraycopy(xSection[j], 0, urTubeVerts[i*n+q],0,3);
-			    if (i==1) urTubeVerts[i*n+q][2] = -.5;
-			    else		urTubeVerts[i*n+q][2] = .5;
-			}
-		}
-		urTube.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(urTubeVerts[0].length).createReadOnly(urTubeVerts));
-		GeometryUtility.calculateAndSetNormals(urTube);
-	}
-	
+//	
 	// TOOD figure out how to clear out local display lists (not returned by the method)!
-	int tubeDL = -1;
+	int[] tubeDL = null;
 	boolean testQMS = true;
-	public int createTubesOnEdgesAsDL(IndexedLineSet ils, double rad,  double alpha, GL gl, int sig)	{
+	public int createTubesOnEdgesAsDL(IndexedLineSet ils, double rad,  double alpha, GL gl, int sig, boolean pickMode)	{
 		int n = ils.getNumEdges();
 		DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
 		
-		if (tubeDL == -1)	{
-			tubeDL = gl.glGenLists(1);
-			gl.glNewList(tubeDL, GL.GL_COMPILE);
-			JOGLRendererHelper.drawFaces(urTube, gl, false, true, alpha);
-			gl.glEndList();			
+		if (tubeDL == null)	{
+			tubeDL = new int[3];
+			for (int i = 0; i<3; ++i)	{
+				tubeDL[i] = gl.glGenLists(1);
+				gl.glNewList(tubeDL[i], GL.GL_COMPILE);
+				JOGLRendererHelper.drawFaces(TubeUtility.urTube[i], gl, polygonShader.isSmoothShading(), alpha);
+				gl.glEndList();			
+			}
 		}
-		
 		int nextDL = gl.glGenLists(1);
 		gl.glNewList(nextDL, GL.GL_COMPILE);
 		
-		System.out.println("Tube radius is "+tubeRadius);
+		//System.out.println("Tube radius is "+tubeRadius);
+		gl.glEnable(GL.GL_COLOR_MATERIAL);
+		gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK, GL.GL_DIFFUSE);
 		if (testQMS && ils instanceof QuadMeshShape)	{
 			QuadMeshShape qms = (QuadMeshShape) ils;
 			int u = qms.getMaxU();
@@ -223,17 +213,17 @@ public class DefaultLineShader implements LineShader  {
 			IndexedFaceSet tube = null;
 			for (int i = 0; i<u; ++i)	{
 				curve = GeometryUtility.extractUParameterCurve(curve, qms, i);
-				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, tubeStyle, closedV, sig);
+				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, tubeStyle, closedV, sig, 0);
 				GeometryUtility.calculateAndSetNormals(tube);
 				//System.out.println("Tube has "+tube.getNumPoints()+" points");
-				JOGLRendererHelper.drawFaces(tube, gl, false, true, alpha);
+				JOGLRendererHelper.drawFaces(tube, gl, polygonShader.isSmoothShading(), alpha, pickMode, JOGLPickAction.GEOMETRY_LINE);
 			}
 			for (int i = 0; i<v; ++i)	{
 				curve = GeometryUtility.extractVParameterCurve(curve, qms, i);
-				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, tubeStyle, closedU, sig);
+				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, tubeStyle, closedU, sig, 0);
 				GeometryUtility.calculateAndSetNormals(tube);
 				//System.out.println("Tube has "+tube.getNumPoints()+" points");
-				JOGLRendererHelper.drawFaces(tube, gl, false, true, alpha);
+				JOGLRendererHelper.drawFaces(tube, gl, polygonShader.isSmoothShading(), alpha,pickMode, JOGLPickAction.GEOMETRY_LINE);
 			}
 		} else {
 			for (int i = 0; i<n; ++i)	{
@@ -248,17 +238,18 @@ public class DefaultLineShader implements LineShader  {
 						SceneGraphComponent cc = TubeUtility.tubeOneEdge(p1, p2, rad, null, sig);
 						gl.glPushMatrix();
 						gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix());
-						gl.glCallList(tubeDL);
+						gl.glCallList(tubeDL[sig+1]);
 						gl.glPopMatrix();
 						
 					}
 				}
 				else {
-					double[][] curve = GeometryUtility.extractCurve(null, ils, i);
+					//double[][] curve = GeometryUtility.extractCurve(null, ils, i);
 					//System.out.println("curve is "+Rn.toString(curve));
-					QuadMeshShape tube = TubeUtility.makeTubeAsIFS(curve, rad, null, tubeStyle, false, sig);
+					//QuadMeshShape tube = TubeUtility.makeTubeAsIFS(curve, rad, null, tubeStyle, false, sig);
+					QuadMeshShape tube = TubeUtility.makeTubeAsIFS(ils, i, smoothShading, rad, null, tubeStyle, false, sig, 0);
 					GeometryUtility.calculateAndSetNormals(tube);
-					JOGLRendererHelper.drawFaces(tube, gl, false, true, alpha);
+					JOGLRendererHelper.drawFaces(tube, gl,  polygonShader.isSmoothShading(), alpha,pickMode, JOGLPickAction.GEOMETRY_LINE);
 				}
 			}
 			
@@ -268,4 +259,7 @@ public class DefaultLineShader implements LineShader  {
 	}
 	
 
+	public boolean isSmoothShading() {
+		return smoothShading;
+	}
 }

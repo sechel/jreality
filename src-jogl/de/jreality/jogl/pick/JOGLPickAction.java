@@ -16,6 +16,8 @@ import java.util.Vector;
 
 import de.jreality.scene.Graphics3D;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
@@ -35,7 +37,10 @@ import de.jreality.util.Rn;
  *
  */
 public class JOGLPickAction extends PickAction  {
-	
+	public static int GEOMETRY_BASE	= 10000;
+	static public int GEOMETRY_POINT = GEOMETRY_BASE;
+	static public int GEOMETRY_LINE = GEOMETRY_BASE+1;
+	static public int GEOMETRY_FACE = GEOMETRY_BASE+2;
 	static boolean useOpenGL = true;
 	
 	public JOGLPickAction(Viewer v) {
@@ -82,12 +87,13 @@ public class JOGLPickAction extends PickAction  {
 			double z2 = selectBuffer.get(count++) * factor;
 			pndc[2] = z1;
 			//System.out.print("Hit "+i+": "+z1+" - "+z2+" ");
-			boolean geometryFound = false;
+			//boolean geometryFound = false;
+			int geometryFound = -1;
 			int geomID = 0;
 			for (int j = 0; j<names; ++j)	{
 				path[j] = selectBuffer.get(count);
 				if (j>0) {
-					if (!geometryFound)	{
+					if (geometryFound == -1)	{
 						if (path[j] >= 0 && sgc.getChildComponentCount() > path[j] && sgc.getChildComponent(path[j]) != null) {
 							SceneGraphComponent tmpc = sgc.getChildComponent(path[j]);
 							sgp.push(tmpc); 
@@ -95,20 +101,34 @@ public class JOGLPickAction extends PickAction  {
 						}
 					}
 					else geomID = path[j];
-					if (path[j] == 10000)	{	// geometry
-						geometryFound = true;
+					if (path[j] >= GEOMETRY_BASE)	{	// geometry
+						geometryFound = path[j];
 						sgp.push(sgc.getGeometry());
 					}
 				}
 				//System.out.print(": "+selectBuffer.get(count));
 				count++;
 			}
-			if (!geometryFound) continue;
+			if (geometryFound == -1) continue;
 			SceneGraphNode sgn = sgp.getLastElement();
 			context3D.setObjectToWorld(sgp.getMatrix(null));
-			if ((sgn instanceof IndexedFaceSet))	{
+			if (geometryFound == GEOMETRY_FACE && (sgn instanceof IndexedFaceSet))	{
 				IndexedFaceSet sg = (IndexedFaceSet) sgn;
 				oneHit = calculatePickPointFor(oneHit, pndc, context3D,sgp, sg, geomID);
+				if (oneHit == null) continue;
+				al.add(oneHit);
+				realHits++;
+			} else if (geometryFound == GEOMETRY_LINE && (sgn instanceof IndexedLineSet))	{
+				IndexedLineSet sg = (IndexedLineSet) sgn;
+				System.out.println("Picked edge "+ geomID);
+//				oneHit = calculatePickPointFor(oneHit, pndc, context3D,sgp, sg, geomID);
+				if (oneHit == null) continue;
+				al.add(oneHit);
+				realHits++;
+			} else if (geometryFound == GEOMETRY_POINT && (sgn instanceof PointSet))	{
+				PointSet sg = (PointSet) sgn;
+				System.out.println("Picked vertex "+geomID);
+//				oneHit = calculatePickPointFor(oneHit, pndc, context3D,sgp, sg, geomID);
 				if (oneHit == null) continue;
 				al.add(oneHit);
 				realHits++;

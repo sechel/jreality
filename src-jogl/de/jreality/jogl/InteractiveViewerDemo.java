@@ -186,23 +186,29 @@ public class InteractiveViewerDemo extends JFrame{
 	SceneGraphComponent root;
 	public void initializeScene()	{
 		root = viewer.getSceneRoot();
-		if (root.getAppearance() == null) root.setAppearance(new Appearance());
-		CommonAttributes.setDefaultValues(root.getAppearance());
-		root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
-		root.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
-		root.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
+//		if (root.getAppearance() == null) root.setAppearance(new Appearance());
+//		//CommonAttributes.setDefaultValues(root.getAppearance());
+//		root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
+//		root.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
+//		root.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
 		SceneGraphComponent lights = makeLights();		
 		if (lights != null)	CameraUtility.getCameraNode(viewer).addChild(lights);		
 	}
 	
 	public void unloadScene()	{
 		if (world != null && root.isDirectAncestor(world))	root.removeChild(world);
+		viewer.getSceneRoot().setAppearance(null);
 		viewer.getSelectionManager().setDefaultSelection(null);
 		viewer.getSelectionManager().setSelection(null);
 	}
 	
 	public void loadScene(String loadableScene)	{
 		root = viewer.getSceneRoot();
+		if (root.getAppearance() == null) root.setAppearance(new Appearance());
+		CommonAttributes.setDefaultValues(root.getAppearance());
+		root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
+		root.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
+		root.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
 		LoadableScene wm = null;
 		
 		if (loadableScene == null)  world = makeWorld();

@@ -15,7 +15,6 @@ import java.awt.Color;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 public interface LineShader extends PrimitiveShader {
-	public boolean isTubeDraw();
-	public double getTubeRadius();
 	public Color getDiffuseColor();
+	public boolean isSmoothShading();
 }

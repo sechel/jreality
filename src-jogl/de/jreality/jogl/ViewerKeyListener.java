@@ -18,6 +18,7 @@ import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
 import net.java.games.jogl.GLDrawable;
 import net.java.games.jogl.GLU;
+import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.tools.ToolManager;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -59,6 +60,7 @@ public class ViewerKeyListener extends KeyAdapter {
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_E,InputEvent.SHIFT_DOWN_MASK), "Toggle edge drawing");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_F,0), "Activate fly tool");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_F,InputEvent.SHIFT_DOWN_MASK), "Toggle face drawing");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_G,0), "Toggle line style");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_H,0), "Toggle help overlay");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_I,0), "Toggle info overlay");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_J,0), "Increase sphere radius");
@@ -71,6 +73,7 @@ public class ViewerKeyListener extends KeyAdapter {
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_N,InputEvent.SHIFT_DOWN_MASK), "Remove current selection from selection list");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_P,0), "Toggle perspective/orthographic view");
 //		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_Q,0), "Force render");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_Q,0), "Toggle interpolate vertex colors in line shader");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_R,0), "Activate rotation tool");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_S,0), "Toggle smooth shading");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_S,InputEvent.SHIFT_DOWN_MASK), "Toggle sphere drawing");
@@ -144,6 +147,12 @@ public class ViewerKeyListener extends KeyAdapter {
 					viewer.render();
 					break;
 
+				case KeyEvent.VK_G:		// toggle face drawing
+					if (e.isShiftDown())		break;
+					toggleValue(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_STYLE);
+					viewer.render();
+					break;
+
 				case KeyEvent.VK_H:		// toggle help
 					if (e.isShiftDown()) break;
 					helpOverlay.setVisible(!helpOverlay.isVisible());
@@ -195,6 +204,8 @@ public class ViewerKeyListener extends KeyAdapter {
 
 				case KeyEvent.VK_Q:		
 					//((GLCanvas) viewer.getViewingComponent()).setNoAutoRedrawMode(false);
+					if (e.isShiftDown()) break;
+					toggleValue(CommonAttributes.LINE_SHADER+"."+CommonAttributes.INTERPOLATE_VERTEX_COLORS);
 					viewer.render();
 					break;
 
@@ -204,7 +215,9 @@ public class ViewerKeyListener extends KeyAdapter {
 				
 				case KeyEvent.VK_S:		//smooth shading
 					if (e.isShiftDown()) toggleValue(CommonAttributes.POINT_SHADER+"."+CommonAttributes.SPHERES_DRAW);
-					else toggleValue(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING);
+					else {
+						toggleValue(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING);
+					}
 				    viewer.render();
 					break;
 
@@ -294,13 +307,28 @@ public class ViewerKeyListener extends KeyAdapter {
 		Appearance ap = viewer.getSelectionManager().getSelectedAppearance();
 		if (ap == null) return;
 		Object obj = ap.getAttribute(name);
-		boolean newVal = true;
 		if (obj != null && obj instanceof Boolean)	{
+			boolean newVal = true;
 			newVal = !((Boolean) obj).booleanValue();
+			ap.setAttribute(name, newVal);
+			viewer.render();
+			return;
+		} else if (name.indexOf(CommonAttributes.TUBE_STYLE) != -1)	{
+			int newV = TubeUtility.PARALLEL;
+			int val = TubeUtility.PARALLEL;
+			if (obj != null && obj instanceof Integer)		{
+				val = ((Integer) obj).intValue();
+				if (val == TubeUtility.PARALLEL)	newV = TubeUtility.FRENET;
+				else newV = TubeUtility.PARALLEL;
+			}
+			System.out.println("Tube style is now: "+(newV == TubeUtility.FRENET ? "frenet" : "parallel"));
+			ap.setAttribute(name, newV);
+			viewer.render();
+			return;
 		}
-		//System.err.println("Toggling property"+name+"Object is "+obj+"New value is "+newVal);
+		System.err.println("Turning on property "+name);
+		ap.setAttribute(name, true);
 			
-		ap.setAttribute(name, newVal);
 		viewer.render();
 	}
 

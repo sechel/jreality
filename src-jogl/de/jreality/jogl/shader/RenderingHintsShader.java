@@ -118,6 +118,7 @@ public class RenderingHintsShader  {
 		GLCanvas theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		gl.glDisable(GL.GL_TEXTURE_2D);
+		gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
 		if (isTransparencyEnabled())	{
 			  gl.glEnable (GL.GL_BLEND);
 			  gl.glDepthMask(false);

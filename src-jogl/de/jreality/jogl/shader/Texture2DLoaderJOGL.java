@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Hashtable;
 
 import net.java.games.jogl.*;
+import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.Texture2D;
 
 /**
@@ -16,120 +17,38 @@ import de.jreality.scene.Texture2D;
  * 
  * @author Kevin Glass
  */
-public class Texture2DLoaderJOGL extends Texture2DLoader {
+public class Texture2DLoaderJOGL {
 	private GL gl;
 	private GLU glu;
 	public static final Texture2DLoaderJOGL FactoryLoader = new Texture2DLoaderJOGL();
-	Hashtable ht = new Hashtable();
+	static Hashtable ht = new Hashtable();
 	
 	private Texture2DLoaderJOGL() {
 		super();
 	}
 
-	private int createTextureID() 
+	private static int createTextureID(GL gl) 
 	{ 
 	   int[] tmp = new int[1]; 
 	   gl.glGenTextures(1, tmp);
 	   return tmp[0]; 
 	} 
 
-	public void bindTexture2D(GLDrawable drawable,
-								String name) throws IOException 
-	{ 
-		Texture2DJOGL tex = (Texture2DJOGL) table.get(name);
-    
-		if (tex == null)		{
-			System.out.println("Unknown texture2D "+name);
-			return;
-		}
-		System.out.println("Binding texture"+name);
-		bindTexture2D(drawable, tex);
-	}
-	
-	public void bindTexture2D(GLDrawable drawable,
-								Texture2DJOGL tex) 
-	{ 
-		boolean first = true;
-		this.gl = drawable.getGL();
-		this.glu = drawable.getGLU();
-		
-		int textureID = tex.getTextureID();
-		if (textureID != -1)	{		// already processed
-			first = false;
-		} else {
-			// create the texture ID for this texture 
-			textureID = createTextureID(); 
-			tex.setTextureID(textureID);
-			// bind this texture 
-		}
-		gl.glBindTexture(GL.GL_TEXTURE_2D, textureID); 
-		
-		BufferedImage bufferedImage = tex.getBufferedImage();
-		int srcPixelFormat = 0;
-    
-		if (bufferedImage.getColorModel().hasAlpha()) {
-			srcPixelFormat = GL.GL_RGBA;
-		} else {
-			srcPixelFormat = GL.GL_RGB;
-		}
-    
-		int wrapMode = tex.getWrapMode();
-
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, wrapMode); 
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, wrapMode); 
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, tex.getMinFilter()); 
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, tex.getMagFilter());
-		gl.glTexParameterf(textureID, GL.GL_TEXTURE_PRIORITY, (float) 1.0);
-		//gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_REPLACE);
-		gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
-		//gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_DECAL);
-		gl.glMatrixMode(GL.GL_TEXTURE);
-		gl.glLoadTransposeMatrixd(tex.getTextureMatrix());
-		gl.glMatrixMode(GL.GL_MODELVIEW);
-		// create either a series of mipmaps of a single texture image based on what's loaded 
-		/*if (mipmapped) 
-		{ 
-			glu.gluBuild2DMipmaps(GL.GL_TEXTURE_2D, 
-								  dstPixelFormat, 
-									tex.getImageWidth(), 
-						  			tex.getImageHeight(), 
-								  srcPixelFormat, 
-								  GL.GL_UNSIGNED_BYTE, 
-								  bufferedImage); 
-		} 
-		else 
-		{ 
-		*/	
-
-		if (first) gl.glTexImage2D(GL.GL_TEXTURE_2D, 
-						  0, 
-						  GL.GL_RGBA, //tex.getPixelFormat(), 
-						tex.getImageWidth(), 
-						tex.getImageHeight(), 
-						  0, 
-						  srcPixelFormat, 
-						  GL.GL_UNSIGNED_BYTE, 
-						  tex.getByteBuffer() ); 
-		//} 
- 
- 		
-	}
-
-	public int getID(Texture2D tex)	{
+	public static int getID(Texture2D tex)	{
 		Integer texid = (Integer) ht.get(tex);
 		if (texid == null) return -1;
-		else return texid.intValue();
+		return texid.intValue();
 	}
 	/**
 	 * @param theCanvas
 	 * @param tex
 	 */
-	public void bindTexture2D(GLCanvas drawable, Texture2D tex) {
+	public static void render(GLCanvas drawable, Texture2D tex) {
 	
 			boolean first = true;
 			boolean mipmapped = true;
-			this.gl = drawable.getGL();
-			this.glu = drawable.getGLU();
+			GL gl = drawable.getGL();
+			GLU glu = drawable.getGLU();
 			
 			Integer texid = (Integer) ht.get(tex);
 			int textureID;
@@ -138,39 +57,13 @@ public class Texture2DLoaderJOGL extends Texture2DLoader {
 				textureID = texid.intValue();
 			} else {
 				// create the texture ID for this texture 
-				textureID = createTextureID(); 
+				textureID = createTextureID(gl); 
 				ht.put(tex, new Integer(textureID));
 			}
-			gl.glBindTexture(GL.GL_TEXTURE_2D, textureID); 
-			//if (!first) return;
-			
-			Image bufferedImage = tex.getImage();
-			int srcPixelFormat = 0;
-	    
-			//if (bufferedImage.getColorModel().hasAlpha()) {
-				srcPixelFormat = GL.GL_RGBA;
-			//} else {
-				//srcPixelFormat = GL.GL_RGB;
-			//}
-	    
-			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, tex.getRepeatS()); 
-			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, tex.getRepeatT()); 
-			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, tex.getMinFilter()); 
-			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, tex.getMagFilter());
-			gl.glTexParameterf(textureID, GL.GL_TEXTURE_PRIORITY, (float) 1.0);
+			gl.glBindTexture(GL.GL_TEXTURE_2D, textureID); 			
+			int srcPixelFormat =  GL.GL_RGBA;  
+			handleTextureParameters(tex, gl);
 
-			float[] texcolor = {.4f, .6f, .3f, .5f};
-			gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, texcolor);
-
-			//gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_REPLACE);
-			gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, tex.getApplyMode());
-			//gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_DECAL);
-			if (tex.getTextureMatrix() != null) {
-				gl.glMatrixMode(GL.GL_TEXTURE);
-				gl.glLoadTransposeMatrixd(tex.getTextureMatrix().getMatrix());
-				gl.glMatrixMode(GL.GL_MODELVIEW);				
-			}
-			
 			byte[] data = tex.getByteArray();
 			
 			// create either a series of mipmaps of a single texture image based on what's loaded 
@@ -196,7 +89,111 @@ public class Texture2DLoaderJOGL extends Texture2DLoader {
 			
 
 	} 
-	
+	/**
+	 * @param tex
+	 * @param textureID
+	 */
+	private static void handleTextureParameters(Texture2D tex, GL gl) {
+		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, tex.getRepeatS()); 
+		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, tex.getRepeatT()); 
+		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, tex.getMinFilter()); 
+		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, tex.getMagFilter());
+
+		// TODO make this a field in Texture2D
+		float[] texcolor = {.4f, .6f, .3f, .6f};
+		gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, texcolor);
+		//gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_REPLACE);
+		gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, tex.getApplyMode());
+		
+		if (tex.getApplyMode() == Texture2D.GL_COMBINE) 
+		{
+			gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_COMBINE);
+			gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, GL.GL_INTERPOLATE);
+			gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE0_RGB, GL.GL_TEXTURE);
+			gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND0_RGB, GL.GL_SRC_COLOR);
+			gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE1_RGB, GL.GL_PREVIOUS);
+			gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND1_RGB, GL.GL_SRC_COLOR);
+			gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE2_RGB, GL.GL_CONSTANT);
+			gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND2_RGB, GL.GL_SRC_ALPHA);
+			
+		}
+
+		//gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_DECAL);
+		if (tex.getTextureTransformation() != null) {
+			gl.glMatrixMode(GL.GL_TEXTURE);
+			gl.glLoadTransposeMatrixd(tex.getTextureMatrix());
+			gl.glMatrixMode(GL.GL_MODELVIEW);				
+		}
+	}
+
+	public static void render(JOGLRenderer jr, ReflectionMap ref) {
+		GLCanvas drawable = jr.getCanvas();
+		boolean first = true;
+		boolean mipmapped = true;
+		GL gl = drawable.getGL();
+		GLU glu = drawable.getGLU();
+		
+		Integer texid = (Integer) ht.get(ref);
+		int textureID;
+		if (texid != null)	{
+			first = false;
+			textureID = texid.intValue();
+		} else {
+			// create the texture ID for this texture 
+			textureID = createTextureID(gl); 
+			ht.put(ref, new Integer(textureID));
+		}
+		gl.glBindTexture(GL.GL_TEXTURE_CUBE_MAP, textureID); 
+		//if (!first) return;
+		
+		int srcPixelFormat =  GL.GL_RGBA;
+		Texture2D tex = ref.getGlobalSettings();
+		// todo make a Texture3D class
+		gl.glTexParameteri(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_WRAP_R, tex.getRepeatT()); 
+		
+		double[] c2w = jr.getContext().getCameraToWorld();
+		c2w[3] = c2w[7] = c2w[11] = 0.0;
+		tex.setTextureMatrix(c2w);
+		handleTextureParameters(tex, gl);
+
+		gl.glTexGeni(GL.GL_S, GL.GL_TEXTURE_GEN_MODE, GL.GL_REFLECTION_MAP);
+		gl.glTexGeni(GL.GL_T, GL.GL_TEXTURE_GEN_MODE, GL.GL_REFLECTION_MAP);
+		gl.glTexGeni(GL.GL_R, GL.GL_TEXTURE_GEN_MODE, GL.GL_REFLECTION_MAP);
+		gl.glEnable(GL.GL_TEXTURE_GEN_S);
+		gl.glEnable(GL.GL_TEXTURE_GEN_T);
+		gl.glEnable(GL.GL_TEXTURE_GEN_R);
+		gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
+		// create either a series of mipmaps of a single texture image based on what's loaded 
+		if (first) 	{
+			Texture2D[] faces = ref.getFaceTextures();
+			for (int i = 0; i<6; ++i)		{
+				byte[] data = faces[i].getByteArray();
+				int width = faces[i].getWidth();
+				int height = faces[i].getHeight();
+				if (mipmapped) 
+					glu.gluBuild2DMipmaps(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 
+											GL.GL_RGBA, 
+											width, 
+								  			height, 
+										  srcPixelFormat, 
+										  GL.GL_UNSIGNED_BYTE, 
+										  data); 
+				else		
+					gl.glTexImage2D(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 
+								  0, 
+								  GL.GL_COMPRESSED_RGBA_ARB, //GL.GL_RGBA, //tex.getPixelFormat(), 
+								width, 
+								height, 
+								  0, 
+								  srcPixelFormat, 
+								  GL.GL_UNSIGNED_BYTE, 
+								  data ); 
+				
+			
+					}
+				}
+	}
+
 	public void deleteTexture(Texture2D tex)	{
 		Integer which = (Integer) ht.get(tex);
 		if (which == null) return;
@@ -204,7 +201,6 @@ public class Texture2DLoaderJOGL extends Texture2DLoader {
 		list[0] = which.intValue();
 		gl.glDeleteTextures(1, list);
 	}
-
 }
 
 

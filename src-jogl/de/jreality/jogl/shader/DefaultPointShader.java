@@ -13,6 +13,7 @@ import net.java.games.jogl.GLCanvas;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLSphereHelper;
+import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.Geometry;
@@ -116,14 +117,13 @@ public class DefaultPointShader  implements PointShader {
 		return sphereDraw;
 	}
 	
-	public int proxyGeometryFor(Geometry original, GL gl, int sig) {
+	public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig) {
+		GL gl = 	jr.globalGL;
 		// TODO handle quadmesh differently
 		if (sphereDraw && original instanceof PointSet)	{
 			PointSet ps = (PointSet) original;
 			DataList vertices = ps.getVertexAttributes(Attribute.COORDINATES);
 			DataList vertexColors = ps.getVertexAttributes(Attribute.COLORS);
-			DataList pointSize = ps.getVertexAttributes(Attribute.POINT_SIZE);
-			int vertexLength = GeometryUtility.getVectorLength(vertices);
 			int colorLength = 0;
 			if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
 			DoubleArray da;
@@ -134,9 +134,10 @@ public class DefaultPointShader  implements PointShader {
 			double[] mat = Rn.identityMatrix(4);
 			double[] scale = Rn.identityMatrix(4);
 			scale[0] = scale[5] = scale[10] = pointRadius;
-			double[] to = null;
-			System.out.println("Signature is "+sig);
+			//System.out.println("Signature is "+sig);
 			//sig = Pn.EUCLIDEAN;
+			boolean pickMode = jr.isPickMode();
+			if (pickMode) gl.glPushName(JOGLPickAction.GEOMETRY_POINT);
 			for (int i = 0; i< n; ++i)	{
 				da = vertices.item(i).toDoubleArray();	
 				gl.glPushMatrix();
@@ -152,9 +153,12 @@ public class DefaultPointShader  implements PointShader {
 						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), 1.0*da.getValueAt(3));
 					} 
 				}
+				if (pickMode) gl.glPushName(i);
 				gl.glCallList(dlist);
+				if (pickMode) gl.glPopName();
 				gl.glPopMatrix();
 			}
+			if (pickMode) gl.glPopName();
 			gl.glEndList();
 			//System.out.println("Creating spheres with radius "+pointRadius);
 			return nextDL;

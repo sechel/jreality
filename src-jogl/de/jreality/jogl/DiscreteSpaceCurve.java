@@ -11,6 +11,8 @@ import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.util.Pn;
+import de.jreality.util.Rn;
 
 /**
  * @author Charles Gunn
@@ -44,12 +46,14 @@ public class DiscreteSpaceCurve extends IndexedLineSet {
 		setEdgeCountAndAttributes(Attribute.INDICES, new IntArrayArray.Array(ind));
 	}
 
+	static double[] color1 = {1,0,0,1};
+	static double[] color2 = {0,1,0,1};
 	public static DiscreteSpaceCurve discreteTorusKnot(double R, double r, int n, int m, int nPts)	{
 		double[][] vertices = new double[nPts][3];
 		for (int i = 0; i<nPts; ++i)	{
 			double angle = ( i * 2.0 * Math.PI)/ nPts;
 			double a = m * angle, A = n * angle;
-			double C = Math.cos(A),			S = Math.sin(A);
+			double C = Math.cos(A),				S = Math.sin(A);
 			double c = r*Math.cos(a), 			s = r*Math.sin(a);
 			
 			vertices[i][0] = C * (R + c);
@@ -58,7 +62,7 @@ public class DiscreteSpaceCurve extends IndexedLineSet {
 		}
 		return new DiscreteSpaceCurve(vertices, true);
 	}
-
+	
 	public Geometry makeTube(double radius)	{
 		// this is your assignment: fill in this method
 		return null;

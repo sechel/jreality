@@ -41,11 +41,11 @@ public class JOGLSphereHelper extends SphereHelper {
 				for (int j = 0; j<SphereHelper.cubeSyms.length; ++j)	{
 					gl.glPushMatrix();
 					gl.glMultTransposeMatrixd(SphereHelper.cubeSyms[j].getMatrix());
-					JOGLRendererHelper.drawFaces(qms, gl, false, true, 1.0);
+					JOGLRendererHelper.drawFaces(qms, gl, true, 1.0);
 					gl.glPopMatrix();
 				}				
 			} else {
-				JOGLRendererHelper.drawFaces(SphereHelper.spheres[i], gl, false, true, 1.0);
+				JOGLRendererHelper.drawFaces(SphereHelper.spheres[i], gl, true, 1.0);
 			}
 			gl.glEndList();
 		}
@@ -80,6 +80,18 @@ public class JOGLSphereHelper extends SphereHelper {
 			else dlists = globalSharedSphereDisplayLists;
 		}
 		return dlists;
+	}
+
+	/**
+	 * @param globalGL
+	 */
+	public static void disposeSphereDLists(GL gl) {
+		int[] dlists = getSphereDLists(gl);
+		if (dlists == null)	{
+			System.out.println("disposeSphereDLists: No such context "+gl);
+			return;
+		}
+		// probably don't need to actually delete them since the context 
 	}
 
 }
