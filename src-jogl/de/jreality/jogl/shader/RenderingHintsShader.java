@@ -113,26 +113,35 @@ public class RenderingHintsShader  {
 	public void render(JOGLRenderer jr)	{
 		GLCanvas theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
-		gl.glDisable(GL.GL_TEXTURE_2D);
-		gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
-		if (isTransparencyEnabled())	{
+		//gl.glDisable(GL.GL_TEXTURE_2D);
+		//gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
+		if (transparencyEnabled != jr.openGLState.transparencyEnabled)	{
+			if (transparencyEnabled)	{
 			  gl.glEnable (GL.GL_BLEND);
 			  gl.glDepthMask(false);
 			  gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-		} else	{
+			} else	{
 			  gl.glDepthMask(true);
 			  gl.glDisable(GL.GL_BLEND);
+			}
+			jr.openGLState.transparencyEnabled = transparencyEnabled;
 		}
-		if (isLightingEnabled())		gl.glEnable(GL.GL_LIGHTING);
-		else							gl.glDisable(GL.GL_LIGHTING);
-		if (backFaceCullingEnabled)  {
-			gl.glEnable(GL.GL_CULL_FACE);
-			gl.glCullFace(GL.GL_BACK);
-		} else
-			gl.glDisable(GL.GL_CULL_FACE);
+		if (lightingEnabled != jr.openGLState.lighting)	{
+			if (lightingEnabled)			gl.glEnable(GL.GL_LIGHTING);
+			else							gl.glDisable(GL.GL_LIGHTING);
+			jr.openGLState.lighting = lightingEnabled;
+		}
+		if (backFaceCullingEnabled != jr.openGLState.backFaceCullingEnabled)	{
+			if (backFaceCullingEnabled)  {
+				gl.glEnable(GL.GL_CULL_FACE);
+				gl.glCullFace(GL.GL_BACK);
+			} else
+				gl.glDisable(GL.GL_CULL_FACE);
+			jr.openGLState.backFaceCullingEnabled = backFaceCullingEnabled;
+		}
 		// TODO: implement a handle for this front/back color flag
-		gl.glEnable(GL.GL_COLOR_MATERIAL);
-		gl.glColorMaterial(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE);
+		//gl.glEnable(GL.GL_COLOR_MATERIAL);
+		//gl.glColorMaterial(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE);
 			
 
 	}

@@ -32,12 +32,13 @@ public class DefaultPolygonShader implements PolygonShader {
 	
 	boolean		smoothShading = true; 		// interpolate shaded values between vertices
 	Texture2D texture2D;
-  Texture2D lightMap;
+	Texture2D lightMap;
 	ReflectionMap reflectionMap;
 	int frontBack = FRONT_AND_BACK;
 	public VertexShader vertexShader = null;
 	AbstractJOGLShader glShader = null;
 	static double[] idmat = Rn.identityMatrix(4);
+	int texUnit = 0, refMapUnit = 0;
 	/**
 		 * 
 		 */
@@ -62,8 +63,8 @@ public class DefaultPolygonShader implements PolygonShader {
 		if (foo instanceof Texture2D)	texture2D = (Texture2D) foo;
 		foo = eap.getAttribute(NameSpace.name(name,"reflectionMap"), null, ReflectionMap.class);
 		if (foo instanceof ReflectionMap)	reflectionMap = (ReflectionMap) foo;
-    foo = eap.getAttribute(NameSpace.name(name,"lightMap"), null, Texture2D.class);
-    if (foo instanceof Texture2D) lightMap = (Texture2D) foo;
+	    foo = eap.getAttribute(NameSpace.name(name,"lightMap"), null, Texture2D.class);
+	    if (foo instanceof Texture2D) lightMap = (Texture2D) foo;
 	
 		//TODO this is a hack. 
 		if (eap.getAttribute(NameSpace.name(name,"useGLShader"), false) == true)	{
@@ -115,8 +116,11 @@ public class DefaultPolygonShader implements PolygonShader {
 		GLCanvas theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		
-		if (isSmoothShading()) gl.glShadeModel(GL.GL_SMOOTH);
-		else		gl.glShadeModel(GL.GL_FLAT);
+		if (smoothShading != jr.openGLState.smoothShading)	{
+			if (isSmoothShading()) gl.glShadeModel(GL.GL_SMOOTH);
+			else		gl.glShadeModel(GL.GL_FLAT);
+			jr.openGLState.smoothShading = smoothShading;
+		}
 		
 		//gl.glMaterialfv(frontBack, GL.GL_DIFFUSE, getDiffuseColorAsFloat());
 //		gl.glEnable(GL.GL_COLOR_MATERIAL);
@@ -126,52 +130,54 @@ public class DefaultPolygonShader implements PolygonShader {
 		//System.out.println("transparency is "+transparency);
 		//float[] testcolor = {.3f, .5f, .7f, 1.0f * ((float) transparency)};
 		//gl.glMaterialfv(GL.GL_BACK, GL.GL_DIFFUSE, testcolor);
-		gl.glActiveTexture(GL.GL_TEXTURE0);
-		gl.glDisable(GL.GL_TEXTURE_2D);
-		gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
-		gl.glDisable(GL.GL_TEXTURE_GEN_S);
-		gl.glDisable(GL.GL_TEXTURE_GEN_T);
-		gl.glDisable(GL.GL_TEXTURE_GEN_R);
-		gl.glActiveTexture(GL.GL_TEXTURE1);
-		gl.glDisable(GL.GL_TEXTURE_2D);
-		gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
-		gl.glDisable(GL.GL_TEXTURE_GEN_S);
-		gl.glDisable(GL.GL_TEXTURE_GEN_T);
-		gl.glDisable(GL.GL_TEXTURE_GEN_R);
-		int texUnit = GL.GL_TEXTURE0;
+		texUnit = GL.GL_TEXTURE0;
 
 		if (texture2D != null)	{
 			gl.glActiveTexture(texUnit);
-			texUnit++;
 			Texture2DLoaderJOGL.render(theCanvas, texture2D);
 			int[] res = new int[1];
-			gl.glGetTexParameteriv(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_RESIDENT, res);
+			//gl.glGetTexParameteriv(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_RESIDENT, res);
 			//System.out.println("Texture is resident: "+res[0]);
-			if (res[0] == 0)	{ jr.texResident = false; }
+			//if (res[0] == 0)	{ jr.texResident = false; }
 			gl.glEnable(GL.GL_TEXTURE_2D);
 		} //else
-    if (lightMap != null)  {
-        Texture2DLoaderJOGL.render(theCanvas, lightMap, 1);
-        //int[] res = new int[2];
-        //gl.glGetTexParameteriv(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_RESIDENT, res);
-        //System.out.println("Texture is resident: "+res[0]);
-        //if (res[0] == 0)    { jr.texResident = false; }
-        gl.glEnable(GL.GL_TEXTURE_2D);
-    } //else
-		if (reflectionMap != null)	{
-			gl.glActiveTexture(texUnit);
+	    if (lightMap != null)  {
 			texUnit++;
+			gl.glActiveTexture(texUnit);
+	       Texture2DLoaderJOGL.render(theCanvas, lightMap);
+	        gl.glEnable(GL.GL_TEXTURE_2D);
+	    } //else
+		if (reflectionMap != null)	{
+			texUnit++;
+			gl.glActiveTexture(texUnit);
+			refMapUnit = texUnit;
 			Texture2DLoaderJOGL.render(jr, reflectionMap);
-			int[] res = new int[1];
-			gl.glGetTexParameteriv(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_RESIDENT, res);
+			//int[] res = new int[1];
+			//gl.glGetTexParameteriv(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_RESIDENT, res);
 			//System.out.println("Texture is resident: "+res[0]);
-			if (res[0] == 0)	{ jr.texResident = false; }
+			//if (res[0] == 0)	{ jr.texResident = false; }
 			gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
 			//System.out.println("cube map enabled");
 		} 
 		vertexShader.setFrontBack(frontBack);
 		vertexShader.render(jr);
 		if (glShader != null) glShader.activate(theCanvas);
+	}
+	
+	public void postRender(JOGLRenderer jr)	{
+		GLCanvas theCanvas = jr.getCanvas();
+		GL gl = theCanvas.getGL();
+		for (int i = GL.GL_TEXTURE0; i< texUnit; ++i)	{
+			gl.glActiveTexture(i);
+			gl.glDisable(GL.GL_TEXTURE_2D);			
+		}
+		if (reflectionMap != null)	{
+			gl.glActiveTexture(refMapUnit);
+			gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
+			gl.glDisable(GL.GL_TEXTURE_GEN_S);
+			gl.glDisable(GL.GL_TEXTURE_GEN_T);
+			gl.glDisable(GL.GL_TEXTURE_GEN_R);			
+		}
 	}
 
 	public boolean providesProxyGeometry() {		

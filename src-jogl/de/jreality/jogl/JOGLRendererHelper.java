@@ -12,6 +12,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.swing.DefaultBoundedRangeModel;
 
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
@@ -23,6 +24,7 @@ import de.jreality.geometry.LabelSet;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.RegularDomainQuadMesh;
 import de.jreality.jogl.pick.JOGLPickAction;
+import de.jreality.jogl.shader.DefaultPolygonShader;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.ClippingPlane;
@@ -113,40 +115,7 @@ public class JOGLRendererHelper {
 				gl.glDisable(GL.GL_TEXTURE_2D);
 			}
 	}
-/**
-	 * @param sg
-	 */
-	// ultimately all this should happen in various visit() methods
-	public  static void initializeGLState(GLCanvas theCanvas)	{
-		GL gl = theCanvas.getGL();
-		// set drawing color and point size
-		gl.glColor3f( 0.3f, 0.0f, 0.6f ); 
-		gl.glEnable(GL.GL_DEPTH_TEST);							// Enables Depth Testing
-		gl.glDepthFunc(GL.GL_LEQUAL);								// The Type Of Depth Testing To Do
-		gl.glClearDepth(1.0f);  
-		gl.glEnable(GL.GL_NORMALIZE);
-		//gl.glDisable(GL.GL_COLOR_MATERIAL);		
-		gl.glEnable(GL.GL_MULTISAMPLE_ARB);	
-		gl.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE);
-		boolean doFog = false;
-		if (doFog)	{
-			gl.glFogi(GL.GL_FOG_MODE, GL.GL_EXP);
-			float[] fogcolor = {.5f, .5f, .5f, 1.0f};
-			gl.glEnable(GL.GL_FOG);
-			gl.glFogi(GL.GL_FOG_MODE, GL.GL_EXP);
-			gl.glFogfv(GL.GL_FOG_COLOR, bg);
-			gl.glFogf(GL.GL_FOG_DENSITY, .4f);
-		}
-	}
-	// for converting double arrays to native buffers:
-//	static ByteBuffer bb = ByteBuffer.allocateDirect(444/* array.length*8 */).order(ByteOrder.nativeOrder());
-//	bb.asDoubleBuffer().put(array);
-//	bb.flip();
-//	
-//	gl.glVertexPointer(3, GL.GL_DOUBLE, 8*3, bb);
-	// can re-use after checking that it's long enough, use some method to reallocate
-	
-	static boolean testArrays = false;
+static boolean testArrays = false;
 	static ByteBuffer vBuffer, vcBuffer, vnBuffer, fcBuffer, fnBuffer, tcBuffer;
 	static DataList vLast = null, vcLast = null, vnLast = null;
 	public static void drawVertices( PointSet sg, JOGLRenderer jr, boolean pickMode, double alpha) {
@@ -158,7 +127,14 @@ public class JOGLRendererHelper {
 		DataList pointSize = sg.getVertexAttributes(Attribute.POINT_SIZE);
 		int vertexLength = GeometryUtility.getVectorLength(vertices);
 		int colorLength = 0;
-		if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
+		if (vertexColors != null) {
+			colorLength = GeometryUtility.getVectorLength(vertexColors);
+			if (jr.openGLState.frontBack != DefaultPolygonShader.FRONT_AND_BACK)	{
+				gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK, GL.GL_DIFFUSE);
+				jr.openGLState.frontBack =DefaultPolygonShader.FRONT_AND_BACK;
+			}
+		}
+		
 		DoubleArray da;
 		if (pickMode)	gl.glPushName(JOGLPickAction.GEOMETRY_POINT);
 		//if (pickMode) System.out.println("Rendering vertices in picking mode");
@@ -194,7 +170,8 @@ public class JOGLRendererHelper {
 	/**
 	 * @param sg
 	 */
-	public static void drawLines(IndexedLineSet sg, GLCanvas theCanvas, boolean pickMode, boolean interpolateVertexColors, double alpha) {
+	public static void drawLines(IndexedLineSet sg, JOGLRenderer jr , boolean pickMode, boolean interpolateVertexColors, double alpha) {
+		GLCanvas theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		vertices = sg.getVertexAttributes(Attribute.COORDINATES);
@@ -254,6 +231,12 @@ public class JOGLRendererHelper {
 			colorLength = GeometryUtility.getVectorLength(edgeColors);
 		} 
 		else 	colorBind = ElementBinding.PER_PART;
+		if (colorBind != ElementBinding.PER_PART)	{
+			if (jr.openGLState.frontBack != DefaultPolygonShader.FRONT_AND_BACK)	{
+				gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK, GL.GL_DIFFUSE);
+				jr.openGLState.frontBack =DefaultPolygonShader.FRONT_AND_BACK;
+			}			
+		}
 		//pickMode = false;
 		if (pickMode)	gl.glPushName(JOGLPickAction.GEOMETRY_LINE);
 		int numEdges = sg.getNumEdges();
@@ -307,19 +290,21 @@ public class JOGLRendererHelper {
 //		gl.glDepthRange(0d, 1d);
 	}
 
-	public static void drawFaces( IndexedFaceSet sg, GL gl,  boolean smooth, double alpha) {
-		drawFaces(sg, gl, smooth, alpha, false, JOGLPickAction.GEOMETRY_FACE);
+	public static void drawFaces( IndexedFaceSet sg,JOGLRenderer jr,  boolean smooth, double alpha) {
+		drawFaces(sg, jr, smooth, alpha, false, JOGLPickAction.GEOMETRY_FACE);
 	}
-	public static void drawFaces( IndexedFaceSet sg, GL gl,  boolean smooth, double alpha, boolean pickMode, int pickName) {
-
+	public static void drawFaces( IndexedFaceSet sg, JOGLRenderer jr,  boolean smooth, double alpha, boolean pickMode, int pickName) {
+		GLCanvas theCanvas = jr.getCanvas();
+		GL gl = theCanvas.getGL();
+		
 		int colorBind = -1,normalBind, colorLength=3;
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		DataList vertexNormals = sg.getVertexAttributes(Attribute.NORMALS);
 		DataList faceNormals = sg.getFaceAttributes(Attribute.NORMALS);
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
 		DataList faceColors = sg.getFaceAttributes(Attribute.COLORS);
-    DataList texCoords = sg.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
-    DataList lightMapCoords = sg.getVertexAttributes(Attribute.attributeForName("lightmap coordinates"));
+		DataList texCoords = sg.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+		DataList lightMapCoords = sg.getVertexAttributes(Attribute.attributeForName("lightmap coordinates"));
 		//System.out.println("Vertex normals are: "+((vertexNormals != null) ? vertexNormals.size() : 0));
 		//System.out.println("alpha value is "+alpha);
 		
@@ -339,7 +324,13 @@ public class JOGLRendererHelper {
 		} 
 		else 	colorBind = ElementBinding.PER_PART;
 		//System.out.println("Color binding is "+colorBind);
-		
+		if (colorBind != ElementBinding.PER_PART)	{
+			if (jr.openGLState.frontBack != DefaultPolygonShader.FRONT_AND_BACK)	{
+				gl.glEnable(GL.GL_COLOR_MATERIAL);
+				gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK, GL.GL_DIFFUSE);
+				jr.openGLState.frontBack =DefaultPolygonShader.FRONT_AND_BACK;
+			}			
+		}
 		if (vertexNormals != null && smooth)	{
 				normalBind = ElementBinding.PER_VERTEX;
 			}
@@ -502,7 +493,7 @@ public class JOGLRendererHelper {
 		}
 		// pop to balance the glPushName(10000) above
 		if (pickMode) gl.glPopName();
-		if (colorBind != ElementBinding.PER_PART)  gl.glDisable(GL.GL_COLOR_MATERIAL);
+		//if (colorBind != ElementBinding.PER_PART)  gl.glDisable(GL.GL_COLOR_MATERIAL);
 		
 //		gl.glDisable(GL.GL_TEXTURE_2D);
 //

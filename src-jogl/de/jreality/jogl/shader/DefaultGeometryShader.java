@@ -110,5 +110,7 @@ public class DefaultGeometryShader  implements Shader {
 		public void render(JOGLRenderer jr) {
 		}
 
+		public void postRender(JOGLRenderer jr) {
+		}
 
 }

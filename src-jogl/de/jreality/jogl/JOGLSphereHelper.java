@@ -24,7 +24,8 @@ public class JOGLSphereHelper extends SphereHelper {
 	static int[] globalSharedSphereDisplayLists = null;
 	//TODO This can't be static; the display lists so created are invalid if the renderer parameter
 	// no longer exists.  So ... these display lists have to be tied to a specific context.
-	public static void setupSphereDLists(GL gl)	{
+	public static void setupSphereDLists(JOGLRenderer jr)	{
+		GL gl = jr.getCanvas().getGL();
 		int n = SphereHelper.tessellatedIcosahedra.length;
 		int[] dlists = null;
 		//if (!sharedDisplayLists)	dlists = (int[] ) sphereDListsTable.get(gl);
@@ -39,7 +40,7 @@ public class JOGLSphereHelper extends SphereHelper {
 			for (int j = 0; j<SphereHelper.cubeSyms.length; ++j)	{
 				gl.glPushMatrix();
 				gl.glMultTransposeMatrixd(SphereHelper.cubeSyms[j].getMatrix());
-				JOGLRendererHelper.drawFaces(qms, gl, true, 1.0);
+				JOGLRendererHelper.drawFaces(qms,jr, true, 1.0);
 				gl.glPopMatrix();
 			}				
 			gl.glEndList();
@@ -52,8 +53,8 @@ public class JOGLSphereHelper extends SphereHelper {
 	 * @param i
 	 * @return
 	 */
-	public static int getSphereDLists(int i, GL gl) {
-		int[] dlists = getSphereDLists(gl);
+	public static int getSphereDLists(int i,JOGLRenderer jr) {
+		int[] dlists = getSphereDLists(jr);
 		if (dlists == null) 	{
 			System.err.println("Invalid sphere display lists");
 			return 0;
@@ -65,12 +66,13 @@ public class JOGLSphereHelper extends SphereHelper {
 	 * @param i
 	 * @return
 	 */
-	public static int[] getSphereDLists( GL gl) {
+	public static int[] getSphereDLists( JOGLRenderer jr) {
+		GL gl = jr.getCanvas().getGL();
 		int dlists[];
 		if (!sharedDisplayLists)	dlists =  (int[] ) sphereDListsTable.get(gl);
 		else dlists = globalSharedSphereDisplayLists;
 		if (dlists == null) 	{
-			setupSphereDLists(gl);
+			setupSphereDLists(jr);
 			if (!sharedDisplayLists)	dlists = (int[] ) sphereDListsTable.get(gl);
 			else dlists = globalSharedSphereDisplayLists;
 		}
@@ -80,11 +82,10 @@ public class JOGLSphereHelper extends SphereHelper {
 	/**
 	 * @param globalGL
 	 */
-	public static void disposeSphereDLists(GL gl) {
-		int[] dlists = getSphereDLists(gl);
+	public static void disposeSphereDLists(JOGLRenderer jr) {
+		int[] dlists = getSphereDLists(jr);
 		if (dlists == null)	{
-			System.out.println("disposeSphereDLists: No such context "+gl);
-			return;
+			throw new IllegalStateException("No such gl context");
 		}
 		// probably don't need to actually delete them since the context 
 	}

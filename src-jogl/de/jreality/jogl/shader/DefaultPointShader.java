@@ -11,6 +11,7 @@ import net.java.games.jogl.GLCanvas;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLSphereHelper;
+import de.jreality.jogl.OpenGLState;
 import de.jreality.jogl.Snake;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.scene.Appearance;
@@ -96,18 +97,28 @@ public class DefaultPointShader  implements PointShader {
 		GLCanvas theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		gl.glPointSize((float) getPointSize());
-		gl.glColor4fv(getDiffuseColorAsFloat());
-		gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, getDiffuseColorAsFloat());
+		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
+			gl.glColor4fv( diffuseColorAsFloat);
+			jr.openGLState.diffuseColor = diffuseColorAsFloat;
+		}
+		boolean lighting = false;
 		if (sphereDraw)	{
 			polygonShader.render(jr);
-			gl.glEnable(GL.GL_LIGHTING);
+			lighting = true;
 		}
-		else gl.glDisable(GL.GL_LIGHTING);
+		if (jr.openGLState.lighting != lighting)	{
+			jr.openGLState.lighting = lighting;
+			if (lighting) gl.glEnable(GL.GL_LIGHTING);
+			else gl.glDisable(GL.GL_LIGHTING);
+			
+		}
 
 		// this little bit of code forces tubes to be opaque: could add
 		// transparency-enable flag to the line shader to allow this to be controlled
-		gl.glDepthMask(true);
-		 gl.glDisable(GL.GL_BLEND);
+		if (jr.openGLState.transparencyEnabled)	{
+			gl.glDepthMask(true);
+			gl.glDisable(GL.GL_BLEND);			
+		}
 		
 	}
 
@@ -128,7 +139,7 @@ public class DefaultPointShader  implements PointShader {
 			DoubleArray da;
 			int n = ps.getNumPoints();
 			int nextDL = gl.glGenLists(1);
-			int dlist = JOGLSphereHelper.getSphereDLists(1, gl);
+			int dlist = JOGLSphereHelper.getSphereDLists(1, jr);
 			gl.glNewList(nextDL, GL.GL_COMPILE);
 			double[] mat = Rn.identityMatrix(4);
 			double[] scale = Rn.identityMatrix(4);
@@ -183,8 +194,12 @@ public class DefaultPointShader  implements PointShader {
 		return -1;
 	}
 	
+	public void postRender(JOGLRenderer jr) {
+	}
+
 	public Shader getPolygonShader() {
 		return polygonShader;
 	}
+
 
 }

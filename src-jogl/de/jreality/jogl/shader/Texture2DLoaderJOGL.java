@@ -47,9 +47,9 @@ public class Texture2DLoaderJOGL {
 	 * @param tex
 	 */
 	public static void render(GLCanvas drawable, Texture2D tex) {
-        render(drawable, tex, 0);
-    }
-  public static void render(GLCanvas drawable, Texture2D tex, int level) {
+//        render(drawable, tex, 0);
+//    }
+//  public static void render(GLCanvas drawable, Texture2D tex, int level) {
 			boolean first = true;
 			boolean mipmapped = true;
 			GL gl = drawable.getGL();
@@ -66,7 +66,7 @@ public class Texture2DLoaderJOGL {
 				ht.put(tex, new Integer(textureID));
 			}
  
-			gl.glActiveTexture(GL.GL_TEXTURE0+level);
+//			gl.glActiveTexture(GL.GL_TEXTURE0+level);
 			gl.glBindTexture(GL.GL_TEXTURE_2D, textureID); 			
 			int srcPixelFormat =  GL.GL_RGBA;
 			handleTextureParameters(tex, gl);

@@ -10,6 +10,7 @@ import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
 
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.OpenGLState;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.util.EffectiveAppearance;
@@ -111,14 +112,23 @@ public class DefaultVertexShader implements VertexShader {
 	public void render(JOGLRenderer jr)	{
 		GLCanvas theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
-		
-		gl.glEnable(GL.GL_COLOR_MATERIAL);
-		gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
+
+		if (jr.openGLState.frontBack != frontBack)	{
+			gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
+			jr.openGLState.frontBack = frontBack;
+		}
+		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
+			gl.glColor4fv( diffuseColorAsFloat);
+			jr.openGLState.diffuseColor = diffuseColorAsFloat;
+		}
 		gl.glColor4fv( diffuseColorAsFloat);
 		gl.glMaterialfv(frontBack, GL.GL_AMBIENT, ambientColorAsFloat);
 		gl.glMaterialfv(frontBack, GL.GL_SPECULAR, specularColorAsFloat);
 		gl.glMaterialf(frontBack, GL.GL_SHININESS, (float) getSpecularExponent());
 		//System.out.println("VertexShader: Setting diffuse color to: "+Rn.toString(getDiffuseColorAsFloat()));
+	}
+
+	public void postRender(JOGLRenderer jr) {
 	}
 
 }

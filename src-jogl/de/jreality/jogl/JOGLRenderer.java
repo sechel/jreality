@@ -98,8 +98,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	int[] currentViewport = new int[4];
 	Graphics3D context;
 	public GL globalGL;
-	int[] sphereDisplayLists;
 	GLU globalGLU;
+	int[] sphereDisplayLists;
+	public OpenGLState openGLState = new OpenGLState();
 	public  boolean texResident;
 	int numberTries = 0;		// how many times we have tried to make textures resident
 	boolean  useDisplayLists;
@@ -167,7 +168,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		}
 		
 		context  = new Graphics3D(theViewer);
-		JOGLRendererHelper.initializeGLState(theCanvas);
 		
 		globalGL.glMatrixMode(GL.GL_PROJECTION);
 		globalGL.glLoadIdentity();
@@ -196,6 +196,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		
 		nodeCount = 0;			// for profiling info
 		texResident = true;		// assume the best ...
+		OpenGLState.initializeGLState(this);
 		thePeerRoot.render();		
 		//System.out.println("Nodes visited in render traversal: "+nodeCount);
 		if (!pickMode && thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.render();
@@ -312,7 +313,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		
 //		otime = System.currentTimeMillis();
 		if (thePeerRoot != null) thePeerRoot.propagateGeometryChanged(ALL_CHANGED);
-		sphereDisplayLists = JOGLSphereHelper.getSphereDLists(globalGL);
+		sphereDisplayLists = JOGLSphereHelper.getSphereDLists(this);
 		if (debugGL)	System.out.println("Got new sphere display lists for context "+globalGL);
 		
 		if (CameraUtility.getCamera(theViewer) == null || theCanvas == null) return;
@@ -753,9 +754,10 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				int dlist = sphereDisplayLists[i];
 				globalGL.glDisable(GL.GL_SMOOTH);
 				if (pickMode) globalGL.glPushName(JOGLPickAction.GEOMETRY_BASE);
-				globalGL.glColor4fv(cdbg[i].getRGBComponents(null));
+				if (debugGL) globalGL.glColor4fv(cdbg[i].getRGBComponents(null));
 				globalGL.glCallList(dlist);
 				if (pickMode) globalGL.glPopName();
+				geometryShader.polygonShader.postRender(globalHandle);
 				return;
 			}		
 			else 	if (originalGeometry instanceof LabelSet)	{
@@ -780,16 +782,17 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				if (proxy)	globalGL.glCallList(dlInfo.getDisplayListID(type));
 				else 	{
 					if (!processDisplayListState(type))		 // false return implies no display lists used
-						JOGLRendererHelper.drawFaces(ifs, theCanvas.getGL(),ss, alpha, pickMode, JOGLPickAction.GEOMETRY_FACE);
+						JOGLRendererHelper.drawFaces(ifs, globalHandle,ss, alpha, pickMode, JOGLPickAction.GEOMETRY_FACE);
 					else // we are using display lists
 						if (dlInfo.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
-							JOGLRendererHelper.drawFaces(ifs, theCanvas.getGL(), ss, alpha, pickMode, JOGLPickAction.GEOMETRY_FACE);
+							JOGLRendererHelper.drawFaces(ifs, globalHandle, ss, alpha, pickMode, JOGLPickAction.GEOMETRY_FACE);
 							globalGL.glEndList();	
 							globalGL.glCallList(dlInfo.getDisplayListID(type));
 							dlInfo.setDisplayListDirty(type, false);
 							dlInfo.setInsideDisplayList(false);							
 						}					
 				}
+				geometryShader.polygonShader.postRender(globalHandle);
 			}
 			if (geometryShader.isEdgeDraw() && ils != null)	{
 				geometryShader.lineShader.render(globalHandle);
@@ -809,10 +812,10 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				if (proxy)	globalGL.glCallList(dlInfo.getDisplayListID(type));
 				else {
 					if (!processDisplayListState(type))		 // false return implies no display lists used
-						JOGLRendererHelper.drawLines(ils, theCanvas, pickMode, smooth, alpha);			
+						JOGLRendererHelper.drawLines(ils, globalHandle, pickMode, smooth, alpha);			
 					else // we are using display lists
 						if (dlInfo.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
-							JOGLRendererHelper.drawLines(ils, theCanvas, pickMode, smooth, alpha);			
+							JOGLRendererHelper.drawLines(ils, globalHandle, pickMode, smooth, alpha);			
 							globalGL.glEndList();	
 							globalGL.glCallList(dlInfo.getDisplayListID(type));
 							dlInfo.setDisplayListDirty(type, false);
@@ -1237,7 +1240,10 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			// should depend on camera transformation ...
 			if (parent != null) cumulativeIsReflection = (isReflection != parent.cumulativeIsReflection);
 			else cumulativeIsReflection = (isReflection != globalIsReflection);
-			globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
+			if (cumulativeIsReflection != openGLState.flipped)	{
+				globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
+				openGLState.flipped  = cumulativeIsReflection;
+			}
 
 			if (appearanceChanged)  	propagateAppearanceChanged();
 			if (appearanceIsDirty)	updateAppearance();

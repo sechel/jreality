@@ -18,4 +18,5 @@ import de.jreality.util.EffectiveAppearance;
 public interface Shader {
 	public void  setFromEffectiveAppearance(EffectiveAppearance eap, String name);
 	public void render(JOGLRenderer jr);
+	public void postRender(JOGLRenderer jr);
 }
