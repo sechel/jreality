@@ -106,10 +106,10 @@
 -->
 
 	<target name="jsyzygy" depends="jSyzygy_java,jogl">
-<!--		<mkdir dir="${build}/jsyzygy" />
+		<mkdir dir="${build}/jsyzygy" />
 		<javac excludesfile="excludes.txt" srcdir="${jsyzygy}" classpath="${lib}/jSyzygy.jar;${dist}/jReality-core.jar:${dist}/jReality-jogl.jar" destdir="${build}/jsyzygy" debug="true" />
 		<jar jarfile="${dist}/jReality-jsyzygy.jar" basedir="${build}/jsyzygy" />
--->	</target>
+	</target>
 
 	<target name="jSyzygy_java">
 		<property name="lib" location="lib" />
@@ -117,7 +117,7 @@
 		<copy file="jSyzygy/jSyzygy.jar" todir="${lib}" />
 	</target>
 
-	<target name="portal" depends="jogl,jSyzygy_java,soft,tests,stubs">
+	<target name="portal" depends="jogl,jSyzygy_java,soft,tests,proxies">
 		<mkdir dir="${build}/portal" />
 		<javac excludesfile="excludes.txt" srcdir="${portal}" classpath="${lib}/jSyzygy.jar;${dist}/jReality-core.jar:${dist}/jReality-jogl.jar:${dist}/jReality-soft.jar:${dist}/jReality-tests.jar:${dist}/jReality-proxies.jar" destdir="${build}/portal" debug="true" />
 		<rmic base="${build}/portal" includes="**/*Impl.class" classpath="${lib}/jSyzygy.jar;${dist}/jReality-core.jar:${dist}/jReality-jogl.jar:${dist}/jReality-stubs.jar:${dist}/jReality-proxies.jar" />

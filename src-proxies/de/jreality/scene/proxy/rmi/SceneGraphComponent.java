@@ -1,6 +1,7 @@
 
 package de.jreality.scene.proxy.rmi;
 
+import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.proxy.SgAdd;
 import de.jreality.scene.proxy.SgRemove;
 
@@ -17,6 +18,7 @@ public class SceneGraphComponent extends de.jreality.scene.SceneGraphComponent
   }
   public void addChild(RemoteSceneGraphComponent sgc)
   {
+    if (sgc == null) throw new NullPointerException("child cant be null");
     super.addChild((de.jreality.scene.SceneGraphComponent)sgc);
   }
   public RemoteSceneGraphComponent getRemoteChildComponent(int index)
@@ -63,10 +65,16 @@ public class SceneGraphComponent extends de.jreality.scene.SceneGraphComponent
   {
     return (RemoteGeometry)super.getGeometry();
   }
-  public void add(RemoteSceneGraphNode newChild) {
-  	new SgAdd().add(this, (de.jreality.scene.SceneGraphNode) RemoteSceneGraphElementsFactoryImpl.getLocal(newChild));
-  }
-  public void remove(RemoteSceneGraphNode newChild) {
-   	new SgRemove().remove(this, (de.jreality.scene.SceneGraphNode) RemoteSceneGraphElementsFactoryImpl.getLocal(newChild));
-  }
+//  public void add(RemoteSceneGraphNode newChild) {
+//        new SgAdd().add(this, (de.jreality.scene.SceneGraphNode) RemoteSceneGraphElementsFactoryImpl.getLocal(newChild));
+//    }
+//    public void remove(RemoteSceneGraphNode newChild) {
+//        new SgRemove().remove(this, (de.jreality.scene.SceneGraphNode) RemoteSceneGraphElementsFactoryImpl.getLocal(newChild));
+//    }
+    public void add(RemoteSceneGraphNode newChild) {
+        new SgAdd().add(this, (SceneGraphNode) newChild);
+      }
+      public void remove(RemoteSceneGraphNode newChild) {
+        new SgRemove().remove(this, (SceneGraphNode) newChild);
+      }
 }
