@@ -60,7 +60,7 @@ import de.jreality.util.SceneGraphUtilities;
 public class HeadtrackedRemoteViewerImpl extends RemoteViewerImpl implements
 		HeadtrackedRemoteViewer {
 
-	private SceneGraphComponent cameraTranslationNode,
+	protected SceneGraphComponent cameraTranslationNode,
 	cameraOrientationNode, root, navigationNode;
 
 	String hostname;
@@ -193,9 +193,8 @@ public class HeadtrackedRemoteViewerImpl extends RemoteViewerImpl implements
 	public void setRemoteSceneRoot(RemoteSceneGraphComponent r) {
 		if (root != null) viewer.getSceneRoot().removeChild(root);
 		if (r != null) { 
-//			root = (SceneGraphComponent)RemoteSceneGraphElementsFactoryImpl.getLocal(r);
-		    root = (SceneGraphComponent) r;
-            viewer.getSceneRoot().addChild(root);
+			root = getLocal(r);
+      viewer.getSceneRoot().addChild(root);
 		}
 		else root = null;
 	}

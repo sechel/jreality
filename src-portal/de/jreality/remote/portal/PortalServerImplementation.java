@@ -45,6 +45,7 @@ import de.jreality.remote.RemoteViewer;
 import de.jreality.remote.util.INetUtilities;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
+import de.jreality.util.LoadableScene;
 import de.jreality.util.Lock;
 import de.jreality.util.P3;
 
@@ -137,7 +138,24 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 //		controlPanel = new ControlPanel();
 	}
 	
-	WandTool wandTool;
+  public void loadWorld(String classname) {
+      long t = System.currentTimeMillis();
+      LoadableScene wm = null;
+      try {
+          wm = (LoadableScene) Class.forName(classname).newInstance();
+      } catch (Exception e) {
+          e.printStackTrace();
+      }
+      // scene settings
+      wm.setConfiguration(getConfig());
+      de.jreality.scene.SceneGraphComponent world = wm.makeWorld();
+      if (world != null) getSceneRoot().addChild(world);
+      setSignature(wm.getSignature());
+      long s = System.currentTimeMillis() - t;
+      System.out.println("loaded world " + classname + " successful. ["+s+"ms]");
+  }
+
+  WandTool wandTool;
 	SceneGraphComponent sceneRoot;
 	SceneGraphComponent wandComp;
 	public void setSceneRoot(SceneGraphComponent root) {

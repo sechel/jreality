@@ -111,16 +111,16 @@ public class RemoteViewerImpl implements RemoteViewer {
 		return (RemoteSceneGraphComponent) viewer.getSceneRoot();
 	}
 
-//    public void setRemoteSceneRoot(RemoteSceneGraphComponent r) {
-//            System.out.println("Setting scene root to ["+r.toString()+"] ");
-//            viewer.setSceneRoot((SceneGraphComponent)RemoteSceneGraphElementsFactoryImpl.getLocal(r));
-//        }
     public void setRemoteSceneRoot(RemoteSceneGraphComponent r) {
-            System.out.println("Setting scene root to ["+r.toString()+"] ");
-            viewer.setSceneRoot((SceneGraphComponent)r);
-        }
+        System.out.println("Setting scene root to ["+r.toString()+"] ");
+        viewer.setSceneRoot(getLocal(r));
+    }
 
-	public RemoteSceneGraphPath getRemoteCameraPath() {
+    protected de.jreality.scene.SceneGraphComponent getLocal(RemoteSceneGraphComponent r) {
+        return (SceneGraphComponent)RemoteSceneGraphElementsFactoryImpl.getLocal(r);
+    }
+
+    public RemoteSceneGraphPath getRemoteCameraPath() {
 		return (RemoteSceneGraphPath) viewer.getCameraPath();
 	}
 

@@ -170,7 +170,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
 
     public void setBackgroundColor(java.awt.Color color) {
         bgColor = color;
-
+        getClients().setBackgroundColor(bgColor);
     }
 
     Lock headMatrixLock = new Lock();
@@ -365,19 +365,14 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         de.jreality.scene.SceneGraphComponent world = wm.makeWorld();
         if (world != null) getSceneRoot().addChild(world);
         setSignature(wm.getSignature());
-        long time = System.currentTimeMillis() - t;
-        System.out.println("loaded world " + classname + " successful. ["+t+"ms]");
+        long s = System.currentTimeMillis() - t;
+        System.out.println("loaded world " + classname + " successful. ["+s+"ms]");
     }
 
     
     public static void main(String[] args) throws Exception {
-	    boolean nio = true;
-	    try {
-		    nio = !args[1].startsWith("io");
-	    } catch (Exception e) {}
-	    if (!nio) System.err.println("using blocking io!");
         String hostname = INetUtilities.getHostname();
-        PortalServerImplementation rsi = new PortalServerImplementation(nio ? new TCPBroadcasterNIO(8868).getRemoteFactory() : new TCPBroadcasterIO(8868).getRemoteFactory());
+        PortalServerImplementation rsi = new PortalServerImplementation(new TCPBroadcasterNIO(8868).getRemoteFactory());
         rsi.setBackgroundColor(new Color(120, 10, 44, 20));
         rsi.loadWorld(args[0]);
     }

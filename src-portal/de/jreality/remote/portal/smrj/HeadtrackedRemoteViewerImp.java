@@ -24,6 +24,8 @@ package de.jreality.remote.portal.smrj;
 
 import java.rmi.RemoteException;
 
+import de.jreality.scene.proxy.rmi.RemoteSceneGraphComponent;
+import de.jreality.scene.SceneGraphComponent;
 
 /**
  *
@@ -37,6 +39,10 @@ de.jreality.remote.portal.HeadtrackedRemoteViewerImpl implements HeadtrackedRemo
 
     public HeadtrackedRemoteViewerImp() throws RemoteException {
         super(new de.jreality.jogl.InteractiveViewer());
+    }
+    
+    protected SceneGraphComponent getLocal(RemoteSceneGraphComponent r) {
+        return (SceneGraphComponent) r;
     }
 
 }
