@@ -182,9 +182,6 @@ public class InteractiveViewerDemo extends JFrame{
 		root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
 		root.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
 
-		CameraUtility.getCamera(viewer).setSignature(getSignature());
-		CameraUtility.getCamera(viewer).reset();
-		
 		if (!loadedScene)  world = makeWorld();
 		SceneGraphComponent lights = makeLights();
 		
@@ -194,6 +191,7 @@ public class InteractiveViewerDemo extends JFrame{
 			root.addChild(world);
 			if (world.getTransformation() == null) 		world.setTransformation(new Transformation());
 		}
+
 		if (isEncompass()|| (loadedScene && getSignature() == Pn.EUCLIDEAN))	{
 			// I have to do this ... for reasons unknown ... or else the encompass sometimes fails.
 			CameraUtility.getCameraNode(viewer).getTransformation().setTranslation(0d, 0d, 2d);
@@ -202,6 +200,9 @@ public class InteractiveViewerDemo extends JFrame{
 	
 		if (addBackPlane()) viewer.addBackPlane();
 
+		CameraUtility.getCamera(viewer).setSignature(getSignature());
+		CameraUtility.getCamera(viewer).reset();
+		
 		SceneGraphUtilities.setDefaultMatrix(root);
 		SceneGraphUtilities.setSignature(root, getSignature());
 

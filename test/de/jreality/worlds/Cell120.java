@@ -6,22 +6,27 @@
  */
 package de.jreality.worlds;
 
+import java.awt.Color;
+import java.io.FileNotFoundException;
 import java.util.Vector;
 
-import de.jreality.geometry.GeometryUtility;
+import javax.swing.JMenuBar;
+
 import de.jreality.geometry.WingedEdge;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.Geometry;
-import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.Viewer;
+import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
-import de.jreality.util.LoadableScene;
-import de.jreality.util.P3;
 import de.jreality.util.Pn;
+import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
+import discreteGroup.CrystallographicGroup;
+import discreteGroup.DiscreteGroup;
+import discreteGroup.DiscreteGroupSceneGraphRepresentation;
+import discreteGroup.DiscreteGroupUtility;
 
 /**
  * @author weissman
@@ -29,80 +34,70 @@ import de.jreality.util.SceneGraphUtilities;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public class Cell120 implements LoadableScene {
-	DiscreteGroup tg;
-	static SceneGraphComponent elkit, cubekit;
-	WingedEdge standardDD;
-	SceneGraphComponent cpkit, theWorld;
-	Geometry vs;
-	SceneGraphPath dgPath = null;
-	SceneGraphComponent sgn, theDD, scaledDD, wire;
-	Vector geom;
+public class Cell120 extends AbstractLoadableScene {
 
+	int signature;
 	public int getSignature() {
-		// TODO Auto-generated method stub
-		return Pn.ELLIPTIC;
+		return signature;
 	}
 	/* (non-Javadoc)
 	 * @see de.jreality.portal.WorldMaker#makeWorld()
 	 */
 	public SceneGraphComponent makeWorld() {
-		theWorld = SceneGraphUtilities.createFullSceneGraphComponent("world");
-		geom = new Vector();
-			tg = DiscreteGroupUtility.initFromFile("data/resources/120cell.gens");
-			tg.setFinite(true);
-		tg.setCenterPoint(P3.originP3);
-		standardDD = (WingedEdge) DiscreteGroupUtility.calculateDirichletDomain(tg);
-		//CameraUtility.getCameraNode(viewer).getTransformation().setMatrix(Rn.identityMatrix(4));
-		theWorld.setTransformation(new Transformation(tg.getSignature()));
-		//CameraUtility.getCamera(viewer).setSignature(tg.getSignature());
-		//CameraUtility.getCamera(viewer).reset();
-
-		//DiscreteGroupViewportConstraint vc = new DiscreteGroupViewportConstraint( tg, 25.0, 5, null, true);
-		//tg.setConstraint(vc);
-
-		tg.update();
-		theDD = scaledDD = wire = sgn = null;
-		//SceneGraphUtilities.setSignature(viewer.getSceneRoot(), tg.getSignature());
-		//viewer.getSceneRoot().getAppearance().setAttribute(CommonAttributes.FAST_AND_DIRTY_ENABLED,true);
-		geom.clear();
-		if (scaledDD == null || theDD == null)	{
-			scaledDD = new SceneGraphComponent();
-			scaledDD.setName("scaledDD");
-			scaledDD.setTransformation(new Transformation());
-			scaledDD.getTransformation().setStretch(.25);
-			Appearance ap = new Appearance();
-			ap.setAttribute(CommonAttributes.FACE_DRAW, true);
-			ap.setAttribute(CommonAttributes.EDGE_DRAW, true);
-			scaledDD.setAppearance(ap);
-			theDD = new SceneGraphComponent();
-			theDD.setName("theDD");
-			theDD.addChild(scaledDD);
-			ap = new Appearance();
-			//ap.setAttribute(CommonAttributes.FACE_DRAW, false);
-			ap.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.GRAY);
-			theDD.setAppearance(ap);
+		
+		SceneGraphComponent theWorld = SceneGraphUtilities.createFullSceneGraphComponent("world");
+		theWorld.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,new Color(240, 20,50));
+		//String realname = DiscreteGroup.resourceDir+"/groups/120cell.gens";
+		DiscreteGroup tg = null;
+		String realname;
+		boolean fromFile = config.getBool("fromFile");
+		if (fromFile)	{
+			realname = config.getProperty("discreteGroupResourceDir",DiscreteGroup.resourceDir)+
+			config.getProperty("discreteGroupFile","groups/120cell.gens");
+			 tg = DiscreteGroupUtility.initFromFile(realname);	
+		} else {
+			//TODO
+			String groupName = config.getProperty("groupName");
+			tg = CrystallographicGroup.instanceOfGroup(groupName);
 		}
-		scaledDD.getTransformation().setCenter(tg.getCenterPoint());
-		scaledDD.getTransformation().setUseCenter(true);
-		scaledDD.getTransformation().setSignature(tg.getSignature());
-		Geometry dd = (Geometry) discreteGroup.jreality.DiscreteGroupUtility.calculateDirichletDomain(tg);
-		scaledDD.setGeometry( dd);
-		if (wire == null) wire = SceneGraphUtilities.createFullSceneGraphComponent("wireDD");
-		dd = (Geometry) discreteGroup.jreality.DiscreteGroupUtility.calculateDirichletDomain(tg);
-		dd = GeometryUtility.implode((IndexedFaceSet) dd, -.05);
-		wire.getTransformation().setStretch(.995);
-		wire.setGeometry(dd);
-		Appearance ap = new Appearance();
+		int maxNumElements = config.getInt("maxNumberElements");
+		tg.setMaxNumberElements(maxNumElements);
+		signature = tg.getSignature();
+		double radius = .02;
+		if (signature == Pn.ELLIPTIC) radius = .02;
+		else if (signature == Pn.EUCLIDEAN) radius = .05;
+		else radius = .01;
+		radius = config.getDouble("beamRadius");
+		
+		double stretchFactor = config.getDouble("stretchFactor");
+		
+		DiscreteGroupSceneGraphRepresentation theMainRepn = new  DiscreteGroupSceneGraphRepresentation(tg);
+		Vector geom = new Vector();
+		geom.clear();
+		double[] cp = config.getDoubleArray("centerPoint");
+		tg.setCenterPoint(cp);
+		WingedEdge standardDD = (WingedEdge) DiscreteGroupUtility.calculateDirichletDomain(null, tg);
+		SceneGraphComponent scaledDD = SceneGraphUtilities.createFullSceneGraphComponent("scaled Dirichlet Domain");
+		scaledDD.getTransformation().setCenter(cp);
+		scaledDD.getTransformation().setStretch(stretchFactor);
+		scaledDD.setGeometry(standardDD);
+		//System.out.println("Center: "+Rn.toString(tg.getCenterPoint()));
+		//scaledDD.getTransformation().setCenter(tg.getCenterPoint());
+		Appearance ap = scaledDD.getAppearance();
 		ap.setAttribute(CommonAttributes.FACE_DRAW, true);
-		ap.setAttribute(CommonAttributes.EDGE_DRAW, true);
-		wire.setAppearance(ap);
-		theDD.addChild(wire);
+		ap.setAttribute(CommonAttributes.EDGE_DRAW, false);
+		SceneGraphComponent theDD =SceneGraphUtilities.createFullSceneGraphComponent("the Dirichlet Domain");
+		theDD.addChild(scaledDD);
+		ap = theDD.getAppearance();
+		//ap.setAttribute(CommonAttributes.FACE_DRAW, false);
+		ap.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
+		ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,new Color(240, 20,50));
 		geom.add(theDD);
-			//System.err.println("Not yet implemented");
-		//else geom.add(tg.getDefaultFundamentalRegion());
-		sgn =  discreteGroup.jreality.DiscreteGroupUtility.representAsSceneGraph(tg, sgn, geom);
-		SceneGraphUtilities.replaceChild(theWorld,sgn);
+		SceneGraphComponent tubes = WingedEdge.createBeamsOnEdges(standardDD, radius, 4, 5);
+		geom.add(tubes);			
+		SceneGraphComponent sgc = SceneGraphUtilities.collectGeometry(geom, null);
+		theMainRepn.setWorldNode(sgc);
+		theWorld.addChild(theMainRepn.getRepresentationRoot());
 		return theWorld;
 	}
 
@@ -116,4 +111,11 @@ public class Cell120 implements LoadableScene {
 	}
 
 	
+	public void customize(JMenuBar menuBar, Viewer viewer) {
+		CameraUtility.getCameraNode(viewer).getTransformation().setMatrix(Rn.identityMatrix(4));
+		CameraUtility.getCameraNode(viewer).getTransformation().setSignature(getSignature());
+		CameraUtility.getCamera(viewer).setSignature(getSignature());
+		CameraUtility.getCamera(viewer).reset();
+
+	}
 }
