@@ -347,16 +347,18 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		canvas.setAutoSwapBufferMode(autoSwap);
 	}
 	
+    final Runnable bufferSwapper = new Runnable() {
+        public void run() {
+            canvas.swapBuffers();
+        }
+    };
+                
 	public void swapBuffers() {
 		if(EventQueue.isDispatchThread()) canvas.swapBuffers();
 		else	try {
-				EventQueue.invokeAndWait(new Runnable() {
-					public void run() {
-						canvas.swapBuffers();
-					}
-				});
+				EventQueue.invokeAndWait(bufferSwapper);
 			}
-		    catch (InterruptedException e) {}
+		  catch (InterruptedException e) {}
 			catch (InvocationTargetException e) {}
 	}
 	public boolean isFlipped() {
