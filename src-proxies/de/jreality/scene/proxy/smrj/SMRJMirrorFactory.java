@@ -13,7 +13,6 @@ import de.smrj.RemoteFactory;
 /**
  * this class should work like the inherited copy factory but copying objects on remote places
  * 
- * TODO: we will possibly have to rewrite the copyAttr-Methods with casts to remote objects...
  * @author weissman
  */
 public class SMRJMirrorFactory extends ProxyFactory {
@@ -104,6 +103,16 @@ public class SMRJMirrorFactory extends ProxyFactory {
     public void visit(de.jreality.scene.Transformation t) {
         created=createRemote(Transformation.class);
         copyAttr(t, (RemoteTransformation)created);
+    }
+
+    public void visit(de.jreality.geometry.LabelSet ls) {
+        created=createRemote(LabelSet.class);
+        copyAttr(ls, (RemoteLabelSet) created);
+    }
+
+    public void visit(de.jreality.scene.SceneGraphNode m) {
+        throw new IllegalStateException(m.getClass() + " not handled by "
+                + getClass().getName());
     }
 
     public void copyAttr(de.jreality.scene.SceneGraphNode src,
@@ -221,9 +230,11 @@ public class SMRJMirrorFactory extends ProxyFactory {
                         .getViewPort().getHeight());
     }
 
-    public void visit(de.jreality.scene.SceneGraphNode m) {
-        throw new IllegalStateException(m.getClass() + " not handled by "
-                + getClass().getName());
+    private void copyAttr(de.jreality.geometry.LabelSet ls, RemoteLabelSet set) {
+        copyAttr((de.jreality.scene.Geometry)ls, (RemoteGeometry) set);
+        set.setBitmapFont(ls.getBitmapFont());
+        set.setPositions(ls.getPositions());
+        set.setScreenOffset(ls.getScreenOffset());
     }
     
 }
