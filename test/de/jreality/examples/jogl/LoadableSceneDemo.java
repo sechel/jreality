@@ -49,7 +49,8 @@ public class LoadableSceneDemo extends InteractiveViewerDemo {
 			"de.jreality.worlds.TestTubes",
   			"discreteGroup.demo.ArchimedeanSolids",
   			"discreteGroup.demo.Cell120",
-			"discreteGroup.demo.SoccerBall"};
+			"discreteGroup.demo.SoccerBall",
+            "de.jreality.worlds.Quake3Demo"};
    
     Class c;
     public void lookupClasses()	{
