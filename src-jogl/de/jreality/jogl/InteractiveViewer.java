@@ -23,6 +23,7 @@ import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
+import de.jreality.util.CameraUtility;
 
 /**
  * @author Charles Gunn
@@ -177,7 +178,7 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 	}
 	public void setCameraPath(SceneGraphPath pp) {
 		SceneGraphPath p = pp;
-		if (p == null || p.getElementAt(0) != sceneRoot || p.getLastComponent().getCamera() == null)	{
+		if (!CameraUtility.isCameraPathValid(pp) || cameraPath.getFirstElement() != sceneRoot) {
 			System.err.println("Invalid camera path, adding new camera.");
 			Camera c = new Camera();
 			SceneGraphComponent sgc = new SceneGraphComponent();

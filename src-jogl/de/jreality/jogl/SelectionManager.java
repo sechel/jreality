@@ -8,6 +8,7 @@ package de.jreality.jogl;
 
 import java.awt.Color;
 import java.util.Iterator;
+import java.util.ListIterator;
 import java.util.Vector;
 
 import de.jreality.geometry.GeometryUtility;
@@ -155,16 +156,16 @@ public class SelectionManager implements TransformationListener {
 			
 		if (theSelection != null)	{
 			selectedAppearance = null;
-			for (int i = theSelection.getLength()-1; i>=0; i--)	{
-				Object selt = theSelection.getElementAt(i);
-				if (selt != null)	{
-					if (selt instanceof Appearance)  selectedAppearance = (Appearance) selt;
-					else if ( selt instanceof SceneGraphComponent)	{
-						selectedAppearance = ((SceneGraphComponent)selt).getAppearance() ;
-						} 		 
-					if (selectedAppearance != null) break;
-				}
-			}
+      for (ListIterator lit = theSelection.reverseIterator(); lit.hasPrevious(); ) {
+        Object selt = lit.previous();
+        if (selt != null) {
+          if (selt instanceof Appearance)  selectedAppearance = (Appearance) selt;
+          else if ( selt instanceof SceneGraphComponent)  {
+            selectedAppearance = ((SceneGraphComponent)selt).getAppearance() ;
+            }      
+          if (selectedAppearance != null) break;
+        }
+      }
 		}
 		if (!cycling) {
 			previousFullSelection = (SceneGraphPath) theSelection.clone();

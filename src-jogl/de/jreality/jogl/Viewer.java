@@ -145,10 +145,9 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	 * @see de.jreality.scene.Viewer#setCameraPath(de.jreality.util.SceneGraphPath)
 	 */
 	public void setCameraPath(SceneGraphPath p) {
-		if (p == null || p.getElementAt(0) != sceneRoot || p.getLastComponent().getCamera() == null || !(p.getLastElement() instanceof Camera))	{
-			System.err.println("Invalid camera path, not setting");
-			return;
-		} 
+    if (!CameraUtility.isCameraPathValid(p) ) {
+			throw new IllegalArgumentException("Invalid camera path, not setting");
+		}
 		cameraPath = p;
 	}
 	
