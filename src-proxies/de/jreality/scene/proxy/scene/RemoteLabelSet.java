@@ -31,8 +31,7 @@ import de.jreality.scene.data.DataList;
  **/
 public interface RemoteLabelSet extends RemoteGeometry {
     public abstract void setPositions(DataList positions);
-
-    public abstract void setScreenOffset(double[] screenOffset);
-
     public abstract void setBitmapFont(int bitmapFont);
+    public abstract void setNDCOffset(double[] offset);
+    public abstract void setLabels(String[] labels);
 }

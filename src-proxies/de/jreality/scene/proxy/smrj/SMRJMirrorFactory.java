@@ -234,7 +234,8 @@ public class SMRJMirrorFactory extends ProxyFactory {
         copyAttr((de.jreality.scene.Geometry)ls, (RemoteGeometry) set);
         set.setBitmapFont(ls.getBitmapFont());
         set.setPositions(ls.getPositions());
-        set.setScreenOffset(ls.getScreenOffset());
+        set.setNDCOffset(ls.getNDCOffset());
+        set.setLabels(ls.getLabels());
     }
     
 }

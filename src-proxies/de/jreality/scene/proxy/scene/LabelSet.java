@@ -34,5 +34,4 @@ public class LabelSet extends de.jreality.geometry.LabelSet implements
     public LabelSet() {
         super();
     }
-
 }
