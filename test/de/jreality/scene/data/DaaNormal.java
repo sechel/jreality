@@ -23,15 +23,7 @@
 package de.jreality.scene.data;
 
 import java.io.*;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.DoubleBuffer;
-import java.nio.IntBuffer;
-import java.nio.channels.Channels;
+import java.nio.*;
 
 public final class DaaNormal extends Daa {
 

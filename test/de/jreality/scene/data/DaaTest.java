@@ -29,10 +29,10 @@ import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.geometry.GeometryUtility;
 import junit.framework.TestCase;
 
-public class AaTest extends TestCase {
+public class DaaTest extends TestCase {
 
     public static void main(String[] args) {
-        junit.swingui.TestRunner.run(AaTest.class);
+        junit.swingui.TestRunner.run(DaaTest.class);
     }
 
     public void testNormal() throws Exception {
