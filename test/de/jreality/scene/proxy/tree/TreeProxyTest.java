@@ -24,8 +24,7 @@ package de.jreality.scene.proxy.tree;
 
 import java.util.Iterator;
 
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.*;
 import de.jreality.scene.proxy.ProxyFactory;
 import de.jreality.util.LoadableScene;
 import de.jreality.worlds.DebugLattice;
@@ -61,8 +60,9 @@ public class TreeProxyTest extends TestCase {
       boolean isValid=node.toPath().isValid();
       System.out.println(indent.substring(0, indent.length()-1)+"-"+node.getNode().getName()+"["+node.getNode().getClass().getName()+"] valid="+isValid);
       indent.append(" | ");
-      for (Iterator i = node.getChildren().iterator(); i.hasNext(); )
-        dumpTree((SceneTreeNode) i.next());
+      if (!node.isLeaf())
+        for (Iterator i = ((SceneTreeNode)node).getChildren().iterator(); i.hasNext(); )
+          dumpTree((SceneTreeNode) i.next());
       indent.delete(indent.length()-3, indent.length());
     }
   }
@@ -90,6 +90,7 @@ public class TreeProxyTest extends TestCase {
     
     root.addChild(p1);
     root.addChild(p2);
+    p2.setGeometry(new Sphere());
     
     UpToDateSceneProxyBuilder ttp = new UpToDateSceneProxyBuilder(root);
     
@@ -101,41 +102,41 @@ public class TreeProxyTest extends TestCase {
     SceneTreeNode tn = ttp.createProxyTree();
 
     td.dumpTree(tn);
-    System.out.println("created ++++++++++++++++++++++\n");
+    System.err.println("created ++++++++++++++++++++++\n");
 
     root.addChild(p3);
 
     td.dumpTree(tn);
-    System.out.println("added p3 to root ++++++++++++++++++++++\n");
+    System.err.println("added p3 to root ++++++++++++++++++++++\n");
     
     p1.addChild(p2);
 
     td.dumpTree(tn);
-    System.out.println("added p2 to p1 ++++++++++++++++++++++\n");
+    System.err.println("added p2 to p1 ++++++++++++++++++++++\n");
     
     root.removeChild(p2);
 
     td.dumpTree(tn);
-    System.out.println("removed p2 from root ++++++++++++++++++++++\n");
+    System.err.println("removed p2 from root ++++++++++++++++++++++\n");
 
     p1.removeChild(p2);
 
     td.dumpTree(tn);
-    System.out.println("removed p2 from p1 (now disposing entity?) ++++++++++++++++++++++\n");
+    System.err.println("removed p2 from p1 (now disposing entity?) ++++++++++++++++++++++\n");
 
     p1.addChild(p3);
 
     td.dumpTree(tn);
-    System.out.println("added p3 to p1 ++++++++++++++++++++++\n");
+    System.err.println("added p3 to p1 ++++++++++++++++++++++\n");
 
     p2.addChild(p1);
     
     td.dumpTree(tn);
-    System.out.println("added p1 to p2 (p2 not in tree) +++++++++++++\n");
+    System.err.println("added p1 to p2 (p2 not in tree) +++++++++++++\n");
 
     root.addChild(p2);
 
     td.dumpTree(tn);
-    System.out.println("added p2 subtree ++++++++++++++++++++++\n");
+    System.err.println("added p2 subtree ++++++++++++++++++++++\n");
   }
 }
