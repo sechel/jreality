@@ -31,6 +31,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Transformation;
 import de.jreality.util.P3;
+import de.jreality.util.Rn;
 
 /**
  *
@@ -126,7 +127,7 @@ public class EventBoxVisitor extends SceneGraphVisitor {
 
         private void computeLocalTrafo() {
             localTrafo = new Transformation(path.getInverseMatrix(null));
-            localTrafo.multiplyOnRight(P3.transposeF2D(null, event.getMatrix()));
+            localTrafo.multiplyOnRight(Rn.transposeF2D(null, event.getMatrix()));
             localTrafo.multiplyOnRight(wandOffset);
         }
 

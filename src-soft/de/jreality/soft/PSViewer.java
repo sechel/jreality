@@ -47,7 +47,7 @@ public class PSViewer extends AbstractViewer implements Viewer {
     }
 
 
-    void render(int width, int height) {
+    public void render(int width, int height) {
         File f=new File(fileName);
         PrintWriter w;
         try {

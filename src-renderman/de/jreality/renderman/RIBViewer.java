@@ -126,6 +126,9 @@ public class RIBViewer implements Viewer {
             Drawable d = v.getDrawable();
             width = d.getWidth();
             height = d.getHeight();
+        } else if (v.hasViewingComponent()){
+			setHeight(v.getViewingComponent().getHeight());
+			setWidth(v.getViewingComponent().getWidth());
         }
         
     }

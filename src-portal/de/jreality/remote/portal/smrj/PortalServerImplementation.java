@@ -41,6 +41,7 @@ import de.jreality.util.CmdLineParser;
 import de.jreality.util.LoadableScene;
 import de.jreality.util.Lock;
 import de.jreality.util.P3;
+import de.jreality.util.Rn;
 import de.smrj.RemoteFactory;
 import de.smrj.tcp.TCPBroadcasterIO;
 import de.smrj.tcp.TCPBroadcasterNIO;
@@ -292,7 +293,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
 
     public void headMoved(HeadEvent event) {
         headMatrixLock.writeLock();
-        System.arraycopy(P3.transposeF2D(null, event.getMatrix()), 0,
+        System.arraycopy(Rn.transposeF2D(null, event.getMatrix()), 0,
                 headMatrix, 0, 16);
         headMatrixLock.writeUnlock();
         headChanged = true;

@@ -160,7 +160,7 @@ public class WandTool implements WandListener, WandMotionListener {
 	}
 
 	private void setWandMatrix(WandEvent arg0, Transformation t) {
-		t.setMatrix(P3.transposeF2D(new double[16], arg0
+		t.setMatrix(Rn.transposeF2D(new double[16], arg0
 				.getMatrix()));
 		//t.multiplyOnRight(wandOffset.getInverse());
 	}
