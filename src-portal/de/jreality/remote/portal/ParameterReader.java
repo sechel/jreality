@@ -46,7 +46,6 @@ public class ParameterReader implements Runnable {
 	InetAddress group;
 	private int DEST_PORT = 5555;
 	private boolean debug = true;
-	private int DATAGRAM_LENGTH = 8188;
 	private boolean running = true;
 	
 	private List values = new LinkedList();
@@ -80,16 +79,16 @@ public class ParameterReader implements Runnable {
 	DatagramPacket dgram = new DatagramPacket(new byte[1], 0);
 	private Object readParameter() throws IOException {
 		byte[] bytes = new byte[readInt()];
-		int fullPieces = bytes.length/DATAGRAM_LENGTH;
-	  	int lastPieceSize = bytes.length%DATAGRAM_LENGTH;
+		int fullPieces = bytes.length/ParameterBroadcaster.DATAGRAM_LENGTH;
+	  	int lastPieceSize = bytes.length%ParameterBroadcaster.DATAGRAM_LENGTH;
 	  	if (debug) System.out.println("Reading byte array ["+bytes.length+"] in "+(fullPieces+1)+" pieces. Last Piece size is "+lastPieceSize);
 	  	for (int i = 0; i < fullPieces; i++) { // read full datagrams
-		  	dgram.setData(bytes, i*DATAGRAM_LENGTH, DATAGRAM_LENGTH); // multicast
+		  	dgram.setData(bytes, i*ParameterBroadcaster.DATAGRAM_LENGTH, ParameterBroadcaster.DATAGRAM_LENGTH); // multicast
 		  	socket.receive(dgram);
 		  	System.out.println("\t\treceived "+i+". part");
 	  	}
 	  	// read last datagram
-	  	dgram.setData(bytes, fullPieces*DATAGRAM_LENGTH, lastPieceSize); // multicast
+	  	dgram.setData(bytes, fullPieces*ParameterBroadcaster.DATAGRAM_LENGTH, lastPieceSize); // multicast
 	  	socket.receive(dgram);
 	  	System.out.println("\treceived last part");
 		ByteArrayInputStream obj_in = new ByteArrayInputStream(bytes);
@@ -106,16 +105,16 @@ public class ParameterReader implements Runnable {
 	private Object readParameterSafe() throws IOException {
 		suddenEnd = false;
 		byte[] bytes = new byte[readInt()];
-		int fullPieces = bytes.length/DATAGRAM_LENGTH;
-	  	int lastPieceSize = bytes.length%DATAGRAM_LENGTH;
+		int fullPieces = bytes.length/ParameterBroadcaster.DATAGRAM_LENGTH;
+	  	int lastPieceSize = bytes.length%ParameterBroadcaster.DATAGRAM_LENGTH;
 	  	if (debug) System.out.println("Reading byte array ["+bytes.length+"] in "+(fullPieces+1)+" pieces. Last Piece size is "+lastPieceSize);
-  		byte[] indexedBytes = new byte[DATAGRAM_LENGTH+4];
+  		byte[] indexedBytes = new byte[ParameterBroadcaster.DATAGRAM_LENGTH+4];
 	  	for (int i = 0; i < fullPieces && !suddenEnd; i++) { // read full datagrams
 	  		dgram.setData(indexedBytes); // multicast
 		  	socket.receive(dgram);
 		  	int id = getIntFromByte(indexedBytes);
 		  	if (id != i) {
-		  		System.out.println("Missed datagram "+i+" got: "+indexedBytes[0]);
+		  		System.out.println("Missed datagram "+i+" got: "+id);
 		  		i++;
 		  	}
 		  	if (id == fullPieces) {
@@ -123,7 +122,7 @@ public class ParameterReader implements Runnable {
 		  		suddenEnd = true;
 		  		continue;
 		  	}
-		  	System.arraycopy(indexedBytes, 4, bytes, i*DATAGRAM_LENGTH, DATAGRAM_LENGTH);
+		  	System.arraycopy(indexedBytes, 4, bytes, i*ParameterBroadcaster.DATAGRAM_LENGTH, ParameterBroadcaster.DATAGRAM_LENGTH);
 		  	System.out.println("\t\treceived "+i+". part");
 	  	}
 	  	// read last datagram
@@ -134,7 +133,7 @@ public class ParameterReader implements Runnable {
 	  		if (getIntFromByte(indexedBytes) != fullPieces) System.out.println("missed last package!");
 		  	else System.out.println("\treceived last ("+fullPieces+") part");
 	  	}
-	  	System.arraycopy(indexedBytes, 4, bytes, fullPieces*DATAGRAM_LENGTH, lastPieceSize);
+	  	System.arraycopy(indexedBytes, 4, bytes, fullPieces*ParameterBroadcaster.DATAGRAM_LENGTH, lastPieceSize);
 		ByteArrayInputStream obj_in = new ByteArrayInputStream(bytes);
 		ObjectInputStream o_in = new ObjectInputStream(obj_in);
 		try {

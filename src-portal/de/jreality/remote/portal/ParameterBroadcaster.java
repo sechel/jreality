@@ -54,7 +54,7 @@ public class ParameterBroadcaster {
 	InetAddress group;
 	private int DEST_PORT = 5555;
 	private boolean debug = true;
-	private int DATAGRAM_LENGTH = 8188;
+	public final static int DATAGRAM_LENGTH = 10000;
 
 	int delay = 10;
 	
