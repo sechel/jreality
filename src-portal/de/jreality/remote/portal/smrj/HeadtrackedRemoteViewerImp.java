@@ -82,7 +82,7 @@ de.jreality.remote.portal.HeadtrackedRemoteViewerImpl implements HeadtrackedRemo
     boolean manualSwapBuffers=true;
     private boolean measure = false;
     
-    public void render() {
+    public void renderTest() {
             long s;
             long t;
             long start = System.currentTimeMillis();
@@ -122,7 +122,10 @@ de.jreality.remote.portal.HeadtrackedRemoteViewerImpl implements HeadtrackedRemo
             rendering = false;
     }
 
-
+	public void render(double[] headMatrix) {
+		sendHeadTransformation(headMatrix);
+		render();
+	}
     
     public static void main(String[] argv) throws Exception {
     	HeadtrackedRemoteViewerImp rsi = new HeadtrackedRemoteViewerImp();
@@ -135,9 +138,8 @@ de.jreality.remote.portal.HeadtrackedRemoteViewerImpl implements HeadtrackedRemo
         //rsi.setUseDisplayLists(true);
         Thread.sleep(100);
         for (;;) {
-        	rsi.render();
+        	rsi.renderTest();
         	Thread.yield();
         }
     }
-
 }

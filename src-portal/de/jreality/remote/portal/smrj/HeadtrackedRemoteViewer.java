@@ -36,4 +36,5 @@ public interface HeadtrackedRemoteViewer extends RemoteViewer {
 	public void setBackgroundColor(java.awt.Color color);
 	public void setManualSwapBuffers(boolean b);
 	public void setUseDisplayLists(boolean b);
+	public void render(double[] headMatrix);
 }

@@ -92,6 +92,16 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
     private boolean navigationEnabled;
     private boolean useDisplayLists = true;
     private Transformation wandOffset = new Transformation();
+    
+    private static final Lock renderLock = new Lock();
+    
+    public static void writing() {
+    	renderLock.writeLock();
+    }
+    
+    public static void writingFinished() {
+    	renderLock.writeUnlock();
+    }
 
     public PortalServerImplementation(RemoteFactory factory) throws IOException {
         super(factory);
@@ -185,7 +195,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
     long maxFrameTime = 0;
     private boolean headTracked = true;
 
-    private final boolean measure;
+    private boolean measure;
     public void render() {
         if (rendering) {
             reRender = true;
@@ -194,20 +204,23 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         rendering = reRender = true;
         while (reRender) {
             reRender = false;
+            renderLock.readLock();
             long s;
             long t;
-            if (headTracked && headChanged) {
-                headMatrixLock.readLock();
-                s  = System.currentTimeMillis();
-                getClients().sendHeadTransformation(headMatrix);
-                t = System.currentTimeMillis() - s;
-if (measure)                System.out.println("sendHead: "+t);
-                headMatrixLock.readUnlock();
-            }
+//            if (headTracked && headChanged) {
+//                headMatrixLock.readLock();
+//                s  = System.currentTimeMillis();
+//                getClients().sendHeadTransformation(headMatrix);
+//                t = System.currentTimeMillis() - s;
+//if (measure)                System.out.println("sendHead: "+t);
+//                headMatrixLock.readUnlock();
+//            }
             long start = System.currentTimeMillis();
             renders++;
             s  = System.currentTimeMillis();
-            getClients().render();
+            headMatrixLock.readLock();
+            getClients().render(headMatrix);
+            headMatrixLock.readUnlock();
             t = System.currentTimeMillis() - s;
             if (measure)            System.out.println("render: "+t);
             s  = System.currentTimeMillis();
@@ -239,6 +252,7 @@ if (measure)                System.out.println("sendHead: "+t);
             }
             runs++;
             rendering = false;
+            renderLock.readUnlock();
         }
     }
 
@@ -390,4 +404,10 @@ if (measure)                System.out.println("sendHead: "+t);
 	//rsi.setUseDisplayLists(true);
     }
 
+	public boolean isMeasure() {
+		return measure;
+	}
+	public void setMeasure(boolean measure) {
+		this.measure = measure;
+	}
 }
