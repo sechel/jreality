@@ -29,6 +29,7 @@ import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;
+import de.jreality.util.Pn;
 import de.jreality.util.Rn;
 import de.jreality.util.ShaderUtility;
 
@@ -240,16 +241,23 @@ public class DefaultLineShader implements LineShader  {
 			for (int i = 0; i<n; ++i)	{
 				int[] ed = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
 				int m = ed.length;
-				for (int j = 0; j<m-1; ++j)	{
-					int k = ed[j];
+				if (m == 2)	{
+					int k = ed[0];
 					double[] p1 = vertices.item(k).toDoubleArray(null);	
-					k = ed[j+1];
+					k = ed[1];
 					double[] p2 = vertices.item(k).toDoubleArray(null);	
 					SceneGraphComponent cc = TubeUtility.makeTubeAsIFS(p1, p2, rad, null);
 					gl.glPushMatrix();
 					gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix());
 					gl.glCallList(tubeDL);
 					gl.glPopMatrix();
+				}
+				else {
+					double[][] curve = GeometryUtility.extractCurve(null, ils, i);
+					System.out.println("curve has "+curve.length+" segments");
+					QuadMeshShape tube = TubeUtility.makeTubeAsIFS(curve, rad, null, TubeUtility.PARALLEL, false, Pn.EUCLIDEAN);
+					GeometryUtility.calculateAndSetNormals(tube);
+					JOGLRendererHelper.drawFaces(tube, gl, false, true, alpha);
 				}
 			}
 			
