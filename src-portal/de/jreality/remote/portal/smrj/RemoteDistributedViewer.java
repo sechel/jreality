@@ -25,14 +25,12 @@ package de.jreality.remote.portal.smrj;
 
 import java.awt.Component;
 import java.io.IOException;
-import java.rmi.RemoteException;
 
 import de.jreality.scene.Drawable;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
-import de.jreality.scene.proxy.rmi.RemoteMirrorScene;
-import de.jreality.scene.proxy.rmi.RemoteSceneGraphComponent;
+import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.scene.proxy.smrj.SMRJMirrorScene;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.LoadableScene;

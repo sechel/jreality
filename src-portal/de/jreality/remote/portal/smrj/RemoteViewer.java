@@ -24,7 +24,7 @@ package de.jreality.remote.portal.smrj;
 
 import java.util.List;
 
-import de.jreality.scene.proxy.rmi.RemoteSceneGraphComponent;
+import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 
 /**
  * Interface in the spirit of de.jreality.scene.Viewer adapted to remote use.

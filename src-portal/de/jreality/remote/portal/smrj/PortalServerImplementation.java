@@ -23,7 +23,6 @@
 
 package de.jreality.remote.portal.smrj;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
@@ -33,7 +32,6 @@ import szg.framework.event.*;
 import szg.framework.event.remote.RemoteEventQueueImpl;
 import de.jreality.portal.tools.EventBoxVisitor;
 import de.jreality.portal.tools.WandTool;
-import de.jreality.remote.util.INetUtilities;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.util.LoadableScene;

@@ -23,12 +23,10 @@
 package de.jreality.remote.portal.smrj;
 
 import java.awt.Color;
-import java.rmi.RemoteException;
 
-import net.java.games.jogl.GLDrawable;
 import de.jreality.remote.util.INetUtilities;
 import de.jreality.scene.*;
-import de.jreality.scene.proxy.rmi.RemoteSceneGraphComponent;
+import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.util.*;
 
 /**

@@ -206,7 +206,7 @@ public class JOGLRendererHelper {
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		int vertexLength = GeometryUtility.getVectorLength(vertices);
-		DataList colors = sg.edgeAttributes.getList(Attribute.COLORS);
+		DataList colors = sg.getEdgeAttributes(Attribute.COLORS);
 		// vertex color has priority over face color
 		// should also check for override behavior
 		//if (vc != null) 		colorBind = ElementBinding.PER_VERTEX;

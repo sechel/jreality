@@ -22,17 +22,7 @@
  */
 package de.jreality.remote.portal.smrj;
 
-import java.awt.Color;
-import java.rmi.RemoteException;
-
 import de.jreality.jogl.InteractiveViewer;
-import de.jreality.scene.Transformation;
-import de.jreality.util.CameraUtility;
-import de.jreality.util.ConfigurationAttributes;
-import de.jreality.util.LoadableScene;
-import de.jreality.worlds.DebugLattice;
-import de.smrj.tcp.TCPBroadcasterIO;
-import de.smrj.tcp.TCPBroadcasterNIO;
 
 /**
  *

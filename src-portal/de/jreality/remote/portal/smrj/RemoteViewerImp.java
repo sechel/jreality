@@ -35,8 +35,8 @@ import javax.swing.JFrame;
 
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
-import de.jreality.scene.proxy.rmi.RemoteSceneGraphComponent;
-import de.jreality.scene.proxy.rmi.RemoteSceneGraphPath;
+import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
+import de.jreality.scene.proxy.scene.RemoteSceneGraphPath;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
 
