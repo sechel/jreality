@@ -198,7 +198,7 @@ public class DefaultLineShader implements LineShader  {
 	public int createTubesOnEdgesAsDL(IndexedLineSet ils, double rad,  double alpha, GL gl, int sig, boolean pickMode)	{
 		int n = ils.getNumEdges();
 		DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
-		
+		System.out.println("Creating tubes for "+ils.getName());
 		if (tubeDL == null)	{
 			tubeDL = new int[3];
 			for (int i = 0; i<3; ++i)	{

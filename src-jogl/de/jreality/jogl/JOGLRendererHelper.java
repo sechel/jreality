@@ -67,7 +67,7 @@ public class JOGLRendererHelper {
 			if (topAp != null)	bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_COLOR);
 			if (bgo != null && bgo instanceof java.awt.Color) bg = ((java.awt.Color) bgo).getComponents(null);
 			else bg = CommonAttributes.BACKGROUND_COLOR_DEFAULT.getRGBComponents(null);
-			gl.glClearColor(bg[0], bg[1], bg[2], bg[3] ); //white 
+			gl.glClearColor(bg[0], bg[1], bg[2], 0.0f); //bg[3] ); //white 
 			
 			boolean hasTexture = false, hasColors = false;
 			double textureAR = 1.0;
@@ -210,7 +210,7 @@ public class JOGLRendererHelper {
 		int[] snakeInfo = null;
 		int begin = -1, length = -1;
 		//System.out.println("Processing ILS");
-		if (sg instanceof Snake)	{
+		if (sg instanceof Snake && sg.getGeometryAttributes(Snake.SNAKE_POINTS) != null)	{
 			sp = (double[][] ) sg.getGeometryAttributes(Snake.SNAKE_POINTS);
 			vertexLength = sp[0].length;
 			snakeInfo = (int[] ) sg.getGeometryAttributes(Snake.SNAKE_INFO);
