@@ -6,12 +6,16 @@
  */
 package de.jreality.portal.tools;
 
+import javax.swing.text.NavigationFilter;
+
 import szg.framework.event.WandEvent;
 import szg.framework.event.WandListener;
 import szg.framework.event.WandMotionListener;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
+import de.jreality.util.BoundingBoxTraversal;
 import de.jreality.util.P3;
+import de.jreality.util.Rectangle3D;
 import de.jreality.util.Rn;
 
 /**
@@ -112,14 +116,27 @@ public class WandTool implements WandListener, WandMotionListener {
 				worldTransform.setMatrix(actOnStartTransformation.getMatrix());
 		}
 	}
+    
+  /**
+   * this method simply trnaslates the center of the boundingbox to (0,2,-2);
+   * 
+   * @param root
+   * @return
+   */
+    public void center() {
+        BoundingBoxTraversal bbv = new BoundingBoxTraversal();
+        bbv.traverse(navComponent);
+        Rectangle3D worldBox = bbv.getBoundingBox();
+        Transformation t = new Transformation();
+        double[] transl = worldBox.getCenter();
+        transl[1] -= 2; transl[2] += 2;
+        t.setTranslation(transl);
+        worldTransform.multiplyOnRight(t.getInverse());
+        navComponent.getTransformation().setMatrix(worldTransform.getMatrix());
+    }
 
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see szg.framework.event.WandMotionListener#wandDragged(szg.framework.event.WandEvent)
-	 */
-	public void wandDragged(WandEvent arg0) {
+    
+    public void wandDragged(WandEvent arg0) {
 		setWandMatrix(arg0, wandTransformation);
 		// rotate & translate
 		if (navigationEnabled && arg0.getButton() == 0) {

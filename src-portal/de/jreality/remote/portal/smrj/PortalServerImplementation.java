@@ -23,6 +23,7 @@
 
 package de.jreality.remote.portal.smrj;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
@@ -32,8 +33,11 @@ import szg.framework.event.*;
 import szg.framework.event.remote.RemoteEventQueueImpl;
 import de.jreality.portal.tools.EventBoxVisitor;
 import de.jreality.portal.tools.WandTool;
+import de.jreality.reader.Input;
+import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
+import de.jreality.util.CmdLineParser;
 import de.jreality.util.LoadableScene;
 import de.jreality.util.Lock;
 import de.jreality.util.P3;
@@ -53,7 +57,6 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         WandListener, WandMotionListener, HeadMotionListener {
 
     boolean manualSwapBuffers;
-    SceneGraphComponent navComp;
 
     private RemoteEventQueueImpl queue;
 
@@ -92,6 +95,8 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
     private Transformation wandOffset = new Transformation();
     
     private static final Lock renderLock = new Lock();
+
+    private SceneGraphComponent navComp;
     
     public static void writing() {
     	renderLock.writeLock();
@@ -107,15 +112,19 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         System.out.println("manualBufferSwap:" + manualSwapBuffers);
         measure = getConfig().getBool("viewer.printRenderTime");
         SceneGraphComponent root = new SceneGraphComponent();
-        navComp = new SceneGraphComponent();
-        root.addChild(navComp);
+        SceneGraphComponent scaleComp = new SceneGraphComponent();
+        SceneGraphComponent realNavComp = new SceneGraphComponent();
+        scaleComp.addChild(navComp = new SceneGraphComponent());
+        realNavComp.addChild(scaleComp);
+        root.addChild(realNavComp);
+        scaleComp.setTransformation(scaleTrafo = new Transformation());
         wandComp = new SceneGraphComponent();
         root.addChild(wandComp);
         super.setSceneRoot(root);
         boxVisitor = new EventBoxVisitor(root, wandOffset);
         try {
             queue = new RemoteEventQueueImpl();
-            wandTool = new WandTool(navComp, wandComp);
+            wandTool = new WandTool(realNavComp, wandComp);
             queue.addWandListener(wandTool);
             queue.addWandMotionListener(wandTool);
             queue.addWandListener(this);
@@ -267,6 +276,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
 
     private static final boolean DEBUG = true;
     private volatile boolean renderOnHeadMove = true;
+    private Transformation scaleTrafo;
 
     public void headMoved(HeadEvent event) {
         headMatrixLock.writeLock();
@@ -388,27 +398,73 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         setSignature(wm.getSignature());
         t = System.currentTimeMillis();
         if (world != null) getNavigationComponent().addChild(world);
+        wandTool.center();
         s = System.currentTimeMillis() - t;
         System.out.println("distributed world " + classname +"["+s+"ms]");
     }
 
-    
-    public static void main(String[] args) throws Exception {
-        boolean nio = true;
-        try {
-            nio = !args[1].startsWith("io");
-        } catch (Exception e) {}
-        if (!nio) System.err.println("Warning: using blocking IO");
-        PortalServerImplementation rsi = new PortalServerImplementation(
-                nio ? new TCPBroadcasterNIO(8868).getRemoteFactory()
-                    : new TCPBroadcasterIO(8868).getRemoteFactory());
-        //rsi.setBackgroundColor(new Color(220, 10, 44, 20));
-        rsi.loadWorld(args[0]);
-        rsi.setNavigationEnabled(true);
-	//rsi.setUseDisplayLists(true);
+    private void loadFile(String name) {
+        de.jreality.scene.SceneGraphComponent world = Readers.readFile(new File(name));
+        if (world != null) getNavigationComponent().addChild(world);
+        wandTool.center();
     }
 
-	public boolean isMeasure() {
+    private static String usage(CmdLineParser parser) {
+        String ret = "usage: java PortalServerImplementation "+parser.usageString()+" <filename | classname>\n";
+        ret +=parser.descriptionString();
+        ret +="\tfilename\t3D data file\n";
+        ret +="\tclassname\tfull classname of class that implements de.jreality.scene.LoadableScene\n";
+        return ret;
+    }
+    
+    public static void main(String[] args) throws Exception {
+        CmdLineParser parser = new CmdLineParser();
+        CmdLineParser.Option ioOption = parser.addBooleanOption("io");
+        parser.addDescription("io", "use blocking io");
+        CmdLineParser.Option worldOpt = parser.addBooleanOption('w', "world");
+        parser.addDescription("world", "given argument is classname of a LoadableScene (not a 3d data file)");
+        CmdLineParser.Option propOpt = parser.addStringOption('p', "properties");
+        parser.addDescription("properties", "the jreality property file to use");
+        CmdLineParser.Option scaleOpt = parser.addDoubleOption('s', "scale");
+        parser.addDescription("scale", "the global scale for displaying the given scene");
+        CmdLineParser.Option helpOpt = parser.addBooleanOption('h', "help");
+        parser.addDescription("help", "print this usage message");
+        parser.parse(args);
+        if (((Boolean)parser.getOptionValue(helpOpt)).booleanValue()) {
+            System.out.println(usage(parser));
+            System.exit(0);
+        }
+        String propFile = (String) parser.getOptionValue(propOpt);
+        if (propFile != null) {
+            System.setProperty("jreality.config", Input.resolveFile(propFile).getAbsolutePath());
+        }
+        System.out.println("jreality.config: "+System.getProperty("jreality.config"));
+        String[] dataArgs = parser.getRemainingArgs();
+        if (dataArgs == null || dataArgs.length != 1) {
+            System.err.println(usage(parser));
+            System.exit(2);
+        }
+        Boolean b = ((Boolean) parser.getOptionValue(ioOption));
+        boolean io = b.booleanValue();
+        if (io) System.err.println("Warning: using blocking IO");
+        PortalServerImplementation rsi = new PortalServerImplementation(
+                io ? new TCPBroadcasterIO(8868).getRemoteFactory()
+                    : new TCPBroadcasterNIO(8868).getRemoteFactory());
+        Double scale = (Double) parser.getOptionValue(scaleOpt);
+        if (scale != null) {
+            System.out.println("setting scale to "+scale);
+            rsi.setGlobalScale(scale.doubleValue());
+        }
+        boolean loadWorld = ((Boolean)parser.getOptionValue(worldOpt)).booleanValue();
+        if (loadWorld) rsi.loadWorld(dataArgs[0]);
+        else rsi.loadFile(dataArgs[0]);
+    }
+
+    private void setGlobalScale(double d) {
+        scaleTrafo.setStretch(d);
+    }
+
+    public boolean isMeasure() {
 		return measure;
 	}
 	public void setMeasure(boolean measure) {

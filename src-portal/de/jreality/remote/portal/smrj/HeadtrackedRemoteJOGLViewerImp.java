@@ -25,6 +25,7 @@ package de.jreality.remote.portal.smrj;
 import net.java.games.jogl.GLCanvas;
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
+import de.smrj.ClientFactory;
 
 /**
  *
@@ -33,31 +34,19 @@ import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
  * @author weissman
  *
  */
-public class HeadtrackedRemoteJOGLViewerImp extends HeadtrackedRemoteViewerImp implements HeadtrackedRemoteJOGLViewer {
+public class HeadtrackedRemoteJOGLViewerImp extends HeadtrackedRemoteViewerImp implements HeadtrackedRemoteJOGLViewer, ClientFactory.ResetCallback {
 
-	static boolean newInstance = true;
-	private static HeadtrackedRemoteJOGLViewerImp currentInstance;
-	
     private static final class Singleton {
         private static final HeadtrackedRemoteJOGLViewerImp instance = new HeadtrackedRemoteJOGLViewerImp();
     }
+    
     public static HeadtrackedRemoteJOGLViewerImp getInstance() {
-    	if (newInstance) {
-    		if (currentInstance != null) {
-    			System.out.println("disposing prev viewer instance");
-    			currentInstance.setRemoteSceneRoot(null);
-    			currentInstance.f.hide();
-    			currentInstance.f.dispose();
-    		}
-    		currentInstance = new HeadtrackedRemoteJOGLViewerImp();
-    		return currentInstance;
-    	}
-        else return Singleton.instance;
+        Singleton.instance.initFrame();
+        return Singleton.instance;
     }
     
     private HeadtrackedRemoteJOGLViewerImp() {
         super(new de.jreality.jogl.InteractiveViewer());
-        System.out.println("HeadtrackedRemoteJOGLViewerImp.<init>()");
     }
     protected void init() {
         super.init();
@@ -91,4 +80,11 @@ public class HeadtrackedRemoteJOGLViewerImp extends HeadtrackedRemoteViewerImp i
 		g = (GLCanvas) getViewer().getViewingComponent();
 		System.out.println(g);
 	}
+
+    public void resetCalled() {
+        System.out.println("disposing prev viewer instance");
+        getInstance().setRemoteSceneRoot(null);
+        getInstance().f.hide();
+        //getInstance().f.dispose();
+    }
 }

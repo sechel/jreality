@@ -1,5 +1,0 @@
-export DISPLAY=:0
-unset CLASSPATH
-for f in $(ls {dist,lib}/*.jar); do export CLASSPATH=$CLASSPATH:$PWD/$f; done
-rmiregistry &
-

@@ -180,11 +180,6 @@ public class RemoteDistributedViewer implements Viewer {
         System.out.println("loaded world " + classname + " successful.");
     }
 
-    public static void main(String[] args) throws Exception {
-        RemoteDistributedViewer rsi = new RemoteDistributedViewer(new TCPBroadcasterNIO(8868).getRemoteFactory());
-        rsi.loadWorld(args[0]);
-    }
- 
     public void dispose() {
         factory.dispose();
     }

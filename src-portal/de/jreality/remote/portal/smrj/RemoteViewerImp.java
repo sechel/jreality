@@ -125,7 +125,6 @@ public class RemoteViewerImp implements RemoteViewer {
     }
 
     public void setRemoteSceneRoot(RemoteSceneGraphComponent r) {
-        //System.out.println("Setting scene root to [" + r.toString() + "] ");
         viewer.setSceneRoot((de.jreality.scene.SceneGraphComponent) r);
     }
 
