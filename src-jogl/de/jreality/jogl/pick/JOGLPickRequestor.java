@@ -6,6 +6,8 @@
  */
 package de.jreality.jogl.pick;
 
+import de.jreality.scene.pick.PickPoint;
+
 /**
  * @author gunn
  *

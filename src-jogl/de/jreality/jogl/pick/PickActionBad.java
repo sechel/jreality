@@ -15,6 +15,7 @@ import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.*;
 /**
  * @author gunn
