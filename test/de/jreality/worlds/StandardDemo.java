@@ -18,7 +18,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
-import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.Pn;
 
 /**
@@ -120,7 +119,7 @@ public class StandardDemo extends AbstractLoadableScene {
 
 	   DiscreteSpaceCurve torus1 = DiscreteSpaceCurve.discreteTorusKnot(1.0, .4,4,5,400);
 	   double[][] pts = torus1.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
-	   QuadMeshShape tube = TubeUtility.makeTubeAsIFS(pts, .2d, null, TubeUtility.PARALLEL, true);
+	   QuadMeshShape tube = TubeUtility.makeTubeAsIFS(pts, .2d, null, TubeUtility.PARALLEL, true, Pn.EUCLIDEAN);
 	   GeometryUtility.calculateAndSetNormals(tube);
 	   SceneGraphComponent globeNode4= new SceneGraphComponent();
 	   gt= new Transformation();

@@ -134,7 +134,7 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 				world.addChild(child);
 			} else {
 				hypersphere = GeometryUtility.makeH3Boundary();
-				viewer.setBackgroundColor(new Color(0,0,50));
+				viewer.setBackgroundColor(new Color(0, 120, 120));
 				world.addChild(hypersphere);
 			}
 		}

@@ -10,28 +10,21 @@ import java.awt.Color;
 
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
-
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.TubeUtility;
-import de.jreality.geometry.TubeUtilityNew;
-import de.jreality.jogl.ElementBinding;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
-import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Texture2D;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;
-import de.jreality.util.Pn;
-import de.jreality.util.Rn;
 import de.jreality.util.ShaderUtility;
 
 /**
@@ -41,6 +34,7 @@ import de.jreality.util.ShaderUtility;
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class DefaultLineShader implements LineShader  {
+	int 	tubeStyle = TubeUtility.PARALLEL;
 	double	tubeRadius = 0.05,
 		 	lineWidth = 1.0,
 			depthFudgeFactor = 0.9999d;			// in pixels
@@ -63,6 +57,7 @@ public class DefaultLineShader implements LineShader  {
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		tubeDraw = eap.getAttribute(NameSpace.name(name, CommonAttributes.TUBES_DRAW), CommonAttributes.TUBES_DRAW_DEFAULT);
 		tubeRadius = eap.getAttribute(NameSpace.name(name,CommonAttributes.TUBE_RADIUS),CommonAttributes.TUBE_RADIUS_DEFAULT);
+		tubeStyle = eap.getAttribute(NameSpace.name(name,CommonAttributes.TUBE_STYLE),CommonAttributes.TUBE_STYLE_DEFAULT);
 		depthFudgeFactor = eap.getAttribute(NameSpace.name(name,CommonAttributes.DEPTH_FUDGE_FACTOR), depthFudgeFactor);
 		lineStipple = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_STIPPLE), lineStipple);
 		lineWidth = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_WIDTH), CommonAttributes.LINE_WIDTH_DEFAULT);
@@ -178,6 +173,7 @@ public class DefaultLineShader implements LineShader  {
 		return -1;
 	}
 	
+	// TOOD figure out how to share this code with TubeUtility
 	static double[][] xSection = {{1,0,0}, {.707, .707, 0}, {0,1,0},{-.707, .707, 0},{-1,0,0},{-.707, -.707, 0},{0,-1,0},{.707, -.707, 0}};
 	private static double[][] urTubeVerts;
 	static QuadMeshShape urTube;
@@ -191,7 +187,8 @@ public class DefaultLineShader implements LineShader  {
 			for (int j = 0; j<n; ++j)	{
 			    int q = n - j - 1;
 			    System.arraycopy(xSection[j], 0, urTubeVerts[i*n+q],0,3);
-			    if (i==1) urTubeVerts[i*n+q][2] = 1.0;
+			    if (i==1) urTubeVerts[i*n+q][2] = -.5;
+			    else		urTubeVerts[i*n+q][2] = .5;
 			}
 		}
 		urTube.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(urTubeVerts[0].length).createReadOnly(urTubeVerts));
@@ -226,14 +223,14 @@ public class DefaultLineShader implements LineShader  {
 			IndexedFaceSet tube = null;
 			for (int i = 0; i<u; ++i)	{
 				curve = GeometryUtility.extractUParameterCurve(curve, qms, i);
-				tube = TubeUtilityNew.makeTubeAsIFS(curve, rad, null, TubeUtility.PARALLEL, closedV, sig);
+				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, tubeStyle, closedV, sig);
 				GeometryUtility.calculateAndSetNormals(tube);
 				//System.out.println("Tube has "+tube.getNumPoints()+" points");
 				JOGLRendererHelper.drawFaces(tube, gl, false, true, alpha);
 			}
 			for (int i = 0; i<v; ++i)	{
 				curve = GeometryUtility.extractVParameterCurve(curve, qms, i);
-				tube = TubeUtilityNew.makeTubeAsIFS(curve, rad, null, TubeUtility.PARALLEL, closedU, sig);
+				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, tubeStyle, closedU, sig);
 				GeometryUtility.calculateAndSetNormals(tube);
 				//System.out.println("Tube has "+tube.getNumPoints()+" points");
 				JOGLRendererHelper.drawFaces(tube, gl, false, true, alpha);
@@ -248,7 +245,7 @@ public class DefaultLineShader implements LineShader  {
 						double[] p1 = vertices.item(k).toDoubleArray(null);	
 						k = ed[j+1];
 						double[] p2 = vertices.item(k).toDoubleArray(null);	
-						SceneGraphComponent cc = TubeUtility.makeTubeAsIFS(p1, p2, rad, null, sig);
+						SceneGraphComponent cc = TubeUtility.tubeOneEdge(p1, p2, rad, null, sig);
 						gl.glPushMatrix();
 						gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix());
 						gl.glCallList(tubeDL);
@@ -259,7 +256,7 @@ public class DefaultLineShader implements LineShader  {
 				else {
 					double[][] curve = GeometryUtility.extractCurve(null, ils, i);
 					//System.out.println("curve is "+Rn.toString(curve));
-					QuadMeshShape tube = TubeUtilityNew.makeTubeAsIFS(curve, rad, null, TubeUtility.PARALLEL, false, sig);
+					QuadMeshShape tube = TubeUtility.makeTubeAsIFS(curve, rad, null, tubeStyle, false, sig);
 					GeometryUtility.calculateAndSetNormals(tube);
 					JOGLRendererHelper.drawFaces(tube, gl, false, true, alpha);
 				}

@@ -22,8 +22,6 @@ import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sun.rsasign.p;
-
 import net.java.games.jogl.DebugGL;
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
@@ -31,7 +29,6 @@ import net.java.games.jogl.GLDrawable;
 import net.java.games.jogl.GLU;
 import net.java.games.jogl.util.BufferUtils;
 import de.jreality.geometry.SphereHelper;
-import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultGeometryShader;
 import de.jreality.jogl.shader.RenderingHintsShader;

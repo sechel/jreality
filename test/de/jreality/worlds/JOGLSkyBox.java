@@ -7,8 +7,6 @@
 package de.jreality.worlds;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.JMenuBar;
 
@@ -18,7 +16,6 @@ import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.Torus;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.DiscreteSpaceCurve;
-import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.jogl.SkyBox;
 import de.jreality.jogl.shader.DefaultVertexShader;
 import de.jreality.scene.Appearance;
@@ -32,6 +29,7 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
+import de.jreality.util.Pn;
 
 /**
  * @author Charles Gunn
@@ -42,10 +40,10 @@ import de.jreality.util.ConfigurationAttributes;
 public class JOGLSkyBox extends AbstractLoadableScene {
 
 	static String resourceDir = "./";
-//	static {
-//		String foo = System.getProperty("resourceDir");
-//		if (foo != null)	resourceDir  = foo;
-//	}
+	static {
+		String foo = System.getProperty("resourceDir");
+		if (foo != null)	resourceDir  = foo;
+	}
 	//static String resourceDir = "/Users/gunn/Library/Textures/";
 	/**
 	 * 
@@ -59,7 +57,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 
 	public boolean encompass()	{ return false; }
 	ConfigurationAttributes config = null;
-	String configResourceDir = "/Users/gunn/Software/eclipse/workspace/jReality/";
+	String configResourceDir = "/homes/geometer/gunn/Software/eclipse/workspace/jReality/";
 	/* (non-Javadoc)
 	 * @see de.jreality.portal.WorldMaker#setConfiguration(de.jreality.portal.util.Configuration)
 	 */
@@ -166,7 +164,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 
 	   DiscreteSpaceCurve torus1 = DiscreteSpaceCurve.discreteTorusKnot(1.0, .4,4,5,400);
 	   double[][] pts = torus1.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
-	   QuadMeshShape tube = TubeUtility.makeTubeAsIFS(pts, .2d, null, TubeUtility.PARALLEL, true);
+	   QuadMeshShape tube = TubeUtility.makeTubeAsIFS(pts, .2d, null, TubeUtility.PARALLEL, true, Pn.EUCLIDEAN);
 	   tube.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(GeometryUtility.calculateFaceNormals(tube)));
 	   tube.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(GeometryUtility.calculateVertexNormals(tube)));
 	   SceneGraphComponent globeNode4= new SceneGraphComponent();

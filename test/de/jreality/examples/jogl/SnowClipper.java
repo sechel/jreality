@@ -288,14 +288,14 @@ public class SnowClipper extends InteractiveViewerDemo {
 			double[][] cutPlane = whiteFrameG.getFirstFaceWithTag(23);
 			whiteframe.setGeometry(GeometryUtility.constructPolygon(cutPlane));
 			SceneGraphUtilities.removeChildren(whiteframe);
-			SceneGraphComponent ballAndStick = TubeUtility.ballAndStick(whiteFrameG, 1.0,0.5, Color.WHITE, Color.WHITE);
+			SceneGraphComponent ballAndStick = TubeUtility.ballAndStick(whiteFrameG, 1.0,0.5, Color.WHITE, Color.WHITE, Pn.EUCLIDEAN);
 			ballAndStick.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
 			whiteframe.addChild(ballAndStick);
 			WingedEdge redFrameG = new WingedEdge(-60, 60, -60, 60, -4, 144);
 			redFrameG.cutWithPlane(clippingPlane2, 24);
 			cutPlane = redFrameG.getFirstFaceWithTag(24);
 			redframe.setGeometry(GeometryUtility.constructPolygon(cutPlane));
-			SceneGraphComponent ballAndStick2 = TubeUtility.ballAndStick(redFrameG,1.0,0.5, Color.RED, Color.RED);
+			SceneGraphComponent ballAndStick2 = TubeUtility.ballAndStick(redFrameG,1.0,0.5, Color.RED, Color.RED, Pn.EUCLIDEAN);
 			ballAndStick2.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
 			SceneGraphUtilities.removeChildren(redframe);
 			redframe.addChild(ballAndStick2);

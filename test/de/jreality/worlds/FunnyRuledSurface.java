@@ -37,7 +37,7 @@ public class FunnyRuledSurface extends AbstractLoadableScene {
 		//oloidkit.addChild(oloid);
 		oloidkit.setGeometry(oloid);
 		//SceneGraphComponent tubes = WingedEdge.createTubesOnEdges(oloid, .05, 8, 8);
-		SceneGraphComponent tubes = TubeUtility.createTubesOnEdges(oloid, .05);
+		SceneGraphComponent tubes = TubeUtility.sticks(oloid, .05, Pn.EUCLIDEAN);
 		oloidkit.addChild(tubes);
 		
 		//SceneGraphComponent s1 = Parser3DS.readFromFile("/homes/geometer/gunn/tmp/read3DS/models/space011.3ds");
