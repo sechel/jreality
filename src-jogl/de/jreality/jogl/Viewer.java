@@ -45,14 +45,9 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	static String OSName = null;
 	static boolean multiSample = true, newBackend = true;
 	static {
-		String foo = System.getProperty("jreality.jogl.newBackend");
+		String foo = System.getProperty("jreality.jogl.multisample");
 		if (foo != null) 
-			if (foo.indexOf("true") != -1) newBackend = true;
-			else newBackend = false;
-		if (newBackend) System.out.println("Using new backend");
-		foo = System.getProperty("jreality.jogl.multisample");
-		if (foo != null) 
-			if (foo.indexOf("true") != -1) multiSample = true;
+			if (foo.indexOf("false") != -1) multiSample = false;
 			//else multisample = false;
 	}
 	public int getSignature() {
