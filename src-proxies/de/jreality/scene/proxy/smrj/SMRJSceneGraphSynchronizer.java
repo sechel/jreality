@@ -22,33 +22,22 @@
  */
 package de.jreality.scene.proxy.smrj;
 
-import java.nio.ByteBuffer;
-import java.rmi.RemoteException;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import de.jreality.scene.*;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Transformation;
-import de.jreality.scene.data.*;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.ByteBufferList;
 import de.jreality.scene.data.DataList;
-import de.jreality.scene.data.DoubleArray;
-import de.jreality.scene.event.AppearanceEvent;
-import de.jreality.scene.event.AppearanceListener;
-import de.jreality.scene.event.GeometryEvent;
-import de.jreality.scene.event.GeometryListener;
-import de.jreality.scene.event.SceneContainerEvent;
-import de.jreality.scene.event.SceneContainerListener;
-import de.jreality.scene.event.TransformationEvent;
-import de.jreality.scene.event.TransformationListener;
-import de.jreality.scene.proxy.rmi.*;
+import de.jreality.scene.event.*;
+import de.jreality.scene.proxy.scene.*;
 
 /**
  * 
@@ -86,12 +75,7 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
 	}
 	
 	public void transformationMatrixChanged(TransformationEvent ev) {
-      	try {
-            ((RemoteTransformation)rmc.getProxy(ev.getSourceNode())).setMatrix(ev.getTransformationMatrix());
-        } catch (RemoteException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+      	((RemoteTransformation)rmc.getProxy(ev.getSourceNode())).setMatrix(ev.getTransformationMatrix());
 	}
 
 	public void appearanceChanged(AppearanceEvent ev) {
@@ -100,16 +84,11 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
         List lst= src.getChildNodes();
         for (int ix= 0, num= lst.size(); ix < num; ix++) {
             de.jreality.scene.AppearanceAttribute aa= (de.jreality.scene.AppearanceAttribute)lst.get(ix);
-            try {
-                dst.setAttribute(
-                        aa.getAttributeName(),
-                        aa.getValue(),
-                        aa.getAttributeType()
-                );
-            } catch (RemoteException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            dst.setAttribute(
+                    aa.getAttributeName(),
+                    aa.getValue(),
+                    aa.getAttributeType()
+            );
         }
 	}
 
@@ -119,77 +98,41 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
         for (Iterator i = ev.getChangedFaceAttributes().iterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             DataList dl = ((IndexedFaceSet) src).getFaceAttributes(a);
-            try {
-                ((RemoteIndexedFaceSet) dst).setAndCheckFaceCountAndAttributes(a,
-                        dl);
-            } catch (RemoteException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            ((RemoteIndexedFaceSet) dst).setFaceCountAndAttributes(a,
+                    dl);
         }
         for (Iterator i = ev.getChangedEdgeAttributes().iterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             DataList dl = ((IndexedLineSet) src).getEdgeAttributes(a);
-            try {
-                ((RemoteIndexedLineSet) dst).setAndCheckEdgeCountAndAttributes(a,
-                        dl);
-            } catch (RemoteException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            ((RemoteIndexedLineSet) dst).setEdgeCountAndAttributes(a,
+                    dl);
         }
         for (Iterator i = ev.getChangedVertexAttributes().iterator(); i
                 .hasNext();) {
             Attribute a = (Attribute) i.next();
             DataList dl = ((PointSet) src).getVertexAttributes(a);
-            try {
-                if (a == Attribute.COORDINATES || a == Attribute.NORMALS) {
-                    DoubleArray da = dl.toDoubleArray(); 
-                    ByteBufferList bbw = ByteBufferList.getInstance();
-                    ByteBuffer bb = bbw.createWriteBuffer(da.getLength()*8);
-                    da.toNativeByteBuffer(bb);
-                    if (bb.remaining()>0) throw new RuntimeException("not all read! "+bb);
-                    if (bbw.getDoubleLength() != da.getLength()) throw new RuntimeException("length differs!");
-                    if (a == Attribute.COORDINATES) ((RemotePointSet) dst).setVertices(bbw, dl.toDoubleArrayArray().getLengthAt(0));
-                    else ((RemotePointSet) dst).setVertexNormals(bbw, dl.toDoubleArrayArray().getLengthAt(0));
-                } else {
-                    ((RemotePointSet) dst).setAndCheckVertexCountAndAttributes(a, dl);
-                }
-            } catch (RemoteException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            if (a == Attribute.COORDINATES || a == Attribute.NORMALS) {
+                DataList copy = ByteBufferList.createByteBufferCopy(dl);
+                ((RemotePointSet) dst).setVertexAttributes(a, copy);
+            } else {
+                ((RemotePointSet) dst).setVertexAttributes(a, dl);
             }
         }
         for (Iterator i = ev.getChangedGeometryAttributes().iterator(); i
                 .hasNext();) {
             Attribute a = (Attribute) i.next();
-            try {
-                dst.setGeometryAttributes(a, src.getGeometryAttributes(a));
-            } catch (RemoteException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            dst.setGeometryAttributes(a, src.getGeometryAttributes(a));
         }
     }
 
 		public void childAdded(SceneContainerEvent ev) {
-   			try {
-                ((RemoteSceneGraphComponent)rmc.getProxyImpl(ev.getParentElement()))
-                .add((RemoteSceneGraphNode) rmc.createProxyScene(ev.getNewChildElement()));
-            } catch (RemoteException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+   			((RemoteSceneGraphComponent)rmc.getProxyImpl(ev.getParentElement()))
+            .add((RemoteSceneGraphNode) rmc.createProxyScene(ev.getNewChildElement()));
 	}
 
 	public void childRemoved(SceneContainerEvent ev) {
-        try {
-            ((RemoteSceneGraphComponent)rmc.getProxyImpl(ev.getParentElement()))
-            .remove((RemoteSceneGraphNode) rmc.getProxyImpl(ev.getOldChildElement()));
-        } catch (RemoteException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        ((RemoteSceneGraphComponent)rmc.getProxyImpl(ev.getParentElement()))
+        .remove((RemoteSceneGraphNode) rmc.getProxyImpl(ev.getOldChildElement()));
 	}
 
 	public void childReplaced(SceneContainerEvent ev) {

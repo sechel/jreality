@@ -22,13 +22,10 @@
  */
 package de.jreality.scene.proxy.smrj;
 
-import java.rmi.RemoteException;
-import java.util.Arrays;
-
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.proxy.SceneProxyBuilder;
-import de.jreality.scene.proxy.rmi.RemoteSceneGraphComponent;
-import de.jreality.scene.proxy.rmi.RemoteSceneGraphNode;
+import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
+import de.jreality.scene.proxy.scene.RemoteSceneGraphNode;
 import de.smrj.RemoteFactory;
 
 /**
@@ -55,11 +52,6 @@ public class SMRJMirrorScene extends SceneProxyBuilder {
 	 * scene graph classes and adds the node to the component.
      */
     public void add(Object parentProxy, Object childProxy) {
-    	try {
-            ((RemoteSceneGraphComponent)parentProxy).add((RemoteSceneGraphNode) childProxy);
-        } catch (RemoteException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    	((RemoteSceneGraphComponent)parentProxy).add((RemoteSceneGraphNode) childProxy);
     }
 }

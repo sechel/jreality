@@ -1,10 +1,13 @@
 package de.jreality.scene.proxy.smrj;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
+import java.util.List;
 
 import de.jreality.geometry.QuadMeshShape;
-import de.jreality.scene.proxy.rmi.*;
+import de.jreality.scene.data.ByteBufferList;
+import de.jreality.scene.data.DataListSet;
+import de.jreality.scene.proxy.ProxyFactory;
+import de.jreality.scene.proxy.scene.*;
 import de.smrj.RemoteFactory;
 
 /**
@@ -13,15 +16,19 @@ import de.smrj.RemoteFactory;
  * TODO: we will possibly have to rewrite the copyAttr-Methods with casts to remote objects...
  * @author weissman
  */
-public class SMRJMirrorFactory extends RemoteMirrorFactory {
+public class SMRJMirrorFactory extends ProxyFactory {
 
     RemoteFactory rf;
+    Object created;
     
     public SMRJMirrorFactory(RemoteFactory rf) {
-        super(null);
-       this.rf = rf;
+        this.rf = rf;
+     }
+    
+    public Object getProxy() {
+        return created;
     }
-	
+
     private Object createRemote(Class clazz) {
         try {
             return rf.createRemote(clazz);
@@ -51,33 +58,26 @@ public class SMRJMirrorFactory extends RemoteMirrorFactory {
     }
 
     public void visit(de.jreality.scene.IndexedFaceSet i) {
-        created=createRemote(de.jreality.scene.proxy.smrj.IndexedFaceSet.class);
+        created=createRemote(IndexedFaceSet.class);
         copyAttr(i, (RemoteIndexedFaceSet)created);
     }
 
     public void visit(de.jreality.scene.IndexedLineSet ils) {
-        created=createRemote(de.jreality.scene.proxy.smrj.IndexedLineSet.class);
+        created=createRemote(IndexedLineSet.class);
         copyAttr(ils, (RemoteIndexedLineSet)created);
     }
 
     public void visit(de.jreality.scene.PointSet p) {
-        created=createRemote(de.jreality.scene.proxy.smrj.PointSet.class);
+        created=createRemote(PointSet.class);
         copyAttr(p, (RemotePointSet)created);
     }
 
-
-    /**
-     * 
-     * TODO: we need to implement the corresponding remote object?
-     * 
-     */
     public void visit(QuadMeshShape q) {
     	visit((de.jreality.scene.IndexedFaceSet) q);
-    }
-    
+    }    
 
     public void visit(de.jreality.scene.SceneGraphComponent c) {
-        created=createRemote(de.jreality.scene.proxy.smrj.SceneGraphComponent.class);
+        created=createRemote(SceneGraphComponent.class);
         copyAttr(c, (RemoteSceneGraphComponent)created);
     }
 
@@ -104,6 +104,126 @@ public class SMRJMirrorFactory extends RemoteMirrorFactory {
     public void visit(de.jreality.scene.Transformation t) {
         created=createRemote(Transformation.class);
         copyAttr(t, (RemoteTransformation)created);
+    }
+
+    public void copyAttr(de.jreality.scene.SceneGraphNode src,
+            RemoteSceneGraphNode dst) {
+        dst.setName(src.getName());
+    }
+
+    public void copyAttr(de.jreality.scene.SceneGraphComponent src,
+            RemoteSceneGraphComponent dst) {
+        copyAttr((de.jreality.scene.SceneGraphNode) src,
+                (RemoteSceneGraphNode) dst);
+    }
+
+    public void copyAttr(de.jreality.scene.Appearance src, RemoteAppearance dst) {
+        copyAttr((de.jreality.scene.SceneGraphNode) src,
+                (RemoteSceneGraphNode) dst);
+        List lst = src.getChildNodes();
+        for (int ix = 0, num = lst.size(); ix < num; ix++) {
+            de.jreality.scene.AppearanceAttribute aa = (de.jreality.scene.AppearanceAttribute) lst
+                    .get(ix);
+            dst.setAttribute(aa.getAttributeName(), aa.getValue(), aa
+                    .getAttributeType());
+        }
+    }
+
+    public void copyAttr(de.jreality.scene.Transformation src,
+            RemoteTransformation dst) {
+        copyAttr((de.jreality.scene.SceneGraphNode) src,
+                (RemoteSceneGraphNode) dst);
+        dst.setMatrix(src.getMatrix());
+    }
+
+    public void copyAttr(de.jreality.scene.Light src, RemoteLight dst) {
+        copyAttr((de.jreality.scene.SceneGraphNode) src,
+                (RemoteSceneGraphNode) dst);
+        dst.setColor(src.getColor());
+        dst.setIntensity(src.getIntensity());
+    }
+
+    public void copyAttr(de.jreality.scene.DirectionalLight src,
+            RemoteDirectionalLight dst) {
+        copyAttr((de.jreality.scene.Light) src, (RemoteLight) dst);
+    }
+
+    public void copyAttr(de.jreality.scene.SpotLight src, RemoteSpotLight dst) {
+        copyAttr((de.jreality.scene.Light) src, (RemoteLight) dst);
+        dst.setConeAngle(src.getConeAngle());
+        dst.setConeDeltaAngle(src.getConeDeltaAngle());
+        dst.setFalloffA0(src.getFalloffA0());
+        dst.setFalloffA1(src.getFalloffA1());
+        dst.setFalloffA2(src.getFalloffA2());
+        dst.setDistribution(src.getDistribution());
+        dst.setUseShadowMap(src.isUseShadowMap());
+        dst.setShadowMapX(src.getShadowMapX());
+        dst.setShadowMapY(src.getShadowMapY());
+        dst.setShadowMap(src.getShadowMap());
+    }
+
+    public void copyAttr(de.jreality.scene.Geometry src, RemoteGeometry dst) {
+        copyAttr((de.jreality.scene.SceneGraphNode) src,
+                (RemoteSceneGraphNode) dst);
+        dst.setGeometryAttributes(src.getGeometryAttributes());
+    }
+
+    public void copyAttr(de.jreality.scene.Sphere src, RemoteSphere dst) {
+        copyAttr((de.jreality.scene.Geometry) src, (RemoteGeometry) dst);
+    }
+
+    public void copyAttr(de.jreality.scene.Cylinder src, RemoteCylinder dst) {
+        copyAttr((de.jreality.scene.Geometry) src, (RemoteGeometry) dst);
+    }
+
+    public void copyAttr(de.jreality.scene.PointSet src, RemotePointSet dst) {
+        copyAttr((de.jreality.scene.Geometry) src, (RemoteGeometry) dst);
+        DataListSet dls = ByteBufferList.prepareDataListSet(src.getVertexAttributes());
+        dst.setVertexCountAndAttributes(dls);
+        ByteBufferList.releaseDataListSet(dls);
+        
+    }
+
+    public void copyAttr(de.jreality.scene.IndexedLineSet src,
+            RemoteIndexedLineSet dst) {
+        copyAttr((de.jreality.scene.PointSet) src, (RemotePointSet) dst);
+        DataListSet dls = ByteBufferList.prepareDataListSet(src.getEdgeAttributes());
+        dst.setEdgeCountAndAttributes(dls);
+        ByteBufferList.releaseDataListSet(dls);
+    }
+
+    public void copyAttr(de.jreality.scene.IndexedFaceSet src,
+            RemoteIndexedFaceSet dst) {
+        copyAttr((de.jreality.scene.IndexedLineSet) src,
+                (RemoteIndexedLineSet) dst);
+        DataListSet dls = ByteBufferList.prepareDataListSet(src.getFaceAttributes());
+        dst.setFaceCountAndAttributes(dls);
+        ByteBufferList.releaseDataListSet(dls);
+    }
+
+    public void copyAttr(de.jreality.scene.Camera src, RemoteCamera dst) {
+        copyAttr((de.jreality.scene.SceneGraphNode) src,
+                (RemoteSceneGraphNode) dst);
+        dst.setAspectRatio(src.getAspectRatio());
+        dst.setEyeSeparation(src.getEyeSeparation());
+        dst.setFar(src.getFar());
+        dst.setFieldOfView(src.getFieldOfView());
+        dst.setFocus(src.getFocus());
+        dst.setNear(src.getNear());
+        dst.setOnAxis(src.isOnAxis());
+        dst.setOrientationMatrix(src.getOrientationMatrix());
+        dst.setPerspective(src.isPerspective());
+        dst.setSignature(src.getSignature());
+        dst.setStereo(src.isStereo());
+        dst
+                .setViewPort(src.getViewPort().getX(), src.getViewPort()
+                        .getY(), src.getViewPort().getWidth(), src
+                        .getViewPort().getHeight());
+    }
+
+    public void visit(de.jreality.scene.SceneGraphNode m) {
+        throw new IllegalStateException(m.getClass() + " not handled by "
+                + getClass().getName());
     }
     
 }

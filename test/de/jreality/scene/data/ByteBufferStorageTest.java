@@ -64,7 +64,7 @@ public class ByteBufferStorageTest extends TestCase
   }
   public void testIntIntArray()
   {
-    int[][] data={ {1, 2, 3, 4}, {2, 4, 6, 8}, {3, 6, 9, 12} };
+    int[][] data={ {1, 5, 3, 4}, {2, 4, 6, 8}, {3, 6, 9, 12} };
     setupTarget(data.length*16);
     check(StorageModel.INT_ARRAY.array(4), data);
   }
