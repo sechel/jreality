@@ -109,20 +109,19 @@ public class ParameterReader implements Runnable {
 	  	int lastPieceSize = bytes.length%ParameterBroadcaster.DATAGRAM_LENGTH;
 	  	if (debug) System.out.println("Reading byte array ["+bytes.length+"] in "+(fullPieces+1)+" pieces. Last Piece size is "+lastPieceSize);
   		byte[] indexedBytes = new byte[ParameterBroadcaster.DATAGRAM_LENGTH+4];
-	  	for (int i = 0; i < fullPieces && !suddenEnd; i++) { // read full datagrams
+	  	for (int i = 0; i < fullPieces; i++) { // read full datagrams
 	  		dgram.setData(indexedBytes); // multicast
 		  	socket.receive(dgram);
 		  	int id = getIntFromByte(indexedBytes);
 		  	if (id != i) {
-		  		System.out.println("Missed datagram "+i+" got: "+id);
-		  		i++;
+		  		System.out.println("expected datagram "+i+" got "+id);
 		  	}
 		  	if (id == fullPieces) {
 		  		System.out.println("Unexpected end of data!");
 		  		suddenEnd = true;
 		  		continue;
 		  	}
-		  	System.arraycopy(indexedBytes, 4, bytes, i*ParameterBroadcaster.DATAGRAM_LENGTH, ParameterBroadcaster.DATAGRAM_LENGTH);
+		  	System.arraycopy(indexedBytes, 4, bytes, id*ParameterBroadcaster.DATAGRAM_LENGTH, ParameterBroadcaster.DATAGRAM_LENGTH);
 		  	System.out.println("\t\treceived "+i+". part");
 	  	}
 	  	// read last datagram
