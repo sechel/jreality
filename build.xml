@@ -117,10 +117,10 @@
 		<copy file="jSyzygy/jSyzygy.jar" todir="${lib}" />
 	</target>
 
-	<target name="portal" depends="jogl,jSyzygy_java,soft,tests">
+	<target name="portal" depends="jogl,jSyzygy_java,soft,tests,stubs">
 		<mkdir dir="${build}/portal" />
-		<javac excludesfile="excludes.txt" srcdir="${portal}" classpath="${lib}/jSyzygy.jar;${dist}/jReality-core.jar:${dist}/jReality-jogl.jar:${dist}/jReality-soft.jar:${dist}/jReality-tests.jar" destdir="${build}/portal" debug="true" />
-		<rmic base="${build}/portal" includes="**/*Impl.class" classpath="${lib}/jSyzygy.jar;${dist}/jReality-core.jar:${dist}/jReality-jogl.jar" />
+		<javac excludesfile="excludes.txt" srcdir="${portal}" classpath="${lib}/jSyzygy.jar;${dist}/jReality-core.jar:${dist}/jReality-jogl.jar:${dist}/jReality-soft.jar:${dist}/jReality-tests.jar:${dist}/jReality-proxies.jar" destdir="${build}/portal" debug="true" />
+		<rmic base="${build}/portal" includes="**/*Impl.class" classpath="${lib}/jSyzygy.jar;${dist}/jReality-core.jar:${dist}/jReality-jogl.jar:${dist}/jReality-stubs.jar:${dist}/jReality-proxies.jar" />
 		<jar jarfile="${dist}/jReality-portal.jar" basedir="${build}/portal" />
 	</target>
 		
