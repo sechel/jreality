@@ -71,7 +71,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 	final static Logger theLog;
 	static boolean debugGL = false;
 	static {
-//		theLog	= Logger.getLogger("de.jreality.jogl");
+		theLog	= Logger.getLogger("de.jreality.jogl");
 //		theLog.setLevel(Level.FINEST);
 		String foo = System.getProperty("jreality.jogl.debugGL");
 		if (foo != null) { if (foo.equals("false")) debugGL = false; else debugGL =true;}
