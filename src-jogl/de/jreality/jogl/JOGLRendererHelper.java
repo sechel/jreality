@@ -205,8 +205,29 @@ public class JOGLRendererHelper {
 		int vertexLength = GeometryUtility.getVectorLength(vertices);
 		DataList edgeColors = sg.getEdgeAttributes(Attribute.COLORS);
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
-		if (sg.getEdgeAttributes(Attribute.INDICES) == null) return;
 		DoubleArray da;
+		double[][] sp = null;
+		int[] snakeInfo = null;
+		int begin = -1, length = -1;
+		//System.out.println("Processing ILS");
+		if (sg instanceof Snake)	{
+			sp = (double[][] ) sg.getGeometryAttributes(Snake.SNAKE_POINTS);
+			vertexLength = sp[0].length;
+			snakeInfo = (int[] ) sg.getGeometryAttributes(Snake.SNAKE_INFO);
+			begin = snakeInfo[0];
+			length = snakeInfo[1];
+			//System.out.println("Processing the snake with "+length+" points");
+			int n = sp.length;
+			 gl.glBegin(GL.GL_LINE_STRIP);
+			 for (int i = 0; i<length; ++i)	{
+			 	int j = (i+begin) % n;
+				if (vertexLength == 3) gl.glVertex3dv(sp[j]);
+				else if (vertexLength == 4) gl.glVertex4dv(sp[j]);
+			 }
+			gl.glEnd();
+			 return;
+		}
+		if (sg.getEdgeAttributes(Attribute.INDICES) == null) return;
 		int colorBind = 0, colorLength = 0;
 		if (interpolateVertexColors && vertexColors != null) 		{
 			colorBind = ElementBinding.PER_VERTEX;
@@ -470,12 +491,12 @@ public class JOGLRendererHelper {
 	public static void drawLabels(LabelSet lb, JOGLRenderer jr)	{
 		GL gl = jr.getCanvas().getGL();
 		String[] labels = lb.getLabels();
-		PointSet positions = lb.getPositions();
+		DataList positions = lb.getPositions();
 		double[][] objectVerts, screenVerts;
 		double[] screenOffset = lb.getScreenOffset();
 		int bitmapFont = lb.getBitmapFont();
 		
-		objectVerts = positions.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+		objectVerts = positions.toDoubleArrayArray(null);
 		screenVerts = new double[objectVerts.length][objectVerts[0].length];
 		
 		Graphics3D gc = jr.getContext();
@@ -484,7 +505,7 @@ public class JOGLRendererHelper {
 		
 		Rn.matrixTimesVector(screenVerts, objectToScreen, objectVerts);
 		if (screenVerts[0].length == 4) Pn.dehomogenize(screenVerts, screenVerts);
-		int np = positions.getNumPoints();
+		int np = objectVerts.length;
 		//for (int i = 0; i<np; ++i)	{ screenVerts[i][2] = (screenVerts[i][2] + 1)/2.0; }
 
 		// Store enabled state and disable lighting, texture mapping and the depth buffer

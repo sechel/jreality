@@ -205,10 +205,16 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 				return canvas.getWidth()/((double) canvas.getHeight());
 			}
 			public int getWidth()	{
-				return canvas.getWidth();
+				return renderer.getWidth();
 			}
 			public int getHeight()	{
-				return canvas.getHeight();
+				return renderer.getHeight();
+			}
+			public int getXMin()	{
+				return renderer.getXMin();
+			}
+			public int getYMin()	{
+				return renderer.getYMin();
 			}
 		};
 	}

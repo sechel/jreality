@@ -84,6 +84,7 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 		JFileChooser fc = new JFileChooser(resourceDir);
 		//System.out.println("FCI resource dir is: "+resourceDir);
 		int result = fc.showOpenDialog(this);
+		resourceDir=fc.getSelectedFile().getAbsolutePath();
 		SceneGraphComponent sgc = Readers.readFile(fc.getSelectedFile());
 		if (child != null && world.isDirectAncestor(child)) 	world.removeChild(child);
 		child = sgc;

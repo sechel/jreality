@@ -34,6 +34,7 @@ import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultGeometryShader;
 import de.jreality.jogl.shader.RenderingHintsShader;
 import de.jreality.scene.Camera;
+import de.jreality.scene.Drawable;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.Graphics3D;
 import de.jreality.scene.IndexedFaceSet;
@@ -70,7 +71,7 @@ import de.jreality.util.Rn;
  * @author gunn
  *
  */
-public class JOGLRenderer extends SceneGraphVisitor  {
+public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 
 	final static Logger theLog;
 	static boolean debugGL = true, collectFrameRate = true;
@@ -96,6 +97,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 	JOGLRendererHelper helper;
 
 	GLCanvas theCanvas;
+	int[] currentViewport = new int[4];
 	Graphics3D context;
 	public GL globalGL;
 	int[] sphereDisplayLists;
@@ -317,6 +319,13 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 
 }
 
+	private void myglViewport(int lx, int ly, int rx, int ry)	{
+		globalGL.glViewport(lx, ly, rx, ry);
+		currentViewport[0] = lx;
+		currentViewport[1] = ly;
+		currentViewport[2] = rx;
+		currentViewport[3] = ry;
+	}
 	/* (non-Javadoc)
 	 * @see net.java.games.jogl.GLEventListener#display(net.java.games.jogl.GLDrawable)
 	 */
@@ -342,15 +351,15 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 				theCamera.update();
 				whichEye = Camera.RIGHT_EYE;
 				globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-				globalGL.glViewport(0,0, w,h);
+				myglViewport(0,0, w,h);
 				visit();
 				whichEye = Camera.LEFT_EYE;
-				globalGL.glViewport(w, 0, w,h);
+				myglViewport(w, 0, w,h);
 				visit();
 			} 
 			else if (which >= Viewer.RED_BLUE_STEREO &&  which <= Viewer.RED_CYAN_STEREO) {
 				theCamera.setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
-				globalGL.glViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
+				myglViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
 				globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 				whichEye = Camera.RIGHT_EYE;
 		        if (which == Viewer.RED_GREEN_STEREO) globalGL.glColorMask(false, true, false, true);
@@ -365,7 +374,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 			} 
 			else	{
 				theCamera.setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
-				globalGL.glViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
+				myglViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
 				whichEye = Camera.RIGHT_EYE;
 				globalGL.glDrawBuffer(GL.GL_BACK_RIGHT);
 				globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
@@ -379,11 +388,11 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 		else {
 			globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 			theCamera.setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
-			globalGL.glViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
+			myglViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
 			if (!pickMode)	visit();
 			else		{
 				// set up the "pick transformation"
-				globalGL.glViewport(0,0, 2,2);
+				myglViewport(0,0, 2,2);
 				IntBuffer selectBuffer = BufferUtils.newIntBuffer(bufsize);
 				//System.out.println("Picking "+frameCount);
 				double[] pp3 = new double[3];
@@ -432,7 +441,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 	 */
 	public void reshape(GLDrawable arg0,int arg1,int arg2,int arg3,int arg4) {
 		CameraUtility.getCamera(theViewer).setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
-		globalGL.glViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
+		myglViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
 	}
 
 	/**
@@ -726,7 +735,8 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 				globalGL.glCallList(dlist);
 				if (pickMode) globalGL.glPopName();
 				return;
-			}		else 	if (originalGeometry instanceof LabelSet)	{
+			}		
+			else 	if (originalGeometry instanceof LabelSet)	{
 				globalGL.glColor4fv(geometryShader.lineShader.getDiffuseColor().getComponents(null));
 				JOGLRendererHelper.drawLabels(((LabelSet) originalGeometry), globalHandle);
 			}
@@ -1471,5 +1481,60 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 	}
 	public void setPickMode(boolean pickMode) {
 		this.pickMode = pickMode;
+	}
+
+
+	public int[] getCurrentViewport()	{
+		return currentViewport;
+	}
+
+
+
+	/* (non-Javadoc)
+	 * @see de.jreality.scene.Drawable#getAspectRatio()
+	 */
+	public double getAspectRatio() {
+		// TODO Auto-generated method stub
+		return ((double) getWidth()/getHeight());
+	}
+
+
+
+	/* (non-Javadoc)
+	 * @see de.jreality.scene.Drawable#getWidth()
+	 */
+	public int getWidth() {
+		// TODO Auto-generated method stub
+		return currentViewport[2] - currentViewport[0];
+	}
+
+
+
+	/* (non-Javadoc)
+	 * @see de.jreality.scene.Drawable#getHeight()
+	 */
+	public int getHeight() {
+		// TODO Auto-generated method stub
+		return currentViewport[3] - currentViewport[1];
+	}
+
+
+
+	/* (non-Javadoc)
+	 * @see de.jreality.scene.Drawable#getXMin()
+	 */
+	public int getXMin() {
+		// TODO Auto-generated method stub
+		return currentViewport[0];
+	}
+
+
+
+	/* (non-Javadoc)
+	 * @see de.jreality.scene.Drawable#getYMin()
+	 */
+	public int getYMin() {
+		// TODO Auto-generated method stub
+		return currentViewport[1];
 	}
 }
