@@ -353,6 +353,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
     }
     
     public void loadWorld(String classname) {
+        long t = System.currentTimeMillis();
         LoadableScene wm = null;
         try {
             wm = (LoadableScene) Class.forName(classname).newInstance();
@@ -364,7 +365,8 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         de.jreality.scene.SceneGraphComponent world = wm.makeWorld();
         if (world != null) getSceneRoot().addChild(world);
         setSignature(wm.getSignature());
-        System.out.println("loaded world " + classname + " successful.");
+        long time = System.currentTimeMillis() - t;
+        System.out.println("loaded world " + classname + " successful. ["+t+"ms]");
     }
 
     
