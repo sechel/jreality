@@ -41,11 +41,11 @@ import de.jreality.util.ConfigurationAttributes;
  */
 public class JOGLSkyBox extends AbstractLoadableScene {
 
-	static String resourceDir = "/gunn/";
-	static {
-		String foo = System.getProperty("resourceDir");
-		if (foo != null)	resourceDir  = foo;
-	}
+	static String resourceDir = "./";
+//	static {
+//		String foo = System.getProperty("resourceDir");
+//		if (foo != null)	resourceDir  = foo;
+//	}
 	//static String resourceDir = "/Users/gunn/Library/Textures/";
 	/**
 	 * 
@@ -59,12 +59,12 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 
 	public boolean encompass()	{ return false; }
 	ConfigurationAttributes config = null;
-	String configResourceDir = "/homes/geometer/gunn/Software/eclipse/workspace/jReality/test/de/jreality/worlds/";
+	String configResourceDir = "/central/home/weissman/jReality/";
 	/* (non-Javadoc)
 	 * @see de.jreality.portal.WorldMaker#setConfiguration(de.jreality.portal.util.Configuration)
 	 */
 	public void setConfiguration(ConfigurationAttributes config) {
-		File f = new File(configResourceDir+"JOGLSkyBox.props");
+		File f = new File(configResourceDir+"test/de/jreality/worlds/JOGLSkyBox.props");
 		this.config = new ConfigurationAttributes(f, config);
 		String foo = this.config.getProperty("resourceDir", resourceDir);
 		resourceDir = foo;

@@ -22,7 +22,9 @@
  */
 package de.jreality.remote.portal.smrj;
 
+import net.java.games.jogl.GLCanvas;
 import de.jreality.jogl.InteractiveViewer;
+import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 
 /**
  *
@@ -68,5 +70,11 @@ public class HeadtrackedRemoteJOGLViewerImp extends HeadtrackedRemoteViewerImp i
     public void setBackgroundColor(java.awt.Color color) {
         getViewer().setBackgroundColor(color);
     }
-
+	public void setRemoteSceneRoot(RemoteSceneGraphComponent r) {
+		GLCanvas g = (GLCanvas) getViewer().getViewingComponent();
+		System.out.println(g);
+		super.setRemoteSceneRoot(r);
+		g = (GLCanvas) getViewer().getViewingComponent();
+		System.out.println(g);
+	}
 }

@@ -55,10 +55,6 @@ public class HeadtrackedRemoteViewerImp extends RemoteViewerImp implements
 
     HeadtrackedRemoteViewerImp(Viewer viewer) {
         super(viewer);
-    }
-
-    protected void init() {
-        super.init();
         // disable vertex draw for performance
         if (viewer.getSceneRoot().getAppearance() == null)
             viewer.getSceneRoot().setAppearance(new Appearance());
@@ -104,7 +100,6 @@ public class HeadtrackedRemoteViewerImp extends RemoteViewerImp implements
 //          t.setTranslation(config.getDoubleArray("portal.fixedHeadPosition"));
 //          viewer.setCameraPosition(t);
 //      }
-
     }
 
     public void render(double[] headMatrix) {

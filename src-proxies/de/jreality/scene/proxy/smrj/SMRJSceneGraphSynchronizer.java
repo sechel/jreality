@@ -98,22 +98,33 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
         for (Iterator i = ev.getChangedFaceAttributes().iterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             DataList dl = ((IndexedFaceSet) src).getFaceAttributes(a);
-            ((RemoteIndexedFaceSet) dst).setFaceCountAndAttributes(a,
-                    dl);
+            if (ByteBufferList.canCopy(dl)) {
+            	ByteBufferList copy = ByteBufferList.createByteBufferCopy(dl);
+                ((RemoteIndexedFaceSet) dst).setFaceAttributes(a, copy);
+                ByteBufferList.releaseList(copy);
+            } else {
+                ((RemoteIndexedFaceSet) dst).setFaceAttributes(a, dl);
+            }            
         }
         for (Iterator i = ev.getChangedEdgeAttributes().iterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             DataList dl = ((IndexedLineSet) src).getEdgeAttributes(a);
-            ((RemoteIndexedLineSet) dst).setEdgeCountAndAttributes(a,
-                    dl);
+            if (ByteBufferList.canCopy(dl)) {
+            	ByteBufferList copy = ByteBufferList.createByteBufferCopy(dl);
+                ((RemoteIndexedLineSet) dst).setEdgeAttributes(a, copy);
+                ByteBufferList.releaseList(copy);
+            } else {
+                ((RemoteIndexedLineSet) dst).setEdgeAttributes(a, dl);
+            }
         }
         for (Iterator i = ev.getChangedVertexAttributes().iterator(); i
                 .hasNext();) {
             Attribute a = (Attribute) i.next();
             DataList dl = ((PointSet) src).getVertexAttributes(a);
-            if (a == Attribute.COORDINATES || a == Attribute.NORMALS) {
-                DataList copy = ByteBufferList.createByteBufferCopy(dl);
+            if (ByteBufferList.canCopy(dl)) {
+            	ByteBufferList copy = ByteBufferList.createByteBufferCopy(dl);
                 ((RemotePointSet) dst).setVertexAttributes(a, copy);
+                ByteBufferList.releaseList(copy);
             } else {
                 ((RemotePointSet) dst).setVertexAttributes(a, dl);
             }

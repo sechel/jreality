@@ -125,6 +125,27 @@ public class SMRJMirrorFactoryTest extends TestCase {
         	ch.setAlpha(i*0.1);
         	assertEquals(ch.getVertexAttributes(), copy.getVertexAttributes());
         }
+    	IndexedFaceSet ifs = new IndexedFaceSet();
+    	Object proxy2 = proxyScene.createProxyScene(ifs);
+    	key = rf.getProxyKey(proxy2);
+    	copy = (IndexedFaceSet) rec[0].getClientFactory().getLocal(key);
+        for (int i = 201; i > 121; i--) {
+        	CatenoidHelicoid src= new CatenoidHelicoid(i);
+        	src.buildEdgesFromFaces();
+        	System.out.println(src.getVertexAttributes().storedAttributes());
+        	ifs.setVertexCountAndAttributes(src.getVertexAttributes());
+        	System.out.println("SMRJMirrorFactoryTest.testVisitIndexedFaceSet() 1");
+        	System.out.println(src.getEdgeAttributes().storedAttributes());
+        	ifs.setEdgeCountAndAttributes(src.getEdgeAttributes());
+        	System.out.println("SMRJMirrorFactoryTest.testVisitIndexedFaceSet() 2");
+        	System.out.println(src.getFaceAttributes().storedAttributes());
+        	ifs.setFaceCountAndAttributes(src.getFaceAttributes());
+        	System.out.println("SMRJMirrorFactoryTest.testVisitIndexedFaceSet() 3");
+        	assertEquals(src.getVertexAttributes(), copy.getVertexAttributes());
+        	assertEquals(src.getEdgeAttributes(), copy.getEdgeAttributes());
+        	assertEquals(src.getFaceAttributes(), copy.getFaceAttributes());
+        	ByteBufferList.BufferPool.releaseAll();
+        }
     }
 
     public static void assertEquals(DataListSet arg0, DataListSet arg1) {

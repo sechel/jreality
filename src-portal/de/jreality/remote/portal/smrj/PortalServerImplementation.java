@@ -132,6 +132,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         }
         renderer.setPriority(Thread.MIN_PRIORITY);
         renderer.start();
+        setBackgroundColor(new java.awt.Color(220, 110, 144, 20));
     }
 
     WandTool wandTool;
