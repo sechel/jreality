@@ -4,7 +4,7 @@
 # parent: parentPropFile.props
 
 # should belong to a global jReality property file
-dataDir: /homes/geometer/gunn/Software/eclipse/workspace/alex/data/
+dataDir: data
 config: config
 textures: textures
 3ds: 3ds
