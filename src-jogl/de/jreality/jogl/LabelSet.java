@@ -23,10 +23,26 @@ import de.jreality.util.Rn;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 public class LabelSet extends Geometry {
+	public static final int GLUT_BITMAP_9_BY_15		= 2;
+
+	public static final int GLUT_BITMAP_8_BY_13		= 3;
+
+	public static final int GLUT_BITMAP_TIMES_ROMAN_10	= 4;
+
+	public static final int GLUT_BITMAP_TIMES_ROMAN_24	= 5;
+
+	public static final int GLUT_BITMAP_HELVETICA_10	= 6;
+
+	public static final int GLUT_BITMAP_HELVETICA_12	= 7;
+
+	public static final int GLUT_BITMAP_HELVETICA_18	= 8;
+
 	String[] labels;
 	double[][] objectVerts, screenVerts;
 	PointSet positions;
+	double[] screenOffset = {10.0, -10.0,-.01};
 	private GLUT glut = new GLUT();
+	int bitmapFont = GLUT_BITMAP_HELVETICA_12;
 
 	/**
 	 * 
@@ -61,18 +77,22 @@ public class LabelSet extends Geometry {
 		}
 	}
 
+	static double[] correctionNDC = null;
+	static {
+		correctionNDC = Rn.identityMatrix(4);
+		correctionNDC[10] = correctionNDC[11] = .5;
+	}
 	public void render(JOGLRenderer jr)	{
 		GL gl = jr.getCanvas().getGL();
-		GLU glu = jr.getCanvas().getGLU();
 		
 		Graphics3D gc = jr.getContext();
 		
-		double[] objectToScreen = gc.getObjectToScreen();
+		double[] objectToScreen = Rn.times(null, correctionNDC, gc.getObjectToScreen());
 		
 		Rn.matrixTimesVector(screenVerts, objectToScreen, objectVerts);
 		if (screenVerts[0].length == 4) Pn.dehomogenize(screenVerts, screenVerts);
 		int np = positions.getNumPoints();
-		for (int i = 0; i<np; ++i)	{ screenVerts[i][2] = (screenVerts[i][2] + 1)/2.0; }
+		//for (int i = 0; i<np; ++i)	{ screenVerts[i][2] = (screenVerts[i][2] + 1)/2.0; }
 
 		// Store enabled state and disable lighting, texture mapping and the depth buffer
 		gl.glPushAttrib(GL.GL_ENABLE_BIT);
@@ -81,20 +101,17 @@ public class LabelSet extends Geometry {
 		gl.glDisable(GL.GL_TEXTURE_2D);
 		for (int i = 0; i< 6; ++i) gl.glDisable(i + GL.GL_CLIP_PLANE0);
 
-		gl.glColor3f(1, 1, 1);
+		//gl.glColor3f(1, 1, 1);
 		float[] cras = new float[4];
 		double[] dras = new double[4];
 		for (int i = 0; i<np; ++i)	{
 			gl.glRasterPos3d(objectVerts[i][0], objectVerts[i][1], objectVerts[i][2]);
 			gl.glGetFloatv(GL.GL_CURRENT_RASTER_POSITION, cras);
 			for (int j = 0; j<4; ++j) dras[j] = cras[j];
-			gl.glWindowPos3d(screenVerts[i][0] + 10.0, screenVerts[i][1] - 10.0, screenVerts[i][2]);
-//			System.out.println("Actual position "+Rn.toString(dras));
-//			System.out.println("I think it should be is "+Rn.toString(screenVerts[i],6));
-//			System.out.println("current - theoretical = "+Rn.toString(Rn.subtract(null, dras,screenVerts[i]),6));
-//			System.out.println("z-ratio: "+dras[2]/screenVerts[i][2]);
+			gl.glWindowPos3d(screenVerts[i][0]+screenOffset[0], screenVerts[i][1] +screenOffset[1], screenVerts[i][2]+screenOffset[2]);
 			String label = (labels == null) ? Integer.toString(i) : labels[i];
-			glut.glutBitmapString(gl, GLUT.BITMAP_HELVETICA_12, label);
+			//bitmapFont = 2 + (i%6);
+			glut.glutBitmapString(gl, bitmapFont, label);
 		}
 
 		gl.glPopAttrib();
@@ -107,4 +124,11 @@ public class LabelSet extends Geometry {
 		objectVerts = positions.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 		screenVerts = new double[objectVerts.length][objectVerts[0].length];
 	}
+	public double[] getScreenOffset() {
+		return screenOffset;
+	}
+	public void setScreenOffset(double[] screenOffset) {
+		this.screenOffset = screenOffset;
+	}
+
 }

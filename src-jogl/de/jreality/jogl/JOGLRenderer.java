@@ -723,6 +723,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 				if (pickMode) globalGL.glPopName();
 				return;
 			}		else 	if (originalGeometry instanceof LabelSet)	{
+				globalGL.glColor4fv(geometryShader.lineShader.getDiffuseColor().getComponents(null));
 				((LabelSet) originalGeometry).render(globalHandle);
 			}
 

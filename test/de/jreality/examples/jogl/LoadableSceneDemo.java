@@ -33,20 +33,23 @@ public class LoadableSceneDemo extends InteractiveViewerDemo {
 		else iv.loadScene(null);
     }
     String root = "de.jreality.worlds.";
-    String[] loadableScenes = {"de.jreality.worlds.AnimationDemo",
+    String[] loadableScenes = {"de.jreality.worlds.AlexDemo",
+    			"de.jreality.worlds.AnimationDemo",
  			"de.jreality.worlds.DebugLattice",
-    			"de.jreality.worlds.FunnyRuledSurface",
 			"de.jreality.worlds.HopfFibration",
 			"de.jreality.worlds.ElephantTrunk",
 			"de.jreality.worlds.Icosahedra",
 			"de.jreality.worlds.ImplodedTori",
-    			"de.jreality.worlds.JOGLSkyBox",
+			"de.jreality.worlds.LabelSetDemo",
+			"de.jreality.worlds.MarsFlyby",
+   			"de.jreality.worlds.JOGLSkyBox",
     			"de.jreality.worlds.ReflectionMapDemo",
     			"de.jreality.worlds.StandardDemo",
 			"de.jreality.worlds.TestClippingPlane",
 			"de.jreality.worlds.TestSphereDrawing",
 			"de.jreality.worlds.TestTubes",
-   			"discreteGroup.demo.Cell120",
+  			"discreteGroup.demo.ArchimedeanSolids",
+  			"discreteGroup.demo.Cell120",
 			"discreteGroup.demo.SoccerBall"};
    
     Class c;
