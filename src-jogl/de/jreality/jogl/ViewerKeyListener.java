@@ -23,8 +23,10 @@ import de.jreality.jogl.tools.ToolManager;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.CommonAttributes;
+import de.jreality.scene.Transformation;
 import de.jreality.soft.MouseTool;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.P3;
 import de.jreality.util.SceneGraphUtilities;
 
 /**
@@ -60,7 +62,7 @@ public class ViewerKeyListener extends KeyAdapter {
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_E,InputEvent.SHIFT_DOWN_MASK), "Toggle edge drawing");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_F,0), "Activate fly tool");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_F,InputEvent.SHIFT_DOWN_MASK), "Toggle face drawing");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_G,0), "Toggle line style");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_G,0), "Toggle line-tubing style");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_H,0), "Toggle help overlay");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_I,0), "Toggle info overlay");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_J,0), "Increase sphere radius");
@@ -71,9 +73,12 @@ public class ViewerKeyListener extends KeyAdapter {
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_M,InputEvent.SHIFT_DOWN_MASK), "Set default Matrices with current state");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_N,0), "Add current selection to selection list");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_N,InputEvent.SHIFT_DOWN_MASK), "Remove current selection from selection list");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_O,0), "Increase level of detail");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_O,InputEvent.SHIFT_DOWN_MASK), "Decrease level of detail");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_P,0), "Toggle perspective/orthographic view");
-//		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_Q,0), "Force render");
+		//		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_Q,0), "Force render");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_Q,0), "Toggle interpolate vertex colors in line shader");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_Q,InputEvent.SHIFT_DOWN_MASK), "Orthonormalize camera transform");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_R,0), "Activate rotation tool");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_S,0), "Toggle smooth shading");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_S,InputEvent.SHIFT_DOWN_MASK), "Toggle sphere drawing");
@@ -114,6 +119,7 @@ public class ViewerKeyListener extends KeyAdapter {
 
 				case KeyEvent.VK_C:		// select a color
 					java.awt.Color color = JColorChooser.showDialog(viewer.getViewingComponent(), "Select background color",  null);
+					if (color == null) break;
 					if (e.isShiftDown())	
 						viewer.getSceneRoot().getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR, color);
 					else viewer.getSelectionManager().getSelectedAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, color);
@@ -195,6 +201,11 @@ public class ViewerKeyListener extends KeyAdapter {
 					viewer.render();
 					break;
 
+				case KeyEvent.VK_O:		// line width
+					modulateValueAdditive(CommonAttributes.LEVEL_OF_DETAIL, 1.0, .05, 0.0, 1.0, !e.isShiftDown()); 
+					viewer.render();
+					break;
+
 				case KeyEvent.VK_P:		// toggle perspective
 					if (e.isShiftDown()) break;
 					boolean val = CameraUtility.getCamera(viewer).isPerspective();
@@ -204,8 +215,12 @@ public class ViewerKeyListener extends KeyAdapter {
 
 				case KeyEvent.VK_Q:		
 					//((GLCanvas) viewer.getViewingComponent()).setNoAutoRedrawMode(false);
-					if (e.isShiftDown()) break;
-					toggleValue(CommonAttributes.LINE_SHADER+"."+CommonAttributes.INTERPOLATE_VERTEX_COLORS);
+					if (e.isShiftDown()){
+						Transformation tt =  CameraUtility.getCameraNode(viewer).getTransformation();
+						double[] clean = P3.orthonormalizeMatrix(null, tt.getMatrix(), 10E-10, tt.getSignature());
+						if (clean != null)	tt.setMatrix(clean);
+					}
+					else toggleValue(CommonAttributes.LINE_SHADER+"."+CommonAttributes.INTERPOLATE_VERTEX_COLORS);
 					viewer.render();
 					break;
 

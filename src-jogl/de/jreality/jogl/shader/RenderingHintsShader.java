@@ -68,8 +68,8 @@ public class RenderingHintsShader  {
 		backFaceCullingEnabled = eap.getAttribute(NameSpace.name(name,CommonAttributes.BACK_FACE_CULLING_ENABLED), false);
 		atInfinity = eap.getAttribute(NameSpace.name(name,CommonAttributes.AT_INFINITY), false);
 		isFastAndDirty = eap.getAttribute(NameSpace.name(name,CommonAttributes.FAST_AND_DIRTY_ENABLED), false);
-		levelOfDetail = eap.getAttribute(NameSpace.name(name,CommonAttributes.LEVEL_OF_DETAIL), 0.0);
-		if (isFastAndDirty) levelOfDetail = 0.0;
+		levelOfDetail = eap.getAttribute(NameSpace.name(name,CommonAttributes.LEVEL_OF_DETAIL),CommonAttributes.LEVEL_OF_DETAIL_DEFAULT);
+		//if (isFastAndDirty) levelOfDetail = 0.0;
 	}
 
 	public boolean isAntiAliasingEnabled() {

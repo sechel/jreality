@@ -4,6 +4,7 @@
   */
 package de.jreality.jogl;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
@@ -497,7 +498,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
     private final static int LINES_CHANGED = 2;
     private final static int FACES_CHANGED = 4;
     private final static int ALL_CHANGED = 7;
-    
+	static Color[] cdbg = {Color.BLUE, Color.GREEN, Color.YELLOW,  Color.RED,Color.GRAY, Color.WHITE};
+   
 	private class DisplayListInfo	{
 		private boolean useDisplayList, 	// can decide based on dynamic evaluation whether it makes sense 
 					insideDisplayList,
@@ -729,7 +731,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			}
 			//System.out.println("Setting display lists dirty with flag: "+type);
 		}
-		
 		/**
 		 * 
 		 */
@@ -743,9 +744,16 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 //				ifs = foo;
 //				ils = foo;
 //				ps = foo;
-				geometryShader.polygonShader.render(globalHandle);				
-				int dlist = sphereDisplayLists[2];
+				
+				geometryShader.polygonShader.render(globalHandle);	
+				double lod = renderingHints.getLevelOfDetail();
+				// TODO do this in a timer
+				int i = JOGLSphereHelper.getResolutionLevel(context.getObjectToNDC(), lod);
+				//int i = 3;
+				int dlist = sphereDisplayLists[i];
+				globalGL.glDisable(GL.GL_SMOOTH);
 				if (pickMode) globalGL.glPushName(JOGLPickAction.GEOMETRY_BASE);
+				globalGL.glColor4fv(cdbg[i].getRGBComponents(null));
 				globalGL.glCallList(dlist);
 				if (pickMode) globalGL.glPopName();
 				return;
@@ -790,7 +798,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				boolean smooth = geometryShader.lineShader.isSmoothShading();
 				int type = proxy ? PROXY_LINEDL : LINEDL;
 				if (proxy && dlInfo.isDisplayListDirty(PROXY_LINEDL))	{
-					//System.out.println("Recalculating tubes");
+					System.out.println("Recalculating tubes");
 					int dl  = geometryShader.lineShader.proxyGeometryFor(ils, globalHandle, currentSignature);
 					if (dl != -1) {
 						//System.out.println("Tubes created");
@@ -1222,7 +1230,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 					globalGL.glMultTransposeMatrixd(thisT.getMatrix());
 					stackDepth++;
 				}
-				else globalGL.glLoadTransposeMatrixd(context.getObjectToCamera());	
+				else 
+					globalGL.glLoadTransposeMatrixd(context.getObjectToCamera());	
 				currentSignature = thisT.getSignature();
 			}  
 			// should depend on camera transformation ...
@@ -1237,6 +1246,11 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			// render the geometry
 			if (goBetween.getPeerGeometry() != null)	goBetween.getPeerGeometry().render(this);
 			
+			if (goBetween.getOriginalComponent() instanceof LevelOfDetailComponent)	{
+				double d = CameraUtility.getNDCExtent(context.getObjectToNDC());
+				double lod = renderingHints.getLevelOfDetail();
+				((LevelOfDetailComponent)goBetween.getOriginalComponent()).setScreenExtent(d * lod);
+			}
 			synchronized(childLock)	{
 				// render the children
 				int n = children.size();
@@ -1250,8 +1264,10 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			}
 			
 			if (thisT != null)	{
-				if (stackDepth <= MAX_STACK_DEPTH) globalGL.glPopMatrix();
-				stackDepth--;
+				if (stackDepth <= MAX_STACK_DEPTH) {
+					globalGL.glPopMatrix();
+					stackDepth--;
+				}
 			}			
 			currentPath.pop();
 		}
@@ -1551,4 +1567,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		// TODO Auto-generated method stub
 		return currentViewport[1];
 	}
+
+
 }

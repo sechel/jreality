@@ -11,6 +11,9 @@ import java.util.Hashtable;
 import net.java.games.jogl.GL;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.SphereHelper;
+import de.jreality.util.CameraUtility;
+import de.jreality.util.Pn;
+import de.jreality.util.Rn;
 
 /**
  * @author gunn
@@ -20,7 +23,6 @@ import de.jreality.geometry.SphereHelper;
  */
 public class JOGLSphereHelper extends SphereHelper {
 
-	static boolean useQuadMesh = true;
 	static boolean sharedDisplayLists = Viewer.sharedContexts;
 	static Hashtable sphereDListsTable = new Hashtable();
 	static int[] globalSharedSphereDisplayLists = null;
@@ -36,17 +38,14 @@ public class JOGLSphereHelper extends SphereHelper {
 		for (int i = 0; i<n; ++i)	{
 			dlists[i] = gl.glGenLists(1);
 			gl.glNewList(dlists[i], GL.GL_COMPILE);
-			if (useQuadMesh) {
-				QuadMeshShape qms = SphereHelper.cubePanels[i];
-				for (int j = 0; j<SphereHelper.cubeSyms.length; ++j)	{
-					gl.glPushMatrix();
-					gl.glMultTransposeMatrixd(SphereHelper.cubeSyms[j].getMatrix());
-					JOGLRendererHelper.drawFaces(qms, gl, true, 1.0);
-					gl.glPopMatrix();
-				}				
-			} else {
-				JOGLRendererHelper.drawFaces(SphereHelper.spheres[i], gl, true, 1.0);
-			}
+			//gl.glDisable(GL.GL_SMOOTH);
+			QuadMeshShape qms = SphereHelper.cubePanels[i];
+			for (int j = 0; j<SphereHelper.cubeSyms.length; ++j)	{
+				gl.glPushMatrix();
+				gl.glMultTransposeMatrixd(SphereHelper.cubeSyms[j].getMatrix());
+				JOGLRendererHelper.drawFaces(qms, gl, true, 1.0);
+				gl.glPopMatrix();
+			}				
 			gl.glEndList();
 		}
 		if (!sharedDisplayLists) sphereDListsTable.put(gl, dlists);
@@ -92,6 +91,21 @@ public class JOGLSphereHelper extends SphereHelper {
 			return;
 		}
 		// probably don't need to actually delete them since the context 
+	}
+
+
+	static double[] lodLevels = {.02,.08,.16,.32,.64};
+	/**
+	 * @return
+	 */
+	public static int getResolutionLevel(double[] o2ndc, double lod) {
+		double d = lod * CameraUtility.getNDCExtent(o2ndc);
+		//System.out.println("Distance is "+d);
+		int i = 0;
+		for ( i = 0; i<5; ++i)	{
+			if (d < lodLevels[i]) break;
+		}
+		return i;
 	}
 
 }

@@ -9,6 +9,7 @@ package de.jreality.jogl;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -26,6 +27,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
@@ -44,6 +47,8 @@ import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
+import de.jreality.soft.PSViewer;
+import de.jreality.ui.SceneTreeViewer;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.LoadableScene;
@@ -76,7 +81,7 @@ public class InteractiveViewerDemo extends JFrame{
 	boolean fullScreen = false;
 	boolean loadedScene = false;
 	int signature = Pn.EUCLIDEAN;
-	boolean showCameraPathInspector = false;
+	boolean showCameraPathInspector = true;
 	
 	protected static String resourceDir = System.getProperty("home.dir"), saveResourceDir = System.getProperty("home.dir");
 	static {
@@ -166,7 +171,7 @@ public class InteractiveViewerDemo extends JFrame{
 		hack.add(tb);
 		hack.add(Box.createHorizontalGlue());
 		if (!fullScreen) getContentPane().add(hack, BorderLayout.NORTH);
-		//This fixes a bug in the Linux version of GLCanvas which prevented menus from showing up
+	     //This fixes a bug in the Linux version of GLCanvas which prevented menus from showing up
 		 JPopupMenu.setDefaultLightWeightPopupEnabled( false ) ;
 				
 		//TODO this should go into the main() method-- but that belongs to the subclass... hmmmm
@@ -184,6 +189,7 @@ public class InteractiveViewerDemo extends JFrame{
     }
     
 	SceneGraphComponent root;
+	LoadableScene currentLoadedScene = null;
 	public void initializeScene()	{
 		root = viewer.getSceneRoot();
 		SceneGraphComponent lights = makeLights();		
@@ -191,6 +197,13 @@ public class InteractiveViewerDemo extends JFrame{
 	}
 	
 	public void unloadScene()	{
+		if (currentLoadedScene != null) currentLoadedScene.dispose();
+		if (treeViewer != null) {
+			getContentPane().remove(treeViewer.getViewingComponent());
+			treeViewer.removeTreeSelectionListener(treeListener);
+			treeViewer = null;
+		}
+		setSize(800, 600);
 		if (world != null && root.isDirectAncestor(world))	root.removeChild(world);
 		viewer.getSceneRoot().setAppearance(null);
 		viewer.getSelectionManager().setDefaultSelection(null);
@@ -204,21 +217,21 @@ public class InteractiveViewerDemo extends JFrame{
 		root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
 		root.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
 		root.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
-		LoadableScene wm = null;
+		root.getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR, new Color(100, 120, 80));
 		
-		if (loadableScene == null)  world = makeWorld();
+		if (loadableScene == null)  world = makeWorld();		// subclasses
 		else		{
 		       try {
-	            wm = (LoadableScene) Class.forName(loadableScene).newInstance();
+	            currentLoadedScene = (LoadableScene) Class.forName(loadableScene).newInstance();
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }
 	        // scene settings
-	        wm.setConfiguration(ConfigurationAttributes.getDefaultConfiguration());
-	        world = wm.makeWorld();
-	        signature = wm.getSignature();
-	        isEncompass = wm.isEncompass();
-	        addBackPlane = wm.addBackPlane();
+	        currentLoadedScene.setConfiguration(ConfigurationAttributes.getDefaultConfiguration());
+	        world = currentLoadedScene.makeWorld();
+	        signature = currentLoadedScene.getSignature();
+	        isEncompass = currentLoadedScene.isEncompass();
+	        addBackPlane = currentLoadedScene.addBackPlane();
 	        loadedScene = true;
 		}
 		if (world != null && !root.isDirectAncestor(world)) {		// sometimes the subclass has already added the world
@@ -248,16 +261,14 @@ public class InteractiveViewerDemo extends JFrame{
 		} 
 		if (theMenuBar != null)	hack.remove(theMenuBar);
 		 theMenuBar = createMenuBar();
-		 if (loadedScene) wm.customize(theMenuBar, viewer);
+		 if (loadedScene) currentLoadedScene.customize(theMenuBar, viewer);
 		 hack.add(theMenuBar, 0);
 		hack.add(Box.createHorizontalGlue(), 1);
 		setVisible(true);
 		repaint();
 		viewer.render();
 		viewer.getViewingComponent().requestFocus();
-		javax.swing.Timer foo = new javax.swing.Timer(33, new ActionListener()	{
-			public void actionPerformed(ActionEvent e) {update(); } } );
-		foo.start();
+		updateTreeInspector();
 	}
 
 	SceneGraphPath camPath = null;
@@ -290,6 +301,13 @@ public class InteractiveViewerDemo extends JFrame{
 			saveRIBToFile();
 		}
 	});
+	jcc = new JMenuItem("Save PS...");
+	fileM.add(jcc);
+	jcc.addActionListener( new ActionListener() {
+		public void actionPerformed(ActionEvent e)	{
+			savePSToFile();
+		}
+	});
 		theMenuBar.add(fileM);
 		JMenu testM = new JMenu("Windows");
 		if (showCameraPathInspector)	{
@@ -303,8 +321,7 @@ public class InteractiveViewerDemo extends JFrame{
 				}
 			});			
 		}
-		jcc = new JCheckBoxMenuItem("New Viewer");
-		jcc.setSelected(showInspector);
+		jcc = new JMenuItem("New Viewer");
 		testM.add(jcc);
 		jcc.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent e)	{
@@ -313,10 +330,47 @@ public class InteractiveViewerDemo extends JFrame{
 				addViewer(iv, "testing");
 			}
 		});
+		jcc = new JRadioButtonMenuItem("Tree Inspector");
+		jcc.setSelected(showTreeInspector);
+		testM.add(jcc);
+		jcc.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent e)	{
+				toggleTreeInspector();
+			}
+		});
 		theMenuBar.add(testM);
 		return theMenuBar;
 	}
 	
+	boolean showTreeInspector;
+	SceneTreeViewer treeViewer = null;
+	HandleTreeSelection treeListener = null;
+	public void toggleTreeInspector()	{
+		showTreeInspector = !showTreeInspector;
+		updateTreeInspector();
+	}
+	public void updateTreeInspector()	{
+		if (showTreeInspector)	{
+			if (treeViewer == null)	{
+				treeViewer =  SceneTreeViewer.sceneTreeViewerFactory(viewer);
+				treeListener = new de.jreality.jogl.HandleTreeSelection(viewer);
+				treeViewer.addTreeSelectionListener(treeListener);
+				   //treeViewer.initializeFrom(viewer);
+				JScrollPane comp = (JScrollPane) treeViewer.getViewingComponent();
+				comp.setPreferredSize(new Dimension(300, viewer.getDrawable().getHeight()));
+				getContentPane().add(comp, BorderLayout.EAST);		
+				pack();
+			}
+		} else {
+			if (treeViewer == null) return;
+			getContentPane().remove(treeViewer.getViewingComponent());
+			pack();
+		}
+		treeViewer.setVisible(showTreeInspector);
+		repaint();
+		viewer.render();
+	}
+ 	
 	protected void loadFile() {
 		SceneGraphComponent parent= null;
 		SceneGraphPath sgp = viewer.getSelectionManager().getSelection();
@@ -329,7 +383,7 @@ public class InteractiveViewerDemo extends JFrame{
     		}
     		parent = (SceneGraphComponent) sgp.getLastElement();
     } else {
-        System.out.println("SelectrionPath == null!");
+        System.out.println("SelectionPath == null!");
         parent = root;
         sgp = new SceneGraphPath();
         sgp.push(parent);
@@ -342,7 +396,7 @@ public class InteractiveViewerDemo extends JFrame{
 			File file = fc.getSelectedFile();
 			sgc = Readers.readFile(file);
 			parent.addChild(sgc);
-      sgp.push(sgc);
+			sgp.push(sgc);
 			resourceDir = file.getAbsolutePath();
 		} else {
 			System.out.println("Unable to open file");
@@ -380,12 +434,30 @@ public class InteractiveViewerDemo extends JFrame{
 			saveResourceDir = file.getAbsolutePath();
 			file.delete();
 			RIBViewer ribv = new RIBViewer();
-			ribv.setCameraPath(viewer.getCameraPath());
-			ribv.setSceneRoot(viewer.getSceneRoot());
-			ribv.setHeight(viewer.getViewingComponent().getHeight());
-			ribv.setWidth(viewer.getViewingComponent().getWidth());
+			ribv.initializeFrom(viewer);
 			ribv.setFileName(name);
 			ribv.render();
+		} else {
+			System.out.println("Unable to open file");
+			return;
+		}
+		viewer.render();
+	}
+
+	protected void savePSToFile() {
+		SceneGraphComponent parent= null;
+		JFileChooser fc = new JFileChooser(saveResourceDir);
+		//System.out.println("FCI resource dir is: "+resourceDir);
+		int result = fc.showSaveDialog(this);
+		SceneGraphComponent sgc = null;
+		if (result == JFileChooser.APPROVE_OPTION)	{
+			File file = fc.getSelectedFile();
+			String name = file.getAbsolutePath();
+			saveResourceDir = file.getAbsolutePath();
+			file.delete();
+			PSViewer psv = new PSViewer(name);
+			psv.initializeFrom(viewer);
+			psv.render(viewer.canvas.getWidth(), viewer.canvas.getHeight());
 		} else {
 			System.out.println("Unable to open file");
 			return;
@@ -415,7 +487,7 @@ public class InteractiveViewerDemo extends JFrame{
 	
 	// allow subclasses to customize the camera path inspector (hack!)
 	public  FramedCurveInspector getCameraPathInspector()	{
-		return new FramedCurveInspector(viewer);
+		return new FramedCurveInspector(viewer, world);
 	}
 	
 	public void update()	{

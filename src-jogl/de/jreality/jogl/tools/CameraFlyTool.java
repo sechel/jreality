@@ -128,11 +128,10 @@ public class CameraFlyTool extends AbstractMouseTool {
 		}	
 		else if (button == 2) {
 			double[] absChange = new double[4];
-			Rn.subtract(absChange, current, anchor);
-			absChange[2] = 0.0;
-			absChange[3] = 1.0;
-			double as = Rn.euclideanNorm(absChange);
+			absChange[0] = current[0] - anchor[0];
+			absChange[1] = current[1] - anchor[1];
 			double[] tvec = Rn.times(null, speed, absChange);
+			tvec[3] = 1.0;
 			P3.makeTranslationMatrix(xyTransM, tvec, signature);
 			cameraTrans.setMatrix(Rn.times(null, origCM, xyTransM));
 			

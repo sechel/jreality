@@ -26,6 +26,7 @@ import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;
+import de.jreality.util.Rn;
 import de.jreality.util.ShaderUtility;
 
 /**
@@ -156,7 +157,7 @@ public class DefaultLineShader implements LineShader  {
 		// GL_COLOR_MATERIAL is disabled.
 		//gl.glDisable(GL.GL_COLOR_MATERIAL);
 		gl.glColor4fv(getDiffuseColorAsFloat());
-		//System.out.println("Setting diffuse color to: "+getDiffuseColor().toString());
+		//System.out.println("LineShader: Setting diffuse color to: "+Rn.toString(getDiffuseColorAsFloat()));
 	
 		gl.glLineWidth((float) getLineWidth());
 		if (isLineStipple()) {
@@ -166,10 +167,14 @@ public class DefaultLineShader implements LineShader  {
 		else gl.glDisable(GL.GL_LINE_STIPPLE);
 		if (tubeDraw) {
 			polygonShader.render(jr);
-			//gl.glEnable(GL.GL_LIGHTING);
-			//System.out.println("polygon shader is smooth: "+(polygonShader.isSmoothShading() ? "true" : "false"));
 		}
 		else gl.glDisable(GL.GL_LIGHTING);
+
+		// this little bit of code forces tubes to be opaque: could add
+		// transparency-enable flag to the line shader to allow this to be controlled
+		gl.glDepthMask(true);
+		 gl.glDisable(GL.GL_BLEND);
+
 		gl.glDepthRange(0.0d, depthFudgeFactor);
 	}
 

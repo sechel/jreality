@@ -16,6 +16,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;
+import de.jreality.util.Rn;
 import de.jreality.util.ShaderUtility;
 
 
@@ -51,6 +52,7 @@ public class DefaultVertexShader implements VertexShader {
 		ambientColorAsFloat = ambientColor.getRGBComponents(null);
 		diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.DIFFUSE_COLOR_DEFAULT);
 		transparency= eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
+		//System.out.println("Name is "+name+" transparency is "+transparency);
 		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transparency);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
 		specularColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.SPECULAR_COLOR), CommonAttributes.SPECULAR_COLOR_DEFAULT);
@@ -120,6 +122,7 @@ public class DefaultVertexShader implements VertexShader {
 		gl.glMaterialfv(frontBack, GL.GL_AMBIENT, ambientColorAsFloat);
 		gl.glMaterialfv(frontBack, GL.GL_SPECULAR, specularColorAsFloat);
 		gl.glMaterialf(frontBack, GL.GL_SHININESS, (float) getSpecularExponent());
+		//System.out.println("VertexShader: Setting diffuse color to: "+Rn.toString(getDiffuseColorAsFloat()));
 	}
 
 }

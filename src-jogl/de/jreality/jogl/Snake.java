@@ -44,7 +44,7 @@ public class Snake extends IndexedLineSet {
 			setGeometryAttributes(SNAKE_INFO, info);
 			setEdgeCountAndAttributes(Attribute.INDICES, StorageModel.INT_ARRAY_ARRAY.createReadOnly(nullindices));
 		} else {
-			setVertexCountAndAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(points[0].length).createReadOnly(points));
+			setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(points[0].length).createReadOnly(points));
 			int begin = info[0];
 			int length = info[1];
 			System.out.println("de-activating snake: "+begin+" "+length);
@@ -56,13 +56,6 @@ public class Snake extends IndexedLineSet {
 			setGeometryAttributes(SNAKE_POINTS, null);
 			setGeometryAttributes(SNAKE_INFO, null);
 		}
-	}
-	
-	protected void fireGeometryChanged(Set vertexAttributeKeys,
-			Set edgeAttributeKeys, Set faceAttributeKeys, Set geomAttributeKeys) {
-		// TODO Auto-generated method stub
-		super.fireGeometryChanged(vertexAttributeKeys, edgeAttributeKeys,
-				faceAttributeKeys, geomAttributeKeys);
 	}
 	
 	public void fireChange()	{

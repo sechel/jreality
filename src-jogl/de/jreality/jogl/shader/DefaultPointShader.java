@@ -13,6 +13,7 @@ import net.java.games.jogl.GLCanvas;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLSphereHelper;
+import de.jreality.jogl.Snake;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
@@ -53,7 +54,7 @@ public class DefaultPointShader  implements PointShader {
 		sphereDraw = eap.getAttribute(NameSpace.name(name,CommonAttributes.SPHERES_DRAW), CommonAttributes.SPHERES_DRAW_DEFAULT);
 		pointSize = eap.getAttribute(NameSpace.name(name,CommonAttributes.POINT_SIZE), CommonAttributes.POINT_SIZE_DEFAULT);
 		pointRadius = eap.getAttribute(NameSpace.name(name,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
-		Color diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.POINT_DIFFUSE_COLOR_DEFAULT);	
+		diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.POINT_DIFFUSE_COLOR_DEFAULT);	
 		double t = eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
 		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, t);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
@@ -106,6 +107,11 @@ public class DefaultPointShader  implements PointShader {
 			gl.glEnable(GL.GL_LIGHTING);
 		}
 		else gl.glDisable(GL.GL_LIGHTING);
+
+		// this little bit of code forces tubes to be opaque: could add
+		// transparency-enable flag to the line shader to allow this to be controlled
+		gl.glDepthMask(true);
+		 gl.glDisable(GL.GL_BLEND);
 		
 	}
 
@@ -120,6 +126,7 @@ public class DefaultPointShader  implements PointShader {
 			PointSet ps = (PointSet) original;
 			DataList vertices = ps.getVertexAttributes(Attribute.COORDINATES);
 			DataList vertexColors = ps.getVertexAttributes(Attribute.COLORS);
+			//System.out.println("VC is "+vertexColors);
 			int colorLength = 0;
 			if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
 			DoubleArray da;
@@ -130,21 +137,39 @@ public class DefaultPointShader  implements PointShader {
 			double[] mat = Rn.identityMatrix(4);
 			double[] scale = Rn.identityMatrix(4);
 			scale[0] = scale[5] = scale[10] = pointRadius;
+			int begin = 0;
+			int length = n;
+			int m = n;
+			double[][] sp = null;
+			boolean doSnake = false;
+			if (original instanceof Snake && original.getGeometryAttributes(Snake.SNAKE_POINTS) != null)	{
+				sp = (double[][] ) original.getGeometryAttributes(Snake.SNAKE_POINTS);
+				int[] snakeInfo = (int[] ) original.getGeometryAttributes(Snake.SNAKE_INFO);
+				begin = snakeInfo[0];
+				length = snakeInfo[1];
+				//System.out.println("Processing the snake with "+length+" points");
+				m = sp.length;
+				doSnake = true;
+			}
 			//System.out.println("Signature is "+sig);
 			//sig = Pn.EUCLIDEAN;
 			boolean pickMode = jr.isPickMode();
 			if (pickMode) gl.glPushName(JOGLPickAction.GEOMETRY_POINT);
-			for (int i = 0; i< n; ++i)	{
-				da = vertices.item(i).toDoubleArray();	
+			for (int i = 0; i< length; ++i)	{
+				double[] transVec = null;
 				gl.glPushMatrix();
-				
-				P3.makeTranslationMatrix(mat, da.toDoubleArray(null),sig);
+				if (doSnake)		{
+					int index = (i+begin) % m;
+					transVec = sp[index];
+				} else 
+					transVec =  vertices.item(i).toDoubleArray().toDoubleArray(null);	
+				P3.makeTranslationMatrix(mat, transVec,sig);
 				Rn.times(mat, mat, scale);
 				gl.glMultTransposeMatrixd(mat);
 				if (vertexColors != null)	{
 					da = vertexColors.item(i).toDoubleArray();
 					if (colorLength == 3) 	{
-						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), 1.0);
+						gl.glColor3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 					} else if (colorLength == 4) 	{
 						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), 1.0*da.getValueAt(3));
 					} 

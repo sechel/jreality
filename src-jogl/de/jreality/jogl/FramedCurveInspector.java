@@ -46,11 +46,12 @@ public class FramedCurveInspector extends JFrame {
 	FramedCurve theCurve;
 	protected Camera fciCamera;
 	boolean showCurve;
+	boolean moveWorld = false;		// default: means move the camera
 	boolean loopPlay = false;
 	FramedCurve.ControlPoint currentPoint = null;
 	protected Viewer parent;
 	SceneGraphPath camPath, origCamPath;
-	SceneGraphComponent myCameraNode;
+	SceneGraphComponent myCameraNode, worldNode, target;
 	int inspectedPoint = 0;
 	//double currentTime = 0.0;
 	MyKeyListener cdkl;
@@ -86,9 +87,16 @@ public class FramedCurveInspector extends JFrame {
 		foo = System.getProperty("mars.playSpeed");
 		if (foo != null) globalPlaybackFactor = Double.parseDouble(foo);
 	}
-	
+
 	public FramedCurveInspector(Viewer v)	{
+		this(v, null);
+	}
+	
+	public FramedCurveInspector(Viewer v, SceneGraphComponent world)	{
 		super();
+		setWorldNode(world);
+		//worldNode = world;
+		
 		me = this;
 		parent = v;
 		cameraEnd = null;
@@ -111,7 +119,8 @@ public class FramedCurveInspector extends JFrame {
 		camPath = new SceneGraphPath();
 		camPath.push(root);
 		
-		myCameraNode = SceneGraphUtilities.createFullSceneGraphComponent("FramedCurveInspectorCamera");
+		target = myCameraNode = SceneGraphUtilities.createFullSceneGraphComponent("FramedCurveInspectorCamera");
+		setWorldNode(null);
 		fciCamera = new Camera();	
 		Camera oldCam = CameraUtility.getCamera(parent);
 		// TODO implement clone() for Camera
@@ -197,6 +206,15 @@ public class FramedCurveInspector extends JFrame {
 			public void actionPerformed(ActionEvent e)	{
 				showCurve = !showCurve;
 				handleShowCurve();
+			}
+		});
+		final JCheckBoxMenuItem scw = new JCheckBoxMenuItem("Move world");
+		scw.setSelected(moveWorld);
+		testM.add(scw);
+		scw.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent e)	{
+				moveWorld = !moveWorld;
+				handleMoveWorld();
 			}
 		});
 		mb.add(testM);
@@ -342,6 +360,17 @@ public class FramedCurveInspector extends JFrame {
 		setLocation(200,600);
 		
 	}
+	
+	/**
+	 * 
+	 */
+	protected void handleMoveWorld() {
+		target.getTransformation().resetMatrix();
+		if (moveWorld) setWorldNode(worldNode);
+		else setWorldNode(null);
+		System.out.println("move world is: "+moveWorld);
+		updateCameraPosition();
+	}
 
 	/**
 	 * 
@@ -395,11 +424,27 @@ public class FramedCurveInspector extends JFrame {
 		updateKeyFrame();
 		time = currentPoint.getTime();
 		tick = tickFromTime(currentPoint.getTime());
-		//System.out.println("Setting time to: "+currentPoint.getTime());
-		myCameraNode.getTransformation().setMatrix(currentPoint.tt.getMatrix());
+		writeTarget(currentPoint.tt.getMatrix());
 		parent.render();
 	}
 
+	/**
+	 * 
+	 */
+	private void writeTarget(double[] m) {
+		//System.out.println("Setting time to: "+currentPoint.getTime());
+		if (moveWorld)	target.getTransformation().setMatrix(Rn.inverse(null,m));
+		else 		target.getTransformation().setMatrix(m);
+	}
+
+	/**
+	 * @return
+	 */
+	private double[] readTarget() {
+		if (moveWorld) return Rn.inverse(null, target.getTransformation().getMatrix());
+		return target.getTransformation().getMatrix();
+	}
+	
 	/**
 	 * Update the inspector but don't render it
 	 */
@@ -446,10 +491,10 @@ public class FramedCurveInspector extends JFrame {
 		}
 		
 		public void actionPerformed(ActionEvent e) {
-			currentPoint.tt.setMatrix(myCameraNode.getTransformation().getMatrix());
+			currentPoint.tt.setMatrix(readTarget());
 			theCurve.setOutOfDate(true);
 		}
-		
+
 }
 
 	class DeleteKeyAction extends AbstractAction		{
@@ -606,7 +651,7 @@ public class FramedCurveInspector extends JFrame {
 		}
 		theCurve.getValueAtTime(time, tt);
 		playtime.setText(doubleToString(time));
-		myCameraNode.getTransformation().setMatrix(tt.getMatrix());
+		writeTarget(tt.getMatrix());
 		parent.render();
 		count++;
 	}
@@ -787,7 +832,7 @@ public class FramedCurveInspector extends JFrame {
 					
 						Transformation tt = new Transformation(parent.getSignature());
 						//TODO apply inverse of objectToWorld transform here
-						tt.setMatrix(myCameraNode.getTransformation().getMatrix());
+						tt.setMatrix(readTarget());
 						double t = (e.getWhen() - beginCurveTime)/1000.0 + startTime;
 						theCurve.addControlPoint(new FramedCurve.ControlPoint(tt,t));
 						// save the curve
@@ -817,5 +862,28 @@ public class FramedCurveInspector extends JFrame {
 	}
 	public void setWorldSGC(SceneGraphComponent worldSGC) {
 		this.worldSGC = worldSGC;
+	}
+	/**
+	 * @return Returns the worldNode.
+	 */
+	public SceneGraphComponent getWorldNode() {
+		return worldNode;
+	}
+	/**
+	 * @param worldNode The worldNode to set.
+	 */
+	public void setWorldNode(SceneGraphComponent wn) {
+		//worldNode = wn;
+		if (wn != null) {
+			worldNode = wn;
+			moveWorld = true;
+			target = worldNode;
+		}
+		else {
+			moveWorld = false;
+			target = myCameraNode;
+		}
+		System.out.println("setWorldNode: "+moveWorld);
+		// TODO if this is a switch, clean up the old target
 	}
 }

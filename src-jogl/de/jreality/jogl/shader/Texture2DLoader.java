@@ -54,58 +54,58 @@ public abstract class Texture2DLoader {
 											DataBuffer.TYPE_BYTE);
 	}
 
-	public Texture2DJOGL getTexture2D(String name,String resourceName) throws IOException {
-
-		return getTexture2D(name,resourceName,
-						 GL.GL_RGBA,     // dst pixel format
-						 GL.GL_LINEAR, // min filter (unused)
-						 GL.GL_LINEAR, // mag filter (unused)
-						 GL.GL_REPEAT,  // wrap?
-						 false,
-						 true); // mipmap?
-	}
-
-	public Texture2DJOGL getTexture2D(String name, 
-							  String resourceName, 
-							  int dstPixelFormat, 
-							  int minFilter, 
-							  int magFilter, 
-							  int wrap, 
-							  boolean mipmapped,
-							  boolean powerOfTwo) throws IOException 
-	{ 
-		Texture2DJOGL texture = (Texture2DJOGL) table.get(name);
-    
-		if (texture != null)		return texture;
-    
-		System.out.println("Loading texture "+resourceName);
-		 texture = new Texture2DJOGL(name, resourceName); 
- 
-		BufferedImage bufferedImage = loadImage(resourceName); 
-		texture.setBufferedImage(bufferedImage); 
-      
-		// Getting the real Width/Height of the Texture in the Memory
-		int realWidth = bufferedImage.getWidth(); 
-		int realHeight = bufferedImage.getHeight();
-		if (powerOfTwo)	{
-			realWidth = get2Fold(bufferedImage.getWidth()); 
-			realHeight = get2Fold(bufferedImage.getHeight());
-		}
-    
-		texture.setWidth(realWidth);
-		texture.setHeight(realHeight);
-		texture.setWrapMode(wrap);
-		texture.setMinFilter(minFilter);
-		texture.setMagFilter(magFilter);
-    
-		ByteBuffer textureBuffer = convertImageData(bufferedImage,texture); 
-    
-		texture.setByteBuffer(textureBuffer); 
-		table.put(name,texture);
-    
-		return texture;
-		
-	}
+//	public Texture2DJOGL getTexture2D(String name,String resourceName) throws IOException {
+//
+//		return getTexture2D(name,resourceName,
+//						 GL.GL_RGBA,     // dst pixel format
+//						 GL.GL_LINEAR, // min filter (unused)
+//						 GL.GL_LINEAR, // mag filter (unused)
+//						 GL.GL_REPEAT,  // wrap?
+//						 false,
+//						 true); // mipmap?
+//	}
+//
+//	public Texture2DJOGL getTexture2D(String name, 
+//							  String resourceName, 
+//							  int dstPixelFormat, 
+//							  int minFilter, 
+//							  int magFilter, 
+//							  int wrap, 
+//							  boolean mipmapped,
+//							  boolean powerOfTwo) throws IOException 
+//	{ 
+//		Texture2DJOGL texture = (Texture2DJOGL) table.get(name);
+//    
+//		if (texture != null)		return texture;
+//    
+//		System.out.println("Loading texture "+resourceName);
+//		 texture = new Texture2DJOGL(name, resourceName); 
+// 
+//		BufferedImage bufferedImage = loadImage(resourceName); 
+//		texture.setBufferedImage(bufferedImage); 
+//      
+//		// Getting the real Width/Height of the Texture in the Memory
+//		int realWidth = bufferedImage.getWidth(); 
+//		int realHeight = bufferedImage.getHeight();
+//		if (powerOfTwo)	{
+//			realWidth = get2Fold(bufferedImage.getWidth()); 
+//			realHeight = get2Fold(bufferedImage.getHeight());
+//		}
+//    
+//		texture.setWidth(realWidth);
+//		texture.setHeight(realHeight);
+//		texture.setWrapMode(wrap);
+//		texture.setMinFilter(minFilter);
+//		texture.setMagFilter(magFilter);
+//    
+//		ByteBuffer textureBuffer = convertImageData(bufferedImage,texture); 
+//    
+//		texture.setByteBuffer(textureBuffer); 
+//		table.put(name,texture);
+//    
+//		return texture;
+//		
+//	}
    private int get2Fold(int fold) {
 	  int ret = 2;
 	  while (ret < fold) {
@@ -129,7 +129,7 @@ public abstract class Texture2DLoader {
 		return bufferedImage;
 	} 
 	
-	private ByteBuffer convertImageData(BufferedImage bufferedImage,Texture2DJOGL texture) throws IOException 
+	private ByteBuffer convertImageData(BufferedImage bufferedImage) throws IOException 
 	{ 
 		ByteBuffer imageBuffer = null; 
 		WritableRaster raster;
