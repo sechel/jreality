@@ -18,12 +18,12 @@ public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
     
     public void setFaceCountAndAttributes(DataListSet dls) {
         PointSet.setAttrImp(nodeLock, faceAttributes, dls, true);
-        fireGeometryChanged(null, null, dls.keySet(), null);
+        fireGeometryChanged(null, null, dls.storedAttributes(), null);
     }
     
     public void setFaceAttributes(DataListSet dls) {
         PointSet.setAttrImp(nodeLock, faceAttributes, dls, dls.getListLength() != faceAttributes.getListLength());
-        fireGeometryChanged(null, null, dls.keySet(), null);
+        fireGeometryChanged(null, null, dls.storedAttributes(), null);
     }
 
     public void setFaceAttributes(Attribute attr, DataList dl) {
@@ -39,12 +39,12 @@ public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
 
     public void setEdgeCountAndAttributes(DataListSet dls) {
         PointSet.setAttrImp(nodeLock, edgeAttributes, dls, true);
-        fireGeometryChanged(null, dls.keySet(), null, null);
+        fireGeometryChanged(null, dls.storedAttributes(), null, null);
     }
     
     public void setEdgeAttributes(DataListSet dls) {
         PointSet.setAttrImp(nodeLock, edgeAttributes, dls, dls.getListLength() != edgeAttributes.getListLength());
-        fireGeometryChanged(null, dls.keySet(), null, null);
+        fireGeometryChanged(null, dls.storedAttributes(), null, null);
     }
     
     public void setEdgeAttributes(Attribute attr, DataList dl) {
@@ -60,12 +60,12 @@ public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
     
     public void setVertexCountAndAttributes(DataListSet dls) {
         PointSet.setAttrImp(nodeLock, vertexAttributes, dls, true);
-        fireGeometryChanged(dls.keySet(), null, null, null);
+        fireGeometryChanged(dls.storedAttributes(), null, null, null);
     }
     
     public void setVertexAttributes(DataListSet dls) {
         PointSet.setAttrImp(nodeLock, vertexAttributes, dls, dls.getListLength() != vertexAttributes.getListLength());
-        fireGeometryChanged(dls.keySet(), null, null, null);
+        fireGeometryChanged(dls.storedAttributes(), null, null, null);
     }
     
     public void setVertexAttributes(Attribute attr, DataList dl) {

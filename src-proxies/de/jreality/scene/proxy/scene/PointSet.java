@@ -14,12 +14,12 @@ public class PointSet extends de.jreality.scene.PointSet implements
     
     public void setVertexCountAndAttributes(DataListSet dls) {
         PointSet.setAttrImp(nodeLock, vertexAttributes, dls, true);
-        fireGeometryChanged(dls.keySet(), null, null, null);
+        fireGeometryChanged(dls.storedAttributes(), null, null, null);
     }
     
     public void setVertexAttributes(DataListSet dls) {
         PointSet.setAttrImp(nodeLock, vertexAttributes, dls, dls.getListLength() != vertexAttributes.getListLength());
-        fireGeometryChanged(dls.keySet(), null, null, null);
+        fireGeometryChanged(dls.storedAttributes(), null, null, null);
     }
     
     public void setVertexAttributes(Attribute attr, DataList dl) {

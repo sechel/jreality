@@ -13,12 +13,12 @@ public class IndexedLineSet extends de.jreality.scene.IndexedLineSet implements
 
     public void setEdgeCountAndAttributes(DataListSet dls) {
         PointSet.setAttrImp(nodeLock, edgeAttributes, dls, true);
-        fireGeometryChanged(null, dls.keySet(), null, null);
+        fireGeometryChanged(null, dls.storedAttributes(), null, null);
     }
     
     public void setEdgeAttributes(DataListSet dls) {
         PointSet.setAttrImp(nodeLock, edgeAttributes, dls, dls.getListLength() != edgeAttributes.getListLength());
-        fireGeometryChanged(null, dls.keySet(), null, null);
+        fireGeometryChanged(null, dls.storedAttributes(), null, null);
     }
     
     public void setEdgeAttributes(Attribute attr, DataList dl) {
@@ -34,12 +34,12 @@ public class IndexedLineSet extends de.jreality.scene.IndexedLineSet implements
     
     public void setVertexCountAndAttributes(DataListSet dls) {
         PointSet.setAttrImp(nodeLock, vertexAttributes, dls, true);
-        fireGeometryChanged(dls.keySet(), null, null, null);
+        fireGeometryChanged(dls.storedAttributes(), null, null, null);
     }
     
     public void setVertexAttributes(DataListSet dls) {
         PointSet.setAttrImp(nodeLock, vertexAttributes, dls, dls.getListLength() != vertexAttributes.getListLength());
-        fireGeometryChanged(dls.keySet(), null, null, null);
+        fireGeometryChanged(dls.storedAttributes(), null, null, null);
     }
     
     public void setVertexAttributes(Attribute attr, DataList dl) {
