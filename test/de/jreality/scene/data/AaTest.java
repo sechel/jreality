@@ -36,24 +36,28 @@ public class AaTest extends TestCase {
     }
 
     public void testNormal() throws Exception {
-        int runCre=200, runAc=1000, runSer=100, runOv=1000;
-        CatenoidHelicoid ch = new CatenoidHelicoid(40);
+        int runCre=0, runAc=0, 
+        runSer=500, runOv=0,
+        completeRuns=5;
+        CatenoidHelicoid ch = new CatenoidHelicoid(50);
         double[][] data = GeometryUtility.calculateVertexNormals(ch);
-        runCreate(data, runCre);
         DaaNormal daan = new DaaNormal(data);
         DaaInlined daai = new DaaInlined(data);
         DaaInlinedNIO daaib = new DaaInlinedNIO(data);
         assertEquals(daan, daai);
         assertEquals(daan, daaib);
-        runOverwrite(daan, data, runOv);
-        runOverwrite(daai, data, runOv);
-        runOverwrite(daaib, data, runOv);
-        runAccess(daan, runAc);
-        runAccess(daai, runAc);
-        runAccess(daaib, runAc);
-        runSerialize(daan, runSer);
-        runSerialize(daai, runSer);
-        runSerialize(daaib, runSer);
+        for (int i = 0; i < completeRuns; i++) {
+            runCreate(data, runCre);
+            runOverwrite(daan, daaib, runOv);
+            runOverwrite(daai, daaib, runOv);
+            runOverwrite(daaib, daaib, runOv);
+            runAccess(daan, runAc);
+            runAccess(daai, runAc);
+            runAccess(daaib, runAc);
+            runSerialize(daan, runSer);
+            runSerialize(daai, runSer);
+            runSerialize(daaib, runSer);
+        }
     }
     
     private void runCreate(double[][] array, int runs) {
@@ -147,14 +151,14 @@ public class AaTest extends TestCase {
         }
         System.out.println("\tserial="+(cts/((double)runs))+" deser="+(ctd/((double)runs)));
     }
-    public void runOverwrite(Daa array, double[][] data, int runs) throws Exception {
+    public void runOverwrite(Daa target, Daa src, int runs) throws Exception {
         if (runs == 0) return;
-        System.out.println(array.getClass().getName());
+        System.out.println(target.getClass().getName());
         long cts=0;
         long s,t;
         for (int i = 0; i < runs; i++) {
             s = System.currentTimeMillis();
-            array.overwriteData(data);
+            target.overwriteData(src);
             t = System.currentTimeMillis() - s;
             cts+=t;
         }

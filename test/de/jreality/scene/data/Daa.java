@@ -35,7 +35,7 @@ public abstract class Daa implements Serializable {
     
     public abstract int getLengthAt(int n);
     public abstract double getValueAt(int n, int i);
-    public abstract void setValueAt(int n, int j, double d);
+    protected abstract void setValueAt(int n, int j, double d);
 
     public final int getLength() {
         return length;
@@ -51,9 +51,9 @@ public abstract class Daa implements Serializable {
         }
         return true;
     }
-    public final void overwriteData(double[][] d) {
+    public final void overwriteData(Daa d) {
         for (int i = 0; i < d.length; i++)
             for(int j=0; j < getLengthAt(i); j++)
-                setValueAt(i, j, d[j][j]);
+                setValueAt(i, j, d.getValueAt(i, j));
     }
 }

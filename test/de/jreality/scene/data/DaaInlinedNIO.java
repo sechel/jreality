@@ -87,7 +87,7 @@ public final class DaaInlinedNIO extends Daa {
     {
       return data.get(getIndex(n, i));
     }
-    public void setValueAt(int n, int j, double d) {
+    protected void setValueAt(int n, int j, double d) {
         data.put(getIndex(n, j), d);
     }
     private int getIndex(int n, int i) {
@@ -95,32 +95,24 @@ public final class DaaInlinedNIO extends Daa {
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-//        System.out.println("DaaInlinedNIO.writeObject()");
         out.writeInt(offsetsBuf.limit());
-//        System.out.println("DaaInlinedNIO.writeObject() offsetsSize="+offsets.limit());
         Channels.newChannel(out).write(offsetsBuf);
         offsetsBuf.clear();
         out.writeInt(dataBuf.limit());
-//        System.out.println("DaaInlinedNIO.writeObject() dataSize="+data.limit());
         Channels.newChannel(out).write(dataBuf);
         dataBuf.clear();
     }
-//    
+
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-//        System.out.println("DaaInlinedNIO.readObject()");
         final int offsetsLength = in.readInt();
         offsetsBuf = ByteBuffer.allocateDirect(offsetsLength).order(ByteOrder.nativeOrder());
         Channels.newChannel(in).read(offsetsBuf);
         offsetsBuf.flip();
         offsets = offsetsBuf.asIntBuffer();
-//        System.out.println(offsetsBuf);
-//        System.out.println(offsets);
         final int dataLength = in.readInt();
         dataBuf = ByteBuffer.allocateDirect(dataLength).order(ByteOrder.nativeOrder());
         Channels.newChannel(in).read(dataBuf);
         dataBuf.flip();
         data = dataBuf.asDoubleBuffer();
-//        System.out.println(dataBuf);
-//        System.out.println(data);
     }
 }

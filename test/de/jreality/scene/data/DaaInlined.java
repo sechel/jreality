@@ -22,6 +22,14 @@
  */
 package de.jreality.scene.data;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
+import java.nio.IntBuffer;
+import java.nio.channels.Channels;
+
 
 /**
  *
@@ -32,8 +40,15 @@ package de.jreality.scene.data;
  */
 public final class DaaInlined extends Daa{
 
-    final double[] data;
-    final int[] offsets;
+    double[] data;
+    int[] offsets;
+
+    static ByteBuffer dataBuf_out;
+    static ByteBuffer dataBuf_in;
+    static DoubleBuffer dataSER;
+    static ByteBuffer offsetsBuf_out;
+    static ByteBuffer offsetsBuf_in;
+    static IntBuffer offsetsSER;
 
     private static Object[] decompose(final double[][] initialData) {
         Object[] ret = new Object[2];
@@ -78,7 +93,42 @@ public final class DaaInlined extends Daa{
         return offsets[n]+i;
     }
 
-    public void setValueAt(int n, int j, double d) {
+    protected void setValueAt(int n, int j, double d) {
         data[getIndex(n, j)] = d;
+    }
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        final int lengthOffset = offsets.length*4;
+        if (offsetsBuf_out == null || offsetsBuf_out.capacity() < lengthOffset) {
+            offsetsBuf_out = ByteBuffer.allocateDirect(lengthOffset).order(ByteOrder.nativeOrder());
+        }
+        offsetsBuf_out.asIntBuffer().put(offsets);
+        out.writeInt(lengthOffset);
+        Channels.newChannel(out).write(offsetsBuf_out);
+        offsetsBuf_out.clear();
+        
+        final int lengthData = data.length*8;
+        if (dataBuf_out == null || dataBuf_out.capacity() < lengthData) {
+            dataBuf_out = ByteBuffer.allocateDirect(lengthData).order(ByteOrder.nativeOrder());
+        }
+        dataBuf_out.asDoubleBuffer().put(data);
+        out.writeInt(lengthData);
+        Channels.newChannel(out).write(dataBuf_out);
+        dataBuf_out.clear();
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        final int offsetsLength = in.readInt();
+        if (offsetsBuf_in == null || offsetsBuf_in.capacity() < offsetsLength)
+            offsetsBuf_in = ByteBuffer.allocateDirect(offsetsLength).order(ByteOrder.nativeOrder());
+        Channels.newChannel(in).read(offsetsBuf_in);
+        offsetsBuf_in.flip();
+        offsetsBuf_in.asIntBuffer().get(offsets=new int[offsetsLength/4]);
+        
+        final int dataLength = in.readInt();
+        if (dataBuf_in == null || dataBuf_in.capacity() < dataLength)
+            dataBuf_in = ByteBuffer.allocateDirect(dataLength).order(ByteOrder.nativeOrder());
+        Channels.newChannel(in).read(dataBuf_in);
+        dataBuf_in.flip();
+        dataBuf_in.asDoubleBuffer().get(data=new double[dataLength/8]);
     }
 }
