@@ -45,7 +45,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	HelpOverlay helpOverlay;
 	
 	static String OSName = null;
-	static boolean multiSample = true, newBackend = true;
+	static boolean multiSample = false, newBackend = true;
 	static {
 		String foo = System.getProperty("jreality.jogl.newBackend");
 		if (foo != null) 
