@@ -122,7 +122,7 @@ public class InteractiveViewerDemo extends JFrame{
 			v2.initializeFrom(viewer);
 			splitPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, false, viewer.getViewingComponent(),v2.getViewingComponent());
 			splitPanel.setDividerLocation(0.5d);
-			setSize(800, 400);	
+			//setSize(800, 400);	
 			getContentPane().add(splitPanel, BorderLayout.CENTER);			
 		} else if (mode == TABBED_PANE){
 			tabbedPane = new JTabbedPane();
@@ -259,6 +259,16 @@ public class InteractiveViewerDemo extends JFrame{
 			public void actionPerformed(ActionEvent e)	{
 				showInspector = !showInspector;
 				toggleInspection();
+			}
+		});
+		jcc = new JCheckBoxMenuItem("New Viewer");
+		jcc.setSelected(showInspector);
+		testM.add(jcc);
+		jcc.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent e)	{
+				InteractiveViewer iv = new InteractiveViewer();
+				iv.initializeFrom(viewer);
+				addViewer(iv, "testing");
 			}
 		});
 		theMenuBar.add(testM);

@@ -42,6 +42,16 @@ public class TestSoftAndJOGLViewersDemo extends InteractiveViewerDemo {
 		/*	
 		*/
 	
+		/**
+	 * @param tabbed_pane
+	 * @param b
+	 */
+	public TestSoftAndJOGLViewersDemo(int tabbed_pane, boolean b) {
+		
+		super(tabbed_pane, b);
+	}
+
+
 		public SceneGraphComponent makeWorld()	{
 			SceneGraphComponent theRow;
 			//Cube ico = new Cube();
@@ -110,7 +120,7 @@ public class TestSoftAndJOGLViewersDemo extends InteractiveViewerDemo {
 		public boolean addBackPlane()	{return false; }
 		
 		public static void main(String argv[])	{
-			TestSoftAndJOGLViewersDemo test = new TestSoftAndJOGLViewersDemo();
+			TestSoftAndJOGLViewersDemo test = new TestSoftAndJOGLViewersDemo(InteractiveViewerDemo.TABBED_PANE, false);
 			test.begin();
 		}
 	
