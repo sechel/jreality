@@ -14,7 +14,6 @@ import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.Torus;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.DiscreteSpaceCurve;
-import de.jreality.jogl.shader.DefaultMaterialShader;
 import de.jreality.reader.Parser3DS;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
@@ -60,8 +59,8 @@ public class StandardDemo implements LoadableScene {
 		gt.setStretch(.3);
 		globeNode1.setTransformation(gt);
 	   Appearance ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.RED);
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.BLACK);
+	   ap1.setAttribute(CommonAttributes.DIFFUSE_COLOR, java.awt.Color.RED);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.BLACK);
 	   ap1.setAttribute(CommonAttributes.LIGHTING_ENABLED,true);
 	   ap1.setAttribute(CommonAttributes.SMOOTH_SHADING,false);
 	   ap1.setAttribute(CommonAttributes.EDGE_DRAW,false);
@@ -89,7 +88,7 @@ public class StandardDemo implements LoadableScene {
 		globeNode2.setGeometry(catHel);
 		//globeNode2.setGeometry(globeSet);
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.PURPLE);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.red);
 	   ap1.setAttribute(CommonAttributes.LINE_WIDTH,2.0);
 	   ap1.setAttribute(CommonAttributes.DIFFUSE_COLOR,new java.awt.Color(.2f, .5f, .5f, 1f));
 	   ap1.setAttribute(CommonAttributes.FACE_DRAW,true);
@@ -113,7 +112,7 @@ public class StandardDemo implements LoadableScene {
 		globeNode3.setTransformation(gt);
 		globeNode3.setGeometry(catHel);
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.WHITE);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
 	   ap1.setAttribute(CommonAttributes.LINE_WIDTH,2.0);
 	   ap1.setAttribute(CommonAttributes.POINT_RADIUS,3.0);
 	   ap1.setAttribute(CommonAttributes.EDGE_DRAW,true);
@@ -137,8 +136,8 @@ public class StandardDemo implements LoadableScene {
 	   //globeNode4.setGeometry(torus1);
 	   globeNode4.setGeometry(tube);
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.BLUE);
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.BLACK);
+	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.BLUE);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.BLACK);
 	   ap1.setAttribute(CommonAttributes.LINE_WIDTH,1.0);
 	   ap1.setAttribute(CommonAttributes.POINT_RADIUS,3.0);
 	   ap1.setAttribute(CommonAttributes.FACE_DRAW,true);
@@ -161,7 +160,7 @@ public class StandardDemo implements LoadableScene {
 	   globeNode5.setTransformation(gt);
 	   globeNode5.setGeometry(torus);
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.YELLOW);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.YELLOW);
 	   ap1.setAttribute(CommonAttributes.FACE_DRAW,false);
 	   ap1.setAttribute(CommonAttributes.EDGE_DRAW,true);
 	   ap1.setAttribute(CommonAttributes.LIGHTING_ENABLED,false);

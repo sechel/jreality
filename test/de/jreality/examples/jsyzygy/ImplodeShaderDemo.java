@@ -12,7 +12,6 @@ import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.geometry.Torus;
 import de.jreality.geometry.WingedEdge;
 import de.jreality.jogl.DiscreteSpaceCurve;
-import de.jreality.jogl.shader.DefaultMaterialShader;
 import de.jreality.jsyzygy.JsyzygyViewer;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
@@ -34,7 +33,7 @@ public class ImplodeShaderDemo {
 	root.setAppearance(ap1);
 	root.getAppearance().setAttribute("normalScale",0.05);
 	// root.getAppearance().setAttribute("faceShader.diffuseColor", java.awt.Color.GREEN);
-	root.getAppearance().setAttribute(CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.GREEN);
+	root.getAppearance().setAttribute(CommonAttributes.DIFFUSE_COLOR, java.awt.Color.green);
 	for (int i = 0; i< 5; ++i)	{
 		Torus torus= new Torus(0.5, 0.3, 20, 30);
 	    //CatenoidHelicoid torus = new CatenoidHelicoid(20);
@@ -99,8 +98,8 @@ public class ImplodeShaderDemo {
 		gt.setStretch(.3);
 		globeNode1.setTransformation(gt);
 	   Appearance ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.RED);
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.BLACK);
+	   ap1.setAttribute(CommonAttributes.DIFFUSE_COLOR, java.awt.Color.RED);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.BLACK);
 	   ap1.setAttribute(CommonAttributes.LIGHTING_ENABLED,true);
 	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING,true);
 	   ap1.setAttribute(CommonAttributes.EDGE_DRAW,false);
@@ -126,7 +125,7 @@ public class ImplodeShaderDemo {
 		globeNode2.setTransformation(gt);
 		globeNode2.setGeometry(globeSet);
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.PURPLE);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.red);
 	   ap1.setAttribute(CommonAttributes.LINE_WIDTH,2.0);
 	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,new java.awt.Color(.2f, .5f, .5f, 1f));
 	   ap1.setAttribute(CommonAttributes.FACE_DRAW,true);
@@ -150,7 +149,7 @@ public class ImplodeShaderDemo {
 		globeNode3.setTransformation(gt);
 		globeNode3.setGeometry(globeSet);
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.WHITE);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
 	   ap1.setAttribute(CommonAttributes.LINE_WIDTH,2.0);
 	   ap1.setAttribute(CommonAttributes.POINT_RADIUS,3.0);
 	   ap1.setAttribute(CommonAttributes.EDGE_DRAW,true);
@@ -174,8 +173,8 @@ public class ImplodeShaderDemo {
 	   globeNode4.setTransformation(gt);
 	   globeNode4.setGeometry(torus1);
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.BLUE);
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.GREEN);
+	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.BLUE);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.GREEN);
 	   ap1.setAttribute(CommonAttributes.LINE_WIDTH,1.0);
 	   ap1.setAttribute(CommonAttributes.POINT_RADIUS,3.0);
 	   ap1.setAttribute(CommonAttributes.FACE_DRAW,false);
@@ -200,7 +199,7 @@ public class ImplodeShaderDemo {
 	   globeNode5.setTransformation(gt);
 	   globeNode5.setGeometry(torus);
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.YELLOW);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.YELLOW);
 	   ap1.setAttribute(CommonAttributes.FACE_DRAW,false);
 	   ap1.setAttribute(CommonAttributes.EDGE_DRAW,true);
 	   ap1.setAttribute(CommonAttributes.LIGHTING_ENABLED,false);
@@ -217,7 +216,7 @@ public class ImplodeShaderDemo {
 	   gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
 	   gt.setStretch(.3);
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.BLUE);
+	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.BLUE);
 	   globeNode6.setTransformation(gt);
 	   globeNode6.setGeometry(torus);
 	   globeNode6.setAppearance(ap1);
