@@ -40,13 +40,14 @@ import de.jreality.util.*;
 public class HeadtrackedRemoteViewerImp extends RemoteViewerImp implements
         HeadtrackedRemoteViewer {
 
-    protected SceneGraphComponent cameraTranslationNode,
-    cameraOrientationNode, root, navigationNode;
+    protected SceneGraphComponent 
+        cameraTranslationNode,
+        cameraOrientationNode,
+        root;
 
-    String hostname;
+    protected String hostname;
 
     static double[] correction;
-    
     static {
         double[] axis = ConfigurationAttributes.getSharedConfiguration().getDoubleArray("camera.correction.axis");
         double angle = ConfigurationAttributes.getSharedConfiguration().getDouble("camera.correction.angle");
@@ -56,13 +57,15 @@ public class HeadtrackedRemoteViewerImp extends RemoteViewerImp implements
 
     HeadtrackedRemoteViewerImp(Viewer viewer) {
         super(viewer);
-        this.config = ConfigurationAttributes.getSharedConfiguration();
+        
+        // disable vertex draw for performance
         if (viewer.getSceneRoot().getAppearance() == null)
             viewer.getSceneRoot().setAppearance(new Appearance());
         viewer.getSceneRoot().getAppearance().setAttribute(
                 CommonAttributes.SMOOTH_SHADING, true);
         viewer.getSceneRoot().getAppearance().setAttribute(
                 CommonAttributes.VERTEX_DRAW, false);
+        
         // insert an extra transform in the camera path
         // This will handle the translation based on the tracked position
         // The "camera node" itself contains only the orientation rotation
@@ -70,37 +73,30 @@ public class HeadtrackedRemoteViewerImp extends RemoteViewerImp implements
         // It may be possible to combine these two transformations into
         // a single node but for now we separate them for the sake of
         // clarity.
-//        hostname = INetUtilities.getHostname();
-//        viewer.getSceneRoot().setName(hostname+" root");
-//        CameraUtility.getCameraNode(viewer).setName("camNode");
-//        CameraUtility.getCameraNode(viewer).getCamera().setName("camera");
-//        System.out.println("orig. cam path:"+viewer.getCameraPath().toString());
-//        
-//        cameraTranslationNode = CameraUtility.getCameraNode(viewer);
-//        cameraTranslationNode.setTransformation(new Transformation());
-//        cameraTranslationNode.addChild(makeLights());
-//        Camera cam = cameraTranslationNode.getCamera();
-//        cam.setNear(.1);
-//        cameraTranslationNode.setCamera(null);
-//        cameraOrientationNode = SceneGraphUtilities
-//                .createFullSceneGraphComponent(hostname + "CameraNode");
-//        cameraTranslationNode.addChild(cameraOrientationNode);
-//        cameraOrientationNode.setCamera(cam);
-//        // lengthen the camera path
-//        viewer.getCameraPath().pop();
-//        viewer.getCameraPath().push(cameraOrientationNode);
-//        viewer.getCameraPath().push(cam);
-//        viewer.setCameraPath(viewer.getCameraPath());
-//        //initCameraOrientation();
-//        System.out.println("new cam path:"+viewer.getCameraPath().toString());
-        viewer.getSceneRoot().getAppearance().setAttribute(
-                CommonAttributes.BACKGROUND_COLOR, Color.DARK_GRAY);
-        navigationNode = new SceneGraphComponent();
-        navigationNode.setTransformation(new Transformation());
-        viewer.getSceneRoot().addChild(navigationNode);
-
+        hostname = INetUtilities.getHostname();
+        viewer.getSceneRoot().setName(hostname+" root");
+        CameraUtility.getCameraNode(viewer).setName("camNode");
+        CameraUtility.getCameraNode(viewer).getCamera().setName("camera");
+        System.out.println("orig. cam path:"+viewer.getCameraPath().toString());
+        cameraTranslationNode = CameraUtility.getCameraNode(viewer);
+        cameraTranslationNode.setTransformation(new Transformation());
+        cameraTranslationNode.addChild(makeLights());
+        Camera cam = cameraTranslationNode.getCamera();
+        cam.setNear(.1);
+        cameraTranslationNode.setCamera(null);
+        cameraOrientationNode = SceneGraphUtilities
+                .createFullSceneGraphComponent(hostname + "CameraNode");
+        cameraTranslationNode.addChild(cameraOrientationNode);
+        cameraOrientationNode.setCamera(cam);
+        // lengthen the camera path
+        viewer.getCameraPath().pop();
+        viewer.getCameraPath().push(cameraOrientationNode);
+        viewer.getCameraPath().push(cam);
+        viewer.setCameraPath(viewer.getCameraPath());
+        initCameraOrientation();
         CameraUtility.getCamera(viewer).setOnAxis(false);
-        
+        System.out.println("new cam path:"+viewer.getCameraPath().toString());
+                
 //      if (config.getBool("portal.fixedHead")) {
 //          fixedHead = true;
 //          Transformation t = new Transformation();
@@ -127,42 +123,37 @@ public class HeadtrackedRemoteViewerImp extends RemoteViewerImp implements
 
     public void setRemoteSceneRoot(RemoteSceneGraphComponent r) {
         if (root != null) viewer.getSceneRoot().removeChild(root);
-        if (r != null) { 
+        root = (SceneGraphComponent) r;
+        if (root != null) { 
             System.out.println("setting scene root to: "+r);
-            viewer.getSceneRoot().addChild((SceneGraphComponent) r);
+            viewer.getSceneRoot().addChild(root);
         }
-        else root = null;
     }
 
     Transformation t = new Transformation();
-    /**
-     * 
-     * @param t current head || camera position
-     * @throws RemoteException
-     */
+    double[] tmp = new double[16];
+    double[] totalOrientation = new double[16]; 
     public void sendHeadTransformation(double[] tm) {
         t.setMatrix(tm);
         //TODO move sensor between the eyes
         Camera cam = CameraUtility.getCamera(viewer);
         cameraTranslationNode.getTransformation().setTranslation(
                 t.getTranslation());
-        double[] tmp = Rn.times(null, t.getMatrix(), correction);
-        double[] totalOrientation = Rn.times(null, Rn.inverse(null,
+        Rn.times(tmp, t.getMatrix(), correction);
+        Rn.times(totalOrientation, Rn.inverse(null,
                 cameraOrientationNode.getTransformation().getMatrix()), tmp);
         cam.setOrientationMatrix(totalOrientation);
         cam.setViewPort(CameraUtility.calculatePORTALViewport(viewer, t));
     }
     
+    //TODO: throw away this method
     private SceneGraphComponent makeLights()    {
         SceneGraphComponent lights = new SceneGraphComponent();
         lights.setName("lights");
         SpotLight pl = new SpotLight();
-        //PointLight pl = new PointLight();
-        //DirectionalLight pl = new DirectionalLight();
         pl.setFalloff(1.0, 0.0, 0.0);
         pl.setColor(new Color(120, 250, 180));
         pl.setConeAngle(Math.PI);
-
         pl.setIntensity(0.6);
         SceneGraphComponent l0 = SceneGraphUtilities.createFullSceneGraphComponent("light0");
         l0.setLight(pl);
@@ -176,7 +167,6 @@ public class HeadtrackedRemoteViewerImp extends RemoteViewerImp implements
         l0.getTransformation().setMatrix( P3.makeRotationMatrix(null, zaxis, other));
         l0.setLight(dl);
         lights.addChild(l0);
-        
         return lights;
     }
 

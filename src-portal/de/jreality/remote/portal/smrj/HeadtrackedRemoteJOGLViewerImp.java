@@ -54,7 +54,7 @@ public class HeadtrackedRemoteJOGLViewerImp extends HeadtrackedRemoteViewerImp i
         super(new de.jreality.jogl.InteractiveViewer());
         getViewer().setStereoType(de.jreality.jogl.Viewer.CROSS_EYED_STEREO);
         getViewer().getHelpOverlay().setVisible(config.getBool("viewer.showFPS"));
-        getViewer().setAutoSwapMode(true); //config.getBool("viewer.autoBufferSwap"));
+        getViewer().setAutoSwapMode(config.getBool("viewer.autoBufferSwap"));
     }
     private InteractiveViewer getViewer() {
         return (InteractiveViewer) viewer;
@@ -73,33 +73,6 @@ public class HeadtrackedRemoteJOGLViewerImp extends HeadtrackedRemoteViewerImp i
     }
     public void setBackgroundColor(java.awt.Color color) {
         getViewer().setBackgroundColor(color);
-    }
-    
-    
-    // just to test if the viewer draws something or not
-    
-    public void loadWorld(String classname) {
-        long t = System.currentTimeMillis();
-        LoadableScene wm = null;
-        try {
-            wm = (LoadableScene) Class.forName(classname).newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        // scene settings
-        wm.setConfiguration(ConfigurationAttributes.getSharedConfiguration());
-        de.jreality.scene.SceneGraphComponent world = wm.makeWorld();
-        long s = System.currentTimeMillis() - t;
-        System.out.println("make world " + classname + " successful. ["+s+"ms]");
-        setSignature(wm.getSignature());
-        t = System.currentTimeMillis();
-        if (world != null) viewer.getSceneRoot().addChild(world);
-        s = System.currentTimeMillis() - t;
-    }
-
-    public static void main(String[] args) throws Exception {
-        HeadtrackedRemoteJOGLViewerImp rsi = getInstance();
-        rsi.loadWorld(args[0]);
     }
    
 }
