@@ -117,7 +117,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 	public JOGLRenderer(de.jreality.jogl.Viewer viewer) {
 		super();
 		theViewer = viewer;
-		gc  = new Graphics3D(viewer);
 		theCanvas = ((GLCanvas) viewer.getViewingComponent());
 		theRoot = viewer.getSceneRoot();
 		useDisplayLists = true;
@@ -158,6 +157,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 			thePeerRoot = (JOGLPeerComponent) constructPeer.visit();	
 		}
 		
+		gc  = new Graphics3D(theViewer);
 		JOGLRendererHelper.initializeGLState(theCanvas);
 		
 		globalGL.glMatrixMode(GL.GL_PROJECTION);
@@ -272,6 +272,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 		
 		otime = System.currentTimeMillis();
 
+		if (CameraUtility.getCamera(theViewer) == null || theCanvas == null) return;
 		CameraUtility.getCamera(theViewer).setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
 		globalGL.glViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
 

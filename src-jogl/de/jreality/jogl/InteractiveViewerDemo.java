@@ -170,10 +170,10 @@ public abstract class InteractiveViewerDemo extends JFrame{
 	public void begin()	{
 		SceneGraphComponent root = viewer.getSceneRoot();
 		if (root.getAppearance() == null) root.setAppearance(new Appearance());
+		CommonAttributes.setDefaultValues(root.getAppearance());
 		root.getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR,CommonAttributes.BACKGROUND_COLOR_DEFAULT);
 		root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
 		root.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
-		CommonAttributes.setDefaultValues(root.getAppearance());
 
 		CameraUtility.getCamera(viewer).setSignature(getSignature());
 		CameraUtility.getCamera(viewer).reset();
