@@ -316,8 +316,10 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 		//if (pickMode) return;
 		long beginTime = 0;
 		if (collectFrameRate) beginTime = System.currentTimeMillis();
-		theCanvas = (GLCanvas) drawable;
-		globalGL = theCanvas.getGL();
+		// following two statements should be redundant: they occur in init() which
+		// gets called exactly once during the life of a context
+		//theCanvas = (GLCanvas) drawable;
+		//globalGL = theCanvas.getGL();
 		Camera theCamera = CameraUtility.getCamera(theViewer);
 
 		//theCamera.update();
@@ -729,7 +731,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 				boolean ss = geometryShader.polygonShader.isSmoothShading();
 				// TODO figure out which sphere proxy to use based on distance, LOD, etc
 				
-				int dlist = JOGLSphereHelper.getSphereDLists(2, globalHandle.theCanvas.getGL());
+				int dlist = sphereDisplayLists[2];
 				if (pickMode) globalGL.glPushName(10000);
 				globalGL.glCallList(dlist);
 				if (pickMode) globalGL.glPopName();

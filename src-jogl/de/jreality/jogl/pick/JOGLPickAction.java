@@ -36,7 +36,7 @@ import de.jreality.util.Rn;
  */
 public class JOGLPickAction extends PickAction  {
 	
-	static boolean useOpenGL = false;
+	static boolean useOpenGL = true;
 	
 	public JOGLPickAction(Viewer v) {
 		super(v);

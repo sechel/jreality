@@ -59,7 +59,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 
 	public boolean encompass()	{ return false; }
 	ConfigurationAttributes config = null;
-	String configResourceDir = "/central/home/weissman/jReality/";
+	String configResourceDir = "/Users/gunn/Software/eclipse/workspace/jReality/";
 	/* (non-Javadoc)
 	 * @see de.jreality.portal.WorldMaker#setConfiguration(de.jreality.portal.util.Configuration)
 	 */

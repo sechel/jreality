@@ -15,6 +15,7 @@ import de.jreality.jogl.HelpOverlay;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.Pn;
 import de.jreality.util.Quaternion;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.Rn;
@@ -48,7 +49,11 @@ public class RotateShapeTool extends AbstractShapeTool {
 		double[] objectToWorld = selection.getMatrix(null);
 		theRotator.setObjectToCamera(Rn.times(null, worldToCamera, objectToWorld));
 		isTracking = true;
-		if (button == 1)	{
+		// TODO figure out a better strategy for setting the center of the rotation:
+		// current version makes an effort to determine if it's sensible or not
+		// but you want to have finer control over this.  E.g., you may want to use
+		// the current pick point as the center, etc.
+		if (button == 1 && theEditedTransform.getSignature() != Pn.ELLIPTIC)	{
 			Rectangle3D bbox = GeometryUtility.calculateChildrenBoundingBox((SceneGraphComponent) theEditedNode);
 			myTransform.setCenter(bbox.getCenter()); 
 		}  else myTransform.setCenter(theEditedTransform.getCenter());
