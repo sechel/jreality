@@ -36,6 +36,7 @@ public class DefaultPolygonShader implements PolygonShader {
 	
 	boolean		smoothShading = true; 		// interpolate shaded values between vertices
 	Texture2D texture2D;
+  Texture2D lightMap;
 	ReflectionMap reflectionMap;
 	int frontBack = FRONT_AND_BACK;
 	public VertexShader vertexShader = null;
@@ -65,6 +66,8 @@ public class DefaultPolygonShader implements PolygonShader {
 		if (foo instanceof Texture2D)	texture2D = (Texture2D) foo;
 		foo = eap.getAttribute(NameSpace.name(name,"reflectionMap"), null, ReflectionMap.class);
 		if (foo instanceof ReflectionMap)	reflectionMap = (ReflectionMap) foo;
+    foo = eap.getAttribute(NameSpace.name(name,"lightMap"), null, Texture2D.class);
+    if (foo instanceof Texture2D) lightMap = (Texture2D) foo;
 	
 		//TODO this is a hack. 
 		if (eap.getAttribute(NameSpace.name(name,"useGLShader"), false) == true)	{
@@ -151,6 +154,14 @@ public class DefaultPolygonShader implements PolygonShader {
 			if (res[0] == 0)	{ jr.texResident = false; }
 			gl.glEnable(GL.GL_TEXTURE_2D);
 		} //else
+    if (lightMap != null)  {
+        Texture2DLoaderJOGL.render(theCanvas, lightMap, 1);
+        //int[] res = new int[2];
+        //gl.glGetTexParameteriv(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_RESIDENT, res);
+        //System.out.println("Texture is resident: "+res[0]);
+        //if (res[0] == 0)    { jr.texResident = false; }
+        gl.glEnable(GL.GL_TEXTURE_2D);
+    } //else
 		if (reflectionMap != null)	{
 			gl.glActiveTexture(texUnit);
 			texUnit++;

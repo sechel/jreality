@@ -298,7 +298,8 @@ public class JOGLRendererHelper {
 		DataList faceNormals = sg.getFaceAttributes(Attribute.NORMALS);
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
 		DataList faceColors = sg.getFaceAttributes(Attribute.COLORS);
-		DataList texCoords = sg.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+    DataList texCoords = sg.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+    DataList lightMapCoords = sg.getVertexAttributes(Attribute.attributeForName("lightmap coordinates"));
 		//System.out.println("Vertex normals are: "+((vertexNormals != null) ? vertexNormals.size() : 0));
 		//System.out.println("alpha value is "+alpha);
 		
@@ -398,8 +399,16 @@ public class JOGLRendererHelper {
 						}
 						if (texCoords != null)	 {
 							da = texCoords.item(vnn).toDoubleArray();
-							gl.glTexCoord2d(da.getValueAt(0), da.getValueAt(1));
+              gl.glMultiTexCoord2d(GL.GL_TEXTURE0, da.getValueAt(0), da.getValueAt(1));
+							//gl.glTexCoord2d(da.getValueAt(0), da.getValueAt(1));
 						}
+            if (lightMapCoords != null) {
+                da = lightMapCoords.item(vnn).toDoubleArray();
+                gl.glMultiTexCoord2d(GL.GL_TEXTURE1, da
+                        .getValueAt(0), da.getValueAt(1));
+                //gl.glTexCoord2d(da.getValueAt(0),
+                // da.getValueAt(1));
+            }
 						da = vertices.item(vnn).toDoubleArray();
 						if (vertexLength == 1)	{		// Regular domain quad mesh
 							double z = da.getValueAt(0);
@@ -454,8 +463,13 @@ public class JOGLRendererHelper {
 				}
 				if (texCoords != null)	 {
 					da = texCoords.item(k).toDoubleArray();
-					gl.glTexCoord2d(da.getValueAt(0), da.getValueAt(1));
+          gl.glMultiTexCoord2d(GL.GL_TEXTURE0, da.getValueAt(0), da.getValueAt(1));
+//					gl.glTexCoord2d(da.getValueAt(0), da.getValueAt(1));
 				}
+        if (lightMapCoords != null) {
+            da = lightMapCoords.item(k).toDoubleArray();
+            gl.glMultiTexCoord2d(GL.GL_TEXTURE1, da.getValueAt(0), da.getValueAt(1));
+        }
 				da = vertices.item(k).toDoubleArray();
 				if (vertexLength == 3) gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 				else if (vertexLength == 4) gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
@@ -522,6 +536,7 @@ public class JOGLRendererHelper {
 			gl.glRasterPos3d(objectVerts[i][0], objectVerts[i][1], objectVerts[i][2]);
 			gl.glGetFloatv(GL.GL_CURRENT_RASTER_POSITION, cras);
 			for (int j = 0; j<4; ++j) dras[j] = cras[j];
+      // TODO This is not available on ATI graphics card!      
 			gl.glWindowPos3d(screenVerts[i][0]+screenOffset[0], screenVerts[i][1] +screenOffset[1], screenVerts[i][2]+screenOffset[2]);
 			String label = (labels == null) ? Integer.toString(i) : labels[i];
 			//bitmapFont = 2 + (i%6);

@@ -41,12 +41,15 @@ public class Texture2DLoaderJOGL {
 		if (texid == null) return -1;
 		return texid.intValue();
 	}
-	/**
+        
+  /**
 	 * @param theCanvas
 	 * @param tex
 	 */
 	public static void render(GLCanvas drawable, Texture2D tex) {
-	
+        render(drawable, tex, 0);
+    }
+  public static void render(GLCanvas drawable, Texture2D tex, int level) {
 			boolean first = true;
 			boolean mipmapped = true;
 			GL gl = drawable.getGL();
@@ -62,8 +65,9 @@ public class Texture2DLoaderJOGL {
 				textureID = createTextureID(gl); 
 				ht.put(tex, new Integer(textureID));
 			}
+      gl.glActiveTexture(GL.GL_TEXTURE0+level);
 			gl.glBindTexture(GL.GL_TEXTURE_2D, textureID); 			
-			int srcPixelFormat =  GL.GL_RGBA;  
+			int srcPixelFormat =  GL.GL_RGBA;
 			handleTextureParameters(tex, gl);
 
 			byte[] data = tex.getByteArray();
@@ -114,7 +118,7 @@ public class Texture2DLoaderJOGL {
 		if (tex.getApplyMode() == Texture2D.GL_COMBINE) 
 		{
 			gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_COMBINE);
-			gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, GL.GL_INTERPOLATE);
+			gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, tex.getCombineMode());
 			gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE0_RGB, GL.GL_TEXTURE);
 			gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND0_RGB, GL.GL_SRC_COLOR);
 			gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE1_RGB, GL.GL_PREVIOUS);
@@ -123,7 +127,7 @@ public class Texture2DLoaderJOGL {
 			gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND2_RGB, GL.GL_SRC_ALPHA);
 			
 		}
-
+    
 		//gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_DECAL);
 		if (tex.getTextureTransformation() != null) {
 			gl.glMatrixMode(GL.GL_TEXTURE);
