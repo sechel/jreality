@@ -9,6 +9,7 @@ package de.jreality.portal.tools;
 import java.util.Iterator;
 import java.util.List;
 
+import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.jogl.tools.UserTool;
 import de.jreality.jogl.tools.UserToolInterface;
@@ -29,6 +30,10 @@ import de.jreality.util.Rn;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 public class JoglBoxTool extends SceneGraphVisitor implements UserToolInterface {
+	public void registerHelp(HelpOverlay ho) {
+		ho.registerInfoString("JoglBoxTool: ","no info available");
+
+	}
 	UserTool boxTool = null;
 	InteractiveViewer viewer;
    
