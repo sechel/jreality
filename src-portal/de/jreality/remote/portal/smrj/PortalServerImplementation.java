@@ -372,8 +372,14 @@ if (measure)                System.out.println("sendHead: "+t);
 
     
     public static void main(String[] args) throws Exception {
-        String hostname = INetUtilities.getHostname();
-        PortalServerImplementation rsi = new PortalServerImplementation(new TCPBroadcasterNIO(8868).getRemoteFactory());
+        boolean nio = true;
+        try {
+            nio = !args[1].startsWith("io");
+        } catch (Exception e) {}
+        if (!nio) System.err.println("Warning: using blocking IO");
+        PortalServerImplementation rsi = new PortalServerImplementation(
+                nio ? new TCPBroadcasterNIO(8868).getRemoteFactory()
+                    : new TCPBroadcasterIO(8868).getRemoteFactory());
         rsi.setBackgroundColor(new Color(120, 10, 44, 20));
         rsi.loadWorld(args[0]);
     }
