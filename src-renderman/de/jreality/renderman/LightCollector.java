@@ -127,7 +127,7 @@ public class LightCollector extends SceneGraphVisitor {
         map.put("coneangle",new Float(l.getConeAngle()));
         map.put("conedeltaangle",new Float(l.getConeDeltaAngle()));
         map.put("beamdistribution",new Float(l.getDistribution()));
-        if(RIBVisitor.fullSpotLight != null) {
+        if(RIBVisitor.fullSpotLight ) {
             map.put("float a0", new Float(l.getFalloffA0()));
             map.put("float a1", new Float(l.getFalloffA1()));
             map.put("float a2", new Float(l.getFalloffA2()));

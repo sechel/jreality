@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
@@ -64,7 +65,8 @@ public class RIBVisitor extends SceneGraphVisitor {
     private int textureCount = 0;
     private Map textures =new HashMap();
     
-    public static String fullSpotLight = null;
+    public static boolean fullSpotLight = false;
+    public static String shaderPath = null;
     /**
      * 
      */
@@ -79,7 +81,8 @@ public class RIBVisitor extends SceneGraphVisitor {
         double[] cam =path.getInverseMatrix(null);
         Ri.begin(name+".rib");
         HashMap map = new HashMap();
-        map.put("shader", (fullSpotLight!=null?(fullSpotLight+":"):"")+".:&");
+        map.put("shader", (shaderPath!=null?(shaderPath+":"):"")+".:&");
+        //map.put("shader", (fullSpotLight!=null?(fullSpotLight+":"):"")+".:&");
         Ri.option( "searchpath", map);
         Ri.display(name+".tif", "tiff", "rgb",null);
         
@@ -90,7 +93,14 @@ public class RIBVisitor extends SceneGraphVisitor {
         Ri.projection("perspective",map);
         
         map = new HashMap();
-        map.put("color background", new float[]{1f,1f,1f});
+        Appearance ap = root.getAppearance();
+        Color col = Color.WHITE;
+        if(ap!=null) { 
+            Object o = ap.getAttribute(CommonAttributes.BACKGROUND_COLOR,Color.class);
+            if(o instanceof Color) col = (Color) o;
+        }
+        float[] f = col.getRGBColorComponents(null);
+        map.put("color background", f);
         Ri.imager("background",map);
         double[] mir= new double[16];
         VecMat.assignScale(mir,1,1,-1);
@@ -117,6 +127,7 @@ public class RIBVisitor extends SceneGraphVisitor {
     }
     
     public void  visit(SceneGraphComponent c) {
+        Ri.comment(c.getName());        
         EffectiveAppearance tmp =eAppearance;
         Appearance a = c.getAppearance();
         if(a!= null) {
@@ -147,6 +158,14 @@ public class RIBVisitor extends SceneGraphVisitor {
     }
 
     private void setupShader(EffectiveAppearance a, String type) {
+        // Attribute
+        Map m = (Map) a.getAttribute("rendermanAttribute",null, Map.class);
+        if(m!=null) {
+            for (Iterator i = m.keySet().iterator(); i.hasNext();) {
+                String key = (String) i.next();
+                Ri.attribute(key,(Map)m.get(key));
+            }
+        }
         
         Object color = a.getAttribute(type+"."+CommonAttributes.DIFFUSE_COLOR,CommonAttributes.DIFFUSE_COLOR_DEFAULT);
         if(color!=Appearance.INHERITED) {
@@ -154,13 +173,14 @@ public class RIBVisitor extends SceneGraphVisitor {
             Ri.color(new float[] {c[0],c[1],c[2]});
         }
     
-    double transparency = a.getAttribute(type+".transparency",0.);
+    double transparency = a.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
         float f = 1f - (float)transparency;
         Ri.opacity(new float[] {f,f,f});
         
-    Object shader = a.getAttribute(type,"default");
-    System.out.println("shader "+type+" is "+shader);
-        if(shader!=Appearance.INHERITED) {
+        Object shader = a.getAttribute(type,"default");
+        SLShader slShader = (SLShader) a.getAttribute(type+".rendermanShader",null,SLShader.class);
+        System.out.println("shader "+type+" is "+shader);
+        if(slShader== null) {
             if(true || shader.equals("default")) {
                 float phongSize =(float) a.getAttribute(type+"."+CommonAttributes.SPECULAR_EXPONENT,CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
                 float phong =(float) a.getAttribute(type+"."+CommonAttributes.SPECULAR_COEFFICIENT,CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);
@@ -178,10 +198,7 @@ public class RIBVisitor extends SceneGraphVisitor {
                 }
             }
         } else {
-            HashMap map =new HashMap(); 
-            map.put("roughness",new Float(.25));
-            map.put("Ks",new Float(1));
-            Ri.surface("plastic",map);
+            Ri.surface(slShader.getName(),slShader.getParameters());
         }
     }
     /**
@@ -237,6 +254,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 //            cylinder(g.getEdgeData(i),r);
 //        }
 //        
+        DoubleArrayArray edgeColors=null;
+        DataList dl = g.getEdgeAttributes(Attribute.COLORS);
+        if(dl != null) 
+            edgeColors = dl.toDoubleArrayArray();
         IntArrayArray edgeIndices=g.getEdgeAttributes(Attribute.INDICES)
         .toIntArrayArray();
         DoubleArrayArray vertices=g.getVertexAttributes(Attribute.COORDINATES)
@@ -244,6 +265,13 @@ public class RIBVisitor extends SceneGraphVisitor {
         double[] edgeData = new double[6];
         for (int i= 0, n=edgeIndices.size(); i < n; i++)
         {
+            if(edgeColors!= null) {
+                float[] f = new float[3];
+                f[0] = (float) edgeColors.getValueAt(i,0);
+                f[1] = (float) edgeColors.getValueAt(i,1);
+                f[2] = (float) edgeColors.getValueAt(i,2);
+                Ri.color(f);
+            }
             IntArray edge=edgeIndices.item(i).toIntArray();
             for(int j = 0; j<edge.getLength()-1;j++) {
                 DoubleArray p1=vertices.item(edge.getValueAt(j)).toDoubleArray();
@@ -434,12 +462,14 @@ public class RIBVisitor extends SceneGraphVisitor {
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.UnitSphere)
      */
     public void visit(Sphere s) {
-        setupShader(eAppearance,"faceShader");
+//        setupShader(eAppearance,"faceShader", CommonAttributes.POLYGON_SHADER);
+        setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
         Ri.sphere(1f,-1f,1f,360f,null);
     }
     
     public void visit(Cylinder c) {
-        setupShader(eAppearance,"faceShader");
+        //setupShader(eAppearance,"faceShader");
+        setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
         Ri.cylinder(1f,-1f,1f,360f,null);
         Ri.disk(-1f,1f,360f,null);
         Ri.disk(1f,1f,360f,null);

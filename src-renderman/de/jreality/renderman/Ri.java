@@ -62,7 +62,12 @@ public class Ri {
     public static  void end() {
         w.close();
     }
-    
+    public static void comment(String s) {
+        String[] ss = s.split("\\n");
+        for (int i = 0; i < ss.length; i++) {
+            w.println("# "+ss[i]);
+        }
+    }
     public static void option(String name, Map map) {
 //        String[] tokens = keysFromMap(map);
 //        Object[] values = valuesFromMap(map, tokens);
@@ -73,7 +78,16 @@ public class Ri {
     }
 //    public static  void option(String name, String[] tokens, Object[] values);
     
-    
+    public static void attribute(String name, Map map) {
+//      String[] tokens = keysFromMap(map);
+//      Object[] values = valuesFromMap(map, tokens);
+//     option(name, tokens, values);
+      w.print("Attribute "+str(name)+" ");
+      writeMap(w, map);
+      
+  }
+//  public static  void attribute(String name, String[] tokens, Object[] values);
+
     /**
      * @param name
      * @return
