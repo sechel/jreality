@@ -32,7 +32,7 @@ import de.jreality.util.SceneGraphUtilities;
 public class ReadFromFileDemo extends InteractiveViewerDemo {
 
 	boolean useLOD = false, showSphere = false;
-	static boolean hyperbolic = false;
+	static boolean hyperbolic = false, elliptic = false;
 	static String resourceDir = "/Users/gunn/Documents/Models",
 		initialFile = null;
 	
@@ -44,21 +44,24 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 		foo = System.getProperty("hyperbolic");
 		if (foo != null) 
 			if (foo.indexOf("true") != -1) { hyperbolic = true; }
+		foo = System.getProperty("elliptic");
+		if (foo != null) 
+			if (foo.indexOf("true") != -1) { hyperbolic = false; elliptic = true; }
 	}
 	public JMenuBar createMenuBar()	{
 		theMenuBar = super.createMenuBar();
-		JMenu testM = new JMenu("File");
-		JMenuItem jcc = new JMenuItem("Open...");
-		testM.add(jcc);
-		jcc.addActionListener( new ActionListener() {
-			public void actionPerformed(ActionEvent e)	{
-				loadFile();
-				viewer.render();
-			}
-		});
-		theMenuBar.add(testM);
+//		JMenu testM = new JMenu("File");
+//		JMenuItem jcc = new JMenuItem("Open...");
+//		testM.add(jcc);
+//		jcc.addActionListener( new ActionListener() {
+//			public void actionPerformed(ActionEvent e)	{
+//				loadFile();
+//				viewer.render();
+//			}
+//		});
+//		theMenuBar.add(testM);
 		if (hyperbolic)	{
-			testM = new JMenu("Geometry");
+			JMenu testM = new JMenu("Geometry");
 			final JCheckBoxMenuItem jg = new JCheckBoxMenuItem("Show Sphere");
 			showSphere = true;
 			jg.setSelected(hyperbolic);
@@ -104,8 +107,8 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 		if (child != null && world.isDirectAncestor(child)) 	world.removeChild(child);
 		child = sgc;
 		world.addChild(child);
-		if (hyperbolic)	{
-			SceneGraphUtilities.setSignature(child, Pn.HYPERBOLIC);
+		if (hyperbolic || elliptic)	{
+			SceneGraphUtilities.setSignature(child, hyperbolic ? Pn.HYPERBOLIC : Pn.ELLIPTIC);
 			SceneGraphPath pathToLoaded = new SceneGraphPath();
 			pathToLoaded.push(viewer.getSceneRoot());
 			pathToLoaded.push(world);
@@ -113,6 +116,8 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 			viewer.getSelectionManager().setSelection(pathToLoaded);
 		} else	
 			viewer.getSelectionManager().setSelection(null);
+		GeometryUtility.calculateFaceNormals(world);
+		GeometryUtility.calculateVertexNormals(world);
 		viewer.render();
 	}
 	
@@ -127,15 +132,17 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 			OOGLReader or = new OOGLReader();	
 			child = or.readFromFile(initialFile);
 		} else {
-			if (!hyperbolic)	{
+			if (!hyperbolic && !elliptic)	{
 				child = SceneGraphUtilities.createFullSceneGraphComponent("child");
 				child.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
 				child.addChild(SphereHelper.SPHERE_SUPERFINE);				
 				world.addChild(child);
 			} else {
-				hypersphere = GeometryUtility.makeH3Boundary();
+				if (hyperbolic) {
+					hypersphere = GeometryUtility.makeH3Boundary();
+					world.addChild(hypersphere);
+				}
 				viewer.setBackgroundColor(new Color(0, 120, 120));
-				world.addChild(hypersphere);
 			}
 		}
 		return world;
@@ -143,7 +150,7 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 	
 	public boolean addBackPlane() {return false; }
 	
-	public boolean isEncompass() { return true; }
+	public boolean isEncompass() { return !elliptic; }
 	
 	public static void main(String[] args) {
 		ReadFromFileDemo test = new ReadFromFileDemo();

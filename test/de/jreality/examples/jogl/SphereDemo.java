@@ -15,6 +15,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 
 import de.jreality.jogl.InteractiveViewerDemo;
+import de.jreality.jogl.shader.SimpleJOGLShader;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
@@ -61,9 +62,9 @@ public class SphereDemo extends InteractiveViewerDemo {
 	 */
 	public SceneGraphComponent makeWorld() {
 		SceneGraphComponent world = SceneGraphUtilities.createFullSceneGraphComponent("world");
-//		SimpleJOGLShader sh = new SimpleJOGLShader("SimpleJOGLVertexShader.txt", "SimpleJOGLFragmentShader.txt");
-//		world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"useGLShader", true);
-//		world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"GLShader", sh);
+		SimpleJOGLShader sh = new SimpleJOGLShader("SimpleJOGLVertexShader.txt", "SimpleJOGLFragmentShader.txt");
+		world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"useGLShader", true);
+		world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"GLShader", sh);
 		
 		for (int i = 0; i<6; ++i)	{
 			SceneGraphComponent c = SceneGraphUtilities.createFullSceneGraphComponent("sphere"+i);
@@ -82,6 +83,10 @@ public class SphereDemo extends InteractiveViewerDemo {
 	public boolean addBackPlane() {
 		
 		return false;
+	}
+	public boolean isEncompass() {
+		
+		return true;
 	}
 	public static void main(String[] args) {
 		SphereDemo test = new SphereDemo();
