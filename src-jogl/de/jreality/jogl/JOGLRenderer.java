@@ -306,12 +306,13 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 		}
 		
 //		otime = System.currentTimeMillis();
+		if (thePeerRoot != null) thePeerRoot.propagateGeometryChanged(ALL_CHANGED);
 		sphereDisplayLists = JOGLSphereHelper.getSphereDLists(globalGL);
 		if (debugGL)	System.out.println("Got new sphere display lists for context "+globalGL);
 		
 		if (CameraUtility.getCamera(theViewer) == null || theCanvas == null) return;
 		CameraUtility.getCamera(theViewer).setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
-		globalGL.glViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
+		//globalGL.glViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
 
 }
 
@@ -470,6 +471,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
     private final static int POINTS_CHANGED = 1;
     private final static int LINES_CHANGED = 2;
     private final static int FACES_CHANGED = 4;
+    private final static int ALL_CHANGED = 7;
     
 	private class DisplayListInfo	{
 		private boolean useDisplayList, 	// can decide based on dynamic evaluation whether it makes sense 
@@ -733,7 +735,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 				boolean ss = geometryShader.polygonShader.isSmoothShading();
 				int type = ss ? SMOOTH_POLYGONDL : FLAT_POLYGONDL;
 				boolean proxy = geometryShader.polygonShader.providesProxyGeometry();
-				if (pickMode || (proxy && dlInfo.isDisplayListDirty(type)))	{
+				if (proxy && dlInfo.isDisplayListDirty(type))	{
 					//System.out.println("Asking "+geometryShader.polygonShader+" for proxy geometry ");
 					int dl  = geometryShader.polygonShader.proxyGeometryFor(ils, globalHandle, currentSignature);
 					if (dl != -1) {

@@ -334,8 +334,8 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 		return renderPick;
 	}
 	public void setRenderPick(boolean renderPick) {
-		renderSelection = this.renderPick = renderPick;
-		broadcastChange();
+		//this.renderPick = renderPick;
+		//broadcastChange();
 	}
 	public boolean isRenderSelection() {
 		return renderSelection;
