@@ -91,6 +91,8 @@ public class HeadtrackedRemoteViewerImpl extends RemoteViewerImpl implements
 			viewer.getSceneRoot().setAppearance(new Appearance());
 		viewer.getSceneRoot().getAppearance().setAttribute(
 				CommonAttributes.SMOOTH_SHADING, true);
+		viewer.getSceneRoot().getAppearance().setAttribute(
+				CommonAttributes.VERTEX_DRAW, false);
 		// insert an extra transform in the camera path
 		// This will handle the translation based on the tracked position
 		// The "camera node" itself contains only the orientation rotation
