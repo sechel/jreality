@@ -1,8 +1,6 @@
 /*
  * Created on Nov 24, 2004
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 package de.jreality.jogl.shader;
 
@@ -17,8 +15,6 @@ import net.java.games.jogl.GLU;
  * A class to handle common tasks related to openGL shading language shaders.
  * @author gunn
  *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 public abstract class AbstractJOGLShader {
 	String[] vertexSource, fragmentSource;

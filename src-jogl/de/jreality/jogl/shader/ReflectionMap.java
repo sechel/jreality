@@ -1,8 +1,6 @@
 /*
  * Created on Mar 2, 2005
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 package de.jreality.jogl.shader;
 
@@ -15,8 +13,6 @@ import de.jreality.scene.Texture2D;
 /**
  * @author Charles Gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class ReflectionMap {
 	Texture2D[] faceTextures;
