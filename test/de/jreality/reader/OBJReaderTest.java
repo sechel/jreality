@@ -22,6 +22,10 @@
  */
 package de.jreality.reader;
 
+import java.io.File;
+
+import de.jreality.scene.SceneGraphComponent;
+
 import junit.framework.TestCase;
 
 
@@ -41,8 +45,9 @@ public class OBJReaderTest extends TestCase {
     public void testOBJReader() throws Exception {
         //String fileName = "/home/gollwas/bolt1.obj";
         //String fileName = "/home/gollwas/cube2.obj";
-        String fileName = "/home/gollwas/obj/cessna.obj";
-        OBJReader.readFromFile(fileName);
+        String fileName = "/home/gollwas/obj/square.obj";
+        SceneGraphComponent sgc = new OBJReader().read(new File(fileName)); 
+        System.out.println(sgc);
     }
 
 //    public void testMTLReader() throws Exception {

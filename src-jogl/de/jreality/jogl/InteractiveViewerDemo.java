@@ -34,8 +34,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.jreality.geometry.GeometryUtility;
-import de.jreality.reader.OOGLReader;
-import de.jreality.reader.PolymakeParser;
+import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.DirectionalLight;
@@ -273,14 +272,14 @@ public class InteractiveViewerDemo extends JFrame{
 	public JMenuBar createMenuBar()	{
 		theMenuBar = new JMenuBar();
 		fileM = new JMenu("File");
-		JMenuItem jcc = new JMenuItem("Open...");
-		fileM.add(jcc);
-		jcc.addActionListener( new ActionListener() {
-			public void actionPerformed(ActionEvent e)	{
-				loadFile();
-				viewer.render();
-			}
-		});
+    JMenuItem jcc = new JMenuItem("Open...");
+    fileM.add(jcc);
+    jcc.addActionListener( new ActionListener() {
+        public void actionPerformed(ActionEvent e)  {
+            loadFile();
+            viewer.render();
+        }
+    });
 		jcc = new JMenuItem("Save Screen...");
 		fileM.add(jcc);
 		jcc.addActionListener( new ActionListener() {
@@ -318,20 +317,29 @@ public class InteractiveViewerDemo extends JFrame{
 	protected void loadFile() {
 		SceneGraphComponent parent= null;
 		SceneGraphPath sgp = viewer.getSelectionManager().getSelection();
-		if (! (sgp.getLastElement() instanceof SceneGraphComponent)) {
-			System.out.println("Unable to load file; invalid selection");
-			return;
-		}  
-		parent = (SceneGraphComponent) sgp.getLastElement();
+    boolean hasSelection = false;
+    if (sgp != null) {
+        hasSelection = true;
+    		if (! (sgp.getLastElement() instanceof SceneGraphComponent)) {
+    			System.out.println("Unable to load file; invalid selection");
+    			return;
+    		}
+    		parent = (SceneGraphComponent) sgp.getLastElement();
+    } else {
+        System.out.println("SelectrionPath == null!");
+        parent = root;
+        sgp = new SceneGraphPath();
+        sgp.push(parent);
+    }
 		JFileChooser fc = new JFileChooser(resourceDir);
 		//System.out.println("FCI resource dir is: "+resourceDir);
 		int result = fc.showOpenDialog(this);
 		SceneGraphComponent sgc = null;
 		if (result == JFileChooser.APPROVE_OPTION)	{
 			File file = fc.getSelectedFile();
-			sgc = readFile(file);
+			sgc = Readers.readFile(file);
 			parent.addChild(sgc);
-			sgp.push(sgc);
+      sgp.push(sgc);
 			resourceDir = file.getAbsolutePath();
 		} else {
 			System.out.println("Unable to open file");
@@ -355,27 +363,6 @@ public class InteractiveViewerDemo extends JFrame{
 			return;
 		}
 		viewer.render();
-	}
-	/**
-	 * TODO move this into the reader package
-	 * @param file
-	 * @return
-	 */
-	protected SceneGraphComponent readFile(File file) {
-		SceneGraphComponent sgc;
-		if (file.getName().indexOf(".top") != -1) {
-			sgc = PolymakeParser.readFromFile(file);
-			IndexedFaceSet ifs = (IndexedFaceSet) sgc.getGeometry();
-			ifs = GeometryUtility.binaryRefine(ifs);
-			GeometryUtility.calculateAndSetFaceNormals(ifs);
-			ifs.buildEdgesFromFaces();
-			sgc.setGeometry(ifs);
-		} else {
-			OOGLReader or = new OOGLReader();	
-			or.setResourceDir(file.getParent()+"/");
-			sgc = or.readFromFile(file);
-		}
-		return sgc;
 	}
 
 	protected void toggleInspection() {

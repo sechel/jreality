@@ -16,6 +16,7 @@ import de.jreality.geometry.SphereHelper;
 import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.reader.OOGLReader;
 import de.jreality.reader.PolymakeParser;
+import de.jreality.reader.Readers;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -83,27 +84,7 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 		JFileChooser fc = new JFileChooser(resourceDir);
 		//System.out.println("FCI resource dir is: "+resourceDir);
 		int result = fc.showOpenDialog(this);
-		SceneGraphComponent sgc = null;
-		if (result == JFileChooser.APPROVE_OPTION)	{
-			File file = fc.getSelectedFile();
-			if (file.getName().indexOf(".top") != -1) {
-				sgc = PolymakeParser.readFromFile(file);
-				IndexedFaceSet ifs = (IndexedFaceSet) sgc.getGeometry();
-				ifs = GeometryUtility.binaryRefine(ifs);
-				GeometryUtility.calculateAndSetFaceNormals(ifs);
-				ifs.buildEdgesFromFaces();
-				sgc.setGeometry(ifs);
-			} else {
-				OOGLReader or = new OOGLReader();	
-				//OFFReader.setResourceDir(resourceDir);
-				or.setResourceDir(file.getParent()+"/");
-				sgc = or.readFromFile(file);
-			}
-			resourceDir=file.getAbsolutePath();
-		} else {
-			System.out.println("Unable to open file");
-			return;
-		}
+		SceneGraphComponent sgc = Readers.readFile(fc.getSelectedFile());
 		if (child != null && world.isDirectAncestor(child)) 	world.removeChild(child);
 		child = sgc;
 		world.addChild(child);
