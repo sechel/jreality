@@ -45,6 +45,7 @@ public class UserTool extends PickTool {
 			newPickPoint = new PickPoint();
 			double[] ndc4 = {current[0], current[1], 0.0, 1.0};
 			newPickPoint.setPointNDC(ndc4);
+			System.out.println("Failed to hit");
 		}
 		if (!listeners.isEmpty())	{
 			for (int i = 0; i<listeners.size(); ++i)	{
@@ -73,6 +74,10 @@ public class UserTool extends PickTool {
 	
 	public PickPoint getPickPoint()	{
 		return newPickPoint;
+	}
+	
+	public int getButton() {
+		return button;
 	}
 	
 	public void addListener(UserToolInterface l)	{

@@ -96,8 +96,11 @@ public class JOGLRendererHelperNew {
 			GL gl = theCanvas.getGL();
 			Object bgo = null;
 			
+			for (int i = 0; i<8; ++i)	{
+				gl.glDisable(i+GL.GL_CLIP_PLANE0);
+			}
 			//TODO replace BackPlane class with simple quad drawn here, keyed to "backgroundColors" in topAp
-			if (topAp != null)	bgo = topAp.getAttribute("backgroundColor");
+			if (topAp != null)	bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_COLOR);
 			if (bgo != null && bgo instanceof java.awt.Color) bg = ((java.awt.Color) bgo).getComponents(null);
 			else bg = backgroundColor;
 			gl.glClearColor(bg[0], bg[1], bg[2], bg[3] ); //white 
@@ -511,15 +514,18 @@ public class JOGLRendererHelperNew {
 //		}
 	}
 	// TODO convert this to peer structure
-	static void processLights(SceneGraphComponent theRoot, GL globalGL) {
+	static List lights = null;
+	static void processLights(SceneGraphComponent theRoot, GL globalGL, boolean lightListDirty) {
 		lightCount = GL.GL_LIGHT0;
 		
 		// collect and process the lights
 		// with a peer structure we don't do this but once, and then
 		// use event listening to keep our list up-to-date
 		// DEBUG: see what happens if we always reuse the light list
-		LightCollector lc = new LightCollector(theRoot);
-		List lights = (List) lc.visit();
+		if (lights == null || lights.size() == 0 || lightListDirty) {
+			LightCollector lc = new LightCollector(theRoot);
+			lights = (List) lc.visit();
+		}
 		int n = lights.size();
 		double[] zDirectiond = {0d,0d,1d,0d};
 		double[] origind = {0d,0d,0d,1d};
@@ -554,7 +560,7 @@ public class JOGLRendererHelperNew {
 	private static float[] zDirection = {0,0,1,0};
 	private static float[] mzDirection = {0,0,1,0};
 	private static float[] origin = {0,0,0,1};
-	
+	private static int lightCount = 0;
 	public static void wisit(Light dl, GL globalGL)	{
 		  //System.out.println("Visiting directional light");
 		  //gl.glLightfv(lightCount, GL.GL_AMBIENT, lightAmbient);
@@ -609,24 +615,28 @@ public class JOGLRendererHelperNew {
 	
 	static double[] clipPlane = {0d, 0d, -1d, 0d};
 	
-	public static void wisit(ClippingPlane cp, GL globalGL)	{
-		globalGL.glClipPlane(GL.GL_CLIP_PLANE0, clipPlane);
-		globalGL.glEnable(GL.GL_CLIP_PLANE0);
+	public static void wisit(ClippingPlane cp, GL globalGL, int i)	{
+		int which = i + clipBase;
+		globalGL.glClipPlane(which, clipPlane);
+		globalGL.glEnable(which);
 	}
 
 	/**
 	 * 
 	 */
-	static int lightCount = 0;
+	static int clipCount = 0;
+	static int clipBase = GL.GL_CLIP_PLANE0;
+	static List clipPlanes = null;
 	static void processClippingPlanes(SceneGraphComponent theRoot, GL globalGL) {
-		lightCount = GL.GL_CLIP_PLANE0;
 		
 		// collect and process the lights
 		// with a peer structure we don't do this but once, and then
 		// use event listening to keep our list up-to-date
 		// DEBUG: see what happens if we always reuse the light list
-		ClippingPlaneCollector lc = new ClippingPlaneCollector(theRoot);
-		List clipPlanes = (List) lc.visit();
+		if (clipPlanes == null)	{
+			ClippingPlaneCollector lc = new ClippingPlaneCollector(theRoot);
+			clipPlanes = (List) lc.visit();			
+		}
 		int n = clipPlanes.size();
 		//globalGL.glDisable(GL.GL_CLIP_PLANE0);
 		for (int i = 0; i<n; ++i)	{
@@ -636,7 +646,7 @@ public class JOGLRendererHelperNew {
 			globalGL.glPushMatrix();
 			globalGL.glMultTransposeMatrixd(mat);
 			SceneGraphNode cp = lp.getLastElement();
-			if (cp instanceof ClippingPlane)		wisit((ClippingPlane) cp, globalGL);
+			if (cp instanceof ClippingPlane)		wisit((ClippingPlane) cp, globalGL, i);
 			else System.out.println("Invalid clipplane class "+cp.getClass().toString());
 			globalGL.glPopMatrix();
 		}

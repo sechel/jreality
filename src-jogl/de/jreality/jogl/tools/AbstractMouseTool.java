@@ -7,6 +7,7 @@
 package de.jreality.jogl.tools;
 
 import java.awt.Component;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 
 import javax.swing.Timer;
@@ -92,13 +93,13 @@ public class AbstractMouseTool implements MouseTool {
 		if (button == 0)	{		// Linux!
 			int mods = e.getModifiersEx();
 			//System.out.println("Mods are: "+mods);
-			if ((mods & MouseEvent.BUTTON1_DOWN_MASK) != 0)		button = 1;
-			else if ((mods & MouseEvent.BUTTON2_DOWN_MASK) != 0)  button = 2;
+			if ((mods & InputEvent.BUTTON1_DOWN_MASK) != 0)		button = 1;
+			else if ((mods & InputEvent.BUTTON2_DOWN_MASK) != 0)  button = 2;
 			else button = 3;
 		} else {					// Mac OS X Laptop (no 3-mouse button)!!
 			int mods = e.getModifiers();
-			if (e.isAltDown() && ((mods & MouseEvent.BUTTON2_MASK) != 0) ) button = 2;
-			else if (button == 1 &&  ((mods & MouseEvent.BUTTON3_MASK) != 0) ) button = 3;
+			if (e.isAltDown() && ((mods & InputEvent.BUTTON2_MASK) != 0) ) button = 2;
+			else if (button == 1 &&  ((mods & InputEvent.BUTTON3_MASK) != 0) ) button = 3;
 		}
 	}
 

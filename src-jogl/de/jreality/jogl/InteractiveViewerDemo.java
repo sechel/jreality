@@ -174,7 +174,7 @@ public abstract class InteractiveViewerDemo extends JFrame{
 		
 		if (lights != null)	CameraUtility.getCameraNode(viewer).addChild(lights);
 		
-		if (world != null) {
+		if (world != null && !root.isDirectAncestor(world)) {		// sometimes the subclass has already added the world
 			root.addChild(world);
 			if (world.getTransformation() == null) 		world.setTransformation(new Transformation());
 		}

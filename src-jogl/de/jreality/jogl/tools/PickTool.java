@@ -30,7 +30,7 @@ public class PickTool extends AbstractMouseTool {
 	public boolean attachToViewer(InteractiveViewer v) {
 		if (!super.attachToViewer(v)) return false;
 		pickAction = new JOGLPickAction(theViewer);
-		pickAction.setUseOpenGL(false);
+		pickAction.setUseOpenGL(true);
 		return true;
 	}
 	
