@@ -49,11 +49,10 @@ public class LoadableSceneViewer extends InteractiveViewerDemo {
 			e.printStackTrace();
 		}
 		// scene settings
-		wm.setConfiguration(ConfigurationAttributes.getSharedConfiguration());
+		wm.setConfiguration(ConfigurationAttributes.getDefaultConfiguration());
 		world = wm.makeWorld();
 		viewer.setSignature(wm.getSignature());
 		System.out.println("loaded world "+classname+" successful.");
-
 	}
 
 	public SceneGraphComponent makeWorld() {
