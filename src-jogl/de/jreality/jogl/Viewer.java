@@ -42,15 +42,17 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	GLCanvas canvas;
 	JOGLRenderer renderer;
 	int signature;
-	static String OSName = null;
 	static boolean multiSample = true;
 	boolean isFlipped = false;			// LH Coordinate system?
 	static GLCanvas firstOne = null;		// for now, all display lists shared with this one
 	static boolean sharedContexts = false;
+	static boolean isLinux = false;
 	static {
 		String foo = System.getProperty("jreality.jogl.multisample");
 		if (foo != null) 
 			if (foo.indexOf("false") != -1) multiSample = false;
+		foo = System.getProperty("os.name");
+		if (foo != null && foo.indexOf("Linux") != -1) isLinux = true;
 			//else multisample = false;
 		// allocate a GLCanvas to be the "sharer": it will never be destroyed
 		foo = System.getProperty("jreality.jogl.sharedContexts");
@@ -94,8 +96,10 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	public Viewer(SceneGraphPath p, SceneGraphComponent r) {
 		super();
 		initializeFrom(r, p);		
-	    canvas.setIgnoreRepaint(true);
-		canvas.setNoAutoRedrawMode(true);
+		if (isLinux)	{
+		    canvas.setIgnoreRepaint(true);
+			canvas.setNoAutoRedrawMode(true);			
+		}
 	}
 
 	/* (non-Javadoc)
@@ -154,6 +158,10 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	 * @see de.jreality.scene.Viewer#render()
 	 */
 	public void render() {
+//		if (isLinux)	{
+//		    canvas.setIgnoreRepaint(false);
+//			canvas.setNoAutoRedrawMode(false);			
+//		}
     synchronized(renderLock) {
   		if(!pendingUpdate) {
   			if (debug) System.out.println("Render: invoke later");

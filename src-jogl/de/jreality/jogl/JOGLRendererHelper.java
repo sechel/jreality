@@ -11,9 +11,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.security.acl.LastOwnerException;
-import java.util.Hashtable;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -25,10 +22,6 @@ import net.java.games.jogl.util.BufferUtils;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.RegularDomainQuadMesh;
-import de.jreality.geometry.SphereHelper;
-import de.jreality.jogl.shader.DefaultPolygonShader;
-import de.jreality.jogl.shader.PolygonShader;
-import de.jreality.jogl.shader.ShaderLookup;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.CommonAttributes;
@@ -38,7 +31,6 @@ import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.Light;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.PointSet;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SpotLight;
@@ -46,10 +38,6 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.IntArray;
-import de.jreality.scene.data.IntArrayArray;
-import de.jreality.util.ClippingPlaneCollector;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.LightCollector;
 import de.jreality.util.Pn;
 import de.jreality.util.Rn;
 
@@ -247,10 +235,6 @@ public class JOGLRendererHelper {
 	 */
 	public static void drawFaces( IndexedFaceSet sg, GL gl, boolean pickMode, boolean smooth, double alpha) {
 
-		//if (jr.pickMode && (insidePointSet || insideLineSet)) return;
-
-		//DefaultGeometryShader currentGeometryShader = jpc.geometryShader;
-		//RenderingHintsShader renderingHints = jpc.renderingHints;
 		int colorBind,normalBind, colorLength=3;
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		DataList vertexNormals = sg.getVertexAttributes(Attribute.NORMALS);
@@ -261,33 +245,12 @@ public class JOGLRendererHelper {
 		//System.out.println("Vertex normals are: "+((vertexNormals != null) ? vertexNormals.size() : 0));
 		//System.out.println("alpha value is "+alpha);
 		
-		//double[][] vv = null, vn=null, fn=null, vc=null, fc=null, tc = null;
 		// signal a geometry
 		if (pickMode)	gl.glPushName(10000);
 		
-//		if (texCoords != null && currentGeometryShader.polygonShader.isTextureEnabled())	{
-//			Texture2DLoaderJOGL tl = Texture2DLoaderJOGL.FactoryLoader;
-//			Object tex =  currentGeometryShader.polygonShader.getTexture2D();
-//			if (tex instanceof Texture2D)		{
-//				tl.bindTexture2D(theCanvas, (Texture2D) tex);
-//				int[] res = new int[1];
-//				gl.glGetTexParameteriv(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_RESIDENT, res);
-//				System.out.println("Texture is resident: "+res[0]);
-//				if (res[0] == 0)	{ jr.texResident = false; }
-//			}
-//			else texCoords = null;
-//			gl.glEnable(GL.GL_TEXTURE_2D);			
-//		} else
-//			texCoords = null;
 		// vertex color has priority over face color
 		vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		int vertexLength = GeometryUtility.getVectorLength(vertices);
-//		boolean shadePerFace = false;
-//		if (!currentGeometryShader.polygonShader.isSmoothShading() ||
-//		(currentGeometryShader.polygonShader.isSmoothShading() && currentGeometryShader.polygonShader.isFaceNormals())) 	{
-//			shadePerFace = true;
-//		}
-
 		if (vertexColors != null && smooth) 		{
 			colorBind = ElementBinding.PER_VERTEX;
 			colorLength = GeometryUtility.getVectorLength(vertexColors);
@@ -309,6 +272,7 @@ public class JOGLRendererHelper {
 		
 		DoubleArray da;
 		if (!pickMode && sg instanceof QuadMeshShape)	{
+			
 			QuadMeshShape qm = (QuadMeshShape) sg;
 			RegularDomainQuadMesh rdqm = null;
 			int type = Pn.EUCLIDEAN;

@@ -58,6 +58,10 @@ public class FunnyRuledSurface extends AbstractLoadableScene {
 		// TODO Auto-generated method stub
 		return Pn.EUCLIDEAN;
 	}
+	
+	public boolean isEncompass()	{return true; }
+	public boolean addBackPlane()	{ return true; }
+	
 	public void setConfiguration(ConfigurationAttributes config) {
 		// TODO Auto-generated method stub
 

@@ -8,8 +8,10 @@ package de.jreality.jogl;
 
 import java.awt.Dimension;
 import java.util.List;
+import java.util.Vector;
 
 import net.java.games.jogl.GL;
+import net.java.games.jogl.GLCanvas;
 import net.java.games.jogl.GLDrawable;
 import net.java.games.jogl.GLEventListener;
 import net.java.games.jogl.GLU;
@@ -19,19 +21,44 @@ import net.java.games.jogl.util.GLUT;
  * @author Pepijn Van Eeckhoudt
  */
 public class InfoOverlay implements GLEventListener {
+	/**
+	 * @author gunn
+	 *
+	 * TODO To change the template for this generated type comment go to
+	 * Window - Preferences - Java - Code Style - Code Templates
+	 */
+	public interface InfoProvider {
+		public void updateInfoStrings(InfoOverlay io);
+	}
+	
+	InfoProvider infoProvider = null;
+	
+	public void setInfoProvider(InfoOverlay.InfoProvider ip)	{
+		infoProvider = ip;
+	}
+	
+	
 	InteractiveViewer viewer;
+	
+	public int position = UPPER_LEFT;
 	private boolean visible = false;
 	private GLUT glut = new GLUT();
 	private static final int CHAR_HEIGHT = 12;
 	private static final int OFFSET = 15;
 	private static final int INDENT = 3;
 	private List info;
+	public static final int UPPER_LEFT = 0;
+	public static final int LOWER_LEFT = 1;
+	public static final int UPPER_RIGHT = 2;
+	public static final int LOWER_RIGHT = 3;
 
 	/**
 	 * @param v
 	 */
 	public InfoOverlay(InteractiveViewer v) {
 		viewer = v;
+		if ((viewer.getViewingComponent() instanceof GLCanvas))
+			((GLDrawable) v.getViewingComponent()).addGLEventListener(this);
 	}
 
 	public boolean isVisible() {
@@ -42,12 +69,23 @@ public class InfoOverlay implements GLEventListener {
 		this.visible = visible;
 	}
 
+	public int getPosition() {
+		return position;
+	}
+	public void setPosition(int position) {
+		this.position = position;
+	}
 	public void setInfoStrings(List s)	{
 		info = s;
 	}
 	
 	public void display(GLDrawable glDrawable) {
 		if (!visible) return;
+		if (infoProvider != null)		infoProvider.updateInfoStrings(this);
+		if (info == null || info.size() == 0) return;
+		
+		//System.out.println("In info display");
+		
 		GL gl = glDrawable.getGL();
 		GLU glu = glDrawable.getGLU();
 
@@ -78,16 +116,19 @@ public class InfoOverlay implements GLEventListener {
 		// Render the text
 		gl.glColor3f(1, 1, 1);
 
-		int x = OFFSET;
+		int offset = (position == LOWER_LEFT || position == LOWER_RIGHT) ? -OFFSET : OFFSET;
+		int x = (position == LOWER_RIGHT || position == UPPER_RIGHT) ? viewPort[2]/2 : OFFSET;
+		x += INDENT;
 		int maxx = 0;
-		int y = OFFSET + CHAR_HEIGHT;
+		int y = (position == LOWER_LEFT || position == LOWER_RIGHT) ? (viewPort[3])-CHAR_HEIGHT : CHAR_HEIGHT;
+		y += offset;
 
 		if (info != null && info.size() > 0) {
 			gl.glRasterPos2i(x, y);
 			//glut.glutBitmapString(gl, GLUT.BITMAP_HELVETICA_12, "Info");
 			//maxx = Math.max(maxx, OFFSET + glut.glutBitmapLength(GLUT.BITMAP_HELVETICA_12, KEYBOARD_CONTROLS));
 
-			y += OFFSET;
+			y += offset;
 			x += INDENT;
 			for (int i = 0; i < info.size(); i++) {
 				gl.glRasterPos2f(x, y);
@@ -97,7 +138,7 @@ public class InfoOverlay implements GLEventListener {
 				}
 				glut.glutBitmapString(gl, GLUT.BITMAP_HELVETICA_12, text);
 				maxx = Math.max(maxx, OFFSET + glut.glutBitmapLength(GLUT.BITMAP_HELVETICA_12, text));
-				y += OFFSET;
+				y += offset;
 			}
 		}
 

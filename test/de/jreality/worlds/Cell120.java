@@ -7,6 +7,7 @@
 package de.jreality.worlds;
 
 import java.awt.Color;
+import java.io.File;
 import java.util.Vector;
 
 import javax.swing.JMenuBar;
@@ -89,7 +90,7 @@ public class Cell120 extends AbstractLoadableScene {
 		ap = theDD.getAppearance();
 		//ap.setAttribute(CommonAttributes.FACE_DRAW, false);
 		ap.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
-		ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,new Color(240, 20,50));
+		ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,new Color(240, 10,10));
 		geom.add(theDD);
 		SceneGraphComponent tubes = WingedEdge.createBeamsOnEdges(standardDD, radius, 4, 5);
 		geom.add(tubes);			
@@ -100,12 +101,13 @@ public class Cell120 extends AbstractLoadableScene {
 	}
 
 	ConfigurationAttributes config = null;
-
+	String configResourceDir = "/homes/geometer/gunn/Software/eclipse/workspace/jReality/test/de/jreality/worlds/";
 	/* (non-Javadoc)
 	 * @see de.jreality.portal.WorldMaker#setConfiguration(de.jreality.portal.util.Configuration)
 	 */
 	public void setConfiguration(ConfigurationAttributes config) {
-		this.config = config;
+		File f = new File(configResourceDir+"Cell120.props");
+		this.config = new ConfigurationAttributes(f, config);
 	}
 
 	

@@ -29,6 +29,12 @@ import de.jreality.util.Pn;
  */
 public class StandardDemo extends AbstractLoadableScene {
 
+	public boolean addBackPlane() {
+		return true;
+	}
+	public boolean isEncompass() {
+		return true;
+	}
 	public int getSignature() {
 		// TODO Auto-generated method stub
 		return Pn.EUCLIDEAN;
@@ -40,7 +46,6 @@ public class StandardDemo extends AbstractLoadableScene {
 		SceneGraphComponent root = new SceneGraphComponent();
 		root.setName("theWorld");
 		root.setTransformation(new Transformation());
-		float[] bgc = {.3f, .3f, .5f, 1f};
 		CatenoidHelicoid globeSet=new CatenoidHelicoid(40);
 		//Torus globeSet = new Torus(2.3, 1.5, 20, 30);
 		GeometryUtility.calculateAndSetNormals(globeSet);
@@ -113,14 +118,13 @@ public class StandardDemo extends AbstractLoadableScene {
 	   ap1.setAttribute(CommonAttributes.EDGE_DRAW,true);
 	   ap1.setAttribute(CommonAttributes.LINE_STIPPLE,true);
 	   ap1.setAttribute(CommonAttributes.LINE_STIPPLE_PATTERN,0x1c47);
-	   ap1.setAttribute(CommonAttributes.ANTIALIASING_ENABLED,true);
 	   ap1.setAttribute(CommonAttributes.FACE_DRAW,false);
 	   ap1.setAttribute(CommonAttributes.VERTEX_DRAW,false);
 	   globeNode3.setAppearance(ap1);
 
 	   DiscreteSpaceCurve torus1 = DiscreteSpaceCurve.discreteTorusKnot(1.0, .4,4,5,400);
 	   double[][] pts = torus1.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
-	   QuadMeshShape tube = TubeUtility.makeTubeAsIFS(pts, .2d, null, TubeUtility.PARALLEL);
+	   QuadMeshShape tube = TubeUtility.makeTubeAsIFS(pts, .2d, null, TubeUtility.PARALLEL, true);
 	   GeometryUtility.calculateAndSetNormals(tube);
 	   SceneGraphComponent globeNode4= new SceneGraphComponent();
 	   gt= new Transformation();
@@ -186,11 +190,12 @@ public class StandardDemo extends AbstractLoadableScene {
 //
 
 		root.addChild(globeNode1);
-		root.addChild(globeNode2);
 		root.addChild(globeNode3);
 	   root.addChild(globeNode4);
 	   root.addChild(globeNode5);	  
 	   root.addChild(globeNode6);	
+	   // add the transparent node LAST
+		root.addChild(globeNode2);
 	   //viewer.removeBackPlane();  
 	  return root;
 	}

@@ -70,12 +70,13 @@ public class InteractiveViewerDemo extends JFrame{
 	protected InteractiveViewer viewer;
 	JTabbedPane tabbedPane;
 	//DefaultViewer softViewer;
-	boolean showSoft = true;
+	boolean showSoft = true, isEncompass = false, addBackPlane = false;
 	int mode;
 	Box hack;
 	boolean fullScreen = false;
 	boolean loadedScene = false;
 	int signature = Pn.EUCLIDEAN;
+	boolean showCameraPathInspector = false;
 	
 	protected static String resourceDir = ".", saveResourceDir = ".";
 	static {
@@ -165,6 +166,8 @@ public class InteractiveViewerDemo extends JFrame{
 		hack.add(tb);
 		hack.add(Box.createHorizontalGlue());
 		if (!fullScreen) getContentPane().add(hack, BorderLayout.NORTH);
+		//This fixes a bug in the Linux version of GLCanvas which prevented menus from showing up
+		 JPopupMenu.setDefaultLightWeightPopupEnabled( false ) ;
 				
 		//TODO this should go into the main() method-- but that belongs to the subclass... hmmmm
 		addWindowListener(new java.awt.event.WindowAdapter() {
@@ -175,27 +178,55 @@ public class InteractiveViewerDemo extends JFrame{
 
 	}
     SceneGraphComponent world = null;
-	public void begin()	{
-		SceneGraphComponent root = viewer.getSceneRoot();
+    public void begin()	{
+    		initializeScene();
+    		loadScene(null);
+    }
+    
+	SceneGraphComponent root;
+	public void initializeScene()	{
+		root = viewer.getSceneRoot();
 		if (root.getAppearance() == null) root.setAppearance(new Appearance());
 		CommonAttributes.setDefaultValues(root.getAppearance());
 		root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
 		root.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
 		root.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
-
-		if (!loadedScene)  world = makeWorld();
-		SceneGraphComponent lights = makeLights();
+		SceneGraphComponent lights = makeLights();		
+		if (lights != null)	CameraUtility.getCameraNode(viewer).addChild(lights);		
+	}
+	
+	public void unloadScene()	{
+		if (world != null && root.isDirectAncestor(world))	root.removeChild(world);
+		viewer.getSelectionManager().setDefaultSelection(null);
+		viewer.getSelectionManager().setSelection(null);
+	}
+	
+	public void loadScene(String loadableScene)	{
+		root = viewer.getSceneRoot();
+		LoadableScene wm = null;
 		
-		if (lights != null)	CameraUtility.getCameraNode(viewer).addChild(lights);
-		
+		if (loadableScene == null)  world = makeWorld();
+		else		{
+		       try {
+	            wm = (LoadableScene) Class.forName(loadableScene).newInstance();
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	        // scene settings
+	        wm.setConfiguration(ConfigurationAttributes.getDefaultConfiguration());
+	        world = wm.makeWorld();
+	        signature = wm.getSignature();
+	        isEncompass = wm.isEncompass();
+	        addBackPlane = wm.addBackPlane();
+	        loadedScene = true;
+		}
 		if (world != null && !root.isDirectAncestor(world)) {		// sometimes the subclass has already added the world
 			root.addChild(world);
 			if (world.getTransformation() == null) 		world.setTransformation(new Transformation());
 		}
 
 		CameraUtility.getCamera(viewer).setSignature(getSignature());
-		CameraUtility.getCamera(viewer).reset();
-		
+		CameraUtility.getCamera(viewer).reset();		
 		if (isEncompass())	{
 			// I have to do this ... for reasons unknown ... or else the encompass sometimes fails.
 			CameraUtility.getCameraNode(viewer).getTransformation().setTranslation(0d, 0d, 2d);
@@ -203,6 +234,7 @@ public class InteractiveViewerDemo extends JFrame{
 		}
 	
 		if (addBackPlane()) viewer.addBackPlane();
+		else viewer.removeBackPlane();
 
 		SceneGraphUtilities.setDefaultMatrix(root);
 		SceneGraphUtilities.setSignature(root, getSignature());
@@ -213,10 +245,9 @@ public class InteractiveViewerDemo extends JFrame{
 			viewer.getSelectionManager().setDefaultSelection(ds);
 			viewer.getSelectionManager().setSelection(ds);	
 		} 
-		//This fixes a bug in the Linux version of GLCanvas which prevented menus from showing up
-		 JPopupMenu.setDefaultLightWeightPopupEnabled( false ) ;
+		if (theMenuBar != null)	hack.remove(theMenuBar);
 		 theMenuBar = createMenuBar();
-		 if (wm != null) wm.customize(theMenuBar, viewer);
+		 if (loadedScene) wm.customize(theMenuBar, viewer);
 		 hack.add(theMenuBar, 0);
 		hack.add(Box.createHorizontalGlue(), 1);
 		setVisible(true);
@@ -231,10 +262,11 @@ public class InteractiveViewerDemo extends JFrame{
 	SceneGraphPath camPath = null;
 	FramedCurveInspector fci;
 	boolean showInspector = false;
+	protected JMenu fileM;
 	// TODO clean this up to make adding menu items easy (via Actions?)
 	public JMenuBar createMenuBar()	{
 		theMenuBar = new JMenuBar();
-		JMenu fileM = new JMenu("File");
+		fileM = new JMenu("File");
 		JMenuItem jcc = new JMenuItem("Open...");
 		fileM.add(jcc);
 		jcc.addActionListener( new ActionListener() {
@@ -252,15 +284,17 @@ public class InteractiveViewerDemo extends JFrame{
 		});
 		theMenuBar.add(fileM);
 		JMenu testM = new JMenu("Windows");
-		jcc = new JCheckBoxMenuItem("Camera Path Inspector...");
-		jcc.setSelected(showInspector);
-		testM.add(jcc);
-		jcc.addActionListener( new ActionListener() {
-			public void actionPerformed(ActionEvent e)	{
-				showInspector = !showInspector;
-				toggleInspection();
-			}
-		});
+		if (showCameraPathInspector)	{
+			jcc = new JCheckBoxMenuItem("Camera Path Inspector...");
+			jcc.setSelected(showInspector);
+			testM.add(jcc);
+			jcc.addActionListener( new ActionListener() {
+				public void actionPerformed(ActionEvent e)	{
+					showInspector = !showInspector;
+					toggleInspection();
+				}
+			});			
+		}
 		jcc = new JCheckBoxMenuItem("New Viewer");
 		jcc.setSelected(showInspector);
 		testM.add(jcc);
@@ -388,13 +422,11 @@ public class InteractiveViewerDemo extends JFrame{
 	}
 	
 	public boolean isEncompass()	{
-		if (loadedScene) return wm.isEncompass();
-		return false;
+		return isEncompass;
 	}
 	
 	public boolean addBackPlane()	{
-		if (loadedScene) return wm.addBackPlane();
-		return false;
+		return addBackPlane;
 	}
 	
 	public SceneGraphComponent makeWorld()	{
@@ -431,33 +463,14 @@ public class InteractiveViewerDemo extends JFrame{
 		
 		return lights;
 	}
-	LoadableScene wm = null;
-	
-	public void loadWorld(String classname) {
-        long t = System.currentTimeMillis();
-        
-        try {
-            wm = (LoadableScene) Class.forName(classname).newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        // scene settings
-        wm.setConfiguration(ConfigurationAttributes.getDefaultConfiguration());
-        world = wm.makeWorld();
-        signature = wm.getSignature();
-        loadedScene = true;
-		viewer.setSignature(getSignature());
-//        if (world != null) viewer.getSceneRoot().addChild(world);
-//        viewer.setSignature(wm.getSignature());
-        long s = System.currentTimeMillis() - t;
-        System.out.println("loaded world " + classname + " successful. ["+s+"ms]");
-    }
-
     public static void main(String[] args) throws Exception {
     		InteractiveViewerDemo iv = new InteractiveViewerDemo();
+    		String loadableScene = null;
     		if (args != null && args.length > 0) {
-    			iv.loadWorld(args[0]);
+    			//iv.loadWorld(args[0]);
+    			loadableScene = args[0];
     		}
-    		iv.begin();
+    		iv.initializeScene();
+    		iv.loadScene(loadableScene);
     }
 }

@@ -143,6 +143,8 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 	
 	public boolean addBackPlane() {return false; }
 	
+	public boolean isEncompass() { return true; }
+	
 	public static void main(String[] args) {
 		ReadFromFileDemo test = new ReadFromFileDemo();
 		test.begin();

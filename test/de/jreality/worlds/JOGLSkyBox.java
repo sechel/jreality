@@ -5,6 +5,7 @@
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.worlds;
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,6 +31,7 @@ import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.ConfigurationAttributes;
 
 /**
  * @author Charles Gunn
@@ -56,6 +58,18 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	static double[][] texc = {{0,0},{1,0},{1,1},{0,1}};
 
 	public boolean encompass()	{ return false; }
+	ConfigurationAttributes config = null;
+	String configResourceDir = "/homes/geometer/gunn/Software/eclipse/workspace/jReality/test/de/jreality/worlds/";
+	/* (non-Javadoc)
+	 * @see de.jreality.portal.WorldMaker#setConfiguration(de.jreality.portal.util.Configuration)
+	 */
+	public void setConfiguration(ConfigurationAttributes config) {
+		File f = new File(configResourceDir+"JOGLSkyBox.props");
+		this.config = new ConfigurationAttributes(f, config);
+		String foo = this.config.getProperty("resourceDir", resourceDir);
+		resourceDir = foo;
+	}
+	
 	public boolean addBackPlane()	{ return false; }
 	public SceneGraphComponent makeWorld() {
 
@@ -152,7 +166,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 
 	   DiscreteSpaceCurve torus1 = DiscreteSpaceCurve.discreteTorusKnot(1.0, .4,4,5,400);
 	   double[][] pts = torus1.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
-	   QuadMeshShape tube = TubeUtility.makeTubeAsIFS(pts, .2d, null, TubeUtility.PARALLEL);
+	   QuadMeshShape tube = TubeUtility.makeTubeAsIFS(pts, .2d, null, TubeUtility.PARALLEL, true);
 	   tube.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(GeometryUtility.calculateFaceNormals(tube)));
 	   tube.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(GeometryUtility.calculateVertexNormals(tube)));
 	   SceneGraphComponent globeNode4= new SceneGraphComponent();

@@ -48,7 +48,7 @@ public class RotateShapeTool extends AbstractShapeTool {
 		double[] objectToWorld = selection.getMatrix(null);
 		theRotator.setObjectToCamera(Rn.times(null, worldToCamera, objectToWorld));
 		isTracking = true;
-		if (button == 2)	{
+		if (button == 1)	{
 			Rectangle3D bbox = GeometryUtility.calculateChildrenBoundingBox((SceneGraphComponent) theEditedNode);
 			myTransform.setCenter(bbox.getCenter()); 
 		}  else myTransform.setCenter(theEditedTransform.getCenter());

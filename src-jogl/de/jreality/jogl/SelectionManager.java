@@ -114,7 +114,11 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 // TODO add SelectionChanged event and listener support, etc
 		if (path == null)	{
 			theSelection = defaultSelection;
-			System.out.println("Default sel: "+theSelection.toString());
+			if (theSelection == null) {
+				setRenderSelection(false);
+				return;
+			}
+			if (defaultSelection != null) System.out.println("Default sel: "+theSelection.toString());
 		} else {
 			if (theSelection!=null) theSelection.removePathMatrixListener(this);
 			theSelection = path;

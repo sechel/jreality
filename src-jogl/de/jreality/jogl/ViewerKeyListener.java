@@ -36,7 +36,8 @@ public class ViewerKeyListener extends KeyAdapter {
 	InteractiveViewer viewer;
 	boolean motionToggle = false;
 	boolean fullScreenToggle = false;
-	HelpOverlay helpOverlay;	
+	HelpOverlay helpOverlay;
+	InfoOverlay infoOverlay;
 	/**
 	 * 
 	 */
@@ -45,6 +46,7 @@ public class ViewerKeyListener extends KeyAdapter {
 		viewer = v;
 		//helpOverlay = new HelpOverlay(v);
 		helpOverlay = v.getHelpOverlay();
+		infoOverlay = v.getInfoOverlay();
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_A,0), "Increase alpha (1-transparency)");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_A,InputEvent.SHIFT_DOWN_MASK), "Decrease alpha");
 		//helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_A,0), "Toggle antialiasing");
@@ -57,15 +59,16 @@ public class ViewerKeyListener extends KeyAdapter {
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_E,InputEvent.SHIFT_DOWN_MASK), "Toggle edge drawing");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_F,0), "Activate fly tool");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_F,InputEvent.SHIFT_DOWN_MASK), "Toggle face drawing");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_H,0), "Toggle display help");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_I,0), "Add current selection to selection list");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_I,InputEvent.SHIFT_DOWN_MASK), "Remove current selection from selection list");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_H,0), "Toggle help overlay");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_I,0), "Toggle info overlay");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_J,0), "Increase sphere radius");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_J,InputEvent.SHIFT_DOWN_MASK), "Decrease sphere radius");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_K,0), "Cycle through selection list");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_L,0), "Toggle lighting enabled");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_M,0), "Reset Matrices to default");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_M,InputEvent.SHIFT_DOWN_MASK), "Set default Matrices with current state");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_N,0), "Add current selection to selection list");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_N,InputEvent.SHIFT_DOWN_MASK), "Remove current selection from selection list");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_P,0), "Toggle perspective/orthographic view");
 //		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_Q,0), "Force render");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_R,0), "Activate rotation tool");
@@ -147,9 +150,9 @@ public class ViewerKeyListener extends KeyAdapter {
 					viewer.render();
 					break;
 
-				case KeyEvent.VK_I:		// line width
-					if (e.isShiftDown()) viewer.getSelectionManager().removeSelection(viewer.getSelectionManager().getSelection());
-					else viewer.getSelectionManager().addSelection(viewer.getSelectionManager().getSelection());
+				case KeyEvent.VK_I:		// toggle help
+					if (e.isShiftDown()) break;
+					infoOverlay.setVisible(!infoOverlay.isVisible());
 					viewer.render();
 					break;
 
@@ -174,6 +177,12 @@ public class ViewerKeyListener extends KeyAdapter {
 				case KeyEvent.VK_M:		// reset matrices
 					if (e.isShiftDown()) SceneGraphUtilities.setDefaultMatrix(viewer.getSceneRoot());
 					else  SceneGraphUtilities.resetMatrix(viewer.getSceneRoot());
+					viewer.render();
+					break;
+
+				case KeyEvent.VK_N:		// line width
+					if (e.isShiftDown()) viewer.getSelectionManager().removeSelection(viewer.getSelectionManager().getSelection());
+					else viewer.getSelectionManager().addSelection(viewer.getSelectionManager().getSelection());
 					viewer.render();
 					break;
 

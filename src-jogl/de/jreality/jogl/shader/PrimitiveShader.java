@@ -17,5 +17,5 @@ import de.jreality.scene.Geometry;
  */
 public interface PrimitiveShader extends Shader {
 	public boolean providesProxyGeometry();
-	public int proxyGeometryFor(Geometry original, GL gl);
+	public int proxyGeometryFor(Geometry original, GL gl, int signature);
 }

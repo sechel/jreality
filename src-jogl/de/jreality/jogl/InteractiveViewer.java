@@ -11,6 +11,8 @@ import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.util.List;
+import java.util.Vector;
 
 import de.jreality.jogl.tools.MotionManager;
 import de.jreality.jogl.tools.MouseTool;
@@ -28,12 +30,13 @@ import de.jreality.scene.Transformation;
  * To change the template for this generated type comment go to
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
-public class InteractiveViewer extends de.jreality.jogl.Viewer implements  SelectionManager.Listener, ToolManager.Listener {
+public class InteractiveViewer extends de.jreality.jogl.Viewer implements  SelectionManager.Listener, ToolManager.Listener, InfoOverlay.InfoProvider {
 	protected SelectionManager selectionManager;
 	protected ToolManager toolManager;
 	protected MotionManager motionManager;
 	protected MouseTool currentTool;
 	HelpOverlay helpOverlay;
+	InfoOverlay infoOverlay;
 
 	/**
 	 * 
@@ -51,6 +54,9 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 		super(p, r);
 
 		helpOverlay = new HelpOverlay(this);
+		infoOverlay = new InfoOverlay(this);
+		infoOverlay.setPosition(InfoOverlay.LOWER_RIGHT);
+		infoOverlay.setInfoProvider(this);
 
 		Component vc = getViewingComponent();
 		selectionManager = new SelectionManager();
@@ -84,6 +90,14 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 		
 	}
 
+	List infoStrings = new Vector();
+	public void updateInfoStrings(InfoOverlay io)	{
+		//System.out.println("Providing info strings");
+		infoStrings.clear();
+		infoStrings.add("FPS: "+getRenderer().getFramerate());
+		infoStrings.add(getRenderer().getMemoryUsage());
+		io.setInfoStrings(infoStrings);
+	}
 	/* (non-Javadoc)
 	 * @see charlesgunn.gv2.SelectionManager.Listener#selectionChanged(charlesgunn.gv2.SelectionManager.Changed)
 	 */
@@ -186,5 +200,13 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 
 	public HelpOverlay getHelpOverlay() {
 		return helpOverlay;
+	}
+
+	/**
+	 * @return
+	 */
+	public InfoOverlay getInfoOverlay() {
+		// TODO Auto-generated method stub
+		return infoOverlay;
 	}
 }

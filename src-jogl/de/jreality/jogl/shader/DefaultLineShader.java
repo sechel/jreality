@@ -165,7 +165,7 @@ public class DefaultLineShader implements LineShader  {
 		return false;
 	}
 	
-	public int proxyGeometryFor(Geometry original, GL gl) {
+	public int proxyGeometryFor(Geometry original, GL gl, int sig) {
 		// TODO handle quadmesh differently
 		if ( !(original instanceof IndexedLineSet)) return -1;
 		if (tubeDraw && original instanceof IndexedLineSet)	{
@@ -196,31 +196,63 @@ public class DefaultLineShader implements LineShader  {
 		GeometryUtility.calculateAndSetNormals(urTube);
 	}
 	
+	// TOOD figure out how to clear out local display lists (not returned by the method)!
+	int tubeDL = -1;
+	boolean testQMS = true;
 	public int createTubesOnEdgesAsDL(IndexedLineSet ils, double rad,  double alpha, GL gl)	{
 		int n = ils.getNumEdges();
 		DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
 		
-		int tubeDL = gl.glGenLists(1);
-		gl.glNewList(tubeDL, GL.GL_COMPILE);
-		JOGLRendererHelper.drawFaces(urTube, gl, false, true, alpha);
-		gl.glEndList();
+		if (tubeDL == -1)	{
+			tubeDL = gl.glGenLists(1);
+			gl.glNewList(tubeDL, GL.GL_COMPILE);
+			JOGLRendererHelper.drawFaces(urTube, gl, false, true, alpha);
+			gl.glEndList();			
+		}
 		
 		int nextDL = gl.glGenLists(1);
 		gl.glNewList(nextDL, GL.GL_COMPILE);
-		for (int i = 0; i<n; ++i)	{
-			int[] ed = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
-			int m = ed.length;
-			for (int j = 0; j<m-1; ++j)	{
-				int k = ed[j];
-				double[] p1 = vertices.item(k).toDoubleArray(null);	
-				k = ed[j+1];
-				double[] p2 = vertices.item(k).toDoubleArray(null);	
-				SceneGraphComponent cc = TubeUtility.makeTubeAsIFS(p1, p2, rad, null);
-				gl.glPushMatrix();
-				gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix());
-				gl.glCallList(tubeDL);
-				gl.glPopMatrix();
+		
+		System.out.println("Tube radius is "+tubeRadius);
+		if (testQMS && ils instanceof QuadMeshShape)	{
+			QuadMeshShape qms = (QuadMeshShape) ils;
+			int u = qms.getMaxU();
+			int v = qms.getMaxV();
+			boolean closedU = qms.isClosedInUDirection();
+			boolean closedV = qms.isClosedInVDirection();
+			double[][] curve = null;
+			IndexedFaceSet tube = null;
+			for (int i = 0; i<u; ++i)	{
+				curve = GeometryUtility.extractUParameterCurve(curve, qms, i);
+				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, TubeUtility.PARALLEL, closedV);
+				GeometryUtility.calculateAndSetNormals(tube);
+				//System.out.println("Tube has "+tube.getNumPoints()+" points");
+				JOGLRendererHelper.drawFaces(tube, gl, false, true, alpha);
 			}
+			for (int i = 0; i<v; ++i)	{
+				curve = GeometryUtility.extractVParameterCurve(curve, qms, i);
+				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, TubeUtility.PARALLEL, closedU);
+				GeometryUtility.calculateAndSetNormals(tube);
+				//System.out.println("Tube has "+tube.getNumPoints()+" points");
+				JOGLRendererHelper.drawFaces(tube, gl, false, true, alpha);
+			}
+		} else {
+			for (int i = 0; i<n; ++i)	{
+				int[] ed = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
+				int m = ed.length;
+				for (int j = 0; j<m-1; ++j)	{
+					int k = ed[j];
+					double[] p1 = vertices.item(k).toDoubleArray(null);	
+					k = ed[j+1];
+					double[] p2 = vertices.item(k).toDoubleArray(null);	
+					SceneGraphComponent cc = TubeUtility.makeTubeAsIFS(p1, p2, rad, null);
+					gl.glPushMatrix();
+					gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix());
+					gl.glCallList(tubeDL);
+					gl.glPopMatrix();
+				}
+			}
+			
 		}
 		gl.glEndList();
 		return nextDL;

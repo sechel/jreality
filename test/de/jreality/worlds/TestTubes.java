@@ -83,16 +83,19 @@ public class TestTubes extends AbstractLoadableScene {
 		
 		double[][] profile = {{0,0,0}, {0,.1,0},{1,.1,0},{1,.2,0},{1.4,0,0}};
 		double[][] profile2 = {{1,.2,0}, {.2, .2,0}, {0,.4,0}, {-.2, .2, 0},{-1,.2,0}, {-1,-.2,0},{-.2, -.2,0}, {0,-.4,0}, {.2, -.2, 0},{1,-.2,0}};
-	   DiscreteSpaceCurve torus1 = DiscreteSpaceCurve.discreteTorusKnot(1.0, .4,4,5,20);
-	   double[][] pts = torus1.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+	   DiscreteSpaceCurve torus1 = DiscreteSpaceCurve.discreteTorusKnot(1.0, .4,4,5,60);
+	   double[][] tpts = torus1.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 	   //torus1.addGeometryListener(torus1);
 	   //pts = square;
-	   pts = form;
-	   double[][][] tubePoints = TubeUtility.makeTubeAsBezierPatchMesh(pts, .2, circle, TubeUtility.PARALLEL);
+	   double[][] pts = form;
+	   double[][][] tubePoints = TubeUtility.makeTubeAsBezierPatchMesh(pts, .2, circle, TubeUtility.PARALLEL,false);
 	   BezierPatchMesh bpm = new BezierPatchMesh(2, 3, tubePoints);
 	   for (int i = 0; i<3; ++i)	{ bpm.refine();}
 	   QuadMeshShape qmpatch = GeometryUtility.representBezierPatchMeshAsQuadMesh(bpm);	   
-	   QuadMeshShape qms = TubeUtility.makeTubeAsIFS(pts, .2, null, TubeUtility.PARALLEL);
+	   QuadMeshShape qms = TubeUtility.makeTubeAsIFS(pts, .2, null, TubeUtility.PARALLEL, true);
+	   
+	   QuadMeshShape torust = TubeUtility.makeTubeAsIFS(tpts, .2,  null, TubeUtility.PARALLEL, false);
+	   GeometryUtility.calculateAndSetNormals(torust);
 	   
 	   IndexedFaceSet arrow = GeometryUtility.surfaceOfRevolutionAsIFS(profile, 24, Math.PI * 2);
 	   SceneGraphComponent globeNode= SceneGraphUtilities.createFullSceneGraphComponent("container");
@@ -108,7 +111,7 @@ public class TestTubes extends AbstractLoadableScene {
 	   ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS,.03);
 	   ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_SIZE, 3.0);
 	   ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.RED);
-	   globeNode2.setGeometry(GeometryUtility.createCurveFromPoints(form, false));
+	   globeNode2.setGeometry(GeometryUtility.createCurveFromPoints(form, true));
 	   
 	   SceneGraphComponent globeNode4= SceneGraphUtilities.createFullSceneGraphComponent("patch");
 	   
@@ -118,10 +121,7 @@ public class TestTubes extends AbstractLoadableScene {
 	   tubie.setTransformation(new Transformation());
 	   tubie.setAppearance(new Appearance());
 	   globeNode4.setGeometry(qmpatch);
-	   //globeNode4.addChild(tubie);
-	   SceneGraphComponent testSGC = SceneGraphUtilities.createFullSceneGraphComponent();
-	   testSGC.setGeometry(TubeUtility.createTubesOnEdgesAsIFS(Primitives.sharedIcosahedron, .05));
-	   globeNode4.addChild(testSGC);
+	   globeNode4.addChild(tubie);
 	   //System.out.println("Geom BBox is: "+torus1.getBoundingBox().toString());
 	   DiscreteSpaceCurve torus2 = DiscreteSpaceCurve.discreteTorusKnot(1.4, .3,4,5,20);
 	   torus1.setVertexAttributes(Attribute.COORDINATES, torus2.getVertexAttributes(Attribute.COORDINATES));

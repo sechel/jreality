@@ -23,6 +23,9 @@ import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;
+import de.jreality.util.P3;
+import de.jreality.util.Pn;
+import de.jreality.util.Rn;
 import de.jreality.util.ShaderUtility;
 
 /**
@@ -113,9 +116,8 @@ public class DefaultPointShader  implements PointShader {
 		return sphereDraw;
 	}
 	
-	public int proxyGeometryFor(Geometry original, GL gl) {
+	public int proxyGeometryFor(Geometry original, GL gl, int sig) {
 		// TODO handle quadmesh differently
-		if ( !(original instanceof IndexedLineSet)) return -1;
 		if (sphereDraw && original instanceof PointSet)	{
 			PointSet ps = (PointSet) original;
 			DataList vertices = ps.getVertexAttributes(Attribute.COORDINATES);
@@ -129,26 +131,19 @@ public class DefaultPointShader  implements PointShader {
 			int nextDL = gl.glGenLists(1);
 			int dlist = JOGLSphereHelper.getSphereDLists(1, gl);
 			gl.glNewList(nextDL, GL.GL_COMPILE);
+			double[] mat = Rn.identityMatrix(4);
+			double[] scale = Rn.identityMatrix(4);
+			scale[0] = scale[5] = scale[10] = pointRadius;
+			double[] to = null;
+			System.out.println("Signature is "+sig);
+			//sig = Pn.EUCLIDEAN;
 			for (int i = 0; i< n; ++i)	{
 				da = vertices.item(i).toDoubleArray();	
-				//TODO figure out how to draw these spheres correctly in non-euclidean case
-				double x=0,y=0,z=0,w=0;
-				if (vertexLength == 4)	{
-					w = da.getValueAt(3);
-					if (w != 0) w  = 1.0/w;
-					else w = 1.0;
-					x = w * da.getValueAt(0);
-					y = w * da.getValueAt(1);
-					z = w * da.getValueAt(2);
-				} else {
-					x = da.getValueAt(0);
-					y = da.getValueAt(1);
-					z = da.getValueAt(2);					
-				}
 				gl.glPushMatrix();
-				// TODO redo this for non-euclidean case
-				gl.glTranslated(x,y,z);
-				gl.glScaled(pointRadius, pointRadius, pointRadius);
+				
+				P3.makeTranslationMatrix(mat, da.toDoubleArray(null),sig);
+				Rn.times(mat, mat, scale);
+				gl.glMultTransposeMatrixd(mat);
 				if (vertexColors != null)	{
 					da = vertexColors.item(i).toDoubleArray();
 					if (colorLength == 3) 	{
@@ -161,7 +156,7 @@ public class DefaultPointShader  implements PointShader {
 				gl.glPopMatrix();
 			}
 			gl.glEndList();
-			System.out.println("Creating spheres with radius "+pointRadius);
+			//System.out.println("Creating spheres with radius "+pointRadius);
 			return nextDL;
 		}
 		return -1;
@@ -170,4 +165,5 @@ public class DefaultPointShader  implements PointShader {
 	public Shader getPolygonShader() {
 		return polygonShader;
 	}
+
 }

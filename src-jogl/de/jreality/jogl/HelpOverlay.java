@@ -120,13 +120,6 @@ public class HelpOverlay implements GLEventListener {
 			}
 		}
 
-//		// display the frame rate
-		gl.glRasterPos2f(x, y);
-		String text = "FPS: "+Double.toString(viewer.getRenderer().getFramerate());
-		glut.glutBitmapString(gl, GLUT.BITMAP_HELVETICA_12, text);
-		maxx = Math.max(maxx, OFFSET + glut.glutBitmapLength(GLUT.BITMAP_HELVETICA_12, text));
-		y += OFFSET;
-		// Restore enabled state
 		gl.glPopAttrib();
 
 		// Restore old matrices
