@@ -120,7 +120,8 @@ public class TestTubes extends AbstractLoadableScene {
 	   ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_SIZE, 3.0);
 	   ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.RED);
 	   IndexedLineSet croxl = GeometryUtility.createCurveFromPoints(form, true);
-	   globeNode2.addChild(TubeUtility.ballAndStick(croxl, .05, .03, java.awt.Color.RED, java.awt.Color.BLUE, Pn.EUCLIDEAN));
+	   //globeNode2.addChild(TubeUtility.ballAndStick(croxl, .05, .03, java.awt.Color.RED, java.awt.Color.BLUE, Pn.EUCLIDEAN));
+	   globeNode2.setGeometry(croxl);
 	   
 	   SceneGraphComponent globeNode4= SceneGraphUtilities.createFullSceneGraphComponent("patch");
 	   
