@@ -6,6 +6,8 @@
  */
 package de.jreality.jogl.shader;
 
+import java.awt.Color;
+
 /**
  * @author gunn
  *
@@ -14,4 +16,6 @@ package de.jreality.jogl.shader;
  */
 public interface VertexShader extends Shader {
 	public void setFrontBack(int f);
+	public Color getDiffuseColor();
+	public float[] getDiffuseColorAsFloat();
 }

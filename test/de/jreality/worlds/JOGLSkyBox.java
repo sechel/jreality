@@ -99,7 +99,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 		gt.setStretch(.3);
 		globeNode1.setTransformation(gt);
 	   Appearance ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.RED);
+	   ap1.setAttribute(CommonAttributes.DIFFUSE_COLOR, java.awt.Color.RED);
 	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.BLACK);
 	   ap1.setAttribute(CommonAttributes.LIGHTING_ENABLED,true);
 	   ap1.setAttribute(CommonAttributes.SMOOTH_SHADING,false);
@@ -183,8 +183,8 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   //globeNode4.setGeometry(torus1);
 	   globeNode4.setGeometry(tube);
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.BLUE);
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.BLACK);
+	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.BLUE);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,java.awt.Color.BLACK);
 	   ap1.setAttribute(CommonAttributes.LINE_WIDTH,1.0);
 	   ap1.setAttribute(CommonAttributes.POINT_RADIUS,3.0);
 	   ap1.setAttribute(CommonAttributes.FACE_DRAW,true);

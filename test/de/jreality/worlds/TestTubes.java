@@ -162,7 +162,7 @@ public class TestTubes extends AbstractLoadableScene {
 		   ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.SPHERES_DRAW,true);
 		   ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS,.06);
 		   ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_SIZE, 3.0);
-		   ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.RED);
+		   ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.RED);
 		   //QuadMeshShape qms = TubeUtility.makeTubeAsIFS(form, .04, null, TubeUtility.PARALLEL, true, Pn.EUCLIDEAN);
 		   //GeometryUtility.calculateAndSetNormals(qms);	   	
 		   IndexedLineSet croxl = GeometryUtility.createCurveFromPoints(form, true);

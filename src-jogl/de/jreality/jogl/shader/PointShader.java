@@ -17,7 +17,6 @@ import de.jreality.scene.Geometry;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 public interface PointShader extends PrimitiveShader {
-	public boolean isSphereDraw();
 	public double getPointRadius();
 	public Color getDiffuseColor();
 }

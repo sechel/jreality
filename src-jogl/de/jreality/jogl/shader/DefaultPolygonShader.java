@@ -34,9 +34,6 @@ public class DefaultPolygonShader implements PolygonShader {
 	public static final int BACK = GL.GL_BACK;
 	
 	boolean		smoothShading = true; 		// interpolate shaded values between vertices
-	Color diffuseColor = DefaultVertexShader.RED; //java.awt.Color.RED;
-	float[] diffuseColorAsFloat = null;
-	double transparency;
 	Texture2D texture2D;
 	ReflectionMap reflectionMap;
 	int frontBack = FRONT_AND_BACK;
@@ -60,15 +57,13 @@ public class DefaultPolygonShader implements PolygonShader {
 	
 	static int count = 0;
 	public void  setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
+		vertexShader = ShaderLookup.getVertexShaderAttr(eap, name, "default");
+
 		smoothShading = eap.getAttribute(NameSpace.name(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);	
-		Color diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.POINT_DIFFUSE_COLOR_DEFAULT);	
-		transparency= eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
-		setDiffuseColor( ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transparency));
 		Object foo = eap.getAttribute(NameSpace.name(name,"texture2d"), null, Texture2D.class);
 		if (foo instanceof Texture2D)	texture2D = (Texture2D) foo;
 		foo = eap.getAttribute(NameSpace.name(name,"reflectionMap"), null, ReflectionMap.class);
 		if (foo instanceof ReflectionMap)	reflectionMap = (ReflectionMap) foo;
-		vertexShader = ShaderLookup.getVertexShaderAttr(eap, name, "vertexShader");
 	
 		//TODO this is a hack. 
 		if (eap.getAttribute(NameSpace.name(name,"useGLShader"), false) == true)	{
@@ -91,24 +86,19 @@ public class DefaultPolygonShader implements PolygonShader {
 	 * @return
 	 */
 	public Color getDiffuseColor() {
-		return diffuseColor;
+		return vertexShader.getDiffuseColor(); //diffuseColor;
 	}
 
 	public float[] getDiffuseColorAsFloat() {
-		return diffuseColorAsFloat;
+		return vertexShader.getDiffuseColorAsFloat();
 	}
 
-	public void setDiffuseColor(Color diffuseColor2) {
-		diffuseColor = diffuseColor2;
-		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
-	}
 	/**
 	 * @return
 	 */
 	public Texture2D getTexture2D() {
 		return texture2D;
 	}
-
 
 	public void setSmoothShading(boolean b) {
 		smoothShading = b;
@@ -128,10 +118,10 @@ public class DefaultPolygonShader implements PolygonShader {
 		if (isSmoothShading()) gl.glShadeModel(GL.GL_SMOOTH);
 		else		gl.glShadeModel(GL.GL_FLAT);
 		
-		gl.glMaterialfv(frontBack, GL.GL_DIFFUSE, getDiffuseColorAsFloat());
-		gl.glEnable(GL.GL_COLOR_MATERIAL);
-		gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
-		gl.glColor4fv( getDiffuseColorAsFloat());
+		//gl.glMaterialfv(frontBack, GL.GL_DIFFUSE, getDiffuseColorAsFloat());
+//		gl.glEnable(GL.GL_COLOR_MATERIAL);
+//		gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
+//		gl.glColor4fv( getDiffuseColorAsFloat());
 		//System.out.println("Alpha channel is "+diffuseColorAsFloat[3]);
 		//System.out.println("transparency is "+transparency);
 		//float[] testcolor = {.3f, .5f, .7f, 1.0f * ((float) transparency)};

@@ -42,10 +42,10 @@ public class TwoSidePolygonShader implements PolygonShader {
 		return front.isSmoothShading();
 	}
 
-	public void setDiffuseColor(Color dc) {
-		front.setDiffuseColor(dc);
-		back.setDiffuseColor(dc);
-	}
+//	public void setDiffuseColor(Color dc) {
+//		front.setDiffuseColor(dc);
+//		back.setDiffuseColor(dc);
+//	}
 
 	public void setSmoothShading(boolean b) {
 		front.setSmoothShading(b);

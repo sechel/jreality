@@ -16,6 +16,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;
+import de.jreality.util.ShaderUtility;
 
 
 /**
@@ -25,21 +26,14 @@ import de.jreality.util.NameSpace;
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class DefaultVertexShader implements VertexShader {
+	// TODO add the diffuse color here also, and transparency
+	// the polygon shader if queried, consults this shader for these values
 	Color	ambientColor,
+			diffuseColor,
 			specularColor;		
-	double 	specularExponent, ambientCoefficient, specularCoefficent;	
-	float[] specularColorAsFloat, ambientColorAsFloat;
+	double 	specularExponent, ambientCoefficient, diffuseCoefficient, specularCoefficent, transparency;	
+	float[] specularColorAsFloat, ambientColorAsFloat, diffuseColorAsFloat;
 	int frontBack = DefaultPolygonShader.FRONT_AND_BACK;
-
-	public static Color RED = new Color(1.0f, 0.0f, 0.0f, 0.5f);
-	public static Color GREEN = new Color(0.0f, 1.0f, 0.0f, 0.5f);
-	public static Color BLUE = new Color(0.0f, 0.0f, 1.0f, 0.5f);
-	public static Color YELLOW = new Color(1.0f, 1.0f, 0.0f, 0.5f);
-	public static Color PURPLE = new Color(1.0f, 0.0f, 1.0f, 0.5f);
-	public static Color ORANGE = new Color(1.0f, .5f, 0.0f, 0.5f);
-	public static Color WHITE = new Color(1.0f, 1.0f, 1.0f, 0.5f);
-	public static Color GRAY = new Color(.5f,.5f,.5f, 0.5f);
-	public static Color BLACK = new Color(0.0f, 0.0f, 0.0f, 0.5f);
 	
 	/**
 	 * 
@@ -51,14 +45,19 @@ public class DefaultVertexShader implements VertexShader {
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		specularExponent = eap.getAttribute(NameSpace.name(name,CommonAttributes.SPECULAR_EXPONENT), CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
 		ambientCoefficient = eap.getAttribute(NameSpace.name(name,CommonAttributes.AMBIENT_COEFFICIENT), CommonAttributes.AMBIENT_COEFFICIENT_DEFAULT);
+		diffuseCoefficient = eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COEFFICIENT), CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
 		specularCoefficent = eap.getAttribute(NameSpace.name(name,CommonAttributes.SPECULAR_COEFFICIENT), CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);
 		ambientColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.AMBIENT_COLOR), CommonAttributes.AMBIENT_COLOR_DEFAULT);
 		ambientColorAsFloat = ambientColor.getRGBComponents(null);
+		diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.DIFFUSE_COLOR_DEFAULT);
+		transparency= eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
+		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transparency);
+		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
 		specularColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.SPECULAR_COLOR), CommonAttributes.SPECULAR_COLOR_DEFAULT);
 		specularColorAsFloat = specularColor.getRGBComponents(null);
 		for (int i  = 0; i<3; ++i) ambientColorAsFloat[i] *= (float) specularCoefficent;
+		for (int i  = 0; i<3; ++i) diffuseColorAsFloat[i] *= (float) diffuseCoefficient;
 		for (int i  = 0; i<3; ++i) specularColorAsFloat[i] *= (float) specularCoefficent;
-			
 	}
 
 	/**
@@ -66,6 +65,10 @@ public class DefaultVertexShader implements VertexShader {
 	 */
 	public Color getAmbientColor() {
 		return ambientColor;
+	}
+
+	public Color getDiffuseColor() {
+		return diffuseColor;
 	}
 
 	/**
@@ -78,19 +81,19 @@ public class DefaultVertexShader implements VertexShader {
 	 * @return
 	 */
 	public float[] getAmbientColorAsFloat() {
-		return ColorToFloat(ambientColor);
+		return ambientColorAsFloat;
+	}
+
+	public float[] getDiffuseColorAsFloat() {
+		return diffuseColorAsFloat;
 	}
 
 	/**
 	 * @return
 	 */
 	public float[] getSpecularColorAsFloat() {
-		return ColorToFloat(specularColor);
+		return specularColorAsFloat;
 	}
-
-	private float[] ColorToFloat(Color cc)	{
-		return cc.getRGBComponents(null);
-		}
 
 
 	/**
@@ -111,7 +114,10 @@ public class DefaultVertexShader implements VertexShader {
 		GLCanvas theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		
-		//gl.glMaterialfv(frontBack, GL.GL_AMBIENT, ambientColorAsFloat);
+		gl.glEnable(GL.GL_COLOR_MATERIAL);
+		gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
+		gl.glColor4fv( diffuseColorAsFloat);
+		gl.glMaterialfv(frontBack, GL.GL_AMBIENT, ambientColorAsFloat);
 		gl.glMaterialfv(frontBack, GL.GL_SPECULAR, specularColorAsFloat);
 		gl.glMaterialf(frontBack, GL.GL_SHININESS, (float) getSpecularExponent());
 	}

@@ -55,7 +55,8 @@ public class DefaultPointShader  implements PointShader {
 		pointRadius = eap.getAttribute(NameSpace.name(name,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
 		Color diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.POINT_DIFFUSE_COLOR_DEFAULT);	
 		double t = eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
-		setDiffuseColor( ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, t));
+		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, t);
+		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
 		polygonShader = ShaderLookup.getPolygonShaderAttr(eap, name, "polygonShader");
 		//polygonShader.setDiffuseColor(diffuseColor);
 		//polygonShader.setSmoothShading(true);
@@ -90,11 +91,6 @@ public class DefaultPointShader  implements PointShader {
 	public Color getDiffuseColor() {
 		return diffuseColor;
 	}
-	public void setDiffuseColor(Color diffuseColor2) {
-		diffuseColor = diffuseColor2;
-		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
-	}
-
 	/**
 	 * @param globalHandle
 	 * @param jpc
