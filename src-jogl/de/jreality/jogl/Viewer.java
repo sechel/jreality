@@ -43,6 +43,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	JOGLRenderer renderer;
 	int signature;
 	static boolean multiSample = true;
+	static boolean portalUsage = false;
 	boolean isFlipped = false;			// LH Coordinate system?
 	static GLCanvas firstOne = null;		// for now, all display lists shared with this one
 	static boolean sharedContexts = false;
@@ -51,6 +52,9 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		String foo = System.getProperty("jreality.jogl.multisample");
 		if (foo != null) 
 			if (foo.indexOf("false") != -1) multiSample = false;
+		foo = System.getProperty("jreality.jogl.portalUsage");
+		if (foo != null) 
+			if (foo.indexOf("true") != -1) portalUsage = true;
 		foo = System.getProperty("os.name");
 		if (foo != null && foo.indexOf("Linux") != -1) isLinux = true;
 			//else multisample = false;
@@ -333,10 +337,11 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 			throw new IllegalStateException();
 		synchronized (renderLock) {
 			pendingUpdate = false;
+			if (portalUsage) canvas.display();
 			renderLock.notifyAll();
 		}
 		if (debug) System.out.println("Render: calling display");
-		canvas.display();
+		if (!portalUsage) canvas.display();
 	}
 
 	public void setAutoSwapMode(boolean autoSwap) {
@@ -352,12 +357,18 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
                 
 	public void swapBuffers() {
 		if(EventQueue.isDispatchThread()) canvas.swapBuffers();
-		else	try {
+		else
+			try {
 				EventQueue.invokeAndWait(bufferSwapper);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		  catch (InterruptedException e) {}
-			catch (InvocationTargetException e) {}
 	}
+	
 	public boolean isFlipped() {
 		return isFlipped;
 	}
