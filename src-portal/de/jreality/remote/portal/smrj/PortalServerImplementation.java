@@ -184,6 +184,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
     long maxFrameTime = 0;
     private boolean headTracked = true;
 
+    private static final boolean measure = true;
     public void render() {
         if (rendering) {
             reRender = true;
@@ -199,7 +200,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
                 s  = System.currentTimeMillis();
                 getClients().sendHeadTransformation(headMatrix);
                 t = System.currentTimeMillis() - s;
-//                System.out.println("sendHead: "+t);
+if (measure)                System.out.println("sendHead: "+t);
                 headMatrixLock.readUnlock();
             }
             long start = System.currentTimeMillis();
@@ -207,16 +208,16 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
             s  = System.currentTimeMillis();
             getClients().render();
             t = System.currentTimeMillis() - s;
-//            System.out.println("render: "+t);
+            if (measure)            System.out.println("render: "+t);
             s  = System.currentTimeMillis();
             getClients().waitForRenderFinish();
             t = System.currentTimeMillis() - s;
-//            System.out.println("renderFinish: "+t);
+            if (measure)            System.out.println("renderFinish: "+t);
             if (manualSwapBuffers) { 
                 s  = System.currentTimeMillis();
                 getClients().swapBuffers();
                 t = System.currentTimeMillis() - s;
-//                System.out.println("swapBuffers: "+t);
+                if (measure)                System.out.println("swapBuffers: "+t);
             }
             long delay = System.currentTimeMillis() - start;
             if (maxFrameTime < delay) maxFrameTime = delay;

@@ -215,6 +215,7 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 	long startTime = System.currentTimeMillis();
 	long maxFrameTime = 0;
 	private boolean headTracked = true;
+    private static final boolean measure = true;
 	
 	public void render() {
         if (rendering) {
@@ -242,7 +243,7 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
                     }
                 }
                 t = System.currentTimeMillis() - s;
-                System.out.println("sendHead: " + t);
+                if (measure)                System.out.println("sendHead: " + t);
                 headMatrixLock.readUnlock();
                 clientMapLock.readUnlock();
             }
@@ -260,7 +261,7 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
                 }
             }
             t = System.currentTimeMillis() - s;
-            System.out.println("render: " + t);
+            if (measure)            System.out.println("render: " + t);
             s = System.currentTimeMillis();
             for (Iterator i = currClients.iterator(); i.hasNext();) {
                 try {
@@ -272,7 +273,7 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
                 }
             }
             t = System.currentTimeMillis() - s;
-            System.out.println("waitForRenderFinish: " + t);
+            if (measure)            System.out.println("waitForRenderFinish: " + t);
             if (manualSwapBuffers) {
                 s = System.currentTimeMillis();
                 for (Iterator i = currClients.iterator(); i.hasNext();) {
@@ -285,7 +286,7 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
                     }
                 }
                 t = System.currentTimeMillis() - s;
-                System.out.println("swapBuffers: " + t);
+                if (measure)                System.out.println("swapBuffers: " + t);
             }
             long delay = System.currentTimeMillis() - start;
             if (maxFrameTime < delay) maxFrameTime = delay;
