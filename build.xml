@@ -51,6 +51,12 @@
 		<mkdir dir="${build}/stubs" />
 		<rmic base="${build}/core" includes="**/*Impl.class" />
 		<rmic base="${build}/core" includes="de/jreality/scene/proxy/rmi/*.class" excludes="**/Remote*.class" />
+		<move todir="${build}/stubs">
+			<fileset dir="${build}/core">
+		    	<include name="**/*_Skel.class"/>
+		    	<include name="**/*_Stub.class"/>
+		    </fileset>
+		</move>
 		<jar jarfile="${dist}/jReality-stubs.jar" basedir="${build}/stubs" />
 	</target>
 
