@@ -226,14 +226,14 @@ public class DefaultLineShader implements LineShader  {
 			IndexedFaceSet tube = null;
 			for (int i = 0; i<u; ++i)	{
 				curve = GeometryUtility.extractUParameterCurve(curve, qms, i);
-				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, TubeUtility.PARALLEL, closedV, sig);
+				tube = TubeUtilityNew.makeTubeAsIFS(curve, rad, null, TubeUtility.PARALLEL, closedV, sig);
 				GeometryUtility.calculateAndSetNormals(tube);
 				//System.out.println("Tube has "+tube.getNumPoints()+" points");
 				JOGLRendererHelper.drawFaces(tube, gl, false, true, alpha);
 			}
 			for (int i = 0; i<v; ++i)	{
 				curve = GeometryUtility.extractVParameterCurve(curve, qms, i);
-				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, TubeUtility.PARALLEL, closedU, sig);
+				tube = TubeUtilityNew.makeTubeAsIFS(curve, rad, null, TubeUtility.PARALLEL, closedU, sig);
 				GeometryUtility.calculateAndSetNormals(tube);
 				//System.out.println("Tube has "+tube.getNumPoints()+" points");
 				JOGLRendererHelper.drawFaces(tube, gl, false, true, alpha);

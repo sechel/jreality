@@ -53,7 +53,7 @@ public class TranslateShapeTool extends AbstractShapeTool {
 			double[] o = {0,0};
 			double[] oV = new double[4];
 			double[] zV = new double[4];
-			double d= Pn.distance(anchorV, currentV, theEditedTransform.getSignature());
+			double d= Pn.distanceBetween(anchorV, currentV, theEditedTransform.getSignature());
 			if (current[1] < anchor[1]) d = -d;
 			double ed = theProjector.getDistanceToPlane();
 			theProjector.getObjectPosition(anchor, oV);

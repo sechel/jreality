@@ -182,7 +182,7 @@ public class FramedCurve extends SceneGraphComponent {
     		// extract translational part
        	double[] p0 = Rn.matrixTimesVector( null, ((ControlPoint) controlPoints.firstElement()).tt.getMatrix(), P3.originP3);
        	double[] p1 = Rn.matrixTimesVector( null, ((ControlPoint) controlPoints.lastElement()).tt.getMatrix(), P3.originP3);
-       	diameter = P3.distance(p0, p1, signature);
+       	diameter = P3.distanceBetween(p0, p1, signature);
        	iconScale = .0002 * diameter;
     		int n = controlPoints.size();
     		Iterator iter;
@@ -288,7 +288,7 @@ public class FramedCurve extends SceneGraphComponent {
    			double m[] = cp.tt.getMatrix();
 			pt[0] = m[3]; pt[1] = m[7]; pt[2] = m[11];  pt[3] = m[15];
    			if (i>0)	{
-     			double d =  Pn.distance(pt, opt, signature);
+     			double d =  Pn.distanceBetween(pt, opt, signature);
     				cp.t  = length = length + d;
     			} else cp.t = 0.0;
     			System.arraycopy(pt, 0, opt, 0, 4);

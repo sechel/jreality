@@ -60,6 +60,8 @@ public class TestTubes extends AbstractLoadableScene {
 			{{2, 0, 0, 2},		{2 ,0, 0, 2},		{4, 0, 0, 4}}};
 
 	static double[][] form = {{1,1,1}, {1,-1,1},{1,-1,-1},{1,1,-1},{-1,1,-1},{-1,-1,-1},{-1,-1,1},{-1,1,1}};
+	static double[][] form2 = {{1,1,1}, {1,0,1}, {1,-1,1},{1,-1,0},{1,-1,-1},{1,0,-1},{1,1,-1},{0,1,-1},
+			{-1,1,-1},{-1,0,-1},{-1,-1,-1},{-1,-1,0},{-1,-1,1},{-1,0,1},{-1,1,1}};
 
 	static double[][] otherDirection	= {{1,0,0,0},{0,0,1,0},{0,0,2,0},{1,0,3,0}};
 	
@@ -81,6 +83,15 @@ public class TestTubes extends AbstractLoadableScene {
 		root.setAppearance(new Appearance());
 		root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
 
+		double[][] rod = new double[8][3];
+		for (int i = 0; i<8; ++i)	{
+			rod[i][0] = .1*i;
+			rod[i][1] = rod[i][2] = 0.0;
+		}
+		TubeUtilityNew.makeTubeAsIFS(rod, .04,null,TubeUtilityNew.FRENET,false, Pn.HYPERBOLIC);
+		
+		boolean simple = true;
+		
 		double[][] square = {{1,1,0},{-1,1,0},{-1,-1,0},{1,-1,0}};
 		
 		double[][] profile = {{0,0,0}, {0,.1,0},{1,.1,0},{1,.2,0},{1.4,0,0}};
@@ -89,13 +100,7 @@ public class TestTubes extends AbstractLoadableScene {
 	   double[][] tpts = torus1.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 	   //torus1.addGeometryListener(torus1);
 	   //pts = square;
-	   double[][] pts = form;
-	   double[][][] tubePoints = TubeUtility.makeTubeAsBezierPatchMesh(pts, .2, circle, TubeUtility.PARALLEL,true, Pn.EUCLIDEAN);
-	   BezierPatchMesh bpm = new BezierPatchMesh(2, 3, tubePoints);
-	   for (int i = 0; i<3; ++i)	{ bpm.refine();}
-	   QuadMeshShape qmpatch = GeometryUtility.representBezierPatchMeshAsQuadMesh(bpm);	   
-	   QuadMeshShape qms = TubeUtilityNew.makeTubeAsIFS(pts, .04, null, TubeUtility.PARALLEL, true, Pn.EUCLIDEAN);
-	   GeometryUtility.calculateAndSetNormals(qms);
+	   double[][] pts = form2;
 	   
 	   //QuadMeshShape torust = TubeUtility.makeTubeAsIFS(tpts, .2,  null, TubeUtility.PARALLEL, false);
 	   //GeometryUtility.calculateAndSetNormals(torust);
@@ -103,11 +108,13 @@ public class TestTubes extends AbstractLoadableScene {
 	   torussgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, 
 	   		new Color(120,0,  120));
 	   torussgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, .03);
-	   QuadMeshShape torus1Tubes = TubeUtilityNew.makeTubeAsIFS(tpts, .04, null, TubeUtilityNew.PARALLEL, true, Pn.EUCLIDEAN);
-	   GeometryUtility.calculateAndSetNormals(torus1Tubes);
-	   torussgc.setGeometry(torus1Tubes); //torus1);
-	   torussgc.getTransformation().setStretch(.9);
-	   root.addChild(torussgc);
+	   if (!simple)	{
+		   QuadMeshShape torus1Tubes = TubeUtilityNew.makeTubeAsIFS(tpts, .04, null, TubeUtilityNew.PARALLEL, true, Pn.EUCLIDEAN);
+		   GeometryUtility.calculateAndSetNormals(torus1Tubes);
+		   torussgc.setGeometry(torus1Tubes); //torus1);
+		   torussgc.getTransformation().setStretch(.9);
+		   root.addChild(torussgc);	   	
+	   }
 	   
 	   IndexedFaceSet arrow = GeometryUtility.surfaceOfRevolutionAsIFS(profile, 24, Math.PI * 2);
 	   SceneGraphComponent globeNode= SceneGraphUtilities.createFullSceneGraphComponent("container");
@@ -125,17 +132,24 @@ public class TestTubes extends AbstractLoadableScene {
 	   ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.RED);
 	   //IndexedLineSet croxl = GeometryUtility.createCurveFromPoints(form, true);
 	   //globeNode2.addChild(TubeUtility.ballAndStick(croxl, .05, .03, java.awt.Color.RED, java.awt.Color.BLUE, Pn.EUCLIDEAN));
-	   globeNode2.setGeometry(qms); //croxl);
+	   if (!simple)	{
+		   QuadMeshShape qms = TubeUtilityNew.makeTubeAsIFS(pts, .04, null, TubeUtility.PARALLEL, true, Pn.EUCLIDEAN);
+		   GeometryUtility.calculateAndSetNormals(qms);	   	
+		   globeNode2.setGeometry(qms); //croxl);
+	   }
 	   
 	   SceneGraphComponent globeNode4= SceneGraphUtilities.createFullSceneGraphComponent("patch");
 	   
-	   double[] p1 = {0,1,0};
-	   double[] p2 = {0,-1,0};
-	   SceneGraphComponent tubie = TubeUtility.ballAndStick(Primitives.sharedIcosahedron, .10, .05, java.awt.Color.YELLOW, java.awt.Color.GREEN, Pn.EUCLIDEAN); //TubeUtility.createTubesOnEdges(Primitives.sharedIcosahedron, .05); //TubeUtility.makeTubeAsIFS(p1, p2, .3, null);
+	   double[][][] tubePoints = TubeUtilityNew.makeTubeAsBezierPatchMesh(form, .2, circle, TubeUtility.PARALLEL,true, Pn.EUCLIDEAN);
+	   BezierPatchMesh bpm = new BezierPatchMesh(2, 3, tubePoints);
+	   for (int i = 0; i<3; ++i)	{ bpm.refine();}
+	   QuadMeshShape qmpatch = GeometryUtility.representBezierPatchMeshAsQuadMesh(bpm);	   
+	   globeNode4.setGeometry(qmpatch);
+
+	   SceneGraphComponent tubie = TubeUtilityNew.ballAndStick(Primitives.sharedIcosahedron, .10, .05, java.awt.Color.YELLOW, java.awt.Color.GREEN, Pn.EUCLIDEAN); //TubeUtility.createTubesOnEdges(Primitives.sharedIcosahedron, .05); //TubeUtility.makeTubeAsIFS(p1, p2, .3, null);
 	   tubie.setTransformation(new Transformation());
 	   tubie.getTransformation().setStretch(.5);
 	   tubie.setAppearance(new Appearance());
-	   //globeNode4.setGeometry(qmpatch);
 	   globeNode4.addChild(tubie);
 	   ap1 = new Appearance();
 	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.BLUE);

@@ -31,7 +31,7 @@ public class PlaneProjector extends Projector {
 		Rn.matrixTimesVector(imageOfOrigin, objectToCam, Pn.originP3);
 		// project onto z-axis
 		imageOfOrigin[0] = imageOfOrigin[1] = 0d;
-		distanceToPlane = Pn.distance(imageOfOrigin, Pn.originP3, camera.getSignature());
+		distanceToPlane = Pn.distanceBetween(imageOfOrigin, Pn.originP3, camera.getSignature());
 		if (imageOfOrigin[2] < 0.0) distanceToPlane *= -1;
 	}
 	
