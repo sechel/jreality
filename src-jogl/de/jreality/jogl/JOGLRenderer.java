@@ -675,7 +675,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 				boolean ss = geometryShader.polygonShader.isSmoothShading();
 				// TODO figure out which sphere proxy to use based on distance, LOD, etc
 				
-				int dlist = JOGLRendererHelper.getSphereDLists(2, globalHandle.theCanvas.getGL());
+				int dlist = JOGLSphereHelper.getSphereDLists(2, globalHandle.theCanvas.getGL());
 				globalGL.glCallList(dlist);
 				return;
 			}

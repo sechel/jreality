@@ -33,21 +33,16 @@ public class PickTool extends AbstractMouseTool {
 		return true;
 	}
 	
-	public boolean endTracking(MouseEvent e) {
-		return super.endTracking(e);
-	}
-	
 	public boolean startTrackingAt(MouseEvent e) {
-		if (!super.startTrackingAt(e)) return false;;
+		if (!super.startTrackingAt(e)) return false;
 
 		newPickPoint = null;
 		pickAction.setPickPoint(current);
 		List picks = (List) pickAction.visit();			
 		if (picks!= null && (picks.size() > 0))	{
 			newPickPoint = (PickPoint) picks.get(0);
-			return true;
 		} 
-		return false;
+		return true;
 		
 	}
 		
@@ -59,8 +54,12 @@ public class PickTool extends AbstractMouseTool {
 		List picks = (List) pickAction.visit();			
 		if (picks!= null && (picks.size() > 0))	{
 			newPickPoint = (PickPoint) picks.get(0);
-			return true;
-		} else return false;
+		} 
+		return true;
 
 	}
+	public boolean endTracking(MouseEvent e) {
+		return super.endTracking(e);
+	}
+	
 }

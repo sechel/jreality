@@ -46,11 +46,16 @@ public class SelectionTool extends PickTool  {
 	 * @see charlesgunn.gv2.tool.MouseTool#startTrackingAt(java.awt.event.MouseEvent)
 	 */
 	public boolean startTrackingAt(MouseEvent e) {
-		if (!super.startTrackingAt(e)) return false;
-		newSelection = newPickPoint.getPickPath();
-		selectionManager.setPickPoint(newPickPoint);
-		theViewer.render();
-		mouseMoved=false;
+		newSelection = null;
+		if (!super.startTrackingAt(e)) 	return false;
+		newSelection = null;
+		mouseMoved=false;		
+
+		if (newPickPoint != null)	{
+			newSelection = newPickPoint.getPickPath();
+			selectionManager.setPickPoint(newPickPoint);
+			theViewer.render();
+		}
 		return true;
 	} 
 		
@@ -59,10 +64,13 @@ public class SelectionTool extends PickTool  {
 	 */
 	public boolean track(MouseEvent e) {
 		if (!super.track(e)) return false;
+	
 		mouseMoved=true;
-		newSelection = newPickPoint.getPickPath();
-		selectionManager.setPickPoint(newPickPoint);
-		theViewer.render();
+		if (newPickPoint != null)	{
+			newSelection = newPickPoint.getPickPath();
+			selectionManager.setPickPoint(newPickPoint);
+			theViewer.render();			
+		}
 		return true;
 	}
 
@@ -71,12 +79,6 @@ public class SelectionTool extends PickTool  {
 	 */
 	public boolean endTracking(MouseEvent e) {
 		if (!super.endTracking(e)) return false;
-		// the selection tool does nothing if the user moves the mouse.
-		// He/she has to hold and click to have an effect.
-		if (mouseMoved) return false;
-		// perform the pick
-		track(e);
-
 		if (newSelection == null)		{		// nothing under the cursor
 			previousFullSelection = null;
 			truncatedSelection = null;
@@ -85,6 +87,12 @@ public class SelectionTool extends PickTool  {
 			//System.err.println("1");
 			return true;
 		} // else {
+		// the selection tool does nothing if the user moves the mouse.
+		// He/she has to hold and click to have an effect.
+		if (mouseMoved) return false;
+		// perform the pick
+		track(e);
+
 		// cycle through the path as long as the full selection path remains the same
 		if (previousFullSelection != null && truncatedSelection != null && truncatedSelection.getLength() > 1  && previousFullSelection.isEqual(newSelection) ) {
 			truncatedSelection.pop();

@@ -21,6 +21,7 @@ import net.java.games.jogl.GLU;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.CommonAttributes;
+import de.jreality.soft.MouseTool;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtilities;
 
@@ -171,7 +172,9 @@ public class ViewerKeyListener extends KeyAdapter {
 
 				case KeyEvent.VK_E:		
 					if (e.isShiftDown()) {		//encompass
-						CameraUtility.encompass(viewer);
+						CameraUtility.encompass2(viewer);
+//						MouseTool mt = new MouseTool(viewer);
+//						mt.encompass();
 						viewer.render();
 					} else						// toggle edge drawing
 						toggleValue(CommonAttributes.EDGE_DRAW);

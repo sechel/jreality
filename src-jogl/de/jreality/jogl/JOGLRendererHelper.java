@@ -55,66 +55,6 @@ import de.jreality.util.Rn;
 public class JOGLRendererHelper {
 
 	static float [] bg = {0f, 0f, 0f, 1f};
-	//static int[] sphereDLists = null;
-	static PolygonShader dps = null;
-	static boolean useQuadMesh = true;
-	static Hashtable sphereDLists = new Hashtable();
-	//TODO This can't be static; the display lists so created are invalid if the renderer parameter
-	// no longer exists.  So ... these display lists have to be tied to a specific context.
-	public static void setupSphereDLists(GL gl)	{
-		int[] dlists = (int[] ) sphereDLists.get(gl);
-		if (dlists != null) 	return;
-		//dps = new DefaultPolygonShader();
-		EffectiveAppearance eap = EffectiveAppearance.create();
-		eap = eap.create(SphereHelper.pointAsSphereAp);
-		dps =ShaderLookup.getPolygonShaderAttr(eap, "", CommonAttributes.POLYGON_SHADER);		
-		int n = SphereHelper.spheres.length;
-		dlists= new int[n];
-		for (int i = 0; i<n; ++i)	{
-			dlists[i] = gl.glGenLists(1);
-			gl.glNewList(dlists[i], GL.GL_COMPILE);
-			if (useQuadMesh) {
-				QuadMeshShape qms = SphereHelper.cubePanels[i];
-				for (int j = 0; j<SphereHelper.cubeSyms.length; ++j)	{
-					gl.glPushMatrix();
-					gl.glMultTransposeMatrixd(SphereHelper.cubeSyms[j].getMatrix());
-					drawFaces(qms, gl, false, true, 1.0);
-					gl.glPopMatrix();
-				}				
-			} else {
-				drawFaces(SphereHelper.spheres[i], gl, false, true, 1.0);
-			}
-			gl.glEndList();
-		}
-		sphereDLists.put(gl, dlists);
-	}
-	
-	/**
-	 * @param i
-	 * @return
-	 */
-	public static int getSphereDLists(int i, GL gl) {
-		int[] dlists = getSphereDLists(gl);
-		if (dlists == null) 	{
-			System.err.println("Invalid sphere display lists");
-			return 0;
-		}
-		return dlists[i];
-	}
-
-	/**
-	 * @param i
-	 * @return
-	 */
-	public static int[] getSphereDLists( GL gl) {
-		int[] dlists = (int[] ) sphereDLists.get(gl);
-		if (dlists == null) 	{
-			setupSphereDLists(gl);
-			dlists = (int[] ) sphereDLists.get(gl);
-		}
-		return dlists;
-	}
-
 	public static void handleBackground(GLCanvas theCanvas, Appearance topAp)	{
 			GL gl = theCanvas.getGL();
 			Object bgo = null;
@@ -201,7 +141,7 @@ public class JOGLRendererHelper {
 		gl.glColorMaterial(GL.GL_FRONT, GL.GL_DIFFUSE);
 		gl.glEnable(GL.GL_COLOR_MATERIAL);
 		if (drawSpheres)	{
-			int[] dlists = getSphereDLists(gl);
+			int[] dlists = JOGLSphereHelper.getSphereDLists(gl);
 			double size = pointRadius;
 			
 			gl.glEnable(GL.GL_COLOR_MATERIAL);		

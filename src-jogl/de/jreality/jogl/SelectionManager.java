@@ -37,7 +37,7 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 	private SceneGraphPath defaultSelection;
 	private SceneGraphPath theSelection;
 	private PickPoint pickPoint;
-	private boolean renderSelection = false, renderPick;
+	private boolean renderSelection = false, renderPick = false;
 	private boolean selectionEditable = false;
 	private Appearance boundAppearance, pickPointAppearance;
 	static boolean debug = true;
@@ -86,8 +86,6 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 		selectionKit.addChild(pickPointKit);
 		boundKit.setVisible(false);
 		selectionKit.addChild(boundKit);
-		//renderSelection = true;
-		renderPick = true;
 		sphereSize = .02;
 	}
 
@@ -110,41 +108,41 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 			if (theSelection!=null) theSelection.removePathMatrixListener(this);
 			theSelection = path;
 		}
-			theSelection.addPathMatrixListener(this);
-			if (theSelection != null) { 
-				System.err.println("sel: "+theSelection.toString());
-				Object tail = theSelection.getLastElement();
-				if (tail instanceof SceneGraphComponent)	{
-					Transformation t =  ((SceneGraphComponent) tail).getTransformation();
-					if (t != null && t.getIsEditable())	{
-						if (debug) System.err.println("SceneGraphComponent is editable");
-						selectionEditable = true;
-					} else {
-						if (debug) System.err.println("SceneGraphComponent is not editable");
-						selectionEditable = false;
-						} 
-				}
-				else {
-					if (debug) System.err.println("Not a SceneGraphComponent");
+		theSelection.addPathMatrixListener(this);
+		if (theSelection != null) { 
+			System.err.println("sel: "+theSelection.toString());
+			Object tail = theSelection.getLastElement();
+			if (tail instanceof SceneGraphComponent)	{
+				Transformation t =  ((SceneGraphComponent) tail).getTransformation();
+				if (t != null && t.getIsEditable())	{
+					if (debug) System.err.println("SceneGraphComponent is editable");
+					selectionEditable = true;
+				} else {
+					if (debug) System.err.println("SceneGraphComponent is not editable");
 					selectionEditable = false;
 					} 
-			} 
-			else if (debug) System.err.println("SelectionManager: empty selection");
-				
-			if (theSelection != null)	{
-				selectedAppearance = null;
-				for (int i = theSelection.getLength()-1; i>=0; i--)	{
-					Object selt = theSelection.getElementAt(i);
-					if (selt != null)	{
-						if (selt instanceof Appearance)  selectedAppearance = (Appearance) selt;
-						else if ( selt instanceof SceneGraphComponent)	{
-							selectedAppearance = ((SceneGraphComponent)selt).getAppearance() ;
-							} 		 
-						if (selectedAppearance != null) break;
-					}
+			}
+			else {
+				if (debug) System.err.println("Not a SceneGraphComponent");
+				selectionEditable = false;
+				} 
+		} 
+		else if (debug) System.err.println("SelectionManager: empty selection");
+			
+		if (theSelection != null)	{
+			selectedAppearance = null;
+			for (int i = theSelection.getLength()-1; i>=0; i--)	{
+				Object selt = theSelection.getElementAt(i);
+				if (selt != null)	{
+					if (selt instanceof Appearance)  selectedAppearance = (Appearance) selt;
+					else if ( selt instanceof SceneGraphComponent)	{
+						selectedAppearance = ((SceneGraphComponent)selt).getAppearance() ;
+						} 		 
+					if (selectedAppearance != null) break;
 				}
 			}
-			
+		}
+		
 		
 		broadcastChange();
 	}
