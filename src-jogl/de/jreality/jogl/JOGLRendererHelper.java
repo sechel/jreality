@@ -19,7 +19,9 @@ import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
 import net.java.games.jogl.GLDrawable;
 import net.java.games.jogl.util.BufferUtils;
+import net.java.games.jogl.util.GLUT;
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.LabelSet;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.RegularDomainQuadMesh;
 import de.jreality.jogl.pick.JOGLPickAction;
@@ -28,6 +30,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.Graphics3D;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.Light;
@@ -272,7 +275,7 @@ public class JOGLRendererHelper {
 	}
 	public static void drawFaces( IndexedFaceSet sg, GL gl,  boolean smooth, double alpha, boolean pickMode, int pickName) {
 
-		int colorBind,normalBind, colorLength=3;
+		int colorBind = -1,normalBind, colorLength=3;
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		DataList vertexNormals = sg.getVertexAttributes(Attribute.NORMALS);
 		DataList faceNormals = sg.getFaceAttributes(Attribute.NORMALS);
@@ -292,7 +295,7 @@ public class JOGLRendererHelper {
 			colorBind = ElementBinding.PER_VERTEX;
 			colorLength = GeometryUtility.getVectorLength(vertexColors);
 		} 
-		else if (faceColors != null && (vertexColors == null || !smooth)) 	{
+		else if (faceColors != null && colorBind != ElementBinding.PER_VERTEX) 	{
 			colorBind = ElementBinding.PER_FACE;
 			colorLength = GeometryUtility.getVectorLength(faceColors);
 		} 
@@ -457,6 +460,56 @@ public class JOGLRendererHelper {
 //			gl.glDepthMask(true);
 //		}
 	}
+	private static GLUT glut = new GLUT();
+	static double[] correctionNDC = null;
+	static {
+		correctionNDC = Rn.identityMatrix(4);
+		correctionNDC[10] = correctionNDC[11] = .5;
+	}
+	
+	public static void drawLabels(LabelSet lb, JOGLRenderer jr)	{
+		GL gl = jr.getCanvas().getGL();
+		String[] labels = lb.getLabels();
+		PointSet positions = lb.getPositions();
+		double[][] objectVerts, screenVerts;
+		double[] screenOffset = lb.getScreenOffset();
+		int bitmapFont = lb.getBitmapFont();
+		
+		objectVerts = positions.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+		screenVerts = new double[objectVerts.length][objectVerts[0].length];
+		
+		Graphics3D gc = jr.getContext();
+		
+		double[] objectToScreen = Rn.times(null, correctionNDC, gc.getObjectToScreen());
+		
+		Rn.matrixTimesVector(screenVerts, objectToScreen, objectVerts);
+		if (screenVerts[0].length == 4) Pn.dehomogenize(screenVerts, screenVerts);
+		int np = positions.getNumPoints();
+		//for (int i = 0; i<np; ++i)	{ screenVerts[i][2] = (screenVerts[i][2] + 1)/2.0; }
+
+		// Store enabled state and disable lighting, texture mapping and the depth buffer
+		gl.glPushAttrib(GL.GL_ENABLE_BIT);
+		gl.glDisable(GL.GL_BLEND);
+		gl.glDisable(GL.GL_LIGHTING);
+		gl.glDisable(GL.GL_TEXTURE_2D);
+		for (int i = 0; i< 6; ++i) gl.glDisable(i + GL.GL_CLIP_PLANE0);
+
+		//gl.glColor3f(1, 1, 1);
+		float[] cras = new float[4];
+		double[] dras = new double[4];
+		for (int i = 0; i<np; ++i)	{
+			gl.glRasterPos3d(objectVerts[i][0], objectVerts[i][1], objectVerts[i][2]);
+			gl.glGetFloatv(GL.GL_CURRENT_RASTER_POSITION, cras);
+			for (int j = 0; j<4; ++j) dras[j] = cras[j];
+			gl.glWindowPos3d(screenVerts[i][0]+screenOffset[0], screenVerts[i][1] +screenOffset[1], screenVerts[i][2]+screenOffset[2]);
+			String label = (labels == null) ? Integer.toString(i) : labels[i];
+			//bitmapFont = 2 + (i%6);
+			glut.glutBitmapString(gl, bitmapFont, label);
+		}
+
+		gl.glPopAttrib();
+	}
+
 	public void processLights(GL globalGL, List lights) {
 		int lightCount =  GL.GL_LIGHT0;
 		
@@ -651,5 +704,6 @@ public class JOGLRendererHelper {
 			 
 		System.out.println("Screenshot saved to "+file.getName());
 	}
+	
 
 }

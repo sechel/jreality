@@ -728,7 +728,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 				return;
 			}		else 	if (originalGeometry instanceof LabelSet)	{
 				globalGL.glColor4fv(geometryShader.lineShader.getDiffuseColor().getComponents(null));
-				((LabelSet) originalGeometry).render(globalHandle);
+				JOGLRendererHelper.drawLabels(((LabelSet) originalGeometry), globalHandle);
 			}
 
 			if (geometryShader.isFaceDraw() && ifs != null)	{
