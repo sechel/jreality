@@ -23,6 +23,7 @@
 package de.jreality.scene.proxy.smrj;
 
 import java.rmi.RemoteException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,6 +37,7 @@ import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
+import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
 import de.jreality.scene.event.GeometryEvent;
@@ -45,10 +47,6 @@ import de.jreality.scene.event.SceneContainerListener;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
 import de.jreality.scene.proxy.rmi.*;
-import de.jreality.scene.proxy.rmi.RemoteGeometry;
-import de.jreality.scene.proxy.rmi.RemoteIndexedFaceSet;
-import de.jreality.scene.proxy.rmi.RemoteIndexedLineSet;
-import de.jreality.scene.proxy.rmi.RemotePointSet;
 
 /**
  * 
@@ -143,7 +141,15 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
             Attribute a = (Attribute) i.next();
             DataList dl = ((PointSet) src).getVertexAttributes(a);
             try {
-                ((RemotePointSet) dst).setAndCheckVertexCountAndAttributes(a, dl);
+                if (a == Attribute.COORDINATES || a == Attribute.NORMALS) {
+                    DoubleArray da = dl.toDoubleArray(); 
+                    ByteBufferWrapper bbw = ByteBufferWrapper.getInstance();
+                    da.toNativeByteBuffer(bbw.createWriteBuffer(da.getLength()*8));
+                    if (a == Attribute.COORDINATES) ((RemotePointSet) dst).setVertices(bbw, dl.toDoubleArrayArray().getLengthAt(0));
+                    else ((RemotePointSet) dst).setVertexNormals(bbw, dl.toDoubleArrayArray().getLengthAt(0));
+                } else {
+                    ((RemotePointSet) dst).setAndCheckVertexCountAndAttributes(a, dl);
+                }
             } catch (RemoteException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

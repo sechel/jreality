@@ -1,6 +1,7 @@
 package de.jreality.scene.proxy.smrj;
 
 import java.io.IOException;
+import java.rmi.RemoteException;
 
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.scene.proxy.rmi.*;
@@ -50,17 +51,17 @@ public class SMRJMirrorFactory extends RemoteMirrorFactory {
     }
 
     public void visit(de.jreality.scene.IndexedFaceSet i) {
-        created=createRemote(IndexedFaceSet.class);
+        created=createRemote(de.jreality.scene.proxy.smrj.IndexedFaceSet.class);
         copyAttr(i, (RemoteIndexedFaceSet)created);
     }
 
     public void visit(de.jreality.scene.IndexedLineSet ils) {
-        created=createRemote(IndexedLineSet.class);
+        created=createRemote(de.jreality.scene.proxy.smrj.IndexedLineSet.class);
         copyAttr(ils, (RemoteIndexedLineSet)created);
     }
 
     public void visit(de.jreality.scene.PointSet p) {
-        created=createRemote(PointSet.class);
+        created=createRemote(de.jreality.scene.proxy.smrj.PointSet.class);
         copyAttr(p, (RemotePointSet)created);
     }
 
