@@ -55,18 +55,6 @@ public class TreeProxyTest extends TestCase {
     }
   }
   
-  static class TestTreeProxy extends SceneProxyTreeBuilder {
-    public TestTreeProxy(SceneGraphComponent root) {
-      super(root, new PrintFactory(), new ProxyConnector());
-    }
-  }
-
-  static class TestTreeProxy2 extends UpToDateSceneProxyBuilder {
-    public TestTreeProxy2(SceneGraphComponent root) {
-      super(root, new PrintFactory(), new ProxyConnector());
-    }
-  }
-
   static class TreeDumper {
     StringBuffer indent=new StringBuffer(" ");
     void dumpTree(SceneTreeNode node) {
@@ -81,7 +69,10 @@ public class TreeProxyTest extends TestCase {
 
   public void testTreeProxy() {
     LoadableScene ls = new Icosahedra();
-    TestTreeProxy ttp = new TestTreeProxy(ls.makeWorld());
+    SceneProxyTreeBuilder ttp = new SceneProxyTreeBuilder(ls.makeWorld());
+    ttp.setProxyTreeFactory(new ProxyTreeFactory());
+    ttp.getProxyTreeFactory().setProxyFactory(new ProxyFactory());
+    ttp.setProxyConnector(new ProxyConnector());
     SceneTreeNode tn = ttp.createProxyTree();
     new TreeDumper().dumpTree(tn);
     System.out.println("++++++++++++++++++++++");
@@ -100,10 +91,15 @@ public class TreeProxyTest extends TestCase {
     root.addChild(p1);
     root.addChild(p2);
     
-    TestTreeProxy2 ttp = new TestTreeProxy2(root);
-    TreeDumper td = new TreeDumper(); 
-    SceneTreeNode tn = ttp.createProxyTree();
+    UpToDateSceneProxyBuilder ttp = new UpToDateSceneProxyBuilder(root);
     
+    TreeDumper td = new TreeDumper(); 
+    ttp.setProxyTreeFactory(new ProxyTreeFactory());
+    ttp.getProxyTreeFactory().setProxyFactory(new ProxyFactory());
+    ttp.setProxyConnector(new ProxyConnector());
+
+    SceneTreeNode tn = ttp.createProxyTree();
+
     td.dumpTree(tn);
     System.out.println("created ++++++++++++++++++++++\n");
 
