@@ -120,7 +120,7 @@ public final class DaaInlinedNIO extends Daa {
      * @see de.jreality.scene.data.Daa#toByteBuffer(java.nio.ByteBuffer)
      */
     public void toByteBuffer(ByteBuffer bb) {
-        bb.put(dataBuf);
+//        bb.put(dataBuf.position(0).limit());
     }
     
 }

@@ -39,9 +39,9 @@ public class DaaTest extends TestCase {
 
     public void testNormal() throws Exception {
         int runCre=0, runAc=0, 
-        runSer=0, runOv=0, runTB=100,
-        completeRuns=5;
-        CatenoidHelicoid ch = new CatenoidHelicoid(50);
+        runSer=0, runOv=0, runTB=500,
+        completeRuns=10;
+        CatenoidHelicoid ch = new CatenoidHelicoid(100);
         double[][] data = GeometryUtility.calculateVertexNormals(ch);
         DaaNormal daan = new DaaNormal(data);
         DaaInlined daai = new DaaInlined(data);
@@ -49,20 +49,20 @@ public class DaaTest extends TestCase {
         assertEquals(daan, daai);
         assertEquals(daan, daaib);
         ByteBuffer bb = ByteBuffer.allocateDirect(1024*1024).order(ByteOrder.nativeOrder());
-        for (int i = 0; i < completeRuns; i++) {
+        for (int i = 0; i < completeRuns; i++) {/*
             runCreate(data, runCre);
             runOverwrite(daan, daaib, runOv);
             runOverwrite(daai, daaib, runOv);
             runOverwrite(daaib, daaib, runOv);
             runAccess(daan, runAc);
             runAccess(daai, runAc);
-            runAccess(daaib, runAc);
+            runAccess(daaib, runAc);*/
 //            runSerialize(daan, runSer);
 //            runSerialize(daai, runSer);
 //            runSerialize(daaib, runSer);
             runToByteBuffer(daan, bb, runTB);
             runToByteBuffer(daai, bb, runTB);
-            runToByteBuffer(daaib, bb, runTB);
+//            runToByteBuffer(daaib, bb, runTB);
         }
     }
     
@@ -72,13 +72,13 @@ public class DaaTest extends TestCase {
         long cts=0;
         long s,t;
         for (int i = 0; i < runs; i++) {
+            bb.clear();
             s = System.currentTimeMillis();
             array.toByteBuffer(bb);
             t = System.currentTimeMillis() - s;
             cts+=t;
-            bb.clear();
         }
-        System.out.println("\ttoByteBuffer="+(cts/((double)runs)));
+        System.out.println("\ttoByteBuffer="+(1000*cts/runs)+" ns "+bb.position()+" bytes");
     }
     
     private void runCreate(double[][] array, int runs) {

@@ -27,15 +27,18 @@ import java.nio.*;
 
 public final class DaaNormal extends Daa {
 
-    final double[][] data;
+    private final int slen;
+    private final double[][] data;
     
     public DaaNormal(double[][] data) {
         super(data.length);
-        this.data=new double[getLength()][];
-        for (int i = 0; i < getLength(); i++) {
-            final double[] slot = this.data[i] = new double[data[i].length];
-            for (int j=0; j<data[i].length; j++) slot[j] = data[i][j];
-        }
+        this.data=data;
+        this.slen=data[0].length;
+//        this.data=new double[getLength()][];
+//        for (int i = 0; i < getLength(); i++) {
+//            final double[] slot = this.data[i] = new double[data[i].length];
+//            for (int j=0; j<data[i].length; j++) slot[j] = data[i][j];
+//        }
     }
     public int getLengthAt(int n)
     {
@@ -48,15 +51,25 @@ public final class DaaNormal extends Daa {
     protected void setValueAt(int n, int j, double d) {
         data[n][j]=d;
     }
-    /* (non-Javadoc)
-     * @see de.jreality.scene.data.Daa#toByteBuffer(java.nio.ByteBuffer)
-     */
+    double[] scratch;
+    DoubleBuffer DB;
     public void toByteBuffer(ByteBuffer bb) {
-        DoubleBuffer db = bb.asDoubleBuffer(); 
-        for (int i = 0; i < length; i++) {
-          db.put(data[i]);
-        }
-        bb.position(bb.position()+db.position()*8);
+/*      final int num=length*slen;
+      if(scratch==null||scratch.length<num) { System.err.println("alloc");
+        scratch=new double[num];}
+      if(DB==null||num!=DB.capacity()) DB=DoubleBuffer.wrap(scratch, 0, num);
+      DB.position(0).limit(num);*/
+      final DoubleBuffer db = bb.asDoubleBuffer();
+//      System.out.println("\tat "+db.getClass().getName()+".put(DirectDoubleBufferU.java:0)");
+      for(int i = 0, k=0, l=length; i < l; i++) {
+        final double[] d=data[i];
+        for(int j=0; j<slen; j++)
+//          scratch[k++]=d[j];
+          db.put(d[j]);
+//        db.put(d);
+      }
+//      db.put(DB);//scratch, 0, num);
+      bb.position(bb.position()+(db.position()<<3));
     }
 
 //    static ByteBuffer outOffsetBuf;

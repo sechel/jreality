@@ -23,6 +23,8 @@
 package de.jreality.scene.data;
 
 import java.io.Serializable;
+import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
 
 
 public abstract class Daa implements Serializable {
@@ -36,7 +38,17 @@ public abstract class Daa implements Serializable {
     public abstract int getLengthAt(int n);
     public abstract double getValueAt(int n, int i);
     protected abstract void setValueAt(int n, int j, double d);
-    public abstract void toByteBuffer(java.nio.ByteBuffer bb);
+  
+  public void toByteBuffer(ByteBuffer bb) {
+    final DoubleBuffer db = bb.asDoubleBuffer();
+    for(int i = 0; i < length; i++) {
+      final double slen=getLengthAt(i);
+      for(int j=0; j<slen; j++)
+        db.put(getValueAt(i, j));
+    }
+    bb.position(bb.position()+(db.position()<<3));
+  }
+  
     public final int getLength() {
         return length;
     }
