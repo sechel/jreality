@@ -7,6 +7,7 @@
 package de.jreality.worlds;
 import java.awt.Color;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
@@ -23,10 +24,11 @@ import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.DiscreteSpaceCurve;
 import de.jreality.jogl.SkyBox;
 import de.jreality.jogl.shader.DefaultVertexShader;
-import de.jreality.jogl.shader.ReflectionMap;
+import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.ReflectionMap;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Texture2D;
 import de.jreality.scene.Transformation;
@@ -84,6 +86,12 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 		root.setName("theWorld");
 		root.setTransformation(new Transformation());
 		
+		String[] texNameSuffixes = {"rt","lf","up", "dn","bk","ft"};
+		ReflectionMap refm = ReflectionMap.reflectionMapFactory("textures/desertstorm/desertstorm_", texNameSuffixes, "JPG");
+		refm.setApplyMode(Texture2D.GL_COMBINE);
+		refm.setBlendColor(new Color(1.0f, 1.0f, 1.0f, 0.6f));
+
+		
 		double[][] pos = new double[6][3];
 		for (int i = 0; i<6; ++i)	{
 			double angle = i*Math.PI * 2.0/(6.0);
@@ -111,11 +119,12 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   double[] vec = {1d, 1.5d, 1d};
 	   Texture2D tex2d = null;
 	   try {
-		tex2d = new Texture2D(resourceDir+"grid256rgba.png");
-	   } catch (MalformedURLException e1) {
+		tex2d = new Texture2D(Readers.resolveDataInput("textures/grid256rgba.png"));
+	   } catch (IOException e1) {
 		e1.printStackTrace();
 	   }
 	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D, tex2d);
+		//ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"reflectionMap", refm);
 	   tex2d.setTextureMatrix( P3.makeStretchMatrix(null, vec));
 	   globeNode1.setAppearance(ap1);
 	   //rootAp = ap1;
@@ -208,11 +217,8 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   globeNode5.setGeometry(torus); //SphereHelper.spheres[4]); //torus);
 	   
 	   ap1 = new Appearance();
-		String[] texNameSuffixes = {"rt","lf","up", "dn","bk","ft"};
-		ReflectionMap refm = ReflectionMap.reflectionMapFactory("/net/MathVis/data/testData3D/textures/desertstorm/desertstorm_", texNameSuffixes, "JPG");
 		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"reflectionMap", refm);
-		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
-		refm.getGlobalSettings().setApplyMode(Texture2D.GL_COMBINE);
+		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.YELLOW);
 		ap1.setAttribute(CommonAttributes.EDGE_DRAW,false);
 	    globeNode5.setAppearance(ap1);
 		
@@ -249,24 +255,6 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   root.addChild(globeNode5);	  
 	   root.addChild(globeNode6);	
 
-		//String[] texNameSuffixes = {"bk","ft","dn","up","lf","rt"};
-//		faceTex = new Texture2D[6];
-//		for (int i = 0; i<6; ++i)	{
-//			try {
-//				//BufferedImage image = Texture2D.loadImage(resourceDir+ "desertstorm/desertstorm_"+texNameSuffixes[i]+".JPG");
-//				//faceTex[i] = new Texture2D(image);
-//				faceTex[i] = new Texture2D(resourceDir+ "/desertstorm/desertstorm_"+texNameSuffixes[i]+".JPG");
-//				faceTex[i].setRepeatS(Texture2D.GL_CLAMP_TO_EDGE);
-//				faceTex[i].setRepeatT(Texture2D.GL_CLAMP_TO_EDGE);
-//				faceTex[i].setMinFilter(Texture2D.GL_LINEAR_MIPMAP_LINEAR);
-//				faceTex[i].setApplyMode(Texture2D.GL_REPLACE);
-//				//faceTex[i].setMagFilter(GL.GL_NEAREST);
-//				//faceTex[i].setMinFilter(GL.GL_NEAREST);
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
 		
 		return root;
 	}

@@ -194,7 +194,7 @@ public class DefaultLineShader implements LineShader  {
 //	
 	// TOOD figure out how to clear out local display lists (not returned by the method)!
 	int[] tubeDL = null;
-	boolean testQMS = false;
+	boolean testQMS = true;
 	public int createTubesOnEdgesAsDL(IndexedLineSet ils, double rad,  double alpha, GL gl, int sig, boolean pickMode)	{
 		int n = ils.getNumEdges();
 		DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
@@ -214,7 +214,7 @@ public class DefaultLineShader implements LineShader  {
 		gl.glEnable(GL.GL_COLOR_MATERIAL);
 		gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK, GL.GL_DIFFUSE);
 		if (pickMode)	gl.glPushName(JOGLPickAction.GEOMETRY_LINE);
-		if (testQMS && ils instanceof QuadMeshShape)	{
+		if (!pickMode && testQMS && ils instanceof QuadMeshShape)	{
 			QuadMeshShape qms = (QuadMeshShape) ils;
 			int u = qms.getMaxU();
 			int v = qms.getMaxV();

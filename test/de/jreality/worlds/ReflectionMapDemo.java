@@ -6,8 +6,8 @@
  */
 package de.jreality.worlds;
 import de.jreality.geometry.SphereHelper;
-import de.jreality.jogl.shader.ReflectionMap;
 import de.jreality.scene.CommonAttributes;
+import de.jreality.scene.ReflectionMap;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Texture2D;
 import de.jreality.util.SceneGraphUtilities;
@@ -20,7 +20,7 @@ import de.jreality.util.SceneGraphUtilities;
  */
 public class ReflectionMapDemo extends AbstractLoadableScene {
 
-	static String resourceDir = "/homes/geometer/gunn/Pictures/textures/";
+	static String resourceDir = "./";
 	static {
 		String foo = System.getProperty("resourceDir");
 		if (foo != null)	resourceDir  = foo;
@@ -50,7 +50,7 @@ public class ReflectionMapDemo extends AbstractLoadableScene {
 		child.getTransformation().setStretch(1.0, 0.6, 1.3);
 		world.addChild(child);
 		String[] texNameSuffixes = {"rt","lf","up", "dn","bk","ft"};
-		ReflectionMap refm = ReflectionMap.reflectionMapFactory("/homes/geometer/gunn/Pictures/textures/desertstorm/desertstorm_", texNameSuffixes, "JPG");
+		ReflectionMap refm = ReflectionMap.reflectionMapFactory("textures/desertstorm/desertstorm_", texNameSuffixes, "JPG");
 		world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"reflectionMap", refm);
 		world.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW,false);
 		return world;

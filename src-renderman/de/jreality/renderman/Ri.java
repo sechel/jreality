@@ -59,6 +59,15 @@ public class Ri {
         }
         lightCount=0;
     }
+    public static  void begin(File file) {
+        try {
+            w =new PrintWriter(new FileWriter(file));
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        lightCount=0;
+    }
     public static  void end() {
         w.close();
     }

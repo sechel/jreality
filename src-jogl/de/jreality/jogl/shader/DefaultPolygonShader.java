@@ -15,6 +15,7 @@ import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.Geometry;
+import de.jreality.scene.ReflectionMap;
 import de.jreality.scene.Texture2D;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;

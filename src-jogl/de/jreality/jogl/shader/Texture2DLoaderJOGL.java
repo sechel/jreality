@@ -7,7 +7,9 @@ import java.util.Hashtable;
 
 import net.java.games.jogl.*;
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.scene.ReflectionMap;
 import de.jreality.scene.Texture2D;
+import de.jreality.scene.Texture3D;
 
 /**
  * A utility class to load textures for JOGL
@@ -89,6 +91,11 @@ public class Texture2DLoaderJOGL {
 			
 
 	} 
+	private static void handleTextureParameters(Texture3D tex, GL gl) {
+		Texture2D foo = (Texture2D) tex;
+		handleTextureParameters(foo, gl);
+		gl.glTexParameteri(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_WRAP_R, tex.getRepeatT()); 
+	}
 	/**
 	 * @param tex
 	 * @param textureID
@@ -100,9 +107,8 @@ public class Texture2DLoaderJOGL {
 		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, tex.getMagFilter());
 
 		// TODO make this a field in Texture2D
-		float[] texcolor = {.4f, .6f, .3f, .6f};
+		float[] texcolor = tex.getBlendColor().getRGBComponents(null);
 		gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, texcolor);
-		//gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_REPLACE);
 		gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, tex.getApplyMode());
 		
 		if (tex.getApplyMode() == Texture2D.GL_COMBINE) 
@@ -147,14 +153,11 @@ public class Texture2DLoaderJOGL {
 		//if (!first) return;
 		
 		int srcPixelFormat =  GL.GL_RGBA;
-		Texture2D tex = ref.getGlobalSettings();
-		// todo make a Texture3D class
-		gl.glTexParameteri(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_WRAP_R, tex.getRepeatT()); 
 		
 		double[] c2w = jr.getContext().getCameraToWorld();
 		c2w[3] = c2w[7] = c2w[11] = 0.0;
-		tex.setTextureMatrix(c2w);
-		handleTextureParameters(tex, gl);
+		ref.setTextureMatrix(c2w);
+		handleTextureParameters(ref, gl);
 
 		gl.glTexGeni(GL.GL_S, GL.GL_TEXTURE_GEN_MODE, GL.GL_REFLECTION_MAP);
 		gl.glTexGeni(GL.GL_T, GL.GL_TEXTURE_GEN_MODE, GL.GL_REFLECTION_MAP);

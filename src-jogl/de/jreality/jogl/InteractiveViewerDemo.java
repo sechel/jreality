@@ -35,6 +35,7 @@ import javax.swing.event.ChangeListener;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.reader.Readers;
+import de.jreality.renderman.RIBViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.DirectionalLight;
@@ -77,7 +78,7 @@ public class InteractiveViewerDemo extends JFrame{
 	int signature = Pn.EUCLIDEAN;
 	boolean showCameraPathInspector = false;
 	
-	protected static String resourceDir = ".", saveResourceDir = ".";
+	protected static String resourceDir = System.getProperty("home.dir"), saveResourceDir = System.getProperty("home.dir");
 	static {
 		String foo = System.getProperty("jreality.jogl.resourceDir");
 		if (foo != null) saveResourceDir = resourceDir = foo; 
@@ -185,11 +186,6 @@ public class InteractiveViewerDemo extends JFrame{
 	SceneGraphComponent root;
 	public void initializeScene()	{
 		root = viewer.getSceneRoot();
-//		if (root.getAppearance() == null) root.setAppearance(new Appearance());
-//		//CommonAttributes.setDefaultValues(root.getAppearance());
-//		root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
-//		root.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
-//		root.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
 		SceneGraphComponent lights = makeLights();		
 		if (lights != null)	CameraUtility.getCameraNode(viewer).addChild(lights);		
 	}
@@ -280,13 +276,20 @@ public class InteractiveViewerDemo extends JFrame{
             viewer.render();
         }
     });
-		jcc = new JMenuItem("Save Screen...");
-		fileM.add(jcc);
-		jcc.addActionListener( new ActionListener() {
-			public void actionPerformed(ActionEvent e)	{
-				saveToFile();
-			}
-		});
+	jcc = new JMenuItem("Save Screen...");
+	fileM.add(jcc);
+	jcc.addActionListener( new ActionListener() {
+		public void actionPerformed(ActionEvent e)	{
+			saveToFile();
+		}
+	});
+	jcc = new JMenuItem("Save RIB...");
+	fileM.add(jcc);
+	jcc.addActionListener( new ActionListener() {
+		public void actionPerformed(ActionEvent e)	{
+			saveRIBToFile();
+		}
+	});
 		theMenuBar.add(fileM);
 		JMenu testM = new JMenu("Windows");
 		if (showCameraPathInspector)	{
@@ -358,6 +361,31 @@ public class InteractiveViewerDemo extends JFrame{
 			File file = fc.getSelectedFile();
 			viewer.getRenderer().saveScreenShot(file);
 			saveResourceDir = file.getAbsolutePath();
+		} else {
+			System.out.println("Unable to open file");
+			return;
+		}
+		viewer.render();
+	}
+
+	protected void saveRIBToFile() {
+		SceneGraphComponent parent= null;
+		JFileChooser fc = new JFileChooser(saveResourceDir);
+		//System.out.println("FCI resource dir is: "+resourceDir);
+		int result = fc.showSaveDialog(this);
+		SceneGraphComponent sgc = null;
+		if (result == JFileChooser.APPROVE_OPTION)	{
+			File file = fc.getSelectedFile();
+			String name = file.getAbsolutePath();
+			saveResourceDir = file.getAbsolutePath();
+			file.delete();
+			RIBViewer ribv = new RIBViewer();
+			ribv.setCameraPath(viewer.getCameraPath());
+			ribv.setSceneRoot(viewer.getSceneRoot());
+			ribv.setHeight(viewer.getViewingComponent().getHeight());
+			ribv.setWidth(viewer.getViewingComponent().getWidth());
+			ribv.setFileName(name);
+			ribv.render();
 		} else {
 			System.out.println("Unable to open file");
 			return;

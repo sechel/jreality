@@ -162,6 +162,7 @@ public class JOGLRendererHelper {
 		if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
 		DoubleArray da;
 		if (pickMode)	gl.glPushName(JOGLPickAction.GEOMETRY_POINT);
+		//if (pickMode) System.out.println("Rendering vertices in picking mode");
 		if (!pickMode) gl.glBegin(GL.GL_POINTS);
 		for (int i = 0; i< sg.getNumPoints(); ++i)	{
 			//double vv;
@@ -216,6 +217,7 @@ public class JOGLRendererHelper {
 		//pickMode = false;
 		if (pickMode)	gl.glPushName(JOGLPickAction.GEOMETRY_LINE);
 		int numEdges = sg.getNumEdges();
+		//if (pickMode) System.out.println("Rendering edges in picking mode");
 		for (int i = 0; i< numEdges; ++i)	{
 			if (pickMode)	gl.glPushName(i);
 			if (!pickMode) gl.glBegin(GL.GL_LINE_STRIP);

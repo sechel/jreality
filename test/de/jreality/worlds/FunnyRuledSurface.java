@@ -10,9 +10,9 @@ import java.net.MalformedURLException;
 import javax.swing.JMenuBar;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.LabelSet;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.geometry.WingedEdge;
-import de.jreality.jogl.LabelSet;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Texture2D;

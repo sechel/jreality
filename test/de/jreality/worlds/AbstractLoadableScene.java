@@ -39,6 +39,7 @@ public abstract class AbstractLoadableScene implements LoadableScene {
 	public boolean addBackPlane() {
 		return false;
 	}
+	
 	public boolean isEncompass() {
 		return false;
 	}

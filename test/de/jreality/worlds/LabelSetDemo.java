@@ -9,8 +9,8 @@ import java.awt.Color;
 
 import javax.swing.JMenuBar;
 
+import de.jreality.geometry.LabelSet;
 import de.jreality.geometry.WingedEdge;
-import de.jreality.jogl.LabelSet;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
@@ -52,7 +52,7 @@ public class LabelSetDemo extends AbstractLoadableScene {
 		theWorld.addChild(oloidkit);
 		
 		SceneGraphComponent label = SceneGraphUtilities.createFullSceneGraphComponent("labels");
-		label.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new Color(255, 200, 200));
+		label.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
 		LabelSet ls = LabelSet.labelSetFactory(oloid, null);
 		label.setGeometry(ls);
 		theWorld.addChild(label);

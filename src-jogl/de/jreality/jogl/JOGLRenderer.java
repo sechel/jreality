@@ -28,6 +28,7 @@ import net.java.games.jogl.GLCanvas;
 import net.java.games.jogl.GLDrawable;
 import net.java.games.jogl.GLU;
 import net.java.games.jogl.util.BufferUtils;
+import de.jreality.geometry.LabelSet;
 import de.jreality.geometry.SphereHelper;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultGeometryShader;
@@ -382,6 +383,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 			if (!pickMode)	visit();
 			else		{
 				// set up the "pick transformation"
+				globalGL.glViewport(0,0, 2,2);
 				IntBuffer selectBuffer = BufferUtils.newIntBuffer(bufsize);
 				//System.out.println("Picking "+frameCount);
 				double[] pp3 = new double[3];

@@ -85,7 +85,7 @@ public class Test implements KeyListener {
     //
     SceneGraphComponent root = new SceneGraphComponent();
     Appearance a =new Appearance();
-    a.setAttribute(CommonAttributes.BACKGROUND_COLOR,new Color(.4f,.5f,.8f));
+    a.setAttribute(CommonAttributes.BACKGROUND_COLOR, Color.WHITE); //new Color(.4f,.5f,.8f));
     root.setAppearance(a);
     buildView(root);
     buildScene(root);
@@ -148,6 +148,8 @@ public class Test implements KeyListener {
     //softViewer.setBackground(1,1,1);		
 
     if(useJOGLViewer) {
+    	   root.getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR, Color.WHITE); //new Color(.4f,.5f,.8f));
+
         joglViewer= new Viewer(SceneGraphPath.getFirstPathBetween(root,firstCamera),root);
         trigger.addViewer(joglViewer);
         frameJOGL= new Frame();
