@@ -29,6 +29,7 @@ import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.DatagramSocket;
+import java.net.MulticastSocket;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -41,7 +42,7 @@ import java.util.List;
  */
 public class ParameterReader implements Runnable {
 
-	DatagramSocket socket;
+	MulticastSocket socket;
 	InetAddress group;
 	private int DEST_PORT = 5555;
 	private boolean debug = true;
@@ -52,10 +53,9 @@ public class ParameterReader implements Runnable {
 	
 	public ParameterReader() {
 		try {
-			socket = new DatagramSocket(DEST_PORT);
-			//group = InetAddress.getByName("192.168.178.255");
-			//socket.joinGroup(group);
-			//socket.setTimeToLive(255);
+			socket = new MulticastSocket(DEST_PORT);
+			group = InetAddress.getByName("229.1.1.1");
+			socket.joinGroup(group);
 		}
 		catch (IOException ioe) { }
 	}

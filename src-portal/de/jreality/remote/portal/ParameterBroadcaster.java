@@ -30,6 +30,7 @@ import java.io.Serializable;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.DatagramSocket;
+import java.net.MulticastSocket;
 
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.scene.Transformation;
@@ -49,7 +50,7 @@ import de.jreality.scene.data.Attribute;
  */
 public class ParameterBroadcaster {
 	
-	DatagramSocket socket;
+	MulticastSocket socket;
 	InetAddress group;
 	private int DEST_PORT = 5555;
 	private boolean debug = true;
@@ -59,10 +60,9 @@ public class ParameterBroadcaster {
 	
 	public ParameterBroadcaster() {
 		try {
-			socket = new DatagramSocket(); //5556);
-			group = InetAddress.getByName("192.168.5.255");
-			//socket.joinGroup(group);
-//			socket.setTimeToLive(255);
+			socket = new MulticastSocket();
+			group = InetAddress.getByName("229.1.1.1");
+			socket.setTimeToLive(1);
 		}
 		catch (IOException ioe) { }
 	}
