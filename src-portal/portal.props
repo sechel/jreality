@@ -29,6 +29,8 @@ frame.title: master
 
 viewer.autoBufferSwap: false 
 viewer.showFPS: false 
+viewer.printRenderTime: false
+
 # these values are overwritten for each side of the portal
 
 client.viewer.name: jRealityRemoteViewer

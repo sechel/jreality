@@ -97,6 +97,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         super(factory);
         manualSwapBuffers = !getConfig().getBool("viewer.autoBufferSwap");
         System.out.println("manualBufferSwap:" + manualSwapBuffers);
+        measure = getConfig().getBool("viewer.printRenderTime");
         SceneGraphComponent root = new SceneGraphComponent();
         navComp = new SceneGraphComponent();
         root.addChild(navComp);
@@ -184,7 +185,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
     long maxFrameTime = 0;
     private boolean headTracked = true;
 
-    private static final boolean measure = true;
+    private final boolean measure;
     public void render() {
         if (rendering) {
             reRender = true;

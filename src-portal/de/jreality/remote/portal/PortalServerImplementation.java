@@ -106,6 +106,7 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 		super();
 		manualSwapBuffers = !getConfig().getBool("viewer.autoBufferSwap");
 		System.out.println("manualBufferSwap:"+manualSwapBuffers);
+    measure = getConfig().getBool("viewer.printRenderTime");
 		SceneGraphComponent root = new SceneGraphComponent();
 		navComp = new SceneGraphComponent();
 		root.addChild(navComp);
@@ -215,7 +216,7 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 	long startTime = System.currentTimeMillis();
 	long maxFrameTime = 0;
 	private boolean headTracked = true;
-    private static final boolean measure = true;
+  private final boolean measure;
 	
 	public void render() {
         if (rendering) {
@@ -273,7 +274,7 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
                 }
             }
             t = System.currentTimeMillis() - s;
-            if (measure)            System.out.println("waitForRenderFinish: " + t);
+            if (measure)            System.out.println("renderFinish: " + t);
             if (manualSwapBuffers) {
                 s = System.currentTimeMillis();
                 for (Iterator i = currClients.iterator(); i.hasNext();) {
