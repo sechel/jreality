@@ -18,8 +18,9 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.SphereHelper;
 import de.jreality.jogl.InteractiveViewerDemo;
-import de.jreality.reader.OFFReader;
+import de.jreality.reader.OOGLReader;
 import de.jreality.reader.PolymakeParser;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
@@ -68,11 +69,11 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 				sgc = PolymakeParser.readFromFile(file);
 				IndexedFaceSet ifs = (IndexedFaceSet) sgc.getGeometry();
 				ifs = GeometryUtility.binaryRefine(ifs);
-				GeometryUtility.calculateAndSetNormals(ifs);
+				GeometryUtility.calculateAndSetFaceNormals(ifs);
 				ifs.buildEdgesFromFaces();
 				sgc.setGeometry(ifs);
 			} else {
-				OFFReader or = new OFFReader();	
+				OOGLReader or = new OOGLReader();	
 				//OFFReader.setResourceDir(resourceDir);
 				or.setResourceDir(file.getParent()+"/");
 				sgc = or.readFromFile(file);
@@ -97,7 +98,7 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 		//for (int i = 0; i<6; ++i)	{
 			child = SceneGraphUtilities.createFullSceneGraphComponent("child");
 			child.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
-			child.setGeometry(new Sphere());
+			child.addChild(SphereHelper.SPHERE_SUPERFINE);
 			world.addChild(child);
 		return world;
 	}

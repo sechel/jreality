@@ -15,7 +15,7 @@ import de.jreality.geometry.Torus;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.DiscreteSpaceCurve;
 import de.jreality.jogl.InteractiveViewerDemo;
-import de.jreality.jogl.shader.DefaultMaterialShader;
+import de.jreality.jogl.shader.DefaultVertexShader;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.util.P3;
@@ -55,8 +55,8 @@ public class SimpleJOGLViewerDemo extends InteractiveViewerDemo {
 		gt.setStretch(.3);
 		globeNode1.setTransformation(gt);
 	   Appearance ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.RED);
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.BLACK);
+	   ap1.setAttribute(CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.RED);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.BLACK);
 	   ap1.setAttribute(CommonAttributes.LIGHTING_ENABLED,true);
 	   ap1.setAttribute(CommonAttributes.SMOOTH_SHADING,false);
 	   ap1.setAttribute(CommonAttributes.EDGE_DRAW,false);
@@ -84,7 +84,7 @@ public class SimpleJOGLViewerDemo extends InteractiveViewerDemo {
 		globeNode2.setGeometry(catHel);
 		//globeNode2.setGeometry(globeSet);
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.PURPLE);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.PURPLE);
 	   ap1.setAttribute(CommonAttributes.LINE_WIDTH,2.0);
 	   ap1.setAttribute(CommonAttributes.DIFFUSE_COLOR,new java.awt.Color(.2f, .5f, .5f, 1f));
 	   ap1.setAttribute(CommonAttributes.FACE_DRAW,true);
@@ -108,7 +108,7 @@ public class SimpleJOGLViewerDemo extends InteractiveViewerDemo {
 		globeNode3.setTransformation(gt);
 		globeNode3.setGeometry(catHel);
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.WHITE);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.WHITE);
 	   ap1.setAttribute(CommonAttributes.LINE_WIDTH,2.0);
 	   ap1.setAttribute(CommonAttributes.POINT_RADIUS,3.0);
 	   ap1.setAttribute(CommonAttributes.EDGE_DRAW,true);
@@ -132,8 +132,8 @@ public class SimpleJOGLViewerDemo extends InteractiveViewerDemo {
 	   //globeNode4.setGeometry(torus1);
 	   globeNode4.setGeometry(tube);
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.BLUE);
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.BLACK);
+	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.BLUE);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.BLACK);
 	   ap1.setAttribute(CommonAttributes.LINE_WIDTH,1.0);
 	   ap1.setAttribute(CommonAttributes.POINT_RADIUS,3.0);
 	   ap1.setAttribute(CommonAttributes.FACE_DRAW,true);
@@ -156,7 +156,7 @@ public class SimpleJOGLViewerDemo extends InteractiveViewerDemo {
 	   globeNode5.setTransformation(gt);
 	   globeNode5.setGeometry(torus);
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.YELLOW);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.YELLOW);
 	   ap1.setAttribute(CommonAttributes.FACE_DRAW,false);
 	   ap1.setAttribute(CommonAttributes.EDGE_DRAW,true);
 	   ap1.setAttribute(CommonAttributes.LIGHTING_ENABLED,false);

@@ -15,7 +15,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 
 import de.jreality.jogl.InteractiveViewerDemo;
-import de.jreality.jogl.shader.DefaultMaterialShader;
+import de.jreality.jogl.shader.DefaultVertexShader;
 import de.jreality.jogl.shader.SimpleJOGLShader;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
@@ -63,9 +63,9 @@ public class SphereDemo extends InteractiveViewerDemo {
 	 */
 	public SceneGraphComponent makeWorld() {
 		SceneGraphComponent world = SceneGraphUtilities.createFullSceneGraphComponent("world");
-		//SimpleJOGLShader sh = new SimpleJOGLShader("SimpleJOGLVertexShader.txt", "SimpleJOGLFragmentShader.txt");
-		//world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"useGLShader", true);
-		//world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"GLShader", sh);
+//		SimpleJOGLShader sh = new SimpleJOGLShader("SimpleJOGLVertexShader.txt", "SimpleJOGLFragmentShader.txt");
+//		world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"useGLShader", true);
+//		world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"GLShader", sh);
 		
 		for (int i = 0; i<6; ++i)	{
 			SceneGraphComponent c = SceneGraphUtilities.createFullSceneGraphComponent("sphere"+i);
@@ -74,6 +74,7 @@ public class SphereDemo extends InteractiveViewerDemo {
 			c.getTransformation().setTranslation(3 * Math.cos(angle), 3*Math.sin(angle), 0.0);
 			float g = (float) (i/5.0);
 			c.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new java.awt.Color(g,g,g));
+			c.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING, true);
 			world.addChild(c);
 		}
 		return world;

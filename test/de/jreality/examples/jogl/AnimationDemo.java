@@ -17,8 +17,8 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.Timer;
 
 import de.jreality.geometry.Primitives;
+import de.jreality.geometry.SphereHelper;
 import de.jreality.jogl.InteractiveViewerDemo;
-import de.jreality.jogl.SphereHelper;
 import de.jreality.jogl.anim.AnimationUtility;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
@@ -59,14 +59,14 @@ public class AnimationDemo extends 	InteractiveViewerDemo  {
 	
 	public SceneGraphComponent makeWorld()	{
 		c1 = SceneGraphUtilities.createFullSceneGraphComponent("c1");
-		c1.setGeometry(SphereHelper.SPHERE_FINER);
+		c1.addChild(SphereHelper.SPHERE_FINER);
 		c2 = SceneGraphUtilities.createFullSceneGraphComponent("c2");
-		c2.setGeometry(SphereHelper.SPHERE_FINER);
+		c2.addChild(SphereHelper.SPHERE_FINER);
 		c2.getTransformation().setTranslation(2d,0d,0d);
 		c2.getTransformation().setStretch(.8d, .8d, .5d);
 		c2.getTransformation().setRotation(Math.PI/3.0, 1d, 1d, 1d);
 		ct = SceneGraphUtilities.createFullSceneGraphComponent("ct");
-		ct.setGeometry(SphereHelper.SPHERE_FINER);
+		ct.addChild(SphereHelper.SPHERE_FINER);
 		theWorld = SceneGraphUtilities.createFullSceneGraphComponent("theWorld");
 		theWorld.addChild(c1);
 		theWorld.addChild(c2);
@@ -76,7 +76,7 @@ public class AnimationDemo extends 	InteractiveViewerDemo  {
 	final int numSteps = 100;
 	double totalTime = 1.0;
 	public void animate()	{
-		if (theWorld.indexOf(ct) == -1) theWorld.addChild(ct);
+		if (!theWorld.isDirectAncestor(ct)) theWorld.addChild(ct);
 		final double dt = totalTime/(numSteps );
 		final Transformation t1 = c1.getTransformation();
 		final Transformation t2 = c2.getTransformation();

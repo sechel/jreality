@@ -15,7 +15,7 @@ import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.DiscreteSpaceCurve;
 import de.jreality.jogl.InteractiveViewerDemo;
-import de.jreality.jogl.shader.DefaultMaterialShader;
+import de.jreality.jogl.shader.DefaultVertexShader;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.util.P3;
@@ -99,7 +99,7 @@ public class TestTubeDemo extends InteractiveViewerDemo {
 	   SceneGraphComponent globeNode= SceneGraphUtilities.createFullSceneGraphComponent("container");
 	   SceneGraphComponent globeNode2= SceneGraphUtilities.createFullSceneGraphComponent("curve");
 	   Appearance ap1 = globeNode2.getAppearance();
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.BLUE);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.BLUE);
 	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_WIDTH,2.0);
 	   ap1.setAttribute(CommonAttributes.FACE_DRAW,false);
 	   ap1.setAttribute(CommonAttributes.EDGE_DRAW,true);
@@ -107,14 +107,14 @@ public class TestTubeDemo extends InteractiveViewerDemo {
 	   ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.SPHERES_DRAW,true);
 	   ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS,.03);
 	   ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_SIZE, 3.0);
-	   ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.RED);
+	   ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.RED);
 	   globeNode2.setGeometry(GeometryUtility.createCurveFromPoints(form, false));
 	   
 	   SceneGraphComponent globeNode4= SceneGraphUtilities.createFullSceneGraphComponent("patch");
 	   
 	   double[] p1 = {0,1,0};
 	   double[] p2 = {0,-1,0};
-	   SceneGraphComponent tubie = TubeUtility.createTubesOnEdges(Primitives.sharedIcosahedron, .05); //TubeUtility.makeTubeAsIFS(p1, p2, .3, null);
+	   SceneGraphComponent tubie = TubeUtility.ballAndStick(Primitives.sharedIcosahedron, .10, .05, java.awt.Color.YELLOW, java.awt.Color.GREEN); //TubeUtility.createTubesOnEdges(Primitives.sharedIcosahedron, .05); //TubeUtility.makeTubeAsIFS(p1, p2, .3, null);
 	   tubie.setTransformation(new Transformation());
 	   tubie.setAppearance(new Appearance());
 	   globeNode4.setGeometry(qmpatch);
@@ -124,8 +124,9 @@ public class TestTubeDemo extends InteractiveViewerDemo {
 	   torus1.setVertexAttributes(Attribute.COORDINATES, torus2.getVertexAttributes(Attribute.COORDINATES));
 	   //System.out.println("Geom BBox is: "+torus1.getBoundingBox().toString());
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.BLUE);
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.BLACK);
+	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.BLUE);
+	   ap1.setAttribute(CommonAttributes.SPECULAR_EXPONENT, 100.0);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.BLACK);
 	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_WIDTH,1.0);
 	   ap1.setAttribute(CommonAttributes.POINT_RADIUS,3.0);
 	   globeNode4.setAppearance(ap1);

@@ -5,6 +5,7 @@
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.examples.jogl;
+import de.jreality.geometry.TubeUtility;
 import de.jreality.geometry.WingedEdge;
 import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.scene.*;
@@ -38,7 +39,8 @@ public class OloidDemo extends InteractiveViewerDemo {
 		SceneGraphComponent oloidkit = new SceneGraphComponent();
 		//oloidkit.addChild(oloid);
 		oloidkit.setGeometry(oloid);
-		SceneGraphComponent tubes = WingedEdge.constructTubesAroundEdges(oloid, .05, 8, 8);
+		SceneGraphComponent tubes = WingedEdge.createTubesOnEdges(oloid, .05, 8, 8);
+		//SceneGraphComponent tubes = TubeUtility.createTubesOnEdges(oloid, .05);
 		oloidkit.addChild(tubes);
 		
 		//SceneGraphComponent s1 = Parser3DS.readFromFile("/homes/geometer/gunn/tmp/read3DS/models/space011.3ds");

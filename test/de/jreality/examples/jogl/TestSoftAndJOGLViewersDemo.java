@@ -69,7 +69,7 @@ public class TestSoftAndJOGLViewersDemo extends InteractiveViewerDemo {
 					double[][] verts = spheres[i].getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 					int vlength = GeometryUtility.getVectorLength(spheres[i]);
 					Rn.normalize(verts, verts);
-					spheres[i].setVertexAttributes(Attribute.COORDINATES, new DataList(StorageModel.DOUBLE_ARRAY.array(vlength), verts));
+					spheres[i].setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(vlength).createReadOnly(verts));
 				}
 				spheres[i].setVertexAttributes(Attribute.NORMALS, spheres[i].getVertexAttributes(Attribute.COORDINATES)); 
 				GeometryUtility.calculateAndSetFaceNormals(spheres[i]);
@@ -85,7 +85,7 @@ public class TestSoftAndJOGLViewersDemo extends InteractiveViewerDemo {
 					vc[j][2] = .3+.7*v.getValueAt(2);
 					vc[j][3] = 0.5d;		// alpha component
 				}
-				spheres[i].setVertexAttributes(Attribute.COLORS, new DataList(StorageModel.DOUBLE_ARRAY.array(4), vc));
+				spheres[i].setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(4).createReadOnly(vc));
 
 				icokit = SceneGraphUtilities.createFullSceneGraphComponent();
 				icokit.setTransformation(new Transformation());
@@ -99,6 +99,8 @@ public class TestSoftAndJOGLViewersDemo extends InteractiveViewerDemo {
 				
 			theWorld.addChild(theRow);
 			theWorld.setAppearance(new Appearance());
+			theWorld.getAppearance().setAttribute(CommonAttributes.DEPTH_FUDGE_FACTOR, .99999d);
+			theWorld.getAppearance().setAttribute(CommonAttributes.SMOOTH_SHADING, true);
 			return theWorld;
 		}
 	

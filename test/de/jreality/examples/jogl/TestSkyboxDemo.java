@@ -20,7 +20,7 @@ import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.DiscreteSpaceCurve;
 import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.jogl.SkyBox;
-import de.jreality.jogl.shader.DefaultMaterialShader;
+import de.jreality.jogl.shader.DefaultVertexShader;
 import de.jreality.jogl.shader.Texture2DJOGL;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.scene.*;
@@ -85,8 +85,8 @@ public class TestSkyboxDemo extends InteractiveViewerDemo {
 		gt.setStretch(.3);
 		globeNode1.setTransformation(gt);
 	   Appearance ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.RED);
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.BLACK);
+	   ap1.setAttribute(CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.RED);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.BLACK);
 	   ap1.setAttribute(CommonAttributes.LIGHTING_ENABLED,true);
 	   ap1.setAttribute(CommonAttributes.SMOOTH_SHADING,false);
 	   ap1.setAttribute(CommonAttributes.EDGE_DRAW,false);
@@ -121,7 +121,7 @@ public class TestSkyboxDemo extends InteractiveViewerDemo {
 		globeNode2.setGeometry(catHel);
 		//globeNode2.setGeometry(globeSet);
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.PURPLE);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.PURPLE);
 	   ap1.setAttribute(CommonAttributes.LINE_WIDTH,2.0);
 	   ap1.setAttribute(CommonAttributes.DIFFUSE_COLOR,new java.awt.Color(.2f, .5f, .5f, 1f));
 	   ap1.setAttribute(CommonAttributes.FACE_DRAW,true);
@@ -144,7 +144,7 @@ public class TestSkyboxDemo extends InteractiveViewerDemo {
 		globeNode3.setTransformation(gt);
 		globeNode3.setGeometry(catHel);
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.WHITE);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.WHITE);
 	   ap1.setAttribute(CommonAttributes.LINE_WIDTH,2.0);
 	   ap1.setAttribute(CommonAttributes.POINT_RADIUS,3.0);
 	   ap1.setAttribute(CommonAttributes.EDGE_DRAW,true);
@@ -169,8 +169,8 @@ public class TestSkyboxDemo extends InteractiveViewerDemo {
 	   //globeNode4.setGeometry(torus1);
 	   globeNode4.setGeometry(tube);
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.BLUE);
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.BLACK);
+	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.BLUE);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.BLACK);
 	   ap1.setAttribute(CommonAttributes.LINE_WIDTH,1.0);
 	   ap1.setAttribute(CommonAttributes.POINT_RADIUS,3.0);
 	   ap1.setAttribute(CommonAttributes.FACE_DRAW,true);
@@ -193,7 +193,7 @@ public class TestSkyboxDemo extends InteractiveViewerDemo {
 	   globeNode5.setTransformation(gt);
 	   globeNode5.setGeometry(torus);
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultMaterialShader.YELLOW);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.YELLOW);
 	   ap1.setAttribute(CommonAttributes.FACE_DRAW,false);
 	   ap1.setAttribute(CommonAttributes.EDGE_DRAW,true);
 	   ap1.setAttribute(CommonAttributes.LIGHTING_ENABLED,false);
@@ -228,12 +228,10 @@ public class TestSkyboxDemo extends InteractiveViewerDemo {
 		ap1 = new Appearance();
 		sbkit.setAppearance(ap1);
 
-		double[] stretch = {1.0, 1.0, 0.0, 1.0};
 		ap1.setAttribute("normalScale",0.05);
+		ap1.setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
 		ap1.setAttribute(CommonAttributes.EDGE_DRAW, false);
 		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
-		//ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"textureMatrix",P3.makeStretchMatrix(null, stretch));
-		java.awt.Color[] colors = {java.awt.Color.WHITE,java.awt.Color.BLUE, java.awt.Color.GRAY, java.awt.Color.YELLOW, java.awt.Color.RED};
 
 		//String[] texNameSuffixes = {"bk","ft","dn","up","lf","rt"};
 		String[] texNameSuffixes = {"rt","lf","up", "dn","bk","ft"};
@@ -246,6 +244,7 @@ public class TestSkyboxDemo extends InteractiveViewerDemo {
 				faceTex[i].setRepeatS(Texture2D.GL_CLAMP_TO_EDGE);
 				faceTex[i].setRepeatT(Texture2D.GL_CLAMP_TO_EDGE);
 				faceTex[i].setMinFilter(Texture2D.GL_LINEAR_MIPMAP_LINEAR);
+				faceTex[i].setApplyMode(Texture2D.GL_REPLACE);
 				//faceTex[i].setMagFilter(GL.GL_NEAREST);
 				//faceTex[i].setMinFilter(GL.GL_NEAREST);
 			} catch (IOException e) {
