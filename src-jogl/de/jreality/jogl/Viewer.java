@@ -1,10 +1,6 @@
 /*
  * Created on Jun 16, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code G       System.out.println("made "+current.getChildComponentCount()+" components");
-        System.out.println("done.");
- eneration&gt;Code and Comments
  */
 package de.jreality.jogl;
 

@@ -24,11 +24,13 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
-import de.jreality.scene.SceneGraphPath.PathMatrixChanged;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.event.TransformationEvent;
+import de.jreality.scene.event.TransformationListener;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.P3;
 import de.jreality.util.Rectangle3D;
+import de.jreality.util.SceneGraphPathObserver;
 import de.jreality.util.SceneGraphUtilities;
 
 /**
@@ -37,10 +39,13 @@ import de.jreality.util.SceneGraphUtilities;
  * To change the template for this generated type comment go to
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
-public class SelectionManager implements SceneGraphPath.PathMatrixListener {
+public class SelectionManager implements TransformationListener {
 	private SceneGraphPath defaultSelection;
 	private SceneGraphPath theSelection;
 	private SceneGraphPath currentCycleSelection;
+  
+  private SceneGraphPathObserver theSelectionObserver;
+  
 	private Vector selectionList;
 	private PickPoint pickPoint;
 	private boolean renderSelection = false, renderPick = false;
@@ -57,7 +62,9 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 	 */
 	public SelectionManager() {
 		super();
-		selectionList = new Vector();
+    theSelectionObserver = new SceneGraphPathObserver();
+    theSelectionObserver.addTransformationListener(this);
+    selectionList = new Vector();
 		boundKit = SceneGraphUtilities.createFullSceneGraphComponent("boundKit");
 		boundAppearance = boundKit.getAppearance();
 		boundAppearance.setAttribute(CommonAttributes.EDGE_DRAW,true);
@@ -122,10 +129,9 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 			}
 			if (defaultSelection != null) System.out.println("Default sel: "+theSelection.toString());
 		} else {
-			if (theSelection!=null) theSelection.removePathMatrixListener(this);
 			theSelection = path;
 		}
-		theSelection.addPathMatrixListener(this);
+    theSelectionObserver.setPath(theSelection);
 		if (theSelection != null) { 
 			System.err.println("sel: "+theSelection.toString());
 			Object tail = theSelection.getLastElement();
@@ -316,8 +322,8 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 		}
 	}
 	
-	public void matrixChanged(PathMatrixChanged e) {
-		if (renderSelection && theSelection  != null && boundKit != null) {
+  public void transformationMatrixChanged(TransformationEvent e) {
+  	if (renderSelection && theSelection  != null && boundKit != null) {
 			if (boundKit.getTransformation() != null)
 				// TODO straighten out the bounding box complications, like here
 				//boundKit.getTransformation().setMatrix(theSelection.getMatrix(null, 0, theSelection.getLength()-2));
@@ -400,5 +406,5 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 		setSelection(currentCycleSelection);
 		System.out.println("Setting selection to "+currentCycleSelection.toString());
 	}
-	
+
 }

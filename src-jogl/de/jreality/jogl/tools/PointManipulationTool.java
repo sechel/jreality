@@ -14,9 +14,10 @@ import de.jreality.geometry.Primitives;
 import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.scene.*;
-import de.jreality.scene.SceneGraphPath.PathMatrixChanged;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.scene.event.TransformationEvent;
+import de.jreality.scene.event.TransformationListener;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.*;
 
@@ -25,8 +26,11 @@ import de.jreality.util.*;
  * @author gunn
  *
  */
-public class PointManipulationTool extends AbstractMouseTool implements SceneGraphPath.PathMatrixListener {
+public class PointManipulationTool extends AbstractMouseTool implements TransformationListener {
 	PickPoint thePoint;
+  
+  SceneGraphPathObserver pickPathObserver;
+  
 	SceneGraphComponent theRepn, theTransKit, frameIconKit, theScaleKit;
 	double[] stretch;
 	double[] origMatrix;
@@ -39,6 +43,8 @@ public class PointManipulationTool extends AbstractMouseTool implements SceneGra
 
 	PointManipulationTool()	{
 		super();
+    pickPathObserver=new SceneGraphPathObserver();
+    pickPathObserver.addTransformationListener(this);
 		mml = new MouseManipulationListener();
 	}
 	
@@ -111,15 +117,15 @@ public class PointManipulationTool extends AbstractMouseTool implements SceneGra
 	static double[][] axisVerts = {{-1,0,0},{1,0,0},{0,-1,0},{0,1,0},{0,0,-1},{0,0,1}};
 	static int[][] indices = {{0,1},{2,3},{4,5}};
 	
-	public void matrixChanged(PathMatrixChanged e) {
-		theRepn.getTransformation().setMatrix(thePoint.getPickPath().getMatrix(null));
+  public void transformationMatrixChanged(TransformationEvent ev) {
+  		theRepn.getTransformation().setMatrix(ev.getTransformationMatrix());
 	}
 
 	public boolean attachToViewer(InteractiveViewer v) {
 		super.attachToViewer(v);
 		thePoint = theViewer.getSelectionManager().getPickPoint();
 		if (thePoint == null) return false;
-		thePoint.getPickPath().addPathMatrixListener(this);
+		pickPathObserver.setPath(thePoint.getPickPath());
 		if (theRepn == null) 		{
 			//System.out.println("Attaching to viewer");
 			frameIconKit = SceneGraphUtilities.createFullSceneGraphComponent("sphere");
@@ -159,7 +165,7 @@ public class PointManipulationTool extends AbstractMouseTool implements SceneGra
 	}
 	
 	public boolean detachFromViewer() {
-		thePoint.getPickPath().removePathMatrixListener(this);
+		pickPathObserver.dispose();
 		theViewer.removeAuxiliaryComponent(theRepn);
 		theViewer.getViewingComponent().removeKeyListener(mml);
 		super.detachFromViewer();
