@@ -74,7 +74,8 @@ public class TwoSidePolygonShader implements PolygonShader {
 		return false;
 	}
 
-	public  int proxyGeometryFor(Geometry original, GL gl) {
+	public  int proxyGeometryFor(Geometry original, GL gl, int sig) {
 		return  -1;
 	}
+
 }

@@ -23,37 +23,10 @@ import de.jreality.util.NameSpace;
 public class ImplodePolygonShader extends DefaultPolygonShader {
     double implodeFactor;
 
-//    public final void shadePolygon(Polygon p, double vertexData[], Environment environment) {
-//		double centerX = 0;
-//		double centerY = 0;
-//		double centerZ = 0;
-//		for(int i = 0; i< p.length;i++) {
-//			int pos = p.vertices[i];
-//			centerX += vertexData[pos+Polygon.SX];
-//			centerY += vertexData[pos+Polygon.SY];
-//			centerZ += vertexData[pos+Polygon.SZ];
-//		}
-//
-//		double oml = (1-implodeFactor)/p.length;
-//		centerX *= oml;
-//		centerY *= oml;
-//		centerZ *= oml;
-//		
-//		for(int i = 0; i< p.length;i++) {
-//			int pos = p.vertices[i];
-//			vertexData[pos+Polygon.SX] = implodeFactor * vertexData[pos+Polygon.SX] + centerX;
-//			vertexData[pos+Polygon.SY] = implodeFactor * vertexData[pos+Polygon.SY] + centerY;
-//			vertexData[pos+Polygon.SZ] = implodeFactor * vertexData[pos+Polygon.SZ] + centerZ;
-//			vertexShader.shadeVertex(vertexData,p.vertices[i],environment);
-//		}
-//    }
-
-
- 
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		super.setFromEffectiveAppearance(eap, name);
 		implodeFactor = eap.getAttribute(NameSpace.name(name, "implodeFactor"), implodeFactor);
-		//System.out.println("Imploding with factor of "+implodeFactor);
+		//System.out.println(this+"Imploding with factor of "+implodeFactor);
       }
     
 	public double getImplodeFactor() {
@@ -63,10 +36,10 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 		if (implodeFactor == 0.0) return false;
 		return true;
 	}
-	public int proxyGeometryFor(Geometry original, GL gl) {
-		System.out.println("Preparing to implode.");
+	public int proxyGeometryFor(Geometry original, GL gl, int sig) {
+		//System.out.println("Preparing to implode.");
 		IndexedFaceSet ifs =  GeometryUtility.implode((IndexedFaceSet) original, implodeFactor);
-		System.out.println("Imploding with factor of "+implodeFactor);
+		//System.out.println("Imploding with factor of "+implodeFactor);
 		int implodeDL = gl.glGenLists(1);
 		gl.glNewList(implodeDL, GL.GL_COMPILE);
 		JOGLRendererHelper.drawFaces(ifs, gl, false, true, 1.0);
