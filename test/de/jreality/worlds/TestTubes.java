@@ -14,6 +14,7 @@ import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.DiscreteSpaceCurve;
 import de.jreality.jogl.shader.DefaultVertexShader;
+import de.jreality.jogl.shader.ReflectionMap;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
@@ -21,8 +22,10 @@ import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.StorageModel;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.Pn;
+import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
 
 /**
@@ -90,7 +93,7 @@ public class TestTubes extends AbstractLoadableScene {
 		boolean doIco = true, doKnot = true, doBez = true, doBox = true, doHyp = false;
 		
 		if (doHyp)	{
-			TubeUtility.makeTubeAsIFS(rod, .04,null,TubeUtility.FRENET,false, Pn.HYPERBOLIC);
+			TubeUtility.makeTubeAsIFS(rod, .04,null,TubeUtility.FRENET,false, Pn.HYPERBOLIC, 0);
 		}
 		
 		double[][] square = {{1,1,0},{-1,1,0},{-1,-1,0},{1,-1,0}};		
@@ -107,12 +110,41 @@ public class TestTubes extends AbstractLoadableScene {
 		   SceneGraphComponent torussgc = SceneGraphUtilities.createFullSceneGraphComponent("torus knot");
 		   torussgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, 
 		   		new Color(120,0,  120));
-		   torussgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, .03);
+		   //torussgc.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, false);
+		   torussgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.SMOOTH_SHADING, true);
+		   torussgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, .06);
+		   //torussgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING, false);
 		   DiscreteSpaceCurve torus1 = DiscreteSpaceCurve.discreteTorusKnot(1,.25, 2, 9, 250);
+//		   double[][] verts = new double[250][3];
+//		   double f = .5;
+//		   double g = .2;
+//		   for (int i = 0; i<250; ++i)	{
+//		   	double t =  (i-125)/125.0;
+//		   	double e = 1.0/(1.01+t);
+//		   	double c = Math.cos(e);
+//		   	double s = Math.sin(e);
+//		   	
+//		   	verts[i][0] = c;
+//		   	verts[i][1] = s;
+//		   	verts[i][2] = t;
+//		   }
+//		   IndexedLineSet ils = GeometryUtility.createCurveFromPoints(verts, false);
+		   int size = 16;
+		   double scale = 1;
+		   double[][] mysection = new double[size][3];
+		   for (int i = 0; i<size; ++i)	{
+		   		double angle = (i/(size-1.0)) * Math.PI * 2;
+		   		mysection[i][0] = scale * Math.cos(angle)  *(1.5+Math.cos(4*angle));
+		   		mysection[i][1] = scale *  Math.sin(angle)  *(1.5+Math.cos(4*angle));
+		   		mysection[i][2] = 0.0;
+		   }
+		   IndexedLineSet ils = torus1;
+		   colorByAngle(ils, new double[] {1,0,0,1}, new double[] {0,1,0,1});
 		   double[][] tpts = torus1.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 		   //QuadMeshShape torus1Tubes = TubeUtility.makeTubeAsIFS(tpts, .04, null, TubeUtility.PARALLEL, true, Pn.EUCLIDEAN);
-		   //GeometryUtility.calculateAndSetNormals(torus1Tubes);
-		   torussgc.setGeometry(torus1);
+		   QuadMeshShape torus1Tubes = TubeUtility.makeTubeAsIFS(torus1, 0, true, .04, mysection, TubeUtility.PARALLEL, true, Pn.EUCLIDEAN, 6);
+		   GeometryUtility.calculateAndSetNormals(torus1Tubes);
+		   torussgc.setGeometry(torus1Tubes); //ils);
 		   torussgc.getTransformation().setStretch(.9);
 		   root.addChild(torussgc);	   	
 	   }
@@ -163,7 +195,11 @@ public class TestTubes extends AbstractLoadableScene {
 		   tubie.setAppearance(new Appearance());
 		   globeNode4.addChild(tubie);	   	
 	   }
- 
+		String[] texNameSuffixes = {"rt","lf","up", "dn","bk","ft"};
+		//ReflectionMap refm = ReflectionMap.reflectionMapFactory("/homes/geometer/gunn/Pictures/textures/desertstorm/desertstorm_", texNameSuffixes, "JPG");
+		//root.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"reflectionMap", refm);
+		root.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW,false);
+
 	   root.addChild(globeNode);
 	   globeNode.addChild(globeNode4);
 	  return root;
@@ -181,6 +217,24 @@ public class TestTubes extends AbstractLoadableScene {
 	}
 	public boolean isEncompass() {
 		return true;
+	}
+
+	public static void colorByAngle(IndexedLineSet ils, double[] color1, double[] color2)	{
+		int nPts = ils.getNumPoints();
+		double[][] colors = new double[nPts][3];
+		double[][] vertices = ils.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+		for (int i = 1; i<nPts-1; ++i)	{
+			double[] v1 = Rn.subtract(null, vertices[i], vertices[i-1]);
+			double[] v2 = Rn.subtract(null, vertices[i], vertices[i+1]);
+			//System.out.println("Angle "+i+" is "+angle);
+			//double t = Math.abs(angle/Math.PI);
+			double t = 10 * Math.sqrt(Math.abs( v1[0]*v1[0] + v1[1] * v1[1]));
+			t = t  - ((int) t);
+			Rn.linearCombination(colors[i],t, color1, 1-t, color2);
+		}
+		System.arraycopy(colors[1], 0, colors[0], 0, 3);
+		System.arraycopy(colors[nPts-2], 0, colors[nPts-1], 0, 3);
+		ils.setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(colors));
 	}
 
 }

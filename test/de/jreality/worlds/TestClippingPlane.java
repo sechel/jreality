@@ -56,7 +56,7 @@ public class TestClippingPlane extends AbstractLoadableScene {
 	public TestClippingPlane() {
 		super();
 	}
-	static String resourceDir = "/gunn/";
+	static String resourceDir = "/homes/geometer/gunn/Pictures/textures/";
 	static {
 		String foo = System.getProperty("resourceDir");
 		if (foo != null)	resourceDir  = foo;
@@ -126,20 +126,14 @@ public class TestClippingPlane extends AbstractLoadableScene {
 			ap1.setAttribute(CommonAttributes.SPECULAR_COLOR, Color.YELLOW);
 			ap1.setAttribute(CommonAttributes.SPECULAR_COEFFICIENT, 0.0);
 			Texture2D tex2d = null;
-			Image theImage = null;
-			tex2d = null;
-			theImage = null;
 			try {
-				tex2d = new Texture2D(resourceDir+"grid256rgba.png");
+				tex2d = new Texture2D("/homes/geometer/gunn/Pictures/grabs/arch-solids.jpg");
+				ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"texture2d",tex2d);
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
 			}
-			theImage = tex2d.getImage();
-			ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"texture2d",tex2d);
-			//tex2d.setTextureMatrix(new Transformation(P3.makeStretchMatrix(null, stretch)));			
 			double[][] vv = {{0,-1,0},{0,1,0},{1,1,0},{1,-1,0}};
 			double[][] texc = {{0,0},{1,0},{1,1} ,{0,1}};
-			//tex2d.setApplyMode(modes[0]);
 			IndexedFaceSet square = GeometryUtility.constructPolygon(vv);
 			square.setVertexAttributes(Attribute.TEXTURE_COORDINATES,StorageModel.DOUBLE_ARRAY.array(2).createReadOnly(texc));
 			cp.setGeometry(square);
@@ -157,42 +151,9 @@ public class TestClippingPlane extends AbstractLoadableScene {
 			sgc.getAppearance().setAttribute(CommonAttributes.SPECULAR_COLOR, java.awt.Color.GREEN);
 			sgc.getAppearance().setAttribute(CommonAttributes.SPECULAR_COEFFICIENT, 1.0);
 			sgc.getAppearance().setAttribute(CommonAttributes.SPECULAR_EXPONENT, 60.0);
-			//double[] center = {.5, .5, 0};
-			//sgc.getTransformation().setCenter(center);
-			//sgc.getTransformation().setRotation(Math.PI/2.0, 1.0, 0.0, 0.0);
-			
 			root.addChild(sgc);
 			root.addChild(cp);
-		} else {
-//			java.awt.Color[] colors = {java.awt.Color.RED,java.awt.Color.RED, java.awt.Color.RED, java.awt.Color.RED, java.awt.Color.BLACK};
-			
-//			stretch[0] = 2.0;
-//			for (int i = 0; i< 5; ++i)	{
-//				Torus torus= new Torus(1.0, 0.6, 50, 50);
-//				torus.setName("torus"+i);
-//				GeometryUtility.calculateAndSetNormals(torus);
-//				StorageModel sm = StorageModel.DOUBLE_ARRAY.array(2);
-//				torus.setVertexAttributes(Attribute.TEXTURE_COORDINATES, sm.createReadOnly(GeometryUtility.calculateTextureCoordinates(torus)));
-//				SceneGraphComponent globeNode = new SceneGraphComponent();
-//				globeNode.setName("torus"+i);
-//				Transformation gt= new Transformation();
-//				gt.setTranslation(-5.0 + 3.0* i, 0, 0.0);
-//				globeNode.setTransformation(gt);
-//				globeNode.setGeometry(torus);
-//				ap1 = new Appearance();
-//				ap1.setAttribute(CommonAttributes.EDGE_DRAW, false);
-//				ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, colors[i]);
-//				stretch[0] = stretch[1] = (i+1)/2.0;
-//				tex2d = new Texture2D(theImage);
-//				tex2d.setTextureMatrix(new Transformation(P3.makeStretchMatrix(null, stretch)));
-//				tex2d.setApplyMode(modes[i]);
-//				tex2d.setChannelArithmeticMatrix(channelMatrices[i]);
-//				ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"texture2d",tex2d);
-//				ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"textureMatrix",P3.makeStretchMatrix(null, stretch));
-//				globeNode.setAppearance(ap1);
-//				root.addChild(globeNode);
-//			}
-		}		
+		}	
 		return root;
 	}
 	SceneGraphComponent camNode = null;

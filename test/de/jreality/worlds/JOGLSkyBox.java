@@ -10,14 +10,18 @@ import java.io.IOException;
 
 import javax.swing.JMenuBar;
 
+import net.java.games.jogl.GL;
+
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.QuadMeshShape;
+import de.jreality.geometry.SphereHelper;
 import de.jreality.geometry.Torus;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.DiscreteSpaceCurve;
 import de.jreality.jogl.SkyBox;
 import de.jreality.jogl.shader.DefaultVertexShader;
+import de.jreality.jogl.shader.ReflectionMap;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
@@ -29,7 +33,10 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
+import de.jreality.util.P3;
 import de.jreality.util.Pn;
+import de.jreality.util.Rn;
+import de.jreality.util.SceneGraphUtilities;
 
 /**
  * @author Charles Gunn
@@ -164,7 +171,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 
 	   DiscreteSpaceCurve torus1 = DiscreteSpaceCurve.discreteTorusKnot(1.0, .4,4,5,400);
 	   double[][] pts = torus1.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
-	   QuadMeshShape tube = TubeUtility.makeTubeAsIFS(pts, .2d, null, TubeUtility.PARALLEL, true, Pn.EUCLIDEAN);
+	   QuadMeshShape tube = TubeUtility.makeTubeAsIFS(pts, .2d, null, TubeUtility.PARALLEL, true, Pn.EUCLIDEAN,0);
 	   tube.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(GeometryUtility.calculateFaceNormals(tube)));
 	   tube.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(GeometryUtility.calculateVertexNormals(tube)));
 	   SceneGraphComponent globeNode4= new SceneGraphComponent();
@@ -190,7 +197,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   ap1.setAttribute(CommonAttributes.VERTEX_DRAW,false);
 	   //globeNode4.setAppearance(ap1);
  
-	   Torus torus= new Torus(2.3, 1.5, 20, 30);
+	   Torus torus= new Torus(2.3, 1.5, 40,60);
 	   torus.calculateNormals();
 	   SceneGraphComponent globeNode5= new SceneGraphComponent();
 	   gt= new Transformation();
@@ -198,16 +205,16 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   //gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
 	   gt.setStretch(.3);
 	   globeNode5.setTransformation(gt);
-	   globeNode5.setGeometry(torus);
+	   globeNode5.setGeometry(torus); //SphereHelper.spheres[4]); //torus);
+	   
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.YELLOW);
-	   ap1.setAttribute(CommonAttributes.FACE_DRAW,false);
-	   ap1.setAttribute(CommonAttributes.EDGE_DRAW,true);
-	   ap1.setAttribute(CommonAttributes.LIGHTING_ENABLED,false);
-	   ap1.setAttribute(CommonAttributes.NORMALS_DRAW,true);
-	   ap1.setAttribute(CommonAttributes.ANTIALIASING_ENABLED,true);
-	   ap1.setAttribute(CommonAttributes.NORMAL_SCALE,1.0);
-	   globeNode5.setAppearance(ap1);
+		String[] texNameSuffixes = {"rt","lf","up", "dn","bk","ft"};
+		ReflectionMap refm = ReflectionMap.reflectionMapFactory("/homes/geometer/gunn/Pictures/textures/desertstorm/desertstorm_", texNameSuffixes, "JPG");
+		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"reflectionMap", refm);
+		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
+		refm.getGlobalSettings().setApplyMode(Texture2D.GL_COMBINE);
+		ap1.setAttribute(CommonAttributes.EDGE_DRAW,false);
+	    globeNode5.setAppearance(ap1);
 		
 	   torus= new Torus(2.3, 1.5, 20, 20);
 	   torus.calculateNormals();
@@ -223,6 +230,18 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   //globeNode6.addChild(s1);
 
 
+		sbkit =SceneGraphUtilities.createFullSceneGraphComponent("skybox");
+		ap1 = sbkit.getAppearance();
+		ap1.setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
+		ap1.setAttribute(CommonAttributes.EDGE_DRAW, false);
+		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
+		faceTex = refm.getFaceTextures();
+		SkyBox sb = new SkyBox(faceTex);
+		sbkit.addChild(sb);
+		sb.getTransformation().setStretch(100.0);
+	
+		root.addChild(sbkit);
+
 		root.addChild(globeNode1);
 		root.addChild(globeNode2);
 		root.addChild(globeNode3);
@@ -230,36 +249,24 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   root.addChild(globeNode5);	  
 	   root.addChild(globeNode6);	
 
-		sbkit = new SceneGraphComponent();
-		sbkit.setName("sbkit");
-		ap1 = new Appearance();
-		sbkit.setAppearance(ap1);
-
-		ap1.setAttribute("normalScale",0.05);
-		ap1.setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
-		ap1.setAttribute(CommonAttributes.EDGE_DRAW, false);
-		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
-
 		//String[] texNameSuffixes = {"bk","ft","dn","up","lf","rt"};
-		String[] texNameSuffixes = {"rt","lf","up", "dn","bk","ft"};
-		faceTex = new Texture2D[6];
-		for (int i = 0; i<6; ++i)	{
-			try {
-				//BufferedImage image = Texture2D.loadImage(resourceDir+ "desertstorm/desertstorm_"+texNameSuffixes[i]+".JPG");
-				//faceTex[i] = new Texture2D(image);
-				faceTex[i] = new Texture2D(resourceDir+ "/desertstorm/desertstorm_"+texNameSuffixes[i]+".JPG");
-				faceTex[i].setRepeatS(Texture2D.GL_CLAMP_TO_EDGE);
-				faceTex[i].setRepeatT(Texture2D.GL_CLAMP_TO_EDGE);
-				faceTex[i].setMinFilter(Texture2D.GL_LINEAR_MIPMAP_LINEAR);
-				faceTex[i].setApplyMode(Texture2D.GL_REPLACE);
-				//faceTex[i].setMagFilter(GL.GL_NEAREST);
-				//faceTex[i].setMinFilter(GL.GL_NEAREST);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		root.addChild(sbkit);
+//		faceTex = new Texture2D[6];
+//		for (int i = 0; i<6; ++i)	{
+//			try {
+//				//BufferedImage image = Texture2D.loadImage(resourceDir+ "desertstorm/desertstorm_"+texNameSuffixes[i]+".JPG");
+//				//faceTex[i] = new Texture2D(image);
+//				faceTex[i] = new Texture2D(resourceDir+ "/desertstorm/desertstorm_"+texNameSuffixes[i]+".JPG");
+//				faceTex[i].setRepeatS(Texture2D.GL_CLAMP_TO_EDGE);
+//				faceTex[i].setRepeatT(Texture2D.GL_CLAMP_TO_EDGE);
+//				faceTex[i].setMinFilter(Texture2D.GL_LINEAR_MIPMAP_LINEAR);
+//				faceTex[i].setApplyMode(Texture2D.GL_REPLACE);
+//				//faceTex[i].setMagFilter(GL.GL_NEAREST);
+//				//faceTex[i].setMinFilter(GL.GL_NEAREST);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
 		
 		return root;
 	}
@@ -269,11 +276,8 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	Texture2D[] faceTex;
 	SceneGraphComponent sbkit;
 	public void customize(JMenuBar menuBar, Viewer viewer) {
-		SkyBox sb = new SkyBox(faceTex, viewer.getCameraPath());
 		//sb.getTransformation().setTranslation(0.0d, 0.0d, -4.0d);
-		sb.getTransformation().setStretch(100.0);
 		CameraUtility.getCamera(viewer).setFar(500.0);
-		sbkit.addChild(sb);
 	}
 }
 

@@ -5,13 +5,22 @@
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.worlds;
+import java.net.MalformedURLException;
+
+import javax.swing.JMenuBar;
+
+import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.geometry.WingedEdge;
+import de.jreality.jogl.LabelSet;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Texture2D;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.Viewer;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.Pn;
+import de.jreality.util.SceneGraphUtilities;
 
 
 /**
@@ -26,10 +35,10 @@ public class FunnyRuledSurface extends AbstractLoadableScene {
 		
 		
 		WingedEdge oloid = new WingedEdge(3.0d);
-		int num = 50;
+		int num = 100;
 		for (int i = 0; i<=num; ++i)  	{
 			double angle = 2.0 * Math.PI * ( i/((double) num));
-			double[] plane = {Math.cos(angle), Math.sin(angle), .5 * Math.cos(2*angle), -1d};
+			double[] plane = {Math.cos(angle), Math.sin(angle), .4 * Math.cos(2.5*angle), -1d};
 			oloid.cutWithPlane(plane);
 		} 
 		oloid.update();
@@ -37,19 +46,19 @@ public class FunnyRuledSurface extends AbstractLoadableScene {
 		//oloidkit.addChild(oloid);
 		oloidkit.setGeometry(oloid);
 		//SceneGraphComponent tubes = WingedEdge.createTubesOnEdges(oloid, .05, 8, 8);
-		SceneGraphComponent tubes = TubeUtility.sticks(oloid, .05, Pn.EUCLIDEAN);
-		oloidkit.addChild(tubes);
+//		SceneGraphComponent tubes = TubeUtility.sticks(oloid, .05, Pn.EUCLIDEAN);
+//		GeometryUtility.calculateFaceNormals(tubes);
+//		GeometryUtility.calculateVertexNormals(tubes);
+//		oloidkit.addChild(tubes);
 		
 		//SceneGraphComponent s1 = Parser3DS.readFromFile("/homes/geometer/gunn/tmp/read3DS/models/space011.3ds");
-		SceneGraphComponent theWorld = new SceneGraphComponent();
-		theWorld.setName("world");
-		Transformation tt = new Transformation();
-		tt.setRotation(Math.PI/3.0,1d,0d,0d);
-		tt.setTranslation(1d,1d,0d);
-		//theWorld.addTransform(tt);
+		SceneGraphComponent theWorld = SceneGraphUtilities.createFullSceneGraphComponent("oloidWorld");
 		theWorld.addChild(oloidkit);
-		//theWorld.addChild(s1);
-		theWorld.setAppearance(new Appearance());
+		
+		SceneGraphComponent label = SceneGraphUtilities.createFullSceneGraphComponent("labels");
+		LabelSet ls = LabelSet.labelSetFactory(oloid, null);
+		label.setGeometry(ls);
+		theWorld.addChild(label);
 		return theWorld;
 	}
 
@@ -67,5 +76,13 @@ public class FunnyRuledSurface extends AbstractLoadableScene {
 
 	}
 
+	public void customize(JMenuBar menuBar, Viewer viewer) {
+//		try {
+//			viewer.getSceneRoot().getAppearance().setAttribute("backgroundTexture", new Texture2D("/homes/geometer/gunn/Pictures/grabs/arch-solids.jpg"));
+//		} catch (MalformedURLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+	}
 
 }
