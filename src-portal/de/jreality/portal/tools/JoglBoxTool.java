@@ -11,7 +11,6 @@ import java.util.List;
 
 import szg.framework.event.WandEvent;
 import de.jreality.jogl.InteractiveViewer;
-import de.jreality.jogl.pick.PickPoint;
 import de.jreality.jogl.tools.UserTool;
 import de.jreality.jogl.tools.UserToolInterface;
 import de.jreality.remote.portal.WandBoxContext;
@@ -20,6 +19,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.P3;
 import de.jreality.util.Pn;
 import de.jreality.util.Rn;
