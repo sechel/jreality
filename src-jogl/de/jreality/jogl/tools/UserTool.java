@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Vector;
 
+import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.scene.pick.PickPoint;
 
@@ -89,5 +90,16 @@ public class UserTool extends PickTool {
 		listeners.remove(l);
 	}
 	
+	public void registerHelp(HelpOverlay overlay) 	{	
+		if (!listeners.isEmpty())	{
+			for (int i = 0; i<listeners.size(); ++i)	{
+				overlay.registerInfoString("User tool ", ""+i);
+				UserToolInterface l = (UserToolInterface) listeners.get(i);
+				l.registerHelp(overlay);
+			}
+		}
+	}
+
+
 
 }

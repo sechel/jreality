@@ -88,7 +88,7 @@ public class TestClippingPlane extends AbstractLoadableScene {
 		});
 		theMenuBar.add(testM);
 	}
-	static double[][] square = {{-1,-1,0},{1,-1,0},{1,1,0},{-1,1,0}};
+	static double[][] square = {{0,-1,0},{1,-1,0},{1,1,0},{0,1,0}};
 	static double[][] texc = {{0,0},{1,0},{1,1},{0,1}};
 	FramedCurve frameCurve;
 	Timer cameraMove;
@@ -98,7 +98,6 @@ public class TestClippingPlane extends AbstractLoadableScene {
 		root.setName("world");
 		Appearance ap1 = new Appearance();
 		root.setAppearance(ap1);
-		double[] stretch = {1.0, 1.0, 0.0, 1.0};
 		ap1.setAttribute(CommonAttributes.VERTEX_DRAW, true);
 		ap1.setAttribute(CommonAttributes.EDGE_DRAW, true);
 		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
@@ -138,7 +137,7 @@ public class TestClippingPlane extends AbstractLoadableScene {
 			theImage = tex2d.getImage();
 			ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"texture2d",tex2d);
 			//tex2d.setTextureMatrix(new Transformation(P3.makeStretchMatrix(null, stretch)));			
-			double[][] vv = {{-1,-1,0},{-1,1,0},{1,1,0},{1,-1,0}};
+			double[][] vv = {{0,-1,0},{0,1,0},{1,1,0},{1,-1,0}};
 			double[][] texc = {{0,0},{1,0},{1,1} ,{0,1}};
 			//tex2d.setApplyMode(modes[0]);
 			IndexedFaceSet square = GeometryUtility.constructPolygon(vv);

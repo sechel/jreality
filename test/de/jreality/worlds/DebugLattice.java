@@ -99,7 +99,7 @@ public class DebugLattice extends AbstractLoadableScene {
 		int dim = 5;
 		double scale = 2*4.068/((dim-1));
 		double yscale = 6.561/(dim-1);
-		SceneGraphComponent lattice = makeLattice(-scale*((double)(dim-1))/2., -yscale*((double)(dim-1))/2., -scale*((double)(dim-1))/2., scale, yscale, scale, dim, dim, dim, 0.05, 0.01);
+		SceneGraphComponent lattice = makeLattice(-scale*(dim-1)/2., -yscale*(dim-1)/2., -scale*(dim-1)/2., scale, yscale, scale, dim, dim, dim, 0.05, 0.01);
 		lattice.setAppearance(new Appearance());
 		theWorld.setAppearance(new Appearance());
 		theWorld.addChild(lattice);

@@ -125,8 +125,10 @@ public class ViewerKeyListener extends KeyAdapter {
 
 				case KeyEvent.VK_E:		
 					if (!e.isShiftDown()) 	{
-						if (encompassToggle)	CameraUtility.encompass2(viewer);
-						else					CameraUtility.encompass(viewer);
+//						if (encompassToggle)	
+//							CameraUtility.encompass2(viewer);
+//						else					
+							CameraUtility.encompass(viewer);
 						encompassToggle = !encompassToggle;
 					}
 					else				toggleValue(CommonAttributes.EDGE_DRAW);
@@ -152,7 +154,8 @@ public class ViewerKeyListener extends KeyAdapter {
 					break;
 
 				case KeyEvent.VK_J:		// line width
-					modulateValue(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, 0.5,!e.isShiftDown());
+					modulateValue(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, 0.05,!e.isShiftDown());
+					modulateValue(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_SIZE, 2.0,!e.isShiftDown());
 				    viewer.render();
 					break;
 
@@ -210,6 +213,7 @@ public class ViewerKeyListener extends KeyAdapter {
 
 				case KeyEvent.VK_W:		// line width
 					modulateValue(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_WIDTH, 1.0, !e.isShiftDown());
+					modulateValue(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, .02, !e.isShiftDown());
 				    viewer.render();
 					break;
 
@@ -273,33 +277,11 @@ public class ViewerKeyListener extends KeyAdapter {
 			}
 		}
 
-	/**
-	 * @param string
-	 * @param d
-	 * @param e
-	 * @param f
-	 * @param g
-	 * @param b
-	 */
-	private void modulateValueAdditive(String name, double def, double inc, double min, double max, boolean increase) {
-		Appearance ap = viewer.getSelectionManager().getSelectedAppearance();
-		if (ap == null) return;
-		Object obj = ap.getAttribute(name);
-		double newVal = def;
-		if (obj != null && obj instanceof Double)	{
-			newVal = ((Double) obj).doubleValue();
-			if (increase) newVal +=  inc;
-			else newVal -= inc;
-		}
-		//System.err.println("Setting value "+name+"Object is "+obj+"New value is "+newVal);
-		if (newVal < min) newVal = min;
-		if (newVal > max) newVal = max;
-		ap.setAttribute(name, newVal);
-		
-		viewer.render();		
-	}
-
 	private void toggleValue(String  name)	{
+		toggleValue(viewer, name);
+	}
+	
+	public static void toggleValue(InteractiveViewer viewer, String  name)	{
 		Appearance ap = viewer.getSelectionManager().getSelectedAppearance();
 		if (ap == null) return;
 		Object obj = ap.getAttribute(name);
@@ -313,8 +295,11 @@ public class ViewerKeyListener extends KeyAdapter {
 		viewer.render();
 	}
 
-	double factor = 1.2;
 	private void modulateValue(String name, double val, boolean increase)	{
+		modulateValue(viewer, name, val, increase, 1.2);
+	}
+	
+	public static void modulateValue(InteractiveViewer viewer, String name, double val, boolean increase, double factor)	{
 		Appearance ap = viewer.getSelectionManager().getSelectedAppearance();
 		if (ap == null) return;
 		Object obj = ap.getAttribute(name);
@@ -326,6 +311,36 @@ public class ViewerKeyListener extends KeyAdapter {
 		}
 		//System.err.println("Setting value "+name+"Object is "+obj+"New value is "+newVal);
 			
+		ap.setAttribute(name, newVal);
+		
+		viewer.render();		
+	}
+
+	/**
+	 * @param string
+	 * @param d
+	 * @param e
+	 * @param f
+	 * @param g
+	 * @param b
+	 */
+	private void modulateValueAdditive(String name, double def, double inc, double min, double max, boolean increase) {
+		modulateValueAdditive(viewer, name, def, inc, min, max, increase);
+	}
+		
+	public static void modulateValueAdditive(InteractiveViewer viewer, String name, double defawlt, double inc, double min, double max, boolean increase) {
+		Appearance ap = viewer.getSelectionManager().getSelectedAppearance();
+		if (ap == null) return;
+		Object obj = ap.getAttribute(name);
+		double newVal = defawlt;
+		if (obj != null && obj instanceof Double)	{
+			newVal = ((Double) obj).doubleValue();
+			if (increase) newVal +=  inc;
+			else newVal -= inc;
+		}
+		//System.err.println("Setting value "+name+"Object is "+obj+"New value is "+newVal);
+		if (newVal < min) newVal = min;
+		if (newVal > max) newVal = max;
 		ap.setAttribute(name, newVal);
 		
 		viewer.render();		

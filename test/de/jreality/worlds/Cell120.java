@@ -7,7 +7,6 @@
 package de.jreality.worlds;
 
 import java.awt.Color;
-import java.io.FileNotFoundException;
 import java.util.Vector;
 
 import javax.swing.JMenuBar;
@@ -16,7 +15,6 @@ import de.jreality.geometry.WingedEdge;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;

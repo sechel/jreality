@@ -21,6 +21,8 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sun.rsasign.p;
+
 import net.java.games.jogl.DebugGL;
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
@@ -451,6 +453,10 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 	private final static int FLAT_POLYGONDL = 3;
 	private final static int SMOOTH_POLYGONDL = 4;
     private final static int NUM_DLISTS = 5;
+    private final static int POINTS_CHANGED = 1;
+    private final static int LINES_CHANGED = 2;
+    private final static int FACES_CHANGED = 4;
+    
 	private class DisplayListInfo	{
 		private boolean useDisplayList, 	// can decide based on dynamic evaluation whether it makes sense 
 					insideDisplayList,
@@ -530,6 +536,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 			realDLDirty[type] = b;
 		}
 		
+		// mark ALL display lists as dirty.
 		public void setDisplayListsDirty() {
 			for (int i = 0; i<NUM_DLISTS; ++i) realDLDirty[i] = true;
 		}
@@ -600,8 +607,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 		SceneGraphVisitor cleanup = new SceneGraphVisitor()	{
 			public void visit(SceneGraphComponent c) {
 				if (c.getGeometry() != null) {
-					Object peer = geometries.get(c.getGeometry());
-					newG.put(c.getGeometry(), peer);
+					Object wawa = c.getGeometry();
+					Object peer = geometries.get(wawa);
+					newG.put(wawa, peer);
 				}
 				c.childrenAccept(this);
 			}
@@ -683,6 +691,19 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 			dlInfo.setChange();
 		}
 		
+		public void geometryChanged(int type)	{
+			if ((type & POINTS_CHANGED) != 0)	
+				dlInfo.setDisplayListDirty(POINTDL, true);
+			if ((type & LINES_CHANGED) != 0)	{
+				dlInfo.setDisplayListDirty(LINEDL, true);
+				dlInfo.setDisplayListDirty(PROXY_LINEDL, true);
+			}
+			if ((type & FACES_CHANGED) != 0)	{
+				dlInfo.setDisplayListDirty(FLAT_POLYGONDL, true);
+				dlInfo.setDisplayListDirty(SMOOTH_POLYGONDL, true);
+			}
+			//System.out.println("Setting display lists dirty with flag: "+type);
+		}
 		
 		/**
 		 * 
@@ -713,7 +734,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 				boolean ss = geometryShader.polygonShader.isSmoothShading();
 				int type = ss ? SMOOTH_POLYGONDL : FLAT_POLYGONDL;
 				boolean proxy = geometryShader.polygonShader.providesProxyGeometry();
-				if (proxy && proxyPolygonGeometry == null)	{
+				if (dlInfo.isDisplayListDirty(FLAT_POLYGONDL) && dlInfo.isDisplayListDirty(SMOOTH_POLYGONDL)) proxyPolygonGeometry = null;
+				if (proxy && (proxyPolygonGeometry == null))	{
 					System.out.println("Asking for proxy geometry ");
 					proxyPolygonGeometry = geometryShader.polygonShader.proxyGeometryFor(ils);
 					System.out.println("proxy geometry of length "+proxyPolygonGeometry.length);
@@ -745,7 +767,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 				boolean tubes = geometryShader.lineShader.providesProxyGeometry();
 				double alpha = geometryShader.lineShader.getDiffuseColor().getAlpha()/255.0;
 				int type = tubes ? PROXY_LINEDL : LINEDL;
-				if (tubes && tubeGeometry == null)	{
+				if (tubes && (tubeGeometry == null || dlInfo.isDisplayListDirty(PROXY_LINEDL)))	{
+					System.out.println("Recalculating tubes");
 					tubeGeometry = geometryShader.lineShader.proxyGeometryFor(ils);
 				}
 				if (!processDisplayListState(type))		 // false return implies no display lists used
@@ -924,11 +947,22 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 		
 		public void appearanceChanged(AppearanceEvent ev) {
 			Iterator iter = peers.iterator();
+			String key = ev.getKey();
+			int changed = 0;
+			// TODO shaders should register keywords somehow and which geometries might be changed
+			if (key.indexOf("implodeFactor") != -1 ) changed |= (FACES_CHANGED);
+			else if (key.indexOf("transparency") != -1) changed |= (FACES_CHANGED);
+			else if (key.indexOf("tubeRadius") != -1) changed |= (LINES_CHANGED);
+			else if (key.indexOf("pointRadius") != -1) changed |= (POINTS_CHANGED);
+//			peerGeometry.geometryChanged(changed);
 			while (iter.hasNext())	{
 				JOGLPeerComponent peer = (JOGLPeerComponent) iter.next();
 				peer.appearanceChanged(ev);
+				peer.propagateGeometryChanged(changed);
 			}
+			//System.out.println("setting display list dirty flag: "+changed);
 		}
+		
 		public void ancestorAttached(SceneHierarchyEvent ev) {
 			Iterator iter = peers.iterator();
 			while (iter.hasNext())	{
@@ -1075,7 +1109,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 		//SceneGraphComponent originalComponent;
 		EffectiveAppearance eAp;
 		Vector children;
-		DisplayListInfo dlInfo;
 		JOGLPeerComponent parent;
 		int childIndex;
 		GoBetween goBetween;
@@ -1114,7 +1147,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 				boundIsDirty = true;
 				object2WorldDirty = true;
 				children = new Vector();		// always have a child list, even if it's empty
-				dlInfo = new DisplayListInfo();
 				parent = p;
 				updateTransformationInfo();
 			}
@@ -1198,16 +1230,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 			}
 		}
 
-		private void setDisplayListDirty(boolean b)	{
-			dlInfo.setDisplayListsDirty();
-			//synchronized(childLock)	{
-				int n = children.size();
-				for (int i = 0; i<n; ++i)	{		
-					JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
-					child.setDisplayListDirty(b);
-				}				
-			//}
-		}
 		
 		private void updateAppearance()	{
 			if (parent == null)	{
@@ -1382,13 +1404,30 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 		
 		private void propagateAppearanceChanged()	{
 			appearanceIsDirty = true;	
-			dlInfo.setDisplayListsDirty();
 			int n = children.size();
 			for (int i = 0; i<n; ++i)	{		
 				JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
 				child.propagateAppearanceChanged();
 			}
 			appearanceChanged = false;
+		}
+		
+		/**
+		 * @param changed
+		 */
+		public void propagateGeometryChanged(int changed) {
+			if (goBetween != null && goBetween.getPeerGeometry() != null) goBetween.getPeerGeometry().geometryChanged(changed);
+			synchronized(childLock)	{
+				int n = children.size();
+				for (int i = 0; i<n; ++i)	{		
+					JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
+					child.propagateGeometryChanged(changed);
+				}				
+			}
+		}
+
+		private void setDisplayListDirty(boolean b)	{
+			propagateGeometryChanged(POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
 		}
 		
 		public SceneGraphComponent getOriginalComponent() {

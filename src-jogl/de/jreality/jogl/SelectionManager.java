@@ -67,6 +67,7 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 		boundAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_FACTOR, 1.0);
 		boundAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_STIPPLE_PATTERN, 0x6666);
 		boundAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_WIDTH,2.0);
+		boundAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
 		boundAppearance.setAttribute(CommonAttributes.LEVEL_OF_DETAIL,0.0);
 		boundAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
 

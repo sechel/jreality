@@ -19,6 +19,12 @@ import de.quasitiler.alexanderplatz.Alex3DModel;
  */
 public class AlexDemo extends AbstractLoadableScene {
 	
+	public boolean addBackPlane() {
+		return true;
+	}
+	public boolean isEncompass() {
+		return true;
+	}
 	/* (non-Javadoc)
 	 * @see de.jreality.portal.WorldMaker#makeWorld()
 	 */

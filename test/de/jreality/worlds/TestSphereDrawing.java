@@ -5,12 +5,21 @@
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.worlds;
+import java.awt.Color;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+
+import javax.swing.JMenuBar;
+
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.Torus;
+import de.jreality.jogl.InteractiveViewer;
+import de.jreality.jogl.ViewerKeyListener;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.Viewer;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.Pn;
 import de.jreality.util.SceneGraphUtilities;
@@ -26,8 +35,11 @@ public class TestSphereDrawing extends AbstractLoadableScene {
 	public SceneGraphComponent makeWorld() {
 		SceneGraphComponent root = SceneGraphUtilities.createFullSceneGraphComponent("theWorld");
 		Appearance ap1 = root.getAppearance();
-		ap1.setAttribute(CommonAttributes.FACE_DRAW, false);
+		ap1.setAttribute(CommonAttributes.FACE_DRAW, true);
 		ap1.setAttribute(CommonAttributes.VERTEX_DRAW, true);
+		ap1.setAttribute(CommonAttributes.POLYGON_SHADER, "implode");
+		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new Color(0,204,204));
+		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+".implodeFactor", -.6);
 		ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, true);
 		ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, .006);
 		ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.RED);
@@ -60,6 +72,35 @@ public class TestSphereDrawing extends AbstractLoadableScene {
 	}
 	public boolean isEncompass() {
 		return true;
+	}
+	public void customize(JMenuBar menuBar, Viewer v) {
+		final Viewer viewer = v;
+		viewer.getSceneRoot().getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR, new Color(0,60,60));
+		viewer.getViewingComponent().addKeyListener(new KeyAdapter()	{
+			
+		    double scaleFactor = .05;
+		    int selection = 0;
+			public void keyPressed(KeyEvent e)	{ 
+				switch(e.getKeyCode())	{
+					
+				case KeyEvent.VK_H:
+					System.out.println("	7:  increase/decrease implode factor increment");
+					System.out.println("shift-7:  decrease plane movement increment");
+					System.out.println("	8:  dump plane info to stdout");
+					System.out.println("	9:  dump pickpoint info to stdout");
+					System.out.println("	0:  cycle through selection list");
+					System.out.println("	up/down arrows: move white plane ");
+					System.out.println("	left/right arrows: move red plane ");
+					break;
+
+				case KeyEvent.VK_7:
+					if ( !(viewer instanceof InteractiveViewer)) break;
+					ViewerKeyListener.modulateValueAdditive((InteractiveViewer) viewer, CommonAttributes.POLYGON_SHADER+".implodeFactor", 0.5, .1, -1.0, 1.0, !e.isShiftDown());
+				    viewer.render();
+					break;
+					}
+			}
+		});
 	}
 }
 

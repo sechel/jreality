@@ -10,9 +10,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 
+import de.jreality.geometry.GeometryUtility;
+import de.jreality.jogl.HelpOverlay;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.Quaternion;
+import de.jreality.util.Rectangle3D;
 import de.jreality.util.Rn;
 
 /**
@@ -21,7 +25,7 @@ import de.jreality.util.Rn;
  * To change the template for this generated type comment go to
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
-public class RotateShapeTool extends ShapeTool {
+public class RotateShapeTool extends AbstractShapeTool {
 	Rotator	theRotator;
 	double	theAngle;
 
@@ -39,12 +43,15 @@ public class RotateShapeTool extends ShapeTool {
 	public boolean startTrackingAt(MouseEvent e) {
 		if (!super.startTrackingAt(e)) return false;
 
-		double[] objectToCamera = new double[16];
 		theRotator.setCamera(CameraUtility.getCamera(theViewer));
 		theRotator.setAnchor(anchor);
 		double[] objectToWorld = selection.getMatrix(null);
 		theRotator.setObjectToCamera(Rn.times(null, worldToCamera, objectToWorld));
 		isTracking = true;
+		if (button == 2)	{
+			Rectangle3D bbox = GeometryUtility.calculateChildrenBoundingBox((SceneGraphComponent) theEditedNode);
+			myTransform.setCenter(bbox.getCenter()); 
+		}  else myTransform.setCenter(theEditedTransform.getCenter());
 		return true;
 	}
 	/* (non-Javadoc)
@@ -55,7 +62,7 @@ public class RotateShapeTool extends ShapeTool {
 		
 		Quaternion q = null;
 		//System.out.println("Mouse is "+e.toString());
-		if (button == 1) q = theRotator.getRotationXY(current);
+		if (button != 3) q = theRotator.getRotationXY(current);
 		else q = theRotator.getRotationZ(current);
 		myTransform.setRotation(q);
 		double[]composite = Rn.times(null, origM, myTransform.getMatrix());
@@ -76,7 +83,7 @@ public class RotateShapeTool extends ShapeTool {
 		if (dt == 0 || strength == 0.0) return true;
 
 		Quaternion q = null;
-		if (e.getButton() == MouseEvent.BUTTON1) q = theRotator.getRotationXY(last, current);
+		if (button != 3) q = theRotator.getRotationXY(last, current);
 		else //if (e.getButton() == MouseEvent.BUTTON3) 
 				q = theRotator.getRotationZ(last, current);
 		theAngle = 2* Math.acos(q.re);
@@ -88,7 +95,7 @@ public class RotateShapeTool extends ShapeTool {
 		double[] axis = (double[] ) theAxis.clone();
 		//final double[] repeater = P3.makeRotationMatrix(null, axis, angle);
 		final Transformation repeater = new Transformation();
-		repeater.setCenter(theEditedTransform.getCenter());
+		repeater.setCenter(myTransform.getCenter());
 		repeater.setRotation(angle, axis);
 		continuedMotion = new javax.swing.Timer(20, new ActionListener()	{
 			final Transformation tt = theEditedTransform;
@@ -114,4 +121,16 @@ public class RotateShapeTool extends ShapeTool {
 		return true;
 	}
 	
+	public void registerHelp(HelpOverlay overlay) 	{	
+		overlay.registerInfoString("Rotate tool", 
+		"Rotate currently selected scene graph component");
+		overlay.registerInfoString("","through an angle proportional to distance of mouse movement.");
+		overlay.registerInfoString("Mouse button1 dragged", 
+		"Rotate around axis perpendicular to mouse motion passing through Object origin.");
+		overlay.registerInfoString("Mouse button2 dragged", 
+		"Rotate around axis perpendicular to mouse motion passing through center of bounding box.");
+		overlay.registerInfoString("Mouse button3 dragged", 
+		"Rotate around axis perpendicular to plane of screen ");
+	}
+
 }

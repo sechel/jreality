@@ -58,6 +58,7 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 		return implodeFactor;
 	}
 	public boolean providesProxyGeometry() {		
+		if (implodeFactor == 0.0) return false;
 		return true;
 	}
 	public Geometry[] proxyGeometryFor(Geometry original) {

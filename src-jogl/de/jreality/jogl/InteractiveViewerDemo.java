@@ -193,6 +193,9 @@ public class InteractiveViewerDemo extends JFrame{
 			if (world.getTransformation() == null) 		world.setTransformation(new Transformation());
 		}
 
+		CameraUtility.getCamera(viewer).setSignature(getSignature());
+		CameraUtility.getCamera(viewer).reset();
+		
 		if (isEncompass())	{
 			// I have to do this ... for reasons unknown ... or else the encompass sometimes fails.
 			CameraUtility.getCameraNode(viewer).getTransformation().setTranslation(0d, 0d, 2d);
@@ -201,9 +204,6 @@ public class InteractiveViewerDemo extends JFrame{
 	
 		if (addBackPlane()) viewer.addBackPlane();
 
-		CameraUtility.getCamera(viewer).setSignature(getSignature());
-		CameraUtility.getCamera(viewer).reset();
-		
 		SceneGraphUtilities.setDefaultMatrix(root);
 		SceneGraphUtilities.setSignature(root, getSignature());
 

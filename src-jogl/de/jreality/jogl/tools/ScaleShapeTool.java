@@ -17,7 +17,7 @@ import de.jreality.util.Rn;
  * To change the template for this generated type comment go to
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
-public class ScaleShapeTool extends ShapeTool {
+public class ScaleShapeTool extends AbstractShapeTool {
 	double	theScale;
 
 	/**

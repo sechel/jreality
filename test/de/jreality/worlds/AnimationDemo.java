@@ -17,7 +17,6 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.Timer;
 
 import de.jreality.geometry.SphereHelper;
-import de.jreality.jogl.InteractiveViewer;
 import de.jreality.jogl.anim.AnimationUtility;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;

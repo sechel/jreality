@@ -118,13 +118,6 @@ public class SnowClipper extends InteractiveViewerDemo {
 		world.getTransformation().setCenter(new double[] {0,0,72});
 		manipulator.getTransformation().setCenter(new double[] {0,0,72});
 		
-//		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{1,0,0,-60}));
-//		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{-1,0,0,-60}));
-//		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{0,1,0,-60}));
-//		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{0,-1,0,-60}));
-//		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{0,0,1,-144}));
-//		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{0,0,-1,-4}));
-		
 
 		SceneGraphPath toWorld = new SceneGraphPath();
 		toWorld.push(viewer.getSceneRoot());
@@ -138,23 +131,17 @@ public class SnowClipper extends InteractiveViewerDemo {
 		toClipPlane = new SceneGraphPath();
 		toClipPlane.push(viewer.getSceneRoot());
 		toClipPlane.push(world);
-//		toClipPlane.push(cp);
 		toClipPlane.push(clipPlaneJiggler);
+		
 		toClipPlane2 = new SceneGraphPath();
 		toClipPlane2.push(viewer.getSceneRoot());
 		toClipPlane2.push(world);
-//		toClipPlane.push(cp);
 		toClipPlane2.push(clipPlaneJiggler2);
 		
 		viewer.getSelectionManager().addSelection(toWorld);
 		viewer.getSelectionManager().addSelection(toSculpture);
 		viewer.getSelectionManager().addSelection(toClipPlane);
 		viewer.getSelectionManager().addSelection(toClipPlane2);
-//		selectionList = new SceneGraphPath[4];
-//		selectionList[0] = toWorld;
-//		selectionList[1] = toSculpture;
-//		selectionList[2] = toClipPlane;
-//		selectionList[3] = toClipPlane2;
 		
 		calculateClippingPlanes();
 		whiteframe = SceneGraphUtilities.createFullSceneGraphComponent("whiteframe");
@@ -197,16 +184,9 @@ public class SnowClipper extends InteractiveViewerDemo {
 					System.out.println("shift-7:  decrease plane movement increment");
 					System.out.println("	8:  dump plane info to stdout");
 					System.out.println("	9:  dump pickpoint info to stdout");
-					System.out.println("	0:  cycle through selection list");
+					System.out.println("	k:  cycle selection path");
 					System.out.println("	up/down arrows: move white plane ");
 					System.out.println("	left/right arrows: move red plane ");
-					break;
-
-				case KeyEvent.VK_0:		// cycle through selection
-//					selection = (selection + 1) % selectionList.length;
-				 	viewer.getSelectionManager().cycleSelectionPaths();
-//				 	System.out.println("Cycling selection");
-				 	viewer.render();
 					break;
 					
 				case KeyEvent.VK_6:
@@ -347,7 +327,9 @@ public class SnowClipper extends InteractiveViewerDemo {
 			Pn.normalizePlane(clippingPlane, clippingPlane);
 			return clippingPlane;
 		}
-	public boolean addBackPlane() { return false; }
+		public boolean addBackPlane() { return false; }
+		
+		public boolean isEncompass() { return true; }
 	
 	public static void main(String[] args) {
 		SnowClipper test = new SnowClipper();

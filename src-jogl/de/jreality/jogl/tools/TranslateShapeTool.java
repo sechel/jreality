@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 
+import de.jreality.jogl.HelpOverlay;
 import de.jreality.scene.Transformation;
 import de.jreality.util.P3;
 import de.jreality.util.Pn;
@@ -21,7 +22,7 @@ import de.jreality.util.Rn;
  * To change the template for this generated type comment go to
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
-public class TranslateShapeTool extends ShapeTool {
+public class TranslateShapeTool extends AbstractShapeTool {
 	double[] zDirectionObject;
 	/**
 	 * 
@@ -31,6 +32,13 @@ public class TranslateShapeTool extends ShapeTool {
 		zDirectionObject = new double[4];
 	}
 
+	private double[] zDir = {0,0,1,0};
+	
+	public boolean startTrackingAt(MouseEvent e) {
+		if (!super.startTrackingAt(e)) return false;
+		Rn.matrixTimesVector(zDirectionObject,theProjector.getCameraToObject(), zDir );
+		return true;
+	}
 	/* (non-Javadoc)
 	 * @see charlesgunn.gv2.tool.MouseTool#track(java.awt.event.MouseEvent)
 	 */
@@ -98,11 +106,14 @@ public class TranslateShapeTool extends ShapeTool {
 		if (mm!= null) mm.addMotion(continuedMotion);
 		return true;
 	}
-	private double[] zDir = {0,0,1,0};
 	
-	public boolean startTrackingAt(MouseEvent e) {
-		if (!super.startTrackingAt(e)) return false;
-		Rn.matrixTimesVector(zDirectionObject,theProjector.getCameraToObject(), zDir );
-		return true;
+	public void registerHelp(HelpOverlay overlay) 	{	
+		overlay.registerInfoString("Translate tool", 
+		"Translate currently selected scene graph component");
+		overlay.registerInfoString("","a distance proportional to distance of mouse movement.");
+		overlay.registerInfoString("Mouse button1 dragged", 
+		"In direction of mouse motion");
+		overlay.registerInfoString("Mouse button2/3 dragged", 
+		"In direction perpendicular to plane of screen ");
 	}
 }
