@@ -48,6 +48,16 @@ public final class DaaNormal extends Daa {
     protected void setValueAt(int n, int j, double d) {
         data[n][j]=d;
     }
+    /* (non-Javadoc)
+     * @see de.jreality.scene.data.Daa#toByteBuffer(java.nio.ByteBuffer)
+     */
+    public void toByteBuffer(ByteBuffer bb) {
+        DoubleBuffer db = bb.asDoubleBuffer(); 
+        for (int i = 0; i < length; i++) {
+          db.put(data[i]);
+        }
+        bb.position(bb.position()+db.position()*8);
+    }
 
 //    static ByteBuffer outOffsetBuf;
 //    static ByteBuffer outDataBuf;

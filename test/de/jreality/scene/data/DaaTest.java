@@ -23,6 +23,8 @@
 package de.jreality.scene.data;
 
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Random;
 
 import de.jreality.geometry.CatenoidHelicoid;
@@ -37,7 +39,7 @@ public class DaaTest extends TestCase {
 
     public void testNormal() throws Exception {
         int runCre=0, runAc=0, 
-        runSer=500, runOv=0,
+        runSer=0, runOv=0, runTB=100,
         completeRuns=5;
         CatenoidHelicoid ch = new CatenoidHelicoid(50);
         double[][] data = GeometryUtility.calculateVertexNormals(ch);
@@ -46,6 +48,7 @@ public class DaaTest extends TestCase {
         DaaInlinedNIO daaib = new DaaInlinedNIO(data);
         assertEquals(daan, daai);
         assertEquals(daan, daaib);
+        ByteBuffer bb = ByteBuffer.allocateDirect(1024*1024).order(ByteOrder.nativeOrder());
         for (int i = 0; i < completeRuns; i++) {
             runCreate(data, runCre);
             runOverwrite(daan, daaib, runOv);
@@ -54,10 +57,28 @@ public class DaaTest extends TestCase {
             runAccess(daan, runAc);
             runAccess(daai, runAc);
             runAccess(daaib, runAc);
-            runSerialize(daan, runSer);
-            runSerialize(daai, runSer);
-            runSerialize(daaib, runSer);
+//            runSerialize(daan, runSer);
+//            runSerialize(daai, runSer);
+//            runSerialize(daaib, runSer);
+            runToByteBuffer(daan, bb, runTB);
+            runToByteBuffer(daai, bb, runTB);
+            runToByteBuffer(daaib, bb, runTB);
         }
+    }
+    
+    private void runToByteBuffer(Daa array, ByteBuffer bb, int runs) {
+        if (runs == 0) return;
+        System.out.println(array.getClass().getName());
+        long cts=0;
+        long s,t;
+        for (int i = 0; i < runs; i++) {
+            s = System.currentTimeMillis();
+            array.toByteBuffer(bb);
+            t = System.currentTimeMillis() - s;
+            cts+=t;
+            bb.clear();
+        }
+        System.out.println("\ttoByteBuffer="+(cts/((double)runs)));
     }
     
     private void runCreate(double[][] array, int runs) {

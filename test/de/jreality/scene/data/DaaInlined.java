@@ -131,4 +131,12 @@ public final class DaaInlined extends Daa{
         dataBuf_in.flip();
         dataBuf_in.asDoubleBuffer().get(data=new double[dataLength/8]);
     }
+
+    /* (non-Javadoc)
+     * @see de.jreality.scene.data.Daa#toByteBuffer(java.nio.ByteBuffer)
+     */
+    public void toByteBuffer(ByteBuffer bb) {
+        bb.asDoubleBuffer().put(data);
+        bb.position(bb.position()+data.length*8);
+    }
 }

@@ -115,4 +115,12 @@ public final class DaaInlinedNIO extends Daa {
         dataBuf.flip();
         data = dataBuf.asDoubleBuffer();
     }
+
+    /* (non-Javadoc)
+     * @see de.jreality.scene.data.Daa#toByteBuffer(java.nio.ByteBuffer)
+     */
+    public void toByteBuffer(ByteBuffer bb) {
+        bb.put(dataBuf);
+    }
+    
 }

@@ -36,7 +36,7 @@ public abstract class Daa implements Serializable {
     public abstract int getLengthAt(int n);
     public abstract double getValueAt(int n, int i);
     protected abstract void setValueAt(int n, int j, double d);
-
+    public abstract void toByteBuffer(java.nio.ByteBuffer bb);
     public final int getLength() {
         return length;
     }
