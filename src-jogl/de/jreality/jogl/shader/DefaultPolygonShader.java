@@ -29,7 +29,6 @@ public class DefaultPolygonShader implements PolygonShader {
 
 	boolean		smoothShading = false; 		// interpolate shaded values between vertices
 	Color diffuseColor = DefaultVertexShader.RED; //java.awt.Color.RED;
-	boolean textureEnabled = false;
 	Texture2D texture2D;
 	public Shader vertexShader = null;
 	AbstractJOGLShader glShader = null;
@@ -66,14 +65,11 @@ public class DefaultPolygonShader implements PolygonShader {
 			f[3] = (float) alpha2;
 			diffuseColor = new Color(f[0], f[1], f[2], f[3]);
 		}
-		textureEnabled = eap.getAttribute(NameSpace.name(name,"textureEnabled"), textureEnabled);	
-		if (textureEnabled)	{
-			Object foo = eap.getAttribute(NameSpace.name(name,"texture2d"), null, Texture2D.class);
-			if (foo instanceof Texture2D)	texture2D = (Texture2D) foo;
-			}
+		Object foo = eap.getAttribute(NameSpace.name(name,"texture2d"), null, Texture2D.class);
+		if (foo instanceof Texture2D)	texture2D = (Texture2D) foo;
 		vertexShader = ShaderLookup.getVertexShaderAttr(eap, name, "vertexShader");
 	
-		//how to activate opengl shaders
+		//TODO this is a hack. 
 		if (eap.getAttribute(NameSpace.name(name,"useGLShader"), false) == true)	{
 			Object obj =  eap.getAttribute(NameSpace.name(name,"GLShader"), null, AbstractJOGLShader.class);
 			if (obj instanceof AbstractJOGLShader) {
@@ -112,13 +108,6 @@ public class DefaultPolygonShader implements PolygonShader {
 		return texture2D;
 	}
 
-	/**
-	 * @return
-	 */
-	public boolean isTextureEnabled() {
-		return textureEnabled;
-	}
-
 	public void render(JOGLRendererNew jr)	{
 		GLCanvas theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
@@ -134,17 +123,15 @@ public class DefaultPolygonShader implements PolygonShader {
 		float[] testcolor = {.3f, .5f, .7f, .5f};
 		gl.glMaterialfv(GL.GL_BACK, GL.GL_DIFFUSE, testcolor);
 		gl.glDisable(GL.GL_TEXTURE_2D);
-		if (isTextureEnabled())	{
+		if (texture2D != null)	{
 			Texture2DLoaderJOGL tl = Texture2DLoaderJOGL.FactoryLoader;
-			Object tex =  getTexture2D();
-			if (tex instanceof Texture2D)		{
-				tl.bindTexture2D(theCanvas, (Texture2D) tex);
-				int[] res = new int[1];
-				gl.glGetTexParameteriv(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_RESIDENT, res);
-				//System.out.println("Texture is resident: "+res[0]);
-				if (res[0] == 0)	{ jr.texResident = false; }
-				gl.glEnable(GL.GL_TEXTURE_2D);			
-			}
+			
+			tl.bindTexture2D(theCanvas, texture2D);
+			int[] res = new int[1];
+			gl.glGetTexParameteriv(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_RESIDENT, res);
+			//System.out.println("Texture is resident: "+res[0]);
+			if (res[0] == 0)	{ jr.texResident = false; }
+			gl.glEnable(GL.GL_TEXTURE_2D);
 		} 
 		if (glShader != null) glShader.activate(theCanvas);
 		vertexShader.render(jr);
