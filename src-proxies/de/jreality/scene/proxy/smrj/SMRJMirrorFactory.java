@@ -76,7 +76,7 @@ public class SMRJMirrorFactory extends RemoteMirrorFactory {
     
 
     public void visit(de.jreality.scene.SceneGraphComponent c) {
-        created=createRemote(SceneGraphComponent.class);
+        created=createRemote(de.jreality.scene.proxy.smrj.SceneGraphComponent.class);
         copyAttr(c, (RemoteSceneGraphComponent)created);
     }
 
