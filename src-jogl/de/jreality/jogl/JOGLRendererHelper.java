@@ -493,7 +493,6 @@ public class JOGLRendererHelper {
 		String[] labels = lb.getLabels();
 		DataList positions = lb.getPositions();
 		double[][] objectVerts, screenVerts;
-		double[] screenOffset = lb.getScreenOffset();
 		int bitmapFont = lb.getBitmapFont();
 		
 		objectVerts = positions.toDoubleArrayArray(null);
@@ -502,7 +501,12 @@ public class JOGLRendererHelper {
 		Graphics3D gc = jr.getContext();
 		
 		double[] objectToScreen = Rn.times(null, correctionNDC, gc.getObjectToScreen());
-		System.out.println("o2s ="+Rn.matrixToString(objectToScreen));
+		Rn.matrixTimesVector(screenVerts, objectToScreen, objectVerts);
+		// It's important that the last coordinate is 0 when we transform to get screen coordinates:
+		// don't want to pick up any translation
+		double[] screenOffset = new double[4];
+		System.arraycopy(lb.getNDCOffset(), 0, screenOffset,0,3);
+		Rn.matrixTimesVector(screenOffset, gc.getNDCToScreen(), screenOffset);
 		Rn.matrixTimesVector(screenVerts, objectToScreen, objectVerts);
 		if (screenVerts[0].length == 4) Pn.dehomogenize(screenVerts, screenVerts);
 		int np = objectVerts.length;
