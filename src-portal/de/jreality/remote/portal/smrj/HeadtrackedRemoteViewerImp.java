@@ -47,8 +47,8 @@ public class HeadtrackedRemoteViewerImp extends RemoteViewerImp implements
 
     static double[] correction;
     static {
-        double[] axis = ConfigurationAttributes.getSharedConfiguration().getDoubleArray("camera.correction.axis");
-        double angle = ConfigurationAttributes.getSharedConfiguration().getDouble("camera.correction.angle");
+        double[] axis = ConfigurationAttributes.getDefaultConfiguration().getDoubleArray("camera.correction.axis");
+        double angle = ConfigurationAttributes.getDefaultConfiguration().getDouble("camera.correction.angle");
         angle *= (Math.PI*2.)/360.;
         correction = P3.makeRotationMatrix(null, axis, angle);
     }

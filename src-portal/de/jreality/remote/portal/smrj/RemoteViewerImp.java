@@ -69,7 +69,7 @@ public class RemoteViewerImp implements RemoteViewer {
         if (!viewer.hasViewingComponent())
                 throw new RuntimeException("expecting viewer with component!");
         Thread.currentThread().setName("RemoteViewerImpl");
-        config = ConfigurationAttributes.getSharedConfiguration();
+        config = ConfigurationAttributes.getDefaultConfiguration();
         // frame settings
         f = new JFrame(config.getProperty("frame.title", "no title"));
         f.addWindowListener(new WindowAdapter() {
