@@ -60,6 +60,12 @@ public class ImplodedTori extends AbstractLoadableScene {
 		// TODO Auto-generated method stub
 
 	}
+	public boolean addBackPlane() {
+		return false;
+	}
+	public boolean isEncompass() {
+		return true;
+	}
 
 }
 

@@ -31,4 +31,10 @@ public class AbstractLoadableScene implements LoadableScene {
 		return null;
 	}
 	public void setConfiguration(ConfigurationAttributes config) { return; }
+	public boolean addBackPlane() {
+		return false;
+	}
+	public boolean isEncompass() {
+		return false;
+	}
 }

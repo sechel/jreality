@@ -59,7 +59,7 @@ public class Test implements KeyListener {
   
   private boolean useSoftViewer = true;
   private boolean USE_DOUBLE_RASTERIZER = false;
-  private boolean useJOGLViewer = false;
+  private boolean useJOGLViewer = true;
   
   public static void main(String[] args) {
     Logger.getLogger("de.jreality").setLevel(Level.INFO);
@@ -174,7 +174,7 @@ public class Test implements KeyListener {
         frameJOGL.setSize(780, 580);
         frameJOGL.validate();
         frameJOGL.setVisible(true);
-        joglViewer.getRenderer().setUseDisplayLists(false);
+        //joglViewer.getRenderer().setUseDisplayLists(false);
         joglViewer.render();
     }
     
@@ -265,7 +265,7 @@ public class Test implements KeyListener {
         catNode.setName("catenoids");
 
         Transformation tr= new Transformation();
-        //tr.setTranslation(-1.2, -1.2, -0.6);
+       tr.setRotation(Math.PI, 0,1,0);
         //tr.setStretch(.2);
         catNode.setTransformation(tr);
 

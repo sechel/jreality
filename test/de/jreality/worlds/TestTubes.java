@@ -5,6 +5,8 @@
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.worlds;
+import java.awt.Color;
+
 import de.jreality.geometry.BezierPatchMesh;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.Primitives;
@@ -97,6 +99,7 @@ public class TestTubes extends AbstractLoadableScene {
 	   SceneGraphComponent globeNode2= SceneGraphUtilities.createFullSceneGraphComponent("curve");
 	   Appearance ap1 = globeNode2.getAppearance();
 	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.BLUE);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, true);
 	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_WIDTH,2.0);
 	   ap1.setAttribute(CommonAttributes.FACE_DRAW,false);
 	   ap1.setAttribute(CommonAttributes.EDGE_DRAW,true);
@@ -115,15 +118,20 @@ public class TestTubes extends AbstractLoadableScene {
 	   tubie.setTransformation(new Transformation());
 	   tubie.setAppearance(new Appearance());
 	   globeNode4.setGeometry(qmpatch);
-	   globeNode4.addChild(tubie);
+	   //globeNode4.addChild(tubie);
+	   SceneGraphComponent testSGC = SceneGraphUtilities.createFullSceneGraphComponent();
+	   testSGC.setGeometry(TubeUtility.createTubesOnEdgesAsIFS(Primitives.sharedIcosahedron, .05));
+	   globeNode4.addChild(testSGC);
 	   //System.out.println("Geom BBox is: "+torus1.getBoundingBox().toString());
 	   DiscreteSpaceCurve torus2 = DiscreteSpaceCurve.discreteTorusKnot(1.4, .3,4,5,20);
 	   torus1.setVertexAttributes(Attribute.COORDINATES, torus2.getVertexAttributes(Attribute.COORDINATES));
 	   //System.out.println("Geom BBox is: "+torus1.getBoundingBox().toString());
 	   ap1 = new Appearance();
-	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.BLUE);
+	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.BLUE);
 	   ap1.setAttribute(CommonAttributes.SPECULAR_EXPONENT, 100.0);
-	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.BLACK);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.BLACK);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.BLACK);
+	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
 	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_WIDTH,1.0);
 	   ap1.setAttribute(CommonAttributes.POINT_RADIUS,3.0);
 	   globeNode4.setAppearance(ap1);
@@ -141,5 +149,11 @@ public class TestTubes extends AbstractLoadableScene {
 		return Pn.EUCLIDEAN;
 	}
 
- 
+	public boolean addBackPlane() {
+		return true;
+	}
+	public boolean isEncompass() {
+		return true;
+	}
+
 }

@@ -110,20 +110,23 @@ public class TestScenarioBuilder extends SceneBuilder {
       
       // A light blue transparent app with green lines. No vertices.
       Appearance a =new Appearance();
+      //silver smooth app .
+      a =new Appearance();
       app[0] = a;
-      a.setAttribute(CommonAttributes.POLYGON_SHADER, "default");
-      a.setAttribute(CommonAttributes.TRANSPARENCY, 0.5);
-      a.setAttribute(CommonAttributes.EDGE_DRAW, true);
-      //a.setAttribute(CommonAttributes.FACE_DRAW, false);
-      a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER, "default");
-      //a.setAttribute("lineShader.polygonShader.vertexShader", "constant");
-      a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new Color(0.2f,.6f,.4f));
-      a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TRANSPARENCY, 0.0);
+      a.setAttribute(CommonAttributes.EDGE_DRAW, false);
       a.setAttribute(CommonAttributes.VERTEX_DRAW, false);
-      a.setAttribute(CommonAttributes.POINT_RADIUS, 0.05);
-      a.setAttribute(CommonAttributes.LINE_WIDTH, 0.05);
+      a.setAttribute(CommonAttributes.DIFFUSE_COLOR, new Color(.4f,.4f,.45f));
+      a.setAttribute(CommonAttributes.SPECULAR_EXPONENT, 1.);
+      a.setAttribute(CommonAttributes.SPECULAR_COEFFICIENT, .2);
+      //a.setAttribute(CommonAttributes.POLYGON_SHADER, "implode");
+      a.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,new Color(.6f,.1f,.2f));
+      a.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, 0.08);
+      a.setAttribute("pointShader.coreShader.vertexShader", "constant");
+      a.setAttribute("pointShader.outlineShader.diffuseColor", new Color(0.0f, 0.0f, 0.0f));
+      a.setAttribute("pointShader.outlineShader.vertexShader", "constant");
+      a.setAttribute("pointShader.outlineFraction", 0.3);
       
-      // green flat shaded faces.
+       // green flat shaded faces.
       a =new Appearance();
       app[1] = a;
       a.setAttribute(CommonAttributes.POLYGON_SHADER, "flat");
@@ -157,23 +160,23 @@ public class TestScenarioBuilder extends SceneBuilder {
       String bs = CommonAttributes.POLYGON_SHADER+".back.";
       a.setAttribute(bs+CommonAttributes.DIFFUSE_COLOR, new Color(.0f,.5f,.8f));
       
-      
-      
-      //silver smooth app .
       a =new Appearance();
-      app[3] = a;
-      a.setAttribute(CommonAttributes.EDGE_DRAW, false);
+     app[3] = a;
+      a.setAttribute(CommonAttributes.POLYGON_SHADER, "default");
+      a.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, true);
+      a.setAttribute(CommonAttributes.TRANSPARENCY, 0.5);
+      a.setAttribute(CommonAttributes.EDGE_DRAW, true);
+      //a.setAttribute(CommonAttributes.FACE_DRAW, false);
+      a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER, "default");
+      //a.setAttribute("lineShader.polygonShader.vertexShader", "constant");
+      a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new Color(0.2f,.6f,.4f));
+      a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TRANSPARENCY, 0.0);
       a.setAttribute(CommonAttributes.VERTEX_DRAW, false);
-      a.setAttribute(CommonAttributes.DIFFUSE_COLOR, new Color(.4f,.4f,.45f));
-      a.setAttribute(CommonAttributes.SPECULAR_EXPONENT, 1.);
-      a.setAttribute(CommonAttributes.SPECULAR_COEFFICIENT, .2);
-      //a.setAttribute(CommonAttributes.POLYGON_SHADER, "implode");
-      a.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,new Color(.6f,.1f,.2f));
-      a.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, 0.08);
-      a.setAttribute("pointShader.coreShader.vertexShader", "constant");
-      a.setAttribute("pointShader.outlineShader.diffuseColor", new Color(0.0f, 0.0f, 0.0f));
-      a.setAttribute("pointShader.outlineShader.vertexShader", "constant");
-      a.setAttribute("pointShader.outlineFraction", 0.3);
+      a.setAttribute(CommonAttributes.POINT_RADIUS, 0.05);
+      a.setAttribute(CommonAttributes.TUBE_RADIUS, 0.05);
+      a.setAttribute(CommonAttributes.LINE_WIDTH, 2.0);
+      
+   
       
       return app;
   }
