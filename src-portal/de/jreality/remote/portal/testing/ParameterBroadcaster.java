@@ -20,7 +20,7 @@
  * Boston, MA 02111-1307
  * USA 
  */
-package de.jreality.remote.portal;
+package de.jreality.remote.portal.testing;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;

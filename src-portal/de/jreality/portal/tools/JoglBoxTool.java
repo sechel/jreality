@@ -9,11 +9,9 @@ package de.jreality.portal.tools;
 import java.util.Iterator;
 import java.util.List;
 
-import szg.framework.event.WandEvent;
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.jogl.tools.UserTool;
 import de.jreality.jogl.tools.UserToolInterface;
-import de.jreality.remote.portal.WandBoxContext;
 import de.jreality.scene.Graphics3D;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;

@@ -4,7 +4,7 @@
  * TODO To change the template for this generated file go to Window -
  * Preferences - Java - Code Generation - Code and Comments
  */
-package de.jreality.remote.portal;
+package de.jreality.portal.tools;
 
 import szg.framework.event.WandEvent;
 import szg.framework.event.WandListener;

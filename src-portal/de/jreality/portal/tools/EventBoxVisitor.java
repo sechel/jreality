@@ -20,18 +20,17 @@
  * Boston, MA 02111-1307
  * USA 
  */
-package de.jreality.remote.portal;
+package de.jreality.portal.tools;
 
 import java.util.Iterator;
 import java.util.List;
 
 import szg.framework.event.WandEvent;
-import de.jreality.portal.tools.BoxContext;
-import de.jreality.portal.tools.EventBox;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Transformation;
+import de.jreality.util.P3;
 
 /**
  *
@@ -106,4 +105,37 @@ public class EventBoxVisitor extends SceneGraphVisitor {
 	public void setWandOffset(Transformation wandOffset) {
 		this.wandOffset = wandOffset;
 	}
+    
+    class WandBoxContext extends BoxContext {
+
+        private SceneGraphPath path;
+        private WandEvent event;
+        private Transformation localTrafo;
+        private Transformation wandOffset;
+        public WandBoxContext(SceneGraphPath path, WandEvent event, Transformation wandOffset) {
+            this.path = (SceneGraphPath) path.clone();
+            this.event = event;
+            this.wandOffset = wandOffset;
+        }
+
+        public Transformation getLocalTransformation() {
+            if (localTrafo ==  null) computeLocalTrafo();
+            return localTrafo;
+        }
+
+        private void computeLocalTrafo() {
+            localTrafo = new Transformation(path.getInverseMatrix(null));
+            localTrafo.multiplyOnRight(P3.transposeF2D(null, event.getMatrix()));
+            localTrafo.multiplyOnRight(wandOffset);
+        }
+
+        public int getButton() {
+            return event.getButton();
+        }
+
+        public SceneGraphPath getRootToLocal() {
+            return path;
+        }
+
+      }
 }

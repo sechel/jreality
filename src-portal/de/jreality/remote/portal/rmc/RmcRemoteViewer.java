@@ -21,7 +21,7 @@
  * USA 
  */
 
-package de.jreality.remote;
+package de.jreality.remote.portal.rmc;
 
 import java.awt.Color;
 import java.awt.event.WindowAdapter;

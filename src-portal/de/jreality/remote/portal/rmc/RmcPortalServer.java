@@ -21,7 +21,7 @@
  * USA 
  */
 
-package de.jreality.remote.portal;
+package de.jreality.remote.portal.rmc;
 
 import java.awt.Color;
 import java.net.MalformedURLException;
@@ -36,11 +36,12 @@ import szg.framework.event.WandEvent;
 import szg.framework.event.WandListener;
 import szg.framework.event.WandMotionListener;
 import szg.framework.event.remote.RemoteEventQueueImpl;
+import de.jreality.portal.tools.EventBoxVisitor;
+import de.jreality.portal.tools.WandTool;
 import de.jreality.remote.ClientDisconnectedException;
 import de.jreality.remote.RemoteServerClient;
 import de.jreality.remote.RemoteServerImpl;
 import de.jreality.remote.RemoteViewer;
-import de.jreality.remote.RmcRemoteServer;
 import de.jreality.remote.util.INetUtilities;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;

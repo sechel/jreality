@@ -36,6 +36,8 @@ import szg.framework.event.WandEvent;
 import szg.framework.event.WandListener;
 import szg.framework.event.WandMotionListener;
 import szg.framework.event.remote.RemoteEventQueueImpl;
+import de.jreality.portal.tools.EventBoxVisitor;
+import de.jreality.portal.tools.WandTool;
 import de.jreality.remote.ClientDisconnectedException;
 import de.jreality.remote.RemoteServerClient;
 import de.jreality.remote.RemoteServerImpl;
@@ -184,26 +186,6 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 		}
 		clientMapLock.writeUnlock();
 	}
-			
-//	SceneGraphComponent findComponentByName(final String name) {
-//		final SceneGraphComponent[] res = new SceneGraphComponent[1];
-//		SceneGraphVisitor sgv = new SceneGraphVisitor() {
-//			public void visit(SceneGraphComponent sg) {
-//				//System.out.println("visit: "+sg.getName());
-//				if (sg.getName().equals(name)) {
-//					res[0] = sg;
-//					System.out.println("found: "+sg.getName());
-//					return;
-//				}
-//				else {
-//					sg.childrenAccept(this);
-//				}
-//			}
-//		};
-//		getSceneRoot().accept(sgv);
-//		return res[0];
-//	}
-	
 	
 	Lock headMatrixLock = new Lock();
 	double[] headMatrix=new double[16];
@@ -314,40 +296,6 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 		if (renderOnHeadMove && !autoRender) render();
 	}
 
-	Transformation tmpTrans = new Transformation();
-	
-//	private WandEvent patchWandToNavigation(WandEvent e) {
-//		tmpTrans.setMatrix(P3.transposeF2D(null, e.getMatrix()));
-//		double[] invM = new double[16];
-//		Rn.inverse(invM, navComp.getTransformation().getMatrix());
-//		tmpTrans.multiplyOnLeft(invM);
-//		WandEvent clone = new WandEvent(e, e.getButton(), e.getType(), e.getButtonMask(), P3.transposeD2F(null, tmpTrans.getMatrix()), e.getAxisMask());
-//		return clone;
-//	}
-//
-//	public void axisMoved(WandEvent e) {
-//		if (wandListener != null) wandListener.axisMoved(patchWandToNavigation(e));
-//	}
-//
-//	public void buttonPressed(WandEvent e) {
-//		if (wandListener != null) wandListener.buttonPressed(patchWandToNavigation(e));
-//	}
-//
-//	public void buttonReleased(WandEvent e) {
-//		if (wandListener != null) wandListener.buttonReleased(patchWandToNavigation(e));
-//	}
-//
-//	public void buttonTipped(WandEvent e) {
-//		if (wandListener != null) wandListener.buttonTipped(patchWandToNavigation(e));
-//	}
-//
-//	public void wandDragged(WandEvent e) {
-//		if (wandMotionListener != null) wandMotionListener.wandDragged(patchWandToNavigation(e));
-//	}
-//	public void wandMoved(WandEvent e) {
-//		if (wandMotionListener != null) wandMotionListener.wandMoved(patchWandToNavigation(e));
-//	}
-	
 	public static void main(String[] args) throws RemoteException {
 		String hostname = INetUtilities.getHostname();
 		PortalServerImplementation rsi = new PortalServerImplementation();
@@ -365,42 +313,7 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 			autoRenderSynch.notify();
 		}
 	}
-	
-//	private class ControlPanel extends JFrame {
-//		
-//		ControlPanel() {
-//			super("Portal Server Control");
-//			getContentPane().setLayout(new GridLayout(3,1));
-//			final JButton autoRenderButton = new JButton("auto-render: "+isAutoRender());
-//			autoRenderButton.addActionListener(new ActionListener() {
-//				public void actionPerformed(ActionEvent e) {
-//					setAutoRender(!isAutoRender());
-//					autoRenderButton.setText("auto-render: "+isAutoRender());
-//				}
-//			});
-//			getContentPane().add(autoRenderButton);
-//			final JButton renderOnHeadMoveButton = new JButton("headMove-render: "+isRenderOnHeadMove());
-//			renderOnHeadMoveButton.addActionListener(new ActionListener() {
-//				public void actionPerformed(ActionEvent e) {
-//					setRenderOnHeadMove(!isRenderOnHeadMove());
-//					renderOnHeadMoveButton.setText("headMove-render: "+isRenderOnHeadMove());
-//				}
-//			});
-//			getContentPane().add(renderOnHeadMoveButton);
-//			final JButton manualSwapButton = new JButton("manual-swap: "+isManualSwapBuffers());
-//			manualSwapButton.addActionListener(new ActionListener() {
-//				public void actionPerformed(ActionEvent e) {
-//					setManualSwapBuffers(!isManualSwapBuffers());
-//					manualSwapButton.setText("manual-swap: "+isManualSwapBuffers());
-//				}
-//			});
-//			getContentPane().add(manualSwapButton);
-//			pack();
-//			show();
-//		}
-//		
-//	}
-	
+
 	public void dispose() {
 		setAutoRender(false);
 		setNavigationEnabled(false);
@@ -408,9 +321,9 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 		queue.removeWandListener(wandTool);
 		queue.removeWandMotionListener(wandTool);
 		queue.dispose();
-//		controlPanel.hide();
 	}
-	public boolean isRenderOnHeadMove() {
+
+  public boolean isRenderOnHeadMove() {
 		return renderOnHeadMove;
 	}
 	public void setRenderOnHeadMove(boolean renderOnHeadMove) {
@@ -432,33 +345,6 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 		}
 		clientMapLock.writeUnlock();
 	}
-//	public void addHeadMotionListener(HeadMotionListener listener) {
-//		queue.addHeadMotionListener(listener);
-//	}
-//	public void removeHeadMotionListener(HeadMotionListener listener) {
-//		queue.removeHeadMotionListener(listener);
-//	}
-//	
-//	// patch events with the current navigation Matrix
-//
-//    private WandListener wandListener;
-//	public void addWandListener(WandListener listener) {
-//	    wandListener=
-//		  WandEventMulticaster.add(wandListener, listener);
-//	}
-//	public void removeWandListener(WandListener listener) {
-//		wandListener=
-//		  WandEventMulticaster.remove(wandListener, listener);
-//	}
-//	private WandMotionListener wandMotionListener;
-//	public void addWandMotionListener(WandMotionListener listener) {
-//	    wandMotionListener=
-//		  WandMotionEventMulticaster.add(wandMotionListener, listener);
-//	}
-//	public void removeWandMotionListener(WandMotionListener listener) {
-//		wandMotionListener=
-//			  WandMotionEventMulticaster.remove(wandMotionListener, listener);
-//	}
 
 	public boolean isNavigationEnabled() {
 		return navigationEnabled;

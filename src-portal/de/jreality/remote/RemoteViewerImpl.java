@@ -62,7 +62,7 @@ import de.jreality.util.ConfigurationAttributes;
  * @author weissman
  *  
  */
-public class RemoteViewerImpl extends UnicastRemoteObject implements RemoteViewer {
+public class RemoteViewerImpl implements RemoteViewer {
 
 	String hostname;
 	Viewer viewer;
@@ -78,7 +78,6 @@ public class RemoteViewerImpl extends UnicastRemoteObject implements RemoteViewe
 	
 
 	public RemoteViewerImpl(Viewer viewer) throws RemoteException {
-		factory = new RemoteSceneGraphElementsFactoryImpl();
 		hostname = INetUtilities.getHostname();
 		this.viewer = viewer;
 		if (!viewer.hasViewingComponent()) throw new RuntimeException("expecting viewer with component!");
@@ -104,23 +103,28 @@ public class RemoteViewerImpl extends UnicastRemoteObject implements RemoteViewe
 	}
 	
 	public RemoteSceneGraphElementsFactory getFactory() throws RemoteException {
+        if (factory == null) factory = new RemoteSceneGraphElementsFactoryImpl();
 		return factory;
 	}
 
-	public RemoteSceneGraphComponent getRemoteSceneRoot() throws RemoteException {
+	public RemoteSceneGraphComponent getRemoteSceneRoot() {
 		return (RemoteSceneGraphComponent) viewer.getSceneRoot();
 	}
 
-	public void setRemoteSceneRoot(RemoteSceneGraphComponent r) throws RemoteException {
-		System.out.println("Setting scene root to ["+r.toString()+"] ");
-		viewer.setSceneRoot((SceneGraphComponent)RemoteSceneGraphElementsFactoryImpl.getLocal(r));
-	}
+//    public void setRemoteSceneRoot(RemoteSceneGraphComponent r) {
+//            System.out.println("Setting scene root to ["+r.toString()+"] ");
+//            viewer.setSceneRoot((SceneGraphComponent)RemoteSceneGraphElementsFactoryImpl.getLocal(r));
+//        }
+    public void setRemoteSceneRoot(RemoteSceneGraphComponent r) {
+            System.out.println("Setting scene root to ["+r.toString()+"] ");
+            viewer.setSceneRoot((SceneGraphComponent)r);
+        }
 
-	public RemoteSceneGraphPath getRemoteCameraPath() throws RemoteException {
+	public RemoteSceneGraphPath getRemoteCameraPath() {
 		return (RemoteSceneGraphPath) viewer.getCameraPath();
 	}
 
-	public void setRemoteCameraPath(List list) throws RemoteException {
+	public void setRemoteCameraPath(List list) {
 		SceneGraphPath sgp = SceneGraphPath.fromList(RemoteSceneGraphElementsFactoryImpl.convertToLocal(list));
 		System.out.println("[RemoteViewer->setCameraPath()] CameraPath: "+sgp.toString());
 		viewer.setCameraPath(sgp);
@@ -132,15 +136,15 @@ public class RemoteViewerImpl extends UnicastRemoteObject implements RemoteViewe
 		
 	}
 
-	public void render() throws RemoteException {
+	public void render() {
 		if (f.isVisible() && viewer.getSceneRoot() != null && viewer.getCameraPath() != null) viewer.render();
 	}
 
-	public int getSignature() throws RemoteException {
+	public int getSignature() {
 		return viewer.getSignature();
 	}
 
-	public void setSignature(int sig) throws RemoteException {
+	public void setSignature(int sig) {
 		viewer.setSignature(sig);
 	}
 
@@ -185,11 +189,12 @@ public class RemoteViewerImpl extends UnicastRemoteObject implements RemoteViewe
 	  new javax.swing.Timer(50, taskPerformer).start();
 	}
 			
-	public String getPreferredCameraName() throws RemoteException {
+	public String getPreferredCameraName() {
 		return config.getProperty("camera.name", "defaultCamera");
 	}
 		
 	protected void bind() throws RemoteException, MalformedURLException {
+        UnicastRemoteObject.exportObject(this);
 		Naming.rebind("//"+hostname+"/"+config.getProperty("client.viewer.name"), this);
 		System.out.println("RemoteViewer ["+"//"+hostname+"/"+config.getProperty("client.viewer.name")+"] bound in registry");
 	}

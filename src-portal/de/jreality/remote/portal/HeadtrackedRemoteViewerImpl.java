@@ -22,7 +22,6 @@
  */
 package de.jreality.remote.portal;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -70,8 +69,7 @@ public class HeadtrackedRemoteViewerImpl extends RemoteViewerImpl implements
 
 	static double[] correction;
 	
-	private static de.jreality.jogl.InteractiveViewer viewer = new de.jreality.jogl.InteractiveViewer();
-	
+	private final de.jreality.jogl.InteractiveViewer viewer;
 	static {
 		double[] axis = ConfigurationAttributes.getSharedConfiguration().getDoubleArray("camera.correction.axis");
 		double angle = ConfigurationAttributes.getSharedConfiguration().getDouble("camera.correction.angle");
@@ -82,9 +80,11 @@ public class HeadtrackedRemoteViewerImpl extends RemoteViewerImpl implements
 	/**
 	 * @param viewer
 	 * @throws RemoteException
+	 * @throws RemoteException
 	 */
-	public HeadtrackedRemoteViewerImpl() throws RemoteException {
+	public HeadtrackedRemoteViewerImpl(de.jreality.jogl.InteractiveViewer viewer) throws RemoteException {
 		super(viewer);
+        this.viewer = viewer;
 		this.config = ConfigurationAttributes.getSharedConfiguration();
 		( (GLDrawable) viewer.getViewingComponent() ).setAutoSwapBufferMode(config.getBool("viewer.autoBufferSwap"));
 		if (viewer.getSceneRoot().getAppearance() == null)
@@ -139,7 +139,6 @@ public class HeadtrackedRemoteViewerImpl extends RemoteViewerImpl implements
 			BufferedImage cursorImg = new BufferedImage(16,16,BufferedImage.TYPE_INT_ARGB);
 			Graphics2D gfx = cursorImg.createGraphics();
 			gfx.setColor(new Color(0,0,0,0));
-			//gfx.setComposite(AlphaComposite.Src);
 			gfx.fillRect(0,0,16,16);
 			gfx.dispose();
 			f.setCursor(f.getToolkit().createCustomCursor(cursorImg, new Point(), ""));
@@ -168,16 +167,16 @@ public class HeadtrackedRemoteViewerImpl extends RemoteViewerImpl implements
 //		}
 	}
 
-	public void render() throws RemoteException {
+	public void render() {
 		viewer.render();
 	}
 	
-	public void swapBuffers() throws RemoteException {
+	public void swapBuffers() {
 		viewer.swapBuffers();
 	}
 
 
-	public void waitForRenderFinish() throws RemoteException {
+	public void waitForRenderFinish() {
 		viewer.waitForRenderFinish();
 	}
 
@@ -191,11 +190,12 @@ public class HeadtrackedRemoteViewerImpl extends RemoteViewerImpl implements
 				rot[0] * ((Math.PI * 2.0) / 360.), rot[1], rot[2], rot[3]);
 	}
 
-	public void setRemoteSceneRoot(RemoteSceneGraphComponent r) throws RemoteException {
+	public void setRemoteSceneRoot(RemoteSceneGraphComponent r) {
 		if (root != null) viewer.getSceneRoot().removeChild(root);
 		if (r != null) { 
-			root = (SceneGraphComponent)RemoteSceneGraphElementsFactoryImpl.getLocal(r);
-			viewer.getSceneRoot().addChild(root);
+//			root = (SceneGraphComponent)RemoteSceneGraphElementsFactoryImpl.getLocal(r);
+		    root = (SceneGraphComponent) r;
+            viewer.getSceneRoot().addChild(root);
 		}
 		else root = null;
 	}
@@ -206,7 +206,7 @@ public class HeadtrackedRemoteViewerImpl extends RemoteViewerImpl implements
 	 * @param t current head || camera position
 	 * @throws RemoteException
 	 */
-	public void sendHeadTransformation(double[] tm) throws RemoteException {
+	public void sendHeadTransformation(double[] tm) {
 		t.setMatrix(tm);
 		//TODO move sensor between the eyes
 		Camera cam = CameraUtility.getCamera(viewer);
@@ -219,7 +219,7 @@ public class HeadtrackedRemoteViewerImpl extends RemoteViewerImpl implements
 		cam.setViewPort(CameraUtility.calculatePORTALViewport(viewer, t));
 	}
 	
-	public SceneGraphComponent makeLights()	{
+	private SceneGraphComponent makeLights()	{
 		SceneGraphComponent lights = new SceneGraphComponent();
 		lights.setName("lights");
 		SpotLight pl = new SpotLight();
@@ -250,7 +250,7 @@ public class HeadtrackedRemoteViewerImpl extends RemoteViewerImpl implements
 		String hostname = INetUtilities.getHostname();
 		ConfigurationAttributes config = ConfigurationAttributes.getDefaultConfiguration();
 		try {
-			HeadtrackedRemoteViewerImpl obj = new HeadtrackedRemoteViewerImpl();
+			HeadtrackedRemoteViewerImpl obj = new HeadtrackedRemoteViewerImpl(new de.jreality.jogl.InteractiveViewer());
 			obj.bind();
 			obj.connect();
 		} catch (Exception e) {
@@ -264,7 +264,7 @@ public class HeadtrackedRemoteViewerImpl extends RemoteViewerImpl implements
 	}
 	
 
-	public static de.jreality.jogl.InteractiveViewer getViewer() {
+	public de.jreality.jogl.InteractiveViewer getViewer() {
 		return viewer;
 	}
 
@@ -272,7 +272,7 @@ public class HeadtrackedRemoteViewerImpl extends RemoteViewerImpl implements
 		viewer.setAutoSwapMode(!b);
 	}
 
-	public void setUseDisplayLists(boolean b) throws RemoteException {
+	public void setUseDisplayLists(boolean b) {
 		viewer.getRenderer().setUseDisplayLists(b);
 	}
 }

@@ -20,7 +20,7 @@
  * Boston, MA 02111-1307
  * USA 
  */
-package de.jreality.remote.portal;
+package de.jreality.remote.portal.rmc;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -33,7 +33,6 @@ import javax.swing.JFrame;
 
 import net.java.games.jogl.GLDrawable;
 import de.jreality.jogl.Viewer;
-import de.jreality.remote.RmcRemoteViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.CommonAttributes;

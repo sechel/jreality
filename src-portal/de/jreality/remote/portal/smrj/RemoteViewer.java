@@ -20,7 +20,7 @@
  * Boston, MA 02111-1307
  * USA 
  */
-package de.jreality.remote;
+package de.jreality.remote.portal.smrj;
 
 import java.util.List;
 import java.rmi.Remote;
@@ -36,12 +36,9 @@ import de.jreality.scene.proxy.rmi.RemoteSceneGraphPath;
  * @author weissman
  *
  */
-public interface RemoteViewer extends Remote {
-	public void setRemoteSceneRoot(RemoteSceneGraphComponent r) throws RemoteException;
-	public void setRemoteCameraPath(List list) throws RemoteException;
-	public void render() throws RemoteException;
-	public void setSignature(int sig) throws RemoteException;
-	public void quit() throws RemoteException;
-	public RemoteSceneGraphElementsFactory getFactory() throws RemoteException;
-	public String getPreferredCameraName() throws RemoteException;
+public interface RemoteViewer extends de.jreality.remote.RemoteViewer {
+	public void setRemoteSceneRoot(RemoteSceneGraphComponent r);
+	public void setRemoteCameraPath(List list);
+	public void render();
+	public void setSignature(int sig);
 }
