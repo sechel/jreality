@@ -73,7 +73,11 @@ public abstract class InteractiveViewerDemo extends JFrame{
 	Box hack;
 	boolean fullScreen = false;
 	
-	String resourceDir = ".";
+	protected static String resourceDir = ".";
+	static {
+		String foo = System.getProperty("jreality.jogl.resourceDir");
+		if (foo != null) resourceDir = foo;
+	}
 	/**
 	 * 
 	 */
@@ -277,7 +281,7 @@ public abstract class InteractiveViewerDemo extends JFrame{
 	 * @param file
 	 * @return
 	 */
-	private SceneGraphComponent readFile(File file) {
+	protected SceneGraphComponent readFile(File file) {
 		SceneGraphComponent sgc;
 		if (file.getName().indexOf(".top") != -1) {
 			sgc = PolymakeParser.readFromFile(file);

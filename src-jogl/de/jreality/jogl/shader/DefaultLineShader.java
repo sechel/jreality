@@ -137,8 +137,8 @@ public class DefaultLineShader implements LineShader  {
 			gl.glLineStipple(getLineFactor(), (short) getLineStipplePattern());
 		} 
 		else gl.glDisable(GL.GL_LINE_STIPPLE);
-		if (tubeDraw) gl.glEnable(GL.GL_LIGHTING);
-		else gl.glDisable(GL.GL_LIGHTING);
+		//if (tubeDraw) gl.glEnable(GL.GL_LIGHTING);
+		gl.glDisable(GL.GL_LIGHTING);
 		gl.glDepthRange(0.0d, depthFudgeFactor);
 	}
 		public double getTubeRadius() {
