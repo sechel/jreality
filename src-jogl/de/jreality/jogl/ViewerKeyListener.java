@@ -207,7 +207,7 @@ public class ViewerKeyListener extends KeyAdapter {
 				
 				case KeyEvent.VK_V:		// draw vertices
 					if (e.isShiftDown()) 					toggleValue(CommonAttributes.VERTEX_DRAW);
-					else if (viewer instanceof de.jreality.jogl.Viewer) viewer.speedTest();
+					else System.out.println("Frame rate: "+viewer.getRenderer().getFramerate()+" fps");
 					viewer.render();
 					break;
 

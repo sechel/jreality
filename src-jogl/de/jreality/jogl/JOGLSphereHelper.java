@@ -29,12 +29,9 @@ public class JOGLSphereHelper extends SphereHelper {
 	public static void setupSphereDLists(GL gl)	{
 		int n = SphereHelper.spheres.length;
 		int[] dlists = null;
-		if (!sharedDisplayLists)	dlists = (int[] ) sphereDListsTable.get(gl);
-		else dlists = new int[n];
-		//dps = new DefaultPolygonShader();
-//		EffectiveAppearance eap = EffectiveAppearance.create();
-//		eap = eap.create(SphereHelper.pointAsSphereAp);
-//		dps =ShaderLookup.getPolygonShaderAttr(eap, "", CommonAttributes.POLYGON_SHADER);		
+		//if (!sharedDisplayLists)	dlists = (int[] ) sphereDListsTable.get(gl);
+		//else 
+				dlists = new int[n];
 		System.out.println("Setting up sphere display lists for context "+gl);
 		for (int i = 0; i<n; ++i)	{
 			dlists[i] = gl.glGenLists(1);

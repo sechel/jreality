@@ -56,9 +56,11 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		foo = System.getProperty("jreality.jogl.sharedContexts");
 		if (foo != null && foo.indexOf("true") != -1) sharedContexts = true;
 		if (sharedContexts)	{
-			GLCapabilities capabilities = new GLCapabilities();
-			firstOne = GLDrawableFactory.getFactory().createGLCanvas(capabilities, null, null);	
-			System.out.println("Using shared contexts: "+firstOne);
+//			GLCapabilities capabilities = new GLCapabilities();
+//			firstOne = GLDrawableFactory.getFactory().createGLCanvas(capabilities, null, null);	
+			System.out.println("Not allowing shared contexts now");
+			sharedContexts=false;
+			//System.out.println("Using shared contexts: "+firstOne);
 		}
 	}
 	public int getSignature() {
@@ -93,6 +95,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		super();
 		initializeFrom(r, p);		
 //	    canvas.setIgnoreRepaint(true);
+		canvas.setNoAutoRedrawMode(true);
 	}
 
 	/* (non-Javadoc)
@@ -247,7 +250,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		canvas.addGLEventListener(this);
 		canvas.requestFocus();
 		renderer =  new JOGLRenderer(this); 
-		//if (firstOne == null) firstOne = canvas;
+		if (sharedContexts && firstOne == null) firstOne = canvas;
 	}
 
 	/**
@@ -257,33 +260,11 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		return renderer;
 	}
 	
-	boolean doSpeedTest = false;
-	double frameRate = 0.0;
 	private boolean pendingUpdate;
-	public void speedTest()		{
-		doSpeedTest = true;
-		render();
-	}
 	/* (non-Javadoc)
 	 * @see net.java.games.jogl.GLEventListener#display(net.java.games.jogl.GLDrawable)
 	 */
 	public void display(GLDrawable arg0) {
-		if (doSpeedTest)	{
-			boolean isnard = canvas.getNoAutoRedrawMode();
-			boolean iir = canvas.getIgnoreRepaint();
-			canvas.setNoAutoRedrawMode(true);
-			canvas.setIgnoreRepaint(true);
-			long begin = System.currentTimeMillis();
-			for (int i = 0; i<50; ++i)	{
-				renderer.display(arg0);
-			}
-			long end = System.currentTimeMillis();
-			frameRate = 50000.0/(end-begin);
-			System.err.println("Timed frame rate: "+frameRate);
-			doSpeedTest = false;
-			canvas.setIgnoreRepaint(iir);
-			canvas.setNoAutoRedrawMode(isnard);
-		}
 		renderer.display(arg0);
 	}
 

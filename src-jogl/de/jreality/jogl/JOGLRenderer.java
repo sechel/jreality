@@ -70,7 +70,7 @@ import de.jreality.util.Rn;
  * @author gunn
  *
  */
-public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInterface {
+public class JOGLRenderer extends SceneGraphVisitor  {
 
 	final static Logger theLog;
 	static boolean debugGL = false, collectFrameRate = true;
@@ -98,6 +98,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 	GLCanvas theCanvas;
 	Graphics3D gc;
 	GL globalGL;
+	int[] sphereDisplayLists;
 	GLU globalGLU;
 	public  boolean texResident;
 	int numberTries = 0;		// how many times we have tried to make textures resident
@@ -287,6 +288,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 		if (debugGL) {
 			drawable.setGL(new DebugGL(drawable.getGL()));
 		}
+		theCanvas = (GLCanvas) drawable;
 		globalGL = theCanvas.getGL();
 		globalGLU = theCanvas.getGLU();
 
@@ -294,7 +296,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 		theLog.log(Level.INFO,"version: "+vv);
 		
 //		otime = System.currentTimeMillis();
-
+		sphereDisplayLists = JOGLSphereHelper.getSphereDLists(globalGL);
+		
 		if (CameraUtility.getCamera(theViewer) == null || theCanvas == null) return;
 		CameraUtility.getCamera(theViewer).setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
 		globalGL.glViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
@@ -311,11 +314,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 		theCanvas = (GLCanvas) drawable;
 		globalGL = theCanvas.getGL();
 		Camera theCamera = CameraUtility.getCamera(theViewer);
-		if (theCamera != CameraUtility.getCamera(theViewer))	{
-			theCamera = CameraUtility.getCamera(theViewer);
-			theCamera.setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
-			globalGL.glViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
-		}
 
 		//theCamera.update();
 		// TODO for split screen stereo, may want to have a real rectangle here, not always at (0,0)

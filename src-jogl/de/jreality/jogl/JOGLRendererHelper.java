@@ -146,7 +146,7 @@ public class JOGLRendererHelper {
 		if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
 		DoubleArray da;
 		if (drawSpheres)	{
-			int[] dlists = JOGLSphereHelper.getSphereDLists(gl);
+			int[] dlists = jr.sphereDisplayLists;	//JOGLSphereHelper.getSphereDLists(gl);
 			double size = pointRadius;
 			
 			for (int i = 0; i< sg.getNumPoints(); ++i)	{
