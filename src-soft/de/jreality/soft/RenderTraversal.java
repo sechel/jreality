@@ -334,7 +334,7 @@ public class RenderTraversal extends SceneGraphVisitor {
     VecMat.normalize(direction);
     environment.addDirectionalLight(new de.jreality.soft.DirectionalLightSoft(
       color[0], color[1], color[2], l.getIntensity(), direction));
-    
+   
   }
 
   public void visit(PointLight l) {
@@ -351,12 +351,11 @@ public class RenderTraversal extends SceneGraphVisitor {
       environment.addSpotLight(new de.jreality.soft.SpotLightSoft(
           color[0], color[1], color[2], l.getIntensity(), direction,
           src, Math.PI, 0,l.getFalloffA0(), l.getFalloffA1(), l.getFalloffA2()));
-
     }
 
   
   public void visit(SpotLight l) {
-    super.visit(l);
+    //super.visit(l);
     if(l.isGlobal()) return; //global lights are already in the environment
     float[] color= l.getColorAsFloat();
     double[] direction= new double[3];
@@ -369,7 +368,6 @@ public class RenderTraversal extends SceneGraphVisitor {
     environment.addSpotLight(new de.jreality.soft.SpotLightSoft(
         color[0], color[1], color[2], l.getIntensity(), direction,
         src, l.getConeAngle(), l.getConeDeltaAngle(),l.getFalloffA0(), l.getFalloffA1(), l.getFalloffA2()));
-
   }
   
 }

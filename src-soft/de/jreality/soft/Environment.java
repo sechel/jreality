@@ -203,7 +203,7 @@ public final class Environment extends SceneGraphVisitor {
         float[] color= l.getColorAsFloat();
         double[] direction= new double[3];
         //VecMat.transformNormal(currentTrafo.getMatrix(),0,0,-1,direction);
-        VecMat.transformNormal(currentTrafo, 0, 0, -1, direction);
+        VecMat.transformNormal(currentTrafo, 0, 0, 1, direction);
         VecMat.normalize(direction);
         double[] src= new double[3];
         //VecMat.transform(currentTrafo.getMatrix(),0,0,0,src);
@@ -216,12 +216,12 @@ public final class Environment extends SceneGraphVisitor {
 
     
     public void visit(SpotLight l) {
-        super.visit(l);
+        //super.visit(l);
         if(!l.isGlobal()) return; // local lights are added at the render traversal
         float[] color= l.getColorAsFloat();
         double[] direction= new double[3];
         //VecMat.transformNormal(currentTrafo.getMatrix(),0,0,-1,direction);
-        VecMat.transformNormal(currentTrafo, 0, 0, -1, direction);
+        VecMat.transformNormal(currentTrafo, 0, 0, 1, direction);
         VecMat.normalize(direction);
         double[] src= new double[3];
         //VecMat.transform(currentTrafo.getMatrix(),0,0,0,src);

@@ -63,6 +63,8 @@ public class RIBVisitor extends SceneGraphVisitor {
     protected EffectiveAppearance eAppearance;
     private int textureCount = 0;
     private Map textures =new HashMap();
+    
+    public static String fullSpotLight = null;
     /**
      * 
      */
@@ -77,7 +79,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         double[] cam =path.getInverseMatrix(null);
         Ri.begin(name+".rib");
         HashMap map = new HashMap();
-        map.put("shader", ".:&");
+        map.put("shader", (fullSpotLight!=null?(fullSpotLight+":"):"")+".:&");
         Ri.option( "searchpath", map);
         Ri.display(name+".tif", "tiff", "rgb",null);
         
@@ -229,7 +231,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         Ri.attributeBegin();
         setupShader(eAppearance,CommonAttributes.LINE_SHADER);
         
-        float r = (float) eAppearance.getAttribute(NameSpace.name(CommonAttributes.LINE_SHADER,CommonAttributes.LINE_WIDTH),0.1);
+        float r = (float) eAppearance.getAttribute(NameSpace.name(CommonAttributes.LINE_SHADER,CommonAttributes.LINE_WIDTH),0.01);
 //        int n= g.getNumEdges();
 //        for(int i = 0;i<n;i++) {
 //            cylinder(g.getEdgeData(i),r);
@@ -298,6 +300,8 @@ public class RIBVisitor extends SceneGraphVisitor {
         Ri.transformEnd();
     }
         public void visit(IndexedFaceSet i) {
+            int npolys =i.getNumFaces();
+            if(npolys!= 0) {
         HashMap map = new HashMap();
         boolean smooth = !((String)eAppearance.getAttribute(CommonAttributes.POLYGON_SHADER,"default")).startsWith("flat");
         DataList coords = i.getVertexAttributes(Attribute.COORDINATES);
@@ -373,7 +377,6 @@ public class RIBVisitor extends SceneGraphVisitor {
         }
         
         
-        int npolys =i.getNumFaces();
         int[] nvertices =new int[npolys];
         int verticesLength =0;
         for(int k =0; k<npolys;k++) {
@@ -393,6 +396,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
         Ri.pointsPolygons(npolys,nvertices,vertices,map);
         Ri.attributeEnd();
+            }
         super.visit(i);
     }
 
@@ -408,7 +412,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         DoubleArrayArray a=coord.toDoubleArrayArray();
         double[] trns = new double[16];
         Ri.attributeBegin();
-        float r = (float) eAppearance.getAttribute(NameSpace.name(CommonAttributes.POINT_SHADER,CommonAttributes.POINT_RADIUS),0.1);
+        float r = (float) eAppearance.getAttribute(NameSpace.name(CommonAttributes.POINT_SHADER,CommonAttributes.POINT_RADIUS),/*CommonAttributes.POINT_RADIUS_DEFAULT*/ 0.01);
         System.out.println("point radius is "+r);
         setupShader(eAppearance,CommonAttributes.POINT_SHADER);
         for (int i= 0; i < n; i++) { 
