@@ -86,7 +86,7 @@ public class ParameterReader implements Runnable {
 	  	for (int i = 0; i < fullPieces; i++) { // read full datagrams
 		  	dgram.setData(bytes, i*DATAGRAM_LENGTH, DATAGRAM_LENGTH); // multicast
 		  	socket.receive(dgram);
-//		  	System.out.println("\t\treceived "+i+". part");
+		  	System.out.println("\t\treceived "+i+". part");
 	  	}
 	  	// read last datagram
 	  	dgram.setData(bytes, fullPieces*DATAGRAM_LENGTH, lastPieceSize); // multicast

@@ -58,7 +58,7 @@ public class ParameterBroadcaster {
 	public ParameterBroadcaster() {
 		try {
 			socket = new DatagramSocket(); //5556);
-			group = InetAddress.getByName("192.168.178.255");
+			group = InetAddress.getByName("192.168.5.255");
 			//socket.joinGroup(group);
 //			socket.setTimeToLive(255);
 		}
@@ -117,10 +117,10 @@ public class ParameterBroadcaster {
 	  	for (int i = 0; i < fullPieces; i++) { // send full datagrams
 		  	DatagramPacket dgram = new DatagramPacket(bytes, i*DATAGRAM_LENGTH, DATAGRAM_LENGTH, group, DEST_PORT); // multicast
 		  	socket.send(dgram);
-//		  	try {
-//				Thread.sleep(10);
-//			} catch (InterruptedException e) {}
-//		  	System.out.println("\t\tsent "+i+". part");
+		  	try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {}
+		  	System.out.println("\t\tsent "+i+". part");
 	  	}
 	  	// send last datagram
 	  	DatagramPacket dgram = new DatagramPacket(bytes, fullPieces*DATAGRAM_LENGTH, lastPieceSize, group, DEST_PORT); // multicast
@@ -139,9 +139,9 @@ public class ParameterBroadcaster {
 	  		//dumpArray(indexedBytes);
 	  		DatagramPacket dgram = new DatagramPacket(indexedBytes, (DATAGRAM_LENGTH+4), group, DEST_PORT); // multicast
 		  	socket.send(dgram);
-//		  	try {
-//				Thread.sleep(10);
-//			} catch (InterruptedException e) {}
+		  	try {
+				Thread.sleep(3);
+			} catch (InterruptedException e) {}
 //		  	System.out.println("\t\tsent "+i+". part");
 	  	}
 	  	// send last datagram
@@ -154,17 +154,22 @@ public class ParameterBroadcaster {
 	}
 
 	public static void main(String[] args) {
+		int i = 10;
+		int j = 5000;
+		try {
+		  i = Integer.parseInt(args[0]);
+		  j = Integer.parseInt(args[1]);
+		} catch (Exception e) {}
 		ParameterBroadcaster pb = new ParameterBroadcaster();
-		CatenoidHelicoid ch = new CatenoidHelicoid(419);
-		Serializable[] s = {/*null, new Transformation(), new double[]{1,2,3,4,5,2,3,4,5,2,3,4,5}, new String("bla"), null, */
-				ch.getVertexAttributes(/*Attribute.COORDINATES*/)};
+		CatenoidHelicoid ch = new CatenoidHelicoid(i);
+		Serializable[] s = {/*null, new Transformation(), new double[]{1,2,3,4,5,2,3,4,5,2,3,4,5}, new String("bla"), null,*/ ch.getVertexAttributes(/*Attribute.COORDINATES*/)};
 		try {
 			pb.sendParameters(s);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(j);
 		} catch (InterruptedException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
