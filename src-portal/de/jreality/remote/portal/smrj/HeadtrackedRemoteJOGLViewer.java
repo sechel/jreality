@@ -20,11 +20,7 @@
  * Boston, MA 02111-1307
  * USA 
  */
-package de.jreality.remote.portal;
-
-import java.rmi.RemoteException;
-
-import de.jreality.remote.RemoteViewer;
+package de.jreality.remote.portal.smrj;
 
 /**
  * viewer interface for remote viewer with one headtracked camera
@@ -32,12 +28,11 @@ import de.jreality.remote.RemoteViewer;
  * @author gollwas
  *
  */
-public interface HeadtrackedRemoteViewer extends RemoteViewer {
+public interface HeadtrackedRemoteJOGLViewer extends HeadtrackedRemoteViewer {
 	
-	public void sendHeadTransformation(double[] transform) throws RemoteException;
-	public void waitForRenderFinish() throws RemoteException;
-	public void swapBuffers() throws RemoteException;
-	public void setBackgroundColor(java.awt.Color color) throws RemoteException;
-	public void setManualSwapBuffers(boolean b) throws RemoteException;
-	public void setUseDisplayLists(boolean b) throws RemoteException;
+    public void setUseDisplayLists(boolean b);
+    public void setManualSwapBuffers(boolean b);
+    public void swapBuffers();
+    public void waitForRenderFinish();
+    public void setBackgroundColor(java.awt.Color color);
 }

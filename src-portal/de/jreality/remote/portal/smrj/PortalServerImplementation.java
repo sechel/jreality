@@ -126,8 +126,10 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (RemoteException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (NotBoundException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         renderer.setPriority(Thread.MIN_PRIORITY);
@@ -138,8 +140,8 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
     SceneGraphComponent sceneRoot;
     SceneGraphComponent wandComp;
 
-    protected RemoteViewer initClient(RemoteFactory factory) throws IOException {
-        return (RemoteViewer) factory.createRemote(HeadtrackedRemoteViewerImp.class);
+    protected RemoteViewer initClients(RemoteFactory factory) throws IOException {
+        return (RemoteViewer) factory.createRemoteViaStaticMethod(HeadtrackedRemoteJOGLViewerImp.class, HeadtrackedRemoteJOGLViewerImp.class, "getInstance");
     }
 
     public void setSceneRoot(SceneGraphComponent root) {
@@ -171,7 +173,6 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
      * method to add movable geometries. the returned Component has coordinates
      * that can be changed with the wand (if isNavigationEnabled() == true)
      * 
-     * @return
      */
     public SceneGraphComponent getNavigationComponent() {
         return navComp;
@@ -256,8 +257,8 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         }
     }
 
-    private HeadtrackedRemoteViewer getClients() {
-        return (HeadtrackedRemoteViewer) clients;
+    private HeadtrackedRemoteJOGLViewer getClients() {
+        return (HeadtrackedRemoteJOGLViewer) clients;
     }
 
     /** ************* portal event listener implementation ************** */
@@ -398,7 +399,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         PortalServerImplementation rsi = new PortalServerImplementation(
                 nio ? new TCPBroadcasterNIO(8868).getRemoteFactory()
                     : new TCPBroadcasterIO(8868).getRemoteFactory());
-        rsi.setBackgroundColor(new Color(120, 10, 44, 20));
+        //rsi.setBackgroundColor(new Color(220, 10, 44, 20));
         rsi.loadWorld(args[0]);
         rsi.setNavigationEnabled(true);
 	//rsi.setUseDisplayLists(true);

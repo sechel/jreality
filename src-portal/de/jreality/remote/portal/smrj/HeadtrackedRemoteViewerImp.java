@@ -1,5 +1,5 @@
 /*
- * Created on 10-Jan-2005
+ * Created on 19-Nov-2004
  *
  * This file is part of the jReality package.
  * 
@@ -25,121 +25,159 @@ package de.jreality.remote.portal.smrj;
 import java.awt.Color;
 import java.rmi.RemoteException;
 
+import net.java.games.jogl.GLDrawable;
+import de.jreality.remote.util.INetUtilities;
+import de.jreality.scene.*;
 import de.jreality.scene.proxy.rmi.RemoteSceneGraphComponent;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.util.ConfigurationAttributes;
-import de.jreality.util.LoadableScene;
-import de.jreality.util.Lock;
+import de.jreality.util.*;
 
 /**
- *
- * TODO: comment this
- *
+ * Portal Viewer - has one camera configured by the ConfigurationAttributes and uses jogl renderer.
+ * 
  * @author weissman
  *
  */
-public class HeadtrackedRemoteViewerImp extends
-de.jreality.remote.portal.HeadtrackedRemoteViewerImpl implements HeadtrackedRemoteViewer {
+public class HeadtrackedRemoteViewerImp extends RemoteViewerImp implements
+        HeadtrackedRemoteViewer {
 
-    public HeadtrackedRemoteViewerImp() throws RemoteException {
-        super(new de.jreality.jogl.InteractiveViewer());
-    }
+    protected SceneGraphComponent cameraTranslationNode,
+    cameraOrientationNode, root, navigationNode;
+
+    String hostname;
+
+    static double[] correction;
     
-    protected SceneGraphComponent getLocal(RemoteSceneGraphComponent r) {
-        return (SceneGraphComponent) r;
+    static {
+        double[] axis = ConfigurationAttributes.getSharedConfiguration().getDoubleArray("camera.correction.axis");
+        double angle = ConfigurationAttributes.getSharedConfiguration().getDouble("camera.correction.angle");
+        angle *= (Math.PI*2.)/360.;
+        correction = P3.makeRotationMatrix(null, axis, angle);
     }
-    
-    public void loadWorld(String classname) {
-        long t = System.currentTimeMillis();
-        LoadableScene wm = null;
-        try {
-            wm = (LoadableScene) Class.forName(classname).newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
+
+    HeadtrackedRemoteViewerImp(Viewer viewer) {
+        super(viewer);
+        this.config = ConfigurationAttributes.getSharedConfiguration();
+        if (viewer.getSceneRoot().getAppearance() == null)
+            viewer.getSceneRoot().setAppearance(new Appearance());
+        viewer.getSceneRoot().getAppearance().setAttribute(
+                CommonAttributes.SMOOTH_SHADING, true);
+        viewer.getSceneRoot().getAppearance().setAttribute(
+                CommonAttributes.VERTEX_DRAW, false);
+        // insert an extra transform in the camera path
+        // This will handle the translation based on the tracked position
+        // The "camera node" itself contains only the orientation rotation
+        // which wall the viewer is attached to.
+        // It may be possible to combine these two transformations into
+        // a single node but for now we separate them for the sake of
+        // clarity.
+//        hostname = INetUtilities.getHostname();
+//        viewer.getSceneRoot().setName(hostname+" root");
+//        CameraUtility.getCameraNode(viewer).setName("camNode");
+//        CameraUtility.getCameraNode(viewer).getCamera().setName("camera");
+//        System.out.println("orig. cam path:"+viewer.getCameraPath().toString());
+//        
+//        cameraTranslationNode = CameraUtility.getCameraNode(viewer);
+//        cameraTranslationNode.setTransformation(new Transformation());
+//        cameraTranslationNode.addChild(makeLights());
+//        Camera cam = cameraTranslationNode.getCamera();
+//        cam.setNear(.1);
+//        cameraTranslationNode.setCamera(null);
+//        cameraOrientationNode = SceneGraphUtilities
+//                .createFullSceneGraphComponent(hostname + "CameraNode");
+//        cameraTranslationNode.addChild(cameraOrientationNode);
+//        cameraOrientationNode.setCamera(cam);
+//        // lengthen the camera path
+//        viewer.getCameraPath().pop();
+//        viewer.getCameraPath().push(cameraOrientationNode);
+//        viewer.getCameraPath().push(cam);
+//        viewer.setCameraPath(viewer.getCameraPath());
+//        //initCameraOrientation();
+//        System.out.println("new cam path:"+viewer.getCameraPath().toString());
+        viewer.getSceneRoot().getAppearance().setAttribute(
+                CommonAttributes.BACKGROUND_COLOR, Color.DARK_GRAY);
+        navigationNode = new SceneGraphComponent();
+        navigationNode.setTransformation(new Transformation());
+        viewer.getSceneRoot().addChild(navigationNode);
+
+        CameraUtility.getCamera(viewer).setOnAxis(false);
+        
+//      if (config.getBool("portal.fixedHead")) {
+//          fixedHead = true;
+//          Transformation t = new Transformation();
+//          t.setTranslation(config.getDoubleArray("portal.fixedHeadPosition"));
+//          viewer.setCameraPosition(t);
+//      }
+    }
+
+    public void render(double[] headMatrix) {
+        System.out.println("HeadtrackedRemoteViewerImp.render()");
+            sendHeadTransformation(headMatrix);
+            render();
+    }
+
+    /**
+     * sets the camera orientation node from the config file (rotation around
+     * given axis)
+     */
+    private void initCameraOrientation() {
+        double[] rot = config.getDoubleArray("camera.orientation");
+        cameraOrientationNode.getTransformation().setRotation(
+                rot[0] * ((Math.PI * 2.0) / 360.), rot[1], rot[2], rot[3]);
+    }
+
+    public void setRemoteSceneRoot(RemoteSceneGraphComponent r) {
+        if (root != null) viewer.getSceneRoot().removeChild(root);
+        if (r != null) { 
+            System.out.println("setting scene root to: "+r);
+            viewer.getSceneRoot().addChild((SceneGraphComponent) r);
         }
-        // scene settings
-        wm.setConfiguration(ConfigurationAttributes.getDefaultConfiguration());
-        de.jreality.scene.SceneGraphComponent world = wm.makeWorld();
-        if (world != null) getViewer().getSceneRoot().addChild(world);
-        setSignature(wm.getSignature());
-        long s = System.currentTimeMillis() - t;
-        System.out.println("loaded world " + classname + " successful. ["+s+"ms]");
-    }
-    
-    Lock headMatrixLock = new Lock();
-    double[] headMatrix = new double[16];
-    boolean headChanged = false;
-    final Object renderSynch = new Object();
-    int statDelay = 10000; // milliseconds between statistic output
-    int runs = 0;
-    int renders = 0;
-    long startTime = System.currentTimeMillis();
-    long maxFrameTime = 0;
-    private boolean headTracked = true;
-    
-    private boolean rendering, reRender;
-    
-    boolean manualSwapBuffers=true;
-    private boolean measure = false;
-    
-    public void renderTest() {
-            long s;
-            long t;
-            long start = System.currentTimeMillis();
-            renders++;
-            s  = System.currentTimeMillis();
-            getViewer().render();
-            t = System.currentTimeMillis() - s;
-            if (measure)            System.out.println("render: "+t);
-            s  = System.currentTimeMillis();
-            getViewer().waitForRenderFinish();
-            t = System.currentTimeMillis() - s;
-            if (measure)            System.out.println("renderFinish: "+t);
-            if (manualSwapBuffers) { 
-                s  = System.currentTimeMillis();
-                getViewer().swapBuffers();
-                t = System.currentTimeMillis() - s;
-                if (measure)                System.out.println("swapBuffers: "+t);
-            }
-            long delay = System.currentTimeMillis() - start;
-            if (maxFrameTime < delay) maxFrameTime = delay;
-
-            long locTime = System.currentTimeMillis() - startTime;
-            if (locTime >= statDelay) {// statistics
-                System.out.println("************* stats  *****************");
-                System.out.println("elapsed time: " + locTime * 0.001 + " sec");
-                System.out.println("fps: " + ((double) renders)
-                        / ((double) locTime * 0.001));
-                System.out.println("wait(): " + runs);
-                System.out.println("Max. frametime: " + maxFrameTime + "[fps: "
-                        + (1. / (maxFrameTime * 0.001)) + "]");
-                System.out.println("******************************");
-                runs = renders = 0;
-                maxFrameTime = 0;
-                startTime = System.currentTimeMillis();
-            }
-            runs++;
-            rendering = false;
+        else root = null;
     }
 
-	public void render(double[] headMatrix) {
-		sendHeadTransformation(headMatrix);
-		render();
-	}
-    
-    public static void main(String[] argv) throws Exception {
-    	HeadtrackedRemoteViewerImp rsi = new HeadtrackedRemoteViewerImp();
-    	try {
-    	    rsi.manualSwapBuffers=(argv[1].indexOf('s') != -1);
-    	    rsi.measure = (argv[1].indexOf('m') != -1);
-    	} catch (Exception e) {}
-        rsi.setBackgroundColor(new Color(120, 10, 44, 20));
-        rsi.loadWorld(argv[0]);
-        //rsi.setUseDisplayLists(true);
-        Thread.sleep(100);
-        for (;;) {
-        	rsi.renderTest();
-        	Thread.yield();
-        }
+    Transformation t = new Transformation();
+    /**
+     * 
+     * @param t current head || camera position
+     * @throws RemoteException
+     */
+    public void sendHeadTransformation(double[] tm) {
+        t.setMatrix(tm);
+        //TODO move sensor between the eyes
+        Camera cam = CameraUtility.getCamera(viewer);
+        cameraTranslationNode.getTransformation().setTranslation(
+                t.getTranslation());
+        double[] tmp = Rn.times(null, t.getMatrix(), correction);
+        double[] totalOrientation = Rn.times(null, Rn.inverse(null,
+                cameraOrientationNode.getTransformation().getMatrix()), tmp);
+        cam.setOrientationMatrix(totalOrientation);
+        cam.setViewPort(CameraUtility.calculatePORTALViewport(viewer, t));
     }
+    
+    private SceneGraphComponent makeLights()    {
+        SceneGraphComponent lights = new SceneGraphComponent();
+        lights.setName("lights");
+        SpotLight pl = new SpotLight();
+        //PointLight pl = new PointLight();
+        //DirectionalLight pl = new DirectionalLight();
+        pl.setFalloff(1.0, 0.0, 0.0);
+        pl.setColor(new Color(120, 250, 180));
+        pl.setConeAngle(Math.PI);
+
+        pl.setIntensity(0.6);
+        SceneGraphComponent l0 = SceneGraphUtilities.createFullSceneGraphComponent("light0");
+        l0.setLight(pl);
+        lights.addChild(l0);
+        DirectionalLight dl = new DirectionalLight();
+        dl.setColor(new Color(250, 100, 255));
+        dl.setIntensity(0.6);
+        l0 = SceneGraphUtilities.createFullSceneGraphComponent("light1");
+        double[] zaxis = {0,0,1};
+        double[] other = {1,1,1};
+        l0.getTransformation().setMatrix( P3.makeRotationMatrix(null, zaxis, other));
+        l0.setLight(dl);
+        lights.addChild(l0);
+        
+        return lights;
+    }
+
 }

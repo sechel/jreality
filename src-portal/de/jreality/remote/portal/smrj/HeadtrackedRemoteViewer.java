@@ -1,5 +1,5 @@
 /*
- * Created on 19-Nov-2004
+ * Created on 17-Feb-2005
  *
  * This file is part of the jReality package.
  * 
@@ -22,19 +22,16 @@
  */
 package de.jreality.remote.portal.smrj;
 
+
 /**
- * viewer interface for remote viewer with one headtracked camera
- *  
- * @author gollwas
+ *
+ * TODO: comment this
+ *
+ * @author weissman
  *
  */
 public interface HeadtrackedRemoteViewer extends RemoteViewer {
-	
-	public void sendHeadTransformation(double[] transform);
-	public void waitForRenderFinish();
-	public void swapBuffers();
-	public void setBackgroundColor(java.awt.Color color);
-	public void setManualSwapBuffers(boolean b);
-	public void setUseDisplayLists(boolean b);
-	public void render(double[] headMatrix);
+    public void sendHeadTransformation(double[] transform);
+    public void render(double[] headMatrix);
+
 }

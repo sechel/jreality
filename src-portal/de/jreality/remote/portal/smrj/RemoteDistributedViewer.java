@@ -62,24 +62,12 @@ public class RemoteDistributedViewer implements Viewer {
     RemoteFactory factory;
     SMRJMirrorScene proxyScene;
 
-    /**
-     * @return Returns the sWAP_BUFFERS.
-     */
     public boolean isSwapBuffers() {
         return swapBuffers;
     }
-
-    /**
-     * @param swap_buffers
-     *            The sWAP_BUFFERS to set.
-     */
     public void setSwapBuffers(boolean swap_buffers) {
         swapBuffers = swap_buffers;
     }
-
-    /**
-     * @return Returns the config.
-     */
     public ConfigurationAttributes getConfig() {
         return config;
     }
@@ -95,11 +83,11 @@ public class RemoteDistributedViewer implements Viewer {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        clients = initClient(factory);
+        clients = initClients(factory);
         proxyScene = new SMRJMirrorScene(factory);
     }
 
-    protected RemoteViewer initClient(RemoteFactory factory) throws IOException {
+    protected RemoteViewer initClients(RemoteFactory factory) throws IOException {
         return (RemoteViewer) factory.createRemote(RemoteViewerImp.class);
     }
     

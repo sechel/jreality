@@ -23,12 +23,8 @@
 package de.jreality.remote.portal.smrj;
 
 import java.util.List;
-import java.rmi.Remote;
-import java.rmi.RemoteException;
 
 import de.jreality.scene.proxy.rmi.RemoteSceneGraphComponent;
-import de.jreality.scene.proxy.rmi.RemoteSceneGraphElementsFactory;
-import de.jreality.scene.proxy.rmi.RemoteSceneGraphPath;
 
 /**
  * Interface in the spirit of de.jreality.scene.Viewer adapted to remote use.
@@ -36,7 +32,7 @@ import de.jreality.scene.proxy.rmi.RemoteSceneGraphPath;
  * @author weissman
  *
  */
-public interface RemoteViewer extends de.jreality.remote.RemoteViewer {
+public interface RemoteViewer {
 	public void setRemoteSceneRoot(RemoteSceneGraphComponent r);
 	public void setRemoteCameraPath(List list);
 	public void render();
