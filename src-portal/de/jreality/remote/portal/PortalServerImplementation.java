@@ -217,89 +217,97 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 	private boolean headTracked = true;
 	
 	public void render() {
-		if (rendering) { reRender = true; return; }
-		rendering = reRender = true;
-		while (reRender) {
-			reRender = false;
-      long s;
-      long t;
-			if (headTracked && headChanged) {
-				clientMapLock.readLock();
-				headMatrixLock.readLock();
-				Collection currClients = getClients().values();
-        s  = System.currentTimeMillis();
-				for (Iterator i = currClients.iterator(); i.hasNext(); ) {
-					headChanged = false;
-					try {
-						((HeadtrackedRemoteServerClient)i.next()).sendHeadTransformation(headMatrix);
-					} catch (ClientDisconnectedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-        t = System.currentTimeMillis() - s;
-        System.out.println("sendHead: "+t);
-				headMatrixLock.readUnlock();
-				clientMapLock.readUnlock();
-			}
-			long start = System.currentTimeMillis();
-			renders++;
-			clientMapLock.writeLock();
-			Collection currClients = getClients().values();
-      s  = System.currentTimeMillis();
-            for (Iterator i = currClients.iterator(); i.hasNext(); ) {
-				try {
-					((HeadtrackedRemoteServerClient)i.next()).render();
-				} catch (ClientDisconnectedException e) {
-					//TODO: make this in a write lock
-					i.remove();
-				}
-			}
-            t = System.currentTimeMillis() - s;
-            System.out.println("render: "+t);
-            s  = System.currentTimeMillis();
-			for (Iterator i = currClients.iterator(); i.hasNext(); ) {
-				try {
-					((HeadtrackedRemoteServerClient)i.next()).waitForRenderFinish();
-				} catch (ClientDisconnectedException e) {
-					//TODO: make this in a write lock
-					i.remove();
-				}
-			}
-      t = System.currentTimeMillis() - s;
-      System.out.println("waitForRenderFinish: "+t);
-			if (manualSwapBuffers) {
-            s  = System.currentTimeMillis();
-                for (Iterator i = currClients.iterator(); i.hasNext(); ) {
-				try {
-					((HeadtrackedRemoteServerClient)i.next()).swapBuffers();
-				} catch (ClientDisconnectedException e) {
-					//TODO: make this in a write lock
-					i.remove();
-				}
-        t = System.currentTimeMillis() - s;
-        System.out.println("swapBuffers: "+t);
-			}
+        if (rendering) {
+            reRender = true;
+            return;
+        }
+        rendering = reRender = true;
+        while (reRender) {
+            reRender = false;
+            long s;
+            long t;
+            if (headTracked && headChanged) {
+                clientMapLock.readLock();
+                headMatrixLock.readLock();
+                Collection currClients = getClients().values();
+                s = System.currentTimeMillis();
+                for (Iterator i = currClients.iterator(); i.hasNext();) {
+                    headChanged = false;
+                    try {
+                        ((HeadtrackedRemoteServerClient) i.next())
+                                .sendHeadTransformation(headMatrix);
+                    } catch (ClientDisconnectedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+                t = System.currentTimeMillis() - s;
+                System.out.println("sendHead: " + t);
+                headMatrixLock.readUnlock();
+                clientMapLock.readUnlock();
             }
-			long delay = System.currentTimeMillis() - start;
-			if (maxFrameTime < delay) maxFrameTime = delay;
-			clientMapLock.writeUnlock();
-			long locTime = System.currentTimeMillis() - startTime;
-			if (locTime >= statDelay) {// statistics
-				System.out.println("************* stats  *****************");
-				System.out.println("elapsed time: "+ locTime *0.001+ " sec");
-				System.out.println("fps: " + ((double)renders) / ((double)locTime * 0.001)  );
-				System.out.println("wait(): " +runs);
-				System.out.println("Max. frametime: " +maxFrameTime+ "[fps: "+(1./(maxFrameTime*0.001))+"]");
-				System.out.println("******************************");
-				runs = renders = 0;
-				maxFrameTime = 0;
-				startTime = System.currentTimeMillis();
-			}
-			runs++;
-			rendering = false;
-		}
-	}
+            long start = System.currentTimeMillis();
+            renders++;
+            clientMapLock.writeLock();
+            Collection currClients = getClients().values();
+            s = System.currentTimeMillis();
+            for (Iterator i = currClients.iterator(); i.hasNext();) {
+                try {
+                    ((HeadtrackedRemoteServerClient) i.next()).render();
+                } catch (ClientDisconnectedException e) {
+                    //TODO: make this in a write lock
+                    i.remove();
+                }
+            }
+            t = System.currentTimeMillis() - s;
+            System.out.println("render: " + t);
+            s = System.currentTimeMillis();
+            for (Iterator i = currClients.iterator(); i.hasNext();) {
+                try {
+                    ((HeadtrackedRemoteServerClient) i.next())
+                            .waitForRenderFinish();
+                } catch (ClientDisconnectedException e) {
+                    //TODO: make this in a write lock
+                    i.remove();
+                }
+            }
+            t = System.currentTimeMillis() - s;
+            System.out.println("waitForRenderFinish: " + t);
+            if (manualSwapBuffers) {
+                s = System.currentTimeMillis();
+                for (Iterator i = currClients.iterator(); i.hasNext();) {
+                    try {
+                        ((HeadtrackedRemoteServerClient) i.next())
+                                .swapBuffers();
+                    } catch (ClientDisconnectedException e) {
+                        //TODO: make this in a write lock
+                        i.remove();
+                    }
+                }
+                t = System.currentTimeMillis() - s;
+                System.out.println("swapBuffers: " + t);
+            }
+            long delay = System.currentTimeMillis() - start;
+            if (maxFrameTime < delay) maxFrameTime = delay;
+            clientMapLock.writeUnlock();
+            long locTime = System.currentTimeMillis() - startTime;
+            if (locTime >= statDelay) {// statistics
+                System.out.println("************* stats  *****************");
+                System.out.println("elapsed time: " + locTime * 0.001 + " sec");
+                System.out.println("fps: " + ((double) renders)
+                        / ((double) locTime * 0.001));
+                System.out.println("wait(): " + runs);
+                System.out.println("Max. frametime: " + maxFrameTime + "[fps: "
+                        + (1. / (maxFrameTime * 0.001)) + "]");
+                System.out.println("******************************");
+                runs = renders = 0;
+                maxFrameTime = 0;
+                startTime = System.currentTimeMillis();
+            }
+            runs++;
+            rendering = false;
+        }
+    }
 
 	/*
 	 * we dont distribute cam paths here
