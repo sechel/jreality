@@ -21,7 +21,7 @@ import de.jreality.geometry.SphereHelper;
 public class JOGLSphereHelper extends SphereHelper {
 
 	static boolean useQuadMesh = true;
-	static boolean sharedDisplayLists = true;
+	static boolean sharedDisplayLists = Viewer.sharedContexts;
 	static Hashtable sphereDListsTable = new Hashtable();
 	static int[] sphereDLists = null;
 	//TODO This can't be static; the display lists so created are invalid if the renderer parameter

@@ -61,7 +61,7 @@ public class DefaultLineShader implements LineShader  {
 		double transp = eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
 		setDiffuseColor( ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transp));
 		polygonShader = ShaderLookup.getPolygonShaderAttr(eap, name, "polygonShader");
-		polygonShader.setDiffuseColor(diffuseColor);
+		//polygonShader.setDiffuseColor(diffuseColor);
 	}
 
 	public double getDepthFudgeFactor() {

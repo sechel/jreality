@@ -57,7 +57,8 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		if (foo != null && foo.indexOf("true") != -1) sharedContexts = true;
 		if (sharedContexts)	{
 			GLCapabilities capabilities = new GLCapabilities();
-			firstOne = GLDrawableFactory.getFactory().createGLCanvas(capabilities, null, null);						
+			firstOne = GLDrawableFactory.getFactory().createGLCanvas(capabilities, null, null);	
+			System.out.println("Using shared contexts: "+firstOne);
 		}
 	}
 	public int getSignature() {
