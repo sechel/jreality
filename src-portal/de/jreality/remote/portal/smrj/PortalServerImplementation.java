@@ -40,8 +40,8 @@ import de.jreality.util.LoadableScene;
 import de.jreality.util.Lock;
 import de.jreality.util.P3;
 import de.smrj.RemoteFactory;
+import de.smrj.tcp.TCPBroadcasterIO;
 import de.smrj.tcp.TCPBroadcasterNIO;
-
 /**
  * The differences between this class and its superclass are the following: <br>
  * <br>* for the Portal every viewer has already one headtracked camera so we
@@ -199,7 +199,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
                 s  = System.currentTimeMillis();
                 getClients().sendHeadTransformation(headMatrix);
                 t = System.currentTimeMillis() - s;
-                System.out.println("sendHead: "+t);
+//                System.out.println("sendHead: "+t);
                 headMatrixLock.readUnlock();
             }
             long start = System.currentTimeMillis();
@@ -207,16 +207,16 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
             s  = System.currentTimeMillis();
             getClients().render();
             t = System.currentTimeMillis() - s;
-            System.out.println("render: "+t);
+//            System.out.println("render: "+t);
             s  = System.currentTimeMillis();
             getClients().waitForRenderFinish();
             t = System.currentTimeMillis() - s;
-            System.out.println("renderFinish: "+t);
+//            System.out.println("renderFinish: "+t);
             if (manualSwapBuffers) { 
                 s  = System.currentTimeMillis();
                 getClients().swapBuffers();
                 t = System.currentTimeMillis() - s;
-                System.out.println("swapBuffers: "+t);
+//                System.out.println("swapBuffers: "+t);
             }
             long delay = System.currentTimeMillis() - start;
             if (maxFrameTime < delay) maxFrameTime = delay;
