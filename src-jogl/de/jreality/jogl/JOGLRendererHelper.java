@@ -279,24 +279,13 @@ public class JOGLRendererHelper {
 		vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		int vertexLength = GeometryUtility.getVectorLength(vertices);
 		DataList colors = sg.edgeAttributes.getList(Attribute.COLORS);
-
-		int[][] indices = null;
-		IntArrayArray foo = sg.getEdgeAttributes(Attribute.INDICES).toIntArrayArray();
-		if (foo != null) indices = foo.toIntArrayArray(null);
-		if (indices == null)	{
-			if (sg instanceof IndexedFaceSet)	indices = ((IndexedFaceSet) sg).getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
-		} 
-		
-		if (indices == null) {
-			//return;
-		}
 		// vertex color has priority over face color
 		// should also check for override behavior
 		//if (vc != null) 		colorBind = ElementBinding.PER_VERTEX;
 		int colorBind = 0;
 		if (colors != null) 	colorBind = ElementBinding.PER_EDGE;
 		else 				colorBind = ElementBinding.PER_PART;
-		
+		if (sg.getEdgeAttributes(Attribute.INDICES) == null) return;
 		DoubleArray da;
 		// TODO support for colors per vertex?
 		for (int i = 0; i< sg.getNumEdges(); ++i)	{
