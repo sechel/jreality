@@ -6,8 +6,11 @@ package de.jreality.scene.tool;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.logging.Level;
 
 import javax.swing.JFrame;
+
+import com.jme.util.LoggingSystem;
 
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.scene.Camera;
@@ -38,6 +41,7 @@ public class ToolTestScene {
 		camNode.setName("test camera");
 		camNode.setTransformation(new Transformation());
 		Camera cam = new Camera();
+    cam.setFar(20);
 		camNode.setCamera(cam);
 		camNode.setLight(new PointLight());
 		
@@ -54,7 +58,7 @@ public class ToolTestScene {
 		camPath.push(cam);
 		viewer.setSceneRoot(root);
 		viewer.setCameraPath(camPath);
-		new InputDeviceHandler(viewer);
+    ToolSystem ts = new ToolSystem(viewer);
 		camNode.addTool(new EgoShooterTool());
 		frame.setVisible(true);
 		frame.getContentPane().add(viewer.getViewingComponent());
