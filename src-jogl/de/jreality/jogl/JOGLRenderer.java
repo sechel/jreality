@@ -741,7 +741,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 				int type = ss ? SMOOTH_POLYGONDL : FLAT_POLYGONDL;
 				boolean proxy = geometryShader.polygonShader.providesProxyGeometry();
 				if (proxy && dlInfo.isDisplayListDirty(type))	{
-					System.out.println("Asking for proxy geometry ");
+					//System.out.println("Asking "+geometryShader.polygonShader+" for proxy geometry ");
 					int dl  = geometryShader.polygonShader.proxyGeometryFor(ils, globalGL, currentSignature);
 					if (dl != -1) {
 						dlInfo.setDisplayListID(type, dl);
@@ -755,6 +755,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 					if (dlInfo.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
 						JOGLRendererHelper.drawFaces(ifs, theCanvas.getGL(),pickMode, ss, alpha);
 						globalGL.glEndList();	
+						globalGL.glCallList(dlInfo.getDisplayListID(type));
 						dlInfo.setDisplayListDirty(type, false);
 						dlInfo.setInsideDisplayList(false);							
 					}
@@ -780,6 +781,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 					if (dlInfo.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
 						JOGLRendererHelper.drawLines(ils, theCanvas, pickMode, alpha);			
 						globalGL.glEndList();	
+						globalGL.glCallList(dlInfo.getDisplayListID(type));
 						dlInfo.setDisplayListDirty(type, false);
 						dlInfo.setInsideDisplayList(false);							
 					}
@@ -806,6 +808,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 						if (dlInfo.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
 							JOGLRendererHelper.drawVertices(ps, globalHandle,  pickMode, alpha);			
 							globalGL.glEndList();	
+							globalGL.glCallList(dlInfo.getDisplayListID(type));
 							dlInfo.setDisplayListDirty(type, false);
 							dlInfo.setInsideDisplayList(false);
 						}
