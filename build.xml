@@ -17,6 +17,7 @@
 	<property name="jogl" location="src-jogl" />
 	<property name="jsyzygy" location="src-jsyzygy" />
 	<property name="portal" location="src-portal" />
+	<property name="proxies" location="src-proxies" />
 
 	<!-- examples will be the last thing to build (if needed) -->
 	<property name="tests" location="test" />
@@ -47,12 +48,21 @@
 		<jar jarfile="${dist}/jReality-core.jar" basedir="${build}/core" />
 	</target>
 
-	<target name="stubs" depends="core" description="compile the stubs ">
+	<target name="proxies" depends="core" description="compile the proxies">
+		<mkdir dir="${build}/proxies" />
+		<javac excludesfile="excludes.txt" srcdir="${proxies}" classpath="${dist}/jReality-core.jar" destdir="${build}/proxies" debug="true">
+			<compilerarg line="-source 1.4" />
+		</javac>
+		<jar jarfile="${dist}/jReality-proxies.jar" basedir="${build}/proxies" />
+	</target>
+
+	<target name="stubs" depends="proxies" description="compile the stubs ">
 		<mkdir dir="${build}/stubs" />
-		<rmic base="${build}/core" includes="**/*Impl.class" />
-		<rmic base="${build}/core" includes="de/jreality/scene/proxy/rmi/*.class" excludes="**/Remote*.class" />
+		<rmic base="${build}/proxies" includes="**/*Impl.class" />
+		<rmic base="${build}/proxies" includes="de/jreality/scene/proxy/rmi/*.class" 
+			classpath="${dist}/jReality-core.jar" excludes="**/Remote*.class" />
 		<move todir="${build}/stubs">
-			<fileset dir="${build}/core">
+			<fileset dir="${build}/proxies">
 		    	<include name="**/*_Skel.class"/>
 		    	<include name="**/*_Stub.class"/>
 		    </fileset>
