@@ -573,6 +573,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 	/**
 	 * 
 	 */
+	int geomDiff = 0;
 	protected void updateGeometryHashtable() {
 		Logger.getLogger("de.jreality.jogl").log(Level.FINEST, "Memory usage: "+getMemoryUsage());
 		if (geometries == null) return;
@@ -590,7 +591,10 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 		cleanup.visit(theRoot);
 		geometryRemoved = false;
 		//TODO dispose of the peer geomtry nodes which are no longer in the graph
-		System.out.println("Old, new hash size: "+geometries.size()+" "+newG.size());
+		if (geometries.size() - newG.size() != geomDiff)	{
+			System.out.println("Old, new hash size: "+geometries.size()+" "+newG.size());
+			geomDiff = geometries.size() - newG.size() ;
+		}
 		return;
 //		ArrayList removedGeoms = new ArrayList();
 //		java.util.Enumeration foo = geometries.keys();

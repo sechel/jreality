@@ -81,6 +81,7 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 				or.setResourceDir(file.getParent()+"/");
 				sgc = or.readFromFile(file);
 			}
+			resourceDir=file.getAbsolutePath();
 		} else {
 			System.out.println("Unable to open file");
 			return;

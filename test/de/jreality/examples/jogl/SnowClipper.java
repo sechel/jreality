@@ -19,6 +19,7 @@ import net.java.games.jogl.GLDrawable;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.TubeUtility;
+import de.jreality.geometry.WingedEdge;
 import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InfoOverlay;
 import de.jreality.jogl.InteractiveViewer;
@@ -49,39 +50,43 @@ public class SnowClipper extends InteractiveViewerDemo {
 		super();
 	}
 	SceneGraphPath toClipPlane, toClipPlane2, toSculpture, selectionList[];
-	SceneGraphComponent snowSculpture, clipPlaneJiggler, clipPlaneJiggler2 ;
+	SceneGraphComponent snowSculpture, clipPlaneJiggler, clipPlaneJiggler2, whiteframe, redframe ;
 	InfoOverlay iolay;
 	Vector infoStrings;
 	double[] clippingPlane, clippingPlane2, pickPoint;
 	static String fileToLoad = "/homes/geometer/gunn/Documents/Models/snowSculpture/taperedscu.off";
 	static double snowSculptureScale = 25.0;
+	static double snowSculptureUpdateRate = 30;
 	static {
 		String foo = System.getProperty("snowSculptureFile");
 		if (foo != null) fileToLoad = foo;
 		foo = System.getProperty("snowSculptureScale");
 		if (foo != null) snowSculptureScale = Double.parseDouble(foo);
+		foo = System.getProperty("snowSculptureUpdateRate");
+		if (foo != null) snowSculptureUpdateRate = Double.parseDouble(foo);
 	}
 	public SceneGraphComponent makeWorld() {
 		SceneGraphComponent world = SceneGraphUtilities.createFullSceneGraphComponent("snowClipperWorld");
-		OOGLReader or = new OOGLReader();
-		SceneGraphComponent manipulator = SceneGraphUtilities.createFullSceneGraphComponent();
+		SceneGraphComponent manipulator = SceneGraphUtilities.createFullSceneGraphComponent("manipulator");
 		world.addChild(manipulator);
+		
+		OOGLReader or = new OOGLReader();
 		snowSculpture = or.readFromFile(fileToLoad);
 		snowSculpture.setName("snowSculptureModel");
-		manipulator.addChild(snowSculpture);
 		snowSculpture.setTransformation(new Transformation());
 		snowSculpture.getTransformation().setStretch(snowSculptureScale);		// (-.2,.2) -> (-60, 60)" 
 		snowSculpture.getTransformation().setTranslation(0,0,72);
 		snowSculpture.getTransformation().setIsEditable(false);
+		manipulator.addChild(snowSculpture);
 		
 		if (snowSculpture.getAppearance() == null)  snowSculpture.setAppearance(new Appearance());
-		snowSculpture.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING, false);
-		snowSculpture.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, false);
+		//world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING, false);
+		world.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, false);
 		
 		 clipPlaneJiggler =  SceneGraphUtilities.createFullSceneGraphComponent("Plane1");
 		Appearance ap1 = clipPlaneJiggler.getAppearance();
-		ap1.setAttribute(CommonAttributes.VERTEX_DRAW, true);
-		ap1.setAttribute(CommonAttributes.EDGE_DRAW, true);
+		ap1.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+		ap1.setAttribute(CommonAttributes.EDGE_DRAW, false);
 		ap1.setAttribute(CommonAttributes.FACE_DRAW, true);
 		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
 		double[][] vv = {{-1,-1,0},{1,-1,0},{1,1,0},{-1,1,0}};
@@ -89,7 +94,7 @@ public class SnowClipper extends InteractiveViewerDemo {
 		clipPlaneJiggler.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY, 0.75);
 		clipPlaneJiggler.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, true);
 		clipPlaneJiggler.getTransformation().setTranslation(0,0,120);
-		clipPlaneJiggler.getTransformation().setStretch(160);
+		clipPlaneJiggler.getTransformation().setStretch(1);
 		
 		//boolean 
 //		SceneGraphComponent cp  =  SceneGraphUtilities.createFullSceneGraphComponent("fineAdjustment1");
@@ -101,14 +106,14 @@ public class SnowClipper extends InteractiveViewerDemo {
 
 		clipPlaneJiggler2 =  SceneGraphUtilities.createFullSceneGraphComponent("Plane2");
 		ap1 = clipPlaneJiggler2.getAppearance();
-		ap1.setAttribute(CommonAttributes.VERTEX_DRAW, true);
-		ap1.setAttribute(CommonAttributes.EDGE_DRAW, true);
+		ap1.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+		ap1.setAttribute(CommonAttributes.EDGE_DRAW, false);
 		ap1.setAttribute(CommonAttributes.FACE_DRAW, true);
 		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.RED);
 		clipPlaneJiggler2.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY, 0.75);
 		clipPlaneJiggler2.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, true);
 		clipPlaneJiggler2.getTransformation().setTranslation(0,0,60);
-		clipPlaneJiggler2.getTransformation().setStretch(160);
+		clipPlaneJiggler2.getTransformation().setStretch(1);
 //	    clipPlaneJiggler2 =  SceneGraphUtilities.createFullSceneGraphComponent("fineAdjustment2");
 		clipPlaneJiggler2.setGeometry(square);
 //		clipPlaneJiggler2.addChild(cp);
@@ -116,20 +121,15 @@ public class SnowClipper extends InteractiveViewerDemo {
 		world.addChild(clipPlaneJiggler2);
 
 		world.getTransformation().setCenter(new double[] {0,0,72});
-		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{1,0,0,-60}));
-		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{-1,0,0,-60}));
-		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{0,1,0,-60}));
-		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{0,-1,0,-60}));
-		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{0,0,1,-144}));
-		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{0,0,-1,-4}));
+		manipulator.getTransformation().setCenter(new double[] {0,0,72});
 		
-		SceneGraphComponent frame = SceneGraphUtilities.createFullSceneGraphComponent("frame");
-		frame.getTransformation().setStretch(59,59,71);
-		frame.getTransformation().setTranslation(0,0,72);
-		IndexedFaceSet tet = Primitives.cube();
-		frame.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,Color.WHITE);
-		frame.addChild(TubeUtility.ballAndStick(tet,.01,.01, null, null));
-		manipulator.addChild(frame);
+//		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{1,0,0,-60}));
+//		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{-1,0,0,-60}));
+//		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{0,1,0,-60}));
+//		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{0,-1,0,-60}));
+//		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{0,0,1,-144}));
+//		manipulator.addChild(GeometryUtility.clippingPlane(new double[]{0,0,-1,-4}));
+		
 
 		SceneGraphPath toWorld = new SceneGraphPath();
 		toWorld.push(viewer.getSceneRoot());
@@ -157,12 +157,37 @@ public class SnowClipper extends InteractiveViewerDemo {
 		selectionList[2] = toClipPlane;
 		selectionList[3] = toClipPlane2;
 		
+		calculateClippingPlanes();
+		whiteframe = SceneGraphUtilities.createFullSceneGraphComponent("whiteframe");
+		whiteframe.setAppearance(clipPlaneJiggler.getAppearance());
+		Appearance ap = whiteframe.getAppearance();
+		ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,Color.WHITE);
+		ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY, 0.75);
+		ap.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, true);
+
+		redframe = SceneGraphUtilities.createFullSceneGraphComponent("redframe");
+		redframe.setAppearance(clipPlaneJiggler2.getAppearance());
+		ap = redframe.getAppearance();
+		ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,Color.RED);
+		ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY, 0.75);
+		ap.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, true);
+		redframe.getTransformation().setStretch(.99);
+		updateFrames();
+//		SceneGraphComponent frame = SceneGraphUtilities.createFullSceneGraphComponent("frame");
+//		frame.getTransformation().setStretch(59,59,71);
+//		frame.getTransformation().setTranslation(0,0,72);
+//		IndexedFaceSet tet = Primitives.cube();
+//		frame.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,Color.WHITE);
+//		frame.addChild(TubeUtility.ballAndStick(tet,.01,.01, null, null));
+		manipulator.addChild(whiteframe);
+		manipulator.addChild(redframe);
+		
 		viewer.getSceneRoot().getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR, new java.awt.Color(60, 60, 60));
 		viewer.getSelectionManager().getPickPointAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, .005);
-		viewer.getSelectionManager().setRenderSelection(true);
+		//viewer.getSelectionManager().setRenderSelection(true);
 		viewer.getViewingComponent().addKeyListener(new KeyAdapter()	{
 			
-		    double scaleFactor = .005;
+		    double scaleFactor = .05;
 		    int selection = 0;
 			public void keyPressed(KeyEvent e)	{ 
 				switch(e.getKeyCode())	{
@@ -192,6 +217,7 @@ public class SnowClipper extends InteractiveViewerDemo {
 				case KeyEvent.VK_7:
 					if (e.isShiftDown()) scaleFactor *= .75;
 					else scaleFactor *= 1.3333;
+				    if (scaleFactor > 10) scaleFactor = 10.0;
 					System.out.println("Plane movement increment is "+scaleFactor);
 			        break;
 					
@@ -237,15 +263,19 @@ public class SnowClipper extends InteractiveViewerDemo {
 			}
 
 		});
-		iolay = new InfoOverlay((InteractiveViewer) viewer);
+		iolay = new InfoOverlay(viewer);
 		iolay.setVisible(true);
 		if ((viewer.getViewingComponent() instanceof GLCanvas))
 			((GLDrawable) viewer.getViewingComponent()).addGLEventListener(iolay);	 		
  		infoStrings = new Vector();
  		iolay.setInfoStrings(infoStrings);
 	
-		javax.swing.Timer followTimer = new javax.swing.Timer(200, new ActionListener()	{
-			public void actionPerformed(ActionEvent e) {updateInfoOverlay(); }
+ 		int milli = (int) (1000/snowSculptureUpdateRate);
+		javax.swing.Timer followTimer = new javax.swing.Timer(milli, new ActionListener()	{
+			public void actionPerformed(ActionEvent e) {
+				if (iolay.isVisible()) updateInfoOverlay(); 
+				updateFrames();
+			}
 		} ) ;
 		followTimer.start();
 		
@@ -270,6 +300,26 @@ public class SnowClipper extends InteractiveViewerDemo {
 			}
 			infoStrings.add("Framerate: "+Double.toString(viewer.getRenderer().getFramerate()));
 			infoStrings.add("Time: "+System.currentTimeMillis());
+			viewer.render();
+		}
+		
+		public void updateFrames()	{
+			WingedEdge whiteFrameG = new WingedEdge(-60, 60, -60, 60, -4, 144);
+			whiteFrameG.cutWithPlane(clippingPlane, 23);
+			double[][] cutPlane = whiteFrameG.getFirstFaceWithTag(23);
+			whiteframe.setGeometry(GeometryUtility.constructPolygon(cutPlane));
+			SceneGraphUtilities.removeChildren(whiteframe);
+			SceneGraphComponent ballAndStick = TubeUtility.ballAndStick(whiteFrameG, 1.0,0.5, Color.WHITE, Color.WHITE);
+			ballAndStick.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
+			whiteframe.addChild(ballAndStick);
+			WingedEdge redFrameG = new WingedEdge(-60, 60, -60, 60, -4, 144);
+			redFrameG.cutWithPlane(clippingPlane2, 24);
+			cutPlane = redFrameG.getFirstFaceWithTag(24);
+			redframe.setGeometry(GeometryUtility.constructPolygon(cutPlane));
+			SceneGraphComponent ballAndStick2 = TubeUtility.ballAndStick(redFrameG,1.0,0.5, Color.RED, Color.RED);
+			ballAndStick2.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
+			SceneGraphUtilities.removeChildren(redframe);
+			redframe.addChild(ballAndStick2);
 			viewer.render();
 		}
 		/**
