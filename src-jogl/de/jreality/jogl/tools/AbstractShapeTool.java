@@ -1,0 +1,117 @@
+/*
+ * Created on Mar 23, 2004
+ *
+ * To change the template for this generated file go to
+ * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
+ */
+package de.jreality.jogl.tools;
+
+import java.awt.event.MouseEvent;
+
+import de.jreality.geometry.GeometryUtility;
+import de.jreality.scene.*;
+import de.jreality.util.BoundingBoxTraversal;
+import de.jreality.util.Rectangle3D;
+import de.jreality.util.Rn;
+import de.jreality.util.SceneGraphUtilities;
+
+/**
+ * @author Charles Gunn
+ *
+ * To change the template for this generated type comment go to
+ * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
+ */
+public abstract class AbstractShapeTool extends AbstractMouseTool {
+	double[] 	origM; 		// original object transformation
+	SceneGraphPath 	selection, alternateSelection;	// two selections: altSel is the "center"
+			// of the motion; sel is the object moved
+	Transformation theEditedTransform;	// the transform that gets edited
+	Transformation myTransform;
+	double[] 	theAxis;
+	double[]	worldToCamera;			// get this from the camera in startTrackingAt()
+	protected double[] anchorV = new double[4];
+	protected double[] currentV = new double[4];
+	int signature;
+	protected PlaneProjector theProjector;
+	protected double distance;
+
+
+	/**
+	 * 
+	 */
+	public AbstractShapeTool() {
+		super();
+		duration = 400.0;			// make it quasi-infinite
+		myTransform =  new Transformation();
+		origM = new double[16];
+		theAxis = new double[3];
+		theProjector = new PlaneProjector();
+	}
+
+
+	/* (non-Javadoc)
+	 * @see charlesgunn.gv2.tool.MouseTool#startTrackingAt(java.awt.event.MouseEvent)
+	 */
+	public boolean startTrackingAt(MouseEvent e) {
+		Object	nodeContents;
+		// the shape tools need a selection path and a shape to
+		// act upon
+		if (!super.startTrackingAt(e)) {isTracking = false; return false; }
+		isTracking =false;
+		selection = theViewer.getSelectionManager().getSelection();
+		if (selection == null) selection = theViewer.getSelectionManager().getDefaultSelection();
+		if (selection == null) return false;
+		nodeContents = selection.getLastElement();
+		if (nodeContents == null) return false;
+		if (!(nodeContents instanceof SceneGraphComponent)) return false;
+		theEditedNode = (SceneGraphComponent) nodeContents;
+		theEditedTransform = ((SceneGraphComponent) theEditedNode).getTransformation();
+		if (theEditedTransform == null || !theEditedTransform.getIsEditable()) return false;
+
+		//theEditedTransform.setDoFactor(false);
+		Rn.copy(origM,theEditedTransform.getMatrix());
+		signature = theEditedTransform.getSignature();
+		myTransform.resetMatrix();
+		//worldToCamera = theCamera.getWorldToCameraMatrix();
+		worldToCamera = theViewer.getCameraPath().getInverseMatrix(worldToCamera);
+		
+		isTracking = true;
+		myTransform.setCenter(theEditedTransform.getCenter()); 
+		theProjector.setCamera(theCamera);
+		theProjector.setAnchor(anchor);
+		double[] objectToWorld = selection.getMatrix(null);
+		theProjector.setObjectToCamera(Rn.times(null, worldToCamera, objectToWorld));
+		theProjector.setDefaultPlane();
+		distance = theProjector.getDistanceToPlane();
+		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see charlesgunn.gv2.tool.MouseTool#track(java.awt.event.MouseEvent)
+	 */
+	public boolean track(MouseEvent e) {
+		if (!isTracking || !super.track(e)) return false;		
+		theProjector.getObjectPosition(anchor, anchorV);
+		theProjector.getObjectPosition(current, currentV);
+		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see charlesgunn.gv2.tool.MouseTool#endTracking(java.awt.event.MouseEvent)
+	 */
+	public boolean endTracking(MouseEvent e) {
+		if (!super.endTracking(e)) return false;
+		//if (theEditedTransform != null) theEditedTransform.setDoFactor(true);
+//		System.out.println("Edited transform is: "+Rn.matrixToString(theEditedTransform.getMatrix()));
+//		System.out.println("Translate is: "+Rn.toString(theEditedTransform.getTranslation()));
+//		System.out.println("Rotate is: "+theEditedTransform.getRotationQuaternion().toString());
+//		System.out.println("Stretch is: "+Rn.toString(theEditedTransform.getStretch()));
+		
+		return true;
+	}
+
+
+
+}
+
+
