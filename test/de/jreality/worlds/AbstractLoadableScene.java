@@ -20,7 +20,8 @@ import de.jreality.util.Pn;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public class AbstractLoadableScene implements LoadableScene {
+public abstract class AbstractLoadableScene implements LoadableScene {
+	ConfigurationAttributes config = null;
 
 	public void customize(JMenuBar menuBar, Viewer viewer) { return; }
 	
@@ -30,7 +31,11 @@ public class AbstractLoadableScene implements LoadableScene {
 	public SceneGraphComponent makeWorld() {
 		return null;
 	}
-	public void setConfiguration(ConfigurationAttributes config) { return; }
+	
+	public void setConfiguration(ConfigurationAttributes config) {
+		this.config = config;
+	}
+
 	public boolean addBackPlane() {
 		return false;
 	}

@@ -35,10 +35,6 @@ public class StandardDemo extends AbstractLoadableScene {
 	public boolean isEncompass() {
 		return true;
 	}
-	public int getSignature() {
-		// TODO Auto-generated method stub
-		return Pn.EUCLIDEAN;
-	}
 	/* (non-Javadoc)
 	 * @see de.jreality.jogl.WorldMaker#makeWorld()
 	 */
@@ -198,15 +194,6 @@ public class StandardDemo extends AbstractLoadableScene {
 		root.addChild(globeNode2);
 	   //viewer.removeBackPlane();  
 	  return root;
-	}
-
-	ConfigurationAttributes config = null;
-
-	/* (non-Javadoc)
-	 * @see de.jreality.portal.WorldMaker#setConfiguration(de.jreality.portal.util.Configuration)
-	 */
-	public void setConfiguration(ConfigurationAttributes config) {
-		this.config = config;
 	}
 
 }

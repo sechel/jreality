@@ -88,7 +88,7 @@ public class TestTubes extends AbstractLoadableScene {
 	   //torus1.addGeometryListener(torus1);
 	   //pts = square;
 	   double[][] pts = form;
-	   double[][][] tubePoints = TubeUtility.makeTubeAsBezierPatchMesh(pts, .2, circle, TubeUtility.PARALLEL,false);
+	   double[][][] tubePoints = TubeUtility.makeTubeAsBezierPatchMesh(pts, .2, circle, TubeUtility.PARALLEL,false, Pn.EUCLIDEAN);
 	   BezierPatchMesh bpm = new BezierPatchMesh(2, 3, tubePoints);
 	   for (int i = 0; i<3; ++i)	{ bpm.refine();}
 	   QuadMeshShape qmpatch = GeometryUtility.representBezierPatchMeshAsQuadMesh(bpm);	   

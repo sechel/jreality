@@ -34,6 +34,8 @@ public class TestImplodeShader extends AbstractLoadableScene {
 		Appearance ap1 = root.getAppearance();
 		ap1.setAttribute(CommonAttributes.POLYGON_SHADER, "implode");
 		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"implodeFactor", 0.75);
+//		ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER, "default");
+//		ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POLYGON_SHADER, "default");
 		ap1.setAttribute(CommonAttributes.FACE_DRAW,true);
 		ap1.setAttribute(CommonAttributes.EDGE_DRAW,false);
 		ap1.setAttribute(CommonAttributes.VERTEX_DRAW,false);
