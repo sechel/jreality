@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import javax.swing.JFrame;
 
 import de.jreality.geometry.CatenoidHelicoid;
+import de.jreality.jme.test.ColliderScene;
 import de.jreality.scene.Camera;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
@@ -37,11 +38,15 @@ public class ToolTestScene {
 		root.setName("test root");
 		SceneGraphComponent camNode = new SceneGraphComponent();
 		camNode.setName("test camera");
-		camNode.setTransformation(new Transformation());
-		Camera cam = new Camera();
-    cam.setFar(20);
-		camNode.setCamera(cam);
-		camNode.setLight(new PointLight());
+        camNode.setTransformation(new Transformation());
+        camNode.getTransformation().setTranslation(0, 0, 3);
+        camNode.addChild(ColliderScene.makeLights());
+//        dummy.addChild(camNode);
+
+        Camera view = new Camera();
+        view.setFar(20);
+        view.setNear(0.1f);
+        camNode.setCamera(view);
 		
 		SceneGraphComponent scene = new SceneGraphComponent();
 		SceneGraphComponent sphere = new SceneGraphComponent();
@@ -53,19 +58,22 @@ public class ToolTestScene {
 		SceneGraphPath camPath = new SceneGraphPath();
 		camPath.push(root);
 		camPath.push(camNode);
-		camPath.push(cam);
-		viewer.setSceneRoot(root);
-		viewer.setCameraPath(camPath);
-    ToolSystem ts = new ToolSystem(viewer);
+		camPath.push(view);
 		camNode.addTool(new EgoShooterTool());
 		frame.setVisible(true);
+		frame.setSize(640, 480);
 		frame.getContentPane().add(viewer.getViewingComponent());
-		frame.setSize(800, 600);
+		viewer.setSceneRoot(root);
+		viewer.setCameraPath(camPath);
+		frame.validate();
+
+		System.out.println(viewer.getViewingComponent().getSize());
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent arg0) {
 				System.exit(0);
 			}
 		});
+		ToolSystem ts = new ToolSystem(viewer);
 	}
 	
 	public void render() {
