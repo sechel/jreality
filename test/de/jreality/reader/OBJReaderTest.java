@@ -55,10 +55,10 @@ public class OBJReaderTest extends TestCase {
         SceneGraphComponent sgc = new ASEReader().read(new File(fileName)); 
     }
 
-    public void test3DSReader() throws Exception {
-        String fileName = "/home/gollwas/3ds/tetranoid_0_7.3ds";
-        SceneGraphComponent sgc = new Reader3DS().read(new File(fileName)); 
-    }
+//    public void test3DSReader() throws Exception {
+//        String fileName = "/home/gollwas/3ds/tetranoid_0_7.3ds";
+//        SceneGraphComponent sgc = new Reader3DS().read(new File(fileName)); 
+//    }
 
     public void testMTLReader() throws Exception {
         String fileName = "/home/gollwas/Buddy-Mesh.mtl";

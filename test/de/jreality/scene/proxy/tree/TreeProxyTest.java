@@ -71,7 +71,7 @@ public class TreeProxyTest extends TestCase {
     LoadableScene ls = new Icosahedra();
     SceneProxyTreeBuilder ttp = new SceneProxyTreeBuilder(ls.makeWorld());
     ttp.setProxyTreeFactory(new ProxyTreeFactory());
-    ttp.getProxyTreeFactory().setProxyFactory(new ProxyFactory());
+    ttp.getProxyTreeFactory().setProxyFactory(new PrintFactory());
     ttp.setProxyConnector(new ProxyConnector());
     SceneTreeNode tn = ttp.createProxyTree();
     new TreeDumper().dumpTree(tn);
@@ -96,7 +96,7 @@ public class TreeProxyTest extends TestCase {
     
     TreeDumper td = new TreeDumper(); 
     ttp.setProxyTreeFactory(new ProxyTreeFactory());
-    ttp.getProxyTreeFactory().setProxyFactory(new ProxyFactory());
+    ttp.getProxyTreeFactory().setProxyFactory(new PrintFactory());
     ttp.setProxyConnector(new ProxyConnector());
 
     SceneTreeNode tn = ttp.createProxyTree();
