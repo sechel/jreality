@@ -125,11 +125,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         try {
             queue = new RemoteEventQueueImpl();
             wandTool = new WandTool(realNavComp, wandComp);
-            queue.addWandListener(wandTool);
-            queue.addWandMotionListener(wandTool);
-            queue.addWandListener(this);
-            queue.addWandMotionListener(this);
-            queue.addHeadMotionListener(this);
+            startQueue();
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (RemoteException e) {
@@ -142,6 +138,22 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         renderer.setPriority(Thread.MIN_PRIORITY);
         renderer.start();
         setBackgroundColor(new java.awt.Color(132, 132, 218));
+    }
+
+    private void startQueue() {
+        queue.addWandListener(wandTool);
+        queue.addWandMotionListener(wandTool);
+        queue.addWandListener(this);
+        queue.addWandMotionListener(this);
+        queue.addHeadMotionListener(this);
+    }
+
+    private void pauseQueue() {
+        queue.removeWandListener(wandTool);
+        queue.removeWandMotionListener(wandTool);
+        queue.removeWandListener(this);
+        queue.removeWandMotionListener(this);
+        queue.removeHeadMotionListener(this);
     }
 
     WandTool wandTool;
@@ -383,6 +395,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
     }
     
     public void loadWorld(String classname) {
+        pauseQueue();
         long t = System.currentTimeMillis();
         LoadableScene wm = null;
         try {
@@ -401,12 +414,15 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         wandTool.center();
         s = System.currentTimeMillis() - t;
         System.out.println("distributed world " + classname +"["+s+"ms]");
+        startQueue();
     }
 
     private void loadFile(String name) {
+        pauseQueue();
         de.jreality.scene.SceneGraphComponent world = Readers.readFile(new File(name));
         if (world != null) getNavigationComponent().addChild(world);
         wandTool.center();
+        startQueue();
     }
 
     private static String usage(CmdLineParser parser) {
