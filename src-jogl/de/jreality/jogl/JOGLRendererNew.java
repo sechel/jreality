@@ -250,7 +250,7 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 			Timer doIt = new Timer();
 			doIt.schedule(rerenderTask, 10);
 			forceNewDisplayLists();
-			System.out.println("Attempting to force textures resident");
+			//System.out.println("Attempting to force textures resident");
 			numberTries++;		// don't keep trying indefinitely
 		} else numberTries = 0;
 	}
@@ -636,7 +636,7 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 		}
 		
 		public void geometryChanged(GeometryEvent ev) {
-//			System.err.println("JOGLPeerGeometry: geometryChanged");
+			System.err.println("JOGLPeerGeometry: geometryChanged");
 			//TODO make more differentiated response based on event ev
 			final SceneGraphNode sg = (SceneGraphNode) ev.getSource();
 			dlInfo.setChange();

@@ -148,66 +148,12 @@ public class JOGLRendererHelperNew {
 			gl.glFogfv(GL.GL_FOG_COLOR, bg);
 			gl.glFogf(GL.GL_FOG_DENSITY, .4f);
 		}
-		// do the lights, etc.
-		// these will be done soon in visit(Material m), visit(Appearance ap), visit(Light l)
-//		 {
-//		  float[] ambient = {(float) 0.1,(float) 0.1,(float).1};
-//		  float[] diffuse = {(float)0.8,(float).1,(float).4, (float) .5};
-//		  float[] white = {(float)1,(float)1,(float)1};
-//
-//		  gl.glShadeModel(GL.GL_SMOOTH);  // Enable Smooth Shading
-		  //gl.glColorMaterial(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE);
-		  //gl.glColorMaterial(GL.GL_FRONT, GL.GL_DIFFUSE);
-		  //gl.glEnable(GL.GL_COLOR_MATERIAL);
- 		
-		  //gl.glEnable(GL.GL_LIGHT_MODEL_TWO_SIDE);
-		  //gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE, diffuse);
-		  //gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SPECULAR, white);
-		  //gl.glMaterialf(GL.GL_FRONT_AND_BACK, GL.GL_SHININESS, (float) 100.0);
-		
-//		  float[] position = {(float)2,(float)2,(float)-2};
-//		  float[] lightAmbient = {0.1f,0.0f,0.0f, 1.0f};
-//		  float[] lightDiffuse = {0.8f, 0.8f, 1.0f, 1.0f};
-//
-//		  float[] lightPosition = {1.0f, 1.0f, 1.0f, 0.0f};
-//		  int cl = GL.GL_LIGHT0;
-//		  gl.glLightfv(cl, GL.GL_AMBIENT, lightAmbient);
-//		  gl.glLightfv(cl, GL.GL_DIFFUSE, lightDiffuse);
-//		  gl.glLightfv(cl, GL.GL_SPECULAR, white);
-//		  //gl.glLightf(cl, GL.GL_CONSTANT_ATTENUATION, (float)1.0);
-//		  gl.glLightfv(cl, GL.GL_POSITION, lightPosition);
-//		  //gl.glEnable(cl);
-//		 }
-//		 {
-//		  float[] white = {(float).8,(float).8,(float).2};
-//		  float[] lightAmbient = {0.1f, 0.1f, 0.1f, 1.0f};
-//		  float[] lightDiffuse = {.9f, .9f, .4f, 1.0f};
-//		  float[] lightPosition = {-2.0f, -1.0f, 5.0f, 0.0f};
-//
-//		
-//		
-//		  int cl = GL.GL_LIGHT1;
-//		  gl.glLightfv(cl, GL.GL_AMBIENT, lightAmbient);
-//		  gl.glLightfv(cl, GL.GL_DIFFUSE, lightDiffuse);
-//		  gl.glLightfv(cl, GL.GL_SPECULAR, white);
-//		  //gl.glLightf(cl, GL.GL_CONSTANT_ATTENUATION, (float)1.0);
-//		  gl.glLightfv(cl, GL.GL_POSITION, lightPosition);
-//		  //gl.glEnable(cl);
-//		 }
 	
 	}
 	public static void drawVertices( PointSet sg, JOGLRendererNew jr, boolean drawSpheres, double pointRadius) {
-		//DefaultGeometryShader currentGeometryShader = jpc.geometryShader;
-		//RenderingHintsShader renderingHints = jpc.renderingHints;
 		GLCanvas theCanvas = jr.theCanvas;
 		GL gl = theCanvas.getGL(); 
 //		gl.glPointSize((float) currentGeometryShader.pointShader.getPointSize());
-//		if (renderingHints.isAntiAliasingEnabled())	{
-//		  gl.glEnable (GL.GL_POINT_SMOOTH);
-//		  gl.glEnable (GL.GL_BLEND);
-//		  gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-//		  gl.glHint (GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST);
-//		}
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
@@ -216,76 +162,56 @@ public class JOGLRendererHelperNew {
 		int colorLength = 0;
 		if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
 		DoubleArray da;
-//		if (true)	{
-//			gl.glColor4fv(currentGeometryShader.pointShader.getDiffuseColorAsFloat());
-//		} 	
-//		if (currentGeometryShader.isVertexDraw()) {
-		  //gl.glColorMaterial(GL.GL_FRONT, GL.GL_DIFFUSE);
-		  //gl.glEnable(GL.GL_COLOR_MATERIAL);
-			if (drawSpheres)	{
-				if (sphereDLists == null) setupSphereDLists(jr);
-				double size = pointRadius;
-				//gl.glEnable(GL.GL_LIGHTING);
-				//dps.render(jr);
-				
-				//Sphere sph = new Sphere();
-				for (int i = 0; i< sg.getNumPoints(); ++i)	{
-					da = vertices.item(i).toDoubleArray();				
-					gl.glPushMatrix();
-					gl.glTranslated(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
-					gl.glScaled(size, size, size);
-					//drawFaces(SphereHelper.spheres[1], theCanvas, false, ElementBinding.PER_VERTEX, ElementBinding.PER_PART);
-					gl.glCallList(sphereDLists[1]);
-					gl.glPopMatrix();
+		gl.glColorMaterial(GL.GL_FRONT, GL.GL_DIFFUSE);
+		gl.glEnable(GL.GL_COLOR_MATERIAL);
+		if (drawSpheres)	{
+			if (sphereDLists == null) setupSphereDLists(jr);
+			double size = pointRadius;
+			
+			gl.glEnable(GL.GL_COLOR_MATERIAL);		
+			gl.glColorMaterial(GL.GL_FRONT, GL.GL_DIFFUSE);
+			for (int i = 0; i< sg.getNumPoints(); ++i)	{
+				da = vertices.item(i).toDoubleArray();				
+				gl.glPushMatrix();
+				gl.glTranslated(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
+				gl.glScaled(size, size, size);
+				if (vertexColors != null)	{
+					da = vertexColors.item(i).toDoubleArray();
+					if (colorLength == 3) 	{
+						gl.glColor3d( da.getValueAt(0), da.getValueAt(1),  da.getValueAt(2));
+					} else if (colorLength == 4) 	{
+						gl.glColor4d(da.getValueAt(0),  da.getValueAt(1),  da.getValueAt(2), da.getValueAt(3));
+					} 						
 				}
-			} else {
-//				gl.glDisable(GL.GL_LIGHTING);
-//				if (renderingHints.isAntiAliasingEnabled())	{
-//					  gl.glEnable (GL.GL_POINT_SMOOTH);
-//					  gl.glEnable (GL.GL_BLEND);
-//					  gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-//					  gl.glHint (GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST);
-//					}
-//				else 
-//						gl.glDisable(GL.GL_POINT_SMOOTH);
-				// draw the points slightly in front of the rest (the faces)	
-				// TODO pull this out and make it accessible to calibration		
-				//gl.glDepthRange(0.0d, 0.9999d);
-//				gl.glPointSize((float) currentGeometryShader.pointShader.getPointSize());
-//				if (pointSize == null) 
-				gl.glBegin(GL.GL_POINTS);
-				for (int i = 0; i< sg.getNumPoints(); ++i)	{
-					double vv = 1.0f;
-					if (pointSize != null) {
-						float ps = (float) pointSize.item(i).toDoubleArray().getValueAt(0);
-						gl.glPointSize( ps);
-						vv =  (ps < 1) ? ps : (1d - (Math.ceil(ps) - ps) * 0.25d);
+				gl.glCallList(sphereDLists[1]);
+				gl.glPopMatrix();
+			}
+		} else {
+			gl.glBegin(GL.GL_POINTS);
+			for (int i = 0; i< sg.getNumPoints(); ++i)	{
+				double vv = 1.0f;
+				if (pointSize != null) {
+					float ps = (float) pointSize.item(i).toDoubleArray().getValueAt(0);
+					gl.glPointSize( ps);
+					vv =  (ps < 1) ? ps : (1d - (Math.ceil(ps) - ps) * 0.25d);
 
-					}
-					//if (pointSize != null)	gl.glBegin(GL.GL_POINTS);
-					if (vertexColors != null)	{
-						da = vertexColors.item(i).toDoubleArray();
-						if (colorLength == 3) 	{
-							gl.glColor3d(vv * da.getValueAt(0), vv * da.getValueAt(1), vv * da.getValueAt(2));
-						} else if (colorLength == 4) 	{
-							gl.glColor4d(vv * da.getValueAt(0), vv * da.getValueAt(1), vv  * da.getValueAt(2), da.getValueAt(3));
-						} 						
-					}
-					da = vertices.item(i).toDoubleArray();				
-					if (vertexLength == 3) gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
-					else if (vertexLength == 4) gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));;
 				}
-//				if (pointSize == null) 
-					gl.glEnd();
-			//gl.glDisable(GL.GL_COLOR_MATERIAL);
-//				//gl.glDepthRange(0d, 1d);		
-//				if (renderingHints.isLightingEnabled()) gl.glEnable(GL.GL_LIGHTING);
-//				if (renderingHints.isAntiAliasingEnabled())	{
-//					gl.glDisable (GL.GL_POINT_SMOOTH);
-//					gl.glDisable (GL.GL_BLEND);
-//				}
-
+				//if (pointSize != null)	gl.glBegin(GL.GL_POINTS);
+				if (vertexColors != null)	{
+					da = vertexColors.item(i).toDoubleArray();
+					if (colorLength == 3) 	{
+						gl.glColor3d( da.getValueAt(0), da.getValueAt(1),  da.getValueAt(2));
+					} else if (colorLength == 4) 	{
+						gl.glColor4d( da.getValueAt(0), da.getValueAt(1),da.getValueAt(2), da.getValueAt(3));
+					} 						
+				}
+				da = vertices.item(i).toDoubleArray();				
+				if (vertexLength == 3) gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
+				else if (vertexLength == 4) gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));;
+			}
+			gl.glEnd();
 		}
+		gl.glDisable(GL.GL_COLOR_MATERIAL);
 //		}
 		// TODO decide whether to keep this
 //		if (currentGeometryShader.pointShader.isNormalsDraw())	{
@@ -354,7 +280,6 @@ public class JOGLRendererHelperNew {
 		if (colors != null) 	colorBind = ElementBinding.PER_EDGE;
 		else 				colorBind = ElementBinding.PER_PART;
 		
-		gl.glDepthRange(0.0d, 0.9999d);
 		DoubleArray da;
 		// TODO support for colors per vertex?
 		for (int i = 0; i< sg.getNumEdges(); ++i)	{
@@ -431,8 +356,6 @@ public class JOGLRendererHelperNew {
 		else 	colorBind = ElementBinding.PER_PART;
 		//System.out.println("Color binding is "+colorBind);
 		
-//		if (renderingHints.isLightingEnabled())	{
-//			if (currentGeometryShader.polygonShader.isSmoothShading() && !(currentGeometryShader.polygonShader.isFaceNormals()) )	{
 		if (vertexNormals != null && smooth)	{
 				normalBind = ElementBinding.PER_VERTEX;
 			}
@@ -441,27 +364,7 @@ public class JOGLRendererHelperNew {
 		}
 		else normalBind = ElementBinding.PER_PART;
 		
-//		if (renderingHints.isTransparencyEnabled())	{
-//		  gl.glEnable (GL.GL_BLEND);
-//		  gl.glDepthMask(false);
-//		  gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-//		}
-//		if (colorBind == ElementBinding.PER_PART) {
-//			//float[] color = currentGeometryShader.polygonShader.getDiffuseColorAsFloat();
-//			if (insidePointSet) gl.glColor4fv(currentGeometryShader.pointShader.getDiffuseColorAsFloat());
-//			else if (insideLineSet) gl.glColor4fv(currentGeometryShader.lineShader.getDiffuseColorAsFloat());
-//			else {
-//				gl.glColor4fv(currentGeometryShader.polygonShader.getDiffuseColorAsFloat());
-//				//System.out.println("JOGLRH: Setting diffuse color to : "+currentGeometryShader.polygonShader.getDiffuseColor().toString());
-//			}
-//		}
 		DoubleArray da;
-//		if (currentGeometryShader.polygonShader.isSmoothShading()) 	
-//			gl.glShadeModel(GL.GL_SMOOTH);
-//		else											
-//			gl.glShadeModel(GL.GL_FLAT);
-		// Fast mode for picking doesn't make sense; it isn't possible to resolve finer than the deepest glBegin/glEnd block,
-		// which in this case is a whole QUAD_STRIP.  Render the slow way instead and get actual polygon info.
 		if (colorBind != ElementBinding.PER_PART){
 			  gl.glEnable(GL.GL_COLOR_MATERIAL);		
 			  gl.glColorMaterial(GL.GL_FRONT, GL.GL_DIFFUSE);

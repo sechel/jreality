@@ -25,12 +25,13 @@ import de.jreality.util.NameSpace;
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class RenderingHintsShader implements Shader {
-	double levelOfDetail = 0.0;
+	double levelOfDetail = 0.0;		// hack for drawing lines in opengl
 	boolean 
 	   transparencyEnabled = false, 
 	   lightingEnabled = true, 
 	   atInfinity = false,
 	   antiAliasingEnabled = false,
+	   backFaceCullingEnabled = false,
 	   isFastAndDirty = false;
 	   
 
@@ -53,6 +54,7 @@ public class RenderingHintsShader implements Shader {
 	public void setDefaultValues(Appearance ap)	{
 		ap.setAttribute(CommonAttributes.LIGHTING_ENABLED,true);
 		ap.setAttribute(CommonAttributes.ANTIALIASING_ENABLED,false);
+		ap.setAttribute(CommonAttributes.BACK_FACE_CULLING_ENABLED, false);
 		ap.setAttribute(CommonAttributes.AT_INFINITY,false);
 		ap.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false);
 		ap.setAttribute(CommonAttributes.FAST_AND_DIRTY_ENABLED,false);
@@ -63,14 +65,13 @@ public class RenderingHintsShader implements Shader {
 		lightingEnabled = eap.getAttribute(NameSpace.name(name,CommonAttributes.LIGHTING_ENABLED), true);
 		transparencyEnabled = eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY_ENABLED), false);
 		antiAliasingEnabled = eap.getAttribute(NameSpace.name(name,CommonAttributes.ANTIALIASING_ENABLED), false);
+		backFaceCullingEnabled = eap.getAttribute(NameSpace.name(name,CommonAttributes.BACK_FACE_CULLING_ENABLED), false);
 		atInfinity = eap.getAttribute(NameSpace.name(name,CommonAttributes.AT_INFINITY), false);
 		isFastAndDirty = eap.getAttribute(NameSpace.name(name,CommonAttributes.FAST_AND_DIRTY_ENABLED), false);
 		levelOfDetail = eap.getAttribute(NameSpace.name(name,CommonAttributes.LEVEL_OF_DETAIL), 0.0);
 		if (isFastAndDirty) levelOfDetail = 0.0;
 	}
-	/**
-	 * @return
-	 */
+
 	public boolean isAntiAliasingEnabled() {
 		return antiAliasingEnabled;
 	}
@@ -110,6 +111,9 @@ public class RenderingHintsShader implements Shader {
 		return isFastAndDirty;
 	}
 
+	public boolean isBackFaceCullingEnabled() {
+		return backFaceCullingEnabled;
+	}
 	public void render(JOGLRendererNew jr)	{
 		GLCanvas theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
@@ -124,6 +128,12 @@ public class RenderingHintsShader implements Shader {
 		}
 		if (isLightingEnabled())		gl.glEnable(GL.GL_LIGHTING);
 		else							gl.glDisable(GL.GL_LIGHTING);
+		if (backFaceCullingEnabled)  {
+			gl.glEnable(GL.GL_CULL_FACE);
+			gl.glCullFace(GL.GL_BACK);
+		} else
+			gl.glDisable(GL.GL_CULL_FACE);
+			
 
 	}
 

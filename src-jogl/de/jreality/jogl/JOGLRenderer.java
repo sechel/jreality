@@ -194,7 +194,7 @@ public class JOGLRenderer  extends SceneGraphVisitor implements JOGLRendererInte
 		eAp =  EffectiveAppearance.create();
 		eAp =  eAp.create(defaultAp);
 		gri.gc.setEffectiveAppearance(eAp);
-		gri.useDisplayLists = false;
+		gri.useDisplayLists = true;
 		Rn.setIdentityMatrix(currentMatrix);
 		theLog.log(Level.FINER, "Looked up logger successfully");
 		rc = new RegisterForChange( this, this);

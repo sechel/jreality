@@ -369,7 +369,7 @@ public class JOGLRendererHelper {
 				tl.bindTexture2D(theCanvas, (Texture2D) tex);
 				int[] res = new int[1];
 				gl.glGetTexParameteriv(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_RESIDENT, res);
-				//System.out.println("Texture is resident: "+res[0]);
+				System.out.println("Texture is resident: "+res[0]);
 				if (res[0] == 0)	{ jr.gri.texResident = false; }
 			}
 			else texCoords = null;

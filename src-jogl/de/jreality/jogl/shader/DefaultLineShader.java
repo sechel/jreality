@@ -27,7 +27,8 @@ import de.jreality.util.NameSpace;
  */
 public class DefaultLineShader implements LineShader  {
 		double	tubeRadius = 1.0,
-			 	lineWidth = 0.05;			// in pixels
+			 	lineWidth = 0.05,
+				depthFudgeFactor = 0.9999d;			// in pixels
 		 int	lineFactor = 1;
 		 int 	lineStipplePattern = 0x1c47; 
 		 
@@ -55,6 +56,7 @@ public class DefaultLineShader implements LineShader  {
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		tubeDraw = eap.getAttribute(NameSpace.name(name, CommonAttributes.TUBES_DRAW), false);
 		tubeRadius = eap.getAttribute(NameSpace.name(name,CommonAttributes.TUBE_RADIUS),tubeRadius);
+		depthFudgeFactor = eap.getAttribute(NameSpace.name(name,CommonAttributes.DEPTH_FUDGE_FACTOR), depthFudgeFactor);
 		lineStipple = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_STIPPLE), lineStipple);
 		lineWidth = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_WIDTH), lineWidth);
 		lineFactor = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_FACTOR),lineFactor);
@@ -69,6 +71,9 @@ public class DefaultLineShader implements LineShader  {
 		}
 	}
 
+	public double getDepthFudgeFactor() {
+		return depthFudgeFactor;
+	}
 		/**
 		 * @return
 		 */
@@ -147,6 +152,7 @@ public class DefaultLineShader implements LineShader  {
 		else gl.glDisable(GL.GL_LINE_STIPPLE);
 		if (tubeDraw) gl.glEnable(GL.GL_LIGHTING);
 		else gl.glDisable(GL.GL_LIGHTING);
+		gl.glDepthRange(0.0d, depthFudgeFactor);
 	}
 		public double getTubeRadius() {
 			return tubeRadius;
