@@ -1,8 +1,6 @@
 /*
  * Created on Jul 14, 2004
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 package de.jreality.worlds;
 
@@ -16,15 +14,13 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.util.Pn;
 
 /**
  * @author weissman
  *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 public class StandardDemo extends AbstractLoadableScene {
 
@@ -40,7 +36,7 @@ public class StandardDemo extends AbstractLoadableScene {
 	public SceneGraphComponent makeWorld() {
 		SceneGraphComponent root = new SceneGraphComponent();
 		root.setName("theWorld");
-		root.setTransformation(new Transformation());
+		root.setTransformation(new FactoredTransformation());
 		CatenoidHelicoid globeSet=new CatenoidHelicoid(40);
 		//Torus globeSet = new Torus(2.3, 1.5, 20, 30);
 		GeometryUtility.calculateAndSetNormals(globeSet);
@@ -49,7 +45,7 @@ public class StandardDemo extends AbstractLoadableScene {
 	   double scaleVal = 1.5;
 		SceneGraphComponent globeNode1= new SceneGraphComponent();
 		globeNode1.setName("Comp1");
-		Transformation gt= new Transformation();
+		FactoredTransformation gt= new FactoredTransformation();
 		gt.setTranslation(0, 0, scaleVal);
 		gt.setStretch(.3);
 		globeNode1.setTransformation(gt);
@@ -76,7 +72,7 @@ public class StandardDemo extends AbstractLoadableScene {
 	   catHel.buildEdgesFromFaces();
 		SceneGraphComponent globeNode2= new SceneGraphComponent();
 		globeNode2.setName("Comp1");
-		gt= new Transformation();
+		gt= new FactoredTransformation();
 		gt.setTranslation(scaleVal, scaleVal, scaleVal);
 		gt.setStretch(.3);
 		globeNode2.setTransformation(gt);
@@ -101,7 +97,7 @@ public class StandardDemo extends AbstractLoadableScene {
 	   GeometryUtility.calculateAndSetNormals(catHel);
 	   catHel.buildEdgesFromFaces();
 		SceneGraphComponent globeNode3= new SceneGraphComponent();
-		gt= new Transformation();
+		gt= new FactoredTransformation();
 		gt.setTranslation(-scaleVal, -scaleVal, scaleVal);
 		gt.setStretch(.3);
 		globeNode3.setTransformation(gt);
@@ -122,7 +118,7 @@ public class StandardDemo extends AbstractLoadableScene {
 	   QuadMeshShape tube = TubeUtility.makeTubeAsIFS(pts, .2d, null, TubeUtility.PARALLEL, true, Pn.EUCLIDEAN,0);
 	   GeometryUtility.calculateAndSetNormals(tube);
 	   SceneGraphComponent globeNode4= new SceneGraphComponent();
-	   gt= new Transformation();
+	   gt= new FactoredTransformation();
 	   gt.setTranslation(0, 0, 0.0);
 	   //gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
 	   //gt.setStretch(.3);
@@ -147,7 +143,7 @@ public class StandardDemo extends AbstractLoadableScene {
 	   Torus torus= new Torus(2.3, 1.5, 20, 30);
 	   GeometryUtility.calculateAndSetNormals(torus);
 	   SceneGraphComponent globeNode5= new SceneGraphComponent();
-	   gt= new Transformation();
+	   gt= new FactoredTransformation();
 	   gt.setTranslation(scaleVal,scaleVal,0.0);
 	   //gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
 	   gt.setStretch(.3);
@@ -166,7 +162,7 @@ public class StandardDemo extends AbstractLoadableScene {
 	   torus= new Torus(2.3, 1.5, 20, 20);
 	   GeometryUtility.calculateAndSetNormals(torus);
 	   SceneGraphComponent globeNode6= new SceneGraphComponent();
-	   gt= new Transformation();
+	   gt= new FactoredTransformation();
 	   gt.setTranslation(-scaleVal,-scaleVal,0.0);
 	   //gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
 	   gt.setStretch(.3);

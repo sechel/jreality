@@ -1,8 +1,6 @@
 /*
  * Created on Jun 17, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.jogl;
 
@@ -23,7 +21,7 @@ import de.jreality.jogl.tools.ToolManager;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.soft.MouseTool;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.P3;
@@ -32,8 +30,6 @@ import de.jreality.util.SceneGraphUtilities;
 /**
  * @author Charles Gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class ViewerKeyListener extends KeyAdapter {
 	InteractiveViewer viewer;
@@ -216,7 +212,7 @@ public class ViewerKeyListener extends KeyAdapter {
 				case KeyEvent.VK_Q:		
 					//((GLCanvas) viewer.getViewingComponent()).setNoAutoRedrawMode(false);
 					if (e.isShiftDown()){
-						Transformation tt =  CameraUtility.getCameraNode(viewer).getTransformation();
+						FactoredTransformation tt =  CameraUtility.getCameraNode(viewer).getTransformation();
 						double[] clean = P3.orthonormalizeMatrix(null, tt.getMatrix(), 10E-10, tt.getSignature());
 						if (clean != null)	tt.setMatrix(clean);
 					}

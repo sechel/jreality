@@ -1,8 +1,6 @@
  /*
  * Created on May 12, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.worlds;
 import java.awt.Color;
@@ -21,7 +19,7 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.ReflectionMap;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.util.ConfigurationAttributes;
@@ -32,8 +30,6 @@ import de.jreality.util.SceneGraphUtilities;
 /**
  * @author Charles Gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class TestTubes extends AbstractLoadableScene {
 
@@ -83,7 +79,7 @@ public class TestTubes extends AbstractLoadableScene {
 
 	public SceneGraphComponent makeWorld() {
 		SceneGraphComponent root = new SceneGraphComponent();
-		root.setTransformation(new Transformation());
+		root.setTransformation(new FactoredTransformation());
 		root.setAppearance(new Appearance());
 		root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
 
@@ -174,7 +170,7 @@ public class TestTubes extends AbstractLoadableScene {
 	   
 	   //SceneGraphComponent globeNode4= SceneGraphUtilities.createFullSceneGraphComponent("patch");
 	   SceneGraphComponent globeNode4 = SceneGraphUtilities.createFullSceneGraphComponent("a node ");
-	   globeNode4.setTransformation(new Transformation());
+	   globeNode4.setTransformation(new FactoredTransformation());
 	   Appearance ap1 = new Appearance();
 	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.BLUE);
 	   ap1.setAttribute(CommonAttributes.SPECULAR_EXPONENT, 100.0);
@@ -200,7 +196,7 @@ public class TestTubes extends AbstractLoadableScene {
 
 	   if (doIco)	{
 		   SceneGraphComponent tubie = TubeUtility.ballAndStick(Primitives.sharedIcosahedron, .10, .05, java.awt.Color.YELLOW, java.awt.Color.GREEN, Pn.EUCLIDEAN); //TubeUtility.createTubesOnEdges(Primitives.sharedIcosahedron, .05); //TubeUtility.makeTubeAsIFS(p1, p2, .3, null);
-		   tubie.setTransformation(new Transformation());
+		   tubie.setTransformation(new FactoredTransformation());
 		   tubie.getTransformation().setStretch(.5);
 		   tubie.setAppearance(new Appearance());
 		   globeNode4.addChild(tubie);	   	

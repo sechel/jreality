@@ -1,8 +1,6 @@
 /*
  * Created on Aug 23, 2004
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 package de.jreality.worlds;
 
@@ -35,7 +33,7 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.Texture2D;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
@@ -48,8 +46,6 @@ import de.jreality.util.SceneGraphUtilities;
 /**
  * @author gunn
  *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 public class TestClippingPlane extends AbstractLoadableScene {
 	Viewer viewer;
@@ -160,7 +156,7 @@ public class TestClippingPlane extends AbstractLoadableScene {
 		return root;
 	}
 	SceneGraphComponent camNode = null;
-	Transformation tt = new Transformation();
+	FactoredTransformation tt = new FactoredTransformation();
 	int tick = 0;
 	int tps = 600;
 	int n;

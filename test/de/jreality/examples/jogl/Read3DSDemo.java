@@ -1,8 +1,6 @@
 /*
  * Created on Apr 15, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.examples.jogl;
 import java.util.logging.Level;
@@ -12,14 +10,12 @@ import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.reader.Parser3DS;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 
 
 /**
  * @author gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class Read3DSDemo extends InteractiveViewerDemo {
 	SceneGraphComponent icokit;
@@ -34,7 +30,7 @@ public class Read3DSDemo extends InteractiveViewerDemo {
 		Logger.getLogger("de.jreality").setLevel(Level.WARNING);
 		SceneGraphComponent s1 = Parser3DS.readFromFile("face.3ds");
 		SceneGraphComponent theWorld = new SceneGraphComponent();
-		s1.setTransformation(new Transformation());
+		s1.setTransformation(new FactoredTransformation());
 		//s1.getTransformation().setStretch(3e-04);
 		//s1.getTransformation().setTranslation(-9.5,-7.5,0);
 

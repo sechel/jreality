@@ -76,7 +76,7 @@ public class HeadtrackedRemoteViewerImp extends RemoteViewerImp implements
         CameraUtility.getCameraNode(viewer).getCamera().setName("camera");
         System.out.println("orig. cam path:"+viewer.getCameraPath().toString());
         cameraTranslationNode = CameraUtility.getCameraNode(viewer);
-        cameraTranslationNode.setTransformation(new Transformation());
+        cameraTranslationNode.setTransformation(new FactoredTransformation());
         cameraTranslationNode.addChild(makeLights());
         Camera cam = cameraTranslationNode.getCamera();
         cam.setNear(.1);
@@ -125,7 +125,7 @@ public class HeadtrackedRemoteViewerImp extends RemoteViewerImp implements
         }
     }
 
-    Transformation t = new Transformation();
+    FactoredTransformation t = new FactoredTransformation();
     double[] tmp = new double[16];
     double[] totalOrientation = new double[16]; 
     public void sendHeadTransformation(double[] tm) {

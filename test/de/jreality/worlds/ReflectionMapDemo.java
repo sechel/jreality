@@ -1,8 +1,6 @@
 /*
  * Created on Mar 2, 2005
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 package de.jreality.worlds;
 import de.jreality.geometry.SphereHelper;
@@ -15,8 +13,6 @@ import de.jreality.util.SceneGraphUtilities;
 /**
  * @author Charles Gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class ReflectionMapDemo extends AbstractLoadableScene {
 
@@ -46,7 +42,7 @@ public class ReflectionMapDemo extends AbstractLoadableScene {
 
 		SceneGraphComponent world = SceneGraphUtilities.createFullSceneGraphComponent("reflectionMap");
 		SceneGraphComponent child = SceneGraphUtilities.createFullSceneGraphComponent("child");
-		child.setGeometry(SphereHelper.spheres[4]);
+		child.setGeometry(SphereHelper.tessellatedIcosahedra[4]);
 		child.getTransformation().setStretch(1.0, 0.6, 1.3);
 		world.addChild(child);
 		String[] texNameSuffixes = {"rt","lf","up", "dn","bk","ft"};

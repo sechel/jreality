@@ -12,7 +12,7 @@ import szg.framework.event.WandEvent;
 import szg.framework.event.WandListener;
 import szg.framework.event.WandMotionListener;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.util.BoundingBoxTraversal;
 import de.jreality.util.P3;
 import de.jreality.util.Rectangle3D;
@@ -29,15 +29,15 @@ public class WandTool implements WandListener, WandMotionListener {
 	
 	/*************** portal event listener implementation ***************/
 	
-	Transformation actOnStartTransformation = new Transformation();
-	Transformation currentWandMatrix = new Transformation();
-	Transformation headTransform = new Transformation();
-	Transformation wandDeltaFractionMatrix = new Transformation();
-	Transformation wandDeltaMatrix = new Transformation();
-	Transformation wandStartMatrix = new Transformation();
-	Transformation wandTransformation;
-	Transformation wandRealTransformation = new Transformation();
-	Transformation worldTransform = new Transformation();
+	FactoredTransformation actOnStartTransformation = new FactoredTransformation();
+	FactoredTransformation currentWandMatrix = new FactoredTransformation();
+	FactoredTransformation headTransform = new FactoredTransformation();
+	FactoredTransformation wandDeltaFractionMatrix = new FactoredTransformation();
+	FactoredTransformation wandDeltaMatrix = new FactoredTransformation();
+	FactoredTransformation wandStartMatrix = new FactoredTransformation();
+	FactoredTransformation wandTransformation;
+	FactoredTransformation wandRealTransformation = new FactoredTransformation();
+	FactoredTransformation worldTransform = new FactoredTransformation();
 	//Transformation wandOffset = new Transformation();
 	private boolean move;
 	private boolean rotate;
@@ -50,14 +50,14 @@ public class WandTool implements WandListener, WandMotionListener {
 	public WandTool(SceneGraphComponent navigationNode, SceneGraphComponent wandNode) {
 		this.navComponent = navigationNode;
 		this.wandComponent = wandNode;
-		if (navComponent.getTransformation() == null) navComponent.setTransformation(new Transformation());
-		if (wandComponent.getTransformation() == null) wandComponent.setTransformation(new Transformation());
+		if (navComponent.getTransformation() == null) navComponent.setTransformation(new FactoredTransformation());
+		if (wandComponent.getTransformation() == null) wandComponent.setTransformation(new FactoredTransformation());
 		actOnStartTransformation.setMatrix(navComponent.getTransformation().getMatrix());
 		wandTransformation = wandComponent.getTransformation();
 		worldTransform.setMatrix(navComponent.getTransformation().getMatrix());
 	}
 	
-	Transformation wand = new Transformation();
+	FactoredTransformation wand = new FactoredTransformation();
 	
 	public void axisMoved(WandEvent event) {
 		if (!navigationEnabled) return;
@@ -79,7 +79,7 @@ public class WandTool implements WandListener, WandMotionListener {
 			//		.getInverse().getMatrix());
 			
 			setWandMatrix(event, wand);
-			Transformation move = new Transformation();
+			FactoredTransformation move = new FactoredTransformation();
 			//move.setCenter(wand.getInverse().getCenter());
 			//move.setRotation(wand.getInverse().getRotationAngle()*0.01, wand.getInverse().getRotationAxis());
 			//move.setMatrix(wandTransformation.getMatrix());
@@ -127,7 +127,7 @@ public class WandTool implements WandListener, WandMotionListener {
         BoundingBoxTraversal bbv = new BoundingBoxTraversal();
         bbv.traverse(navComponent);
         Rectangle3D worldBox = bbv.getBoundingBox();
-        Transformation t = new Transformation();
+        FactoredTransformation t = new FactoredTransformation();
         double[] transl = worldBox.getCenter();
         transl[1] -= 2; transl[2] += 2;
         t.setTranslation(transl);
@@ -151,7 +151,7 @@ public class WandTool implements WandListener, WandMotionListener {
 		}
 	}
 
-	Transformation oldWandMatrix = new Transformation();
+	FactoredTransformation oldWandMatrix = new FactoredTransformation();
 	private boolean navigationEnabled;
 
 	public void wandMoved(WandEvent arg0) {
@@ -159,7 +159,7 @@ public class WandTool implements WandListener, WandMotionListener {
 		setWandMatrix(arg0, wandTransformation);
 	}
 
-	private void setWandMatrix(WandEvent arg0, Transformation t) {
+	private void setWandMatrix(WandEvent arg0, FactoredTransformation t) {
 		t.setMatrix(Rn.transposeF2D(new double[16], arg0
 				.getMatrix()));
 		//t.multiplyOnRight(wandOffset.getInverse());

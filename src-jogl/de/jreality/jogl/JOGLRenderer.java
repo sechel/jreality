@@ -44,7 +44,7 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
 import de.jreality.scene.event.GeometryEvent;
@@ -109,7 +109,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	// pick-related stuff
 	boolean pickMode = false;
 	private final double pickScale = 10000.0;
-	Transformation pickT = new Transformation();
+	FactoredTransformation pickT = new FactoredTransformation();
 	PickPoint[] hits;
 	// another eccentric mode: render in order to capture a screenshot
 	boolean screenShot = false;
@@ -883,7 +883,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		 * @return
 		 */
 		private IndexedFaceSet getProxyFor(Sphere sphere) {
-			return SphereHelper.spheres[2];
+			return SphereHelper.tessellatedIcosahedra[2];
 		}
 	}
 	
@@ -1221,7 +1221,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			nodeCount++;
 			currentPath.push(goBetween.getOriginalComponent());
 			context.setCurrentPath(currentPath);
-			Transformation thisT = goBetween.getOriginalComponent().getTransformation();
+			FactoredTransformation thisT = goBetween.getOriginalComponent().getTransformation();
 			
 			//System.out.println("In JOGLPeerComponent render() for "+goBetween.getOriginalComponent().getName());
 			if (thisT != null)	{

@@ -32,7 +32,9 @@ import javax.swing.JOptionPane;
 
 import de.jreality.reader.Readers;
 import de.jreality.reader.quake3.Quake3Converter;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
@@ -84,7 +86,7 @@ public class Quake3Demo extends AbstractLoadableScene implements TransformationL
         if (setting) return;
         setting = true;
 //        System.out.println("Quake3Demo.transformationMatrixChanged()");
-        conv.setVisibility(ev.getTransformation());
+        conv.setVisibility((FactoredTransformation) ev.getTransformation());
         setting = false;
     }
 

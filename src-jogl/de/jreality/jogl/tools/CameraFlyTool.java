@@ -1,8 +1,6 @@
 /*
  * Created on May 27, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.jogl.tools;
 
@@ -12,7 +10,7 @@ import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.P3;
 import de.jreality.util.Rn;
@@ -20,12 +18,10 @@ import de.jreality.util.Rn;
 /**
  * @author Charles Gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class CameraFlyTool extends AbstractMouseTool {
 	SceneGraphComponent cameraNode;
-	Transformation cameraTrans;
+	FactoredTransformation cameraTrans;
 	CameraDirectionKeyListener cdkl;
 	double camFactor = 0.5;
 	double[] transM;
@@ -89,7 +85,7 @@ public class CameraFlyTool extends AbstractMouseTool {
 			continuedMotion.stop();
 		}
 		continuedMotion = new javax.swing.Timer(20, new ActionListener()	{
-			final Transformation tt = cameraTrans;
+			final FactoredTransformation tt = cameraTrans;
 			final double[] repeater1 = transM;
 			final double[] repeater2 = rotM;
 			public void actionPerformed(ActionEvent e) {updateRotation(); } 
@@ -193,8 +189,6 @@ public class CameraFlyTool extends AbstractMouseTool {
 /**
 	 * @author Charles Gunn
 	 *
-	 * To change the template for this generated type comment go to
-	 * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
 	 */
 	public class CameraDirectionKeyListener extends KeyAdapter {
 		private boolean showHelp = false;

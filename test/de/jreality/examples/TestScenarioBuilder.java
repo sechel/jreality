@@ -58,30 +58,30 @@ public class TestScenarioBuilder extends SceneBuilder {
   }
 
   private void addWithDistance(Geometry geom, double d, Appearance[] app) {
-    Transformation trans=new Transformation();
+    FactoredTransformation trans=new FactoredTransformation();
     trans.setTranslation(d, 0, 0);
     addM(geom, trans, app);
   }
 
   private void addInCircle(Geometry geom, double r, Appearance[] app) {
-    Transformation trans=new Transformation();
+    FactoredTransformation trans=new FactoredTransformation();
 	trans.setRotation(Math.PI*2/app.length,0d,1d,0d);
 	trans.setTranslation(r, 0, 0);
     addM(geom, trans, app);
     up().translate(-r, 0, 0);
   }
 
-  private void addM(Geometry geom, Transformation t, Appearance[] app) {
+  private void addM(Geometry geom, FactoredTransformation t, Appearance[] app) {
     addM(createGeometryNode(createSceneGraphComponent(), geom), t, app);
   }
 
-  private void addM(SceneGraphComponent node, Transformation t, Appearance[] app) {
+  private void addM(SceneGraphComponent node, FactoredTransformation t, Appearance[] app) {
     final int max=app.length-1;
     if(max==-1) return;
-    Transformation local=new Transformation();
+    FactoredTransformation local=new FactoredTransformation();
     for(int i=0; i<max; i++) {
       add(local).add(app[i]).addChild(node);
-      local=new Transformation(local.getMatrix());
+      local=new FactoredTransformation(local.getMatrix());
       local.multiplyOnRight(t);
     }
     add(local).add(app[max]).addChild(node);

@@ -65,7 +65,8 @@ public class Texture2DLoaderJOGL {
 				textureID = createTextureID(gl); 
 				ht.put(tex, new Integer(textureID));
 			}
-      gl.glActiveTexture(GL.GL_TEXTURE0+level);
+ 
+			gl.glActiveTexture(GL.GL_TEXTURE0+level);
 			gl.glBindTexture(GL.GL_TEXTURE_2D, textureID); 			
 			int srcPixelFormat =  GL.GL_RGBA;
 			handleTextureParameters(tex, gl);

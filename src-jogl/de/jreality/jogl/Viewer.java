@@ -19,15 +19,13 @@ import de.jreality.scene.Camera;
 import de.jreality.scene.Drawable;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtilities;
 
 /**
  * @author Charles Gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnable {
 	SceneGraphComponent sceneRoot;

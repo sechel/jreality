@@ -1,8 +1,6 @@
 /*
  * Created on May 12, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.worlds;
 import java.awt.Color;
@@ -24,6 +22,7 @@ import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.DiscreteSpaceCurve;
 import de.jreality.jogl.SkyBox;
 import de.jreality.jogl.shader.DefaultVertexShader;
+import de.jreality.reader.Input;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
@@ -31,7 +30,7 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.ReflectionMap;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Texture2D;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
@@ -45,12 +44,10 @@ import de.jreality.util.SceneGraphUtilities;
 /**
  * @author Charles Gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class JOGLSkyBox extends AbstractLoadableScene {
 
-	static String resourceDir = "./";
+	static String resourceDir = "/net/MathVis/data/";
 	static {
 		String foo = System.getProperty("resourceDir");
 		if (foo != null)	resourceDir  = foo;
@@ -68,23 +65,23 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 
 	public boolean encompass()	{ return false; }
 	ConfigurationAttributes config = null;
-	String configResourceDir = "/homes/geometer/gunn/Software/eclipse/workspace/jReality/";
+	String configResourceDir = "/net/MathVis/data/config/";
 	/* (non-Javadoc)
 	 * @see de.jreality.portal.WorldMaker#setConfiguration(de.jreality.portal.util.Configuration)
 	 */
-	public void setConfiguration(ConfigurationAttributes config) {
-		File f = new File(configResourceDir+"test/de/jreality/worlds/JOGLSkyBox.props");
-		//this.config = new ConfigurationAttributes(f, config);
-		String foo = this.config.getProperty("resourceDir", resourceDir);
-		resourceDir = foo;
-	}
+//	public void setConfiguration(ConfigurationAttributes config) {
+//		File f = new File(configResourceDir+"JOGLSkyBox.props");
+//		this.config = new ConfigurationAttributes(Input.resolveInput("JOGLSkyBox.props"), config);
+//		String foo = this.config.getProperty("resourceDir", resourceDir);
+//		resourceDir = foo;
+//	}
 	
 	public boolean addBackPlane()	{ return false; }
 	public SceneGraphComponent makeWorld() {
 
 		SceneGraphComponent root = new SceneGraphComponent();
 		root.setName("theWorld");
-		root.setTransformation(new Transformation());
+		root.setTransformation(new FactoredTransformation());
 		
 		String[] texNameSuffixes = {"rt","lf","up", "dn","bk","ft"};
 		ReflectionMap refm = ReflectionMap.reflectionMapFactory("textures/desertstorm/desertstorm_", texNameSuffixes, "JPG");
@@ -104,7 +101,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 		globeSet.setName("CatHel1");
 		SceneGraphComponent globeNode1= new SceneGraphComponent();
 		globeNode1.setName("Comp1");
-		Transformation gt= new Transformation();
+		FactoredTransformation gt= new FactoredTransformation();
 		gt.setTranslation(pos[0]);
 		gt.setStretch(.3);
 		globeNode1.setTransformation(gt);
@@ -138,7 +135,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   catHel.buildEdgesFromFaces();
 		SceneGraphComponent globeNode2= new SceneGraphComponent();
 		globeNode2.setName("Comp1");
-		gt= new Transformation();
+		gt= new FactoredTransformation();
 		gt.setTranslation(pos[1]);
 		gt.setStretch(.3);
 		globeNode2.setTransformation(gt);
@@ -162,7 +159,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   catHel.setName("CatHel3");
 	   catHel.buildEdgesFromFaces();
 		SceneGraphComponent globeNode3= new SceneGraphComponent();
-		gt= new Transformation();
+		gt= new FactoredTransformation();
 		gt.setTranslation(pos[2]);
 		gt.setStretch(.3);
 		globeNode3.setTransformation(gt);
@@ -184,7 +181,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   tube.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(GeometryUtility.calculateFaceNormals(tube)));
 	   tube.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(GeometryUtility.calculateVertexNormals(tube)));
 	   SceneGraphComponent globeNode4= new SceneGraphComponent();
-	   gt= new Transformation();
+	   gt= new FactoredTransformation();
 	   gt.setTranslation(pos[3]);
 	   //gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
 	   //gt.setStretch(.3);
@@ -209,7 +206,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   Torus torus= new Torus(2.3, 1.5, 40,60);
 	   torus.calculateNormals();
 	   SceneGraphComponent globeNode5= new SceneGraphComponent();
-	   gt= new Transformation();
+	   gt= new FactoredTransformation();
 	   gt.setTranslation(pos[4]);
 	   //gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
 	   gt.setStretch(.3);
@@ -225,7 +222,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   torus= new Torus(2.3, 1.5, 20, 20);
 	   torus.calculateNormals();
 	   SceneGraphComponent globeNode6= new SceneGraphComponent();
-	   gt= new Transformation();
+	   gt= new FactoredTransformation();
 	   gt.setTranslation(pos[5]);
 	   gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
 	   gt.setStretch(.3);

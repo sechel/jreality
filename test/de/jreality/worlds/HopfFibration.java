@@ -1,8 +1,6 @@
 /*
  * Created on Nov 11, 2004
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 package de.jreality.worlds;
 
@@ -32,8 +30,6 @@ import de.jreality.util.SceneGraphUtilities;
 /**
  * @author gunn
  *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 public class HopfFibration extends AbstractLoadableScene {
 		SceneGraphComponent icokit;
@@ -117,7 +113,7 @@ public class HopfFibration extends AbstractLoadableScene {
 		private SceneGraphComponent hopfFibration(int level, int numSegs, double radius) {
 			if (level < 0) level = 0; 
 			if (level > 3) level = 3;
-			IndexedFaceSet ico = SphereHelper.spheres[level];
+			IndexedFaceSet ico = SphereHelper.tessellatedIcosahedra[level];
 			int profileSize = 7;
 			double[][] verts = ico.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 			int numCurves = verts.length;

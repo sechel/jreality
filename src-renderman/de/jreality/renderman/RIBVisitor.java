@@ -49,7 +49,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.Texture2D;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
@@ -157,7 +157,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         
         eAppearance= tmp;
     }
-     public void visit(Transformation t) {
+     public void visit(FactoredTransformation t) {
          double[] mat = t.getMatrix();
          float[] tmat = new float[16];
          for (int i = 0; i < 4; i++) 

@@ -1,8 +1,6 @@
 /*
  * Created on Jan 18, 2005
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 package de.jreality.jogl;
 
@@ -18,8 +16,6 @@ import de.jreality.util.Rn;
 /**
  * @author gunn
  *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 public class JOGLSphereHelper extends SphereHelper {
 
@@ -29,7 +25,7 @@ public class JOGLSphereHelper extends SphereHelper {
 	//TODO This can't be static; the display lists so created are invalid if the renderer parameter
 	// no longer exists.  So ... these display lists have to be tied to a specific context.
 	public static void setupSphereDLists(GL gl)	{
-		int n = SphereHelper.spheres.length;
+		int n = SphereHelper.tessellatedIcosahedra.length;
 		int[] dlists = null;
 		//if (!sharedDisplayLists)	dlists = (int[] ) sphereDListsTable.get(gl);
 		//else 

@@ -5,7 +5,7 @@
 package de.jreality.jogl.anim;
 
 import de.jreality.scene.Camera;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.util.Pn;
 import de.jreality.util.Quaternion;
 
@@ -20,8 +20,8 @@ public class AnimationUtility {
 	}
 	
 	// form the transformation so that when s = 0, dst = t1 and when s=1,  dst = t2
-	public static Transformation linearInterpolation(Transformation dst, Transformation t1, Transformation t2, double s ) {
-		if (dst == null) dst = new Transformation();
+	public static FactoredTransformation linearInterpolation(FactoredTransformation dst, FactoredTransformation t1, FactoredTransformation t2, double s ) {
+		if (dst == null) dst = new FactoredTransformation();
 		int sig = t1.getSignature();
 		if (sig != t2.getSignature())	{
 			// TODO signal error

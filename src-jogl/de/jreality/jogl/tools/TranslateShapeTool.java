@@ -1,8 +1,6 @@
 /*
  * Created on Mar 23, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.jogl.tools;
 
@@ -11,7 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 
 import de.jreality.jogl.HelpOverlay;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.util.P3;
 import de.jreality.util.Pn;
 import de.jreality.util.Rn;
@@ -19,8 +17,6 @@ import de.jreality.util.Rn;
 /**
  * @author Charles Gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class TranslateShapeTool extends AbstractShapeTool {
 	double[] zDirectionObject;
@@ -92,7 +88,7 @@ public class TranslateShapeTool extends AbstractShapeTool {
 		final double[] mat = P3.makeTranslationMatrix(null, anchorV, currentV,theEditedTransform.getSignature());
 		//System.out.println("Translation: "+Rn.matrixToString(mat));
 		continuedMotion = new javax.swing.Timer(20, new ActionListener()	{
-			final Transformation tt = theEditedTransform;
+			final FactoredTransformation tt = theEditedTransform;
 			final double[] repeater = mat;
 			public void actionPerformed(ActionEvent e) {updateRotation(); } 
 			public void updateRotation()	{

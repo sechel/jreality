@@ -1,21 +1,17 @@
 /*
  * Created on Jul 16, 2004
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 package de.jreality.worlds;
 
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.util.ConfigurationAttributes;
 import de.quasitiler.alexanderplatz.Alex3DModel;
 
 /**
  * @author weissman
  *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 public class AlexDemo extends AbstractLoadableScene {
 	
@@ -30,11 +26,11 @@ public class AlexDemo extends AbstractLoadableScene {
 	 */
 	public SceneGraphComponent makeWorld() {
 		SceneGraphComponent world = new SceneGraphComponent();
-		world.setTransformation(new Transformation());
+		world.setTransformation(new FactoredTransformation());
 		world.getTransformation().setRotation(-Math.PI/2., 1,0,0);
         SceneGraphComponent sgc = Alex3DModel.createRoot(6, true, true, true);
         SceneGraphComponent scaleComp = new SceneGraphComponent();
-        Transformation t = new Transformation();
+        FactoredTransformation t = new FactoredTransformation();
         t.setStretch(3.);
         scaleComp.setTransformation(t);
         scaleComp.addChild(sgc);

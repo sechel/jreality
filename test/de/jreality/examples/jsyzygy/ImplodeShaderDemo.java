@@ -1,8 +1,6 @@
 /*
  * Created on Jun 4, 2004
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Generation - Code and Comments
  */
 package de.jreality.examples.jsyzygy;
 
@@ -22,8 +20,6 @@ import de.jreality.scene.data.StorageModel;
 /**
  * @author gollwas
  *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
  */
 public class ImplodeShaderDemo { 	
     
@@ -44,7 +40,7 @@ public class ImplodeShaderDemo {
 		//torus.setVertexAttributes(Attribute.NORMALS, new DataList(StorageModel.DOUBLE_ARRAY.array(3), GeometryUtility.calculateVertexNormals(torus)));
 		SceneGraphComponent globeNode = new SceneGraphComponent();
 		globeNode.setName("comp"+i);
-		Transformation gt= new Transformation();
+		FactoredTransformation gt= new FactoredTransformation();
 		gt.setTranslation(-5.0 + 8.0* i, 0, 0.0);
 		gt.setStretch(5);
 		globeNode.setTransformation(gt);
@@ -75,7 +71,7 @@ public class ImplodeShaderDemo {
 		
 		SceneGraphComponent theWorld = new SceneGraphComponent();
 		theWorld.setName("world");
-		Transformation tt = new Transformation();
+		FactoredTransformation tt = new FactoredTransformation();
 		tt.setRotation(Math.PI/3.0,1d,0d,0d);
 		tt.setTranslation(1d,1d,0d);
 		//theWorld.addTransform(tt);
@@ -93,7 +89,7 @@ public class ImplodeShaderDemo {
 	   double scaleVal = 1.5;
 		SceneGraphComponent globeNode1= new SceneGraphComponent();
 		globeNode1.setName("Comp1");
-		Transformation gt= new Transformation();
+		FactoredTransformation gt= new FactoredTransformation();
 		gt.setTranslation(0, 0, scaleVal);
 		gt.setStretch(.3);
 		globeNode1.setTransformation(gt);
@@ -119,7 +115,7 @@ public class ImplodeShaderDemo {
 	   globeSet.buildEdgesFromFaces();
 		SceneGraphComponent globeNode2= new SceneGraphComponent();
 		globeNode2.setName("Comp1");
-		gt= new Transformation();
+		gt= new FactoredTransformation();
 		gt.setTranslation(scaleVal, scaleVal, scaleVal);
 		gt.setStretch(.3);
 		globeNode2.setTransformation(gt);
@@ -143,7 +139,7 @@ public class ImplodeShaderDemo {
 	   globeSet.setName("CatHel3");
 	   globeSet.buildEdgesFromFaces();
 		SceneGraphComponent globeNode3= new SceneGraphComponent();
-		gt= new Transformation();
+		gt= new FactoredTransformation();
 		gt.setTranslation(-scaleVal, -scaleVal, scaleVal);
 		gt.setStretch(.3);
 		globeNode3.setTransformation(gt);
@@ -166,7 +162,7 @@ public class ImplodeShaderDemo {
 	   //torus.calculateNormals();
 	   DiscreteSpaceCurve torus1 = DiscreteSpaceCurve.discreteTorusKnot(1.0, .4,3,5,100);
 	   SceneGraphComponent globeNode4= new SceneGraphComponent();
-	   gt= new Transformation();
+	   gt= new FactoredTransformation();
 	   gt.setTranslation(0, 0, 0.0);
 	   //gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
 	   //gt.setStretch(.3);
@@ -192,7 +188,7 @@ public class ImplodeShaderDemo {
 	   Torus torus= new Torus(2.3, 1.5, 20, 30);
 	   torus.calculateNormals();
 	   SceneGraphComponent globeNode5= new SceneGraphComponent();
-	   gt= new Transformation();
+	   gt= new FactoredTransformation();
 	   gt.setTranslation(scaleVal,scaleVal,0.0);
 	   //gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
 	   gt.setStretch(.3);
@@ -211,7 +207,7 @@ public class ImplodeShaderDemo {
 	   torus= new Torus(2.3, 1.5, 20, 30);
 	   torus.calculateNormals();
 	   SceneGraphComponent globeNode6= new SceneGraphComponent();
-	   gt= new Transformation();
+	   gt= new FactoredTransformation();
 	   gt.setTranslation(-scaleVal,-scaleVal,0.0);
 	   gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
 	   gt.setStretch(.3);

@@ -1,8 +1,6 @@
 /*
  * Created on Feb 23, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.worlds;
 import de.jreality.geometry.Primitives;
@@ -11,7 +9,7 @@ import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
 import de.jreality.util.ConfigurationAttributes;
@@ -22,8 +20,6 @@ import de.jreality.util.Pn;
 /**
  * @author gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class ElephantTrunk extends AbstractLoadableScene {
 	SceneGraphComponent icokit;
@@ -45,7 +41,7 @@ public class ElephantTrunk extends AbstractLoadableScene {
 			//double[] stretchV = {.5d, .5d, .5d};
 			SceneGraphComponent theWorld = new SceneGraphComponent();
 			theWorld.setName("theWorld");
-			Transformation t = new Transformation();
+			FactoredTransformation t = new FactoredTransformation();
 			t.setRotation(0.1, 1d, 0d, 0d);
 			t.setTranslation(tlate);
 			t.setStretch(.9,.9,.9);
@@ -70,12 +66,12 @@ public class ElephantTrunk extends AbstractLoadableScene {
 		protected class IteratedTransform extends SceneGraphComponent implements TransformationListener {
 			int iterationCount = 0;
 			boolean countChanged = true;
-			Transformation theT;
+			FactoredTransformation theT;
 			SceneGraphNode geometry;
 			/**
 			 * 
 			 */
-			public IteratedTransform(Transformation t, int itcount, SceneGraphNode g) {
+			public IteratedTransform(FactoredTransformation t, int itcount, SceneGraphNode g) {
 				super();
 				theT = t;
 				setTransformation(theT);
@@ -85,7 +81,7 @@ public class ElephantTrunk extends AbstractLoadableScene {
 			}
 			
 			public IteratedTransform()	{
-				this(new Transformation(), 1, Primitives.coloredCube());
+				this(new FactoredTransformation(), 1, Primitives.coloredCube());
 			}
 
 			/**

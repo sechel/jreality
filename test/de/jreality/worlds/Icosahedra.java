@@ -1,8 +1,6 @@
 /*
  * Created on Jan 29, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.worlds;
 
@@ -12,7 +10,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
@@ -24,8 +22,6 @@ import de.jreality.util.SceneGraphUtilities;
 /**
  * @author gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class Icosahedra extends AbstractLoadableScene {
 	SceneGraphComponent icokit;
@@ -46,15 +42,15 @@ public class Icosahedra extends AbstractLoadableScene {
 			//Cube ico = new Cube();
 			
 			SceneGraphComponent theWorld = new SceneGraphComponent();
-			theWorld.setTransformation(new Transformation());
+			theWorld.setTransformation(new FactoredTransformation());
 			theRow = new SceneGraphComponent();
 			theRow.setName("theRow");
-			theRow.setTransformation(new Transformation());
+			theRow.setTransformation(new FactoredTransformation());
 			SceneGraphComponent newRow;
 			double[] axis2 = {0.0, 0.0, 1.0};
 			newRow = new SceneGraphComponent();
 			newRow.setName("newRow");
-			newRow.setTransformation(new Transformation());
+			newRow.setTransformation(new FactoredTransformation());
 			newRow.getTransformation().setRotation(Math.PI/2.0, axis2);
 			newRow.getTransformation().setTranslation(0.0, 0.0, 1.0);
 			newRow.addChild(theRow);
@@ -89,7 +85,7 @@ public class Icosahedra extends AbstractLoadableScene {
 				spheres[i].setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(4).createReadOnly(vc));
 
 				icokit = SceneGraphUtilities.createFullSceneGraphComponent("sphere"+i);
-				icokit.setTransformation(new Transformation());
+				icokit.setTransformation(new FactoredTransformation());
 				icokit.setGeometry(spheres[i]);
 				icokit.getTransformation().setTranslation(-1.5 + i, 0, 0);
 				icokit.getTransformation().setStretch(.5);
@@ -106,6 +102,9 @@ public class Icosahedra extends AbstractLoadableScene {
 			return theWorld;
 		}
 	
+		public boolean isEncompass() {
+			return true;
+		}
 			
 	
 }

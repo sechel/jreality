@@ -41,7 +41,7 @@ public abstract class Renderer {
   protected int                 argbBackground;
   protected SceneGraphComponent root;
   private SceneGraphPath cameraPath;
-  private Transformation cameraWorld = new Transformation();
+  private FactoredTransformation cameraWorld = new FactoredTransformation();
 
   private PolygonPipeline pipeline;
   private PolygonRasterizer rasterizer;

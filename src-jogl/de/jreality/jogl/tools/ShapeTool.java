@@ -1,8 +1,6 @@
 /*
  * Created on Mar 23, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.jogl.tools;
 
@@ -14,15 +12,13 @@ import de.jreality.util.Rn;
 /**
  * @author Charles Gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class ShapeTool extends AbstractMouseTool {
 	double[] 	origM; 		// original object transformation
 	SceneGraphPath 	selection, alternateSelection;	// two selections: altSel is the "center"
 			// of the motion; sel is the object moved
-	Transformation theEditedTransform;	// the transform that gets edited
-	Transformation myTransform;
+	FactoredTransformation theEditedTransform;	// the transform that gets edited
+	FactoredTransformation myTransform;
 	double[] 	theAxis;
 	double[]	worldToCamera;			// get this from the camera in startTrackingAt()
 	protected double[] anchorV = new double[4];
@@ -38,7 +34,7 @@ public class ShapeTool extends AbstractMouseTool {
 	public ShapeTool() {
 		super();
 		duration = 400.0;			// make it quasi-infinite
-		myTransform =  new Transformation();
+		myTransform =  new FactoredTransformation();
 		origM = new double[16];
 		theAxis = new double[3];
 		theProjector = new PlaneProjector();

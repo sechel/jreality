@@ -1,8 +1,6 @@
 /*
  * Created on Jun 14, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.jogl;
 
@@ -13,13 +11,11 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Texture2D;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 
 /**
  * @author Charles Gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class SkyBox extends SceneGraphComponent {
 	Texture2D[] faceTextures;
@@ -60,7 +56,7 @@ public class SkyBox extends SceneGraphComponent {
 		ap.setAttribute(CommonAttributes.EDGE_DRAW,false);
 		setAppearance(ap);
 		
-		Transformation tt = new Transformation();
+		FactoredTransformation tt = new FactoredTransformation();
 //		tt.setRotation(Math.PI, 1d, 0d, 0d);	
 		setTransformation(tt);
 //		

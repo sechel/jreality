@@ -1,8 +1,6 @@
 /*
  * Created on Jun 17, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.jogl;
 
@@ -46,7 +44,8 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
+import de.jreality.soft.DefaultViewer;
 import de.jreality.soft.PSViewer;
 import de.jreality.ui.SceneTreeViewer;
 import de.jreality.util.CameraUtility;
@@ -60,8 +59,6 @@ import de.jreality.util.SceneGraphUtilities;
 /**
  * @author Charles Gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class InteractiveViewerDemo extends JFrame{
 	public final static int STANDARD = 1;
@@ -124,12 +121,20 @@ public class InteractiveViewerDemo extends JFrame{
 		// The frame has to be visible (on some versions of linux!) before we can safely add the GLCanvas!!
 		setVisible(true);
 		if (mode == SPLIT_PANE)	{
-			Viewer v2 = new Viewer(null, null);
+			final DefaultViewer v2 = new DefaultViewer();
 			v2.initializeFrom(viewer);
 			splitPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, false, viewer.getViewingComponent(),v2.getViewingComponent());
 			splitPanel.setDividerLocation(0.5d);
-			//setSize(800, 400);	
-			getContentPane().add(splitPanel, BorderLayout.CENTER);			
+			javax.swing.Timer timer = new javax.swing.Timer(200, new ActionListener()	{
+				public void actionPerformed(ActionEvent e) {
+					v2.render();
+				}
+			});	
+				
+			splitPanel.setSize(800, 400);	
+			setSize(800,400);
+			//getContentPane().add(splitPanel, BorderLayout.CENTER);			
+			getContentPane().add(viewer.getViewingComponent(), BorderLayout.CENTER);
 		} else if (mode == TABBED_PANE){
 			tabbedPane = new JTabbedPane();
 			addViewer(viewer, "Standard");
@@ -236,7 +241,7 @@ public class InteractiveViewerDemo extends JFrame{
 		}
 		if (world != null && !root.isDirectAncestor(world)) {		// sometimes the subclass has already added the world
 			root.addChild(world);
-			if (world.getTransformation() == null) 		world.setTransformation(new Transformation());
+			if (world.getTransformation() == null) 		world.setTransformation(new FactoredTransformation());
 		}
 
 		CameraUtility.getCamera(viewer).setSignature(getSignature());

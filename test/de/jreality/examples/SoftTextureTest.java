@@ -188,7 +188,7 @@ public class SoftTextureTest implements KeyListener {
               SceneGraphComponent s1 = Parser3DS.readFromFile("/home/timh/tmp/terrain.3ds");
               bottomC.setGeometry(s1.getChildComponent(0).getGeometry());
               GeometryUtility.calculateVertexNormals(s1);
-              Transformation t =new Transformation();
+              FactoredTransformation t =new FactoredTransformation();
               t.setStretch(.2);
               t.setTranslation(0,-5,0);
               bottomC.setTransformation(t);
@@ -226,14 +226,14 @@ public class SoftTextureTest implements KeyListener {
 
       catenoid.buildEdgesFromFaces();
 
-      Transformation gt;
+      FactoredTransformation gt;
       
       Appearance ap;
       
       // 3.
   
       SceneGraphComponent globeNode3= new SceneGraphComponent();
-      gt= new Transformation();
+      gt= new FactoredTransformation();
       gt.setTranslation(0., .0, 1.2);
       gt.setStretch(.7);
       gt.setRotation(Math.PI/2.,1,0,0);
@@ -295,7 +295,7 @@ public class SoftTextureTest implements KeyListener {
     // camera
     //
     SceneGraphComponent cameraNode= new SceneGraphComponent();
-    Transformation ct= new Transformation();
+    FactoredTransformation ct= new FactoredTransformation();
     ct.setTranslation(0, 0, 16);
     cameraNode.setTransformation(ct);
     firstCamera= new Camera();
@@ -305,7 +305,7 @@ public class SoftTextureTest implements KeyListener {
     cameraNode.setCamera(firstCamera);
 
     SceneGraphComponent lightNode= new SceneGraphComponent();
-    Transformation lt= new Transformation();
+    FactoredTransformation lt= new FactoredTransformation();
     lt.setRotation(-Math.PI / 4, 1, 1, 0);
     lightNode.setTransformation(lt);
     DirectionalLight light= new DirectionalLight();
@@ -313,7 +313,7 @@ public class SoftTextureTest implements KeyListener {
     cameraNode.addChild(lightNode);
 
     SceneGraphComponent lightNode2= new SceneGraphComponent();
-    Transformation lt2= new Transformation();
+    FactoredTransformation lt2= new FactoredTransformation();
     //   lt2.assignScale(-1);
     lt.setRotation(-Math.PI / 4, 1, 1, 0);
     lightNode2.setTransformation(lt2);

@@ -174,8 +174,6 @@ public class PointManipulationTool extends AbstractMouseTool implements Transfor
 	/**
 	 * @author Charles Gunn
 	 *
-	 * To change the template for this generated type comment go to
-	 * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
 	 */
 	public class MouseManipulationListener extends KeyAdapter {
 		private boolean showHelp = false;

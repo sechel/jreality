@@ -17,7 +17,7 @@ import de.jreality.scene.Graphics3D;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.P3;
 import de.jreality.util.Pn;
@@ -106,8 +106,8 @@ public class JoglBoxTool extends SceneGraphVisitor implements UserToolInterface 
 	BoxContext createContext() {
 		return new BoxContext() {
 
-			public Transformation getLocalTransformation() {
-				return new Transformation(Rn.times(null, path.getInverseMatrix(null), worldToPoint));
+			public FactoredTransformation getLocalTransformation() {
+				return new FactoredTransformation(Rn.times(null, path.getInverseMatrix(null), worldToPoint));
 			}
 
 			public int getButton() {

@@ -1,8 +1,6 @@
 /*
  * Created on Feb 8, 2005
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 package de.jreality.examples.jogl;
 
@@ -15,22 +13,22 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 
+import de.jreality.jogl.InteractiveViewer;
 import de.jreality.jogl.InteractiveViewerDemo;
+import de.jreality.util.Pn;
 import discreteGroup.TriangleGroup;
 
 /**
  * @author gunn
  *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 public class LoadableSceneDemo extends InteractiveViewerDemo {
 
-    public static void main(String[] args) throws Exception {
-		LoadableSceneDemo iv = new LoadableSceneDemo();
+	public static void main(String[] args) throws Exception {
+		LoadableSceneDemo iv = new LoadableSceneDemo();//InteractiveViewerDemo.SPLIT_PANE, false);
 		iv.initializeScene();
 		if (args != null) iv.loadScene(args[0]);
-		else iv.loadScene(null);
+		else iv.loadScene("de.jreality.worlds.AnimationDemo");
     }
     String root = "de.jreality.worlds.";
     String[] loadableScenes = {"de.jreality.worlds.AlexDemo",

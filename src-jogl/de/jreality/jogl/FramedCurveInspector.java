@@ -31,7 +31,7 @@ import de.jreality.scene.Camera;
 import de.jreality.scene.Graphics3D;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.Rn;
@@ -522,7 +522,7 @@ public class FramedCurveInspector extends JFrame {
 			//int which = theCurve.getSegmentAtTime(time);
 			if (inspectedPoint == theCurve.getNumberControlPoints()-1) return;
 			double tm = (theCurve.getControlPoint(inspectedPoint).getTime() + theCurve.getControlPoint(inspectedPoint+1).getTime())*.5;
-			Transformation tt = new Transformation();
+			FactoredTransformation tt = new FactoredTransformation();
 			theCurve.getValueAtTime(tm, tt );
 			FramedCurve.ControlPoint ncp = new FramedCurve.ControlPoint(tt, tm);
 			theCurve.addControlPoint(ncp);
@@ -622,7 +622,7 @@ public class FramedCurveInspector extends JFrame {
 	}
 	
 	double tick = 0;
-	Transformation tt = new Transformation();
+	FactoredTransformation tt = new FactoredTransformation();
 	int count = 0;
 	protected double time;
 	public void updateTime()	{
@@ -741,8 +741,6 @@ public class FramedCurveInspector extends JFrame {
 	/**
 	 * @author Charles Gunn
 	 *
-	 * To change the template for this generated type comment go to
-	 * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
 	 */
 	private class MyKeyListener extends KeyAdapter {
 		private boolean showHelp = false;
@@ -830,7 +828,7 @@ public class FramedCurveInspector extends JFrame {
 					System.out.println("time is: "+e.getWhen());
 					System.out.println("Camera node is: "+Rn.matrixToString(myCameraNode.getTransformation().getMatrix()));
 					
-						Transformation tt = new Transformation(parent.getSignature());
+						FactoredTransformation tt = new FactoredTransformation(parent.getSignature());
 						//TODO apply inverse of objectToWorld transform here
 						tt.setMatrix(readTarget());
 						double t = (e.getWhen() - beginCurveTime)/1000.0 + startTime;

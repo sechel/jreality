@@ -223,6 +223,26 @@ public class JOGLRendererHelper {
 			gl.glEnd();
 			 return;
 		}
+//        if (testArrays) {
+//                   double[] varray = vertices.toDoubleArray(null);
+//                   ByteBuffer bb = ByteBuffer.allocateDirect(8*varray.length).order(ByteOrder.nativeOrder());
+//                   bb.asDoubleBuffer().put(varray);
+//                   bb.flip();
+//                   gl.glVertexPointer(vertexLength, GL.GL_DOUBLE, 0, bb);
+// 
+//                   gl.glDisableClientState(GL.GL_COLOR_ARRAY);
+//                   gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
+//                   gl.glDrawArrays(GL.GL_POINTS, 0, sg.getNumPoints());
+// 
+//                   for (int i = 0; i sg.getNumEdges(); ++i)       {
+//                        gl.glBegin(GL.GL_LINE_STRIP);
+//                        IntArray ed = sg.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray();
+//                        int m = ed.getLength();
+//                        for (int j = 0; jm; ++j)       {
+//                            gl.glArrayElement(ed.getValueAt(j));
+//                         }
+//                    gl.glEnd();
+//              }
 		if (sg.getEdgeAttributes(Attribute.INDICES) == null) return;
 		int colorBind = 0, colorLength = 0;
 		if (interpolateVertexColors && vertexColors != null) 		{

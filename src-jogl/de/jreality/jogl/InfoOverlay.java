@@ -1,8 +1,6 @@
 /*
  * Created on Jun 18, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.jogl;
 
@@ -24,8 +22,6 @@ public class InfoOverlay implements GLEventListener {
 	/**
 	 * @author gunn
 	 *
-	 * TODO To change the template for this generated type comment go to
-	 * Window - Preferences - Java - Code Style - Code Templates
 	 */
 	public interface InfoProvider {
 		public void updateInfoStrings(InfoOverlay io);

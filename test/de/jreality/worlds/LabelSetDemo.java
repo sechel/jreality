@@ -1,8 +1,6 @@
 /*
  * Created on Apr 15, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.worlds;
 import java.awt.Color;
@@ -22,8 +20,6 @@ import de.jreality.util.SceneGraphUtilities;
 /**
  * @author gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class LabelSetDemo extends AbstractLoadableScene {
 	SceneGraphComponent icokit;

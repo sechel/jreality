@@ -1,8 +1,6 @@
 /*
  * Created on Jan 4, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.jogl;
 
@@ -24,7 +22,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Sphere;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
@@ -37,8 +35,6 @@ import de.jreality.util.SceneGraphUtilities;
 /**
  * @author gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class SelectionManager implements TransformationListener {
 	private SceneGraphPath defaultSelection;
@@ -137,7 +133,7 @@ public class SelectionManager implements TransformationListener {
 			System.err.println("sel: "+theSelection.toString());
 			Object tail = theSelection.getLastElement();
 			if (tail instanceof SceneGraphComponent)	{
-				Transformation t =  ((SceneGraphComponent) tail).getTransformation();
+				FactoredTransformation t =  ((SceneGraphComponent) tail).getTransformation();
 				if (t != null && t.getIsEditable())	{
 					if (debug) System.err.println("Transformation is editable");
 					selectionEditable = true;

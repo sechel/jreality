@@ -24,7 +24,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.util.P3;
 import de.jreality.util.Pn;
 import de.jreality.util.Quaternion;
@@ -73,7 +73,7 @@ public class FramedCurve extends SceneGraphComponent {
 	}
 		
 	public static class ControlPoint	implements Comparable {
-		Transformation tt;
+		FactoredTransformation tt;
 		double t;
 			
 		public int compareTo(Object o) {
@@ -85,7 +85,7 @@ public class FramedCurve extends SceneGraphComponent {
 		 * @param tt
 		 * @param t
 		 */
-		public ControlPoint(Transformation tt, double t) {
+		public ControlPoint(FactoredTransformation tt, double t) {
 			super();
 			this.tt = tt;
 			this.t = t;
@@ -105,7 +105,7 @@ public class FramedCurve extends SceneGraphComponent {
 			return t;
 		}
 		
-		public Transformation getTransformation() {
+		public FactoredTransformation getTransformation() {
 			return tt;
 		}
 	}
@@ -123,7 +123,7 @@ public class FramedCurve extends SceneGraphComponent {
 		return fc;
 	}
 	
-     public void setControlPoints(Transformation[] cp)	{
+     public void setControlPoints(FactoredTransformation[] cp)	{
 		controlPoints.clear();
 		int n = cp.length;
 		for (int i  = 0; i<n; ++i)	{
@@ -139,7 +139,7 @@ public class FramedCurve extends SceneGraphComponent {
     		int n = matrices.length;
     		for (int i  = 0; i<n; ++i)	{
     			double p = (i==0) ? 0d : (i/(n-1.0));
-    	   		controlPoints.add(new ControlPoint(new Transformation(matrices[i]), p));	
+    	   		controlPoints.add(new ControlPoint(new FactoredTransformation(matrices[i]), p));	
     		}
     		outOfDate=true;
     		update();
@@ -316,18 +316,18 @@ public class FramedCurve extends SceneGraphComponent {
 	    return previousSegment;
     }
     
-   public Transformation getValueAtTime(double t, Transformation dst)		{
+   public FactoredTransformation getValueAtTime(double t, FactoredTransformation dst)		{
     		if (controlPoints.size() == 1) 	{
     			ControlPoint cp = ((ControlPoint) controlPoints.get(0));
     			try {
-					dst = ((Transformation) cp.tt.clone());
+					dst = ((FactoredTransformation) cp.tt.clone());
 				} catch (CloneNotSupportedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
     			return dst;
     		}
-    		if (dst == null) dst = new Transformation();
+    		if (dst == null) dst = new FactoredTransformation();
     		// assume 0<=t<=1  
     		// assume each segment is same length in parameter
     		if (outOfDate) update();
@@ -340,7 +340,7 @@ public class FramedCurve extends SceneGraphComponent {
        	double thist = (dt == 0.0) ?  0.0 : (t-cp1.t)/dt;
        	if (currentPoint == null) {
        		currentPoint = new SceneGraphComponent();
-       		currentPoint.setTransformation(new Transformation());
+       		currentPoint.setTransformation(new FactoredTransformation());
        		currentPoint.addChild(camIconItself);
        		camIcon.addChild(currentPoint);
        	}	// else ??
@@ -414,7 +414,7 @@ public static FramedCurve readFromFile(File file)		{
 								firsttime = false;
 							}
 							count = 0;
-							Transformation gen = new Transformation(signature, mat);
+							FactoredTransformation gen = new FactoredTransformation(signature, mat);
 							ControlPoint thiscp = new ControlPoint(gen, thist);
 							cplist.add(thiscp);
 						}

@@ -1,8 +1,6 @@
 /*
  * Created on Apr 15, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.worlds;
 import java.net.MalformedURLException;
@@ -16,7 +14,7 @@ import de.jreality.geometry.WingedEdge;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Texture2D;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.scene.Viewer;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.Pn;
@@ -26,8 +24,6 @@ import de.jreality.util.SceneGraphUtilities;
 /**
  * @author gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class FunnyRuledSurface extends AbstractLoadableScene {
 	SceneGraphComponent icokit;

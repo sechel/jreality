@@ -23,7 +23,7 @@
 package de.jreality.portal.tools;
 
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 
 /**
  *
@@ -34,7 +34,7 @@ import de.jreality.scene.Transformation;
  */
 public abstract class BoxContext {
 
-	public abstract Transformation getLocalTransformation();
+	public abstract FactoredTransformation getLocalTransformation();
 	public abstract int getButton();
 	public abstract SceneGraphPath getRootToLocal();
 

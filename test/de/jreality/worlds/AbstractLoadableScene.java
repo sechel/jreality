@@ -1,8 +1,6 @@
 /*
  * Created on Jan 27, 2005
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 package de.jreality.worlds;
 
@@ -17,8 +15,6 @@ import de.jreality.util.Pn;
 /**
  * @author gunn
  *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 public abstract class AbstractLoadableScene implements LoadableScene {
 	

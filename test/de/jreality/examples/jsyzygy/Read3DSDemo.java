@@ -1,8 +1,6 @@
 /*
  * Created on Apr 15, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.examples.jsyzygy;
 
@@ -11,14 +9,12 @@ import java.util.logging.Logger;
 
 import de.jreality.reader.Parser3DS;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 
 
 /**
  * @author gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class Read3DSDemo {
 	SceneGraphComponent icokit;
@@ -33,7 +29,7 @@ public class Read3DSDemo {
 			Logger.getLogger("de.jreality").setLevel(Level.WARNING);
 			SceneGraphComponent s1 = Parser3DS.readFromFile(filename);
 			SceneGraphComponent theWorld = new SceneGraphComponent();
-			s1.setTransformation(new Transformation());
+			s1.setTransformation(new FactoredTransformation());
 //			s1.getTransformation().setTranslation(-25400, -21400 ,-10 );
 			//Transformation stretch = new Transformation();
 			s1.getTransformation().setStretch(scale);

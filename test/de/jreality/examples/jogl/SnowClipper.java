@@ -1,8 +1,6 @@
 /*
  * Created on Jan 18, 2005
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 package de.jreality.examples.jogl;
 
@@ -26,7 +24,7 @@ import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.P3;
 import de.jreality.util.Pn;
@@ -36,8 +34,6 @@ import de.jreality.util.SceneGraphUtilities;
 /**
  * @author gunn
  *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 public class SnowClipper extends InteractiveViewerDemo {
 
@@ -68,7 +64,7 @@ public class SnowClipper extends InteractiveViewerDemo {
 		OOGLReader or = new OOGLReader();
 		snowSculpture = or.readFromFile(fileToLoad);
 		snowSculpture.setName("snowSculptureModel");
-		snowSculpture.setTransformation(new Transformation());
+		snowSculpture.setTransformation(new FactoredTransformation());
 		snowSculpture.getTransformation().setStretch(snowSculptureScale);		// (-.2,.2) -> (-60, 60)" 
 		snowSculpture.getTransformation().setTranslation(0,0,72);
 		snowSculpture.getTransformation().setIsEditable(false);

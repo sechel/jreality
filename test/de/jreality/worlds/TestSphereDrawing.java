@@ -1,8 +1,6 @@
 /*
  * Created on May 12, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.worlds;
 import java.awt.Color;
@@ -18,7 +16,7 @@ import de.jreality.jogl.ViewerKeyListener;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
@@ -29,8 +27,6 @@ import de.jreality.util.SceneGraphUtilities;
 /**
  * @author Charles Gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class TestSphereDrawing extends AbstractLoadableScene {
 
@@ -64,7 +60,7 @@ public class TestSphereDrawing extends AbstractLoadableScene {
 //			torus.setEdgeAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(4).createWritableDataList(edgeColors));
 			SceneGraphComponent globeNode = new SceneGraphComponent();
 			globeNode.setName("comp"+i);
-			Transformation gt= new Transformation();
+			FactoredTransformation gt= new FactoredTransformation();
 			//gt.setTranslation(-5.0 + 2.0* i, 0, 0.0);
 			globeNode.setTransformation(gt);
 			//if (i!=0) globeNode.setGeometry(GeometryUtility.implode(torus, -.9 + .4 * i));

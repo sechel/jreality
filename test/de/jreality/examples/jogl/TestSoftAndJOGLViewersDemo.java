@@ -1,8 +1,6 @@
 /*
  * Created on Jul 5, 2004
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 package de.jreality.examples.jogl;
 
@@ -13,7 +11,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
@@ -25,8 +23,6 @@ import de.jreality.util.SceneGraphUtilities;
 /**
  * @author gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class TestSoftAndJOGLViewersDemo extends InteractiveViewerDemo {
 	SceneGraphComponent icokit;
@@ -57,15 +53,15 @@ public class TestSoftAndJOGLViewersDemo extends InteractiveViewerDemo {
 			//Cube ico = new Cube();
 			
 			SceneGraphComponent theWorld = new SceneGraphComponent();
-			theWorld.setTransformation(new Transformation());
+			theWorld.setTransformation(new FactoredTransformation());
 			theRow = new SceneGraphComponent();
-			theRow.setTransformation(new Transformation());
+			theRow.setTransformation(new FactoredTransformation());
 			SceneGraphComponent theRowI = new SceneGraphComponent();
-			theRowI.setTransformation(new Transformation());
+			theRowI.setTransformation(new FactoredTransformation());
 			SceneGraphComponent newRow;
 			double[] axis2 = {0.0, 0.0, 1.0};
 			newRow = new SceneGraphComponent();
-			newRow.setTransformation(new Transformation());
+			newRow.setTransformation(new FactoredTransformation());
 			newRow.getTransformation().setRotation(Math.PI/2.0, axis2);
 			newRow.getTransformation().setTranslation(0.0, 0.0, 1.0);
 			newRow.addChild(theRow);
@@ -98,7 +94,7 @@ public class TestSoftAndJOGLViewersDemo extends InteractiveViewerDemo {
 				spheres[i].setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(4).createReadOnly(vc));
 
 				icokit = SceneGraphUtilities.createFullSceneGraphComponent();
-				icokit.setTransformation(new Transformation());
+				icokit.setTransformation(new FactoredTransformation());
 				icokit.setGeometry(spheres[i]);
 				icokit.getTransformation().setTranslation(-1.5 + i, 0, 0);
 				icokit.getTransformation().setStretch(.5);

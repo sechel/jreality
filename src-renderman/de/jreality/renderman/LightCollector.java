@@ -72,7 +72,7 @@ public class LightCollector extends SceneGraphVisitor {
         c.childrenAccept(subContext());
     }
     
-    public void visit(Transformation t) {
+    public void visit(FactoredTransformation t) {
         if (initialTrafo == currentTrafo)
             currentTrafo= new double[16];
         VecMat.copyMatrix(initialTrafo, currentTrafo);

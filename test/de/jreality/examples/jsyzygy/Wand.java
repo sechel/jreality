@@ -64,7 +64,7 @@ public class Wand extends QuadMeshShape
   ap.setAttribute("lineShader.lineWidth", 0.04);
   ap.setAttribute("lineShader.diffuseColor",new Color(0.2f, 0.2f, 0.4f) );
   
-  Transformation wandTransformation = new Transformation();
+  FactoredTransformation wandTransformation = new FactoredTransformation();
   //gt.setTranslation(-1.2, -1.2, 1.2);
   //gt.setStretch(.3);
   wandComponent.setTransformation(wandTransformation);

@@ -52,7 +52,7 @@ public static final String MOUSE_DONE = "mouseDone";
 
 
 	//private SceneGraphNode node;
-    protected Transformation transformation;
+    protected FactoredTransformation transformation;
     protected double[] tmp = new double[16];
     protected Component viewer;
     protected Camera camera;
@@ -71,7 +71,7 @@ public static final String MOUSE_DONE = "mouseDone";
     protected double[] mouseOld = new double[3];
     protected double[] mouseNew = new double[3];
     protected double[] tmpV = new double[3];
-    protected Transformation tmpTrafo = new Transformation();
+    protected FactoredTransformation tmpTrafo = new FactoredTransformation();
 
     protected Viewer v;
 
@@ -317,7 +317,7 @@ public static final String MOUSE_DONE = "mouseDone";
 			 //double[][] transmat = transformation.getMatrix();
 
 			 if(simpleMode){
-                 Transformation tr =new Transformation();
+                 FactoredTransformation tr =new FactoredTransformation();
                  tr.resetMatrix();
                 
                  double[] c2 = new double[3];
@@ -392,7 +392,7 @@ public static final String MOUSE_DONE = "mouseDone";
 	/**
 	 * @return Transformation
 	 */
-	public Transformation getTransformation() {
+	public FactoredTransformation getTransformation() {
 		return transformation;
 	}
 
@@ -637,12 +637,12 @@ public static final String MOUSE_DONE = "mouseDone";
         }
     }
 
-    protected void applyCameraTrafo(Transformation tmpTrafo) {
+    protected void applyCameraTrafo(FactoredTransformation tmpTrafo) {
         //cameraPath.applyEffectiveTransformation(tmpTrafo);
         cameraPath.getMatrix(tmp);
         tmpTrafo.multiplyOnLeft(tmp);
 	}
-    protected void applyCameraParentTrafo(Transformation tmpTrafo) {
+    protected void applyCameraParentTrafo(FactoredTransformation tmpTrafo) {
 		//cameraParentPath.applyEffectiveTransformation(tmpTrafo);
         cameraPath.getMatrix(tmp,0,cameraPath.getLength()-3);
         //cameraParentPath.getMatrix(tmp);

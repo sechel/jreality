@@ -1,9 +1,7 @@
 /*
  * Created on Aug 17, 2004
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
- */
+  */
 package de.jreality.worlds;
 
 import java.awt.event.ActionEvent;
@@ -19,24 +17,17 @@ import javax.swing.Timer;
 import de.jreality.geometry.SphereHelper;
 import de.jreality.jogl.anim.AnimationUtility;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.scene.Viewer;
 import de.jreality.util.SceneGraphUtilities;
+import de.jreality.worlds.AbstractLoadableScene;
 /**
  * @author gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class AnimationDemo extends 	AbstractLoadableScene  {
 	SceneGraphComponent c1, c2, ct, theWorld;
 	Viewer viewer;
-	/**
-	 * 
-	 */
-	public AnimationDemo() {
-		super();
-	}
 	
 	public void customize(JMenuBar theMenuBar,  Viewer v)	{
 		viewer = v;
@@ -57,14 +48,14 @@ public class AnimationDemo extends 	AbstractLoadableScene  {
 	
 	public SceneGraphComponent makeWorld()	{
 		c1 = SceneGraphUtilities.createFullSceneGraphComponent("c1");
-		c1.addChild(SphereHelper.SPHERE_FINER);
+		c1.addChild(SphereHelper.tessellatedCubes[9]);
 		c2 = SceneGraphUtilities.createFullSceneGraphComponent("c2");
-		c2.addChild(SphereHelper.SPHERE_FINER);
+		c2.addChild(SphereHelper.tessellatedCubes[9]);
 		c2.getTransformation().setTranslation(2d,0d,0d);
 		c2.getTransformation().setStretch(.8d, .8d, .5d);
 		c2.getTransformation().setRotation(Math.PI/3.0, 1d, 1d, 1d);
 		ct = SceneGraphUtilities.createFullSceneGraphComponent("ct");
-		ct.addChild(SphereHelper.SPHERE_FINER);
+		ct.addChild(SphereHelper.tessellatedCubes[9]);
 		theWorld = SceneGraphUtilities.createFullSceneGraphComponent("theWorld");
 		theWorld.addChild(c1);
 		theWorld.addChild(c2);
@@ -73,24 +64,34 @@ public class AnimationDemo extends 	AbstractLoadableScene  {
 
 	final int numSteps = 100;
 	double totalTime = 1.0;
+	Timer anim = null;
+	boolean animating = false;
 	public void animate()	{
+		animating = !animating;
+		if (!animating )  {
+			if (anim != null) anim.stop();
+			return;
+		}
+		
 		if (!theWorld.isDirectAncestor(ct)) theWorld.addChild(ct);
 		final double dt = totalTime/(numSteps );
-		final Transformation t1 = c1.getTransformation();
-		final Transformation t2 = c2.getTransformation();
-		final Transformation tt = ct.getTransformation();
+		final FactoredTransformation t1 = c1.getTransformation();
+		final FactoredTransformation t2 = c2.getTransformation();
+		final FactoredTransformation tt = ct.getTransformation();
 		System.out.println("animating");
-		Timer anim = new javax.swing.Timer(30, new ActionListener()	{
-			int k = 0;
-			public void actionPerformed(ActionEvent e) {tick(); } 
-			public void tick()	{
-				double t = (k>numSteps) ?   (1.0 -(k-numSteps)*dt): k * dt;
-				AnimationUtility.linearInterpolation(tt, t1, t2, t);
-				viewer.render();
-				k++;
-				if (k== 2*numSteps) k = 0;
-			}
-		} );
+		if (anim == null)	{
+			anim = new javax.swing.Timer(30, new ActionListener()	{
+				int k = 0;
+				public void actionPerformed(ActionEvent e) {tick(); } 
+				public void tick()	{
+					double t = (k>numSteps) ?   (1.0 -(k-numSteps)*dt): k * dt;
+					AnimationUtility.linearInterpolation(tt, t1, t2, t);
+					viewer.render();
+					k++;
+					if (k== 2*numSteps) k = 0;
+				}
+			} );
+		}
 		anim.start();
 		//theWorld.removeChild(ct);
 	}

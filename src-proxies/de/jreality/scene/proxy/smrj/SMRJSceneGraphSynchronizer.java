@@ -32,7 +32,7 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.ByteBufferList;
 import de.jreality.scene.data.DataList;
@@ -58,7 +58,7 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
 		factory = (SMRJMirrorFactory) rmc.getProxyFactory();
 	}
 	
-	public void visit(final Transformation t) {
+	public void visit(final FactoredTransformation t) {
 		t.addTransformationListener(this);
 	}
 

@@ -52,7 +52,7 @@ public class RenderTraversal extends SceneGraphVisitor {
   protected EffectiveAppearance eAppearance;
 
   double[]  initialTrafo,   currentTrafo;
-  private   Transformation  initialTransformation;
+  private   FactoredTransformation  initialTransformation;
   protected LineShader   lineShader;
   protected PolygonPipeline pipeline;
   //protected PolygonShader   pointOutlineShader;
@@ -107,7 +107,7 @@ public class RenderTraversal extends SceneGraphVisitor {
    * Sets the initialTransformation.
    * @param initialTransformation The initialTransformation to set
    */
-  public void setInitialTransformation(Transformation initialTransformation) {
+  public void setInitialTransformation(FactoredTransformation initialTransformation) {
     this.initialTransformation= initialTransformation;
     environment.setInitialTransformation(initialTransformation);
   }
@@ -143,7 +143,7 @@ public class RenderTraversal extends SceneGraphVisitor {
         c.childrenAccept(subContext());
   }
 
-  public void visit(Transformation t) {
+  public void visit(FactoredTransformation t) {
     if (initialTrafo == currentTrafo)
       currentTrafo= new double[16];
     VecMat.copyMatrix(initialTrafo, currentTrafo);

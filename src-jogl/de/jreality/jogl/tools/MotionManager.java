@@ -1,8 +1,6 @@
 /*
  * Created on Mar 24, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.jogl.tools;
 
@@ -16,8 +14,6 @@ import javax.swing.Timer;
 /**
  * @author gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class MotionManager {
 	List motions;			// list of Timer instances

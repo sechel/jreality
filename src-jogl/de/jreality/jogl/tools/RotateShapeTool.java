@@ -1,8 +1,6 @@
 /*
  * Created on Mar 23, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.jogl.tools;
 
@@ -13,7 +11,7 @@ import java.awt.event.MouseEvent;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.HelpOverlay;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.Pn;
 import de.jreality.util.Quaternion;
@@ -23,8 +21,6 @@ import de.jreality.util.Rn;
 /**
  * @author Charles Gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class RotateShapeTool extends AbstractShapeTool {
 	Rotator	theRotator;
@@ -99,12 +95,12 @@ public class RotateShapeTool extends AbstractShapeTool {
 		//System.out.println("dt: "+dt+"Strength: "+strength+"angle: "+theAngle);
 		double[] axis = (double[] ) theAxis.clone();
 		//final double[] repeater = P3.makeRotationMatrix(null, axis, angle);
-		final Transformation repeater = new Transformation();
+		final FactoredTransformation repeater = new FactoredTransformation();
 		repeater.setCenter(myTransform.getCenter());
 		repeater.setRotation(angle, axis);
 		continuedMotion = new javax.swing.Timer(20, new ActionListener()	{
-			final Transformation tt = theEditedTransform;
-			final Transformation mt = myTransform;
+			final FactoredTransformation tt = theEditedTransform;
+			final FactoredTransformation mt = myTransform;
 			//final double[] repeater = mat;
 			final double[] OM = origM; //theEditedTransform.getMatrix();
 			final double[] acc = Rn.identityMatrix(4);

@@ -1,8 +1,6 @@
 /*
  * Created on Mar 22, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.jogl.tools;
 
@@ -15,8 +13,6 @@ import de.jreality.scene.SceneGraphPath;
 /**
  * @author Charles Gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class SelectionTool extends PickTool  {
 	int			depth; 

@@ -1,8 +1,6 @@
 /*
  * Created on Jun 16, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.jogl;
 
@@ -22,14 +20,12 @@ import de.jreality.scene.Camera;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.FactoredTransformation;
 import de.jreality.util.CameraUtility;
 
 /**
  * @author Charles Gunn
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class InteractiveViewer extends de.jreality.jogl.Viewer implements  SelectionManager.Listener, ToolManager.Listener, InfoOverlay.InfoProvider {
 	protected SelectionManager selectionManager;
@@ -178,11 +174,11 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 	}
 	public void setCameraPath(SceneGraphPath pp) {
 		SceneGraphPath p = pp;
-		if (pp == null || !CameraUtility.isCameraPathValid(pp) || cameraPath.getFirstElement() != sceneRoot) {
+		if (pp == null || !CameraUtility.isCameraPathValid(pp) || pp.getFirstElement() != sceneRoot) {
 			System.err.println("Invalid camera path, adding new camera.");
 			Camera c = new Camera();
 			SceneGraphComponent sgc = new SceneGraphComponent();
-			sgc.setTransformation(new Transformation());
+			sgc.setTransformation(new FactoredTransformation());
 			sgc.setName("Default Camera node");
 			sgc.setCamera(c);
 			sceneRoot.addChild(sgc);

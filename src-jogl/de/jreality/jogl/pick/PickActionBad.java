@@ -1,8 +1,6 @@
 /*
  * Created on Jan 30, 2004
  *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package de.jreality.jogl.pick;
 
@@ -218,7 +216,7 @@ public class PickActionBad  {
 			//if (!sg.isPickable) return;
 			//sg.preRender(gc);
 		
-			Transformation t = sg.getTransformation();
+			FactoredTransformation t = sg.getTransformation();
 			if (t != null)	{
 				Rn.times(currentMatrix, currentMatrix, t.getMatrix());
 				context3D.setObjectToWorld(currentMatrix);

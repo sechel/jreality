@@ -203,7 +203,7 @@ public class Test implements KeyListener {
         //SceneGraphComponent s1 = Parser3DS.readFromFile("/home/timh/tmp/scherk4.3ds");
         
         //GeometryUtility.calculateVertexNormals(s1);
-        Transformation scale = new Transformation();
+        FactoredTransformation scale = new FactoredTransformation();
         scale.setStretch(.05);
         s1.setTransformation(scale);
         Appearance a =new Appearance();
@@ -235,7 +235,7 @@ public class Test implements KeyListener {
       SceneGraphComponent sphereNode= new SceneGraphComponent();
       sphereNode.setName("spheres");
 
-      Transformation tr= new Transformation();
+      FactoredTransformation tr= new FactoredTransformation();
       //tr.setTranslation(-1.2, -1.2, -0.6);
       //tr.setStretch(.2);
       sphereNode.setTransformation(tr);
@@ -264,7 +264,7 @@ public class Test implements KeyListener {
         SceneGraphComponent catNode= new SceneGraphComponent();
         catNode.setName("catenoids");
 
-        Transformation tr= new Transformation();
+        FactoredTransformation tr= new FactoredTransformation();
        tr.setRotation(Math.PI, 0,1,0);
         //tr.setStretch(.2);
         catNode.setTransformation(tr);
@@ -297,7 +297,7 @@ public class Test implements KeyListener {
         SceneGraphComponent catNode= new SceneGraphComponent();
         catNode.setName("one catenoid");
 
-        Transformation tr= new Transformation();
+        FactoredTransformation tr= new FactoredTransformation();
         //tr.setTranslation(-1.2, -1.2, -0.6);
         //tr.setStretch(.2);
         catNode.setTransformation(tr);
@@ -336,7 +336,7 @@ public class Test implements KeyListener {
         SceneGraphComponent catNode= new SceneGraphComponent();
         catNode.setName("vertex color");
 
-        Transformation tr= new Transformation();
+        FactoredTransformation tr= new FactoredTransformation();
         catNode.setTransformation(tr);
 
         Appearance ap= new Appearance();
@@ -358,7 +358,7 @@ public class Test implements KeyListener {
     if(SHOW_CLIPPING) {
         ClippingPlane cp =new ClippingPlane();
         SceneGraphComponent cpc = new SceneGraphComponent();
-        Transformation trans= new Transformation();
+        FactoredTransformation trans= new FactoredTransformation();
         //trans.setRotation(-.2,0,1,0);
         trans.setTranslation(0,0,0);
         cpc.setTransformation(trans);
@@ -366,7 +366,7 @@ public class Test implements KeyListener {
         root.addChild(cpc);
         
         cpc = new SceneGraphComponent();
-        trans= new Transformation();
+        trans= new FactoredTransformation();
         trans.setRotation(Math.PI,0,1,0);
         trans.setTranslation(0,0,-6);
         cpc.setTransformation(trans);
@@ -382,7 +382,7 @@ public class Test implements KeyListener {
     // camera
     //
     SceneGraphComponent cameraNode= new SceneGraphComponent();
-    Transformation ct= new Transformation();
+    FactoredTransformation ct= new FactoredTransformation();
     ct.setTranslation(0, 0, 16);
     cameraNode.setTransformation(ct);
     firstCamera= new Camera();
@@ -392,7 +392,7 @@ public class Test implements KeyListener {
     cameraNode.setCamera(firstCamera);
 
     SceneGraphComponent lightNode= new SceneGraphComponent();
-    Transformation lt= new Transformation();
+    FactoredTransformation lt= new FactoredTransformation();
     lt.setRotation(-Math.PI / 4, 1, 1, 0);
     lightNode.setTransformation(lt);
     DirectionalLight light= new DirectionalLight();
@@ -400,7 +400,7 @@ public class Test implements KeyListener {
     root.addChild(lightNode);
 
     SceneGraphComponent lightNode2= new SceneGraphComponent();
-    Transformation lt2= new Transformation();
+    FactoredTransformation lt2= new FactoredTransformation();
     //   lt2.assignScale(-1);
     lt.setRotation(-Math.PI / 4, 1, 1, 0);
     lightNode2.setTransformation(lt2);
