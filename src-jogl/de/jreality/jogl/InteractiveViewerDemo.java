@@ -53,6 +53,7 @@ import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.LoadableScene;
 import de.jreality.util.P3;
 import de.jreality.util.Pn;
+import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
 //import de.jreality.soft.DefaultViewer;
 
@@ -210,6 +211,7 @@ public class InteractiveViewerDemo extends JFrame{
 		}
 		setSize(800, 600);
 		if (world != null && root.isDirectAncestor(world))	root.removeChild(world);
+		CameraUtility.getCameraNode(viewer).getTransformation().setMatrix(Rn.identityMatrix(4));
 		viewer.getSceneRoot().setAppearance(null);
 		viewer.getSelectionManager().setDefaultSelection(null);
 		viewer.getSelectionManager().setSelection(null);

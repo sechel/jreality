@@ -174,6 +174,9 @@ public class TestClippingPlane extends AbstractLoadableScene {
 	
  	public boolean addBackPlane()	{return false;}
  	
+	public boolean isEncompass() {
+		return true;
+	}
  	public SceneGraphComponent makeLights()	{
  		SceneGraphComponent spot = SceneGraphUtilities.createFullSceneGraphComponent("Spot");
  		SpotLight sl = new SpotLight();

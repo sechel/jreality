@@ -54,15 +54,12 @@ public class ElephantTrunk extends AbstractLoadableScene {
 			return theWorld;
 		}
 	
-		public int getSignature() {
-			// TODO Auto-generated method stub
-			return Pn.EUCLIDEAN;
+		/* (non-Javadoc)
+		 * @see de.jreality.util.LoadableScene#isEncompass()
+		 */
+		public boolean isEncompass() {
+			return true;
 		}
-		public void setConfiguration(ConfigurationAttributes config) {
-			// TODO Auto-generated method stub
-
-		}
-		
 		protected class IteratedTransform extends SceneGraphComponent implements TransformationListener {
 			int iterationCount = 0;
 			boolean countChanged = true;
