@@ -15,8 +15,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 
 import de.jreality.jogl.InteractiveViewerDemo;
-import de.jreality.jogl.shader.DefaultVertexShader;
-import de.jreality.jogl.shader.SimpleJOGLShader;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;

@@ -7,8 +7,6 @@
  */
 package de.jreality.worlds;
 
-import java.awt.Color;
-
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.QuadMeshShape;
@@ -23,7 +21,6 @@ import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.util.ConfigurationAttributes;
-import de.jreality.util.LoadableScene;
 import de.jreality.util.Pn;
 import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
@@ -34,7 +31,7 @@ import de.jreality.util.SceneGraphUtilities;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public class DebugLattice implements LoadableScene {
+public class DebugLattice extends AbstractLoadableScene {
 
 	public int getSignature() {
 		// TODO Auto-generated method stub

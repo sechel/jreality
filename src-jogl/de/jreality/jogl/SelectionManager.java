@@ -6,6 +6,7 @@
  */
 package de.jreality.jogl;
 
+import java.util.Iterator;
 import java.util.Vector;
 
 import de.jreality.geometry.GeometryUtility;
@@ -357,11 +358,25 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 	}
 	
 	public void addSelection(SceneGraphPath p)	{
-		if (selectionList.indexOf(p) == -1) selectionList.add(p);
+		Iterator iter = selectionList.iterator();
+		while (iter.hasNext())	{
+			SceneGraphPath sgp = (SceneGraphPath) iter.next();
+			if (sgp.isEqual(p)) return;
+		}
+		selectionList.add(p);
+		System.out.println("Adding path "+p.toString());
 	}
 		
 	public void removeSelection(SceneGraphPath p)	{
-		selectionList.remove(p);
+		Iterator iter = selectionList.iterator();
+		while (iter.hasNext())	{
+			SceneGraphPath sgp = (SceneGraphPath) iter.next();
+			if (sgp.isEqual(p)) {
+				selectionList.remove(sgp);
+				System.out.println("Removing path "+p.toString());
+				return;
+			}
+		}
 	}
 		
 	public void cycleSelectionPaths()	{
@@ -375,6 +390,7 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 		}
 		currentCycleSelection = (SceneGraphPath) selectionList.get(target);
 		setSelection(currentCycleSelection);
+		System.out.println("Setting selection to "+currentCycleSelection.toString());
 	}
 	
 }

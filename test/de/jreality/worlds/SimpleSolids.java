@@ -16,8 +16,6 @@ import de.jreality.util.LoadableScene;
 import de.jreality.util.Pn;
 import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
-import discreteGroup.TriangleGroup;
-import discreteGroup.jreality.DiscreteGroupUtility;
 
 /**
  * @author weissman

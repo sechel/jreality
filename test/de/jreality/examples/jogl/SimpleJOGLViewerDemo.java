@@ -16,7 +16,11 @@ import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.DiscreteSpaceCurve;
 import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.jogl.shader.DefaultVertexShader;
-import de.jreality.scene.*;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.CommonAttributes;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Sphere;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.util.P3;
 
@@ -39,9 +43,6 @@ public class SimpleJOGLViewerDemo extends InteractiveViewerDemo {
 		SceneGraphComponent root = new SceneGraphComponent();
 		root.setName("theWorld");
 		root.setTransformation(new Transformation());
-		float[] bgc = {.3f, .3f, .5f, 1f};
-		viewer.getSceneRoot().getAppearance().setAttribute("backgroundColor", java.awt.Color.DARK_GRAY);
-		Object foo = viewer.getSceneRoot().getAppearance().getAttribute("backgroundColor");
 		CatenoidHelicoid globeSet=new CatenoidHelicoid(40);
 		//Torus globeSet = new Torus(2.3, 1.5, 20, 30);
 		GeometryUtility.calculateAndSetNormals(globeSet);

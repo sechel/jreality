@@ -6,15 +6,12 @@
  */
 package de.jreality.worlds;
 
-import java.io.FileNotFoundException;
-
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.Torus;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.DiscreteSpaceCurve;
-import de.jreality.reader.Parser3DS;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
@@ -22,8 +19,6 @@ import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.util.ConfigurationAttributes;
-import de.jreality.util.LoadableScene;
-import de.jreality.util.P3;
 import de.jreality.util.Pn;
 
 /**
@@ -32,7 +27,7 @@ import de.jreality.util.Pn;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public class StandardDemo implements LoadableScene {
+public class StandardDemo extends AbstractLoadableScene {
 
 	public int getSignature() {
 		// TODO Auto-generated method stub
@@ -174,21 +169,21 @@ public class StandardDemo implements LoadableScene {
 	   SceneGraphComponent globeNode6= new SceneGraphComponent();
 	   gt= new Transformation();
 	   gt.setTranslation(-scaleVal,-scaleVal,0.0);
-	   gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
-	   //gt.setStretch(.3);
+	   //gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
+	   gt.setStretch(.3);
 	   globeNode6.setTransformation(gt);
 	   globeNode6.setGeometry(new Sphere());
 	   globeNode6.setGeometry(torus);
 	   globeNode6.setGeometry(GeometryUtility.implode(torus, -.35));
 	   SceneGraphComponent s1;
-	try {
-		s1 = Parser3DS.readFromFile(config.getDataFile("3ds", "space011.3ds"));
-		globeNode6.addChild(s1);
-	} catch (FileNotFoundException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-
+//	try {
+//		s1 = Parser3DS.readFromFile(config.getDataFile("3ds", "space011.3ds"));
+//		globeNode6.addChild(s1);
+//	} catch (FileNotFoundException e) {
+//		// TODO Auto-generated catch block
+//		e.printStackTrace();
+//	}
+//
 
 		root.addChild(globeNode1);
 		root.addChild(globeNode2);

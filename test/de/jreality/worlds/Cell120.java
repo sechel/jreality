@@ -22,8 +22,6 @@ import de.jreality.util.LoadableScene;
 import de.jreality.util.P3;
 import de.jreality.util.Pn;
 import de.jreality.util.SceneGraphUtilities;
-import discreteGroup.DiscreteGroup;
-import discreteGroup.jreality.DiscreteGroupUtility;
 
 /**
  * @author weissman

@@ -17,7 +17,6 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.util.BoundingBoxTraversal;
 import de.jreality.util.ConfigurationAttributes;
-import de.jreality.util.LoadableScene;
 import de.jreality.util.Pn;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtilities;
@@ -51,7 +50,7 @@ Created on Jul 12, 2004
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public class MarsFlyby implements LoadableScene{
+public class MarsFlyby extends AbstractLoadableScene{
 
 	public int getSignature() {
 		return Pn.EUCLIDEAN;

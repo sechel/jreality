@@ -145,14 +145,10 @@ public class JOGLRendererHelper {
 		int colorLength = 0;
 		if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
 		DoubleArray da;
-		gl.glColorMaterial(GL.GL_FRONT, GL.GL_DIFFUSE);
-		gl.glEnable(GL.GL_COLOR_MATERIAL);
 		if (drawSpheres)	{
 			int[] dlists = JOGLSphereHelper.getSphereDLists(gl);
 			double size = pointRadius;
 			
-			gl.glEnable(GL.GL_COLOR_MATERIAL);		
-			gl.glColorMaterial(GL.GL_FRONT, GL.GL_DIFFUSE);
 			for (int i = 0; i< sg.getNumPoints(); ++i)	{
 				da = vertices.item(i).toDoubleArray();	
 				//TODO figure out how to draw these spheres correctly in non-euclidean case
@@ -399,10 +395,6 @@ public class JOGLRendererHelper {
 		else normalBind = ElementBinding.PER_PART;
 		
 		DoubleArray da;
-		if (colorBind != ElementBinding.PER_PART){
-			  gl.glEnable(GL.GL_COLOR_MATERIAL);		
-			  gl.glColorMaterial(GL.GL_FRONT, GL.GL_DIFFUSE);
-		}
 		if (!pickMode && sg instanceof QuadMeshShape)	{
 			QuadMeshShape qm = (QuadMeshShape) sg;
 			RegularDomainQuadMesh rdqm = null;

@@ -74,6 +74,8 @@ public class InteractiveViewerDemo extends JFrame{
 	int mode;
 	Box hack;
 	boolean fullScreen = false;
+	boolean loadedScene = false;
+	int signature = Pn.EUCLIDEAN;
 	
 	protected static String resourceDir = ".", saveResourceDir = ".";
 	static {
@@ -172,19 +174,18 @@ public class InteractiveViewerDemo extends JFrame{
 		 });
 
 	}
-
+    SceneGraphComponent world = null;
 	public void begin()	{
 		SceneGraphComponent root = viewer.getSceneRoot();
 		if (root.getAppearance() == null) root.setAppearance(new Appearance());
 		CommonAttributes.setDefaultValues(root.getAppearance());
-		root.getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR,CommonAttributes.BACKGROUND_COLOR_DEFAULT);
 		root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
 		root.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
 
 		CameraUtility.getCamera(viewer).setSignature(getSignature());
 		CameraUtility.getCamera(viewer).reset();
 		
-		SceneGraphComponent world = makeWorld();
+		if (!loadedScene)  world = makeWorld();
 		SceneGraphComponent lights = makeLights();
 		
 		if (lights != null)	CameraUtility.getCameraNode(viewer).addChild(lights);
@@ -193,9 +194,9 @@ public class InteractiveViewerDemo extends JFrame{
 			root.addChild(world);
 			if (world.getTransformation() == null) 		world.setTransformation(new Transformation());
 		}
-		if (isEncompass())	{
+		if (isEncompass()|| (loadedScene && getSignature() == Pn.EUCLIDEAN))	{
 			// I have to do this ... for reasons unknown ... or else the encompass sometimes fails.
-			CameraUtility.getCameraNode(viewer).getTransformation().setTranslation(0d, 0d, 1d);
+			CameraUtility.getCameraNode(viewer).getTransformation().setTranslation(0d, 0d, 2d);
 			CameraUtility.encompass(viewer);
 		}
 	
@@ -205,15 +206,16 @@ public class InteractiveViewerDemo extends JFrame{
 		SceneGraphUtilities.setSignature(root, getSignature());
 
 		SceneGraphPath ds = viewer.getSelectionManager().getDefaultSelection();
-		if (ds == null)	{
+		if (ds == null && world != null)	{
 			ds = SceneGraphUtilities.findFirstPathBetween(root, world);
 			viewer.getSelectionManager().setDefaultSelection(ds);
 			viewer.getSelectionManager().setSelection(ds);	
-		}
+		} 
 		//This fixes a bug in the Linux version of GLCanvas which prevented menus from showing up
 		 JPopupMenu.setDefaultLightWeightPopupEnabled( false ) ;
 		 theMenuBar = createMenuBar();
-		hack.add(theMenuBar, 0);
+		 if (wm != null) wm.customize(theMenuBar, viewer);
+		 hack.add(theMenuBar, 0);
 		hack.add(Box.createHorizontalGlue(), 1);
 		setVisible(true);
 		repaint();
@@ -374,11 +376,11 @@ public class InteractiveViewerDemo extends JFrame{
 	}
 	
 	public boolean isEncompass()	{
-		return true;
+		return false;
 	}
 	
 	public boolean addBackPlane()	{
-		return true;
+		return false;
 	}
 	
 	public SceneGraphComponent makeWorld()	{
@@ -386,7 +388,7 @@ public class InteractiveViewerDemo extends JFrame{
 	}
 	
 	public int getSignature()	{
-		return Pn.EUCLIDEAN;
+		return signature;
 	}
 	
 	public SceneGraphComponent makeLights()	{
@@ -415,9 +417,11 @@ public class InteractiveViewerDemo extends JFrame{
 		
 		return lights;
 	}
-    public void loadWorld(String classname) {
+	LoadableScene wm = null;
+	
+	public void loadWorld(String classname) {
         long t = System.currentTimeMillis();
-        LoadableScene wm = null;
+        
         try {
             wm = (LoadableScene) Class.forName(classname).newInstance();
         } catch (Exception e) {
@@ -425,16 +429,21 @@ public class InteractiveViewerDemo extends JFrame{
         }
         // scene settings
         wm.setConfiguration(ConfigurationAttributes.getDefaultConfiguration());
-        de.jreality.scene.SceneGraphComponent world = wm.makeWorld();
-        if (world != null) viewer.getSceneRoot().addChild(world);
-        viewer.setSignature(wm.getSignature());
+        world = wm.makeWorld();
+        signature = wm.getSignature();
+        loadedScene = true;
+		viewer.setSignature(getSignature());
+//        if (world != null) viewer.getSceneRoot().addChild(world);
+//        viewer.setSignature(wm.getSignature());
         long s = System.currentTimeMillis() - t;
         System.out.println("loaded world " + classname + " successful. ["+s+"ms]");
     }
 
     public static void main(String[] args) throws Exception {
     		InteractiveViewerDemo iv = new InteractiveViewerDemo();
-    		iv.loadWorld(args[0]);
+    		if (args != null && args.length > 0) {
+    			iv.loadWorld(args[0]);
+    		}
     		iv.begin();
     }
 }

@@ -45,10 +45,6 @@ public class ViewerKeyListener extends KeyAdapter {
 		viewer = v;
 		//helpOverlay = new HelpOverlay(v);
 		helpOverlay = v.getHelpOverlay();
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_2,0), "Toggle stereo/mono camera");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_3,0), "Cycle stereo modes");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_3,0), "Toggle perspective/orthographic camera");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_4,0), "Print frame rate");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_A,0), "Increase alpha (1-transparency)");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_A,InputEvent.SHIFT_DOWN_MASK), "Decrease alpha");
 		//helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_A,0), "Toggle antialiasing");
@@ -56,14 +52,17 @@ public class ViewerKeyListener extends KeyAdapter {
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_B,InputEvent.SHIFT_DOWN_MASK), "Toggle selection bound display");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_C,0), "Set polygon diffuse color in selected appearance");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_C,InputEvent.SHIFT_DOWN_MASK), "Set background color");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_D,0), "Toggle force display lists");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_D,0), "Toggle use of display lists");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_E,0), "Encompass");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_E,InputEvent.SHIFT_DOWN_MASK), "Toggle edge drawing");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_F,0), "Activate fly tool");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_F,InputEvent.SHIFT_DOWN_MASK), "Toggle face drawing");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_H,0), "Toggle display help");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_I,0), "Add current selection to selection list");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_I,InputEvent.SHIFT_DOWN_MASK), "Remove current selection from selection list");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_J,0), "Increase sphere radius");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_J,InputEvent.SHIFT_DOWN_MASK), "Decrease sphere radius");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_K,0), "Cycle through selection list");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_L,0), "Toggle lighting enabled");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_M,0), "Reset Matrices to default");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_M,InputEvent.SHIFT_DOWN_MASK), "Set default Matrices with current state");
@@ -73,9 +72,12 @@ public class ViewerKeyListener extends KeyAdapter {
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_S,0), "Toggle smooth shading");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_S,InputEvent.SHIFT_DOWN_MASK), "Toggle sphere drawing");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_T,0), "Activate translation tool");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_V,0), "Toggle vertex drawing");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_V,0), "Print frame rate");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_V,InputEvent.SHIFT_DOWN_MASK), "Toggle vertex drawing");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_X,0), "Toggle transparency enabled");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_Y,0), "Activate selection tool");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_Z,0), "Toggle stereo/mono camera");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_Z,InputEvent.SHIFT_DOWN_MASK), "Cycle stereo modes");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_QUOTE,0), "Toggle fullscreen mode");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0), "Quit");
 		if ((viewer.getViewingComponent() instanceof GLCanvas))
@@ -83,76 +85,14 @@ public class ViewerKeyListener extends KeyAdapter {
 
 	}
 
+    boolean encompassToggle = true;
 	public void keyPressed(KeyEvent e)	{
 			//System.err.println("handling keyboard event");
-			int on;
-			//System.out.println("Alt + Meta: "+e.isAltDown()+" "+e.isMetaDown());
-			double[] cm ;
 			switch(e.getKeyCode())	{
 
-
-				case KeyEvent.VK_2:		// toggle stereo
-					if (e.isShiftDown()) break;
-					Camera cam = CameraUtility.getCamera(viewer);
-					cam.setStereo(!cam.isStereo());
-					cam.update();
-					viewer.render();
-					break;
-				
-				case KeyEvent.VK_3:		// cycle among cross-eyes and hardware stereo
-					if (e.isShiftDown()) break;
-					int which = viewer.getStereoType()+1;
-					which = (which + 1) % 4;
-					viewer.setStereoType(which+1);
-					viewer.render();
-					break;
-
-				case KeyEvent.VK_4:		// display frame rate
-					//System.err.println("Frame rate:\t"+viewer.getRenderer().getFramerate());
-					//System.err.println("Speed test:\t"+viewer.speedTest());
-					if (e.isShiftDown()) break;
-					if (viewer instanceof de.jreality.jogl.Viewer) viewer.speedTest();
-					break;
-
-				case KeyEvent.VK_5:		// print out frame buffer capabilities
-					if (e.isShiftDown()) break;
-					if (! (viewer.getViewingComponent() instanceof GLCanvas)) break;
-					GLCanvas can = (GLCanvas) viewer.getViewingComponent();
-					GL gl = can.getGL();
-					GLU glu = can.getGLU();
-					int[] vals = new int[64];
-					gl.glGetIntegerv(GL.GL_AUX_BUFFERS, vals);
-					System.err.println("Auxilliary buffers: "+vals[0]);
-					gl.glGetIntegerv(GL.GL_RED_BITS, vals);
-					System.err.println("Red bits: "+vals[0]);
-					gl.glGetIntegerv(GL.GL_BLUE_BITS, vals);
-					System.err.println("Blue bits: "+vals[0]);
-					gl.glGetIntegerv(GL.GL_GREEN_BITS, vals);
-					System.err.println("Green bits: "+vals[0]);
-						byte[] bvals = new byte[64];
-					gl.glGetBooleanv(GL.GL_STEREO, bvals);
-					System.err.println("Stereo: "+bvals[0]);
-					gl.glGetIntegerv(GL.GL_SAMPLE_BUFFERS, vals);
-					System.err.println("Sample buffers: "+vals[0]);
-					gl.glGetIntegerv(GL.GL_STENCIL_BITS, vals);
-					System.err.println("Stencil bits: "+vals[0]);
-					break;
-	
-				case KeyEvent.VK_8:		// toggle stereo
-					if (e.isShiftDown()) break;
-					motionToggle = !motionToggle;
-					if (motionToggle)	viewer.getMotionManager().resumeMotions();
-					else viewer.getMotionManager().stopMotions();
-					break;
-				
 				case KeyEvent.VK_A:		// transparency
 					modulateValueAdditive(CommonAttributes.TRANSPARENCY,  0.5, .05, 0.0, 1.0, e.isShiftDown());
 					break;
-
-//				case KeyEvent.VK_A:		//antialiasing
-//					if (e.isShiftDown()) break;
-//					toggleValue(CommonAttributes.ANTIALIASING_ENABLED);
-//					break;
 
 				case KeyEvent.VK_B:		// toggle backplane
 					if (e.isShiftDown()) {
@@ -176,22 +116,24 @@ public class ViewerKeyListener extends KeyAdapter {
 					if (e.isShiftDown()) break;
 					boolean useD = viewer.getRenderer().isUseDisplayLists();
 					viewer.getRenderer().setUseDisplayLists(!useD);
+					viewer.render();
 					System.out.println("Using display lists: "+viewer.getRenderer().isUseDisplayLists());
 					break;
 
 				case KeyEvent.VK_E:		
-					if (!e.isShiftDown()) {		//encompass
-						CameraUtility.encompass2(viewer);
-//						MouseTool mt = new MouseTool(viewer);
-//						mt.encompass();
-						viewer.render();
-					} else						// toggle edge drawing
-						toggleValue(CommonAttributes.EDGE_DRAW);
+					if (!e.isShiftDown()) 	{
+						if (encompassToggle)	CameraUtility.encompass2(viewer);
+						else					CameraUtility.encompass(viewer);
+						encompassToggle = !encompassToggle;
+					}
+					else				toggleValue(CommonAttributes.EDGE_DRAW);
+					viewer.render();
 					break;
 
 				case KeyEvent.VK_F:		// toggle face drawing
 					if (e.isShiftDown())		toggleValue(CommonAttributes.FACE_DRAW);
 					viewer.getToolManager().activateTool(ToolManager.CAMERA_FLY_TOOL);
+					viewer.render();
 					break;
 
 				case KeyEvent.VK_H:		// toggle help
@@ -200,13 +142,27 @@ public class ViewerKeyListener extends KeyAdapter {
 					viewer.render();
 					break;
 
+				case KeyEvent.VK_I:		// line width
+					if (e.isShiftDown()) viewer.getSelectionManager().removeSelection(viewer.getSelectionManager().getSelection());
+					else viewer.getSelectionManager().addSelection(viewer.getSelectionManager().getSelection());
+					viewer.render();
+					break;
+
 				case KeyEvent.VK_J:		// line width
 					modulateValue(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, 0.5,!e.isShiftDown());
+				    viewer.render();
+					break;
+
+				case KeyEvent.VK_K:		// line width
+					if (e.isShiftDown()) break;
+					viewer.getSelectionManager().cycleSelectionPaths();
+					viewer.render();
 					break;
 
 				case KeyEvent.VK_L:		// toggle lighting
 					if (e.isShiftDown()) break;
 					toggleValue(CommonAttributes.LIGHTING_ENABLED);
+					viewer.render();
 					break;
 
 				case KeyEvent.VK_M:		// reset matrices
@@ -214,9 +170,6 @@ public class ViewerKeyListener extends KeyAdapter {
 					else  SceneGraphUtilities.resetMatrix(viewer.getSceneRoot());
 					viewer.render();
 					break;
-
-//				case KeyEvent.VK_N:		
-//					break;
 
 				case KeyEvent.VK_P:		// toggle perspective
 					if (e.isShiftDown()) break;
@@ -226,9 +179,8 @@ public class ViewerKeyListener extends KeyAdapter {
 					break;
 
 				case KeyEvent.VK_Q:		
-					if (e.isShiftDown()) break;
-//					((GLCanvas) viewer.getViewingComponent()).setNoAutoRedrawMode(false);
-//					viewer.render();
+					//((GLCanvas) viewer.getViewingComponent()).setNoAutoRedrawMode(false);
+					viewer.render();
 					break;
 
 				case KeyEvent.VK_R:		// activate translation tool
@@ -238,6 +190,7 @@ public class ViewerKeyListener extends KeyAdapter {
 				case KeyEvent.VK_S:		//smooth shading
 					if (e.isShiftDown()) toggleValue(CommonAttributes.POINT_SHADER+"."+CommonAttributes.SPHERES_DRAW);
 					else toggleValue(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING);
+				    viewer.render();
 					break;
 
 				case KeyEvent.VK_T:		// activate translation tool
@@ -245,12 +198,14 @@ public class ViewerKeyListener extends KeyAdapter {
 					break;
 				
 				case KeyEvent.VK_V:		// draw vertices
-					if (e.isShiftDown()) break;
-					toggleValue(CommonAttributes.VERTEX_DRAW);
+					if (e.isShiftDown()) 					toggleValue(CommonAttributes.VERTEX_DRAW);
+					else if (viewer instanceof de.jreality.jogl.Viewer) viewer.speedTest();
+					viewer.render();
 					break;
 
 				case KeyEvent.VK_W:		// line width
 					modulateValue(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_WIDTH, 1.0, !e.isShiftDown());
+				    viewer.render();
 					break;
 
 				case KeyEvent.VK_X:		// toggle fast and dirty
@@ -280,6 +235,19 @@ public class ViewerKeyListener extends KeyAdapter {
 					viewer.getToolManager().activateTool(ToolManager.SELECTION_TOOL);
 					break;
 				
+				
+				case KeyEvent.VK_Z:		
+					if (e.isShiftDown()) {		// cycle stereo types
+						int which = viewer.getStereoType()+1;
+						which = (which + 1) % 4;
+						viewer.setStereoType(which+1);						
+					} else {						// toggle stereo/mono
+						Camera cam = CameraUtility.getCamera(viewer);
+						cam.setStereo(!cam.isStereo());
+						cam.update();						
+					}
+					viewer.render();
+					break;
 				
 				case KeyEvent.VK_ESCAPE:		// toggle lighting
 					if (e.isShiftDown()) break;

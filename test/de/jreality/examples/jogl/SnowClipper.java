@@ -15,18 +15,13 @@ import java.util.Vector;
 
 import net.java.games.jogl.GLCanvas;
 import net.java.games.jogl.GLDrawable;
-
 import de.jreality.geometry.GeometryUtility;
-import de.jreality.geometry.Primitives;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.geometry.WingedEdge;
-import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InfoOverlay;
-import de.jreality.jogl.InteractiveViewer;
 import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.reader.OOGLReader;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;

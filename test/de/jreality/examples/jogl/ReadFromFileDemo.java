@@ -1,9 +1,3 @@
-/*
- * Created on Oct 31, 2004
- *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
- */
 package de.jreality.examples.jogl;
 
 import java.awt.Color;
@@ -11,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
-import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
@@ -23,12 +16,10 @@ import de.jreality.geometry.SphereHelper;
 import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.reader.OOGLReader;
 import de.jreality.reader.PolymakeParser;
-import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Sphere;
 import de.jreality.util.Pn;
 import de.jreality.util.SceneGraphUtilities;
 
@@ -55,7 +46,7 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 			if (foo.indexOf("true") != -1) { hyperbolic = true; }
 	}
 	public JMenuBar createMenuBar()	{
-		theMenuBar = new JMenuBar(); //super.createMenuBar();
+		theMenuBar = super.createMenuBar();
 		JMenu testM = new JMenu("File");
 		JMenuItem jcc = new JMenuItem("Open...");
 		testM.add(jcc);

@@ -9,7 +9,6 @@ package de.jreality.worlds;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.util.ConfigurationAttributes;
-import de.jreality.util.LoadableScene;
 import de.quasitiler.alexanderplatz.Alex3DModel;
 
 /**
@@ -18,7 +17,7 @@ import de.quasitiler.alexanderplatz.Alex3DModel;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public class AlexDemo implements LoadableScene {
+public class AlexDemo extends AbstractLoadableScene {
 	
 	/* (non-Javadoc)
 	 * @see de.jreality.portal.WorldMaker#makeWorld()

@@ -133,6 +133,9 @@ public class RenderingHintsShader  {
 			gl.glCullFace(GL.GL_BACK);
 		} else
 			gl.glDisable(GL.GL_CULL_FACE);
+		// TODO: implement a handle for this front/back color flag
+		gl.glEnable(GL.GL_COLOR_MATERIAL);
+		gl.glColorMaterial(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE);
 			
 
 	}
