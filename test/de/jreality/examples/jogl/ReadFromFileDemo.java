@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -22,10 +23,13 @@ import de.jreality.geometry.SphereHelper;
 import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.reader.OOGLReader;
 import de.jreality.reader.PolymakeParser;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Sphere;
+import de.jreality.util.Pn;
 import de.jreality.util.SceneGraphUtilities;
 
 /**
@@ -36,7 +40,8 @@ import de.jreality.util.SceneGraphUtilities;
  */
 public class ReadFromFileDemo extends InteractiveViewerDemo {
 
-	boolean useLOD = false;
+	boolean useLOD = false, showSphere = false;
+	static boolean hyperbolic = false;
 	static String resourceDir = "/Users/gunn/Documents/Models",
 		initialFile = null;
 	
@@ -45,11 +50,14 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 		if (foo != null) resourceDir = foo;
 		foo = System.getProperty("initialFile");
 		if (foo != null) initialFile = foo;
+		foo = System.getProperty("hyperbolic");
+		if (foo != null) 
+			if (foo.indexOf("true") != -1) { hyperbolic = true; }
 	}
 	public JMenuBar createMenuBar()	{
 		theMenuBar = new JMenuBar(); //super.createMenuBar();
 		JMenu testM = new JMenu("File");
-		final JMenuItem jcc = new JMenuItem("Open...");
+		JMenuItem jcc = new JMenuItem("Open...");
 		testM.add(jcc);
 		jcc.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent e)	{
@@ -58,6 +66,22 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 			}
 		});
 		theMenuBar.add(testM);
+		if (hyperbolic)	{
+			testM = new JMenu("Geometry");
+			final JCheckBoxMenuItem jg = new JCheckBoxMenuItem("Show Sphere");
+			showSphere = true;
+			jg.setSelected(hyperbolic);
+			testM.add(jg);
+			jg.addActionListener( new ActionListener() {
+				public void actionPerformed(ActionEvent e)	{
+					showSphere = jg.isSelected();
+					hypersphere.setVisible(showSphere);
+					viewer.render();
+				}
+			});
+			theMenuBar.add(testM);
+			
+		}
 		return theMenuBar;
 	}
 	
@@ -86,14 +110,22 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 			System.out.println("Unable to open file");
 			return;
 		}
-		world.removeChild(child);
+		if (child != null && world.isDirectAncestor(child)) 	world.removeChild(child);
 		child = sgc;
 		world.addChild(child);
-		viewer.getSelectionManager().setSelection(null);
+		if (hyperbolic)	{
+			SceneGraphUtilities.setSignature(child, Pn.HYPERBOLIC);
+			SceneGraphPath pathToLoaded = new SceneGraphPath();
+			pathToLoaded.push(viewer.getSceneRoot());
+			pathToLoaded.push(world);
+			pathToLoaded.push(child);
+			viewer.getSelectionManager().setSelection(pathToLoaded);
+		} else	
+			viewer.getSelectionManager().setSelection(null);
 		viewer.render();
 	}
 	
-	SceneGraphComponent world = null, child = null;
+	SceneGraphComponent world = null, child = null, hypersphere;
 	/* (non-Javadoc)
 	 * @see de.jreality.jogl.InteractiveViewerDemo#makeWorld()
 	 */
@@ -102,17 +134,23 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 		//for (int i = 0; i<6; ++i)	{
 		if (initialFile != null)	{
 			OOGLReader or = new OOGLReader();	
-			//OFFReader.setResourceDir(resourceDir);
-			
 			child = or.readFromFile(initialFile);
 		} else {
-			child = SceneGraphUtilities.createFullSceneGraphComponent("child");
-			child.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
-			child.addChild(SphereHelper.SPHERE_SUPERFINE);
+			if (!hyperbolic)	{
+				child = SceneGraphUtilities.createFullSceneGraphComponent("child");
+				child.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
+				child.addChild(SphereHelper.SPHERE_SUPERFINE);				
+				world.addChild(child);
+			} else {
+				hypersphere = GeometryUtility.makeH3Boundary();
+				viewer.setBackgroundColor(new Color(0,0,50));
+				world.addChild(hypersphere);
+			}
 		}
-		world.addChild(child);
 		return world;
 	}
+	
+	public boolean addBackPlane() {return false; }
 	
 	public static void main(String[] args) {
 		ReadFromFileDemo test = new ReadFromFileDemo();
