@@ -178,9 +178,14 @@ public class RIBVisitor extends SceneGraphVisitor {
         Ri.opacity(new float[] {f,f,f});
         
         Object shader = a.getAttribute(type,"default");
-        SLShader slShader = (SLShader) a.getAttribute(type+".rendermanShader",null,SLShader.class);
         System.out.println("shader "+type+" is "+shader);
-        if(slShader== null) {
+
+        SLShader slShader = (SLShader) a.getAttribute(type+".rendermanDisplacement",null,SLShader.class);
+        if(slShader != null) {
+            Ri.displacement(slShader.getName(),slShader.getParameters());
+        }
+        slShader = (SLShader) a.getAttribute(type+".rendermanSurface",null,SLShader.class);
+        if(slShader == null) {
             if(true || shader.equals("default")) {
                 float phongSize =(float) a.getAttribute(type+"."+CommonAttributes.SPECULAR_EXPONENT,CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
                 float phong =(float) a.getAttribute(type+"."+CommonAttributes.SPECULAR_COEFFICIENT,CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);

@@ -212,6 +212,16 @@ public class Ri {
     }
 //    public static  void surface(String name, String[] tokens, Object[] values);
     
+    public static void displacement(String name, Map map) {
+//      String[] tokens = keysFromMap(map);
+//      Object[] values = valuesFromMap(map, tokens);
+//      surface(name, tokens, values);
+      w.print("Displacement "+str(name)+" ");
+      writeMap(w,map);
+  }
+//  public static  void displacement(String name, String[] tokens, Object[] values);
+
+    
     public static void imager(String name, Map map) {
 //        String[] tokens = keysFromMap(map);
 //        Object[] values = valuesFromMap(map, tokens);

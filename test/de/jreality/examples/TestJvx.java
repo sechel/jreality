@@ -209,10 +209,24 @@ public class TestJvx implements KeyListener{
           
           Appearance ap = new Appearance();
           ap.setAttribute(CommonAttributes.DIFFUSE_COLOR, Color.GRAY);
-          ap.setAttribute(CommonAttributes.TRANSPARENCY, .3);
+          ap.setAttribute(CommonAttributes.TRANSPARENCY, 0);
           SLShader shader = new SLShader("mirror");
           shader.addParameter("roughness", new Float(0));
-          ap.setAttribute(CommonAttributes.POLYGON_SHADER+".rendermanShader", shader);
+          ap.setAttribute(CommonAttributes.POLYGON_SHADER+".rendermanSurface", shader);
+
+          
+          shader = new SLShader("dented");
+          shader.addParameter("float Km", new Float(0.05));
+          shader.addParameter("float frequency", new Float(0.5));
+          ap.setAttribute(CommonAttributes.POLYGON_SHADER+".rendermanDisplacement", shader);
+
+          HashMap m = new HashMap();
+          HashMap vm = new HashMap();
+          vm.put("float sphere",new float[]{.1f});
+          vm.put("string coordinatesystem","shader");
+          m.put("displacementbound",vm);
+          ap.setAttribute("rendermanAttribute",m);
+          
           RIBVisitor.shaderPath = "/home/timh/renderers/shader";
           room.setAppearance(ap);
 
