@@ -5,8 +5,10 @@
 
 	<!-- the following should belong to core... -->
 	<property name="scene" location="src/de/jreality/scene" />
+	<property name="beans" location="src/de/jreality/beans" />
 	<property name="reader" location="src/de/jreality/reader" />
 	<property name="util" location="src/de/jreality/util" />
+	<property name="ui" location="src/de/jreality/ui" />
 	<property name="geometry" location="src/de/jreality/geometry" />
 
 	<!-- backends (dependencies from top to bottom) -->
@@ -40,7 +42,7 @@
 	<!-- all the core classes will be build here - all beackends depend on it-->
 	<target name="core" depends="init" description="compile the source ">
 		<mkdir dir="${build}/core" />
-		<javac excludesfile="excludes.txt" srcdir="${util}:${scene}:${geometry}:${reader}" destdir="${build}/core" debug="true">
+		<javac excludesfile="excludes.txt" srcdir="${util}:${scene}:${beans}:${geometry}:${reader}:${ui}" destdir="${build}/core" debug="true">
 			<compilerarg line="-source 1.4" />
 		</javac>
 		<jar jarfile="${dist}/jReality-core.jar" basedir="${build}/core" />
@@ -52,20 +54,6 @@
 			<compilerarg line="-source 1.4" />
 		</javac>
 		<jar jarfile="${dist}/jReality-proxies.jar" basedir="${build}/proxies" />
-	</target>
-
-	<target name="stubs" depends="proxies" description="compile the stubs ">
-		<mkdir dir="${build}/stubs" />
-		<rmic base="${build}/proxies" includes="**/*Impl.class" />
-		<rmic base="${build}/proxies" includes="de/jreality/scene/proxy/rmi/*.class" 
-			classpath="${dist}/jReality-core.jar" excludes="**/Remote*.class" />
-		<move todir="${build}/stubs">
-			<fileset dir="${build}/proxies">
-		    	<include name="**/*_Skel.class"/>
-		    	<include name="**/*_Stub.class"/>
-		    </fileset>
-		</move>
-		<jar jarfile="${dist}/jReality-stubs.jar" basedir="${build}/stubs" />
 	</target>
 
 	<target name="soft" depends="core">
@@ -85,9 +73,9 @@
 		<jar jarfile="${dist}/jReality-jogl.jar" basedir="${build}/jogl" />
 	</target>
 
-	<target name="tests" depends="core, soft, jogl, jsyzygy">
+	<target name="tests" depends="core, soft, jogl, jsyzygy, proxies">
 		<mkdir dir="${build}/tests" />
-		<javac excludesfile="excludes.txt" srcdir="${tests}"  classpath="${dist}/jReality-core.jar:${dist}/jReality-soft.jar:${dist}/jReality-jogl.jar:${dist}/jReality-jsyzygy.jar" destdir="${build}/tests" debug="true">
+		<javac excludesfile="excludes.txt" srcdir="${tests}"  classpath="${dist}/jReality-core.jar:${dist}/jReality-soft.jar:${dist}/jReality-jogl.jar:${dist}/jReality-jsyzygy.jar:${dist}/jReality-proxies.jar" destdir="${build}/tests" debug="true">
 			<compilerarg line="-source 1.4" />
 		</javac>
 		<jar jarfile="${dist}/jReality-tests.jar" basedir="${build}/tests" />
