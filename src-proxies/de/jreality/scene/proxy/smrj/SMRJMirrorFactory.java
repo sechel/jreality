@@ -22,7 +22,6 @@ public class SMRJMirrorFactory extends RemoteMirrorFactory {
     }
 	
     private Object createRemote(Class clazz) {
-        System.out.println("SMRJMirrorFactory.createRemote()");
         try {
             return rf.createRemote(clazz);
         } catch (IOException ie) {
