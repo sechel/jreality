@@ -14,7 +14,7 @@ public class IndexedFaceSet extends de.jreality.scene.proxy.rmi.IndexedFaceSet i
   private double[] vertices;
   private double[] vertexNormals;
 
-      public void setVertices(ByteBufferWrapper data, int vertexSize) {
+      public void setVertices(ByteBufferList data, int vertexSize) {
 //      	System.out.println("IndexedFaceSet.setVertices()");
           if (verticesDL == null) {
               verticesDL = vertexAttributes.getWritableList(Attribute.COORDINATES);
@@ -32,7 +32,7 @@ public class IndexedFaceSet extends de.jreality.scene.proxy.rmi.IndexedFaceSet i
           fireGeometryChanged(Collections.singleton(Attribute.COORDINATES), null, null, null);
       }
             
-      public void setVertexNormals(ByteBufferWrapper data, int normalSize) {
+      public void setVertexNormals(ByteBufferList data, int normalSize) {
 //      	System.out.println("IndexedFaceSet.setVertexNormals()");
           if (vertexNormalsDL == null) {
               vertexNormalsDL = vertexAttributes.getWritableList(Attribute.NORMALS);

@@ -39,6 +39,7 @@ import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.data.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
@@ -97,7 +98,7 @@ public class SMRJMirrorFactoryTest extends TestCase {
     private boolean finished;
 
     public void testBufferWrapper() throws Exception {
-        ByteBufferWrapper bbw = ByteBufferWrapper.getInstance();
+        ByteBufferList bbw = ByteBufferList.getInstance();
         double[] data={34, 6,7,42,11};
         ByteBuffer bb= bbw.createWriteBuffer(data.length*8);
         bb.asDoubleBuffer().put(data);
@@ -105,7 +106,7 @@ public class SMRJMirrorFactoryTest extends TestCase {
         ByteArrayOutputStream bbos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bbos);
         oos.writeObject(bbw);
-        ByteBufferWrapper bbw2 = (ByteBufferWrapper) new ObjectInputStream(new ByteArrayInputStream(bbos.toByteArray())).readObject();
+        ByteBufferList bbw2 = (ByteBufferList) new ObjectInputStream(new ByteArrayInputStream(bbos.toByteArray())).readObject();
         ByteBuffer bb2 = bbw2.getReadBuffer();
         bbw2.getReadBuffer().asDoubleBuffer().get(rec);
         assertEquals(data, rec);

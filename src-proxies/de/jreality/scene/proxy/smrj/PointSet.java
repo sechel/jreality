@@ -44,11 +44,11 @@ public class PointSet extends de.jreality.scene.proxy.rmi.PointSet implements
     private double[] vertices;
     private double[] vertexNormals;
 
-        public void setVertices(ByteBufferWrapper data, int vertexSize) {
+        public void setVertices(ByteBufferList data, int vertexSize) {
             System.out.println("PointSet.setVertices()");
         }
         
-        public void setVertexNormals(ByteBufferWrapper data, int normalSize) {
+        public void setVertexNormals(ByteBufferList data, int normalSize) {
             System.out.println("PointSet.setVertexNormals()");
         }
 }

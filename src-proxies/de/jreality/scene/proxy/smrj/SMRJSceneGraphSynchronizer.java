@@ -36,6 +36,7 @@ import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.data.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
@@ -144,7 +145,7 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
             try {
                 if (a == Attribute.COORDINATES || a == Attribute.NORMALS) {
                     DoubleArray da = dl.toDoubleArray(); 
-                    ByteBufferWrapper bbw = ByteBufferWrapper.getInstance();
+                    ByteBufferList bbw = ByteBufferList.getInstance();
                     ByteBuffer bb = bbw.createWriteBuffer(da.getLength()*8);
                     da.toNativeByteBuffer(bb);
                     if (bb.remaining()>0) throw new RuntimeException("not all read! "+bb);

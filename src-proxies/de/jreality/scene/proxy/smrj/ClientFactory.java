@@ -22,20 +22,23 @@
  */
 package de.jreality.scene.proxy.smrj;
 
-import de.jreality.scene.data.*;
-import de.jreality.scene.data.*;
+import java.io.IOException;
+import java.net.UnknownHostException;
 
+import de.jreality.scene.data.ByteBufferList;
+import de.smrj.RemoteCall;
+import de.smrj.tcp.TCPReceiverIO;
 
-/**
- *
- * TODO: comment this
- *
- * @author weissman
- *
- */
-public interface RemotePointSet extends
-        de.jreality.scene.proxy.rmi.RemotePointSet {
+public class ClientFactory extends de.smrj.ClientFactory
+{
 
-    public void setVertices(ByteBufferList data, int vertexSize);
-    public void setVertexNormals(ByteBufferList data, int normalSize);
+  protected void postCall(RemoteCall rc)
+  {
+    ByteBufferList.BufferPool.releaseAll();
+  }
+
+  public static void main(String[] args) throws IOException
+  {
+    new TCPReceiverIO(args[0], 8868, new ClientFactory()).start();
+  }
 }
