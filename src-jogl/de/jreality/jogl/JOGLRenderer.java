@@ -660,7 +660,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 				boolean ss = geometryShader.polygonShader.isSmoothShading();
 				// TODO figure out which sphere proxy to use based on distance, LOD, etc
 				
-				int dlist = JOGLRendererHelper.getSphereDLists(2, globalHandle);
+				int dlist = JOGLRendererHelper.getSphereDLists(2, globalHandle.theCanvas.getGL());
 				globalGL.glCallList(dlist);
 				return;
 			}
@@ -669,10 +669,10 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 				boolean ss = geometryShader.polygonShader.isSmoothShading();
 				int type = ss ? SMOOTH_POLYGONDL : FLAT_POLYGONDL;
 				if (!processDisplayListState(type))		 // false return implies no display lists used
-					JOGLRendererHelper.drawFaces(ifs, theCanvas,pickMode, ss);
+					JOGLRendererHelper.drawFaces(ifs, theCanvas.getGL(),pickMode, ss);
 				else // we are using display lists
 					if (dlInfo.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
-						JOGLRendererHelper.drawFaces(ifs, theCanvas,pickMode, ss);
+						JOGLRendererHelper.drawFaces(ifs, theCanvas.getGL(),pickMode, ss);
 						globalGL.glEndList();	
 						dlInfo.setDisplayListDirty(type, false);
 						dlInfo.setInsideDisplayList(false);

@@ -57,7 +57,7 @@ public class UserTool extends PickTool {
 	}
 	
 	public boolean track(MouseEvent e) {
-		if (!super.startTrackingAt(e)) {
+		if (!super.track(e)) {
 			newPickPoint = new PickPoint();
 			double[] ndc4 = {current[0], current[1], 0.0, 1.0};
 			newPickPoint.setPointNDC(ndc4);

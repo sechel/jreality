@@ -7,6 +7,7 @@
 package de.jreality.jogl;
 
 import java.awt.Color;
+import java.util.Hashtable;
 import java.util.List;
 
 import net.java.games.jogl.GL;
@@ -50,46 +51,65 @@ import de.jreality.util.Rn;
  */
 public class JOGLRendererHelper {
 
-	static float[] backgroundColor = {0f, 0f, 0f, 1f};
 	static float [] bg = {0f, 0f, 0f, 1f};
-	static int[] sphereDLists = null;
+	//static int[] sphereDLists = null;
 	static PolygonShader dps = null;
 	static boolean useQuadMesh = true;
-	public static void setupSphereDLists(JOGLRenderer jr)	{
-		GLCanvas theCanvas = jr.theCanvas;
-		GL gl = theCanvas.getGL();
-		if (sphereDLists != null) return;
+	static Hashtable sphereDLists = new Hashtable();
+	//TODO This can't be static; the display lists so created are invalid if the renderer parameter
+	// no longer exists.  So ... these display lists have to be tied to a specific context.
+	public static void setupSphereDLists(GL gl)	{
+		int[] dlists = (int[] ) sphereDLists.get(gl);
+		if (dlists != null) 	return;
 		//dps = new DefaultPolygonShader();
 		EffectiveAppearance eap = EffectiveAppearance.create();
 		eap = eap.create(SphereHelper.pointAsSphereAp);
 		dps =ShaderLookup.getPolygonShaderAttr(eap, "", CommonAttributes.POLYGON_SHADER);		
 		int n = SphereHelper.spheres.length;
-		sphereDLists= new int[n];
+		dlists= new int[n];
 		for (int i = 0; i<n; ++i)	{
-			sphereDLists[i] = gl.glGenLists(1);
-			gl.glNewList(sphereDLists[i], GL.GL_COMPILE);
+			dlists[i] = gl.glGenLists(1);
+			gl.glNewList(dlists[i], GL.GL_COMPILE);
 			if (useQuadMesh) {
 				QuadMeshShape qms = SphereHelper.cubePanels[i];
 				for (int j = 0; j<SphereHelper.cubeSyms.length; ++j)	{
 					gl.glPushMatrix();
 					gl.glMultTransposeMatrixd(SphereHelper.cubeSyms[j].getMatrix());
-					drawFaces(qms, theCanvas, false, true);
+					drawFaces(qms, gl, false, true);
 					gl.glPopMatrix();
 				}				
 			} else {
-				drawFaces(SphereHelper.spheres[i], theCanvas, false, true);
+				drawFaces(SphereHelper.spheres[i], gl, false, true);
 			}
 			gl.glEndList();
 		}
+		sphereDLists.put(gl, dlists);
 	}
 	
 	/**
 	 * @param i
 	 * @return
 	 */
-	public static int getSphereDLists(int i, JOGLRenderer jr) {
-		if (sphereDLists == null) setupSphereDLists(jr);
-		return sphereDLists[i];
+	public static int getSphereDLists(int i, GL gl) {
+		int[] dlists = getSphereDLists(gl);
+		if (dlists == null) 	{
+			System.err.println("Invalid sphere display lists");
+			return 0;
+		}
+		return dlists[i];
+	}
+
+	/**
+	 * @param i
+	 * @return
+	 */
+	public static int[] getSphereDLists( GL gl) {
+		int[] dlists = (int[] ) sphereDLists.get(gl);
+		if (dlists == null) 	{
+			setupSphereDLists(gl);
+			dlists = (int[] ) sphereDLists.get(gl);
+		}
+		return dlists;
 	}
 
 	public static void handleBackground(GLCanvas theCanvas, Appearance topAp)	{
@@ -102,7 +122,7 @@ public class JOGLRendererHelper {
 			//TODO replace BackPlane class with simple quad drawn here, keyed to "backgroundColors" in topAp
 			if (topAp != null)	bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_COLOR);
 			if (bgo != null && bgo instanceof java.awt.Color) bg = ((java.awt.Color) bgo).getComponents(null);
-			else bg = backgroundColor;
+			else bg = CommonAttributes.BACKGROUND_COLOR_DEFAULT.getRGBComponents(null);
 			gl.glClearColor(bg[0], bg[1], bg[2], bg[3] ); //white 
 			
 			if (topAp != null) bgo =  topAp.getAttribute("backgroundColors");
@@ -168,7 +188,7 @@ public class JOGLRendererHelper {
 		gl.glColorMaterial(GL.GL_FRONT, GL.GL_DIFFUSE);
 		gl.glEnable(GL.GL_COLOR_MATERIAL);
 		if (drawSpheres)	{
-			if (sphereDLists == null) setupSphereDLists(jr);
+			int[] dlists = getSphereDLists(gl);
 			double size = pointRadius;
 			
 			gl.glEnable(GL.GL_COLOR_MATERIAL);		
@@ -200,7 +220,7 @@ public class JOGLRendererHelper {
 						gl.glColor4d(da.getValueAt(0),  da.getValueAt(1),  da.getValueAt(2), da.getValueAt(3));
 					} 						
 				}
-				gl.glCallList(sphereDLists[1]);
+				gl.glCallList(dlists[1]);
 				gl.glPopMatrix();
 			}
 		} else {
@@ -306,13 +326,12 @@ public class JOGLRendererHelper {
 	/**
 	 * @param sg
 	 */
-	public static void drawFaces( IndexedFaceSet sg, GLCanvas theCanvas, boolean pickMode, boolean smooth) {
+	public static void drawFaces( IndexedFaceSet sg, GL gl, boolean pickMode, boolean smooth) {
 
 		//if (jr.pickMode && (insidePointSet || insideLineSet)) return;
 
 		//DefaultGeometryShader currentGeometryShader = jpc.geometryShader;
 		//RenderingHintsShader renderingHints = jpc.renderingHints;
-		GL gl = theCanvas.getGL();
 		int colorBind,normalBind, colorLength=3;
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		DataList vertexNormals = sg.getVertexAttributes(Attribute.NORMALS);

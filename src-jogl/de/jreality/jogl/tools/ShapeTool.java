@@ -52,11 +52,12 @@ public class ShapeTool extends AbstractMouseTool {
 		Object	nodeContents;
 		// the shape tools need a selection path and a shape to
 		// act upon
-		if (!super.startTrackingAt(e)) return false;
+		if (!super.startTrackingAt(e)) {isTracking = false; return false; }
+		isTracking =false;
 		selection = theViewer.getSelectionManager().getSelection();
 		if (selection == null) selection = theViewer.getSelectionManager().getDefaultSelection();
 		if (selection == null) return false;
-		nodeContents = (SceneGraphNode) selection.getLastElement();
+		nodeContents = selection.getLastElement();
 		if (nodeContents == null) return false;
 		if (!(nodeContents instanceof SceneGraphComponent)) return false;
 		theEditedNode = (SceneGraphComponent) nodeContents;

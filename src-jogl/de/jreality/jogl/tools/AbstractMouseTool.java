@@ -16,6 +16,7 @@ import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphNode;
+import de.jreality.util.CameraUtility;
 import de.jreality.util.Rn;
 
 /**
@@ -109,6 +110,8 @@ public class AbstractMouseTool implements MouseTool {
 	public boolean startTrackingAt(MouseEvent e) {
 		// assert good pointers
 		if (theViewer == null || e == null) return false;
+		theCamera = CameraUtility.getCamera(theViewer);
+		theCanvas = theViewer.getViewingComponent();
 		getButton(e);
 		MotionManager mm = theViewer.getMotionManager();
 		mm.pauseMotions();
@@ -122,6 +125,7 @@ public class AbstractMouseTool implements MouseTool {
 		Rn.copy(last, anchor);
 		lastTime = currentTime;
 		theViewer.render();
+		isTracking = true;
 		return true;
 	}
 	
