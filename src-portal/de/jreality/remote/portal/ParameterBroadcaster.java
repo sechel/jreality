@@ -54,6 +54,8 @@ public class ParameterBroadcaster {
 	private int DEST_PORT = 5555;
 	private boolean debug = true;
 	private int DATAGRAM_LENGTH = 8188;
+
+	int delay = 10;
 	
 	public ParameterBroadcaster() {
 		try {
@@ -118,7 +120,7 @@ public class ParameterBroadcaster {
 		  	DatagramPacket dgram = new DatagramPacket(bytes, i*DATAGRAM_LENGTH, DATAGRAM_LENGTH, group, DEST_PORT); // multicast
 		  	socket.send(dgram);
 		  	try {
-				Thread.sleep(10);
+				Thread.sleep(delay);
 			} catch (InterruptedException e) {}
 		  	System.out.println("\t\tsent "+i+". part");
 	  	}
@@ -140,7 +142,7 @@ public class ParameterBroadcaster {
 	  		DatagramPacket dgram = new DatagramPacket(indexedBytes, (DATAGRAM_LENGTH+4), group, DEST_PORT); // multicast
 		  	socket.send(dgram);
 		  	try {
-				Thread.sleep(3);
+				Thread.sleep(delay);
 			} catch (InterruptedException e) {}
 //		  	System.out.println("\t\tsent "+i+". part");
 	  	}
@@ -154,13 +156,15 @@ public class ParameterBroadcaster {
 	}
 
 	public static void main(String[] args) {
+		ParameterBroadcaster pb = new ParameterBroadcaster();
 		int i = 10;
 		int j = 5000;
 		try {
 		  i = Integer.parseInt(args[0]);
 		  j = Integer.parseInt(args[1]);
+		  pb.delay = Integer.parseInt(args[2]);
 		} catch (Exception e) {}
-		ParameterBroadcaster pb = new ParameterBroadcaster();
+		System.out.println("delay is "+pb.delay);
 		CatenoidHelicoid ch = new CatenoidHelicoid(i);
 		Serializable[] s = {/*null, new Transformation(), new double[]{1,2,3,4,5,2,3,4,5,2,3,4,5}, new String("bla"), null,*/ ch.getVertexAttributes(/*Attribute.COORDINATES*/)};
 		try {
