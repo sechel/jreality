@@ -28,6 +28,7 @@ import net.java.games.jogl.GLDrawable;
 import net.java.games.jogl.GLU;
 import net.java.games.jogl.util.BufferUtils;
 import de.jreality.geometry.SphereHelper;
+import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultGeometryShader;
 import de.jreality.jogl.shader.RenderingHintsShader;
@@ -70,7 +71,7 @@ import de.jreality.util.Rn;
 public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInterface {
 
 	final static Logger theLog;
-	static boolean debugGL = false;
+	static boolean debugGL = false, collectFrameRate = true;
 	static {
 		theLog	= Logger.getLogger("de.jreality.jogl");
 //		theLog.setLevel(Level.FINEST);
@@ -168,9 +169,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 
 		if (!pickMode)
 			JOGLRendererHelper.handleBackground(theCanvas, theRoot.getAppearance());
-		if (pickMode)	{
+		if (pickMode)
 			globalGL.glMultTransposeMatrixd(pickT.getMatrix());
-		}
+
 		theCanvas.setAutoSwapBufferMode(!pickMode);
 		
 		// We "inline" the visit to the camera since it cannot be visited in the traversal order
@@ -274,7 +275,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 	}
 
 
-	long frameCount = 0, otime;
+	int frameCount = 0;
+	long[] history = new long[20];
 	
 	/* (non-Javadoc)
 	 * @see net.java.games.jogl.GLEventListener#init(net.java.games.jogl.GLDrawable)
@@ -289,7 +291,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 		String vv = globalGL.glGetString(GL.GL_VERSION);
 		theLog.log(Level.INFO,"version: "+vv);
 		
-		otime = System.currentTimeMillis();
+//		otime = System.currentTimeMillis();
 
 		if (CameraUtility.getCamera(theViewer) == null || theCanvas == null) return;
 		CameraUtility.getCamera(theViewer).setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
@@ -302,6 +304,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 	 */
 	public void display(GLDrawable drawable) {
 		//if (pickMode) return;
+		long beginTime = 0;
+		if (collectFrameRate) beginTime = System.currentTimeMillis();
 		theCanvas = (GLCanvas) drawable;
 		globalGL = theCanvas.getGL();
 		Camera theCamera = CameraUtility.getCamera(theViewer);
@@ -388,13 +392,15 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 			}
 		}
 		if (screenShot)   JOGLRendererHelper.saveScreenShot(theCanvas, screenShotFile);
-		if (++frameCount % 100 == 0) {
-			long time = System.currentTimeMillis();
-			//theLog.log(Level.FINER,"Frame rate:\t"+(1000000.0/(time-otime)));
-			//System.err.println("Frame rate:\t"+(1000000.0/(time-otime)));
-			framerate = (100000.0/(time-otime));
-			otime = time;
-		} 
+//		if (++frameCount % 100 == 0) {
+//			long time = System.currentTimeMillis();
+//			framerate = (100000.0/(time-otime));
+//			otime = time;
+//		} 
+		if (collectFrameRate)	{
+			++frameCount;
+			history[(frameCount % 20)]  = System.currentTimeMillis() - beginTime;			
+		}
 	}
 
 	/* (non-Javadoc)
@@ -441,20 +447,21 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 //	}
 	private final static int POINTDL = 0;
 	private final static int LINEDL = 1;
-	private final static int FLAT_POLYGONDL = 2;
-	private final static int SMOOTH_POLYGONDL = 3;
-
+	private final static int PROXY_LINEDL = 2;
+	private final static int FLAT_POLYGONDL = 3;
+	private final static int SMOOTH_POLYGONDL = 4;
+    private final static int NUM_DLISTS = 5;
 	private class DisplayListInfo	{
 		private boolean useDisplayList, 	// can decide based on dynamic evaluation whether it makes sense 
 					insideDisplayList,
-					realDLDirty[] = new boolean[4];
+					realDLDirty[] = new boolean[NUM_DLISTS];
 		private int dl[];
 		private int changeCount;
 		private long frameCountAtLastChange;
 		DisplayListInfo()	{
 			super();
-			dl = new int[4];
-			for (int i = 0; i<4; ++i) { realDLDirty[i] = true; dl[i] = -1;}
+			dl = new int[NUM_DLISTS];
+			for (int i = 0; i<NUM_DLISTS; ++i) { realDLDirty[i] = true; dl[i] = -1;}
 			insideDisplayList = false;
 			frameCountAtLastChange = frameCount;
 			changeCount = 0;
@@ -491,6 +498,14 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 			return dl[LINEDL];
 		}
 		
+		public int getTubeDisplayListID() {
+			return dl[PROXY_LINEDL];
+		}
+		
+		public void setTubeDisplayListID(int id)	{
+			dl[PROXY_LINEDL] = id;
+		}
+		
 		public void setPointDisplayListID(int id)	{
 			dl[POINTDL] = id;
 		}
@@ -516,7 +531,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 		}
 		
 		public void setDisplayListsDirty() {
-			for (int i = 0; i<4; ++i) realDLDirty[i] = true;
+			for (int i = 0; i<NUM_DLISTS; ++i) realDLDirty[i] = true;
 		}
 		
 		public boolean isInsideDisplayList() {
@@ -542,6 +557,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 	
 	
 	public double getFramerate()	{
+		long totalTime = 0;
+		for (int i = 0; i<20; ++i)	totalTime += history[i];
+		framerate = 20*1000.0 / totalTime;
 		return framerate;
 	}
 
@@ -626,6 +644,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 	
 	public class JOGLPeerGeometry extends JOGLPeerNode implements GeometryListener	{
 		Geometry originalGeometry;
+		Geometry[] tubeGeometry, proxyPolygonGeometry;
 		Vector proxyGeometry;
 		DisplayListInfo dlInfo;
 		IndexedFaceSet ifs;
@@ -693,11 +712,29 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 				double alpha = geometryShader.polygonShader.getDiffuseColor().getAlpha()/255.0;
 				boolean ss = geometryShader.polygonShader.isSmoothShading();
 				int type = ss ? SMOOTH_POLYGONDL : FLAT_POLYGONDL;
+				boolean proxy = geometryShader.polygonShader.providesProxyGeometry();
+				if (proxy && proxyPolygonGeometry == null)	{
+					System.out.println("Asking for proxy geometry ");
+					proxyPolygonGeometry = geometryShader.polygonShader.proxyGeometryFor(ils);
+					System.out.println("proxy geometry of length "+proxyPolygonGeometry.length);
+				}
 				if (!processDisplayListState(type))		 // false return implies no display lists used
-					JOGLRendererHelper.drawFaces(ifs, theCanvas.getGL(),pickMode, ss, alpha);
+					if (proxy)	{
+						int n = proxyPolygonGeometry.length;
+						for (int x=0; x<n; ++x)	{
+							JOGLRendererHelper.drawFaces((IndexedFaceSet) proxyPolygonGeometry[x], theCanvas.getGL(), pickMode, true, alpha);								
+						}
+					} else
+						JOGLRendererHelper.drawFaces(ifs, theCanvas.getGL(),pickMode, ss, alpha);
 				else // we are using display lists
 					if (dlInfo.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
-						JOGLRendererHelper.drawFaces(ifs, theCanvas.getGL(),pickMode, ss, alpha);
+						if (proxy)	{
+							int n = proxyPolygonGeometry.length;
+							for (int x=0; x<n; ++x)	{
+								JOGLRendererHelper.drawFaces((IndexedFaceSet) proxyPolygonGeometry[x], theCanvas.getGL(), pickMode, true, alpha);								
+							}
+						} else
+							JOGLRendererHelper.drawFaces(ifs, theCanvas.getGL(),pickMode, ss, alpha);
 						globalGL.glEndList();	
 						dlInfo.setDisplayListDirty(type, false);
 						dlInfo.setInsideDisplayList(false);
@@ -705,13 +742,29 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 			}
 			if (geometryShader.isEdgeDraw() && ils != null)	{
 				geometryShader.lineShader.render(globalHandle);
+				boolean tubes = geometryShader.lineShader.providesProxyGeometry();
 				double alpha = geometryShader.lineShader.getDiffuseColor().getAlpha()/255.0;
-				int type = LINEDL;
+				int type = tubes ? PROXY_LINEDL : LINEDL;
+				if (tubes && tubeGeometry == null)	{
+					tubeGeometry = geometryShader.lineShader.proxyGeometryFor(ils);
+				}
 				if (!processDisplayListState(type))		 // false return implies no display lists used
-					JOGLRendererHelper.drawLines(ils, theCanvas, alpha);			
+					if (tubes)	{
+						int n = tubeGeometry.length;
+						for (int x=0; x<n; ++x)	{
+							JOGLRendererHelper.drawFaces((IndexedFaceSet) tubeGeometry[x], theCanvas.getGL(), pickMode, true, alpha);								
+						}
+					} else
+						JOGLRendererHelper.drawLines(ils, theCanvas, alpha);			
 				else // we are using display lists
 					if (dlInfo.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
-						JOGLRendererHelper.drawLines(ils, theCanvas, alpha);			
+						if (tubes)	{
+							int n = tubeGeometry.length;
+							for (int x=0; x<n; ++x)	{
+								JOGLRendererHelper.drawFaces((IndexedFaceSet) tubeGeometry[x], theCanvas.getGL(), pickMode, true, alpha);								
+							}
+						} else
+							JOGLRendererHelper.drawLines(ils, theCanvas, alpha);			
 						globalGL.glEndList();	
 						dlInfo.setDisplayListDirty(type, false);
 						dlInfo.setInsideDisplayList(false);

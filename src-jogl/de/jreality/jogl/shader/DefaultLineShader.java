@@ -11,10 +11,13 @@ import java.awt.Color;
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
 
+import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.ElementBinding;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
+import de.jreality.scene.Geometry;
+import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.Texture2D;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;
@@ -27,15 +30,17 @@ import de.jreality.util.ShaderUtility;
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class DefaultLineShader implements LineShader  {
-		double	tubeRadius = 0.05,
-			 	lineWidth = 1.0,
-				depthFudgeFactor = 0.9999d;			// in pixels
-		 int	lineFactor = 1;
-		 int 	lineStipplePattern = 0x1c47; 
-		 
-		 boolean
-			lineStipple = false;
+	double	tubeRadius = 0.05,
+		 	lineWidth = 1.0,
+			depthFudgeFactor = 0.9999d;			// in pixels
+	int	lineFactor = 1;
+	int 	lineStipplePattern = 0x1c47; 
+	 
+	boolean lineStipple = false;
+	boolean tubeDraw = false;
+			
 	Color diffuseColor = java.awt.Color.BLACK;
+	private PolygonShader polygonShader;
 	 
 		/**
 		 * 
@@ -55,68 +60,71 @@ public class DefaultLineShader implements LineShader  {
 		diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.LINE_DIFFUSE_COLOR_DEFAULT);
 		double transp = eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
 		setDiffuseColor( ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transp));
+		polygonShader = ShaderLookup.getPolygonShaderAttr(eap, name, "polygonShader");
+		polygonShader.setDiffuseColor(diffuseColor);
 	}
 
 	public double getDepthFudgeFactor() {
 		return depthFudgeFactor;
 	}
-		/**
-		 * @return
-		 */
-		public double getLineWidth() {
-			return lineWidth;
-		}
+	/**
+	 * @return
+	 */
+	public double getLineWidth() {
+		return lineWidth;
+	}
 
-		/* (non-Javadoc)
-		 * @see java.lang.Object#clone()
-		 */
-		protected Object clone() throws CloneNotSupportedException {
-			return super.clone();
-		}
+	/* (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	protected Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
 
-		/**
-		 * @return
-		 */
-		public boolean isLineStipple() {
-			return lineStipple;
-		}
+	/**
+	 * @return
+	 */
+	public boolean isLineStipple() {
+		return lineStipple;
+	}
 
-		/**
-		 * @return
-		 */
-		public int getLineStipplePattern() {
-			return lineStipplePattern;
-		}
+	/**
+	 * @return
+	 */
+	public int getLineStipplePattern() {
+		return lineStipplePattern;
+	}
 
-		/**
-		 * @return
-		 */
-		public int getLineFactor() {
-			return lineFactor;
-		}
+	/**
+	 * @return
+	 */
+	public int getLineFactor() {
+		return lineFactor;
+	}
 
-		/**
-		 * @return
-		 */
-		public boolean isTubeDraw() {
-			return tubeDraw;
-		}
+	/**
+	 * @return
+	 */
+	public boolean isTubeDraw() {
+		return tubeDraw;
+	}
 
-		public Color getDiffuseColor() {
-			return diffuseColor;
-		}
-		float[] diffuseColorAsFloat;
-		public float[] getDiffuseColorAsFloat() {
-			return diffuseColorAsFloat;
-		}
+	public Color getDiffuseColor() {
+		return diffuseColor;
+	}
+	float[] diffuseColorAsFloat;
+	public float[] getDiffuseColorAsFloat() {
+		return diffuseColorAsFloat;
+	}
 
-		public void setDiffuseColor(Color diffuseColor2) {
-			diffuseColor = diffuseColor2;
-			diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
-		}
+	public void setDiffuseColor(Color diffuseColor2) {
+		diffuseColor = diffuseColor2;
+		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
+	}
 
-	boolean tubeDraw = false;
-	
+	public double getTubeRadius() {
+		return tubeRadius;
+	}
 	public void render(JOGLRenderer jr)	{
 		GLCanvas theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
@@ -135,11 +143,25 @@ public class DefaultLineShader implements LineShader  {
 		} 
 		else gl.glDisable(GL.GL_LINE_STIPPLE);
 		//TODO set this correctly when tube-drawing is supported
-		//if (tubeDraw) gl.glEnable(GL.GL_LIGHTING);
-		gl.glDisable(GL.GL_LIGHTING);
+		if (tubeDraw) {
+			polygonShader.render(jr);
+			gl.glEnable(GL.GL_LIGHTING);
+		}
+		else gl.glDisable(GL.GL_LIGHTING);
 		gl.glDepthRange(0.0d, depthFudgeFactor);
 	}
-		public double getTubeRadius() {
-			return tubeRadius;
+
+	public boolean providesProxyGeometry() {		
+		if (tubeDraw) return true;
+		return false;
+	}
+	public Geometry[] proxyGeometryFor(Geometry original) {
+		if (tubeDraw && original instanceof IndexedLineSet)	{
+			Geometry[] ret = new Geometry[1];
+			System.out.println("Creating tubes with radius "+tubeRadius);
+			ret[0] = TubeUtility.createTubesOnEdgesAsIFS((IndexedLineSet) original, tubeRadius);
+			return ret;
 		}
+		return null;
+	}
 }

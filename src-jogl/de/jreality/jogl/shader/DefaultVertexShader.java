@@ -24,11 +24,12 @@ import de.jreality.util.NameSpace;
  * To change the template for this generated type comment go to
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
-public class DefaultVertexShader implements Shader {
+public class DefaultVertexShader implements VertexShader {
 	Color	ambientColor,
 			specularColor;		
 	double 	specularExponent, ambientCoefficient, specularCoefficent;	
 	float[] specularColorAsFloat, ambientColorAsFloat;
+	int frontBack = DefaultPolygonShader.FRONT_AND_BACK;
 
 	public static Color RED = new Color(1.0f, 0.0f, 0.0f, 0.5f);
 	public static Color GREEN = new Color(0.0f, 1.0f, 0.0f, 0.5f);
@@ -99,13 +100,20 @@ public class DefaultVertexShader implements Shader {
 		return specularExponent;
 	}
 
+	public int getFrontBack() {
+		return frontBack;
+	}
+	public void setFrontBack(int frontBack) {
+		this.frontBack = frontBack;
+	}
+	
 	public void render(JOGLRenderer jr)	{
 		GLCanvas theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		
-		gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT, ambientColorAsFloat);
-		gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SPECULAR, specularColorAsFloat);
-		gl.glMaterialf(GL.GL_FRONT_AND_BACK, GL.GL_SHININESS, (float) getSpecularExponent());
+		//gl.glMaterialfv(frontBack, GL.GL_AMBIENT, ambientColorAsFloat);
+		gl.glMaterialfv(frontBack, GL.GL_SPECULAR, specularColorAsFloat);
+		gl.glMaterialf(frontBack, GL.GL_SHININESS, (float) getSpecularExponent());
 	}
 
 }

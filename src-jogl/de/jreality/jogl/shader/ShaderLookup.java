@@ -24,8 +24,8 @@ public class ShaderLookup
   public static PolygonShader lookupPolygonShader(String name) {
     return (PolygonShader)lookup1(name, "Polygon");
   }
-  public static Shader lookupVertexShader(String name) {
-      return (Shader)lookup1(name, "Vertex");
+  public static VertexShader lookupVertexShader(String name) {
+      return (VertexShader)lookup1(name, "Vertex");
   }
   
   public static LineShader lookupLineShader(String name) {
@@ -63,7 +63,7 @@ public class ShaderLookup
     }
     return ps;
   }
-  public static Shader getVertexShaderAttr(
+  public static VertexShader getVertexShaderAttr(
   	    EffectiveAppearance eAppearance, String base, String attr) {
 
   	    String vShader = (String)eAppearance.getAttribute(NameSpace.name(base, attr), "default");
@@ -71,7 +71,7 @@ public class ShaderLookup
   	      NameSpace.name(base, attr));
 //  	    System.out.println(vShaderName+" <= "+NameSpace.name(base, attr+".name")
 //  	      +": "+NameSpace.name(base, attr));
-  	    Shader vShaderImpl= ShaderLookup.lookupVertexShader(vShader);
+  	    VertexShader vShaderImpl= ShaderLookup.lookupVertexShader(vShader);
   	    vShaderImpl.setFromEffectiveAppearance(eAppearance, vShaderName);
   	    return vShaderImpl;
   	  }

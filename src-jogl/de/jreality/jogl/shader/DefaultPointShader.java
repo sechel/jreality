@@ -13,6 +13,7 @@ import net.java.games.jogl.GLCanvas;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
+import de.jreality.scene.Geometry;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;
 import de.jreality.util.ShaderUtility;
@@ -101,6 +102,12 @@ public class DefaultPointShader  implements PointShader {
 		
 	}
 
+	public boolean providesProxyGeometry() {		
+		return false;
+	}
+	public Geometry[] proxyGeometryFor(Geometry original) {
+		return null;
+	}
 	public Shader getPolygonShader() {
 		return polygonShader;
 	}

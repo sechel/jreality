@@ -180,6 +180,7 @@ public class InteractiveViewerDemo extends JFrame{
 		if (root.getAppearance() == null) root.setAppearance(new Appearance());
 		CommonAttributes.setDefaultValues(root.getAppearance());
 		root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
+		root.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
 		root.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
 
 		if (!loadedScene)  world = makeWorld();
@@ -192,7 +193,7 @@ public class InteractiveViewerDemo extends JFrame{
 			if (world.getTransformation() == null) 		world.setTransformation(new Transformation());
 		}
 
-		if (isEncompass()|| (loadedScene && getSignature() == Pn.EUCLIDEAN))	{
+		if (isEncompass())	{
 			// I have to do this ... for reasons unknown ... or else the encompass sometimes fails.
 			CameraUtility.getCameraNode(viewer).getTransformation().setTranslation(0d, 0d, 2d);
 			CameraUtility.encompass(viewer);
@@ -377,10 +378,12 @@ public class InteractiveViewerDemo extends JFrame{
 	}
 	
 	public boolean isEncompass()	{
+		if (loadedScene) return wm.isEncompass();
 		return false;
 	}
 	
 	public boolean addBackPlane()	{
+		if (loadedScene) return wm.addBackPlane();
 		return false;
 	}
 	

@@ -8,13 +8,15 @@ package de.jreality.jogl.shader;
 
 import java.awt.Color;
 
+import de.jreality.scene.Geometry;
+
 /**
  * @author gunn
  *
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public interface PointShader extends Shader {
+public interface PointShader extends PrimitiveShader {
 	public boolean isSphereDraw();
 	public double getPointRadius();
 	public Color getDiffuseColor();

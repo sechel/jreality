@@ -14,6 +14,7 @@ import de.jreality.jogl.ElementBinding;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.Texture2D;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;
@@ -28,12 +29,17 @@ import de.jreality.util.ShaderUtility;
  */
 public class DefaultPolygonShader implements PolygonShader {
 
-	boolean		smoothShading = false; 		// interpolate shaded values between vertices
+	public static final int FRONT_AND_BACK = GL.GL_FRONT_AND_BACK;
+	public static final int FRONT = GL.GL_FRONT;
+	public static final int BACK = GL.GL_BACK;
+	
+	boolean		smoothShading = true; 		// interpolate shaded values between vertices
 	Color diffuseColor = DefaultVertexShader.RED; //java.awt.Color.RED;
 	float[] diffuseColorAsFloat = null;
 	double transparency;
 	Texture2D texture2D;
-	public Shader vertexShader = null;
+	int frontBack = FRONT_AND_BACK;
+	public VertexShader vertexShader = null;
 	AbstractJOGLShader glShader = null;
 	static double[] idmat = Rn.identityMatrix(4);
 	/**
@@ -59,7 +65,7 @@ public class DefaultPolygonShader implements PolygonShader {
 		setDiffuseColor( ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transparency));
 		Object foo = eap.getAttribute(NameSpace.name(name,"texture2d"), null, Texture2D.class);
 		if (foo instanceof Texture2D)	texture2D = (Texture2D) foo;
-		vertexShader = ShaderLookup.getVertexShaderAttr(eap, name, "vertexShader");
+		vertexShader = (VertexShader) ShaderLookup.getVertexShaderAttr(eap, name, "vertexShader");
 	
 		//TODO this is a hack. 
 		if (eap.getAttribute(NameSpace.name(name,"useGLShader"), false) == true)	{
@@ -100,6 +106,18 @@ public class DefaultPolygonShader implements PolygonShader {
 		return texture2D;
 	}
 
+
+	public void setSmoothShading(boolean b) {
+		smoothShading = b;
+	}
+	
+	public int getFrontBack() {
+		return frontBack;
+	}
+	public void setFrontBack(int frontBack) {
+		this.frontBack = frontBack;
+	}
+	
 	public void render(JOGLRenderer jr)	{
 		GLCanvas theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
@@ -109,8 +127,9 @@ public class DefaultPolygonShader implements PolygonShader {
 		else		{
 			gl.glShadeModel(GL.GL_FLAT);		
 		}
-		//System.out.println("Smooth shading is: "+isSmoothShading());
-		gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE, getDiffuseColorAsFloat());
+		gl.glMaterialfv(frontBack, GL.GL_DIFFUSE, getDiffuseColorAsFloat());
+		gl.glEnable(GL.GL_COLOR_MATERIAL);
+		gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
 		gl.glColor4fv( getDiffuseColorAsFloat());
 		//System.out.println("Alpha channel is "+diffuseColorAsFloat[3]);
 		//System.out.println("transparency is "+transparency);
@@ -128,12 +147,15 @@ public class DefaultPolygonShader implements PolygonShader {
 			gl.glEnable(GL.GL_TEXTURE_2D);
 		} 
 		if (glShader != null) glShader.activate(theCanvas);
+		vertexShader.setFrontBack(frontBack);
 		vertexShader.render(jr);
 	}
 
-
-	public void setSmoothShading(boolean b) {
-		smoothShading = b;
+	public boolean providesProxyGeometry() {		
+		return false;
 	}
-	
+	public Geometry[] proxyGeometryFor(Geometry original) {
+		return null;
+	}
+
 }

@@ -35,12 +35,12 @@ public class DiscreteSpaceCurve extends IndexedLineSet {
 		setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(vectorLength).createReadOnly(vertices));
 		int numPoints = getNumPoints();
 		setClosed(closed);
-		int[][] ind = new int[1][numPoints];
-		ind[0] = new int[numPoints];
-		
+		int extra = closed? 1 : 0;
+		int[][] ind = new int[1][numPoints+extra];
 		for (int i = 0 ; i<numPoints; ++i) {
 			ind[0][i] = i;
 		}
+		if (closed) ind[0][numPoints] = 0;
 		setEdgeCountAndAttributes(Attribute.INDICES, new IntArrayArray.Array(ind));
 	}
 

@@ -10,6 +10,7 @@ import java.awt.Color;
 
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.Geometry;
 import de.jreality.util.EffectiveAppearance;
 
 /**

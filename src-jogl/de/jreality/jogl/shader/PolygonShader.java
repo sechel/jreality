@@ -14,9 +14,10 @@ import java.awt.Color;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public interface PolygonShader extends Shader {
+public interface PolygonShader extends PrimitiveShader {
 	public void setSmoothShading(boolean b);
 	public boolean isSmoothShading();
 	public void setDiffuseColor(Color dc);		// need to be able to overwrite the diffuse color by line and point diffuse color/**
 	public Color getDiffuseColor();
+	public void setFrontBack(int f);
 }
