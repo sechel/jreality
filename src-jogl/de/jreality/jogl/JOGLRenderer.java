@@ -71,11 +71,11 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 	final static Logger theLog;
 	static boolean debugGL = false;
 	static {
-		theLog	= Logger.getLogger("de.jreality.jogl");
-		theLog.setLevel(Level.FINEST);
+//		theLog	= Logger.getLogger("de.jreality.jogl");
+//		theLog.setLevel(Level.FINEST);
 		String foo = System.getProperty("jreality.jogl.debugGL");
 		if (foo != null) { if (foo.equals("false")) debugGL = false; else debugGL =true;}
-		theLog.setLevel(Level.FINEST);
+//		theLog.setLevel(Level.FINEST);
 	}
 	
 	public final static int MAX_STACK_DEPTH = 30;
