@@ -8,6 +8,8 @@ package de.jreality.jogl.shader;
 
 import java.awt.Color;
 
+import net.java.games.jogl.GL;
+
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.shader.PolygonShader;
 import de.jreality.scene.Geometry;
@@ -72,7 +74,7 @@ public class TwoSidePolygonShader implements PolygonShader {
 		return false;
 	}
 
-	public Geometry[] proxyGeometryFor(Geometry original) {
-		return null;
+	public  int proxyGeometryFor(Geometry original, GL gl) {
+		return  -1;
 	}
 }

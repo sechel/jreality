@@ -137,7 +137,7 @@ public class ViewerKeyListener extends KeyAdapter {
 
 				case KeyEvent.VK_F:		// toggle face drawing
 					if (e.isShiftDown())		toggleValue(CommonAttributes.FACE_DRAW);
-					viewer.getToolManager().activateTool(ToolManager.CAMERA_FLY_TOOL);
+					else viewer.getToolManager().activateTool(ToolManager.CAMERA_FLY_TOOL);
 					viewer.render();
 					break;
 

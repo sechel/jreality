@@ -154,8 +154,8 @@ public class DefaultPolygonShader implements PolygonShader {
 	public boolean providesProxyGeometry() {		
 		return false;
 	}
-	public Geometry[] proxyGeometryFor(Geometry original) {
-		return null;
+	public int  proxyGeometryFor(Geometry original, GL gl) {
+		return -1;
 	}
 
 }

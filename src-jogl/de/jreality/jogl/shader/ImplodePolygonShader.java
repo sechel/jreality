@@ -6,7 +6,9 @@
  */
 package de.jreality.jogl.shader;
 
+import net.java.games.jogl.GL;
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.util.EffectiveAppearance;
@@ -61,11 +63,14 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 		if (implodeFactor == 0.0) return false;
 		return true;
 	}
-	public Geometry[] proxyGeometryFor(Geometry original) {
+	public int proxyGeometryFor(Geometry original, GL gl) {
 		System.out.println("Preparing to implode.");
-		Geometry[] ret = new Geometry[1];
-		ret[0] = GeometryUtility.implode((IndexedFaceSet) original, implodeFactor);
+		IndexedFaceSet ifs =  GeometryUtility.implode((IndexedFaceSet) original, implodeFactor);
 		System.out.println("Imploding with factor of "+implodeFactor);
-		return ret;
+		int implodeDL = gl.glGenLists(1);
+		gl.glNewList(implodeDL, GL.GL_COMPILE);
+		JOGLRendererHelper.drawFaces(ifs, gl, false, true, 1.0);
+		gl.glEndList();
+		return implodeDL;
 	}
 }

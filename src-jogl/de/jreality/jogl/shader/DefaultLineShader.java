@@ -11,16 +11,25 @@ import java.awt.Color;
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
 
+import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.ElementBinding;
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.Geometry;
+import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Texture2D;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.DataList;
+import de.jreality.scene.data.StorageModel;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;
+import de.jreality.util.Rn;
 import de.jreality.util.ShaderUtility;
 
 /**
@@ -155,13 +164,67 @@ public class DefaultLineShader implements LineShader  {
 		if (tubeDraw) return true;
 		return false;
 	}
-	public Geometry[] proxyGeometryFor(Geometry original) {
+	
+	public int proxyGeometryFor(Geometry original, GL gl) {
+		// TODO handle quadmesh differently
+		if ( !(original instanceof IndexedLineSet)) return -1;
 		if (tubeDraw && original instanceof IndexedLineSet)	{
-			Geometry[] ret = new Geometry[1];
+			int dlist =  createTubesOnEdgesAsDL((IndexedLineSet) original, tubeRadius, 1.0, gl);
 			System.out.println("Creating tubes with radius "+tubeRadius);
-			ret[0] = TubeUtility.createTubesOnEdgesAsIFS((IndexedLineSet) original, tubeRadius);
-			return ret;
+			return dlist;
 		}
-		return null;
+		return -1;
 	}
+	
+	static double[][] xSection = {{1,0,0}, {.707, .707, 0}, {0,1,0},{-.707, .707, 0},{-1,0,0},{-.707, -.707, 0},{0,-1,0},{.707, -.707, 0}};
+	private static double[][] urTubeVerts;
+	static QuadMeshShape urTube;
+	static int urTubeLength;
+	static {
+	    int n = xSection.length;
+		urTube = new QuadMeshShape(n, 2, true, false);
+		urTubeLength = n;
+		urTubeVerts = new  double[2*n][3];
+		for (int i = 0; i<2; ++i){
+			for (int j = 0; j<n; ++j)	{
+			    int q = n - j - 1;
+			    System.arraycopy(xSection[j], 0, urTubeVerts[i*n+q],0,3);
+			    if (i==1) urTubeVerts[i*n+q][2] = 1.0;
+			}
+		}
+		urTube.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(urTubeVerts[0].length).createReadOnly(urTubeVerts));
+		GeometryUtility.calculateAndSetNormals(urTube);
+	}
+	
+	public int createTubesOnEdgesAsDL(IndexedLineSet ils, double rad,  double alpha, GL gl)	{
+		int n = ils.getNumEdges();
+		DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
+		
+		int tubeDL = gl.glGenLists(1);
+		gl.glNewList(tubeDL, GL.GL_COMPILE);
+		JOGLRendererHelper.drawFaces(urTube, gl, false, true, alpha);
+		gl.glEndList();
+		
+		int nextDL = gl.glGenLists(1);
+		gl.glNewList(nextDL, GL.GL_COMPILE);
+		for (int i = 0; i<n; ++i)	{
+			int[] ed = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
+			int m = ed.length;
+			for (int j = 0; j<m-1; ++j)	{
+				int k = ed[j];
+				double[] p1 = vertices.item(k).toDoubleArray(null);	
+				k = ed[j+1];
+				double[] p2 = vertices.item(k).toDoubleArray(null);	
+				SceneGraphComponent cc = TubeUtility.makeTubeAsIFS(p1, p2, rad, null);
+				gl.glPushMatrix();
+				gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix());
+				gl.glCallList(tubeDL);
+				gl.glPopMatrix();
+			}
+		}
+		gl.glEndList();
+		return nextDL;
+	}
+	
+
 }

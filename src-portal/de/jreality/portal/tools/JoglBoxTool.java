@@ -69,10 +69,13 @@ public class JoglBoxTool extends SceneGraphVisitor implements UserToolInterface 
 	public void startTracking(UserTool t) {
 		currentEvent = START;
 		//if (debug) System.out.println("Start tracking");
-		anchorPointNDC = t.getPickPoint().getPointNDC();
+		anchorPointNDC = t.getPointNDC();
 //		anchorPointWorld = t.getPickPoint().getPointWorld();
+		if (t.getPickPoint() == null) {
+			return;
+		}
 		gc = t.getPickPoint().getContext();
-		double[] currentNDC = t.getPickPoint().getPointNDC();
+		double[] currentNDC = t.getPointNDC();
 		try {
 			NDCToWorld = gc.getNDCToWorld();
 			double[] currentWorld = Rn.matrixTimesVector(null, NDCToWorld, currentNDC);
@@ -84,9 +87,7 @@ public class JoglBoxTool extends SceneGraphVisitor implements UserToolInterface 
 	
 	public void track(UserTool t) {
 		currentEvent = TRACK;
-		PickPoint thePoint = t.getPickPoint();
-		double[] currentNDC = thePoint.getPointNDC();
-		double[] currentWorldPoint = thePoint.getPointWorld();
+		double[] currentNDC = t.getPointNDC();
 		currentNDC[2] = anchorPointNDC[2];		// we're working in a plane parallel to the screen
 		try {
 			double[] currentWorld = Rn.matrixTimesVector(null, NDCToWorld, currentNDC);

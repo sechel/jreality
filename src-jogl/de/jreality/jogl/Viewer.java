@@ -94,7 +94,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	public Viewer(SceneGraphPath p, SceneGraphComponent r) {
 		super();
 		initializeFrom(r, p);		
-//	    canvas.setIgnoreRepaint(true);
+	    canvas.setIgnoreRepaint(true);
 		canvas.setNoAutoRedrawMode(true);
 	}
 

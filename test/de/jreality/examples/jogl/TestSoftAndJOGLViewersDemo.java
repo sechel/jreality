@@ -122,6 +122,8 @@ public class TestSoftAndJOGLViewersDemo extends InteractiveViewerDemo {
 		public static void main(String argv[])	{
 			TestSoftAndJOGLViewersDemo test = new TestSoftAndJOGLViewersDemo(InteractiveViewerDemo.TABBED_PANE, false);
 			test.begin();
+			test = new TestSoftAndJOGLViewersDemo(InteractiveViewerDemo.TABBED_PANE, false);
+			test.begin();
 		}
 	
 }

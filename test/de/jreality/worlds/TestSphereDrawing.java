@@ -42,7 +42,7 @@ public class TestSphereDrawing extends AbstractLoadableScene {
 		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+".implodeFactor", -.6);
 		ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, true);
 		ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, .006);
-		ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.RED);
+		ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new Color(210, 150, 0));
 		ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.SPHERES_DRAW, true);
 		ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.BLUE);
 		for (int i = 0; i< 1; ++i)	{
@@ -75,7 +75,7 @@ public class TestSphereDrawing extends AbstractLoadableScene {
 	}
 	public void customize(JMenuBar menuBar, Viewer v) {
 		final Viewer viewer = v;
-		viewer.getSceneRoot().getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR, new Color(0,60,60));
+		viewer.getSceneRoot().getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR, new Color(0,80, 60));
 		viewer.getViewingComponent().addKeyListener(new KeyAdapter()	{
 			
 		    double scaleFactor = .05;

@@ -133,104 +133,42 @@ public class JOGLRendererHelper {
 	static boolean testArrays = false;
 	static ByteBuffer vBuffer, vcBuffer, vnBuffer, fcBuffer, fnBuffer, tcBuffer;
 	static DataList vLast = null, vcLast = null, vnLast = null;
-	public static void drawVertices( PointSet sg, JOGLRenderer jr, boolean drawSpheres, double pointRadius, double alpha) {
+	public static void drawVertices( PointSet sg, JOGLRenderer jr, boolean pickMode, double alpha) {
 		GLCanvas theCanvas = jr.theCanvas;
 		GL gl = theCanvas.getGL(); 
 //		gl.glPointSize((float) currentGeometryShader.pointShader.getPointSize());
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
-		vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
 		DataList pointSize = sg.getVertexAttributes(Attribute.POINT_SIZE);
 		int vertexLength = GeometryUtility.getVectorLength(vertices);
 		int colorLength = 0;
 		if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
 		DoubleArray da;
-		if (drawSpheres)	{
-			int[] dlists = jr.sphereDisplayLists;	//JOGLSphereHelper.getSphereDLists(gl);
-			double size = pointRadius;
-			
-			for (int i = 0; i< sg.getNumPoints(); ++i)	{
-				da = vertices.item(i).toDoubleArray();	
-				//TODO figure out how to draw these spheres correctly in non-euclidean case
-				double x=0,y=0,z=0,w=0;
-				if (da.getLength() == 4)	{
-					w = da.getValueAt(3);
-					if (w != 0) w  = 1.0/w;
-					else w = 1.0;
-					x = w * da.getValueAt(0);
-					y = w * da.getValueAt(1);
-					z = w * da.getValueAt(2);
-				} else {
-					x = da.getValueAt(0);
-					y = da.getValueAt(1);
-					z = da.getValueAt(2);					
-				}
-				gl.glPushMatrix();
-				gl.glTranslated(x,y,z);
-				gl.glScaled(size, size, size);
-				if (vertexColors != null)	{
-					da = vertexColors.item(i).toDoubleArray();
-					if (colorLength == 3) 	{
-						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
-					} else if (colorLength == 4) 	{
-						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha*da.getValueAt(3));
-					} 
-				}
-				gl.glCallList(dlists[1]);
-				gl.glPopMatrix();
-			}
-		} else {
-			if (testArrays)	{
-					double[] varray = vertices.toDoubleArray(null);
-					ByteBuffer bb = ByteBuffer.allocateDirect(8*varray.length).order(ByteOrder.nativeOrder());
-					bb.asDoubleBuffer().put(varray);
-					bb.flip();				
-					gl.glVertexPointer(vertexLength, GL.GL_DOUBLE, 0, bb);	
-				
-				double[] carray = null;
-				if (vertexColors != null) {
-					vertexColors.toDoubleArray(null);
-					ByteBuffer cb = ByteBuffer.allocateDirect(8*varray.length).order(ByteOrder.nativeOrder());
-					cb.asDoubleBuffer().put(varray);
-					cb.flip();
-					gl.glColorPointer(colorLength, GL.GL_DOUBLE, 0, cb);
-				}
-				// can re-use after checking that it's long enough, use some method to reallocate
-				if (vertexColors != null) gl.glEnableClientState(GL.GL_COLOR_ARRAY);
-				else gl.glDisableClientState(GL.GL_COLOR_ARRAY);
-				gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
-				gl.glDrawArrays(GL.GL_POINTS, 0, sg.getNumPoints());
-				gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
-				gl.glDisableClientState(GL.GL_COLOR_ARRAY);
-				
-			} else {
-				gl.glBegin(GL.GL_POINTS);
-				for (int i = 0; i< sg.getNumPoints(); ++i)	{
-					//double vv;
-					if (pointSize != null) {
-						float ps = (float) pointSize.item(i).toDoubleArray().getValueAt(0);
-						gl.glPointSize( ps);
-						//vv =  (ps < 1) ? ps : (1d - (Math.ceil(ps) - ps) * 0.25d);
+		gl.glBegin(GL.GL_POINTS);
+		for (int i = 0; i< sg.getNumPoints(); ++i)	{
+			//double vv;
+			if (pointSize != null) {
+				float ps = (float) pointSize.item(i).toDoubleArray().getValueAt(0);
+				gl.glPointSize( ps);
+				//vv =  (ps < 1) ? ps : (1d - (Math.ceil(ps) - ps) * 0.25d);
 
-					}
-					//if (pointSize != null)	gl.glBegin(GL.GL_POINTS);
-					if (vertexColors != null)	{
-						da = vertexColors.item(i).toDoubleArray();
-						if (colorLength == 3) 	{
-							gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
-						} else if (colorLength == 4) 	{
-							gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha*da.getValueAt(3));
-						} 
-					}
-					da = vertices.item(i).toDoubleArray();				
-					if (vertexLength == 3) gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
-					else if (vertexLength == 4) gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
-				}
-				gl.glEnd();
-				
 			}
+			//if (pointSize != null)	gl.glBegin(GL.GL_POINTS);
+			if (vertexColors != null)	{
+				da = vertexColors.item(i).toDoubleArray();
+				if (colorLength == 3) 	{
+					gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
+				} else if (colorLength == 4) 	{
+					gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha*da.getValueAt(3));
+				} 
+			}
+			da = vertices.item(i).toDoubleArray();				
+			if (vertexLength == 3) gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
+			else if (vertexLength == 4) gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
 		}
-		gl.glDisable(GL.GL_COLOR_MATERIAL);
+		gl.glEnd();
+		
+//		gl.glDisable(GL.GL_COLOR_MATERIAL);
 //		}
 		// TODO decide whether to keep this
 //		if (currentGeometryShader.pointShader.isNormalsDraw())	{
@@ -273,7 +211,7 @@ public class JOGLRendererHelper {
 	/**
 	 * @param sg
 	 */
-	public static void drawLines(IndexedLineSet sg, GLCanvas theCanvas, double alpha) {
+	public static void drawLines(IndexedLineSet sg, GLCanvas theCanvas, boolean pickMode, double alpha) {
 		GL gl = theCanvas.getGL();
 //		DefaultGeometryShader currentGeometryShader = jpc.geometryShader;
 //		RenderingHintsShader renderingHints = jpc.renderingHints;
@@ -289,30 +227,6 @@ public class JOGLRendererHelper {
 //		if (colors != null) 	colorBind = ElementBinding.PER_EDGE;
 		DoubleArray da;
 		// TODO support for colors per vertex?
-		if (testArrays)	{
-			double[] varray = vertices.toDoubleArray(null);
-			ByteBuffer bb = ByteBuffer.allocateDirect(8*varray.length).order(ByteOrder.nativeOrder());
-			bb.asDoubleBuffer().put(varray);
-			bb.flip();				
-			gl.glVertexPointer(vertexLength, GL.GL_DOUBLE, 0, bb);	
-			
-			gl.glDisableClientState(GL.GL_COLOR_ARRAY);
-			gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
-			gl.glDrawArrays(GL.GL_POINTS, 0, sg.getNumPoints());
-			
-			for (int i = 0; i< sg.getNumEdges(); ++i)	{
-				gl.glBegin(GL.GL_LINE_STRIP);
-				IntArray ed = sg.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray();
-				int m = ed.getLength();
-				for (int j = 0; j<m; ++j)	{
-					gl.glArrayElement(ed.getValueAt(j));
-				}
-				gl.glEnd();
-			}
-			gl.glDisableClientState(GL.GL_COLOR_ARRAY);
-			gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
-			
-		}	else {
 			for (int i = 0; i< sg.getNumEdges(); ++i)	{
 				gl.glBegin(GL.GL_LINE_STRIP);
 				int[] ed = sg.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
@@ -325,7 +239,6 @@ public class JOGLRendererHelper {
 				}
 				gl.glEnd();
 			}
-		}
 		gl.glDepthRange(0d, 1d);
 	}
 
@@ -476,70 +389,6 @@ public class JOGLRendererHelper {
 			}				
 		}
 		else
-			if (testArrays)	{
-				gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
-				gl.glDisableClientState(GL.GL_NORMAL_ARRAY);
-				gl.glDisableClientState(GL.GL_COLOR_ARRAY);
-				double[] varray = vertices.toDoubleArray(null);
-				ByteBuffer bb = ByteBuffer.allocateDirect(8*varray.length).order(ByteOrder.nativeOrder());
-				bb.asDoubleBuffer().put(varray);
-				bb.flip();				
-				gl.glVertexPointer(vertexLength, GL.GL_DOUBLE, 0, bb);	
-				gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
-			
-				double[] carray = null;
-				if (colorBind == ElementBinding.PER_VERTEX) {
-					carray = vertexColors.toDoubleArray(null);
-					ByteBuffer cb = ByteBuffer.allocateDirect(8*carray.length).order(ByteOrder.nativeOrder());
-					cb.asDoubleBuffer().put(carray);
-					cb.flip();
-					gl.glColorPointer(colorLength, GL.GL_DOUBLE, 0, cb);
-				} 
-				if (carray != null) gl.glEnableClientState(GL.GL_COLOR_ARRAY);
-				double[] narray = null;
-				if (normalBind == ElementBinding.PER_VERTEX) {
-					narray = vertexNormals.toDoubleArray(null);
-					ByteBuffer nb = ByteBuffer.allocateDirect(8*narray.length).order(ByteOrder.nativeOrder());
-					nb.asDoubleBuffer().put(narray);
-					nb.flip();
-					gl.glColorPointer(colorLength, GL.GL_DOUBLE, 0, nb);
-				} 
-				if (narray != null) gl.glEnableClientState(GL.GL_NORMAL_ARRAY);
-				
-				for (int i = 0; i< sg.getNumFaces(); ++i)	{
-					IntArray tf = sg.getFaceAttributes(Attribute.INDICES).item(i).toIntArray();
-					if (colorBind == ElementBinding.PER_FACE) 		{					
-						da = faceColors.item(i).toDoubleArray();
-						if (colorLength == 3) 	{
-							gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
-						} else if (colorLength == 4) 	{
-							gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha*da.getValueAt(3));
-						} 
-					}
-					if (pickMode) {
-						//System.out.print("+G"+i+"\n");
-						gl.glPushName( i);
-				}
-					if (normalBind == ElementBinding.PER_FACE) {
-						da = faceNormals.item(i).toDoubleArray();
-						gl.glNormal3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
-					} 
-					gl.glBegin(GL.GL_POLYGON);
-					for (int j = 0; j<tf.getLength(); ++j)	{
-						int k = tf.getValueAt(j);
-						gl.glArrayElement(k);
-						}
-					gl.glEnd();
-					if (pickMode) {
-						//System.out.print("-");
-						gl.glPopName();
-					}
-				}
-				gl.glDisableClientState(GL.GL_COLOR_ARRAY);
-				gl.glDisableClientState(GL.GL_NORMAL_ARRAY);
-				gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
-				
-			}	else {
 		for (int i = 0; i< sg.getNumFaces(); ++i)	{
 			if (colorBind == ElementBinding.PER_FACE) 		{					
 				da = faceColors.item(i).toDoubleArray();
@@ -587,7 +436,6 @@ public class JOGLRendererHelper {
 				gl.glPopName();
 			}
 		}
-			}
 		// pop to balance the glPushName(10000) above
 		if (pickMode) gl.glPopName();
 		if (colorBind != ElementBinding.PER_PART)  gl.glDisable(GL.GL_COLOR_MATERIAL);
