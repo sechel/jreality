@@ -13,11 +13,11 @@ public class SceneGraphComponent extends de.jreality.scene.SceneGraphComponent
 {
   public void setGeometry(RemoteGeometry g)
   {
-    super.setGeometry((Geometry)g);
+    super.setGeometry((de.jreality.scene.Geometry)g);
   }
   public void addChild(RemoteSceneGraphComponent sgc)
   {
-    super.addChild((SceneGraphComponent)sgc);
+    super.addChild((de.jreality.scene.SceneGraphComponent)sgc);
   }
   public RemoteSceneGraphComponent getRemoteChildComponent(int index)
   {
@@ -25,15 +25,15 @@ public class SceneGraphComponent extends de.jreality.scene.SceneGraphComponent
   }
   public void removeChild(RemoteSceneGraphComponent sgc)
   {
-    super.removeChild((SceneGraphComponent)sgc);
+    super.removeChild((de.jreality.scene.SceneGraphComponent)sgc);
   }
   public void setTransformation(RemoteTransformation newTrans)
   {
-    super.setTransformation((Transformation)newTrans);
+    super.setTransformation((de.jreality.scene.Transformation)newTrans);
   }
   public void setAppearance(RemoteAppearance newApp)
   {
-    super.setAppearance((Appearance)newApp);
+    super.setAppearance((de.jreality.scene.Appearance)newApp);
   }
   public RemoteAppearance getRemoteAppearance()
   {
@@ -45,7 +45,7 @@ public class SceneGraphComponent extends de.jreality.scene.SceneGraphComponent
   }
   public void setCamera(RemoteCamera newCamera)
   {
-    super.setCamera((Camera)newCamera);
+    super.setCamera((de.jreality.scene.Camera)newCamera);
   }
   public RemoteLight getRemoteLight()
   {
@@ -53,7 +53,7 @@ public class SceneGraphComponent extends de.jreality.scene.SceneGraphComponent
   }
   public void setLight(RemoteLight newLight)
   {
-    super.setLight((Light)newLight);
+    super.setLight((de.jreality.scene.Light)newLight);
   }
   public RemoteTransformation getRemoteTransformation()
   {
