@@ -474,6 +474,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         boolean loadWorld = ((Boolean)parser.getOptionValue(worldOpt)).booleanValue();
         if (loadWorld) rsi.loadWorld(dataArgs[0]);
         else rsi.loadFile(dataArgs[0]);
+	rsi.setNavigationEnabled(true);
     }
 
     private void setGlobalScale(double d) {
