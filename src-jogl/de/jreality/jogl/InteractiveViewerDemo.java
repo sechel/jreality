@@ -24,6 +24,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
@@ -44,7 +45,7 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.soft.DefaultViewer;
 import de.jreality.soft.PSViewer;
 import de.jreality.ui.SceneTreeViewer;
@@ -124,18 +125,25 @@ public class InteractiveViewerDemo extends JFrame{
 		if (mode == SPLIT_PANE)	{
 			final DefaultViewer v2 = new DefaultViewer();
 			v2.initializeFrom(viewer);
-			splitPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, false, viewer.getViewingComponent(),v2.getViewingComponent());
-			splitPanel.setDividerLocation(0.5d);
-			javax.swing.Timer timer = new javax.swing.Timer(200, new ActionListener()	{
-				public void actionPerformed(ActionEvent e) {
-					v2.render();
-				}
-			});	
+//			getContentPane().add(viewer.getViewingComponent(), BorderLayout.CENTER);
+			getContentPane().add(v2.getViewingComponent(), BorderLayout.CENTER);
+			if (!fullScreen) setSize(800, 600);
+//			javax.swing.JPanel moo = new javax.swing.JPanel();
+//			moo.setMaximumSize(new java.awt.Dimension(32768,32768));
+//			moo.setMinimumSize(new java.awt.Dimension(10,10));
+//			moo.add(viewer.getViewingComponent());
+//			splitPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, false, moo,v2.getViewingComponent());
+//			splitPanel.setDividerLocation(0.5d);
+//			javax.swing.Timer timer = new javax.swing.Timer(200, new ActionListener()	{
+//				public void actionPerformed(ActionEvent e) {
+//					v2.render();
+//				}
+//			});	
 				
-			splitPanel.setSize(800, 400);	
-			setSize(800,400);
-			//getContentPane().add(splitPanel, BorderLayout.CENTER);			
-			getContentPane().add(viewer.getViewingComponent(), BorderLayout.CENTER);
+//			splitPanel.setSize(800, 400);	
+//			setSize(800,400);
+//			getContentPane().add(splitPanel, BorderLayout.CENTER);			
+//			getContentPane().add(viewer.getViewingComponent(), BorderLayout.CENTER);
 		} else if (mode == TABBED_PANE){
 			tabbedPane = new JTabbedPane();
 			addViewer(viewer, "Standard");
@@ -243,7 +251,7 @@ public class InteractiveViewerDemo extends JFrame{
 		}
 		if (world != null && !root.isDirectAncestor(world)) {		// sometimes the subclass has already added the world
 			root.addChild(world);
-			if (world.getTransformation() == null) 		world.setTransformation(new FactoredTransformation());
+			if (world.getTransformation() == null) 		world.setTransformation(new Transformation());
 		}
 
 		CameraUtility.getCamera(viewer).setSignature(getSignature());

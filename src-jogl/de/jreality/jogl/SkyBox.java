@@ -11,7 +11,7 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Texture2D;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 
 /**
  * @author Charles Gunn
@@ -56,7 +56,7 @@ public class SkyBox extends SceneGraphComponent {
 		ap.setAttribute(CommonAttributes.EDGE_DRAW,false);
 		setAppearance(ap);
 		
-		FactoredTransformation tt = new FactoredTransformation();
+		Transformation tt = new Transformation();
 //		tt.setRotation(Math.PI, 1d, 0d, 0d);	
 		setTransformation(tt);
 //		

@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 
 import de.jreality.reader.Parser3DS;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 
 
 /**
@@ -29,7 +29,7 @@ public class Read3DSDemo {
 			Logger.getLogger("de.jreality").setLevel(Level.WARNING);
 			SceneGraphComponent s1 = Parser3DS.readFromFile(filename);
 			SceneGraphComponent theWorld = new SceneGraphComponent();
-			s1.setTransformation(new FactoredTransformation());
+			s1.setTransformation(new Transformation());
 //			s1.getTransformation().setTranslation(-25400, -21400 ,-10 );
 			//Transformation stretch = new Transformation();
 			s1.getTransformation().setStretch(scale);

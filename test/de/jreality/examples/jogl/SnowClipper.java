@@ -24,7 +24,7 @@ import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.P3;
 import de.jreality.util.Pn;
@@ -64,7 +64,7 @@ public class SnowClipper extends InteractiveViewerDemo {
 		OOGLReader or = new OOGLReader();
 		snowSculpture = or.readFromFile(fileToLoad);
 		snowSculpture.setName("snowSculptureModel");
-		snowSculpture.setTransformation(new FactoredTransformation());
+		snowSculpture.setTransformation(new Transformation());
 		snowSculpture.getTransformation().setStretch(snowSculptureScale);		// (-.2,.2) -> (-60, 60)" 
 		snowSculpture.getTransformation().setTranslation(0,0,72);
 		snowSculpture.getTransformation().setIsEditable(false);

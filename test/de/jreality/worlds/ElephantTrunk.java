@@ -9,7 +9,7 @@ import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
 import de.jreality.util.ConfigurationAttributes;
@@ -41,7 +41,7 @@ public class ElephantTrunk extends AbstractLoadableScene {
 			//double[] stretchV = {.5d, .5d, .5d};
 			SceneGraphComponent theWorld = new SceneGraphComponent();
 			theWorld.setName("theWorld");
-			FactoredTransformation t = new FactoredTransformation();
+			Transformation t = new Transformation();
 			t.setRotation(0.1, 1d, 0d, 0d);
 			t.setTranslation(tlate);
 			t.setStretch(.9,.9,.9);
@@ -63,12 +63,12 @@ public class ElephantTrunk extends AbstractLoadableScene {
 		protected class IteratedTransform extends SceneGraphComponent implements TransformationListener {
 			int iterationCount = 0;
 			boolean countChanged = true;
-			FactoredTransformation theT;
+			Transformation theT;
 			SceneGraphNode geometry;
 			/**
 			 * 
 			 */
-			public IteratedTransform(FactoredTransformation t, int itcount, SceneGraphNode g) {
+			public IteratedTransform(Transformation t, int itcount, SceneGraphNode g) {
 				super();
 				theT = t;
 				setTransformation(theT);
@@ -78,7 +78,7 @@ public class ElephantTrunk extends AbstractLoadableScene {
 			}
 			
 			public IteratedTransform()	{
-				this(new FactoredTransformation(), 1, Primitives.coloredCube());
+				this(new Transformation(), 1, Primitives.coloredCube());
 			}
 
 			/**

@@ -53,6 +53,10 @@ public class TwoSidePolygonShader implements PolygonShader {
 		if (back != null) back.render(jr);
 	}
 	
+	public void postRender(JOGLRenderer jr) {
+		if (front != null) front.postRender(jr);
+		if (back != null) back.postRender(jr);
+	}
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String shaderName) {
 	      front = ShaderLookup.getPolygonShaderAttr(eap, shaderName, "front");
 	      front.setFrontBack(DefaultPolygonShader.FRONT);

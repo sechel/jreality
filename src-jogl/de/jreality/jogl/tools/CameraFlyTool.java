@@ -10,7 +10,7 @@ import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.P3;
 import de.jreality.util.Rn;
@@ -21,7 +21,7 @@ import de.jreality.util.Rn;
  */
 public class CameraFlyTool extends AbstractMouseTool {
 	SceneGraphComponent cameraNode;
-	FactoredTransformation cameraTrans;
+	Transformation cameraTrans;
 	CameraDirectionKeyListener cdkl;
 	double camFactor = 0.5;
 	double[] transM;
@@ -85,7 +85,7 @@ public class CameraFlyTool extends AbstractMouseTool {
 			continuedMotion.stop();
 		}
 		continuedMotion = new javax.swing.Timer(20, new ActionListener()	{
-			final FactoredTransformation tt = cameraTrans;
+			final Transformation tt = cameraTrans;
 			final double[] repeater1 = transM;
 			final double[] repeater2 = rotM;
 			public void actionPerformed(ActionEvent e) {updateRotation(); } 

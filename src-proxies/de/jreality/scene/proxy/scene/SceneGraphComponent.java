@@ -28,7 +28,7 @@ public class SceneGraphComponent extends de.jreality.scene.SceneGraphComponent
     }
 
     public void setTransformation(RemoteTransformation newTrans) {
-        super.setTransformation((de.jreality.scene.FactoredTransformation) newTrans);
+        super.setTransformation((de.jreality.scene.Transformation) newTrans);
     }
 
     public void setAppearance(RemoteAppearance newApp) {

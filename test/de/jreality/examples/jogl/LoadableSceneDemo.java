@@ -24,6 +24,14 @@ import discreteGroup.TriangleGroup;
  */
 public class LoadableSceneDemo extends InteractiveViewerDemo {
 
+//	/**
+//	 * @param split_pane
+//	 * @param b
+//	 */
+//	public LoadableSceneDemo(int split_pane, boolean b) {
+//		super(split_pane, b);
+//	}
+
 	public static void main(String[] args) throws Exception {
 		LoadableSceneDemo iv = new LoadableSceneDemo();//InteractiveViewerDemo.SPLIT_PANE, false);
 		iv.initializeScene();

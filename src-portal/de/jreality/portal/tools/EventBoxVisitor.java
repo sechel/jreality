@@ -29,7 +29,7 @@ import szg.framework.event.WandEvent;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.util.P3;
 import de.jreality.util.Rn;
 
@@ -46,10 +46,10 @@ public class EventBoxVisitor extends SceneGraphVisitor {
 	private SceneGraphComponent root;
 	private WandEvent currentEvent;
 	private SceneGraphPath path;
-	private FactoredTransformation wandOffset;
+	private Transformation wandOffset;
 	private boolean debug = false;
 
-	public EventBoxVisitor(SceneGraphComponent root, FactoredTransformation wandOffset) {
+	public EventBoxVisitor(SceneGraphComponent root, Transformation wandOffset) {
 		this.root = root;
 		path = new SceneGraphPath();
 		this.wandOffset = wandOffset;
@@ -104,7 +104,7 @@ public class EventBoxVisitor extends SceneGraphVisitor {
 			}
 		}
 	}
-	public void setWandOffset(FactoredTransformation wandOffset) {
+	public void setWandOffset(Transformation wandOffset) {
 		this.wandOffset = wandOffset;
 	}
     
@@ -112,21 +112,21 @@ public class EventBoxVisitor extends SceneGraphVisitor {
 
         private SceneGraphPath path;
         private WandEvent event;
-        private FactoredTransformation localTrafo;
-        private FactoredTransformation wandOffset;
-        public WandBoxContext(SceneGraphPath path, WandEvent event, FactoredTransformation wandOffset) {
+        private Transformation localTrafo;
+        private Transformation wandOffset;
+        public WandBoxContext(SceneGraphPath path, WandEvent event, Transformation wandOffset) {
             this.path = (SceneGraphPath) path.clone();
             this.event = event;
             this.wandOffset = wandOffset;
         }
 
-        public FactoredTransformation getLocalTransformation() {
+        public Transformation getLocalTransformation() {
             if (localTrafo ==  null) computeLocalTrafo();
             return localTrafo;
         }
 
         private void computeLocalTrafo() {
-            localTrafo = new FactoredTransformation(path.getInverseMatrix(null));
+            localTrafo = new Transformation(path.getInverseMatrix(null));
             localTrafo.multiplyOnRight(Rn.transposeF2D(null, event.getMatrix()));
             localTrafo.multiplyOnRight(wandOffset);
         }

@@ -70,7 +70,7 @@ static {
     
     logo = new SceneGraphComponent();
     SceneGraphComponent cpc = new SceneGraphComponent();
-    FactoredTransformation trans= new FactoredTransformation();
+    Transformation trans= new Transformation();
     trans.setTranslation(-20,-12,0);
     cpc.setTransformation(trans);
     cpc.setGeometry(ts);
@@ -97,7 +97,7 @@ static {
     Torus t = new Torus(20,1.5,30,30);
     //Sphere t = new Sphere();
     SceneGraphComponent tpc = new SceneGraphComponent();
-    trans= new FactoredTransformation();
+    trans= new Transformation();
     //trans.setRotation(-.2,0,1,0);
     trans.setTranslation(0,0,0);
     tpc.setTransformation(trans);
@@ -120,7 +120,7 @@ static {
          
          // scene View
          SceneGraphComponent cameraNode= new SceneGraphComponent();
-         FactoredTransformation ct= new FactoredTransformation();
+         Transformation ct= new Transformation();
          ct.setTranslation(0, 0, 16);
          cameraNode.setTransformation(ct);
          Camera firstCamera= new Camera();
@@ -130,7 +130,7 @@ static {
          cameraNode.setCamera(firstCamera);
 
          SceneGraphComponent lightNode= new SceneGraphComponent();
-         FactoredTransformation lt= new FactoredTransformation();
+         Transformation lt= new Transformation();
          lt.setRotation(-Math.PI / 4, 1, 1, 0);
          lightNode.setTransformation(lt);
          DirectionalLight light= new DirectionalLight();
@@ -138,7 +138,7 @@ static {
          root.addChild(lightNode);
 
          SceneGraphComponent lightNode2= new SceneGraphComponent();
-         FactoredTransformation lt2= new FactoredTransformation();
+         Transformation lt2= new Transformation();
          //   lt2.assignScale(-1);
          lt.setRotation(-Math.PI / 4, 1, 1, 0);
          lightNode2.setTransformation(lt2);
@@ -158,7 +158,7 @@ static {
          // scene
          SceneGraphComponent logo = new SceneGraphComponent();
          logo.addChild(jRLogo.logo);
-         FactoredTransformation t = new FactoredTransformation();
+         Transformation t = new Transformation();
          logo.setTransformation(t);
          root.addChild(logo);
          

@@ -11,7 +11,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
@@ -53,15 +53,15 @@ public class TestSoftAndJOGLViewersDemo extends InteractiveViewerDemo {
 			//Cube ico = new Cube();
 			
 			SceneGraphComponent theWorld = new SceneGraphComponent();
-			theWorld.setTransformation(new FactoredTransformation());
+			theWorld.setTransformation(new Transformation());
 			theRow = new SceneGraphComponent();
-			theRow.setTransformation(new FactoredTransformation());
+			theRow.setTransformation(new Transformation());
 			SceneGraphComponent theRowI = new SceneGraphComponent();
-			theRowI.setTransformation(new FactoredTransformation());
+			theRowI.setTransformation(new Transformation());
 			SceneGraphComponent newRow;
 			double[] axis2 = {0.0, 0.0, 1.0};
 			newRow = new SceneGraphComponent();
-			newRow.setTransformation(new FactoredTransformation());
+			newRow.setTransformation(new Transformation());
 			newRow.getTransformation().setRotation(Math.PI/2.0, axis2);
 			newRow.getTransformation().setTranslation(0.0, 0.0, 1.0);
 			newRow.addChild(theRow);
@@ -94,7 +94,7 @@ public class TestSoftAndJOGLViewersDemo extends InteractiveViewerDemo {
 				spheres[i].setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(4).createReadOnly(vc));
 
 				icokit = SceneGraphUtilities.createFullSceneGraphComponent();
-				icokit.setTransformation(new FactoredTransformation());
+				icokit.setTransformation(new Transformation());
 				icokit.setGeometry(spheres[i]);
 				icokit.getTransformation().setTranslation(-1.5 + i, 0, 0);
 				icokit.getTransformation().setStretch(.5);

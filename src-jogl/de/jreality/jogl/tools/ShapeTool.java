@@ -17,8 +17,8 @@ public class ShapeTool extends AbstractMouseTool {
 	double[] 	origM; 		// original object transformation
 	SceneGraphPath 	selection, alternateSelection;	// two selections: altSel is the "center"
 			// of the motion; sel is the object moved
-	FactoredTransformation theEditedTransform;	// the transform that gets edited
-	FactoredTransformation myTransform;
+	Transformation theEditedTransform;	// the transform that gets edited
+	Transformation myTransform;
 	double[] 	theAxis;
 	double[]	worldToCamera;			// get this from the camera in startTrackingAt()
 	protected double[] anchorV = new double[4];
@@ -34,7 +34,7 @@ public class ShapeTool extends AbstractMouseTool {
 	public ShapeTool() {
 		super();
 		duration = 400.0;			// make it quasi-infinite
-		myTransform =  new FactoredTransformation();
+		myTransform =  new Transformation();
 		origM = new double[16];
 		theAxis = new double[3];
 		theProjector = new PlaneProjector();

@@ -38,7 +38,7 @@ public final class Environment extends SceneGraphVisitor {
     //protected EffectiveAppearance eAppearance;
 
     double[]  initialTrafo,   currentTrafo;
-    private   FactoredTransformation  initialTransformation;
+    private   Transformation  initialTransformation;
     protected Environment reclaimableSubcontext;
 
     
@@ -146,7 +146,7 @@ public final class Environment extends SceneGraphVisitor {
      * Sets the initialTransformation.
      * @param initialTransformation The initialTransformation to set
      */
-    public void setInitialTransformation(FactoredTransformation initialTransformation) {
+    public void setInitialTransformation(Transformation initialTransformation) {
         this.initialTransformation= initialTransformation;
     }
 
@@ -178,7 +178,7 @@ public final class Environment extends SceneGraphVisitor {
         c.childrenAccept(subContext());
     }
 
-    public void visit(FactoredTransformation t) {
+    public void visit(Transformation t) {
         if (initialTrafo == currentTrafo)
             currentTrafo= new double[16];
         VecMat.copyMatrix(initialTrafo, currentTrafo);

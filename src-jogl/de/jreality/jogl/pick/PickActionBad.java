@@ -216,7 +216,7 @@ public class PickActionBad  {
 			//if (!sg.isPickable) return;
 			//sg.preRender(gc);
 		
-			FactoredTransformation t = sg.getTransformation();
+			Transformation t = sg.getTransformation();
 			if (t != null)	{
 				Rn.times(currentMatrix, currentMatrix, t.getMatrix());
 				context3D.setObjectToWorld(currentMatrix);

@@ -33,7 +33,7 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.Texture2D;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
@@ -156,7 +156,7 @@ public class TestClippingPlane extends AbstractLoadableScene {
 		return root;
 	}
 	SceneGraphComponent camNode = null;
-	FactoredTransformation tt = new FactoredTransformation();
+	Transformation tt = new Transformation();
 	int tick = 0;
 	int tps = 600;
 	int n;

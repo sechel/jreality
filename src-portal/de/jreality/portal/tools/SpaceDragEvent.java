@@ -17,7 +17,7 @@
 
 package de.jreality.portal.tools;
 
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 
 /** The event that signals that some scene node is being dragged. */
 
@@ -29,7 +29,7 @@ public class SpaceDragEvent extends SpaceIndexedEvent {
 	double posY;
 	double posZ;
 	
-	FactoredTransformation transformation;
+	Transformation transformation;
 	
 	public SpaceDragEvent (
 		Object source,
@@ -43,7 +43,7 @@ public class SpaceDragEvent extends SpaceIndexedEvent {
 		posZ = z;
 	}
 	
-	public SpaceDragEvent(Object source, FactoredTransformation transformation) {
+	public SpaceDragEvent(Object source, Transformation transformation) {
 		super(source);
 		this.transformation = transformation;
 		final double[] t = transformation.getTranslation();
@@ -67,7 +67,7 @@ public class SpaceDragEvent extends SpaceIndexedEvent {
 		return posZ;
 	}
 
-	public FactoredTransformation getTransformation() {
+	public Transformation getTransformation() {
 		if (transformation == null) throw new UnsupportedOperationException("transformation not set");
 		return transformation;
 	}

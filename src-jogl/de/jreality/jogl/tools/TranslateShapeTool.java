@@ -9,7 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 
 import de.jreality.jogl.HelpOverlay;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.util.P3;
 import de.jreality.util.Pn;
 import de.jreality.util.Rn;
@@ -88,7 +88,7 @@ public class TranslateShapeTool extends AbstractShapeTool {
 		final double[] mat = P3.makeTranslationMatrix(null, anchorV, currentV,theEditedTransform.getSignature());
 		//System.out.println("Translation: "+Rn.matrixToString(mat));
 		continuedMotion = new javax.swing.Timer(20, new ActionListener()	{
-			final FactoredTransformation tt = theEditedTransform;
+			final Transformation tt = theEditedTransform;
 			final double[] repeater = mat;
 			public void actionPerformed(ActionEvent e) {updateRotation(); } 
 			public void updateRotation()	{

@@ -43,7 +43,7 @@ public abstract class AbstractViewer implements Viewer {
     protected int argbBackground;
     protected SceneGraphComponent root;
     private SceneGraphPath cameraPath;
-    private FactoredTransformation cameraWorld = new FactoredTransformation();
+    private Transformation cameraWorld = new Transformation();
 
     private PolygonPipeline pipeline;
     protected PolygonRasterizer rasterizer;

@@ -17,7 +17,7 @@ import javax.swing.Timer;
 import de.jreality.geometry.SphereHelper;
 import de.jreality.jogl.anim.AnimationUtility;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.util.SceneGraphUtilities;
 import de.jreality.worlds.AbstractLoadableScene;
@@ -75,9 +75,9 @@ public class AnimationDemo extends 	AbstractLoadableScene  {
 		
 		if (!theWorld.isDirectAncestor(ct)) theWorld.addChild(ct);
 		final double dt = totalTime/(numSteps );
-		final FactoredTransformation t1 = c1.getTransformation();
-		final FactoredTransformation t2 = c2.getTransformation();
-		final FactoredTransformation tt = ct.getTransformation();
+		final Transformation t1 = c1.getTransformation();
+		final Transformation t2 = c2.getTransformation();
+		final Transformation tt = ct.getTransformation();
 		System.out.println("animating");
 		if (anim == null)	{
 			anim = new javax.swing.Timer(30, new ActionListener()	{

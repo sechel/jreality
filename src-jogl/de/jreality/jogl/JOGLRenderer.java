@@ -44,7 +44,7 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
 import de.jreality.scene.event.GeometryEvent;
@@ -110,7 +110,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	// pick-related stuff
 	boolean pickMode = false;
 	private final double pickScale = 10000.0;
-	FactoredTransformation pickT = new FactoredTransformation();
+	Transformation pickT = new Transformation();
 	PickPoint[] hits;
 	// another eccentric mode: render in order to capture a screenshot
 	boolean screenShot = false;
@@ -285,6 +285,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 
 	int frameCount = 0;
 	long[] history = new long[20];
+	long[] clockTime = new long[20];
 	
 	/* (non-Javadoc)
 	 * @see net.java.games.jogl.GLEventListener#init(net.java.games.jogl.GLDrawable)
@@ -442,7 +443,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 //		} 
 		if (collectFrameRate)	{
 			++frameCount;
-			history[(frameCount % 20)]  = System.currentTimeMillis() - beginTime;			
+			int j = (frameCount % 20);
+			clockTime[j] = beginTime;
+			history[j]  =  System.currentTimeMillis() - beginTime;
 		}
 	}
 
@@ -612,6 +615,15 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		for (int i = 0; i<20; ++i)	totalTime += history[i];
 		framerate = 20*1000.0 / totalTime;
 		return framerate;
+	}
+	
+	public double getClockrate()	{
+		int j = frameCount % 20;
+		int k = (frameCount +1) % 20;
+		long totalTime = clockTime[j] - clockTime[k];
+		double clockrate = 20*1000.0 / totalTime;
+		return clockrate;
+		
 	}
 
 	private static  int bufsize =16384;
@@ -1224,7 +1236,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			nodeCount++;
 			currentPath.push(goBetween.getOriginalComponent());
 			context.setCurrentPath(currentPath);
-			FactoredTransformation thisT = goBetween.getOriginalComponent().getTransformation();
+			Transformation thisT = goBetween.getOriginalComponent().getTransformation();
 			
 			//System.out.println("In JOGLPeerComponent render() for "+goBetween.getOriginalComponent().getName());
 			if (thisT != null)	{

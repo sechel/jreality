@@ -14,7 +14,7 @@ import de.jreality.geometry.WingedEdge;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Texture2D;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.Pn;

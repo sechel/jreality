@@ -13,7 +13,7 @@ import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
@@ -38,16 +38,16 @@ public class DebugLattice extends AbstractLoadableScene {
 		//Cube ico = new Cube();
 		
 		SceneGraphComponent theWorld = new SceneGraphComponent();
-		theWorld.setTransformation(new FactoredTransformation());
+		theWorld.setTransformation(new Transformation());
 		theWorld.setName("navComp");
 		theRow = new SceneGraphComponent();
-		theRow.setTransformation(new FactoredTransformation());
+		theRow.setTransformation(new Transformation());
 		SceneGraphComponent theRowI = new SceneGraphComponent();
-		theRowI.setTransformation(new FactoredTransformation());
+		theRowI.setTransformation(new Transformation());
 		SceneGraphComponent newRow;
 		double[] axis2 = {0.0, 0.0, 1.0};
 		newRow = new SceneGraphComponent();
-		newRow.setTransformation(new FactoredTransformation());
+		newRow.setTransformation(new Transformation());
 		newRow.getTransformation().setRotation(Math.PI/2.0, axis2);
 		newRow.getTransformation().setTranslation(0.0, 0.0, 1.0);
 		newRow.addChild(theRow);
@@ -80,7 +80,7 @@ public class DebugLattice extends AbstractLoadableScene {
 			spheres[i].setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(4).createReadOnly(vc));
 
 			SceneGraphComponent icokit = SceneGraphUtilities.createFullSceneGraphComponent();
-			icokit.setTransformation(new FactoredTransformation());
+			icokit.setTransformation(new Transformation());
 			icokit.setGeometry(spheres[i]);
 			icokit.getTransformation().setTranslation(-1.5 + i, 0, 0);
 			icokit.getTransformation().setStretch(.5);
@@ -124,7 +124,7 @@ public class DebugLattice extends AbstractLoadableScene {
             QuadMeshShape lY = GeometryUtility.surfaceOfRevolutionAsIFS(
                     profileY, 5, 2.0 * Math.PI);
             lineY.setGeometry(lY);
-            lineY.setTransformation(new FactoredTransformation());
+            lineY.setTransformation(new Transformation());
             lineY.getTransformation().setRotation(Math.PI / 2.,
                     new double[] { 0., 0., 1.});
             SceneGraphComponent lineZ = new SceneGraphComponent();
@@ -133,14 +133,14 @@ public class DebugLattice extends AbstractLoadableScene {
             QuadMeshShape lZ = GeometryUtility.surfaceOfRevolutionAsIFS(
                     profileZ, 5, 2.0 * Math.PI);
             lineZ.setGeometry(lZ);
-            lineZ.setTransformation(new FactoredTransformation());
+            lineZ.setTransformation(new Transformation());
             lineZ.getTransformation().setRotation(-Math.PI / 2.,
                     new double[] { 0., 1., 0.});
 
             for (int i = 0; i < cy; i++) {
                 for (int j = 0; j < cz; j++) {
                     SceneGraphComponent c = new SceneGraphComponent();
-                    c.setTransformation(new FactoredTransformation());
+                    c.setTransformation(new Transformation());
                     c.getTransformation().setTranslation(0, ymin + i * dy,
                             zmin + j * dz);
                     c.addChild(lineX);
@@ -150,7 +150,7 @@ public class DebugLattice extends AbstractLoadableScene {
             for (int i = 0; i < cx; i++) {
                 for (int j = 0; j < cz; j++) {
                     SceneGraphComponent c = new SceneGraphComponent();
-                    c.setTransformation(new FactoredTransformation());
+                    c.setTransformation(new Transformation());
                     c.getTransformation().setTranslation(xmin + i * dx, 0, zmin + j * dz);
                     c.addChild(lineY);
                     latticeComp.addChild(c);
@@ -159,7 +159,7 @@ public class DebugLattice extends AbstractLoadableScene {
             for (int i = 0; i < cx; i++) {
                 for (int j = 0; j < cy; j++) {
                     SceneGraphComponent c = new SceneGraphComponent();
-                    c.setTransformation(new FactoredTransformation());
+                    c.setTransformation(new Transformation());
                     c.getTransformation().setTranslation(xmin + i * dx, ymin + j * dy, 0);
                     c.addChild(lineZ);
                     latticeComp.addChild(c);
@@ -169,13 +169,13 @@ public class DebugLattice extends AbstractLoadableScene {
         if (sphereRadius > 0) {
             SceneGraphComponent sphereComp = new SceneGraphComponent();
             sphereComp.setGeometry(new Sphere());
-            sphereComp.setTransformation(new FactoredTransformation());
+            sphereComp.setTransformation(new Transformation());
             sphereComp.getTransformation().setStretch(sphereRadius);
 
             SceneGraphComponent line = new SceneGraphComponent();
             for (int i = 0; i < cx; i++) {
                 SceneGraphComponent c = new SceneGraphComponent();
-                c.setTransformation(new FactoredTransformation());
+                c.setTransformation(new Transformation());
                 c.getTransformation().setTranslation(xmin + i * dx, 0, 0);
                 c.addChild(sphereComp);
                 line.addChild(c);
@@ -183,14 +183,14 @@ public class DebugLattice extends AbstractLoadableScene {
             SceneGraphComponent plane = new SceneGraphComponent();
             for (int j = 0; j < cy; j++) {
                 SceneGraphComponent c = new SceneGraphComponent();
-                c.setTransformation(new FactoredTransformation());
+                c.setTransformation(new Transformation());
                 c.getTransformation().setTranslation(0, ymin + j * dy, 0);
                 c.addChild(line);
                 plane.addChild(c);
             }
             for (int k = 0; k < cz; k++) {
                 SceneGraphComponent c = new SceneGraphComponent();
-                c.setTransformation(new FactoredTransformation());
+                c.setTransformation(new Transformation());
                 c.getTransformation().setTranslation(0, 0, zmin + k * dz);
                 c.addChild(plane);
                 latticeComp.addChild(c);

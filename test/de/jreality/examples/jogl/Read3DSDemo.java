@@ -10,7 +10,7 @@ import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.reader.Parser3DS;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 
 
 /**
@@ -30,7 +30,7 @@ public class Read3DSDemo extends InteractiveViewerDemo {
 		Logger.getLogger("de.jreality").setLevel(Level.WARNING);
 		SceneGraphComponent s1 = Parser3DS.readFromFile("face.3ds");
 		SceneGraphComponent theWorld = new SceneGraphComponent();
-		s1.setTransformation(new FactoredTransformation());
+		s1.setTransformation(new Transformation());
 		//s1.getTransformation().setStretch(3e-04);
 		//s1.getTransformation().setTranslation(-9.5,-7.5,0);
 

@@ -36,7 +36,7 @@ import de.jreality.portal.tools.WandTool;
 import de.jreality.reader.Input;
 import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.util.CmdLineParser;
 import de.jreality.util.LoadableScene;
 import de.jreality.util.Lock;
@@ -93,7 +93,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
 
     private boolean navigationEnabled;
     private boolean useDisplayLists = true;
-    private FactoredTransformation wandOffset = new FactoredTransformation();
+    private Transformation wandOffset = new Transformation();
     
     private static final Lock renderLock = new Lock();
 
@@ -118,7 +118,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         scaleComp.addChild(navComp = new SceneGraphComponent());
         realNavComp.addChild(scaleComp);
         root.addChild(realNavComp);
-        scaleComp.setTransformation(scaleTrafo = new FactoredTransformation());
+        scaleComp.setTransformation(scaleTrafo = new Transformation());
         wandComp = new SceneGraphComponent();
         root.addChild(wandComp);
         super.setSceneRoot(root);
@@ -289,7 +289,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
 
     private static final boolean DEBUG = true;
     private volatile boolean renderOnHeadMove = true;
-    private FactoredTransformation scaleTrafo;
+    private Transformation scaleTrafo;
 
     public void headMoved(HeadEvent event) {
         headMatrixLock.writeLock();
@@ -369,11 +369,11 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         boxVisitor.process(event);
     }
 
-    public FactoredTransformation getWandOffset() {
+    public Transformation getWandOffset() {
         return wandOffset;
     }
 
-    public void setWandOffset(FactoredTransformation wandOffset) {
+    public void setWandOffset(Transformation wandOffset) {
         this.wandOffset = wandOffset;
         boxVisitor.setWandOffset(wandOffset);
     }

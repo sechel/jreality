@@ -16,7 +16,7 @@ import de.jreality.jogl.ViewerKeyListener;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
@@ -60,7 +60,7 @@ public class TestSphereDrawing extends AbstractLoadableScene {
 //			torus.setEdgeAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(4).createWritableDataList(edgeColors));
 			SceneGraphComponent globeNode = new SceneGraphComponent();
 			globeNode.setName("comp"+i);
-			FactoredTransformation gt= new FactoredTransformation();
+			Transformation gt= new Transformation();
 			//gt.setTranslation(-5.0 + 2.0* i, 0, 0.0);
 			globeNode.setTransformation(gt);
 			//if (i!=0) globeNode.setGeometry(GeometryUtility.implode(torus, -.9 + .4 * i));

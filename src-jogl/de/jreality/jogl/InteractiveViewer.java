@@ -20,7 +20,7 @@ import de.jreality.scene.Camera;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
 
 /**
@@ -91,7 +91,8 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 	public void updateInfoStrings(InfoOverlay io)	{
 		//System.out.println("Providing info strings");
 		infoStrings.clear();
-		infoStrings.add("FPS: "+getRenderer().getFramerate());
+		infoStrings.add("Real FPS: "+getRenderer().getFramerate());
+		infoStrings.add("Clock FPS: "+getRenderer().getClockrate());
 		infoStrings.add(getRenderer().getMemoryUsage());
 		io.setInfoStrings(infoStrings);
 	}
@@ -178,7 +179,7 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 			System.err.println("Invalid camera path, adding new camera.");
 			Camera c = new Camera();
 			SceneGraphComponent sgc = new SceneGraphComponent();
-			sgc.setTransformation(new FactoredTransformation());
+			sgc.setTransformation(new Transformation());
 			sgc.setName("Default Camera node");
 			sgc.setCamera(c);
 			sceneRoot.addChild(sgc);

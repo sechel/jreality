@@ -30,7 +30,7 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.ReflectionMap;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Texture2D;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
@@ -81,7 +81,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 
 		SceneGraphComponent root = new SceneGraphComponent();
 		root.setName("theWorld");
-		root.setTransformation(new FactoredTransformation());
+		root.setTransformation(new Transformation());
 		
 		String[] texNameSuffixes = {"rt","lf","up", "dn","bk","ft"};
 		ReflectionMap refm = ReflectionMap.reflectionMapFactory("textures/desertstorm/desertstorm_", texNameSuffixes, "JPG");
@@ -101,7 +101,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 		globeSet.setName("CatHel1");
 		SceneGraphComponent globeNode1= new SceneGraphComponent();
 		globeNode1.setName("Comp1");
-		FactoredTransformation gt= new FactoredTransformation();
+		Transformation gt= new Transformation();
 		gt.setTranslation(pos[0]);
 		gt.setStretch(.3);
 		globeNode1.setTransformation(gt);
@@ -135,7 +135,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   catHel.buildEdgesFromFaces();
 		SceneGraphComponent globeNode2= new SceneGraphComponent();
 		globeNode2.setName("Comp1");
-		gt= new FactoredTransformation();
+		gt= new Transformation();
 		gt.setTranslation(pos[1]);
 		gt.setStretch(.3);
 		globeNode2.setTransformation(gt);
@@ -159,7 +159,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   catHel.setName("CatHel3");
 	   catHel.buildEdgesFromFaces();
 		SceneGraphComponent globeNode3= new SceneGraphComponent();
-		gt= new FactoredTransformation();
+		gt= new Transformation();
 		gt.setTranslation(pos[2]);
 		gt.setStretch(.3);
 		globeNode3.setTransformation(gt);
@@ -181,7 +181,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   tube.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(GeometryUtility.calculateFaceNormals(tube)));
 	   tube.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(GeometryUtility.calculateVertexNormals(tube)));
 	   SceneGraphComponent globeNode4= new SceneGraphComponent();
-	   gt= new FactoredTransformation();
+	   gt= new Transformation();
 	   gt.setTranslation(pos[3]);
 	   //gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
 	   //gt.setStretch(.3);
@@ -206,7 +206,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   Torus torus= new Torus(2.3, 1.5, 40,60);
 	   torus.calculateNormals();
 	   SceneGraphComponent globeNode5= new SceneGraphComponent();
-	   gt= new FactoredTransformation();
+	   gt= new Transformation();
 	   gt.setTranslation(pos[4]);
 	   //gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
 	   gt.setStretch(.3);
@@ -222,7 +222,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   torus= new Torus(2.3, 1.5, 20, 20);
 	   torus.calculateNormals();
 	   SceneGraphComponent globeNode6= new SceneGraphComponent();
-	   gt= new FactoredTransformation();
+	   gt= new Transformation();
 	   gt.setTranslation(pos[5]);
 	   gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
 	   gt.setStretch(.3);

@@ -19,7 +19,7 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.ReflectionMap;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.util.ConfigurationAttributes;
@@ -79,7 +79,7 @@ public class TestTubes extends AbstractLoadableScene {
 
 	public SceneGraphComponent makeWorld() {
 		SceneGraphComponent root = new SceneGraphComponent();
-		root.setTransformation(new FactoredTransformation());
+		root.setTransformation(new Transformation());
 		root.setAppearance(new Appearance());
 		root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
 
@@ -170,7 +170,7 @@ public class TestTubes extends AbstractLoadableScene {
 	   
 	   //SceneGraphComponent globeNode4= SceneGraphUtilities.createFullSceneGraphComponent("patch");
 	   SceneGraphComponent globeNode4 = SceneGraphUtilities.createFullSceneGraphComponent("a node ");
-	   globeNode4.setTransformation(new FactoredTransformation());
+	   globeNode4.setTransformation(new Transformation());
 	   Appearance ap1 = new Appearance();
 	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.BLUE);
 	   ap1.setAttribute(CommonAttributes.SPECULAR_EXPONENT, 100.0);
@@ -196,7 +196,7 @@ public class TestTubes extends AbstractLoadableScene {
 
 	   if (doIco)	{
 		   SceneGraphComponent tubie = TubeUtility.ballAndStick(Primitives.sharedIcosahedron, .10, .05, java.awt.Color.YELLOW, java.awt.Color.GREEN, Pn.EUCLIDEAN); //TubeUtility.createTubesOnEdges(Primitives.sharedIcosahedron, .05); //TubeUtility.makeTubeAsIFS(p1, p2, .3, null);
-		   tubie.setTransformation(new FactoredTransformation());
+		   tubie.setTransformation(new Transformation());
 		   tubie.getTransformation().setStretch(.5);
 		   tubie.setAppearance(new Appearance());
 		   globeNode4.addChild(tubie);	   	

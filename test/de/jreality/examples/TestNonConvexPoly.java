@@ -190,14 +190,14 @@ public class TestNonConvexPoly implements KeyListener{
         // camera
         //
         SceneGraphComponent cameraNode= new SceneGraphComponent();
-        FactoredTransformation ct= new FactoredTransformation();
+        Transformation ct= new Transformation();
         ct.setTranslation(0, 0, 16);
         cameraNode.setTransformation(ct);
         firstCamera= new Camera();
         cameraNode.setCamera(firstCamera);
 
         SceneGraphComponent lightNode= new SceneGraphComponent();
-        FactoredTransformation lt= new FactoredTransformation();
+        Transformation lt= new Transformation();
         lt.setRotation(-Math.PI / 4, 1, 1, 0);
         lightNode.setTransformation(lt);
         DirectionalLight light= new DirectionalLight();
@@ -205,7 +205,7 @@ public class TestNonConvexPoly implements KeyListener{
         cameraNode.addChild(lightNode);
 
         SceneGraphComponent lightNode2= new SceneGraphComponent();
-        FactoredTransformation lt2= new FactoredTransformation();
+        Transformation lt2= new Transformation();
         //   lt2.assignScale(-1);
         lt.setRotation(-Math.PI / 4, 1, 1, 0);
         lightNode2.setTransformation(lt2);

@@ -11,7 +11,7 @@ import java.awt.event.MouseEvent;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.HelpOverlay;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.Pn;
 import de.jreality.util.Quaternion;
@@ -95,12 +95,12 @@ public class RotateShapeTool extends AbstractShapeTool {
 		//System.out.println("dt: "+dt+"Strength: "+strength+"angle: "+theAngle);
 		double[] axis = (double[] ) theAxis.clone();
 		//final double[] repeater = P3.makeRotationMatrix(null, axis, angle);
-		final FactoredTransformation repeater = new FactoredTransformation();
+		final Transformation repeater = new Transformation();
 		repeater.setCenter(myTransform.getCenter());
 		repeater.setRotation(angle, axis);
 		continuedMotion = new javax.swing.Timer(20, new ActionListener()	{
-			final FactoredTransformation tt = theEditedTransform;
-			final FactoredTransformation mt = myTransform;
+			final Transformation tt = theEditedTransform;
+			final Transformation mt = myTransform;
 			//final double[] repeater = mat;
 			final double[] OM = origM; //theEditedTransform.getMatrix();
 			final double[] acc = Rn.identityMatrix(4);

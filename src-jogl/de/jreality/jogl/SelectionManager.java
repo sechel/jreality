@@ -22,7 +22,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Sphere;
-import de.jreality.scene.FactoredTransformation;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
@@ -133,7 +133,7 @@ public class SelectionManager implements TransformationListener {
 			System.err.println("sel: "+theSelection.toString());
 			Object tail = theSelection.getLastElement();
 			if (tail instanceof SceneGraphComponent)	{
-				FactoredTransformation t =  ((SceneGraphComponent) tail).getTransformation();
+				Transformation t =  ((SceneGraphComponent) tail).getTransformation();
 				if (t != null && t.getIsEditable())	{
 					if (debug) System.err.println("Transformation is editable");
 					selectionEditable = true;
