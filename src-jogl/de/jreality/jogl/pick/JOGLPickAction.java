@@ -21,9 +21,13 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.Viewer;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.DataList;
 import de.jreality.scene.pick.PickAction;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.scene.pick.PickPointComparator;
+import de.jreality.util.P2;
+import de.jreality.util.P3;
 import de.jreality.util.Pn;
 import de.jreality.util.Rn;
 /**
@@ -32,7 +36,7 @@ import de.jreality.util.Rn;
  */
 public class JOGLPickAction extends PickAction  {
 	
-	static boolean useOpenGL = true;
+	static boolean useOpenGL = false;
 	
 	public JOGLPickAction(Viewer v) {
 		super(v);
@@ -44,7 +48,7 @@ public class JOGLPickAction extends PickAction  {
 	
 	public Object visit() {
 		if (useOpenGL && theViewer instanceof de.jreality.jogl.Viewer)	{
-			PickPoint[] hits = ((de.jreality.jogl.Viewer) theViewer).getRenderer().performPick(pickPoint);	
+			PickPoint[] hits = ((de.jreality.jogl.Viewer) theViewer).getRenderer().performPick(pickPointNDC);	
 			int n = 0;
 			if (hits != null)	n = hits.length;
 			pickHits = new Vector();
@@ -61,13 +65,12 @@ public class JOGLPickAction extends PickAction  {
 	public static PickPoint[] processOpenGLSelectionBuffer(int numberHits, IntBuffer selectBuffer, double[] pickPoint, Viewer v) {
 		double factor = 1.0/(0x7fffffff);
 		ArrayList al = new ArrayList();
-		PickPoint oneHit = new PickPoint();
+		PickPoint oneHit = null;
 		int realHits = 0;
 		Graphics3D context3D = new Graphics3D(v);
 		SceneGraphComponent theRoot = v.getSceneRoot();
 		for (int i =0, count = 0; i<numberHits; ++i)	{
 			int names = selectBuffer.get(count++);
-			oneHit = new PickPoint();
 			int[] path = new int[names];
 			double[] pndc = new double[3];
 			pndc[0] = pickPoint[0];
@@ -86,7 +89,7 @@ public class JOGLPickAction extends PickAction  {
 				if (j>0) {
 					if (!geometryFound)	{
 						if (path[j] >= 0 && sgc.getChildComponentCount() > path[j] && sgc.getChildComponent(path[j]) != null) {
-							SceneGraphComponent tmpc = (SceneGraphComponent) sgc.getChildComponent(path[j]);
+							SceneGraphComponent tmpc = sgc.getChildComponent(path[j]);
 							sgp.push(tmpc); 
 							sgc = tmpc;
 						}
@@ -147,11 +150,11 @@ public class JOGLPickAction extends PickAction  {
 					opt[k] = Rn.linearCombination(null, 1.0 - x[k], hp0, x[k], hp1);
 					ndcpt[k] = Rn.matrixTimesVector(null, o2ndc, opt[k]);
 					//Pn.dehomogenize(ndcpt[k], ndcpt[k]);
-					oneHit = new PickPoint();
+					oneHit = new PickPoint(v, sgp, ndcpt[k]);
 					oneHit.setPointObject(opt[k]);				
-					oneHit.setPointNDC(ndcpt[k]);
-					oneHit.setPickPath( (SceneGraphPath) sgp.clone());
-					oneHit.setContext(context3D.copy());
+					//oneHit.setPointNDC(ndcpt[k]);
+					//oneHit.setPickPath( (SceneGraphPath) sgp.clone());
+					//oneHit.setContext(context3D.copy());
 					oneHit.setPickType(PickPoint.HIT_FACE);  // TODO not really a face;  HIT_PRIMITIVE ?
 					al.add(oneHit);
 					realHits++;
@@ -167,6 +170,52 @@ public class JOGLPickAction extends PickAction  {
 		Arrays.sort(hits, cc);
 		return hits;
 	}
+	
+	protected static PickPoint calculatePickPointFor(PickPoint dst, double[] pndc, Graphics3D gc, SceneGraphPath sgp, IndexedFaceSet sg, int faceNum)	{
+		int[][] indices = sg.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
+		DataList verts = sg.getVertexAttributes(Attribute.COORDINATES);
+		if (faceNum >= indices.length)	{
+			System.out.println("Invalid face number in calculatePickPointFor()");
+			return null;
+		}
+		pndc[2] = 1.0;
+		double[][] onePolygon = new double[indices[faceNum].length][];
+		for (int j = 0; j<indices[faceNum].length; ++j)	{
+				onePolygon[j] = verts.item(indices[faceNum][j]).toDoubleArray(null);
+		}
+		Rn.matrixTimesVector(onePolygon,gc.getObjectToNDC(), onePolygon);
+		if (onePolygon[0].length == 4) Pn.dehomogenize(onePolygon, onePolygon);
+		//if (P2.isConvex(onePolygon) && P2.polygonContainsPoint(onePolygon,pndc))	{
+		if (P2.polygonContainsPoint(onePolygon,pndc))	{
+			double[] plane = P3.planeFromPoints(null, onePolygon[0], onePolygon[1], onePolygon[2]);
+			double[] p1 = (double[]) pndc.clone();
+			p1[2] = 0.0;
+			double[] intersect = P3.lineIntersectPlane(null, pndc, p1, plane);
+			if (intersect[2] < MIN_PICKZ || intersect[2] > MAX_PICKZ) {
+				System.out.println("calculatePickPointFor: bad z-coordinate");
+				return null;
+			}
+			//System.out.println("Intersect = "+Rn.toString(intersect));
+			double[] NDCToObject = Rn.inverse(null, gc.getObjectToNDC());
+			double[] objectPt = Rn.matrixTimesVector(null, NDCToObject, intersect);
+			Pn.dehomogenize(objectPt, objectPt);
+			dst = new PickPoint(gc.getViewer(), sgp, intersect);
+			//dst.setPickPath( (SceneGraphPath) sgp.clone());
+			//dst.setContext(gc.copy());
+			//dst.setPointNDC(intersect);
+			dst.setPointObject(objectPt);
+			dst.setFaceNum(faceNum);
+			dst.setPickType(PickPoint.HIT_FACE);
+		} else{
+			//System.out.println("calculatePickPointFor: no hit");
+			return null;
+		}
+		
+		return dst;
+	}
+
+	// In case I want to be able to use the superclass functionality, I have to be
+	// able to turn off the JOGL 
 	public static boolean isUseOpenGL() {
 		return useOpenGL;
 	}

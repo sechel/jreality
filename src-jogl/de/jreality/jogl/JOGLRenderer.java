@@ -184,6 +184,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 		// We "inline" the visit to the camera since it cannot be visited in the traversal order
 		// load the projection transformation
 		globalGL.glMultTransposeMatrixd(CameraUtility.getCamera(theViewer).getCameraToNDC(whichEye));
+		//System.out.println("CameraToNDC is \n"+Rn.matrixToString(CameraUtility.getCamera(theViewer).getCameraToNDC(whichEye)));
 
 		// prepare for rendering the geometry
 		globalGL.glMatrixMode(GL.GL_MODELVIEW);

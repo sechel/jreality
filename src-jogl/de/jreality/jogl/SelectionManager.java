@@ -116,6 +116,7 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 			theSelection = defaultSelection;
 			if (theSelection == null) {
 				setRenderSelection(false);
+				setRenderPick(false);
 				return;
 			}
 			if (defaultSelection != null) System.out.println("Default sel: "+theSelection.toString());
@@ -247,7 +248,7 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 				boundAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_STIPPLE,true);
 				//System.out.println("Turning on stippling");
 			}
-			SceneGraphNode sgn = ((SceneGraphNode) theSelection.getLastElement());
+			SceneGraphNode sgn =  theSelection.getLastElement();
 			Rectangle3D bbox = null;
 			// TODO implement bounding box business
 			if (sgn instanceof SceneGraphComponent) bbox = GeometryUtility.calculateChildrenBoundingBox((SceneGraphComponent) sgn);
@@ -328,29 +329,23 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 		return selectedAppearance;
 	}
 
-	/**
-	 * @param b
-	 */
-	public void setShowPick(boolean b) {
-		renderPick = b;
-		
-	}
 
 	public boolean isRenderPick() {
 		return renderPick;
 	}
 	public void setRenderPick(boolean renderPick) {
-		this.renderPick = renderPick;
+		renderSelection = this.renderPick = renderPick;
 		broadcastChange();
 	}
 	public boolean isRenderSelection() {
 		return renderSelection;
 	}
 	public void setRenderSelection(boolean renderSelection) {
-		this.renderSelection = renderSelection;
+		renderPick = this.renderSelection = renderSelection;
 		System.out.println("Render bound: "+renderSelection);
 		broadcastChange();
 	}
+	
 	public Appearance getPickPointAppearance() {
 		return pickPointAppearance;
 	}

@@ -14,6 +14,7 @@ import net.java.games.jogl.GLCanvas;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.TubeUtility;
+import de.jreality.geometry.TubeUtilityNew;
 import de.jreality.jogl.ElementBinding;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
@@ -170,7 +171,7 @@ public class DefaultLineShader implements LineShader  {
 		// TODO handle quadmesh differently
 		if ( !(original instanceof IndexedLineSet)) return -1;
 		if (tubeDraw && original instanceof IndexedLineSet)	{
-			int dlist =  createTubesOnEdgesAsDL((IndexedLineSet) original, tubeRadius, 1.0, gl);
+			int dlist =  createTubesOnEdgesAsDL((IndexedLineSet) original, tubeRadius, 1.0, gl, sig);
 			System.out.println("Creating tubes with radius "+tubeRadius);
 			return dlist;
 		}
@@ -200,7 +201,7 @@ public class DefaultLineShader implements LineShader  {
 	// TOOD figure out how to clear out local display lists (not returned by the method)!
 	int tubeDL = -1;
 	boolean testQMS = true;
-	public int createTubesOnEdgesAsDL(IndexedLineSet ils, double rad,  double alpha, GL gl)	{
+	public int createTubesOnEdgesAsDL(IndexedLineSet ils, double rad,  double alpha, GL gl, int sig)	{
 		int n = ils.getNumEdges();
 		DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
 		
@@ -225,14 +226,14 @@ public class DefaultLineShader implements LineShader  {
 			IndexedFaceSet tube = null;
 			for (int i = 0; i<u; ++i)	{
 				curve = GeometryUtility.extractUParameterCurve(curve, qms, i);
-				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, TubeUtility.PARALLEL, closedV);
+				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, TubeUtility.PARALLEL, closedV, sig);
 				GeometryUtility.calculateAndSetNormals(tube);
 				//System.out.println("Tube has "+tube.getNumPoints()+" points");
 				JOGLRendererHelper.drawFaces(tube, gl, false, true, alpha);
 			}
 			for (int i = 0; i<v; ++i)	{
 				curve = GeometryUtility.extractVParameterCurve(curve, qms, i);
-				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, TubeUtility.PARALLEL, closedU);
+				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, TubeUtility.PARALLEL, closedU, sig);
 				GeometryUtility.calculateAndSetNormals(tube);
 				//System.out.println("Tube has "+tube.getNumPoints()+" points");
 				JOGLRendererHelper.drawFaces(tube, gl, false, true, alpha);
@@ -242,20 +243,23 @@ public class DefaultLineShader implements LineShader  {
 				int[] ed = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
 				int m = ed.length;
 				if (m == 2)	{
-					int k = ed[0];
-					double[] p1 = vertices.item(k).toDoubleArray(null);	
-					k = ed[1];
-					double[] p2 = vertices.item(k).toDoubleArray(null);	
-					SceneGraphComponent cc = TubeUtility.makeTubeAsIFS(p1, p2, rad, null);
-					gl.glPushMatrix();
-					gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix());
-					gl.glCallList(tubeDL);
-					gl.glPopMatrix();
+					for (int j = 0; j<m-1; ++j)	{
+						int k = ed[j];
+						double[] p1 = vertices.item(k).toDoubleArray(null);	
+						k = ed[j+1];
+						double[] p2 = vertices.item(k).toDoubleArray(null);	
+						SceneGraphComponent cc = TubeUtility.makeTubeAsIFS(p1, p2, rad, null, sig);
+						gl.glPushMatrix();
+						gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix());
+						gl.glCallList(tubeDL);
+						gl.glPopMatrix();
+						
+					}
 				}
 				else {
 					double[][] curve = GeometryUtility.extractCurve(null, ils, i);
-					System.out.println("curve has "+curve.length+" segments");
-					QuadMeshShape tube = TubeUtility.makeTubeAsIFS(curve, rad, null, TubeUtility.PARALLEL, false, Pn.EUCLIDEAN);
+					//System.out.println("curve is "+Rn.toString(curve));
+					QuadMeshShape tube = TubeUtilityNew.makeTubeAsIFS(curve, rad, null, TubeUtility.PARALLEL, false, sig);
 					GeometryUtility.calculateAndSetNormals(tube);
 					JOGLRendererHelper.drawFaces(tube, gl, false, true, alpha);
 				}
