@@ -45,6 +45,8 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.ConfigurationAttributes;
+import de.jreality.util.LoadableScene;
 import de.jreality.util.P3;
 import de.jreality.util.Pn;
 import de.jreality.util.SceneGraphUtilities;
@@ -56,7 +58,7 @@ import de.jreality.util.SceneGraphUtilities;
  * To change the template for this generated type comment go to
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
-public abstract class InteractiveViewerDemo extends JFrame{
+public class InteractiveViewerDemo extends JFrame{
 	public final static int STANDARD = 1;
 	public final static int TABBED_PANE = 2;
 	public final static int SPLIT_PANE = 3;
@@ -389,5 +391,26 @@ public abstract class InteractiveViewerDemo extends JFrame{
 		
 		return lights;
 	}
+    public void loadWorld(String classname) {
+        long t = System.currentTimeMillis();
+        LoadableScene wm = null;
+        try {
+            wm = (LoadableScene) Class.forName(classname).newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // scene settings
+        wm.setConfiguration(ConfigurationAttributes.getDefaultConfiguration());
+        de.jreality.scene.SceneGraphComponent world = wm.makeWorld();
+        if (world != null) viewer.getSceneRoot().addChild(world);
+        viewer.setSignature(wm.getSignature());
+        long s = System.currentTimeMillis() - t;
+        System.out.println("loaded world " + classname + " successful. ["+s+"ms]");
+    }
 
+    public static void main(String[] args) throws Exception {
+    		InteractiveViewerDemo iv = new InteractiveViewerDemo();
+    		iv.loadWorld(args[0]);
+    		iv.begin();
+    }
 }

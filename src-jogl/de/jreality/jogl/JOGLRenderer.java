@@ -839,12 +839,12 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 		}
 		
 		public void removeJOGLPeer(JOGLPeerComponent jpc)	{
-			if (peers.contains(jpc)) return;
+			if (!peers.contains(jpc)) return;
 			peers.remove(jpc);
 			if (peers.size() == 0)	{
-				System.out.println("GoBetween for "+originalComponent.getName()+" has no peers left");
-//				goBetweenTable.remove(originalComponent);
-//				dispose();
+				//System.out.println("GoBetween for "+originalComponent.getName()+" has no peers left");
+				goBetweenTable.remove(originalComponent);
+				dispose();
 			}
 		}
 		

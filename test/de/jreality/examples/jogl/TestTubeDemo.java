@@ -18,7 +18,10 @@ import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.jogl.shader.DefaultVertexShader;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
+import de.jreality.util.ConfigurationAttributes;
+import de.jreality.util.LoadableScene;
 import de.jreality.util.P3;
+import de.jreality.util.Pn;
 import de.jreality.util.SceneGraphUtilities;
 
 /**
@@ -27,7 +30,7 @@ import de.jreality.util.SceneGraphUtilities;
  * To change the template for this generated type comment go to
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
-public class TestTubeDemo extends InteractiveViewerDemo {
+public class TestTubeDemo implements LoadableScene {
 
 	/**
 	 * 
@@ -139,13 +142,22 @@ public class TestTubeDemo extends InteractiveViewerDemo {
 	  return root;
 	}
 	 
+	public void setConfiguration(ConfigurationAttributes config) {
+	}
+
+	public int getSignature() {
+		return Pn.EUCLIDEAN;
+	}
+
    public static void main(String argv[])	{
 		Logger.getLogger("de.jreality").setLevel(Level.FINER);
 		Logger.getLogger("").getHandlers()[0].setLevel(Level.FINER);
-	   TestTubeDemo test = new TestTubeDemo();
+	   InteractiveViewerDemo test = new InteractiveViewerDemo();
+	   test.loadWorld(TestTubeDemo.class.getName());
 	   if (argv != null && argv.length > 0)	{
 		   Logger.getLogger("de.jreality").log(Level.INFO, "arguments are {0}",argv[0]);
 	   }
 	   test.begin();
    }
+
 }

@@ -147,6 +147,7 @@ public class ViewerKeyListener extends KeyAdapter {
 				case KeyEvent.VK_B:		// toggle backplane
 					if (e.isShiftDown()) {
 						viewer.getSelectionManager().setRenderSelection( !viewer.getSelectionManager().isRenderSelection());
+						viewer.getSelectionManager().setRenderPick( !viewer.getSelectionManager().isRenderPick());
 					} else
 						viewer.toggleBackPlane();
 					viewer.render();
