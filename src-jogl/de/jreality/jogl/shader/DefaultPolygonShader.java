@@ -149,4 +149,13 @@ public class DefaultPolygonShader implements PolygonShader {
 		diffuseColor = diffuseColor2;
 		
 	}
+
+
+	/**
+	 * @return
+	 */
+	public boolean isTextureEnabled() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

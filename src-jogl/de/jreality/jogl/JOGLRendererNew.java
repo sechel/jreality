@@ -648,7 +648,7 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 		}
 		
 		public void geometryChanged(GeometryEvent ev) {
-			System.err.println("JOGLPeerGeometry: geometryChanged");
+			//System.err.println("JOGLPeerGeometry: geometryChanged");
 			//TODO make more differentiated response based on event ev
 			final SceneGraphNode sg = (SceneGraphNode) ev.getSource();
 			dlInfo.setChange();
