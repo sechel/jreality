@@ -36,8 +36,26 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import de.jreality.scene.*;
-import de.jreality.scene.data.*;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.Camera;
+import de.jreality.scene.ClippingPlane;
+import de.jreality.scene.CommonAttributes;
+import de.jreality.scene.Cylinder;
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.PointSet;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.SceneGraphVisitor;
+import de.jreality.scene.Sphere;
+import de.jreality.scene.Texture2D;
+import de.jreality.scene.Transformation;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.DataList;
+import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.data.DoubleArrayArray;
+import de.jreality.scene.data.IntArray;
+import de.jreality.scene.data.IntArrayArray;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;
 import de.jreality.util.VecMat;

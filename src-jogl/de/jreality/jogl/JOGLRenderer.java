@@ -1,18 +1,20 @@
 /*
- * Created on Jan 8, 2004
+ * Created on Nov 25, 2004
  *
- * TODO figure out stencil drawing 
- * */
+ * TODO To change the template for this generated file go to
+ * Window - Preferences - Java - Code Style - Code Templates
+ */
 package de.jreality.jogl;
 
-import java.awt.Component;
-import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.geom.Rectangle2D;
 import java.nio.IntBuffer;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,43 +25,38 @@ import net.java.games.jogl.GLDrawable;
 import net.java.games.jogl.GLU;
 import net.java.games.jogl.util.BufferUtils;
 import de.jreality.geometry.SphereHelper;
-import de.jreality.jogl.pick.JOGLPickRequestor;
 import de.jreality.jogl.pick.JOGLPickAction;
-import de.jreality.jogl.shader.AbstractJOGLShader;
 import de.jreality.jogl.shader.DefaultGeometryShader;
-import de.jreality.jogl.shader.DefaultPolygonShader;
-import de.jreality.jogl.shader.DefaultVertexShader;
 import de.jreality.jogl.shader.RenderingHintsShader;
-import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
-import de.jreality.scene.ClippingPlane;
-import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.Graphics3D;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
-import de.jreality.scene.Light;
-import de.jreality.scene.PointLight;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
-import de.jreality.scene.SpotLight;
 import de.jreality.scene.Transformation;
-import de.jreality.scene.data.Attribute;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
 import de.jreality.scene.event.GeometryEvent;
 import de.jreality.scene.event.GeometryListener;
+import de.jreality.scene.event.SceneAncestorListener;
+import de.jreality.scene.event.SceneContainerEvent;
+import de.jreality.scene.event.SceneContainerListener;
+import de.jreality.scene.event.SceneHierarchyEvent;
+import de.jreality.scene.event.SceneTreeListener;
+import de.jreality.scene.event.TransformationEvent;
+import de.jreality.scene.event.TransformationListener;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ClippingPlaneCollector;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.LightCollector;
-import de.jreality.util.Pn;
+import de.jreality.util.Rectangle3D;
 import de.jreality.util.Rn;
 /**
  * TODO implement  isVisible   bit in SceneGraphNode
@@ -67,7 +64,8 @@ import de.jreality.util.Rn;
  * @author gunn
  *
  */
-public class JOGLRenderer  extends SceneGraphVisitor implements JOGLRendererInterface, GeometryListener, AppearanceListener  {
+public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInterface {
+
 	final static Logger theLog;
 	static boolean debugGL = false;
 	static {
@@ -77,631 +75,273 @@ public class JOGLRenderer  extends SceneGraphVisitor implements JOGLRendererInte
 		if (foo != null) { if (foo.equals("false")) debugGL = false; else debugGL =true;}
 		theLog.setLevel(Level.FINEST);
 	}
+	
 	public final static int MAX_STACK_DEPTH = 30;
 	protected int stackDepth;
-	/*
-	 * 	 These fields are used at each "level" of the traversal.
-	 * They are in essence stacked by each visit to a Component node 
-	 * (see pushContext() method)
-	 */
-	protected Appearance currentAppearance;
-	protected RenderingHintsShader renderingHints = new RenderingHintsShader();
-	protected DefaultGeometryShader currentGeometryShader = new DefaultGeometryShader();
-	protected EffectiveAppearance eAp;
-	protected double[] currentMatrix = new double[16];
+	JOGLRenderer globalHandle = null;
 	SceneGraphPath currentPath = new SceneGraphPath();
-	protected boolean isReflection = false;
-	protected boolean shaderUptodate = false;
-	protected boolean insidePointSet = false;
-	protected boolean insideLineSet = false;
-	public GlobalRenderInfo gri;
 	protected int whichEye;
-	protected int childIndex;
 	
+	
+	de.jreality.jogl.Viewer theViewer;
+	SceneGraphComponent theRoot, auxiliaryRoot;
+	JOGLPeerComponent thePeerRoot = null;
+	JOGLPeerComponent thePeerAuxilliaryRoot = null;
+	ConstructPeerGraphVisitor constructPeer;
+	JOGLRendererHelper helper;
+
+	GLCanvas theCanvas;
+	Graphics3D gc;
+	GL globalGL;
+	GLU globalGLU;
+	public  boolean texResident;
+	int numberTries = 0;		// how many times we have tried to make textures resident
+	boolean  useDisplayLists;
+	boolean globalIsReflection = false;
+
+	// pick-related stuff
+	boolean pickMode = false;
 	private final double pickScale = 10000.0;
-	
-	public class GlobalRenderInfo	{
-		de.jreality.jogl.Viewer theViewer;
-		SceneGraphComponent theRoot, auxiliaryRoot;
-		GLCanvas theCanvas;
-		Camera theCamera;
-		Graphics3D gc;
-		GL gl;
-		GLU glu;
-		public  boolean texResident;
-		int numberTries = 0;		// how many times we have tried to make textures resident
-		boolean  useDisplayLists, forceNewDisplayLists, insideDisplayList;
-		boolean apDirty = false;
-		boolean pickMode = false;
-		Transformation pickT = new Transformation();
-		PickPoint[] hits;
-		HashSet registeredAlready = new HashSet();
-		Hashtable apTable = new Hashtable();
-		Hashtable rhTable = new Hashtable();
-		Hashtable dlTable;
-		double framerate;
-		int lightCount = 0;
-		int nodeCount = 0;
-		public GlobalRenderInfo()	{
-			super();
-		}
-	}
+	Transformation pickT = new Transformation();
+	PickPoint[] hits;
 
-	
-	// register for geometry change events
-	private class RegisterForChange extends SceneGraphVisitor	{
-		public GeometryListener l;
-		public AppearanceListener al;
-		public RegisterForChange(GeometryListener who, AppearanceListener awho)	{
-			super();
-			l = who;
-			al = awho;
-		}
-		public void visit(SceneGraphComponent c) {
-			//theLog.log(Level.FINER, "Register change:  Component");
-		  	c.childrenAccept(this);
-		}
+	double framerate;
+	int lightCount = 0;
+	int nodeCount = 0;
+	Hashtable geometries = new Hashtable();
+	boolean geometryRemoved = false, lightListDirty = true;
 
-		public void visit(Appearance a) {
-			if (gri.registeredAlready.add(a)) 	{
-				a.addAppearanceListener(al);
-				//theLog.log(Level.FINER, "Adding appearance listener");
-			} 
-		}
-
-		public void visit(Geometry sg)	{
-			if (gri.registeredAlready.add(sg)) 	sg.addGeometryListener(l);
-		}
-	}
-	RegisterForChange rc;
-	
-	// I'd use clone() but it's not supported by super [SceneGraphVisitor]
-	public JOGLRenderer (JOGLRenderer p) {
-		super();
-		gri = p.gri;
-		renderingHints = p.renderingHints;
-		currentGeometryShader = p.currentGeometryShader;
-		renderingHints = p.renderingHints;
-		currentAppearance = p.currentAppearance;
-		eAp = p.eAp;
-		shaderUptodate = p.shaderUptodate;
-		isReflection = p.isReflection;
-		//currentMatrix = ((double[]) p.currentMatrix.clone());
-		currentPath = p.currentPath;
-		shaderUptodate = p.shaderUptodate;
-		childIndex = 0;
-	}
-	
 	/**
-	 * @param canvas
 	 * @param viewer
 	 */
 	public JOGLRenderer(de.jreality.jogl.Viewer viewer) {
 		super();
-		gri = new GlobalRenderInfo();
-		gri.theViewer = viewer;
-		gri.gc  = new Graphics3D(viewer);
-		//gri.gc.setCamera(cam);
-		gri.theCanvas = (GLCanvas) viewer.getViewingComponent();
-		gri.theRoot = viewer.getSceneRoot();
-		gri.theCamera = CameraUtility.getCamera(gri.theViewer);
-		gri.dlTable = new Hashtable();
-		Appearance defaultAp = new Appearance();
-		currentGeometryShader.setDefaultValues(defaultAp);
-		CommonAttributes.setDefaultValues(defaultAp);
-		renderingHints.setDefaultValues(defaultAp);
-		//currentMaterialShader.setDefaultValues(defaultAp);
-		eAp =  EffectiveAppearance.create();
-		eAp =  eAp.create(defaultAp);
-		gri.gc.setEffectiveAppearance(eAp);
-		gri.useDisplayLists = true;
-		Rn.setIdentityMatrix(currentMatrix);
+		theViewer = viewer;
+		gc  = new Graphics3D(viewer);
+		theCanvas = ((GLCanvas) viewer.getViewingComponent());
+		theRoot = viewer.getSceneRoot();
+		useDisplayLists = true;
 		theLog.log(Level.FINER, "Looked up logger successfully");
-		rc = new RegisterForChange( this, this);
-		childIndex = 0;
+		
+		globalHandle = this;
+		helper = new JOGLRendererHelper();
+		
+		javax.swing.Timer followTimer = new javax.swing.Timer(1000, new ActionListener()	{
+			public void actionPerformed(ActionEvent e) {updateGeometryHashtable(); } } );
+		followTimer.start();
+		
 	}
 
 
-	public  JOGLRenderer pushContext()	{
-		return new JOGLRenderer(this);
-	}
-	
-	
+
 	public SceneGraphComponent getAuxiliaryRoot() {
-		return gri.auxiliaryRoot;
+		return auxiliaryRoot;
 	}
 	public void setAuxiliaryRoot(SceneGraphComponent auxiliaryRoot) {
-		gri.auxiliaryRoot = auxiliaryRoot;
+		this.auxiliaryRoot = auxiliaryRoot;
+		if (auxiliaryRoot != null) {
+			ConstructPeerGraphVisitor aux = new ConstructPeerGraphVisitor(this.auxiliaryRoot, null);
+			thePeerAuxilliaryRoot = (JOGLPeerComponent) aux.visit();
+		}
+
 	}
 
-	private static final int MAX_DLIST_SIZE = 10000;
 	/* (non-Javadoc)
 	 * @see de.jreality..SceneGraphVisitor#init()
 	 */
 	public Object visit() {
 		//System.err.println("Initializing Visiting");
-		// register for changes
-		//TODO this is wasteful: use hierarchy events to keep uptodate with scene graph.
-		rc.visit(gri.theRoot);
-		if (gri.auxiliaryRoot != null) rc.visit(gri.auxiliaryRoot);
-		if (gri.apDirty || !gri.texResident )	{
-			gri.apTable.clear();
-			gri.rhTable.clear();
-			gri.forceNewDisplayLists = true;
-			gri.apDirty = false;
+		// check to see that the root hasn't changed; all other changes handled by hierarchy events
+		if (thePeerRoot == null || theViewer.getSceneRoot() != thePeerRoot.getOriginalComponent())	{
+			theRoot = theViewer.getSceneRoot();
+			constructPeer = new ConstructPeerGraphVisitor( theRoot, null);
+			thePeerRoot = (JOGLPeerComponent) constructPeer.visit();	
 		}
 		
-		gri.gl.glMatrixMode(GL.GL_PROJECTION);
-		gri.gl.glLoadIdentity();
+		JOGLRendererHelper.initializeGLState(theCanvas);
+		
+		globalGL.glMatrixMode(GL.GL_PROJECTION);
+		globalGL.glLoadIdentity();
 
-		if (!gri.pickMode)
-			JOGLRendererHelperNew.handleBackground(gri.theCanvas, gri.theRoot.getAppearance());
-		if (gri.pickMode)	{
-			gri.gl.glMultTransposeMatrixd(gri.pickT.getMatrix());
+		if (!pickMode)
+			JOGLRendererHelper.handleBackground(theCanvas, theRoot.getAppearance());
+		if (pickMode)	{
+			globalGL.glMultTransposeMatrixd(pickT.getMatrix());
 		}
-		gri.theCanvas.setAutoSwapBufferMode(
-				gri.theViewer.autoSwapBuffers&&!gri.pickMode);
+		theCanvas.setAutoSwapBufferMode(!pickMode);
 		
 		// We "inline" the visit to the camera since it cannot be visited in the traversal order
 		// load the projection transformation
-		gri.gl.glMultTransposeMatrixd(gri.theCamera.getCameraToNDC(whichEye));
+		globalGL.glMultTransposeMatrixd(CameraUtility.getCamera(theViewer).getCameraToNDC(whichEye));
 
 		// prepare for rendering the geometry
-		gri.gl.glMatrixMode(GL.GL_MODELVIEW);
-		gri.gl.glLoadIdentity();
-		double[] w2c = gri.gc.getWorldToCamera();
-		gri.gl.glLoadTransposeMatrixd(w2c);
-		isReflection = (Rn.determinant(w2c) > 0) ? false : true;
+		globalGL.glMatrixMode(GL.GL_MODELVIEW);
+		globalGL.glLoadIdentity();
+		double[] w2c = gc.getWorldToCamera();
+		globalGL.glLoadTransposeMatrixd(w2c);
 
-		if (!gri.pickMode) processLights();
+		if (!pickMode) processLights();
+		
 		processClippingPlanes();
 		
-		gri.nodeCount = 0;
-		gri.texResident = true;		// assume the best ...
-		gri.theRoot.accept(this);			
-		//System.out.println("Nodes visited in render traversal: "+gri.nodeCount);
-		//if (!gri.pickMode)	System.out.println("Rendering");
-		//else 	System.out.println("Picking");
-		if (!gri.pickMode && gri.auxiliaryRoot != null) gri.auxiliaryRoot.accept(this);
-		//if (gri.auxiliaryRoot != null) gri.auxiliaryRoot.accept(this);
-		gri.gl.glLoadIdentity();
-		gri.forceNewDisplayLists = false;
-		
-		//if (!gri.pickMode) gri.theCanvas.swapBuffers();
-		
-		//System.err.println("Display list population: "+gri.dlTable.size());
-		if (gri.dlTable.size() > MAX_DLIST_SIZE)	{
-			gri.dlTable.clear();
-			gri.forceNewDisplayLists = true;
-		} 
+		nodeCount = 0;			// for profiling info
+		texResident = true;		// assume the best ...
+		thePeerRoot.render();		
+		//System.out.println("Nodes visited in render traversal: "+nodeCount);
+		if (!pickMode && thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.render();
+		globalGL.glLoadIdentity();
 		forceResidentTextures();
+		
+		lightListDirty = false;
 		return null;
 	}
 	
 	/**
 	 * 
 	 */
+	private void processClippingPlanes() {
+		List clipPlanes = null;
+		if (clipPlanes == null)	{
+			ClippingPlaneCollector lc = new ClippingPlaneCollector(theRoot);
+			clipPlanes = (List) lc.visit();			
+		}
+		helper.processClippingPlanes(globalGL, clipPlanes);
+	}
+
+	// TODO convert this to peer structure
+	static List lights = null;
+	/**
+	 * @param theRoot2
+	 * @param globalGL2
+	 * @param lightListDirty2
+	 */
+	private void processLights( ) {
+		if (lights == null || lights.size() == 0 || lightListDirty) {
+			LightCollector lc = new LightCollector(theRoot);
+			lights = (List) lc.visit();
+		}
+		helper.processLights(globalGL, lights);
+	}
+
+
+
+	/**
+	 * 
+	 */
 	private void forceResidentTextures() {
 		// Try to force textures to be resident if they're not already
-		if (!gri.texResident && gri.numberTries < 3)	{
+		if (!texResident && numberTries < 3)	{
+			final Viewer theV = theViewer;
 			TimerTask rerenderTask = new TimerTask()	{
 				public void run()	{
-					rerender();
+					theV.render();
 				}
 			};
 			Timer doIt = new Timer();
 			doIt.schedule(rerenderTask, 10);
-			gri.forceNewDisplayLists = true;
-			System.out.println("Attempting to force textures resident");
-			gri.numberTries++;		// don't keep trying indefinitely
-		} else gri.numberTries = 0;
+			forceNewDisplayLists();
+			//System.out.println("Attempting to force textures resident");
+			numberTries++;		// don't keep trying indefinitely
+		} else numberTries = 0;
 	}
+
 
 	/**
 	 * 
 	 */
-	List lights = null;
-	private void processLights() {
-		gri.lightCount = GL.GL_LIGHT0;
-		
-		// collect and process the lights
-		// with a peer structure we don't do this but once, and then
-		// use event listening to keep our list up-to-date
-		// DEBUG: see what happens if we always reuse the light list
-		LightCollector lc = new LightCollector(gri.theRoot);
-		lights = (List) lc.visit();
-		int n = lights.size();
-		double[] zDirectiond = {0d,0d,1d,0d};
-		double[] origind = {0d,0d,0d,1d};
-		for (int i = 0; i<n; ++i)	{
-			SceneGraphPath lp = (SceneGraphPath) lights.get(i);
-			//System.out.println("Light"+i+": "+lp.toString());
-			double[] mat = lp.getMatrix(null);
-			double[] mat2 = Rn.identityMatrix(4);
-			double[] dir, trans;
-			dir = Rn.matrixTimesVector(null, mat, zDirectiond);
-			trans = Rn.matrixTimesVector(null, mat,origind);
-			Pn.dehomogenize(dir, dir);
-			Pn.dehomogenize(trans, trans);
-			for (int j=0; j<3; ++j) mat2[4*j+2] = dir[j];
-			for (int j=0; j<3; ++j) mat2[4*j+3] = trans[j];
-			//System.out.println("Light matrix is: "+Rn.matrixToString(mat));
-			gri.gl.glPushMatrix();
-			gri.gl.glMultTransposeMatrixd(mat2);
-			SceneGraphNode light = lp.getLastElement();
-			if (light instanceof SpotLight)		wisit((SpotLight) light);
-			else if (light instanceof PointLight)		wisit((PointLight) light);
-			else if (light instanceof DirectionalLight)		wisit((DirectionalLight) light);
-			else System.out.println("Invalid light class "+light.getClass().toString());
-			gri.gl.glPopMatrix();
-		}
-	}
-	
-	private static float[] zDirection = {0,0,1,0};
-	private static float[] mzDirection = {0,0,1,0};
-	private static float[] origin = {0,0,0,1};
-	
-	public void wisit(Light dl)	{
-		  //System.out.println("Visiting directional light");
-		  //gri.gl.glLightfv(gri.lightCount, GL.GL_AMBIENT, lightAmbient);
-		  gri.gl.glLightfv(gri.lightCount, GL.GL_DIFFUSE, dl.getScaledColorAsFloat());
-		  float f = (float) dl.getIntensity();
-		  float[] specC = {f,f,f};
-		  gri.gl.glLightfv(gri.lightCount, GL.GL_SPECULAR, specC);
-		  //gri.gl.glLightfv(gri.lightCount, GL.GL_SPECULAR, white);	
-	}
-	
-	public void wisit(DirectionalLight dl)		{
-		  if (gri.lightCount > GL.GL_LIGHT7)	{
-		  	System.out.println("Max. # lights exceeded");
-		  	return;
-		  }
-		  wisit( (Light) dl);
-		  gri.gl.glLightfv(gri.lightCount, GL.GL_POSITION, zDirection);
-		  gri.gl.glEnable(gri.lightCount);
-		  gri.lightCount++;
-	}
-	
-	public void wisit(PointLight dl)		{
-		  if (gri.lightCount >= GL.GL_LIGHT7)	{
-		  	System.out.println("Max. # lights exceeded");
-		  	return;
-		  }
-		  //gri.gl.glLightfv(gri.lightCount, GL.GL_AMBIENT, lightAmbient);
-		  wisit((Light) dl);
-		  gri.gl.glLightfv(gri.lightCount, GL.GL_POSITION, origin);
-		  gri.gl.glLightf(gri.lightCount, GL.GL_CONSTANT_ATTENUATION, (float) dl.getFalloffA0());
-		  gri.gl.glLightf(gri.lightCount, GL.GL_LINEAR_ATTENUATION, (float) dl.getFalloffA1());
-		  gri.gl.glLightf(gri.lightCount, GL.GL_QUADRATIC_ATTENUATION, (float) dl.getFalloffA2());
-		  if (!(dl instanceof SpotLight)) 	{
-			  	gri.gl.glEnable(gri.lightCount);
-		  		gri.lightCount++;
-		  }
-	}
-	
-	public void wisit(SpotLight dl)		{
-		  if (gri.lightCount >= GL.GL_LIGHT7)	{
-		  	System.out.println("Max. # lights exceeded");
-		  	return;
-		  }
-		  PointLight pl = (PointLight) dl;
-		  wisit(pl);
-		  gri.gl.glLightf(gri.lightCount, GL.GL_SPOT_CUTOFF, (float) ((180.0/Math.PI) * dl.getConeAngle()));
-		  gri.gl.glLightfv(gri.lightCount, GL.GL_SPOT_DIRECTION, mzDirection);
-		  gri.gl.glLightf(gri.lightCount, GL.GL_SPOT_EXPONENT, (float) dl.getDistribution());
-		  gri.gl.glEnable(gri.lightCount);
-		  gri.lightCount++;
-	}
-	
-	static double[] clipPlane = {0d, 0d, -1d, 0d};
-	
-	public void wisit(ClippingPlane cp)	{
-		gri.gl.glClipPlane(GL.GL_CLIP_PLANE0, clipPlane);
-		gri.gl.glEnable(GL.GL_CLIP_PLANE0);
+	private void forceNewDisplayLists() {
+		thePeerRoot.setDisplayListDirty(true);
+		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.setDisplayListDirty(true);
 	}
 
-	/**
-	 * 
-	 */
-	List clipPlanes = null;
-	private void processClippingPlanes() {
-		gri.lightCount = GL.GL_CLIP_PLANE0;
-		
-		// collect and process the lights
-		// with a peer structure we don't do this but once, and then
-		// use event listening to keep our list up-to-date
-		// DEBUG: see what happens if we always reuse the light list
-		ClippingPlaneCollector lc = new ClippingPlaneCollector(gri.theRoot);
-		clipPlanes = (List) lc.visit();
-		int n = clipPlanes.size();
-		double[] zDirectiond = {0d,0d,1d,0d};
-		double[] origind = {0d,0d,0d,1d};
-		for (int i = 0; i<n; ++i)	{
-			SceneGraphPath lp = (SceneGraphPath) clipPlanes.get(i);
-			//System.out.println("Light"+i+": "+lp.toString());
-			double[] mat = lp.getMatrix(null);
-			gri.gl.glPushMatrix();
-			gri.gl.glMultTransposeMatrixd(mat);
-			SceneGraphNode cp = lp.getLastElement();
-			if (cp instanceof ClippingPlane)		wisit((ClippingPlane) cp);
-			else System.out.println("Invalid clipplane class "+cp.getClass().toString());
-			gri.gl.glPopMatrix();
-		}
-	}
 
-	public void rerender()	{
-		gri.theViewer.render();
-	}
-	
-	public void visit(Appearance ap)	{
-		currentAppearance = ap;
-		currentGeometryShader = (DefaultGeometryShader) gri.apTable.get(ap);
-		renderingHints = (RenderingHintsShader) gri.rhTable.get(ap);
-		if (currentGeometryShader == null ) {
-			shaderUptodate = false;
-			setupShader();
-		}
-		if (renderingHints.isLightingEnabled())	gri.gl.glEnable(GL.GL_LIGHTING);
-		else									gri.gl.glDisable(GL.GL_LIGHTING);
-		
-		if (eAp.getAttribute("polygonShader.useGLShader", false) == true)	{
-			Object obj = (Object) eAp.getAttribute("polygonShader.GLShader", null, AbstractJOGLShader.class);
-			if (obj instanceof AbstractJOGLShader) {
-				System.out.println("Attempting to activate GL shader");
-				AbstractJOGLShader sh = (AbstractJOGLShader) obj;
-				//sh.setupShader();
-				sh.activate(gri.theCanvas);
-			}
-		}
-		//System.out.println("Transparency "+(renderingHints.isTransparencyEnabled() ? "enabled" : "disabled"));
-		//gri.gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE, polygonShader.getDiffuseColorAsFloat());
-		float[] testcolor = {.3f, .5f, .7f, .5f};
-		DefaultPolygonShader dps =  ((DefaultPolygonShader) currentGeometryShader.getPolygonShader());
-		if (dps != null) gri.gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, dps.getDiffuseColorAsFloat());
-		//System.out.println("Setting diffuse color to : "+currentGeometryShader.polygonShader.getDiffuseColor().toString());
-		gri.gl.glMaterialfv(GL.GL_BACK, GL.GL_DIFFUSE, testcolor);
-		if (dps != null) gri.gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SPECULAR, ((DefaultVertexShader) ((DefaultPolygonShader) currentGeometryShader.getPolygonShader()).vertexShader).getSpecularColorAsFloat());
-		if (dps != null) gri.gl.glMaterialf(GL.GL_FRONT_AND_BACK, GL.GL_SHININESS, (float) ((DefaultVertexShader) ((DefaultPolygonShader) currentGeometryShader.getPolygonShader()).vertexShader).getSpecularExponent());
-	}
-	
-	private void setupShader()	{
-		if (shaderUptodate) return;
-		eAp = eAp.create(currentAppearance);
-		gri.gc.setEffectiveAppearance(eAp);
-		if (currentGeometryShader == null) 	{
-			currentGeometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp,"");
-			gri.apTable.put(currentAppearance, currentGeometryShader);
-			renderingHints = RenderingHintsShader.createFromEffectiveAppearance(eAp,"");
-			gri.rhTable.put(currentAppearance, renderingHints);
-		} 
-		shaderUptodate = true;
-	}
-	/* (non-Javadoc)
-	 * @see de.jreality..SceneGraphVisitor#visit(de.jreality..Camera)
-	 */
-	public void visit(PointSet sg) {
-		if (!shaderUptodate) setupShader();
-		//Logger.getLoggerer.getLogger("de.jreality").log(Level.FINER, "Visiting VertexShape3D");
-		//if (!sg.isVisible()) return;		
-		boolean insideAtEntry = gri.insideDisplayList;
-		
-		if (displayListValid(sg))	return;
-		// TODO figure out how to avoid recurring on "helper" geometry
-		// i.e., we don't want to draw spheres around the vertices of
-		// a geometry used to represent a point as a sphere.
-		if (insidePointSet) return;
-		
-		insidePointSet = true;
-		JOGLRendererHelper.drawVertices(sg, gri.theCanvas, currentGeometryShader, renderingHints, this, gri.pickMode);
-		if (gri.useDisplayLists && !insideAtEntry)	{
-			gri.gl.glEndList();
-			gri.insideDisplayList = false;
-		}
-		insidePointSet = false;
-	}
-	
-
-	/* (non-Javadoc)
-	 * @see de.jreality..SceneGraphVisitor#visit(de.jreality..IndexedLineSet)
-	 */
-	public void visit(IndexedLineSet sg) {
-
-		if (!shaderUptodate) setupShader();
-		//theLog.log(Level.FINER, "Visiting IndexedLineSet");
-		//if (!sg.isVisible()) return;
-		int colorBind,normalBind;
-		
-		boolean insideAtEntry = gri.insideDisplayList;
-		if (displayListValid(sg))	return;
-		if (sg.getEdgeAttributes(Attribute.INDICES) == null) return;
-		insideLineSet = true;
-		if (currentGeometryShader.isEdgeDraw())	{
-			JOGLRendererHelper.drawLines(sg, gri.theCanvas, currentGeometryShader, renderingHints, insidePointSet, gri.pickMode);
-		}
-		insideLineSet = false;
-		visit((PointSet) sg);
-		if ( gri.useDisplayLists && !insideAtEntry)	{
-			gri.gl.glEndList();
-			gri.insideDisplayList = false;
-		}
-
-	}
-	
-	/* (non-Javadoc)
-	 * @see de.jreality..SceneGraphVisitor#visit(de.jreality..IndexedFaceSet)
-	 */
-	public void visit(IndexedFaceSet sg) {
-		//if (!sg.isVisible()) return;
-
-		if (!shaderUptodate) setupShader();
-		//theLog.log(Level.FINER, "Visiting IndexedFaceSet");
-		
-		boolean insideAtEntry = gri.insideDisplayList;
-		if (displayListValid(sg))	return;
-		
-		if (currentGeometryShader.isFaceDraw())	{
-			JOGLRendererHelper.drawFaces(this, sg, gri.theCanvas, currentGeometryShader, renderingHints, insidePointSet, insideLineSet, gri.pickMode);
-		}
-		visit((IndexedLineSet) sg);
-		if (!insideAtEntry && gri.useDisplayLists)	{
-			gri.gl.glEndList();
-			gri.insideDisplayList = false;
-		}
-	}
-  
-	public void visit(Sphere sg) {
-		//Primitives.sharedIcosahedron.accept(this);
-		double lod = renderingHints.getLevelOfDetail();
-		Geometry helper = null;
-		//if (lod == 0.0) 
-			//helper = SphereHelper.SPHERE_FINE;
-//		else	{
-//			double area = GeometryUtility.getNDCArea(sg, gri.gc.getObjectToNDC());
-//			if (area < .01)	helper = SphereHelper.SPHERE_COARSE;
-//			else if (area < .1 ) helper = SphereHelper.SPHERE_FINE;
-//			else if (area < .5) helper = SphereHelper.SPHERE_FINER;
-//			else helper = SphereHelper.SPHERE_FINEST;
-//		}
-			SphereHelper.SPHERE_FINE.accept(this);
-		//Rectangle3D uc = Rectangle3D.unitCube;
-		//SphereHelper.SPHERE_BOUND.accept(this);
-	}
-	
-	public void visit(SceneGraphComponent sg) {
-		//Logger.getLogger("de.jreality").log(Level.FINER, "Visiting SceneGraphComponent");
-		if (gri.pickMode)	{
-			gri.gl.glPushName(childIndex++);
-		}
-		if (!sg.isVisible()) return;
-		sg.preRender(gri.gc);
-		gri.nodeCount++;
-		// we aren't maintaining a software stack; use the path to calculate current matrix
-		// if needed
-		currentPath.push(sg);
-		gri.gc.setCurrentPath(currentPath);
-		//System.out.println("Node "+sg.getName());
-		stackDepth++;
-		if (stackDepth <= MAX_STACK_DEPTH) gri.gl.glPushMatrix();
-		sg.childrenAccept(pushContext());			
-		if (stackDepth <= MAX_STACK_DEPTH) gri.gl.glPopMatrix();
-		stackDepth--;
-		
-		currentPath.pop();
-		if (gri.pickMode)	{
-			gri.gl.glPopName();
-		}
-
-	}
-	
-	/* (non-Javadoc)
-	 * @see de.jreality..SceneGraphVisitor#visit(de.jreality..SceneGraphKit)
-	 */
-	public void visit(Transformation sg) {
-		//theLog.log(Level.FINER, "Visiting Transformation");
-		boolean isR = false;
-		//Rn.times(currentMatrix, currentMatrix, sg.getMatrix());
-		//gri.gc.setObjectToWorld(currentMatrix);
-		isR = sg.getIsReflection();
-		isReflection = !(isR == isReflection);
-		gri.gl.glFrontFace( isReflection? GL.GL_CW : GL.GL_CCW);
-		if (stackDepth <= MAX_STACK_DEPTH) gri.gl.glMultTransposeMatrixd(sg.getMatrix());
-		else gri.gl.glLoadTransposeMatrixd(gri.gc.getObjectToCamera());
-
-	}
-
-	static long frameCount = 0, otime;
+	long frameCount = 0, otime;
 	
 	/* (non-Javadoc)
 	 * @see net.java.games.jogl.GLEventListener#init(net.java.games.jogl.GLDrawable)
 	 */
 	public void init(GLDrawable drawable) {
-		//theLog.log(Level.FINER, "In init()");
 		if (debugGL) {
 			drawable.setGL(new DebugGL(drawable.getGL()));
 		}
-		//Thread currentThread = Thread.currentThread();
-		//Thread rThread = drawable.getRenderingThread();
-		//if (rThread == null || rThread != currentThread)	{
-			//theLog.log(Level.INFO, "Current thread: "+currentThread.getName());
-			//if (rThread == null) theLog.log(Level.INFO, "Rendering thread is null");
-			//else theLog.log(Level.INFO, "Rendering thread: "+rThread.getName());
-			//drawable.setRenderingThread(currentThread);
-		//}
-		gri.gl = gri.theCanvas.getGL();
-		gri.glu = gri.theCanvas.getGLU();
+		globalGL = theCanvas.getGL();
+		globalGLU = theCanvas.getGLU();
 
-		String vv = (String) gri.gl.glGetString(GL.GL_VERSION);
+		String vv = globalGL.glGetString(GL.GL_VERSION);
 		theLog.log(Level.INFO,"version: "+vv);
 		
 		otime = System.currentTimeMillis();
 
-		gri.theCamera.setAspectRatio(((double) gri.theCanvas.getWidth())/gri.theCanvas.getHeight());
-		gri.gl.glViewport(0,0, gri.theCanvas.getWidth(), gri.theCanvas.getHeight());
+		CameraUtility.getCamera(theViewer).setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
+		globalGL.glViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
 
-		JOGLRendererHelperNew.initializeGLState(gri.theCanvas);
 }
 
+	/* (non-Javadoc)
+	 * @see net.java.games.jogl.GLEventListener#display(net.java.games.jogl.GLDrawable)
+	 */
 	public void display(GLDrawable drawable) {
-		//if (gri.pickMode) return;
-		gri.theCanvas = (GLCanvas) drawable;
-		gri.gl = gri.theCanvas.getGL();
-		if (gri.theCamera != CameraUtility.getCamera(gri.theViewer))	{
-			gri.theCamera = CameraUtility.getCamera(gri.theViewer);
-			gri.theCamera.setAspectRatio(((double) gri.theCanvas.getWidth())/gri.theCanvas.getHeight());
-			gri.gl.glViewport(0,0, gri.theCanvas.getWidth(), gri.theCanvas.getHeight());
+		//if (pickMode) return;
+		theCanvas = (GLCanvas) drawable;
+		globalGL = theCanvas.getGL();
+		Camera theCamera = CameraUtility.getCamera(theViewer);
+		if (theCamera != CameraUtility.getCamera(theViewer))	{
+			theCamera = CameraUtility.getCamera(theViewer);
+			theCamera.setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
+			globalGL.glViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
 		}
 
-		//gri.theCamera.update();
+		//theCamera.update();
 		// TODO for split screen stereo, may want to have a real rectangle here, not always at (0,0)
 		// for now just do cross-eyed stereo
-		if (gri.theCamera.isStereo())		{
-			int which = gri.theViewer.getStereoType();
+		if (theCamera.isStereo())		{
+			int which = theViewer.getStereoType();
 			if (which == Viewer.CROSS_EYED_STEREO)		{
-				int w = gri.theCanvas.getWidth()/2;
-				int h = gri.theCanvas.getHeight();
-				gri.theCamera.setAspectRatio(((double) w)/h);
-				gri.theCamera.update();
+				int w = theCanvas.getWidth()/2;
+				int h = theCanvas.getHeight();
+				theCamera.setAspectRatio(((double) w)/h);
+				theCamera.update();
 				whichEye = Camera.RIGHT_EYE;
-				gri.gl.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-				gri.gl.glViewport(0,0, w,h);
+				globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+				globalGL.glViewport(0,0, w,h);
 				visit();
 				whichEye = Camera.LEFT_EYE;
-				gri.gl.glViewport(w, 0, w,h);
+				globalGL.glViewport(w, 0, w,h);
 				visit();
 			} 
 			else if (which >= Viewer.RED_BLUE_STEREO &&  which <= Viewer.RED_CYAN_STEREO) {
-				gri.theCamera.setAspectRatio(((double) gri.theCanvas.getWidth())/gri.theCanvas.getHeight());
-				gri.gl.glViewport(0,0, gri.theCanvas.getWidth(), gri.theCanvas.getHeight());
-				gri.gl.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+				theCamera.setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
+				globalGL.glViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
+				globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 				whichEye = Camera.RIGHT_EYE;
-		        if (which == Viewer.RED_GREEN_STEREO) gri.gl.glColorMask(false, true, false, true);
-		        else if (which == Viewer.RED_BLUE_STEREO) gri.gl.glColorMask(false, false, true, true);
-		        else if (which == Viewer.RED_CYAN_STEREO) gri.gl.glColorMask(false, true, true, true);
+		        if (which == Viewer.RED_GREEN_STEREO) globalGL.glColorMask(false, true, false, true);
+		        else if (which == Viewer.RED_BLUE_STEREO) globalGL.glColorMask(false, false, true, true);
+		        else if (which == Viewer.RED_CYAN_STEREO) globalGL.glColorMask(false, true, true, true);
 				visit();
 				whichEye = Camera.LEFT_EYE;
-		        gri.gl.glColorMask(true, false, false, true);
-				gri.gl.glClear (GL.GL_DEPTH_BUFFER_BIT);
+		        globalGL.glColorMask(true, false, false, true);
+				globalGL.glClear (GL.GL_DEPTH_BUFFER_BIT);
 				visit();
-		        gri.gl.glColorMask(true, true, true, true);
+		        globalGL.glColorMask(true, true, true, true);
 			} 
 			else	{
-				gri.theCamera.setAspectRatio(((double) gri.theCanvas.getWidth())/gri.theCanvas.getHeight());
-				gri.gl.glViewport(0,0, gri.theCanvas.getWidth(), gri.theCanvas.getHeight());
+				theCamera.setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
+				globalGL.glViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
 				whichEye = Camera.RIGHT_EYE;
-				gri.gl.glDrawBuffer(GL.GL_BACK_RIGHT);
-				gri.gl.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+				globalGL.glDrawBuffer(GL.GL_BACK_RIGHT);
+				globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 				visit();
 				whichEye = Camera.LEFT_EYE;
-				gri.gl.glDrawBuffer(GL.GL_BACK_LEFT);
-				gri.gl.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+				globalGL.glDrawBuffer(GL.GL_BACK_LEFT);
+				globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 				visit();
 			}
 		} 
 		else {
-			gri.gl.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-			gri.theCamera.setAspectRatio(((double) gri.theCanvas.getWidth())/gri.theCanvas.getHeight());
-			gri.gl.glViewport(0,0, gri.theCanvas.getWidth(), gri.theCanvas.getHeight());
-			if (!gri.pickMode)	visit();
+			globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+			theCamera.setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
+			globalGL.glViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
+			if (!pickMode)	visit();
 			else		{
 				// set up the "pick transformation"
 				IntBuffer selectBuffer = BufferUtils.newIntBuffer(bufsize);
@@ -709,36 +349,29 @@ public class JOGLRenderer  extends SceneGraphVisitor implements JOGLRendererInte
 				double[] pp3 = new double[3];
 				pp3[0] = -pickScale * pickPoint[0]; pp3[1] = -pickScale * pickPoint[1]; pp3[2] = 0.0;
 				
-				gri.pickT.setTranslation(pp3);
+				pickT.setTranslation(pp3);
 				double[] stretch = {pickScale, pickScale, 1.0};
-				gri.pickT.setStretch(stretch);
+				pickT.setStretch(stretch);
 				boolean store = isUseDisplayLists();
-				gri.useDisplayLists = false;
-				childIndex = 0;
-				gri.gl.glSelectBuffer(bufsize, selectBuffer);		
-				gri.gl.glRenderMode(GL.GL_SELECT);
-				gri.gl.glInitNames();
+				useDisplayLists = false;
+				globalGL.glSelectBuffer(bufsize, selectBuffer);		
+				globalGL.glRenderMode(GL.GL_SELECT);
+				globalGL.glInitNames();
+				globalGL.glPushName(0);
 				visit();
-				gri.pickMode = false;
-				int numberHits = gri.gl.glRenderMode(GL.GL_RENDER);
+				pickMode = false;
+				int numberHits = globalGL.glRenderMode(GL.GL_RENDER);
 				//System.out.println(numberHits+" hits");
-				gri.hits = JOGLPickAction.processOpenGLSelectionBuffer(numberHits, selectBuffer, pickPoint,gri.theViewer);
-				gri.useDisplayLists = store;
+				hits = JOGLPickAction.processOpenGLSelectionBuffer(numberHits, selectBuffer, pickPoint,theViewer);
+				useDisplayLists = store;
 				display(drawable);
-				//gri.theViewer.render();
-				// redraw
-//				display(drawable);
-//				if (pickRequestor != null)	{
-//					pickRequestor.pickPerformed( hits);
-//					pickRequestor = null;
-//				}
 			}
 		}
 		if (++frameCount % 100 == 0) {
 			long time = System.currentTimeMillis();
 			//theLog.log(Level.FINER,"Frame rate:\t"+(1000000.0/(time-otime)));
 			//System.err.println("Frame rate:\t"+(1000000.0/(time-otime)));
-			gri.framerate = (100000.0/(time-otime));
+			framerate = (100000.0/(time-otime));
 			otime = time;
 		} 
 	}
@@ -753,184 +386,793 @@ public class JOGLRenderer  extends SceneGraphVisitor implements JOGLRendererInte
 	 * @see net.java.games.jogl.GLEventListener#reshape(net.java.games.jogl.GLDrawable, int, int, int, int)
 	 */
 	public void reshape(GLDrawable arg0,int arg1,int arg2,int arg3,int arg4) {
-		gri.theCamera.setAspectRatio(((double) gri.theCanvas.getWidth())/gri.theCanvas.getHeight());
-		gri.gl.glViewport(0,0, gri.theCanvas.getWidth(), gri.theCanvas.getHeight());
+		CameraUtility.getCamera(theViewer).setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
+		globalGL.glViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
 	}
 
 	/**
 	 * @return
 	 */
 	public boolean isUseDisplayLists() {
-		return gri.useDisplayLists;
+		return useDisplayLists;
 	}
 
 	/**
 	 * @param b
 	 */
 	public void setUseDisplayLists(boolean b) {
-		gri.useDisplayLists = b;
-		if (gri.useDisplayLists)	gri.forceNewDisplayLists = true;
+		useDisplayLists = b;
+		if (useDisplayLists)	forceNewDisplayLists();
 	}
 
-	private static boolean removeOnChange = true;
-	/* (non-Javadoc)
-	 * @see de.jreality..VertexShape3D.Listener#geometryChanged(de.jreality..VertexShape3D.Changed)
-	 */
-	public void geometryChanged(GeometryEvent e) {
-		//System.err.println("SGRT: geometryChanged");
-		final SceneGraphNode sg = (SceneGraphNode) e.getSource();
-		Object foo = gri.dlTable.get(sg);
-		if (foo!= null && foo instanceof DisplayListInfo) {
-			DisplayListInfo dli = (DisplayListInfo) foo;
-			dli.frameCountAtLastChange = frameCount;
-			final int dlId = dli.displayListID;
-			dli.changeCount++;
-			dli.displayListDirty = true;
-			//System.err.println("Deleting display list for geometry: "+sg.getName());
-			// remove the entry from the table:
-			if (removeOnChange)	{
-					EventQueue.invokeLater(new Runnable() {
-						public void run() {
-							gri.dlTable.remove(sg);
-							gri.gl.glDeleteLists(dlId, 1);				
-						}
-					});
-			}
-		}
+//	public void geometryChanged(GeometryEvent e) {
+//		}
 		/*
-		CollectAncestorsVisitor cav = new CollectAncestorsVisitor(gri.theRoot, sg);
+		CollectAncestorsVisitor cav = new CollectAncestorsVisitor(theRoot, sg);
 		List anc = (List) cav.visit();
 		for (int i = 0; i<anc.size(); ++i)		{
 			Object ancx = anc.get(i);
 			//System.err.println("ancestor: "+ancx);
-			foo = gri.dlTable.get(ancx);
-			if (foo!= null) gri.dlTable.remove(ancx);
+			foo = dlTable.get(ancx);
+			if (foo!= null) dlTable.remove(ancx);
 		}
 		*/
-	}
-	
+//	}
+	private final static int POINTDL = 0;
+	private final static int LINEDL = 1;
+	private final static int FLAT_POLYGONDL = 2;
+	private final static int SMOOTH_POLYGONDL = 3;
+
 	private class DisplayListInfo	{
-		boolean useDisplayList;
-		int displayListID;
-		boolean displayListDirty;
-		int changeCount;
-		long frameCountAtLastChange;
-		DisplayListInfo(int id)	{
+		private boolean validDisplayList, 
+					useDisplayList, 	// can decide based on dynamic evaluation whether it makes sense 
+					insideDisplayList,
+					displayListDirty, realDLDirty[] = new boolean[4];
+		private int dl[];
+		private int changeCount;
+		private long frameCountAtLastChange;
+		DisplayListInfo()	{
 			super();
-			displayListID = id;
-			useDisplayList = true;
-			displayListDirty = false;
+			dl = new int[4];
+			for (int i = 0; i<4; ++i) { realDLDirty[i] = true; dl[i] = -1;}
+			validDisplayList = false;
+			insideDisplayList = false;
 			frameCountAtLastChange = frameCount;
 			changeCount = 0;
 		}
-		boolean useDisplayList(long frameCount)	{
+		boolean useDisplayList()	{
 			if (changeCount <= 3) return true;
 			long df = frameCount - frameCountAtLastChange;
 			if (useDisplayList && df <= 5) useDisplayList = false;
 			else if (!useDisplayList && df >= 5) useDisplayList = true;
 			return useDisplayList;
 		}
+
+		public void setFlatPolygonDisplayListID(int id)	{
+			dl[FLAT_POLYGONDL] = id;
+		}
+		
+		public int getFlatPolygonDisplayListID() {
+			return dl[FLAT_POLYGONDL];
+		}
+		
+		public void setSmoothPolygonDisplayListID(int id)	{
+			dl[SMOOTH_POLYGONDL] = id;
+		}
+		
+		public int getSmoothPolygonDisplayListID() {
+			return dl[SMOOTH_POLYGONDL];
+		}
+		
+		public void setLineDisplayListID(int id)	{
+			dl[LINEDL] = id;
+		}
+		
+		public int getLineDisplayListID() {
+			return dl[LINEDL];
+		}
+		
+		public void setPointDisplayListID(int id)	{
+			dl[POINTDL] = id;
+		}
+		
+		public int getPointDisplayListID() {
+			return dl[POINTDL];
+		}
+
+		public void setDisplayListID(int type, int id)	{
+			dl[type] = id;
+		}
+		
+		public int getDisplayListID(int type) {
+			return dl[type];
+		}
+
+		public boolean isDisplayListDirty(int type) {
+			return realDLDirty[type];
+		}
+		
+		public void setDisplayListDirty(int type, boolean b) {
+			realDLDirty[type] = b;
+		}
+		
+		public void setDisplayListsDirty() {
+			validDisplayList = false;
+			for (int i = 0; i<4; ++i) realDLDirty[i] = true;
+		}
+		
+		public boolean isInsideDisplayList() {
+			return insideDisplayList;
+		}
+		
+		public void setInsideDisplayList(boolean b) {
+			insideDisplayList = b;
+		}
+		
+		public boolean isValidDisplayList(int type) {
+			return false;
+		}
+		/**
+		 * 
+		 */
+		public void setChange() {
+			frameCountAtLastChange = frameCount;
+			changeCount++;
+			setDisplayListsDirty();
+		}
 	}
 	
 	
-	private boolean displayListValid(Object sg)	{
-		// There are two cases where we don't generate display lists
-		// First, if we're already inside a display list 
-		// or the global flag for display lists is turned off
-		if (gri.insideDisplayList || !gri.useDisplayLists) return false;
-		
-		boolean reuse = false;
-		DisplayListInfo dl = (DisplayListInfo) gri.dlTable.get(sg);
-		
-		// and secondly if this particular object dynamically determines that
-		// display lists are a bad idea
-		if (dl != null)	{
-			if (!dl.useDisplayList(frameCount)) return false;
-			if (!gri.forceNewDisplayLists) reuse = true;
-			if (dl.displayListDirty) reuse = false;
-		}
-		// to be here means we will use display lists
-		// Either the current one is valid ...
-		if (reuse)	{
-			gri.gl.glCallList(dl.displayListID);
-			return true;
-		} // or we need to generate a new display list
-		int nextDL = gri.gl.glGenLists(1);
-		if (dl == null)	{
-			dl = new DisplayListInfo(nextDL);					
-			gri.dlTable.put(sg,dl);
-		} else {
-			gri.gl.glDeleteLists(dl.displayListID, 1);
-		}
-		dl.displayListID = nextDL;
-		gri.gl.glNewList(nextDL, GL.GL_COMPILE_AND_EXECUTE);
-		gri.insideDisplayList = true;
-		dl.displayListDirty = false;
-		return false; 
-	}
-
-	/**
-	 * @return
-	 */
-	public Graphics3D getGraphics3D() {
-		return gri.gc;
-	}
-
-	/**
-	 * @param graphics3D
-	 */
-	/* public void setGraphics3D(Graphics3D graphics3D) {
-		gri.gc = graphics3D;
-	} */
-
-	/* (non-Javadoc)
-	 * @see de.jreality..AncestorFound#ancestorFound(java.lang.Object)
-	 */
-	public void ancestorFound(Object ancestor) {
-		Object foo = gri.dlTable.get(ancestor);
-		if (foo!= null) gri.dlTable.remove(ancestor);
-
-	}
-
-	/* (non-Javadoc)
-	 * @see de.jreality.scene.event.AppearanceListener#appearanceChanged(de.jreality.scene.event.AppearanceEvent)
-	 */
-	public void appearanceChanged(AppearanceEvent ev) {
-		gri.apDirty = true;
-		//theLog.log(Level.FINER, "SGRT: appearanceChanged");
-
-	}
-
 	public double getFramerate()	{
-		return gri.framerate;
+		return framerate;
 	}
 
-	private static boolean toggle = true;
 	private static  int bufsize = 4096;
 	double[] pickPoint = new double[2];
-	JOGLPickRequestor  pickRequestor = null;
 	public PickPoint[] performPick(double[] p)	{
-		if (gri.theCamera.isStereo())		{
+		if (CameraUtility.getCamera(theViewer).isStereo())		{
 			System.out.println("Can't pick in stereo mode");
 			return null;
 		}
 		pickPoint[0] = p[0];  pickPoint[1] = p[1];
-		gri.pickMode = true;
-		final Component viewingComponent = gri.theViewer.getViewingComponent();
-		((GLCanvas) viewingComponent).display();
-//		if(EventQueue.isDispatchThread()) {
-//			viewingComponent.update(viewingComponent.getGraphics());
-//		} else
-//			try {
-//				EventQueue.invokeAndWait(new Runnable() {
-//					public void run() {
-//						viewingComponent.update(viewingComponent.getGraphics());
-//					}
-//				});
+		pickMode = true;
+		theCanvas.display();	// this calls out display() method  directly
+		return hits;
+	}
+	
+	public class JOGLPeerNode	{
+		String name;
+		
+		public String getName()	{
+			return name;
+		}
+		
+		public void setName(String n)	{
+			name = n;
+		}
+	}
+
+	/**
+	 * 
+	 */
+	protected void updateGeometryHashtable() {
+		Logger.getLogger("de.jreality.jogl").log(Level.FINEST, "Memory usage: "+getMemoryUsage());
+		if (geometries == null) return;
+		if (!geometryRemoved) return;
+		final Hashtable newG = new Hashtable();
+		SceneGraphVisitor cleanup = new SceneGraphVisitor()	{
+			public void visit(SceneGraphComponent c) {
+				if (c.getGeometry() != null) {
+					Object peer = geometries.get(c.getGeometry());
+					newG.put(c.getGeometry(), peer);
+				}
+				c.childrenAccept(this);
+			}
+		};
+		cleanup.visit(theRoot);
+		//TODO dispose of the peer geomtry nodes which are no longer in the graph
+		//System.out.println("Old, new hash size: "+geometries.size()+" "+newG.size());
+		return;
+//		ArrayList removedGeoms = new ArrayList();
+//		java.util.Enumeration foo = geometries.keys();
+//		while (foo.hasMoreElements())	{
+//			Object key = foo.nextElement();
+//			if (!newG.containsKey(key)) removedGeoms.add(geometries.get(key));
+//		}
+		// switch over the hash table
+//		synchronized(geometries)	{
+//			geometries = newG;
+//			//System.out.println("Removing "+removedGeoms.size()+" geometry peers");
+//			Iterator iter = removedGeoms.iterator();
+//			while (iter.hasNext())	{
+//				Object el = iter.next();
+//				if (el instanceof JOGLPeerGeometry)	{
+//					((JOGLPeerGeometry)el).dispose();
+//				}
 //			}
-//		    catch (InterruptedException e) {}
-//			catch (InvocationTargetException e) {}
-		return gri.hits;
+//			geometryRemoved = false;
+//		}
+	}
+
+	public static String getMemoryUsage() {
+        Runtime r = Runtime.getRuntime();
+        int block = 1024;
+        return
+                "(memory usage: " + ((r.totalMemory() / block) - (r.freeMemory() / block)) + " kB)";
+    }
+	
+	public class JOGLPeerGeometry extends JOGLPeerNode implements GeometryListener	{
+		Geometry originalGeometry;
+		Vector proxyGeometry;
+		DisplayListInfo dlInfo;
+		IndexedFaceSet ifs;
+		IndexedLineSet ils;
+		PointSet ps;
+		int refCount = 0;
+		
+		protected JOGLPeerGeometry(Geometry g)	{
+			super();
+			originalGeometry = g;
+			name = "JOGLPeer:"+g.getName();
+			dlInfo = new DisplayListInfo();
+			ifs = null; ils = null; ps = null;
+			if (g instanceof IndexedFaceSet) ifs = (IndexedFaceSet) g;
+			if (g instanceof IndexedLineSet) ils = (IndexedLineSet) g;
+			if (g instanceof PointSet) ps = (PointSet) g;
+			originalGeometry.addGeometryListener(this);
+		}
+		
+		public void dispose()		{
+			refCount--;
+			if (refCount < 0)	{
+				System.out.println("Negative reference count!");
+			}
+			if (refCount == 0)	{
+				//System.out.println("Geometry is no longer referenced");
+				originalGeometry.removeGeometryListener(this);	
+				geometries.remove(originalGeometry);
+			}
+		}
+		
+		public void geometryChanged(GeometryEvent ev) {
+			//System.err.println("JOGLPeerGeometry: geometryChanged");
+			//TODO make more differentiated response based on event ev
+			final SceneGraphNode sg = (SceneGraphNode) ev.getSource();
+			dlInfo.setChange();
+		}
+		
+		
+		/**
+		 * 
+		 */
+		public void render(JOGLPeerComponent jpc) {
+			//System.out.println("In JOGLPeerGeometry render() for "+originalGeometry.getName());
+			RenderingHintsShader renderingHints = jpc.renderingHints;
+			DefaultGeometryShader geometryShader = jpc.geometryShader;
+			renderingHints.render(globalHandle);
+			if (originalGeometry instanceof Sphere)	{
+//				IndexedFaceSet foo = getProxyFor((Sphere) originalGeometry);
+//				ifs = foo;
+//				ils = foo;
+//				ps = foo;
+				geometryShader.polygonShader.render(globalHandle);
+				boolean ss = geometryShader.polygonShader.isSmoothShading();
+				// TODO figure out which sphere proxy to use based on distance, LOD, etc
+				
+				int dlist = JOGLRendererHelper.getSphereDLists(2, globalHandle);
+				globalGL.glCallList(dlist);
+				return;
+			}
+			if (geometryShader.isFaceDraw() && ifs != null)	{
+				geometryShader.polygonShader.render(globalHandle);
+				boolean ss = geometryShader.polygonShader.isSmoothShading();
+				int type = ss ? SMOOTH_POLYGONDL : FLAT_POLYGONDL;
+				if (!processDisplayListState(type))		 // false return implies no display lists used
+					JOGLRendererHelper.drawFaces(ifs, theCanvas,pickMode, ss);
+				else // we are using display lists
+					if (dlInfo.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
+						JOGLRendererHelper.drawFaces(ifs, theCanvas,pickMode, ss);
+						globalGL.glEndList();	
+						dlInfo.setDisplayListDirty(type, false);
+						dlInfo.setInsideDisplayList(false);
+					}
+			}
+			if (geometryShader.isEdgeDraw() && ils != null)	{
+				geometryShader.lineShader.render(globalHandle);
+				int type = LINEDL;
+				if (!processDisplayListState(type))		 // false return implies no display lists used
+					JOGLRendererHelper.drawLines(ils, theCanvas, jpc, pickMode);			
+				else // we are using display lists
+					if (dlInfo.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
+						JOGLRendererHelper.drawLines(ils, theCanvas, jpc, pickMode);			
+						globalGL.glEndList();	
+						dlInfo.setDisplayListDirty(type, false);
+						dlInfo.setInsideDisplayList(false);
+					}
+			}
+			if (geometryShader.isVertexDraw() && ps != null)	{
+				geometryShader.pointShader.render(globalHandle);
+				int type = POINTDL;
+				boolean spheres = geometryShader.pointShader.isSphereDraw();
+				if (spheres || !processDisplayListState(type))		 // false return implies no display lists used
+					JOGLRendererHelper.drawVertices(ps, globalHandle, geometryShader.pointShader.isSphereDraw(), geometryShader.pointShader.getPointRadius());			
+				else // we are using display lists
+					if (dlInfo.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
+						JOGLRendererHelper.drawVertices(ps, globalHandle, geometryShader.pointShader.isSphereDraw(), geometryShader.pointShader.getPointRadius());			
+						globalGL.glEndList();	
+						dlInfo.setDisplayListDirty(type, false);
+						dlInfo.setInsideDisplayList(false);
+					}
+			}
+		}
+
+		private boolean processDisplayListState(int type)	{
+			DisplayListInfo dl = dlInfo;
+			
+			//System.out.println("Valid display list for "+pc.getOriginalComponent().getName()+"is "+dl.isValidDisplayList());
+			dl.setInsideDisplayList(false);
+			if (!useDisplayLists || !dl.useDisplayList()) {
+				return false;
+			}
+			if (!dl.isDisplayListDirty(type))	{
+				//System.out.println("Using display list");
+				globalGL.glCallList(dlInfo.getDisplayListID(type));
+				return true;
+			}
+			
+			if (dl.getDisplayListID(type) != -1) {
+				globalGL.glDeleteLists(dl.getDisplayListID(type), 1);
+				dl.setDisplayListID(type, -1);
+			}
+			int nextDL = globalGL.glGenLists(1);
+
+			dl.setDisplayListID(type, nextDL);
+			globalGL.glNewList(dl.getDisplayListID(type), GL.GL_COMPILE_AND_EXECUTE);
+			//System.out.println("Beginning display list for "+originalGeometry.getName());
+			dl.setInsideDisplayList(true);
+			return true;
+		}
+
+		/**
+		 * @param sphere
+		 * @return
+		 */
+		private IndexedFaceSet getProxyFor(Sphere sphere) {
+			return SphereHelper.spheres[2];
+		}
+	}
+	
+//	public void visit(Sphere sg) {
+//		//Primitives.sharedIcosahedron.accept(this);
+//		//double lod = renderingHints.getLevelOfDetail();
+//		SceneGraphComponent helper = null;
+//		System.out.println("Rendering sphere");
+//		//if (lod == 0.0) 
+//			
+//		else	{
+//			double area = GeometryUtility.getNDCArea(sg, gc.getObjectToNDC());
+//			if (area < .01)	helper = SphereHelper.SPHERE_COARSE;
+//			else if (area < .1 ) helper = SphereHelper.SPHERE_FINE;
+//			else if (area < .5) helper = SphereHelper.SPHERE_FINER;
+//			else helper = SphereHelper.SPHERE_FINEST;
+//		}
+//		SphereHelper.SPHERE_FINE.accept(this);
+//		//Rectangle3D uc = Rectangle3D.unitCube;
+//		//SphereHelper.SPHERE_BOUND.accept(this);
+//	}
+	
+	public  JOGLPeerGeometry getJOGLPeerGeometryFor(Geometry g)	{
+		JOGLPeerGeometry pg;
+		synchronized(geometries)	{
+			pg = (JOGLPeerGeometry) geometries.get(g);
+			if (pg != null) return pg;
+			pg = new JOGLPeerGeometry(g);
+			geometries.put(g, pg);			
+		}
+		return pg;
+	}
+	
+	// register for geometry change events
+	private class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
+		SceneGraphComponent myRoot;
+		JOGLPeerComponent thePeerRoot, myParent;
+		SceneGraphPath sgp;
+		boolean topLevel = true;
+		public ConstructPeerGraphVisitor(SceneGraphComponent r, JOGLPeerComponent p)	{
+			super();
+			myRoot = r;
+			sgp = new SceneGraphPath();
+			myParent = p;
+			System.out.println("Constructing peer");
+			//thePeerRoot = p;
+		}
+		
+		private ConstructPeerGraphVisitor(ConstructPeerGraphVisitor pv, JOGLPeerComponent p)	{
+			super();
+			sgp = (SceneGraphPath) pv.sgp.clone();
+			myParent = p;
+			topLevel = false;
+		}
+		
+		public void visit(SceneGraphComponent c) {
+			sgp.push(c);
+			JOGLPeerComponent peer = new JOGLPeerComponent(sgp, myParent);
+			// we don't add the top-level node here to its parent; 
+			// that has to be done carefully using a childLock by the caller
+			if (topLevel) thePeerRoot = peer;
+			else if (myParent != null) {
+				int n = myParent.children.size();
+				myParent.children.add(peer);
+				peer.childIndex = n;
+			}
+		  	c.childrenAccept(new ConstructPeerGraphVisitor(this, peer));
+		  	//peer.setIndexOfChildren();
+		  	sgp.pop();
+		}
+
+		public Object visit()	{
+			visit(myRoot);
+			return thePeerRoot;
+		}
+		
+	}
+	public class JOGLPeerComponent extends JOGLPeerNode implements TransformationListener, AppearanceListener,
+		SceneAncestorListener, SceneContainerListener, SceneTreeListener {
+		
+		public int[] bindings = new int[2];
+		SceneGraphComponent originalComponent;
+		EffectiveAppearance eAp;
+		Vector children;
+		DisplayListInfo dlInfo;
+		JOGLPeerComponent parent;
+		int childIndex;	
+		JOGLPeerGeometry peerGeometry;
+		
+		Rectangle3D childrenBound;
+		Rectangle2D ndcExtent;
+		SceneGraphPath	pathToHere;
+		boolean isReflection = false, cumulativeIsReflection = false;
+		double determinant = 0.0;
+		
+		// for now, keep the primitive shading support
+		RenderingHintsShader renderingHints;
+		DefaultGeometryShader geometryShader;
+		
+		Object childLock = new Object();		
+		
+		boolean appearanceChanged,
+			appearanceIsDirty,
+			geometryIsDirty,
+			boundIsDirty,
+			object2WorldDirty;
+
+		public JOGLPeerComponent(SceneGraphPath sgp, JOGLPeerComponent p)		{
+			super();
+			if (sgp == null || !(sgp.getLastElement() instanceof SceneGraphComponent))  {
+				System.out.println("Invalid parameters to constructor JOGLPeerComponent");
+			} else {
+				pathToHere = sgp;
+				originalComponent = sgp.getLastComponent();
+				name = "JOGLPeer:"+originalComponent.getName();
+				appearanceChanged = false;
+				appearanceIsDirty = true;
+				geometryIsDirty = true;
+				boundIsDirty = true;
+				object2WorldDirty = true;
+				children = new Vector();		// always have a child list, even if it's empty
+				dlInfo = new DisplayListInfo();
+				parent = p;
+				updateTransformationInfo();
+				if (originalComponent.getGeometry() != null)  {
+					peerGeometry = getJOGLPeerGeometryFor(originalComponent.getGeometry());
+					peerGeometry.refCount++;
+				} else peerGeometry = null;
+				originalComponent.addSceneAncestorListener(this);
+				originalComponent.addSceneContainerListener(this);
+				originalComponent.addSceneTreeListener(this);
+				if (originalComponent.getAppearance() != null) originalComponent.getAppearance().addAppearanceListener(this);				
+			}
+		}
+		
+		public void dispose()	{
+			originalComponent.removeSceneAncestorListener(this);
+			originalComponent.removeSceneContainerListener(this);
+			originalComponent.removeSceneTreeListener(this);
+			if (originalComponent.getAppearance() != null) originalComponent.getAppearance().removeAppearanceListener(this);
+			if (peerGeometry != null)		peerGeometry.dispose();
+	
+			//synchronized(childLock)	{
+				int n = children.size();
+				for (int i = n-1; i>=0; --i)	{
+					JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
+					child.dispose();
+				}				
+			//}
+
+		}
+		public void render()		{
+			//System.out.println("Rendering "+originalComponent.getName());
+			if (!originalComponent.isVisible()) return;
+						
+			// the following looks very dangerous
+			//originalComponent.preRender(gc);
+			
+			nodeCount++;
+			currentPath.push(originalComponent);
+			gc.setCurrentPath(currentPath);
+			Transformation thisT = originalComponent.getTransformation();
+			
+			//System.out.println("In JOGLPeerComponent render() for "+originalComponent.getName());
+			if (thisT != null)	{
+				if (stackDepth <= MAX_STACK_DEPTH) {
+					globalGL.glPushMatrix();
+					globalGL.glMultTransposeMatrixd(thisT.getMatrix());
+				}
+				else globalGL.glLoadTransposeMatrixd(gc.getObjectToCamera());				
+			}  
+			// should depend on camera transformation ...
+			if (parent != null) cumulativeIsReflection = (isReflection != parent.cumulativeIsReflection);
+			globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
+
+			if (appearanceChanged)  	propagateAppearanceChanged();
+			if (appearanceIsDirty)	{ updateAppearance(); }
+			gc.setEffectiveAppearance(eAp);
+			
+			// render the geometry
+			if (peerGeometry != null)	{
+				peerGeometry.render(this);
+			}
+			
+			//synchronized(childLock)	{
+				// render the children
+				int n = children.size();
+				for (int i = 0; i<n; ++i)	{		
+					JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
+					
+					if (pickMode)	globalGL.glPushName(child.childIndex);
+					child.render();
+					if (pickMode)	globalGL.glPopName();
+				}				
+			//}
+			
+			if (thisT != null)	{
+				if (stackDepth <= MAX_STACK_DEPTH) globalGL.glPopMatrix();
+				stackDepth--;
+			}			
+			currentPath.pop();
+		}
+		
+		public void setIndexOfChildren()	{
+			synchronized(childLock){
+				int n = originalComponent.getChildComponentCount();
+				for (int i = 0; i<n; ++i)	{
+					SceneGraphComponent sgc = originalComponent.getChildComponent(i);
+					JOGLPeerComponent jpc = getPeerForChildComponent(sgc);
+					if (jpc == null)	{
+						System.out.println("No peer for sgc "+sgc);
+						jpc.childIndex = -1;
+					} else jpc.childIndex = i;
+				}				
+			}
+		}
+
+		private void setDisplayListDirty(boolean b)	{
+			dlInfo.setDisplayListsDirty();
+			//synchronized(childLock)	{
+				int n = children.size();
+				for (int i = 0; i<n; ++i)	{		
+					JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
+					child.setDisplayListDirty(b);
+				}				
+			//}
+		}
+		
+		private void updateAppearance()	{
+			if (parent == null)	{
+				if (eAp == null) eAp = EffectiveAppearance.create();
+				if (originalComponent.getAppearance() != null )	
+					eAp = eAp.create(originalComponent.getAppearance());
+				// TODO figure out why I put this here in the first place
+				//else eAp = eAp.create(new Appearance());				
+			} else {
+				if ( parent.eAp == null)	{
+					System.out.println("No effective appearance in parent "+parent.getName());
+					return;
+				}
+				if (originalComponent.getAppearance() != null )	
+					eAp = parent.eAp.create(originalComponent.getAppearance());
+				else eAp = parent.eAp;				
+			}
+			geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
+			//System.out.println("component "+originalComponent.getName()+" vertex draw is "+geometryShader.isVertexDraw());
+			renderingHints = RenderingHintsShader.createFromEffectiveAppearance(eAp, "");
+			appearanceIsDirty = false;
+		}
+		
+		public void ancestorAttached(SceneHierarchyEvent ev) {
+		}
+		
+		public void ancestorDetached(SceneHierarchyEvent ev) {
+		}
+		
+		/**
+		 * @param sgc
+		 * @return
+		 */
+		private JOGLPeerComponent getPeerForChildComponent(SceneGraphComponent sgc) {
+			
+			int n = children.size();
+			for (int i = 0; i<n; ++i)	{
+				JOGLPeerComponent jpc = (JOGLPeerComponent) children.get(i);
+				if ( jpc.originalComponent == sgc) { // found!
+					return jpc;
+				}
+			}
+			return null;
+		}
+
+		public void childAdded(SceneContainerEvent ev) {
+			//System.out.println("Container Child added to: "+originalComponent.getName());
+			//System.out.println("Event is: "+ev.toString());
+			switch (ev.getChildType() )	{
+				case SceneContainerEvent.CHILD_TYPE_COMPONENT:
+					SceneGraphComponent sgc = (SceneGraphComponent) ev.getNewChildElement();
+					ConstructPeerGraphVisitor pv = new ConstructPeerGraphVisitor(sgc, this);
+					JOGLPeerComponent pc = (JOGLPeerComponent) pv.visit();
+					synchronized(childLock)	{
+				    //System.out.println("Before adding child count is "+children.size());
+						children.add(pc);						
+					  
+					//System.out.println("After adding child count is "+children.size());
+					}
+					setIndexOfChildren();
+					break;
+				case SceneContainerEvent.CHILD_TYPE_GEOMETRY:
+					if (peerGeometry != null)	{
+						peerGeometry.dispose();
+						geometryRemoved = true;
+						System.out.println("Warning: Adding geometry while old one still valid");
+						peerGeometry=null;
+					}
+					if (originalComponent.getGeometry() != null)  {
+						peerGeometry = getJOGLPeerGeometryFor(originalComponent.getGeometry());
+						peerGeometry.refCount++;
+					} 
+					break;
+				case SceneContainerEvent.CHILD_TYPE_LIGHT:
+					lightListDirty = true;
+					break;
+				case SceneContainerEvent.CHILD_TYPE_TRANSFORMATION:
+					updateTransformationInfo();
+					break;
+				default:
+					System.out.println("Taking no action for addition of child type "+ev.getChildType());
+					break;
+			}
+		}
+		
+		public void childRemoved(SceneContainerEvent ev) {
+			//System.out.println("Container Child removed from: "+originalComponent.getName());
+			switch (ev.getChildType() )	{
+				case SceneContainerEvent.CHILD_TYPE_COMPONENT:
+					SceneGraphComponent sgc = (SceneGraphComponent) ev.getOldChildElement();
+				    JOGLPeerComponent jpc = getPeerForChildComponent(sgc);
+				    if (jpc == null) return;
+				    System.out.println("removing peer "+jpc.getName());
+				    //System.out.println("Before removal child count is "+children.size());
+					synchronized(childLock)	{
+					    children.remove(jpc);						
+					}
+					//System.out.println("After removal child count is "+children.size());
+				    jpc.dispose();		// there are no other references to this child
+				    setIndexOfChildren();
+					break;
+				case SceneContainerEvent.CHILD_TYPE_GEOMETRY:
+					if (peerGeometry != null) {
+						peerGeometry.dispose();		// really decreases reference count
+						peerGeometry = null;
+						geometryRemoved = true;
+					}
+					break;
+				case SceneContainerEvent.CHILD_TYPE_LIGHT:
+					lightListDirty = true;
+					break;
+				case SceneContainerEvent.CHILD_TYPE_TRANSFORMATION:
+					updateTransformationInfo();
+					break;			
+				default:
+					System.out.println("Taking no action for removal of child type "+ev.getChildType());
+					break;
+		}
+		}
+		
+		public void childReplaced(SceneContainerEvent ev) {
+			//System.out.println("Container Child replaced at: "+originalComponent.getName());
+			switch(ev.getChildType())	{
+				case SceneContainerEvent.CHILD_TYPE_APPEARANCE:
+					appearanceChanged = true;
+					break;
+				case SceneContainerEvent.CHILD_TYPE_GEOMETRY:
+					if (peerGeometry != null && peerGeometry.originalGeometry == originalComponent.getGeometry()) break;		// no change, really
+					if (peerGeometry != null) {
+						peerGeometry.dispose();
+						geometryRemoved=true;
+						peerGeometry = null;
+					}
+					if (originalComponent.getGeometry() != null)  {
+						peerGeometry = getJOGLPeerGeometryFor(originalComponent.getGeometry());
+						peerGeometry.refCount++;
+					} 
+					break;
+				case SceneContainerEvent.CHILD_TYPE_LIGHT:
+					lightListDirty = true;
+					break;
+				case SceneContainerEvent.CHILD_TYPE_TRANSFORMATION:
+					updateTransformationInfo();
+					break;
+				default:
+					System.out.println("Taking no action for replacement of child type "+ev.getChildType());
+					break;
+			}
+		}
+		
+		public void childAdded(SceneHierarchyEvent ev) {
+			System.out.println("Hierarchy Child added");
+		}
+		
+		public void childRemoved(SceneHierarchyEvent ev) {
+			System.out.println("Hierarchy Child removed");
+		}
+		
+		public void childReplaced(SceneHierarchyEvent ev) {
+			System.out.println("Hierarchy Child replaced");
+		}
+		
+		public void transformationMatrixChanged(TransformationEvent ev) {
+			// TODO notify ancestors that their bounds are no longer valid
+			updateTransformationInfo();
+		}
+		
+		/**
+		 * 
+		 */
+		private void updateTransformationInfo() {
+			if (originalComponent.getTransformation() != null) {
+				isReflection = originalComponent.getTransformation().getIsReflection();
+			} else {
+				determinant  = 0.0;
+				isReflection = false;
+			}
+		}
+
+		public void appearanceChanged(AppearanceEvent ev) {
+			//System.out.println("Appearance change "+originalComponent.getName());
+			appearanceChanged = true;
+		}
+		
+		private void propagateAppearanceChanged()	{
+			appearanceIsDirty = true;	
+			dlInfo.setDisplayListsDirty();
+			int n = children.size();
+			for (int i = 0; i<n; ++i)	{		
+				JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
+				child.propagateAppearanceChanged();
+			}
+			appearanceChanged = false;
+		}
+		
+		public SceneGraphComponent getOriginalComponent() {
+			return originalComponent;
+		}
+		public void setOriginalComponent(SceneGraphComponent originalComponent) {
+			this.originalComponent = originalComponent;
+		}
+	}
+	/**
+	 * @return
+	 */
+	public GLCanvas getCanvas()	{
+		return theCanvas;
 	}
 
 }

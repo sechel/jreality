@@ -16,9 +16,11 @@ import de.jreality.jogl.tools.MotionManager;
 import de.jreality.jogl.tools.MouseTool;
 import de.jreality.jogl.tools.ToolManager;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.Camera;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Transformation;
 
 /**
  * @author Charles Gunn
@@ -31,6 +33,7 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 	protected ToolManager toolManager;
 	protected MotionManager motionManager;
 	protected MouseTool currentTool;
+	HelpOverlay helpOverlay;
 
 	/**
 	 * 
@@ -157,5 +160,31 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 	
 	public MouseTool getCurrentTool() {
 		return currentTool;
+	}
+	public void setCameraPath(SceneGraphPath pp) {
+		SceneGraphPath p = pp;
+		if (p == null || p.getElementAt(0) != sceneRoot || p.getLastComponent().getCamera() == null)	{
+			System.err.println("Invalid camera path, adding new camera.");
+			Camera c = new Camera();
+			SceneGraphComponent sgc = new SceneGraphComponent();
+			sgc.setTransformation(new Transformation());
+			sgc.setName("Default Camera node");
+			sgc.setCamera(c);
+			sceneRoot.addChild(sgc);
+			p = SceneGraphPath.getFirstPathBetween(sceneRoot, c);
+		}
+		super.setCameraPath(p);
+	}
+	public void setSceneRoot(SceneGraphComponent r) {
+		if (r == null)	{
+			System.err.println("Invalid scene root, creating new root.");
+			r = new SceneGraphComponent();
+			r.setName("Default SceneRoot");
+		}
+		super.setSceneRoot(r);
+	}
+
+	public HelpOverlay getHelpOverlay() {
+		return helpOverlay;
 	}
 }

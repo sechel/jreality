@@ -79,6 +79,8 @@ public class TestTubeDemo extends InteractiveViewerDemo {
 	public SceneGraphComponent makeWorld() {
 		SceneGraphComponent root = new SceneGraphComponent();
 		root.setTransformation(new Transformation());
+		root.setAppearance(new Appearance());
+		root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
 
 		double[][] square = {{1,1,0},{-1,1,0},{-1,-1,0},{1,-1,0}};
 		

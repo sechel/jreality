@@ -66,7 +66,6 @@ public class SkyBox extends SceneGraphComponent {
 		ap.setAttribute(CommonAttributes.LIGHTING_ENABLED,false);
 		ap.setAttribute(CommonAttributes.FACE_DRAW,true);
 		ap.setAttribute(CommonAttributes.EDGE_DRAW,false);
-		ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"textureEnabled",true);
 		setAppearance(ap);
 		
 		Transformation tt = new Transformation();
@@ -76,7 +75,7 @@ public class SkyBox extends SceneGraphComponent {
 		for (int i = 0; i<6; ++i)	{
 			SceneGraphComponent sgc = new SceneGraphComponent();
 			ap = new Appearance();
-			ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE2D, ft[i]);
+			ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D, ft[i]);
 			sgc.setAppearance(ap);
 			IndexedFaceSet face = GeometryUtility.createIndexedFaceSetFrom(cubeIndices, cubeVerts3[i], null, null, texCoords[i], null, null);
 			face.buildEdgesFromFaces();

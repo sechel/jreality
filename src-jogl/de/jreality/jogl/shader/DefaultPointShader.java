@@ -10,7 +10,7 @@ import java.awt.Color;
 
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
-import de.jreality.jogl.JOGLRendererNew;
+import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.util.EffectiveAppearance;
@@ -24,8 +24,9 @@ import de.jreality.util.NameSpace;
  */
 public class DefaultPointShader  implements PointShader {
 	double pointSize = 1.0;
-	double	pointRadius = 2.0;		// break into facets about this many pixels big
+	double	pointRadius = .1;		
 	Color diffuseColor = java.awt.Color.RED;
+	float[] diffuseColorAsFloat;
 	boolean sphereDraw = false;
 	PolygonShader polygonShader = null;
 	/**
@@ -35,24 +36,18 @@ public class DefaultPointShader  implements PointShader {
 		super();
 	}
 
-	public void setDefaultValues(Appearance ap)	{
-		ap.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.SPHERES_DRAW,false);
-		ap.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_SIZE,1);
-		ap.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS,0.2);
-		ap.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,java.awt.Color.RED);
-	}
-	
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
-		sphereDraw = eap.getAttribute(NameSpace.name(name,CommonAttributes.SPHERES_DRAW), false);
-		pointSize = eap.getAttribute(NameSpace.name(name,CommonAttributes.POINT_SIZE), pointSize);
-		pointRadius = eap.getAttribute(NameSpace.name(name,CommonAttributes.POINT_RADIUS),pointRadius);
-		diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), diffuseColor);	
+		sphereDraw = eap.getAttribute(NameSpace.name(name,CommonAttributes.SPHERES_DRAW), CommonAttributes.SPHERES_DRAW_DEFAULT);
+		pointSize = eap.getAttribute(NameSpace.name(name,CommonAttributes.POINT_SIZE), CommonAttributes.POINT_SIZE_DEFAULT);
+		pointRadius = eap.getAttribute(NameSpace.name(name,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
+		diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.POINT_DIFFUSE_COLOR_DEFAULT);	
+		setDiffuseColor(diffuseColor);
 		double alpha = diffuseColor.getAlpha();
-		double alpha2 = eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), alpha );
+		double alpha2 = eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
 		if (alpha != alpha2)	{
 			float[] f = getDiffuseColorAsFloat();
 			f[3] = (float) alpha2;
-			diffuseColor = new Color(f[0], f[1], f[2], f[3]);
+			setDiffuseColor(new Color(f[0], f[1], f[2], f[3]));
 		}
 		polygonShader = ShaderLookup.getPolygonShaderAttr(eap, name, "polygonShader");
 		polygonShader.setDiffuseColor(diffuseColor);
@@ -81,29 +76,20 @@ public class DefaultPointShader  implements PointShader {
 		return pointRadius;
 	}
 
-	public void setDiffuseColor(Color dc) {
-		diffuseColor = dc;
-	}
-	/**
-	 * @return
-	 */
-	public Color getDiffuseColor() {
-		return diffuseColor;
-	}
-
 	public float[] getDiffuseColorAsFloat() {
-		return ColorToFloat(diffuseColor);
+		return diffuseColorAsFloat;
 	}
 
-	private float[] ColorToFloat(Color cc)	{
-		return cc.getRGBComponents(null);
-		}
+	public void setDiffuseColor(Color diffuseColor2) {
+		diffuseColor = diffuseColor2;
+		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
+	}
 
 	/**
 	 * @param globalHandle
 	 * @param jpc
 	 */
-	public void render(JOGLRendererNew jr) {
+	public void render(JOGLRenderer jr) {
 		GLCanvas theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		gl.glPointSize((float) getPointSize());

@@ -42,8 +42,6 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	GLCanvas canvas;
 	JOGLRendererInterface renderer;
 	int signature;
-	HelpOverlay helpOverlay;
-	
 	static String OSName = null;
 	static boolean multiSample = true, newBackend = true;
 	static {
@@ -103,10 +101,10 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	 */
 	public void setSceneRoot(SceneGraphComponent r) {
 		if (r == null)	{
-			System.err.println("Invalid scene root, creating new root.");
-			sceneRoot = new SceneGraphComponent();
+			System.err.println("Invalid scene root.");
+			return;
 		}
-		else sceneRoot = r;
+		sceneRoot = r;
 	}
 
 	public void addAuxiliaryComponent(SceneGraphComponent aux)	{
@@ -134,17 +132,11 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	 * @see de.jreality.scene.Viewer#setCameraPath(de.jreality.util.SceneGraphPath)
 	 */
 	public void setCameraPath(SceneGraphPath p) {
-		if (p == null || p.getElementAt(0) != sceneRoot || p.getLastComponent().getCamera() == null)	{
-			System.err.println("Invalid camera path, adding new camera.");
-			Camera c = new Camera();
-			SceneGraphComponent sgc = new SceneGraphComponent();
-			sgc.setTransformation(new Transformation());
-			sgc.setCamera(c);
-			sceneRoot.addChild(sgc);
-			cameraPath = SceneGraphPath.getFirstPathBetween(sceneRoot, c);
-		} else  cameraPath = p;
-		cameraNode = cameraPath.getLastComponent();
-		camera = ((Camera) cameraPath.getLastElement());
+		if (p == null || p.getElementAt(0) != sceneRoot || p.getLastComponent().getCamera() == null || !(p.getLastElement() instanceof Camera))	{
+			System.err.println("Invalid camera path, not setting");
+			return;
+		} 
+		cameraPath = p;
 	}
 	
 	private boolean debug = false;
@@ -236,7 +228,6 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	private void initializeFrom(SceneGraphComponent r, SceneGraphPath p)	{
 		setSceneRoot(r);
 		setCameraPath(p);
-		//String[] = gluCheckExtension("GL_ARB_multisample"
 		GLCapabilities caps = new GLCapabilities();
 		if (multiSample)	{
 			GLCapabilitiesChooser chooser = new MultisampleChooser();
@@ -247,13 +238,9 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 			GLCapabilities capabilities = new GLCapabilities();
 			canvas = GLDrawableFactory.getFactory().createGLCanvas(capabilities);			
 		}
-		//canvas.setNoAutoRedrawMode(true);
 		canvas.addGLEventListener(this);
-		
 		canvas.requestFocus();
-		
-		if (newBackend) renderer =  new JOGLRendererNew(this); 
-		else renderer = new JOGLRenderer(this);
+		renderer =  new JOGLRenderer(this); 
 	}
 
 	/**
@@ -263,23 +250,6 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		return renderer;
 	}
 	
-	/**
-	 * 
-	 * @return
-	 * @deprecated  Use {@link de.jreality.util.CameraUtility.getCameraNode(Viewer v)}
-	 */public SceneGraphComponent getCameraNode()	{
-		return CameraUtility.getCameraNode(this);
-	}
-
-	/**
-	 * 
-	 * @return
-	 * @deprecated  Use {@link de.jreality.util.CameraUtility.getCamera(Viewer v)}
-	 */	
-	 public Camera getCamera()	{
-		return CameraUtility.getCamera(this);
-	}
-
 	boolean doSpeedTest = false;
 	double frameRate = 0.0;
 	private boolean pendingUpdate;
@@ -292,8 +262,8 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	 */
 	public void display(GLDrawable arg0) {
 		if (doSpeedTest)	{
-			double rate;
-			
+			boolean isnard = canvas.getNoAutoRedrawMode();
+			boolean iir = canvas.getIgnoreRepaint();
 			canvas.setNoAutoRedrawMode(true);
 			canvas.setIgnoreRepaint(true);
 			long begin = System.currentTimeMillis();
@@ -304,8 +274,8 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 			frameRate = 50000.0/(end-begin);
 			System.err.println("Timed frame rate: "+frameRate);
 			doSpeedTest = false;
-			canvas.setIgnoreRepaint(false);
-			canvas.setNoAutoRedrawMode(false);
+			canvas.setIgnoreRepaint(iir);
+			canvas.setNoAutoRedrawMode(isnard);
 		}
 		renderer.display(arg0);
 	}
@@ -340,26 +310,27 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		stereoType = type;
 	}
 	
+	// used in JOGLRenderer
 	public int getStereoType()	{
 		return stereoType;
 	}
 
-  private final Object renderLock=new Object();
-  boolean autoSwapBuffers=true;
-
-  public boolean isRendering() {
-    synchronized(renderLock) {
-      return pendingUpdate;
-    }
-  }
-  
-  public void waitForRenderFinish() {
-    synchronized(renderLock) {
-      while(pendingUpdate) try {
-        renderLock.wait();
-      } catch(InterruptedException ex) {}
-    }
-  }
+	private final Object renderLock=new Object();
+	boolean autoSwapBuffers=true;
+	
+	public boolean isRendering() {
+		synchronized(renderLock) {
+			return pendingUpdate;
+		}
+	}
+	  
+	public void waitForRenderFinish() {
+		synchronized(renderLock) {
+			while(pendingUpdate) try {
+				renderLock.wait();
+			} catch(InterruptedException ex) {}
+		}
+	}
   
 	public void run() {
 		if (!EventQueue.isDispatchThread())
@@ -368,7 +339,6 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 			pendingUpdate = false;
 			renderLock.notifyAll();
 		}
-		//canvas.update(canvas.getGraphics());
 		if (debug) System.out.println("Render: calling display");
 		canvas.display();
 	}
@@ -389,9 +359,5 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 			}
 		    catch (InterruptedException e) {}
 			catch (InvocationTargetException e) {}
-	}
-
-	public HelpOverlay getHelpOverlay() {
-		return helpOverlay;
 	}
 }

@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
 
-import de.jreality.jogl.JOGLRendererNew;
+import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.Texture2D;
@@ -114,7 +114,7 @@ public class RenderingHintsShader implements Shader {
 	public boolean isBackFaceCullingEnabled() {
 		return backFaceCullingEnabled;
 	}
-	public void render(JOGLRendererNew jr)	{
+	public void render(JOGLRenderer jr)	{
 		GLCanvas theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		gl.glDisable(GL.GL_TEXTURE_2D);

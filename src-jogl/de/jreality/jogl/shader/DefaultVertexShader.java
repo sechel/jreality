@@ -11,7 +11,7 @@ import java.awt.Color;
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
 
-import de.jreality.jogl.JOGLRendererNew;
+import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.util.EffectiveAppearance;
@@ -98,7 +98,7 @@ public class DefaultVertexShader implements Shader {
 		return specularExponent;
 	}
 
-	public void render(JOGLRendererNew jr)	{
+	public void render(JOGLRenderer jr)	{
 		GLCanvas theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SPECULAR, getSpecularColorAsFloat());

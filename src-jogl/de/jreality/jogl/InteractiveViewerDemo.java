@@ -11,6 +11,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.Iterator;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -19,9 +20,11 @@ import java.util.logging.Logger;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -30,9 +33,13 @@ import javax.swing.ToolTipManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.jreality.geometry.GeometryUtility;
+import de.jreality.reader.OOGLReader;
+import de.jreality.reader.PolymakeParser;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -65,6 +72,8 @@ public abstract class InteractiveViewerDemo extends JFrame{
 	int mode;
 	Box hack;
 	boolean fullScreen = false;
+	
+	String resourceDir = ".";
 	/**
 	 * 
 	 */
@@ -87,9 +96,8 @@ public abstract class InteractiveViewerDemo extends JFrame{
 			mode = STANDARD;
 		}
 	
-		String jlp = System.getProperty("java.library.path");
-		System.err.println(jlp);
-		
+		String foo = System.getProperty("jreality.jogl.resourceDir");
+		if (foo != null) resourceDir = foo;
 		
 		viewer = new InteractiveViewer(null, null);
 		viewerList = new Vector();
@@ -162,9 +170,10 @@ public abstract class InteractiveViewerDemo extends JFrame{
 	public void begin()	{
 		SceneGraphComponent root = viewer.getSceneRoot();
 		if (root.getAppearance() == null) root.setAppearance(new Appearance());
-		root.getAppearance().setAttribute("backgroundColor",java.awt.Color.GRAY);
-		Appearance defaultAp = root.getAppearance();
-		CommonAttributes.setDefaultValues(defaultAp);
+		root.getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR,CommonAttributes.BACKGROUND_COLOR_DEFAULT);
+		root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
+		root.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
+		CommonAttributes.setDefaultValues(root.getAppearance());
 
 		CameraUtility.getCamera(viewer).setSignature(getSignature());
 		CameraUtility.getCamera(viewer).reset();
@@ -195,7 +204,7 @@ public abstract class InteractiveViewerDemo extends JFrame{
 			viewer.getSelectionManager().setDefaultSelection(ds);
 			viewer.getSelectionManager().setSelection(ds);	
 		}
-		
+		//This fixes a bug in the Linux version of GLCanvas which prevented menus from showing up
 		 JPopupMenu.setDefaultLightWeightPopupEnabled( false ) ;
 		 theMenuBar = createMenuBar();
 		hack.add(theMenuBar, 0);
@@ -212,11 +221,21 @@ public abstract class InteractiveViewerDemo extends JFrame{
 	SceneGraphPath camPath = null;
 	FramedCurveInspector fci;
 	boolean showInspector = false;
+	// TODO clean this up to make adding menu items easy (via Actions?)
 	public JMenuBar createMenuBar()	{
 		theMenuBar = new JMenuBar();
+		JMenu fileM = new JMenu("File");
+		JMenuItem jcc = new JMenuItem("Open...");
+		fileM.add(jcc);
+		jcc.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent e)	{
+				loadFile();
+				viewer.render();
+			}
+		});
+		theMenuBar.add(fileM);
 		JMenu testM = new JMenu("Windows");
-		ButtonGroup bg = new ButtonGroup();
-		final JCheckBoxMenuItem jcc = new JCheckBoxMenuItem("Camera Path Inspector");
+		jcc = new JCheckBoxMenuItem("Camera Path Inspector...");
 		jcc.setSelected(showInspector);
 		testM.add(jcc);
 		jcc.addActionListener( new ActionListener() {
@@ -229,6 +248,52 @@ public abstract class InteractiveViewerDemo extends JFrame{
 		return theMenuBar;
 	}
 	
+	protected void loadFile() {
+		SceneGraphComponent parent= null;
+		SceneGraphPath sgp = viewer.getSelectionManager().getSelection();
+		if (! (sgp.getLastElement() instanceof SceneGraphComponent)) {
+			System.out.println("Unable to load file; invalid selection");
+			return;
+		}  
+		parent = (SceneGraphComponent) sgp.getLastElement();
+		JFileChooser fc = new JFileChooser(resourceDir);
+		//System.out.println("FCI resource dir is: "+resourceDir);
+		int result = fc.showOpenDialog(this);
+		SceneGraphComponent sgc = null;
+		if (result == JFileChooser.APPROVE_OPTION)	{
+			File file = fc.getSelectedFile();
+			sgc = readFile(file);
+			parent.addChild(sgc);
+			sgp.push(sgc);
+		} else {
+			System.out.println("Unable to open file");
+			return;
+		}
+		viewer.getSelectionManager().setSelection(sgp);
+		viewer.render();
+	}
+	/**
+	 * TODO move this into the reader package
+	 * @param file
+	 * @return
+	 */
+	private SceneGraphComponent readFile(File file) {
+		SceneGraphComponent sgc;
+		if (file.getName().indexOf(".top") != -1) {
+			sgc = PolymakeParser.readFromFile(file);
+			IndexedFaceSet ifs = (IndexedFaceSet) sgc.getGeometry();
+			ifs = GeometryUtility.binaryRefine(ifs);
+			GeometryUtility.calculateAndSetFaceNormals(ifs);
+			ifs.buildEdgesFromFaces();
+			sgc.setGeometry(ifs);
+		} else {
+			OOGLReader or = new OOGLReader();	
+			or.setResourceDir(file.getParent()+"/");
+			sgc = or.readFromFile(file);
+		}
+		return sgc;
+	}
+
 	protected void toggleInspection() {
 		if (showInspector) {
 			if (fci == null) {

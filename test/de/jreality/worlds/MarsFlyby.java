@@ -14,7 +14,6 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.util.BoundingBoxTraversal;
 import de.jreality.util.ConfigurationAttributes;
@@ -125,7 +124,6 @@ public class MarsFlyby implements LoadableScene{
 		Rectangle3D worldBox = bbv.getBoundingBox();
 		world.getTransformation().setStretch(10.);
 		world.getTransformation().setCenter(worldBox.getCenter());
-		world.getTransformation().setUseCenter(true);
 		Appearance ap1 = world.getAppearance();
 		ap1.setAttribute(CommonAttributes.EDGE_DRAW, false);
 		ap1.setAttribute(CommonAttributes.LIGHTING_ENABLED,false);
