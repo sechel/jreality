@@ -231,6 +231,16 @@ public abstract class AbstractViewer implements Viewer {
             public int getHeight() {
                 return h;
             }
+
+            public int getXMin() {
+                // TODO Auto-generated method stub
+                return 0;
+            }
+
+            public int getYMin() {
+                // TODO Auto-generated method stub
+                return 0;
+            }
             
         };
     }
