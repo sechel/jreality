@@ -27,8 +27,7 @@ import net.java.games.jogl.GLU;
 import net.java.games.jogl.util.BufferUtils;
 import de.jreality.geometry.SphereHelper;
 import de.jreality.jogl.pick.JOGLPickRequestor;
-import de.jreality.jogl.pick.PickAction;
-import de.jreality.jogl.pick.PickPoint;
+import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.AbstractJOGLShader;
 import de.jreality.jogl.shader.DefaultGeometryShader;
 import de.jreality.jogl.shader.RenderingHintsShader;
@@ -56,6 +55,7 @@ import de.jreality.scene.event.SceneHierarchyEvent;
 import de.jreality.scene.event.SceneTreeListener;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
+import de.jreality.scene.pick.PickPoint;
 import de.jreality.soft.LineShader;
 import de.jreality.soft.PointShader;
 import de.jreality.soft.PolygonShader;
@@ -374,7 +374,7 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 				pickMode = false;
 				int numberHits = globalGL.glRenderMode(GL.GL_RENDER);
 				//System.out.println(numberHits+" hits");
-				hits = PickAction.processOpenGLSelectionBuffer(numberHits, selectBuffer, pickPoint,theViewer);
+				hits = JOGLPickAction.processOpenGLSelectionBuffer(numberHits, selectBuffer, pickPoint,theViewer);
 				useDisplayLists = store;
 				display(drawable);
 			}
@@ -584,7 +584,7 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 		};
 		cleanup.visit(theRoot);
 		//TODO dispose of the peer geomtry nodes which are no longer in the graph
-		System.out.println("Old, new hash size: "+geometries.size()+" "+newG.size());
+		//System.out.println("Old, new hash size: "+geometries.size()+" "+newG.size());
 		return;
 //		ArrayList removedGeoms = new ArrayList();
 //		java.util.Enumeration foo = geometries.keys();

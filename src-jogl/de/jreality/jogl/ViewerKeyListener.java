@@ -59,7 +59,6 @@ public class ViewerKeyListener extends KeyAdapter {
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_H,0), "Toggle display help");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_J,0), "Increase sphere radius");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_J,KeyEvent.SHIFT_DOWN_MASK), "Decrease sphere radius");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_K,0), "Toggle use face/vertex normals for smooth shading");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_L,0), "Toggle lighting enabled");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_N,0), "Toggle normals drawing");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_P,0), "Toggle perspective/orthographic view");
@@ -189,11 +188,6 @@ public class ViewerKeyListener extends KeyAdapter {
 
 				case KeyEvent.VK_J:		// line width
 					modulateValue(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, 0.05, !e.isShiftDown());
-					break;
-
-				case KeyEvent.VK_K:		// toggle lighting
-					if (e.isShiftDown()) break;
-					toggleValue(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.FACE_NORMALS);
 					break;
 
 				case KeyEvent.VK_L:		// toggle lighting

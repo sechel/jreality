@@ -28,13 +28,13 @@ import javax.swing.JMenuItem;
 import javax.swing.JTextField;
 import javax.swing.Timer;
 
-import de.jreality.jogl.pick.PickAction;
-import de.jreality.jogl.pick.PickPoint;
+import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Graphics3D;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
@@ -670,7 +670,7 @@ public class FramedCurveInspector extends JFrame {
 
 	public double[] guessCameraFocusOnPath(FramedCurve fc, Viewer v)	{
 		if (fc == null || v == null) return null;
-		PickAction pickAction = new PickAction(v);
+		JOGLPickAction pickAction = new JOGLPickAction(v);
 		double[] ndc = {0.0, ycoord};
 		pickAction.setPickPoint(ndc);
 		int n = fc.getNumberControlPoints();

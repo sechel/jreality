@@ -7,8 +7,8 @@
 package de.jreality.jogl;
 
 import net.java.games.jogl.GLEventListener;
-import de.jreality.jogl.pick.PickPoint;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.pick.PickPoint;
 
 /**
  * @author gunn
