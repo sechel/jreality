@@ -12,6 +12,7 @@ import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereHelper;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.AppearanceAttribute;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.Graphics3D;
 import de.jreality.scene.IndexedFaceSet;
@@ -22,6 +23,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.SceneGraphPath.PathMatrixChanged;
+import de.jreality.scene.data.Attribute;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.P3;
 import de.jreality.util.Rectangle3D;
@@ -43,7 +45,7 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 	static boolean debug = true;
 	SceneGraphComponent boundKit, pickPointKit, selectionKit, sphereKit;
 	private Appearance selectedAppearance;
-	private double sphereSize;
+	private double pickPointSize = .02;
 	private boolean useSphere = true;
 	/**
 	 * 
@@ -65,6 +67,7 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 
 		pickPointKit = SceneGraphUtilities.createFullSceneGraphComponent("pickPointKit");
 		pickPointAppearance = pickPointKit.getAppearance();
+		pickPointAppearance.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, pickPointSize);
 		if (useSphere)	{
 			pickPointAppearance.setAttribute(CommonAttributes.VERTEX_DRAW,false);
 			pickPointAppearance.setAttribute(CommonAttributes.EDGE_DRAW,false);
@@ -74,7 +77,6 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 			pickPointAppearance.setAttribute(CommonAttributes.EDGE_DRAW,false);
 			pickPointAppearance.setAttribute(CommonAttributes.FACE_DRAW,false);
 			pickPointAppearance.setAttribute(CommonAttributes.SPHERES_DRAW,true);			
-			pickPointAppearance.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS,0.01);
 		}
 		pickPointAppearance.setAttribute(CommonAttributes.LIGHTING_ENABLED,true);
 		pickPointAppearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING,true);
@@ -86,7 +88,6 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 		selectionKit.addChild(pickPointKit);
 		boundKit.setVisible(false);
 		selectionKit.addChild(boundKit);
-		sphereSize = .02;
 	}
 
 	/**
@@ -202,13 +203,12 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 			pickPointKit.getTransformation().setMatrix( mm);
 			//System.out.println("PPTranslation is : "+Rn.toString(sphereKit.getTransformation().getTranslation()));
 			
-			Graphics3D gc = new Graphics3D(v);
-			gc.setObjectToWorld(mm);
-			// TODO fix this!  It doesn't do what it's supposed to do
-			double r = P3.getXYScale(gc.getObjectToNDC(), pickPoint.getPointObject());
-			r = (r == 0.0) ? 1.0 : 1.0/r;
-			r =  sphereSize *r;
-			r = .02;
+			Object val = pickPointAppearance.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, Double.class);
+			double r;
+			if (val instanceof Double)	{
+				r = ((Double) val).doubleValue();
+			} else r = .02;
+			
 			if (useSphere)
 				sphereKit.getTransformation().setStretch(r);
 			else
@@ -333,5 +333,8 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 		this.renderSelection = renderSelection;
 		System.out.println("Render bound: "+renderSelection);
 		broadcastChange();
+	}
+	public Appearance getPickPointAppearance() {
+		return pickPointAppearance;
 	}
 }

@@ -89,6 +89,7 @@ public class SelectionTool extends PickTool  {
 		} // else {
 		// the selection tool does nothing if the user moves the mouse.
 		// He/she has to hold and click to have an effect.
+		System.out.println("Pick point: "+newPickPoint.toString());
 		if (mouseMoved) return false;
 		// perform the pick
 		track(e);

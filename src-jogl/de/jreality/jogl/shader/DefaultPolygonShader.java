@@ -110,11 +110,12 @@ public class DefaultPolygonShader implements PolygonShader {
 			gl.glShadeModel(GL.GL_FLAT);		
 		}
 		//System.out.println("Smooth shading is: "+isSmoothShading());
-		gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, getDiffuseColorAsFloat());
+		gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE, getDiffuseColorAsFloat());
 		gl.glColor4fv( getDiffuseColorAsFloat());
 		//System.out.println("Alpha channel is "+diffuseColorAsFloat[3]);
-		float[] testcolor = {.3f, .5f, .7f, 1.0f * ((float) transparency)};
-		gl.glMaterialfv(GL.GL_BACK, GL.GL_DIFFUSE, testcolor);
+		//System.out.println("transparency is "+transparency);
+		//float[] testcolor = {.3f, .5f, .7f, 1.0f * ((float) transparency)};
+		//gl.glMaterialfv(GL.GL_BACK, GL.GL_DIFFUSE, testcolor);
 		gl.glDisable(GL.GL_TEXTURE_2D);
 		if (texture2D != null)	{
 			Texture2DLoaderJOGL tl = Texture2DLoaderJOGL.FactoryLoader;

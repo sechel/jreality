@@ -68,6 +68,7 @@ public class InfoOverlay implements GLEventListener {
 		gl.glDisable(GL.GL_LIGHTING);
 		gl.glDisable(GL.GL_TEXTURE_2D);
 		gl.glDisable(GL.GL_DEPTH_TEST);
+		for (int i = 0; i< 6; ++i) gl.glDisable(i + GL.GL_CLIP_PLANE0);
 
 		// Retrieve the current viewport and switch to orthographic mode
 		int viewPort[] = new int[4];

@@ -679,7 +679,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements JOGLRendererInter
 				// TODO figure out which sphere proxy to use based on distance, LOD, etc
 				
 				int dlist = JOGLSphereHelper.getSphereDLists(2, globalHandle.theCanvas.getGL());
+				if (pickMode) globalGL.glPushName(10000);
 				globalGL.glCallList(dlist);
+				if (pickMode) globalGL.glPopName();
 				return;
 			}
 			if (geometryShader.isFaceDraw() && ifs != null)	{

@@ -69,8 +69,10 @@ public class ViewerKeyListener extends KeyAdapter {
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_R,InputEvent.SHIFT_DOWN_MASK), "Set default matrices with current state");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_S,0), "Toggle smooth shading");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_S,InputEvent.SHIFT_DOWN_MASK), "Toggle sphere drawing");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_T,0), "Toggle transparency");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_T,0), "Increase transparency");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_T,InputEvent.SHIFT_DOWN_MASK), "Decrease transparency");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_V,0), "Toggle vertex drawing");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_X,0), "Toggle transparency enabled");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_QUOTE,0), "Toggle fullscreen mode");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0), "Quit");
 		if ((viewer.getViewingComponent() instanceof GLCanvas))
@@ -193,7 +195,7 @@ public class ViewerKeyListener extends KeyAdapter {
 					break;
 
 				case KeyEvent.VK_J:		// line width
-					modulateValue(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, 0.05, !e.isShiftDown());
+					modulateValue(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, 0.5,!e.isShiftDown());
 					break;
 
 				case KeyEvent.VK_L:		// toggle lighting
@@ -231,8 +233,10 @@ public class ViewerKeyListener extends KeyAdapter {
 					break;
 
 				case KeyEvent.VK_T:		// transparency
-					if (e.isShiftDown()) break;
-					toggleValue(CommonAttributes.TRANSPARENCY_ENABLED);
+					//if (e.isShiftDown())					
+					modulateValueAdditive(CommonAttributes.TRANSPARENCY,  0.5, .05, 0.0, 1.0, !e.isShiftDown());
+
+					//toggleValue(CommonAttributes.TRANSPARENCY_ENABLED);
 					break;
 
 				case KeyEvent.VK_V:		// draw vertices
@@ -245,25 +249,26 @@ public class ViewerKeyListener extends KeyAdapter {
 					break;
 
 				case KeyEvent.VK_X:		// toggle fast and dirty
+					toggleValue(CommonAttributes.TRANSPARENCY_ENABLED);
 					// the following is unfortunately unsymmetric: the get and the set don't match
 					// this means that if the fastAndDirty attribute has been set somewhere below the root, 
 					// (which shouldn't happen!), then this will have unintended results.
-					// In general, however, it would be good to have "rendering hints" 
-					boolean fad;
-					Object foo;
-					foo = viewer.getSceneRoot().getAppearance().getAttribute(CommonAttributes.FAST_AND_DIRTY_ENABLED);
-					if (foo instanceof Boolean)		{
-						fad = ((Boolean) foo).booleanValue();
-						System.err.println("Read value of "+fad);
-					}
-					else fad = false;
-					viewer.getSceneRoot().getAppearance().setAttribute(CommonAttributes.FAST_AND_DIRTY_ENABLED,!fad);
-					foo = viewer.getSceneRoot().getAppearance().getAttribute(CommonAttributes.FAST_AND_DIRTY_ENABLED);
-					if (foo instanceof Boolean)		{
-						fad = ((Boolean) foo).booleanValue();
-						System.err.println("After flipping: Read value of "+fad);
-					}
-					viewer.render();
+//					// In general, however, it would be good to have "rendering hints" 
+//					boolean fad;
+//					Object foo;
+//					foo = viewer.getSceneRoot().getAppearance().getAttribute(CommonAttributes.FAST_AND_DIRTY_ENABLED);
+//					if (foo instanceof Boolean)		{
+//						fad = ((Boolean) foo).booleanValue();
+//						System.err.println("Read value of "+fad);
+//					}
+//					else fad = false;
+//					viewer.getSceneRoot().getAppearance().setAttribute(CommonAttributes.FAST_AND_DIRTY_ENABLED,!fad);
+//					foo = viewer.getSceneRoot().getAppearance().getAttribute(CommonAttributes.FAST_AND_DIRTY_ENABLED);
+//					if (foo instanceof Boolean)		{
+//						fad = ((Boolean) foo).booleanValue();
+//						System.err.println("After flipping: Read value of "+fad);
+//					}
+//					viewer.render();
 					break;
 					
 				
@@ -285,6 +290,32 @@ public class ViewerKeyListener extends KeyAdapter {
 			        break;
 			}
 		}
+
+	/**
+	 * @param string
+	 * @param d
+	 * @param e
+	 * @param f
+	 * @param g
+	 * @param b
+	 */
+	private void modulateValueAdditive(String name, double def, double inc, double min, double max, boolean increase) {
+		Appearance ap = viewer.getSelectionManager().getSelectedAppearance();
+		if (ap == null) return;
+		Object obj = ap.getAttribute(name);
+		double newVal = def;
+		if (obj != null && obj instanceof Double)	{
+			newVal = ((Double) obj).doubleValue();
+			if (increase) newVal +=  inc;
+			else newVal -= inc;
+		}
+		//System.err.println("Setting value "+name+"Object is "+obj+"New value is "+newVal);
+		if (newVal < min) newVal = min;
+		if (newVal > max) newVal = max;
+		ap.setAttribute(name, newVal);
+		
+		viewer.render();		
+	}
 
 	private void toggleValue(String  name)	{
 		Appearance ap = viewer.getSelectionManager().getSelectedAppearance();

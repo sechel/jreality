@@ -37,11 +37,14 @@ import de.jreality.util.SceneGraphUtilities;
 public class ReadFromFileDemo extends InteractiveViewerDemo {
 
 	boolean useLOD = false;
-	static String resourceDir = "/Users/gunn/Documents/Models";
+	static String resourceDir = "/Users/gunn/Documents/Models",
+		initialFile = null;
 	
 	static {
 		String foo = System.getProperty("resourceDir");
 		if (foo != null) resourceDir = foo;
+		foo = System.getProperty("initialFile");
+		if (foo != null) initialFile = foo;
 	}
 	public JMenuBar createMenuBar()	{
 		theMenuBar = new JMenuBar(); //super.createMenuBar();
@@ -96,10 +99,17 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 	public SceneGraphComponent makeWorld() {
 		world = SceneGraphUtilities.createFullSceneGraphComponent("world");
 		//for (int i = 0; i<6; ++i)	{
+		if (initialFile != null)	{
+			OOGLReader or = new OOGLReader();	
+			//OFFReader.setResourceDir(resourceDir);
+			
+			child = or.readFromFile(initialFile);
+		} else {
 			child = SceneGraphUtilities.createFullSceneGraphComponent("child");
 			child.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
 			child.addChild(SphereHelper.SPHERE_SUPERFINE);
-			world.addChild(child);
+		}
+		world.addChild(child);
 		return world;
 	}
 	

@@ -46,12 +46,19 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	static boolean multiSample = true;
 	boolean isFlipped = false;			// LH Coordinate system?
 	static GLCanvas firstOne = null;		// for now, all display lists shared with this one
-	
+	static boolean sharedContexts = false;
 	static {
 		String foo = System.getProperty("jreality.jogl.multisample");
 		if (foo != null) 
 			if (foo.indexOf("false") != -1) multiSample = false;
 			//else multisample = false;
+		// allocate a GLCanvas to be the "sharer": it will never be destroyed
+		foo = System.getProperty("jreality.jogl.sharedContexts");
+		if (foo != null && foo.indexOf("true") != -1) sharedContexts = true;
+		if (sharedContexts)	{
+			GLCapabilities capabilities = new GLCapabilities();
+			firstOne = GLDrawableFactory.getFactory().createGLCanvas(capabilities, null, null);						
+		}
 	}
 	public int getSignature() {
 		return signature;
@@ -239,7 +246,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		canvas.addGLEventListener(this);
 		canvas.requestFocus();
 		renderer =  new JOGLRenderer(this); 
-		firstOne = canvas;
+		//if (firstOne == null) firstOne = canvas;
 	}
 
 	/**

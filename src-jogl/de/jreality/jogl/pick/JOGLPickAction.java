@@ -46,8 +46,7 @@ public class JOGLPickAction extends PickAction  {
 		if (useOpenGL && theViewer instanceof de.jreality.jogl.Viewer)	{
 			PickPoint[] hits = ((de.jreality.jogl.Viewer) theViewer).getRenderer().performPick(pickPoint);	
 			int n = 0;
-			if (hits != null)	
-				n = hits.length;
+			if (hits != null)	n = hits.length;
 			pickHits = new Vector();
 			for (int i =0; i<n; ++i)	pickHits.add(hits[i]);
 			return pickHits;			
