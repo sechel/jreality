@@ -18,4 +18,5 @@ public interface PolygonShader extends Shader {
 	public void setSmoothShading(boolean b);
 	public boolean isSmoothShading();
 	public void setDiffuseColor(Color dc);		// need to be able to overwrite the diffuse color by line and point diffuse color/**
+	public Color getDiffuseColor();
 }

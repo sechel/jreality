@@ -158,6 +158,7 @@ public class ViewerKeyListener extends KeyAdapter {
 						viewer.getSceneRoot().getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR, color);
 					else viewer.getSelectionManager().getSelectedAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, color);
 					viewer.render();
+					viewer.render();
 					break;
 					
 				case KeyEvent.VK_D:		// toggle use of display lists

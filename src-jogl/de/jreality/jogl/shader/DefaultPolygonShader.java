@@ -18,6 +18,7 @@ import de.jreality.scene.Texture2D;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;
 import de.jreality.util.Rn;
+import de.jreality.util.ShaderUtility;
 
 /**
  * @author Charles Gunn
@@ -30,6 +31,7 @@ public class DefaultPolygonShader implements PolygonShader {
 	boolean		smoothShading = false; 		// interpolate shaded values between vertices
 	Color diffuseColor = DefaultVertexShader.RED; //java.awt.Color.RED;
 	float[] diffuseColorAsFloat = null;
+	double transparency;
 	Texture2D texture2D;
 	public Shader vertexShader = null;
 	AbstractJOGLShader glShader = null;
@@ -52,15 +54,9 @@ public class DefaultPolygonShader implements PolygonShader {
 	static int count = 0;
 	public void  setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		smoothShading = eap.getAttribute(NameSpace.name(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);	
-		diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.DIFFUSE_COLOR_DEFAULT);
-		setDiffuseColor(diffuseColor);
-		double alpha = diffuseColor.getAlpha();
-		double alpha2 = eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT);
-		if (alpha != alpha2)	{
-			float[] f = getDiffuseColorAsFloat();
-			f[3] = (float) alpha2;
-			setDiffuseColor( new Color(f[0], f[1], f[2], f[3]));
-		}
+		Color diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.POINT_DIFFUSE_COLOR_DEFAULT);	
+		transparency= eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
+		setDiffuseColor( ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transparency));
 		Object foo = eap.getAttribute(NameSpace.name(name,"texture2d"), null, Texture2D.class);
 		if (foo instanceof Texture2D)	texture2D = (Texture2D) foo;
 		vertexShader = ShaderLookup.getVertexShaderAttr(eap, name, "vertexShader");
@@ -116,7 +112,8 @@ public class DefaultPolygonShader implements PolygonShader {
 		//System.out.println("Smooth shading is: "+isSmoothShading());
 		gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, getDiffuseColorAsFloat());
 		gl.glColor4fv( getDiffuseColorAsFloat());
-		float[] testcolor = {.3f, .5f, .7f, .5f};
+		//System.out.println("Alpha channel is "+diffuseColorAsFloat[3]);
+		float[] testcolor = {.3f, .5f, .7f, 1.0f * ((float) transparency)};
 		gl.glMaterialfv(GL.GL_BACK, GL.GL_DIFFUSE, testcolor);
 		gl.glDisable(GL.GL_TEXTURE_2D);
 		if (texture2D != null)	{

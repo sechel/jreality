@@ -18,6 +18,7 @@ import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.Texture2D;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;
+import de.jreality.util.ShaderUtility;
 
 /**
  * @author Charles Gunn
@@ -52,15 +53,8 @@ public class DefaultLineShader implements LineShader  {
 		lineFactor = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_FACTOR),lineFactor);
 		lineStipplePattern = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_STIPPLE_PATTERN),lineStipplePattern);
 		diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.LINE_DIFFUSE_COLOR_DEFAULT);
-		setDiffuseColor(diffuseColor);
-		double alpha = diffuseColor.getAlpha();
-		double alpha2 = eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
-		if (alpha != alpha2)	{
-			float[] f = getDiffuseColorAsFloat();
-			f[3] = (float) alpha2;
-			diffuseColor = new Color(f[0], f[1], f[2], f[3]);
-			setDiffuseColor(diffuseColor);
-		}
+		double transp = eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
+		setDiffuseColor( ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transp));
 	}
 
 	public double getDepthFudgeFactor() {
@@ -108,6 +102,9 @@ public class DefaultLineShader implements LineShader  {
 			return tubeDraw;
 		}
 
+		public Color getDiffuseColor() {
+			return diffuseColor;
+		}
 		float[] diffuseColorAsFloat;
 		public float[] getDiffuseColorAsFloat() {
 			return diffuseColorAsFloat;
@@ -137,6 +134,7 @@ public class DefaultLineShader implements LineShader  {
 			gl.glLineStipple(getLineFactor(), (short) getLineStipplePattern());
 		} 
 		else gl.glDisable(GL.GL_LINE_STIPPLE);
+		//TODO set this correctly when tube-drawing is supported
 		//if (tubeDraw) gl.glEnable(GL.GL_LIGHTING);
 		gl.glDisable(GL.GL_LIGHTING);
 		gl.glDepthRange(0.0d, depthFudgeFactor);

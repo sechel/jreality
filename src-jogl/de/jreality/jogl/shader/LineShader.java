@@ -6,6 +6,8 @@
  */
 package de.jreality.jogl.shader;
 
+import java.awt.Color;
+
 /**
  * @author gunn
  *
@@ -15,4 +17,5 @@ package de.jreality.jogl.shader;
 public interface LineShader extends Shader {
 	public boolean isTubeDraw();
 	public double getTubeRadius();
+	public Color getDiffuseColor();
 }

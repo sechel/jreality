@@ -6,6 +6,8 @@
  */
 package de.jreality.jogl.shader;
 
+import java.awt.Color;
+
 /**
  * @author gunn
  *
@@ -15,4 +17,5 @@ package de.jreality.jogl.shader;
 public interface PointShader extends Shader {
 	public boolean isSphereDraw();
 	public double getPointRadius();
+	public Color getDiffuseColor();
 }

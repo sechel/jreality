@@ -43,7 +43,9 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	JOGLRendererInterface renderer;
 	int signature;
 	static String OSName = null;
-	static boolean multiSample = true, newBackend = true;
+	static boolean multiSample = true;
+	boolean isFlipped = false;			// LH Coordinate system?
+	
 	static {
 		String foo = System.getProperty("jreality.jogl.multisample");
 		if (foo != null) 
@@ -354,5 +356,11 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 			}
 		    catch (InterruptedException e) {}
 			catch (InvocationTargetException e) {}
+	}
+	public boolean isFlipped() {
+		return isFlipped;
+	}
+	public void setFlipped(boolean isFlipped) {
+		this.isFlipped = isFlipped;
 	}
 }

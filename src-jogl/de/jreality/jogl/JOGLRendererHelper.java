@@ -75,11 +75,11 @@ public class JOGLRendererHelper {
 				for (int j = 0; j<SphereHelper.cubeSyms.length; ++j)	{
 					gl.glPushMatrix();
 					gl.glMultTransposeMatrixd(SphereHelper.cubeSyms[j].getMatrix());
-					drawFaces(qms, gl, false, true);
+					drawFaces(qms, gl, false, true, 1.0);
 					gl.glPopMatrix();
 				}				
 			} else {
-				drawFaces(SphereHelper.spheres[i], gl, false, true);
+				drawFaces(SphereHelper.spheres[i], gl, false, true, 1.0);
 			}
 			gl.glEndList();
 		}
@@ -173,7 +173,7 @@ public class JOGLRendererHelper {
 		}
 	
 	}
-	public static void drawVertices( PointSet sg, JOGLRenderer jr, boolean drawSpheres, double pointRadius) {
+	public static void drawVertices( PointSet sg, JOGLRenderer jr, boolean drawSpheres, double pointRadius, double alpha) {
 		GLCanvas theCanvas = jr.theCanvas;
 		GL gl = theCanvas.getGL(); 
 //		gl.glPointSize((float) currentGeometryShader.pointShader.getPointSize());
@@ -215,10 +215,12 @@ public class JOGLRendererHelper {
 				if (vertexColors != null)	{
 					da = vertexColors.item(i).toDoubleArray();
 					if (colorLength == 3) 	{
-						gl.glColor3d( da.getValueAt(0), da.getValueAt(1),  da.getValueAt(2));
+						//gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
+						gl.glColor3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 					} else if (colorLength == 4) 	{
-						gl.glColor4d(da.getValueAt(0),  da.getValueAt(1),  da.getValueAt(2), da.getValueAt(3));
-					} 						
+						//gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha*da.getValueAt(3));
+						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
+					} 
 				}
 				gl.glCallList(dlists[1]);
 				gl.glPopMatrix();
@@ -226,25 +228,27 @@ public class JOGLRendererHelper {
 		} else {
 			gl.glBegin(GL.GL_POINTS);
 			for (int i = 0; i< sg.getNumPoints(); ++i)	{
-				double vv = 1.0f;
+				//double vv;
 				if (pointSize != null) {
 					float ps = (float) pointSize.item(i).toDoubleArray().getValueAt(0);
 					gl.glPointSize( ps);
-					vv =  (ps < 1) ? ps : (1d - (Math.ceil(ps) - ps) * 0.25d);
+					//vv =  (ps < 1) ? ps : (1d - (Math.ceil(ps) - ps) * 0.25d);
 
 				}
 				//if (pointSize != null)	gl.glBegin(GL.GL_POINTS);
 				if (vertexColors != null)	{
 					da = vertexColors.item(i).toDoubleArray();
 					if (colorLength == 3) 	{
-						gl.glColor3d( da.getValueAt(0), da.getValueAt(1),  da.getValueAt(2));
+						//gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
+						gl.glColor3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 					} else if (colorLength == 4) 	{
-						gl.glColor4d( da.getValueAt(0), da.getValueAt(1),da.getValueAt(2), da.getValueAt(3));
-					} 						
+						//gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha*da.getValueAt(3));
+						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
+					} 
 				}
 				da = vertices.item(i).toDoubleArray();				
 				if (vertexLength == 3) gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
-				else if (vertexLength == 4) gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));;
+				else if (vertexLength == 4) gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
 			}
 			gl.glEnd();
 		}
@@ -291,7 +295,7 @@ public class JOGLRendererHelper {
 	/**
 	 * @param sg
 	 */
-	public static void drawLines(IndexedLineSet sg, GLCanvas theCanvas,JOGLRenderer.JOGLPeerComponent jpc, boolean pickMode) {
+	public static void drawLines(IndexedLineSet sg, GLCanvas theCanvas, double alpha) {
 		GL gl = theCanvas.getGL();
 //		DefaultGeometryShader currentGeometryShader = jpc.geometryShader;
 //		RenderingHintsShader renderingHints = jpc.renderingHints;
@@ -302,10 +306,9 @@ public class JOGLRendererHelper {
 		// vertex color has priority over face color
 		// should also check for override behavior
 		//if (vc != null) 		colorBind = ElementBinding.PER_VERTEX;
-		int colorBind = 0;
-		if (colors != null) 	colorBind = ElementBinding.PER_EDGE;
-		else 				colorBind = ElementBinding.PER_PART;
 		if (sg.getEdgeAttributes(Attribute.INDICES) == null) return;
+//		int colorBind = ElementBinding.PER_PART;
+//		if (colors != null) 	colorBind = ElementBinding.PER_EDGE;
 		DoubleArray da;
 		// TODO support for colors per vertex?
 		for (int i = 0; i< sg.getNumEdges(); ++i)	{
@@ -326,7 +329,7 @@ public class JOGLRendererHelper {
 	/**
 	 * @param sg
 	 */
-	public static void drawFaces( IndexedFaceSet sg, GL gl, boolean pickMode, boolean smooth) {
+	public static void drawFaces( IndexedFaceSet sg, GL gl, boolean pickMode, boolean smooth, double alpha) {
 
 		//if (jr.pickMode && (insidePointSet || insideLineSet)) return;
 
@@ -340,8 +343,7 @@ public class JOGLRendererHelper {
 		DataList faceColors = sg.getFaceAttributes(Attribute.COLORS);
 		DataList texCoords = sg.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
 		//System.out.println("Vertex normals are: "+((vertexNormals != null) ? vertexNormals.size() : 0));
-		//System.out.println("Face normals are: "+((faceNormals != null) ? faceNormals.size() : 0));
-		
+		//System.out.println("alpha value is "+alpha);
 		
 		//double[][] vv = null, vn=null, fn=null, vc=null, fc=null, tc = null;
 		// signal a geometry
@@ -438,18 +440,21 @@ public class JOGLRendererHelper {
 							if (incr == 0) {
 								da = faceColors.item(fnn).toDoubleArray();
 								if (colorLength == 3) 	{
+									//gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
 									gl.glColor3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
-								}
-								else if (colorLength == 4) 	{
+								} else if (colorLength == 4) 	{
+									//gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha*da.getValueAt(3));
 									gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
-								}
+								} 
 							}
 						} else
 						if (colorBind == ElementBinding.PER_VERTEX) {
 							da = vertexColors.item(vnn).toDoubleArray();
 							if (colorLength == 3) 	{
+								//gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
 								gl.glColor3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 							} else if (colorLength == 4) 	{
+								//gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha*da.getValueAt(3));
 								gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
 							} 
 						}
@@ -481,11 +486,12 @@ public class JOGLRendererHelper {
 			if (colorBind == ElementBinding.PER_FACE) 		{					
 				da = faceColors.item(i).toDoubleArray();
 				if (colorLength == 3) 	{
+					//gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
 					gl.glColor3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
-				}
-				else if (colorLength == 4) 	{//gl.glColor4dv(fc[i]);
+				} else if (colorLength == 4) 	{
+					//gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha*da.getValueAt(3));
 					gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
-				}
+				} 
 			}
 			if (pickMode) {
 				//System.out.print("+G"+i+"\n");
@@ -505,8 +511,10 @@ public class JOGLRendererHelper {
 				if (colorBind == ElementBinding.PER_VERTEX) {
 					da = vertexColors.item(k).toDoubleArray();
 						if (colorLength == 3) 	{
+							//gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
 							gl.glColor3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 						} else if (colorLength == 4) 	{
+							//gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha*da.getValueAt(3));
 							gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
 						} 
 				}

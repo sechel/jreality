@@ -24,7 +24,7 @@ import de.jreality.util.NameSpace;
  * To change the template for this generated type comment go to
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
-public class RenderingHintsShader implements Shader {
+public class RenderingHintsShader  {
 	double levelOfDetail = 0.0;		// hack for drawing lines in opengl
 	boolean 
 	   transparencyEnabled = false, 

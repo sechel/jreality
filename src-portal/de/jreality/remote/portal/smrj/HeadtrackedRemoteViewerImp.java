@@ -132,7 +132,7 @@ de.jreality.remote.portal.HeadtrackedRemoteViewerImpl implements HeadtrackedRemo
     	} catch (Exception e) {}
         rsi.setBackgroundColor(new Color(120, 10, 44, 20));
         rsi.loadWorld(argv[0]);
-        rsi.setUseDisplayLists(true);
+        //rsi.setUseDisplayLists(true);
         Thread.sleep(100);
         for (;;) {
         	rsi.render();

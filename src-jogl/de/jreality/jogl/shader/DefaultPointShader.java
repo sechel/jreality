@@ -15,6 +15,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;
+import de.jreality.util.ShaderUtility;
 
 /**
  * @author Charles Gunn
@@ -40,18 +41,12 @@ public class DefaultPointShader  implements PointShader {
 		sphereDraw = eap.getAttribute(NameSpace.name(name,CommonAttributes.SPHERES_DRAW), CommonAttributes.SPHERES_DRAW_DEFAULT);
 		pointSize = eap.getAttribute(NameSpace.name(name,CommonAttributes.POINT_SIZE), CommonAttributes.POINT_SIZE_DEFAULT);
 		pointRadius = eap.getAttribute(NameSpace.name(name,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
-		diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.POINT_DIFFUSE_COLOR_DEFAULT);	
-		setDiffuseColor(diffuseColor);
-		double alpha = diffuseColor.getAlpha();
-		double alpha2 = eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
-		if (alpha != alpha2)	{
-			float[] f = getDiffuseColorAsFloat();
-			f[3] = (float) alpha2;
-			setDiffuseColor(new Color(f[0], f[1], f[2], f[3]));
-		}
+		Color diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.POINT_DIFFUSE_COLOR_DEFAULT);	
+		double t = eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
+		setDiffuseColor( ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, t));
 		polygonShader = ShaderLookup.getPolygonShaderAttr(eap, name, "polygonShader");
 		polygonShader.setDiffuseColor(diffuseColor);
-		polygonShader.setSmoothShading(true);
+		//polygonShader.setSmoothShading(true);
 	}
 
 
@@ -80,6 +75,9 @@ public class DefaultPointShader  implements PointShader {
 		return diffuseColorAsFloat;
 	}
 
+	public Color getDiffuseColor() {
+		return diffuseColor;
+	}
 	public void setDiffuseColor(Color diffuseColor2) {
 		diffuseColor = diffuseColor2;
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
