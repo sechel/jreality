@@ -60,6 +60,7 @@ import de.jreality.util.CameraUtility;
 import de.jreality.util.ClippingPlaneCollector;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.LightCollector;
+import de.jreality.util.P3;
 import de.jreality.util.Pn;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.Rn;
@@ -72,7 +73,7 @@ import de.jreality.util.Rn;
 public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 
 	final static Logger theLog;
-	static boolean debugGL = true, collectFrameRate = true;
+	static boolean debugGL = false, collectFrameRate = true;
 	static {
 		theLog	= Logger.getLogger("de.jreality.jogl");
 //		theLog.setLevel(Level.FINEST);
@@ -111,13 +112,13 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	PickPoint[] hits;
 	// another eccentric mode: render in order to capture a screenshot
 	boolean screenShot = false;
-	
+	boolean backSphere = false;
 	double framerate;
 	int lightCount = 0;
 	int nodeCount = 0;
 	WeakHashMap geometries = new WeakHashMap();
 	boolean geometryRemoved = false, lightListDirty = true;
-
+	static double[] p3involution = P3.makeStretchMatrix(null, new double[]{-1d,-1d,-1d,1d});
 	/**
 	 * @param viewer
 	 */
@@ -184,7 +185,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 
 		// prepare for rendering the geometry
 		globalGL.glMatrixMode(GL.GL_MODELVIEW);
-		globalGL.glLoadIdentity();
+		if (backSphere) {  globalGL.glLoadTransposeMatrixd(p3involution);	globalGL.glPushMatrix(); }
 		double[] w2c = context.getWorldToCamera();
 		globalGL.glLoadTransposeMatrixd(w2c);
 		globalIsReflection = (theViewer.isFlipped != (Rn.determinant(w2c) < 0.0));
@@ -197,6 +198,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		thePeerRoot.render();		
 		//System.out.println("Nodes visited in render traversal: "+nodeCount);
 		if (!pickMode && thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.render();
+		if (backSphere) globalGL.glPopMatrix();
 		globalGL.glLoadIdentity();
 		forceResidentTextures();
 		
@@ -302,6 +304,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		if (debugGL)	{
 			String vv = globalGL.glGetString(GL.GL_VERSION);
 			theLog.log(Level.INFO,"version: "+vv);			
+			int[] tu = new int[1];
+			globalGL.glGetIntegerv(GL.GL_MAX_TEXTURE_UNITS, tu);
+			theLog.log(Level.INFO,"# of texture units: "+tu[0]);			
 		}
 		
 //		otime = System.currentTimeMillis();
@@ -386,7 +391,19 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			theCamera.setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
 			theCamera.setEye(Camera.MIDDLE_EYE);
 			myglViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
-			if (!pickMode)	visit();
+			if (!pickMode)	{
+				// Following code seems to have NO effect: An attempt to render the "back banana"
+//				if (theViewer.getSignature() == Pn.ELLIPTIC )	{
+//					if (useDisplayLists)	{		// debug purposes
+//						backSphere = true;
+//						visit();						
+//					}
+//					backSphere = false;
+//					visit();
+//				}
+//				 else 
+				 	visit();
+			}
 			else		{
 				// set up the "pick transformation"
 				myglViewport(0,0, 2,2);

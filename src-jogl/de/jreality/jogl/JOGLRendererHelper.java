@@ -718,7 +718,8 @@ public class JOGLRendererHelper {
 			 bufferedImage.setRGB(0, 0, width, height, pixelInts, 0, width); 
 			 
 			 try { 
-			  ImageIO.write(bufferedImage, "PNG", file); 
+				  ImageIO.write(bufferedImage, "PNG", file); 
+				  //ImageIO.write(bufferedImage, "TIF", file); 
 			 } catch (IOException e) { 
 			  e.printStackTrace(); 
 			 } 

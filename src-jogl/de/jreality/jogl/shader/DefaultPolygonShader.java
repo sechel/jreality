@@ -127,12 +127,23 @@ public class DefaultPolygonShader implements PolygonShader {
 		//System.out.println("transparency is "+transparency);
 		//float[] testcolor = {.3f, .5f, .7f, 1.0f * ((float) transparency)};
 		//gl.glMaterialfv(GL.GL_BACK, GL.GL_DIFFUSE, testcolor);
+		gl.glActiveTexture(GL.GL_TEXTURE0);
 		gl.glDisable(GL.GL_TEXTURE_2D);
 		gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
 		gl.glDisable(GL.GL_TEXTURE_GEN_S);
 		gl.glDisable(GL.GL_TEXTURE_GEN_T);
 		gl.glDisable(GL.GL_TEXTURE_GEN_R);
+		gl.glActiveTexture(GL.GL_TEXTURE1);
+		gl.glDisable(GL.GL_TEXTURE_2D);
+		gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
+		gl.glDisable(GL.GL_TEXTURE_GEN_S);
+		gl.glDisable(GL.GL_TEXTURE_GEN_T);
+		gl.glDisable(GL.GL_TEXTURE_GEN_R);
+		int texUnit = GL.GL_TEXTURE0;
+
 		if (texture2D != null)	{
+			gl.glActiveTexture(texUnit);
+			texUnit++;
 			Texture2DLoaderJOGL.render(theCanvas, texture2D);
 			int[] res = new int[1];
 			gl.glGetTexParameteriv(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_RESIDENT, res);
@@ -141,6 +152,8 @@ public class DefaultPolygonShader implements PolygonShader {
 			gl.glEnable(GL.GL_TEXTURE_2D);
 		} //else
 		if (reflectionMap != null)	{
+			gl.glActiveTexture(texUnit);
+			texUnit++;
 			Texture2DLoaderJOGL.render(jr, reflectionMap);
 			int[] res = new int[1];
 			gl.glGetTexParameteriv(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_RESIDENT, res);

@@ -124,7 +124,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 		e1.printStackTrace();
 	   }
 	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D, tex2d);
-		//ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"reflectionMap", refm);
+		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"reflectionMap", refm);
 	   tex2d.setTextureMatrix( P3.makeStretchMatrix(null, vec));
 	   globeNode1.setAppearance(ap1);
 	   //rootAp = ap1;
