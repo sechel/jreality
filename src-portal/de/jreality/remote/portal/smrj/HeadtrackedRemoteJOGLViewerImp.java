@@ -35,15 +35,29 @@ import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
  */
 public class HeadtrackedRemoteJOGLViewerImp extends HeadtrackedRemoteViewerImp implements HeadtrackedRemoteJOGLViewer {
 
+	static boolean newInstance = true;
+	private static HeadtrackedRemoteJOGLViewerImp currentInstance;
+	
     private static final class Singleton {
         private static final HeadtrackedRemoteJOGLViewerImp instance = new HeadtrackedRemoteJOGLViewerImp();
     }
     public static HeadtrackedRemoteJOGLViewerImp getInstance() {
-        return Singleton.instance;
+    	if (newInstance) {
+    		if (currentInstance != null) {
+    			System.out.println("disposing prev viewer instance");
+    			currentInstance.setRemoteSceneRoot(null);
+    			currentInstance.f.hide();
+    			currentInstance.f.dispose();
+    		}
+    		currentInstance = new HeadtrackedRemoteJOGLViewerImp();
+    		return currentInstance;
+    	}
+        else return Singleton.instance;
     }
     
     private HeadtrackedRemoteJOGLViewerImp() {
         super(new de.jreality.jogl.InteractiveViewer());
+        System.out.println("HeadtrackedRemoteJOGLViewerImp.<init>()");
     }
     protected void init() {
         super.init();

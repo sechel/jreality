@@ -132,14 +132,14 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         }
         renderer.setPriority(Thread.MIN_PRIORITY);
         renderer.start();
-        setBackgroundColor(new java.awt.Color(220, 110, 144, 20));
+        setBackgroundColor(new java.awt.Color(132, 132, 218));
     }
 
     WandTool wandTool;
     SceneGraphComponent sceneRoot;
     SceneGraphComponent wandComp;
 
-    protected RemoteViewer initClients(RemoteFactory factory) throws IOException {
+    protected RemoteViewer initClients() throws IOException {
         RemoteViewer clients = (RemoteViewer) factory.createRemoteViaStaticMethod(HeadtrackedRemoteJOGLViewerImp.class, HeadtrackedRemoteJOGLViewerImp.class, "getInstance");
         clients.setRemoteSceneRoot(null);
         clients.reset();
@@ -289,13 +289,13 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
     }
 
     public void dispose() {
-        super.dispose();
         setAutoRender(false);
         setNavigationEnabled(false);
         queue.removeHeadMotionListener(this);
         queue.removeWandListener(wandTool);
         queue.removeWandMotionListener(wandTool);
         queue.dispose();
+        super.dispose();
     }
 
     public boolean isRenderOnHeadMove() {

@@ -81,12 +81,13 @@ public class RemoteDistributedViewer implements Viewer {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        clients = initClients(factory);
+        clients = initClients();
         clients.reset();
         proxyScene = new SMRJMirrorScene(factory);
     }
 
-    protected RemoteViewer initClients(RemoteFactory factory) throws IOException {
+    protected RemoteViewer initClients() throws IOException {
+    	// doesnt work!!!
         return (RemoteViewer) factory.createRemote(RemoteViewerImp.class);
     }
     

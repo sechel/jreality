@@ -121,7 +121,7 @@ public class HeadtrackedRemoteViewerImp extends RemoteViewerImp implements
         if (root != null) viewer.getSceneRoot().removeChild(root);
         root = (SceneGraphComponent) r;
         if (root != null) { 
-            System.out.println("setting scene root to: "+r);
+            //System.out.println("setting scene root to: "+r);
             viewer.getSceneRoot().addChild(root);
         }
     }
