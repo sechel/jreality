@@ -76,14 +76,15 @@ public class EventBoxVisitor extends SceneGraphVisitor {
 			EventBox box = (EventBox) i.next();
 			if (debug) System.out.println("event type: "+currentEvent.getType());
 			switch(currentEvent.getType()) {	
-				case WandEvent.ID_WAND_DRAGGED:
-					if (debug) System.out.println("ID_WAND_DRAGGED");
-					box.processDrag(context);
-				break;
+//				case WandEvent.ID_WAND_DRAGGED:
+//					if (debug) System.out.println("ID_WAND_DRAGGED");
+//					box.processDrag(context);
+//				break;
 				
 				case WandEvent.ID_WAND_MOVED:
 					if (debug) System.out.println("ID_WAND_MOVED");
-					box.processMove(context);
+					if (currentEvent.getButton() == -1) box.processMove(context); 
+					else box.processDrag(context);
 				break;
 				
 				case WandEvent.ID_BUTTON_PRESSED:
