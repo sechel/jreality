@@ -51,16 +51,16 @@ public class TestSphereDrawing extends AbstractLoadableScene {
 			Torus torus= new Torus(0.5, 0.3, 20, 30);
 			torus.setName("torus"+i);
 			GeometryUtility.calculateAndSetNormals(torus);
-			int lim = torus.getMaxU() + torus.getMaxV();
-			lim = lim + 2;
-			double[][] edgeColors = new double[lim][4];
-			for (int j = 0; j<lim; ++j)	{
-				edgeColors[j][0] = j/((double) lim);
-				edgeColors[j][1] = 0.0;
-				edgeColors[j][2] = (lim-j)/((double) lim);
-				edgeColors[j][3] = 1.0;
-			}
-			torus.setEdgeAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(4).createWritableDataList(edgeColors));
+//			int lim = torus.getMaxU() + torus.getMaxV();
+//			lim = lim + 2;
+//			double[][] edgeColors = new double[lim][4];
+//			for (int j = 0; j<lim; ++j)	{
+//				edgeColors[j][0] = j/((double) lim);
+//				edgeColors[j][1] = 0.0;
+//				edgeColors[j][2] = (lim-j)/((double) lim);
+//				edgeColors[j][3] = 1.0;
+//			}
+//			torus.setEdgeAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(4).createWritableDataList(edgeColors));
 			SceneGraphComponent globeNode = new SceneGraphComponent();
 			globeNode.setName("comp"+i);
 			Transformation gt= new Transformation();

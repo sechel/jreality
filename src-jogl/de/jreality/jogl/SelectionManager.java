@@ -6,6 +6,7 @@
  */
 package de.jreality.jogl;
 
+import java.awt.Color;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -193,8 +194,15 @@ public class SelectionManager implements SceneGraphPath.PathMatrixListener {
 	 */
 	public void setPickPoint(PickPoint point) {
 		pickPoint = point;
+		if (pickPoint == null) return;
 		// probably should have a separate event and listener list for this
 		//System.out.println("Setting pick point");
+		Color pickPointColor = Color.BLUE;
+		if (point.getPickType() == PickPoint.HIT_FACE) pickPointColor = Color.RED;
+		else if (point.getPickType() == PickPoint.HIT_EDGE) pickPointColor = Color.YELLOW;
+		else if (point.getPickType() == PickPoint.HIT_VERTEX) pickPointColor = Color.BLUE;
+
+		pickPointAppearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, pickPointColor);		
 		broadcastChange();
 		//System.out.println("Did broadcast change");
 	}

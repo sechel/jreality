@@ -744,16 +744,18 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 					}
 				}
 				if (proxy)	globalGL.glCallList(dlInfo.getDisplayListID(type));
-				if (!processDisplayListState(type))		 // false return implies no display lists used
-					JOGLRendererHelper.drawFaces(ifs, theCanvas.getGL(),ss, alpha, pickMode, JOGLPickAction.GEOMETRY_FACE);
-				else // we are using display lists
-					if (dlInfo.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
-						JOGLRendererHelper.drawFaces(ifs, theCanvas.getGL(), ss, alpha, pickMode, JOGLPickAction.GEOMETRY_FACE);
-						globalGL.glEndList();	
-						globalGL.glCallList(dlInfo.getDisplayListID(type));
-						dlInfo.setDisplayListDirty(type, false);
-						dlInfo.setInsideDisplayList(false);							
-					}
+				else 	{
+					if (!processDisplayListState(type))		 // false return implies no display lists used
+						JOGLRendererHelper.drawFaces(ifs, theCanvas.getGL(),ss, alpha, pickMode, JOGLPickAction.GEOMETRY_FACE);
+					else // we are using display lists
+						if (dlInfo.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
+							JOGLRendererHelper.drawFaces(ifs, theCanvas.getGL(), ss, alpha, pickMode, JOGLPickAction.GEOMETRY_FACE);
+							globalGL.glEndList();	
+							globalGL.glCallList(dlInfo.getDisplayListID(type));
+							dlInfo.setDisplayListDirty(type, false);
+							dlInfo.setInsideDisplayList(false);							
+						}					
+				}
 			}
 			if (geometryShader.isEdgeDraw() && ils != null)	{
 				geometryShader.lineShader.render(globalHandle);
@@ -762,7 +764,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 				boolean smooth = geometryShader.lineShader.isSmoothShading();
 				int type = proxy ? PROXY_LINEDL : LINEDL;
 				if (proxy && dlInfo.isDisplayListDirty(PROXY_LINEDL))	{
-					//System.out.println("Recalculating tubes");
+					System.out.println("Recalculating tubes");
 					int dl  = geometryShader.lineShader.proxyGeometryFor(ils, globalHandle, currentSignature);
 					if (dl != -1) {
 						//System.out.println("Tubes created");
@@ -771,16 +773,18 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 					}
 				}
 				if (proxy)	globalGL.glCallList(dlInfo.getDisplayListID(type));
-				if (!processDisplayListState(type))		 // false return implies no display lists used
+				else {
+					if (!processDisplayListState(type))		 // false return implies no display lists used
 						JOGLRendererHelper.drawLines(ils, theCanvas, pickMode, smooth, alpha);			
-				else // we are using display lists
-					if (dlInfo.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
-						JOGLRendererHelper.drawLines(ils, theCanvas, pickMode, smooth, alpha);			
-						globalGL.glEndList();	
-						globalGL.glCallList(dlInfo.getDisplayListID(type));
-						dlInfo.setDisplayListDirty(type, false);
-						dlInfo.setInsideDisplayList(false);							
-					}
+					else // we are using display lists
+						if (dlInfo.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
+							JOGLRendererHelper.drawLines(ils, theCanvas, pickMode, smooth, alpha);			
+							globalGL.glEndList();	
+							globalGL.glCallList(dlInfo.getDisplayListID(type));
+							dlInfo.setDisplayListDirty(type, false);
+							dlInfo.setInsideDisplayList(false);							
+						}
+				}
 			}
 			if (geometryShader.isVertexDraw() && ps != null)	{
 				geometryShader.pointShader.render(globalHandle);
@@ -1213,7 +1217,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 				for (int i = 0; i<n; ++i)	{		
 					JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
 					
-					if (pickMode)	globalGL.glPushName(child.childIndex);
+					if (pickMode)	globalGL.glPushName(JOGLPickAction.SGCOMP_BASE+child.childIndex);
 					child.render();
 					if (pickMode)	globalGL.glPopName();
 				}				

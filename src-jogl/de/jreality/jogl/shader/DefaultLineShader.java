@@ -35,6 +35,17 @@ import de.jreality.util.ShaderUtility;
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class DefaultLineShader implements LineShader  {
+	public static Attribute PROXY_FOR_EDGE = Attribute.attributeForName("proxyForEdge");
+	public class ProxyTubeIdentifier	{
+		public IndexedLineSet originalGeometry;
+		public int edgeNumber;
+		public ProxyTubeIdentifier(IndexedLineSet ils, int en)	{
+			super();
+			originalGeometry = ils;
+			edgeNumber = en;
+		}
+	}
+	
 	int 	tubeStyle = TubeUtility.PARALLEL;
 	double	tubeRadius = 0.05,
 		 	lineWidth = 1.0,
@@ -183,7 +194,7 @@ public class DefaultLineShader implements LineShader  {
 //	
 	// TOOD figure out how to clear out local display lists (not returned by the method)!
 	int[] tubeDL = null;
-	boolean testQMS = true;
+	boolean testQMS = false;
 	public int createTubesOnEdgesAsDL(IndexedLineSet ils, double rad,  double alpha, GL gl, int sig, boolean pickMode)	{
 		int n = ils.getNumEdges();
 		DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
@@ -193,16 +204,16 @@ public class DefaultLineShader implements LineShader  {
 			for (int i = 0; i<3; ++i)	{
 				tubeDL[i] = gl.glGenLists(1);
 				gl.glNewList(tubeDL[i], GL.GL_COMPILE);
-				JOGLRendererHelper.drawFaces(TubeUtility.urTube[i], gl, polygonShader.isSmoothShading(), alpha);
-				gl.glEndList();			
+				JOGLRendererHelper.drawFaces(TubeUtility.urTube[i], gl, polygonShader.isSmoothShading(), alpha );
+				gl.glEndList();	
 			}
 		}
 		int nextDL = gl.glGenLists(1);
 		gl.glNewList(nextDL, GL.GL_COMPILE);
-		
 		//System.out.println("Tube radius is "+tubeRadius);
 		gl.glEnable(GL.GL_COLOR_MATERIAL);
 		gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK, GL.GL_DIFFUSE);
+		if (pickMode)	gl.glPushName(JOGLPickAction.GEOMETRY_LINE);
 		if (testQMS && ils instanceof QuadMeshShape)	{
 			QuadMeshShape qms = (QuadMeshShape) ils;
 			int u = qms.getMaxU();
@@ -211,49 +222,70 @@ public class DefaultLineShader implements LineShader  {
 			boolean closedV = qms.isClosedInVDirection();
 			double[][] curve = null;
 			IndexedFaceSet tube = null;
+//			int numEdges = qms.getNumEdges();
+//			for (int i = 0; i<numEdges; ++i)	{
+//				curve = GeometryUtility.extractCurve(curve, qms, i);
+//				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, tubeStyle, false, sig, 0);
+//				GeometryUtility.calculateAndSetNormals(tube);
+//				//System.out.println("Tube has "+tube.getNumPoints()+" points");
+//				JOGLRendererHelper.drawFaces(tube, gl, polygonShader.isSmoothShading(), alpha, pickMode, JOGLPickAction.GEOMETRY_LINE);
+//			}
+			int count = 0;
 			for (int i = 0; i<u; ++i)	{
 				curve = GeometryUtility.extractUParameterCurve(curve, qms, i);
 				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, tubeStyle, closedV, sig, 0);
 				GeometryUtility.calculateAndSetNormals(tube);
 				//System.out.println("Tube has "+tube.getNumPoints()+" points");
-				JOGLRendererHelper.drawFaces(tube, gl, polygonShader.isSmoothShading(), alpha, pickMode, JOGLPickAction.GEOMETRY_LINE);
+				//tube.setGeometryAttributes(PROXY_FOR_EDGE, new ProxyTubeIdentifier(ils, count));
+				if (pickMode)	gl.glPushName(count++);
+				JOGLRendererHelper.drawFaces(tube, gl, polygonShader.isSmoothShading(), alpha);
+				if (pickMode) 	gl.glPopName();
 			}
 			for (int i = 0; i<v; ++i)	{
 				curve = GeometryUtility.extractVParameterCurve(curve, qms, i);
 				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, tubeStyle, closedU, sig, 0);
 				GeometryUtility.calculateAndSetNormals(tube);
 				//System.out.println("Tube has "+tube.getNumPoints()+" points");
-				JOGLRendererHelper.drawFaces(tube, gl, polygonShader.isSmoothShading(), alpha,pickMode, JOGLPickAction.GEOMETRY_LINE);
+				//tube.setGeometryAttributes(PROXY_FOR_EDGE, new ProxyTubeIdentifier(ils, count));
+				if (pickMode)	gl.glPushName(count++);
+				JOGLRendererHelper.drawFaces(tube, gl, polygonShader.isSmoothShading(), alpha);
+				if (pickMode) 	gl.glPopName();
 			}
 		} else {
-			for (int i = 0; i<n; ++i)	{
-				int[] ed = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
-				int m = ed.length;
-				if (m == 2)	{
-					for (int j = 0; j<m-1; ++j)	{
-						int k = ed[j];
-						double[] p1 = vertices.item(k).toDoubleArray(null);	
-						k = ed[j+1];
-						double[] p2 = vertices.item(k).toDoubleArray(null);	
-						SceneGraphComponent cc = TubeUtility.tubeOneEdge(p1, p2, rad, null, sig);
-						gl.glPushMatrix();
-						gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix());
-						gl.glCallList(tubeDL[sig+1]);
-						gl.glPopMatrix();
-						
-					}
-				}
-				else {
-					//double[][] curve = GeometryUtility.extractCurve(null, ils, i);
-					//System.out.println("curve is "+Rn.toString(curve));
-					//QuadMeshShape tube = TubeUtility.makeTubeAsIFS(curve, rad, null, tubeStyle, false, sig);
-					QuadMeshShape tube = TubeUtility.makeTubeAsIFS(ils, i, smoothShading, rad, null, tubeStyle, false, sig, 0);
-					GeometryUtility.calculateAndSetNormals(tube);
-					JOGLRendererHelper.drawFaces(tube, gl,  polygonShader.isSmoothShading(), alpha,pickMode, JOGLPickAction.GEOMETRY_LINE);
+		for (int i = 0; i<n; ++i)	{
+			int[] ed = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
+			int m = ed.length;
+			if (pickMode)	gl.glPushName(i);
+			if (m == 2)	{
+				for (int j = 0; j<1; ++j)	{
+					int k = ed[j];
+					double[] p1 = vertices.item(k).toDoubleArray(null);	
+					k = ed[j+1];
+					double[] p2 = vertices.item(k).toDoubleArray(null);	
+					SceneGraphComponent cc = TubeUtility.tubeOneEdge(p1, p2, rad, null, sig);
+					//cc.getGeometry().setGeometryAttributes(PROXY_FOR_EDGE, new ProxyTubeIdentifier(ils, i));
+					gl.glPushMatrix();
+					gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix());
+					gl.glCallList(tubeDL[sig+1]);
+					gl.glPopMatrix();
+					
 				}
 			}
-			
+			else {
+				//double[][] curve = GeometryUtility.extractCurve(null, ils, i);
+				//System.out.println("curve is "+Rn.toString(curve));
+				//QuadMeshShape tube = TubeUtility.makeTubeAsIFS(curve, rad, null, tubeStyle, false, sig);
+				//QuadMeshShape tube = TubeUtility.makeTubeAsIFS(ils, i, smoothShading, rad, null, tubeStyle, false, sig, 0);
+				QuadMeshShape tube = TubeUtility.makeTubeAsIFS(ils, i, false, rad, null, tubeStyle, false, sig, 0);
+				//tube.setGeometryAttributes(PROXY_FOR_EDGE, new ProxyTubeIdentifier(ils, i));
+				GeometryUtility.calculateAndSetNormals(tube);
+				JOGLRendererHelper.drawFaces(tube, gl,  polygonShader.isSmoothShading(), alpha);
+			}
+			if (pickMode) 	gl.glPopName();					
 		}
+		}
+		if (pickMode) gl.glPopName();
+		
 		gl.glEndList();
 		return nextDL;
 	}

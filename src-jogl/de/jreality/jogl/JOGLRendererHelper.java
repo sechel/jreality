@@ -246,11 +246,11 @@ public class JOGLRendererHelper {
 			if (pickMode)	gl.glPopName();
 		}
 		if (pickMode)	gl.glPopName();
-		gl.glDepthRange(0d, 1d);
+//		gl.glDepthRange(0d, 1d);
 	}
 
 	public static void drawFaces( IndexedFaceSet sg, GL gl,  boolean smooth, double alpha) {
-		drawFaces(sg, gl, smooth, alpha, false, 0);
+		drawFaces(sg, gl, smooth, alpha, false, JOGLPickAction.GEOMETRY_FACE);
 	}
 	public static void drawFaces( IndexedFaceSet sg, GL gl,  boolean smooth, double alpha, boolean pickMode, int pickName) {
 
@@ -265,7 +265,7 @@ public class JOGLRendererHelper {
 		//System.out.println("alpha value is "+alpha);
 		
 		// signal a geometry
-		if (pickMode)	gl.glPushName(pickName);
+		if (pickMode)	gl.glPushName(JOGLPickAction.GEOMETRY_FACE); //pickName);
 		
 		// vertex color has priority over face color
 		vertices = sg.getVertexAttributes(Attribute.COORDINATES);
@@ -316,6 +316,7 @@ public class JOGLRendererHelper {
 			double[] pt = new double[3];
 			// this loops through the "rows" of  the mesh (v is constant on each row)
 			for (int i = 0; i< maxFV ; ++i)	{
+				if (pickMode) gl.glPushName(i);
 				gl.glBegin(GL.GL_QUAD_STRIP);
 				// each iteration of this loop draws one quad strip consisting of 2 * (maxFU + 1) vertices
 				for (int j = 0; j <= maxFU; ++j)	{
@@ -371,12 +372,12 @@ public class JOGLRendererHelper {
 						if (vertexLength == 3) gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 						else if (vertexLength == 4) gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));								
 					}
-//					if (pickMode) {
-//						//System.out.print("-");
-//						gl.glPopName();
-//					}
 				}
 				gl.glEnd();
+				if (pickMode) {
+					//System.out.print("-");
+					gl.glPopName();
+				}
 			}				
 		}
 		else
