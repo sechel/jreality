@@ -972,7 +972,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 			while (iter.hasNext())	{
 				JOGLPeerComponent peer = (JOGLPeerComponent) iter.next();
 				peer.appearanceChanged(ev);
-				peer.propagateGeometryChanged(changed);
+				if (changed != 0) peer.propagateGeometryChanged(changed);
 			}
 			//System.out.println("setting display list dirty flag: "+changed);
 		}
@@ -1006,12 +1006,9 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 					return;
 			}
 			Iterator iter = peers.iterator();
-			boolean apAdded = (ev.getChildType() ==  SceneContainerEvent.CHILD_TYPE_APPEARANCE);
-			int changed = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
 			while (iter.hasNext())	{
 				JOGLPeerComponent peer = (JOGLPeerComponent) iter.next();
 				peer.childAdded(ev);
-				if (apAdded) peer.propagateGeometryChanged(changed);
 			}
 		}
 		public void childRemoved(SceneContainerEvent ev) {
@@ -1023,10 +1020,13 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 				}
 				return;
 			}
+			boolean apAdded = (ev.getChildType() ==  SceneContainerEvent.CHILD_TYPE_APPEARANCE);
+			int changed = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
 			Iterator iter = peers.iterator();
 			while (iter.hasNext())	{
 				JOGLPeerComponent peer = (JOGLPeerComponent) iter.next();
 				peer.childRemoved(ev);
+				if (apAdded) peer.propagateGeometryChanged(changed);
 			}
 		}
 		
@@ -1044,11 +1044,14 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 					} 
 					return;
 			}
+			boolean apAdded = (ev.getChildType() ==  SceneContainerEvent.CHILD_TYPE_APPEARANCE);
+			int changed = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
 			Iterator iter = peers.iterator();
 			while (iter.hasNext())	{
 				JOGLPeerComponent peer = (JOGLPeerComponent) iter.next();
 				peer.childReplaced(ev);
-			}
+				if (apAdded) peer.propagateGeometryChanged(changed);
+				}				
 		}
 		public void childAdded(SceneHierarchyEvent ev) {
 			Iterator iter = peers.iterator();
@@ -1307,18 +1310,12 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 					}
 					setIndexOfChildren();
 					break;
-//				case SceneContainerEvent.CHILD_TYPE_GEOMETRY:
-//					if (peerGeometry != null)	{
-//						peerGeometry.dispose();
-//						geometryRemoved = true;
-//						System.out.println("Warning: Adding geometry while old one still valid");
-//						peerGeometry=null;
-//					}
-//					if (goBetween.getOriginalComponent().getGeometry() != null)  {
-//						peerGeometry = getJOGLPeerGeometryFor(goBetween.getOriginalComponent().getGeometry());
-//						peerGeometry.refCount++;
-//					} 
-//					break;
+				case SceneContainerEvent.CHILD_TYPE_APPEARANCE:
+					int changed = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
+					propagateGeometryChanged(changed);	
+					appearanceChanged = true;
+					System.out.println("Propagating geometry change due to added appearance");
+					break;				
 				case SceneContainerEvent.CHILD_TYPE_LIGHT:
 					lightListDirty = true;
 					break;
@@ -1347,14 +1344,12 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 				    jpc.dispose();		// there are no other references to this child
 				    setIndexOfChildren();
 					break;
-					// geometry handled now by gobetween
-//				case SceneContainerEvent.CHILD_TYPE_GEOMETRY:
-//					if (peerGeometry != null) {
-//						peerGeometry.dispose();		// really decreases reference count
-//						peerGeometry = null;
-//						geometryRemoved = true;
-//					}
-//					break;
+				case SceneContainerEvent.CHILD_TYPE_APPEARANCE:
+					int changed = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
+					propagateGeometryChanged(changed);	
+					appearanceChanged = true;
+					System.out.println("Propagating geometry change due to removed appearance");
+					break;				
 				case SceneContainerEvent.CHILD_TYPE_LIGHT:
 					lightListDirty = true;
 					break;
@@ -1371,7 +1366,10 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 			//System.out.println("Container Child replaced at: "+goBetween.getOriginalComponent().getName());
 			switch(ev.getChildType())	{
 				case SceneContainerEvent.CHILD_TYPE_APPEARANCE:
+					int changed = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
+					propagateGeometryChanged(changed);	
 					appearanceChanged = true;
+					System.out.println("Propagating geometry change due to replaced appearance");
 					break;
 				case SceneContainerEvent.CHILD_TYPE_LIGHT:
 					lightListDirty = true;
