@@ -62,9 +62,9 @@ public class SphereDemo extends InteractiveViewerDemo {
 	 */
 	public SceneGraphComponent makeWorld() {
 		SceneGraphComponent world = SceneGraphUtilities.createFullSceneGraphComponent("world");
-		SimpleJOGLShader sh = new SimpleJOGLShader("SimpleJOGLVertexShader.txt", "SimpleJOGLFragmentShader.txt");
-		world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"useGLShader", true);
-		world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"GLShader", sh);
+//		SimpleJOGLShader sh = new SimpleJOGLShader("SimpleJOGLVertexShader.txt", "SimpleJOGLFragmentShader.txt");
+//		world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"useGLShader", true);
+//		world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"GLShader", sh);
 		
 		for (int i = 0; i<6; ++i)	{
 			SceneGraphComponent c = SceneGraphUtilities.createFullSceneGraphComponent("sphere"+i);

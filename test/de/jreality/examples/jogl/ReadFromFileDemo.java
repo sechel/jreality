@@ -117,7 +117,7 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 			if (!hyperbolic && !elliptic)	{
 				child = SceneGraphUtilities.createFullSceneGraphComponent("child");
 				child.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
-				child.addChild(SphereHelper.SPHERE_SUPERFINE);				
+				child.addChild(SphereHelper.SPHERE_WAYFINE);				
 				world.addChild(child);
 			} else {
 				if (hyperbolic) {

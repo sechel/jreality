@@ -164,14 +164,14 @@ public class TestScenarioBuilder extends SceneBuilder {
      app[3] = a;
       a.setAttribute(CommonAttributes.POLYGON_SHADER, "default");
       a.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, true);
-      a.setAttribute(CommonAttributes.TRANSPARENCY, 0.5);
+      a.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY, 0.5);
       a.setAttribute(CommonAttributes.EDGE_DRAW, true);
       //a.setAttribute(CommonAttributes.FACE_DRAW, false);
       a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER, "default");
       //a.setAttribute("lineShader.polygonShader.vertexShader", "constant");
       a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new Color(0.2f,.6f,.4f));
-      a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TRANSPARENCY, 0.0);
-      a.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+      a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY, 0.0);
+     a.setAttribute(CommonAttributes.VERTEX_DRAW, false);
       a.setAttribute(CommonAttributes.POINT_RADIUS, 0.05);
       a.setAttribute(CommonAttributes.TUBE_RADIUS, 0.05);
       a.setAttribute(CommonAttributes.LINE_WIDTH, 2.0);

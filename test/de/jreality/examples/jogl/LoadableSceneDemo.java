@@ -35,6 +35,7 @@ public class LoadableSceneDemo extends InteractiveViewerDemo {
     String root = "de.jreality.worlds.";
     String[] loadableScenes = {"de.jreality.worlds.AlexDemo",
     			"de.jreality.worlds.AnimationDemo",
+			"de.jreality.worlds.BouncingSpheres",
  			"de.jreality.worlds.DebugLattice",
 			"de.jreality.worlds.HopfFibration",
 			"de.jreality.worlds.ElephantTrunk",
@@ -42,8 +43,7 @@ public class LoadableSceneDemo extends InteractiveViewerDemo {
 			"de.jreality.worlds.ImplodedTori",
 			"de.jreality.worlds.LabelSetDemo",
   			"de.jreality.worlds.JOGLSkyBox",
-    			"de.jreality.worlds.ReflectionMapDemo",
-    			"de.jreality.worlds.StandardDemo",
+   			"de.jreality.worlds.StandardDemo",
 			"de.jreality.worlds.TestClippingPlane",
 			"de.jreality.worlds.TestSphereDrawing",
 			"de.jreality.worlds.TestTubes",

@@ -216,8 +216,6 @@ public class Test implements KeyListener {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        a.setAttribute("textureEnabled", true);
-        a.setAttribute("tryTexture2D", true);
         a.setAttribute("polygonShader.texture", tex);
         a.setAttribute("texture2d", tex);
         a.setAttribute("diffuseColor", new Color(0.4f, 0.4f, 0.4f));
