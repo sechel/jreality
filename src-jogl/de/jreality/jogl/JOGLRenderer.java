@@ -383,7 +383,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 			else		{
 				// set up the "pick transformation"
 				IntBuffer selectBuffer = BufferUtils.newIntBuffer(bufsize);
-				
+				//System.out.println("Picking "+frameCount);
 				double[] pp3 = new double[3];
 				pp3[0] = -pickScale * pickPoint[0]; pp3[1] = -pickScale * pickPoint[1]; pp3[2] = 0.0;
 				
@@ -764,7 +764,7 @@ public class JOGLRenderer extends SceneGraphVisitor  {
 				boolean smooth = geometryShader.lineShader.isSmoothShading();
 				int type = proxy ? PROXY_LINEDL : LINEDL;
 				if (proxy && dlInfo.isDisplayListDirty(PROXY_LINEDL))	{
-					System.out.println("Recalculating tubes");
+					//System.out.println("Recalculating tubes");
 					int dl  = geometryShader.lineShader.proxyGeometryFor(ils, globalHandle, currentSignature);
 					if (dl != -1) {
 						//System.out.println("Tubes created");

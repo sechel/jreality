@@ -80,6 +80,7 @@ public class JOGLPickAction extends PickAction  {
 		int realHits = 0;
 		Graphics3D context3D = new Graphics3D(v);
 		SceneGraphComponent theRoot = v.getSceneRoot();
+		if (debug) System.out.println("Processing gl selection buffer");
 		for (int i =0, count = 0; i<numberHits; ++i)	{
 			int names = selectBuffer.get(count++);
 			int[] path = new int[names];
@@ -91,11 +92,12 @@ public class JOGLPickAction extends PickAction  {
 			sgp.push(theRoot);
 			double z1 = selectBuffer.get(count++) * factor;
 			double z2 = selectBuffer.get(count++) * factor;
-			pndc[2] = z1;
-			//System.out.print("Hit "+i+": "+z1+" - "+z2+" ");
+			// TODO figure out why I have to add 1 to get agreement with my transformation
+			pndc[2] = z1+1.0;
+			if (debug) System.out.print("Hit "+i+": "+z1+" - "+z2+" ");
 			//boolean geometryFound = false;
 			int geometryFound = -1;
-			int geomID = -1;
+			int[] geomID = {-1, -1};
 			for (int j = 0; j<names; ++j)	{
 				path[j] = selectBuffer.get(count);
 				if (debug) System.out.print(": "+path[j]);
@@ -106,12 +108,12 @@ public class JOGLPickAction extends PickAction  {
 						// otherwise we assume it's a scene graph component
 						// and store it off
 						int which = path[j] - SGCOMP_BASE;
-						System.out.print("?");
+						if (debug) System.out.print("?");
 						if (sgc.getChildComponentCount() > which && sgc.getChildComponent(which) != null) {
 							SceneGraphComponent tmpc = sgc.getChildComponent(which);
 							sgp.push(tmpc); 
 							sgc = tmpc;
-							System.out.print("("+sgc.getName()+")");
+							if (debug) System.out.print("("+sgc.getName()+")");
 						}
 					}
 					else if (path[j] >= GEOMETRY_BASE)	{
@@ -123,7 +125,8 @@ public class JOGLPickAction extends PickAction  {
 							System.out.println("Whoa: too many geometries in the path");
 						}
 					} 	
-					else if (geomID == -1) geomID = path[j];	
+					else if (geomID[0] == -1) geomID[0] = path[j];	
+					else if (geomID[1] == -1) geomID[1]= path[j];
 				}
 				count++;
 			}
@@ -138,7 +141,7 @@ public class JOGLPickAction extends PickAction  {
 			Geometry geom = (Geometry) sgn;
 			context3D.setObjectToWorld(sgp.getMatrix(null));
 			if (geometryFound == GEOMETRY_FACE && (geom instanceof IndexedFaceSet))	{
-				if (debug) System.out.println("Picked face "+ geomID);
+				if (debug) System.out.println("Picked face "+ geomID[0]);
 				IndexedFaceSet sg = (IndexedFaceSet) sgn;
 				oneHit = calculatePickPointForFace(oneHit, pndc, context3D,sgp, sg, geomID);
 				if (oneHit == null) continue;
@@ -146,7 +149,7 @@ public class JOGLPickAction extends PickAction  {
 				realHits++;
 			} 
 			else if (geometryFound == GEOMETRY_LINE  && (geom instanceof IndexedLineSet))	{
-				if (debug) System.out.println("Picked edge "+ geomID);
+				if (debug) System.out.println("Picked edge "+ geomID[0]+" "+geomID[1]);
 				IndexedLineSet sg = (IndexedLineSet) geom;
 				oneHit = calculatePickPointForEdge(oneHit, pndc, context3D, sgp, sg,geomID);
 				if (oneHit == null) continue;
@@ -154,7 +157,7 @@ public class JOGLPickAction extends PickAction  {
 				realHits++;					
 			} else if (geometryFound == GEOMETRY_POINT && (geom instanceof PointSet))	{
 				PointSet sg = (PointSet) geom;
-				if (debug) System.out.println("Picked vertex "+geomID);
+				if (debug) System.out.println("Picked vertex "+geomID[0]);
 				oneHit = calculatePickPointForVertex(oneHit, pndc, context3D,sgp, sg, geomID);
 				if (oneHit == null) continue;
 				al.add(oneHit);
@@ -217,86 +220,93 @@ public class JOGLPickAction extends PickAction  {
 		Arrays.sort(hits, cc);
 		return hits;
 	}
-	protected static PickPoint calculatePickPointForVertex(PickPoint dst, double[] pndc, Graphics3D gc, SceneGraphPath sgp, PointSet sg, int vertexNum)	{
+	protected static PickPoint calculatePickPointForVertex(PickPoint dst, double[] pndc, Graphics3D gc, SceneGraphPath sgp, PointSet sg, int[] geomID)	{
 		DataList verts = sg.getVertexAttributes(Attribute.COORDINATES);
-		if (vertexNum >= verts.size())	{
+		if (geomID[0] >= verts.size())	{
 			System.out.println("Invalid vertex number in calculatePickPointFor()");
 			return null;
 		}
-		double[] realNDC = Rn.matrixTimesVector(null,gc.getObjectToNDC(), verts.item(vertexNum).toDoubleArray(null));
+		double[] realNDC = Rn.matrixTimesVector(null,gc.getObjectToNDC(), verts.item(geomID[0]).toDoubleArray(null));
 		if (realNDC.length == 4) Pn.dehomogenize(realNDC, realNDC);
+		realNDC[2] = pndc[2];
+		if (debug) System.out.println("Real and theoretical z-value: "+pndc[2]+"  "+realNDC[2]);
 		PickPoint pp = new PickPoint(gc.getViewer(), sgp, realNDC);
+		pp.setVertexNum(geomID[0]);
+		pp.setPickType(PickPoint.HIT_VERTEX);
 		return pp;
 	}
-	protected static PickPoint calculatePickPointForEdge(PickPoint dst, double[] pndc, Graphics3D gc, SceneGraphPath sgp, IndexedLineSet sg, int edgeNum)	{
+	protected static PickPoint calculatePickPointForEdge(PickPoint dst, double[] pndc, Graphics3D gc, SceneGraphPath sgp, IndexedLineSet sg, int[] geomID)	{
 		int[][] indices = sg.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
 		DataList verts = sg.getVertexAttributes(Attribute.COORDINATES);
-		if (edgeNum >= indices.length)	{
+		if (geomID[0] >= indices.length)	{
 			System.out.println("Invalid edge number in calculatePickPointFor()");
 			return null;
 		}
-		int n = indices[edgeNum].length;
-		pndc[2] = 1.0;
-		double[][] oneEdge = new double[n][], oneEdgeP2 = new double[n][3];
-		for (int j = 0; j<indices[edgeNum].length; ++j)	{
-				oneEdge[j] = verts.item(indices[edgeNum][j]).toDoubleArray(null);
-		}
-		Rn.matrixTimesVector(oneEdge,gc.getObjectToNDC(), oneEdge);
-		if (oneEdge[0].length == 4) Pn.dehomogenize(oneEdge, oneEdge);
-		for (int j = 0; j<indices[edgeNum].length; ++j)	{
-			oneEdgeP2[j][0] = oneEdge[j][0]; 
-			oneEdgeP2[j][1] = oneEdge[j][1]; 
-			oneEdgeP2[j][2] = 1.0; 
-		}
-		double[][] lines = new double[n-1][3];
-		double min = 10E20;
-		double[] distances = new double[n-1];
-		int index = 0;
-		for (int i = 0; i<n-1; ++i)	{
-			P2.lineFromPoints(lines[i], oneEdgeP2[i], oneEdgeP2[i+1]);
-			distances[i] = Math.abs(Rn.innerProduct(pndc, lines[i]));
-			if (distances[i] < min) { min = distances[i]; index = i; }
-		}
-		double d1 = 10^20, d2=10^20;
-		double[] pickndc1 = null, pickndc2 = null;
-		double tt = 0.0, zval = 0;
-		if (index > 0)	{
-			pickndc1 = P2.closestPointOnLine(null, lines[index-1], pndc, Pn.EUCLIDEAN);
-			d1 = Rn.innerProduct(pndc, pickndc1);
-			double dx = (oneEdge[index+1][0] - oneEdge[index][0]);
-			if (dx != 0.0)	
-				tt = (pickndc1[0] - oneEdge[index][0])/dx;				
-			else 
-				tt = (pickndc1[1] - oneEdge[index][1])/(oneEdge[index+1][1] - oneEdge[index][1]);
-
-			zval = tt * oneEdge[index+1][2] + (1-tt)*oneEdge[index][2];
-			//System.out.println("d1 is "+d1);
-		}
-		if (index < n-2)	{
-			pickndc2 = P2.closestPointOnLine(null, lines[index], pndc, Pn.EUCLIDEAN);
-			d2 = Rn.innerProduct(pndc, pickndc2);
-			double dx = (oneEdge[index+1][0] - oneEdge[index][0]);
-			if (dx != 0.0) tt = (pickndc2[0] - oneEdge[index][0])/dx;
-			else tt = (pickndc2[1] - oneEdge[index][1])/(oneEdge[index+1][1] - oneEdge[index][1]);
-			zval = tt * oneEdge[index+1][2] + (1-tt)*oneEdge[index][2];
-			//System.out.println("d2 is "+d2);
-		}
-		double[] pickndc = null;
-		if (d1 < d2)	pickndc  = pickndc1;
-		else pickndc = pickndc2;
+		int n = indices[geomID[0]].length;
+		//pndc[2] = 1.0;
+//		double[][] oneEdge = new double[n][], oneEdgeP2 = new double[n][3];
+//		for (int j = 0; j<indices[geomID[0]].length; ++j)	{
+//				oneEdge[j] = verts.item(indices[geomID[0]][j]).toDoubleArray(null);
+//		}
+//		Rn.matrixTimesVector(oneEdge,gc.getObjectToNDC(), oneEdge);
+//		if (oneEdge[0].length == 4) Pn.dehomogenize(oneEdge, oneEdge);
+//		for (int j = 0; j<indices[geomID[0]].length; ++j)	{
+//			oneEdgeP2[j][0] = oneEdge[j][0]; 
+//			oneEdgeP2[j][1] = oneEdge[j][1]; 
+//			oneEdgeP2[j][2] = 1.0; 
+//		}
+//		double[][] lines = new double[n-1][3];
+//		double min = 10E20;
+//		double[] distances = new double[n-1];
+//		int index = 0;
+//		for (int i = 0; i<n-1; ++i)	{
+//			P2.lineFromPoints(lines[i], oneEdgeP2[i], oneEdgeP2[i+1]);
+//			distances[i] = Math.abs(Rn.innerProduct(pndc, lines[i]));
+//			if (distances[i] < min) { min = distances[i]; index = i; }
+//		}
+//		double d1 = 10^20, d2=10^20;
+//		double[] pickndc1 = null, pickndc2 = null;
+//		double tt = 0.0, zval1 = 0, zval2=0;
+//		double[] pndcp2 = {pndc[0], pndc[1], 1.0};
+//		if (index > 0)	{
+//			pickndc1 = P2.closestPointOnLine(null, lines[index-1],  pndcp2, Pn.EUCLIDEAN);
+//			d1 = Rn.innerProduct( pndcp2, pickndc1);
+//			double dx = (oneEdge[index+1][0] - oneEdge[index][0]);
+//			if (dx != 0.0)	
+//				tt = (pickndc1[0] - oneEdge[index][0])/dx;				
+//			else 
+//				tt = (pickndc1[1] - oneEdge[index][1])/(oneEdge[index+1][1] - oneEdge[index][1]);
+//
+//			zval1 = tt * oneEdge[index+1][2] + (1-tt)*oneEdge[index][2];
+//			//System.out.println("d1 is "+d1);
+//		}
+//		if (index < n-2)	{
+//			pickndc2 = P2.closestPointOnLine(null, lines[index],  pndcp2, Pn.EUCLIDEAN);
+//			d2 = Rn.innerProduct( pndcp2, pickndc2);
+//			double dx = (oneEdge[index+1][0] - oneEdge[index][0]);
+//			if (dx != 0.0) tt = (pickndc2[0] - oneEdge[index][0])/dx;
+//			else tt = (pickndc2[1] - oneEdge[index][1])/(oneEdge[index+1][1] - oneEdge[index][1]);
+//			zval2 = tt * oneEdge[index+1][2] + (1-tt)*oneEdge[index][2];
+//			//System.out.println("d2 is "+d2);
+//		}
+//		double zval = 0;
+//		if (d1 < d2)	zval = zval1;
+//		else zval = zval2;
+//		if (debug) System.out.println("Real and theoretical z-value: "+pndc[2]+"  "+zval);
 		double[] realNDC = new double[4];
-		realNDC[0] = pickndc[0]; realNDC[1] = pickndc[1];  realNDC[2] = zval; realNDC[3] = 1.0;
+		realNDC[0] = pndc[0]; realNDC[1] = pndc[1];  		realNDC[2] = pndc[2]; realNDC[3] = 1.0;
 		dst = new PickPoint(gc.getViewer(), sgp, realNDC);
-		dst.setEdgeNum(index);
+		dst.setEdgeNum(geomID);
 		dst.setPickType(PickPoint.HIT_EDGE);
 		return dst;
 	}
 
 	
-	protected static PickPoint calculatePickPointForFace(PickPoint dst, double[] pndc, Graphics3D gc, SceneGraphPath sgp, IndexedFaceSet sg, int faceNum)	{
+	protected static PickPoint calculatePickPointForFace(PickPoint dst, double[] pndc, Graphics3D gc, SceneGraphPath sgp, IndexedFaceSet sg, int[] geomID)	{
 
 		int[][] indices = sg.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
 		DataList verts = sg.getVertexAttributes(Attribute.COORDINATES);
+		int faceNum = geomID[0];
 		if (faceNum >= indices.length)	{
 			System.out.println("Invalid face number in calculatePickPointFor()");
 			return null;

@@ -256,8 +256,8 @@ public class DefaultLineShader implements LineShader  {
 			int[] ed = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
 			int m = ed.length;
 			if (pickMode)	gl.glPushName(i);
-			if (m == 2)	{
-				for (int j = 0; j<1; ++j)	{
+			if (m == 2 || pickMode)	{
+				for (int j = 0; j<m-1; ++j)	{
 					int k = ed[j];
 					double[] p1 = vertices.item(k).toDoubleArray(null);	
 					k = ed[j+1];
@@ -266,7 +266,9 @@ public class DefaultLineShader implements LineShader  {
 					//cc.getGeometry().setGeometryAttributes(PROXY_FOR_EDGE, new ProxyTubeIdentifier(ils, i));
 					gl.glPushMatrix();
 					gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix());
+					if (pickMode) gl.glPushName(j);
 					gl.glCallList(tubeDL[sig+1]);
+					if (pickMode) gl.glPopName();
 					gl.glPopMatrix();
 					
 				}

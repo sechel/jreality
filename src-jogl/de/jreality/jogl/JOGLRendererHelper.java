@@ -162,9 +162,11 @@ public class JOGLRendererHelper {
 		if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
 		DoubleArray da;
 		if (pickMode)	gl.glPushName(JOGLPickAction.GEOMETRY_POINT);
-		gl.glBegin(GL.GL_POINTS);
+		if (!pickMode) gl.glBegin(GL.GL_POINTS);
 		for (int i = 0; i< sg.getNumPoints(); ++i)	{
 			//double vv;
+			if (pickMode) gl.glPushName(i);
+			if (pickMode) gl.glBegin(GL.GL_POINTS);
 			if (pointSize != null) {
 				float ps = (float) pointSize.item(i).toDoubleArray().getValueAt(0);
 				gl.glPointSize( ps);
@@ -183,8 +185,10 @@ public class JOGLRendererHelper {
 			da = vertices.item(i).toDoubleArray();				
 			if (vertexLength == 3) gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 			else if (vertexLength == 4) gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
+			if (pickMode) gl.glEnd();
+			if (pickMode) gl.glPopName();
 		}
-		gl.glEnd();
+		if (!pickMode) gl.glEnd();
 		if (pickMode) gl.glPopName();
 	}
 	/**
@@ -214,10 +218,10 @@ public class JOGLRendererHelper {
 		int numEdges = sg.getNumEdges();
 		for (int i = 0; i< numEdges; ++i)	{
 			if (pickMode)	gl.glPushName(i);
-			gl.glBegin(GL.GL_LINE_STRIP);
+			if (!pickMode) gl.glBegin(GL.GL_LINE_STRIP);
 			int[] ed = sg.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
 			int m = ed.length;
-			if (colorBind == ElementBinding.PER_EDGE) 		{	
+			if (!pickMode && colorBind == ElementBinding.PER_EDGE) 		{	
 				da = edgeColors.item(i).toDoubleArray();
 				if (colorLength == 3) 	{
 					gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
@@ -227,9 +231,13 @@ public class JOGLRendererHelper {
 			}
 
 			for (int j = 0; j<m; ++j)	{
-				//if (pickMode)	gl.glPushName(j);
+				if (pickMode)	{
+					if (j == m-1) break;
+					gl.glPushName(j);
+					gl.glBegin(GL.GL_LINES);
+				}
 				int k = ed[j];
-				if (colorBind == ElementBinding.PER_VERTEX) 		{	
+				if (!pickMode && colorBind == ElementBinding.PER_VERTEX) 		{	
 					da = vertexColors.item(k).toDoubleArray();
 					if (colorLength == 3) 	{
 						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
@@ -241,8 +249,16 @@ public class JOGLRendererHelper {
 				if (vertexLength == 3) gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 				else if (vertexLength == 4) gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
 				//if (pickMode)	gl.glPopName();
+				if (pickMode)	{
+					k = ed[j+1];
+					da = vertices.item(k).toDoubleArray();				
+					if (vertexLength == 3) gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
+					else if (vertexLength == 4) gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
+					gl.glEnd();
+					gl.glPopName();
+				}
 			}
-			gl.glEnd();
+			if (!pickMode) 	gl.glEnd();
 			if (pickMode)	gl.glPopName();
 		}
 		if (pickMode)	gl.glPopName();
