@@ -221,10 +221,13 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 		rendering = reRender = true;
 		while (reRender) {
 			reRender = false;
+      long s;
+      long t;
 			if (headTracked && headChanged) {
 				clientMapLock.readLock();
 				headMatrixLock.readLock();
 				Collection currClients = getClients().values();
+        s  = System.currentTimeMillis();
 				for (Iterator i = currClients.iterator(); i.hasNext(); ) {
 					headChanged = false;
 					try {
@@ -234,6 +237,8 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 						e.printStackTrace();
 					}
 				}
+        t = System.currentTimeMillis() - s;
+        System.out.println("sendHead: "+t);
 				headMatrixLock.readUnlock();
 				clientMapLock.readUnlock();
 			}
@@ -241,6 +246,7 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 			renders++;
 			clientMapLock.writeLock();
 			Collection currClients = getClients().values();
+      s  = System.currentTimeMillis();
             for (Iterator i = currClients.iterator(); i.hasNext(); ) {
 				try {
 					((HeadtrackedRemoteServerClient)i.next()).render();
@@ -249,6 +255,9 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 					i.remove();
 				}
 			}
+            t = System.currentTimeMillis() - s;
+            System.out.println("render: "+t);
+            s  = System.currentTimeMillis();
 			for (Iterator i = currClients.iterator(); i.hasNext(); ) {
 				try {
 					((HeadtrackedRemoteServerClient)i.next()).waitForRenderFinish();
@@ -257,14 +266,21 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 					i.remove();
 				}
 			}
-			if (manualSwapBuffers) for (Iterator i = currClients.iterator(); i.hasNext(); ) {
+      t = System.currentTimeMillis() - s;
+      System.out.println("waitForRenderFinish: "+t);
+			if (manualSwapBuffers) {
+            s  = System.currentTimeMillis();
+                for (Iterator i = currClients.iterator(); i.hasNext(); ) {
 				try {
 					((HeadtrackedRemoteServerClient)i.next()).swapBuffers();
 				} catch (ClientDisconnectedException e) {
 					//TODO: make this in a write lock
 					i.remove();
 				}
+        t = System.currentTimeMillis() - s;
+        System.out.println("swapBuffers: "+t);
 			}
+            }
 			long delay = System.currentTimeMillis() - start;
 			if (maxFrameTime < delay) maxFrameTime = delay;
 			clientMapLock.writeUnlock();
