@@ -136,11 +136,7 @@ public class WandTool implements WandListener, WandMotionListener {
 
 	Transformation oldWandMatrix = new Transformation();
 	private boolean navigationEnabled;
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see szg.framework.event.WandMotionListener#wandMoved(szg.framework.event.WandEvent)
-	 */
+
 	public void wandMoved(WandEvent arg0) {
 		oldWandMatrix.setMatrix(wandTransformation.getMatrix());
 		setWandMatrix(arg0, wandTransformation);

@@ -121,6 +121,7 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 			queue.addWandMotionListener(wandTool);
 			queue.addWandListener(this);
 			queue.addWandMotionListener(this);
+      queue.addHeadMotionListener(this);
 		} catch (RuntimeException e) {
 			e.printStackTrace();
 		} catch (MalformedURLException e) {
@@ -133,29 +134,11 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		queue.addHeadMotionListener(this);
 		renderer.setPriority(Thread.MIN_PRIORITY);
 		renderer.start();
 //		controlPanel = new ControlPanel();
 	}
 	
-  public void loadWorld(String classname) {
-      long t = System.currentTimeMillis();
-      LoadableScene wm = null;
-      try {
-          wm = (LoadableScene) Class.forName(classname).newInstance();
-      } catch (Exception e) {
-          e.printStackTrace();
-      }
-      // scene settings
-      wm.setConfiguration(getConfig());
-      de.jreality.scene.SceneGraphComponent world = wm.makeWorld();
-      if (world != null) getSceneRoot().addChild(world);
-      setSignature(wm.getSignature());
-      long s = System.currentTimeMillis() - t;
-      System.out.println("loaded world " + classname + " successful. ["+s+"ms]");
-  }
-
   WandTool wandTool;
 	SceneGraphComponent sceneRoot;
 	SceneGraphComponent wandComp;
@@ -340,14 +323,6 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 		if (renderOnHeadMove && !autoRender) render();
 	}
 
-	public static void main(String[] args) throws RemoteException {
-		String hostname = INetUtilities.getHostname();
-		PortalServerImplementation rsi = new PortalServerImplementation();
-		rsi.bind();
-		rsi.setBackgroundColor(new Color(120, 10, 44, 20));
-		rsi.loadWorld(args[0]);
-	}
-
 	public boolean isAutoRender() {
 		return autoRender;
 	}
@@ -448,4 +423,31 @@ public class PortalServerImplementation extends RemoteServerImpl implements Wand
 		}
 		clientMapLock.writeUnlock();
 	}
+
+  public void loadWorld(String classname) {
+      long t = System.currentTimeMillis();
+      LoadableScene wm = null;
+      try {
+          wm = (LoadableScene) Class.forName(classname).newInstance();
+      } catch (Exception e) {
+          e.printStackTrace();
+      }
+      // scene settings
+      wm.setConfiguration(getConfig());
+      de.jreality.scene.SceneGraphComponent world = wm.makeWorld();
+      if (world != null) getNavigationComponent().addChild(world);
+      setSignature(wm.getSignature());
+      long s = System.currentTimeMillis() - t;
+      System.out.println("loaded world " + classname + " successful. ["+s+"ms]");
+  }
+
+    public static void main(String[] args) throws RemoteException {
+            String hostname = INetUtilities.getHostname();
+            PortalServerImplementation rsi = new PortalServerImplementation();
+            rsi.bind();
+            rsi.setBackgroundColor(new Color(120, 10, 44, 20));
+            rsi.loadWorld(args[0]);
+            rsi.setNavigationEnabled(true);
+        }
+
 }
