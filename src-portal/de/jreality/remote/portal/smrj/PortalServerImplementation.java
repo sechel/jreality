@@ -365,10 +365,13 @@ if (measure)                System.out.println("sendHead: "+t);
         // scene settings
         wm.setConfiguration(getConfig());
         de.jreality.scene.SceneGraphComponent world = wm.makeWorld();
-        if (world != null) getNavigationComponent().addChild(world);
-        setSignature(wm.getSignature());
         long s = System.currentTimeMillis() - t;
-        System.out.println("loaded world " + classname + " successful. ["+s+"ms]");
+        System.out.println("make world " + classname + " successful. ["+s+"ms]");
+        setSignature(wm.getSignature());
+        t = System.currentTimeMillis();
+        if (world != null) getNavigationComponent().addChild(world);
+        s = System.currentTimeMillis() - t;
+        System.out.println("distributed world " + classname +"["+s+"ms]");
     }
 
     
