@@ -55,7 +55,6 @@ public class SMRJMirrorScene extends SceneProxyBuilder {
 	 * scene graph classes and adds the node to the component.
      */
     public void add(Object parentProxy, Object childProxy) {
-        System.out.println(Arrays.asList(childProxy.getClass().getInterfaces()).toString().replace(',', '\n'));
     	try {
             ((RemoteSceneGraphComponent)parentProxy).add((RemoteSceneGraphNode) childProxy);
         } catch (RemoteException e) {
