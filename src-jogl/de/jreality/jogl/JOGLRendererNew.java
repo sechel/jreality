@@ -570,7 +570,6 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 		Logger.getLogger("de.jreality.jogl").log(Level.FINEST, "Memory usage: "+getMemoryUsage());
 		if (geometries == null) return;
 		if (!geometryRemoved) return;
-		ArrayList removedGeoms = new ArrayList();
 		final Hashtable newG = new Hashtable();
 		SceneGraphVisitor cleanup = new SceneGraphVisitor()	{
 			public void visit(SceneGraphComponent c) {
@@ -583,24 +582,26 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 		};
 		cleanup.visit(theRoot);
 		//TODO dispose of the peer geomtry nodes which are no longer in the graph
-		//System.out.println("Old, new hash size: "+geometries.size()+" "+newG.size());
-		java.util.Enumeration foo = geometries.keys();
-		while (foo.hasMoreElements())	{
-			Object key = foo.nextElement();
-			if (!newG.containsKey(key)) removedGeoms.add(geometries.get(key));
-		}
+		System.out.println("Old, new hash size: "+geometries.size()+" "+newG.size());
+		return;
+//		ArrayList removedGeoms = new ArrayList();
+//		java.util.Enumeration foo = geometries.keys();
+//		while (foo.hasMoreElements())	{
+//			Object key = foo.nextElement();
+//			if (!newG.containsKey(key)) removedGeoms.add(geometries.get(key));
+//		}
 		// switch over the hash table
 //		synchronized(geometries)	{
-			geometries = newG;
-			//System.out.println("Removing "+removedGeoms.size()+" geometry peers");
-			Iterator iter = removedGeoms.iterator();
-			while (iter.hasNext())	{
-				Object el = iter.next();
-				if (el instanceof JOGLPeerGeometry)	{
-					((JOGLPeerGeometry)el).dispose();
-				}
-			}
-			geometryRemoved = false;
+//			geometries = newG;
+//			//System.out.println("Removing "+removedGeoms.size()+" geometry peers");
+//			Iterator iter = removedGeoms.iterator();
+//			while (iter.hasNext())	{
+//				Object el = iter.next();
+//				if (el instanceof JOGLPeerGeometry)	{
+//					((JOGLPeerGeometry)el).dispose();
+//				}
+//			}
+//			geometryRemoved = false;
 //		}
 	}
 
@@ -618,6 +619,7 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 		IndexedFaceSet ifs;
 		IndexedLineSet ils;
 		PointSet ps;
+		int refCount = 0;
 		
 		protected JOGLPeerGeometry(Geometry g)	{
 			super();
@@ -632,7 +634,15 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 		}
 		
 		public void dispose()		{
-			originalGeometry.removeGeometryListener(this);
+			refCount--;
+			if (refCount < 0)	{
+				System.out.println("Negative reference count!");
+			}
+			if (refCount == 0)	{
+				//System.out.println("Geometry is no longer referenced");
+				originalGeometry.removeGeometryListener(this);	
+				geometries.remove(originalGeometry);
+			}
 		}
 		
 		public void geometryChanged(GeometryEvent ev) {
@@ -816,6 +826,7 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 				parent = p;
 				if (originalComponent.getGeometry() != null)  {
 					jpg = getJOGLPeerGeometryFor(originalComponent.getGeometry());
+					jpg.refCount++;
 				} else jpg = null;
 				originalComponent.addSceneAncestorListener(this);
 				originalComponent.addSceneContainerListener(this);
@@ -828,7 +839,14 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 			originalComponent.removeSceneAncestorListener(this);
 			originalComponent.removeSceneContainerListener(this);
 			originalComponent.removeSceneTreeListener(this);
-			if (originalComponent.getAppearance() != null) originalComponent.getAppearance().removeAppearanceListener(this);				
+			if (originalComponent.getAppearance() != null) originalComponent.getAppearance().removeAppearanceListener(this);
+			//if (jpg != null)		jpg.dispose();
+	
+			int n = children.size();
+			for (int i = n-1; i>=0; --i)	{
+				JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
+				child.dispose();
+			}
 
 		}
 		public void render()		{
@@ -934,45 +952,6 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 		public void ancestorDetached(SceneHierarchyEvent ev) {
 		}
 		
-		public void childAdded(SceneContainerEvent ev) {
-			//System.out.println("Container Child added to: "+originalComponent.getName());
-			//System.out.println("Event is: "+ev.toString());
-			switch (ev.getChildType() )	{
-				case SceneContainerEvent.CHILD_TYPE_COMPONENT:
-					SceneGraphComponent sgc = (SceneGraphComponent) ev.getNewChildElement();
-					ConstructPeerGraphVisitor pv = new ConstructPeerGraphVisitor(sgc, this);
-					JOGLPeerComponent pc = (JOGLPeerComponent) pv.visit();
-					//pc.updateAppearance();
-					break;
-				case SceneContainerEvent.CHILD_TYPE_GEOMETRY:
-					if (originalComponent.getGeometry() != null)  {
-						jpg = getJOGLPeerGeometryFor(originalComponent.getGeometry());
-					} else jpg = null;
-					geometryRemoved = true;
-					break;
-				
-			}
-		}
-		
-		public void childRemoved(SceneContainerEvent ev) {
-			//System.out.println("Container Child removed from: "+originalComponent.getName());
-			switch (ev.getChildType() )	{
-				case SceneContainerEvent.CHILD_TYPE_COMPONENT:
-					SceneGraphComponent sgc = (SceneGraphComponent) ev.getOldChildElement();
-				    JOGLPeerComponent jpc = getPeerForChildComponent(sgc);
-				    //System.out.println("removing peer "+jpc.getName());
-				    children.remove(jpc);
-				    jpc.dispose();		// there are no other references to this child
-					break;
-				case SceneContainerEvent.CHILD_TYPE_GEOMETRY:
-					if (jpg != null) jpg.dispose();
-					jpg = null;
-					geometryRemoved = true;
-					break;
-			
-		}
-		}
-		
 		/**
 		 * @param sgc
 		 * @return
@@ -989,6 +968,53 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 			return null;
 		}
 
+		public void childAdded(SceneContainerEvent ev) {
+			//System.out.println("Container Child added to: "+originalComponent.getName());
+			//System.out.println("Event is: "+ev.toString());
+			switch (ev.getChildType() )	{
+				case SceneContainerEvent.CHILD_TYPE_COMPONENT:
+					SceneGraphComponent sgc = (SceneGraphComponent) ev.getNewChildElement();
+					ConstructPeerGraphVisitor pv = new ConstructPeerGraphVisitor(sgc, this);
+					JOGLPeerComponent pc = (JOGLPeerComponent) pv.visit();
+					children.add(pc);
+					//pc.updateAppearance();
+					break;
+				case SceneContainerEvent.CHILD_TYPE_GEOMETRY:
+					if (jpg != null)	{
+						jpg.refCount--;
+						System.out.println("Warning: Adding geometry while old one still valid");
+						jpg=null;
+					}
+					if (originalComponent.getGeometry() != null)  {
+						jpg = getJOGLPeerGeometryFor(originalComponent.getGeometry());
+						jpg.refCount++;
+					} 
+					break;
+				
+			}
+		}
+		
+		public void childRemoved(SceneContainerEvent ev) {
+			//System.out.println("Container Child removed from: "+originalComponent.getName());
+			switch (ev.getChildType() )	{
+				case SceneContainerEvent.CHILD_TYPE_COMPONENT:
+					SceneGraphComponent sgc = (SceneGraphComponent) ev.getOldChildElement();
+				    JOGLPeerComponent jpc = getPeerForChildComponent(sgc);
+				    //System.out.println("removing peer "+jpc.getName());
+				    children.remove(jpc);
+				    jpc.dispose();		// there are no other references to this child
+					break;
+				case SceneContainerEvent.CHILD_TYPE_GEOMETRY:
+					if (jpg != null) {
+						jpg.dispose();		// really decreases reference count
+						jpg = null;
+					}
+					geometryRemoved = true;
+					break;
+			
+		}
+		}
+		
 		public void childReplaced(SceneContainerEvent ev) {
 			//System.out.println("Container Child replaced at: "+originalComponent.getName());
 			switch(ev.getChildType())	{
@@ -996,13 +1022,16 @@ public class JOGLRendererNew extends SceneGraphVisitor implements JOGLRendererIn
 					setAppearanceDirty();
 					break;
 				case SceneContainerEvent.CHILD_TYPE_GEOMETRY:
-					if (jpg.originalGeometry == originalComponent.getGeometry()) break;		// no change, really
-					if (jpg != null) jpg.dispose();
+					if (jpg != null && jpg.originalGeometry == originalComponent.getGeometry()) break;		// no change, really
+					if (jpg != null) {
+						jpg.dispose();
+						geometryRemoved=true;
+						jpg = null;
+					}
 					if (originalComponent.getGeometry() != null)  {
 						jpg = getJOGLPeerGeometryFor(originalComponent.getGeometry());
+						jpg.refCount++;
 					} 
-					else jpg = null;
-					geometryRemoved=true;
 					break;
 				default:
 					System.out.println("Taking no action for child type "+ev.getChildType());

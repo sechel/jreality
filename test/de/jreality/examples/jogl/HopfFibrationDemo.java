@@ -151,6 +151,10 @@ public class HopfFibrationDemo extends InteractiveViewerDemo {
 			tubes.setName("Tubes");
 			node.addChild(curves);
 			node.addChild(tubes);
+			Appearance ap = new Appearance();
+			node.setAppearance( ap);
+			ap.setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
+			ap.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_WIDTH, 0.5d);
 			
 			for (int i = 0; i<numCurves; ++i)  	{
 				///if (verts[i][2] > 0.0) continue;
