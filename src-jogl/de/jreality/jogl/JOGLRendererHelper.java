@@ -502,7 +502,7 @@ public class JOGLRendererHelper {
 		Graphics3D gc = jr.getContext();
 		
 		double[] objectToScreen = Rn.times(null, correctionNDC, gc.getObjectToScreen());
-		
+		System.out.println("o2s ="+Rn.matrixToString(objectToScreen));
 		Rn.matrixTimesVector(screenVerts, objectToScreen, objectVerts);
 		if (screenVerts[0].length == 4) Pn.dehomogenize(screenVerts, screenVerts);
 		int np = objectVerts.length;

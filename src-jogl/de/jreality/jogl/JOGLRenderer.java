@@ -1,9 +1,7 @@
 /*
  * Created on Nov 25, 2004
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
- */
+  */
 package de.jreality.jogl;
 
 import java.awt.event.ActionEvent;
@@ -1505,7 +1503,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	 */
 	public int getWidth() {
 		// TODO Auto-generated method stub
-		return currentViewport[2] - currentViewport[0];
+		return currentViewport[2];
 	}
 
 
@@ -1515,7 +1513,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	 */
 	public int getHeight() {
 		// TODO Auto-generated method stub
-		return currentViewport[3] - currentViewport[1];
+		return currentViewport[3];
 	}
 
 
