@@ -23,6 +23,7 @@
 package de.jreality.remote.portal;
 
 import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
@@ -44,7 +45,7 @@ public class ParameterReader implements Runnable {
 	InetAddress group;
 	private int DEST_PORT = 5555;
 	private boolean debug = true;
-	private int DATAGRAM_LENGTH = 65506;
+	private int DATAGRAM_LENGTH = 8188;
 	private boolean running = true;
 	
 	private List values = new LinkedList();
@@ -63,10 +64,10 @@ public class ParameterReader implements Runnable {
 		while (running = true) {
 			try {
 				// read number of parameters (Integer)
-				int paramCount = readLong().intValue();
+				int paramCount = readInt();
 				System.out.println("Reading "+paramCount+" parameters:");
 				for (int i = 0; i < paramCount; i++) {
-					Object o = readParameter();
+					Object o = readParameterSafe();
 					System.out.println("Read "+(o == null ? "<null>" : (o.getClass().getName() + "  "/*+o*/)));
 				}
 			} catch (IOException ioe) {
@@ -78,7 +79,7 @@ public class ParameterReader implements Runnable {
 
 	DatagramPacket dgram = new DatagramPacket(new byte[1], 0);
 	private Object readParameter() throws IOException {
-		byte[] bytes = new byte[readLong().intValue()];
+		byte[] bytes = new byte[readInt()];
 		int fullPieces = bytes.length/DATAGRAM_LENGTH;
 	  	int lastPieceSize = bytes.length%DATAGRAM_LENGTH;
 	  	if (debug) System.out.println("Reading byte array ["+bytes.length+"] in "+(fullPieces+1)+" pieces. Last Piece size is "+lastPieceSize);
@@ -104,36 +105,36 @@ public class ParameterReader implements Runnable {
 	boolean suddenEnd;
 	private Object readParameterSafe() throws IOException {
 		suddenEnd = false;
-		byte[] bytes = new byte[readLong().intValue()];
+		byte[] bytes = new byte[readInt()];
 		int fullPieces = bytes.length/DATAGRAM_LENGTH;
 	  	int lastPieceSize = bytes.length%DATAGRAM_LENGTH;
 	  	if (debug) System.out.println("Reading byte array ["+bytes.length+"] in "+(fullPieces+1)+" pieces. Last Piece size is "+lastPieceSize);
-  		byte[] indexedBytes = new byte[DATAGRAM_LENGTH+1];
+  		byte[] indexedBytes = new byte[DATAGRAM_LENGTH+4];
 	  	for (int i = 0; i < fullPieces && !suddenEnd; i++) { // read full datagrams
-		  	dgram.setData(indexedBytes); // multicast
+	  		dgram.setData(indexedBytes); // multicast
 		  	socket.receive(dgram);
-		  	//dumpArray(indexedBytes);
-		  	if (indexedBytes[0] != (i % 10)) {
+		  	int id = getIntFromByte(indexedBytes);
+		  	if (id != i) {
 		  		System.out.println("Missed datagram "+i+" got: "+indexedBytes[0]);
 		  		i++;
 		  	}
-		  	if (indexedBytes[0] == 99) {
+		  	if (id == fullPieces) {
 		  		System.out.println("Unexpected end of data!");
 		  		suddenEnd = true;
 		  		continue;
 		  	}
-		  	System.arraycopy(indexedBytes, 1, bytes, i*DATAGRAM_LENGTH, DATAGRAM_LENGTH);
-//		  	System.out.println("\t\treceived "+i+". part");
+		  	System.arraycopy(indexedBytes, 4, bytes, i*DATAGRAM_LENGTH, DATAGRAM_LENGTH);
+		  	System.out.println("\t\treceived "+i+". part");
 	  	}
 	  	// read last datagram
 	  	if (!suddenEnd) {
-	  		dgram.setData(indexedBytes, 0, lastPieceSize+1); // multicast
+	  		dgram.setData(indexedBytes, 0, lastPieceSize+4); // multicast
 	  		socket.receive(dgram);
 		  	//dumpArray(indexedBytes, lastPieceSize+1);
-	  		if (indexedBytes[0] != 99) System.out.println("missed last package!");
-		  	System.out.println("\treceived last part");
+	  		if (getIntFromByte(indexedBytes) != fullPieces) System.out.println("missed last package!");
+		  	else System.out.println("\treceived last ("+fullPieces+") part");
 	  	}
-	  	System.arraycopy(indexedBytes, 1, bytes, fullPieces*DATAGRAM_LENGTH, lastPieceSize);
+	  	System.arraycopy(indexedBytes, 4, bytes, fullPieces*DATAGRAM_LENGTH, lastPieceSize);
 		ByteArrayInputStream obj_in = new ByteArrayInputStream(bytes);
 		ObjectInputStream o_in = new ObjectInputStream(obj_in);
 		try {
@@ -144,19 +145,14 @@ public class ParameterReader implements Runnable {
 		return null;
 	}
 
-	byte[] longBytes = new byte[82]; 
-	ByteArrayInputStream long_in = new ByteArrayInputStream(longBytes);
-	DatagramPacket longDgram = new DatagramPacket(longBytes, 82);
-	private Long readLong() throws IOException {
-		socket.receive(longDgram); // blocks
-		ObjectInputStream o_in = new ObjectInputStream(long_in);
-		Long l = null;
-		try {
-			l = (Long) o_in.readObject();
-		} catch (ClassNotFoundException e) {}
-		long_in.reset(); // reset so next read is from start of byte[] again
-		System.out.println("Read long "+l);
-		return l;
+	byte[] intBytes = new byte[4]; 
+	ByteArrayInputStream int_in = new ByteArrayInputStream(intBytes);
+	DatagramPacket intDgram = new DatagramPacket(intBytes, 4);
+	
+	private int readInt() throws IOException {
+		int_in.reset();
+		socket.receive(intDgram); // blocks
+		return getIntFromByte(intBytes);
 	}
 	
 	public static void main(String[] args) {
@@ -173,5 +169,22 @@ public class ParameterReader implements Runnable {
 		}
 		System.out.println("}");
 	}
+	
+	private static int getIntFromByte(byte[] bytes) {
+		return getIntFromByte(bytes, 0);
+	}
+	private static int getIntFromByte(byte[] bytes, int pos) {
+		int returnNumber = 0;
+	    returnNumber += byteToInt(bytes[pos++]) << 24;
+	    returnNumber += byteToInt(bytes[pos++]) << 16;
+	    returnNumber += byteToInt(bytes[pos++]) << 8;
+	    returnNumber += byteToInt(bytes[pos++]) << 0;
+	    return returnNumber;
+	}
+  
+	private static int byteToInt(byte b) {
+		return (int) b & 0xFF;
+	}
+
 
 }

@@ -23,6 +23,7 @@
 package de.jreality.remote.portal;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -52,7 +53,7 @@ public class ParameterBroadcaster {
 	InetAddress group;
 	private int DEST_PORT = 5555;
 	private boolean debug = true;
-	private int DATAGRAM_LENGTH = 65506;
+	private int DATAGRAM_LENGTH = 8188;
 	
 	public ParameterBroadcaster() {
 		try {
@@ -65,7 +66,7 @@ public class ParameterBroadcaster {
 	}
 	
 	public void sendParameters(Serializable[] data) throws IOException {
-		sendLong(new Long(data.length));
+		sendInt(data.length);
 		for (int i = 0; i < data.length; i++) {
 			send(data[i]);
 		}
@@ -73,24 +74,26 @@ public class ParameterBroadcaster {
 	
 	
 	ByteArrayOutputStream b_out = new ByteArrayOutputStream();
+	
 	private void send(Serializable s) throws IOException {
 		System.out.println("Sending "+(s == null ? "<null>" : (s.getClass().getName() + "  "/*+s*/)));
 		ObjectOutputStream o_out = new ObjectOutputStream(b_out);
 		o_out.writeObject(s);
 		byte[] bytes = b_out.toByteArray();
 		if (debug) System.out.print("\t Sending data size ["+bytes.length+"] ");
-		sendLong(new Long(bytes.length));
+		sendInt(bytes.length);
 		if (debug) System.out.print("\t Sending Data: ");
-		send(bytes);
+		sendSafe(bytes);
 		b_out.reset();
 	}
 
-	ByteArrayOutputStream long_out = new ByteArrayOutputStream();
-	private void sendLong(Long l) throws IOException {
-		ObjectOutputStream o_out = new ObjectOutputStream(long_out);
-		o_out.writeObject(l);
-		send(long_out.toByteArray());
-		long_out.reset();
+	ByteArrayOutputStream int_out = new ByteArrayOutputStream();
+
+	private void sendInt(int i) throws IOException {
+		DataOutputStream o_out = new DataOutputStream(int_out);
+		o_out.writeInt(i);
+		send(int_out.toByteArray());
+		int_out.reset();
 //		try {
 //			Thread.sleep(100);
 //		} catch (InterruptedException e) {
@@ -98,7 +101,15 @@ public class ParameterBroadcaster {
 //			e.printStackTrace();
 //		}
 	}
-
+	
+	private static byte[] int2byte(int value) {
+		byte b[] = new byte[4];
+		int i, shift; 
+		for(i = 0, shift = 24; i < 4; i++, shift -= 8)
+		b[i] = (byte)(0xFF & (value >> shift));
+		return b;
+	}
+	
 	private void send(byte[] bytes) throws IOException {
 		int fullPieces = bytes.length/DATAGRAM_LENGTH;
 	  	int lastPieceSize = bytes.length%DATAGRAM_LENGTH;
@@ -121,12 +132,12 @@ public class ParameterBroadcaster {
 		int fullPieces = bytes.length/DATAGRAM_LENGTH;
 	  	int lastPieceSize = bytes.length%DATAGRAM_LENGTH;
 	  	if (debug) System.out.println("byte array ["+bytes.length+"] in "+(fullPieces+1)+" pieces. Last Piece size is "+lastPieceSize);
-  		byte[] indexedBytes = new byte[DATAGRAM_LENGTH+1];
+  		byte[] indexedBytes = new byte[DATAGRAM_LENGTH+4];
 	  	for (int i = 0; i < fullPieces; i++) { // send full datagrams
-	  		indexedBytes[0] = (byte) (i % 10);
-	  		System.arraycopy(bytes, i*DATAGRAM_LENGTH, indexedBytes, 1, DATAGRAM_LENGTH);
+	  		System.arraycopy(int2byte(i), 0, indexedBytes, 0, 4);
+	  		System.arraycopy(bytes, i*DATAGRAM_LENGTH, indexedBytes, 4, DATAGRAM_LENGTH);
 	  		//dumpArray(indexedBytes);
-	  		DatagramPacket dgram = new DatagramPacket(indexedBytes, (DATAGRAM_LENGTH+1), group, DEST_PORT); // multicast
+	  		DatagramPacket dgram = new DatagramPacket(indexedBytes, (DATAGRAM_LENGTH+4), group, DEST_PORT); // multicast
 		  	socket.send(dgram);
 //		  	try {
 //				Thread.sleep(10);
@@ -134,18 +145,19 @@ public class ParameterBroadcaster {
 //		  	System.out.println("\t\tsent "+i+". part");
 	  	}
 	  	// send last datagram
-  		indexedBytes[0] = 99;
-  		System.arraycopy(bytes, fullPieces*DATAGRAM_LENGTH, indexedBytes, 1, lastPieceSize);
+	  	System.arraycopy(int2byte(fullPieces), 0, indexedBytes, 0, 4);
+  		System.arraycopy(bytes, fullPieces*DATAGRAM_LENGTH, indexedBytes, 4, lastPieceSize);
   		//dumpArray(indexedBytes, lastPieceSize+1);
-  		DatagramPacket dgram = new DatagramPacket(indexedBytes, (lastPieceSize+1), group, DEST_PORT); // multicast
+  		DatagramPacket dgram = new DatagramPacket(indexedBytes, (lastPieceSize+4), group, DEST_PORT); // multicast
 	  	socket.send(dgram);
-	  	System.out.println("\t\tsent last part");
+	  	System.out.println("\t\tsent last ("+fullPieces+") part");
 	}
 
 	public static void main(String[] args) {
 		ParameterBroadcaster pb = new ParameterBroadcaster();
 		CatenoidHelicoid ch = new CatenoidHelicoid(419);
-		Serializable[] s = {null, new Transformation(), new double[]{1,2,3,4,5,2,3,4,5,2,3,4,5}, new String("bla"), null, ch.getVertexAttributes(/*Attribute.COORDINATES*/)};
+		Serializable[] s = {/*null, new Transformation(), new double[]{1,2,3,4,5,2,3,4,5,2,3,4,5}, new String("bla"), null, */
+				ch.getVertexAttributes(/*Attribute.COORDINATES*/)};
 		try {
 			pb.sendParameters(s);
 		} catch (IOException e) {
