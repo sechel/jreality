@@ -27,6 +27,7 @@ import java.rmi.RemoteException;
 
 import de.jreality.scene.proxy.rmi.RemoteSceneGraphComponent;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.LoadableScene;
 import de.jreality.util.Lock;
 
@@ -57,7 +58,7 @@ de.jreality.remote.portal.HeadtrackedRemoteViewerImpl implements HeadtrackedRemo
             e.printStackTrace();
         }
         // scene settings
-        wm.setConfiguration(null);
+        wm.setConfiguration(ConfigurationAttributes.getDefaultConfiguration());
         de.jreality.scene.SceneGraphComponent world = wm.makeWorld();
         if (world != null) getViewer().getSceneRoot().addChild(world);
         setSignature(wm.getSignature());
@@ -131,6 +132,7 @@ de.jreality.remote.portal.HeadtrackedRemoteViewerImpl implements HeadtrackedRemo
     	} catch (Exception e) {}
         rsi.setBackgroundColor(new Color(120, 10, 44, 20));
         rsi.loadWorld(argv[0]);
+        rsi.setUseDisplayLists(true);
         Thread.sleep(100);
         for (;;) {
         	rsi.render();
