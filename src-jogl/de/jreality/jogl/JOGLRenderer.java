@@ -85,8 +85,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	protected int stackDepth;
 	JOGLRenderer globalHandle = null;
 	SceneGraphPath currentPath = new SceneGraphPath();
-	protected int whichEye;
-	
 	
 	de.jreality.jogl.Viewer theViewer;
 	SceneGraphComponent theRoot, auxiliaryRoot;
@@ -181,7 +179,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		
 		// We "inline" the visit to the camera since it cannot be visited in the traversal order
 		// load the projection transformation
-		globalGL.glMultTransposeMatrixd(CameraUtility.getCamera(theViewer).getCameraToNDC(whichEye));
+		globalGL.glMultTransposeMatrixd(CameraUtility.getCamera(theViewer).getCameraToNDC());
 		//System.out.println("CameraToNDC is \n"+Rn.matrixToString(CameraUtility.getCamera(theViewer).getCameraToNDC(whichEye)));
 
 		// prepare for rendering the geometry
@@ -346,12 +344,12 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				int w = theCanvas.getWidth()/2;
 				int h = theCanvas.getHeight();
 				theCamera.setAspectRatio(((double) w)/h);
+				theCamera.setEye(Camera.RIGHT_EYE);
 				theCamera.update();
-				whichEye = Camera.RIGHT_EYE;
 				globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 				myglViewport(0,0, w,h);
 				visit();
-				whichEye = Camera.LEFT_EYE;
+				theCamera.setEye(Camera.LEFT_EYE);
 				myglViewport(w, 0, w,h);
 				visit();
 			} 
@@ -359,12 +357,12 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				theCamera.setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
 				myglViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
 				globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-				whichEye = Camera.RIGHT_EYE;
+				theCamera.setEye(Camera.RIGHT_EYE);
 		        if (which == Viewer.RED_GREEN_STEREO) globalGL.glColorMask(false, true, false, true);
 		        else if (which == Viewer.RED_BLUE_STEREO) globalGL.glColorMask(false, false, true, true);
 		        else if (which == Viewer.RED_CYAN_STEREO) globalGL.glColorMask(false, true, true, true);
 				visit();
-				whichEye = Camera.LEFT_EYE;
+				theCamera.setEye(Camera.LEFT_EYE);
 		        globalGL.glColorMask(true, false, false, true);
 				globalGL.glClear (GL.GL_DEPTH_BUFFER_BIT);
 				visit();
@@ -373,11 +371,11 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			else	{
 				theCamera.setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
 				myglViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
-				whichEye = Camera.RIGHT_EYE;
+				theCamera.setEye(Camera.RIGHT_EYE);
 				globalGL.glDrawBuffer(GL.GL_BACK_RIGHT);
 				globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 				visit();
-				whichEye = Camera.LEFT_EYE;
+				theCamera.setEye(Camera.LEFT_EYE);
 				globalGL.glDrawBuffer(GL.GL_BACK_LEFT);
 				globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 				visit();
@@ -386,6 +384,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		else {
 			globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 			theCamera.setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
+			theCamera.setEye(Camera.MIDDLE_EYE);
 			myglViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
 			if (!pickMode)	visit();
 			else		{
