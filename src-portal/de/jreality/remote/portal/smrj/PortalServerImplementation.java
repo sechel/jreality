@@ -384,6 +384,7 @@ if (measure)                System.out.println("sendHead: "+t);
         rsi.setBackgroundColor(new Color(120, 10, 44, 20));
         rsi.loadWorld(args[0]);
         rsi.setNavigationEnabled(true);
+	//rsi.setUseDisplayLists(true);
     }
 
 }

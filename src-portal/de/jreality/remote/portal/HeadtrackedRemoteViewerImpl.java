@@ -245,7 +245,7 @@ public class HeadtrackedRemoteViewerImpl extends RemoteViewerImpl implements
 		return lights;
 	}
 
-	public static void main(String args[]) {
+	public static void main(String args[]) throws Exception {
 		String hostname = INetUtilities.getHostname();
 		ConfigurationAttributes config = ConfigurationAttributes.getDefaultConfiguration();
 		try {

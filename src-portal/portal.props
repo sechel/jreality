@@ -27,9 +27,9 @@ frame.width: 600
 frame.height: 480
 frame.title: master
 
-viewer.autoBufferSwap: false 
-viewer.showFPS: false 
-viewer.printRenderTime: false
+#viewer.autoBufferSwap: true
+#viewer.showFPS: false 
+#viewer.printRenderTime: true 
 
 # these values are overwritten for each side of the portal
 

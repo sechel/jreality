@@ -199,7 +199,7 @@ public class RemoteViewerImpl implements RemoteViewer {
 		System.out.println("RemoteViewer ["+"//"+hostname+"/"+config.getProperty("client.viewer.name")+"] bound in registry");
 	}
 		
-	public static void main(String args[]) {
+	public static void main(String args[]) throws Exception {
 		String hostname = INetUtilities.getHostname();
 		ConfigurationAttributes config = ConfigurationAttributes.getDefaultConfiguration();
 		DefaultViewer viewer = new DefaultViewer(false); // new de.jreality.jogl.InteractiveViewer();
