@@ -1,0 +1,3 @@
+killall java
+killall rmiregistry
+

@@ -1,0 +1,1 @@
+export CLASSPATH=:dist/jReality-core.jar:dist/jReality-jogl.jar:dist/jReality-jsyzygy.jar:dist/jReality-portal.jar:dist/jReality-soft.jar:dist/jReality-stubs.jar:dist/jReality-tests.jar:lib/CVS:lib/alex.jar:lib/discreteGroup.jar:lib/jSyzygy.jar:lib/jogl.jar:lib/numericalMethods.jar

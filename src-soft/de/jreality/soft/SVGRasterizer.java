@@ -1,0 +1,335 @@
+/*
+ * Created on 01.05.2004
+ *
+ * This file is part of the de.jreality.soft package.
+ * 
+ * This program is free software; you can redistribute and/or modify 
+ * it under the terms of the GNU General Public License as published 
+ * by the Free Software Foundation; either version 2 of the license, or
+ * any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, 
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITTNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License 
+ * along with this program; if not, write to the 
+ * Free Software Foundation, Inc.,
+ * 59 Temple Place, Suite 330,
+ * Boston, MA 02111-1307
+ * USA 
+ */
+package de.jreality.soft;
+
+import java.io.PrintWriter;
+
+/**
+ * This is a SVG writer for the software renderer. At the moment it needs
+ * the PolygonPipline to be configured to sort <em>all</em> Polygons (and
+ * not only the transparent ones) since it uses a simple painter's 
+ * algorithm. No polygon intersections are done. It is
+ * first come first paint at the moment.
+ * @version 1.0
+ * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
+ *
+ */
+public class SVGRasterizer implements PolygonRasterizer {
+    public static final String NONE = "none";
+    private boolean useGradients = false;
+    private int background;
+    private int xmin;
+    private int xmax;
+    private int ymin;
+    private int ymax;
+    
+    private int pLength = 0;    
+    private double[][] polygon = new double[Polygon.MAXPOLYVERTEX][Polygon.VERTEX_LENGTH];
+    protected double transparency = 0;
+    protected double oneMinusTransparency = 1;
+    
+    private PrintWriter writer;
+    private int count;
+    private double wh;
+    private double hh;
+    private double mh;
+    /**
+     * 
+     */
+    public SVGRasterizer( PrintWriter w) {
+        super();
+       writer =w;
+
+    }
+
+    /* (non-Javadoc)
+     * @see de.jreality.soft.PolygonRasterizer#renderPolygon(de.jreality.soft.Polygon, double[], boolean)
+     */
+    public void renderPolygon(
+        Polygon p,
+        double[] vertexData,
+        boolean outline) {
+        transparency = (p.getShader().getVertexShader().getTransparency());
+        oneMinusTransparency = 1 - transparency;
+
+        pLength = p.length;
+
+        double[] t0 = new double[Polygon.VERTEX_LENGTH];
+        
+       
+        for (int i = 0; i < pLength; i++) {
+            int pos = p.vertices[i];
+            double[] pi= polygon[i];
+            //System.out.println("render Poly"+i+" "+vertexData[pos+Polygon.SX]+" pos"+pos);
+            double w = 1/vertexData[pos+Polygon.SW];
+            double wxy =w*mh;
+            pi[Polygon.SX] =(wh + vertexData[pos+Polygon.SX] * wxy);
+            pi[Polygon.SY] =(hh - vertexData[pos+Polygon.SY] * wxy);
+            pi[Polygon.SZ] =(vertexData[pos+Polygon.SZ] * w) ;
+
+
+            pi[Polygon.R] = ((vertexData[pos+Polygon.R] > 1 ? 255 : (255*vertexData[pos+Polygon.R] )));
+            pi[Polygon.G] = ((vertexData[pos+Polygon.G] > 1 ? 255 : (255*vertexData[pos+Polygon.G] )));
+            pi[Polygon.B] = ((vertexData[pos+Polygon.B] > 1 ? 255 : (255*vertexData[pos+Polygon.B])));
+            
+
+            t0[Polygon.SX] += pi[Polygon.SX];
+            t0[Polygon.SY] += pi[Polygon.SY];
+            t0[Polygon.SZ] += pi[Polygon.SZ];
+            t0[Polygon.R] += pi[Polygon.R];
+            t0[Polygon.G] += pi[Polygon.G];
+            t0[Polygon.B] += pi[Polygon.B];
+        }
+
+        t0[Polygon.SX] /= pLength;
+        t0[Polygon.SY] /= pLength;
+        t0[Polygon.R]  /= pLength;
+        t0[Polygon.G]  /= pLength;
+        t0[Polygon.B]  /= pLength;
+        
+        if(useGradients && p.getShader().interpolateColor()) {
+        }
+        
+        String col;
+        if(useGradients && p.getShader().interpolateColor()) {
+            double[][] pol = new double[3][];
+            pol[2] =t0; 
+            String t0Col = colorString((int)t0[Polygon.R],(int)t0[Polygon.G],(int)t0[Polygon.B]);
+            
+            for(int n=0;n<pLength-1;n++) {
+                pol[0] =polygon[n];
+                pol[1] =polygon[n+1];
+                writeGradients(pol);
+                col ="url(#"+count+"a)";
+                col = t0Col;
+                writePolygon(pol, 3, col, NONE);
+                col ="url(#"+count+"b)";
+                writePolygon(pol, 3, col, NONE);
+                col ="url(#"+count+"c)";
+                writePolygon(pol, 3, col, NONE);
+                
+                
+                count++;
+            }
+            pol[0] =polygon[pLength-1];
+            pol[1] =polygon[0];
+            writeGradients(pol);
+            col ="url(#"+count+"a)";
+            col =t0Col;
+            writePolygon(pol, 3, col, NONE);
+            col ="url(#"+count+"b)";
+            writePolygon(pol, 3, col, NONE);
+            col ="url(#"+count+"c)";
+            writePolygon(pol, 3, col, NONE);
+            count++;
+            if(p.getShader().isOutline())
+                writePolygon(polygon, pLength, "none", "black");
+            
+        }
+        else {
+            //col = colorString((int)polygon[0][Polygon.R],(int)polygon[0][Polygon.G],(int)polygon[0][Polygon.B]);
+            col = colorString((int)t0[Polygon.R],(int)t0[Polygon.G],(int)t0[Polygon.B]);
+            
+            //TODO decide how to handle the stroke:NONE or col
+            //it seems that NONE is good for transparent but col is better for opaque
+            writePolygon(polygon, pLength, col, p.getShader().isOutline()?"black":NONE);
+        }
+        
+        
+        
+        count++;
+    }
+
+    
+    private void writeGradients(double[][] p) {
+        /*
+        writer.print("<linearGradient gradientUnits=\"userSpaceOnUse\" ");
+        writer.print("id=\""+count+"a\" ");
+        writer.print("x1=\""+p[0][Polygon.SX]+"\" ");
+        writer.print("y1=\""+p[0][Polygon.SY]+"\" ");
+        writer.print("x2=\""+p[1][Polygon.SX]+"\" ");
+        writer.print("y2=\""+p[1][Polygon.SY]+"\" ");
+        writer.println(">");
+        
+        writer.print("<stop offset=\"0\" stop-color=\""+
+                colorString((int)p[0][Polygon.R],(int)p[0][Polygon.G],(int)p[0][Polygon.B])+"\" ");
+        writer.print("/>");
+        writer.print("<stop offset=\"1\" stop-color=\""+
+                colorString((int)p[1][Polygon.R],(int)p[1][Polygon.G],(int)p[1][Polygon.B])+"\" ");
+        writer.print("/>");
+        
+        writer.println("</linearGradient>");
+        */
+        //writeGradient(p[0],p[1],p[2],""+count+"a");
+        writeGradient(p[1],p[2],p[0],""+count+"b");
+        writeGradient(p[2],p[0],p[1],""+count+"c");
+    }
+
+    private void writeGradient(double[] p0, double [] p1, double[] p2, String name) {
+        double[] proj =project(p0,p1,p2);
+        
+        writer.print("<linearGradient gradientUnits=\"userSpaceOnUse\" ");
+        writer.print("id=\""+name+"\" ");
+        writer.print("x1=\""+proj[0]+"\" ");
+        writer.print("y1=\""+proj[1]+"\" ");
+        writer.print("x2=\""+p2[Polygon.SX]+"\" ");
+        writer.print("y2=\""+p2[Polygon.SY]+"\" ");
+        writer.println(">");
+        
+        String col = 
+            colorString((int)p2[Polygon.R],(int)p2[Polygon.G],(int)p2[Polygon.B]);
+        String col2 = 
+            colorString((int)(oneMinusTransparency*p2[Polygon.R]),(int)(oneMinusTransparency*p2[Polygon.G]),(int)(oneMinusTransparency*p2[Polygon.B]));
+        
+        writer.print("<stop offset=\"0\" stop-color=\""+col+"\" stop-opacity=\"0\" ");
+        writer.print("/>");
+        writer.print("<stop offset=\".99\" stop-color=\""+col+"\" stop-opacity=\""+1+"\" ");
+        writer.print("/>");
+        
+//        writer.print("<stop offset=\"0\" stop-color=\""+"currentColor"+"\" stop-opacity=\"1\" ");
+//        writer.print("/>");
+//        writer.print("<stop offset=\"1\" stop-color=\""+col+"\" stop-opacity=\""+1+"\" ");
+//        writer.print("/>");
+        
+        writer.println("</linearGradient>");
+    }
+
+    private void writePolygon(double[][] polygon, int pLength, String color, String outlineColor) {
+        writer.print("<polygon ");
+        writer.print("stroke=\""+outlineColor+"\" ");
+        if(!outlineColor.equals("none"))
+            writer.print("stroke-opacity=\""+oneMinusTransparency+"\" ");
+        
+        writer.print("fill=\""+color+"\" ");
+        
+        writer.print("fill-opacity=\""+oneMinusTransparency+"\" ");
+        
+        writer.print("points=\"");
+        for(int i =0;i<pLength;i++) {
+            writer.print(" "+polygon[i][Polygon.SX]);
+            writer.print(" "+polygon[i][Polygon.SY]);
+        }
+        writer.print("\"");
+        writer.println(" />");
+    }
+
+    /**
+     * projects p2 onto the line through p0 p1.
+     * @param polygon2
+     * @return
+     */
+    private double[] project(double[] p0, double [] p1, double[] p2) {
+        double[] r =new double[3];
+        double d0 =p1[Polygon.SX]-p0[Polygon.SX];
+        double d1 =p1[Polygon.SY]-p0[Polygon.SY];
+        
+        double e0 =p2[Polygon.SX]-p0[Polygon.SX];
+        double e1 =p2[Polygon.SY]-p0[Polygon.SY];
+        
+        double normS =(d0*d0 +d1*d1);
+        double s =d0*e0 + d1*e1;
+        double l;
+        if(normS != 0) {
+            l = s/normS;
+        d0 *= l;
+        d1 *= l;
+        }else {
+            l = d0 = d1 = 0;
+        }
+        r[0] = p0[Polygon.SX]+d0;
+        r[1] = p0[Polygon.SY]+d1;
+        r[2] = l/Math.sqrt(normS);
+        return r;
+    }
+
+    /**
+     * @param i
+     * @param j
+     * @param k
+     * @return
+     */
+    private String colorString(int r, int g, int b) {
+        String sr =Integer.toHexString(r);
+        sr =sr.length()==1?"0"+sr:sr;
+        String sg =Integer.toHexString(g);
+        sg =sg.length()==1?"0"+sg:sg;
+        String sb =Integer.toHexString(b);
+        sb =sb.length()==1?"0"+sb:sb;
+        return "#"+sr+sg+sb;
+    }
+
+    /* (non-Javadoc)
+     * @see de.jreality.soft.PolygonRasterizer#setBackground(int)
+     */
+    public void setBackground(int argb) {
+        background =argb;
+
+    }
+
+    /* (non-Javadoc)
+     * @see de.jreality.soft.PolygonRasterizer#clear()
+     */
+    public void clear() {
+    }
+    /**
+     * This should be called before any renderPolygon.
+     * It writes the header.
+     */
+    public void start() {
+        count =0;
+        writer.println(
+                "<svg color-interpolation=\"sRGB\" color-rendering=\"auto\" fill=\"none\""+
+                "    fill-opacity=\"1\" font-family=\"\'Arial\'\" font-size=\"12\" font-style=\"normal\""+
+                "    font-weight=\"normal\"  "+
+                " viewBox=\""+xmin+" "+ymin+" "+(xmax-xmin)+" "+(ymax-ymin)+" \" "+
+                " image-rendering=\"auto\" "+
+                "    shape-rendering=\"auto\" stroke=\"black\" stroke-dasharray=\"none\" "+
+                "    stroke-dashoffset=\"0\" stroke-linecap=\"square\" stroke-linejoin=\"miter\""+
+                "    stroke-miterlimit=\"10\" stroke-opacity=\"1\" stroke-width=\"1\" "+
+                "    text-rendering=\"auto\" >"        
+        );
+    }
+    
+    /**
+     * This should be called after the last renderPolygon call.
+     */
+    public void stop() {
+        writer.println("</svg>");
+    }
+
+    /* (non-Javadoc)
+     * @see de.jreality.soft.PolygonRasterizer#setWindow(int, int, int, int)
+     */
+    public void setWindow(int xmin, int xmax, int ymin, int ymax) {
+        this.xmin =xmin;
+        this.xmax =xmax;
+        this.ymin =ymin;
+        this.ymax =ymax;
+    }
+    public void setSize(double width, double height) {
+        wh =(width)/2;
+        hh =(height)/2;
+        mh =Math.min(wh,hh);
+        
+    }
+}

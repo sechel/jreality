@@ -1,0 +1,172 @@
+<project name="jReality" default="dist" basedir=".">
+	<description>
+        jReality build file
+    </description>
+
+	<!-- the following should belong to core... -->
+	<property name="ui" location="src/de/jreality/ui" />
+	<property name="scene" location="src/de/jreality/scene" />
+	<property name="reader" location="src/de/jreality/reader" />
+	<property name="util" location="src/de/jreality/util" />
+	<property name="geometry" location="src/de/jreality/geometry" />
+	<property name="beans" location="src/de/jreality/beans" />
+
+	<!-- backends (dependencies from top to bottom) -->
+	<property name="soft" location="src-soft" />
+	<property name="renderman" location="src-renderman" />
+	<property name="jogl" location="src-jogl" />
+	<property name="jsyzygy" location="src-jsyzygy" />
+	<property name="portal" location="src-portal" />
+
+	<!-- examples will be the last thing to build (if needed) -->
+	<property name="tests" location="test" />
+
+
+	<!-- these folders will be created -->
+	<property name="build" location="build" />
+	<property name="javadoc" location="docs/api" />
+	<property name="lib" location="lib" />
+	<property name="dist" location="dist" />
+
+	
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp />
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build}" />
+		<mkdir dir="${lib}" />
+		<mkdir dir="${dist}" />
+	</target>
+
+	<!-- all the core classes will be build here - all beackends depend on it-->
+	<target name="core" depends="init" description="compile the source ">
+		<mkdir dir="${build}/core" />
+		<javac excludesfile="excludes.txt" srcdir="${ui}:${util}:${scene}:${geometry}:${reader}:${beans}" destdir="${build}/core" debug="true">
+			<compilerarg line="-source 1.4" />
+		</javac>
+		<jar jarfile="${dist}/jReality-core.jar" basedir="${build}/core" />
+	</target>
+
+	<target name="stubs" depends="core" description="compile the stubs ">
+		<mkdir dir="${build}/stubs" />
+		<rmic base="${build}/core" includes="**/*Impl.class" />
+		<rmic base="${build}/core" includes="de/jreality/scene/proxy/rmi/*.class" excludes="**/Remote*.class" />
+		<jar jarfile="${dist}/jReality-stubs.jar" basedir="${build}/stubs" />
+	</target>
+
+	<target name="soft" depends="core">
+		<mkdir dir="${build}/soft" />
+		<javac excludesfile="excludes.txt" srcdir="${soft}:${renderman}" classpath="${dist}/jReality-core.jar" destdir="${build}/soft" debug="true">
+			<compilerarg line="-source 1.4" />
+		</javac>
+		<jar jarfile="${dist}/jReality-soft.jar" basedir="${build}/soft" />
+	</target>
+
+	
+	<target name="jogl" depends="core">
+		<mkdir dir="${build}/jogl" />
+		<javac excludesfile="excludes.txt" srcdir="${jogl}"  classpath="${dist}/jReality-core.jar:${dist}/jReality-soft.jar" destdir="${build}/jogl" debug="true">
+			<compilerarg line="-source 1.4" />
+		</javac>
+		<jar jarfile="${dist}/jReality-jogl.jar" basedir="${build}/jogl" />
+	</target>
+
+	<target name="tests" depends="core, soft, jogl, jsyzygy">
+		<mkdir dir="${build}/tests" />
+		<javac excludesfile="excludes.txt" srcdir="${tests}"  classpath="${dist}/jReality-core.jar:${dist}/jReality-soft.jar:${dist}/jReality-jogl.jar:${dist}/jReality-jsyzygy.jar" destdir="${build}/tests" debug="true">
+			<compilerarg line="-source 1.4" />
+		</javac>
+		<jar jarfile="${dist}/jReality-tests.jar" basedir="${build}/tests" />
+	</target>
+
+<!--
+	<target name="renderman" depends="core,soft">
+		<mkdir dir="${build}/renderman" />
+		<javac excludesfile="excludes.txt" srcdir="${renderman}" destdir="${build}/renderman" debug="true">
+			<compilerarg line="-source 1.4" />
+		</javac>
+		<jar jarfile="${dist}/jReality-renderman.jar" basedir="${build}/renderman" />
+	</target>
+-->
+
+	<target name="jsyzygy" depends="jSyzygy_java,jogl">
+		<mkdir dir="${build}/jsyzygy" />
+		<javac excludesfile="excludes.txt" srcdir="${jsyzygy}" classpath="${lib}/jSyzygy.jar;${dist}/jReality-core.jar:${dist}/jReality-jogl.jar" destdir="${build}/jsyzygy" debug="true" />
+		<jar jarfile="${dist}/jReality-jsyzygy.jar" basedir="${build}/jsyzygy" />
+	</target>
+
+	<target name="jSyzygy_java">
+		<property name="lib" location="lib" />
+		<ant dir="jSyzygy" target="java" inheritAll="false" />
+		<copy file="jSyzygy/jSyzygy.jar" todir="${lib}" />
+	</target>
+
+	<target name="portal" depends="jogl,jSyzygy_java,soft,tests">
+		<mkdir dir="${build}/portal" />
+		<javac excludesfile="excludes.txt" srcdir="${portal}" classpath="${lib}/jSyzygy.jar;${dist}/jReality-core.jar:${dist}/jReality-jogl.jar:${dist}/jReality-soft.jar:${dist}/jReality-tests.jar" destdir="${build}/portal" debug="true" />
+		<rmic base="${build}/portal" includes="**/*Impl.class" classpath="${lib}/jSyzygy.jar;${dist}/jReality-core.jar:${dist}/jReality-jogl.jar" />
+		<jar jarfile="${dist}/jReality-portal.jar" basedir="${build}/portal" />
+	</target>
+		
+	<target name="javadoc">
+		<mkdir dir="${javadoc}" />
+		<javadoc destdir="${javadoc}" author="true" version="true" use="true" windowtitle="jReality API" source="1.4">
+
+			<fileset dir="src" defaultexcludes="yes">
+				<include name="de/jreality/beans/**" />
+				<include name="de/jreality/geometry/**" />
+				<include name="de/jreality/reader/**" />
+				<include name="de/jreality/scene/**" />
+				<include name="de/jreality/ui/**" />
+				<include name="de/jreality/util/**" />
+				<exclude name="**/doc-files/**" />
+				<exclude name="**/*.html" />
+				<exclude name="**/*.properties" />
+			</fileset>
+			<fileset dir="src-jogl" defaultexcludes="yes">
+				<include name="de/jreality/jogl/**" />
+				<exclude name="**/doc-files/**" />
+				<exclude name="**/*.html" />
+				<exclude name="**/*.properties" />
+			</fileset>
+			<fileset dir="src-jsyzygy" defaultexcludes="yes">
+				<include name="de/jreality/jsyzygy/**" />
+				<exclude name="**/doc-files/**" />
+				<exclude name="**/*.html" />
+				<exclude name="**/*.properties" />
+			</fileset>
+			<fileset dir="src-renderman" defaultexcludes="yes">
+				<include name="de/jreality/renderman/**" />
+				<exclude name="**/doc-files/**" />
+				<exclude name="**/*.html" />
+				<exclude name="**/*.properties" />
+			</fileset>
+			<fileset dir="src-soft" defaultexcludes="yes">
+				<exclude name="**/doc-files/**" />
+				<exclude name="**/*.html" />
+				<exclude name="**/*.properties" />
+				<include name="de/jreality/soft/**" />
+			</fileset>
+            <fileset dir="src-portal" defaultexcludes="yes">
+				<exclude name="**/doc-files/**" />
+				<exclude name="**/*.html" />
+				<exclude name="**/*.properties" />
+				<include name="de/jreality/**" />
+			</fileset>
+																						
+			<link offline="true" href="http://java.sun.com/products/jdk/1.2/docs/api/" packagelistLoc="C:\tmp" />
+			<link href="http://developer.java.sun.com/developer/products/xml/docs/api/" />
+		</javadoc>
+	</target>
+
+	<target name="dist" depends="core,jogl,soft,portal" description="generate the distribution">
+	</target>
+
+	<target name="clean" description="clean up">
+		<delete dir="${build}" />
+		<delete dir="${dist}" />
+		<!-- ant dir="jSyzygy" target="clean" inheritAll="false" / -->
+		<delete dir="${javadoc}"/>
+	</target>
+
+</project>
