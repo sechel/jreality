@@ -738,7 +738,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			RenderingHintsShader renderingHints = jpc.renderingHints;
 			DefaultGeometryShader geometryShader = jpc.geometryShader;
 			renderingHints.render(globalHandle);
-			if (originalGeometry instanceof Sphere)	{
+			if (geometryShader.isFaceDraw() && originalGeometry instanceof Sphere)	{
 //				IndexedFaceSet foo = getProxyFor((Sphere) originalGeometry);
 //				ifs = foo;
 //				ils = foo;
