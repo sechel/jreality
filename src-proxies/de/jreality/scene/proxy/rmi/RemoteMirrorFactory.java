@@ -266,7 +266,6 @@ public class RemoteMirrorFactory extends de.jreality.scene.proxy.CopyFactory {
     }
 
     public void copyAttr(de.jreality.scene.Geometry src, RemoteGeometry dst) {
-        System.out.println("RemoteMirrorFactory.copyAttr(Geometry)");
         try {
             dst.setGeometryAttributes(src.getGeometryAttributes());
         } catch (RemoteException e) {
@@ -286,7 +285,6 @@ public class RemoteMirrorFactory extends de.jreality.scene.proxy.CopyFactory {
     }
 
     public void copyAttr(de.jreality.scene.PointSet src, RemotePointSet dst) {
-        System.out.println("RemoteMirrorFactory.copyAttr(PointSet)");
         copyAttr((de.jreality.scene.Geometry) src, (RemoteGeometry) dst);
         try {
             dst.setVertexCountAndAttributes(src.getVertexAttributes());
@@ -298,7 +296,6 @@ public class RemoteMirrorFactory extends de.jreality.scene.proxy.CopyFactory {
 
     public void copyAttr(de.jreality.scene.IndexedLineSet src,
             RemoteIndexedLineSet dst) {
-        System.out.println("RemoteMirrorFactory.copyAttr(LineSet)");
         copyAttr((de.jreality.scene.PointSet) src, (RemotePointSet) dst);
         try {
             dst.setEdgeCountAndAttributes(src.getEdgeAttributes());
@@ -310,7 +307,6 @@ public class RemoteMirrorFactory extends de.jreality.scene.proxy.CopyFactory {
 
     public void copyAttr(de.jreality.scene.IndexedFaceSet src,
             RemoteIndexedFaceSet dst) {
-        System.out.println("RemoteMirrorFactory.copyAttr(FaceSet)");
         copyAttr((de.jreality.scene.IndexedLineSet) src,
                 (RemoteIndexedLineSet) dst);
         try {
