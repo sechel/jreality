@@ -72,11 +72,11 @@
 	</target>
 
 	<target name="tests" depends="core, soft, jogl, jsyzygy">
-		<mkdir dir="${build}/tests" />
+<!--		<mkdir dir="${build}/tests" />
 		<javac excludesfile="excludes.txt" srcdir="${tests}"  classpath="${dist}/jReality-core.jar:${dist}/jReality-soft.jar:${dist}/jReality-jogl.jar:${dist}/jReality-jsyzygy.jar" destdir="${build}/tests" debug="true">
 			<compilerarg line="-source 1.4" />
 		</javac>
-		<jar jarfile="${dist}/jReality-tests.jar" basedir="${build}/tests" />
+-->		<jar jarfile="${dist}/jReality-tests.jar" basedir="${build}/tests" />
 	</target>
 
 <!--
@@ -90,10 +90,10 @@
 -->
 
 	<target name="jsyzygy" depends="jSyzygy_java,jogl">
-		<mkdir dir="${build}/jsyzygy" />
+<!--		<mkdir dir="${build}/jsyzygy" />
 		<javac excludesfile="excludes.txt" srcdir="${jsyzygy}" classpath="${lib}/jSyzygy.jar;${dist}/jReality-core.jar:${dist}/jReality-jogl.jar" destdir="${build}/jsyzygy" debug="true" />
 		<jar jarfile="${dist}/jReality-jsyzygy.jar" basedir="${build}/jsyzygy" />
-	</target>
+-->	</target>
 
 	<target name="jSyzygy_java">
 		<property name="lib" location="lib" />
