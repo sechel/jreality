@@ -42,10 +42,14 @@ public class HeadtrackedRemoteJOGLViewerImp extends HeadtrackedRemoteViewerImp i
     
     private HeadtrackedRemoteJOGLViewerImp() {
         super(new de.jreality.jogl.InteractiveViewer());
+    }
+    protected void init() {
+        super.init();
         getViewer().setStereoType(de.jreality.jogl.Viewer.CROSS_EYED_STEREO);
         getViewer().getHelpOverlay().setVisible(config.getBool("viewer.showFPS"));
         getViewer().setAutoSwapMode(config.getBool("viewer.autoBufferSwap"));
     }
+
     private InteractiveViewer getViewer() {
         return (InteractiveViewer) viewer;
     }
@@ -64,5 +68,5 @@ public class HeadtrackedRemoteJOGLViewerImp extends HeadtrackedRemoteViewerImp i
     public void setBackgroundColor(java.awt.Color color) {
         getViewer().setBackgroundColor(color);
     }
-   
+
 }

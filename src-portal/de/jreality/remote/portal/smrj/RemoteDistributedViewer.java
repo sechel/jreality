@@ -82,6 +82,7 @@ public class RemoteDistributedViewer implements Viewer {
             e.printStackTrace();
         }
         clients = initClients(factory);
+        clients.reset();
         proxyScene = new SMRJMirrorScene(factory);
     }
 

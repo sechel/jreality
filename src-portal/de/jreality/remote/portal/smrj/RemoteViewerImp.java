@@ -64,15 +64,30 @@ public class RemoteViewerImp implements RemoteViewer {
     ConfigurationAttributes config;
     JFrame f;
 
-    public RemoteViewerImp(Viewer viewer) {
+    protected RemoteViewerImp(Viewer viewer) {
         this.viewer = viewer;
         if (!viewer.hasViewingComponent())
                 throw new RuntimeException("expecting viewer with component!");
         Thread.currentThread().setName("RemoteViewerImpl");
         config = ConfigurationAttributes.getSharedConfiguration();
-
         // frame settings
         f = new JFrame(config.getProperty("frame.title", "no title"));
+        f.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                quit();
+            }
+        });
+        f.getContentPane().add(viewer.getViewingComponent());
+        init();
+        initFrame();
+    }
+    
+    protected void initFrame() {
+        f.validate();
+        f.show();
+    }
+    
+    protected void init() {
         if (config.getBool("frame.fullscreen")) {
             // disable mouse cursor in fullscreen mode
             BufferedImage cursorImg = new BufferedImage(16, 16,
@@ -89,12 +104,6 @@ public class RemoteViewerImp implements RemoteViewer {
         } else {
             f.setSize(config.getInt("frame.width"), config
                     .getInt("frame.height"));
-            f.addWindowListener(new WindowAdapter() {
-
-                public void windowClosing(WindowEvent e) {
-                    quit();
-                }
-            });
         }
         CameraUtility.getCamera(viewer).setStereo(
                 config.getBool("camera.stereo"));
@@ -104,9 +113,11 @@ public class RemoteViewerImp implements RemoteViewer {
                 config.getDouble("camera.nearPlane"));
         de.jreality.util.CameraUtility.getCamera(viewer).setFar(
                 config.getDouble("camera.farPlane"));
-        f.getContentPane().add(viewer.getViewingComponent());
-        f.validate();
-        f.show();
+    }
+
+    public void reset() {
+        init();
+        initFrame();     
     }
 
     public RemoteSceneGraphComponent getRemoteSceneRoot() {

@@ -139,7 +139,10 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
     SceneGraphComponent wandComp;
 
     protected RemoteViewer initClients(RemoteFactory factory) throws IOException {
-        return (RemoteViewer) factory.createRemoteViaStaticMethod(HeadtrackedRemoteJOGLViewerImp.class, HeadtrackedRemoteJOGLViewerImp.class, "getInstance");
+        RemoteViewer clients = (RemoteViewer) factory.createRemoteViaStaticMethod(HeadtrackedRemoteJOGLViewerImp.class, HeadtrackedRemoteJOGLViewerImp.class, "getInstance");
+        clients.setRemoteSceneRoot(null);
+        clients.reset();
+        return clients;
     }
 
     public void setSceneRoot(SceneGraphComponent root) {

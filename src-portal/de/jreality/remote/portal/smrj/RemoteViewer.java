@@ -37,4 +37,5 @@ public interface RemoteViewer {
 	public void setRemoteCameraPath(List list);
 	public void render();
 	public void setSignature(int sig);
+  public void reset();
 }
