@@ -44,6 +44,10 @@ public class SoccerBall extends AbstractLoadableScene {
 		super();
 	}
 
+	int refineLevel = 2;
+	public void setRefineLevel(int rf)	{
+		refineLevel = rf;
+	}
 	
 		/*	
 		*/
@@ -65,7 +69,7 @@ public class SoccerBall extends AbstractLoadableScene {
 			GeometryUtility.calculateAndSetFaceNormals(pentifs);
 			pentifs.buildEdgesFromFaces();
 			hexifs.buildEdgesFromFaces();
-			for (int i = 0; i<3; ++i)	{
+			for (int i = 0; i<refineLevel; ++i)	{
 				pentifs = GeometryUtility.binaryRefine(pentifs);
 				pentifs.buildEdgesFromFaces();
 				hexifs = GeometryUtility.binaryRefine(hexifs);
@@ -84,12 +88,12 @@ public class SoccerBall extends AbstractLoadableScene {
 
 			SceneGraphComponent pentsgc = SceneGraphUtilities.createFullSceneGraphComponent("pentagon");
 			pentsgc.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, false);
-			pentsgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,Color.WHITE);
+			pentsgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,new Color(0,0,0));
 			pentsgc.setGeometry(pentifs);
 
 			SceneGraphComponent hexsgc = SceneGraphUtilities.createFullSceneGraphComponent("hexagon");
 			hexsgc.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, false);
-			hexsgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,Color.GREEN);
+			hexsgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,Color.WHITE);
 			hexsgc.setGeometry(hexifs);
 
 			int[][] tubeind = new int[][]{{1,0},{0,4}};
@@ -103,7 +107,7 @@ public class SoccerBall extends AbstractLoadableScene {
 			
 			SceneGraphComponent tubesgc = SceneGraphUtilities.createFullSceneGraphComponent("tubes");
 			tubesgc.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, true);
-			tubesgc.getAppearance().setAttribute(CommonAttributes.TUBES_DRAW, true);
+			tubesgc.getAppearance().setAttribute(CommonAttributes.TUBES_DRAW, false);
 			tubesgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,Color.BLUE);
 			tubesgc.setGeometry(tubeils);
 

@@ -80,6 +80,12 @@ public class Cell120 extends AbstractLoadableScene {
 		scaledDD.getTransformation().setCenter(cp);
 		scaledDD.getTransformation().setStretch(stretchFactor);
 		scaledDD.setGeometry(standardDD);
+//		SoccerBall sb = new SoccerBall();
+//		sb.setRefineLevel(1);
+//		SceneGraphComponent sgc = sb.makeWorld() ;
+//		sgc.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW,false);
+//		sgc.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW,false);
+//		scaledDD.addChild(sgc);
 		//System.out.println("Center: "+Rn.toString(tg.getCenterPoint()));
 		//scaledDD.getTransformation().setCenter(tg.getCenterPoint());
 		Appearance ap = scaledDD.getAppearance();
