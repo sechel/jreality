@@ -138,7 +138,7 @@ public class SMRJMirrorFactory extends ProxyFactory {
         }
     }
 
-    public void copyAttr(de.jreality.scene.Transformation src,
+    public void copyAttr(de.jreality.scene.SimpleTransformation src,
             RemoteTransformation dst) {
         copyAttr((de.jreality.scene.SceneGraphNode) src,
                 (RemoteSceneGraphNode) dst);
