@@ -135,7 +135,6 @@ public class RemoteViewerImp implements RemoteViewer {
     public void render() {
         if (f.isVisible() && viewer.getSceneRoot() != null
                 && viewer.getCameraPath() != null) {
-            System.out.println("RemoteViewerImp.render() really");
             viewer.render();
         }
     }

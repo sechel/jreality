@@ -106,9 +106,8 @@ public class HeadtrackedRemoteViewerImp extends RemoteViewerImp implements
     }
 
     public void render(double[] headMatrix) {
-        System.out.println("HeadtrackedRemoteViewerImp.render()");
-            sendHeadTransformation(headMatrix);
-            render();
+        sendHeadTransformation(headMatrix);
+        render();
     }
 
     /**
