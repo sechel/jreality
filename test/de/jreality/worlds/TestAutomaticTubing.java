@@ -33,7 +33,7 @@ public class TestAutomaticTubing extends AbstractLoadableScene {
 		SceneGraphComponent root = SceneGraphUtilities.createFullSceneGraphComponent("testAutomaticTubing");
 		root.setGeometry(ils);
 		Appearance ap1 = root.getAppearance();
-		ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, DefaultVertexShader.BLUE);
+		ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.BLUE);
 //		ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, true);
 		ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, .03);
 		ap1.setAttribute(CommonAttributes.FACE_DRAW,false);
