@@ -53,7 +53,13 @@ public class PointSet extends de.jreality.scene.PointSet implements
             ByteBufferList bbl = null;
             int length = d.size();
             boolean isBBList = d instanceof ByteBufferList;
+            if (sm == ByteBufferStorage.MODEL) {
+                System.out.println("ByteBufferStorage!");
+                System.out.println("ByteBufferList: "+isBBList);
+            }
+            
           if (isBBList) {
+              System.out.println("found  ByteBufferList!");
               bbl = (ByteBufferList) d;
               sm = bbl.getCoveredModel();
               length = bbl.getCoveredLength();
