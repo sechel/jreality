@@ -28,7 +28,7 @@ import de.jreality.soft.DefaultViewer;
 public class ToolTestScene {
 
 	//Viewer viewer = new de.jreality.jogl.Viewer();
-	Viewer viewer = new DefaultViewer();
+	final Viewer viewer = new DefaultViewer();
 	JFrame frame = new JFrame("viewer");
 	
 	void createScene() {
