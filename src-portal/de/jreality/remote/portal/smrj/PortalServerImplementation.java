@@ -288,6 +288,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
     }
 
     public void dispose() {
+        super.dispose();
         setAutoRender(false);
         setNavigationEnabled(false);
         queue.removeHeadMotionListener(this);

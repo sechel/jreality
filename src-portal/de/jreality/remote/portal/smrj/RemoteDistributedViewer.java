@@ -183,5 +183,9 @@ public class RemoteDistributedViewer implements Viewer {
         RemoteDistributedViewer rsi = new RemoteDistributedViewer(new TCPBroadcasterNIO(8868).getRemoteFactory());
         rsi.loadWorld(args[0]);
     }
+ 
+    public void dispose() {
+        factory.dispose();
+    }
 
 }
