@@ -63,7 +63,7 @@
 	</target>
 
 	
-	<target name="jogl" depends="core">
+	<target name="jogl" depends="core, soft">
 		<mkdir dir="${build}/jogl" />
 		<javac excludesfile="excludes.txt" srcdir="${jogl}"  classpath="${dist}/jReality-core.jar:${dist}/jReality-soft.jar" destdir="${build}/jogl" debug="true">
 			<compilerarg line="-source 1.4" />
