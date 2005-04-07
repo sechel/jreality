@@ -100,7 +100,7 @@ public class SMRJMirrorFactory extends ProxyFactory {
         copyAttr(l, (RemotePointLight)created);
     }
 
-    public void visit(de.jreality.scene.SimpleTransformation t) {
+    public void visit(de.jreality.scene.Transformation t) {
         created=createRemote(Transformation.class);
         copyAttr(t, (RemoteTransformation)created);
     }
@@ -138,7 +138,7 @@ public class SMRJMirrorFactory extends ProxyFactory {
         }
     }
 
-    public void copyAttr(de.jreality.scene.SimpleTransformation src,
+    public void copyAttr(de.jreality.scene.Transformation src,
             RemoteTransformation dst) {
         copyAttr((de.jreality.scene.SceneGraphNode) src,
                 (RemoteSceneGraphNode) dst);
@@ -190,7 +190,6 @@ public class SMRJMirrorFactory extends ProxyFactory {
         DataListSet dls = ByteBufferList.prepareDataListSet(src.getVertexAttributes());
         dst.setVertexCountAndAttributes(dls);
         ByteBufferList.releaseDataListSet(dls);
-        
     }
 
     public void copyAttr(de.jreality.scene.IndexedLineSet src,
@@ -224,10 +223,8 @@ public class SMRJMirrorFactory extends ProxyFactory {
         dst.setPerspective(src.isPerspective());
         dst.setSignature(src.getSignature());
         dst.setStereo(src.isStereo());
-        dst
-                .setViewPort(src.getViewPort().getX(), src.getViewPort()
-                        .getY(), src.getViewPort().getWidth(), src
-                        .getViewPort().getHeight());
+        dst.setViewPort(src.getViewPort().getX(), src.getViewPort().getY(),
+            src.getViewPort().getWidth(), src.getViewPort().getHeight());
     }
 
     private void copyAttr(de.jreality.geometry.LabelSet ls, RemoteLabelSet set) {
