@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
 import javax.swing.DefaultBoundedRangeModel;
@@ -73,7 +74,7 @@ public class JOGLRendererHelper {
 			if (bgo != null && bgo instanceof Texture2D)	{
 				Texture2D tex = ((Texture2D) bgo);
 				Texture2DLoaderJOGL tl = Texture2DLoaderJOGL.FactoryLoader;
-				//System.out.println("Texture: "+tex.getWidth()+" "+tex.getHeight());
+				//JOGLConfiguration.theLog.log(Level.INFO,"Texture: "+tex.getWidth()+" "+tex.getHeight());
 				textureAR = tex.getWidth()/((double) tex.getHeight());
 				tl.render(theCanvas, tex);
 				gl.glEnable(GL.GL_TEXTURE_2D);
@@ -137,7 +138,7 @@ static boolean testArrays = false;
 		
 		DoubleArray da;
 		if (pickMode)	gl.glPushName(JOGLPickAction.GEOMETRY_POINT);
-		//if (pickMode) System.out.println("Rendering vertices in picking mode");
+		//if (pickMode) JOGLConfiguration.theLog.log(Level.INFO,"Rendering vertices in picking mode");
 		if (!pickMode) gl.glBegin(GL.GL_POINTS);
 		for (int i = 0; i< sg.getNumPoints(); ++i)	{
 			//double vv;
@@ -182,14 +183,14 @@ static boolean testArrays = false;
 		double[][] sp = null;
 		int[] snakeInfo = null;
 		int begin = -1, length = -1;
-		//System.out.println("Processing ILS");
+		//SJOGLConfiguration.theLog.log(Level.INFO,"Processing ILS");
 		if (sg instanceof Snake && sg.getGeometryAttributes(Snake.SNAKE_POINTS) != null)	{
 			sp = (double[][] ) sg.getGeometryAttributes(Snake.SNAKE_POINTS);
 			vertexLength = sp[0].length;
 			snakeInfo = (int[] ) sg.getGeometryAttributes(Snake.SNAKE_INFO);
 			begin = snakeInfo[0];
 			length = snakeInfo[1];
-			//System.out.println("Processing the snake with "+length+" points");
+			//JOGLConfiguration.theLog.log(Level.INFO,"Processing the snake with "+length+" points");
 			int n = sp.length;
 			 gl.glBegin(GL.GL_LINE_STRIP);
 			 for (int i = 0; i<length; ++i)	{
@@ -240,7 +241,7 @@ static boolean testArrays = false;
 		//pickMode = false;
 		if (pickMode)	gl.glPushName(JOGLPickAction.GEOMETRY_LINE);
 		int numEdges = sg.getNumEdges();
-		//if (pickMode) System.out.println("Rendering edges in picking mode");
+		//if (pickMode) JOGLConfiguration.theLog.log(Level.INFO,"Rendering edges in picking mode");
 		for (int i = 0; i< numEdges; ++i)	{
 			if (pickMode)	gl.glPushName(i);
 			if (!pickMode) gl.glBegin(GL.GL_LINE_STRIP);
@@ -305,8 +306,8 @@ static boolean testArrays = false;
 		DataList faceColors = sg.getFaceAttributes(Attribute.COLORS);
 		DataList texCoords = sg.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
 		DataList lightMapCoords = sg.getVertexAttributes(Attribute.attributeForName("lightmap coordinates"));
-		//System.out.println("Vertex normals are: "+((vertexNormals != null) ? vertexNormals.size() : 0));
-		//System.out.println("alpha value is "+alpha);
+		//JOGLConfiguration.theLog.log(Level.INFO,"Vertex normals are: "+((vertexNormals != null) ? vertexNormals.size() : 0));
+		//JOGLConfiguration.theLog.log(Level.INFO,"alpha value is "+alpha);
 		
 		// signal a geometry
 		if (pickMode)	gl.glPushName(JOGLPickAction.GEOMETRY_FACE); //pickName);
@@ -323,7 +324,7 @@ static boolean testArrays = false;
 			colorLength = GeometryUtility.getVectorLength(faceColors);
 		} 
 		else 	colorBind = ElementBinding.PER_PART;
-		//System.out.println("Color binding is "+colorBind);
+		//JOGLConfiguration.theLog.log(Level.INFO,"Color binding is "+colorBind);
 		if (colorBind != ElementBinding.PER_PART)	{
 			if (jr.openGLState.frontBack != DefaultPolygonShader.FRONT_AND_BACK)	{
 				gl.glEnable(GL.GL_COLOR_MATERIAL);
@@ -341,11 +342,11 @@ static boolean testArrays = false;
 		
 //		if (vertices != null)	{
 //			int vlength = GeometryUtility.getVectorLength(vertices);
-//			System.out.println("Vertics have length "+vlength);			
+//			JOGLConfiguration.theLog.log(Level.INFO,"Vertics have length "+vlength);			
 //		}
 //		if (faceNormals != null)	{
 //			int vlength = GeometryUtility.getVectorLength(faceNormals);
-//			System.out.println("Normals have length "+vlength);			
+//			JOGLConfiguration.theLog.log(Level.INFO,("Normals have length "+vlength);			
 //		}
 		DoubleArray da;
 		if (!pickMode && sg instanceof QuadMeshShape)	{
@@ -372,7 +373,7 @@ static boolean testArrays = false;
 				for (int j = 0; j <= maxFU; ++j)	{
 					int u = j%maxU;
 //					if (pickMode) {
-//						//System.out.print("+G"+faceCount+"\n");
+//						//JOGLConfiguration.theLog.log(Level.INFO,"+G"+faceCount+"\n");
 //						gl.glPushName(faceCount++);
 //					}
 					// draw two points: one on "this" row, the other directly below on the next "row"
@@ -433,7 +434,7 @@ static boolean testArrays = false;
 				}
 				gl.glEnd();
 				if (pickMode) {
-					//System.out.print("-");
+					//JOGLConfiguration.theLog.log(Level.INFO,"-");
 					gl.glPopName();
 				}
 			}				
@@ -449,7 +450,7 @@ static boolean testArrays = false;
 				} 
 			}
 			if (pickMode) {
-				//System.out.print("+G"+i+"\n");
+				//JOGLConfiguration.theLog.log(Level.INFO,"+G"+i+"\n");
 				gl.glPushName( i);
 			}
 			if (normalBind == ElementBinding.PER_FACE) {
@@ -487,7 +488,7 @@ static boolean testArrays = false;
 			}
 			gl.glEnd();
 			if (pickMode) {
-				//System.out.print("-");
+				//JOGLConfiguration.theLog.log(Level.INFO,"-");
 				gl.glPopName();
 			}
 		}
@@ -573,7 +574,7 @@ static boolean testArrays = false;
 		}
 		for (int i = 0; i<n; ++i)	{
 			SceneGraphPath lp = (SceneGraphPath) lights.get(i);
-			//System.out.println("Light"+i+": "+lp.toString());
+			//JOGLConfiguration.theLog.log(Level.INFO,"Light"+i+": "+lp.toString());
 			double[] mat = lp.getMatrix(null);
 			double[] mat2 = Rn.identityMatrix(4);
 			double[] dir, trans;
@@ -583,18 +584,18 @@ static boolean testArrays = false;
 			Pn.dehomogenize(trans, trans);
 			for (int j=0; j<3; ++j) mat2[4*j+2] = dir[j];
 			for (int j=0; j<3; ++j) mat2[4*j+3] = trans[j];
-			//System.out.println("Light matrix is: "+Rn.matrixToString(mat));
+			//JOGLConfiguration.theLog.log(Level.INFO,"Light matrix is: "+Rn.matrixToString(mat));
 			globalGL.glPushMatrix();
 			globalGL.glMultTransposeMatrixd(mat2);
 			SceneGraphNode light = lp.getLastElement();
 			if (light instanceof SpotLight)		wisit((SpotLight) light, globalGL, lightCount);
 			else if (light instanceof PointLight)		wisit((PointLight) light, globalGL, lightCount);
 			else if (light instanceof DirectionalLight)		wisit((DirectionalLight) light,globalGL, lightCount);
-			else System.out.println("Invalid light class "+light.getClass().toString());
+			else JOGLConfiguration.theLog.log(Level.WARNING,"Invalid light class "+light.getClass().toString());
 			globalGL.glPopMatrix();
 			lightCount++;
 			if (lightCount > GL.GL_LIGHT7)	{
-			  	System.out.println("Max. # lights exceeded");
+				JOGLConfiguration.theLog.log(Level.WARNING,"Max. # lights exceeded");
 			  	break;
 			}
 		}
@@ -604,7 +605,7 @@ static boolean testArrays = false;
 	private static float[] mzDirection = {0,0,1,0};
 	private static float[] origin = {0,0,0,1};
 	public static void wisit(Light dl, GL globalGL, int lightCount)	{
-		  //System.out.println("Visiting directional light");
+		  //JOGLConfiguration.theLog.log(Level.FINE,"Visiting directional light");
 		  //gl.glLightfv(lightCount, GL.GL_AMBIENT, lightAmbient);
 		  globalGL.glLightfv(lightCount, GL.GL_DIFFUSE, dl.getScaledColorAsFloat());
 		  float f = (float) dl.getIntensity();
@@ -622,7 +623,7 @@ static boolean testArrays = false;
 	
 	public static  void wisit(PointLight dl, GL globalGL, int lightCount)		{
 		  if (lightCount >= GL.GL_LIGHT7)	{
-		  	System.out.println("Max. # lights exceeded");
+		  	JOGLConfiguration.theLog.log(Level.WARNING,"Max. # lights exceeded");
 		  	return;
 		  }
 		  //gl.glLightfv(lightCount, GL.GL_AMBIENT, lightAmbient);
@@ -639,7 +640,7 @@ static boolean testArrays = false;
 	
 	public static void wisit(SpotLight dl, GL globalGL, int lightCount)		{
 		  if (lightCount >= GL.GL_LIGHT7)	{
-		  	System.out.println("Max. # lights exceeded");
+		  	JOGLConfiguration.theLog.log(Level.WARNING,"Max. # lights exceeded");
 		  	return;
 		  }
 		  PointLight pl = dl;
@@ -674,13 +675,13 @@ static boolean testArrays = false;
 		//globalGL.glDisable(GL.GL_CLIP_PLANE0);
 		for (int i = 0; i<n; ++i)	{
 			SceneGraphPath lp = (SceneGraphPath) clipPlanes.get(i);
-			//System.out.println("Light"+i+": "+lp.toString());
+			//JOGLConfiguration.theLog.log(Level.INFO,"Light"+i+": "+lp.toString());
 			double[] mat = lp.getMatrix(null);
 			globalGL.glPushMatrix();
 			globalGL.glMultTransposeMatrixd(mat);
 			SceneGraphNode cp = lp.getLastElement();
 			if (cp instanceof ClippingPlane)		wisit((ClippingPlane) cp, globalGL, clipBase+i);
-			else System.out.println("Invalid clipplane class "+cp.getClass().toString());
+			else JOGLConfiguration.theLog.log(Level.WARNING,"Invalid clipplane class "+cp.getClass().toString());
 			globalGL.glPopMatrix();
 		}
 	}
@@ -750,7 +751,7 @@ static boolean testArrays = false;
 			  e.printStackTrace(); 
 			 } 
 			 
-		System.out.println("Screenshot saved to "+file.getName());
+			 JOGLConfiguration.theLog.log(Level.INFO,"Screenshot saved to "+file.getName());
 	}
 	
 

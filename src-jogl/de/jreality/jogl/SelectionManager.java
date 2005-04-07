@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Vector;
+import java.util.logging.Level;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.Primitives;
@@ -124,30 +125,30 @@ public class SelectionManager implements TransformationListener {
 				setRenderPick(false);
 				return;
 			}
-			if (defaultSelection != null) System.out.println("Default sel: "+theSelection.toString());
+			if (defaultSelection != null) JOGLConfiguration.theLog.log(Level.INFO,"Default sel: "+theSelection.toString());
 		} else {
 			theSelection = path;
 		}
     theSelectionObserver.setPath(theSelection);
 		if (theSelection != null) { 
-			System.err.println("sel: "+theSelection.toString());
+			JOGLConfiguration.theLog.log(Level.INFO,"sel: "+theSelection.toString());
 			Object tail = theSelection.getLastElement();
 			if (tail instanceof SceneGraphComponent)	{
 				Transformation t =  ((SceneGraphComponent) tail).getTransformation();
 				if (t != null && t.getIsEditable())	{
-					if (debug) System.err.println("Transformation is editable");
+					if (debug) JOGLConfiguration.theLog.log(Level.INFO,"Transformation is editable");
 					selectionEditable = true;
 				} else {
-					if (debug) System.err.println("Transformation is not editable");
+					if (debug) JOGLConfiguration.theLog.log(Level.INFO,"Transformation is not editable");
 					selectionEditable = false;
 					} 
 			}
 			else {
-				if (debug) System.err.println("Not a SceneGraphComponent");
+				if (debug) JOGLConfiguration.theLog.log(Level.INFO,"Not a SceneGraphComponent");
 				selectionEditable = false;
 				} 
 		} 
-		else if (debug) System.err.println("SelectionManager: empty selection");
+		else if (debug) JOGLConfiguration.theLog.log(Level.INFO,"SelectionManager: empty selection");
 		
 			
 		if (theSelection != null)	{
@@ -199,7 +200,7 @@ public class SelectionManager implements TransformationListener {
 		pickPoint = point;
 		if (pickPoint == null) return;
 		// probably should have a separate event and listener list for this
-		//System.out.println("Setting pick point");
+		//JOGLConfiguration.theLog.log(Level.INFO,"Setting pick point");
 		Color pickPointColor = Color.BLUE;
 		if (point.getPickType() == PickPoint.HIT_FACE) pickPointColor = Color.RED;
 		else if (point.getPickType() == PickPoint.HIT_EDGE) pickPointColor = Color.YELLOW;
@@ -207,7 +208,7 @@ public class SelectionManager implements TransformationListener {
 
 		pickPointAppearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, pickPointColor);		
 		broadcastChange();
-		//System.out.println("Did broadcast change");
+		JOGLConfiguration.theLog.log(Level.INFO,"Face number is "+point.getFaceNum());
 	}
 
 
@@ -216,7 +217,7 @@ public class SelectionManager implements TransformationListener {
 	{				
 		if (pickPoint != null && renderPick)	{
 			// TODO: How big should the sphere representing the pick point be?
-			//System.out.println("Representing pick point");
+			//JOGLConfiguration.theLog.log(Level.INFO,"Representing pick point");
 			if (useSphere)	{
 				if (sphereKit == null)	{
 					sphereKit = Primitives.sphere(1.0, pickPoint.getPointObject() );
@@ -230,7 +231,7 @@ public class SelectionManager implements TransformationListener {
 
 			double[] mm = pickPoint.getPickPath().getMatrix(null);
 			pickPointKit.getTransformation().setMatrix( mm);
-			//System.out.println("PPTranslation is : "+Rn.toString(sphereKit.getTransformation().getTranslation()));
+			//JOGLConfiguration.theLog.log(Level.INFO,"PPTranslation is : "+Rn.toString(sphereKit.getTransformation().getTranslation()));
 			
 			Object val = pickPointAppearance.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, Double.class);
 			double r;
@@ -253,11 +254,11 @@ public class SelectionManager implements TransformationListener {
 			boundAppearance = boundKit.getAppearance();
 			if (selectionEditable)    {
 				boundAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_STIPPLE,false);
-				//System.out.println("Turning off stippling");
+				//JOGLConfiguration.theLog.log(Level.INFO,"Turning off stippling");
 			}
 			else	{
 				boundAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_STIPPLE,true);
-				//System.out.println("Turning on stippling");
+				//JOGLConfiguration.theLog.log(Level.INFO,"Turning on stippling");
 			}
 			SceneGraphNode sgn =  theSelection.getLastElement();
 			Rectangle3D bbox = null;
@@ -266,10 +267,10 @@ public class SelectionManager implements TransformationListener {
 			else if (sgn instanceof PointSet) bbox = GeometryUtility.calculateBoundingBox( (PointSet) sgn);
 			else if (sgn instanceof Sphere) bbox = SphereHelper.getSphereBoundingBox();
 			else {
-				System.out.println("Unknown selection class: "+sgn.getClass().toString());
+				JOGLConfiguration.theLog.log(Level.WARNING,"Unknown selection class: "+sgn.getClass().toString());
 				return selectionKit;
 			}
-			//System.out.println("BBox is "+bbox.toString());
+			//JOGLConfiguration.theLog.log(Level.INFO,"BBox is "+bbox.toString());
 			//else bbox = sgn.getBoundingBox();
 			IndexedFaceSet boxRep = GeometryUtility.representAsSceneGraph(bbox);
 			boundKit.setGeometry(boxRep );
@@ -298,7 +299,7 @@ public class SelectionManager implements TransformationListener {
 		if (listeners == null)	listeners = new Vector();
 		if (listeners.contains(l)) return;
 		listeners.add(l);
-		//System.err.println("SelectionManager: Adding geometry listener"+l+"to this:"+this);
+		//JOGLConfiguration.theLog.log(Level.INFO,"SelectionManager: Adding geometry listener"+l+"to this:"+this);
 	}
 	
 	public void removeSelectionListener(SelectionManager.Listener l)	{
@@ -308,10 +309,10 @@ public class SelectionManager implements TransformationListener {
 
 	public void broadcastChange()	{
 		if (listeners == null) return;
-		//System.err.println("SelectionManager: broadcasting"+listeners.size()+" listeners");
+		//SyJOGLConfiguration.theLog.log(Level.INFO,"SelectionManager: broadcasting"+listeners.size()+" listeners");
 		if (!listeners.isEmpty())	{
 			SelectionManager.Changed e = new SelectionManager.Changed(this);
-			//System.out.println("SelectionManager: broadcasting"+listeners.size()+" listeners");
+			//JOGLConfiguration.theLog.log(Level.INFO,"SelectionManager: broadcasting"+listeners.size()+" listeners");
 			for (int i = 0; i<listeners.size(); ++i)	{
 				SelectionManager.Listener l = (SelectionManager.Listener) listeners.get(i);
 				l.selectionChanged(e);
@@ -327,7 +328,7 @@ public class SelectionManager implements TransformationListener {
 				boundKit.getTransformation().setMatrix(theSelection.getMatrix(null));
 		} 
 		if (renderPick && pickPoint!= null && pickPointKit != null)	{
-			//System.out.println("matrixChanged callback");
+			//JOGLConfiguration.theLog.log(Level.INFO,"matrixChanged callback");
 			double[] mm = pickPoint.getPickPath().getMatrix(null);
 			pickPointKit.getTransformation().setMatrix( mm);			
 		}
@@ -353,7 +354,7 @@ public class SelectionManager implements TransformationListener {
 	}
 	public void setRenderSelection(boolean renderSelection) {
 		renderPick = this.renderSelection = renderSelection;
-		System.out.println("Render bound: "+renderSelection);
+		JOGLConfiguration.theLog.log(Level.FINE,"Render bound: "+renderSelection);
 		broadcastChange();
 	}
 	
@@ -375,7 +376,7 @@ public class SelectionManager implements TransformationListener {
 			if (sgp.isEqual(p)) return;
 		}
 		selectionList.add(p);
-		System.out.println("Adding path "+p.toString());
+		JOGLConfiguration.theLog.log(Level.FINE,"Adding path "+p.toString());
 	}
 		
 	public void removeSelection(SceneGraphPath p)	{
@@ -384,7 +385,7 @@ public class SelectionManager implements TransformationListener {
 			SceneGraphPath sgp = (SceneGraphPath) iter.next();
 			if (sgp.isEqual(p)) {
 				selectionList.remove(sgp);
-				System.out.println("Removing path "+p.toString());
+				JOGLConfiguration.theLog.log(Level.FINE,"Removing path "+p.toString());
 				return;
 			}
 		}
@@ -401,7 +402,7 @@ public class SelectionManager implements TransformationListener {
 		}
 		currentCycleSelection = (SceneGraphPath) selectionList.get(target);
 		setSelection(currentCycleSelection);
-		System.out.println("Setting selection to "+currentCycleSelection.toString());
+		JOGLConfiguration.theLog.log(Level.INFO,"Setting selection to "+currentCycleSelection.toString());
 	}
 
 }

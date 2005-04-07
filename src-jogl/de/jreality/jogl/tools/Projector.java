@@ -4,6 +4,9 @@
  */
 package de.jreality.jogl.tools;
 
+import java.util.logging.Level;
+
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.scene.Camera;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.Pn;
@@ -87,7 +90,7 @@ public class Projector {
 		Rn.inverse(objectToCam, camToObject);
 		if (Rn.determinant(camToObject) < 0.0) isReflection = true;
 		else isReflection = false;
-		//System.out.println("Reflection is "+isReflection);
+		//JOGLConfiguration.theLog.log(Level.FINE,"Reflection is "+isReflection);
 	}
 
 	/**
@@ -98,7 +101,7 @@ public class Projector {
 		Rn.inverse(camToObject, objectToCam);
 		if (Rn.determinant(camToObject) < 0.0) isReflection = true;
 		else isReflection = false;
-		//System.out.println("Reflection is "+isReflection);
+		//JOGLConfiguration.theLog.log(Level.FINE,"Reflection is "+isReflection);
 	}
 	
 //	this translates a vector in camera coordinates to object coordinates

@@ -7,8 +7,10 @@ package de.jreality.jogl.tools;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.util.logging.Level;
 
 import de.jreality.jogl.HelpOverlay;
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.scene.Transformation;
 import de.jreality.util.P3;
 import de.jreality.util.Pn;
@@ -72,21 +74,21 @@ public class TranslateShapeTool extends AbstractShapeTool {
 		
 		isTracking = false;
 		if (theEditedTransform == null) return false;
-		//System.out.println("Translation is: "+Rn.toString(myTransform.getTranslation()));
+		//JOGLConfiguration.theLog.log(Level.FINE,"Translation is: "+Rn.toString(myTransform.getTranslation()));
 		if (!keepsMoving) return true;
 		long dt = currentTime - lastTime;
 		if (dt == 0 || strength == 0.0) return true;
 		if (button != 1)		{
-			System.out.println("Continued motion not yet implemented here");
+			JOGLConfiguration.theLog.log(Level.FINE,"Continued motion not yet implemented here");
 			return true;
 		}
 		theProjector.getObjectPosition(last, anchorV);
 		theProjector.getObjectPosition(current, currentV);
 		double size = .03* strength * (1000.0 /(currentTime-lastTime));
-		//System.out.println("dt: "+dt+"Strength: "+strength+"size: "+size);
+		//JOGLConfiguration.theLog.log(Level.FINE,"dt: "+dt+"Strength: "+strength+"size: "+size);
 		Pn.linearInterpolation(currentV, anchorV, currentV, size, theEditedTransform.getSignature());
 		final double[] mat = P3.makeTranslationMatrix(null, anchorV, currentV,theEditedTransform.getSignature());
-		//System.out.println("Translation: "+Rn.matrixToString(mat));
+		//SJOGLConfiguration.theLog.log(Level.FINE,"Translation: "+Rn.matrixToString(mat));
 		continuedMotion = new javax.swing.Timer(20, new ActionListener()	{
 			final Transformation tt = theEditedTransform;
 			final double[] repeater = mat;

@@ -5,6 +5,7 @@
 package de.jreality.jogl;
 
 import java.util.Hashtable;
+import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
 import de.jreality.geometry.QuadMeshShape;
@@ -19,7 +20,7 @@ import de.jreality.util.Rn;
  */
 public class JOGLSphereHelper extends SphereHelper {
 
-	static boolean sharedDisplayLists = Viewer.sharedContexts;
+	static boolean sharedDisplayLists = JOGLConfiguration.sharedContexts;
 	static Hashtable sphereDListsTable = new Hashtable();
 	static int[] globalSharedSphereDisplayLists = null;
 	//TODO This can't be static; the display lists so created are invalid if the renderer parameter
@@ -31,7 +32,7 @@ public class JOGLSphereHelper extends SphereHelper {
 		//if (!sharedDisplayLists)	dlists = (int[] ) sphereDListsTable.get(gl);
 		//else 
 				dlists = new int[n];
-		System.out.println("Setting up sphere display lists for context "+gl);
+				JOGLConfiguration.theLog.log(Level.INFO,"Setting up sphere display lists for context "+gl);
 		for (int i = 0; i<n; ++i)	{
 			dlists[i] = gl.glGenLists(1);
 			gl.glNewList(dlists[i], GL.GL_COMPILE);
@@ -97,7 +98,7 @@ public class JOGLSphereHelper extends SphereHelper {
 	 */
 	public static int getResolutionLevel(double[] o2ndc, double lod) {
 		double d = lod * CameraUtility.getNDCExtent(o2ndc);
-		//System.out.println("Distance is "+d);
+		//JOGLConfiguration.theLog.log(Level.FINE,"Distance is "+d);
 		int i = 0;
 		for ( i = 0; i<5; ++i)	{
 			if (d < lodLevels[i]) break;

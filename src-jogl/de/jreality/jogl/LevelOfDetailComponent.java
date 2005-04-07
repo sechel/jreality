@@ -36,7 +36,6 @@ public class LevelOfDetailComponent extends SelectionComponent {
 		for ( i = 0; i<lodLevels.length-1; ++i)	{
 			if (screenExtent < lodLevels[i]) break;
 		}
-		//System.out.println("Setting child "+i);
 		setSelectedChild(i);
 	}
 	

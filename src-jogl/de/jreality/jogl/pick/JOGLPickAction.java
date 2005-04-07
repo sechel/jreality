@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Vector;
+import java.util.logging.Level;
 
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.shader.DefaultLineShader;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.Graphics3D;
@@ -78,7 +80,7 @@ public class JOGLPickAction extends PickAction  {
 		int realHits = 0;
 		Graphics3D context3D = new Graphics3D(v);
 		SceneGraphComponent theRoot = v.getSceneRoot();
-		if (debug) System.out.println("Processing gl selection buffer");
+		if (debug) JOGLConfiguration.theLog.log(Level.FINE,"Processing gl selection buffer");
 		for (int i =0, count = 0; i<numberHits; ++i)	{
 			int names = selectBuffer.get(count++);
 			int[] path = new int[names];
@@ -98,7 +100,7 @@ public class JOGLPickAction extends PickAction  {
 			int[] geomID = {-1, -1};
 			for (int j = 0; j<names; ++j)	{
 				path[j] = selectBuffer.get(count);
-				if (debug) System.out.print(": "+path[j]);
+				if (debug) JOGLConfiguration.theLog.log(Level.FINE,": "+path[j]);
 				if (j>0) {
 					// apparently the first thing on the selection stack is bogus
 					// we look for identifiers corresponding to geomteries
@@ -106,12 +108,12 @@ public class JOGLPickAction extends PickAction  {
 						// otherwise we assume it's a scene graph component
 						// and store it off
 						int which = path[j] - SGCOMP_BASE;
-						if (debug) System.out.print("?");
+						if (debug) JOGLConfiguration.theLog.log(Level.FINE,"?");
 						if (sgc.getChildComponentCount() > which && sgc.getChildComponent(which) != null) {
 							SceneGraphComponent tmpc = sgc.getChildComponent(which);
 							sgp.push(tmpc); 
 							sgc = tmpc;
-							if (debug) System.out.print("("+sgc.getName()+")");
+							if (debug) JOGLConfiguration.theLog.log(Level.FINE,"("+sgc.getName()+")");
 						}
 					}
 					else if (path[j] >= GEOMETRY_BASE)	{
@@ -120,7 +122,7 @@ public class JOGLPickAction extends PickAction  {
 							sgp.push(sgc.getGeometry());
 						}
 						else {
-							System.out.println("Whoa: too many geometries in the path");
+							JOGLConfiguration.theLog.log(Level.WARNING,"Whoa: too many geometries in the path");
 						}
 					} 	
 					else if (geomID[0] == -1) geomID[0] = path[j];	
@@ -128,18 +130,18 @@ public class JOGLPickAction extends PickAction  {
 				}
 				count++;
 			}
-			if (debug) System.out.print("\n");
+			if (debug) JOGLConfiguration.theLog.log(Level.FINE,"\n");
 			SceneGraphNode sgn = sgp.getLastElement();
 			if (geometryFound != -1)	{
-//				System.out.println("\ngeometry found "+geometryFound);
-//				System.out.println("geoemtry is"+sgn.getName());	
+//				JOGLConfiguration.theLog.log(Level.FINE,"\ngeometry found "+geometryFound);
+//				JOGLConfiguration.theLog.log(Level.FINE,"geoemtry is"+sgn.getName());	
 			}
 			else continue;
 			if (!(sgn instanceof Geometry))	continue;
 			Geometry geom = (Geometry) sgn;
 			context3D.setObjectToWorld(sgp.getMatrix(null));
 			if (geometryFound == GEOMETRY_FACE && (geom instanceof IndexedFaceSet))	{
-				if (debug) System.out.println("Picked face "+ geomID[0]);
+				if (debug) JOGLConfiguration.theLog.log(Level.FINE,"Picked face "+ geomID[0]);
 				IndexedFaceSet sg = (IndexedFaceSet) sgn;
 				oneHit = calculatePickPointForFace(oneHit, pndc, context3D,sgp, sg, geomID);
 				if (oneHit == null) continue;
@@ -147,7 +149,7 @@ public class JOGLPickAction extends PickAction  {
 				realHits++;
 			} 
 			else if (geometryFound == GEOMETRY_LINE  && (geom instanceof IndexedLineSet))	{
-				if (debug) System.out.println("Picked edge "+ geomID[0]+" "+geomID[1]);
+				if (debug) JOGLConfiguration.theLog.log(Level.FINE,"Picked edge "+ geomID[0]+" "+geomID[1]);
 				IndexedLineSet sg = (IndexedLineSet) geom;
 				oneHit = calculatePickPointForEdge(oneHit, pndc, context3D, sgp, sg,geomID);
 				if (oneHit == null) continue;
@@ -155,7 +157,7 @@ public class JOGLPickAction extends PickAction  {
 				realHits++;					
 			} else if (geometryFound == GEOMETRY_POINT && (geom instanceof PointSet))	{
 				PointSet sg = (PointSet) geom;
-				if (debug) System.out.println("Picked vertex "+geomID[0]);
+				if (debug) JOGLConfiguration.theLog.log(Level.FINE,"Picked vertex "+geomID[0]);
 				oneHit = calculatePickPointForVertex(oneHit, pndc, context3D,sgp, sg, geomID);
 				if (oneHit == null) continue;
 				al.add(oneHit);
@@ -183,7 +185,7 @@ public class JOGLPickAction extends PickAction  {
 				double c = q - 1.0;
 				double d = b*b - 4 * a * c;
 				if (d < 0) {
-					System.out.println("Missed sphere");
+					JOGLConfiguration.theLog.log(Level.WARNING,"Missed sphere");
 					continue;
 				}
 				d = Math.sqrt(d);
@@ -208,7 +210,7 @@ public class JOGLPickAction extends PickAction  {
 					realHits++;
 				}
 			} else {
-				System.out.println("Invalid geometry type");
+				JOGLConfiguration.theLog.log(Level.WARNING,"Invalid geometry type");
 				continue; 			
 			}
 		}
@@ -221,13 +223,13 @@ public class JOGLPickAction extends PickAction  {
 	protected static PickPoint calculatePickPointForVertex(PickPoint dst, double[] pndc, Graphics3D gc, SceneGraphPath sgp, PointSet sg, int[] geomID)	{
 		DataList verts = sg.getVertexAttributes(Attribute.COORDINATES);
 		if (geomID[0] >= verts.size())	{
-			System.out.println("Invalid vertex number in calculatePickPointFor()");
+			JOGLConfiguration.theLog.log(Level.WARNING,"Invalid vertex number in calculatePickPointFor()");
 			return null;
 		}
 		double[] realNDC = Rn.matrixTimesVector(null,gc.getObjectToNDC(), verts.item(geomID[0]).toDoubleArray(null));
 		if (realNDC.length == 4) Pn.dehomogenize(realNDC, realNDC);
 		realNDC[2] = pndc[2];
-		if (debug) System.out.println("Real and theoretical z-value: "+pndc[2]+"  "+realNDC[2]);
+		if (debug) JOGLConfiguration.theLog.log(Level.FINE,"Real and theoretical z-value: "+pndc[2]+"  "+realNDC[2]);
 		PickPoint pp = new PickPoint(gc.getViewer(), sgp, realNDC);
 		pp.setVertexNum(geomID[0]);
 		pp.setPickType(PickPoint.HIT_VERTEX);
@@ -237,7 +239,7 @@ public class JOGLPickAction extends PickAction  {
 		int[][] indices = sg.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
 		DataList verts = sg.getVertexAttributes(Attribute.COORDINATES);
 		if (geomID[0] >= indices.length)	{
-			System.out.println("Invalid edge number in calculatePickPointFor()");
+			JOGLConfiguration.theLog.log(Level.WARNING,"Invalid edge number in calculatePickPointFor()");
 			return null;
 		}
 		int n = indices[geomID[0]].length;
@@ -276,7 +278,7 @@ public class JOGLPickAction extends PickAction  {
 //				tt = (pickndc1[1] - oneEdge[index][1])/(oneEdge[index+1][1] - oneEdge[index][1]);
 //
 //			zval1 = tt * oneEdge[index+1][2] + (1-tt)*oneEdge[index][2];
-//			//System.out.println("d1 is "+d1);
+//			//JOGLConfiguration.theLog.log(Level.INFO,"d1 is "+d1);
 //		}
 //		if (index < n-2)	{
 //			pickndc2 = P2.closestPointOnLine(null, lines[index],  pndcp2, Pn.EUCLIDEAN);
@@ -285,12 +287,12 @@ public class JOGLPickAction extends PickAction  {
 //			if (dx != 0.0) tt = (pickndc2[0] - oneEdge[index][0])/dx;
 //			else tt = (pickndc2[1] - oneEdge[index][1])/(oneEdge[index+1][1] - oneEdge[index][1]);
 //			zval2 = tt * oneEdge[index+1][2] + (1-tt)*oneEdge[index][2];
-//			//System.out.println("d2 is "+d2);
+//			//JOGLConfiguration.theLog.log(Level.INFO,"d2 is "+d2);
 //		}
 //		double zval = 0;
 //		if (d1 < d2)	zval = zval1;
 //		else zval = zval2;
-//		if (debug) System.out.println("Real and theoretical z-value: "+pndc[2]+"  "+zval);
+//		if (debug) JOGLConfiguration.theLog.log(Level.FINE,"Real and theoretical z-value: "+pndc[2]+"  "+zval);
 		double[] realNDC = new double[4];
 		realNDC[0] = pndc[0]; realNDC[1] = pndc[1];  		realNDC[2] = pndc[2]; realNDC[3] = 1.0;
 		dst = new PickPoint(gc.getViewer(), sgp, realNDC);
@@ -306,7 +308,7 @@ public class JOGLPickAction extends PickAction  {
 		DataList verts = sg.getVertexAttributes(Attribute.COORDINATES);
 		int faceNum = geomID[0];
 		if (faceNum >= indices.length)	{
-			System.out.println("Invalid face number in calculatePickPointFor()");
+			JOGLConfiguration.theLog.log(Level.WARNING,"Invalid face number in calculatePickPointFor()");
 			return null;
 		}
 		pndc[2] = 1.0;
@@ -323,10 +325,10 @@ public class JOGLPickAction extends PickAction  {
 			p1[2] = 0.0;
 			double[] intersect = P3.lineIntersectPlane(null, pndc, p1, plane);
 			if (intersect[2] < MIN_PICKZ || intersect[2] > MAX_PICKZ) {
-				System.out.println("calculatePickPointFor: bad z-coordinate");
+				JOGLConfiguration.theLog.log(Level.WARNING,"calculatePickPointFor: bad z-coordinate");
 				return null;
 			}
-			//System.out.println("Intersect = "+Rn.toString(intersect));
+			//JOGLConfiguration.theLog.log(Level.FINE,"Intersect = "+Rn.toString(intersect));
 			double[] NDCToObject = Rn.inverse(null, gc.getObjectToNDC());
 			double[] objectPt = Rn.matrixTimesVector(null, NDCToObject, intersect);
 			Pn.dehomogenize(objectPt, objectPt);
@@ -338,7 +340,7 @@ public class JOGLPickAction extends PickAction  {
 			dst.setFaceNum(faceNum);
 			dst.setPickType(PickPoint.HIT_FACE);
 		} else{
-			//System.out.println("calculatePickPointFor: no hit");
+			//JOGLConfiguration.theLog.log(Level.FINE,"calculatePickPointFor: no hit");
 			return null;
 		}
 		

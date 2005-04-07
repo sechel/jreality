@@ -89,7 +89,7 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 
 	List infoStrings = new Vector();
 	public void updateInfoStrings(InfoOverlay io)	{
-		//System.out.println("Providing info strings");
+		//JOGLConfiguration.theLog.log(Level.INFO,"Providing info strings");
 		infoStrings.clear();
 		infoStrings.add("Real FPS: "+getRenderer().getFramerate());
 		infoStrings.add("Clock FPS: "+getRenderer().getClockrate());
@@ -104,12 +104,12 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 		SceneGraphComponent sel = selectionManager.representSelectionAsSceneGraph(this);
 //		if (oldSel != null && sceneRoot.isDirectAncestor(oldSel)) sceneRoot.removeChild(oldSel);
 //		sceneRoot.addChild(sel);
-		//System.out.println("In selection changed");
+		//JOGLConfiguration.theLog.log(Level.FINE,"In selection changed");
 		if (sel != oldSel)	{
 			if (oldSel != null) removeAuxiliaryComponent(oldSel);
 			addAuxiliaryComponent(sel);
 			oldSel = sel;
-			//System.out.println("Adding selection to viewer");			
+			//JOGLConfiguration.theLog.log(Level.FINE,"Adding selection to viewer");			
 		}
 		render(); 
 	}
@@ -173,16 +173,22 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 	public MouseTool getCurrentTool() {
 		return currentTool;
 	}
+	public SceneGraphComponent getScalerNode() {
+		return scalerNode;
+	}
+	SceneGraphComponent scalerNode = null;
 	public void setCameraPath(SceneGraphPath pp) {
 		SceneGraphPath p = pp;
 		if (pp == null || !CameraUtility.isCameraPathValid(pp) || pp.getFirstElement() != sceneRoot) {
 			System.err.println("Invalid camera path, adding new camera.");
+			scalerNode = new SceneGraphComponent();
+			sceneRoot.addChild(scalerNode);
 			Camera c = new Camera();
 			SceneGraphComponent sgc = new SceneGraphComponent();
 			sgc.setTransformation(new Transformation());
 			sgc.setName("Default Camera node");
 			sgc.setCamera(c);
-			sceneRoot.addChild(sgc);
+			scalerNode.addChild(sgc);
 			p = SceneGraphPath.getFirstPathBetween(sceneRoot, c);
 		}
 		super.setCameraPath(p);

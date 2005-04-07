@@ -59,7 +59,8 @@ public class DefaultPolygonShader implements PolygonShader {
 		vertexShader = ShaderLookup.getVertexShaderAttr(eap, name, "default");
 
 		smoothShading = eap.getAttribute(NameSpace.name(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);	
-		Object foo = eap.getAttribute(NameSpace.name(name,"texture2d"), null, Texture2D.class);
+//		Object foo = eap.getAttribute(NameSpace.name(name,"texture2d"), null, Texture2D.class);
+		Object foo = eap.app.getAttribute(NameSpace.name(name,"texture2d"), Texture2D.class);
 		if (foo instanceof Texture2D)	texture2D = (Texture2D) foo;
 		foo = eap.getAttribute(NameSpace.name(name,"reflectionMap"), null, ReflectionMap.class);
 		if (foo instanceof ReflectionMap)	reflectionMap = (ReflectionMap) foo;
@@ -126,8 +127,8 @@ public class DefaultPolygonShader implements PolygonShader {
 //		gl.glEnable(GL.GL_COLOR_MATERIAL);
 //		gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
 //		gl.glColor4fv( getDiffuseColorAsFloat());
-		//System.out.println("Alpha channel is "+diffuseColorAsFloat[3]);
-		//System.out.println("transparency is "+transparency);
+		//JOGLConfiguration.theLog.log(Level.FINE,"Alpha channel is "+diffuseColorAsFloat[3]);
+		//JOGLConfiguration.theLog.log(Level.FINE,"transparency is "+transparency);
 		//float[] testcolor = {.3f, .5f, .7f, 1.0f * ((float) transparency)};
 		//gl.glMaterialfv(GL.GL_BACK, GL.GL_DIFFUSE, testcolor);
 		texUnit = GL.GL_TEXTURE0;
@@ -137,7 +138,7 @@ public class DefaultPolygonShader implements PolygonShader {
 			Texture2DLoaderJOGL.render(theCanvas, texture2D);
 			int[] res = new int[1];
 			//gl.glGetTexParameteriv(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_RESIDENT, res);
-			//System.out.println("Texture is resident: "+res[0]);
+			//JOGLConfiguration.theLog.log(Level.FINE,"Texture is resident: "+res[0]);
 			//if (res[0] == 0)	{ jr.texResident = false; }
 			gl.glEnable(GL.GL_TEXTURE_2D);
 		} //else
@@ -154,10 +155,10 @@ public class DefaultPolygonShader implements PolygonShader {
 			Texture2DLoaderJOGL.render(jr, reflectionMap);
 			//int[] res = new int[1];
 			//gl.glGetTexParameteriv(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_RESIDENT, res);
-			//System.out.println("Texture is resident: "+res[0]);
+			//JOGLConfiguration.theLog.log(Level.FINE,"Texture is resident: "+res[0]);
 			//if (res[0] == 0)	{ jr.texResident = false; }
 			gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
-			//System.out.println("cube map enabled");
+			//JOGLConfiguration.theLog.log(Level.FINE,("cube map enabled");
 		} 
 		vertexShader.setFrontBack(frontBack);
 		vertexShader.render(jr);

@@ -7,9 +7,11 @@ package de.jreality.jogl.tools;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Vector;
+import java.util.logging.Level;
 
 import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InteractiveViewer;
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.scene.pick.PickPoint;
 
 /**
@@ -45,7 +47,7 @@ public class UserTool extends PickTool {
 		if (!super.track(e)) return false;
 			
 		pointNDC = new double[] {current[0], current[1], 0.0, 1.0};
-		//System.out.println("Object coordinates: "+Rn.toString(newPickPoint.getPointObject()));
+		//JOGLConfiguration.theLog.log(Level.FINE,"Object coordinates: "+Rn.toString(newPickPoint.getPointObject()));
 		if (!listeners.isEmpty())	{
 			for (int i = 0; i<listeners.size(); ++i)	{
 				UserToolInterface l = (UserToolInterface) listeners.get(i);

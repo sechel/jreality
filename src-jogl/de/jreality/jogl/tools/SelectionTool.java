@@ -5,8 +5,10 @@
 package de.jreality.jogl.tools;
 
 import java.awt.event.MouseEvent;
+import java.util.logging.Level;
 
 import de.jreality.jogl.InteractiveViewer;
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.SelectionManager;
 import de.jreality.scene.SceneGraphPath;
 
@@ -86,7 +88,7 @@ public class SelectionTool extends PickTool  {
 		} // else {
 		// the selection tool does nothing if the user moves the mouse.
 		// He/she has to hold and click to have an effect.
-		//System.out.println("Pick point: "+newPickPoint.toString());
+		//JOGLConfiguration.theLog.log(Level.FINE,"Pick point: "+newPickPoint.toString());
 		if (mouseMoved) return false;
 		// perform the pick
 		track(e);

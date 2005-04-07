@@ -12,6 +12,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.swing.AbstractAction;
 import javax.swing.Box;
@@ -79,7 +80,7 @@ public class FramedCurveInspector extends JFrame {
 	static {
 		String foo = System.getProperty("framedCurveInspector.resourceDir");
 		if (foo != null) resourceDir = foo;
-		//System.out.println("FCI resource dir is: "+resourceDir);
+		//JOGLConfiguration.theLog.log(Level.FINE,"FCI resource dir is: "+resourceDir);
 		foo = System.getProperty("framedCurveInspector.frameRate");
 		if (foo != null) framesPerSecond = Integer.parseInt(foo);
 		foo = System.getProperty("framedCurveInspector.ycoord");
@@ -126,7 +127,7 @@ public class FramedCurveInspector extends JFrame {
 		// TODO implement clone() for Camera
 		fciCamera.setNear(oldCam.getNear());
 		fciCamera.setFar(oldCam.getFar());
-		//System.out.println("Camera is: "+fciCamera);
+		//JOGLConfiguration.theLog.log(Level.FINE,"Camera is: "+fciCamera);
 		myCameraNode.setCamera(fciCamera);
 		myCameraNode.getTransformation().setMatrix( CameraUtility.getCameraNode(parent).getTransformation().getMatrix());
 		root.addChild(myCameraNode);
@@ -174,7 +175,7 @@ public class FramedCurveInspector extends JFrame {
 		testM.add(jcb);
 		jcb.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent e)	{
-				System.out.println("Not yet implemented");
+				JOGLConfiguration.theLog.log(Level.WARNING,"Not yet implemented");
 				parent.render();
 				parent.getViewingComponent().requestFocus();
 			}
@@ -277,7 +278,7 @@ public class FramedCurveInspector extends JFrame {
 				if (next >= theCurve.getNumberControlPoints()) atEnd = true;
 				else nextTime = theCurve.getControlPoint(next).getTime();
 				if (value < prevTime || (!atEnd && value > nextTime))	{
-					System.out.println("Invalid time");
+					JOGLConfiguration.theLog.log(Level.WARNING,"Invalid time");
 					timeValue.setText(doubleToString(thisTime));
 					return;
 				}
@@ -368,7 +369,7 @@ public class FramedCurveInspector extends JFrame {
 		target.getTransformation().resetMatrix();
 		if (moveWorld) setWorldNode(worldNode);
 		else setWorldNode(null);
-		System.out.println("move world is: "+moveWorld);
+		JOGLConfiguration.theLog.log(Level.FINE,"move world is: "+moveWorld);
 		updateCameraPosition();
 	}
 
@@ -378,7 +379,7 @@ public class FramedCurveInspector extends JFrame {
 	protected void updateFilename() {
 		if (filename != null && theCurve != null)	{
 			if (theCurve.getSourceFile() != null) {
-				System.out.println("filename is"+theCurve.getSourceFile().toString());
+				JOGLConfiguration.theLog.log(Level.FINE,"filename is"+theCurve.getSourceFile().toString());
 				filename.setText(theCurve.getSourceFile().getName());
 				resourceDir = theCurve.getSourceFile().getAbsolutePath();
 			}
@@ -432,7 +433,7 @@ public class FramedCurveInspector extends JFrame {
 	 * 
 	 */
 	private void writeTarget(double[] m) {
-		//System.out.println("Setting time to: "+currentPoint.getTime());
+		//JOGLConfiguration.theLog.log(Level.FINE,"Setting time to: "+currentPoint.getTime());
 		if (moveWorld)	target.getTransformation().setMatrix(Rn.inverse(null,m));
 		else 		target.getTransformation().setMatrix(m);
 	}
@@ -469,7 +470,7 @@ public class FramedCurveInspector extends JFrame {
 		parent.getViewingComponent().addKeyListener(cdkl);
 		origCamPath = parent.getCameraPath();
 		parent.setCameraPath(camPath);
-		//System.out.println("Camera is: "+CameraUtility.getCamera(parent));
+		//JOGLConfiguration.theLog.log(Level.FINE,"Camera is: "+CameraUtility.getCamera(parent));
 		setVisible(true);
 		repaint();
 		inspectKeyFrame();
@@ -477,7 +478,7 @@ public class FramedCurveInspector extends JFrame {
 	
 	public void endInspection()	{
 		parent.setCameraPath(origCamPath);
-		//System.out.println("Camera is: "+fciCamera);
+		//JOGLConfiguration.theLog.log(Level.FINE,"Camera is: "+fciCamera);
 		setVisible(false);
 		repaint();		
 		parent.getViewingComponent().removeKeyListener(cdkl);
@@ -580,14 +581,14 @@ public class FramedCurveInspector extends JFrame {
 	 */
 	protected FramedCurve openFramedCurve() {
 		JFileChooser fc = new JFileChooser(resourceDir);
-		//System.out.println("FCI resource dir is: "+resourceDir);
+		//JOGLConfiguration.theLog.log(Level.FINE,"FCI resource dir is: "+resourceDir);
 		int result = fc.showOpenDialog(this);
 		FramedCurve aCurve = null;
 		if (result == JFileChooser.APPROVE_OPTION)	{
 			File file = fc.getSelectedFile();
 			aCurve = FramedCurve.readFromFile(file);
 		} else {
-			System.out.println("Unable to open file");
+			JOGLConfiguration.theLog.log(Level.FINE,"Unable to open file");
 		}
 		return aCurve;
 	}
@@ -658,7 +659,7 @@ public class FramedCurveInspector extends JFrame {
 	
 	public void updateData()		{
 		// for subclasses to implement
-		System.out.println("Updating data");
+		JOGLConfiguration.theLog.log(Level.FINE,"Updating data");
 	}
 
 	/**
@@ -667,11 +668,11 @@ public class FramedCurveInspector extends JFrame {
 	private void handleShowCurve() {
 		if (showCurve) {
 			parent.addAuxiliaryComponent(theCurve);
-			//System.out.println("Removing frame curve. Index is: "+world.indexOf(frameCurve));
+			//JOGLConfiguration.theLog.log(Level.FINE,"Removing frame curve. Index is: "+world.indexOf(frameCurve));
 		}
 		else {
 			parent.removeAuxiliaryComponent(theCurve);
-			//System.out.println("Adding frame curve. Index is: "+world.indexOf(frameCurve));
+			//JOGLConfiguration.theLog.log(Level.FINE,"Adding frame curve. Index is: "+world.indexOf(frameCurve));
 		}
 		parent.render();
 		parent.getViewingComponent().requestFocus();
@@ -735,7 +736,7 @@ public class FramedCurveInspector extends JFrame {
 			else 
 				sb.append(time+" 3390.0\n");
 		}
-		System.out.println(sb.toString());
+		JOGLConfiguration.theLog.log(Level.FINE,sb.toString());
 		return focus;
 	}
 	/**
@@ -772,14 +773,14 @@ public class FramedCurveInspector extends JFrame {
 					updatePlayState();
 					if (cameraEnd != null) cameraEnd.stop();
 					updateTime();
-					System.out.println("Enter shift-P to resume playing");
+					JOGLConfiguration.theLog.log(Level.INFO,"Enter shift-P to resume playing");
 					break;
 					
 				case KeyEvent.VK_6:
 					if (e.isShiftDown()) playbackFactor /= 1.2;
 					else playbackFactor *= 1.2;
 					setPlaybackFactor(playbackFactor);
-					System.out.println("playbackFactor is "+playbackFactor);
+					JOGLConfiguration.theLog.log(Level.INFO,"playbackFactor is "+playbackFactor);
 					break;
 	
 				case KeyEvent.VK_H:
@@ -799,14 +800,9 @@ public class FramedCurveInspector extends JFrame {
 					
 				case KeyEvent.VK_G:
 					if (e.isShiftDown()) System.gc();
-					System.out.println("Garbage collecting");
+					JOGLConfiguration.theLog.log(Level.INFO,"Garbage collecting");
 					break;
 					
-//				case KeyEvent.VK_L:		// double-code the L key to force textures and do gc
-//					System.gc();
-//					System.out.println("Garbage collecting");
-//					break;
-//					
 				case KeyEvent.VK_P:
 					if (e.isShiftDown()) togglePlay();
 					break;
@@ -822,11 +818,11 @@ public class FramedCurveInspector extends JFrame {
 							beginCurveTime = e.getWhen();
 							startTime = theCurve.tmax;
 							active = true;
-							System.out.println("Key frame saving activated");
+							JOGLConfiguration.theLog.log(Level.INFO,"Key frame saving activated");
 							return;
 						}
-					System.out.println("time is: "+e.getWhen());
-					System.out.println("Camera node is: "+Rn.matrixToString(myCameraNode.getTransformation().getMatrix()));
+					JOGLConfiguration.theLog.log(Level.INFO,"time is: "+e.getWhen());
+					JOGLConfiguration.theLog.log(Level.INFO,"Camera node is: "+Rn.matrixToString(myCameraNode.getTransformation().getMatrix()));
 					
 						Transformation tt = new Transformation(parent.getSignature());
 						//TODO apply inverse of objectToWorld transform here
@@ -838,7 +834,7 @@ public class FramedCurveInspector extends JFrame {
 							//saveFramedCurve(theCurve);
 							//updateFilename();
 							active = false;
-							System.out.println("Key frame saving de-activated");
+							JOGLConfiguration.theLog.log(Level.INFO,"Key frame saving de-activated");
 						}
 						break;
 				}
@@ -881,7 +877,7 @@ public class FramedCurveInspector extends JFrame {
 			moveWorld = false;
 			target = myCameraNode;
 		}
-		System.out.println("setWorldNode: "+moveWorld);
+		JOGLConfiguration.theLog.log(Level.INFO,"setWorldNode: "+moveWorld);
 		// TODO if this is a switch, clean up the old target
 	}
 }

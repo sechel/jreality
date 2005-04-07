@@ -8,9 +8,11 @@ package de.jreality.jogl.pick;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Vector;
+import java.util.logging.Level;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.InteractiveViewer;
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.pick.PickPoint;
@@ -98,7 +100,7 @@ public class PickActionBad  {
 			currentMatrix = Rn.identityMatrix(4);
 			pickHits.clear();
 			//thePath.push(theRoot);
-			if (debug >= 1) System.out.println(Rn.toString(pickPoint));
+			if (debug >= 1) JOGLConfiguration.theLog.log(Level.FINE,Rn.toString(pickPoint));
 			theRoot.accept(this);
 			//thePath.pop();
 		
@@ -118,7 +120,7 @@ public class PickActionBad  {
 			Collections.sort(pickHits, sorter);
 			for (int i = 0; i<pickHits.size(); ++i)	{
 				PickPoint pp = ((PickPoint) pickHits.get(i));
-				//System.out.println(pp.getPointNDC()[2]+pp.getPickPath().toString());
+				//JOGLConfiguration.theLog.log(Level.FINE,pp.getPointNDC()[2]+pp.getPickPath().toString());
 			}
 			return pickHits;
 		}
@@ -135,7 +137,7 @@ public class PickActionBad  {
 			Rectangle3D box = GeometryUtility.calculateBoundingBox(pointsInNDC);
 			double[][] bnds = box.getBounds();
 			if ((debug & 2) != 0) 	{
-				System.out.println("NDC bound: "+Rn.toString(bnds));
+				JOGLConfiguration.theLog.log(Level.FINE,"NDC bound: "+Rn.toString(bnds));
 			}
 			if (bnds[0][0] < pickPoint[0] &&
 				bnds[1][0] > pickPoint[0] && 
@@ -182,20 +184,20 @@ public class PickActionBad  {
 				else if (pointsInNDC[0].length == 4)	bds = Pn.calculateBounds(bds, onePolygon);
 				if (bds[0][2] < -2.0)	continue;
 				if (P2.polygonContainsPoint(onePolygon, pickPoint))	{
-					if ((debug & 2) != 0) System.out.println("Hit Polygon "+i+Rn.toString(onePolygon));
-					//System.out.println("Polygon hit "+i);
-					//System.out.println("Path: "+thePath.toString());
+					if ((debug & 2) != 0) JOGLConfiguration.theLog.log(Level.INFO,"Hit Polygon "+i+Rn.toString(onePolygon));
+					//JOGLConfiguration.theLog.log(Level.FINER,"Polygon hit "+i);
+					//JOGLConfiguration.theLog.log(Level.FINER"Path: "+thePath.toString());
 					// find the exact point of intersection
 					double[] plane = P3.planeFromPoints(null, onePolygon[0], onePolygon[1], onePolygon[2]);
 					double[] p1 = (double[]) pickPoint.clone();
 					p1[2] = 0.0;
 					double[] intersect = P3.lineIntersectPlane(null, pickPoint, p1, plane);
 					if (intersect[2] < MIN_PICKZ || intersect[2] > MAX_PICKZ) continue;
-					//System.out.println("Intersect = "+Rn.toString(intersect));
+					//JOGLConfiguration.theLog.log(Level.FINER"Intersect = "+Rn.toString(intersect));
 					double[] NDCToObject = Rn.inverse(null, context3D.getObjectToNDC());
 					double[] objectPt = Rn.matrixTimesVector(null, NDCToObject, intersect);
 					Pn.dehomogenize(objectPt, objectPt);
-					//System.out.println("Object coords: "+Rn.toString(objectPt));
+					//JOGLConfiguration.theLog.log(Level.FINER"Object coords: "+Rn.toString(objectPt));
 					PickPoint pp = new PickPoint(null, thePath, intersect);
 					//pp.setPickPath( (SceneGraphPath) thePath.clone());
 					//pp.setPointNDC(intersect);

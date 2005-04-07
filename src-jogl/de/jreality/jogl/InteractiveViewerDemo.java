@@ -74,7 +74,7 @@ public class InteractiveViewerDemo extends JFrame{
 	protected InteractiveViewer viewer;
 	JTabbedPane tabbedPane;
 	//DefaultViewer softViewer;
-	boolean showSoft = true, isEncompass = false, addBackPlane = false;
+	boolean showSoft = false, isEncompass = false, addBackPlane = false;
 	int mode;
 	Box hack;
 	boolean fullScreen = false;
@@ -82,11 +82,6 @@ public class InteractiveViewerDemo extends JFrame{
 	int signature = Pn.EUCLIDEAN;
 	boolean showCameraPathInspector = true;
 	
-	protected static String resourceDir = System.getProperty("home.dir"), saveResourceDir = System.getProperty("home.dir");
-	static {
-		String foo = System.getProperty("jreality.jogl.resourceDir");
-		if (foo != null) saveResourceDir = resourceDir = foo; 
-	}
 	/**
 	 * 
 	 */
@@ -109,9 +104,6 @@ public class InteractiveViewerDemo extends JFrame{
 			mode = STANDARD;
 		}
 	
-		String foo = System.getProperty("jreality.jogl.resourceDir");
-		if (foo != null) resourceDir = foo;
-		
 		viewer = new InteractiveViewer(null, null);
 		viewerList = new Vector();
 		viewerList.add(viewer);
@@ -152,7 +144,7 @@ public class InteractiveViewerDemo extends JFrame{
 			ChangeListener vl = new ChangeListener()	{
 				
 				public void stateChanged(ChangeEvent e) {
-					System.out.println("stateChanged: now there are: "+tabbedPane.getTabCount());
+					JOGLConfiguration.theLog.log(Level.INFO,"stateChanged: now there are: "+tabbedPane.getTabCount());
 					Component c = tabbedPane.getSelectedComponent();
 					if (c == null) return;
 					Iterator iter = viewerList.iterator();
@@ -161,13 +153,13 @@ public class InteractiveViewerDemo extends JFrame{
 						InteractiveViewer v = (InteractiveViewer) iter.next();
 						if (v.getViewingComponent() == c)  {
 							viewer = v;
-							System.out.println("Current viewer is "+viewer);
+							JOGLConfiguration.theLog.log(Level.INFO,"Current viewer is "+viewer);
 							found = true;
 							break;
 						}
 					}
 					if (!found)	{
-						System.out.println("No such viewing component: "+c);
+						JOGLConfiguration.theLog.log(Level.INFO,"No such viewing component: "+c);
 					}
 					else viewer.render();
 				}
@@ -204,6 +196,7 @@ public class InteractiveViewerDemo extends JFrame{
     
 	SceneGraphComponent root;
 	LoadableScene currentLoadedScene = null;
+	Component inspectorPanel = null;
 	public void initializeScene()	{
 		root = viewer.getSceneRoot();
 		SceneGraphComponent lights = makeLights();		
@@ -279,6 +272,12 @@ public class InteractiveViewerDemo extends JFrame{
 		 if (loadedScene) currentLoadedScene.customize(theMenuBar, viewer);
 		 hack.add(theMenuBar, 0);
 		hack.add(Box.createHorizontalGlue(), 1);
+		if (loadedScene) {
+			inspectorPanel = currentLoadedScene.getInspector();
+		}
+		if (inspectorPanel != null) {
+			getContentPane().add(inspectorPanel, BorderLayout.SOUTH);
+		}
 		setVisible(true);
 		repaint();
 		viewer.render();
@@ -393,18 +392,18 @@ public class InteractiveViewerDemo extends JFrame{
     if (sgp != null) {
         hasSelection = true;
     		if (! (sgp.getLastElement() instanceof SceneGraphComponent)) {
-    			System.out.println("Unable to load file; invalid selection");
+    			JOGLConfiguration.theLog.log(Level.WARNING,"Unable to load file; invalid selection");
     			return;
     		}
     		parent = (SceneGraphComponent) sgp.getLastElement();
     } else {
-        System.out.println("SelectionPath == null!");
+        JOGLConfiguration.theLog.log(Level.INFO,"SelectionPath == null!");
         parent = root;
         sgp = new SceneGraphPath();
         sgp.push(parent);
     }
-		JFileChooser fc = new JFileChooser(resourceDir);
-		//System.out.println("FCI resource dir is: "+resourceDir);
+		JFileChooser fc = new JFileChooser(JOGLConfiguration.resourceDir);
+		//JOGLConfiguration.theLog.log(Level.INFO,"FCI resource dir is: "+resourceDir);
 		int result = fc.showOpenDialog(this);
 		SceneGraphComponent sgc = null;
 		if (result == JFileChooser.APPROVE_OPTION)	{
@@ -412,9 +411,9 @@ public class InteractiveViewerDemo extends JFrame{
 			sgc = Readers.readFile(file);
 			parent.addChild(sgc);
 			sgp.push(sgc);
-			resourceDir = file.getAbsolutePath();
+			JOGLConfiguration.resourceDir = file.getAbsolutePath();
 		} else {
-			System.out.println("Unable to open file");
+			JOGLConfiguration.theLog.log(Level.WARNING,"Unable to open file");
 			return;
 		}
 		viewer.getSelectionManager().setSelection(sgp);
@@ -422,16 +421,16 @@ public class InteractiveViewerDemo extends JFrame{
 	}
 	protected void saveToFile() {
 		SceneGraphComponent parent= null;
-		JFileChooser fc = new JFileChooser(saveResourceDir);
-		//System.out.println("FCI resource dir is: "+resourceDir);
+		JFileChooser fc = new JFileChooser(JOGLConfiguration.saveResourceDir);
+		//JOGLConfiguration.theLog.log(Level.INFO,"FCI resource dir is: "+resourceDir);
 		int result = fc.showSaveDialog(this);
 		SceneGraphComponent sgc = null;
 		if (result == JFileChooser.APPROVE_OPTION)	{
 			File file = fc.getSelectedFile();
 			viewer.getRenderer().saveScreenShot(file);
-			saveResourceDir = file.getAbsolutePath();
+			JOGLConfiguration.saveResourceDir = file.getAbsolutePath();
 		} else {
-			System.out.println("Unable to open file");
+			JOGLConfiguration.theLog.log(Level.WARNING,"Unable to open file");
 			return;
 		}
 		viewer.render();
@@ -439,21 +438,21 @@ public class InteractiveViewerDemo extends JFrame{
 
 	protected void saveRIBToFile() {
 		SceneGraphComponent parent= null;
-		JFileChooser fc = new JFileChooser(saveResourceDir);
-		//System.out.println("FCI resource dir is: "+resourceDir);
+		JFileChooser fc = new JFileChooser(JOGLConfiguration.saveResourceDir);
+		//JOGLConfiguration.theLog.log(Level.INFO,"FCI resource dir is: "+resourceDir);
 		int result = fc.showSaveDialog(this);
 		SceneGraphComponent sgc = null;
 		if (result == JFileChooser.APPROVE_OPTION)	{
 			File file = fc.getSelectedFile();
 			String name = file.getAbsolutePath();
-			saveResourceDir = file.getAbsolutePath();
+			JOGLConfiguration.saveResourceDir = file.getAbsolutePath();
 			file.delete();
 			RIBViewer ribv = new RIBViewer();
 			ribv.initializeFrom(viewer);
 			ribv.setFileName(name);
 			ribv.render();
 		} else {
-			System.out.println("Unable to open file");
+			JOGLConfiguration.theLog.log(Level.WARNING,"Unable to open file");
 			return;
 		}
 		viewer.render();
@@ -461,20 +460,19 @@ public class InteractiveViewerDemo extends JFrame{
 
 	protected void savePSToFile() {
 		SceneGraphComponent parent= null;
-		JFileChooser fc = new JFileChooser(saveResourceDir);
-		//System.out.println("FCI resource dir is: "+resourceDir);
+		JFileChooser fc = new JFileChooser(JOGLConfiguration.saveResourceDir);
 		int result = fc.showSaveDialog(this);
 		SceneGraphComponent sgc = null;
 		if (result == JFileChooser.APPROVE_OPTION)	{
 			File file = fc.getSelectedFile();
 			String name = file.getAbsolutePath();
-			saveResourceDir = file.getAbsolutePath();
+			JOGLConfiguration.saveResourceDir = file.getAbsolutePath();
 			file.delete();
 			PSViewer psv = new PSViewer(name);
 			psv.initializeFrom(viewer);
 			psv.render(viewer.canvas.getWidth(), viewer.canvas.getHeight());
 		} else {
-			System.out.println("Unable to open file");
+			JOGLConfiguration.theLog.log(Level.WARNING,"Unable to open file");
 			return;
 		}
 		viewer.render();
@@ -489,14 +487,14 @@ public class InteractiveViewerDemo extends JFrame{
 
 			fci.beginInspection();
 			repaint();
-			System.out.println("Beginning inspector");
+			JOGLConfiguration.theLog.log(Level.INFO,"Beginning inspector");
 		}
 		else {
 			fci.endInspection();
 			repaint();
 			viewer.setCameraPath(camPath);
 			viewer.render();
-			System.out.println("Ending inspector");
+			JOGLConfiguration.theLog.log(Level.INFO,"Ending inspector");
 		}
 	}
 	
@@ -513,14 +511,14 @@ public class InteractiveViewerDemo extends JFrame{
 		viewerList.add(v);
 		if (mode == TABBED_PANE)	{
 			tabbedPane.addTab(name, v.getViewingComponent());
-			System.out.println("Adding viewer, now there are: "+tabbedPane.getTabCount());			
+			JOGLConfiguration.theLog.log(Level.INFO,"Adding viewer, now there are: "+tabbedPane.getTabCount());			
 		}
 	}
 	
 	public void removeViewer(Viewer v)	{
 		if (mode == TABBED_PANE)	{
 			tabbedPane.remove(viewer.getViewingComponent());
-			System.out.println("Removing viewer, now there are: "+tabbedPane.getTabCount());		
+			JOGLConfiguration.theLog.log(Level.INFO,"Removing viewer, now there are: "+tabbedPane.getTabCount());		
 		}
 		viewerList.remove(v);
 	}
@@ -573,7 +571,7 @@ public class InteractiveViewerDemo extends JFrame{
 	}
     public static void main(String[] args) throws Exception {
     		InteractiveViewerDemo iv = new InteractiveViewerDemo();
-    		String loadableScene = null;
+    		String loadableScene = "de.jreality.worlds.TestSphereDrawing";
     		if (args != null && args.length > 0) {
     			//iv.loadWorld(args[0]);
     			loadableScene = args[0];

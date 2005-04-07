@@ -6,6 +6,7 @@ package de.jreality.jogl;
 
 
 import java.util.Set;
+import java.util.logging.Level;
 
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.data.Attribute;
@@ -45,7 +46,7 @@ public class Snake extends IndexedLineSet {
 			setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(points[0].length).createReadOnly(points));
 			int begin = info[0];
 			int length = info[1];
-			System.out.println("de-activating snake: "+begin+" "+length);
+			JOGLConfiguration.theLog.log(Level.FINE,"de-activating snake: "+begin+" "+length);
 			int[][] indices = new int[1][length];
 			for (int i = 0; i<length; ++i)	{
 				indices[0][i] = (i+begin)%points.length;

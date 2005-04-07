@@ -7,12 +7,14 @@ package de.jreality.jogl.tools;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.util.logging.Level;
 
 import javax.swing.KeyStroke;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InteractiveViewer;
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
@@ -127,7 +129,7 @@ public class PointManipulationTool extends AbstractMouseTool implements Transfor
 		if (thePoint == null) return false;
 		pickPathObserver.setPath(thePoint.getPickPath());
 		if (theRepn == null) 		{
-			//System.out.println("Attaching to viewer");
+			//JOGLConfiguration.theLog.log(Level.FINE,"Attaching to viewer");
 			frameIconKit = SceneGraphUtilities.createFullSceneGraphComponent("sphere");
 			//theSphereKit.setGeometry(SphereHelper.SPHERE_FINE);
 			frameIconKit.addChild(Primitives.cameraIcon(1.0));
@@ -221,7 +223,7 @@ public class PointManipulationTool extends AbstractMouseTool implements Transfor
 						move();
 						break;
 				}
-				System.out.println("Value is "+value);
+				JOGLConfiguration.theLog.log(Level.FINE,"Value is "+value);
 			}
 		
 		private void move()	{

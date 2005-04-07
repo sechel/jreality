@@ -6,8 +6,10 @@ package de.jreality.jogl.tools;
 
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.logging.Level;
 
 import de.jreality.jogl.InteractiveViewer;
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.scene.pick.PickPoint;
 
@@ -50,7 +52,7 @@ public class PickTool extends AbstractMouseTool {
 		//long begin = System.currentTimeMillis();
 		List picks = (List) pickAction.visit();			
 		//long end = System.currentTimeMillis();
-		//System.out.println("Pick took "+(end-begin)+" ms");
+		//JOGLConfiguration.theLog.log(Level.FINE,"Pick took "+(end-begin)+" ms");
 		if (picks!= null && (picks.size() > 0))	{
 			newPickPoint = (PickPoint) picks.get(0);
 		} 

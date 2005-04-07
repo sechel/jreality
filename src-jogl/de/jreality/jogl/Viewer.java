@@ -7,6 +7,7 @@ package de.jreality.jogl;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
 
 import net.java.games.jogl.DefaultGLCapabilitiesChooser;
 import net.java.games.jogl.GLCanvas;
@@ -36,33 +37,8 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	GLCanvas canvas;
 	JOGLRenderer renderer;
 	int signature;
-	static boolean multiSample = true;
-	static boolean portalUsage = false;
 	boolean isFlipped = false;			// LH Coordinate system?
 	static GLCanvas firstOne = null;		// for now, all display lists shared with this one
-	static boolean sharedContexts = false;
-	static boolean isLinux = false;
-	static {
-		String foo = System.getProperty("jreality.jogl.multisample");
-		if (foo != null) 
-			if (foo.indexOf("false") != -1) multiSample = false;
-		foo = System.getProperty("jreality.jogl.portalUsage");
-		if (foo != null) 
-			if (foo.indexOf("true") != -1) portalUsage = true;
-		foo = System.getProperty("os.name");
-		if (foo != null && foo.indexOf("Linux") != -1) isLinux = true;
-			//else multisample = false;
-		// allocate a GLCanvas to be the "sharer": it will never be destroyed
-		foo = System.getProperty("jreality.jogl.sharedContexts");
-		if (foo != null && foo.indexOf("true") != -1) sharedContexts = true;
-		if (sharedContexts)	{
-//			GLCapabilities capabilities = new GLCapabilities();
-//			firstOne = GLDrawableFactory.getFactory().createGLCanvas(capabilities, null, null);	
-			System.out.println("Not allowing shared contexts now");
-			sharedContexts=false;
-			//System.out.println("Using shared contexts: "+firstOne);
-		}
-	}
 	public int getSignature() {
 		return signature;
 	}
@@ -94,7 +70,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	public Viewer(SceneGraphPath p, SceneGraphComponent r) {
 		super();
 		initializeFrom(r, p);		
-		if (isLinux)	{
+		if (JOGLConfiguration.isLinux)	{
 		    canvas.setIgnoreRepaint(true);
 			canvas.setNoAutoRedrawMode(true);			
 		}
@@ -161,7 +137,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 //		}
     synchronized(renderLock) {
   		if(!pendingUpdate) {
-  			if (debug) System.out.println("Render: invoke later");
+  			if (debug) JOGLConfiguration.theLog.log(Level.INFO,"Render: invoke later");
  			EventQueue.invokeLater(this);
   			pendingUpdate=true;
       }
@@ -217,7 +193,6 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	 */
 	public void initializeFrom(de.jreality.scene.Viewer v) {
 		initializeFrom(v.getSceneRoot(), v.getCameraPath());
-		// TODO handle the drawable
 	}
 	
 
@@ -249,7 +224,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		setSceneRoot(r);
 		setCameraPath(p);
 		GLCapabilities caps = new GLCapabilities();
-		if (multiSample)	{
+		if (JOGLConfiguration.multiSample)	{
 			GLCapabilitiesChooser chooser = new MultisampleChooser();
 			caps.setSampleBuffers(true);
 			caps.setNumSamples(4);
@@ -261,7 +236,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		canvas.addGLEventListener(this);
 		canvas.requestFocus();
 		renderer =  new JOGLRenderer(this); 
-		if (sharedContexts && firstOne == null) firstOne = canvas;
+		if (JOGLConfiguration.sharedContexts && firstOne == null) firstOne = canvas;
 	}
 
 	/**
@@ -336,11 +311,11 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 			throw new IllegalStateException();
 		synchronized (renderLock) {
 			pendingUpdate = false;
-			if (portalUsage) canvas.display();
+			if (JOGLConfiguration.portalUsage) canvas.display();
 			renderLock.notifyAll();
 		}
-		if (debug) System.out.println("Render: calling display");
-		if (!portalUsage) canvas.display();
+		if (debug) JOGLConfiguration.theLog.log(Level.INFO,"Render: calling display");
+		if (!JOGLConfiguration.portalUsage) canvas.display();
 	}
 
 	public void setAutoSwapMode(boolean autoSwap) {

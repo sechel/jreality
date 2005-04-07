@@ -5,9 +5,11 @@
 package de.jreality.jogl.tools;
 
 import java.awt.event.*;
+import java.util.logging.Level;
 
 import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InteractiveViewer;
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
@@ -54,11 +56,11 @@ public class CameraFlyTool extends AbstractMouseTool {
 		Camera cam = CameraUtility.getCamera(v);
 		signature = cam.getSignature();
 		if ( cameraTrans == null)	{
-			System.out.println("No transform in CameraDirectionTool");
+			JOGLConfiguration.theLog.log(Level.FINE,"No transform in CameraDirectionTool");
 			return false;
 		}
 		theViewer.getViewingComponent().addKeyListener(cdkl);
-		//System.out.println("Start tracking: Mouse event"+e.toString());
+		//JOGLConfiguration.theLog.log(Level.FINE,"Start tracking: Mouse event"+e.toString());
 		return true;
 	}
 
@@ -108,7 +110,7 @@ public class CameraFlyTool extends AbstractMouseTool {
 	 */
 	public boolean track(MouseEvent e) {
 		if (!super.track(e)) return false;
-		//System.out.println("Mouse event"+e.toString());
+		//JOGLConfiguration.theLog.log(Level.FINE,"Mouse event"+e.toString());
 		
 		deltas = Rn.subtract(null, current, last);
 		double s = Rn.euclideanNorm(deltas);
@@ -179,11 +181,11 @@ public class CameraFlyTool extends AbstractMouseTool {
 		//if (isTracking)	{
 		if (!coMo)	{
 			if (isTracking) continuedMotion.stop();
-			System.out.println("Pointing mode");
+			JOGLConfiguration.theLog.log(Level.INFO,"Pointing mode");
 		}
 		else			{
 			if (isTracking) continuedMotion.start();							
-			System.out.println("Moving mode");
+			JOGLConfiguration.theLog.log(Level.INFO,"Moving mode");
 		}
 	}
 /**
@@ -216,12 +218,14 @@ public class CameraFlyTool extends AbstractMouseTool {
 						if (speed == 0.0) speed = .1;
 						speed /= scaleFactor;
 						setTranslation();
+						JOGLConfiguration.theLog.log(Level.FINE,"Speed is "+speed);
 				        break;
 						
 					case KeyEvent.VK_UP:
 						if (speed == 0.0) speed = .1;
 						speed *= scaleFactor;
 						setTranslation();
+						JOGLConfiguration.theLog.log(Level.FINE,"Speed is "+speed);
 						break;
 						
 					case KeyEvent.VK_LEFT:
@@ -244,7 +248,6 @@ public class CameraFlyTool extends AbstractMouseTool {
 						break;
 					
 				}
-				System.out.println("Speed is "+speed);
 			}
 		
 

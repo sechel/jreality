@@ -7,11 +7,13 @@ package de.jreality.jogl.tools;
 import java.awt.Component;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
+import java.util.logging.Level;
 
 import javax.swing.Timer;
 
 import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InteractiveViewer;
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.util.CameraUtility;
@@ -23,7 +25,7 @@ import de.jreality.util.Rn;
  */
 public class AbstractMouseTool implements MouseTool {
 	public void registerHelp(HelpOverlay overlay) {
-		System.out.println("The "+this.getClass().getName()+" toolclass should override this abstract method");
+		JOGLConfiguration.theLog.log(Level.WARNING,"The "+this.getClass().getName()+" toolclass should override this abstract method");
 	}
 	
 	int button = 1;
@@ -89,7 +91,6 @@ public class AbstractMouseTool implements MouseTool {
 		isTracking = true;
 		if (button == 0)	{		// Linux!
 			int mods = e.getModifiersEx();
-			//System.out.println("Mods are: "+mods);
 			if ((mods & InputEvent.BUTTON1_DOWN_MASK) != 0)		button = 1;
 			else if ((mods & InputEvent.BUTTON2_DOWN_MASK) != 0)  button = 2;
 			else button = 3;
@@ -115,8 +116,8 @@ public class AbstractMouseTool implements MouseTool {
 		Rn.copy(current, anchor);
 		Rn.subtract(diff, current, anchor);
 		currentTime = e.getWhen();
-		//System.out.println("Mouse event: "+e.toString());
-		//System.out.println("Button: "+e.getButton());
+		//JOGLConfiguration.theLog.log(Level.FINE,"Mouse event: "+e.toString());
+		//SJOGLConfiguration.theLog.log(Level.FINE,"Button: "+e.getButton());
 		// want to have a clean slate in case there are no motion events
 		Rn.copy(last, anchor);
 		lastTime = currentTime;
@@ -131,7 +132,7 @@ public class AbstractMouseTool implements MouseTool {
 	public boolean track(MouseEvent e) {
 		if (theViewer == null || e == null) return false;
 		getButton(e);
-		//System.out.println("Mouse event: "+e.toString());
+		//JOGLConfiguration.theLog.log(Level.FINE,"Mouse event: "+e.toString());
 		lastTime = currentTime;
 		currentTime = e.getWhen();
 		Rn.copy(last, current);

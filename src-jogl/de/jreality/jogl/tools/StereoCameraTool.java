@@ -5,9 +5,11 @@
 package de.jreality.jogl.tools;
 
 import java.awt.event.MouseEvent;
+import java.util.logging.Level;
 
 import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InteractiveViewer;
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.scene.Camera;
 import de.jreality.util.CameraUtility;
 
@@ -55,7 +57,7 @@ public class StereoCameraTool extends AbstractMouseTool {
 		double f = focusOrig * Math.pow(5.0, diff[1]);
 		cam.setFocus(f);
 		
-		System.out.println("Sep: "+es+"Focus: "+f);
+		JOGLConfiguration.theLog.log(Level.FINE,"Sep: "+es+"Focus: "+f);
 		return true;
 	}
 

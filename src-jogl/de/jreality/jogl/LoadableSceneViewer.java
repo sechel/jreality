@@ -1,5 +1,7 @@
 package de.jreality.jogl;
 
+import java.util.logging.Level;
+
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.LoadableScene;
@@ -52,7 +54,7 @@ public class LoadableSceneViewer extends InteractiveViewerDemo {
 		wm.setConfiguration(ConfigurationAttributes.getDefaultConfiguration());
 		world = wm.makeWorld();
 		viewer.setSignature(wm.getSignature());
-		System.out.println("loaded world "+classname+" successful.");
+		JOGLConfiguration.theLog.log(Level.INFO,"loaded world "+classname+" successful.");
 	}
 
 	public SceneGraphComponent makeWorld() {
@@ -61,7 +63,7 @@ public class LoadableSceneViewer extends InteractiveViewerDemo {
 	
 	public static void main(String[] args) {
 		if (args.length == 0) {
-			System.out.println("usage: java -Djava.library.path=<path to libjogl.so> [-Djreality.config=<config-file>] <full classname of LoadableScene>" );
+			JOGLConfiguration.theLog.log(Level.INFO,"usage: java -Djava.library.path=<path to libjogl.so> [-Djreality.config=<config-file>] <full classname of LoadableScene>" );
 			return;
 		}
 		LoadableSceneViewer test = new LoadableSceneViewer(args[0]);

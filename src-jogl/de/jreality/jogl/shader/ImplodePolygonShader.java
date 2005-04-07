@@ -4,8 +4,11 @@
   */
 package de.jreality.jogl.shader;
 
+import java.util.logging.Level;
+
 import net.java.games.jogl.GL;
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.pick.JOGLPickAction;
@@ -24,7 +27,7 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		super.setFromEffectiveAppearance(eap, name);
 		implodeFactor = eap.getAttribute(NameSpace.name(name, "implodeFactor"), implodeFactor);
-		//System.out.println(this+"Imploding with factor of "+implodeFactor);
+		//JOGLConfiguration.theLog.log(Level.INFO,this+"Imploding with factor of "+implodeFactor);
       }
     
 	public double getImplodeFactor() {
@@ -36,9 +39,7 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 	}
 	public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig) {
 		GL gl = jr.globalGL;
-		//System.out.println("Preparing to implode.");
 		IndexedFaceSet ifs =  GeometryUtility.implode((IndexedFaceSet) original, implodeFactor);
-		//System.out.println("Imploding with factor of "+implodeFactor);
 		double alpha = vertexShader == null ? 1.0 : vertexShader.getDiffuseColorAsFloat()[3];
 		int implodeDL = gl.glGenLists(1);
 		gl.glNewList(implodeDL, GL.GL_COMPILE);

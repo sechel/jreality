@@ -4,6 +4,8 @@
  */
 package de.jreality.worlds;
 
+import java.awt.Component;
+
 import javax.swing.JMenuBar;
 
 import de.jreality.scene.SceneGraphComponent;
@@ -32,6 +34,8 @@ public abstract class AbstractLoadableScene implements LoadableScene {
 	public void setConfiguration(ConfigurationAttributes config) {
 		this.config = config;
 	}
+	
+	public Component getInspector()	{ return null; }
 
 	public boolean addBackPlane() {
 		return false;

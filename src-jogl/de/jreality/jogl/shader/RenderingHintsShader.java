@@ -126,11 +126,14 @@ public class RenderingHintsShader  {
 			}
 			jr.openGLState.transparencyEnabled = transparencyEnabled;
 		}
-		if (lightingEnabled != jr.openGLState.lighting)	{
+		// problems with using the openGLState:  possibly related to
+		// the fact that we're not doing any "popping" so the last value set
+		// remains even if we leave the subtree where the set took placce..
+		//if (lightingEnabled != jr.openGLState.lighting)	{
 			if (lightingEnabled)			gl.glEnable(GL.GL_LIGHTING);
 			else							gl.glDisable(GL.GL_LIGHTING);
-			jr.openGLState.lighting = lightingEnabled;
-		}
+			//jr.openGLState.lighting = lightingEnabled;
+		//}
 		if (backFaceCullingEnabled != jr.openGLState.backFaceCullingEnabled)	{
 			if (backFaceCullingEnabled)  {
 				gl.glEnable(GL.GL_CULL_FACE);

@@ -6,6 +6,9 @@ package de.jreality.jogl.shader;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.logging.Level;
+
+import de.jreality.jogl.JOGLConfiguration;
 
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
@@ -99,7 +102,7 @@ public abstract class AbstractJOGLShader {
 			StringBuffer foo = new StringBuffer(charsWritten[0]);
 			
 			for (int i = 0; i< charsWritten[0]; ++i)	foo.append((char) infoLog[i]);
-			System.out.println("Info Log: "+foo.toString());
+			JOGLConfiguration.theLog.log(Level.INFO,"Info Log: "+foo.toString());
 		}
 		printOpenGLError();
 	}
@@ -120,7 +123,7 @@ public abstract class AbstractJOGLShader {
 			sb.append(array,0,length);
 			length = fr.read(array);
 		}
-		System.out.println("Read "+sb.toString());
+		JOGLConfiguration.theLog.log(Level.INFO,"Read "+sb.toString());
 		return sb.toString();
 	}
 }

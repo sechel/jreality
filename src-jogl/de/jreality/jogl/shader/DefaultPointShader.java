@@ -5,10 +5,12 @@
 package de.jreality.jogl.shader;
 
 import java.awt.Color;
+import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLSphereHelper;
 import de.jreality.jogl.OpenGLState;
@@ -104,7 +106,7 @@ public class DefaultPointShader  implements PointShader {
 		boolean lighting = false;
 		if (sphereDraw)	{
 			polygonShader.render(jr);
-			lighting = true;
+			//lighting = true;
 		}
 		if (jr.openGLState.lighting != lighting)	{
 			jr.openGLState.lighting = lighting;
@@ -133,7 +135,7 @@ public class DefaultPointShader  implements PointShader {
 			PointSet ps = (PointSet) original;
 			DataList vertices = ps.getVertexAttributes(Attribute.COORDINATES);
 			DataList vertexColors = ps.getVertexAttributes(Attribute.COLORS);
-			//System.out.println("VC is "+vertexColors);
+			//JOGLConfiguration.theLog.log(Level.INFO,"VC is "+vertexColors);
 			int colorLength = 0;
 			if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
 			DoubleArray da;
@@ -154,11 +156,11 @@ public class DefaultPointShader  implements PointShader {
 				int[] snakeInfo = (int[] ) original.getGeometryAttributes(Snake.SNAKE_INFO);
 				begin = snakeInfo[0];
 				length = snakeInfo[1];
-				//System.out.println("Processing the snake with "+length+" points");
+				//JOGLConfiguration.theLog.log(Level.INFO,"Processing the snake with "+length+" points");
 				m = sp.length;
 				doSnake = true;
 			}
-			//System.out.println("Signature is "+sig);
+			//JOGLConfiguration.theLog.log(Level.INFO,"Signature is "+sig);
 			//sig = Pn.EUCLIDEAN;
 			boolean pickMode = jr.isPickMode();
 			if (pickMode) gl.glPushName(JOGLPickAction.GEOMETRY_POINT);
@@ -188,7 +190,7 @@ public class DefaultPointShader  implements PointShader {
 			}
 			if (pickMode) gl.glPopName();
 			gl.glEndList();
-			//System.out.println("Creating spheres with radius "+pointRadius);
+			//JOGLConfiguration.theLog.log(Level.INFO,"Creating spheres with radius "+pointRadius);
 			return nextDL;
 		}
 		return -1;

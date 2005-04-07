@@ -6,8 +6,10 @@ package de.jreality.jogl.tools;
 
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
+import java.util.logging.Level;
 
 import de.jreality.jogl.HelpOverlay;
+import de.jreality.jogl.JOGLConfiguration;
 
 /**
  * @author Charles Gunn
@@ -68,8 +70,8 @@ public class CameraZoomTool extends AbstractMouseTool {
 			double newminx = iminx + iw * (cx - w/2.0);
 			double newminy = iminy + ih * (cy - w/2.0);
 			viewport.setFrameFromCenter(icx, icy, newminx, newminy);
-			System.out.println("old viewport is "+initialViewport.toString());
-			System.out.println("new viewport is "+viewport.toString());
+			JOGLConfiguration.theLog.log(Level.FINE,"old viewport is "+initialViewport.toString());
+			JOGLConfiguration.theLog.log(Level.FINE,"new viewport is "+viewport.toString());
 			theCamera.setOnAxis(false);
 			theCamera.setViewPort(viewport);
 			theViewer.render();

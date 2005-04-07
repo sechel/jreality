@@ -8,6 +8,7 @@ import java.awt.Frame;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.logging.Level;
 
 import javax.swing.JColorChooser;
 import javax.swing.KeyStroke;
@@ -128,7 +129,7 @@ public class ViewerKeyListener extends KeyAdapter {
 					boolean useD = viewer.getRenderer().isUseDisplayLists();
 					viewer.getRenderer().setUseDisplayLists(!useD);
 					viewer.render();
-					System.out.println("Using display lists: "+viewer.getRenderer().isUseDisplayLists());
+					JOGLConfiguration.theLog.log(Level.INFO,"Using display lists: "+viewer.getRenderer().isUseDisplayLists());
 					break;
 
 				case KeyEvent.VK_E:		
@@ -240,7 +241,7 @@ public class ViewerKeyListener extends KeyAdapter {
 				
 				case KeyEvent.VK_V:		// draw vertices
 					if (e.isShiftDown()) 					toggleValue(CommonAttributes.VERTEX_DRAW);
-					else System.out.println("Frame rate: "+viewer.getRenderer().getFramerate()+" fps");
+					else JOGLConfiguration.theLog.log(Level.INFO,"Frame rate: "+viewer.getRenderer().getFramerate()+" fps");
 					viewer.render();
 					break;
 
@@ -332,7 +333,7 @@ public class ViewerKeyListener extends KeyAdapter {
 				if (val == TubeUtility.PARALLEL)	newV = TubeUtility.FRENET;
 				else newV = TubeUtility.PARALLEL;
 			}
-			System.out.println("Tube style is now: "+(newV == TubeUtility.FRENET ? "frenet" : "parallel"));
+			JOGLConfiguration.theLog.log(Level.INFO,"Tube style is now: "+(newV == TubeUtility.FRENET ? "frenet" : "parallel"));
 			ap.setAttribute(name, newV);
 			viewer.render();
 			return;

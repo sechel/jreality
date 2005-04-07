@@ -7,6 +7,7 @@ package de.jreality.jogl;
 import java.awt.Dimension;
 import java.util.List;
 import java.util.Vector;
+import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
@@ -80,7 +81,7 @@ public class InfoOverlay implements GLEventListener {
 		if (infoProvider != null)		infoProvider.updateInfoStrings(this);
 		if (info == null || info.size() == 0) return;
 		
-		//System.out.println("In info display");
+		//JOGLConfiguration.theLog.log(Level.FINE,"In info display");
 		
 		GL gl = glDrawable.getGL();
 		GLU glu = glDrawable.getGLU();

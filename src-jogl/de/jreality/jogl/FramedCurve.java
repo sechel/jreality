@@ -170,8 +170,7 @@ public class FramedCurve extends SceneGraphComponent {
 	
     private void update()		{
     		if (!outOfDate) return;
-    		//System.out.println("Update: "+controlPoints.size()+" control points.");
-    		if (controlPoints.size() < 2) return;
+    		//JOGLConfiguration.theLog.log(Level.FINE
     		Collections.sort(controlPoints);
     		tmin = ((ControlPoint) controlPoints.firstElement()).t;
     		tmax = ((ControlPoint) controlPoints.lastElement()).t;
@@ -379,8 +378,7 @@ public static FramedCurve readFromFile(File file)		{
 			fc.sourceFile = file;
 		}
 		catch (java.io.IOException ev)	{
-			System.out.println("IOException:"+ev.getMessage());
-			return null;
+			ev.printStackTrace();
 		}
 		return fc;
     }
@@ -454,7 +452,7 @@ public static FramedCurve readFromFile(File file)		{
 			pw.close();
  		}
 		catch (java.io.IOException ev)	{
-			System.out.println("IOException:"+ev.getMessage());
+			ev.printStackTrace();
 		}
     }
     

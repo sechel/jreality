@@ -5,9 +5,11 @@
 package de.jreality.jogl.shader;
 
 import java.awt.Color;
+import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
 
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.shader.PolygonShader;
 import de.jreality.scene.Geometry;
@@ -62,8 +64,8 @@ public class TwoSidePolygonShader implements PolygonShader {
 	      front.setFrontBack(DefaultPolygonShader.FRONT);
 	      back = ShaderLookup.getPolygonShaderAttr(eap, shaderName, "back");
 	      back.setFrontBack(DefaultPolygonShader.BACK);
-	      System.out.println("Front color is "+front.getDiffuseColor().toString());
-	      System.out.println("Back color is "+back.getDiffuseColor().toString());
+	      JOGLConfiguration.theLog.log(Level.FINE,"Front color is "+front.getDiffuseColor().toString());
+	      JOGLConfiguration.theLog.log(Level.FINE,"Back color is "+back.getDiffuseColor().toString());
 	}
 
 	public void setFrontBack(int f) {

@@ -7,9 +7,11 @@ package de.jreality.jogl.tools;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.util.logging.Level;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.HelpOverlay;
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
@@ -62,7 +64,7 @@ public class RotateShapeTool extends AbstractShapeTool {
 		if (!isTracking || !super.track(e)) return false;
 		
 		Quaternion q = null;
-		//System.out.println("Mouse is "+e.toString());
+		//JOGLConfiguration.theLog.log(Level.FINE,"Mouse is "+e.toString());
 		if (button != 3) q = theRotator.getRotationXY(current);
 		else q = theRotator.getRotationZ(current);
 		myTransform.setRotation(q);
@@ -92,7 +94,7 @@ public class RotateShapeTool extends AbstractShapeTool {
 		Quaternion.IJK(theAxis, q);
 		Rn.normalize(theAxis, theAxis);
 		double angle = .3* strength * theAngle * (1000.0 /(currentTime-lastTime));
-		//System.out.println("dt: "+dt+"Strength: "+strength+"angle: "+theAngle);
+		//JOGLConfiguration.theLog.log(Level.FINE,"dt: "+dt+"Strength: "+strength+"angle: "+theAngle);
 		double[] axis = (double[] ) theAxis.clone();
 		//final double[] repeater = P3.makeRotationMatrix(null, axis, angle);
 		final Transformation repeater = new Transformation();
@@ -127,9 +129,9 @@ public class RotateShapeTool extends AbstractShapeTool {
 		"Rotate currently selected scene graph component");
 		overlay.registerInfoString("","through an angle proportional to distance of mouse movement.");
 		overlay.registerInfoString("Mouse button1 dragged", 
-		"Rotate around axis perpendicular to mouse motion passing through Object origin.");
+		"Rotate around axis perpendicular to mouse motion passing through center of bounding box in object space.");
 		overlay.registerInfoString("Mouse button2 dragged", 
-		"Rotate around axis perpendicular to mouse motion passing through center of bounding box.");
+		"Rotate around axis perpendicular to mouse motion passing through origin of object space.");
 		overlay.registerInfoString("Mouse button3 dragged", 
 		"Rotate around axis perpendicular to plane of screen ");
 	}

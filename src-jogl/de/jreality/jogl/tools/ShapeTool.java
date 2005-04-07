@@ -95,10 +95,6 @@ public class ShapeTool extends AbstractMouseTool {
 	public boolean endTracking(MouseEvent e) {
 		if (!super.endTracking(e)) return false;
 		//if (theEditedTransform != null) theEditedTransform.setDoFactor(true);
-//		System.out.println("Edited transform is: "+Rn.matrixToString(theEditedTransform.getMatrix()));
-//		System.out.println("Translate is: "+Rn.toString(theEditedTransform.getTranslation()));
-//		System.out.println("Rotate is: "+theEditedTransform.getRotationQuaternion().toString());
-//		System.out.println("Stretch is: "+Rn.toString(theEditedTransform.getStretch()));
 		
 		return true;
 	}
