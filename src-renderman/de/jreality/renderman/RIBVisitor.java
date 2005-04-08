@@ -125,8 +125,8 @@ public class RIBVisitor extends SceneGraphVisitor {
         //icam.scale(1.);
         VecMat.multiplyFromLeft(cam,mir);
         Ri.transform(fTranspose(cam));
-        new LightCollector(root);
         Ri.worldBegin();
+        new LightCollector(root);
         root.accept(this);
         Ri.worldEnd();
         Ri.end();
@@ -146,12 +146,13 @@ public class RIBVisitor extends SceneGraphVisitor {
     
     public void  visit(SceneGraphComponent c) {
         Ri.comment(c.getName());        
+        Ri.attributeBegin();
         EffectiveAppearance tmp =eAppearance;
         Appearance a = c.getAppearance();
         if(a!= null) {
             eAppearance = eAppearance.create(a);
+            setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
         }
-        Ri.attributeBegin();
         c.childrenAccept(this);
         Ri.attributeEnd();
         
@@ -444,7 +445,7 @@ public class RIBVisitor extends SceneGraphVisitor {
             }
         }
         Ri.attributeBegin();
-        setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
+        //setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
         Ri.pointsPolygons(npolys,nvertices,vertices,map);
         Ri.attributeEnd();
             }
@@ -485,14 +486,12 @@ public class RIBVisitor extends SceneGraphVisitor {
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.UnitSphere)
      */
     public void visit(Sphere s) {
-//        setupShader(eAppearance,"faceShader", CommonAttributes.POLYGON_SHADER);
-        setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
+        //setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
         Ri.sphere(1f,-1f,1f,360f,null);
     }
     
     public void visit(Cylinder c) {
-        //setupShader(eAppearance,"faceShader");
-        setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
+        //setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
         Ri.cylinder(1f,-1f,1f,360f,null);
         Ri.disk(-1f,1f,360f,null);
         Ri.disk(1f,1f,360f,null);
