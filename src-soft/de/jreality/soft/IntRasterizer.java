@@ -77,6 +77,7 @@ public final class IntRasterizer extends ModularIntegerPolygonRasterizer {
         
       pixels[pos]  = OPAQUE |  r |  g | b;
       
+      //zBuffer[pos]= apszI;
     } else {
       // once again this is for int version :
 			final int sample = pixels[pos];

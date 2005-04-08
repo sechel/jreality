@@ -83,6 +83,7 @@ public class DoubleRasterizer extends ModularDoublePolygonRasterizer {
       pixelsR[tpos++]= (byte) ((apr));
       pixelsR[tpos++]= (byte) ((apg));
       pixelsR[tpos]= (byte) (apb);
+    zBuffer[pos]= apsz;
     } else {
       // once again this is for int version :
       //			int sample = pixels[pos];
@@ -116,7 +117,6 @@ public class DoubleRasterizer extends ModularDoublePolygonRasterizer {
       //			pixelsR[tpos] = (byte)(((255&pixelsR[tpos++  ])*transparency +oneMinusTransparency*(apbI>>FIXP))>>8);
 
     }
-    zBuffer[pos]= apsz;
   }
 
   protected final void setPixel(final int x, final int y, final double z, final double red, final double green, final double blue, final double transparency) {

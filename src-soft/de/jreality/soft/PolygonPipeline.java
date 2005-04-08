@@ -406,8 +406,8 @@ public class PolygonPipeline
                     pi.setShader(ps);
                     if (queueOpaque || isTransparent) {
                         if(sortOpaque || isTransparent)
-                            //pi.computeCenterZ(vertexData);
-                            pi.computeMaxZ(vertexData);
+                            pi.computeCenterZ(vertexData);
+                            //pi.computeMaxZ(vertexData);
                         //return;
                     } else {
                         renderer.renderPolygon(pi, vertexData, ps.isOutline());
@@ -422,8 +422,8 @@ public class PolygonPipeline
 
             if (queueOpaque || isTransparent) {
 				if(sortOpaque || isTransparent)
-					//p.computeCenterZ(vertexData);
-				    p.computeMaxZ(vertexData);
+					p.computeCenterZ(vertexData);
+				    //p.computeMaxZ(vertexData);
 				return;
             } else {
 				renderer.renderPolygon(p, vertexData, p.getShader().isOutline());

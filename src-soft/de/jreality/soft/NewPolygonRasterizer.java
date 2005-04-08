@@ -543,7 +543,7 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
 //        if(b<0||b>255) System.out.println("B: "+r);
 //        if(r<0||r>255)  www.dump();
         
-        int omt= (255*(FIXPS - transparency))>>FIXP;;
+        int omt= (255*(FIXPS - transparency))>>FIXP;
         if(interpolateA) omt = ((int)((1 - dTransparency)*factor*aaa.value));
         
         if (interpolateUV) {

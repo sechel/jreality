@@ -35,9 +35,9 @@ public class SimpleTexture implements Texture {
     int width;
     int height;
 
-    double vscale = 1.;
-    double uscale=1.;
-    
+//    double vscale = 1.;
+//    double uscale=1.;
+    double matrix[];
     protected boolean clampU =false;
     protected boolean clampV =false;
     protected int incr =4;
@@ -47,8 +47,9 @@ public class SimpleTexture implements Texture {
         this.bytes = texture.getByteArray();
         this.width=texture.getWidth();
         this.height = texture.getHeight();
-        this.uscale = texture.getSScale();
-        this.vscale = texture.getTScale();
+        //this.uscale = texture.getSScale();
+        //this.vscale = texture.getTScale();
+        this.matrix = texture.getTextureMatrix();
         this.clampU = texture.getRepeatS()==Texture2D.CLAMP;
         this.clampV = texture.getRepeatT()==Texture2D.CLAMP;
         incr =3*width*height== bytes.length?3:4;
@@ -65,20 +66,25 @@ public class SimpleTexture implements Texture {
         
     }
 
-    protected final void getPixelNearest(final double u, final double v,  final int[] color) {
+    protected final void getPixelNearest(final double uu, final double vv,  final int[] color) {
         int a,b;
+        double u = width*(uu*matrix[0] + vv*matrix[1] + matrix[3]);
+        double v = height*(uu*matrix[4+0] + vv*matrix[4+1] + matrix[4+3]);
+        u = u<0?u -Math.floor(u/width):u;
+        v = v<0?v -Math.floor(v/height):v;
+
         
         if(clampU) {
-            a = (int)(u*width*uscale);
-            a =a<0?a:a>=width?width-1:a;
+            a = (int)(u);
+            a =a<0?0:a>=width?width-1:a;
         } else {
-            a = ((int)(u*width*uscale))%width;
+            a = ((int)(u))%width;
         }
         if(clampV) {
-            b = (int)(v*height*vscale);
+            b = (int)(v);
             b =b<0?b:b>=height?height-1:b;
         } else {
-            b = (((int)(v*height*vscale))%height);
+            b = (((int)(v))%height);
         }
         //c = pixels[a +width*b];
         //c = pixels[((int)(u*width*uscale))%width +width*(((int)(v*height*vscale))%height)];
@@ -99,19 +105,22 @@ public class SimpleTexture implements Texture {
         //color[3]  =255;
     }
     
-    protected final void getPixelInterpolate(final double u, final double v,  final int[] color) {
+    protected final void getPixelInterpolate(final double uu, final double vv,  final int[] color) {
         int ap,am, bp, bm;
         double[] tmpColor =new double[4];
         double dam;
         double dap;
         double dbm;
         double dbp;
-        
-        dam = (u*width*uscale);
+        double u = width*(uu*matrix[0] + vv*matrix[1] + matrix[3]);
+        double v = height*(uu*matrix[4+0] + vv*matrix[4+1] + matrix[4+3]);
+        u = u<0?u -Math.floor(u/width):u;
+        v = v<0?v -Math.floor(v/height):v;
+        dam = (u);
         am  = (int)dam;
         dam = 1 - (dam-am);
 
-        dap = (u*width*uscale + 1);
+        dap = (u + 1);
         ap  = (int)dap;
         dap = 1 - dam;
         
@@ -124,11 +133,11 @@ public class SimpleTexture implements Texture {
             ap = (ap)%width;
         }
         
-        dbm = (v*height*vscale);
+        dbm = (v);
         bm  = (int)dbm;
         dbm = 1 - (dbm - bm);
 
-        dbp = (v*height*vscale + 1);
+        dbp = (v + 1);
         bp  = (int)dbp;
         dbp = 1- dbm;
         
@@ -184,8 +193,6 @@ public class SimpleTexture implements Texture {
         
         else
             color[3] = 255;
-        
-        
         
     }
 
