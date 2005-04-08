@@ -199,9 +199,9 @@ public class RenderTraversal extends SceneGraphVisitor {
 
   public void visit(IndexedLineSet g) {
     if(!shaderUptodate) setupShader();
-    if(lineShader != null) {
-        IntArrayArray edgeIndices=g.getEdgeAttributes(Attribute.INDICES)
-          .toIntArrayArray();
+    DataList dl  = g.getEdgeAttributes(Attribute.INDICES);
+    if(lineShader != null&& dl!= null) {
+        IntArrayArray edgeIndices=dl.toIntArrayArray();
         DoubleArrayArray vertices=g.getVertexAttributes(Attribute.COORDINATES)
           .toDoubleArrayArray();
         pipeline.startGeometry(g);
