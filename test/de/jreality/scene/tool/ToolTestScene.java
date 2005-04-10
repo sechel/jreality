@@ -12,8 +12,8 @@ import java.util.logging.Level;
 import javax.swing.JFrame;
 
 import de.jreality.geometry.CatenoidHelicoid;
+import de.jreality.scene.*;
 import de.jreality.scene.Camera;
-import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
@@ -32,40 +32,40 @@ import de.jreality.util.SceneGraphUtilities;
  */
 public class ToolTestScene {
 
-	//Viewer viewer = new de.jreality.jogl.Viewer();
-	final Viewer viewer = new DefaultViewer();
+	final Viewer viewer = new de.jreality.jogl.Viewer();
+	//final Viewer viewer = new DefaultViewer();
 	JFrame frame = new JFrame("viewer");
+	
+  public static SceneGraphComponent makeLights() {
+      SceneGraphComponent lights = new SceneGraphComponent();
+      lights.setName("lights");
+      //SpotLight pl = new SpotLight();
+      de.jreality.scene.PointLight pl = new de.jreality.scene.PointLight();
+      //DirectionalLight pl = new DirectionalLight();
+      pl.setFalloff(1.0, 0.0, 0.0);
+      pl.setColor(new Color(170, 170, 120));
+      //pl.setConeAngle(Math.PI);
 
-    public static SceneGraphComponent makeLights() {
-        SceneGraphComponent lights = new SceneGraphComponent();
-        lights.setName("lights");
-        //SpotLight pl = new SpotLight();
-        de.jreality.scene.PointLight pl = new de.jreality.scene.PointLight();
-        //DirectionalLight pl = new DirectionalLight();
-        pl.setFalloff(1.0, 0.0, 0.0);
-        pl.setColor(new Color(170, 170, 120));
-        //pl.setConeAngle(Math.PI);
+      pl.setIntensity(0.6);
+      SceneGraphComponent l0 = SceneGraphUtilities
+              .createFullSceneGraphComponent("light0");
+      l0.setLight(pl);
+      lights.addChild(l0);
+      DirectionalLight dl = new DirectionalLight();
+      dl.setColor(new Color(200, 150, 200));
+      dl.setIntensity(0.6);
+      l0 = SceneGraphUtilities.createFullSceneGraphComponent("light1");
+      double[] zaxis = { 0, 0, 1 };
+      double[] other = { 1, 1, 1 };
+      l0.getTransformation().setMatrix(
+              P3.makeRotationMatrix(null, zaxis, other));
+      l0.setLight(dl);
+      lights.addChild(l0);
 
-        pl.setIntensity(0.6);
-        SceneGraphComponent l0 = SceneGraphUtilities
-                .createFullSceneGraphComponent("light0");
-        l0.setLight(pl);
-        lights.addChild(l0);
-        DirectionalLight dl = new DirectionalLight();
-        dl.setColor(new Color(200, 150, 200));
-        dl.setIntensity(0.6);
-        l0 = SceneGraphUtilities.createFullSceneGraphComponent("light1");
-        double[] zaxis = { 0, 0, 1 };
-        double[] other = { 1, 1, 1 };
-        l0.getTransformation().setMatrix(
-                P3.makeRotationMatrix(null, zaxis, other));
-        l0.setLight(dl);
-        lights.addChild(l0);
+      return lights;
+  }
 
-        return lights;
-    }
-
-	void createScene() {
+  void createScene() {
 		SceneGraphComponent root = new SceneGraphComponent();
 		root.setName("test root");
 		SceneGraphComponent camNode = new SceneGraphComponent();
@@ -83,6 +83,7 @@ public class ToolTestScene {
 		SceneGraphComponent scene = new SceneGraphComponent();
 		SceneGraphComponent sphere = new SceneGraphComponent();
 		sphere.setGeometry(new Sphere());
+        sphere.addTool(new TestTool());
 		//sphere.setGeometry(new CatenoidHelicoid(10));
 		root.addChild(scene);
 		scene.addChild(sphere);
@@ -91,7 +92,7 @@ public class ToolTestScene {
 		camPath.push(root);
 		camPath.push(camNode);
 		camPath.push(view);
-		camNode.addTool(new EgoShooterTool());
+		//camNode.addTool(new EgoShooterTool());
 		frame.setVisible(true);
 		frame.setSize(640, 480);
 		frame.getContentPane().add(viewer.getViewingComponent());
@@ -105,7 +106,15 @@ public class ToolTestScene {
 				System.exit(0);
 			}
 		});
-		ToolSystem ts = new ToolSystem(viewer);
+        ToolSystem ts = new ToolSystem(viewer);
+    try {
+        PickSystem ps = (PickSystem) Class.forName("de.jreality.jme.intersection.proxy.JmePickSystem").newInstance();
+        ps.setSceneRoot(root);
+        ts.setPickSystem(ps);
+    } catch (Exception e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+    }
 	}
 	
 	public void render() {

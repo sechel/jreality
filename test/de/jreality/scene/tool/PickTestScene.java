@@ -73,8 +73,11 @@ public class PickTestScene {
 			double[] mouse = mouseToWorld(viewer, event.getX(), event.getY());
 			Transformation cam = new Transformation(viewer.getCameraPath().getMatrix(null));
 			double[] camPos = cam.getTranslation();
+      System.out.println("camPos: ["+camPos[0]+","+camPos[1]+","+camPos[2]+","+camPos[3]+"]");
+      
 			double[] direction = Rn.subtract(null, mouse, camPos);
-			List lst = picksys.computePick(camPos, direction);
+			System.out.println("direction: ["+direction[0]+","+direction[1]+","+direction[2]+","+direction[3]+"]");
+      List lst = picksys.computePick(camPos, direction);
 			System.out.println(lst);
 		}
 
@@ -90,7 +93,14 @@ public class PickTestScene {
 		double y1 = v.getViewingComponent().getHeight();
 		double[] mouseToNDC = new double[] { -1 + 2 * x / x1, 1 - 2 * y / y1, 1 };
 		Camera cam = (Camera) v.getCameraPath().getLastElement();
-		return Rn.matrixTimesVector(null, Rn.inverse(null, Rn.times(null, cam.getCameraToNDC(), v.getCameraPath().getInverseMatrix(null))), mouseToNDC);
+		return Rn.matrixTimesVector(null, 
+                Rn.inverse(null, 
+                        Rn.times(null, 
+                                cam.getCameraToNDC(), 
+                                v.getCameraPath().getInverseMatrix(null)
+                        )
+                ),
+                mouseToNDC);
 	}
 	void createScene() {
 		SceneGraphComponent root = new SceneGraphComponent();
@@ -109,6 +119,7 @@ public class PickTestScene {
 		IndexedFaceSet ifs = new CatenoidHelicoid(10);
 		ifs.buildEdgesFromFaces();
 		sphere.setGeometry(ifs);
+    sphere.addTool(new TestTool());
 		root.addChild(scene);
 		scene.addChild(sphere);
 		root.addChild(camNode);
@@ -123,6 +134,9 @@ public class PickTestScene {
 		
 		picksys.setSceneRoot(root);
 	
+    ToolSystem ts = new ToolSystem(viewer);
+    ts.setPickSystem(picksys);
+        
 		frame.setVisible(true);
 		frame.getContentPane().add(viewer.getViewingComponent());
 		frame.setSize(800, 600);
