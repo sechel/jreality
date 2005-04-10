@@ -153,8 +153,8 @@ public class SelectionManager implements TransformationListener {
 			
 		if (theSelection != null)	{
 			selectedAppearance = null;
-      for (ListIterator lit = theSelection.reverseIterator(); lit.hasPrevious(); ) {
-        Object selt = lit.previous();
+      for (Iterator lit = theSelection.reverseIterator(); lit.hasNext(); ) {
+        Object selt = lit.next();
         if (selt != null) {
           if (selt instanceof Appearance)  selectedAppearance = (Appearance) selt;
           else if ( selt instanceof SceneGraphComponent)  {
