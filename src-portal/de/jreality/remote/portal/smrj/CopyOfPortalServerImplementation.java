@@ -37,17 +37,10 @@ import de.jreality.reader.Input;
 import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
-import de.jreality.scene.tool.EgoShooterTool;
-import de.jreality.scene.tool.EgoShooterTool2;
-import de.jreality.scene.tool.PickSystem;
-import de.jreality.scene.tool.TestTool;
-import de.jreality.scene.tool.ToolSystem;
-import de.jreality.util.BoundingBoxTraversal;
 import de.jreality.util.CmdLineParser;
 import de.jreality.util.LoadableScene;
 import de.jreality.util.Lock;
 import de.jreality.util.P3;
-import de.jreality.util.Rectangle3D;
 import de.jreality.util.Rn;
 import de.smrj.RemoteFactory;
 import de.smrj.tcp.TCPBroadcasterIO;
@@ -61,17 +54,17 @@ import de.smrj.tcp.TCPBroadcasterNIO;
  * @author weissman
  */
 
-public class PortalServerImplementation extends RemoteDistributedViewer implements
+public class CopyOfPortalServerImplementation extends RemoteDistributedViewer implements
         WandListener, WandMotionListener, HeadMotionListener {
 
     boolean manualSwapBuffers;
 
-    private RemoteEventQueueImpl szgQueue;
+    private RemoteEventQueueImpl queue;
 
     private volatile boolean autoRender = false;
     private final Object autoRenderSynch = new Object();
 
-//    EventBoxVisitor boxVisitor;
+    EventBoxVisitor boxVisitor;
 
     private Thread renderer = new Thread() {
 
@@ -114,7 +107,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
     	renderLock.writeUnlock();
     }
 
-    public PortalServerImplementation(RemoteFactory factory) throws IOException {
+    public CopyOfPortalServerImplementation(RemoteFactory factory) throws IOException {
         super(factory);
         manualSwapBuffers = !getConfig().getBool("viewer.autoBufferSwap");
         System.out.println("manualBufferSwap:" + manualSwapBuffers);
@@ -123,20 +116,16 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         SceneGraphComponent scaleComp = new SceneGraphComponent();
         SceneGraphComponent realNavComp = new SceneGraphComponent();
         scaleComp.addChild(navComp = new SceneGraphComponent());
-        navComp.addTool(new EgoShooterTool());
-        navComp.setTransformation(new Transformation());
         realNavComp.addChild(scaleComp);
         root.addChild(realNavComp);
         scaleComp.setTransformation(scaleTrafo = new Transformation());
         wandComp = new SceneGraphComponent();
         root.addChild(wandComp);
-        root.addTool(new TestTool());
         super.setSceneRoot(root);
-
-//        boxVisitor = new EventBoxVisitor(root, wandOffset);
+        boxVisitor = new EventBoxVisitor(root, wandOffset);
         try {
-            szgQueue = new RemoteEventQueueImpl();
-//            wandTool = new WandTool(realNavComp, wandComp);
+            queue = new RemoteEventQueueImpl();
+            wandTool = new WandTool(realNavComp, wandComp);
             startQueue();
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -147,45 +136,28 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
-        ToolSystem ts = new ToolSystem(this);
-        try {
-			PickSystem ps = (PickSystem) Class.forName("de.jreality.jme.intersection.proxy.JmePickSystem").newInstance();
-			ps.setSceneRoot(root);
-			ts.setPickSystem(ps);
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        
         renderer.setPriority(Thread.MIN_PRIORITY);
         renderer.start();
         setBackgroundColor(new java.awt.Color(132, 132, 218));
     }
 
     private void startQueue() {
-//        szgQueue.addWandListener(wandTool);
-//        szgQueue.addWandMotionListener(wandTool);
-//        szgQueue.addWandListener(this);
-//        szgQueue.addWandMotionListener(this);
-        szgQueue.addHeadMotionListener(this);
+        queue.addWandListener(wandTool);
+        queue.addWandMotionListener(wandTool);
+        queue.addWandListener(this);
+        queue.addWandMotionListener(this);
+        queue.addHeadMotionListener(this);
     }
 
     private void pauseQueue() {
-//        szgQueue.removeWandListener(wandTool);
-//        szgQueue.removeWandMotionListener(wandTool);
-//        szgQueue.removeWandListener(this);
-//        szgQueue.removeWandMotionListener(this);
-        szgQueue.removeHeadMotionListener(this);
+        queue.removeWandListener(wandTool);
+        queue.removeWandMotionListener(wandTool);
+        queue.removeWandListener(this);
+        queue.removeWandMotionListener(this);
+        queue.removeHeadMotionListener(this);
     }
 
-    //WandTool wandTool;
+    WandTool wandTool;
     SceneGraphComponent sceneRoot;
     SceneGraphComponent wandComp;
 
@@ -342,10 +314,10 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
     public void dispose() {
         setAutoRender(false);
         setNavigationEnabled(false);
-        szgQueue.removeHeadMotionListener(this);
-//        szgQueue.removeWandListener(wandTool);
-//        szgQueue.removeWandMotionListener(wandTool);
-        szgQueue.dispose();
+        queue.removeHeadMotionListener(this);
+        queue.removeWandListener(wandTool);
+        queue.removeWandMotionListener(wandTool);
+        queue.dispose();
         super.dispose();
     }
 
@@ -372,15 +344,15 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
 
     public void setNavigationEnabled(boolean navigationEnabled) {
         this.navigationEnabled = navigationEnabled;
-//        wandTool.setNavigationEnabled(navigationEnabled);
+        wandTool.setNavigationEnabled(navigationEnabled);
     }
 
     public void buttonPressed(WandEvent event) {
-//        boxVisitor.process(event);
+        boxVisitor.process(event);
     }
 
     public void buttonReleased(WandEvent event) {
-//        boxVisitor.process(event);
+        boxVisitor.process(event);
     }
 
     public void buttonTipped(WandEvent event) {
@@ -390,11 +362,11 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
     }
 
     public void wandDragged(WandEvent event) {
-//        boxVisitor.process(event);
+        boxVisitor.process(event);
     }
 
     public void wandMoved(WandEvent event) {
-//        boxVisitor.process(event);
+        boxVisitor.process(event);
     }
 
     public Transformation getWandOffset() {
@@ -403,7 +375,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
 
     public void setWandOffset(Transformation wandOffset) {
         this.wandOffset = wandOffset;
-//        boxVisitor.setWandOffset(wandOffset);
+        boxVisitor.setWandOffset(wandOffset);
     }
 
     public boolean isHeadTracked() {
@@ -440,43 +412,19 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         setSignature(wm.getSignature());
         t = System.currentTimeMillis();
         if (world != null) getNavigationComponent().addChild(world);
-//        wandTool.center();
+        wandTool.center();
         s = System.currentTimeMillis() - t;
         System.out.println("distributed world " + classname +"["+s+"ms]");
         startQueue();
     }
 
     private void loadFile(String name) {
-        long t = System.currentTimeMillis();
         pauseQueue();
         de.jreality.scene.SceneGraphComponent world = Readers.readFile(new File(name));
         if (world != null) getNavigationComponent().addChild(world);
-        center();
-//        wandTool.center();
+        wandTool.center();
         startQueue();
-        long s = System.currentTimeMillis() - t;
-        System.out.println("loaded file " + name + " successful. ["+s+"ms]");
     }
-    
-    /**
-     * this method simply trnaslates the center of the boundingbox to (0,2,-2);
-     * 
-     * @param root
-     * @return
-     */
-    Transformation worldTransform = new Transformation();
-      public void center() {
-          BoundingBoxTraversal bbv = new BoundingBoxTraversal();
-          bbv.traverse(navComp);
-          Rectangle3D worldBox = bbv.getBoundingBox();
-          Transformation t = new Transformation();
-          double[] transl = worldBox.getCenter();
-          transl[1] -= 2; transl[2] += 2;
-          t.setTranslation(transl);
-          worldTransform.multiplyOnRight(t.getInverse());
-          navComp.getTransformation().setMatrix(worldTransform.getMatrix());
-      }
-
 
     private static String usage(CmdLineParser parser) {
         String ret = "usage: java PortalServerImplementation "+parser.usageString()+" <filename | classname>\n";
@@ -516,7 +464,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         Boolean b = ((Boolean) parser.getOptionValue(ioOption));
         boolean io = b.booleanValue();
         if (io) System.err.println("Warning: using blocking IO");
-        PortalServerImplementation rsi = new PortalServerImplementation(
+        CopyOfPortalServerImplementation rsi = new CopyOfPortalServerImplementation(
                 io ? new TCPBroadcasterIO(8868).getRemoteFactory()
                     : new TCPBroadcasterNIO(8868).getRemoteFactory());
         Double scale = (Double) parser.getOptionValue(scaleOpt);
@@ -539,8 +487,5 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
 	}
 	public void setMeasure(boolean measure) {
 		this.measure = measure;
-	}
-	public RemoteEventQueueImpl getSzgQueue() {
-		return szgQueue;
 	}
 }
