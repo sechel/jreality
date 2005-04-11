@@ -92,7 +92,7 @@ public class ToolTestScene {
 		camPath.push(root);
 		camPath.push(camNode);
 		camPath.push(view);
-		//camNode.addTool(new EgoShooterTool());
+		camNode.addTool(new EgoShooterTool());
 		frame.setVisible(true);
 		frame.setSize(640, 480);
 		frame.getContentPane().add(viewer.getViewingComponent());
