@@ -85,6 +85,10 @@ public class RIBVisitor extends SceneGraphVisitor {
     
     public static boolean fullSpotLight = false;
     public static String shaderPath = null;
+    
+    private double sScale=1;
+    private double tScale=1;
+    
     /**
      * 
      */
@@ -218,7 +222,18 @@ public class RIBVisitor extends SceneGraphVisitor {
                 } else {
                     String fname = writeTexture(tex);
                     map.put("string texturename",fname);
-                    Ri.surface("paintedplastic",map);
+                    double[] mat = tex.getTextureMatrix();
+                    if(mat != null) {
+                    float[] tmat = new float[16];
+                    for (int i = 0; i < 4; i++) 
+                        for (int j = 0;j<4;j++){
+                       tmat[i + 4*j] = (float) mat[j+4*i];
+                   }
+                    map.put("matrix textureMatrix",tmat);
+                    }
+                    //map.put("sScale",new Float(tex.getTextureTransformation().getStretch()[0]));
+                    //map.put("tScale",new Float(tex.getTextureTransformation().getStretch()[1]));
+                    Ri.surface("transformedpaintedplastic",map);
                 }
             }
         } else {
@@ -267,46 +282,48 @@ public class RIBVisitor extends SceneGraphVisitor {
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.IndexedLineSet)
      */
     public void visit(IndexedLineSet g) {
-        String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
-        if(!eAppearance.getAttribute(NameSpace.name(geomShaderName, CommonAttributes.EDGE_DRAW),true)) return;
-        Ri.attributeBegin();
-        setupShader(eAppearance,CommonAttributes.LINE_SHADER);
+        DataList dl = g.getEdgeAttributes(Attribute.INDICES);
+        if(dl!=null){
+            String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
+            if(!eAppearance.getAttribute(NameSpace.name(geomShaderName, CommonAttributes.EDGE_DRAW),true)) return;
+            Ri.attributeBegin();
+            setupShader(eAppearance,CommonAttributes.LINE_SHADER);
         
-        float r = (float) eAppearance.getAttribute(NameSpace.name(CommonAttributes.LINE_SHADER,CommonAttributes.LINE_WIDTH),0.01);
+            float r = (float) eAppearance.getAttribute(NameSpace.name(CommonAttributes.LINE_SHADER,CommonAttributes.LINE_WIDTH),0.01);
 //        int n= g.getNumEdges();
 //        for(int i = 0;i<n;i++) {
 //            cylinder(g.getEdgeData(i),r);
 //        }
 //        
-        DoubleArrayArray edgeColors=null;
-        DataList dl = g.getEdgeAttributes(Attribute.COLORS);
-        if(dl != null) 
-            edgeColors = dl.toDoubleArrayArray();
-        IntArrayArray edgeIndices=g.getEdgeAttributes(Attribute.INDICES)
-        .toIntArrayArray();
-        DoubleArrayArray vertices=g.getVertexAttributes(Attribute.COORDINATES)
-        .toDoubleArrayArray();
-        double[] edgeData = new double[6];
-        for (int i= 0, n=edgeIndices.size(); i < n; i++)
-        {
-            if(edgeColors!= null) {
-                float[] f = new float[3];
-                f[0] = (float) edgeColors.getValueAt(i,0);
-                f[1] = (float) edgeColors.getValueAt(i,1);
-                f[2] = (float) edgeColors.getValueAt(i,2);
-                Ri.color(f);
-            }
-            IntArray edge=edgeIndices.item(i).toIntArray();
-            for(int j = 0; j<edge.getLength()-1;j++) {
-                DoubleArray p1=vertices.item(edge.getValueAt(j)).toDoubleArray();
-                DoubleArray p2=vertices.item(edge.getValueAt(j+1)).toDoubleArray();
+            IntArrayArray edgeIndices= dl.toIntArrayArray();
+            DoubleArrayArray edgeColors=null;
+            dl = g.getEdgeAttributes(Attribute.COLORS);
+            if(dl != null) 
+                edgeColors = dl.toDoubleArrayArray();
+            DoubleArrayArray vertices=g.getVertexAttributes(Attribute.COORDINATES)
+            .toDoubleArrayArray();
+            double[] edgeData = new double[6];
+            for (int i= 0, n=edgeIndices.size(); i < n; i++)
+            {
+                if(edgeColors!= null) {
+                    float[] f = new float[3];
+                    f[0] = (float) edgeColors.getValueAt(i,0);
+                    f[1] = (float) edgeColors.getValueAt(i,1);
+                    f[2] = (float) edgeColors.getValueAt(i,2);
+                    Ri.color(f);
+                }
+                IntArray edge=edgeIndices.item(i).toIntArray();
+                for(int j = 0; j<edge.getLength()-1;j++) {
+                    DoubleArray p1=vertices.item(edge.getValueAt(j)).toDoubleArray();
+                    DoubleArray p2=vertices.item(edge.getValueAt(j+1)).toDoubleArray();
                 //pipeline.processLine(p1, p2);
                 //pipeline.processPseudoTube(p1, p2);
-                cylinder(p1,p2,r);
+                    cylinder(p1,p2,r);
+                }
             }
+
+            Ri.attributeEnd();
         }
-        
-        Ri.attributeEnd();
         super.visit(g);
     }
 
