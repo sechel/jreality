@@ -38,7 +38,6 @@ import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.tool.EgoShooterTool;
-import de.jreality.scene.tool.EgoShooterTool2;
 import de.jreality.scene.tool.PickSystem;
 import de.jreality.scene.tool.TestTool;
 import de.jreality.scene.tool.ToolSystem;
