@@ -81,13 +81,16 @@ public class ToolTestScene {
         camNode.setCamera(view);
 		
 		SceneGraphComponent scene = new SceneGraphComponent();
-		SceneGraphComponent sphere = new SceneGraphComponent();
+    SceneGraphComponent cath = new SceneGraphComponent();
+    SceneGraphComponent sphere = new SceneGraphComponent();
 		sphere.setGeometry(new Sphere());
-        sphere.addTool(new TestTool());
-		//sphere.setGeometry(new CatenoidHelicoid(10));
+    cath.addTool(new TestTool());
+		cath.setGeometry(new CatenoidHelicoid(40));
 		root.addChild(scene);
-		scene.addChild(sphere);
+		scene.addChild(cath);
+    scene.addChild(sphere);
 		root.addChild(camNode);
+    scene.addTool(new TranslateTool());
 		SceneGraphPath camPath = new SceneGraphPath();
 		camPath.push(root);
 		camPath.push(camNode);
