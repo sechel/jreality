@@ -119,7 +119,6 @@ public class ToolTestScene {
         ToolSystem ts = new ToolSystem(viewer);
     try {
         PickSystem ps = (PickSystem) Class.forName("de.jreality.jme.intersection.proxy.JmePickSystem").newInstance();
-        ps.setSceneRoot(root);
         ts.setPickSystem(ps);
     } catch (Exception e) {
         // TODO Auto-generated catch block
