@@ -83,8 +83,15 @@ public class ToolTestScene {
 		SceneGraphComponent scene = new SceneGraphComponent();
     SceneGraphComponent cath = new SceneGraphComponent();
     SceneGraphComponent sphere = new SceneGraphComponent();
+    sphere.addTool(new DraggingTool());
 		sphere.setGeometry(new Sphere());
     cath.addTool(new TestTool());
+    cath.addTool(new DraggingTool() {
+		public void enforceConstraints(double[] matrix) {
+			matrix[3]=0;
+			matrix[7]=0;
+			matrix[11]=0;
+		}});
 		cath.setGeometry(new CatenoidHelicoid(40));
 		root.addChild(scene);
 		scene.addChild(cath);
@@ -124,7 +131,7 @@ public class ToolTestScene {
 		while (true) {
 			viewer.render();
 			try {
-				Thread.sleep(10);
+				Thread.sleep(20);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
