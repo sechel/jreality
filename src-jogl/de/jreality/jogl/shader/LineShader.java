@@ -11,6 +11,6 @@ import java.awt.Color;
  *
  */
 public interface LineShader extends PrimitiveShader {
-	public Color getDiffuseColor();
-	public boolean isSmoothShading();
+//	public Color getDiffuseColor();
+//	public boolean isSmoothShading();
 }

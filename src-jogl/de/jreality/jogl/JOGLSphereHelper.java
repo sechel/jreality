@@ -11,6 +11,7 @@ import net.java.games.jogl.GL;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.SphereHelper;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.LoggingSystem;
 import de.jreality.util.Pn;
 import de.jreality.util.Rn;
 
@@ -57,7 +58,7 @@ public class JOGLSphereHelper extends SphereHelper {
 	public static int getSphereDLists(int i,JOGLRenderer jr) {
 		int[] dlists = getSphereDLists(jr);
 		if (dlists == null) 	{
-			System.err.println("Invalid sphere display lists");
+			JOGLConfiguration.getLogger().log(Level.WARNING,"Invalid sphere display lists");
 			return 0;
 		}
 		return dlists[i];

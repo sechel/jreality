@@ -4,11 +4,21 @@
  */
 package de.jreality.worlds;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JMenuBar;
+import javax.swing.SwingConstants;
 
 import de.jreality.geometry.LabelSet;
 import de.jreality.geometry.WingedEdge;
+import de.jreality.jogl.inspection.FancySlider;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
@@ -22,33 +32,19 @@ import de.jreality.util.SceneGraphUtilities;
  *
  */
 public class LabelSetDemo extends AbstractLoadableScene {
-	SceneGraphComponent icokit;
+	SceneGraphComponent  oloidkit, label;
+	double a=.4,b=2.5;
 	public SceneGraphComponent makeWorld()	{
 		
 		
-		WingedEdge oloid = new WingedEdge(3.0d);
-		int num = 100;
-		for (int i = 0; i<=num; ++i)  	{
-			double angle = 2.0 * Math.PI * ( i/((double) num));
-			double[] plane = {Math.cos(angle), Math.sin(angle), .4 * Math.cos(2.5*angle), -1d};
-			oloid.cutWithPlane(plane);
-		} 
-		oloid.update();
-		SceneGraphComponent oloidkit = new SceneGraphComponent();
-		//oloidkit.addChild(oloid);
+		WingedEdge oloid = makeOloid();
+		oloidkit = new SceneGraphComponent();
 		oloidkit.setGeometry(oloid);
-		//SceneGraphComponent tubes = WingedEdge.createTubesOnEdges(oloid, .05, 8, 8);
-//		SceneGraphComponent tubes = TubeUtility.sticks(oloid, .05, Pn.EUCLIDEAN);
-//		GeometryUtility.calculateFaceNormals(tubes);
-//		GeometryUtility.calculateVertexNormals(tubes);
-//		oloidkit.addChild(tubes);
-		
-		//SceneGraphComponent s1 = Parser3DS.readFromFile("/homes/geometer/gunn/tmp/read3DS/models/space011.3ds");
 		SceneGraphComponent theWorld = SceneGraphUtilities.createFullSceneGraphComponent("oloidWorld");
 		theWorld.addChild(oloidkit);
 		
-		SceneGraphComponent label = SceneGraphUtilities.createFullSceneGraphComponent("labels");
-		label.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
+		label = SceneGraphUtilities.createFullSceneGraphComponent("labels");
+		label.getAppearance().setAttribute("textShader"+"."+CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
 		LabelSet ls = LabelSet.labelSetFactory(oloid, null);
 		label.setGeometry(ls);
 		theWorld.addChild(label);
@@ -56,6 +52,22 @@ public class LabelSetDemo extends AbstractLoadableScene {
 	}
 
 	
+	/**
+	 * @param oloid
+	 */
+	private WingedEdge makeOloid() {
+		WingedEdge oloid = new WingedEdge(20.0d);
+		int num = 100;
+		for (int i = 0; i<=num; ++i)  	{
+			double angle = 2.0 * Math.PI * ( i/((double) num));
+			double[] plane = {Math.cos(angle), Math.sin(angle), a * Math.cos(b*angle), -1d};
+			oloid.cutWithPlane(plane);
+		} 
+		oloid.update();
+		return oloid;
+	}
+
+
 	public int getSignature() {
 		// TODO Auto-generated method stub
 		return Pn.EUCLIDEAN;
@@ -69,6 +81,7 @@ public class LabelSetDemo extends AbstractLoadableScene {
 
 	}
 
+	Viewer viewer;
 	public void customize(JMenuBar menuBar, Viewer viewer) {
 //		try {
 //			viewer.getSceneRoot().getAppearance().setAttribute("backgroundTexture", new Texture2D("/homes/geometer/gunn/Pictures/grabs/arch-solids.jpg"));
@@ -76,6 +89,62 @@ public class LabelSetDemo extends AbstractLoadableScene {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
+		this.viewer = viewer;
+	}
+	public Component getInspector() {
+		Box container = Box.createVerticalBox();
+		FancySlider aSlider = new FancySlider.Double("a",  SwingConstants.HORIZONTAL, 0.0, 2.5, a);
+	    aSlider.textField.addPropertyChangeListener(new PropertyChangeListener()	{
+		    public void propertyChange(PropertyChangeEvent e) {
+		        if ("value".equals(e.getPropertyName())) {
+		            Number value = (Number)e.getNewValue();
+		            if (value != null) {
+		                setA(value.doubleValue());
+		            }
+		        }
+		    }	       	
+	       });
+		container.add(aSlider);
+		FancySlider bSlider = new FancySlider.Double("b",  SwingConstants.HORIZONTAL, 0.0, 2.5, b);
+	    bSlider.textField.addPropertyChangeListener(new PropertyChangeListener()	{
+		    public void propertyChange(PropertyChangeEvent e) {
+		        if ("value".equals(e.getPropertyName())) {
+		            Number value = (Number)e.getNewValue();
+		            if (value != null) {
+		                setB(value.doubleValue());
+		            }
+		        }
+		    }	       	
+	       });
+		container.add(bSlider);
+
+		container.add(Box.createVerticalGlue());
+		return container;
+	}
+
+    private void update()	{
+    		WingedEdge we = makeOloid();
+		oloidkit.setGeometry(we);
+		LabelSet ls = LabelSet.labelSetFactory(we, null);
+		label.setGeometry(ls);
+		viewer.render();
+
+    }
+	/**
+	 * @param d
+	 */
+	protected void setB(double d) {
+		b = d;
+		update();
+	}
+
+
+	/**
+	 * @param d
+	 */
+	protected void setA(double d) {
+		a = d;
+		update();
 	}
 
 }

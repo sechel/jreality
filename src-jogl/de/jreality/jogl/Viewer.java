@@ -22,6 +22,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.LoggingSystem;
 import de.jreality.util.SceneGraphUtilities;
 
 /**
@@ -88,7 +89,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	 */
 	public void setSceneRoot(SceneGraphComponent r) {
 		if (r == null)	{
-			System.err.println("Invalid scene root.");
+			JOGLConfiguration.getLogger().log(Level.WARNING,"Null scene root, ignoring.");
 			return;
 		}
 		sceneRoot = r;
@@ -211,10 +212,10 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	      }
 	      int selection = super.chooseCapabilities(desired, available, windowSystemRecommendedChoice);
 	      if (!anyHaveSampleBuffers) {
-	        System.err.println("WARNING: antialiasing will be disabled because none of the available pixel formats had it to offer");
+	      	JOGLConfiguration.getLogger().log(Level.WARNING,"WARNING: antialiasing will be disabled because none of the available pixel formats had it to offer");
 	      } else {
 	        if (!available[selection].getSampleBuffers()) {
-	          System.err.println("WARNING: antialiasing will be disabled because the DefaultGLCapabilitiesChooser didn't supply it");
+	        	JOGLConfiguration.getLogger().log(Level.WARNING,"WARNING: antialiasing will be disabled because the DefaultGLCapabilitiesChooser didn't supply it");
 	        }
 	      }
 	      return selection;
@@ -335,10 +336,8 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 			try {
 				EventQueue.invokeAndWait(bufferSwapper);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	}

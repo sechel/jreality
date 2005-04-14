@@ -24,10 +24,10 @@ import discreteGroup.TriangleGroup;
  */
 public class LoadableSceneDemo extends InteractiveViewerDemo {
 
-//	/**
-//	 * @param split_pane
-//	 * @param b
-//	 */
+	/**
+	 * @param split_pane
+	 * @param b
+	 */
 //	public LoadableSceneDemo(int split_pane, boolean b) {
 //		super(split_pane, b);
 //	}

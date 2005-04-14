@@ -121,7 +121,7 @@ public class DefaultVertexShader implements VertexShader {
 		}
 		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
 			gl.glColor4fv( diffuseColorAsFloat);
-			jr.openGLState.diffuseColor = diffuseColorAsFloat;
+			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
 		}
 		gl.glColor4fv( diffuseColorAsFloat);
 		gl.glMaterialfv(frontBack, GL.GL_AMBIENT, ambientColorAsFloat);

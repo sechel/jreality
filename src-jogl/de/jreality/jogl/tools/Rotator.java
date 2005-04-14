@@ -52,8 +52,7 @@ public class Rotator extends Projector {
 	
 	public Quaternion getRotationXY(double[] ndcLoc) {
 		if (ndcLoc == null || ndcLoc.length != 2)	{
-			System.err.println("getRotation: bad dimensions");
-			return null;
+			throw new IllegalArgumentException("Bad NDC argument");
 		}
 		Quaternion theQ = new Quaternion();
 		Rn.copy(current, ndcLoc);
@@ -69,8 +68,7 @@ public class Rotator extends Projector {
 	}
 	public Quaternion getRotationZ(double[] ndcLoc) {
 		if (ndcLoc == null || ndcLoc.length != 2)	{
-			System.err.println("getRotation: bad dimensions");
-			return null;
+			throw new IllegalArgumentException("Bad NDC argument");
 		}
 		Quaternion theQ = new Quaternion();
 		Rn.copy(current, ndcLoc);

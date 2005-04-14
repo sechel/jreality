@@ -822,7 +822,7 @@ public class FramedCurveInspector extends JFrame {
 							return;
 						}
 					JOGLConfiguration.theLog.log(Level.INFO,"time is: "+e.getWhen());
-					JOGLConfiguration.theLog.log(Level.INFO,"Camera node is: "+Rn.matrixToString(myCameraNode.getTransformation().getMatrix()));
+					//JOGLConfiguration.theLog.log(Level.INFO,"Camera node is: "+Rn.matrixToString(myCameraNode.getTransformation().getMatrix()));
 					
 						Transformation tt = new Transformation(parent.getSignature());
 						//TODO apply inverse of objectToWorld transform here

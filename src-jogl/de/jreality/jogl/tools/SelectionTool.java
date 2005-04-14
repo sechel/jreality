@@ -83,7 +83,6 @@ public class SelectionTool extends PickTool  {
 			truncatedSelection = null;
 			selectionManager.setPickPoint(null);
 			selectionManager.setSelection(null);
-			//System.err.println("1");
 			return true;
 		} // else {
 		// the selection tool does nothing if the user moves the mouse.

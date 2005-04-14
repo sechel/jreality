@@ -4,6 +4,9 @@
   */
 package de.jreality.jogl;
 
+import java.util.logging.Level;
+
+import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rn;
 
 /**
@@ -15,7 +18,7 @@ public class BezierCurve {
 	public BezierCurve(double[][] cp)	{
 		super();
 		if (cp.length % 3 != 1)	{
-			System.err.println("Invalid dimension");
+			JOGLConfiguration.getLogger().log(Level.WARNING,"Array length must be for form 3n + 1");
 			return;
 		}
 		controlPoints = cp;
@@ -30,7 +33,7 @@ public class BezierCurve {
 	public static double[][] refine(double[][] controlPoints)	{
 		int n = controlPoints.length;
 		if (n % 3 != 1)	{
-			System.err.println("Invalid dimension");
+			JOGLConfiguration.getLogger().log(Level.WARNING,"Array length must be for form 3n + 1");
 			return null;
 		}
 		int m = (controlPoints.length-1) / 3;
@@ -58,7 +61,7 @@ public class BezierCurve {
 		int vDim = controlPoints[0].length;
 		
 		if (uDim % 3 != 1 || vDim % 3 != 1)	{
-			System.err.println("Invalid dimension");
+			JOGLConfiguration.getLogger().log(Level.WARNING,"Array length must be for form 3n + 1");
 			return null;
 		}
 		int setsU = (uDim-1) / 3;
@@ -88,7 +91,7 @@ public class BezierCurve {
 		int vDim = controlPoints[0].length;
 		
 		if (uDim % 3 != 1 || vDim % 3 != 1)	{
-			System.err.println("Invalid dimension");
+			JOGLConfiguration.getLogger().log(Level.WARNING,"Array length must be for form 3n + 1");
 			return null;
 		}
 		int setsU = (uDim-1) / 3;

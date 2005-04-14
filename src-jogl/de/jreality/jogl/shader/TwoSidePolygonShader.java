@@ -32,23 +32,6 @@ public class TwoSidePolygonShader implements PolygonShader {
 		back = new DefaultPolygonShader();
 	}
 
-	public Color getDiffuseColor() {
-		return front.getDiffuseColor();
-	}
-
-	public boolean isSmoothShading() {
-		return front.isSmoothShading();
-	}
-
-//	public void setDiffuseColor(Color dc) {
-//		front.setDiffuseColor(dc);
-//		back.setDiffuseColor(dc);
-//	}
-
-	public void setSmoothShading(boolean b) {
-		front.setSmoothShading(b);
-		back.setSmoothShading(b);
-	}
 
 	public void render(JOGLRenderer jr) {
 		if (front != null) front.render(jr);
@@ -64,8 +47,6 @@ public class TwoSidePolygonShader implements PolygonShader {
 	      front.setFrontBack(DefaultPolygonShader.FRONT);
 	      back = ShaderLookup.getPolygonShaderAttr(eap, shaderName, "back");
 	      back.setFrontBack(DefaultPolygonShader.BACK);
-	      JOGLConfiguration.theLog.log(Level.FINE,"Front color is "+front.getDiffuseColor().toString());
-	      JOGLConfiguration.theLog.log(Level.FINE,"Back color is "+back.getDiffuseColor().toString());
 	}
 
 	public void setFrontBack(int f) {

@@ -28,9 +28,9 @@ public class DefaultGeometryShader  implements Shader {
 		 */
 		public DefaultGeometryShader() {
 			super();
-			polygonShader = new DefaultPolygonShader();
-			lineShader = new DefaultLineShader();
-			pointShader = new DefaultPointShader();
+//			polygonShader = new DefaultPolygonShader();
+//			lineShader = new DefaultLineShader();
+//			pointShader = new DefaultPointShader();
 		}
 			
 	public static DefaultGeometryShader createFromEffectiveAppearance(EffectiveAppearance eap, String name)	{

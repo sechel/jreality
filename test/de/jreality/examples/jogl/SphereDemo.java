@@ -12,12 +12,15 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 
+import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.SphereHelper;
 import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.jogl.shader.SimpleJOGLShader;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
+import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
 
 /**
@@ -26,7 +29,7 @@ import de.jreality.util.SceneGraphUtilities;
  */
 public class SphereDemo extends InteractiveViewerDemo {
 
-	boolean useLOD = false;
+	boolean useLOD = true;
 	
 	public JMenuBar createMenuBar()	{
 		theMenuBar = super.createMenuBar();
@@ -58,18 +61,36 @@ public class SphereDemo extends InteractiveViewerDemo {
 	 */
 	public SceneGraphComponent makeWorld() {
 		SceneGraphComponent world = SceneGraphUtilities.createFullSceneGraphComponent("world");
-//		SimpleJOGLShader sh = new SimpleJOGLShader("SimpleJOGLVertexShader.txt", "SimpleJOGLFragmentShader.txt");
-//		world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"useGLShader", true);
-//		world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"GLShader", sh);
-		
+		//SimpleJOGLShader sh = new SimpleJOGLShader("brick.vert", "brick.frag");//null,"SimpleJOGLFragmentShader-01.txt");
+		//world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"useGLShader", true);
+		//world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"GLShader", sh);
+		world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER, "brick");
+		world.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, false);
 		for (int i = 0; i<6; ++i)	{
+		double[] brickSize = new double[2];
+		double[] brickPct = new double[2];
+		double[] lightPosition = {0,0,4};
 			SceneGraphComponent c = SceneGraphUtilities.createFullSceneGraphComponent("sphere"+i);
-			c.setGeometry(new Sphere());
+			c.setGeometry(SphereHelper.tessellatedIcosahedra[i]);
 			double angle = (2 * Math.PI * i)/6.0;
 			c.getTransformation().setTranslation(3 * Math.cos(angle), 3*Math.sin(angle), 0.0);
 			float g = (float) (i/5.0);
 			c.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new java.awt.Color(g,g,g));
 			c.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING, true);
+			float r = (float) (i/6.0);
+			float b = 1f - r;
+			brickSize[0] = .1+r*.5;
+			brickSize[1] = .2+r*.3;
+			brickPct[0] = .4 + .1*i;
+			brickPct[1] = .7 + .05*i;
+			lightPosition[0] = i-2.0;
+			c.getAppearance().setAttribute("polygonShader.specularCoefficient", (double)(i*.15));
+			c.getAppearance().setAttribute("polygonShader.BrickColor", new java.awt.Color(r,0f,b));
+			c.getAppearance().setAttribute("polygonShader.MortarColor", new java.awt.Color(b,1f,r));
+			c.getAppearance().setAttribute("polygonShader.BrickSize", brickSize);
+			System.out.println("Brick size is "+Rn.toString(brickSize));
+			c.getAppearance().setAttribute("polygonShader.BrickPct", brickPct);
+			c.getAppearance().setAttribute("polygonShader.LightPosition", lightPosition);
 			world.addChild(c);
 		}
 		return world;

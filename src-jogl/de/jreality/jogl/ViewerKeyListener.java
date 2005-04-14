@@ -25,6 +25,7 @@ import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.Transformation;
 import de.jreality.soft.MouseTool;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.LoggingSystem;
 import de.jreality.util.P3;
 import de.jreality.util.SceneGraphUtilities;
 
@@ -300,12 +301,9 @@ public class ViewerKeyListener extends KeyAdapter {
 				case KeyEvent.VK_BACK_QUOTE:
 					if (e.isShiftDown()) break;
 					Frame frame = Frame.getFrames()[0];
-				    //frame.dispose();
-				    //System.err.println("Disposal complete");
 					fullScreenToggle = !fullScreenToggle;
 					//frame.setUndecorated(fullScreenToggle);
 					//frame.show();
-				    //System.err.println("Show complete");
 					frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(fullScreenToggle ? frame : null);
 			        break;
 			}
@@ -338,7 +336,7 @@ public class ViewerKeyListener extends KeyAdapter {
 			viewer.render();
 			return;
 		}
-		System.err.println("Turning on property "+name);
+		JOGLConfiguration.getLogger().log(Level.INFO,"Turning on property "+name);
 		ap.setAttribute(name, true);
 			
 		viewer.render();

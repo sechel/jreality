@@ -50,12 +50,13 @@ public class DefaultLineShader implements LineShader  {
 	double	tubeRadius = 0.05,
 		 	lineWidth = 1.0,
 			depthFudgeFactor = 0.9999d;			// in pixels
-	boolean smoothShading = false;
+	boolean interpolateVertexColors = false;
 	int	lineFactor = 1;
 	int 	lineStipplePattern = 0x1c47; 
 	 
 	boolean lineStipple = false;
 	boolean tubeDraw = false;
+	boolean lighting = false;
 			
 	Color diffuseColor = java.awt.Color.BLACK;
 	private PolygonShader polygonShader;
@@ -72,7 +73,7 @@ public class DefaultLineShader implements LineShader  {
 		tubeRadius = eap.getAttribute(NameSpace.name(name,CommonAttributes.TUBE_RADIUS),CommonAttributes.TUBE_RADIUS_DEFAULT);
 		tubeStyle = eap.getAttribute(NameSpace.name(name,CommonAttributes.TUBE_STYLE),CommonAttributes.TUBE_STYLE_DEFAULT);
 		depthFudgeFactor = eap.getAttribute(NameSpace.name(name,CommonAttributes.DEPTH_FUDGE_FACTOR), depthFudgeFactor);
-		smoothShading = eap.getAttribute(NameSpace.name(name,CommonAttributes.INTERPOLATE_VERTEX_COLORS), CommonAttributes.INTERPOLATE_VERTEX_COLORS_DEFAULT);
+		interpolateVertexColors = eap.getAttribute(NameSpace.name(name,CommonAttributes.INTERPOLATE_VERTEX_COLORS), CommonAttributes.INTERPOLATE_VERTEX_COLORS_DEFAULT);
 		lineStipple = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_STIPPLE), lineStipple);
 		lineWidth = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_WIDTH), CommonAttributes.LINE_WIDTH_DEFAULT);
 		lineFactor = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_FACTOR),lineFactor);
@@ -151,14 +152,14 @@ public class DefaultLineShader implements LineShader  {
 		GLCanvas theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		gl.glDisable(GL.GL_TEXTURE_2D);
-		gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, getDiffuseColorAsFloat());
+		gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, diffuseColorAsFloat);
 		// TODO figure out why I have to use this call too, even though
 		// GL_COLOR_MATERIAL is disabled.
 		//gl.glDisable(GL.GL_COLOR_MATERIAL);
 		//gl.glColor4fv(getDiffuseColorAsFloat());
 		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
 			gl.glColor4fv( diffuseColorAsFloat);
-			jr.openGLState.diffuseColor = diffuseColorAsFloat;
+			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
 		}
 		//JOGLConfiguration.theLog.log(Level.FINE,"LineShader: Setting diffuse color to: "+Rn.toString(getDiffuseColorAsFloat()));
 	
@@ -169,12 +170,11 @@ public class DefaultLineShader implements LineShader  {
 		} 
 		else gl.glDisable(GL.GL_LINE_STIPPLE);
 
-		boolean lighting = false;
 		if (tubeDraw)	{
 			polygonShader.render(jr);
-			//lighting = true;
 		}
-		if (jr.openGLState.lighting != lighting)	{
+//		if (jr.openGLState.lighting != lighting)	{
+		else {
 			jr.openGLState.lighting = lighting;
 			if (lighting) gl.glEnable(GL.GL_LIGHTING);
 			else gl.glDisable(GL.GL_LIGHTING);
@@ -184,7 +184,7 @@ public class DefaultLineShader implements LineShader  {
 		// this little bit of code forces tubes to be opaque: could add
 		// transparency-enable flag to the line shader to allow this to be controlled
 		gl.glDepthMask(true);
-		 gl.glDisable(GL.GL_BLEND);
+		gl.glDisable(GL.GL_BLEND);
 
 		gl.glDepthRange(0.0d, depthFudgeFactor);
 	}
@@ -211,6 +211,7 @@ public class DefaultLineShader implements LineShader  {
 	// TOOD figure out how to clear out local display lists (not returned by the method)!
 	int[] tubeDL = null;
 	boolean testQMS = true;
+	boolean smoothShading = true;		// force tubes to be smooth shaded ?
 	public int createTubesOnEdgesAsDL(IndexedLineSet ils, double rad,  double alpha, JOGLRenderer jr, int sig, boolean pickMode)	{
 		GL gl = jr.globalGL;
 		
@@ -223,7 +224,7 @@ public class DefaultLineShader implements LineShader  {
 			for (int i = 0; i<3; ++i)	{
 				tubeDL[i] = gl.glGenLists(1);
 				gl.glNewList(tubeDL[i], GL.GL_COMPILE);
-				JOGLRendererHelper.drawFaces(TubeUtility.urTube[i], jr, polygonShader.isSmoothShading(), alpha );
+				JOGLRendererHelper.drawFaces(TubeUtility.urTube[i], jr, smoothShading, alpha );
 				gl.glEndList();	
 			}
 		}
@@ -257,7 +258,7 @@ public class DefaultLineShader implements LineShader  {
 				//JOGLConfiguration.theLog.log(Level.FINE,"Tube has "+tube.getNumPoints()+" points");
 				//tube.setGeometryAttributes(PROXY_FOR_EDGE, new ProxyTubeIdentifier(ils, count));
 				if (pickMode)	gl.glPushName(count++);
-				JOGLRendererHelper.drawFaces(tube, jr, polygonShader.isSmoothShading(), alpha);
+				JOGLRendererHelper.drawFaces(tube, jr, smoothShading, alpha);
 				if (pickMode) 	gl.glPopName();
 			}
 			for (int i = 0; i<v; ++i)	{
@@ -267,7 +268,7 @@ public class DefaultLineShader implements LineShader  {
 				//JOGLConfiguration.theLog.log(Level.FINE,"Tube has "+tube.getNumPoints()+" points");
 				//tube.setGeometryAttributes(PROXY_FOR_EDGE, new ProxyTubeIdentifier(ils, count));
 				if (pickMode)	gl.glPushName(count++);
-				JOGLRendererHelper.drawFaces(tube, jr, polygonShader.isSmoothShading(), alpha);
+				JOGLRendererHelper.drawFaces(tube, jr, smoothShading, alpha);
 				if (pickMode) 	gl.glPopName();
 			}
 		} else {
@@ -301,7 +302,7 @@ public class DefaultLineShader implements LineShader  {
 				//tube.setGeometryAttributes(PROXY_FOR_EDGE, new ProxyTubeIdentifier(ils, i));
 				if (tube != null)	{
 					GeometryUtility.calculateAndSetNormals(tube);
-					JOGLRendererHelper.drawFaces(tube, jr,  polygonShader.isSmoothShading(), alpha);					
+					JOGLRendererHelper.drawFaces(tube, jr,  smoothShading, alpha);					
 				}
 			}
 			if (pickMode) 	gl.glPopName();					
@@ -314,10 +315,11 @@ public class DefaultLineShader implements LineShader  {
 	}
 	
 	public void postRender(JOGLRenderer jr) {
+		jr.getCanvas().getGL().glDepthRange(0.0d, 1d);
 	}
 
 	public boolean isSmoothShading() {
-		return smoothShading;
+		return interpolateVertexColors;
 	}
 
 }

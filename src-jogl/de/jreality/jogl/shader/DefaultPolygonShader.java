@@ -68,13 +68,13 @@ public class DefaultPolygonShader implements PolygonShader {
 	    if (foo instanceof Texture2D) lightMap = (Texture2D) foo;
 	
 		//TODO this is a hack. 
-		if (eap.getAttribute(NameSpace.name(name,"useGLShader"), false) == true)	{
-			Object obj =  eap.getAttribute(NameSpace.name(name,"GLShader"), null, AbstractJOGLShader.class);
-			if (obj instanceof AbstractJOGLShader) {
-				glShader = (AbstractJOGLShader) obj;
-			}
-		} else glShader = null;
-	
+//		if (eap.getAttribute(NameSpace.name(name,"useGLShader"), false) == true)	{
+//			Object obj =  eap.getAttribute(NameSpace.name(name,"GLShader"), null, AbstractJOGLShader.class);
+//			if (obj instanceof AbstractJOGLShader) {
+//				glShader = (AbstractJOGLShader) obj;
+//			}
+//		} else glShader = null;
+//	
 	}
 
 		/**
@@ -162,7 +162,9 @@ public class DefaultPolygonShader implements PolygonShader {
 		} 
 		vertexShader.setFrontBack(frontBack);
 		vertexShader.render(jr);
-		if (glShader != null) glShader.activate(theCanvas);
+//		if (glShader != null) {
+//			glShader.render(jr);
+//		}
 	}
 	
 	public void postRender(JOGLRenderer jr)	{
@@ -179,6 +181,7 @@ public class DefaultPolygonShader implements PolygonShader {
 			gl.glDisable(GL.GL_TEXTURE_GEN_T);
 			gl.glDisable(GL.GL_TEXTURE_GEN_R);			
 		}
+//		if (glShader != null) glShader.deactivate(theCanvas);
 	}
 
 	public boolean providesProxyGeometry() {		

@@ -566,7 +566,7 @@ static boolean testArrays = false;
 		// use event listening to keep our list up-to-date
 		// DEBUG: see what happens if we always reuse the light list
 		int n = lights.size();
-		double[] zDirectiond = {0d,0d,1d,0d};
+		double[] zDirectiond = {0d,0d,1d,10E-16};		// try to work around a suspected openGL bug on some nvidia cards
 		double[] origind = {0d,0d,0d,1d};
 		globalGL.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE);
 		for (int i = 0; i<8; ++i)	{

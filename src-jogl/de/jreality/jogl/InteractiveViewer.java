@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.List;
 import java.util.Vector;
+import java.util.logging.Level;
 
 import de.jreality.jogl.tools.MotionManager;
 import de.jreality.jogl.tools.MouseTool;
@@ -22,6 +23,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.LoggingSystem;
 
 /**
  * @author Charles Gunn
@@ -69,7 +71,7 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 
 		vc.addMouseListener(new MouseAdapter() {
 				public void mousePressed(MouseEvent e)	{
-					//System.err.println("Button: "+e.getButton());
+					JOGLConfiguration.getLogger().log(Level.FINER,"Button: "+e.getButton());
 					currentTool.startTrackingAt(e);
 				}
 		        
@@ -180,7 +182,7 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 	public void setCameraPath(SceneGraphPath pp) {
 		SceneGraphPath p = pp;
 		if (pp == null || !CameraUtility.isCameraPathValid(pp) || pp.getFirstElement() != sceneRoot) {
-			System.err.println("Invalid camera path, adding new camera.");
+			JOGLConfiguration.theLog.log(Level.INFO,"Invalid camera path, adding new camera.");
 			scalerNode = new SceneGraphComponent();
 			sceneRoot.addChild(scalerNode);
 			Camera c = new Camera();
@@ -195,7 +197,7 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 	}
 	public void setSceneRoot(SceneGraphComponent r) {
 		if (r == null)	{
-			System.err.println("Invalid scene root, creating new root.");
+			JOGLConfiguration.getLogger().log(Level.INFO,"Invalid scene root, creating new root.");
 			r = new SceneGraphComponent();
 			r.setName("Default SceneRoot");
 		}

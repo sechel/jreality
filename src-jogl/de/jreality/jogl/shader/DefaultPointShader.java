@@ -101,13 +101,13 @@ public class DefaultPointShader  implements PointShader {
 		gl.glPointSize((float) getPointSize());
 		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
 			gl.glColor4fv( diffuseColorAsFloat);
-			jr.openGLState.diffuseColor = diffuseColorAsFloat;
+			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
 		}
 		boolean lighting = false;
 		if (sphereDraw)	{
 			polygonShader.render(jr);
-			//lighting = true;
-		}
+			gl.glEnable(GL.GL_LIGHTING);  // a hack			//lighting = true;
+		} else 
 		if (jr.openGLState.lighting != lighting)	{
 			jr.openGLState.lighting = lighting;
 			if (lighting) gl.glEnable(GL.GL_LIGHTING);

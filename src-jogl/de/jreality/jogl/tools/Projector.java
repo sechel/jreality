@@ -108,16 +108,14 @@ public class Projector {
 //	since it's a vector with w=0, dehomogenizing is dangerous
 	protected void convertCameraToObject(double[] inv, double[] outV)	{
 		if (inv.length != 4 || outV.length != 4)	{
-			System.err.println("convertCameraToObject bad dimensions");
-			return;
+			throw new IllegalArgumentException("Arguments must be 4-vectors");
 		}
 		Rn.matrixTimesVector(outV, camToObject, inv);
 	}
 
 	protected void NDCToObject(double[] object, double[] ndc)	{
 		if (ndc == null || object != null && object.length != 4)	{
-			System.err.println("convertCameraToObject bad dimensions");
-			return;
+			throw new IllegalArgumentException("Null arguments, or arguments must be 4-vectors");
 		}
 		double[] ndc4 = new double[4];
 		Rn.setToValue(ndc4, ndc[0], ndc[1], 0d, 1d);
@@ -132,8 +130,7 @@ public class Projector {
 //	based at the origin of object space
 	public void getDirection(double[] ndcLoc, double[] result)	{
 		if (ndcLoc.length != 3 || result.length != 4)	{
-			System.err.println("projectToDirection bad dimensions");
-			return;
+			throw new IllegalArgumentException("Bad vector length");
 		}
 		CameraUtility.projectToDirection(camera, ndcLoc, result);
 		result[3] = 0.0;

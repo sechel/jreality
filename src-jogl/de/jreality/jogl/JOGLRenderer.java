@@ -32,6 +32,7 @@ import de.jreality.geometry.SphereHelper;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultGeometryShader;
 import de.jreality.jogl.shader.RenderingHintsShader;
+import de.jreality.jogl.shader.TextShader;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Drawable;
 import de.jreality.scene.Geometry;
@@ -756,21 +757,26 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				int dlist = sphereDisplayLists[i];
 				globalGL.glDisable(GL.GL_SMOOTH);
 				if (pickMode) globalGL.glPushName(JOGLPickAction.GEOMETRY_BASE);
-				if (debugGL) globalGL.glColor4fv(cdbg[i].getRGBComponents(null));
+				//if (debugGL) 
+					globalGL.glColor4fv(cdbg[i].getRGBComponents(null));
 				globalGL.glCallList(dlist);
 				if (pickMode) globalGL.glPopName();
 				geometryShader.polygonShader.postRender(globalHandle);
 				return;
 			}		
 			else 	if (originalGeometry instanceof LabelSet)	{
-				globalGL.glColor4fv(geometryShader.lineShader.getDiffuseColor().getComponents(null));
+				// NOTE we don't use display lists here because the text rendering is done in screen
+				// coordinates and must be recalculated for each frame
+				TextShader textShader = new TextShader();
+				textShader.setFromEffectiveAppearance(jpc.eAp, "textShader");
+				textShader.render(globalHandle);
 				JOGLRendererHelper.drawLabels(((LabelSet) originalGeometry), globalHandle);
 			}
 
 			if (geometryShader.isFaceDraw() && ifs != null)	{
 				geometryShader.polygonShader.render(globalHandle);
-				double alpha = geometryShader.polygonShader.getDiffuseColor().getAlpha()/255.0;
-				boolean ss = geometryShader.polygonShader.isSmoothShading();
+				double alpha = openGLState.diffuseColor[3];
+				boolean ss = openGLState.smoothShading;
 				int type = ss ? SMOOTH_POLYGONDL : FLAT_POLYGONDL;
 				boolean proxy = geometryShader.polygonShader.providesProxyGeometry();
 				if (proxy && dlInfo.isDisplayListDirty(type))	{
@@ -799,8 +805,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			if (geometryShader.isEdgeDraw() && ils != null)	{
 				geometryShader.lineShader.render(globalHandle);
 				boolean proxy = geometryShader.lineShader.providesProxyGeometry();
-				double alpha = geometryShader.lineShader.getDiffuseColor().getAlpha()/255.0;
-				boolean smooth = geometryShader.lineShader.isSmoothShading();
+				double alpha = openGLState.diffuseColor[3];
+				boolean smooth = false; //openGLState.smoothShading;;
 				int type = proxy ? PROXY_LINEDL : LINEDL;
 				if (proxy && dlInfo.isDisplayListDirty(PROXY_LINEDL))	{
 					theLog.log(Level.FINER,"Recalculating tubes");

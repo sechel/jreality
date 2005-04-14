@@ -117,25 +117,30 @@ public class InteractiveViewerDemo extends JFrame{
 		if (mode == SPLIT_PANE)	{
 			final DefaultViewer v2 = new DefaultViewer();
 			v2.initializeFrom(viewer);
-//			getContentPane().add(viewer.getViewingComponent(), BorderLayout.CENTER);
-			getContentPane().add(v2.getViewingComponent(), BorderLayout.CENTER);
+			JFrame softframe = new JFrame();
+			softframe.getContentPane().add(v2.getViewingComponent());
+			softframe.show();
+			//getContentPane().add(viewer.getViewingComponent(), BorderLayout.CENTER);
+			//getContentPane().add(v2.getViewingComponent(), BorderLayout.EAST);
 			if (!fullScreen) setSize(800, 600);
 //			javax.swing.JPanel moo = new javax.swing.JPanel();
 //			moo.setMaximumSize(new java.awt.Dimension(32768,32768));
 //			moo.setMinimumSize(new java.awt.Dimension(10,10));
+//			moo.setSize(400, 400);
 //			moo.add(viewer.getViewingComponent());
-//			splitPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, false, moo,v2.getViewingComponent());
+//			JSplitPane splitPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, false,viewer.getViewingComponent(),v2.getViewingComponent());
 //			splitPanel.setDividerLocation(0.5d);
-//			javax.swing.Timer timer = new javax.swing.Timer(200, new ActionListener()	{
-//				public void actionPerformed(ActionEvent e) {
-//					v2.render();
-//				}
-//			});	
-				
 //			splitPanel.setSize(800, 400);	
+			javax.swing.Timer timer = new javax.swing.Timer(200, new ActionListener()	{
+				public void actionPerformed(ActionEvent e) {
+					v2.render();
+				}
+			});	
+				
+			timer.start();
+//			getContentPane().add(splitPanel, BorderLayout.CENTER);	
 //			setSize(800,400);
-//			getContentPane().add(splitPanel, BorderLayout.CENTER);			
-//			getContentPane().add(viewer.getViewingComponent(), BorderLayout.CENTER);
+			getContentPane().add(viewer.getViewingComponent(), BorderLayout.CENTER);
 		} else if (mode == TABBED_PANE){
 			tabbedPane = new JTabbedPane();
 			addViewer(viewer, "Standard");
