@@ -67,16 +67,6 @@
 		<jar jarfile="${dist}/jReality-soft.jar" basedir="${build}/soft" />
 	</target>
 	
-	<target name="pick" depends="core">
-		<mkdir dir="${build}/pick" />
-		<javac excludesfile="excludes.txt" srcdir="test-picking" classpath="${dist}/jReality-core.jar" destdir="${build}/pick" debug="true">
-			<compilerarg line="-source 1.4" />
-		</javac>
-		<jar jarfile="${dist}/jReality-pick.jar" basedir="${build}/pick" />
-	</target>
-
-
-	
 	<target name="jogl" depends="core, soft">
 		<mkdir dir="${build}/jogl" />
 		<javac excludesfile="excludes.txt" srcdir="${jogl}"  classpath="${dist}/jReality-core.jar:${dist}/jReality-soft.jar" destdir="${build}/jogl" debug="true">
@@ -125,7 +115,6 @@
 	<target name="javadoc">
 		<mkdir dir="${javadoc}" />
 		<javadoc destdir="${javadoc}" author="true" version="true" use="true" windowtitle="jReality API" source="1.4">
-
 			<fileset dir="src" defaultexcludes="yes">
 				<include name="de/jreality/geometry/**" />
 				<include name="de/jreality/reader/**" />
@@ -165,7 +154,6 @@
 				<exclude name="**/*.properties" />
 				<include name="de/jreality/**" />
 			</fileset>
-																						
 			<link offline="true" href="http://java.sun.com/products/jdk/1.2/docs/api/" packagelistLoc="C:\tmp" />
 			<link href="http://developer.java.sun.com/developer/products/xml/docs/api/" />
 		</javadoc>
