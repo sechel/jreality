@@ -21,6 +21,7 @@ import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.soft.DefaultViewer;
+import de.jreality.util.Matrix;
 import de.jreality.util.P3;
 import de.jreality.util.SceneGraphUtilities;
 
@@ -87,10 +88,10 @@ public class ToolTestScene {
 		sphere.setGeometry(new Sphere());
     cath.addTool(new TestTool());
     cath.addTool(new DraggingTool() {
-		public void enforceConstraints(double[] matrix) {
-			matrix[3]=0;
-			matrix[7]=0;
-			matrix[11]=0;
+    	// only allow translation along y axis
+		public void enforceConstraints(Matrix matrix) {
+			matrix.setEntry(0, 3, 0.);
+			matrix.setEntry(2, 3, 0.);
 		}});
 		cath.setGeometry(new CatenoidHelicoid(40));
 		root.addChild(scene);
