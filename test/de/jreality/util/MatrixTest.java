@@ -143,7 +143,6 @@ public class MatrixTest extends TestCase {
 		for(int i=0; i<16; i++) {
 			assertTrue(v[i]==rnd.getArray()[i]);
 		}
-		double[] v0=v;
 		(new Matrix(range)).writeToArray(v);
 		for(int i=0; i<16; i++) {
 			assertTrue(v[i]==range[i]);
