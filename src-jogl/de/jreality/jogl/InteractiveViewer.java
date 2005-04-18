@@ -183,14 +183,14 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 		SceneGraphPath p = pp;
 		if (pp == null || !CameraUtility.isCameraPathValid(pp) || pp.getFirstElement() != sceneRoot) {
 			JOGLConfiguration.theLog.log(Level.INFO,"Invalid camera path, adding new camera.");
-			scalerNode = new SceneGraphComponent();
-			sceneRoot.addChild(scalerNode);
+//			scalerNode = new SceneGraphComponent();
+//			sceneRoot.addChild(scalerNode);
 			Camera c = new Camera();
 			SceneGraphComponent sgc = new SceneGraphComponent();
 			sgc.setTransformation(new Transformation());
 			sgc.setName("Default Camera node");
 			sgc.setCamera(c);
-			scalerNode.addChild(sgc);
+			sceneRoot.addChild(sgc);
 			p = SceneGraphPath.getFirstPathBetween(sceneRoot, c);
 		}
 		super.setCameraPath(p);
