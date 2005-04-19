@@ -138,7 +138,7 @@ public class HeadtrackedRemoteViewerImp extends RemoteViewerImp implements
         Rn.times(totalOrientation, Rn.inverse(null,
                 cameraOrientationNode.getTransformation().getMatrix()), tmp);
         cam.setOrientationMatrix(totalOrientation);
-        cam.setViewPort(CameraUtility.calculatePORTALViewport(viewer, t));
+        cam.setViewPort(CameraUtility.calculatePORTALViewport(viewer));
     }
     
     //TODO: throw away this method

@@ -42,6 +42,9 @@ import de.jreality.scene.Transformation;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
+import de.jreality.util.FactoredMatrix;
+import de.jreality.util.Matrix;
+import de.jreality.util.MatrixBuilder;
 import de.jreality.util.P3;
 import de.jreality.util.Rn;
 import de.smrj.ClientFactory;
@@ -98,8 +101,12 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
 	    cameraOrientationNode = new SceneGraphComponent();
 	    cameraOrientationNode.setTransformation(new Transformation());
         double[] rot = config.getDoubleArray("camera.orientation");
-        cameraOrientationNode.getTransformation().setRotation(
-                rot[0] * ((Math.PI * 2.0) / 360.), rot[1], rot[2], rot[3]);
+        Matrix m = new Matrix(cameraOrientationNode.getTransformation().getMatrix());
+        MatrixBuilder.euclidian(m).rotate(
+                rot[0] * ((Math.PI * 2.0) / 360.),
+                new double[] {rot[1], rot[2], rot[3]}
+        );
+        cameraOrientationNode.getTransformation().setMatrix(m.getArray());
         cameraTranslationNode.addChild(cameraOrientationNode);
     }
 	
@@ -199,21 +206,21 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
         frame.hide();
     }
 
-    Transformation t = new Transformation();
     double[] tmp = new double[16];
     double[] totalOrientation = new double[16];
     
     public void setHeadMatrix(double[] tm) {
-        t.setMatrix(tm);
+        FactoredMatrix t = new FactoredMatrix(tm);
+        FactoredMatrix trans = new FactoredMatrix();
+        trans.setTranslation(t.getTranslation());
         //TODO move sensor between the eyes
         Camera cam = CameraUtility.getCamera(viewer);
-        cameraTranslationNode.getTransformation().setTranslation(
-                t.getTranslation());
-        Rn.times(tmp, t.getMatrix(), correction);
+        cameraTranslationNode.getTransformation().setMatrix(trans.getArray());
+        Rn.times(tmp, trans.getArray(), correction);
         Rn.times(totalOrientation, Rn.inverse(null,
                 cameraOrientationNode.getTransformation().getMatrix()), tmp);
         cam.setOrientationMatrix(totalOrientation);
-        cam.setViewPort(CameraUtility.calculatePORTALViewport(viewer, t));
+        cam.setViewPort(CameraUtility.calculatePORTALViewport(viewer));
     }
 
 	public void setBackgroundColor(java.awt.Color c) {

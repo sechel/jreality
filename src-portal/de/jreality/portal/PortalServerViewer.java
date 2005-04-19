@@ -33,6 +33,7 @@ import de.jreality.scene.tool.ToolSystem;
 import de.jreality.util.CmdLineParser;
 import de.jreality.util.Lock;
 import de.jreality.util.LoggingSystem;
+import de.jreality.util.MatrixBuilder;
 import de.jreality.util.P3;
 import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
@@ -303,7 +304,7 @@ public class PortalServerViewer implements Viewer, HeadMotionListener {
         	world.addTool(new DraggingTool());
         	world.addTool(new TestTool());
         	world.setTransformation(new Transformation());
-        	world.getTransformation().setStretch(fileScale);
+        	world.getTransformation().setMatrix(MatrixBuilder.euclidian().scale(fileScale).getMatrix().getArray());
         	setSceneRoot(defaultRoot);
         	setCameraPath(defaultCamPath);
         	ToolSystem ts = new ToolSystem(this);
