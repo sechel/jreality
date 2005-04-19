@@ -119,7 +119,7 @@ public class MatrixTest extends TestCase {
 	public void testScale() {
 		Matrix m = new Matrix(rnd);
 		double x = Math.random();
-		m.scale(x);
+		m.scale(x, x, x, x);
 		for(int i=0; i<16; i++) {
 			assertTrue(m.getArray()[i]==rnd.getArray()[i]*x);
 		}
