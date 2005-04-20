@@ -33,7 +33,7 @@ import de.jreality.scene.Transformation;
  * @author weissman
  *
  */
-public interface Texture2DInterface {
+public interface Texture2DInterface extends AttributeEntity {
 
   // we share constants with OpenGL
   // texture formats

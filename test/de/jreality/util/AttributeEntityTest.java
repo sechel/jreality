@@ -22,6 +22,8 @@
  */
 package de.jreality.util;
 
+import java.awt.Color;
+
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Transformation;
 import junit.framework.TestCase;
@@ -44,10 +46,9 @@ public class AttributeEntityTest extends TestCase {
     Appearance app1 = new Appearance();
     Appearance app2 = new Appearance();
     
-    AttributeEntity attributeEntity = new AttributeEntity(Texture2DInterface.class, "TEXTURE2D");
-    Texture2DInterface tex = (Texture2DInterface) attributeEntity.getProxy();
-    attributeEntity.registerAppearance(app1);
-    attributeEntity.registerAppearance(app2);
+    Texture2DInterface tex = (Texture2DInterface) AttributeEntityFactory.createEntity(Texture2DInterface.class);
+    tex.registerAppearance(app1, "texture2d");
+    tex.registerAppearance(app2, "lightMap");
     tex.setApplyMode(Texture2DInterface.GL_LINEAR_MIPMAP_LINEAR);
     tex.setSScale(0.006);
     tex.setTScale(3.14);
@@ -61,17 +62,34 @@ public class AttributeEntityTest extends TestCase {
     Appearance app1 = new Appearance();
     Appearance app2 = new Appearance();
     
-    AttributeEntity attributeEntity = new AttributeEntity(Texture2DInterface.class, "TEXTURE2D");
-    Texture2DInterface tex = (Texture2DInterface) attributeEntity.getProxy();
-    attributeEntity.registerAppearance(app1);
-    attributeEntity.registerAppearance(app2);
+    Texture2DInterface tex = (Texture2DInterface) AttributeEntityFactory.createEntity(Texture2DInterface.class);
+    tex.registerAppearance(app1, "texture2d");
+    tex.registerAppearance(app2, "lightMap");
     tex.setApplyMode(Texture2DInterface.GL_LINEAR_MIPMAP_LINEAR);
     tex.setSScale(0.006);
     tex.setTScale(3.14);
     tex.setTextureTransformation(new Transformation());
     System.out.println("App1:"+app1);
     System.out.println("\n\nApp2:"+app2);
-    attributeEntity.unRegisterAppearance(app1);
+    tex.unregisterAppearance(app1);
     System.out.println("App1:"+app1);
+  }
+  
+  public void testDefaultShader() {
+    Appearance app1 = new Appearance();
+    Appearance app2 = new Appearance();
+    
+    DefaultShaderInterface def = (DefaultShaderInterface) AttributeEntityFactory.createEntity(DefaultShaderInterface.class);
+    def.registerAppearance(app1, "");
+    def.polygonShader().setDiffuseColor(new Color(122, 13,188));
+    def.polygonShader().setSpecularCoefficient(0.81);
+    def.setShowLines(false);
+    def.setLineShader("twoSide");
+    def.lineShader().front().setAmbientColor(new Color(22,11,33));
+    def.setTexture2d((Texture2DInterface) AttributeEntityFactory.createEntity(Texture2DInterface.class));
+    def.getTexture2d().registerAppearance(app1, "texture2d");
+    def.getTexture2d().setApplyMode(Texture2DInterface.GL_CLAMP);
+    def.getTexture2d().setMagFilter(Texture2DInterface.GL_ONE_MINUS_SRC_COLOR);
+    System.out.println(app1);
   }
 }
