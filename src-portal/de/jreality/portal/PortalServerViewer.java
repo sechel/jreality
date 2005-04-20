@@ -15,7 +15,9 @@ import szg.framework.event.remote.RemoteEventQueueImpl;
 import de.jreality.reader.Readers;
 import de.jreality.remote.portal.smrj.HeadtrackedRemoteJOGLViewer;
 import de.jreality.remote.portal.smrj.HeadtrackedRemoteJOGLViewerImp;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
+import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.Drawable;
 import de.jreality.scene.SceneGraphComponent;
@@ -27,6 +29,8 @@ import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.scene.proxy.smrj.SMRJMirrorScene;
 import de.jreality.scene.tool.*;
 import de.jreality.util.CmdLineParser;
+import de.jreality.util.ConfigurationAttributes;
+import de.jreality.util.LoadableScene;
 import de.jreality.util.Lock;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.MatrixBuilder;
@@ -76,6 +80,8 @@ public class PortalServerViewer implements Viewer, HeadMotionListener {
     private RemoteEventQueueImpl szgQueue;
     
     private ToolSystem toolSystem;
+    
+    private Color backgroundColor = new Color(122,122,122);
 
     private final Lock headMatrixLock = new Lock();
 	private final double[] headMatrix = new double[16];
@@ -116,6 +122,7 @@ public class PortalServerViewer implements Viewer, HeadMotionListener {
 
 	public void setSceneRoot(SceneGraphComponent r) {
 		this.root = r;
+        applyBackgroundColor();
 		RemoteSceneGraphComponent rsgc = (RemoteSceneGraphComponent) proxyScene.createProxyScene(root);
 		clients.setRemoteSceneRoot(rsgc);
 	}
@@ -204,6 +211,7 @@ public class PortalServerViewer implements Viewer, HeadMotionListener {
 
 	public void setSignature(int sig) {
 		this.signature = sig;
+        clients.setSignature(this.signature);
 	}
 
     private static String usage(CmdLineParser parser) {
@@ -260,8 +268,20 @@ public class PortalServerViewer implements Viewer, HeadMotionListener {
     }
 
 	public void setBackgroundColor(Color color) {
-		clients.setBackgroundColor(color);
+		this.backgroundColor = color;
+        applyBackgroundColor();
 	}
+
+    private void applyBackgroundColor() {
+        if (getSceneRoot() != null) {
+            Appearance ap = getSceneRoot().getAppearance();
+            if (ap == null) {
+                ap = new Appearance();
+                getSceneRoot().setAppearance(ap);
+            }
+            ap.setAttribute(CommonAttributes.BACKGROUND_COLOR, backgroundColor);
+        }
+    }
 
 	private SceneGraphComponent defaultRoot;
     private SceneGraphPath defaultCamPath;
@@ -292,6 +312,15 @@ public class PortalServerViewer implements Viewer, HeadMotionListener {
 	private void loadFile(String name) {
         long t = System.currentTimeMillis();
         de.jreality.scene.SceneGraphComponent world = Readers.readFile(new File(name));
+        setUpWorld(world);
+        long s = System.currentTimeMillis() - t;
+        System.out.println("loaded file " + name + " successful. ["+s+"ms]");
+	}
+
+	/**
+     * @param world
+     */
+    private void setUpWorld(de.jreality.scene.SceneGraphComponent world) {
         if (world != null) {
         	if (defaultRoot == null || !defaultCamPath.isValid()) {
         		initDefaultScene();
@@ -311,12 +340,27 @@ public class PortalServerViewer implements Viewer, HeadMotionListener {
         		LoggingSystem.getLogger(this).log(Level.WARNING, "PickSystem instanciation failed", e);
         	}
         }
-        long s = System.currentTimeMillis() - t;
-        System.out.println("loaded file " + name + " successful. ["+s+"ms]");
-	}
+    }
 
-	private void loadWorld(String string) {
-		throw new UnsupportedOperationException();
+    private void loadWorld(String classname) {
+        long t = System.currentTimeMillis();
+        LoadableScene wm = null;
+        try {
+            wm = (LoadableScene) Class.forName(classname).newInstance();
+        } catch (Exception e) {
+            LoggingSystem.getLogger(this).log(Level.WARNING, "problem loading world", e);
+            return;
+        }
+        // scene settings
+        wm.setConfiguration(ConfigurationAttributes.getDefaultConfiguration());
+        SceneGraphComponent world = wm.makeWorld();
+        long s = System.currentTimeMillis() - t;
+        System.out.println("make world " + classname + " successful. ["+s+"ms]");
+        setSignature(wm.getSignature());
+        t = System.currentTimeMillis();
+        if (world != null) setUpWorld(world);
+        s = System.currentTimeMillis() - t;
+        System.out.println("distributed world " + classname +"["+s+"ms]");
 	}
 
     static SceneGraphComponent makeLights()    {

@@ -31,5 +31,4 @@ public interface RemoteJoglViewer extends RemoteViewer {
     public void setManualSwapBuffers(boolean b);
     public void swapBuffers();
     public void waitForRenderFinish();
-    public void setBackgroundColor(java.awt.Color c);
 }

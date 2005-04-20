@@ -222,15 +222,4 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
         cam.setOrientationMatrix(totalOrientation);
         cam.setViewPort(CameraUtility.calculatePORTALViewport(viewer));
     }
-
-	public void setBackgroundColor(java.awt.Color c) {
-		Appearance ap = viewer.getSceneRoot().getAppearance();
-		if (ap == null)	{
-			ap = new Appearance();
-			viewer.getSceneRoot().setAppearance(ap);
-		}
-		ap.setAttribute(CommonAttributes.BACKGROUND_COLOR, c);
-	}
-	
-
 }
