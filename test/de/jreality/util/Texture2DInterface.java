@@ -27,140 +27,99 @@ import java.awt.Color;
 import de.jreality.scene.Transformation;
 
 /**
- *
+ * 
  * TODO: comment this
- *
+ * 
  * @author weissman
- *
+ *  
  */
-public interface Texture2DInterface extends AttributeEntity {
+public interface Texture2DInterface extends AttributeEntityWriter {
 
   // we share constants with OpenGL
   // texture formats
   public static final int GL_RGB = 0x1907;
-
   public static final int GL_RGBA = 0x1908;
-
   public static final int GL_ALPHA = 0x1906;
-
   public static final int GL_LUMINANCE = 0x1909;
-
   public static final int GL_LUMINANCE_ALPHA = 0x190A;
-
   public static final int GL_INTENSITY = 0x8049;
-
   // types of application of texture
   public static final int GL_DECAL = 0x2101;
-
   public static final int GL_MODULATE = 0x2100;
-
   public static final int GL_REPLACE = 0x1E01;
-
   public static final int GL_BLEND = 0x0BE2;
-
   public static final int GL_ADD = 0x0104;
-
   public static final int GL_COMBINE = 0x8570;
-
   public static final int GL_COMBINE_RGB = 0x8571;
-
   public static final int GL_COMBINE_ALPHA = 0x8572;
-
   public static final int GL_RGB_SCALE = 0x8573;
-
   public static final int GL_ALPHA_SCALE = 0x0D1C;
-
   public static final int GL_ADD_SIGNED = 0x8574;
-
   public static final int GL_INTERPOLATE = 0x8575;
-
   public static final int GL_CONSTANT = 0x8576;
-
   public static final int GL_PRIMARY_COLOR = 0x8577;
-
   public static final int GL_PREVIOUS = 0x8578;
-
   public static final int GL_SOURCE0_RGB = 0x8580;
-
   public static final int GL_SOURCE1_RGB = 0x8581;
-
   public static final int GL_SOURCE2_RGB = 0x8582;
-
   public static final int GL_SOURCE0_ALPHA = 0x8588;
-
   public static final int GL_SOURCE1_ALPHA = 0x8589;
-
   public static final int GL_SOURCE2_ALPHA = 0x858A;
-
   public static final int GL_OPERAND0_RGB = 0x8590;
-
   public static final int GL_OPERAND1_RGB = 0x8591;
-
   public static final int GL_OPERAND2_RGB = 0x8592;
-
   public static final int GL_OPERAND0_ALPHA = 0x8598;
-
   public static final int GL_OPERAND1_ALPHA = 0x8599;
-
   public static final int GL_OPERAND2_ALPHA = 0x859A;
-
   public static final int GL_SUBTRACT = 0x84E7;
-
   public static final int GL_DOT3_RGB = 0x86AE;
-
   public static final int GL_DOT3_RGBA = 0x86AF;
-
   public static final int GL_ONE = 1;
-
   public static final int GL_SRC_COLOR = 0x0300;
-
   public static final int GL_ONE_MINUS_SRC_COLOR = 0x0301;
-
   public static final int GL_SRC_ALPHA = 0x0302;
-
   public static final int GL_ONE_MINUS_SRC_ALPHA = 0x0303;
-
   public static final int GL_DST_ALPHA = 0x0304;
-
   public static final int GL_ONE_MINUS_DST_ALPHA = 0x0305;
-
   public static final int GL_DST_COLOR = 0x0306;
-
   public static final int GL_ONE_MINUS_DST_COLOR = 0x0307;
-
   public static final int GL_SRC_ALPHA_SATURATE = 0x0308;
-
   // types of filtering of texture image
   public static final int GL_NEAREST = 0x2600;
-
   public static final int GL_LINEAR = 0x2601;
-
   public static final int GL_NEAREST_MIPMAP_NEAREST = 0x2700;
-
   public static final int GL_NEAREST_MIPMAP_LINEAR = 0x2702;
-
   public static final int GL_LINEAR_MIPMAP_NEAREST = 0x2701;
-
   public static final int GL_LINEAR_MIPMAP_LINEAR = 0x2703;
-
   // types of behavior outside of [0,1]x[0,1]
   public static final int GL_REPEAT = 0x2901;
-
   public static final int GL_CLAMP = 0x2900;
-
   public static final int GL_CLAMP_TO_EDGE = 0x812F;
-
   public static final int CLAMP = 0;
-
   public static final int REPEAT = 1;
 
+  // default values
+  public static final double S_SCALE_DEFAULT=1;
+  public static final double T_SCALE_DEFAULT=1;
+  public static final int REPEAT_S_DEFAULT=GL_REPEAT;
+  public static final int REPEAT_T_DEFAULT=GL_REPEAT;
+
+  public static final int APPLY_MODE_DEFAULT = GL_MODULATE;
+  public static final int MAG_FILTER_DEFAULT = GL_LINEAR;
+  public static final int MIN_FILTER_DEFAULT = GL_LINEAR;
+  public static final int COMBINE_MODE_DEFAULT = GL_INTERPOLATE;
+
+  public static final Transformation TEXTURE_TRANSFORMATION_DEFAULT=new Transformation();
+  public static final Color BLEND_COLOR_DEFAULT=Color.WHITE;
+  
   /**
    * @return Returns the scaling in s direction.
    */
   public abstract double getSScale();
-
+  
   /**
-   * @param uscale The scalefactor for the s direction to set.
+   * @param uscale
+   *          The scalefactor for the s direction to set.
    */
   public abstract void setSScale(double sScale);
 
@@ -170,7 +129,8 @@ public interface Texture2DInterface extends AttributeEntity {
   public abstract double getTScale();
 
   /**
-   * @param vscale The scalefactor for the t direction to set.
+   * @param vscale
+   *          The scalefactor for the t direction to set.
    */
   public abstract void setTScale(double tScale);
 
@@ -180,7 +140,8 @@ public interface Texture2DInterface extends AttributeEntity {
   public abstract int getRepeatS();
 
   /**
-   * @param repeatS The repeatS to set.
+   * @param repeatS
+   *          The repeatS to set.
    */
   public abstract void setRepeatS(int repeatS);
 
@@ -190,7 +151,8 @@ public interface Texture2DInterface extends AttributeEntity {
   public abstract int getRepeatT();
 
   /**
-   * @param repeatT The repeatT to set.
+   * @param repeatT
+   *          The repeatT to set.
    */
   public abstract void setRepeatT(int repeatT);
 
@@ -225,33 +187,13 @@ public interface Texture2DInterface extends AttributeEntity {
   public abstract void setTextureTransformation(Transformation ds);
 
   /**
-   * @return
-   */
-  public abstract double[] getTextureMatrix();
-
-  /**
-   * @param ds
-   */
-  public abstract void setTextureMatrix(double[] ds);
-
-  /**
-   * @return Returns the channelArithmeticMatrix.
-   */
-  public abstract double[] getChannelArithmeticMatrix();
-
-  /**
-   * @param channelArithmeticMatrix The channelArithmeticMatrix to set.
-   */
-  public abstract void setChannelArithmeticMatrix(
-      double[] channelArithmeticMatrix);
-
-  /**
    * @return Returns the applyMode.
    */
   public abstract int getApplyMode();
 
   /**
-   * @param applyMode The applyMode to set.
+   * @param applyMode
+   *          The applyMode to set.
    */
   public abstract void setApplyMode(int applyMode);
 
@@ -262,4 +204,8 @@ public interface Texture2DInterface extends AttributeEntity {
   public abstract int getCombineMode();
 
   public abstract void setCombineMode(int combineMode);
+  
+  public abstract void setImage(AttributeImage image);
+  
+  public abstract AttributeImage getImage();
 }

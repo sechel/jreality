@@ -28,9 +28,8 @@ import de.jreality.scene.Appearance;
  * @author weissman
  *
  **/
-public interface AttributeEntity {
+public interface AttributeEntityWriter {
 
-  public abstract void registerAppearance(Appearance app, String name);
-  public abstract void unregisterAppearance(Appearance app);
+  public abstract void writeDefaults();
   
 }
