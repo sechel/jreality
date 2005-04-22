@@ -49,7 +49,6 @@ import de.jreality.scene.Texture2D;
  */
 public class AttributeImage implements Serializable {
 
-  private transient byte[] handoutByteArray;
   private transient Image img;
   private byte[] byteArray;
   private int width;
@@ -75,7 +74,6 @@ public class AttributeImage implements Serializable {
 
   public AttributeImage(byte[] data, int width, int height) {
     byteArray = new byte[data.length];
-    handoutByteArray = new byte[data.length];
     this.width = width;
     this.height = height;
   }
@@ -147,7 +145,6 @@ public class AttributeImage implements Serializable {
       }
       int num = pixelsI.length << 2;
       byteArray = new byte[num];
-      handoutByteArray = new byte[num];
       for (int i = 0, j = 0; j < num; i++, j += 4) {
         final int px = pixelsI[i];
         byteArray[j + 3] = (byte) (px >>> 24);

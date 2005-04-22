@@ -33,7 +33,7 @@ import de.jreality.scene.Transformation;
  * @author weissman
  *  
  */
-public interface Texture2DInterface extends AttributeEntityWriter {
+public interface Texture2DInterface extends AttributeEntity {
 
   // we share constants with OpenGL
   // texture formats
@@ -99,8 +99,8 @@ public interface Texture2DInterface extends AttributeEntityWriter {
   public static final int REPEAT = 1;
 
   // default values
-  public static final double S_SCALE_DEFAULT=1;
-  public static final double T_SCALE_DEFAULT=1;
+  public static final double SSCALE_DEFAULT=1;
+  public static final double TSCALE_DEFAULT=1;
   public static final int REPEAT_S_DEFAULT=GL_REPEAT;
   public static final int REPEAT_T_DEFAULT=GL_REPEAT;
 

@@ -55,9 +55,9 @@ public class AttributeEntityTest extends TestCase {
   public void testTexture2dSingleton() throws Exception {
     Appearance app1 = new Appearance();
 
-    AttributeImage ai = AttributeImage.load(Readers.resolveDataInput("/home/gollwas/miaomiamologo.jpeg"));
+    AttributeImage ai = AttributeImage.load(Readers.resolveDataInput("/homes/geometer/pietsch/Desktop/pic0611.jpg"));
     
-    Texture2DInterface tex = (Texture2DInterface) AttributeEntityFactory.createWriter(Texture2DInterface.class, "texture2d", app1);
+    Texture2DInterface tex = (Texture2DInterface) AttributeEntityFactory.createAttributeEntity(Texture2DInterface.class, "texture2d", app1);
     tex.setImage(ai);
     tex.setApplyMode(Texture2DInterface.GL_LINEAR_MIPMAP_LINEAR);
     tex.setSScale(0.006);
@@ -67,7 +67,17 @@ public class AttributeEntityTest extends TestCase {
     EffectiveAppearance ea = EffectiveAppearance.create();
     ea = ea.create(app1);
     
-    Texture2DInterface t2 = (Texture2DInterface) AttributeEntityFactory.createReader(Texture2DInterface.class, "texture2d", ea);
+    Texture2DInterface t1 = (Texture2DInterface) AttributeEntityFactory.createAttributeEntity(Texture2DInterface.class, "texture2d", app1);
+    
+    System.out.println(t1);
+    
+    System.out.println("repeatS="+t1.getRepeatS());
+    
+    assertEquals(t1.getSScale(), 0.006, 0);
+    assertEquals(t1.getTScale(), 1, 0);
+    assertEquals(t1.getApplyMode(), Texture2DInterface.GL_LINEAR_MIPMAP_LINEAR);
+
+    Texture2DInterface t2 = (Texture2DInterface) AttributeEntityFactory.createAttributeEntity(Texture2DInterface.class, "texture2d", ea);
     
     System.out.println(t2);
     
@@ -78,71 +88,21 @@ public class AttributeEntityTest extends TestCase {
     assertEquals(t2.getApplyMode(), Texture2DInterface.GL_LINEAR_MIPMAP_LINEAR);
     tex.setTScale(3.14);
     assertEquals(t2.getTScale(), 3.14, 0);
-//    assertEquals(t2.getTextureTransformation(), t);
-  }
-
-  public void testTexture2dCollection() {
-    
-    Appearance app1 = new Appearance();
-    Appearance app2 = new Appearance();
-    Appearance app3 = new Appearance();
-    
-    LinkedList ll = new LinkedList();
-    ll.add(app1);
-    ll.add(app2);
-    ll.add(app3);
-    
-    Texture2DInterface tex = (Texture2DInterface) AttributeEntityFactory.createWriter(Texture2DInterface.class, "texture2d", ll);
-
-    tex.writeDefaults();
-    
-    tex.setApplyMode(Texture2DInterface.GL_LINEAR_MIPMAP_LINEAR);
-    tex.setSScale(0.006);
-    Transformation t = new Transformation();
-    tex.setTextureTransformation(t);
-    
-    EffectiveAppearance ea1 = EffectiveAppearance.create();
-    ea1 = ea1.create(app1);
-    EffectiveAppearance ea2 = EffectiveAppearance.create();
-    ea2 = ea2.create(app2);
-    EffectiveAppearance ea3 = EffectiveAppearance.create();
-    ea3 = ea3.create(app3);
-    
-    
-    Texture2DInterface t1 = (Texture2DInterface) AttributeEntityFactory.createReader(Texture2DInterface.class, "texture2d", ea1);
-    Texture2DInterface t2 = (Texture2DInterface) AttributeEntityFactory.createReader(Texture2DInterface.class, "texture2d", ea2);
-    Texture2DInterface t3 = (Texture2DInterface) AttributeEntityFactory.createReader(Texture2DInterface.class, "texture2d", ea3);
-        
-    assertEquals(t1.getSScale(), t2.getSScale(), 0);
-    assertEquals(t2.getSScale(), t3.getSScale(), 0);
-    assertEquals(t3.getSScale(), t1.getSScale(), 0);
-    
-    assertEquals(t1.getTScale(), t2.getTScale(), 0);
-    assertEquals(t2.getTScale(), t3.getTScale(), 0);
-    assertEquals(t3.getTScale(), t1.getTScale(), 0);
-    
-    
-    
-    assertEquals(t2.getTScale(), 1, 0);
-    assertEquals(t2.getApplyMode(), Texture2DInterface.GL_LINEAR_MIPMAP_LINEAR);
-    tex.setTScale(3.14);
-    assertEquals(t2.getTScale(), 3.14, 0);
-    assertEquals(t2.getTextureTransformation(), t);
   }
   
-  public void testDefaultShader() throws Exception {
-    System.out.println("\n");
-    Appearance a = new Appearance();
-    DefaultShaderInterface di = (DefaultShaderInterface) AttributeEntityFactory.createWriter(DefaultShaderInterface.class, "plygonShader", a);
-    //di.writeDefaults();
-    System.out.println(di);
-    System.out.println(a);
-    System.out.println("\n");
-    EffectiveAppearance ea = EffectiveAppearance.create();
-    ea = ea.create(a);
-    di = (DefaultShaderInterface) AttributeEntityFactory.createReader(DefaultShaderInterface.class, "plygonShader", ea);
-    System.out.println(di);
-    
-  }
+//  public void testDefaultShader() throws Exception {
+//    System.out.println("\n");
+//    Appearance a = new Appearance();
+//    DefaultShaderInterface di = (DefaultShaderInterface) AttributeEntityFactory.createWriter(DefaultShaderInterface.class, "plygonShader", a);
+//    //di.writeDefaults();
+//    System.out.println(di);
+//    System.out.println(a);
+//    System.out.println("\n");
+//    EffectiveAppearance ea = EffectiveAppearance.create();
+//    ea = ea.create(a);
+//    di = (DefaultShaderInterface) AttributeEntityFactory.createReader(DefaultShaderInterface.class, "plygonShader", ea);
+//    System.out.println(di);
+//    
+//  }
 
 }
