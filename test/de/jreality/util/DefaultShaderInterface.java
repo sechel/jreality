@@ -30,7 +30,7 @@ import de.jreality.geometry.TubeUtility;
  * @author weissman
  *
  **/
-public interface DefaultShaderInterface extends AttributeEntity {
+public interface DefaultShaderInterface extends AttributeEntityWriter {
 
   public final static Color  BACKGROUND_COLOR_DEFAULT = new java.awt.Color(225, 225, 225);
   public final static boolean FACE_DRAW_DEFAULT = true;

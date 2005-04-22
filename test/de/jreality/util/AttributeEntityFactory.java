@@ -116,15 +116,19 @@ public class AttributeEntityFactory {
   private final LinkedList appearances = new LinkedList();
   
   public static Object createReader(Class clazz, String prefix, EffectiveAppearance ea) {
+    LoggingSystem.getLogger(AttributeEntityFactory.class).log(Level.INFO, "creating reader {0} with prefix {1}", new Object[]{clazz, prefix});
     return new AttributeEntityFactory(clazz, prefix, ea).getProxy();
   }
 
   public static Object createWriter(Class clazz, String prefix, Appearance a) {
-    return new AttributeEntityFactory(clazz, prefix, Collections.singleton(a)).getProxy();
+    return createWriter(clazz, prefix, Collections.singleton(a));
   }
 
   public static Object createWriter(Class clazz, String prefix, Collection apps) {
-    return new AttributeEntityFactory(clazz, prefix, apps).getProxy();
+    Object proxy = new AttributeEntityFactory(clazz, prefix, apps).getProxy();
+    for (Iterator i = apps.iterator(); i.hasNext(); )
+      ((Appearance)i.next()).setAttribute(prefix, clazz, Class.class);
+    return proxy;
   }
 
   private AttributeEntityFactory(Class declaringInterface, String prefix, EffectiveAppearance ea) {
@@ -156,7 +160,7 @@ public class AttributeEntityFactory {
       this.prefix = prefix;
       this.declaringInterface=declaringInterface;
       if (!ea.getAttribute(prefix, Object.class, Class.class).equals(declaringInterface)) {
-        throw new IllegalStateException("no ["+declaringInterface.getName()+"] assigned");
+        throw new IllegalStateException("no ["+prefix+"<->"+declaringInterface.getName()+" : "+ea.getAttribute(prefix, Object.class, Class.class)+"] assigned");
       }
       readDefaultValues();
     }
@@ -249,7 +253,6 @@ public class AttributeEntityFactory {
      this.a = (Appearance) apps.iterator().next();
      this.prefix = prefix;
      this.declaringInterface=declaringInterface;
-     setAttribute(prefix, declaringInterface, Class.class);
     }
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
       if (method.getName().startsWith("set")) {
@@ -265,6 +268,7 @@ public class AttributeEntityFactory {
         Object ret = getAttribute(key);
         if (ret == null && method.getReturnType().isPrimitive())
           throw new IllegalStateException("default value for primitive not defined ["+attrName+"]");
+        return ret;
       }
       if (method.equals(writeDefaults)) {
         writeDefaults();

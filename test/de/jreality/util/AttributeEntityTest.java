@@ -129,5 +129,20 @@ public class AttributeEntityTest extends TestCase {
     assertEquals(t2.getTScale(), 3.14, 0);
     assertEquals(t2.getTextureTransformation(), t);
   }
+  
+  public void testDefaultShader() throws Exception {
+    System.out.println("\n");
+    Appearance a = new Appearance();
+    DefaultShaderInterface di = (DefaultShaderInterface) AttributeEntityFactory.createWriter(DefaultShaderInterface.class, "plygonShader", a);
+    //di.writeDefaults();
+    System.out.println(di);
+    System.out.println(a);
+    System.out.println("\n");
+    EffectiveAppearance ea = EffectiveAppearance.create();
+    ea = ea.create(a);
+    di = (DefaultShaderInterface) AttributeEntityFactory.createReader(DefaultShaderInterface.class, "plygonShader", ea);
+    System.out.println(di);
+    
+  }
 
 }

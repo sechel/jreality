@@ -147,6 +147,7 @@ public class AttributeImage implements Serializable {
       }
       int num = pixelsI.length << 2;
       byteArray = new byte[num];
+      handoutByteArray = new byte[num];
       for (int i = 0, j = 0; j < num; i++, j += 4) {
         final int px = pixelsI[i];
         byteArray[j + 3] = (byte) (px >>> 24);
@@ -172,11 +173,17 @@ public class AttributeImage implements Serializable {
   }
 
   public byte[] getByteArray() {
-    System.arraycopy(byteArray, 0, handoutByteArray, 0, byteArray.length);
-    return handoutByteArray;
+    //System.arraycopy(byteArray, 0, handoutByteArray, 0, byteArray.length);
+    return byteArray;
   }
 
   public String toString() {
     return "AttributeImage: width=" + width + " height=" + height;
+  }
+  public int getHeight() {
+    return height;
+  }
+  public int getWidth() {
+    return width;
   }
 }
