@@ -10,6 +10,7 @@
 	<property name="util" location="src/de/jreality/util" />
 	<property name="ui" location="src/de/jreality/ui" />
 	<property name="geometry" location="src/de/jreality/geometry" />
+	<property name="shader" location="src/de/jreality/shader" />
 
 	<!-- backends (dependencies from top to bottom) -->
 	<property name="soft" location="src-soft" />
@@ -42,7 +43,7 @@
 	<!-- all the core classes will be build here - all beackends depend on it-->
 	<target name="core" depends="init" description="compile the source ">
 		<mkdir dir="${build}/core" />
-		<javac excludesfile="excludes.txt" srcdir="${util}:${scene}:${beans}:${geometry}:${reader}:${ui}" destdir="${build}/core" debug="true">
+		<javac excludesfile="excludes.txt" srcdir="${util}:${scene}:${beans}:${geometry}:${reader}:${ui}:${shader}" destdir="${build}/core" debug="true">
 			<compilerarg line="-source 1.4" />
 		</javac>
         <copy todir="build/core">
