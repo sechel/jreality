@@ -26,6 +26,7 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.logging.Level;
 
@@ -34,8 +35,8 @@ import javax.imageio.ImageIO;
 import de.jreality.reader.Input;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.Texture2D;
 import de.jreality.scene.Transformation;
+import de.jreality.shader.Texture2D;
 import junit.framework.TestCase;
 
 
@@ -54,40 +55,29 @@ public class AttributeEntityTest extends TestCase {
   
   public void testTexture2dSingleton() throws Exception {
     Appearance app1 = new Appearance();
-
-    AttributeImage ai = AttributeImage.load(Readers.resolveDataInput("/homes/geometer/pietsch/Desktop/pic0611.jpg"));
-    
-    Texture2DInterface tex = (Texture2DInterface) AttributeEntityFactory.createAttributeEntity(Texture2DInterface.class, "texture2d", app1);
+    assertFalse(AttributeEntityFactory.hasAttributeEntity(Texture2D.class, "texture2d", app1));
+    Texture2D tex = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, "texture2d", app1);
+    assertTrue(AttributeEntityFactory.hasAttributeEntity(Texture2D.class, "texture2d", app1));
+    ImageData ai = ImageData.load(Readers.resolveDataInput("/home/gollwas/miaomiamologo.jpeg"));
     tex.setImage(ai);
-    tex.setApplyMode(Texture2DInterface.GL_LINEAR_MIPMAP_LINEAR);
-    tex.setSScale(0.006);
-    
+    tex.setApplyMode(Texture2D.GL_LINEAR_MIPMAP_LINEAR);
     System.out.println(tex);
+
+    Texture2D t1 = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, "texture2d", app1);
+    System.out.println(t1);
+    assertEquals(Texture2D.GL_LINEAR_MIPMAP_LINEAR, t1.getApplyMode());
+
     
     EffectiveAppearance ea = EffectiveAppearance.create();
+    assertFalse(AttributeEntityFactory.hasAttributeEntity(Texture2D.class, "texture2d", ea));
     ea = ea.create(app1);
-    
-    Texture2DInterface t1 = (Texture2DInterface) AttributeEntityFactory.createAttributeEntity(Texture2DInterface.class, "texture2d", app1);
-    
-    System.out.println(t1);
-    
-    System.out.println("repeatS="+t1.getRepeatS());
-    
-    assertEquals(t1.getSScale(), 0.006, 0);
-    assertEquals(t1.getTScale(), 1, 0);
-    assertEquals(t1.getApplyMode(), Texture2DInterface.GL_LINEAR_MIPMAP_LINEAR);
-
-    Texture2DInterface t2 = (Texture2DInterface) AttributeEntityFactory.createAttributeEntity(Texture2DInterface.class, "texture2d", ea);
-    
+    assertTrue(AttributeEntityFactory.hasAttributeEntity(Texture2D.class, "texture2d", ea));
+    ea = ea.create(new Appearance());
+    assertTrue(AttributeEntityFactory.hasAttributeEntity(Texture2D.class, "texture2d", ea));
+    Texture2D t2 = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, "texture2d", ea);
     System.out.println(t2);
-    
-    System.out.println("repeatS="+t2.getRepeatS());
-    
-    assertEquals(t2.getSScale(), 0.006, 0);
-    assertEquals(t2.getTScale(), 1, 0);
-    assertEquals(t2.getApplyMode(), Texture2DInterface.GL_LINEAR_MIPMAP_LINEAR);
-    tex.setTScale(3.14);
-    assertEquals(t2.getTScale(), 3.14, 0);
+    assertEquals(t2.getApplyMode(), Texture2D.GL_LINEAR_MIPMAP_LINEAR);
+
   }
   
 //  public void testDefaultShader() throws Exception {
