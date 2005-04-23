@@ -31,6 +31,7 @@ import szg.framework.event.HeadMotionListener;
 import szg.framework.event.WandListener;
 import szg.framework.event.WandMotionListener;
 import szg.framework.event.remote.RemoteEventQueueImpl;
+import de.jreality.portal.PortalServerViewer;
 import de.jreality.remote.portal.smrj.PortalServerImplementation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.DoubleArray;
@@ -117,7 +118,7 @@ public class DeviceMotionstar implements RawDevice {
             axesMatrix[3]  = event.getAxisValue(0);
             axesMatrix[7]  = event.getAxisValue(1);
             axesMatrix[11] = 1;
-            queue.addEventAndWait(new ToolEvent(DeviceMotionstar.this, slot, new DoubleArray(Rn.copy(null, axesMatrix))));
+            queue.addEvent(new ToolEvent(DeviceMotionstar.this, slot, new DoubleArray(Rn.copy(null, axesMatrix))));
         }
 
         public void wandDragged(WandEvent event) {
@@ -131,7 +132,7 @@ public class DeviceMotionstar implements RawDevice {
             InputSlot slot = (InputSlot) usedSources.get("wandMatrix");
             if (slot == null) return;
             matrixWand = Rn.transposeF2D(matrixWand, event.getMatrix());
-            queue.addEventAndWait(new ToolEvent(DeviceMotionstar.this, slot, new DoubleArray(Rn.copy(null, matrixWand))));
+            queue.addEvent(new ToolEvent(DeviceMotionstar.this, slot, new DoubleArray(Rn.copy(null, matrixWand))));
         }
 
         double[] matrixHead = new double[16];
@@ -140,7 +141,7 @@ public class DeviceMotionstar implements RawDevice {
             if (!usedSources.containsKey("headMatrix")) return;
             InputSlot slot = (InputSlot) usedSources.get("headMatrix");
             matrixHead = Rn.transposeF2D(matrixHead, event.getMatrix());
-            queue.addEventAndWait(new ToolEvent(DeviceMotionstar.this, slot, new DoubleArray(Rn.copy(null, matrixHead))));
+            queue.addEvent(new ToolEvent(DeviceMotionstar.this, slot, new DoubleArray(Rn.copy(null, matrixHead))));
         }
         
     }
@@ -153,7 +154,7 @@ public class DeviceMotionstar implements RawDevice {
 
     public void initialize(Viewer viewer) {
         try {
-        	PortalServerImplementation psi = (PortalServerImplementation) viewer;
+        	PortalServerViewer psi = (PortalServerViewer) viewer;
         	szgQueue = psi.getSzgQueue();
         } catch (Exception mfe) {
             LoggingSystem.getLogger(this).log(Level.SEVERE, "error creating remote motionstar eventqueue", mfe);
