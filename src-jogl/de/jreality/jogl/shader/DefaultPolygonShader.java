@@ -61,12 +61,12 @@ public class DefaultPolygonShader implements PolygonShader {
 
 		smoothShading = eap.getAttribute(NameSpace.name(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);	
 //		Object foo = eap.getAttribute(NameSpace.name(name,"texture2d"), null, Texture2D.class);
-		Object foo = eap.getAttribute(NameSpace.name(name,"texture2d"), de.jreality.scene.Texture2D.class);
+		Object foo = eap.getAttribute(NameSpace.name(name,"texture2d"), null, de.jreality.scene.Texture2D.class);
 		if (foo instanceof de.jreality.scene.Texture2D)	texture2D = (de.jreality.scene.Texture2D) foo;
     foo = eap.getAttribute(NameSpace.name(name,"reflectionMap"), null, ReflectionMap.class);
-		if (foo instanceof ReflectionMap)	reflectionMap = (ReflectionMap) foo;
+    if (foo instanceof ReflectionMap)	reflectionMap = (ReflectionMap) foo;
 	  foo = eap.getAttribute(NameSpace.name(name,"lightMap"), null, de.jreality.scene.Texture2D.class);
-	  if (foo instanceof de.jreality.scene.Texture2D) lightMap = (de.jreality.scene.Texture2D) foo;
+    if (foo instanceof de.jreality.scene.Texture2D) lightMap = (de.jreality.scene.Texture2D) foo;
 	
     if (AttributeEntityFactory.hasAttributeEntity(Texture2D.class, NameSpace.name(name,"texture2d"), eap))
       texture2Dnew = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, NameSpace.name(name,"texture2d"), eap);
