@@ -62,7 +62,7 @@ public class Quake3Demo extends AbstractLoadableScene implements TransformationL
         String mapName = JOptionPane.showInputDialog("please enter map name [ctf<1-4> | dm<0-19> | tourney<1-6>]");
         if (mapName != null) {
             try {
-                conv.setInput(Readers.resolveSystemResource("maps/q3"+mapName+".bsp"));
+                conv.setInput(Readers.resolveResource("maps/q3"+mapName+".bsp"));
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
