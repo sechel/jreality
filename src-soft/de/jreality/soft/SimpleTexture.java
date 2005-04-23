@@ -22,7 +22,7 @@
  */
 package de.jreality.soft;
 
-import de.jreality.scene.Texture2D;
+import de.jreality.shader.Texture2D;
 
 /**
  * 
@@ -43,7 +43,7 @@ public class SimpleTexture implements Texture {
     protected int incr =4;
     private final boolean interpolate;
     
-    public SimpleTexture(Texture2D texture) {
+    public SimpleTexture(de.jreality.scene.Texture2D texture) {
         this.bytes = texture.getByteArray();
         this.width=texture.getWidth();
         this.height = texture.getHeight();
@@ -55,6 +55,19 @@ public class SimpleTexture implements Texture {
         incr =3*width*height== bytes.length?3:4;
         interpolate =(texture.getMinFilter()==Texture2D.GL_LINEAR);
     }
+
+    public SimpleTexture(Texture2D texture) {
+      this.bytes = (byte[]) texture.getImage().getByteArray().clone();
+      this.width=texture.getImage().getWidth();
+      this.height = texture.getImage().getHeight();
+      //this.uscale = texture.getSScale();
+      //this.vscale = texture.getTScale();
+      this.matrix = texture.getTextureMatrix().getArray();
+      this.clampU = texture.getRepeatS()==Texture2D.CLAMP;
+      this.clampV = texture.getRepeatT()==Texture2D.CLAMP;
+      incr =3*width*height== bytes.length?3:4;
+      interpolate =(texture.getMinFilter()==Texture2D.GL_LINEAR);
+  }
 
     public void  getColor(double u, double v, int color[]) {
         //if(u!= 0)System.out.println(((int)(u*width*uscale+.5))%width);

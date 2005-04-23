@@ -23,7 +23,8 @@
 package de.jreality.soft;
 
 import de.jreality.scene.Geometry;
-import de.jreality.scene.Texture2D;
+import de.jreality.shader.Texture2D;
+import de.jreality.util.AttributeEntityFactory;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;
 
@@ -92,8 +93,11 @@ public class DefaultPolygonShader implements PolygonShader {
     outline = eAppearance.getAttribute(NameSpace.name(name, "outline"), outline);
     setVertexShader(ShaderLookup.getVertexShaderAttr(eAppearance, name, "vertexShader"));
 
-    Texture2D tex = (Texture2D)eAppearance.getAttribute(NameSpace.name(name, "texture"),null,Texture2D.class);
+    de.jreality.scene.Texture2D tex = (de.jreality.scene.Texture2D)eAppearance.getAttribute(NameSpace.name(name, "texture"),null,de.jreality.scene.Texture2D.class);
     if(tex != null) texture = new SimpleTexture(tex);
+
+    if (AttributeEntityFactory.hasAttributeEntity(Texture2D.class, NameSpace.name(name,"texture2d"), eAppearance))
+      texture = new SimpleTexture((Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, NameSpace.name(name,"texture2d"), eAppearance));
   }
 
 

@@ -10,11 +10,10 @@ import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
 import de.jreality.jogl.ElementBinding;
 import de.jreality.jogl.JOGLRenderer;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.Geometry;
+import de.jreality.scene.*;
 import de.jreality.scene.ReflectionMap;
-import de.jreality.scene.Texture2D;
+import de.jreality.shader.Texture2D;
+import de.jreality.util.*;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;
 import de.jreality.util.Rn;
@@ -31,8 +30,10 @@ public class DefaultPolygonShader implements PolygonShader {
 	public static final int BACK = GL.GL_BACK;
 	
 	boolean		smoothShading = true; 		// interpolate shaded values between vertices
-	Texture2D texture2D;
-	Texture2D lightMap;
+  de.jreality.scene.Texture2D texture2D;
+  de.jreality.scene.Texture2D lightMap;
+  Texture2D texture2Dnew;
+  Texture2D lightMapNew;
 	ReflectionMap reflectionMap;
 	int frontBack = FRONT_AND_BACK;
 	public VertexShader vertexShader = null;
@@ -60,13 +61,18 @@ public class DefaultPolygonShader implements PolygonShader {
 
 		smoothShading = eap.getAttribute(NameSpace.name(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);	
 //		Object foo = eap.getAttribute(NameSpace.name(name,"texture2d"), null, Texture2D.class);
-		Object foo = eap.app.getAttribute(NameSpace.name(name,"texture2d"), Texture2D.class);
-		if (foo instanceof Texture2D)	texture2D = (Texture2D) foo;
-		foo = eap.getAttribute(NameSpace.name(name,"reflectionMap"), null, ReflectionMap.class);
+		Object foo = eap.getAttribute(NameSpace.name(name,"texture2d"), de.jreality.scene.Texture2D.class);
+		if (foo instanceof de.jreality.scene.Texture2D)	texture2D = (de.jreality.scene.Texture2D) foo;
+    foo = eap.getAttribute(NameSpace.name(name,"reflectionMap"), null, ReflectionMap.class);
 		if (foo instanceof ReflectionMap)	reflectionMap = (ReflectionMap) foo;
-	    foo = eap.getAttribute(NameSpace.name(name,"lightMap"), null, Texture2D.class);
-	    if (foo instanceof Texture2D) lightMap = (Texture2D) foo;
+	  foo = eap.getAttribute(NameSpace.name(name,"lightMap"), null, de.jreality.scene.Texture2D.class);
+	  if (foo instanceof de.jreality.scene.Texture2D) lightMap = (de.jreality.scene.Texture2D) foo;
 	
+    if (AttributeEntityFactory.hasAttributeEntity(Texture2D.class, NameSpace.name(name,"texture2d"), eap))
+      texture2Dnew = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, NameSpace.name(name,"texture2d"), eap);
+    if (AttributeEntityFactory.hasAttributeEntity(Texture2D.class, NameSpace.name(name,"lightMap"), eap))
+      lightMapNew = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, NameSpace.name(name,"lightMap"), eap);
+      
 		//TODO this is a hack. 
 //		if (eap.getAttribute(NameSpace.name(name,"useGLShader"), false) == true)	{
 //			Object obj =  eap.getAttribute(NameSpace.name(name,"GLShader"), null, AbstractJOGLShader.class);
@@ -98,7 +104,7 @@ public class DefaultPolygonShader implements PolygonShader {
 	/**
 	 * @return
 	 */
-	public Texture2D getTexture2D() {
+	public de.jreality.scene.Texture2D getTexture2D() {
 		return texture2D;
 	}
 
@@ -133,26 +139,40 @@ public class DefaultPolygonShader implements PolygonShader {
 		//gl.glMaterialfv(GL.GL_BACK, GL.GL_DIFFUSE, testcolor);
 		texUnit = GL.GL_TEXTURE0;
 
-		if (texture2D != null)	{
-			gl.glActiveTexture(texUnit);
-			Texture2DLoaderJOGL.render(theCanvas, texture2D);
-			int[] res = new int[1];
-			//gl.glGetTexParameteriv(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_RESIDENT, res);
-			//JOGLConfiguration.theLog.log(Level.FINE,"Texture is resident: "+res[0]);
-			//if (res[0] == 0)	{ jr.texResident = false; }
-			gl.glEnable(GL.GL_TEXTURE_2D);
-		} //else
-	    if (lightMap != null)  {
-			texUnit++;
-			gl.glActiveTexture(texUnit);
-	       Texture2DLoaderJOGL.render(theCanvas, lightMap);
-	        gl.glEnable(GL.GL_TEXTURE_2D);
-	    } //else
+    if (texture2Dnew != null) {
+      gl.glActiveTexture(texUnit);
+      Texture2DLoaderJOGL.render(theCanvas, texture2Dnew);
+      int[] res = new int[1];
+      gl.glEnable(GL.GL_TEXTURE_2D);
+    }
+    if (lightMapNew != null) {
+      texUnit++;
+      gl.glActiveTexture(texUnit);
+      Texture2DLoaderJOGL.render(theCanvas, lightMapNew);
+      gl.glEnable(GL.GL_TEXTURE_2D);
+    }
+
+		if (texture2D != null) {
+      gl.glActiveTexture(texUnit);
+      Texture2DLoaderJOGL.render(theCanvas, texture2D);
+      int[] res = new int[1];
+      //gl.glGetTexParameteriv(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_RESIDENT, res);
+      //JOGLConfiguration.theLog.log(Level.FINE,"Texture is resident:
+      // "+res[0]);
+      //if (res[0] == 0) { jr.texResident = false; }
+      gl.glEnable(GL.GL_TEXTURE_2D);
+    } //else
+    if (lightMap != null) {
+      texUnit++;
+      gl.glActiveTexture(texUnit);
+      Texture2DLoaderJOGL.render(theCanvas, lightMap);
+      gl.glEnable(GL.GL_TEXTURE_2D);
+    } //else
 		if (reflectionMap != null)	{
 			texUnit++;
 			gl.glActiveTexture(texUnit);
 			refMapUnit = texUnit;
-			Texture2DLoaderJOGL.render(jr, reflectionMap);
+      Texture2DLoaderJOGL.render(jr, reflectionMap);
 			//int[] res = new int[1];
 			//gl.glGetTexParameteriv(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_RESIDENT, res);
 			//JOGLConfiguration.theLog.log(Level.FINE,"Texture is resident: "+res[0]);
