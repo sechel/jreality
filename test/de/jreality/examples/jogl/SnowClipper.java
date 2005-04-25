@@ -14,6 +14,7 @@ import java.util.Vector;
 import net.java.games.jogl.GLCanvas;
 import net.java.games.jogl.GLDrawable;
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.geometry.WingedEdge;
 import de.jreality.jogl.InfoOverlay;
@@ -81,7 +82,7 @@ public class SnowClipper extends InteractiveViewerDemo {
 		ap1.setAttribute(CommonAttributes.FACE_DRAW, true);
 		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
 		double[][] vv = {{-1,-1,0},{1,-1,0},{1,1,0},{-1,1,0}};
-		IndexedFaceSet square = GeometryUtility.constructPolygon(vv);
+		IndexedFaceSet square = IndexedFaceSetUtility.constructPolygon(vv);
 		clipPlaneJiggler.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY, 0.75);
 		clipPlaneJiggler.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, true);
 		clipPlaneJiggler.getTransformation().setTranslation(0,0,120);
@@ -282,7 +283,7 @@ public class SnowClipper extends InteractiveViewerDemo {
 			WingedEdge whiteFrameG = new WingedEdge(-60, 60, -60, 60, -4, 144);
 			whiteFrameG.cutWithPlane(clippingPlane, 23);
 			double[][] cutPlane = whiteFrameG.getFirstFaceWithTag(23);
-			whiteframe.setGeometry(GeometryUtility.constructPolygon(cutPlane));
+			whiteframe.setGeometry(IndexedFaceSetUtility.constructPolygon(cutPlane));
 			SceneGraphUtilities.removeChildren(whiteframe);
 			SceneGraphComponent ballAndStick = TubeUtility.ballAndStick(whiteFrameG, 1.0,0.5, Color.WHITE, Color.WHITE, Pn.EUCLIDEAN);
 			ballAndStick.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
@@ -290,7 +291,7 @@ public class SnowClipper extends InteractiveViewerDemo {
 			WingedEdge redFrameG = new WingedEdge(-60, 60, -60, 60, -4, 144);
 			redFrameG.cutWithPlane(clippingPlane2, 24);
 			cutPlane = redFrameG.getFirstFaceWithTag(24);
-			redframe.setGeometry(GeometryUtility.constructPolygon(cutPlane));
+			redframe.setGeometry(IndexedFaceSetUtility.constructPolygon(cutPlane));
 			SceneGraphComponent ballAndStick2 = TubeUtility.ballAndStick(redFrameG,1.0,0.5, Color.RED, Color.RED, Pn.EUCLIDEAN);
 			ballAndStick2.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
 			SceneGraphUtilities.removeChildren(redframe);

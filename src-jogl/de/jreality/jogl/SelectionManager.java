@@ -11,6 +11,7 @@ import java.util.Vector;
 import java.util.logging.Level;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereHelper;
 import de.jreality.scene.Appearance;
@@ -272,7 +273,7 @@ public class SelectionManager implements TransformationListener {
 			}
 			//JOGLConfiguration.theLog.log(Level.INFO,"BBox is "+bbox.toString());
 			//else bbox = sgn.getBoundingBox();
-			IndexedFaceSet boxRep = GeometryUtility.representAsSceneGraph(bbox);
+			IndexedFaceSet boxRep = IndexedFaceSetUtility.representAsSceneGraph(bbox);
 			boundKit.setGeometry(boxRep );
 			
 		} else boundKit.setVisible(false);

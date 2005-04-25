@@ -15,6 +15,7 @@ import net.java.games.jogl.GL;
 
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.SphereHelper;
 import de.jreality.geometry.Torus;
@@ -47,7 +48,7 @@ import de.jreality.util.SceneGraphUtilities;
  */
 public class JOGLSkyBox extends AbstractLoadableScene {
 
-	static String resourceDir = "/net/MathVis/data/";
+	static String resourceDir = "/net/MathVis/data/testData3D";
 	static {
 		String foo = System.getProperty("resourceDir");
 		if (foo != null)	resourceDir  = foo;
@@ -228,7 +229,7 @@ public class JOGLSkyBox extends AbstractLoadableScene {
 	   gt.setStretch(.3);
 	   globeNode6.setTransformation(gt);
 	   //globeNode6.setGeometry(torus);
-	   globeNode6.setGeometry(GeometryUtility.implode(torus, -.35));
+	   globeNode6.setGeometry(IndexedFaceSetUtility.implode(torus, -.35));
 	   //SceneGraphComponent s1 = Parser3DS.readFromFile("/homes/geometer/gunn/tmp/read3DS/models/space011.3ds");
 	   //globeNode6.addChild(s1);
 

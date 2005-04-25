@@ -44,8 +44,8 @@ public class ImplodeShaderDemo {
 		gt.setTranslation(-5.0 + 8.0* i, 0, 0.0);
 		gt.setStretch(5);
 		globeNode.setTransformation(gt);
-		if (i!=0) globeNode.setGeometry(GeometryUtility.implode(torus, -.9 + .4 * i));
-		else globeNode.setGeometry(GeometryUtility.truncate(torus));
+		if (i!=0) globeNode.setGeometry(IndexedFaceSetUtility.implode(torus, -.9 + .4 * i));
+		else globeNode.setGeometry(IndexedFaceSetUtility.truncate(torus));
 		ap1 = new Appearance();
 		ap1.setAttribute(CommonAttributes.POLYGON_SHADER + "." + CommonAttributes.DIFFUSE_COLOR, new java.awt.Color(255-(5*i),10*i,20*i));
 		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING, ((i%2)==0));

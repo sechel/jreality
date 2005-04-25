@@ -21,6 +21,7 @@ import javax.swing.JMenuBar;
 import javax.swing.Timer;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.SphereHelper;
 import de.jreality.jogl.FramedCurve;
 import de.jreality.jogl.InteractiveViewer;
@@ -133,7 +134,7 @@ public class TestClippingPlane extends AbstractLoadableScene {
 			}
 			double[][] vv = {{0,-1,0},{0,1,0},{1,1,0},{1,-1,0}};
 			double[][] texc = {{0,0},{1,0},{1,1} ,{0,1}};
-			IndexedFaceSet square = GeometryUtility.constructPolygon(vv);
+			IndexedFaceSet square = IndexedFaceSetUtility.constructPolygon(vv);
 			square.setVertexAttributes(Attribute.TEXTURE_COORDINATES,StorageModel.DOUBLE_ARRAY.array(2).createReadOnly(texc));
 			cp.setGeometry(square);
 			cp.getTransformation().setTranslation(0,0,.5);

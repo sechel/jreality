@@ -90,6 +90,7 @@ public abstract  class FancySlider extends JPanel implements PropertyChangeListe
 //		label.setAlignmentX(1.0f);
 //		textField.setAlignmentX(0.6f);
 //		slider.setAlignmentX(0.4f);
+	    setMaximumSize(new Dimension(10000, 40));
 	    setPreferredSize(new Dimension(10000, 40));
 //		label.setMinimumSize(new Dimension( 50, 30));
 //		textField.setMinimumSize(new Dimension( 50, 30));

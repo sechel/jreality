@@ -11,6 +11,7 @@ import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.QuadMeshShape;
+import de.jreality.geometry.QuadMeshUtility;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
@@ -252,7 +253,7 @@ public class DefaultLineShader implements LineShader  {
 //			}
 			int count = 0;
 			for (int i = 0; i<u; ++i)	{
-				curve = GeometryUtility.extractUParameterCurve(curve, qms, i);
+				curve = QuadMeshUtility.extractUParameterCurve(curve, qms, i);
 				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, tubeStyle, closedV, sig, 0);
 				GeometryUtility.calculateAndSetNormals(tube);
 				//JOGLConfiguration.theLog.log(Level.FINE,"Tube has "+tube.getNumPoints()+" points");
@@ -262,7 +263,7 @@ public class DefaultLineShader implements LineShader  {
 				if (pickMode) 	gl.glPopName();
 			}
 			for (int i = 0; i<v; ++i)	{
-				curve = GeometryUtility.extractVParameterCurve(curve, qms, i);
+				curve = QuadMeshUtility.extractVParameterCurve(curve, qms, i);
 				tube = TubeUtility.makeTubeAsIFS(curve, rad, null, tubeStyle, closedU, sig, 0);
 				GeometryUtility.calculateAndSetNormals(tube);
 				//JOGLConfiguration.theLog.log(Level.FINE,"Tube has "+tube.getNumPoints()+" points");

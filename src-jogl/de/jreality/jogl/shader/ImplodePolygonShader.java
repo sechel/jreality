@@ -8,6 +8,7 @@ import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
@@ -39,7 +40,7 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 	}
 	public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig) {
 		GL gl = jr.globalGL;
-		IndexedFaceSet ifs =  GeometryUtility.implode((IndexedFaceSet) original, implodeFactor);
+		IndexedFaceSet ifs =  IndexedFaceSetUtility.implode((IndexedFaceSet) original, implodeFactor);
 		double alpha = vertexShader == null ? 1.0 : vertexShader.getDiffuseColorAsFloat()[3];
 		int implodeDL = gl.glGenLists(1);
 		gl.glNewList(implodeDL, GL.GL_COMPILE);

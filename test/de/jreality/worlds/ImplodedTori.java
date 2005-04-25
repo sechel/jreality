@@ -6,6 +6,7 @@ package de.jreality.worlds;
 import java.awt.Color;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Torus;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
@@ -40,8 +41,8 @@ public class ImplodedTori extends AbstractLoadableScene {
 			SceneGraphComponent globeNode = SceneGraphUtilities.createFullSceneGraphComponent("SGC"+i);
 			globeNode.getTransformation().setRotation(angle, 0,0,1);
 			globeNode.getTransformation().setTranslation(Math.cos(angle), Math.sin(angle),0);
-			if (i!=0) globeNode.setGeometry(GeometryUtility.implode(torus, -.9 + .35 * i));
-			else globeNode.setGeometry(GeometryUtility.truncate(torus));
+			if (i!=0) globeNode.setGeometry(IndexedFaceSetUtility.implode(torus, -.9 + .35 * i));
+			else globeNode.setGeometry(IndexedFaceSetUtility.truncate(torus));
 			root.addChild(globeNode);
 		}
 		//viewer.getCameraPath().getLastComponent().getTransformation().setTranslation(0.0d, 0.0d, 4.0d);

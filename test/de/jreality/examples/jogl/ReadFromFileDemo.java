@@ -12,6 +12,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereHelper;
 import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.reader.OOGLReader;
@@ -119,7 +120,7 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 				world.addChild(child);
 			} else {
 				if (hyperbolic) {
-					hypersphere = GeometryUtility.makeH3Boundary();
+					hypersphere = Primitives.wireframeSphere();
 					world.addChild(hypersphere);
 				}
 				viewer.setBackgroundColor(new Color(0, 120, 120));

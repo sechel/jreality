@@ -6,6 +6,7 @@ package de.jreality.worlds;
 
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.Torus;
 import de.jreality.geometry.TubeUtility;
@@ -169,7 +170,7 @@ public class StandardDemo extends AbstractLoadableScene {
 	   globeNode6.setTransformation(gt);
 	   globeNode6.setGeometry(new Sphere());
 	   globeNode6.setGeometry(torus);
-	   globeNode6.setGeometry(GeometryUtility.implode(torus, -.35));
+	   globeNode6.setGeometry(IndexedFaceSetUtility.implode(torus, -.35));
 	   SceneGraphComponent s1;
 //	try {
 //		s1 = Parser3DS.readFromFile(config.getDataFile("3ds", "space011.3ds"));

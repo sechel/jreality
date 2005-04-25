@@ -7,8 +7,10 @@ import java.awt.Color;
 
 import de.jreality.geometry.BezierPatchMesh;
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.QuadMeshShape;
+import de.jreality.geometry.QuadMeshUtility;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.DiscreteSpaceCurve;
 import de.jreality.jogl.LevelOfDetailComponent;
@@ -97,7 +99,7 @@ public class TestTubes extends AbstractLoadableScene {
 		double[][] square = {{1,1,0},{-1,1,0},{-1,-1,0},{1,-1,0}};		
 		double[][] profile = {{0,0,0}, {0,.1,0},{1,.1,0},{1,.2,0},{1.4,0,0}};
 		double[][] profile2 = {{1,.2,0}, {.2, .2,0}, {0,.4,0}, {-.2, .2, 0},{-1,.2,0}, {-1,-.2,0},{-.2, -.2,0}, {0,-.4,0}, {.2, -.2, 0},{1,-.2,0}};
-		  IndexedFaceSet arrow = GeometryUtility.surfaceOfRevolutionAsIFS(profile, 24, Math.PI * 2);
+		  IndexedFaceSet arrow = Primitives.surfaceOfRevolutionAsIFS(profile, 24, Math.PI * 2);
 	   //torus1.addGeometryListener(torus1);
 	   //pts = square;
 	   double[][] pts = form2;
@@ -163,7 +165,7 @@ public class TestTubes extends AbstractLoadableScene {
 		   ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.RED);
 		   //QuadMeshShape qms = TubeUtility.makeTubeAsIFS(form, .04, null, TubeUtility.PARALLEL, true, Pn.EUCLIDEAN);
 		   //GeometryUtility.calculateAndSetNormals(qms);	   	
-		   IndexedLineSet croxl = GeometryUtility.createCurveFromPoints(form, true);
+		   IndexedLineSet croxl = IndexedFaceSetUtility.createCurveFromPoints(form, true);
 		   globeNode2.setGeometry(croxl);
 		   globeNode.addChild(globeNode2);
 	   }
@@ -186,7 +188,7 @@ public class TestTubes extends AbstractLoadableScene {
 	   		for (int i = 0; i<4; ++i)	{ 
 	   			BezierPatchMesh bpm = new BezierPatchMesh(2, 3, tubePoints);
 		   		for (int j = 1; j<= i; ++j)	bpm.refine();
-		   		QuadMeshShape qmpatch = GeometryUtility.representBezierPatchMeshAsQuadMesh(bpm);	   
+		   		QuadMeshShape qmpatch = QuadMeshUtility.representBezierPatchMeshAsQuadMesh(bpm);	   
 		   		SceneGraphComponent sgc = SceneGraphUtilities.createFullSceneGraphComponent("selection child "+i);
 		   		sgc.setGeometry(qmpatch);	   
 		   		parent.addChild(sgc);

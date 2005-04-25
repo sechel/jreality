@@ -5,6 +5,7 @@
 package de.jreality.worlds;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
@@ -62,7 +63,7 @@ public class Icosahedra extends AbstractLoadableScene {
 			for (int i = 0; i<4; ++i)	{
 				if (i == 0)		spheres[0] = Primitives.icosahedron();
 				else {
-					spheres[i] = GeometryUtility.binaryRefine(spheres[i-1]);
+					spheres[i] = IndexedFaceSetUtility.binaryRefine(spheres[i-1]);
 					double[][] verts = spheres[i].getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 					int vlength = GeometryUtility.getVectorLength(spheres[i]);
 					Rn.normalize(verts, verts);

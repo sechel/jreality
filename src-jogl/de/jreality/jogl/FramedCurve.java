@@ -18,6 +18,7 @@ import java.util.Vector;
 
 import numericalMethods.calculus.interpolation.CubicBSpline;
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.jogl.anim.AnimationUtility;
 import de.jreality.scene.Appearance;
@@ -247,7 +248,7 @@ public class FramedCurve extends SceneGraphComponent {
     			//double w = cbw.valueAt(t);
     			
     		}
-     	curveRepresentation = GeometryUtility.createCurveFromPoints(verts, false);
+     	curveRepresentation = IndexedFaceSetUtility.createCurveFromPoints(verts, false);
      	if (theCurveItself == null)
      	{
      		theCurveItself = SceneGraphUtilities.createFullSceneGraphComponent();

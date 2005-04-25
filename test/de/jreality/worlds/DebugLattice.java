@@ -6,6 +6,7 @@
 package de.jreality.worlds;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.scene.Appearance;
@@ -57,7 +58,7 @@ public class DebugLattice extends AbstractLoadableScene {
 		for (int i = 0; i<4; ++i)	{
 			if (i == 0)		spheres[0] = Primitives.icosahedron();
 			else {
-				spheres[i] = GeometryUtility.binaryRefine(spheres[i-1]);
+				spheres[i] = IndexedFaceSetUtility.binaryRefine(spheres[i-1]);
 				double[][] verts = spheres[i].getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 				int vlength = GeometryUtility.getVectorLength(spheres[i]);
 				Rn.normalize(verts, verts);
@@ -115,13 +116,13 @@ public class DebugLattice extends AbstractLoadableScene {
             SceneGraphComponent lineX = new SceneGraphComponent();
             double[][] profileX = { { xmin, latticeRad, 0},
                     { xmin + (cx-1) * dx, latticeRad, 0}};
-            QuadMeshShape lX = GeometryUtility.surfaceOfRevolutionAsIFS(
+            QuadMeshShape lX = Primitives.surfaceOfRevolutionAsIFS(
                     profileX, 5, 2.0 * Math.PI);
             lineX.setGeometry(lX);
             SceneGraphComponent lineY = new SceneGraphComponent();
             double[][] profileY = { { ymin, latticeRad, 0},
                     { ymin + (cy-1) * dy, latticeRad, 0}};
-            QuadMeshShape lY = GeometryUtility.surfaceOfRevolutionAsIFS(
+            QuadMeshShape lY = Primitives.surfaceOfRevolutionAsIFS(
                     profileY, 5, 2.0 * Math.PI);
             lineY.setGeometry(lY);
             lineY.setTransformation(new Transformation());
@@ -130,7 +131,7 @@ public class DebugLattice extends AbstractLoadableScene {
             SceneGraphComponent lineZ = new SceneGraphComponent();
             double[][] profileZ = { { zmin, latticeRad, 0},
                     { zmin + (cz-1) * dz, latticeRad, 0}};
-            QuadMeshShape lZ = GeometryUtility.surfaceOfRevolutionAsIFS(
+            QuadMeshShape lZ = Primitives.surfaceOfRevolutionAsIFS(
                     profileZ, 5, 2.0 * Math.PI);
             lineZ.setGeometry(lZ);
             lineZ.setTransformation(new Transformation());

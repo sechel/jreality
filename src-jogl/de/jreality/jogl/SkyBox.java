@@ -5,6 +5,7 @@
 package de.jreality.jogl;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
@@ -65,7 +66,7 @@ public class SkyBox extends SceneGraphComponent {
 			ap = new Appearance();
 			ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D, ft[i]);
 			sgc.setAppearance(ap);
-			IndexedFaceSet face = GeometryUtility.createIndexedFaceSetFrom(cubeIndices, cubeVerts3[i], null, null, texCoords, null, null);
+			IndexedFaceSet face = IndexedFaceSetUtility.createIndexedFaceSetFrom(cubeIndices, cubeVerts3[i], null, null, texCoords, null, null);
 			face.buildEdgesFromFaces();
 			//GeometryUtility.calculateAndSetFaceNormals(face);
 			sgc.setGeometry(face);
