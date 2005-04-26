@@ -79,18 +79,13 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
 	}
 
 	public void appearanceChanged(AppearanceEvent ev) {
-		Appearance src = (Appearance) ev.getSourceNode();
-        RemoteAppearance dst = (RemoteAppearance) rmc.getProxy(src);
-        List lst= src.getChildNodes();
-        for (int ix= 0, num= lst.size(); ix < num; ix++) {
-            de.jreality.scene.AppearanceAttribute aa= (de.jreality.scene.AppearanceAttribute)lst.get(ix);
-            dst.setAttribute(
-                    aa.getAttributeName(),
-                    aa.getValue(),
-                    aa.getAttributeType()
-            );
-        }
-	}
+    Appearance src = (Appearance) ev.getSourceNode();
+    RemoteAppearance dst = (RemoteAppearance) rmc.getProxy(src);
+    de.jreality.scene.AppearanceAttribute aa = (de.jreality.scene.AppearanceAttribute) src
+        .getAppearanceAttribute(ev.getKey());
+    dst.setAttribute(aa.getAttributeName(), aa.getValue(), aa
+        .getAttributeType());
+  }
 
 	public void geometryChanged(GeometryEvent ev) {
         Geometry src = ev.getGeometry();
