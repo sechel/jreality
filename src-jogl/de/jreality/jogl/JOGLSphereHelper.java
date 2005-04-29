@@ -5,6 +5,7 @@
 package de.jreality.jogl;
 
 import java.util.Hashtable;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
@@ -22,14 +23,18 @@ import de.jreality.util.Rn;
 public class JOGLSphereHelper extends SphereHelper {
 
 	static boolean sharedDisplayLists = JOGLConfiguration.sharedContexts;
-	static Hashtable sphereDListsTable = new Hashtable();
+	static WeakHashMap sphereDListsTable = new WeakHashMap();
 	static int[] globalSharedSphereDisplayLists = null;
 	//TODO This can't be static; the display lists so created are invalid if the renderer parameter
 	// no longer exists.  So ... these display lists have to be tied to a specific context.
 	public static void setupSphereDLists(JOGLRenderer jr)	{
+		int[] dlists = null; //getSphereDLists(jr);
+//		if (dlists != null)	{
+//			JOGLConfiguration.theLog.log(Level.WARNING,"Already have sphere display lists for this renderer "+jr);
+//		}
 		GL gl = jr.getCanvas().getGL();
 		int n = SphereHelper.tessellatedIcosahedra.length;
-		int[] dlists = null;
+		dlists = null;
 		//if (!sharedDisplayLists)	dlists = (int[] ) sphereDListsTable.get(gl);
 		//else 
 				dlists = new int[n];

@@ -71,7 +71,7 @@ public class SphereDemo extends InteractiveViewerDemo {
 		double[] brickPct = new double[2];
 		double[] lightPosition = {0,0,4};
 			SceneGraphComponent c = SceneGraphUtilities.createFullSceneGraphComponent("sphere"+i);
-			c.setGeometry(SphereHelper.tessellatedIcosahedra[i]);
+			c.setGeometry(new Sphere()); //SphereHelper.tessellatedIcosahedra[i]);
 			double angle = (2 * Math.PI * i)/6.0;
 			c.getTransformation().setTranslation(3 * Math.cos(angle), 3*Math.sin(angle), 0.0);
 			float g = (float) (i/5.0);

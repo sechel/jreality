@@ -305,6 +305,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		}
 		
 //		otime = System.currentTimeMillis();
+		// all display lists need to be set to dirty
 		if (thePeerRoot != null) thePeerRoot.propagateGeometryChanged(ALL_CHANGED);
 		sphereDisplayLists = JOGLSphereHelper.getSphereDLists(this);
 		if (debugGL)	theLog.log(Level.INFO,"Got new sphere display lists for context "+globalGL);
@@ -750,14 +751,18 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 //				ps = foo;
 				
 				geometryShader.polygonShader.render(globalHandle);	
-				double lod = renderingHints.getLevelOfDetail();
-				// TODO do this in a timer
-				int i = JOGLSphereHelper.getResolutionLevel(context.getObjectToNDC(), lod);
-				//int i = 3;
+				int i = 3;
+				if (debugGL)	{
+					double lod = renderingHints.getLevelOfDetail();
+					// TODO do this in a timer
+					i = JOGLSphereHelper.getResolutionLevel(context.getObjectToNDC(), lod);
+					//int i = 3;
+				}
 				int dlist = sphereDisplayLists[i];
-				globalGL.glDisable(GL.GL_SMOOTH);
+				
+				//globalGL.glDisable(GL.GL_SMOOTH);
 				if (pickMode) globalGL.glPushName(JOGLPickAction.GEOMETRY_BASE);
-				//if (debugGL) 
+				if (debugGL) 
 					globalGL.glColor4fv(cdbg[i].getRGBComponents(null));
 				globalGL.glCallList(dlist);
 				if (pickMode) globalGL.glPopName();
@@ -880,7 +885,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				dl.setDisplayListID(type, -1);
 			}
 			int nextDL = globalGL.glGenLists(1);
-
+			JOGLConfiguration.theLog.log(Level.FINE, "Allocating new display list "+nextDL);
 			dl.setDisplayListID(type, nextDL);
 			globalGL.glNewList(dl.getDisplayListID(type), GL.GL_COMPILE); //_AND_EXECUTE);
 			//JOGLConfiguration.theLog.log(Level.INFO,"Beginning display list for "+originalGeometry.getName());
