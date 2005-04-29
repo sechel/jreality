@@ -177,6 +177,7 @@ public class InteractiveViewerDemo extends JFrame{
 		}
 
 		JToolBar tb = viewer.getToolManager().getToolbar();
+		
 		ToolTipManager.sharedInstance().setEnabled(true);
 		hack = Box.createHorizontalBox();
 		hack.add(tb);
@@ -201,6 +202,7 @@ public class InteractiveViewerDemo extends JFrame{
     
 	SceneGraphComponent root;
 	LoadableScene currentLoadedScene = null;
+	JOGLLoadableScene currentJOGLLoadedScene = null;
 	Component inspectorPanel = null;
 	public void initializeScene()	{
 		root = viewer.getSceneRoot();
@@ -209,7 +211,7 @@ public class InteractiveViewerDemo extends JFrame{
 	}
 	
 	public void unloadScene()	{
-		if (currentLoadedScene != null) currentLoadedScene.dispose();
+		if (currentJOGLLoadedScene != null) currentJOGLLoadedScene.dispose();
 		if (treeViewer != null) {
 			getContentPane().remove(treeViewer.getViewingComponent());
 			treeViewer.removeTreeSelectionListener(treeListener);
@@ -239,12 +241,16 @@ public class InteractiveViewerDemo extends JFrame{
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }
+	        currentJOGLLoadedScene = null;
+	        if (currentLoadedScene instanceof JOGLLoadableScene) currentJOGLLoadedScene = (JOGLLoadableScene) currentLoadedScene;
 	        // scene settings
-	        currentLoadedScene.setConfiguration(ConfigurationAttributes.getDefaultConfiguration());
 	        world = currentLoadedScene.makeWorld();
 	        signature = currentLoadedScene.getSignature();
-	        isEncompass = currentLoadedScene.isEncompass();
-	        addBackPlane = currentLoadedScene.addBackPlane();
+	        if (currentJOGLLoadedScene != null)	{
+		        currentJOGLLoadedScene.setConfiguration(ConfigurationAttributes.getDefaultConfiguration());
+		        isEncompass = currentJOGLLoadedScene.isEncompass();
+		        addBackPlane = currentJOGLLoadedScene.addBackPlane();        	
+	        }
 	        loadedScene = true;
 		}
 		if (world != null && !root.isDirectAncestor(world)) {		// sometimes the subclass has already added the world
@@ -274,11 +280,11 @@ public class InteractiveViewerDemo extends JFrame{
 		} 
 		if (theMenuBar != null)	hack.remove(theMenuBar);
 		 theMenuBar = createMenuBar();
-		 if (loadedScene) currentLoadedScene.customize(theMenuBar, viewer);
+		 if (currentJOGLLoadedScene != null) currentJOGLLoadedScene.customize(theMenuBar, viewer);
 		 hack.add(theMenuBar, 0);
 		hack.add(Box.createHorizontalGlue(), 1);
-		if (loadedScene) {
-			inspectorPanel = currentLoadedScene.getInspector();
+		if (currentJOGLLoadedScene != null) {
+			inspectorPanel = currentJOGLLoadedScene.getInspector();
 		}
 		if (inspectorPanel != null) {
 			getContentPane().add(inspectorPanel, BorderLayout.SOUTH);
