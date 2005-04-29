@@ -28,7 +28,7 @@ import de.jreality.util.SceneGraphUtilities;
  * @author weissman
  *
  */
-public class DebugLattice extends AbstractLoadableScene {
+public class DebugLattice extends AbstractJOGLLoadableScene {
 
 	public int getSignature() {
 		// TODO Auto-generated method stub

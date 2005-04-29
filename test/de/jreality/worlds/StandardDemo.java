@@ -23,7 +23,7 @@ import de.jreality.util.Pn;
  * @author weissman
  *
  */
-public class StandardDemo extends AbstractLoadableScene {
+public class StandardDemo extends AbstractJOGLLoadableScene {
 
 	public boolean addBackPlane() {
 		return true;

@@ -44,7 +44,7 @@ import de.jreality.util.MatrixBuilder;
  * @author weissman
  *
  */
-public class Texture2DShaderTest extends AbstractLoadableScene {
+public class Texture2DShaderTest extends AbstractJOGLLoadableScene {
 
   public SceneGraphComponent makeWorld() {
     SceneGraphComponent root = new SceneGraphComponent();

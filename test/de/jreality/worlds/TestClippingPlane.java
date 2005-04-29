@@ -48,7 +48,7 @@ import de.jreality.util.SceneGraphUtilities;
  * @author gunn
  *
  */
-public class TestClippingPlane extends AbstractLoadableScene {
+public class TestClippingPlane extends AbstractJOGLLoadableScene {
 	Viewer viewer;
 	/**
 	 * 

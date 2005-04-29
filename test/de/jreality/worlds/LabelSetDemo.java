@@ -31,7 +31,7 @@ import de.jreality.util.SceneGraphUtilities;
  * @author gunn
  *
  */
-public class LabelSetDemo extends AbstractLoadableScene {
+public class LabelSetDemo extends AbstractJOGLLoadableScene {
 	SceneGraphComponent  oloidkit, label;
 	double a=.4,b=2.5;
 	public SceneGraphComponent makeWorld()	{

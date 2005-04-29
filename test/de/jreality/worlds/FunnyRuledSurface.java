@@ -25,7 +25,7 @@ import de.jreality.util.SceneGraphUtilities;
  * @author gunn
  *
  */
-public class FunnyRuledSurface extends AbstractLoadableScene {
+public class FunnyRuledSurface extends AbstractJOGLLoadableScene {
 	SceneGraphComponent icokit;
 	public SceneGraphComponent makeWorld()	{
 		

@@ -25,7 +25,7 @@ import de.jreality.worlds.AbstractLoadableScene;
  * @author gunn
  *
  */
-public class AnimationDemo extends 	AbstractLoadableScene  {
+public class AnimationDemo extends 	AbstractJOGLLoadableScene  {
 	SceneGraphComponent c1, c2, ct, theWorld;
 	Viewer viewer;
 	

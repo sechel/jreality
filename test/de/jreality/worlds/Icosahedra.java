@@ -24,7 +24,7 @@ import de.jreality.util.SceneGraphUtilities;
  * @author gunn
  *
  */
-public class Icosahedra extends AbstractLoadableScene {
+public class Icosahedra extends AbstractJOGLLoadableScene {
 	SceneGraphComponent icokit;
 	boolean tryFlatten = true;
 	/**

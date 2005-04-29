@@ -46,7 +46,7 @@ import de.jreality.util.SceneGraphUtilities;
  * @author Charles Gunn
  *
  */
-public class JOGLSkyBox extends AbstractLoadableScene {
+public class JOGLSkyBox extends AbstractJOGLLoadableScene {
 
 	static String resourceDir = "/net/MathVis/data/testData3D";
 	static {

@@ -18,7 +18,7 @@ import de.jreality.util.SceneGraphUtilities;
  * @author Charles Gunn
  *
  */
-public class ImplodedTori extends AbstractLoadableScene {
+public class ImplodedTori extends AbstractJOGLLoadableScene {
 
 
 	public SceneGraphComponent makeWorld() {

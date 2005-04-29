@@ -21,7 +21,7 @@ import de.jreality.util.Pn;
  * @author gunn
  *
  */
-public class ElephantTrunk extends AbstractLoadableScene {
+public class ElephantTrunk extends AbstractJOGLLoadableScene {
 	SceneGraphComponent icokit;
 	/**
 	 * 

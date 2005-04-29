@@ -38,7 +38,7 @@ import de.jreality.util.SceneGraphUtilities;
  * @author gunn
  *
  */
-public class BouncingSpheres extends AbstractLoadableScene {
+public class BouncingSpheres extends AbstractJOGLLoadableScene {
 	/* (non-Javadoc)
 	 * @see de.jreality.util.LoadableScene#dispose()
 	 */

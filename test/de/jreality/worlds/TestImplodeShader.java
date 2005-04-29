@@ -23,7 +23,7 @@ import de.jreality.util.SceneGraphUtilities;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public class TestImplodeShader extends AbstractLoadableScene {
+public class TestImplodeShader extends AbstractJOGLLoadableScene {
 
 	public SceneGraphComponent makeWorld() {
 	

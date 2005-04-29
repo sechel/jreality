@@ -28,7 +28,7 @@ import de.jreality.util.SceneGraphUtilities;
  * @author Charles Gunn
  *
  */
-public class TestSphereDrawing extends AbstractLoadableScene {
+public class TestSphereDrawing extends AbstractJOGLLoadableScene {
 
 	public SceneGraphComponent makeWorld() {
 		SceneGraphComponent root = SceneGraphUtilities.createFullSceneGraphComponent("theWorld");

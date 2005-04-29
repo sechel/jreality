@@ -33,7 +33,7 @@ import de.jreality.util.SceneGraphUtilities;
  * @author Charles Gunn
  *
  */
-public class TestTubes extends AbstractLoadableScene {
+public class TestTubes extends AbstractJOGLLoadableScene {
 
 	static double x = 1;
 	static double[][] circle =  {{x, 0, 0, 1},	 {x, 1,0, 1}, {0,2, 0, 2}, {-x, 1,0, 1}, {-x, 0, 0, 1},{-x, -1,0, 1},{0,-2, 0, 2},{x, -1,0, 1},{x, 0, 0, 1}};

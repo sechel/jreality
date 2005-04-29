@@ -31,7 +31,7 @@ import de.jreality.util.SceneGraphUtilities;
  * @author gunn
  *
  */
-public class HopfFibration extends AbstractLoadableScene {
+public class HopfFibration extends AbstractJOGLLoadableScene {
 		SceneGraphComponent icokit;
 		SceneGraphComponent[][] levels = new SceneGraphComponent[4][2];
 		protected boolean showTubes = true, showLevel[] = {true, true, false, false};

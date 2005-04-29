@@ -14,7 +14,7 @@ import de.jreality.util.SceneGraphUtilities;
  * @author Charles Gunn
  *
  */
-public class ReflectionMapDemo extends AbstractLoadableScene {
+public class ReflectionMapDemo extends AbstractJOGLLoadableScene {
 
 	static String resourceDir = "./";
 	static {
