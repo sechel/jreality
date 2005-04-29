@@ -19,11 +19,6 @@ import de.jreality.util.ConfigurationAttributes;
  */
 public abstract class AbstractJOGLLoadableScene extends AbstractLoadableScene implements JOGLLoadableScene {
 	
-	ConfigurationAttributes config = null;
-
-	public void setConfiguration(ConfigurationAttributes config) {
-		this.config = config;
-	}
 	
 	public Component getInspector()	{ return null; }
 

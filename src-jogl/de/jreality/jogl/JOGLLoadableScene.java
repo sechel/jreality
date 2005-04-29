@@ -18,14 +18,11 @@ import de.jreality.util.LoadableScene;
  *
  */
 public interface JOGLLoadableScene extends LoadableScene {
-	public void setConfiguration(ConfigurationAttributes config);
-
 	/* This is a provisional method which allows the LoadableScene access to
 	 * a menu bar and the viewer
 	 * in order to customize settings not yet implemented via configuration attributes.
 	 * This is called after makeWorld() has been called.
 	 */
-	public void customize(JMenuBar menuBar, Viewer viewer);
 	public Component getInspector();
 	/* These also are temporary until I figure out out ConfigurationAttributes works
 	 */

@@ -21,6 +21,11 @@ import de.jreality.util.Pn;
 public abstract class AbstractLoadableScene implements LoadableScene {
 	
 	
+	ConfigurationAttributes config = null;
+
+	public void setConfiguration(ConfigurationAttributes config) {
+		this.config = config;
+	}
 	public int getSignature() {
 		return Pn.EUCLIDEAN;
 	}
