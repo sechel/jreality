@@ -6,15 +6,19 @@ package de.jreality.jogl.tools;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
+import java.util.logging.Level;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JButton;
 import javax.swing.JToolBar;
 
 import de.jreality.jogl.InteractiveViewer;
+import de.jreality.jogl.JOGLConfiguration;
 
 
 /**
@@ -167,18 +171,33 @@ public class ToolManager {
 			}
 		}
 	}
-	
+	HashMap usertools = null; 
 	public void addUserTool(final UserTool tool, final String symbol, final String name)	{
 		// just adding this at start-up is causing problems allocating the GLCanvas (!!)
 		// see TriangleGroupDemo
+		final ToolAction ta = new ToolAction(symbol, tool, name);
+		if (usertools == null) usertools = new HashMap();
 		TimerTask addToolTask = new TimerTask()	{
 			public void run()	{
-				tb.add(new ToolAction(symbol, tool, name));
+				JButton jb = tb.add(new ToolAction(symbol, tool, name));
+				usertools.put(tool, jb);
 			}
 		};
 		Timer doIt = new Timer();
 		doIt.schedule(addToolTask, 10);
 		
+	}
+	
+	public void removeUserTool(final UserTool tool)	{
+		if (usertools == null)	{
+			JOGLConfiguration.theLog.log(Level.WARNING, "Removing usertool before any have been added");
+			return;
+		}
+		Object obj = usertools.get(tool);
+		if (obj != null && obj instanceof JButton)	{
+			tb.remove(((JButton) obj));
+			usertools.remove(tool);
+		}
 	}
 	
 	/**
