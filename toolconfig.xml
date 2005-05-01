@@ -119,7 +119,7 @@
       <inputslot>right</inputslot>
       <outputslot>LeftRightAxis</outputslot>
     </virtualdevice>
-    <virtualdevice type="de.jreality.scene.tool.VirtualRevertAxis">
+    <virtualdevice type="de.jreality.scene.tool.VirtualReverseAxis">
       <inputslot>RightLeftAxis</inputslot>
       <outputslot>LeftRightAxis</outputslot>
     </virtualdevice>
