@@ -22,11 +22,16 @@
  */
 package de.jreality.portal.tools;
 
+import java.util.List;
+
+import de.jreality.scene.tool.Tool;
+import de.jreality.scene.tool.ToolContext;
+
 /**
  * @author weissman
  *
  **/
-public class EventBox {
+public class EventBox extends Tool {
 
 	double x, dx, y, dy, z, dz;
 	private boolean dragging;
@@ -192,4 +197,34 @@ public class EventBox {
 	public void setNotifyCollision(boolean notifyCollision) {
 		this.notifyCollision = notifyCollision;
 	}
+
+  public List getActivationSlots() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public List getCurrentSlots() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public List getOutputSlots() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  public void activate(ToolContext tc) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  public void perform(ToolContext tc) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  public void deactivate(ToolContext tc) {
+    // TODO Auto-generated method stub
+    
+  }
 }
