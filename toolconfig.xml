@@ -1,0 +1,128 @@
+<toolconfig>
+
+  <rawdevices>
+    <rawdevice id="Keyboard"
+             type="de.jreality.scene.tool.DeviceKeyboard"/>
+    <rawdevice id="Mouse"
+             type="de.jreality.scene.tool.DeviceMouse"/>
+    <rawdevice id="SystemTimer"
+             type="de.jreality.scene.tool.DeviceSystemTimer"/>
+    <rawdevice id="Motionstar"
+             type="de.jreality.scene.tool.DeviceMotionstar"/>
+    <rawdevice id="Joystick"
+             type="de.jreality.scene.tool.DeviceJoystick"/>
+  </rawdevices>
+
+  <rawslots> <!-- map slots of raw devices to InputSlots -->
+    <mapping device="Keyboard" src="VK_W" target="forward"/>
+    <mapping device="Keyboard" src="VK_S" target="backward"/>
+    <mapping device="Keyboard" src="VK_A" target="left"/>
+    <mapping device="Keyboard" src="VK_D" target="right"/>
+    <mapping device="Keyboard" src="VK_0" target="IncreaseSpeed"/>
+    <mapping device="Keyboard" src="VK_9" target="DecreaseSpeed"/>
+    <mapping device="Mouse" src="left" target="PrimaryAction"/>
+    <mapping device="Mouse" src="right" target="PrimarySelection"/>
+    <mapping device="Mouse" src="center" target="PrimaryMenu"/>
+    <mapping device="Mouse" src="wheel_up" target="PrimaryUp"/>
+    <mapping device="Mouse" src="wheel_down" target="PrimaryDown"/>
+    <mapping device="Mouse" src="axes" target="PointerNDC"/>
+    <mapping device="SystemTimer" src="tick" target="SystemTime"/>
+    <mapping device="Motionstar" src="wand_left" target="PrimaryAction"/>
+    <mapping device="Motionstar" src="wand_center" target="PrimaryMenu"/>
+    <mapping device="Motionstar" src="wand_right" target="PrimarySelection"/>
+    <mapping device="Motionstar" src="wand_axes"
+            target="PrimaryNavigationNDC"/>
+    <mapping device="Motionstar" src="wandMatrix"
+            target="PointerTransformation"/>
+    <mapping device="Motionstar" src="headMatrix"
+            target="AvatarTransformation"/>
+    <mapping device="Joystick" src="axis_1" target="ForwardBackwardAxis"/>
+    <mapping device="Joystick" src="axis_0" target="RightLeftAxis"/>
+    <mapping device="Joystick" src="button_0" target="IncreaseSpeed"/>
+    <mapping device="Joystick" src="button_1" target="DecreaseSpeed"/>
+  </rawslots>
+  
+  <virtualdevices>
+    <virtualdevice type="de.jreality.scene.tool.VirtualMap">
+      <inputslot>PrimaryUp</inputslot>
+      <outputslot>forward</outputslot>
+
+      <prop name="foo">
+        <string>bla</string>
+      </prop>
+      <prop name="bar">
+        <int>42</int>
+      </prop>
+      <prop name="baz">
+        <double>3.14</double>
+      </prop>
+
+      </virtualdevice>
+    <virtualdevice type="de.jreality.scene.tool.VirtualMap">
+      <inputslot>PrimaryDown</inputslot>
+      <outputslot>backward</outputslot>
+    </virtualdevice>
+    <virtualdevice type="de.jreality.scene.tool.VirtualMap">
+      <inputslot>PrimarySelection</inputslot>
+      <outputslot>mouseLook</outputslot>
+    </virtualdevice>
+    <virtualdevice type="de.jreality.scene.tool.VirtualMap">
+      <inputslot>PrimaryMenu</inputslot>
+      <outputslot>DragActivation</outputslot>
+    </virtualdevice>
+    <virtualdevice type="de.jreality.scene.tool.VirtualEvolutionOperator">
+      <inputslot>PointerTransformation</inputslot>
+      <outputslot>PointerEvolution</outputslot>
+    </virtualdevice>
+    <virtualdevice type="de.jreality.scene.tool.VirtualExtractRotationTrafo">
+      <inputslot>PointerTransformation</inputslot>
+      <outputslot>PointerRotation</outputslot>
+    </virtualdevice>
+    <virtualdevice type="de.jreality.scene.tool.VirtualEvolutionOperator">
+      <inputslot>PointerRotation</inputslot>
+      <outputslot>LookRotation</outputslot>
+    </virtualdevice>
+    <virtualdevice type="de.jreality.scene.tool.VirtualMap">
+      <inputslot>PrimaryAction</inputslot>
+      <outputslot>TestActivation</outputslot>
+    </virtualdevice>
+    <virtualdevice type="de.jreality.scene.tool.VirtualInvertMatrix">
+      <inputslot>CameraToNDC</inputslot>
+      <outputslot>NDCToCamera</outputslot>
+    </virtualdevice>
+    <virtualdevice type="de.jreality.scene.tool.VirtualInvertMatrix">
+      <inputslot>WorldToCamera</inputslot>
+      <outputslot>CameraToWorld</outputslot>
+    </virtualdevice>
+    <virtualdevice type="de.jreality.scene.tool.VirtualProductMatrix">
+      <inputslot>CameraToNDC</inputslot>
+      <inputslot>WorldToCamera</inputslot>
+      <outputslot>WorldToNDC</outputslot>
+    </virtualdevice>
+    <virtualdevice type="de.jreality.scene.tool.VirtualProductMatrix">
+      <inputslot>CameraToWorld</inputslot>
+      <inputslot>NDCToCamera</inputslot>
+      <outputslot>NDCToWorld</outputslot>
+    </virtualdevice>
+    <virtualdevice type="de.jreality.scene.tool.VirtualMousePointerTrafo">
+      <inputslot>NDCToWorld</inputslot>
+      <inputslot>PointerNDC</inputslot>
+      <outputslot>PointerTransformation</outputslot>
+    </virtualdevice>
+    <virtualdevice type="de.jreality.scene.tool.VirtualMergedAxis">
+      <inputslot>forward</inputslot>
+      <inputslot>backward</inputslot>
+      <outputslot>ForwardBackwardAxis</outputslot>
+    </virtualdevice>
+    <virtualdevice type="de.jreality.scene.tool.VirtualMergedAxis">
+      <inputslot>left</inputslot>
+      <inputslot>right</inputslot>
+      <outputslot>LeftRightAxis</outputslot>
+    </virtualdevice>
+    <virtualdevice type="de.jreality.scene.tool.VirtualRevertAxis">
+      <inputslot>RightLeftAxis</inputslot>
+      <outputslot>LeftRightAxis</outputslot>
+    </virtualdevice>
+  </virtualdevices>
+
+</toolconfig>
