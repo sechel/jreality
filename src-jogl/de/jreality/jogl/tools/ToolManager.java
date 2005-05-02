@@ -177,6 +177,7 @@ public class ToolManager {
 		// see TriangleGroupDemo
 		final ToolAction ta = new ToolAction(symbol, tool, name);
 		if (usertools == null) usertools = new HashMap();
+		if (tb == null) getToolbar();
 		TimerTask addToolTask = new TimerTask()	{
 			public void run()	{
 				JButton jb = tb.add(new ToolAction(symbol, tool, name));
