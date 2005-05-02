@@ -14,12 +14,14 @@ import javax.swing.JMenuBar;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.SphereHelper;
+import de.jreality.jogl.AbstractDeformation;
 import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.jogl.shader.SimpleJOGLShader;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
+import de.jreality.scene.proxy.CopyScene;
 import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
 
@@ -71,7 +73,7 @@ public class SphereDemo extends InteractiveViewerDemo {
 		double[] brickPct = new double[2];
 		double[] lightPosition = {0,0,4};
 			SceneGraphComponent c = SceneGraphUtilities.createFullSceneGraphComponent("sphere"+i);
-			c.setGeometry(new Sphere()); //SphereHelper.tessellatedIcosahedra[i]);
+			c.setGeometry(SphereHelper.tessellatedIcosahedra[i]); //new Sphere()); //
 			double angle = (2 * Math.PI * i)/6.0;
 			c.getTransformation().setTranslation(3 * Math.cos(angle), 3*Math.sin(angle), 0.0);
 			float g = (float) (i/5.0);
@@ -93,6 +95,19 @@ public class SphereDemo extends InteractiveViewerDemo {
 			c.getAppearance().setAttribute("polygonShader.LightPosition", lightPosition);
 			world.addChild(c);
 		}
+		//SceneGraphComponent flatt = GeometryUtility.flatten(world);
+		CopyScene cp = new CopyScene();
+		SceneGraphComponent flatt = (SceneGraphComponent) cp.createProxyScene(world);
+		AbstractDeformation ad = new AbstractDeformation()		{
+			public double[] valueAt(double[] in, double[] out)	{
+				if (out == null || out.length != in.length) out = new double[in.length];
+				for (int i = 0; i<in.length; ++i)	out[i] = in[i];
+				out[1] *= 2;
+				out[2] *= .5;
+				return out;
+			}
+		};
+		AbstractDeformation.deform(flatt, ad);
 		return world;
 	}
 	
