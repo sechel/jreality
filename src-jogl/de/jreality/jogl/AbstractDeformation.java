@@ -46,6 +46,7 @@ public abstract class AbstractDeformation {
 	            c.childrenAccept(this);
 	        }
 	        public void visit(PointSet ps) {
+	        	//System.out.println("Point set is "+ps.getName());
 	        	   double[][] v = ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 	        	   double[][] nv = new double[v.length][v[0].length];
 	        	   for (int i = 0; i<v.length; ++i)	{
