@@ -42,7 +42,7 @@ public abstract class AbstractDeformation {
 		
 	    SceneGraphVisitor v =new SceneGraphVisitor() {
 	        public void visit(SceneGraphComponent c) {
-	        	    System.out.println("AbstractDeformation.deform()"+c.getName());
+	        	    //System.out.println("AbstractDeformation.deform()"+c.getName());
 	            c.childrenAccept(this);
 	        }
 	        public void visit(PointSet ps) {
@@ -52,7 +52,7 @@ public abstract class AbstractDeformation {
 	        	   		deform.valueAt(v[i], nv[i]);
 	        	   }
 	           map.put(ps, nv);
-	        	   System.out.println("AbstractDeformation.ps()");
+	        	   //System.out.println("AbstractDeformation.ps()");
 	        	   // TODO transform normals also by the inverse matrix
 	        }
 	        public void visit(Sphere s)	{
@@ -62,13 +62,13 @@ public abstract class AbstractDeformation {
 		v.visit(sgc);
         Set keys = map.keySet();
         for (Iterator iter = keys.iterator(); iter.hasNext();) {
-            PointSet i = (IndexedFaceSet) iter.next();
+            PointSet i = (PointSet) iter.next();
             double[][] nv = (double[][]) map.get(i);
      	   i.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
        }
 		GeometryUtility.calculateFaceNormals(sgc);
 		GeometryUtility.calculateVertexNormals(sgc);
-		System.out.println("Boudning box is "+GeometryUtility.calculateBoundingBox(sgc).toString());
+		//System.out.println("Bounding box is "+GeometryUtility.calculateBoundingBox(sgc).toString());
 		return sgc;
 	}
 }
