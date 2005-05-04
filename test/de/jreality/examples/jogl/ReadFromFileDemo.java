@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
@@ -15,6 +16,7 @@ import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereHelper;
 import de.jreality.jogl.InteractiveViewerDemo;
+import de.jreality.reader.Input;
 import de.jreality.reader.OOGLReader;
 import de.jreality.reader.PolymakeParser;
 import de.jreality.reader.Readers;
@@ -85,8 +87,16 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 		int result = fc.showOpenDialog(this);
 		resourceDir=fc.getSelectedFile().getAbsolutePath();
 		SceneGraphComponent sgc = Readers.readFile(fc.getSelectedFile());
+//		SceneGraphComponent sgc = null;
+//		try {
+//			sgc = Readers.read("OOGL", Readers.resolveResource(fc.getName()));
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		if (child != null && world.isDirectAncestor(child)) 	world.removeChild(child);
 		child = sgc;
+		if (sgc == null) return;
 		world.addChild(child);
 		if (hyperbolic || elliptic)	{
 			SceneGraphUtilities.setSignature(child, hyperbolic ? Pn.HYPERBOLIC : Pn.ELLIPTIC);

@@ -275,9 +275,17 @@ public class DefaultLineShader implements LineShader  {
 		} else {
 		for (int i = 0; i<n; ++i)	{
 			int[] ed = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
+			DataList edgec =  ils.getEdgeAttributes(Attribute.COLORS);
 			int m = ed.length;
 			if (pickMode)	gl.glPushName(i);
 			if (m == 2 || pickMode)	{
+				double[] edgecolor = null;
+				int clength = 3;
+				if (edgec != null) {
+					edgecolor = edgec.item(i).toDoubleArray(null);
+					clength = edgecolor.length;
+				}
+				
 				for (int j = 0; j<m-1; ++j)	{
 					int k = ed[j];
 					double[] p1 = vertices.item(k).toDoubleArray(null);	
@@ -288,6 +296,9 @@ public class DefaultLineShader implements LineShader  {
 					gl.glPushMatrix();
 					gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix());
 					if (pickMode) gl.glPushName(j);
+					if (edgec != null) 
+						if (clength == 3) gl.glColor3dv(edgecolor);
+						else gl.glColor4dv(edgecolor);
 					gl.glCallList(tubeDL[sig+1]);
 					if (pickMode) gl.glPopName();
 					gl.glPopMatrix();
