@@ -124,6 +124,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		theViewer = viewer;
 		theCanvas = ((GLCanvas) viewer.getViewingComponent());
 		theRoot = viewer.getSceneRoot();
+		auxiliaryRoot = viewer.getAuxiliaryRoot();
 		useDisplayLists = true;
 		theLog.log(Level.FINER, "Looked up logger successfully");
 		

@@ -95,10 +95,16 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		sceneRoot = r;
 	}
 
+	public SceneGraphComponent getAuxiliaryRoot() {
+		return auxiliaryRoot;
+	}
+	public void setAuxiliaryRoot(SceneGraphComponent auxiliaryRoot) {
+		this.auxiliaryRoot = auxiliaryRoot;
+	}
 	public void addAuxiliaryComponent(SceneGraphComponent aux)	{
 		if (auxiliaryRoot == null)	{
 			auxiliaryRoot = SceneGraphUtilities.createFullSceneGraphComponent("AuxiliaryRoot");
-			renderer.setAuxiliaryRoot(auxiliaryRoot);
+			if (renderer != null) renderer.setAuxiliaryRoot(auxiliaryRoot);
 		}
 		auxiliaryRoot.addChild(aux);
 	}
@@ -236,7 +242,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		}
 		canvas.addGLEventListener(this);
 		canvas.requestFocus();
-		renderer =  new JOGLRenderer(this); 
+		//renderer =  new JOGLRenderer(this); 
 		if (JOGLConfiguration.sharedContexts && firstOne == null) firstOne = canvas;
 	}
 
@@ -266,6 +272,8 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	 * @see net.java.games.jogl.GLEventListener#init(net.java.games.jogl.GLDrawable)
 	 */
 	public void init(GLDrawable arg0) {
+		JOGLConfiguration.theLog.log(Level.INFO,"JOGL Context initialization, creating new renderer");
+		renderer =  new JOGLRenderer(this); 
 	   renderer.init(arg0);  
 	}
 
