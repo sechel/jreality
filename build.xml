@@ -23,6 +23,8 @@
 	<property name="lib" location="lib" />
 	<property name="dist" location="dist" />
 
+	<property name="no.fetch" value="true"/>
+
 	<path id="class.path">
 	  <fileset dir="lib">
             <include name="**/*.jar"/>
@@ -54,7 +56,7 @@
 	  <jar jarfile="${dist}/jReality-core.jar" basedir="${build}/core" />
 	</target>
 
-	<target name="core-deps">
+	<target name="core-deps" unless="no.fetch">
 	  <get dest="lib/j3daudio.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/j3daudio.jar" usetimestamp="true"/>
 	  <get dest="lib/j3dcore.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/j3dcore.jar" usetimestamp="true"/>
 	  <get dest="lib/j3dutils.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/j3dutils.jar" usetimestamp="true"/>
@@ -70,7 +72,7 @@
 	  <jar jarfile="${dist}/jReality-proxies.jar" basedir="${build}/proxies" />
 	</target>
 
-	<target name="proxies-deps">
+	<target name="proxies-deps" unless="no.fetch">
 	  <available file="lib/smrj.jar" property="smrj-exists"/>
 	  <antcall target="get-smrj"/>
 	</target>
@@ -79,7 +81,7 @@
 	  <mkdir dir="tmp"/>
 	  <cvs package="SMRJ" dest="tmp"/>
 	  <ant dir="tmp/SMRJ" inheritAll="false"/>
-	  <copyfile src="tmp/SMRJ/dist/smrj.jar" dest="lib/smrj.jar"/>
+	  <copy file="tmp/SMRJ/dist/smrj.jar" tofile="lib/smrj.jar"/>
 	  <delete dir="tmp"/>
 	</target>
 
@@ -101,7 +103,7 @@
 	  <jar jarfile="${dist}/jReality-jogl.jar" basedir="${build}/jogl" />
 	</target>
 
-	<target name="jogl-deps">
+	<target name="jogl-deps" unless="no.fetch">
 	  <get dest="lib/jogl.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/jogl.jar"/>
 	  <get dest="lib/numericalMethods.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/numericalMethods.jar"/>
 	</target>
@@ -148,7 +150,7 @@
 	  <jar jarfile="${dist}/jReality-tests.jar" basedir="${build}/tests" />
 	</target>
 
-	<target name="tests-deps">
+	<target name="tests-deps" unless="no.fetch">
 	  <get dest="lib/alex.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/alex.jar"/>
 	  <get dest="lib/discreteGroup.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/discreteGroup.jar"/>
 	</target>
