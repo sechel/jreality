@@ -4,13 +4,7 @@
     </description>
 
 	<!-- the following should belong to core... -->
-	<property name="scene" location="src/de/jreality/scene" />
-	<property name="beans" location="src/de/jreality/beans" />
-	<property name="reader" location="src/de/jreality/reader" />
-	<property name="util" location="src/de/jreality/util" />
-	<property name="ui" location="src/de/jreality/ui" />
-	<property name="geometry" location="src/de/jreality/geometry" />
-	<property name="shader" location="src/de/jreality/shader" />
+	<property name="core" location="src/de/jreality" />
 
 	<!-- backends (dependencies from top to bottom) -->
 	<property name="soft" location="src-soft" />
@@ -23,14 +17,21 @@
 	<!-- examples will be the last thing to build (if needed) -->
 	<property name="tests" location="test" />
 
-
 	<!-- these folders will be created -->
 	<property name="build" location="build" />
 	<property name="javadoc" location="docs/api" />
 	<property name="lib" location="lib" />
 	<property name="dist" location="dist" />
 
-	
+	<path id="class.path">
+	  <fileset dir="lib">
+            <include name="**/*.jar"/>
+          </fileset>
+	  <fileset dir="dist">
+            <include name="**/*.jar"/>
+          </fileset>
+	</path>
+
 	<target name="init">
 		<!-- Create the time stamp -->
 		<tstamp />
@@ -41,126 +42,144 @@
 	</target>
 
 	<!-- all the core classes will be build here - all beackends depend on it-->
-	<target name="core" depends="init" description="compile the source ">
-		<mkdir dir="${build}/core" />
-		<javac excludesfile="excludes.txt" srcdir="${util}:${scene}:${beans}:${geometry}:${reader}:${ui}:${shader}" destdir="${build}/core" debug="true">
-			<compilerarg line="-source 1.4" />
-		</javac>
-        <copy todir="build/core">
-		    <fileset dir="src" excludes="**/*.java"/>
-		</copy>
-		<jar jarfile="${dist}/jReality-core.jar" basedir="${build}/core" />
+	<target name="core" depends="init, core-deps" description="compile the source ">
+	  <mkdir dir="${build}/core" />
+	  <javac excludesfile="excludes.txt" srcdir="${core}" destdir="${build}/core" debug="true">
+	    <compilerarg line="-source 1.4" />
+	    <classpath refid="class.path"/>
+	  </javac>
+          <copy todir="build/core">
+	    <fileset dir="src" excludes="**/*.java"/>
+	  </copy>
+	  <jar jarfile="${dist}/jReality-core.jar" basedir="${build}/core" />
 	</target>
 
-	<target name="proxies" depends="core" description="compile the proxies">
-		<mkdir dir="${build}/proxies" />
-		<javac excludesfile="excludes.txt" srcdir="${proxies}" classpath="${dist}/jReality-core.jar" destdir="${build}/proxies" debug="true">
-			<compilerarg line="-source 1.4" />
-		</javac>
-		<jar jarfile="${dist}/jReality-proxies.jar" basedir="${build}/proxies" />
+	<target name="core-deps">
+	  <get dest="lib/j3daudio.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/j3daudio.jar" usetimestamp="true"/>
+	  <get dest="lib/j3dcore.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/j3dcore.jar" usetimestamp="true"/>
+	  <get dest="lib/j3dutils.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/j3dutils.jar" usetimestamp="true"/>
+	  <get dest="lib/vecmath.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/vecmath.jar" usetimestamp="true"/>
+	</target>
+
+	<target name="proxies" depends="core, proxies-deps" description="compile the proxies">
+	  <mkdir dir="${build}/proxies" />
+	  <javac excludesfile="excludes.txt" srcdir="${proxies}" destdir="${build}/proxies" debug="true">
+	    <compilerarg line="-source 1.4" />
+	    <classpath refid="class.path"/>
+	  </javac>
+	  <jar jarfile="${dist}/jReality-proxies.jar" basedir="${build}/proxies" />
+	</target>
+
+	<target name="proxies-deps">
+	  <available file="lib/smrj.jar" property="smrj-exists"/>
+	  <antcall target="get-smrj"/>
+	</target>
+
+	<target name="get-smrj" unless="smrj-exists">
+	  <mkdir dir="tmp"/>
+	  <cvs package="SMRJ" dest="tmp"/>
+	  <ant dir="tmp/SMRJ" inheritAll="false"/>
+	  <copyfile src="tmp/SMRJ/dist/smrj.jar" dest="lib/smrj.jar"/>
+	  <delete dir="tmp"/>
 	</target>
 
 	<target name="soft" depends="core">
-		<mkdir dir="${build}/soft" />
-		<javac excludesfile="excludes.txt" srcdir="${soft}:${renderman}" classpath="${dist}/jReality-core.jar" destdir="${build}/soft" debug="true">
-			<compilerarg line="-source 1.4" />
-		</javac>
-		<jar jarfile="${dist}/jReality-soft.jar" basedir="${build}/soft" />
+	<mkdir dir="${build}/soft" />
+	  <javac excludesfile="excludes.txt" srcdir="${soft}:${renderman}" destdir="${build}/soft" debug="true">
+	    <compilerarg line="-source 1.4" />
+	    <classpath refid="class.path"/>
+	  </javac>
+	  <jar jarfile="${dist}/jReality-soft.jar" basedir="${build}/soft" />
 	</target>
 	
-	<target name="jogl" depends="core, soft">
-		<mkdir dir="${build}/jogl" />
-		<javac excludesfile="excludes.txt" srcdir="${jogl}"  classpath="${dist}/jReality-core.jar:${dist}/jReality-soft.jar" destdir="${build}/jogl" debug="true">
-			<compilerarg line="-source 1.4" />
-		</javac>
-		<jar jarfile="${dist}/jReality-jogl.jar" basedir="${build}/jogl" />
+	<target name="jogl" depends="core, soft, jogl-deps">
+	  <mkdir dir="${build}/jogl" />
+	  <javac excludesfile="excludes.txt" srcdir="${jogl}"  destdir="${build}/jogl" debug="true">
+	    <compilerarg line="-source 1.4" />
+	    <classpath refid="class.path"/>
+	  </javac>
+	  <jar jarfile="${dist}/jReality-jogl.jar" basedir="${build}/jogl" />
 	</target>
 
-	<target name="tests" depends="core, soft, jogl, jsyzygy, proxies">
-		<mkdir dir="${build}/tests" />
-		<javac excludesfile="excludes.txt" srcdir="${tests}"  classpath="${dist}/jReality-core.jar:${dist}/jReality-soft.jar:${dist}/jReality-jogl.jar:${dist}/jReality-jsyzygy.jar:${dist}/jReality-proxies.jar" destdir="${build}/tests" debug="true">
-			<compilerarg line="-source 1.4" />
-		</javac>
-		<jar jarfile="${dist}/jReality-tests.jar" basedir="${build}/tests" />
+	<target name="jogl-deps">
+	  <get dest="lib/jogl.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/jogl.jar"/>
+	  <get dest="lib/numericalMethods.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/numericalMethods.jar"/>
 	</target>
 
-<!--
 	<target name="renderman" depends="core,soft">
-		<mkdir dir="${build}/renderman" />
-		<javac excludesfile="excludes.txt" srcdir="${renderman}" destdir="${build}/renderman" debug="true">
-			<compilerarg line="-source 1.4" />
-		</javac>
-		<jar jarfile="${dist}/jReality-renderman.jar" basedir="${build}/renderman" />
+	  <mkdir dir="${build}/renderman" />
+	  <javac excludesfile="excludes.txt" srcdir="${renderman}" destdir="${build}/renderman" debug="true">
+	    <compilerarg line="-source 1.4"/>
+	    <classpath refid="class.path"/>
+	  </javac>
+	  <jar jarfile="${dist}/jReality-renderman.jar" basedir="${build}/renderman" />
 	</target>
--->
 
 	<target name="jsyzygy" depends="jSyzygy_java,jogl">
-		<mkdir dir="${build}/jsyzygy" />
-		<javac excludesfile="excludes.txt" srcdir="${jsyzygy}" classpath="${lib}/jSyzygy.jar;${dist}/jReality-core.jar:${dist}/jReality-jogl.jar" destdir="${build}/jsyzygy" debug="true" />
-		<jar jarfile="${dist}/jReality-jsyzygy.jar" basedir="${build}/jsyzygy" />
+	  <mkdir dir="${build}/jsyzygy" />
+	  <javac excludesfile="excludes.txt" srcdir="${jsyzygy}"  destdir="${build}/jsyzygy" debug="true">
+	    <compilerarg line="-source 1.4" />
+	    <classpath refid="class.path"/>
+	  </javac>
+	  <jar jarfile="${dist}/jReality-jsyzygy.jar" basedir="${build}/jsyzygy" />
 	</target>
-
+	
 	<target name="jSyzygy_java">
-		<property name="lib" location="lib" />
-		<ant dir="jSyzygy" target="java" inheritAll="false" />
-		<copy file="jSyzygy/jSyzygy.jar" todir="${lib}" />
+	  <property name="lib" location="lib" />
+	  <ant dir="jSyzygy" target="java" inheritAll="false" />
+	  <copy file="jSyzygy/jSyzygy.jar" todir="${lib}" />
 	</target>
 
-	<target name="portal" depends="jogl,jSyzygy_java,soft,tests,proxies">
-		<mkdir dir="${build}/portal" />
-		<javac excludesfile="excludes.txt" srcdir="${portal}" classpath="${lib}/jSyzygy.jar;${dist}/jReality-core.jar:${dist}/jReality-jogl.jar:${dist}/jReality-soft.jar:${dist}/jReality-tests.jar:${dist}/jReality-proxies.jar" destdir="${build}/portal" debug="true" />
-		<rmic base="${build}/portal" includes="**/*Impl.class" classpath="${lib}/jSyzygy.jar;${dist}/jReality-core.jar:${dist}/jReality-jogl.jar:${dist}/jReality-stubs.jar:${dist}/jReality-proxies.jar" />
-		<jar jarfile="${dist}/jReality-portal.jar" basedir="${build}/portal" />
+	<target name="portal" depends="jogl,jSyzygy_java,soft,proxies">
+	  <mkdir dir="${build}/portal" />
+	  <javac excludesfile="excludes.txt" srcdir="${portal}" destdir="${build}/portal" debug="true">
+	    <classpath refid="class.path"/>
+	  </javac>
+	  <rmic base="${build}/portal" includes="**/*Impl.class" classpath="${lib}/jSyzygy.jar;${dist}/jReality-core.jar:${dist}/jReality-jogl.jar:${dist}/jReality-stubs.jar:${dist}/jReality-proxies.jar" />
+	  <jar jarfile="${dist}/jReality-portal.jar" basedir="${build}/portal" />
 	</target>
-		
+
+	<target name="tests" depends="core, soft, jogl, jsyzygy, proxies, tests-deps">
+	  <mkdir dir="${build}/tests" />
+	  <javac excludesfile="excludes.txt" srcdir="${tests}"  destdir="${build}/tests" debug="true">
+	    <compilerarg line="-source 1.4" />
+	    <classpath refid="class.path"/>
+	  </javac>
+	  <jar jarfile="${dist}/jReality-tests.jar" basedir="${build}/tests" />
+	</target>
+
+	<target name="tests-deps">
+	  <get dest="lib/alex.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/alex.jar"/>
+	  <get dest="lib/discreteGroup.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/discreteGroup.jar"/>
+	</target>
+
 	<target name="javadoc">
-		<mkdir dir="${javadoc}" />
-		<javadoc destdir="${javadoc}" author="true" version="true" use="true" windowtitle="jReality API" source="1.4">
-			<fileset dir="src" defaultexcludes="yes">
-				<include name="de/jreality/geometry/**" />
-				<include name="de/jreality/reader/**" />
-				<include name="de/jreality/scene/**" />
-				<include name="de/jreality/util/**" />
-				<exclude name="**/doc-files/**" />
-				<exclude name="**/*.html" />
-				<exclude name="**/*.properties" />
-			</fileset>
-			<fileset dir="src-jogl" defaultexcludes="yes">
-				<include name="de/jreality/jogl/**" />
-				<exclude name="**/doc-files/**" />
-				<exclude name="**/*.html" />
-				<exclude name="**/*.properties" />
-			</fileset>
-			<fileset dir="src-jsyzygy" defaultexcludes="yes">
-				<include name="de/jreality/jsyzygy/**" />
-				<exclude name="**/doc-files/**" />
-				<exclude name="**/*.html" />
-				<exclude name="**/*.properties" />
-			</fileset>
-			<fileset dir="src-renderman" defaultexcludes="yes">
-				<include name="de/jreality/renderman/**" />
-				<exclude name="**/doc-files/**" />
-				<exclude name="**/*.html" />
-				<exclude name="**/*.properties" />
-			</fileset>
-			<fileset dir="src-soft" defaultexcludes="yes">
-				<exclude name="**/doc-files/**" />
-				<exclude name="**/*.html" />
-				<exclude name="**/*.properties" />
-				<include name="de/jreality/soft/**" />
-			</fileset>
+  	  <mkdir dir="${javadoc}" />
+	  <javadoc destdir="${javadoc}" author="true" version="true" use="true" windowtitle="jReality API" source="1.4">
+	    <fileset dir="src" defaultexcludes="yes">
+	      <include name="de/jreality/**/*.java" />
+	    </fileset>
+	    <fileset dir="src-jogl" defaultexcludes="yes">
+	      <include name="de/jreality/**/*.java" />
+	    </fileset>
+	    <fileset dir="src-jsyzygy" defaultexcludes="yes">
+	      <include name="de/jreality/**/*.java" />
+	    </fileset>
+	    <fileset dir="src-renderman" defaultexcludes="yes">
+	      <include name="de/jreality/**/*.java" />
+	    </fileset>
+	    <fileset dir="src-soft" defaultexcludes="yes">
+	      <include name="de/jreality/**/*.java" />
+	    </fileset>
             <fileset dir="src-portal" defaultexcludes="yes">
-				<exclude name="**/doc-files/**" />
-				<exclude name="**/*.html" />
-				<exclude name="**/*.properties" />
-				<include name="de/jreality/**" />
-			</fileset>
-			<link offline="true" href="http://java.sun.com/products/jdk/1.2/docs/api/" packagelistLoc="C:\tmp" />
-			<link href="http://developer.java.sun.com/developer/products/xml/docs/api/" />
-		</javadoc>
+	      <include name="de/jreality/**/*.java" />
+	    </fileset>
+	    <link offline="true" href="http://java.sun.com/products/jdk/1.2/docs/api/" packagelistLoc="C:\tmp" />
+	    <link href="http://developer.java.sun.com/developer/products/xml/docs/api/" />
+	  </javadoc>
 	</target>
 
-	<target name="dist" depends="core,jogl,soft,portal" description="generate the distribution">
+	<target name="dist" depends="core,jogl,soft,renderman,portal" description="generate the distribution">
 	</target>
 
 	<target name="clean" description="clean up">
