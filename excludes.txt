@@ -2,4 +2,3 @@
 # see README.ant for description
 
 **/jsyzygy/**/*.java
-
