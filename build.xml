@@ -27,13 +27,65 @@
 
   <property environment="env"/>
 
-  <path id="class.path">
+  <path id="core.classpath">
     <fileset dir="lib">
-            <include name="**/*.jar"/>
-          </fileset>
+      <include name="j3daudio.jar"/>
+      <include name="j3dcore.jar"/>
+      <include name="j3dutil.jar"/>
+      <include name="vecmath.jar"/>
+    </fileset>
+  </path>
+
+  <path id="backend.classpath">
     <fileset dir="dist">
-            <include name="**/*.jar"/>
-          </fileset>
+      <include name="jReality-core.jar"/>
+    </fileset>
+  </path>
+
+  <path id="proxies.classpath">
+  	<path refid="backend.classpath"/>
+    <fileset dir="lib">
+      <include name="smrj.jar"/>
+    </fileset>
+  </path>
+
+  <path id="jogl.classpath">
+  	<path refid="backend.classpath"/>
+    <fileset dir="lib">
+      <include name="jogl.jar"/>
+      <include name="numericalMethods.jar"/>
+    </fileset>
+    <fileset dir="dist">
+      <include name="jReality-soft.jar"/>
+    </fileset>
+  </path>
+
+  <path id="tests.classpath">
+  	<path refid="proxies.classpath"/>
+    <fileset dir="lib">
+      <include name="alex.jar"/>
+      <include name="discreteGroup.jar"/>
+      <include name="junit.jar"/>
+      <include name="jogl.jar"/>
+    </fileset>
+    <fileset dir="dist">
+      <include name="jReality-soft.jar"/>
+      <include name="jReality-jogl.jar"/>
+      <include name="jReality-proxies.jar"/>
+    </fileset>
+  </path>
+
+  <path id="portal.classpath">
+  	<path refid="backend.classpath"/>
+    <fileset dir="lib">
+      <include name="jSyzygy.jar"/>
+      <include name="smrj.jar"/>
+      <include name="jogl.jar"/>
+     </fileset>
+    <fileset dir="dist">
+      <include name="jReality-jogl.jar"/>
+      <include name="jReality-proxies.jar"/>
+     </fileset>
   </path>
 
   <target name="init">
@@ -48,9 +100,9 @@
     <mkdir dir="${build}/core" />
     <javac excludesfile="excludes.txt" srcdir="${core}" destdir="${build}/core" debug="true">
       <compilerarg line="-source 1.4" />
-      <classpath refid="class.path"/>
+      <classpath refid="core.classpath"/>
     </javac>
-          <copy todir="build/core">
+    <copy todir="build/core">
       <fileset dir="src" excludes="**/*.java"/>
     </copy>
     <jar jarfile="${dist}/jReality-core.jar" basedir="${build}/core" />
@@ -67,7 +119,8 @@
     <mkdir dir="${build}/proxies" />
     <javac excludesfile="excludes.txt" srcdir="${proxies}" destdir="${build}/proxies" debug="true">
       <compilerarg line="-source 1.4" />
-      <classpath refid="class.path"/>
+      <!--classpath refid="backend.classpath"/-->
+      <classpath refid="proxies.classpath"/>
     </javac>
     <jar jarfile="${dist}/jReality-proxies.jar" basedir="${build}/proxies" />
   </target>
@@ -91,7 +144,7 @@
   <mkdir dir="${build}/soft" />
     <javac excludesfile="excludes.txt" srcdir="${soft}:${renderman}" destdir="${build}/soft" debug="true">
       <compilerarg line="-source 1.4" />
-      <classpath refid="class.path"/>
+      <classpath refid="backend.classpath"/>
     </javac>
     <jar jarfile="${dist}/jReality-soft.jar" basedir="${build}/soft" />
   </target>
@@ -100,7 +153,8 @@
     <mkdir dir="${build}/jogl" />
     <javac excludesfile="excludes.txt" srcdir="${jogl}"  destdir="${build}/jogl" debug="true">
       <compilerarg line="-source 1.4" />
-      <classpath refid="class.path"/>
+      <!--classpath refid="backend.classpath"/-->
+      <classpath refid="jogl.classpath"/>
     </javac>
     <jar jarfile="${dist}/jReality-jogl.jar" basedir="${build}/jogl" />
   </target>
@@ -114,20 +168,11 @@
     <mkdir dir="${build}/renderman" />
     <javac excludesfile="excludes.txt" srcdir="${renderman}" destdir="${build}/renderman" debug="true">
       <compilerarg line="-source 1.4"/>
-      <classpath refid="class.path"/>
+      <classpath refid="backend.classpath"/>
     </javac>
     <jar jarfile="${dist}/jReality-renderman.jar" basedir="${build}/renderman" />
   </target>
 
-  <target name="jsyzygy" depends="jSyzygy_java,jogl">
-    <mkdir dir="${build}/jsyzygy" />
-    <javac excludesfile="excludes.txt" srcdir="${jsyzygy}"  destdir="${build}/jsyzygy" debug="true">
-      <compilerarg line="-source 1.4" />
-      <classpath refid="class.path"/>
-    </javac>
-    <jar jarfile="${dist}/jReality-jsyzygy.jar" basedir="${build}/jsyzygy" />
-  </target>
-  
   <target name="jSyzygy_java">
     <property name="lib" location="lib" />
     <ant dir="jSyzygy" target="java" inheritAll="false" />
@@ -137,25 +182,25 @@
   <target name="portal" depends="jogl,jSyzygy_java,soft,proxies">
     <mkdir dir="${build}/portal" />
     <javac excludesfile="excludes.txt" srcdir="${portal}" destdir="${build}/portal" debug="true">
-      <classpath refid="class.path"/>
+      <classpath refid="portal.classpath"/>
     </javac>
     <rmic base="${build}/portal" includes="**/*Impl.class" classpath="${lib}/jSyzygy.jar;${dist}/jReality-core.jar:${dist}/jReality-jogl.jar:${dist}/jReality-stubs.jar:${dist}/jReality-proxies.jar" />
     <jar jarfile="${dist}/jReality-portal.jar" basedir="${build}/portal" />
   </target>
 
-  <target name="tests" depends="core, soft, jogl, jsyzygy, proxies, tests-deps">
+  <target name="tests" depends="core, soft, jogl, proxies, tests-deps">
     <mkdir dir="${build}/tests" />
     <javac excludesfile="excludes.txt" srcdir="${tests}"  destdir="${build}/tests" debug="true">
       <compilerarg line="-source 1.4" />
-      <classpath refid="class.path"/>
+      <classpath refid="tests.classpath"/>
     </javac>
     <jar jarfile="${dist}/jReality-tests.jar" basedir="${build}/tests" />
   </target>
 
   <target name="tests-deps" if="env.FETCH_DEPS">
-    <get dest="lib/junit.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/junit.jar" usetimestamp="true" verbose="true"/>
     <get dest="lib/alex.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/alex.jar" usetimestamp="true" verbose="true"/>
     <get dest="lib/discreteGroup.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/discreteGroup.jar" usetimestamp="true" verbose="true"/>
+    <get dest="lib/junit.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/junit.jar" usetimestamp="true" verbose="true"/>
   </target>
 
   <target name="javadoc">

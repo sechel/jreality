@@ -1,8 +1,5 @@
 # this file contains the filenames that should not be compiled.
 # see README.ant for description
 
-#**/soft/*
-**/oldcode/*
-#**/Test*
-#**/*Test.java
-**/Cell120*
+**/jsyzygy/**/*.java
+
