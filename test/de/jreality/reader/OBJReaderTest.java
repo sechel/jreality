@@ -46,13 +46,13 @@ public class OBJReaderTest extends TestCase {
         //String fileName = "/home/gollwas/bolt1.obj";
         //String fileName = "/home/gollwas/cube2.obj";
         String fileName = "/home/gollwas/obj/square.obj";
-        SceneGraphComponent sgc = new OBJReader().read(new File(fileName)); 
+        SceneGraphComponent sgc = new ReaderOBJ().read(new File(fileName)); 
         System.out.println(sgc);
     }
     
     public void testASEReader() throws Exception {
         String fileName = "/home/gollwas/d3/models/sfb288/wenteBubble.ASE";
-        SceneGraphComponent sgc = new ASEReader().read(new File(fileName)); 
+        SceneGraphComponent sgc = new ReaderASE().read(new File(fileName)); 
     }
 
 //    public void test3DSReader() throws Exception {
@@ -62,7 +62,7 @@ public class OBJReaderTest extends TestCase {
 
     public void testMTLReader() throws Exception {
         String fileName = "/home/gollwas/Buddy-Mesh.mtl";
-        MTLReader.readAppearences(Readers.getInput(new File(fileName)));
+        ParserMTL.readAppearences(Readers.getInput(new File(fileName)));
     }
 
 }

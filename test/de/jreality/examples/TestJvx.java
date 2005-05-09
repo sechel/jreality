@@ -30,6 +30,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,7 +38,7 @@ import java.util.logging.Logger;
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.geometry.SkyBoxFactory.Square;
 import de.jreality.jogl.Viewer;
-import de.jreality.reader.JvxReader;
+import de.jreality.reader.ReaderJVX;
 import de.jreality.renderman.RIBVisitor;
 import de.jreality.renderman.SLShader;
 import de.jreality.scene.*;
@@ -141,7 +142,13 @@ public class TestJvx implements KeyListener{
          */
       private SceneGraphComponent buildScene(SceneGraphComponent root) {
           
-          SceneGraphComponent c = JvxReader.read(new File(filename));
+          SceneGraphComponent c=null;
+          try {
+            c = new ReaderJVX().read(new File(filename));
+          } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
           Appearance ap = c.getAppearance();
           if(ap == null ) {
               ap = new Appearance();

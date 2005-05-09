@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
 import java.util.Vector;
 
 import net.java.games.jogl.GLCanvas;
@@ -19,7 +21,7 @@ import de.jreality.geometry.TubeUtility;
 import de.jreality.geometry.WingedEdge;
 import de.jreality.jogl.InfoOverlay;
 import de.jreality.jogl.InteractiveViewerDemo;
-import de.jreality.reader.OOGLReader;
+import de.jreality.reader.ReaderOOGL;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
@@ -62,8 +64,13 @@ public class SnowClipper extends InteractiveViewerDemo {
 		SceneGraphComponent manipulator = SceneGraphUtilities.createFullSceneGraphComponent("manipulator");
 		world.addChild(manipulator);
 		
-		OOGLReader or = new OOGLReader();
-		snowSculpture = or.readFromFile(fileToLoad);
+		ReaderOOGL or = new ReaderOOGL();
+		try {
+      snowSculpture = or.read(new File(fileToLoad));
+    } catch (IOException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
 		snowSculpture.setName("snowSculptureModel");
 		snowSculpture.setTransformation(new Transformation());
 		snowSculpture.getTransformation().setStretch(snowSculptureScale);		// (-.2,.2) -> (-60, 60)" 

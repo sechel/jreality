@@ -117,7 +117,7 @@ public class JOGLSkyBox extends AbstractJOGLLoadableScene {
 	   double[] vec = {1d, 1.5d, 1d};
 	   Texture2D tex2d = null;
 	   try {
-		tex2d = new Texture2D(Readers.resolveDataInput("textures/grid256rgba.png"));
+		tex2d = new Texture2D(Readers.getInput("textures/grid256rgba.png"));
 	   } catch (IOException e1) {
 		e1.printStackTrace();
 	   }

@@ -17,8 +17,8 @@ import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereHelper;
 import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.reader.Input;
-import de.jreality.reader.OOGLReader;
-import de.jreality.reader.PolymakeParser;
+import de.jreality.reader.ReaderOOGL;
+import de.jreality.reader.ReaderPOLY;
 import de.jreality.reader.Readers;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
@@ -120,8 +120,13 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 		world = SceneGraphUtilities.createFullSceneGraphComponent("world");
 		//for (int i = 0; i<6; ++i)	{
 		if (initialFile != null)	{
-			OOGLReader or = new OOGLReader();	
-			child = or.readFromFile(initialFile);
+			ReaderOOGL or = new ReaderOOGL();	
+			try {
+        child = or.read(new File(initialFile));
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
 		} else {
 			if (!hyperbolic && !elliptic)	{
 				child = SceneGraphUtilities.createFullSceneGraphComponent("child");

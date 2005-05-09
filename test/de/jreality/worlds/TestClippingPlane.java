@@ -127,7 +127,7 @@ public class TestClippingPlane extends AbstractJOGLLoadableScene {
 			ap1.setAttribute(CommonAttributes.SPECULAR_COEFFICIENT, 0.0);
 			Texture2D tex2d = null;
 			try {
-				tex2d = new Texture2D(Readers.resolveDataInput("textures/arch-solids.jpg"));
+				tex2d = new Texture2D(Readers.getInput("textures/arch-solids.jpg"));
 				ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"texture2d",tex2d);
 			} catch (IOException e) {
 				e.printStackTrace();

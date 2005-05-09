@@ -57,7 +57,7 @@ public class Texture2DShaderTest extends AbstractJOGLLoadableScene {
     a.setAttribute(CommonAttributes.EDGE_DRAW, false);
     Texture2D tex = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, "polygonShader.texture2d", a);
     try {
-      tex.setImage(ImageData.load(Readers.resolveResource("final.jpg")));
+      tex.setImage(ImageData.load(Readers.getInput("final.jpg")));
     } catch (IOException e) {
       e.printStackTrace();
     }

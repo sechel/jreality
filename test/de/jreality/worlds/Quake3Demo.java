@@ -30,6 +30,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 
+import de.jreality.reader.ReaderBSP;
 import de.jreality.reader.Readers;
 import de.jreality.reader.quake3.Quake3Converter;
 import de.jreality.scene.Transformation;
@@ -38,6 +39,7 @@ import de.jreality.scene.Viewer;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.Matrix;
 
 
 /**
@@ -49,8 +51,8 @@ import de.jreality.util.CameraUtility;
  */
 public class Quake3Demo extends AbstractLoadableScene implements TransformationListener {
 
-    Quake3Converter conv;
-    SceneGraphComponent camNode;
+    private ReaderBSP r = new ReaderBSP();
+    private SceneGraphComponent camNode;
     
     public void customize(JMenuBar menuBar, Viewer viewer) {
         SceneGraphComponent camNode = CameraUtility.getCameraNode(viewer);
@@ -58,11 +60,10 @@ public class Quake3Demo extends AbstractLoadableScene implements TransformationL
     }
     
     public SceneGraphComponent makeWorld() {
-        conv = new Quake3Converter();
         String mapName = JOptionPane.showInputDialog("please enter map name [ctf<1-4> | dm<0-19> | tourney<1-6>]");
         if (mapName != null) {
             try {
-                conv.setInput(Readers.resolveResource("maps/q3"+mapName+".bsp"));
+                r.setInput(Readers.getInput("maps/q3"+mapName+".bsp"));
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -71,22 +72,19 @@ public class Quake3Demo extends AbstractLoadableScene implements TransformationL
             JFileChooser fc = new JFileChooser();
             fc.showOpenDialog(null);
             try {
-                conv.setInput(Readers.getInput(fc.getSelectedFile()));
+                r.setInput(Readers.getInput(fc.getSelectedFile()));
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
-        return conv.getComponent();
+        return r.getComponent();
     }
 
-    volatile boolean setting;
-    public void transformationMatrixChanged(TransformationEvent ev) {
-        if (setting) return;
-        setting = true;
-//        System.out.println("Quake3Demo.transformationMatrixChanged()");
-        conv.setVisibility((Transformation) ev.getTransformation());
-        setting = false;
+    private Matrix viewTrafo = new Matrix();
+    public synchronized void transformationMatrixChanged(TransformationEvent ev) {
+        ev.getMatrix(viewTrafo.getArray());
+        r.setViewTransformation(viewTrafo);
     }
 
 }
