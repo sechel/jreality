@@ -504,7 +504,7 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
         }
         String propFile = (String) parser.getOptionValue(propOpt);
         if (propFile != null) {
-            System.setProperty("jreality.config", Readers.resolveFile(propFile).getAbsolutePath());
+            System.setProperty("jreality.config", new File(propFile).getAbsolutePath());
         }
         System.out.println("jreality.config: "+System.getProperty("jreality.config"));
         String[] dataArgs = parser.getRemainingArgs();
