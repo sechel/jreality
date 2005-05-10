@@ -94,7 +94,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	Graphics3D context;
 	public GL globalGL;
 	GLU globalGLU;
-	int[] sphereDisplayLists;
+	int[] sphereDisplayLists = null;
 	public OpenGLState openGLState = new OpenGLState();
 	public  boolean texResident;
 	int numberTries = 0;		// how many times we have tried to make textures resident

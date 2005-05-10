@@ -76,12 +76,17 @@ public class JOGLSphereHelper extends SphereHelper {
 	public static int[] getSphereDLists( JOGLRenderer jr) {
 		GL gl = jr.getCanvas().getGL();
 		int dlists[];
-		if (!sharedDisplayLists)	dlists =  (int[] ) sphereDListsTable.get(gl);
-		else dlists = globalSharedSphereDisplayLists;
+		//if (!sharedDisplayLists)	
+			dlists =  (int[] ) sphereDListsTable.get(gl);
+		//else dlists = globalSharedSphereDisplayLists;
 		if (dlists == null) 	{
 			setupSphereDLists(jr);
-			if (!sharedDisplayLists)	dlists = (int[] ) sphereDListsTable.get(gl);
-			else dlists = globalSharedSphereDisplayLists;
+			//if (!sharedDisplayLists)	
+				dlists = (int[] ) sphereDListsTable.get(gl);
+			//else dlists = globalSharedSphereDisplayLists;
+		}
+		if (dlists == null)	{
+			throw new IllegalStateException("Can't make sphere display lists successfully");
 		}
 		return dlists;
 	}

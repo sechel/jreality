@@ -756,11 +756,6 @@ public class FramedCurveInspector extends JFrame {
 		MyKeyListener() {
 			super();
 			
-			//helpOverlay = new HelpOverlay(parent);
-//			helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_1,0), "Encompass");
-//			if ((theViewer.getViewingComponent() instanceof GLCanvas))
-//				((GLDrawable) theViewer.getViewingComponent()).addGLEventListener(helpOverlay);
-
 		}
 		public void keyPressed(KeyEvent e)	{
 				switch(e.getKeyCode())	{
