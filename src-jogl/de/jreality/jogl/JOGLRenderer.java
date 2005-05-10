@@ -124,12 +124,13 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		theViewer = viewer;
 		theCanvas = ((GLCanvas) viewer.getViewingComponent());
 		theRoot = viewer.getSceneRoot();
-		auxiliaryRoot = viewer.getAuxiliaryRoot();
-		useDisplayLists = true;
-		theLog.log(Level.FINER, "Looked up logger successfully");
-		
 		globalHandle = this;
 		helper = new JOGLRendererHelper();
+		useDisplayLists = true;
+
+		setAuxiliaryRoot(viewer.getAuxiliaryRoot());
+		theLog.log(Level.FINER, "auxiliary root is "+auxiliaryRoot);
+		
 		
 		javax.swing.Timer followTimer = new javax.swing.Timer(1000, new ActionListener()	{
 			public void actionPerformed(ActionEvent e) {updateGeometryHashtable(); } } );

@@ -70,6 +70,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	 */
 	public Viewer(SceneGraphPath p, SceneGraphComponent r) {
 		super();
+		auxiliaryRoot = SceneGraphUtilities.createFullSceneGraphComponent("AuxiliaryRoot");
 		initializeFrom(r, p);		
 		if (JOGLConfiguration.isLinux)	{
 		    canvas.setIgnoreRepaint(true);
@@ -100,13 +101,13 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	}
 	public void setAuxiliaryRoot(SceneGraphComponent auxiliaryRoot) {
 		this.auxiliaryRoot = auxiliaryRoot;
+		if (renderer != null) renderer.setAuxiliaryRoot(auxiliaryRoot);
 	}
 	public void addAuxiliaryComponent(SceneGraphComponent aux)	{
-		if (auxiliaryRoot == null)	{
-			auxiliaryRoot = SceneGraphUtilities.createFullSceneGraphComponent("AuxiliaryRoot");
-			if (renderer != null) renderer.setAuxiliaryRoot(auxiliaryRoot);
-		}
-		auxiliaryRoot.addChild(aux);
+//		if (auxiliaryRoot == null)	{
+//			auxiliaryRoot = SceneGraphUtilities.createFullSceneGraphComponent("AuxiliaryRoot");
+//		}
+		if (!auxiliaryRoot.isDirectAncestor(aux)) auxiliaryRoot.addChild(aux);
 	}
 	
 	public void removeAuxiliaryComponent(SceneGraphComponent aux)	{

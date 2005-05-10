@@ -217,6 +217,10 @@ public class InteractiveViewerDemo extends JFrame{
 			treeViewer.removeTreeSelectionListener(treeListener);
 			treeViewer = null;
 		}
+		if (inspectorPanel != null) {
+			getContentPane().remove(inspectorPanel);
+			inspectorPanel = null;
+		}
 		setSize(800, 600);
 		if (world != null && root.isDirectAncestor(world))	root.removeChild(world);
 		CameraUtility.getCameraNode(viewer).getTransformation().setMatrix(Rn.identityMatrix(4));

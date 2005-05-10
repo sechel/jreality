@@ -209,7 +209,7 @@ public class SelectionManager implements TransformationListener {
 
 		pickPointAppearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, pickPointColor);		
 		broadcastChange();
-		JOGLConfiguration.theLog.log(Level.INFO,"Face number is "+point.getFaceNum());
+		JOGLConfiguration.theLog.log(Level.FINER,"Face number is "+point.getFaceNum());
 	}
 
 

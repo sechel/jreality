@@ -32,7 +32,7 @@ public class JOGLConfiguration {
 		super(); 
 		theLog	= LoggingSystem.getLogger(this);
 		try {
-      theLog.setLevel(Level.INFO);
+			//theLog.setLevel(Level.INFO);
 			String foo = System.getProperty("jreality.jogl.debugGL");
 			if (foo != null) { if (foo.equals("false")) debugGL = false; else debugGL =true;}
 			foo = System.getProperty("jreality.jogl.multisample");
