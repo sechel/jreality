@@ -231,7 +231,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	}
 
 	// TODO convert this to peer structure
-	static List lights = null;
+	List lights = null;
 	/**
 	 * @param theRoot2
 	 * @param globalGL2
@@ -935,7 +935,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	
 	// register for geometry change events
 	//static Hashtable goBetweenTable = new Hashtable();
-	static WeakHashMap goBetweenTable = new WeakHashMap();
+	WeakHashMap goBetweenTable = new WeakHashMap();
 	public  GoBetween goBetweenFor(SceneGraphComponent sgc)	{
 		if (sgc == null) return null;
 		GoBetween gb = null;

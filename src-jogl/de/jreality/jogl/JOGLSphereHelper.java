@@ -52,7 +52,7 @@ public class JOGLSphereHelper extends SphereHelper {
 			}				
 			gl.glEndList();
 		}
-		if (!sharedDisplayLists) sphereDListsTable.put(gl, dlists);
+		if (!sharedDisplayLists) sphereDListsTable.put(jr, dlists);
 		else globalSharedSphereDisplayLists = dlists;
 	}
 	
@@ -77,12 +77,12 @@ public class JOGLSphereHelper extends SphereHelper {
 		GL gl = jr.getCanvas().getGL();
 		int dlists[];
 		//if (!sharedDisplayLists)	
-			dlists =  (int[] ) sphereDListsTable.get(gl);
+			dlists =  (int[] ) sphereDListsTable.get(jr);
 		//else dlists = globalSharedSphereDisplayLists;
 		if (dlists == null) 	{
 			setupSphereDLists(jr);
 			//if (!sharedDisplayLists)	
-				dlists = (int[] ) sphereDListsTable.get(gl);
+				dlists = (int[] ) sphereDListsTable.get(jr);
 			//else dlists = globalSharedSphereDisplayLists;
 		}
 		if (dlists == null)	{
