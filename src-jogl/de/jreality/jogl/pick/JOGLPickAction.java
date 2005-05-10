@@ -94,7 +94,7 @@ public class JOGLPickAction extends PickAction  {
 			double z2 = selectBuffer.get(count++) * factor;
 			// TODO figure out why I have to add 1 to get agreement with my transformation
 			pndc[2] = z1+1.0;
-			if (debug) System.out.print("Hit "+i+": "+z1+" - "+z2+" ");
+			if (debug) JOGLConfiguration.theLog.log(Level.FINE,"Hit "+i+": "+z1+" - "+z2+" ");
 			//boolean geometryFound = false;
 			int geometryFound = -1;
 			int[] geomID = {-1, -1};

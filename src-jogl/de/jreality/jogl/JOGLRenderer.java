@@ -129,7 +129,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		useDisplayLists = true;
 
 		setAuxiliaryRoot(viewer.getAuxiliaryRoot());
-		theLog.log(Level.FINER, "auxiliary root is "+auxiliaryRoot);
+		//theLog.log(Level.FINER, "auxiliary root is "+auxiliaryRoot);
 		
 		
 		javax.swing.Timer followTimer = new javax.swing.Timer(1000, new ActionListener()	{
