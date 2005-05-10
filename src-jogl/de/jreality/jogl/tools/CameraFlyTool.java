@@ -205,9 +205,6 @@ public class CameraFlyTool extends AbstractMouseTool {
 			super();
 			
 			helpOverlay = new HelpOverlay(theViewer);
-//			helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_1,0), "Encompass");
-//			if ((theViewer.getViewingComponent() instanceof GLCanvas))
-//				((GLDrawable) theViewer.getViewingComponent()).addGLEventListener(helpOverlay);
 
 		}
 		double scaleFactor = 1.1;

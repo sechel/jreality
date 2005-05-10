@@ -191,9 +191,6 @@ public class PointManipulationTool extends AbstractMouseTool implements Transfor
 			
 			helpOverlay = new HelpOverlay(theViewer);
 			helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_1,0), "Encompass");
-//			if ((theViewer.getViewingComponent() instanceof GLCanvas))
-//				((GLDrawable) theViewer.getViewingComponent()).addGLEventListener(helpOverlay);
-
 		}
 
 		public void keyPressed(KeyEvent e)	{
