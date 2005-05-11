@@ -15,7 +15,6 @@ import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereHelper;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.AppearanceAttribute;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.Graphics3D;
 import de.jreality.scene.IndexedFaceSet;
