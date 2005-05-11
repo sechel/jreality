@@ -27,15 +27,6 @@
 
   <property environment="env"/>
 
-  <path id="core.classpath">
-    <fileset dir="lib">
-      <include name="j3daudio.jar"/>
-      <include name="j3dcore.jar"/>
-      <include name="j3dutil.jar"/>
-      <include name="vecmath.jar"/>
-    </fileset>
-  </path>
-
   <path id="backend.classpath">
     <fileset dir="dist">
       <include name="jReality-core.jar"/>
@@ -96,23 +87,16 @@
   </target>
 
   <!-- all the core classes will be build here - all beackends depend on it-->
-  <target name="core" depends="init, core-deps" description="compile the source ">
+  <target name="core" depends="init" description="compile the source ">
     <mkdir dir="${build}/core" />
     <javac excludesfile="excludes.txt" srcdir="${core}" destdir="${build}/core" debug="true">
       <compilerarg line="-source 1.4" />
-      <classpath refid="core.classpath"/>
+      <!--classpath refid="core.classpath"/-->
     </javac>
     <copy todir="build/core">
       <fileset dir="src" excludes="**/*.java"/>
     </copy>
     <jar jarfile="${dist}/jReality-core.jar" basedir="${build}/core" />
-  </target>
-
-  <target name="core-deps" if="env.FETCH_DEPS">
-    <get dest="lib/j3daudio.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/j3daudio.jar" usetimestamp="true" verbose="true"/>
-    <get dest="lib/j3dcore.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/j3dcore.jar" usetimestamp="true" verbose="true"/>
-    <get dest="lib/j3dutils.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/j3dutils.jar" usetimestamp="true" verbose="true"/>
-    <get dest="lib/vecmath.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/vecmath.jar" usetimestamp="true" verbose="true"/>
   </target>
 
   <target name="proxies" depends="core, proxies-deps" description="compile the proxies">
