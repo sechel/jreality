@@ -58,7 +58,7 @@ public class AttributeEntityTest extends TestCase {
     assertFalse(AttributeEntityFactory.hasAttributeEntity(Texture2D.class, "texture2d", app1));
     Texture2D tex = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, "texture2d", app1);
     assertTrue(AttributeEntityFactory.hasAttributeEntity(Texture2D.class, "texture2d", app1));
-    ImageData ai = ImageData.load(Readers.resolveDataInput("/home/gollwas/miaomiamologo.jpeg"));
+    ImageData ai = ImageData.load(Readers.getInput("/home/gollwas/miaomiamologo.jpeg"));
     tex.setImage(ai);
     tex.setApplyMode(Texture2D.GL_LINEAR_MIPMAP_LINEAR);
     System.out.println(tex);
