@@ -6,7 +6,7 @@
   <taskdef resource="checkstyletask.properties"/>
 	
   <!-- the following should belong to core... -->
-  <property name="core" location="src/de/jreality" />
+  <property name="core" location="src" />
 
   <!-- backends (dependencies from top to bottom) -->
   <property name="soft" location="src-soft" />
