@@ -34,14 +34,14 @@
   </path>
 
   <path id="proxies.classpath">
-  	<path refid="backend.classpath"/>
+    <path refid="backend.classpath"/>
     <fileset dir="lib">
       <include name="smrj.jar"/>
     </fileset>
   </path>
 
   <path id="jogl.classpath">
-  	<path refid="backend.classpath"/>
+    <path refid="backend.classpath"/>
     <fileset dir="lib">
       <include name="jogl.jar"/>
       <include name="numericalMethods.jar"/>
@@ -52,7 +52,7 @@
   </path>
 
   <path id="tests.classpath">
-  	<path refid="proxies.classpath"/>
+    <path refid="proxies.classpath"/>
     <fileset dir="lib">
       <include name="alex.jar"/>
       <include name="discreteGroup.jar"/>
@@ -67,7 +67,7 @@
   </path>
 
   <path id="portal.classpath">
-  	<path refid="backend.classpath"/>
+    <path refid="backend.classpath"/>
     <fileset dir="lib">
       <include name="jSyzygy.jar"/>
       <include name="smrj.jar"/>
@@ -124,7 +124,7 @@
     <delete dir="tmp"/>
   </target>
 
-  <target name="soft" depends="core">
+  <target name="soft" depends="core" description="build soft backend">
   <mkdir dir="${build}/soft" />
     <javac excludesfile="excludes.txt" srcdir="${soft}:${renderman}" destdir="${build}/soft" debug="true">
       <compilerarg line="-source 1.4" />
@@ -133,7 +133,7 @@
     <jar jarfile="${dist}/jReality-soft.jar" basedir="${build}/soft" />
   </target>
   
-  <target name="jogl" depends="core, soft, jogl-deps">
+  <target name="jogl" depends="core, soft, jogl-deps" description="build jogl backend">
     <mkdir dir="${build}/jogl" />
     <javac excludesfile="excludes.txt" srcdir="${jogl}"  destdir="${build}/jogl" debug="true">
       <compilerarg line="-source 1.4" />
@@ -148,7 +148,7 @@
     <get dest="lib/numericalMethods.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/numericalMethods.jar" usetimestamp="true" verbose="true"/>
   </target>
 
-  <target name="renderman" depends="core,soft">
+  <target name="renderman" depends="core,soft" description="build renderman backend">
     <mkdir dir="${build}/renderman" />
     <javac excludesfile="excludes.txt" srcdir="${renderman}" destdir="${build}/renderman" debug="true">
       <compilerarg line="-source 1.4"/>
@@ -163,7 +163,7 @@
     <copy file="jSyzygy/jSyzygy.jar" todir="${lib}" />
   </target>
 
-  <target name="portal" depends="jogl,jSyzygy_java,soft,proxies">
+  <target name="portal" depends="jogl,jSyzygy_java,soft,proxies" description="build portal backend">
     <mkdir dir="${build}/portal" />
     <javac excludesfile="excludes.txt" srcdir="${portal}" destdir="${build}/portal" debug="true">
       <classpath refid="portal.classpath"/>
@@ -172,7 +172,7 @@
     <jar jarfile="${dist}/jReality-portal.jar" basedir="${build}/portal" />
   </target>
 
-  <target name="tests" depends="core, soft, jogl, proxies, tests-deps">
+  <target name="tests" depends="core, soft, jogl, proxies, tests-deps" description="build test classes (example apps + junit tests)">
     <mkdir dir="${build}/tests" />
     <javac excludesfile="excludes.txt" srcdir="${tests}"  destdir="${build}/tests" debug="true">
       <compilerarg line="-source 1.4" />
@@ -187,7 +187,7 @@
     <get dest="lib/junit.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/junit.jar" usetimestamp="true" verbose="true"/>
   </target>
 
-  <target name="javadoc">
+  <target name="javadoc" description="generate javadoc in docs/api">
       <mkdir dir="${javadoc}" />
     <javadoc destdir="${javadoc}" author="true" version="true" use="true" windowtitle="jReality API" source="1.4">
       <fileset dir="src" defaultexcludes="yes">
@@ -209,8 +209,8 @@
     </javadoc>
   </target>
 	
-  <target name="checkstyle">
-    <checkstyle config="lib/sun_checks.xml">
+  <target name="checkstyle" description="perform checkstyle on core src tree">
+    <checkstyle config="jReality_style.xml">
       <fileset dir="src" includes="**/*.java"/>
       <formatter type="plain" toFile="build/checkstyle_errors.txt"/>
       <formatter type="xml" toFile="build/checkstyle_errors.xml"/>
