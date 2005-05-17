@@ -6,6 +6,7 @@ package de.jreality.examples.jogl;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Level;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JMenu;
@@ -15,6 +16,7 @@ import javax.swing.JRadioButtonMenuItem;
 
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.jogl.InteractiveViewerDemo;
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.util.Pn;
 import discreteGroup.TriangleGroup;
 
@@ -33,6 +35,11 @@ public class LoadableSceneDemo extends InteractiveViewerDemo {
 //	}
 
 	public static void main(String[] args) throws Exception {
+//		System.out.println(LoadableSceneDemo.class.getResource("/net/java/games/jogl/impl/NativeLibLoader.class"));
+//		System.out.println(System.getProperty("sun.boot.class.path").replaceAll(":", "\n"));
+//		System.out.println(net.java.games.jogl.impl.NativeLibLoader.class.getClassLoader());
+//
+		JOGLConfiguration.theLog.log(Level.INFO, System.getProperty("java.library.path"));
 		LoadableSceneDemo iv = new LoadableSceneDemo();//InteractiveViewerDemo.SPLIT_PANE, false);
 		iv.initializeScene();
 		if (args != null) iv.loadScene(args[0]);
