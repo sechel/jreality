@@ -71,7 +71,9 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	public Viewer(SceneGraphPath p, SceneGraphComponent r) {
 		super();
 		auxiliaryRoot = SceneGraphUtilities.createFullSceneGraphComponent("AuxiliaryRoot");
-		initializeFrom(r, p);		
+		initializeFrom(r, p);	
+		// for reasons unknown, have to be very careful on Linux not to try to draw too early.
+		// to avoid this, set the following variables 
 		if (JOGLConfiguration.isLinux)	{
 		    canvas.setIgnoreRepaint(true);
 			canvas.setNoAutoRedrawMode(true);			

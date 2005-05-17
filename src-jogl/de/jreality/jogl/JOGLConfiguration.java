@@ -1,7 +1,12 @@
 package de.jreality.jogl;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import net.java.games.jogl.impl.JAWT;
+import net.java.games.jogl.impl.JAWTFactory;
 
 import de.jreality.util.LoggingSystem;
 
@@ -31,6 +36,12 @@ public class JOGLConfiguration {
 	private JOGLConfiguration() { 
 		super(); 
 		theLog	= LoggingSystem.getLogger(this);
+	    AccessController.doPrivileged(new PrivilegedAction() {
+	        public Object run() {
+	          isLinux = System.getProperty("os.name").equals("Linux");
+	          return null;
+	        }
+	      });
 		try {
 			//theLog.setLevel(Level.INFO);
 			String foo = System.getProperty("jreality.jogl.debugGL");
@@ -41,8 +52,8 @@ public class JOGLConfiguration {
 			foo = System.getProperty("jreality.jogl.portalUsage");
 			if (foo != null) 
 				if (foo.indexOf("true") != -1) portalUsage = true;
-			foo = System.getProperty("os.name");
-			if (foo != null && foo.indexOf("Linux") != -1) isLinux = true;
+//			foo = System.getProperty("os.name");
+//			if (foo != null && foo.indexOf("Linux") != -1) isLinux = true;
 			// allocate a GLCanvas to be the "sharer": it will never be destroyed
 			foo = System.getProperty("jreality.jogl.sharedContexts");
 			if (foo != null && foo.indexOf("true") != -1) sharedContexts = true;
