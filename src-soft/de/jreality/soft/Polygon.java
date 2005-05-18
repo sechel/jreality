@@ -22,6 +22,7 @@
  */
 package de.jreality.soft;
 
+import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rn;
 
 /**
@@ -31,7 +32,18 @@ import de.jreality.util.Rn;
  *
  */
 public final class Polygon {
-  public static final int MAXPOLYVERTEX= 14;
+  public static final int MAXPOLYVERTEX;
+  static {
+    int pvInt = 14;
+    try {
+      String pv = System.getProperty("jreality.soft.maxpolyvertex");
+      if (pv != null) pvInt = Integer.parseInt(pv);
+    } catch (Exception e) {
+      // hm... now we are back with 14 verts each polygon
+    }
+    MAXPOLYVERTEX = pvInt;
+    LoggingSystem.getLogger(Polygon.class).finer("Setting MAXPOLYVERTEX="+MAXPOLYVERTEX);
+  }
   public static final int SX= 0;
   public static final int SY= 1;
   public static final int SZ= 2;
