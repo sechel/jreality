@@ -38,7 +38,7 @@ public class JOGLConfiguration {
 		theLog	= LoggingSystem.getLogger(this);
 	    AccessController.doPrivileged(new PrivilegedAction() {
 	        public Object run() {
-	          isLinux = System.getProperty("os.name").equals("Linux");
+	          if (System.getProperty("os.name").indexOf("Linux") != -1) isLinux = true; else isLinux = false;
 	          return null;
 	        }
 	      });
