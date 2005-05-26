@@ -13,13 +13,8 @@ import java.beans.PropertyChangeListener;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JMenuBar;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
 import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.jogl.Snake;
