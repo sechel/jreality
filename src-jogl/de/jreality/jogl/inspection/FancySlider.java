@@ -165,7 +165,20 @@ public abstract  class FancySlider extends JPanel implements PropertyChangeListe
 		    formatter.setMaximum(new java.lang.Double(max));
 		    super.init();
 		}
+		/**
+		 * 
+		 */
+		public void setMinimum(double d) {
+			min = d;
+			formatter.setMinimum(new java.lang.Double(min));
+		}
 
+		public void setMaximum(double d) {
+			max = d;
+			formatter.setMaximum(new java.lang.Double(max));
+		}
+
+		
 	}
 	
 	   /**
