@@ -634,7 +634,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		return hits;
 	}
 	
-	public class JOGLPeerNode	{
+	protected class JOGLPeerNode	{
 		String name;
 		
 		public String getName()	{
@@ -683,7 +683,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
     }
 	
 	
-	public class JOGLPeerGeometry extends JOGLPeerNode implements GeometryListener	{
+	protected class JOGLPeerGeometry extends JOGLPeerNode implements GeometryListener	{
 		Geometry originalGeometry;
 		Geometry[] tubeGeometry, proxyPolygonGeometry;
 		Vector proxyGeometry;
@@ -1165,7 +1165,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		}
 		
 	}
-	public class JOGLPeerComponent extends JOGLPeerNode implements TransformationListener, AppearanceListener,
+	protected class JOGLPeerComponent extends JOGLPeerNode implements TransformationListener, AppearanceListener,
 		SceneAncestorListener, SceneContainerListener, SceneTreeListener {
 		
 		public int[] bindings = new int[2];

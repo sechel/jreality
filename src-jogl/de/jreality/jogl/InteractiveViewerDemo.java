@@ -247,14 +247,14 @@ public class InteractiveViewerDemo extends JFrame{
 	        }
 	        currentJOGLLoadedScene = null;
 	        if (currentLoadedScene instanceof JOGLLoadableScene) currentJOGLLoadedScene = (JOGLLoadableScene) currentLoadedScene;
-	        // scene settings
-	        world = currentLoadedScene.makeWorld();
 	        signature = currentLoadedScene.getSignature();
 	        if (currentJOGLLoadedScene != null)	{
 		        currentJOGLLoadedScene.setConfiguration(ConfigurationAttributes.getDefaultConfiguration());
 		        isEncompass = currentJOGLLoadedScene.isEncompass();
 		        addBackPlane = currentJOGLLoadedScene.addBackPlane();        	
 	        }
+	        // scene settings
+	        world = currentLoadedScene.makeWorld();
 	        loadedScene = true;
 		}
 		if (world != null && !root.isDirectAncestor(world)) {		// sometimes the subclass has already added the world
@@ -263,7 +263,7 @@ public class InteractiveViewerDemo extends JFrame{
 		}
 
 		CameraUtility.getCamera(viewer).setSignature(getSignature());
-		CameraUtility.getCamera(viewer).reset();		
+		//CameraUtility.getCamera(viewer).reset();		
 		if (isEncompass())	{
 			// I have to do this ... for reasons unknown ... or else the encompass sometimes fails.
 			CameraUtility.getCameraNode(viewer).getTransformation().setTranslation(0d, 0d, 2d);
