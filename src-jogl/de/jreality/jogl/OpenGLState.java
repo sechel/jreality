@@ -70,16 +70,8 @@ public class OpenGLState {
 			gl.glEnable(GL.GL_NORMALIZE);
 			gl.glEnable(GL.GL_MULTISAMPLE_ARB);	
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE);
-			boolean doFog = false;
+			boolean doFog = true;
 			openGLState.render(gl);
-			if (doFog)	{
-				gl.glFogi(GL.GL_FOG_MODE, GL.GL_EXP);
-				float[] fogcolor = {.5f, .5f, .5f, 1.0f};
-				gl.glEnable(GL.GL_FOG);
-				gl.glFogi(GL.GL_FOG_MODE, GL.GL_EXP);
-				gl.glFogfv(GL.GL_FOG_COLOR, JOGLRendererHelper.bg);
-				gl.glFogf(GL.GL_FOG_DENSITY, .4f);
-			}
 		}
 		// for converting double arrays to native buffers:
 	//	static ByteBuffer bb = ByteBuffer.allocateDirect(444/* array.length*8 */).order(ByteOrder.nativeOrder());

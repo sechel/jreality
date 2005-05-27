@@ -60,7 +60,8 @@ public class ViewerKeyListener extends KeyAdapter {
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_E,InputEvent.SHIFT_DOWN_MASK), "Toggle edge drawing");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_F,0), "Activate fly tool");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_F,InputEvent.SHIFT_DOWN_MASK), "Toggle face drawing");
-		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_G,0), "Toggle line-tubing style");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_G,0), "Toggle fog");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_G,InputEvent.SHIFT_DOWN_MASK), "Toggle parallel/frenet tubes");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_H,0), "Toggle help overlay");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_I,0), "Toggle info overlay");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_J,0), "Increase sphere radius");
@@ -152,8 +153,8 @@ public class ViewerKeyListener extends KeyAdapter {
 					break;
 
 				case KeyEvent.VK_G:		// toggle face drawing
-					if (e.isShiftDown())		break;
-					toggleValue(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_STYLE);
+					if (e.isShiftDown())		toggleValue(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_STYLE);
+					else toggleValue(viewer,"fogEnabled", viewer.getSceneRoot().getAppearance());
 					viewer.render();
 					break;
 
@@ -310,11 +311,16 @@ public class ViewerKeyListener extends KeyAdapter {
 		}
 
 	private void toggleValue(String  name)	{
-		toggleValue(viewer, name);
+		toggleValue(viewer, name,viewer.getSelectionManager().getSelectedAppearance());
 	}
 	
 	public static void toggleValue(InteractiveViewer viewer, String  name)	{
 		Appearance ap = viewer.getSelectionManager().getSelectedAppearance();
+		toggleValue(viewer, name, ap);
+	}
+		
+	public static void toggleValue(InteractiveViewer viewer, String  name, Appearance ap)	{
+
 		if (ap == null) return;
 		Object obj = ap.getAttribute(name);
 		if (obj != null && obj instanceof Boolean)	{

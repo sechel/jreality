@@ -54,23 +54,25 @@ import de.jreality.util.Rn;
  */
 public class JOGLRendererHelper {
 
-	static float [] bg = {0f, 0f, 0f, 1f};
+	static float [] backgroundColor = {0f, 0f, 0f, 1f};
+	static float val = 1f;
+	static float[][] unitsquare = {{val,val},{-val,val},{-val, -val},{val,-val}};
 	public static void handleBackground(GLCanvas theCanvas, Appearance topAp)	{
 			GL gl = theCanvas.getGL();
 			Object bgo = null;
-			
+			if (topAp == null) return;
 			for (int i = 0; i<6; ++i)	{
 				gl.glDisable(i+GL.GL_CLIP_PLANE0);
 			}
 			//TODO replace BackPlane class with simple quad drawn here, keyed to "backgroundColors" in topAp
 			if (topAp != null)	bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_COLOR);
-			if (bgo != null && bgo instanceof java.awt.Color) bg = ((java.awt.Color) bgo).getComponents(null);
-			else bg = CommonAttributes.BACKGROUND_COLOR_DEFAULT.getRGBComponents(null);
-			gl.glClearColor(bg[0], bg[1], bg[2], 0.0f); //bg[3] ); //white 
+			if (bgo != null && bgo instanceof java.awt.Color) backgroundColor = ((java.awt.Color) bgo).getComponents(null);
+			else backgroundColor = CommonAttributes.BACKGROUND_COLOR_DEFAULT.getRGBComponents(null);
+			gl.glClearColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], 0.0f); //bg[3] ); //white 
 			
 			boolean hasTexture = false, hasColors = false;
 			double textureAR = 1.0;
-			if (topAp != null) bgo =  topAp.getAttribute("backgroundTexture");
+			bgo =  topAp.getAttribute("backgroundTexture");
 			if (bgo != null && bgo instanceof Texture2D)	{
 				Texture2D tex = ((Texture2D) bgo);
 				Texture2DLoaderJOGL tl = Texture2DLoaderJOGL.FactoryLoader;
@@ -85,11 +87,7 @@ public class JOGLRendererHelper {
 			if (ar > 1.0)	{ xl = 0.0; xr = 1.0; yb =.5*(1-1/ar);  yt = 1.0 - yb; }
 			else 			{ yb = 0.0; yt = 1.0; xl =.5*(1-ar);  xr = 1.0 - xl; }
 			double[][] texcoords = {{xl,yb },{xr,yb},{xr,yt},{xl,yt}};
-			if (topAp != null) bgo =  topAp.getAttribute("backgroundColors");
-			float val = 1f;
-			float[][] unitsquare = {{val,val},{-val,val},{-val, -val},{val,-val}};
-			//float[][] unitsquare = {{0, 0},{val,0},{val,val},{0,val}};
-			//Color[] corners = { new Color(.5f,.5f,1f), new Color(.5f,.5f,.5f),new Color(1f,.5f,.5f),new Color(.5f,1f,.5f) };
+			bgo =  topAp.getAttribute("backgroundColors");
 			if (bgo != null && bgo instanceof Color[])	{
 				hasColors = true;
 			}
@@ -115,8 +113,29 @@ public class JOGLRendererHelper {
 				gl.glEnable(GL.GL_DEPTH_TEST);
 				gl.glDisable(GL.GL_TEXTURE_2D);
 			}
+			bgo = topAp.getAttribute("fogEnabled");
+			boolean doFog = false;
+			if (bgo instanceof Boolean) doFog = ((Boolean) bgo).booleanValue();
+			if (doFog)	{
+				gl.glEnable(GL.GL_FOG);
+				gl.glFogi(GL.GL_FOG_MODE, GL.GL_EXP);
+				bgo =  topAp.getAttribute("fogColor");
+				float[] fogColor = backgroundColor;
+				if (bgo != null && bgo instanceof Color)	{
+					fogColor = ((Color) bgo).getRGBComponents(null);
+				}
+				gl.glFogi(GL.GL_FOG_MODE, GL.GL_EXP);
+				gl.glFogfv(GL.GL_FOG_COLOR, fogColor);
+				bgo =  topAp.getAttribute("fogDensity");
+				float density = .4f;
+				if (bgo != null && bgo instanceof Double)	{
+					density = (float) ((Double) bgo).doubleValue();
+				}
+				gl.glFogf(GL.GL_FOG_DENSITY, density);
+			} else gl.glDisable(GL.GL_FOG);
+
 	}
-static boolean testArrays = false;
+	static boolean testArrays = false;
 	static ByteBuffer vBuffer, vcBuffer, vnBuffer, fcBuffer, fnBuffer, tcBuffer;
 	static DataList vLast = null, vcLast = null, vnLast = null;
 	public static void drawVertices( PointSet sg, JOGLRenderer jr, boolean pickMode, double alpha) {
