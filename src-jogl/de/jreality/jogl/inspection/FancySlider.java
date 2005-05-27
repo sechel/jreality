@@ -100,13 +100,16 @@ public abstract  class FancySlider extends JPanel implements PropertyChangeListe
 		slider.setPreferredSize(new Dimension( 200, 30));
 		label.setMaximumSize(label.getPreferredSize());
 		textField.setMaximumSize(textField.getPreferredSize());
-		slider.setMaximumSize(slider.getPreferredSize());
-		add(label);
-		add(Box.createHorizontalGlue());
-		add(textField);
-		add(Box.createHorizontalGlue());
-		add(slider);	
-		add(Box.createHorizontalGlue());
+		slider.setMinimumSize(new Dimension(100, 30));
+		slider.setMaximumSize(new Dimension(1000, 30));
+		Box box = new Box(SwingConstants.HORIZONTAL);
+		box.add(label);
+		//add(Box.createHorizontalGlue());
+		box.add(textField);
+		//add(Box.createHorizontalGlue());
+		box.add(slider);	
+		//add(Box.createHorizontalGlue());
+		add(box);
 	}
 	
 	abstract Number sliderToText();
