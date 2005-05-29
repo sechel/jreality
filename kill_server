@@ -1,7 +1,0 @@
-PID=/tmp/jReality-portal-server-pid
-if [ -f $PID ] ; then
-  kill $(<$PID)
-  rm $PID
-else
-  echo No server
-fi

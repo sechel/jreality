@@ -1,9 +1,0 @@
-export DISPLAY=:0
-#export __GL_FSAA_MODE=4
-#export __GL_SYNC_TO_VBLANK=1
-for f in $(ls {dist,lib}/*.jar); do export CLASSPATH=$CLASSPATH:$PWD/$f; done
-rmiregistry &
-sleep 2
-# -Xincgc -server 
-java -Xincgc -Xms1024M -Xmx1024M $2 -Dhostname="$1" -Djreality.jogl.newBackend=true -Djava.library.path=jSyzygy/jSyzygy-natives-linux.jar:/central/home/weissman/usr/lib/ -Djreality.config=src-portal/portal."$1" de.jreality.remote.portal.HeadtrackedRemoteViewerImpl &
-

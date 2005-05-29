@@ -1,4 +1,0 @@
-execute -f -l "cd $PWD; ./start_client left"
-execute -f -c "cd $PWD; ./start_client center"
-execute -f -r "cd $PWD; ./start_client right"
-

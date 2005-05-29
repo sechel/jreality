@@ -1,1 +1,0 @@
-execute -clr "cd $PWD; ./kill_client"
