@@ -22,6 +22,7 @@ import de.jreality.jogl.tools.ToolManager;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.CommonAttributes;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.soft.MouseTool;
 import de.jreality.util.CameraUtility;
@@ -83,6 +84,8 @@ public class ViewerKeyListener extends KeyAdapter {
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_S,InputEvent.SHIFT_DOWN_MASK), "Toggle sphere drawing");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_T,0), "Activate translation tool");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_T,InputEvent.SHIFT_DOWN_MASK), "Toggle tube drawing");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_U,0), "Increase fog factor");
+		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_U,InputEvent.SHIFT_DOWN_MASK), "Decrease fog factor");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_V,0), "Print frame rate");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_V,InputEvent.SHIFT_DOWN_MASK), "Toggle vertex drawing");
 		helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_W,0), "Increase line width/ tube radius");
@@ -241,6 +244,11 @@ public class ViewerKeyListener extends KeyAdapter {
 				    viewer.render();
 					break;
 				
+				case KeyEvent.VK_U:		// line width
+					modulateValue("fogDensity", .2, !e.isShiftDown());
+				    viewer.render();
+					break;
+
 				case KeyEvent.VK_V:		// draw vertices
 					if (e.isShiftDown()) 					toggleValue(CommonAttributes.VERTEX_DRAW);
 					else JOGLConfiguration.theLog.log(Level.INFO,"Frame rate: "+viewer.getRenderer().getFramerate()+" fps");
@@ -344,7 +352,6 @@ public class ViewerKeyListener extends KeyAdapter {
 		}
 		JOGLConfiguration.getLogger().log(Level.INFO,"Turning on property "+name);
 		ap.setAttribute(name, true);
-			
 		viewer.render();
 	}
 
