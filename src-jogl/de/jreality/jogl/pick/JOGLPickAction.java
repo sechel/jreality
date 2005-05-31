@@ -49,8 +49,10 @@ public class JOGLPickAction extends PickAction  {
 	static public int PROXY_GEOMETRY_FACE = GEOMETRY_BASE+5;
 	static boolean useOpenGL = false;
 	static boolean debug = false;
-	public JOGLPickAction(Viewer v) {
+	de.jreality.jogl.Viewer theViewer = null;
+	public JOGLPickAction(de.jreality.jogl.Viewer v) {
 		super(v);
+		theViewer = v;
 	}
 	
 	/* (non-Javadoc)
@@ -58,8 +60,8 @@ public class JOGLPickAction extends PickAction  {
 	 */
 	
 	public Object visit() {
-		if (useOpenGL && theViewer instanceof de.jreality.jogl.Viewer)	{
-			PickPoint[] hits = ((de.jreality.jogl.Viewer) theViewer).getRenderer().performPick(pickPointNDC);	
+		if (useOpenGL)	{
+			PickPoint[] hits = theViewer.getRenderer().performPick(pickPointNDC);	
 			int n = 0;
 			if (hits != null)	n = hits.length;
 			pickHits = new Vector();
@@ -200,8 +202,8 @@ public class JOGLPickAction extends PickAction  {
 					opt[k] = Rn.linearCombination(null, 1.0 - x[k], hp0, x[k], hp1);
 					ndcpt[k] = Rn.matrixTimesVector(null, o2ndc, opt[k]);
 					//Pn.dehomogenize(ndcpt[k], ndcpt[k]);
-					oneHit = new PickPoint(v, sgp, ndcpt[k]);
-					oneHit.setPointObject(opt[k]);				
+					oneHit = PickPoint.PickPointFactory(sgp, v.getCameraPath(), ndcpt[k]);
+					//oneHit.setPointObject(opt[k]);				
 					//oneHit.setPointNDC(ndcpt[k]);
 					//oneHit.setPickPath( (SceneGraphPath) sgp.clone());
 					//oneHit.setContext(context3D.copy());
@@ -230,7 +232,7 @@ public class JOGLPickAction extends PickAction  {
 		if (realNDC.length == 4) Pn.dehomogenize(realNDC, realNDC);
 		realNDC[2] = pndc[2];
 		if (debug) JOGLConfiguration.theLog.log(Level.FINE,"Real and theoretical z-value: "+pndc[2]+"  "+realNDC[2]);
-		PickPoint pp = new PickPoint(gc.getViewer(), sgp, realNDC);
+		PickPoint pp = PickPoint.PickPointFactory(sgp, gc.getCameraPath(),  realNDC);
 		pp.setVertexNum(geomID[0]);
 		pp.setPickType(PickPoint.HIT_VERTEX);
 		return pp;
@@ -295,7 +297,7 @@ public class JOGLPickAction extends PickAction  {
 //		if (debug) JOGLConfiguration.theLog.log(Level.FINE,"Real and theoretical z-value: "+pndc[2]+"  "+zval);
 		double[] realNDC = new double[4];
 		realNDC[0] = pndc[0]; realNDC[1] = pndc[1];  		realNDC[2] = pndc[2]; realNDC[3] = 1.0;
-		dst = new PickPoint(gc.getViewer(), sgp, realNDC);
+		dst = PickPoint.PickPointFactory(sgp, gc.getCameraPath(),realNDC);
 		dst.setEdgeNum(geomID);
 		dst.setPickType(PickPoint.HIT_EDGE);
 		return dst;
@@ -332,11 +334,11 @@ public class JOGLPickAction extends PickAction  {
 			double[] NDCToObject = Rn.inverse(null, gc.getObjectToNDC());
 			double[] objectPt = Rn.matrixTimesVector(null, NDCToObject, intersect);
 			Pn.dehomogenize(objectPt, objectPt);
-			dst = new PickPoint(gc.getViewer(), sgp, intersect);
+			dst = PickPoint.PickPointFactory(sgp,  gc.getCameraPath(),intersect);
 			//dst.setPickPath( (SceneGraphPath) sgp.clone());
 			//dst.setContext(gc.copy());
 			//dst.setPointNDC(intersect);
-			dst.setPointObject(objectPt);
+			//dst.setPointObject(objectPt);
 			dst.setFaceNum(faceNum);
 			dst.setPickType(PickPoint.HIT_FACE);
 		} else{
