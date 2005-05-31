@@ -43,8 +43,8 @@ public class TestWorldPick extends TestCase {
 		root.addChild(world);
 		InteractiveViewer iv = new InteractiveViewer(null, root);
 		PickAction pa = new PickAction(iv);
-		double[] p0 = {.5,.5,.5,1};
-		double[] p1 = {-.5, -.5, -.5,0};
+		double[] p0 = {2,2,2,1};
+		double[] p1 = {-2,-2,-2,1};
 		pa.setPickSegment(p0, p1);
 		Vector hits = (Vector) pa.visit();
 		if (hits != null )	{
