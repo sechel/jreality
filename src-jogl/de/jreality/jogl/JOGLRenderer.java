@@ -83,7 +83,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	JOGLRenderer globalHandle = null;
 	SceneGraphPath currentPath = new SceneGraphPath();
 	
-	de.jreality.jogl.Viewer theViewer;
+	public de.jreality.jogl.Viewer theViewer;
 	SceneGraphComponent theRoot, auxiliaryRoot;
 	JOGLPeerComponent thePeerRoot = null;
 	JOGLPeerComponent thePeerAuxilliaryRoot = null;
@@ -1257,7 +1257,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 
 			if (appearanceChanged)  	propagateAppearanceChanged();
 			if (appearanceIsDirty)	updateAppearance();
-			context.setEffectiveAppearance(eAp);
+			//context.setEffectiveAppearance(eAp);
 			
 			// render the geometry
 			if (goBetween.getPeerGeometry() != null)	goBetween.getPeerGeometry().render(this);
