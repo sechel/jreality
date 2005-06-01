@@ -198,10 +198,10 @@ public class PickActionBad  {
 					double[] objectPt = Rn.matrixTimesVector(null, NDCToObject, intersect);
 					Pn.dehomogenize(objectPt, objectPt);
 					//JOGLConfiguration.theLog.log(Level.FINER"Object coords: "+Rn.toString(objectPt));
-					PickPoint pp = new PickPoint(null, thePath, intersect);
+					PickPoint pp = PickPoint.PickPointFactory(thePath, null, intersect);
 					//pp.setPickPath( (SceneGraphPath) thePath.clone());
 					//pp.setPointNDC(intersect);
-					pp.setPointObject(objectPt);
+					//pp.setPointObject(objectPt);
 					pp.setFaceNum(i);
 					pp.setPickType(PickPoint.HIT_FACE);
 					if (pickHits == null)	pickHits = new Vector();
