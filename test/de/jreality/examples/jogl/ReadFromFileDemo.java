@@ -86,8 +86,14 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 		//System.out.println("FCI resource dir is: "+resourceDir);
 		int result = fc.showOpenDialog(this);
 		resourceDir=fc.getSelectedFile().getAbsolutePath();
-		SceneGraphComponent sgc = Readers.readFile(fc.getSelectedFile());
-//		SceneGraphComponent sgc = null;
+		SceneGraphComponent sgc = null;
+		try {
+			sgc = Readers.read(fc.getSelectedFile());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//		SceneGraphComponent sgc = null;
 //		try {
 //			sgc = Readers.read("OOGL", Readers.resolveResource(fc.getName()));
 //		} catch (IOException e) {

@@ -184,7 +184,7 @@ public class InteractiveViewerDemo extends JFrame{
 		hack.add(Box.createHorizontalGlue());
 		if (!fullScreen) getContentPane().add(hack, BorderLayout.NORTH);
 	     //This fixes a bug in the Linux version of GLCanvas which prevented menus from showing up
-		 JPopupMenu.setDefaultLightWeightPopupEnabled( false ) ;
+		JPopupMenu.setDefaultLightWeightPopupEnabled( false ) ;
 				
 		//TODO this should go into the main() method-- but that belongs to the subclass... hmmmm
 		addWindowListener(new java.awt.event.WindowAdapter() {
