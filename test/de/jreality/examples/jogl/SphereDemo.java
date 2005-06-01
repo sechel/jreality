@@ -75,7 +75,7 @@ public class SphereDemo extends InteractiveViewerDemo {
 		IndexedFaceSet ifs = SphereHelper.tessellatedIcosahedra[2];
 		double[] lightPosition = {0,0,4};
 			SceneGraphComponent c = SceneGraphUtilities.createFullSceneGraphComponent("sphere"+i);
-			c.setGeometry(ifs); //SphereHelper.tessellatedIcosahedra[i]); //new Sphere()); //
+			c.setGeometry(new Sphere()); //SphereHelper.tessellatedIcosahedra[i]); //new Sphere()); //
 			double angle = (2 * Math.PI * i)/6.0;
 			c.getTransformation().setTranslation(3 * Math.cos(angle), 3*Math.sin(angle), 0.0);
 			float g = (float) (i/5.0);
@@ -97,7 +97,7 @@ public class SphereDemo extends InteractiveViewerDemo {
 			c.getAppearance().setAttribute("polygonShader.LightPosition", lightPosition);
 			world.addChild(c);
 		}
-		SceneGraphComponent flatt = GeometryUtility.flatten(world);
+		//SceneGraphComponent flatt = GeometryUtility.flatten(world);
 		//CopyScene cp = new CopyScene();
 		//SceneGraphComponent flatt = (SceneGraphComponent) cp.createProxyScene(world);
 		AbstractDeformation ad = new AbstractDeformation()		{
@@ -110,7 +110,7 @@ public class SphereDemo extends InteractiveViewerDemo {
 			}
 		};
 		//AbstractDeformation.deform(flatt, ad);
-		return flatt;
+		return world;
 	}
 	
 
