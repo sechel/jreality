@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 
 import de.jreality.scene.*;
 import de.jreality.scene.data.*;
-import de.jreality.scene.tool.PickResult;
+import de.jreality.scene.pick.PickResult;
 import de.jreality.util.*;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;
