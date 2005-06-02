@@ -21,6 +21,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
+import de.jreality.scene.pick.PickSystem;
 import de.jreality.soft.DefaultViewer;
 import de.jreality.util.Rn;
 

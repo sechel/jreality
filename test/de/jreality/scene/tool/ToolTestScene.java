@@ -20,9 +20,12 @@ import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.pick.PickSystem;
+import de.jreality.scene.pick.SoftPickSystem;
 import de.jreality.util.Matrix;
 import de.jreality.util.P3;
 import de.jreality.util.SceneGraphUtilities;
+import de.jreality.worlds.JOGLSkyBox;
 
 /**
  * @author brinkman
@@ -87,9 +90,10 @@ public class ToolTestScene {
     camNode.setCamera(camera);
 
     SceneGraphComponent scene = new SceneGraphComponent();
-    SceneGraphComponent cath = new SceneGraphComponent();
+    SceneGraphComponent cath1 = new SceneGraphComponent();
+    SceneGraphComponent cath2 = new SceneGraphComponent();
+    SceneGraphComponent cath3 = new SceneGraphComponent();
     SceneGraphComponent sphere = new SceneGraphComponent();
-//    sphere.addTool(new DraggingTool());
     sphere.setGeometry(new Sphere());
 //    cath.addTool(new TestTool());
 //    cath.addTool(new DraggingTool() {
@@ -99,12 +103,21 @@ public class ToolTestScene {
 //        matrix.setEntry(2, 3, 0.);
 //      }
 //    });
-    cath.setGeometry(new CatenoidHelicoid(40));
+    cath1.setGeometry(new CatenoidHelicoid(40));
+    cath2.setGeometry(new CatenoidHelicoid(20));
+    cath3.setGeometry(new CatenoidHelicoid(10));
     root.addChild(scene);
-    scene.addChild(cath);
-    scene.addChild(sphere);
+   
+    
+    //scene.addChild(cath1);
+    //scene.addChild(cath2);
+    //scene.addChild(cath3);
+    //scene.addChild(sphere);
+    
+    scene.addChild(new JOGLSkyBox().makeWorld());
     root.addChild(avatarNode);
     
+    scene.addTool(new TestTool());
     scene.addTool(new DraggingTool());
 //    scene.addTool(new TranslateTool());
     scene.addTool(new RotateTool());
@@ -116,7 +129,8 @@ public class ToolTestScene {
     camPath.push(avatarNode);
     camPath.push(camNode);
     camPath.push(camera);
-    camNode.addTool(new EgoShooterTool());
+    avatarNode.addTool(new ShipNavigationTool());
+    camNode.addTool(new HeadTransformationTool());
     frame.setVisible(true);
     frame.setSize(640, 480);
     frame.getContentPane().add(viewer.getViewingComponent());
@@ -131,8 +145,8 @@ public class ToolTestScene {
       }
     });
     try {
-      PickSystem ps = (PickSystem) Class.forName(
-          "de.jreality.jme.intersection.proxy.JmePickSystem").newInstance();
+      //PickSystem ps = (PickSystem) Class.forName("de.jreality.jme.intersection.proxy.JmePickSystem").newInstance();
+      PickSystem ps = new SoftPickSystem();
       viewer.setPickSystem(ps);
     } catch (Exception e) {
       // TODO Auto-generated catch block
