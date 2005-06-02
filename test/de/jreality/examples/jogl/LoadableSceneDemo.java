@@ -42,7 +42,7 @@ public class LoadableSceneDemo extends InteractiveViewerDemo {
 		JOGLConfiguration.theLog.log(Level.INFO, System.getProperty("java.library.path"));
 		LoadableSceneDemo iv = new LoadableSceneDemo();//InteractiveViewerDemo.SPLIT_PANE, false);
 		iv.initializeScene();
-		if (args != null) iv.loadScene(args[0]);
+		if (args != null && args.length > 0) iv.loadScene(args[0]);
 		else iv.loadScene("de.jreality.worlds.AnimationDemo");
     }
     String root = "de.jreality.worlds.";
