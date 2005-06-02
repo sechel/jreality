@@ -25,6 +25,7 @@ package de.jreality.soft;
 import java.awt.Component;
 import java.awt.event.*;
 import java.io.Serializable;
+import java.util.List;
 
 import de.jreality.renderman.RIBVisitor;
 import de.jreality.scene.*;
@@ -74,8 +75,11 @@ public static final String MOUSE_DONE = "mouseDone";
     protected Transformation tmpTrafo = new Transformation();
 
     protected Viewer v;
-
     private RenderTrigger trigger =new RenderTrigger();
+    
+    // Experimental Pick:
+    protected PickViewer pickViewer = new PickViewer();
+    SceneGraphComponent pick; 
     
 	/**
 	 * 
@@ -87,19 +91,64 @@ public static final String MOUSE_DONE = "mouseDone";
         setViewer(v.getViewingComponent());
 	}
 
+    private void pickAction(MouseEvent e) {
+       
+            if(pick == null){
+                pick = new SceneGraphComponent();
+                Transformation t = new Transformation();
+                t.setStretch(.15);
+                pick.setTransformation(t);
+                
+                pick.setGeometry(new Sphere());
+            } else {
+//            if(root.isAncestor(pick))
+                root.removeChild(pick);
+//            System.out.println("removed");
+            }
+            pickViewer.initializeFrom(v);
+            pickViewer.setPickPoint(e.getX(), e.getY());
+            pickViewer.render();
+            List list = pickViewer.getHitList();
+            if(list.size() >0) {
+                int i = 0;
+//                while(((PickVisitor.Hit) list.get(i)).getPath().getLastComponent() == pick){
+//                    i++;
+//                }   
+                Transformation t = pick.getTransformation();
+                t.setTranslation(((PickVisitor.Hit) list.get(i)).getWorldCoordinates());
+                /*
+                double d[] = ((PickVisitor.Hit) list.get(i)).getPointNDC();
+                    System.out.println("length "+list.size()+" pic at "+d[0]+" "+d[1]+" "+d[2]);
+                    SceneGraphPath p = ((PickVisitor.Hit) list.get(i)).getPath();
+                    p.pop();
+                    Appearance a = p.getLastComponent().getAppearance();
+                    if(a!=null)
+                            System.out.println("appearance name is "+a.getName());
+                            */
+            }
+            root.addChild(pick);
+
+           trigger.forceRender();
+           
+    }
+    
 	/* (non-Javadoc)
 	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
 	 */
 	public void mouseClicked(MouseEvent e) {
-
+	   
 	}
 
 	/* (non-Javadoc)
 	 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
 	 */
 	public void mousePressed(MouseEvent e) {
-		oldX = e.getX();
-		oldY = e.getY();
+        if(e.isShiftDown()) {
+             pickAction(e);
+            } else {
+                oldX = e.getX();
+                oldY = e.getY();
+            }
 		//Renderer.setDragging(true);
 	}
 
@@ -127,6 +176,10 @@ public static final String MOUSE_DONE = "mouseDone";
 	 * @see java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent)
 	 */
 	 public void mouseDragged(MouseEvent e) {
+         if(e.isShiftDown()) {
+             pickAction(e);
+            return;
+            } 
 		 if(cameraPath.getLength()!= 0)
              this.transformation = cameraPath.getLastComponent().getTransformation();
          //this.transformation = ((SceneGraphComponent)cameraPath.getLastElement()).getTransformation();
@@ -657,4 +710,5 @@ public static final String MOUSE_DONE = "mouseDone";
     public void removeFromTriggerList(Viewer v) {
         trigger.removeViewer(v);
     }
+    
 }

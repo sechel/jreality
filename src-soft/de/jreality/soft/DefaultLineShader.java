@@ -41,6 +41,10 @@ public class DefaultLineShader implements LineShader {
     public DefaultLineShader() {
         super();
     }
+    public DefaultLineShader(PolygonShader p) {
+        super();
+        polygonShader = p;
+    }
 
     /* (non-Javadoc)
      * @see de.jreality.soft.LineShader#getPolygonShader()

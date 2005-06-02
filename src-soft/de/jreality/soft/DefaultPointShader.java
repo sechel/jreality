@@ -43,6 +43,11 @@ public class DefaultPointShader implements PointShader {
     public DefaultPointShader() {
         super();
     }
+    public DefaultPointShader(PolygonShader coreShader, PolygonShader outlineShader) {
+        super();
+        this.coreShader = coreShader;
+        this.outlineShader = outlineShader;
+    }
 
     public PolygonShader getCoreShader() {
         return coreShader;

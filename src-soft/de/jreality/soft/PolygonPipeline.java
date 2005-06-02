@@ -24,6 +24,8 @@ package de.jreality.soft;
 
 import java.util.Arrays;
 
+import sun.awt.VerticalBagLayout;
+
 import de.jreality.scene.Geometry;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.data.*;
@@ -438,7 +440,8 @@ public class PolygonPipeline
     }
 
     public int getFreeVertex() {
-        if(vertexCount*Polygon.VERTEX_LENGTH>=vertexData.length) increaseVertexCapacity(1);
+//        if(vertexCount*Polygon.VERTEX_LENGTH>=vertexData.length) increaseVertexCapacity(1);
+        if(vertexCount>=vertexData.length) increaseVertexCapacity(1);
         int vc =vertexCount;
         vertexCount+= Polygon.VERTEX_LENGTH;
         return vc;
@@ -555,6 +558,7 @@ public class PolygonPipeline
         int index,
         int sign,
         double k) {
+
         Polygon p = polygons[polPos];
         if (p.length == 0)
             return;
