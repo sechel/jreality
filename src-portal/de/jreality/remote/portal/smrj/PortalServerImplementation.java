@@ -420,9 +420,14 @@ public class PortalServerImplementation extends RemoteDistributedViewer implemen
 
     private void loadFile(String name) {
         pauseQueue();
-        de.jreality.scene.SceneGraphComponent world = Readers.readFile(new File(name));
-        if (world != null) getNavigationComponent().addChild(world);
-        wandTool.center();
+        try {
+          de.jreality.scene.SceneGraphComponent world = Readers.read(new File(name));
+          if (world != null) getNavigationComponent().addChild(world);
+          wandTool.center();
+        } catch (IOException e) {
+          e.printStackTrace();
+          System.out.println("Loading file "+name+" failed!");
+        }
         startQueue();
     }
 

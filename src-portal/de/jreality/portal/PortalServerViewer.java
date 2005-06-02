@@ -311,10 +311,15 @@ public class PortalServerViewer implements Viewer, HeadMotionListener {
 
 	private void loadFile(String name) {
         long t = System.currentTimeMillis();
-        de.jreality.scene.SceneGraphComponent world = Readers.readFile(new File(name));
-        setUpWorld(world);
-        long s = System.currentTimeMillis() - t;
-        System.out.println("loaded file " + name + " successful. ["+s+"ms]");
+        try {
+          de.jreality.scene.SceneGraphComponent world = Readers.read(new File(name));
+          setUpWorld(world);
+          long s = System.currentTimeMillis() - t;
+          System.out.println("loaded file " + name + " successful. ["+s+"ms]");
+        } catch (IOException e) {
+          e.printStackTrace();
+          System.out.println("loading file " + name + " failed!");
+        }
 	}
 
 	/**
