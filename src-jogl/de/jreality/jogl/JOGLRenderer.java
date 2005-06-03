@@ -780,35 +780,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				JOGLRendererHelper.drawLabels(((LabelSet) originalGeometry), globalHandle);
 			}
 
-			if (geometryShader.isFaceDraw() && ifs != null)	{
-				geometryShader.polygonShader.render(globalHandle);
-				double alpha = openGLState.diffuseColor[3];
-				boolean ss = openGLState.smoothShading;
-				int type = ss ? SMOOTH_POLYGONDL : FLAT_POLYGONDL;
-				boolean proxy = geometryShader.polygonShader.providesProxyGeometry();
-				if (proxy && dlInfo.isDisplayListDirty(type))	{
-					//theLog.log(Level.FINER,"Asking "+geometryShader.polygonShader+" for proxy geometry ");
-					int dl  = geometryShader.polygonShader.proxyGeometryFor(ils, globalHandle, currentSignature);
-					if (dl != -1) {
-						dlInfo.setDisplayListID(type, dl);
-						dlInfo.setDisplayListDirty(type, false);
-					}
-				}
-				if (proxy)	globalGL.glCallList(dlInfo.getDisplayListID(type));
-				else 	{
-					if (!processDisplayListState(type))		 // false return implies no display lists used
-						JOGLRendererHelper.drawFaces(ifs, globalHandle,ss, alpha, pickMode, JOGLPickAction.GEOMETRY_FACE);
-					else // we are using display lists
-						if (dlInfo.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
-							JOGLRendererHelper.drawFaces(ifs, globalHandle, ss, alpha, pickMode, JOGLPickAction.GEOMETRY_FACE);
-							globalGL.glEndList();	
-							globalGL.glCallList(dlInfo.getDisplayListID(type));
-							dlInfo.setDisplayListDirty(type, false);
-							dlInfo.setInsideDisplayList(false);							
-						}					
-				}
-				geometryShader.polygonShader.postRender(globalHandle);
-			}
 			if (geometryShader.isEdgeDraw() && ils != null)	{
 				geometryShader.lineShader.render(globalHandle);
 				boolean proxy = geometryShader.lineShader.providesProxyGeometry();
@@ -866,6 +837,36 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 					}			
 				}
 			}
+			if (geometryShader.isFaceDraw() && ifs != null)	{
+				geometryShader.polygonShader.render(globalHandle);
+				double alpha = openGLState.diffuseColor[3];
+				boolean ss = openGLState.smoothShading;
+				int type = ss ? SMOOTH_POLYGONDL : FLAT_POLYGONDL;
+				boolean proxy = geometryShader.polygonShader.providesProxyGeometry();
+				if (proxy && dlInfo.isDisplayListDirty(type))	{
+					//theLog.log(Level.FINER,"Asking "+geometryShader.polygonShader+" for proxy geometry ");
+					int dl  = geometryShader.polygonShader.proxyGeometryFor(ils, globalHandle, currentSignature);
+					if (dl != -1) {
+						dlInfo.setDisplayListID(type, dl);
+						dlInfo.setDisplayListDirty(type, false);
+					}
+				}
+				if (proxy)	globalGL.glCallList(dlInfo.getDisplayListID(type));
+				else 	{
+					if (!processDisplayListState(type))		 // false return implies no display lists used
+						JOGLRendererHelper.drawFaces(ifs, globalHandle,ss, alpha, pickMode, JOGLPickAction.GEOMETRY_FACE);
+					else // we are using display lists
+						if (dlInfo.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
+							JOGLRendererHelper.drawFaces(ifs, globalHandle, ss, alpha, pickMode, JOGLPickAction.GEOMETRY_FACE);
+							globalGL.glEndList();	
+							globalGL.glCallList(dlInfo.getDisplayListID(type));
+							dlInfo.setDisplayListDirty(type, false);
+							dlInfo.setInsideDisplayList(false);							
+						}					
+				}
+				geometryShader.polygonShader.postRender(globalHandle);
+			}
+
 		}
 
 		private boolean processDisplayListState(int type)	{

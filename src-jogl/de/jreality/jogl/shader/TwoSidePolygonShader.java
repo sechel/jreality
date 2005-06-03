@@ -14,6 +14,7 @@ import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.shader.PolygonShader;
 import de.jreality.scene.Geometry;
 import de.jreality.util.EffectiveAppearance;
+import de.jreality.util.LoggingSystem;
 
 /**
  * @author gunn
@@ -28,8 +29,8 @@ public class TwoSidePolygonShader implements PolygonShader {
 		 */
 	public TwoSidePolygonShader() {
 		super();
-		front = new DefaultPolygonShader();
-		back = new DefaultPolygonShader();
+		front = new ImplodePolygonShader();
+		back = new ImplodePolygonShader();
 	}
 
 
@@ -44,6 +45,7 @@ public class TwoSidePolygonShader implements PolygonShader {
 	}
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String shaderName) {
 	      front = ShaderLookup.getPolygonShaderAttr(eap, shaderName, "front");
+	      System.out.println("Front shader is "+front.getClass().toString());
 	      front.setFrontBack(DefaultPolygonShader.FRONT);
 	      back = ShaderLookup.getPolygonShaderAttr(eap, shaderName, "back");
 	      back.setFrontBack(DefaultPolygonShader.BACK);
@@ -54,10 +56,16 @@ public class TwoSidePolygonShader implements PolygonShader {
 	}
 
 	public boolean providesProxyGeometry() {
+		LoggingSystem.getLogger(this).log(Level.INFO,"Front has proxy: "+front.providesProxyGeometry());
+		if (front != null) return front.providesProxyGeometry();
 		return false;
 	}
 
 	public  int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig) {
+		int dp = 0;
+		if (front != null) dp = front.proxyGeometryFor(original, jr, sig);
+		LoggingSystem.getLogger(this).log(Level.INFO,"Providing dl "+dp);
+		if (front != null) return dp;
 		return  -1;
 	}
 
