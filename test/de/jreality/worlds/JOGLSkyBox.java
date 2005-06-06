@@ -4,26 +4,18 @@
  */
 package de.jreality.worlds;
 import java.awt.Color;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 
 import javax.swing.JMenuBar;
-
-import net.java.games.jogl.GL;
 
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.QuadMeshShape;
-import de.jreality.geometry.SphereHelper;
 import de.jreality.geometry.Torus;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.DiscreteSpaceCurve;
 import de.jreality.jogl.SkyBox;
-import de.jreality.jogl.shader.DefaultVertexShader;
-import de.jreality.reader.Input;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
@@ -39,7 +31,6 @@ import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.P3;
 import de.jreality.util.Pn;
-import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
 
 /**
