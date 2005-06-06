@@ -490,8 +490,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	private final static int PROXY_POINTDL = 1;
 	private final static int LINEDL = 2;
 	private final static int PROXY_LINEDL = 3;
-	private final static int FLAT_POLYGONDL = 4;
-	private final static int SMOOTH_POLYGONDL = 5;
+	private final static int POLYGONDL = 4;
     private final static int NUM_DLISTS = 6;
     private final static int POINTS_CHANGED = 1;
     private final static int LINES_CHANGED = 2;
@@ -522,20 +521,12 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			return useDisplayList;
 		}
 
-		public void setFlatPolygonDisplayListID(int id)	{
-			dl[FLAT_POLYGONDL] = id;
+		public void setPolygonDisplayListID(int id)	{
+			dl[POLYGONDL] = id;
 		}
 		
-		public int getFlatPolygonDisplayListID() {
-			return dl[FLAT_POLYGONDL];
-		}
-		
-		public void setSmoothPolygonDisplayListID(int id)	{
-			dl[SMOOTH_POLYGONDL] = id;
-		}
-		
-		public int getSmoothPolygonDisplayListID() {
-			return dl[SMOOTH_POLYGONDL];
+		public int getPolygonDisplayListID() {
+			return dl[POLYGONDL];
 		}
 		
 		public void setLineDisplayListID(int id)	{
@@ -733,8 +724,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				dlInfo.setDisplayListDirty(PROXY_LINEDL, true);
 			}
 			if ((type & FACES_CHANGED) != 0)	{
-				dlInfo.setDisplayListDirty(FLAT_POLYGONDL, true);
-				dlInfo.setDisplayListDirty(SMOOTH_POLYGONDL, true);
+				dlInfo.setDisplayListDirty(POLYGONDL, true);
 			}
 			theLog.log(Level.FINER,"Setting display lists dirty with flag: "+type);
 		}
@@ -784,7 +774,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				geometryShader.polygonShader.render(globalHandle);
 				double alpha = openGLState.diffuseColor[3];
 				boolean ss = openGLState.smoothShading;
-				int type = ss ? SMOOTH_POLYGONDL : FLAT_POLYGONDL;
+				int type = POLYGONDL;
 				boolean proxy = geometryShader.polygonShader.providesProxyGeometry();
 				if (proxy && dlInfo.isDisplayListDirty(type))	{
 					//theLog.log(Level.FINER,"Asking "+geometryShader.polygonShader+" for proxy geometry ");
