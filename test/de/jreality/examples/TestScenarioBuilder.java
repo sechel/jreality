@@ -151,7 +151,8 @@ public class TestScenarioBuilder extends SceneBuilder {
       a.setAttribute(CommonAttributes.EDGE_DRAW, false);
       a.setAttribute(CommonAttributes.VERTEX_DRAW, false);
       
-      a.setAttribute(CommonAttributes.POLYGON_SHADER+".front", "default");
+      a.setAttribute(CommonAttributes.POLYGON_SHADER+".front", "implode");
+      a.setAttribute(CommonAttributes.POLYGON_SHADER+".front.implodeFactor", -.5);
       String fs = CommonAttributes.POLYGON_SHADER+".front.";
       a.setAttribute(fs+CommonAttributes.DIFFUSE_COLOR, new Color(.8f,.5f,.0f));
       //a.setAttribute(fs+CommonAttributes.TRANSPARENCY, .3);
