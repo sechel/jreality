@@ -152,7 +152,7 @@ public class DefaultPolygonShader implements PolygonShader {
       gl.glEnable(GL.GL_TEXTURE_2D);
     }
 
-		if (texture2D != null) {
+	if (texture2D != null) {
       gl.glActiveTexture(texUnit);
       Texture2DLoaderJOGL.render(theCanvas, texture2D);
       int[] res = new int[1];
@@ -168,11 +168,11 @@ public class DefaultPolygonShader implements PolygonShader {
       Texture2DLoaderJOGL.render(theCanvas, lightMap);
       gl.glEnable(GL.GL_TEXTURE_2D);
     } //else
-		if (reflectionMap != null)	{
+	if (reflectionMap != null)	{
 			texUnit++;
 			gl.glActiveTexture(texUnit);
 			refMapUnit = texUnit;
-      Texture2DLoaderJOGL.render(jr, reflectionMap);
+			Texture2DLoaderJOGL.render(jr, reflectionMap);
 			//int[] res = new int[1];
 			//gl.glGetTexParameteriv(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_RESIDENT, res);
 			//JOGLConfiguration.theLog.log(Level.FINE,"Texture is resident: "+res[0]);

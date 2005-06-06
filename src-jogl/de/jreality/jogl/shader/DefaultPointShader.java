@@ -106,17 +106,14 @@ public class DefaultPointShader  implements PointShader {
 		boolean lighting = false;
 		if (sphereDraw)	{
 			polygonShader.render(jr);
-			gl.glEnable(GL.GL_LIGHTING);  // a hack			//lighting = true;
-		} else 
+			lighting = true;
+		} 
 		if (jr.openGLState.lighting != lighting)	{
 			jr.openGLState.lighting = lighting;
 			if (lighting) gl.glEnable(GL.GL_LIGHTING);
 			else gl.glDisable(GL.GL_LIGHTING);
-			
 		}
 
-		// this little bit of code forces tubes to be opaque: could add
-		// transparency-enable flag to the line shader to allow this to be controlled
 		if (jr.openGLState.transparencyEnabled)	{
 			gl.glDepthMask(true);
 			gl.glDisable(GL.GL_BLEND);			

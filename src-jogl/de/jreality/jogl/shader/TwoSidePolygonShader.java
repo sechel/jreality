@@ -46,7 +46,7 @@ public class TwoSidePolygonShader implements PolygonShader {
 	}
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String shaderName) {
 	      front = ShaderLookup.getPolygonShaderAttr(eap, shaderName, "front");
-	      System.out.println("Front shader is "+front.getClass().toString());
+	      //System.out.println("Front shader is "+front.getClass().toString());
 	      front.setFrontBack(DefaultPolygonShader.FRONT);
 	      back = ShaderLookup.getPolygonShaderAttr(eap, shaderName, "back");
 	      back.setFrontBack(DefaultPolygonShader.BACK);
