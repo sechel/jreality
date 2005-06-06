@@ -245,7 +245,7 @@ public class ViewerKeyListener extends KeyAdapter {
 					break;
 				
 				case KeyEvent.VK_U:		// line width
-					modulateValue("fogDensity", .2, !e.isShiftDown());
+					modulateValue(viewer, "fogDensity", .2, !e.isShiftDown(), 1.2, viewer.getSceneRoot().getAppearance());
 				    viewer.render();
 					break;
 
@@ -356,11 +356,12 @@ public class ViewerKeyListener extends KeyAdapter {
 	}
 
 	private void modulateValue(String name, double val, boolean increase)	{
-		modulateValue(viewer, name, val, increase, 1.2);
+		Appearance ap = viewer.getSelectionManager().getSelectedAppearance();
+		modulateValue(viewer, name, val, increase, 1.2, ap);
 	}
 	
-	public static void modulateValue(InteractiveViewer viewer, String name, double val, boolean increase, double factor)	{
-		Appearance ap = viewer.getSelectionManager().getSelectedAppearance();
+	public static void modulateValue(InteractiveViewer viewer, String name, double val, boolean increase, double factor, Appearance ap)	{
+		//Appearance ap = viewer.getSelectionManager().getSelectedAppearance();
 		if (ap == null) return;
 		Object obj = ap.getAttribute(name);
 		double newVal = val;
