@@ -57,7 +57,6 @@ public class DefaultLineShader implements LineShader  {
 	 
 	boolean lineStipple = false;
 	boolean tubeDraw = false;
-	boolean lighting = false;
 			
 	Color diffuseColor = java.awt.Color.BLACK;
 	private PolygonShader polygonShader;
@@ -171,16 +170,18 @@ public class DefaultLineShader implements LineShader  {
 		} 
 		else gl.glDisable(GL.GL_LINE_STIPPLE);
 
+		boolean lighting = false;
 		if (tubeDraw)	{
 			polygonShader.render(jr);
+			lighting = true;
 		}
 //		if (jr.openGLState.lighting != lighting)	{
-		else {
+		//else {
 			jr.openGLState.lighting = lighting;
 			if (lighting) gl.glEnable(GL.GL_LIGHTING);
 			else gl.glDisable(GL.GL_LIGHTING);
 			
-		}
+		//}
 
 		// this little bit of code forces tubes to be opaque: could add
 		// transparency-enable flag to the line shader to allow this to be controlled

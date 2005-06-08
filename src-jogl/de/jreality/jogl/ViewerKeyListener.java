@@ -307,12 +307,14 @@ public class ViewerKeyListener extends KeyAdapter {
 					System.exit(0);
 					break;
 
-				case KeyEvent.VK_BACK_QUOTE:
+				//case KeyEvent.VK_BACK_QUOTE:
+				case KeyEvent.VK_COMMA:
 					if (e.isShiftDown()) break;
 					Frame frame = Frame.getFrames()[0];
 					fullScreenToggle = !fullScreenToggle;
-					//frame.setUndecorated(fullScreenToggle);
-					//frame.show();
+					frame.dispose();
+					frame.setUndecorated(fullScreenToggle);
+					frame.show();
 					frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(fullScreenToggle ? frame : null);
 			        break;
 			}

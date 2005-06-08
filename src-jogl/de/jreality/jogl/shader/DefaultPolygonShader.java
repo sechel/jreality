@@ -128,50 +128,42 @@ public class DefaultPolygonShader implements PolygonShader {
 			else		gl.glShadeModel(GL.GL_FLAT);
 			jr.openGLState.smoothShading = smoothShading;
 		}
-		
-		//gl.glMaterialfv(frontBack, GL.GL_DIFFUSE, getDiffuseColorAsFloat());
-//		gl.glEnable(GL.GL_COLOR_MATERIAL);
-//		gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
-//		gl.glColor4fv( getDiffuseColorAsFloat());
-		//JOGLConfiguration.theLog.log(Level.FINE,"Alpha channel is "+diffuseColorAsFloat[3]);
-		//JOGLConfiguration.theLog.log(Level.FINE,"transparency is "+transparency);
-		//float[] testcolor = {.3f, .5f, .7f, 1.0f * ((float) transparency)};
-		//gl.glMaterialfv(GL.GL_BACK, GL.GL_DIFFUSE, testcolor);
 		texUnit = GL.GL_TEXTURE0;
 
     if (texture2Dnew != null) {
       gl.glActiveTexture(texUnit);
+	  texUnit++;
       Texture2DLoaderJOGL.render(theCanvas, texture2Dnew);
-      int[] res = new int[1];
-      gl.glEnable(GL.GL_TEXTURE_2D);
-    }
-    if (lightMapNew != null) {
-      texUnit++;
-      gl.glActiveTexture(texUnit);
-      Texture2DLoaderJOGL.render(theCanvas, lightMapNew);
       gl.glEnable(GL.GL_TEXTURE_2D);
     }
 
 	if (texture2D != null) {
       gl.glActiveTexture(texUnit);
+      texUnit++;
       Texture2DLoaderJOGL.render(theCanvas, texture2D);
-      int[] res = new int[1];
+      //int[] res = new int[1];
       //gl.glGetTexParameteriv(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_RESIDENT, res);
       //JOGLConfiguration.theLog.log(Level.FINE,"Texture is resident:
       // "+res[0]);
       //if (res[0] == 0) { jr.texResident = false; }
       gl.glEnable(GL.GL_TEXTURE_2D);
     } //else
-    if (lightMap != null) {
-      texUnit++;
+    if (lightMapNew != null) {
       gl.glActiveTexture(texUnit);
-      Texture2DLoaderJOGL.render(theCanvas, lightMap);
+      texUnit++;
+      Texture2DLoaderJOGL.render(theCanvas, lightMapNew);
+      gl.glEnable(GL.GL_TEXTURE_2D);
+    }
+    if (lightMap != null) {
+      gl.glActiveTexture(texUnit);
+      texUnit++;
+     Texture2DLoaderJOGL.render(theCanvas, lightMap);
       gl.glEnable(GL.GL_TEXTURE_2D);
     } //else
 	if (reflectionMap != null)	{
-			texUnit++;
 			gl.glActiveTexture(texUnit);
 			refMapUnit = texUnit;
+			texUnit++;
 			Texture2DLoaderJOGL.render(jr, reflectionMap);
 			//int[] res = new int[1];
 			//gl.glGetTexParameteriv(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_RESIDENT, res);

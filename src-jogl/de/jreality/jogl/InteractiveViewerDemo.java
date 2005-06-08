@@ -263,7 +263,7 @@ public class InteractiveViewerDemo extends JFrame{
 		}
 
 		CameraUtility.getCamera(viewer).setSignature(getSignature());
-		//CameraUtility.getCamera(viewer).reset();		
+		CameraUtility.getCamera(viewer).reset();		
 		if (isEncompass())	{
 			// I have to do this ... for reasons unknown ... or else the encompass sometimes fails.
 			CameraUtility.getCameraNode(viewer).getTransformation().setTranslation(0d, 0d, 2d);

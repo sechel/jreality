@@ -91,7 +91,7 @@ public class Icosahedra extends AbstractJOGLLoadableScene {
 				icokit.getTransformation().setTranslation(-1.5 + i, 0, 0);
 				icokit.getTransformation().setStretch(.5);
 				if (i == 0) icokit.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
-				if (i == 1) icokit.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, true);
+				//if (i == 1) icokit.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, true);
 				theRow.addChild(icokit);
 
 			}

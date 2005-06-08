@@ -27,6 +27,22 @@ import discreteGroup.TriangleGroup;
 public class LoadableSceneDemo extends InteractiveViewerDemo {
 
 	/**
+	 * @param b
+	 */
+	public LoadableSceneDemo(boolean b) {
+		
+		super(true);
+	}
+
+	/**
+	 * 
+	 */
+	public LoadableSceneDemo() {
+		
+		super();
+	}
+
+	/**
 	 * @param split_pane
 	 * @param b
 	 */

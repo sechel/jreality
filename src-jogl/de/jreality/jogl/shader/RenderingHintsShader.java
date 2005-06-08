@@ -115,7 +115,7 @@ public class RenderingHintsShader  {
 		GL gl = theCanvas.getGL();
 		//gl.glDisable(GL.GL_TEXTURE_2D);
 		//gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
-		if (transparencyEnabled != jr.openGLState.transparencyEnabled)	{
+		//if (transparencyEnabled != jr.openGLState.transparencyEnabled)	{
 			if (transparencyEnabled)	{
 			  gl.glEnable (GL.GL_BLEND);
 			  gl.glDepthMask(false);
@@ -125,7 +125,7 @@ public class RenderingHintsShader  {
 			  gl.glDisable(GL.GL_BLEND);
 			}
 			jr.openGLState.transparencyEnabled = transparencyEnabled;
-		}
+		//}
 		// problems with using the openGLState:  possibly related to
 		// the fact that we're not doing any "popping" so the last value set
 		// remains even if we leave the subtree where the set took placce..

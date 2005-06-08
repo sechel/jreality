@@ -22,13 +22,16 @@ import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.ReflectionMap;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Texture2D;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.shader.Texture2D;
+import de.jreality.util.AttributeEntityFactory;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
+import de.jreality.util.ImageData;
+import de.jreality.util.Matrix;
 import de.jreality.util.P3;
 import de.jreality.util.Pn;
 import de.jreality.util.SceneGraphUtilities;
@@ -104,17 +107,21 @@ public class JOGLSkyBox extends AbstractJOGLLoadableScene {
 	   ap1.setAttribute(CommonAttributes.SMOOTH_SHADING,false);
 	   ap1.setAttribute(CommonAttributes.EDGE_DRAW,false);
 	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
-	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"textureEnabled",true);
+	   //ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"textureEnabled",true);
 	   double[] vec = {1d, 1.5d, 1d};
 	   Texture2D tex2d = null;
+	   tex2d = (Texture2D) AttributeEntityFactory
+	       .createAttributeEntity(Texture2D.class, "polygonShader.texture2d", ap1);		
 	   try {
-		tex2d = new Texture2D(Readers.getInput("textures/grid256rgba.png"));
-	   } catch (IOException e1) {
-		e1.printStackTrace();
-	   }
-	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D, tex2d);
-		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"reflectionMap", refm);
-	   tex2d.setTextureMatrix( P3.makeStretchMatrix(null, vec));
+	      ImageData id = ImageData.load(Readers.getInput("textures/grid256rgba.png"));
+	      tex2d.setImage(id);
+	    } catch (IOException e) {
+	      e.printStackTrace();
+	    }
+	 	   	//tex2d = new Texture2D(Readers.getInput("textures/grid256rgba.png"));
+	   //ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D, tex2d);
+	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"reflectionMap", refm);
+	   tex2d.setTextureMatrix( new Matrix(P3.makeStretchMatrix(null, vec)));
 	   globeNode1.setAppearance(ap1);
 	   //rootAp = ap1;
 		globeNode1.setGeometry(globeSet);
@@ -250,7 +257,7 @@ public class JOGLSkyBox extends AbstractJOGLLoadableScene {
 	
 	public boolean isEncompass() {return false;}
  
-	Texture2D[] faceTex;
+	de.jreality.scene.Texture2D[] faceTex;
 	SceneGraphComponent sbkit;
 	public void customize(JMenuBar menuBar, Viewer viewer) {
 		//sb.getTransformation().setTranslation(0.0d, 0.0d, -4.0d);
