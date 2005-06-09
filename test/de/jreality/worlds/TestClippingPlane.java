@@ -39,6 +39,7 @@ import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.P3;
 import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
 
@@ -127,11 +128,12 @@ public class TestClippingPlane extends AbstractJOGLLoadableScene {
 			ap1.setAttribute(CommonAttributes.SPECULAR_COEFFICIENT, 0.0);
 			Texture2D tex2d = null;
 			try {
-				tex2d = new Texture2D(Readers.getInput("textures/arch-solids.jpg"));
+				tex2d = new Texture2D(Readers.getInput("textures/boysurface.png"));
 				ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"texture2d",tex2d);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			tex2d.setTextureMatrix(P3.makeStretchMatrix(null, 10));
 			double[][] vv = {{0,-1,0},{0,1,0},{1,1,0},{1,-1,0}};
 			double[][] texc = {{0,0},{1,0},{1,1} ,{0,1}};
 			IndexedFaceSet square = IndexedFaceSetUtility.constructPolygon(vv);
