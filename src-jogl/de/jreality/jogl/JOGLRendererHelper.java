@@ -75,10 +75,10 @@ public class JOGLRendererHelper {
 			bgo =  topAp.getAttribute("backgroundTexture");
 			if (bgo != null && bgo instanceof Texture2D)	{
 				Texture2D tex = ((Texture2D) bgo);
-				Texture2DLoaderJOGL tl = Texture2DLoaderJOGL.FactoryLoader;
+				//Texture2DLoaderJOGL tl = Texture2DLoaderJOGL.FactoryLoader;
 				//JOGLConfiguration.theLog.log(Level.INFO,"Texture: "+tex.getWidth()+" "+tex.getHeight());
 				textureAR = tex.getWidth()/((double) tex.getHeight());
-				tl.render(theCanvas, tex);
+				Texture2DLoaderJOGL.render(theCanvas, tex);
 				gl.glEnable(GL.GL_TEXTURE_2D);
 				hasTexture = true;
 			}

@@ -33,6 +33,7 @@ import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultGeometryShader;
 import de.jreality.jogl.shader.RenderingHintsShader;
 import de.jreality.jogl.shader.TextShader;
+import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Drawable;
 import de.jreality.scene.Geometry;
@@ -309,6 +310,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 //		otime = System.currentTimeMillis();
 		// all display lists need to be set to dirty
 		if (thePeerRoot != null) thePeerRoot.propagateGeometryChanged(ALL_CHANGED);
+		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.propagateGeometryChanged(ALL_CHANGED);
+		Texture2DLoaderJOGL.deleteAllTextures(globalGL);
 		sphereDisplayLists = JOGLSphereHelper.getSphereDLists(this);
 		if (debugGL)	theLog.log(Level.INFO,"Got new sphere display lists for context "+globalGL);
 		

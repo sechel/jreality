@@ -3,7 +3,9 @@ package de.jreality.jogl.shader;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Hashtable;
+import java.util.Iterator;
 
 import net.java.games.jogl.*;
 import de.jreality.jogl.JOGLRenderer;
@@ -22,9 +24,8 @@ import de.jreality.shader.Texture3D;
 public class Texture2DLoaderJOGL {
 	private GL gl;
 	private GLU glu;
-	public static final Texture2DLoaderJOGL FactoryLoader = new Texture2DLoaderJOGL();
-	static Hashtable ht = new Hashtable();
-	
+	static Hashtable lookupFromGL = new Hashtable();
+
 	private Texture2DLoaderJOGL() {
 		super();
 	}
@@ -36,12 +37,22 @@ public class Texture2DLoaderJOGL {
 	   return tmp[0]; 
 	} 
 
-  public static int getID(de.jreality.scene.Texture2D tex)  {
+  public static int getID(de.jreality.scene.Texture2D tex, Hashtable ht )  {
     Integer texid = (Integer) ht.get(tex);
     if (texid == null) return -1;
     return texid.intValue();
   }
-        
+       
+    private static Hashtable getHashTableForGL(GL gl)	{
+    		Object obj = lookupFromGL.get(gl);
+    		Hashtable ht = null;
+    		if (obj == null || !(obj instanceof Hashtable))	{
+    			ht = new Hashtable();
+    			lookupFromGL.put(gl, ht);
+    		} 
+    		else ht = (Hashtable) obj;
+    		return ht;
+  }
   /**
 	 * @param theCanvas
 	 * @param tex
@@ -54,7 +65,7 @@ public class Texture2DLoaderJOGL {
 			boolean mipmapped = true;
 			GL gl = drawable.getGL();
 			GLU glu = drawable.getGLU();
-			
+			Hashtable ht = getHashTableForGL(gl);
 			Integer texid = (Integer) ht.get(tex);
 			int textureID;
 			if (texid != null)	{
@@ -144,6 +155,7 @@ public class Texture2DLoaderJOGL {
 		boolean mipmapped = true;
 		GL gl = drawable.getGL();
 		GLU glu = drawable.getGLU();
+		Hashtable ht = getHashTableForGL(gl);
 		
 		Integer texid = (Integer) ht.get(ref);
 		int textureID;
@@ -203,7 +215,9 @@ public class Texture2DLoaderJOGL {
 				}
 	}
 
-	public void deleteTexture(de.jreality.scene.Texture2D tex)	{
+	public void deleteTexture(de.jreality.scene.Texture2D tex, GL gl)	{
+		Hashtable ht = (Hashtable) lookupFromGL.get(gl);
+		if (ht == null) return;
 		Integer which = (Integer) ht.get(tex);
 		if (which == null) return;
 		int[] list = new int[1];
@@ -221,6 +235,7 @@ public class Texture2DLoaderJOGL {
     boolean mipmapped = true;
     GL gl = drawable.getGL();
     GLU glu = drawable.getGLU();
+	Hashtable ht = getHashTableForGL(gl);
 
     Integer texid = (Integer) ht.get(tex.getImage());
     int textureID;
@@ -285,6 +300,24 @@ public class Texture2DLoaderJOGL {
     gl.glLoadTransposeMatrixd(tex.getTextureMatrix().getArray());
     gl.glMatrixMode(GL.GL_MODELVIEW);       
   }
+
+	/**
+	 * 
+	 */
+	public static void deleteAllTextures(GL gl) {
+		Hashtable ht = (Hashtable) lookupFromGL.get(gl);
+		if (ht == null) return;
+		Collection vals = ht.values();
+		Iterator it = vals.iterator();
+		while (it.hasNext())	{
+			Object obj = it.next();
+			if (obj == null || ! (obj instanceof Integer)) continue;
+			int[] list = new int[1];
+			list[0] = ((Integer) obj).intValue();
+			gl.glDeleteTextures(1, list);
+		}
+		ht.clear();
+	}
 
 }
 
