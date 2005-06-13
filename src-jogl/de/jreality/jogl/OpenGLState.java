@@ -66,11 +66,12 @@ public class OpenGLState {
 			gl.glColor3f( 0.3f, 0.0f, 0.6f ); 
 			gl.glEnable(GL.GL_DEPTH_TEST);							// Enables Depth Testing
 			gl.glDepthFunc(GL.GL_LEQUAL);								// The Type Of Depth Testing To Do
+			gl.glEnable(GL.GL_ALPHA_TEST);
+			gl.glAlphaFunc(GL.GL_GREATER, .001f);
 			gl.glClearDepth(1.0f);  
 			gl.glEnable(GL.GL_NORMALIZE);
 			gl.glEnable(GL.GL_MULTISAMPLE_ARB);	
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE);
-			boolean doFog = true;
 			openGLState.render(gl);
 		}
 		// for converting double arrays to native buffers:

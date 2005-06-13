@@ -4,6 +4,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 
@@ -317,6 +318,31 @@ public class Texture2DLoaderJOGL {
 			gl.glDeleteTextures(1, list);
 		}
 		ht.clear();
+	}
+
+	/**
+	 * @param tex2d
+	 */
+	public static void deleteTexture(de.jreality.scene.Texture2D tex2d) {
+		Enumeration gls = lookupFromGL.keys();
+		
+		while (gls.hasMoreElements())	{
+			Object foo = gls.nextElement();
+			if ( !(foo instanceof GL)) continue;
+			GL gl = (GL) foo;
+			Hashtable ht = (Hashtable) lookupFromGL.get(gl);
+			Enumeration texx = ht.keys();
+			while (texx.hasMoreElements())	{
+				Object key = texx.nextElement();
+				if (key== null ) continue;
+				int[] list = new int[1];
+				foo = ht.get(key);
+				if (foo == null || !(foo instanceof Integer)) continue;
+				list[0] = ((Integer) foo).intValue();
+				gl.glDeleteTextures(1, list);
+			}
+			
+		}
 	}
 
 }

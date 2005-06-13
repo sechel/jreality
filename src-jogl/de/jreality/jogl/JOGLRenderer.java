@@ -129,10 +129,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		helper = new JOGLRendererHelper();
 		useDisplayLists = true;
 
-		setAuxiliaryRoot(viewer.getAuxiliaryRoot());
-		//theLog.log(Level.FINER, "auxiliary root is "+auxiliaryRoot);
-		
-		
+		setAuxiliaryRoot(viewer.getAuxiliaryRoot());		
 		javax.swing.Timer followTimer = new javax.swing.Timer(1000, new ActionListener()	{
 			public void actionPerformed(ActionEvent e) {updateGeometryHashtable(); } } );
 		followTimer.start();
@@ -494,7 +491,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	private final static int LINEDL = 2;
 	private final static int PROXY_LINEDL = 3;
 	private final static int POLYGONDL = 4;
-    private final static int NUM_DLISTS = 6;
+    private final static int NUM_DLISTS = 5;
     private final static int POINTS_CHANGED = 1;
     private final static int LINES_CHANGED = 2;
     private final static int FACES_CHANGED = 4;

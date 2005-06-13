@@ -62,7 +62,7 @@ public class LoadableSceneDemo extends InteractiveViewerDemo {
 		else iv.loadScene("de.jreality.worlds.AnimationDemo");
     }
     String root = "de.jreality.worlds.";
-    String[] loadableScenes = {"de.jreality.worlds.AlexDemo",
+    String[] loadableScenes = {//"de.jreality.worlds.AlexDemo",
     			"de.jreality.worlds.AnimationDemo",
 			"de.jreality.worlds.BouncingSpheres",
  			"de.jreality.worlds.DebugLattice",
@@ -70,8 +70,9 @@ public class LoadableSceneDemo extends InteractiveViewerDemo {
 			"de.jreality.worlds.ElephantTrunk",
 			"de.jreality.worlds.Icosahedra",
 			"de.jreality.worlds.ImplodedTori",
+			"de.jreality.worlds.JOGLSkyBox",
 			"de.jreality.worlds.LabelSetDemo",
-  			"de.jreality.worlds.JOGLSkyBox",
+  			"de.jreality.worlds.MakeWeave",
    			"de.jreality.worlds.StandardDemo",
 			"de.jreality.worlds.TestClippingPlane",
 			"de.jreality.worlds.TestSphereDrawing",
@@ -79,7 +80,8 @@ public class LoadableSceneDemo extends InteractiveViewerDemo {
   			"discreteGroup.demo.ArchimedeanSolids",
   			"discreteGroup.demo.Cell120",
 			"discreteGroup.demo.SoccerBall",
-            "de.jreality.worlds.Quake3Demo"};
+            //"de.jreality.worlds.Quake3Demo"
+			};
    
     Class c;
     public void lookupClasses()	{
@@ -87,7 +89,6 @@ public class LoadableSceneDemo extends InteractiveViewerDemo {
 			try {
 				c = Class.forName("de.jreality.util.LoadableScene");
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			System.out.println("Interface is "+c.toString());

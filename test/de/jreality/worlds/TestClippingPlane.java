@@ -124,16 +124,18 @@ public class TestClippingPlane extends AbstractJOGLLoadableScene {
 			ap1.setAttribute(CommonAttributes.EDGE_DRAW, true);
 			ap1.setAttribute(CommonAttributes.FACE_DRAW, true);
 			ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
-			ap1.setAttribute(CommonAttributes.SPECULAR_COLOR, Color.YELLOW);
-			ap1.setAttribute(CommonAttributes.SPECULAR_COEFFICIENT, 0.0);
+			ap1.setAttribute(CommonAttributes.DIFFUSE_COEFFICIENT, 1.0);
+			ap1.setAttribute(CommonAttributes.TRANSPARENCY, 0.0);
+			ap1.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, true);
+			ap1.setAttribute(CommonAttributes.SPECULAR_COEFFICIENT, 0.2);
 			Texture2D tex2d = null;
 			try {
-				tex2d = new Texture2D(Readers.getInput("textures/boysurface.png"));
+				tex2d = new Texture2D(Readers.getInput("textures/weaveRGBABright.png"));
 				ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"texture2d",tex2d);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			tex2d.setTextureMatrix(P3.makeStretchMatrix(null, 10));
+			tex2d.setTextureMatrix(P3.makeStretchMatrix(null,new double[]{8,4,1}));
 			double[][] vv = {{0,-1,0},{0,1,0},{1,1,0},{1,-1,0}};
 			double[][] texc = {{0,0},{1,0},{1,1} ,{0,1}};
 			IndexedFaceSet square = IndexedFaceSetUtility.constructPolygon(vv);
@@ -180,21 +182,21 @@ public class TestClippingPlane extends AbstractJOGLLoadableScene {
 	public boolean isEncompass() {
 		return true;
 	}
- 	public SceneGraphComponent makeLights()	{
- 		SceneGraphComponent spot = SceneGraphUtilities.createFullSceneGraphComponent("Spot");
- 		SpotLight sl = new SpotLight();
- 		//PointLight sl = new PointLight();
- 		//DirectionalLight sl = new DirectionalLight();
- 		sl.setColor(Color.YELLOW);
-		sl.setConeAngle(Math.PI/6.0 );
-		sl.setConeDeltaAngle(Math.PI/20.0);
- 		sl.setDistribution(2.0);
- 		sl.setIntensity(1.0);
- 		double[] atten = {0.5, 0.5,0.0};
- 		sl.setFalloff(atten);
- 		spot.getTransformation().setRotation(Math.PI, 1.0, 0.0, 0.0);
- 		//spot.getTransformation().setTranslation(.25, .5, .25);
- 		spot.setLight(sl);
- 		return spot;
- 	}
+// 	public SceneGraphComponent makeLights()	{
+// 		SceneGraphComponent spot = SceneGraphUtilities.createFullSceneGraphComponent("Spot");
+// 		SpotLight sl = new SpotLight();
+// 		//PointLight sl = new PointLight();
+// 		//DirectionalLight sl = new DirectionalLight();
+// 		sl.setColor(Color.YELLOW);
+//		sl.setConeAngle(Math.PI/6.0 );
+//		sl.setConeDeltaAngle(Math.PI/20.0);
+// 		sl.setDistribution(2.0);
+// 		sl.setIntensity(1.0);
+// 		double[] atten = {0.5, 0.5,0.0};
+// 		sl.setFalloff(atten);
+// 		spot.getTransformation().setRotation(Math.PI, 1.0, 0.0, 0.0);
+// 		//spot.getTransformation().setTranslation(.25, .5, .25);
+// 		spot.setLight(sl);
+// 		return spot;
+// 	}
  }
