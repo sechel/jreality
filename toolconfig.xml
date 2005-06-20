@@ -65,6 +65,11 @@
       <inputslot>PrimaryMenu</inputslot>
       <outputslot>DragActivation</outputslot>
     </virtualdevice>
+
+    <virtualdevice type="de.jreality.scene.tool.VirtualMap">
+      <inputslot>PrimarySelection</inputslot>
+      <outputslot>ShipRotateActivation</outputslot>
+    </virtualdevice>
     
     <virtualdevice type="de.jreality.scene.tool.VirtualRotation">
       <inputslot>PointerNDC</inputslot>
@@ -79,8 +84,53 @@
       <inputslot>PointerTransformation</inputslot>
       <outputslot>PointerEvolution</outputslot>
     </virtualdevice>
+
+    <virtualdevice type="de.jreality.scene.tool.VirtualEvolutionOperator">
+      <inputslot>PointerNDC</inputslot>
+      <outputslot>PointerNdcEvolution</outputslot>
+    </virtualdevice>
     
-    <virtualdevice type="de.jreality.scene.tool.VirtualExtractRotationTrafo">
+    <virtualdevice type="de.jreality.scene.tool.VirtualExtractAxis">
+      <inputslot>PointerNdcEvolution</inputslot>
+      <outputslot>HorizontalShipRotationAngleEvolution</outputslot>
+      <prop name="axis">
+        <string>translationX</string>
+      </prop>
+    </virtualdevice>
+
+    <virtualdevice type="de.jreality.scene.tool.VirtualExtractAxis">
+      <inputslot>PointerNdcEvolution</inputslot>
+      <outputslot>VerticalHeadRotationAngleEvolution</outputslot>
+      <prop name="axis">
+        <string>translationY</string>
+      </prop>
+    </virtualdevice>
+
+    <virtualdevice type="de.jreality.scene.tool.VirtualRotationAboutAxis">
+      <inputslot>HorizontalShipRotationAngleEvolution</inputslot>
+      <outputslot>HorizontalShipRotationEvolution</outputslot>
+        <prop name="axis"><string>Y-axis</string></prop>
+	<prop name="gain"><double>-3</double></prop>
+        <!--array class="double" length="3">
+          <void index="0"><double>0</double></void>
+          <void index="1"><double>1</double></void>
+          <void index="2"><double>0</double></void>
+	</array-->
+</virtualdevice>
+    
+    <virtualdevice type="de.jreality.scene.tool.VirtualRotationAboutAxis">
+      <inputslot>VerticalHeadRotationAngleEvolution</inputslot>
+      <outputslot>VerticalHeadRotationEvolution</outputslot>
+        <prop name="axis"><string>X-axis</string></prop>
+	<prop name="gain"><double>3</double></prop>
+        <!--array class="double" length="3">
+          <void index="0"><double>0</double></void>
+          <void index="1"><double>1</double></void>
+          <void index="2"><double>0</double></void>
+	</array-->
+</virtualdevice>
+
+<virtualdevice type="de.jreality.scene.tool.VirtualExtractRotationTrafo">
       <inputslot>PointerTransformation</inputslot>
       <outputslot>PointerRotation</outputslot>
     </virtualdevice>
@@ -140,8 +190,8 @@
     </virtualdevice>
     
     <virtualdevice type="de.jreality.scene.tool.VirtualMergedAxis">
-      <inputslot>left</inputslot>
       <inputslot>right</inputslot>
+      <inputslot>left</inputslot>
       <outputslot>LeftRightAxis</outputslot>
     </virtualdevice>
     
