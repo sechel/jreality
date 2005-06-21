@@ -67,7 +67,7 @@ public class OpenGLState {
 			gl.glEnable(GL.GL_DEPTH_TEST);							// Enables Depth Testing
 			gl.glDepthFunc(GL.GL_LEQUAL);								// The Type Of Depth Testing To Do
 			gl.glEnable(GL.GL_ALPHA_TEST);
-			gl.glAlphaFunc(GL.GL_GREATER, .001f);
+			gl.glAlphaFunc(GL.GL_GREATER, 0f);
 			gl.glClearDepth(1.0f);  
 			gl.glEnable(GL.GL_NORMALIZE);
 			gl.glEnable(GL.GL_MULTISAMPLE_ARB);	

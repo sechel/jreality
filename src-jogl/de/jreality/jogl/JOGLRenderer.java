@@ -857,6 +857,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				}
 				geometryShader.polygonShader.postRender(globalHandle);
 			}
+			renderingHints.postRender(globalHandle);
 
 		}
 

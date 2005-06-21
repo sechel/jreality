@@ -23,8 +23,6 @@ import de.jreality.shader.Texture3D;
  * @author Kevin Glass
  */
 public class Texture2DLoaderJOGL {
-	private GL gl;
-	private GLU glu;
 	static Hashtable lookupFromGL = new Hashtable();
 
 	private Texture2DLoaderJOGL() {

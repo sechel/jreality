@@ -149,11 +149,12 @@ public class RenderingHintsShader  {
 
 	}
 
-	public class Inspector extends JPanel {
-		Inspector()		{
-			super();
-			
-		}
+	public void postRender(JOGLRenderer jr)	{
+		GLCanvas theCanvas = jr.getCanvas();
+		GL gl = theCanvas.getGL();
+		if (transparencyEnabled)	{
+			  gl.glDepthMask(true);
+			  gl.glDisable(GL.GL_BLEND);
+			}
 	}
-
 }
