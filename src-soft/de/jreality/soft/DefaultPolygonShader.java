@@ -37,8 +37,8 @@ import de.jreality.util.NameSpace;
 public class DefaultPolygonShader implements PolygonShader {
     private boolean interpolateColor=true;
     private VertexShader vertexShader;
-    private boolean outline = false;
-    private Texture texture;
+    protected boolean outline = false;
+    protected Texture texture;
 
     public DefaultPolygonShader() {
         super();

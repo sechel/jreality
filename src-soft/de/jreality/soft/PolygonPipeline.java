@@ -358,7 +358,7 @@ public class PolygonPipeline
         
         // sky box shaders need the matrix...
         environment.setMatrix(matrix);
-        
+        //****
         shader.shadePolygon(p, vertexData, environment);
         
         
@@ -511,6 +511,7 @@ public class PolygonPipeline
 
         }
         if (x0out + x1out + y0out + y1out + z0out + z1out == 0) {
+            //shader.shadePolygon(p1, vertexData, environment);
             return false; /*POLY_CLIP_IN*/
         }
         if (x0out == n
@@ -523,6 +524,7 @@ public class PolygonPipeline
             //System.out.println("OUT "+(n*Polygon.VERTEX_LENGTH));
             return true; /*POLY_CLIP_OUT*/
         }
+        //shader.shadePolygon(p1, vertexData, environment);
         // now clip:
         //if (x0out) CLIP_AND_SWAP(sx, -1., box->x0, p, q, r);
         if (x0out != 0)

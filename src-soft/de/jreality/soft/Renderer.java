@@ -124,17 +124,19 @@ public abstract class Renderer {
     // render
     //
     pipeline.renderRemaining(rasterizer);
+    rasterizer.stop();
   }    
 	
-  public Camera getCamera() {
-    return camera;
+  public SceneGraphPath getCameraPath() {
+    return cameraPath;
   }
 
-  public void setCamera(Camera aCamera) {
-    camera=aCamera;
-    if(root!= null && camera !=null)
-        //cameraPath = new SceneGraphPath(root,camera); 
-        cameraPath = SceneGraphPath.getFirstPathBetween(root,camera); 
+  public void setCameraPath(SceneGraphPath p) {
+      cameraPath = p;
+    camera=(Camera) p.getLastElement();
+//    if(root!= null && camera !=null)
+//        //cameraPath = new SceneGraphPath(root,camera); 
+//        cameraPath = SceneGraphPath.getFirstPathBetween(root,camera); 
   }
 
   public SceneGraphComponent getSceneRoot() {

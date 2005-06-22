@@ -1,5 +1,5 @@
 /*
- * Created on 12.05.2004
+ * Created on 09.06.2005
  *
  * This file is part of the de.jreality.soft package.
  * 
@@ -22,12 +22,32 @@
  */
 package de.jreality.soft;
 
+import de.jreality.shader.Texture2D;
+import de.jreality.util.AttributeEntityFactory;
+import de.jreality.util.EffectiveAppearance;
+import de.jreality.util.NameSpace;
+
+
 /**
  * 
  * @version 1.0
- * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
+ * @author timh
  *
  */
-public interface Texture {
-    public void  getColor(double u, double v,int x, int y,  int[] color);
+public class HatchPolygonShader extends DefaultPolygonShader {
+
+    /**
+     * 
+     */
+    public HatchPolygonShader() {
+        super();
+        texture = new HatchTexture();
+    }
+
+    public void setup(EffectiveAppearance eAppearance, String name) {
+        outline = eAppearance.getAttribute(NameSpace.name(name, "outline"), outline);
+        setVertexShader(ShaderLookup.getVertexShaderAttr(eAppearance, name, "vertexShader"));
+      }
+    
+ 
 }

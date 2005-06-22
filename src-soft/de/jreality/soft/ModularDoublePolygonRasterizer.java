@@ -553,11 +553,13 @@ public abstract class ModularDoublePolygonRasterizer implements PolygonRasterize
                 texture.getColor(apu/apw,apv/apw,
                     //adpu/(2.) + adru/(4.) +adlu/(4.),
                     //adpv/(2.) + adrv/(4.) +adlv/(4.),
+                        x,y,
                     color);
             else 
                 texture.getColor(apu,apv,
                     //adpu/(2.) + adru/(4.) +adlu/(4.),
                     //adpv/(2.) + adrv/(4.) +adlv/(4.),
+                        x,y,
                     color);
             double t =(255&color[3])/255.;
             double d;

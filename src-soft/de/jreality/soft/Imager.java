@@ -1,5 +1,5 @@
 /*
- * Created on 12.05.2004
+ * Created on 09.06.2005
  *
  * This file is part of the de.jreality.soft package.
  * 
@@ -25,9 +25,12 @@ package de.jreality.soft;
 /**
  * 
  * @version 1.0
- * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
+ * @author timh
  *
  */
-public interface Texture {
-    public void  getColor(double u, double v,int x, int y,  int[] color);
+public abstract class Imager {
+
+    
+ public abstract  void process(int[] pixels, int[] zBuf, int w, int h);
+
 }

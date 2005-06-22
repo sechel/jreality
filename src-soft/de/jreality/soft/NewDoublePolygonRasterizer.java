@@ -508,7 +508,7 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
             final int[] color=this.color;
             final double WW = ((double)ww);
             texture.getColor(
-                    uuu.value /WW, vvv.value /WW, color);
+                    uuu.value /WW, vvv.value /WW,pos%w,pos/w, color);
             omt *= color[3]*COLOR_CH_SCALE;
             r   *= color[0]*COLOR_CH_SCALE;
             g   *= color[1]*COLOR_CH_SCALE;

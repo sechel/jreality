@@ -411,11 +411,13 @@ public abstract class ModularLongPolygonRasterizer implements PolygonRasterizer 
                 texture.getColor((double)apuI/(double)apwI,(double)apvI/(double)apwI,
                     //adpuI/(2.*FIXPTS) + adruI/(4.*FIXPTS) +adluI/(4.*FIXPTS),
                     //adpvI/(2.*FIXPTS) + adrvI/(4.*FIXPTS) +adlvI/(4.*FIXPTS),
+                        (int)x,(int)y,
                     color);
             else
                 texture.getColor((double)apuI/(double)FIXPTS,(double)apvI/(double)FIXPTS,
                     //adpuI/(2.*FIXPTS) + adruI/(4.*FIXPTS) +adluI/(4.*FIXPTS),
                     //adpvI/(2.*FIXPTS) + adrvI/(4.*FIXPTS) +adlvI/(4.*FIXPTS),
+                        (int)x,(int)y,
                     color);
             int t =color[3];
             if(correctInterpolation&&interpolateColor) {

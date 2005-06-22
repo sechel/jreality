@@ -92,7 +92,6 @@ public static final String MOUSE_DONE = "mouseDone";
 	}
 
     private void pickAction(MouseEvent e) {
-       
             if(pick == null){
                 pick = new SceneGraphComponent();
                 Transformation t = new Transformation();
@@ -177,7 +176,7 @@ public static final String MOUSE_DONE = "mouseDone";
 	 */
 	 public void mouseDragged(MouseEvent e) {
          if(e.isShiftDown()) {
-             pickAction(e);
+             //pickAction(e);
             return;
             } 
 		 if(cameraPath.getLength()!= 0)

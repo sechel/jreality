@@ -455,6 +455,7 @@ public abstract class ModularIntegerPolygonRasterizer implements PolygonRasteriz
             texture.getColor( (double)apuI / div, (double)apvI / div,
                 //adpuI / (2.*FIXPTS) + adruI / (4.*FIXPTS) + adluI / (4.*FIXPTS),
                 //adpvI / (2.*FIXPTS) + adrvI / (4.*FIXPTS) + adlvI / (4.*FIXPTS),
+                    x,y,
                 color);
             t=((0xff&color[3])+t)>>1;
             r=(r >> 8) * color[0];

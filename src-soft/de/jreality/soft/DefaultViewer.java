@@ -38,7 +38,7 @@ import de.jreality.scene.Viewer;
 public class DefaultViewer extends Component implements Runnable, Viewer {
   private static final boolean ENFORCE_PAINT_ON_MOUSEEVENTS= false;
   private final Object renderLock= new Object();
-  private Camera camera;
+  //private Camera camera;
   private SceneGraphPath cameraPath;
   private SceneGraphComponent root;
 
@@ -209,7 +209,7 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
         }
         Color c = getBackground();
         renderer.setBackgroundColor(c !=null? c.getRGB(): 0);
-        renderer.setCamera(camera);
+        renderer.setCameraPath(cameraPath);
         renderer.setSceneRoot(root);
       } else if(!backgroundExplicitlySet) {
         Color c = getBackground();//inherited from parent
@@ -289,7 +289,7 @@ public SceneGraphPath getCameraPath() {
  */
 public void setCameraPath(SceneGraphPath p) {
     cameraPath = p;
-    camera = (Camera) p.getLastElement();
+    //camera = (Camera) p.getLastElement();
     
 }
 /* (non-Javadoc)

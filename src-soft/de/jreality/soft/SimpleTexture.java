@@ -69,7 +69,7 @@ public class SimpleTexture implements Texture {
       interpolate =(texture.getMinFilter()==Texture2D.GL_LINEAR);
   }
 
-    public void  getColor(double u, double v, int color[]) {
+    public void  getColor(double u, double v,int x, int y, int color[]) {
         //if(u!= 0)System.out.println(((int)(u*width*uscale+.5))%width);
         //int c = pixels[((int)(u*width*uscale+.5))%width +width*(((int)(v*height*vscale+.5))%height)];
         if(interpolate)
@@ -102,14 +102,19 @@ public class SimpleTexture implements Texture {
         //c = pixels[a +width*b];
         //c = pixels[((int)(u*width*uscale))%width +width*(((int)(v*height*vscale))%height)];
         int pos =incr *(a +width*b);
-        color[0]  = 255&bytes[pos+0];
-        color[1]  = 255&bytes[pos+1];
-        color[2]  = 255&bytes[pos+2];
+        color[0]   = ((255&bytes[pos+0])  *color[0]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
+        color[1]   = ((255&bytes[pos+1])  *color[1]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
+        color[2]   = ((255&bytes[pos+2])  *color[2]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
+//        color[0]  = 255&bytes[pos+0];
+//        color[1]  = 255&bytes[pos+1];
+//        color[2]  = 255&bytes[pos+2];
         
         if(incr == 4)
-            color[3]  = 255&bytes[pos+3];
+            color[3] = (255&bytes[pos+3]*color[3]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
+//            color[3]  = 255&bytes[pos+3];
         else
-            color[3] = 255;
+            color[3] = (255*color[3]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
+//            color[3] = 255;
     
         
         //color[0]  =255;

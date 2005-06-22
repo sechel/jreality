@@ -35,7 +35,7 @@ import java.util.Arrays;
  */
 public class NewPolygonRasterizer implements PolygonRasterizer {
     //For fixpoint math:
-    protected static final int FIXP = 16;
+    public static final int FIXP = 16;
     protected final static int FIXPS = 1 << FIXP;
     protected final static long LONG_DFIXPS = 1L << (2*FIXP);
     protected final static double DOUBLE_DFIXPS = 1L << (2*FIXP);
@@ -43,8 +43,8 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
     protected final static int HIGH_BITS = (0xffffffff << FIXP);
     protected final static int MAX_RANGE_FACTOR = (Integer.MAX_VALUE>>(FIXP+1));
     
-    private static final int  COLOR_CH_SCALE = fpInverse(255<<FIXP);
-    private static final int     COLOR_CH_MASK  = 255;
+    public static final int  COLOR_CH_SCALE = fpInverse(255<<FIXP);
+    public static final int     COLOR_CH_MASK  = 255;
     private static final int     OPAQUE         = (COLOR_CH_MASK << 24);
     protected static final int R_MASK = (0xff0000 );
     protected static final int G_MASK = (0xff00 );
@@ -52,6 +52,9 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
    
     private static final boolean correctInterpolation = false;
 
+    //private Imager imager = new HatchImager();
+    private Imager imager = null;
+    
     //dimensions of the image to render into:
 
     private int xmin = 0;
@@ -549,12 +552,20 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
         if (interpolateUV) {
             final int[] color=this.color;
             final double WW = ((double)ww);
+            color[0] = r;
+            color[1] = g;
+            color[2] = b;
             texture.getColor(
-                    uuu.value /WW, vvv.value /WW, color);
-            omt = (omt*color[3]*COLOR_CH_SCALE)>>FIXP;
-            r   = (r  *color[0]*COLOR_CH_SCALE)>>FIXP;
-            g   = (g  *color[1]*COLOR_CH_SCALE)>>FIXP;
-            b   = (b  *color[2]*COLOR_CH_SCALE)>>FIXP;    
+                    uuu.value /WW, vvv.value /WW,pos%w,pos/w, color);
+            //This is now done in getColor:
+//            omt = (omt*color[3]*COLOR_CH_SCALE)>>FIXP;
+//            r   = (r  *color[0]*COLOR_CH_SCALE)>>FIXP;
+//            g   = (g  *color[1]*COLOR_CH_SCALE)>>FIXP;
+//            b   = (b  *color[2]*COLOR_CH_SCALE)>>FIXP;   
+              r   = color[0];
+              g   = color[1];
+              b   = color[2];
+              omt = color[3];
         }
         if(omt<255) {
             final int sample = pixels[pos];
@@ -669,6 +680,8 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
 
 
     public final  void stop() {
+        if(imager != null)
+            imager.process(pixels,zBuffer,w,h);
     }
     
     
