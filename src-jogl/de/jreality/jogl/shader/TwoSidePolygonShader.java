@@ -57,7 +57,7 @@ public class TwoSidePolygonShader implements PolygonShader {
 	}
 
 	public boolean providesProxyGeometry() {
-		LoggingSystem.getLogger(this).log(Level.INFO,"Front has proxy: "+front.providesProxyGeometry());
+		//LoggingSystem.getLogger(this).log(Level.INFO,"Front has proxy: "+front.providesProxyGeometry());
 		if (front != null) return front.providesProxyGeometry();
 		return false;
 	}
@@ -65,7 +65,7 @@ public class TwoSidePolygonShader implements PolygonShader {
 	public  int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig) {
 		int dp = 0;
 		if (front != null) dp = front.proxyGeometryFor(original, jr, sig);
-		LoggingSystem.getLogger(this).log(Level.INFO,"Providing dl "+dp);
+		//LoggingSystem.getLogger(this).log(Level.INFO,"Providing dl "+dp);
 		if (front != null) return dp;
 		return  -1;
 	}

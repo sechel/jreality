@@ -157,10 +157,10 @@ public class DefaultLineShader implements LineShader  {
 		// GL_COLOR_MATERIAL is disabled.
 		//gl.glDisable(GL.GL_COLOR_MATERIAL);
 		//gl.glColor4fv(getDiffuseColorAsFloat());
-		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
+		//if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
 			gl.glColor4fv( diffuseColorAsFloat);
 			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
-		}
+		//}
 		//JOGLConfiguration.theLog.log(Level.FINE,"LineShader: Setting diffuse color to: "+Rn.toString(getDiffuseColorAsFloat()));
 	
 		gl.glLineWidth((float) getLineWidth());
