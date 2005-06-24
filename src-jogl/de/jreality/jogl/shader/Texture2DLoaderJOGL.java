@@ -4,9 +4,8 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.WeakHashMap;
 
 import net.java.games.jogl.*;
 import de.jreality.jogl.JOGLRenderer;
@@ -23,7 +22,7 @@ import de.jreality.shader.Texture3D;
  * @author Kevin Glass
  */
 public class Texture2DLoaderJOGL {
-	static Hashtable lookupFromGL = new Hashtable();
+	static WeakHashMap lookupFromGL = new WeakHashMap();
 
 	private Texture2DLoaderJOGL() {
 		super();
@@ -36,20 +35,20 @@ public class Texture2DLoaderJOGL {
 	   return tmp[0]; 
 	} 
 
-  public static int getID(de.jreality.scene.Texture2D tex, Hashtable ht )  {
+  public static int getID(de.jreality.scene.Texture2D tex, WeakHashMap ht )  {
     Integer texid = (Integer) ht.get(tex);
     if (texid == null) return -1;
     return texid.intValue();
   }
        
-    private static Hashtable getHashTableForGL(GL gl)	{
+    private static WeakHashMap getHashTableForGL(GL gl)	{
     		Object obj = lookupFromGL.get(gl);
-    		Hashtable ht = null;
-    		if (obj == null || !(obj instanceof Hashtable))	{
-    			ht = new Hashtable();
+    		WeakHashMap ht = null;
+    		if (obj == null || !(obj instanceof WeakHashMap))	{
+    			ht = new WeakHashMap();
     			lookupFromGL.put(gl, ht);
     		} 
-    		else ht = (Hashtable) obj;
+    		else ht = (WeakHashMap) obj;
     		return ht;
   }
   /**
@@ -64,7 +63,7 @@ public class Texture2DLoaderJOGL {
 			boolean mipmapped = true;
 			GL gl = drawable.getGL();
 			GLU glu = drawable.getGLU();
-			Hashtable ht = getHashTableForGL(gl);
+			WeakHashMap ht = getHashTableForGL(gl);
 			Integer texid = (Integer) ht.get(tex);
 			int textureID;
 			if (texid != null)	{
@@ -154,7 +153,7 @@ public class Texture2DLoaderJOGL {
 		boolean mipmapped = true;
 		GL gl = drawable.getGL();
 		GLU glu = drawable.getGLU();
-		Hashtable ht = getHashTableForGL(gl);
+		WeakHashMap ht = getHashTableForGL(gl);
 		
 		Integer texid = (Integer) ht.get(ref);
 		int textureID;
@@ -215,7 +214,7 @@ public class Texture2DLoaderJOGL {
 	}
 
 	public void deleteTexture(de.jreality.scene.Texture2D tex, GL gl)	{
-		Hashtable ht = (Hashtable) lookupFromGL.get(gl);
+	    WeakHashMap ht = (WeakHashMap) lookupFromGL.get(gl);
 		if (ht == null) return;
 		Integer which = (Integer) ht.get(tex);
 		if (which == null) return;
@@ -234,7 +233,7 @@ public class Texture2DLoaderJOGL {
     boolean mipmapped = true;
     GL gl = drawable.getGL();
     GLU glu = drawable.getGLU();
-	Hashtable ht = getHashTableForGL(gl);
+	WeakHashMap ht = getHashTableForGL(gl);
 
     Integer texid = (Integer) ht.get(tex.getImage());
     int textureID;
@@ -304,7 +303,7 @@ public class Texture2DLoaderJOGL {
 	 * 
 	 */
 	public static void deleteAllTextures(GL gl) {
-		Hashtable ht = (Hashtable) lookupFromGL.get(gl);
+        WeakHashMap ht = (WeakHashMap) lookupFromGL.get(gl);
 		if (ht == null) return;
 		Collection vals = ht.values();
 		Iterator it = vals.iterator();
@@ -322,16 +321,16 @@ public class Texture2DLoaderJOGL {
 	 * @param tex2d
 	 */
 	public static void deleteTexture(de.jreality.scene.Texture2D tex2d) {
-		Enumeration gls = lookupFromGL.keys();
+		Iterator gls = lookupFromGL.keySet().iterator();
 		
-		while (gls.hasMoreElements())	{
-			Object foo = gls.nextElement();
+		while (gls.hasNext())	{
+			Object foo = gls.next();
 			if ( !(foo instanceof GL)) continue;
 			GL gl = (GL) foo;
-			Hashtable ht = (Hashtable) lookupFromGL.get(gl);
-			Enumeration texx = ht.keys();
-			while (texx.hasMoreElements())	{
-				Object key = texx.nextElement();
+			WeakHashMap ht = (WeakHashMap) lookupFromGL.get(gl);
+			Iterator texx = ht.keySet().iterator();
+			while (texx.hasNext())	{
+				Object key = texx.next();
 				if (key== null ) continue;
 				int[] list = new int[1];
 				foo = ht.get(key);
