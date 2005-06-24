@@ -52,8 +52,17 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
    
     private static final boolean correctInterpolation = false;
 
-    //private Imager imager = new HatchImager();
+    
     private Imager imager = null;
+    
+    {
+    	try {
+    		String img = System.getProperty("jreality.soft.imager");
+            if (img != null && img.equals("hatch")) imager = new HatchImager();
+    	} catch (SecurityException se) {
+ 			//webstart
+		}
+    }
     
     //dimensions of the image to render into:
 
