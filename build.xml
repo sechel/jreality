@@ -96,6 +96,7 @@
     <copy todir="build/core">
       <fileset dir="src" excludes="**/*.java"/>
     </copy>
+    <copy file="toolconfig.xml" todir="build/core/de/jreality/scene/tool/config"/>
     <jar jarfile="${dist}/jReality-core.jar" basedir="${build}/core" />
   </target>
 
