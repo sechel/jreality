@@ -11,6 +11,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -423,10 +424,14 @@ public class InteractiveViewerDemo extends JFrame{
 		SceneGraphComponent sgc = null;
 		if (result == JFileChooser.APPROVE_OPTION)	{
 			File file = fc.getSelectedFile();
-			sgc = Readers.readFile(file);
-			parent.addChild(sgc);
-			sgp.push(sgc);
-			JOGLConfiguration.resourceDir = file.getAbsolutePath();
+            try {
+    			sgc = Readers.read(Readers.getInput(file));
+                parent.addChild(sgc);
+                sgp.push(sgc);
+                JOGLConfiguration.resourceDir = file.getAbsolutePath();
+            } catch (IOException ioe) {
+                JOGLConfiguration.theLog.log(Level.WARNING,"Unable to open file");
+            }
 		} else {
 			JOGLConfiguration.theLog.log(Level.WARNING,"Unable to open file");
 			return;
