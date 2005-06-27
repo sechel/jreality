@@ -1,9 +1,13 @@
 package de.jreality.jogl.shader;
 
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.util.Collection;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.WeakHashMap;
 
@@ -22,10 +26,16 @@ import de.jreality.shader.Texture3D;
  * @author Kevin Glass
  */
 public class Texture2DLoaderJOGL {
-	static WeakHashMap lookupFromGL = new WeakHashMap();
+	private static WeakHashMap lookupFromGL = new WeakHashMap();
 
+  private static ReferenceQueue refQueue = new ReferenceQueue();
+  private static IdentityHashMap refToID = new IdentityHashMap();
+  private static IdentityHashMap refToGL = new IdentityHashMap();
+  private static IdentityHashMap refToDim = new IdentityHashMap();
+  
+  private static final boolean REPLACE_TEXTURES = false;
+  
 	private Texture2DLoaderJOGL() {
-		super();
 	}
 
 	private static int createTextureID(GL gl) 
@@ -34,22 +44,14 @@ public class Texture2DLoaderJOGL {
 	   gl.glGenTextures(1, tmp);
 	   return tmp[0]; 
 	} 
-
-  public static int getID(de.jreality.scene.Texture2D tex, WeakHashMap ht )  {
-    Integer texid = (Integer) ht.get(tex);
-    if (texid == null) return -1;
-    return texid.intValue();
-  }
        
     private static WeakHashMap getHashTableForGL(GL gl)	{
-    		Object obj = lookupFromGL.get(gl);
-    		WeakHashMap ht = null;
-    		if (obj == null || !(obj instanceof WeakHashMap))	{
+      WeakHashMap ht = (WeakHashMap) lookupFromGL.get(gl);
+  		if (ht == null)	{
     			ht = new WeakHashMap();
     			lookupFromGL.put(gl, ht);
-    		} 
-    		else ht = (WeakHashMap) obj;
-    		return ht;
+      } 
+  		return ht;
   }
   /**
 	 * @param theCanvas
@@ -71,8 +73,9 @@ public class Texture2DLoaderJOGL {
 				textureID = texid.intValue();
 			} else {
 				// create the texture ID for this texture 
-				textureID = createTextureID(gl); 
-				ht.put(tex, new Integer(textureID));
+				textureID = createTextureID(gl);
+				Integer id = new Integer(textureID);
+        ht.put(tex, id);
 			}
  
 //			gl.glActiveTexture(GL.GL_TEXTURE0+level);
@@ -192,8 +195,8 @@ public class Texture2DLoaderJOGL {
 				if (mipmapped) 
 					glu.gluBuild2DMipmaps(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 
 											GL.GL_RGBA, 
-											width, 
-								  			height, 
+											width,
+								  		height, 
 										  srcPixelFormat, 
 										  GL.GL_UNSIGNED_BYTE, 
 										  data); 
@@ -213,15 +216,15 @@ public class Texture2DLoaderJOGL {
 				}
 	}
 
-	public void deleteTexture(de.jreality.scene.Texture2D tex, GL gl)	{
-	    WeakHashMap ht = (WeakHashMap) lookupFromGL.get(gl);
-		if (ht == null) return;
-		Integer which = (Integer) ht.get(tex);
-		if (which == null) return;
-		int[] list = new int[1];
-		list[0] = which.intValue();
-		gl.glDeleteTextures(1, list);
-	}
+  public static void deleteTexture(de.jreality.scene.Texture2D tex, GL gl)  {
+    WeakHashMap ht = (WeakHashMap) lookupFromGL.get(gl);
+    if (ht == null) return;
+    Integer which = (Integer) ht.get(tex);
+    if (which == null) return;
+    int[] list = new int[1];
+    list[0] = which.intValue();
+    gl.glDeleteTextures(1, list);
+  }
 
   /******************* new Textures *******************/
   
@@ -231,19 +234,47 @@ public class Texture2DLoaderJOGL {
     //public static void render(GLCanvas drawable, Texture2D tex, int level) {
     boolean first = true;
     boolean mipmapped = true;
+    boolean replace = false;
+    
     GL gl = drawable.getGL();
     GLU glu = drawable.getGLU();
-	WeakHashMap ht = getHashTableForGL(gl);
+    
+    WeakHashMap ht = getHashTableForGL(gl);
 
     Integer texid = (Integer) ht.get(tex.getImage());
-    int textureID;
+    int textureID = -1;
     if (texid != null) {
       first = false;
       textureID = texid.intValue();
     } else {
+      Dimension dim = new Dimension(tex.getImage().getWidth(), tex.getImage().getHeight());
+      { // delete garbage collected textures or reuse if possible
+        for (Object ref=refQueue.poll(); ref != null; ref=refQueue.poll()) {
+          Integer id = (Integer) refToID.remove(ref);
+          if (id == null) throw new Error();
+          GL g = (GL) refToGL.remove(ref);
+          Dimension d = (Dimension) refToDim.remove(ref);
+          if (REPLACE_TEXTURES && g == gl && dim.equals(d) && !replace) {
+            // replace texture
+            System.out.println("replacing texture...");
+            textureID = id.intValue();
+            replace = true;
+            first = false;
+          } else {
+            System.out.println("deleted texture...");
+            g.glDeleteTextures(1, new int[]{id.intValue()});
+          }
+        }
+      }
       // create the texture ID for this texture
-      textureID = createTextureID(gl);
-      ht.put(tex.getImage(), new Integer(textureID));
+      if (textureID == -1) textureID = createTextureID(gl);
+      Integer id = new Integer(textureID);
+      ht.put(tex.getImage(), id);
+      // register reference for refQueue
+      WeakReference ref = new WeakReference(tex.getImage(), refQueue);
+      refToID.put(ref, id);
+      refToGL.put(ref, gl);
+      refToDim.put(ref, new Dimension(tex.getImage().getWidth(), tex.getImage().getHeight()));
     }
 
     //gl.glActiveTexture(GL.GL_TEXTURE0+level);
@@ -255,15 +286,24 @@ public class Texture2DLoaderJOGL {
 
     // create either a series of mipmaps of a single texture image based on
     // what's loaded
-    if (first)
-        if (mipmapped)
+    if (first) {
+        if (mipmapped) {
           glu.gluBuild2DMipmaps(GL.GL_TEXTURE_2D, GL.GL_RGBA, tex.getImage().getWidth(),
               tex.getImage().getHeight(), srcPixelFormat, GL.GL_UNSIGNED_BYTE, data);
-        else
+        } else {
           gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_COMPRESSED_RGBA_ARB, //GL.GL_RGBA,
                                                                           // //tex.getPixelFormat(),
               tex.getImage().getWidth(), tex.getImage().getHeight(), 0, srcPixelFormat,
               GL.GL_UNSIGNED_BYTE, data);
+        }
+    }
+    
+    if (replace) {
+      // write data into the tex with id = textureID
+      // what aboud mipmapped textures?
+      throw new Error("not implemented");
+    }
+    
   } 
 
   private static void handleTextureParameters(Texture3D tex, GL gl) {
@@ -325,20 +365,9 @@ public class Texture2DLoaderJOGL {
 		
 		while (gls.hasNext())	{
 			Object foo = gls.next();
-			if ( !(foo instanceof GL)) continue;
+			if ( !(foo instanceof GL)) throw new Error();
 			GL gl = (GL) foo;
-			WeakHashMap ht = (WeakHashMap) lookupFromGL.get(gl);
-			Iterator texx = ht.keySet().iterator();
-			while (texx.hasNext())	{
-				Object key = texx.next();
-				if (key== null ) continue;
-				int[] list = new int[1];
-				foo = ht.get(key);
-				if (foo == null || !(foo instanceof Integer)) continue;
-				list[0] = ((Integer) foo).intValue();
-				gl.glDeleteTextures(1, list);
-			}
-			
+			deleteTexture(tex2d, gl);
 		}
 	}
 
