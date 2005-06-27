@@ -24,12 +24,15 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Texture2D;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.shader.Texture2D;
+import de.jreality.util.AttributeEntityFactory;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
+import de.jreality.util.ImageData;
+import de.jreality.util.Matrix;
 import de.jreality.util.MatrixBuilder;
 import de.jreality.util.P3;
 import de.jreality.util.Pn;
@@ -78,19 +81,20 @@ import de.jreality.util.SceneGraphUtilities;
 		   copies5.addChild(sgc);
 	   }
 	   world.addChild(copies5);
-		Texture2D tex2d = null;
-		try {
-			tex2d = new Texture2D(Readers.getInput("textures/weaveRGBABright.png"));
-			world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"texture2d",tex2d);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		double[] mat = new double[16];
-		MatrixBuilder.euclidian().rotate(Math.PI/4.0,0,0,1).scale(8,8,1).assignTo(mat);
-		tex2d.setTextureMatrix(mat);
-	   
- 	   Appearance ap1 = world.getAppearance();
- 	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
+
+	   Appearance ap1 = world.getAppearance();
+	   Texture2D tex2d = null;
+	   tex2d = (Texture2D) AttributeEntityFactory
+	       .createAttributeEntity(Texture2D.class, "polygonShader.texture2d", ap1);		
+	   try {
+	      ImageData id = ImageData.load(Readers.getInput("textures/weaveRGBABright.png"));
+	      tex2d.setImage(id);
+	    } catch (IOException e) {
+	      e.printStackTrace();
+	    }
+		tex2d.setTextureMatrix(MatrixBuilder.euclidian().rotate(Math.PI/4.0,0,0,1).scale(8,8,1).getMatrix());
+   
+  	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
  	   ap1.setAttribute(CommonAttributes.SPECULAR_EXPONENT, 100.0);
  	   ap1.setAttribute(CommonAttributes.SPECULAR_COEFFICIENT, 0.1);
  	   ap1.setAttribute(CommonAttributes.DIFFUSE_COEFFICIENT, 1.0);

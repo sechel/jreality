@@ -33,12 +33,15 @@ import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SpotLight;
-import de.jreality.scene.Texture2D;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.shader.Texture2D;
+import de.jreality.util.AttributeEntityFactory;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.ImageData;
+import de.jreality.util.Matrix;
 import de.jreality.util.P3;
 import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
@@ -127,15 +130,19 @@ public class TestClippingPlane extends AbstractJOGLLoadableScene {
 			ap1.setAttribute(CommonAttributes.DIFFUSE_COEFFICIENT, 1.0);
 			ap1.setAttribute(CommonAttributes.TRANSPARENCY, 0.0);
 			ap1.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, true);
-			ap1.setAttribute(CommonAttributes.SPECULAR_COEFFICIENT, 0.2);
-			Texture2D tex2d = null;
-			try {
-				tex2d = new Texture2D(Readers.getInput("textures/weaveRGBABright.png"));
-				ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"texture2d",tex2d);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			tex2d.setTextureMatrix(P3.makeStretchMatrix(null,new double[]{8,4,1}));
+			ap1.setAttribute(CommonAttributes.SPECULAR_COEFFICIENT, 0.6);
+		   Texture2D tex2d = null;
+		   tex2d = (Texture2D) AttributeEntityFactory
+		       .createAttributeEntity(Texture2D.class, "polygonShader.texture2d", ap1);		
+		   try {
+		      ImageData id = ImageData.load(Readers.getInput("textures/schwarz128.png")); //weaveRGBABright.png"));
+		      tex2d.setImage(id);
+		    } catch (IOException e) {
+		      e.printStackTrace();
+		    }
+		 	   	//tex2d = new Texture2D(Readers.getInput("textures/grid256rgba.png"));
+		   //ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D, tex2d);
+			tex2d.setTextureMatrix(new Matrix(P3.makeStretchMatrix(null,new double[]{8,4,1})));
 			double[][] vv = {{0,-1,0},{0,1,0},{1,1,0},{1,-1,0}};
 			double[][] texc = {{0,0},{1,0},{1,1} ,{0,1}};
 			IndexedFaceSet square = IndexedFaceSetUtility.constructPolygon(vv);

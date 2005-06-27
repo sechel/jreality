@@ -242,6 +242,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			lights = (List) lc.visit();
 		}
 		helper.processLights(globalGL, lights);
+		lightListDirty = false;
 	}
 
 
