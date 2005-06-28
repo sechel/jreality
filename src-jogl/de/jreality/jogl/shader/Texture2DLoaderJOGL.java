@@ -16,6 +16,7 @@ import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.ReflectionMap;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.Texture3D;
+import de.jreality.util.LoggingSystem;
 
 /**
  * A utility class to load textures for JOGL
@@ -33,7 +34,7 @@ public class Texture2DLoaderJOGL {
   private static IdentityHashMap refToGL = new IdentityHashMap();
   private static IdentityHashMap refToDim = new IdentityHashMap();
   
-  private static final boolean REPLACE_TEXTURES = false;
+  private static final boolean REPLACE_TEXTURES = true;
   
 	private Texture2DLoaderJOGL() {
 	}
@@ -256,12 +257,12 @@ public class Texture2DLoaderJOGL {
           Dimension d = (Dimension) refToDim.remove(ref);
           if (REPLACE_TEXTURES && g == gl && dim.equals(d) && !replace) {
             // replace texture
-            System.out.println("replacing texture...");
+            LoggingSystem.getLogger(Texture2DLoaderJOGL.class).fine("replacing texture...");
             textureID = id.intValue();
             replace = true;
             first = false;
           } else {
-            System.out.println("deleted texture...");
+            LoggingSystem.getLogger(Texture2DLoaderJOGL.class).fine("deleted texture...");
             g.glDeleteTextures(1, new int[]{id.intValue()});
           }
         }
@@ -286,7 +287,7 @@ public class Texture2DLoaderJOGL {
 
     // create either a series of mipmaps of a single texture image based on
     // what's loaded
-    if (first) {
+    if (first || replace) {
         if (mipmapped) {
           glu.gluBuild2DMipmaps(GL.GL_TEXTURE_2D, GL.GL_RGBA, tex.getImage().getWidth(),
               tex.getImage().getHeight(), srcPixelFormat, GL.GL_UNSIGNED_BYTE, data);
@@ -298,11 +299,11 @@ public class Texture2DLoaderJOGL {
         }
     }
     
-    if (replace) {
+/*    if (replace) {
       // write data into the tex with id = textureID
       // what aboud mipmapped textures?
       throw new Error("not implemented");
-    }
+    }*/
     
   } 
 
