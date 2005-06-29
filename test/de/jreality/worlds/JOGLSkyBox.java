@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import javax.swing.JMenuBar;
 
+import de.jreality.geometry.*;
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
@@ -20,13 +21,14 @@ import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.ReflectionMap;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.shader.ShaderFactory;
 import de.jreality.shader.Texture2D;
+import de.jreality.util.*;
 import de.jreality.util.AttributeEntityFactory;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
@@ -42,34 +44,12 @@ import de.jreality.util.SceneGraphUtilities;
  */
 public class JOGLSkyBox extends AbstractJOGLLoadableScene {
 
-	static String resourceDir = "/net/MathVis/data/testData3D";
-	static {
-		String foo = System.getProperty("resourceDir");
-		if (foo != null)	resourceDir  = foo;
-	}
-	//static String resourceDir = "/Users/gunn/Library/Textures/";
-	/**
-	 * 
-	 */
-	public JOGLSkyBox() {
-		super();
-	}
-
 	static double[][] square = {{-1,-1,0},{1,-1,0},{1,1,0},{-1,1,0}};
 	static double[][] texc = {{0,0},{1,0},{1,1},{0,1}};
 
 	public boolean encompass()	{ return false; }
 	ConfigurationAttributes config = null;
 	String configResourceDir = "/net/MathVis/data/config/";
-	/* (non-Javadoc)
-	 * @see de.jreality.portal.WorldMaker#setConfiguration(de.jreality.portal.util.Configuration)
-	 */
-//	public void setConfiguration(ConfigurationAttributes config) {
-//		File f = new File(configResourceDir+"JOGLSkyBox.props");
-//		this.config = new ConfigurationAttributes(Input.resolveInput("JOGLSkyBox.props"), config);
-//		String foo = this.config.getProperty("resourceDir", resourceDir);
-//		resourceDir = foo;
-//	}
 	
 	public boolean addBackPlane()	{ return false; }
 	public SceneGraphComponent makeWorld() {
@@ -77,13 +57,7 @@ public class JOGLSkyBox extends AbstractJOGLLoadableScene {
 		SceneGraphComponent root = new SceneGraphComponent();
 		root.setName("theWorld");
 		root.setTransformation(new Transformation());
-		
-		String[] texNameSuffixes = {"rt","lf","up", "dn","bk","ft"};
-		ReflectionMap refm = ReflectionMap.reflectionMapFactory("textures/desertstorm/desertstorm_", texNameSuffixes, "JPG");
-		refm.setApplyMode(Texture2D.GL_COMBINE);
-		refm.setBlendColor(new Color(1.0f, 1.0f, 1.0f, 0.6f));
-
-		
+				
 		double[][] pos = new double[6][3];
 		for (int i = 0; i<6; ++i)	{
 			double angle = i*Math.PI * 2.0/(6.0);
@@ -96,10 +70,10 @@ public class JOGLSkyBox extends AbstractJOGLLoadableScene {
 		globeSet.setName("CatHel1");
 		SceneGraphComponent globeNode1= new SceneGraphComponent();
 		globeNode1.setName("Comp1");
-		Transformation gt= new Transformation();
-		gt.setTranslation(pos[0]);
-		gt.setStretch(.3);
-		globeNode1.setTransformation(gt);
+		MatrixBuilder.euclidian()
+      .translate(pos[0])
+      .scale(.3)
+      .assignTo(globeNode1);
 	   Appearance ap1 = new Appearance();
 	   ap1.setAttribute(CommonAttributes.DIFFUSE_COLOR, java.awt.Color.RED);
 	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.BLACK);
@@ -113,14 +87,14 @@ public class JOGLSkyBox extends AbstractJOGLLoadableScene {
 	   tex2d = (Texture2D) AttributeEntityFactory
 	       .createAttributeEntity(Texture2D.class, "polygonShader.texture2d", ap1);		
 	   try {
-	      ImageData id = ImageData.load(Readers.getInput("textures/grid256rgba.png"));
+	      ImageData id = ImageData.load(Readers.getInput("textures/mxsnow0.jpg"));//grid256rgba.png"));
 	      tex2d.setImage(id);
 	    } catch (IOException e) {
 	      e.printStackTrace();
 	    }
 	 	   	//tex2d = new Texture2D(Readers.getInput("textures/grid256rgba.png"));
 	   //ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D, tex2d);
-	   ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"reflectionMap", refm);
+	   //ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"reflectionMap", refm);
 	   tex2d.setTextureMatrix( new Matrix(P3.makeStretchMatrix(null, vec)));
 	   globeNode1.setAppearance(ap1);
 	   //rootAp = ap1;
@@ -134,10 +108,10 @@ public class JOGLSkyBox extends AbstractJOGLLoadableScene {
 	   catHel.buildEdgesFromFaces();
 		SceneGraphComponent globeNode2= new SceneGraphComponent();
 		globeNode2.setName("Comp1");
-		gt= new Transformation();
-		gt.setTranslation(pos[1]);
-		gt.setStretch(.3);
-		globeNode2.setTransformation(gt);
+    MatrixBuilder.euclidian()
+    .translate(pos[1])
+    .scale(.3)
+    .assignTo(globeNode2);
 		globeNode2.setGeometry(catHel);
 		//globeNode2.setGeometry(globeSet);
 	   ap1 = new Appearance();
@@ -158,10 +132,10 @@ public class JOGLSkyBox extends AbstractJOGLLoadableScene {
 	   catHel.setName("CatHel3");
 	   catHel.buildEdgesFromFaces();
 		SceneGraphComponent globeNode3= new SceneGraphComponent();
-		gt= new Transformation();
-		gt.setTranslation(pos[2]);
-		gt.setStretch(.3);
-		globeNode3.setTransformation(gt);
+    MatrixBuilder.euclidian()
+    .translate(pos[2])
+    .scale(.3)
+    .assignTo(globeNode3);
 		globeNode3.setGeometry(catHel);
 	   ap1 = new Appearance();
 	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new Color(200, 150, 0));
@@ -180,11 +154,9 @@ public class JOGLSkyBox extends AbstractJOGLLoadableScene {
 	   tube.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(GeometryUtility.calculateFaceNormals(tube)));
 	   tube.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(GeometryUtility.calculateVertexNormals(tube)));
 	   SceneGraphComponent globeNode4= new SceneGraphComponent();
-	   gt= new Transformation();
-	   gt.setTranslation(pos[3]);
-	   //gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
-	   //gt.setStretch(.3);
-	   globeNode4.setTransformation(gt);
+      MatrixBuilder.euclidian()
+      .translate(pos[3])
+      .assignTo(globeNode4);
 	   //globeNode4.setGeometry(torus1);
 	   globeNode4.setGeometry(tube);
 	   ap1 = new Appearance();
@@ -205,15 +177,25 @@ public class JOGLSkyBox extends AbstractJOGLLoadableScene {
 	   Torus torus= new Torus(2.3, 1.5, 40,60);
 	   torus.calculateNormals();
 	   SceneGraphComponent globeNode5= new SceneGraphComponent();
-	   gt= new Transformation();
-	   gt.setTranslation(pos[4]);
-	   //gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
-	   gt.setStretch(.3);
-	   globeNode5.setTransformation(gt);
+     globeNode5.setName("TorusWithReflectionMap");
+    MatrixBuilder.euclidian()
+    .translate(pos[4])
+    .scale(.3)
+    .assignTo(globeNode5);
 	   globeNode5.setGeometry(torus); //SphereHelper.spheres[4]); //torus);
 	   
 	   ap1 = new Appearance();
-		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"reflectionMap", refm);
+		try {
+      ShaderFactory.createReflectionMap(
+          ap1,
+          "polygonShader",
+          "textures/desertstorm/desertstorm_",
+          new String[]{"rt","lf","up", "dn","bk","ft"},
+          ".JPG");
+    } catch (Exception e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
 		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.YELLOW);
 		ap1.setAttribute(CommonAttributes.EDGE_DRAW,false);
 	    globeNode5.setAppearance(ap1);
@@ -221,12 +203,12 @@ public class JOGLSkyBox extends AbstractJOGLLoadableScene {
 	   torus= new Torus(2.3, 1.5, 20, 20);
 	   torus.calculateNormals();
 	   SceneGraphComponent globeNode6= new SceneGraphComponent();
-	   gt= new Transformation();
-	   gt.setTranslation(pos[5]);
-	   gt.setRotation( Math.PI/2.0,1.0, 0.0, 0.0);
-	   gt.setStretch(.3);
-	   globeNode6.setTransformation(gt);
-	   //globeNode6.setGeometry(torus);
+     MatrixBuilder.euclidian()
+       .translate(pos[5])
+       .rotate(Math.PI/2.0,1.0, 0.0, 0.0)
+       .scale(0.3)
+       .assignTo(globeNode6);
+     //globeNode6.setGeometry(torus);
 	   globeNode6.setGeometry(IndexedFaceSetUtility.implode(torus, -.35));
 	   //SceneGraphComponent s1 = Parser3DS.readFromFile("/homes/geometer/gunn/tmp/read3DS/models/space011.3ds");
 	   //globeNode6.addChild(s1);
@@ -237,8 +219,12 @@ public class JOGLSkyBox extends AbstractJOGLLoadableScene {
 		ap1.setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
 		ap1.setAttribute(CommonAttributes.EDGE_DRAW, false);
 		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
-		faceTex = refm.getFaceTextures();
-		SkyBox sb = new SkyBox(faceTex);
+
+    de.jreality.scene.ReflectionMap rm = de.jreality.scene.ReflectionMap.reflectionMapFactory(
+        "textures/desertstorm/desertstorm_",
+        new String[]{"rt","lf","up", "dn","bk","ft"},
+        "JPG");
+		SkyBox sb = new SkyBox(rm.getFaceTextures());
 		sbkit.addChild(sb);
 		sb.getTransformation().setStretch(100.0);
 	
@@ -257,7 +243,6 @@ public class JOGLSkyBox extends AbstractJOGLLoadableScene {
 	
 	public boolean isEncompass() {return false;}
  
-	de.jreality.scene.Texture2D[] faceTex;
 	SceneGraphComponent sbkit;
 	public void customize(JMenuBar menuBar, Viewer viewer) {
 		//sb.getTransformation().setTranslation(0.0d, 0.0d, -4.0d);
