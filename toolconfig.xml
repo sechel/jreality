@@ -13,6 +13,7 @@
   <!-- map slots of raw devices to InputSlots -->
   
     <mapping device="Keyboard" src="VK_W" target="forward"/>
+    <mapping device="Keyboard" src="VK_SPACE" target="JumpActivation"/>
     <mapping device="Keyboard" src="VK_S" target="backward"/>
     <mapping device="Keyboard" src="VK_A" target="left"/>
     <mapping device="Keyboard" src="VK_D" target="right"/>
