@@ -9,34 +9,14 @@ import java.io.IOException;
 import javax.swing.JMenuBar;
 
 import de.jreality.geometry.*;
-import de.jreality.geometry.CatenoidHelicoid;
-import de.jreality.geometry.GeometryUtility;
-import de.jreality.geometry.IndexedFaceSetUtility;
-import de.jreality.geometry.QuadMeshShape;
-import de.jreality.geometry.Torus;
-import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.DiscreteSpaceCurve;
 import de.jreality.jogl.SkyBox;
-import de.jreality.reader.Readers;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
-import de.jreality.scene.Viewer;
+import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.ShaderFactory;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.*;
-import de.jreality.util.AttributeEntityFactory;
-import de.jreality.util.CameraUtility;
-import de.jreality.util.ConfigurationAttributes;
-import de.jreality.util.ImageData;
-import de.jreality.util.Matrix;
-import de.jreality.util.P3;
-import de.jreality.util.Pn;
-import de.jreality.util.SceneGraphUtilities;
 
 /**
  * @author Charles Gunn
@@ -84,11 +64,14 @@ public class JOGLSkyBox extends AbstractJOGLLoadableScene {
 	   //ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+"textureEnabled",true);
 	   double[] vec = {1d, 1.5d, 1d};
 	   Texture2D tex2d = null;
-	   tex2d = (Texture2D) AttributeEntityFactory
-	       .createAttributeEntity(Texture2D.class, "polygonShader.texture2d", ap1);		
 	   try {
-	      ImageData id = ImageData.load(Readers.getInput("textures/mxsnow0.jpg"));//grid256rgba.png"));
-	      tex2d.setImage(id);
+	      tex2d = ShaderFactory.createTexture(ap1, "", "textures/grid256rgba.png");
+        ShaderFactory.createReflectionMap(
+            ap1,
+            "polygonShader",
+            "textures/desertstorm/desertstorm_",
+            new String[]{"rt","lf","up", "dn","bk","ft"},
+            ".JPG");
 	    } catch (IOException e) {
 	      e.printStackTrace();
 	    }
