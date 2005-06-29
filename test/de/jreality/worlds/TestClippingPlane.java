@@ -60,7 +60,7 @@ public class TestClippingPlane extends AbstractJOGLLoadableScene {
 	public TestClippingPlane() {
 		super();
 	}
-	static String resourceDir = "/homes/geometer/gunn/Pictures/textures/";
+	static String resourceDir = "/net/MathVis/data/testData3D/textures/";
 	static {
 		String foo = System.getProperty("resourceDir");
 		if (foo != null)	resourceDir  = foo;
@@ -118,7 +118,20 @@ public class TestClippingPlane extends AbstractJOGLLoadableScene {
 			channelMatrices[i][11] = 1;
 			channelMatrices[i][10] = 0;
 		}
-		
+		boolean testImageCreation = true;
+		byte[] im = new byte[128 * 128 * 4];
+		if (testImageCreation)	{
+			for (int i = 0; i<128; ++i)	{
+				for (int j = 0; j< 128; ++j)	{
+					int I = 4*(i*128+j);
+					int sq = (i-64)*(i-64) + (j-64)*(j-64);
+					if (sq < 4096)	
+						{im[I] =  im[I+1] = im[I+2] = im[I+3] = -128; }
+					else
+						{im[I] =  im[I+1] = im[I+2] = im[I+3]  = 0;  }
+				}
+			}
+		}
 		boolean simple = true;
 		if (simple)	{
 			SceneGraphComponent cp =  SceneGraphUtilities.createFullSceneGraphComponent("theClipIcon");
@@ -134,7 +147,12 @@ public class TestClippingPlane extends AbstractJOGLLoadableScene {
 		   Texture2D tex2d = null;
 		   tex2d = (Texture2D) AttributeEntityFactory
 		       .createAttributeEntity(Texture2D.class, "polygonShader.texture2d", ap1);		
-		   try {
+		  if (testImageCreation)	{
+		  		ImageData it = new ImageData(im, 128, 128);
+		  		 tex2d.setImage(it);
+		  }
+		  	else 
+		  		try {
 		      ImageData id = ImageData.load(Readers.getInput("textures/schwarz128.png")); //weaveRGBABright.png"));
 		      tex2d.setImage(id);
 		    } catch (IOException e) {
