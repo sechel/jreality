@@ -113,21 +113,20 @@ public class JOGLRendererHelper {
 				gl.glEnable(GL.GL_DEPTH_TEST);
 				gl.glDisable(GL.GL_TEXTURE_2D);
 			}
-			bgo = topAp.getAttribute("fogEnabled");
-			boolean doFog = false;
+			bgo = topAp.getAttribute(CommonAttributes.FOG_ENABLED);
+			boolean doFog = CommonAttributes.FOG_ENABLED_DEFAULT;
 			if (bgo instanceof Boolean) doFog = ((Boolean) bgo).booleanValue();
 			if (doFog)	{
 				gl.glEnable(GL.GL_FOG);
-				gl.glFogi(GL.GL_FOG_MODE, GL.GL_EXP);
-				bgo =  topAp.getAttribute("fogColor");
+				bgo =  topAp.getAttribute(CommonAttributes.FOG_COLOR);
 				float[] fogColor = backgroundColor;
 				if (bgo != null && bgo instanceof Color)	{
 					fogColor = ((Color) bgo).getRGBComponents(null);
 				}
 				gl.glFogi(GL.GL_FOG_MODE, GL.GL_EXP);
 				gl.glFogfv(GL.GL_FOG_COLOR, fogColor);
-				bgo =  topAp.getAttribute("fogDensity");
-				float density = .4f;
+				bgo =  topAp.getAttribute(CommonAttributes.FOG_DENSITY);
+				float density = (float) CommonAttributes.FOG_DENSITY_DEFAULT;
 				if (bgo != null && bgo instanceof Double)	{
 					density = (float) ((Double) bgo).doubleValue();
 				}
