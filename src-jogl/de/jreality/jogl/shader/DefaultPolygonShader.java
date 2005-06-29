@@ -11,8 +11,9 @@ import net.java.games.jogl.GLCanvas;
 import de.jreality.jogl.ElementBinding;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.*;
-import de.jreality.scene.ReflectionMap;
+import de.jreality.shader.ShaderFactory;
 import de.jreality.shader.Texture2D;
+import de.jreality.shader.ReflectionMap;
 import de.jreality.util.*;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.NameSpace;
@@ -34,7 +35,9 @@ public class DefaultPolygonShader implements PolygonShader {
   de.jreality.scene.Texture2D lightMap;
   Texture2D texture2Dnew;
   Texture2D lightMapNew;
-	ReflectionMap reflectionMap;
+  de.jreality.scene.ReflectionMap reflectionMap;
+  ReflectionMap reflectionMapNew;
+  Texture2D[] reflectionMapSides;
 	int frontBack = FRONT_AND_BACK;
 	public VertexShader vertexShader = null;
 	AbstractJOGLShader glShader = null;
@@ -63,13 +66,19 @@ public class DefaultPolygonShader implements PolygonShader {
 //		Object foo = eap.getAttribute(NameSpace.name(name,"texture2d"), null, Texture2D.class);
 		Object foo = eap.getAttribute(NameSpace.name(name,"texture2d"), null, de.jreality.scene.Texture2D.class);
 		if (foo instanceof de.jreality.scene.Texture2D)	texture2D = (de.jreality.scene.Texture2D) foo;
-    foo = eap.getAttribute(NameSpace.name(name,"reflectionMap"), null, ReflectionMap.class);
-    if (foo instanceof ReflectionMap)	reflectionMap = (ReflectionMap) foo;
+    foo = eap.getAttribute(NameSpace.name(name,"reflectionMap"), null, de.jreality.scene.ReflectionMap.class);
+    if (foo instanceof de.jreality.scene.ReflectionMap)	reflectionMap = (de.jreality.scene.ReflectionMap) foo;
 	  foo = eap.getAttribute(NameSpace.name(name,"lightMap"), null, de.jreality.scene.Texture2D.class);
     if (foo instanceof de.jreality.scene.Texture2D) lightMap = (de.jreality.scene.Texture2D) foo;
-	
+
     if (AttributeEntityFactory.hasAttributeEntity(Texture2D.class, NameSpace.name(name,"texture2d"), eap))
       texture2Dnew = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, NameSpace.name(name,"texture2d"), eap);
+    if (AttributeEntityFactory.hasAttributeEntity(ReflectionMap.class, NameSpace.name(name,"reflectionMap"), eap)) {
+      reflectionMapNew = (ReflectionMap) AttributeEntityFactory.createAttributeEntity(ReflectionMap.class, NameSpace.name(name,"reflectionMap"), eap);
+      reflectionMapSides = ShaderFactory.readReflectionMap(eap, NameSpace.name(name,"reflectionMap"));
+    } else {
+      reflectionMapNew = null;
+    }
     if (AttributeEntityFactory.hasAttributeEntity(Texture2D.class, NameSpace.name(name,"lightMap"), eap))
       lightMapNew = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, NameSpace.name(name,"lightMap"), eap);
       
@@ -160,18 +169,30 @@ public class DefaultPolygonShader implements PolygonShader {
      Texture2DLoaderJOGL.render(theCanvas, lightMap);
       gl.glEnable(GL.GL_TEXTURE_2D);
     } //else
-	if (reflectionMap != null)	{
-			gl.glActiveTexture(texUnit);
-			refMapUnit = texUnit;
-			texUnit++;
-			Texture2DLoaderJOGL.render(jr, reflectionMap);
-			//int[] res = new int[1];
-			//gl.glGetTexParameteriv(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_RESIDENT, res);
-			//JOGLConfiguration.theLog.log(Level.FINE,"Texture is resident: "+res[0]);
-			//if (res[0] == 0)	{ jr.texResident = false; }
-			gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
-			//JOGLConfiguration.theLog.log(Level.FINE,("cube map enabled");
-		} 
+    if (reflectionMap != null)  {
+      gl.glActiveTexture(texUnit);
+      refMapUnit = texUnit;
+      texUnit++;
+      Texture2DLoaderJOGL.render(jr, reflectionMap);
+      //int[] res = new int[1];
+      //gl.glGetTexParameteriv(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_RESIDENT, res);
+      //JOGLConfiguration.theLog.log(Level.FINE,"Texture is resident: "+res[0]);
+      //if (res[0] == 0)  { jr.texResident = false; }
+      gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
+      //JOGLConfiguration.theLog.log(Level.FINE,("cube map enabled");
+    } 
+    if (reflectionMapNew != null)  {
+      gl.glActiveTexture(texUnit);
+      refMapUnit = texUnit;
+      texUnit++;
+      Texture2DLoaderJOGL.render(jr, reflectionMapNew, reflectionMapSides);
+      //int[] res = new int[1];
+      //gl.glGetTexParameteriv(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_RESIDENT, res);
+      //JOGLConfiguration.theLog.log(Level.FINE,"Texture is resident: "+res[0]);
+      //if (res[0] == 0)  { jr.texResident = false; }
+      gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
+      //JOGLConfiguration.theLog.log(Level.FINE,("cube map enabled");
+    } 
 		vertexShader.setFrontBack(frontBack);
 		vertexShader.render(jr);
 //		if (glShader != null) {
@@ -186,13 +207,20 @@ public class DefaultPolygonShader implements PolygonShader {
 			gl.glActiveTexture(i);
 			gl.glDisable(GL.GL_TEXTURE_2D);			
 		}
-		if (reflectionMap != null)	{
-			gl.glActiveTexture(refMapUnit);
-			gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
-			gl.glDisable(GL.GL_TEXTURE_GEN_S);
-			gl.glDisable(GL.GL_TEXTURE_GEN_T);
-			gl.glDisable(GL.GL_TEXTURE_GEN_R);			
-		}
+    if (reflectionMap != null)  {
+      gl.glActiveTexture(refMapUnit);
+      gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
+      gl.glDisable(GL.GL_TEXTURE_GEN_S);
+      gl.glDisable(GL.GL_TEXTURE_GEN_T);
+      gl.glDisable(GL.GL_TEXTURE_GEN_R);      
+    }
+    if (reflectionMapNew != null)  {
+      gl.glActiveTexture(refMapUnit);
+      gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
+      gl.glDisable(GL.GL_TEXTURE_GEN_S);
+      gl.glDisable(GL.GL_TEXTURE_GEN_T);
+      gl.glDisable(GL.GL_TEXTURE_GEN_R);      
+    }
 //		if (glShader != null) glShader.deactivate(theCanvas);
 	}
 
