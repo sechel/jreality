@@ -37,7 +37,6 @@ public class DefaultPolygonShader implements PolygonShader {
   Texture2D lightMapNew;
   de.jreality.scene.ReflectionMap reflectionMap;
   ReflectionMap reflectionMapNew;
-  Texture2D[] reflectionMapSides;
 	int frontBack = FRONT_AND_BACK;
 	public VertexShader vertexShader = null;
 	AbstractJOGLShader glShader = null;
@@ -73,12 +72,8 @@ public class DefaultPolygonShader implements PolygonShader {
 
     if (AttributeEntityFactory.hasAttributeEntity(Texture2D.class, NameSpace.name(name,"texture2d"), eap))
       texture2Dnew = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, NameSpace.name(name,"texture2d"), eap);
-    if (AttributeEntityFactory.hasAttributeEntity(ReflectionMap.class, NameSpace.name(name,"reflectionMap"), eap)) {
-      reflectionMapNew = (ReflectionMap) AttributeEntityFactory.createAttributeEntity(ReflectionMap.class, NameSpace.name(name,"reflectionMap"), eap);
-      reflectionMapSides = ShaderFactory.readReflectionMap(eap, NameSpace.name(name,"reflectionMap"));
-    } else {
-      reflectionMapNew = null;
-    }
+    if (AttributeEntityFactory.hasAttributeEntity(ReflectionMap.class, NameSpace.name(name,"reflectionMap"), eap))
+      reflectionMapNew = ShaderFactory.readReflectionMap(eap, NameSpace.name(name,"reflectionMap"));
     if (AttributeEntityFactory.hasAttributeEntity(Texture2D.class, NameSpace.name(name,"lightMap"), eap))
       lightMapNew = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, NameSpace.name(name,"lightMap"), eap);
       
@@ -185,7 +180,7 @@ public class DefaultPolygonShader implements PolygonShader {
       gl.glActiveTexture(texUnit);
       refMapUnit = texUnit;
       texUnit++;
-      Texture2DLoaderJOGL.render(jr, reflectionMapNew, reflectionMapSides);
+      Texture2DLoaderJOGL.render(jr, reflectionMapNew);
       //int[] res = new int[1];
       //gl.glGetTexParameteriv(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_RESIDENT, res);
       //JOGLConfiguration.theLog.log(Level.FINE,"Texture is resident: "+res[0]);

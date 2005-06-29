@@ -15,6 +15,7 @@ import net.java.games.jogl.*;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.ReflectionMap;
+import de.jreality.util.ImageData;
 import de.jreality.util.LoggingSystem;
 
 /**
@@ -306,7 +307,7 @@ public class Texture2DLoaderJOGL {
     
   } 
 
-  public static void render(JOGLRenderer jr, ReflectionMap ref, Texture2D[] faces) {
+  public static void render(JOGLRenderer jr, ReflectionMap ref) {
     GLCanvas drawable = jr.getCanvas();
     boolean first = true;
     boolean mipmapped = true;
@@ -369,10 +370,17 @@ public class Texture2DLoaderJOGL {
 
     // create either a series of mipmaps of a single texture image based on what's loaded 
     if (first)  {
+      ImageData[] faces = new ImageData[6];
+      faces[0]=ref.getBack();
+      faces[1]=ref.getFront();
+      faces[2]=ref.getBottom();
+      faces[3]=ref.getTop();
+      faces[4]=ref.getLeft();
+      faces[5]=ref.getRight();
       for (int i = 0; i<6; ++i)   {
-        byte[] data = faces[i].getImage().getByteArray();
-        int width = faces[i].getImage().getWidth();
-        int height = faces[i].getImage().getHeight();
+        byte[] data = faces[i].getByteArray();
+        int width = faces[i].getWidth();
+        int height = faces[i].getHeight();
         if (mipmapped) 
           glu.gluBuild2DMipmaps(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 
                       GL.GL_RGBA, 
