@@ -120,7 +120,9 @@ public class ToolTestScene {
     scene.addTool(new TestTool());
     scene.addTool(new DraggingTool());
 //    scene.addTool(new TranslateTool());
-    scene.addTool(new RotateTool());
+    RotateTool rotateTool = new RotateTool();
+    rotateTool.setMoveChildren(true);
+	scene.addTool(rotateTool);
 
     root.addTool(new EncompassTool());
     
