@@ -32,7 +32,23 @@ public class JOGLSkyBox extends AbstractJOGLLoadableScene {
 	String configResourceDir = "/net/MathVis/data/config/";
 	
 	public boolean addBackPlane()	{ return false; }
-	public SceneGraphComponent makeWorld() {
+  
+  public SceneGraphComponent makeWorld() {
+    SceneGraphComponent root = makeScene();
+    de.jreality.scene.ReflectionMap rm = de.jreality.scene.ReflectionMap.reflectionMapFactory(
+        "textures/desertstorm/desertstorm_",
+        new String[]{"rt","lf","up", "dn","bk","ft"},
+        "JPG");
+    SkyBox sb = new SkyBox(rm.getFaceTextures());
+    sbkit.addChild(sb);
+    sb.getTransformation().setStretch(100.0);
+  
+    root.addChild(sbkit);
+    return root;
+
+  }
+  
+	public SceneGraphComponent makeScene() {
 
 		SceneGraphComponent root = new SceneGraphComponent();
 		root.setName("theWorld");
@@ -202,16 +218,6 @@ public class JOGLSkyBox extends AbstractJOGLLoadableScene {
 		ap1.setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
 		ap1.setAttribute(CommonAttributes.EDGE_DRAW, false);
 		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
-
-    de.jreality.scene.ReflectionMap rm = de.jreality.scene.ReflectionMap.reflectionMapFactory(
-        "textures/desertstorm/desertstorm_",
-        new String[]{"rt","lf","up", "dn","bk","ft"},
-        "JPG");
-		SkyBox sb = new SkyBox(rm.getFaceTextures());
-		sbkit.addChild(sb);
-		sb.getTransformation().setStretch(100.0);
-	
-		root.addChild(sbkit);
 
 		root.addChild(globeNode1);
 		root.addChild(globeNode2);
