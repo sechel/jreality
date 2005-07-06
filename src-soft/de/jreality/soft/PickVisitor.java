@@ -23,19 +23,12 @@
 package de.jreality.soft;
 
 import java.util.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.logging.Logger;
 
 import de.jreality.scene.*;
 import de.jreality.scene.data.*;
 import de.jreality.scene.pick.PickResult;
 import de.jreality.util.*;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.NameSpace;
-import de.jreality.util.Rn;
-import de.jreality.util.VecMat;
 
 /**
  * This class traverses a scene graph starting from the given "root" scene
@@ -448,6 +441,14 @@ public void setPipeline(PolygonPipeline pipeline) {
      */
     public double[] getObjectCoordinates() {
         return pointObject;
+    }
+    public String toString() {
+      StringBuffer sb = new StringBuffer();
+      sb.append("Soft-Pick: ");
+      sb.append(" dist=").append(Rn.euclideanDistance(pointCamera, pointWorld));
+      sb.append(" world=").append(Rn.toString(pointWorld));
+      sb.append(" path=").append(path.toString());
+      return sb.toString();
     }
   }
       public static class HitComparator implements Comparator {
