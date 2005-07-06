@@ -97,6 +97,7 @@ public class SkyBox extends SceneGraphComponent {
 			ap = new Appearance();
 			ShaderFactory.createTexture(ap, "polygonShader", ft[i]);			sgc.setAppearance(ap);
 			IndexedFaceSet face = IndexedFaceSetUtility.createIndexedFaceSetFrom(cubeIndices, cubeVerts3[i], null, null, texCoords, null, null);
+      GeometryUtility.calculateAndSetNormals(face);
 			face.buildEdgesFromFaces();
 			//GeometryUtility.calculateAndSetFaceNormals(face);
 			sgc.setGeometry(face);
