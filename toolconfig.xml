@@ -14,6 +14,7 @@
   
     <mapping device="Keyboard" src="VK_W" target="forward"/>
     <mapping device="Keyboard" src="VK_SPACE" target="JumpActivation"/>
+    <mapping device="Keyboard" src="VK_R" target="DrawPickActivation"/>
     <mapping device="Keyboard" src="VK_S" target="backward"/>
     <mapping device="Keyboard" src="VK_A" target="left"/>
     <mapping device="Keyboard" src="VK_D" target="right"/>
@@ -167,11 +168,6 @@
       <outputslot>WorldToNDC</outputslot>
     </virtualdevice>
     
-    <virtualdevice type="de.jreality.scene.tool.VirtualMap">
-      <inputslot>WorldToCamera</inputslot>
-      <outputslot>AvatarTransformation</outputslot>
-    </virtualdevice>
-
     <virtualdevice type="de.jreality.scene.tool.VirtualProductMatrix">
       <inputslot>CameraToWorld</inputslot>
       <inputslot>NDCToCamera</inputslot>
