@@ -303,7 +303,7 @@ public class DefaultLineShader implements LineShader  {
 					gl.glCallList(tubeDL[sig+1]);
 					if (pickMode) gl.glPopName();
 					gl.glPopMatrix();
-					
+	
 				}
 			}
 			else {

@@ -31,7 +31,7 @@ public class DefaultVertexShader implements VertexShader {
 	Color	ambientColor,
 			diffuseColor,
 			specularColor;		
-	double 	specularExponent, ambientCoefficient, diffuseCoefficient, specularCoefficent, transparency;	
+	double 	specularExponent, ambientCoefficient, diffuseCoefficient, specularCoefficient, transparency;	
 	float[] specularColorAsFloat, ambientColorAsFloat, diffuseColorAsFloat;
 	int frontBack = DefaultPolygonShader.FRONT_AND_BACK;
 	
@@ -46,7 +46,7 @@ public class DefaultVertexShader implements VertexShader {
 		specularExponent = eap.getAttribute(NameSpace.name(name,CommonAttributes.SPECULAR_EXPONENT), CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
 		ambientCoefficient = eap.getAttribute(NameSpace.name(name,CommonAttributes.AMBIENT_COEFFICIENT), CommonAttributes.AMBIENT_COEFFICIENT_DEFAULT);
 		diffuseCoefficient = eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COEFFICIENT), CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
-		specularCoefficent = eap.getAttribute(NameSpace.name(name,CommonAttributes.SPECULAR_COEFFICIENT), CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);
+		specularCoefficient = eap.getAttribute(NameSpace.name(name,CommonAttributes.SPECULAR_COEFFICIENT), CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);
 		ambientColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.AMBIENT_COLOR), CommonAttributes.AMBIENT_COLOR_DEFAULT);
 		ambientColorAsFloat = ambientColor.getRGBComponents(null);
 		diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.DIFFUSE_COLOR_DEFAULT);
@@ -56,9 +56,9 @@ public class DefaultVertexShader implements VertexShader {
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
 		specularColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.SPECULAR_COLOR), CommonAttributes.SPECULAR_COLOR_DEFAULT);
 		specularColorAsFloat = specularColor.getRGBComponents(null);
-		for (int i  = 0; i<3; ++i) ambientColorAsFloat[i] *= (float) specularCoefficent;
+		for (int i  = 0; i<3; ++i) ambientColorAsFloat[i] *= (float) ambientCoefficient;
 		for (int i  = 0; i<3; ++i) diffuseColorAsFloat[i] *= (float) diffuseCoefficient;
-		for (int i  = 0; i<3; ++i) specularColorAsFloat[i] *= (float) specularCoefficent;
+		for (int i  = 0; i<3; ++i) specularColorAsFloat[i] *= (float) specularCoefficient;
 	}
 
 	/**
@@ -127,7 +127,7 @@ public class DefaultVertexShader implements VertexShader {
 		gl.glMaterialfv(frontBack, GL.GL_AMBIENT, ambientColorAsFloat);
 		gl.glMaterialfv(frontBack, GL.GL_SPECULAR, specularColorAsFloat);
 		gl.glMaterialf(frontBack, GL.GL_SHININESS, (float) getSpecularExponent());
-		//JOGLConfiguration.theLog.log(Level.INFO,"VertexShader: Setting diffuse color to: "+Rn.toString(getDiffuseColorAsFloat()));
+		//JOGLConfiguration.theLog.log(Level.INFO,"VertexShader: Setting ambient color to: "+Rn.toString(getAmbientColorAsFloat()));
 	}
 
 	public void postRender(JOGLRenderer jr) {

@@ -629,7 +629,7 @@ public class JOGLRendererHelper {
 		  float f = (float) dl.getIntensity();
 		  float[] specC = {f,f,f};
 		  globalGL.glLightfv(lightCount, GL.GL_SPECULAR, specC);
-		  //gl.glLightfv(lightCount, GL.GL_SPECULAR, white);	
+		  globalGL.glLightfv(lightCount, GL.GL_AMBIENT, dl.getScaledColorAsFloat());	
 	}
 	
 	public static void wisit(DirectionalLight dl, GL globalGL, int lightCount)		{

@@ -72,6 +72,8 @@ public class OpenGLState {
 			gl.glEnable(GL.GL_NORMALIZE);
 			gl.glEnable(GL.GL_MULTISAMPLE_ARB);	
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE);
+			float[] white = {1f, 1f, 1f, 1f};
+			gl.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, white );
 			openGLState.render(gl);
 		}
 		// for converting double arrays to native buffers:
