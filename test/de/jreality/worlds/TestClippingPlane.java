@@ -5,14 +5,9 @@
 package de.jreality.worlds;
 
 import java.awt.Color;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.io.Reader;
-import java.net.MalformedURLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
@@ -20,19 +15,15 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.Timer;
 
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.SphereHelper;
 import de.jreality.jogl.FramedCurve;
-import de.jreality.jogl.InteractiveViewer;
-import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SpotLight;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
@@ -104,20 +95,7 @@ public class TestClippingPlane extends AbstractJOGLLoadableScene {
 		root.setAppearance(ap1);
 		ap1.setAttribute(CommonAttributes.VERTEX_DRAW, true);
 		ap1.setAttribute(CommonAttributes.EDGE_DRAW, true);
-		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
-		ap1.setAttribute(CommonAttributes.SPECULAR_COLOR, Color.YELLOW);
-		//ap1.setAttribute(CommonAttributes.SPECULAR_COEFFICIENT, 0.0);
 		
-		int[] modes = { Texture2D.GL_REPLACE, Texture2D.GL_MODULATE,Texture2D.GL_DECAL, Texture2D.GL_BLEND, Texture2D.GL_ADD};
-		double[][] channelMatrices = new double[5][];
-		for (int i = 0; i<5; ++i)	{
-			channelMatrices[i] = Rn.identityMatrix(4);
-			// replace alpha channel by blue channel
-			channelMatrices[i][15] = 0;
-			channelMatrices[i][14] = 1;
-			channelMatrices[i][11] = 1;
-			channelMatrices[i][10] = 0;
-		}
 		boolean testImageCreation = true;
 		byte[] im = new byte[128 * 128 * 4];
 		if (testImageCreation)	{
@@ -125,7 +103,8 @@ public class TestClippingPlane extends AbstractJOGLLoadableScene {
 				for (int j = 0; j< 128; ++j)	{
 					int I = 4*(i*128+j);
 					int sq = (i-64)*(i-64) + (j-64)*(j-64);
-					if (sq < 4096)	
+					sq = i*i + j*j;
+					if (sq >= 4*4096)	
 						{im[I] =  im[I+1] = im[I+2] = im[I+3] = -128; }
 					else
 						{im[I] =  im[I+1] = im[I+2] = im[I+3]  = 0;  }
@@ -142,7 +121,7 @@ public class TestClippingPlane extends AbstractJOGLLoadableScene {
 			ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
 			ap1.setAttribute(CommonAttributes.DIFFUSE_COEFFICIENT, 1.0);
 			ap1.setAttribute(CommonAttributes.TRANSPARENCY, 0.0);
-			ap1.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, true);
+			//ap1.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, true);
 			ap1.setAttribute(CommonAttributes.SPECULAR_COEFFICIENT, 0.6);
 		   Texture2D tex2d = null;
 		   tex2d = (Texture2D) AttributeEntityFactory
@@ -160,7 +139,9 @@ public class TestClippingPlane extends AbstractJOGLLoadableScene {
 		    }
 		 	   	//tex2d = new Texture2D(Readers.getInput("textures/grid256rgba.png"));
 		   //ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D, tex2d);
-			tex2d.setTextureMatrix(new Matrix(P3.makeStretchMatrix(null,new double[]{8,4,1})));
+			tex2d.setTextureMatrix(new Matrix(P3.makeStretchMatrix(null,new double[]{16,8,1})));
+			tex2d.setRepeatS(Texture2D.GL_MIRRORED_REPEAT);
+			tex2d.setRepeatT(Texture2D.GL_MIRRORED_REPEAT);
 			double[][] vv = {{0,-1,0},{0,1,0},{1,1,0},{1,-1,0}};
 			double[][] texc = {{0,0},{1,0},{1,1} ,{0,1}};
 			IndexedFaceSet square = IndexedFaceSetUtility.constructPolygon(vv);
@@ -177,9 +158,15 @@ public class TestClippingPlane extends AbstractJOGLLoadableScene {
 			sgc.addChild(SphereHelper.SPHERE_SUPERFINE);
 			//sgc.setGeometry(new Sphere());
 			sgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.GREEN);
-			sgc.getAppearance().setAttribute(CommonAttributes.SPECULAR_COLOR, java.awt.Color.GREEN);
-			sgc.getAppearance().setAttribute(CommonAttributes.SPECULAR_COEFFICIENT, 1.0);
-			sgc.getAppearance().setAttribute(CommonAttributes.SPECULAR_EXPONENT, 60.0);
+			ap1 = sgc.getAppearance();
+			ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COLOR, java.awt.Color.GREEN);
+			//ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COEFFICIENT, 1.0);
+			ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_EXPONENT, 60.0);
+			ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COLOR, Color.YELLOW);
+			ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COEFFICIENT, 0.0);
+			ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COEFFICIENT, 0.0);
+			ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.AMBIENT_COLOR, Color.YELLOW);
+			ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.AMBIENT_COEFFICIENT, 0.1);
 			root.addChild(sgc);
 			root.addChild(cp);
 		}	
