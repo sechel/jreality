@@ -18,7 +18,6 @@ import de.jreality.jogl.InteractiveViewer;
 import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.util.Pn;
-import discreteGroup.TriangleGroup;
 
 /**
  * @author gunn
