@@ -95,7 +95,10 @@ public class SkyBox extends SceneGraphComponent {
 		for (int i = 0; i<6; ++i)	{
 			SceneGraphComponent sgc = new SceneGraphComponent();
 			ap = new Appearance();
-			ShaderFactory.createTexture(ap, "polygonShader", ft[i]);			sgc.setAppearance(ap);
+			de.jreality.shader.Texture2D tex = ShaderFactory.createTexture(ap, "polygonShader", ft[i]);
+      tex.setRepeatS(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
+      tex.setRepeatT(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
+      sgc.setAppearance(ap);
 			IndexedFaceSet face = IndexedFaceSetUtility.createIndexedFaceSetFrom(cubeIndices, cubeVerts3[i], null, null, texCoords, null, null);
       GeometryUtility.calculateAndSetNormals(face);
 			face.buildEdgesFromFaces();
