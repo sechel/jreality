@@ -39,6 +39,7 @@ public class TestTubeColors extends AbstractJOGLLoadableScene {
 			ils.setVertexCountAndAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(verts));
 			ils.setEdgeCountAndAttributes(Attribute.INDICES, StorageModel.INT_ARRAY_ARRAY.createReadOnly(indices));
 			ils.setEdgeAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(colors));
+			ils.setEdgeAttributes(Attribute.COLORS, null);
 			IndexedFaceSet ifs = new IndexedFaceSet(5,1);
 			ifs.setVertexCountAndAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(verts));
 			ifs.setFaceCountAndAttributes(Attribute.INDICES, StorageModel.INT_ARRAY_ARRAY.createReadOnly(findices));
@@ -46,7 +47,7 @@ public class TestTubeColors extends AbstractJOGLLoadableScene {
 			ifs.setEdgeAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(colors));
 			theWorld.getAppearance().setAttribute(CommonAttributes.FACE_DRAW,true);
 
-			theWorld.setGeometry( ifs);
+			theWorld.setGeometry( ils);
 			
 			return theWorld;
 		}

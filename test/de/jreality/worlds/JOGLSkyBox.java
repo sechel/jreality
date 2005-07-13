@@ -35,7 +35,7 @@ public class JOGLSkyBox extends AbstractJOGLLoadableScene {
   
   public SceneGraphComponent makeWorld() {
     SceneGraphComponent root = makeScene();
-    de.jreality.scene.ReflectionMap rm = de.jreality.scene.ReflectionMap.reflectionMapFactory(
+    ReflectionMap rm = ReflectionMap.reflectionMapFactory(
         "textures/desertstorm/desertstorm_",
         new String[]{"rt","lf","up", "dn","bk","ft"},
         "JPG");
