@@ -78,13 +78,13 @@ public class DefaultPolygonShader implements PolygonShader {
       lightMapNew = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, NameSpace.name(name,"lightMap"), eap);
       
 		//TODO this is a hack. 
-//		if (eap.getAttribute(NameSpace.name(name,"useGLShader"), false) == true)	{
-//			Object obj =  eap.getAttribute(NameSpace.name(name,"GLShader"), null, AbstractJOGLShader.class);
-//			if (obj instanceof AbstractJOGLShader) {
-//				glShader = (AbstractJOGLShader) obj;
-//			}
-//		} else glShader = null;
-//	
+		if (eap.getAttribute(NameSpace.name(name,"useGLShader"), false) == true)	{
+			Object obj =  eap.getAttribute(NameSpace.name(name,"GLShader"), null, AbstractJOGLShader.class);
+			if (obj instanceof AbstractJOGLShader) {
+				glShader = (AbstractJOGLShader) obj;
+			}
+		} else glShader = null;
+	
 	}
 
 		/**
@@ -190,9 +190,9 @@ public class DefaultPolygonShader implements PolygonShader {
     } 
 		vertexShader.setFrontBack(frontBack);
 		vertexShader.render(jr);
-//		if (glShader != null) {
-//			glShader.render(jr);
-//		}
+		if (glShader != null) {
+			glShader.render(jr);
+		}
 	}
 	
 	public void postRender(JOGLRenderer jr)	{

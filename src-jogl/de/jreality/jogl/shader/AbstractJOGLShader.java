@@ -91,7 +91,7 @@ public abstract class AbstractJOGLShader implements PolygonShader {
 			if (program == -1) return;
 		}
 		gl.glUseProgramObjectARB(program);
-		//System.out.println("Setting active program to "+program);
+		JOGLConfiguration.theLog.log(Level.FINE,"Setting GLSL program to "+program);
 	}
 	
 	public void deactivate(GLCanvas theCanvas)	{
@@ -169,19 +169,7 @@ public abstract class AbstractJOGLShader implements PolygonShader {
      }
     
 
-	public Color getDiffuseColor() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	public boolean isSmoothShading() {
-		// TODO Auto-generated method stub
-		return false;
-	}
 	public void setFrontBack(int f) {
-		// TODO Auto-generated method stub
-
-	}
-	public void setSmoothShading(boolean b) {
 		// TODO Auto-generated method stub
 
 	}
