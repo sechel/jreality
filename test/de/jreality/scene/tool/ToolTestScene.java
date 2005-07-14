@@ -12,20 +12,16 @@ import java.util.logging.Level;
 import javax.swing.JFrame;
 
 import de.jreality.geometry.CatenoidHelicoid;
+import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.Primitives;
 import de.jreality.scene.*;
-import de.jreality.scene.Camera;
-import de.jreality.scene.PointLight;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Sphere;
-import de.jreality.scene.Transformation;
-import de.jreality.scene.Viewer;
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.pick.PickSystem;
-import de.jreality.scene.pick.SoftPickSystem;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.pick.*;
+import de.jreality.soft.SoftPickSystem;
+import de.jreality.scene.pick.bounding.AABBTree;
 import de.jreality.util.Matrix;
 import de.jreality.util.P3;
 import de.jreality.util.SceneGraphUtilities;
-import de.jreality.worlds.JOGLSkyBox;
 
 /**
  * @author brinkman
@@ -90,48 +86,43 @@ public class ToolTestScene {
     camNode.setCamera(camera);
 
     SceneGraphComponent scene = new SceneGraphComponent();
-    SceneGraphComponent cath1 = new SceneGraphComponent();
-    SceneGraphComponent cath2 = new SceneGraphComponent();
-    SceneGraphComponent cath3 = new SceneGraphComponent();
-    SceneGraphComponent sphere = new SceneGraphComponent();
-    sphere.setGeometry(new Sphere());
-//    cath.addTool(new TestTool());
-//    cath.addTool(new DraggingTool() {
-//      // only allow translation along y axis
-//      public void enforceConstraints(Matrix matrix) {
-//        matrix.setEntry(0, 3, 0.);
-//        matrix.setEntry(2, 3, 0.);
-//      }
-//    });
-    cath1.setGeometry(new CatenoidHelicoid(40));
-    cath2.setGeometry(new CatenoidHelicoid(20));
-    cath3.setGeometry(new CatenoidHelicoid(10));
     root.addChild(scene);
    
+    /************ CREATE SCENE ***********/
+    //scene.addChild(new JOGLSkyBox().makeWorld());
     
-    //scene.addChild(cath1);
-    //scene.addChild(cath2);
-    //scene.addChild(cath3);
-    //scene.addChild(sphere);
+    IndexedFaceSet ifs = //Primitives.icosahedron(); 
+      new CatenoidHelicoid(7);
     
-    scene.addChild(new JOGLSkyBox().makeWorld());
+    GeometryUtility.calculateAndSetFaceNormals(ifs);
+    AABBTree obbTree = AABBTree.construct(ifs, 1);
+    ifs.setGeometryAttributes(Attribute.attributeForName("AABBTree"), obbTree);
+    SceneGraphComponent comp = new SceneGraphComponent();
+    comp.setGeometry(ifs);
+    //comp.addChild(obbTree.display());
+    
+    scene.addChild(comp);
+    
+    /********** SCENE DONE ***********/
+    
     root.addChild(avatarNode);
     
     scene.addTool(new TestTool());
     scene.addTool(new DraggingTool());
-//    scene.addTool(new TranslateTool());
+    scene.addTool(new PickShowTool("PrimaryAction"));
     RotateTool rotateTool = new RotateTool();
-    rotateTool.setMoveChildren(true);
-	scene.addTool(rotateTool);
+    //rotateTool.setMoveChildren(true);
+    scene.addTool(rotateTool);
 
-    root.addTool(new EncompassTool());
-    
     SceneGraphPath camPath = new SceneGraphPath();
     camPath.push(root);
     camPath.push(avatarNode);
     camPath.push(camNode);
     camPath.push(camera);
-    avatarNode.addTool(new ShipNavigationTool());
+    ShipNavigationTool shipNavigationTool = new ShipNavigationTool();
+    shipNavigationTool.setGravity(0);
+    shipNavigationTool.setJumpSpeed(0);
+    avatarNode.addTool(shipNavigationTool);
     camNode.addTool(new HeadTransformationTool());
     frame.setVisible(true);
     frame.setSize(640, 480);
