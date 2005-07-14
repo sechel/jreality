@@ -411,13 +411,16 @@ public class ReaderOBJ extends AbstractReader {
                 vertexTex.toArray(new double[vertexTex.size()][])));
       } if (vertexNorms != null) {
         ifs.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE3_ARRAY.createReadOnly(vertexNorms.toArray(new double[vertexNorms.size()][])));
+        System.out.println("using VERTEX normals!");
       }
       boolean hasVertexNormals = ifs.getVertexAttributes(Attribute.NORMALS) != null;
       if (!hasVertexNormals && smooth) {
         GeometryUtility.calculateAndSetVertexNormals(ifs);
+        System.out.println("using calculated VERTEX normals!");
       }
       if (!smooth && !hasVertexNormals) {
         GeometryUtility.calculateAndSetFaceNormals(ifs);
+        System.out.println("using FACE normals!");
       }
       ifs.buildEdgesFromFaces();
       return ifs;
