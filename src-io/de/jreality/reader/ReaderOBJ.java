@@ -30,6 +30,7 @@ import java.util.*;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.util.LoggingSystem;
 
@@ -196,7 +197,6 @@ public class ReaderOBJ extends AbstractReader {
 
   private void addVertex(StreamTokenizer st) throws IOException {
     double[] coords = new double[3];
-    int ix = 0;
     coords[0]=ParserUtil.parseNumber(st);
     coords[1]=ParserUtil.parseNumber(st);
     coords[2]=ParserUtil.parseNumber(st);
@@ -206,7 +206,6 @@ public class ReaderOBJ extends AbstractReader {
   private void addVertexTextureCoordinate(StreamTokenizer st)
       throws IOException {
     double[] coords = new double[2];
-    int ix = 0;
     coords[0]=ParserUtil.parseNumber(st);
     coords[1]=ParserUtil.parseNumber(st);
     vTexs.add(coords);
@@ -214,7 +213,6 @@ public class ReaderOBJ extends AbstractReader {
 
   private void addVertexNormal(StreamTokenizer st) throws IOException {
     double[] coords = new double[3];
-    int ix = 0;
     coords[0]=ParserUtil.parseNumber(st);
     coords[1]=ParserUtil.parseNumber(st);
     coords[2]=ParserUtil.parseNumber(st);
@@ -413,12 +411,10 @@ public class ReaderOBJ extends AbstractReader {
                 vertexTex.toArray(new double[vertexTex.size()][])));
           System.err.println("Using TEX coordinates!");
       } if (vertexNorms != null) {
-        ifs.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE3_ARRAY
-            .createReadOnly(vertexNorms
-                .toArray(new double[vertexNorms.size()][])));
+        ifs.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE3_ARRAY.createReadOnly(vertexNorms.toArray(new double[vertexNorms.size()][])));
         System.err.println("Using VERTEX normals!");
       }
-      boolean hasVertexNormals = ifs.getVertexAttributes(Attribute.NORMALS) == null;
+      boolean hasVertexNormals = ifs.getVertexAttributes(Attribute.NORMALS) != null;
       System.out.println("hasVertexNormals="+hasVertexNormals);
       if (!hasVertexNormals && smooth) {
         GeometryUtility.calculateAndSetVertexNormals(ifs);
