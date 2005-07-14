@@ -1,7 +1,9 @@
 #!/bin/sh
+cd /tmp
 cvs co jReality
 cd jReality
-/gunn/Software/apache-ant-1.6.2/bin/ant -lib ../lib 
+export FETCH_DEPS=1
+ant 
 cd ..
 rm -r jReality
 
