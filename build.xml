@@ -137,7 +137,7 @@
     <jar jarfile="${dist}/jReality-soft.jar" basedir="${build}/soft" />
   </target>
   
-  <target name="jogl" depends="core, jogl-deps" description="build jogl backend">
+  <target name="jogl" depends="core, soft, jogl-deps" description="build jogl backend">
     <mkdir dir="${build}/jogl" />
     <javac excludesfile="excludes.txt" srcdir="${jogl}"  destdir="${build}/jogl" debug="true">
       <compilerarg line="-source 1.4" />
