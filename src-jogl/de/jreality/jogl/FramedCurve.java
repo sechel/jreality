@@ -16,8 +16,8 @@ import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.jogl.anim.AnimationUtility;
 import de.jreality.scene.Appearance;
@@ -25,12 +25,12 @@ import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
+import de.jreality.util.CubicBSpline;
 import de.jreality.util.P3;
 import de.jreality.util.Pn;
 import de.jreality.util.Quaternion;
 import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
-import de.jreality.util.CubicBSpline;
 
 /**
  * 
@@ -230,7 +230,7 @@ public class FramedCurve extends SceneGraphComponent {
         			cbj = new CubicBSpline.Default(t, qj);
         			cbk = new CubicBSpline.Default(t, qk);   	   			
     	   		}
-    		}
+
 //   		for ( i = 0, iter = controlPoints.iterator(); iter.hasNext(); ++i )	{
 //    			ControlPoint tmp = (ControlPoint) iter.next();
 //    			Rn.matrixTimesVector(verts[i], tmp.tt.getMatrix(), P3.originP3);
@@ -240,15 +240,15 @@ public class FramedCurve extends SceneGraphComponent {
     		double[][] verts = new double[pointsForCurveRepn][4];
     		double dt = (tmax - tmin)/pointsForCurveRepn;
     		for (i = 0; i<pointsForCurveRepn;++i)	{
-    			double t = tmin + dt * i;
-    			verts[i][0] = cbx.valueAt(t);
-    			verts[i][1] = cby.valueAt(t);
-    			verts[i][2] = cbz.valueAt(t);
+    			double tt = tmin + dt * i;
+    			verts[i][0] = cbx.valueAt(tt);
+    			verts[i][1] = cby.valueAt(tt);
+    			verts[i][2] = cbz.valueAt(tt);
     			verts[i][3] = 1.0;
     			//double w = cbw.valueAt(t);
     			
     		}
-     	curveRepresentation = IndexedFaceSetUtility.createCurveFromPoints(verts, false);
+     	curveRepresentation = IndexedLineSetUtility.createCurveFromPoints(verts, false);
      	if (theCurveItself == null)
      	{
      		theCurveItself = SceneGraphUtilities.createFullSceneGraphComponent();
@@ -271,6 +271,7 @@ public class FramedCurve extends SceneGraphComponent {
 		}
    		SceneGraphUtilities.setDefaultMatrix(this);
    		outOfDate = false;
+    		}
     }
         
     public void setUnitSpeed()	{
@@ -337,7 +338,6 @@ public class FramedCurve extends SceneGraphComponent {
         	ControlPoint cp1 = (ControlPoint) controlPoints.get(whichSeg);
        	ControlPoint cp2 = (ControlPoint) controlPoints.get(whichSeg+1);
        	double dt = cp2.t - cp1.t;
-       	double thist = (dt == 0.0) ?  0.0 : (t-cp1.t)/dt;
        	if (currentPoint == null) {
        		currentPoint = new SceneGraphComponent();
        		currentPoint.setTransformation(new Transformation());

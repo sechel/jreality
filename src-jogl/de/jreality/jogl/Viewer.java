@@ -35,7 +35,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	SceneGraphPath cameraPath;
 	SceneGraphComponent cameraNode;
 	Camera camera;
-	GLCanvas canvas;
+	public GLCanvas canvas;
 	JOGLRenderer renderer;
 	int signature;
 	boolean isFlipped = false;			// LH Coordinate system?

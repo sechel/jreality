@@ -28,7 +28,7 @@ public class JOGLConfiguration {
 	static boolean isLinux = false;
 	static boolean multiSample = true;
 	static boolean portalUsage = false;
-	static String resourceDir = null, saveResourceDir = null;
+	public static String resourceDir = null, saveResourceDir = null;
 	/**
 	 * 
 	 */

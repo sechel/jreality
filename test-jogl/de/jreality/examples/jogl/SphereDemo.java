@@ -64,9 +64,9 @@ public class SphereDemo extends InteractiveViewerDemo {
 	 */
 	public SceneGraphComponent makeWorld() {
 		SceneGraphComponent world = SceneGraphUtilities.createFullSceneGraphComponent("world");
-		//SimpleJOGLShader sh = new SimpleJOGLShader("brick.vert", "brick.frag");//null,"SimpleJOGLFragmentShader-01.txt");
+		SimpleJOGLShader sh = new SimpleJOGLShader("brick.vert", "brick.frag");//null,"SimpleJOGLFragmentShader-01.txt");
 		//world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"useGLShader", true);
-		//world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"GLShader", sh);
+		world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"GLShader", sh);
 		world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER, "brick");
 		world.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, false);
 		for (int i = 0; i<6; ++i)	{
@@ -75,7 +75,7 @@ public class SphereDemo extends InteractiveViewerDemo {
 		IndexedFaceSet ifs = SphereHelper.tessellatedIcosahedra[2];
 		double[] lightPosition = {0,0,4};
 			SceneGraphComponent c = SceneGraphUtilities.createFullSceneGraphComponent("sphere"+i);
-			c.setGeometry(new Sphere()); //SphereHelper.tessellatedIcosahedra[i]); //new Sphere()); //
+			c.setGeometry(SphereHelper.tessellatedIcosahedra[i]); //new Sphere()); //
 			double angle = (2 * Math.PI * i)/6.0;
 			c.getTransformation().setTranslation(3 * Math.cos(angle), 3*Math.sin(angle), 0.0);
 			float g = (float) (i/5.0);
@@ -100,15 +100,15 @@ public class SphereDemo extends InteractiveViewerDemo {
 		//SceneGraphComponent flatt = GeometryUtility.flatten(world);
 		//CopyScene cp = new CopyScene();
 		//SceneGraphComponent flatt = (SceneGraphComponent) cp.createProxyScene(world);
-		AbstractDeformation ad = new AbstractDeformation()		{
-			public double[] valueAt(double[] in, double[] out)	{
-				if (out == null || out.length != in.length) out = new double[in.length];
-				for (int i = 0; i<in.length; ++i)	out[i] = in[i];
-				out[1] *= 2;
-				out[2] *= .5;
-				return out;
-			}
-		};
+//		AbstractDeformation ad = new AbstractDeformation()		{
+//			public double[] valueAt(double[] in, double[] out)	{
+//				if (out == null || out.length != in.length) out = new double[in.length];
+//				for (int i = 0; i<in.length; ++i)	out[i] = in[i];
+//				out[1] *= 2;
+//				out[2] *= .5;
+//				return out;
+//			}
+//		};
 		//AbstractDeformation.deform(flatt, ad);
 		return world;
 	}
