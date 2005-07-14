@@ -16,7 +16,7 @@ import de.jreality.scene.data.IntArray;
  * @author schmies
  * 
  */
-public class OBJWriter {
+public class WriterOBJ {
 
 	public static void write( IndexedFaceSet ifs, OutputStream out ) {
 		write( ifs, null, new PrintWriter( out ));
@@ -28,7 +28,7 @@ public class OBJWriter {
 		for( int i=0; i<array.length; i++ ) {
 			out.print(prefix);
 			out.print( seperator );
-			STLWriter.write(out, array[i], seperator );
+			WriterSTL.write(out, array[i], seperator );
 			out.println();
 		}
 	}

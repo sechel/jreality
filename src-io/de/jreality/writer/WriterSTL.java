@@ -13,7 +13,7 @@ import de.jreality.scene.data.IntArray;
  * @author schmies
  * 
  */
-public class STLWriter {
+public class WriterSTL {
 
 	final static String t1 = "   ";
 	final static String t2 = t1+t1;
