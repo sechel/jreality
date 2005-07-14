@@ -187,6 +187,15 @@
 	
   <target name="dist" depends="core,io,jogl,soft,renderman,portal" description="generate the distribution">
   </target>
+	
+  <target name="check_cvs" description="check the current cvs state">
+	<mkdir dir="check_cvs_tmp"/>
+  	<cvs cvsroot="${env.CVSROOT}" package="jReality" dest="check_cvs_tmp"/>
+    <ant dir="check_cvs_tmp/jReality" inheritall="false">
+    	<property name="env.FETCH_DEPS" value="1"/>
+    </ant>
+    <delete dir="check_cvs_tmp"/>
+  </target>
 
   <target name="clean" description="clean up">
     <delete dir="${build}" />
