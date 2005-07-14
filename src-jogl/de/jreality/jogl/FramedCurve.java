@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import numericalMethods.calculus.interpolation.CubicBSpline;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
@@ -31,6 +30,7 @@ import de.jreality.util.Pn;
 import de.jreality.util.Quaternion;
 import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
+import de.jreality.util.CubicBSpline;
 
 /**
  * 
