@@ -77,7 +77,7 @@ public class PickTestScene {
       System.out.println("camPos: ["+camPos[0]+","+camPos[1]+","+camPos[2]+","+camPos[3]+"]");
       
 			double[] direction = Rn.subtract(null, mouse, camPos);
-			System.out.println("direction: ["+direction[0]+","+direction[1]+","+direction[2]+","+direction[3]+"]");
+			System.out.println("direction: ["+direction[0]+","+direction[1]+","+direction[2]+/*","+direction[3]+*/"]");
       List lst = picksys.computePick(camPos, direction);
 			System.out.println(lst);
 		}
