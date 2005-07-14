@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.jogl.anim.AnimationUtility;
@@ -176,9 +175,9 @@ public class FramedCurve extends SceneGraphComponent {
     		tmin = ((ControlPoint) controlPoints.firstElement()).t;
     		tmax = ((ControlPoint) controlPoints.lastElement()).t;
     		// extract translational part
-       	double[] p0 = Rn.matrixTimesVector( null, ((ControlPoint) controlPoints.firstElement()).tt.getMatrix(), P3.originP3);
-       	double[] p1 = Rn.matrixTimesVector( null, ((ControlPoint) controlPoints.lastElement()).tt.getMatrix(), P3.originP3);
-       	diameter = P3.distanceBetween(p0, p1, signature);
+       	double[] p0 = Rn.matrixTimesVector( null, ((ControlPoint) controlPoints.firstElement()).tt.getMatrix(), Pn.originP3);
+       	double[] p1 = Rn.matrixTimesVector( null, ((ControlPoint) controlPoints.lastElement()).tt.getMatrix(), Pn.originP3);
+       	diameter = Pn.distanceBetween(p0, p1, signature);
        	iconScale = .0002 * diameter;
     		int n = controlPoints.size();
     		Iterator iter;
@@ -388,7 +387,7 @@ public static FramedCurve readFromFile(File file)		{
 			String ss;
 			double[] mat = new double[16];
 			double thist = 0;
-			int count = 0, gcount = 0;
+			int count = 0;
 			Vector cplist = new Vector();
 			int signature = Pn.EUCLIDEAN;
 			boolean firsttime = true;
@@ -442,8 +441,7 @@ public static FramedCurve readFromFile(File file)		{
     		if (outOfDate) update();
  		try {
 	        PrintWriter pw = new PrintWriter(new FileWriter(file));
-	        String ss;
-	   		Iterator iter;
+	        Iterator iter;
 	   		int i;
 	   		for ( i = 0, iter = controlPoints.iterator(); iter.hasNext(); ++i )	{
 	   			ControlPoint tmp = (ControlPoint) iter.next();
@@ -469,7 +467,6 @@ public static FramedCurve readFromFile(File file)		{
 	 * @param inspectedPoint
 	 */
 	public void deleteControlPoint(int i) {
-		ControlPoint cp = null;
 		if (outOfDate) update();
 		if (i>=controlPoints.size()) return;
 		if (i<0) return;
@@ -499,7 +496,6 @@ public static FramedCurve readFromFile(File file)		{
 	}
 	
 	public void multiplyOnLeft(double[] mat)	{
-		int n = controlPoints.size();
 		Iterator iter;
 	    	for (iter = controlPoints.iterator(); iter.hasNext(); )	{
 	    		ControlPoint cp = (ControlPoint) iter.next();
@@ -511,7 +507,6 @@ public static FramedCurve readFromFile(File file)		{
 	 * @param mat
 	 */
 	public void repair(double[] mat1, double[] mat2) {
-		int n = controlPoints.size();
 		Iterator iter;
 	    	for (iter = controlPoints.iterator(); iter.hasNext(); )	{
 	    		ControlPoint cp = (ControlPoint) iter.next();

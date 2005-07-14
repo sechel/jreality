@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -25,6 +26,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.Timer;
 
 import de.jreality.jogl.pick.JOGLPickAction;
@@ -228,7 +230,7 @@ public class FramedCurveInspector extends JFrame {
 		
 		panel = Box.createHorizontalBox();
 		panel.setSize(panelwidth, panelheight);
-		JLabel label = new JLabel("Filename:", JLabel.LEFT);
+		JLabel label = new JLabel("Filename:", SwingConstants.LEFT);
 		panel.add(label);
 		filename = new JTextField();
 		filename.setText("Untitled");
@@ -238,9 +240,9 @@ public class FramedCurveInspector extends JFrame {
 		col.add(panel);
 		
 		panel = Box.createHorizontalBox();
-		label = new JLabel("Key frame", JLabel.LEFT);
+		label = new JLabel("Key frame", SwingConstants.LEFT);
 		panel.add(label);
-		label = new JLabel("#=", JLabel.RIGHT);
+		label = new JLabel("#=", SwingConstants.RIGHT);
 		panel.add(label);
 		keyNo = new JTextField(4);
 		keyNo.setText("0");
@@ -260,7 +262,7 @@ public class FramedCurveInspector extends JFrame {
 		panel.add(new JButton(new RetreatAction()));
 		panel.add(new JButton(new AdvanceAction()));
 		
-		label = new JLabel("t=", JLabel.RIGHT);
+		label = new JLabel("t=", SwingConstants.RIGHT);
 		panel.add(label);
 		
 		timeValue = new JTextField( 8);
@@ -288,7 +290,7 @@ public class FramedCurveInspector extends JFrame {
 		});
 		panel.add(timeValue);
 		
-		label = new JLabel("dt=", JLabel.RIGHT);
+		label = new JLabel("dt=", SwingConstants.RIGHT);
 		panel.add(label);
 		
 		durationValue = new JTextField( 8);
@@ -321,14 +323,14 @@ public class FramedCurveInspector extends JFrame {
 		
 		panel = Box.createHorizontalBox();
 		panel.setSize(panelwidth, panelheight);
-		label = new JLabel("Playback", JLabel.LEFT);
+		label = new JLabel("Playback", SwingConstants.LEFT);
 		panel.add(label);
 		
 		playAction = new PlayAction();
 		playButton = new JButton( playAction);
 		panel.add(playButton);
 		
-		label = new JLabel("t=", JLabel.RIGHT);
+		label = new JLabel("t=", SwingConstants.RIGHT);
 		panel.add(label);
 
 		playtime = new JTextField( 8);
@@ -340,7 +342,7 @@ public class FramedCurveInspector extends JFrame {
 
 		getContentPane().add(col, BorderLayout.CENTER);
 		
-		label = new JLabel("x=", JLabel.RIGHT);
+		label = new JLabel("x=", SwingConstants.RIGHT);
 		panel.add(label);
 
 		playBackF = new JTextField(4);
@@ -415,7 +417,7 @@ public class FramedCurveInspector extends JFrame {
 	}
 
 	private String doubleToString(double dd)	{
-		return Double.toString(  (double) (   (Math.floor(1000*dd))  * 0.001d)    )   ;
+		return Double.toString(  (   (Math.floor(1000*dd))  * 0.001d)    )   ;
 	}
 
 	/**
@@ -488,7 +490,7 @@ public class FramedCurveInspector extends JFrame {
 		
 		SaveKeyAction()	{
 			super();
-			putValue(AbstractAction.NAME, "Save");
+			putValue(Action.NAME, "Save");
 		}
 		
 		public void actionPerformed(ActionEvent e) {
@@ -502,7 +504,7 @@ public class FramedCurveInspector extends JFrame {
 		
 		DeleteKeyAction()	{
 			super();
-			putValue(AbstractAction.NAME, "Delete");
+			putValue(Action.NAME, "Delete");
 		}
 		
 		public void actionPerformed(ActionEvent e) {
@@ -516,7 +518,7 @@ public class FramedCurveInspector extends JFrame {
 		
 		InsertKeyAction()	{
 			super();
-			putValue(AbstractAction.NAME, "Insert");
+			putValue(Action.NAME, "Insert");
 		}
 		
 		public void actionPerformed(ActionEvent e) {
@@ -537,7 +539,7 @@ public class FramedCurveInspector extends JFrame {
 		
 		AdvanceAction()	{
 			super();
-			putValue(AbstractAction.NAME, ">");
+			putValue(Action.NAME, ">");
 		}
 		
 		public void actionPerformed(ActionEvent e) {
@@ -552,12 +554,13 @@ public class FramedCurveInspector extends JFrame {
 		
 		RetreatAction()	{
 			super();
-			putValue(AbstractAction.NAME, "<");
+			putValue(Action.NAME, "<");
 		}
 		
 		public void actionPerformed(ActionEvent e) {
 			inspectedPoint--;
-			if (inspectedPoint < 0) inspectedPoint += theCurve.getNumberControlPoints();;
+			if (inspectedPoint < 0) inspectedPoint += theCurve.getNumberControlPoints();
+
 			inspectKeyFrame();
 		}
 		
@@ -567,7 +570,7 @@ public class FramedCurveInspector extends JFrame {
 		Component parent;
 		SaveAllAction()	{
 			super();
-			putValue(AbstractAction.NAME, "Save As...");
+			putValue(Action.NAME, "Save As...");
 		}
 		
 		public void actionPerformed(ActionEvent e) {
@@ -610,7 +613,7 @@ public class FramedCurveInspector extends JFrame {
 	class PlayAction extends AbstractAction		{
 		PlayAction()	{
 			super();
-			putValue(AbstractAction.NAME, "Play");
+			putValue(Action.NAME, "Play");
 		}
 		
 		public void actionPerformed(ActionEvent e) {
@@ -628,7 +631,7 @@ public class FramedCurveInspector extends JFrame {
 	protected double time;
 	public void updateTime()	{
 		// time is a parameter between 0 and 1
-		time = (tick % totalTicks)/((double) totalTicks);
+		time = (tick % totalTicks)/totalTicks;
 		double factor = theCurve.getTmax() - theCurve.getTmin();
 		time = theCurve.getTmin() + time * factor;
 		updateCameraPosition();
@@ -639,7 +642,7 @@ public class FramedCurveInspector extends JFrame {
 				cameraMove.stop();
 				// TODO Remove this hack!
 				if (cameraEnd != null) cameraEnd.start();
-				playAction.putValue(AbstractAction.NAME, "Play");
+				playAction.putValue(Action.NAME, "Play");
 			}
 		}
 	}
@@ -692,13 +695,13 @@ public class FramedCurveInspector extends JFrame {
 	private void updatePlayState() {
 		if (isPaused) {
 			cameraMove.stop();
-			playAction.putValue(AbstractAction.NAME, "Play");
+			playAction.putValue(Action.NAME, "Play");
 		} else	{
 			totalSeconds = theCurve.getTmax() - theCurve.getTmin();
 			totalTicks = (int) totalSeconds * framesPerSecond;
 
 			cameraMove.start();
-			playAction.putValue(AbstractAction.NAME, "Pause");
+			playAction.putValue(Action.NAME, "Pause");
 		}
 		parent.render();
 	}
@@ -717,7 +720,6 @@ public class FramedCurveInspector extends JFrame {
 		pickAction.setPickPoint(ndc);
 		int n = fc.getNumberControlPoints();
 		double[] focus = new double[n];
-		SceneGraphComponent camNode = CameraUtility.getCameraNode(v);
 		Graphics3D gc = new Graphics3D(v);
 		StringBuffer sb = new StringBuffer();
 		sb.append("focus\n");
@@ -744,8 +746,6 @@ public class FramedCurveInspector extends JFrame {
 	 *
 	 */
 	private class MyKeyListener extends KeyAdapter {
-		private boolean showHelp = false;
-		
 		HelpOverlay helpOverlay;	
 		long beginCurveTime = 0;
 		boolean active = false;

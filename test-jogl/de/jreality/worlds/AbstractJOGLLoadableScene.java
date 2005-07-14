@@ -7,11 +7,7 @@ package de.jreality.worlds;
 
 import java.awt.Component;
 
-import javax.swing.JMenuBar;
-
 import de.jreality.jogl.JOGLLoadableScene;
-import de.jreality.scene.Viewer;
-import de.jreality.util.ConfigurationAttributes;
 
 /**
  * @author gunn

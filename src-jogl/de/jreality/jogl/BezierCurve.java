@@ -6,7 +6,6 @@ package de.jreality.jogl;
 
 import java.util.logging.Level;
 
-import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rn;
 
 /**
@@ -36,7 +35,6 @@ public class BezierCurve {
 			JOGLConfiguration.getLogger().log(Level.WARNING,"Array length must be for form 3n + 1");
 			return null;
 		}
-		int m = (controlPoints.length-1) / 3;
 		int vectorLength = controlPoints[0].length;
 		double[][] vals = new double[2*n-1][vectorLength];
 		for (int i = 0; i<vectorLength; ++i)	{
@@ -64,8 +62,6 @@ public class BezierCurve {
 			JOGLConfiguration.getLogger().log(Level.WARNING,"Array length must be for form 3n + 1");
 			return null;
 		}
-		int setsU = (uDim-1) / 3;
-		int setsV = (vDim-1) / 3;
 		int vectorLength = controlPoints[0][0].length;
 		double[][][] vals = new double[2*uDim-1][vDim][vectorLength];
 		for (int k = 0; k< vDim; ++k)	{
@@ -94,8 +90,6 @@ public class BezierCurve {
 			JOGLConfiguration.getLogger().log(Level.WARNING,"Array length must be for form 3n + 1");
 			return null;
 		}
-		int setsU = (uDim-1) / 3;
-		int setsV = (vDim-1) / 3;
 		int vectorLength = controlPoints[0][0].length;
 		double[][][] vals = new double[uDim][2*vDim-1][vectorLength];
 		for (int k = 0; k< uDim; ++k)	{

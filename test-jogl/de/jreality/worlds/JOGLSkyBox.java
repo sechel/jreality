@@ -8,15 +8,32 @@ import java.io.IOException;
 
 import javax.swing.JMenuBar;
 
-import de.jreality.geometry.*;
+import de.jreality.geometry.CatenoidHelicoid;
+import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.geometry.QuadMeshShape;
+import de.jreality.geometry.Torus;
+import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.DiscreteSpaceCurve;
 import de.jreality.jogl.SkyBox;
-import de.jreality.scene.*;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.CommonAttributes;
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.ReflectionMap;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Transformation;
+import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.ShaderFactory;
 import de.jreality.shader.Texture2D;
-import de.jreality.util.*;
+import de.jreality.util.CameraUtility;
+import de.jreality.util.ConfigurationAttributes;
+import de.jreality.util.Matrix;
+import de.jreality.util.MatrixBuilder;
+import de.jreality.util.P3;
+import de.jreality.util.Pn;
+import de.jreality.util.SceneGraphUtilities;
 
 /**
  * @author Charles Gunn

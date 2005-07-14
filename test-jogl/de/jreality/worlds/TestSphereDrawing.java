@@ -18,8 +18,6 @@ import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.StorageModel;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.Pn;
 import de.jreality.util.SceneGraphUtilities;

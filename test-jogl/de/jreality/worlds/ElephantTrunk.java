@@ -12,8 +12,6 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
-import de.jreality.util.ConfigurationAttributes;
-import de.jreality.util.Pn;
 
 
 

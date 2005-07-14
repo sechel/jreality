@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
-import javax.swing.DefaultBoundedRangeModel;
 
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;

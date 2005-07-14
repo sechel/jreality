@@ -47,7 +47,7 @@ public class JOGLPickAction extends PickAction  {
 	static public int PROXY_GEOMETRY_POINT = GEOMETRY_BASE+3;
 	static public int PROXY_GEOMETRY_LINE = GEOMETRY_BASE+4;
 	static public int PROXY_GEOMETRY_FACE = GEOMETRY_BASE+5;
-	static boolean useOpenGL = false;
+	static boolean useOpenGL = true;
 	static boolean debug = false;
 	de.jreality.jogl.Viewer theViewer = null;
 	public JOGLPickAction(de.jreality.jogl.Viewer v) {

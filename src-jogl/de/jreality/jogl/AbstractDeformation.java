@@ -11,16 +11,13 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import de.jreality.geometry.GeometryUtility;
-import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.util.LoggingSystem;
-import de.jreality.util.Rn;
 
 /**
  * @author gunn

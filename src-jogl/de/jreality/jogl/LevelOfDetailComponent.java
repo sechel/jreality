@@ -4,7 +4,6 @@
  */
 package de.jreality.jogl;
 
-import de.jreality.util.CameraUtility;
 
 /**
  * @author gunn

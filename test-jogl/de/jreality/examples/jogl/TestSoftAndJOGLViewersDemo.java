@@ -7,7 +7,6 @@ package de.jreality.examples.jogl;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
-import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;

@@ -13,19 +13,15 @@ import java.util.logging.Level;
 import javax.swing.JColorChooser;
 import javax.swing.KeyStroke;
 
-import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
 import net.java.games.jogl.GLDrawable;
-import net.java.games.jogl.GLU;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.tools.ToolManager;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.LoggingSystem;
 import de.jreality.util.P3;
 import de.jreality.util.SceneGraphUtilities;
 

@@ -5,9 +5,6 @@ import java.security.PrivilegedAction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.java.games.jogl.impl.JAWT;
-import net.java.games.jogl.impl.JAWTFactory;
-
 import de.jreality.util.LoggingSystem;
 
 /*

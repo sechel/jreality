@@ -22,21 +22,15 @@ import de.jreality.jogl.inspection.FancySlider;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.AttributeEntityFactory;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.ImageData;
-import de.jreality.util.Matrix;
 import de.jreality.util.MatrixBuilder;
-import de.jreality.util.P3;
 import de.jreality.util.Pn;
-import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
 
  /**

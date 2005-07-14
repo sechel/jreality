@@ -4,8 +4,6 @@
  */
 package de.jreality.worlds;
 
-import java.awt.Component;
-
 import javax.swing.JMenuBar;
 
 import de.jreality.scene.SceneGraphComponent;

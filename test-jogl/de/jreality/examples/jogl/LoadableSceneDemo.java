@@ -14,10 +14,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 
-import de.jreality.jogl.InteractiveViewer;
-import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.jogl.JOGLConfiguration;
-import de.jreality.util.Pn;
 
 /**
  * @author gunn

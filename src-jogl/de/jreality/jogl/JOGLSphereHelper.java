@@ -4,7 +4,6 @@
  */
 package de.jreality.jogl;
 
-import java.util.Hashtable;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 
@@ -12,9 +11,6 @@ import net.java.games.jogl.GL;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.SphereHelper;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.LoggingSystem;
-import de.jreality.util.Pn;
-import de.jreality.util.Rn;
 
 /**
  * @author gunn

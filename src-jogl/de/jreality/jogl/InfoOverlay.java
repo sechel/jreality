@@ -6,8 +6,6 @@ package de.jreality.jogl;
 
 import java.awt.Dimension;
 import java.util.List;
-import java.util.Vector;
-import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;

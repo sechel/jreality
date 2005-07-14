@@ -3,7 +3,6 @@
  *
  */
 package de.jreality.examples.jogl;
-import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.quasitiler.alexanderplatz.Alex3DModel;

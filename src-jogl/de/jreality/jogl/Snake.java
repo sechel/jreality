@@ -5,7 +5,6 @@
 package de.jreality.jogl;
 
 
-import java.util.Set;
 import java.util.logging.Level;
 
 import de.jreality.scene.IndexedLineSet;

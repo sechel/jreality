@@ -6,7 +6,6 @@ package de.jreality.jogl;
 
 import java.awt.Color;
 import java.util.Iterator;
-import java.util.ListIterator;
 import java.util.Vector;
 import java.util.logging.Level;
 
@@ -16,7 +15,6 @@ import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereHelper;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.Graphics3D;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -24,11 +22,9 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
-import de.jreality.scene.data.Attribute;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
 import de.jreality.scene.pick.PickPoint;
-import de.jreality.util.P3;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphPathObserver;
 import de.jreality.util.SceneGraphUtilities;

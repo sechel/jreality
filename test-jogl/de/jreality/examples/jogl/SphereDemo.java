@@ -12,17 +12,12 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.SphereHelper;
-import de.jreality.jogl.AbstractDeformation;
-import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.jogl.shader.SimpleJOGLShader;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Sphere;
-import de.jreality.scene.proxy.CopyScene;
 import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
 

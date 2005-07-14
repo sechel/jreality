@@ -17,6 +17,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
+import de.jreality.util.MatrixBuilder;
 import de.jreality.util.Pn;
 
 /**
@@ -46,10 +47,7 @@ public class StandardDemo extends AbstractJOGLLoadableScene {
 	   double scaleVal = 1.5;
 		SceneGraphComponent globeNode1= new SceneGraphComponent();
 		globeNode1.setName("Comp1");
-		Transformation gt= new Transformation();
-		gt.setTranslation(0, 0, scaleVal);
-		gt.setStretch(.3);
-		globeNode1.setTransformation(gt);
+		MatrixBuilder.euclidian().translate(0,0,scaleVal).scale(.3).assignTo(globeNode1);
 	   Appearance ap1 = new Appearance();
 	   ap1.setAttribute(CommonAttributes.DIFFUSE_COLOR, java.awt.Color.RED);
 	   ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.BLACK);

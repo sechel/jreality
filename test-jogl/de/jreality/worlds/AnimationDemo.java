@@ -20,7 +20,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.util.SceneGraphUtilities;
-import de.jreality.worlds.AbstractLoadableScene;
 /**
  * @author gunn
  *

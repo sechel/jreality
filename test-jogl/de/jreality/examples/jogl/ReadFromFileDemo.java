@@ -10,18 +10,13 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereHelper;
-import de.jreality.jogl.InteractiveViewerDemo;
-import de.jreality.reader.Input;
 import de.jreality.reader.ReaderOOGL;
-import de.jreality.reader.ReaderPOLY;
 import de.jreality.reader.Readers;
 import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.util.Pn;

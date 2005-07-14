@@ -3,18 +3,11 @@
  *
  */
 package de.jreality.worlds;
-import java.net.MalformedURLException;
-
 import javax.swing.JMenuBar;
 
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.LabelSet;
-import de.jreality.geometry.TubeUtility;
 import de.jreality.geometry.WingedEdge;
-import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Texture2D;
-import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.Pn;

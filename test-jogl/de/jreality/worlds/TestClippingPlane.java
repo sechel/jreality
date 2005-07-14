@@ -34,7 +34,6 @@ import de.jreality.util.CameraUtility;
 import de.jreality.util.ImageData;
 import de.jreality.util.Matrix;
 import de.jreality.util.P3;
-import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
 
 

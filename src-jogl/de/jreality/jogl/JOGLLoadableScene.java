@@ -7,10 +7,6 @@ package de.jreality.jogl;
 
 import java.awt.Component;
 
-import javax.swing.JMenuBar;
-
-import de.jreality.scene.Viewer;
-import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.LoadableScene;
 
 /**

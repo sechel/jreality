@@ -10,7 +10,6 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Texture2D;
 import de.jreality.scene.Transformation;
 import de.jreality.shader.ShaderFactory;

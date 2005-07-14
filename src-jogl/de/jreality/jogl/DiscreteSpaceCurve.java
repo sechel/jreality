@@ -9,8 +9,6 @@ import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
-import de.jreality.util.Pn;
-import de.jreality.util.Rn;
 
 /**
  * @author Charles Gunn
@@ -59,10 +57,6 @@ public class DiscreteSpaceCurve extends IndexedLineSet {
 		return new DiscreteSpaceCurve(vertices, true);
 	}
 	
-	public Geometry makeTube(double radius)	{
-		// this is your assignment: fill in this method
-		return null;
-	}
 	/**
 	 * @return
 	 */

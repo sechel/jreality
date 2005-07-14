@@ -6,7 +6,6 @@ package de.jreality.examples.jogl;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import de.jreality.jogl.InteractiveViewerDemo;
 import de.jreality.reader.Parser3DS;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;

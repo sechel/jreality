@@ -20,9 +20,7 @@ import de.jreality.scene.Camera;
 import de.jreality.scene.Drawable;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.LoggingSystem;
 import de.jreality.util.SceneGraphUtilities;
 
 /**
