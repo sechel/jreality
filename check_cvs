@@ -1,9 +1,0 @@
-#!/bin/sh
-cd /tmp
-cvs co jReality
-cd jReality
-export FETCH_DEPS=1
-ant 
-cd ..
-rm -r jReality
-
