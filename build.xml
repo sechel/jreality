@@ -5,7 +5,7 @@
   
   <!-- the following should belong to core... -->
   <property name="core" location="src" />
-	  <property name="io" location="src-io" />
+  <property name="io" location="src-io" />
 
   <!-- backends (dependencies from top to bottom) -->
   <property name="soft" location="src-soft" />
@@ -114,18 +114,7 @@
   </target>
 
   <target name="proxies-deps" if="env.FETCH_DEPS">
-  	<echo message="in proxies-dep"/>
-    <available file="lib/smrj.jar" property="smrj-exists"/>
-    <antcall target="get-smrj"/>
-  </target>
-
-  <target name="get-smrj" unless="smrj-exists">
-  	<echo message="in get-smrj"/>
-    <mkdir dir="tmp"/>
-    <cvs package="SMRJ" dest="tmp"/>
-    <ant dir="tmp/SMRJ" inheritAll="false"/>
-    <copy file="tmp/SMRJ/dist/smrj.jar" tofile="lib/smrj.jar"/>
-    <delete dir="tmp"/>
+    <get dest="lib/smrj.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/smrj.jar" usetimestamp="true" verbose="true"/>
   </target>
 
   <target name="soft" depends="core" description="build soft backend">
@@ -148,7 +137,6 @@
 
   <target name="jogl-deps" if="env.FETCH_DEPS">
     <get dest="lib/jogl.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/jogl.jar" usetimestamp="true" verbose="true"/>
-    <get dest="lib/numericalMethods.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/numericalMethods.jar" usetimestamp="true" verbose="true"/>
   </target>
 
   <target name="renderman" depends="core,soft" description="build renderman backend">
