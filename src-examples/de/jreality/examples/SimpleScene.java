@@ -20,19 +20,23 @@ import de.jreality.util.MatrixBuilder;
 public class SimpleScene {
 
 	public static void display(Geometry geom, double dist) {
-        SceneGraphComponent rootNode=new SceneGraphComponent();
         SceneGraphComponent geometryNode=new SceneGraphComponent();
+        geometryNode.setGeometry(geom);
+        display(geometryNode, dist);
+	}
+        
+	public static void display(SceneGraphComponent geom, double dist) {
+        SceneGraphComponent rootNode=new SceneGraphComponent();
         SceneGraphComponent cameraNode=new SceneGraphComponent();
         SceneGraphComponent lightNode=new SceneGraphComponent();
         
-        rootNode.addChild(geometryNode);
+        rootNode.addChild(geom);
         rootNode.addChild(cameraNode);
         cameraNode.addChild(lightNode);
         
         Camera camera=new Camera();
         Light light=new DirectionalLight();
         
-        geometryNode.setGeometry(geom);
         cameraNode.setCamera(camera);
         lightNode.setLight(light);
         
@@ -41,7 +45,12 @@ public class SimpleScene {
 
         DefaultViewer viewer=new DefaultViewer();
         viewer.setSceneRoot(rootNode);
-        viewer.setCameraPath(SceneGraphPath.getFirstPathBetween(rootNode, camera));
+        
+        SceneGraphPath cameraPath=new SceneGraphPath();
+        cameraPath.push(rootNode);
+        cameraPath.push(cameraNode);
+        cameraPath.push(camera);
+        viewer.setCameraPath(cameraPath);
 
         Frame frame=new Frame();
         frame.add(viewer);

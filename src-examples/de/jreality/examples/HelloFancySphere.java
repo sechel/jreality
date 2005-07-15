@@ -1,5 +1,5 @@
 /*
- * $Id: HelloFancySphere.java,v 1.1 2005/07/14 13:29:07 brinkman Exp $
+ * $Id: HelloFancySphere.java,v 1.2 2005/07/15 00:10:55 brinkman Exp $
  * 
  * A fancier "Hello World" for jReality. The idea is to show how to use appearances
  * as well as the JOGL viewer, and eventually picking and tools.
@@ -65,7 +65,12 @@ public class HelloFancySphere {
         
         Viewer viewer=new Viewer();
         viewer.setSceneRoot(rootNode);
-        viewer.setCameraPath(SceneGraphPath.getFirstPathBetween(rootNode, camera));
+        
+        SceneGraphPath cameraPath=new SceneGraphPath();
+        cameraPath.push(rootNode);
+        cameraPath.push(cameraNode);
+        cameraPath.push(camera);
+        viewer.setCameraPath(cameraPath);
 
         Frame frame=new Frame();
         frame.add(viewer.getViewingComponent());
