@@ -10,7 +10,7 @@ import de.jreality.util.VecMat;
 public class GreatArc extends Arc {
 
 	public GreatArc(double p0[], double p1[]) {
-		this(p0, p1, 1.);
+		this(p0, p1, 10.);
 	}
 	
 	public GreatArc(double[] pp0, double[] pp1, double res) {

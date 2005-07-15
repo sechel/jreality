@@ -45,7 +45,7 @@ public class HyperbolicArc extends Arc {
 		double l2[]=lineofsight(x0, y0, x1, y1, p1);
 		double lm[]=lineofsight(x0, y0, x1, y1, pm);
 		double l1[]=VecMat.product(VecMat.sum(l0, l2), .5);
-		if (VecMat.dot(lm, l1)<.999*VecMat.norm(lm)*VecMat.norm(l1)) {
+		if (VecMat.dot(lm, l1)<.01*VecMat.norm(lm)*VecMat.norm(l1)) {
 			computePoints(x0, y0, x1, y1, p0, pm, v);
 			computePoints(x0, y0, x1, y1, pm, p1, v);
 		}

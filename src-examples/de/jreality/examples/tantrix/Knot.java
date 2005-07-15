@@ -48,7 +48,7 @@ public class Knot extends KnotBase {
 
 	public static void main(String[] args) throws IOException {
 		Knot k=new Knot();
-		k.read("/home/brinkman/illiMath04/pytantrix/knots/3-1.txt");
+		k.read("/home/brinkman/illiMath04/pytantrix/knots/7-3smooth.txt");
 		Tantrix r1=new Tantrix(k);
 		Binix r2=new Binix(k);
 		Tertrix r3=new Tertrix(k);
