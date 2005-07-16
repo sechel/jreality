@@ -26,11 +26,6 @@ import java.util.Iterator;
 
 import de.jreality.scene.*;
 import de.jreality.scene.proxy.ProxyFactory;
-import de.jreality.util.LoadableScene;
-import de.jreality.worlds.DebugLattice;
-import de.jreality.worlds.Icosahedra;
-import de.jreality.worlds.ImplodedTori;
-import de.jreality.worlds.JOGLSkyBox;
 import junit.framework.TestCase;
 
 
@@ -68,8 +63,9 @@ public class TreeProxyTest extends TestCase {
   }
 
   public void testTreeProxy() {
-    LoadableScene ls = new Icosahedra();
-    SceneProxyTreeBuilder ttp = new SceneProxyTreeBuilder(ls.makeWorld());
+    SceneGraphComponent root = null;
+    // build up scene...
+    SceneProxyTreeBuilder ttp = new SceneProxyTreeBuilder(root);
     ttp.setProxyTreeFactory(new ProxyTreeFactory());
     ttp.getProxyTreeFactory().setProxyFactory(new PrintFactory());
     ttp.setProxyConnector(new ProxyConnector());
