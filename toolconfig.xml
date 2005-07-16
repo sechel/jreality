@@ -18,6 +18,7 @@
     <mapping device="Keyboard" src="VK_S" target="backward"/>
     <mapping device="Keyboard" src="VK_A" target="left"/>
     <mapping device="Keyboard" src="VK_D" target="right"/>
+    <mapping device="Keyboard" src="VK_P" target="ShowPick"/>
     <mapping device="Keyboard" src="VK_E" target="EncompassActivation"/>
     <mapping device="Keyboard" src="VK_0" target="IncreaseSpeed"/>
     <mapping device="Keyboard" src="VK_9" target="DecreaseSpeed"/>
