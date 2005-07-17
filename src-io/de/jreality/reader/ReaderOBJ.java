@@ -30,7 +30,6 @@ import java.util.*;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.util.LoggingSystem;
 
