@@ -1,5 +1,5 @@
 /*
- * $Id: IndexedSomethingSets.java,v 1.2 2005/07/15 00:10:55 brinkman Exp $
+ * $Id: IndexedSomethingSets.java,v 1.3 2005/07/22 10:42:17 gunn Exp $
  * 
  * A short illustration of how to use Indexed*Set.
  * 
@@ -16,6 +16,7 @@ import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.Viewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -41,7 +42,7 @@ public class IndexedSomethingSets {
         SceneGraphComponent faceNode=new SceneGraphComponent();
         SceneGraphComponent cameraNode=new SceneGraphComponent();
         SceneGraphComponent lightNode=new SceneGraphComponent();
-        
+ 
         rootNode.addChild(pointNode);
         rootNode.addChild(lineNode);
         rootNode.addChild(faceNode);
@@ -75,6 +76,7 @@ public class IndexedSomethingSets {
         		new DoubleArrayArray.Array(vertices));
         faceset.setFaceCountAndAttributes(Attribute.INDICES,
         		new IntArrayArray.Array(new int[][] {{0, 1, 2, 3, 4, 5, 0}}));
+        GeometryUtility.calculateAndSetNormals(faceset);
         
         pointNode.setGeometry(pointset);
         lineNode.setGeometry(lineset);
@@ -88,16 +90,23 @@ public class IndexedSomethingSets {
     	Appearance rootApp= new Appearance();
         rootApp.setAttribute(CommonAttributes.BACKGROUND_COLOR, new Color(0f, .1f, .1f));
         rootApp.setAttribute(CommonAttributes.DIFFUSE_COLOR, new Color(1f, 0f, 0f));
-        
+        rootApp.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED,true);
+     
     	Appearance pointApp= new Appearance();
         pointApp.setAttribute(CommonAttributes.DIFFUSE_COLOR, new Color(0f, 0f, 1f));
         pointApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
+        pointApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
         pointApp.setAttribute(CommonAttributes.POINT_RADIUS, .1);
         
-        rootNode.setAppearance(rootApp);
-        pointNode.setAppearance(pointApp);
-        
-        Viewer viewer=new Viewer();
+    Appearance faceApp= new Appearance();
+        faceApp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new Color(0f, 1f, 1f));
+       faceApp.setAttribute(CommonAttributes.FACE_DRAW, true);
+         
+       rootNode.setAppearance(rootApp);
+       pointNode.setAppearance(pointApp);
+       faceNode.setAppearance(faceApp);
+
+       Viewer viewer=new Viewer();
         viewer.setSceneRoot(rootNode);
         
         SceneGraphPath cameraPath=new SceneGraphPath();
@@ -119,5 +128,5 @@ public class IndexedSomethingSets {
         frame.setVisible(true);
         
         viewer.render();
-    }
+   }
 }
