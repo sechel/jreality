@@ -51,7 +51,7 @@ public class DefaultLineShader implements LineShader  {
 	double	tubeRadius = 0.05,
 		 	lineWidth = 1.0,
 			depthFudgeFactor = 0.9999d;			// in pixels
-	boolean interpolateVertexColors = false;
+	boolean interpolateVertexColors = false, lighting;
 	int	lineFactor = 1;
 	int 	lineStipplePattern = 0x1c47; 
 	 
@@ -74,6 +74,7 @@ public class DefaultLineShader implements LineShader  {
 		tubeStyle = eap.getAttribute(NameSpace.name(name,CommonAttributes.TUBE_STYLE),CommonAttributes.TUBE_STYLE_DEFAULT);
 		depthFudgeFactor = eap.getAttribute(NameSpace.name(name,CommonAttributes.DEPTH_FUDGE_FACTOR), depthFudgeFactor);
 		interpolateVertexColors = eap.getAttribute(NameSpace.name(name,CommonAttributes.INTERPOLATE_VERTEX_COLORS), CommonAttributes.INTERPOLATE_VERTEX_COLORS_DEFAULT);
+		lighting = eap.getAttribute(NameSpace.name(name,CommonAttributes.LIGHTING_ENABLED), true);
 		lineStipple = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_STIPPLE), lineStipple);
 		lineWidth = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_WIDTH), CommonAttributes.LINE_WIDTH_DEFAULT);
 		lineFactor = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_FACTOR),lineFactor);
@@ -170,11 +171,11 @@ public class DefaultLineShader implements LineShader  {
 		} 
 		else gl.glDisable(GL.GL_LINE_STIPPLE);
 
-		boolean lighting = false;
+//		boolean lighting = false;
 		if (tubeDraw)	{
 			polygonShader.render(jr);
-			lighting = true;
-		}
+			//lighting = true;
+		} else lighting = false;
 //		if (jr.openGLState.lighting != lighting)	{
 		//else {
 			jr.openGLState.lighting = lighting;
@@ -207,7 +208,7 @@ public class DefaultLineShader implements LineShader  {
 		return -1;
 	}
 	
-	// TOOD figure out how to share this code with TubeUtility
+	// TODO figure out how to share this code with TubeUtility
 	static double[][] xSection = {{1,0,0}, {.707, .707, 0}, {0,1,0},{-.707, .707, 0},{-1,0,0},{-.707, -.707, 0},{0,-1,0},{.707, -.707, 0}};
 //	
 	// TOOD figure out how to clear out local display lists (not returned by the method)!

@@ -216,8 +216,8 @@ public class FramedCurveInspector extends JFrame {
 		testM.add(scw);
 		scw.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent e)	{
-				moveWorld = !moveWorld;
-				handleMoveWorld();
+				setMoveWorld(!moveWorld);
+//				handleMoveWorld();
 			}
 		});
 		mb.add(testM);
@@ -365,15 +365,28 @@ public class FramedCurveInspector extends JFrame {
 	}
 	
 	/**
-	 * 
+	 * @param b
 	 */
-	protected void handleMoveWorld() {
+	protected void setMoveWorld(boolean b) {
+		if (moveWorld == b) return;
+		moveWorld=b;
 		target.getTransformation().resetMatrix();
 		if (moveWorld) setWorldNode(worldNode);
 		else setWorldNode(null);
 		JOGLConfiguration.theLog.log(Level.FINE,"move world is: "+moveWorld);
 		updateCameraPosition();
 	}
+
+//	/**
+//	 * 
+//	 */
+//	protected void handleMoveWorld() {
+//		target.getTransformation().resetMatrix();
+//		if (moveWorld) setWorldNode(worldNode);
+//		else setWorldNode(null);
+//		JOGLConfiguration.theLog.log(Level.FINE,"move world is: "+moveWorld);
+//		updateCameraPosition();
+//	}
 
 	/**
 	 * 

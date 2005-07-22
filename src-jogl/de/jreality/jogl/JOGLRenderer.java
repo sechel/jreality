@@ -63,6 +63,8 @@ import de.jreality.util.CameraUtility;
 import de.jreality.util.ClippingPlaneCollector;
 import de.jreality.util.EffectiveAppearance;
 import de.jreality.util.LightCollector;
+import de.jreality.util.Matrix;
+import de.jreality.util.MatrixBuilder;
 import de.jreality.util.P3;
 import de.jreality.util.Pn;
 import de.jreality.util.Rectangle3D;
@@ -410,10 +412,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				//JOGLConfiguration.theLog.log(Level.INFO,"Picking "+frameCount);
 				double[] pp3 = new double[3];
 				pp3[0] = -pickScale * pickPoint[0]; pp3[1] = -pickScale * pickPoint[1]; pp3[2] = 0.0;
-				
-				pickT.setTranslation(pp3);
 				double[] stretch = {pickScale, pickScale, 1.0};
-				pickT.setStretch(stretch);
+				MatrixBuilder.init(new Matrix(pickT.getMatrix()), pickT.getSignature()).translate(pp3).scale(pickScale, pickScale, 1.0).assignTo(pickT);
 				boolean store = isUseDisplayLists();
 				useDisplayLists = false;
 				thePeerRoot.propagateGeometryChanged(POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
@@ -1252,7 +1252,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			if (appearanceChanged)  	propagateAppearanceChanged();
 			if (appearanceIsDirty)	updateAppearance();
 			//context.setEffectiveAppearance(eAp);
-			
+			JOGLConfiguration.theLog.log(Level.FINER,"Rendering "+goBetween.getOriginalComponent().getName());
 			// render the geometry
 			if (goBetween.getPeerGeometry() != null)	goBetween.getPeerGeometry().render(this);
 			
@@ -1453,7 +1453,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		 */
 		private void updateTransformationInfo() {
 			if (goBetween.getOriginalComponent().getTransformation() != null) {
-				isReflection = goBetween.getOriginalComponent().getTransformation().getIsReflection();
+//				isReflection = goBetween.getOriginalComponent().getTransformation().getIsReflection();
+				isReflection = Rn.determinant(goBetween.getOriginalComponent().getTransformation().getMatrix()) < 0;
 			} else {
 				determinant  = 0.0;
 				isReflection = false;

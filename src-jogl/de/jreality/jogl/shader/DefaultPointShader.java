@@ -40,7 +40,7 @@ public class DefaultPointShader  implements PointShader {
 	double	pointRadius = .1;		
 	Color diffuseColor = java.awt.Color.RED;
 	float[] diffuseColorAsFloat;
-	boolean sphereDraw = false;
+	boolean sphereDraw = false, lighting = true;
 	PolygonShader polygonShader = null;
 	/**
 	 * 
@@ -51,6 +51,7 @@ public class DefaultPointShader  implements PointShader {
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		sphereDraw = eap.getAttribute(NameSpace.name(name,CommonAttributes.SPHERES_DRAW), CommonAttributes.SPHERES_DRAW_DEFAULT);
+		lighting = eap.getAttribute(NameSpace.name(name,CommonAttributes.LIGHTING_ENABLED), true);
 		pointSize = eap.getAttribute(NameSpace.name(name,CommonAttributes.POINT_SIZE), CommonAttributes.POINT_SIZE_DEFAULT);
 		pointRadius = eap.getAttribute(NameSpace.name(name,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
 		diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.POINT_DIFFUSE_COLOR_DEFAULT);	
@@ -103,16 +104,16 @@ public class DefaultPointShader  implements PointShader {
 			gl.glColor4fv( diffuseColorAsFloat);
 			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
 		}
-		boolean lighting = false;
+		
 		if (sphereDraw)	{
 			polygonShader.render(jr);
-			lighting = true;
-		} 
-		if (jr.openGLState.lighting != lighting)	{
+		} else lighting = false;
+		
+		//if (jr.openGLState.lighting != lighting)	{
 			jr.openGLState.lighting = lighting;
 			if (lighting) gl.glEnable(GL.GL_LIGHTING);
 			else gl.glDisable(GL.GL_LIGHTING);
-		}
+		//}
 
 		if (jr.openGLState.transparencyEnabled)	{
 			gl.glDepthMask(true);

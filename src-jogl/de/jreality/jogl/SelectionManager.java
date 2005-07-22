@@ -363,6 +363,7 @@ public class SelectionManager implements TransformationListener {
 		if (truncatedSelection == null || truncatedSelection.getLength()<=2) truncatedSelection = (SceneGraphPath) previousFullSelection.clone();
 		else truncatedSelection.pop();
 		setSelection(truncatedSelection, true);
+		JOGLConfiguration.theLog.log(Level.INFO,"Cycling selection: "+renderSelection);
 	}
 	
 	public void addSelection(SceneGraphPath p)	{

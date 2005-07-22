@@ -119,15 +119,15 @@ public class DefaultVertexShader implements VertexShader {
 			gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
 			jr.openGLState.frontBack = frontBack;
 		}
-		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
+		//if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
 			gl.glColor4fv( diffuseColorAsFloat);
 			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
-		}
+		//}
 		gl.glColor4fv( diffuseColorAsFloat);
 		gl.glMaterialfv(frontBack, GL.GL_AMBIENT, ambientColorAsFloat);
 		gl.glMaterialfv(frontBack, GL.GL_SPECULAR, specularColorAsFloat);
 		gl.glMaterialf(frontBack, GL.GL_SHININESS, (float) getSpecularExponent());
-		//JOGLConfiguration.theLog.log(Level.INFO,"VertexShader: Setting ambient color to: "+Rn.toString(getAmbientColorAsFloat()));
+		JOGLConfiguration.theLog.log(Level.FINER,"VertexShader: Setting diffuse color to: "+Rn.toString(getDiffuseColorAsFloat()));
 	}
 
 	public void postRender(JOGLRenderer jr) {

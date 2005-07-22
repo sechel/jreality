@@ -71,7 +71,7 @@ public class StandardDemo extends AbstractJOGLLoadableScene {
 	   catHel.buildEdgesFromFaces();
 		SceneGraphComponent globeNode2= new SceneGraphComponent();
 		globeNode2.setName("Comp1");
-		gt= new Transformation();
+		Transformation gt= new Transformation();
 		gt.setTranslation(scaleVal, scaleVal, scaleVal);
 		gt.setStretch(.3);
 		globeNode2.setTransformation(gt);

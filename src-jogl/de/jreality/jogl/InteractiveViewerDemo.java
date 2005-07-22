@@ -53,6 +53,8 @@ import de.jreality.ui.SceneTreeViewer;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.LoadableScene;
+import de.jreality.util.Matrix;
+import de.jreality.util.MatrixBuilder;
 import de.jreality.util.P3;
 import de.jreality.util.Pn;
 import de.jreality.util.Rn;
@@ -267,7 +269,7 @@ public class InteractiveViewerDemo extends JFrame{
 		CameraUtility.getCamera(viewer).reset();		
 		if (isEncompass())	{
 			// I have to do this ... for reasons unknown ... or else the encompass sometimes fails.
-			CameraUtility.getCameraNode(viewer).getTransformation().setTranslation(0d, 0d, 2d);
+			MatrixBuilder.init(null, getSignature()).translate(0d, 0d, 2d).assignTo(CameraUtility.getCameraNode(viewer).getTransformation());
 			CameraUtility.encompass(viewer);
 		}
 	
