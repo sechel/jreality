@@ -26,8 +26,6 @@ import de.jreality.scene.pick.PickSystem;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.scene.proxy.smrj.SMRJMirrorScene;
 import de.jreality.scene.tool.DraggingTool;
-import de.jreality.scene.tool.EgoShooterTool;
-import de.jreality.scene.tool.TestTool;
 import de.jreality.scene.tool.ToolSystem;
 import de.jreality.util.CmdLineParser;
 import de.jreality.util.ConfigurationAttributes;
@@ -302,7 +300,6 @@ public class PortalServerViewer implements Viewer, HeadMotionListener {
     	defaultCamPath.push(portal);
     	defaultCamPath.push(camera);
     	defaultRoot.addChild(makeLights());
-    	portal.addTool(new EgoShooterTool());
     }
     
     private double fileScale=1.;
@@ -333,7 +330,6 @@ public class PortalServerViewer implements Viewer, HeadMotionListener {
         	}
         	defaultRoot.addChild(world);
         	world.addTool(new DraggingTool());
-        	world.addTool(new TestTool());
         	world.setTransformation(new Transformation());
         	world.getTransformation().setMatrix(MatrixBuilder.euclidian().scale(fileScale).getMatrix().getArray());
         	setSceneRoot(defaultRoot);
