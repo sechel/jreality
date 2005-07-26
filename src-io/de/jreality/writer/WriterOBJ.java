@@ -5,12 +5,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.logging.Level;
 
 import de.jreality.geometry.CatenoidHelicoid;
+import de.jreality.geometry.GeometryUtility;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.IntArray;
+import de.jreality.util.LoggingSystem;
 
 /**
  * @author schmies
@@ -33,6 +38,32 @@ public class WriterOBJ {
 		}
 	}
 
+
+	static void write( Geometry geom, String groupName, OutputStream out ) {
+		if( geom == null ) return;
+		
+		if( geom instanceof IndexedFaceSet ) {
+			write( (IndexedFaceSet)geom, groupName, out);
+		} else {
+			 LoggingSystem.getLogger(GeometryUtility.class).log(Level.WARNING, 
+					 	"ignoring scene graph component " + groupName );
+		}
+	}
+	
+	public static void write( SceneGraphComponent sgc , OutputStream out ) {
+		
+		SceneGraphComponent flat = GeometryUtility.flatten(sgc);
+		
+		write( flat.getGeometry(), flat.getName(), out );
+		
+		final int noc = flat.getChildComponentCount();
+			
+		for( int i=0; i<noc; i++ ) {
+			SceneGraphComponent child=flat.getChildComponent(i);
+			write( child.getGeometry(), child.getName(), out );
+		}
+	}
+	
 	static void writeFaceIndex( PrintWriter out, int index, boolean hasTexture, boolean hasNormals ) {
 		out.print(index+1);
 		if( !hasTexture && !hasNormals ) return;
@@ -46,7 +77,7 @@ public class WriterOBJ {
 	static void write( IndexedFaceSet ifs, String groupName, PrintWriter out ) {
 		
 		if( groupName != null ) {
-			out.println( "g" + groupName );
+			out.println( "g " + groupName );
 		    out.println();
 		}
 
@@ -103,4 +134,5 @@ public class WriterOBJ {
 			e.printStackTrace();
 		}
 	}
+	
 }
