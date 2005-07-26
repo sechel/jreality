@@ -107,7 +107,6 @@ public class ToolTestScene {
     
     root.addChild(avatarNode);
     
-    scene.addTool(new TestTool());
     scene.addTool(new DraggingTool());
     scene.addTool(new PickShowTool("PrimaryAction"));
     RotateTool rotateTool = new RotateTool();

@@ -120,7 +120,6 @@ public class PickTestScene {
 		IndexedFaceSet ifs = new CatenoidHelicoid(10);
 		ifs.buildEdgesFromFaces();
 		sphere.setGeometry(ifs);
-    sphere.addTool(new TestTool());
 		root.addChild(scene);
 		scene.addChild(sphere);
 		root.addChild(camNode);
