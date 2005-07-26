@@ -3,7 +3,7 @@
  * Created on Apr 28, 2005
  *
  */
-package de.jreality.jogl;
+package de.jreality.examples.jogl;
 
 import java.awt.Component;
 

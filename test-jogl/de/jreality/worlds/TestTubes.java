@@ -8,11 +8,11 @@ import java.awt.Color;
 import de.jreality.geometry.BezierPatchMesh;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.QuadMeshUtility;
 import de.jreality.geometry.TubeUtility;
-import de.jreality.jogl.DiscreteSpaceCurve;
 import de.jreality.jogl.LevelOfDetailComponent;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
@@ -112,8 +112,7 @@ public class TestTubes extends AbstractJOGLLoadableScene {
 		   torussgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.SMOOTH_SHADING, true);
 		   torussgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, .06);
 		   //torussgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING, false);
-		   DiscreteSpaceCurve torus1 = DiscreteSpaceCurve.discreteTorusKnot(1,.25, 2, 9, 250);
-//		   double[][] verts = new double[250][3];
+		   IndexedLineSet torus1 = IndexedLineSetUtility.discreteTorusKnot(1,.25, 2, 9, 250);//		   double[][] verts = new double[250][3];
 //		   double f = .5;
 //		   double g = .2;
 //		   for (int i = 0; i<250; ++i)	{

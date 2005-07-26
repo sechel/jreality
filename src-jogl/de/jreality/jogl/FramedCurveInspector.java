@@ -367,7 +367,7 @@ public class FramedCurveInspector extends JFrame {
 	/**
 	 * @param b
 	 */
-	protected void setMoveWorld(boolean b) {
+	public void setMoveWorld(boolean b) {
 		if (moveWorld == b) return;
 		moveWorld=b;
 		target.getTransformation().resetMatrix();

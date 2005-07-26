@@ -5,6 +5,7 @@
  */
 package de.jreality.worlds;
 
+import de.jreality.geometry.GeometryUtility;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -40,14 +41,27 @@ public class TestTubeColors extends AbstractJOGLLoadableScene {
 			ils.setEdgeCountAndAttributes(Attribute.INDICES, StorageModel.INT_ARRAY_ARRAY.createReadOnly(indices));
 			ils.setEdgeAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(colors));
 			//ils.setEdgeAttributes(Attribute.COLORS, null);
-			IndexedFaceSet ifs = new IndexedFaceSet(5,1);
-			ifs.setVertexCountAndAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(verts));
-			ifs.setFaceCountAndAttributes(Attribute.INDICES, StorageModel.INT_ARRAY_ARRAY.createReadOnly(findices));
-			ifs.buildEdgesFromFaces();
-			ifs.setEdgeAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(colors));
-			theWorld.getAppearance().setAttribute(CommonAttributes.FACE_DRAW,true);
+			IndexedFaceSet ifs = new IndexedFaceSet(4,1);
+			
+			double[][] edgecolors={{1,0,0},{0,1,0},{1,0,0},{0,1,0}};
+			double[][] points = {{1,1,0},{-1,1,0},{-1,-1,0},{1,-1,0}}; //new double[4][3];
+			int[][] eindices = {{0,1},{1,2},{2,3},{3,0}};
+			int[][] xindices = {{0,1,2,3}};
+//			ifs =new IndexedFaceSet(4,1);
+			ifs.setFaceAttributes(Attribute.INDICES,StorageModel.INT_ARRAY_ARRAY.createReadOnly(xindices));
+			ifs.setVertexAttributes(Attribute.COORDINATES,  StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(points));
+			ifs.setEdgeCountAndAttributes(Attribute.INDICES, StorageModel.INT_ARRAY_ARRAY.createReadOnly(eindices));
+			ifs.setEdgeAttributes(Attribute.COLORS,  StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(edgecolors));
+			GeometryUtility.calculateAndSetNormals(ifs);
+//			ifs.setVertexCountAndAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(verts));
+//			ifs.setFaceCountAndAttributes(Attribute.INDICES, StorageModel.INT_ARRAY_ARRAY.createReadOnly(findices));
+//			ifs.buildEdgesFromFaces();
+//			ifs.setEdgeAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(colors));
+//			theWorld.getAppearance().setAttribute(CommonAttributes.FACE_DRAW,true);
 
-			theWorld.setGeometry( ils);
+			theWorld.setGeometry( ifs);
+			ifs.setVertexAttributes(Attribute.COORDINATES,  StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(points));
+			
 			
 			return theWorld;
 		}

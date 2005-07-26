@@ -7,12 +7,13 @@ package de.jreality.worlds;
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.Torus;
 import de.jreality.geometry.TubeUtility;
-import de.jreality.jogl.DiscreteSpaceCurve;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
+import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
@@ -112,7 +113,7 @@ public class StandardDemo extends AbstractJOGLLoadableScene {
 	   ap1.setAttribute(CommonAttributes.VERTEX_DRAW,false);
 	   globeNode3.setAppearance(ap1);
 
-	   DiscreteSpaceCurve torus1 = DiscreteSpaceCurve.discreteTorusKnot(1.0, .4,4,5,400);
+	   IndexedLineSet torus1 = IndexedLineSetUtility.discreteTorusKnot(1.0, .4,4,5,400);
 	   double[][] pts = torus1.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 	   QuadMeshShape tube = TubeUtility.makeTubeAsIFS(pts, .2d, null, TubeUtility.PARALLEL, true, Pn.EUCLIDEAN,0);
 	   GeometryUtility.calculateAndSetNormals(tube);

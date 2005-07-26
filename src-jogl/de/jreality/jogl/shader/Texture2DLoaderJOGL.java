@@ -10,8 +10,10 @@ import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
 
 import net.java.games.jogl.*;
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.ReflectionMap;
@@ -76,7 +78,8 @@ public class Texture2DLoaderJOGL {
 				// create the texture ID for this texture 
 				textureID = createTextureID(gl);
 				Integer id = new Integer(textureID);
-        ht.put(tex, id);
+				ht.put(tex, id);
+				JOGLConfiguration.theLog.log(Level.INFO, "Creating new (old) texture2d "+tex);
 			}
  
 //			gl.glActiveTexture(GL.GL_TEXTURE0+level);
@@ -217,7 +220,7 @@ public class Texture2DLoaderJOGL {
 				}
 	}
 
-  public static void deleteTexture(de.jreality.scene.Texture2D tex, GL gl)  {
+  public static void deleteTexture(Object tex, GL gl)  {
     WeakHashMap ht = (WeakHashMap) lookupFromGL.get(gl);
     if (ht == null) return;
     Integer which = (Integer) ht.get(tex);
@@ -265,7 +268,8 @@ public class Texture2DLoaderJOGL {
             LoggingSystem.getLogger(Texture2DLoaderJOGL.class).fine("deleted texture...");
             g.glDeleteTextures(1, new int[]{id.intValue()});
           }
-        }
+       }
+        LoggingSystem.getLogger(Texture2DLoaderJOGL.class).info("creating texture... "+tex);
       }
       // create the texture ID for this texture
       if (textureID == -1) textureID = createTextureID(gl);
@@ -453,7 +457,7 @@ public class Texture2DLoaderJOGL {
 	/**
 	 * @param tex2d
 	 */
-	public static void deleteTexture(de.jreality.scene.Texture2D tex2d) {
+	public static void deleteTexture(Object tex2d) {
 		Iterator gls = lookupFromGL.keySet().iterator();
 		
 		while (gls.hasNext())	{

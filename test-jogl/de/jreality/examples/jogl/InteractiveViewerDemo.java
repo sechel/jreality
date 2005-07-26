@@ -38,7 +38,6 @@ import de.jreality.jogl.FramedCurveInspector;
 import de.jreality.jogl.HandleTreeSelection;
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.jogl.JOGLConfiguration;
-import de.jreality.jogl.JOGLLoadableScene;
 import de.jreality.reader.Readers;
 import de.jreality.renderman.RIBViewer;
 import de.jreality.scene.Appearance;

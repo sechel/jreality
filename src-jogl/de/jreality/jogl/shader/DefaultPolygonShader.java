@@ -5,10 +5,12 @@
 package de.jreality.jogl.shader;
 
 import java.awt.Color;
+import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
 import de.jreality.jogl.ElementBinding;
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.*;
 import de.jreality.shader.ShaderFactory;
@@ -138,6 +140,7 @@ public class DefaultPolygonShader implements PolygonShader {
       gl.glActiveTexture(texUnit);
 	  texUnit++;
       Texture2DLoaderJOGL.render(theCanvas, texture2Dnew);
+      testTextureResident(jr, gl);
       gl.glEnable(GL.GL_TEXTURE_2D);
     }
 
@@ -145,23 +148,21 @@ public class DefaultPolygonShader implements PolygonShader {
       gl.glActiveTexture(texUnit);
       texUnit++;
       Texture2DLoaderJOGL.render(theCanvas, texture2D);
-      //int[] res = new int[1];
-      //gl.glGetTexParameteriv(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_RESIDENT, res);
-      //JOGLConfiguration.theLog.log(Level.FINE,"Texture is resident:
-      // "+res[0]);
-      //if (res[0] == 0) { jr.texResident = false; }
+      testTextureResident(jr, gl);
       gl.glEnable(GL.GL_TEXTURE_2D);
     } //else
     if (lightMapNew != null) {
       gl.glActiveTexture(texUnit);
       texUnit++;
       Texture2DLoaderJOGL.render(theCanvas, lightMapNew);
+      testTextureResident(jr, gl);
       gl.glEnable(GL.GL_TEXTURE_2D);
     }
     if (lightMap != null) {
       gl.glActiveTexture(texUnit);
       texUnit++;
      Texture2DLoaderJOGL.render(theCanvas, lightMap);
+     testTextureResident(jr, gl);
       gl.glEnable(GL.GL_TEXTURE_2D);
     } //else
     if (reflectionMap != null)  {
@@ -169,25 +170,17 @@ public class DefaultPolygonShader implements PolygonShader {
       refMapUnit = texUnit;
       texUnit++;
       Texture2DLoaderJOGL.render(jr, reflectionMap);
-      //int[] res = new int[1];
-      //gl.glGetTexParameteriv(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_RESIDENT, res);
-      //JOGLConfiguration.theLog.log(Level.FINE,"Texture is resident: "+res[0]);
-      //if (res[0] == 0)  { jr.texResident = false; }
-      gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
-      //JOGLConfiguration.theLog.log(Level.FINE,("cube map enabled");
+      //testTextureResident(jr, gl);
+     gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
     } 
     if (reflectionMapNew != null)  {
       gl.glActiveTexture(texUnit);
       refMapUnit = texUnit;
       texUnit++;
       Texture2DLoaderJOGL.render(jr, reflectionMapNew);
-      //int[] res = new int[1];
-      //gl.glGetTexParameteriv(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_RESIDENT, res);
-      //JOGLConfiguration.theLog.log(Level.FINE,"Texture is resident: "+res[0]);
-      //if (res[0] == 0)  { jr.texResident = false; }
+      //testTextureResident(jr, gl);
       gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
-      //JOGLConfiguration.theLog.log(Level.FINE,("cube map enabled");
-    } 
+     } 
 		vertexShader.setFrontBack(frontBack);
 		vertexShader.render(jr);
 		if (glShader != null) {
@@ -195,6 +188,14 @@ public class DefaultPolygonShader implements PolygonShader {
 		}
 	}
 	
+	private void testTextureResident(JOGLRenderer jr, GL gl) {
+		int[] res = new int[1];
+		gl.glGetTexParameteriv(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_RESIDENT, res);
+		JOGLConfiguration.theLog.log(Level.FINE,"Texture is resident"+res[0]);
+		if (res[0] == 0) { jr.texResident = false; }
+	}
+
+
 	public void postRender(JOGLRenderer jr)	{
 		GLCanvas theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();

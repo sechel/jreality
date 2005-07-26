@@ -265,6 +265,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			doIt.schedule(rerenderTask, 10);
 			forceNewDisplayLists();
 			numberTries++;		// don't keep trying indefinitely
+			System.out.println("Textures not resident");
 		} else numberTries = 0;
 	}
 
@@ -316,7 +317,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		if (debugGL)	theLog.log(Level.INFO,"Got new sphere display lists for context "+globalGL);
 		
 		if (CameraUtility.getCamera(theViewer) == null || theCanvas == null) return;
-		CameraUtility.getCamera(theViewer).setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
+		//CameraUtility.getCamera(theViewer).setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
 		//globalGL.glViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
 
 }
@@ -413,7 +414,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				double[] pp3 = new double[3];
 				pp3[0] = -pickScale * pickPoint[0]; pp3[1] = -pickScale * pickPoint[1]; pp3[2] = 0.0;
 				double[] stretch = {pickScale, pickScale, 1.0};
-				MatrixBuilder.init(new Matrix(pickT.getMatrix()), pickT.getSignature()).translate(pp3).scale(pickScale, pickScale, 1.0).assignTo(pickT);
+				MatrixBuilder.euclidian().translate(pp3).scale(pickScale, pickScale, 1.0).assignTo(pickT);
 				boolean store = isUseDisplayLists();
 				useDisplayLists = false;
 				thePeerRoot.propagateGeometryChanged(POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);

@@ -7,7 +7,7 @@ package de.jreality.worlds;
 
 import java.awt.Component;
 
-import de.jreality.jogl.JOGLLoadableScene;
+import de.jreality.examples.jogl.JOGLLoadableScene;
 
 /**
  * @author gunn

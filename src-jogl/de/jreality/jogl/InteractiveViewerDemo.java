@@ -36,6 +36,7 @@ import javax.swing.ToolTipManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.jreality.examples.jogl.JOGLLoadableScene;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.reader.Readers;
 import de.jreality.renderman.RIBViewer;
@@ -227,6 +228,7 @@ public class InteractiveViewerDemo extends JFrame{
 		setSize(800, 600);
 		if (world != null && root.isDirectAncestor(world))	root.removeChild(world);
 		CameraUtility.getCameraNode(viewer).getTransformation().setMatrix(Rn.identityMatrix(4));
+		CameraUtility.getCamera(viewer).reset();		
 		viewer.getSceneRoot().setAppearance(null);
 		viewer.getSelectionManager().setDefaultSelection(null);
 		viewer.getSelectionManager().setSelection(null);
@@ -266,7 +268,7 @@ public class InteractiveViewerDemo extends JFrame{
 		}
 
 		CameraUtility.getCamera(viewer).setSignature(getSignature());
-		CameraUtility.getCamera(viewer).reset();		
+		//CameraUtility.getCamera(viewer).reset();		
 		if (isEncompass())	{
 			// I have to do this ... for reasons unknown ... or else the encompass sometimes fails.
 			MatrixBuilder.init(null, getSignature()).translate(0d, 0d, 2d).assignTo(CameraUtility.getCameraNode(viewer).getTransformation());

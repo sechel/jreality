@@ -13,12 +13,13 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.SphereHelper;
-import de.jreality.jogl.DiscreteSpaceCurve;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
@@ -170,7 +171,7 @@ public class HopfFibration extends AbstractJOGLLoadableScene {
 						product.asDouble(oneTube[j*profileSize+k]);
 					}
 				}
-				DiscreteSpaceCurve dsc = new DiscreteSpaceCurve(oneCircle, false);
+				IndexedLineSet dsc = IndexedLineSetUtility.createCurveFromPoints(oneCircle, false);
 				SceneGraphComponent coreSGC = new SceneGraphComponent();
 				coreSGC.setName("core curve"+i);
 				coreSGC.setAppearance(new Appearance());
