@@ -38,19 +38,23 @@ public class WriterOBJ {
 		}
 	}
 
-
-	static void write( Geometry geom, String groupName, OutputStream out ) {
+	static void write( Geometry geom, String groupName, PrintWriter out ) {
 		if( geom == null ) return;
 		
 		if( geom instanceof IndexedFaceSet ) {
-			write( (IndexedFaceSet)geom, groupName, out);
+			write( ((IndexedFaceSet)geom), groupName, out);
 		} else {
 			 LoggingSystem.getLogger(GeometryUtility.class).log(Level.WARNING, 
 					 	"ignoring scene graph component " + groupName );
 		}
 	}
 	
-	public static void write( SceneGraphComponent sgc , OutputStream out ) {
+
+	public static void write( SceneGraphComponent sgc, OutputStream out ) {
+		write( sgc, new PrintWriter( out ));
+	}
+	
+	public static void write( SceneGraphComponent sgc, PrintWriter out ) {
 		
 		SceneGraphComponent flat = GeometryUtility.flatten(sgc);
 		
@@ -121,7 +125,22 @@ public class WriterOBJ {
 	}
 	
 	static public void main( String [] arg ) {
-		write( new CatenoidHelicoid(10), System.out );
+		
+		SceneGraphComponent s1 = new SceneGraphComponent();
+		s1.setName( "s1" );
+		s1.setGeometry(new IndexedFaceSet());
+		SceneGraphComponent s11 = new SceneGraphComponent();
+		s11.setName( "s11" );
+		s11.setGeometry(new CatenoidHelicoid(10));
+		s1.addChild(s11);
+		SceneGraphComponent s12 = new SceneGraphComponent();
+		s12.setName( "s12" );
+		s12.setGeometry(new IndexedFaceSet());
+		s1.addChild(s12);
+		
+		
+		
+		write( s1, System.out );
 
         try {
 			FileOutputStream stream = new FileOutputStream("/tmp/gaga.obj");
