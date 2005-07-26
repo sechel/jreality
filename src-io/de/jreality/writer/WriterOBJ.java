@@ -77,6 +77,7 @@ public class WriterOBJ {
 	static void write( IndexedFaceSet ifs, String groupName, PrintWriter out ) {
 		
 		if( groupName != null ) {
+			out.println();	
 			out.println( "g " + groupName );
 		    out.println();
 		}
