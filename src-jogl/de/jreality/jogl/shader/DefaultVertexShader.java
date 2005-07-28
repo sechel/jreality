@@ -8,7 +8,7 @@ import java.awt.Color;
 import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
-import net.java.games.jogl.GLCanvas;
+import net.java.games.jogl.GLDrawable;
 
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
@@ -104,6 +104,7 @@ public class DefaultVertexShader implements VertexShader {
 		return specularExponent;
 	}
 
+	
 	public int getFrontBack() {
 		return frontBack;
 	}
@@ -112,18 +113,17 @@ public class DefaultVertexShader implements VertexShader {
 	}
 	
 	public void render(JOGLRenderer jr)	{
-		GLCanvas theCanvas = jr.getCanvas();
+		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 
 		if (jr.openGLState.frontBack != frontBack)	{
 			gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
 			jr.openGLState.frontBack = frontBack;
 		}
-		//if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
+//		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
 			gl.glColor4fv( diffuseColorAsFloat);
-			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
-		//}
-		gl.glColor4fv( diffuseColorAsFloat);
+//			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
+//		}
 		gl.glMaterialfv(frontBack, GL.GL_AMBIENT, ambientColorAsFloat);
 		gl.glMaterialfv(frontBack, GL.GL_SPECULAR, specularColorAsFloat);
 		gl.glMaterialf(frontBack, GL.GL_SHININESS, (float) getSpecularExponent());

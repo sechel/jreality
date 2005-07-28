@@ -8,7 +8,7 @@ import java.awt.Color;
 import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
-import net.java.games.jogl.GLCanvas;
+import net.java.games.jogl.GLDrawable;
 import de.jreality.jogl.ElementBinding;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
@@ -61,7 +61,7 @@ public class DefaultPolygonShader implements PolygonShader {
 	
 	static int count = 0;
 	public void  setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
-		vertexShader = ShaderLookup.getVertexShaderAttr(eap, name, "default");
+		vertexShader = ShaderLookup.getVertexShaderAttr(eap, name, "vertexShader");
 
 		smoothShading = eap.getAttribute(NameSpace.name(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);	
 //		Object foo = eap.getAttribute(NameSpace.name(name,"texture2d"), null, Texture2D.class);
@@ -126,7 +126,7 @@ public class DefaultPolygonShader implements PolygonShader {
 	}
 	
 	public void render(JOGLRenderer jr)	{
-		GLCanvas theCanvas = jr.getCanvas();
+		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		
 		if (smoothShading != jr.openGLState.smoothShading)	{
@@ -181,12 +181,12 @@ public class DefaultPolygonShader implements PolygonShader {
       //testTextureResident(jr, gl);
       gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
      } 
-		vertexShader.setFrontBack(frontBack);
-		vertexShader.render(jr);
-		if (glShader != null) {
-			glShader.render(jr);
-		}
+    vertexShader.setFrontBack(frontBack);
+	vertexShader.render(jr);
+	if (glShader != null) {
+		glShader.render(jr);
 	}
+}
 	
 	private void testTextureResident(JOGLRenderer jr, GL gl) {
 		int[] res = new int[1];
@@ -197,7 +197,7 @@ public class DefaultPolygonShader implements PolygonShader {
 
 
 	public void postRender(JOGLRenderer jr)	{
-		GLCanvas theCanvas = jr.getCanvas();
+		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		for (int i = GL.GL_TEXTURE0; i< texUnit; ++i)	{
 			gl.glActiveTexture(i);

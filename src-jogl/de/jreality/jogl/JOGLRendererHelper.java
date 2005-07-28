@@ -56,7 +56,7 @@ public class JOGLRendererHelper {
 	static float [] backgroundColor = {0f, 0f, 0f, 1f};
 	static float val = 1f;
 	static float[][] unitsquare = {{val,val},{-val,val},{-val, -val},{val,-val}};
-	public static void handleBackground(GLCanvas theCanvas, Appearance topAp)	{
+	public static void handleBackground(GLDrawable theCanvas, int width, int height, Appearance topAp)	{
 			GL gl = theCanvas.getGL();
 			Object bgo = null;
 			if (topAp == null) return;
@@ -77,11 +77,11 @@ public class JOGLRendererHelper {
 				//Texture2DLoaderJOGL tl = Texture2DLoaderJOGL.FactoryLoader;
 				//JOGLConfiguration.theLog.log(Level.INFO,"Texture: "+tex.getWidth()+" "+tex.getHeight());
 				textureAR = tex.getWidth()/((double) tex.getHeight());
-				Texture2DLoaderJOGL.render(theCanvas, tex);
+				Texture2DLoaderJOGL.render( theCanvas, tex);
 				gl.glEnable(GL.GL_TEXTURE_2D);
 				hasTexture = true;
 			}
-			double ar = theCanvas.getWidth()/((double) theCanvas.getHeight())/textureAR;
+			double ar = width/((double) height)/textureAR;
 			double xl=0, xr=1, yb=0, yt=1;
 			if (ar > 1.0)	{ xl = 0.0; xr = 1.0; yb =.5*(1-1/ar);  yt = 1.0 - yb; }
 			else 			{ yb = 0.0; yt = 1.0; xl =.5*(1-ar);  xr = 1.0 - xl; }
@@ -137,7 +137,7 @@ public class JOGLRendererHelper {
 	static ByteBuffer vBuffer, vcBuffer, vnBuffer, fcBuffer, fnBuffer, tcBuffer;
 	static DataList vLast = null, vcLast = null, vnLast = null;
 	public static void drawVertices( PointSet sg, JOGLRenderer jr, boolean pickMode, double alpha) {
-		GLCanvas theCanvas = jr.theCanvas;
+		GLDrawable theCanvas = jr.theCanvas;
 		GL gl = theCanvas.getGL(); 
 //		gl.glPointSize((float) currentGeometryShader.pointShader.getPointSize());
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
@@ -189,7 +189,7 @@ public class JOGLRendererHelper {
 	 * @param sg
 	 */
 	public static void drawLines(IndexedLineSet sg, JOGLRenderer jr , boolean pickMode, boolean interpolateVertexColors, double alpha) {
-		GLCanvas theCanvas = jr.getCanvas();
+		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		vertices = sg.getVertexAttributes(Attribute.COORDINATES);
@@ -312,7 +312,7 @@ public class JOGLRendererHelper {
 		drawFaces(sg, jr, smooth, alpha, false, JOGLPickAction.GEOMETRY_FACE);
 	}
 	public static void drawFaces( IndexedFaceSet sg, JOGLRenderer jr,  boolean smooth, double alpha, boolean pickMode, int pickName) {
-		GLCanvas theCanvas = jr.getCanvas();
+		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		
 		int colorBind = -1,normalBind, colorLength=3;
@@ -702,14 +702,16 @@ public class JOGLRendererHelper {
 			globalGL.glPopMatrix();
 		}
 	}
+	
+	public static void saveScreenShot(GLCanvas can, File file)	{
+		saveScreenShot(can, can.getWidth(), can.getHeight(), file);
+	}
 	/**
 	 * @param globalGL
 	 * @param file
 	 */
-	public static void saveScreenShot(GLDrawable drawable, File file) {
+	public static void saveScreenShot(GLDrawable drawable, int width, int height, File file) {
 			 
-			int width = drawable.getSize().width; 
-			int height = drawable.getSize().height; 
 			//TODO figure out why channels = 4 doesn't work: transparency getting written into fb even
 			// though transparency disabled.
 			 int channels = 3;
@@ -717,8 +719,10 @@ public class JOGLRendererHelper {
 			 
 			GL gl = drawable.getGL(); 
 			
-			gl.glReadBuffer(GL.GL_BACK); 
-			gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1); 
+			if (drawable instanceof GLCanvas)	{
+				gl.glReadBuffer(GL.GL_BACK); 
+				gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1); 				
+			}
 			
 			gl.glReadPixels(0, 	// GLint x 
 					0, // GLint y 

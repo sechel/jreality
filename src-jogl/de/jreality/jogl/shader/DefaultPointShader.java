@@ -8,7 +8,7 @@ import java.awt.Color;
 import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
-import net.java.games.jogl.GLCanvas;
+import net.java.games.jogl.GLDrawable;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
@@ -97,7 +97,7 @@ public class DefaultPointShader  implements PointShader {
 	 * @param jpc
 	 */
 	public void render(JOGLRenderer jr) {
-		GLCanvas theCanvas = jr.getCanvas();
+		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		gl.glPointSize((float) getPointSize());
 		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {

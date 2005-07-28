@@ -25,6 +25,7 @@ import net.java.games.jogl.DebugGL;
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
 import net.java.games.jogl.GLDrawable;
+import net.java.games.jogl.GLPbuffer;
 import net.java.games.jogl.GLU;
 import net.java.games.jogl.util.BufferUtils;
 import de.jreality.geometry.LabelSet;
@@ -92,7 +93,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	JOGLPeerComponent thePeerAuxilliaryRoot = null;
 	JOGLRendererHelper helper;
 
-	GLCanvas theCanvas;
+	GLDrawable theCanvas;
+	int width, height;		// GLDrawable.getSize() isnt' implemented for GLPBuffer!
 	int[] currentViewport = new int[4];
 	Graphics3D context;
 	public GL globalGL;
@@ -123,18 +125,21 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	 * @param viewer
 	 */
 	public JOGLRenderer(de.jreality.jogl.Viewer viewer) {
+		this(viewer, ((GLDrawable) viewer.getViewingComponent()));
+		javax.swing.Timer followTimer = new javax.swing.Timer(1000, new ActionListener()	{
+			public void actionPerformed(ActionEvent e) {updateGeometryHashtable(); } } );
+		followTimer.start();
+	}
+	public JOGLRenderer(de.jreality.jogl.Viewer viewer, GLDrawable d) {
 		super();
 		theViewer = viewer;
-		theCanvas = ((GLCanvas) viewer.getViewingComponent());
+		theCanvas = d;
 		theRoot = viewer.getSceneRoot();
 		globalHandle = this;
 		helper = new JOGLRendererHelper();
 		useDisplayLists = true;
 
 		setAuxiliaryRoot(viewer.getAuxiliaryRoot());		
-		javax.swing.Timer followTimer = new javax.swing.Timer(1000, new ActionListener()	{
-			public void actionPerformed(ActionEvent e) {updateGeometryHashtable(); } } );
-		followTimer.start();
 		
 	}
 
@@ -170,7 +175,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		globalGL.glLoadIdentity();
 
 		if (!pickMode)
-			JOGLRendererHelper.handleBackground(theCanvas, theRoot.getAppearance());
+			JOGLRendererHelper.handleBackground(theCanvas, width, height, theRoot.getAppearance());
 		if (pickMode)
 			globalGL.glMultTransposeMatrixd(pickT.getMatrix());
 
@@ -185,7 +190,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		if (backSphere) {  globalGL.glLoadTransposeMatrixd(p3involution);	globalGL.glPushMatrix(); }
 		double[] w2c = context.getWorldToCamera();
 		globalGL.glLoadTransposeMatrixd(w2c);
-		globalIsReflection = (theViewer.isFlipped != (Rn.determinant(w2c) < 0.0));
+		globalIsReflection = (theViewer.isFlipped() != (Rn.determinant(w2c) < 0.0));
 		if (!pickMode) processLights();
 		
 		processClippingPlanes();
@@ -262,10 +267,10 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				}
 			};
 			Timer doIt = new Timer();
-			doIt.schedule(rerenderTask, 10);
 			forceNewDisplayLists();
+			doIt.schedule(rerenderTask, 10);
 			numberTries++;		// don't keep trying indefinitely
-			System.out.println("Textures not resident");
+			JOGLConfiguration.theLog.log(Level.WARNING,"Textures not resident");
 		} else numberTries = 0;
 	}
 
@@ -283,6 +288,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	long[] history = new long[20];
 	long[] clockTime = new long[20];
 	
+	public void setSize(int w, int h)	{
+		width = w; height = h;
+	}
 	/* (non-Javadoc)
 	 * @see net.java.games.jogl.GLEventListener#init(net.java.games.jogl.GLDrawable)
 	 */
@@ -294,7 +302,11 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			theLog.log(Level.WARNING,"New context, same JOGLRenderer. ");
 			//JOGLSphereHelper.disposeSphereDLists(globalGL);
 		}
-		theCanvas = (GLCanvas) drawable;
+		theCanvas = drawable;
+		if (!(theCanvas instanceof GLPbuffer))	{  // workaround in bug in implementation of GLPbuffer
+			width = theCanvas.getSize().width;
+			height = theCanvas.getSize().height;
+		}
 		// it should be possible to set these once and for all, since each context (a GL instance)
 		// gets its own init() call.
 		globalGL = theCanvas.getGL();
@@ -316,7 +328,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		sphereDisplayLists = JOGLSphereHelper.getSphereDLists(this);
 		if (debugGL)	theLog.log(Level.INFO,"Got new sphere display lists for context "+globalGL);
 		
-		if (CameraUtility.getCamera(theViewer) == null || theCanvas == null) return;
+		//if (CameraUtility.getCamera(theViewer) == null || theCanvas == null) return;
 		//CameraUtility.getCamera(theViewer).setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
 		//globalGL.glViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
 
@@ -348,8 +360,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		if (theCamera.isStereo())		{
 			int which = theViewer.getStereoType();
 			if (which == Viewer.CROSS_EYED_STEREO)		{
-				int w = theCanvas.getWidth()/2;
-				int h = theCanvas.getHeight();
+				int w = width/2;
+				int h = height;
 				theCamera.setAspectRatio(((double) w)/h);
 				theCamera.setEye(Camera.RIGHT_EYE);
 				theCamera.update();
@@ -361,8 +373,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				visit();
 			} 
 			else if (which >= Viewer.RED_BLUE_STEREO &&  which <= Viewer.RED_CYAN_STEREO) {
-				theCamera.setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
-				myglViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
+				theCamera.setAspectRatio(((double) width)/height);
+				myglViewport(0,0, width, height);
 				globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 				theCamera.setEye(Camera.RIGHT_EYE);
 		        if (which == Viewer.RED_GREEN_STEREO) globalGL.glColorMask(false, true, false, true);
@@ -376,8 +388,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		        globalGL.glColorMask(true, true, true, true);
 			} 
 			else	{
-				theCamera.setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
-				myglViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
+				theCamera.setAspectRatio(((double)width)/height);
+				myglViewport(0,0, width, height);
 				theCamera.setEye(Camera.RIGHT_EYE);
 				globalGL.glDrawBuffer(GL.GL_BACK_RIGHT);
 				globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
@@ -390,9 +402,11 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		} 
 		else {
 			globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-			theCamera.setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
+			theCamera.setAspectRatio(((double) width)/height);
+			myglViewport(0,0,width, height);
+//			theCamera.setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
 			theCamera.setEye(Camera.MIDDLE_EYE);
-			myglViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
+//			myglViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
 			if (!pickMode)	{
 				// Following code seems to have NO effect: An attempt to render the "back banana"
 //				if (theViewer.getSignature() == Pn.ELLIPTIC )	{
@@ -432,7 +446,11 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				display(drawable);
 			}
 		}
-		if (screenShot)   JOGLRendererHelper.saveScreenShot(theCanvas, screenShotFile);
+		if (screenShot)	{
+			if (theCanvas instanceof GLCanvas) JOGLRendererHelper.saveScreenShot((GLCanvas) theCanvas, screenShotFile);
+			else JOGLConfiguration.theLog.log(Level.WARNING, "Can't find the size of class "+theCanvas.getClass());
+		}
+		
 //		if (++frameCount % 100 == 0) {
 //			long time = System.currentTimeMillis();
 //			framerate = (100000.0/(time-otime));
@@ -456,8 +474,13 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	 * @see net.java.games.jogl.GLEventListener#reshape(net.java.games.jogl.GLDrawable, int, int, int, int)
 	 */
 	public void reshape(GLDrawable arg0,int arg1,int arg2,int arg3,int arg4) {
-		CameraUtility.getCamera(theViewer).setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
-		myglViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
+//		CameraUtility.getCamera(theViewer).setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
+//		myglViewport(0,0, theCanvas.getWidth(), theCanvas.getHeight());
+		//System.out.println("Reshape args are "+arg1+" "+arg2+" "+arg3+" "+arg4);
+		width = arg3-arg1;
+		height = arg4-arg2;
+		CameraUtility.getCamera(theViewer).setAspectRatio(((double) width)/height);
+		myglViewport(0,0, width, height);
 	}
 
 	/**
@@ -837,7 +860,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				int type = POLYGONDL;
 				boolean proxy = geometryShader.polygonShader.providesProxyGeometry();
 				if (proxy && dlInfo.isDisplayListDirty(type))	{
-					//theLog.log(Level.FINER,"Asking "+geometryShader.polygonShader+" for proxy geometry ");
+					theLog.log(Level.FINER,"Asking "+geometryShader.polygonShader+" for proxy geometry ");
 					int dl  = geometryShader.polygonShader.proxyGeometryFor(ils, globalHandle, currentSignature);
 					if (dl != -1) {
 						dlInfo.setDisplayListID(type, dl);
@@ -899,24 +922,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		}
 	}
 	
-//	public void visit(Sphere sg) {
-//		//Primitives.sharedIcosahedron.accept(this);
-//		//double lod = renderingHints.getLevelOfDetail();
-//		SceneGraphComponent helper = null;
-//		JOGLConfiguration.theLog.log(Level.INFO,"Rendering sphere");
-//		//if (lod == 0.0) 
-//			
-//		else	{
-//			double area = GeometryUtility.getNDCArea(sg, gc.getObjectToNDC());
-//			if (area < .01)	helper = SphereHelper.SPHERE_COARSE;
-//			else if (area < .1 ) helper = SphereHelper.SPHERE_FINE;
-//			else if (area < .5) helper = SphereHelper.SPHERE_FINER;
-//			else helper = SphereHelper.SPHERE_FINEST;
-//		}
-//		SphereHelper.SPHERE_FINE.accept(this);
-//		//Rectangle3D uc = Rectangle3D.unitCube;
-//		//SphereHelper.SPHERE_BOUND.accept(this);
-//	}
 	
 	public  JOGLPeerGeometry getJOGLPeerGeometryFor(Geometry g)	{
 		JOGLPeerGeometry pg;
@@ -1502,8 +1507,12 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	/**
 	 * @return
 	 */
-	public GLCanvas getCanvas()	{
+	public GLDrawable getCanvas()	{
 		return theCanvas;
+	}
+
+	public void setCanvas(GLDrawable d)	{
+		theCanvas = d;
 	}
 	/**
 	 * @param file

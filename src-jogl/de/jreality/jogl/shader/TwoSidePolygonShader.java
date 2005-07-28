@@ -46,7 +46,7 @@ public class TwoSidePolygonShader implements PolygonShader {
 	}
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String shaderName) {
 	      front = ShaderLookup.getPolygonShaderAttr(eap, shaderName, "front");
-	      //System.out.println("Front shader is "+front.getClass().toString());
+	      LoggingSystem.getLogger(this).log(Level.FINER,"Front shader is "+front.getClass().toString());
 	      front.setFrontBack(DefaultPolygonShader.FRONT);
 	      back = ShaderLookup.getPolygonShaderAttr(eap, shaderName, "back");
 	      back.setFrontBack(DefaultPolygonShader.BACK);
@@ -57,16 +57,18 @@ public class TwoSidePolygonShader implements PolygonShader {
 	}
 
 	public boolean providesProxyGeometry() {
-		//LoggingSystem.getLogger(this).log(Level.INFO,"Front has proxy: "+front.providesProxyGeometry());
+		LoggingSystem.getLogger(this).log(Level.FINER,"Front has proxy: "+front.providesProxyGeometry());
 		if (front != null) return front.providesProxyGeometry();
 		return false;
 	}
 
 	public  int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig) {
 		int dp = 0;
-		if (front != null) dp = front.proxyGeometryFor(original, jr, sig);
-		//LoggingSystem.getLogger(this).log(Level.INFO,"Providing dl "+dp);
-		if (front != null) return dp;
+		if (front != null) {
+			dp = front.proxyGeometryFor(original, jr, sig);
+			LoggingSystem.getLogger(this).log(Level.FINER,"Providing dl "+dp);
+			return dp;
+		}
 		return  -1;
 	}
 

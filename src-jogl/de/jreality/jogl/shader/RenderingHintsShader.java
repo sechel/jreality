@@ -7,7 +7,7 @@ package de.jreality.jogl.shader;
 import javax.swing.JPanel;
 
 import net.java.games.jogl.GL;
-import net.java.games.jogl.GLCanvas;
+import net.java.games.jogl.GLDrawable;
 
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.Appearance;
@@ -111,7 +111,7 @@ public class RenderingHintsShader  {
 		return backFaceCullingEnabled;
 	}
 	public void render(JOGLRenderer jr)	{
-		GLCanvas theCanvas = jr.getCanvas();
+		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		//gl.glDisable(GL.GL_TEXTURE_2D);
 		//gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
@@ -150,7 +150,7 @@ public class RenderingHintsShader  {
 	}
 
 	public void postRender(JOGLRenderer jr)	{
-		GLCanvas theCanvas = jr.getCanvas();
+		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		if (transparencyEnabled)	{
 			  gl.glDepthMask(true);

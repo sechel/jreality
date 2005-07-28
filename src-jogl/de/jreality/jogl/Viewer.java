@@ -6,6 +6,7 @@ package de.jreality.jogl;
 
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 
@@ -16,6 +17,7 @@ import net.java.games.jogl.GLCapabilitiesChooser;
 import net.java.games.jogl.GLDrawable;
 import net.java.games.jogl.GLDrawableFactory;
 import net.java.games.jogl.GLEventListener;
+import net.java.games.jogl.GLPbuffer;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Drawable;
 import de.jreality.scene.SceneGraphComponent;
@@ -36,7 +38,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	public GLCanvas canvas;
 	JOGLRenderer renderer;
 	int signature;
-	boolean isFlipped = false;			// LH Coordinate system?
+	boolean isFlipped = false;
 	static GLCanvas firstOne = null;		// for now, all display lists shared with this one
 	public int getSignature() {
 		return signature;
@@ -104,9 +106,9 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		if (renderer != null) renderer.setAuxiliaryRoot(auxiliaryRoot);
 	}
 	public void addAuxiliaryComponent(SceneGraphComponent aux)	{
-//		if (auxiliaryRoot == null)	{
-//			auxiliaryRoot = SceneGraphUtilities.createFullSceneGraphComponent("AuxiliaryRoot");
-//		}
+		if (auxiliaryRoot == null)	{
+			setAuxiliaryRoot(SceneGraphUtilities.createFullSceneGraphComponent("AuxiliaryRoot"));
+		}
 		if (!auxiliaryRoot.isDirectAncestor(aux)) auxiliaryRoot.addChild(aux);
 	}
 	
@@ -182,16 +184,16 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 				return canvas.getWidth()/((double) canvas.getHeight());
 			}
 			public int getWidth()	{
-				return renderer.getWidth();
+				return canvas.getWidth();
 			}
 			public int getHeight()	{
-				return renderer.getHeight();
+				return canvas.getHeight();
 			}
 			public int getXMin()	{
-				return renderer.getXMin();
+				return canvas.getX();
 			}
 			public int getYMin()	{
-				return renderer.getYMin();
+				return canvas.getY();
 			}
 		};
 	}
@@ -228,25 +230,96 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	      return selection;
 	    }
 	  }
-	private void initializeFrom(SceneGraphComponent r, SceneGraphPath p)	{
+
+	  private void initializeFrom(SceneGraphComponent r, SceneGraphPath p)	{
 		setSceneRoot(r);
 		setCameraPath(p);
 		GLCapabilities caps = new GLCapabilities();
+		caps.setAlphaBits(8);
 		if (JOGLConfiguration.multiSample)	{
 			GLCapabilitiesChooser chooser = new MultisampleChooser();
 			caps.setSampleBuffers(true);
 			caps.setNumSamples(4);
 			canvas = GLDrawableFactory.getFactory().createGLCanvas(caps, chooser, firstOne);
 		} else {
-			GLCapabilities capabilities = new GLCapabilities();
-			canvas = GLDrawableFactory.getFactory().createGLCanvas(capabilities, null, firstOne);			
+			canvas = GLDrawableFactory.getFactory().createGLCanvas(caps, null, firstOne);			
 		}
+        JOGLConfiguration.getLogger().log(Level.INFO, "Caps is "+caps.toString());
 		canvas.addGLEventListener(this);
 		canvas.requestFocus();
-		//renderer =  new JOGLRenderer(this); 
 		if (JOGLConfiguration.sharedContexts && firstOne == null) firstOne = canvas;
 	}
 
+	  public void renderScreen(File file)	{
+	  	if (renderer != null) renderer.saveScreenShot(file);
+	  	else JOGLConfiguration.getLogger().log(Level.WARNING,"Renderer not initialized");
+	  }
+	  GLPbuffer pbuffer = null;
+	  File pbufferFile = null;
+	  public void renderOffscreen(int w, int h,final File file)	{
+        boolean supported = canvas.canCreateOffscreenDrawable();
+        GLCapabilities caps = new GLCapabilities();
+        // doesn't seem to support anti-aliasing; just creates junk
+//		caps.setSampleBuffers(true);
+//		caps.setNumSamples(4);
+        //caps.setOffscreenRenderToTexture(true);
+        caps.setDoubleBuffered(false); 
+        JOGLConfiguration.getLogger().log(Level.INFO, "Caps is "+caps.toString());
+        if(!supported) 
+        {
+        	JOGLConfiguration.getLogger().log(Level.WARNING,"PBuffers not supported");
+              return;
+        }
+        final int width;
+        if (w > 2048)	{
+           	JOGLConfiguration.getLogger().log(Level.WARNING,"Width being truncated to 2048");
+           	width = 2048;
+        } else width = w;
+        final int height;
+        if (h > 2048)	{
+           	JOGLConfiguration.getLogger().log(Level.WARNING,"Height being truncated to 2048");
+           	height = 2048;
+        } else height = w;
+        pbufferFile = file;       
+        pbuffer = canvas.createOffscreenDrawable(caps, width, height);
+        pbuffer.addGLEventListener(new  GLEventListener() {
+        		boolean done = false;
+			public void init(GLDrawable arg0) {
+	        	JOGLConfiguration.getLogger().log(Level.INFO,"PBuffer init");
+				
+			}
+
+			public void display(GLDrawable arg0) {
+				if (done) return;
+			   	JOGLConfiguration.getLogger().log(Level.INFO,"PBuffer display");
+			   	//JOGLRenderer renderer = new JOGLRenderer(me, pbuffer);
+			   	// have to set the rendering size since the jogl implementations of GLPbuffer
+			   	// don't implement getSize() (!!)
+			   	// we piggyback on the canvas's renderer.  To be safe, we need to put a lock around the
+			   	// following 3 lines of code.
+			   	renderer.setSize(width, height);
+			   	renderer.display(arg0);
+			   	renderer.setSize(canvas.getWidth(), canvas.getHeight());
+			   	JOGLRendererHelper.saveScreenShot(pbuffer,width, height, file);
+			   	done = true;
+			   	disposePBuffer();
+			}
+
+			public void reshape(GLDrawable arg0, int arg1, int arg2, int arg3, int arg4) {
+			   	JOGLConfiguration.getLogger().log(Level.INFO,"PBuffer reshape");
+			}
+
+			public void displayChanged(GLDrawable arg0, boolean arg1, boolean arg2) {
+			   	JOGLConfiguration.getLogger().log(Level.INFO,"PBuffer displayChanged");
+			}
+        });
+        System.err.println("Pbuffer created"); 
+ 	    JOGLConfiguration.getLogger().log(Level.INFO,"Pbuffer is initialized: "+pbuffer.isInitialized());
+	  }
+	  public void disposePBuffer()	{
+	  	pbuffer = null;
+	  	pbufferFile = null;
+	  }
 	/**
 	 * @return
 	 */
@@ -260,6 +333,9 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	 */
 	public void display(GLDrawable arg0) {
 		renderer.display(arg0);
+		if (pbuffer != null) {
+			pbuffer.display();
+		}
 	}
 
 	/* (non-Javadoc)
@@ -357,4 +433,5 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	public void setFlipped(boolean isFlipped) {
 		this.isFlipped = isFlipped;
 	}
+
 }

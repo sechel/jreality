@@ -60,7 +60,7 @@ public class Texture2DLoaderJOGL {
 	 * @param theCanvas
 	 * @param tex
 	 */
-	public static void render(GLCanvas drawable, de.jreality.scene.Texture2D tex) {
+	public static void render(GLDrawable drawable, de.jreality.scene.Texture2D tex) {
 //        render(drawable, tex, 0);
 //    }
 //  public static void render(GLCanvas drawable, Texture2D tex, int level) {
@@ -155,7 +155,7 @@ public class Texture2DLoaderJOGL {
   }
 
 	public static void render(JOGLRenderer jr, de.jreality.scene.ReflectionMap ref) {
-		GLCanvas drawable = jr.getCanvas();
+		GLDrawable drawable = jr.getCanvas();
 		boolean first = true;
 		boolean mipmapped = true;
 		GL gl = drawable.getGL();
@@ -220,19 +220,9 @@ public class Texture2DLoaderJOGL {
 				}
 	}
 
-  public static void deleteTexture(Object tex, GL gl)  {
-    WeakHashMap ht = (WeakHashMap) lookupFromGL.get(gl);
-    if (ht == null) return;
-    Integer which = (Integer) ht.get(tex);
-    if (which == null) return;
-    int[] list = new int[1];
-    list[0] = which.intValue();
-    gl.glDeleteTextures(1, list);
-  }
-
-  /******************* new Textures *******************/
+   /******************* new Textures *******************/
   
-  public static void render(GLCanvas drawable, Texture2D tex) {
+  public static void render(GLDrawable drawable, Texture2D tex) {
     //  render(drawable, tex, 0);
     //}
     //public static void render(GLCanvas drawable, Texture2D tex, int level) {
@@ -269,7 +259,7 @@ public class Texture2DLoaderJOGL {
             g.glDeleteTextures(1, new int[]{id.intValue()});
           }
        }
-        LoggingSystem.getLogger(Texture2DLoaderJOGL.class).info("creating texture... "+tex);
+        LoggingSystem.getLogger(Texture2DLoaderJOGL.class).info("creating texture... ");
       }
       // create the texture ID for this texture
       if (textureID == -1) textureID = createTextureID(gl);
@@ -312,7 +302,7 @@ public class Texture2DLoaderJOGL {
   } 
 
   public static void render(JOGLRenderer jr, ReflectionMap ref) {
-    GLCanvas drawable = jr.getCanvas();
+    GLDrawable drawable = jr.getCanvas();
     boolean first = true;
     boolean mipmapped = true;
     GL gl = drawable.getGL();
@@ -467,6 +457,18 @@ public class Texture2DLoaderJOGL {
 			deleteTexture(tex2d, gl);
 		}
 	}
+
+	 public static void deleteTexture(Object tex, GL gl)  {
+	    WeakHashMap ht = (WeakHashMap) lookupFromGL.get(gl);
+	    if (ht == null) return;
+	    Integer which = (Integer) ht.get(tex);
+	    if (which == null) return;
+	    int[] list = new int[1];
+	    list[0] = which.intValue();
+	    JOGLConfiguration.theLog.info("Deleting texture2d ID "+list[0]);
+	    gl.glDeleteTextures(1, list);
+	  }
+
 
 }
 

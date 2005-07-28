@@ -7,6 +7,7 @@ package de.jreality.jogl;
 
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
+import net.java.games.jogl.GLDrawable;
 
 /**
  * @author gunn
@@ -44,7 +45,7 @@ public class OpenGLState {
 		else		gl.glShadeModel(GL.GL_FLAT);
 		
 		if (flipped) gl.glFrontFace( GL.GL_CCW);
-		else 		gl.glFrontFace( GL.GL_CCW);
+		else 		gl.glFrontFace( GL.GL_CW);
 		gl.glEnable(GL.GL_COLOR_MATERIAL);
 		gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
 	}
@@ -59,7 +60,7 @@ public class OpenGLState {
 		 */
 		// ultimately all this should happen in various visit() methods
 		public  static void initializeGLState(JOGLRenderer jr)	{
-			GLCanvas theCanvas = jr.getCanvas();
+			GLDrawable theCanvas = jr.getCanvas();
 			GL gl = theCanvas.getGL();
 			OpenGLState openGLState = jr.openGLState;
 			// set drawing color and point size
@@ -74,13 +75,11 @@ public class OpenGLState {
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE);
 			float[] white = {1f, 1f, 1f, 1f};
 			gl.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, white );
+			float[] amb = {0f, 0f, 0f};
+			float[] spec = {.5f, .5f, .5f};
+			gl.glMaterialfv(openGLState.frontBack, GL.GL_AMBIENT, amb);
+			gl.glMaterialfv(openGLState.frontBack, GL.GL_SPECULAR, spec);
+			gl.glMaterialf(openGLState.frontBack, GL.GL_SHININESS, 60f);
 			openGLState.render(gl);
 		}
-		// for converting double arrays to native buffers:
-	//	static ByteBuffer bb = ByteBuffer.allocateDirect(444/* array.length*8 */).order(ByteOrder.nativeOrder());
-	//	bb.asDoubleBuffer().put(array);
-	//	bb.flip();
-	//	
-	//	gl.glVertexPointer(3, GL.GL_DOUBLE, 8*3, bb);
-		// can re-use after checking that it's long enough, use some method to reallocate
 }

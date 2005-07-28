@@ -35,11 +35,13 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 		return implodeFactor;
 	}
 	public boolean providesProxyGeometry() {		
-		if (implodeFactor == 0.0) return false;
+		//if (implodeFactor == 0.0) return false;
 		return true;
 	}
 	public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig) {
+		if (!(original instanceof IndexedFaceSet)) return -1;
 		GL gl = jr.globalGL;
+		//JOGLConfiguration.theLog.log(Level.INFO,this+"Providing proxy geometry "+implodeFactor);
 		IndexedFaceSet ifs =  IndexedFaceSetUtility.implode((IndexedFaceSet) original, implodeFactor);
 		double alpha = vertexShader == null ? 1.0 : vertexShader.getDiffuseColorAsFloat()[3];
 		int implodeDL = gl.glGenLists(1);

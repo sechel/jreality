@@ -16,6 +16,7 @@ import de.jreality.util.EffectiveAppearance;
 
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
+import net.java.games.jogl.GLDrawable;
 import net.java.games.jogl.GLU;
 
 /**
@@ -38,7 +39,7 @@ public abstract class AbstractJOGLShader implements PolygonShader {
 		super();
 	}
 
-	public void setupShader(GLCanvas theCanvas)	{
+	public void setupShader(GLDrawable theCanvas)	{
 		if (theCanvas == null)	{
 			return;
 		}
@@ -84,7 +85,7 @@ public abstract class AbstractJOGLShader implements PolygonShader {
 		activate(jr.getCanvas());
 	}
 	
-	public void activate(GLCanvas theCanvas)	{
+	public void activate(GLDrawable theCanvas)	{
 		GL gl = theCanvas.getGL();
 		if (program == -1)	{
 			setupShader(theCanvas);
@@ -94,11 +95,11 @@ public abstract class AbstractJOGLShader implements PolygonShader {
 		JOGLConfiguration.theLog.log(Level.FINE,"Setting GLSL program to "+program);
 	}
 	
-	public void deactivate(GLCanvas theCanvas)	{
+	public void deactivate(GLDrawable theCanvas)	{
 		GL gl = theCanvas.getGL();
 		// TODO how to deactivate a shader?
 	}
-	private void printInfoLog(int objectHandle, GLCanvas theCanvas)	{
+	private void printInfoLog(int objectHandle, GLDrawable theCanvas)	{
 		GL gl = theCanvas.getGL();
 		
 		int[] logLength = new int[1];
