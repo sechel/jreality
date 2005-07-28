@@ -22,7 +22,13 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.shader.Texture2D;
+import de.jreality.util.AttributeEntityFactory;
 import de.jreality.util.ConfigurationAttributes;
+import de.jreality.util.ImageData;
+import de.jreality.util.Matrix;
+import de.jreality.util.MatrixBuilder;
+import de.jreality.util.P3;
 import de.jreality.util.Pn;
 import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
@@ -162,7 +168,7 @@ public class TestTubes extends AbstractJOGLLoadableScene {
 		   ap1.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.RED);
 		   //QuadMeshShape qms = TubeUtility.makeTubeAsIFS(form, .04, null, TubeUtility.PARALLEL, true, Pn.EUCLIDEAN);
 		   //GeometryUtility.calculateAndSetNormals(qms);	   	
-		   IndexedLineSet croxl = IndexedFaceSetUtility.createCurveFromPoints(form, true);
+		   IndexedLineSet croxl = IndexedLineSetUtility.createCurveFromPoints(form, true);
 		   globeNode2.setGeometry(croxl);
 		   globeNode.addChild(globeNode2);
 	   }
@@ -185,8 +191,11 @@ public class TestTubes extends AbstractJOGLLoadableScene {
 	   		for (int i = 0; i<4; ++i)	{ 
 	   			BezierPatchMesh bpm = new BezierPatchMesh(2, 3, tubePoints);
 		   		for (int j = 1; j<= i; ++j)	bpm.refine();
-		   		QuadMeshShape qmpatch = QuadMeshUtility.representBezierPatchMeshAsQuadMesh(bpm);	   
+		   		QuadMeshShape qmpatch = QuadMeshUtility.representBezierPatchMeshAsQuadMesh(bpm);	 
+		   		GeometryUtility.calculateAndSetTextureCoordinates(qmpatch);
 		   		SceneGraphComponent sgc = SceneGraphUtilities.createFullSceneGraphComponent("selection child "+i);
+		   		sgc.setAppearance(makeTextureAppearance(5d,35d));
+		 	   sgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
 		   		sgc.setGeometry(qmpatch);	   
 		   		parent.addChild(sgc);
 	   		}
@@ -241,5 +250,58 @@ public class TestTubes extends AbstractJOGLLoadableScene {
 		System.arraycopy(colors[nPts-2], 0, colors[nPts-1], 0, 3);
 		ils.setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(colors));
 	}
+
+	int size = 64;
+	int margin = size/16;
+	int bandwidth = 16;
+	int gapwidth =16;
+	int shwd = 2;
+	int onewidth = 32;
+	int iband, jband, imod, jmod;
+	int which;
+	byte[] im = new byte[size*size* 4];
+	byte[][] colors = {{(byte)0x0,(byte)0x0,(byte)0x0,(byte)0x0},
+	{(byte)200,(byte)200,(byte)200,(byte)0xff},
+	{(byte)255,(byte)255,(byte)255,(byte)255},
+	{(byte)0,(byte)0, (byte) 0, (byte) 255}};
+	public Appearance makeTextureAppearance(double n, double m) 	{
+	    for (int i = 0; i<size; ++i)	{
+	        iband = i/onewidth;
+	        imod = i%onewidth;
+	        for (int j = 0; j< size; ++j)	{
+		int where = 4*(i*size+j);
+		jband = j /onewidth;
+		jmod = j%onewidth;
+		int q = 2*(iband)+jband;
+		if (imod > bandwidth && jmod > bandwidth) which = 0;
+		else {
+		    if (imod <= bandwidth && jmod <= bandwidth)	{
+		        if (q == 0 || q == 3) which = 1;
+		        else which = 2;
+		    } else if (jmod > bandwidth) {
+		        which = 1;
+		        if ((q == 0 || q == 3)&& jmod > (onewidth - shwd)) which = 3;
+		        if ((q == 1 || q == 2) && jmod < (bandwidth + shwd)) which = 3;
+		    } else if (imod > bandwidth) {
+	 	        which = 2;
+		        if ((q == 1 || q == 2)&& imod > (onewidth - shwd)) which = 3;
+		        if ((q == 0 || q ==3) && imod < (bandwidth + shwd)) which = 3;
+		    }
+		}
+		System.arraycopy(colors[which],0,im,where,4);
+		}
+	    }
+	    ImageData it = new ImageData(im,size,size);
+	    Appearance ap =new Appearance();
+	    Texture2D tex2d = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, "polygonShader.texture2d", ap);	
+	    Matrix mat = new Matrix();
+	    MatrixBuilder.euclidian().rotateZ(Math.PI/4.0).scale(n,m,1.0).assignTo(mat);
+	    tex2d.setTextureMatrix(mat);
+        tex2d.setImage(it);
+        tex2d.setRepeatS(Texture2D.GL_REPEAT);
+        tex2d.setRepeatT(Texture2D.GL_REPEAT);
+        return ap;
+     }
+
 
 }

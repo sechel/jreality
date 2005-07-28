@@ -33,9 +33,12 @@ public class TestSphereDrawing extends AbstractJOGLLoadableScene {
 		Appearance ap1 = root.getAppearance();
 		ap1.setAttribute(CommonAttributes.FACE_DRAW, true);
 		ap1.setAttribute(CommonAttributes.VERTEX_DRAW, true);
-		ap1.setAttribute(CommonAttributes.POLYGON_SHADER, "implode");
-		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new Color(0,204,204));
+		ap1.setAttribute(CommonAttributes.POLYGON_SHADER,"twoSide");
+		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+".front", "implode");
+		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+".front."+CommonAttributes.DIFFUSE_COLOR, new Color(0,204,204));
+		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+".back."+CommonAttributes.DIFFUSE_COLOR, new Color(204,204,0));
 		ap1.setAttribute(CommonAttributes.POLYGON_SHADER+".implodeFactor", -.6);
+		//ap1.setAttribute(CommonAttributes.POLYGON_SHADER+".vertexShader", "simple");
 		ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, true);
 		ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, .006);
 		ap1.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new Color(210, 150, 0));
@@ -109,5 +112,6 @@ public class TestSphereDrawing extends AbstractJOGLLoadableScene {
 			}
 		});
 	}
+	
 }
 
