@@ -278,7 +278,12 @@ public class Test implements KeyListener {
 
         TestScenarioBuilder tstBuilder =new TestScenarioBuilder();
         SceneGraphComponent s = tstBuilder.createFourCatenoids();
-        catenoid =(CatenoidHelicoid) s.getChildComponent(0).getChildComponent(0).getGeometry();
+        //currently jogl backend requires unique geometries to get the proxy geometry right
+        for (int i = 1; i<4; ++i)  {
+        		s.getChildComponent(i).getChildComponent(0).setGeometry(tstBuilder.createCatenoid());
+           	s.getChildComponent(i).getChildComponent(0).removeChild(s.getChildComponent(i).getChildComponent(0).getChildComponent(0));
+        }
+        //catenoid =(CatenoidHelicoid) s.getChildComponent(0).getChildComponent(0).getGeometry();
         //System.out.println("catenoid" + catenoid);
         catNode.addChild(s);
         

@@ -50,7 +50,7 @@ public class TestScenarioBuilder extends SceneBuilder {
       return current();
   }
 
-  protected Geometry createCatenoid() {
+  public Geometry createCatenoid() {
     CatenoidHelicoid c =new CatenoidHelicoid(20);
     c.setAlpha(Math.PI/2);
     GeometryUtility.calculateAndSetFaceNormals(c); 
@@ -152,13 +152,12 @@ public class TestScenarioBuilder extends SceneBuilder {
       a.setAttribute(CommonAttributes.VERTEX_DRAW, false);
       
       a.setAttribute(CommonAttributes.POLYGON_SHADER+".front", "implode");
-      a.setAttribute(CommonAttributes.POLYGON_SHADER+".front.implodeFactor", -.5);
-      String fs = CommonAttributes.POLYGON_SHADER+".front.";
-      a.setAttribute(fs+CommonAttributes.DIFFUSE_COLOR, new Color(.8f,.5f,.0f));
+      a.setAttribute(CommonAttributes.POLYGON_SHADER+".front.implodeFactor", -.3);
+      a.setAttribute(CommonAttributes.POLYGON_SHADER+".front"+CommonAttributes.DIFFUSE_COLOR, new Color(.8f,.5f,.0f));
       //a.setAttribute(fs+CommonAttributes.TRANSPARENCY, .3);
       
       a.setAttribute(CommonAttributes.POLYGON_SHADER+".back", "default");
-      String bs = CommonAttributes.POLYGON_SHADER+".back.";
+    String bs = CommonAttributes.POLYGON_SHADER+".back.";
       a.setAttribute(bs+CommonAttributes.DIFFUSE_COLOR, new Color(.0f,.5f,.8f));
       
       a =new Appearance();
