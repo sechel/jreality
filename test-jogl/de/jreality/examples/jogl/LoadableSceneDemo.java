@@ -27,7 +27,7 @@ public class LoadableSceneDemo extends InteractiveViewerDemo {
 	 */
 	public LoadableSceneDemo(boolean b) {
 		
-		super(true);
+		super( b);
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class LoadableSceneDemo extends InteractiveViewerDemo {
 //		System.out.println(net.java.games.jogl.impl.NativeLibLoader.class.getClassLoader());
 //
 		JOGLConfiguration.theLog.log(Level.INFO, System.getProperty("java.library.path"));
-		LoadableSceneDemo iv = new LoadableSceneDemo();//InteractiveViewerDemo.SPLIT_PANE, false);
+		LoadableSceneDemo iv = new LoadableSceneDemo(false);//InteractiveViewerDemo.SPLIT_PANE, false);
 		iv.initializeScene();
 		if (args != null && args.length > 0) iv.loadScene(args[0]);
 		else iv.loadScene("de.jreality.worlds.AnimationDemo");

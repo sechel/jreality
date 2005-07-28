@@ -10,6 +10,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
@@ -30,6 +32,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
+import javax.swing.SwingConstants;
 import javax.swing.ToolTipManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -38,6 +41,7 @@ import de.jreality.jogl.FramedCurveInspector;
 import de.jreality.jogl.HandleTreeSelection;
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.jogl.JOGLConfiguration;
+import de.jreality.jogl.inspection.FancySlider;
 import de.jreality.reader.Readers;
 import de.jreality.renderman.RIBViewer;
 import de.jreality.scene.Appearance;
@@ -295,6 +299,7 @@ public class InteractiveViewerDemo extends JFrame{
 		if (inspectorPanel != null) {
 			getContentPane().add(inspectorPanel, BorderLayout.SOUTH);
 		}
+		getContentPane().add(getInspector(), BorderLayout.SOUTH);
 		setVisible(true);
 		repaint();
 		viewer.render();
@@ -323,6 +328,13 @@ public class InteractiveViewerDemo extends JFrame{
 	jcc.addActionListener( new ActionListener() {
 		public void actionPerformed(ActionEvent e)	{
 			saveToFile();
+		}
+	});
+	jcc = new JMenuItem("Save Offscreen...");
+	fileM.add(jcc);
+	jcc.addActionListener( new ActionListener() {
+		public void actionPerformed(ActionEvent e)	{
+			saveOffscreen();
 		}
 	});
 	jcc = new JMenuItem("Save RIB...");
@@ -440,12 +452,28 @@ public class InteractiveViewerDemo extends JFrame{
 		viewer.getSelectionManager().setSelection(sgp);
 		viewer.render();
 	}
-	protected void saveToFile() {
-		SceneGraphComponent parent= null;
+	/**
+	 * 
+	 */
+	int width=2048, height=1536;
+	protected void saveOffscreen() {
 		JFileChooser fc = new JFileChooser(JOGLConfiguration.saveResourceDir);
 		//JOGLConfiguration.theLog.log(Level.INFO,"FCI resource dir is: "+resourceDir);
 		int result = fc.showSaveDialog(this);
-		SceneGraphComponent sgc = null;
+		if (result == JFileChooser.APPROVE_OPTION)	{
+			File file = fc.getSelectedFile();
+			viewer.renderOffscreen(width, height, file);
+			JOGLConfiguration.saveResourceDir = file.getAbsolutePath();
+		} else {
+			JOGLConfiguration.theLog.log(Level.WARNING,"Unable to open file");
+			return;
+		}
+		viewer.render();		
+	}
+	protected void saveToFile() {
+		JFileChooser fc = new JFileChooser(JOGLConfiguration.saveResourceDir);
+		//JOGLConfiguration.theLog.log(Level.INFO,"FCI resource dir is: "+resourceDir);
+		int result = fc.showSaveDialog(this);
 		if (result == JFileChooser.APPROVE_OPTION)	{
 			File file = fc.getSelectedFile();
 			viewer.getRenderer().saveScreenShot(file);
@@ -590,7 +618,38 @@ public class InteractiveViewerDemo extends JFrame{
 		
 		return lights;
 	}
-    public static void main(String[] args) throws Exception {
+	public Component getInspector() {
+		Box container = Box.createVerticalBox();
+		FancySlider aSlider = new FancySlider.Integer("w",  SwingConstants.HORIZONTAL,0, 4096, width);
+	    aSlider.textField.addPropertyChangeListener(new PropertyChangeListener()	{
+		    public void propertyChange(PropertyChangeEvent e) {
+		        if ("value".equals(e.getPropertyName())) {
+		            Number value = (Number)e.getNewValue();
+		            if (value != null) {
+		                width = value.intValue();
+		            }
+		        }
+		    }	       	
+	       });
+		container.add(aSlider);
+		FancySlider bSlider = new FancySlider.Integer("h",  SwingConstants.HORIZONTAL, 0, 4096, height);
+	    bSlider.textField.addPropertyChangeListener(new PropertyChangeListener()	{
+		    public void propertyChange(PropertyChangeEvent e) {
+		        if ("value".equals(e.getPropertyName())) {
+		            Number value = (Number)e.getNewValue();
+		            if (value != null) {
+		                height=value.intValue();
+		            }
+		        }
+		    }	       	
+	       });
+		container.add(bSlider);
+
+		container.add(Box.createVerticalGlue());
+		return container;
+	}
+
+   public static void main(String[] args) throws Exception {
     		InteractiveViewerDemo iv = new InteractiveViewerDemo();
     		String loadableScene = "de.jreality.worlds.TestSphereDrawing";
     		if (args != null && args.length > 0) {
