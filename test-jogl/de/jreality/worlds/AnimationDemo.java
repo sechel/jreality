@@ -14,7 +14,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.Timer;
 
-import de.jreality.geometry.SphereHelper;
+import de.jreality.geometry.SphereUtility;
 import de.jreality.jogl.anim.AnimationUtility;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
@@ -47,14 +47,14 @@ public class AnimationDemo extends 	AbstractJOGLLoadableScene  {
 	
 	public SceneGraphComponent makeWorld()	{
 		c1 = SceneGraphUtilities.createFullSceneGraphComponent("c1");
-		c1.addChild(SphereHelper.tessellatedCubes[9]);
+		c1.addChild(SphereUtility.tessellatedCubes[9]);
 		c2 = SceneGraphUtilities.createFullSceneGraphComponent("c2");
-		c2.addChild(SphereHelper.tessellatedCubes[9]);
+		c2.addChild(SphereUtility.tessellatedCubes[9]);
 		c2.getTransformation().setTranslation(2d,0d,0d);
 		c2.getTransformation().setStretch(.8d, .8d, .5d);
 		c2.getTransformation().setRotation(Math.PI/3.0, 1d, 1d, 1d);
 		ct = SceneGraphUtilities.createFullSceneGraphComponent("ct");
-		ct.addChild(SphereHelper.tessellatedCubes[9]);
+		ct.addChild(SphereUtility.tessellatedCubes[9]);
 		theWorld = SceneGraphUtilities.createFullSceneGraphComponent("theWorld");
 		theWorld.addChild(c1);
 		theWorld.addChild(c2);

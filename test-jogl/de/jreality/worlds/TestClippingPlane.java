@@ -16,7 +16,7 @@ import javax.swing.JMenuBar;
 import javax.swing.Timer;
 
 import de.jreality.geometry.IndexedFaceSetUtility;
-import de.jreality.geometry.SphereHelper;
+import de.jreality.geometry.SphereUtility;
 import de.jreality.jogl.FramedCurve;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
@@ -154,7 +154,7 @@ public class TestClippingPlane extends AbstractJOGLLoadableScene {
 			cp.addChild(cp2);
 			
 			SceneGraphComponent sgc = SceneGraphUtilities.createFullSceneGraphComponent("sphere");
-			sgc.addChild(SphereHelper.SPHERE_SUPERFINE);
+			sgc.addChild(SphereUtility.SPHERE_SUPERFINE);
 			//sgc.setGeometry(new Sphere());
 			sgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.GREEN);
 			ap1 = sgc.getAppearance();

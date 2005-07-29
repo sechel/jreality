@@ -9,14 +9,14 @@ import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
 import de.jreality.geometry.QuadMeshShape;
-import de.jreality.geometry.SphereHelper;
+import de.jreality.geometry.SphereUtility;
 import de.jreality.util.CameraUtility;
 
 /**
  * @author gunn
  *
  */
-public class JOGLSphereHelper extends SphereHelper {
+public class JOGLSphereHelper extends SphereUtility {
 
 	static boolean sharedDisplayLists = JOGLConfiguration.sharedContexts;
 	static WeakHashMap sphereDListsTable = new WeakHashMap();
@@ -29,7 +29,7 @@ public class JOGLSphereHelper extends SphereHelper {
 //			JOGLConfiguration.theLog.log(Level.WARNING,"Already have sphere display lists for this renderer "+jr);
 //		}
 		GL gl = jr.getCanvas().getGL();
-		int n = SphereHelper.tessellatedIcosahedra.length;
+		int n = SphereUtility.tessellatedIcosahedra.length;
 		dlists = null;
 		//if (!sharedDisplayLists)	dlists = (int[] ) sphereDListsTable.get(gl);
 		//else 
@@ -39,10 +39,10 @@ public class JOGLSphereHelper extends SphereHelper {
 			dlists[i] = gl.glGenLists(1);
 			gl.glNewList(dlists[i], GL.GL_COMPILE);
 			//gl.glDisable(GL.GL_SMOOTH);
-			QuadMeshShape qms = SphereHelper.cubePanels[i];
-			for (int j = 0; j<SphereHelper.cubeSyms.length; ++j)	{
+			QuadMeshShape qms = SphereUtility.cubePanels[i];
+			for (int j = 0; j<SphereUtility.cubeSyms.length; ++j)	{
 				gl.glPushMatrix();
-				gl.glMultTransposeMatrixd(SphereHelper.cubeSyms[j].getMatrix());
+				gl.glMultTransposeMatrixd(SphereUtility.cubeSyms[j].getMatrix());
 				JOGLRendererHelper.drawFaces(qms,jr, true, 1.0);
 				gl.glPopMatrix();
 			}				

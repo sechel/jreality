@@ -28,10 +28,9 @@ import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import de.jreality.geometry.*;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.Torus;
-import de.jreality.geometry.TriangleSet;
-import de.jreality.geometry.TriangulateNonConvexPolygons;
 import de.jreality.renderman.RIBViewer;
 import de.jreality.scene.*;
 import de.jreality.scene.IndexedFaceSet;
@@ -66,7 +65,7 @@ static {
     fs.setFaceCountAndAttributes(Attribute.INDICES,StorageModel.INT_ARRAY_ARRAY.createReadOnly(new int[][] {face0,face1,face2}));
     fs.buildEdgesFromFaces();
     GeometryUtility.calculateAndSetFaceNormals(fs);
-    TriangleSet ts = TriangulateNonConvexPolygons.triangulate(fs);
+    IndexedFaceSet ts = IndexedFaceSetUtility.triangulate(fs);
     
     logo = new SceneGraphComponent();
     SceneGraphComponent cpc = new SceneGraphComponent();

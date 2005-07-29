@@ -12,7 +12,7 @@ import java.util.logging.Level;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
-import de.jreality.geometry.SphereHelper;
+import de.jreality.geometry.SphereUtility;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
@@ -261,7 +261,7 @@ public class SelectionManager implements TransformationListener {
 			// TODO implement bounding box business
 			if (sgn instanceof SceneGraphComponent) bbox = GeometryUtility.calculateChildrenBoundingBox((SceneGraphComponent) sgn);
 			else if (sgn instanceof PointSet) bbox = GeometryUtility.calculateBoundingBox( (PointSet) sgn);
-			else if (sgn instanceof Sphere) bbox = SphereHelper.getSphereBoundingBox();
+			else if (sgn instanceof Sphere) bbox = SphereUtility.getSphereBoundingBox();
 			else {
 				JOGLConfiguration.theLog.log(Level.WARNING,"Unknown selection class: "+sgn.getClass().toString());
 				return selectionKit;

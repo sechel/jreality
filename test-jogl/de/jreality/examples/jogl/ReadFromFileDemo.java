@@ -13,7 +13,7 @@ import javax.swing.JMenuBar;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.Primitives;
-import de.jreality.geometry.SphereHelper;
+import de.jreality.geometry.SphereUtility;
 import de.jreality.reader.ReaderOOGL;
 import de.jreality.reader.Readers;
 import de.jreality.scene.CommonAttributes;
@@ -132,7 +132,7 @@ public class ReadFromFileDemo extends InteractiveViewerDemo {
 			if (!hyperbolic && !elliptic)	{
 				child = SceneGraphUtilities.createFullSceneGraphComponent("child");
 				child.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
-				child.addChild(SphereHelper.SPHERE_WAYFINE);				
+				child.addChild(SphereUtility.SPHERE_WAYFINE);				
 				world.addChild(child);
 			} else {
 				if (hyperbolic) {

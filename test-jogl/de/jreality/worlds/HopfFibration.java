@@ -15,7 +15,7 @@ import javax.swing.JMenuBar;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.QuadMeshShape;
-import de.jreality.geometry.SphereHelper;
+import de.jreality.geometry.SphereUtility;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.IndexedFaceSet;
@@ -114,7 +114,7 @@ public class HopfFibration extends AbstractJOGLLoadableScene {
 		private SceneGraphComponent hopfFibration(int level, int numSegs, double radius) {
 			if (level < 0) level = 0; 
 			if (level > 3) level = 3;
-			IndexedFaceSet ico = SphereHelper.tessellatedIcosahedra[level];
+			IndexedFaceSet ico = SphereUtility.tessellatedIcosahedra[level];
 			int profileSize = 7;
 			double[][] verts = ico.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 			int numCurves = verts.length;

@@ -3,7 +3,7 @@
  *
  */
 package de.jreality.worlds;
-import de.jreality.geometry.SphereHelper;
+import de.jreality.geometry.SphereUtility;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.ReflectionMap;
 import de.jreality.scene.SceneGraphComponent;
@@ -42,7 +42,7 @@ public class ReflectionMapDemo extends AbstractJOGLLoadableScene {
 
 		SceneGraphComponent world = SceneGraphUtilities.createFullSceneGraphComponent("reflectionMap");
 		SceneGraphComponent child = SceneGraphUtilities.createFullSceneGraphComponent("child");
-		child.setGeometry(SphereHelper.tessellatedIcosahedra[4]);
+		child.setGeometry(SphereUtility.tessellatedIcosahedra[4]);
 		child.getTransformation().setStretch(1.0, 0.6, 1.3);
 		world.addChild(child);
 		String[] texNameSuffixes = {"rt","lf","up", "dn","bk","ft"};

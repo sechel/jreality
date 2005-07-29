@@ -29,7 +29,7 @@ import net.java.games.jogl.GLPbuffer;
 import net.java.games.jogl.GLU;
 import net.java.games.jogl.util.BufferUtils;
 import de.jreality.geometry.LabelSet;
-import de.jreality.geometry.SphereHelper;
+import de.jreality.geometry.SphereUtility;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultGeometryShader;
 import de.jreality.jogl.shader.RenderingHintsShader;
@@ -887,7 +887,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		 * @return
 		 */
 		private IndexedFaceSet getProxyFor(Sphere sphere) {
-			return SphereHelper.tessellatedIcosahedra[2];
+			return SphereUtility.tessellatedIcosahedra[2];
 		}
 	}
 	

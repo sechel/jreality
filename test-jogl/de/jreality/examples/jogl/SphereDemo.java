@@ -12,7 +12,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 
-import de.jreality.geometry.SphereHelper;
+import de.jreality.geometry.SphereUtility;
 import de.jreality.jogl.shader.SimpleJOGLShader;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
@@ -67,10 +67,10 @@ public class SphereDemo extends InteractiveViewerDemo {
 		for (int i = 0; i<6; ++i)	{
 		double[] brickSize = new double[2];
 		double[] brickPct = new double[2];
-		IndexedFaceSet ifs = SphereHelper.tessellatedIcosahedra[2];
+		IndexedFaceSet ifs = SphereUtility.tessellatedIcosahedra[2];
 		double[] lightPosition = {0,0,4};
 			SceneGraphComponent c = SceneGraphUtilities.createFullSceneGraphComponent("sphere"+i);
-			c.setGeometry(SphereHelper.tessellatedIcosahedra[i]); //new Sphere()); //
+			c.setGeometry(SphereUtility.tessellatedIcosahedra[i]); //new Sphere()); //
 			double angle = (2 * Math.PI * i)/6.0;
 			c.getTransformation().setTranslation(3 * Math.cos(angle), 3*Math.sin(angle), 0.0);
 			float g = (float) (i/5.0);
