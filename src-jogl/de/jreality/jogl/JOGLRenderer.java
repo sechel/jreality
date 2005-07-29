@@ -63,6 +63,7 @@ import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ClippingPlaneCollector;
 import de.jreality.util.EffectiveAppearance;
+import de.jreality.util.LevelOfDetailComponent;
 import de.jreality.util.LightCollector;
 import de.jreality.util.Matrix;
 import de.jreality.util.MatrixBuilder;
