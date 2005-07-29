@@ -127,7 +127,7 @@ public class DefaultVertexShader implements VertexShader {
 		gl.glMaterialfv(frontBack, GL.GL_AMBIENT, ambientColorAsFloat);
 		gl.glMaterialfv(frontBack, GL.GL_SPECULAR, specularColorAsFloat);
 		gl.glMaterialf(frontBack, GL.GL_SHININESS, (float) getSpecularExponent());
-		JOGLConfiguration.theLog.log(Level.FINER,"VertexShader: Setting diffuse color to: "+Rn.toString(getDiffuseColorAsFloat()));
+		JOGLConfiguration.theLog.log(Level.FINEST,"VertexShader: Setting diffuse color to: "+Rn.toString(getDiffuseColorAsFloat()));
 	}
 
 	public void postRender(JOGLRenderer jr) {

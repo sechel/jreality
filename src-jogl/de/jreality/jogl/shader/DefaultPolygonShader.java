@@ -191,7 +191,7 @@ public class DefaultPolygonShader implements PolygonShader {
 	private void testTextureResident(JOGLRenderer jr, GL gl) {
 		int[] res = new int[1];
 		gl.glGetTexParameteriv(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_RESIDENT, res);
-		JOGLConfiguration.theLog.log(Level.FINE,"Texture is resident"+res[0]);
+		JOGLConfiguration.theLog.log(Level.FINEST,"Texture is resident"+res[0]);
 		if (res[0] == 0) { jr.texResident = false; }
 	}
 
