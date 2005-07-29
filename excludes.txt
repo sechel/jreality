@@ -2,4 +2,4 @@
 # see README.ant for description
 
 **/jsyzygy/**/*.java
-
+**/AlexDemo.java
