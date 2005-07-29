@@ -49,6 +49,15 @@ public class JOGLConfiguration {
 			foo = System.getProperty("jreality.jogl.portalUsage");
 			if (foo != null) 
 				if (foo.indexOf("true") != -1) portalUsage = true;
+			foo = System.getProperty("jreality.jogl.loggingLevel");
+			if (foo != null)  {
+				Level level = Level.INFO;
+				if (foo.indexOf("finest") != -1) level = Level.FINEST;
+				else if (foo.indexOf("finer") != -1) level = Level.FINER;
+				else if (foo.indexOf("fine") != -1) level = Level.FINE;
+				else if (foo.indexOf("info") != -1) level = Level.INFO;
+				theLog.setLevel(level);
+			}
 //			foo = System.getProperty("os.name");
 //			if (foo != null && foo.indexOf("Linux") != -1) isLinux = true;
 			// allocate a GLCanvas to be the "sharer": it will never be destroyed

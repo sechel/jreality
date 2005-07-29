@@ -498,19 +498,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		if (useDisplayLists)	forceNewDisplayLists();
 	}
 
-//	public void geometryChanged(GeometryEvent e) {
-//		}
-		/*
-		CollectAncestorsVisitor cav = new CollectAncestorsVisitor(theRoot, sg);
-		List anc = (List) cav.visit();
-		for (int i = 0; i<anc.size(); ++i)		{
-			Object ancx = anc.get(i);
-			//System.err.println("ancestor: "+ancx);
-			foo = dlTable.get(ancx);
-			if (foo!= null) dlTable.remove(ancx);
-		}
-		*/
-//	}
 	private final static int POINTDL = 0;
 	private final static int PROXY_POINTDL = 1;
 	private final static int LINEDL = 2;
@@ -544,38 +531,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			if (useDisplayList && df <= 5) useDisplayList = false;
 			else if (!useDisplayList && df >= 5) useDisplayList = true;
 			return useDisplayList;
-		}
-
-		public void setPolygonDisplayListID(int id)	{
-			dl[POLYGONDL] = id;
-		}
-		
-		public int getPolygonDisplayListID() {
-			return dl[POLYGONDL];
-		}
-		
-		public void setLineDisplayListID(int id)	{
-			dl[LINEDL] = id;
-		}
-		
-		public int getLineDisplayListID() {
-			return dl[LINEDL];
-		}
-		
-		public int getTubeDisplayListID() {
-			return dl[PROXY_LINEDL];
-		}
-		
-		public void setTubeDisplayListID(int id)	{
-			dl[PROXY_LINEDL] = id;
-		}
-		
-		public void setPointDisplayListID(int id)	{
-			dl[POINTDL] = id;
-		}
-		
-		public int getPointDisplayListID() {
-			return dl[POINTDL];
 		}
 
 		public void setDisplayListID(int type, int id)	{
@@ -617,6 +572,18 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			frameCountAtLastChange = frameCount;
 			changeCount++;
 			setDisplayListsDirty();
+		}
+		/**
+		 * 
+		 */
+		public void dispose() {
+			for (int i = 0; i<NUM_DLISTS; ++i) {
+				if (dl[i] != -1) {
+					globalGL.glDeleteLists(dl[i], 1);
+					JOGLConfiguration.theLog.log(Level.FINER, "Deleting display list "+dl[i]);
+					dl[i] = -1;
+				}
+			}	
 		}
 	}
 	
@@ -667,10 +634,10 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	 */
 	int geomDiff = 0;
 	protected void updateGeometryHashtable() {
-		Logger.getLogger("de.jreality.jogl").log(Level.FINEST, "Memory usage: "+getMemoryUsage());
+		JOGLConfiguration.theLog.log(Level.FINEST, "Memory usage: "+getMemoryUsage());
 		if (geometries == null) return;
 		if (!geometryRemoved) return;
-		final Hashtable newG = new Hashtable();
+		final WeakHashMap newG = new WeakHashMap();
 		SceneGraphVisitor cleanup = new SceneGraphVisitor()	{
 			public void visit(SceneGraphComponent c) {
 				if (c.getGeometry() != null) {
@@ -685,7 +652,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 		geometryRemoved = false;
 		//TODO dispose of the peer geomtry nodes which are no longer in the graph
 		if (geometries.size() - newG.size() != geomDiff)	{
-			theLog.log(Level.INFO,"Old, new hash size: "+geometries.size()+" "+newG.size());
+			JOGLConfiguration.theLog.log(Level.WARNING,"Old, new hash size: "+geometries.size()+" "+newG.size());
 			geomDiff = geometries.size() - newG.size() ;
 		}
 		return;
@@ -694,8 +661,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 	public String getMemoryUsage() {
         Runtime r = Runtime.getRuntime();
         int block = 1024;
-        return
-                "Memory usage: " + ((r.totalMemory() / block) - (r.freeMemory() / block)) + " kB";
+        return "Memory usage: " + ((r.totalMemory() / block) - (r.freeMemory() / block)) + " kB";
     }
 	
 	
@@ -727,7 +693,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 				JOGLConfiguration.theLog.log(Level.WARNING,"Negative reference count!");
 			}
 			if (refCount == 0)	{
-				//JOGLConfiguration.theLog.log(Level.INFO,"Geometry is no longer referenced");
+				JOGLConfiguration.theLog.log(Level.INFO,"Geometry is no longer referenced");
+				dlInfo.dispose();
 				originalGeometry.removeGeometryListener(this);	
 				geometries.remove(originalGeometry);
 			}
@@ -902,6 +869,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			
 			if (dl.getDisplayListID(type) != -1) {
 				globalGL.glDeleteLists(dl.getDisplayListID(type), 1);
+				JOGLConfiguration.theLog.log(Level.FINE, "Deleting display list "+dl.getDisplayListID(type));
 				dl.setDisplayListID(type, -1);
 			}
 			int nextDL = globalGL.glGenLists(1);
@@ -1013,6 +981,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			else if (key.indexOf("transparency") != -1) changed |= (FACES_CHANGED);
 			else if (key.indexOf("tubeRadius") != -1) changed |= (LINES_CHANGED);
 			else if (key.indexOf("pointRadius") != -1) changed |= (POINTS_CHANGED);
+			else if (key.indexOf("lighting") != -1) changed |= (POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
 //			peerGeometry.geometryChanged(changed);
 			while (iter.hasNext())	{
 				JOGLPeerComponent peer = (JOGLPeerComponent) iter.next();
@@ -1226,7 +1195,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 
 		}
 		public void render()		{
-			theLog.log(Level.FINE,"Rendering "+goBetween.getOriginalComponent().getName());
 			if (!goBetween.getOriginalComponent().isVisible()) return;
 						
 			// the following looks very dangerous
@@ -1258,7 +1226,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements Drawable {
 			if (appearanceChanged)  	propagateAppearanceChanged();
 			if (appearanceIsDirty)	updateAppearance();
 			//context.setEffectiveAppearance(eAp);
-			JOGLConfiguration.theLog.log(Level.FINER,"Rendering "+goBetween.getOriginalComponent().getName());
+			JOGLConfiguration.theLog.log(Level.FINEST,"Rendering "+goBetween.getOriginalComponent().getName());
 			// render the geometry
 			if (goBetween.getPeerGeometry() != null)	goBetween.getPeerGeometry().render(this);
 			

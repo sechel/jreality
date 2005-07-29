@@ -44,8 +44,8 @@ public class OpenGLState {
 		if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
 		else		gl.glShadeModel(GL.GL_FLAT);
 		
-		if (flipped) gl.glFrontFace( GL.GL_CCW);
-		else 		gl.glFrontFace( GL.GL_CW);
+		if (flipped) gl.glFrontFace( GL.GL_CW);
+		else 		gl.glFrontFace( GL.GL_CCW);
 		gl.glEnable(GL.GL_COLOR_MATERIAL);
 		gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
 	}
