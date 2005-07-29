@@ -299,7 +299,8 @@ public class InteractiveViewerDemo extends JFrame{
 		if (inspectorPanel != null) {
 			getContentPane().add(inspectorPanel, BorderLayout.SOUTH);
 		}
-		getContentPane().add(getInspector(), BorderLayout.SOUTH);
+		Component inspector = getInspector();
+		if (inspector != null) getContentPane().add(inspector, BorderLayout.SOUTH);
 		setVisible(true);
 		repaint();
 		viewer.render();
@@ -618,35 +619,8 @@ public class InteractiveViewerDemo extends JFrame{
 		
 		return lights;
 	}
-	public Component getInspector() {
-		Box container = Box.createVerticalBox();
-		FancySlider aSlider = new FancySlider.Integer("w",  SwingConstants.HORIZONTAL,0, 4096, width);
-	    aSlider.textField.addPropertyChangeListener(new PropertyChangeListener()	{
-		    public void propertyChange(PropertyChangeEvent e) {
-		        if ("value".equals(e.getPropertyName())) {
-		            Number value = (Number)e.getNewValue();
-		            if (value != null) {
-		                width = value.intValue();
-		            }
-		        }
-		    }	       	
-	       });
-		container.add(aSlider);
-		FancySlider bSlider = new FancySlider.Integer("h",  SwingConstants.HORIZONTAL, 0, 4096, height);
-	    bSlider.textField.addPropertyChangeListener(new PropertyChangeListener()	{
-		    public void propertyChange(PropertyChangeEvent e) {
-		        if ("value".equals(e.getPropertyName())) {
-		            Number value = (Number)e.getNewValue();
-		            if (value != null) {
-		                height=value.intValue();
-		            }
-		        }
-		    }	       	
-	       });
-		container.add(bSlider);
-
-		container.add(Box.createVerticalGlue());
-		return container;
+	public Component getInspector()	{
+		return null;
 	}
 
    public static void main(String[] args) throws Exception {

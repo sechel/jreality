@@ -4,17 +4,23 @@
  */
 package de.jreality.examples.jogl;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.logging.Level;
 
+import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.SwingConstants;
 
 import de.jreality.jogl.JOGLConfiguration;
+import de.jreality.jogl.inspection.FancySlider;
 
 /**
  * @author gunn
@@ -112,4 +118,35 @@ public class LoadableSceneDemo extends InteractiveViewerDemo {
 		}
 		return menuBar;
 	}
+	public Component getInspector() {
+		Box container = Box.createVerticalBox();
+		FancySlider aSlider = new FancySlider.Integer("w",  SwingConstants.HORIZONTAL,0, 4096, width);
+	    aSlider.textField.addPropertyChangeListener(new PropertyChangeListener()	{
+		    public void propertyChange(PropertyChangeEvent e) {
+		        if ("value".equals(e.getPropertyName())) {
+		            Number value = (Number)e.getNewValue();
+		            if (value != null) {
+		                width = value.intValue();
+		            }
+		        }
+		    }	       	
+	       });
+		container.add(aSlider);
+		FancySlider bSlider = new FancySlider.Integer("h",  SwingConstants.HORIZONTAL, 0, 4096, height);
+	    bSlider.textField.addPropertyChangeListener(new PropertyChangeListener()	{
+		    public void propertyChange(PropertyChangeEvent e) {
+		        if ("value".equals(e.getPropertyName())) {
+		            Number value = (Number)e.getNewValue();
+		            if (value != null) {
+		                height=value.intValue();
+		            }
+		        }
+		    }	       	
+	       });
+		container.add(bSlider);
+
+		container.add(Box.createVerticalGlue());
+		return container;
+	}
+
 }
