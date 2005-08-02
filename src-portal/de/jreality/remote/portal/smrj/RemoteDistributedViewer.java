@@ -183,5 +183,13 @@ public class RemoteDistributedViewer implements Viewer {
     public void dispose() {
         factory.dispose();
     }
+	public SceneGraphComponent getAuxiliaryRoot() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	public void setAuxiliaryRoot(SceneGraphComponent ar) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

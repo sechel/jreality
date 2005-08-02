@@ -395,4 +395,14 @@ public class PortalServerViewer implements Viewer, HeadMotionListener {
 		return szgQueue;
 	}
 
+	public SceneGraphComponent getAuxiliaryRoot() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void setAuxiliaryRoot(SceneGraphComponent ar) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

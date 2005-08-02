@@ -24,6 +24,7 @@ package de.jreality.soft;
 
 import java.io.*;
 
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
 
 /**
@@ -76,7 +77,19 @@ public class PSViewer extends AbstractViewer implements Viewer {
     public void setSignature(int sig) {
         // TODO Auto-generated method stub
         
-    }    
+    }
+
+
+	public SceneGraphComponent getAuxiliaryRoot() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	public void setAuxiliaryRoot(SceneGraphComponent ar) {
+		// TODO Auto-generated method stub
+		
+	}    
     
 
 }

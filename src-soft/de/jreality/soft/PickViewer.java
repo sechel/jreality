@@ -288,4 +288,14 @@ public  class PickViewer implements Viewer {
         return pickVisitor.getHitDetector().getHitList();
     }
 
+	public SceneGraphComponent getAuxiliaryRoot() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void setAuxiliaryRoot(SceneGraphComponent ar) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
