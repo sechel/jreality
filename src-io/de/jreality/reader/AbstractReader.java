@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.util.Input;
 
 /**
  * Abstract class for a SceneReader. Implement setInput so that

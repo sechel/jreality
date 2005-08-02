@@ -6,10 +6,8 @@ package de.jreality.jogl.tools;
 
 import java.awt.event.MouseEvent;
 import java.util.List;
-import java.util.logging.Level;
 
 import de.jreality.jogl.InteractiveViewer;
-import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.scene.pick.PickPoint;
 

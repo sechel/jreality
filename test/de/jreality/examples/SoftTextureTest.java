@@ -37,10 +37,10 @@ import de.jreality.geometry.*;
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.reader.Parser3DS;
 import de.jreality.scene.*;
+import de.jreality.scene.proxy.treeview.SceneTreeViewer;
 import de.jreality.soft.DefaultViewer;
 import de.jreality.soft.GameTool;
 import de.jreality.soft.MouseTool;
-import de.jreality.ui.SceneTreeViewer;
 
 /**
  * 

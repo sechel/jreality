@@ -28,7 +28,7 @@ import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 
 import de.jreality.scene.*;
-import de.jreality.util.Rn;
+import de.jreality.util.math.Rn;
 
 /**
  * 

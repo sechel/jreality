@@ -6,16 +6,11 @@ package de.jreality.jogl.tools;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.util.HashMap;
+import java.util.*;
 import java.util.Timer;
-import java.util.TimerTask;
-import java.util.Vector;
 import java.util.logging.Level;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JButton;
-import javax.swing.JToolBar;
+import javax.swing.*;
 
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.jogl.JOGLConfiguration;

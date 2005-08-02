@@ -29,36 +29,15 @@ import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import javax.imageio.ImageIO;
 
-import de.jreality.scene.Appearance;
-import de.jreality.scene.Camera;
-import de.jreality.scene.ClippingPlane;
-import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.Cylinder;
-import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.IndexedLineSet;
-import de.jreality.scene.PointSet;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.SceneGraphVisitor;
-import de.jreality.scene.Sphere;
-import de.jreality.scene.Texture2D;
-import de.jreality.scene.Transformation;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DataList;
-import de.jreality.scene.data.DoubleArray;
-import de.jreality.scene.data.DoubleArrayArray;
-import de.jreality.scene.data.IntArray;
-import de.jreality.scene.data.IntArrayArray;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.NameSpace;
-import de.jreality.util.VecMat;
+import de.jreality.scene.*;
+import de.jreality.scene.data.*;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
+import de.jreality.util.math.VecMat;
 
 /**
  * A Visitor for writing renderman<sup>TM</sup> rib files. At the moment the following 
@@ -285,11 +264,11 @@ public class RIBVisitor extends SceneGraphVisitor {
         DataList dl = g.getEdgeAttributes(Attribute.INDICES);
         if(dl!=null){
             String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
-            if(!eAppearance.getAttribute(NameSpace.name(geomShaderName, CommonAttributes.EDGE_DRAW),true)) return;
+            if(!eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW),true)) return;
             Ri.attributeBegin();
             setupShader(eAppearance,CommonAttributes.LINE_SHADER);
         
-            float r = (float) eAppearance.getAttribute(NameSpace.name(CommonAttributes.LINE_SHADER,CommonAttributes.LINE_WIDTH),0.01);
+            float r = (float) eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER,CommonAttributes.LINE_WIDTH),0.01);
 //        int n= g.getNumEdges();
 //        for(int i = 0;i<n;i++) {
 //            cylinder(g.getEdgeData(i),r);
@@ -474,14 +453,14 @@ public class RIBVisitor extends SceneGraphVisitor {
      */
     public void visit(PointSet p) {
         String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
-        if(!eAppearance.getAttribute(NameSpace.name(geomShaderName, CommonAttributes.VERTEX_DRAW),true)) return;
+        if(!eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.VERTEX_DRAW),true)) return;
         int n= p.getNumPoints();
         DataList coord=p.getVertexAttributes(Attribute.COORDINATES);
         if(coord == null) return;
         DoubleArrayArray a=coord.toDoubleArrayArray();
         double[] trns = new double[16];
         Ri.attributeBegin();
-        float r = (float) eAppearance.getAttribute(NameSpace.name(CommonAttributes.POINT_SHADER,CommonAttributes.POINT_RADIUS),/*CommonAttributes.POINT_RADIUS_DEFAULT*/ 0.01);
+        float r = (float) eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,CommonAttributes.POINT_RADIUS),/*CommonAttributes.POINT_RADIUS_DEFAULT*/ 0.01);
         System.out.println("point radius is "+r);
         setupShader(eAppearance,CommonAttributes.POINT_SHADER);
         for (int i= 0; i < n; i++) { 

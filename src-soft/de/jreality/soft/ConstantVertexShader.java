@@ -26,8 +26,8 @@ import java.awt.Color;
 
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.Geometry;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.NameSpace;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
 
 /**
  * 
@@ -108,9 +108,9 @@ public class ConstantVertexShader implements VertexShader {
     }
 
     public void setup(EffectiveAppearance eAppearance, String name) {
-      transparency = eAppearance.getAttribute(NameSpace.name(name, "transparency"), transparency);
-      Color c = (Color)eAppearance.getAttribute(NameSpace.name(name, "color"), Color.BLACK);
-      c = (Color)eAppearance.getAttribute(NameSpace.name(name, CommonAttributes.DIFFUSE_COLOR), c);
+      transparency = eAppearance.getAttribute(ShaderUtility.nameSpace(name, "transparency"), transparency);
+      Color c = (Color)eAppearance.getAttribute(ShaderUtility.nameSpace(name, "color"), Color.BLACK);
+      c = (Color)eAppearance.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.DIFFUSE_COLOR), c);
       float[] rgb=c.getComponents(null);
       red=rgb[0];
       green=rgb[1];

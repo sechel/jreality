@@ -4,7 +4,7 @@
  */
 package de.jreality.jogl.shader;
 
-import de.jreality.util.EffectiveAppearance;
+import de.jreality.shader.EffectiveAppearance;
 
 /**
  * @author gunn

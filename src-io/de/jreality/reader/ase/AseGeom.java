@@ -41,13 +41,13 @@ package de.jreality.reader.ase;
 import java.awt.Color;
 import java.util.logging.Level;
 
-import de.jreality.reader.Input;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.reader.vecmath.Vector3f;
+import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
-import de.jreality.util.MatrixBuilder;
+import de.jreality.util.math.MatrixBuilder;
 
 
 /**

@@ -14,8 +14,8 @@ import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.P3;
-import de.jreality.util.Rn;
+import de.jreality.util.math.P3;
+import de.jreality.util.math.Rn;
 
 /**
  * @author Charles Gunn

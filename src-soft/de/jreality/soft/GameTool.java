@@ -26,8 +26,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
 import de.jreality.scene.Viewer;
-import de.jreality.util.Rn;
-import de.jreality.util.VecMat;
+import de.jreality.util.math.Rn;
+import de.jreality.util.math.VecMat;
 
 /**
  * 

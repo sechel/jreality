@@ -4,7 +4,6 @@
  */
 package de.jreality.jogl.shader;
 
-import java.awt.Color;
 
 /**
  * @author gunn

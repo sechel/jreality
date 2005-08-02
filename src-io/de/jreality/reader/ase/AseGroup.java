@@ -42,9 +42,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
 
-import de.jreality.reader.Input;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.reader.vecmath.Vector3f;
+import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 
 /**

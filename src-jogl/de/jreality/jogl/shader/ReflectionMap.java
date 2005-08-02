@@ -7,7 +7,6 @@ package de.jreality.jogl.shader;
 import java.io.IOException;
 
 import net.java.games.jogl.GL;
-import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Texture2D;
 
 /**

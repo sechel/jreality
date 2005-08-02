@@ -7,6 +7,7 @@ import junit.framework.TestCase;
 
 import de.jreality.scene.Appearance;
 import de.jreality.scene.AppearanceAttribute;
+import de.jreality.shader.EffectiveAppearance;
 
 /**
  * 

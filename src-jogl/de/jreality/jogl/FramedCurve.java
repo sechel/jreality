@@ -5,31 +5,15 @@
 package de.jreality.jogl;
 
 import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.StringTokenizer;
-import java.util.Vector;
+import java.io.*;
+import java.util.*;
 
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.jogl.anim.AnimationUtility;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.IndexedLineSet;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
-import de.jreality.util.CubicBSpline;
-import de.jreality.util.FactoredMatrix;
-import de.jreality.util.Pn;
-import de.jreality.util.Quaternion;
-import de.jreality.util.Rn;
-import de.jreality.util.SceneGraphUtilities;
+import de.jreality.scene.*;
+import de.jreality.util.SceneGraphUtility;
+import de.jreality.util.math.*;
 
 /**
  * 
@@ -250,7 +234,7 @@ public class FramedCurve extends SceneGraphComponent {
      	curveRepresentation = IndexedLineSetUtility.createCurveFromPoints(verts, false);
      	if (theCurveItself == null)
      	{
-     		theCurveItself = SceneGraphUtilities.createFullSceneGraphComponent();
+     		theCurveItself = SceneGraphUtility.createFullSceneGraphComponent();
      		addChild(theCurveItself);
      	}
      	
@@ -268,7 +252,7 @@ public class FramedCurve extends SceneGraphComponent {
 			sgc.addChild(camIconItself);
 			camIcon.addChild(sgc);
 		}
-   		SceneGraphUtilities.setDefaultMatrix(this);
+   		SceneGraphUtility.setDefaultMatrix(this);
    		outOfDate = false;
     		}
     }

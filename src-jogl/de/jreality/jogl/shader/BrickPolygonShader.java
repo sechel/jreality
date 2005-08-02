@@ -6,19 +6,14 @@
 package de.jreality.jogl.shader;
 
 import java.awt.Color;
-import java.io.IOException;
 import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
-import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.Geometry;
-import de.jreality.scene.ReflectionMap;
-import de.jreality.scene.Texture2D;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.NameSpace;
-import de.jreality.util.Rn;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
+import de.jreality.util.math.Rn;
 
 /**
  * @author gunn
@@ -44,17 +39,17 @@ public class BrickPolygonShader extends SimpleJOGLShader {
 	public void  setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		JOGLConfiguration.theLog.log(Level.INFO,"Evaluating appearance");
 
-		Object foo = eap.getAttribute(NameSpace.name(name,"BrickColor"), brickColor);
+		Object foo = eap.getAttribute(ShaderUtility.nameSpace(name,"BrickColor"), brickColor);
 		if (foo instanceof Color)	brickColor = (Color) foo;
-		foo = eap.getAttribute(NameSpace.name(name,"MortarColor"), mortarColor);
+		foo = eap.getAttribute(ShaderUtility.nameSpace(name,"MortarColor"), mortarColor);
 		if (foo instanceof Color)	mortarColor = (Color) foo;
-		foo = eap.getAttribute(NameSpace.name(name,"BrickSize"), brickSize);
+		foo = eap.getAttribute(ShaderUtility.nameSpace(name,"BrickSize"), brickSize);
 		if (foo instanceof double[])	brickSize = (double[]) foo;
-		foo = eap.getAttribute(NameSpace.name(name,"BrickPct"), brickPct);
+		foo = eap.getAttribute(ShaderUtility.nameSpace(name,"BrickPct"), brickPct);
 		if (foo instanceof double[])	brickPct = (double[]) foo;
-		foo = eap.getAttribute(NameSpace.name(name,"LightPosition"), lightPosition);
+		foo = eap.getAttribute(ShaderUtility.nameSpace(name,"LightPosition"), lightPosition);
 		if (foo instanceof double[])	lightPosition = (double[]) foo;
-		specularContribution = eap.getAttribute(NameSpace.name(name,"specularCoefficient"), specularContribution);
+		specularContribution = eap.getAttribute(ShaderUtility.nameSpace(name,"specularCoefficient"), specularContribution);
 		changed = true;
 	}
 	public void render(JOGLRenderer jr) {

@@ -36,8 +36,8 @@ import de.jreality.remote.portal.smrj.PortalServerImplementation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.util.LoggingSystem;
-import de.jreality.util.P3;
-import de.jreality.util.Rn;
+import de.jreality.util.math.P3;
+import de.jreality.util.math.Rn;
 
 
 /**

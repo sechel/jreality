@@ -6,7 +6,6 @@
 package de.jreality.jogl;
 
 import net.java.games.jogl.GL;
-import net.java.games.jogl.GLCanvas;
 import net.java.games.jogl.GLDrawable;
 
 /**

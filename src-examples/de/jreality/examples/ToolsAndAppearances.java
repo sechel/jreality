@@ -1,5 +1,5 @@
 /*
- * $Id: ToolsAndAppearances.java,v 1.1 2005/07/16 13:49:28 brinkman Exp $
+ * $Id: ToolsAndAppearances.java,v 1.2 2005/08/02 15:07:33 pinkall Exp $
  * As simple example using appearances and tools.
  */
 package de.jreality.examples;
@@ -23,7 +23,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.pick.PickSystem;
 import de.jreality.scene.tool.RotateTool;
 import de.jreality.scene.tool.ToolSystemViewer;
-import de.jreality.util.MatrixBuilder;
+import de.jreality.util.math.MatrixBuilder;
 
 public class ToolsAndAppearances {
   public static void main(String[] args) {

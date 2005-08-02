@@ -5,16 +5,11 @@
 package de.jreality.jogl.shader;
 
 
-import java.awt.Color;
 import java.util.logging.Level;
 
-import net.java.games.jogl.GL;
-
-import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
-import de.jreality.jogl.shader.PolygonShader;
 import de.jreality.scene.Geometry;
-import de.jreality.util.EffectiveAppearance;
+import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.LoggingSystem;
 
 /**

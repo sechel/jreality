@@ -29,8 +29,8 @@ import de.jreality.scene.Geometry;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.NameSpace;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
 
 /**
  * 
@@ -250,15 +250,15 @@ public class DefaultVertexShader implements VertexShader {
     }
 
     public void setup(EffectiveAppearance eAppearance, String name) {
-      transparency = eAppearance.getAttribute(NameSpace.name(name, CommonAttributes.TRANSPARENCY), transparency);
-      Color c = (Color)eAppearance.getAttribute(NameSpace.name(name, CommonAttributes.DIFFUSE_COLOR), CommonAttributes.DIFFUSE_COLOR_DEFAULT);
+      transparency = eAppearance.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.TRANSPARENCY), transparency);
+      Color c = (Color)eAppearance.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.DIFFUSE_COLOR), CommonAttributes.DIFFUSE_COLOR_DEFAULT);
       float[] rgb=c.getComponents(null);
       red=rgb[0];
       green=rgb[1];
       blue=rgb[2];
       //pending
-      phong = eAppearance.getAttribute(NameSpace.name(name, CommonAttributes.SPECULAR_COEFFICIENT), CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);
-      phongSize = eAppearance.getAttribute(NameSpace.name(name, CommonAttributes.SPECULAR_EXPONENT), CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
+      phong = eAppearance.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.SPECULAR_COEFFICIENT), CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);
+      phongSize = eAppearance.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.SPECULAR_EXPONENT), CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
     }
     public void startGeometry(Geometry geom)
     {

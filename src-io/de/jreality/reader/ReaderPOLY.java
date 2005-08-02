@@ -34,6 +34,7 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 
 

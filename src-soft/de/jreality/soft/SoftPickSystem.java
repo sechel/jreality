@@ -27,9 +27,9 @@ import java.util.List;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.pick.PickSystem;
-import de.jreality.util.MatrixBuilder;
-import de.jreality.util.P3;
-import de.jreality.util.Rn;
+import de.jreality.util.math.MatrixBuilder;
+import de.jreality.util.math.P3;
+import de.jreality.util.math.Rn;
 
 /**
  * 

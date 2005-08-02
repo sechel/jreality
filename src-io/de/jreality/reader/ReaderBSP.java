@@ -27,7 +27,8 @@ import java.io.IOException;
 import de.jreality.reader.quake3.Quake3Converter;
 import de.jreality.reader.quake3.Quake3Loader;
 import de.jreality.scene.Transformation;
-import de.jreality.util.Matrix;
+import de.jreality.util.Input;
+import de.jreality.util.math.Matrix;
 
 /**
  * 

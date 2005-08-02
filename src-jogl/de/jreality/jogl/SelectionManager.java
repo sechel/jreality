@@ -9,25 +9,13 @@ import java.util.Iterator;
 import java.util.Vector;
 import java.util.logging.Level;
 
-import de.jreality.geometry.GeometryUtility;
-import de.jreality.geometry.IndexedFaceSetUtility;
-import de.jreality.geometry.Primitives;
-import de.jreality.geometry.SphereUtility;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.PointSet;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Sphere;
-import de.jreality.scene.Transformation;
+import de.jreality.geometry.*;
+import de.jreality.scene.*;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.Rectangle3D;
-import de.jreality.util.SceneGraphPathObserver;
-import de.jreality.util.SceneGraphUtilities;
+import de.jreality.util.SceneGraphUtility;
 
 /**
  * @author gunn
@@ -59,7 +47,7 @@ public class SelectionManager implements TransformationListener {
     theSelectionObserver = new SceneGraphPathObserver();
     theSelectionObserver.addTransformationListener(this);
     selectionList = new Vector();
-		boundKit = SceneGraphUtilities.createFullSceneGraphComponent("boundKit");
+		boundKit = SceneGraphUtility.createFullSceneGraphComponent("boundKit");
 		boundAppearance = boundKit.getAppearance();
 		boundAppearance.setAttribute(CommonAttributes.EDGE_DRAW,true);
 		boundAppearance.setAttribute(CommonAttributes.FACE_DRAW,false);
@@ -73,7 +61,7 @@ public class SelectionManager implements TransformationListener {
 		boundAppearance.setAttribute(CommonAttributes.LEVEL_OF_DETAIL,0.0);
 		boundAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
 
-		pickPointKit = SceneGraphUtilities.createFullSceneGraphComponent("pickPointKit");
+		pickPointKit = SceneGraphUtility.createFullSceneGraphComponent("pickPointKit");
 		pickPointAppearance = pickPointKit.getAppearance();
 		pickPointAppearance.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, pickPointSize);
 		if (useSphere)	{
@@ -91,7 +79,7 @@ public class SelectionManager implements TransformationListener {
 		//pickPointAppearance.setAttribute(CommonAttributes.LEVEL_OF_DETAIL,0.0);
 		pickPointAppearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.RED);
 
-		selectionKit = SceneGraphUtilities.createFullSceneGraphComponent("selectionKit");
+		selectionKit = SceneGraphUtility.createFullSceneGraphComponent("selectionKit");
 		pickPointKit.setVisible(false);
 		selectionKit.addChild(pickPointKit);
 		boundKit.setVisible(false);

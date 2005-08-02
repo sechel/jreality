@@ -16,12 +16,7 @@ import java.util.logging.Level;
 import de.jreality.jogl.tools.MotionManager;
 import de.jreality.jogl.tools.MouseTool;
 import de.jreality.jogl.tools.ToolManager;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.Camera;
-import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.*;
 import de.jreality.util.CameraUtility;
 
 /**

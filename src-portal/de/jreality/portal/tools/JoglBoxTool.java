@@ -19,9 +19,9 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.pick.PickPoint;
-import de.jreality.util.P3;
-import de.jreality.util.Pn;
-import de.jreality.util.Rn;
+import de.jreality.util.math.P3;
+import de.jreality.util.math.Pn;
+import de.jreality.util.math.Rn;
 
 /**
  * @author gunn

@@ -6,8 +6,6 @@ package de.jreality.jogl.shader;
 
 import java.awt.Color;
 
-import de.jreality.scene.Geometry;
-
 /**
  * @author gunn
  *

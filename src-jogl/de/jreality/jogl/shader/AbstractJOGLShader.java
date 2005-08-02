@@ -4,20 +4,17 @@
  */
 package de.jreality.jogl.shader;
 
-import java.awt.Color;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.logging.Level;
 
+import net.java.games.jogl.GL;
+import net.java.games.jogl.GLDrawable;
+import net.java.games.jogl.GLU;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.Geometry;
-import de.jreality.util.EffectiveAppearance;
-
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLCanvas;
-import net.java.games.jogl.GLDrawable;
-import net.java.games.jogl.GLU;
+import de.jreality.shader.EffectiveAppearance;
 
 /**
  * A class to handle common tasks related to openGL shading language shaders.

@@ -6,40 +6,20 @@ package de.jreality.jogl;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.util.List;
 import java.util.logging.Level;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.Timer;
+import javax.swing.*;
 
 import de.jreality.jogl.pick.JOGLPickAction;
-import de.jreality.scene.Camera;
-import de.jreality.scene.Graphics3D;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.*;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.FactoredMatrix;
-import de.jreality.util.Rn;
-import de.jreality.util.SceneGraphUtilities;
+import de.jreality.util.SceneGraphUtility;
+import de.jreality.util.math.FactoredMatrix;
+import de.jreality.util.math.Rn;
 
 /**
  * @author gunn
@@ -122,7 +102,7 @@ public class FramedCurveInspector extends JFrame {
 		camPath = new SceneGraphPath();
 		camPath.push(root);
 		
-		target = myCameraNode = SceneGraphUtilities.createFullSceneGraphComponent("FramedCurveInspectorCamera");
+		target = myCameraNode = SceneGraphUtility.createFullSceneGraphComponent("FramedCurveInspectorCamera");
 		setWorldNode(null);
 		fciCamera = new Camera();	
 		Camera oldCam = CameraUtility.getCamera(parent);

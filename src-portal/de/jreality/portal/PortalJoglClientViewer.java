@@ -42,11 +42,9 @@ import de.jreality.scene.Transformation;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
-import de.jreality.util.FactoredMatrix;
-import de.jreality.util.Matrix;
-import de.jreality.util.MatrixBuilder;
-import de.jreality.util.P3;
-import de.jreality.util.Rn;
+import de.jreality.util.math.*;
+import de.jreality.util.math.P3;
+import de.jreality.util.math.Rn;
 import de.smrj.ClientFactory;
 
 /**
@@ -143,8 +141,12 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
     public void swapBuffers() {
         viewer.swapBuffers();
     }
+    
+    /**
+     * TODO !!
+     */
     public void setUseDisplayLists(boolean b) {
-        viewer.getRenderer().setUseDisplayLists(b);
+//        viewer.getRenderer().setUseDisplayLists(b);
     }
     public void waitForRenderFinish() {
         viewer.waitForRenderFinish();

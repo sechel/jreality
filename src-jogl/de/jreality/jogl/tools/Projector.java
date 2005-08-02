@@ -4,13 +4,10 @@
  */
 package de.jreality.jogl.tools;
 
-import java.util.logging.Level;
-
-import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.scene.Camera;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.Pn;
-import de.jreality.util.Rn;
+import de.jreality.util.math.Pn;
+import de.jreality.util.math.Rn;
 
 /**
  * @author Charles Gunn

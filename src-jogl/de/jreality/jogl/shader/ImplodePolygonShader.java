@@ -4,19 +4,14 @@
   */
 package de.jreality.jogl.shader;
 
-import java.util.logging.Level;
-
 import net.java.games.jogl.GL;
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
-import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
-import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.NameSpace;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
 
 /**
  * @author gunn
@@ -27,7 +22,7 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		super.setFromEffectiveAppearance(eap, name);
-		implodeFactor = eap.getAttribute(NameSpace.name(name, "implodeFactor"), implodeFactor);
+		implodeFactor = eap.getAttribute(ShaderUtility.nameSpace(name, "implodeFactor"), implodeFactor);
 		//JOGLConfiguration.theLog.log(Level.INFO,this+"Imploding with factor of "+implodeFactor);
       }
     

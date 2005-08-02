@@ -7,33 +7,17 @@ package de.jreality.jogl.pick;
 
 
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Vector;
+import java.util.*;
 import java.util.logging.Level;
 
 import de.jreality.jogl.JOGLConfiguration;
-import de.jreality.jogl.shader.DefaultLineShader;
-import de.jreality.scene.Geometry;
-import de.jreality.scene.Graphics3D;
-import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.IndexedLineSet;
-import de.jreality.scene.PointSet;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Sphere;
-import de.jreality.scene.Viewer;
+import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.pick.PickAction;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.scene.pick.PickPointComparator;
-import de.jreality.util.P2;
-import de.jreality.util.P3;
-import de.jreality.util.Pn;
-import de.jreality.util.Rn;
+import de.jreality.util.math.*;
 /**
  * @author gunn
  *

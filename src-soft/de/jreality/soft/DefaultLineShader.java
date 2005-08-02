@@ -23,8 +23,8 @@
 package de.jreality.soft;
 
 import de.jreality.scene.Geometry;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.NameSpace;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
 
 /**
  * 
@@ -64,7 +64,7 @@ public class DefaultLineShader implements LineShader {
      * @see de.jreality.soft.AbstractShader#setup(de.jreality.util.EffectiveAppearance, java.lang.String)
      */
     public void setup(EffectiveAppearance eAppearance, String shaderName) {
-        lineWidth = eAppearance.getAttribute(NameSpace.name(shaderName, "tubeRadius"), lineWidth);
+        lineWidth = eAppearance.getAttribute(ShaderUtility.nameSpace(shaderName, "tubeRadius"), lineWidth);
         polygonShader=ShaderLookup.getPolygonShaderAttr(eAppearance, shaderName, "polygonShader");
     }
     public void startGeometry(Geometry geom)

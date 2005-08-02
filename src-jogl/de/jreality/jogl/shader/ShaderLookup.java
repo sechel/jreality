@@ -7,9 +7,8 @@ package de.jreality.jogl.shader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import de.jreality.jogl.JOGLConfiguration;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.NameSpace;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
 
 /**
  * Utility class encapsulating the shader lookup algorithm.
@@ -65,9 +64,9 @@ public class ShaderLookup
   public static VertexShader getVertexShaderAttr(
   	    EffectiveAppearance eAppearance, String base, String attr) {
 
-  	    String vShader = (String)eAppearance.getAttribute(NameSpace.name(base, attr), "default");
-  	    String vShaderName = (String)eAppearance.getAttribute(NameSpace.name(base, attr+".name"),
-  	      NameSpace.name(base, attr));
+  	    String vShader = (String)eAppearance.getAttribute(ShaderUtility.nameSpace(base, attr), "default");
+  	    String vShaderName = (String)eAppearance.getAttribute(ShaderUtility.nameSpace(base, attr+".name"),
+  	      ShaderUtility.nameSpace(base, attr));
 //  	    JOGLConfiguration.theLog.log(Level.FINE,vShaderName+" <= "+NameSpace.name(base, attr+".name")
 //  	      +": "+NameSpace.name(base, attr));
   	    VertexShader vShaderImpl= ShaderLookup.lookupVertexShader(vShader);
@@ -78,9 +77,9 @@ public class ShaderLookup
   	  public static PolygonShader getPolygonShaderAttr(
   	    EffectiveAppearance eAppearance, String base, String attr) {
 
-  	    String vShader = (String)eAppearance.getAttribute(NameSpace.name(base, attr), "default");
-  	    String vShaderName = (String)eAppearance.getAttribute(NameSpace.name(base, attr+".name"),
-  	      NameSpace.name(base, attr));
+  	    String vShader = (String)eAppearance.getAttribute(ShaderUtility.nameSpace(base, attr), "default");
+  	    String vShaderName = (String)eAppearance.getAttribute(ShaderUtility.nameSpace(base, attr+".name"),
+  	      ShaderUtility.nameSpace(base, attr));
   	    PolygonShader vShaderImpl= ShaderLookup.lookupPolygonShader(vShader);
   	    //JOGLConfiguration.theLog.log(Level.FINE,"base "+base+" attr "+attr+" vShaderName "+vShaderName+" vShader "+vShader);
   	    vShaderImpl.setFromEffectiveAppearance(eAppearance, vShaderName);
@@ -90,9 +89,9 @@ public class ShaderLookup
   	  public static LineShader getLineShaderAttr(
   	          EffectiveAppearance eAppearance, String base, String attr) {
 
-  	      String vShader = (String)eAppearance.getAttribute(NameSpace.name(base, attr), "default");
-  	      String vShaderName = (String)eAppearance.getAttribute(NameSpace.name(base, attr+".name"),
-  	              NameSpace.name(base, attr));
+  	      String vShader = (String)eAppearance.getAttribute(ShaderUtility.nameSpace(base, attr), "default");
+  	      String vShaderName = (String)eAppearance.getAttribute(ShaderUtility.nameSpace(base, attr+".name"),
+  	              ShaderUtility.nameSpace(base, attr));
   	      LineShader vShaderImpl= ShaderLookup.lookupLineShader(vShader);
   	      vShaderImpl.setFromEffectiveAppearance(eAppearance, vShaderName);
   	      return vShaderImpl;
@@ -100,9 +99,9 @@ public class ShaderLookup
   	  public static PointShader getPointShaderAttr(
   	          EffectiveAppearance eAppearance, String base, String attr) {
 
-  	      String vShader = (String)eAppearance.getAttribute(NameSpace.name(base, attr), "default");
-  	      String vShaderName = (String)eAppearance.getAttribute(NameSpace.name(base, attr+".name"),
-  	              NameSpace.name(base, attr));
+  	      String vShader = (String)eAppearance.getAttribute(ShaderUtility.nameSpace(base, attr), "default");
+  	      String vShaderName = (String)eAppearance.getAttribute(ShaderUtility.nameSpace(base, attr+".name"),
+  	              ShaderUtility.nameSpace(base, attr));
   	      PointShader vShaderImpl= ShaderLookup.lookupPointShader(vShader);
   	      vShaderImpl.setFromEffectiveAppearance(eAppearance, vShaderName);
   	      return vShaderImpl;

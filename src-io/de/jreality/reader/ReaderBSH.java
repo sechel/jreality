@@ -37,6 +37,7 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.SimpleURLPolicy;
 

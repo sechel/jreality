@@ -6,12 +6,10 @@ package de.jreality.jogl.tools;
 
 import java.awt.event.MouseEvent;
 
-import de.jreality.geometry.GeometryUtility;
-import de.jreality.scene.*;
-import de.jreality.util.BoundingBoxTraversal;
-import de.jreality.util.Rectangle3D;
-import de.jreality.util.Rn;
-import de.jreality.util.SceneGraphUtilities;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Transformation;
+import de.jreality.util.math.Rn;
 
 /**
  * @author Charles Gunn

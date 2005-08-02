@@ -28,6 +28,8 @@ import de.jreality.remote.util.INetUtilities;
 import de.jreality.scene.*;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.util.*;
+import de.jreality.util.math.P3;
+import de.jreality.util.math.Rn;
 
 /**
  * Portal Viewer - has one camera configured by the ConfigurationAttributes and uses jogl renderer.
@@ -81,7 +83,7 @@ public class HeadtrackedRemoteViewerImp extends RemoteViewerImp implements
         Camera cam = cameraTranslationNode.getCamera();
         cam.setNear(.1);
         cameraTranslationNode.setCamera(null);
-        cameraOrientationNode = SceneGraphUtilities
+        cameraOrientationNode = SceneGraphUtility
                 .createFullSceneGraphComponent(hostname + "CameraNode");
         cameraTranslationNode.addChild(cameraOrientationNode);
         cameraOrientationNode.setCamera(cam);
@@ -150,13 +152,13 @@ public class HeadtrackedRemoteViewerImp extends RemoteViewerImp implements
         pl.setColor(new Color(120, 250, 180));
         pl.setConeAngle(Math.PI);
         pl.setIntensity(0.6);
-        SceneGraphComponent l0 = SceneGraphUtilities.createFullSceneGraphComponent("light0");
+        SceneGraphComponent l0 = SceneGraphUtility.createFullSceneGraphComponent("light0");
         l0.setLight(pl);
         lights.addChild(l0);
         DirectionalLight dl = new DirectionalLight();
         dl.setColor(new Color(250, 100, 255));
         dl.setIntensity(0.6);
-        l0 = SceneGraphUtilities.createFullSceneGraphComponent("light1");
+        l0 = SceneGraphUtility.createFullSceneGraphComponent("light1");
         double[] zaxis = {0,0,1};
         double[] other = {1,1,1};
         l0.getTransformation().setMatrix( P3.makeRotationMatrix(null, zaxis, other));

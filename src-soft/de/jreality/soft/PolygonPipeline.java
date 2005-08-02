@@ -24,13 +24,11 @@ package de.jreality.soft;
 
 import java.util.Arrays;
 
-import sun.awt.VerticalBagLayout;
-
 import de.jreality.scene.Geometry;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.data.*;
-import de.jreality.util.Rn;
-import de.jreality.util.VecMat;
+import de.jreality.util.math.Rn;
+import de.jreality.util.math.VecMat;
 
 /**
  * 

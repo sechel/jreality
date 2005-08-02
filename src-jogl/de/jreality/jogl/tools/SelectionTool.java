@@ -5,10 +5,8 @@
 package de.jreality.jogl.tools;
 
 import java.awt.event.MouseEvent;
-import java.util.logging.Level;
 
 import de.jreality.jogl.InteractiveViewer;
-import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.SelectionManager;
 import de.jreality.scene.SceneGraphPath;
 

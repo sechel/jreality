@@ -32,10 +32,12 @@ import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
 
-import de.jreality.reader.Input;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import junit.framework.TestCase;
 
@@ -55,26 +57,26 @@ public class AttributeEntityTest extends TestCase {
   
   public void testTexture2dSingleton() throws Exception {
     Appearance app1 = new Appearance();
-    assertFalse(AttributeEntityFactory.hasAttributeEntity(Texture2D.class, "texture2d", app1));
-    Texture2D tex = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, "texture2d", app1);
-    assertTrue(AttributeEntityFactory.hasAttributeEntity(Texture2D.class, "texture2d", app1));
-    ImageData ai = ImageData.load(Readers.getInput("/home/gollwas/miaomiamologo.jpeg"));
+    assertFalse(AttributeEntityUtility.hasAttributeEntity(Texture2D.class, "texture2d", app1));
+    Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "texture2d", app1);
+    assertTrue(AttributeEntityUtility.hasAttributeEntity(Texture2D.class, "texture2d", app1));
+    ImageData ai = ImageData.load(Input.getInput("/home/gollwas/miaomiamologo.jpeg"));
     tex.setImage(ai);
     tex.setApplyMode(Texture2D.GL_LINEAR_MIPMAP_LINEAR);
     System.out.println(tex);
 
-    Texture2D t1 = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, "texture2d", app1);
+    Texture2D t1 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "texture2d", app1);
     System.out.println(t1);
     assertEquals(Texture2D.GL_LINEAR_MIPMAP_LINEAR, t1.getApplyMode());
 
     
     EffectiveAppearance ea = EffectiveAppearance.create();
-    assertFalse(AttributeEntityFactory.hasAttributeEntity(Texture2D.class, "texture2d", ea));
+    assertFalse(AttributeEntityUtility.hasAttributeEntity(Texture2D.class, "texture2d", ea));
     ea = ea.create(app1);
-    assertTrue(AttributeEntityFactory.hasAttributeEntity(Texture2D.class, "texture2d", ea));
+    assertTrue(AttributeEntityUtility.hasAttributeEntity(Texture2D.class, "texture2d", ea));
     ea = ea.create(new Appearance());
-    assertTrue(AttributeEntityFactory.hasAttributeEntity(Texture2D.class, "texture2d", ea));
-    Texture2D t2 = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, "texture2d", ea);
+    assertTrue(AttributeEntityUtility.hasAttributeEntity(Texture2D.class, "texture2d", ea));
+    Texture2D t2 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "texture2d", ea);
     System.out.println(t2);
     assertEquals(t2.getApplyMode(), Texture2D.GL_LINEAR_MIPMAP_LINEAR);
 

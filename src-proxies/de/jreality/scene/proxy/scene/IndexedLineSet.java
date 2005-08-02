@@ -6,7 +6,6 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.ByteBufferList;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
-import de.jreality.util.Lock;
 
 public class IndexedLineSet extends de.jreality.scene.IndexedLineSet implements
         RemoteIndexedLineSet {

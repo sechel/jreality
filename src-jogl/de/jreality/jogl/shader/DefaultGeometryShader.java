@@ -5,10 +5,9 @@
 package de.jreality.jogl.shader;
 
 import de.jreality.jogl.JOGLRenderer;
-import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.NameSpace;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
 
 /**
  * @author Charles Gunn
@@ -41,9 +40,9 @@ public class DefaultGeometryShader  implements Shader {
 	
 	public void  setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		String geomShaderName = "";		// at a later date this may be a field;
-		vertexDraw = eap.getAttribute(NameSpace.name(geomShaderName, CommonAttributes.VERTEX_DRAW), CommonAttributes.VERTEX_DRAW_DEFAULT);
-		edgeDraw = eap.getAttribute(NameSpace.name(geomShaderName, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT );
-		faceDraw = eap.getAttribute(NameSpace.name(geomShaderName, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
+		vertexDraw = eap.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.VERTEX_DRAW), CommonAttributes.VERTEX_DRAW_DEFAULT);
+		edgeDraw = eap.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT );
+		faceDraw = eap.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
 		if(faceDraw) {
 	        polygonShader =ShaderLookup.getPolygonShaderAttr(eap, geomShaderName, CommonAttributes.POLYGON_SHADER);
 	    } else {

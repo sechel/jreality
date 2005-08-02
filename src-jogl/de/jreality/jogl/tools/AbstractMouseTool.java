@@ -17,7 +17,7 @@ import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.Rn;
+import de.jreality.util.math.Rn;
 
 /**
  * @author Charles Gunn

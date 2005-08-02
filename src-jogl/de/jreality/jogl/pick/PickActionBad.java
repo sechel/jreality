@@ -16,7 +16,8 @@ import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.pick.PickPoint;
-import de.jreality.util.*;
+import de.jreality.util.Rectangle3D;
+import de.jreality.util.math.*;
 /**
  * @author gunn
  *

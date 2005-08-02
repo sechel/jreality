@@ -19,9 +19,9 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.pick.*;
 import de.jreality.soft.SoftPickSystem;
 import de.jreality.scene.pick.bounding.AABBTree;
-import de.jreality.util.Matrix;
-import de.jreality.util.P3;
-import de.jreality.util.SceneGraphUtilities;
+import de.jreality.util.SceneGraphUtility;
+import de.jreality.util.math.Matrix;
+import de.jreality.util.math.P3;
 
 /**
  * @author brinkman
@@ -47,14 +47,14 @@ public class ToolTestScene {
     //pl.setConeAngle(Math.PI);
 
     pl.setIntensity(0.6);
-    SceneGraphComponent l0 = SceneGraphUtilities
+    SceneGraphComponent l0 = SceneGraphUtility
         .createFullSceneGraphComponent("light0");
     l0.setLight(pl);
     lights.addChild(l0);
     DirectionalLight dl = new DirectionalLight();
     dl.setColor(new Color(200, 150, 200));
     dl.setIntensity(0.6);
-    l0 = SceneGraphUtilities.createFullSceneGraphComponent("light1");
+    l0 = SceneGraphUtility.createFullSceneGraphComponent("light1");
     double[] zaxis = { 0, 0, 1 };
     double[] other = { 1, 1, 1 };
     l0.getTransformation().setMatrix(P3.makeRotationMatrix(null, zaxis, other));

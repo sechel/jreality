@@ -12,9 +12,9 @@ import java.util.logging.Level;
 import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.scene.Transformation;
-import de.jreality.util.P3;
-import de.jreality.util.Pn;
-import de.jreality.util.Rn;
+import de.jreality.util.math.P3;
+import de.jreality.util.math.Pn;
+import de.jreality.util.math.Rn;
 
 /**
  * @author Charles Gunn

@@ -9,27 +9,16 @@ import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
-import de.jreality.geometry.GeometryUtility;
-import de.jreality.geometry.QuadMeshShape;
-import de.jreality.geometry.QuadMeshUtility;
-import de.jreality.geometry.TubeUtility;
+import de.jreality.geometry.*;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
-import de.jreality.jogl.OpenGLState;
 import de.jreality.jogl.pick.JOGLPickAction;
-import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.Geometry;
-import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.IndexedLineSet;
-import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
-import de.jreality.scene.data.StorageModel;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.NameSpace;
-import de.jreality.util.Rn;
-import de.jreality.util.ShaderUtility;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
 
 /**
  * @author Charles Gunn
@@ -69,18 +58,18 @@ public class DefaultLineShader implements LineShader  {
 		}
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
-		tubeDraw = eap.getAttribute(NameSpace.name(name, CommonAttributes.TUBES_DRAW), CommonAttributes.TUBES_DRAW_DEFAULT);
-		tubeRadius = eap.getAttribute(NameSpace.name(name,CommonAttributes.TUBE_RADIUS),CommonAttributes.TUBE_RADIUS_DEFAULT);
-		tubeStyle = eap.getAttribute(NameSpace.name(name,CommonAttributes.TUBE_STYLE),CommonAttributes.TUBE_STYLE_DEFAULT);
-		depthFudgeFactor = eap.getAttribute(NameSpace.name(name,CommonAttributes.DEPTH_FUDGE_FACTOR), depthFudgeFactor);
-		interpolateVertexColors = eap.getAttribute(NameSpace.name(name,CommonAttributes.INTERPOLATE_VERTEX_COLORS), CommonAttributes.INTERPOLATE_VERTEX_COLORS_DEFAULT);
-		lighting = eap.getAttribute(NameSpace.name(name,CommonAttributes.LIGHTING_ENABLED), true);
-		lineStipple = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_STIPPLE), lineStipple);
-		lineWidth = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_WIDTH), CommonAttributes.LINE_WIDTH_DEFAULT);
-		lineFactor = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_FACTOR),lineFactor);
-		lineStipplePattern = eap.getAttribute(NameSpace.name(name,CommonAttributes.LINE_STIPPLE_PATTERN),lineStipplePattern);
-		diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.LINE_DIFFUSE_COLOR_DEFAULT);
-		double transp = eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
+		tubeDraw = eap.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.TUBES_DRAW), CommonAttributes.TUBES_DRAW_DEFAULT);
+		tubeRadius = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TUBE_RADIUS),CommonAttributes.TUBE_RADIUS_DEFAULT);
+		tubeStyle = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TUBE_STYLE),CommonAttributes.TUBE_STYLE_DEFAULT);
+		depthFudgeFactor = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DEPTH_FUDGE_FACTOR), depthFudgeFactor);
+		interpolateVertexColors = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.INTERPOLATE_VERTEX_COLORS), CommonAttributes.INTERPOLATE_VERTEX_COLORS_DEFAULT);
+		lighting = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHTING_ENABLED), true);
+		lineStipple = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LINE_STIPPLE), lineStipple);
+		lineWidth = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LINE_WIDTH), CommonAttributes.LINE_WIDTH_DEFAULT);
+		lineFactor = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LINE_FACTOR),lineFactor);
+		lineStipplePattern = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LINE_STIPPLE_PATTERN),lineStipplePattern);
+		diffuseColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.LINE_DIFFUSE_COLOR_DEFAULT);
+		double transp = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
 		setDiffuseColor( ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transp));
 		polygonShader = ShaderLookup.getPolygonShaderAttr(eap, name, "polygonShader");
 		//JOGLConfiguration.theLog.log(Level.FINE,"Line shader is smooth: "+smoothShading);

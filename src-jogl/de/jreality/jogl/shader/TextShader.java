@@ -8,12 +8,11 @@ package de.jreality.jogl.shader;
 import java.awt.Color;
 
 import net.java.games.jogl.GL;
-
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.OpenGLState;
 import de.jreality.scene.CommonAttributes;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.NameSpace;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
 
 /**
  * @author gunn
@@ -36,7 +35,7 @@ public class TextShader implements Shader {
 	}
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
-		diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.DIFFUSE_COLOR_DEFAULT);
+		diffuseColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.DIFFUSE_COLOR_DEFAULT);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
 	}
 }

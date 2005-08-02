@@ -24,8 +24,8 @@ package de.jreality.soft;
 
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.Geometry;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.NameSpace;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
 
 /**
  * 
@@ -66,8 +66,8 @@ public class DefaultPointShader implements PointShader {
     }
 
     public void setup(EffectiveAppearance eAppearance, String shaderName) {
-        pointRadius = eAppearance.getAttribute(NameSpace.name(shaderName, CommonAttributes.POINT_RADIUS), pointRadius);
-        outlineFraction = eAppearance.getAttribute(NameSpace.name(shaderName, "outlineFraction"), outlineFraction);
+        pointRadius = eAppearance.getAttribute(ShaderUtility.nameSpace(shaderName, CommonAttributes.POINT_RADIUS), pointRadius);
+        outlineFraction = eAppearance.getAttribute(ShaderUtility.nameSpace(shaderName, "outlineFraction"), outlineFraction);
         coreShader=ShaderLookup.getPolygonShaderAttr(eAppearance, shaderName, "coreShader");
         outlineShader=ShaderLookup.getPolygonShaderAttr(eAppearance, shaderName, "outlineShader");
     }

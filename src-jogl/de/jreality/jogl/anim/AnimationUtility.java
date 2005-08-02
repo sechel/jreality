@@ -6,9 +6,9 @@ package de.jreality.jogl.anim;
 
 import de.jreality.scene.Camera;
 import de.jreality.scene.Transformation;
-import de.jreality.util.FactoredMatrix;
-import de.jreality.util.Pn;
-import de.jreality.util.Quaternion;
+import de.jreality.util.math.FactoredMatrix;
+import de.jreality.util.math.Pn;
+import de.jreality.util.math.Quaternion;
 
 /**
  * @author gunn

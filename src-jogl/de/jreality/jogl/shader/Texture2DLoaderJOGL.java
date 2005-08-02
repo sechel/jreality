@@ -1,23 +1,19 @@
 package de.jreality.jogl.shader;
 
 import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
-import java.util.Collection;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.logging.Level;
 
-import net.java.games.jogl.*;
+import net.java.games.jogl.GL;
+import net.java.games.jogl.GLDrawable;
+import net.java.games.jogl.GLU;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
-import de.jreality.shader.Texture2D;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.ReflectionMap;
-import de.jreality.util.ImageData;
+import de.jreality.shader.Texture2D;
 import de.jreality.util.LoggingSystem;
 
 /**

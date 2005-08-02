@@ -22,6 +22,7 @@
  */
 package de.jreality.util;
 
+import de.jreality.util.math.Matrix;
 import junit.framework.TestCase;
 
 /**

@@ -28,7 +28,11 @@ import java.util.logging.Logger;
 import de.jreality.scene.*;
 import de.jreality.scene.data.*;
 import de.jreality.scene.pick.PickResult;
-import de.jreality.util.*;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
+import de.jreality.util.math.Pn;
+import de.jreality.util.math.Rn;
+import de.jreality.util.math.VecMat;
 
 /**
  * This class traverses a scene graph starting from the given "root" scene
@@ -172,14 +176,14 @@ public void setPipeline(PolygonPipeline pipeline) {
       Logger.getLogger("de.jreality").warning("unsupported geometry shader");
     String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
     
-    if((boolean)eAppearance.getAttribute(NameSpace.name(geomShaderName, CommonAttributes.FACE_DRAW), true)) {
+    if((boolean)eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.FACE_DRAW), true)) {
         PolygonShader fs=ShaderLookup
             .getPolygonShaderAttr(eAppearance, geomShaderName, FACE_SHADER);
         pipeline.setFaceShader(this.polygonShader=fs);
     } else {
         pipeline.setFaceShader(this.polygonShader=null);
     }
-    if((boolean)eAppearance.getAttribute(NameSpace.name(geomShaderName, CommonAttributes.EDGE_DRAW), true)) {
+    if((boolean)eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW), true)) {
         LineShader ls=ShaderLookup
        .getLineShaderAttr(eAppearance, geomShaderName, CommonAttributes.LINE_SHADER);;
        pipeline.setLineShader(this.lineShader=ls);
@@ -187,7 +191,7 @@ public void setPipeline(PolygonPipeline pipeline) {
         pipeline.setLineShader(this.lineShader=null);
     }
        
-    if((boolean)eAppearance.getAttribute(NameSpace.name(geomShaderName, CommonAttributes.VERTEX_DRAW), true)) {
+    if((boolean)eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.VERTEX_DRAW), true)) {
         PointShader ps=ShaderLookup
             .getPointShaderAttr(eAppearance, geomShaderName, CommonAttributes.POINT_SHADER);;
         pipeline.setPointShader(this.pointShader=ps);

@@ -64,8 +64,12 @@ public class HeadtrackedRemoteJOGLViewerImp extends HeadtrackedRemoteViewerImp i
     public void swapBuffers() {
         getViewer().swapBuffers();
     }
+
+    /**
+     * TODO !!
+     */
     public void setUseDisplayLists(boolean b) {
-        getViewer().getRenderer().setUseDisplayLists(b);
+//        getViewer().getRenderer().setUseDisplayLists(b);
     }
     public void waitForRenderFinish() {
         getViewer().waitForRenderFinish();

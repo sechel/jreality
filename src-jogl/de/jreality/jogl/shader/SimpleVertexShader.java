@@ -10,14 +10,11 @@ import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
-
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.CommonAttributes;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.NameSpace;
-import de.jreality.util.Rn;
-import de.jreality.util.ShaderUtility;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
 
 /**
  * @author gunn
@@ -56,9 +53,9 @@ public class SimpleVertexShader implements VertexShader {
 	}
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
 		JOGLConfiguration.theLog.log(Level.FINER,"Setting simple vertex shader");
-		diffuseCoefficient = eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COEFFICIENT), CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
-		diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.DIFFUSE_COLOR_DEFAULT);
-		transparency= eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
+		diffuseCoefficient = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COEFFICIENT), CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
+		diffuseColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.DIFFUSE_COLOR_DEFAULT);
+		transparency= eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
 		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transparency);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
 	}

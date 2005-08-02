@@ -24,6 +24,7 @@ package de.jreality.soft;
 
 import java.io.*;
 
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
 
 /**
@@ -139,6 +140,20 @@ public class SVGViewer extends AbstractViewer implements Viewer {
     public void setSignature(int sig) {
         // TODO Auto-generated method stub
         
+    }
+
+    /* (non-Javadoc)
+     * @see de.jreality.scene.Viewer#setAuxiliaryRoot(de.jreality.scene.SceneGraphComponent)
+     */
+    public void setAuxiliaryRoot(SceneGraphComponent ar) {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    /* (non-Javadoc)
+     * @see de.jreality.scene.Viewer#getAuxiliaryRoot()
+     */
+    public SceneGraphComponent getAuxiliaryRoot() {
+        throw new UnsupportedOperationException("not implemented");
     }    
     
 }

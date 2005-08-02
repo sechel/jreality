@@ -6,10 +6,6 @@ package de.jreality.jogl.shader;
 
 import java.io.IOException;
 
-import net.java.games.jogl.GL;
-import de.jreality.jogl.JOGLRenderer;
-import de.jreality.util.EffectiveAppearance;
-
 /**
  * @author gunn
  *

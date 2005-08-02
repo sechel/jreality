@@ -11,10 +11,7 @@ import java.util.List;
 
 import javax.swing.KeyStroke;
 
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLDrawable;
-import net.java.games.jogl.GLEventListener;
-import net.java.games.jogl.GLU;
+import net.java.games.jogl.*;
 import net.java.games.jogl.util.GLUT;
 
 /**

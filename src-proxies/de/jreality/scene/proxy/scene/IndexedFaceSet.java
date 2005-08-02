@@ -1,17 +1,8 @@
 package de.jreality.scene.proxy.scene;
 
-import java.nio.ByteBuffer;
-import java.nio.DoubleBuffer;
-import java.nio.IntBuffer;
 import java.util.Collections;
-import java.util.Iterator;
 
 import de.jreality.scene.data.*;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.ByteBufferList;
-import de.jreality.scene.data.DataList;
-import de.jreality.scene.data.DataListSet;
-import de.jreality.util.Lock;
 
 public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
         RemoteIndexedFaceSet {

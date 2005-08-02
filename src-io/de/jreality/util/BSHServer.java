@@ -31,11 +31,11 @@ import java.util.logging.Level;
 
 import javax.swing.JMenuBar;
 
-import de.jreality.reader.Input;
 import de.jreality.reader.ReaderBSH;
 import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
+import de.jreality.util.math.Pn;
 
 
 /**
@@ -78,7 +78,7 @@ public class BSHServer implements LoadableScene {
                     PrintStream ps = new PrintStream(sock.getOutputStream());
                     synchronized (readerBSH) {
                         try {
-                            readerBSH.appendInput(Readers.getInput("socket input stream", is));
+                            readerBSH.appendInput(Input.getInput("socket input stream", is));
                         } catch(Exception e) {
                             e.printStackTrace(ps);
                         } finally

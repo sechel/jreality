@@ -6,14 +6,9 @@ package de.jreality.jogl;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Texture2D;
-import de.jreality.scene.Transformation;
-import de.jreality.shader.ShaderFactory;
-import de.jreality.util.ImageData;
+import de.jreality.scene.*;
+import de.jreality.shader.ImageData;
+import de.jreality.shader.TextureUtility;
 
 /**
  * @author Charles Gunn
@@ -95,7 +90,7 @@ public class SkyBox extends SceneGraphComponent {
 			SceneGraphComponent sgc = new SceneGraphComponent();
 			ap = new Appearance();
 			sgc.setAppearance(ap);
-			de.jreality.shader.Texture2D tex = ShaderFactory.createTexture(ap, "polygonShader", ft[i]);
+			de.jreality.shader.Texture2D tex = TextureUtility.createTexture(ap, "polygonShader", ft[i]);
       tex.setRepeatS(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
       tex.setRepeatT(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
 			IndexedFaceSet face = IndexedFaceSetUtility.createIndexedFaceSetFrom(cubeIndices, cubeVerts3[i], null, null, texCoords, null, null);

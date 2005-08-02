@@ -17,13 +17,10 @@ import net.java.games.jogl.GLCanvas;
 import net.java.games.jogl.GLDrawable;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.tools.ToolManager;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.Camera;
-import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.*;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.P3;
-import de.jreality.util.SceneGraphUtilities;
+import de.jreality.util.SceneGraphUtility;
+import de.jreality.util.math.P3;
 
 /**
  * @author Charles Gunn
@@ -188,8 +185,8 @@ public class ViewerKeyListener extends KeyAdapter {
 					break;
 
 				case KeyEvent.VK_M:		// reset matrices
-					if (e.isShiftDown()) SceneGraphUtilities.setDefaultMatrix(viewer.getSceneRoot());
-					else  SceneGraphUtilities.resetMatrix(viewer.getSceneRoot());
+					if (e.isShiftDown()) SceneGraphUtility.setDefaultMatrix(viewer.getSceneRoot());
+					else  SceneGraphUtility.resetMatrix(viewer.getSceneRoot());
 					viewer.render();
 					break;
 

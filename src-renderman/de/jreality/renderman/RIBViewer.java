@@ -185,4 +185,18 @@ public class RIBViewer implements Viewer {
     public void setWidth(int width) {
         this.width = width;
     }
+
+    /* (non-Javadoc)
+     * @see de.jreality.scene.Viewer#setAuxiliaryRoot(de.jreality.scene.SceneGraphComponent)
+     */
+    public void setAuxiliaryRoot(SceneGraphComponent ar) {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    /* (non-Javadoc)
+     * @see de.jreality.scene.Viewer#getAuxiliaryRoot()
+     */
+    public SceneGraphComponent getAuxiliaryRoot() {
+        throw new UnsupportedOperationException("not implemented");
+    }
 }

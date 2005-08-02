@@ -22,8 +22,8 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.LoggingSystem;
-import de.jreality.util.Rn;
-import de.jreality.util.SceneGraphUtilities;
+import de.jreality.util.SceneGraphUtility;
+import de.jreality.util.math.Rn;
 
 /**
  * 
@@ -101,7 +101,7 @@ public class OOGLReader {
         //st.parseNumbers();
          
         SceneGraphComponent sgc = loadOneLevel(st, 0);
-       	SceneGraphUtilities.setDefaultMatrix(sgc);
+       	SceneGraphUtility.setDefaultMatrix(sgc);
    		return sgc;
 
     }
@@ -148,7 +148,7 @@ public class OOGLReader {
                  		boolean hasVC = st.sval.indexOf("C") >= 0;
                  		boolean hasVN = st.sval.indexOf("N") >= 0;
                 		    int[][] indices = null;
-                 		current =SceneGraphUtilities.createFullSceneGraphComponent("OFF-node");
+                 		current =SceneGraphUtility.createFullSceneGraphComponent("OFF-node");
                 			//LoggingSystem.getLogger().log(Level.FINER,"found object!");
                  		int numV, numE, numF;
                  		int vLength = (st.sval.indexOf("4") != -1) ?  4 : 3;
@@ -223,7 +223,7 @@ public class OOGLReader {
                  		current.setGeometry(ifs);
             		}
                		else if ( st.sval.indexOf("MESH") != -1) {
-                 		current =SceneGraphUtilities.createFullSceneGraphComponent("MESH-node");
+                 		current =SceneGraphUtility.createFullSceneGraphComponent("MESH-node");
                  		boolean closedU = st.sval.indexOf("u") >= 0;
                  		boolean closedV = st.sval.indexOf("v") >= 0;
                 			boolean hasTC = st.sval.indexOf("ST") >= 0;
@@ -276,7 +276,7 @@ public class OOGLReader {
                 		}
         	
            		else if ( st.sval.indexOf("VECT") != -1) {
-             		current =SceneGraphUtilities.createFullSceneGraphComponent("VECT-node");
+             		current =SceneGraphUtility.createFullSceneGraphComponent("VECT-node");
             			//LoggingSystem.getLogger().log(Level.FINER,"found object!");
              		st.nextToken();
              		int numCurves = Integer.parseInt(st.sval);
@@ -362,7 +362,7 @@ public class OOGLReader {
            			current.setName("SPHERE-node");
            		}
                	else if ( st.sval.indexOf("TLIST") != -1) {
-            			current =SceneGraphUtilities.createFullSceneGraphComponent("TLIST-node");
+            			current =SceneGraphUtility.createFullSceneGraphComponent("TLIST-node");
             			boolean transposed = (st.sval.indexOf("FLIP") != -1);
             			if (transposed) LoggingSystem.getLogger(OOGLReader.class).log(Level.FINER,"Matrices are trasnposed");
            			double[] mat = new double[16];
@@ -383,15 +383,15 @@ public class OOGLReader {
          				current.addChild(sgc);          			}
            		}
            		else if ( st.sval.indexOf("LIST") != -1) {
-            			current =SceneGraphUtilities.createFullSceneGraphComponent("LIST-node");
+            			current =SceneGraphUtility.createFullSceneGraphComponent("LIST-node");
            			SceneGraphComponent child;
            			while ( (child = loadOneLevel(st, bracketDepth)) != null)	{
            				current.addChild( child);
            			}
            		}
           		else if ( st.sval.indexOf("INST") != -1) {
-          			current =SceneGraphUtilities.createFullSceneGraphComponent("INST-node");
-          			SceneGraphComponent geom =SceneGraphUtilities.createFullSceneGraphComponent("INST-unit");
+          			current =SceneGraphUtility.createFullSceneGraphComponent("INST-node");
+          			SceneGraphComponent geom =SceneGraphUtility.createFullSceneGraphComponent("INST-unit");
           			
           			st.nextToken();
           			if (st.ttype != StreamTokenizer.TT_WORD)	{

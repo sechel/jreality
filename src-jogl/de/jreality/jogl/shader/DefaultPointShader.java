@@ -5,31 +5,24 @@
 package de.jreality.jogl.shader;
 
 import java.awt.Color;
-import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
 import de.jreality.geometry.GeometryUtility;
-import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLSphereHelper;
 import de.jreality.jogl.OpenGLState;
-import de.jreality.jogl.Snake;
 import de.jreality.jogl.pick.JOGLPickAction;
-import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.Geometry;
-import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.NameSpace;
-import de.jreality.util.P3;
-import de.jreality.util.Pn;
-import de.jreality.util.Rn;
-import de.jreality.util.ShaderUtility;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
+import de.jreality.util.math.P3;
+import de.jreality.util.math.Rn;
 
 /**
  * @author Charles Gunn
@@ -50,12 +43,12 @@ public class DefaultPointShader  implements PointShader {
 	}
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
-		sphereDraw = eap.getAttribute(NameSpace.name(name,CommonAttributes.SPHERES_DRAW), CommonAttributes.SPHERES_DRAW_DEFAULT);
-		lighting = eap.getAttribute(NameSpace.name(name,CommonAttributes.LIGHTING_ENABLED), true);
-		pointSize = eap.getAttribute(NameSpace.name(name,CommonAttributes.POINT_SIZE), CommonAttributes.POINT_SIZE_DEFAULT);
-		pointRadius = eap.getAttribute(NameSpace.name(name,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
-		diffuseColor = (Color) eap.getAttribute(NameSpace.name(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.POINT_DIFFUSE_COLOR_DEFAULT);	
-		double t = eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
+		sphereDraw = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SPHERES_DRAW), CommonAttributes.SPHERES_DRAW_DEFAULT);
+		lighting = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHTING_ENABLED), true);
+		pointSize = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POINT_SIZE), CommonAttributes.POINT_SIZE_DEFAULT);
+		pointRadius = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
+		diffuseColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.POINT_DIFFUSE_COLOR_DEFAULT);	
+		double t = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
 		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, t);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
 		polygonShader = ShaderLookup.getPolygonShaderAttr(eap, name, "polygonShader");

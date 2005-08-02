@@ -23,7 +23,7 @@ import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.PickSystem;
 import de.jreality.soft.DefaultViewer;
-import de.jreality.util.Rn;
+import de.jreality.util.math.Rn;
 
 /**
  * @author brinkman

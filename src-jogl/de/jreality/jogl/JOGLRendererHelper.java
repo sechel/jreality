@@ -16,39 +16,17 @@ import javax.imageio.ImageIO;
 
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
-import net.java.games.jogl.GLCapabilities;
 import net.java.games.jogl.GLDrawable;
-import net.java.games.jogl.GLEventListener;
-import net.java.games.jogl.GLPbuffer;
 import net.java.games.jogl.util.BufferUtils;
 import net.java.games.jogl.util.GLUT;
-import de.jreality.geometry.GeometryUtility;
-import de.jreality.geometry.LabelSet;
-import de.jreality.geometry.QuadMeshShape;
-import de.jreality.geometry.RegularDomainQuadMesh;
+import de.jreality.geometry.*;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultPolygonShader;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.ClippingPlane;
-import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.DirectionalLight;
-import de.jreality.scene.Graphics3D;
-import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.IndexedLineSet;
-import de.jreality.scene.Light;
-import de.jreality.scene.PointLight;
-import de.jreality.scene.PointSet;
-import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.SpotLight;
-import de.jreality.scene.Texture2D;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DataList;
-import de.jreality.scene.data.DoubleArray;
-import de.jreality.scene.data.IntArray;
-import de.jreality.util.Pn;
-import de.jreality.util.Rn;
+import de.jreality.scene.*;
+import de.jreality.scene.data.*;
+import de.jreality.util.math.Pn;
+import de.jreality.util.math.Rn;
 
 /**
  * @author gunn

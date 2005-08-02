@@ -4,8 +4,8 @@
  */
 package de.jreality.jogl.tools;
 
-import de.jreality.util.Quaternion;
-import de.jreality.util.Rn;
+import de.jreality.util.math.Quaternion;
+import de.jreality.util.math.Rn;
 
 /**
  * A Rotator is a class which interprets mouse motions to produce rotations

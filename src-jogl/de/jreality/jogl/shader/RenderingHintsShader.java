@@ -4,17 +4,13 @@
  */
 package de.jreality.jogl.shader;
 
-import javax.swing.JPanel;
-
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
-
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
-import de.jreality.scene.Texture2D;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.NameSpace;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
 
 /**
  * @author Charles Gunn
@@ -59,14 +55,14 @@ public class RenderingHintsShader  {
 	}
 	
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
-		lightingEnabled = eap.getAttribute(NameSpace.name(name,CommonAttributes.LIGHTING_ENABLED), true);
-		transparencyEnabled = eap.getAttribute(NameSpace.name(name,CommonAttributes.TRANSPARENCY_ENABLED), false);
-		antiAliasingEnabled = eap.getAttribute(NameSpace.name(name,CommonAttributes.ANTIALIASING_ENABLED), false);
-		backFaceCullingEnabled = eap.getAttribute(NameSpace.name(name,CommonAttributes.BACK_FACE_CULLING_ENABLED), false);
-		atInfinity = eap.getAttribute(NameSpace.name(name,CommonAttributes.AT_INFINITY), false);
-		isFastAndDirty = eap.getAttribute(NameSpace.name(name,CommonAttributes.FAST_AND_DIRTY_ENABLED), false);
-		useDisplayLists = eap.getAttribute(NameSpace.name(name,CommonAttributes.ANY_DISPLAY_LISTS), true);
-		levelOfDetail = eap.getAttribute(NameSpace.name(name,CommonAttributes.LEVEL_OF_DETAIL),CommonAttributes.LEVEL_OF_DETAIL_DEFAULT);
+		lightingEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHTING_ENABLED), true);
+		transparencyEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY_ENABLED), false);
+		antiAliasingEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.ANTIALIASING_ENABLED), false);
+		backFaceCullingEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.BACK_FACE_CULLING_ENABLED), false);
+		atInfinity = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.AT_INFINITY), false);
+		isFastAndDirty = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.FAST_AND_DIRTY_ENABLED), false);
+		useDisplayLists = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.ANY_DISPLAY_LISTS), true);
+		levelOfDetail = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LEVEL_OF_DETAIL),CommonAttributes.LEVEL_OF_DETAIL_DEFAULT);
 		//if (isFastAndDirty) levelOfDetail = 0.0;
 	}
 

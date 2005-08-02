@@ -7,11 +7,7 @@ package de.jreality.jogl;
 import java.awt.Dimension;
 import java.util.List;
 
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLCanvas;
-import net.java.games.jogl.GLDrawable;
-import net.java.games.jogl.GLEventListener;
-import net.java.games.jogl.GLU;
+import net.java.games.jogl.*;
 import net.java.games.jogl.util.GLUT;
 
 /**

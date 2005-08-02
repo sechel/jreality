@@ -7,18 +7,16 @@ package de.jreality.jogl.tools;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.util.logging.Level;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.HelpOverlay;
-import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.Pn;
-import de.jreality.util.Quaternion;
 import de.jreality.util.Rectangle3D;
-import de.jreality.util.Rn;
+import de.jreality.util.math.Pn;
+import de.jreality.util.math.Quaternion;
+import de.jreality.util.math.Rn;
 
 /**
  * @author Charles Gunn

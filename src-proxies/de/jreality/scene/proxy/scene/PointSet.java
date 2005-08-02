@@ -3,11 +3,11 @@ package de.jreality.scene.proxy.scene;
 import java.util.Collections;
 import java.util.Iterator;
 
+import de.jreality.scene.Lock;
 import de.jreality.scene.data.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
-import de.jreality.util.Lock;
 
 public class PointSet extends de.jreality.scene.PointSet implements
         RemotePointSet {

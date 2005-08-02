@@ -43,10 +43,10 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.scene.proxy.treeview.SceneTreeViewer;
 import de.jreality.soft.DefaultViewer;
 import de.jreality.soft.MouseTool;
 import de.jreality.soft.SVGViewer;
-import de.jreality.ui.SceneTreeViewer;
 
 /**
  * 

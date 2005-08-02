@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 
 import de.jreality.reader.ase.AseFile;
 import de.jreality.reader.ase.AseReader;
+import de.jreality.util.Input;
 
 
 /**

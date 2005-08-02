@@ -14,9 +14,9 @@ import szg.framework.event.WandMotionListener;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.util.BoundingBoxTraversal;
-import de.jreality.util.P3;
 import de.jreality.util.Rectangle3D;
-import de.jreality.util.Rn;
+import de.jreality.util.math.P3;
+import de.jreality.util.math.Rn;
 
 /**
  * @author gollwas

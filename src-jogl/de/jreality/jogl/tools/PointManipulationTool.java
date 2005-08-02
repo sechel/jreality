@@ -21,7 +21,9 @@ import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
 import de.jreality.scene.pick.PickPoint;
-import de.jreality.util.*;
+import de.jreality.util.CameraUtility;
+import de.jreality.util.SceneGraphUtility;
+import de.jreality.util.math.*;
 
 
 /**
@@ -130,7 +132,7 @@ public class PointManipulationTool extends AbstractMouseTool implements Transfor
 		pickPathObserver.setPath(thePoint.getPickPath());
 		if (theRepn == null) 		{
 			//JOGLConfiguration.theLog.log(Level.FINE,"Attaching to viewer");
-			frameIconKit = SceneGraphUtilities.createFullSceneGraphComponent("sphere");
+			frameIconKit = SceneGraphUtility.createFullSceneGraphComponent("sphere");
 			//theSphereKit.setGeometry(SphereHelper.SPHERE_FINE);
 			frameIconKit.addChild(Primitives.cameraIcon(1.0));
 			SceneGraphComponent sph = Primitives.sphere(.1, null);
@@ -138,15 +140,15 @@ public class PointManipulationTool extends AbstractMouseTool implements Transfor
 			frameIconKit.addChild(sph);
 			frameIconKit.getTransformation().setStretch(iconScale);	
 			frameIconKit.getTransformation().setDefaultMatrix();
-			theScaleKit = SceneGraphUtilities.createFullSceneGraphComponent("scaleKit");
+			theScaleKit = SceneGraphUtility.createFullSceneGraphComponent("scaleKit");
 			theScaleKit.addChild(frameIconKit);
 			IndexedLineSet axes = new IndexedLineSet(6,3);
 			axes.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(axisVerts));
 			axes.setEdgeAttributes(Attribute.INDICES, StorageModel.INT_ARRAY.array(2).createReadOnly(indices));
 			theScaleKit.setGeometry(axes);
-			theTransKit = SceneGraphUtilities.createFullSceneGraphComponent("transKit");
+			theTransKit = SceneGraphUtility.createFullSceneGraphComponent("transKit");
 			theTransKit.addChild(theScaleKit);
-			theRepn = SceneGraphUtilities.createFullSceneGraphComponent("pointManipulation");
+			theRepn = SceneGraphUtility.createFullSceneGraphComponent("pointManipulation");
 			theRepn.addChild(theTransKit);
 			pathToIcon = new SceneGraphPath();
 			pathToIcon.push(theRepn);

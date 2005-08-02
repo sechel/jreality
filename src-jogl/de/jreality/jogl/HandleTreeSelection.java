@@ -11,7 +11,7 @@ import javax.swing.tree.TreePath;
 
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.ui.SceneTreeModel.Node;
+import de.jreality.scene.proxy.treeview.SceneTreeModel.Node;
 
 /**
  * @author Holger

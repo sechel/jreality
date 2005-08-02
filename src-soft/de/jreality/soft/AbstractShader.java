@@ -23,7 +23,7 @@
 package de.jreality.soft;
 
 import de.jreality.scene.Geometry;
-import de.jreality.util.EffectiveAppearance;
+import de.jreality.shader.EffectiveAppearance;
 
 /**
  * 

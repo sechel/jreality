@@ -30,16 +30,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.jreality.scene.*;
+import de.jreality.scene.data.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.*;
-import de.jreality.util.AttributeEntityFactory;
-import de.jreality.util.ImageData;
-import de.jreality.util.P3;
-import de.jreality.util.Rn;
+import de.jreality.util.math.MatrixBuilder;
+import de.jreality.util.math.P3;
+import de.jreality.util.math.Rn;
 
 /**
  *
@@ -279,7 +280,7 @@ public class Reader3DS extends AbstractReader {
         try {
           ImageData imgData = ImageData.load(input.resolveInput(textName));
           if (imgData != null) {
-            tex2d = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, 
+            tex2d = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, 
               CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D, getCurrentApperance());
             tex2d.setImage(imgData);
             tex2d.setTextureMatrix(MatrixBuilder.euclidian().scale(1,-1,0).getMatrix());

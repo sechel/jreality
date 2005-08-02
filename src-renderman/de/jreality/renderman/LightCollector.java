@@ -25,8 +25,8 @@ package de.jreality.renderman;
 import java.util.HashMap;
 
 import de.jreality.scene.*;
-import de.jreality.util.Rn;
-import de.jreality.util.VecMat;
+import de.jreality.util.math.Rn;
+import de.jreality.util.math.VecMat;
 
 /**
  * This is a utility for the RIBVisitor. It collects all the lights in the scene

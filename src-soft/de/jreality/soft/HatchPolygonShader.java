@@ -22,10 +22,8 @@
  */
 package de.jreality.soft;
 
-import de.jreality.shader.Texture2D;
-import de.jreality.util.AttributeEntityFactory;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.NameSpace;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
 
 
 /**
@@ -45,7 +43,7 @@ public class HatchPolygonShader extends DefaultPolygonShader {
     }
 
     public void setup(EffectiveAppearance eAppearance, String name) {
-        outline = eAppearance.getAttribute(NameSpace.name(name, "outline"), outline);
+        outline = eAppearance.getAttribute(ShaderUtility.nameSpace(name, "outline"), outline);
         setVertexShader(ShaderLookup.getVertexShaderAttr(eAppearance, name, "vertexShader"));
       }
     

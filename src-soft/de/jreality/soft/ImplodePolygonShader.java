@@ -24,8 +24,8 @@ package de.jreality.soft;
 
 
 import de.jreality.scene.Geometry;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.NameSpace;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
 
 /**
  * 
@@ -104,8 +104,8 @@ public class ImplodePolygonShader implements PolygonShader {
     }
 
     public void setup(EffectiveAppearance eAppearance, String name) {
-      outline = eAppearance.getAttribute(NameSpace.name(name, "outline"), outline);
-      implodeFactor = eAppearance.getAttribute(NameSpace.name(name, "implodeFactor"), implodeFactor);
+      outline = eAppearance.getAttribute(ShaderUtility.nameSpace(name, "outline"), outline);
+      implodeFactor = eAppearance.getAttribute(ShaderUtility.nameSpace(name, "implodeFactor"), implodeFactor);
       setVertexShader(ShaderLookup.getVertexShaderAttr(eAppearance, name, "vertexShader"));
 //    String textureFile = (String) eAppearance.getAttribute(NameSpace.name(name, "texture"), "");
 //    try {
@@ -114,7 +114,7 @@ public class ImplodePolygonShader implements PolygonShader {
 //        Logger.getLogger("de.jreality").log(Level.FINEST, "attempt to load textur {0} failed", textureFile);
 //        texture =null;
 //    }
-      texture =(Texture)eAppearance.getAttribute(NameSpace.name(name, "texture"),null,Texture.class);
+      texture =(Texture)eAppearance.getAttribute(ShaderUtility.nameSpace(name, "texture"),null,Texture.class);
       
       }
     public Texture getTexture() {

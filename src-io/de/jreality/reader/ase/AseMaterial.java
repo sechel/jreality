@@ -60,12 +60,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
-import de.jreality.reader.Input;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
+import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
-import de.jreality.util.AttributeEntityFactory;
-import de.jreality.util.ImageData;
+import de.jreality.util.*;
 import de.jreality.util.LoggingSystem;
 
 
@@ -197,7 +197,7 @@ public class AseMaterial extends AseNode {
             try {
               ImageData id = ImageData.load(input.getRelativeInput(tname));
               
-              Texture2D t = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, 
+              Texture2D t = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, 
                 CommonAttributes.POLYGON_SHADER + "."
                 + CommonAttributes.TEXTURE_2D, a);
 

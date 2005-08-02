@@ -22,6 +22,8 @@
  */
 package de.jreality.util;
 
+import de.jreality.util.math.FactoredMatrix;
+import de.jreality.util.math.Rn;
 import junit.framework.TestCase;
 
 

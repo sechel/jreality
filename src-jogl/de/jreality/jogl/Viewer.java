@@ -10,20 +10,12 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 
-import net.java.games.jogl.DefaultGLCapabilitiesChooser;
-import net.java.games.jogl.GLCanvas;
-import net.java.games.jogl.GLCapabilities;
-import net.java.games.jogl.GLCapabilitiesChooser;
-import net.java.games.jogl.GLDrawable;
-import net.java.games.jogl.GLDrawableFactory;
-import net.java.games.jogl.GLEventListener;
-import net.java.games.jogl.GLPbuffer;
-import de.jreality.scene.Camera;
+import net.java.games.jogl.*;
 import de.jreality.scene.Drawable;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.SceneGraphUtilities;
+import de.jreality.util.SceneGraphUtility;
 
 /**
  * @author Charles Gunn
@@ -54,7 +46,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 
 	public Viewer(SceneGraphPath p, SceneGraphComponent r) {
 		super();
-		auxiliaryRoot = SceneGraphUtilities.createFullSceneGraphComponent("AuxiliaryRoot");
+		auxiliaryRoot = SceneGraphUtility.createFullSceneGraphComponent("AuxiliaryRoot");
 		initializeFrom(r, p);	
 		// for reasons unknown, have to be very careful on Linux not to try to draw too early.
 		// to avoid this, set the following variables 
@@ -156,7 +148,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	}
 	public void setSignature(int signature) {
 		this.signature = signature;
-		SceneGraphUtilities.setSignature(sceneRoot, signature);
+		SceneGraphUtility.setSignature(sceneRoot, signature);
 		
 	}
 	
@@ -186,7 +178,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		
 		public void addAuxiliaryComponent(SceneGraphComponent aux)	{
 			if (auxiliaryRoot == null)	{
-				setAuxiliaryRoot(SceneGraphUtilities.createFullSceneGraphComponent("AuxiliaryRoot"));
+				setAuxiliaryRoot(SceneGraphUtility.createFullSceneGraphComponent("AuxiliaryRoot"));
 			}
 			if (!auxiliaryRoot.isDirectAncestor(aux)) auxiliaryRoot.addChild(aux);
 		}

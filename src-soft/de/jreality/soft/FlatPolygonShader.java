@@ -24,8 +24,8 @@ package de.jreality.soft;
 
 import de.jreality.scene.Geometry;
 import de.jreality.scene.Texture2D;
-import de.jreality.util.EffectiveAppearance;
-import de.jreality.util.NameSpace;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
 
 /**
  * 
@@ -146,13 +146,13 @@ public class FlatPolygonShader implements PolygonShader {
     }
 
     public void setup(EffectiveAppearance eAppearance, String name) {
-      outline = eAppearance.getAttribute(NameSpace.name(name, "outline"), outline);
+      outline = eAppearance.getAttribute(ShaderUtility.nameSpace(name, "outline"), outline);
       vertexShader=ShaderLookup.getVertexShaderAttr(eAppearance, name, "vertexShader");
       // since the shading is done only once per polygon at the moment
       // we do not need to interpolate the colors:
       //interpolateColor=!(vertexShader instanceof ConstantVertexShader);
 
-      Texture2D tex = (Texture2D)eAppearance.getAttribute(NameSpace.name(name, "texture"),null,Texture2D.class);
+      Texture2D tex = (Texture2D)eAppearance.getAttribute(ShaderUtility.nameSpace(name, "texture"),null,Texture2D.class);
       if(tex != null) texture = new SimpleTexture(tex);     
     }
     public Texture getTexture() {

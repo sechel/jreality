@@ -25,6 +25,7 @@ package de.jreality.reader;
 import java.io.File;
 
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.util.Input;
 
 import junit.framework.TestCase;
 
@@ -62,7 +63,7 @@ public class OBJReaderTest extends TestCase {
 
     public void testMTLReader() throws Exception {
         String fileName = "/home/gollwas/Buddy-Mesh.mtl";
-        ParserMTL.readAppearences(Readers.getInput(new File(fileName)));
+        ParserMTL.readAppearences(Input.getInput(new File(fileName)));
     }
 
 }

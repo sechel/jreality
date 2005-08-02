@@ -42,8 +42,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import de.jreality.reader.Input;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.util.Input;
 
 /**
  * <p>Loader for the ase file format.  Once the data is loaded, several methods can be

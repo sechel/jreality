@@ -34,9 +34,10 @@ import java.util.Vector;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
-import de.jreality.util.AttributeEntityFactory;
-import de.jreality.util.ImageData;
+import de.jreality.util.*;
 import de.jreality.util.LoggingSystem;
 
 
@@ -219,7 +220,7 @@ public class ParserMTL {
     private void setTextureMap(StreamTokenizer st, Appearance ret) throws IOException {
         String texFile = readString(st);
         try {
-            Texture2D tex = (Texture2D) AttributeEntityFactory.createAttributeEntity(Texture2D.class, CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D, ret);
+            Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D, ret);
             tex.setImage(ImageData.load(input.resolveInput(texFile)));
         } catch (FileNotFoundException e) {
         	LoggingSystem.getLogger(this).warning("couldn't find "+texFile);
