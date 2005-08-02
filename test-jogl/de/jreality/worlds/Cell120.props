@@ -1,9 +1,0 @@
-# first attempt to use configuation file with LoadableScene
-# in this case de.jreality.worlds.Cell120
-fromFile: true
-maxNumberElements: 300
-discreteGroupResourceDir: /homes/geometer/gunn/Software/eclipse/workspace/discreteGroup/resources/
-discreteGroupFile: groups/120cell.gens
-centerPoint: 0 0 0
-beamRadius: .02
-stretchFactor: .2

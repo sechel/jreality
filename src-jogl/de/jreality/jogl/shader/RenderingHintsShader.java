@@ -28,7 +28,8 @@ public class RenderingHintsShader  {
 	   atInfinity = false,
 	   antiAliasingEnabled = false,
 	   backFaceCullingEnabled = false,
-	   isFastAndDirty = false;
+	   isFastAndDirty = false,
+	   useDisplayLists = true;
 	   
 
 	/**
@@ -64,6 +65,7 @@ public class RenderingHintsShader  {
 		backFaceCullingEnabled = eap.getAttribute(NameSpace.name(name,CommonAttributes.BACK_FACE_CULLING_ENABLED), false);
 		atInfinity = eap.getAttribute(NameSpace.name(name,CommonAttributes.AT_INFINITY), false);
 		isFastAndDirty = eap.getAttribute(NameSpace.name(name,CommonAttributes.FAST_AND_DIRTY_ENABLED), false);
+		useDisplayLists = eap.getAttribute(NameSpace.name(name,CommonAttributes.ANY_DISPLAY_LISTS), true);
 		levelOfDetail = eap.getAttribute(NameSpace.name(name,CommonAttributes.LEVEL_OF_DETAIL),CommonAttributes.LEVEL_OF_DETAIL_DEFAULT);
 		//if (isFastAndDirty) levelOfDetail = 0.0;
 	}
@@ -156,5 +158,9 @@ public class RenderingHintsShader  {
 			  gl.glDepthMask(true);
 			  gl.glDisable(GL.GL_BLEND);
 			}
+	}
+
+	public boolean isUseDisplayLists() {
+		return useDisplayLists;
 	}
 }

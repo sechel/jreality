@@ -86,10 +86,12 @@ public class Test implements KeyListener {
     SceneGraphComponent root = new SceneGraphComponent();
     Appearance a =new Appearance();
     a.setAttribute(CommonAttributes.BACKGROUND_COLOR, Color.WHITE); //new Color(.4f,.5f,.8f));
+    //testing new feature of JOGL backend to generate unique dl's for each occurrance of Geometry
     root.setAppearance(a);
     buildView(root);
     buildScene(root);
-    trigger.addSceneGraphComponent(root);
+    root.getAppearance().setAttribute(CommonAttributes.MANY_DISPLAY_LISTS, true); 
+   trigger.addSceneGraphComponent(root);
     if(useSoftViewer) {
         softViewer= new DefaultViewer(USE_DOUBLE_RASTERIZER);
         softViewer.setBackground(new Color(.4f,.5f,.8f));
@@ -279,10 +281,10 @@ public class Test implements KeyListener {
         TestScenarioBuilder tstBuilder =new TestScenarioBuilder();
         SceneGraphComponent s = tstBuilder.createFourCatenoids();
         //currently jogl backend requires unique geometries to get the proxy geometry right
-        for (int i = 1; i<4; ++i)  {
-        		s.getChildComponent(i).getChildComponent(0).setGeometry(tstBuilder.createCatenoid());
-           	s.getChildComponent(i).getChildComponent(0).removeChild(s.getChildComponent(i).getChildComponent(0).getChildComponent(0));
-        }
+//        for (int i = 1; i<4; ++i)  {
+//        		s.getChildComponent(i).getChildComponent(0).setGeometry(tstBuilder.createCatenoid());
+//           	s.getChildComponent(i).getChildComponent(0).removeChild(s.getChildComponent(i).getChildComponent(0).getChildComponent(0));
+//        }
         //catenoid =(CatenoidHelicoid) s.getChildComponent(0).getChildComponent(0).getGeometry();
         //System.out.println("catenoid" + catenoid);
         catNode.addChild(s);

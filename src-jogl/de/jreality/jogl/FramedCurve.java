@@ -25,7 +25,7 @@ import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.util.CubicBSpline;
-import de.jreality.util.P3;
+import de.jreality.util.FactoredMatrix;
 import de.jreality.util.Pn;
 import de.jreality.util.Quaternion;
 import de.jreality.util.Rn;
@@ -40,7 +40,6 @@ public class FramedCurve extends SceneGraphComponent {
 	double tmin, tmax;
 	IndexedLineSet curveRepresentation;
 	private boolean outOfDate;
-	private boolean showLastSample = true;
 	private SceneGraphComponent camIcon;
 	private SceneGraphComponent camIconItself;
 	private SceneGraphComponent theCurveItself;
@@ -73,7 +72,7 @@ public class FramedCurve extends SceneGraphComponent {
 	}
 		
 	public static class ControlPoint	implements Comparable {
-		Transformation tt;
+		FactoredMatrix tt;
 		double t;
 			
 		public int compareTo(Object o) {
@@ -85,7 +84,7 @@ public class FramedCurve extends SceneGraphComponent {
 		 * @param tt
 		 * @param t
 		 */
-		public ControlPoint(Transformation tt, double t) {
+		public ControlPoint(FactoredMatrix tt, double t) {
 			super();
 			this.tt = tt;
 			this.t = t;
@@ -105,7 +104,7 @@ public class FramedCurve extends SceneGraphComponent {
 			return t;
 		}
 		
-		public Transformation getTransformation() {
+		public FactoredMatrix getTransformation() {
 			return tt;
 		}
 	}
@@ -116,6 +115,7 @@ public class FramedCurve extends SceneGraphComponent {
 		ap.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.white);
 		ap.setAttribute(CommonAttributes.VERTEX_DRAW, false);
 		ap.setAttribute(CommonAttributes.EDGE_DRAW, true);
+		ap.setAttribute(CommonAttributes.TUBES_DRAW, false);
 		ap.setAttribute(CommonAttributes.FACE_DRAW, false);
 		ap.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_SIZE, 3.0);
 		fc.setAppearance(ap);
@@ -123,7 +123,7 @@ public class FramedCurve extends SceneGraphComponent {
 		return fc;
 	}
 	
-     public void setControlPoints(Transformation[] cp)	{
+     public void setControlPoints(FactoredMatrix[] cp)	{
 		controlPoints.clear();
 		int n = cp.length;
 		for (int i  = 0; i<n; ++i)	{
@@ -139,7 +139,7 @@ public class FramedCurve extends SceneGraphComponent {
     		int n = matrices.length;
     		for (int i  = 0; i<n; ++i)	{
     			double p = (i==0) ? 0d : (i/(n-1.0));
-    	   		controlPoints.add(new ControlPoint(new Transformation(matrices[i]), p));	
+    	   		controlPoints.add(new ControlPoint(new FactoredMatrix((double[]) matrices[i].clone()), p));	
     		}
     		outOfDate=true;
     		update();
@@ -175,8 +175,8 @@ public class FramedCurve extends SceneGraphComponent {
     		tmin = ((ControlPoint) controlPoints.firstElement()).t;
     		tmax = ((ControlPoint) controlPoints.lastElement()).t;
     		// extract translational part
-       	double[] p0 = Rn.matrixTimesVector( null, ((ControlPoint) controlPoints.firstElement()).tt.getMatrix(), Pn.originP3);
-       	double[] p1 = Rn.matrixTimesVector( null, ((ControlPoint) controlPoints.lastElement()).tt.getMatrix(), Pn.originP3);
+       	double[] p0 = Rn.matrixTimesVector( null, ((ControlPoint) controlPoints.firstElement()).tt.getArray(), Pn.originP3);
+       	double[] p1 = Rn.matrixTimesVector( null, ((ControlPoint) controlPoints.lastElement()).tt.getArray(), Pn.originP3);
        	diameter = Pn.distanceBetween(p0, p1, signature);
        	iconScale = .0002 * diameter;
     		int n = controlPoints.size();
@@ -194,7 +194,7 @@ public class FramedCurve extends SceneGraphComponent {
     			Quaternion oldQ = null;
     	   		for ( i = 0, iter = controlPoints.iterator(); iter.hasNext(); ++i )	{
     	   			ControlPoint tmp = (ControlPoint) iter.next();
-        			 double[] m = tmp.tt.getMatrix();
+        			 double[] m = tmp.tt.getArray();
         			 Quaternion rot = tmp.tt.getRotationQuaternion();
     				double w = m[15];
     				t[i] = tmp.t;
@@ -264,7 +264,7 @@ public class FramedCurve extends SceneGraphComponent {
    		for ( i = 0, iter = controlPoints.iterator(); iter.hasNext(); ++i )	{
    			ControlPoint tmp = (ControlPoint) iter.next();
 			SceneGraphComponent sgc = new SceneGraphComponent();
-			sgc.setTransformation(tmp.tt);
+			sgc.setTransformation(new Transformation(tmp.tt.getArray()));
 			sgc.addChild(camIconItself);
 			camIcon.addChild(sgc);
 		}
@@ -281,7 +281,7 @@ public class FramedCurve extends SceneGraphComponent {
     		double[] opt = new double[4];
     		for ( i = 0, iter = controlPoints.iterator(); iter.hasNext(); ++i )	{
     			ControlPoint cp = (ControlPoint) iter.next();
-   			double m[] = cp.tt.getMatrix();
+   			double m[] = cp.tt.getArray();
 			pt[0] = m[3]; pt[1] = m[7]; pt[2] = m[11];  pt[3] = m[15];
    			if (i>0)	{
      			double d =  Pn.distanceBetween(pt, opt, signature);
@@ -316,18 +316,23 @@ public class FramedCurve extends SceneGraphComponent {
 	    return previousSegment;
     }
     
-   public Transformation getValueAtTime(double t, Transformation dst)		{
+	public FactoredMatrix getValueAtTime(double time) {
+		return getValueAtTime(time, null);
+	}
+	
+   public FactoredMatrix getValueAtTime(double t, FactoredMatrix dst)		{
+	   if (dst == null) dst = new FactoredMatrix();
     		if (controlPoints.size() == 1) 	{
     			ControlPoint cp = ((ControlPoint) controlPoints.get(0));
-    			try {
-					dst = ((Transformation) cp.tt.clone());
-				} catch (CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+//    			try {
+//					dst = ((FactoredMatrix) cp.tt.clone());
+//				} catch (CloneNotSupportedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+    			dst.assignFrom(cp.tt.getArray());
     			return dst;
     		}
-    		if (dst == null) dst = new Transformation();
     		// assume 0<=t<=1  
     		// assume each segment is same length in parameter
     		if (outOfDate) update();
@@ -359,7 +364,7 @@ public class FramedCurve extends SceneGraphComponent {
 		} else {
 	     	AnimationUtility.linearInterpolation(dst, cp1.tt, cp2.tt, (t - cp1.t)/dt);
 		}
-       	currentPoint.getTransformation().setMatrix(dst.getMatrix());	 			
+       	currentPoint.getTransformation().setMatrix(dst.getArray());	 			
      	return dst;
     }
     
@@ -412,7 +417,7 @@ public static FramedCurve readFromFile(File file)		{
 								firsttime = false;
 							}
 							count = 0;
-							Transformation gen = new Transformation(signature, mat);
+							FactoredMatrix gen = new FactoredMatrix(signature, (double[]) mat.clone());
 							ControlPoint thiscp = new ControlPoint(gen, thist);
 							cplist.add(thiscp);
 						}
@@ -446,7 +451,7 @@ public static FramedCurve readFromFile(File file)		{
 	   		for ( i = 0, iter = controlPoints.iterator(); iter.hasNext(); ++i )	{
 	   			ControlPoint tmp = (ControlPoint) iter.next();
 	   			pw.println(tmp.t);
-	   			pw.print(Rn.matrixToString(tmp.tt.getMatrix()));
+	   			pw.print(Rn.matrixToString(tmp.tt.getArray()));
 			}
 			pw.close();
  		}
@@ -511,7 +516,7 @@ public static FramedCurve readFromFile(File file)		{
 	    	for (iter = controlPoints.iterator(); iter.hasNext(); )	{
 	    		ControlPoint cp = (ControlPoint) iter.next();
 	    		//cp.tt.setMatrix(Rn.conjugateByMatrix(null, cp.tt.getMatrix(), mat));
-	    		double [] tr = cp.tt.getMatrix();
+	    		double [] tr = cp.tt.getArray();
 	    		boolean toOriginal = false;
 	    		if (toOriginal)	{
 		    		tr[3] = tr[3] + mat1[3]; // - mat2[3];
@@ -523,7 +528,8 @@ public static FramedCurve readFromFile(File file)		{
 		    		tr[11] = tr[11]  - mat2[11];	
 	    			
 	    		}
-	    		cp.tt.setMatrix(tr);
+	    		cp.tt.assignFrom(tr);
 	    	}
 	}
+
  }

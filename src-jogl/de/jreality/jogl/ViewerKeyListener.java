@@ -126,10 +126,11 @@ public class ViewerKeyListener extends KeyAdapter {
 					
 				case KeyEvent.VK_D:		// toggle use of display lists
 					if (e.isShiftDown()) break;
-					boolean useD = viewer.getRenderer().isUseDisplayLists();
-					viewer.getRenderer().setUseDisplayLists(!useD);
+//					boolean useD = viewer.getRenderer().isUseDisplayLists();
+//					viewer.getRenderer().setUseDisplayLists(!useD);
+					toggleValue(viewer, CommonAttributes.ANY_DISPLAY_LISTS, viewer.getSceneRoot().getAppearance());
 					viewer.render();
-					JOGLConfiguration.theLog.log(Level.INFO,"Using display lists: "+viewer.getRenderer().isUseDisplayLists());
+//					JOGLConfiguration.theLog.log(Level.INFO,"Using display lists: "+viewer.getRenderer().isUseDisplayLists());
 					break;
 
 				case KeyEvent.VK_E:		
@@ -331,6 +332,7 @@ public class ViewerKeyListener extends KeyAdapter {
 		if (obj != null && obj instanceof Boolean)	{
 			boolean newVal = true;
 			newVal = !((Boolean) obj).booleanValue();
+			JOGLConfiguration.getLogger().log(Level.INFO,"Toggling property "+name);
 			ap.setAttribute(name, newVal);
 			viewer.render();
 			return;

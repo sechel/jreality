@@ -37,6 +37,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.FactoredMatrix;
 import de.jreality.util.Rn;
 import de.jreality.util.SceneGraphUtilities;
 
@@ -74,7 +75,6 @@ public class FramedCurveInspector extends JFrame {
 	PlayAction playAction;
 	protected Timer cameraMove, cameraEnd;
 	protected double playbackFactor = 1.0;
-	SceneGraphComponent worldSGC = null;
 	
 	
 	static String resourceDir = null;
@@ -371,10 +371,26 @@ public class FramedCurveInspector extends JFrame {
 		if (moveWorld == b) return;
 		moveWorld=b;
 		target.getTransformation().resetMatrix();
-		if (moveWorld) setWorldNode(worldNode);
-		else setWorldNode(null);
+		if (moveWorld && worldNode != null) target = worldNode;
+		else target = myCameraNode;
 		JOGLConfiguration.theLog.log(Level.FINE,"move world is: "+moveWorld);
 		updateCameraPosition();
+	}
+
+	/**
+	 * @return Returns the worldNode.
+	 */
+	public SceneGraphComponent getWorldNode() {
+		return worldNode;
+	}
+	/**
+	 * @param worldNode The worldNode to set.
+	 */
+	public void setWorldNode(SceneGraphComponent wn) {
+		if (wn == null)	{
+			return;
+		}
+		worldNode = wn;
 	}
 
 //	/**
@@ -408,7 +424,7 @@ public class FramedCurveInspector extends JFrame {
 	public void setInspectedCurve(FramedCurve fc) {
 		// calculate time-related constants
 		if (showCurve)	{
-			parent.removeAuxiliaryComponent(theCurve);
+			removeCurve();
 		}
 		theCurve = fc;
 		handleShowCurve();
@@ -440,7 +456,7 @@ public class FramedCurveInspector extends JFrame {
 		updateKeyFrame();
 		time = currentPoint.getTime();
 		tick = tickFromTime(currentPoint.getTime());
-		writeTarget(currentPoint.tt.getMatrix());
+		writeTarget(currentPoint.tt.getArray());
 		parent.render();
 	}
 
@@ -507,7 +523,7 @@ public class FramedCurveInspector extends JFrame {
 		}
 		
 		public void actionPerformed(ActionEvent e) {
-			currentPoint.tt.setMatrix(readTarget());
+			currentPoint.tt.assignFrom(readTarget());
 			theCurve.setOutOfDate(true);
 		}
 
@@ -538,7 +554,7 @@ public class FramedCurveInspector extends JFrame {
 			//int which = theCurve.getSegmentAtTime(time);
 			if (inspectedPoint == theCurve.getNumberControlPoints()-1) return;
 			double tm = (theCurve.getControlPoint(inspectedPoint).getTime() + theCurve.getControlPoint(inspectedPoint+1).getTime())*.5;
-			Transformation tt = new Transformation();
+			FactoredMatrix tt = new FactoredMatrix();
 			theCurve.getValueAtTime(tm, tt );
 			FramedCurve.ControlPoint ncp = new FramedCurve.ControlPoint(tt, tm);
 			theCurve.addControlPoint(ncp);
@@ -666,7 +682,8 @@ public class FramedCurveInspector extends JFrame {
 			inspectedPoint = which;
 			updateKeyFrame();
 		}
-		theCurve.getValueAtTime(time, tt);
+		FactoredMatrix fm = theCurve.getValueAtTime(time);
+		fm.assignTo(tt);
 		playtime.setText(doubleToString(time));
 		writeTarget(tt.getMatrix());
 		parent.render();
@@ -683,15 +700,23 @@ public class FramedCurveInspector extends JFrame {
 	 */
 	private void handleShowCurve() {
 		if (showCurve) {
-			parent.addAuxiliaryComponent(theCurve);
+			if (worldNode != null) 
+				if (!worldNode.isDirectAncestor(theCurve)) worldNode.addChild(theCurve);
+			else  if (parent.getAuxiliaryRoot() == null || !parent.getAuxiliaryRoot().isDirectAncestor(theCurve)) parent.addAuxiliaryComponent(theCurve);
+		 	theCurve.setVisible(true);
 			//JOGLConfiguration.theLog.log(Level.FINE,"Removing frame curve. Index is: "+world.indexOf(frameCurve));
 		}
 		else {
-			parent.removeAuxiliaryComponent(theCurve);
+			theCurve.setVisible(false);
 			//JOGLConfiguration.theLog.log(Level.FINE,"Adding frame curve. Index is: "+world.indexOf(frameCurve));
 		}
 		parent.render();
 		parent.getViewingComponent().requestFocus();
+	}
+
+	public void removeCurve()	{
+		if (worldNode.isDirectAncestor(theCurve)) worldNode.removeChild(theCurve);
+		parent.removeAuxiliaryComponent(theCurve);		
 	}
 
 	/**
@@ -730,10 +755,9 @@ public class FramedCurveInspector extends JFrame {
 		if (fc == null || v == null) return null;
 		JOGLPickAction pickAction = new JOGLPickAction(v);
 		double[] ndc = {0.0, ycoord};
-		pickAction.setPickPoint(ndc);
+		pickAction.setPickPoint(ndc[0], ndc[1]);
 		int n = fc.getNumberControlPoints();
 		double[] focus = new double[n];
-		Graphics3D gc = new Graphics3D(v);
 		StringBuffer sb = new StringBuffer();
 		sb.append("focus\n");
 		for (int i =0; i<n; ++i)	{
@@ -743,7 +767,7 @@ public class FramedCurveInspector extends JFrame {
 			List picks = (List) pickAction.visit();			
 			if (picks!= null && (picks.size() > 0))	{
 				PickPoint pp = (PickPoint) picks.get(0);
-				gc.setCurrentPath(pp.getPickPath());
+				Graphics3D gc = pp.getContext();
 				double[] camPt = Rn.matrixTimesVector(null, gc.getObjectToCamera(), pp.getPointObject());
 				focus[i] = Math.abs(camPt[2]);
 				sb.append(time+" "+focus[i]*3390.0+"\n");
@@ -832,9 +856,9 @@ public class FramedCurveInspector extends JFrame {
 					JOGLConfiguration.theLog.log(Level.INFO,"time is: "+e.getWhen());
 					//JOGLConfiguration.theLog.log(Level.INFO,"Camera node is: "+Rn.matrixToString(myCameraNode.getTransformation().getMatrix()));
 					
-						Transformation tt = new Transformation(parent.getSignature());
+						FactoredMatrix tt = new FactoredMatrix();
 						//TODO apply inverse of objectToWorld transform here
-						tt.setMatrix(readTarget());
+						tt.assignFrom(readTarget());
 						double t = (e.getWhen() - beginCurveTime)/1000.0 + startTime;
 						theCurve.addControlPoint(new FramedCurve.ControlPoint(tt,t));
 						// save the curve
@@ -858,34 +882,5 @@ public class FramedCurveInspector extends JFrame {
 		this.playbackFactor = playbackFactor;
 		playBackF.setText(Double.toString(playbackFactor));
 
-	}
-	public SceneGraphComponent getWorldSGC() {
-		return worldSGC;
-	}
-	public void setWorldSGC(SceneGraphComponent worldSGC) {
-		this.worldSGC = worldSGC;
-	}
-	/**
-	 * @return Returns the worldNode.
-	 */
-	public SceneGraphComponent getWorldNode() {
-		return worldNode;
-	}
-	/**
-	 * @param worldNode The worldNode to set.
-	 */
-	public void setWorldNode(SceneGraphComponent wn) {
-		//worldNode = wn;
-		if (wn != null) {
-			worldNode = wn;
-			moveWorld = true;
-			target = worldNode;
-		}
-		else {
-			moveWorld = false;
-			target = myCameraNode;
-		}
-		JOGLConfiguration.theLog.log(Level.INFO,"setWorldNode: "+moveWorld);
-		// TODO if this is a switch, clean up the old target
 	}
 }

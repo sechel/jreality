@@ -16,7 +16,10 @@ import javax.imageio.ImageIO;
 
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
+import net.java.games.jogl.GLCapabilities;
 import net.java.games.jogl.GLDrawable;
+import net.java.games.jogl.GLEventListener;
+import net.java.games.jogl.GLPbuffer;
 import net.java.games.jogl.util.BufferUtils;
 import net.java.games.jogl.util.GLUT;
 import de.jreality.geometry.GeometryUtility;
@@ -201,23 +204,23 @@ public class JOGLRendererHelper {
 		int[] snakeInfo = null;
 		int begin = -1, length = -1;
 		//SJOGLConfiguration.theLog.log(Level.INFO,"Processing ILS");
-		if (sg instanceof Snake && sg.getGeometryAttributes(Snake.SNAKE_POINTS) != null)	{
-			sp = (double[][] ) sg.getGeometryAttributes(Snake.SNAKE_POINTS);
-			vertexLength = sp[0].length;
-			snakeInfo = (int[] ) sg.getGeometryAttributes(Snake.SNAKE_INFO);
-			begin = snakeInfo[0];
-			length = snakeInfo[1];
-			//JOGLConfiguration.theLog.log(Level.INFO,"Processing the snake with "+length+" points");
-			int n = sp.length;
-			 gl.glBegin(GL.GL_LINE_STRIP);
-			 for (int i = 0; i<length; ++i)	{
-			 	int j = (i+begin) % n;
-				if (vertexLength == 3) gl.glVertex3dv(sp[j]);
-				else if (vertexLength == 4) gl.glVertex4dv(sp[j]);
-			 }
-			gl.glEnd();
-			 return;
-		}
+//		if (sg instanceof Snake ) { // && sg.getGeometryAttributes(Snake.SNAKE_POINTS) != null)	{
+//			sp = (double[][] ) sg.getGeometryAttributes(Snake.SNAKE_POINTS);
+//			vertexLength = sp[0].length;
+//			snakeInfo = (int[] ) sg.getGeometryAttributes(Snake.SNAKE_INFO);
+//			begin = snakeInfo[0];
+//			length = snakeInfo[1];
+//			//JOGLConfiguration.theLog.log(Level.INFO,"Processing the snake with "+length+" points");
+//			int n = sp.length;
+//			 gl.glBegin(GL.GL_LINE_STRIP);
+//			 for (int i = 0; i<length; ++i)	{
+//			 	int j = (i+begin) % n;
+//				if (vertexLength == 3) gl.glVertex3dv(sp[j]);
+//				else if (vertexLength == 4) gl.glVertex4dv(sp[j]);
+//			 }
+//			gl.glEnd();
+//			 return;
+//		}
 //        if (testArrays) {
 //                   double[] varray = vertices.toDoubleArray(null);
 //                   ByteBuffer bb = ByteBuffer.allocateDirect(8*varray.length).order(ByteOrder.nativeOrder());
@@ -575,6 +578,8 @@ public class JOGLRendererHelper {
 		gl.glPopAttrib();
 	}
 
+	double mat[] = new double[16];
+	double[] mat2 = Rn.identityMatrix(4);
 	public void processLights(GL globalGL, List lights) {
 		int lightCount =  GL.GL_LIGHT0;
 		
@@ -592,8 +597,7 @@ public class JOGLRendererHelper {
 		for (int i = 0; i<n; ++i)	{
 			SceneGraphPath lp = (SceneGraphPath) lights.get(i);
 			//JOGLConfiguration.theLog.log(Level.INFO,"Light"+i+": "+lp.toString());
-			double[] mat = lp.getMatrix(null);
-			double[] mat2 = Rn.identityMatrix(4);
+			lp.getMatrix(mat);
 			double[] dir, trans;
 			dir = Rn.matrixTimesVector(null, mat, zDirectiond);
 			trans = Rn.matrixTimesVector(null, mat,origind);
@@ -775,5 +779,65 @@ public class JOGLRendererHelper {
 			 JOGLConfiguration.theLog.log(Level.INFO,"Screenshot saved to "+file.getName());
 	}
 	
+//	  private static GLPbuffer getPbuffer(int width, int height, GLDrawable d)	{
+//		  GLPbuffer pbuffer = null;
+//		  GLCapabilities caps = new GLCapabilities();
+//        // doesn't seem to support anti-aliasing; just creates junk
+////		caps.setSampleBuffers(true);
+////		caps.setNumSamples(4);
+//        //caps.setOffscreenRenderToTexture(true);
+//		  caps.setDoubleBuffered(false); 
+//		  JOGLConfiguration.getLogger().log(Level.INFO, "Caps is "+caps.toString());
+//		  pbuffer = d.createOffscreenDrawable(caps, width, height);
+//		  return pbuffer;
+//	  }
+//	  public static void renderOffscreen(int w, int h,final File file, final GLDrawable d)	{
+//		  GLPbuffer pbuffer = null;
+//		  File pbufferFile = null;
+//		  pbufferFile = file;  
+//		  final int width;
+//		  if (w > 2048)	{
+//			  JOGLConfiguration.getLogger().log(Level.WARNING,"Width being truncated to 2048");
+//			  width = 2048;
+//		  } else width = w;
+//		  final int height;
+//		  if (h > 2048)	{
+//			  JOGLConfiguration.getLogger().log(Level.WARNING,"Height being truncated to 2048");
+//			  height = 2048;
+//		  } else height = w;
+//		  pbuffer = getPbuffer(width, height, d);
+//		  pbuffer.addGLEventListener(new  GLEventListener() {
+//        		boolean done = false;
+//			public void init(GLDrawable arg0) {
+//	        	JOGLConfiguration.getLogger().log(Level.INFO,"PBuffer init");
+//				
+//			}
+//
+//			public void display(GLDrawable arg0) {
+//				if (done) return;
+//			   	JOGLConfiguration.getLogger().log(Level.INFO,"PBuffer display");
+//			   	//JOGLRenderer renderer = new JOGLRenderer(me, pbuffer);
+//			   	// have to set the rendering size since the jogl implementations of GLPbuffer
+//			   	// don't implement getSize() (!!)
+//			   	// we piggyback on the canvas's renderer.  To be safe, we need to put a lock around the
+//			   	// following 3 lines of code.
+//			   	renderer.setSize(width, height);
+//			   	renderer.display(arg0);
+//			   	renderer.setSize(d.getWidth(), d.getHeight());
+//			   	JOGLRendererHelper.saveScreenShot(pbuffer,width, height, file);
+//			   	done = true;
+//			}
+//
+//			public void reshape(GLDrawable arg0, int arg1, int arg2, int arg3, int arg4) {
+//			   	JOGLConfiguration.getLogger().log(Level.INFO,"PBuffer reshape");
+//			}
+//
+//			public void displayChanged(GLDrawable arg0, boolean arg1, boolean arg2) {
+//			   	JOGLConfiguration.getLogger().log(Level.INFO,"PBuffer displayChanged");
+//			}
+//        });
+//        System.err.println("Pbuffer created"); 
+// 	    JOGLConfiguration.getLogger().log(Level.INFO,"Pbuffer is initialized: "+pbuffer.isInitialized());
+//	  }
 
 }

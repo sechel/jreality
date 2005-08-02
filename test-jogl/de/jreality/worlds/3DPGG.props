@@ -1,8 +1,0 @@
-# first attempt to use configuation file with LoadableScene
-# in this case de.jreality.worlds.Cell120
-fromFile: false
-maxNumberElements: 300
-groupName: 22X
-centerPoint: .2 .2 .2
-beamRadius: .02
-stretchFactor: .2

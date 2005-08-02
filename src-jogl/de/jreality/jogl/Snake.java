@@ -5,8 +5,6 @@
 package de.jreality.jogl;
 
 
-import java.util.logging.Level;
-
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
@@ -18,42 +16,42 @@ import de.jreality.scene.data.StorageModel;
 public class Snake extends IndexedLineSet {
 
 	double[][] points;		// storage for points
+	int[][] indices;
 	int[] info;		// #beginning point and # of points
-	public static Attribute SNAKE_POINTS = Attribute.attributeForName("snakePoints");
 	public static Attribute SNAKE_INFO = Attribute.attributeForName("snakeInfo");
 	boolean active = false;
 	
 	public Snake(double[][] p)	{
-		super(p.length);
+		super(p.length, 1);
 		points = p;
-		info = new int[2];
-		info[0] = 0;
-		info[1] = p.length;
-		setVertexCountAndAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(points[0].length).createWritableDataList(points));
-		activate(true);
+		info = new int[3];
+		info[0] = 0; info[1] = p.length; info[2] = -1;
+		vertexAttributes.addWritable(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(points[0].length),points);
+		update();
 	}
 	
 	int[][] nullindices = {{0}};
-	public void activate(boolean b)		{
-		if (active == b) return;
-		active = b;
-		if (active) {
-			setGeometryAttributes(SNAKE_POINTS, points);
-			setGeometryAttributes(SNAKE_INFO, info);
-			setEdgeCountAndAttributes(Attribute.INDICES, StorageModel.INT_ARRAY_ARRAY.createReadOnly(nullindices));
-		} else {
-			setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(points[0].length).createReadOnly(points));
+	public void update()	{
 			int begin = info[0];
 			int length = info[1];
-			JOGLConfiguration.theLog.log(Level.FINE,"de-activating snake: "+begin+" "+length);
-			int[][] indices = new int[1][length];
+			int oldlength = info[2];
+			if (length != oldlength) indices = new int[1][length];
+
 			for (int i = 0; i<length; ++i)	{
 				indices[0][i] = (i+begin)%points.length;
 			}
-			setEdgeCountAndAttributes(Attribute.INDICES, StorageModel.INT_ARRAY_ARRAY.createReadOnly(indices));
-			setGeometryAttributes(SNAKE_POINTS, null);
-			setGeometryAttributes(SNAKE_INFO, null);
-		}
+			//setEdgeCountAndAttributes(Attribute.INDICES, StorageModel.INT_ARRAY_ARRAY.createReadOnly(indices));
+			if (length != oldlength)	{
+				  nodeLock.writeLock();
+				  try 
+				  {
+						edgeAttributes.remove(Attribute.INDICES);
+						edgeAttributes.addWritable(Attribute.INDICES, StorageModel.INT_ARRAY_ARRAY, indices);
+				  } finally {
+				    nodeLock.writeUnlock();
+				  }
+			}
+			info[2] = length;
 	}
 	
 	public void fireChange()	{

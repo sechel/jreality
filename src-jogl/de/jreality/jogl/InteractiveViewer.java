@@ -198,6 +198,7 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 		if (r == null)	{
 			JOGLConfiguration.getLogger().log(Level.INFO,"Invalid scene root, creating new root.");
 			r = new SceneGraphComponent();
+			r.setAppearance(new Appearance());
 			r.setName("Default SceneRoot");
 		}
 		super.setSceneRoot(r);

@@ -147,17 +147,6 @@ public class DefaultPointShader  implements PointShader {
 			int begin = 0;
 			int length = n;
 			int m = n;
-			double[][] sp = null;
-			boolean doSnake = false;
-			if (original instanceof Snake && original.getGeometryAttributes(Snake.SNAKE_POINTS) != null)	{
-				sp = (double[][] ) original.getGeometryAttributes(Snake.SNAKE_POINTS);
-				int[] snakeInfo = (int[] ) original.getGeometryAttributes(Snake.SNAKE_INFO);
-				begin = snakeInfo[0];
-				length = snakeInfo[1];
-				//JOGLConfiguration.theLog.log(Level.INFO,"Processing the snake with "+length+" points");
-				m = sp.length;
-				doSnake = true;
-			}
 			//JOGLConfiguration.theLog.log(Level.INFO,"Signature is "+sig);
 			//sig = Pn.EUCLIDEAN;
 			boolean pickMode = jr.isPickMode();
@@ -165,11 +154,7 @@ public class DefaultPointShader  implements PointShader {
 			for (int i = 0; i< length; ++i)	{
 				double[] transVec = null;
 				gl.glPushMatrix();
-				if (doSnake)		{
-					int index = (i+begin) % m;
-					transVec = sp[index];
-				} else 
-					transVec =  vertices.item(i).toDoubleArray().toDoubleArray(null);	
+				transVec =  vertices.item(i).toDoubleArray().toDoubleArray(null);	
 				P3.makeTranslationMatrix(mat, transVec,sig);
 				Rn.times(mat, mat, scale);
 				gl.glMultTransposeMatrixd(mat);
@@ -188,7 +173,6 @@ public class DefaultPointShader  implements PointShader {
 			}
 			if (pickMode) gl.glPopName();
 			gl.glEndList();
-			//JOGLConfiguration.theLog.log(Level.INFO,"Creating spheres with radius "+pointRadius);
 			return nextDL;
 		}
 		return -1;

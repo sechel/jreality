@@ -36,6 +36,7 @@ public class JOGLSphereHelper extends SphereUtility {
 				dlists = new int[n];
 				JOGLConfiguration.theLog.log(Level.INFO,"Setting up sphere display lists for context "+gl);
 		for (int i = 0; i<n; ++i)	{
+			tessellatedCube(i);
 			dlists[i] = gl.glGenLists(1);
 			gl.glNewList(dlists[i], GL.GL_COMPILE);
 			//gl.glDisable(GL.GL_SMOOTH);
