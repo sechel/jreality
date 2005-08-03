@@ -1217,11 +1217,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			// render the geometry
 			if (goBetween.getPeerGeometry() != null)	goBetween.getPeerGeometry().render(this);
 			
-			if (goBetween.getOriginalComponent() instanceof LevelOfDetailComponent)	{
-				double d = CameraUtility.getNDCExtent(context.getObjectToNDC());
-				double lod = renderingHints.getLevelOfDetail();
-				((LevelOfDetailComponent)goBetween.getOriginalComponent()).setScreenExtent(d * lod);
-			}
 			synchronized(childLock)	{
 				// render the children
 				int n = children.size();
