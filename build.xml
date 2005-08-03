@@ -87,7 +87,7 @@
   <!-- all the core classes will be build here - all beackends depend on it-->
   <target name="core" depends="init" description="compile the source ">
     <mkdir dir="${build}/core" />
-    <javac excludesfile="excludes.txt" srcdir="${core}:${attic}:${io}" destdir="${build}/core" debug="true">
+    <javac excludesfile="excludes.txt" srcdir="${core}:${attic}" destdir="${build}/core" debug="true">
       <compilerarg line="-source 1.4" />
     </javac>
     <copy todir="build/core">
