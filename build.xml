@@ -6,7 +6,7 @@
   <!-- the following should belong to core... -->
 	  <property name="core" location="src" />
 	  <property name="attic" location="src-attic" />
-  <property name="io" location="src-io" />
+      <property name="io" location="src-io" />
 
   <!-- backends (dependencies from top to bottom) -->
   <property name="soft" location="src-soft" />
@@ -44,7 +44,7 @@
       <include name="jogl.jar"/>
     </fileset>
     <fileset dir="dist">
-      <include name="jReality-soft.jar"/>
+      <include name="jReality-proxies.jar"/>
     </fileset>
   </path>
 
@@ -87,7 +87,7 @@
   <!-- all the core classes will be build here - all beackends depend on it-->
   <target name="core" depends="init" description="compile the source ">
     <mkdir dir="${build}/core" />
-    <javac excludesfile="excludes.txt" srcdir="${core}:${attic}" destdir="${build}/core" debug="true">
+    <javac excludesfile="excludes.txt" srcdir="${core}:${attic}:${io}" destdir="${build}/core" debug="true">
       <compilerarg line="-source 1.4" />
     </javac>
     <copy todir="build/core">
@@ -127,7 +127,7 @@
     <jar jarfile="${dist}/jReality-soft.jar" basedir="${build}/soft" />
   </target>
   
-  <target name="jogl" depends="core, jogl-deps" description="build jogl backend">
+  <target name="jogl" depends="core, proxies,jogl-deps" description="build jogl backend">
     <mkdir dir="${build}/jogl" />
     <javac excludesfile="excludes.txt" srcdir="${jogl}"  destdir="${build}/jogl" debug="true">
       <compilerarg line="-source 1.4" />
