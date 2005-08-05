@@ -11,9 +11,10 @@ import java.util.*;
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.jogl.anim.AnimationUtility;
+import de.jreality.math.*;
 import de.jreality.scene.*;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.util.SceneGraphUtility;
-import de.jreality.util.math.*;
 
 /**
  * 

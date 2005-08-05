@@ -11,13 +11,13 @@ import java.util.*;
 import java.util.logging.Level;
 
 import de.jreality.jogl.JOGLConfiguration;
+import de.jreality.math.*;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.pick.PickAction;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.scene.pick.PickPointComparator;
-import de.jreality.util.math.*;
 /**
  * @author gunn
  *

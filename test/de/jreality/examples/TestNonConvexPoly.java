@@ -44,6 +44,7 @@ import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.proxy.treeview.SceneTreeViewer;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.soft.DefaultViewer;
 import de.jreality.soft.MouseTool;
 import de.jreality.soft.SVGViewer;

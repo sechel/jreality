@@ -25,9 +25,10 @@ package de.jreality.soft;
 import java.awt.Color;
 import java.awt.Component;
 
+import de.jreality.math.Rn;
 import de.jreality.scene.*;
 import de.jreality.scene.Viewer;
-import de.jreality.util.math.Rn;
+import de.jreality.shader.CommonAttributes;
 
 /**
  * This is an experimental PS viewer for jReality.

@@ -20,13 +20,15 @@ import net.java.games.jogl.GLDrawable;
 import net.java.games.jogl.util.BufferUtils;
 import net.java.games.jogl.util.GLUT;
 import de.jreality.geometry.*;
+import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultPolygonShader;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
+import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.scene.*;
 import de.jreality.scene.data.*;
-import de.jreality.util.math.Pn;
-import de.jreality.util.math.Rn;
+import de.jreality.shader.CommonAttributes;
 
 /**
  * @author gunn

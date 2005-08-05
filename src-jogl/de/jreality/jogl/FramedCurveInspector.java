@@ -13,13 +13,14 @@ import java.util.logging.Level;
 
 import javax.swing.*;
 
+import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.JOGLPickAction;
+import de.jreality.math.FactoredMatrix;
+import de.jreality.math.Rn;
 import de.jreality.scene.*;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
-import de.jreality.util.math.FactoredMatrix;
-import de.jreality.util.math.Rn;
 
 /**
  * @author gunn

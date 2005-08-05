@@ -13,16 +13,16 @@ import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLSphereHelper;
 import de.jreality.jogl.OpenGLState;
 import de.jreality.jogl.pick.JOGLPickAction;
-import de.jreality.scene.CommonAttributes;
+import de.jreality.math.P3;
+import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.util.math.P3;
-import de.jreality.util.math.Rn;
 
 /**
  * @author Charles Gunn

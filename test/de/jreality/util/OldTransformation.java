@@ -8,14 +8,11 @@ package de.jreality.util;
 
 import java.io.Serializable;
 
+import de.jreality.math.*;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationEventMulticaster;
 import de.jreality.scene.event.TransformationListener;
 import de.jreality.util.*;
-import de.jreality.util.math.*;
-import de.jreality.util.math.P3;
-import de.jreality.util.math.Pn;
-import de.jreality.util.math.Rn;
 /**
  * I've put this class in here to be able to compare the results from the new class FactoredMatrix
  * with the reults from the former Transformation class.

@@ -1,5 +1,5 @@
 /*
- * $Id: HelloSphere.java,v 1.2 2005/08/02 15:07:33 pinkall Exp $
+ * $Id: HelloSphere.java,v 1.3 2005/08/05 10:22:28 pinkall Exp $
  * 
  * Some sort of "Hello World" for jReality. The idea is to put something meaningful
  * on the screen, in as few lines as possible.
@@ -11,6 +11,7 @@ import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.Geometry;
@@ -19,7 +20,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Sphere;
 import de.jreality.soft.DefaultViewer;
-import de.jreality.util.math.MatrixBuilder;
 
 
 public class HelloSphere {

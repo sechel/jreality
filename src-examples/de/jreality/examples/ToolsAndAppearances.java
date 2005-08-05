@@ -1,5 +1,5 @@
 /*
- * $Id: ToolsAndAppearances.java,v 1.2 2005/08/02 15:07:33 pinkall Exp $
+ * $Id: ToolsAndAppearances.java,v 1.3 2005/08/05 10:22:28 pinkall Exp $
  * As simple example using appearances and tools.
  */
 package de.jreality.examples;
@@ -11,10 +11,10 @@ import javax.swing.JFrame;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.jogl.Viewer;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.soft.SoftPickSystem;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
-import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Light;
@@ -23,7 +23,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.pick.PickSystem;
 import de.jreality.scene.tool.RotateTool;
 import de.jreality.scene.tool.ToolSystemViewer;
-import de.jreality.util.math.MatrixBuilder;
+import de.jreality.shader.CommonAttributes;
 
 public class ToolsAndAppearances {
   public static void main(String[] args) {

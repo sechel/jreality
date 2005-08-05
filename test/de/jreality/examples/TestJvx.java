@@ -42,6 +42,7 @@ import de.jreality.reader.ReaderJVX;
 import de.jreality.renderman.RIBVisitor;
 import de.jreality.renderman.SLShader;
 import de.jreality.scene.*;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.soft.DefaultViewer;
 import de.jreality.soft.MouseTool;
 import de.jreality.util.RenderTrigger;

@@ -11,17 +11,17 @@ import java.util.List;
 
 import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InteractiveViewer;
+import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.tools.UserTool;
 import de.jreality.jogl.tools.UserToolInterface;
-import de.jreality.scene.Graphics3D;
+import de.jreality.math.P3;
+import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.pick.PickPoint;
-import de.jreality.util.math.P3;
-import de.jreality.util.math.Pn;
-import de.jreality.util.math.Rn;
 
 /**
  * @author gunn

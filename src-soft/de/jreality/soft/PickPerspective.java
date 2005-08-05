@@ -22,7 +22,7 @@
  */
 package de.jreality.soft;
 
-import de.jreality.util.math.Rn;
+import de.jreality.math.Rn;
 
 /**
  * 

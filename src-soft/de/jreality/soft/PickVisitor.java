@@ -25,14 +25,15 @@ package de.jreality.soft;
 import java.util.*;
 import java.util.logging.Logger;
 
+import de.jreality.math.Pn;
+import de.jreality.math.Rn;
+import de.jreality.math.VecMat;
 import de.jreality.scene.*;
 import de.jreality.scene.data.*;
 import de.jreality.scene.pick.PickResult;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.util.math.Pn;
-import de.jreality.util.math.Rn;
-import de.jreality.util.math.VecMat;
 
 /**
  * This class traverses a scene graph starting from the given "root" scene

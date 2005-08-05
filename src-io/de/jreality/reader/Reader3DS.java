@@ -29,18 +29,19 @@ import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import de.jreality.math.MatrixBuilder;
+import de.jreality.math.P3;
+import de.jreality.math.Rn;
 import de.jreality.scene.*;
 import de.jreality.scene.data.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.*;
-import de.jreality.util.math.MatrixBuilder;
-import de.jreality.util.math.P3;
-import de.jreality.util.math.Rn;
 
 /**
  *

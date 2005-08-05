@@ -22,8 +22,8 @@
  */
 package de.jreality.util;
 
-import de.jreality.util.math.Matrix;
-import de.jreality.util.math.MatrixBuilder;
+import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
 import junit.framework.TestCase;
 
 

@@ -9,13 +9,13 @@ import java.util.Vector;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.jogl.InteractiveViewer;
+import de.jreality.math.P3;
+import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.pick.PickAction;
 import de.jreality.scene.pick.PickPoint;
-import de.jreality.util.math.P3;
-import de.jreality.util.math.Rn;
 import junit.framework.TestCase;
 
 /**

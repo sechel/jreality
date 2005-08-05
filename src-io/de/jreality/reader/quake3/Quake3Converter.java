@@ -59,6 +59,7 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 
 
+import de.jreality.math.Matrix;
 import de.jreality.reader.AbstractReader;
 import de.jreality.reader.quake3.lumps.tBSPFace;
 import de.jreality.reader.quake3.lumps.tBSPLeaf;
@@ -66,11 +67,11 @@ import de.jreality.reader.quake3.lumps.tBSPVertex;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.reader.vecmath.Vector3f;
 import de.jreality.util.*;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.SceneGraphComponentSwitch;
-import de.jreality.util.math.Matrix;
 
 /**
  * Takes the data from a Quake3Loader and converts it into a Xith3d scenegraph.  There is

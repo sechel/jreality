@@ -13,6 +13,7 @@ import java.util.List;
 import javax.swing.JFrame;
 
 import de.jreality.geometry.CatenoidHelicoid;
+import de.jreality.math.Rn;
 import de.jreality.scene.Camera;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.PointLight;
@@ -23,7 +24,6 @@ import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.PickSystem;
 import de.jreality.soft.DefaultViewer;
-import de.jreality.util.math.Rn;
 
 /**
  * @author brinkman

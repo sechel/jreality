@@ -32,9 +32,9 @@ import java.util.List;
 import java.util.Vector;
 
 import de.jreality.scene.Appearance;
-import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.*;

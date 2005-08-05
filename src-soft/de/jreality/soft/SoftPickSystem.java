@@ -24,12 +24,12 @@ package de.jreality.soft;
 
 import java.util.List;
 
+import de.jreality.math.MatrixBuilder;
+import de.jreality.math.P3;
+import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.pick.PickSystem;
-import de.jreality.util.math.MatrixBuilder;
-import de.jreality.util.math.P3;
-import de.jreality.util.math.Rn;
 
 /**
  * 

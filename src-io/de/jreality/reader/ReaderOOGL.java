@@ -30,6 +30,7 @@ import java.util.logging.Level;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.QuadMeshShape;
+import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -40,7 +41,6 @@ import de.jreality.util.*;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.SceneGraphUtility;
-import de.jreality.util.math.Rn;
 
 
 /**

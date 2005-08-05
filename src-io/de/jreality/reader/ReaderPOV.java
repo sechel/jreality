@@ -25,6 +25,7 @@ package de.jreality.reader;
 import java.io.*;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Cylinder;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -33,7 +34,6 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
-import de.jreality.util.math.MatrixBuilder;
 
 /**
  *

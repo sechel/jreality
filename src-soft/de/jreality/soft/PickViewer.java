@@ -25,9 +25,9 @@ package de.jreality.soft;
 import java.awt.Component;
 import java.util.List;
 
+import de.jreality.math.Rn;
 import de.jreality.scene.*;
 import de.jreality.scene.Viewer;
-import de.jreality.util.math.Rn;
 
 /**
  * This is an experimental PS viewer for jReality.

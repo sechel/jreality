@@ -1,5 +1,5 @@
 /*
- * $Id: IndexedSomethingSets.java,v 1.4 2005/08/02 15:07:33 pinkall Exp $
+ * $Id: IndexedSomethingSets.java,v 1.5 2005/08/05 10:22:28 pinkall Exp $
  * 
  * A short illustration of how to use Indexed*Set.
  * 
@@ -18,9 +18,9 @@ import java.awt.event.WindowEvent;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.Viewer;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
-import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -31,7 +31,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
-import de.jreality.util.math.MatrixBuilder;
+import de.jreality.shader.CommonAttributes;
 
 
 public class IndexedSomethingSets {

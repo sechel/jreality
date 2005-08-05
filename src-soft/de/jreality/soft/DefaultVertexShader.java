@@ -24,11 +24,11 @@ package de.jreality.soft;
 
 import java.awt.Color;
 
-import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 

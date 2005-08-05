@@ -13,11 +13,11 @@ import java.util.logging.Level;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.jogl.JOGLConfiguration;
+import de.jreality.math.*;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.Rectangle3D;
-import de.jreality.util.math.*;
 /**
  * @author gunn
  *

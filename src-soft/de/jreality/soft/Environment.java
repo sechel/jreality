@@ -22,8 +22,8 @@
  */
 package de.jreality.soft;
 
+import de.jreality.math.VecMat;
 import de.jreality.scene.*;
-import de.jreality.util.math.VecMat;
 
 /**
  * This class holds information about the environment---mainly lights and the camera at the moment.

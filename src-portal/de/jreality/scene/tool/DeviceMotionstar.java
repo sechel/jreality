@@ -31,13 +31,13 @@ import szg.framework.event.HeadMotionListener;
 import szg.framework.event.WandListener;
 import szg.framework.event.WandMotionListener;
 import szg.framework.event.remote.RemoteEventQueueImpl;
+import de.jreality.math.P3;
+import de.jreality.math.Rn;
 import de.jreality.portal.PortalServerViewer;
 import de.jreality.remote.portal.smrj.PortalServerImplementation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.util.LoggingSystem;
-import de.jreality.util.math.P3;
-import de.jreality.util.math.Rn;
 
 
 /**

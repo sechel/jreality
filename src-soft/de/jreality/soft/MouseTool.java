@@ -27,13 +27,13 @@ import java.awt.event.*;
 import java.io.Serializable;
 import java.util.List;
 
+import de.jreality.math.Rn;
+import de.jreality.math.VecMat;
 import de.jreality.renderman.RIBVisitor;
 import de.jreality.scene.*;
 import de.jreality.scene.Viewer;
 import de.jreality.util.BoundingBoxTraversal;
 import de.jreality.util.RenderTrigger;
-import de.jreality.util.math.Rn;
-import de.jreality.util.math.VecMat;
 
 /**
  * This class provides the basic mouse interaction of the viewers.

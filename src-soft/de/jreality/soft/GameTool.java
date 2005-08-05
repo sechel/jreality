@@ -25,9 +25,9 @@ package de.jreality.soft;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
+import de.jreality.math.Rn;
+import de.jreality.math.VecMat;
 import de.jreality.scene.Viewer;
-import de.jreality.util.math.Rn;
-import de.jreality.util.math.VecMat;
 
 /**
  * 

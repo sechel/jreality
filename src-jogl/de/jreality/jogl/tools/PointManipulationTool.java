@@ -15,15 +15,17 @@ import de.jreality.geometry.Primitives;
 import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.jogl.JOGLConfiguration;
+import de.jreality.jogl.pick.Graphics3D;
+import de.jreality.math.*;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
 import de.jreality.scene.pick.PickPoint;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
-import de.jreality.util.math.*;
 
 
 /**

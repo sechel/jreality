@@ -36,6 +36,7 @@ import de.jreality.scene.*;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.soft.DefaultViewer;
 import de.jreality.soft.MouseTool;
 

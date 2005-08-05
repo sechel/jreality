@@ -14,10 +14,10 @@ import javax.swing.Timer;
 import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.jogl.JOGLConfiguration;
+import de.jreality.math.Rn;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.math.Rn;
 
 /**
  * @author Charles Gunn

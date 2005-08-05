@@ -24,8 +24,8 @@ package de.jreality.soft;
 
 import java.util.Arrays;
 
-import de.jreality.util.math.Rn;
-import de.jreality.util.math.VecMat;
+import de.jreality.math.Rn;
+import de.jreality.math.VecMat;
 
 /**
  * This class capsules utility methods for intersecting polygons (well triangles

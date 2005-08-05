@@ -24,12 +24,13 @@ package de.jreality.remote.portal.smrj;
 
 import java.awt.Color;
 
+import de.jreality.math.P3;
+import de.jreality.math.Rn;
 import de.jreality.remote.util.INetUtilities;
 import de.jreality.scene.*;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.util.*;
-import de.jreality.util.math.P3;
-import de.jreality.util.math.Rn;
 
 /**
  * Portal Viewer - has one camera configured by the ConfigurationAttributes and uses jogl renderer.

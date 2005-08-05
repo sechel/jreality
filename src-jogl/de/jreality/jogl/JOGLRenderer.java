@@ -18,14 +18,16 @@ import net.java.games.jogl.*;
 import net.java.games.jogl.util.BufferUtils;
 import de.jreality.geometry.LabelSet;
 import de.jreality.geometry.SphereUtility;
+import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.*;
+import de.jreality.math.*;
 import de.jreality.scene.*;
 import de.jreality.scene.event.*;
 import de.jreality.scene.pick.PickPoint;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.*;
-import de.jreality.util.math.*;
 /**
  * TODO implement  isVisible   bit in SceneGraphNode
  * TODO implement collectAncestorVisitor (see method geometryChanged() at end of file )

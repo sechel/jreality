@@ -26,12 +26,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import szg.framework.event.WandEvent;
+import de.jreality.math.P3;
+import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Transformation;
-import de.jreality.util.math.P3;
-import de.jreality.util.math.Rn;
 
 /**
  *

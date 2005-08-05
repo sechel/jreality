@@ -10,14 +10,11 @@ import java.awt.event.MouseEvent;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.HelpOverlay;
+import de.jreality.math.*;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.Rectangle3D;
-import de.jreality.util.math.FactoredMatrix;
-import de.jreality.util.math.Pn;
-import de.jreality.util.math.Quaternion;
-import de.jreality.util.math.Rn;
 
 /**
  * @author Charles Gunn

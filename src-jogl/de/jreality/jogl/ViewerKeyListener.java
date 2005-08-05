@@ -17,10 +17,11 @@ import net.java.games.jogl.GLCanvas;
 import net.java.games.jogl.GLDrawable;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.tools.ToolManager;
+import de.jreality.math.P3;
 import de.jreality.scene.*;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
-import de.jreality.util.math.P3;
 
 /**
  * @author Charles Gunn

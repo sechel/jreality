@@ -11,11 +11,8 @@ import java.util.logging.Level;
 
 import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.JOGLConfiguration;
+import de.jreality.math.*;
 import de.jreality.scene.Transformation;
-import de.jreality.util.math.FactoredMatrix;
-import de.jreality.util.math.P3;
-import de.jreality.util.math.Pn;
-import de.jreality.util.math.Rn;
 
 /**
  * @author Charles Gunn

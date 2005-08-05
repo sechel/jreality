@@ -4,9 +4,9 @@
  */
 package de.jreality.jogl.tools;
 
+import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.math.Pn;
-import de.jreality.util.math.Rn;
 
 /**
  * @author Charles Gunn

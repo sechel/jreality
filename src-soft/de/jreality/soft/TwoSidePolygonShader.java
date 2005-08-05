@@ -22,9 +22,9 @@
  */
 package de.jreality.soft;
 
+import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
 import de.jreality.shader.EffectiveAppearance;
-import de.jreality.util.math.Rn;
 
 /**
  * 

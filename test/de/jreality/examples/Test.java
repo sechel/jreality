@@ -38,6 +38,7 @@ import de.jreality.jogl.Viewer;
 import de.jreality.reader.Parser3DS;
 import de.jreality.scene.*;
 import de.jreality.scene.proxy.treeview.SceneTreeViewer;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.soft.DefaultViewer;
 import de.jreality.soft.MouseTool;
 import de.jreality.util.RenderTrigger;

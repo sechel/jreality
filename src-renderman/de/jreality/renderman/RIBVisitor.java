@@ -33,11 +33,12 @@ import java.util.*;
 
 import javax.imageio.ImageIO;
 
+import de.jreality.math.VecMat;
 import de.jreality.scene.*;
 import de.jreality.scene.data.*;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.util.math.VecMat;
 
 /**
  * A Visitor for writing renderman<sup>TM</sup> rib files. At the moment the following 

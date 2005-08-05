@@ -31,11 +31,11 @@ import java.util.logging.Level;
 
 import javax.swing.JMenuBar;
 
+import de.jreality.math.Pn;
 import de.jreality.reader.ReaderBSH;
 import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
-import de.jreality.util.math.Pn;
 
 
 /**

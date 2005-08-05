@@ -17,6 +17,7 @@ import de.jreality.jogl.tools.MotionManager;
 import de.jreality.jogl.tools.MouseTool;
 import de.jreality.jogl.tools.ToolManager;
 import de.jreality.scene.*;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.util.CameraUtility;
 
 /**

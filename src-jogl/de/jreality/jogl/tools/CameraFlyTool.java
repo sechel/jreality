@@ -14,11 +14,11 @@ import java.util.logging.Level;
 import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.jogl.JOGLConfiguration;
+import de.jreality.math.P3;
+import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.math.P3;
-import de.jreality.util.math.Rn;
 
 /**
  * @author Charles Gunn

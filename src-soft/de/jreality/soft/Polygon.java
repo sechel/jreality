@@ -22,8 +22,8 @@
  */
 package de.jreality.soft;
 
+import de.jreality.math.Rn;
 import de.jreality.util.LoggingSystem;
-import de.jreality.util.math.Rn;
 
 /**
  * 

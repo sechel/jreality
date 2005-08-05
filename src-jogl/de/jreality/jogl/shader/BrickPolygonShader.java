@@ -11,9 +11,9 @@ import java.util.logging.Level;
 import net.java.games.jogl.GL;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.math.Rn;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.util.math.Rn;
 
 /**
  * @author gunn

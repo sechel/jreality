@@ -14,14 +14,14 @@ import javax.swing.JFrame;
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.Primitives;
+import de.jreality.math.Matrix;
+import de.jreality.math.P3;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.pick.*;
 import de.jreality.soft.SoftPickSystem;
 import de.jreality.scene.pick.bounding.AABBTree;
 import de.jreality.util.SceneGraphUtility;
-import de.jreality.util.math.Matrix;
-import de.jreality.util.math.P3;
 
 /**
  * @author brinkman

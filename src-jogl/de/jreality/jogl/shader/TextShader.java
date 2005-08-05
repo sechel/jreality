@@ -10,7 +10,7 @@ import java.awt.Color;
 import net.java.games.jogl.GL;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.OpenGLState;
-import de.jreality.scene.CommonAttributes;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 

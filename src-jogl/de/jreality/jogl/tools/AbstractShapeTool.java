@@ -6,11 +6,11 @@ package de.jreality.jogl.tools;
 
 import java.awt.event.MouseEvent;
 
+import de.jreality.math.FactoredMatrix;
+import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
-import de.jreality.util.math.FactoredMatrix;
-import de.jreality.util.math.Rn;
 
 /**
  * @author Charles Gunn

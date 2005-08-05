@@ -24,8 +24,8 @@ package de.jreality.soft;
 
 import java.awt.Color;
 
-import de.jreality.scene.CommonAttributes;
 import de.jreality.scene.Geometry;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 

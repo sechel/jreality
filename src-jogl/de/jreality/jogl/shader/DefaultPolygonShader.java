@@ -11,12 +11,11 @@ import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
-import de.jreality.scene.CommonAttributes;
+import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.*;
 import de.jreality.shader.ReflectionMap;
-import de.jreality.util.math.Rn;
 
 /**
  * @author Charles Gunn

@@ -31,6 +31,8 @@ import java.rmi.RemoteException;
 
 import szg.framework.event.*;
 import szg.framework.event.remote.RemoteEventQueueImpl;
+import de.jreality.math.P3;
+import de.jreality.math.Rn;
 import de.jreality.portal.tools.EventBoxVisitor;
 import de.jreality.portal.tools.WandTool;
 import de.jreality.reader.Readers;
@@ -40,8 +42,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.util.*;
 import de.jreality.util.LoadableScene;
-import de.jreality.util.math.P3;
-import de.jreality.util.math.Rn;
 import de.smrj.RemoteFactory;
 import de.smrj.tcp.TCPBroadcasterIO;
 import de.smrj.tcp.TCPBroadcasterNIO;

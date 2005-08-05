@@ -44,10 +44,10 @@ import java.util.logging.Level;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.vecmath.Vector3f;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
-import de.jreality.util.math.MatrixBuilder;
 
 
 /**
