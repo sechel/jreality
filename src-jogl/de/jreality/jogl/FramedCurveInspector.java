@@ -748,7 +748,7 @@ public class FramedCurveInspector extends JFrame {
 			List picks = (List) pickAction.visit();			
 			if (picks!= null && (picks.size() > 0))	{
 				PickPoint pp = (PickPoint) picks.get(0);
-				Graphics3D gc = pp.getContext();
+				Graphics3D gc = new Graphics3D(pp.getCameraPath(), pp.getPickPath());
 				double[] camPt = Rn.matrixTimesVector(null, gc.getObjectToCamera(), pp.getPointObject());
 				focus[i] = Math.abs(camPt[2]);
 				sb.append(time+" "+focus[i]*3390.0+"\n");

@@ -74,7 +74,7 @@ public class JoglBoxTool extends SceneGraphVisitor implements UserToolInterface 
 		if (t.getPickPoint() == null) {
 			return;
 		}
-		gc = t.getPickPoint().getContext();
+		gc = new Graphics3D(t.getPickPoint().getCameraPath(), t.getPickPoint().getPickPath());
 		double[] currentNDC = t.getPointNDC();
 		try {
 			NDCToWorld = gc.getNDCToWorld();
