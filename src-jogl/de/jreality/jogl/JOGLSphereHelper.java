@@ -71,7 +71,6 @@ public class JOGLSphereHelper extends SphereUtility {
 	 * @return
 	 */
 	public static int[] getSphereDLists( JOGLRenderer jr) {
-		GL gl = jr.getCanvas().getGL();
 		int dlists[];
 		//if (!sharedDisplayLists)	
 			dlists =  (int[] ) sphereDListsTable.get(jr);

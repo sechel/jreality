@@ -42,7 +42,7 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 		int implodeDL = gl.glGenLists(1);
 		gl.glNewList(implodeDL, GL.GL_COMPILE);
 		//if (jr.isPickMode())	gl.glPushName(JOGLPickAction.GEOMETRY_BASE);
-		JOGLRendererHelper.drawFaces(ifs, jr,  isSmoothShading(), alpha, jr.isPickMode(), 0);
+		JOGLRendererHelper.drawFaces(ifs, jr,  isSmoothShading(), alpha, jr.isPickMode());
 		//if (jr.isPickMode())	gl.glPopName();
 		gl.glEndList();
 		return implodeDL;

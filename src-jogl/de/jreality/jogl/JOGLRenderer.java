@@ -222,8 +222,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 	private void processClippingPlanes() {
 		List clipPlanes = null;
 		if (clipPlanes == null)	{
-			ClippingPlaneCollector lc = new ClippingPlaneCollector(theRoot);
-			clipPlanes = (List) lc.visit();			
+			clipPlanes = SceneGraphUtility.collectClippingPlanes(theRoot);
 		}
 		helper.processClippingPlanes(globalGL, clipPlanes);
 	}
@@ -237,8 +236,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 	 */
 	private void processLights( ) {
 		if (lights == null || lights.size() == 0 || lightListDirty) {
-			LightCollector lc = new LightCollector(theRoot);
-			lights = (List) lc.visit();
+			lights = SceneGraphUtility.collectLights(theRoot);
 		}
 		helper.processLights(globalGL, lights);
 		lightListDirty = false;
@@ -699,7 +697,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		
 		public void geometryChanged(GeometryEvent ev) {
 			//TODO make more differentiated response based on event ev
-			final SceneGraphNode sg = (SceneGraphNode) ev.getSource();
+//			final SceneGraphNode sg = (SceneGraphNode) ev.getSource();
 			dlInfo.setChange();
 		}
 		
@@ -825,10 +823,10 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 				if (proxy)	globalGL.glCallList(activeDL.getDisplayListID(type));
 				else 	{
 					if (!processDisplayListState(activeDL, jpc, type))		 // false return implies no display lists used
-						JOGLRendererHelper.drawFaces(ifs, globalHandle,ss, alpha, pickMode, JOGLPickAction.GEOMETRY_FACE);
+						JOGLRendererHelper.drawFaces(ifs, globalHandle,ss, alpha, pickMode);
 					else // we are using display lists
 						if (activeDL.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
-							JOGLRendererHelper.drawFaces(ifs, globalHandle, ss, alpha, pickMode, JOGLPickAction.GEOMETRY_FACE);
+							JOGLRendererHelper.drawFaces(ifs, globalHandle, ss, alpha, pickMode);
 							globalGL.glEndList();	
 							globalGL.glCallList(activeDL.getDisplayListID(type));
 							activeDL.setDisplayListDirty(type, false);
@@ -869,13 +867,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			return true;
 		}
 
-		/**
-		 * @param sphere
-		 * @return
-		 */
-		private IndexedFaceSet getProxyFor(Sphere sphere) {
-			return SphereUtility.tessellatedIcosahedron(2);
-		}
+//		private IndexedFaceSet getProxyFor(Sphere sphere) {
+//			return SphereUtility.tessellatedIcosahedron(2);
+//		}
 	}
 	
 	
@@ -1460,7 +1454,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		}
 
 		private void setDisplayListDirty(boolean b)	{
-			propagateGeometryChanged(POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
+			if (b) propagateGeometryChanged(POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
 		}
 		
 		public SceneGraphComponent getOriginalComponent() {

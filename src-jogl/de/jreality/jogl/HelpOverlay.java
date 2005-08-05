@@ -124,12 +124,15 @@ public class HelpOverlay implements GLEventListener {
 	}
 
 	public void displayChanged(GLDrawable glDrawable, boolean b, boolean b1) {
+		//TODO document this
 	}
 
 	public void init(GLDrawable glDrawable) {
+		//TODO document this
 	}
 
 	public void reshape(GLDrawable glDrawable, int i, int i1, int i2, int i3) {
+		//TODO document this
 	}
 
 	public void registerKeyStroke(KeyStroke keyStroke, String description) {

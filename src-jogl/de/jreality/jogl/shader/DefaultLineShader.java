@@ -187,7 +187,6 @@ public class DefaultLineShader implements LineShader  {
 	}
 	
 	public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig) {
-		GL gl = jr.globalGL;
 		if ( !(original instanceof IndexedLineSet)) return -1;
 		if (tubeDraw && original instanceof IndexedLineSet)	{
 			int dlist =  createTubesOnEdgesAsDL((IndexedLineSet) original, tubeRadius, 1.0, jr, sig, jr.isPickMode());

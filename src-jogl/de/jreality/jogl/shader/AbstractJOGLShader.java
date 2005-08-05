@@ -15,6 +15,7 @@ import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.Geometry;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.util.LoggingSystem;
 
 /**
  * A class to handle common tasks related to openGL shading language shaders.
@@ -93,8 +94,8 @@ public abstract class AbstractJOGLShader implements PolygonShader {
 	}
 	
 	public void deactivate(GLDrawable theCanvas)	{
-		GL gl = theCanvas.getGL();
-		// TODO how to deactivate a shader?
+		//TODO fix this
+		LoggingSystem.getLogger(this).log(Level.FINE,"Deactivating GLSL program");
 	}
 	private void printInfoLog(int objectHandle, GLDrawable theCanvas)	{
 		GL gl = theCanvas.getGL();

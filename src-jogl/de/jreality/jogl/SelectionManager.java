@@ -16,6 +16,7 @@ import de.jreality.scene.event.TransformationListener;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
+import de.jreality.util.math.P3;
 
 /**
  * @author gunn
@@ -38,7 +39,6 @@ public class SelectionManager implements TransformationListener {
 	private Appearance selectedAppearance;
 	private double pickPointSize = .02;
 	private boolean useSphere = true;
-	private boolean firstTime = true;
 	/**
 	 * 
 	 */
@@ -207,7 +207,7 @@ public class SelectionManager implements TransformationListener {
 					sphereKit = Primitives.sphere(1.0, pickPoint.getPointObject() );
 					pickPointKit.addChild(sphereKit);
 				} else {
-					sphereKit.getTransformation().setTranslation(pickPoint.getPointObject());
+					sphereKit.getTransformation().setMatrix(P3.makeTranslationMatrix(null,pickPoint.getPointObject(),v.getSignature()) );
 				}				
 			}
 			else
@@ -330,7 +330,7 @@ public class SelectionManager implements TransformationListener {
 		return renderPick;
 	}
 	public void setRenderPick(boolean renderPick) {
-		//this.renderPick = renderPick;
+		this.renderPick = renderPick;
 		//broadcastChange();
 	}
 	public boolean isRenderSelection() {

@@ -44,7 +44,6 @@ public class JOGLRendererHelper {
 			for (int i = 0; i<6; ++i)	{
 				gl.glDisable(i+GL.GL_CLIP_PLANE0);
 			}
-			//TODO replace BackPlane class with simple quad drawn here, keyed to "backgroundColors" in topAp
 			if (topAp != null)	bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_COLOR);
 			if (bgo != null && bgo instanceof java.awt.Color) backgroundColor = ((java.awt.Color) bgo).getComponents(null);
 			else backgroundColor = CommonAttributes.BACKGROUND_COLOR_DEFAULT.getRGBComponents(null);
@@ -178,9 +177,6 @@ public class JOGLRendererHelper {
 		DataList edgeColors = sg.getEdgeAttributes(Attribute.COLORS);
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
 		DoubleArray da;
-		double[][] sp = null;
-		int[] snakeInfo = null;
-		int begin = -1, length = -1;
 		//SJOGLConfiguration.theLog.log(Level.INFO,"Processing ILS");
 //		if (sg instanceof Snake ) { // && sg.getGeometryAttributes(Snake.SNAKE_POINTS) != null)	{
 //			sp = (double[][] ) sg.getGeometryAttributes(Snake.SNAKE_POINTS);
@@ -290,9 +286,9 @@ public class JOGLRendererHelper {
 	}
 
 	public static void drawFaces( IndexedFaceSet sg,JOGLRenderer jr,  boolean smooth, double alpha) {
-		drawFaces(sg, jr, smooth, alpha, false, JOGLPickAction.GEOMETRY_FACE);
+		drawFaces(sg, jr, smooth, alpha, false);
 	}
-	public static void drawFaces( IndexedFaceSet sg, JOGLRenderer jr,  boolean smooth, double alpha, boolean pickMode, int pickName) {
+	public static void drawFaces( IndexedFaceSet sg, JOGLRenderer jr,  boolean smooth, double alpha, boolean pickMode) {
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		
@@ -526,7 +522,7 @@ public class JOGLRendererHelper {
 		// don't want to pick up any translation
 		double[] screenOffset = new double[4];
 		System.arraycopy(lb.getNDCOffset(), 0, screenOffset,0,3);
-		Rn.matrixTimesVector(screenOffset, gc.getNDCToScreen(jr.theViewer.getDrawable()), screenOffset);
+		Rn.matrixTimesVector(screenOffset, Graphics3D.getNDCToScreen(jr.theViewer.getDrawable()), screenOffset);
 		Rn.matrixTimesVector(screenVerts, objectToScreen, objectVerts);
 		if (screenVerts[0].length == 4) Pn.dehomogenize(screenVerts, screenVerts);
 		int np = objectVerts.length;
@@ -653,18 +649,11 @@ public class JOGLRendererHelper {
 	
 	static double[] clipPlane = {0d, 0d, -1d, 0d};
 	
-	public static void wisit(ClippingPlane cp, GL globalGL, int which)	{
-		
-		globalGL.glClipPlane(which, clipPlane);
-		globalGL.glEnable(which);
-	}
-
 	/**
 	 * 
 	 */
 	public void processClippingPlanes(GL globalGL, List clipPlanes) {
 		
-		int clipCount = 0;
 		int clipBase = GL.GL_CLIP_PLANE0;
 		// collect and process the lights
 		// with a peer structure we don't do this but once, and then
@@ -675,13 +664,16 @@ public class JOGLRendererHelper {
 		for (int i = 0; i<n; ++i)	{
 			SceneGraphPath lp = (SceneGraphPath) clipPlanes.get(i);
 			//JOGLConfiguration.theLog.log(Level.INFO,"Light"+i+": "+lp.toString());
-			double[] mat = lp.getMatrix(null);
-			globalGL.glPushMatrix();
-			globalGL.glMultTransposeMatrixd(mat);
 			SceneGraphNode cp = lp.getLastElement();
-			if (cp instanceof ClippingPlane)		wisit((ClippingPlane) cp, globalGL, clipBase+i);
-			else JOGLConfiguration.theLog.log(Level.WARNING,"Invalid clipplane class "+cp.getClass().toString());
-			globalGL.glPopMatrix();
+			if (!(cp instanceof ClippingPlane))	 JOGLConfiguration.theLog.log(Level.WARNING,"Invalid clipplane class "+cp.getClass().toString());
+			else {
+				double[] mat = lp.getMatrix(null);
+				globalGL.glPushMatrix();
+				globalGL.glMultTransposeMatrixd(mat);
+				globalGL.glClipPlane(clipBase+i, clipPlane);
+				globalGL.glEnable(clipBase+i);				
+				globalGL.glPopMatrix();
+			}
 		}
 	}
 	

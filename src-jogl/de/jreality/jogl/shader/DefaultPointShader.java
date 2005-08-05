@@ -137,9 +137,7 @@ public class DefaultPointShader  implements PointShader {
 			double[] mat = Rn.identityMatrix(4);
 			double[] scale = Rn.identityMatrix(4);
 			scale[0] = scale[5] = scale[10] = pointRadius;
-			int begin = 0;
 			int length = n;
-			int m = n;
 			//JOGLConfiguration.theLog.log(Level.INFO,"Signature is "+sig);
 			//sig = Pn.EUCLIDEAN;
 			boolean pickMode = jr.isPickMode();
