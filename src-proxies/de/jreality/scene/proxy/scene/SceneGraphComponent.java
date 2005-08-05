@@ -36,7 +36,7 @@ public class SceneGraphComponent extends de.jreality.scene.SceneGraphComponent
     }
 
     public RemoteAppearance getRemoteAppearance() {
-        return (RemoteAppearance) super.getAppearance();
+      return (RemoteAppearance) super.getAppearance();
     }
 
     public RemoteCamera getRemoteCamera() {

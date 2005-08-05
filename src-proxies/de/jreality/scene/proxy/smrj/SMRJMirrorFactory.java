@@ -1,7 +1,9 @@
 package de.jreality.scene.proxy.smrj;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.scene.data.ByteBufferList;
@@ -129,12 +131,10 @@ public class SMRJMirrorFactory extends ProxyFactory {
     public void copyAttr(de.jreality.scene.Appearance src, RemoteAppearance dst) {
         copyAttr((de.jreality.scene.SceneGraphNode) src,
                 (RemoteSceneGraphNode) dst);
-        List lst = src.getChildNodes();
-        for (int ix = 0, num = lst.size(); ix < num; ix++) {
-            de.jreality.scene.AppearanceAttribute aa = (de.jreality.scene.AppearanceAttribute) lst
-                    .get(ix);
-            dst.setAttribute(aa.getAttributeName(), aa.getValue(), aa
-                    .getAttributeType());
+        Set lst = src.getStoredAttributes();
+        for (Iterator i = lst.iterator(); i.hasNext(); ) {
+          String aName = (String) i.next();
+            dst.setAttribute(aName, src.getAppearanceAttribute(aName));
         }
     }
 

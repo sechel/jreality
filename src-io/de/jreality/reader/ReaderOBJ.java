@@ -381,12 +381,10 @@ public class ReaderOBJ extends AbstractReader {
         System.err.println("Warning: current app==null");
         return;
       }
-      List lst = a.getChildNodes();
-      for (int ix = 0, num = lst.size(); ix < num; ix++) {
-        de.jreality.scene.AppearanceAttribute aa = (de.jreality.scene.AppearanceAttribute) lst
-            .get(ix);
-        material.setAttribute(aa.getAttributeName(), aa.getValue(), aa
-            .getAttributeType());
+      Set lst = a.getStoredAttributes();
+      for (Iterator i = lst.iterator(); i.hasNext(); ) {
+        String aName = (String) i.next();
+        material.setAttribute(aName, a.getAppearanceAttribute(aName));
       }
       setSmoothening(smooth);
     }

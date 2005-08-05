@@ -6,7 +6,6 @@ import java.awt.Component;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
-import de.jreality.scene.AppearanceAttribute;
 import de.jreality.scene.SceneGraphNode;
 
 /**
@@ -37,12 +36,17 @@ public class SimpleSGCellRenderer
     buffer.append(" : ");
     final int ix1=buffer.length();
     String clName=m.getClass().getName();
+    
+    // TODO: check how to deal with that without appearance attributes
+    /*
     if(clName.intern()=="de.jreality.scene.AppearanceAttribute")
     {
-      AppearanceAttribute aa=(AppearanceAttribute)m;
+      Object aa=(AppearanceAttribute)m;
       buffer.append(aa.getAttributeName()).append(" = ").append(aa.getValue());
     }
+    
     else
+    */
     {
       buffer.append(clName);
       buffer.delete(ix1, clName.lastIndexOf('.')+ix1+1);

@@ -1,12 +1,13 @@
 
 package de.jreality.util;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
 import de.jreality.scene.Appearance;
-import de.jreality.scene.AppearanceAttribute;
 import de.jreality.shader.EffectiveAppearance;
 
 /**
@@ -38,10 +39,9 @@ public class AttributeStackTest extends TestCase {
   }
 
   private void clear(Appearance app) {
-    List l=app.getChildNodes();
-    for(int i=0, n=l.size(); i<n; i++)
-      app.setAttribute(((AppearanceAttribute)l.get(i)).getAttributeName(),
-                        Appearance.INHERITED);
+    Set l=app.getStoredAttributes();
+    for(Iterator i = l.iterator(); i.hasNext(); )
+      app.setAttribute((String) i.next(), Appearance.INHERITED);
   }
 
   /*
