@@ -6,7 +6,6 @@ package de.jreality.jogl.tools;
 
 import de.jreality.scene.Camera;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.math.Pn;
 import de.jreality.util.math.Rn;
 
 /**
@@ -110,17 +109,17 @@ public class Projector {
 		Rn.matrixTimesVector(outV, camToObject, inv);
 	}
 
-	protected void NDCToObject(double[] object, double[] ndc)	{
-		if (ndc == null || object != null && object.length != 4)	{
-			throw new IllegalArgumentException("Null arguments, or arguments must be 4-vectors");
-		}
-		double[] ndc4 = new double[4];
-		Rn.setToValue(ndc4, ndc[0], ndc[1], 0d, 1d);
-		if (object == null)	object = new double[4];
-		Rn.matrixTimesVector(object, camera.getNDCToCamera(), ndc4);
-		Rn.matrixTimesVector(object, camToObject, object);
-		Pn.dehomogenize(object, object);
-	}
+//	protected void NDCToObject(double[] object, double[] ndc)	{
+//		if (ndc == null || object != null && object.length != 4)	{
+//			throw new IllegalArgumentException("Null arguments, or arguments must be 4-vectors");
+//		}
+//		double[] ndc4 = new double[4];
+//		Rn.setToValue(ndc4, ndc[0], ndc[1], 0d, 1d);
+//		if (object == null)	object = new double[4];
+//		Rn.matrixTimesVector(object, camera.getNDCToCamera(), ndc4);
+//		Rn.matrixTimesVector(object, camToObject, object);
+//		Pn.dehomogenize(object, object);
+//	}
 	
 //	this translates the NDC position (considered as a tangent vector
 //	projected on near clipping plane) into a tangent vector in object coords

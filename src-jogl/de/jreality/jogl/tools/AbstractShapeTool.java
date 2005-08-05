@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
+import de.jreality.util.math.FactoredMatrix;
 import de.jreality.util.math.Rn;
 
 /**
@@ -20,7 +21,7 @@ public abstract class AbstractShapeTool extends AbstractMouseTool {
 	SceneGraphPath 	selection, alternateSelection;	// two selections: altSel is the "center"
 			// of the motion; sel is the object moved
 	Transformation theEditedTransform;	// the transform that gets edited
-	Transformation myTransform;
+	FactoredMatrix myTransform;
 	double[] 	theAxis;
 	double[]	worldToCamera;			// get this from the camera in startTrackingAt()
 	protected double[] anchorV = new double[4];
@@ -36,7 +37,7 @@ public abstract class AbstractShapeTool extends AbstractMouseTool {
 	public AbstractShapeTool() {
 		super();
 		duration = 400.0;			// make it quasi-infinite
-		myTransform =  new Transformation();
+		myTransform =  new FactoredMatrix();
 		origM = new double[16];
 		theAxis = new double[3];
 		theProjector = new PlaneProjector();
@@ -65,12 +66,12 @@ public abstract class AbstractShapeTool extends AbstractMouseTool {
 		//theEditedTransform.setDoFactor(false);
 		Rn.copy(origM,theEditedTransform.getMatrix());
 		signature = theEditedTransform.getSignature();
-		myTransform.resetMatrix();
+		myTransform =  new FactoredMatrix();
 		//worldToCamera = theCamera.getWorldToCameraMatrix();
 		worldToCamera = theViewer.getCameraPath().getInverseMatrix(worldToCamera);
 		
 		isTracking = true;
-		myTransform.setCenter(theEditedTransform.getCenter()); 
+		//myTransform.setCenter(theEditedTransform.getCenter()); 
 		theProjector.setCamera(theCamera);
 		theProjector.setAnchor(anchor);
 		double[] objectToWorld = selection.getMatrix(null);

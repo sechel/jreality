@@ -14,6 +14,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.Rectangle3D;
+import de.jreality.util.math.FactoredMatrix;
 import de.jreality.util.math.Pn;
 import de.jreality.util.math.Quaternion;
 import de.jreality.util.math.Rn;
@@ -52,7 +53,7 @@ public class RotateShapeTool extends AbstractShapeTool {
 		if (button == 1 && theEditedTransform.getSignature() != Pn.ELLIPTIC)	{
 			Rectangle3D bbox = GeometryUtility.calculateChildrenBoundingBox((SceneGraphComponent) theEditedNode);
 			myTransform.setCenter(bbox.getCenter()); 
-		}  else myTransform.setCenter(theEditedTransform.getCenter());
+		}  //else myTransform.setCenter(theEditedTransform.getCenter());
 		return true;
 	}
 	/* (non-Javadoc)
@@ -66,7 +67,7 @@ public class RotateShapeTool extends AbstractShapeTool {
 		if (button != 3) q = theRotator.getRotationXY(current);
 		else q = theRotator.getRotationZ(current);
 		myTransform.setRotation(q);
-		double[]composite = Rn.times(null, origM, myTransform.getMatrix());
+		double[]composite = Rn.times(null, origM, myTransform.getArray());
 		theEditedTransform.setMatrix(composite);
 		return true;
 	}
@@ -95,22 +96,21 @@ public class RotateShapeTool extends AbstractShapeTool {
 		//JOGLConfiguration.theLog.log(Level.FINE,"dt: "+dt+"Strength: "+strength+"angle: "+theAngle);
 		double[] axis = (double[] ) theAxis.clone();
 		//final double[] repeater = P3.makeRotationMatrix(null, axis, angle);
-		final Transformation repeater = new Transformation();
+		final FactoredMatrix repeater = new FactoredMatrix();
 		repeater.setCenter(myTransform.getCenter());
 		repeater.setRotation(angle, axis);
 		continuedMotion = new javax.swing.Timer(20, new ActionListener()	{
 			final Transformation tt = theEditedTransform;
-			final Transformation mt = myTransform;
+			final FactoredMatrix mt = myTransform;
 			//final double[] repeater = mat;
 			final double[] OM = origM; //theEditedTransform.getMatrix();
-			final double[] acc = Rn.identityMatrix(4);
 			public void actionPerformed(ActionEvent e) {updateRotation(); } 
 			public void updateRotation()	{
 				if (tt == null) return;
 				//tt.multiplyOnRight(repeater);
 				//Rn.times(acc, acc, repeater);
 				mt.multiplyOnRight(repeater);
-				tt.setMatrix(Rn.times(null, OM,mt.getMatrix()));
+				tt.setMatrix(Rn.times(null, OM,mt.getArray()));
 				//theEditedTransform.setRotation(tt.getRotationQuaternion());
 
 				theViewer.render();

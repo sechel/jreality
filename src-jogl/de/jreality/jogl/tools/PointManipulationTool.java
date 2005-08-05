@@ -28,7 +28,7 @@ import de.jreality.util.math.*;
 
 /**
  * @author gunn
- *
+ * @deprecated
  */
 public class PointManipulationTool extends AbstractMouseTool implements TransformationListener {
 	PickPoint thePoint;
@@ -45,7 +45,10 @@ public class PointManipulationTool extends AbstractMouseTool implements Transfor
 	MouseManipulationListener mml = null;
 	private double scaleFactor;
 
-	PointManipulationTool()	{
+	/**
+	 * @deprecated
+	 *
+	 */PointManipulationTool()	{
 		super();
     pickPathObserver=new SceneGraphPathObserver();
     pickPathObserver.addTransformationListener(this);
@@ -59,8 +62,8 @@ public class PointManipulationTool extends AbstractMouseTool implements Transfor
 			thePoint = theViewer.getSelectionManager().getPickPoint();
 		if (thePoint == null) return false;
 		// TODO this needs to be calculated based on screen extent
-		frameIconKit.getTransformation().setStretch(.1);	
-		theTransKit.getTransformation().setTranslation(thePoint.getPointObject());
+		frameIconKit.getTransformation().setMatrix(P3.makeStretchMatrix(null,.1));	
+		theTransKit.getTransformation().setMatrix(P3.makeTranslationMatrix(null, thePoint.getPointObject(), Pn.EUCLIDEAN));
 		theRepn.getTransformation().setMatrix(thePoint.getPickPath().getMatrix(null));
 		stretch = theScaleKit.getTransformation().getStretch();
 		origMatrix = frameIconKit.getTransformation().getMatrix();

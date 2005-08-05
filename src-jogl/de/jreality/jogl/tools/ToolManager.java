@@ -26,7 +26,7 @@ public class ToolManager {
 	protected MouseTool currentTool;
 	protected SelectionTool selTool;
 	protected UserTool userTool;
-	protected PointManipulationTool pmTool;
+//	protected PointManipulationTool pmTool;
 	protected CameraZoomTool zoomTool;
 	protected CameraFlyTool pointTool;
 //	protected OldCameraFlyTool flyTool;
@@ -52,7 +52,7 @@ public class ToolManager {
 		viewer = v;
 		selTool = new SelectionTool();
 		userTool = new UserTool();
-		pmTool = new PointManipulationTool();
+//		pmTool = new PointManipulationTool();
 		rotTool = new RotateShapeTool();
 		scaleTool = new ScaleShapeTool();
 		transTool = new TranslateShapeTool();
@@ -168,9 +168,6 @@ public class ToolManager {
 	}
 	HashMap usertools = null; 
 	public void addUserTool(final UserTool tool, final String symbol, final String name)	{
-		// just adding this at start-up is causing problems allocating the GLCanvas (!!)
-		// see TriangleGroupDemo
-		final ToolAction ta = new ToolAction(symbol, tool, name);
 		if (usertools == null) usertools = new HashMap();
 		if (tb == null) getToolbar();
 		TimerTask addToolTask = new TimerTask()	{

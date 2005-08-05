@@ -4,13 +4,16 @@
  */
 package de.jreality.jogl.tools;
 
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.util.logging.Level;
 
 import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.jogl.JOGLConfiguration;
-import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
@@ -53,8 +56,7 @@ public class CameraFlyTool extends AbstractMouseTool {
 		if (!super.attachToViewer(v)) return false;
 		cameraNode = CameraUtility.getCameraNode(v);
 		cameraTrans = cameraNode.getTransformation();
-		Camera cam = CameraUtility.getCamera(v);
-		signature = cam.getSignature();
+		signature = v.getSignature();
 		if ( cameraTrans == null)	{
 			JOGLConfiguration.theLog.log(Level.FINE,"No transform in CameraDirectionTool");
 			return false;
@@ -78,8 +80,7 @@ public class CameraFlyTool extends AbstractMouseTool {
 		//if (mm!= null) mm.addMotion(continuedMotion);
 		cameraNode = CameraUtility.getCameraNode(theViewer);
 		cameraTrans = cameraNode.getTransformation();
-		Camera cam = CameraUtility.getCamera(theViewer);
-		signature = cam.getSignature();
+		signature = theViewer.getSignature();
 		cameraTrans.getMatrix(origCM);
 		Rn.setIdentityMatrix(transM);
 		Rn.setIdentityMatrix(rotM);
@@ -89,7 +90,6 @@ public class CameraFlyTool extends AbstractMouseTool {
 		continuedMotion = new javax.swing.Timer(20, new ActionListener()	{
 			final Transformation tt = cameraTrans;
 			final double[] repeater1 = transM;
-			final double[] repeater2 = rotM;
 			public void actionPerformed(ActionEvent e) {updateRotation(); } 
 			public void updateRotation()	{
 				if (tt == null || theViewer == null) return;
@@ -193,8 +193,6 @@ public class CameraFlyTool extends AbstractMouseTool {
 	 *
 	 */
 	public class CameraDirectionKeyListener extends KeyAdapter {
-		private boolean showHelp = false;
-		
 		HelpOverlay helpOverlay;	
 		int value = 0;
 		long beginCurveTime = 0;

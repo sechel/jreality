@@ -39,7 +39,7 @@ public class MotionManager {
 	}
 
 	public void addMotion(Timer m)	{
-		if (m == null || !(m instanceof Timer)) return;
+		if (m == null ) return;
 		if (oneAtATime) {
 			motions.clear();
 			if (currentMotion != null && currentMotion.isRunning()) currentMotion.stop();

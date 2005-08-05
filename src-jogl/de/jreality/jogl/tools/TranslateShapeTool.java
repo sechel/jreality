@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import de.jreality.jogl.HelpOverlay;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.scene.Transformation;
+import de.jreality.util.math.FactoredMatrix;
 import de.jreality.util.math.P3;
 import de.jreality.util.math.Pn;
 import de.jreality.util.math.Rn;
@@ -47,8 +48,6 @@ public class TranslateShapeTool extends AbstractShapeTool {
 		if (button == 1)	{
 			mat = P3.makeTranslationMatrix(null, anchorV, currentV, theEditedTransform.getSignature());
 		} else {
-			// TODO Figure out why this doesn't work as planned: too slow (sometimes)
-			double[] o = {0,0};
 			double[] oV = new double[4];
 			double[] zV = new double[4];
 			double d= Pn.distanceBetween(anchorV, currentV, theEditedTransform.getSignature());
@@ -60,8 +59,8 @@ public class TranslateShapeTool extends AbstractShapeTool {
 			theProjector.setDistanceToPlane(ed);
 			mat = P3.makeTranslationMatrix(null, oV, zV, theEditedTransform.getSignature());
 		}
-		myTransform.setMatrix(mat);		
-		double[] comp = Rn.times(null, origM, myTransform.getMatrix());
+		myTransform = new FactoredMatrix(mat);		
+		double[] comp = Rn.times(null, origM, myTransform.getArray());
 		theEditedTransform.setMatrix(comp);
 		return true;
 	}

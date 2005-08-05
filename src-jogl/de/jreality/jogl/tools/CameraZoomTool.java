@@ -60,7 +60,6 @@ public class CameraZoomTool extends AbstractMouseTool {
 			double cx = viewport.getCenterX();
 			double cy = viewport.getCenterY();
 			double w = viewport.getWidth();
-			double h = w / theCamera.getAspectRatio();
 			double iw = initialViewport.getWidth();
 			double ih = initialViewport.getHeight();
 			double iminx = initialViewport.getMinX();
