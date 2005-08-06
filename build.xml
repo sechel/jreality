@@ -72,6 +72,7 @@
       <include name="jogl.jar"/>
      </fileset>
     <fileset dir="dist">
+      <include name="jReality-io.jar"/>
       <include name="jReality-jogl.jar"/>
       <include name="jReality-proxies.jar"/>
      </fileset>
@@ -136,14 +137,14 @@
     <jar jarfile="${dist}/jReality-jogl.jar" basedir="${build}/jogl" />
   </target>
 
-  <target name="testjogl" depends="core, soft, jogl, jogl-deps" description="build jogl tests">
+  <!--target name="testjogl" depends="core, soft, jogl, jogl-deps" description="build jogl tests">
     <mkdir dir="${build}/testjogl" />
     <javac excludesfile="excludes.txt" srcdir="${testjogl}"  destdir="${build}/testjogl" debug="true">
       <compilerarg line="-source 1.4" />
       <classpath refid="tests.classpath"/>
     </javac>
     <jar jarfile="${dist}/jReality-testjogl.jar" basedir="${build}/testjogl" />
-  </target>
+  </target-->
 
   <target name="jogl-deps" if="env.FETCH_DEPS">
     <get dest="lib/jogl.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/jogl.jar" usetimestamp="true" verbose="true"/>
@@ -195,7 +196,7 @@
     </javadoc>
   </target>
 	
-  <target name="dist" depends="core,io,jogl,soft,renderman,portal,testjogl" description="generate the distribution">
+  <target name="dist" depends="core,io,jogl,soft,renderman,portal" description="generate the distribution">
   </target>
 	
   <target name="check_cvs" description="check the current cvs state">
