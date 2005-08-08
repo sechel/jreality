@@ -10,6 +10,7 @@ import java.util.Vector;
 import java.util.logging.Level;
 
 import de.jreality.geometry.*;
+import de.jreality.jogl.pick.JOGLPickUtility;
 import de.jreality.math.P3;
 import de.jreality.scene.*;
 import de.jreality.scene.event.TransformationEvent;
@@ -205,14 +206,14 @@ public class SelectionManager implements TransformationListener {
 			//JOGLConfiguration.theLog.log(Level.INFO,"Representing pick point");
 			if (useSphere)	{
 				if (sphereKit == null)	{
-					sphereKit = Primitives.sphere(1.0, pickPoint.getPointObject() );
+					sphereKit = Primitives.sphere(1.0, JOGLPickUtility.getPointObject(pickPoint, v) );
 					pickPointKit.addChild(sphereKit);
 				} else {
-					sphereKit.getTransformation().setMatrix(P3.makeTranslationMatrix(null,pickPoint.getPointObject(),v.getSignature()) );
+					sphereKit.getTransformation().setMatrix(P3.makeTranslationMatrix(null,JOGLPickUtility.getPointObject(pickPoint, v),v.getSignature()) );
 				}				
 			}
 			else
-				pickPointKit.setGeometry(Primitives.point( pickPoint.getPointObject() ) );
+				pickPointKit.setGeometry(Primitives.point( JOGLPickUtility.getPointObject(pickPoint, v)  ) );
 
 			double[] mm = pickPoint.getPickPath().getMatrix(null);
 			pickPointKit.getTransformation().setMatrix( mm);

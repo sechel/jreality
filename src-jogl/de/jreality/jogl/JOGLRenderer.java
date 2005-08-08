@@ -163,7 +163,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			if (thePeerRoot != null) thePeerRoot.dispose();
 			setSceneRoot(theViewer.getSceneRoot());
 		}
-		context  = new Graphics3D(theViewer.getCameraPath(), null);
+		context  = new Graphics3D(theViewer.getCameraPath(), null, CameraUtility.getAspectRatio(theViewer));
 		theLog.finer(" top level display lists = "+thePeerRoot.useDisplayLists);
 		
 		OpenGLState.initializeGLState(this);
@@ -177,7 +177,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 
 		theCanvas.setAutoSwapBufferMode(!pickMode);
 		
-		globalGL.glMultTransposeMatrixd(CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), getAspectRatio(), CameraUtility.getCamera(theViewer).getEye()));
+		globalGL.glMultTransposeMatrixd(CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), CameraUtility.getAspectRatio(theViewer), CameraUtility.getCamera(theViewer).getEye()));
 
 		// prepare for rendering the geometry
 		globalGL.glMatrixMode(GL.GL_MODELVIEW);
@@ -1501,7 +1501,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 	 * @see de.jreality.scene.Drawable#getAspectRatio()
 	 */
 	public double getAspectRatio() {
-		return ((double) getWidth()/getHeight());
+		return ((double) getWidth())/getHeight();
 	}
 
 

@@ -10,6 +10,8 @@ import java.util.logging.Level;
 import net.java.games.jogl.GL;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.SphereUtility;
+import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.util.CameraUtility;
 
 /**
@@ -36,7 +38,7 @@ public class JOGLSphereHelper extends SphereUtility {
 				dlists = new int[n];
 				JOGLConfiguration.theLog.log(Level.INFO,"Setting up sphere display lists for context "+gl);
 		for (int i = 0; i<n; ++i)	{
-			tessellatedCube(i);
+			tessellatedCubeSphere(i);
 			dlists[i] = gl.glGenLists(1);
 			gl.glNewList(dlists[i], GL.GL_COMPILE);
 			//gl.glDisable(GL.GL_SMOOTH);
@@ -104,13 +106,33 @@ public class JOGLSphereHelper extends SphereUtility {
 	 * @return
 	 */
 	public static int getResolutionLevel(double[] o2ndc, double lod) {
-		double d = lod * CameraUtility.getNDCExtent(o2ndc);
+		double d = lod * getNDCExtent(o2ndc);
 		//JOGLConfiguration.theLog.log(Level.FINE,"Distance is "+d);
 		int i = 0;
 		for ( i = 0; i<5; ++i)	{
 			if (d < lodLevels[i]) break;
 		}
 		return i;
+	}
+
+	static double[] m4 = {1,0,0,1,0,1,0,1,0,0,1,1,0,0,0,1};
+	/**
+	 * @param o2ndc
+	 * @return
+	 */
+	public static double getNDCExtent(double[] o2ndc) {
+		double[][] images = new double[4][4];
+		Rn.transpose(o2ndc, o2ndc);
+		Rn.times(o2ndc, m4, o2ndc);
+		for (int i = 0; i<4; ++i)	System.arraycopy(o2ndc, 4*i, images[i], 0, 4);
+		Pn.dehomogenize(images, images);
+		double d = 0.0;
+		for (int i = 0; i<3; ++i)	 {
+			double[] tmp = Rn.subtract(null, images[3], images[i]);
+			double t = Math.sqrt(Rn.innerProduct(tmp,tmp,2));
+			if (t > d) d = t;
+		}
+		return d;
 	}
 
 }
