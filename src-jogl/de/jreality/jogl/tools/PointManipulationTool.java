@@ -70,8 +70,7 @@ public class PointManipulationTool extends AbstractMouseTool implements Transfor
 		stretch = theScaleKit.getTransformation().getStretch();
 		origMatrix = frameIconKit.getTransformation().getMatrix();
 		
-		if (theRotator == null) 		theRotator = new Rotator();
-		theRotator.setCamera(CameraUtility.getCamera(theViewer));
+		if (theRotator == null) 		theRotator = new Rotator(theViewer);
 		theRotator.setAnchor(anchor);
 		Graphics3D gc = new Graphics3D(theViewer);
 		gc.setObjectToWorld(pathToIcon.getMatrix(null));

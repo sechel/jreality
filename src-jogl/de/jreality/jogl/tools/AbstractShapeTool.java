@@ -40,7 +40,6 @@ public abstract class AbstractShapeTool extends AbstractMouseTool {
 		myTransform =  new FactoredMatrix();
 		origM = new double[16];
 		theAxis = new double[3];
-		theProjector = new PlaneProjector();
 	}
 
 
@@ -72,7 +71,7 @@ public abstract class AbstractShapeTool extends AbstractMouseTool {
 		
 		isTracking = true;
 		//myTransform.setCenter(theEditedTransform.getCenter()); 
-		theProjector.setCamera(theCamera);
+		theProjector = new PlaneProjector(theViewer);
 		theProjector.setAnchor(anchor);
 		double[] objectToWorld = selection.getMatrix(null);
 		theProjector.setObjectToCamera(Rn.times(null, worldToCamera, objectToWorld));

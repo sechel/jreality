@@ -38,7 +38,8 @@ public class RotateShapeTool extends AbstractShapeTool {
 	public boolean startTrackingAt(MouseEvent e) {
 		if (!super.startTrackingAt(e)) return false;
 
-		theRotator.setCamera(CameraUtility.getCamera(theViewer));
+		theRotator = new Rotator(theViewer);
+		//theRotator.setCamera(CameraUtility.getCamera(theViewer));
 		theRotator.setAnchor(anchor);
 		double[] objectToWorld = selection.getMatrix(null);
 		theRotator.setObjectToCamera(Rn.times(null, worldToCamera, objectToWorld));

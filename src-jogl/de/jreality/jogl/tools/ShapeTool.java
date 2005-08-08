@@ -69,7 +69,7 @@ public class ShapeTool extends AbstractMouseTool {
 		worldToCamera = theViewer.getCameraPath().getInverseMatrix(worldToCamera);
 		
 		isTracking = true;
-		theProjector.setCamera(theCamera);
+		theProjector = new PlaneProjector(theViewer);
 		theProjector.setAnchor(anchor);
 		double[] objectToWorld = selection.getMatrix(null);
 		theProjector.setObjectToCamera(Rn.times(null, worldToCamera, objectToWorld));

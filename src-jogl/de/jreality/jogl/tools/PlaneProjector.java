@@ -6,7 +6,7 @@ package de.jreality.jogl.tools;
 
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
-import de.jreality.util.CameraUtility;
+import de.jreality.scene.Viewer;
 
 /**
  * @author Charles Gunn
@@ -22,12 +22,16 @@ public class PlaneProjector extends Projector {
 		distanceToPlane = -1;
 	}
 
+	public PlaneProjector(Viewer theViewer) {
+		super(theViewer);
+	}
+
 	public void setDefaultPlane()	{
 		double[] imageOfOrigin = new double[4];
 		Rn.matrixTimesVector(imageOfOrigin, objectToCam, Pn.originP3);
 		// project onto z-axis
 		imageOfOrigin[0] = imageOfOrigin[1] = 0d;
-		distanceToPlane = Pn.distanceBetween(imageOfOrigin, Pn.originP3, camera.getSignature());
+		distanceToPlane = Pn.distanceBetween(imageOfOrigin, Pn.originP3, theViewer.getSignature());
 		if (imageOfOrigin[2] < 0.0) distanceToPlane *= -1;
 	}
 	
@@ -43,7 +47,7 @@ public class PlaneProjector extends Projector {
 		double[] position;
 		if (result == null) position = new double[4];
 		else position = result;
-		double[] p3 = CameraUtility.projectToPlane(camera, distanceToPlane, ndc);
+		double[] p3 = Projector.projectToPlane(theViewer, distanceToPlane, ndc);
 		System.arraycopy(p3, 0, position, 0, 3);
 		position[3] = 1.0;
 		Rn.matrixTimesVector(position, camToObject, position);

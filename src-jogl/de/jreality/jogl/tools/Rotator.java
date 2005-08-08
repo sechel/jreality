@@ -4,6 +4,8 @@
  */
 package de.jreality.jogl.tools;
 
+import de.jreality.jogl.InteractiveViewer;
+import de.jreality.scene.Viewer;
 import de.jreality.math.Quaternion;
 import de.jreality.math.Rn;
 
@@ -23,6 +25,11 @@ public class Rotator extends Projector {
 	 */
 	public Rotator() {
 		super();
+		scaleFactor = 1.0;
+	}
+
+	public Rotator(Viewer theViewer) {
+		super(theViewer);
 		scaleFactor = 1.0;
 	}
 
