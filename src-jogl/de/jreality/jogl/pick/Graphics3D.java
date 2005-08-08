@@ -5,7 +5,12 @@
 package de.jreality.jogl.pick;
 
 import de.jreality.math.Rn;
-import de.jreality.scene.*;
+import de.jreality.scene.Camera;
+import de.jreality.scene.Drawable;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Viewer;
+import de.jreality.util.CameraUtility;
 
 /**
  * @author gunn
@@ -13,6 +18,7 @@ import de.jreality.scene.*;
  */
 public class Graphics3D {
 	//Viewer viewer;
+	double aspectRatio = 1.0;
 	SceneGraphComponent theRoot;
 	SceneGraphPath cameraPath;
 	Camera camera;
@@ -21,7 +27,6 @@ public class Graphics3D {
 	SceneGraphPath currentPath;
 
 	/**
-	 * @deprecated
 	 * @param v
 	 */
 	public Graphics3D(Viewer v)	{
@@ -29,21 +34,28 @@ public class Graphics3D {
 	}
 	
 	/**
-	 * @deprecated
 	 * @param v
 	 * @param sgp
-	 */public Graphics3D(Viewer v, SceneGraphPath sgp)	{
-	 	this( v.getCameraPath(), sgp);
+	 */
+	public Graphics3D(Viewer v, SceneGraphPath sgp)	{
+	 	this( v.getCameraPath(), sgp, CameraUtility.getAspectRatio(v));
 	 }
 	 
-	 public Graphics3D(SceneGraphPath cp, SceneGraphPath sgp)	{
-		super();
-		//objectToWorld = Rn.identityMatrix(4);
-		if (sgp != null && sgp.getLength() > 0) setRoot((SceneGraphComponent) sgp.getFirstElement());
-		setCameraPath(cp);
-		setCurrentPath(sgp);
+//	 public Graphics3D(SceneGraphPath cp, SceneGraphPath sgp)	{
+//		 this(cp, sgp, 1.0);
+//	}
+	 public Graphics3D(SceneGraphPath cp, SceneGraphPath sgp, double ar)	{
+			super();
+			//objectToWorld = Rn.identityMatrix(4);
+			if (sgp != null && sgp.getLength() > 0) setRoot((SceneGraphComponent) sgp.getFirstElement());
+			setCameraPath(cp);
+			setCurrentPath(sgp);
+			setAspectRatio(ar);
+	 }
+	private void setAspectRatio(double ar) {
+		aspectRatio = ar;
 	}
-	
+
 	/**
 	 * @param cameraPath2
 	 */
@@ -63,13 +75,13 @@ public class Graphics3D {
 		theRoot = sceneRoot;
 	}
 
-	public Graphics3D Graphics3DFactory( SceneGraphPath cp, SceneGraphPath sgp)	{
-		if (sgp == null) {
-			sgp = new SceneGraphPath();
-		}
-		Graphics3D gc = new Graphics3D( cp, sgp);
-		return gc;
-	}
+//	public Graphics3D Graphics3DFactory( SceneGraphPath cp, SceneGraphPath sgp)	{
+//		if (sgp == null) {
+//			sgp = new SceneGraphPath();
+//		}
+//		Graphics3D gc = new Graphics3D( cp, sgp);
+//		return gc;
+//	}
 //	public Object clone() throws CloneNotSupportedException {
 //		try {
 //			Graphics3D copy = (Graphics3D) super.clone();
@@ -81,12 +93,12 @@ public class Graphics3D {
 //		}
 //		return null;
 //	}
-	public Graphics3D copy()	{
-		Graphics3D copy = new Graphics3D(cameraPath, currentPath);
-		copy.fastAndDirty = fastAndDirty;
-		copy.objectToWorld = objectToWorld;  // already a copy, no danger using it
-		return copy;
-	}
+//	public Graphics3D copy()	{
+//		Graphics3D copy = new Graphics3D(cameraPath, currentPath);
+//		copy.fastAndDirty = fastAndDirty;
+//		copy.objectToWorld = objectToWorld;  // already a copy, no danger using it
+//		return copy;
+//	}
 
 	public SceneGraphPath getCameraPath() {
 		return cameraPath;
@@ -99,7 +111,7 @@ public class Graphics3D {
 	 */
 	public double[] getCameraToNDC() {
 		if (cameraPath == null) throw new IllegalStateException("No camera path set for this context");
-		return camera.getCameraToNDC();
+		return CameraUtility.getCameraToNDC(camera, aspectRatio);
 	}
 
 	/**
@@ -170,7 +182,7 @@ public class Graphics3D {
 	public double[] getObjectToNDC() {
 		if (camera == null) 
 			throw new IllegalStateException("No camera for this context");
-		return Rn.times(null,camera.getCameraToNDC(), getObjectToCamera());
+		return Rn.times(null,CameraUtility.getCameraToNDC(camera, aspectRatio), getObjectToCamera());
 	}
 
 	/**
@@ -179,7 +191,7 @@ public class Graphics3D {
 	public double[] getNDCToObject() {
 		if (camera == null) 
 			throw new IllegalStateException("No camera for this context");
-		return Rn.inverse(null, Rn.times(null, camera.getCameraToNDC(), getObjectToCamera()));
+		return Rn.inverse(null, Rn.times(null, CameraUtility.getCameraToNDC(camera, aspectRatio), getObjectToCamera()));
 	}
 
 	/**
