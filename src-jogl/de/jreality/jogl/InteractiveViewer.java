@@ -24,7 +24,7 @@ import de.jreality.util.CameraUtility;
  * @author Charles Gunn
  *
  */
-public class InteractiveViewer extends de.jreality.jogl.Viewer implements  SelectionManager.Listener, ToolManager.Listener, InfoOverlay.InfoProvider {
+public class InteractiveViewer extends de.jreality.jogl.Viewer implements  SelectionManager.SelectionListener, ToolManager.Listener, InfoOverlay.InfoProvider {
 	protected SelectionManager selectionManager;
 	protected ToolManager toolManager;
 	protected MotionManager motionManager;
@@ -97,7 +97,7 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 	 * @see charlesgunn.gv2.SelectionManager.Listener#selectionChanged(charlesgunn.gv2.SelectionManager.Changed)
 	 */
 	SceneGraphComponent oldSel = null;
-	public void selectionChanged(SelectionManager.Changed e) {
+	public void selectionChanged(SelectionManager.SelectionEvent e) {
 		SceneGraphComponent sel = selectionManager.representSelectionAsSceneGraph(this);
 //		if (oldSel != null && sceneRoot.isDirectAncestor(oldSel)) sceneRoot.removeChild(oldSel);
 //		sceneRoot.addChild(sel);

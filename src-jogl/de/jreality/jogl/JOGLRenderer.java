@@ -177,7 +177,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 
 		theCanvas.setAutoSwapBufferMode(!pickMode);
 		
-		globalGL.glMultTransposeMatrixd(CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), CameraUtility.getAspectRatio(theViewer), CameraUtility.getCamera(theViewer).getEye()));
+		globalGL.glMultTransposeMatrixd(CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), getAspectRatio(), CameraUtility.getCamera(theViewer).getEye()));
 
 		// prepare for rendering the geometry
 		globalGL.glMatrixMode(GL.GL_MODELVIEW);
@@ -355,7 +355,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 				int w = width/2;
 				int h = height;
 				theCamera.setEye(Camera.RIGHT_EYE);
-				theCamera.update();
+				//theCamera.update();
 				globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 				myglViewport(0,0, w,h);
 				visit();

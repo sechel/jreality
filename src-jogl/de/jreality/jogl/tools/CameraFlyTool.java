@@ -56,7 +56,6 @@ public class CameraFlyTool extends AbstractMouseTool {
 		if (!super.attachToViewer(v)) return false;
 		cameraNode = CameraUtility.getCameraNode(v);
 		cameraTrans = cameraNode.getTransformation();
-		signature = v.getSignature();
 		if ( cameraTrans == null)	{
 			JOGLConfiguration.theLog.log(Level.FINE,"No transform in CameraDirectionTool");
 			return false;
@@ -80,7 +79,9 @@ public class CameraFlyTool extends AbstractMouseTool {
 		//if (mm!= null) mm.addMotion(continuedMotion);
 		cameraNode = CameraUtility.getCameraNode(theViewer);
 		cameraTrans = cameraNode.getTransformation();
-		signature = theViewer.getSignature();
+		//signature = theViewer.getSignature();
+		signature = cameraNode.getTransformation().getSignature();
+		System.out.println("Signature is "+signature);
 		cameraTrans.getMatrix(origCM);
 		Rn.setIdentityMatrix(transM);
 		Rn.setIdentityMatrix(rotM);

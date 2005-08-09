@@ -265,30 +265,30 @@ public class SelectionManager implements TransformationListener {
 		
 		return selectionKit;
 	}
-	public static class Changed extends java.util.EventObject	{
+	public static class SelectionEvent extends java.util.EventObject	{
 
 		/**
 		 * @param source
 		 */
-		public Changed(Object source) {
+		public SelectionEvent(Object source) {
 			super(source);
 		}
 	}
 	
 	Vector listeners;
 	
-	public interface Listener extends java.util.EventListener	{
-		public void selectionChanged(SelectionManager.Changed e);
+	public interface SelectionListener extends java.util.EventListener	{
+		public void selectionChanged(SelectionManager.SelectionEvent e);
 	}
 
-	public void addSelectionListener(SelectionManager.Listener l)	{
+	public void addSelectionListener(SelectionManager.SelectionListener l)	{
 		if (listeners == null)	listeners = new Vector();
 		if (listeners.contains(l)) return;
 		listeners.add(l);
 		//JOGLConfiguration.theLog.log(Level.INFO,"SelectionManager: Adding geometry listener"+l+"to this:"+this);
 	}
 	
-	public void removeSelectionListener(SelectionManager.Listener l)	{
+	public void removeSelectionListener(SelectionManager.SelectionListener l)	{
 		if (listeners == null)	return;
 		listeners.remove(l);
 	}
@@ -297,10 +297,10 @@ public class SelectionManager implements TransformationListener {
 		if (listeners == null) return;
 		//SyJOGLConfiguration.theLog.log(Level.INFO,"SelectionManager: broadcasting"+listeners.size()+" listeners");
 		if (!listeners.isEmpty())	{
-			SelectionManager.Changed e = new SelectionManager.Changed(this);
+			SelectionManager.SelectionEvent e = new SelectionManager.SelectionEvent(this);
 			//JOGLConfiguration.theLog.log(Level.INFO,"SelectionManager: broadcasting"+listeners.size()+" listeners");
 			for (int i = 0; i<listeners.size(); ++i)	{
-				SelectionManager.Listener l = (SelectionManager.Listener) listeners.get(i);
+				SelectionManager.SelectionListener l = (SelectionManager.SelectionListener) listeners.get(i);
 				l.selectionChanged(e);
 			}
 		}

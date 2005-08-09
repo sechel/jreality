@@ -291,7 +291,7 @@ public class ViewerKeyListener extends KeyAdapter {
 					} else {						// toggle stereo/mono
 						Camera cam = CameraUtility.getCamera(viewer);
 						cam.setStereo(!cam.isStereo());
-						cam.update();						
+						//cam.update();						
 					}
 					viewer.render();
 					break;
