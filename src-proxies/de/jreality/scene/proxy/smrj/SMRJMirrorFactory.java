@@ -212,7 +212,7 @@ public class SMRJMirrorFactory extends ProxyFactory {
     public void copyAttr(de.jreality.scene.Camera src, RemoteCamera dst) {
         copyAttr((de.jreality.scene.SceneGraphNode) src,
                 (RemoteSceneGraphNode) dst);
-        dst.setAspectRatio(src.getAspectRatio());
+//        dst.setAspectRatio(src.getAspectRatio());
         dst.setEyeSeparation(src.getEyeSeparation());
         dst.setFar(src.getFar());
         dst.setFieldOfView(src.getFieldOfView());
@@ -221,7 +221,7 @@ public class SMRJMirrorFactory extends ProxyFactory {
         dst.setOnAxis(src.isOnAxis());
         dst.setOrientationMatrix(src.getOrientationMatrix());
         dst.setPerspective(src.isPerspective());
-        dst.setSignature(src.getSignature());
+//        dst.setSignature(src.getSignature());
         dst.setStereo(src.isStereo());
         dst.setViewPort(src.getViewPort().getX(), src.getViewPort().getY(),
             src.getViewPort().getWidth(), src.getViewPort().getHeight());
