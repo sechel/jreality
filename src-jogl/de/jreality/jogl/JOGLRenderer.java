@@ -124,7 +124,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 	}
 	
 	public void appearanceChanged(AppearanceEvent ev) {
-		theLog.info("top appearance changed");
+		theLog.fine("top appearance changed");
 		extractGlobalParameters();
 	}
 	

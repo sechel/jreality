@@ -5,6 +5,7 @@
 package de.jreality.jogl;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -180,23 +181,7 @@ public class JOGLRendererHelper {
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
 		DoubleArray da;
 		//SJOGLConfiguration.theLog.log(Level.INFO,"Processing ILS");
-//		if (sg instanceof Snake ) { // && sg.getGeometryAttributes(Snake.SNAKE_POINTS) != null)	{
-//			sp = (double[][] ) sg.getGeometryAttributes(Snake.SNAKE_POINTS);
-//			vertexLength = sp[0].length;
-//			snakeInfo = (int[] ) sg.getGeometryAttributes(Snake.SNAKE_INFO);
-//			begin = snakeInfo[0];
-//			length = snakeInfo[1];
-//			//JOGLConfiguration.theLog.log(Level.INFO,"Processing the snake with "+length+" points");
-//			int n = sp.length;
-//			 gl.glBegin(GL.GL_LINE_STRIP);
-//			 for (int i = 0; i<length; ++i)	{
-//			 	int j = (i+begin) % n;
-//				if (vertexLength == 3) gl.glVertex3dv(sp[j]);
-//				else if (vertexLength == 4) gl.glVertex4dv(sp[j]);
-//			 }
-//			gl.glEnd();
-//			 return;
-//		}
+
 //        if (testArrays) {
 //                   double[] varray = vertices.toDoubleArray(null);
 //                   ByteBuffer bb = ByteBuffer.allocateDirect(8*varray.length).order(ByteOrder.nativeOrder());
@@ -345,21 +330,38 @@ public class JOGLRendererHelper {
 //			JOGLConfiguration.theLog.log(Level.INFO,("Normals have length "+vlength);			
 //		}
 		DoubleArray da;
-		if (!pickMode && sg instanceof QuadMeshShape)	{
-			
+		boolean isQuadMesh = false;
+		int maxU = 0, maxV = 0, maxFU = 0, maxFV = 0, numV = 0, numF;
+//		Object qmatt = sg.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
+//		if (qmatt != null && qmatt instanceof Dimension)	{
+//			Dimension dm = (Dimension) qmatt;
+//			isQuadMesh = true;
+//			maxU = dm.width;
+//			maxV = dm.height;
+//			numV = maxU * maxV;
+//			maxFU = maxU-1;
+//			maxFV = maxV-1;
+//		} else 
+			if (sg instanceof QuadMeshShape)	{
 			QuadMeshShape qm = (QuadMeshShape) sg;
-			RegularDomainQuadMesh rdqm = null;
+			isQuadMesh = true;
+			maxU = qm.getMaxU();
+			maxV = qm.getMaxV();
+			numV = maxU * maxV;
+			maxFU = qm.isClosedInUDirection() ? maxU : maxU-1;
+			maxFV = qm.isClosedInVDirection() ? maxV : maxV-1;
+			numF = qm.getNumFaces();
+			
+		}
+		numF = sg.getNumFaces();
+		if (!pickMode && isQuadMesh)	{
+			//System.out.println("Is quad mesh");
+//			RegularDomainQuadMesh rdqm = null;
 			int type = Pn.EUCLIDEAN;
-			if (qm instanceof RegularDomainQuadMesh) {
-				rdqm = (RegularDomainQuadMesh) qm;
-				type = rdqm.getType();
-			}
-			int maxU = qm.getMaxU();
-			int maxV = qm.getMaxV();
-			int numV = maxU * maxV;
-			int maxFU = qm.isClosedInUDirection() ? maxU : maxU-1;
-			int maxFV = qm.isClosedInVDirection() ? maxV : maxV-1;
-			int numF = qm.getNumFaces();
+//			if (qm instanceof RegularDomainQuadMesh) {
+//				rdqm = (RegularDomainQuadMesh) qm;
+//				type = rdqm.getType();
+//			}
 			double[] pt = new double[3];
 			// this loops through the "rows" of  the mesh (v is constant on each row)
 			for (int i = 0; i< maxFV ; ++i)	{
@@ -418,12 +420,12 @@ public class JOGLRendererHelper {
                 // da.getValueAt(1));
             }
 						da = vertices.item(vnn).toDoubleArray();
-						if (vertexLength == 1)	{		// Regular domain quad mesh
-							double z = da.getValueAt(0);
-							rdqm.getPointForIndices(u, v, pt);
-							if (type == Pn.EUCLIDEAN)		gl.glVertex3d(pt[0], pt[1], z);
-							else							gl.glVertex3d(z*pt[0], z*pt[1], z*pt[2]);
-						}
+//						if (vertexLength == 1)	{		// Regular domain quad mesh
+//							double z = da.getValueAt(0);
+//							rdqm.getPointForIndices(u, v, pt);
+//							if (type == Pn.EUCLIDEAN)		gl.glVertex3d(pt[0], pt[1], z);
+//							else							gl.glVertex3d(z*pt[0], z*pt[1], z*pt[2]);
+//						}
 						if (vertexLength == 3) gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 						else if (vertexLength == 4) gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));								
 					}
