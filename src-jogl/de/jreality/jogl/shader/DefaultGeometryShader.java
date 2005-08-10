@@ -44,18 +44,18 @@ public class DefaultGeometryShader  implements Shader {
 		edgeDraw = eap.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT );
 		faceDraw = eap.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
 		if(faceDraw) {
-	        polygonShader =ShaderLookup.getPolygonShaderAttr(eap, geomShaderName, CommonAttributes.POLYGON_SHADER);
+	        polygonShader =(PolygonShader) ShaderLookup.getShaderAttr(eap, geomShaderName, CommonAttributes.POLYGON_SHADER);
 	    } else {
 	    		polygonShader = null;
 	    }
 	    if(edgeDraw) {
-	    		lineShader =ShaderLookup.getLineShaderAttr(eap, geomShaderName, CommonAttributes.LINE_SHADER);
+	    		lineShader =(LineShader) ShaderLookup.getShaderAttr(eap, geomShaderName, CommonAttributes.LINE_SHADER);
 	    } else {
 	        	lineShader = null;
 	    }
 	       
 	    if(vertexDraw) {
-	        pointShader=ShaderLookup.getPointShaderAttr(eap, geomShaderName, CommonAttributes.POINT_SHADER);
+	        pointShader=(PointShader) ShaderLookup.getShaderAttr(eap, geomShaderName, CommonAttributes.POINT_SHADER);
 	    } else {
 	        pointShader=null;
 	    }

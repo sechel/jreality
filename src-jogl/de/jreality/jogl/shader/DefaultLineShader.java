@@ -72,7 +72,7 @@ public class DefaultLineShader implements LineShader  {
 		diffuseColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.LINE_DIFFUSE_COLOR_DEFAULT);
 		double transp = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
 		setDiffuseColor( ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transp));
-		polygonShader = ShaderLookup.getPolygonShaderAttr(eap, name, "polygonShader");
+		polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
 		//JOGLConfiguration.theLog.log(Level.FINE,"Line shader is smooth: "+smoothShading);
 		//JOGLConfiguration.theLog.log(Level.FINE,"Line shader's polygon shader is smooth: "+(polygonShader.isSmoothShading() ? "true" : "false"));
 		//polygonShader.setDiffuseColor(diffuseColor);

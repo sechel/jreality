@@ -51,7 +51,7 @@ public class DefaultPointShader  implements PointShader {
 		double t = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
 		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, t);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
-		polygonShader = ShaderLookup.getPolygonShaderAttr(eap, name, "polygonShader");
+		polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
 		//polygonShader.setDiffuseColor(diffuseColor);
 		//polygonShader.setSmoothShading(true);
 	}

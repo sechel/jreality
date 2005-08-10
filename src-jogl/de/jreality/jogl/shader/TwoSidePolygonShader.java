@@ -9,6 +9,7 @@ import java.util.logging.Level;
 
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.Geometry;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.LoggingSystem;
 
@@ -40,10 +41,10 @@ public class TwoSidePolygonShader implements PolygonShader {
 		if (back != null) back.postRender(jr);
 	}
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String shaderName) {
-	      front = ShaderLookup.getPolygonShaderAttr(eap, shaderName, "front");
+	      front = (PolygonShader) ShaderLookup.getShaderAttr(eap, shaderName, CommonAttributes.POLYGON_SHADER, "front");
 	      LoggingSystem.getLogger(this).log(Level.FINER,"Front shader is "+front.getClass().toString());
 	      front.setFrontBack(DefaultPolygonShader.FRONT);
-	      back = ShaderLookup.getPolygonShaderAttr(eap, shaderName, "back");
+	      back = (PolygonShader) ShaderLookup.getShaderAttr(eap, shaderName,CommonAttributes.POLYGON_SHADER, "back");
 	      back.setFrontBack(DefaultPolygonShader.BACK);
 	}
 
