@@ -332,16 +332,16 @@ public class JOGLRendererHelper {
 		DoubleArray da;
 		boolean isQuadMesh = false;
 		int maxU = 0, maxV = 0, maxFU = 0, maxFV = 0, numV = 0, numF;
-//		Object qmatt = sg.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
-//		if (qmatt != null && qmatt instanceof Dimension)	{
-//			Dimension dm = (Dimension) qmatt;
-//			isQuadMesh = true;
-//			maxU = dm.width;
-//			maxV = dm.height;
-//			numV = maxU * maxV;
-//			maxFU = maxU-1;
-//			maxFV = maxV-1;
-//		} else 
+		Object qmatt = sg.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
+		if (qmatt != null && qmatt instanceof Dimension)	{
+			Dimension dm = (Dimension) qmatt;
+			isQuadMesh = true;
+			maxU = dm.width;
+			maxV = dm.height;
+			numV = maxU * maxV;
+			maxFU = maxU-1;
+			maxFV = maxV-1;
+		} else 
 			if (sg instanceof QuadMeshShape)	{
 			QuadMeshShape qm = (QuadMeshShape) sg;
 			isQuadMesh = true;
