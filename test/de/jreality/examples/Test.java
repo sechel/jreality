@@ -277,6 +277,7 @@ public class Test implements KeyListener {
 
         //ap.setAttribute("transparency", 0.5);
         ap.setAttribute(CommonAttributes.DIFFUSE_COLOR, new Color(0.2f, 0.2f, 0.6f));
+        ap.setAttribute(CommonAttributes.AMBIENT_COEFFICIENT, 0.0);
         //ap.setAttribute("outline", true);
 
         TestScenarioBuilder tstBuilder =new TestScenarioBuilder();
