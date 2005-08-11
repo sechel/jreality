@@ -218,7 +218,7 @@ public class DefaultPolygonShader implements PolygonShader {
 	public boolean providesProxyGeometry() {		
 		return false;
 	}
-	public int  proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig) {
+	public int  proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig, boolean useDisplayLists) {
 		return -1;
 	}
 

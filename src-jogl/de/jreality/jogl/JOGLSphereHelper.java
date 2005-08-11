@@ -117,7 +117,7 @@ public class JOGLSphereHelper extends SphereUtility {
 
 	static double[] m4 = {1,0,0,1,0,1,0,1,0,0,1,1,0,0,0,1};
 	/**
-	 * @param o2ndc
+	 * @param o2ndc	object to normalized device coordinate transformation
 	 * @return
 	 */
 	public static double getNDCExtent(double[] o2ndc) {

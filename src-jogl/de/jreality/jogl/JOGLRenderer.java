@@ -40,7 +40,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 	final static boolean debugGL = JOGLConfiguration.debugGL;
 	
 	static boolean collectFrameRate = true;
-	public final static int MAX_STACK_DEPTH = 30;
+	public final static int MAX_STACK_DEPTH = 28;
 	protected int stackDepth;
 	JOGLRenderer globalHandle = null;
 	SceneGraphPath currentPath = new SceneGraphPath();
@@ -57,7 +57,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 	Graphics3D context;
 	public GL globalGL;
 	GLU globalGLU;
-	int[] sphereDisplayLists = null;
+	int[] sphereDisplayLists = null, cylinderDisplayLists = null;
 	public OpenGLState openGLState = new OpenGLState();
 	public  boolean texResident = true;
 	int numberTries = 0;		// how many times we have tried to make textures resident
@@ -176,8 +176,12 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			globalGL.glMultTransposeMatrixd(pickT.getMatrix());
 
 		theCanvas.setAutoSwapBufferMode(!pickMode);
-		
-		globalGL.glMultTransposeMatrixd(CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), getAspectRatio(), CameraUtility.getCamera(theViewer).getEye()));
+		double aspectRatio = getAspectRatio();
+		// for pick mode the aspect ratio has to be set to that of the viewer component
+		if (pickMode) aspectRatio = CameraUtility.getAspectRatio(theViewer);
+		globalGL.glMultTransposeMatrixd(CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), 
+				aspectRatio,
+				CameraUtility.getCamera(theViewer).getEye()));
 
 		// prepare for rendering the geometry
 		globalGL.glMatrixMode(GL.GL_MODELVIEW);
@@ -317,7 +321,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		if (thePeerRoot != null) thePeerRoot.propagateGeometryChanged(ALL_CHANGED);
 		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.propagateGeometryChanged(ALL_CHANGED);
 		Texture2DLoaderJOGL.deleteAllTextures(globalGL);
-		sphereDisplayLists = JOGLSphereHelper.getSphereDLists(this);
+//		sphereDisplayLists = JOGLSphereHelper.getSphereDLists(this);
+//		cylinderDisplayLists = JOGLCylinderUtility.getCylinderDLists(this);
 		if (debugGL)	theLog.log(Level.INFO,"Got new sphere display lists for context "+globalGL);
 		
 		//if (CameraUtility.getCamera(theViewer) == null || theCanvas == null) return;
@@ -721,6 +726,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 //				ils = foo;
 //				ps = foo;
 				
+				if (sphereDisplayLists == null) sphereDisplayLists = JOGLSphereHelper.getSphereDLists(globalHandle);
 				geometryShader.polygonShader.render(globalHandle);	
 				int i = 3;
 				if (debugGL)	{
@@ -739,7 +745,29 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 				if (pickMode) globalGL.glPopName();
 				geometryShader.polygonShader.postRender(globalHandle);
 				return;
-			}		
+			} else if ((geometryShader.isFaceDraw() && originalGeometry instanceof Cylinder))	{
+				if (cylinderDisplayLists == null) cylinderDisplayLists = JOGLCylinderUtility.getCylinderDLists(globalHandle);
+				geometryShader.polygonShader.render(globalHandle);	
+				int i = 3;
+				if (debugGL)	{
+					double lod = renderingHints.getLevelOfDetail();
+					// TODO do this in a timer
+					i = JOGLCylinderUtility.getResolutionLevel(context.getObjectToNDC(), lod);
+					//int i = 3;
+				}
+	
+				int dlist = cylinderDisplayLists[i];
+				
+				//globalGL.glDisable(GL.GL_SMOOTH);
+				if (pickMode) globalGL.glPushName(JOGLPickAction.GEOMETRY_BASE);
+				if (debugGL) 
+					globalGL.glColor4fv(cdbg[i].getRGBComponents(null));
+				globalGL.glCallList(dlist);
+				if (pickMode) globalGL.glPopName();
+				geometryShader.polygonShader.postRender(globalHandle);
+				return;
+				
+			}
 			else 	if (originalGeometry instanceof LabelSet)	{
 				// NOTE we don't use display lists here because the text rendering is done in screen
 				// coordinates and must be recalculated for each frame
@@ -749,62 +777,93 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 				JOGLRendererHelper.drawLabels(((LabelSet) originalGeometry), globalHandle);
 			}
 
+			boolean useDisplayLists = useDisplayLists(activeDL, jpc);
 			if (geometryShader.isEdgeDraw() && ils != null)	{
 				geometryShader.lineShader.render(globalHandle);
 				boolean proxy = geometryShader.lineShader.providesProxyGeometry();
 				double alpha = openGLState.diffuseColor[3];
 				boolean smooth = false; //openGLState.smoothShading;;
 				int type = proxy ? PROXY_LINEDL : LINEDL;
-				if (proxy && activeDL.isDisplayListDirty(PROXY_LINEDL))	{
-					theLog.log(Level.FINER,"Recalculating tubes");
-					int dl  = geometryShader.lineShader.proxyGeometryFor(ils, globalHandle, currentSignature);
-					if (dl != -1) {
-						activeDL.setDisplayListID(type, dl);
-						activeDL.setDisplayListDirty(type, false);
-					}
-				}
-				if (proxy)	globalGL.glCallList(activeDL.getDisplayListID(type));
-				else {
-					if (!processDisplayListState(activeDL, jpc, type))		 // false return implies no display lists used
-						JOGLRendererHelper.drawLines(ils, globalHandle, pickMode, smooth, alpha);			
-					else // we are using display lists
-						if (activeDL.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
-							JOGLRendererHelper.drawLines(ils, globalHandle, pickMode, smooth, alpha);			
-							globalGL.glEndList();	
-							globalGL.glCallList(activeDL.getDisplayListID(type));
+				if (proxy)	{
+					if ((!useDisplayLists || activeDL.isDisplayListDirty(type))) {
+						theLog.log(Level.FINER,"Recalculating tubes");
+						int dl  = geometryShader.lineShader.proxyGeometryFor(ils, globalHandle, currentSignature, useDisplayLists);
+						if (dl != -1) {
+							activeDL.setDisplayListID(type, dl);
 							activeDL.setDisplayListDirty(type, false);
-							activeDL.setInsideDisplayList(false);							
 						}
+					}
+					if (useDisplayLists) globalGL.glCallList(activeDL.getDisplayListID(type));
 				}
+				else 	{
+					if (useDisplayLists)		setupDisplayLists(activeDL, type);
+					if (!useDisplayLists || activeDL.isInsideDisplayList()) 
+						JOGLRendererHelper.drawLines(ils, globalHandle, pickMode, smooth, alpha);
+					if (useDisplayLists)		cleanupDisplayLists(activeDL, type);
+				}
+				geometryShader.lineShader.postRender(globalHandle);
+//				if (proxy && activeDL.isDisplayListDirty(PROXY_LINEDL))	{
+//					theLog.log(Level.FINER,"Recalculating tubes");
+//					int dl  = geometryShader.lineShader.proxyGeometryFor(ils, globalHandle, currentSignature, true);
+//					if (dl != -1) {
+//						activeDL.setDisplayListID(type, dl);
+//						activeDL.setDisplayListDirty(type, false);
+//					}
+//				}
+//				if (proxy)	globalGL.glCallList(activeDL.getDisplayListID(type));
+//				else {
+//					if (!processDisplayListState(activeDL, jpc, type))		 // false return implies no display lists used
+//						JOGLRendererHelper.drawLines(ils, globalHandle, pickMode, smooth, alpha);			
+//					else // we are using display lists
+//						if (activeDL.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
+//							JOGLRendererHelper.drawLines(ils, globalHandle, pickMode, smooth, alpha);			
+//							cleanupDisplayLists(activeDL, type);							
+//						}
+//				}
 			}
 			if (geometryShader.isVertexDraw() && ps != null)	{
 				geometryShader.pointShader.render(globalHandle);
 				double alpha = geometryShader.pointShader.getDiffuseColor().getAlpha()/255.0;
 				boolean proxy = geometryShader.pointShader.providesProxyGeometry();
 				int type = proxy ? PROXY_POINTDL : POINTDL;
-				if (proxy && activeDL.isDisplayListDirty(type))	{
-					theLog.log(Level.FINER,"Recalculating spheres");
-					int dl  = geometryShader.pointShader.proxyGeometryFor(ps, globalHandle, currentSignature);
-					if (dl != -1) {
-						theLog.log(Level.FINER,"spheres created");
-						activeDL.setDisplayListID(type, dl);
-						activeDL.setDisplayListDirty(type, false);
-					}
-				}
-				if (proxy) globalGL.glCallList(activeDL.getDisplayListID(type));
-				else {
-					if (!processDisplayListState(activeDL, jpc, type))		{// false return implies no display lists used
-						JOGLRendererHelper.drawVertices(ps, globalHandle, pickMode, alpha);			
-					}  else  {		// we are using display lists 
-						if (activeDL.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
-							JOGLRendererHelper.drawVertices(ps, globalHandle,  pickMode, alpha);			
-							globalGL.glEndList();	
-							globalGL.glCallList(activeDL.getDisplayListID(type));
+				if (proxy)	{
+					if ((!useDisplayLists || activeDL.isDisplayListDirty(type))) {
+						theLog.log(Level.FINER,"Recalculating spheres");
+						int dl = geometryShader.pointShader.proxyGeometryFor(ps, globalHandle, currentSignature,useDisplayLists);
+						if (dl != -1) {
+							activeDL.setDisplayListID(type, dl);
 							activeDL.setDisplayListDirty(type, false);
-							activeDL.setInsideDisplayList(false);
 						}
-					}			
+					}
+					if (useDisplayLists) globalGL.glCallList(activeDL.getDisplayListID(type));
 				}
+				else 	{
+					if (useDisplayLists)		setupDisplayLists(activeDL, type);
+					if (!useDisplayLists || activeDL.isInsideDisplayList()) 
+						JOGLRendererHelper.drawVertices(ps, globalHandle, pickMode, alpha);
+					if (useDisplayLists)		cleanupDisplayLists(activeDL, type);
+				}
+				geometryShader.pointShader.postRender(globalHandle);
+//				if (proxy && activeDL.isDisplayListDirty(type))	{
+//					theLog.log(Level.FINER,"Recalculating spheres");
+//					int dl  = geometryShader.pointShader.proxyGeometryFor(ps, globalHandle, currentSignature, true);
+//					if (dl != -1) {
+//						theLog.log(Level.FINER,"spheres created");
+//						activeDL.setDisplayListID(type, dl);
+//						activeDL.setDisplayListDirty(type, false);
+//					}
+//				}
+//				if (proxy) globalGL.glCallList(activeDL.getDisplayListID(type));
+//				else {
+//					if (!processDisplayListState(activeDL, jpc, type))		{// false return implies no display lists used
+//						JOGLRendererHelper.drawVertices(ps, globalHandle, pickMode, alpha);			
+//					}  else  {		// we are using display lists 
+//						if (activeDL.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
+//							JOGLRendererHelper.drawVertices(ps, globalHandle,  pickMode, alpha);			
+//							cleanupDisplayLists(activeDL, type);
+//						}
+//					}			
+//				}
 			}
 			// do I need this?Yes, the point and line shader can turn off lighting
 			renderingHints.render(globalHandle);
@@ -814,31 +873,64 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 				boolean ss = openGLState.smoothShading;
 				int type = POLYGONDL;
 				boolean proxy = geometryShader.polygonShader.providesProxyGeometry();
-				if (proxy && activeDL.isDisplayListDirty(type))	{
-					theLog.log(Level.FINER,"Asking "+geometryShader.polygonShader+" for proxy geometry ");
-					int dl  = geometryShader.polygonShader.proxyGeometryFor(ils, globalHandle, currentSignature);
-					if (dl != -1) {
-						activeDL.setDisplayListID(type, dl);
-						activeDL.setDisplayListDirty(type, false);
-					}
-				}
-				if (proxy)	globalGL.glCallList(activeDL.getDisplayListID(type));
-				else 	{
-					if (!processDisplayListState(activeDL, jpc, type))		 // false return implies no display lists used
-						JOGLRendererHelper.drawFaces(ifs, globalHandle,ss, alpha, pickMode);
-					else // we are using display lists
-						if (activeDL.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
-							JOGLRendererHelper.drawFaces(ifs, globalHandle, ss, alpha, pickMode);
-							globalGL.glEndList();	
-							globalGL.glCallList(activeDL.getDisplayListID(type));
+				theLog.log(Level.FINE,"Using display lists: "+useDisplayLists);
+				if (proxy)	{
+					if ((!useDisplayLists || activeDL.isDisplayListDirty(type))) {
+						theLog.log(Level.FINER, "Asking "+ geometryShader.polygonShader+ " for proxy geometry ");
+						int dl = geometryShader.polygonShader.proxyGeometryFor(ifs, globalHandle, currentSignature,useDisplayLists);
+						if (dl != -1) {
+							activeDL.setDisplayListID(type, dl);
 							activeDL.setDisplayListDirty(type, false);
-							activeDL.setInsideDisplayList(false);							
-						}					
+						}
+					}
+					if (useDisplayLists) globalGL.glCallList(activeDL.getDisplayListID(type));
+				}
+				else 	{
+					if (useDisplayLists)		setupDisplayLists(activeDL, type);
+					if (!useDisplayLists || activeDL.isInsideDisplayList()) 
+						JOGLRendererHelper.drawFaces(ifs, globalHandle,ss, alpha, pickMode);
+					if (useDisplayLists)		cleanupDisplayLists(activeDL, type);
 				}
 				geometryShader.polygonShader.postRender(globalHandle);
 			}
 			renderingHints.postRender(globalHandle);
 
+		}
+
+		private boolean useDisplayLists(DisplayListInfo dl, JOGLPeerComponent jpc)	{
+			return jpc.useDisplayLists && dl.useDisplayList();
+		}
+		
+		private void setupDisplayLists(DisplayListInfo dl, int type)	{
+			if (!dl.isDisplayListDirty(type))	{
+				//JOGLConfiguration.theLog.log(Level.INFO,"Using display list");
+				globalGL.glCallList(dl.getDisplayListID(type));
+				dl.setInsideDisplayList(false);
+				return;
+			}
+			
+			if (dl.getDisplayListID(type) != -1) {
+				globalGL.glDeleteLists(dl.getDisplayListID(type), 1);
+				JOGLConfiguration.theLog.log(Level.FINE, "Deleting display list "+dl.getDisplayListID(type));
+				dl.setDisplayListID(type, -1);
+			}
+			int nextDL = globalGL.glGenLists(1);
+			JOGLConfiguration.theLog.log(Level.FINE, "Allocating new display list "+nextDL);
+			dl.setDisplayListID(type, nextDL);
+			globalGL.glNewList(dl.getDisplayListID(type), GL.GL_COMPILE); //_AND_EXECUTE);
+			//JOGLConfiguration.theLog.log(Level.INFO,"Beginning display list for "+originalGeometry.getName());
+			dl.setInsideDisplayList(true);
+		}
+		/**
+		 * @param activeDL
+		 * @param type
+		 */
+		private void cleanupDisplayLists(DisplayListInfo activeDL, int type) {
+			if (!activeDL.isInsideDisplayList()) return;
+			globalGL.glEndList();	
+			globalGL.glCallList(activeDL.getDisplayListID(type));
+			activeDL.setDisplayListDirty(type, false);
+			activeDL.setInsideDisplayList(false);
 		}
 
 		private boolean processDisplayListState(DisplayListInfo dl, JOGLPeerComponent jpc, int type)	{
@@ -1208,8 +1300,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			if (appearanceChanged)  	propagateAppearanceChanged();
 			if (appearanceIsDirty)	updateAppearance();
 			//context.setEffectiveAppearance(eAp);
-			JOGLConfiguration.theLog.log(Level.FINE, goBetween.getOriginalComponent().getName()+"Using display list: "+useDisplayLists);
-			JOGLConfiguration.theLog.log(Level.FINEST,"Rendering "+goBetween.getOriginalComponent().getName());
+			JOGLConfiguration.theLog.log(Level.FINEST, goBetween.getOriginalComponent().getName()+"Using display list: "+useDisplayLists);
+			//JOGLConfiguration.theLog.log(Level.FINEST,"Rendering "+goBetween.getOriginalComponent().getName());
 			// render the geometry
 			if (goBetween.getPeerGeometry() != null)	goBetween.getPeerGeometry().render(this);
 			

@@ -58,10 +58,10 @@ public class TwoSidePolygonShader implements PolygonShader {
 		return false;
 	}
 
-	public  int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig) {
+	public  int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig, boolean useDisplayLists) {
 		int dp = 0;
 		if (front != null) {
-			dp = front.proxyGeometryFor(original, jr, sig);
+			dp = front.proxyGeometryFor(original, jr, sig, useDisplayLists);
 			LoggingSystem.getLogger(this).log(Level.FINER,"Providing dl "+dp);
 			return dp;
 		}

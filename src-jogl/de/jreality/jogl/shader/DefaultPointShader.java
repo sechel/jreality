@@ -119,10 +119,10 @@ public class DefaultPointShader  implements PointShader {
 		return sphereDraw;
 	}
 	
-	public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig) {
+	public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig, boolean useDisplayLists) {
 		GL gl = 	jr.globalGL;
 		// TODO handle quadmesh differently
-		if (sphereDraw && original instanceof PointSet)	{
+		if (original instanceof PointSet)	{
 			PointSet ps = (PointSet) original;
 			DataList vertices = ps.getVertexAttributes(Attribute.COORDINATES);
 			DataList vertexColors = ps.getVertexAttributes(Attribute.COLORS);
@@ -131,9 +131,12 @@ public class DefaultPointShader  implements PointShader {
 			if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
 			DoubleArray da;
 			int n = ps.getNumPoints();
-			int nextDL = gl.glGenLists(1);
 			int dlist = JOGLSphereHelper.getSphereDLists(1, jr);
-			gl.glNewList(nextDL, GL.GL_COMPILE);
+			int nextDL = -1;
+			if (useDisplayLists)	{
+				nextDL = gl.glGenLists(1);
+				gl.glNewList(nextDL, GL.GL_COMPILE);				
+			}
 			double[] mat = Rn.identityMatrix(4);
 			double[] scale = Rn.identityMatrix(4);
 			scale[0] = scale[5] = scale[10] = pointRadius;
@@ -163,7 +166,7 @@ public class DefaultPointShader  implements PointShader {
 				gl.glPopMatrix();
 			}
 			if (pickMode) gl.glPopName();
-			gl.glEndList();
+			if (useDisplayLists) gl.glEndList();
 			return nextDL;
 		}
 		return -1;

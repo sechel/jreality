@@ -33,18 +33,21 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 		//if (implodeFactor == 0.0) return false;
 		return true;
 	}
-	public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig) {
+	public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig, boolean useDisplayLists) {
 		if (!(original instanceof IndexedFaceSet)) return -1;
 		GL gl = jr.globalGL;
 		//JOGLConfiguration.theLog.log(Level.INFO,this+"Providing proxy geometry "+implodeFactor);
 		IndexedFaceSet ifs =  IndexedFaceSetUtility.implode((IndexedFaceSet) original, implodeFactor);
 		double alpha = vertexShader == null ? 1.0 : vertexShader.getDiffuseColorAsFloat()[3];
-		int implodeDL = gl.glGenLists(1);
-		gl.glNewList(implodeDL, GL.GL_COMPILE);
+		int implodeDL = -1;
+		if (useDisplayLists) {
+			implodeDL = gl.glGenLists(1);
+			gl.glNewList(implodeDL, GL.GL_COMPILE);
+		}
 		//if (jr.isPickMode())	gl.glPushName(JOGLPickAction.GEOMETRY_BASE);
 		JOGLRendererHelper.drawFaces(ifs, jr,  isSmoothShading(), alpha, jr.isPickMode());
 		//if (jr.isPickMode())	gl.glPopName();
-		gl.glEndList();
+		if (useDisplayLists) gl.glEndList();
 		return implodeDL;
 	}
 }

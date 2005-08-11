@@ -179,7 +179,7 @@ public class DefaultLineShader implements LineShader  {
 		gl.glDepthMask(true);
 		gl.glDisable(GL.GL_BLEND);
 
-		gl.glDepthRange(0.0d, depthFudgeFactor);
+		if (!tubeDraw) gl.glDepthRange(0.0d, depthFudgeFactor);
 	}
 
 	public boolean providesProxyGeometry() {		
@@ -187,10 +187,10 @@ public class DefaultLineShader implements LineShader  {
 		return false;
 	}
 	
-	public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig) {
+	public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig, boolean useDisplayLists) {
 		if ( !(original instanceof IndexedLineSet)) return -1;
 		if (tubeDraw && original instanceof IndexedLineSet)	{
-			int dlist =  createTubesOnEdgesAsDL((IndexedLineSet) original, tubeRadius, 1.0, jr, sig, jr.isPickMode());
+			int dlist =  createTubesOnEdgesAsDL((IndexedLineSet) original, tubeRadius, 1.0, jr, sig, jr.isPickMode(), useDisplayLists);
 			//JOGLConfiguration.theLog.log(Level.FINE,"Creating tubes with radius "+tubeRadius);
 			return dlist;
 		}
@@ -204,7 +204,7 @@ public class DefaultLineShader implements LineShader  {
 	int[] tubeDL = null;
 	boolean testQMS = true;
 	boolean smoothShading = true;		// force tubes to be smooth shaded ?
-	public int createTubesOnEdgesAsDL(IndexedLineSet ils, double rad,  double alpha, JOGLRenderer jr, int sig, boolean pickMode)	{
+	public int createTubesOnEdgesAsDL(IndexedLineSet ils, double rad,  double alpha, JOGLRenderer jr, int sig, boolean pickMode, boolean useDisplayLists)	{
 		GL gl = jr.globalGL;
 		
 		int n = ils.getNumEdges();
@@ -220,8 +220,11 @@ public class DefaultLineShader implements LineShader  {
 				gl.glEndList();	
 			}
 		}
-		int nextDL = gl.glGenLists(1);
-		gl.glNewList(nextDL, GL.GL_COMPILE);
+		int nextDL = -1;
+		if (useDisplayLists) {
+			nextDL = gl.glGenLists(1);
+			gl.glNewList(nextDL, GL.GL_COMPILE);
+		}
 		//JOGLConfiguration.theLog.log(Level.FINE,"Tube radius is "+tubeRadius);
 		//gl.glEnable(GL.GL_COLOR_MATERIAL);
 		//gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK, GL.GL_DIFFUSE);
@@ -313,12 +316,12 @@ public class DefaultLineShader implements LineShader  {
 		}
 		if (pickMode) gl.glPopName();
 		
-		gl.glEndList();
+		if (useDisplayLists) gl.glEndList();
 		return nextDL;
 	}
 	
 	public void postRender(JOGLRenderer jr) {
-		jr.getCanvas().getGL().glDepthRange(0.0d, 1d);
+		if (!tubeDraw) jr.getCanvas().getGL().glDepthRange(0.0d, 1d);
 	}
 
 	public boolean isSmoothShading() {

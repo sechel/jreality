@@ -177,7 +177,7 @@ public abstract class AbstractJOGLShader implements PolygonShader {
 		return false;
 	}
 	public int proxyGeometryFor(Geometry original, JOGLRenderer jr,
-			int signature) {
+			int signature, boolean useDisplayLists) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
