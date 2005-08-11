@@ -92,7 +92,10 @@
       <compilerarg line="-source 1.4" />
     </javac>
     <copy todir="build/core">
-      <fileset dir="src" excludes="**/*.java"/>
+      <fileset dir="src">
+        <exclude name="**/*.java"/>
+        <exclude name="**/*.gif"/>
+      </fileset>
     </copy>
     <jar jarfile="${dist}/jReality-core.jar" basedir="${build}/core" />
   </target>
