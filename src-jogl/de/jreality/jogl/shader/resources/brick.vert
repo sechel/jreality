@@ -27,7 +27,7 @@ void main(void)
     float diffuse   = max(dot(lightVec, tnorm), 0.0);
     float spec      = 0.0;
     float maxx	= 99.0;
-    int index = (int) clamp(abs(gl_Vertex.x * maxx),0.0,maxx);
+    //int index = (int) clamp(abs(gl_Vertex.x * maxx),0.0,maxx);
     float scale = 1.0 ; //+ .4 * rtable[index];
     vec4 scaler = vec4(scale, scale, scale, 1.0);
     vec4 jitter = scaler * gl_Vertex;
@@ -43,7 +43,7 @@ void main(void)
 
     
     MCposition      = gl_Vertex.xy;
-    gl_Vertex = gl_Vertex * scale;
+    //gl_Vertex = gl_Vertex * scale;
     gl_Position     = ftransform();
     //gl_Position = gl_ModelViewProjectionMatrix * jitter;
 }
