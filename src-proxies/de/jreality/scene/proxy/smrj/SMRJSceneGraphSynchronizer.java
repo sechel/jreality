@@ -47,7 +47,7 @@ import de.jreality.scene.proxy.scene.*;
  * 
  * @author weissman
  */
-public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements TransformationListener, AppearanceListener, GeometryListener, SceneContainerListener {
+public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements TransformationListener, AppearanceListener, GeometryListener, SceneGraphComponentListener {
 		
 	SMRJMirrorScene rmc;
 	SMRJMirrorFactory factory;
@@ -71,7 +71,7 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
 	}
 	
 	public void visit(SceneGraphComponent sg) {
-		sg.addSceneContainerListener(this);
+		sg.addSceneGraphComponentListener(this);
 	}
 	
 	public void transformationMatrixChanged(TransformationEvent ev) {
@@ -129,17 +129,17 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
         }
     }
 
-		public void childAdded(SceneContainerEvent ev) {
+		public void childAdded(SceneGraphComponentEvent ev) {
    			((RemoteSceneGraphComponent)rmc.getProxyImpl(ev.getParentElement()))
             .add((RemoteSceneGraphNode) rmc.createProxyScene(ev.getNewChildElement()));
 	}
 
-	public void childRemoved(SceneContainerEvent ev) {
+	public void childRemoved(SceneGraphComponentEvent ev) {
         ((RemoteSceneGraphComponent)rmc.getProxyImpl(ev.getParentElement()))
         .remove((RemoteSceneGraphNode) rmc.getProxyImpl(ev.getOldChildElement()));
 	}
 
-	public void childReplaced(SceneContainerEvent ev) {
+	public void childReplaced(SceneGraphComponentEvent ev) {
 		childRemoved(ev); childAdded(ev);
 	}
   

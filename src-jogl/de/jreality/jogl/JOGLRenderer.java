@@ -994,7 +994,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 	}
 	
 	protected class GoBetween implements TransformationListener, AppearanceListener,
-	SceneAncestorListener, SceneContainerListener, SceneTreeListener	{
+	SceneAncestorListener, SceneGraphComponentListener, SceneTreeListener	{
 		SceneGraphComponent originalComponent;
 		ArrayList peers = new ArrayList();
 		JOGLPeerGeometry peerGeometry;
@@ -1007,14 +1007,14 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 				peerGeometry.refCount++;
 			} else peerGeometry = null;
 			originalComponent.addSceneAncestorListener(this);
-			originalComponent.addSceneContainerListener(this);
+			originalComponent.addSceneGraphComponentListener(this);
 			originalComponent.addSceneTreeListener(this);
 			if (originalComponent.getAppearance() != null) originalComponent.getAppearance().addAppearanceListener(this);				
 		}
 		
 		public void dispose()	{
 			originalComponent.removeSceneAncestorListener(this);
-			originalComponent.removeSceneContainerListener(this);
+			originalComponent.removeSceneGraphComponentListener(this);
 			originalComponent.removeSceneTreeListener(this);
 			if (originalComponent.getAppearance() != null) originalComponent.getAppearance().removeAppearanceListener(this);
 			if (peerGeometry != null)		peerGeometry.dispose();
@@ -1081,8 +1081,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 				peer.ancestorDetached(ev);
 			}
 		}
-		public void childAdded(SceneContainerEvent ev) {
-			if  (ev.getChildType() ==  SceneContainerEvent.CHILD_TYPE_GEOMETRY) {
+		public void childAdded(SceneGraphComponentEvent ev) {
+			if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY) {
 					if (peerGeometry != null)	{
 						peerGeometry.dispose();
 						geometryRemoved = true;
@@ -1101,8 +1101,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 				peer.childAdded(ev);
 			}
 		}
-		public void childRemoved(SceneContainerEvent ev) {
-			if  (ev.getChildType() ==  SceneContainerEvent.CHILD_TYPE_GEOMETRY) {
+		public void childRemoved(SceneGraphComponentEvent ev) {
+			if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY) {
 				if (peerGeometry != null) {
 					peerGeometry.dispose();		// really decreases reference count
 					peerGeometry = null;
@@ -1110,7 +1110,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 				}
 				return;
 			}
-			boolean apAdded = (ev.getChildType() ==  SceneContainerEvent.CHILD_TYPE_APPEARANCE);
+			boolean apAdded = (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE);
 			int changed = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
 			Iterator iter = peers.iterator();
 			while (iter.hasNext())	{
@@ -1120,8 +1120,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			}
 		}
 		
-		public void childReplaced(SceneContainerEvent ev) {
-			if  (ev.getChildType() ==  SceneContainerEvent.CHILD_TYPE_GEOMETRY) {
+		public void childReplaced(SceneGraphComponentEvent ev) {
+			if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY) {
 					if (peerGeometry != null && peerGeometry.originalGeometry == originalComponent.getGeometry()) return;		// no change, really
 					if (peerGeometry != null) {
 						peerGeometry.dispose();
@@ -1134,7 +1134,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 					} 
 					return;
 			}
-			boolean apAdded = (ev.getChildType() ==  SceneContainerEvent.CHILD_TYPE_APPEARANCE);
+			boolean apAdded = (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE);
 			int changed = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
 			Iterator iter = peers.iterator();
 			while (iter.hasNext())	{
@@ -1211,7 +1211,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		
 	}
 	protected class JOGLPeerComponent extends JOGLPeerNode implements TransformationListener, AppearanceListener,
-		SceneAncestorListener, SceneContainerListener, SceneTreeListener {
+		SceneAncestorListener, SceneGraphComponentListener, SceneTreeListener {
 		
 		public int[] bindings = new int[2];
 		//SceneGraphComponent originalComponent;
@@ -1388,11 +1388,11 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			return null;
 		}
 
-		public void childAdded(SceneContainerEvent ev) {
+		public void childAdded(SceneGraphComponentEvent ev) {
 			theLog.log(Level.FINE,"Container Child added to: "+goBetween.getOriginalComponent().getName());
 			//theLog.log(Level.FINE,"Event is: "+ev.toString());
 			switch (ev.getChildType() )	{
-				case SceneContainerEvent.CHILD_TYPE_COMPONENT:
+				case SceneGraphComponentEvent.CHILD_TYPE_COMPONENT:
 					SceneGraphComponent sgc = (SceneGraphComponent) ev.getNewChildElement();
 					JOGLPeerComponent pc = globalHandle.constructPeerForSceneGraphComponent(sgc, this);
 					synchronized(childLock)	{
@@ -1403,7 +1403,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 					}
 					setIndexOfChildren();
 					break;
-				case SceneContainerEvent.CHILD_TYPE_APPEARANCE:
+				case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
 					int changed = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
 					propagateGeometryChanged(changed);	
 					appearanceChanged = true;
@@ -1413,10 +1413,10 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 						extractGlobalParameters();
 					}
 					break;				
-				case SceneContainerEvent.CHILD_TYPE_LIGHT:
+				case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
 					lightListDirty = true;
 					break;
-				case SceneContainerEvent.CHILD_TYPE_TRANSFORMATION:
+				case SceneGraphComponentEvent.CHILD_TYPE_TRANSFORMATION:
 					updateTransformationInfo();
 					break;
 				default:
@@ -1425,10 +1425,10 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			}
 		}
 		
-		public void childRemoved(SceneContainerEvent ev) {
+		public void childRemoved(SceneGraphComponentEvent ev) {
 			//theLog.log(Level.FINE,"Container Child removed from: "+goBetween.getOriginalComponent().getName());
 			switch (ev.getChildType() )	{
-				case SceneContainerEvent.CHILD_TYPE_COMPONENT:
+				case SceneGraphComponentEvent.CHILD_TYPE_COMPONENT:
 					SceneGraphComponent sgc = (SceneGraphComponent) ev.getOldChildElement();
 				    JOGLPeerComponent jpc = getPeerForChildComponent(sgc);
 				    if (jpc == null) return;
@@ -1441,7 +1441,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 				    jpc.dispose();		// there are no other references to this child
 				    setIndexOfChildren();
 					break;
-				case SceneContainerEvent.CHILD_TYPE_APPEARANCE:
+				case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
 					int changed = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
 					propagateGeometryChanged(changed);	
 					appearanceChanged = true;
@@ -1450,10 +1450,10 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 					}
 					theLog.log(Level.INFO,"Propagating geometry change due to removed appearance");
 					break;				
-				case SceneContainerEvent.CHILD_TYPE_LIGHT:
+				case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
 					lightListDirty = true;
 					break;
-				case SceneContainerEvent.CHILD_TYPE_TRANSFORMATION:
+				case SceneGraphComponentEvent.CHILD_TYPE_TRANSFORMATION:
 					updateTransformationInfo();
 					break;			
 				default:
@@ -1462,10 +1462,10 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		}
 		}
 		
-		public void childReplaced(SceneContainerEvent ev) {
+		public void childReplaced(SceneGraphComponentEvent ev) {
 			//theLog.log(Level.FINE,"Container Child replaced at: "+goBetween.getOriginalComponent().getName());
 			switch(ev.getChildType())	{
-				case SceneContainerEvent.CHILD_TYPE_APPEARANCE:
+				case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
 					int changed = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
 					propagateGeometryChanged(changed);	
 					appearanceChanged = true;
@@ -1475,10 +1475,10 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 					}
 					theLog.log(Level.INFO,"Propagating geometry change due to replaced appearance");
 					break;
-				case SceneContainerEvent.CHILD_TYPE_LIGHT:
+				case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
 					lightListDirty = true;
 					break;
-				case SceneContainerEvent.CHILD_TYPE_TRANSFORMATION:
+				case SceneGraphComponentEvent.CHILD_TYPE_TRANSFORMATION:
 					updateTransformationInfo();
 					break;
 				default:

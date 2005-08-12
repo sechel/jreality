@@ -5,7 +5,7 @@ import java.util.List;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.event.SceneContainerEvent;
+import de.jreality.scene.event.SceneGraphComponentEvent;
 import de.jreality.scene.event.SceneHierarchyEvent;
 import de.jreality.scene.event.SceneTreeListener;
 
@@ -85,24 +85,24 @@ public class SceneTreeModel extends AbstractTreeModel
       new int[]{ ev.getChildIndex() }, new Object[] { ev.getNewChildElement() });
   }
 
-  private int ix(SceneContainerEvent ev)
+  private int ix(SceneGraphComponentEvent ev)
   {
     SceneGraphComponent p=(SceneGraphComponent)ev.getParentElement();
     int index=0;
     switch(ev.getChildType())
     {
-      case SceneContainerEvent.CHILD_TYPE_COMPONENT: index=ev.getChildIndex();
+      case SceneGraphComponentEvent.CHILD_TYPE_COMPONENT: index=ev.getChildIndex();
 //      case CHILD_TYPE_TOOL           = 6;
         if(p.getGeometry()!=null) index++;
-      case SceneContainerEvent.CHILD_TYPE_GEOMETRY:
+      case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
         if(p.getLight()!=null) index++;
-      case SceneContainerEvent.CHILD_TYPE_LIGHT:
+      case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
         if(p.getCamera()!=null) index++;
-      case SceneContainerEvent.CHILD_TYPE_CAMERA:
+      case SceneGraphComponentEvent.CHILD_TYPE_CAMERA:
         if(p.getAppearance()!=null) index++;
-      case SceneContainerEvent.CHILD_TYPE_APPEARANCE:
+      case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
         if(p.getTransformation()!=null) index++;
-      case SceneContainerEvent.CHILD_TYPE_TRANSFORMATION:
+      case SceneGraphComponentEvent.CHILD_TYPE_TRANSFORMATION:
     }
     return 0;
   }
