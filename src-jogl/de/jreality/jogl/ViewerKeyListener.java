@@ -156,7 +156,7 @@ public class ViewerKeyListener extends KeyAdapter {
 					break;
 
 				case KeyEvent.VK_H:		// toggle help
-					if (e.isShiftDown()) break;
+					if (e.isShiftDown()) helpOverlay.printOut();
 					helpOverlay.setVisible(!helpOverlay.isVisible());
 					viewer.render();
 					break;

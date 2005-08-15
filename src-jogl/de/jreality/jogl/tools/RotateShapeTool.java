@@ -48,7 +48,7 @@ public class RotateShapeTool extends AbstractShapeTool {
 		// current version makes an effort to determine if it's sensible or not
 		// but you want to have finer control over this.  E.g., you may want to use
 		// the current pick point as the center, etc.
-		if (button == 1 && theEditedTransform.getSignature() != Pn.ELLIPTIC)	{
+		if ((button == 1 || (button == 3 && e.isShiftDown())) && theEditedTransform.getSignature() != Pn.ELLIPTIC)	{
 			Rectangle3D bbox = GeometryUtility.calculateChildrenBoundingBox((SceneGraphComponent) theEditedNode);
 			myTransform.setCenter(bbox.getCenter()); 
 		}  //else myTransform.setCenter(theEditedTransform.getCenter());

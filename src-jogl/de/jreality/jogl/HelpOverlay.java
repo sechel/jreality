@@ -151,4 +151,12 @@ public class HelpOverlay implements GLEventListener {
 		);
 
 	}
+	
+	public void printOut()	{
+		for (int i = 0; i < keyboardEntries.size(); i++) {
+			String text = (String) keyboardEntries.get(i);
+			System.out.println(text);
+		}
+
+	}
 }

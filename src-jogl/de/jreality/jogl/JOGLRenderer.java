@@ -993,8 +993,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		return ((GoBetween) foo);
 	}
 	
-	protected class GoBetween implements TransformationListener, AppearanceListener,
-	SceneAncestorListener, SceneGraphComponentListener, SceneTreeListener	{
+	protected class GoBetween implements TransformationListener, AppearanceListener,SceneGraphComponentListener	{
 		SceneGraphComponent originalComponent;
 		ArrayList peers = new ArrayList();
 		JOGLPeerGeometry peerGeometry;
@@ -1006,16 +1005,12 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 				peerGeometry = getJOGLPeerGeometryFor(originalComponent.getGeometry());
 				peerGeometry.refCount++;
 			} else peerGeometry = null;
-			originalComponent.addSceneAncestorListener(this);
 			originalComponent.addSceneGraphComponentListener(this);
-			originalComponent.addSceneTreeListener(this);
 			if (originalComponent.getAppearance() != null) originalComponent.getAppearance().addAppearanceListener(this);				
 		}
 		
 		public void dispose()	{
-			originalComponent.removeSceneAncestorListener(this);
 			originalComponent.removeSceneGraphComponentListener(this);
-			originalComponent.removeSceneTreeListener(this);
 			if (originalComponent.getAppearance() != null) originalComponent.getAppearance().removeAppearanceListener(this);
 			if (peerGeometry != null)		peerGeometry.dispose();
 		}
@@ -1065,21 +1060,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 				if (changed != 0) peer.propagateGeometryChanged(changed);
 			}
 			//theLog.log(Level.FINER,"setting display list dirty flag: "+changed);
-		}
-		
-		public void ancestorAttached(SceneHierarchyEvent ev) {
-			Iterator iter = peers.iterator();
-			while (iter.hasNext())	{
-				JOGLPeerComponent peer = (JOGLPeerComponent) iter.next();
-				peer.ancestorAttached(ev);
-			}
-		}
-		public void ancestorDetached(SceneHierarchyEvent ev) {
-			Iterator iter = peers.iterator();
-			while (iter.hasNext())	{
-				JOGLPeerComponent peer = (JOGLPeerComponent) iter.next();
-				peer.ancestorDetached(ev);
-			}
 		}
 		public void childAdded(SceneGraphComponentEvent ev) {
 			if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY) {
@@ -1143,27 +1123,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 				if (apAdded) peer.propagateGeometryChanged(changed);
 				}				
 		}
-		public void childAdded(SceneHierarchyEvent ev) {
-			Iterator iter = peers.iterator();
-			while (iter.hasNext())	{
-				JOGLPeerComponent peer = (JOGLPeerComponent) iter.next();
-				peer.childAdded(ev);
-			}
-		}
-		public void childRemoved(SceneHierarchyEvent ev) {
-			Iterator iter = peers.iterator();
-			while (iter.hasNext())	{
-				JOGLPeerComponent peer = (JOGLPeerComponent) iter.next();
-				peer.childRemoved(ev);
-			}
-		}
-		public void childReplaced(SceneHierarchyEvent ev) {
-			Iterator iter = peers.iterator();
-			while (iter.hasNext())	{
-				JOGLPeerComponent peer = (JOGLPeerComponent) iter.next();
-				peer.childReplaced(ev);
-			}
-		}
 		
 		public SceneGraphComponent getOriginalComponent() {
 			return originalComponent;
@@ -1210,8 +1169,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		}
 		
 	}
-	protected class JOGLPeerComponent extends JOGLPeerNode implements TransformationListener, AppearanceListener,
-		SceneAncestorListener, SceneGraphComponentListener, SceneTreeListener {
+	protected class JOGLPeerComponent extends JOGLPeerNode implements TransformationListener, AppearanceListener,SceneGraphComponentListener {
 		
 		public int[] bindings = new int[2];
 		//SceneGraphComponent originalComponent;
@@ -1366,12 +1324,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			appearanceIsDirty = false;
 		}
 		
-		public void ancestorAttached(SceneHierarchyEvent ev) {
-		}
-		
-		public void ancestorDetached(SceneHierarchyEvent ev) {
-		}
-		
 		/**
 		 * @param sgc
 		 * @return
@@ -1485,18 +1437,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 					theLog.log(Level.INFO,"Taking no action for replacement of child type "+ev.getChildType());
 					break;
 			}
-		}
-		
-		public void childAdded(SceneHierarchyEvent ev) {
-			theLog.log(Level.INFO,"Hierarchy Child added");
-		}
-		
-		public void childRemoved(SceneHierarchyEvent ev) {
-			theLog.log(Level.INFO,"Hierarchy Child removed");
-		}
-		
-		public void childReplaced(SceneHierarchyEvent ev) {
-			theLog.log(Level.INFO,"Hierarchy Child replaced");
 		}
 		
 		public void transformationMatrixChanged(TransformationEvent ev) {
