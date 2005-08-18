@@ -99,7 +99,7 @@ public class ToolTestScene {
     ifs.setGeometryAttributes(Attribute.attributeForName("AABBTree"), obbTree);
     SceneGraphComponent comp = new SceneGraphComponent();
     comp.setGeometry(ifs);
-    //comp.addChild(obbTree.display());
+    comp.addChild(obbTree.display());
     
     scene.addChild(comp);
     
@@ -110,7 +110,7 @@ public class ToolTestScene {
     scene.addTool(new DraggingTool());
     scene.addTool(new PickShowTool("PrimaryAction"));
     RotateTool rotateTool = new RotateTool();
-    //rotateTool.setMoveChildren(true);
+    rotateTool.setMoveChildren(true);
     scene.addTool(rotateTool);
 
     SceneGraphPath camPath = new SceneGraphPath();
@@ -138,7 +138,7 @@ public class ToolTestScene {
     });
     try {
       //PickSystem ps = (PickSystem) Class.forName("de.jreality.jme.intersection.proxy.JmePickSystem").newInstance();
-      PickSystem ps = new SoftPickSystem();
+      PickSystem ps = new AABBPickSystem();
       viewer.setPickSystem(ps);
     } catch (Exception e) {
       // TODO Auto-generated catch block

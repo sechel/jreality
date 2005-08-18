@@ -3,13 +3,10 @@ package de.jreality.scene.proxy.treeview;
 
 import java.awt.Component;
 import java.awt.Font;
-import java.util.logging.Logger;
 
-import javax.swing.CellRendererPane;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
-import javax.swing.tree.DefaultTreeCellEditor;
 
 import de.jreality.scene.Drawable;
 import de.jreality.scene.SceneGraphComponent;

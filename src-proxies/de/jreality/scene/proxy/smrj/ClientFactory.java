@@ -23,7 +23,6 @@
 package de.jreality.scene.proxy.smrj;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 
 import de.jreality.scene.data.ByteBufferList;
 import de.smrj.RemoteCall;

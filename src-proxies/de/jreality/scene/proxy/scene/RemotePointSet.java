@@ -5,10 +5,6 @@ import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
 
 public interface RemotePointSet extends RemoteGeometry {
-
-    public abstract int getNumPoints();
-    public abstract void setNumPoints(int numVertices);
-    public abstract DataList getVertexAttributes(Attribute attr);
     public abstract void setVertexAttributes(DataListSet dls);
     public abstract void setVertexAttributes(Attribute attr, DataList dl);
     public abstract void setVertexCountAndAttributes(Attribute attr, DataList dl);

@@ -1127,6 +1127,11 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		public SceneGraphComponent getOriginalComponent() {
 			return originalComponent;
 		}
+
+    public void visibilityChanged(SceneGraphComponentEvent ev) {
+      // TODO Auto-generated method stub
+      
+    }
 	}
 	private class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
 		SceneGraphComponent myRoot;
@@ -1494,6 +1499,11 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		public SceneGraphComponent getOriginalComponent() {
 			return goBetween.getOriginalComponent();
 		}
+
+    public void visibilityChanged(SceneGraphComponentEvent ev) {
+      // TODO Auto-generated method stub
+      
+    }
 	}
 	public GLDrawable getCanvas()	{
 		return theCanvas;

@@ -2,7 +2,6 @@ package de.jreality.scene.proxy.smrj;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import de.jreality.geometry.QuadMeshShape;
@@ -105,11 +104,6 @@ public class SMRJMirrorFactory extends ProxyFactory {
     public void visit(de.jreality.scene.Transformation t) {
         created=createRemote(Transformation.class);
         copyAttr(t, (RemoteTransformation)created);
-    }
-
-    public void visit(de.jreality.geometry.LabelSet ls) {
-        created=createRemote(LabelSet.class);
-        copyAttr(ls, (RemoteLabelSet) created);
     }
 
     public void visit(de.jreality.scene.SceneGraphNode m) {
@@ -227,12 +221,4 @@ public class SMRJMirrorFactory extends ProxyFactory {
             src.getViewPort().getWidth(), src.getViewPort().getHeight());
     }
 
-    private void copyAttr(de.jreality.geometry.LabelSet ls, RemoteLabelSet set) {
-        copyAttr((de.jreality.scene.Geometry)ls, (RemoteGeometry) set);
-        set.setBitmapFont(ls.getBitmapFont());
-        set.setPositions(ls.getPositions());
-        set.setNDCOffset(ls.getNDCOffset());
-        set.setLabels(ls.getLabels());
-    }
-    
 }

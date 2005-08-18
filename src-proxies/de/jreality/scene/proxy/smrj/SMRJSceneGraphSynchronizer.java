@@ -23,7 +23,6 @@
 package de.jreality.scene.proxy.smrj;
 
 import java.util.Iterator;
-import java.util.List;
 
 import de.jreality.scene.*;
 import de.jreality.scene.Appearance;
@@ -51,7 +50,6 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
 		
 	SMRJMirrorScene rmc;
 	SMRJMirrorFactory factory;
-	private boolean debug;
 
 	public SMRJSceneGraphSynchronizer(SMRJMirrorScene rmc) {
 		this.rmc = rmc;
@@ -130,17 +128,21 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
     }
 
 		public void childAdded(SceneGraphComponentEvent ev) {
-   			((RemoteSceneGraphComponent)rmc.getProxyImpl(ev.getParentElement()))
+   			((RemoteSceneGraphComponent)rmc.getProxyImpl(ev.getSceneGraphComponent()))
             .add((RemoteSceneGraphNode) rmc.createProxyScene(ev.getNewChildElement()));
 	}
 
 	public void childRemoved(SceneGraphComponentEvent ev) {
-        ((RemoteSceneGraphComponent)rmc.getProxyImpl(ev.getParentElement()))
+        ((RemoteSceneGraphComponent)rmc.getProxyImpl(ev.getSceneGraphComponent()))
         .remove((RemoteSceneGraphNode) rmc.getProxyImpl(ev.getOldChildElement()));
 	}
 
 	public void childReplaced(SceneGraphComponentEvent ev) {
 		childRemoved(ev); childAdded(ev);
 	}
+
+  public void visibilityChanged(SceneGraphComponentEvent ev) {
+    ((RemoteSceneGraphComponent)rmc.getProxyImpl(ev.getSceneGraphComponent())).setVisible(ev.getSceneGraphComponent().isVisible());
+  }
   
 }

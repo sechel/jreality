@@ -163,7 +163,6 @@
   </target>
 
   <target name="jSyzygy_java">
-    <property name="lib" location="lib" />
     <ant dir="jSyzygy" target="java" inheritAll="false" />
     <copy file="jSyzygy/jSyzygy.jar" todir="${lib}" />
   </target>

@@ -22,15 +22,9 @@
  */
 package de.jreality.scene.proxy.smrj;
 
-import java.io.*;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,8 +33,8 @@ import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.data.*;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.ByteBufferList;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
 import de.smrj.Receiver;
@@ -48,7 +42,6 @@ import de.smrj.RemoteFactory;
 import de.smrj.RemoteKey;
 import de.smrj.tcp.TCPBroadcasterIO;
 import de.smrj.tcp.TCPReceiverIO;
-import de.smrj.tcp.TCPReceiverNIO;
 
 /**
  * 
@@ -95,14 +88,12 @@ public class SMRJMirrorFactoryTest extends TestCase {
     SMRJMirrorScene proxyScene;
     
     CatenoidHelicoid ch;
-    private boolean finished;
     
     public void testVisitIndexedFaceSet() throws Exception {
         proxyScene = new SMRJMirrorScene(rf);
         ch = new CatenoidHelicoid(3);
         ch.setName("my own proxy test node");
         ch.buildEdgesFromFaces();
-        long l = System.currentTimeMillis();
         Object proxy = proxyScene.createProxyScene(ch);
         //System.out.println("proxy: "+(Arrays.asList(proxy.getClass().getInterfaces())));
         //System.out.println(proxy);

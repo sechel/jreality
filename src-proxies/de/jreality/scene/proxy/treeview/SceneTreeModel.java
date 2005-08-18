@@ -5,21 +5,16 @@ import java.util.List;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.event.SceneGraphComponentEvent;
-import de.jreality.scene.event.SceneHierarchyEvent;
-import de.jreality.scene.event.SceneTreeListener;
+//import de.jreality.scene.event.SceneGraphComponentEvent;
 
 /**
  * @author holger
  */
-public class SceneTreeModel extends AbstractTreeModel
-  implements SceneTreeListener
-{
+public class SceneTreeModel extends AbstractTreeModel {
 
   public SceneTreeModel(SceneGraphNode root)
   {
     super(mirror(root));
-    root.addSceneTreeListener(this);
   }
 
   private static Node mirror(SceneGraphNode node) {
@@ -67,45 +62,50 @@ public class SceneTreeModel extends AbstractTreeModel
     return ((Node)o).parent;
   }
 
-  public void childAdded(SceneHierarchyEvent ev)
-  {
-    fireNodesAdded(ev.getParentElement(),
-      new int[]{ ev.getChildIndex() }, new Object[] { ev.getNewChildElement() });
-  }
-
-  public void childRemoved(SceneHierarchyEvent ev)
-  {
-    fireNodesRemoved(ev.getParentElement(),
-      new int[]{ ev.getChildIndex() }, new Object[] { ev.getOldChildElement() });
-  }
-
-  public void childReplaced(SceneHierarchyEvent ev)
-  {
-    fireNodesChanged(ev.getParentElement(),
-      new int[]{ ev.getChildIndex() }, new Object[] { ev.getNewChildElement() });
-  }
-
-  private int ix(SceneGraphComponentEvent ev)
-  {
-    SceneGraphComponent p=(SceneGraphComponent)ev.getParentElement();
-    int index=0;
-    switch(ev.getChildType())
-    {
-      case SceneGraphComponentEvent.CHILD_TYPE_COMPONENT: index=ev.getChildIndex();
-//      case CHILD_TYPE_TOOL           = 6;
-        if(p.getGeometry()!=null) index++;
-      case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
-        if(p.getLight()!=null) index++;
-      case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
-        if(p.getCamera()!=null) index++;
-      case SceneGraphComponentEvent.CHILD_TYPE_CAMERA:
-        if(p.getAppearance()!=null) index++;
-      case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
-        if(p.getTransformation()!=null) index++;
-      case SceneGraphComponentEvent.CHILD_TYPE_TRANSFORMATION:
-    }
-    return 0;
-  }
+//  public void childAdded(SceneGraphComponentEvent ev)
+//  {
+//    fireNodesAdded(ev.getSceneGraphComponent(),
+//      new int[]{ ev.getChildIndex() }, new Object[] { ev.getNewChildElement() });
+//  }
+//
+//  public void childRemoved(SceneGraphComponentEvent ev)
+//  {
+//    fireNodesRemoved(ev.getSceneGraphComponent(),
+//      new int[]{ ev.getChildIndex() }, new Object[] { ev.getOldChildElement() });
+//  }
+//
+//  public void childReplaced(SceneGraphComponentEvent ev)
+//  {
+//    fireNodesChanged(ev.getSceneGraphComponent(),
+//      new int[]{ ev.getChildIndex() }, new Object[] { ev.getNewChildElement() });
+//  }
+//
+//  public void visibilityChanged(SceneGraphComponentEvent ev) {
+//    fireNodesChanged(ev.getSceneGraphComponent(),
+//        null, null); //new int[]{ }, new Object[] { });
+//  }
+//
+//  private int ix(SceneGraphComponentEvent ev)
+//  {
+//    SceneGraphComponent p=(SceneGraphComponent)ev.getSceneGraphComponent();
+//    int index=0;
+//    switch(ev.getChildType())
+//    {
+//      case SceneGraphComponentEvent.CHILD_TYPE_COMPONENT: index=ev.getChildIndex();
+////      case CHILD_TYPE_TOOL           = 6;
+//        if(p.getGeometry()!=null) index++;
+//      case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
+//        if(p.getLight()!=null) index++;
+//      case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
+//        if(p.getCamera()!=null) index++;
+//      case SceneGraphComponentEvent.CHILD_TYPE_CAMERA:
+//        if(p.getAppearance()!=null) index++;
+//      case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
+//        if(p.getTransformation()!=null) index++;
+//      case SceneGraphComponentEvent.CHILD_TYPE_TRANSFORMATION:
+//    }
+//    return 0;
+//  }
 
   public static class Node {
     public Node parent;
@@ -119,4 +119,5 @@ public class SceneTreeModel extends AbstractTreeModel
   public boolean isLeaf(Object node) {
     return ((Node)node).children==null;
   }
+
 }

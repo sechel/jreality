@@ -63,8 +63,7 @@ public class TreeProxyTest extends TestCase {
   }
 
   public void testTreeProxy() {
-    SceneGraphComponent root = null;
-    // build up scene...
+    SceneGraphComponent root = new SceneGraphComponent();
     SceneProxyTreeBuilder ttp = new SceneProxyTreeBuilder(root);
     ttp.setProxyTreeFactory(new ProxyTreeFactory());
     ttp.getProxyTreeFactory().setProxyFactory(new PrintFactory());
@@ -98,41 +97,41 @@ public class TreeProxyTest extends TestCase {
     SceneTreeNode tn = ttp.createProxyTree();
 
     td.dumpTree(tn);
-    System.err.println("created ++++++++++++++++++++++\n");
+    System.out.println("created ++++++++++++++++++++++\n");
 
     root.addChild(p3);
 
     td.dumpTree(tn);
-    System.err.println("added p3 to root ++++++++++++++++++++++\n");
+    System.out.println("added p3 to root ++++++++++++++++++++++\n");
     
     p1.addChild(p2);
 
     td.dumpTree(tn);
-    System.err.println("added p2 to p1 ++++++++++++++++++++++\n");
+    System.out.println("added p2 to p1 ++++++++++++++++++++++\n");
     
     root.removeChild(p2);
 
     td.dumpTree(tn);
-    System.err.println("removed p2 from root ++++++++++++++++++++++\n");
+    System.out.println("removed p2 from root ++++++++++++++++++++++\n");
 
     p1.removeChild(p2);
 
     td.dumpTree(tn);
-    System.err.println("removed p2 from p1 (now disposing entity?) ++++++++++++++++++++++\n");
+    System.out.println("removed p2 from p1 (now disposing entity?) ++++++++++++++++++++++\n");
 
     p1.addChild(p3);
 
     td.dumpTree(tn);
-    System.err.println("added p3 to p1 ++++++++++++++++++++++\n");
+    System.out.println("added p3 to p1 ++++++++++++++++++++++\n");
 
     p2.addChild(p1);
     
     td.dumpTree(tn);
-    System.err.println("added p1 to p2 (p2 not in tree) +++++++++++++\n");
+    System.out.println("added p1 to p2 (p2 not in tree) +++++++++++++\n");
 
     root.addChild(p2);
 
     td.dumpTree(tn);
-    System.err.println("added p2 subtree ++++++++++++++++++++++\n");
+    System.out.println("added p2 subtree ++++++++++++++++++++++\n");
   }
 }
