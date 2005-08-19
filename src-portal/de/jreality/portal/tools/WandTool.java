@@ -6,12 +6,9 @@
  */
 package de.jreality.portal.tools;
 
-import javax.swing.text.NavigationFilter;
-
 import szg.framework.event.WandEvent;
 import szg.framework.event.WandListener;
 import szg.framework.event.WandMotionListener;
-import de.jreality.math.P3;
 import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
