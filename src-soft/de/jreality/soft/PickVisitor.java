@@ -455,6 +455,14 @@ public void setPipeline(PolygonPipeline pipeline) {
       sb.append(" path=").append(path.toString());
       return sb.toString();
     }
+    public int getIndex() {
+      // TODO Auto-generated method stub
+      return -1;
+    }
+    public int getPickType() {
+      // TODO Auto-generated method stub
+      return -1;
+    }
   }
       public static class HitComparator implements Comparator {
 
