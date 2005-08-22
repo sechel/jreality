@@ -27,7 +27,6 @@ import java.util.Iterator;
 import de.jreality.scene.*;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
-import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
