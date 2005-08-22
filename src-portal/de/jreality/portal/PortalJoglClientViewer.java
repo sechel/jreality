@@ -34,13 +34,11 @@ import javax.swing.JFrame;
 
 import de.jreality.jogl.Viewer;
 import de.jreality.math.*;
-import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
 import de.smrj.ClientFactory;

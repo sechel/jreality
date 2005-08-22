@@ -9,7 +9,7 @@
  * 
  * 
  */
-package de.jreality.remote.util;
+package de.jreality.portal;
 
 import java.text.NumberFormat;
 import java.text.ParseException;

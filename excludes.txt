@@ -3,3 +3,6 @@
 
 **/jsyzygy/**/*.java
 **/AlexDemo.java
+de/jreality/remote/util/*.java
+de/jreality/remote/portal/smrj/*.java
+de/jreality/portal/tools/*.java
