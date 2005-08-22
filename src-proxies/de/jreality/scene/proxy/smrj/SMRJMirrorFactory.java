@@ -151,18 +151,26 @@ public class SMRJMirrorFactory extends ProxyFactory {
         copyAttr((de.jreality.scene.Light) src, (RemoteLight) dst);
     }
 
+    public void copyAttr(de.jreality.scene.PointLight src, RemotePointLight dst) {
+      
+      copyAttr((de.jreality.scene.Light) src, (RemoteLight) dst);
+
+      dst.setFalloffA0(src.getFalloffA0());
+      dst.setFalloffA1(src.getFalloffA1());
+      dst.setFalloffA2(src.getFalloffA2());
+      dst.setUseShadowMap(src.isUseShadowMap());
+      dst.setShadowMapX(src.getShadowMapX());
+      dst.setShadowMapY(src.getShadowMapY());
+      dst.setShadowMap(src.getShadowMap());
+    }
+    
     public void copyAttr(de.jreality.scene.SpotLight src, RemoteSpotLight dst) {
-        copyAttr((de.jreality.scene.Light) src, (RemoteLight) dst);
-        dst.setConeAngle(src.getConeAngle());
-        dst.setConeDeltaAngle(src.getConeDeltaAngle());
-        dst.setFalloffA0(src.getFalloffA0());
-        dst.setFalloffA1(src.getFalloffA1());
-        dst.setFalloffA2(src.getFalloffA2());
-        dst.setDistribution(src.getDistribution());
-        dst.setUseShadowMap(src.isUseShadowMap());
-        dst.setShadowMapX(src.getShadowMapX());
-        dst.setShadowMapY(src.getShadowMapY());
-        dst.setShadowMap(src.getShadowMap());
+        
+      copyAttr((de.jreality.scene.PointLight) src, (RemotePointLight) dst);
+        
+      dst.setConeAngle(src.getConeAngle());
+      dst.setConeDeltaAngle(src.getConeDeltaAngle());
+      dst.setDistribution(src.getDistribution());
     }
 
     public void copyAttr(de.jreality.scene.Geometry src, RemoteGeometry dst) {

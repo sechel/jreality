@@ -26,11 +26,16 @@ import java.util.Iterator;
 
 import de.jreality.scene.*;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.Camera;
+import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.Light;
+import de.jreality.scene.PointLight;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SpotLight;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.ByteBufferList;
@@ -46,7 +51,7 @@ import de.jreality.scene.proxy.scene.*;
  * 
  * @author weissman
  */
-public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements TransformationListener, AppearanceListener, GeometryListener, SceneGraphComponentListener {
+public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements TransformationListener, AppearanceListener, GeometryListener, SceneGraphComponentListener, CameraListener, LightListener {
 		
 	SMRJMirrorScene rmc;
 	SMRJMirrorFactory factory;
@@ -56,6 +61,14 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
 		factory = (SMRJMirrorFactory) rmc.getProxyFactory();
 	}
 	
+  public void visit(Camera c) {
+    c.addCameraListener(this);
+  }
+  
+  public void visit(Light l) {
+    l.addLightListener(this);
+  }
+  
 	public void visit(final Transformation t) {
 		t.addTransformationListener(this);
 	}
@@ -143,6 +156,48 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
 
   public void visibilityChanged(SceneGraphComponentEvent ev) {
     ((RemoteSceneGraphComponent)rmc.getProxyImpl(ev.getSceneGraphComponent())).setVisible(ev.getSceneGraphComponent().isVisible());
+  }
+
+  public void cameraChanged(CameraEvent ev) {
+    Camera src = ev.getCamera();
+    RemoteCamera dst = (RemoteCamera) rmc.getProxyImpl(ev.getCamera());
+    dst.setEyeSeparation(src.getEyeSeparation());
+    dst.setFar(src.getFar());
+    dst.setFieldOfView(src.getFieldOfView());
+    dst.setFocus(src.getFocus());
+    dst.setNear(src.getNear());
+    dst.setOnAxis(src.isOnAxis());
+    dst.setOrientationMatrix(src.getOrientationMatrix());
+    dst.setPerspective(src.isPerspective());
+//    dst.setSignature(src.getSignature());
+    dst.setStereo(src.isStereo());
+    dst.setViewPort(src.getViewPort().getX(), src.getViewPort().getY(),
+        src.getViewPort().getWidth(), src.getViewPort().getHeight());
+  }
+
+  public void lightChanged(LightEvent ev) {
+    Light src = ev.getLight();
+    RemoteLight dst = (RemoteLight) rmc.getProxyImpl(src);
+    if (src instanceof SpotLight) {
+      SpotLight src1 = (SpotLight) src;
+      RemoteSpotLight dst1 = (RemoteSpotLight) dst;
+      dst1.setConeAngle(src1.getConeAngle());
+      dst1.setConeDeltaAngle(src1.getConeDeltaAngle());
+      dst1.setDistribution(src1.getDistribution());
+    }
+    if (src instanceof PointLight) {
+      PointLight src1 = (PointLight) src;
+      RemotePointLight dst1 = (RemotePointLight) dst;
+      dst1.setFalloffA0(src1.getFalloffA0());
+      dst1.setFalloffA1(src1.getFalloffA1());
+      dst1.setFalloffA2(src1.getFalloffA2());
+      dst1.setUseShadowMap(src1.isUseShadowMap());
+      dst1.setShadowMapX(src1.getShadowMapX());
+      dst1.setShadowMapY(src1.getShadowMapY());
+      dst1.setShadowMap(src1.getShadowMap());
+    }
+    dst.setColor(src.getColor());
+    dst.setIntensity(src.getIntensity());
   }
   
 }
