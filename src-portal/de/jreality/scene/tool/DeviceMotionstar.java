@@ -110,10 +110,23 @@ public class DeviceMotionstar implements RawDevice {
             InputSlot slot = (InputSlot) usedSources.get("wand_axes");
             if (slot == null) return;
             Rn.setIdentityMatrix(axesMatrix);
-            axesMatrix[3]  = event.getAxisValue(0);
-            axesMatrix[7]  = event.getAxisValue(1);
+            double x = event.getAxisValue(0);
+            double y = event.getAxisValue(1);
+            axesMatrix[3]  = trim(x);
+            axesMatrix[7]  = trim(y);
             axesMatrix[11] = 1;
             queue.addEvent(new ToolEvent(DeviceMotionstar.this, slot, new DoubleArray(Rn.copy(null, axesMatrix))));
+        }
+        
+        private double trim(double d) {
+        	if (d > 0) {
+        		if (d < 0.09) return 0;
+        		if (d > 1) return 1;
+        		return d;
+        	}
+    		if (d > -0.09) return 0;
+    		if (d <  -1) return -1;
+    		return d;
         }
 
         public void wandDragged(WandEvent event) {
