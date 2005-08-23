@@ -122,6 +122,7 @@ public class SMRJMirrorFactory extends ProxyFactory {
             RemoteSceneGraphComponent dst) {
         copyAttr((de.jreality.scene.SceneGraphNode) src,
                 (RemoteSceneGraphNode) dst);
+        dst.setVisible(src.isVisible());
     }
 
     public void copyAttr(de.jreality.scene.Appearance src, RemoteAppearance dst) {

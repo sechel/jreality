@@ -65,6 +65,9 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
     }
 
 	ConfigurationAttributes config;
+
+	boolean hasCamPath;
+	boolean hasSceneRoot;
 	
     private static final class Singleton {
         private static final PortalJoglClientViewer instance = new PortalJoglClientViewer();
@@ -149,9 +152,11 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
 	public void setRemoteSceneRoot(RemoteSceneGraphComponent r) {
 		System.out.println("PortalJoglClientViewer.setRemoteSceneRoot() root="+r.getName());
 		viewer.setSceneRoot((SceneGraphComponent) r);
+		hasSceneRoot = r != null;
 	}
 
 	public void setRemoteCameraPath(List list) {
+		hasCamPath = !(list == null || list.isEmpty());
 		if (viewer.getCameraPath() != null) {
 			SceneGraphPath last = viewer.getCameraPath();
 			last.pop(); // Camera
@@ -188,6 +193,7 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
 	}
 
 	public void render(double[] headMatrix) {
+		if (!hasSceneRoot || !hasCamPath) return;
 		setHeadMatrix(headMatrix);
 		viewer.render();
 	}
