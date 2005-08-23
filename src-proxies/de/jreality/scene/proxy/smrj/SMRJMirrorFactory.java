@@ -1,6 +1,8 @@
 package de.jreality.scene.proxy.smrj;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -176,7 +178,14 @@ public class SMRJMirrorFactory extends ProxyFactory {
     public void copyAttr(de.jreality.scene.Geometry src, RemoteGeometry dst) {
         copyAttr((de.jreality.scene.SceneGraphNode) src,
                 (RemoteSceneGraphNode) dst);
-        dst.setGeometryAttributes(src.getGeometryAttributes());
+        HashMap serializableGeometryAttributes = new HashMap();
+        for (Iterator i = src.getGeometryAttributes().keySet().iterator(); i.hasNext(); ) {
+          Object key = i.next();
+          Object attr = src.getGeometryAttributes().get(key);
+          if (attr instanceof Serializable)
+        	  serializableGeometryAttributes.put(key, attr);
+        }
+        dst.setGeometryAttributes(serializableGeometryAttributes);
     }
 
     public void copyAttr(de.jreality.scene.Sphere src, RemoteSphere dst) {
@@ -225,7 +234,8 @@ public class SMRJMirrorFactory extends ProxyFactory {
         dst.setPerspective(src.isPerspective());
 //        dst.setSignature(src.getSignature());
         dst.setStereo(src.isStereo());
-        dst.setViewPort(src.getViewPort().getX(), src.getViewPort().getY(),
+        if (src.getViewPort() != null)
+          dst.setViewPort(src.getViewPort().getX(), src.getViewPort().getY(),
             src.getViewPort().getWidth(), src.getViewPort().getHeight());
     }
 

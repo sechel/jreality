@@ -22,6 +22,7 @@
  */
 package de.jreality.scene.proxy.smrj;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import de.jreality.scene.*;
@@ -135,7 +136,8 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
         for (Iterator i = ev.getChangedGeometryAttributes().iterator(); i
                 .hasNext();) {
             Attribute a = (Attribute) i.next();
-            dst.setGeometryAttributes(a, src.getGeometryAttributes(a));
+            if (src.getGeometryAttributes(a) instanceof Serializable)
+              dst.setGeometryAttributes(a, src.getGeometryAttributes(a));
         }
     }
 
@@ -170,7 +172,8 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
     dst.setPerspective(src.isPerspective());
 //    dst.setSignature(src.getSignature());
     dst.setStereo(src.isStereo());
-    dst.setViewPort(src.getViewPort().getX(), src.getViewPort().getY(),
+    if (src.getViewPort() != null)
+      dst.setViewPort(src.getViewPort().getX(), src.getViewPort().getY(),
         src.getViewPort().getWidth(), src.getViewPort().getHeight());
   }
 
