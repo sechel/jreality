@@ -140,6 +140,7 @@ public class DeviceMotionstar implements RawDevice {
             InputSlot slot = (InputSlot) usedSources.get("wandMatrix");
             if (slot == null) return;
             matrixWand = Rn.transposeF2D(matrixWand, event.getMatrix());
+            coordinateChange(matrixWand);
             queue.addEvent(new ToolEvent(DeviceMotionstar.this, slot, new DoubleArray(Rn.copy(null, matrixWand))));
         }
 
@@ -149,9 +150,20 @@ public class DeviceMotionstar implements RawDevice {
             if (!usedSources.containsKey("headMatrix")) return;
             InputSlot slot = (InputSlot) usedSources.get("headMatrix");
             matrixHead = Rn.transposeF2D(matrixHead, event.getMatrix());
+            coordinateChange(matrixHead);
             queue.addEvent(new ToolEvent(DeviceMotionstar.this, slot, new DoubleArray(Rn.copy(null, matrixHead))));
         }
-        
+        /**
+         * changes the translation part of the given matrix
+         * from feet to meters
+         * 
+         * @param matrix
+         */
+        private void coordinateChange(double[] matrix) {
+          matrix[3]  *= 0.3048;
+          matrix[7]  *= 0.3048;
+          matrix[11] *= 0.3048;
+        }
     }
     
     private MyListener myListener = new MyListener();

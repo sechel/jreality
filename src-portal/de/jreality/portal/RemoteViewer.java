@@ -33,9 +33,9 @@ import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
  *
  */
 public interface RemoteViewer {
-	public void setRemoteSceneRoot(RemoteSceneGraphComponent r);
+  public void setRemoteSceneRoot(RemoteSceneGraphComponent r);
+  public void setRemoteAuxiliaryRoot(RemoteSceneGraphComponent r);
 	public void setRemoteCameraPath(List list);
-    public void render(double[] headMatrix);
+  public void render(double[] headMatrix);
 	public void setSignature(int sig);
-    public void reset();
 }

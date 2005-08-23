@@ -37,10 +37,7 @@ import de.jreality.math.*;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.SceneGraphPathObserver;
 import de.jreality.scene.Transformation;
-import de.jreality.scene.event.TransformationEvent;
-import de.jreality.scene.event.TransformationListener;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
@@ -93,9 +90,6 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
 	    initFrame();
 	    cameraTranslationNode = new SceneGraphComponent();
 	    cameraTranslationNode.setTransformation(new Transformation());
-	    
-	    // TODO: this is a hack!
-	    cameraTranslationNode.addChild(PortalServerViewer.makeLights());
 	    
 	    cameraOrientationNode = new SceneGraphComponent();
 	    cameraOrientationNode.setTransformation(new Transformation());
@@ -174,13 +168,12 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
 		System.out.println("PortalJoglClientViewer.setRemoteCameraPath() "+camPath);
 		Camera cam = (Camera) camPath.getLastElement();
 		
-		// make stereo settings
-        cam.setStereo(config.getBool("camera.stereo"));
-        cam.setEyeSeparation(config.getDouble("camera.eyeSeparation"));
-        //cam.setNear(config.getDouble("camera.nearPlane"));
-        //cam.setFar(config.getDouble("camera.farPlane"));
-        
-        cam.setOnAxis(false);
+    cam.setStereo(config.getBool("camera.stereo"));
+    cam.setEyeSeparation(config.getDouble("camera.eyeSeparation"));
+    //cam.setNear(config.getDouble("camera.nearPlane"));
+    //cam.setFar(config.getDouble("camera.farPlane"));
+    
+    cam.setOnAxis(false);
 		
 		camPath.pop();
 		camPath.getLastComponent().addChild(cameraTranslationNode);
@@ -203,22 +196,18 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
 		viewer.setSignature(sig);
 	}
 
-	public void reset() {
-		init();
-	}
-
-    public void resetCalled() {
-        System.out.println("disposing prev viewer instance");
-        setRemoteSceneRoot(null);
-        setRemoteCameraPath(null);
-        frame.hide();
-    }
+  public void resetCalled() {
+    System.out.println("disposing prev viewer instance");
+    setRemoteSceneRoot(null);
+    setRemoteCameraPath(null);
+    frame.hide();
+  }
 
     double[] tmp = new double[16];
     double[] tmp2 = new double[16];
     double[] totalOrientation = new double[16];
     
-    public void setHeadMatrix(double[] tm) {
+    private void setHeadMatrix(double[] tm) {
         FactoredMatrix t = new FactoredMatrix(tm);
         FactoredMatrix trans = new FactoredMatrix();
         trans.setTranslation(t.getTranslation());
@@ -231,6 +220,10 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
         cam.setOrientationMatrix(totalOrientation);
         FactoredMatrix fm = new FactoredMatrix(portalPath.getMatrix(tmp2));
         cam.setViewPort(CameraUtility.calculatePORTALViewport(viewer, fm.getTranslation()));
+    }
+
+    public void setRemoteAuxiliaryRoot(RemoteSceneGraphComponent r) {
+      viewer.setAuxiliaryRoot((SceneGraphComponent) r);
     }
 
 }

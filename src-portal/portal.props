@@ -15,7 +15,7 @@ server.uri: //master/jRealityRemoteServer
 portal.fixedHead: false 
 portal.fixedHeadPosition: 0. 4.5 4.068
 
-camera.eyeSeparation: 0.19
+camera.eyeSeparation: 0.06
 camera.nearPlane: 0.1
 camera.farPlane: 100.
 camera.stereo: true 
