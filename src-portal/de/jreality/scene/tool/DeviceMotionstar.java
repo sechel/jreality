@@ -105,18 +105,21 @@ public class DeviceMotionstar implements RawDevice {
         	if (dump) System.out.println("MyListener.buttonTipped()");
         }
 
-        double[] axesMatrix = new double[16];
+        double[] axesMatrix = new Matrix().getArray();
+        double oldX,oldY;
         public void axisMoved(WandEvent event) {
         	if (dump) System.out.println("MyListener.axisMoved()");
             InputSlot slot = (InputSlot) usedSources.get("wand_axes");
             if (slot == null) return;
-            Rn.setIdentityMatrix(axesMatrix);
+            oldX=axesMatrix[3];
+            oldY=axesMatrix[7];
             double x = event.getAxisValue(0);
             double y = event.getAxisValue(1);
             axesMatrix[3]  = trim(x);
             axesMatrix[7]  = trim(y);
             axesMatrix[11] = 1;
-            queue.addEvent(new ToolEvent(DeviceMotionstar.this, slot, new DoubleArray(Rn.copy(null, axesMatrix))));
+            if (oldX != axesMatrix[3] || oldY != axesMatrix[7])
+            	queue.addEvent(new ToolEvent(DeviceMotionstar.this, slot, new DoubleArray(Rn.copy(null, axesMatrix))));
         }
         
         private double trim(double d) {
