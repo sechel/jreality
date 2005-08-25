@@ -25,6 +25,7 @@ package de.jreality.scene.proxy.smrj;
 import java.io.Serializable;
 import java.util.Iterator;
 
+import de.jreality.math.Matrix;
 import de.jreality.scene.*;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -93,7 +94,22 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
     Appearance src = (Appearance) ev.getSourceNode();
     RemoteAppearance dst = (RemoteAppearance) rmc.getProxy(src);
     Object aa = src.getAppearanceAttribute(ev.getKey());
+    boolean measure = (aa instanceof Matrix);
+    long t, dt;
+    t = System.currentTimeMillis(); 
+    rmc.writeLock.writeLock();
+    if (measure) {
+    	dt = System.currentTimeMillis()-t;
+    	System.out.println("Matrix measure: waiting for lock="+dt);
+        t = System.currentTimeMillis(); 
+    }
     dst.setAttribute(ev.getKey(), aa);
+    if (measure) {
+    	dt = System.currentTimeMillis()-t;
+    	System.out.println("Matrix measure: writing="+dt);
+        t = System.currentTimeMillis(); 
+    }
+    rmc.writeLock.writeUnlock();
   }
 
 	public void geometryChanged(GeometryEvent ev) {
@@ -104,10 +120,14 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
             DataList dl = ((IndexedFaceSet) src).getFaceAttributes(a);
             if (ByteBufferList.canCopy(dl)) {
             	ByteBufferList copy = ByteBufferList.createByteBufferCopy(dl);
+                rmc.writeLock.writeLock();
                 ((RemoteIndexedFaceSet) dst).setFaceAttributes(a, copy);
+                rmc.writeLock.writeUnlock();
                 ByteBufferList.releaseList(copy);
             } else {
+                rmc.writeLock.writeLock();
                 ((RemoteIndexedFaceSet) dst).setFaceAttributes(a, dl);
+                rmc.writeLock.writeUnlock();
             }            
         }
         for (Iterator i = ev.getChangedEdgeAttributes().iterator(); i.hasNext();) {
@@ -115,10 +135,14 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
             DataList dl = ((IndexedLineSet) src).getEdgeAttributes(a);
             if (ByteBufferList.canCopy(dl)) {
             	ByteBufferList copy = ByteBufferList.createByteBufferCopy(dl);
+                rmc.writeLock.writeLock();
                 ((RemoteIndexedLineSet) dst).setEdgeAttributes(a, copy);
+                rmc.writeLock.writeUnlock();
                 ByteBufferList.releaseList(copy);
             } else {
+                rmc.writeLock.writeLock();
                 ((RemoteIndexedLineSet) dst).setEdgeAttributes(a, dl);
+                rmc.writeLock.writeUnlock();
             }
         }
         for (Iterator i = ev.getChangedVertexAttributes().iterator(); i
@@ -127,28 +151,39 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
             DataList dl = ((PointSet) src).getVertexAttributes(a);
             if (ByteBufferList.canCopy(dl)) {
             	ByteBufferList copy = ByteBufferList.createByteBufferCopy(dl);
+                rmc.writeLock.writeLock();
                 ((RemotePointSet) dst).setVertexAttributes(a, copy);
+                rmc.writeLock.writeUnlock();
                 ByteBufferList.releaseList(copy);
             } else {
+                rmc.writeLock.writeLock();
                 ((RemotePointSet) dst).setVertexAttributes(a, dl);
+                rmc.writeLock.writeUnlock();
             }
         }
         for (Iterator i = ev.getChangedGeometryAttributes().iterator(); i
                 .hasNext();) {
             Attribute a = (Attribute) i.next();
-            if (src.getGeometryAttributes(a) instanceof Serializable)
+            if (src.getGeometryAttributes(a) instanceof Serializable) {
+                rmc.writeLock.writeLock();
               dst.setGeometryAttributes(a, src.getGeometryAttributes(a));
+              rmc.writeLock.writeUnlock();
+            }
         }
     }
 
 		public void childAdded(SceneGraphComponentEvent ev) {
-   			((RemoteSceneGraphComponent)rmc.getProxyImpl(ev.getSceneGraphComponent()))
-            .add((RemoteSceneGraphNode) rmc.createProxyScene(ev.getNewChildElement()));
+   		    rmc.writeLock.writeLock();
+   			RemoteSceneGraphNode createProxyScene = (RemoteSceneGraphNode) rmc.createProxyScene(ev.getNewChildElement());
+			((RemoteSceneGraphComponent)rmc.getProxyImpl(ev.getSceneGraphComponent())).add(createProxyScene);
+		    rmc.writeLock.writeUnlock();
 	}
 
 	public void childRemoved(SceneGraphComponentEvent ev) {
+	    rmc.writeLock.writeLock();
         ((RemoteSceneGraphComponent)rmc.getProxyImpl(ev.getSceneGraphComponent()))
         .remove((RemoteSceneGraphNode) rmc.getProxyImpl(ev.getOldChildElement()));
+        rmc.writeLock.writeUnlock();
 	}
 
 	public void childReplaced(SceneGraphComponentEvent ev) {
@@ -156,12 +191,15 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
 	}
 
   public void visibilityChanged(SceneGraphComponentEvent ev) {
+    rmc.writeLock.writeLock();
     ((RemoteSceneGraphComponent)rmc.getProxyImpl(ev.getSceneGraphComponent())).setVisible(ev.getSceneGraphComponent().isVisible());
+    rmc.writeLock.writeUnlock();
   }
 
   public void cameraChanged(CameraEvent ev) {
     Camera src = ev.getCamera();
     RemoteCamera dst = (RemoteCamera) rmc.getProxyImpl(ev.getCamera());
+    rmc.writeLock.writeLock();
     dst.setEyeSeparation(src.getEyeSeparation());
     dst.setFar(src.getFar());
     dst.setFieldOfView(src.getFieldOfView());
@@ -175,11 +213,13 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
     if (src.getViewPort() != null)
       dst.setViewPort(src.getViewPort().getX(), src.getViewPort().getY(),
         src.getViewPort().getWidth(), src.getViewPort().getHeight());
+    rmc.writeLock.writeUnlock();
   }
 
   public void lightChanged(LightEvent ev) {
     Light src = ev.getLight();
     RemoteLight dst = (RemoteLight) rmc.getProxyImpl(src);
+    rmc.writeLock.writeLock();
     if (src instanceof SpotLight) {
       SpotLight src1 = (SpotLight) src;
       RemoteSpotLight dst1 = (RemoteSpotLight) dst;
@@ -200,6 +240,7 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
     }
     dst.setColor(src.getColor());
     dst.setIntensity(src.getIntensity());
+    rmc.writeLock.writeUnlock();
   }
   
 }

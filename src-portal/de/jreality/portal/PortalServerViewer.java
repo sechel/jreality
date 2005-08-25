@@ -69,6 +69,8 @@ public class PortalServerViewer implements Viewer, HeadMotionListener {
 	private boolean rendering;
 
 	private boolean reRender;
+	
+	private final Lock renderLock = new Lock();
 
 	public PortalServerViewer(RemoteFactory factory) throws IOException,
 			MalformedURLException, RemoteException, NotBoundException {
@@ -76,7 +78,7 @@ public class PortalServerViewer implements Viewer, HeadMotionListener {
 		clients = (RemoteJoglViewer) factory.createRemoteViaStaticMethod(
 				PortalJoglClientViewer.class, PortalJoglClientViewer.class,
 				"getInstance");
-		proxyScene = new SMRJMirrorScene(factory);
+		proxyScene = new SMRJMirrorScene(factory, renderLock);
 		szgQueue = new RemoteEventQueueImpl();
 	}
 
@@ -144,12 +146,14 @@ public class PortalServerViewer implements Viewer, HeadMotionListener {
 			reRender = false;
 			long start = System.currentTimeMillis();
 			renders++;
+			renderLock.readLock();
 			headMatrixLock.readLock();
-		  clients.render(headMatrix);
+		    clients.render(headMatrix);
 			headMatrixLock.readUnlock();
 			clients.waitForRenderFinish();
 			if (manualSwapBuffers)
 				clients.swapBuffers();
+			renderLock.readUnlock();
 			long delay = System.currentTimeMillis() - start;
 			if (maxFrameTime < delay)
 				maxFrameTime = delay;

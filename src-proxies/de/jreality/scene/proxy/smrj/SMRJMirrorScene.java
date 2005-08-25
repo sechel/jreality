@@ -22,6 +22,8 @@
  */
 package de.jreality.scene.proxy.smrj;
 
+import de.jreality.scene.Lock;
+
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.proxy.SceneProxyBuilder;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
@@ -36,7 +38,10 @@ public class SMRJMirrorScene extends SceneProxyBuilder {
 
 	SMRJSceneGraphSynchronizer synchronizer;
 	
-	public SMRJMirrorScene(RemoteFactory rf) {
+	Lock writeLock;
+	
+	public SMRJMirrorScene(RemoteFactory rf, Lock writeLock) {
+		this.writeLock=writeLock;
 		setProxyFactory(new SMRJMirrorFactory(rf));
 		synchronizer = new SMRJSceneGraphSynchronizer(this);
 	}

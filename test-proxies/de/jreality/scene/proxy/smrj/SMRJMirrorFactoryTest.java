@@ -33,6 +33,7 @@ import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.Lock;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.ByteBufferList;
 import de.jreality.scene.data.DataList;
@@ -90,7 +91,7 @@ public class SMRJMirrorFactoryTest extends TestCase {
     CatenoidHelicoid ch;
     
     public void testVisitIndexedFaceSet() throws Exception {
-        proxyScene = new SMRJMirrorScene(rf);
+        proxyScene = new SMRJMirrorScene(rf, new Lock());
         ch = new CatenoidHelicoid(3);
         ch.setName("my own proxy test node");
         ch.buildEdgesFromFaces();
