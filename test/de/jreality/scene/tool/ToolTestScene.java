@@ -99,7 +99,7 @@ public class ToolTestScene {
     ifs.setGeometryAttributes(Attribute.attributeForName("AABBTree"), obbTree);
     SceneGraphComponent comp = new SceneGraphComponent();
     comp.setGeometry(ifs);
-    comp.addChild(obbTree.display());
+    //comp.addChild(obbTree.display());
     
     scene.addChild(comp);
     
@@ -108,10 +108,10 @@ public class ToolTestScene {
     root.addChild(avatarNode);
     
     scene.addTool(new DraggingTool());
-    scene.addTool(new PickShowTool("PrimaryAction"));
+    //scene.addTool(new PickShowTool("PickShowActivation"));
     RotateTool rotateTool = new RotateTool();
     rotateTool.setMoveChildren(true);
-    scene.addTool(rotateTool);
+    root.addTool(rotateTool);
 
     SceneGraphPath camPath = new SceneGraphPath();
     camPath.push(root);
@@ -128,6 +128,9 @@ public class ToolTestScene {
     frame.getContentPane().add(viewer.getViewingComponent());
     viewer.setSceneRoot(root);
     viewer.setCameraPath(camPath);
+    SceneGraphPath avatarPath = camPath.popNew(); //cam
+    avatarPath.pop();//camNode
+    viewer.setAvatarPath(avatarPath);
     frame.validate();
 
     System.out.println(viewer.getViewingComponent().getSize());

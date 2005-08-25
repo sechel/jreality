@@ -28,6 +28,7 @@ import java.util.logging.Level;
 
 import szg.framework.event.*;
 import szg.framework.event.remote.RemoteEventQueueImpl;
+import de.jreality.math.Matrix;
 import de.jreality.math.Rn;
 import de.jreality.portal.PortalServerViewer;
 import de.jreality.scene.Viewer;
@@ -171,9 +172,12 @@ public class DeviceMotionstar implements RawDevice {
         szgQueue.addHeadMotionListener(myListener);
     }
 
-    public void mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
+    public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
         if (!knownSources.contains(rawDeviceName)) throw new IllegalArgumentException("no such raw device");
         usedSources.put(rawDeviceName, inputDevice);
+        if (rawDeviceName.indexOf("Matrix") != -1 || rawDeviceName.equals("wand_axes"))
+          return new ToolEvent(this, inputDevice, new DoubleArray(new Matrix().getArray()));
+        return new ToolEvent(this, inputDevice, AxisState.ORIGIN);
     }
 
     public void dispose() {
