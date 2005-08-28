@@ -187,12 +187,17 @@ public class DefaultLineShader implements LineShader  {
 		return false;
 	}
 	
-	public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig, boolean useDisplayLists) {
+	public int proxyGeometryFor(final Geometry original, final JOGLRenderer jr, final int sig, final boolean useDisplayLists) {
 		if ( !(original instanceof IndexedLineSet)) return -1;
 		if (tubeDraw && original instanceof IndexedLineSet)	{
-			int dlist =  createTubesOnEdgesAsDL((IndexedLineSet) original, tubeRadius, 1.0, jr, sig, jr.isPickMode(), useDisplayLists);
-			//JOGLConfiguration.theLog.log(Level.FINE,"Creating tubes with radius "+tubeRadius);
-			return dlist;
+      final int[] dlist = new int[1];
+      Scene.executeReader(original, new Runnable() {
+        public void run() {
+    			dlist[0] = createTubesOnEdgesAsDL((IndexedLineSet) original, tubeRadius, 1.0, jr, sig, jr.isPickMode(), useDisplayLists);
+			    //JOGLConfiguration.theLog.log(Level.FINE,"Creating tubes with radius "+tubeRadius);
+        }
+      });
+			return dlist[0];
 		}
 		return -1;
 	}
