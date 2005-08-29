@@ -92,14 +92,15 @@ public class ToolTestScene {
     //scene.addChild(new JOGLSkyBox().makeWorld());
     
     IndexedFaceSet ifs = //Primitives.icosahedron(); 
-      new CatenoidHelicoid(7);
+      new CatenoidHelicoid(4);
     
     GeometryUtility.calculateAndSetFaceNormals(ifs);
-    AABBTree obbTree = AABBTree.construct(ifs, 1);
-    ifs.setGeometryAttributes(Attribute.attributeForName("AABBTree"), obbTree);
+    AABBTree obbTree = AABBTree.constructEdgeAABB(ifs, 0.1);
+    ifs.setGeometryAttributes(Attribute.attributeForName("AABBTreeEdge"), obbTree);
+    AABBTree.constructAndRegister(ifs, null, 5);
     SceneGraphComponent comp = new SceneGraphComponent();
     comp.setGeometry(ifs);
-    //comp.addChild(obbTree.display());
+    comp.addChild(obbTree.display());
     
     scene.addChild(comp);
     
@@ -107,12 +108,17 @@ public class ToolTestScene {
     
     root.addChild(avatarNode);
     
-    scene.addTool(new DraggingTool());
+    ToolRotateTool toolSelection = new ToolRotateTool();
+    toolSelection.setComponent(scene);
+    
+    toolSelection.addTool(new DraggingTool());
     //scene.addTool(new PickShowTool("PickShowActivation"));
     RotateTool rotateTool = new RotateTool();
     rotateTool.setMoveChildren(true);
-    root.addTool(rotateTool);
+    toolSelection.addTool(rotateTool);
 
+    root.addTool(toolSelection);
+    
     SceneGraphPath camPath = new SceneGraphPath();
     camPath.push(root);
     camPath.push(avatarNode);
