@@ -61,7 +61,7 @@ public class DeviceMotionstar implements RawDevice {
     
     RemoteEventQueueImpl szgQueue;
 
-    private class MyListener implements WandListener, WandMotionListener, HeadMotionListener {
+    private class MyListener implements WandListener, HeadMotionListener {
 
         public void buttonPressed(WandEvent event) {
         	if (dump) System.out.println("MyListener.buttonPressed()");
@@ -101,10 +101,6 @@ public class DeviceMotionstar implements RawDevice {
 	    	}
         }
 
-        public void buttonTipped(WandEvent event) {
-        	if (dump) System.out.println("MyListener.buttonTipped()");
-        }
-
         double[] axesMatrix = new Matrix().getArray();
         double oldX,oldY;
         public void axisMoved(WandEvent event) {
@@ -135,7 +131,7 @@ public class DeviceMotionstar implements RawDevice {
 
         public void wandDragged(WandEvent event) {
         	if (dump) System.out.println("MyListener.wandDragged()");
-            wandMoved(event);
+          wandMoved(event);
         }
 
         double[] matrixWand = new double[16];
@@ -171,7 +167,6 @@ public class DeviceMotionstar implements RawDevice {
             LoggingSystem.getLogger(this).log(Level.SEVERE, "error creating remote motionstar eventqueue", mfe);
         }
         szgQueue.addWandListener(myListener);
-        szgQueue.addWandMotionListener(myListener);
         szgQueue.addHeadMotionListener(myListener);
     }
 
@@ -185,7 +180,6 @@ public class DeviceMotionstar implements RawDevice {
 
     public void dispose() {
         szgQueue.removeWandListener(myListener);
-        szgQueue.removeWandMotionListener(myListener);
         szgQueue.removeHeadMotionListener(myListener);
     }
 
