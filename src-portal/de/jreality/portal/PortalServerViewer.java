@@ -43,35 +43,19 @@ import de.smrj.RemoteFactory;
  * @author weissman
  * 
  */
-public class PortalServerViewer implements Viewer, HeadMotionListener {
+public class PortalServerViewer implements Viewer {
 
   SceneGraphComponent root;
   SceneGraphComponent auxRoot;
-
 	SceneGraphPath camPath;
+  private int signature;
 
 	RemoteFactory factory;
-
-	private int signature;
-
 	RemoteJoglViewer clients;
 
 	SMRJMirrorScene proxyScene;
-
-	private RemoteEventQueueImpl szgQueue;
-
-	private final Lock headMatrixLock = new Lock();
-
-	private final double[] headMatrix = new double[16];
-
-	private boolean manualSwapBuffers;
-
-	private boolean rendering;
-
-	private boolean reRender;
-	
-	private final Lock renderLock = new Lock();
-
+  final Lock renderLock = new Lock();
+  
 	public PortalServerViewer(RemoteFactory factory) throws IOException,
 			MalformedURLException, RemoteException, NotBoundException {
 		this.factory = factory;
@@ -79,27 +63,6 @@ public class PortalServerViewer implements Viewer, HeadMotionListener {
 				PortalJoglClientViewer.class, PortalJoglClientViewer.class,
 				"getInstance");
 		proxyScene = new SMRJMirrorScene(factory, renderLock);
-		szgQueue = new RemoteEventQueueImpl();
-	}
-
-	public void start() {
-		szgQueue.addHeadMotionListener(this);
-	}
-
-	public void pause() {
-		szgQueue.removeHeadMotionListener(this);
-	}
-
-	public void headMoved(HeadEvent event) {
-		headMatrixLock.writeLock();
-		System.arraycopy(Rn.transposeF2D(null, event.getMatrix()), 0,
-				headMatrix, 0, 16);
-		headMatrixLock.writeUnlock();
-		render();
-	}
-
-	public RemoteEventQueueImpl getSzgQueue() {
-		return szgQueue;
 	}
 
 	public SceneGraphComponent getSceneRoot() {
@@ -120,64 +83,6 @@ public class PortalServerViewer implements Viewer, HeadMotionListener {
 		camPath = p;
 		clients.setRemoteCameraPath(proxyScene.getProxies(p.toList()));
 	}
-
-	int statDelay = 10000; // milliseconds between statistic output
-
-	int runs = 0;
-
-	int renders = 0;
-
-	long startTime = System.currentTimeMillis();
-
-	long maxFrameTime = 0;
-	
-	public void render() {
-		if (root == null || camPath == null) {
-			LoggingSystem.getLogger(this).log(Level.FINER,
-					"not rendering - roo or camera path is null");
-			return;
-		}
-		if (rendering) {
-			reRender = true;
-			return;
-		}
-		rendering = reRender = true;
-		while (reRender) {
-			reRender = false;
-			long start = System.currentTimeMillis();
-			renders++;
-			renderLock.readLock();
-			headMatrixLock.readLock();
-		    clients.render(headMatrix);
-			headMatrixLock.readUnlock();
-			clients.waitForRenderFinish();
-			if (manualSwapBuffers)
-				clients.swapBuffers();
-			renderLock.readUnlock();
-			long delay = System.currentTimeMillis() - start;
-			if (maxFrameTime < delay)
-				maxFrameTime = delay;
-
-			long locTime = System.currentTimeMillis() - startTime;
-			if (locTime >= statDelay) {// statistics
-				System.out.println("************* stats  *****************");
-				System.out.println("elapsed time: " + locTime * 0.001 + " sec");
-				System.out.println("fps: " + ((double) renders)
-						/ ((double) locTime * 0.001));
-				System.out.println("wait(): " + runs);
-				System.out.println("Max. frametime: " + maxFrameTime + "[fps: "
-						+ (1. / (maxFrameTime * 0.001)) + "]");
-				System.out.println("******************************");
-				runs = renders = 0;
-				maxFrameTime = 0;
-				startTime = System.currentTimeMillis();
-			}
-			runs++;
-			rendering = false;
-		}
-	}
-
-	/** ************* viewer interface ******************** */
 
 	/**
 	 * TODO: open frame for keyboard/mouse input!?
@@ -221,6 +126,13 @@ public class PortalServerViewer implements Viewer, HeadMotionListener {
     this.auxRoot = ar;
     RemoteSceneGraphComponent rsgc = (RemoteSceneGraphComponent) proxyScene.createProxyScene(auxRoot);
     clients.setRemoteAuxiliaryRoot(rsgc);
+  }
+
+  public void render() {
+    renderLock.writeLock();
+    clients.render();
+    clients.waitForRenderFinish();
+    renderLock.writeUnlock();
   }
 
 }

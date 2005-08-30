@@ -26,11 +26,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Level;
 
-import szg.framework.event.*;
+import szg.framework.event.HeadEvent;
+import szg.framework.event.HeadMotionListener;
+import szg.framework.event.WandEvent;
+import szg.framework.event.WandListener;
 import szg.framework.event.remote.RemoteEventQueueImpl;
 import de.jreality.math.Matrix;
 import de.jreality.math.Rn;
-import de.jreality.portal.PortalServerViewer;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.util.LoggingSystem;
@@ -160,14 +162,13 @@ public class DeviceMotionstar implements RawDevice {
     }
 
     public void initialize(Viewer viewer) {
-        try {
-        	PortalServerViewer psi = (PortalServerViewer) viewer;
-        	szgQueue = psi.getSzgQueue();
-        } catch (Exception mfe) {
-            LoggingSystem.getLogger(this).log(Level.SEVERE, "error creating remote motionstar eventqueue", mfe);
-        }
+      try {
+      	szgQueue = new RemoteEventQueueImpl();
         szgQueue.addWandListener(myListener);
         szgQueue.addHeadMotionListener(myListener);
+      } catch (Exception mfe) {
+        LoggingSystem.getLogger(this).log(Level.SEVERE, "error creating remote motionstar eventqueue", mfe);
+      }
     }
 
     public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {

@@ -36,6 +36,7 @@ public interface RemoteViewer {
   public void setRemoteSceneRoot(RemoteSceneGraphComponent r);
   public void setRemoteAuxiliaryRoot(RemoteSceneGraphComponent r);
 	public void setRemoteCameraPath(List list);
-  public void render(double[] headMatrix);
+  public void render();
+  public void waitForRenderFinish();
 	public void setSignature(int sig);
 }

@@ -30,5 +30,4 @@ public interface RemoteJoglViewer extends RemoteViewer {
     public void setUseDisplayLists(boolean b);
     public void setManualSwapBuffers(boolean b);
     public void swapBuffers();
-    public void waitForRenderFinish();
 }

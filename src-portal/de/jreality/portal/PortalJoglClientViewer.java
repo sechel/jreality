@@ -38,6 +38,8 @@ import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.event.TransformationEvent;
+import de.jreality.scene.event.TransformationListener;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
@@ -49,158 +51,179 @@ import de.smrj.ClientFactory;
  */
 public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.ResetCallback {
 
-	private Viewer viewer;
-	private JFrame frame;
-	
-	SceneGraphPath portalPath;
-	
-    private SceneGraphComponent cameraTranslationNode;
-    private SceneGraphComponent cameraOrientationNode;
-    static double[] correction;
-    static {
-        double[] axis = ConfigurationAttributes.getDefaultConfiguration().getDoubleArray("camera.correction.axis");
-        double angle = ConfigurationAttributes.getDefaultConfiguration().getDouble("camera.correction.angle");
-        angle *= (Math.PI*2.)/360.;
-        correction = P3.makeRotationMatrix(null, axis, angle);
-    }
+  private Viewer viewer;
+  private JFrame frame;
+  SceneGraphPath portalPath;
+  SceneGraphComponent headComponent;
+  
+  private SceneGraphComponent cameraTranslationNode;
+  private SceneGraphComponent cameraOrientationNode;
+  
+  Camera cam;
 
-	ConfigurationAttributes config;
+  static double[] correction;
+  static {
+    double[] axis = ConfigurationAttributes.getDefaultConfiguration()
+        .getDoubleArray("camera.correction.axis");
+    double angle = ConfigurationAttributes.getDefaultConfiguration().getDouble(
+        "camera.correction.angle");
+    angle *= (Math.PI * 2.) / 360.;
+    correction = P3.makeRotationMatrix(null, axis, angle);
+  }
 
-	boolean hasCamPath;
-	boolean hasSceneRoot;
-	
-    private static final class Singleton {
-        private static final PortalJoglClientViewer instance = new PortalJoglClientViewer();
-    }
-    
-    public static PortalJoglClientViewer getInstance() {
-        Singleton.instance.initFrame();
-        return Singleton.instance;
-    }
-    
-    private PortalJoglClientViewer() {
-        viewer = new de.jreality.jogl.Viewer();
-        config = ConfigurationAttributes.getDefaultConfiguration();
-        // frame settings
-        frame = new JFrame(config.getProperty("frame.title", "no title"));
-        frame.addWindowListener(new WindowAdapter() {
-        	public void windowClosing(WindowEvent e) {
-        		System.exit(0);
-        	}
-        });
-        frame.getContentPane().add(viewer.getViewingComponent());
-	    init();
-	    initFrame();
-	    cameraTranslationNode = new SceneGraphComponent();
-	    cameraTranslationNode.setTransformation(new Transformation());
-	    
-	    cameraOrientationNode = new SceneGraphComponent();
-	    cameraOrientationNode.setTransformation(new Transformation());
-        double[] rot = config.getDoubleArray("camera.orientation");
-        Matrix m = new Matrix(cameraOrientationNode.getTransformation().getMatrix());
-        MatrixBuilder.euclidian(m).rotate(
-                rot[0] * ((Math.PI * 2.0) / 360.),
-                new double[] {rot[1], rot[2], rot[3]}
-        );
-        cameraOrientationNode.getTransformation().setMatrix(m.getArray());
-        cameraTranslationNode.addChild(cameraOrientationNode);
-    }
-	
-	protected void initFrame() {
-		frame.validate();
-		frame.show();
-	}
+  ConfigurationAttributes config;
 
-	protected void init() {
-		if (config.getBool("frame.fullscreen")) {
-			// disable mouse cursor in fullscreen mode
-			BufferedImage cursorImg = new BufferedImage(16, 16,
-					BufferedImage.TYPE_INT_ARGB);
-			Graphics2D gfx = cursorImg.createGraphics();
-			gfx.setColor(new Color(0, 0, 0, 0));
-			gfx.fillRect(0, 0, 16, 16);
-			gfx.dispose();
-			frame.setCursor(frame.getToolkit().createCustomCursor(cursorImg,
-					new Point(), ""));
-			frame.dispose();
-			frame.setUndecorated(true);
-			frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(frame);
-		} else {
-			frame.setSize(config.getInt("frame.width"), config
-					.getInt("frame.height"));
-		}
-		viewer.setStereoType(de.jreality.jogl.Viewer.CROSS_EYED_STEREO);
-		viewer.setAutoSwapMode(config.getBool("viewer.autoBufferSwap"));
-	}
+  boolean hasCamPath;
 
-    public void setManualSwapBuffers(boolean b) {
-        viewer.setAutoSwapMode(!b);
-    }
-    public void swapBuffers() {
-        viewer.swapBuffers();
-    }
-    
-    /**
-     * TODO !!
-     */
-    public void setUseDisplayLists(boolean b) {
-//        viewer.getRenderer().setUseDisplayLists(b);
-    }
-    public void waitForRenderFinish() {
-        viewer.waitForRenderFinish();
-    }
-	public void setRemoteSceneRoot(RemoteSceneGraphComponent r) {
-		System.out.println("PortalJoglClientViewer.setRemoteSceneRoot() root="+r.getName());
-		viewer.setSceneRoot((SceneGraphComponent) r);
-		hasSceneRoot = r != null;
-	}
+  boolean hasSceneRoot;
 
-	public void setRemoteCameraPath(List list) {
-		hasCamPath = !(list == null || list.isEmpty());
-		if (viewer.getCameraPath() != null) {
-			SceneGraphPath last = viewer.getCameraPath();
-			last.pop(); // Camera
-			last.getLastComponent().setCamera(null);
-			last.pop(); // Orientation
-			last.pop(); // Translation
-			last.getLastComponent().removeChild(cameraTranslationNode);
-		}
-		if (list == null || list.isEmpty()) {
-			viewer.setCameraPath(null);
-			return;
-		}
-		SceneGraphPath camPath = SceneGraphPath.fromList(list);
-		System.out.println("PortalJoglClientViewer.setRemoteCameraPath() "+camPath);
-		Camera cam = (Camera) camPath.getLastElement();
-		
+  private static final class Singleton {
+    private static final PortalJoglClientViewer instance = new PortalJoglClientViewer();
+  }
+
+  public static PortalJoglClientViewer getInstance() {
+    Singleton.instance.initFrame();
+    return Singleton.instance;
+  }
+
+  private PortalJoglClientViewer() {
+    viewer = new de.jreality.jogl.Viewer();
+    config = ConfigurationAttributes.getDefaultConfiguration();
+    // frame settings
+    frame = new JFrame(config.getProperty("frame.title", "no title"));
+    frame.addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent e) {
+        System.exit(0);
+      }
+    });
+    frame.getContentPane().add(viewer.getViewingComponent());
+    init();
+    initFrame();
+    cameraTranslationNode = new SceneGraphComponent();
+    cameraTranslationNode.setTransformation(new Transformation());
+
+    cameraOrientationNode = new SceneGraphComponent();
+    cameraOrientationNode.setTransformation(new Transformation());
+    double[] rot = config.getDoubleArray("camera.orientation");
+    Matrix m = new Matrix(cameraOrientationNode.getTransformation().getMatrix());
+    MatrixBuilder.euclidian(m).rotate(rot[0] * ((Math.PI * 2.0) / 360.),
+        new double[] { rot[1], rot[2], rot[3] });
+    cameraOrientationNode.getTransformation().setMatrix(m.getArray());
+    cameraTranslationNode.addChild(cameraOrientationNode);
+  }
+
+  protected void initFrame() {
+    frame.validate();
+    frame.show();
+  }
+
+  protected void init() {
+    if (config.getBool("frame.fullscreen")) {
+      // disable mouse cursor in fullscreen mode
+      BufferedImage cursorImg = new BufferedImage(16, 16,
+          BufferedImage.TYPE_INT_ARGB);
+      Graphics2D gfx = cursorImg.createGraphics();
+      gfx.setColor(new Color(0, 0, 0, 0));
+      gfx.fillRect(0, 0, 16, 16);
+      gfx.dispose();
+      frame.setCursor(frame.getToolkit().createCustomCursor(cursorImg,
+          new Point(), ""));
+      frame.dispose();
+      frame.setUndecorated(true);
+      frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(frame);
+    } else {
+      frame
+          .setSize(config.getInt("frame.width"), config.getInt("frame.height"));
+    }
+    viewer.setStereoType(de.jreality.jogl.Viewer.CROSS_EYED_STEREO);
+    viewer.setAutoSwapMode(config.getBool("viewer.autoBufferSwap"));
+  }
+
+  public void setManualSwapBuffers(boolean b) {
+    viewer.setAutoSwapMode(!b);
+  }
+
+  public void swapBuffers() {
+    viewer.swapBuffers();
+  }
+
+  /**
+   * TODO !!
+   */
+  public void setUseDisplayLists(boolean b) {
+    //        viewer.getRenderer().setUseDisplayLists(b);
+  }
+
+  public void waitForRenderFinish() {
+    viewer.waitForRenderFinish();
+  }
+
+  public void setRemoteSceneRoot(RemoteSceneGraphComponent r) {
+    System.out.println("PortalJoglClientViewer.setRemoteSceneRoot() root="
+        + r.getName());
+    viewer.setSceneRoot((SceneGraphComponent) r);
+    hasSceneRoot = r != null;
+  }
+
+  public void setRemoteCameraPath(List list) {
+    // dispose artificial camera path
+    if (viewer.getCameraPath() != null) {
+      SceneGraphPath last = viewer.getCameraPath();
+      last.pop(); // Camera
+      last.getLastComponent().setCamera(null);
+      last.pop(); // Orientation
+      last.pop(); // Translation
+      last.getLastComponent().removeChild(cameraTranslationNode);
+    }
+    hasCamPath = !(list == null || list.isEmpty());
+    // empty path => reset fields
+    if (list == null || list.isEmpty()) {
+      viewer.setCameraPath(null);
+      headComponent = null;
+      portalPath = null;
+      cam = null;
+      return;
+    }
+    // new camera path => extract headComponent and set artificial camera path
+    SceneGraphPath camPath = SceneGraphPath.fromList(list);
+    System.out.println("PortalJoglClientViewer.setRemoteCameraPath() "+camPath);
+
+    cam = (Camera) camPath.getLastElement();
+    // TODO: do these settings on client side...
     cam.setStereo(config.getBool("camera.stereo"));
     cam.setEyeSeparation(config.getDouble("camera.eyeSeparation"));
-    //cam.setNear(config.getDouble("camera.nearPlane"));
-    //cam.setFar(config.getDouble("camera.farPlane"));
-    
     cam.setOnAxis(false);
-		
-		camPath.pop();
-		camPath.getLastComponent().addChild(cameraTranslationNode);
-		cameraOrientationNode.setCamera(cam);
-		camPath.push(cameraTranslationNode);
-		camPath.push(cameraOrientationNode);
-		camPath.push(cam);
-		viewer.setCameraPath(camPath);
-		portalPath = camPath.popNew(); // cam
-		portalPath.pop(); // trans
-		portalPath.pop(); // orien
-	}
 
-	public void render(double[] headMatrix) {
-		if (!hasSceneRoot || !hasCamPath) return;
-		setHeadMatrix(headMatrix);
-		viewer.render();
-	}
+    camPath.pop();
 
-	public void setSignature(int sig) {
-		viewer.setSignature(sig);
-	}
+    headComponent = camPath.getLastComponent();
+    
+    camPath.pop(); // now this should be the portal path
+    portalPath = (SceneGraphPath) camPath.clone();
+    
+    // add camera position and orientation, add camera there
+    camPath.getLastComponent().addChild(cameraTranslationNode);
+    cameraOrientationNode.setCamera(cam);
+    
+    // build the right camera path
+    camPath.push(cameraTranslationNode);
+    camPath.push(cameraOrientationNode);
+    camPath.push(cam);
+    
+    // set camera path to viewer
+    viewer.setCameraPath(camPath);
+  }
+
+  double[] tmpHead = new double[16];
+  public void render() {
+    if (!hasSceneRoot || !hasCamPath) return;
+    setHeadMatrix(headComponent.getTransformation().getMatrix(tmpHead));
+    viewer.render();
+  }
+
+  public void setSignature(int sig) {
+    viewer.setSignature(sig);
+  }
 
   public void resetCalled() {
     System.out.println("disposing prev viewer instance");
@@ -209,27 +232,34 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
     frame.hide();
   }
 
-    double[] tmp = new double[16];
-    double[] tmp2 = new double[16];
-    double[] totalOrientation = new double[16];
-    
-    private void setHeadMatrix(double[] tm) {
-        FactoredMatrix t = new FactoredMatrix(tm);
-        FactoredMatrix trans = new FactoredMatrix();
-        trans.setTranslation(t.getTranslation());
-        //TODO move sensor between the eyes
-        Camera cam = CameraUtility.getCamera(viewer);
-        cameraTranslationNode.getTransformation().setMatrix(trans.getArray());
-        Rn.times(tmp, trans.getArray(), correction);
-        Rn.times(totalOrientation, Rn.inverse(null,
-                cameraOrientationNode.getTransformation().getMatrix()), tmp);
-        cam.setOrientationMatrix(totalOrientation);
-        FactoredMatrix fm = new FactoredMatrix(portalPath.getMatrix(tmp2));
-        CameraUtility.setPORTALViewport(viewer, fm.getTranslation());
-    }
+  double[] tmp = new double[16];
 
-    public void setRemoteAuxiliaryRoot(RemoteSceneGraphComponent r) {
-      viewer.setAuxiliaryRoot((SceneGraphComponent) r);
-    }
+  double[] tmp2 = new double[16];
+
+  double[] totalOrientation = new double[16];
+
+  private void setHeadMatrix(double[] tm) {
+    FactoredMatrix t = new FactoredMatrix(tm);
+    FactoredMatrix trans = new FactoredMatrix();
+    trans.setTranslation(t.getTranslation());
+
+    //TODO move sensor between the eyes
+    trans.assignTo(cameraTranslationNode.getTransformation());
+    
+    // TODO: fix orientation
+    Rn.times(tmp, trans.getArray(), correction);
+    Rn.times(totalOrientation, Rn.inverse(null, cameraOrientationNode
+        .getTransformation().getMatrix()), tmp);
+    cam.setOrientationMatrix(totalOrientation);
+    
+    
+    FactoredMatrix fm = new FactoredMatrix(portalPath.getMatrix(tmp2));
+    double[] world2cam = viewer.getCameraPath().getInverseMatrix(null);
+    CameraUtility.setPORTALViewport(world2cam, fm.getTranslation(), cam);
+  }
+
+  public void setRemoteAuxiliaryRoot(RemoteSceneGraphComponent r) {
+    viewer.setAuxiliaryRoot((SceneGraphComponent) r);
+  }
 
 }
