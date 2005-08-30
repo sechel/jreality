@@ -61,6 +61,7 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
   
   Camera cam;
 
+  // TODO: what is this for??
   static double[] correction;
   static {
     double[] axis = ConfigurationAttributes.getDefaultConfiguration()
@@ -104,11 +105,13 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
 
     cameraOrientationNode = new SceneGraphComponent();
     cameraOrientationNode.setTransformation(new Transformation());
+    // set camera orientation to value from config file...
     double[] rot = config.getDoubleArray("camera.orientation");
     Matrix m = new Matrix(cameraOrientationNode.getTransformation().getMatrix());
     MatrixBuilder.euclidian(m).rotate(rot[0] * ((Math.PI * 2.0) / 360.),
         new double[] { rot[1], rot[2], rot[3] });
     cameraOrientationNode.getTransformation().setMatrix(m.getArray());
+    
     cameraTranslationNode.addChild(cameraOrientationNode);
   }
 
@@ -233,29 +236,32 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
   }
 
   double[] tmp = new double[16];
-
   double[] tmp2 = new double[16];
 
-  double[] totalOrientation = new double[16];
-
-  private void setHeadMatrix(double[] tm) {
-    FactoredMatrix t = new FactoredMatrix(tm);
-    FactoredMatrix trans = new FactoredMatrix();
-    trans.setTranslation(t.getTranslation());
+  private void setHeadMatrix(double[] head) {
+    FactoredMatrix headMatrix = new FactoredMatrix(head);
+    FactoredMatrix headTranslation = new FactoredMatrix();
+    headTranslation.setTranslation(headMatrix.getTranslation());
 
     //TODO move sensor between the eyes
-    trans.assignTo(cameraTranslationNode.getTransformation());
+    headTranslation.assignTo(cameraTranslationNode.getTransformation());
     
     // TODO: fix orientation
-    Rn.times(tmp, trans.getArray(), correction);
-    Rn.times(totalOrientation, Rn.inverse(null, cameraOrientationNode
-        .getTransformation().getMatrix()), tmp);
-    cam.setOrientationMatrix(totalOrientation);
+    headTranslation.multiplyOnRight(correction);
+    //tmp = headTranslation.getArray();
     
+    Matrix totalOrientation2 = new Matrix(cameraOrientationNode.getTransformation());
+    totalOrientation2.invert();
+    totalOrientation2.multiplyOnRight(headTranslation);
+   
+    //Rn.times(totalOrientation, Rn.inverse(null, cameraOrientationNode
+    //    .getTransformation().getMatrix()), tmp);
     
-    FactoredMatrix fm = new FactoredMatrix(portalPath.getMatrix(tmp2));
-    double[] world2cam = viewer.getCameraPath().getInverseMatrix(null);
-    CameraUtility.setPORTALViewport(world2cam, fm.getTranslation(), cam);
+    cam.setOrientationMatrix(totalOrientation2.getArray());
+    
+    FactoredMatrix portalMatrix = new FactoredMatrix(portalPath.getMatrix(tmp2));
+    Matrix world2cam = new Matrix(viewer.getCameraPath().getInverseMatrix(null));
+    CameraUtility.setPORTALViewport(world2cam, portalMatrix, cam);
   }
 
   public void setRemoteAuxiliaryRoot(RemoteSceneGraphComponent r) {
