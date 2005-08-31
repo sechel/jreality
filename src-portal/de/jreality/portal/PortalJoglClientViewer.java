@@ -62,15 +62,13 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
   
   Camera cam;
 
-  // TODO: what is this for??
-  static double[] correction;
+  // this field moves the sensor from the middle
+  // of the glasses to its real position - rotate and translate to the left... 
+  static double[] sensorCorrection;
   static {
-    double[] axis = ConfigurationAttributes.getDefaultConfiguration()
-        .getDoubleArray("camera.correction.axis");
-    double angle = ConfigurationAttributes.getDefaultConfiguration().getDouble(
-        "camera.correction.angle");
-    angle *= (Math.PI * 2.) / 360.;
-    correction = P3.makeRotationMatrix(null, axis, angle);
+    double angle = -Math.PI/2;
+    //sensorOrientationCorrection = P3.makeRotationMatrix(null, axis, angle);
+    sensorCorrection = MatrixBuilder.euclidean().rotateX(angle).translate(-0.08, 0, 0).getMatrix().getArray();
   }
 
   ConfigurationAttributes config;
@@ -235,49 +233,29 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
     frame.hide();
   }
 
-//  public void setHeadMatrix(double[] tm) {
-//    t.setMatrix(tm);
-//    //TODO move sensor between the eyes
-//    Camera cam = CameraUtility.getCamera(viewer);
-//    cameraTranslationNode.getTransformation().setTranslation(
-//            t.getTranslation());
-//    Rn.times(tmp, t.getMatrix(), correction);
-//    Rn.times(totalOrientation, Rn.inverse(null,
-//            cameraOrientationNode.getTransformation().getMatrix()), tmp);
-//    cam.setOrientationMatrix(totalOrientation);
-//    cam.setViewPort(CameraUtility.calculatePORTALViewport(viewer, t));
-//}
-
-  
-  double[] tmp = new double[16];
+  double[] tmp1 = new double[16];
   double[] tmp2 = new double[16];
+  FactoredMatrix headMatrix = new FactoredMatrix();
+  FactoredMatrix headTranslation = new FactoredMatrix();
+  FactoredMatrix portalMatrix = new FactoredMatrix();
+  Matrix totalOrientation = new Matrix();
+  Matrix world2cam = new Matrix();
+  
   private void setHeadMatrix(double[] head) {
-    FactoredMatrix headMatrix = new FactoredMatrix(head);
-    FactoredMatrix headTranslation = new FactoredMatrix();
+    headMatrix.assignFrom(head);
     headTranslation.setTranslation(headMatrix.getTranslation());
 
-    //TODO move sensor between the eyes
-    headTranslation.assignTo(cameraTranslationNode.getTransformation());
+    headTranslation.assignTo(cameraTranslationNode);
     
-    // TODO: fix orientation
-    headTranslation.multiplyOnRight(correction);
-    //tmp = headTranslation.getArray();
-    
-//  Rn.times(tmp, t.getMatrix(), correction);
-    headMatrix.multiplyOnRight(correction); // tmp = headMatrix
-//  Rn.times(totalOrientation, Rn.inverse(null,
-//  cameraOrientationNode.getTransformation().getMatrix()), tmp);
-    Matrix totalOrientation = new Matrix(cameraOrientationNode.getTransformation());
+    headTranslation.multiplyOnRight(sensorCorrection);
+    headMatrix.multiplyOnRight(sensorCorrection); // tmp = headMatrix
+    totalOrientation.assignFrom(cameraOrientationNode.getTransformation());
     totalOrientation.invert();
     totalOrientation.multiplyOnRight(headMatrix);
-   
-    //Rn.times(totalOrientation, Rn.inverse(null, cameraOrientationNode
-    //    .getTransformation().getMatrix()), tmp);
-    
     cam.setOrientationMatrix(totalOrientation.getArray());
     
-    FactoredMatrix portalMatrix = new FactoredMatrix(portalPath.getMatrix(tmp2));
-    Matrix world2cam = new Matrix(viewer.getCameraPath().getInverseMatrix(null));
+    portalMatrix.assignFrom(portalPath.getMatrix(tmp1));
+    world2cam.assignFrom(viewer.getCameraPath().getInverseMatrix(tmp2));
     CameraUtility.setPORTALViewport(world2cam, portalMatrix, cam);
   }
 
