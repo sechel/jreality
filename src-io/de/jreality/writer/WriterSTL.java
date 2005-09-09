@@ -2,9 +2,14 @@ package de.jreality.writer;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.List;
+import java.util.Vector;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.IntArray;
@@ -19,7 +24,7 @@ public class WriterSTL {
 	final static String t2 = t1+t1;
 	
 	public static void write( IndexedFaceSet ifs, OutputStream out ) {
-		writeSolid( ifs, new PrintWriter( System.out ));
+		writeSolid( ifs, new PrintWriter( out ));
 	}
 	
 	static void write( PrintWriter out, double [] array, String seperator ) {
@@ -68,6 +73,41 @@ public class WriterSTL {
 		out.flush();
 	}
 	
+	public static void write( SceneGraphComponent sgc, OutputStream out ) {
+		write( sgc, new PrintWriter( out ));
+	}
+	
+	public static void write( SceneGraphComponent sgc, PrintWriter out ) {
+		
+		List ifsList = new Vector(0);
+		
+		SceneGraphComponent flat = GeometryUtility.flatten(sgc);
+		
+		write( flat.getGeometry(), out, ifsList );
+		
+		final int noc = flat.getChildComponentCount();
+			
+		for( int i=0; i<noc; i++ ) {
+			SceneGraphComponent child=flat.getChildComponent(i);
+			write( child.getGeometry(), out, ifsList );
+		}
+		
+		IndexedFaceSet [] ifs = new IndexedFaceSet[ifsList.size()];
+		
+		for( int i=0; i<ifs.length; i++ ) {
+			ifs[i] = (IndexedFaceSet)ifsList.get(i);
+		}
+		
+		writeSolid( IndexedFaceSetUtility.mergeIndexedFaceSets(ifs), out);
+	}
+	
+	private static void write(Geometry geometry, PrintWriter out, List ifsList) {
+		if( !(geometry instanceof IndexedFaceSet) )
+			return;
+		
+		ifsList.add( geometry );
+	}
+
 	static public void main( String [] arg ) {
 		writeSolid( new IndexedFaceSet(), System.out );
 	}
