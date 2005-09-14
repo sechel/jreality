@@ -8,6 +8,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -23,6 +24,7 @@ import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.PickSystem;
+import de.jreality.scene.tool.config.ToolSystemConfiguration;
 import de.jreality.soft.DefaultViewer;
 
 /**
@@ -134,9 +136,16 @@ public class PickTestScene {
 		
 		picksys.setSceneRoot(root);
 	
-    ToolSystem ts = new ToolSystem(viewer);
+    ToolSystem ts=null;
+    try {
+      ts = new ToolSystem(viewer, ToolSystemConfiguration.loadDefaultDesktopConfiguration());
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      System.exit(0);
+    }
     ts.setPickSystem(picksys);
-        
+
 		frame.setVisible(true);
 		frame.getContentPane().add(viewer.getViewingComponent());
 		frame.setSize(800, 600);
