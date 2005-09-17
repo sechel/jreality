@@ -137,6 +137,12 @@
       <compilerarg line="-source 1.4" />
       <classpath refid="jogl.classpath"/>
     </javac>
+    <copy todir="build/jogl"> <!-- copy shader progs -->
+      <fileset dir="src-jogl">
+        <exclude name="**/*.java"/>
+        <exclude name="**/*.gif"/>
+      </fileset>
+    </copy>
     <jar jarfile="${dist}/jReality-jogl.jar" basedir="${build}/jogl" />
   </target>
 

@@ -4,8 +4,10 @@
  */
 package de.jreality.jogl.shader;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
@@ -15,6 +17,7 @@ import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.Geometry;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 
 /**
@@ -127,9 +130,16 @@ public abstract class AbstractJOGLShader implements PolygonShader {
 		String filename;
 		if (fn.charAt(0) == '/') filename = fn;
 		else filename = resourceDir + fn;
-		FileReader fr = new FileReader(filename);
-		StringBuffer sb = new StringBuffer(1024);
-		char[] array = new char[100];
+    File f = new File(filename);
+    Reader fr;
+    if (f.exists()) {
+      fr = new FileReader(filename);
+    } else { // try to read from de.jreality.jogl.shader.resources
+      Input in = Input.getInput("de/jreality/jogl/shader/resources/"+fn);
+      fr = in.getReader();
+    }
+    StringBuffer sb = new StringBuffer(1024);
+    char[] array = new char[1024];
 		int length = fr.read(array);
 		while(length != -1)	{
 			sb.append(array,0,length);
