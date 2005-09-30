@@ -377,6 +377,10 @@ public class SelectionManager implements TransformationListener {
 			}
 		}
 	}
+	
+	public void clearSelections()	{
+		selectionList.clear();
+	}
 		
 	public void cycleSelectionPaths()	{
 		int target = 0;

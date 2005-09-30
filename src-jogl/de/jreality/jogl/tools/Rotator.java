@@ -6,6 +6,7 @@ package de.jreality.jogl.tools;
 
 import de.jreality.jogl.InteractiveViewer;
 import de.jreality.scene.Viewer;
+import de.jreality.util.LoggingSystem;
 import de.jreality.math.Quaternion;
 import de.jreality.math.Rn;
 
@@ -81,6 +82,7 @@ public class Rotator extends Projector {
 		Rn.copy(current, ndcLoc);
 		double[] diff = Rn.subtract(null, current, anchor);
 		double theAngle = scaleFactor * Rn.euclideanNorm(diff);
+		//LoggingSystem.getLogger(this).info("Angle of rotation is "+theAngle*180.0/Math.PI);
 		// very important this is a 4-vector!
 		double[] theAxis = Rn.setToValue(null, 0d, 0d, diff[1],0d);
 		Rn.matrixTimesVector(theAxis, camToObject, theAxis);
