@@ -29,8 +29,6 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.*;
 /**
- * TODO implement  isVisible   bit in SceneGraphNode
- * TODO implement collectAncestorVisitor (see method geometryChanged() at end of file )
  * @author gunn
  *
  */
@@ -1243,13 +1241,14 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			
 			//theLog.log(Level.FINE,"In JOGLPeerComponent render() for "+goBetween.getOriginalComponent().getName());
 			if (thisT != null)	{
+				globalGL.glPushMatrix();
 				if (stackDepth <= MAX_STACK_DEPTH) {
-					globalGL.glPushMatrix();
 					globalGL.glMultTransposeMatrixd(thisT.getMatrix());
 					stackDepth++;
 				}
-				else 
+				else {
 					globalGL.glLoadTransposeMatrixd(context.getObjectToCamera());	
+				}
 				currentSignature = thisT.getSignature();
 			}  
 			// should depend on camera transformation ...
@@ -1281,8 +1280,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			}
 			
 			if (thisT != null)	{
+				globalGL.glPopMatrix();			
 				if (stackDepth <= MAX_STACK_DEPTH) {
-					globalGL.glPopMatrix();
 					stackDepth--;
 				}
 			}			
