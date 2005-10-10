@@ -154,7 +154,7 @@ public class InteractiveViewer extends de.jreality.jogl.Viewer implements  Selec
 	}
 	
 	public void removeBackPlane()	{
-		sceneRoot.getAppearance().setAttribute("backgroundColors", Appearance.INHERITED);
+		if (sceneRoot.getAppearance() != null) sceneRoot.getAppearance().setAttribute("backgroundColors", Appearance.INHERITED);
 		hasBackPlane = false;
 	}
 
