@@ -293,7 +293,7 @@ public class JOGLPickAction extends PickAction  {
 		int[][] indices = sg.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
 		DataList verts = sg.getVertexAttributes(Attribute.COORDINATES);
 		int faceNum = geomID[0];
-		if (faceNum >= indices.length)	{
+		if (faceNum >= indices.length || faceNum < 0)	{
 			JOGLConfiguration.theLog.log(Level.WARNING,"Invalid face number in calculatePickPointFor()");
 			return null;
 		}

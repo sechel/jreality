@@ -15,7 +15,7 @@ import de.jreality.math.Rn;
  */
 public class ScaleShapeTool extends AbstractShapeTool {
 	double	theScale;
-
+    double fudge = 0.02;
 	/**
 	 * 
 	 */
@@ -29,7 +29,7 @@ public class ScaleShapeTool extends AbstractShapeTool {
 	public boolean track(MouseEvent e) {
 		if (!isTracking || !super.track(e)) return false;
 		
-		theScale = 1.0 + diff[1];
+		theScale = 1.0 + fudge*diff[1];
 		myTransform.setStretch(theScale);
 		double[] composite;
 		// TODO figure out how to do scales in non-euc space, which aren't around the origin

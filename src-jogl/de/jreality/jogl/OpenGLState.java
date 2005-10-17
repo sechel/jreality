@@ -59,6 +59,8 @@ public class OpenGLState {
 		 */
 		// ultimately all this should happen in various visit() methods
 		public  static void initializeGLState(JOGLRenderer jr)	{
+			// TODO clean this up, provide an interface to set "OpenGL Preferences ..."
+			// and make sure everything is here.
 			GLDrawable theCanvas = jr.getCanvas();
 			GL gl = theCanvas.getGL();
 			OpenGLState openGLState = jr.openGLState;

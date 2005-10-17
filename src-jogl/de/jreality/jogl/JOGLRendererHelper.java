@@ -520,17 +520,18 @@ public class JOGLRendererHelper {
 		
 		Graphics3D gc = jr.getContext();
 		
-		double[] objectToScreen = Rn.times(null, correctionNDC, gc.getObjectToScreen(jr.theViewer.getDrawable()));
+		double[] objectToScreen = Rn.times(null, correctionNDC, gc.getObjectToScreen(jr.theViewer.getViewingComponent()));
+//		System.out.println("object to Screen is \n"+Rn.matrixToString(objectToScreen));
 		Rn.matrixTimesVector(screenVerts, objectToScreen, objectVerts);
 		// It's important that the last coordinate is 0 when we transform to get screen coordinates:
 		// don't want to pick up any translation
 		double[] screenOffset = new double[4];
 		System.arraycopy(lb.getNDCOffset(), 0, screenOffset,0,3);
-		Rn.matrixTimesVector(screenOffset, Graphics3D.getNDCToScreen(jr.theViewer.getDrawable()), screenOffset);
+		Rn.matrixTimesVector(screenOffset, Graphics3D.getNDCToScreen(jr.theViewer.getViewingComponent()), screenOffset);
+		//System.out.println("Screen offset is "+Rn.toString(screenOffset));
 		Rn.matrixTimesVector(screenVerts, objectToScreen, objectVerts);
 		if (screenVerts[0].length == 4) Pn.dehomogenize(screenVerts, screenVerts);
 		int np = objectVerts.length;
-		//for (int i = 0; i<np; ++i)	{ screenVerts[i][2] = (screenVerts[i][2] + 1)/2.0; }
 
 		// Store enabled state and disable lighting, texture mapping and the depth buffer
 		gl.glPushAttrib(GL.GL_ENABLE_BIT);
@@ -539,14 +540,13 @@ public class JOGLRendererHelper {
 		gl.glDisable(GL.GL_TEXTURE_2D);
 		for (int i = 0; i< 6; ++i) gl.glDisable(i + GL.GL_CLIP_PLANE0);
 
-		//gl.glColor3f(1, 1, 1);
-		float[] cras = new float[4];
-		double[] dras = new double[4];
+//		float[] cras = new float[4];
+//		double[] dras = new double[4];
 		for (int i = 0; i<np; ++i)	{
-			gl.glRasterPos3d(objectVerts[i][0], objectVerts[i][1], objectVerts[i][2]);
-			gl.glGetFloatv(GL.GL_CURRENT_RASTER_POSITION, cras);
-			for (int j = 0; j<4; ++j) dras[j] = cras[j];
-      // TODO This is not available on ATI graphics card!      
+//			gl.glRasterPos3d(objectVerts[i][0], objectVerts[i][1], objectVerts[i][2]);
+//			gl.glGetFloatv(GL.GL_CURRENT_RASTER_POSITION, cras);
+//			for (int j = 0; j<4; ++j) dras[j] = cras[j];
+			// TODO This is not available on ATI graphics card!      
 			gl.glWindowPos3d(screenVerts[i][0]+screenOffset[0], screenVerts[i][1] +screenOffset[1], screenVerts[i][2]+screenOffset[2]);
 			String label = (labels == null) ? Integer.toString(i) : labels[i];
 			//bitmapFont = 2 + (i%6);
@@ -557,40 +557,36 @@ public class JOGLRendererHelper {
 	}
 
 	double mat[] = new double[16];
-	double[] mat2 = Rn.identityMatrix(4);
-	public void processLights(GL globalGL, List lights) {
-		int lightCount =  GL.GL_LIGHT0;
-		
-		// collect and process the lights
-		// with a peer structure we don't do this but once, and then
-		// use event listening to keep our list up-to-date
-		// DEBUG: see what happens if we always reuse the light list
-		int n = lights.size();
-		double[] zDirectiond = {0d,0d,1d,10E-16};		// try to work around a suspected openGL bug on some nvidia cards
-		double[] origind = {0d,0d,0d,1d};
-		globalGL.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE);
-		for (int i = 0; i<8; ++i)	{
+	int lightCount =  GL.GL_LIGHT0;
+	GL lightGL = null;
+	static int maxLights = 8;
+	OpenGLLightVisitor ogllv = new OpenGLLightVisitor();
+	public void resetLights(GL globalGL, List lights)	{
+		for (int i = 0; i<maxLights; ++i)	{
+			globalGL.glLightf(GL.GL_LIGHT0+i, GL.GL_SPOT_CUTOFF, 180f);
+			globalGL.glLightf(GL.GL_LIGHT0+i, GL.GL_SPOT_EXPONENT, (float) 0);
+			globalGL.glLightf(GL.GL_LIGHT0+i, GL.GL_CONSTANT_ATTENUATION, 1.0f);
+			globalGL.glLightf(GL.GL_LIGHT0+i, GL.GL_LINEAR_ATTENUATION, 0.0f);
+			globalGL.glLightf(GL.GL_LIGHT0+i, GL.GL_QUADRATIC_ATTENUATION, 0.0f);
 			globalGL.glDisable(GL.GL_LIGHT0+i);
 		}
+		for (int i = 0; i<lights.size(); ++i)	
+			globalGL.glEnable(GL.GL_LIGHT0+i);
+	}
+	
+	public void processLights(GL globalGL, List lights) {
+		lightCount = GL.GL_LIGHT0;
+		lightGL = globalGL;
+		int n = lights.size();
 		for (int i = 0; i<n; ++i)	{
 			SceneGraphPath lp = (SceneGraphPath) lights.get(i);
-			//JOGLConfiguration.theLog.log(Level.INFO,"Light"+i+": "+lp.toString());
 			lp.getMatrix(mat);
-			double[] dir, trans;
-			dir = Rn.matrixTimesVector(null, mat, zDirectiond);
-			trans = Rn.matrixTimesVector(null, mat,origind);
-			Pn.dehomogenize(dir, dir);
-			Pn.dehomogenize(trans, trans);
-			for (int j=0; j<3; ++j) mat2[4*j+2] = dir[j];
-			for (int j=0; j<3; ++j) mat2[4*j+3] = trans[j];
-			//JOGLConfiguration.theLog.log(Level.INFO,"Light matrix is: "+Rn.matrixToString(mat));
+//			JOGLConfiguration.theLog.log(Level.INFO,"Light matrix "+i+" is:\n"+Rn.matrixToString(mat));
+//			JOGLConfiguration.theLog.log(Level.INFO,"Light"+i+": "+lp.toString());
 			globalGL.glPushMatrix();
-			globalGL.glMultTransposeMatrixd(mat2);
+			globalGL.glMultTransposeMatrixd(mat);
 			SceneGraphNode light = lp.getLastElement();
-			if (light instanceof SpotLight)		wisit((SpotLight) light, globalGL, lightCount);
-			else if (light instanceof PointLight)		wisit((PointLight) light, globalGL, lightCount);
-			else if (light instanceof DirectionalLight)		wisit((DirectionalLight) light,globalGL, lightCount);
-			else JOGLConfiguration.theLog.log(Level.WARNING,"Invalid light class "+light.getClass().toString());
+			light.accept(ogllv);
 			globalGL.glPopMatrix();
 			lightCount++;
 			if (lightCount > GL.GL_LIGHT7)	{
@@ -600,12 +596,27 @@ public class JOGLRendererHelper {
 		}
 	}
 	
-	private static float[] zDirection = {0,0,1,0};
-	private static float[] mzDirection = {0,0,1,0};
+	private class OpenGLLightVisitor extends SceneGraphVisitor {
+		public void visit(Light l) {
+			wisit(l, lightGL, lightCount);
+		}
+
+		public void visit(DirectionalLight l) {
+			wisit(l, lightGL, lightCount);
+		}
+
+		public void visit(PointLight l) {
+			wisit(l, lightGL, lightCount);
+		}
+
+		public void visit(SpotLight l) {
+			wisit(l, lightGL, lightCount);
+		}
+		
+	}
+	private static float[] zDirection = {0,0,1,(float)10E-10};
 	private static float[] origin = {0,0,0,1};
 	public static void wisit(Light dl, GL globalGL, int lightCount)	{
-		  //JOGLConfiguration.theLog.log(Level.FINE,"Visiting directional light");
-		  //gl.glLightfv(lightCount, GL.GL_AMBIENT, lightAmbient);
 		  globalGL.glLightfv(lightCount, GL.GL_DIFFUSE, dl.getScaledColorAsFloat());
 		  float f = (float) dl.getIntensity();
 		  float[] specC = {f,f,f};
@@ -616,25 +627,15 @@ public class JOGLRendererHelper {
 	public static void wisit(DirectionalLight dl, GL globalGL, int lightCount)		{
 		  wisit( (Light) dl, globalGL, lightCount);
 		  globalGL.glLightfv(lightCount, GL.GL_POSITION, zDirection);
-		  globalGL.glEnable(lightCount);
-		  lightCount++;
 	}
 	
 	public static  void wisit(PointLight dl, GL globalGL, int lightCount)		{
-		  if (lightCount >= GL.GL_LIGHT7)	{
-		  	JOGLConfiguration.theLog.log(Level.WARNING,"Max. # lights exceeded");
-		  	return;
-		  }
 		  //gl.glLightfv(lightCount, GL.GL_AMBIENT, lightAmbient);
 		  wisit((Light) dl, globalGL, lightCount);
 		  globalGL.glLightfv(lightCount, GL.GL_POSITION, origin);
 		  globalGL.glLightf(lightCount, GL.GL_CONSTANT_ATTENUATION, (float) dl.getFalloffA0());
 		  globalGL.glLightf(lightCount, GL.GL_LINEAR_ATTENUATION, (float) dl.getFalloffA1());
 		  globalGL.glLightf(lightCount, GL.GL_QUADRATIC_ATTENUATION, (float) dl.getFalloffA2());
-		  if (!(dl instanceof SpotLight)) 	{
-			  	globalGL.glEnable(lightCount);
-		  		lightCount++;
-		  }
 	}
 	
 	public static void wisit(SpotLight dl, GL globalGL, int lightCount)		{
@@ -642,13 +643,10 @@ public class JOGLRendererHelper {
 		  	JOGLConfiguration.theLog.log(Level.WARNING,"Max. # lights exceeded");
 		  	return;
 		  }
-		  PointLight pl = dl;
-		  wisit(pl, globalGL, lightCount);
+		  wisit((PointLight) dl, globalGL, lightCount);
 		  globalGL.glLightf(lightCount, GL.GL_SPOT_CUTOFF, (float) ((180.0/Math.PI) * dl.getConeAngle()));
-		  globalGL.glLightfv(lightCount, GL.GL_SPOT_DIRECTION, mzDirection);
+		  globalGL.glLightfv(lightCount, GL.GL_SPOT_DIRECTION, zDirection);
 		  globalGL.glLightf(lightCount, GL.GL_SPOT_EXPONENT, (float) dl.getDistribution());
-		  globalGL.glEnable(lightCount);
-		  lightCount++;
 	}
 	
 	static double[] clipPlane = {0d, 0d, -1d, 0d};

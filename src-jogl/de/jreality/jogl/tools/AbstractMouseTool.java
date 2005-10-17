@@ -137,6 +137,7 @@ public class AbstractMouseTool implements MouseTool {
 		currentTime = e.getWhen();
 		Rn.copy(last, current);
 		current = convertScreenToNDC(e.getX(), e.getY(), theCanvas.getWidth(), theCanvas.getHeight());
+		//System.out.println("Screen "+e.getX()+" "+e.getY()+"NDC: "+Rn.toString(current));
 		Rn.subtract(diff, current, anchor);
 		strength = Rn.euclideanNorm(diff);
 		theViewer.render();

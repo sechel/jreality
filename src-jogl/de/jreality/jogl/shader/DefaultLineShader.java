@@ -142,7 +142,7 @@ public class DefaultLineShader implements LineShader  {
 	public void render(JOGLRenderer jr)	{
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
-		gl.glDisable(GL.GL_TEXTURE_2D);
+		//gl.glDisable(GL.GL_TEXTURE_2D);
 		gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, diffuseColorAsFloat);
 		// TODO figure out why I have to use this call too, even though
 		// GL_COLOR_MATERIAL is disabled.
@@ -180,6 +180,10 @@ public class DefaultLineShader implements LineShader  {
 		gl.glDisable(GL.GL_BLEND);
 
 		if (!tubeDraw) gl.glDepthRange(0.0d, depthFudgeFactor);
+	}
+
+	public void postRender(JOGLRenderer jr) {
+		if (!tubeDraw) jr.getCanvas().getGL().glDepthRange(0.0d, 1d);
 	}
 
 	public boolean providesProxyGeometry() {		
@@ -323,14 +327,6 @@ public class DefaultLineShader implements LineShader  {
 		
 		if (useDisplayLists) gl.glEndList();
 		return nextDL;
-	}
-	
-	public void postRender(JOGLRenderer jr) {
-		if (!tubeDraw) jr.getCanvas().getGL().glDepthRange(0.0d, 1d);
-	}
-
-	public boolean isSmoothShading() {
-		return interpolateVertexColors;
 	}
 
 }

@@ -11,6 +11,6 @@ import java.awt.Color;
  *
  */
 public interface PointShader extends PrimitiveShader {
-	public double getPointRadius();
+	//public double getPointRadius();
 	public Color getDiffuseColor();
 }

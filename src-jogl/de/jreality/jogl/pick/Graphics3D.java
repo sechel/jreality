@@ -4,6 +4,8 @@
  */
 package de.jreality.jogl.pick;
 
+import java.awt.Component;
+
 import de.jreality.math.Rn;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Drawable;
@@ -197,7 +199,7 @@ public class Graphics3D {
 	/**
 	 * @param ds
 	 */
-	public double[] getObjectToScreen(Drawable dr) {
+	public double[] getObjectToScreen(Component dr) {
 		return Rn.times(null, getNDCToScreen(dr), getObjectToNDC());
 	}
 
@@ -205,12 +207,14 @@ public class Graphics3D {
 	/**
 	 * @return
 	 */
-	public static double[] getNDCToScreen(Drawable dr) {
+	public static double[] getNDCToScreen(Component dr) {
 		double[] NDCToScreen = Rn.identityMatrix(4);
+//		System.out.println("Canvas is "+dr.getSize().toString());
+//		System.out.println("x,y,w,h is: "+dr.getX()+"."+dr.getY()+"."+dr.getWidth()+" "+dr.getHeight());
 		NDCToScreen[0] = .5 * dr.getWidth();
 		NDCToScreen[5] = .5 * dr.getHeight();
-		NDCToScreen[3] = .5 * dr.getWidth()+dr.getXMin();
-		NDCToScreen[7] = .5 * dr.getHeight()+dr.getYMin();	
+		NDCToScreen[3] = .5 * dr.getWidth();//+dr.getX();
+		NDCToScreen[7] = .5 * dr.getHeight();//+dr.getY();	
 		return NDCToScreen;
 	}
 

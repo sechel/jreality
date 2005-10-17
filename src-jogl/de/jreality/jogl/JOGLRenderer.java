@@ -164,7 +164,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		context  = new Graphics3D(theViewer.getCameraPath(), null, CameraUtility.getAspectRatio(theViewer));
 		theLog.finer(" top level display lists = "+thePeerRoot.useDisplayLists);
 		
-		OpenGLState.initializeGLState(this);
 		globalGL.glMatrixMode(GL.GL_PROJECTION);
 		globalGL.glLoadIdentity();
 
@@ -241,9 +240,10 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 	private void processLights( ) {
 		if (lights == null || lights.size() == 0 || lightListDirty) {
 			lights = SceneGraphUtility.collectLights(theRoot);
+			helper.resetLights(globalGL, lights);
+			lightListDirty = false;
 		}
 		helper.processLights(globalGL, lights);
-		lightListDirty = false;
 	}
 
 
@@ -322,6 +322,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 //		sphereDisplayLists = JOGLSphereHelper.getSphereDLists(this);
 //		cylinderDisplayLists = JOGLCylinderUtility.getCylinderDLists(this);
 		if (debugGL)	theLog.log(Level.INFO,"Got new sphere display lists for context "+globalGL);
+		OpenGLState.initializeGLState(this);
 		
 		//if (CameraUtility.getCamera(theViewer) == null || theCanvas == null) return;
 		//CameraUtility.getCamera(theViewer).setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
@@ -1239,7 +1240,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			context.setCurrentPath(currentPath);
 			Transformation thisT = goBetween.getOriginalComponent().getTransformation();
 			
-			//theLog.log(Level.FINE,"In JOGLPeerComponent render() for "+goBetween.getOriginalComponent().getName());
+			theLog.log(Level.FINE,"In JOGLPeerComponent render() for "+goBetween.getOriginalComponent().getName());
 			if (thisT != null)	{
 				globalGL.glPushMatrix();
 				if (stackDepth <= MAX_STACK_DEPTH) {
@@ -1358,6 +1359,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 					//theLog.log(Level.FINE,"After adding child count is "+children.size());
 					}
 					setIndexOfChildren();
+					lightListDirty = true;
 					break;
 				case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
 					int changed = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
@@ -1396,6 +1398,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 					//theLog.log(Level.FINE,"After removal child count is "+children.size());
 				    jpc.dispose();		// there are no other references to this child
 				    setIndexOfChildren();
+				    lightListDirty = true;
 					break;
 				case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
 					int changed = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;

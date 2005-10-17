@@ -90,7 +90,10 @@ public abstract class AbstractJOGLShader implements PolygonShader {
 		GL gl = theCanvas.getGL();
 		if (program == -1)	{
 			setupShader(theCanvas);
-			if (program == -1) return;
+			if (program == -1) {
+				JOGLConfiguration.theLog.log(Level.WARNING,"Can't  setup OpenGL shader "+vertexSource);
+				return;
+			}
 		}
 		gl.glUseProgramObjectARB(program);
 		JOGLConfiguration.theLog.log(Level.FINE,"Setting GLSL program to "+program);
