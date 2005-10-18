@@ -29,7 +29,7 @@ public class ScaleShapeTool extends AbstractShapeTool {
 	public boolean track(MouseEvent e) {
 		if (!isTracking || !super.track(e)) return false;
 		
-		theScale = 1.0 + fudge*diff[1];
+		theScale = Math.exp(.2*diff[1]); //)1.0 + fudge*diff[1];
 		myTransform.setStretch(theScale);
 		double[] composite;
 		// TODO figure out how to do scales in non-euc space, which aren't around the origin
