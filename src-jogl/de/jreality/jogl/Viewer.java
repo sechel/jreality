@@ -22,7 +22,7 @@ import de.jreality.util.SceneGraphUtility;
  *
  */
 public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnable {
-	SceneGraphComponent sceneRoot;
+	protected SceneGraphComponent sceneRoot;
 	SceneGraphComponent auxiliaryRoot;
 	SceneGraphPath cameraPath;
 	SceneGraphComponent cameraNode;

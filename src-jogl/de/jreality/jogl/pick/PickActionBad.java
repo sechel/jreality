@@ -10,8 +10,9 @@ import java.util.Comparator;
 import java.util.Vector;
 import java.util.logging.Level;
 
+import charlesgunn.jreality.InteractiveViewer;
+
 import de.jreality.geometry.GeometryUtility;
-import de.jreality.jogl.InteractiveViewer;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.math.*;
 import de.jreality.scene.*;

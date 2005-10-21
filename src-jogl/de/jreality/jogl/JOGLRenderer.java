@@ -867,7 +867,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			// do I need this?Yes, the point and line shader can turn off lighting
 			renderingHints.render(globalHandle);
 			if (geometryShader.isFaceDraw() && ifs != null)	{
-				geometryShader.polygonShader.render(globalHandle);
+//				if (geometryShader.polygonShaderNew != null) DefaultPolygonShader.renderNew(geometryShader.polygonShaderNew, globalHandle);
+//				else 
+					geometryShader.polygonShader.render(globalHandle);
 				double alpha = openGLState.diffuseColor[3];
 				boolean ss = openGLState.smoothShading;
 				int type = POLYGONDL;
