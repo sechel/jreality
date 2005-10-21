@@ -3,7 +3,10 @@ package de.jreality.jogl.shader;
 import java.awt.Dimension;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
-import java.util.*;
+import java.util.Collection;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 
 import net.java.games.jogl.GL;

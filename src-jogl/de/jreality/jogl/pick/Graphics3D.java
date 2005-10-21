@@ -77,31 +77,6 @@ public class Graphics3D {
 		theRoot = sceneRoot;
 	}
 
-//	public Graphics3D Graphics3DFactory( SceneGraphPath cp, SceneGraphPath sgp)	{
-//		if (sgp == null) {
-//			sgp = new SceneGraphPath();
-//		}
-//		Graphics3D gc = new Graphics3D( cp, sgp);
-//		return gc;
-//	}
-//	public Object clone() throws CloneNotSupportedException {
-//		try {
-//			Graphics3D copy = (Graphics3D) super.clone();
-//			if (objectToWorld !=null) copy.objectToWorld = (double[]) objectToWorld.clone();
-//			if (currentPath !=null) copy.currentPath = (SceneGraphPath) currentPath.clone();
-//			return copy;
-//		} catch (CloneNotSupportedException e) {
-//			e.printStackTrace();
-//		}
-//		return null;
-//	}
-//	public Graphics3D copy()	{
-//		Graphics3D copy = new Graphics3D(cameraPath, currentPath);
-//		copy.fastAndDirty = fastAndDirty;
-//		copy.objectToWorld = objectToWorld;  // already a copy, no danger using it
-//		return copy;
-//	}
-
 	public SceneGraphPath getCameraPath() {
 		return cameraPath;
 	}

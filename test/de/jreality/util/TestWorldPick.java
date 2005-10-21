@@ -7,8 +7,9 @@ package de.jreality.util;
 
 import java.util.Vector;
 
+import charlesgunn.jreality.InteractiveViewer;
+
 import de.jreality.geometry.Primitives;
-import de.jreality.jogl.InteractiveViewer;
 import de.jreality.math.P3;
 import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
