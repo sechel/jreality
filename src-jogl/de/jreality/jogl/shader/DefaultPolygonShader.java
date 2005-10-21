@@ -222,4 +222,9 @@ public class DefaultPolygonShader implements PolygonShader {
 		return -1;
 	}
 
+
+//	public static void renderNew(de.jreality.shader.DefaultPolygonShader polygonShaderNew, JOGLRenderer globalHandle) {
+//		
+//	}
+
 }

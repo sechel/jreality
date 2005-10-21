@@ -5,9 +5,12 @@
 package de.jreality.jogl.shader;
 
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.shader.Texture2D;
 
 /**
  * @author Charles Gunn
@@ -22,6 +25,7 @@ public class DefaultGeometryShader  implements Shader {
 		public PolygonShader polygonShader;
 		public LineShader lineShader;
 		public PointShader pointShader;
+//		public DefaultPolygonShader polygonShaderNew;
 		/**
 		 * 
 		 */
@@ -44,8 +48,11 @@ public class DefaultGeometryShader  implements Shader {
 		edgeDraw = eap.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT );
 		faceDraw = eap.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
 		if(faceDraw) {
-	        polygonShader =(PolygonShader) ShaderLookup.getShaderAttr(eap, geomShaderName, CommonAttributes.POLYGON_SHADER);
+//		    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"polygonShader"), eap))
+//		        polygonShaderNew = (DefaultPolygonShader) AttributeEntityUtility.createAttributeEntity(DefaultPolygonShader.class, ShaderUtility.nameSpace(name,"polygonShader"), eap);
+	        	polygonShader =(PolygonShader) ShaderLookup.getShaderAttr(eap, geomShaderName, CommonAttributes.POLYGON_SHADER);
 	    } else {
+//	    		polygonShaderNew = null;
 	    		polygonShader = null;
 	    }
 	    if(edgeDraw) {
