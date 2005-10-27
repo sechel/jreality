@@ -41,12 +41,12 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.SpotLight;
-import de.jreality.scene.Texture2D;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.Texture2D;
 
 /**
  * @author gunn
@@ -76,7 +76,7 @@ public class JOGLRendererHelper {
 				Texture2D tex = ((Texture2D) bgo);
 				//Texture2DLoaderJOGL tl = Texture2DLoaderJOGL.FactoryLoader;
 				//JOGLConfiguration.theLog.log(Level.INFO,"Texture: "+tex.getWidth()+" "+tex.getHeight());
-				textureAR = tex.getWidth()/((double) tex.getHeight());
+				textureAR = tex.getImage().getWidth()/((double) tex.getImage().getHeight());
 				Texture2DLoaderJOGL.render( theCanvas, tex);
 				gl.glEnable(GL.GL_TEXTURE_2D);
 				hasTexture = true;

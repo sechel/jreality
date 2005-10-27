@@ -149,7 +149,6 @@ public class DefaultLineShader implements LineShader  {
 	public void render(JOGLRenderer jr)	{
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
-		//gl.glDisable(GL.GL_TEXTURE_2D);
 		gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, diffuseColorAsFloat);
 		// TODO figure out why I have to use this call too, even though
 		// GL_COLOR_MATERIAL is disabled.
@@ -159,7 +158,6 @@ public class DefaultLineShader implements LineShader  {
 			gl.glColor4fv( diffuseColorAsFloat);
 			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
 		//}
-		//JOGLConfiguration.theLog.log(Level.FINE,"LineShader: Setting diffuse color to: "+Rn.toString(getDiffuseColorAsFloat()));
 	
 		gl.glLineWidth((float) getLineWidth());
 		if (isLineStipple()) {
@@ -226,7 +224,7 @@ public class DefaultLineShader implements LineShader  {
 		int n = ils.getNumEdges();
 		DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
 		if (ils.getNumPoints() <= 1) return -1;
-		JOGLConfiguration.theLog.log(Level.FINE,"Creating tubes for "+ils.getName());
+//		JOGLConfiguration.theLog.log(Level.FINE,"Creating tubes for "+ils.getName());
 		if (tubeDL == null)	{
 			tubeDL = new int[3];
 			for (int i = 0; i<3; ++i)	{
@@ -316,12 +314,7 @@ public class DefaultLineShader implements LineShader  {
 				}
 			}
 			else {
-				//double[][] curve = GeometryUtility.extractCurve(null, ils, i);
-				//JOGLConfiguration.theLog.log(Level.FINE,"curve is "+Rn.toString(curve));
-				//QuadMeshShape tube = TubeUtility.makeTubeAsIFS(curve, rad, null, tubeStyle, false, sig);
-				//QuadMeshShape tube = TubeUtility.makeTubeAsIFS(ils, i, smoothShading, rad, null, tubeStyle, false, sig, 0);
 				QuadMeshShape tube = TubeUtility.makeTubeAsIFS(ils, i, false, rad, null, tubeStyle, false, sig, 0);
-				//tube.setGeometryAttributes(PROXY_FOR_EDGE, new ProxyTubeIdentifier(ils, i));
 				if (tube != null)	{
 					GeometryUtility.calculateAndSetNormals(tube);
 					JOGLRendererHelper.drawFaces(tube, jr,  smoothShading, alpha);					

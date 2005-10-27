@@ -31,6 +31,7 @@ import de.jreality.geometry.LabelSet;
 import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultGeometryShader;
+import de.jreality.jogl.shader.DefaultVertexShader;
 import de.jreality.jogl.shader.RenderingHintsShader;
 import de.jreality.jogl.shader.TextShader;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
@@ -115,6 +116,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 	WeakHashMap geometries = new WeakHashMap();
 	boolean geometryRemoved = false, lightListDirty = true;
 	static double[] p3involution = P3.makeStretchMatrix(null, new double[]{-1d,-1d,-1d,1d});
+	DefaultVertexShader dvs = new DefaultVertexShader();
 	/**
 	 * @param viewer
 	 */
@@ -1085,16 +1087,20 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			Iterator iter = peers.iterator();
 			String key = ev.getKey();
 			int changed = 0;
+			boolean propagates = true;
 			// TODO shaders should register keywords somehow and which geometries might be changed
 			if (key.indexOf("implodeFactor") != -1 ) changed |= (FACES_CHANGED);
 			else if (key.indexOf("transparency") != -1) changed |= (FACES_CHANGED);
-			else if (key.indexOf("tubeRadius") != -1) changed |= (LINES_CHANGED);
+			else if (key.indexOf("tubeRadius") != -1) changed |= (
+					LINES_CHANGED);
 			else if (key.indexOf("pointRadius") != -1) changed |= (POINTS_CHANGED);
 			else if (key.indexOf("anyDisplayLists") != -1) changed |= (POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
-//			peerGeometry.geometryChanged(changed);
+			if (key.indexOf(CommonAttributes.BACKGROUND_COLOR) != -1	||
+				key.indexOf("fog") != -1) propagates = false;
+				
 			while (iter.hasNext())	{
 				JOGLPeerComponent peer = (JOGLPeerComponent) iter.next();
-				peer.appearanceChanged(ev);
+				if (propagates) peer.appearanceChanged(ev);
 				if (changed != 0) peer.propagateGeometryChanged(changed);
 			}
 			//theLog.log(Level.FINER,"setting display list dirty flag: "+changed);

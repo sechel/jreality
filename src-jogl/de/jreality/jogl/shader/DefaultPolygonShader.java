@@ -32,8 +32,7 @@ public class DefaultPolygonShader implements PolygonShader {
   de.jreality.scene.Texture2D lightMap;
   Texture2D texture2Dnew;
   Texture2D lightMapNew;
-  de.jreality.scene.ReflectionMap reflectionMap;
-  ReflectionMap reflectionMapNew;
+   ReflectionMap reflectionMapNew;
 	int frontBack = FRONT_AND_BACK;
 	public VertexShader vertexShader = null;
 	AbstractJOGLShader glShader = null;
@@ -62,8 +61,6 @@ public class DefaultPolygonShader implements PolygonShader {
 //		Object foo = eap.getAttribute(NameSpace.name(name,"texture2d"), null, Texture2D.class);
 		Object foo = eap.getAttribute(ShaderUtility.nameSpace(name,"texture2d"), null, de.jreality.scene.Texture2D.class);
 		if (foo instanceof de.jreality.scene.Texture2D)	texture2D = (de.jreality.scene.Texture2D) foo;
-    foo = eap.getAttribute(ShaderUtility.nameSpace(name,"reflectionMap"), null, de.jreality.scene.ReflectionMap.class);
-    if (foo instanceof de.jreality.scene.ReflectionMap)	reflectionMap = (de.jreality.scene.ReflectionMap) foo;
 	  foo = eap.getAttribute(ShaderUtility.nameSpace(name,"lightMap"), null, de.jreality.scene.Texture2D.class);
     if (foo instanceof de.jreality.scene.Texture2D) lightMap = (de.jreality.scene.Texture2D) foo;
 
@@ -160,14 +157,6 @@ public class DefaultPolygonShader implements PolygonShader {
      testTextureResident(jr, gl);
       gl.glEnable(GL.GL_TEXTURE_2D);
     } //else
-    if (reflectionMap != null)  {
-      gl.glActiveTexture(texUnit);
-      refMapUnit = texUnit;
-      texUnit++;
-      Texture2DLoaderJOGL.render(jr, reflectionMap);
-      //testTextureResident(jr, gl);
-     gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
-    } 
     if (reflectionMapNew != null)  {
       gl.glActiveTexture(texUnit);
       refMapUnit = texUnit;
@@ -198,13 +187,6 @@ public class DefaultPolygonShader implements PolygonShader {
 			gl.glActiveTexture(i);
 			gl.glDisable(GL.GL_TEXTURE_2D);			
 		}
-    if (reflectionMap != null)  {
-      gl.glActiveTexture(refMapUnit);
-      gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
-      gl.glDisable(GL.GL_TEXTURE_GEN_S);
-      gl.glDisable(GL.GL_TEXTURE_GEN_T);
-      gl.glDisable(GL.GL_TEXTURE_GEN_R);      
-    }
     if (reflectionMapNew != null)  {
       gl.glActiveTexture(refMapUnit);
       gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
