@@ -196,6 +196,8 @@ public class JOGLRendererHelper {
 		int vertexLength = GeometryUtility.getVectorLength(vertices);
 		DataList edgeColors = sg.getEdgeAttributes(Attribute.COLORS);
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
+		DataList vertexNormals = sg.getVertexAttributes(Attribute.NORMALS);
+		boolean hasNormals = vertexNormals == null ? false : true;
 		DoubleArray da;
 		//SJOGLConfiguration.theLog.log(Level.INFO,"Processing ILS");
 
@@ -269,7 +271,11 @@ public class JOGLRendererHelper {
 						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha*da.getValueAt(3));
 					} 
 				}
-				da = vertices.item(k).toDoubleArray();				
+				if (hasNormals)	{
+					da = vertexNormals.item(k).toDoubleArray();
+					gl.glNormal3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
+				}
+				da = vertices.item(k).toDoubleArray();		
 				if (vertexLength == 3) gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 				else if (vertexLength == 4) gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
 				//if (pickMode)	gl.glPopName();

@@ -8,6 +8,8 @@ import java.awt.Component;
 import java.awt.EventQueue;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.EventObject;
+import java.util.Vector;
 import java.util.logging.Level;
 
 import net.java.games.jogl.*;
@@ -174,8 +176,39 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 			return renderer;
 		}
 		
-/****** Convenience methods ************/
+/****** listeners!  ************/
+		Vector listeners;
 		
+		public interface RenderListener extends java.util.EventListener	{
+			public void renderPerformed(EventObject e);
+		}
+
+		public void addRenderListener(Viewer.RenderListener l)	{
+			if (listeners == null)	listeners = new Vector();
+			if (listeners.contains(l)) return;
+			listeners.add(l);
+			//JOGLConfiguration.theLog.log(Level.INFO,"Viewer: Adding geometry listener"+l+"to this:"+this);
+		}
+		
+		public void removeRenderListener(Viewer.RenderListener l)	{
+			if (listeners == null)	return;
+			listeners.remove(l);
+		}
+
+		public void broadcastChange()	{
+			if (listeners == null) return;
+			//SyJOGLConfiguration.theLog.log(Level.INFO,"Viewer: broadcasting"+listeners.size()+" listeners");
+			if (!listeners.isEmpty())	{
+				EventObject e = new EventObject(this);
+				//JOGLConfiguration.theLog.log(Level.INFO,"Viewer: broadcasting"+listeners.size()+" listeners");
+				for (int i = 0; i<listeners.size(); ++i)	{
+					Viewer.RenderListener l = (Viewer.RenderListener) listeners.get(i);
+					l.renderPerformed(e);
+				}
+			}
+		}
+
+		/****** Convenience methods ************/
 		public void addAuxiliaryComponent(SceneGraphComponent aux)	{
 			if (auxiliaryRoot == null)	{
 				setAuxiliaryRoot(SceneGraphUtility.createFullSceneGraphComponent("AuxiliaryRoot"));
@@ -361,7 +394,10 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 			renderLock.notifyAll();
 		}
 		if (debug) JOGLConfiguration.theLog.log(Level.INFO,"Render: calling display");
-		if (!JOGLConfiguration.portalUsage) canvas.display();
+		if (!JOGLConfiguration.portalUsage) {
+			canvas.display();
+			if (listeners!=null) broadcastChange();
+		}
 	}
 
 	public void setAutoSwapMode(boolean autoSwap) {
