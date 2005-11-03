@@ -119,20 +119,26 @@ public class GlslLoader {
     
     void linkProgram(GL gl) {
       if (isLinked) return;
-      // check once again if no instance is loaded:
-      int vertexProgID = gl.glCreateShaderObjectARB(GL.GL_VERTEX_SHADER_ARB);
-      int fragmentProgID = gl.glCreateShaderObjectARB(GL.GL_FRAGMENT_SHADER_ARB);
-      gl.glShaderSourceARB(vertexProgID, source.getVertexProgram().length, source.getVertexProgram(), (int[]) null);
-      gl.glShaderSourceARB(fragmentProgID, source.getFragmentProgram().length, source.getFragmentProgram(), (int[]) null);
-      gl.glCompileShaderARB(vertexProgID);
-      gl.glCompileShaderARB(fragmentProgID);
-      printInfoLog("vert compile", vertexProgID, gl);
-      printInfoLog("frag compile", fragmentProgID, gl);
+
       progID = new Integer(gl.glCreateProgramObjectARB());
-      gl.glAttachObjectARB(progID.intValue(), vertexProgID);
-      gl.glAttachObjectARB(progID.intValue(), fragmentProgID);
-      printInfoLog("vert attatch", vertexProgID, gl);
-      printInfoLog("frag attatch", fragmentProgID, gl);
+
+      if (source.getVertexProgram() != null) {
+        int vertexProgID = gl.glCreateShaderObjectARB(GL.GL_VERTEX_SHADER_ARB);
+        gl.glShaderSourceARB(vertexProgID, source.getVertexProgram().length, source.getVertexProgram(), (int[]) null);
+        gl.glCompileShaderARB(vertexProgID);
+        printInfoLog("vert compile", vertexProgID, gl);
+        gl.glAttachObjectARB(progID.intValue(), vertexProgID);
+        printInfoLog("vert attatch", vertexProgID, gl);
+      }
+      if (source.getFragmentProgram() != null) {
+        int fragmentProgID = gl.glCreateShaderObjectARB(GL.GL_FRAGMENT_SHADER_ARB);
+        gl.glShaderSourceARB(fragmentProgID, source.getFragmentProgram().length, source.getFragmentProgram(), (int[]) null);
+        gl.glCompileShaderARB(fragmentProgID);
+        printInfoLog("frag compile", fragmentProgID, gl);
+        gl.glAttachObjectARB(progID.intValue(), fragmentProgID);
+        printInfoLog("frag attatch", fragmentProgID, gl);
+      }
+      
       printInfoLog("prog attatch", progID.intValue(), gl);
       gl.glLinkProgramARB(progID.intValue());
       printInfoLog("prog link", progID.intValue(), gl);
@@ -144,7 +150,7 @@ public class GlslLoader {
       int loc;
       loc = gl.glGetUniformLocationARB(progID.intValue(), name);
       if (loc == -1) {
-        throw new IllegalStateException();
+        throw new IllegalStateException("failed uniLoc for "+name);
       }
       return new Integer(loc);
     }
