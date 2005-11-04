@@ -15,7 +15,7 @@ import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.*;
-import de.jreality.shader.ReflectionMap;
+import de.jreality.shader.CubeMap;
 
 /**
  * @author Charles Gunn
@@ -32,7 +32,7 @@ public class DefaultPolygonShader implements PolygonShader {
   de.jreality.scene.Texture2D lightMap;
   Texture2D texture2Dnew;
   Texture2D lightMapNew;
-   ReflectionMap reflectionMapNew;
+   CubeMap reflectionMapNew;
 	int frontBack = FRONT_AND_BACK;
 	public VertexShader vertexShader = null;
 	AbstractJOGLShader glShader = null;
@@ -66,7 +66,7 @@ public class DefaultPolygonShader implements PolygonShader {
 
     if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap))
       texture2Dnew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap);
-    if (AttributeEntityUtility.hasAttributeEntity(ReflectionMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))
+    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))
       reflectionMapNew = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));
     if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap))
       lightMapNew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap);

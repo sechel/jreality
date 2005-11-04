@@ -15,7 +15,7 @@ import net.java.games.jogl.GLU;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.shader.ImageData;
-import de.jreality.shader.ReflectionMap;
+import de.jreality.shader.CubeMap;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.LoggingSystem;
 
@@ -300,7 +300,7 @@ public class Texture2DLoaderJOGL {
     
   } 
 
-  public static void render(JOGLRenderer jr, ReflectionMap ref) {
+  public static void render(JOGLRenderer jr, CubeMap ref) {
     GLDrawable drawable = jr.getCanvas();
     boolean first = true;
     boolean mipmapped = true;
