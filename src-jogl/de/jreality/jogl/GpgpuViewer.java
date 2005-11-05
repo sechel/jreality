@@ -17,7 +17,7 @@ import net.java.games.jogl.GLU;
 
 public class GpgpuViewer extends Viewer {
 
-  private static final boolean ATI=false;
+  private static final boolean ATI=true;
   
   private static final boolean dump=false;
   
@@ -41,23 +41,24 @@ public class GpgpuViewer extends Viewer {
       + "void main(void) { "
       + "vec4 y = textureRect(textureY, gl_TexCoord[0].st);"
       + "vec4 x = textureRect(textureX, gl_TexCoord[0].st);"
-      + "gl_FragColor = y + alpha*x;" + "}" };
+      + "gl_FragColor = x;" + "}" };
 
-    GlslProgram prog;
+    
     
     int cnt;
     long st;
     
-    //GlslProgram prog= new GlslProgram(new Appearance(), "foo", (String[])null, frag);
+    GlslProgram prog;//= new GlslProgram(new Appearance(), "foo", (String[])null, frag);
     {
       try {
-        prog= new GlslProgram(new Appearance(), "foo", null, Input.getInput("/homes/geometer/weissman/dipl/software/glsl/biot_savart.glsl"));
+        prog= new GlslProgram(new Appearance(), "foo", null, Input.getInput("../../dipl/software/glsl/biot_savart.glsl"));
       } catch (IOException ioe) {
         ioe.printStackTrace();
       }
     }
-  private int theWidth = 1024;
-  private int theHeight = 1024;
+  private int theWidth=1;
+  private int theHeight=theWidth;
+  int vortexTextureSize=2;
 
   private int[] fbos = new int[1];
   private int[] yTexs = new int[2];
@@ -67,36 +68,35 @@ public class GpgpuViewer extends Viewer {
 
   int readTex, writeTex = 1;
 
-  private float[] X = new float[theWidth * theHeight * 4];
   private float[] Y = new float[theWidth * theHeight * 4];
 
+  
   private FloatBuffer read = ByteBuffer.allocateDirect(
       theWidth * theHeight * 4 * 4).order(ByteOrder.nativeOrder())
       .asFloatBuffer();
 
   private int numIts = 1;
+  float[] X = new float[vortexTextureSize*vortexTextureSize*4];
 
   {
-    for (int i = 0; i < X.length; i++) {
-      Y[i] = (i%4 == 3) ? 1.0f : (float) (1.3+0.01*i);
-      X[i] = 0.1f;
+    for (int i = 0; i < Y.length; i++) {
+      Y[i] = (float)i; //(i%4 == 3) ? 1.0f : (float) (1.3+0.01*i);
+//      X[i] = 0.1f;
     }
   }
   
-  int numPts=3;
-  
-  float[] data = new float[numPts*3];
   {
+    int numPts = vortexTextureSize*vortexTextureSize;
     for (int i = 0; i < numPts; i++) {
-      data[3*i] = (float) Math.sin(2*i*Math.PI/numPts);
-      data[3*i+1] = (float) Math.cos(2*i*Math.PI/numPts);
-      //data[3*i+2] = 1f;
+      X[4*i] = (float) Math.sin(2*i*Math.PI/numPts);
+      X[4*i+1] = (float) Math.cos(2*i*Math.PI/numPts);
+      X[4*i+3] = 1f;
     }
   }
 
   public void display(GLDrawable drawable) {
     cnt++;
-    if (cnt == 100) {
+    if (cnt == 20) {
       long t = System.currentTimeMillis();
       if (st != 0) System.out.println("cps="+ (((double)cnt)/(0.001*(t-st)) ) );
       st = System.currentTimeMillis();
@@ -107,22 +107,17 @@ public class GpgpuViewer extends Viewer {
     initFBO(gl);
     initViewport(gl, glu);
     initTextures(gl);
-    prog.setUniform("points", data);
-    //prog.setUniform("inds", new int[]{0, 4});
-    //prog.setUniform("alpha", 0.1f);
+    //prog.setUniform("tex0", 0);
+    //prog.setUniform("vort", 1);
     
     GlslLoader.render(prog, drawable);
-    //if (progID == -1)
-    //  initGLSL(gl);
-
-    //gl.glUseProgramObjectARB(progID);
 
     performCalculation(gl);
 
     if (dump) System.out.println("calc done");
     
-    //transferFromTexture(gl, read);
-    //dumpData(read);
+    transferFromTexture(gl, read);
+    dumpData(read);
 
     // switch back to old buffer
     gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, 0);
@@ -237,16 +232,16 @@ public class GpgpuViewer extends Viewer {
     if (yTexs[0] == 0) {
       gl.glEnable(TEX_TARGET);
       gl.glGenTextures(2, yTexs);
-      setupTexture(gl, yTexs[0]);
-      setupTexture(gl, yTexs[1]);
-      transferToTexture(gl, Y, yTexs[readTex]);
+      setupTexture(gl, yTexs[0], theWidth, theHeight);
+      setupTexture(gl, yTexs[1], theWidth, theHeight);
+      transferToTexture(gl, Y, yTexs[readTex], theWidth, theHeight);
       gl.glGenTextures(1, xTexs);
-      setupTexture(gl, xTexs[0]);
-      transferToTexture(gl, X, xTexs[0]);
+      setupTexture(gl, xTexs[0], vortexTextureSize, vortexTextureSize);
+      transferToTexture(gl, X, xTexs[0], vortexTextureSize, vortexTextureSize);
     }
   }
 
-  private void setupTexture(GL gl, int i) {
+  private void setupTexture(GL gl, int i, int theWidth, int theHeight) {
     gl.glBindTexture(TEX_TARGET, i);
     gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
     gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
@@ -290,7 +285,7 @@ public class GpgpuViewer extends Viewer {
   /**
    * Transfers data to texture.
    */
-  void transferToTexture(GL gl, float[] data, int texID) {
+  void transferToTexture(GL gl, float[] data, int texID, int theWidth, int theHeight) {
     // version (a): HW-accelerated on NVIDIA
     gl.glBindTexture(TEX_TARGET, texID);
     gl.glTexSubImage2D(TEX_TARGET, 0, 0, 0, theWidth, theHeight, TEX_FORMAT,
