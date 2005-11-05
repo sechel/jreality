@@ -285,7 +285,7 @@ public class Texture2DLoaderJOGL {
           glu.gluBuild2DMipmaps(GL.GL_TEXTURE_2D, GL.GL_RGBA, tex.getImage().getWidth(),
               tex.getImage().getHeight(), srcPixelFormat, GL.GL_UNSIGNED_BYTE, data);
         } else {
-          gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_COMPRESSED_RGBA_ARB, //GL.GL_RGBA,
+          gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA, //GL.GL_RGBA,
                                                                           // //tex.getPixelFormat(),
               tex.getImage().getWidth(), tex.getImage().getHeight(), 0, srcPixelFormat,
               GL.GL_UNSIGNED_BYTE, data);
