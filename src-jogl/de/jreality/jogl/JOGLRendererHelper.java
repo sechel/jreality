@@ -6,6 +6,7 @@ package de.jreality.jogl;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +24,8 @@ import net.java.games.jogl.util.GLUT;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.LabelSet;
 import de.jreality.geometry.QuadMeshShape;
+import de.jreality.geometry.RegularDomainQuadMesh;
+import de.jreality.geometry.RegularDomainQuadMeshFactory;
 import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultPolygonShader;
@@ -53,6 +56,11 @@ import de.jreality.shader.Texture2D;
  *
  */
 public class JOGLRendererHelper {
+
+	public final static int PER_PART = 1;
+	public final static int PER_FACE = 2;
+	public final static int PER_VERTEX = 4;
+	public final static int PER_EDGE = 8;
 
 	static float [] backgroundColor = {0f, 0f, 0f, 1f};
 	static float val = 1f;
@@ -224,15 +232,15 @@ public class JOGLRendererHelper {
 		if (sg.getEdgeAttributes(Attribute.INDICES) == null) return;
 		int colorBind = 0, colorLength = 0;
 		if (interpolateVertexColors && vertexColors != null) 		{
-			colorBind = ElementBinding.PER_VERTEX;
+			colorBind = PER_VERTEX;
 			colorLength = GeometryUtility.getVectorLength(vertexColors);
 		} 
 		else if (edgeColors != null) 	{
-			colorBind = ElementBinding.PER_EDGE;
+			colorBind = PER_EDGE;
 			colorLength = GeometryUtility.getVectorLength(edgeColors);
 		} 
-		else 	colorBind = ElementBinding.PER_PART;
-		if (colorBind != ElementBinding.PER_PART)	{
+		else 	colorBind = PER_PART;
+		if (colorBind != PER_PART)	{
 			if (jr.openGLState.frontBack != DefaultPolygonShader.FRONT_AND_BACK)	{
 				gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK, GL.GL_DIFFUSE);
 				jr.openGLState.frontBack =DefaultPolygonShader.FRONT_AND_BACK;
@@ -247,7 +255,7 @@ public class JOGLRendererHelper {
 			if (!pickMode) gl.glBegin(GL.GL_LINE_STRIP);
 			int[] ed = sg.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
 			int m = ed.length;
-			if (!pickMode && colorBind == ElementBinding.PER_EDGE) 		{	
+			if (!pickMode && colorBind == PER_EDGE) 		{	
 				da = edgeColors.item(i).toDoubleArray();
 				if (colorLength == 3) 	{
 					gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
@@ -263,7 +271,7 @@ public class JOGLRendererHelper {
 					gl.glBegin(GL.GL_LINES);
 				}
 				int k = ed[j];
-				if (!pickMode && colorBind == ElementBinding.PER_VERTEX) 		{	
+				if (!pickMode && colorBind == PER_VERTEX) 		{	
 					da = vertexColors.item(k).toDoubleArray();
 					if (colorLength == 3) 	{
 						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
@@ -320,16 +328,16 @@ public class JOGLRendererHelper {
 		vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		int vertexLength = GeometryUtility.getVectorLength(vertices);
 		if (vertexColors != null && smooth) 		{
-			colorBind = ElementBinding.PER_VERTEX;
+			colorBind = PER_VERTEX;
 			colorLength = GeometryUtility.getVectorLength(vertexColors);
 		} 
-		else if (faceColors != null && colorBind != ElementBinding.PER_VERTEX) 	{
-			colorBind = ElementBinding.PER_FACE;
+		else if (faceColors != null && colorBind != PER_VERTEX) 	{
+			colorBind = PER_FACE;
 			colorLength = GeometryUtility.getVectorLength(faceColors);
 		} 
-		else 	colorBind = ElementBinding.PER_PART;
+		else 	colorBind = PER_PART;
 		//JOGLConfiguration.theLog.log(Level.INFO,"Color binding is "+colorBind);
-		if (colorBind != ElementBinding.PER_PART)	{
+		if (colorBind != PER_PART)	{
 			if (jr.openGLState.frontBack != DefaultPolygonShader.FRONT_AND_BACK)	{
 				gl.glEnable(GL.GL_COLOR_MATERIAL);
 				gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK, GL.GL_DIFFUSE);
@@ -337,12 +345,12 @@ public class JOGLRendererHelper {
 			}			
 		}
 		if (vertexNormals != null && smooth)	{
-				normalBind = ElementBinding.PER_VERTEX;
+				normalBind = PER_VERTEX;
 			}
 		else 	if (faceNormals != null  && (vertexNormals == null || !smooth)) {
-				normalBind = ElementBinding.PER_FACE;
+				normalBind = PER_FACE;
 		}
-		else normalBind = ElementBinding.PER_PART;
+		else normalBind = PER_PART;
 		
 //		if (vertices != null)	{
 //			int vlength = GeometryUtility.getVectorLength(vertices);
@@ -354,6 +362,8 @@ public class JOGLRendererHelper {
 //		}
 		DoubleArray da;
 		boolean isQuadMesh = false;
+		boolean isRegularDomainQuadMesh = false;
+		Rectangle2D theDomain = null;
 		int maxU = 0, maxV = 0, maxFU = 0, maxFV = 0, numV = 0, numF;
 		Object qmatt = sg.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
 		if (qmatt != null && qmatt instanceof Dimension)	{
@@ -364,18 +374,27 @@ public class JOGLRendererHelper {
 			numV = maxU * maxV;
 			maxFU = maxU-1;
 			maxFV = maxV-1;
-		} else 
-			if (sg instanceof QuadMeshShape)	{
+			// Done with GeometryAttributes?
+			qmatt = sg.getGeometryAttributes(GeometryUtility.REGULAR_DOMAIN_QUAD_MESH_SHAPE);
+			if (qmatt != null && qmatt instanceof Rectangle2D)	{
+				theDomain = (Rectangle2D) qmatt;
+				isRegularDomainQuadMesh = true;
+			}				
+		} else if (sg instanceof QuadMeshShape) {
 			QuadMeshShape qm = (QuadMeshShape) sg;
 			isQuadMesh = true;
 			maxU = qm.getMaxU();
 			maxV = qm.getMaxV();
 			numV = maxU * maxV;
-			maxFU = qm.isClosedInUDirection() ? maxU : maxU-1;
-			maxFV = qm.isClosedInVDirection() ? maxV : maxV-1;
+			maxFU = qm.isClosedInUDirection() ? maxU : maxU - 1;
+			maxFV = qm.isClosedInVDirection() ? maxV : maxV - 1;
 			numF = qm.getNumFaces();
-			
+			if (sg instanceof RegularDomainQuadMesh) {
+				theDomain = ((RegularDomainQuadMesh) sg).getDomain();
+				isRegularDomainQuadMesh = true;
+			}
 		}
+
 		numF = sg.getNumFaces();
 		if (!pickMode && isQuadMesh)	{
 			//System.out.println("Is quad mesh");
@@ -402,17 +421,17 @@ public class JOGLRendererHelper {
 						int vnn = (i*maxU + j%maxU + incr*maxU)%numV;
 						int fnn = (i*maxFU + j%maxFU + incr*maxFU)%numF;
 						int v = (i+incr)%maxV;
-						if (normalBind == ElementBinding.PER_FACE) {
+						if (normalBind == PER_FACE) {
 							if (incr == 0 && j != maxFU) 	{
 								da = faceNormals.item(fnn).toDoubleArray();
 								gl.glNormal3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));								
 							}
 						} else 
-						if (normalBind == ElementBinding.PER_VERTEX) {
+						if (normalBind == PER_VERTEX) {
 							da = vertexNormals.item(vnn).toDoubleArray();
 							gl.glNormal3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 						} 
-						if (colorBind == ElementBinding.PER_FACE) 		{	
+						if (colorBind == PER_FACE) 		{	
 							if (incr == 0) {
 								da = faceColors.item(fnn).toDoubleArray();
 								if (colorLength == 3) 	{
@@ -422,7 +441,7 @@ public class JOGLRendererHelper {
 								} 
 							}
 						} else
-						if (colorBind == ElementBinding.PER_VERTEX) {
+						if (colorBind == PER_VERTEX) {
 							da = vertexColors.item(vnn).toDoubleArray();
 							if (colorLength == 3) 	{
 								gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
@@ -432,24 +451,20 @@ public class JOGLRendererHelper {
 						}
 						if (texCoords != null)	 {
 							da = texCoords.item(vnn).toDoubleArray();
-              gl.glMultiTexCoord2d(GL.GL_TEXTURE0, da.getValueAt(0), da.getValueAt(1));
-							//gl.glTexCoord2d(da.getValueAt(0), da.getValueAt(1));
+							gl.glMultiTexCoord2d(GL.GL_TEXTURE0, da.getValueAt(0), da.getValueAt(1));
 						}
-            if (lightMapCoords != null) {
-                da = lightMapCoords.item(vnn).toDoubleArray();
-                gl.glMultiTexCoord2d(GL.GL_TEXTURE1, da
-                        .getValueAt(0), da.getValueAt(1));
-                //gl.glTexCoord2d(da.getValueAt(0),
-                // da.getValueAt(1));
-            }
+						if (lightMapCoords != null) {
+							da = lightMapCoords.item(vnn).toDoubleArray();
+							gl.glMultiTexCoord2d(GL.GL_TEXTURE1, da
+									.getValueAt(0), da.getValueAt(1));
+						}
 						da = vertices.item(vnn).toDoubleArray();
-//						if (vertexLength == 1)	{		// Regular domain quad mesh
-//							double z = da.getValueAt(0);
-//							rdqm.getPointForIndices(u, v, pt);
-//							if (type == Pn.EUCLIDEAN)		gl.glVertex3d(pt[0], pt[1], z);
-//							else							gl.glVertex3d(z*pt[0], z*pt[1], z*pt[2]);
-//						}
-						if (vertexLength == 3) gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
+						if (vertexLength == 1 && isRegularDomainQuadMesh)	{		// Regular domain quad mesh
+							double z = da.getValueAt(0);
+							RegularDomainQuadMeshFactory.getCoordinatesForUV(pt, theDomain, u, v, maxU, maxV);
+							gl.glVertex3d(pt[0], pt[1], z);
+						}
+						else if (vertexLength == 3) gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 						else if (vertexLength == 4) gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));								
 					}
 				}
@@ -462,7 +477,7 @@ public class JOGLRendererHelper {
 		}
 		else
 		for (int i = 0; i< sg.getNumFaces(); ++i)	{
-			if (colorBind == ElementBinding.PER_FACE) 		{					
+			if (colorBind == PER_FACE) 		{					
 				da = faceColors.item(i).toDoubleArray();
 				if (colorLength == 3) 	{
 					gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
@@ -474,7 +489,7 @@ public class JOGLRendererHelper {
 				//JOGLConfiguration.theLog.log(Level.INFO,"+G"+i+"\n");
 				gl.glPushName( i);
 			}
-			if (normalBind == ElementBinding.PER_FACE) {
+			if (normalBind == PER_FACE) {
 				da = faceNormals.item(i).toDoubleArray();
 				gl.glNormal3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 			} 
@@ -482,11 +497,11 @@ public class JOGLRendererHelper {
 			gl.glBegin(GL.GL_POLYGON);
 			for (int j = 0; j<tf.getLength(); ++j)	{
 				int k = tf.getValueAt(j);
-				if (normalBind == ElementBinding.PER_VERTEX) {
+				if (normalBind == PER_VERTEX) {
 					da = vertexNormals.item(k).toDoubleArray();
 					gl.glNormal3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 				} 
-				if (colorBind == ElementBinding.PER_VERTEX) {
+				if (colorBind == PER_VERTEX) {
 					da = vertexColors.item(k).toDoubleArray();
 						if (colorLength == 3) 	{
 							gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
@@ -515,7 +530,7 @@ public class JOGLRendererHelper {
 		}
 		// pop to balance the glPushName(10000) above
 		if (pickMode) gl.glPopName();
-		//if (colorBind != ElementBinding.PER_PART)  gl.glDisable(GL.GL_COLOR_MATERIAL);
+		//if (colorBind != PER_PART)  gl.glDisable(GL.GL_COLOR_MATERIAL);
 		
 //		gl.glDisable(GL.GL_TEXTURE_2D);
 //
@@ -711,72 +726,76 @@ public class JOGLRendererHelper {
 	 */
 	public static void saveScreenShot(GLDrawable drawable, int width, int height, File file) {
 			 
-			//TODO figure out why channels = 4 doesn't work: transparency getting written into fb even
-			// though transparency disabled.
-			 int channels = 3;
-			ByteBuffer pixelsRGBA = BufferUtils.newByteBuffer(width * height * channels); 
-			 
-			GL gl = drawable.getGL(); 
-			
-			if (drawable instanceof GLCanvas)	{
-				gl.glReadBuffer(GL.GL_BACK); 
-				gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1); 				
+			// TODO figure out why channels = 4 doesn't work: transparency
+			// getting written into fb even
+		// though transparency disabled.
+		int channels = 3;
+		ByteBuffer pixelsRGBA = BufferUtils.newByteBuffer(width * height
+				* channels);
+
+		GL gl = drawable.getGL();
+
+		if (drawable instanceof GLCanvas) {
+			gl.glReadBuffer(GL.GL_BACK);
+			gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
+		}
+
+		gl.glReadPixels(0, // GLint x
+				0, // GLint y
+				width,// GLsizei width
+				height, // GLsizei height
+				channels == 3 ? GL.GL_RGB : GL.GL_RGBA, // GLenum format
+				GL.GL_UNSIGNED_BYTE, // GLenum type
+				pixelsRGBA); // GLvoid *pixels
+
+		int[] pixelInts = new int[width * height];
+
+		// Convert RGB bytes to ARGB ints with no transparency. Flip image
+		// vertically by reading the
+		// rows of pixels in the byte buffer in reverse - (0,0) is at bottom
+		// left in OpenGL.
+
+		int p = width * height * channels; // Points to first byte (red) in
+											// each row.
+		int q; // Index into ByteBuffer
+		int i = 0; // Index into target int[]
+		int w3 = width * channels; // Number of bytes in each row
+
+		for (int row = 0; row < height; row++) {
+			p -= w3;
+			q = p;
+			for (int col = 0; col < width; col++) {
+				int iR = pixelsRGBA.get(q++);
+				int iG = pixelsRGBA.get(q++);
+				int iB = pixelsRGBA.get(q++);
+				int iA = (channels == 3) ? 0xff : pixelsRGBA.get(q++);
+
+				pixelInts[i++] = ((iA & 0x000000FF) << 24)
+						| ((iR & 0x000000FF) << 16) | ((iG & 0x000000FF) << 8)
+						| (iB & 0x000000FF);
 			}
-			
-			gl.glReadPixels(0, 	// GLint x 
-					0, // GLint y 
-			width,// GLsizei width 
-			height, // GLsizei height 
-			channels == 3 ? GL.GL_RGB : GL.GL_RGBA, // GLenum format 
-			GL.GL_UNSIGNED_BYTE, // GLenum type 
-			pixelsRGBA); // GLvoid *pixels 
-			
-			int[] pixelInts = new int[width * height]; 
-			
-			// Convert RGB bytes to ARGB ints with no transparency. Flip image vertically by reading the 
-			// rows of pixels in the byte buffer in reverse - (0,0) is at bottom left in OpenGL. 
-	
-		int p = width * height * channels; // Points to first byte (red) in each row. 
-			int q;   // Index into ByteBuffer 
-			int i = 0;   // Index into target int[] 
-			int w3 = width*channels;    // Number of bytes in each row 
-			
-			for (int row = 0; row < height; row++) { 
-			p -= w3; 
-			q = p; 
-			for (int col = 0; col < width; col++) { 
-			 int iR = pixelsRGBA.get(q++); 
-			int iG = pixelsRGBA.get(q++); 
-			int iB = pixelsRGBA.get(q++); 
-			int iA = (channels == 3) ? 0xff : pixelsRGBA.get(q++); 
-			
-			   pixelInts[i++] =  
-			      ((iA & 0x000000FF) << 24) 
-			     | ((iR & 0x000000FF) << 16) 
-			     | ((iG & 0x000000FF) << 8) 
-			     | (iB & 0x000000FF); 
-			  } 
-			 
-			 } 
-			 
-			 BufferedImage bufferedImage = 
-			  new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB); 
-			 
-			 bufferedImage.setRGB(0, 0, width, height, pixelInts, 0, width); 
-			 
-			 try { 
-				  ImageIO.write(bufferedImage, "PNG", file); 
-				  //ImageIO.write(bufferedImage, "TIF", file); 
-			 } catch (IOException e) { 
-			  e.printStackTrace(); 
-			 } 
-			 
-			 JOGLConfiguration.theLog.log(Level.INFO,"Screenshot saved to "+file.getName());
+
+		}
+
+		BufferedImage bufferedImage = new BufferedImage(width, height,
+				BufferedImage.TYPE_INT_ARGB);
+
+		bufferedImage.setRGB(0, 0, width, height, pixelInts, 0, width);
+
+		try {
+			ImageIO.write(bufferedImage, "PNG", file);
+			// ImageIO.write(bufferedImage, "TIF", file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		JOGLConfiguration.theLog.log(Level.INFO, "Screenshot saved to "
+				+ file.getName());
 	}
 	
-//	  private static GLPbuffer getPbuffer(int width, int height, GLDrawable d)	{
-//		  GLPbuffer pbuffer = null;
-//		  GLCapabilities caps = new GLCapabilities();
+// private static GLPbuffer getPbuffer(int width, int height, GLDrawable d) {
+// GLPbuffer pbuffer = null;
+// GLCapabilities caps = new GLCapabilities();
 //        // doesn't seem to support anti-aliasing; just creates junk
 ////		caps.setSampleBuffers(true);
 ////		caps.setNumSamples(4);

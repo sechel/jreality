@@ -11,11 +11,9 @@ import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
 import de.jreality.geometry.Primitives;
-import de.jreality.geometry.QuadMeshShape;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.util.CameraUtility;
 
 /**
  * @author gunn

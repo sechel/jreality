@@ -8,11 +8,10 @@ import java.util.WeakHashMap;
 import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
-import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.SphereUtility;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
-import de.jreality.util.CameraUtility;
+import de.jreality.scene.IndexedFaceSet;
 
 /**
  * @author gunn
@@ -42,7 +41,7 @@ public class JOGLSphereHelper extends SphereUtility {
 			dlists[i] = gl.glGenLists(1);
 			gl.glNewList(dlists[i], GL.GL_COMPILE);
 			//gl.glDisable(GL.GL_SMOOTH);
-			QuadMeshShape qms = SphereUtility.cubePanels[i];
+			IndexedFaceSet qms = SphereUtility.cubePanels[i];
 			for (int j = 0; j<SphereUtility.cubeSyms.length; ++j)	{
 				gl.glPushMatrix();
 				gl.glMultTransposeMatrixd(SphereUtility.cubeSyms[j].getMatrix());

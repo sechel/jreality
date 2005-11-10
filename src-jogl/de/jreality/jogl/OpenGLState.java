@@ -23,6 +23,7 @@ public class OpenGLState {
 	public double lineWidth;
 	public int activeTexture;
 	public int frontBack = GL.GL_FRONT_AND_BACK;
+	public double levelOfDetail;
 	
 	private void render(GL gl)	{
 		if (backFaceCullingEnabled)  {
@@ -72,7 +73,7 @@ public class OpenGLState {
 			gl.glAlphaFunc(GL.GL_GREATER, 0f);
 			gl.glClearDepth(1.0f);  
 			gl.glEnable(GL.GL_NORMALIZE);
-			gl.glEnable(GL.GL_MULTISAMPLE_ARB);	
+			//gl.glEnable(GL.GL_MULTISAMPLE_ARB);	
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE);
 			float[] white = {1f, 1f, 1f, 1f};
 			gl.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, white );

@@ -297,9 +297,12 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	  
 	  GLPbuffer pbuffer = null;
 	  File pbufferFile = null;
+	  JOGLRenderer pbufferRenderer = null;
 	  public void renderOffscreen(int w, int h,final File file)	{
 		  pbufferFile = file;  
 		  final int width;
+		  if (pbufferRenderer == null) pbufferRenderer = new JOGLRenderer(this);
+		  final JOGLRenderer pbufferrenderer = pbufferRenderer;
 		  if (w > 2048)	{
 			  JOGLConfiguration.getLogger().log(Level.WARNING,"Width being truncated to 2048");
 			  width = 2048;
@@ -314,24 +317,30 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
         		boolean done = false;
 			public void init(GLDrawable arg0) {
 	        	JOGLConfiguration.getLogger().log(Level.INFO,"PBuffer init");
-				
+	        	pbufferrenderer.init(arg0);
 			}
 
 			public void display(GLDrawable arg0) {
 				if (done) return;
 			   	JOGLConfiguration.getLogger().log(Level.INFO,"PBuffer display");
+//				JOGLConfiguration.theLog.log(Level.INFO,"rendering "+renderer.frameCount);
+		 	    JOGLConfiguration.getLogger().log(Level.INFO,"Pbuffer is initialized: "+pbuffer.isInitialized());
 			   	//JOGLRenderer renderer = new JOGLRenderer(me, pbuffer);
 			   	// have to set the rendering size since the jogl implementations of GLPbuffer
 			   	// don't implement getSize() (!!)
 			   	// we piggyback on the canvas's renderer.  To be safe, we need to put a lock around the
 			   	// following 3 lines of code.
-			   	renderer.setSize(width, height);
-			   	renderer.display(arg0);
-			   	renderer.setSize(canvas.getWidth(), canvas.getHeight());
-			   	JOGLRendererHelper.saveScreenShot(pbuffer,width, height, file);
-			  	pbuffer = null;
-			  	pbufferFile = null;
-			   	done = true;
+			   	synchronized(renderLock)	{
+				   	pbufferrenderer.setSize(width, height);
+//					OpenGLState.initializeGLState(pbufferenderer);
+					pbufferrenderer.display(arg0);
+					pbufferrenderer.display(arg0);
+				   	pbufferrenderer.setSize(canvas.getWidth(), canvas.getHeight());
+				   	JOGLRendererHelper.saveScreenShot(pbuffer,width, height, file);
+				  	pbuffer = null;
+				  	pbufferFile = null;
+				   	done = true;			   		
+			   	}
 			}
 
 			public void reshape(GLDrawable arg0, int arg1, int arg2, int arg3, int arg4) {
@@ -390,14 +399,17 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 			throw new IllegalStateException();
 		synchronized (renderLock) {
 			pendingUpdate = false;
-			if (JOGLConfiguration.portalUsage) canvas.display();
+//			if (JOGLConfiguration.portalUsage) 
+				canvas.display();
+//			JOGLConfiguration.theLog.log(Level.INFO,"rendering "+renderer.frameCount);
+				if (listeners!=null) broadcastChange();
 			renderLock.notifyAll();
 		}
 		if (debug) JOGLConfiguration.theLog.log(Level.INFO,"Render: calling display");
-		if (!JOGLConfiguration.portalUsage) {
-			canvas.display();
-			if (listeners!=null) broadcastChange();
-		}
+//		if (!JOGLConfiguration.portalUsage) {
+//			canvas.display();
+//			if (listeners!=null) broadcastChange();
+//		}
 	}
 
 	public void setAutoSwapMode(boolean autoSwap) {

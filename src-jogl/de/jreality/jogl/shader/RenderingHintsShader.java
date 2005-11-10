@@ -140,6 +140,7 @@ public class RenderingHintsShader  {
 				gl.glDisable(GL.GL_CULL_FACE);
 			jr.openGLState.backFaceCullingEnabled = backFaceCullingEnabled;
 		}
+		jr.openGLState.levelOfDetail = levelOfDetail;
 		// TODO: implement a handle for this front/back color flag
 		//gl.glEnable(GL.GL_COLOR_MATERIAL);
 		//gl.glColorMaterial(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE);

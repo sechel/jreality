@@ -121,7 +121,6 @@ public class DefaultPointShader  implements PointShader {
 	
 	public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig, boolean useDisplayLists) {
 		GL gl = 	jr.globalGL;
-		// TODO handle quadmesh differently
 		if (original instanceof PointSet)	{
 			PointSet ps = (PointSet) original;
 			DataList vertices = ps.getVertexAttributes(Attribute.COORDINATES);
@@ -131,7 +130,9 @@ public class DefaultPointShader  implements PointShader {
 			if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
 			DoubleArray da;
 			int n = ps.getNumPoints();
-			int dlist = JOGLSphereHelper.getSphereDLists(1, jr);
+			int resolution = 1;
+			if (jr.openGLState.levelOfDetail == 0.0) resolution = 0;
+			int dlist = JOGLSphereHelper.getSphereDLists(resolution, jr);
 			int nextDL = -1;
 			if (useDisplayLists)	{
 				nextDL = gl.glGenLists(1);

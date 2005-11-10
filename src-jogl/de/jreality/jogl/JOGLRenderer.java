@@ -81,7 +81,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 	JOGLRenderer globalHandle = null;
 	SceneGraphPath currentPath = new SceneGraphPath();
 	
-	public de.jreality.jogl.Viewer theViewer;
+	public Viewer theViewer;
 	SceneGraphComponent theRoot, auxiliaryRoot;
 	JOGLPeerComponent thePeerRoot = null;
 	JOGLPeerComponent thePeerAuxilliaryRoot = null;
@@ -120,13 +120,13 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 	/**
 	 * @param viewer
 	 */
-	public JOGLRenderer(de.jreality.jogl.Viewer viewer) {
+	public JOGLRenderer(Viewer viewer) {
 		this(viewer, ((GLDrawable) viewer.getViewingComponent()));
 		javax.swing.Timer followTimer = new javax.swing.Timer(1000, new ActionListener()	{
 			public void actionPerformed(ActionEvent e) {updateGeometryHashtable(); } } );
 		followTimer.start();
 	}
-	public JOGLRenderer(de.jreality.jogl.Viewer viewer, GLDrawable d) {
+	public JOGLRenderer(Viewer viewer, GLDrawable d) {
 		super();
 		theViewer = viewer;
 		theCanvas = d;
@@ -201,7 +201,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			setSceneRoot(theViewer.getSceneRoot());
 		}
 		context  = new Graphics3D(theViewer.getCameraPath(), null, CameraUtility.getAspectRatio(theViewer));
-		theLog.finer(" top level display lists = "+thePeerRoot.useDisplayLists);
+		//theLog.finer(" top level display lists = "+thePeerRoot.useDisplayLists);
 		
 		globalGL.glMatrixMode(GL.GL_PROJECTION);
 		globalGL.glLoadIdentity();
@@ -350,7 +350,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			theLog.log(Level.INFO,"version: "+vv);			
 			int[] tu = new int[1];
 			globalGL.glGetIntegerv(GL.GL_MAX_TEXTURE_UNITS, tu);
-			theLog.log(Level.INFO,"# of texture units: "+tu[0]);			
+			theLog.info("# of texture units: "+tu[0]);			
 		}
 		
 //		otime = System.currentTimeMillis();
@@ -605,7 +605,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			for (int i = 0; i<NUM_DLISTS; ++i) {
 				if (dl[i] != -1) {
 					globalGL.glDeleteLists(dl[i], 1);
-					JOGLConfiguration.theLog.log(Level.FINER, "Deleting display list "+dl[i]);
+//					JOGLConfiguration.theLog.log(Level.FINER, "Deleting display list "+dl[i]);
 					dl[i] = -1;
 				}
 			}	
@@ -1084,7 +1084,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		}
 		
 		public void appearanceChanged(AppearanceEvent ev) {
-			Iterator iter = peers.iterator();
 			String key = ev.getKey();
 			int changed = 0;
 			boolean propagates = true;
@@ -1095,9 +1094,11 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 					LINES_CHANGED);
 			else if (key.indexOf("pointRadius") != -1) changed |= (POINTS_CHANGED);
 			else if (key.indexOf("anyDisplayLists") != -1) changed |= (POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
+			// there are some appearances which we know aren't inherited, so don't propagate change event.
 			if (key.indexOf(CommonAttributes.BACKGROUND_COLOR) != -1	||
 				key.indexOf("fog") != -1) propagates = false;
 				
+			Iterator iter = peers.iterator();
 			while (iter.hasNext())	{
 				JOGLPeerComponent peer = (JOGLPeerComponent) iter.next();
 				if (propagates) peer.appearanceChanged(ev);
@@ -1287,8 +1288,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			
 			theLog.log(Level.FINE,"In JOGLPeerComponent render() for "+goBetween.getOriginalComponent().getName());
 			if (thisT != null)	{
-				globalGL.glPushMatrix();
 				if (stackDepth <= MAX_STACK_DEPTH) {
+					globalGL.glPushMatrix();
 					globalGL.glMultTransposeMatrixd(thisT.getMatrix());
 					stackDepth++;
 				}
@@ -1326,8 +1327,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			}
 			
 			if (thisT != null)	{
-				globalGL.glPopMatrix();			
 				if (stackDepth <= MAX_STACK_DEPTH) {
+					globalGL.glPopMatrix();			
 					stackDepth--;
 				}
 			}			
