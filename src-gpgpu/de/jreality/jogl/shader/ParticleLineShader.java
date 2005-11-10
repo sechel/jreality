@@ -23,9 +23,7 @@ public class ParticleLineShader implements LineShader {
   private Color diffuseColor;
   private static float[] difCol=new float[4];
   
-  static private float[] data;
-
-  static float[] vortexData;
+  static private float[] data=new float[0];
   
   static float[] mat = new float[16];
   static {
@@ -34,19 +32,17 @@ public class ParticleLineShader implements LineShader {
   
   boolean debug;
   
-  static IndexedLineSet ils;
   static float[] particles=new float[0];
   static boolean setParticles;
   
-  static double dt;
-  static float velocityFator;
+  static float[] vortexData=new float[0];
+  static boolean setVortexData;
   
   public boolean providesProxyGeometry() {
     return true;
   }
 
   public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig, boolean useDisplayLists) {
-    ils = (IndexedLineSet) original;
     return -1;
   }
 
@@ -55,12 +51,15 @@ public class ParticleLineShader implements LineShader {
     debug = eap.getAttribute(ShaderUtility.nameSpace(name, "debug"), false);
     diffuseColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COLOR),CommonAttributes.DIFFUSE_COLOR_DEFAULT);
     diffuseColor.getComponents(difCol);
-    dt = eap.getAttribute(ShaderUtility.nameSpace(name, "dt"), 0.001);
-    velocityFator = (float) eap.getAttribute(ShaderUtility.nameSpace(name, "velocityFator"), 0.1);
     float[] parts = (float[]) eap.getAttribute(ShaderUtility.nameSpace(name,"particles"), particles);
     if (parts != particles) {
       particles = parts;
       setParticles = true;
+    }
+    float[] rkData = (float[]) eap.getAttribute(ShaderUtility.nameSpace(name,"rungeKuttaData"), vortexData);
+    if (rkData != vortexData) {
+      vortexData = rkData;
+      setVortexData = true;
     }
   }
 
@@ -70,14 +69,11 @@ public class ParticleLineShader implements LineShader {
       v.setParticles(particles);
       setParticles=false;
     }
-    data = (float[]) v.getCurrentParticlePositions(data).clone();
-    if (ils != null) {
-      float[] d = (float[]) ils.getGeometryAttributes(Attribute.attributeForName("rungeKuttaData"));
-      if (d != null && d != vortexData) {
-        vortexData = d;
-        v.setVortexData(d);
-      }
+    if (setVortexData) {
+      v.setVortexData(vortexData);
+      setVortexData=false;
     }
+    data = v.getCurrentParticlePositions(data);
   }
 
   public void render(JOGLRenderer jr) {

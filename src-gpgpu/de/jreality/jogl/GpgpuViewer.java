@@ -8,27 +8,18 @@ import java.nio.FloatBuffer;
 import java.util.Random;
 import java.util.logging.Level;
 
-import de.jreality.jogl.Viewer.MultisampleChooser;
-import de.jreality.jogl.shader.GlslLoader;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.IndexedLineSet;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DoubleArray;
-import de.jreality.scene.data.DoubleArrayArray;
-import de.jreality.scene.data.IntArray;
-import de.jreality.scene.data.IntArrayArray;
-import de.jreality.shader.GlslProgram;
-import de.jreality.util.Input;
-
 import net.java.games.jogl.DebugGL;
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCapabilities;
-import net.java.games.jogl.GLCapabilitiesChooser;
 import net.java.games.jogl.GLDrawable;
 import net.java.games.jogl.GLDrawableFactory;
 import net.java.games.jogl.GLU;
+import de.jreality.jogl.shader.GlslLoader;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.shader.GlslProgram;
+import de.jreality.util.Input;
 
 public class GpgpuViewer extends Viewer {
 
@@ -81,7 +72,6 @@ public class GpgpuViewer extends Viewer {
   private boolean particlesChanged;
   private boolean particlesTexSizeChanged;
 
-  private boolean numVorticesChanged;
   private boolean vortexDataChanged;
   private boolean vortexTexSizeChanged;
 
@@ -90,6 +80,8 @@ public class GpgpuViewer extends Viewer {
   private boolean recompilePrograms;
 
   private int numFloats;
+
+private int statsInterval=100;
 
   public GpgpuViewer() {
     super();
@@ -150,7 +142,7 @@ public class GpgpuViewer extends Viewer {
   public void display(GLDrawable drawable) {
       if (doIntegrate && hasVortices && hasParticles) {
         cnt++;
-        if (cnt == 1000) {
+        if (cnt == statsInterval) {
           long t = System.currentTimeMillis();
           if (st != 0) System.out.println("cps="+ (((double)cnt)/(0.001*(t-st)) ) );
           st = System.currentTimeMillis();
@@ -607,13 +599,13 @@ public class GpgpuViewer extends Viewer {
   }
 
   public void setVortexData(float[] vortData) {
+	  //System.out.println("GpgpuViewer.setVortexData()");
       if (vortData == null || vortData.length == 0) {
         hasVortices = false;
         return;
       }
       if (this.vorts0 == null || this.vorts0.length != vortData.length) {
         this.vorts0 = (float[]) vortData.clone();
-        numVorticesChanged=true;
         int texSize = texSize((vortData.length-1)/(3*4));
         if (texSize != vortexTextureHeight) {
           System.out.println("[setVortexData] new vortex tex size="+texSize);
@@ -680,26 +672,6 @@ public class GpgpuViewer extends Viewer {
     }
   }
     
-  private static void printInfoLog(String name, int objectHandle, GL gl) {
-    int[] logLength = new int[1];
-    int[] charsWritten = new int[1];
-    byte[] infoLog;
-
-    gl.glGetObjectParameterivARB(objectHandle,
-        GL.GL_OBJECT_INFO_LOG_LENGTH_ARB, logLength);
-
-    if (logLength[0] > 0) {
-      infoLog = new byte[logLength[0]];
-      gl.glGetInfoLogARB(objectHandle, logLength[0], charsWritten, infoLog);
-      StringBuffer foo = new StringBuffer(charsWritten[0]);
-
-      for (int i = 0; i < charsWritten[0]; ++i)
-        foo.append((char) infoLog[i]);
-      if (foo.length() > 0)
-        System.out.println("[" + name + "] GLSL info log: " + foo.toString());
-    }
-  }
-
   public double getDt() {
     return dt;
   }
@@ -707,5 +679,13 @@ public class GpgpuViewer extends Viewer {
   public void setDt(double dt) {
     this.dt = dt;
   }
+
+public int getStatsInterval() {
+	return statsInterval;
+}
+
+public void setStatsInterval(int statsInterval) {
+	this.statsInterval = statsInterval;
+}
 
 }

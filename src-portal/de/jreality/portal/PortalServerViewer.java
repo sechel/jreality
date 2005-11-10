@@ -54,6 +54,11 @@ public class PortalServerViewer implements de.jreality.scene.Viewer {
 	SMRJMirrorScene proxyScene;
   final Lock renderLock = new Lock();
   
+	public PortalServerViewer(RemoteFactory factory, Class viewerClass) throws IOException,
+	MalformedURLException, RemoteException, NotBoundException {
+      init(factory, viewerClass);
+    }
+
 	public PortalServerViewer(RemoteFactory factory) throws IOException,
 			MalformedURLException, RemoteException, NotBoundException {
     init(factory, Viewer.class);

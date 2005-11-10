@@ -148,6 +148,9 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
         for (Iterator i = ev.getChangedVertexAttributes().iterator(); i
                 .hasNext();) {
             Attribute a = (Attribute) i.next();
+            if (a.getName().equals("rungeKuttaData")) {
+            	System.out.println("transfering RK data!");
+            }
             DataList dl = ((PointSet) src).getVertexAttributes(a);
             if (ByteBufferList.canCopy(dl)) {
             	ByteBufferList copy = ByteBufferList.createByteBufferCopy(dl);

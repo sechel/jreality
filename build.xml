@@ -166,7 +166,7 @@
         <exclude name="**/*.gif"/>
       </fileset>
     </copy>
-    <jar jarfile="${dist}/jReality-gpgpu.jar" basedir="${build}/gpgpu" />
+    <jar jarfile="${dist}/jReality-gpgpu.jar" basedir="${build}/gpgpu" includes="de/jreality/jogl/**"/>
   </target>
 
 	<!--target name="testjogl" depends="core, soft, jogl, jogl-deps" description="build jogl tests">
