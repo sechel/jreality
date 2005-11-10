@@ -27,23 +27,21 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.logging.Level;
 
-import szg.framework.event.HeadEvent;
-import szg.framework.event.HeadMotionListener;
-import szg.framework.event.remote.RemoteEventQueueImpl;
-import de.jreality.math.Rn;
-import de.jreality.scene.*;
+import de.jreality.jogl.Viewer;
+import de.jreality.scene.Drawable;
+import de.jreality.scene.Lock;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.scene.proxy.smrj.SMRJMirrorScene;
-import de.jreality.util.LoggingSystem;
 import de.smrj.RemoteFactory;
 
 /**
  * @author weissman
  * 
  */
-public class PortalServerViewer implements Viewer {
+public class PortalServerViewer implements de.jreality.scene.Viewer {
 
   SceneGraphComponent root;
   SceneGraphComponent auxRoot;
@@ -58,14 +56,18 @@ public class PortalServerViewer implements Viewer {
   
 	public PortalServerViewer(RemoteFactory factory) throws IOException,
 			MalformedURLException, RemoteException, NotBoundException {
-		this.factory = factory;
-		clients = (RemoteJoglViewer) factory.createRemoteViaStaticMethod(
-				PortalJoglClientViewer.class, PortalJoglClientViewer.class,
-				"getInstance");
-		proxyScene = new SMRJMirrorScene(factory, renderLock);
+    init(factory, Viewer.class);
 	}
 
-	public SceneGraphComponent getSceneRoot() {
+  public void init(RemoteFactory factory, Class viewerClass) throws IOException {
+    this.factory = factory;
+    clients = (RemoteJoglViewer) factory.createRemoteViaStaticMethod(
+        PortalJoglClientViewer.class, PortalJoglClientViewer.class,
+        "getInstance", new Class[]{Class.class}, new Object[]{viewerClass});
+    proxyScene = new SMRJMirrorScene(factory, renderLock);
+  }
+  
+  public SceneGraphComponent getSceneRoot() {
 		return root;
 	}
 

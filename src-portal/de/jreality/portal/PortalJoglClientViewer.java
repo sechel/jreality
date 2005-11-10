@@ -36,7 +36,6 @@ import de.jreality.jogl.Viewer;
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.math.P3;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -77,17 +76,34 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
 
   boolean hasSceneRoot;
 
-  private static final class Singleton {
-    private static final PortalJoglClientViewer instance = new PortalJoglClientViewer();
-  }
-
+  private static PortalJoglClientViewer instance;
+  private static final Object MUTEX=new Object();
+  private static boolean inited=false;
+  
   public static PortalJoglClientViewer getInstance() {
-    Singleton.instance.initFrame();
-    return Singleton.instance;
+    try {
+      return getInstance(Viewer.class);
+    } catch (InstantiationException e) {
+    } catch (IllegalAccessException e) {
+    }
+    throw new Error();
   }
 
-  private PortalJoglClientViewer() {
-    viewer = new de.jreality.jogl.Viewer();
+  public static PortalJoglClientViewer getInstance(Class delegatedViewerType) throws InstantiationException, IllegalAccessException {
+    synchronized (MUTEX) {
+      if (!inited) {
+          Viewer v = (Viewer) delegatedViewerType.newInstance();
+          instance = new PortalJoglClientViewer(v);
+          inited=true;
+      }
+    }
+    if (instance.viewer.getClass() != delegatedViewerType) throw new IllegalStateException("viewer class change impossible");
+    instance.initFrame();
+    return instance;
+  }
+  
+  private PortalJoglClientViewer(Viewer viewer) {
+    this.viewer=viewer;
     config = ConfigurationAttributes.getDefaultConfiguration();
     // frame settings
     frame = new JFrame(config.getProperty("frame.title", "no title"));

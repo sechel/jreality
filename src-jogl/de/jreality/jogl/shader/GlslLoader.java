@@ -174,4 +174,20 @@ public class GlslLoader {
     }
   }
 
+  public static void dispose(GL gl, GlslProgram prog) {
+    ProgramContext context = getContext(gl, prog);
+    if (context == null) {
+      System.out.println("Context NULL while disposing!!!");
+      return;
+    }
+    Integer id = context.progID;
+    if (id == null) {
+      System.out.println("id NULL while disposing!!!");
+      return;
+    }
+    gl.glDeleteProgramsARB(1, new int[]{id.intValue()});
+    WeakHashMap glContexts = (WeakHashMap) GL_TO_GLSL.get(gl);
+    glContexts.remove(prog.getSource());
+  }
+
 }
