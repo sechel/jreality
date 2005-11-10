@@ -220,7 +220,7 @@ public final class Readers
       format = "3DS";
     } else if (lc.endsWith(".jvx")) {
       format = "JVX";
-    } else if (lc.endsWith("off") || lc.endsWith("mesh") || lc.endsWith("vect") || lc.endsWith("bez") 
+    } else if (lc.endsWith("off") || lc.endsWith("quad") || lc.endsWith("mesh") || lc.endsWith("vect") || lc.endsWith("bez") 
         || lc.endsWith(".grp") || lc.endsWith(".oogl") || lc.endsWith(".list") || lc.endsWith("inst")){
       format = "OOGL";
     }
