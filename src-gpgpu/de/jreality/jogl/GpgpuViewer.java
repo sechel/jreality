@@ -385,37 +385,37 @@ public class GpgpuViewer extends Viewer {
         String cst = "const int cnt="+vortexTextureWidth+";\n";
         String biotSavart="";
         System.out.println("recompiling program: prefix="+cst);
-        LineNumberReader lnr = new LineNumberReader(Input.getInput("/homes/geometer/weissman/dipl/software/glsl/biot_savart-impl.glsl").getReader());
+        LineNumberReader lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("biot_savart-impl.glsl")).getReader());
         for (String line=lnr.readLine(); line != null; line=lnr.readLine()) biotSavart += line+"\n";
         lnr.close();
         
         String rk = "\n";
         // read RK-1
-        lnr = new LineNumberReader(Input.getInput("/homes/geometer/weissman/dipl/software/glsl/RK-1.glsl").getReader());
+        lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("RK-1.glsl")).getReader());
         for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
         progK1 = new GlslProgram(new Appearance(), "foo", null, cst+rk+biotSavart);
         
         rk = "\n";
         // read RK-2
-        lnr = new LineNumberReader(Input.getInput("/homes/geometer/weissman/dipl/software/glsl/RK-2.glsl").getReader());
+        lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("RK-2.glsl")).getReader());
         for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
         progK2 = new GlslProgram(new Appearance(), "foo", null, cst+rk+biotSavart);
 
         rk = "\n";
         // read RK-3
-        lnr = new LineNumberReader(Input.getInput("/homes/geometer/weissman/dipl/software/glsl/RK-3.glsl").getReader());
+        lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("RK-3.glsl")).getReader());
         for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
         progK3 = new GlslProgram(new Appearance(), "foo", null, cst+rk+biotSavart);
 
         rk = "\n";
         // read RK-4
-        lnr = new LineNumberReader(Input.getInput("/homes/geometer/weissman/dipl/software/glsl/RK-4.glsl").getReader());
+        lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("RK-4.glsl")).getReader());
         for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
         progK4 = new GlslProgram(new Appearance(), "foo", null, cst+rk+biotSavart);
 
         rk = "\n";
         // read RK-merge
-        lnr = new LineNumberReader(Input.getInput("/homes/geometer/weissman/dipl/software/glsl/RK-merge.glsl").getReader());
+        lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("RK-merge.glsl")).getReader());
         for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
         progMerge = new GlslProgram(new Appearance(), "foo", null, rk);
 

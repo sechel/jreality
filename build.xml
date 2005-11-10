@@ -12,6 +12,7 @@
   <property name="soft" location="src-soft" />
   <property name="renderman" location="src-renderman" />
   <property name="jogl" location="src-jogl" />
+  <property name="gpgpu" location="src-gpgpu" />
   <property name="jsyzygy" location="src-jsyzygy" />
   <property name="portal" location="src-portal" />
   <property name="proxies" location="src-proxies" />
@@ -48,6 +49,13 @@
     </fileset>
   </path>
 
+  <path id="gpgpu.classpath">
+    <path refid="jogl.classpath"/>
+    <fileset dir="dist">
+      <include name="jReality-jogl.jar"/>
+    </fileset>
+  </path>
+	
   <path id="tests.classpath">
     <path refid="proxies.classpath"/>
     <fileset dir="lib">
@@ -146,7 +154,22 @@
     <jar jarfile="${dist}/jReality-jogl.jar" basedir="${build}/jogl" />
   </target>
 
-  <!--target name="testjogl" depends="core, soft, jogl, jogl-deps" description="build jogl tests">
+  <target name="gpgpu" depends="jogl" description="build gpgpu backend">
+    <mkdir dir="${build}/gpgpu" />
+    <javac excludesfile="excludes.txt" srcdir="${gpgpu}"  destdir="${build}/gpgpu" debug="true">
+      <compilerarg line="-source 1.4" />
+      <classpath refid="gpgpu.classpath"/>
+    </javac>
+    <copy todir="build/gpgpu"> <!-- copy shader progs -->
+      <fileset dir="src-gpgpu">
+        <exclude name="**/*.java"/>
+        <exclude name="**/*.gif"/>
+      </fileset>
+    </copy>
+    <jar jarfile="${dist}/jReality-gpgpu.jar" basedir="${build}/gpgpu" />
+  </target>
+
+	<!--target name="testjogl" depends="core, soft, jogl, jogl-deps" description="build jogl tests">
     <mkdir dir="${build}/testjogl" />
     <javac excludesfile="excludes.txt" srcdir="${testjogl}"  destdir="${build}/testjogl" debug="true">
       <compilerarg line="-source 1.4" />
