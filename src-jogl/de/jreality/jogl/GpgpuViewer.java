@@ -1,243 +1,492 @@
 package de.jreality.jogl;
 
 import java.io.IOException;
+import java.io.LineNumberReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.Random;
+import java.util.logging.Level;
 
+import de.jreality.jogl.Viewer.MultisampleChooser;
 import de.jreality.jogl.shader.GlslLoader;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.data.DoubleArrayArray;
+import de.jreality.scene.data.IntArray;
+import de.jreality.scene.data.IntArrayArray;
 import de.jreality.shader.GlslProgram;
 import de.jreality.util.Input;
 
 import net.java.games.jogl.DebugGL;
 import net.java.games.jogl.GL;
+import net.java.games.jogl.GLCapabilities;
+import net.java.games.jogl.GLCapabilitiesChooser;
 import net.java.games.jogl.GLDrawable;
+import net.java.games.jogl.GLDrawableFactory;
 import net.java.games.jogl.GLU;
 
 public class GpgpuViewer extends Viewer {
 
-  private static final boolean ATI=true;
+  private boolean doIntegrate;
+  
+  private static final boolean ATI=false;
   
   private static final boolean dump=false;
+
+  private static final Object MUTEX = new Object();
   
   //private static int TEX_TARGET = GL.GL_TEXTURE_2D;
   private static int TEX_TARGET = ATI ? GL.GL_TEXTURE_2D : GL.GL_TEXTURE_RECTANGLE_ARB;
   private static int TEX_INTERNAL_FORMAT = ATI ? GL.GL_RGBA32F_ARB : GL.GL_FLOAT_RGBA32_NV;
   private static int TEX_FORMAT = GL.GL_RGBA;
   
-  //    String vert = "void main(void) { gl_Position = ftransform(); }";
-  static String[] frag = ATI ? new String[] { "uniform sampler2D textureY;"
-    + "uniform sampler2D textureX;" + "uniform float alpha;"
-    + "void main(void) { "
-    + "vec4 y = texture2D(textureY, gl_TexCoord[0].st);"
-    + "vec4 x = texture2D(textureX, gl_TexCoord[0].st);"
-    + "gl_FragColor = y + alpha*x;" + "}" }
+  // performance check variables
+  int cnt;
+  long st;
+    
+  GlslProgram progK1;
+  GlslProgram progK2;
+  GlslProgram progK3;
+  GlslProgram progK4;
+  GlslProgram progMerge;
   
-  :
-    
-    new String[] { "uniform samplerRect textureY;\n"
-      + "uniform samplerRect textureX;\n" + "uniform float alpha;\n"
-      + "void main(void) { "
-      + "vec4 y = textureRect(textureY, gl_TexCoord[0].st);"
-      + "vec4 x = textureRect(textureX, gl_TexCoord[0].st);"
-      + "gl_FragColor = x;" + "}" };
-
-    
-    
-    int cnt;
-    long st;
-    
-    GlslProgram prog;//= new GlslProgram(new Appearance(), "foo", (String[])null, frag);
-    {
-      try {
-        prog= new GlslProgram(new Appearance(), "foo", null, Input.getInput("../../dipl/software/glsl/biot_savart.glsl"));
-      } catch (IOException ioe) {
-        ioe.printStackTrace();
-      }
-    }
-  private int theWidth=1;
-  private int theHeight=theWidth;
-  int vortexTextureSize=2;
-
-  private int[] fbos = new int[1];
-  private int[] yTexs = new int[2];
-  private int[] xTexs = new int[1];
-
-  private int[] attachmentpoints = new int[] { GL.GL_COLOR_ATTACHMENT0_EXT, GL.GL_COLOR_ATTACHMENT1_EXT };
-
-  int readTex, writeTex = 1;
-
-  private float[] Y = new float[theWidth * theHeight * 4];
-
+  private boolean programsLoaded;  
   
-  private FloatBuffer read = ByteBuffer.allocateDirect(
-      theWidth * theHeight * 4 * 4).order(ByteOrder.nativeOrder())
-      .asFloatBuffer();
+  private int theWidth;
+  private int theHeight;
+  private int vortexTextureWidth;
+  private int vortexTextureHeight;
 
-  private int numIts = 1;
-  float[] X = new float[vortexTextureSize*vortexTextureSize*4];
+  private int[] fbos = new int[1]; // 1 framebuffer
+  private int[] particleTexs = new int[2]; // ping pong textures
+  private int[] intermediateTexs = new int[4]; // ping pong textures
+  private int[] vortexTexs = new int[3]; // vortex polygons
 
-  {
-    for (int i = 0; i < Y.length; i++) {
-      Y[i] = (float)i; //(i%4 == 3) ? 1.0f : (float) (1.3+0.01*i);
-//      X[i] = 0.1f;
+  private int readTex, writeTex = 1;
+
+  boolean writeData=false;
+  
+  private FloatBuffer particleBuffer;
+  float[] vorts0;
+  private FloatBuffer vortexBuffer;
+  
+  private boolean hasVortices;
+  private boolean hasParticles;
+
+  private boolean particlesChanged;
+  private boolean particlesTexSizeChanged;
+
+  private boolean numVorticesChanged;
+  private boolean vortexDataChanged;
+  private boolean vortexTexSizeChanged;
+
+  private double dt=0.001;
+
+  private boolean recompilePrograms;
+
+  private int numFloats;
+
+  public GpgpuViewer() {
+    super();
+    JOGLConfiguration.portalUsage=true;
+  }
+
+  public GpgpuViewer(boolean writeData) {
+    this();
+    this.writeData=writeData;
+    Random rand = new Random();
+    int numParticles = 1;
+    float[] particles = new float[numParticles*4];
+    for (int i = 0; i < numParticles; i++) {
+      float len = 2*(rand.nextFloat()-0.5f);
+      particles[4*i] = len * (rand.nextFloat()-0.5f);
+      particles[4*i+1] = len * (rand.nextFloat()-0.5f);
+      particles[4*i+2] = 1+ len * (rand.nextFloat()-0.5f);
+      particles[4*i+3] = 1;
     }
+    setParticles(particles);
+    
+    int numEdges=3;
+    float[] vorts = new float[numEdges*4*3];
+    for (int i = 0; i < numEdges; i++) {
+      vorts[4*i] = (float) Math.cos(2*i*Math.PI/(numEdges-1));
+      vorts[4*i+1] = (float) Math.sin(2*i*Math.PI/(numEdges-1));
+      vorts[4*i+3] = i == 0 ? 0 : 1;
+    }
+    System.arraycopy(vorts, 0, vorts, numEdges*4, numEdges*4);
+    System.arraycopy(vorts, 0, vorts, numEdges*8, numEdges*4);
+    setVortexData(vorts);
   }
   
-  {
-    int numPts = vortexTextureSize*vortexTextureSize;
-    for (int i = 0; i < numPts; i++) {
-      X[4*i] = (float) Math.sin(2*i*Math.PI/numPts);
-      X[4*i+1] = (float) Math.cos(2*i*Math.PI/numPts);
-      X[4*i+3] = 1f;
-    }
+  protected void initializeFrom(SceneGraphComponent r, SceneGraphPath p)  {
+    setSceneRoot(r);
+    setCameraPath(p);
+    GLCapabilities caps = new GLCapabilities();
+    caps.setAlphaBits(8);
+    caps.setOffscreenRenderToTexture(true);
+    caps.setOffscreenFloatingPointBuffers(true);
+    caps.setOffscreenRenderToTextureRectangle(true);
+//    if (JOGLConfiguration.multiSample)  {
+//      GLCapabilitiesChooser chooser = new MultisampleChooser();
+//      caps.setSampleBuffers(true);
+//      caps.setNumSamples(4);
+//      canvas = GLDrawableFactory.getFactory().createGLCanvas(caps, chooser, firstOne);
+//    } else {
+      canvas = GLDrawableFactory.getFactory().createGLCanvas(caps, null, firstOne);
+      System.out.println("canvas caps="+canvas);
+//    }
+        JOGLConfiguration.getLogger().log(Level.INFO, "Caps is "+caps.toString());
+    canvas.addGLEventListener(this);
+    canvas.requestFocus();
+    if (JOGLConfiguration.sharedContexts && firstOne == null) firstOne = canvas;
   }
+
 
   public void display(GLDrawable drawable) {
-    cnt++;
-    if (cnt == 20) {
-      long t = System.currentTimeMillis();
-      if (st != 0) System.out.println("cps="+ (((double)cnt)/(0.001*(t-st)) ) );
-      st = System.currentTimeMillis();
-      cnt=0;
-    }
-    GL gl = new DebugGL(drawable.getGL());
-    GLU glu = drawable.getGLU();
-    initFBO(gl);
-    initViewport(gl, glu);
-    initTextures(gl);
-    //prog.setUniform("tex0", 0);
-    //prog.setUniform("vort", 1);
+      if (doIntegrate && hasVortices && hasParticles) {
+        cnt++;
+        if (cnt == 1000) {
+          long t = System.currentTimeMillis();
+          if (st != 0) System.out.println("cps="+ (((double)cnt)/(0.001*(t-st)) ) );
+          st = System.currentTimeMillis();
+          cnt=0;
+        }
+        GL gl = new DebugGL(drawable.getGL());
+        GLU glu = drawable.getGLU();
+        initPrograms(gl);
+        initFBO(gl);
+        initViewport(gl, glu);
+        initTextures(gl);
+        
+        progK1.setUniform("particles", 0);
+        progK1.setUniform("vorticity", 1);
+  
+        progK2.setUniform("particles", 0);
+        progK2.setUniform("vorticity", 1);
+        progK2.setUniform("K1", 2);
+        progK2.setUniform("h", dt);
+        
+        progK3.setUniform("particles", 0);
+        progK3.setUniform("vorticity", 1);
+        progK3.setUniform("K2", 2);
+        progK3.setUniform("h", dt);
+  
+        progK4.setUniform("particles", 0);
+        progK4.setUniform("vorticity", 1);
+        progK4.setUniform("K3", 2);
+        progK4.setUniform("h", dt);
+  
+        progMerge.setUniform("particles", 0);
+        progMerge.setUniform("K1", 1);
+        progMerge.setUniform("K2", 2);
+        progMerge.setUniform("K3", 3);
+        progMerge.setUniform("K4", 4);
+        progMerge.setUniform("h", dt);
+        
+        GlslLoader.render(progK1, drawable);  
+  
+        synchronized (MUTEX) {
+          // first eval
+          gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+              GL.GL_COLOR_ATTACHMENT0_EXT, TEX_TARGET, intermediateTexs[0], 0);      
+          checkBuf(gl);
+          gl.glFinish();
+          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+          
+          // enable particles 
+          gl.glActiveTexture(GL.GL_TEXTURE0);
+          gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
+          
+          // enable vorticities
+          gl.glActiveTexture(GL.GL_TEXTURE1);
+          gl.glBindTexture(TEX_TARGET, vortexTexs[0]);
+          
+          renderQuad(gl);
+          
+          GlslLoader.render(progK2, drawable);
     
-    GlslLoader.render(prog, drawable);
-
-    performCalculation(gl);
-
-    if (dump) System.out.println("calc done");
+          // second eval
+          gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+              GL.GL_COLOR_ATTACHMENT0_EXT, TEX_TARGET, intermediateTexs[1], 0);      
+          checkBuf(gl);
+          gl.glFinish();
+          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+          
+          // enable particles 
+          gl.glActiveTexture(GL.GL_TEXTURE0);
+          gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
+          
+          // enable vorticities
+          gl.glActiveTexture(GL.GL_TEXTURE1);
+          gl.glBindTexture(TEX_TARGET, vortexTexs[1]);
     
-    transferFromTexture(gl, read);
-    dumpData(read);
-
-    // switch back to old buffer
-    gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, 0);
-    //gl.glUseProgramObjectARB(0);
-
-    GlslLoader.postRender(prog, drawable);
+          // enable K1
+          gl.glActiveTexture(GL.GL_TEXTURE2);
+          gl.glBindTexture(TEX_TARGET, intermediateTexs[0]);
+          
+          renderQuad(gl);
     
-    //gl.glDeleteFramebuffersEXT(1, fbos);
-
-    //System.exit(0);
-
-    //super.display(drawable);
-  }
-
-  private void dumpData(float[] data) {
-    for (int i = 0; i < data.length; i++)
-      System.out.print(data[i] + ", ");
-    System.out.println();
-  }
-
-  private void dumpData(FloatBuffer data) {
-    for (int i = 0; i < data.capacity(); i++)
-      System.out.print(data.get(i) + ", ");
-    System.out.println();
-  }
-
-  private void performCalculation(GL gl) {
-    if (dump) System.out.println("attatching first buffer...");
-    // attach two textures to FBO
-    gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-        attachmentpoints[writeTex], TEX_TARGET, yTexs[writeTex], 0);
-    if (dump) System.out.println("...done. attatching second buffer...");
-    gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-        attachmentpoints[readTex], TEX_TARGET, yTexs[readTex], 0);
-    // check if that worked
-    if (dump) System.out.println("...done.");
-    checkBuf(gl);
-    if (dump) System.out.println("checked buffer status");
-
-    gl.glFinish();
-
-    if (dump) System.out.println("starting calc loop...");
+          GlslLoader.render(progK3, drawable);
+          
+          // third eval
+          gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+              GL.GL_COLOR_ATTACHMENT0_EXT, TEX_TARGET, intermediateTexs[2], 0);      
+          checkBuf(gl);
+          gl.glFinish();
+          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+          
+          // enable particles
+          gl.glActiveTexture(GL.GL_TEXTURE0);
+          gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
+          
+          // enable vorticities
+          gl.glActiveTexture(GL.GL_TEXTURE1);
+          gl.glBindTexture(TEX_TARGET, vortexTexs[1]);
     
-    for (int i = 0; i < numIts; i++) {
-      gl.glDrawBuffer(attachmentpoints[writeTex]);
-      if (dump) System.out.println("set glDrawBuffer");
-      // enable texture y_old (read-only)
-      gl.glActiveTexture(GL.GL_TEXTURE0);
-      gl.glBindTexture(TEX_TARGET, yTexs[readTex]);
-      //gl.glUniform1iARB(yParam, 0); // texunit 0
-      if (dump) System.out.println("set yParam");
-      // enable texture x (read-only)
-      gl.glActiveTexture(GL.GL_TEXTURE1);
-      gl.glBindTexture(TEX_TARGET, xTexs[0]);
-      //gl.glUniform1iARB(xParam, 1); // texunit 1
-      if (dump) System.out.println("set xParam");
-      // enable scalar alpha
-      //gl.glUniform1fARB(alphaParam, alpha);
-      
-      if (dump) System.out.println("set alpha");
-      
-      // and render multitextured viewport-sized quad
-      // depending on the texture target, switch between
-      // normalised ([0,1]^2) and unnormalised ([0,w]x[0,h])
-      // texture coordinates
+          // enable K2
+          gl.glActiveTexture(GL.GL_TEXTURE2);
+          gl.glBindTexture(TEX_TARGET, intermediateTexs[1]);
+          
+          renderQuad(gl);
+    
+          GlslLoader.render(progK3, drawable);
+          
+          // forth eval
+          gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+              GL.GL_COLOR_ATTACHMENT0_EXT, TEX_TARGET, intermediateTexs[3], 0);
+          checkBuf(gl);
+          gl.glFinish();
+          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+          
+          // enable particles
+          gl.glActiveTexture(GL.GL_TEXTURE0);
+          gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
+          
+          // enable vorticities
+          gl.glActiveTexture(GL.GL_TEXTURE1);
+          gl.glBindTexture(TEX_TARGET, vortexTexs[2]);
+    
+          // enable K3
+          gl.glActiveTexture(GL.GL_TEXTURE2);
+          gl.glBindTexture(TEX_TARGET, intermediateTexs[2]);      
+          
+          renderQuad(gl);
+    
+          GlslLoader.render(progMerge, drawable);
+          programsLoaded = true;
+          // merge step
+          gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+              GL.GL_COLOR_ATTACHMENT0_EXT, TEX_TARGET, particleTexs[writeTex], 0);      
+          checkBuf(gl);
+          gl.glFinish();
+          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+          
+          // enable particles
+          gl.glActiveTexture(GL.GL_TEXTURE0);
+          gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
+          
+          // enable K1
+          gl.glActiveTexture(GL.GL_TEXTURE1);
+          gl.glBindTexture(TEX_TARGET, intermediateTexs[0]);
+    
+          // enable K2
+          gl.glActiveTexture(GL.GL_TEXTURE2);
+          gl.glBindTexture(TEX_TARGET, intermediateTexs[1]);      
+          
+          // enable K3
+          gl.glActiveTexture(GL.GL_TEXTURE3);
+          gl.glBindTexture(TEX_TARGET, intermediateTexs[2]);      
+          
+          // enable K4
+          gl.glActiveTexture(GL.GL_TEXTURE4);
+          gl.glBindTexture(TEX_TARGET, intermediateTexs[3]);      
+    
+          renderQuad(gl);
+          
+          gl.glFinish();
+          
+          transferFromTexture(gl, particleBuffer);
+        
+          if (writeData) dumpData(particleBuffer);
+        }
 
-      // make quad filled to hit every pixel/texel
-      // (should be default but we never know)
-      gl.glPolygonMode(GL.GL_FRONT, GL.GL_FILL);
-
-      if (dump) System.out.println("polygon mode");
-
-      // and render the quad
-
-      gl.glBegin(GL.GL_QUADS);
-      if (TEX_TARGET == GL.GL_TEXTURE_RECTANGLE_ARB) {
-        gl.glTexCoord2d(0.0, 0.0);
-        gl.glVertex2d(0.0, 0.0);
-        gl.glTexCoord2d(theWidth, 0.0);
-        gl.glVertex2d(theWidth, 0.0);
-        gl.glTexCoord2d(theWidth, theHeight);
-        gl.glVertex2d(theWidth, theHeight);
-        gl.glTexCoord2d(0.0, theHeight);
-        gl.glVertex2d(0.0, theHeight);
-      } else {
-        if (dump) System.out.println("draw poly start");
-        gl.glTexCoord2d(0.0, 0.0);
-        gl.glVertex2d(0.0, 0.0);
-        gl.glTexCoord2d(1, 0.0);
-        gl.glVertex2d(theWidth, 0.0);
-        gl.glTexCoord2d(1, 1);
-        gl.glVertex2d(theWidth, theHeight);
-        gl.glTexCoord2d(0.0, 1);
-        gl.glVertex2d(0.0, theHeight);
-        if (dump) System.out.println("draw poly done");
+        // do swap
+        int tmp = readTex;
+        readTex = writeTex;
+        writeTex = tmp;
+    
+        // switch back to old buffer
+        gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, 0);
+  
+        GlslLoader.postRender(progK1, drawable); // any postRender just resets the shader pipeline
+        doIntegrate=false;
       }
-      if (dump) System.out.println("calling end.");
-      gl.glEnd();
+    super.display(drawable);
+  }
 
-      if (dump) System.out.println("swapping...");
-      // do swap
-      int tmp = readTex;
-      readTex = writeTex;
-      writeTex = tmp;
-      if (dump) System.out.println("done.");
+  private void renderQuad(GL gl) {
+    // and render multitextured viewport-sized quad
+    // depending on the texture target, switch between
+    // normalised ([0,1]^2) and unnormalised ([0,w]x[0,h])
+    // texture coordinates
+    
 
+    // make quad filled to hit every pixel/texel
+    // (should be default but we never know)
+    gl.glPolygonMode(GL.GL_FRONT, GL.GL_FILL);
+    
+    if (dump) System.out.println("polygon mode");
+    
+    // and render the quad
+    
+    gl.glBegin(GL.GL_QUADS);
+    if (TEX_TARGET == GL.GL_TEXTURE_RECTANGLE_ARB) {
+      gl.glTexCoord2d(0.0, 0.0);
+      gl.glVertex2d(0.0, 0.0);
+      gl.glTexCoord2d(theWidth, 0.0);
+      gl.glVertex2d(theWidth, 0.0);
+      gl.glTexCoord2d(theWidth, theHeight);
+      gl.glVertex2d(theWidth, theHeight);
+      gl.glTexCoord2d(0.0, theHeight);
+      gl.glVertex2d(0.0, theHeight);
+    } else {
+      if (dump) System.out.println("draw poly start");
+      gl.glTexCoord2d(0.0, 0.0);
+      gl.glVertex2d(0.0, 0.0);
+      gl.glTexCoord2d(1, 0.0);
+      gl.glVertex2d(theWidth, 0.0);
+      gl.glTexCoord2d(1, 1);
+      gl.glVertex2d(theWidth, theHeight);
+      gl.glTexCoord2d(0.0, 1);
+      gl.glVertex2d(0.0, theHeight);
+      if (dump) System.out.println("draw poly done");
     }
+    if (dump) System.out.println("calling end.");
+    gl.glEnd();
+  }
 
+  private void initPrograms(GL gl) {
+    if (recompilePrograms) {
+      if (programsLoaded) {
+        GlslLoader.dispose(gl, progK1);
+        GlslLoader.dispose(gl, progK2);
+        GlslLoader.dispose(gl, progK3);
+        GlslLoader.dispose(gl, progK4);
+        GlslLoader.dispose(gl, progMerge);
+      }
+      try {
+        
+        // read biot savart formula
+        String cst = "const int cnt="+vortexTextureWidth+";\n";
+        String biotSavart="";
+        System.out.println("recompiling program: prefix="+cst);
+        LineNumberReader lnr = new LineNumberReader(Input.getInput("/homes/geometer/weissman/dipl/software/glsl/biot_savart-impl.glsl").getReader());
+        for (String line=lnr.readLine(); line != null; line=lnr.readLine()) biotSavart += line+"\n";
+        lnr.close();
+        
+        String rk = "\n";
+        // read RK-1
+        lnr = new LineNumberReader(Input.getInput("/homes/geometer/weissman/dipl/software/glsl/RK-1.glsl").getReader());
+        for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
+        progK1 = new GlslProgram(new Appearance(), "foo", null, cst+rk+biotSavart);
+        
+        rk = "\n";
+        // read RK-2
+        lnr = new LineNumberReader(Input.getInput("/homes/geometer/weissman/dipl/software/glsl/RK-2.glsl").getReader());
+        for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
+        progK2 = new GlslProgram(new Appearance(), "foo", null, cst+rk+biotSavart);
+
+        rk = "\n";
+        // read RK-3
+        lnr = new LineNumberReader(Input.getInput("/homes/geometer/weissman/dipl/software/glsl/RK-3.glsl").getReader());
+        for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
+        progK3 = new GlslProgram(new Appearance(), "foo", null, cst+rk+biotSavart);
+
+        rk = "\n";
+        // read RK-4
+        lnr = new LineNumberReader(Input.getInput("/homes/geometer/weissman/dipl/software/glsl/RK-4.glsl").getReader());
+        for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
+        progK4 = new GlslProgram(new Appearance(), "foo", null, cst+rk+biotSavart);
+
+        rk = "\n";
+        // read RK-merge
+        lnr = new LineNumberReader(Input.getInput("/homes/geometer/weissman/dipl/software/glsl/RK-merge.glsl").getReader());
+        for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
+        progMerge = new GlslProgram(new Appearance(), "foo", null, rk);
+
+        programsLoaded = false;
+      } catch (IOException ioe) {
+        throw new Error("cant find program template!");
+      }
+      recompilePrograms=false;
+    }
   }
 
   private void initTextures(GL gl) {
-    if (yTexs[0] == 0) {
+    if (particlesTexSizeChanged) {
       gl.glEnable(TEX_TARGET);
-      gl.glGenTextures(2, yTexs);
-      setupTexture(gl, yTexs[0], theWidth, theHeight);
-      setupTexture(gl, yTexs[1], theWidth, theHeight);
-      transferToTexture(gl, Y, yTexs[readTex], theWidth, theHeight);
-      gl.glGenTextures(1, xTexs);
-      setupTexture(gl, xTexs[0], vortexTextureSize, vortexTextureSize);
-      transferToTexture(gl, X, xTexs[0], vortexTextureSize, vortexTextureSize);
+      if (particleTexs[0] != 0) {
+        gl.glDeleteTextures(2, particleTexs);
+        gl.glDeleteTextures(4, intermediateTexs);
+      }
+      gl.glGenTextures(2, particleTexs);
+      gl.glGenTextures(4, intermediateTexs);
+      setupTexture(gl, particleTexs[0], theWidth, theHeight);
+      setupTexture(gl, particleTexs[1], theWidth, theHeight);
+      setupTexture(gl, intermediateTexs[0], theWidth, theHeight);
+      setupTexture(gl, intermediateTexs[1], theWidth, theHeight);
+      setupTexture(gl, intermediateTexs[2], theWidth, theHeight);
+      setupTexture(gl, intermediateTexs[3], theWidth, theHeight);
+      particlesTexSizeChanged=false;
+      System.out.println("[initTextures] new particles tex size: "+theWidth);
+    }
+    if (particlesChanged) {
+      gl.glEnable(TEX_TARGET);
+      particleBuffer.clear();
+      transferToTexture(gl, particleBuffer, particleTexs[readTex], theWidth, theHeight);
+      System.out.println("[initTextures] new particle data");
+      particlesChanged=false;
+    }
+    if (vortexTexSizeChanged) {
+      gl.glEnable(TEX_TARGET);
+      if (vortexTexs[0] != 0) {
+        gl.glDeleteTextures(3, vortexTexs);
+      }
+      gl.glGenTextures(3, vortexTexs);
+      setupTexture(gl, vortexTexs[0], vortexTextureWidth, vortexTextureHeight);
+      setupTexture(gl, vortexTexs[1], vortexTextureWidth, vortexTextureHeight);
+      setupTexture(gl, vortexTexs[2], vortexTextureWidth, vortexTextureHeight);
+      vortexTexSizeChanged=false;
+      vortexBuffer = ByteBuffer.allocateDirect(vortexTextureWidth*vortexTextureHeight*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+      System.out.println("[initTextures] new vortex tex size: "+vortexTextureWidth);
+    }
+    if (vortexDataChanged) {
+      gl.glEnable(TEX_TARGET);
+      dt = vorts0[0];
+      int n = (vorts0.length-1)/3;
+      for(
+        vortexBuffer.position(n).limit(vortexBuffer.capacity());
+        vortexBuffer.hasRemaining();
+        vortexBuffer.put(0f)
+      );
+      vortexBuffer.position(0).limit(n);
+      vortexBuffer.put(vorts0, 1, n);
+      vortexBuffer.clear();
+      transferToTexture(gl, vortexBuffer, vortexTexs[0], vortexTextureWidth, vortexTextureHeight);
+      vortexBuffer.position(0).limit(n);
+      vortexBuffer.put(vorts0, n+1, n);
+      vortexBuffer.clear();
+      transferToTexture(gl, vortexBuffer, vortexTexs[1], vortexTextureWidth, vortexTextureHeight);
+      vortexBuffer.position(0).limit(n);
+      vortexBuffer.put(vorts0, 2*n+1, n);
+      vortexBuffer.clear();
+      transferToTexture(gl, vortexBuffer, vortexTexs[2], vortexTextureWidth, vortexTextureHeight);
+      vortexDataChanged=false;
     }
   }
 
@@ -258,7 +507,7 @@ public class GpgpuViewer extends Viewer {
   void transferFromTexture(GL gl, float[] data) {
     // version (a): texture is attached
     // recommended on both NVIDIA and ATI
-    gl.glReadBuffer(attachmentpoints[readTex]);
+    gl.glReadBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
     gl.glReadPixels(0, 0, theWidth, theHeight, TEX_FORMAT, GL.GL_FLOAT, data);
 
     // version b: texture is not neccessarily attached
@@ -273,23 +522,23 @@ public class GpgpuViewer extends Viewer {
   void transferFromTexture(GL gl, FloatBuffer data) {
     // version (a): texture is attached
     // recommended on both NVIDIA and ATI
-    gl.glReadBuffer(attachmentpoints[readTex]);
+    gl.glReadBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
     gl.glReadPixels(0, 0, theWidth, theHeight, TEX_FORMAT, GL.GL_FLOAT, data);
 
     // version b: texture is not neccessarily attached
-    //    glBindTexture(textureParameters.texTarget,yTexID[readTex]);
-    //    glGetTexImage(textureParameters.texTarget,0,textureParameters.texFormat,GL_FLOAT,data);
+//    gl.glBindTexture(TEX_TARGET, particleTexs[writeTex]);
+//    gl.glGetTexImage(TEX_TARGET, 0, TEX_FORMAT, GL.GL_FLOAT, data.clear());
 
   }
 
   /**
    * Transfers data to texture.
    */
-  void transferToTexture(GL gl, float[] data, int texID, int theWidth, int theHeight) {
+  void transferToTexture(GL gl, FloatBuffer buffer, int texID, int theWidth, int theHeight) {
     // version (a): HW-accelerated on NVIDIA
     gl.glBindTexture(TEX_TARGET, texID);
     gl.glTexSubImage2D(TEX_TARGET, 0, 0, 0, theWidth, theHeight, TEX_FORMAT,
-        GL.GL_FLOAT, data);
+        GL.GL_FLOAT, buffer);
 
     // version (b): HW-accelerated on ATI
     //    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, textureParameters.texTarget, texID, 0);
@@ -306,12 +555,6 @@ public class GpgpuViewer extends Viewer {
     gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, fbos[0]);
   }
 
-  private void checkBuf(GL gl) {
-    String res = checkFrameBufferStatus(gl);
-    if (!res.equals("OK"))
-      System.out.println(res);
-  }
-
   private void initViewport(GL gl, GLU glu) {
     gl.glMatrixMode(GL.GL_PROJECTION);
     gl.glLoadIdentity();
@@ -320,8 +563,98 @@ public class GpgpuViewer extends Viewer {
     gl.glLoadIdentity();
     gl.glViewport(0, 0, theWidth, theHeight);
   }
+  
+  public float[] getCurrentParticlePositions(float[] store) {
+    if (store == null || store.length != numFloats)
+      store = new float[numFloats];
+    synchronized (MUTEX) {
+      particleBuffer.position(0).limit(numFloats);
+      particleBuffer.get(store);
+    }
+    return store;
+  }
 
-  public static String checkFrameBufferStatus(GL gl) {
+  public void setParticles(float[] particles) {
+    System.out.println("GpgpuViewer.setParticles()");
+    if (numFloats != particles.length) {
+      int texSize = texSize(particles.length/4);
+      if (theWidth!=texSize || theHeight != texSize) {
+        System.out.println("[setParticles] new particles tex size="+texSize);
+        synchronized (MUTEX) {
+          particleBuffer = ByteBuffer.allocateDirect(texSize*texSize*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        }
+        theWidth=theHeight=texSize;
+        particlesTexSizeChanged=true;
+      }
+    }
+    numFloats = particles.length;
+    particleBuffer.position(0).limit(numFloats);
+    particleBuffer.put(particles);
+    
+    for(
+      particleBuffer.position(numFloats).limit(particleBuffer.capacity());
+      particleBuffer.hasRemaining();
+      particleBuffer.put(0f)
+    );
+    
+    particlesChanged=true;
+    hasParticles=true;
+  }
+  
+  private int texSize(int i) {
+    double fl = Math.floor(Math.sqrt(i));
+    return (int) ((fl*fl < i) ? fl+1 : fl);
+  }
+
+  public void setVortexData(float[] vortData) {
+      if (vortData == null || vortData.length == 0) {
+        hasVortices = false;
+        return;
+      }
+      if (this.vorts0 == null || this.vorts0.length != vortData.length) {
+        this.vorts0 = (float[]) vortData.clone();
+        numVorticesChanged=true;
+        int texSize = texSize((vortData.length-1)/(3*4));
+        if (texSize != vortexTextureHeight) {
+          System.out.println("[setVortexData] new vortex tex size="+texSize);
+          vortexTextureWidth=vortexTextureHeight=texSize;
+          vortexTexSizeChanged=recompilePrograms=true;
+        }
+        vortexDataChanged=true;
+      } else {
+        boolean changed=false;
+        for (int i = 0; i < vorts0.length; i++) {
+          if (!changed) {
+            if (vorts0[i] != vortData[i]) {
+              changed=true;
+              i--;
+            }
+          } else vorts0[i] = vortData[i];
+        }
+        vortexDataChanged = changed;
+      }
+      doIntegrate=hasVortices=true;
+  }
+
+  public static void dumpData(float[] data) {
+    for (int i = 0; i < data.length; i++)
+      System.out.print(data[i] + ", ");
+    System.out.println();
+  }
+
+  void dumpData(FloatBuffer data) {
+    for (int i = 0; i < data.capacity(); i++)
+      System.out.print(data.get(i) + ", ");
+    System.out.println();
+  }
+  
+  private void checkBuf(GL gl) {
+    String res = checkFrameBufferStatus(gl);
+    if (!res.equals("OK"))
+      System.out.println(res);
+  }
+
+  private static String checkFrameBufferStatus(GL gl) {
     int status = gl.glCheckFramebufferStatusEXT(GL.GL_FRAMEBUFFER_EXT);
     switch (status) {
     case GL.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENTS_EXT:
@@ -346,7 +679,7 @@ public class GpgpuViewer extends Viewer {
       return "FrameBuffer unreckognized error";
     }
   }
-
+    
   private static void printInfoLog(String name, int objectHandle, GL gl) {
     int[] logLength = new int[1];
     int[] charsWritten = new int[1];
@@ -365,6 +698,14 @@ public class GpgpuViewer extends Viewer {
       if (foo.length() > 0)
         System.out.println("[" + name + "] GLSL info log: " + foo.toString());
     }
+  }
+
+  public double getDt() {
+    return dt;
+  }
+
+  public void setDt(double dt) {
+    this.dt = dt;
   }
 
 }
