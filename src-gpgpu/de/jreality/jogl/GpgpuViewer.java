@@ -58,6 +58,7 @@ public class GpgpuViewer extends Viewer {
   private int[] intermediateTexs = new int[4]; // ping pong textures
   private int[] vortexTexs = new int[3]; // vortex polygons
 
+  private int[] attachments = {GL.GL_COLOR_ATTACHMENT0_EXT, GL.GL_COLOR_ATTACHMENT1_EXT};
   private int readTex, writeTex = 1;
 
   boolean writeData=false;
@@ -85,7 +86,7 @@ public class GpgpuViewer extends Viewer {
   
   static {
     //JOGLConfiguration.portalUsage=true;
-    JOGLConfiguration.multiSample=false;
+    //JOGLConfiguration.multiSample=false;
   }
 
   public GpgpuViewer() {
@@ -165,12 +166,17 @@ public class GpgpuViewer extends Viewer {
         synchronized (MUTEX) {
           // first eval
           gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-              GL.GL_COLOR_ATTACHMENT0_EXT, TEX_TARGET, intermediateTexs[0], 0);      
+              attachments[readTex], TEX_TARGET, particleTexs[readTex], 0);      
+          gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+              attachments[writeTex], TEX_TARGET, particleTexs[writeTex], 0);
+
+          gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+              GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[0], 0);      
           checkBuf(gl);
           gl.glFinish();
-          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT2_EXT);
           
-          // enable particles 
+          // enable particles
           gl.glActiveTexture(GL.GL_TEXTURE0);
           gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
           
@@ -179,16 +185,15 @@ public class GpgpuViewer extends Viewer {
           gl.glBindTexture(TEX_TARGET, vortexTexs[0]);
           
           renderQuad(gl);
-          gl.glFinish();
-          
-          GlslLoader.render(progK2, drawable);
-    
+              
           // second eval
           gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-              GL.GL_COLOR_ATTACHMENT0_EXT, TEX_TARGET, intermediateTexs[1], 0);      
+              GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[1], 0);      
           checkBuf(gl);
           gl.glFinish();
-          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+          GlslLoader.render(progK2, drawable);
+          
+          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT2_EXT);
           
           // enable particles 
           gl.glActiveTexture(GL.GL_TEXTURE0);
@@ -203,16 +208,16 @@ public class GpgpuViewer extends Viewer {
           gl.glBindTexture(TEX_TARGET, intermediateTexs[0]);
           
           renderQuad(gl);
-          gl.glFinish();
-    
-          GlslLoader.render(progK3, drawable);
-          
+              
           // third eval
           gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-              GL.GL_COLOR_ATTACHMENT0_EXT, TEX_TARGET, intermediateTexs[2], 0);      
+              GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[2], 0);      
           checkBuf(gl);
           gl.glFinish();
-          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+
+          GlslLoader.render(progK3, drawable);
+      
+          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT2_EXT);
           
           // enable particles
           gl.glActiveTexture(GL.GL_TEXTURE0);
@@ -227,16 +232,16 @@ public class GpgpuViewer extends Viewer {
           gl.glBindTexture(TEX_TARGET, intermediateTexs[1]);
           
           renderQuad(gl);
-          gl.glFinish();
-    
-          GlslLoader.render(progK3, drawable);
           
           // forth eval
           gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-              GL.GL_COLOR_ATTACHMENT0_EXT, TEX_TARGET, intermediateTexs[3], 0);
+              GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[3], 0);
           checkBuf(gl);
           gl.glFinish();
-          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+
+          GlslLoader.render(progK3, drawable);
+          
+          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT2_EXT);
           
           // enable particles
           gl.glActiveTexture(GL.GL_TEXTURE0);
@@ -254,13 +259,11 @@ public class GpgpuViewer extends Viewer {
           gl.glFinish();
     
           GlslLoader.render(progMerge, drawable);
+
           programsLoaded = true;
+          
           // merge step
-          gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-              GL.GL_COLOR_ATTACHMENT0_EXT, TEX_TARGET, particleTexs[writeTex], 0);      
-          checkBuf(gl);
-          gl.glFinish();
-          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+          gl.glDrawBuffer(attachments[writeTex]);
           
           // enable particles
           gl.glActiveTexture(GL.GL_TEXTURE0);
@@ -498,7 +501,7 @@ public class GpgpuViewer extends Viewer {
   void transferFromTexture(GL gl, FloatBuffer data) {
     // version (a): texture is attached
     // recommended on both NVIDIA and ATI
-    gl.glReadBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+    gl.glReadBuffer(attachments[writeTex]);
     gl.glReadPixels(0, 0, theWidth, theHeight, TEX_FORMAT, GL.GL_FLOAT, data);
 
     // version b: texture is not neccessarily attached
