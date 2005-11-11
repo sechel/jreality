@@ -227,7 +227,7 @@
     </javadoc>
   </target>
 	
-  <target name="dist" depends="core,io,jogl,soft,renderman,portal" description="generate the distribution">
+  <target name="dist" depends="core,io,jogl,soft,renderman,portal,gpgpu" description="generate the distribution">
   </target>
 	
   <target name="check_cvs" description="check the current cvs state">

@@ -81,11 +81,15 @@ public class GpgpuViewer extends Viewer {
 
   private int numFloats;
 
-private int statsInterval=100;
+  private int statsInterval=100;
+  
+  static {
+    //JOGLConfiguration.portalUsage=true;
+    JOGLConfiguration.multiSample=false;
+  }
 
   public GpgpuViewer() {
     super();
-    JOGLConfiguration.portalUsage=true;
   }
 
   public GpgpuViewer(boolean writeData) {
@@ -115,30 +119,6 @@ private int statsInterval=100;
     setVortexData(vorts);
   }
   
-  protected void initializeFrom(SceneGraphComponent r, SceneGraphPath p)  {
-    setSceneRoot(r);
-    setCameraPath(p);
-    GLCapabilities caps = new GLCapabilities();
-    caps.setAlphaBits(8);
-    caps.setOffscreenRenderToTexture(true);
-    caps.setOffscreenFloatingPointBuffers(true);
-    caps.setOffscreenRenderToTextureRectangle(true);
-//    if (JOGLConfiguration.multiSample)  {
-//      GLCapabilitiesChooser chooser = new MultisampleChooser();
-//      caps.setSampleBuffers(true);
-//      caps.setNumSamples(4);
-//      canvas = GLDrawableFactory.getFactory().createGLCanvas(caps, chooser, firstOne);
-//    } else {
-      canvas = GLDrawableFactory.getFactory().createGLCanvas(caps, null, firstOne);
-      System.out.println("canvas caps="+canvas);
-//    }
-        JOGLConfiguration.getLogger().log(Level.INFO, "Caps is "+caps.toString());
-    canvas.addGLEventListener(this);
-    canvas.requestFocus();
-    if (JOGLConfiguration.sharedContexts && firstOne == null) firstOne = canvas;
-  }
-
-
   public void display(GLDrawable drawable) {
       if (doIntegrate && hasVortices && hasParticles) {
         cnt++;
@@ -199,6 +179,7 @@ private int statsInterval=100;
           gl.glBindTexture(TEX_TARGET, vortexTexs[0]);
           
           renderQuad(gl);
+          gl.glFinish();
           
           GlslLoader.render(progK2, drawable);
     
@@ -222,6 +203,7 @@ private int statsInterval=100;
           gl.glBindTexture(TEX_TARGET, intermediateTexs[0]);
           
           renderQuad(gl);
+          gl.glFinish();
     
           GlslLoader.render(progK3, drawable);
           
@@ -245,6 +227,7 @@ private int statsInterval=100;
           gl.glBindTexture(TEX_TARGET, intermediateTexs[1]);
           
           renderQuad(gl);
+          gl.glFinish();
     
           GlslLoader.render(progK3, drawable);
           
@@ -268,6 +251,7 @@ private int statsInterval=100;
           gl.glBindTexture(TEX_TARGET, intermediateTexs[2]);      
           
           renderQuad(gl);
+          gl.glFinish();
     
           GlslLoader.render(progMerge, drawable);
           programsLoaded = true;
@@ -374,7 +358,7 @@ private int statsInterval=100;
       try {
         
         // read biot savart formula
-        String cst = "const int cnt="+vortexTextureWidth+";\n";
+        String cst = "const int cnt="+vortexTextureWidth+";\n"+"const float PI="+Math.PI+";\n";
         String biotSavart="";
         System.out.println("recompiling program: prefix="+cst);
         LineNumberReader lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("biot_savart-impl.glsl")).getReader());
