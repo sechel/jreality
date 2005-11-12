@@ -7,8 +7,6 @@ package de.jreality.util;
 
 import java.util.Vector;
 
-import charlesgunn.jreality.InteractiveViewer;
-
 import de.jreality.geometry.Primitives;
 import de.jreality.math.P3;
 import de.jreality.math.Rn;
@@ -25,6 +23,8 @@ import junit.framework.TestCase;
  */
 public class TestWorldPick extends TestCase {
 
+	
+	
 	public void testWorldPick()	{
 		SceneGraphComponent root = new SceneGraphComponent();
 		root.setName("root");
@@ -42,7 +42,8 @@ public class TestWorldPick extends TestCase {
 		world.setTransformation(new Transformation());
 		world.getTransformation().setTranslation(0.0, 0.0, -1.0);
 		root.addChild(world);
-		InteractiveViewer iv = new InteractiveViewer(null, root);
+/*
+		charlesgunn.jreality.InteractiveViewer iv = new charlesgunn.jreality.InteractiveViewer(null, root);
 		PickAction pa = new PickAction(iv);
 		double[] p0 = {2,2,2,1};
 		double[] p1 = {-2,-2,-2,1};
@@ -54,5 +55,6 @@ public class TestWorldPick extends TestCase {
 				System.out.println(thisone.toString());				
 			}
 		}
+*/
 	}
 }
