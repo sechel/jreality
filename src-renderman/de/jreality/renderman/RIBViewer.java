@@ -38,6 +38,7 @@ public class RIBViewer implements Viewer {
     private int width=100;
     private int height=100;
     private String fileName="test.rib";
+    private String proj = "perspective";
     /**
      * 
      */
@@ -76,6 +77,7 @@ public class RIBViewer implements Viewer {
         RIBVisitor rv =new RIBVisitor();
         rv.setWidth(width);
         rv.setHeight(height);
+        rv.projection(proj);
         System.out.print(" Rendering RIB into "+fileName+"..");
         rv.visit(sceneRoot,cameraPath,fileName);
         System.out.println(".done."); 
@@ -184,6 +186,13 @@ public class RIBViewer implements Viewer {
      */
     public void setWidth(int width) {
         this.width = width;
+    }
+    
+    /**
+     * @param proj The style of Projection.
+     */
+    public void projection(String proj) {
+        this.proj=proj;
     }
 
     /* (non-Javadoc)

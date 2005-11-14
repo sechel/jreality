@@ -62,6 +62,7 @@ public class RIBVisitor extends SceneGraphVisitor {
     protected EffectiveAppearance eAppearance;
     private int textureCount = 0;
     private Map textures =new HashMap();
+    private String proj = "perspective";
     
     public static boolean fullSpotLight = false;
     public static String shaderPath = null;
@@ -92,7 +93,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         Ri.shadingRate(1f);
         map = new HashMap();
         map.put("fov", new Float(camera.getFieldOfView()));
-        Ri.projection("perspective",map);
+        Ri.projection(proj,map);
         
         map = new HashMap();
         Appearance ap = root.getAppearance();
@@ -521,6 +522,13 @@ public class RIBVisitor extends SceneGraphVisitor {
      */
     public void setWidth(int width) {
         this.width = width;
+    }
+    
+    /**
+     * @param proj The style of Projection.
+     */
+    public void projection(String proj){
+    	this.proj=proj;
     }
     
     private static void dirToEuler(double r[]) {
