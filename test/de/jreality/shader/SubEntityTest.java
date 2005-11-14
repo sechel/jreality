@@ -11,17 +11,21 @@ public class SubEntityTest extends TestCase {
 
   public void testDefaultGeometryShader() {
     Appearance a = new Appearance();
+    
     DefaultGeometryShader gs = ShaderUtility.createDefaultGeometryShader(a);
-    System.out.println(gs);
+    
     gs.setEdgeDraw(false);
     gs.setFaceDraw(true);
+    
     DefaultPolygonShader ps = (DefaultPolygonShader) gs.getPolygonShader();
-    System.out.println(ps);
+    
     ps.setAmbientCoefficient(1.2);
     ps.setSmoothShading(false);
-    System.out.println(a);
     
+    
+
     DefaultPointShader dps = (DefaultPointShader)gs.getPointShader();
+    
     TwoSidePolygonShader tps = (TwoSidePolygonShader) dps.createPolygonShader("TwoSidePolygonShader");
     
     DefaultPolygonShader back = (DefaultPolygonShader) tps.createBack("DefaultPolygonShader");
