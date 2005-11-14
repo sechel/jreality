@@ -29,8 +29,6 @@ public class GpgpuViewer extends Viewer {
   
   private static final boolean dump=false;
 
-  private static final Object MUTEX = new Object();
-  
   //private static int TEX_TARGET = GL.GL_TEXTURE_2D;
   private static int TEX_TARGET = ATI ? GL.GL_TEXTURE_2D : GL.GL_TEXTURE_RECTANGLE_ARB;
   private static int TEX_INTERNAL_FORMAT = ATI ? GL.GL_RGBA32F_ARB : GL.GL_FLOAT_RGBA32_NV;
@@ -163,136 +161,134 @@ public class GpgpuViewer extends Viewer {
         
         GlslLoader.render(progK1, drawable);  
   
-        synchronized (MUTEX) {
-          // first eval
-          gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-              attachments[readTex], TEX_TARGET, particleTexs[readTex], 0);      
-          gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-              attachments[writeTex], TEX_TARGET, particleTexs[writeTex], 0);
+        // first eval
+        gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+            attachments[readTex], TEX_TARGET, particleTexs[readTex], 0);      
+        gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+            attachments[writeTex], TEX_TARGET, particleTexs[writeTex], 0);
 
-          gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-              GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[0], 0);      
-          checkBuf(gl);
-          gl.glFinish();
-          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT2_EXT);
-          
-          // enable particles
-          gl.glActiveTexture(GL.GL_TEXTURE0);
-          gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
-          
-          // enable vorticities
-          gl.glActiveTexture(GL.GL_TEXTURE1);
-          gl.glBindTexture(TEX_TARGET, vortexTexs[0]);
-          
-          renderQuad(gl);
-              
-          // second eval
-          gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-              GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[1], 0);      
-          checkBuf(gl);
-          gl.glFinish();
-          GlslLoader.render(progK2, drawable);
-          
-          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT2_EXT);
-          
-          // enable particles 
-          gl.glActiveTexture(GL.GL_TEXTURE0);
-          gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
-          
-          // enable vorticities
-          gl.glActiveTexture(GL.GL_TEXTURE1);
-          gl.glBindTexture(TEX_TARGET, vortexTexs[1]);
-    
-          // enable K1
-          gl.glActiveTexture(GL.GL_TEXTURE2);
-          gl.glBindTexture(TEX_TARGET, intermediateTexs[0]);
-          
-          renderQuad(gl);
-              
-          // third eval
-          gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-              GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[2], 0);      
-          checkBuf(gl);
-          gl.glFinish();
-
-          GlslLoader.render(progK3, drawable);
-      
-          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT2_EXT);
-          
-          // enable particles
-          gl.glActiveTexture(GL.GL_TEXTURE0);
-          gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
-          
-          // enable vorticities
-          gl.glActiveTexture(GL.GL_TEXTURE1);
-          gl.glBindTexture(TEX_TARGET, vortexTexs[1]);
-    
-          // enable K2
-          gl.glActiveTexture(GL.GL_TEXTURE2);
-          gl.glBindTexture(TEX_TARGET, intermediateTexs[1]);
-          
-          renderQuad(gl);
-          
-          // forth eval
-          gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-              GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[3], 0);
-          checkBuf(gl);
-          gl.glFinish();
-
-          GlslLoader.render(progK3, drawable);
-          
-          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT2_EXT);
-          
-          // enable particles
-          gl.glActiveTexture(GL.GL_TEXTURE0);
-          gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
-          
-          // enable vorticities
-          gl.glActiveTexture(GL.GL_TEXTURE1);
-          gl.glBindTexture(TEX_TARGET, vortexTexs[2]);
-    
-          // enable K3
-          gl.glActiveTexture(GL.GL_TEXTURE2);
-          gl.glBindTexture(TEX_TARGET, intermediateTexs[2]);      
-          
-          renderQuad(gl);
-          gl.glFinish();
-    
-          GlslLoader.render(progMerge, drawable);
-
-          programsLoaded = true;
-          
-          // merge step
-          gl.glDrawBuffer(attachments[writeTex]);
-          
-          // enable particles
-          gl.glActiveTexture(GL.GL_TEXTURE0);
-          gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
-          
-          // enable K1
-          gl.glActiveTexture(GL.GL_TEXTURE1);
-          gl.glBindTexture(TEX_TARGET, intermediateTexs[0]);
-    
-          // enable K2
-          gl.glActiveTexture(GL.GL_TEXTURE2);
-          gl.glBindTexture(TEX_TARGET, intermediateTexs[1]);      
-          
-          // enable K3
-          gl.glActiveTexture(GL.GL_TEXTURE3);
-          gl.glBindTexture(TEX_TARGET, intermediateTexs[2]);      
-          
-          // enable K4
-          gl.glActiveTexture(GL.GL_TEXTURE4);
-          gl.glBindTexture(TEX_TARGET, intermediateTexs[3]);      
-    
-          renderQuad(gl);
-          
-          gl.glFinish();
-          
-          transferFromTexture(gl, particleBuffer);
+        gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+            GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[0], 0);      
+        checkBuf(gl);
+        gl.glFinish();
+        gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT2_EXT);
         
-          if (writeData) dumpData(particleBuffer);
-        }
+        // enable particles
+        gl.glActiveTexture(GL.GL_TEXTURE0);
+        gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
+        
+        // enable vorticities
+        gl.glActiveTexture(GL.GL_TEXTURE1);
+        gl.glBindTexture(TEX_TARGET, vortexTexs[0]);
+        
+        renderQuad(gl);
+            
+        // second eval
+        gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+            GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[1], 0);      
+        checkBuf(gl);
+        gl.glFinish();
+        GlslLoader.render(progK2, drawable);
+        
+        gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT2_EXT);
+        
+        // enable particles 
+        gl.glActiveTexture(GL.GL_TEXTURE0);
+        gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
+        
+        // enable vorticities
+        gl.glActiveTexture(GL.GL_TEXTURE1);
+        gl.glBindTexture(TEX_TARGET, vortexTexs[1]);
+  
+        // enable K1
+        gl.glActiveTexture(GL.GL_TEXTURE2);
+        gl.glBindTexture(TEX_TARGET, intermediateTexs[0]);
+        
+        renderQuad(gl);
+            
+        // third eval
+        gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+            GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[2], 0);      
+        checkBuf(gl);
+        gl.glFinish();
+
+        GlslLoader.render(progK3, drawable);
+    
+        gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT2_EXT);
+        
+        // enable particles
+        gl.glActiveTexture(GL.GL_TEXTURE0);
+        gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
+        
+        // enable vorticities
+        gl.glActiveTexture(GL.GL_TEXTURE1);
+        gl.glBindTexture(TEX_TARGET, vortexTexs[1]);
+  
+        // enable K2
+        gl.glActiveTexture(GL.GL_TEXTURE2);
+        gl.glBindTexture(TEX_TARGET, intermediateTexs[1]);
+        
+        renderQuad(gl);
+        
+        // forth eval
+        gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+            GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[3], 0);
+        checkBuf(gl);
+        gl.glFinish();
+
+        GlslLoader.render(progK3, drawable);
+        
+        gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT2_EXT);
+        
+        // enable particles
+        gl.glActiveTexture(GL.GL_TEXTURE0);
+        gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
+        
+        // enable vorticities
+        gl.glActiveTexture(GL.GL_TEXTURE1);
+        gl.glBindTexture(TEX_TARGET, vortexTexs[2]);
+  
+        // enable K3
+        gl.glActiveTexture(GL.GL_TEXTURE2);
+        gl.glBindTexture(TEX_TARGET, intermediateTexs[2]);      
+        
+        renderQuad(gl);
+        gl.glFinish();
+  
+        GlslLoader.render(progMerge, drawable);
+
+        programsLoaded = true;
+        
+        // merge step
+        gl.glDrawBuffer(attachments[writeTex]);
+        
+        // enable particles
+        gl.glActiveTexture(GL.GL_TEXTURE0);
+        gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
+        
+        // enable K1
+        gl.glActiveTexture(GL.GL_TEXTURE1);
+        gl.glBindTexture(TEX_TARGET, intermediateTexs[0]);
+  
+        // enable K2
+        gl.glActiveTexture(GL.GL_TEXTURE2);
+        gl.glBindTexture(TEX_TARGET, intermediateTexs[1]);      
+        
+        // enable K3
+        gl.glActiveTexture(GL.GL_TEXTURE3);
+        gl.glBindTexture(TEX_TARGET, intermediateTexs[2]);      
+        
+        // enable K4
+        gl.glActiveTexture(GL.GL_TEXTURE4);
+        gl.glBindTexture(TEX_TARGET, intermediateTexs[3]);      
+  
+        renderQuad(gl);
+        
+        gl.glFinish();
+        
+        transferFromTexture(gl, particleBuffer);
+      
+        if (writeData) dumpData(particleBuffer);
 
         // do swap
         int tmp = readTex;
@@ -546,10 +542,8 @@ public class GpgpuViewer extends Viewer {
   public float[] getCurrentParticlePositions(float[] store) {
     if (store == null || store.length != numFloats)
       store = new float[numFloats];
-    synchronized (MUTEX) {
-      particleBuffer.position(0).limit(numFloats);
-      particleBuffer.get(store);
-    }
+    particleBuffer.position(0).limit(numFloats);
+    particleBuffer.get(store);
     return store;
   }
 
@@ -559,9 +553,7 @@ public class GpgpuViewer extends Viewer {
       int texSize = texSize(particles.length/4);
       if (theWidth!=texSize || theHeight != texSize) {
         System.out.println("[setParticles] new particles tex size="+texSize);
-        synchronized (MUTEX) {
-          particleBuffer = ByteBuffer.allocateDirect(texSize*texSize*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        }
+        particleBuffer = ByteBuffer.allocateDirect(texSize*texSize*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
         theWidth=theHeight=texSize;
         particlesTexSizeChanged=true;
       }
