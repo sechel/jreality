@@ -11,7 +11,7 @@ public class SubEntityTest extends TestCase {
 
   public void testDefaultGeometryShader() {
     Appearance a = new Appearance();
-    DefaultGeometryShader gs = (DefaultGeometryShader) AttributeEntityUtility.createAttributeEntity(DefaultGeometryShader.class, "", a);
+    DefaultGeometryShader gs = ShaderUtility.createDefaultGeometryShader(a);
     System.out.println(gs);
     gs.setEdgeDraw(false);
     gs.setFaceDraw(true);
@@ -22,7 +22,7 @@ public class SubEntityTest extends TestCase {
     System.out.println(a);
     
     DefaultPointShader dps = (DefaultPointShader)gs.getPointShader();
-    TwoSidePolygonShader tps = (TwoSidePolygonShader) dps.createPolygonShader("TwoSidedPolygonShader");
+    TwoSidePolygonShader tps = (TwoSidePolygonShader) dps.createPolygonShader("TwoSidePolygonShader");
     
     DefaultPolygonShader back = (DefaultPolygonShader) tps.createBack("DefaultPolygonShader");
     DefaultPolygonShader front = (DefaultPolygonShader) tps.createFront("DefaultPolygonShader");
@@ -30,9 +30,9 @@ public class SubEntityTest extends TestCase {
     back.setDiffuseColor(Color.BLACK);
     front.setDiffuseColor(Color.WHITE);
     
-//    EffectiveAppearance ea = EffectiveAppearance.create().create(a);
-//    DefaultGeometryShader gs2 = (DefaultGeometryShader) AttributeEntityUtility.createAttributeEntity(DefaultGeometryShader.class, "", ea);
-//    System.out.println(gs2);
+    EffectiveAppearance ea = EffectiveAppearance.create().create(a);
+    DefaultGeometryShader gs2 = ShaderUtility.createDefaultGeometryShader(ea);
+    System.out.println(gs2);
 
     System.out.println(a);
   }
