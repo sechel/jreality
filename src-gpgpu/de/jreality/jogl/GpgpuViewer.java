@@ -357,7 +357,9 @@ public class GpgpuViewer extends Viewer {
       try {
         
         // read biot savart formula
-        String cst = "const int cnt="+vortexTextureWidth+";\n"+"const float PI="+Math.PI+";\n";
+        String cst = "const int cnt="+vortexTextureWidth+";\n"
+        +"const float PI="+Math.PI+";\n"
+        +"const float RO_SQUARED=0.0001;\n";
         String biotSavart="";
         System.out.println("recompiling program: prefix="+cst);
         LineNumberReader lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("biot_savart-impl.glsl")).getReader());
