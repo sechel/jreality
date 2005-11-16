@@ -81,6 +81,8 @@ public class GpgpuViewer extends Viewer {
   private int numFloats;
 
   private int statsInterval=100;
+
+  private double ro;
   
   static {
     //JOGLConfiguration.portalUsage=true;
@@ -134,21 +136,27 @@ public class GpgpuViewer extends Viewer {
         initViewport(gl, glu);
         initTextures(gl);
         
+        double roSquared=ro*ro;
+        
         progK1.setUniform("particles", 0);
         progK1.setUniform("vorticity", 1);
+        progK1.setUniform("roSquared", roSquared);
   
         progK2.setUniform("particles", 0);
         progK2.setUniform("vorticity", 1);
+        progK2.setUniform("roSquared", roSquared);
         progK2.setUniform("K1", 2);
         progK2.setUniform("h", dt);
         
         progK3.setUniform("particles", 0);
         progK3.setUniform("vorticity", 1);
+        progK3.setUniform("roSquared", roSquared);
         progK3.setUniform("K2", 2);
         progK3.setUniform("h", dt);
   
         progK4.setUniform("particles", 0);
         progK4.setUniform("vorticity", 1);
+        progK4.setUniform("roSquared", roSquared);
         progK4.setUniform("K3", 2);
         progK4.setUniform("h", dt);
   
@@ -359,7 +367,7 @@ public class GpgpuViewer extends Viewer {
         // read biot savart formula
         String cst = "const int cnt="+vortexTextureWidth+";\n"
         +"const float PI="+Math.PI+";\n"
-        +"const float RO_SQUARED=0.0001;\n";
+        +"uniform float roSquared;\n";
         String biotSavart="";
         System.out.println("recompiling program: prefix="+cst);
         LineNumberReader lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("biot_savart-impl.glsl")).getReader());
@@ -667,6 +675,10 @@ public int getStatsInterval() {
 
 public void setStatsInterval(int statsInterval) {
 	this.statsInterval = statsInterval;
+}
+
+public void setRo(double ro) {
+  this.ro = ro;
 }
 
 }

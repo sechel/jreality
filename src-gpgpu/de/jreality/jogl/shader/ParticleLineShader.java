@@ -38,6 +38,8 @@ public class ParticleLineShader implements LineShader {
   static float[] vortexData=new float[0];
   static boolean setVortexData;
   
+  static double ro=0.01;
+  
   public boolean providesProxyGeometry() {
     return true;
   }
@@ -48,6 +50,7 @@ public class ParticleLineShader implements LineShader {
 
   public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
     pointRadius = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
+    ro = eap.getAttribute(ShaderUtility.nameSpace(name, "ro"), ro);
     debug = eap.getAttribute(ShaderUtility.nameSpace(name, "debug"), false);
     diffuseColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COLOR),CommonAttributes.DIFFUSE_COLOR_DEFAULT);
     diffuseColor.getComponents(difCol);
@@ -74,6 +77,7 @@ public class ParticleLineShader implements LineShader {
       setVortexData=false;
     }
     data = v.getCurrentParticlePositions(data);
+    v.setRo(ro);
   }
 
   public void render(JOGLRenderer jr) {

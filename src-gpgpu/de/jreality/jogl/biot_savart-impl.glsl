@@ -45,10 +45,10 @@ vec3 biotSavartEdge(const vec3 edge, const vec3 point, const vec3 v1, const floa
   vec3 v2CrossS = cross(v2, edge);
   
   float normC1 = dot(v1CrossS, v1CrossS);
-  fac1 /= sqrt(RO_SQUARED+norm1*norm1) * (RO_SQUARED * dot(edge, edge) + normC1);
+  fac1 /= sqrt(roSquared+norm1*norm1) * (roSquared * dot(edge, edge) + normC1);
   
   float normC2 = dot(v2CrossS, v2CrossS);
-  fac2 /= sqrt(RO_SQUARED+norm2*norm2) * (RO_SQUARED * dot(edge, edge) + normC2);
+  fac2 /= sqrt(roSquared+norm2*norm2) * (roSquared * dot(edge, edge) + normC2);
   
   return fac2*v2CrossS - fac1*v1CrossS;
 }
