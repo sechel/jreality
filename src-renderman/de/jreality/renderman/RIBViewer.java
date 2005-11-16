@@ -103,32 +103,14 @@ public class RIBViewer implements Viewer {
     public boolean hasViewingComponent() {
         return false;
     }
-
-    /* (non-Javadoc)
-     * @see de.jreality.scene.Viewer#hasDrawable()
-     */
-    public boolean hasDrawable() {
-        return false;
-    }
-
-    /* (non-Javadoc)
-     * @see de.jreality.scene.Viewer#getDrawable()
-     */
-    public Drawable getDrawable() {
-        return null;
-    }
-
+  
     /* (non-Javadoc)
      * @see de.jreality.scene.Viewer#initializeFrom(de.jreality.scene.Viewer)
      */
     public void initializeFrom(Viewer v) {
         cameraPath = v.getCameraPath();
         sceneRoot = v.getSceneRoot();
-        if(v.hasDrawable()) {
-            Drawable d = v.getDrawable();
-            width = d.getWidth();
-            height = d.getHeight();
-        } else if (v.hasViewingComponent()){
+        if (v.hasViewingComponent()){
 			setHeight(v.getViewingComponent().getHeight());
 			setWidth(v.getViewingComponent().getWidth());
         }

@@ -10,56 +10,19 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.Vector;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.java.games.jogl.DebugGL;
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLCanvas;
-import net.java.games.jogl.GLDrawable;
-import net.java.games.jogl.GLPbuffer;
-import net.java.games.jogl.GLU;
+import net.java.games.jogl.*;
 import net.java.games.jogl.util.BufferUtils;
 import de.jreality.geometry.LabelSet;
 import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.JOGLPickAction;
-import de.jreality.jogl.shader.DefaultGeometryShader;
-import de.jreality.jogl.shader.DefaultVertexShader;
-import de.jreality.jogl.shader.RenderingHintsShader;
-import de.jreality.jogl.shader.TextShader;
-import de.jreality.jogl.shader.Texture2DLoaderJOGL;
-import de.jreality.math.MatrixBuilder;
-import de.jreality.math.P3;
-import de.jreality.math.Pn;
-import de.jreality.math.Rn;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.Camera;
-import de.jreality.scene.Cylinder;
-import de.jreality.scene.Drawable;
-import de.jreality.scene.Geometry;
-import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.IndexedLineSet;
-import de.jreality.scene.PointSet;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.SceneGraphVisitor;
-import de.jreality.scene.Sphere;
-import de.jreality.scene.Transformation;
-import de.jreality.scene.event.AppearanceEvent;
-import de.jreality.scene.event.AppearanceListener;
-import de.jreality.scene.event.GeometryEvent;
-import de.jreality.scene.event.GeometryListener;
-import de.jreality.scene.event.SceneGraphComponentEvent;
-import de.jreality.scene.event.SceneGraphComponentListener;
-import de.jreality.scene.event.TransformationEvent;
-import de.jreality.scene.event.TransformationListener;
+import de.jreality.jogl.shader.*;
+import de.jreality.math.*;
+import de.jreality.scene.*;
+import de.jreality.scene.event.*;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
@@ -70,7 +33,7 @@ import de.jreality.util.SceneGraphUtility;
  * @author gunn
  *
  */
-public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListener, Drawable {
+public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListener {
 
 	final static Logger theLog = JOGLConfiguration.theLog;
 	final static boolean debugGL = JOGLConfiguration.debugGL;

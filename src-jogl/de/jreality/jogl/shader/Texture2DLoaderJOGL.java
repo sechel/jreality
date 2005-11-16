@@ -108,16 +108,8 @@ public class Texture2DLoaderJOGL {
 								  srcPixelFormat, 
 								  GL.GL_UNSIGNED_BYTE, 
 								  data ); 
-			
-
 	} 
 
-  private static void handleTextureParameters(de.jreality.scene.Texture3D tex, GL gl) {
-    de.jreality.scene.Texture2D foo = (de.jreality.scene.Texture2D) tex;
-    handleTextureParameters(foo, gl);
-    gl.glTexParameteri(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_WRAP_R, tex.getRepeatT()); 
-  }
-  
 	/**
 	 * @param tex
 	 * @param textureID

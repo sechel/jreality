@@ -27,12 +27,13 @@ import java.awt.event.*;
 import java.io.Serializable;
 import java.util.List;
 
+import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Rn;
 import de.jreality.math.VecMat;
 import de.jreality.renderman.RIBVisitor;
 import de.jreality.scene.*;
 import de.jreality.scene.Viewer;
-import de.jreality.util.BoundingBoxTraversal;
+import de.jreality.util.Rectangle3D;
 import de.jreality.util.RenderTrigger;
 
 /**
@@ -521,13 +522,11 @@ public static final String MOUSE_DONE = "mouseDone";
 
         if (transformation == null)
             return;
-        BoundingBoxTraversal bt =new BoundingBoxTraversal();
         cameraPath.getInverseMatrix(tmp);
 //        double[] bla = cameraPath.getMatrix(null);
 //        VecMat.invert(bla,tmp);
-        bt.setInitialMatrix(tmp);
-        bt.traverse(root);
-        bt.getBoundingBoxCenter(center);
+        Rectangle3D bt = GeometryUtility.calculateBoundingBox(tmp, root);
+        center = bt.getCenter();
         
 
         System.out.println("encompass center "+center[0]+" "+center[1]+" "+center[2]);
@@ -538,9 +537,10 @@ public static final String MOUSE_DONE = "mouseDone";
         double w =v.getViewingComponent().getWidth();
         double h =v.getViewingComponent().getHeight();
         double fl = 1/Math.tan((Math.PI/180.0)*(camera).getFieldOfView()/2);
-        distance = 0.5*(bt.getZmax() -bt.getZmin());
-        double wc = .5*(bt.getXmax() -bt.getXmin())*fl;
-        double hc = .5*(bt.getYmax() -bt.getYmin())*fl;
+        
+        distance = 0.5*(bt.getMaxZ() -bt.getMinZ());
+        double wc = .5*(bt.getMaxX() -bt.getMinX())*fl;
+        double hc = .5*(bt.getMaxY() -bt.getMinY())*fl;
 
         distance += Math.max(wc,hc);
         System.out.println("dist"+wc+" "+hc);
@@ -553,7 +553,7 @@ public static final String MOUSE_DONE = "mouseDone";
         center[0] = 0;
         center[1] = 0;
         center[2] = -distance;
-        double d =.8*(bt.getZmax() - bt.getZmin());
+        double d =.8*(bt.getMaxZ() - bt.getMinZ());
         System.out.println("far "+camera.getFar()+" near "+camera.getNear());
         camera.setFar(d+distance);
         camera.setNear(-d+distance);

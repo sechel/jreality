@@ -49,7 +49,7 @@ import de.jreality.scene.Viewer;
  * @author weissman
  *
  */
-public class BSHServer implements LoadableScene {
+public class BSHServer {
     
     private ReaderBSH readerBSH;
     private int port;

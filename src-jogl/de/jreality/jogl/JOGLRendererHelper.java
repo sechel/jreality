@@ -24,7 +24,6 @@ import net.java.games.jogl.util.GLUT;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.LabelSet;
 import de.jreality.geometry.QuadMeshShape;
-import de.jreality.geometry.RegularDomainQuadMesh;
 import de.jreality.geometry.RegularDomainQuadMeshFactory;
 import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.JOGLPickAction;
@@ -389,10 +388,6 @@ public class JOGLRendererHelper {
 			maxFU = qm.isClosedInUDirection() ? maxU : maxU - 1;
 			maxFV = qm.isClosedInVDirection() ? maxV : maxV - 1;
 			numF = qm.getNumFaces();
-			if (sg instanceof RegularDomainQuadMesh) {
-				theDomain = ((RegularDomainQuadMesh) sg).getDomain();
-				isRegularDomainQuadMesh = true;
-			}
 		}
 
 		numF = sg.getNumFaces();

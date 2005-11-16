@@ -13,7 +13,6 @@ import java.util.Vector;
 import java.util.logging.Level;
 
 import net.java.games.jogl.*;
-import de.jreality.scene.Drawable;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.util.CameraUtility;
@@ -112,30 +111,6 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 
 	public Component getViewingComponent() {
 		return canvas;
-	}
-
-	public boolean hasDrawable() {
-		return true;
-	}
-
-	public Drawable getDrawable() {
-		return new Drawable()	{
-			public double getAspectRatio()	{
-				return canvas.getWidth()/((double) canvas.getHeight());
-			}
-			public int getWidth()	{
-				return canvas.getWidth();
-			}
-			public int getHeight()	{
-				return canvas.getHeight();
-			}
-			public int getXMin()	{
-				return canvas.getX();
-			}
-			public int getYMin()	{
-				return canvas.getY();
-			}
-		};
 	}
 
 	/* (non-Javadoc)

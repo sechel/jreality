@@ -29,7 +29,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import de.jreality.jogl.Viewer;
-import de.jreality.scene.Drawable;
 import de.jreality.scene.Lock;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -99,14 +98,6 @@ public class PortalServerViewer implements de.jreality.scene.Viewer {
 	}
 
 	public Component getViewingComponent() {
-		return null;
-	}
-
-	public boolean hasDrawable() {
-		return false;
-	}
-
-	public Drawable getDrawable() {
 		return null;
 	}
 

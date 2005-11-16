@@ -207,60 +207,11 @@ public abstract class AbstractViewer implements Viewer {
     }
 
     /* (non-Javadoc)
-     * @see de.jreality.scene.Viewer#hasDrawable()
-     */
-    public boolean hasDrawable() {
-        return true;
-    }
-
-    /* (non-Javadoc)
-     * @see de.jreality.scene.Viewer#getDrawable()
-     */
-    public Drawable getDrawable() {
-        return new Drawable() {
-            private final int w =getWidth();
-            private final int h =getHeight();
-            public double getAspectRatio() {
-                
-                return w/(double)h;
-            }
-
-            public int getWidth() {
-                return w;
-            }
-
-            public int getHeight() {
-                return h;
-            }
-
-            public int getXMin() {
-                // TODO Auto-generated method stub
-                return 0;
-            }
-
-            public int getYMin() {
-                // TODO Auto-generated method stub
-                return 0;
-            }
-            
-        };
-    }
-
-    /* (non-Javadoc)
      * @see de.jreality.scene.Viewer#initializeFrom(de.jreality.scene.Viewer)
      */
     public void initializeFrom(Viewer v) {
         setSceneRoot(v.getSceneRoot());
         setCameraPath(v.getCameraPath());
-        if(v.hasDrawable()) {
-            Drawable d =v.getDrawable();
-            
-            //TODO check wether this is o.k.
-            setWidth(d.getWidth());
-            setHeight(d.getHeight());
-        }
-        
-        
     }
 
 }

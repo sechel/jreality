@@ -36,7 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.jreality.geometry.CatenoidHelicoid;
-import de.jreality.geometry.SkyBoxFactory.Square;
+import de.jreality.geometry.Primitives;
 import de.jreality.jogl.Viewer;
 import de.jreality.reader.ReaderJVX;
 import de.jreality.renderman.RIBVisitor;
@@ -173,7 +173,7 @@ public class TestJvx implements KeyListener{
           double h = 2;
           SceneGraphComponent frontC = new SceneGraphComponent();
           frontC.setName("front");
-          Square front =new Square(new double[] {
+          IndexedFaceSet front = Primitives.texturedSquare(new double[] {
                   -s, h+s,-s, 
                    s, h+s,-s, 
                    s, h-s,-s, 
@@ -184,7 +184,7 @@ public class TestJvx implements KeyListener{
           
           SceneGraphComponent leftC = new SceneGraphComponent();
           leftC.setName("left");
-          Square left =new Square(new double[] {
+          IndexedFaceSet left = Primitives.texturedSquare(new double[] {
                   s, h+s,-s, 
                   s, h+s, s, 
                   s, h-s, s, 
@@ -195,7 +195,7 @@ public class TestJvx implements KeyListener{
           SceneGraphComponent bottomC = new SceneGraphComponent();
           bottomC.setName("bottom");
           
-          Square bottom =new Square(new double[] {
+          IndexedFaceSet bottom = Primitives.texturedSquare(new double[] {
                   -s, h-s, s, 
                   -s, h-s,-s, 
                    s, h-s,-s,

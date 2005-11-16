@@ -175,7 +175,7 @@ public class SoftTextureTest implements KeyListener {
               double s = 40;
               double h = -5;
               SceneGraphComponent bottomC = new SceneGraphComponent();
-              SkyBoxFactory.Square bottom =new SkyBoxFactory.Square(new double[] {
+              IndexedFaceSet bottom = Primitives.texturedSquare(new double[] {
                       -s, h, s, 
                       -s, h,-s, 
                        s, h,-s,

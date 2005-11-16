@@ -8,7 +8,6 @@ import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 
-import de.jreality.scene.Drawable;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
@@ -30,12 +29,7 @@ public class SceneTreeViewer extends JTree implements de.jreality.scene.Viewer
 		
 		return camPath;
 	}
-	/* (non-Javadoc)
-	 * @see de.jreality.scene.Viewer#getDrawable()
-	 */
-	public Drawable getDrawable() {
-		return null;
-	}
+
 	/* (non-Javadoc)
 	 * @see de.jreality.scene.Viewer#getSceneRoot()
 	 */
@@ -55,12 +49,7 @@ public class SceneTreeViewer extends JTree implements de.jreality.scene.Viewer
 		if (viewingComponent == null) viewingComponent = new JScrollPane(this);
 		return viewingComponent;
 	}
-	/* (non-Javadoc)
-	 * @see de.jreality.scene.Viewer#hasDrawable()
-	 */
-	public boolean hasDrawable() {
-		return false;
-	}
+
 	/* (non-Javadoc)
 	 * @see de.jreality.scene.Viewer#hasViewingComponent()
 	 */
