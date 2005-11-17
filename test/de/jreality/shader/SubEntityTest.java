@@ -49,8 +49,8 @@ public class SubEntityTest extends TestCase {
     
     DefaultGeometryShader gs = ShaderUtility.createDefaultGeometryShader(a);
     
-    gs.setEdgeDraw(false);
-    gs.setFaceDraw(true);
+    gs.setShowLines(false);
+    gs.setShowFaces(true);
     
     DefaultPolygonShader ps = (DefaultPolygonShader) gs.getPolygonShader();
     
