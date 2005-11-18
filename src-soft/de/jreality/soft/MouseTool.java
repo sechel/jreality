@@ -35,6 +35,7 @@ import de.jreality.scene.*;
 import de.jreality.scene.Viewer;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.RenderTrigger;
+import de.jreality.util.SceneGraphUtility;
 
 /**
  * This class provides the basic mouse interaction of the viewers.
@@ -686,7 +687,7 @@ public static final String MOUSE_DONE = "mouseDone";
 	private void findPath() {
         if(root!= null && camera !=null) {
 			//cameraPath = new Path(root,camera); 
-			cameraPath = SceneGraphPath.getFirstPathBetween(root, camera);
+			cameraPath = (SceneGraphPath) SceneGraphUtility.getPathsBetween(root, camera).get(0);
 			int l = cameraPath.getLength(); 
             guessCenter();
         }

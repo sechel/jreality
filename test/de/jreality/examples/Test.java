@@ -42,6 +42,7 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.soft.DefaultViewer;
 import de.jreality.soft.MouseTool;
 import de.jreality.util.RenderTrigger;
+import de.jreality.util.SceneGraphUtility;
 
 /**
  * 
@@ -115,7 +116,7 @@ public class Test implements KeyListener {
     
         softViewer.getViewingComponent().addKeyListener(this);
         softViewer.setSceneRoot(root);
-        softViewer.setCameraPath(SceneGraphPath.getFirstPathBetween(root,firstCamera));
+        softViewer.setCameraPath(((SceneGraphPath) SceneGraphUtility.getPathsBetween(root, firstCamera).get(0)));
 
     //frameSoft.add(SceneTreeViewer.getViewerComponent(root, softViewer), BorderLayout.WEST);
     frameSoft.setSize(780, 580);
@@ -153,7 +154,7 @@ public class Test implements KeyListener {
     if(useJOGLViewer) {
     	   root.getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR, Color.WHITE); //new Color(.4f,.5f,.8f));
 
-        joglViewer= new Viewer(SceneGraphPath.getFirstPathBetween(root,firstCamera),root);
+        joglViewer= new Viewer(((SceneGraphPath) SceneGraphUtility.getPathsBetween(root, firstCamera).get(0)),root);
         trigger.addViewer(joglViewer);
         frameJOGL= new Frame();
         frameJOGL.addWindowListener(new WindowAdapter() {

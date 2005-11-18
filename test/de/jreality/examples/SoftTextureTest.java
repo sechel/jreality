@@ -42,6 +42,7 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.soft.DefaultViewer;
 import de.jreality.soft.GameTool;
 import de.jreality.soft.MouseTool;
+import de.jreality.util.SceneGraphUtility;
 
 /**
  * 
@@ -91,7 +92,7 @@ public class SoftTextureTest implements KeyListener {
     buildScene(root);
     //v.setBackground(1,1,1);		
     v.setSceneRoot(root);
-    v.setCameraPath(SceneGraphPath.getFirstPathBetween(root,firstCamera));
+    v.setCameraPath(((SceneGraphPath) SceneGraphUtility.getPathsBetween(root, firstCamera).get(0)));
 
     frame.add(SceneTreeViewer.getViewerComponent(root, v), BorderLayout.WEST);
     frame.setSize(780, 580);

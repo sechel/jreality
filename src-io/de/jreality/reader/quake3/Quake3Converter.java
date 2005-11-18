@@ -71,7 +71,6 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.reader.vecmath.Vector3f;
 import de.jreality.util.*;
 import de.jreality.util.LoggingSystem;
-import de.jreality.util.SceneGraphComponentSwitch;
 
 /**
  * Takes the data from a Quake3Loader and converts it into a Xith3d scenegraph.  There is

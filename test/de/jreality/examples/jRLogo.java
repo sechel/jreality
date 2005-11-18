@@ -39,6 +39,7 @@ import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.soft.DefaultViewer;
 import de.jreality.soft.MouseTool;
+import de.jreality.util.SceneGraphUtility;
 
 /**
  * 
@@ -183,7 +184,7 @@ static {
          
          //softViewer.getViewingComponent().addKeyListener(this);
          softViewer.setSceneRoot(root);
-         softViewer.setCameraPath(SceneGraphPath.getFirstPathBetween(root,firstCamera));
+         softViewer.setCameraPath(((SceneGraphPath) SceneGraphUtility.getPathsBetween(root, firstCamera).get(0)));
          
          frameSoft.setSize(4*134, 4*114);
          frameSoft.validate();

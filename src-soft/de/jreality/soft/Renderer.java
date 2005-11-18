@@ -30,6 +30,7 @@ import java.awt.image.BufferedImage;
 import de.jreality.math.Rn;
 import de.jreality.scene.*;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.util.SceneGraphUtility;
 
 /**
  * 
@@ -148,7 +149,7 @@ public abstract class Renderer {
     root=component;
     if(root!= null && camera !=null)
         //cameraPath = new SceneGraphPath(root,camera); 
-        cameraPath = SceneGraphPath.getFirstPathBetween(root,camera); 
+        cameraPath = (SceneGraphPath) SceneGraphUtility.getPathsBetween(root, camera).get(0); 
   }
 
 //  public static class ByteArray extends Renderer

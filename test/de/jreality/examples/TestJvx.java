@@ -46,6 +46,7 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.soft.DefaultViewer;
 import de.jreality.soft.MouseTool;
 import de.jreality.util.RenderTrigger;
+import de.jreality.util.SceneGraphUtility;
 
 /**
  * Test for the jvx reader. 
@@ -124,7 +125,7 @@ public class TestJvx implements KeyListener{
         
             softViewer.getViewingComponent().addKeyListener(this);
             softViewer.setSceneRoot(root);
-            softViewer.setCameraPath(SceneGraphPath.getFirstPathBetween(root,firstCamera));
+            softViewer.setCameraPath(((SceneGraphPath) SceneGraphUtility.getPathsBetween(root, firstCamera).get(0)));
 
         //frameSoft.add(SceneTreeViewer.getViewerComponent(root, softViewer), BorderLayout.WEST);
         frameSoft.setSize(780, 580);
