@@ -28,8 +28,8 @@ public class DefaultPolygonShader implements PolygonShader {
 	public static final int BACK = GL.GL_BACK;
 	
 	boolean		smoothShading = true; 		// interpolate shaded values between vertices
-  de.jreality.scene.Texture2D texture2D;
-  de.jreality.scene.Texture2D lightMap;
+//  de.jreality.scene.Texture2D texture2D;
+//  de.jreality.scene.Texture2D lightMap;
   Texture2D texture2Dnew;
   Texture2D lightMapNew;
    CubeMap reflectionMapNew;
@@ -59,10 +59,10 @@ public class DefaultPolygonShader implements PolygonShader {
 
 		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);	
 //		Object foo = eap.getAttribute(NameSpace.name(name,"texture2d"), null, Texture2D.class);
-		Object foo = eap.getAttribute(ShaderUtility.nameSpace(name,"texture2d"), null, de.jreality.scene.Texture2D.class);
-		if (foo instanceof de.jreality.scene.Texture2D)	texture2D = (de.jreality.scene.Texture2D) foo;
-	  foo = eap.getAttribute(ShaderUtility.nameSpace(name,"lightMap"), null, de.jreality.scene.Texture2D.class);
-    if (foo instanceof de.jreality.scene.Texture2D) lightMap = (de.jreality.scene.Texture2D) foo;
+//		Object foo = eap.getAttribute(ShaderUtility.nameSpace(name,"texture2d"), null, de.jreality.scene.Texture2D.class);
+//		if (foo instanceof de.jreality.scene.Texture2D)	texture2D = (de.jreality.scene.Texture2D) foo;
+//	  foo = eap.getAttribute(ShaderUtility.nameSpace(name,"lightMap"), null, de.jreality.scene.Texture2D.class);
+//    if (foo instanceof de.jreality.scene.Texture2D) lightMap = (de.jreality.scene.Texture2D) foo;
 
     if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap))
       texture2Dnew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap);
@@ -71,7 +71,7 @@ public class DefaultPolygonShader implements PolygonShader {
     if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap))
       lightMapNew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap);
       
-		//TODO this is a hack. 
+     //TODO this is a hack. 
 		if (eap.getAttribute(ShaderUtility.nameSpace(name,"useGLShader"), false) == true)	{
 			Object obj =  eap.getAttribute(ShaderUtility.nameSpace(name,"GLShader"), null, AbstractJOGLShader.class);
 			if (obj instanceof AbstractJOGLShader) {
@@ -102,10 +102,10 @@ public class DefaultPolygonShader implements PolygonShader {
 	/**
 	 * @return
 	 */
-	public de.jreality.scene.Texture2D getTexture2D() {
-		return texture2D;
-	}
-
+//	public de.jreality.scene.Texture2D getTexture2D() {
+//		return texture2D;
+//	}
+//
 	public void setSmoothShading(boolean b) {
 		smoothShading = b;
 	}
@@ -136,13 +136,13 @@ public class DefaultPolygonShader implements PolygonShader {
       gl.glEnable(GL.GL_TEXTURE_2D);
     }
 
-	if (texture2D != null) {
-      gl.glActiveTexture(texUnit);
-      texUnit++;
-      Texture2DLoaderJOGL.render(theCanvas, texture2D);
-      testTextureResident(jr, gl);
-      gl.glEnable(GL.GL_TEXTURE_2D);
-    } //else
+//	if (texture2D != null) {
+//      gl.glActiveTexture(texUnit);
+//      texUnit++;
+//      Texture2DLoaderJOGL.render(theCanvas, texture2D);
+//      testTextureResident(jr, gl);
+//      gl.glEnable(GL.GL_TEXTURE_2D);
+//    } //else
     if (lightMapNew != null) {
       gl.glActiveTexture(texUnit);
       texUnit++;
@@ -150,13 +150,13 @@ public class DefaultPolygonShader implements PolygonShader {
       testTextureResident(jr, gl);
       gl.glEnable(GL.GL_TEXTURE_2D);
     }
-    if (lightMap != null) {
-      gl.glActiveTexture(texUnit);
-      texUnit++;
-     Texture2DLoaderJOGL.render(theCanvas, lightMap);
-     testTextureResident(jr, gl);
-      gl.glEnable(GL.GL_TEXTURE_2D);
-    } //else
+//    if (lightMap != null) {
+//      gl.glActiveTexture(texUnit);
+//      texUnit++;
+//     Texture2DLoaderJOGL.render(theCanvas, lightMap);
+//     testTextureResident(jr, gl);
+//      gl.glEnable(GL.GL_TEXTURE_2D);
+//    } //else
     if (reflectionMapNew != null)  {
       gl.glActiveTexture(texUnit);
       refMapUnit = texUnit;

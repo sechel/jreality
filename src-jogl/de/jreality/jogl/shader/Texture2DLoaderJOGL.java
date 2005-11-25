@@ -366,7 +366,7 @@ public class Texture2DLoaderJOGL {
         byte[] data = faces[i].getByteArray();
         int width = faces[i].getWidth();
         int height = faces[i].getHeight();
-        if (mipmapped) 
+         if (mipmapped) 
           glu.gluBuild2DMipmaps(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 
                       GL.GL_RGBA, 
                       width,

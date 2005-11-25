@@ -24,7 +24,7 @@ import net.java.games.jogl.util.GLUT;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.LabelSet;
 import de.jreality.geometry.QuadMeshShape;
-import de.jreality.geometry.RegularDomainQuadMeshFactory;
+import de.jreality.geometry.HeightFieldFactory;
 import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultPolygonShader;
@@ -456,7 +456,7 @@ public class JOGLRendererHelper {
 						da = vertices.item(vnn).toDoubleArray();
 						if (vertexLength == 1 && isRegularDomainQuadMesh)	{		// Regular domain quad mesh
 							double z = da.getValueAt(0);
-							RegularDomainQuadMeshFactory.getCoordinatesForUV(pt, theDomain, u, v, maxU, maxV);
+							HeightFieldFactory.getCoordinatesForUV(pt, theDomain, u, v, maxU, maxV);
 							gl.glVertex3d(pt[0], pt[1], z);
 						}
 						else if (vertexLength == 3) gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));

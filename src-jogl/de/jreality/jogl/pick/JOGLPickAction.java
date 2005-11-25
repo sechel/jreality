@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.logging.Level;
 
 import de.jreality.jogl.JOGLConfiguration;
+import de.jreality.jogl.Viewer;
 import de.jreality.math.*;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
@@ -33,8 +34,8 @@ public class JOGLPickAction extends PickAction  {
 	static public int PROXY_GEOMETRY_FACE = GEOMETRY_BASE+5;
 	static boolean useOpenGL = true;
 	static boolean debug = false;
-	de.jreality.jogl.Viewer theViewer = null;
-	public JOGLPickAction(de.jreality.jogl.Viewer v) {
+	Viewer theViewer = null;
+	public JOGLPickAction(Viewer v) {
 		super(v);
 		theViewer = v;
 	}
