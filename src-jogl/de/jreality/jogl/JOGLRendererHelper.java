@@ -5,7 +5,6 @@
 package de.jreality.jogl;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -73,12 +72,7 @@ public class JOGLRendererHelper {
 				gl.glDisable(i+GL.GL_CLIP_PLANE0);
 			}
 			if (topAp != null)	bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_COLOR);
-			if (bgo != null && bgo instanceof java.awt.Color) {
-			    backgroundColor = ((java.awt.Color) bgo).getComponents(null);
-			    if (theCanvas instanceof Component) {
-			        ((Component)theCanvas).setBackground(new Color(1,0,0,0));
-			    }
-			}
+			if (bgo != null && bgo instanceof java.awt.Color) backgroundColor = ((java.awt.Color) bgo).getComponents(null);
 			else backgroundColor = CommonAttributes.BACKGROUND_COLOR_DEFAULT.getRGBComponents(null);
 			gl.glClearColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], 0.0f); //bg[3] ); //white 
 			

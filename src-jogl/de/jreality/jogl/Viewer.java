@@ -100,8 +100,8 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 
 	public void render() {
 //		if (isLinux)	{
-		    canvas.setIgnoreRepaint(false);
-			canvas.setNoAutoRedrawMode(false);			
+//		    canvas.setIgnoreRepaint(false);
+//			canvas.setNoAutoRedrawMode(false);			
 //		}
 	    synchronized (renderLock) {
 				if (!pendingUpdate) {
@@ -122,7 +122,6 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	public Component getViewingComponent() {
     if (component == null) {
       component=new javax.swing.JPanel();
-      component.setOpaque(false);
       component.setLayout(new java.awt.BorderLayout());
       component.setMaximumSize(new java.awt.Dimension(32768,32768));
       component.setMinimumSize(new java.awt.Dimension(10,10));
