@@ -201,14 +201,14 @@ public class InspectorPanel extends JPanel
   }
   private PropertyEditor editor(PropertyDescriptor descriptor)
   {
+    
     Class edcl=descriptor.getPropertyEditorClass();
     PropertyEditor pe=null;
     if(edcl!=null) try
     {
       pe=(PropertyEditor)edcl.newInstance();
     } catch(Exception ex){}
-    if(pe==null) pe=PropertyEditorManager
-      .findEditor(descriptor.getPropertyType());
+    if(pe==null) pe=PropertyEditorManager.findEditor(descriptor.getPropertyType());
     return pe;
   }
   

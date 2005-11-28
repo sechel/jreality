@@ -26,11 +26,13 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyEditorManager;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.*;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -66,6 +68,7 @@ import de.jreality.scene.tool.EncompassTool;
 import de.jreality.scene.tool.RotateTool;
 import de.jreality.scene.tool.ToolSystemViewer;
 import de.jreality.scene.tool.config.ToolSystemConfiguration;
+import de.jreality.shader.*;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPolygonShader;
@@ -91,6 +94,7 @@ public class ViewerApp
 
   public static void main(String[] args) throws Exception
   {
+    System.setProperty("sun.awt.noerasebackground", "true");
     new ViewerApp();
   }
   
@@ -257,6 +261,8 @@ public class ViewerApp
     Appearance ap= new Appearance();
     ap.setName("root appearance");
     DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(ap);
+    RootAppearance ra = ShaderUtility.createRootAppearance(ap);
+    ra.setBackgroundColor(Color.blue);
     DefaultLineShader dls = (DefaultLineShader) dgs.getLineShader();
     dls.setTubeDraw(false);
     DefaultPolygonShader dps = (DefaultPolygonShader) dgs.getPolygonShader();
