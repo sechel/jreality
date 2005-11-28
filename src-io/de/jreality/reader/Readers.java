@@ -201,31 +201,35 @@ public final class Readers
     SceneGraphComponent sgc = null;
     //String lc = input.toURL().toExternalForm();
     String lc = input.getDescription();
-    String format="";
-    if (lc.endsWith(".top")) {
-      format = "POLY";
-    } else if (lc.endsWith(".pov")) {
-      format = "POV";
-    } else if (lc.endsWith(".bsh")) {
-      format = "BSH";
-    } else if (lc.endsWith(".pov")) {
-      format = "POV";
-    } else if (lc.endsWith(".bsp")) {
-      format = "BSP";
-    } else if (lc.endsWith(".ase")) {
-      format = "ASE";
-    } else if (lc.endsWith(".obj")) {
-      format = "OBJ";
-    } else if (lc.endsWith(".3ds")) {
-      format = "3DS";
-    } else if (lc.endsWith(".jvx")) {
-      format = "JVX";
-    } else if (lc.endsWith("off") || lc.endsWith("quad") || lc.endsWith("mesh") || lc.endsWith("vect") || lc.endsWith("bez") 
-        || lc.endsWith(".grp") || lc.endsWith(".oogl") || lc.endsWith(".list") || lc.endsWith("inst")){
-      format = "OOGL";
-    }
-    if (format == "") throw new IllegalArgumentException("unknown file format");
+    String format = findFormat(lc);
+    if (format == null) throw new IllegalArgumentException("unknown file format");
     return read(format, input);
   }
+public static String findFormat(String resourceName) {
+	String format=null;
+    if (resourceName.endsWith(".top")) {
+      format = "POLY";
+    } else if (resourceName.endsWith(".pov")) {
+      format = "POV";
+    } else if (resourceName.endsWith(".bsh")) {
+      format = "BSH";
+    } else if (resourceName.endsWith(".pov")) {
+      format = "POV";
+    } else if (resourceName.endsWith(".bsp")) {
+      format = "BSP";
+    } else if (resourceName.endsWith(".ase")) {
+      format = "ASE";
+    } else if (resourceName.endsWith(".obj")) {
+      format = "OBJ";
+    } else if (resourceName.endsWith(".3ds")) {
+      format = "3DS";
+    } else if (resourceName.endsWith(".jvx")) {
+      format = "JVX";
+    } else if (resourceName.endsWith("off") || resourceName.endsWith("quad") || resourceName.endsWith("mesh") || resourceName.endsWith("vect") || resourceName.endsWith("bez") 
+        || resourceName.endsWith(".grp") || resourceName.endsWith(".oogl") || resourceName.endsWith(".list") || resourceName.endsWith("inst")){
+      format = "OOGL";
+    }
+	return format;
+}
 
 }
