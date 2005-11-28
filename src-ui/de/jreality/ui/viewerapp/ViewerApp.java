@@ -23,6 +23,7 @@
 package de.jreality.ui.viewerapp;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -38,6 +40,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
+import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -66,6 +69,7 @@ import de.jreality.scene.tool.config.ToolSystemConfiguration;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.ui.treeview.SimpleSGListRenderer;
 import de.jreality.util.RenderTrigger;
 
 /**
@@ -178,17 +182,15 @@ public class ViewerApp
     mi.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent arg0) {
           List children = currSceneNode.getChildNodes();
-          String[] names = new String[children.size()];
-          Iterator it = children.iterator();
-          for (int i = 0; i < children.size(); i++) {
-            names[i] = ((SceneGraphNode)it.next()).getName();
-          }
-          JList list = new JList(names);
+          JList list = new JList(children.toArray());
+          list.setCellRenderer(new SimpleSGListRenderer());
           list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-          JOptionPane.showInputDialog(frame, uiFactory.scroll(list));
-          int[] idx = list.getSelectedIndices();
-          for (int i = 0; i < idx.length; i++) {
-            currSceneNode.removeChildNode((SceneGraphNode)children.get(idx[i]));
+          int ret = JOptionPane.showConfirmDialog(frame, uiFactory.scroll(list), "Remove child", JOptionPane.OK_CANCEL_OPTION);
+          if (ret == JOptionPane.OK_OPTION) {
+            int[] idx = list.getSelectedIndices();
+            for (int i = 0; i < idx.length; i++) {
+              currSceneNode.removeChildNode((SceneGraphNode)children.get(idx[i]));
+            }
           }
         }
     });
