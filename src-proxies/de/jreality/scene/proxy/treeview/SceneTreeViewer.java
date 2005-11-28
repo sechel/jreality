@@ -117,7 +117,6 @@ public class SceneTreeViewer extends JTree implements de.jreality.scene.Viewer
     Viewer v)
   {
     final SceneTreeViewer viewer= new SceneTreeViewer(root);
-    viewer.addTreeSelectionListener(new FlashSelection(v));
     return new JScrollPane(viewer);
   }
 
