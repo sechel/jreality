@@ -206,27 +206,28 @@ public final class Readers
     return read(format, input);
   }
 public static String findFormat(String resourceName) {
-	String format=null;
-    if (resourceName.endsWith(".top")) {
+	  String format=null;
+    String lcName = resourceName.toLowerCase();
+    if (lcName.endsWith(".top")) {
       format = "POLY";
-    } else if (resourceName.endsWith(".pov")) {
+    } else if (lcName.endsWith(".pov")) {
       format = "POV";
-    } else if (resourceName.endsWith(".bsh")) {
+    } else if (lcName.endsWith(".bsh")) {
       format = "BSH";
-    } else if (resourceName.endsWith(".pov")) {
+    } else if (lcName.endsWith(".pov")) {
       format = "POV";
-    } else if (resourceName.endsWith(".bsp")) {
+    } else if (lcName.endsWith(".bsp")) {
       format = "BSP";
-    } else if (resourceName.endsWith(".ase")) {
+    } else if (lcName.endsWith(".ase")) {
       format = "ASE";
-    } else if (resourceName.endsWith(".obj")) {
+    } else if (lcName.endsWith(".obj")) {
       format = "OBJ";
-    } else if (resourceName.endsWith(".3ds")) {
+    } else if (lcName.endsWith(".3ds")) {
       format = "3DS";
-    } else if (resourceName.endsWith(".jvx")) {
+    } else if (lcName.endsWith(".jvx")) {
       format = "JVX";
-    } else if (resourceName.endsWith("off") || resourceName.endsWith("quad") || resourceName.endsWith("mesh") || resourceName.endsWith("vect") || resourceName.endsWith("bez") 
-        || resourceName.endsWith(".grp") || resourceName.endsWith(".oogl") || resourceName.endsWith(".list") || resourceName.endsWith("inst")){
+    } else if (lcName.endsWith("off") || lcName.endsWith("quad") || lcName.endsWith("mesh") || lcName.endsWith("vect") || lcName.endsWith("bez") 
+        || lcName.endsWith(".grp") || lcName.endsWith(".oogl") || lcName.endsWith(".list") || lcName.endsWith("inst")){
       format = "OOGL";
     }
 	return format;

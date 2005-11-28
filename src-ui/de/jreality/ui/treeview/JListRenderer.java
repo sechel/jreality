@@ -3,7 +3,9 @@ package de.jreality.ui.treeview;
 
 import java.awt.Component;
 
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
+import javax.swing.JList;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
@@ -21,12 +23,12 @@ import de.jreality.scene.proxy.tree.SceneTreeNode;
  * Render a node by showing the simple name and an (optional) icon.
  * @author holger
  */
-public class SimpleSGCellRenderer extends DefaultTreeCellRenderer
+public class JListRenderer extends DefaultListCellRenderer
   //implements TreeCellRenderer, TableCellRenderer, ListCellRenderer
 {
 
   protected static ImageIcon createImageIcon(String path) {
-    java.net.URL imgURL = SimpleSGCellRenderer.class.getResource(path);
+    java.net.URL imgURL = JListRenderer.class.getResource(path);
     if (imgURL != null) {
         return new ImageIcon(imgURL);
     } else {
@@ -68,7 +70,7 @@ public class SimpleSGCellRenderer extends DefaultTreeCellRenderer
   /**
    * Constructor for SimpleSGCellRenderer.
    */
-  public SimpleSGCellRenderer()
+  public JListRenderer()
   {
     super();
   }
@@ -76,31 +78,13 @@ public class SimpleSGCellRenderer extends DefaultTreeCellRenderer
   /**
    * @see javax.swing.tree.TreeCellRenderer#getTreeCellRendererComponent(JTree, Object, boolean, boolean, boolean, int, boolean)
    */
-  public Component getTreeCellRendererComponent(JTree tree, Object value,
-    boolean selected, boolean expanded, boolean leaf, int row, boolean focus)
+  public Component getListCellRendererComponent(JList list, Object value,
+    int index, boolean selected, boolean focus)
   {
-    SceneGraphNode m=((SceneTreeNode)value).getNode();
+    SceneGraphNode m=(SceneGraphNode)value;
     buffer.append(m.getName());
-    //buffer.append(" : ");
-    //final int ix1=buffer.length();
-    //String clName=m.getClass().getName();
-    
-    // TODO: check how to deal with that without appearance attributes
-    /*
-    if(clName.intern()=="de.jreality.scene.AppearanceAttribute")
-    {
-      Object aa=(AppearanceAttribute)m;
-      buffer.append(aa.getAttributeName()).append(" = ").append(aa.getValue());
-    }
-    
-    else
-    */
-    //{
-      //buffer.append(clName);
-      //buffer.delete(ix1, clName.lastIndexOf('.')+ix1+1);
-    //}
-    final Component c=super.getTreeCellRendererComponent(
-      tree, buffer.toString(), selected, expanded, leaf, row, focus);
+    final Component c=super.getListCellRendererComponent(
+      list, buffer.toString(), index, selected, focus);
     buffer.setLength(0);
     m.accept(iconSelector);
     return c;

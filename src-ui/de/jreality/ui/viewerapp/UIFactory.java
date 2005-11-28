@@ -29,10 +29,12 @@ import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTree;
 import javax.swing.border.Border;
 
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.treeview.SceneTreeViewer;
+import de.jreality.ui.treeview.JTreeRenderer;
+import de.jreality.ui.treeview.SceneTreeModel;
 
 /**
  * TODO: comment UIFactory
@@ -43,7 +45,7 @@ public class UIFactory
   private Component viewer;
   private Component inspector;
   final Border emptyBorder=BorderFactory.createEmptyBorder();
-  SceneTreeViewer sceneTree;
+  JTree sceneTree;
 
   public JFrame createFrame()
   {
@@ -60,18 +62,22 @@ public class UIFactory
 
   Container createViewerContent()
   {
-    JSplitPane main=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-      createNavigation(), createViewerPanel());
-    main.setResizeWeight(.5);
-    JSplitPane content=new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-      main, createInspectorPanel());
+    JSplitPane main=new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+      createNavigation(), createInspectorPanel());
+    main.setResizeWeight(.1);
+    JSplitPane content=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+      main, createViewerPanel());
+    content.setDividerLocation(0.5);
     return content;
   }
 
   private Component createNavigation()
   {
-    sceneTree=new SceneTreeViewer();
-    sceneTree.setRoot(root);
+    sceneTree=new JTree();
+    SceneTreeModel model = new SceneTreeModel(root);
+    sceneTree.setModel(model);
+    sceneTree.setCellRenderer(new JTreeRenderer());
+
     return scroll(sceneTree);
   }
 

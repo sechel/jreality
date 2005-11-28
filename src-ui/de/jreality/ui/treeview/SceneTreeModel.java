@@ -2,18 +2,17 @@ package de.jreality.ui.treeview;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.proxy.tree.EntityFactory;
 import de.jreality.scene.proxy.tree.ProxyTreeFactory;
-import de.jreality.scene.proxy.tree.SceneGraphNodeEntity;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.scene.proxy.tree.UpToDateSceneProxyBuilder;
 
-public class TreeUpdateProxy extends AbstractTreeModel {
+public class SceneTreeModel extends AbstractTreeModel {
 
   private UpToDateSceneProxyBuilder builder;
 
-  TreeUpdateProxy() {
+  public SceneTreeModel(SceneGraphComponent root) {
     super(null);
+    setSceneRoot(root);
   }
 
   void dispose() {
@@ -43,11 +42,6 @@ public class TreeUpdateProxy extends AbstractTreeModel {
         };
       }
     });
-//    builder.setEntityFactory(new EntityFactory() {
-//      protected SceneGraphNodeEntity produceSceneGraphNodeEntity(SceneGraphNode n) {
-//        if ()
-//      }
-//    });
     super.root = builder.createProxyTree();
   }
 

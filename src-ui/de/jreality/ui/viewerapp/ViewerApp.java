@@ -69,7 +69,7 @@ import de.jreality.scene.tool.config.ToolSystemConfiguration;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.ui.treeview.SimpleSGListRenderer;
+import de.jreality.ui.treeview.JListRenderer;
 import de.jreality.util.RenderTrigger;
 
 /**
@@ -150,10 +150,8 @@ public class ViewerApp
     JMenuItem mi = new JMenuItem("Load...");
     mi.addActionListener(new ActionListener(){
     		public void actionPerformed(ActionEvent arg0) {
-    			JFileChooser chooser = FileLoaderDialog.createFileChooser();
-    			chooser.showOpenDialog(frame);
-    			File[] files = chooser.getSelectedFiles();
-    			for (int i = 0; i < files.length; i++) {
+    		  File[] files = FileLoaderDialog.loadFiles(frame);
+          for (int i = 0; i < files.length; i++) {
     				try {
     					SceneGraphComponent f = Readers.read(files[i]);
               f.setName(files[i].getName());
@@ -183,7 +181,7 @@ public class ViewerApp
         public void actionPerformed(ActionEvent arg0) {
           List children = currSceneNode.getChildNodes();
           JList list = new JList(children.toArray());
-          list.setCellRenderer(new SimpleSGListRenderer());
+          list.setCellRenderer(new JListRenderer());
           list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
           int ret = JOptionPane.showConfirmDialog(frame, uiFactory.scroll(list), "Remove child", JOptionPane.OK_CANCEL_OPTION);
           if (ret == JOptionPane.OK_OPTION) {
