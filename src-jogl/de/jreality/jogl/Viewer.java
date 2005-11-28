@@ -6,11 +6,20 @@ package de.jreality.jogl;
 
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.EventObject;
 import java.util.Vector;
 import java.util.logging.Level;
+
+import javax.swing.JPanel;
 
 import net.java.games.jogl.*;
 import de.jreality.scene.SceneGraphComponent;
@@ -40,6 +49,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	public static final int 	HARDWARE_BUFFER_STEREO = 23;
 	int stereoType = 		CROSS_EYED_STEREO;	
 	private boolean debug = false;
+  private JPanel component;
 
 	public Viewer() {
 		this(null, null);
@@ -51,10 +61,10 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		initializeFrom(r, p);	
 		// for reasons unknown, have to be very careful on Linux not to try to draw too early.
 		// to avoid this, set the following variables 
-		if (JOGLConfiguration.isLinux)	{
-		    canvas.setIgnoreRepaint(true);
-			canvas.setNoAutoRedrawMode(true);			
-		}
+//		if (JOGLConfiguration.isLinux)	{
+//		    canvas.setIgnoreRepaint(true);
+//			canvas.setNoAutoRedrawMode(true);			
+//		}
 	}
 
 	public SceneGraphComponent getSceneRoot() {
@@ -110,7 +120,55 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 
 
 	public Component getViewingComponent() {
-		return canvas;
+    if (component == null) {
+      component=new javax.swing.JPanel();
+      component.setLayout(new java.awt.BorderLayout());
+      component.setMaximumSize(new java.awt.Dimension(32768,32768));
+      component.setMinimumSize(new java.awt.Dimension(10,10));
+      component.add("Center", canvas);
+      canvas.addKeyListener(new KeyListener() {
+        public void keyPressed(KeyEvent e) {
+          component.dispatchEvent(e);
+        }
+        public void keyReleased(KeyEvent e) {
+          component.dispatchEvent(e);
+        }
+        public void keyTyped(KeyEvent e) {
+          component.dispatchEvent(e);
+        }
+      });
+      canvas.addMouseListener(new MouseListener() {
+        public void mouseClicked(MouseEvent e) {
+          component.dispatchEvent(e);
+        }
+        public void mouseEntered(MouseEvent e) {
+          component.dispatchEvent(e);
+        }
+        public void mouseExited(MouseEvent e) {
+          component.dispatchEvent(e);
+        }
+        public void mousePressed(MouseEvent e) {
+          component.dispatchEvent(e);
+        }
+        public void mouseReleased(MouseEvent e) {
+          component.dispatchEvent(e);
+        }
+      });
+      canvas.addMouseMotionListener(new MouseMotionListener() {
+        public void mouseDragged(MouseEvent e) {
+          component.dispatchEvent(e);
+        }
+        public void mouseMoved(MouseEvent e) {
+          component.dispatchEvent(e);
+        }
+      });
+      canvas.addMouseWheelListener(new MouseWheelListener() {
+        public void mouseWheelMoved(MouseWheelEvent e) {
+          component.dispatchEvent(e);
+        }
+      });
+    }
+		return component;
 	}
 
 	/* (non-Javadoc)
@@ -345,13 +403,13 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	public void init(GLDrawable arg0) {
 		JOGLConfiguration.theLog.log(Level.INFO,"JOGL Context initialization, creating new renderer");
 		renderer =  new JOGLRenderer(this); 
-	   renderer.init(arg0);  
+    renderer.init(arg0);  
 	}
 
 	public void reshape(
 		GLDrawable arg0,int arg1,int arg2,int arg3,int arg4) {
 		renderer.reshape(arg0, arg1, arg2, arg3, arg4);
-	}
+  }
 	private final Object renderLock=new Object();
 	boolean autoSwapBuffers=true;
 	

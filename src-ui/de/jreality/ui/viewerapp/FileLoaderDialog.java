@@ -11,11 +11,11 @@ import de.jreality.reader.Readers;
 
 public class FileLoaderDialog {
 	
-  static File lastDir;
+  static File lastDir=new File("/net/MathVis/data/testData3D");
   
 	static JFileChooser createFileChooser() {
 		FileSystemView view = FileSystemView.getFileSystemView();
-		JFileChooser chooser = new JFileChooser(lastDir == null ? view.getHomeDirectory() : lastDir, view);
+		JFileChooser chooser = new JFileChooser(!lastDir.exists() ? view.getHomeDirectory() : lastDir, view);
 		FileFilter ff = new FileFilter(){
 			public boolean accept(File arg0) {
 				if (arg0.isDirectory()) return true;

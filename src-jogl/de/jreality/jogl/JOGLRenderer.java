@@ -84,7 +84,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 	 * @param viewer
 	 */
 	public JOGLRenderer(Viewer viewer) {
-		this(viewer, ((GLDrawable) viewer.getViewingComponent()));
+		this(viewer, ((GLDrawable) viewer.canvas));
 		javax.swing.Timer followTimer = new javax.swing.Timer(1000, new ActionListener()	{
 			public void actionPerformed(ActionEvent e) {updateGeometryHashtable(); } } );
 		followTimer.start();

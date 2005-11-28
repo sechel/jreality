@@ -279,30 +279,4 @@ public class InspectorPanel extends JPanel
     });
     return cb;
   }
-  public static void main(String[] args) throws IntrospectionException
-  {
-    Class type=Texture2D.class;
-    Appearance app=new Appearance();
-    final AttributeEntity t2d=AttributeEntityUtility.createAttributeEntity(type, "", app);
-    final Button b=new Button("Click Me");
-    b.setBackground(Color.blue);
-    
-    final InspectorPanel ip=new InspectorPanel();
-    JFrame f=new JFrame("Test");
-    ip.setObject(b);
-    f.setContentPane(ip);
-    f.pack();
-    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    f.show();
-    Timer t=new Timer(10000, new ActionListener()
-    {
-      public void actionPerformed(ActionEvent e)
-      {
-        ip.setObject(t2d);
-        System.out.println(b);
-      }
-    });
-    t.setRepeats(false/*true*/);
-    t.start();
-  }
 }

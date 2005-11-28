@@ -67,6 +67,7 @@ import de.jreality.scene.tool.RotateTool;
 import de.jreality.scene.tool.ToolSystemViewer;
 import de.jreality.scene.tool.config.ToolSystemConfiguration;
 import de.jreality.shader.DefaultGeometryShader;
+import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.ui.treeview.JListRenderer;
@@ -105,10 +106,6 @@ public class ViewerApp
     currViewer.setAvatarPath(avatarPath);
     currViewer.setEmptyPickPath(emptyPick);
     
-    RenderTrigger rt = new RenderTrigger();
-    rt.addViewer(currViewer);
-    rt.addSceneGraphComponent(root);
-
     uiFactory=new UIFactory();
     uiFactory.setViewer(currViewer.getViewingComponent());
     uiFactory.setInspector(inspector);
@@ -142,6 +139,9 @@ public class ViewerApp
     });
     createMenu();
     frame.show();
+    RenderTrigger rt = new RenderTrigger();
+    rt.addViewer(currViewer);
+    rt.addSceneGraphComponent(root);
   }
   
   private void createMenu() {
@@ -257,6 +257,8 @@ public class ViewerApp
     Appearance ap= new Appearance();
     ap.setName("root appearance");
     DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(ap);
+    DefaultLineShader dls = (DefaultLineShader) dgs.getLineShader();
+    dls.setTubeDraw(false);
     DefaultPolygonShader dps = (DefaultPolygonShader) dgs.getPolygonShader();
     dps.setDiffuseColor(new Color(1f, 0f, 0f));
 // ap.setAttribute("lightingEnabled", true);
@@ -287,12 +289,13 @@ public class ViewerApp
   {
     String viewer=System.getProperty("de.jreality.scene.Viewer",
       "de.jreality.jogl.Viewer");
-    ToolSystemViewer v = createViewer(viewer);
+    //  "de.jreality.soft.DefaultViewer");
+    ToolSystemViewer v = new ToolSystemViewer(createViewer(viewer), ToolSystemConfiguration.loadDefaultDesktopConfiguration());
     v.setPickSystem(new AABBPickSystem());
     return v;
   }
-  private static ToolSystemViewer createViewer(String viewer) throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
+  private static Viewer createViewer(String viewer) throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
   {
-    return new ToolSystemViewer((Viewer)Class.forName(viewer).newInstance(), ToolSystemConfiguration.loadDefaultDesktopConfiguration());
+    return (Viewer)Class.forName(viewer).newInstance();
   }
 }

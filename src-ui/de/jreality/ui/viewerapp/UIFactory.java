@@ -62,12 +62,13 @@ public class UIFactory
 
   Container createViewerContent()
   {
-    JSplitPane main=new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-      createNavigation(), createInspectorPanel());
+    JSplitPane main=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+      createNavigation(), createViewerPanel());
+    main.setContinuousLayout(true);
     main.setResizeWeight(.1);
-    JSplitPane content=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-      main, createViewerPanel());
-    content.setDividerLocation(0.5);
+    JSplitPane content=new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+      main, createInspectorPanel());
+    content.setContinuousLayout(true);
     return content;
   }
 
