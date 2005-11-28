@@ -85,7 +85,7 @@ public class UIFactory
     return scroll(inspector);
   }
 
-  private JScrollPane scroll(Component tree)
+  JScrollPane scroll(Component tree)
   {
     JScrollPane scroll=new JScrollPane(tree);
     scroll.setBorder(emptyBorder);

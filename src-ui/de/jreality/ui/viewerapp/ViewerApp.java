@@ -27,12 +27,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JSeparator;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
@@ -42,8 +48,12 @@ import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.Geometry;
+import de.jreality.scene.Light;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
@@ -162,6 +172,29 @@ public class ViewerApp
     fileMenu.addSeparator();
     fileMenu.add(mi);
     mb.add(fileMenu);
+
+    JMenu compMenu = new JMenu("Component");
+    mi = new JMenuItem("Remove child...");
+    mi.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent arg0) {
+          List children = currSceneNode.getChildNodes();
+          String[] names = new String[children.size()];
+          Iterator it = children.iterator();
+          for (int i = 0; i < children.size(); i++) {
+            names[i] = ((SceneGraphNode)it.next()).getName();
+          }
+          JList list = new JList(names);
+          list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+          JOptionPane.showInputDialog(frame, uiFactory.scroll(list));
+          int[] idx = list.getSelectedIndices();
+          for (int i = 0; i < idx.length; i++) {
+            currSceneNode.removeChildNode((SceneGraphNode)children.get(idx[i]));
+          }
+        }
+    });
+    compMenu.add(mi);
+    mb.add(compMenu);
+    
     frame.setJMenuBar(mb);
   }
   
