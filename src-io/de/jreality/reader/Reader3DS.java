@@ -24,7 +24,6 @@ package de.jreality.reader;
 
 import java.awt.Image;
 import java.io.*;
-import java.io.IOException;
 import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,13 +33,10 @@ import de.jreality.math.P3;
 import de.jreality.math.Rn;
 import de.jreality.scene.*;
 import de.jreality.scene.data.*;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DoubleArrayArray;
-import de.jreality.scene.data.IntArrayArray;
-import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
 import de.jreality.util.*;
 
 /**
@@ -281,9 +277,9 @@ public class Reader3DS extends AbstractReader {
         try {
           ImageData imgData = ImageData.load(input.resolveInput(textName));
           if (imgData != null) {
-            tex2d = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, 
-              CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D, getCurrentApperance());
-            tex2d.setImage(imgData);
+            tex2d = TextureUtility.createTexture(getCurrentApperance(),
+                CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D,
+                imgData);
             tex2d.setTextureMatrix(MatrixBuilder.euclidian().scale(1,-1,0).getMatrix());
           }
         } catch (Exception e) {

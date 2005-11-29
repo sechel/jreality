@@ -23,8 +23,6 @@
 package de.jreality.ui.viewerapp;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -41,24 +39,18 @@ import java.beans.PropertyEditorManager;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.text.JTextComponent;
-
-import de.jreality.scene.Appearance;
-import de.jreality.scene.data.AttributeEntity;
-import de.jreality.scene.data.AttributeEntityUtility;
-import de.jreality.shader.Texture2D;
 
 /**
  * TODO: comment InspectorPanel
@@ -83,12 +75,13 @@ public class InspectorPanel extends JPanel
     editors=new ArrayList();
     properties=new ArrayList();
     setup();
-    System.out.println(type+" has "+properties.size()+" properties");
+    System.out.println(type+" has "+properties.size()+" properties "+Arrays.asList(type.getInterfaces()));
   }
   private void setup() throws IntrospectionException
   {
     BeanInfo bi=Introspector.getBeanInfo(type);
     PropertyDescriptor[] pd=bi.getPropertyDescriptors();
+    System.out.println("pds length="+pd.length);
     setLayout(new GridBagLayout());
     GridBagConstraints label=new GridBagConstraints();
     label.fill=GridBagConstraints.HORIZONTAL;
@@ -138,7 +131,9 @@ public class InspectorPanel extends JPanel
           }
         });
       }
-    } catch(Exception ex){}
+    } catch(Exception ex){
+      ex.printStackTrace();
+    }
     editor.weighty=1;
     this.add(new JLabel(), editor);
   }
@@ -201,14 +196,21 @@ public class InspectorPanel extends JPanel
   }
   private PropertyEditor editor(PropertyDescriptor descriptor)
   {
-    
     Class edcl=descriptor.getPropertyEditorClass();
     PropertyEditor pe=null;
     if(edcl!=null) try
     {
       pe=(PropertyEditor)edcl.newInstance();
-    } catch(Exception ex){}
-    if(pe==null) pe=PropertyEditorManager.findEditor(descriptor.getPropertyType());
+    } catch(Exception ex){
+      ex.printStackTrace();
+    }
+    if(pe==null) { 
+      try {
+        pe=PropertyEditorManager.findEditor(descriptor.getPropertyType());
+      } catch (Exception e) {
+        System.out.println("Exception in findEditor for property="+descriptor.getName()+" type="+descriptor.getPropertyType());
+      }
+    }
     return pe;
   }
   

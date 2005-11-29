@@ -46,16 +46,18 @@ public class SubEntityTest extends TestCase {
 
   public void testDefaultGeometryShader() {
     Appearance a = new Appearance();
+    Appearance a2 = new Appearance();
     
-    DefaultGeometryShader gs = ShaderUtility.createDefaultGeometryShader(a);
+    DefaultGeometryShader gs = ShaderUtility.createDefaultGeometryShader(a, false);
+    DefaultGeometryShader gs2 = ShaderUtility.createDefaultGeometryShader(a2, true);
     
-    gs.setShowLines(false);
-    gs.setShowFaces(true);
+    gs.setShowLines(Boolean.FALSE);
+    gs.setShowFaces(Boolean.TRUE);
     
     DefaultPolygonShader ps = (DefaultPolygonShader) gs.getPolygonShader();
     
-    ps.setAmbientCoefficient(1.2);
-    ps.setSmoothShading(false);  
+    ps.setAmbientCoefficient(new Double(1.2));
+    ps.setSmoothShading(Boolean.FALSE);  
 
     DefaultPointShader dps = (DefaultPointShader)gs.getPointShader();
     
@@ -67,11 +69,28 @@ public class SubEntityTest extends TestCase {
     back.setDiffuseColor(Color.BLACK);
     front.setDiffuseColor(Color.WHITE);
     
+    DefaultPolygonShader dpols = (DefaultPolygonShader) gs.getPolygonShader();
+    
     EffectiveAppearance ea = EffectiveAppearance.create().create(a);
-    DefaultGeometryShader gs2 = ShaderUtility.createDefaultGeometryShader(ea);
-    System.out.println(gs2);
-
+    DefaultPolygonShader dpols2 = (DefaultPolygonShader) gs2.getPolygonShader();
+    
+    Color defCol = dpols2.getDiffuseColor();
+    assertFalse(defCol == null);
+    dpols2.setDiffuseColor(Color.black);
+    defCol = dpols2.getDiffuseColor();
+    assertFalse(defCol == null);
+    dpols2.setDiffuseColor(null);
+    assertFalse(defCol == null);
+    defCol = dpols2.getDiffuseColor();
+    
     System.out.println(a);
+    dpols.setDiffuseColor(null);
+    Object o = dpols.getDiffuseColor();
+    System.out.println(o);
+    assertTrue(o == null);
+    
+    System.out.println(a);
+    
   }
   
   public void testDefaultGeometryShaderRead() {

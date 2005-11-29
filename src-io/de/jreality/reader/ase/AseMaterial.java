@@ -65,8 +65,8 @@ import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
 import de.jreality.util.*;
-import de.jreality.util.LoggingSystem;
 
 
 /**
@@ -197,11 +197,9 @@ public class AseMaterial extends AseNode {
             try {
               ImageData id = ImageData.load(input.getRelativeInput(tname));
               
-              Texture2D t = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, 
+              Texture2D t = TextureUtility.createTexture(a,
                 CommonAttributes.POLYGON_SHADER + "."
-                + CommonAttributes.TEXTURE_2D, a);
-
-              t.setImage(id);
+                + CommonAttributes.TEXTURE_2D, id);
                 
                 // Tries to load the texture extracting the file name from the path
                 // (the path for example could be "C:\Models\textures\grass.jpg" and

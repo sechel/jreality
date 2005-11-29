@@ -42,6 +42,7 @@ public class JTreeRenderer extends DefaultTreeCellRenderer
   static final ImageIcon sgcIcon = createImageIcon("icons/SceneGraphComponentIcon.jpg");
   static final ImageIcon appIcon = createImageIcon("icons/AppearanceIcon.jpg");
   static final ImageIcon lightIcon = createImageIcon("icons/LightIcon.jpg");
+  static final ImageIcon shaderIcon = createImageIcon("icons/ShaderIcon.jpg");
 
   final SceneGraphVisitor iconSelector = new SceneGraphVisitor() {
     public void visit(Appearance a) {
@@ -79,30 +80,19 @@ public class JTreeRenderer extends DefaultTreeCellRenderer
   public Component getTreeCellRendererComponent(JTree tree, Object value,
     boolean selected, boolean expanded, boolean leaf, int row, boolean focus)
   {
-    SceneGraphNode m=((SceneTreeNode)value).getNode();
-    buffer.append(m.getName());
-    //buffer.append(" : ");
-    //final int ix1=buffer.length();
-    //String clName=m.getClass().getName();
-    
-    // TODO: check how to deal with that without appearance attributes
-    /*
-    if(clName.intern()=="de.jreality.scene.AppearanceAttribute")
-    {
-      Object aa=(AppearanceAttribute)m;
-      buffer.append(aa.getAttributeName()).append(" = ").append(aa.getValue());
+    if (value instanceof SceneTreeNode) {
+      SceneGraphNode m=((SceneTreeNode)value).getNode();
+      buffer.append(m.getName());
+    } else {
+      String ifName = value.getClass().getInterfaces()[0].getName();
+      buffer.append(ifName.substring(ifName.lastIndexOf(".")+1));
     }
-    
-    else
-    */
-    //{
-      //buffer.append(clName);
-      //buffer.delete(ix1, clName.lastIndexOf('.')+ix1+1);
-    //}
     final Component c=super.getTreeCellRendererComponent(
-      tree, buffer.toString(), selected, expanded, leaf, row, focus);
+        tree, buffer.toString(), selected, expanded, leaf, row, focus);
     buffer.setLength(0);
-    m.accept(iconSelector);
+    if (value instanceof SceneTreeNode) {
+      ((SceneTreeNode)value).getNode().accept(iconSelector);
+    } else setIcon(shaderIcon);
     return c;
   }
 }
