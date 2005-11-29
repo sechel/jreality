@@ -33,7 +33,9 @@ import de.jreality.scene.tool.ShipNavigationTool;
 import de.jreality.scene.tool.ToolSystemViewer;
 import de.jreality.scene.tool.config.ToolSystemConfiguration;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.ShaderUtility;
 import de.jreality.soft.DefaultViewer;
+import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.RenderTrigger;
 import de.jreality.util.SceneGraphUtility;
 import de.smrj.tcp.TCPBroadcasterIO;
@@ -94,11 +96,12 @@ public class PortalFileViewer {
     if (scale != null) fileScale = scale.doubleValue();
     String viewerType = (String) parser.getOptionValue(viewerOpt);
     if (viewerType == null || viewerType.equalsIgnoreCase("PORTAL")) {
-      viewer = new ToolSystemViewer(new PortalServerViewer(
+      viewer = new ToolSystemViewer(new DesktopPortalViewer(
           io ? new TCPBroadcasterIO(8868).getRemoteFactory()
               : new TCPBroadcasterNIO(8868).getRemoteFactory()), ToolSystemConfiguration.loadDefaultPortalConfiguration());
     } else {
-      ToolSystemConfiguration tsc = ToolSystemConfiguration.loadDefaultDesktopConfiguration();
+      ToolSystemConfiguration tsc = ToolSystemConfiguration.loadDefaultDesktopAndPortalConfiguration();
+      
       if (viewerType.equalsIgnoreCase("SOFT")) {
         viewer = new ToolSystemViewer(new DefaultViewer(), tsc);
       } else if (viewerType.equalsIgnoreCase("JOGL")){
@@ -107,11 +110,6 @@ public class PortalFileViewer {
         System.err.println("unknown viewer: "+viewerType+"\n"+usage(parser));
         System.exit(2);
       }
-      JFrame f = new JFrame("jReality");
-      f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      f.setSize(400, 300);
-      f.getContentPane().add("Center", viewer.getViewingComponent());
-      f.show();
     }
     setUpWorld();
     for (int i = 0; i < dataArgs.length; i++) {
@@ -123,6 +121,7 @@ public class PortalFileViewer {
       createToggleFrame();
     }
     applyBackgroundColor(new java.awt.Color(1f, 0.2f, 0.2f));
+    new ViewerApp(viewer, false);
   }
 
   private static void createToggleFrame() {
@@ -152,9 +151,10 @@ public class PortalFileViewer {
       Appearance ap = defaultRoot.getAppearance();
       if (ap == null) {
         ap = new Appearance();
+        ap.setName("Root Appearance");
         defaultRoot.setAppearance(ap);
       }
-      ap.setAttribute(CommonAttributes.BACKGROUND_COLOR, color);
+      ShaderUtility.createRootAppearance(ap).setBackgroundColor(color);
     }
   }
 
@@ -162,6 +162,7 @@ public class PortalFileViewer {
     long t = System.currentTimeMillis();
     try {
       de.jreality.scene.SceneGraphComponent file = Readers.read(new File(name));
+      file.setName(name);
       System.out.println("PortalServerViewer.loadFile() load file done. Now set up world:");
       world.addChild(file);
       fileNodes.add(file);
@@ -178,7 +179,7 @@ public class PortalFileViewer {
    * @param world
    */
   private static void setUpWorld() {
-      
+      world.setName("world");
       defaultRoot = new SceneGraphComponent();
       defaultRoot.setName("root node");
       SceneGraphComponent portal = new SceneGraphComponent();

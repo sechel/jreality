@@ -127,10 +127,17 @@ public class PortalServerViewer implements de.jreality.scene.Viewer {
   }
 
   public void render() {
+    renderStart();
+    renderEnd();
+  }
+  
+  void renderStart() {
     renderLock.writeLock();
     clients.render();
+  }
+
+  void renderEnd() {
     clients.waitForRenderFinish();
     renderLock.writeUnlock();
   }
-
 }

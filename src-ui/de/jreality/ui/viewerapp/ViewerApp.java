@@ -85,21 +85,23 @@ public class ViewerApp
   public static void main(String[] args) throws Exception
   {
     System.setProperty("sun.awt.noerasebackground", "true");
-    new ViewerApp();
+    new ViewerApp(createViewer(), true);
   }
   
-  ViewerApp() throws Exception {
-    root=buildRoot();
-    currSceneNode = scene;
-	
+  public ViewerApp(ToolSystemViewer viewer, boolean initScene) throws Exception {
     inspector=new InspectorPanel();
 
-    currViewer=createViewer();
-    currViewer.setSceneRoot(root);
-    currViewer.setCameraPath(cameraPath);
-    currViewer.setAvatarPath(avatarPath);
-    currViewer.setEmptyPickPath(emptyPick);
-    
+    currViewer=viewer;
+    if (initScene) {
+      root=buildRoot();
+      currSceneNode = scene;
+      currViewer.setSceneRoot(root);
+      currViewer.setCameraPath(cameraPath);
+      currViewer.setAvatarPath(avatarPath);
+      currViewer.setEmptyPickPath(emptyPick);
+    } else {
+      root = viewer.getSceneRoot();
+    }
     uiFactory=new UIFactory();
     uiFactory.setViewer(currViewer.getViewingComponent());
     uiFactory.setInspector(inspector);
