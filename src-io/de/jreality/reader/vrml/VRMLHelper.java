@@ -5,6 +5,7 @@
  */
 package de.jreality.reader.vrml;
 
+import java.awt.Color;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -50,7 +51,18 @@ public class VRMLHelper {
 		}
 		return foo;
 	}
+
+	public static Color[] listToColorArray(List l)		{
+		Color[] foo = new Color[l.size()];
+		int count = 0;
+		Iterator iter = l.iterator();
+		while (iter.hasNext()	)	{
+			foo[count++] = ((Color)iter.next());
+		}
+		return foo;
+	}
 	
+
 	public static int[][] convertIndices(int[] input)	{
 		// count the number of negative entries
 		int count = 0, subcount = 0;

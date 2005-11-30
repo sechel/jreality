@@ -1,31 +1,33 @@
 // $ANTLR 2.7.4: "vrml-v1.0.g" -> "VRMLV1Parser.java"$
 
+/*
+ *	@author gunn
+ *  Nov. 30, 2005
+ */
 package de.jreality.reader.vrml;
 import java.awt.Color;
-import java.util.Vector;
+import java.util.*;
+import de.jreality.scene.*;
+import de.jreality.math.*;
+import de.jreality.geometry.*;
+import de.jreality.shader.*;
 
-import antlr.NoViableAltException;
-import antlr.ParserSharedInputState;
-import antlr.RecognitionException;
-import antlr.Token;
 import antlr.TokenBuffer;
-import antlr.TokenStream;
 import antlr.TokenStreamException;
+import antlr.TokenStreamIOException;
+import antlr.ANTLRException;
+import antlr.LLkParser;
+import antlr.Token;
+import antlr.TokenStream;
+import antlr.RecognitionException;
+import antlr.NoViableAltException;
+import antlr.MismatchedTokenException;
+import antlr.SemanticException;
+import antlr.ParserSharedInputState;
 import antlr.collections.impl.BitSet;
-import de.jreality.geometry.IndexedFaceSetFactory;
-import de.jreality.math.FactoredMatrix;
-import de.jreality.math.P3;
-import de.jreality.math.Pn;
-import de.jreality.math.Rn;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Transformation;
-import de.jreality.shader.CommonAttributes;
 
 /*****************************************************************************
- * The VRML Parser
+ * The VRMLV1 Parser
  *****************************************************************************
  */
 public class VRMLV1Parser extends antlr.LLkParser       implements VRMLV1ParserTokenTypes
@@ -591,7 +593,7 @@ public VRMLV1Parser(ParserSharedInputState state) {
 				// TODO handle other attributes, decide whether they are face/vertex attributes, etc.
 				ifsf.setGenerateEdgesFromFaces(false);
 				ifsf.setGenerateFaceNormals(true); // depends on whether face normals were set above!
-				ifsf.setGenerateVertexNormals(true); // depends on whether face normals were set above!
+				ifsf.setGenerateVertexNormals(false); // depends on whether face normals were set above!
 				ifsf.refactor();
 				ifs = ifsf.getIndexedFaceSet();
 				currentSGC.setGeometry(ifs);
@@ -655,7 +657,7 @@ public VRMLV1Parser(ParserSharedInputState state) {
 			} while (true);
 			}
 			match(CLOSE_BRACE);
-			if (VRMLHelper.verbose)	System.err.println("Unrecognized statement "+	n);
+			System.err.println("Unrecognized keyword "+	n);
 		}
 		catch (RecognitionException ex) {
 			reportError(ex);
@@ -973,35 +975,35 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		Appearance ap
 	) throws RecognitionException, TokenStreamException {
 		
-			Color c=null; double d = 0.0;
+			Color[] c=null; double d = 0.0;
 		
 		try {      // for error handling
 			switch ( LA(1)) {
 			case LITERAL_ambientColor:
 			{
 				match(LITERAL_ambientColor);
-				c=sfcolorValue();
-				ap.setAttribute(CommonAttributes.AMBIENT_COLOR, c);
+				c=mfcolorValue();
+				ap.setAttribute(CommonAttributes.AMBIENT_COLOR, c[0]);
 				break;
 			}
 			case LITERAL_diffuseColor:
 			{
 				match(LITERAL_diffuseColor);
-				c=sfcolorValue();
-				ap.setAttribute(CommonAttributes.DIFFUSE_COLOR, c);
+				c=mfcolorValue();
+				ap.setAttribute(CommonAttributes.DIFFUSE_COLOR, c[0]);
 				break;
 			}
 			case LITERAL_specularColor:
 			{
 				match(LITERAL_specularColor);
-				c=sfcolorValue();
-				ap.setAttribute(CommonAttributes.SPECULAR_COLOR, c);
+				c=mfcolorValue();
+				ap.setAttribute(CommonAttributes.SPECULAR_COLOR, c[0]);
 				break;
 			}
 			case LITERAL_emissiveColor:
 			{
 				match(LITERAL_emissiveColor);
-				c=sfcolorValue();
+				c=mfcolorValue();
 				break;
 			}
 			case LITERAL_transparency:
@@ -1031,23 +1033,36 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		}
 	}
 	
-	public final Color  sfcolorValue() throws RecognitionException, TokenStreamException {
-		Color c;
+	public final Color[]  mfcolorValue() throws RecognitionException, TokenStreamException {
+		Color[] cl;
 		
-		c = null; double r, g, b;
+		cl = null;Color c = null;
 		
 		try {      // for error handling
-			r=number();
-			b=number();
-			g=number();
-			c = new Color( (float)r, (float) g, (float) b);
+			if ((LA(1)==INT32||LA(1)==FLOAT)) {
+				c=sfcolorValue();
+				cl = new Color[1];	cl[0] = c;
+			}
+			else if ((LA(1)==OPEN_BRACKET) && (LA(2)==CLOSE_BRACKET)) {
+				match(OPEN_BRACKET);
+				match(CLOSE_BRACKET);
+			}
+			else if ((LA(1)==OPEN_BRACKET) && (LA(2)==INT32||LA(2)==FLOAT)) {
+				match(OPEN_BRACKET);
+				cl=sfcolorValues();
+				match(CLOSE_BRACKET);
+			}
+			else {
+				throw new NoViableAltException(LT(1), getFilename());
+			}
+			
 		}
 		catch (RecognitionException ex) {
 			reportError(ex);
 			consume();
-			consumeUntil(_tokenSet_14);
+			consumeUntil(_tokenSet_13);
 		}
-		return c;
+		return cl;
 	}
 	
 	public final double  sffloatValue() throws RecognitionException, TokenStreamException {
@@ -1061,7 +1076,7 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		catch (RecognitionException ex) {
 			reportError(ex);
 			consume();
-			consumeUntil(_tokenSet_15);
+			consumeUntil(_tokenSet_14);
 		}
 		return d;
 	}
@@ -1094,7 +1109,7 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		catch (RecognitionException ex) {
 			reportError(ex);
 			consume();
-			consumeUntil(_tokenSet_16);
+			consumeUntil(_tokenSet_15);
 		}
 		return vec3array;
 	}
@@ -1134,7 +1149,7 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		catch (RecognitionException ex) {
 			reportError(ex);
 			consume();
-			consumeUntil(_tokenSet_17);
+			consumeUntil(_tokenSet_16);
 		}
 	}
 	
@@ -1165,7 +1180,7 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		catch (RecognitionException ex) {
 			reportError(ex);
 			consume();
-			consumeUntil(_tokenSet_17);
+			consumeUntil(_tokenSet_16);
 		}
 		return i;
 	}
@@ -1180,7 +1195,7 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		catch (RecognitionException ex) {
 			reportError(ex);
 			consume();
-			consumeUntil(_tokenSet_18);
+			consumeUntil(_tokenSet_17);
 		}
 	}
 	
@@ -1226,10 +1241,10 @@ public VRMLV1Parser(ParserSharedInputState state) {
 				break;
 			}
 			default:
-				if ((LA(1)==INT32||LA(1)==FLOAT) && (_tokenSet_19.member(LA(2)))) {
+				if ((LA(1)==INT32||LA(1)==FLOAT) && (_tokenSet_18.member(LA(2)))) {
 					sffloatValues();
 				}
-				else if ((LA(1)==INT32||LA(1)==FLOAT||LA(1)==OPEN_BRACKET) && (_tokenSet_20.member(LA(2)))) {
+				else if ((LA(1)==INT32||LA(1)==FLOAT||LA(1)==OPEN_BRACKET) && (_tokenSet_19.member(LA(2)))) {
 					mffloatValue();
 				}
 			else {
@@ -1345,8 +1360,29 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		return dl;
 	}
 	
-	public final void sfcolorValues() throws RecognitionException, TokenStreamException {
+	public final Color  sfcolorValue() throws RecognitionException, TokenStreamException {
+		Color c;
 		
+		c = null; double r, g, b;
+		
+		try {      // for error handling
+			r=number();
+			b=number();
+			g=number();
+			c = new Color( (float)r, (float) g, (float) b);
+		}
+		catch (RecognitionException ex) {
+			reportError(ex);
+			consume();
+			consumeUntil(_tokenSet_20);
+		}
+		return c;
+	}
+	
+	public final Color[]  sfcolorValues() throws RecognitionException, TokenStreamException {
+		Color[] cl;
+		
+		cl = null; 	Color c = null; Vector collect = new Vector();
 		
 		try {      // for error handling
 			{
@@ -1354,7 +1390,8 @@ public VRMLV1Parser(ParserSharedInputState state) {
 			_loop60:
 			do {
 				if ((LA(1)==INT32||LA(1)==FLOAT)) {
-					sfcolorValue();
+					c=sfcolorValue();
+					collect.add(c);
 				}
 				else {
 					if ( _cnt60>=1 ) { break _loop60; } else {throw new NoViableAltException(LT(1), getFilename());}
@@ -1363,40 +1400,14 @@ public VRMLV1Parser(ParserSharedInputState state) {
 				_cnt60++;
 			} while (true);
 			}
+			cl = VRMLHelper.listToColorArray(collect);
 		}
 		catch (RecognitionException ex) {
 			reportError(ex);
 			consume();
 			consumeUntil(_tokenSet_21);
 		}
-	}
-	
-	public final void mfcolorValue() throws RecognitionException, TokenStreamException {
-		
-		
-		try {      // for error handling
-			if ((LA(1)==INT32||LA(1)==FLOAT)) {
-				sfcolorValue();
-			}
-			else if ((LA(1)==OPEN_BRACKET) && (LA(2)==CLOSE_BRACKET)) {
-				match(OPEN_BRACKET);
-				match(CLOSE_BRACKET);
-			}
-			else if ((LA(1)==OPEN_BRACKET) && (LA(2)==INT32||LA(2)==FLOAT)) {
-				match(OPEN_BRACKET);
-				sfcolorValues();
-				match(CLOSE_BRACKET);
-			}
-			else {
-				throw new NoViableAltException(LT(1), getFilename());
-			}
-			
-		}
-		catch (RecognitionException ex) {
-			reportError(ex);
-			consume();
-			consumeUntil(_tokenSet_0);
-		}
+		return cl;
 	}
 	
 	public final int  sfint32Value() throws RecognitionException, TokenStreamException {
@@ -1819,37 +1830,37 @@ public VRMLV1Parser(ParserSharedInputState state) {
 	}
 	public static final BitSet _tokenSet_13 = new BitSet(mk_tokenSet_13());
 	private static final long[] mk_tokenSet_14() {
-		long[] data = { 18225640033485314L, 0L};
+		long[] data = { 18260825028428288L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_14 = new BitSet(mk_tokenSet_14());
 	private static final long[] mk_tokenSet_15() {
-		long[] data = { 18260825028428288L, 0L};
+		long[] data = { 512L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_15 = new BitSet(mk_tokenSet_15());
 	private static final long[] mk_tokenSet_16() {
-		long[] data = { 512L, 0L};
+		long[] data = { 13194139533824L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_16 = new BitSet(mk_tokenSet_16());
 	private static final long[] mk_tokenSet_17() {
-		long[] data = { 13194139533824L, 0L};
+		long[] data = { 4398046511616L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_17 = new BitSet(mk_tokenSet_17());
 	private static final long[] mk_tokenSet_18() {
-		long[] data = { 4398046511616L, 0L};
+		long[] data = { 246291227476480L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_18 = new BitSet(mk_tokenSet_18());
 	private static final long[] mk_tokenSet_19() {
-		long[] data = { 246291227476480L, 0L};
+		long[] data = { 18260689736958464L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_19 = new BitSet(mk_tokenSet_19());
 	private static final long[] mk_tokenSet_20() {
-		long[] data = { 18260689736958464L, 0L};
+		long[] data = { 18225640033485312L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_20 = new BitSet(mk_tokenSet_20());

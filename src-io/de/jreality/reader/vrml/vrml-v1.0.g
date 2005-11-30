@@ -1,10 +1,20 @@
 //**************************************************
 // * VRML 1.0 Parser
+// * TODO: 
+// * 	Read over vrml1.0 spec and figure out what it says
+// *		Implement the unimplemented nodes/properties
+// *		Some tricky areas:
+// *			Difference between Group and Separator
+// *			Implementation of DEF and USE
+// *			
 // */
 
 header {
-package charlesgunn.antlr.vrml;
-import charlesgunn.jreality.examples.jogl.*;
+/*
+ *	@author gunn
+ *  Nov. 30, 2005
+ */
+package de.jreality.reader.vrml;
 import java.awt.Color;
 import java.util.*;
 import de.jreality.scene.*;
@@ -14,10 +24,10 @@ import de.jreality.shader.*;
 }
 
 /*****************************************************************************
- * The VRML Parser
+ * The VRMLV1 Parser
  *****************************************************************************
  */
- class VRMLV1Parser extends Parser;
+class VRMLV1Parser extends Parser;
 options {
 	k = 2;							// two token lookahead
 }
@@ -196,12 +206,12 @@ materialStatement returns [Appearance ap]
 	;
 
 materialAttribute[Appearance ap]
-{	Color c=null; double d = 0.0; }
+{	Color[] c=null; double d = 0.0; }
 	:
-	 	"ambientColor"	c=sfcolorValue 	{ap.setAttribute(CommonAttributes.AMBIENT_COLOR, c);}
-	 |	"diffuseColor"	c=sfcolorValue {ap.setAttribute(CommonAttributes.DIFFUSE_COLOR, c);}
-	 |	"specularColor"	c=sfcolorValue {ap.setAttribute(CommonAttributes.SPECULAR_COLOR, c);}
-	 | 	"emissiveColor" c=sfcolorValue //{ap.setAttribute(CommonAttributes.EMISSIVE_COLOR, c);}
+	 	"ambientColor"	c=mfcolorValue 	{ap.setAttribute(CommonAttributes.AMBIENT_COLOR, c[0]);}
+	 |	"diffuseColor"	c=mfcolorValue {ap.setAttribute(CommonAttributes.DIFFUSE_COLOR, c[0]);}
+	 |	"specularColor"	c=mfcolorValue {ap.setAttribute(CommonAttributes.SPECULAR_COLOR, c[0]);}
+	 | 	"emissiveColor" c=mfcolorValue //{ap.setAttribute(CommonAttributes.EMISSIVE_COLOR, c[0]);}
 	 | 	"transparency"	d=sffloatValue {ap.setAttribute(CommonAttributes.TRANSPARENCY, d);}
 	 | 	"shininess"	d=sffloatValue {ap.setAttribute(CommonAttributes.SPECULAR_EXPONENT, d);}
 	 ;
@@ -247,7 +257,7 @@ indexedFaceSetStatement returns [IndexedFaceSet ifs]
 	// TODO handle other attributes, decide whether they are face/vertex attributes, etc.
 	ifsf.setGenerateEdgesFromFaces(false);
 	ifsf.setGenerateFaceNormals(true); // depends on whether face normals were set above!
-	ifsf.setGenerateVertexNormals(true); // depends on whether face normals were set above!
+	ifsf.setGenerateVertexNormals(false); // depends on whether face normals were set above!
 	ifsf.refactor();
 	ifs = ifsf.getIndexedFaceSet();
 	currentSGC.setGeometry(ifs);
@@ -329,14 +339,19 @@ sfcolorValue returns [Color c]
 		r=number b=number g=number	{c = new Color( (float)r, (float) g, (float) b); }
 	;
 
-sfcolorValues:
-		(sfcolorValue)+
+sfcolorValues returns [Color[] cl]
+{cl = null; 	Color c = null; Vector collect = new Vector(); }
+	:
+		(c=sfcolorValue	{collect.add(c);}	)+
+		{cl = VRMLHelper.listToColorArray(collect);}
 	;
 
-mfcolorValue:
-		sfcolorValue
+mfcolorValue returns [Color[] cl]
+{ cl = null;Color c = null;}
+	:
+		c = sfcolorValue				{ cl = new Color[1];	cl[0] = c; }
 	|	OPEN_BRACKET CLOSE_BRACKET
-	|	OPEN_BRACKET sfcolorValues CLOSE_BRACKET
+	|	OPEN_BRACKET cl=sfcolorValues CLOSE_BRACKET
 	;
 
 sffloatValue returns [double d]

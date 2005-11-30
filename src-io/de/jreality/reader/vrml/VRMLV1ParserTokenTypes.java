@@ -1,6 +1,16 @@
 // $ANTLR 2.7.4: "vrml-v1.0.g" -> "VRMLV1Lexer.java"$
 
+/*
+ *	@author gunn
+ *  Nov. 30, 2005
+ */
 package de.jreality.reader.vrml;
+import java.awt.Color;
+import java.util.*;
+import de.jreality.scene.*;
+import de.jreality.math.*;
+import de.jreality.geometry.*;
+import de.jreality.shader.*;
 
 public interface VRMLV1ParserTokenTypes {
 	int EOF = 1;
