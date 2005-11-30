@@ -226,6 +226,8 @@ public static String findFormat(String resourceName) {
       format = "3DS";
     } else if (lcName.endsWith(".jvx")) {
       format = "JVX";
+    } else if (lcName.endsWith(".wrl")) {
+        format = "VRML";
     } else if (lcName.endsWith("off") || lcName.endsWith("quad") || lcName.endsWith("mesh") || lcName.endsWith("vect") || lcName.endsWith("bez") 
         || lcName.endsWith(".grp") || lcName.endsWith(".oogl") || lcName.endsWith(".list") || lcName.endsWith("inst")){
       format = "OOGL";
