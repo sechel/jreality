@@ -2,6 +2,7 @@ package de.jreality.io.jrs;
 
 import com.thoughtworks.xstream.XStream;
 
+import de.jreality.io.JrScene;
 import de.jreality.scene.*;
 import de.jreality.scene.data.*;
 
@@ -13,13 +14,8 @@ public class XStreamFactory {
   }
   
   static XStream simpleXStream() {
-    XStream ret = new XStream();
-    
-    // primitives
-    ret.alias("d", double.class);
-    ret.alias("b", byte.class);
-    ret.alias("i", int.class);
 
+    XStream ret = new XStream();
     // scene package
     ret.alias("Appearance", Appearance.class);
     ret.alias("Camera", Camera.class);
@@ -44,6 +40,9 @@ public class XStreamFactory {
     ret.alias("IntArray", IntArray.class);
     ret.alias("IntArrayArray", IntArrayArray.class);
     ret.alias("StorageModel", StorageModel.class);
+    
+    // io package
+    ret.alias("Scene", JrScene.class);
     
     return ret;
   }

@@ -4,6 +4,7 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.WeakHashMap;
@@ -16,6 +17,7 @@ import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.proxy.tree.ProxyTreeFactory;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.scene.proxy.tree.UpToDateSceneProxyBuilder;
+import de.jreality.scene.tool.Tool;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
@@ -65,6 +67,13 @@ public class SceneTreeModel extends AbstractTreeModel {
   public Object getChild(Object parent, int index) {
     if (parent instanceof SceneTreeNode) {
       SceneTreeNode sn = (SceneTreeNode) parent;
+      if (sn.getNode() instanceof SceneGraphComponent) {
+        if (index < sn.getChildren().size()) return sn.getChildren().get(index);
+        int newInd = index-sn.getChildren().size();
+        SceneGraphComponent comp = (SceneGraphComponent) sn.getNode();
+        Tool t = (Tool) comp.getTools().get(newInd);
+        return TreeTool.getInstance(sn, t);
+      }
       if (!(sn.getNode() instanceof Appearance))
         return sn.getChildren().get(index);
     }
@@ -73,10 +82,10 @@ public class SceneTreeModel extends AbstractTreeModel {
   }
 
   public int getChildCount(Object parent) {
+    if (parent instanceof TreeTool) return 0;
     if (parent instanceof SceneTreeNode) {
       SceneTreeNode sn = (SceneTreeNode)parent;
-      if (!(sn.getNode() instanceof Appearance)) return sn.getChildren().size();
-      else {
+      if ((sn.getNode() instanceof Appearance)) {
         Object[] ents = (Object[]) entities.get(sn);
         if (ents == null) {
           Object o1 = ShaderUtility.createDefaultGeometryShader((Appearance) sn.getNode(), false);
@@ -91,6 +100,11 @@ public class SceneTreeModel extends AbstractTreeModel {
             parents.put(ents[i], sn);
         }
         return ents.length;
+      } else {
+        int ret = sn.getChildren().size(); 
+        if (sn.getNode() instanceof SceneGraphComponent)
+          ret += ((SceneGraphComponent)sn.getNode()).getTools().size();
+        return ret;
       }
     } else {
       // entity
@@ -127,7 +141,43 @@ public class SceneTreeModel extends AbstractTreeModel {
   public Object getParent(Object o) {
     if (o instanceof SceneTreeNode && !(((SceneTreeNode)o).getNode() instanceof Appearance) )
       return ((SceneTreeNode)o).getParent();
+    if (o instanceof TreeTool) return ((TreeTool)o).getTreeNode();
     else return parents.get(o);
+  }
+  
+  public static class TreeTool {
+    
+    static WeakHashMap map = new WeakHashMap();
+    
+    private final SceneTreeNode treeNode;
+    private final Tool tool;
+
+    static TreeTool getInstance(SceneTreeNode n, Tool t) {
+      HashMap m = (HashMap) map.get(n);
+      if (m == null) {
+        m = new HashMap();
+        map.put(n, m);
+      }
+      HashMap m2 = (HashMap) m.get(t);
+      if (m2 == null) {
+        m2 = new HashMap();
+        m2.put(t, new TreeTool(n, t));
+      }
+      return (TreeTool) m2.get(t);
+    }
+    
+    private TreeTool(SceneTreeNode n, Tool t) {
+      this.treeNode = n;
+      this.tool = t;
+    }
+
+    public Tool getTool() {
+      return tool;
+    }
+
+    public SceneTreeNode getTreeNode() {
+      return treeNode;
+    }
   }
   
 }

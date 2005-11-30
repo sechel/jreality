@@ -1,11 +1,13 @@
 package de.jreality.ui.beans;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyEditorSupport;
@@ -24,11 +26,12 @@ public class ColorEditor extends PropertyEditorSupport {
     /** The Component returned by getCustomEditor(). */
     JButton button;
 
-    public final static String title = "Select color...";
+    public final static String title = "Select...";
 
     /** Create FilePropertyEditor. */
     public ColorEditor() {
         button = new JButton(title);
+        button.setMargin(new Insets(2,2,2,2));
         button.setIcon(colorIcon);
     }
 
@@ -53,15 +56,9 @@ public class ColorEditor extends PropertyEditorSupport {
                 ColorEditor.this.setValue(col);
             }
         });
-
-        JPanel panel = new JPanel();
-        GridBagLayout gridbag = new GridBagLayout();
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.WEST;
-        c.weightx = 1;
-        panel.setLayout(gridbag);
-        gridbag.setConstraints(button, c);
-        panel.add(button);
+        button.setMinimumSize(new Dimension(50, 12));
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add("Center", button);
         
         return panel;
     }

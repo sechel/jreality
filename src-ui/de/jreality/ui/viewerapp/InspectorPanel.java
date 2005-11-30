@@ -84,11 +84,12 @@ public class InspectorPanel extends JPanel
     System.out.println("pds length="+pd.length);
     setLayout(new GridBagLayout());
     GridBagConstraints label=new GridBagConstraints();
-    label.fill=GridBagConstraints.HORIZONTAL;
-    label.anchor=GridBagConstraints.SOUTH;
+    //label.fill=GridBagConstraints.HORIZONTAL;
+    label.anchor=GridBagConstraints.EAST;
+    label.ipadx=3;
     GridBagConstraints editor=new GridBagConstraints();
     editor.fill=GridBagConstraints.BOTH;
-    editor.anchor=GridBagConstraints.SOUTH;
+    editor.anchor=GridBagConstraints.CENTER;
     editor.weightx=1;
     editor.gridwidth=GridBagConstraints.REMAINDER;
     for(int ix=0, num=pd.length; ix<num; ix++) try

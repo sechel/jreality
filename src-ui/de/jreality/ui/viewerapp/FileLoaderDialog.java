@@ -30,15 +30,23 @@ public class FileLoaderDialog {
 			}
 		};
 		chooser.addChoosableFileFilter(ff);
-		chooser.setMultiSelectionEnabled(true);
 		return chooser;
 	}
 	
   public static File[] loadFiles(Component parent) {
     JFileChooser chooser = createFileChooser();
+    chooser.setMultiSelectionEnabled(true);
     chooser.showOpenDialog(parent);
     File[] files = chooser.getSelectedFiles();
     lastDir = chooser.getCurrentDirectory();
     return files;
+  }
+  
+  public static File selectTargetFile(Component parent) {
+    JFileChooser chooser = createFileChooser();
+    chooser.setMultiSelectionEnabled(false);
+    chooser.showSaveDialog(parent);
+    lastDir = chooser.getCurrentDirectory();
+    return chooser.getSelectedFile();
   }
 }

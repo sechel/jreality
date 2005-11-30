@@ -15,7 +15,9 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.data.AttributeEntity;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
+import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
 
 /**
  * Render a node by showing the simple name and an (optional) icon.
@@ -43,6 +45,7 @@ public class JTreeRenderer extends DefaultTreeCellRenderer
   static final ImageIcon appIcon = createImageIcon("icons/AppearanceIcon.jpg");
   static final ImageIcon lightIcon = createImageIcon("icons/LightIcon.jpg");
   static final ImageIcon shaderIcon = createImageIcon("icons/ShaderIcon.jpg");
+  static final ImageIcon toolIcon = createImageIcon("icons/ToolIcon.jpg");
 
   final SceneGraphVisitor iconSelector = new SceneGraphVisitor() {
     public void visit(Appearance a) {
@@ -83,8 +86,12 @@ public class JTreeRenderer extends DefaultTreeCellRenderer
     if (value instanceof SceneTreeNode) {
       SceneGraphNode m=((SceneTreeNode)value).getNode();
       buffer.append(m.getName());
-    } else {
+    } else if (value instanceof AttributeEntity){
       String ifName = value.getClass().getInterfaces()[0].getName();
+      buffer.append(ifName.substring(ifName.lastIndexOf(".")+1));
+    }
+    else if (value instanceof TreeTool){
+      String ifName = ((TreeTool)value).getTool().getClass().getName();
       buffer.append(ifName.substring(ifName.lastIndexOf(".")+1));
     }
     final Component c=super.getTreeCellRendererComponent(
@@ -92,7 +99,11 @@ public class JTreeRenderer extends DefaultTreeCellRenderer
     buffer.setLength(0);
     if (value instanceof SceneTreeNode) {
       ((SceneTreeNode)value).getNode().accept(iconSelector);
-    } else setIcon(shaderIcon);
+    } else if (value instanceof AttributeEntity) {
+      setIcon(shaderIcon);
+    } else if (value instanceof TreeTool) {
+      setIcon(toolIcon);
+    }
     return c;
   }
 }

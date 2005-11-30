@@ -24,15 +24,19 @@ package de.jreality.ui.viewerapp;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.ComponentOrientation;
 import java.awt.Container;
 import java.beans.PropertyEditorManager;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTree;
 import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.beans.BooleanEditor;
@@ -56,15 +60,18 @@ public class UIFactory
   private SceneGraphComponent root;
   private Component viewer;
   private Component inspector;
-  final Border emptyBorder=BorderFactory.createEmptyBorder();
+  final Border emptyBorder=BorderFactory.createEmptyBorder(2,2,2,2);
   JTree sceneTree;
 
+  JSplitPane content;
+  JFrame frame;
+  
   public JFrame createFrame()
   {
-    JFrame frame=new JFrame("Viewer");
+    if (frame == null) frame=new JFrame("Viewer");
     frame.setContentPane(createViewerContent());
     frame.pack();
-    frame.setSize(Math.max(800, frame.getWidth()),
+    frame.setSize(Math.max(900, frame.getWidth()),
       Math.max(600, frame.getHeight()));
     frame.validate();
     //frame.show();
@@ -74,19 +81,27 @@ public class UIFactory
 
   Container createViewerContent()
   {
-    JSplitPane main=new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-      createNavigation(), createInspectorPanel());
-    main.setContinuousLayout(true);
-    main.setResizeWeight(.1);
-    JSplitPane content=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+    JSplitPane main = createLHS();
+    content=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
       main, createViewerPanel());
     content.setContinuousLayout(true);
+    content.setDividerLocation(260);
+    content.setOneTouchExpandable(true);
     return content;
+  }
+
+  private JSplitPane createLHS() {
+    JSplitPane main=new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+        createNavigation(), createInspectorPanel());
+      main.setContinuousLayout(true);
+      main.setResizeWeight(.1);
+      return main;
   }
 
   private Component createNavigation()
   {
     sceneTree=new JTree();
+    sceneTree.setBorder(emptyBorder);
     SceneTreeModel model = new SceneTreeModel(root);
     sceneTree.setModel(model);
     sceneTree.setCellRenderer(new JTreeRenderer());
@@ -101,13 +116,14 @@ public class UIFactory
 
   private Component createInspectorPanel()
   {
-    return scroll(inspector);
+    JScrollPane scroll = scroll(inspector);
+    return scroll;
   }
 
   JScrollPane scroll(Component tree)
   {
     JScrollPane scroll=new JScrollPane(tree);
-    scroll.setBorder(emptyBorder);
+//    scroll.setBorder(BorderFactory.createEmptyBorder());
     return scroll;
   }
 
@@ -122,9 +138,15 @@ public class UIFactory
     root= component;
   }
 
-  public void setInspector(Component component)
+  public void setInspector(JComponent component)
   {
     inspector= component;
+    inspector.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+    component.setBorder(emptyBorder);
+  }
+
+  public void update() {
+    createFrame();
   }
 
 }

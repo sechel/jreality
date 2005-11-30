@@ -26,9 +26,12 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JMenu;
@@ -36,11 +39,20 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.UIManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import sun.awt.geom.Curve;
+
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.DomDriver;
+
+import de.jreality.io.JrScene;
+import de.jreality.io.jrs.XStreamFactory;
+import de.jreality.reader.ReaderJRS;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -64,7 +76,12 @@ import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.TextureUtility;
 import de.jreality.ui.treeview.JListRenderer;
+import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
+import de.jreality.util.Input;
 import de.jreality.util.RenderTrigger;
+import de.jreality.util.SceneGraphUtility;
+import de.jreality.writer.SceneWriter;
+import de.jreality.writer.WriterJRS;
 
 /**
  * TODO: comment ViewerApp
@@ -84,6 +101,7 @@ public class ViewerApp
 
   public static void main(String[] args) throws Exception
   {
+    UIManager.setLookAndFeel("com.incors.plaf.kunststoff.KunststoffLookAndFeel");
     System.setProperty("sun.awt.noerasebackground", "true");
     new ViewerApp(createViewer(), true);
   }
@@ -107,6 +125,15 @@ public class ViewerApp
     uiFactory.setInspector(inspector);
     uiFactory.setRoot(root);
     frame=uiFactory.createFrame();
+    initTree();
+    createMenu();
+    frame.show();
+    RenderTrigger rt = new RenderTrigger();
+    rt.addViewer(currViewer);
+    rt.addSceneGraphComponent(root);
+  }
+
+  private void initTree() {
     TreeSelectionModel sm=uiFactory.sceneTree.getSelectionModel();
     sm.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     sm.addTreeSelectionListener(new TreeSelectionListener() {
@@ -117,6 +144,8 @@ public class ViewerApp
         if(p!=null) {
           if (p.getLastPathComponent() instanceof SceneTreeNode) {
             o=((SceneTreeNode)p.getLastPathComponent()).getNode();
+          } else if (p.getLastPathComponent() instanceof TreeTool) {
+            o = ((TreeTool)p.getLastPathComponent()).getTool();
           } else {
             o = p.getLastPathComponent();
           }
@@ -130,11 +159,6 @@ public class ViewerApp
         }
       }
     });
-    createMenu();
-    frame.show();
-    RenderTrigger rt = new RenderTrigger();
-    rt.addViewer(currViewer);
-    rt.addSceneGraphComponent(root);
   }
   
   private void createMenu() {
@@ -154,6 +178,69 @@ public class ViewerApp
     					e.printStackTrace();
     				}
     			}
+      }
+    });
+    
+    fileMenu.add(mi);
+
+    mi = new JMenuItem("Save...");
+    mi.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent arg0) {
+          File file = FileLoaderDialog.selectTargetFile(frame);
+          try {
+            FileWriter fw = new FileWriter(file);
+            WriterJRS writer = new WriterJRS();
+            JrScene s = new JrScene(root);
+            s.addPath("cameraPath", currViewer.getCameraPath());
+            s.addPath("avatarPath", currViewer.getAvatarPath());
+            s.addPath("emptyPickPath", currViewer.getEmptyPickPath());
+            writer.writeScene(s, fw);
+            fw.close();
+          } catch (IOException ioe) {
+            JOptionPane.showMessageDialog(frame, "Save failed: "+ioe.getMessage());
+          }
+        }
+      });
+    
+    fileMenu.add(mi);
+    
+    mi = new JMenuItem("Load Scene...");
+    
+    mi.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent arg0) {
+          File f = FileLoaderDialog.loadFiles(frame)[0];
+          JrScene s = null;
+          try {
+            ReaderJRS r = new ReaderJRS();
+            r.setInput(new Input(f));
+            s = r.getScene();
+            try {
+              currViewer = createViewer();
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+            root = s.getSceneRoot();
+            currViewer.setSceneRoot(root);
+            SceneGraphPath p = s.getPath("cameraPath");
+            if (p != null) currViewer.setCameraPath(p);
+            p = s.getPath("avatarPath");
+            if (p != null) currViewer.setAvatarPath(p);
+            emptyPick = s.getPath("emptyPickPath");
+            if (emptyPick != null) {
+              scene = emptyPick.getLastComponent();
+              currViewer.setEmptyPickPath(emptyPick);
+            }
+            uiFactory.setViewer(currViewer.getViewingComponent());
+            uiFactory.setRoot(root);
+            uiFactory.update();
+            initTree();
+            RenderTrigger rt = new RenderTrigger();
+            rt.addViewer(currViewer);
+            rt.addSceneGraphComponent(root);
+            rt.forceRender();
+          } catch (IOException ioe) {
+            JOptionPane.showMessageDialog(frame, "Load failed: "+ioe.getMessage());
+          }
       }
     });
     
@@ -203,7 +290,7 @@ public class ViewerApp
 	root.addChild(scene);
     
     SceneGraphComponent avatarNode= new SceneGraphComponent();
-    avatarNode.setName("avatar Node");
+    avatarNode.setName("avatar");
     Transformation at= new Transformation();
     at.setName("avatar Trafo");
     avatarNode.setTransformation(at);
@@ -217,7 +304,7 @@ public class ViewerApp
     ct.setTranslation(0, 0, 16);
     cameraNode.setTransformation(ct);
     Camera firstCamera= new Camera();
-    firstCamera.setName("cam");
+    firstCamera.setName("camera");
     firstCamera.setFieldOfView(30);
     firstCamera.setFar(50);
     firstCamera.setNear(3);
