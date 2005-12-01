@@ -7,7 +7,7 @@ import de.jreality.scene.SceneGraphPath;
 
 public class JrScene {
   
-  private SceneGraphComponent sceneGraph;  
+  private SceneGraphComponent sceneGraph;
   private HashMap scenePaths;
   private HashMap sceneAttributes;
   

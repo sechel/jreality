@@ -44,6 +44,10 @@ public class XStreamFactory {
     // io package
     ret.alias("Scene", JrScene.class);
     
+    ret.registerConverter(new DataListSetConverter(ret.getClassMapper()));
+    ret.registerConverter(new DataListConverter(ret.getClassMapper()));
+    ret.registerConverter(new AttributeConverter(ret.getClassMapper()));
+    ret.registerConverter(new ArrayConverter(ret.getClassMapper()));
     return ret;
   }
   
