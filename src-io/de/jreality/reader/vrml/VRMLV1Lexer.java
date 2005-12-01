@@ -11,6 +11,7 @@ import de.jreality.scene.*;
 import de.jreality.math.*;
 import de.jreality.geometry.*;
 import de.jreality.shader.*;
+import de.jreality.scene.data.*;
 
 import java.io.InputStream;
 import antlr.TokenStreamException;

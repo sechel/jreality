@@ -11,6 +11,7 @@ import de.jreality.scene.*;
 import de.jreality.math.*;
 import de.jreality.geometry.*;
 import de.jreality.shader.*;
+import de.jreality.scene.data.*;
 
 import antlr.TokenBuffer;
 import antlr.TokenStreamException;
@@ -38,8 +39,9 @@ public class VRMLV1Parser extends antlr.LLkParser       implements VRMLV1ParserT
 	SceneGraphComponent root = null;
 	SceneGraphPath currentPath = new SceneGraphPath();
 	Transformation currentTransform = new Transformation();
-	double[] currentCoordinate3 = null;
-	double[] currentNormal = null;
+	Appearance currentAp = null;
+	DataList currentCoordinate3 = null;
+	DataList currentNormal = null;
 	int[][] currentCoordinateIndex = null;
 	int[][] currentNormalIndex = null;
 	final int MAXSIZE = 100000;
@@ -232,7 +234,7 @@ public VRMLV1Parser(ParserSharedInputState state) {
 			}
 			case LITERAL_Material:
 			{
-				materialStatement();
+				currentAp=materialStatement();
 				break;
 			}
 			case 37:
@@ -359,6 +361,8 @@ public VRMLV1Parser(ParserSharedInputState state) {
 			}
 			match(CLOSE_BRACE);
 			
+					// TODO check to be sure the transform not already set; if it is,
+					// make child
 					currentSGC.setTransformation(new Transformation( fm.getArray())); 
 				
 		}
@@ -509,10 +513,10 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		return ap;
 	}
 	
-	public final double[]  coordinate3Statement() throws RecognitionException, TokenStreamException {
-		double[] points;
+	public final DataList  coordinate3Statement() throws RecognitionException, TokenStreamException {
+		DataList dl;
 		
-		points = null;
+		dl = null;  double[] points = null;
 		
 		try {      // for error handling
 			match(37);
@@ -525,7 +529,8 @@ public VRMLV1Parser(ParserSharedInputState state) {
 							System.err.println("Got Coordinate3");
 							System.err.println("Points: "+Rn.toString(points));
 							}
-						currentCoordinate3 = points; 
+						
+						dl = currentCoordinate3 = StorageModel.DOUBLE_ARRAY.inlined(3).createReadOnly(points);
 					 	
 		}
 		catch (RecognitionException ex) {
@@ -533,13 +538,13 @@ public VRMLV1Parser(ParserSharedInputState state) {
 			consume();
 			consumeUntil(_tokenSet_2);
 		}
-		return points;
+		return dl;
 	}
 	
-	public final double[]  normalStatement() throws RecognitionException, TokenStreamException {
-		double[] normals;
+	public final DataList  normalStatement() throws RecognitionException, TokenStreamException {
+		DataList dl;
 		
-		normals = null;
+		dl = null;  double[] normals = null;
 		
 		try {      // for error handling
 			match(LITERAL_Normal);
@@ -549,7 +554,7 @@ public VRMLV1Parser(ParserSharedInputState state) {
 			match(CLOSE_BRACE);
 			
 					if (VRMLHelper.verbose)	System.err.println("Got Normal"); 
-					currentNormal = normals; 
+					dl = currentNormal = StorageModel.DOUBLE_ARRAY.inlined(3).createReadOnly(normals);
 				
 		}
 		catch (RecognitionException ex) {
@@ -557,7 +562,7 @@ public VRMLV1Parser(ParserSharedInputState state) {
 			consume();
 			consumeUntil(_tokenSet_2);
 		}
-		return normals;
+		return dl;
 	}
 	
 	public final IndexedFaceSet  indexedFaceSetStatement() throws RecognitionException, TokenStreamException {
@@ -586,17 +591,23 @@ public VRMLV1Parser(ParserSharedInputState state) {
 			
 				if (VRMLHelper.verbose) System.err.println("Got IndexedFaceSet"); 
 				IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
-				ifsf.setVertexCount(currentCoordinate3.length/3);
+				ifsf.setVertexCount(currentCoordinate3.size());
 				ifsf.setFaceCount(currentCoordinateIndex.length);
 				ifsf.setVertexCoordinates(currentCoordinate3);
 				ifsf.setFaceIndices(currentCoordinateIndex);
 				// TODO handle other attributes, decide whether they are face/vertex attributes, etc.
 				ifsf.setGenerateEdgesFromFaces(false);
 				ifsf.setGenerateFaceNormals(true); // depends on whether face normals were set above!
-				ifsf.setGenerateVertexNormals(false); // depends on whether face normals were set above!
+				ifsf.setGenerateVertexNormals(true); // depends on whether face normals were set above!
 				ifsf.refactor();
 				ifs = ifsf.getIndexedFaceSet();
-				currentSGC.setGeometry(ifs);
+				if (currentSGC.getGeometry() != null) currentSGC.setGeometry(ifs);
+				else		{
+					SceneGraphComponent sgc = new SceneGraphComponent();
+					sgc.setGeometry(ifs);
+					sgc.setAppearance(currentAp);
+					currentSGC.addChild(sgc);
+				}
 				
 		}
 		catch (RecognitionException ex) {

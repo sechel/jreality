@@ -11,6 +11,7 @@ import de.jreality.scene.*;
 import de.jreality.math.*;
 import de.jreality.geometry.*;
 import de.jreality.shader.*;
+import de.jreality.scene.data.*;
 
 public interface VRMLV1ParserTokenTypes {
 	int EOF = 1;

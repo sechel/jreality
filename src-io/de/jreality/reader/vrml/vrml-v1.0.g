@@ -21,6 +21,7 @@ import de.jreality.scene.*;
 import de.jreality.math.*;
 import de.jreality.geometry.*;
 import de.jreality.shader.*;
+import de.jreality.scene.data.*;
 }
 
 /*****************************************************************************
@@ -37,8 +38,9 @@ options {
 	SceneGraphComponent root = null;
 	SceneGraphPath currentPath = new SceneGraphPath();
 	Transformation currentTransform = new Transformation();
-	double[] currentCoordinate3 = null;
-	double[] currentNormal = null;
+	Appearance currentAp = null;
+	DataList currentCoordinate3 = null;
+	DataList currentNormal = null;
 	int[][] currentCoordinateIndex = null;
 	int[][] currentNormalIndex = null;
 	final int MAXSIZE = 100000;
@@ -82,7 +84,7 @@ atomicStatement:
 	|	scaleStatement
 	|	matrixTransformStatement
 	| 	shapeHintsStatement
-	|	materialStatement
+	|	currentAp=materialStatement
 	|	coordinate3Statement
 	|	normalStatement
 	|	indexedFaceSetStatement
@@ -121,6 +123,8 @@ transformStatement
 	:
 	"Transform"	OPEN_BRACE	(transformAttribute[fm])*	CLOSE_BRACE
 	{
+		// TODO check to be sure the transform not already set; if it is,
+		// make child
 		currentSGC.setTransformation(new Transformation( fm.getArray())); 
 	}
 	;
@@ -208,6 +212,7 @@ materialStatement returns [Appearance ap]
 materialAttribute[Appearance ap]
 {	Color[] c=null; double d = 0.0; }
 	:
+	// TODO check whether there are multiple values returned; may need to set the color per face or vertex
 	 	"ambientColor"	c=mfcolorValue 	{ap.setAttribute(CommonAttributes.AMBIENT_COLOR, c[0]);}
 	 |	"diffuseColor"	c=mfcolorValue {ap.setAttribute(CommonAttributes.DIFFUSE_COLOR, c[0]);}
 	 |	"specularColor"	c=mfcolorValue {ap.setAttribute(CommonAttributes.SPECULAR_COLOR, c[0]);}
@@ -216,8 +221,8 @@ materialAttribute[Appearance ap]
 	 | 	"shininess"	d=sffloatValue {ap.setAttribute(CommonAttributes.SPECULAR_EXPONENT, d);}
 	 ;
 	 
-coordinate3Statement returns [double[] points]
-{ points = null; }
+coordinate3Statement returns [DataList dl]
+{ dl = null;  double[] points = null;}
 	:				
 	"Coordinate3"	OPEN_BRACE	"point" 
 			points = mfvec3fValue
@@ -227,19 +232,20 @@ coordinate3Statement returns [double[] points]
 				System.err.println("Got Coordinate3");
 				System.err.println("Points: "+Rn.toString(points));
 				}
-			currentCoordinate3 = points; 
+			
+			dl = currentCoordinate3 = StorageModel.DOUBLE_ARRAY.inlined(3).createReadOnly(points);
 		 	}
 	;
 	
-normalStatement returns [double[] normals]
-{ normals = null;}
+normalStatement returns [DataList dl]
+{ dl = null;  double[] normals = null;}
 	:
 	"Normal"	OPEN_BRACE	"vector" 
 			normals=mfvec3fValue
 			CLOSE_BRACE
 	{ 
 		if (VRMLHelper.verbose)	System.err.println("Got Normal"); 
-		currentNormal = normals; 
+		dl = currentNormal = StorageModel.DOUBLE_ARRAY.inlined(3).createReadOnly(normals);
 	}	
 	;
 	
@@ -250,17 +256,23 @@ indexedFaceSetStatement returns [IndexedFaceSet ifs]
 	{
 	if (VRMLHelper.verbose) System.err.println("Got IndexedFaceSet"); 
 	IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
-	ifsf.setVertexCount(currentCoordinate3.length/3);
+	ifsf.setVertexCount(currentCoordinate3.size());
 	ifsf.setFaceCount(currentCoordinateIndex.length);
 	ifsf.setVertexCoordinates(currentCoordinate3);
 	ifsf.setFaceIndices(currentCoordinateIndex);
 	// TODO handle other attributes, decide whether they are face/vertex attributes, etc.
 	ifsf.setGenerateEdgesFromFaces(false);
 	ifsf.setGenerateFaceNormals(true); // depends on whether face normals were set above!
-	ifsf.setGenerateVertexNormals(false); // depends on whether face normals were set above!
+	ifsf.setGenerateVertexNormals(true); // depends on whether face normals were set above!
 	ifsf.refactor();
 	ifs = ifsf.getIndexedFaceSet();
-	currentSGC.setGeometry(ifs);
+	if (currentSGC.getGeometry() != null) currentSGC.setGeometry(ifs);
+	else		{
+		SceneGraphComponent sgc = new SceneGraphComponent();
+		sgc.setGeometry(ifs);
+		sgc.setAppearance(currentAp);
+		currentSGC.addChild(sgc);
+	}
 	}
 	;
 	

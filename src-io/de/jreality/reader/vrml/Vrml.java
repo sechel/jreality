@@ -11,8 +11,11 @@ import javax.swing.JFrame;
 import antlr.RecognitionException;
 import antlr.TokenStreamException;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.data.DataList;
+import de.jreality.scene.data.DoubleArray;
 
 class Vrml {
+	
 	public static void main(String[] args) {
 		JFileChooser fc = new JFileChooser("/homes/geometer/gunn/Documents/Models/VRML/");
 		//JOGLConfiguration.theLog.log(Level.INFO,"FCI resource dir is: "+resourceDir);
