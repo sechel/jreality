@@ -121,11 +121,11 @@ public class DefaultPolygonShader implements PolygonShader {
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		
-		if (smoothShading != jr.openGLState.smoothShading)	{
-			if (isSmoothShading()) gl.glShadeModel(GL.GL_SMOOTH);
+//		if (smoothShading != jr.openGLState.smoothShading)	{
+			if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
 			else		gl.glShadeModel(GL.GL_FLAT);
 			jr.openGLState.smoothShading = smoothShading;
-		}
+//		}
 		texUnit = GL.GL_TEXTURE0;
 
     if (texture2Dnew != null) {

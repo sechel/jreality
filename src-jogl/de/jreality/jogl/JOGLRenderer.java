@@ -783,7 +783,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 				geometryShader.lineShader.render(globalHandle);
 				boolean proxy = geometryShader.lineShader.providesProxyGeometry();
 				double alpha = openGLState.diffuseColor[3];
-				boolean smooth = false; //openGLState.smoothShading;;
+				boolean smooth = false; 
 				int type = proxy ? PROXY_LINEDL : LINEDL;
 				if (proxy)	{
 					if ((!useDisplayLists || activeDL.isDisplayListDirty(type))) {
@@ -803,24 +803,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 					if (useDisplayLists)		cleanupDisplayLists(activeDL, type);
 				}
 				geometryShader.lineShader.postRender(globalHandle);
-//				if (proxy && activeDL.isDisplayListDirty(PROXY_LINEDL))	{
-//					theLog.log(Level.FINER,"Recalculating tubes");
-//					int dl  = geometryShader.lineShader.proxyGeometryFor(ils, globalHandle, currentSignature, true);
-//					if (dl != -1) {
-//						activeDL.setDisplayListID(type, dl);
-//						activeDL.setDisplayListDirty(type, false);
-//					}
-//				}
-//				if (proxy)	globalGL.glCallList(activeDL.getDisplayListID(type));
-//				else {
-//					if (!processDisplayListState(activeDL, jpc, type))		 // false return implies no display lists used
-//						JOGLRendererHelper.drawLines(ils, globalHandle, pickMode, smooth, alpha);			
-//					else // we are using display lists
-//						if (activeDL.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
-//							JOGLRendererHelper.drawLines(ils, globalHandle, pickMode, smooth, alpha);			
-//							cleanupDisplayLists(activeDL, type);							
-//						}
-//				}
 			}
 			if (geometryShader.isVertexDraw() && ps != null)	{
 				geometryShader.pointShader.render(globalHandle);
@@ -845,33 +827,13 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 					if (useDisplayLists)		cleanupDisplayLists(activeDL, type);
 				}
 				geometryShader.pointShader.postRender(globalHandle);
-//				if (proxy && activeDL.isDisplayListDirty(type))	{
-//					theLog.log(Level.FINER,"Recalculating spheres");
-//					int dl  = geometryShader.pointShader.proxyGeometryFor(ps, globalHandle, currentSignature, true);
-//					if (dl != -1) {
-//						theLog.log(Level.FINER,"spheres created");
-//						activeDL.setDisplayListID(type, dl);
-//						activeDL.setDisplayListDirty(type, false);
-//					}
-//				}
-//				if (proxy) globalGL.glCallList(activeDL.getDisplayListID(type));
-//				else {
-//					if (!processDisplayListState(activeDL, jpc, type))		{// false return implies no display lists used
-//						JOGLRendererHelper.drawVertices(ps, globalHandle, pickMode, alpha);			
-//					}  else  {		// we are using display lists 
-//						if (activeDL.isInsideDisplayList())	{		// display list wasn't clean, so we have to regenerate it
-//							JOGLRendererHelper.drawVertices(ps, globalHandle,  pickMode, alpha);			
-//							cleanupDisplayLists(activeDL, type);
-//						}
-//					}			
-//				}
 			}
 			// do I need this?Yes, the point and line shader can turn off lighting
 			renderingHints.render(globalHandle);
 			if (geometryShader.isFaceDraw() && ifs != null)	{
 //				if (geometryShader.polygonShaderNew != null) DefaultPolygonShader.renderNew(geometryShader.polygonShaderNew, globalHandle);
 //				else 
-					geometryShader.polygonShader.render(globalHandle);
+				geometryShader.polygonShader.render(globalHandle);
 				double alpha = openGLState.diffuseColor[3];
 				boolean ss = openGLState.smoothShading;
 				int type = POLYGONDL;
@@ -1213,6 +1175,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			object2WorldDirty = true,
 			useDisplayLists = true;
 
+		double[] tform = new double[16];		// for optimized access to matrix
 		public JOGLPeerComponent(SceneGraphPath sgp, JOGLPeerComponent p)		{
 			super();
 			if (sgp == null || !(sgp.getLastElement() instanceof SceneGraphComponent))  {
@@ -1253,7 +1216,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			if (thisT != null)	{
 				if (stackDepth <= MAX_STACK_DEPTH) {
 					globalGL.glPushMatrix();
-					globalGL.glMultTransposeMatrixd(thisT.getMatrix());
+					globalGL.glMultTransposeMatrixd(thisT.getMatrix(tform));
 					stackDepth++;
 				}
 				else {

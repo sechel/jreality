@@ -394,7 +394,6 @@ public class JOGLRendererHelper {
 		if (!pickMode && isQuadMesh)	{
 			//System.out.println("Is quad mesh");
 //			RegularDomainQuadMesh rdqm = null;
-			int type = Pn.EUCLIDEAN;
 //			if (qm instanceof RegularDomainQuadMesh) {
 //				rdqm = (RegularDomainQuadMesh) qm;
 //				type = rdqm.getType();
@@ -506,13 +505,13 @@ public class JOGLRendererHelper {
 				}
 				if (texCoords != null)	 {
 					da = texCoords.item(k).toDoubleArray();
-          gl.glMultiTexCoord2d(GL.GL_TEXTURE0, da.getValueAt(0), da.getValueAt(1));
+					gl.glMultiTexCoord2d(GL.GL_TEXTURE0, da.getValueAt(0), da.getValueAt(1));
 //					gl.glTexCoord2d(da.getValueAt(0), da.getValueAt(1));
 				}
-        if (lightMapCoords != null) {
-            da = lightMapCoords.item(k).toDoubleArray();
-            gl.glMultiTexCoord2d(GL.GL_TEXTURE1, da.getValueAt(0), da.getValueAt(1));
-        }
+		        if (lightMapCoords != null) {
+		            da = lightMapCoords.item(k).toDoubleArray();
+		            gl.glMultiTexCoord2d(GL.GL_TEXTURE1, da.getValueAt(0), da.getValueAt(1));
+		        }
 				da = vertices.item(k).toDoubleArray();
 				if (vertexLength == 3) gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 				else if (vertexLength == 4) gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
@@ -525,14 +524,6 @@ public class JOGLRendererHelper {
 		}
 		// pop to balance the glPushName(10000) above
 		if (pickMode) gl.glPopName();
-		//if (colorBind != PER_PART)  gl.glDisable(GL.GL_COLOR_MATERIAL);
-		
-//		gl.glDisable(GL.GL_TEXTURE_2D);
-//
-//		if (renderingHints.isTransparencyEnabled())	{
-//		  	gl.glDisable (GL.GL_BLEND);
-//			gl.glDepthMask(true);
-//		}
 	}
 	private static GLUT glut = new GLUT();
 	static double[] correctionNDC = null;

@@ -112,14 +112,15 @@ public class DefaultVertexShader implements VertexShader {
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 
-		if (jr.openGLState.frontBack != frontBack)	{
+//		if (jr.openGLState.frontBack != frontBack)	{
 			gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
-			jr.openGLState.frontBack = frontBack;
-		}
+//			jr.openGLState.frontBack = frontBack;
+//		}
 //		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
 			gl.glColor4fv( diffuseColorAsFloat);
-//			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
+			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
 //		}
+			gl.glMaterialfv(frontBack, GL.GL_DIFFUSE, diffuseColorAsFloat);
 		gl.glMaterialfv(frontBack, GL.GL_AMBIENT, ambientColorAsFloat);
 		gl.glMaterialfv(frontBack, GL.GL_SPECULAR, specularColorAsFloat);
 		gl.glMaterialf(frontBack, GL.GL_SHININESS, (float) getSpecularExponent());

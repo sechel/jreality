@@ -10,6 +10,8 @@ import java.awt.Dimension;
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.PolygonalTubeFactory;
+import de.jreality.geometry.Primitives;
 import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.QuadMeshUtility;
 import de.jreality.geometry.TubeUtility;
@@ -49,7 +51,7 @@ public class DefaultLineShader implements LineShader  {
 	int 	tubeStyle = TubeUtility.PARALLEL;
 	double	tubeRadius = 0.05,
 		 	lineWidth = 1.0,
-			depthFudgeFactor = 0.9999d;			// in pixels
+			depthFudgeFactor = 0.9999d;
 	boolean interpolateVertexColors = false, lighting;
 	int	lineFactor = 1;
 	int 	lineStipplePattern = 0x1c47; 
@@ -152,14 +154,8 @@ public class DefaultLineShader implements LineShader  {
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, diffuseColorAsFloat);
-		// TODO figure out why I have to use this call too, even though
-		// GL_COLOR_MATERIAL is disabled.
-		//gl.glDisable(GL.GL_COLOR_MATERIAL);
-		//gl.glColor4fv(getDiffuseColorAsFloat());
-		//if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
-			gl.glColor4fv( diffuseColorAsFloat);
-			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
-		//}
+		gl.glColor4fv( diffuseColorAsFloat);
+		System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
 	
 		gl.glLineWidth((float) getLineWidth());
 		if (isLineStipple()) {
@@ -212,10 +208,6 @@ public class DefaultLineShader implements LineShader  {
 		return -1;
 	}
 	
-	// TODO figure out how to share this code with TubeUtility
-	static double[][] xSection = {{1,0,0}, {.707, .707, 0}, {0,1,0},{-.707, .707, 0},{-1,0,0},{-.707, -.707, 0},{0,-1,0},{.707, -.707, 0}};
-//	
-	// TOOD figure out how to clear out local display lists (not returned by the method)!
 	int[] tubeDL = null;
 	boolean testQMS = true;
 	boolean smoothShading = true;		// force tubes to be smooth shaded ?
@@ -224,7 +216,6 @@ public class DefaultLineShader implements LineShader  {
 		double[] p1 = new double[4],
 			p2 = new double[4];
 		p1[3] = p2[3] = 1.0;
-		DataList edgeIndices;
 		double[][] crossSection = TubeUtility.octagonalCrossSection;
 		if (jr.openGLState.levelOfDetail == 0.0) crossSection = TubeUtility.diamondCrossSection;
 		int n = ils.getNumEdges();
@@ -233,12 +224,12 @@ public class DefaultLineShader implements LineShader  {
 //		JOGLConfiguration.theLog.log(Level.FINE,"Creating tubes for "+ils.getName());
 		if (tubeDL == null)	{
 			tubeDL = new int[3];
-			for (int i = 0; i<3; ++i)	{
-				tubeDL[i] = gl.glGenLists(1);
-				gl.glNewList(tubeDL[i], GL.GL_COMPILE);
-				JOGLRendererHelper.drawFaces(TubeUtility.urTube[i], jr, smoothShading, alpha );
-				gl.glEndList();	
-			}
+		}
+		if (tubeDL[sig+1] == 0)	{
+			tubeDL[sig+1] = gl.glGenLists(1);
+			gl.glNewList(tubeDL[sig+1], GL.GL_COMPILE);
+			JOGLRendererHelper.drawFaces(TubeUtility.urTube[sig+1], jr, smoothShading , alpha );
+			gl.glEndList();	
 		}
 		int nextDL = -1;
 		if (useDisplayLists) {
@@ -260,7 +251,8 @@ public class DefaultLineShader implements LineShader  {
 		//gl.glEnable(GL.GL_COLOR_MATERIAL);
 		//gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK, GL.GL_DIFFUSE);
 		if (pickMode)	gl.glPushName(JOGLPickAction.GEOMETRY_LINE);
-		if (!pickMode && testQMS && isQuadMesh)	{
+//		GeometryUtility.calculateAndSetNormals(TubeUtility.urTube[sig+1]);
+		if (!pickMode && isQuadMesh)	{
 			int u, v, count=0;
 			boolean closedU, closedV;
 			if (qms != null)	{
@@ -275,18 +267,24 @@ public class DefaultLineShader implements LineShader  {
 			}
 			double[][] curve = null;
 			IndexedFaceSet tube = null;
-			for (int i = 0; i<u; ++i)	{
-				curve = QuadMeshUtility.extractParameterCurve(curve,(IndexedFaceSet) ils, u, v, i,0);
-				tube = TubeUtility.makeTubeAsIFS(curve, rad, crossSection, tubeStyle, closedV, sig, 0);
-				//JOGLConfiguration.theLog.log(Level.FINE,"Tube has "+tube.getNumPoints()+" points");
-				//tube.setGeometryAttributes(PROXY_FOR_EDGE, new ProxyTubeIdentifier(ils, count));
-				if (pickMode)	gl.glPushName(count++);
-				JOGLRendererHelper.drawFaces(tube, jr, smoothShading, alpha);
-				if (pickMode) 	gl.glPopName();
-			}
-			for (int i = 0; i<v; ++i)	{
-				curve = QuadMeshUtility.extractParameterCurve(curve,(IndexedFaceSet) ils, u, v, i,1);
-				tube = TubeUtility.makeTubeAsIFS(curve, rad, crossSection, tubeStyle, closedU, sig, 0);
+			for (int i = 0; i<u+v; ++i)	{
+				int uv = 0;
+				int curvenum = i;
+				boolean closed = closedU;
+				if (i>=u) { 
+					uv = 1; curvenum = i-u; 
+					closed = closedV;
+				}
+				curve = QuadMeshUtility.extractParameterCurve(curve,(IndexedFaceSet) ils, u, v, curvenum,uv);
+//				tube = TubeUtility.makeTubeAsIFS(curve, rad, crossSection, tubeStyle, closedV, sig, 0);
+				PolygonalTubeFactory ptf = new PolygonalTubeFactory(curve);
+				ptf.setClosed(closed);
+				ptf.setCrossSection(crossSection);
+				ptf.setFrameFieldType(tubeStyle);
+				ptf.setSignature(sig);
+				ptf.setRadius(rad);
+				ptf.update();
+				tube = ptf.getTube();
 				//JOGLConfiguration.theLog.log(Level.FINE,"Tube has "+tube.getNumPoints()+" points");
 				//tube.setGeometryAttributes(PROXY_FOR_EDGE, new ProxyTubeIdentifier(ils, count));
 				if (pickMode)	gl.glPushName(count++);
@@ -296,18 +294,20 @@ public class DefaultLineShader implements LineShader  {
 		} else {
 			int  k, l;
 			DoubleArray da;
+			double[] mat = new double[16];
 			for (int i = 0; i<n; ++i)	{
-// int[] ed = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
 			IntArray ia = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray();
 			DataList edgec =  ils.getEdgeAttributes(Attribute.COLORS);
 			int m = ia.size();
 			if (pickMode)	gl.glPushName(i);
-			if (m == 2 || pickMode)	{
+			if (m == 2 || pickMode)	{		// probably an IndexedFaceSet 
 				DoubleArray edgecolor = null;
 				int clength = 3;
 				if (edgec != null) {
 					edgecolor = edgec.item(i).toDoubleArray();
 					clength = edgecolor.size();
+					if (clength == 3) gl.glColor3d(edgecolor.getValueAt(0), edgecolor.getValueAt(1), edgecolor.getValueAt(2));
+					else gl.glColor4d(edgecolor.getValueAt(0), edgecolor.getValueAt(1), edgecolor.getValueAt(2), edgecolor.getValueAt(3));
 				}
 				
 				for (int j = 0; j<m-1; ++j)	{
@@ -320,22 +320,27 @@ public class DefaultLineShader implements LineShader  {
 					l = da.size();
 					for (int xx=0; xx<l; ++xx) p2[xx] = da.getValueAt(xx);
 					SceneGraphComponent cc = TubeUtility.tubeOneEdge(p1, p2, rad, crossSection, sig);
-					gl.glPushMatrix();
-					gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix());
 					if (pickMode) gl.glPushName(j);
-					if (edgec != null) 
-						if (clength == 3) gl.glColor3d(edgecolor.getValueAt(0), edgecolor.getValueAt(1), edgecolor.getValueAt(2));
-						else gl.glColor4d(edgecolor.getValueAt(0), edgecolor.getValueAt(1), edgecolor.getValueAt(2), edgecolor.getValueAt(3));
+					gl.glPushMatrix();
+					gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix(mat));
 					gl.glCallList(tubeDL[sig+1]);
-					if (pickMode) gl.glPopName();
+//					JOGLRendererHelper.drawFaces(TubeUtility.urTube[sig+1], jr, smoothShading, alpha );					if (pickMode) gl.glPopName();
 					gl.glPopMatrix();
-	
+					if (pickMode) 	gl.glPopName();					
+					
 				}
 			}
-			else {
-				IndexedFaceSet tube = TubeUtility.makeTubeAsIFS(ils, i, false, rad, crossSection, tubeStyle, false, sig, 0);
+			else {		// the assumption is that this is a genuine IndexedLineSet (not subclass with faces)
+				PolygonalTubeFactory ptf = new PolygonalTubeFactory(ils);
+				ptf.setClosed(false);
+				ptf.setCrossSection(crossSection);
+				ptf.setFrameFieldType(tubeStyle);
+				ptf.setSignature(sig);
+				ptf.setRadius(rad);
+				ptf.update();
+				IndexedFaceSet tube = ptf.getTube();
 				if (tube != null)	{
-					JOGLRendererHelper.drawFaces(tube, jr,  smoothShading, alpha);					
+					JOGLRendererHelper.drawFaces(tube, jr,  smoothShading, alpha);			
 				}
 			}
 			if (pickMode) 	gl.glPopName();					
