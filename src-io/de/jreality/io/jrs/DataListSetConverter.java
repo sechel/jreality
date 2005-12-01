@@ -22,7 +22,7 @@ public class DataListSetConverter implements Converter {
   }
 
   public boolean canConvert(Class type) {
-    return type == DataListSet.class;
+    return DataListSet.class.isAssignableFrom(type);
   }
 
   public void marshal(Object source, HierarchicalStreamWriter writer,
@@ -32,9 +32,6 @@ public class DataListSetConverter implements Converter {
     for (Iterator iterator = dls.storedAttributes().iterator(); iterator.hasNext();) {
       
       Attribute a = (Attribute) iterator.next();
-//      writer.startNode(mapper.serializedClass(Attribute.class));
-//      context.convertAnother(a);
-//      writer.endNode();
 
       DataList dl = dls.getList(a);
       writer.startNode(mapper.serializedClass(DataList.class));

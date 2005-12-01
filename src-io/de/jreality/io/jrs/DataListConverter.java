@@ -39,58 +39,63 @@ public class DataListConverter implements Converter {
     DataList dl = (DataList) source;
     String sm = dl.getStorageModel().toString();
     writer.addAttribute("data", sm);
+    Object dst=null;
     if (sm.startsWith("double")) {
       if (isArray(sm) || isInlined(sm)) {
         double[] data = dl.toDoubleArray(null);
-        context.convertAnother(data);
+        dst = data;
       } else if (isArrayArray(sm)) {
         double[][] data = dl.toDoubleArrayArray(null);
-        context.convertAnother(data);
+        dst = data;
       }
     } else if (sm.startsWith("int")) {
       if (isArray(sm) || isInlined(sm)) {
         int[] data = dl.toIntArray(null);
-        context.convertAnother(data);
+        dst = data;
       } else if (isArrayArray(sm)) {
         int[][] data = dl.toIntArrayArray(null);
-        context.convertAnother(data);
-      }      
+        dst = data;
+      }
     } else {
       throw new UnsupportedOperationException("cannot write: "+sm);
     }
-    
+    writer.startNode(mapper.serializedClass(dst.getClass()));
+    context.convertAnother(dst);
+    writer.endNode();
   }
 
   public Object unmarshal(HierarchicalStreamReader reader,
       UnmarshallingContext context) {
-    System.out.println("unmarshal dataList");
     String sm = reader.getAttribute("data");
+    Object ret = null;
+    reader.moveDown();
     if (sm.startsWith("double")) {
       if (isArray(sm)) {
         double[] data = (double[]) context.convertAnother(null, double[].class);
-        return new DoubleArray(data);
+        ret = new DoubleArray(data);
       } else if (isInlined(sm)) {
         double[] data = (double[]) context.convertAnother(null, double[].class);
-        return new DoubleArrayArray.Inlined(data, slotLength(sm));
+        ret =  new DoubleArrayArray.Inlined(data, slotLength(sm));
       } else if (isArrayArray(sm)) {
         double[][] data = (double[][]) context.convertAnother(null, double[][].class);
-        return new DoubleArrayArray.Array(data);
+        ret = new DoubleArrayArray.Array(data);
       }
     } else if (sm.startsWith("int")) {
       if (isArray(sm)) {
         int[] data = (int[]) context.convertAnother(null, int[].class);
-        return new IntArray(data);
+        ret = new IntArray(data);
       } else if (isInlined(sm)) {
         int[] data = (int[]) context.convertAnother(null, int[].class);
-        return new IntArrayArray.Inlined(data, slotLength(sm));
+        ret = new IntArrayArray.Inlined(data, slotLength(sm));
       } else if (isArrayArray(sm)) {
         int[][] data = (int[][]) context.convertAnother(null, int[][].class);
-        return new IntArrayArray.Array(data);
+        ret = new IntArrayArray.Array(data);
       }
     } else {
-      throw new UnsupportedOperationException("cannot write: "+sm);
+      throw new UnsupportedOperationException("cannot read: "+sm);
     }
-    return null;
+    reader.moveUp();
+    return ret;
   }
 
   private int slotLength(String sm) {

@@ -7,20 +7,10 @@ import java.util.Set;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.mapper.Mapper;
 
-import de.jreality.scene.Appearance;
-import de.jreality.scene.Camera;
-import de.jreality.scene.Geometry;
-import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.IndexedLineSet;
-import de.jreality.scene.Light;
-import de.jreality.scene.PointLight;
-import de.jreality.scene.PointSet;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.SceneGraphVisitor;
-import de.jreality.scene.SpotLight;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.*;
+import de.jreality.scene.tool.Tool;
 
 /**
  * this class should work like the inherited copy factory but copying objects on remote places
@@ -31,65 +21,75 @@ class NodeWriter extends SceneGraphVisitor {
 
   private HierarchicalStreamWriter writer;
   private MarshallingContext context;
+  private Mapper mapper;
 
-  public void setUp(HierarchicalStreamWriter writer, MarshallingContext context) {
+  public void setUp(HierarchicalStreamWriter writer, MarshallingContext context, Mapper mapper) {
     this.writer = writer;
     this.context = context;
+    this.mapper = mapper;
   }
 
-  public void visit(de.jreality.scene.Appearance a) {
+  public void visit(Appearance a) {
     copyAttr(a);
   }
 
-  public void visit(de.jreality.scene.Camera c) {
+  public void visit(Camera c) {
     copyAttr(c);
   }
 
-  public void visit(de.jreality.scene.Cylinder c) {
+  public void visit(Cylinder c) {
     copyAttr(c);
   }
 
-  public void visit(de.jreality.scene.DirectionalLight l) {
+  public void visit(DirectionalLight l) {
+    writer.addAttribute("type", mapper.serializedClass(DirectionalLight.class));
     copyAttr(l);
   }
 
-  public void visit(de.jreality.scene.IndexedFaceSet i) {
+  public void visit(IndexedFaceSet i) {
+    writer.addAttribute("type", mapper.serializedClass(IndexedFaceSet.class));
     copyAttr(i);
   }
 
-  public void visit(de.jreality.scene.IndexedLineSet ils) {
+  public void visit(IndexedLineSet ils) {
+    writer.addAttribute("type", mapper.serializedClass(DirectionalLight.class));
     copyAttr(ils);
   }
 
-  public void visit(de.jreality.scene.PointSet p) {
+  public void visit(PointSet p) {
+    writer.addAttribute("type", mapper.serializedClass(PointSet.class));
     copyAttr(p);
   }
 
-  public void visit(de.jreality.scene.SceneGraphComponent c) {
+  public void visit(SceneGraphComponent c) {
     copyAttr(c);
   }
 
-  public void visit(de.jreality.scene.Sphere s) {
+  public void visit(Sphere s) {
+    writer.addAttribute("type", mapper.serializedClass(Sphere.class));
     copyAttr(s);
   }
 
-  public void visit(de.jreality.scene.SpotLight l) {
+  public void visit(SpotLight l) {
+    writer.addAttribute("type", mapper.serializedClass(DirectionalLight.class));
     copyAttr(l);
   }
 
-  public void visit(de.jreality.scene.ClippingPlane c) {
+  public void visit(ClippingPlane c) {
+    writer.addAttribute("type", mapper.serializedClass(ClippingPlane.class));
     copyAttr(c);
   }
 
-  public void visit(de.jreality.scene.PointLight l) {
+  public void visit(PointLight l) {
+    writer.addAttribute("type", mapper.serializedClass(PointLight.class));
     copyAttr(l);
   }
 
-  public void visit(de.jreality.scene.Transformation t) {
+  public void visit(Transformation t) {
     copyAttr(t);
   }
 
-  public void visit(de.jreality.scene.SceneGraphNode m) {
+  public void visit(SceneGraphNode m) {
     throw new IllegalStateException(m.getClass() + " not handled by "
         + getClass().getName());
   }
@@ -101,9 +101,20 @@ class NodeWriter extends SceneGraphVisitor {
   public void copyAttr(SceneGraphComponent src) {
     copyAttr((SceneGraphNode) src);
     write("visible", src.isVisible());
+    write("transformation", src.getTransformation());
+    write("appearance", src.getAppearance());
+    write("camera", src.getCamera());
+    write("light", src.getLight());
+    write("geometry", src.getGeometry());
     writer.startNode("children");
-    for (Iterator i = src.getChildNodes().iterator(); i.hasNext(); ) {
-      context.convertAnother(i.next());
+    for (int i = 0; i < src.getChildComponentCount(); i++) {
+      write("child", src.getChildComponent(i));
+    }
+    writer.endNode();
+    writer.startNode("tools");
+    for (Iterator i = src.getTools().iterator(); i.hasNext(); ) {
+      Tool t = (Tool) i.next();
+      writeUnknown(t);
     }
     writer.endNode();
   }
@@ -112,17 +123,18 @@ class NodeWriter extends SceneGraphVisitor {
     copyAttr((SceneGraphNode) src);
     Set lst = src.getStoredAttributes();
     for (Iterator i = lst.iterator(); i.hasNext();) {
-      writer.startNode("appearanceAttribute");
+      writer.startNode("attribute");
       String aName = (String) i.next();
+      Object val = src.getAttribute(aName);
       writer.addAttribute("name", aName);
-      context.convertAnother(src.getAppearanceAttribute(aName));
+      writeUnknown(val);
       writer.endNode();
     }
   }
 
   public void copyAttr(Transformation src) {
     copyAttr((SceneGraphNode) src);
-    context.convertAnother(src.getMatrix());
+    write("matrix", src.getMatrix());
   }
 
   public void copyAttr(Light src) {
@@ -180,7 +192,6 @@ class NodeWriter extends SceneGraphVisitor {
 
   public void copyAttr(Camera src) {
     copyAttr((SceneGraphNode) src);
-    //        src.setAspectRatio(src.getAspectRatio());
     write("eyeSeparation", src.getEyeSeparation());
     write("far", src.getFar());
     write("fieldOfView", src.getFieldOfView());
@@ -189,11 +200,7 @@ class NodeWriter extends SceneGraphVisitor {
     write("onAxis", src.isOnAxis());
     write("orientationMatrix", src.getOrientationMatrix());
     write("perspective", src.isPerspective());
-    // src.setSignature(src.getSignature());
     write("stereo", src.isStereo());
-// if (src.getViewPort() != null)
-// dst.setViewPort(src.getViewPort().getX(), src.getViewPort().getY(), src
-//          .getViewPort().getWidth(), src.getViewPort().getHeight());
   }
 
   private void write(String name, double d) {
@@ -210,7 +217,13 @@ class NodeWriter extends SceneGraphVisitor {
 
   private void write(String name, Object src) {
     writer.startNode(name);
-    context.convertAnother(src);
+    if (src != null) context.convertAnother(src);
+    writer.endNode();
+  }
+
+  private void writeUnknown(Object src) {
+    writer.startNode(mapper.serializedClass(src.getClass()));
+    if (src != null) context.convertAnother(src);
     writer.endNode();
   }
 

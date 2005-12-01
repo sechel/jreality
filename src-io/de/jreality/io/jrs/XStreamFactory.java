@@ -1,6 +1,7 @@
 package de.jreality.io.jrs;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.reflection.PureJavaReflectionProvider;
 
 import de.jreality.io.JrScene;
 import de.jreality.scene.*;
@@ -15,7 +16,8 @@ public class XStreamFactory {
   
   static XStream simpleXStream() {
 
-    XStream ret = new XStream();
+    XStream ret = new XStream(new PureJavaReflectionProvider());
+    
     // scene package
     ret.alias("Appearance", Appearance.class);
     ret.alias("Camera", Camera.class);
@@ -34,11 +36,8 @@ public class XStreamFactory {
 
     // data package
     ret.alias("Attribute", Attribute.class);
+    ret.alias("DataList", DataList.class);
     ret.alias("DataListSet", DataListSet.class);
-    ret.alias("DoubleArray", DoubleArray.class);
-    ret.alias("DoubleArrayArray", DoubleArrayArray.class);
-    ret.alias("IntArray", IntArray.class);
-    ret.alias("IntArrayArray", IntArrayArray.class);
     ret.alias("StorageModel", StorageModel.class);
     
     // io package
@@ -47,7 +46,10 @@ public class XStreamFactory {
     ret.registerConverter(new DataListSetConverter(ret.getClassMapper()));
     ret.registerConverter(new DataListConverter(ret.getClassMapper()));
     ret.registerConverter(new AttributeConverter(ret.getClassMapper()));
-    ret.registerConverter(new ArrayConverter(ret.getClassMapper()));
+    ret.registerConverter(new DoubleArrayConverter(ret.getClassMapper()));
+    ret.registerConverter(new IntArrayConverter(ret.getClassMapper()));
+    ret.registerConverter(new SceneGraphNodeConverter(ret.getClassMapper()));
+    ret.registerConverter(new InputSlotConverter(ret.getClassMapper()));
     return ret;
   }
   
