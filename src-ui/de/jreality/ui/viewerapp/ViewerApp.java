@@ -22,15 +22,12 @@
  */
 package de.jreality.ui.viewerapp;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -45,10 +42,6 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import de.jreality.examples.jRLogo;
-import de.jreality.geometry.GeometryUtility;
-import de.jreality.geometry.IndexedFaceSetUtility;
-import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.io.JrScene;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.ReaderJRS;
@@ -56,7 +49,6 @@ import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
-import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
@@ -72,10 +64,8 @@ import de.jreality.scene.tool.config.ToolSystemConfiguration;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPolygonShader;
-import de.jreality.shader.ImageData;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.shader.TextureUtility;
 import de.jreality.ui.treeview.JListRenderer;
 import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
 import de.jreality.util.Input;
@@ -171,6 +161,7 @@ public class ViewerApp
     				try {
     					SceneGraphComponent f = Readers.read(files[i]);
               f.setName(files[i].getName());
+              System.out.println("READ finished.");
     					currSceneNode.addChild(f);
     				} catch (IOException e) {
     					// TODO Auto-generated catch block
@@ -306,15 +297,9 @@ public class ViewerApp
     root.setName("root");
 
     scene = new SceneGraphComponent();
-	scene.setName("scene");
-	root.addChild(scene);
+  	scene.setName("scene");
+	  root.addChild(scene);
 
-  IndexedFaceSet ifs = new IndexedFaceSet();
-  IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs);
-  scene.setGeometry(ifs);
-  
-  //scene.addChild(jRLogo.logo);
-  
     SceneGraphComponent avatarNode= new SceneGraphComponent();
     avatarNode.setName("avatar");
     Transformation at= new Transformation();
@@ -325,10 +310,7 @@ public class ViewerApp
     //
     SceneGraphComponent cameraNode= new SceneGraphComponent();
     cameraNode.setName("camera Node");
-    Transformation ct= new Transformation();
-    ct.setName("cam Trafo");
-    ct.setTranslation(0, 0, 16);
-    cameraNode.setTransformation(ct);
+    MatrixBuilder.euclidean().translate(0, 0, 16).assignTo(cameraNode);
     Camera firstCamera= new Camera();
     firstCamera.setName("camera");
     firstCamera.setFieldOfView(30);
@@ -338,10 +320,7 @@ public class ViewerApp
 
     SceneGraphComponent lightNode= new SceneGraphComponent();
     lightNode.setName("lightComp 1");
-    Transformation lt= new Transformation();
-    lt.setName("lightTrafo 1");
-    lt.setRotation(-Math.PI / 4, 1, 1, 0);
-    lightNode.setTransformation(lt);
+    MatrixBuilder.euclidean().rotate(-Math.PI / 4, 1, 1, 0).assignTo(lightNode);
     DirectionalLight light= new DirectionalLight();
     light.setName("light 1");
     lightNode.setLight(light);
@@ -349,11 +328,7 @@ public class ViewerApp
 
     SceneGraphComponent lightNode2= new SceneGraphComponent();
     lightNode2.setName("lightComp 2");
-    Transformation lt2= new Transformation();
-    lt.setName("lightTrafo 2");
-    // lt2.assignScale(-1);
-    lt.setRotation(-Math.PI / 4, 1, 1, 0);
-    lightNode2.setTransformation(lt2);
+    MatrixBuilder.euclidean().rotate(-Math.PI / 4, 1, 1, 0).assignTo(lightNode2);
     DirectionalLight light2= new DirectionalLight();
     light2.setName("light 2");
     lightNode2.setLight(light2);
@@ -391,9 +366,7 @@ public class ViewerApp
   }
   private static ToolSystemViewer createViewer() throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
   {
-    String viewer=System.getProperty("de.jreality.scene.Viewer",
-      "de.jreality.jogl.Viewer");
-    //  "de.jreality.soft.DefaultViewer");
+    String viewer=System.getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer");
     ToolSystemViewer v = new ToolSystemViewer(createViewer(viewer), ToolSystemConfiguration.loadDefaultDesktopConfiguration());
     v.setPickSystem(new AABBPickSystem());
     return v;
