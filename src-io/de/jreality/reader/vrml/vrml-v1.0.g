@@ -48,7 +48,7 @@ options {
 	int[] is = new int[MAXSIZE];
 	double[] evil3Vec = new double[3];
 	boolean collectingMFVec3 = false;
-	int primitiveCount, polygonCount;
+	int primitiveCount, polygonCount, coordinate3Count;
 }
 vrmlFile returns [SceneGraphComponent r]
 { r = null;}
@@ -70,6 +70,7 @@ vrmlScene returns [SceneGraphComponent r]
 		{
 			r = root;
 			System.err.println("Read in "+primitiveCount+" primitives with a total of "+polygonCount+" faces.");
+			System.err.println("There were "+coordinate3Count+" vertex lists");
 		}
 	;
 
@@ -237,6 +238,7 @@ coordinate3Statement returns [DataList dl]
 			}
 			
 			dl = currentCoordinate3 = StorageModel.DOUBLE_ARRAY.inlined(3).createReadOnly(points);
+		 	coordinate3Count++;
 		 	}
 	;
 	
