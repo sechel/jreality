@@ -9,8 +9,25 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.mapper.Mapper;
 
-import de.jreality.scene.*;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.Camera;
+import de.jreality.scene.ClippingPlane;
+import de.jreality.scene.Cylinder;
+import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.Geometry;
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.Light;
+import de.jreality.scene.PointLight;
+import de.jreality.scene.PointSet;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.SceneGraphVisitor;
+import de.jreality.scene.Sphere;
+import de.jreality.scene.SpotLight;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.tool.Tool;
+import de.jreality.util.LoggingSystem;
 
 /**
  * @author weissman
@@ -112,7 +129,11 @@ class NodeWriter extends SceneGraphVisitor {
     writer.startNode("tools");
     for (Iterator i = src.getTools().iterator(); i.hasNext(); ) {
       Tool t = (Tool) i.next();
-      writeUnknown(t);
+      if (XStreamFactory.canWrite(t)) {
+        writeUnknown(t);
+      } else {
+        LoggingSystem.getLogger(this).warning("skipping Tool: ["+t.getClass()+"] not supported");
+      }
     }
     writer.endNode();
   }
@@ -121,12 +142,16 @@ class NodeWriter extends SceneGraphVisitor {
     copyAttr((SceneGraphNode) src);
     Set lst = src.getStoredAttributes();
     for (Iterator i = lst.iterator(); i.hasNext();) {
-      writer.startNode("attribute");
       String aName = (String) i.next();
       Object val = src.getAttribute(aName);
-      writer.addAttribute("name", aName);
-      writeUnknown(val);
-      writer.endNode();
+      if (XStreamFactory.canWrite(val)) {
+        writer.startNode("attribute");
+        writer.addAttribute("name", aName);
+        writeUnknown(val);
+        writer.endNode();
+      } else {
+        LoggingSystem.getLogger(this).warning("skipping appearance attribute: "+aName+" ["+val.getClass()+"] not supported");
+      }
     }
   }
 
@@ -220,9 +245,7 @@ class NodeWriter extends SceneGraphVisitor {
   }
 
   private void writeUnknown(Object src) {
-    writer.startNode(mapper.serializedClass(src.getClass()));
-    if (src != null) context.convertAnother(src);
-    writer.endNode();
+    XStreamFactory.writeUnknown(src, writer, context, mapper);
   }
 
 }

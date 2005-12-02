@@ -3,8 +3,6 @@ package de.jreality.io.jrs;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -16,11 +14,7 @@ import com.thoughtworks.xstream.mapper.Mapper;
 import de.jreality.io.JrScene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.data.DataList;
-import de.jreality.scene.data.DoubleArray;
-import de.jreality.scene.data.DoubleArrayArray;
-import de.jreality.scene.data.IntArray;
-import de.jreality.scene.data.IntArrayArray;
+import de.jreality.util.LoggingSystem;
 
 class JrSceneConverter implements Converter {
 
@@ -36,10 +30,10 @@ class JrSceneConverter implements Converter {
 
   public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
     JrScene scene = (JrScene) source;
-    writer.startNode("SceneRoot");
+    writer.startNode("sceneRoot");
     context.convertAnother(scene.getSceneRoot());
     writer.endNode();
-    writer.startNode("ScenePaths");
+    writer.startNode("scenePaths");
     for (Iterator it = scene.getScenePaths().entrySet().iterator(); it.hasNext(); ) {
       Map.Entry e = (Entry) it.next();
       writer.startNode("path");
@@ -48,15 +42,17 @@ class JrSceneConverter implements Converter {
       writer.endNode();
     }
     writer.endNode();
-    writer.startNode("SceneAttributes");
+    writer.startNode("sceneAttributes");
     for (Iterator it = scene.getSceneAttributes().entrySet().iterator(); it.hasNext(); ) {
       Map.Entry e = (Entry) it.next();
-      writer.startNode("attribute");
-      writer.addAttribute("name", (String) e.getKey());
-      writer.startNode(mapper.serializedClass(e.getValue().getClass()));
-      context.convertAnother(e.getValue());
-      writer.endNode();
-      writer.endNode();
+      if (XStreamFactory.canWrite(e.getValue())) {
+        writer.startNode("attribute");
+        writer.addAttribute("name", (String) e.getKey());
+        XStreamFactory.writeUnknown(e.getValue(), writer, context, mapper);
+        writer.endNode();
+      } else {
+        LoggingSystem.getLogger(this).warning("cannot write scene attribute="+e.getKey()+" ["+e.getValue().getClass()+"] not supported.");
+      }
     }
     writer.endNode();
   }
@@ -87,11 +83,7 @@ class JrSceneConverter implements Converter {
     while(reader.hasMoreChildren()) {
       reader.moveDown();
       String attrName = reader.getAttribute("name");
-      reader.moveDown();
-      Class type = mapper.realClass(reader.getNodeName());
-      Object obj = context.convertAnother(null, type);
-      reader.moveUp();
-      reader.moveUp();
+      Object obj = XStreamFactory.readUnknown(reader, context, mapper);
       ret.addAttribute(attrName, obj);
     }
     reader.moveUp();

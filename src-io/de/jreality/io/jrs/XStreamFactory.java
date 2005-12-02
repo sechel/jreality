@@ -1,10 +1,21 @@
 package de.jreality.io.jrs;
 
+import java.awt.Color;
+import java.util.HashSet;
+
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.converters.reflection.PureJavaReflectionProvider;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.mapper.Mapper;
 
 import de.jreality.io.JrScene;
 import de.jreality.jogl.shader.DefaultPointShader;
+import de.jreality.math.FactoredMatrix;
+import de.jreality.math.Matrix;
+import de.jreality.math.Quaternion;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.ClippingPlane;
@@ -23,6 +34,13 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.scene.tool.DraggingTool;
+import de.jreality.scene.tool.EncompassTool;
+import de.jreality.scene.tool.HeadTransformationTool;
+import de.jreality.scene.tool.InputSlot;
+import de.jreality.scene.tool.PortalHeadMoveTool;
+import de.jreality.scene.tool.RotateTool;
+import de.jreality.scene.tool.ShipNavigationTool;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPolygonShader;
@@ -31,8 +49,37 @@ import de.jreality.shader.Texture2D;
 
 public class XStreamFactory {
 
-  static final int PLAIN_ARRAY_LENGTH = 16;
-
+  private static HashSet knownClasses = new HashSet();
+  
+  static {
+    //knownClasses.add(Void.class);
+    knownClasses.add(Boolean.class);
+    knownClasses.add(Byte.class);
+    knownClasses.add(Double.class);
+    knownClasses.add(Integer.class);
+    knownClasses.add(Character.class);
+    knownClasses.add(Float.class);
+    knownClasses.add(Short.class);
+    
+    knownClasses.add(String.class);
+    knownClasses.add(Class.class);
+    
+    knownClasses.add(Color.class);
+    
+    knownClasses.add(Matrix.class);
+    knownClasses.add(FactoredMatrix.class);
+    knownClasses.add(Quaternion.class);
+    
+    knownClasses.add(ImageData.class);
+    
+    knownClasses.add(RotateTool.class);
+    knownClasses.add(EncompassTool.class);
+    knownClasses.add(DraggingTool.class);
+    knownClasses.add(ShipNavigationTool.class);
+    knownClasses.add(HeadTransformationTool.class);
+    knownClasses.add(PortalHeadMoveTool.class);
+  }
+  
   public static XStream forVersion(double version) {
     if (version < 1) return simpleXStream();
     else throw new IllegalArgumentException("no such version");
@@ -70,22 +117,55 @@ public class XStreamFactory {
     ret.alias("DefaultPointShader", DefaultPointShader.class);
     ret.alias("Texture2D", Texture2D.class);
     ret.alias("CubeMap", CubeMap.class);
-    
     ret.alias("ImageData", ImageData.class);
     
     // io package
-    ret.alias("Scene", JrScene.class);
+    ret.alias("scene", JrScene.class);
+    
+    // math package
+    ret.alias("Matrix", Matrix.class);
+    ret.alias("FactoredMatrix", FactoredMatrix.class);
+    ret.alias("Quaternion", Quaternion.class);
+    
+    // immutable types
+    ret.addImmutableType(InputSlot.class);
+    ret.addImmutableType(Attribute.class);
+    ret.addImmutableType(ImageData.class);
     
     ret.registerConverter(new JrSceneConverter(ret.getClassMapper()));
     ret.registerConverter(new SceneGraphNodeConverter(ret.getClassMapper()));
     ret.registerConverter(new SceneGraphPathConverter(ret.getClassMapper()));
     ret.registerConverter(new DataListSetConverter(ret.getClassMapper()));
     ret.registerConverter(new DataListConverter(ret.getClassMapper()));
-    ret.registerConverter(new EncodedDoubleArrayConverter(ret.getClassMapper()));
-    ret.registerConverter(new EncodedIntArrayConverter(ret.getClassMapper()));
+    ret.registerConverter(new DoubleArrayConverter(ret.getClassMapper()));
+    ret.registerConverter(new IntArrayConverter(ret.getClassMapper()));
     ret.registerConverter(new InputSlotConverter());
+    ret.registerConverter(new MatrixConverter(ret.getClassMapper()));
     
     return ret;
+  }
+
+  static Object readUnknown(HierarchicalStreamReader reader, UnmarshallingContext context, Mapper mapper) {
+    Object ret = null;
+    reader.moveDown();
+    Class type = mapper.realClass(reader.getNodeName());
+    ret = context.convertAnother(null, type);
+    reader.moveUp();
+    return ret;
+  }
+
+  static void writeUnknown(Object src, HierarchicalStreamWriter writer, MarshallingContext context, Mapper mapper) {
+    if (!canWrite(src)) throw new IllegalArgumentException("cannot write: ["+src.getClass()+"]");
+    writer.startNode(mapper.serializedClass(src.getClass()));
+    if (src != null) context.convertAnother(src);
+    writer.endNode();
+  }
+
+  static boolean canWrite(Object val) {
+    Class clazz = val.getClass();
+    if (clazz.isPrimitive() || knownClasses.contains(clazz))
+      return true;
+    return false;
   }
   
 }

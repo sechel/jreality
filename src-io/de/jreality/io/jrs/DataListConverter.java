@@ -57,7 +57,7 @@ class DataListConverter implements Converter {
     } else {
       throw new UnsupportedOperationException("cannot write: "+sm);
     }
-    writer.startNode(mapper.serializedClass(dst.getClass()));
+    writer.startNode(mapper.serializedClass(DataList.class));
     context.convertAnother(dst);
     writer.endNode();
   }

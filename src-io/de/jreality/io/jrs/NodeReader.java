@@ -235,12 +235,7 @@ class NodeReader extends SceneGraphVisitor {
   }
   
   private Object readUnknown() {
-    Object ret = null;
-    reader.moveDown();
-    Class type = mapper.realClass(reader.getNodeName());
-    ret = context.convertAnother(null, type);
-    reader.moveUp();
-    return ret;
+    return XStreamFactory.readUnknown(reader, context, mapper);
   }
 
 }
