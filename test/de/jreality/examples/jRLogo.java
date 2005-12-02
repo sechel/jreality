@@ -97,13 +97,13 @@ static {
     cpc.setAppearance(a);
     logo.addChild(cpc);
     
-    Torus t = new Torus(20,1.5,30,30);
+    Geometry t = Primitives.torus(20,1.5,30,3);
     //Sphere t = new Sphere();
     SceneGraphComponent tpc = new SceneGraphComponent();
     trans= new Transformation();
     //trans.setRotation(-.2,0,1,0);
     trans.setTranslation(0,0,0);
-    tpc.setTransformation(trans);
+    //tpc.setTransformation(trans);
     tpc.setGeometry(t);
     
     a = new Appearance();
