@@ -48,6 +48,7 @@ options {
 	int[] is = new int[MAXSIZE];
 	double[] evil3Vec = new double[3];
 	boolean collectingMFVec3 = false;
+	int primitiveCount, polygonCount;
 }
 vrmlFile returns [SceneGraphComponent r]
 { r = null;}
@@ -63,10 +64,12 @@ vrmlScene returns [SceneGraphComponent r]
 		root = new SceneGraphComponent();
 		currentSGC = root;
 		currentPath.push(root);
+		primitiveCount = polygonCount = 0;
 		}
 		(statement)*
 		{
 			r = root;
+			System.err.println("Read in "+primitiveCount+" primitives with a total of "+polygonCount+" faces.");
 		}
 	;
 
@@ -231,7 +234,7 @@ coordinate3Statement returns [DataList dl]
 			if (VRMLHelper.verbose)	{
 				System.err.println("Got Coordinate3");
 				System.err.println("Points: "+Rn.toString(points));
-				}
+			}
 			
 			dl = currentCoordinate3 = StorageModel.DOUBLE_ARRAY.inlined(3).createReadOnly(points);
 		 	}
@@ -266,6 +269,8 @@ indexedFaceSetStatement returns [IndexedFaceSet ifs]
 	ifsf.setGenerateVertexNormals(true); // depends on whether face normals were set above!
 	ifsf.refactor();
 	ifs = ifsf.getIndexedFaceSet();
+	primitiveCount++;
+	polygonCount += ifs.getNumFaces();
 	if (currentSGC.getGeometry() != null) currentSGC.setGeometry(ifs);
 	else		{
 		SceneGraphComponent sgc = new SceneGraphComponent();
@@ -485,7 +490,12 @@ int count = 0;
 	}
 	:
 		(onevec = sfvec3fValue	
-		{	for (int i=0; i<3; ++i)	ds[count+i] = onevec[i];
+		{	
+			if (count + 3 >= ds.length)	{
+				// Reallocate!
+				ds = VRMLHelper.reallocate(ds);
+			}
+			for (int i=0; i<3; ++i)	ds[count+i] = onevec[i];
 			count += 3;
 			//collect.add(onevec);
 		} )+

@@ -94,6 +94,13 @@ public class VRMLHelper {
 		FactoredMatrix fm = new FactoredMatrix();
 		IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
 	}
+	
+	public static double[] reallocate(double[] array)	{
+		int n = array.length;
+		double[] newarray = new double[n*2];
+		System.arraycopy(array, 0, newarray, 0, n);
+		return newarray;
+	}
 
 //	public static void viewSceneGraph(SceneGraphComponent r) {
 //		InteractiveViewerDemo ivd = new InteractiveViewerDemo();
