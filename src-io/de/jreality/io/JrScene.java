@@ -8,8 +8,8 @@ import de.jreality.scene.SceneGraphPath;
 public class JrScene {
   
   private SceneGraphComponent sceneRoot;
-  private HashMap scenePaths;
-  private HashMap sceneAttributes;
+  private HashMap scenePaths=new HashMap();
+  private HashMap sceneAttributes=new HashMap();
   
   public JrScene() {
   }
@@ -21,12 +21,12 @@ public class JrScene {
   public void addPath(String name, SceneGraphPath path) {
     if (!(path.getFirstElement() == sceneRoot) || !path.isValid())
       throw new IllegalArgumentException("invalid path!");
-    if (scenePaths == null) scenePaths = new HashMap();
+//    if (scenePaths == null) scenePaths = new HashMap();
     scenePaths.put(name, path);
   }
   
   public void addAttribute(String name, Object attribute) {
-    if (sceneAttributes == null) sceneAttributes = new HashMap();
+//    if (sceneAttributes == null) sceneAttributes = new HashMap();
     sceneAttributes.put(name, attribute);
   }
 
@@ -45,5 +45,13 @@ public class JrScene {
 
   public Object getAttribute(String name) {
     return sceneAttributes.get(name);
+  }
+  
+  public HashMap getScenePaths() {
+    return scenePaths;
+  }
+  
+  public HashMap getSceneAttributes() {
+    return sceneAttributes;
   }
 }

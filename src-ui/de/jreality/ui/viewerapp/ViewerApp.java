@@ -28,7 +28,9 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -44,6 +46,9 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import de.jreality.examples.jRLogo;
+import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.io.JrScene;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.ReaderJRS;
@@ -67,6 +72,7 @@ import de.jreality.scene.tool.config.ToolSystemConfiguration;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPolygonShader;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.TextureUtility;
@@ -226,6 +232,7 @@ public class ViewerApp
               scene = emptyPick.getLastComponent();
               currViewer.setEmptyPickPath(emptyPick);
             }
+ 
             uiFactory.setViewer(currViewer.getViewingComponent());
             uiFactory.setRoot(root);
             uiFactory.update();
@@ -302,7 +309,11 @@ public class ViewerApp
 	scene.setName("scene");
 	root.addChild(scene);
 
-  scene.addChild(jRLogo.logo);
+  IndexedFaceSet ifs = new IndexedFaceSet();
+  IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs);
+  scene.setGeometry(ifs);
+  
+  //scene.addChild(jRLogo.logo);
   
     SceneGraphComponent avatarNode= new SceneGraphComponent();
     avatarNode.setName("avatar");
@@ -353,17 +364,9 @@ public class ViewerApp
     ap.setName("root appearance");
     DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
     RootAppearance ra = ShaderUtility.createRootAppearance(ap);
-    ra.setBackgroundColor(Color.blue);
     DefaultLineShader dls = (DefaultLineShader) dgs.getLineShader();
-    dls.setTubeDraw(Boolean.FALSE);
     DefaultPolygonShader dps = (DefaultPolygonShader) dgs.getPolygonShader();
-    dps.setDiffuseColor(new Color(1f, 0f, 0f));
-// ap.setAttribute("lightingEnabled", true);
-    
-    try {
-      TextureUtility.createTexture(ap, "polygonShader", "/Users/gollwas/Sunflower.gif");
-    } catch (IOException e) {}
-    
+
     root.setAppearance(ap);
 
     root.addChild(avatarNode);

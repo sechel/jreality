@@ -13,7 +13,7 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
 
-public class DataListSetConverter implements Converter {
+class DataListSetConverter implements Converter {
 
   Mapper mapper;
 

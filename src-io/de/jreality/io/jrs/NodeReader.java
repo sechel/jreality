@@ -1,20 +1,15 @@
 package de.jreality.io.jrs;
 
 import java.awt.Color;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.Map.Entry;
 
 import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import com.thoughtworks.xstream.io.path.PathTrackingReader;
 import com.thoughtworks.xstream.mapper.Mapper;
 
 import de.jreality.scene.Appearance;
@@ -34,8 +29,6 @@ import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.tool.Tool;
 
 /**
- * this class should work like the inherited copy factory but copying objects on remote places
- * 
  * @author weissman
  */
 class NodeReader extends SceneGraphVisitor {

@@ -13,8 +13,6 @@ import de.jreality.scene.*;
 import de.jreality.scene.tool.Tool;
 
 /**
- * this class should work like the inherited copy factory but copying objects on remote places
- * 
  * @author weissman
  */
 class NodeWriter extends SceneGraphVisitor {

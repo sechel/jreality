@@ -74,7 +74,7 @@ public class ReaderBSH implements SceneReader {
   
   static {
     try {
-      URL bshURL=new URL(System.getProperty("jreality.bsh.jar"));
+      URL bshURL=new URL(System.getProperty("jreality.bsh.jar", "file:///net/MathVis/Oorange/oorange1.9/lib/bsh-1.3b2.jar"));
       System.out.println(bshURL);
       bshLoader = new URLClassLoader(new URL[]{bshURL}, Thread.currentThread().getContextClassLoader());
       LinkedList pc = new LinkedList();

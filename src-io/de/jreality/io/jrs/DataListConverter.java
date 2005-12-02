@@ -10,15 +10,13 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.mapper.Mapper;
 
-import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
-import de.jreality.scene.data.StorageModel;
 
-public class DataListConverter implements Converter {
+class DataListConverter implements Converter {
 
   Mapper mapper;
   

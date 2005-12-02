@@ -10,10 +10,9 @@ import com.thoughtworks.xstream.mapper.Mapper;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphNode;
 
-public class SceneGraphNodeConverter implements Converter {
+class SceneGraphNodeConverter implements Converter {
 
   Mapper mapper;
-//  NodeStarter nodeStarter = new NodeStarter();
   NodeWriter nodeWriter = new NodeWriter();
   NodeReader nodeReader = new NodeReader();
   
