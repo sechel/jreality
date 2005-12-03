@@ -26,6 +26,7 @@ import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.data.Attribute;
 import de.jreality.scene.tool.Tool;
 import de.jreality.util.LoggingSystem;
 
@@ -186,16 +187,19 @@ class NodeWriter extends SceneGraphVisitor {
 
   public void copyAttr(Geometry src) {
     copyAttr((SceneGraphNode) src);
-    HashMap serializableGeometryAttributes = new HashMap();
+    writer.startNode("attributes");
     for (Iterator i = src.getGeometryAttributes().keySet().iterator(); i
         .hasNext();) {
-      Object key = i.next();
-      Object attr = src.getGeometryAttributes().get(key);
-      if (attr instanceof Serializable) {
-        serializableGeometryAttributes.put(key, attr);
+      Attribute key = ((Attribute)i.next());
+      Object attr = src.getGeometryAttributes(key);
+      if (XStreamFactory.canWrite(attr)) {
+        writer.startNode("attribute");
+        writer.addAttribute("name", key.getName());
+        writeUnknown(attr);
+        writer.endNode();
       }
     }
-    write("geometryAttributes", serializableGeometryAttributes);
+    writer.endNode();
   }
 
   public void copyAttr(PointSet src) {

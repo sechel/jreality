@@ -25,6 +25,7 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.tool.Tool;
 
@@ -167,11 +168,15 @@ class NodeReader extends SceneGraphVisitor {
 
   public void copyAttr(Geometry src) {
     copyAttr((SceneGraphNode) src);
-    HashMap serializableGeometryAttributes = (HashMap) read(HashMap.class);
-    for (Iterator i = serializableGeometryAttributes.entrySet().iterator(); i.hasNext(); ) {
-      Map.Entry e = (Entry) i.next();
-      src.setGeometryAttributes(e.getKey().toString(), e.getValue());
+    reader.moveDown();
+    while(reader.hasMoreChildren()) {
+      reader.moveDown();
+      String name = reader.getAttribute("name");
+      Object val = readUnknown();
+      reader.moveUp();
+      src.setGeometryAttributes(name, val);
     }
+    reader.moveUp();
   }
 
   public void copyAttr(PointSet src) {
