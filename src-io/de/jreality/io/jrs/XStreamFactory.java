@@ -12,7 +12,6 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.mapper.Mapper;
 
 import de.jreality.io.JrScene;
-import de.jreality.jogl.shader.DefaultPointShader;
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.Quaternion;
@@ -38,11 +37,12 @@ import de.jreality.scene.tool.DraggingTool;
 import de.jreality.scene.tool.EncompassTool;
 import de.jreality.scene.tool.HeadTransformationTool;
 import de.jreality.scene.tool.InputSlot;
-import de.jreality.scene.tool.PortalHeadMoveTool;
+//import de.jreality.scene.tool.PortalHeadMoveTool;
 import de.jreality.scene.tool.RotateTool;
 import de.jreality.scene.tool.ShipNavigationTool;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.DefaultLineShader;
+import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
@@ -77,7 +77,7 @@ public class XStreamFactory {
     knownClasses.add(DraggingTool.class);
     knownClasses.add(ShipNavigationTool.class);
     knownClasses.add(HeadTransformationTool.class);
-    knownClasses.add(PortalHeadMoveTool.class);
+//    knownClasses.add(PortalHeadMoveTool.class);
   }
   
   public static XStream forVersion(double version) {

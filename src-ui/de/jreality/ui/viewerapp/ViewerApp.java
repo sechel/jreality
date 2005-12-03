@@ -36,7 +36,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.UIManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
@@ -90,7 +89,7 @@ public class ViewerApp
 
   public static void main(String[] args) throws Exception
   {
-    UIManager.setLookAndFeel("com.incors.plaf.kunststoff.KunststoffLookAndFeel");
+    //UIManager.setLookAndFeel("com.incors.plaf.kunststoff.KunststoffLookAndFeel");
     System.setProperty("sun.awt.noerasebackground", "true");
     new ViewerApp(createViewer(), true);
   }

@@ -4,11 +4,12 @@
   </description>
   
   <!-- the following should belong to core... -->
-	  <property name="core" location="src" />
-	  <property name="attic" location="src-attic" />
-      <property name="io" location="src-io" />
+	<property name="core" location="src" />
+	<property name="attic" location="src-attic" />
+  <property name="io" location="src-io" />
 
   <!-- backends (dependencies from top to bottom) -->
+  <property name="ui" location="src-ui" />
   <property name="soft" location="src-soft" />
   <property name="renderman" location="src-renderman" />
   <property name="jogl" location="src-jogl" />
@@ -32,7 +33,23 @@
     </fileset>
   </path>
 
-  <path id="proxies.classpath">
+  <path id="io.classpath">
+    <path refid="backend.classpath"/>
+    <fileset dir="lib">
+      <include name="antlr-2.7.5.jar"/>
+      <include name="xstream-1.1.2.jar"/>
+      <include name="xpp3-1.1.3.4.O.jar"/>
+    </fileset>
+  </path>
+
+  <path id="ui.classpath">
+    <path refid="backend.classpath"/>
+    <fileset dir="dist">
+      <include name="jReality-io.jar"/>
+    </fileset>
+  </path>
+
+	<path id="proxies.classpath">
     <path refid="backend.classpath"/>
     <fileset dir="lib">
       <include name="smrj.jar"/>
@@ -81,7 +98,9 @@
      </fileset>
     <fileset dir="dist">
       <include name="jReality-io.jar"/>
+      <include name="jReality-ui.jar"/>
       <include name="jReality-jogl.jar"/>
+      <include name="jReality-soft.jar"/>
       <include name="jReality-proxies.jar"/>
      </fileset>
   </path>
@@ -108,15 +127,36 @@
     <jar jarfile="${dist}/jReality-core.jar" basedir="${build}/core" />
   </target>
 
-  <target name="io" depends="core" description="build readers and writers">
+  <target name="io" depends="core, io-deps" description="build readers and writers">
     <mkdir dir="${build}/io" />
+	  <antlr target="${io}/de/jreality/reader/vrml/vrml-v1.0.g">
+	  	  <classpath refid="io.classpath"/>
+	  	</antlr>
+	  <antlr target="${io}/de/jreality/reader/vrml/vrml-v2.0.g">
+  	    <classpath refid="io.classpath"/>
+  	  </antlr>
     <javac excludesfile="excludes.txt" srcdir="${io}" destdir="${build}/io" debug="true">
       <compilerarg line="-source 1.4"/>
-      <classpath refid="backend.classpath"/>
+      <classpath refid="io.classpath"/>
     </javac>
     <jar jarfile="${dist}/jReality-io.jar" basedir="${build}/io"/>
   </target>
 	  
+  <target name="io-deps" if="env.FETCH_DEPS">
+    <get dest="lib/antlr-2.7.5.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/antlr-2.7.5.jar" usetimestamp="true" verbose="true"/>
+    <get dest="lib/xpp3-1.1.3.4.O.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/xpp3-1.1.3.4.O.jar" usetimestamp="true" verbose="true"/>
+    <get dest="lib/xstream-1.1.2.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/xstream-1.1.2.jar" usetimestamp="true" verbose="true"/>
+  </target>
+
+  <target name="ui" depends="core, io" description="compile the ui">
+    <mkdir dir="${build}/ui" />
+    <javac excludesfile="excludes.txt" srcdir="${ui}" destdir="${build}/ui" debug="true">
+      <compilerarg line="-source 1.4" />
+      <classpath refid="ui.classpath"/>
+    </javac>
+    <jar jarfile="${dist}/jReality-ui.jar" basedir="${build}/ui" />
+  </target>
+
   <target name="proxies" depends="core, proxies-deps" description="compile the proxies">
     <mkdir dir="${build}/proxies" />
     <javac excludesfile="excludes.txt" srcdir="${proxies}" destdir="${build}/proxies" debug="true">
@@ -139,7 +179,7 @@
     <jar jarfile="${dist}/jReality-soft.jar" basedir="${build}/soft" />
   </target>
   
-  <target name="jogl" depends="core, proxies,jogl-deps" description="build jogl backend">
+  <target name="jogl" depends="core, proxies, jogl-deps" description="build jogl backend">
     <mkdir dir="${build}/jogl" />
     <javac excludesfile="excludes.txt" srcdir="${jogl}"  destdir="${build}/jogl" debug="true">
       <compilerarg line="-source 1.4" />
@@ -196,7 +236,7 @@
     <copy file="jSyzygy/jSyzygy.jar" todir="${lib}" />
   </target>
 
-  <target name="portal" depends="jogl,jSyzygy_java,soft,proxies" description="build portal backend">
+  <target name="portal" depends="ui,jogl,jSyzygy_java,soft,proxies" description="build portal backend">
     <mkdir dir="${build}/portal" />
     <javac excludesfile="excludes.txt" srcdir="${portal}" destdir="${build}/portal" debug="true">
       <classpath refid="portal.classpath"/>
@@ -234,7 +274,7 @@
 	<mkdir dir="check_cvs_tmp"/>
   	<cvs cvsroot="${env.CVSROOT}" package="jReality" dest="check_cvs_tmp"/>
     <ant dir="check_cvs_tmp/jReality" inheritall="false">
-    	<property name="env.FETCH_DEPS" value="1"/>
+    	  <property name="env.FETCH_DEPS" value="1"/>
     </ant>
     <delete dir="check_cvs_tmp"/>
   </target>
