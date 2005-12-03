@@ -29,13 +29,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
@@ -68,6 +62,7 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.ui.treeview.JListRenderer;
 import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
 import de.jreality.util.Input;
+import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
 import de.jreality.writer.WriterJRS;
 
@@ -89,7 +84,11 @@ public class ViewerApp
 
   public static void main(String[] args) throws Exception
   {
-    //UIManager.setLookAndFeel("com.incors.plaf.kunststoff.KunststoffLookAndFeel");
+    try {
+      UIManager.setLookAndFeel("com.incors.plaf.kunststoff.KunststoffLookAndFeel");
+    } catch (Exception e) {
+      LoggingSystem.getLogger(ViewerApp.class).config("couldn't set Kunststoff look and feel.");
+    }
     System.setProperty("sun.awt.noerasebackground", "true");
     new ViewerApp(createViewer(), true);
   }

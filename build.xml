@@ -118,7 +118,7 @@
     <javac excludesfile="excludes.txt" srcdir="${core}:${attic}" destdir="${build}/core" debug="true">
       <compilerarg line="-source 1.4" />
     </javac>
-    <copy todir="build/core">
+    <copy todir="${build}/core">
       <fileset dir="src">
         <exclude name="**/*.java"/>
         <exclude name="**/*.gif"/>
@@ -154,6 +154,11 @@
       <compilerarg line="-source 1.4" />
       <classpath refid="ui.classpath"/>
     </javac>
+    <copy todir="${build}/ui">
+      <fileset dir="src-ui">
+        <exclude name="**/*.java"/>
+      </fileset>
+    </copy>
     <jar jarfile="${dist}/jReality-ui.jar" basedir="${build}/ui" />
   </target>
 
