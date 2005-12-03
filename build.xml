@@ -4,8 +4,8 @@
   </description>
   
   <!-- the following should belong to core... -->
-	<property name="core" location="src" />
-	<property name="attic" location="src-attic" />
+  <property name="core" location="src" />
+  <property name="attic" location="src-attic" />
   <property name="io" location="src-io" />
 
   <!-- backends (dependencies from top to bottom) -->
@@ -86,6 +86,16 @@
       <include name="jReality-soft.jar"/>
       <include name="jReality-jogl.jar"/>
       <include name="jReality-proxies.jar"/>
+    </fileset>
+  </path>
+
+  <path id="apps.classpath">
+    <path refid="proxies.classpath"/>
+    <fileset dir="lib">
+      <include name="*.jar"/>
+    </fileset>
+    <fileset dir="dist">
+        <include name="*.jar"/>
     </fileset>
   </path>
 
@@ -282,6 +292,19 @@
     	  <property name="env.FETCH_DEPS" value="1"/>
     </ant>
     <delete dir="check_cvs_tmp"/>
+  </target>
+
+  <target name="viewer-deps" if="env.FETCH_DEPS">
+    <get dest="lib/kunststoff.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/kunststoff.jar" usetimestamp="true" verbose="true"/>
+  </target>
+
+  <target name="viewer" depends="dist,viewer-deps" description="launch a standalone viewer">
+    <java classname="de.jreality.ui.viewerapp.ViewerApp" maxmemory="1024M" failonerror="true" fork="true">
+      <classpath>
+      	<path refid="apps.classpath"/>
+      	<pathelement path="${java.class.path}"/>
+      </classpath>
+    </java>
   </target>
 
   <target name="clean" description="clean up">
