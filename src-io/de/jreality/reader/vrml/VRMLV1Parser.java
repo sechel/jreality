@@ -37,6 +37,7 @@ public class VRMLV1Parser extends antlr.LLkParser       implements VRMLV1ParserT
 	// current state of the parsing process
 	SceneGraphComponent currentSGC = null;
 	SceneGraphComponent root = null;
+	// this is the state, as it is currently maintained
 	SceneGraphPath currentPath = new SceneGraphPath();
 	Transformation currentTransform = new Transformation();
 	Appearance currentAp = null;
@@ -44,12 +45,16 @@ public class VRMLV1Parser extends antlr.LLkParser       implements VRMLV1ParserT
 	DataList currentNormal = null;
 	int[][] currentCoordinateIndex = null;
 	int[][] currentNormalIndex = null;
+	int currentNormalBinding = VRMLHelper.DEFAULT;
+	int currentMaterialBinding = VRMLHelper.DEFAULT;
+	
 	final int MAXSIZE = 100000;
 	double[] ds = new double[MAXSIZE];
 	int[] is = new int[MAXSIZE];
 	double[] evil3Vec = new double[3];
 	boolean collectingMFVec3 = false;
-	int primitiveCount, polygonCount;
+	int primitiveCount, polygonCount, coordinate3Count;
+	SceneGraphComponent cameraNode = null;
 
 protected VRMLV1Parser(TokenBuffer tokenBuf, int k) {
   super(tokenBuf,k);
@@ -118,6 +123,7 @@ public VRMLV1Parser(ParserSharedInputState state) {
 			
 						r = root;
 						System.err.println("Read in "+primitiveCount+" primitives with a total of "+polygonCount+" faces.");
+						System.err.println("There were "+coordinate3Count+" vertex lists");
 					
 		}
 		catch (RecognitionException ex) {
@@ -156,8 +162,11 @@ public VRMLV1Parser(ParserSharedInputState state) {
 			case LITERAL_Material:
 			case 37:
 			case LITERAL_Normal:
+			case LITERAL_NormalBinding:
+			case LITERAL_MaterialBinding:
 			case LITERAL_IndexedFaceSet:
 			case LITERAL_IndexedLineSet:
+			case LITERAL_PerspectiveCamera:
 			case ID:
 			{
 				atomicStatement();
@@ -250,6 +259,16 @@ public VRMLV1Parser(ParserSharedInputState state) {
 				normalStatement();
 				break;
 			}
+			case LITERAL_NormalBinding:
+			{
+				currentNormalBinding=normalBindingStatement();
+				break;
+			}
+			case LITERAL_MaterialBinding:
+			{
+				currentMaterialBinding=materialBindingStatement();
+				break;
+			}
 			case LITERAL_IndexedFaceSet:
 			{
 				indexedFaceSetStatement();
@@ -258,6 +277,11 @@ public VRMLV1Parser(ParserSharedInputState state) {
 			case LITERAL_IndexedLineSet:
 			{
 				indexedLineSetStatement();
+				break;
+			}
+			case LITERAL_PerspectiveCamera:
+			{
+				perspectiveCameraStatement();
 				break;
 			}
 			case ID:
@@ -534,6 +558,7 @@ public VRMLV1Parser(ParserSharedInputState state) {
 						}
 						
 						dl = currentCoordinate3 = StorageModel.DOUBLE_ARRAY.inlined(3).createReadOnly(points);
+					 	coordinate3Count++;
 					 	
 		}
 		catch (RecognitionException ex) {
@@ -568,6 +593,46 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		return dl;
 	}
 	
+	public final int  normalBindingStatement() throws RecognitionException, TokenStreamException {
+		int nb;
+		
+		nb = 0;
+		
+		try {      // for error handling
+			match(LITERAL_NormalBinding);
+			match(OPEN_BRACE);
+			match(LITERAL_value);
+			nb=bindingAttribute();
+			match(CLOSE_BRACE);
+		}
+		catch (RecognitionException ex) {
+			reportError(ex);
+			consume();
+			consumeUntil(_tokenSet_2);
+		}
+		return nb;
+	}
+	
+	public final int  materialBindingStatement() throws RecognitionException, TokenStreamException {
+		int mb;
+		
+		mb = 0;
+		
+		try {      // for error handling
+			match(LITERAL_MaterialBinding);
+			match(OPEN_BRACE);
+			match(LITERAL_value);
+			mb=bindingAttribute();
+			match(CLOSE_BRACE);
+		}
+		catch (RecognitionException ex) {
+			reportError(ex);
+			consume();
+			consumeUntil(_tokenSet_2);
+		}
+		return mb;
+	}
+	
 	public final IndexedFaceSet  indexedFaceSetStatement() throws RecognitionException, TokenStreamException {
 		IndexedFaceSet ifs;
 		
@@ -577,17 +642,17 @@ public VRMLV1Parser(ParserSharedInputState state) {
 			match(LITERAL_IndexedFaceSet);
 			match(OPEN_BRACE);
 			{
-			int _cnt36=0;
-			_loop36:
+			int _cnt39=0;
+			_loop39:
 			do {
 				if ((LA(1)==LITERAL_coordIndex||LA(1)==LITERAL_normalIndex)) {
 					indexedFaceSetAttribute();
 				}
 				else {
-					if ( _cnt36>=1 ) { break _loop36; } else {throw new NoViableAltException(LT(1), getFilename());}
+					if ( _cnt39>=1 ) { break _loop39; } else {throw new NoViableAltException(LT(1), getFilename());}
 				}
 				
-				_cnt36++;
+				_cnt39++;
 			} while (true);
 			}
 			match(CLOSE_BRACE);
@@ -611,6 +676,8 @@ public VRMLV1Parser(ParserSharedInputState state) {
 					SceneGraphComponent sgc = new SceneGraphComponent();
 					sgc.setGeometry(ifs);
 					sgc.setAppearance(currentAp);
+					if (sgc.getAppearance() != null) 
+						sgc.getAppearance().setAttribute("vertexShader","simple");		// hack to speed it up
 					currentSGC.addChild(sgc);
 				}
 				
@@ -630,17 +697,17 @@ public VRMLV1Parser(ParserSharedInputState state) {
 			match(LITERAL_IndexedLineSet);
 			match(OPEN_BRACE);
 			{
-			int _cnt40=0;
-			_loop40:
+			int _cnt43=0;
+			_loop43:
 			do {
 				if ((LA(1)==LITERAL_coordIndex)) {
 					indexedLineSetAttribute();
 				}
 				else {
-					if ( _cnt40>=1 ) { break _loop40; } else {throw new NoViableAltException(LT(1), getFilename());}
+					if ( _cnt43>=1 ) { break _loop43; } else {throw new NoViableAltException(LT(1), getFilename());}
 				}
 				
-				_cnt40++;
+				_cnt43++;
 			} while (true);
 			}
 			match(CLOSE_BRACE);
@@ -653,6 +720,78 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		}
 	}
 	
+	public final SceneGraphComponent  perspectiveCameraStatement() throws RecognitionException, TokenStreamException {
+		SceneGraphComponent cn;
+		
+			cn = new SceneGraphComponent();
+			FactoredMatrix fm = new FactoredMatrix();
+			Camera c = new Camera();
+			double[] d = null;
+			double a = 0.0;
+			
+		
+		try {      // for error handling
+			{
+			match(LITERAL_PerspectiveCamera);
+			match(OPEN_BRACE);
+			{
+			int _cnt48=0;
+			_loop48:
+			do {
+				switch ( LA(1)) {
+				case LITERAL_position:
+				{
+					match(LITERAL_position);
+					d=sfvec3fValue();
+					fm.setTranslation(d);
+					break;
+				}
+				case LITERAL_orientation:
+				{
+					match(LITERAL_orientation);
+					d=sfrotationValue();
+					fm.setRotation(d[3], d[0], d[1], d[2]);
+					break;
+				}
+				case LITERAL_focalDistance:
+				{
+					match(LITERAL_focalDistance);
+					a=sffloatValue();
+					c.setFocus(a);
+					break;
+				}
+				case LITERAL_heightAngle:
+				{
+					match(LITERAL_heightAngle);
+					a=sffloatValue();
+					c.setFieldOfView(180.0*a/Math.PI);
+					break;
+				}
+				default:
+				{
+					if ( _cnt48>=1 ) { break _loop48; } else {throw new NoViableAltException(LT(1), getFilename());}
+				}
+				}
+				_cnt48++;
+			} while (true);
+			}
+			match(CLOSE_BRACE);
+			}
+				
+					fm.update();
+					cn.setTransformation(new Transformation(fm.getArray()));
+					cn.setCamera(c);
+					cameraNode = cn;
+				
+		}
+		catch (RecognitionException ex) {
+			reportError(ex);
+			consume();
+			consumeUntil(_tokenSet_2);
+		}
+		return cn;
+	}
+	
 	public final void unknownStatement() throws RecognitionException, TokenStreamException {
 		
 		String n = null;
@@ -661,13 +800,13 @@ public VRMLV1Parser(ParserSharedInputState state) {
 			n=id();
 			match(OPEN_BRACE);
 			{
-			_loop44:
+			_loop51:
 			do {
 				if ((LA(1)==ID)) {
 					unknownAttribute();
 				}
 				else {
-					break _loop44;
+					break _loop51;
 				}
 				
 			} while (true);
@@ -801,18 +940,18 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		
 		try {      // for error handling
 			{
-			int _cnt65=0;
-			_loop65:
+			int _cnt72=0;
+			_loop72:
 			do {
 				if ((LA(1)==INT32||LA(1)==FLOAT)) {
 					d=sffloatValue();
 					vl.add(new Double(d));
 				}
 				else {
-					if ( _cnt65>=1 ) { break _loop65; } else {throw new NoViableAltException(LT(1), getFilename());}
+					if ( _cnt72>=1 ) { break _loop72; } else {throw new NoViableAltException(LT(1), getFilename());}
 				}
 				
-				_cnt65++;
+				_cnt72++;
 			} while (true);
 			}
 			dl = VRMLHelper.listToDoubleArray(vl);
@@ -1130,6 +1269,75 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		return vec3array;
 	}
 	
+	public final int  bindingAttribute() throws RecognitionException, TokenStreamException {
+		int which;
+		
+		which = VRMLHelper.DEFAULT;
+		
+		try {      // for error handling
+			switch ( LA(1)) {
+			case LITERAL_DEFAULT:
+			{
+				match(LITERAL_DEFAULT);
+				which = VRMLHelper.DEFAULT;	
+				break;
+			}
+			case LITERAL_OVERALL:
+			{
+				match(LITERAL_OVERALL);
+				which = VRMLHelper.OVERALL;	
+				break;
+			}
+			case LITERAL_PER_PART:
+			{
+				match(LITERAL_PER_PART);
+				which = VRMLHelper.PER_PART;	
+				break;
+			}
+			case LITERAL_PER_PART_INDEXED:
+			{
+				match(LITERAL_PER_PART_INDEXED);
+				which = VRMLHelper.PER_PART_INDEXED;	
+				break;
+			}
+			case LITERAL_PER_FACE:
+			{
+				match(LITERAL_PER_FACE);
+				which = VRMLHelper.PER_FACE;	
+				break;
+			}
+			case LITERAL_PER_FACE_INDEXED:
+			{
+				match(LITERAL_PER_FACE_INDEXED);
+				which = VRMLHelper.PER_FACE_INDEXED;	
+				break;
+			}
+			case LITERAL_PER_VERTEX:
+			{
+				match(LITERAL_PER_VERTEX);
+				which = VRMLHelper.PER_VERTEX;	
+				break;
+			}
+			case LITERAL_PER_VERTEX_INDEXED:
+			{
+				match(LITERAL_PER_VERTEX_INDEXED);
+				which = VRMLHelper.PER_VERTEX_INDEXED;	
+				break;
+			}
+			default:
+			{
+				throw new NoViableAltException(LT(1), getFilename());
+			}
+			}
+		}
+		catch (RecognitionException ex) {
+			reportError(ex);
+			consume();
+			consumeUntil(_tokenSet_15);
+		}
+		return which;
+	}
+	
 	public final void indexedFaceSetAttribute() throws RecognitionException, TokenStreamException {
 		
 		int[] indices = null;
@@ -1242,13 +1450,13 @@ public VRMLV1Parser(ParserSharedInputState state) {
 			{
 				match(OPEN_BRACE);
 				{
-				_loop49:
+				_loop56:
 				do {
 					if ((LA(1)==ID)) {
 						unknownAttribute();
 					}
 					else {
-						break _loop49;
+						break _loop56;
 					}
 					
 				} while (true);
@@ -1402,18 +1610,18 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		
 		try {      // for error handling
 			{
-			int _cnt60=0;
-			_loop60:
+			int _cnt67=0;
+			_loop67:
 			do {
 				if ((LA(1)==INT32||LA(1)==FLOAT)) {
 					c=sfcolorValue();
 					collect.add(c);
 				}
 				else {
-					if ( _cnt60>=1 ) { break _loop60; } else {throw new NoViableAltException(LT(1), getFilename());}
+					if ( _cnt67>=1 ) { break _loop67; } else {throw new NoViableAltException(LT(1), getFilename());}
 				}
 				
-				_cnt60++;
+				_cnt67++;
 			} while (true);
 			}
 			cl = VRMLHelper.listToColorArray(collect);
@@ -1457,18 +1665,23 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		
 		try {      // for error handling
 			{
-			int _cnt70=0;
-			_loop70:
+			int _cnt77=0;
+			_loop77:
 			do {
 				if ((LA(1)==INT32)) {
 					t=sfint32Value();
-					is[count++] = t;
+					
+									if (count +1 > is.length)	{
+										is=VRMLHelper.reallocate(is);
+									}
+									is[count++] = t; 
+								
 				}
 				else {
-					if ( _cnt70>=1 ) { break _loop70; } else {throw new NoViableAltException(LT(1), getFilename());}
+					if ( _cnt77>=1 ) { break _loop77; } else {throw new NoViableAltException(LT(1), getFilename());}
 				}
 				
-				_cnt70++;
+				_cnt77++;
 			} while (true);
 			}
 			il = new int[count];
@@ -1489,17 +1702,17 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		
 		try {      // for error handling
 			{
-			int _cnt75=0;
-			_loop75:
+			int _cnt82=0;
+			_loop82:
 			do {
 				if ((LA(1)==INT32||LA(1)==FLOAT)) {
 					sfrotationValue();
 				}
 				else {
-					if ( _cnt75>=1 ) { break _loop75; } else {throw new NoViableAltException(LT(1), getFilename());}
+					if ( _cnt82>=1 ) { break _loop82; } else {throw new NoViableAltException(LT(1), getFilename());}
 				}
 				
-				_cnt75++;
+				_cnt82++;
 			} while (true);
 			}
 		}
@@ -1571,17 +1784,17 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		
 		try {      // for error handling
 			{
-			int _cnt80=0;
-			_loop80:
+			int _cnt87=0;
+			_loop87:
 			do {
 				if ((LA(1)==STRING)) {
 					sfstringValue();
 				}
 				else {
-					if ( _cnt80>=1 ) { break _loop80; } else {throw new NoViableAltException(LT(1), getFilename());}
+					if ( _cnt87>=1 ) { break _loop87; } else {throw new NoViableAltException(LT(1), getFilename());}
 				}
 				
-				_cnt80++;
+				_cnt87++;
 			} while (true);
 			}
 		}
@@ -1611,17 +1824,17 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		
 		try {      // for error handling
 			{
-			int _cnt84=0;
-			_loop84:
+			int _cnt91=0;
+			_loop91:
 			do {
 				if ((LA(1)==INT32||LA(1)==FLOAT)) {
 					sfvec2fValue();
 				}
 				else {
-					if ( _cnt84>=1 ) { break _loop84; } else {throw new NoViableAltException(LT(1), getFilename());}
+					if ( _cnt91>=1 ) { break _loop91; } else {throw new NoViableAltException(LT(1), getFilename());}
 				}
 				
-				_cnt84++;
+				_cnt91++;
 			} while (true);
 			}
 		}
@@ -1672,8 +1885,8 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		
 		try {      // for error handling
 			{
-			int _cnt89=0;
-			_loop89:
+			int _cnt96=0;
+			_loop96:
 			do {
 				if ((LA(1)==INT32||LA(1)==FLOAT)) {
 					onevec=sfvec3fValue();
@@ -1688,10 +1901,10 @@ public VRMLV1Parser(ParserSharedInputState state) {
 							
 				}
 				else {
-					if ( _cnt89>=1 ) { break _loop89; } else {throw new NoViableAltException(LT(1), getFilename());}
+					if ( _cnt96>=1 ) { break _loop96; } else {throw new NoViableAltException(LT(1), getFilename());}
 				}
 				
-				_cnt89++;
+				_cnt96++;
 			} while (true);
 			}
 			
@@ -1752,10 +1965,26 @@ public VRMLV1Parser(ParserSharedInputState state) {
 		"\"point\"",
 		"\"Normal\"",
 		"\"vector\"",
+		"\"NormalBinding\"",
+		"\"value\"",
+		"\"MaterialBinding\"",
+		"\"DEFAULT\"",
+		"\"OVERALL\"",
+		"\"PER_PART\"",
+		"\"PER_PART_INDEXED\"",
+		"\"PER_FACE\"",
+		"\"PER_FACE_INDEXED\"",
+		"\"PER_VERTEX\"",
+		"\"PER_VERTEX_INDEXED\"",
 		"\"IndexedFaceSet\"",
 		"\"coordIndex\"",
 		"\"normalIndex\"",
 		"\"IndexedLineSet\"",
+		"\"PerspectiveCamera\"",
+		"\"position\"",
+		"\"orientation\"",
+		"\"focalDistance\"",
+		"\"heightAngle\"",
 		"an identifier",
 		"INT32",
 		"FLOAT",
@@ -1786,22 +2015,22 @@ public VRMLV1Parser(ParserSharedInputState state) {
 	}
 	public static final BitSet _tokenSet_0 = new BitSet(mk_tokenSet_0());
 	private static final long[] mk_tokenSet_1() {
-		long[] data = { 55663851377888L, 0L};
+		long[] data = { 2418444683284223200L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_1 = new BitSet(mk_tokenSet_1());
 	private static final long[] mk_tokenSet_2() {
-		long[] data = { 55663851378402L, 0L};
+		long[] data = { 2418444683284223714L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_2 = new BitSet(mk_tokenSet_2());
 	private static final long[] mk_tokenSet_3() {
-		long[] data = { 17999694239537122L, 0L};
+		long[] data = { -2193241334520309790L, 63L, 0L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_3 = new BitSet(mk_tokenSet_3());
 	private static final long[] mk_tokenSet_4() {
-		long[] data = { 35184994942976L, 0L};
+		long[] data = { 2305843009836548096L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_4 = new BitSet(mk_tokenSet_4());
@@ -1811,7 +2040,7 @@ public VRMLV1Parser(ParserSharedInputState state) {
 	}
 	public static final BitSet _tokenSet_5 = new BitSet(mk_tokenSet_5());
 	private static final long[] mk_tokenSet_6() {
-		long[] data = { 22553183131798018L, 0L};
+		long[] data = { 2305843009836550658L, 80L, 0L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_6 = new BitSet(mk_tokenSet_6());
@@ -1821,27 +2050,27 @@ public VRMLV1Parser(ParserSharedInputState state) {
 	}
 	public static final BitSet _tokenSet_7 = new BitSet(mk_tokenSet_7());
 	private static final long[] mk_tokenSet_8() {
-		long[] data = { 18225504742040066L, 0L};
+		long[] data = { -2449958197289524734L, 64L, 0L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_8 = new BitSet(mk_tokenSet_8());
 	private static final long[] mk_tokenSet_9() {
-		long[] data = { 18225504742040064L, 0L};
+		long[] data = { -2449958197289524736L, 64L, 0L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_9 = new BitSet(mk_tokenSet_9());
 	private static final long[] mk_tokenSet_10() {
-		long[] data = { 18049583504425472L, 0L};
+		long[] data = { 2305843009836548608L, 64L, 0L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_10 = new BitSet(mk_tokenSet_10());
 	private static final long[] mk_tokenSet_11() {
-		long[] data = { 35184994943488L, 0L};
+		long[] data = { 2305843009836548608L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_11 = new BitSet(mk_tokenSet_11());
 	private static final long[] mk_tokenSet_12() {
-		long[] data = { 18260825028452866L, 0L};
+		long[] data = { -144115052161506814L, 64L, 0L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_12 = new BitSet(mk_tokenSet_12());
@@ -1851,7 +2080,7 @@ public VRMLV1Parser(ParserSharedInputState state) {
 	}
 	public static final BitSet _tokenSet_13 = new BitSet(mk_tokenSet_13());
 	private static final long[] mk_tokenSet_14() {
-		long[] data = { 18260825028428288L, 0L};
+		long[] data = { -144115052161531392L, 64L, 0L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_14 = new BitSet(mk_tokenSet_14());
@@ -1861,42 +2090,42 @@ public VRMLV1Parser(ParserSharedInputState state) {
 	}
 	public static final BitSet _tokenSet_15 = new BitSet(mk_tokenSet_15());
 	private static final long[] mk_tokenSet_16() {
-		long[] data = { 13194139533824L, 0L};
+		long[] data = { 27021597764223488L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_16 = new BitSet(mk_tokenSet_16());
 	private static final long[] mk_tokenSet_17() {
-		long[] data = { 4398046511616L, 0L};
+		long[] data = { 9007199254741504L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_17 = new BitSet(mk_tokenSet_17());
 	private static final long[] mk_tokenSet_18() {
-		long[] data = { 246291227476480L, 0L};
+		long[] data = { -2305843008590839296L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_18 = new BitSet(mk_tokenSet_18());
 	private static final long[] mk_tokenSet_19() {
-		long[] data = { 18260689736958464L, 0L};
+		long[] data = { -2305843008590839296L, 64L, 0L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_19 = new BitSet(mk_tokenSet_19());
 	private static final long[] mk_tokenSet_20() {
-		long[] data = { 18225640033485312L, 0L};
+		long[] data = { -4611685883135917568L, 64L, 0L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_20 = new BitSet(mk_tokenSet_20());
 	private static final long[] mk_tokenSet_21() {
-		long[] data = { 18014398509481984L, 0L};
+		long[] data = { 0L, 64L, 0L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_21 = new BitSet(mk_tokenSet_21());
 	private static final long[] mk_tokenSet_22() {
-		long[] data = { 18097961393193472L, 0L};
+		long[] data = { 4638707616191611392L, 64L, 0L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_22 = new BitSet(mk_tokenSet_22());
 	private static final long[] mk_tokenSet_23() {
-		long[] data = { 18225504742014978L, 0L};
+		long[] data = { -4611686018427387902L, 64L, 0L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_23 = new BitSet(mk_tokenSet_23());

@@ -57,48 +57,64 @@ public VRMLV1Lexer(LexerSharedInputState state) {
 	caseSensitiveLiterals = true;
 	setCaseSensitive(true);
 	literals = new Hashtable();
-	literals.put(new ANTLRHashString("string", this), new Integer(11));
+	literals.put(new ANTLRHashString("normalIndex", this), new Integer(54));
+	literals.put(new ANTLRHashString("DEFAULT", this), new Integer(44));
 	literals.put(new ANTLRHashString("vertexOrdering", this), new Integer(21));
-	literals.put(new ANTLRHashString("USE", this), new Integer(6));
-	literals.put(new ANTLRHashString("specularColor", this), new Integer(33));
-	literals.put(new ANTLRHashString("FALSE", this), new Integer(51));
-	literals.put(new ANTLRHashString("ambientColor", this), new Integer(31));
-	literals.put(new ANTLRHashString("vector", this), new Integer(40));
-	literals.put(new ANTLRHashString("Coordinate3", this), new Integer(37));
-	literals.put(new ANTLRHashString("center", this), new Integer(14));
-	literals.put(new ANTLRHashString("Rotation", this), new Integer(17));
-	literals.put(new ANTLRHashString("UNKNOWN_FACE_TYPE", this), new Integer(28));
-	literals.put(new ANTLRHashString("Info", this), new Integer(10));
-	literals.put(new ANTLRHashString("MatrixTransform", this), new Integer(15));
+	literals.put(new ANTLRHashString("IndexedFaceSet", this), new Integer(52));
 	literals.put(new ANTLRHashString("COUNTERCLOCKWISE", this), new Integer(22));
-	literals.put(new ANTLRHashString("IndexedFaceSet", this), new Integer(41));
-	literals.put(new ANTLRHashString("diffuseColor", this), new Integer(32));
-	literals.put(new ANTLRHashString("shapeType", this), new Integer(24));
-	literals.put(new ANTLRHashString("creaseAngle", this), new Integer(29));
-	literals.put(new ANTLRHashString("scaleFactor", this), new Integer(19));
-	literals.put(new ANTLRHashString("DEF", this), new Integer(5));
-	literals.put(new ANTLRHashString("Translation", this), new Integer(16));
-	literals.put(new ANTLRHashString("coordIndex", this), new Integer(42));
-	literals.put(new ANTLRHashString("TRUE", this), new Integer(49));
-	literals.put(new ANTLRHashString("CONVEX", this), new Integer(27));
-	literals.put(new ANTLRHashString("SOLID", this), new Integer(25));
-	literals.put(new ANTLRHashString("IndexedLineSet", this), new Integer(44));
+	literals.put(new ANTLRHashString("Info", this), new Integer(10));
+	literals.put(new ANTLRHashString("MaterialBinding", this), new Integer(43));
 	literals.put(new ANTLRHashString("Transform", this), new Integer(12));
-	literals.put(new ANTLRHashString("Separator", this), new Integer(7));
-	literals.put(new ANTLRHashString("point", this), new Integer(38));
-	literals.put(new ANTLRHashString("true", this), new Integer(48));
-	literals.put(new ANTLRHashString("ShapeHints", this), new Integer(20));
-	literals.put(new ANTLRHashString("transparency", this), new Integer(35));
-	literals.put(new ANTLRHashString("Scale", this), new Integer(18));
-	literals.put(new ANTLRHashString("Normal", this), new Integer(39));
+	literals.put(new ANTLRHashString("PER_PART", this), new Integer(46));
+	literals.put(new ANTLRHashString("CONVEX", this), new Integer(27));
+	literals.put(new ANTLRHashString("MatrixTransform", this), new Integer(15));
+	literals.put(new ANTLRHashString("IndexedLineSet", this), new Integer(55));
+	literals.put(new ANTLRHashString("false", this), new Integer(66));
 	literals.put(new ANTLRHashString("shininess", this), new Integer(36));
-	literals.put(new ANTLRHashString("CLOCKWISE", this), new Integer(23));
-	literals.put(new ANTLRHashString("emissiveColor", this), new Integer(34));
-	literals.put(new ANTLRHashString("false", this), new Integer(50));
+	literals.put(new ANTLRHashString("true", this), new Integer(64));
+	literals.put(new ANTLRHashString("specularColor", this), new Integer(33));
+	literals.put(new ANTLRHashString("transparency", this), new Integer(35));
+	literals.put(new ANTLRHashString("Coordinate3", this), new Integer(37));
+	literals.put(new ANTLRHashString("shapeType", this), new Integer(24));
 	literals.put(new ANTLRHashString("faceType", this), new Integer(26));
-	literals.put(new ANTLRHashString("rotation", this), new Integer(13));
-	literals.put(new ANTLRHashString("normalIndex", this), new Integer(43));
+	literals.put(new ANTLRHashString("diffuseColor", this), new Integer(32));
+	literals.put(new ANTLRHashString("UNKNOWN_FACE_TYPE", this), new Integer(28));
+	literals.put(new ANTLRHashString("string", this), new Integer(11));
+	literals.put(new ANTLRHashString("creaseAngle", this), new Integer(29));
+	literals.put(new ANTLRHashString("emissiveColor", this), new Integer(34));
+	literals.put(new ANTLRHashString("ShapeHints", this), new Integer(20));
+	literals.put(new ANTLRHashString("SOLID", this), new Integer(25));
+	literals.put(new ANTLRHashString("center", this), new Integer(14));
+	literals.put(new ANTLRHashString("NormalBinding", this), new Integer(41));
+	literals.put(new ANTLRHashString("PER_VERTEX", this), new Integer(50));
+	literals.put(new ANTLRHashString("position", this), new Integer(57));
+	literals.put(new ANTLRHashString("heightAngle", this), new Integer(60));
+	literals.put(new ANTLRHashString("FALSE", this), new Integer(67));
+	literals.put(new ANTLRHashString("TRUE", this), new Integer(65));
+	literals.put(new ANTLRHashString("scaleFactor", this), new Integer(19));
+	literals.put(new ANTLRHashString("CLOCKWISE", this), new Integer(23));
+	literals.put(new ANTLRHashString("PerspectiveCamera", this), new Integer(56));
+	literals.put(new ANTLRHashString("ambientColor", this), new Integer(31));
+	literals.put(new ANTLRHashString("orientation", this), new Integer(58));
+	literals.put(new ANTLRHashString("OVERALL", this), new Integer(45));
+	literals.put(new ANTLRHashString("value", this), new Integer(42));
+	literals.put(new ANTLRHashString("DEF", this), new Integer(5));
+	literals.put(new ANTLRHashString("PER_VERTEX_INDEXED", this), new Integer(51));
+	literals.put(new ANTLRHashString("focalDistance", this), new Integer(59));
+	literals.put(new ANTLRHashString("coordIndex", this), new Integer(53));
+	literals.put(new ANTLRHashString("Scale", this), new Integer(18));
+	literals.put(new ANTLRHashString("point", this), new Integer(38));
+	literals.put(new ANTLRHashString("vector", this), new Integer(40));
+	literals.put(new ANTLRHashString("USE", this), new Integer(6));
+	literals.put(new ANTLRHashString("Normal", this), new Integer(39));
 	literals.put(new ANTLRHashString("Material", this), new Integer(30));
+	literals.put(new ANTLRHashString("PER_FACE", this), new Integer(48));
+	literals.put(new ANTLRHashString("PER_PART_INDEXED", this), new Integer(47));
+	literals.put(new ANTLRHashString("Translation", this), new Integer(16));
+	literals.put(new ANTLRHashString("PER_FACE_INDEXED", this), new Integer(49));
+	literals.put(new ANTLRHashString("Separator", this), new Integer(7));
+	literals.put(new ANTLRHashString("Rotation", this), new Integer(17));
+	literals.put(new ANTLRHashString("rotation", this), new Integer(13));
 }
 
 public Token nextToken() throws TokenStreamException {
@@ -345,13 +361,13 @@ tryAgain:
 		}
 		}
 		{
-		_loop99:
+		_loop106:
 		do {
 			if ((_tokenSet_1.member(LA(1)))) {
 				mID_LETTER(false);
 			}
 			else {
-				break _loop99;
+				break _loop106;
 			}
 			
 		} while (true);
@@ -436,17 +452,17 @@ tryAgain:
 				{
 				match('.');
 				{
-				int _cnt108=0;
-				_loop108:
+				int _cnt115=0;
+				_loop115:
 				do {
 					if (((LA(1) >= '0' && LA(1) <= '9'))) {
 						mDIGIT(false);
 					}
 					else {
-						if ( _cnt108>=1 ) { break _loop108; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
+						if ( _cnt115>=1 ) { break _loop115; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
 					}
 					
-					_cnt108++;
+					_cnt115++;
 				} while (true);
 				}
 				{
@@ -514,17 +530,17 @@ tryAgain:
 		}
 		}
 		{
-		int _cnt120=0;
-		_loop120:
+		int _cnt127=0;
+		_loop127:
 		do {
 			if (((LA(1) >= '0' && LA(1) <= '9'))) {
 				mDIGIT(false);
 			}
 			else {
-				if ( _cnt120>=1 ) { break _loop120; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
+				if ( _cnt127>=1 ) { break _loop127; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
 			}
 			
-			_cnt120++;
+			_cnt127++;
 		} while (true);
 		}
 		if ( _createToken && _token==null && _ttype!=Token.SKIP ) {
@@ -598,17 +614,17 @@ tryAgain:
 		}
 		}
 		{
-		int _cnt126=0;
-		_loop126:
+		int _cnt133=0;
+		_loop133:
 		do {
 			if (((LA(1) >= '0' && LA(1) <= '9'))) {
 				matchRange('0','9');
 			}
 			else {
-				if ( _cnt126>=1 ) { break _loop126; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
+				if ( _cnt133>=1 ) { break _loop133; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
 			}
 			
-			_cnt126++;
+			_cnt133++;
 		} while (true);
 		}
 		}
@@ -646,8 +662,8 @@ tryAgain:
 			}
 			}
 			{
-			int _cnt114=0;
-			_loop114:
+			int _cnt121=0;
+			_loop121:
 			do {
 				switch ( LA(1)) {
 				case '0':  case '1':  case '2':  case '3':
@@ -671,10 +687,10 @@ tryAgain:
 				}
 				default:
 				{
-					if ( _cnt114>=1 ) { break _loop114; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
+					if ( _cnt121>=1 ) { break _loop121; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
 				}
 				}
-				_cnt114++;
+				_cnt121++;
 			} while (true);
 			}
 			}
@@ -700,7 +716,7 @@ tryAgain:
 		
 		match('"');
 		{
-		_loop130:
+		_loop137:
 		do {
 			if ((LA(1)=='\\')) {
 				mESC(false);
@@ -711,7 +727,7 @@ tryAgain:
 				}
 			}
 			else {
-				break _loop130;
+				break _loop137;
 			}
 			
 		} while (true);
@@ -761,7 +777,7 @@ tryAgain:
 		int _saveIndex;
 		
 		{
-		_loop136:
+		_loop143:
 		do {
 			if ((_tokenSet_3.member(LA(1)))) {
 				{
@@ -769,7 +785,7 @@ tryAgain:
 				}
 			}
 			else {
-				break _loop136;
+				break _loop143;
 			}
 			
 		} while (true);
@@ -821,7 +837,7 @@ tryAgain:
 		
 		match('#');
 		{
-		_loop143:
+		_loop150:
 		do {
 			if ((_tokenSet_3.member(LA(1)))) {
 				{
@@ -829,7 +845,7 @@ tryAgain:
 				}
 			}
 			else {
-				break _loop143;
+				break _loop150;
 			}
 			
 		} while (true);
@@ -851,8 +867,8 @@ tryAgain:
 		int _saveIndex;
 		
 		{
-		int _cnt148=0;
-		_loop148:
+		int _cnt155=0;
+		_loop155:
 		do {
 			switch ( LA(1)) {
 			case ' ':
@@ -896,10 +912,10 @@ tryAgain:
 			}
 			default:
 			{
-				if ( _cnt148>=1 ) { break _loop148; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
+				if ( _cnt155>=1 ) { break _loop155; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
 			}
 			}
-			_cnt148++;
+			_cnt155++;
 		} while (true);
 		}
 		_ttype = Token.SKIP;
@@ -917,7 +933,7 @@ tryAgain:
 		
 		match('{');
 		{
-		_loop152:
+		_loop159:
 		do {
 			if ((_tokenSet_4.member(LA(1)))) {
 				{
@@ -925,7 +941,7 @@ tryAgain:
 				}
 			}
 			else {
-				break _loop152;
+				break _loop159;
 			}
 			
 		} while (true);

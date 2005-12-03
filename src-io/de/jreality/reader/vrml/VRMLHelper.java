@@ -16,6 +16,15 @@ import de.jreality.math.FactoredMatrix;
 public class VRMLHelper {
 	public static boolean verbose = false;
 	
+	public static final int DEFAULT = 1;
+	public static final int OVERALL = 2;
+	public static final int PER_PART = 3;
+	public static final int PER_PART_INDEXED = 4;
+	public static final int PER_FACE = 5;
+	public static final int PER_FACE_INDEXED = 6;
+	public static final int PER_VERTEX = 7;
+	public static final int PER_VERTEX_INDEXED = 8;
+
 	public VRMLHelper() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -65,7 +74,7 @@ public class VRMLHelper {
 
 	public static int[][] convertIndices(int[] input)	{
 		// count the number of negative entries
-		int count = 0, subcount = 0;
+		int count = 0;
 		List breakpoints = new Vector();
 		for (int i=0; i<input.length; ++i)	{
 			if (input[i] < 0) breakpoints.add(new Integer(i));
@@ -92,12 +101,20 @@ public class VRMLHelper {
 	
 	public void foo()	{
 		FactoredMatrix fm = new FactoredMatrix();
+
 		IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
 	}
 	
 	public static double[] reallocate(double[] array)	{
 		int n = array.length;
 		double[] newarray = new double[n*2];
+		System.arraycopy(array, 0, newarray, 0, n);
+		return newarray;
+	}
+
+	public static int[] reallocate(int[] array)	{
+		int n = array.length;
+		int[] newarray = new int[n*2];
 		System.arraycopy(array, 0, newarray, 0, n);
 		return newarray;
 	}

@@ -4,7 +4,9 @@
 // * 	Read over vrml1.0 spec and figure out what it says
 // *		Implement the unimplemented nodes/properties
 // *		Some tricky areas:
-// *			Difference between Group and Separator
+// *			Difference between Group and Separator: Separator requires that we stack the state
+// *				(Leaving a separator should pop this stack)
+// *				The state is kept by fields in the parser beginning with "current"
 // *			Implementation of DEF and USE
 // *			
 // */
@@ -36,6 +38,7 @@ options {
 	// current state of the parsing process
 	SceneGraphComponent currentSGC = null;
 	SceneGraphComponent root = null;
+	// this is the state, as it is currently maintained
 	SceneGraphPath currentPath = new SceneGraphPath();
 	Transformation currentTransform = new Transformation();
 	Appearance currentAp = null;
@@ -43,12 +46,16 @@ options {
 	DataList currentNormal = null;
 	int[][] currentCoordinateIndex = null;
 	int[][] currentNormalIndex = null;
+	int currentNormalBinding = VRMLHelper.DEFAULT;
+	int currentMaterialBinding = VRMLHelper.DEFAULT;
+	
 	final int MAXSIZE = 100000;
 	double[] ds = new double[MAXSIZE];
 	int[] is = new int[MAXSIZE];
 	double[] evil3Vec = new double[3];
 	boolean collectingMFVec3 = false;
 	int primitiveCount, polygonCount, coordinate3Count;
+	SceneGraphComponent cameraNode = null;
 }
 vrmlFile returns [SceneGraphComponent r]
 { r = null;}
@@ -91,8 +98,11 @@ atomicStatement:
 	|	currentAp=materialStatement
 	|	coordinate3Statement
 	|	normalStatement
+	|	currentNormalBinding=normalBindingStatement
+	|	currentMaterialBinding=materialBindingStatement
 	|	indexedFaceSetStatement
 	|	indexedLineSetStatement
+	|	perspectiveCameraStatement
 	|	unknownStatement
 	;
 
@@ -136,6 +146,7 @@ transformStatement
 transformAttribute[FactoredMatrix fm]
 { double[] rr = null; }
 	:
+		// TODO add more attributes
 		"rotation"	rr=sfrotationValue	{fm.setRotation(rr[3], rr[0], rr[1], rr[2]);}
 	|	"center"		rr=sfvec3fValue		{fm.setCenter(rr);}
 	;
@@ -253,6 +264,31 @@ normalStatement returns [DataList dl]
 		dl = currentNormal = StorageModel.DOUBLE_ARRAY.inlined(3).createReadOnly(normals);
 	}	
 	;
+
+normalBindingStatement returns [int nb]
+{ nb = 0;}
+	:
+	"NormalBinding"	OPEN_BRACE	"value" nb=bindingAttribute CLOSE_BRACE
+	;
+	
+materialBindingStatement returns [int mb]
+{ mb = 0;}
+	:
+	"MaterialBinding"	OPEN_BRACE	"value" mb=bindingAttribute CLOSE_BRACE
+	;
+	
+bindingAttribute returns [int which]
+{ which = VRMLHelper.DEFAULT; }
+	:
+		"DEFAULT"			{which = VRMLHelper.DEFAULT;	}
+	|	"OVERALL"			{which = VRMLHelper.OVERALL;	}
+	|	"PER_PART"			{which = VRMLHelper.PER_PART;	}
+	|	"PER_PART_INDEXED"	{which = VRMLHelper.PER_PART_INDEXED;	}
+	|	"PER_FACE"			{which = VRMLHelper.PER_FACE;	}
+	|	"PER_FACE_INDEXED"	{which = VRMLHelper.PER_FACE_INDEXED;	}
+	|	"PER_VERTEX"			{which = VRMLHelper.PER_VERTEX;	}
+	|	"PER_VERTEX_INDEXED"	{which = VRMLHelper.PER_VERTEX_INDEXED;	}
+	;
 	
 indexedFaceSetStatement returns [IndexedFaceSet ifs]
 {ifs = null;}
@@ -278,6 +314,8 @@ indexedFaceSetStatement returns [IndexedFaceSet ifs]
 		SceneGraphComponent sgc = new SceneGraphComponent();
 		sgc.setGeometry(ifs);
 		sgc.setAppearance(currentAp);
+		if (sgc.getAppearance() != null) 
+			sgc.getAppearance().setAttribute("vertexShader","simple");		// hack to speed it up
 		currentSGC.addChild(sgc);
 	}
 	}
@@ -306,7 +344,28 @@ indexedLineSetStatement:
 indexedLineSetAttribute:
 		"coordIndex"	mfint32Value
 	;
-	
+
+perspectiveCameraStatement returns [SceneGraphComponent cn]
+{	cn = new SceneGraphComponent();
+	FactoredMatrix fm = new FactoredMatrix();
+	Camera c = new Camera();
+	double[] d = null;
+	double a = 0.0;
+	}
+	:
+	("PerspectiveCamera"	OPEN_BRACE	(
+			"position"		d=sfvec3fValue		{fm.setTranslation(d); }		
+		|	"orientation"	d=sfrotationValue	{fm.setRotation(d[3], d[0], d[1], d[2]);}
+		|	"focalDistance"	a=sffloatValue		{c.setFocus(a);}
+		|	"heightAngle"	a=sffloatValue		{c.setFieldOfView(180.0*a/Math.PI);} )+	CLOSE_BRACE )
+	{	
+		fm.update();
+		cn.setTransformation(new Transformation(fm.getArray()));
+		cn.setCamera(c);
+		cameraNode = cn;
+	}
+	;
+		
 unknownStatement
 {String n = null; }
 	:
@@ -413,7 +472,14 @@ sfint32Values returns [int[] il]
 	int count = 0;
 }
 	:
-		(t=sfint32Value	{is[count++] = t; } )+
+		(t=sfint32Value	
+			{
+				if (count +1 > is.length)	{
+					is=VRMLHelper.reallocate(is);
+				}
+				is[count++] = t; 
+			} 
+		)+
 		{il = new int[count];
 		System.arraycopy(is,0,il,0,count);
 		//VRMLHelper.listToIntArray(vl); 
