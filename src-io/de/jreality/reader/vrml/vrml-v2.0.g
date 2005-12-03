@@ -8,7 +8,7 @@
 // */
 
 header {
-package charlesgunn.antlr.vrml;
+package de.jreality.reader.vrml;
 import java.awt.Color;
 import java.util.*;
 }
