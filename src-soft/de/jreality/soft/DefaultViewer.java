@@ -28,6 +28,7 @@ import java.awt.image.BufferedImage;
 
 import de.jreality.scene.*;
 import de.jreality.scene.Viewer;
+import de.jreality.util.LoggingSystem;
 
 /**
  * The default software renderer component.
@@ -216,7 +217,11 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
         renderer.setBackgroundColor(c !=null? c.getRGB(): 0);
       }
 //      System.out.println("start rendering "+new java.util.Date());
-      renderer.render();
+      try {
+        renderer.render();
+      } catch (Exception e) {
+        LoggingSystem.getLogger(this).severe("renderer.render() failed! "+e.getMessage());
+      }
       synchronized(this) {
         //imageValid = false;
         renderer.update();

@@ -134,8 +134,8 @@ public abstract class Renderer {
   }
 
   public void setCameraPath(SceneGraphPath p) {
-      cameraPath = p;
-    camera=(Camera) p.getLastElement();
+    cameraPath = p;
+    camera= p == null ? null : (Camera) p.getLastElement();
 //    if(root!= null && camera !=null)
 //        //cameraPath = new SceneGraphPath(root,camera); 
 //        cameraPath = SceneGraphPath.getFirstPathBetween(root,camera); 
