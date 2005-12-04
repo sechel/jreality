@@ -42,6 +42,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -103,6 +105,7 @@ public class ViewerApp
   {
     //UIManager.setLookAndFeel("com.incors.plaf.kunststoff.KunststoffLookAndFeel");
     System.setProperty("sun.awt.noerasebackground", "true");
+    JPopupMenu.setDefaultLightWeightPopupEnabled(false);
     new ViewerApp(createViewer(), true);
   }
   
@@ -110,6 +113,18 @@ public class ViewerApp
     inspector=new InspectorPanel();
 
     currViewer=viewer;
+    currViewer.getViewingComponent().addKeyListener(new KeyListener() {
+      public void keyTyped(KeyEvent arg0) {
+      }
+      public void keyPressed(KeyEvent arg0) {
+        if (arg0.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+          toggleFullScreen();
+        }
+      }
+      public void keyReleased(KeyEvent arg0) {
+      }
+    });
+
     viewerSwitch = (ViewerSwitch) currViewer.getDelegatedViewer();
     
     if (initScene) {
@@ -141,17 +156,6 @@ public class ViewerApp
     if (frame == null) {
       frame=new JFrame("jReality Viewer");
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      frame.addKeyListener(new KeyListener() {
-        public void keyTyped(KeyEvent arg0) {
-        }
-        public void keyPressed(KeyEvent arg0) {
-          if (arg0.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-            toggleFullScreen();
-          }
-        }
-        public void keyReleased(KeyEvent arg0) {
-        }
-      });
     }
     frame.setContentPane(content);
   }
@@ -172,13 +176,15 @@ public class ViewerApp
       frame.setUndecorated(true);
     }
     if (isFullScreen) {
+      //frame.remove(mb);
+      //frame.setMenuBar(null);
       frame.setContentPane(new Container());
       frame.getContentPane().setLayout(new BorderLayout());
       frame.getContentPane().add("Center", currViewer.getViewingComponent());
-      frame.setMenuBar(null);
     } else {
       frame.setJMenuBar(mb);
       frame.setContentPane(uiFactory.createViewerContent());
+      initTree();
     }
 
     frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(
