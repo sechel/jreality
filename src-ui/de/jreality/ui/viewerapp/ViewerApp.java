@@ -28,8 +28,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.StringTokenizer;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
@@ -62,8 +69,8 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.ui.treeview.JListRenderer;
 import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
 import de.jreality.util.Input;
-import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
+import de.jreality.util.ViewerSwitch;
 import de.jreality.writer.WriterJRS;
 
 /**
@@ -78,17 +85,16 @@ public class ViewerApp
   private SceneGraphPath cameraPath;
   private UIFactory uiFactory;
   private JFrame frame;
+
   private ToolSystemViewer currViewer;
+  private ViewerSwitch viewerSwitch;
+  
   private SceneGraphPath emptyPick;
   private SceneGraphPath avatarPath;
 
   public static void main(String[] args) throws Exception
   {
-    try {
-      UIManager.setLookAndFeel("com.incors.plaf.kunststoff.KunststoffLookAndFeel");
-    } catch (Exception e) {
-      LoggingSystem.getLogger(ViewerApp.class).config("couldn't set Kunststoff look and feel.");
-    }
+    //UIManager.setLookAndFeel("com.incors.plaf.kunststoff.KunststoffLookAndFeel");
     System.setProperty("sun.awt.noerasebackground", "true");
     new ViewerApp(createViewer(), true);
   }
@@ -97,6 +103,8 @@ public class ViewerApp
     inspector=new InspectorPanel();
 
     currViewer=viewer;
+    viewerSwitch = (ViewerSwitch) currViewer.getDelegatedViewer();
+    
     if (initScene) {
       root=buildRoot();
       currSceneNode = scene;
@@ -284,7 +292,23 @@ public class ViewerApp
 
     compMenu.add(mi);
     mb.add(compMenu);
-    
+
+    JMenu viewerMenu = new JMenu("Viewer");
+    String[] viewerNames = viewerSwitch.getViewerNames();
+    for (int i = 0; i < viewerSwitch.getNumViewers(); i++) {
+      mi = new JMenuItem(viewerNames[i]);
+      final int ind = i;
+      mi.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent arg0) {
+          viewerSwitch.selectViewer(ind);
+          frame.validate();
+          currViewer.render();
+          frame.repaint();
+        }
+      });
+      viewerMenu.add(mi);
+    }  
+    mb.add(viewerMenu);
     frame.setJMenuBar(mb);
   }
   
@@ -364,8 +388,14 @@ public class ViewerApp
   }
   private static ToolSystemViewer createViewer() throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
   {
-    String viewer=System.getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer");
-    ToolSystemViewer v = new ToolSystemViewer(createViewer(viewer), ToolSystemConfiguration.loadDefaultDesktopConfiguration());
+    String viewer=System.getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer");
+    StringTokenizer st = new StringTokenizer(viewer);
+    Viewer[] viewers = new Viewer[st.countTokens()];
+    for (int i = 0; i < viewers.length; i++) {
+      viewers[i] = createViewer(st.nextToken());
+    }
+    ViewerSwitch vs = new ViewerSwitch(viewers);
+    ToolSystemViewer v = new ToolSystemViewer(vs, ToolSystemConfiguration.loadDefaultDesktopConfiguration());
     v.setPickSystem(new AABBPickSystem());
     return v;
   }
