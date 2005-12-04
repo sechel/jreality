@@ -107,11 +107,7 @@ public class PortalJoglClientViewer implements RemoteJoglViewer, ClientFactory.R
     config = ConfigurationAttributes.getDefaultConfiguration();
     // frame settings
     frame = new JFrame(config.getProperty("frame.title", "no title"));
-    frame.addWindowListener(new WindowAdapter() {
-      public void windowClosing(WindowEvent e) {
-        System.exit(0);
-      }
-    });
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.getContentPane().add(viewer.getViewingComponent());
     init();
     initFrame();
