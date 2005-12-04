@@ -64,21 +64,7 @@ public class UIFactory
   JTree sceneTree;
 
   JSplitPane content;
-  JFrame frame;
   
-  public JFrame createFrame()
-  {
-    if (frame == null) frame=new JFrame("Viewer");
-    frame.setContentPane(createViewerContent());
-    frame.pack();
-    frame.setSize(Math.max(900, frame.getWidth()),
-      Math.max(600, frame.getHeight()));
-    frame.validate();
-    //frame.show();
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    return frame;
-  }
-
   Container createViewerContent()
   {
     JSplitPane main = createLHS();
@@ -98,7 +84,7 @@ public class UIFactory
       return main;
   }
 
-  private Component createNavigation()
+  Component createNavigation()
   {
     sceneTree=new JTree();
     sceneTree.setBorder(emptyBorder);
@@ -109,12 +95,12 @@ public class UIFactory
     return scroll(sceneTree);
   }
 
-  private Component createViewerPanel()
+  Component createViewerPanel()
   {
     return viewer;
   }
 
-  private Component createInspectorPanel()
+  Component createInspectorPanel()
   {
     JScrollPane scroll = scroll(inspector);
     return scroll;
@@ -143,10 +129,6 @@ public class UIFactory
     inspector= component;
     inspector.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
     component.setBorder(emptyBorder);
-  }
-
-  public void update() {
-    createFrame();
   }
 
 }

@@ -22,14 +22,20 @@
  */
 package de.jreality.ui.viewerapp;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JMenu;
@@ -84,8 +90,9 @@ public class ViewerApp
   private SceneGraphComponent root;
   private SceneGraphPath cameraPath;
   private UIFactory uiFactory;
+  
   private JFrame frame;
-
+  
   private ToolSystemViewer currViewer;
   private ViewerSwitch viewerSwitch;
   
@@ -119,7 +126,8 @@ public class ViewerApp
     uiFactory.setViewer(currViewer.getViewingComponent());
     uiFactory.setInspector(inspector);
     uiFactory.setRoot(root);
-    frame=uiFactory.createFrame();
+    createFrame(uiFactory.createViewerContent());
+    initFrame();
     initTree();
     createMenu();
     frame.show();
@@ -127,7 +135,63 @@ public class ViewerApp
     rt.addViewer(currViewer);
     rt.addSceneGraphComponent(root);
   }
+  
+  void createFrame(Container content)
+  {
+    if (frame == null) {
+      frame=new JFrame("jReality Viewer");
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      frame.addKeyListener(new KeyListener() {
+        public void keyTyped(KeyEvent arg0) {
+        }
+        public void keyPressed(KeyEvent arg0) {
+          if (arg0.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+            toggleFullScreen();
+          }
+        }
+        public void keyReleased(KeyEvent arg0) {
+        }
+      });
+    }
+    frame.setContentPane(content);
+  }
+  
+  void initFrame() {
+    frame.pack();
+    frame.setSize(Math.max(900, frame.getWidth()), Math.max(600, frame.getHeight()));
+    frame.validate();
+  }
 
+  boolean isFullScreen;
+  private JMenuBar mb;
+  
+  void toggleFullScreen() {
+    isFullScreen = !isFullScreen;
+    if(isFullScreen) {
+      frame.dispose();
+      frame.setUndecorated(true);
+    }
+    if (isFullScreen) {
+      frame.setContentPane(new Container());
+      frame.getContentPane().setLayout(new BorderLayout());
+      frame.getContentPane().add("Center", currViewer.getViewingComponent());
+      frame.setMenuBar(null);
+    } else {
+      frame.setJMenuBar(mb);
+      frame.setContentPane(uiFactory.createViewerContent());
+    }
+
+    frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(
+      isFullScreen ? frame : null
+    );
+    if(!isFullScreen) {
+      frame.dispose();
+      frame.setUndecorated(false);
+    }
+    frame.validate();
+    frame.show();
+  }
+  
   private void initTree() {
     TreeSelectionModel sm=uiFactory.sceneTree.getSelectionModel();
     sm.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -157,7 +221,7 @@ public class ViewerApp
   }
   
   private void createMenu() {
-	  JMenuBar mb = new JMenuBar();
+	  mb = new JMenuBar();
     JMenu fileMenu = new JMenu("File");
     JMenuItem mi = new JMenuItem("Load...");
     mi.addActionListener(new ActionListener(){
@@ -232,7 +296,8 @@ public class ViewerApp
  
             uiFactory.setViewer(currViewer.getViewingComponent());
             uiFactory.setRoot(root);
-            uiFactory.update();
+            createFrame(uiFactory.createViewerContent());
+            initFrame();
             initTree();
             RenderTrigger rt = new RenderTrigger();
             rt.addViewer(currViewer);
@@ -309,6 +374,18 @@ public class ViewerApp
       viewerMenu.add(mi);
     }  
     mb.add(viewerMenu);
+
+    JMenu frameMenu = new JMenu("Frame");
+    mi = new JMenuItem("Fullscreen");
+    mi.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent arg0) {
+        toggleFullScreen();
+      }
+    });
+    frameMenu.add(mi);
+
+    mb.add(frameMenu);
+    
     frame.setJMenuBar(mb);
   }
   
