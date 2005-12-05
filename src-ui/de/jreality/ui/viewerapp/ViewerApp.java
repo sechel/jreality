@@ -41,6 +41,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.io.JrScene;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.ReaderJRS;
@@ -57,6 +58,7 @@ import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.scene.tool.*;
 import de.jreality.scene.tool.config.ToolSystemConfiguration;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPolygonShader;
@@ -97,7 +99,7 @@ public class ViewerApp
   public static void main(String[] args) throws Exception
   {
     try {
-      UIManager.setLookAndFeel("com.incors.plaf.kunststoff.KunststoffLookAndFeel");
+      UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
     } catch (Exception e) {
       LoggingSystem.getLogger(ViewerApp.class).config("loading Kusntstoff Look & Feel failed: "+e.getMessage());
     }
@@ -235,6 +237,27 @@ public class ViewerApp
     					SceneGraphComponent f = Readers.read(files[i]);
               f.setName(files[i].getName());
               System.out.println("READ finished.");
+    					currSceneNode.addChild(f);
+    				} catch (IOException e) {
+    					// TODO Auto-generated catch block
+    					e.printStackTrace();
+    				}
+    			}
+      }
+    });
+    
+    fileMenu.add(mi);
+
+    mi = new JMenuItem("Load merged ...");
+    mi.addActionListener(new ActionListener(){
+    		public void actionPerformed(ActionEvent arg0) {
+    		  File[] files = FileLoaderDialog.loadFiles(frame);
+          for (int i = 0; i < files.length; i++) {
+    				try {
+    					SceneGraphComponent f = Readers.read(files[i]);
+    					f=IndexedFaceSetUtility.mergeIndexedFaceSets(f);
+    					f.setName(files[i].getName());
+    					System.out.println("READ finished.");
     					currSceneNode.addChild(f);
     				} catch (IOException e) {
     					// TODO Auto-generated catch block
@@ -516,7 +539,7 @@ public class ViewerApp
     RootAppearance ra = ShaderUtility.createRootAppearance(ap);
     DefaultLineShader dls = (DefaultLineShader) dgs.getLineShader();
     DefaultPolygonShader dps = (DefaultPolygonShader) dgs.getPolygonShader();
-
+ 
     root.setAppearance(ap);
 
     root.addChild(avatarNode);
