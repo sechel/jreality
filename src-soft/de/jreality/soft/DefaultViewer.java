@@ -25,6 +25,7 @@ package de.jreality.soft;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.logging.Level;
 
 import de.jreality.scene.*;
 import de.jreality.scene.Viewer;
@@ -220,7 +221,8 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
       try {
         renderer.render();
       } catch (Exception e) {
-        LoggingSystem.getLogger(this).severe("renderer.render() failed! "+e.getMessage());
+        LoggingSystem.getLogger(this).log(Level.SEVERE, "renderer.render() failed! ", e);
+        
       }
       synchronized(this) {
         //imageValid = false;

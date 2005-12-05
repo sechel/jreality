@@ -23,7 +23,11 @@ public class ShaderLookup
     return (PolygonShader)lookup1(name, "Polygon");
   }
   public static VertexShader lookupVertexShader(String name) {
+    try {
       return (VertexShader)lookup1(name, "Vertex");
+    } catch (Exception e) {
+      return new DefaultVertexShader();
+    }
   }
   
   public static LineShader lookupLineShader(String name) {
@@ -50,7 +54,11 @@ public class ShaderLookup
       type=Character.toUpperCase(type.charAt(0))+type.substring(1);
       Logger.getLogger("de.jreality").log(Level.WARNING,
         "unsupported {0} shader {1}", new String[] {type, shaderName});
-      ps=new DefaultPolygonShader();
+      try {
+        ps=Class.forName("de.jreality.soft.Default"+type+"Shader").newInstance();
+      } catch (Exception e) {
+        throw new Error();
+      }
     }
     catch(Exception ex)
     {

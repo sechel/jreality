@@ -23,7 +23,6 @@
 package de.jreality.ui.viewerapp;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -98,7 +97,7 @@ public class ViewerApp
   public static void main(String[] args) throws Exception
   {
     try {
-      //UIManager.setLookAndFeel("com.incors.plaf.kunststoff.KunststoffLookAndFeel");
+      UIManager.setLookAndFeel("com.incors.plaf.kunststoff.KunststoffLookAndFeel");
     } catch (Exception e) {
       LoggingSystem.getLogger(ViewerApp.class).config("loading Kusntstoff Look & Feel failed: "+e.getMessage());
     }
@@ -283,6 +282,7 @@ public class ViewerApp
             s = r.getScene();
             try {
               currViewer = createViewer();
+              viewerSwitch = (ViewerSwitch) currViewer.getDelegatedViewer();
             } catch (Exception e) {
               e.printStackTrace();
             }
