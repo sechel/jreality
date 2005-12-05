@@ -52,7 +52,14 @@ public class SMRJMirrorScene extends SceneProxyBuilder {
     	return super.getProxyImpl(target);
     }
 
-	/**
+    protected void disposeProxyImpl(SceneGraphNode target) {
+      synchronizer.detatch=true;
+      ((SceneGraphNode)target).accept(synchronizer);
+      super.disposeProxyImpl(target);
+      synchronizer.detatch=false;
+    }
+
+  /**
 	 * Assumes that the created proxies are instanceof of the appropriate
 	 * scene graph classes and adds the node to the component.
      */

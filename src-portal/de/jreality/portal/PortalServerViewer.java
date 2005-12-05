@@ -58,8 +58,7 @@ public class PortalServerViewer implements de.jreality.scene.Viewer {
       init(factory, viewerClass);
     }
 
-	public PortalServerViewer(RemoteFactory factory) throws IOException,
-			MalformedURLException, RemoteException, NotBoundException {
+	public PortalServerViewer(RemoteFactory factory) throws IOException, RemoteException, NotBoundException {
     init(factory, Viewer.class);
 	}
 
@@ -76,9 +75,17 @@ public class PortalServerViewer implements de.jreality.scene.Viewer {
 	}
 
 	public void setSceneRoot(SceneGraphComponent r) {
-		this.root = r;
-		RemoteSceneGraphComponent rsgc = (RemoteSceneGraphComponent) proxyScene.createProxyScene(root);
-		clients.setRemoteSceneRoot(rsgc);
+    if (root != null) {
+      // dispose proxies for old root
+      proxyScene.disposeProxy(root);
+    }
+		root = r;
+    if (root != null) {
+  		RemoteSceneGraphComponent rsgc = (RemoteSceneGraphComponent) proxyScene.createProxyScene(root);
+	  	clients.setRemoteSceneRoot(rsgc);
+    } else {
+      clients.setRemoteSceneRoot(null);
+    }
 	}
 
 	public SceneGraphPath getCameraPath() {
@@ -87,7 +94,7 @@ public class PortalServerViewer implements de.jreality.scene.Viewer {
 
 	public void setCameraPath(SceneGraphPath p) {
 		camPath = p;
-		clients.setRemoteCameraPath(proxyScene.getProxies(p.toList()));
+		clients.setRemoteCameraPath(p == null ? null : proxyScene.getProxies(p.toList()));
 	}
 
 	/**

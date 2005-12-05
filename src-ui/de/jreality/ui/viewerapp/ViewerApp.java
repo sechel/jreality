@@ -32,6 +32,7 @@ import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -55,10 +56,7 @@ import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
-import de.jreality.scene.tool.DraggingTool;
-import de.jreality.scene.tool.EncompassTool;
-import de.jreality.scene.tool.RotateTool;
-import de.jreality.scene.tool.ToolSystemViewer;
+import de.jreality.scene.tool.*;
 import de.jreality.scene.tool.config.ToolSystemConfiguration;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
@@ -100,7 +98,7 @@ public class ViewerApp
   public static void main(String[] args) throws Exception
   {
     try {
-      UIManager.setLookAndFeel("com.incors.plaf.kunststoff.KunststoffLookAndFeel");
+      //UIManager.setLookAndFeel("com.incors.plaf.kunststoff.KunststoffLookAndFeel");
     } catch (Exception e) {
       LoggingSystem.getLogger(ViewerApp.class).config("loading Kusntstoff Look & Feel failed: "+e.getMessage());
     }
@@ -345,6 +343,56 @@ public class ViewerApp
     });
     compMenu.add(mi);
 
+    mi = new JMenuItem("Add Tool...");
+    mi.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent arg0) {
+          List tools = new LinkedList();
+          tools.add(RotateTool.class);
+          tools.add(DraggingTool.class);
+          tools.add(ScaleTool.class);
+          tools.add(FlyTool.class);
+          tools.add(HeadTransformationTool.class);
+          tools.add(ShipNavigationTool.class);
+          try {
+            tools.add(Class.forName("de.jreality.scene.tool.PortalHeadMoveTool"));
+          } catch (ClassNotFoundException e) {}
+          JList list = new JList(tools.toArray());
+          //list.setCellRenderer(new JListRenderer());
+          list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+          int ret = JOptionPane.showConfirmDialog(frame, uiFactory.scroll(list), "Add Tool", JOptionPane.OK_CANCEL_OPTION);
+          if (ret == JOptionPane.OK_OPTION) {
+            int[] idx = list.getSelectedIndices();
+            for (int i = 0; i < idx.length; i++) {
+              try {
+                Tool t = (Tool) ((Class)tools.get(idx[i])).newInstance();
+                currSceneNode.addTool(t);
+              } catch (Exception e) {
+                LoggingSystem.getLogger(ViewerApp.this).warning("could not add tool!");
+              }
+            }
+          }
+        }
+    });
+    compMenu.add(mi);
+
+    mi = new JMenuItem("Remove Tool...");
+    mi.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent arg0) {
+          List children = currSceneNode.getTools();
+          JList list = new JList(children.toArray());
+          //list.setCellRenderer(new JListRenderer());
+          list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+          int ret = JOptionPane.showConfirmDialog(frame, uiFactory.scroll(list), "Remove child", JOptionPane.OK_CANCEL_OPTION);
+          if (ret == JOptionPane.OK_OPTION) {
+            Object[] tools = list.getSelectedValues();
+            for (int i = 0; i < tools.length; i++) {
+              currSceneNode.removeTool((Tool) tools[i]);
+            }
+          }
+        }
+    });
+    compMenu.add(mi);
+
     mi = new JMenuItem("Scale...");
     mi.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent arg0) {
@@ -493,7 +541,7 @@ public class ViewerApp
   }
   private static ToolSystemViewer createViewer() throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
   {
-    String viewer=System.getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer");
+    String viewer=System.getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer de.jreality.portal.DesktopPortalViewer");
     StringTokenizer st = new StringTokenizer(viewer);
     Viewer[] viewers = new Viewer[st.countTokens()];
     for (int i = 0; i < viewers.length; i++) {

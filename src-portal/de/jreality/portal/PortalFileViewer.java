@@ -96,9 +96,7 @@ public class PortalFileViewer {
     if (scale != null) fileScale = scale.doubleValue();
     String viewerType = (String) parser.getOptionValue(viewerOpt);
     if (viewerType == null || viewerType.equalsIgnoreCase("PORTAL")) {
-      viewer = new ToolSystemViewer(new DesktopPortalViewer(
-          io ? new TCPBroadcasterIO(8868).getRemoteFactory()
-              : new TCPBroadcasterNIO(8868).getRemoteFactory()), ToolSystemConfiguration.loadDefaultPortalConfiguration());
+      viewer = new ToolSystemViewer(new DesktopPortalViewer(), ToolSystemConfiguration.loadDefaultPortalConfiguration());
     } else {
       ToolSystemConfiguration tsc = ToolSystemConfiguration.loadDefaultDesktopAndPortalConfiguration();
       

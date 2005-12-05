@@ -52,6 +52,8 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.text.JTextComponent;
 
+import de.jreality.util.LoggingSystem;
+
 /**
  * TODO: comment InspectorPanel
  */
@@ -75,16 +77,13 @@ public class InspectorPanel extends JPanel
     editors=new ArrayList();
     properties=new ArrayList();
     setup();
-    System.out.println(type+" has "+properties.size()+" properties "+Arrays.asList(type.getInterfaces()));
   }
   private void setup() throws IntrospectionException
   {
     BeanInfo bi=Introspector.getBeanInfo(type);
     PropertyDescriptor[] pd=bi.getPropertyDescriptors();
-    System.out.println("pds length="+pd.length);
     setLayout(new GridBagLayout());
     GridBagConstraints label=new GridBagConstraints();
-    //label.fill=GridBagConstraints.HORIZONTAL;
     label.anchor=GridBagConstraints.EAST;
     label.ipadx=3;
     GridBagConstraints editor=new GridBagConstraints();
@@ -209,7 +208,7 @@ public class InspectorPanel extends JPanel
       try {
         pe=PropertyEditorManager.findEditor(descriptor.getPropertyType());
       } catch (Exception e) {
-        System.out.println("Exception in findEditor for property="+descriptor.getName()+" type="+descriptor.getPropertyType());
+        LoggingSystem.getLogger(this).info("Exception in findEditor for property="+descriptor.getName()+" type="+descriptor.getPropertyType());
       }
     }
     return pe;

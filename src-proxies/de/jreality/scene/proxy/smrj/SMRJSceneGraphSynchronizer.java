@@ -62,32 +62,40 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
 		factory = (SMRJMirrorFactory) rmc.getProxyFactory();
 	}
 	
+  boolean detatch=false;
+  
   public void visit(Camera c) {
-    c.addCameraListener(this);
+    if (detatch) c.removeCameraListener(this);
+    else c.addCameraListener(this);
   }
   
   public void visit(Light l) {
-    l.addLightListener(this);
+    if (detatch) l.removeLightListener(this);
+    else l.addLightListener(this);
   }
   
 	public void visit(final Transformation t) {
-		t.addTransformationListener(this);
+    if (detatch) t.removeTransformationListener(this);
+    else t.addTransformationListener(this);
 	}
 
 	public void visit(final Appearance a) {
-		a.addAppearanceListener(this);
+    if (detatch) a.removeAppearanceListener(this);
+    else a.addAppearanceListener(this);
 	}
 
 	public void visit(final Geometry g) {
-		g.addGeometryListener(this);
+		if (detatch) g.removeGeometryListener(this);
+    else g.addGeometryListener(this);
 	}
 	
 	public void visit(SceneGraphComponent sg) {
-		sg.addSceneGraphComponentListener(this);
+    if (detatch) sg.removeSceneGraphComponentListener(this);
+    else sg.addSceneGraphComponentListener(this);
 	}
 	
 	public void transformationMatrixChanged(TransformationEvent ev) {
-      	((RemoteTransformation)rmc.getProxy(ev.getSourceNode())).setMatrix(ev.getTransformationMatrix());
+   	((RemoteTransformation)rmc.getProxy(ev.getSourceNode())).setMatrix(ev.getTransformationMatrix());
 	}
 
 	public void appearanceChanged(AppearanceEvent ev) {

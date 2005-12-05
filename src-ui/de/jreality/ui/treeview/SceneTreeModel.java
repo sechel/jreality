@@ -4,16 +4,17 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.WeakHashMap;
+import java.util.*;
+
+import javax.swing.tree.TreeNode;
 
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.data.AttributeEntity;
 import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.scene.event.ToolEvent;
+import de.jreality.scene.event.ToolListener;
 import de.jreality.scene.proxy.tree.ProxyTreeFactory;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.scene.proxy.tree.UpToDateSceneProxyBuilder;
@@ -47,19 +48,9 @@ public class SceneTreeModel extends AbstractTreeModel {
     builder = new UpToDateSceneProxyBuilder(comp);
     builder.setProxyTreeFactory(new ProxyTreeFactory() {
       public SceneTreeNode createProxyTreeNode(SceneGraphNode n) {
-        return new SceneTreeNode(n) {
-          public int addChild(SceneTreeNode child) {
-            int ret = super.addChild(child);
-            fireNodesAdded(this, new Object[]{child});
-            return ret;
-          }
-          protected int removeChild(SceneTreeNode prevChild) {
-            int ret = super.removeChild(prevChild);
-            fireNodesRemoved(this, new int[]{ret}, new Object[]{prevChild});
-            return ret;
-          }
-        };
+        return new SceneTreeNodeWithToolListener(n);
       }
+      
     });
     super.root = builder.createProxyTree();
   }
@@ -102,8 +93,9 @@ public class SceneTreeModel extends AbstractTreeModel {
         return ents.length;
       } else {
         int ret = sn.getChildren().size(); 
-        if (sn.getNode() instanceof SceneGraphComponent)
+        if (sn.getNode() instanceof SceneGraphComponent) {
           ret += ((SceneGraphComponent)sn.getNode()).getTools().size();
+        }
         return ret;
       }
     } else {
@@ -139,7 +131,7 @@ public class SceneTreeModel extends AbstractTreeModel {
   }
 
   public Object getParent(Object o) {
-    if (o instanceof SceneTreeNode && !(((SceneTreeNode)o).getNode() instanceof Appearance) )
+    if (o instanceof SceneTreeNode )
       return ((SceneTreeNode)o).getParent();
     if (o instanceof TreeTool) return ((TreeTool)o).getTreeNode();
     else return parents.get(o);
@@ -177,6 +169,50 @@ public class SceneTreeModel extends AbstractTreeModel {
 
     public SceneTreeNode getTreeNode() {
       return treeNode;
+    }
+  }
+  
+  private class SceneTreeNodeWithToolListener extends SceneTreeNode implements ToolListener {
+    SceneGraphComponent cmp;
+    List tools=new LinkedList();
+    protected SceneTreeNodeWithToolListener(SceneGraphNode node) {
+      super(node);
+      if (isComponent) {
+        cmp = (SceneGraphComponent) node;
+        cmp.addToolListener(this);
+        tools.addAll(cmp.getTools());
+      }
+    }
+    public int addChild(SceneTreeNode child) {
+      int ret = super.addChild(child);
+      fireNodesAdded(this, new Object[]{child});
+      return ret;
+    }
+    protected int removeChild(SceneTreeNode prevChild) {
+      int ret = super.removeChild(prevChild);
+      fireNodesRemoved(this, new int[]{ret}, new Object[]{prevChild});
+      return ret;
+    }
+    public void toolAdded(ToolEvent ev) {
+      int idx = getChildren().size();
+      for (Iterator it = cmp.getTools().iterator(); it.hasNext(); ) {
+        if (ev.getTool() == it.next()) break;
+        idx++;
+      }
+      tools.add(ev.getTool());
+      fireNodesAdded(this, new int[]{idx}, new Object[]{TreeTool.getInstance(this, ev.getTool())});
+    }
+    public void toolRemoved(ToolEvent ev) {
+      int idx = getChildren().size();
+      int tind = tools.indexOf(ev.getTool());
+      tools.remove(tind);
+      fireNodesRemoved(this, new int[]{idx+tind}, new Object[]{TreeTool.getInstance(this, ev.getTool())});
+    }
+    protected void dispose(ArrayList disposedEntities) {
+      super.dispose(disposedEntities);
+      if (isComponent) {
+        cmp.removeToolListener(this);
+      }
     }
   }
   

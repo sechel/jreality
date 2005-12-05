@@ -10,20 +10,30 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.smrj.RemoteFactory;
+import de.smrj.tcp.TCPBroadcasterNIO;
 
 public class DesktopPortalViewer implements Viewer {
 
   Viewer desktopViewer;
   PortalServerViewer portalViewer;
   
-  public DesktopPortalViewer(RemoteFactory factory) throws MalformedURLException, RemoteException, IOException, NotBoundException {
-    portalViewer = new PortalServerViewer(factory);
+  public DesktopPortalViewer() {
+    try {
+      RemoteFactory factory = new TCPBroadcasterNIO(8868).getRemoteFactory();
+      portalViewer = new PortalServerViewer(factory);
+    } catch (Exception e) {
+      throw new ExceptionInInitializerError(e.getMessage());
+    }
     desktopViewer = new de.jreality.jogl.Viewer();
   }
   
   public DesktopPortalViewer(RemoteFactory factory, Class portalViewerClass) throws MalformedURLException, RemoteException, IOException, NotBoundException {
     portalViewer = new PortalServerViewer(factory, portalViewerClass);
-    desktopViewer = new de.jreality.jogl.Viewer();
+    try {
+      desktopViewer =(Viewer) portalViewerClass.newInstance();
+    } catch (Exception e) {
+      
+    }
   }
   
   public SceneGraphComponent getSceneRoot() {
