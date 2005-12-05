@@ -35,16 +35,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
@@ -77,6 +68,7 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.ui.treeview.JListRenderer;
 import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
 import de.jreality.util.Input;
+import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
 import de.jreality.util.ViewerSwitch;
 import de.jreality.writer.WriterJRS;
@@ -86,6 +78,10 @@ import de.jreality.writer.WriterJRS;
  */
 public class ViewerApp
 {
+  
+  public static final String ABOUT_MESSAGE="<html><body><center><b>jReality viewer</b></center><br>preview version</body></html>";
+  public static final String HELP_MESSAGE="<html>jReality viewer help<ul>"+"<li>left mouse - rotate</li>"+"<li>middle mouse - drag</li>"+"<li>CRTL + middle mouse - drag along view direction</li>"+"<li>e - encompass</li>"+"<li>BACKSPACE - toggle fullscreen</li>"+"</ul></html>";
+  
   private InspectorPanel inspector;
   private SceneGraphComponent currSceneNode;
   private SceneGraphComponent scene;
@@ -103,7 +99,11 @@ public class ViewerApp
 
   public static void main(String[] args) throws Exception
   {
-    //UIManager.setLookAndFeel("com.incors.plaf.kunststoff.KunststoffLookAndFeel");
+    try {
+      UIManager.setLookAndFeel("com.incors.plaf.kunststoff.KunststoffLookAndFeel");
+    } catch (Exception e) {
+      LoggingSystem.getLogger(ViewerApp.class).config("loading Kusntstoff Look & Feel failed: "+e.getMessage());
+    }
     System.setProperty("sun.awt.noerasebackground", "true");
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
     new ViewerApp(createViewer(), true);
@@ -176,8 +176,7 @@ public class ViewerApp
       frame.setUndecorated(true);
     }
     if (isFullScreen) {
-      //frame.remove(mb);
-      //frame.setMenuBar(null);
+      frame.setJMenuBar(null);
       frame.setContentPane(new Container());
       frame.getContentPane().setLayout(new BorderLayout());
       frame.getContentPane().add("Center", currViewer.getViewingComponent());
@@ -196,6 +195,7 @@ public class ViewerApp
     }
     frame.validate();
     frame.show();
+    currViewer.render();
   }
   
   private void initTree() {
@@ -392,6 +392,28 @@ public class ViewerApp
 
     mb.add(frameMenu);
     
+    mb.add(javax.swing.Box.createHorizontalGlue());
+    
+    JMenu helpMenu = new JMenu("Help");
+    
+    mi = new JMenuItem("About");
+    mi.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent arg0) {
+        JOptionPane.showMessageDialog(frame, ABOUT_MESSAGE);
+      }
+    });
+
+    helpMenu.add(mi);
+    mi = new JMenuItem("Help...");
+    mi.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent arg0) {
+        JOptionPane.showMessageDialog(frame, HELP_MESSAGE);
+      }
+    });
+    helpMenu.add(mi);
+
+    mb.add(helpMenu);
+
     frame.setJMenuBar(mb);
   }
   
