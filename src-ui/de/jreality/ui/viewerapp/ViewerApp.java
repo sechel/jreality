@@ -541,13 +541,19 @@ public class ViewerApp
   }
   private static ToolSystemViewer createViewer() throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
   {
-    String viewer=System.getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer de.jreality.portal.DesktopPortalViewer");
+    String viewer=System.getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
+    String config=System.getProperty("de.jreality.scene.tool.Config", "default");
     StringTokenizer st = new StringTokenizer(viewer);
     Viewer[] viewers = new Viewer[st.countTokens()];
     for (int i = 0; i < viewers.length; i++) {
       viewers[i] = createViewer(st.nextToken());
     }
     ViewerSwitch vs = new ViewerSwitch(viewers);
+    ToolSystemConfiguration cfg = null;
+    if (config.equals("default")) cfg = ToolSystemConfiguration.loadDefaultDesktopConfiguration();
+    if (config.equals("portal")) cfg = ToolSystemConfiguration.loadDefaultPortalConfiguration();
+    if (config.equals("default+portal")) cfg = ToolSystemConfiguration.loadDefaultDesktopAndPortalConfiguration();
+    if (cfg == null) throw new IllegalStateException("couldn't load config ["+config+"]");
     ToolSystemViewer v = new ToolSystemViewer(vs, ToolSystemConfiguration.loadDefaultDesktopConfiguration());
     v.setPickSystem(new AABBPickSystem());
     return v;
