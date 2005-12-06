@@ -49,7 +49,7 @@ options {
 	int currentNormalBinding = VRMLHelper.DEFAULT;
 	int currentMaterialBinding = VRMLHelper.DEFAULT;
 	
-	final int MAXSIZE = 100000;
+	final int MAXSIZE = 10000;
 	double[] ds = new double[MAXSIZE];
 	int[] is = new int[MAXSIZE];
 	double[] evil3Vec = new double[3];
@@ -314,8 +314,6 @@ indexedFaceSetStatement returns [IndexedFaceSet ifs]
 		SceneGraphComponent sgc = new SceneGraphComponent();
 		sgc.setGeometry(ifs);
 		sgc.setAppearance(currentAp);
-		if (sgc.getAppearance() != null) 
-			sgc.getAppearance().setAttribute("vertexShader","simple");		// hack to speed it up
 		currentSGC.addChild(sgc);
 	}
 	}
