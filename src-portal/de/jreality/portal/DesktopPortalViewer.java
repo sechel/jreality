@@ -14,25 +14,25 @@ import de.smrj.tcp.TCPBroadcasterNIO;
 
 public class DesktopPortalViewer implements Viewer {
 
-  Viewer desktopViewer;
-  PortalServerViewer portalViewer;
+  HeadTrackedViewer desktopViewer;
+  NewPortalServerViewer portalViewer;
   
   public DesktopPortalViewer() {
     try {
       RemoteFactory factory = new TCPBroadcasterNIO(8868).getRemoteFactory();
-      portalViewer = new PortalServerViewer(factory);
+      portalViewer = new NewPortalServerViewer(factory);
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e.getMessage());
     }
-    desktopViewer = new de.jreality.jogl.Viewer();
+    desktopViewer = new HeadTrackedViewer();
   }
   
   public DesktopPortalViewer(RemoteFactory factory, Class portalViewerClass) throws MalformedURLException, RemoteException, IOException, NotBoundException {
-    portalViewer = new PortalServerViewer(factory, portalViewerClass);
+    portalViewer = new NewPortalServerViewer(factory, portalViewerClass);
     try {
-      desktopViewer =(Viewer) portalViewerClass.newInstance();
+      desktopViewer = new HeadTrackedViewer(portalViewerClass);
     } catch (Exception e) {
-      
+      e.printStackTrace();
     }
   }
   
