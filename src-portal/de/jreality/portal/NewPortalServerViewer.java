@@ -48,27 +48,25 @@ public class NewPortalServerViewer implements de.jreality.scene.Viewer {
 	SceneGraphPath camPath;
   private int signature;
 
-	RemoteFactory factory;
+	static RemoteFactory factory;
 	RemoteViewer clients;
 
 	SMRJMirrorScene proxyScene;
   final Lock renderLock = new Lock();
-
+  
   public NewPortalServerViewer() throws RemoteException, IOException, NotBoundException {
-    this(new TCPBroadcasterNIO(8868).getRemoteFactory());
+    init(Viewer.class);
   }
   
-	public NewPortalServerViewer(RemoteFactory factory, Class viewerClass) throws IOException,
+	public NewPortalServerViewer(Class viewerClass) throws IOException,
 	MalformedURLException, RemoteException, NotBoundException {
-      init(factory, viewerClass);
+      init(viewerClass);
     }
 
-	public NewPortalServerViewer(RemoteFactory factory) throws IOException, RemoteException, NotBoundException {
-    init(factory, Viewer.class);
-	}
-
-  public void init(RemoteFactory factory, Class viewerClass) throws IOException {
-    this.factory = factory;
+  public void init(Class viewerClass) throws IOException {
+	  
+    if (factory == null) factory = new TCPBroadcasterNIO(8868).getRemoteFactory();
+    
     clients = (RemoteViewer) factory.createRemoteViaStaticMethod(
         HeadTrackedViewer.class, HeadTrackedViewer.class,
         "createFullscreen", new Class[]{Class.class}, new Object[]{viewerClass});

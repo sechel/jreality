@@ -22,6 +22,7 @@ import de.jreality.scene.Viewer;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
+import de.jreality.util.LoggingSystem;
 import de.smrj.ClientFactory;
 
 public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.ResetCallback {
@@ -35,6 +36,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
   private boolean hasCamPath;
   private SceneGraphComponent headComponent;
   SceneGraphPath portalPath;
+  SceneGraphPath cameraPath;
 
   Camera cam;
 
@@ -53,10 +55,12 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
   }
 
   private static JFrame frame;
+  private static HeadTrackedViewer hv;
   
   public static HeadTrackedViewer createFullscreen() {
+    if (frame == null) {
     frame = new JFrame("no title");
-    HeadTrackedViewer hv = new HeadTrackedViewer();
+    hv = new HeadTrackedViewer();
     frame.getContentPane().add(hv.getViewingComponent());
     // disable mouse cursor in fullscreen mode
     BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
@@ -71,6 +75,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(frame);
     frame.validate();
     frame.show();
+    }
     return hv;
   }
   
@@ -81,6 +86,12 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     } catch (Exception e) {
       throw new Error("Viewer creation failed!");
     }
+//    try {
+//      Statement configStatement = new Statement(viewer, "setAutoSwapMode", new Object[]{Boolean.FALSE});
+//      configStatement.execute();
+//    } catch (Exception e) {
+//      LoggingSystem.getLogger(this).config("viewer cant set auto swap mode");
+//    }
     init();
   }
   
@@ -117,7 +128,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
   }
 
   public SceneGraphPath getCameraPath() {
-    return viewer.getCameraPath();
+    return cameraPath;
   }
 
   public SceneGraphComponent getSceneRoot() {
@@ -147,6 +158,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
   }
 
   public void setCameraPath(SceneGraphPath camPath) {
+    cameraPath = (SceneGraphPath) camPath.clone();
     hasCamPath = !(camPath == null || camPath.getLength() == 0);
     // empty path => reset fields
     if (camPath == null || camPath.getLength() == 0) {
@@ -250,4 +262,13 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
 	frame = null;
   }
 
+//  Statement swapStatement;
+//  public void swapBuffers() {
+//	    if (swapStatement == null) swapStatement = new Statement(viewer, "swapBuffers", null);
+//	    try {
+//	    	swapStatement.execute();
+//	    } catch (Exception e) {
+//	      e.printStackTrace();
+//	    }
+//  }
 }

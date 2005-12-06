@@ -19,16 +19,15 @@ public class DesktopPortalViewer implements Viewer {
   
   public DesktopPortalViewer() {
     try {
-      RemoteFactory factory = new TCPBroadcasterNIO(8868).getRemoteFactory();
-      portalViewer = new NewPortalServerViewer(factory);
+      portalViewer = new NewPortalServerViewer();
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e.getMessage());
     }
     desktopViewer = new HeadTrackedViewer();
   }
   
-  public DesktopPortalViewer(RemoteFactory factory, Class portalViewerClass) throws MalformedURLException, RemoteException, IOException, NotBoundException {
-    portalViewer = new NewPortalServerViewer(factory, portalViewerClass);
+  public DesktopPortalViewer(Class portalViewerClass) throws MalformedURLException, RemoteException, IOException, NotBoundException {
+    portalViewer = new NewPortalServerViewer(portalViewerClass);
     try {
       desktopViewer = new HeadTrackedViewer(portalViewerClass);
     } catch (Exception e) {
@@ -37,7 +36,7 @@ public class DesktopPortalViewer implements Viewer {
   }
   
   public SceneGraphComponent getSceneRoot() {
-    return portalViewer.getSceneRoot();
+    return desktopViewer.getSceneRoot();
   }
 
   public void setSceneRoot(SceneGraphComponent r) {
@@ -46,7 +45,7 @@ public class DesktopPortalViewer implements Viewer {
   }
 
   public SceneGraphPath getCameraPath() {
-    return portalViewer.getCameraPath();
+    return desktopViewer.getCameraPath();
   }
 
   public void setCameraPath(SceneGraphPath p) {
@@ -69,7 +68,7 @@ public class DesktopPortalViewer implements Viewer {
   }
 
   public int getSignature() {
-    return portalViewer.getSignature();
+    return desktopViewer.getSignature();
   }
 
   public void setSignature(int sig) {
