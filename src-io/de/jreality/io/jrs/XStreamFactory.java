@@ -77,7 +77,13 @@ public class XStreamFactory {
     knownClasses.add(DraggingTool.class);
     knownClasses.add(ShipNavigationTool.class);
     knownClasses.add(HeadTransformationTool.class);
-//    knownClasses.add(PortalHeadMoveTool.class);
+    
+    try {
+		knownClasses.add(Class.forName("de.jreality.scene.tool.PortalHeadMoveTool"));
+	} catch (ClassNotFoundException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
   }
   
   public static XStream forVersion(double version) {
