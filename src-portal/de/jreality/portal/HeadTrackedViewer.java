@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Rn;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -21,8 +22,9 @@ import de.jreality.scene.Viewer;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
+import de.smrj.ClientFactory;
 
-public class HeadTrackedViewer implements Viewer, RemoteViewer {
+public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.ResetCallback {
 
   Viewer viewer;
   private ConfigurationAttributes config;
@@ -50,8 +52,10 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer {
     return createFullscreen();
   }
 
+  private static JFrame frame;
+  
   public static HeadTrackedViewer createFullscreen() {
-    JFrame frame = new JFrame("no title");
+    frame = new JFrame("no title");
     HeadTrackedViewer hv = new HeadTrackedViewer();
     frame.getContentPane().add(hv.getViewingComponent());
     // disable mouse cursor in fullscreen mode
@@ -94,7 +98,10 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer {
     cameraTranslationNode = new SceneGraphComponent();
     cameraTranslationNode.setTransformation(new Transformation());
 
+    cameraTranslationNode.setName("cam Translation");
+    
     cameraOrientationNode = new SceneGraphComponent();
+    cameraOrientationNode.setName("cam Orientation");
     // set camera orientation to value from config file...
     double[] rot = config.getDoubleArray("camera.orientation");
     MatrixBuilder.euclidian()
@@ -183,9 +190,13 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer {
     
     // set camera path to viewer
     viewer.setCameraPath(camPath);
+    
+    // hack
+    setHeadMatrix(Rn.identityMatrix(4));
   }
 
   public void setSceneRoot(SceneGraphComponent r) {
+	hasSceneRoot = !(r == null);
     viewer.setSceneRoot(r);
   }
 
@@ -239,6 +250,12 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer {
 
   public void setRemoteCameraPath(List list) {
     setCameraPath(SceneGraphPath.fromList(list));
+  }
+
+  public void resetCalled() {
+	frame.hide();
+	frame.dispose();
+	frame = null;
   }
 
 }

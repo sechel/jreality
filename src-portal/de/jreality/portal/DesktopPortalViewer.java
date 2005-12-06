@@ -83,7 +83,7 @@ public class DesktopPortalViewer implements Viewer {
   }
 
   public SceneGraphComponent getAuxiliaryRoot() {
-    return portalViewer.getAuxiliaryRoot();
+    return desktopViewer.getAuxiliaryRoot();
   }
 
 }
