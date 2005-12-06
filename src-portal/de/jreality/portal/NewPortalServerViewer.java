@@ -35,6 +35,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.scene.proxy.smrj.SMRJMirrorScene;
 import de.smrj.RemoteFactory;
+import de.smrj.tcp.TCPBroadcasterNIO;
 
 /**
  * @author weissman
@@ -52,6 +53,10 @@ public class NewPortalServerViewer implements de.jreality.scene.Viewer {
 
 	SMRJMirrorScene proxyScene;
   final Lock renderLock = new Lock();
+
+  public NewPortalServerViewer() throws RemoteException, IOException, NotBoundException {
+    this(new TCPBroadcasterNIO(8868).getRemoteFactory());
+  }
   
 	public NewPortalServerViewer(RemoteFactory factory, Class viewerClass) throws IOException,
 	MalformedURLException, RemoteException, NotBoundException {
