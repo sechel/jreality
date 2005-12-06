@@ -35,8 +35,8 @@ import de.jreality.scene.Viewer;
  **/
 public class PortalHeadMoveTool extends Tool {
   
-  InputSlot headSlot = InputSlot.getDevice("AvatarShipTransformation");
-  final List used = Collections.singletonList(headSlot);
+  final transient InputSlot headSlot = InputSlot.getDevice("AvatarShipTransformation");
+  final transient List used = Collections.singletonList(headSlot);
   
   public List getActivationSlots() {
     return Collections.EMPTY_LIST;
@@ -50,8 +50,8 @@ public class PortalHeadMoveTool extends Tool {
     return Collections.EMPTY_LIST;
   }
 
-  double[] tmp = new double[16];
-  Viewer viewer;
+  transient double[] tmp = new double[16];
+  transient Viewer viewer;
   
   public void perform(ToolContext tc) {
     if (viewer == null) {
