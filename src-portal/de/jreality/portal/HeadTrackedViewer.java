@@ -147,15 +147,6 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
   }
 
   public void setCameraPath(SceneGraphPath camPath) {
-    // dispose artificial camera path
-    if (viewer.getCameraPath() != null) {
-      SceneGraphPath last = viewer.getCameraPath();
-      last.pop(); // Camera
-      last.getLastComponent().setCamera(null);
-      last.pop(); // Orientation
-      last.pop(); // Translation
-      last.getLastComponent().removeChild(cameraTranslationNode);
-    }
     hasCamPath = !(camPath == null || camPath.getLength() == 0);
     // empty path => reset fields
     if (camPath == null || camPath.getLength() == 0) {
@@ -180,7 +171,8 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     portalPath = (SceneGraphPath) camPath.clone();
     
     // add camera position and orientation, add camera there
-    camPath.getLastComponent().addChild(cameraTranslationNode);
+    // DONT CHANGE SCENEGRAPH
+//    camPath.getLastComponent().addChild(cameraTranslationNode);
     cameraOrientationNode.setCamera(cam);
     
     // build the right camera path
