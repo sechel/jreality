@@ -145,10 +145,18 @@ public class ViewerApp
     initTree();
     createMenu();
     frame.show();
-    RenderTrigger rt = new RenderTrigger();
-    rt.addViewer(currViewer);
-    rt.addSceneGraphComponent(root);
+    autoRender();
   }
+
+private void autoRender() {
+    String autoRenderStr = System.getProperty("de.jreality.autorender");
+    System.out.println("'"+autoRenderStr+"'");
+	if (autoRenderStr == null || !autoRenderStr.equals("false")) {
+      RenderTrigger rt = new RenderTrigger();
+      rt.addViewer(currViewer);
+      rt.addSceneGraphComponent(root);
+    }
+}
   
   void createFrame(Container content)
   {
@@ -326,10 +334,7 @@ public class ViewerApp
             createFrame(uiFactory.createViewerContent());
             initFrame();
             initTree();
-            RenderTrigger rt = new RenderTrigger();
-            rt.addViewer(currViewer);
-            rt.addSceneGraphComponent(root);
-            rt.forceRender();
+            autoRender();
           } catch (IOException ioe) {
             JOptionPane.showMessageDialog(frame, "Load failed: "+ioe.getMessage());
           }
@@ -376,6 +381,7 @@ public class ViewerApp
           tools.add(FlyTool.class);
           tools.add(HeadTransformationTool.class);
           tools.add(ShipNavigationTool.class);
+          tools.add(PointerDisplayTool.class);
           try {
             tools.add(Class.forName("de.jreality.scene.tool.PortalHeadMoveTool"));
           } catch (ClassNotFoundException e) {}
@@ -449,7 +455,15 @@ public class ViewerApp
         }
       });
       viewerMenu.add(mi);
-    }  
+    }
+    viewerMenu.addSeparator();
+    mi = new JMenuItem("force render");
+    mi.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent arg0) {
+        currViewer.render();
+      }
+    });
+    viewerMenu.add(mi);
     mb.add(viewerMenu);
 
     JMenu frameMenu = new JMenu("Frame");
@@ -577,7 +591,7 @@ public class ViewerApp
     if (config.equals("portal")) cfg = ToolSystemConfiguration.loadDefaultPortalConfiguration();
     if (config.equals("default+portal")) cfg = ToolSystemConfiguration.loadDefaultDesktopAndPortalConfiguration();
     if (cfg == null) throw new IllegalStateException("couldn't load config ["+config+"]");
-    ToolSystemViewer v = new ToolSystemViewer(vs, ToolSystemConfiguration.loadDefaultDesktopConfiguration());
+    ToolSystemViewer v = new ToolSystemViewer(vs, cfg);
     v.setPickSystem(new AABBPickSystem());
     return v;
   }
