@@ -95,7 +95,9 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
 	}
 	
 	public void transformationMatrixChanged(TransformationEvent ev) {
+	rmc.writeLock.writeLock();
    	((RemoteTransformation)rmc.getProxy(ev.getSourceNode())).setMatrix(ev.getTransformationMatrix());
+   	rmc.writeLock.writeUnlock();
 	}
 
 	public void appearanceChanged(AppearanceEvent ev) {
