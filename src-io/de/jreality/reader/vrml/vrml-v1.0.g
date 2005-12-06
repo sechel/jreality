@@ -46,6 +46,7 @@ options {
 	DataList currentNormal = null;
 	int[][] currentCoordinateIndex = null;
 	int[][] currentNormalIndex = null;
+	int[][] currentMaterialIndex = null;
 	int currentNormalBinding = VRMLHelper.DEFAULT;
 	int currentMaterialBinding = VRMLHelper.DEFAULT;
 	
@@ -148,6 +149,8 @@ transformAttribute[FactoredMatrix fm]
 	:
 		// TODO add more attributes
 		"rotation"	rr=sfrotationValue	{fm.setRotation(rr[3], rr[0], rr[1], rr[2]);}
+	|	"scale"		rr=sfvec3fValue		{fm.setStretch(rr[0], rr[1], rr[2]);}
+	|	"translation"	rr=sfvec3fValue	{fm.setTranslation(rr[0], rr[1], rr[2]);}
 	|	"center"		rr=sfvec3fValue		{fm.setCenter(rr);}
 	;
 
@@ -324,13 +327,18 @@ indexedFaceSetAttribute
 	:
 		"coordIndex"	indices = mfint32Value		
 				{
-					if (VRMLHelper.verbose) System.err.println("Got "+indices.length+"indices");
+					if (VRMLHelper.verbose) System.err.println("Got coord "+indices.length+"indices");
 					currentCoordinateIndex = VRMLHelper.convertIndices(indices); 
 				}
 	|	"normalIndex" indices=mfint32Value
 				{
-					if (VRMLHelper.verbose) System.err.println("Got "+indices.length+"indices");
+					if (VRMLHelper.verbose) System.err.println("Got normal "+indices.length+"indices");
 					currentNormalIndex = VRMLHelper.convertIndices(indices); 
+				}
+	|	"materialIndex" indices=mfint32Value
+				{
+					if (VRMLHelper.verbose) System.err.println("Got material "+indices.length+"indices");
+					currentMaterialIndex = VRMLHelper.convertIndices(indices); 
 				}
 	;
 
