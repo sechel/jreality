@@ -35,7 +35,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.ListSelectionModel;
+import javax.swing.UIManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
@@ -46,24 +54,22 @@ import de.jreality.io.JrScene;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.ReaderJRS;
 import de.jreality.reader.Readers;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.Camera;
-import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
-import de.jreality.scene.tool.*;
+import de.jreality.scene.tool.DraggingTool;
+import de.jreality.scene.tool.FlyTool;
+import de.jreality.scene.tool.HeadTransformationTool;
+import de.jreality.scene.tool.PointerDisplayTool;
+import de.jreality.scene.tool.RotateTool;
+import de.jreality.scene.tool.ScaleTool;
+import de.jreality.scene.tool.ShipNavigationTool;
+import de.jreality.scene.tool.Tool;
+import de.jreality.scene.tool.ToolSystemViewer;
 import de.jreality.scene.tool.config.ToolSystemConfiguration;
-import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.DefaultGeometryShader;
-import de.jreality.shader.DefaultLineShader;
-import de.jreality.shader.DefaultPolygonShader;
-import de.jreality.shader.RootAppearance;
-import de.jreality.shader.ShaderUtility;
 import de.jreality.ui.treeview.JListRenderer;
 import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
 import de.jreality.util.Input;
@@ -80,12 +86,12 @@ public class ViewerApp
   
   public static final String ABOUT_MESSAGE="<html><body><center><b>jReality viewer</b></center><br>preview version</body></html>";
   public static final String HELP_MESSAGE="<html>jReality viewer help<ul>"+"<li>left mouse - rotate</li>"+"<li>middle mouse - drag</li>"+"<li>CRTL + middle mouse - drag along view direction</li>"+"<li>e - encompass</li>"+"<li>BACKSPACE - toggle fullscreen</li>"+"</ul></html>";
+  private static Viewer[] viewers;
   
   private InspectorPanel inspector;
   private SceneGraphComponent currSceneNode;
   private SceneGraphComponent scene;
   private SceneGraphComponent root;
-  private SceneGraphPath cameraPath;
   private UIFactory uiFactory;
   
   private JFrame frame;
@@ -94,7 +100,6 @@ public class ViewerApp
   private ViewerSwitch viewerSwitch;
   
   private SceneGraphPath emptyPick;
-  private SceneGraphPath avatarPath;
 
   public static void main(String[] args) throws Exception
   {
@@ -105,13 +110,15 @@ public class ViewerApp
     }
     System.setProperty("sun.awt.noerasebackground", "true");
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-    new ViewerApp(createViewer(), true);
+    new ViewerApp(true);
   }
   
-  public ViewerApp(ToolSystemViewer viewer, boolean initScene) throws Exception {
+  public ViewerApp(boolean initScene) throws Exception {
     inspector=new InspectorPanel();
+    // we assume that currViewer has a viewing component and later that it
+    // delegates a viewer switch...
 
-    currViewer=viewer;
+    currViewer = createViewer();
     currViewer.getViewingComponent().addKeyListener(new KeyListener() {
       public void keyTyped(KeyEvent arg0) {
       }
@@ -123,29 +130,18 @@ public class ViewerApp
       public void keyReleased(KeyEvent arg0) {
       }
     });
-
     viewerSwitch = (ViewerSwitch) currViewer.getDelegatedViewer();
-    
-    if (initScene) {
-      root=buildRoot();
-      currSceneNode = scene;
-      currViewer.setSceneRoot(root);
-      currViewer.setCameraPath(cameraPath);
-      currViewer.setAvatarPath(avatarPath);
-      currViewer.setEmptyPickPath(emptyPick);
-    } else {
-      root = viewer.getSceneRoot();
-    }
+
     uiFactory=new UIFactory();
     uiFactory.setViewer(currViewer.getViewingComponent());
     uiFactory.setInspector(inspector);
-    uiFactory.setRoot(root);
+
     createFrame(uiFactory.createViewerContent());
     initFrame();
     initTree();
     createMenu();
     frame.show();
-    autoRender();
+
   }
 
 private void autoRender() {
@@ -276,7 +272,58 @@ private void autoRender() {
     });
     
     fileMenu.add(mi);
+    
+    mi = new JMenuItem("Load Scene...");
+    mi.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent arg0) {
+          File[] fs = FileLoaderDialog.loadFiles(frame);
+          if (fs == null || fs.length == 0) return;
+          File f = fs[0];
+          JrScene s = null;
+          try {
+            ReaderJRS r = new ReaderJRS();
+            r.setInput(new Input(f));
+            s = r.getScene();
+            loadScene(s);
+          } catch (IOException ioe) {
+            JOptionPane.showMessageDialog(frame, "Load failed: "+ioe.getMessage());
+          }
+      }
+    });
+    fileMenu.add(mi);
 
+    fileMenu.addSeparator();
+
+    mi = new JMenuItem("Desktop Scene");
+    mi.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent arg0) {
+          try {
+            ReaderJRS r = new ReaderJRS();
+            r.setInput(new Input(ViewerApp.class.getResource("desktop-scene.jrs")));
+            loadScene(r.getScene());
+          } catch (IOException ioe) {
+            JOptionPane.showMessageDialog(frame, "Load failed: "+ioe.getMessage());
+          }
+      }
+    });
+    fileMenu.add(mi);
+
+    mi = new JMenuItem("Portal Scene");
+    mi.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent arg0) {
+          try {
+            ReaderJRS r = new ReaderJRS();
+            r.setInput(new Input(ViewerApp.class.getResource("portal-scene.jrs")));
+            loadScene(r.getScene());
+          } catch (IOException ioe) {
+            JOptionPane.showMessageDialog(frame, "Load failed: "+ioe.getMessage());
+          }
+      }
+    });
+    fileMenu.add(mi);
+
+    fileMenu.addSeparator();
+    
     mi = new JMenuItem("Save...");
     mi.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent arg0) {
@@ -296,60 +343,18 @@ private void autoRender() {
           }
         }
       });
-    
     fileMenu.add(mi);
+
+    fileMenu.addSeparator();
     
-    mi = new JMenuItem("Load Scene...");
-    
-    mi.addActionListener(new ActionListener(){
-        public void actionPerformed(ActionEvent arg0) {
-          File[] fs = FileLoaderDialog.loadFiles(frame);
-          if (fs == null || fs.length == 0) return;
-          File f = fs[0];
-          JrScene s = null;
-          try {
-            ReaderJRS r = new ReaderJRS();
-            r.setInput(new Input(f));
-            s = r.getScene();
-            try {
-              currViewer = createViewer();
-              viewerSwitch = (ViewerSwitch) currViewer.getDelegatedViewer();
-            } catch (Exception e) {
-              e.printStackTrace();
-            }
-            root = s.getSceneRoot();
-            currViewer.setSceneRoot(root);
-            SceneGraphPath p = s.getPath("cameraPath");
-            if (p != null) currViewer.setCameraPath(p);
-            p = s.getPath("avatarPath");
-            if (p != null) currViewer.setAvatarPath(p);
-            emptyPick = s.getPath("emptyPickPath");
-            if (emptyPick != null) {
-              scene = emptyPick.getLastComponent();
-              currViewer.setEmptyPickPath(emptyPick);
-            }
- 
-            uiFactory.setViewer(currViewer.getViewingComponent());
-            uiFactory.setRoot(root);
-            createFrame(uiFactory.createViewerContent());
-            initFrame();
-            initTree();
-            autoRender();
-          } catch (IOException ioe) {
-            JOptionPane.showMessageDialog(frame, "Load failed: "+ioe.getMessage());
-          }
-      }
-    });
-    
-    fileMenu.add(mi);
     mi = new JMenuItem("Quit");
     mi.addActionListener(new ActionListener(){
 		  public void actionPerformed(ActionEvent arg0) {
 			  System.exit(0);
 		  }
     });
-    fileMenu.addSeparator();
     fileMenu.add(mi);
+
     mb.add(fileMenu);
 
     JMenu compMenu = new JMenu("Component");
@@ -502,91 +507,46 @@ private void autoRender() {
     frame.setJMenuBar(mb);
   }
   
-  private SceneGraphComponent buildRoot()
-  {
+  private void loadScene(JrScene s) {
+    try {
+      currViewer = createViewer();
+      viewerSwitch = (ViewerSwitch) currViewer.getDelegatedViewer();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    root = s.getSceneRoot();
+    currViewer.setSceneRoot(root);
+    SceneGraphPath p = s.getPath("cameraPath");
+    if (p != null) currViewer.setCameraPath(p);
+    p = s.getPath("avatarPath");
+    if (p != null) currViewer.setAvatarPath(p);
+    emptyPick = s.getPath("emptyPickPath");
+    if (emptyPick != null) {
+      scene = emptyPick.getLastComponent();
+      currViewer.setEmptyPickPath(emptyPick);
+    }
 
-    SceneGraphComponent root=new SceneGraphComponent();
-    root.setName("root");
-
-    scene = new SceneGraphComponent();
-  	scene.setName("scene");
-	  root.addChild(scene);
-
-    SceneGraphComponent avatarNode= new SceneGraphComponent();
-    avatarNode.setName("avatar");
-    Transformation at= new Transformation();
-    at.setName("avatar Trafo");
-    avatarNode.setTransformation(at);
-    //
-    // camera
-    //
-    SceneGraphComponent cameraNode= new SceneGraphComponent();
-    cameraNode.setName("camera Node");
-    MatrixBuilder.euclidean().translate(0, 0, 16).assignTo(cameraNode);
-    Camera firstCamera= new Camera();
-    firstCamera.setName("camera");
-    firstCamera.setFieldOfView(30);
-    firstCamera.setFar(50);
-    firstCamera.setNear(3);
-    cameraNode.setCamera(firstCamera);
-
-    SceneGraphComponent lightNode= new SceneGraphComponent();
-    lightNode.setName("lightComp 1");
-    MatrixBuilder.euclidean().rotate(-Math.PI / 4, 1, 1, 0).assignTo(lightNode);
-    DirectionalLight light= new DirectionalLight();
-    light.setName("light 1");
-    lightNode.setLight(light);
-    root.addChild(lightNode);
-
-    SceneGraphComponent lightNode2= new SceneGraphComponent();
-    lightNode2.setName("lightComp 2");
-    MatrixBuilder.euclidean().rotate(-Math.PI / 4, 1, 1, 0).assignTo(lightNode2);
-    DirectionalLight light2= new DirectionalLight();
-    light2.setName("light 2");
-    lightNode2.setLight(light2);
-    root.addChild(lightNode2);
-
-
-    Appearance ap= new Appearance();
-    ap.setName("root appearance");
-    DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
-    RootAppearance ra = ShaderUtility.createRootAppearance(ap);
-    DefaultLineShader dls = (DefaultLineShader) dgs.getLineShader();
-    DefaultPolygonShader dps = (DefaultPolygonShader) dgs.getPolygonShader();
- 
-    root.setAppearance(ap);
-
-    root.addChild(avatarNode);
-    avatarNode.addChild(cameraNode);
-    
-    avatarPath=new SceneGraphPath();
-    avatarPath.push(root);
-    avatarPath.push(avatarNode);
-    
-    cameraPath = avatarPath.pushNew(cameraNode);
-    cameraPath.push(firstCamera);
-    
-    emptyPick = new SceneGraphPath();
-    emptyPick.push(root);
-    emptyPick.push(scene);
-    
-	scene.addTool(new EncompassTool());
-	scene.addTool(new RotateTool());
-	scene.addTool(new DraggingTool());
-
-    return root;
+    uiFactory.setViewer(currViewer.getViewingComponent());
+    uiFactory.setRoot(root);
+    createFrame(uiFactory.createViewerContent());
+    initFrame();
+    initTree();
+    autoRender();
   }
+  
   private static ToolSystemViewer createViewer() throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
   {
-    String viewer=System.getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
-    String config=System.getProperty("de.jreality.scene.tool.Config", "default");
-    StringTokenizer st = new StringTokenizer(viewer);
-    Viewer[] viewers = new Viewer[st.countTokens()];
-    for (int i = 0; i < viewers.length; i++) {
-      viewers[i] = createViewer(st.nextToken());
+    if (viewers == null) {
+      String viewer=System.getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
+      StringTokenizer st = new StringTokenizer(viewer);
+      viewers = new Viewer[st.countTokens()];
+      for (int i = 0; i < viewers.length; i++) {
+        viewers[i] = createViewer(st.nextToken());
+      }
     }
     ViewerSwitch vs = new ViewerSwitch(viewers);
     ToolSystemConfiguration cfg = null;
+    String config=System.getProperty("de.jreality.scene.tool.Config", "default");
     if (config.equals("default")) cfg = ToolSystemConfiguration.loadDefaultDesktopConfiguration();
     if (config.equals("portal")) cfg = ToolSystemConfiguration.loadDefaultPortalConfiguration();
     if (config.equals("default+portal")) cfg = ToolSystemConfiguration.loadDefaultDesktopAndPortalConfiguration();
