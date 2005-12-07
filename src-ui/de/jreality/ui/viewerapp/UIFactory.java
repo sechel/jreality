@@ -59,6 +59,7 @@ public class UIFactory
   }
   private SceneGraphComponent root;
   private Component viewer;
+  private Component console;
   private Component inspector;
   final Border emptyBorder=BorderFactory.createEmptyBorder(2,2,2,2);
   JTree sceneTree;
@@ -91,13 +92,20 @@ public class UIFactory
     SceneTreeModel model = new SceneTreeModel(root);
     sceneTree.setModel(model);
     sceneTree.setCellRenderer(new JTreeRenderer());
-
     return scroll(sceneTree);
   }
 
   Component createViewerPanel()
   {
-    return viewer;
+    JSplitPane main=new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+        viewer, scroll(console));
+    main.setContinuousLayout(true);
+    main.setResizeWeight(.01);
+    main.setDividerLocation(420);
+    main.setLastDividerLocation(420);
+    main.setDividerLocation(600);
+    main.setOneTouchExpandable(true);
+    return main;
   }
 
   Component createInspectorPanel()
@@ -109,7 +117,6 @@ public class UIFactory
   JScrollPane scroll(Component tree)
   {
     JScrollPane scroll=new JScrollPane(tree);
-//    scroll.setBorder(BorderFactory.createEmptyBorder());
     return scroll;
   }
 
@@ -118,6 +125,10 @@ public class UIFactory
     viewer=component;
   }
 
+  public void setConsole(Component component)
+  {
+    console=component;
+  }
 
   public void setRoot(SceneGraphComponent component)
   {

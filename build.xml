@@ -47,6 +47,10 @@
     <fileset dir="dist">
       <include name="jReality-io.jar"/>
     </fileset>
+    <fileset dir="lib">
+        <include name="jterm.jar"/>
+        <include name="bsh-1.3b2.jar"/>
+    </fileset>
   </path>
 
 	<path id="proxies.classpath">
@@ -158,7 +162,12 @@
     <get dest="lib/xstream-1.1.2.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/xstream-1.1.2.jar" usetimestamp="true" verbose="true"/>
   </target>
 
-  <target name="ui" depends="core, io" description="compile the ui">
+  <target name="ui-deps" if="env.FETCH_DEPS">
+    <get dest="lib/bsh-1.3b2.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/bsh-1.3b2.jar" usetimestamp="true" verbose="true"/>
+    <get dest="lib/jterm.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/jterm.jar" usetimestamp="true" verbose="true"/>
+  </target>
+
+  <target name="ui" depends="core, io, ui-deps" description="compile the ui">
     <mkdir dir="${build}/ui" />
     <javac excludesfile="excludes.txt" srcdir="${ui}" destdir="${build}/ui" debug="true">
       <compilerarg line="-source 1.4" />

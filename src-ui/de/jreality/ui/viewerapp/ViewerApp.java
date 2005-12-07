@@ -23,7 +23,9 @@
 package de.jreality.ui.viewerapp;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -46,8 +48,18 @@ import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+
+import bsh.EvalError;
+
+import jterm.BshEvaluator;
+import jterm.JTerm;
+import jterm.Session;
+import jterm.StringEvaluator;
 
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.io.JrScene;
@@ -78,6 +90,7 @@ import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
+import de.jreality.util.PickUtility;
 import de.jreality.util.RenderTrigger;
 import de.jreality.util.ViewerSwitch;
 import de.jreality.writer.WriterJRS;
@@ -91,7 +104,7 @@ public class ViewerApp
   public static final String ABOUT_MESSAGE="<html><body><center><b>jReality viewer</b></center><br>preview version</body></html>";
   public static final String HELP_MESSAGE="<html>jReality viewer help<ul>"+"<li>left mouse - rotate</li>"+"<li>middle mouse - drag</li>"+"<li>CRTL + middle mouse - drag along view direction</li>"+"<li>e - encompass</li>"+"<li>BACKSPACE - toggle fullscreen</li>"+"</ul></html>";
   private static Viewer[] viewers;
-  private static ViewerSwitch vs;
+  private static ViewerSwitch viewerSwitch;
   
   private InspectorPanel inspector;
   private SceneGraphComponent currSceneNode;
@@ -102,12 +115,15 @@ public class ViewerApp
   private JFrame frame;
   
   private ToolSystemViewer currViewer;
-  private ViewerSwitch viewerSwitch;
   
   private SceneGraphPath emptyPick;
   private RenderTrigger renderTrigger = new RenderTrigger();
 
   boolean autoRender=true;
+  
+  JTerm jterm;
+  private BshEvaluator bshEval;
+  private SimpleAttributeSet infoStyle;
   
   public static void main(String[] args) throws Exception
   {
@@ -122,17 +138,27 @@ public class ViewerApp
   }
   
   public ViewerApp(boolean initScene) throws Exception {
+    
+    bshEval = new BshEvaluator();
+    jterm = new JTerm(new Session(bshEval));
+    jterm.setMaximumSize(new Dimension(10, 10));
+
+    infoStyle = new SimpleAttributeSet();
+    StyleConstants.setForeground(infoStyle, new Color(165, 204, 0));
+    StyleConstants.setFontFamily(infoStyle, "Monospaced");
+    StyleConstants.setBold(infoStyle, true);
+    StyleConstants.setFontSize(infoStyle, 12);
+    
     inspector=new InspectorPanel();
     // we assume that currViewer has a viewing component and later that it
     // delegates a viewer switch...
 
     currViewer = createViewer();
-    viewerSwitch = (ViewerSwitch) currViewer.getDelegatedViewer();
 
     uiFactory=new UIFactory();
     uiFactory.setViewer(currViewer.getViewingComponent());
     uiFactory.setInspector(inspector);
-
+    uiFactory.setConsole(jterm);
     createFrame(uiFactory.createViewerContent());
     initFrame();
     initTree();
@@ -201,6 +227,7 @@ public class ViewerApp
       	public void valueChanged(TreeSelectionEvent e) {
         Object o=null;
         TreePath p= e.getNewLeadSelectionPath();
+                
         if(p!=null) {
           if (p.getLastPathComponent() instanceof SceneTreeNode) {
             o=((SceneTreeNode)p.getLastPathComponent()).getNode();
@@ -212,6 +239,18 @@ public class ViewerApp
         }
         System.out.println("setting "+(o==null? "null": o.getClass().getName()));
         inspector.setObject(o);
+        if (o instanceof SceneGraphNode) {
+          try {
+            SceneGraphNode sn = (SceneGraphNode) o;
+            bshEval.getInterpreter().set("self", sn);
+            String info="\nself="+sn.getName()+"["+sn.getClass().getName()+"]\n";
+            jterm.getSession().displayAndPrompt(info, infoStyle);
+            jterm.setCaretPosition(jterm.getDocument().getLength());
+          } catch (EvalError e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+          }
+        }
         if (o instanceof SceneGraphComponent) {
         	  currSceneNode = (SceneGraphComponent) o;
         } else {
@@ -437,15 +476,26 @@ public class ViewerApp
 
     compMenu.add(mi);
 
+    compMenu.addSeparator();
+    
     mi = new JMenuItem("Make Geometry pickable");
     mi.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent arg0) {
           Geometry geom = currSceneNode.getGeometry();
           if (geom != null && geom instanceof IndexedFaceSet) {
-        	  geom.setGeometryAttributes("AABBTree", AABBTree.construct((IndexedFaceSet)geom, 5));
+            PickUtility.assignFaceAABBTree((IndexedFaceSet)geom);
           } else {
-        	  JOptionPane.showMessageDialog(frame, "need IndexedFaceSet");
+            JOptionPane.showMessageDialog(frame, "need IndexedFaceSet");
           }
+        }
+    });
+
+    compMenu.add(mi);
+    mi = new JMenuItem("Make Subgraph pickable");
+    mi.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent arg0) {
+          if (currSceneNode != null) PickUtility.assignFaceAABBTrees(currSceneNode);
+          else JOptionPane.showMessageDialog(frame, "Select a component fist!");
         }
     });
     compMenu.add(mi);
@@ -560,9 +610,9 @@ public class ViewerApp
       for (int i = 0; i < viewers.length; i++) {
         viewers[i] = createViewer(st.nextToken());
       }
-      vs = new ViewerSwitch(viewers);
-      renderTrigger.addViewer(vs);
-      vs.getViewingComponent().addKeyListener(new KeyListener() {
+      viewerSwitch = new ViewerSwitch(viewers);
+      renderTrigger.addViewer(viewerSwitch);
+      viewerSwitch.getViewingComponent().addKeyListener(new KeyListener() {
         public void keyTyped(KeyEvent arg0) {
         }
         public void keyPressed(KeyEvent arg0) {
@@ -580,7 +630,7 @@ public class ViewerApp
     if (config.equals("portal")) cfg = ToolSystemConfiguration.loadDefaultPortalConfiguration();
     if (config.equals("default+portal")) cfg = ToolSystemConfiguration.loadDefaultDesktopAndPortalConfiguration();
     if (cfg == null) throw new IllegalStateException("couldn't load config ["+config+"]");
-    ToolSystemViewer v = new ToolSystemViewer(vs, cfg);
+    ToolSystemViewer v = new ToolSystemViewer(viewerSwitch, cfg);
     v.setPickSystem(new AABBPickSystem());
     return v;
   }
