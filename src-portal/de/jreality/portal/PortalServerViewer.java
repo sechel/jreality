@@ -34,7 +34,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.scene.proxy.smrj.SMRJMirrorScene;
-import de.smrj.RemoteFactory;
 
 /**
  * @author weissman
@@ -47,27 +46,25 @@ public class PortalServerViewer implements de.jreality.scene.Viewer {
 	SceneGraphPath camPath;
   private int signature;
 
-	RemoteFactory factory;
-	RemoteJoglViewer clients;
+	RemoteViewer clients;
 
 	SMRJMirrorScene proxyScene;
   final Lock renderLock = new Lock();
   
-	public PortalServerViewer(RemoteFactory factory, Class viewerClass) throws IOException,
+  public PortalServerViewer() throws RemoteException, IOException, NotBoundException {
+    init(Viewer.class);
+  }
+  
+	public PortalServerViewer(Class viewerClass) throws IOException,
 	MalformedURLException, RemoteException, NotBoundException {
-      init(factory, viewerClass);
+      init(viewerClass);
     }
 
-	public PortalServerViewer(RemoteFactory factory) throws IOException, RemoteException, NotBoundException {
-    init(factory, Viewer.class);
-	}
-
-  public void init(RemoteFactory factory, Class viewerClass) throws IOException {
-    this.factory = factory;
-    clients = (RemoteJoglViewer) factory.createRemoteViaStaticMethod(
-        PortalJoglClientViewer.class, PortalJoglClientViewer.class,
-        "getInstance", new Class[]{Class.class}, new Object[]{viewerClass});
-    proxyScene = new SMRJMirrorScene(factory, renderLock);
+  public void init(Class viewerClass) throws IOException {
+    clients = (RemoteViewer) SMRJFactory.getRemoteFactory().createRemoteViaStaticMethod(
+        HeadTrackedViewer.class, HeadTrackedViewer.class,
+        "createFullscreen", new Class[]{Class.class}, new Object[]{viewerClass});
+    proxyScene = new SMRJMirrorScene(SMRJFactory.getRemoteFactory(), renderLock);
   }
   
   public SceneGraphComponent getSceneRoot() {
@@ -97,9 +94,6 @@ public class PortalServerViewer implements de.jreality.scene.Viewer {
 		clients.setRemoteCameraPath(p == null ? null : proxyScene.getProxies(p.toList()));
 	}
 
-	/**
-	 * TODO: open frame for keyboard/mouse input!?
-	 */
 	public boolean hasViewingComponent() {
 		return false;
 	}

@@ -22,7 +22,6 @@ import de.jreality.scene.Viewer;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
-import de.jreality.util.LoggingSystem;
 import de.smrj.ClientFactory;
 
 public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.ResetCallback {

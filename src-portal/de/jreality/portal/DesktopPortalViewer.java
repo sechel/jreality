@@ -9,17 +9,15 @@ import java.rmi.RemoteException;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
-import de.smrj.RemoteFactory;
-import de.smrj.tcp.TCPBroadcasterNIO;
 
 public class DesktopPortalViewer implements Viewer {
 
   HeadTrackedViewer desktopViewer;
-  NewPortalServerViewer portalViewer;
+  PortalServerViewer portalViewer;
   
   public DesktopPortalViewer() {
     try {
-      portalViewer = new NewPortalServerViewer();
+      portalViewer = new PortalServerViewer();
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e.getMessage());
     }
@@ -27,7 +25,7 @@ public class DesktopPortalViewer implements Viewer {
   }
   
   public DesktopPortalViewer(Class portalViewerClass) throws MalformedURLException, RemoteException, IOException, NotBoundException {
-    portalViewer = new NewPortalServerViewer(portalViewerClass);
+    portalViewer = new PortalServerViewer(portalViewerClass);
     try {
       desktopViewer = new HeadTrackedViewer(portalViewerClass);
     } catch (Exception e) {
