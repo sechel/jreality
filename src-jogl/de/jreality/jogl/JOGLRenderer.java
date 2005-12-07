@@ -27,6 +27,7 @@ import de.jreality.scene.pick.PickPoint;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
 /**
@@ -343,7 +344,13 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 	 * @see net.java.games.jogl.GLEventListener#display(net.java.games.jogl.GLDrawable)
 	 */
 	public void display(GLDrawable drawable) {
-		//if (pickMode) return;
+	  if (theViewer.getSceneRoot() == null || theViewer.getCameraPath() == null) {
+     LoggingSystem.getLogger(this).info("display called w/o scene root or camera path");
+     // TODO: clear background
+     return;
+    }
+      
+    //if (pickMode) return;
 		long beginTime = 0;
 		if (collectFrameRate) beginTime = System.currentTimeMillis();
 		// following two statements should be redundant: they occur in init() which
