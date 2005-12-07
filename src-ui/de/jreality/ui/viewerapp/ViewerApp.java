@@ -54,11 +54,14 @@ import de.jreality.io.JrScene;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.ReaderJRS;
 import de.jreality.reader.Readers;
+import de.jreality.scene.Geometry;
+import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
+import de.jreality.scene.pick.bounding.AABBTree;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.scene.tool.DraggingTool;
 import de.jreality.scene.tool.FlyTool;
@@ -433,6 +436,20 @@ public class ViewerApp
     });
 
     compMenu.add(mi);
+
+    mi = new JMenuItem("Make Geometry pickable");
+    mi.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent arg0) {
+          Geometry geom = currSceneNode.getGeometry();
+          if (geom != null && geom instanceof IndexedFaceSet) {
+        	  geom.setGeometryAttributes("AABBTree", AABBTree.construct((IndexedFaceSet)geom, 5));
+          } else {
+        	  JOptionPane.showMessageDialog(frame, "need IndexedFaceSet");
+          }
+        }
+    });
+    compMenu.add(mi);
+
     mb.add(compMenu);
 
     JMenu viewerMenu = new JMenu("Viewer");
