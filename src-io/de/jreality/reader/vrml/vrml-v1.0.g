@@ -102,6 +102,7 @@ atomicStatement:
 	|	normalStatement
 	|	currentNormalBinding=normalBindingStatement
 	|	currentMaterialBinding=materialBindingStatement
+	|	cubeStatement
 	|	indexedFaceSetStatement
 	|	indexedLineSetStatement
 	|	perspectiveCameraStatement
@@ -293,7 +294,26 @@ bindingAttribute returns [int which]
 	|	"PER_VERTEX"			{which = VRMLHelper.PER_VERTEX;	}
 	|	"PER_VERTEX_INDEXED"	{which = VRMLHelper.PER_VERTEX_INDEXED;	}
 	;
-	
+
+cubeStatement returns [SceneGraphComponent sgc]
+{ sgc = null; double w=2, h=2, d=2;}	
+	:
+	"Cube"	OPEN_BRACE	(
+			("width"		w = 	sffloatValue)
+		| 	("height"	h = 	sffloatValue)
+		| 	("depth"		d = 	sffloatValue)
+		)+ CLOSE_BRACE
+	{
+		IndexedFaceSet cube = Primitives.cube(false);
+		sgc = new SceneGraphComponent();
+		sgc.setName("cube");
+		sgc.setGeometry(cube);
+		double[] scaleMatrix = P3.makeStretchMatrix(null, new double[]{w,d,h});
+		sgc.setTransformation(new Transformation(scaleMatrix));
+		currentSGC.addChild(sgc);
+	}
+	;
+		
 indexedFaceSetStatement returns [IndexedFaceSet ifs]
 {ifs = null;}
 	:
