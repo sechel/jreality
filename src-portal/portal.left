@@ -3,10 +3,4 @@
 # load shared config
 parent: portal.props
 
-frame.title: left
-frame.fullscreen: true
-
-# only needed if different clients run on the same machine, nice for debugging
-client.viewer.name: jRealityRemoteRenderL
-
 camera.orientation: 90. 0. 1. 0.

@@ -24,11 +24,8 @@ package de.jreality.portal;
 
 import java.awt.Component;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 
-import de.jreality.jogl.Viewer;
+import de.jreality.scene.Viewer;
 import de.jreality.scene.Lock;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -39,7 +36,7 @@ import de.jreality.scene.proxy.smrj.SMRJMirrorScene;
  * @author weissman
  * 
  */
-public class PortalServerViewer implements de.jreality.scene.Viewer {
+public class PortalServerViewer implements Viewer {
 
   SceneGraphComponent root;
   SceneGraphComponent auxRoot;
@@ -51,14 +48,13 @@ public class PortalServerViewer implements de.jreality.scene.Viewer {
 	SMRJMirrorScene proxyScene;
   final Lock renderLock = new Lock();
   
-  public PortalServerViewer() throws RemoteException, IOException, NotBoundException {
-    init(Viewer.class);
+  public PortalServerViewer() throws IOException {
+    init(de.jreality.jogl.Viewer.class);
   }
   
-	public PortalServerViewer(Class viewerClass) throws IOException,
-	MalformedURLException, RemoteException, NotBoundException {
-      init(viewerClass);
-    }
+	public PortalServerViewer(Class viewerClass) throws IOException {
+    init(viewerClass);
+  }
 
   public void init(Class viewerClass) throws IOException {
     clients = (RemoteViewer) SMRJFactory.getRemoteFactory().createRemoteViaStaticMethod(

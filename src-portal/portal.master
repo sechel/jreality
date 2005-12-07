@@ -1,8 +1,3 @@
 # portal configurtation file
 
 parent: portal.props
-
-frame.title: master
-frame.fullscreen: false 
-
-camera.stereo: false

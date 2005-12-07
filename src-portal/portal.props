@@ -3,34 +3,5 @@
 # inherit configuration attributes via
 # parent: parentPropFile.props
 
-# should belong to a global jReality property file
-dataDir: data
-config: config
-textures: textures
-3ds: 3ds
-gens: gens
-
-server.uri: //master/jRealityRemoteServer
-
-portal.fixedHead: false 
-portal.fixedHeadPosition: 0. 4.5 4.068
-
-camera.eyeSeparation: 0.06
-camera.nearPlane: 0.1
-camera.farPlane: 100.
-camera.stereo: true 
-camera.correction.axis: 1. 0. 0.
-camera.correction.angle: -90.
-
-frame.fullscreen: false
-frame.width: 600
-frame.height: 480
-frame.title: master
-
-#viewer.autoBufferSwap: true
-#viewer.printRenderTime: true 
-
 # these values are overwritten for each side of the portal
-
-client.viewer.name: jRealityRemoteViewer
 camera.orientation: 0. 0. 1. 0.

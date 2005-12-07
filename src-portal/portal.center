@@ -1,8 +1,3 @@
 # portal configurtation file
 
 parent: portal.props
-
-frame.title: center
-frame.fullscreen: true 
-
-client.viewer.name: jRealityRemoteRenderC

@@ -24,6 +24,12 @@ import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
 import de.smrj.ClientFactory;
 
+/**
+ * TODO: make configuration better...
+ * 
+ * @author gollwas
+ *
+ */
 public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.ResetCallback {
 
   Viewer viewer;

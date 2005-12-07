@@ -2,9 +2,6 @@ package de.jreality.portal;
 
 import java.awt.Component;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -24,7 +21,7 @@ public class DesktopPortalViewer implements Viewer {
     desktopViewer = new HeadTrackedViewer();
   }
   
-  public DesktopPortalViewer(Class portalViewerClass) throws MalformedURLException, RemoteException, IOException, NotBoundException {
+  public DesktopPortalViewer(Class portalViewerClass) throws IOException {
     portalViewer = new PortalServerViewer(portalViewerClass);
     try {
       desktopViewer = new HeadTrackedViewer(portalViewerClass);
