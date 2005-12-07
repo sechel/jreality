@@ -26,6 +26,7 @@ package de.jreality.soft;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
+import java.util.List;
 
 import de.jreality.math.Rn;
 import de.jreality.scene.*;
@@ -68,10 +69,6 @@ public abstract class Renderer {
   public abstract void update();
   
   void render(int width, int height) {
-    if(root == null || camera == null)
-      throw new IllegalStateException("need camera and root node");
-    if(width == 0 || height == 0) return;
-
     //
     //make sure that the buffered image is of correct size:
     //
@@ -82,7 +79,7 @@ public abstract class Renderer {
       pipeline.getPerspective().setWidth(width);
       pipeline.getPerspective().setHeight(height);
 //    }
-      Appearance a = root.getAppearance();
+    Appearance a = root == null ? null : root.getAppearance();
       Color background;
       if(a != null) {
           Object o = a.getAttribute(CommonAttributes.BACKGROUND_COLOR);
@@ -97,26 +94,27 @@ public abstract class Renderer {
     // set camera settings:
     //
     
-    DefaultPerspective p =( (DefaultPerspective)pipeline.getPerspective());
-    p.setFieldOfViewDeg(camera.getFieldOfView());
-    p.setNear(camera.getNear());
-    p.setFar(camera.getFar());
-    cameraWorld.resetMatrix();
-    //cameraPath.applyEffectiveTransformation(cameraWorld);
-    cameraWorld.setMatrix(cameraPath.getMatrix(null));
-    //SceneGraphUtilities.applyEffectiveTransformation(cameraWorld,(SceneGraphComponent) camera.getParentNode(),root);
-    
-    //
-    // traverse   
-    //
-    pipeline.clearPipeline();
-	double[] im = new double[16];
-	Rn.inverse(im,cameraWorld.getMatrix());
-	//cameraWorld.getInverseMatrix(im);
-	cameraWorld.setMatrix(im);
-    renderTraversal.setInitialTransformation(cameraWorld);
-    renderTraversal.traverse(root);
-    
+    if (root != null && camera != null) {
+      DefaultPerspective p =( (DefaultPerspective)pipeline.getPerspective());
+      p.setFieldOfViewDeg(camera.getFieldOfView());
+      p.setNear(camera.getNear());
+      p.setFar(camera.getFar());
+      cameraWorld.resetMatrix();
+      //cameraPath.applyEffectiveTransformation(cameraWorld);
+      cameraWorld.setMatrix(cameraPath.getMatrix(null));
+      //SceneGraphUtilities.applyEffectiveTransformation(cameraWorld,(SceneGraphComponent) camera.getParentNode(),root);
+      
+      //
+      // traverse   
+      //
+      pipeline.clearPipeline();
+  	double[] im = new double[16];
+  	Rn.inverse(im,cameraWorld.getMatrix());
+  	//cameraWorld.getInverseMatrix(im);
+  	cameraWorld.setMatrix(im);
+      renderTraversal.setInitialTransformation(cameraWorld);
+      renderTraversal.traverse(root);
+    }    
     //
     // sort
     // TODO: make sorting customizable
@@ -147,9 +145,15 @@ public abstract class Renderer {
 
   public void setSceneRoot(SceneGraphComponent component) {
     root=component;
-    if(root!= null && camera !=null)
+    if(root!= null && camera !=null) {
         //cameraPath = new SceneGraphPath(root,camera); 
-        cameraPath = (SceneGraphPath) SceneGraphUtility.getPathsBetween(root, camera).get(0); 
+        List camPaths = SceneGraphUtility.getPathsBetween(root, camera);
+        if (camPaths.size() > 0) cameraPath = (SceneGraphPath) camPaths.get(0);
+        else {
+          camera = null;
+          cameraPath = null;
+        }
+    }
   }
 
 //  public static class ByteArray extends Renderer

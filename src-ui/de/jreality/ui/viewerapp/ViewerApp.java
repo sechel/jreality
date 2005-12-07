@@ -88,6 +88,7 @@ public class ViewerApp
   public static final String ABOUT_MESSAGE="<html><body><center><b>jReality viewer</b></center><br>preview version</body></html>";
   public static final String HELP_MESSAGE="<html>jReality viewer help<ul>"+"<li>left mouse - rotate</li>"+"<li>middle mouse - drag</li>"+"<li>CRTL + middle mouse - drag along view direction</li>"+"<li>e - encompass</li>"+"<li>BACKSPACE - toggle fullscreen</li>"+"</ul></html>";
   private static Viewer[] viewers;
+  private static ViewerSwitch vs;
   
   private InspectorPanel inspector;
   private SceneGraphComponent currSceneNode;
@@ -101,7 +102,10 @@ public class ViewerApp
   private ViewerSwitch viewerSwitch;
   
   private SceneGraphPath emptyPick;
+  private RenderTrigger renderTrigger = new RenderTrigger();
 
+  boolean autoRender=true;
+  
   public static void main(String[] args) throws Exception
   {
     try {
@@ -131,19 +135,14 @@ public class ViewerApp
     initTree();
     createMenu();
     frame.show();
+    
+    String autoRenderProp = System.getProperty("de.jreality.ui.viewerapp.autorender", "true");
+    if (autoRenderProp.equalsIgnoreCase("false")) {
+      autoRender = false;
+    }
 
   }
 
-private void autoRender() {
-    String autoRenderStr = System.getProperty("de.jreality.autorender");
-    System.out.println("'"+autoRenderStr+"'");
-	if (autoRenderStr == null || !autoRenderStr.equals("false")) {
-      RenderTrigger rt = new RenderTrigger();
-      rt.addViewer(currViewer);
-      rt.addSceneGraphComponent(root);
-    }
-}
-  
   void createFrame(Container content)
   {
     if (frame == null) {
@@ -500,7 +499,53 @@ private void autoRender() {
   private void loadScene(JrScene s) {
     try {
       currViewer = createViewer();
-      currViewer.getViewingComponent().addKeyListener(new KeyListener() {
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    
+    if (autoRender && root != null)
+      renderTrigger.removeSceneGraphComponent(root);
+
+    root = s.getSceneRoot();
+    currViewer.setSceneRoot(root);
+    SceneGraphPath p = s.getPath("cameraPath");
+    if (p != null) currViewer.setCameraPath(p);
+    p = s.getPath("avatarPath");
+    if (p != null) currViewer.setAvatarPath(p);
+    emptyPick = s.getPath("emptyPickPath");
+    if (emptyPick != null) {
+      currSceneNode = scene = emptyPick.getLastComponent();
+      currViewer.setEmptyPickPath(emptyPick);
+    }
+
+    uiFactory.setViewer(currViewer.getViewingComponent());
+    uiFactory.setRoot(root);
+    createFrame(uiFactory.createViewerContent());
+    initFrame();
+    initTree();
+    
+    if (autoRender)
+      renderTrigger.addSceneGraphComponent(root);
+
+    renderTrigger.forceRender();
+
+//    frame.repaint();
+//    CameraUtility.encompass(currViewer.getAvatarPath(), emptyPick, currViewer.getCameraPath());
+  }
+  
+  private ToolSystemViewer createViewer() throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
+  {
+    if (viewers == null) {
+
+      String viewer=System.getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
+      StringTokenizer st = new StringTokenizer(viewer);
+      viewers = new Viewer[st.countTokens()];
+      for (int i = 0; i < viewers.length; i++) {
+        viewers[i] = createViewer(st.nextToken());
+      }
+      vs = new ViewerSwitch(viewers);
+      renderTrigger.addViewer(vs);
+      vs.getViewingComponent().addKeyListener(new KeyListener() {
         public void keyTyped(KeyEvent arg0) {
         }
         public void keyPressed(KeyEvent arg0) {
@@ -511,42 +556,7 @@ private void autoRender() {
         public void keyReleased(KeyEvent arg0) {
         }
       });
-      viewerSwitch = (ViewerSwitch) currViewer.getDelegatedViewer();
-    } catch (Exception e) {
-      e.printStackTrace();
     }
-    root = s.getSceneRoot();
-    currViewer.setSceneRoot(root);
-    SceneGraphPath p = s.getPath("cameraPath");
-    if (p != null) currViewer.setCameraPath(p);
-    p = s.getPath("avatarPath");
-    if (p != null) currViewer.setAvatarPath(p);
-    emptyPick = s.getPath("emptyPickPath");
-    if (emptyPick != null) {
-      scene = emptyPick.getLastComponent();
-      currViewer.setEmptyPickPath(emptyPick);
-    }
-
-    uiFactory.setViewer(currViewer.getViewingComponent());
-    uiFactory.setRoot(root);
-    createFrame(uiFactory.createViewerContent());
-    initFrame();
-    initTree();
-    autoRender();
-    //CameraUtility.encompass(currViewer.getAvatarPath(), emptyPick, currViewer.getCameraPath());
-  }
-  
-  private static ToolSystemViewer createViewer() throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
-  {
-    if (viewers == null) {
-      String viewer=System.getProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
-      StringTokenizer st = new StringTokenizer(viewer);
-      viewers = new Viewer[st.countTokens()];
-      for (int i = 0; i < viewers.length; i++) {
-        viewers[i] = createViewer(st.nextToken());
-      }
-    }
-    ViewerSwitch vs = new ViewerSwitch(viewers);
     ToolSystemConfiguration cfg = null;
     String config=System.getProperty("de.jreality.scene.tool.Config", "default");
     if (config.equals("default")) cfg = ToolSystemConfiguration.loadDefaultDesktopConfiguration();
