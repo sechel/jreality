@@ -92,6 +92,7 @@ atomicStatement:
 		separatorStatement
 	|	infoStatement
 	| 	transformStatement
+	| 	translationStatement
 	|	rotationStatement
 	|	scaleStatement
 	|	matrixTransformStatement
@@ -167,7 +168,7 @@ matrixTransformStatement returns [double[] mat]
 translationStatement returns [double[] mat]
 {mat = null;  double[] t = null; }
 		:
-		"Translation"	OPEN_BRACE	t=sfvec3fValue CLOSE_BRACE		
+		"Translation"	OPEN_BRACE "translation" t=sfvec3fValue CLOSE_BRACE		
 		{
 			if (VRMLHelper.verbose) System.err.println("Got Translation");
 			mat = P3.makeTranslationMatrix(null, t, Pn.EUCLIDEAN);

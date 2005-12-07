@@ -176,8 +176,8 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     // new camera path => extract headComponent and set artificial camera path
     cam = (Camera) camPath.getLastElement();
     // TODO: do these settings on client side...
-    cam.setStereo(config.getBool("camera.stereo"));
-    cam.setEyeSeparation(config.getDouble("camera.eyeSeparation"));
+    //cam.setStereo(config.getBool("camera.stereo"));
+    //cam.setEyeSeparation(config.getDouble("camera.eyeSeparation"));
     cam.setOnAxis(false);
 
     camPath.pop();

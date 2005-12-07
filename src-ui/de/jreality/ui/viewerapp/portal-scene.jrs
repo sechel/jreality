@@ -125,7 +125,7 @@
               <fieldOfView>29.999999999999996</fieldOfView>
               <focus>3.0</focus>
               <near>3.0</near>
-              <onAxis>true</onAxis>
+              <onAxis>false</onAxis>
               <orientationMatrix></orientationMatrix>
               <perspective>true</perspective>
               <stereo>false</stereo>
