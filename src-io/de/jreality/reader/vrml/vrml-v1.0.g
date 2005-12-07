@@ -441,7 +441,7 @@ sfstringValue
 sfcolorValue returns [Color c]
 { c = null; double r, g, b;}
 	:
-		r=number b=number g=number	{c = new Color( (float)r, (float) g, (float) b); }
+		r=number g=number b=number	{c = new Color( (float)r, (float) g, (float) b); }
 	;
 
 sfcolorValues returns [Color[] cl]
