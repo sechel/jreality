@@ -26,7 +26,7 @@ class IntArrayConverter implements Converter {
     StringBuffer sb = new StringBuffer();
     for (int i = 0, n = data.length; i<n; i++)
       sb.append(data[i]).append(' ');
-    sb.delete(sb.length()-1, sb.length());
+    if (sb.length() > 0) sb.delete(sb.length()-1, sb.length());
     writer.setValue(sb.toString());
   }
 

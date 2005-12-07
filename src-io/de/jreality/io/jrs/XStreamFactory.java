@@ -35,6 +35,7 @@ import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.tool.DraggingTool;
 import de.jreality.scene.tool.EncompassTool;
+import de.jreality.scene.tool.FlyTool;
 import de.jreality.scene.tool.HeadTransformationTool;
 import de.jreality.scene.tool.InputSlot;
 //import de.jreality.scene.tool.PortalHeadMoveTool;
@@ -52,7 +53,7 @@ public class XStreamFactory {
   private static HashSet knownClasses = new HashSet();
   
   static {
-    //knownClasses.add(Void.class);
+    // primitives are accepted anyway
     knownClasses.add(Boolean.class);
     knownClasses.add(Byte.class);
     knownClasses.add(Double.class);
@@ -77,6 +78,7 @@ public class XStreamFactory {
     knownClasses.add(DraggingTool.class);
     knownClasses.add(ShipNavigationTool.class);
     knownClasses.add(HeadTransformationTool.class);
+    knownClasses.add(FlyTool.class);
     
     try {
 		knownClasses.add(Class.forName("de.jreality.scene.tool.PortalHeadMoveTool"));
