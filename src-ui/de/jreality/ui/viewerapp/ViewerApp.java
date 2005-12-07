@@ -72,6 +72,7 @@ import de.jreality.scene.tool.ToolSystemViewer;
 import de.jreality.scene.tool.config.ToolSystemConfiguration;
 import de.jreality.ui.treeview.JListRenderer;
 import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
+import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
@@ -119,17 +120,6 @@ public class ViewerApp
     // delegates a viewer switch...
 
     currViewer = createViewer();
-    currViewer.getViewingComponent().addKeyListener(new KeyListener() {
-      public void keyTyped(KeyEvent arg0) {
-      }
-      public void keyPressed(KeyEvent arg0) {
-        if (arg0.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-          toggleFullScreen();
-        }
-      }
-      public void keyReleased(KeyEvent arg0) {
-      }
-    });
     viewerSwitch = (ViewerSwitch) currViewer.getDelegatedViewer();
 
     uiFactory=new UIFactory();
@@ -510,6 +500,17 @@ private void autoRender() {
   private void loadScene(JrScene s) {
     try {
       currViewer = createViewer();
+      currViewer.getViewingComponent().addKeyListener(new KeyListener() {
+        public void keyTyped(KeyEvent arg0) {
+        }
+        public void keyPressed(KeyEvent arg0) {
+          if (arg0.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+            toggleFullScreen();
+          }
+        }
+        public void keyReleased(KeyEvent arg0) {
+        }
+      });
       viewerSwitch = (ViewerSwitch) currViewer.getDelegatedViewer();
     } catch (Exception e) {
       e.printStackTrace();
@@ -532,12 +533,13 @@ private void autoRender() {
     initFrame();
     initTree();
     autoRender();
+    //CameraUtility.encompass(currViewer.getAvatarPath(), emptyPick, currViewer.getCameraPath());
   }
   
   private static ToolSystemViewer createViewer() throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
   {
     if (viewers == null) {
-      String viewer=System.getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
+      String viewer=System.getProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
       StringTokenizer st = new StringTokenizer(viewer);
       viewers = new Viewer[st.countTokens()];
       for (int i = 0; i < viewers.length; i++) {
