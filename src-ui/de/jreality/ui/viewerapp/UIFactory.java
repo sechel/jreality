@@ -61,7 +61,7 @@ public class UIFactory
   private Component viewer;
   private Component console;
   private Component inspector;
-  final Border emptyBorder=BorderFactory.createEmptyBorder(2,2,2,2);
+  final Border emptyBorder=BorderFactory.createEmptyBorder();
   JTree sceneTree;
 
   JSplitPane content;
@@ -138,7 +138,6 @@ public class UIFactory
   public void setInspector(JComponent component)
   {
     inspector= component;
-    inspector.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
     component.setBorder(emptyBorder);
   }
 

@@ -48,19 +48,15 @@ import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import bsh.EvalError;
-
 import jterm.BshEvaluator;
 import jterm.JTerm;
 import jterm.Session;
-import jterm.StringEvaluator;
-
+import bsh.EvalError;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.io.JrScene;
 import de.jreality.math.MatrixBuilder;
@@ -73,7 +69,6 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
-import de.jreality.scene.pick.bounding.AABBTree;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.scene.tool.DraggingTool;
 import de.jreality.scene.tool.FlyTool;
@@ -87,7 +82,6 @@ import de.jreality.scene.tool.ToolSystemViewer;
 import de.jreality.scene.tool.config.ToolSystemConfiguration;
 import de.jreality.ui.treeview.JListRenderer;
 import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
-import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.PickUtility;
@@ -140,6 +134,15 @@ public class ViewerApp
   public ViewerApp(boolean initScene) throws Exception {
     
     bshEval = new BshEvaluator();
+    
+    bshEval.getInterpreter().eval("import de.jreality.scene.*;");
+    bshEval.getInterpreter().eval("import de.jreality.scene.tool.*;");
+    bshEval.getInterpreter().eval("import de.jreality.scene.data.*;");
+    bshEval.getInterpreter().eval("import de.jreality.geometry.*;");
+    bshEval.getInterpreter().eval("import de.jreality.math.*;");    
+    bshEval.getInterpreter().eval("import de.jreality.shader.*;");
+    bshEval.getInterpreter().eval("import de.jreality.util.*;");
+        
     jterm = new JTerm(new Session(bshEval));
     jterm.setMaximumSize(new Dimension(10, 10));
 
@@ -150,15 +153,18 @@ public class ViewerApp
     StyleConstants.setFontSize(infoStyle, 12);
     
     inspector=new InspectorPanel();
-    // we assume that currViewer has a viewing component and later that it
-    // delegates a viewer switch...
 
     currViewer = createViewer();
-
+    
     uiFactory=new UIFactory();
+    
     uiFactory.setViewer(currViewer.getViewingComponent());
     uiFactory.setInspector(inspector);
     uiFactory.setConsole(jterm);
+
+    String env = System.getProperty("de.jreality.viewerapp.env", "desktop");
+    initDefaultScene(env);
+
     createFrame(uiFactory.createViewerContent());
     initFrame();
     initTree();
@@ -328,13 +334,7 @@ public class ViewerApp
     mi = new JMenuItem("Desktop Scene");
     mi.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent arg0) {
-          try {
-            ReaderJRS r = new ReaderJRS();
-            r.setInput(new Input(ViewerApp.class.getResource("desktop-scene.jrs")));
-            loadScene(r.getScene());
-          } catch (IOException ioe) {
-            JOptionPane.showMessageDialog(frame, "Load failed: "+ioe.getMessage());
-          }
+          initDefaultScene("desktop");
       }
     });
     fileMenu.add(mi);
@@ -342,13 +342,7 @@ public class ViewerApp
     mi = new JMenuItem("Portal Scene");
     mi.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent arg0) {
-          try {
-            ReaderJRS r = new ReaderJRS();
-            r.setInput(new Input(ViewerApp.class.getResource("portal-scene.jrs")));
-            loadScene(r.getScene());
-          } catch (IOException ioe) {
-            JOptionPane.showMessageDialog(frame, "Load failed: "+ioe.getMessage());
-          }
+          initDefaultScene("portal");
       }
     });
     fileMenu.add(mi);
@@ -494,8 +488,15 @@ public class ViewerApp
     mi = new JMenuItem("Make Subgraph pickable");
     mi.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent arg0) {
-          if (currSceneNode != null) PickUtility.assignFaceAABBTrees(currSceneNode);
-          else JOptionPane.showMessageDialog(frame, "Select a component fist!");
+          
+          if (currSceneNode != null) {
+            String trisPerBox = JOptionPane.showInputDialog(frame, "maxTrisPerBox");
+            int numTris = 10;
+            try {
+              numTris = Integer.parseInt(trisPerBox);
+            } catch (Exception e) {}
+            PickUtility.assignFaceAABBTrees(currSceneNode, numTris);
+          } else JOptionPane.showMessageDialog(frame, "Select a component fist!");
         }
     });
     compMenu.add(mi);
@@ -634,6 +635,18 @@ public class ViewerApp
     v.setPickSystem(new AABBPickSystem());
     return v;
   }
+  private void initDefaultScene(String environment) {
+    if (!environment.equals("desktop") && !environment.equals("portal"))
+      throw new IllegalArgumentException("unknown environment!");
+    try {
+      ReaderJRS r = new ReaderJRS();
+      r.setInput(new Input(ViewerApp.class.getResource(environment+"-scene.jrs")));
+      loadScene(r.getScene());
+    } catch (IOException ioe) {
+      JOptionPane.showMessageDialog(frame, "Load failed: "+ioe.getMessage());
+    }
+  }
+
   private static Viewer createViewer(String viewer) throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
   {
     return (Viewer)Class.forName(viewer).newInstance();
