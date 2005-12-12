@@ -124,7 +124,7 @@ public class ViewerApp
     try {
       UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
     } catch (Exception e) {
-      LoggingSystem.getLogger(ViewerApp.class).config("loading Kusntstoff Look & Feel failed: "+e.getMessage());
+      LoggingSystem.getLogger(ViewerApp.class).config("loading cross platform Look & Feel failed: "+e.getMessage());
     }
     System.setProperty("sun.awt.noerasebackground", "true");
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
