@@ -20,6 +20,7 @@ public class RenderingHintsShader  {
 	double levelOfDetail = 0.0;		// hack for drawing lines in opengl
 	boolean 
 	   transparencyEnabled = false, 
+	   zbufferEnabled = true,
 	   lightingEnabled = true, 
 	   atInfinity = false,
 	   antiAliasingEnabled = false,
@@ -57,6 +58,7 @@ public class RenderingHintsShader  {
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		lightingEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHTING_ENABLED), true);
 		transparencyEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY_ENABLED), false);
+		zbufferEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.Z_BUFFER_ENABLED), true);
 		antiAliasingEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.ANTIALIASING_ENABLED), false);
 		backFaceCullingEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.BACK_FACE_CULLING_ENABLED), false);
 		atInfinity = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.AT_INFINITY), false);

@@ -1,20 +1,26 @@
 //**************************************************
 // * VRML 1.0 Parser
-// * TODO: 
-// * 	Read over vrml1.0 spec and figure out what it says
-// *		Implement the unimplemented nodes/properties
-// *		Some tricky areas:
-// *			Difference between Group and Separator: Separator requires that we stack the state
-// *				(Leaving a separator should pop this stack)
-// *				The state is kept by fields in the parser beginning with "current"
-// *			Implementation of DEF and USE
-// *			
 // */
 
 header {
 /*
  *	@author gunn
  *  Nov. 30, 2005
+ */
+/* TODO: 
+ * 	Read over vrml1.0 spec and figure out exactly what it says
+ *		Implement the unimplemented nodes/properties
+ *			Priority: Implement  DEF and USE
+ *		Move as much of the Java code into separate classes where eclipse can help
+ *		Some tricky areas:
+ *			Difference between Group and Separator: Separator requires that we stack the state
+ *				(Leaving a separator should pop this stack)
+ *				The state is kept by fields in the parser beginning with "current"
+ *			Appearance currently accumulates within a Separator clause. It's then assigned to each 
+ *				child that is created within the Separator (such as for each geometric primitive).
+ *				I don't think that's correct; the state of the appearance should be copied to a new
+ *				instance before being assigned to a child, so later changes to the appearance don't 
+ *				effect this child.
  */
 package de.jreality.reader.vrml;
 import java.awt.Color;
@@ -53,9 +59,11 @@ options {
 	final int MAXSIZE = 10000;
 	double[] ds = new double[MAXSIZE];
 	int[] is = new int[MAXSIZE];
-	double[] evil3Vec = new double[3];
+	double[] tempVector3 = new double[3];
 	boolean collectingMFVec3 = false;
+	// for collecting statistics
 	int primitiveCount, polygonCount, coordinate3Count;
+	int[] ngons = new int[10];
 	SceneGraphComponent cameraNode = null;
 }
 vrmlFile returns [SceneGraphComponent r]
@@ -77,7 +85,9 @@ vrmlScene returns [SceneGraphComponent r]
 		(statement)*
 		{
 			r = root;
-			System.err.println("Read in "+primitiveCount+" primitives with a total of "+polygonCount+" faces.");
+			System.err.println("Read in "+primitiveCount+" indexed face sets with a total of "+polygonCount+" faces.");
+			System.err.println("Face population:");
+			for (int i = 0; i<10; ++i) System.out.print(ngons[i]+"\t");
 			System.err.println("There were "+coordinate3Count+" vertex lists");
 		}
 	;
@@ -313,6 +323,23 @@ cubeStatement returns [SceneGraphComponent sgc]
 		currentSGC.addChild(sgc);
 	}
 	;
+
+sphereStatement returns [SceneGraphComponent sgc]
+{ sgc = null; double r=1, h=2, d=2;}	
+	:
+	"Sphere"	OPEN_BRACE	(
+			("radius"		r = 	sffloatValue)
+		)+ CLOSE_BRACE
+	{
+		sgc = new SceneGraphComponent();
+		sgc.setName("vrml sphere");
+		sgc.setGeometry(new Sphere());
+		double[] scaleMatrix = P3.makeStretchMatrix(null, r);
+		sgc.setTransformation(new Transformation(scaleMatrix));
+		currentSGC.addChild(sgc);
+	}
+	;
+		
 		
 indexedFaceSetStatement returns [IndexedFaceSet ifs]
 {ifs = null;}
@@ -331,6 +358,12 @@ indexedFaceSetStatement returns [IndexedFaceSet ifs]
 	ifsf.setGenerateVertexNormals(true); // depends on whether face normals were set above!
 	ifsf.refactor();
 	ifs = ifsf.getIndexedFaceSet();
+	// collect some statistics
+//	int n = ifs.getNumFaces();
+//	int[][] faceI = ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
+//	for (int i = 0; i<n; ++i)	
+//		if (faceI[i].length < 9) ngons[faceI[i].length]++;
+//		else if (faceI[i].length >= 9) ngons[9]++;
 	primitiveCount++;
 	polygonCount += ifs.getNumFaces();
 	if (currentSGC.getGeometry() != null) currentSGC.setGeometry(ifs);
@@ -569,8 +602,8 @@ double a, b, c;}
 		a=number b=number c=number	
 		{	
 			if (collectingMFVec3)	{
-				evil3Vec[0] = a;  evil3Vec[1] = b; evil3Vec[2] = c;
-				vec3 = evil3Vec;
+				tempVector3[0] = a;  tempVector3[1] = b; tempVector3[2] = c;
+				vec3 = tempVector3;
 			} else 
 				vec3 = new double[]{a,b,c}; 
 		}
