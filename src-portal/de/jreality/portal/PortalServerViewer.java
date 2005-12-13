@@ -49,20 +49,16 @@ public class PortalServerViewer implements Viewer {
   final Lock renderLock = new Lock();
   
   public PortalServerViewer() throws IOException {
-    init(de.jreality.jogl.Viewer.class);
+    this(de.jreality.jogl.Viewer.class);
   }
   
 	public PortalServerViewer(Class viewerClass) throws IOException {
-    init(viewerClass);
-  }
-
-  public void init(Class viewerClass) throws IOException {
     clients = (RemoteViewer) SMRJFactory.getRemoteFactory().createRemoteViaStaticMethod(
         HeadTrackedViewer.class, HeadTrackedViewer.class,
         "createFullscreen", new Class[]{Class.class}, new Object[]{viewerClass});
     proxyScene = new SMRJMirrorScene(SMRJFactory.getRemoteFactory(), renderLock);
   }
-  
+
   public SceneGraphComponent getSceneRoot() {
 		return root;
 	}
