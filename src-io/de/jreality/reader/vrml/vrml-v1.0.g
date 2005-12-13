@@ -9,9 +9,13 @@ header {
  */
 /* TODO: 
  * 	Read over vrml1.0 spec and figure out exactly what it says
+ *		Replace calls to System.err.println to de.jreality.util.LoggingSystem.getLogger(this).log()
  *		Implement the unimplemented nodes/properties
- *			Priority: Implement  DEF and USE
+ *			Priority: Implement  DEF and USE.  That means all node rules need to return an
+ *				instance of a jReality object that can be put into a hash map for later lookup.
+ *				That is not yet the case.
  *		Move as much of the Java code into separate classes where eclipse can help
+ *			Keep an eye on Antlr Studio (www.antlrstudio.com) for direct editing of .g file in eclipse.
  *		Some tricky areas:
  *			Difference between Group and Separator: Separator requires that we stack the state
  *				(Leaving a separator should pop this stack)
@@ -21,10 +25,19 @@ header {
  *				I don't think that's correct; the state of the appearance should be copied to a new
  *				instance before being assigned to a child, so later changes to the appearance don't 
  *				effect this child.
+ *		 	We need a Material class to store all the info in a Material node.  If MaterialBinding 
+ *				is per face or per vertex, then we have a problem, since currently only the diffuse
+ *				color can be easily assigned per face or per vertex in jReality.
+ *	General comment:
+ *		This parser probably needs to be rewritten from the ground up to be a two-stage process.
+ *		First, parse the VRML into a parse tree which knows nothing of specific keywords, but
+ *		works purely with key-value pairs.  The big problem here is to dis-ambiguate all the possible
+ *		value types.  
  */
 package de.jreality.reader.vrml;
 import java.awt.Color;
 import java.util.*;
+import de.jreality.util.*;
 import de.jreality.scene.*;
 import de.jreality.math.*;
 import de.jreality.geometry.*;
@@ -33,7 +46,7 @@ import de.jreality.scene.data.*;
 }
 
 /*****************************************************************************
- * The VRMLV1 Parser
+ * The VRML version 1.0 Parser
  *****************************************************************************
  */
 class VRMLV1Parser extends Parser;
@@ -41,10 +54,10 @@ options {
 	k = 2;							// two token lookahead
 }
 {
+	// this is what is returned from the parsing process
+	SceneGraphComponent root = null;
 	// current state of the parsing process
 	SceneGraphComponent currentSGC = null;
-	SceneGraphComponent root = null;
-	// this is the state, as it is currently maintained
 	SceneGraphPath currentPath = new SceneGraphPath();
 	Transformation currentTransform = new Transformation();
 	Appearance currentAp = null;
@@ -56,9 +69,10 @@ options {
 	int currentNormalBinding = VRMLHelper.DEFAULT;
 	int currentMaterialBinding = VRMLHelper.DEFAULT;
 	
-	final int MAXSIZE = 10000;
-	double[] ds = new double[MAXSIZE];
-	int[] is = new int[MAXSIZE];
+	// we use a dynamic allocation scheme, beginning with arrays of length 10000
+	final int INITIAL_SIZE = 10000;
+	double[] ds = new double[INITIAL_SIZE];		// for storing double arrays
+	int[] is = new int[INITIAL_SIZE];				// for storing int arrays
 	double[] tempVector3 = new double[3];
 	boolean collectingMFVec3 = false;
 	// for collecting statistics
@@ -66,6 +80,8 @@ options {
 	int[] ngons = new int[10];
 	SceneGraphComponent cameraNode = null;
 }
+
+// the "main" rule for the parser
 vrmlFile returns [SceneGraphComponent r]
 { r = null;}
 		:
@@ -77,17 +93,15 @@ vrmlScene returns [SceneGraphComponent r]
 {r = null; }
 		:
 		{
-		root = new SceneGraphComponent();
-		currentSGC = root;
-		currentPath.push(root);
-		primitiveCount = polygonCount = 0;
+			root = new SceneGraphComponent();
+			currentSGC = root;
+			currentPath.push(root);
+			primitiveCount = polygonCount = 0;
 		}
 		(statement)*
 		{
 			r = root;
 			System.err.println("Read in "+primitiveCount+" indexed face sets with a total of "+polygonCount+" faces.");
-			System.err.println("Face population:");
-			for (int i = 0; i<10; ++i) System.out.print(ngons[i]+"\t");
 			System.err.println("There were "+coordinate3Count+" vertex lists");
 		}
 	;
@@ -95,34 +109,36 @@ vrmlScene returns [SceneGraphComponent r]
 statement:
 		"DEF"	id	statement		//TODO statements must return values, and then get put into a map
 	|	"USE"	id					// TODO pull out the value from the map
-	|	atomicStatement
-	;
-	
-atomicStatement:
-		separatorStatement
-	|	infoStatement
-	| 	transformStatement
-	| 	translationStatement
-	|	rotationStatement
-	|	scaleStatement
-	|	matrixTransformStatement
-	| 	shapeHintsStatement
-	|	currentAp=materialStatement
-	|	coordinate3Statement
-	|	normalStatement
-	|	currentNormalBinding=normalBindingStatement
-	|	currentMaterialBinding=materialBindingStatement
-	|	cubeStatement
-	|	indexedFaceSetStatement
-	|	indexedLineSetStatement
-	|	perspectiveCameraStatement
-	|	unknownStatement
+	|	atomicNode
 	;
 
-separatorStatement:
-		"Separator"			
+// TODO put the global assignments into this rule, and pull out of the node rules themselves
+atomicNode:
+		separatorNode
+	|	infoNode
+	| 	transformNode
+	| 	translationNode
+	|	rotationNode
+	|	scaleNode
+	|	matrixTransformNode
+	| 	shapeHintsNode
+	|	currentAp=materialNode
+	|	currentCoordinate3=coordinate3Node		{coordinate3Count++;}
+	|	currentNormal=normalNode
+	|	currentNormalBinding=normalBindingNode
+	|	currentMaterialBinding=materialBindingNode
+	|	cubeNode
+	|	indexedFaceSetNode
+	|	indexedLineSetNode
+	|	cameraNode=perspectiveCameraNode
+	|	unknownNode
+	;
+
+separatorNode:
+		g:"Separator"			
 			{
 				SceneGraphComponent sgc = new SceneGraphComponent();
+				sgc.setName("LineNo "+g.getLine());		// for looking up later
 				currentSGC.addChild(sgc);
 				currentSGC = sgc;
 				currentPath.push(sgc);
@@ -137,15 +153,30 @@ separatorStatement:
 			}
 	;
 
-infoStatement:
-	"Info"	OPEN_BRACE	(infoAttribute)* 	CLOSE_BRACE
+infoNode returns [String[] info]
+{ info = null; 
+  String s = null;
+  Vector v = new Vector();}
+	:
+	"Info"	OPEN_BRACE	(s=infoAttribute		{v.add(s);} )* 	CLOSE_BRACE
+	{
+		info = new String[v.size()];
+		v.toArray(info);
+		//LoggingSystem.getLogger(this).info("Got "+info.length+" info strings.");
+		if (VRMLHelper.verbose) System.err.println("Got "+info.length+" info strings.");
+	}
 	;
 	
-infoAttribute:
-	"string"	sfstringValue
+infoAttribute returns [String s]
+{s = null; }
+	:
+	"string"	s=sfstringValue
 	;
-	
-transformStatement
+
+//
+//  *************** Transformation-related noded *******************
+//	
+transformNode
 {FactoredMatrix fm = new FactoredMatrix();}
 	:
 	"Transform"	OPEN_BRACE	(transformAttribute[fm])*	CLOSE_BRACE
@@ -166,7 +197,7 @@ transformAttribute[FactoredMatrix fm]
 	|	"center"		rr=sfvec3fValue		{fm.setCenter(rr);}
 	;
 
-matrixTransformStatement returns [double[] mat]
+matrixTransformNode returns [double[] mat]
 { mat = null;}
 	:
 	"MatrixTransform"		OPEN_BRACE	mat = sffloatValues CLOSE_BRACE	
@@ -176,7 +207,7 @@ matrixTransformStatement returns [double[] mat]
 	}
 	;
 	
-translationStatement returns [double[] mat]
+translationNode returns [double[] mat]
 {mat = null;  double[] t = null; }
 		:
 		"Translation"	OPEN_BRACE "translation" t=sfvec3fValue CLOSE_BRACE		
@@ -189,7 +220,7 @@ translationStatement returns [double[] mat]
 		}
 		;
 
-rotationStatement returns [double[] mat]
+rotationNode returns [double[] mat]
 {mat = null; double[] t = null; }
 		:
 		"Rotation"	OPEN_BRACE	"rotation" t=sfrotationValue CLOSE_BRACE		
@@ -203,7 +234,7 @@ rotationStatement returns [double[] mat]
 		}
 		;
 
-scaleStatement returns [double[] mat]
+scaleNode returns [double[] mat]
 {mat = null; double[] t = null; }
 		:
 		"Scale"	OPEN_BRACE	"scaleFactor" t=sfvec3fValue CLOSE_BRACE		
@@ -216,7 +247,7 @@ scaleStatement returns [double[] mat]
 		}
 		;
 	
-shapeHintsStatement:
+shapeHintsNode:
 		"ShapeHints"	OPEN_BRACE	(shapeHintAttribute)* CLOSE_BRACE		
 		{if (VRMLHelper.verbose) System.err.println("Got ShapeHints"); }
 	;
@@ -229,7 +260,9 @@ shapeHintAttribute:
 	|	unknownAttribute
 	;
 	
-materialStatement returns [Appearance ap]
+// TODO fix this
+// The Material node has values that are potentially arrays (mfcolorValue and mffloatValue)
+materialNode returns [Appearance ap]
 {ap = new Appearance();}
 	:
 	"Material" OPEN_BRACE  (materialAttribute[ap])*	CLOSE_BRACE			
@@ -238,20 +271,23 @@ materialStatement returns [Appearance ap]
 		currentSGC.setAppearance(ap);
 	}
 	;
-
+//TODO fix this
+// remove mfcolorValue, replace with mfvec3fValue.
+// look at current state of MaterialBinding to decide what to do with the return values
+// If PER_PART, then values need to be converted to Color type
 materialAttribute[Appearance ap]
-{	Color[] c=null; double d = 0.0; }
+{	Color[] c=null; double[] d = null; }
 	:
 	// TODO check whether there are multiple values returned; may need to set the color per face or vertex
 	 	"ambientColor"	c=mfcolorValue 	{ap.setAttribute(CommonAttributes.AMBIENT_COLOR, c[0]);}
 	 |	"diffuseColor"	c=mfcolorValue {ap.setAttribute(CommonAttributes.DIFFUSE_COLOR, c[0]);}
 	 |	"specularColor"	c=mfcolorValue {ap.setAttribute(CommonAttributes.SPECULAR_COLOR, c[0]);}
 	 | 	"emissiveColor" c=mfcolorValue //{ap.setAttribute(CommonAttributes.EMISSIVE_COLOR, c[0]);}
-	 | 	"transparency"	d=sffloatValue {ap.setAttribute(CommonAttributes.TRANSPARENCY, d);}
-	 | 	"shininess"	d=sffloatValue {ap.setAttribute(CommonAttributes.SPECULAR_EXPONENT, d);}
+	 | 	"transparency"	d=mffloatValue {ap.setAttribute(CommonAttributes.TRANSPARENCY, d[0]);}
+	 | 	"shininess"	d=mffloatValue {ap.setAttribute(CommonAttributes.SPECULAR_EXPONENT, d[0]);}
 	 ;
 	 
-coordinate3Statement returns [DataList dl]
+coordinate3Node returns [DataList dl]
 { dl = null;  double[] points = null;}
 	:				
 	"Coordinate3"	OPEN_BRACE	"point" 
@@ -262,13 +298,11 @@ coordinate3Statement returns [DataList dl]
 				System.err.println("Got Coordinate3");
 				System.err.println("Points: "+Rn.toString(points));
 			}
-			
-			dl = currentCoordinate3 = StorageModel.DOUBLE_ARRAY.inlined(3).createReadOnly(points);
-		 	coordinate3Count++;
+			dl = StorageModel.DOUBLE_ARRAY.inlined(3).createReadOnly(points);
 		 	}
 	;
 	
-normalStatement returns [DataList dl]
+normalNode returns [DataList dl]
 { dl = null;  double[] normals = null;}
 	:
 	"Normal"	OPEN_BRACE	"vector" 
@@ -276,17 +310,17 @@ normalStatement returns [DataList dl]
 			CLOSE_BRACE
 	{ 
 		if (VRMLHelper.verbose)	System.err.println("Got Normal"); 
-		dl = currentNormal = StorageModel.DOUBLE_ARRAY.inlined(3).createReadOnly(normals);
+		dl =  StorageModel.DOUBLE_ARRAY.inlined(3).createReadOnly(normals);
 	}	
 	;
 
-normalBindingStatement returns [int nb]
+normalBindingNode returns [int nb]
 { nb = 0;}
 	:
 	"NormalBinding"	OPEN_BRACE	"value" nb=bindingAttribute CLOSE_BRACE
 	;
 	
-materialBindingStatement returns [int mb]
+materialBindingNode returns [int mb]
 { mb = 0;}
 	:
 	"MaterialBinding"	OPEN_BRACE	"value" mb=bindingAttribute CLOSE_BRACE
@@ -305,7 +339,7 @@ bindingAttribute returns [int which]
 	|	"PER_VERTEX_INDEXED"	{which = VRMLHelper.PER_VERTEX_INDEXED;	}
 	;
 
-cubeStatement returns [SceneGraphComponent sgc]
+cubeNode returns [SceneGraphComponent sgc]
 { sgc = null; double w=2, h=2, d=2;}	
 	:
 	"Cube"	OPEN_BRACE	(
@@ -324,7 +358,7 @@ cubeStatement returns [SceneGraphComponent sgc]
 	}
 	;
 
-sphereStatement returns [SceneGraphComponent sgc]
+sphereNode returns [SceneGraphComponent sgc]
 { sgc = null; double r=1, h=2, d=2;}	
 	:
 	"Sphere"	OPEN_BRACE	(
@@ -340,12 +374,16 @@ sphereStatement returns [SceneGraphComponent sgc]
 	}
 	;
 		
-		
-indexedFaceSetStatement returns [IndexedFaceSet ifs]
+
+// TODO
+// Decide whether to "inline" the indexedFaceSetAttribute's so that no global variables
+// have to be used. (See perspectiveCameraNode below).	
+indexedFaceSetNode returns [IndexedFaceSet ifs]
 {ifs = null;}
 	:
-	"IndexedFaceSet"		OPEN_BRACE	(indexedFaceSetAttribute)+ CLOSE_BRACE	
+	g:"IndexedFaceSet"		OPEN_BRACE	(indexedFaceSetAttribute)+ CLOSE_BRACE	
 	{
+	// TODO move this into VRMLHelper somehow
 	if (VRMLHelper.verbose) System.err.println("Got IndexedFaceSet"); 
 	IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
 	ifsf.setVertexCount(currentCoordinate3.size());
@@ -358,17 +396,14 @@ indexedFaceSetStatement returns [IndexedFaceSet ifs]
 	ifsf.setGenerateVertexNormals(true); // depends on whether face normals were set above!
 	ifsf.refactor();
 	ifs = ifsf.getIndexedFaceSet();
+	ifs.setName("IFS:LineNo "+g.getLine());
 	// collect some statistics
-//	int n = ifs.getNumFaces();
-//	int[][] faceI = ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
-//	for (int i = 0; i<n; ++i)	
-//		if (faceI[i].length < 9) ngons[faceI[i].length]++;
-//		else if (faceI[i].length >= 9) ngons[9]++;
 	primitiveCount++;
 	polygonCount += ifs.getNumFaces();
 	if (currentSGC.getGeometry() != null) currentSGC.setGeometry(ifs);
 	else		{
 		SceneGraphComponent sgc = new SceneGraphComponent();
+		sgc.setName("LineNo "+g.getLine());		// for looking up later
 		sgc.setGeometry(ifs);
 		sgc.setAppearance(currentAp);
 		currentSGC.addChild(sgc);
@@ -396,7 +431,7 @@ indexedFaceSetAttribute
 				}
 	;
 
-indexedLineSetStatement:
+indexedLineSetNode:
 	"IndexedLineSet"	OPEN_BRACE	(indexedLineSetAttribute)+ CLOSE_BRACE	
 	{if (VRMLHelper.verbose)	System.err.println("Got IndexedLineSet"); }
 	;
@@ -405,9 +440,11 @@ indexedLineSetAttribute:
 		"coordIndex"	mfint32Value
 	;
 
-perspectiveCameraStatement returns [SceneGraphComponent cn]
+// TODO hook this up
+perspectiveCameraNode returns [SceneGraphComponent cn]
 {	cn = new SceneGraphComponent();
 	FactoredMatrix fm = new FactoredMatrix();
+	// TODO set default position/orientation for fm?
 	Camera c = new Camera();
 	double[] d = null;
 	double a = 0.0;
@@ -422,11 +459,10 @@ perspectiveCameraStatement returns [SceneGraphComponent cn]
 		fm.update();
 		cn.setTransformation(new Transformation(fm.getArray()));
 		cn.setCamera(c);
-		cameraNode = cn;
 	}
 	;
 		
-unknownStatement
+unknownNode
 {String n = null; }
 	:
 	n=id		OPEN_BRACE  	(unknownAttribute)* CLOSE_BRACE	
@@ -452,7 +488,9 @@ value:				// TODO extend this list while keeping the grammar unambiguous
 	|	OPEN_BRACE	(unknownAttribute)* CLOSE_BRACE
 	;
 
-// From here on, parsing of basic value types	
+// ********************** Field parsing rules *******************
+// 		From here on, parsing of basic field value types	
+//
 number returns [double d]	
 {d = 0; }
 	:
@@ -466,11 +504,15 @@ sfboolValue returns [boolean b]
     ("true" | "TRUE"	{b = true;} ) | ( "false" | "FALSE"  {b = false;} )
 	;
 
-sfstringValue
+sfstringValue returns [String s]
+{ s = null; }
 	:
-	STRING	
+	g:STRING		{ s = g.getText();}
 	;
 
+// TODO fix this 
+// should return double[] since that's how IndexedFaceSets define colors
+// in that case, can be omitted and use instead sfvec3fValue, sfvec3fValues, and mfvec3fValue
 sfcolorValue returns [Color c]
 { c = null; double r, g, b;}
 	:
@@ -498,6 +540,7 @@ sffloatValue returns [double d]
 	d = number
 	;
 
+// TODO decide whether to optimize this as mfvec3fValue (probably should)
 sffloatValues returns [double[] dl]
 {
 	dl = null;
@@ -542,7 +585,6 @@ sfint32Values returns [int[] il]
 		)+
 		{il = new int[count];
 		System.arraycopy(is,0,il,0,count);
-		//VRMLHelper.listToIntArray(vl); 
 		}
 	;
 
@@ -613,7 +655,7 @@ sfvec3fValues returns [double[] vec3array]
 {vec3array = null;
 //List collect = new Vector();
 double[] onevec  = null;
-collectingMFVec3 = true;
+collectingMFVec3 = true;			// optimized reading into a big double[] array
 int count = 0;
 	}
 	:
@@ -625,12 +667,10 @@ int count = 0;
 			}
 			for (int i=0; i<3; ++i)	ds[count+i] = onevec[i];
 			count += 3;
-			//collect.add(onevec);
 		} )+
 		{
 			vec3array = new double[count];
 			System.arraycopy(ds, 0, vec3array, 0, count);
-			//vec3array = VRMLHelper.listToDoubleArrayArray(collect);
 			collectingMFVec3 = false; 
 		}
 	;
@@ -737,7 +777,7 @@ WS_:
 		: "\r\n"	// Evil DOS
 			| '\r'		// MacINTosh
 			| '\n'		// Unix (the right way)
-			)
+			{newline(); } )	
 		)+ { $setType(Token.SKIP); }
 	;
 
