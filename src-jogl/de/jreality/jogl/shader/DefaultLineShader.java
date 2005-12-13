@@ -10,6 +10,7 @@ import java.awt.Dimension;
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.PolygonalTubeFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.QuadMeshShape;
@@ -216,6 +217,7 @@ public class DefaultLineShader implements LineShader  {
 		double[] p1 = new double[4],
 			p2 = new double[4];
 		p1[3] = p2[3] = 1.0;
+		double[][] oneCurve = null;
 		double[][] crossSection = TubeUtility.octagonalCrossSection;
 		if (jr.openGLState.levelOfDetail == 0.0) crossSection = TubeUtility.diamondCrossSection;
 		int n = ils.getNumEdges();
@@ -331,7 +333,8 @@ public class DefaultLineShader implements LineShader  {
 				}
 			}
 			else {		// the assumption is that this is a genuine IndexedLineSet (not subclass with faces)
-				PolygonalTubeFactory ptf = new PolygonalTubeFactory(ils);
+				oneCurve = IndexedLineSetUtility.extractCurve(oneCurve, ils, i);
+				PolygonalTubeFactory ptf = new PolygonalTubeFactory(oneCurve);
 				ptf.setClosed(false);
 				ptf.setCrossSection(crossSection);
 				ptf.setFrameFieldType(tubeStyle);

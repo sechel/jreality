@@ -25,8 +25,8 @@ public class GlslLoader {
       UniformParameter param = (UniformParameter) it.next();
       Object value = prog.getUniform(param.getName());
       Object oldValue = context.getUniform(param);
-      //System.out.println("checking "+param);
-      //System.out.println("\t old="+oldValue+ " new="+value);
+//      System.out.println("checking "+param);
+//      System.out.println("\t old="+oldValue+ " new="+value);
       if (compare(oldValue, value, param.getPrimitiveType())) {
         context.writeValue(gl, param, value);
       }
@@ -53,7 +53,7 @@ public class GlslLoader {
   public static void postRender(GlslProgram prog, GLDrawable drawable) {
     GL gl = drawable.getGL();
     ProgramContext context = getContext(gl, prog);
-    context.deavtivateProgram(gl);
+    context.deactivateProgram(gl);
   }
   
   private static ProgramContext getContext(GL gl, GlslProgram prog) {
@@ -84,7 +84,7 @@ public class GlslLoader {
       gl.glUseProgramObjectARB(progID.intValue());
     }
     
-    public void deavtivateProgram(GL gl) {
+    public void deactivateProgram(GL gl) {
       gl.glUseProgramObjectARB(0);
     }
 
