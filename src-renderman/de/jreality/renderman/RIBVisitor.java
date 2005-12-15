@@ -39,6 +39,7 @@ import de.jreality.scene.data.*;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.shader.Texture2D;
 
 /**
  * A Visitor for writing renderman<sup>TM</sup> rib files. At the moment the following 
@@ -197,13 +198,15 @@ public class RIBVisitor extends SceneGraphVisitor {
                 map.put("roughness",new Float(1/phongSize));
                 map.put("Ks",new Float(phong));
                 map.put("Kd",new Float(1));
-                Texture2D tex = (Texture2D) a.getAttribute(type+".texture",null,Texture2D.class);
-                if(tex == null) {
-                    Ri.surface("plastic",map);
-                } else {
+                
+                if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), a)) {
+                    Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), a);
+               
+//                Texture2D tex = (Texture2D) a.getAttribute(type+".texture",null,Texture2D.class);
+//                if(tex != null) {
                     String fname = writeTexture(tex);
                     map.put("string texturename",fname);
-                    double[] mat = tex.getTextureMatrix();
+                    double[] mat = tex.getTextureMatrix().getArray();
                     if(mat != null) {
                     float[] tmat = new float[16];
                     for (int i = 0; i < 4; i++) 
@@ -215,6 +218,8 @@ public class RIBVisitor extends SceneGraphVisitor {
                     //map.put("sScale",new Float(tex.getTextureTransformation().getStretch()[0]));
                     //map.put("tScale",new Float(tex.getTextureTransformation().getStretch()[1]));
                     Ri.surface("transformedpaintedplastic",map);
+                } else {
+                    Ri.surface("plastic",map);
                 }
             }
         } else {
@@ -230,7 +235,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         if(fname == null) {
             fname = name+"_texture"+(textureCount++)+".tiff";
             File f = new File(fname);
-            Image img = tex.getImage();
+            Image img = tex.getImage().getImage();
             RenderedImage rImage =null;
             if( img instanceof RenderedImage )
                 rImage = (RenderedImage) img;
@@ -263,10 +268,13 @@ public class RIBVisitor extends SceneGraphVisitor {
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.IndexedLineSet)
      */
     public void visit(IndexedLineSet g) {
+        String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
+        if(!eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW),true)) {
+        
         DataList dl = g.getEdgeAttributes(Attribute.INDICES);
         if(dl!=null){
-            String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
-            if(!eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW),true)) return;
+//            String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
+//            if(!eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW),true)) return;
             Ri.attributeBegin();
             setupShader(eAppearance,CommonAttributes.LINE_SHADER);
         
@@ -304,6 +312,7 @@ public class RIBVisitor extends SceneGraphVisitor {
             }
 
             Ri.attributeEnd();
+        }
         }
         super.visit(g);
     }
@@ -350,6 +359,9 @@ public class RIBVisitor extends SceneGraphVisitor {
         Ri.transformEnd();
     }
         public void visit(IndexedFaceSet i) {
+            String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
+            if(!eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.FACE_DRAW),true)) {
+                
             int npolys =i.getNumFaces();
             if(npolys!= 0) {
         HashMap map = new HashMap();
@@ -446,6 +458,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         //setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
         Ri.pointsPolygons(npolys,nvertices,vertices,map);
         Ri.attributeEnd();
+            }
             }
         super.visit(i);
     }

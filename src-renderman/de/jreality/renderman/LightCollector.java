@@ -122,7 +122,7 @@ public class LightCollector extends SceneGraphVisitor {
         HashMap map =new HashMap();
         map.put("intensity",new Float(l.getIntensity()));
         map.put("lightcolor",l.getColorAsFloat());
-        map.put("from",new float[] {0f,0f,1f});
+        map.put("from",new float[] {0f,0f,-1f});
         map.put("to",new float[] {0f,0f,0f});
         map.put("coneangle",new Float(l.getConeAngle()));
         map.put("conedeltaangle",new Float(l.getConeDeltaAngle()));
