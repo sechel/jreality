@@ -173,10 +173,7 @@ public class DefaultVertexShader implements VertexShader {
 			double lr = light.red;
 			double lg = light.green;
 			double lb = light.blue;
-			double intensity =
-				4
-					* light.intensity
-					/ (light.a0
+			double intensity = 1 * light.intensity/ (light.a0
 						+ (light.a1 + light.a2 * dst) * dst);
 			double softFrac = light.softEdgeFraction;
 			if (cosAngle - cosCone < softFrac)
