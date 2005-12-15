@@ -65,7 +65,7 @@ public class RIBVisitor extends SceneGraphVisitor {
     private Map textures =new HashMap();
     private String proj = "perspective";
     
-    public static boolean fullSpotLight = false;
+    public static boolean fullSpotLight = true;
     public static String shaderPath = null;
     
     private double sScale=1;
@@ -181,9 +181,9 @@ public class RIBVisitor extends SceneGraphVisitor {
     double transparency = a.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
         float f = 1f - (float)transparency;
         Ri.opacity(new float[] {f,f,f});
-        
+        System.out.println("transparency is "+type+" is "+transparency);
         Object shader = a.getAttribute(type,"default");
-        System.out.println("shader "+type+" is "+shader);
+        System.out.println("shader for "+type+" is "+shader);
 
         SLShader slShader = (SLShader) a.getAttribute(type+".rendermanDisplacement",null,SLShader.class);
         if(slShader != null) {
@@ -269,7 +269,7 @@ public class RIBVisitor extends SceneGraphVisitor {
      */
     public void visit(IndexedLineSet g) {
         String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
-        if(!eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW),true)) {
+        if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW),true)) {
         
         DataList dl = g.getEdgeAttributes(Attribute.INDICES);
         if(dl!=null){
@@ -278,7 +278,7 @@ public class RIBVisitor extends SceneGraphVisitor {
             Ri.attributeBegin();
             setupShader(eAppearance,CommonAttributes.LINE_SHADER);
         
-            float r = (float) eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER,CommonAttributes.LINE_WIDTH),0.01);
+            float r = (float) eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER,CommonAttributes.TUBE_RADIUS),CommonAttributes.TUBE_RADIUS_DEFAULT);
 //        int n= g.getNumEdges();
 //        for(int i = 0;i<n;i++) {
 //            cylinder(g.getEdgeData(i),r);
@@ -360,7 +360,7 @@ public class RIBVisitor extends SceneGraphVisitor {
     }
         public void visit(IndexedFaceSet i) {
             String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
-            if(!eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.FACE_DRAW),true)) {
+            if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.FACE_DRAW),true)) {
                 
             int npolys =i.getNumFaces();
             if(npolys!= 0) {
@@ -455,7 +455,7 @@ public class RIBVisitor extends SceneGraphVisitor {
             }
         }
         Ri.attributeBegin();
-        //setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
+        setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
         Ri.pointsPolygons(npolys,nvertices,vertices,map);
         Ri.attributeEnd();
             }
@@ -475,7 +475,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         DoubleArrayArray a=coord.toDoubleArrayArray();
         double[] trns = new double[16];
         Ri.attributeBegin();
-        float r = (float) eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,CommonAttributes.POINT_RADIUS),/*CommonAttributes.POINT_RADIUS_DEFAULT*/ 0.01);
+        float r = (float) eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
         System.out.println("point radius is "+r);
         setupShader(eAppearance,CommonAttributes.POINT_SHADER);
         for (int i= 0; i < n; i++) { 

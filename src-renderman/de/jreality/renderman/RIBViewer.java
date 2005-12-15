@@ -78,7 +78,7 @@ public class RIBViewer implements Viewer {
         rv.setWidth(width);
         rv.setHeight(height);
         rv.projection(proj);
-        System.out.print(" Rendering RIB into "+fileName+"..");
+        System.out.print(" Rendering renderman RIB into "+fileName+"..");
         rv.visit(sceneRoot,cameraPath,fileName);
         System.out.println(".done."); 
     }
