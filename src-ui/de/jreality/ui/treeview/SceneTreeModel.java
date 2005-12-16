@@ -1,9 +1,11 @@
 package de.jreality.ui.treeview;
 
+import java.awt.EventQueue;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import javax.swing.tree.TreeNode;
@@ -183,30 +185,49 @@ public class SceneTreeModel extends AbstractTreeModel {
         tools.addAll(cmp.getTools());
       }
     }
-    public int addChild(SceneTreeNode child) {
+    public int addChild(final SceneTreeNode child) {
+      EventQueue.invokeLater(new Runnable(){
+        public void run() {
+          // TODO Auto-generated method stub
+          
+        }
+      });
       int ret = super.addChild(child);
       fireNodesAdded(this, new Object[]{child});
       return ret;
     }
-    protected int removeChild(SceneTreeNode prevChild) {
-      int ret = super.removeChild(prevChild);
-      fireNodesRemoved(this, new int[]{ret}, new Object[]{prevChild});
-      return ret;
-    }
-    public void toolAdded(ToolEvent ev) {
-      int idx = getChildren().size();
-      for (Iterator it = cmp.getTools().iterator(); it.hasNext(); ) {
-        if (ev.getTool() == it.next()) break;
-        idx++;
+    protected int removeChild(final SceneTreeNode prevChild) {
+      final int[] ret = new int[1];
+      try {
+        EventQueue.invokeAndWait(new Runnable(){
+          public void run() {
+            ret[0] = SceneTreeNodeWithToolListener.super.removeChild(prevChild);
+            fireNodesRemoved(this, new int[]{ret[0]}, new Object[]{prevChild});
+          }
+        });
+      } catch (Exception e) {
+        throw new Error(";-(");
       }
-      tools.add(ev.getTool());
-      fireNodesAdded(this, new int[]{idx}, new Object[]{TreeTool.getInstance(this, ev.getTool())});
+      return ret[0];
     }
-    public void toolRemoved(ToolEvent ev) {
-      int idx = getChildren().size();
-      int tind = tools.indexOf(ev.getTool());
-      tools.remove(tind);
-      fireNodesRemoved(this, new int[]{idx+tind}, new Object[]{TreeTool.getInstance(this, ev.getTool())});
+    public void toolAdded(final ToolEvent ev) {
+      EventQueue.invokeLater(new Runnable(){
+        public void run() {
+          int idx = getChildren().size()+tools.size();
+          tools.add(ev.getTool());
+          fireNodesAdded(this, new int[]{idx}, new Object[]{TreeTool.getInstance(SceneTreeNodeWithToolListener.this, ev.getTool())});
+        }
+      });
+    }
+    public void toolRemoved(final ToolEvent ev) {
+      EventQueue.invokeLater(new Runnable(){
+        public void run() {
+          int idx = getChildren().size();
+          int tind = tools.indexOf(ev.getTool());
+          tools.remove(tind);
+          fireNodesRemoved(this, new int[]{idx+tind}, new Object[]{TreeTool.getInstance(SceneTreeNodeWithToolListener.this, ev.getTool())});
+        }
+      });
     }
     protected void dispose(ArrayList disposedEntities) {
       super.dispose(disposedEntities);
