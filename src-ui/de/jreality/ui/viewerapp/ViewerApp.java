@@ -189,7 +189,10 @@ public class ViewerApp
   
   void initFrame() {
     frame.pack();
-    frame.setSize(Math.max(900, frame.getWidth()), Math.max(600, frame.getHeight()));
+    Dimension size = frame.getToolkit().getScreenSize();
+    size.width*=.7;
+    size.height*=.7;
+    frame.setSize(size);
     frame.validate();
   }
 

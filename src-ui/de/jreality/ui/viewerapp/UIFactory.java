@@ -88,7 +88,6 @@ public class UIFactory
   Component createNavigation()
   {
     sceneTree=new JTree();
-    sceneTree.setBorder(emptyBorder);
     SceneTreeModel model = new SceneTreeModel(root);
     sceneTree.setModel(model);
     sceneTree.setCellRenderer(new JTreeRenderer());
@@ -99,12 +98,14 @@ public class UIFactory
   {
     JSplitPane main=new JSplitPane(JSplitPane.VERTICAL_SPLIT,
         viewer, scroll(console));
+
     main.setContinuousLayout(true);
-    main.setResizeWeight(.01);
-    main.setDividerLocation(420);
-    main.setLastDividerLocation(420);
-    main.setDividerLocation(600);
     main.setOneTouchExpandable(true);
+    
+    main.setResizeWeight(.01);
+    
+    main.setDividerLocation(420);
+    main.setDividerLocation(Integer.MAX_VALUE);
     return main;
   }
 
@@ -117,6 +118,7 @@ public class UIFactory
   JScrollPane scroll(Component tree)
   {
     JScrollPane scroll=new JScrollPane(tree);
+    scroll.setBorder(emptyBorder);
     return scroll;
   }
 
@@ -137,8 +139,8 @@ public class UIFactory
 
   public void setInspector(JComponent component)
   {
+    component.setBorder(BorderFactory.createEmptyBorder(1,1,1,1));
     inspector= component;
-    component.setBorder(emptyBorder);
   }
 
 }

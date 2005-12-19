@@ -67,8 +67,6 @@ public class SceneTreeModel extends AbstractTreeModel {
         Tool t = (Tool) comp.getTools().get(newInd);
         return TreeTool.getInstance(sn, t);
       }
-      if (!(sn.getNode() instanceof Appearance))
-        return sn.getChildren().get(index);
     }
     Object[] childEntities = (Object[]) entities.get(parent);
     return childEntities[index];
