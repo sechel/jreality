@@ -20,6 +20,7 @@ import de.jreality.shader.ShaderUtility;
 public class ParticleLineShader implements LineShader {
   
   private double pointRadius;
+  private int sphereDetail=0;
   private Color diffuseColor;
   private static float[] difCol=new float[4];
   
@@ -39,6 +40,7 @@ public class ParticleLineShader implements LineShader {
   static boolean setVortexData;
   
   static double ro=0.01;
+  static boolean setRo=true;
   
   public boolean providesProxyGeometry() {
     return true;
@@ -50,7 +52,8 @@ public class ParticleLineShader implements LineShader {
 
   public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
     pointRadius = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
-    ro = eap.getAttribute(ShaderUtility.nameSpace(name, "ro"), ro);
+    sphereDetail = eap.getAttribute(ShaderUtility.nameSpace(name,"sphereDetail"),0);
+    double curRo = eap.getAttribute(ShaderUtility.nameSpace(name, "ro"), ro);
     debug = eap.getAttribute(ShaderUtility.nameSpace(name, "debug"), false);
     diffuseColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COLOR),CommonAttributes.DIFFUSE_COLOR_DEFAULT);
     diffuseColor.getComponents(difCol);
@@ -64,6 +67,10 @@ public class ParticleLineShader implements LineShader {
       vortexData = rkData;
       setVortexData = true;
     }
+    if (curRo != ro) {
+      ro = curRo;
+      setRo = true;
+    }
   }
 
   public void updateData(JOGLRenderer jr) {
@@ -76,8 +83,11 @@ public class ParticleLineShader implements LineShader {
       v.setVortexData(vortexData);
       setVortexData=false;
     }
+    if (setRo) {
+      v.setRo(ro);
+      setRo=false;
+    }
     data = v.getCurrentParticlePositions(data);
-    v.setRo(ro);
   }
 
   public void render(JOGLRenderer jr) {
@@ -91,7 +101,7 @@ public class ParticleLineShader implements LineShader {
     
       int n = data.length/4;
 
-      int dlist = JOGLSphereHelper.getSphereDLists(0, jr);
+      int dlist = JOGLSphereHelper.getSphereDLists(sphereDetail, jr);
 
       gl.glColor4fv(difCol);
       
