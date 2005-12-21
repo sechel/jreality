@@ -99,31 +99,31 @@ public class ParticleLineShader implements LineShader {
     if (particles.length == 0) return;
     GL gl =   jr.globalGL;
     
-      int n = data.length/4;
+    int n = data.length/4;
 
-      int dlist = JOGLSphereHelper.getSphereDLists(sphereDetail, jr);
+    int dlist = JOGLSphereHelper.getSphereDLists(sphereDetail, jr);
 
-      gl.glColor4fv(difCol);
-      
-      mat[0] = mat[5] = mat[10] = (float) pointRadius;
-      int nanCnt=0;
-      for (int i = 0; i< n; i++) {
-        if (Float.isNaN(data[4*i]) || Float.isNaN(data[4*i+1]) || Float.isNaN(data[4*i]+2)) {
-          nanCnt++;
-          continue;
-        }
-        mat[3] = data[4*i];
-        mat[7] = data[4*i+1];
-        mat[11] = data[4*i+2];
-        
-        gl.glPushMatrix();
-        gl.glMultTransposeMatrixf(mat);
-
-        gl.glCallList(dlist);
-        gl.glPopMatrix();
+    gl.glColor4fv(difCol);
+    
+    mat[0] = mat[5] = mat[10] = (float) pointRadius;
+    int nanCnt=0;
+    for (int i = 0; i< n; i++) {
+      if (Float.isNaN(data[4*i]) || Float.isNaN(data[4*i+1]) || Float.isNaN(data[4*i]+2)) {
+        nanCnt++;
+        continue;
       }
-      if (nanCnt > 0) System.out.println("nanCnt="+nanCnt);
+      mat[3] = data[4*i];
+      mat[7] = data[4*i+1];
+      mat[11] = data[4*i+2];
+      
+      gl.glPushMatrix();
+      gl.glMultTransposeMatrixf(mat);
+
+      gl.glCallList(dlist);
+      gl.glPopMatrix();
     }
+    if (nanCnt > 0) System.out.println("nanCnt="+nanCnt);
+  }
 
   public void postRender(JOGLRenderer jr) {
   }
