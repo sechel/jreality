@@ -5,6 +5,7 @@
 package de.jreality.jogl.shader;
 
 import java.awt.Color;
+import java.io.IOException;
 import java.util.logging.Level;
 
 import net.java.games.jogl.GL;
@@ -12,10 +13,11 @@ import net.java.games.jogl.GLDrawable;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.math.Rn;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.*;
-import de.jreality.shader.CubeMap;
+import de.jreality.util.Input;
 
 /**
  * @author Charles Gunn
@@ -28,22 +30,37 @@ public class DefaultPolygonShader implements PolygonShader {
 	public static final int BACK = GL.GL_BACK;
 	
 	boolean		smoothShading = true; 		// interpolate shaded values between vertices
-//  de.jreality.scene.Texture2D texture2D;
-//  de.jreality.scene.Texture2D lightMap;
   Texture2D texture2Dnew;
   Texture2D lightMapNew;
    CubeMap reflectionMapNew;
 	int frontBack = FRONT_AND_BACK;
 	public VertexShader vertexShader = null;
-	AbstractJOGLShader glShader = null;
+	boolean useGLSL = true;
+	static GlslSource glSource = null;
+	GlslProgram glProgram = null;
+	GlslPolygonShader glShader = null;
 	static double[] idmat = Rn.identityMatrix(4);
 	int texUnit = 0, refMapUnit = 0;
+	Appearance ap = new Appearance();
+	EffectiveAppearance myEap = null;
 	/**
 		 * 
 		 */
 		public DefaultPolygonShader() {
 			super();
 			vertexShader = new DefaultVertexShader();
+			if (useGLSL)	{
+				try {
+					if (glSource == null) glSource = new GlslSource( Input.getInput("de/jreality/jogl/shader/resources/standardOGL.vert"),
+					        null);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}				
+				ap = new Appearance();
+				myEap = EffectiveAppearance.create().create(ap);
+				glProgram = new GlslProgram(ap, "polygonShader", glSource );
+				glShader = new GlslPolygonShader();
+			}
 		}
 
 		
@@ -58,28 +75,18 @@ public class DefaultPolygonShader implements PolygonShader {
 		vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);
 
 		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);	
-//		Object foo = eap.getAttribute(NameSpace.name(name,"texture2d"), null, Texture2D.class);
-//		Object foo = eap.getAttribute(ShaderUtility.nameSpace(name,"texture2d"), null, de.jreality.scene.Texture2D.class);
-//		if (foo instanceof de.jreality.scene.Texture2D)	texture2D = (de.jreality.scene.Texture2D) foo;
-//	  foo = eap.getAttribute(ShaderUtility.nameSpace(name,"lightMap"), null, de.jreality.scene.Texture2D.class);
-//    if (foo instanceof de.jreality.scene.Texture2D) lightMap = (de.jreality.scene.Texture2D) foo;
-
-    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap))
-      texture2Dnew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap);
-    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))
-      reflectionMapNew = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));
-    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap))
-      lightMapNew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap);
+	    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap))
+	    	texture2Dnew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap);
+	    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))
+	    	reflectionMapNew = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));
+	    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap))
+	    	lightMapNew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap);
       
-     //TODO this is a hack. 
-		if (eap.getAttribute(ShaderUtility.nameSpace(name,"useGLShader"), false) == true)	{
-			Object obj =  eap.getAttribute(ShaderUtility.nameSpace(name,"GLShader"), null, AbstractJOGLShader.class);
-			if (obj instanceof AbstractJOGLShader) {
-				glShader = (AbstractJOGLShader) obj;
-			}
-		} else glShader = null;
-	
-	}
+	    if (useGLSL)		{
+	    	vertexShader.setGlsl(glProgram);
+		    glShader.setFromEffectiveAppearance(myEap,name);
+	    }
+ 	}
 
 		/**
 		 * @return
@@ -136,13 +143,6 @@ public class DefaultPolygonShader implements PolygonShader {
       gl.glEnable(GL.GL_TEXTURE_2D);
     }
 
-//	if (texture2D != null) {
-//      gl.glActiveTexture(texUnit);
-//      texUnit++;
-//      Texture2DLoaderJOGL.render(theCanvas, texture2D);
-//      testTextureResident(jr, gl);
-//      gl.glEnable(GL.GL_TEXTURE_2D);
-//    } //else
     if (lightMapNew != null) {
       gl.glActiveTexture(texUnit);
       texUnit++;
@@ -150,13 +150,6 @@ public class DefaultPolygonShader implements PolygonShader {
       testTextureResident(jr, gl);
       gl.glEnable(GL.GL_TEXTURE_2D);
     }
-//    if (lightMap != null) {
-//      gl.glActiveTexture(texUnit);
-//      texUnit++;
-//     Texture2DLoaderJOGL.render(theCanvas, lightMap);
-//     testTextureResident(jr, gl);
-//      gl.glEnable(GL.GL_TEXTURE_2D);
-//    } //else
     if (reflectionMapNew != null)  {
       gl.glActiveTexture(texUnit);
       refMapUnit = texUnit;
@@ -165,11 +158,12 @@ public class DefaultPolygonShader implements PolygonShader {
       //testTextureResident(jr, gl);
       gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
      } 
-    vertexShader.setFrontBack(frontBack);
-	vertexShader.render(jr);
-	if (glShader != null) {
-		glShader.render(jr);
-	}
+    if (useGLSL)		{
+    	glShader.render(jr);
+    } else {
+        vertexShader.setFrontBack(frontBack);
+    	vertexShader.render(jr);    	
+    }
 }
 	
 	private void testTextureResident(JOGLRenderer jr, GL gl) {
@@ -194,7 +188,7 @@ public class DefaultPolygonShader implements PolygonShader {
       gl.glDisable(GL.GL_TEXTURE_GEN_T);
       gl.glDisable(GL.GL_TEXTURE_GEN_R);      
     }
-//		if (glShader != null) glShader.deactivate(theCanvas);
+    if (useGLSL) glShader.postRender(jr);
 	}
 
 	public boolean providesProxyGeometry() {		

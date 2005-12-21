@@ -14,6 +14,7 @@ import de.jreality.jogl.JOGLRenderer;
 import de.jreality.math.Rn;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.GlslProgram;
 import de.jreality.shader.ShaderUtility;
 
 
@@ -24,11 +25,11 @@ import de.jreality.shader.ShaderUtility;
 public class DefaultVertexShader implements VertexShader {
 	// TODO add the diffuse color here also, and transparency
 	// the polygon shader if queried, consults this shader for these values
-	Color	ambientColor,
+	public Color	ambientColor,
 			diffuseColor,
 			specularColor;		
-	double 	specularExponent, ambientCoefficient, diffuseCoefficient, specularCoefficient, transparency;	
-	float[] specularColorAsFloat, ambientColorAsFloat, diffuseColorAsFloat;
+	public double 	specularExponent, ambientCoefficient, diffuseCoefficient, specularCoefficient, transparency;	
+	public float[] specularColorAsFloat, ambientColorAsFloat, diffuseColorAsFloat;
 	int frontBack = DefaultPolygonShader.FRONT_AND_BACK;
 	
 	/**
@@ -52,9 +53,11 @@ public class DefaultVertexShader implements VertexShader {
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
 		specularColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SPECULAR_COLOR), CommonAttributes.SPECULAR_COLOR_DEFAULT);
 		specularColorAsFloat = specularColor.getRGBComponents(null);
-		for (int i  = 0; i<3; ++i) ambientColorAsFloat[i] *= (float) ambientCoefficient;
-		for (int i  = 0; i<3; ++i) diffuseColorAsFloat[i] *= (float) diffuseCoefficient;
-		for (int i  = 0; i<3; ++i) specularColorAsFloat[i] *= (float) specularCoefficient;
+		for (int i  = 0; i<3; ++i) {
+			ambientColorAsFloat[i] *= (float) ambientCoefficient;
+			diffuseColorAsFloat[i] *= (float) diffuseCoefficient;
+			specularColorAsFloat[i] *= (float) specularCoefficient;
+		}
 	}
 
 	/**
@@ -120,7 +123,7 @@ public class DefaultVertexShader implements VertexShader {
 			gl.glColor4fv( diffuseColorAsFloat);
 			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
 //		}
-			gl.glMaterialfv(frontBack, GL.GL_DIFFUSE, diffuseColorAsFloat);
+			//gl.glMaterialfv(frontBack, GL.GL_DIFFUSE, diffuseColorAsFloat);
 		gl.glMaterialfv(frontBack, GL.GL_AMBIENT, ambientColorAsFloat);
 		gl.glMaterialfv(frontBack, GL.GL_SPECULAR, specularColorAsFloat);
 		gl.glMaterialf(frontBack, GL.GL_SHININESS, (float) getSpecularExponent());
@@ -130,4 +133,14 @@ public class DefaultVertexShader implements VertexShader {
 	public void postRender(JOGLRenderer jr) {
 	}
 
+	public void setGlsl( GlslProgram glProgram)	{
+		glProgram.setUniform("shininess",specularExponent);
+		glProgram.setUniform("ambientColor", ambientColorAsFloat);
+		glProgram.setUniform("ambientCoefficient", 1.0);
+		glProgram.setUniform("diffuseColor", diffuseColorAsFloat);
+		glProgram.setUniform("diffuseCoefficient", 1.0);
+		glProgram.setUniform("specularColor", specularColorAsFloat);
+		glProgram.setUniform("specularCoefficient", 1.0);
+
+	}
 }

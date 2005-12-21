@@ -102,6 +102,9 @@ public class GlslLoader {
 
       Object[] params = new Object[3];
       params[0] = uniLocation(param.getName(), gl);
+      if (((Integer) params[0]).intValue() == -1)		{
+    	  return;
+      }
       params[1] = new Integer(param.isArray() ? param.getArrayLength() : 1);
       params[2] = value;
       Statement s = new Statement(gl, sb.toString(), params);
@@ -150,7 +153,9 @@ public class GlslLoader {
       int loc;
       loc = gl.glGetUniformLocationARB(progID.intValue(), name);
       if (loc == -1) {
-        throw new IllegalStateException("failed uniLoc for "+name);
+    	  // this can happen easily since parameters that aren't used are optimized away
+    	  // don't want to throw an exception in this case.
+        //throw new IllegalStateException("failed uniLoc for "+name);
       }
       return new Integer(loc);
     }

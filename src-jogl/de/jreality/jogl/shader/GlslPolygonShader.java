@@ -37,4 +37,8 @@ public class GlslPolygonShader implements PolygonShader {
   public void setFrontBack(int f) {
   }
 
+public void setProgram(GlslProgram program) {
+	this.program = program;
+}
+
 }

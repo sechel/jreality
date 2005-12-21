@@ -14,6 +14,7 @@ import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.GlslProgram;
 import de.jreality.shader.ShaderUtility;
 
 /**
@@ -58,5 +59,8 @@ public class SimpleVertexShader implements VertexShader {
 		transparency= eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
 		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transparency);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
+	}
+	public void setGlsl(GlslProgram glProgram) {
+		glProgram.setUniform("diffuseColor", diffuseColorAsFloat);
 	}
 }
