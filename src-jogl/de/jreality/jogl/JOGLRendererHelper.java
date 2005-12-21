@@ -604,12 +604,16 @@ public class JOGLRendererHelper {
 		int n = lights.size();
 		for (int i = 0; i<n; ++i)	{
 			SceneGraphPath lp = (SceneGraphPath) lights.get(i);
+			SceneGraphNode light = lp.getLastElement();
+			if (! (light instanceof Light))	{
+				JOGLConfiguration.theLog.warning("Invalid light path: no light there");
+				continue;
+			}
 			lp.getMatrix(mat);
 //			JOGLConfiguration.theLog.log(Level.INFO,"Light matrix "+i+" is:\n"+Rn.matrixToString(mat));
 //			JOGLConfiguration.theLog.log(Level.INFO,"Light"+i+": "+lp.toString());
 			globalGL.glPushMatrix();
 			globalGL.glMultTransposeMatrixd(mat);
-			SceneGraphNode light = lp.getLastElement();
 			light.accept(ogllv);
 			globalGL.glPopMatrix();
 			lightCount++;
@@ -638,7 +642,7 @@ public class JOGLRendererHelper {
 		}
 		
 	}
-	private static float[] zDirection = {0,0,1,(float)10E-10};
+	private static float[] zDirection = {0,0,1,0}; //(float)10E-10};
 	private static float[] origin = {0,0,0,1};
 	public static void wisit(Light dl, GL globalGL, int lightCount)	{
 		  globalGL.glLightfv(lightCount, GL.GL_DIFFUSE, dl.getScaledColorAsFloat());
@@ -663,10 +667,6 @@ public class JOGLRendererHelper {
 	}
 	
 	public static void wisit(SpotLight dl, GL globalGL, int lightCount)		{
-		  if (lightCount >= GL.GL_LIGHT7)	{
-		  	JOGLConfiguration.theLog.log(Level.WARNING,"Max. # lights exceeded");
-		  	return;
-		  }
 		  wisit((PointLight) dl, globalGL, lightCount);
 		  globalGL.glLightf(lightCount, GL.GL_SPOT_CUTOFF, (float) ((180.0/Math.PI) * dl.getConeAngle()));
 		  globalGL.glLightfv(lightCount, GL.GL_SPOT_DIRECTION, zDirection);

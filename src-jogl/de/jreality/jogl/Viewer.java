@@ -286,12 +286,13 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 			GLCapabilitiesChooser chooser = new MultisampleChooser();
 			caps.setSampleBuffers(true);
 			caps.setNumSamples(4);
+//			caps.setStereo(true);
 			canvas = GLDrawableFactory.getFactory().createGLCanvas(caps, chooser, firstOne);
 		} else {
 			canvas = GLDrawableFactory.getFactory().createGLCanvas(caps, null, firstOne);			
 		}
         JOGLConfiguration.getLogger().log(Level.INFO, "Caps is "+caps.toString());
-		canvas.addGLEventListener(this);
+ 		canvas.addGLEventListener(this);
 		canvas.requestFocus();
 		if (JOGLConfiguration.sharedContexts && firstOne == null) firstOne = canvas;
 	}
@@ -400,7 +401,10 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	public void init(GLDrawable arg0) {
 		JOGLConfiguration.theLog.log(Level.INFO,"JOGL Context initialization, creating new renderer");
 		renderer =  new JOGLRenderer(this); 
-    renderer.init(arg0);  
+		renderer.init(arg0);  
+	      byte[] foo = new byte[4];
+	        canvas.getGL().glGetBooleanv(GL.GL_STEREO, foo);
+	        JOGLConfiguration.getLogger().log(Level.INFO, "Stereo is:"+foo[0]);
 	}
 
 	public void reshape(
