@@ -67,6 +67,7 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
@@ -119,8 +120,31 @@ public class ViewerApp
   private BshEvaluator bshEval;
   private SimpleAttributeSet infoStyle;
   
+  public static void display(final SceneGraphNode n) {
+    initAWT();
+    final ViewerApp app;
+    try {
+      app = new ViewerApp(true);
+    } catch (Exception e) {
+      throw new RuntimeException("creating viewer failed: "+e.getMessage());
+    }
+    n.accept(new SceneGraphVisitor() {
+      public void visit(SceneGraphComponent sc) {
+        app.scene.addChild(sc);
+      }
+      public void visit(Geometry g) {
+        app.scene.setGeometry(g);
+      }
+    });
+  }
+  
   public static void main(String[] args) throws Exception
   {
+    initAWT();
+    new ViewerApp(true);
+  }
+
+  private static void initAWT() {
     try {
       UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
     } catch (Exception e) {
@@ -128,7 +152,6 @@ public class ViewerApp
     }
     System.setProperty("sun.awt.noerasebackground", "true");
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-    new ViewerApp(true);
   }
   
   public ViewerApp(boolean initScene) throws Exception {
