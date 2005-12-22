@@ -214,7 +214,7 @@ public class ReaderOOGL extends AbstractReader {
                   	if (fc != null)ifsf.setFaceColors(fc);
                    ifsf.setGenerateEdgesFromFaces(true);
                    ifsf.setGenerateFaceNormals(true);
-                 	ifsf.refactor();
+                 	ifsf.update();
                   IndexedFaceSet ifs = ifsf.getIndexedFaceSet();
 //                  IndexedFaceSetUtility.createIndexedFaceSetFrom(indices, verts, vn, vc, tc, null, fc);
                   ifs.setName("OFF Geometry");
@@ -266,7 +266,11 @@ public class ReaderOOGL extends AbstractReader {
                         }
                   }
                   LoggingSystem.getLogger(ReaderOOGL.class).log(Level.FINER,"Read "+n+" vertices");
-                  QuadMeshFactory qmf = new QuadMeshFactory(u,v, closedU, closedV);
+                  QuadMeshFactory qmf = new QuadMeshFactory();//u,v, closedU, closedV);
+                  qmf.setULineCount(u);
+                  qmf.setVLineCount(v);
+                  qmf.setClosedInUDirection(closedU);
+                  qmf.setClosedInVDirection(closedV);
                   qmf.setVertexCoordinates(verts);
                   if (hasVN) qmf.setVertexNormals(vn);
                   else qmf.setGenerateVertexNormals(true);
@@ -279,7 +283,7 @@ public class ReaderOOGL extends AbstractReader {
 //                      //qms.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(vLength).createReadOnly(verts));
 //                  qms.buildEdgesFromFaces();
                   //GeometryUtility.calculateAndSetNormals(qms);
-                  qmf.refactor();
+                  qmf.update();
                   IndexedFaceSet mesh = qmf.getIndexedFaceSet();
                   mesh.setName("OOGL MESH");
                   current.setGeometry(mesh);

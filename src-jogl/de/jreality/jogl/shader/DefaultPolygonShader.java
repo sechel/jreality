@@ -35,7 +35,7 @@ public class DefaultPolygonShader implements PolygonShader {
    CubeMap reflectionMapNew;
 	int frontBack = FRONT_AND_BACK;
 	public VertexShader vertexShader = null;
-	boolean useGLSL = true;
+	boolean useGLSL = false;
 	static GlslSource glSource = null;
 	GlslProgram glProgram = null;
 	GlslPolygonShader glShader = null;
