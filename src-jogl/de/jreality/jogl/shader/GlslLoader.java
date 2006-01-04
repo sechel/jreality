@@ -93,13 +93,7 @@ public class GlslLoader {
     }
     
     void writeValue(GL gl, UniformParameter param, Object value) {
-      StringBuffer sb = new StringBuffer("glUniform");
-      if (param.isMatrix()) sb.append("Matrix");
-      sb.append(param.getPrimitiveSize());
-      sb.append(param.getPrimitiveType() == float.class ? 'f' : 'i');
-      sb.append('v');
-      sb.append("ARB");
-
+      String rep = param.getStringRep();
       Object[] params = new Object[3];
       params[0] = uniLocation(param.getName(), gl);
       if (((Integer) params[0]).intValue() == -1)		{
@@ -107,7 +101,7 @@ public class GlslLoader {
       }
       params[1] = new Integer(param.isArray() ? param.getArrayLength() : 1);
       params[2] = value;
-      Statement s = new Statement(gl, sb.toString(), params);
+      Statement s = new Statement(gl, rep, params);
       //System.out.println("will call: "+s);
       try {
         s.execute();

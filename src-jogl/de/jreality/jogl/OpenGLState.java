@@ -24,6 +24,7 @@ public class OpenGLState {
 	public int activeTexture;
 	public int frontBack = GL.GL_FRONT_AND_BACK;
 	public double levelOfDetail;
+	public int numLights = 0;
 	
 	private void render(GL gl)	{
 		if (backFaceCullingEnabled)  {

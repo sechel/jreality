@@ -245,6 +245,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			lights = SceneGraphUtility.collectLights(theRoot);
 			helper.resetLights(globalGL, lights);
 			lightListDirty = false;
+			openGLState.numLights = lights.size();
 		}
 		helper.processLights(globalGL, lights);
 	}

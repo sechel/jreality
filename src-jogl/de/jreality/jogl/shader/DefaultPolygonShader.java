@@ -29,19 +29,17 @@ public class DefaultPolygonShader implements PolygonShader {
 	public static final int FRONT = GL.GL_FRONT;
 	public static final int BACK = GL.GL_BACK;
 	
-	boolean		smoothShading = true; 		// interpolate shaded values between vertices
-  Texture2D texture2Dnew;
+	boolean		smoothShading = true;		// interpolate shaded values between vertices
+	Texture2D texture2Dnew;
   Texture2D lightMapNew;
    CubeMap reflectionMapNew;
 	int frontBack = FRONT_AND_BACK;
 	public VertexShader vertexShader = null;
-	boolean useGLSL = false;
-	static GlslSource glSource = null;
-	GlslProgram glProgram = null;
-	GlslPolygonShader glShader = null;
+	boolean useGLSL =true;
 	static double[] idmat = Rn.identityMatrix(4);
 	int texUnit = 0, refMapUnit = 0;
 	Appearance ap = new Appearance();
+	GlslDefaultPolygonShader glslShader;
 	EffectiveAppearance myEap = null;
 	/**
 		 * 
@@ -50,29 +48,13 @@ public class DefaultPolygonShader implements PolygonShader {
 			super();
 			vertexShader = new DefaultVertexShader();
 			if (useGLSL)	{
-				try {
-					if (glSource == null) glSource = new GlslSource( Input.getInput("de/jreality/jogl/shader/resources/standardOGL.vert"),
-					        null);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}				
-				ap = new Appearance();
-				myEap = EffectiveAppearance.create().create(ap);
-				glProgram = new GlslProgram(ap, "polygonShader", glSource );
-				glShader = new GlslPolygonShader();
+				glslShader  = new GlslDefaultPolygonShader();
 			}
 		}
 
 		
-	public static DefaultPolygonShader createFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
-		DefaultPolygonShader dgs = new DefaultPolygonShader();
-		dgs.setFromEffectiveAppearance(eap, name);
-		return dgs;
-	}
-	
 	static int count = 0;
 	public void  setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
-		vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);
 
 		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);	
 	    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap))
@@ -83,9 +65,10 @@ public class DefaultPolygonShader implements PolygonShader {
 	    	lightMapNew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap);
       
 	    if (useGLSL)		{
-	    	vertexShader.setGlsl(glProgram);
-		    glShader.setFromEffectiveAppearance(myEap,name);
-	    }
+		    glslShader.setFromEffectiveAppearance(eap,name+".vertexShader");
+	    } //else
+			vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);
+
  	}
 
 		/**
@@ -136,34 +119,36 @@ public class DefaultPolygonShader implements PolygonShader {
 		texUnit = GL.GL_TEXTURE0;
 
     if (texture2Dnew != null) {
-      gl.glActiveTexture(texUnit);
-	  texUnit++;
-      Texture2DLoaderJOGL.render(theCanvas, texture2Dnew);
-      testTextureResident(jr, gl);
-      gl.glEnable(GL.GL_TEXTURE_2D);
+	      gl.glActiveTexture(texUnit);
+		  texUnit++;
+	      Texture2DLoaderJOGL.render(theCanvas, texture2Dnew);
+	      testTextureResident(jr, gl);
+	      gl.glEnable(GL.GL_TEXTURE_2D);
     }
 
     if (lightMapNew != null) {
-      gl.glActiveTexture(texUnit);
-      texUnit++;
-      Texture2DLoaderJOGL.render(theCanvas, lightMapNew);
-      testTextureResident(jr, gl);
-      gl.glEnable(GL.GL_TEXTURE_2D);
+	      gl.glActiveTexture(texUnit);
+	      texUnit++;
+	      Texture2DLoaderJOGL.render(theCanvas, lightMapNew);
+	      testTextureResident(jr, gl);
+	      gl.glEnable(GL.GL_TEXTURE_2D);
     }
+    
     if (reflectionMapNew != null)  {
-      gl.glActiveTexture(texUnit);
-      refMapUnit = texUnit;
-      texUnit++;
-      Texture2DLoaderJOGL.render(jr, reflectionMapNew);
-      //testTextureResident(jr, gl);
-      gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
+	      gl.glActiveTexture(texUnit);
+	      refMapUnit = texUnit;
+	      texUnit++;
+	      Texture2DLoaderJOGL.render(jr, reflectionMapNew);
+	      //testTextureResident(jr, gl);
+	      gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
      } 
+    
     if (useGLSL)		{
-    	glShader.render(jr);
-    } else {
+    	glslShader.render(jr);
+    } //else {
         vertexShader.setFrontBack(frontBack);
     	vertexShader.render(jr);    	
-    }
+   // }
 }
 	
 	private void testTextureResident(JOGLRenderer jr, GL gl) {
@@ -174,21 +159,22 @@ public class DefaultPolygonShader implements PolygonShader {
 	}
 
 
-	public void postRender(JOGLRenderer jr)	{
+	public void postRender(JOGLRenderer jr) {
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
-		for (int i = GL.GL_TEXTURE0; i< texUnit; ++i)	{
+		for (int i = GL.GL_TEXTURE0; i < texUnit; ++i) {
 			gl.glActiveTexture(i);
-			gl.glDisable(GL.GL_TEXTURE_2D);			
+			gl.glDisable(GL.GL_TEXTURE_2D);
 		}
-    if (reflectionMapNew != null)  {
-      gl.glActiveTexture(refMapUnit);
-      gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
-      gl.glDisable(GL.GL_TEXTURE_GEN_S);
-      gl.glDisable(GL.GL_TEXTURE_GEN_T);
-      gl.glDisable(GL.GL_TEXTURE_GEN_R);      
-    }
-    if (useGLSL) glShader.postRender(jr);
+		if (reflectionMapNew != null) {
+			gl.glActiveTexture(refMapUnit);
+			gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
+			gl.glDisable(GL.GL_TEXTURE_GEN_S);
+			gl.glDisable(GL.GL_TEXTURE_GEN_T);
+			gl.glDisable(GL.GL_TEXTURE_GEN_R);
+		}
+		if (useGLSL)
+			glslShader.postRender(jr);
 	}
 
 	public boolean providesProxyGeometry() {		

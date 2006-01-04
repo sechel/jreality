@@ -99,8 +99,13 @@ public abstract class AbstractJOGLShader implements PolygonShader {
 		JOGLConfiguration.theLog.log(Level.FINE,"Setting GLSL program to "+program);
 	}
 	
+	public void postRender(JOGLRenderer jr) {
+		deactivate(jr.getCanvas());
+	}
+	
 	public void deactivate(GLDrawable theCanvas)	{
 		//TODO fix this
+		theCanvas.getGL().glUseProgramObjectARB(0);
 		LoggingSystem.getLogger(this).log(Level.FINE,"Deactivating GLSL program");
 	}
 	private void printInfoLog(int objectHandle, GLDrawable theCanvas)	{
@@ -120,7 +125,7 @@ public abstract class AbstractJOGLShader implements PolygonShader {
 			StringBuffer foo = new StringBuffer(charsWritten[0]);
 			
 			for (int i = 0; i< charsWritten[0]; ++i)	foo.append((char) infoLog[i]);
-			JOGLConfiguration.theLog.log(Level.INFO,"Info Log: "+foo.toString());
+			JOGLConfiguration.theLog.log(Level.FINE,"Info Log: "+foo.toString());
 		}
 		printOpenGLError();
 	}
@@ -152,16 +157,8 @@ public abstract class AbstractJOGLShader implements PolygonShader {
 		return sb.toString();
 	}
 	
-	public void postRender(JOGLRenderer jr) {
-	
-	}
-	
-//	public void render(JOGLRenderer jr) {
-//	}
-//	
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
 		
-
 	}
 	//
      // Get the location of a uniform variable
