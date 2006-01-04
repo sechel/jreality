@@ -394,7 +394,7 @@ indexedFaceSetNode returns [IndexedFaceSet ifs]
 	ifsf.setGenerateEdgesFromFaces(false);
 	ifsf.setGenerateFaceNormals(true); // depends on whether face normals were set above!
 	ifsf.setGenerateVertexNormals(true); // depends on whether face normals were set above!
-	ifsf.refactor();
+	ifsf.update();
 	ifs = ifsf.getIndexedFaceSet();
 	ifs.setName("IFS:LineNo "+g.getLine());
 	// collect some statistics
