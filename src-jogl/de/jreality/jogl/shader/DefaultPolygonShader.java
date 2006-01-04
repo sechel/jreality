@@ -35,7 +35,7 @@ public class DefaultPolygonShader implements PolygonShader {
    CubeMap reflectionMapNew;
 	int frontBack = FRONT_AND_BACK;
 	public VertexShader vertexShader = null;
-	boolean useGLSL =true;
+	boolean useGLSL = false;
 	static double[] idmat = Rn.identityMatrix(4);
 	int texUnit = 0, refMapUnit = 0;
 	Appearance ap = new Appearance();
