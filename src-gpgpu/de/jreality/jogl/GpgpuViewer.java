@@ -6,23 +6,20 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.Random;
-import java.util.logging.Level;
 
-import net.java.games.jogl.DebugGL;
 import net.java.games.jogl.GL;
-import net.java.games.jogl.GLCapabilities;
 import net.java.games.jogl.GLDrawable;
-import net.java.games.jogl.GLDrawableFactory;
 import net.java.games.jogl.GLU;
 import de.jreality.jogl.shader.GlslLoader;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
 import de.jreality.shader.GlslProgram;
 import de.jreality.util.Input;
 
 public class GpgpuViewer extends Viewer {
 
+  private boolean forthOrder;
+  private boolean orderChanged; // TODO: use this flag...
+  
   private boolean doIntegrate;
   
   private static final boolean ATI=false;
@@ -84,11 +81,6 @@ public class GpgpuViewer extends Viewer {
 
   private double ro;
   
-  static {
-    //JOGLConfiguration.portalUsage=true;
-    //JOGLConfiguration.multiSample=false;
-  }
-
   public GpgpuViewer() {
     super();
   }
@@ -129,7 +121,10 @@ public class GpgpuViewer extends Viewer {
           st = System.currentTimeMillis();
           cnt=0;
         }
-        GL gl = new DebugGL(drawable.getGL());
+        if (orderChanged) {
+          recompilePrograms=true;
+        }
+        GL gl = drawable.getGL();
         GLU glu = drawable.getGLU();
         initPrograms(gl);
         initFBO(gl);
@@ -148,25 +143,28 @@ public class GpgpuViewer extends Viewer {
         progK2.setUniform("K1", 2);
         progK2.setUniform("h", dt);
         
-        progK3.setUniform("particles", 0);
-        progK3.setUniform("vorticity", 1);
-        progK3.setUniform("roSquared", roSquared);
-        progK3.setUniform("K2", 2);
-        progK3.setUniform("h", dt);
-  
-        progK4.setUniform("particles", 0);
-        progK4.setUniform("vorticity", 1);
-        progK4.setUniform("roSquared", roSquared);
-        progK4.setUniform("K3", 2);
-        progK4.setUniform("h", dt);
-  
-        progMerge.setUniform("particles", 0);
-        progMerge.setUniform("K1", 1);
-        progMerge.setUniform("K2", 2);
-        progMerge.setUniform("K3", 3);
-        progMerge.setUniform("K4", 4);
-        progMerge.setUniform("h", dt);
+        if (forthOrder) {
+          progK3.setUniform("particles", 0);
+          progK3.setUniform("vorticity", 1);
+          progK3.setUniform("roSquared", roSquared);
+          progK3.setUniform("K2", 2);
+          progK3.setUniform("h", dt);
+    
+          progK4.setUniform("particles", 0);
+          progK4.setUniform("vorticity", 1);
+          progK4.setUniform("roSquared", roSquared);
+          progK4.setUniform("K3", 2);
+          progK4.setUniform("h", dt);
+        }
         
+        progMerge.setUniform("particles", 0);
+        progMerge.setUniform("h", dt);
+        progMerge.setUniform("K2", 2);
+        if (forthOrder) {
+          progMerge.setUniform("K1", 1);
+          progMerge.setUniform("K3", 3);
+          progMerge.setUniform("K4", 4);
+        }        
         GlslLoader.render(progK1, drawable);  
   
         // first eval
@@ -213,59 +211,64 @@ public class GpgpuViewer extends Viewer {
         gl.glBindTexture(TEX_TARGET, intermediateTexs[0]);
         
         renderQuad(gl);
-            
-        // third eval
-        gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-            GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[2], 0);      
-        checkBuf(gl);
-        gl.glFinish();
-
-        GlslLoader.render(progK3, drawable);
+        
+        if (forthOrder) {
+          
+          // third eval
+          gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+              GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[2], 0);      
+          checkBuf(gl);
+          gl.glFinish();
+  
+          GlslLoader.render(progK3, drawable);
+      
+          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT2_EXT);
+          
+          // enable particles
+          gl.glActiveTexture(GL.GL_TEXTURE0);
+          gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
+          
+          // enable vorticities
+          gl.glActiveTexture(GL.GL_TEXTURE1);
+          gl.glBindTexture(TEX_TARGET, vortexTexs[1]);
     
-        gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT2_EXT);
-        
-        // enable particles
-        gl.glActiveTexture(GL.GL_TEXTURE0);
-        gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
-        
-        // enable vorticities
-        gl.glActiveTexture(GL.GL_TEXTURE1);
-        gl.glBindTexture(TEX_TARGET, vortexTexs[1]);
+          // enable K2
+          gl.glActiveTexture(GL.GL_TEXTURE2);
+          gl.glBindTexture(TEX_TARGET, intermediateTexs[1]);
+          
+          renderQuad(gl);
+          
+          // forth eval
+          gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+              GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[3], 0);
+          checkBuf(gl);
+          gl.glFinish();
   
-        // enable K2
-        gl.glActiveTexture(GL.GL_TEXTURE2);
-        gl.glBindTexture(TEX_TARGET, intermediateTexs[1]);
+          GlslLoader.render(progK3, drawable);
+          
+          gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT2_EXT);
+          
+          // enable particles
+          gl.glActiveTexture(GL.GL_TEXTURE0);
+          gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
+          
+          // enable vorticities
+          gl.glActiveTexture(GL.GL_TEXTURE1);
+          gl.glBindTexture(TEX_TARGET, vortexTexs[2]);
+    
+          // enable K3
+          gl.glActiveTexture(GL.GL_TEXTURE2);
+          gl.glBindTexture(TEX_TARGET, intermediateTexs[2]);      
+          
+          renderQuad(gl);
+        }
         
-        renderQuad(gl);
-        
-        // forth eval
-        gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-            GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[3], 0);
-        checkBuf(gl);
-        gl.glFinish();
-
-        GlslLoader.render(progK3, drawable);
-        
-        gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT2_EXT);
-        
-        // enable particles
-        gl.glActiveTexture(GL.GL_TEXTURE0);
-        gl.glBindTexture(TEX_TARGET, particleTexs[readTex]);
-        
-        // enable vorticities
-        gl.glActiveTexture(GL.GL_TEXTURE1);
-        gl.glBindTexture(TEX_TARGET, vortexTexs[2]);
-  
-        // enable K3
-        gl.glActiveTexture(GL.GL_TEXTURE2);
-        gl.glBindTexture(TEX_TARGET, intermediateTexs[2]);      
-        
-        renderQuad(gl);
         gl.glFinish();
   
         GlslLoader.render(progMerge, drawable);
 
         programsLoaded = true;
+        orderChanged=false;
         
         // merge step
         gl.glDrawBuffer(attachments[writeTex]);
@@ -282,14 +285,16 @@ public class GpgpuViewer extends Viewer {
         gl.glActiveTexture(GL.GL_TEXTURE2);
         gl.glBindTexture(TEX_TARGET, intermediateTexs[1]);      
         
-        // enable K3
-        gl.glActiveTexture(GL.GL_TEXTURE3);
-        gl.glBindTexture(TEX_TARGET, intermediateTexs[2]);      
+        if (forthOrder) {
+          // enable K3
+          gl.glActiveTexture(GL.GL_TEXTURE3);
+          gl.glBindTexture(TEX_TARGET, intermediateTexs[2]);      
+          
+          // enable K4
+          gl.glActiveTexture(GL.GL_TEXTURE4);
+          gl.glBindTexture(TEX_TARGET, intermediateTexs[3]);      
+        }
         
-        // enable K4
-        gl.glActiveTexture(GL.GL_TEXTURE4);
-        gl.glBindTexture(TEX_TARGET, intermediateTexs[3]);      
-  
         renderQuad(gl);
         
         gl.glFinish();
@@ -358,9 +363,10 @@ public class GpgpuViewer extends Viewer {
       if (programsLoaded) {
         GlslLoader.dispose(gl, progK1);
         GlslLoader.dispose(gl, progK2);
-        GlslLoader.dispose(gl, progK3);
-        GlslLoader.dispose(gl, progK4);
+        if (progK3 != null) GlslLoader.dispose(gl, progK3);
+        if (progK4 != null) GlslLoader.dispose(gl, progK4);
         GlslLoader.dispose(gl, progMerge);
+        progK1=progK2=progK3=progK4=progMerge=null;
       }
       try {
         
@@ -376,34 +382,41 @@ public class GpgpuViewer extends Viewer {
         
         String rk = "\n";
         // read RK-1
-        lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("RK-1.glsl")).getReader());
+        lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("K1.glsl")).getReader());
         for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
         progK1 = new GlslProgram(new Appearance(), "foo", null, cst+rk+biotSavart);
         
         rk = "\n";
         // read RK-2
-        lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("RK-2.glsl")).getReader());
+        lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("K2.glsl")).getReader());
         for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
         progK2 = new GlslProgram(new Appearance(), "foo", null, cst+rk+biotSavart);
 
-        rk = "\n";
-        // read RK-3
-        lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("RK-3.glsl")).getReader());
-        for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
-        progK3 = new GlslProgram(new Appearance(), "foo", null, cst+rk+biotSavart);
-
-        rk = "\n";
-        // read RK-4
-        lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("RK-4.glsl")).getReader());
-        for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
-        progK4 = new GlslProgram(new Appearance(), "foo", null, cst+rk+biotSavart);
-
-        rk = "\n";
-        // read RK-merge
-        lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("RK-merge.glsl")).getReader());
-        for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
-        progMerge = new GlslProgram(new Appearance(), "foo", null, rk);
-
+        if (forthOrder) {
+          rk = "\n";
+          // read RK-3
+          lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("K3.glsl")).getReader());
+          for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
+          progK3 = new GlslProgram(new Appearance(), "foo", null, cst+rk+biotSavart);
+  
+          rk = "\n";
+          // read RK-4
+          lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("K4.glsl")).getReader());
+          for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
+          progK4 = new GlslProgram(new Appearance(), "foo", null, cst+rk+biotSavart);
+  
+          rk = "\n";
+          // read RK-merge
+          lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("RK4.glsl")).getReader());
+          for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
+          progMerge = new GlslProgram(new Appearance(), "foo", null, rk);
+        } else {
+          rk = "\n";
+          // read RK-merge
+          lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("RK2.glsl")).getReader());
+          for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
+          progMerge = new GlslProgram(new Appearance(), "foo", null, rk);
+        }
         programsLoaded = false;
       } catch (IOException ioe) {
         throw new Error("cant find program template!");
@@ -440,12 +453,12 @@ public class GpgpuViewer extends Viewer {
     if (vortexTexSizeChanged) {
       gl.glEnable(TEX_TARGET);
       if (vortexTexs[0] != 0) {
-        gl.glDeleteTextures(3, vortexTexs);
+        gl.glDeleteTextures(vortexTexs.length, vortexTexs);
       }
       gl.glGenTextures(3, vortexTexs);
       setupTexture(gl, vortexTexs[0], vortexTextureWidth, vortexTextureHeight);
       setupTexture(gl, vortexTexs[1], vortexTextureWidth, vortexTextureHeight);
-      setupTexture(gl, vortexTexs[2], vortexTextureWidth, vortexTextureHeight);
+      if (forthOrder) setupTexture(gl, vortexTexs[2], vortexTextureWidth, vortexTextureHeight);
       vortexTexSizeChanged=false;
       vortexBuffer = ByteBuffer.allocateDirect(vortexTextureWidth*vortexTextureHeight*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
       System.out.println("[initTextures] new vortex tex size: "+vortexTextureWidth);
@@ -453,7 +466,7 @@ public class GpgpuViewer extends Viewer {
     if (vortexDataChanged) {
       gl.glEnable(TEX_TARGET);
       dt = vorts0[0];
-      int n = (vorts0.length-1)/3;
+      int n = (vorts0.length-1)/3; // TODO: later read only two time steps for 2nd order
       for(
         vortexBuffer.position(n).limit(vortexBuffer.capacity());
         vortexBuffer.hasRemaining();
@@ -467,10 +480,12 @@ public class GpgpuViewer extends Viewer {
       vortexBuffer.put(vorts0, n+1, n);
       vortexBuffer.clear();
       transferToTexture(gl, vortexBuffer, vortexTexs[1], vortexTextureWidth, vortexTextureHeight);
-      vortexBuffer.position(0).limit(n);
-      vortexBuffer.put(vorts0, 2*n+1, n);
-      vortexBuffer.clear();
-      transferToTexture(gl, vortexBuffer, vortexTexs[2], vortexTextureWidth, vortexTextureHeight);
+      if (forthOrder) {
+        vortexBuffer.position(0).limit(n);
+        vortexBuffer.put(vorts0, 2*n+1, n);
+        vortexBuffer.clear();
+        transferToTexture(gl, vortexBuffer, vortexTexs[2], vortexTextureWidth, vortexTextureHeight);
+      }
       vortexDataChanged=false;
     }
   }
@@ -661,24 +676,25 @@ public class GpgpuViewer extends Viewer {
     }
   }
     
-  public double getDt() {
-    return dt;
+  public int getStatsInterval() {
+    	return statsInterval;
+  }
+    
+  public void setStatsInterval(int statsInterval) {
+    	this.statsInterval = statsInterval;
+  }
+    
+  public void setRo(double ro) {
+    this.ro = ro;
   }
 
-  public void setDt(double dt) {
-    this.dt = dt;
+  public boolean isForthOrder() {
+    return forthOrder;
   }
-
-public int getStatsInterval() {
-	return statsInterval;
-}
-
-public void setStatsInterval(int statsInterval) {
-	this.statsInterval = statsInterval;
-}
-
-public void setRo(double ro) {
-  this.ro = ro;
-}
+  
+  public void setForthOrder(boolean forthOrder) {
+    this.forthOrder=forthOrder;
+    orderChanged=true;
+  }
 
 }
