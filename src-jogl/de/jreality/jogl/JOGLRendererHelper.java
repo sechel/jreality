@@ -587,7 +587,7 @@ public class JOGLRendererHelper {
 	OpenGLLightVisitor ogllv = new OpenGLLightVisitor();
 	public void resetLights(GL globalGL, List lights)	{
 		for (int i = 0; i<maxLights; ++i)	{
-			globalGL.glLightf(GL.GL_LIGHT0+i, GL.GL_SPOT_CUTOFF, 180f);
+			globalGL.glLightf(GL.GL_LIGHT0+i, GL.GL_SPOT_CUTOFF, 0f);  // use this as a marker for disabled lights in glsl
 			globalGL.glLightf(GL.GL_LIGHT0+i, GL.GL_SPOT_EXPONENT, (float) 0);
 			globalGL.glLightf(GL.GL_LIGHT0+i, GL.GL_CONSTANT_ATTENUATION, 1.0f);
 			globalGL.glLightf(GL.GL_LIGHT0+i, GL.GL_LINEAR_ATTENUATION, 0.0f);
@@ -645,6 +645,7 @@ public class JOGLRendererHelper {
 	private static float[] zDirection = {0,0,1,0}; //(float)10E-10};
 	private static float[] origin = {0,0,0,1};
 	public static void wisit(Light dl, GL globalGL, int lightCount)	{
+		 globalGL.glLightf(lightCount, GL.GL_SPOT_CUTOFF, 180f);			// use cutoff == 0 as marker for invalid lights in glsl
 		  globalGL.glLightfv(lightCount, GL.GL_DIFFUSE, dl.getScaledColorAsFloat());
 		  float f = (float) dl.getIntensity();
 		  float[] specC = {f,f,f};

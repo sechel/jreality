@@ -171,7 +171,7 @@ public abstract class AbstractJOGLShader implements PolygonShader {
          loc = gl.glGetUniformLocationARB(program, name);
     
        if (loc == -1)
-             JOGLConfiguration.theLog.log(Level.WARNING,"No such uniform named"+ name);
+             JOGLConfiguration.theLog.log(Level.FINE,"No such uniform named"+ name);
     
          printOpenGLError();  // Check for OpenGL errors
          return loc;

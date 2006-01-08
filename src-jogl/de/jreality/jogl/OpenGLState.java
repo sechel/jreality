@@ -14,11 +14,11 @@ import net.java.games.jogl.GLDrawable;
  */
 public class OpenGLState {
 
-	public boolean smoothShading;
-	public boolean lighting;
-	public boolean backFaceCullingEnabled;
-	public boolean flipped;
-	public boolean transparencyEnabled;
+	public boolean smoothShading = true;
+	public boolean lighting = true;
+	public boolean backFaceCullingEnabled = false;
+	public boolean flipped = false;
+	public boolean transparencyEnabled = false;
 	public float[] diffuseColor = new float[4];
 	public double lineWidth;
 	public int activeTexture;
@@ -75,8 +75,8 @@ public class OpenGLState {
 			gl.glClearDepth(1.0f);  
 			gl.glEnable(GL.GL_NORMALIZE);
 			gl.glEnable(GL.GL_MULTISAMPLE_ARB);	
-			gl.glEnable(GL.GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
-			gl.glLightModeli(GL.GL_LIGHT_MODEL_LOCAL_VIEWER, GL.GL_TRUE);
+			//gl.glEnable(GL.GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
+			gl.glLightModeli(GL.GL_LIGHT_MODEL_LOCAL_VIEWER, GL.GL_FALSE);
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE);
 			float[] white = {1f, 1f, 1f, 1f};
 			gl.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, white );

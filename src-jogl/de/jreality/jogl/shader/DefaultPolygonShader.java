@@ -47,9 +47,6 @@ public class DefaultPolygonShader implements PolygonShader {
 		public DefaultPolygonShader() {
 			super();
 			vertexShader = new DefaultVertexShader();
-			if (useGLSL)	{
-				glslShader  = new GlslDefaultPolygonShader();
-			}
 		}
 
 		
@@ -57,6 +54,7 @@ public class DefaultPolygonShader implements PolygonShader {
 	public void  setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 
 		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);	
+		useGLSL = eap.getAttribute(ShaderUtility.nameSpace(name,"useGLSL"), false);	
 	    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap))
 	    	texture2Dnew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap);
 	    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))
@@ -65,6 +63,9 @@ public class DefaultPolygonShader implements PolygonShader {
 	    	lightMapNew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap);
       
 	    if (useGLSL)		{
+			if (glslShader == null)	{
+				glslShader  = new GlslDefaultPolygonShader();
+			}
 		    glslShader.setFromEffectiveAppearance(eap,name+".vertexShader");
 	    } //else
 			vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);
@@ -141,13 +142,15 @@ public class DefaultPolygonShader implements PolygonShader {
 	      Texture2DLoaderJOGL.render(jr, reflectionMapNew);
 	      //testTextureResident(jr, gl);
 	      gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
-     } 
+	      if (useGLSL) glslShader.reflectionTextureUnit = texUnit;
+     } else
+    	 if (useGLSL) glslShader.reflectionTextureUnit = -1;
     
+    vertexShader.setFrontBack(frontBack);
+	vertexShader.render(jr);    	
     if (useGLSL)		{
     	glslShader.render(jr);
     } //else {
-        vertexShader.setFrontBack(frontBack);
-    	vertexShader.render(jr);    	
    // }
 }
 	

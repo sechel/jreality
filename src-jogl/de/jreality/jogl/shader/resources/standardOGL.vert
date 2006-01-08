@@ -8,6 +8,7 @@
 //uniform float diffuseCoefficient;
 //uniform float specularCoefficient;
 uniform bool lightingEnabled;
+uniform int reflectionTextureUnit;
 uniform int numLights;
 #pragma optimize(on)
 
@@ -66,7 +67,6 @@ void doLighting(in vec3 normal, in vec3 surfaceToCameraVector, in vec3 surfaceCa
      vec4 amb = vec4(0.0);
     vec4 diff = vec4(0.0);
     vec4 spec = vec4(0.0);
-    // loop through lights
     gl_MaterialParameters mp;
     gl_LightModelProducts lmp;
     if (front) {
@@ -78,11 +78,14 @@ void doLighting(in vec3 normal, in vec3 surfaceToCameraVector, in vec3 surfaceCa
     }
     
     int i;
-    int count = 1;
+    int count = gl_MaxLights;
     if (!lightingEnabled)	{
     	color = gl_Color;
     }  else {
-    	for (i = 0; i<count; ++i)    {
+    	// loop through lights
+    	for (i = 0; i<1; ++i)    {
+    	    // Hack to workaround problem with knowing which lights are enabled
+    	    //if (gl_LightSource[i].spotCutoff == 0.0)  break;
  			Light(i, surfaceToCameraVector, surfaceCameraCoordinates, normal, mp.shininess, amb, diff, spec);
    	 	}
  		color = lmp.sceneColor + amb*mp.ambient+diff * gl_Color; //mp.diffuse; 
@@ -109,9 +112,14 @@ void main(void)
          surfaceToCameraVector = vec3 (0.0, 0.0, 1.0);
     }
      
-    vec3 normal = gl_NormalMatrix * gl_Normal;
+     vec3 normal = gl_NormalMatrix * gl_Normal;
     normal = normalize(normal);
+ 
     gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+//     if (reflectionTextureUnit != -1)	{
+//     	gl_TexCoord[reflectionTextureUnit] = vec4(reflect(normalize(surfaceCameraCoordinates), normal),1.0);
+//     }
+     
     doLighting(normal, surfaceToCameraVector, surfaceCameraCoordinates, true, gl_FrontColor, gl_FrontSecondaryColor);
     normal = -normal;
     doLighting(normal, surfaceToCameraVector, surfaceCameraCoordinates, false, gl_BackColor, gl_BackSecondaryColor);

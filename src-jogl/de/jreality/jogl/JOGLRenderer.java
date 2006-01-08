@@ -1232,7 +1232,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 				}
 				currentSignature = thisT.getSignature();
 			}  
-			// should depend on camera transformation ...
+			
 			if (parent != null) cumulativeIsReflection = (isReflection != parent.cumulativeIsReflection);
 			else cumulativeIsReflection = (isReflection != globalIsReflection);
 			if (cumulativeIsReflection != openGLState.flipped)	{

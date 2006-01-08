@@ -18,14 +18,15 @@ import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 
 public class GlslDefaultPolygonShader extends SimpleJOGLShader {
-		public Color	ambientColor,
-		diffuseColor,
-		specularColor;		
-		public double 	specularExponent, ambientCoefficient, diffuseCoefficient, specularCoefficient, transparency;	
-		public float[] specularColorAsFloat, ambientColorAsFloat, diffuseColorAsFloat;
+//		public Color	ambientColor,
+//		diffuseColor,
+//		specularColor;		
+//		public double 	specularExponent, ambientCoefficient, diffuseCoefficient, specularCoefficient, transparency;	
+//		public float[] specularColorAsFloat, ambientColorAsFloat, diffuseColorAsFloat;
+	    protected int reflectionTextureUnit = -1;
 		int frontBack = DefaultPolygonShader.FRONT_AND_BACK;
 	    boolean	lightingEnabled = true;
-	    int numLights = 2;
+//	    int numLights = 2;
 		boolean changed = true;
 
 		public GlslDefaultPolygonShader() {
@@ -78,6 +79,7 @@ public class GlslDefaultPolygonShader extends SimpleJOGLShader {
 //		JOGLConfiguration.theLog.fine("Writing "+numLights+" lights");
 //	    gl.glUniform1iARB(getUniLoc(program, "numLights",gl),jr.openGLState.numLights );
 	    gl.glUniform1iARB(getUniLoc(program, "lightingEnabled",gl), lightingEnabled ? 1 : 0 );
+	    gl.glUniform1iARB(getUniLoc(program, "reflectionTextureUnit",gl), reflectionTextureUnit);
 //	    gl.glUniform1fvARB(getUniLoc(program, "ambientColor",gl), 4,ambientColorAsFloat);
 //	    gl.glUniform1fvARB(getUniLoc(program, "diffuseColor",gl), 4,diffuseColorAsFloat);
 //	    gl.glUniform1fvARB(getUniLoc(program, "specularColor",gl), 4,specularColorAsFloat);
