@@ -27,6 +27,7 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -36,10 +37,12 @@ import javax.imageio.ImageIO;
 import de.jreality.math.VecMat;
 import de.jreality.scene.*;
 import de.jreality.scene.data.*;
+import de.jreality.shader.*;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
+
 
 /**
  * A Visitor for writing renderman<sup>TM</sup> rib files. At the moment the following 
@@ -199,9 +202,10 @@ public class RIBVisitor extends SceneGraphVisitor {
                 map.put("Ks",new Float(phong));
                 map.put("Kd",new Float(1));
                 
-                if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), a)) {
-                    Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), a);
-               
+                //System.out.println("has texture "+AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), a));
+                if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), a)) {
+                    Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), a);
+               //System.out.println("texture is "+tex);
 //                Texture2D tex = (Texture2D) a.getAttribute(type+".texture",null,Texture2D.class);
 //                if(tex != null) {
                     String fname = writeTexture(tex);
@@ -235,7 +239,28 @@ public class RIBVisitor extends SceneGraphVisitor {
         if(fname == null) {
             fname = name+"_texture"+(textureCount++)+".tiff";
             File f = new File(fname);
-            Image img = tex.getImage().getImage();
+            //Image img = tex.getImage().getImage();
+            // TODO temporary as long as ImageData does not return a propper BufferedImage
+            Image img;
+            ImageData data = tex.getImage();
+            BufferedImage bi = new BufferedImage(width, height,
+                    BufferedImage.TYPE_INT_ARGB);
+            WritableRaster raster = bi.getRaster();
+            byte[] byteArray = data.getByteArray();
+            int dataHeight = data.getHeight();
+            int dataWidth = data.getWidth();
+            int[] pix = new int[4];
+            for (int y = 0, ptr = 0; y < dataHeight; y++)
+                for (int x = 0; x < dataWidth; x++, ptr += 4) {
+                    pix[3] = byteArray[ptr + 3];
+                    pix[0] = byteArray[ptr];
+                    pix[1] = byteArray[ptr + 1];
+                    pix[2] = byteArray[ptr + 2];
+                    raster.setPixel(x, y, pix);
+                }
+            img = bi;
+            //END of temp code...
+            
             RenderedImage rImage =null;
             if( img instanceof RenderedImage )
                 rImage = (RenderedImage) img;
