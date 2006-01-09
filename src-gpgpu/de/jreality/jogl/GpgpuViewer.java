@@ -123,6 +123,7 @@ public class GpgpuViewer extends Viewer {
         }
         if (orderChanged) {
           recompilePrograms=true;
+          orderChanged=false;
         }
         GL gl = drawable.getGL();
         GLU glu = drawable.getGLU();
@@ -268,7 +269,6 @@ public class GpgpuViewer extends Viewer {
         GlslLoader.render(progMerge, drawable);
 
         programsLoaded = true;
-        orderChanged=false;
         
         // merge step
         gl.glDrawBuffer(attachments[writeTex]);

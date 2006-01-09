@@ -23,7 +23,7 @@ vec3 biotSavart(const vec3 pt, const samplerRect vort) {
       
       vec3 e = v2-v1;
       
-      if (strength > 0) {
+      if (strength != 0) {
         ret += strength*biotSavartEdge(e, pt, v1, norm1, v2, norm2);
       }
       vec3 swap = v1;
@@ -44,11 +44,13 @@ vec3 biotSavartEdge(const vec3 edge, const vec3 point, const vec3 v1, const floa
   vec3 v1CrossS = cross(v1, edge);
   vec3 v2CrossS = cross(v2, edge);
   
+  float edgeLenSqr=dot(edge, edge);
+  
   float normC1 = dot(v1CrossS, v1CrossS);
-  fac1 /= sqrt(roSquared+norm1*norm1) * (roSquared * dot(edge, edge) + normC1);
+  fac1 /= sqrt(roSquared+norm1*norm1) * (roSquared * edgeLenSqr + normC1);
   
   float normC2 = dot(v2CrossS, v2CrossS);
-  fac2 /= sqrt(roSquared+norm2*norm2) * (roSquared * dot(edge, edge) + normC2);
+  fac2 /= sqrt(roSquared+norm2*norm2) * (roSquared * edgeLenSqr + normC2);
   
   return fac2*v2CrossS - fac1*v1CrossS;
 }
