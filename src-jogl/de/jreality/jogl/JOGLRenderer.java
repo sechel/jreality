@@ -179,17 +179,23 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		double aspectRatio = getAspectRatio();
 		// for pick mode the aspect ratio has to be set to that of the viewer component
 		if (pickMode) aspectRatio = CameraUtility.getAspectRatio(theViewer);
+		// load the camera transformation
 		globalGL.glMultTransposeMatrixd(CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), 
 				aspectRatio,
 				CameraUtility.getCamera(theViewer).getEye()));
 
+		
 		// prepare for rendering the geometry
 		globalGL.glMatrixMode(GL.GL_MODELVIEW);
 		globalGL.glLoadIdentity();
+
 		if (backSphere) {  globalGL.glLoadTransposeMatrixd(p3involution);	globalGL.glPushMatrix(); }
 		double[] w2c = context.getWorldToCamera();
 		globalGL.glLoadTransposeMatrixd(w2c);
 		globalIsReflection = (theViewer.isFlipped() != (Rn.determinant(w2c) < 0.0));
+
+		JOGLRendererHelper.handleSkyBox(theCanvas, theRoot.getAppearance(), globalHandle);
+		
 		if (!pickMode) processLights();
 		
 		processClippingPlanes();

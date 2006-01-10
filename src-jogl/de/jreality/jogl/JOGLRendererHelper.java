@@ -78,7 +78,7 @@ public class JOGLRendererHelper {
 			
 			boolean hasTexture = false, hasColors = false;
 			double textureAR = 1.0;
-			bgo =  topAp.getAttribute("backgroundTexture");
+			bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_TEXTURE2D);
 			if (bgo != null && bgo instanceof Texture2D)	{
 				Texture2D tex = ((Texture2D) bgo);
 				//Texture2DLoaderJOGL tl = Texture2DLoaderJOGL.FactoryLoader;
@@ -93,7 +93,7 @@ public class JOGLRendererHelper {
 			if (ar > 1.0)	{ xl = 0.0; xr = 1.0; yb =.5*(1-1/ar);  yt = 1.0 - yb; }
 			else 			{ yb = 0.0; yt = 1.0; xl =.5*(1-ar);  xr = 1.0 - xl; }
 			double[][] texcoords = {{xl,yb },{xr,yb},{xr,yt},{xl,yt}};
-			bgo =  topAp.getAttribute("backgroundColors");
+			bgo =  topAp.getAttribute(CommonAttributes.BACKGROUND_COLORS);
 			if (bgo != null && bgo instanceof Color[])	{
 				hasColors = true;
 			}
@@ -140,6 +140,18 @@ public class JOGLRendererHelper {
 			} else gl.glDisable(GL.GL_FOG);
 
 	}
+	
+	public static void handleSkyBox(GLDrawable theCanvas, Appearance topAp, JOGLRenderer r) {
+		GL gl = theCanvas.getGL();
+		Object bgo = topAp.getAttribute(CommonAttributes.SKY_BOX);
+		if (bgo != null && bgo instanceof SkyBox)	{
+			SkyBox skybox = (SkyBox) bgo;
+			skybox.render(theCanvas, r);
+			
+		}
+
+	}
+
 	static boolean testArrays = false;
 	static ByteBuffer vBuffer, vcBuffer, vnBuffer, fcBuffer, fnBuffer, tcBuffer;
 	static DataList vLast = null, vcLast = null, vnLast = null;
@@ -779,7 +791,6 @@ public class JOGLRendererHelper {
 		JOGLConfiguration.theLog.log(Level.INFO, "Screenshot saved to "
 				+ file.getName());
 	}
-	
 // private static GLPbuffer getPbuffer(int width, int height, GLDrawable d) {
 // GLPbuffer pbuffer = null;
 // GLCapabilities caps = new GLCapabilities();
