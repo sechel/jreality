@@ -114,7 +114,11 @@ public class RIBViewer implements Viewer {
 			setHeight(v.getViewingComponent().getHeight());
 			setWidth(v.getViewingComponent().getWidth());
         }
-        
+        if(v.getCameraPath().getLastComponent().getCamera().isPerspective()){
+        	projection(new String("perspective"));
+        }else{
+        	projection(new String("orthographic"));
+        }
     }
 
     /* (non-Javadoc)
@@ -190,4 +194,12 @@ public class RIBViewer implements Viewer {
     public SceneGraphComponent getAuxiliaryRoot() {
         throw new UnsupportedOperationException("not implemented");
     }
+    
+    public boolean hasDrawable(){
+    	return false;
+    }
+    public Drawable getDrawable(){
+    	return null;
+    }
+    
 }
