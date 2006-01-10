@@ -195,11 +195,4 @@ public class RIBViewer implements Viewer {
         throw new UnsupportedOperationException("not implemented");
     }
     
-    public boolean hasDrawable(){
-    	return false;
-    }
-    public Drawable getDrawable(){
-    	return null;
-    }
-    
 }
