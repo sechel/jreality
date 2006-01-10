@@ -38,7 +38,7 @@ void Light(in int i,
     float nDotVP;
     float nDotHV;
     float pf;
-    float attenuation=1;
+    float attenuation=1.0;
     float d;
     vec3 surfaceToLightVector;
     vec3 halfVector;
@@ -83,7 +83,7 @@ void doLighting(in vec3 normal, in vec3 surfaceToCameraVector, in vec3 surfaceCa
     	color = gl_Color;
     }  else {
     	// loop through lights
-    	for (i = 0; i<1; ++i)    {
+    	for (i = 0; i<count; ++i)    {
     	    // Hack to workaround problem with knowing which lights are enabled
     	    //if (gl_LightSource[i].spotCutoff == 0.0)  break;
  			Light(i, surfaceToCameraVector, surfaceCameraCoordinates, normal, mp.shininess, amb, diff, spec);
