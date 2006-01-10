@@ -44,10 +44,12 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.CubeMap;
 import de.jreality.shader.Texture2D;
 
 /**
@@ -143,10 +145,10 @@ public class JOGLRendererHelper {
 	
 	public static void handleSkyBox(GLDrawable theCanvas, Appearance topAp, JOGLRenderer r) {
 		GL gl = theCanvas.getGL();
-		Object bgo = topAp.getAttribute(CommonAttributes.SKY_BOX);
-		if (bgo != null && bgo instanceof SkyBox)	{
-			SkyBox skybox = (SkyBox) bgo;
-			skybox.render(theCanvas, r);
+		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, "skyBox", topAp)) {
+			CubeMap cm = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, "", topAp, true);
+			SkyBox sb = new SkyBox(cm);
+			sb.render(theCanvas, r);
 			
 		}
 
