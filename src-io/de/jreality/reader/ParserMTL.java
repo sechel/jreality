@@ -220,8 +220,7 @@ public class ParserMTL {
     private void setTextureMap(StreamTokenizer st, Appearance ret) throws IOException {
         String texFile = readString(st);
         try {
-            Texture2D tex = TextureUtility.createTexture(ret, CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D,
-                input.resolveInput(texFile));
+            Texture2D tex = TextureUtility.createTexture(ret, CommonAttributes.POLYGON_SHADER, input.resolveInput(texFile), false);
         } catch (FileNotFoundException e) {
         	LoggingSystem.getLogger(this).warning("couldn't find "+texFile);
         } catch (IOException e) {

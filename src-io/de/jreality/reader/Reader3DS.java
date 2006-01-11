@@ -278,8 +278,8 @@ public class Reader3DS extends AbstractReader {
           ImageData imgData = ImageData.load(input.resolveInput(textName));
           if (imgData != null) {
             tex2d = TextureUtility.createTexture(getCurrentApperance(),
-                CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D,
-                imgData);
+                CommonAttributes.POLYGON_SHADER,
+                imgData, false);
             tex2d.setTextureMatrix(MatrixBuilder.euclidian().scale(1,-1,0).getMatrix());
           }
         } catch (Exception e) {

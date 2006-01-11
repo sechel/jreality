@@ -199,7 +199,7 @@ public class AseMaterial extends AseNode {
               
               Texture2D t = TextureUtility.createTexture(a,
                 CommonAttributes.POLYGON_SHADER + "."
-                + CommonAttributes.TEXTURE_2D, id);
+                + CommonAttributes.TEXTURE_2D, id, false);
                 
                 // Tries to load the texture extracting the file name from the path
                 // (the path for example could be "C:\Models\textures\grass.jpg" and
