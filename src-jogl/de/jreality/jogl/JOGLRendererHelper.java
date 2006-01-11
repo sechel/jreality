@@ -51,6 +51,7 @@ import de.jreality.scene.data.IntArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
 
 /**
  * @author gunn
@@ -140,16 +141,12 @@ public class JOGLRendererHelper {
 				}
 				gl.glFogf(GL.GL_FOG_DENSITY, density);
 			} else gl.glDisable(GL.GL_FOG);
-
 	}
-	
+  
 	public static void handleSkyBox(GLDrawable theCanvas, Appearance topAp, JOGLRenderer r) {
-		GL gl = theCanvas.getGL();
 		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, "skyBox", topAp)) {
-			CubeMap cm = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, "", topAp, true);
-			SkyBox sb = new SkyBox(cm);
-			sb.render(theCanvas, r);
-			
+			CubeMap cm = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, "skyBox", topAp, true);
+			SkyBox.render(theCanvas, r, cm);
 		}
 
 	}

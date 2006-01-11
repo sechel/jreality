@@ -1,12 +1,17 @@
 package de.jreality.jogl.shader;
 
 import java.awt.Color;
+import java.util.WeakHashMap;
 
 import net.java.games.jogl.GL;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.GpgpuViewer;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLSphereHelper;
+import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
+import de.jreality.math.P3;
+import de.jreality.math.Pn;
 import de.jreality.scene.Geometry;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
@@ -119,6 +124,36 @@ public class ParticleLineShader implements LineShader {
     data = v.getCurrentParticlePositions(data);
   }
 
+  static WeakHashMap displayLists=new WeakHashMap();
+  
+  private static int getDisplayList(JOGLRenderer jr) {
+    if (displayLists.get(jr) != null) return ((int[])displayLists.get(jr))[0];
+    GL gl = jr.getCanvas().getGL();
+    int[] dlist = new int[]{gl.glGenLists(1)};
+    displayLists.put(jr, dlist);
+    gl.glNewList(dlist[0], GL.GL_COMPILE);
+    gl.glBegin(GL.GL_TRIANGLE_FAN);
+    gl.glColor3d(1,1,1);
+    gl.glVertex3d(1,1,1);
+    gl.glColor3d(0,0,.5);
+    gl.glVertex3d(1,-1,1);
+    gl.glColor3d(0,0,0);
+    gl.glVertex3d(-1,-1,1);
+    gl.glColor3d(0,0,.5);
+    gl.glVertex3d(-1,1,1);
+    gl.glColor3d(0,0,0);
+    gl.glVertex3d(-1,1,-1);
+    gl.glColor3d(0,0,.5);
+    gl.glVertex3d(1,1,-1);
+    gl.glColor3d(0,0,0);
+    gl.glVertex3d(1,-1,-1);
+    gl.glColor3d(0,0,.5);
+    gl.glVertex3d(1,-1,1);
+    gl.glEnd();
+    gl.glEndList();
+    return dlist[0];
+  }
+  
 public void render(JOGLRenderer jr) {
     if (debug) {
       System.out.println("ParticleLineShader.render()");
@@ -131,7 +166,7 @@ public void render(JOGLRenderer jr) {
     int n = data.length/4;
     int nanCnt=0;
 
-    gl.glColor4fv(difCol);
+    gl.glDisable(GL.GL_LIGHTING);
     
     float[][] bounds=new float[2][3];
     
@@ -143,7 +178,9 @@ public void render(JOGLRenderer jr) {
     bounds[1][2]=Float.MIN_VALUE;
     
     if (!renderCheap) {
-      int dlist = JOGLSphereHelper.getSphereDLists(sphereDetail, jr);
+      double[] orientation = P3.extractOrientationMatrix(null, jr.getContext().getCameraToObject(), Pn.originP3, Pn.EUCLIDEAN);
+      MatrixBuilder.euclidean(new Matrix(orientation)).rotateY(-Math.PI/4).rotateX(Math.PI/4).getMatrix();
+      int dlist = getDisplayList(jr); //JOGLSphereHelper.getSphereDLists(sphereDetail, jr);
       mat[0] = mat[5] = mat[10] = (float) pointRadius;
       for (int i = 0; i< n; i++) {
         if (Float.isNaN(data[4*i]) || Float.isNaN(data[4*i+1]) || Float.isNaN(data[4*i]+2)) {
@@ -163,10 +200,11 @@ public void render(JOGLRenderer jr) {
         
         gl.glPushMatrix();
         gl.glMultTransposeMatrixf(mat);
-  
+        gl.glMultTransposeMatrixd(orientation);
         gl.glCallList(dlist);
         gl.glPopMatrix();
       }
+      gl.glPopMatrix();
     } else {
       gl.glDisable(GL.GL_LIGHTING);
       gl.glBegin(GL.GL_POINTS);

@@ -4,10 +4,14 @@
  */
 package de.jreality.jogl;
 
+import java.util.Arrays;
+
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
 import de.jreality.geometry.IndexedFaceSetFactory;
+import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
+import de.jreality.math.Matrix;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.scene.Appearance;
@@ -28,12 +32,10 @@ import de.jreality.util.CameraUtility;
  * @author Charles Gunn
  *
  */
-public class SkyBox extends SceneGraphComponent {
+class SkyBox {
 	double stretch = 40.0;
 
-	static private int[][] cubeIndices = {{0,1,2,3}};
-
-	// TODO straighten out nomenclature on faces
+  // TODO straighten out nomenclature on faces
 	static private double[][][] cubeVerts3 =  
 		{
 			 {{1,1,1}, {1,1,-1}, {1, -1, -1}, {1, -1, 1}},		// right
@@ -43,76 +45,20 @@ public class SkyBox extends SceneGraphComponent {
 			 {{-1,1,1}, {1,1,1}, {1,-1,1},{-1,-1,1}},		// back
 			 {   {1,1,-1},{-1,1,-1}, {-1,-1,-1},{1,-1,-1}}			// front
 		 };	
-		 	
-
-	// TODO figure out texture coordinates 
+	
+  // TODO figure out texture coordinates 
 	static private double[][] texCoords = {{0,0},{1,0},{1,1},{0,1}};
-	
-	String[] faceNames = {"back","front","down","up","left","right"};
-	String[] texNameSuffixes = {"rt","lf","up", "dn","bk","ft"};
-//	Texture2D[] imagesIn = new Texture2D[6], imagesOut = new Texture2D[6];
-//	EffectiveAppearance parentEap = EffectiveAppearance.create();
-//	EffectiveAppearance children[] = new EffectiveAppearance[6];
-
-	ImageData[] imgs;
-	
-	public SkyBox(CubeMap cm) {
-		this(new ImageData[] {cm.getRight(), cm.getLeft(), cm.getTop(), cm.getBottom(), cm.getBack(), cm.getFront()});
-	}
-	
-	public SkyBox(ImageData[] ft) {
-		super();
-		imgs=ft;
-		// TODO  check validity of parameters		
-//		Appearance ap = new Appearance();
-//		parentEap = parentEap.create(ap);
-//		
-//		ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING,true);
-//		ap.setAttribute(CommonAttributes.AT_INFINITY,true);
-//		ap.setAttribute(CommonAttributes.LIGHTING_ENABLED,false);
-//		ap.setAttribute(CommonAttributes.FACE_DRAW,true);
-//		ap.setAttribute(CommonAttributes.EDGE_DRAW,false);
-//		setAppearance(ap);
-//		
-//		Transformation tt = new Transformation();
-////		tt.setRotation(Math.PI, 1d, 0d, 0d);	
-//		setTransformation(tt);
-//
-////		
-//		for (int i = 0; i<6; ++i)	{
-//			SceneGraphComponent sgc = new SceneGraphComponent();
-//			ap = new Appearance();
-//			sgc.setAppearance(ap);
-//			imagesIn[i] = TextureUtility.createTexture(ap, "polygonShader", ft[i]);
-//			imagesIn[i].setRepeatS(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
-//			imagesIn[i].setRepeatT(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
-//			children[i] = parentEap.create(ap);
-//			imagesOut[i] = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), children[i]);
-//			IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
-//			ifsf.setFaceCount(cubeIndices.length);
-//			ifsf.setVertexCount(cubeVerts3[i].length);
-//			ifsf.setVertexCoordinates(cubeVerts3[i]);
-//			ifsf.setFaceIndices(cubeIndices);
-//			ifsf.setVertexTextureCoordinates(texCoords);
-//			ifsf.setGenerateEdgesFromFaces(false);
-//			ifsf.setGenerateFaceNormals(false);
-//			ifsf.setGenerateVertexNormals(false);
-//			//IndexedFaceSet face = IndexedFaceSetUtility.createIndexedFaceSetFrom(cubeIndices, cubeVerts3[i], null, null, texCoords, null, null);
-//			//GeometryUtility.calculateAndSetNormals(face);
-//			//face.buildEdgesFromFaces();
-//			ifsf.update();
-//			IndexedFaceSet face = ifsf.getIndexedFaceSet();
-//		
-//			//GeometryUtility.calculateAndSetFaceNormals(face);
-//			sgc.setGeometry(face);
-//			addChild(sgc);
-//		}
-	}
 	
 	static Appearance a=new Appearance();
 	static Texture2D tex=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a, true);
-    
-	public void render(GLDrawable gd, JOGLRenderer glr)	{
+  static {
+    tex.setRepeatS(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
+    tex.setRepeatT(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
+  }
+
+  static void render(GLDrawable gd, JOGLRenderer glr, CubeMap cm)	{
+    ImageData[] imgs=TextureUtility.getCubeMapImages(cm);
+    tex.setBlendColor(cm.getBlendColor());
 		GL gl = gd.getGL();
 		gl.glDepthMask(false);
 		gl.glDepthFunc(GL.GL_NEVER);
@@ -128,9 +74,9 @@ public class SkyBox extends SceneGraphComponent {
 	    gl.glPushMatrix();
 	    
 	    double[] w2c = glr.context.getWorldToCamera();
+      
 	    gl.glLoadTransposeMatrixd(P3.extractOrientationMatrix(null, w2c, Pn.originP3, Pn.EUCLIDEAN));
 		for (int i = 0; i<6; ++i)	{
-			Texture2D t=tex;
 			tex.setImage(imgs[i]);
 		    Texture2DLoaderJOGL.render(gd, tex);
 			gl.glBegin(GL.GL_POLYGON);
