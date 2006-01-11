@@ -4,29 +4,17 @@
  */
 package de.jreality.jogl;
 
-import java.util.Arrays;
-
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
-import de.jreality.geometry.IndexedFaceSetFactory;
-import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
-import de.jreality.math.Matrix;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
 import de.jreality.scene.data.AttributeEntityUtility;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
-import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
-import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
-import de.jreality.util.CameraUtility;
 
 /**
  * @author Charles Gunn
