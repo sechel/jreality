@@ -54,12 +54,12 @@ class SkyBox {
 		gl.glDisable(GL.GL_BLEND);
 		gl.glDisable(GL.GL_DEPTH_TEST);
 		gl.glDisable(GL.GL_LIGHTING);
-	    gl.glActiveTexture(0);
-	    gl.glEnable(GL.GL_TEXTURE_2D);
-	    float[] white = {1f,1f,1f,1f};
+    gl.glActiveTexture(GL.GL_TEXTURE0);
+    gl.glEnable(GL.GL_TEXTURE_2D);
+    float[] white = {1f,1f,1f,1f};
 //	    gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, white);
-	    gl.glColor4fv( white);
-	    gl.glPushMatrix();
+    gl.glColor4fv( white);
+    gl.glPushMatrix();
 	    
 	    double[] w2c = glr.context.getWorldToCamera();
       
@@ -78,7 +78,6 @@ class SkyBox {
 		gl.glDepthFunc(GL.GL_LESS);
 		gl.glPopAttrib();
 		gl.glDepthMask(true);
-
 	}
 	
 }
