@@ -194,7 +194,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		globalGL.glLoadTransposeMatrixd(w2c);
 		globalIsReflection = (theViewer.isFlipped() != (Rn.determinant(w2c) < 0.0));
 
-		JOGLRendererHelper.handleSkyBox(theCanvas, theRoot.getAppearance(), globalHandle);
+		if (theRoot.getAppearance() != null) JOGLRendererHelper.handleSkyBox(theCanvas, theRoot.getAppearance(), globalHandle);
 		
 		if (!pickMode) processLights();
 		
