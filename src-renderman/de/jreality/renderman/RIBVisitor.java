@@ -184,9 +184,9 @@ public class RIBVisitor extends SceneGraphVisitor {
     double transparency = a.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
         float f = 1f - (float)transparency;
         Ri.opacity(new float[] {f,f,f});
-        System.out.println("transparency is "+type+" is "+transparency);
+        //System.out.println("transparency is "+type+" is "+transparency);
         Object shader = a.getAttribute(type,"default");
-        System.out.println("shader for "+type+" is "+shader);
+        //System.out.println("shader for "+type+" is "+shader);
 
         SLShader slShader = (SLShader) a.getAttribute(type+".rendermanDisplacement",null,SLShader.class);
         if(slShader != null) {
@@ -252,10 +252,14 @@ public class RIBVisitor extends SceneGraphVisitor {
             int[] pix = new int[4];
             for (int y = 0, ptr = 0; y < dataHeight; y++)
                 for (int x = 0; x < dataWidth; x++, ptr += 4) {
-                    pix[3] = byteArray[ptr + 3];
+                    /*pix[3] = byteArray[ptr + 3];
                     pix[0] = byteArray[ptr];
                     pix[1] = byteArray[ptr + 1];
-                    pix[2] = byteArray[ptr + 2];
+                    pix[2] = byteArray[ptr + 2];*/
+                	pix[3] = byteArray[ptr + 0];
+                    pix[0] = byteArray[ptr + 3];
+                    pix[1] = byteArray[ptr + 2];
+                    pix[2] = byteArray[ptr + 1];
                     raster.setPixel(x, y, pix);
                 }
             img = bi;
@@ -270,7 +274,7 @@ public class RIBVisitor extends SceneGraphVisitor {
                 g.drawImage(img,0,0,null);
                 rImage =bImage;
             }
-            System.out.println( Arrays.asList(ImageIO.getWriterFormatNames()));
+            //System.out.println( Arrays.asList(ImageIO.getWriterFormatNames()));
 //            RenderedImage image = tex.getImage();
 //            String format = "tiff";
 //
@@ -501,7 +505,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         double[] trns = new double[16];
         Ri.attributeBegin();
         float r = (float) eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
-        System.out.println("point radius is "+r);
+        //System.out.println("point radius is "+r);
         setupShader(eAppearance,CommonAttributes.POINT_SHADER);
         for (int i= 0; i < n; i++) { 
             VecMat.assignTranslation(trns,new double[] {a.getValueAt(i, 0),a.getValueAt(i, 1),a.getValueAt(i, 2)});
