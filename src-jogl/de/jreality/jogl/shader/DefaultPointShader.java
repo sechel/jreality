@@ -15,14 +15,18 @@ import de.jreality.jogl.OpenGLState;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.math.P3;
 import de.jreality.math.Rn;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.shader.Texture2D;
 
 /**
  * @author Charles Gunn
@@ -30,6 +34,7 @@ import de.jreality.shader.ShaderUtility;
  */
 public class DefaultPointShader  implements PointShader {
 	double pointSize = 1.0;
+	float[] pointAttenuation = {1.0f, .00f, 0.0f};
 	double	pointRadius = .1;		
 	Color diffuseColor = java.awt.Color.RED;
 	float[] diffuseColorAsFloat;
@@ -52,8 +57,6 @@ public class DefaultPointShader  implements PointShader {
 		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, t);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
 		polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
-		//polygonShader.setDiffuseColor(diffuseColor);
-		//polygonShader.setSmoothShading(true);
 	}
 
 
@@ -89,18 +92,44 @@ public class DefaultPointShader  implements PointShader {
 	 * @param globalHandle
 	 * @param jpc
 	 */
+	static byte[] defaultSphereTexture = new byte[128 * 128 * 4];
+	static Appearance a=new Appearance();
+	static Texture2D tex=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a, true);
+	static {
+		for (int i = 0; i<128; ++i)	{
+			for (int j = 0; j< 128; ++j)	{
+				int I = 4*(i*128+j);
+				int sq = (i-64)*(i-64) + (j-64)*(j-64);
+				//sq = i*i + j*j;
+				if (sq < 4096)	
+					{defaultSphereTexture[I] =  defaultSphereTexture[I+1] = defaultSphereTexture[I+2] = defaultSphereTexture[I+3] = (byte) (255- Math.abs(sq/16.0)); }
+				else
+					{defaultSphereTexture[I] =  defaultSphereTexture[I+1] = defaultSphereTexture[I+2] = defaultSphereTexture[I+3]  = 0;  }
+			}
+		}
+		tex.setImage(new ImageData(defaultSphereTexture, 128, 128));
+	}
 	public void render(JOGLRenderer jr) {
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
-		gl.glPointSize((float) getPointSize());
 //		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
 			gl.glColor4fv( diffuseColorAsFloat);
 			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
 //		}
 		
-		if (sphereDraw)	{
-			polygonShader.render(jr);
-		} else lighting = false;
+//		if (sphereDraw)	{
+//		} else {
+		if (!sphereDraw)	{
+			lighting = false;
+			gl.glPointSize((float) getPointSize());
+			gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, pointAttenuation);
+			gl.glEnable(GL.GL_POINT_SPRITE_ARB);
+		    gl.glActiveTexture(0);
+			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
+			Texture2DLoaderJOGL.render(theCanvas, tex);
+			gl.glEnable(GL.GL_TEXTURE_2D);
+		} else
+		polygonShader.render(jr);
 		
 		//if (jr.openGLState.lighting != lighting)	{
 			jr.openGLState.lighting = lighting;
@@ -108,11 +137,22 @@ public class DefaultPointShader  implements PointShader {
 			else gl.glDisable(GL.GL_LIGHTING);
 		//}
 
-		if (jr.openGLState.transparencyEnabled)	{
-			gl.glDepthMask(true);
-			gl.glDisable(GL.GL_BLEND);			
-		}
+//		if (jr.openGLState.transparencyEnabled)	{
+//			gl.glDepthMask(true);
+//			gl.glDisable(GL.GL_BLEND);			
+//		}
 		
+	}
+
+	public void postRender(JOGLRenderer jr) {
+		polygonShader.postRender(jr);
+		if (!sphereDraw)	{
+			GL gl = jr.globalGL;
+			jr.globalGL.glDisable(GL.GL_POINT_SPRITE_ARB);
+		    gl.glActiveTexture(0);
+			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_FALSE);
+			gl.glDisable(GL.GL_TEXTURE_2D);
+		}
 	}
 
 	public boolean providesProxyGeometry() {		
@@ -173,9 +213,6 @@ public class DefaultPointShader  implements PointShader {
 		return -1;
 	}
 	
-	public void postRender(JOGLRenderer jr) {
-	}
-
 	public Shader getPolygonShader() {
 		return polygonShader;
 	}
