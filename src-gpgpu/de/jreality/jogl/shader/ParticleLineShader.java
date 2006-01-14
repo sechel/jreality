@@ -26,8 +26,6 @@ public class ParticleLineShader implements LineShader {
 
   private double pointRadius;
 
-  private int sphereDetail = 0;
-
   private Color diffuseColor;
 
   private static float[] difCol = new float[4];
@@ -75,8 +73,6 @@ public class ParticleLineShader implements LineShader {
   public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
     pointRadius = eap.getAttribute(ShaderUtility.nameSpace(name,
         CommonAttributes.POINT_RADIUS), CommonAttributes.POINT_RADIUS_DEFAULT);
-    sphereDetail = eap.getAttribute(ShaderUtility.nameSpace(name,
-        "sphereDetail"), 0);
     double curRo = eap.getAttribute(ShaderUtility.nameSpace(name, "ro"), ro);
     pointSize = eap.getAttribute(ShaderUtility.nameSpace(name, "pointSize"), pointSize);
     debug = eap.getAttribute(ShaderUtility.nameSpace(name, "debug"), false);
@@ -204,7 +200,6 @@ public void render(JOGLRenderer jr) {
         gl.glCallList(dlist);
         gl.glPopMatrix();
       }
-      gl.glPopMatrix();
     } else {
       gl.glDisable(GL.GL_LIGHTING);
       gl.glBegin(GL.GL_POINTS);
