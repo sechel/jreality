@@ -7,6 +7,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.Random;
 
+import net.java.games.jogl.DebugGL;
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
 import net.java.games.jogl.GLU;
@@ -125,7 +126,7 @@ public class GpgpuViewer extends Viewer {
           recompilePrograms=true;
           orderChanged=false;
         }
-        GL gl = drawable.getGL();
+        GL gl = new DebugGL(drawable.getGL());
         GLU glu = drawable.getGLU();
         initPrograms(gl);
         initFBO(gl);
