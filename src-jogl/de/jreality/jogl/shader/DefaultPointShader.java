@@ -6,6 +6,8 @@ package de.jreality.jogl.shader;
 
 import java.awt.Color;
 
+import com.sun.corba.se.internal.core.Constant;
+
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
 import de.jreality.geometry.GeometryUtility;
@@ -34,12 +36,18 @@ import de.jreality.shader.Texture2D;
  */
 public class DefaultPointShader  implements PointShader {
 	double pointSize = 1.0;
-	float[] pointAttenuation = {1.0f, .00f, 0.0f};
+	// on my mac, the only value for the following array that seems to "work" is {1,0,0}.  WHY?
+	float[] pointAttenuation = {1.0f, .0f, 0.00000f};
 	double	pointRadius = .1;		
 	Color diffuseColor = java.awt.Color.RED;
 	float[] diffuseColorAsFloat;
+	float[] specularColorAsFloat = {0f,1f,1f,1f};		// for texturing point sprite to simulate sphere
 	boolean sphereDraw = false, lighting = true;
 	PolygonShader polygonShader = null;
+	static Appearance a=new Appearance();
+	static Texture2D tex=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a, true);
+	double specularExponent = 60.0;
+	
 	/**
 	 * 
 	 */
@@ -49,6 +57,7 @@ public class DefaultPointShader  implements PointShader {
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		sphereDraw = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SPHERES_DRAW), CommonAttributes.SPHERES_DRAW_DEFAULT);
+		lightDirection = (double[]) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHT_DIRECTION),lightDirection);
 		lighting = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHTING_ENABLED), true);
 		pointSize = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POINT_SIZE), CommonAttributes.POINT_SIZE_DEFAULT);
 		pointRadius = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
@@ -57,8 +66,57 @@ public class DefaultPointShader  implements PointShader {
 		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, t);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
 		polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
+
+		if (!sphereDraw)	{
+			Rn.normalize(lightDirection, lightDirection);
+			specularColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COLOR), CommonAttributes.SPECULAR_COLOR_DEFAULT);
+			specularColorAsFloat = specularColor.getRGBComponents(null);
+			specularExponent = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_EXPONENT), CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
+			setupTexture();
+			}
 	}
 
+
+	byte[] sphereTex;
+	double[] lightDirection = {1,-1,2};
+	
+	private void setupTexture() {
+		int I = 0, II = 0;
+		double[] reflected = new double[3];
+		//System.out.println("specular color is "+specularColor.toString());
+		if (sphereTex == null) sphereTex = new byte[textureSize * textureSize * 4];
+		for (int i = 0; i<textureSize; ++i)	{
+			for (int j = 0; j< textureSize; ++j)	{
+				if (sphereVertices[I][0] != -1)	{	
+					double diffuse = Rn.innerProduct(lightDirection, sphereVertices[I]);
+					if (diffuse < 0) diffuse = 0;
+					if (diffuse > 1.0) diffuse =1.0;
+					double z = sphereVertices[I][2];
+					reflected[0] = 2*sphereVertices[I][0]*z;
+					reflected[1] = 2*sphereVertices[I][1]*z;
+					reflected[2] = 2*z*z-1;
+					double specular = Rn.innerProduct(lightDirection, reflected);
+					if (specular < 0.0) specular = 0.0;
+					if (specular > 1.0) specular = 1.0;
+					specular = Math.pow(specular, specularExponent);
+					for (int k = 0; k<3; ++k)	{
+						double f = (diffuse * diffuseColorAsFloat[k] + specular * specularColorAsFloat[k]);
+						if (f < 0) f = 0;
+						if (f > 1) f = 1;
+						sphereTex[II+k] =  (byte) (255 * f); 
+					}
+					sphereTex[II+3] = sphereVertices[I][2] < .1 ? (byte) (2550*sphereVertices[I][2]) : -128;
+				}
+				else	{
+					sphereTex[II] =  sphereTex[II+1] = sphereTex[II+2] = sphereTex[II+3]  = 0;  
+					}
+				II += 4;
+				I++;
+				}
+			}
+			tex.setImage(new ImageData(sphereTex, textureSize, textureSize));
+			tex.setApplyMode(Texture2D.GL_REPLACE);
+	}
 
 	/**
 	 * @return
@@ -92,22 +150,25 @@ public class DefaultPointShader  implements PointShader {
 	 * @param globalHandle
 	 * @param jpc
 	 */
-	static byte[] defaultSphereTexture = new byte[128 * 128 * 4];
-	static Appearance a=new Appearance();
-	static Texture2D tex=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a, true);
+	static final int textureSize = 128;
+	static double[][] sphereVertices = new double[textureSize * textureSize][3];
+	private Color specularColor;
 	static {
-		for (int i = 0; i<128; ++i)	{
-			for (int j = 0; j< 128; ++j)	{
-				int I = 4*(i*128+j);
-				int sq = (i-64)*(i-64) + (j-64)*(j-64);
-				//sq = i*i + j*j;
-				if (sq < 4096)	
-					{defaultSphereTexture[I] =  defaultSphereTexture[I+1] = defaultSphereTexture[I+2] = defaultSphereTexture[I+3] = (byte) (255- Math.abs(sq/16.0)); }
-				else
-					{defaultSphereTexture[I] =  defaultSphereTexture[I+1] = defaultSphereTexture[I+2] = defaultSphereTexture[I+3]  = 0;  }
+		double x,y,z;
+		int I = 0;
+		for (int i = 0; i<textureSize; ++i)	{
+			y = 2*(i+.5)/textureSize - 1.0;
+			for (int j = 0; j< textureSize; ++j)	{
+				x = 2*(j+.5)/textureSize - 1.0;
+				double dsq = x*x+y*y;
+				if (dsq <= 1.0)	{	
+					z = Math.sqrt(1.0-dsq);
+					sphereVertices[I][0] = x; sphereVertices[I][1] = y; sphereVertices[I][2] = z;
+					}
+				else sphereVertices[I][0] = sphereVertices[I][1] = sphereVertices[I][2] = -1;
+				I++;
 			}
 		}
-		tex.setImage(new ImageData(defaultSphereTexture, 128, 128));
 	}
 	public void render(JOGLRenderer jr) {
 		GLDrawable theCanvas = jr.getCanvas();
@@ -123,8 +184,10 @@ public class DefaultPointShader  implements PointShader {
 			lighting = false;
 			gl.glPointSize((float) getPointSize());
 			gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, pointAttenuation);
+			 //gl.glPointParameterf(GL.GL_POINT_DISTANCE_ATTENUATION, ))
+			gl.glEnable(GL.GL_POINT_SMOOTH);
 			gl.glEnable(GL.GL_POINT_SPRITE_ARB);
-      gl.glActiveTexture(GL.GL_TEXTURE0);
+			gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
 			Texture2DLoaderJOGL.render(theCanvas, tex);
 			gl.glEnable(GL.GL_TEXTURE_2D);
