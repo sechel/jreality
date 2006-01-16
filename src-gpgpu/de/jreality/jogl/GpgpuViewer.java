@@ -2,6 +2,7 @@ package de.jreality.jogl;
 
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -28,8 +29,8 @@ public class GpgpuViewer extends Viewer {
   private static final boolean dump=false;
 
   //private static int TEX_TARGET = GL.GL_TEXTURE_2D;
-  private static int TEX_TARGET = ATI ? GL.GL_TEXTURE_2D : GL.GL_TEXTURE_RECTANGLE_ARB;
-  private static int TEX_INTERNAL_FORMAT = ATI ? GL.GL_RGBA32F_ARB : GL.GL_FLOAT_RGBA32_NV;
+  public static int TEX_TARGET = ATI ? GL.GL_TEXTURE_2D : GL.GL_TEXTURE_RECTANGLE_ARB;
+  private static int TEX_INTERNAL_FORMAT = ATI ? GL.GL_RGBA32F_ARB : /*GL.GL_RGBA_FLOAT32_ATI; */ GL.GL_FLOAT_RGBA32_NV;
   private static int TEX_FORMAT = GL.GL_RGBA;
   
   // performance check variables
@@ -49,6 +50,7 @@ public class GpgpuViewer extends Viewer {
   private int vortexTextureWidth;
   private int vortexTextureHeight;
 
+  private int[] vbos = new int[1]; // 1 framebuffer
   private int[] fbos = new int[1]; // 1 framebuffer
   private int[] particleTexs = new int[2]; // ping pong textures
   private int[] intermediateTexs = new int[4]; // ping pong textures
@@ -57,8 +59,6 @@ public class GpgpuViewer extends Viewer {
   private int[] attachments = {GL.GL_COLOR_ATTACHMENT0_EXT, GL.GL_COLOR_ATTACHMENT1_EXT};
   private int readTex, writeTex = 1;
 
-  boolean writeData=false;
-  
   private FloatBuffer particleBuffer;
   float[] vorts0;
   private FloatBuffer vortexBuffer;
@@ -81,14 +81,15 @@ public class GpgpuViewer extends Viewer {
   private int statsInterval=100;
 
   private double ro;
+
+  private boolean readData=true;
   
   public GpgpuViewer() {
     super();
   }
 
-  public GpgpuViewer(boolean writeData) {
+  public GpgpuViewer(boolean foo) {
     this();
-    this.writeData=writeData;
     Random rand = new Random();
     int numParticles = 1;
     float[] particles = new float[numParticles*4];
@@ -114,6 +115,9 @@ public class GpgpuViewer extends Viewer {
   }
   
   public void display(GLDrawable drawable) {
+      GL gl = drawable.getGL();
+      GLU glu = drawable.getGLU();
+      gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
       if (doIntegrate && hasVortices && hasParticles) {
         cnt++;
         if (cnt == statsInterval) {
@@ -126,10 +130,9 @@ public class GpgpuViewer extends Viewer {
           recompilePrograms=true;
           orderChanged=false;
         }
-        GL gl = new DebugGL(drawable.getGL());
-        GLU glu = drawable.getGLU();
         initPrograms(gl);
         initFBO(gl);
+        initVBO(gl);
         initViewport(gl, glu);
         initTextures(gl);
         
@@ -178,7 +181,7 @@ public class GpgpuViewer extends Viewer {
         gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
             GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[0], 0);      
         checkBuf(gl);
-        gl.glFinish();
+//        gl.glFinish();
         gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT2_EXT);
         
         // enable particles
@@ -195,7 +198,7 @@ public class GpgpuViewer extends Viewer {
         gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
             GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[1], 0);      
         checkBuf(gl);
-        gl.glFinish();
+//        gl.glFinish();
         GlslLoader.render(progK2, drawable);
         
         gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT2_EXT);
@@ -220,7 +223,7 @@ public class GpgpuViewer extends Viewer {
           gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
               GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[2], 0);      
           checkBuf(gl);
-          gl.glFinish();
+//          gl.glFinish();
   
           GlslLoader.render(progK3, drawable);
       
@@ -244,7 +247,7 @@ public class GpgpuViewer extends Viewer {
           gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
               GL.GL_COLOR_ATTACHMENT2_EXT, TEX_TARGET, intermediateTexs[3], 0);
           checkBuf(gl);
-          gl.glFinish();
+//          gl.glFinish();
   
           GlslLoader.render(progK3, drawable);
           
@@ -265,7 +268,7 @@ public class GpgpuViewer extends Viewer {
           renderQuad(gl);
         }
         
-        gl.glFinish();
+//        gl.glFinish();
   
         GlslLoader.render(progMerge, drawable);
 
@@ -298,12 +301,12 @@ public class GpgpuViewer extends Viewer {
         
         renderQuad(gl);
         
-        gl.glFinish();
+        if (readData) {
+          transferFromTexture(gl, particleBuffer);
+        } else {
+          transferFromTextureToVBO(gl);
+        }
         
-        transferFromTexture(gl, particleBuffer);
-      
-        if (writeData) dumpData(particleBuffer);
-
         // do swap
         int tmp = readTex;
         readTex = writeTex;
@@ -315,7 +318,18 @@ public class GpgpuViewer extends Viewer {
         GlslLoader.postRender(progK1, drawable); // any postRender just resets the shader pipeline
         doIntegrate=false;
       }
+    gl.glPopAttrib();
+    gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
     super.display(drawable);
+    gl.glPopAttrib();
+    		
+  }
+
+  private void transferFromTextureToVBO(GL gl) {
+    gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, vbos[0]);
+    gl.glReadBuffer(attachments[writeTex]);
+    gl.glReadPixels(0, 0, theWidth, theWidth, TEX_FORMAT, GL.GL_FLOAT, (float[]) null);
+    gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 0);
   }
 
   private void renderQuad(GL gl) {
@@ -499,7 +513,6 @@ public class GpgpuViewer extends Viewer {
     gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP);
     gl.glTexImage2D(TEX_TARGET, 0, TEX_INTERNAL_FORMAT, theWidth, theHeight, 0,
         TEX_FORMAT, GL.GL_FLOAT, (float[]) null);
-
   }
 
   /**
@@ -556,6 +569,20 @@ public class GpgpuViewer extends Viewer {
     gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, fbos[0]);
   }
 
+  private void initVBO(GL gl) {
+    boolean newVBO=false;
+    if (vbos[0] == 0) {
+      gl.glGenBuffersARB(1, vbos);
+      System.out.println("created VBO=" + vbos[0]);
+      newVBO=true;
+    }
+    if (newVBO || particlesTexSizeChanged) {// TODO: see if we need to multiply by 4 bytes a float
+      gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, vbos[0]);
+      gl.glBufferDataARB(GL.GL_PIXEL_PACK_BUFFER_EXT, theWidth*theWidth*4*4, (float[]) null, GL.GL_STREAM_COPY);
+      gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 0);
+    }
+  }
+  
   private void initViewport(GL gl, GLU glu) {
     gl.glMatrixMode(GL.GL_PROJECTION);
     gl.glLoadIdentity();
@@ -565,12 +592,14 @@ public class GpgpuViewer extends Viewer {
     gl.glViewport(0, 0, theWidth, theHeight);
   }
   
-  public float[] getCurrentParticlePositions(float[] store) {
-    if (store == null || store.length != numFloats)
-      store = new float[numFloats];
+  public int getParticleTexID() {
+	  return particleTexs[readTex];
+  }
+  
+  public FloatBuffer getCurrentParticlePositions() {
+    if (!readData) return null;
     particleBuffer.position(0).limit(numFloats);
-    particleBuffer.get(store);
-    return store;
+    return particleBuffer.asReadOnlyBuffer();
   }
 
   public void setParticles(float[] particles) {
@@ -613,7 +642,7 @@ public class GpgpuViewer extends Viewer {
         this.vorts0 = (float[]) vortData.clone();
         int texSize = texSize((vortData.length-1)/(3*4));
         if (texSize != vortexTextureHeight) {
-          System.out.println("[setVortexData] new vortex tex size="+texSize);
+          System.out.println("[setVortexData] new vortex tex size="+texSize+" data.length="+vortData.length);
           vortexTextureWidth=vortexTextureHeight=texSize;
           vortexTexSizeChanged=recompilePrograms=true;
         }
@@ -698,4 +727,28 @@ public class GpgpuViewer extends Viewer {
     orderChanged=true;
   }
 
+public boolean isReadData() {
+	return readData;
+}
+
+public void setReadData(boolean readData) {
+	this.readData = readData;
+}
+
+public int getParticleTexSize() {
+  return theWidth;
+}
+
+public void renderPoints(JOGLRenderer jr) {
+  GL gl = jr.globalGL;
+  gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
+  gl.glBindBufferARB(GL.GL_ARRAY_BUFFER_ARB, vbos[0]);
+  gl.glVertexPointer(4, GL.GL_FLOAT, 0, (Buffer) null);
+//  gl.glBindBufferARB(GL.GL_ARRAY_BUFFER, 0);
+
+  //glBindBufferARB(GL_ARRAY_BUFFER, 0); 
+  gl.glDrawArrays(GL.GL_POINTS, 0, theWidth*theWidth);
+  gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
+
+}
 }
