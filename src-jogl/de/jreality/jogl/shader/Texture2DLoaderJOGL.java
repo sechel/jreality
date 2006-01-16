@@ -263,7 +263,6 @@ public class Texture2DLoaderJOGL {
       refToDim.put(ref, new Dimension(tex.getImage().getWidth(), tex.getImage().getHeight()));
     }
 
-    //gl.glActiveTexture(GL.GL_TEXTURE0+level);
     gl.glBindTexture(GL.GL_TEXTURE_2D, textureID);
     int srcPixelFormat = GL.GL_RGBA;
     handleTextureParameters(tex, gl);

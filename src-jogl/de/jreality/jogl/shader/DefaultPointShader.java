@@ -124,7 +124,7 @@ public class DefaultPointShader  implements PointShader {
 			gl.glPointSize((float) getPointSize());
 			gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, pointAttenuation);
 			gl.glEnable(GL.GL_POINT_SPRITE_ARB);
-		    gl.glActiveTexture(0);
+      gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
 			Texture2DLoaderJOGL.render(theCanvas, tex);
 			gl.glEnable(GL.GL_TEXTURE_2D);
@@ -149,7 +149,7 @@ public class DefaultPointShader  implements PointShader {
 		if (!sphereDraw)	{
 			GL gl = jr.globalGL;
 			jr.globalGL.glDisable(GL.GL_POINT_SPRITE_ARB);
-		    gl.glActiveTexture(0);
+      gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_FALSE);
 			gl.glDisable(GL.GL_TEXTURE_2D);
 		}
