@@ -155,6 +155,7 @@ public class JOGLRendererHelper {
 	static ByteBuffer vBuffer, vcBuffer, vnBuffer, fcBuffer, fnBuffer, tcBuffer;
 	static DataList vLast = null, vcLast = null, vnLast = null;
 	public static void drawVertices( PointSet sg, JOGLRenderer jr, boolean pickMode, double alpha) {
+	        if (sg.getNumPoints() == 0) return;
 		GLDrawable theCanvas = jr.theCanvas;
 		GL gl = theCanvas.getGL(); 
 //		gl.glPointSize((float) currentGeometryShader.pointShader.getPointSize());
@@ -207,6 +208,7 @@ public class JOGLRendererHelper {
 	 * @param sg
 	 */
 	public static void drawLines(IndexedLineSet sg, JOGLRenderer jr , boolean pickMode, boolean interpolateVertexColors, double alpha) {
+	        if (sg.getNumEdges() == 0) return;
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
@@ -317,6 +319,7 @@ public class JOGLRendererHelper {
 		drawFaces(sg, jr, smooth, alpha, false);
 	}
 	public static void drawFaces( IndexedFaceSet sg, JOGLRenderer jr,  boolean smooth, double alpha, boolean pickMode) {
+	        if (sg.getNumFaces() == 0) return;
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		
