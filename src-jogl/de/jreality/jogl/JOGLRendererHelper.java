@@ -605,11 +605,11 @@ public class JOGLRendererHelper {
 			globalGL.glLightf(GL.GL_LIGHT0+i, GL.GL_QUADRATIC_ATTENUATION, 0.0f);
 			globalGL.glDisable(GL.GL_LIGHT0+i);
 		}
-		for (int i = 0; i<lights.size(); ++i)	
-			globalGL.glEnable(GL.GL_LIGHT0+i);
 	}
 	
 	public void processLights(GL globalGL, List lights) {
+    for (int i = 0; i<lights.size(); ++i) 
+      globalGL.glEnable(GL.GL_LIGHT0+i);
 		lightCount = GL.GL_LIGHT0;
 		lightGL = globalGL;
 		int n = lights.size();

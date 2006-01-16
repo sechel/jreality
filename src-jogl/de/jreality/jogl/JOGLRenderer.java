@@ -332,7 +332,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 //		sphereDisplayLists = JOGLSphereHelper.getSphereDLists(this);
 //		cylinderDisplayLists = JOGLCylinderUtility.getCylinderDLists(this);
 		if (debugGL)	theLog.log(Level.INFO,"Got new sphere display lists for context "+globalGL);
-		OpenGLState.initializeGLState(this);
+//		OpenGLState.initializeGLState(this);
 		
 		//if (CameraUtility.getCamera(theViewer) == null || theCanvas == null) return;
 		//CameraUtility.getCamera(theViewer).setAspectRatio(((double) theCanvas.getWidth())/theCanvas.getHeight());
@@ -347,15 +347,18 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		currentViewport[2] = rx;
 		currentViewport[3] = ry;
 	}
+
 	/* (non-Javadoc)
 	 * @see net.java.games.jogl.GLEventListener#display(net.java.games.jogl.GLDrawable)
 	 */
 	public void display(GLDrawable drawable) {
-	  if (theViewer.getSceneRoot() == null || theViewer.getCameraPath() == null) {
+  if (theViewer.getSceneRoot() == null || theViewer.getCameraPath() == null) {
      LoggingSystem.getLogger(this).info("display called w/o scene root or camera path");
      // TODO: clear background
      return;
     }
+	  
+    OpenGLState.initializeGLState(this);
       
     //if (pickMode) return;
 		long beginTime = 0;
