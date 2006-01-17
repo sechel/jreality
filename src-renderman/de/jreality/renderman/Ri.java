@@ -295,7 +295,8 @@ public class Ri {
 //        String[] tokens = keysFromMap(map);
 //        Object[] values = valuesFromMap(map, tokens);
 //        points(npoints,tokens,values);
-        w.print("Points "+" "+npoints+" ");
+//        w.print("Points "+" "+npoints+" ");
+        w.print("Points ");
         writeMap(w,map);
     }
 //    public static  void points(int npoints, String[] tokens, Object[] values) ;
