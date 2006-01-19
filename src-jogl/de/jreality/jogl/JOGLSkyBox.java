@@ -20,7 +20,7 @@ import de.jreality.shader.TextureUtility;
  * @author Charles Gunn
  *
  */
-class SkyBox {
+class JOGLSkyBox {
 	double stretch = 40.0;
 
   // TODO straighten out nomenclature on faces

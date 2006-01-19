@@ -146,7 +146,7 @@ public class JOGLRendererHelper {
 	public static void handleSkyBox(GLDrawable theCanvas, Appearance topAp, JOGLRenderer r) {
 		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, CommonAttributes.SKY_BOX, topAp)) {
 			CubeMap cm = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, CommonAttributes.SKY_BOX, topAp, true);
-			SkyBox.render(theCanvas, r, cm);
+			JOGLSkyBox.render(theCanvas, r, cm);
 		}
 
 	}
