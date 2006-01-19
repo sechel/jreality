@@ -189,24 +189,26 @@ public class ReaderOOGL extends AbstractReader {
                       //has a color
                       if (fc == null) fc = new double[numF][4];
                       //int colComps = Integer.parseInt(st.sval);
-                      for (int j = 0; j<4; ++j) {
+                      int j = 0;
+                      for (j = 0; j<4; ++j) {
                                if (st.ttype == StreamTokenizer.TT_EOL ||  st.ttype == StreamTokenizer.TT_EOF) break;
                         fc[i][j] = Double.parseDouble(st.sval);
                         //LoggingSystem.getLogger().log(Level.FINER,"Token is "+st.sval);
                         st.nextToken();
                     }
+                      if (j != 4) fc[i][3] = 1.0;
                       // read the rest of the line if it hasnt' been read
                           while (st.ttype != StreamTokenizer.TT_EOL && st.ttype != StreamTokenizer.TT_EOF)  
                             st.nextToken();
                     } 
                     st.eolIsSignificant(false);
                   }
-                  LoggingSystem.getLogger(ReaderOOGL.class).log(Level.FINER,"Read "+numV+" vertices and "+numF+" faces");
+                  LoggingSystem.getLogger(ReaderOOGL.class).log(Level.INFO,"Read "+numV+" vertices and "+numF+" faces");
                   	IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
                   	ifsf.setVertexCount(verts.length);
-                  	ifsf.setFaceCount(indices.length);
-                  	ifsf.setVertexCoordinates(verts);
-                  	ifsf.setFaceIndices(indices);
+                   	ifsf.setVertexCoordinates(verts);
+                 	ifsf.setFaceCount(indices.length);
+                 	ifsf.setFaceIndices(indices);
                   	if (vn != null) ifsf.setVertexNormals(vn);
                    else ifsf.setGenerateVertexNormals(true);
                 	if (vc != null)ifsf.setVertexColors(vc);
@@ -216,10 +218,7 @@ public class ReaderOOGL extends AbstractReader {
                    ifsf.setGenerateFaceNormals(true);
                  	ifsf.update();
                   IndexedFaceSet ifs = ifsf.getIndexedFaceSet();
-//                  IndexedFaceSetUtility.createIndexedFaceSetFrom(indices, verts, vn, vc, tc, null, fc);
                   ifs.setName("OFF Geometry");
-//                      //GeometryUtility.calculateAndSetFaceNormals(ifs);
-//                  ifs.buildEdgesFromFaces();
                   current.setGeometry(ifs);
               }
                 else if ( st.sval.indexOf("MESH") != -1) {
@@ -357,7 +356,7 @@ public class ReaderOOGL extends AbstractReader {
                   vertC++;
                 }
                 }
-              LoggingSystem.getLogger(ReaderOOGL.class).log(Level.FINER,"Read "+numCurves+" curves and "+totalVerts+ " vertices");
+              LoggingSystem.getLogger(ReaderOOGL.class).log(Level.INFO,"Read "+numCurves+" curves and "+totalVerts+ " vertices");
               IndexedLineSet ils = new IndexedLineSet(totalVerts);
               ils.setName("VECT Geometry");
                   ils.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(vLength).createReadOnly(verts));
