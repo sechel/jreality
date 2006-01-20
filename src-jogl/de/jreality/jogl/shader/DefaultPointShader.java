@@ -6,8 +6,6 @@ package de.jreality.jogl.shader;
 
 import java.awt.Color;
 
-import com.sun.corba.se.internal.core.Constant;
-
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
 import de.jreality.geometry.GeometryUtility;
