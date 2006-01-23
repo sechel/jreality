@@ -67,6 +67,7 @@ public class RIBVisitor extends SceneGraphVisitor {
     private int textureCount = 0;
     private Map textures =new HashMap();
     private String proj = "perspective";
+    private int[] maximumEyeSplits={10};
     
     public static boolean fullSpotLight = true;
     public static String shaderPath = null;
@@ -91,6 +92,11 @@ public class RIBVisitor extends SceneGraphVisitor {
         map.put("shader", (shaderPath!=null?(shaderPath+":"):"")+".:&");
         //map.put("shader", (fullSpotLight!=null?(fullSpotLight+":"):"")+".:&");
         Ri.option( "searchpath", map);
+        
+        HashMap map2 = new HashMap();
+        map2.put("eyesplits",maximumEyeSplits);
+        Ri.option("limits",map2);
+        
         Ri.display(name+".tif", "tiff", "rgb",null);
         
         Ri.format(width,height,1);
@@ -572,6 +578,14 @@ public class RIBVisitor extends SceneGraphVisitor {
     public void projection(String proj){
     	this.proj=proj;
     }
+    
+    /**
+     * @param maximumEyeSplits.
+     */
+    public void setMaximumEyeSplits(int maximumEyeSplits){
+    	this.maximumEyeSplits[0]=maximumEyeSplits;
+    }
+    
     
     private static void dirToEuler(double r[]) {
         double d =VecMat.norm(r);
