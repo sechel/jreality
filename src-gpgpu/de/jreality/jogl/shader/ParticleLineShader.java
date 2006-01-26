@@ -1,6 +1,7 @@
 package de.jreality.jogl.shader;
 
 import java.awt.Color;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.WeakHashMap;
@@ -62,17 +63,19 @@ public class ParticleLineShader implements LineShader {
     mat[15] = 1;
   }
 
-  private static boolean renderCheap;
+  protected static boolean renderCheap;
   protected static double pointSize;
   private static boolean forthOrder;
   
   boolean debug;
+  private boolean newFrame;
+  private boolean write;
 
   private static boolean array=true;
 
-  private static boolean sprites=true;
+  protected static boolean sprites=true;
 
-  private static float[] pointAttenuation = {1f, 0f, 0f};
+  protected static float[] pointAttenuation = {1f, 0f, 0f};
 
   static float[] particles = new float[0];
 
@@ -90,6 +93,9 @@ public class ParticleLineShader implements LineShader {
   private static Rectangle3D bb=new Rectangle3D();
   
   private static float[][] bounds=new float[2][3];
+  
+  private static Matrix objToRoot=new Matrix();
+  private static int framecnt;
 
   public boolean providesProxyGeometry() {
     return true;
@@ -109,6 +115,7 @@ public class ParticleLineShader implements LineShader {
     double curRo = eap.getAttribute(ShaderUtility.nameSpace(name, "ro"), ro);
     pointSize = eap.getAttribute(ShaderUtility.nameSpace(name, "size"), 2.);
     debug = eap.getAttribute(ShaderUtility.nameSpace(name, "debug"), false);
+    write = eap.getAttribute(ShaderUtility.nameSpace(name, "write"), false);
     forthOrder = eap.getAttribute(ShaderUtility.nameSpace(name, "forthOrder"), forthOrder);
     renderCheap = eap.getAttribute(
         ShaderUtility.nameSpace(name, "renderCheap"), false);
@@ -135,7 +142,12 @@ public class ParticleLineShader implements LineShader {
       ro = curRo;
       setRo = true;
     }
-    System.out.println("pointSize="+pointSize);
+    double[] m = (double[]) eap.getAttribute("objectToRoot", objToRoot.getArray());
+    int fcnt = eap.getAttribute("frameCnt", framecnt);
+    if (fcnt > framecnt) {
+      framecnt = fcnt;
+      newFrame=true;
+    }
   }
 
   public void updateData(JOGLRenderer jr) {
@@ -200,6 +212,30 @@ public void render(JOGLRenderer jr) {
     gl.glPushAttrib(GL.GL_LIGHTING_BIT);
     
     gl.glDisable(GL.GL_LIGHTING);
+    
+    if (write && newFrame) {
+      String fn = "particles";
+      if (framecnt < 1000) fn+="0";
+      if (framecnt < 100) fn+= "0";
+      if (framecnt < 10) fn +="0";
+      fn+=framecnt+".parts";
+      try {
+        FileWriter fw = new FileWriter(fn);
+        double [] tmp = new double[4];
+        for (int i=0; i<n; i++) {
+          tmp[0]=data.get(4*i);
+          tmp[1]=data.get(4*i+1);
+          tmp[2]=data.get(4*i+2);
+          tmp[3]=data.get(4*i+3);
+          tmp = objToRoot.multiplyVector(tmp);
+          fw.write(tmp[0]+" "+tmp[1]+" "+tmp[2]+"\n");
+        }
+        fw.close();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
     
     if (!renderCheap) {
       resetBounds();
