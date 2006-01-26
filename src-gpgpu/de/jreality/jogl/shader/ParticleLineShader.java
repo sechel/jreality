@@ -10,21 +10,16 @@ import net.java.games.jogl.GL;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.GpgpuViewer;
 import de.jreality.jogl.JOGLRenderer;
-import de.jreality.jogl.JOGLSphereHelper;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
-import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
-import de.jreality.shader.GlslProgram;
-import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
-import de.jreality.util.Input;
 import de.jreality.util.Rectangle3D;
 
 /**
@@ -33,22 +28,7 @@ import de.jreality.util.Rectangle3D;
  */
 public class ParticleLineShader implements LineShader {
 
-  private static byte[] defaultSphereTexture = new byte[128 * 128 * 4];
-  static Texture2D tex=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
-  static {
-    for (int i = 0; i<128; ++i) {
-      for (int j = 0; j< 128; ++j)  {
-        int I = 4*(i*128+j);
-        int sq = (i-64)*(i-64) + (j-64)*(j-64);
-        //sq = i*i + j*j;
-        if (sq < 4096)  
-          {defaultSphereTexture[I] =  defaultSphereTexture[I+1] = defaultSphereTexture[I+2] = defaultSphereTexture[I+3] = (byte) (255- Math.abs(sq/16.0)); }
-        else
-          {defaultSphereTexture[I] =  defaultSphereTexture[I+1] = defaultSphereTexture[I+2] = defaultSphereTexture[I+3]  = 0;  }
-      }
-    }
-    tex.setImage(new ImageData(defaultSphereTexture, 128, 128));
-  }
+  static Texture2D tex;
   
   private double pointRadius;
 
@@ -89,21 +69,21 @@ public class ParticleLineShader implements LineShader {
 
   static boolean setRo = true;
   
-  private static Geometry ils;
   private static Rectangle3D bb=new Rectangle3D();
   
   private static float[][] bounds=new float[2][3];
   
-  private static Matrix objToRoot=new Matrix();
+  private static Matrix rootToObject=new Matrix();
   private static int framecnt;
-
+  private String folder=".";
+  private String fileName="particles";
+  
   public boolean providesProxyGeometry() {
     return true;
   }
 
   public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig,
       boolean useDisplayLists) {
-    ils=original;
     if (original.getGeometryAttributes(GeometryUtility.BOUNDING_BOX) != bb)
       original.setGeometryAttributes(GeometryUtility.BOUNDING_BOX, bb);
     return -1;
@@ -116,11 +96,22 @@ public class ParticleLineShader implements LineShader {
     pointSize = eap.getAttribute(ShaderUtility.nameSpace(name, "size"), 2.);
     debug = eap.getAttribute(ShaderUtility.nameSpace(name, "debug"), false);
     write = eap.getAttribute(ShaderUtility.nameSpace(name, "write"), false);
+    if (write) {
+      folder = (String) eap.getAttribute(ShaderUtility.nameSpace(name, "folder"), folder);
+      fileName = (String) eap.getAttribute(ShaderUtility.nameSpace(name, "fileName"), fileName);
+    }
     forthOrder = eap.getAttribute(ShaderUtility.nameSpace(name, "forthOrder"), forthOrder);
     renderCheap = eap.getAttribute(
         ShaderUtility.nameSpace(name, "renderCheap"), false);
     sprites = eap.getAttribute(
         ShaderUtility.nameSpace(name, "sprites"), sprites);
+    if (sprites) {
+      if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "pointSprite"), eap)) {
+        tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "pointSprite"), eap);
+      } else {
+        tex = DefaultPointShader.tex;        
+      }
+    }
     diffuseColor = (Color) eap
         .getAttribute(ShaderUtility.nameSpace(name,
             CommonAttributes.DIFFUSE_COLOR),
@@ -142,7 +133,7 @@ public class ParticleLineShader implements LineShader {
       ro = curRo;
       setRo = true;
     }
-    double[] m = (double[]) eap.getAttribute("objectToRoot", objToRoot.getArray());
+    eap.getAttribute("objectToRoot", rootToObject.getArray());
     int fcnt = eap.getAttribute("frameCnt", framecnt);
     if (fcnt > framecnt) {
       framecnt = fcnt;
@@ -153,8 +144,7 @@ public class ParticleLineShader implements LineShader {
   public void updateData(JOGLRenderer jr) {
     GpgpuViewer v = (GpgpuViewer) jr.theViewer;
     if (v.isForthOrder() != forthOrder) v.setForthOrder(forthOrder);
-    if (setParticles) {        tex.setImage(new ImageData(defaultSphereTexture, 128, 128));
-
+    if (setParticles) {
       v.setParticles(particles);
       setParticles = false;
     }
@@ -214,20 +204,22 @@ public void render(JOGLRenderer jr) {
     gl.glDisable(GL.GL_LIGHTING);
     
     if (write && newFrame) {
-      String fn = "particles";
-      if (framecnt < 1000) fn+="0";
-      if (framecnt < 100) fn+= "0";
-      if (framecnt < 10) fn +="0";
-      fn+=framecnt+".parts";
+      StringBuffer fn = new StringBuffer(folder);
+      fn.append('/').append(fileName);
+      if (framecnt < 1000) fn.append(0);
+      if (framecnt < 100) fn.append(0);
+      if (framecnt < 10) fn.append(0);
+      fn.append(framecnt);
       try {
-        FileWriter fw = new FileWriter(fn);
+        FileWriter fw = new FileWriter(fn.toString());
         double [] tmp = new double[4];
         for (int i=0; i<n; i++) {
           tmp[0]=data.get(4*i);
           tmp[1]=data.get(4*i+1);
           tmp[2]=data.get(4*i+2);
           tmp[3]=data.get(4*i+3);
-          tmp = objToRoot.multiplyVector(tmp);
+          tmp = rootToObject.multiplyVector(tmp);
+          if (Double.isNaN(tmp[0]) || Double.isNaN(tmp[1]) || Double.isNaN(tmp[2])) continue;
           fw.write(tmp[0]+" "+tmp[1]+" "+tmp[2]+"\n");
         }
         fw.close();
