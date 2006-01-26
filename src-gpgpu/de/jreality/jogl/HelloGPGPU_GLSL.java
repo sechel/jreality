@@ -127,7 +127,7 @@ public class HelloGPGPU_GLSL extends Viewer {
       transferToTexture(gl, particles, pingTex[readTex], pingSize, pingSize);
 
       System.out.println("Wrote: ");
-      EulerViewer.dumpData(particles);
+      GpgpuViewer.dumpData(particles);
 
       float[] vorts = new float[dataSize*dataSize*4];
       for (int i = 0; i < dataSize*dataSize; i++) {
@@ -178,7 +178,7 @@ public class HelloGPGPU_GLSL extends Viewer {
      transferFromTexture(gl, f);
      
      System.out.println("Read: ");
-     EulerViewer.dumpData(f);
+     GpgpuViewer.dumpData(f);
      
      // do swap
      int tmp = readTex;
@@ -304,13 +304,13 @@ public class HelloGPGPU_GLSL extends Viewer {
        +"uniform float roSquared;\n";
        String biotSavart="";
        System.out.println("recompiling program: prefix="+cst);
-       LineNumberReader lnr = new LineNumberReader(Input.getInput(EulerViewer.class.getResource("biot_savart-impl.glsl")).getReader());
+       LineNumberReader lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("biot_savart-impl.glsl")).getReader());
        for (String line=lnr.readLine(); line != null; line=lnr.readLine()) biotSavart += line+"\n";
        lnr.close();
        
        String rk = "\n";
 
-       lnr = new LineNumberReader(Input.getInput(EulerViewer.class.getResource("Euler.glsl")).getReader());
+       lnr = new LineNumberReader(Input.getInput(GpgpuViewer.class.getResource("Euler.glsl")).getReader());
        for (String line=lnr.readLine(); line != null; line=lnr.readLine()) rk += line+"\n";
        String prog = cst+rk+biotSavart;
        System.out.println("PROG: "+prog);
