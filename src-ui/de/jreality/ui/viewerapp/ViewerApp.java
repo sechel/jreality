@@ -165,7 +165,7 @@ public class ViewerApp
     bshEval.getInterpreter().eval("import de.jreality.math.*;");    
     bshEval.getInterpreter().eval("import de.jreality.shader.*;");
     bshEval.getInterpreter().eval("import de.jreality.util.*;");
-        
+    
     jterm = new JTerm(new Session(bshEval));
     jterm.setMaximumSize(new Dimension(10, 10));
 
@@ -276,8 +276,12 @@ public class ViewerApp
             SceneGraphNode sn = (SceneGraphNode) o;
             bshEval.getInterpreter().set("self", sn);
             String info="\nself="+sn.getName()+"["+sn.getClass().getName()+"]\n";
-            jterm.getSession().displayAndPrompt(info, infoStyle);
-            jterm.setCaretPosition(jterm.getDocument().getLength());
+            try {
+              jterm.getSession().displayAndPrompt(info, infoStyle);
+              jterm.setCaretPosition(jterm.getDocument().getLength());
+            } catch (Exception ex) {
+              // unpatched jterm
+            }
           } catch (EvalError e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -638,6 +642,12 @@ public class ViewerApp
         viewers[i] = createViewer(st.nextToken());
       }
       viewerSwitch = new ViewerSwitch(viewers);
+      try {
+        bshEval.getInterpreter().set("_viewer", viewerSwitch);
+      } catch (EvalError e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
       renderTrigger.addViewer(viewerSwitch);
       viewerSwitch.getViewingComponent().addKeyListener(new KeyListener() {
         public void keyTyped(KeyEvent arg0) {
