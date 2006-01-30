@@ -122,7 +122,8 @@ atomicNode:
 	|	scaleNode
 	|	matrixTransformNode
 	| 	shapeHintsNode
-	|	currentAp=materialNode
+	|	directionalLightNode
+ 	|	currentAp=materialNode
 	|	currentCoordinate3=coordinate3Node		{coordinate3Count++;}
 	|	currentNormal=normalNode
 	|	currentNormalBinding=normalBindingNode
@@ -253,13 +254,40 @@ shapeHintsNode:
 	;
 
 shapeHintAttribute:
-		"vertexOrdering"	("COUNTERCLOCKWISE" | "CLOCKWISE")
-	|	"shapeType"		"SOLID"
-	|	"faceType"		("CONVEX" | "UNKNOWN_FACE_TYPE")
+                "vertexOrdering"        ("COUNTERCLOCKWISE" | "CLOCKWISE")
+     |        "shapeType"                ("SOLID" | "UNKNOWN_SHAPE_TYPE" )
+     |        "faceType"                ("CONVEX" | "UNKNOWN_FACE_TYPE")
 	|	"creaseAngle"	number
 	|	unknownAttribute
 	;
 	
+directionalLightNode returns [DirectionalLight dl]
+{     dl = new DirectionalLight();
+     SceneGraphComponent sgc = new SceneGraphComponent();
+    sgc.setLight(dl);
+        }
+        :
+        "DirectionalLight"        OPEN_BRACE        (directionalLightAttribute[sgc])* CLOSE_BRACE
+       ;
+        
+directionalLightAttribute[SceneGraphComponent sgc]
+{       boolean b = false;
+     double d = 1.0;
+     Color c = null;
+     double[] dir = null;
+     }
+        :
+                "on"                b=sfboolValue               { if (VRMLHelper.verbose)      System.err.println("Got on"); }
+      |        "intensity"        d=sffloatValue                { if (VRMLHelper.verbose)      System.err.println("Got intensity"); sgc.getLight().setIntensity(d); }
+     |        "color"        c=sfcolorValue                     { if (VRMLHelper.verbose)      System.err.println("Got color"); sgc.getLight().setColor(c);      }
+        |        "direction" dir=sfvec3fValue               
+                { 
+                    Transformation tt = new Transformation();
+                    tt.setMatrix(P3.makeLookatMatrix(null, P3.originP3, dir, 0.0, Pn.EUCLIDEAN));
+                    sgc.setTransformation(tt);
+                    if (VRMLHelper.verbose)      System.err.println("Got direction"); 
+                }
+        ;
 // TODO fix this
 // The Material node has values that are potentially arrays (mfcolorValue and mffloatValue)
 materialNode returns [Appearance ap]
@@ -494,8 +522,9 @@ value:				// TODO extend this list while keeping the grammar unambiguous
 number returns [double d]	
 {d = 0; }
 	:
-	(f:INT32 {d=Double.parseDouble(f.getText()); } )
-	| (g:FLOAT {d=Double.parseDouble(g.getText()); })		
+		(f:INT {d=Double.parseDouble(f.getText()); } )
+	|	(g:FLOAT {d=Double.parseDouble(g.getText()); } )
+	{ if (VRMLHelper.verbose) System.err.println("Got number "+d); }		
 	;
 		
 sfboolValue returns [boolean b]
@@ -564,7 +593,7 @@ mffloatValue returns [double[] dl]
 sfint32Value returns [int i]
 { i = 0;}
 	:
-	    f:INT32	{i = Integer.parseInt(f.getText()); }
+	    f:INT	{i = Integer.parseInt(f.getText()); }
 	;
 
 sfint32Values returns [int[] il]
@@ -697,7 +726,6 @@ options {
 	filter=IGNORE;
 }
 	/* Terminal Symbols */
-PERIOD:			'.';
 OPEN_BRACE:		'{';
 CLOSE_BRACE:		'}';
 OPEN_BRACKET:	'[';
@@ -716,26 +744,42 @@ ID_LETTER:
 	('a'..'z'|'A'..'Z'|'_'|'0'..'9')
 	;
 
-INT_OR_FLOAT : (DECIMAL_BEGIN) {$setType(INT32);}  
-	( (('.' (DIGIT)+ (EXPONENT)? ) | EXPONENT) {$setType(FLOAT);} )?;
+//INT_OR_FLOAT : 
+//   		((('+'|'-')? DECIMAL_FRACTION (EXPONENT)?) {$setType(FLOAT);})
+//	|	(DECIMAL_INT) {$setType(INT32);}  (DECIMAL_FRACTION (EXPONENT)? {$setType(FLOAT);} )?
+//INT_OR_FLOAT : (DECIMAL_INT) {$setType(INT32);}  
+//       ( (('.' (DIGIT)+ (EXPONENT)? ) | EXPONENT) {$setType(FLOAT);} )?
+//       ;
 
-INT32:
-		DECIMAL_BEGIN | ('0' ('x'|'X') ('0'..'9' | 'a'..'f' | 'A'..'F')+)
+//INT:
+//	(('+'|'-')? (DIGIT)+) | ('0' ('x'|'X') ('0'..'9' | 'a'..'f' | 'A'..'F')+)
+//	;
+
+INT_OR_FLOAT:
+//   optional sign   either integer w/exponent or   real number with optional exponent
+//  this rule doesn't accept simple integers, only integers with exponents
+//	('+'|'-')? ( ( (DIGIT)+ EXPONENT) | ( (DIGIT)* '.' (DIGIT)+   (EXPONENT)?) )
+	('+'|'-')? ((DIGIT)* {$setType(INT);}) ('.' {$setType(FLOAT); }  (DIGIT)+   (EXPONENT)?)?
 	;
-
+	
 protected
 DIGIT:	
 	('0'..'9')
 	;
 	
 protected 
-DECIMAL_BEGIN:
+DECIMAL_INT:
 	('+'|'-')? (DIGIT)+
+	;
+
+protected
+DECIMAL_FRACTION:
+	'.' (DIGIT)+
 	;
 	
 protected
 EXPONENT:
-	(('e'|'E') ('+'|'-')? ('0'..'9')+) 
+	(('e'|'E') ('+'|'-')? (DIGIT)+) 
 	;
 	
 	/* ".*" ... double-quotes must be \", backslashes must be \\... */
