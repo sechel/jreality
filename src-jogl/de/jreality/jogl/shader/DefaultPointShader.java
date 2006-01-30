@@ -75,14 +75,16 @@ public class DefaultPointShader  implements PointShader {
 	}
 
 
-	byte[] sphereTex;
+	static byte[] sphereTex;
 	double[] lightDirection = {1,-1,2};
 	
 	private void setupTexture() {
 		int I = 0, II = 0;
 		double[] reflected = new double[3];
+		if (sphereTex != null) return;
 		//System.out.println("specular color is "+specularColor.toString());
-		if (sphereTex == null) sphereTex = new byte[textureSize * textureSize * 4];
+		//if (sphereTex == null) 
+			sphereTex = new byte[textureSize * textureSize * 4];
 		for (int i = 0; i<textureSize; ++i)	{
 			for (int j = 0; j< textureSize; ++j)	{
 				if (sphereVertices[I][0] != -1)	{	
@@ -112,7 +114,8 @@ public class DefaultPointShader  implements PointShader {
 				I++;
 				}
 			}
-			tex.setImage(new ImageData(sphereTex, textureSize, textureSize));
+			ImageData id = new ImageData(sphereTex, textureSize, textureSize) ;
+			tex.setImage(id);
 			tex.setApplyMode(Texture2D.GL_REPLACE);
 	}
 
