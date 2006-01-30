@@ -36,8 +36,8 @@ public class ReaderVRML extends AbstractReader {
       e.printStackTrace();
     } catch (NoSuchMethodException e) {
       throw new Error();
-    } catch (IllegalArgumentException e) {
-      throw new Error();
+//    } catch (IllegalArgumentException e) {
+//      throw new Error();
     } catch (InstantiationException e) {
       throw new Error();
     } catch (IllegalAccessException e) {
