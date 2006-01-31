@@ -19,13 +19,13 @@ class GpgpuUtility {
     return (int) ((fl*fl < i) ? fl+1 : fl);
   }
 
-  static void dumpData(float[] data) {
+  public static void dumpData(float[] data) {
     for (int i = 0; i < data.length; i++)
       System.out.print(data[i] + ", ");
     System.out.println();
   }
 
-  static void dumpData(FloatBuffer data) {
+  public static void dumpData(FloatBuffer data) {
     for (int i = 0; i < data.capacity(); i++)
       System.out.print(data.get(i) + ", ");
     System.out.println();
@@ -65,7 +65,7 @@ class GpgpuUtility {
     }
   }
 
-  static void run(GLEventListener listener) {
+  public static void run(GLEventListener listener) {
     Frame f=new Frame("gpgpu runner");
     f.setSize(1, 1);
     
