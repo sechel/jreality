@@ -4,16 +4,19 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import javax.swing.JOptionPane;
+
 import net.java.games.jogl.DebugGL;
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
+import net.java.games.jogl.GLEventListener;
 import net.java.games.jogl.GLU;
 import de.jreality.jogl.shader.GlslLoader;
 import de.jreality.scene.Appearance;
 import de.jreality.shader.GlslProgram;
 import de.jreality.shader.GlslSource;
 
-public abstract class AbstractGpgpuViewer extends Viewer {
+public abstract class AbstractCalculation implements GLEventListener {
 
   private boolean doIntegrate;
   
@@ -40,12 +43,22 @@ public abstract class AbstractGpgpuViewer extends Viewer {
 
   private boolean readData=true;
 
-  public AbstractGpgpuViewer(boolean tex2D) {
+  public AbstractCalculation(boolean tex2D) {
     super();
     this.tex2D = tex2D;
     atiHack=tex2D;
     TEX_TARGET = tex2D ? GL.GL_TEXTURE_2D : GL.GL_TEXTURE_RECTANGLE_NV;
     TEX_INTERNAL_FORMAT = tex2D ? GL.GL_RGBA32F_ARB : GL.GL_FLOAT_RGBA32_NV;
+  }
+  
+  public void init(GLDrawable drawable) {
+    if (!drawable.getGL().isExtensionAvailable("GL_ARB_fragment_shader")
+        || !drawable.getGL().isExtensionAvailable("GL_ARB_vertex_shader")
+        || !drawable.getGL().isExtensionAvailable("GL_ARB_shader_objects")
+        || !drawable.getGL().isExtensionAvailable("GL_ARB_shading_language_100")) {
+      JOptionPane.showMessageDialog(null, "<html><center>Driver does not support OpenGL Shading Language!<br>Cannot execute program.</center></html>");
+      System.exit(-1);
+    }
   }
   
   public void display(GLDrawable drawable) {
@@ -103,11 +116,6 @@ public abstract class AbstractGpgpuViewer extends Viewer {
       gl.glDisable(TEX_TARGET);
       calculationFinished();
     }
-    
-    gl.glPopAttrib();
-    gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
-    super.display(drawable);
-    gl.glPopAttrib();
     		
   }
 
@@ -290,4 +298,11 @@ public abstract class AbstractGpgpuViewer extends Viewer {
   protected boolean isTex2D() {
     return tex2D;
   }
+  
+  public void reshape(GLDrawable arg0, int arg1, int arg2, int arg3, int arg4) {
+  }
+
+  public void displayChanged(GLDrawable arg0, boolean arg1, boolean arg2) {
+  }
+
 }

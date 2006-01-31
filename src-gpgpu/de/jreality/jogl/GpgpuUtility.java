@@ -67,7 +67,7 @@ class GpgpuUtility {
 
   static void run(GLEventListener listener) {
     Frame f=new Frame("gpgpu runner");
-    f.setSize(256, 256);
+    f.setSize(1, 1);
     
     // get a GLCanvas
     GLCapabilities capabilities = new GLCapabilities();

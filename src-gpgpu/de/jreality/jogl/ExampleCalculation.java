@@ -1,12 +1,13 @@
 package de.jreality.jogl;
 
 import net.java.games.jogl.GL;
+import net.java.games.jogl.GLDrawable;
 import de.jreality.shader.GlslProgram;
 import de.jreality.shader.GlslSource;
 
-public class ExampleGpgpuViewer extends AbstractGpgpuViewer {
+public class ExampleCalculation extends AbstractCalculation {
   
-  public ExampleGpgpuViewer() {
+  public ExampleCalculation() {
     super(true);
   }
 
@@ -39,9 +40,10 @@ public class ExampleGpgpuViewer extends AbstractGpgpuViewer {
   }
   
   public static void main(String[] args) {
-    ExampleGpgpuViewer ev = new ExampleGpgpuViewer();
+    ExampleCalculation ev = new ExampleCalculation();
     ev.setValues(new float[]{1.1f,1.2f,1.3f,1.4f,2.1f,2.2f,2.3f,2.4f,3.1f,3.2f,3.3f,3.4f}); //,4.1f,4.2f,4.3f,4.4f});
     ev.triggerCalculation();
     GpgpuUtility.run(ev);
   }
+
 }
