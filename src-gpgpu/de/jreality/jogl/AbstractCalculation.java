@@ -1,5 +1,6 @@
 package de.jreality.jogl;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -14,7 +15,6 @@ import net.java.games.jogl.GLU;
 import de.jreality.jogl.shader.GlslLoader;
 import de.jreality.scene.Appearance;
 import de.jreality.shader.GlslProgram;
-import de.jreality.shader.GlslSource;
 
 public abstract class AbstractCalculation implements GLEventListener {
 
@@ -45,6 +45,7 @@ public abstract class AbstractCalculation implements GLEventListener {
   }
   
   private int[] fbos = new int[1]; // 1 framebuffer
+  private int[] vbo = new int[1]; // 1 vertexbuffer
   private int[] valueTextures = new int[2]; // ping pong textures
   private int[] attachments = {GL.GL_COLOR_ATTACHMENT0_EXT, GL.GL_COLOR_ATTACHMENT1_EXT};
   private int readTex, writeTex = 1;
@@ -76,7 +77,7 @@ public abstract class AbstractCalculation implements GLEventListener {
    tex2D = !vendor.startsWith("NVIDIA");
    atiHack=tex2D;
    TEX_TARGET = tex2D ? GL.GL_TEXTURE_2D : GL.GL_TEXTURE_RECTANGLE_NV;
-   TEX_INTERNAL_FORMAT = tex2D ? GL.GL_RGBA32F_ARB : GL.GL_FLOAT_RGBA32_NV;   
+   TEX_INTERNAL_FORMAT = tex2D ? GL.GL_RGBA32F_ARB : GL.GL_FLOAT_RGBA32_NV;
   }
   
   public void display(GLDrawable drawable) {
@@ -89,6 +90,7 @@ public abstract class AbstractCalculation implements GLEventListener {
       
       initPrograms(gl);
       initFBO(gl);
+      if (!readData) initVBO(gl);
       initViewport(gl, glu, true);
       initTextures(gl);
 
@@ -119,7 +121,7 @@ public abstract class AbstractCalculation implements GLEventListener {
         transferFromTexture(gl, valueBuffer);
         if (atiHack) GpgpuUtility.atiHack(valueBuffer);
       } else {
-//          transferFromTextureToVBO(gl);
+        transferFromTextureToVBO(gl);
       }
       
       // do swap
@@ -163,6 +165,8 @@ public abstract class AbstractCalculation implements GLEventListener {
 
   int cnt;
   long st;
+
+  private boolean hasValidVBO;
   private void measure() {
     if (measureCPS) {
       if (st == 0) st = System.currentTimeMillis();
@@ -204,6 +208,17 @@ public abstract class AbstractCalculation implements GLEventListener {
       gl.glTexCoord2d(0.0, tex2D ? 1 : valueTextureSize);
       gl.glVertex2d(0.0, valueTextureSize);
     gl.glEnd();
+  }
+
+  private void initVBO(GL gl) {
+    if (vbo[0] == 0) {
+      gl.glGenBuffersARB(1, vbo);
+      System.out.println("created VBO=" + vbo[0]);
+      gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, vbo[0]);
+      gl.glBufferDataARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 1024*1024*4*4, (float[])null, GL.GL_STREAM_COPY);
+      gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 0);
+      hasValidVBO=true;
+    }
   }
 
   private void initPrograms(GL gl) {
@@ -284,6 +299,14 @@ public abstract class AbstractCalculation implements GLEventListener {
     //    glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
     //    glRasterPos2i(0,0);
     //    glDrawPixels(texSize,texSize,textureParameters.texFormat,GL_FLOAT,data);
+  }
+
+  private void transferFromTextureToVBO(GL gl) {
+    gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, vbo[0]);
+    gl.glReadBuffer(attachments[writeTex]);
+    gl.glReadPixels(0, 0, valueTextureSize, valueTextureSize, TEX_FORMAT, GL.GL_FLOAT, (float[]) null);
+    gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 0);
+    hasValidVBO=true;
   }
 
   private void initFBO(GL gl) {
@@ -385,6 +408,19 @@ public abstract class AbstractCalculation implements GLEventListener {
 
   public void setMeasureCPS(boolean measureCPS) {
     this.measureCPS = measureCPS;
+  }
+
+  public void renderPoints(JOGLRenderer jr) {
+    if (!hasValidVBO || readData) return;
+    GL gl = jr.globalGL;
+    
+    gl.glBindBufferARB(GL.GL_ARRAY_BUFFER, vbo[0]);
+    gl.glVertexPointer(4, GL.GL_FLOAT, 0, (Buffer) null);
+    gl.glBindBufferARB(GL.GL_ARRAY_BUFFER, 0);  
+    
+    gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
+    gl.glDrawArrays(GL.GL_POINTS, 0, valueTextureSize*valueTextureSize);
+    gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
   }
 
 }

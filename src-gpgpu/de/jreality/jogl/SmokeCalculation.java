@@ -37,15 +37,15 @@ public class SmokeCalculation extends AbstractCalculation {
 
     String bsMethods = 
     "vec4 evaluateT0(const vec4 point) {\n" + 
-    "  return vec4(biotSavart(point, vorts0), 1);\n" + 
+    "  return vec4(biotSavart(point.xyz, vorts0), 1);\n" + 
     "}\n" + 
     "" + 
     "vec4 evaluateT0_H2(const vec4 point) {\n" + 
-    "  return vec4(biotSavart(point, vorts1), 1);\n" + 
+    "  return vec4(biotSavart(point.xyz, vorts1), 1);\n" + 
     "}\n" + 
     "\n" +
     "vec4 evaluateT0_H(const vec4 point) {\n" + 
-    "  return vec4(biotSavart(point, vorts2), 1);\n" + 
+    "  return vec4(biotSavart(point.xyz, vorts2), 1);\n" + 
     "}\n" + 
     "vec3 biotSavart(const vec3 pt, const samplerRect vort) {\n" + 
     "  \n" + 

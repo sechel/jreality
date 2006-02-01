@@ -1,5 +1,7 @@
 package de.jreality.jogl;
 
+import java.nio.FloatBuffer;
+
 import net.java.games.jogl.GL;
 import de.jreality.shader.GlslProgram;
 import de.smokering.util.PointSets;
@@ -8,7 +10,7 @@ public class PathCurves extends AbstractCalculation {
   
   protected String initSource() {
     String uniforms =
-     "uniform mat4 matrix;\n";
+      "uniform mat4 matrix;\n";
     String methods = 
       "vec4 evaluateT0(const vec4 pt) {\n"+
       "  return matrix*pt;" +
@@ -22,18 +24,22 @@ public class PathCurves extends AbstractCalculation {
     return RungeKuttaGlslCode.rkUniforms() + uniforms
       + RungeKuttaGlslCode.rk4MethodDeclarations()
       + RungeKuttaGlslCode.rk4Main() + methods;
-      
   }
 
   protected void prepareUniformValues(GL gl, GlslProgram prog) {
     super.prepareUniformValues(gl, prog);
-    prog.setUniform("matrix", new float[]{0,1,0,0, -1,0,0,0, 0,0,1,0, 0,0,0,1});
+    prog.setUniform("matrix", new float[]{0,1,0,0, -1,0,0,0,0, 0,0,1,0, 0,0,0,1});
     prog.setUniform("h", 0.01);
   }
   
   protected void calculationFinished() {
-    if (numValues < 64) 
-      GpgpuUtility.dumpData(getCurrentValues());
+//    if (numValues < 64) 
+//      GpgpuUtility.dumpData(getCurrentValues());
+//    else {
+//      FloatBuffer fb = getCurrentValues();
+//      fb.position(0).limit(3*4);
+//      GpgpuUtility.dumpSelectedData(fb);
+//    }
     triggerCalculation();
   }
   

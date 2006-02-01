@@ -9,7 +9,6 @@ import java.util.WeakHashMap;
 import net.java.games.jogl.GL;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.GpgpuViewer;
-import de.jreality.jogl.OldGpgpuViewer;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.SmokeCalculation;
 import de.jreality.math.Matrix;
@@ -141,26 +140,28 @@ public class ParticleLineShader implements LineShader {
     }
   }
 
+  SmokeCalculation calc;
+  
   public void updateData(JOGLRenderer jr) {
-    SmokeCalculation v = (SmokeCalculation) ((GpgpuViewer) jr.theViewer).getCalculation();
-    if (v == null) {
+    calc = (SmokeCalculation) ((GpgpuViewer) jr.theViewer).getCalculation();
+    if (calc == null) {
       System.out.println("calc==null!");
       return;
     }
     if (setParticles) {
-      v.setValues(particles);
+      calc.setValues(particles);
       setParticles = false;
     }
     if (setVortexData) {
-      v.setData(vortexData);
-      v.triggerCalculation();
+      calc.setData(vortexData);
+      calc.triggerCalculation();
       setVortexData = false;
     }
     if (setRo) {
-      v.setRo(ro);
+      calc.setRo(ro);
       setRo = false;
     }
-    data = v.getCurrentValues();
+    data = calc.getCurrentValues();
   }
 
   static WeakHashMap displayLists=new WeakHashMap();
@@ -196,17 +197,31 @@ public class ParticleLineShader implements LineShader {
 public void render(JOGLRenderer jr) {
     updateData(jr);
     if (particles.length == 0) return;
-    if (data == null) return;
+    if (calc == null) return;
+    GL gl = jr.globalGL;
+        
+    gl.glPushAttrib(GL.GL_LIGHTING_BIT);
+    gl.glDisable(GL.GL_LIGHTING);
+
+    if (data == null) {
+      gl.glColor3fv(difCol);
+      gl.glPointSize((float) pointSize);
+      if (sprites) {
+        gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, pointAttenuation);
+        gl.glEnable(GL.GL_POINT_SPRITE_ARB);
+        gl.glActiveTexture(GL.GL_TEXTURE0);
+        gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
+        gl.glEnable(GL.GL_TEXTURE_2D);
+        Texture2DLoaderJOGL.render(jr.getCanvas(), tex);
+      }
+      calc.renderPoints(jr);
+      gl.glPopAttrib();
+      return;
+    }
 
     int n = data.remaining()/4;
     int nanCnt=0;
-    
-    GL gl =   jr.globalGL;
-    
-    gl.glPushAttrib(GL.GL_LIGHTING_BIT);
-    
-    gl.glDisable(GL.GL_LIGHTING);
-    
+
     if (write && newFrame) {
       StringBuffer fn = new StringBuffer(folder);
       fn.append('/').append(fileName);
@@ -316,7 +331,7 @@ private void resetBounds() {
 }  
 
   public void postRender(JOGLRenderer jr) {
-    if (renderCheap && sprites) {
+    if (sprites && (renderCheap || data == null)) {
       GL gl = jr.globalGL;
       gl.glDisable(GL.GL_POINT_SPRITE_ARB);
       gl.glActiveTexture(GL.GL_TEXTURE0);

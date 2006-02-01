@@ -33,6 +33,12 @@ class GpgpuUtility {
     System.out.println();
   }
   
+  public static void dumpSelectedData(FloatBuffer data) {
+    while (data.hasRemaining())
+      System.out.print(data.get() + ", ");
+    System.out.println();
+  }
+  
   static void checkBuf(GL gl) {
     String res = checkFrameBufferStatus(gl);
     if (!res.equals("OK")) {
