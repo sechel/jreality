@@ -16,7 +16,9 @@ public class RungeKuttaGlslCode {
     "  vec4 pt = textureRect(values, pos);\n" + 
     "  vec4 k1 = h * evaluateT0(pt);\n" + 
     "  vec4 k2 = h * evaluateT0_H2(pt+k1/2.);\n" + 
-    "  gl_FragColor = pt + k2;\n" + 
+    "  vec4 res = pt + k2;\n" + 
+    "  if (r3) res.w = 1.;\n" + 
+    "  gl_FragColor = res;\n" +
     "}\n";
   }
   
@@ -29,13 +31,16 @@ public class RungeKuttaGlslCode {
     "  vec4 k2 = h * evaluateT0_H2(pt+k1/2.);\n" +
     "  vec4 k3 = h * evaluateT0_H2(pt+k2/2.);\n" +
     "  vec4 k4 = h * evaluateT0_H(pt+k3);\n" +
-    "  gl_FragColor = pt + (k1 + 2.*(k2 + k3) + k4)/6.;\n" +
+    "  vec4 res = pt + (k1 + 2.*(k2 + k3) + k4)/6.;\n" +
+    "  if (r3) res.w = 1.;\n" + 
+    "  gl_FragColor = res;\n" +
     "}\n";
   }
   
   static String rkUniforms() {
     return
     "uniform float h;\n"+
+    "uniform bool r3;\n"+
     "uniform samplerRect values;\n";
   }
   

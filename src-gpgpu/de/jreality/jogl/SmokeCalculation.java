@@ -150,6 +150,7 @@ public class SmokeCalculation extends AbstractCalculation {
     
     prog.setUniform("ro", ro);
     prog.setUniform("h", h);
+    prog.setUniform("r3", true);
   }
   
   public void setData(float[] data) {

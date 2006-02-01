@@ -37,10 +37,7 @@ public abstract class AbstractCalculation implements GLEventListener {
         "void main(void) {\n" +
         "  vec2 pos = gl_TexCoord[0].st;\n" +
         "  vec4 col = textureRect(values, pos);" +
-        "  vec3 a = abs(col.xyz);" +
-        "  float rescale = max(max(a.x, a.y), a.z);" +
-        "  rescale = rescale > 1. ? 1./rescale : 1.;" +
-        "  gl_FragColor = abs(col); //vec4(scale*rescale*a, 1.);\n" + 
+        "  gl_FragColor = abs(col/col.w); //vec4(scale*rescale*a, 1.);\n" + 
         "}\n");
   }
   
