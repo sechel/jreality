@@ -36,11 +36,11 @@ public abstract class AbstractCalculation implements GLEventListener {
         "uniform float scale;\n" +
         "void main(void) {\n" +
         "  vec2 pos = gl_TexCoord[0].st;\n" +
-        "  vec3 col = textureRect(values, pos).xyz;" +
-        "  vec3 a = abs(col);" +
+        "  vec4 col = textureRect(values, pos);" +
+        "  vec3 a = abs(col.xyz);" +
         "  float rescale = max(max(a.x, a.y), a.z);" +
         "  rescale = rescale > 1. ? 1./rescale : 1.;" +
-        "  gl_FragColor = vec4(scale*rescale*col, 1.);\n" + 
+        "  gl_FragColor = abs(col); //vec4(scale*rescale*a, 1.);\n" + 
         "}\n");
   }
   
@@ -57,7 +57,7 @@ public abstract class AbstractCalculation implements GLEventListener {
   private boolean valueTextureSizeChanged;
   private boolean hasValues;
 
-  private boolean readData=false;
+  private boolean readData=true;
 
   private boolean displayTexture;
   private int[] canvasViewport = new int[2];
@@ -140,7 +140,7 @@ public abstract class AbstractCalculation implements GLEventListener {
         gl.glActiveTexture(GL.GL_TEXTURE0);
         gl.glBindTexture(TEX_TARGET, valueTextures[writeTex]);
         renderer.setUniform("values", 0);
-        renderer.setUniform("scale", findScale());
+        renderer.setUniform("scale", 1.); //findScale());
         GlslLoader.render(renderer, drawable);
         renderQuad(gl);
         GlslLoader.postRender(renderer, drawable);
@@ -318,7 +318,7 @@ public abstract class AbstractCalculation implements GLEventListener {
   }
 
   public void setValues(float[] values) {
-    System.out.println("GpgpuViewer.setParticles()");
+    System.out.println("AbstractCalculation.setParticles()");
     if (numValues != values.length) {
       int texSize = GpgpuUtility.texSize(values.length/4);
       if (valueTextureSize!=texSize) {

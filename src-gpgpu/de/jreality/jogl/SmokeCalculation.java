@@ -36,16 +36,16 @@ public class SmokeCalculation extends AbstractCalculation {
       "vec3 biotSavartEdge(const vec3 edge, const vec3 point, const vec3 v1, const float norm1, const vec3 v2, const float norm2);\n"; 
 
     String bsMethods = 
-    "vec3 evaluateT0(const vec3 point) {\n" + 
-    "  return biotSavart(point, vorts0);\n" + 
+    "vec4 evaluateT0(const vec4 point) {\n" + 
+    "  return vec4(biotSavart(point, vorts0), 1);\n" + 
     "}\n" + 
     "" + 
-    "vec3 evaluateT0_H2(const vec3 point) {\n" + 
-    "  return biotSavart(point, vorts1);\n" + 
+    "vec4 evaluateT0_H2(const vec4 point) {\n" + 
+    "  return vec4(biotSavart(point, vorts1), 1);\n" + 
     "}\n" + 
     "\n" +
-    "vec3 evaluateT0_H(const vec3 point) {\n" + 
-    "  return biotSavart(point, vorts2);\n" + 
+    "vec4 evaluateT0_H(const vec4 point) {\n" + 
+    "  return vec4(biotSavart(point, vorts2), 1);\n" + 
     "}\n" + 
     "vec3 biotSavart(const vec3 pt, const samplerRect vort) {\n" + 
     "  \n" + 
@@ -185,6 +185,5 @@ public class SmokeCalculation extends AbstractCalculation {
   
   protected void calculationFinished() {
     if (numValues < 30) GpgpuUtility.dumpData(getCurrentValues());
-    triggerCalculation();
   }
 }

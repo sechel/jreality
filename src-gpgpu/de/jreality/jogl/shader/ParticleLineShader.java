@@ -143,12 +143,17 @@ public class ParticleLineShader implements LineShader {
 
   public void updateData(JOGLRenderer jr) {
     SmokeCalculation v = (SmokeCalculation) ((GpgpuViewer) jr.theViewer).getCalculation();
+    if (v == null) {
+      System.out.println("calc==null!");
+      return;
+    }
     if (setParticles) {
       v.setValues(particles);
       setParticles = false;
     }
     if (setVortexData) {
       v.setData(vortexData);
+      v.triggerCalculation();
       setVortexData = false;
     }
     if (setRo) {

@@ -94,13 +94,14 @@ public class GlslLoader {
     
     void writeValue(GL gl, UniformParameter param, Object value) {
       String rep = param.getStringRep();
-      Object[] params = new Object[3];
+      Object[] params = new Object[param.isMatrix() ? 4 : 3];
       params[0] = uniLocation(param.getName(), gl);
       if (((Integer) params[0]).intValue() == -1)		{
     	  return;
       }
       params[1] = new Integer(param.isArray() ? param.getArrayLength() : 1);
-      params[2] = value;
+      if (param.isMatrix()) params[2]=Boolean.TRUE;
+      params[param.isMatrix() ? 3 : 2] = value;
       Statement s = new Statement(gl, rep, params);
       //System.out.println("will call: "+s);
       try {

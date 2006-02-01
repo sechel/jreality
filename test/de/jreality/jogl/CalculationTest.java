@@ -50,7 +50,9 @@ public class CalculationTest {
     ev.setRo(0.001);
     ev.triggerCalculation();
     if (false) {
-      ToolSystemViewer viewer = new ToolSystemViewer(new GpgpuViewer(ev));
+      GpgpuViewer gv = new GpgpuViewer();
+      gv.setCalculation(ev);
+      ToolSystemViewer viewer = new ToolSystemViewer(gv);
       try {
         ReaderJRS r = new ReaderJRS();
         r.setInput(new Input(ViewerApp.class.getResource("desktop-scene.jrs")));
