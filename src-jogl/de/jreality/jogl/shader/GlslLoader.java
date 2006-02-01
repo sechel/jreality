@@ -100,7 +100,7 @@ public class GlslLoader {
     	  return;
       }
       params[1] = new Integer(param.isArray() ? param.getArrayLength() : 1);
-      if (param.isMatrix()) params[2]=Boolean.TRUE;
+      if (param.isMatrix()) params[2]=Boolean.FALSE;
       params[param.isMatrix() ? 3 : 2] = value;
       Statement s = new Statement(gl, rep, params);
       //System.out.println("will call: "+s);
