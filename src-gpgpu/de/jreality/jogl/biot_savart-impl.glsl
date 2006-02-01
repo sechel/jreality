@@ -1,3 +1,19 @@
+uniform samplerRect vorts0;
+uniform samplerRect vorts1;
+uniform samplerRect vorts2;
+
+vec3 evaluateT0(const vec3 point) {
+  return biotSavart(point, vorts0);
+}
+
+vec3 evaluateT0_H2(const vec3 point) {
+  return biotSavart(point, vorts1);
+}
+
+vec3 evaluateT0_H(const vec3 point) {
+  return biotSavart(point, vorts2);
+}
+
 vec3 biotSavart(const vec3 pt, const samplerRect vort) {
   
   vec3 ret;

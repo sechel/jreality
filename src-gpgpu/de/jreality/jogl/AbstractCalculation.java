@@ -21,12 +21,28 @@ public abstract class AbstractCalculation implements GLEventListener {
   private boolean doIntegrate;
   
   private boolean tex2D;
-  private int TEX_TARGET;
+  protected int TEX_TARGET;
   private int TEX_INTERNAL_FORMAT;
   private static int TEX_FORMAT = GL.GL_RGBA;
   private boolean atiHack;
   
   private GlslProgram program;
+  
+  private static GlslProgram renderer;
+  
+  static {
+    renderer = new GlslProgram(new Appearance(), "foo", null,
+        "uniform samplerRect values;\n" +
+        "uniform float scale;\n" +
+        "void main(void) {\n" +
+        "  vec2 pos = gl_TexCoord[0].st;\n" +
+        "  vec3 col = textureRect(values, pos).xyz;" +
+        "  vec3 a = abs(col);" +
+        "  float rescale = max(max(a.x, a.y), a.z);" +
+        "  rescale = rescale > 1. ? 1./rescale : 1.;" +
+        "  gl_FragColor = vec4(scale*rescale*col, 1.);\n" + 
+        "}\n");
+  }
   
   private int[] fbos = new int[1]; // 1 framebuffer
   private int[] valueTextures = new int[2]; // ping pong textures
@@ -35,22 +51,19 @@ public abstract class AbstractCalculation implements GLEventListener {
 
   private FloatBuffer valueBuffer;
   private int valueTextureSize;
-  private int numValues;
+  protected int numValues;
 
   private boolean valuesChanged;
   private boolean valueTextureSizeChanged;
   private boolean hasValues;
 
-  private boolean readData=true;
+  private boolean readData=false;
 
-  public AbstractCalculation(boolean tex2D) {
-    super();
-    this.tex2D = tex2D;
-    atiHack=tex2D;
-    TEX_TARGET = tex2D ? GL.GL_TEXTURE_2D : GL.GL_TEXTURE_RECTANGLE_NV;
-    TEX_INTERNAL_FORMAT = tex2D ? GL.GL_RGBA32F_ARB : GL.GL_FLOAT_RGBA32_NV;
-  }
-  
+  private boolean displayTexture;
+  private int[] canvasViewport = new int[2];
+
+  private boolean measureCPS=true;
+
   public void init(GLDrawable drawable) {
     if (!drawable.getGL().isExtensionAvailable("GL_ARB_fragment_shader")
         || !drawable.getGL().isExtensionAvailable("GL_ARB_vertex_shader")
@@ -59,20 +72,24 @@ public abstract class AbstractCalculation implements GLEventListener {
       JOptionPane.showMessageDialog(null, "<html><center>Driver does not support OpenGL Shading Language!<br>Cannot execute program.</center></html>");
       System.exit(-1);
     }
+   String vendor = drawable.getGL().glGetString(GL.GL_VENDOR);
+   tex2D = !vendor.startsWith("NVIDIA");
+   atiHack=tex2D;
+   TEX_TARGET = tex2D ? GL.GL_TEXTURE_2D : GL.GL_TEXTURE_RECTANGLE_NV;
+   TEX_INTERNAL_FORMAT = tex2D ? GL.GL_RGBA32F_ARB : GL.GL_FLOAT_RGBA32_NV;   
   }
   
   public void display(GLDrawable drawable) {
-    //GL gl = new DebugGL(drawable.getGL());
-    GL gl = drawable.getGL();
+    GL gl = new DebugGL(drawable.getGL());
+    //GL gl = drawable.getGL();
     GLU glu = drawable.getGLU();
-    gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
     if (doIntegrate && hasValues) {
       
       gl.glEnable(TEX_TARGET);
       
       initPrograms(gl);
       initFBO(gl);
-      initViewport(gl, glu);
+      initViewport(gl, glu, true);
       initTextures(gl);
 
       gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
@@ -86,6 +103,8 @@ public abstract class AbstractCalculation implements GLEventListener {
       
       // set all values
       prepareUniformValues(gl, program);
+      
+      
       
       GlslLoader.render(program, drawable);
       
@@ -108,37 +127,76 @@ public abstract class AbstractCalculation implements GLEventListener {
       readTex = writeTex;
       writeTex = tmp;
   
+      GlslLoader.postRender(program, drawable); // any postRender just resets the shader pipeline
+
       // switch back to old buffer
       gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, 0);
 
-      GlslLoader.postRender(program, drawable); // any postRender just resets the shader pipeline
       doIntegrate=false;
-      gl.glDisable(TEX_TARGET);
+      measure();
       calculationFinished();
+      if (displayTexture) {
+        initViewport(gl, glu, false);
+        gl.glActiveTexture(GL.GL_TEXTURE0);
+        gl.glBindTexture(TEX_TARGET, valueTextures[writeTex]);
+        renderer.setUniform("values", 0);
+        renderer.setUniform("scale", findScale());
+        GlslLoader.render(renderer, drawable);
+        renderQuad(gl);
+        GlslLoader.postRender(renderer, drawable);
+      }
+      gl.glDisable(TEX_TARGET);
     }
-    		
+  }
+
+  private float findScale() {
+    if (!readData) return 1;
+    float max = 0;
+    for (int i = 0; i < numValues; i++) {
+      float val = Math.abs(valueBuffer.get(i));
+      if (val > max) max = val;
+    }
+    float ret = 1/max;
+    if (ret == 0 || Float.isNaN(ret)) return 1;
+    return ret;
+  }
+
+  int cnt;
+  long st;
+  private void measure() {
+    if (measureCPS) {
+      if (st == 0) st = System.currentTimeMillis();
+      cnt++;
+      long ct = System.currentTimeMillis();
+      if (ct - st > 5000) {
+        System.out.println("CPS="+(1000.*cnt)/(ct-st));
+        cnt=0;
+        st=ct;
+      }
+    }
   }
 
   protected void calculationFinished() {
   }
-
+  
   protected void prepareUniformValues(GL gl, GlslProgram prog) {
     gl.glActiveTexture(GL.GL_TEXTURE0);
     gl.glBindTexture(TEX_TARGET, valueTextures[readTex]);
     prog.setUniform("values", 0);
   }
 
-  protected GlslSource updateSource() {
+  protected String updateSource() {
     return null;
   }
 
-  protected abstract GlslSource initSource();
+  protected abstract String initSource();
   
   private void renderQuad(GL gl) {
+    gl.glColor3f(1,0,0);
     gl.glPolygonMode(GL.GL_FRONT, GL.GL_FILL);
     gl.glBegin(GL.GL_QUADS);
       gl.glTexCoord2d(0.0, 0.0);
-      gl.glVertex2d(0.0, 0.0);
+      gl.glVertex2d(0.0,0.0);
       gl.glTexCoord2d(tex2D ? 1 : valueTextureSize, 0.0);
       gl.glVertex2d(valueTextureSize, 0.0);
       gl.glTexCoord2d(tex2D ? 1 : valueTextureSize, tex2D ? 1 : valueTextureSize);
@@ -149,10 +207,11 @@ public abstract class AbstractCalculation implements GLEventListener {
   }
 
   private void initPrograms(GL gl) {
-    GlslSource src = program == null ? initSource() : updateSource();
+    String src = program == null ? initSource() : updateSource();
     if (src == null) return;
     if (program != null) GlslLoader.dispose(gl, program);
-    program = new GlslProgram(new Appearance(), "foo", src);
+    if (isTex2D()) src = src.replaceAll("Rect", "2D");
+    program = new GlslProgram(new Appearance(), "foo", null, src);
   }
 
   private void initTextures(GL gl) {
@@ -180,9 +239,13 @@ public abstract class AbstractCalculation implements GLEventListener {
 //      }
       valuesChanged=false;
     }
+    initDataTextures(gl);
   }
 
-  private void setupTexture(GL gl, int i, int size) {
+  protected void initDataTextures(GL gl) {
+  }
+
+  protected void setupTexture(GL gl, int i, int size) {
     gl.glBindTexture(TEX_TARGET, i);
     gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
     gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
@@ -210,7 +273,7 @@ public abstract class AbstractCalculation implements GLEventListener {
   /**
    * Transfers data to texture.
    */
-  void transferToTexture(GL gl, FloatBuffer buffer, int texID, int size) {
+  protected void transferToTexture(GL gl, FloatBuffer buffer, int texID, int size) {
     // version (a): HW-accelerated on NVIDIA
     gl.glBindTexture(TEX_TARGET, texID);
     gl.glTexSubImage2D(TEX_TARGET, 0, 0, 0, size, size, TEX_FORMAT,
@@ -238,13 +301,14 @@ public abstract class AbstractCalculation implements GLEventListener {
 //    }
 //  }
   
-  private void initViewport(GL gl, GLU glu) {
+  private void initViewport(GL gl, GLU glu, boolean gpgpu) {
     gl.glMatrixMode(GL.GL_PROJECTION);
     gl.glLoadIdentity();
     glu.gluOrtho2D(0, valueTextureSize, 0, valueTextureSize);
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glLoadIdentity();
-    gl.glViewport(0, 0, valueTextureSize, valueTextureSize);
+    if (gpgpu) gl.glViewport(0, 0, valueTextureSize, valueTextureSize);
+    else  gl.glViewport(0, 0, canvasViewport[0], canvasViewport[1]);
   }
   
   public FloatBuffer getCurrentValues() {
@@ -300,9 +364,27 @@ public abstract class AbstractCalculation implements GLEventListener {
   }
   
   public void reshape(GLDrawable arg0, int arg1, int arg2, int arg3, int arg4) {
+    canvasViewport[0]=arg3;
+    canvasViewport[1]=arg4;
   }
 
   public void displayChanged(GLDrawable arg0, boolean arg1, boolean arg2) {
+  }
+
+  public boolean isDisplayTexture() {
+    return displayTexture;
+  }
+
+  public void setDisplayTexture(boolean displayTexture) {
+    this.displayTexture = displayTexture;
+  }
+
+  public boolean isMeasureCPS() {
+    return measureCPS;
+  }
+
+  public void setMeasureCPS(boolean measureCPS) {
+    this.measureCPS = measureCPS;
   }
 
 }

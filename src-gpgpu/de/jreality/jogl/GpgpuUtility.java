@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.nio.FloatBuffer;
 
+import javax.swing.JFrame;
+
 import net.java.games.jogl.Animator;
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
@@ -66,9 +68,8 @@ class GpgpuUtility {
   }
 
   public static void run(GLEventListener listener) {
-    Frame f=new Frame("gpgpu runner");
-    f.setSize(1, 1);
-    
+    JFrame f=new JFrame("gpgpu runner");
+    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     // get a GLCanvas
     GLCapabilities capabilities = new GLCapabilities();
 
@@ -76,13 +77,14 @@ class GpgpuUtility {
           GLDrawableFactory.getFactory().createGLCanvas(capabilities);
     
     Animator animator = new Animator(canvas);
-    
+    canvas.setSize(256, 256);
       // add a GLEventListener, which will get called when the
       // canvas is resized or needs a repaint
       canvas.addGLEventListener(listener);
       // now add the canvas to the Frame.  Note we use BorderLayout.CENTER
       // to make the canvas stretch to fill the container (ie, the frame)
-      f.add (canvas, BorderLayout.CENTER);
+      f.getContentPane().add(canvas, BorderLayout.CENTER);
+      f.pack();
       f.show();
       animator.start();
   }

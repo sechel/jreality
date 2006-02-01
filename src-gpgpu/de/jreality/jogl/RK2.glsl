@@ -2,13 +2,16 @@
 
 uniform float h;
 
-uniform samplerRect K2;
-uniform samplerRect particles;
+uniform samplerRect values;
+
+vec3 evaluateT0(const vec3 point);
+vec3 evaluateT0_H2(const vec3 point);
 
 void main(void) {
   vec2 pos = gl_TexCoord[0].st;
-  vec3 pt = textureRect(particles, pos).xyz;
-  vec3 k_2 = textureRect(K2, pos).xyz;
-  gl_FragColor = vec4(pt + h*k_2, 1);
+  vec3 pt = textureRect(values, pos).xyz;
+  vec3 k1 = h * evaluateT0(pt);
+  vec3 k2 = h * evaluateT0_H2(pt+k1/2.);
+  gl_FragColor = vec4(pt + k_2, 1);
 }
 
