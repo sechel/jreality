@@ -9,7 +9,9 @@ import java.util.WeakHashMap;
 import net.java.games.jogl.GL;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.GpgpuViewer;
+import de.jreality.jogl.OldGpgpuViewer;
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.SmokeCalculation;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
@@ -45,7 +47,6 @@ public class ParticleLineShader implements LineShader {
 
   protected static boolean renderCheap;
   protected static double pointSize;
-  private static boolean forthOrder;
   
   boolean debug;
   private boolean newFrame;
@@ -100,7 +101,6 @@ public class ParticleLineShader implements LineShader {
       folder = (String) eap.getAttribute(ShaderUtility.nameSpace(name, "folder"), folder);
       fileName = (String) eap.getAttribute(ShaderUtility.nameSpace(name, "fileName"), fileName);
     }
-    forthOrder = eap.getAttribute(ShaderUtility.nameSpace(name, "forthOrder"), forthOrder);
     renderCheap = eap.getAttribute(
         ShaderUtility.nameSpace(name, "renderCheap"), false);
     sprites = eap.getAttribute(
@@ -142,21 +142,20 @@ public class ParticleLineShader implements LineShader {
   }
 
   public void updateData(JOGLRenderer jr) {
-    GpgpuViewer v = (GpgpuViewer) jr.theViewer;
-    if (v.isForthOrder() != forthOrder) v.setForthOrder(forthOrder);
+    SmokeCalculation v = (SmokeCalculation) ((GpgpuViewer) jr.theViewer).getCalculation();
     if (setParticles) {
-      v.setParticles(particles);
+      v.setValues(particles);
       setParticles = false;
     }
     if (setVortexData) {
-      v.setVortexData(vortexData);
+      v.setData(vortexData);
       setVortexData = false;
     }
     if (setRo) {
       v.setRo(ro);
       setRo = false;
     }
-    data = v.getCurrentParticlePositions();
+    data = v.getCurrentValues();
   }
 
   static WeakHashMap displayLists=new WeakHashMap();

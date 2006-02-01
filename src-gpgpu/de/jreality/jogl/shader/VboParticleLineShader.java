@@ -1,7 +1,7 @@
 package de.jreality.jogl.shader;
 
 import net.java.games.jogl.GL;
-import de.jreality.jogl.GpgpuViewer;
+import de.jreality.jogl.OldGpgpuViewer;
 import de.jreality.jogl.JOGLRenderer;
 
 /**
@@ -12,7 +12,7 @@ public class VboParticleLineShader extends ParticleLineShader {
   
   public void updateData(JOGLRenderer jr) {
     super.updateData(jr);
-    GpgpuViewer gpgpuViewer = (GpgpuViewer)jr.theViewer;
+    OldGpgpuViewer gpgpuViewer = (OldGpgpuViewer)jr.theViewer;
     if (gpgpuViewer.isReadData()) gpgpuViewer.setReadData(false);
   }
   
@@ -34,7 +34,7 @@ public class VboParticleLineShader extends ParticleLineShader {
          gl.glEnable(GL.GL_TEXTURE_2D);
          Texture2DLoaderJOGL.render(jr.getCanvas(), tex);
        }
-      ((GpgpuViewer)jr.theViewer).renderPoints(jr);
+      ((OldGpgpuViewer)jr.theViewer).renderPoints(jr);
       gl.glPopAttrib();
     }
   }
