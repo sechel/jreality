@@ -9,6 +9,7 @@ import net.java.games.jogl.GLDrawable;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CubeMap;
@@ -62,8 +63,10 @@ class JOGLSkyBox {
     gl.glPushMatrix();
 	    
 	    double[] w2c = glr.context.getWorldToCamera();
+	    //System.err.println("w2c: \n"+Rn.matrixToString(w2c));
       
 	    gl.glLoadTransposeMatrixd(P3.extractOrientationMatrix(null, w2c, Pn.originP3, Pn.EUCLIDEAN));
+	    gl.glMultTransposeMatrixd(P3.makeStretchMatrix(null, 500.0));
 		for (int i = 0; i<6; ++i)	{
 			tex.setImage(imgs[i]);
 		    Texture2DLoaderJOGL.render(gd, tex);
