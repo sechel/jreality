@@ -44,6 +44,7 @@ public class DefaultPointShader  implements PointShader {
 	PolygonShader polygonShader = null;
 	static Appearance a=new Appearance();
 	static Texture2D tex=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a, true);
+  static Texture2D currentTex;
 	double specularExponent = 60.0;
 	
 	/**
@@ -66,12 +67,17 @@ public class DefaultPointShader  implements PointShader {
 		polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
 
 		if (!sphereDraw)	{
-			Rn.normalize(lightDirection, lightDirection);
-			specularColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COLOR), CommonAttributes.SPECULAR_COLOR_DEFAULT);
-			specularColorAsFloat = specularColor.getRGBComponents(null);
-			specularExponent = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_EXPONENT), CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
-			setupTexture();
-			}
+      if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "pointSprite"), eap))
+        currentTex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "pointSprite"), eap);
+      else {
+  			Rn.normalize(lightDirection, lightDirection);
+  			specularColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COLOR), CommonAttributes.SPECULAR_COLOR_DEFAULT);
+  			specularColorAsFloat = specularColor.getRGBComponents(null);
+  			specularExponent = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_EXPONENT), CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
+  			setupTexture();
+        currentTex=tex;
+      }
+	  }
 	}
 
 
@@ -190,7 +196,7 @@ public class DefaultPointShader  implements PointShader {
 			gl.glEnable(GL.GL_POINT_SPRITE_ARB);
 			gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
-			Texture2DLoaderJOGL.render(theCanvas, tex);
+			Texture2DLoaderJOGL.render(theCanvas, currentTex);
 			gl.glEnable(GL.GL_TEXTURE_2D);
 		} else
 		polygonShader.render(jr);
