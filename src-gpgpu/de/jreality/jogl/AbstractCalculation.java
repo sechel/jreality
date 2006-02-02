@@ -18,6 +18,14 @@ import de.jreality.shader.GlslProgram;
 
 public abstract class AbstractCalculation implements GLEventListener {
 
+  private static final String RENDER_PROGRAM = "uniform samplerRect values;\n" +
+  "uniform float scale;\n" +
+  "void main(void) {\n" +
+  "  vec2 pos = gl_TexCoord[0].st;\n" +
+  "  vec4 col = textureRect(values, pos);" +
+  "  gl_FragColor = abs(col/col.w); //vec4(scale*rescale*a, 1.);\n" + 
+  "}\n";
+
   private boolean doIntegrate;
   
   private boolean tex2D;
@@ -28,18 +36,7 @@ public abstract class AbstractCalculation implements GLEventListener {
   
   private GlslProgram program;
   
-  private static GlslProgram renderer;
-  
-  static {
-    renderer = new GlslProgram(new Appearance(), "foo", null,
-        "uniform samplerRect values;\n" +
-        "uniform float scale;\n" +
-        "void main(void) {\n" +
-        "  vec2 pos = gl_TexCoord[0].st;\n" +
-        "  vec4 col = textureRect(values, pos);" +
-        "  gl_FragColor = abs(col/col.w); //vec4(scale*rescale*a, 1.);\n" + 
-        "}\n");
-  }
+  private GlslProgram renderer;
   
   private int[] fbos = new int[1]; // 1 framebuffer
   private int[] vbo = new int[1]; // 1 vertexbuffer
@@ -54,6 +51,8 @@ public abstract class AbstractCalculation implements GLEventListener {
   private boolean valuesChanged;
   private boolean valueTextureSizeChanged;
   private boolean hasValues;
+
+  private boolean hasValidVBO;
 
   private boolean readData=true;
 
@@ -75,6 +74,7 @@ public abstract class AbstractCalculation implements GLEventListener {
    atiHack=tex2D;
    TEX_TARGET = tex2D ? GL.GL_TEXTURE_2D : GL.GL_TEXTURE_RECTANGLE_NV;
    TEX_INTERNAL_FORMAT = tex2D ? GL.GL_RGBA32F_ARB : GL.GL_FLOAT_RGBA32_NV;
+   renderer = new GlslProgram(new Appearance(), "foo", null, isTex2D() ? RENDER_PROGRAM.replaceAll("Rect", "2D") : RENDER_PROGRAM);
   }
   
   public void display(GLDrawable drawable) {
@@ -148,22 +148,9 @@ public abstract class AbstractCalculation implements GLEventListener {
     }
   }
 
-  private float findScale() {
-    if (!readData) return 1;
-    float max = 0;
-    for (int i = 0; i < numValues; i++) {
-      float val = Math.abs(valueBuffer.get(i));
-      if (val > max) max = val;
-    }
-    float ret = 1/max;
-    if (ret == 0 || Float.isNaN(ret)) return 1;
-    return ret;
-  }
-
   int cnt;
   long st;
 
-  private boolean hasValidVBO;
   private void measure() {
     if (measureCPS) {
       if (st == 0) st = System.currentTimeMillis();
@@ -273,13 +260,14 @@ public abstract class AbstractCalculation implements GLEventListener {
   void transferFromTexture(GL gl, FloatBuffer data) {
     // version (a): texture is attached
     // recommended on both NVIDIA and ATI
-    gl.glReadBuffer(attachments[writeTex]);
-    gl.glReadPixels(0, 0, valueTextureSize, valueTextureSize, TEX_FORMAT, GL.GL_FLOAT, data);
-
-    // version b: texture is not neccessarily attached
-//    gl.glBindTexture(TEX_TARGET, particleTexs[writeTex]);
-//    gl.glGetTexImage(TEX_TARGET, 0, TEX_FORMAT, GL.GL_FLOAT, data.clear());
-
+    if (!isTex2D()) {
+      gl.glReadBuffer(attachments[writeTex]);
+      gl.glReadPixels(0, 0, valueTextureSize, valueTextureSize, TEX_FORMAT, GL.GL_FLOAT, data);
+    } else {
+      // version b: texture is not neccessarily attached
+      gl.glBindTexture(TEX_TARGET, valueTextures[writeTex]);
+      gl.glGetTexImage(TEX_TARGET, 0, TEX_FORMAT, GL.GL_FLOAT, data.clear());
+    }
   }
 
   /**

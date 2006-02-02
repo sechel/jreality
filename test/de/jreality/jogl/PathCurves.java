@@ -11,39 +11,39 @@ import de.smokering.util.PointSets;
 public class PathCurves extends AbstractCalculation {
   
   protected String initSource() {
-    String uniforms =
-      "uniform mat4 matrix;\n";
-    String methods =
-      "vec4 eval(const vec4 pt) {\n" +
-      "  vec4 ret = matrix*pt;\n" +
-      "  //ret.w = 0;\n" +
-      "  return ret;\n" +
-      "}\n" +
-      "vec4 evaluateT0(const vec4 pt) {\n"+
-      "  return eval(pt);\n" +
-      "}\n" +
-      "vec4 evaluateT0_H2(const vec4 pt) {\n"+
-      "  return eval(pt);\n" +
-      "}\n" +
-      "vec4 evaluateT0_H(const vec4 pt) {\n"+
-      "  return eval(pt);\n" +
-      "}\n";
-    return RungeKuttaGlslCode.rkUniforms() + uniforms
-      + RungeKuttaGlslCode.rk4MethodDeclarations() + "vec4 eval(const vec4 pt);\n"
-      + RungeKuttaGlslCode.rk4Main() + methods;
-    
-//    return
-//    "uniform samplerRect values;\n" +
-//    "uniform float h;\n" +
-//    "uniform bool r3;\n" +
-//    "uniform mat4 matrix;\n" +
-//      "void main(void) {\n" +
-//      "  vec2 pos = gl_TexCoord[0].st;\n" +
-//      "  vec4 pt = textureRect(values, pos);\n" +
-//      "  vec4 res = pt + h*(matrix*pt);\n" +
-//      "  if (r3) res.w = 1.;\n" +
-//      "  gl_FragColor = res;\n" +
+//    String uniforms =
+//      "uniform mat4 matrix;\n";
+//    String methods =
+//      "vec4 eval(const vec4 pt) {\n" +
+//      "  vec4 ret = matrix*pt;\n" +
+//      "  //ret.w = 0.;\n" +
+//      "  return ret;\n" +
+//      "}\n" +
+//      "vec4 evaluateT0(const vec4 pt) {\n"+
+//      "  return eval(pt);\n" +
+//      "}\n" +
+//      "vec4 evaluateT0_H2(const vec4 pt) {\n"+
+//      "  return eval(pt);\n" +
+//      "}\n" +
+//      "vec4 evaluateT0_H(const vec4 pt) {\n"+
+//      "  return eval(pt);\n" +
 //      "}\n";
+//    return RungeKuttaGlslCode.rkUniforms() + uniforms
+//      + RungeKuttaGlslCode.rk4MethodDeclarations() + "vec4 eval(const vec4 pt);\n"
+//      + RungeKuttaGlslCode.rk4Main() + methods;
+    
+    return
+    "uniform samplerRect values;\n" +
+    "uniform float h;\n" +
+    "uniform bool r3;\n" +
+    "uniform mat4 matrix;\n" +
+      "void main(void) {\n" +
+      "  vec2 pos = gl_TexCoord[0].st;\n" +
+      "  vec4 pt = textureRect(values, pos);\n" +
+      "  vec4 res = pt + h*(matrix*pt);\n" +
+      "  if (r3) res.w = 1.;\n" +
+      "  gl_FragColor = res;\n" +
+      "}\n";
   }
 
   protected void prepareUniformValues(GL gl, GlslProgram prog) {
@@ -70,7 +70,7 @@ public class PathCurves extends AbstractCalculation {
   public static void main(String[] args) {
     PathCurves ev = new PathCurves();
     ev.setDisplayTexture(true);
-    if (false) {
+    if (true) {
       int sl = 128;
       float[] f = new float[sl*sl*4];
       for (int i = 0; i < sl; i++) {
