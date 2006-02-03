@@ -173,8 +173,10 @@ public class SceneTreeModel extends AbstractTreeModel {
   }
   
   private class SceneTreeNodeWithToolListener extends SceneTreeNode implements ToolListener {
+
     SceneGraphComponent cmp;
     List tools=new LinkedList();
+    
     protected SceneTreeNodeWithToolListener(SceneGraphNode node) {
       super(node);
       if (isComponent) {
@@ -183,56 +185,69 @@ public class SceneTreeModel extends AbstractTreeModel {
         tools.addAll(cmp.getTools());
       }
     }
+    
     public int addChild(final SceneTreeNode child) {
-      EventQueue.invokeLater(new Runnable(){
-        public void run() {
-          // TODO Auto-generated method stub
-          
-        }
-      });
-      int ret = super.addChild(child);
-      fireNodesAdded(this, new Object[]{child});
-      return ret;
-    }
-    protected int removeChild(final SceneTreeNode prevChild) {
       final int[] ret = new int[1];
-      try {
-        EventQueue.invokeAndWait(new Runnable(){
-          public void run() {
-            ret[0] = SceneTreeNodeWithToolListener.super.removeChild(prevChild);
-            fireNodesRemoved(this, new int[]{ret[0]}, new Object[]{prevChild});
-          }
-        });
+      Runnable runner = new Runnable(){
+        public void run() {
+          ret[0] = SceneTreeNodeWithToolListener.super.addChild(child);
+          fireNodesAdded(SceneTreeNodeWithToolListener.this, new Object[]{child});
+        }
+      };
+      if (EventQueue.isDispatchThread()) runner.run();
+      else try {
+        EventQueue.invokeAndWait(runner);
       } catch (Exception e) {
         throw new Error(";-(");
       }
       return ret[0];
     }
+
+    protected int removeChild(final SceneTreeNode prevChild) {
+      final int[] ret = new int[1];
+      Runnable runner = new Runnable(){
+        public void run() {
+          ret[0] = SceneTreeNodeWithToolListener.super.removeChild(prevChild);
+          fireNodesRemoved(SceneTreeNodeWithToolListener.this, new int[]{ret[0]}, new Object[]{prevChild});
+        }
+      };
+      if (EventQueue.isDispatchThread()) runner.run();
+      else try {
+        EventQueue.invokeAndWait(runner);
+      } catch (Exception e) {
+        throw new Error(";-(");
+      }
+      return ret[0];
+    }
+
     public void toolAdded(final ToolEvent ev) {
       EventQueue.invokeLater(new Runnable(){
         public void run() {
           int idx = getChildren().size()+tools.size();
           tools.add(ev.getTool());
-          fireNodesAdded(this, new int[]{idx}, new Object[]{TreeTool.getInstance(SceneTreeNodeWithToolListener.this, ev.getTool())});
+          fireNodesAdded(SceneTreeNodeWithToolListener.this, new int[]{idx}, new Object[]{TreeTool.getInstance(SceneTreeNodeWithToolListener.this, ev.getTool())});
         }
       });
     }
+    
     public void toolRemoved(final ToolEvent ev) {
       EventQueue.invokeLater(new Runnable(){
         public void run() {
           int idx = getChildren().size();
           int tind = tools.indexOf(ev.getTool());
           tools.remove(tind);
-          fireNodesRemoved(this, new int[]{idx+tind}, new Object[]{TreeTool.getInstance(SceneTreeNodeWithToolListener.this, ev.getTool())});
+          fireNodesRemoved(SceneTreeNodeWithToolListener.this, new int[]{idx+tind}, new Object[]{TreeTool.getInstance(SceneTreeNodeWithToolListener.this, ev.getTool())});
         }
       });
     }
+    
     protected void dispose(ArrayList disposedEntities) {
       super.dispose(disposedEntities);
       if (isComponent) {
         cmp.removeToolListener(this);
       }
     }
+    
   }
   
 }
