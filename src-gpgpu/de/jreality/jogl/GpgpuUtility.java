@@ -13,7 +13,7 @@ import net.java.games.jogl.GLCapabilities;
 import net.java.games.jogl.GLDrawableFactory;
 import net.java.games.jogl.GLEventListener;
 
-class GpgpuUtility {
+public class GpgpuUtility {
   private GpgpuUtility() {}
   
   static int texSize(int i) {

@@ -1,36 +1,28 @@
-package de.jreality.jogl;
-
-import java.nio.FloatBuffer;
+package de.jreality.examples;
 
 import net.java.games.jogl.GL;
+import de.jreality.jogl.AbstractCalculation;
+import de.jreality.jogl.GpgpuUtility;
+import de.jreality.jogl.RungeKuttaFactory;
 import de.jreality.math.Matrix;
-import de.jreality.math.MatrixBuilder;
 import de.jreality.shader.GlslProgram;
 
 public class PathCurves extends AbstractCalculation {
   
   protected String initSource() {
-    String uniforms =
-      "uniform mat4 matrix;\n";
-    String methods =
-      "vec4 eval(const vec4 pt) {\n" +
-      "  vec4 ret = matrix*pt;\n" +
-      "  //ret.w = 0.;\n" +
-      "  return ret;\n" +
-      "}\n" +
-      "vec4 evaluateT0(const vec4 pt) {\n"+
-      "  return eval(pt);\n" +
-      "}\n" +
-      "vec4 evaluateT0_H2(const vec4 pt) {\n"+
-      "  return eval(pt);\n" +
-      "}\n" +
-      "vec4 evaluateT0_H(const vec4 pt) {\n"+
-      "  return eval(pt);\n" +
-      "}\n";
-    return RungeKuttaGlslCode.rkUniforms() + uniforms
-      + RungeKuttaGlslCode.rk4MethodDeclarations() + "vec4 eval(const vec4 pt);\n"
-      + RungeKuttaGlslCode.rk4Main() + methods;
+    RungeKuttaFactory rk = RungeKuttaFactory.rk4();
+
+      rk.addUniform("matrix", "mat4");
+      rk.srcAll(
+        "  vec4 ret = matrix*pt;\n" +
+        "  //ret.w = 0.;\n" +
+        "  return ret;\n"
+      );
+
+      String ret = rk.toString();
+      System.out.println(ret);
     
+      return ret;
     // this is the euler version
     
 //    return
@@ -47,8 +39,8 @@ public class PathCurves extends AbstractCalculation {
 //      "}\n";
   }
 
-  protected void prepareUniformValues(GL gl, GlslProgram prog) {
-    super.prepareUniformValues(gl, prog);
+  protected void setUniformValues(GL gl, GlslProgram prog) {
+    super.setUniformValues(gl, prog);
     // some matrix in gl(3)
     double a=3, b=2, c=-.1;
     Matrix m = new Matrix(0,-a,-b,0, a,0,-c,0, b,c,0,0, 0,0,0,0);

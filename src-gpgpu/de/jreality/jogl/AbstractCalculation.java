@@ -89,7 +89,10 @@ public abstract class AbstractCalculation implements GLEventListener {
       initFBO(gl);
       if (!readData) initVBO(gl);
       initViewport(gl, glu, true);
+      // ping pong textures
       initTextures(gl);
+      // user data textures
+      initDataTextures(gl);
 
       gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
           attachments[readTex], TEX_TARGET, valueTextures[readTex], 0);      
@@ -101,17 +104,19 @@ public abstract class AbstractCalculation implements GLEventListener {
       gl.glDrawBuffer(attachments[writeTex]);
       
       // set all values
-      prepareUniformValues(gl, program);
+      // ping pong - current values
+      gl.glActiveTexture(GL.GL_TEXTURE0);
+      gl.glBindTexture(TEX_TARGET, valueTextures[readTex]);
+      program.setUniform("values", 0);
       
-      
+      // user uniforms
+      setUniformValues(gl, program);
       
       GlslLoader.render(program, drawable);
       
       renderQuad(gl);
       
       gl.glFinish();
-
-      GpgpuUtility.checkBuf(gl);
 
       if (readData) {
         valueBuffer.clear();
@@ -164,20 +169,43 @@ public abstract class AbstractCalculation implements GLEventListener {
     }
   }
 
-  protected void calculationFinished() {
-  }
-  
-  protected void prepareUniformValues(GL gl, GlslProgram prog) {
-    gl.glActiveTexture(GL.GL_TEXTURE0);
-    gl.glBindTexture(TEX_TARGET, valueTextures[readTex]);
-    prog.setUniform("values", 0);
+  /**
+   * use this method to create and update data that
+   * is used as a samplerRect in the Glsl program
+   * @param gl
+   */
+  protected void initDataTextures(GL gl) {
   }
 
+  /**
+   * used to update/change the glsl sourcecode
+   * @return null if code didn't change, the 
+   * whole new frag program otherwise
+   */
   protected String updateSource() {
     return null;
   }
 
+  /**
+   * @return the complete fragment shader program
+   */
   protected abstract String initSource();
+
+  /**
+   * use this method to set/update uniform values of the program -
+   * also activate and bind data textures here
+   * @param gl
+   * @param prog the Glsl program (from init/updateSource)
+   */
+  protected void setUniformValues(GL gl, GlslProgram prog) {
+  }
+  
+  /**
+   * just a callback when the calculation is done, can be used
+   * to retrigger the calculation again,...
+   */
+  protected void calculationFinished() {
+  }
   
   private void renderQuad(GL gl) {
     gl.glColor3f(1,0,0);
@@ -238,14 +266,16 @@ public abstract class AbstractCalculation implements GLEventListener {
 //      }
       valuesChanged=false;
     }
-    initDataTextures(gl);
   }
 
-  protected void initDataTextures(GL gl) {
-  }
-
-  protected void setupTexture(GL gl, int i, int size) {
-    gl.glBindTexture(TEX_TARGET, i);
+  /**
+   * set up a texture with the given size
+   * @param gl
+   * @param texID the texID
+   * @param size the size
+   */
+  protected void setupTexture(GL gl, int texID, int size) {
+    gl.glBindTexture(TEX_TARGET, texID);
     gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
     gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
     gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP);
@@ -257,7 +287,7 @@ public abstract class AbstractCalculation implements GLEventListener {
   /**
    * Transfers data from currently texture, and stores it in given array.
    */
-  void transferFromTexture(GL gl, FloatBuffer data) {
+  private void transferFromTexture(GL gl, FloatBuffer data) {
     // version (a): texture is attached
     // recommended on both NVIDIA and ATI
     if (!isTex2D()) {
@@ -271,7 +301,7 @@ public abstract class AbstractCalculation implements GLEventListener {
   }
 
   /**
-   * Transfers data to texture.
+   * Transfers data to the texture with texid
    */
   protected void transferToTexture(GL gl, FloatBuffer buffer, int texID, int size) {
     // version (a): HW-accelerated on NVIDIA
@@ -319,12 +349,21 @@ public abstract class AbstractCalculation implements GLEventListener {
     else  gl.glViewport(0, 0, canvasViewport[0], canvasViewport[1]);
   }
   
+  /**
+   * get the current result - returns null if !readData()
+   * @return a FloatBuffer that contains the latest calculated values
+   */
   public FloatBuffer getCurrentValues() {
     if (!readData) return null;
     valueBuffer.position(0).limit(numValues);
     return valueBuffer.asReadOnlyBuffer();
   }
 
+
+  /**
+   * set the 4d values to start the calculation with
+   * @param values
+   */
   public void setValues(float[] values) {
     System.out.println("AbstractCalculation.setParticles()");
     if (numValues != values.length) {
@@ -351,23 +390,33 @@ public abstract class AbstractCalculation implements GLEventListener {
     hasValues=true;
   }
       
+  /**
+   * read the data from the texture into a FloatBuffer?
+   */
   public boolean isReadData() {
-  	return readData;
+  	  return readData;
   }
   
+  /**
+   * read the data from the texture into a FloatBuffer?
+   */
   public void setReadData(boolean readData) {
-  	this.readData = readData;
+  	  this.readData = readData;
   }
   
   public int getValueTextureSize() {
     return valueTextureSize;
   }
   
+  /**
+   * call this method to trigger a calculation the next time display is called
+   *
+   */
   public void triggerCalculation() {
     doIntegrate=true;
   }
   
-  protected boolean isTex2D() {
+  private boolean isTex2D() {
     return tex2D;
   }
   
@@ -379,22 +428,39 @@ public abstract class AbstractCalculation implements GLEventListener {
   public void displayChanged(GLDrawable arg0, boolean arg1, boolean arg2) {
   }
 
+  /**
+   * display the current value texture in the gl canvas?
+   */
   public boolean isDisplayTexture() {
     return displayTexture;
   }
 
+  /**
+   * display the current value texture in the gl canvas?
+   * @param displayTexture
+   */
   public void setDisplayTexture(boolean displayTexture) {
     this.displayTexture = displayTexture;
   }
 
+  /**
+   * print cps to system.out?
+   */
   public boolean isMeasureCPS() {
     return measureCPS;
   }
 
+  /**
+   * print cps to system.out?
+   * @param measureCPS
+   */
   public void setMeasureCPS(boolean measureCPS) {
     this.measureCPS = measureCPS;
   }
 
+  /**
+   * doesn't (yet) work
+   */
   public void renderPoints(JOGLRenderer jr) {
     if (!hasValidVBO || readData) return;
     GL gl = jr.globalGL;
