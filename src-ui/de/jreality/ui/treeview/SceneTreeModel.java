@@ -188,15 +188,16 @@ public class SceneTreeModel extends AbstractTreeModel {
     
     public int addChild(final SceneTreeNode child) {
       final int[] ret = new int[1];
+      ret[0] = SceneTreeNodeWithToolListener.super.addChild(child);
       Runnable runner = new Runnable(){
         public void run() {
-          ret[0] = SceneTreeNodeWithToolListener.super.addChild(child);
           fireNodesAdded(SceneTreeNodeWithToolListener.this, new Object[]{child});
         }
       };
       if (EventQueue.isDispatchThread()) runner.run();
       else try {
-        EventQueue.invokeAndWait(runner);
+//      EventQueue.invokeAndWait(runner);
+        EventQueue.invokeLater(runner);
       } catch (Exception e) {
         throw new Error(";-(");
       }
@@ -205,15 +206,16 @@ public class SceneTreeModel extends AbstractTreeModel {
 
     protected int removeChild(final SceneTreeNode prevChild) {
       final int[] ret = new int[1];
+      ret[0] = SceneTreeNodeWithToolListener.super.removeChild(prevChild);
       Runnable runner = new Runnable(){
         public void run() {
-          ret[0] = SceneTreeNodeWithToolListener.super.removeChild(prevChild);
           fireNodesRemoved(SceneTreeNodeWithToolListener.this, new int[]{ret[0]}, new Object[]{prevChild});
         }
       };
       if (EventQueue.isDispatchThread()) runner.run();
       else try {
-        EventQueue.invokeAndWait(runner);
+//        EventQueue.invokeAndWait(runner);
+        EventQueue.invokeLater(runner);
       } catch (Exception e) {
         throw new Error(";-(");
       }
