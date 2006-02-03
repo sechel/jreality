@@ -64,6 +64,7 @@ import de.jreality.reader.ReaderJRS;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
@@ -87,6 +88,7 @@ import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.PickUtility;
 import de.jreality.util.RenderTrigger;
+import de.jreality.util.SceneGraphUtility;
 import de.jreality.util.ViewerSwitch;
 import de.jreality.writer.WriterJRS;
 
@@ -305,10 +307,10 @@ public class ViewerApp
     		  File[] files = FileLoaderDialog.loadFiles(frame);
           for (int i = 0; i < files.length; i++) {
     				try {
-    					SceneGraphComponent f = Readers.read(files[i]);
+    					final SceneGraphComponent f = Readers.read(files[i]);
               f.setName(files[i].getName());
               System.out.println("READ finished.");
-    					currSceneNode.addChild(f);
+              attatch(currSceneNode, f);
     				} catch (IOException e) {
     					// TODO Auto-generated catch block
     					e.printStackTrace();
@@ -424,7 +426,7 @@ public class ViewerApp
           if (ret == JOptionPane.OK_OPTION) {
             int[] idx = list.getSelectedIndices();
             for (int i = 0; i < idx.length; i++) {
-              currSceneNode.removeChildNode((SceneGraphNode)children.get(idx[i]));
+              detatch(currSceneNode, (SceneGraphNode) children.get(idx[i]));
             }
           }
         }
@@ -453,8 +455,12 @@ public class ViewerApp
             int[] idx = list.getSelectedIndices();
             for (int i = 0; i < idx.length; i++) {
               try {
-                Tool t = (Tool) ((Class)tools.get(idx[i])).newInstance();
-                currSceneNode.addTool(t);
+                final Tool t = (Tool) ((Class)tools.get(idx[i])).newInstance();
+                Scene.executeWriter(currSceneNode, new Runnable() {
+                  public void run() {
+                    currSceneNode.addTool(t);
+                  }
+                });
               } catch (Exception e) {
                 LoggingSystem.getLogger(ViewerApp.this).warning("could not add tool!");
               }
@@ -475,7 +481,12 @@ public class ViewerApp
           if (ret == JOptionPane.OK_OPTION) {
             Object[] tools = list.getSelectedValues();
             for (int i = 0; i < tools.length; i++) {
-              currSceneNode.removeTool((Tool) tools[i]);
+              final Tool tl = (Tool) tools[i];
+              Scene.executeWriter(currSceneNode, new Runnable() {
+                public void run() {
+                  currSceneNode.removeTool(tl);
+                }
+              });
             }
           }
         }
@@ -505,9 +516,13 @@ public class ViewerApp
     mi = new JMenuItem("Make Geometry pickable");
     mi.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent arg0) {
-          Geometry geom = currSceneNode.getGeometry();
+          final Geometry geom = currSceneNode.getGeometry();
           if (geom != null && geom instanceof IndexedFaceSet) {
-            PickUtility.assignFaceAABBTree((IndexedFaceSet)geom);
+            Scene.executeReader(geom, new Runnable() {
+              public void run() {
+                PickUtility.assignFaceAABBTree((IndexedFaceSet)geom);
+              }
+            });
           } else {
             JOptionPane.showMessageDialog(frame, "need IndexedFaceSet");
           }
@@ -681,6 +696,22 @@ public class ViewerApp
     } catch (IOException ioe) {
       JOptionPane.showMessageDialog(frame, "Load failed: "+ioe.getMessage());
     }
+  }
+
+  private void attatch(final SceneGraphComponent parent, final SceneGraphNode child) {
+    Scene.executeWriter(parent, new Runnable() {
+      public void run() {
+        SceneGraphUtility.addChildNode(parent, child);
+      }
+    });
+  }
+
+  private void detatch(final SceneGraphComponent parent, final SceneGraphNode child) {
+    Scene.executeWriter(parent, new Runnable() {
+      public void run() {
+        SceneGraphUtility.removeChildNode(parent, child);
+      }
+    });
   }
 
   private static Viewer createViewer(String viewer) throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
