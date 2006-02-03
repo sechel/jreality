@@ -24,7 +24,7 @@ public class SmokeCalculation extends AbstractCalculation {
   static String src;
   
   static {
-    RungeKuttaFactory rk = RungeKuttaFactory.rk2();
+    IntegratorFactory rk = IntegratorFactory.rk2();
     rk.addUniform("vorts0", "samplerRect");
     rk.addUniform("vorts1", "samplerRect");
     rk.addUniform("vorts2", "samplerRect");

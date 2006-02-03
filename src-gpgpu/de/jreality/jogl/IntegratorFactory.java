@@ -8,7 +8,16 @@ import java.util.Iterator;
  * @author weissman
  *
  */
-public class RungeKuttaFactory {
+public class IntegratorFactory {
+
+  private static final String EULER =
+    "void main(void) {" +
+    "  vec2 pos = gl_TexCoord[0].st;\n" + 
+    "  vec4 pt = textureRect(values, pos);\n" + 
+    "  vec4 res = pt + h*evaluateT0(pt);\n" + 
+    "  if (r3) res.w = 1.;\n" + 
+    "  gl_FragColor = res;\n" +
+    "}\n";
 
   private static final String RK2 =
     "void main(void) {" +
@@ -39,7 +48,7 @@ public class RungeKuttaFactory {
   private HashSet signatures=new HashSet();
   private HashSet methods=new HashSet();
 
-  private RungeKuttaFactory(int order) {
+  private IntegratorFactory(int order) {
     this.order=order;
     addUniform("h", "float");
     addUniform("r3", "bool");
@@ -51,16 +60,24 @@ public class RungeKuttaFactory {
    * create a factory for runge kutta integration of order 2
    * @return the factory
    */
-  public static RungeKuttaFactory rk2() {
-    return new RungeKuttaFactory(2);
+  public static IntegratorFactory euler() {
+    return new IntegratorFactory(1);
+  }
+
+  /**
+   * create a factory for runge kutta integration of order 2
+   * @return the factory
+   */
+  public static IntegratorFactory rk2() {
+    return new IntegratorFactory(2);
   }
   
   /**
    * create a factory for runge kutta integration of order 2
    * @return the factory
    */
-  public static RungeKuttaFactory rk4() {
-    return new RungeKuttaFactory(4);
+  public static IntegratorFactory rk4() {
+    return new IntegratorFactory(4);
   }
 
   /**
@@ -84,18 +101,19 @@ public class RungeKuttaFactory {
   }
 
   public void srcT0_H2(String impl) {
+    if (order < 2) throw new IllegalStateException("no such method for euler"); 
     addMethod("evaluateT0_H2", "vec4", "const vec4 point", impl);
   }
 
   public void srcT0_H(String impl) {
-    if (order == 2) throw new IllegalStateException("no such method for order 2"); 
+    if (order < 4) throw new IllegalStateException("no such method for order 2"); 
     addMethod("evaluateT0_H", "vec4", "const vec4 point", impl);
   }
 
   public void srcAll(String impl) {
     srcT0(impl);
-    srcT0_H2(impl);
-    if (order == 4) srcT0_H(impl);
+    if (order > 1) srcT0_H2(impl);
+    if (order > 2) srcT0_H(impl);
   }
   
   public String toString() {
@@ -106,7 +124,7 @@ public class RungeKuttaFactory {
     for (Iterator i = signatures.iterator(); i.hasNext(); )
       sb.append(i.next()).append(';').append('\n');
     sb.append('\n');
-    sb.append(order == 2 ? RK2 : RK4).append('\n');
+    sb.append(order < 4 ? order < 2 ? EULER : RK2 : RK4).append('\n');
     for (Iterator i = methods.iterator(); i.hasNext(); )
       sb.append(i.next()).append('\n');
     sb.append('\n');

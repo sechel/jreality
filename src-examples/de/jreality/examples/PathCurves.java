@@ -3,14 +3,14 @@ package de.jreality.examples;
 import net.java.games.jogl.GL;
 import de.jreality.jogl.AbstractCalculation;
 import de.jreality.jogl.GpgpuUtility;
-import de.jreality.jogl.RungeKuttaFactory;
+import de.jreality.jogl.IntegratorFactory;
 import de.jreality.math.Matrix;
 import de.jreality.shader.GlslProgram;
 
 public class PathCurves extends AbstractCalculation {
   
   protected String initSource() {
-    RungeKuttaFactory rk = RungeKuttaFactory.rk4();
+    IntegratorFactory rk = IntegratorFactory.rk4();
     rk.addUniform("matrix", "mat4");
     rk.srcAll(
       "  vec4 ret = matrix*point;\n" +
