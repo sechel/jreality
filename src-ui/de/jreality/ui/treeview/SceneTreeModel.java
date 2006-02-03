@@ -186,6 +186,10 @@ public class SceneTreeModel extends AbstractTreeModel {
       }
     }
     
+    // addChild and removeChild is not really correct!
+    // both methods would cause a deadlock when calling super.... in the runnable
+    // and executed by invokeAndWait(..)
+    
     public int addChild(final SceneTreeNode child) {
       final int[] ret = new int[1];
       ret[0] = SceneTreeNodeWithToolListener.super.addChild(child);
