@@ -11,32 +11,13 @@ public class PathCurves extends AbstractCalculation {
   
   protected String initSource() {
     RungeKuttaFactory rk = RungeKuttaFactory.rk4();
-
-      rk.addUniform("matrix", "mat4");
-      rk.srcAll(
-        "  vec4 ret = matrix*pt;\n" +
-        "  //ret.w = 0.;\n" +
-        "  return ret;\n"
-      );
-
-      String ret = rk.toString();
-      System.out.println(ret);
-    
-      return ret;
-    // this is the euler version
-    
-//    return
-//    "uniform samplerRect values;\n" +
-//    "uniform float h;\n" +
-//    "uniform bool r3;\n" +
-//    "uniform mat4 matrix;\n" +
-//      "void main(void) {\n" +
-//      "  vec2 pos = gl_TexCoord[0].st;\n" +
-//      "  vec4 pt = textureRect(values, pos);\n" +
-//      "  vec4 res = pt + h*(matrix*pt);\n" +
-//      "  if (r3) res.w = 1.;\n" +
-//      "  gl_FragColor = res;\n" +
-//      "}\n";
+    rk.addUniform("matrix", "mat4");
+    rk.srcAll(
+      "  vec4 ret = matrix*point;\n" +
+      "  //ret.w = 0.;\n" +
+      "  return ret;\n"
+    );
+    return rk.toString();
   }
 
   protected void setUniformValues(GL gl, GlslProgram prog) {
