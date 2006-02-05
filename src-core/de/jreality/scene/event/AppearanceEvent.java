@@ -11,30 +11,20 @@ import de.jreality.scene.Appearance;
  *
  */
 public class AppearanceEvent extends SceneEvent {
-	String key;		// tell listeners what the attribute being set was/is
+  
+	String key;
   Object old;
-  Class oldType;
     
   public AppearanceEvent(Appearance source, String key, Object old) {
-    this(source, key, old, old == null ? null : old.getClass());    
+    super(source);
+    this.key = key;
+    this.old=old;    
   }
     
-	/**
-	 * @param source
-	 */
-	private AppearanceEvent(Appearance source, String key, Object old, Class oldType) {
-		super(source);
-		this.key = key;
-		this.old=old;
-    this.oldType=oldType;
-	}
 	public String getKey()	{
 		return key;
 	}
     public Object getOldValue() {
       return old;
-    }
-    public Class getOldAttributeType() {
-      return oldType;
     }
 }

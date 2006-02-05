@@ -7,14 +7,6 @@ package de.jreality.scene;
  */
 public class Sphere extends Geometry
 {
-  /**
-   * Constructor for UnitSphere.
-   */
-  public Sphere()
-  {
-    super();
-  }
-	
   public void accept(SceneGraphVisitor v) {
     v.visit(this);
   }

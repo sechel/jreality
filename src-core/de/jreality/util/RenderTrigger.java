@@ -41,7 +41,7 @@ import de.jreality.scene.event.*;
  * TODO: fix problems maybe use Proxy (remove/add doesn't work how it should)
  */
 public class RenderTrigger implements SceneGraphComponentListener,
-  TransformationListener, AppearanceListener, GeometryListener {
+  TransformationListener, AppearanceListener, GeometryListener, LightListener {
 
     private RenderTriggerCaster viewer;
     //private HashMap map = new HashMap();
@@ -60,25 +60,21 @@ public class RenderTrigger implements SceneGraphComponentListener,
     }
     private void registerNode(SceneGraphNode n) {
         SceneGraphVisitor v =new SceneGraphVisitor() {
-            
-
-           
             public void visit(SceneGraphComponent c) {
-                    c.childrenAccept(this);
-                    c.addSceneGraphComponentListener(RenderTrigger.this);
-              }
-            
+                c.childrenAccept(this);
+                c.addSceneGraphComponentListener(RenderTrigger.this);
+            }
             public void visit(Appearance a) {
                 a.addAppearanceListener(RenderTrigger.this);
-                super.visit(a);
             }
             public void visit(Geometry g) {
                 g.addGeometryListener(RenderTrigger.this);
-                super.visit(g);
             }
             public void visit(Transformation t) {
                 t.addTransformationListener(RenderTrigger.this);
-                super.visit(t);
+            }
+            public void visit(Light l) {
+              l.addLightListener(RenderTrigger.this);
             }
         };
         n.accept(v);
@@ -91,15 +87,15 @@ public class RenderTrigger implements SceneGraphComponentListener,
           }
             public void visit(Appearance a) {
                 a.removeAppearanceListener(RenderTrigger.this);
-                super.visit(a);
             }
             public void visit(Geometry g) {
                 g.removeGeometryListener(RenderTrigger.this);
-                super.visit(g);
             }
             public void visit(Transformation t) {
                 t.removeTransformationListener(RenderTrigger.this);
-                super.visit(t);
+            }
+            public void visit(Light l) {
+                l.removeLightListener(RenderTrigger.this);
             }
         };
         n.accept(v);
@@ -210,5 +206,9 @@ public class RenderTrigger implements SceneGraphComponentListener,
         {
             a.render(); b.render();
         }
+    }
+    public void lightChanged(LightEvent ev) {
+      // TODO Auto-generated method stub
+      
     }
 }

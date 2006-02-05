@@ -9,11 +9,9 @@ import de.jreality.scene.event.AppearanceEventMulticaster;
 import de.jreality.scene.event.AppearanceListener;
 
 /**
- * The appearance node. Contains more specific attribute nodes of
- * type {@link AppearanceAttribute}.
- * @see AppearanceAttribute
+ * The appearance node. Contains attributes of arbitrary type.
  * 
- * TODO: remove AppearanceAttribute
+ * TODO: fire ONE single event that reports all changed attributes
  */
 public class Appearance extends SceneGraphNode
 {
@@ -24,25 +22,32 @@ public class Appearance extends SceneGraphNode
     public String toString() { return "inherited"; }
   };
   private transient AppearanceListener appearanceListener;
-  HashMap attributes=new HashMap();
-  Set storedAttributes = Collections.unmodifiableSet(attributes.keySet());
+  private HashMap attributes=new HashMap();
+  private Set storedAttributes = Collections.unmodifiableSet(attributes.keySet());
   
-  public Appearance()
-  {
-    super();
-  }
-
+  private transient Set changedAttributes=new HashSet();
+  
   public Object getAttribute(String key)
   {
-    Object aa=attributes.get(key);
-    return aa!=null? aa : INHERITED;
+    startReader();
+    try {
+      Object aa=attributes.get(key);
+      return aa!=null? aa : INHERITED;
+    } finally {
+      finishReader();
+    }
   }
 
   public Object getAttribute(String key, Class type)
   {
-    Object val=getAttribute(key);
-    if(val==DEFAULT||type.isInstance(val)) return val;
-    return INHERITED;
+    startReader();
+    try {
+      Object val=getAttribute(key);
+      if(val==DEFAULT||type.isInstance(val)) return val;
+      return INHERITED;
+    } finally {
+      finishReader();
+    }
   }
 
   public void setAttribute(String key, Object value)
@@ -53,21 +58,26 @@ public class Appearance extends SceneGraphNode
   public void setAttribute(String key, Object value, Class declaredType)
   {
     checkReadOnly();
-    Object old=null;
-    
-    if(declaredType==null||value==null) throw new NullPointerException();
-    if(value==INHERITED)
-    {
-      old=attributes.remove(key);
+    startWriter();
+    try {
+      Object old=null;
+      
+      if(declaredType==null||value==null) throw new NullPointerException();
+      if(value==INHERITED)
+      {
+        old=attributes.remove(key);
+      }
+      else
+      {
+        // TODO: is this check ok? (cheap enough?)
+        if (AttributeEntity.class.isAssignableFrom(value.getClass()))
+          throw new IllegalArgumentException("no proxies allowed");
+        old=attributes.put(key, value);
+      }
+      fireAppearanceChanged(key, old);
+    } finally {
+      finishWriter();
     }
-    else
-    {
-      // TODO: is this check ok? (cheap enough?)
-      if (AttributeEntity.class.isAssignableFrom(value.getClass()))
-        throw new IllegalArgumentException("no proxies allowed");
-      old=attributes.put(key, value);
-    }
-    fireAppearanceChanged(key, old);
   }
   public void setAttribute(String key, double value)
   {
@@ -93,37 +103,34 @@ public class Appearance extends SceneGraphNode
   {
     setAttribute(key, new Character(value));
   }
-//  public void addAppearanceAttribute(AppearanceAttribute aa)
-//  {
-//    checkReadOnly();
-//    String name=aa.getAttributeName();
-//    if(attributes.containsKey(name))
-//      throw new IllegalStateException(name+" already defined");
-//    attributes.put(name, aa);
-//  }
 
-  public Object getAppearanceAttribute(String name) {
-    return attributes.get(name);
-  }
-
-   // add event handling for Appearance events
    public void addAppearanceListener(AppearanceListener listener) {
-	   appearanceListener=
-		 AppearanceEventMulticaster.add(appearanceListener, listener);
+     startReader();
+	   appearanceListener=AppearanceEventMulticaster.add(appearanceListener, listener);
+     finishReader();
    }
    public void removeAppearanceListener(AppearanceListener listener) {
-	   appearanceListener=
-		 AppearanceEventMulticaster.remove(appearanceListener, listener);
+     startReader();
+	   appearanceListener=AppearanceEventMulticaster.remove(appearanceListener, listener);
+     finishReader();
    }
 
-   /**
+ /**
 	* Tell the outside world that this appearance has changed.
-	* This methods takes no parameters and is equivalent
-	* to "everything has/might have changed".
 	*/
+   protected void writingFinished() {
+     try {
+       for (Iterator i = changedAttributes.iterator(); i.hasNext(); ) {
+         appearanceListener.appearanceChanged((AppearanceEvent) i.next());
+         i.remove();
+       }
+     } finally {
+       changedAttributes.clear();
+     }
+   };
+   
    protected void fireAppearanceChanged(String key, Object old) {
-	 final AppearanceListener l=appearanceListener;
-	 if(l != null) l.appearanceChanged(new AppearanceEvent(this, key, old));
+	 	 if(appearanceListener != null) changedAttributes.add(new AppearanceEvent(this, key, old));
    }
 
    public Set getStoredAttributes() {
@@ -131,7 +138,12 @@ public class Appearance extends SceneGraphNode
    }
    
   public void accept(SceneGraphVisitor v) {
-    v.visit(this);
+    startReader();
+    try {
+      v.visit(this);
+    } finally {
+      finishReader();
+    }
   }
   static void superAccept(Appearance a, SceneGraphVisitor v) {
     a.superAccept(v);

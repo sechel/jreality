@@ -4,6 +4,7 @@
  */
 package de.jreality.scene;
 
+
 /**
  * A point light class.  Situated at the origin (0,0,0,1); use scene graph transformations to
  * position it where you want.
@@ -23,25 +24,31 @@ public class PointLight extends Light {
 	private int shadowMapX = 512;
 	private int shadowMapY = 512;
 
-	/**
-	 * @return double
-	 */
-	public double getFalloffA0() {
-	    return falloffA0;
+  public double getFalloffA0() {
+    startReader();
+    try {
+      return falloffA0;
+    } finally {
+      finishReader();
+    }
 	}
 
-	/**
-	 * @return double
-	 */
 	public double getFalloffA1() {
-	    return falloffA1;
+    startReader();
+    try {
+      return falloffA1;
+    } finally {
+      finishReader();
+    }
 	}
 
-	/**
-	 * @return double
-	 */
 	public double getFalloffA2() {
-	    return falloffA2;
+    startReader();
+    try {
+      return falloffA2;
+    } finally {
+      finishReader();
+    }
 	}
 
 	/**
@@ -49,10 +56,10 @@ public class PointLight extends Light {
 	 * @param falloffA0 The falloffA0 to set
 	 */
 	public void setFalloffA0(double falloffA0) {
-	    if (falloffA0 != this.falloffA0) {
-	        this.falloffA0 = falloffA0;
-          fireLightChanged();
-	    }
+    startWriter();
+    if (this.falloffA0 != falloffA0) fireLightChanged();
+    this.falloffA0 = falloffA0;
+    finishWriter();
 	}
 
 	/**
@@ -60,10 +67,10 @@ public class PointLight extends Light {
 	 * @param falloffA1 The falloffA1 to set
 	 */
 	public void setFalloffA1(double falloffA1) {
-	    if (falloffA1 != this.falloffA1) {
-	        this.falloffA1 = falloffA1;
-          fireLightChanged();
-	    }
+    startWriter();
+    if (this.falloffA1 != falloffA1) fireLightChanged();
+    this.falloffA1 = falloffA1;
+    finishWriter();
 	}
 
 	/**
@@ -71,18 +78,21 @@ public class PointLight extends Light {
 	 * @param falloffA2 The falloffA2 to set
 	 */
 	public void setFalloffA2(double falloffA2) {
-	    if (falloffA2 != this.falloffA2) {
-	        this.falloffA2 = falloffA2;
-          fireLightChanged();
-	    }
+    startWriter();
+    if (this.falloffA2 != falloffA2) fireLightChanged();
+    this.falloffA2 = falloffA2;
+    finishWriter();
 	}
 
 	public void setFalloff(double a0, double a1, double a2)	{
-		falloffA0 = a0;
-		falloffA1 = a1;
-		falloffA2 = a2;
-    // TODO: compare with old value?
-    fireLightChanged();
+    startWriter();
+    if (falloffA0 != a0 ||
+        falloffA1 != a1 ||
+        falloffA2 != a2) fireLightChanged();
+      falloffA0 = a0;
+      falloffA1 = a1;
+      falloffA2 = a2;
+    finishWriter();
 	}
   
 	/**
@@ -100,18 +110,22 @@ public class PointLight extends Light {
     fireLightChanged();
 	}
 
-  /**
-	 * @return String
-	 */
 	public String getShadowMap() {
-	    return shadowMap;
+    startReader();
+    try {
+      return shadowMap;
+    } finally {
+      finishReader();
+    }
 	}
 
-	/**
-	 * @return boolean
-	 */
 	public boolean isUseShadowMap() {
-	    return useShadowMap;
+    startReader();
+    try {
+      return useShadowMap;
+    } finally {
+      finishReader();
+    }
 	}
 
 	/**
@@ -119,9 +133,10 @@ public class PointLight extends Light {
 	 * @param shadowMap The shadowMap to set
 	 */
 	public void setShadowMap(String shadowMap) {
-	    this.shadowMap = shadowMap;
-      // TODO: compare with old value?
-      fireLightChanged();
+    startWriter();
+    if (this.shadowMap != shadowMap) fireLightChanged();
+    this.shadowMap = shadowMap;
+    finishWriter();
 }
 
 	/**
@@ -129,24 +144,28 @@ public class PointLight extends Light {
 	 * @param useShadowMap The useShadowMap to set
 	 */
 	public void setUseShadowMap(boolean useShadowMap) {
-	    if (useShadowMap != this.useShadowMap) {
-	        this.useShadowMap = useShadowMap;
-          fireLightChanged();
-	    }
-	}
+    startWriter();
+    if (this.useShadowMap != useShadowMap) fireLightChanged();
+    this.useShadowMap = useShadowMap;
+    finishWriter();
+  }
 
-	/**
-	 * @return int
-	 */
 	public int getShadowMapX() {
-	    return shadowMapX;
+    startReader();
+    try {
+      return shadowMapX;
+    } finally {
+      finishReader();
+    }
 	}
 
-	/**
-	 * @return int
-	 */
 	public int getShadowMapY() {
-	    return shadowMapY;
+    startReader();
+    try {
+      return shadowMapY;
+    } finally {
+      finishReader();
+    }
 	}
 
 	/**
@@ -154,9 +173,10 @@ public class PointLight extends Light {
 	 * @param shadowMapX The shadowMapX to set
 	 */
 	public void setShadowMapX(int shadowMapX) {
-			this.shadowMapX = shadowMapX;
-      // TODO: compare with old value?
-      fireLightChanged();
+    startWriter();
+    if (this.shadowMapX != shadowMapX) fireLightChanged();
+    this.shadowMapX = shadowMapX;
+    finishWriter();
 	}
 
 	/**
@@ -164,14 +184,21 @@ public class PointLight extends Light {
 	 * @param shadowMapY The shadowMapY to set
 	 */
 	public void setShadowMapY(int shadowMapY) {
-	    		this.shadowMapY = shadowMapY;
-          // TODO: compare with old value?
-          fireLightChanged();
-	    }
+    startWriter();
+    if (this.shadowMapY != shadowMapY) fireLightChanged();
+    this.shadowMapY = shadowMapY;
+    finishWriter();
+  }
 
     public void accept(SceneGraphVisitor v) {
+      startReader();
+      try {
         v.visit(this);
+      } finally {
+        finishReader();
       }
+    }
+    
     static void superAccept(PointLight l, SceneGraphVisitor v) {
         l.superAccept(v);
       }

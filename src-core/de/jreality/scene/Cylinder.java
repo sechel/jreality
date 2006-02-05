@@ -6,14 +6,6 @@ package de.jreality.scene;
  */
 public class Cylinder extends Geometry
 {
-  /**
-   * Constructor for Cylinder.
-   */
-  public Cylinder()
-  {
-    super();
-  }
-
   public void accept(SceneGraphVisitor v) {
     v.visit(this);
   }

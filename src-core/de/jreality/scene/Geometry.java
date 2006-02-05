@@ -13,17 +13,13 @@ import de.jreality.scene.event.GeometryListener;
  */
 public abstract class Geometry extends SceneGraphNode {
 
-  protected Map geometryAttributes;
+  protected Map geometryAttributes=Collections.EMPTY_MAP;
   private transient GeometryListener geometryListener;
   
   protected transient Set changedGeometryAttributes=new HashSet();
   protected transient Set changedVertexAttributes=new HashSet();
   protected transient Set changedEdgeAttributes=new HashSet();
   protected transient Set changedFaceAttributes=new HashSet();
-
-  public Geometry() {
-      geometryAttributes=Collections.EMPTY_MAP;
-  }
 
   /**
    * Returns a read-only view to all currently defined geometry attributes.
@@ -138,7 +134,7 @@ public abstract class Geometry extends SceneGraphNode {
   }
 
   /**
-   * Tell the outside world that this geometry has changed.
+   * collect changed attributes
    */
   protected void fireGeometryChanged(Set vertexAttributeKeys,
     Set edgeAttributeKeys, Set faceAttributeKeys, Set geomAttributeKeys) {

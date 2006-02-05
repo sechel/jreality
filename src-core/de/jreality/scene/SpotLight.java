@@ -35,15 +35,14 @@ public class SpotLight extends PointLight {
     private double coneAngle = Math.PI / 6;
     private double coneDeltaAngle = coneAngle / 3.;
     private double distribution = 2;
-    public SpotLight() {
-        super();
-    }
 
-    /**
-     * @return double
-     */
     public double getConeAngle() {
+      startReader();
+      try {
         return coneAngle;
+      } finally {
+        finishReader();
+      }
     }
 
     /**
@@ -51,24 +50,28 @@ public class SpotLight extends PointLight {
      * @param coneAngle The coneAngle to set
      */
     public void setConeAngle(double coneAngle) {
-        if (coneAngle != this.coneAngle) {
-            this.coneAngle = coneAngle;
-            fireLightChanged();
-        }
+      startWriter();
+      if (this.coneAngle != coneAngle) fireLightChanged();
+      this.coneAngle = coneAngle;
+      finishWriter();
     }
 
-    /**
-     * @return double
-     */
     public double getConeDeltaAngle() {
+      startReader();
+      try {
         return coneDeltaAngle;
+      } finally {
+        finishReader();
+      }
     }
 
-    /**
-     * @return double
-     */
     public double getDistribution() {
+      startReader();
+      try {
         return distribution;
+      } finally {
+        finishReader();
+      }
     }
 
     /**
@@ -77,10 +80,10 @@ public class SpotLight extends PointLight {
      * @param coneDeltaAngle The coneDeltaAngle to set
      */
     public void setConeDeltaAngle(double coneDeltaAngle) {
-        if (this.coneDeltaAngle != coneDeltaAngle) {
-            this.coneDeltaAngle = coneDeltaAngle;
-            fireLightChanged();
-        }
+      startWriter();
+      if (this.coneDeltaAngle != coneDeltaAngle) fireLightChanged();
+      this.coneDeltaAngle = coneDeltaAngle;
+      finishWriter();
     }
 
     /**
@@ -89,10 +92,10 @@ public class SpotLight extends PointLight {
      * @param distribution The distribution to set
      */
     public void setDistribution(double distribution) {
-        if (this.distribution != distribution) {
-            this.distribution = distribution;
-            fireLightChanged();
-        }
+      startWriter();
+      if (this.distribution != distribution) fireLightChanged();
+      this.distribution = distribution;
+      finishWriter();
     }
 
     public void accept(SceneGraphVisitor v) {

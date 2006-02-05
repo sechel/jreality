@@ -32,13 +32,6 @@ package de.jreality.scene;
  */
 public class DirectionalLight extends Light {
 
-	/**
-	 * 
-	 */
-	public DirectionalLight() {
-		super();
-	}
-
   public void accept(SceneGraphVisitor v) {
     v.visit(this);
   }

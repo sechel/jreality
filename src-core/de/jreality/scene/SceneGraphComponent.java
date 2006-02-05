@@ -25,13 +25,6 @@ public class SceneGraphComponent extends SceneGraphNode {
   
   private transient List cachedEvents=new LinkedList();
 
-  /**
-   * Constructor for SceneGraphComponent.
-   */
-  public SceneGraphComponent() {
-    super();
-  }
-
   public List getChildNodes() {
     startReader();
     try {

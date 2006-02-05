@@ -22,13 +22,12 @@ public class SceneGraphNode {
    * subclasses should always use try{}finally{} statements when
    * executing guarded code.
    **/
-  private final Lock nodeLock= new Lock();
-  private boolean writing;
+  private final transient Lock nodeLock= new Lock();
   
   private boolean readOnly;
   private String  name;
   
-  private List writers=Collections.EMPTY_LIST;
+  private transient List writers=Collections.EMPTY_LIST, writersSwap=Collections.EMPTY_LIST;
   
   /**
    * use this ONLY from inside a listener via event.enqueueWriter( runner );
@@ -80,10 +79,6 @@ public class SceneGraphNode {
     nodeLock.writeUnlock();
   }
 
-  protected boolean isWriting() {
-    return writing;
-  }
-  
   /**
    * this method is called berfore a sequence of write operations
    * are executed. So the changed object can collect the changed information
@@ -91,15 +86,8 @@ public class SceneGraphNode {
    */
   protected final void startWriter() {
     nodeLock.writeLock();
-    if (!writing) {
-      writing = true;
-      writingStarted();
-    }
   }
   
-  protected void writingStarted() {
-  }
-
   /**
    * this method is called after a sequence of write operations
    * are executed. in this call the corresponding events should 
@@ -114,11 +102,13 @@ public class SceneGraphNode {
         if (!writers.isEmpty()) {
           if (!nodeLock.canSwitchBack()) throw new IllegalStateException("sth wrong");
           nodeLock.switchBackToWriteLock();
-          final List w=writers;
-          writers=Collections.EMPTY_LIST;
+          final List w=writers;          
           try {
-            processWriters(w);
+            processWriters(w);            
           } finally {
+            w.clear();
+            writers=writersSwap;
+            writersSwap=w;
             finishWriter();
           }
         } else {
@@ -190,7 +180,7 @@ public class SceneGraphNode {
         java.lang.reflect.AccessibleObject.setAccessible(f, true);
         for(int i= 0, n= f.length; i < n; i++) try {
           final java.lang.reflect.Field field= f[i];
-          if(java.lang.reflect.Modifier.isStatic(field.getModifiers())) continue;
+          if(java.lang.reflect.Modifier.isStatic(field.getModifiers()) || java.lang.reflect.Modifier.isTransient(field.getModifiers())) continue;
           final Object value=field.get(this);
           if(!trace.contains(value)) {
             sb.append(field.getName()).append(" = ");

@@ -113,13 +113,7 @@ public class DataList extends DataItem implements Serializable {
 
   public String toString() {
     StringBuffer sb= new StringBuffer().append('[');
-    int num=length;
-    if (num > 0)
-      format.toStringImpl(data, offset, sb);
-    for (int ix= 1; ix < num; ix++) {
-      sb.append(", ");
-      format.toStringImpl(data, ix+offset, sb);
-    }
+    sb.append("len=").append(length).append(" storage=").append(format);
     sb.append(']');
     return sb.toString();
   }
