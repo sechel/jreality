@@ -456,11 +456,7 @@ public class ViewerApp
             for (int i = 0; i < idx.length; i++) {
               try {
                 final Tool t = (Tool) ((Class)tools.get(idx[i])).newInstance();
-                Scene.executeWriter(currSceneNode, new Runnable() {
-                  public void run() {
-                    currSceneNode.addTool(t);
-                  }
-                });
+                currSceneNode.addTool(t);
               } catch (Exception e) {
                 LoggingSystem.getLogger(ViewerApp.this).warning("could not add tool!");
               }
@@ -518,11 +514,7 @@ public class ViewerApp
         public void actionPerformed(ActionEvent arg0) {
           final Geometry geom = currSceneNode.getGeometry();
           if (geom != null && geom instanceof IndexedFaceSet) {
-            Scene.executeReader(geom, new Runnable() {
-              public void run() {
-                PickUtility.assignFaceAABBTree((IndexedFaceSet)geom);
-              }
-            });
+            PickUtility.assignFaceAABBTree((IndexedFaceSet)geom);
           } else {
             JOptionPane.showMessageDialog(frame, "need IndexedFaceSet");
           }
@@ -699,19 +691,11 @@ public class ViewerApp
   }
 
   private void attatch(final SceneGraphComponent parent, final SceneGraphNode child) {
-    Scene.executeWriter(parent, new Runnable() {
-      public void run() {
-        SceneGraphUtility.addChildNode(parent, child);
-      }
-    });
+    SceneGraphUtility.addChildNode(parent, child);
   }
 
   private void detatch(final SceneGraphComponent parent, final SceneGraphNode child) {
-    Scene.executeWriter(parent, new Runnable() {
-      public void run() {
-        SceneGraphUtility.removeChildNode(parent, child);
-      }
-    });
+    SceneGraphUtility.removeChildNode(parent, child);
   }
 
   private static Viewer createViewer(String viewer) throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
