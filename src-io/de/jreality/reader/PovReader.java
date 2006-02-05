@@ -26,6 +26,7 @@ import java.io.*;
 import java.util.logging.Logger;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
@@ -199,7 +200,7 @@ public class PovReader {
         //        StorageModel.DOUBLE_ARRAY.inlined(3).createReadOnly(normals));
         setFaceCountAndAttributes(Attribute.INDICES,
                 StorageModel.INT_ARRAY.inlined(3).createReadOnly( faces));
-        buildEdgesFromFaces();
+        IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(this);
         GeometryUtility.calculateAndSetFaceNormals(this);
         GeometryUtility.calculateAndSetVertexNormals(this);
     }

@@ -29,11 +29,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import de.jreality.geometry.*;
-import de.jreality.geometry.GeometryUtility;
-import de.jreality.geometry.Torus;
 import de.jreality.renderman.RIBViewer;
 import de.jreality.scene.*;
-import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
@@ -67,7 +64,7 @@ static {
     IndexedFaceSet fs = new IndexedFaceSet();
     fs.setVertexCountAndAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(points));
     fs.setFaceCountAndAttributes(Attribute.INDICES,StorageModel.INT_ARRAY_ARRAY.createReadOnly(new int[][] {face0,face1,face2}));
-    fs.buildEdgesFromFaces();
+    IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(fs);
     GeometryUtility.calculateAndSetFaceNormals(fs);
     IndexedFaceSet ts = IndexedFaceSetUtility.triangulate(fs);
     

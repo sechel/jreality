@@ -28,6 +28,7 @@ import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Rn;
@@ -469,7 +470,7 @@ public class Reader3DS extends AbstractReader {
            idxFaceSetNode.setVertexAttributes(Attribute.NORMALS,
            new DataList(StorageModel.DOUBLE_ARRAY.array(3),
            GeometryUtility.calculateVertexNormals(idxFaceSetNode)));*/
-          idxFaceSetNode.buildEdgesFromFaces();
+          IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(idxFaceSetNode);
         }
       }
         break;

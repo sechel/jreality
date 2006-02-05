@@ -25,6 +25,7 @@ package de.jreality.reader;
 import java.io.*;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Cylinder;
 import de.jreality.scene.IndexedFaceSet;
@@ -161,7 +162,7 @@ public class ReaderPOV extends AbstractReader {
       //        StorageModel.DOUBLE_ARRAY.inlined(3).createReadOnly(normals));
       setFaceCountAndAttributes(Attribute.INDICES, StorageModel.INT_ARRAY
           .inlined(3).createReadOnly(faces));
-      buildEdgesFromFaces();
+      IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(this);
       GeometryUtility.calculateAndSetFaceNormals(this);
       GeometryUtility.calculateAndSetVertexNormals(this);
     }

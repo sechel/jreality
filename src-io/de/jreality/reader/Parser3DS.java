@@ -6,6 +6,7 @@ import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.math.P3;
 import de.jreality.math.Rn;
 import de.jreality.scene.*;
@@ -429,7 +430,7 @@ public class Parser3DS {
                         idxFaceSetNode.setVertexAttributes(Attribute.NORMALS,
                                 new DataList(StorageModel.DOUBLE_ARRAY.array(3),
                                         GeometryUtility.calculateVertexNormals(idxFaceSetNode)));*/
-                        idxFaceSetNode.buildEdgesFromFaces();
+                        IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(idxFaceSetNode);
                     }
                 }
                 break;

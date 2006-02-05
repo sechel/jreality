@@ -28,6 +28,7 @@ import java.io.StreamTokenizer;
 import java.util.*;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
@@ -421,7 +422,7 @@ public class ReaderOBJ extends AbstractReader {
         GeometryUtility.calculateAndSetFaceNormals(ifs);
         System.out.println("using FACE normals!");
       }
-      ifs.buildEdgesFromFaces();
+      IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs);
       return ifs;
     }
 

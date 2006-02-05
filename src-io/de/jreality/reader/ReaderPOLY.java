@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
@@ -112,7 +113,7 @@ public class ReaderPOLY extends AbstractReader {
      ifs.setFaceCountAndAttributes(Attribute.INDICES,StorageModel.INT_ARRAY_ARRAY.createReadOnly(faces));
      GeometryUtility.calculateAndSetFaceNormals(ifs);
      GeometryUtility.calculateAndSetVertexNormals(ifs);
-     ifs.buildEdgesFromFaces();
+     IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs);
      root.setGeometry(ifs);
 //     System.out.println("we return "+root+" with geometry "+root.getGeometry());
     return root;
