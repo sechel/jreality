@@ -216,14 +216,12 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 	 * @param theRoot2
 	 * @return
 	 */
-	protected JOGLPeerComponent constructPeerForSceneGraphComponent(SceneGraphComponent sgc, JOGLPeerComponent p) {
+	protected JOGLPeerComponent constructPeerForSceneGraphComponent(final SceneGraphComponent sgc, final JOGLPeerComponent p) {
 		if (sgc == null) return null;
-		JOGLPeerComponent peer = null;
-		synchronized(sgc.getChildLock())	{
-			ConstructPeerGraphVisitor constructPeer = new ConstructPeerGraphVisitor( sgc, p);
-			peer = (JOGLPeerComponent) constructPeer.visit();				
-		}
-		return peer;
+		final JOGLPeerComponent[] peer = new JOGLPeerComponent[1];
+    ConstructPeerGraphVisitor constructPeer = new ConstructPeerGraphVisitor( sgc, p);
+	  peer[0] = (JOGLPeerComponent) constructPeer.visit();
+		return peer[0];
 	}
 
 
