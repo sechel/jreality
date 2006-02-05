@@ -36,11 +36,9 @@ public class SceneGraphNode {
    * @param runnable
    */
   public void enqueueWriter(SceneEvent event, Runnable runnable) {
-    synchronized (nodeLock) {
-      if (new Exception().getStackTrace()[1].getMethodName() != "enqueueWriter") throw new IllegalStateException("only allowed via event");
-      if (writers == Collections.EMPTY_LIST) writers = new LinkedList();
-      writers.add(runnable);
-    }
+    if (new Exception().getStackTrace()[1].getMethodName() != "enqueueWriter") throw new IllegalStateException("only allowed via event");
+    if (writers == Collections.EMPTY_LIST) writers = new LinkedList();
+    writers.add(runnable);
   }
   
   /**
@@ -48,7 +46,12 @@ public class SceneGraphNode {
    * @return boolean
    */
   public boolean isReadOnly() {
-    return readOnly;
+    startReader();
+    try {
+      return readOnly;
+    } finally {
+      finishReader();
+    }
   }
 
   /**
@@ -56,7 +59,9 @@ public class SceneGraphNode {
    * @param newReadOnlyState the desired readOnly flag value
    */
   protected void setReadOnly(boolean newReadOnlyState) {
-    readOnly= newReadOnlyState;
+    startWriter();
+    readOnly=newReadOnlyState;
+    finishWriter();
   }
 
   protected final void checkReadOnly() {
@@ -102,12 +107,12 @@ public class SceneGraphNode {
         if (!writers.isEmpty()) {
           if (!nodeLock.canSwitchBack()) throw new IllegalStateException("sth wrong");
           nodeLock.switchBackToWriteLock();
-          final List w=writers;          
+          final List w=writers;
+          writers=writersSwap;
           try {
             processWriters(w);            
           } finally {
             w.clear();
-            writers=writersSwap;
             writersSwap=w;
             finishWriter();
           }
