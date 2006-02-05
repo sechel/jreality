@@ -89,9 +89,13 @@ public final class Lock
   
   void switchToReadLock() {
     if (!canSwitch()) throw new IllegalStateException("cannot switch - not owner or nested writes");
-    readLock();
+    readNestCount=1;
     lastWriter=writer;
-    writeUnlock();
+    writeNestCount=0;
+    writer=null;
+    synchronized(mutex) {
+      mutex.notifyAll();
+    }
   }
   
   boolean canSwitchBack() {
@@ -103,6 +107,7 @@ public final class Lock
     assert (writeNestCount == 0);
     synchronized(mutex) {
       while(readNestCount>1) try {
+        System.out.println("waiting for switch back: readers="+readNestCount);
         mutex.wait();
       } catch (InterruptedException e) {}
       writer=lastWriter;
