@@ -76,6 +76,7 @@ public final class Lock
           writer=null;
           mutex.notifyAll();
           //debug();
+          return;
         }
       default:
         writeNestCount--;
