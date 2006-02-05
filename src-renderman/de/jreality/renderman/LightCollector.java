@@ -95,7 +95,7 @@ public class LightCollector extends SceneGraphVisitor {
         // now write the light:
         HashMap map =new HashMap();
         map.put("intensity",new Float(l.getIntensity()));
-        map.put("lightcolor",l.getColorAsFloat());
+        map.put("lightcolor",l.getColor().getRGBColorComponents(null));
         map.put("from",new float[] {0f,0f,1f});
         map.put("to",new float[] {0f,0f,0f});
         Ri.lightSource("distantlight",map);
@@ -121,7 +121,7 @@ public class LightCollector extends SceneGraphVisitor {
         // now write the light:
         HashMap map =new HashMap();
         map.put("intensity",new Float(l.getIntensity()));
-        map.put("lightcolor",l.getColorAsFloat());
+        map.put("lightcolor",l.getColor().getRGBColorComponents(null));
         map.put("from",new float[] {0f,0f,1f});
         map.put("to",new float[] {0f,0f,0f});
         map.put("coneangle",new Float(l.getConeAngle()));

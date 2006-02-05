@@ -103,7 +103,7 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
 	public void appearanceChanged(AppearanceEvent ev) {
     Appearance src = (Appearance) ev.getSourceNode();
     RemoteAppearance dst = (RemoteAppearance) rmc.getProxy(src);
-    Object aa = src.getAppearanceAttribute(ev.getKey());
+    Object aa = src.getAttribute(ev.getKey());
     boolean measure = (aa instanceof Matrix);
     long t, dt;
     t = System.currentTimeMillis(); 

@@ -133,7 +133,7 @@
       <compilerarg line="-source 1.4" />
     </javac>
     <copy todir="${build}/core">
-      <fileset dir="src">
+      <fileset dir="${core}">
         <exclude name="**/*.java"/>
         <exclude name="**/*.gif"/>
       </fileset>

@@ -385,7 +385,7 @@ public class ReaderOBJ extends AbstractReader {
       Set lst = a.getStoredAttributes();
       for (Iterator i = lst.iterator(); i.hasNext(); ) {
         String aName = (String) i.next();
-        material.setAttribute(aName, a.getAppearanceAttribute(aName));
+        material.setAttribute(aName, a.getAttribute(aName));
       }
       setSmoothening(smooth);
     }

@@ -131,7 +131,7 @@ public class SMRJMirrorFactory extends ProxyFactory {
         Set lst = src.getStoredAttributes();
         for (Iterator i = lst.iterator(); i.hasNext(); ) {
           String aName = (String) i.next();
-            dst.setAttribute(aName, src.getAppearanceAttribute(aName));
+            dst.setAttribute(aName, src.getAttribute(aName));
         }
     }
 
