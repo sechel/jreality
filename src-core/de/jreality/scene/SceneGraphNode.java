@@ -17,6 +17,7 @@ import de.jreality.util.LoggingSystem;
  * and a read-only flag.
  */
 public class SceneGraphNode {
+  private static final Object writerMutex = new Object();
   private static int UNNAMED_ID;
   /** PENDING: <b>work in progress</b>, the lock for this component,
    * subclasses should always use try{}finally{} statements when
@@ -36,7 +37,7 @@ public class SceneGraphNode {
    * @param runnable
    */
   public void enqueueWriter(SceneEvent event, Runnable runnable) {
-    if (new Exception().getStackTrace()[1].getMethodName() != "enqueueWriter") throw new IllegalStateException("only allowed via event");
+    if (Thread.currentThread() != nodeLock.lastWriter) throw new IllegalStateException("only allowed via event");
     if (writers == Collections.EMPTY_LIST) writers = new LinkedList();
     writers.add(runnable);
   }
@@ -99,29 +100,29 @@ public class SceneGraphNode {
    * be generated
    */
   protected final void finishWriter() {
-    if (nodeLock.canSwitch()) {
-      nodeLock.switchToReadLock();
-      try {
-        writingFinished(); // broadcast events
-      } finally {
-        if (!writers.isEmpty()) {
-          if (!nodeLock.canSwitchBack()) throw new IllegalStateException("sth wrong");
-          nodeLock.switchBackToWriteLock();
-          final List w=writers;
-          writers=writersSwap;
-          try {
-            processWriters(w);            
-          } finally {
-            w.clear();
-            writersSwap=w;
-            finishWriter();
-          }
-        } else {
-          nodeLock.readUnlock();
-        }
-      }
-    } else {
+    if (!nodeLock.canSwitch()) {
       nodeLock.writeUnlock();
+      return;
+    }
+    nodeLock.switchToReadLock();
+    try {
+      writingFinished(); // broadcast events
+    } finally {
+      if (!writers.isEmpty()) {
+        if (!nodeLock.canSwitchBack()) throw new IllegalStateException("sth wrong");
+        nodeLock.switchBackToWriteLock();
+        final List w=writers;
+        writers=writersSwap;
+        try {
+          processWriters(w);            
+        } finally {
+          w.clear();
+          writersSwap=w;
+          finishWriter();
+        }
+      } else {
+        nodeLock.readUnlock();
+      }
     }
   }
   
