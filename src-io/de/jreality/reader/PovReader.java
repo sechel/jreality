@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
@@ -83,7 +84,7 @@ public class PovReader {
             disk.setGeometry(new UnitDisk(UNIT_DISK_DETAIL));
         }
         Transformation t =new Transformation();
-        t.setStretch(1,1,.02);
+        MatrixBuilder.euclidean().scale(1,1,.02).assignTo(t);
         disk.setTransformation(t);
         
         StreamTokenizer st = new StreamTokenizer(r);
