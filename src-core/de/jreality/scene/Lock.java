@@ -14,7 +14,8 @@ import java.util.Map.Entry;
 public final class Lock
 {
   private final Object mutex=new Object();
-  private Thread writer, lastWriter;
+  private Thread writer;
+  Thread lastWriter;
   private int writeNestCount;
   private int lastWriterReadNestCount;
   private int readNestCount;
