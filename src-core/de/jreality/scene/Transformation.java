@@ -12,7 +12,7 @@ import de.jreality.scene.event.TransformationEventMulticaster;
 import de.jreality.scene.event.TransformationListener;
 /**
  * 
- * A almost clean Transformation class, do not use anything else than set/getMatrix.
+ * A almost clean Transformation class, do not use anything else than set/getMatrix and multiplyOnRight/Left.
  * 
  * For doing projective geometry, see {@link de.jreality.math.MatrixBuilder} and
  * {@link de.jreality.math.FactoredMatrix}.
@@ -65,6 +65,11 @@ public class Transformation extends SceneGraphNode implements Cloneable {
 		this(Pn.EUCLIDEAN, null);
 	}
 
+	public static Transformation copyTransformation(Transformation t)	{
+		Transformation copy = new Transformation(t.signature,  t.theMatrix);
+		copy.setDefaultMatrix(t.getDefaultMatrix());
+		return copy;
+	}
 	/** 
 	 * @deprecated
 	 */
@@ -72,7 +77,7 @@ public class Transformation extends SceneGraphNode implements Cloneable {
 		Transformation copy = (Transformation) super.clone();
 		if (theMatrix !=null) copy.theMatrix = (double[]) theMatrix.clone();
 		if (defaultMatrix !=null) copy.defaultMatrix = (double[]) defaultMatrix.clone();
-    copy.signature = signature;
+		copy.signature = signature;
 		return copy;
 	}
 	
@@ -99,7 +104,6 @@ public class Transformation extends SceneGraphNode implements Cloneable {
     startWriter();
     try {
   		setDefaultMatrix(theMatrix);
-      //fireTransformationChanged();
     } finally {
       finishWriter();
     }
@@ -177,6 +181,26 @@ public class Transformation extends SceneGraphNode implements Cloneable {
       finishWriter();
     }
 	}
+
+	  public void multiplyOnRight( double[] T) {
+		  startWriter();
+		  try {
+			  Rn.times(theMatrix, theMatrix, T);
+		  } 
+		  finally {
+			  finishWriter();		  
+		  }
+	  }
+	    
+	  public void multiplyOnLeft( double[] T) {
+		  startWriter();
+		  try {
+			  Rn.times(theMatrix, T, theMatrix);
+		  } 
+		  finally {
+			  finishWriter();		  
+		  }
+	  }
 
 	/**
 	 * See {@link Pn}, {@link Pn#ELLIPTIC}, {@link Pn#EUCLIDEAN}, and {@link Pn#HYPERBOLIC}.
@@ -258,63 +282,6 @@ public class Transformation extends SceneGraphNode implements Cloneable {
   /**
    * @deprecated
    */
-  public void multiplyOnRight( Transformation aTform ) {
-    Matrix m = new Matrix(this);
-    m.multiplyOnRight(aTform.getMatrix());
-    setMatrix(m.getArray());
-  }
-    
-  /**
-   * @deprecated
-   */
-  public void multiplyOnLeft( Transformation aTform ) {
-     Matrix m = new Matrix(this);
-     m.multiplyOnLeft(aTform.getMatrix());
-     setMatrix(m.getArray());
-  }
-    
-  /**
-   * @deprecated
-   */
-  public void multiplyOnRight( double[] T) {
-    Matrix m = new Matrix(this);
-    m.multiplyOnRight(T);
-    setMatrix(m.getArray());
-  }
-    
-  /**
-   * @deprecated
-   */
-  public void multiplyOnLeft( double[] T) {
-     Matrix m = new Matrix(this);
-     m.multiplyOnLeft(T);
-     setMatrix(m.getArray());
-  }
-
-  /**
-   * @deprecated
-   */
-  public double[] getTranslation() {
-    return new FactoredMatrix(this).getTranslation();
-  }
-
-  /**
-   * @deprecated
-   */
-  public double[] getStretch() {
-    return new FactoredMatrix(this).getStretch();
-  }
-
-  /**
-   * @deprecated
-   */
-  public Quaternion getRotationQuaternion() {
-    return new FactoredMatrix(this).getRotationQuaternion();
-  }
-
-  /**
-   * @deprecated
-   */
   public void setTranslation(double[] translation) {
     MatrixBuilder.init(new Matrix(this), signature).translate(translation).assignTo(theMatrix);
   }
@@ -324,67 +291,6 @@ public class Transformation extends SceneGraphNode implements Cloneable {
    */
   public void setTranslation(double x, double y, double z) {
     setTranslation(new double[]{x, y, z});
-  }
-
-  /**
-   * @deprecated
-   */
-  public void setStretch(double[] stretch) {
-    FactoredMatrix fm = new FactoredMatrix(this);
-    fm.setStretch(stretch);
-    setMatrix(fm.getArray());
-  }
-
-  /**
-   * @deprecated
-   */
-  public void setStretch(double stretch) {
-    FactoredMatrix fm = new FactoredMatrix(this);
-    fm.setStretch(stretch);
-    setMatrix(fm.getArray());
-  }
-
-  /**
-   * @deprecated
-   */
-  public void setRotation(Quaternion rot) {
-    FactoredMatrix fm = new FactoredMatrix(this);
-    fm.setRotation(rot);
-    setMatrix(fm.getArray());
-  }
-
-  /**
-   * @deprecated
-   */
-  public void setRotation(double d, double i, double j, double k) {
-    FactoredMatrix fm = new FactoredMatrix(this);
-    fm.setRotation(d, i, j, k);
-    setMatrix(fm.getArray());
-  }
-
-  /**
-   * @deprecated
-   */
-  public void setRotation(double d, double[] es) {
-    FactoredMatrix fm = new FactoredMatrix(this);
-    fm.setRotation(d, es);
-    setMatrix(fm.getArray());
-  }
-
-  /**
-   * @deprecated
-   */
-  public void setCenter(double[] center, boolean b) {
-    FactoredMatrix fm = new FactoredMatrix(this);
-    fm.setCenter(center, false);
-    setMatrix(fm.getArray());
-  }
-
-  /**
-   * @deprecated
-   */
-  public double getRotationAngle() {
-    return new FactoredMatrix(this).getRotationAngle();
   }
 
 }

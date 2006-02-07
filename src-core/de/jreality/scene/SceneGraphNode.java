@@ -59,7 +59,7 @@ public class SceneGraphNode {
    * Sets the readOnly flag
    * @param newReadOnlyState the desired readOnly flag value
    */
-  protected void setReadOnly(boolean newReadOnlyState) {
+  public void setReadOnly(boolean newReadOnlyState) {
     startWriter();
     readOnly=newReadOnlyState;
     finishWriter();
