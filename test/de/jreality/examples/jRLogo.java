@@ -29,6 +29,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import de.jreality.geometry.*;
+import de.jreality.math.FactoredMatrix;
 import de.jreality.renderman.RIBViewer;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
@@ -131,7 +132,9 @@ static {
 
          SceneGraphComponent lightNode= new SceneGraphComponent();
          Transformation lt= new Transformation();
-         lt.setRotation(-Math.PI / 4, 1, 1, 0);
+         FactoredMatrix fm = new FactoredMatrix(lt);
+		fm.setRotation(-Math.PI / 4, 1, 1, 0);
+		lt.setMatrix(fm.getArray());
          lightNode.setTransformation(lt);
          DirectionalLight light= new DirectionalLight();
          lightNode.setLight(light);
@@ -140,7 +143,9 @@ static {
          SceneGraphComponent lightNode2= new SceneGraphComponent();
          Transformation lt2= new Transformation();
          //   lt2.assignScale(-1);
-         lt.setRotation(-Math.PI / 4, 1, 1, 0);
+         FactoredMatrix fm = new FactoredMatrix(lt);
+		fm.setRotation(-Math.PI / 4, 1, 1, 0);
+		lt.setMatrix(fm.getArray());
          lightNode2.setTransformation(lt2);
          DirectionalLight light2= new DirectionalLight();
          lightNode2.setLight(light2);
@@ -195,7 +200,9 @@ static {
          RIBViewer rv = new RIBViewer();
          rv.initializeFrom(softViewer);
          for(int i = 0; i<20;i++) {
-             t.setRotation(2*Math.PI/20*i,new double[]{1,0,0});
+             FactoredMatrix fm1 = new FactoredMatrix(t);
+			fm1.setRotation(2*Math.PI/20*i, (new double[]{1,0,0}));
+			t.setMatrix(fm1.getArray());
              softViewer.render();
              rv.setFileName("jRLogo_"+numString(i,4));
              rv.render();

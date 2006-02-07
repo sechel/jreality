@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.geometry.Primitives;
 import de.jreality.jogl.Viewer;
+import de.jreality.math.FactoredMatrix;
 import de.jreality.reader.ReaderJVX;
 import de.jreality.renderman.RIBVisitor;
 import de.jreality.renderman.SLShader;
@@ -210,10 +211,14 @@ public class TestJvx implements KeyListener{
           room.addChild(bottomC);
           
           Transformation t = new Transformation();
-          t.setRotation(.5* Math.PI/2,0,1,0);
+          FactoredMatrix fm = new FactoredMatrix(t);
+		fm.setRotation(.5* Math.PI/2, 0, 1, 0);
+		t.setMatrix(fm.getArray());
           Transformation t2 = new Transformation();
-          t2.setRotation(.5* Math.PI/4,1,0,0);
-          t.multiplyOnLeft(t2);
+          FactoredMatrix fm = new FactoredMatrix(t2);
+		fm.setRotation(.5* Math.PI/4, 1, 0, 0);
+		t2.setMatrix(fm.getArray());
+          t.multiplyOnLeft(t2.getMatrix());
           room.setTransformation(t);
           
           Appearance ap = new Appearance();
@@ -258,7 +263,9 @@ public class TestJvx implements KeyListener{
 
         SceneGraphComponent lightNode= new SceneGraphComponent();
         Transformation lt= new Transformation();
-        lt.setRotation(-Math.PI / 4, 1, 1, 0);
+        FactoredMatrix fm = new FactoredMatrix(lt);
+		fm.setRotation(-Math.PI / 4, 1, 1, 0);
+		lt.setMatrix(fm.getArray());
         lightNode.setTransformation(lt);
         DirectionalLight light= new DirectionalLight();
         lightNode.setLight(light);
@@ -267,7 +274,9 @@ public class TestJvx implements KeyListener{
         SceneGraphComponent lightNode2= new SceneGraphComponent();
         Transformation lt2= new Transformation();
         //   lt2.assignScale(-1);
-        lt.setRotation(-Math.PI / 4, 1, 1, 0);
+        FactoredMatrix fm = new FactoredMatrix(lt);
+		fm.setRotation(-Math.PI / 4, 1, 1, 0);
+		lt.setMatrix(fm.getArray());
         lightNode2.setTransformation(lt2);
         DirectionalLight light2= new DirectionalLight();
         lightNode2.setLight(light2);

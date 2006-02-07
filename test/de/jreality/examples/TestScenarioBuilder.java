@@ -8,6 +8,7 @@ import java.util.Random;
 
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.math.FactoredMatrix;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
@@ -66,7 +67,9 @@ public class TestScenarioBuilder extends SceneBuilder {
 
   private void addInCircle(Geometry geom, double r, Appearance[] app) {
     Transformation trans=new Transformation();
-	trans.setRotation(Math.PI*2/app.length,0d,1d,0d);
+	FactoredMatrix fm = new FactoredMatrix(trans);
+	fm.setRotation(Math.PI*2/app.length, 0d, 1d, 0d);
+	trans.setMatrix(fm.getArray());
 	trans.setTranslation(r, 0, 0);
     addM(geom, trans, app);
     up().translate(-r, 0, 0);
@@ -83,7 +86,7 @@ public class TestScenarioBuilder extends SceneBuilder {
     for(int i=0; i<max; i++) {
       add(local).add(app[i]).addChild(node);
       local=new Transformation(local.getMatrix());
-      local.multiplyOnRight(t);
+      local.multiplyOnRight(t.getMatrix());
     }
     add(local).add(app[max]).addChild(node);
   }

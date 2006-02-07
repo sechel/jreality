@@ -34,7 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.jreality.geometry.*;
-import de.jreality.geometry.CatenoidHelicoid;
+import de.jreality.math.FactoredMatrix;
 import de.jreality.reader.Parser3DS;
 import de.jreality.scene.*;
 import de.jreality.scene.proxy.treeview.SceneTreeViewer;
@@ -191,7 +191,9 @@ public class SoftTextureTest implements KeyListener {
               bottomC.setGeometry(s1.getChildComponent(0).getGeometry());
               GeometryUtility.calculateVertexNormals(s1);
               Transformation t =new Transformation();
-              t.setStretch(.2);
+              FactoredMatrix fm = new FactoredMatrix(t);
+			fm.setStretch(.2);
+			t.setMatrix(fm.getArray());
               t.setTranslation(0,-5,0);
               bottomC.setTransformation(t);
               Appearance ap = new Appearance();
@@ -237,8 +239,12 @@ public class SoftTextureTest implements KeyListener {
       SceneGraphComponent globeNode3= new SceneGraphComponent();
       gt= new Transformation();
       gt.setTranslation(0., .0, 1.2);
-      gt.setStretch(.7);
-      gt.setRotation(Math.PI/2.,1,0,0);
+      FactoredMatrix fm1 = new FactoredMatrix(gt);
+	fm1.setStretch(.7);
+	gt.setMatrix(fm1.getArray());
+      FactoredMatrix fm = new FactoredMatrix(gt);
+	fm.setRotation(Math.PI/2., 1, 0, 0);
+	gt.setMatrix(fm.getArray());
       globeNode3.setTransformation(gt);
       globeNode3.setGeometry(catenoid);
   
@@ -308,7 +314,9 @@ public class SoftTextureTest implements KeyListener {
 
     SceneGraphComponent lightNode= new SceneGraphComponent();
     Transformation lt= new Transformation();
-    lt.setRotation(-Math.PI / 4, 1, 1, 0);
+    FactoredMatrix fm = new FactoredMatrix(lt);
+	fm.setRotation(-Math.PI / 4, 1, 1, 0);
+	lt.setMatrix(fm.getArray());
     lightNode.setTransformation(lt);
     DirectionalLight light= new DirectionalLight();
     lightNode.setLight(light);
@@ -317,7 +325,9 @@ public class SoftTextureTest implements KeyListener {
     SceneGraphComponent lightNode2= new SceneGraphComponent();
     Transformation lt2= new Transformation();
     //   lt2.assignScale(-1);
-    lt.setRotation(-Math.PI / 4, 1, 1, 0);
+    fm = new FactoredMatrix(lt);
+	fm.setRotation(-Math.PI / 4, 1, 1, 0);
+	lt.setMatrix(fm.getArray());
     lightNode2.setTransformation(lt2);
     DirectionalLight light2= new DirectionalLight();
     lightNode2.setLight(light2);

@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 
 import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.jogl.Viewer;
+import de.jreality.math.FactoredMatrix;
 import de.jreality.reader.Parser3DS;
 import de.jreality.scene.*;
 import de.jreality.scene.proxy.treeview.SceneTreeViewer;
@@ -208,7 +209,9 @@ public class Test implements KeyListener {
         
         //GeometryUtility.calculateVertexNormals(s1);
         Transformation scale = new Transformation();
-        scale.setStretch(.05);
+        FactoredMatrix fm = new FactoredMatrix(scale);
+		fm.setStretch(.05);
+		scale.setMatrix(fm.getArray());
         s1.setTransformation(scale);
         Appearance a =new Appearance();
         a.setAttribute(CommonAttributes.POLYGON_SHADER, "flat");
@@ -269,7 +272,9 @@ public class Test implements KeyListener {
         catNode.setName("catenoids");
 
         Transformation tr= new Transformation();
-       tr.setRotation(Math.PI, 0,1,0);
+       FactoredMatrix fm = new FactoredMatrix(tr);
+	fm.setRotation(Math.PI, 0, 1, 0);
+	tr.setMatrix(fm.getArray());
         //tr.setStretch(.2);
         catNode.setTransformation(tr);
 
@@ -377,7 +382,9 @@ public class Test implements KeyListener {
         
         cpc = new SceneGraphComponent();
         trans= new Transformation();
-        trans.setRotation(Math.PI,0,1,0);
+        FactoredMatrix fm = new FactoredMatrix(trans);
+		fm.setRotation(Math.PI, 0, 1, 0);
+		trans.setMatrix(fm.getArray());
         trans.setTranslation(0,0,-6);
         cpc.setTransformation(trans);
         cpc.setGeometry(cp);
@@ -403,7 +410,9 @@ public class Test implements KeyListener {
 
     SceneGraphComponent lightNode= new SceneGraphComponent();
     Transformation lt= new Transformation();
-    lt.setRotation(-Math.PI / 4, 1, 1, 0);
+    FactoredMatrix fm = new FactoredMatrix(lt);
+	fm.setRotation(-Math.PI / 4, 1, 1, 0);
+	lt.setMatrix(fm.getArray());
     lightNode.setTransformation(lt);
     DirectionalLight light= new DirectionalLight();
     lightNode.setLight(light);
@@ -412,7 +421,9 @@ public class Test implements KeyListener {
     SceneGraphComponent lightNode2= new SceneGraphComponent();
     Transformation lt2= new Transformation();
     //   lt2.assignScale(-1);
-    lt.setRotation(-Math.PI / 4, 1, 1, 0);
+    fm = new FactoredMatrix(lt);
+	fm.setRotation(-Math.PI / 4, 1, 1, 0);
+	lt.setMatrix(fm.getArray());
     lightNode2.setTransformation(lt2);
     DirectionalLight light2= new DirectionalLight();
     lightNode2.setLight(light2);

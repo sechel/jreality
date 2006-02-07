@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.math.FactoredMatrix;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.ClippingPlane;
@@ -201,7 +202,9 @@ public class TestNonConvexPoly implements KeyListener{
 
         SceneGraphComponent lightNode= new SceneGraphComponent();
         Transformation lt= new Transformation();
-        lt.setRotation(-Math.PI / 4, 1, 1, 0);
+        FactoredMatrix fm = new FactoredMatrix(lt);
+		fm.setRotation(-Math.PI / 4, 1, 1, 0);
+		lt.setMatrix(fm.getArray());
         lightNode.setTransformation(lt);
         DirectionalLight light= new DirectionalLight();
         lightNode.setLight(light);
@@ -210,7 +213,9 @@ public class TestNonConvexPoly implements KeyListener{
         SceneGraphComponent lightNode2= new SceneGraphComponent();
         Transformation lt2= new Transformation();
         //   lt2.assignScale(-1);
-        lt.setRotation(-Math.PI / 4, 1, 1, 0);
+        FactoredMatrix fm = new FactoredMatrix(lt);
+		fm.setRotation(-Math.PI / 4, 1, 1, 0);
+		lt.setMatrix(fm.getArray());
         lightNode2.setTransformation(lt2);
         DirectionalLight light2= new DirectionalLight();
         lightNode2.setLight(light2);
