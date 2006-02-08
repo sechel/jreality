@@ -212,12 +212,11 @@ public class TubeUtility {
 			// to the (dehomogenized) points (0,0,+/-.5,1).
 			double[] net = Rn.times(null, frame, Rn.times(null, translateM, scaler));
 			if ((debug & 64) != 0) theLogger.log(Level.FINE,"net is \n"+Rn.matrixToString( net,6));
-			double[] inet = Rn.inverse(null, net);
-			double[] inp1 = Rn.matrixTimesVector(null, inet, p1);
-			double[] inp2 = Rn.matrixTimesVector(null, inet, p2);
-			if ((debug & 64) != 0) theLogger.log(Level.FINE,"Image of end points: "+Rn.toString(Pn.dehomogenize(null,inp1), 6)+"  "+Rn.toString(Pn.dehomogenize(null,inp2),6));
+//			double[] inet = Rn.inverse(null, net);
+//			double[] inp1 = Rn.matrixTimesVector(null, inet, p1);
+//			double[] inp2 = Rn.matrixTimesVector(null, inet, p2);
+//			if ((debug & 64) != 0) theLogger.log(Level.FINE,"Image of end points: "+Rn.toString(Pn.dehomogenize(null,inp1), 6)+"  "+Rn.toString(Pn.dehomogenize(null,inp2),6));
 			SceneGraphComponent sgc = new SceneGraphComponent();
-			// TODO:  remove cross section argument or change this
 			sgc.setGeometry(urTube[signature+1]);
 			sgc.setTransformation(new Transformation(net)); 
 			//LoggingSystem.getLogger().log(Level.FINE,"Matrix is "+Rn.matrixToString(sgc.getTransformation().getMatrix()));

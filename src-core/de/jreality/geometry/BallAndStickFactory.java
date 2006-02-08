@@ -7,8 +7,11 @@ package de.jreality.geometry;
 
 import java.awt.Color;
 
+import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
@@ -18,10 +21,27 @@ import de.jreality.shader.CommonAttributes;
 public class BallAndStickFactory {
 	 IndexedLineSet ils;
 	 double stickRadius=.025, ballRadius=.05;
-	 Color stickColor = Color.YELLOW, ballColor=Color.GREEN;
+	 Color stickColor = Color.YELLOW, ballColor=Color.GREEN, arrowColor = Color.RED;
 	 int signature = Pn.EUCLIDEAN;
 	 SceneGraphComponent theResult;
-
+	 boolean drawArrows = false;
+	 double arrowPosition = .5;		// where is tip of arrow placed?
+	 double arrowScale = .1;			// scale=1:  height of cone is length of edge
+	 double arrowSlope = 1.0;			// bigger scale: more pointy arrow profile
+	 private static IndexedFaceSet urCone = null;
+		public static double[][] octagonalCrossSection = {{1,0,-1}, 
+			{.707, .707, -1}, 
+			{0,1,-1},
+			{-.707, .707, -1},
+			{-1,0,-1},
+			{-.707, -.707, -1},
+			{0,-1,-1},
+			{.707, -.707, -1},
+			{1,0,-1}};
+	 static {
+		 urCone = Primitives.pyramid(octagonalCrossSection, new double[]{0,0,0});
+		 GeometryUtility.calculateAndSetVertexNormals(urCone);
+	 }
 
 	public BallAndStickFactory(IndexedLineSet i)	{
 		super();
@@ -29,7 +49,41 @@ public class BallAndStickFactory {
 	 }
 
 	 public void update()	{
-			SceneGraphComponent sticks = BallAndStickFactory.sticks(ils, stickRadius, signature);
+		 	// create sticks on edges
+			SceneGraphComponent sgc = new SceneGraphComponent();
+			DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
+			int n = ils.getNumEdges();
+			for (int i = 0; i<n; ++i)	{
+				int[] ed = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
+				int m = ed.length;
+				for (int j = 0; j<m-1; ++j)	{
+					int k = ed[j];
+					double[] p1 = vertices.item(k).toDoubleArray(null);	
+					k = ed[j+1];
+					double[] p2 = vertices.item(k).toDoubleArray(null);	
+					SceneGraphComponent cc = TubeUtility.tubeOneEdge(p1, p2, stickRadius, null, signature);
+					if (cc != null) sgc.addChild(cc);
+					if (drawArrows)		{
+						FactoredMatrix arrowM = new FactoredMatrix(signature);
+						double d;
+						if (p1.length == 3) d = Rn.euclideanDistance(p1, p2);
+						else d = Pn.distanceBetween(p1, p2, signature);
+						double flatten = arrowSlope/(d);
+						double stretch = arrowScale/stickRadius;
+						arrowM.setStretch(stretch, stretch, arrowScale*flatten);
+						arrowM.setTranslation(0,0,arrowPosition-.5);
+						SceneGraphComponent arrow = new SceneGraphComponent();
+						Appearance ap = new Appearance();
+						ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, arrowColor);
+						arrow.setAppearance(ap);
+						arrowM.update();
+						arrowM.assignTo(arrow);
+						arrow.setGeometry(urCone);
+						cc.addChild(arrow);
+					}
+				}
+			}
+			SceneGraphComponent sticks = sgc;
 			// we should allow the user to specify "real" balls, not via the appearance.
 			SceneGraphComponent balls = new SceneGraphComponent();
 			balls.setGeometry(ils);
@@ -96,6 +150,46 @@ public class BallAndStickFactory {
 			}
 		}
 		return sgc;
+	}
+
+	public double getArrowPosition() {
+		return arrowPosition;
+	}
+
+	public void setArrowPosition(double arrowPosition) {
+		this.arrowPosition = arrowPosition;
+	}
+
+	public double getArrowScale() {
+		return arrowScale;
+	}
+
+	public void setArrowScale(double arrowScale) {
+		this.arrowScale = arrowScale;
+	}
+
+	public double getArrowSlope() {
+		return arrowSlope;
+	}
+
+	public void setArrowSlope(double arrowSlope) {
+		this.arrowSlope = arrowSlope;
+	}
+
+	public boolean isDrawArrows() {
+		return drawArrows;
+	}
+
+	public void setDrawArrows(boolean drawArrows) {
+		this.drawArrows = drawArrows;
+	}
+
+	public IndexedLineSet getIls() {
+		return ils;
+	}
+
+	public void setIls(IndexedLineSet ils) {
+		this.ils = ils;
 	}
 
 }
