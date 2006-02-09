@@ -25,6 +25,7 @@ package de.jreality.soft;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
+import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Rn;
 import de.jreality.math.VecMat;
 import de.jreality.scene.Viewer;
@@ -49,7 +50,7 @@ public class GameTool extends MouseTool {
     }
     public void mouseDragged(MouseEvent e) {
         if(cameraPath.getLength()!= 0)
-            this.transformation = cameraPath.getLastComponent().getTransformation();
+            this.transformation = new FactoredMatrix(cameraPath.getLastComponent().getTransformation().getMatrix());
         
 
         if (transformation == null)
@@ -142,7 +143,7 @@ public class GameTool extends MouseTool {
             rotate(yangle,0,1,0);
             xangle += 4*Math.asin(md[1]*.002);
             rotate(xangle,1,0,0);
-            transformation.setMatrix(tmp);
+            transformation.assignIdentity(); //setMatrix(tmp);
             transformation.setTranslation(translation);
             
                 //VecMat.assignTranslation(tmp,c2[0],c2[1],c2[2]);
@@ -213,7 +214,7 @@ public class GameTool extends MouseTool {
         yangle += 4*Math.asin(a*.002);
         rotate(yangle,0,1,0);
         rotate(xangle,1,0,0);
-        transformation.setMatrix(tmp);
+        transformation.assignIdentity(); //setMatrix(tmp);
         transformation.setTranslation(translation);
         v.render();
     }
