@@ -28,6 +28,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Rn;
 import de.jreality.math.VecMat;
 import de.jreality.renderman.RIBVisitor;
@@ -58,7 +59,7 @@ public static final String MOUSE_DONE = "mouseDone";
 
 
 	//private SceneGraphNode node;
-    protected Transformation transformation;
+    protected FactoredMatrix transformation;
     protected double[] tmp = new double[16];
     protected Component viewer;
     protected Camera camera;
@@ -99,9 +100,9 @@ public static final String MOUSE_DONE = "mouseDone";
     private void pickAction(MouseEvent e) {
             if(pick == null){
                 pick = new SceneGraphComponent();
-                Transformation t = new Transformation();
+                FactoredMatrix t = new FactoredMatrix();
                 t.setStretch(.15);
-                pick.setTransformation(t);
+                pick.setTransformation(new Transformation(t.getArray()));
                 
                 pick.setGeometry(new Sphere());
             } else {
@@ -185,7 +186,7 @@ public static final String MOUSE_DONE = "mouseDone";
             return;
             } 
 		 if(cameraPath.getLength()!= 0)
-             this.transformation = cameraPath.getLastComponent().getTransformation();
+             this.transformation = new FactoredMatrix(cameraPath.getLastComponent().getTransformation().getMatrix());
          //this.transformation = ((SceneGraphComponent)cameraPath.getLastElement()).getTransformation();
          
 		 if (transformation == null)
@@ -374,8 +375,8 @@ public static final String MOUSE_DONE = "mouseDone";
 			 //double[][] transmat = transformation.getMatrix();
 
 			 if(simpleMode){
-                 Transformation tr =new Transformation();
-                 tr.resetMatrix();
+                 FactoredMatrix tr =new FactoredMatrix();
+                 //tr.resetMatrix();
                 
                  double[] c2 = new double[3];
                  c2[0] =-center[0];
@@ -386,8 +387,7 @@ public static final String MOUSE_DONE = "mouseDone";
                  //tr.setUseCenter(true);
                  System.out.println(" angle "+angle);
                  System.out.println(" ongle "+transformation.getRotationAngle());
-                 tr.setRotation(
-                 (angle ),tmpV);
+                 tr.setRotation((angle ),tmpV);
                  transformation.multiplyOnRight(tr);
                  //transformation.setTranslation(0,0,distance);
              }
@@ -399,7 +399,7 @@ public static final String MOUSE_DONE = "mouseDone";
 
              double[] c2 = new double[3];
              c2 = transformation.getTranslation();
-             VecMat.transform(transformation.getMatrix(),
+             VecMat.transform(transformation.getArray(),
                      center[0], center[1], center[2], c2);
                      //0, 0, -distance, c2);
              
@@ -450,7 +450,7 @@ public static final String MOUSE_DONE = "mouseDone";
 	 * @return Transformation
 	 */
 	public Transformation getTransformation() {
-		return transformation;
+		return new Transformation(transformation.getArray());
 	}
 
 //	/**
@@ -470,7 +470,7 @@ public static final String MOUSE_DONE = "mouseDone";
             center[1] = 0;
 		}
 		if (e.getKeyChar() == 'i') {
-			transformation.resetMatrix();
+			transformation.assignIdentity();
 		}
 //		if (e.getKeyChar() == 't') {
 //			simpleMode = !simpleMode;
@@ -519,7 +519,7 @@ public static final String MOUSE_DONE = "mouseDone";
     public void encompass() {
         
         if(cameraPath.getLength()!= 0)
-            this.transformation = cameraPath.getLastComponent().getTransformation();
+            this.transformation = new FactoredMatrix(cameraPath.getLastComponent().getTransformation().getMatrix());
 
         if (transformation == null)
             return;
@@ -657,7 +657,7 @@ public static final String MOUSE_DONE = "mouseDone";
      */
     private void guessCenter() {
         if(cameraPath.getLength()!= 0)
-            this.transformation = cameraPath.getLastComponent().getTransformation();
+            this.transformation = new FactoredMatrix(cameraPath.getLastComponent().getTransformation().getMatrix());
 
         if (transformation == null)
             return;
