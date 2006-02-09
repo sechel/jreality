@@ -53,6 +53,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 
 	GLDrawable theCanvas;
 	int width, height;		// GLDrawable.getSize() isnt' implemented for GLPBuffer!
+	int whichEye = CameraUtility.MIDDLE_EYE;
 	int[] currentViewport = new int[4];
 	Graphics3D context;
 	public GL globalGL;
@@ -182,7 +183,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		// load the camera transformation
 		globalGL.glMultTransposeMatrixd(CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), 
 				aspectRatio,
-				CameraUtility.getCamera(theViewer).getEye()));
+				whichEye));
 
 		
 		// prepare for rendering the geometry
@@ -375,24 +376,24 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			if (which == Viewer.CROSS_EYED_STEREO)		{
 				int w = width/2;
 				int h = height;
-				theCamera.setEye(Camera.RIGHT_EYE);
+				whichEye=CameraUtility.RIGHT_EYE;
 				//theCamera.update();
 				globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 				myglViewport(0,0, w,h);
 				visit();
-				theCamera.setEye(Camera.LEFT_EYE);
+				whichEye=CameraUtility.LEFT_EYE;
 				myglViewport(w, 0, w,h);
 				visit();
 			} 
 			else if (which >= Viewer.RED_BLUE_STEREO &&  which <= Viewer.RED_CYAN_STEREO) {
 				myglViewport(0,0, width, height);
 				globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-				theCamera.setEye(Camera.RIGHT_EYE);
+				whichEye=CameraUtility.RIGHT_EYE;
 		        if (which == Viewer.RED_GREEN_STEREO) globalGL.glColorMask(false, true, false, true);
 		        else if (which == Viewer.RED_BLUE_STEREO) globalGL.glColorMask(false, false, true, true);
 		        else if (which == Viewer.RED_CYAN_STEREO) globalGL.glColorMask(false, true, true, true);
 				visit();
-				theCamera.setEye(Camera.LEFT_EYE);
+				whichEye=CameraUtility.LEFT_EYE;
 		        globalGL.glColorMask(true, false, false, true);
 				globalGL.glClear (GL.GL_DEPTH_BUFFER_BIT);
 				visit();
@@ -400,11 +401,11 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			} 
 			else	{
 				myglViewport(0,0, width, height);
-				theCamera.setEye(Camera.RIGHT_EYE);
+				whichEye=CameraUtility.RIGHT_EYE;
 				globalGL.glDrawBuffer(GL.GL_BACK_RIGHT);
 				globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 				visit();
-				theCamera.setEye(Camera.LEFT_EYE);
+				whichEye=CameraUtility.LEFT_EYE;
 				globalGL.glDrawBuffer(GL.GL_BACK_LEFT);
 				globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 				visit();
@@ -413,7 +414,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		else {
 			globalGL.glClear (GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 			myglViewport(0,0,width, height);
-			theCamera.setEye(Camera.MIDDLE_EYE);
+			whichEye=CameraUtility.MIDDLE_EYE;
 			if (!pickMode)	{
 				// Following code seems to have NO effect: An attempt to render the "back banana"
 //				if (theViewer.getSignature() == Pn.ELLIPTIC )	{

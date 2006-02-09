@@ -19,6 +19,10 @@ import de.jreality.scene.*;
 public class CameraUtility {
 
 	static boolean debug = false;
+	// constants for support of stereo viewing
+	public static final int MIDDLE_EYE = 0;
+	public static final int LEFT_EYE = 1;
+	public static final int RIGHT_EYE = 2;
 
 	private CameraUtility() {
 		super();
@@ -120,7 +124,7 @@ public class CameraUtility {
 	}
 	
 	public static double[] getCameraToNDC(Camera cam, double aspectRatio)		{
-		return getCameraToNDC(cam, aspectRatio, Camera.MIDDLE_EYE);
+		return getCameraToNDC(cam, aspectRatio, CameraUtility.MIDDLE_EYE);
 	}
 	
 	/**
@@ -161,7 +165,7 @@ public class CameraUtility {
 				viewPort.setFrameFromDiagonal(-hwidth,-hwidth/aspectRatio, hwidth,  hwidth/aspectRatio);
 			}	
 		} else viewPort = cam.getViewPort();
-		if (which == Camera.MIDDLE_EYE)		{
+		if (which == CameraUtility.MIDDLE_EYE)		{
 			double[] cameraToNDC = null;
 			if (cam.isPerspective())
 				cameraToNDC = P3.makePerspectiveProjectionMatrix(null, viewPort, cam.getNear(), cam.getFar());
@@ -170,7 +174,7 @@ public class CameraUtility {
 			return cameraToNDC;			
 		}  // else we're in a stereo mode
 		double factor;
-		factor = (which == Camera.LEFT_EYE) ? -1 : 1;
+		factor = (which == CameraUtility.LEFT_EYE) ? -1 : 1;
 		//if (eyeSeparation == 0.0) eyeSeparation = focus/6.0;
 		
 		double[] eyePosition = new double[] {factor * cam.getEyeSeparation()/2.0, 0d, 0d, 0d};

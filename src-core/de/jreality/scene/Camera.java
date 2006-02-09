@@ -63,11 +63,7 @@ public class Camera extends SceneGraphNode {
 			isPerspective = true,
 			isStereo = false;
 	
-	// constants for support of stereo viewing
-	public static final int MIDDLE_EYE = 0;
-	public static final int LEFT_EYE = 1;
-	public static final int RIGHT_EYE = 2;
-	int whichEye = MIDDLE_EYE;
+	//int whichEye = CameraUtility.MIDDLE_EYE;
 	double eyeSeparation = 0.1;
 	double[] orientationMatrix;		
 	
@@ -275,25 +271,25 @@ public class Camera extends SceneGraphNode {
     fireCameraChanged();
 	}
 	
-	public int getEye()	{
-		return whichEye;
-	}
-	
-	// TODO: backends should not set this!!!!
-	public void setEye(int which)	{
-		// TODO figure out proper behavior if not stereo already
-		if (!isStereo) { whichEye = MIDDLE_EYE; return; }
-		whichEye = which;
-    // TODO: compare with old value?
-//    fireCameraChanged();
-	}
+//	public int getEye()	{
+//		return whichEye;
+//	}
+//	
+//	// TODO: backends should not set this!!!!
+//	public void setEye(int which)	{
+//		// TODO figure out proper behavior if not stereo already
+//		if (!isStereo) { whichEye = CameraUtility.MIDDLE_EYE; return; }
+//		whichEye = which;
+//    // TODO: compare with old value?
+////    fireCameraChanged();
+//	}
 	
 	/**
 	 * @deprecated
 	 * @return
 	 */
 	public double[] getCameraToNDC() {
-		double[] m1 = CameraUtility.getCameraToNDC(this, aspectRatio, whichEye);
+		double[] m1 = CameraUtility.getCameraToNDC(this, aspectRatio, CameraUtility.MIDDLE_EYE); //whichEye);
 		return m1;
 	}
 	
