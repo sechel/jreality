@@ -23,7 +23,8 @@
 package de.jreality.soft;
 
 import de.jreality.scene.Geometry;
-import de.jreality.scene.Texture2D;
+import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.shader.Texture2D;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 
@@ -152,8 +153,12 @@ public class FlatPolygonShader implements PolygonShader {
       // we do not need to interpolate the colors:
       //interpolateColor=!(vertexShader instanceof ConstantVertexShader);
 
-      Texture2D tex = (Texture2D)eAppearance.getAttribute(ShaderUtility.nameSpace(name, "texture"),null,Texture2D.class);
+      de.jreality.scene.Texture2D tex = (de.jreality.scene.Texture2D)eAppearance.getAttribute(ShaderUtility.nameSpace(name, "texture"),null,de.jreality.scene.Texture2D.class);
       if(tex != null) texture = new SimpleTexture(tex);     
+      
+      if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eAppearance))
+          texture = new SimpleTexture((Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eAppearance));
+     
     }
     public Texture getTexture() {
         return texture;

@@ -43,8 +43,21 @@ public class SimpleTexture implements Texture {
     protected int incr =4;
     private final boolean interpolate;
     
+//    public SimpleTexture(de.jreality.shader.Texture2D texture) {
+//        this.bytes = texture.getByteArray();
+//        this.width=texture.getWidth();
+//        this.height = texture.getHeight();
+//        //this.uscale = texture.getSScale();
+//        //this.vscale = texture.getTScale();
+//        this.matrix = texture.getTextureMatrix();
+//        this.clampU = texture.getRepeatS()==Texture2D.CLAMP;
+//        this.clampV = texture.getRepeatT()==Texture2D.CLAMP;
+//        incr =3*width*height== bytes.length?3:4;
+//        interpolate =(texture.getMinFilter()==Texture2D.GL_LINEAR);
+//    }
+
     public SimpleTexture(de.jreality.scene.Texture2D texture) {
-        this.bytes = texture.getByteArray();
+        this.bytes = (byte[]) texture.getByteArray().clone();
         this.width=texture.getWidth();
         this.height = texture.getHeight();
         //this.uscale = texture.getSScale();

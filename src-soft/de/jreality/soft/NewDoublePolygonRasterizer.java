@@ -39,7 +39,7 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
     private static final int     OPAQUE         = (COLOR_CH_MASK << 24);
     //private static final boolean[] interpolate = new boolean[Polygon.VERTEX_LENGTH];
 
-    private static final boolean correctInterpolation = false;
+    private static final boolean correctInterpolation = true;
     private final Colorizer colorizer;
     
     //dimensions of the image to render into:

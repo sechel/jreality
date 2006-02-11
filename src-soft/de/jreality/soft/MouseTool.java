@@ -508,7 +508,7 @@ public static final String MOUSE_DONE = "mouseDone";
             RIBVisitor rv =new RIBVisitor();
             rv.setWidth(v.getViewingComponent().getWidth());
             rv.setHeight(v.getViewingComponent().getHeight());
-            System.out.print(" Rendering RIB into test.rib..");
+            System.out.print(" Rendering RIB file into test.rib..");
             rv.visit(v.getSceneRoot(),v.getCameraPath(),"test");
             System.out.println(".done.");          
         }

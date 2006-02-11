@@ -162,14 +162,14 @@ public class RenderTraversal extends SceneGraphVisitor {
       Logger.getLogger("de.jreality").warning("unsupported geometry shader");
     String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
     
-    if((boolean)eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.FACE_DRAW), true)) {
+    if((boolean)eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT)) {
         PolygonShader fs=ShaderLookup
             .getPolygonShaderAttr(eAppearance, geomShaderName, FACE_SHADER);
         pipeline.setFaceShader(this.polygonShader=fs);
     } else {
         pipeline.setFaceShader(this.polygonShader=null);
     }
-    if((boolean)eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW), true)) {
+    if((boolean)eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT)) {
         LineShader ls=ShaderLookup
        .getLineShaderAttr(eAppearance, geomShaderName, CommonAttributes.LINE_SHADER);;
        pipeline.setLineShader(this.lineShader=ls);
@@ -177,7 +177,7 @@ public class RenderTraversal extends SceneGraphVisitor {
         pipeline.setLineShader(this.lineShader=null);
     }
        
-    if((boolean)eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.VERTEX_DRAW), true)) {
+    if((boolean)eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.VERTEX_DRAW), CommonAttributes.VERTEX_DRAW_DEFAULT)) {
         PointShader ps=ShaderLookup
             .getPointShaderAttr(eAppearance, geomShaderName, CommonAttributes.POINT_SHADER);;
         pipeline.setPointShader(this.pointShader=ps);
