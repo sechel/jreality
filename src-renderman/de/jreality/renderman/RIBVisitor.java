@@ -146,6 +146,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         Appearance a = c.getAppearance();
         if(a!= null) {
             eAppearance = eAppearance.create(a);
+            //FIXME: omit this call to avoid writing attributes twice???
             setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
         }
         c.childrenAccept(this);
@@ -241,21 +242,22 @@ public class RIBVisitor extends SceneGraphVisitor {
      * @return
      */
     private String writeTexture(Texture2D tex) {
-        String fname = (String) textures.get(tex);
+            Image img;
+            ImageData data = tex.getImage();
+        String fname = (String) textures.get(data);
         if(fname == null) {
             fname = name+"_texture"+(textureCount++)+".tiff";
             File f = new File(fname);
             //Image img = tex.getImage().getImage();
             // TODO temporary as long as ImageData does not return a propper BufferedImage
-            Image img;
-            ImageData data = tex.getImage();
-            BufferedImage bi = new BufferedImage(width, height,
-                    BufferedImage.TYPE_INT_ARGB);
-            WritableRaster raster = bi.getRaster();
             byte[] byteArray = data.getByteArray();
             int dataHeight = data.getHeight();
             int dataWidth = data.getWidth();
+            BufferedImage bi = new BufferedImage(dataWidth, dataHeight,
+                    BufferedImage.TYPE_INT_ARGB);
+            WritableRaster raster = bi.getRaster();
             int[] pix = new int[4];
+           
             for (int y = 0, ptr = 0; y < dataHeight; y++)
                 for (int x = 0; x < dataWidth; x++, ptr += 4) {
                     /*pix[3] = byteArray[ptr + 3];
@@ -291,7 +293,7 @@ public class RIBVisitor extends SceneGraphVisitor {
                 boolean worked =ImageIO.write(rImage,"tiff",f);
                 if(!worked) System.err.println("writing of "+fname+" did not work!");
                 //os.close();
-                textures.put(tex,fname);
+                textures.put(data,fname);
             } catch (IOException e) {
                 e.printStackTrace();
                 fname = null;
@@ -410,8 +412,8 @@ public class RIBVisitor extends SceneGraphVisitor {
             fcoords[3*j+2] =(float)da.getValueAt(j,2);
         }
         map.put("P",fcoords);
-        if(smooth) {
-            DataList normals = i.getVertexAttributes(Attribute.NORMALS);
+        DataList normals = i.getVertexAttributes(Attribute.NORMALS);
+        if(smooth&& normals!=null) {
             da = normals.toDoubleArrayArray();
             float[] fnormals =new float[3*da.getLength()];
             for (int j = 0; j < da.getLength(); j++) {
@@ -421,7 +423,7 @@ public class RIBVisitor extends SceneGraphVisitor {
             }
             map.put("N",fnormals);
         } else { //face normals
-            DataList normals = i.getFaceAttributes(Attribute.NORMALS);
+            normals = i.getFaceAttributes(Attribute.NORMALS);
             da = normals.toDoubleArrayArray();
             float[] fnormals =new float[3*da.getLength()];
             for (int j = 0; j < da.getLength(); j++) {
@@ -503,24 +505,38 @@ public class RIBVisitor extends SceneGraphVisitor {
      */
     public void visit(PointSet p) {
         String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
-        if(!eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.VERTEX_DRAW),true)) return;
+        if(!eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.VERTEX_DRAW),CommonAttributes.VERTEX_DRAW_DEFAULT)) return;
         int n= p.getNumPoints();
         DataList coord=p.getVertexAttributes(Attribute.COORDINATES);
         if(coord == null) return;
-        DoubleArrayArray a=coord.toDoubleArrayArray();
-        double[] trns = new double[16];
         Ri.attributeBegin();
         float r = (float) eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
         //System.out.println("point radius is "+r);
         setupShader(eAppearance,CommonAttributes.POINT_SHADER);
-        for (int i= 0; i < n; i++) { 
-            VecMat.assignTranslation(trns,new double[] {a.getValueAt(i, 0),a.getValueAt(i, 1),a.getValueAt(i, 2)});
-            Ri.transformBegin();
-            Ri.concatTransform(fTranspose(trns));
+        boolean drawSpheres = eAppearance.getAttribute(CommonAttributes.SPHERES_DRAW,CommonAttributes.SPHERES_DRAW_DEFAULT);
+        if(drawSpheres) {
+            DoubleArrayArray a=coord.toDoubleArrayArray();
+            double[] trns = new double[16];
+            for (int i= 0; i < n; i++) { 
+                VecMat.assignTranslation(trns,new double[] {a.getValueAt(i, 0),a.getValueAt(i, 1),a.getValueAt(i, 2)});
+                Ri.transformBegin();
+                Ri.concatTransform(fTranspose(trns));
+                HashMap map =new HashMap();
+                Ri.sphere(r,-r,r,360f,map);
+                Ri.transformEnd();
+                //pipeline.processPoint(a, i);            
+            }
+        } else {
             HashMap map =new HashMap();
-            Ri.sphere(r,-r,r,360f,map);
-            Ri.transformEnd();
-            //pipeline.processPoint(a, i);            
+            double[] pc = new double[3*n];
+            coord.toDoubleArray(pc);
+            float[] pcf = new float[3*n];
+            for (int i = 0; i < pcf.length; i++) {
+                pcf[i] = (float) pc[i];
+            }
+            map.put("P",pcf);
+            map.put("constant float constantwidth",new Float(r));
+            Ri.points(n,map);
         }
             Ri.attributeEnd();
     }
