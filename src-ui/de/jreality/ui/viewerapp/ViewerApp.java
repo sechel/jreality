@@ -33,6 +33,8 @@ import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -53,6 +55,8 @@ import javax.swing.text.StyleConstants;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import org.w3c.dom.Attr;
+
 import jterm.BshEvaluator;
 import jterm.JTerm;
 import jterm.Session;
@@ -62,6 +66,8 @@ import de.jreality.io.JrScene;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.ReaderJRS;
 import de.jreality.reader.Readers;
+import de.jreality.renderman.RIBViewer;
+import de.jreality.scene.*;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Scene;
@@ -70,6 +76,7 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Viewer;
+import de.jreality.scene.data.Attribute;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.scene.tool.DraggingTool;
@@ -82,6 +89,9 @@ import de.jreality.scene.tool.ShipNavigationTool;
 import de.jreality.scene.tool.Tool;
 import de.jreality.scene.tool.ToolSystemViewer;
 import de.jreality.scene.tool.config.ToolSystemConfiguration;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.ImageData;
+import de.jreality.shader.TextureUtility;
 import de.jreality.ui.treeview.JListRenderer;
 import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
 import de.jreality.util.Input;
@@ -122,7 +132,7 @@ public class ViewerApp
   private BshEvaluator bshEval;
   private SimpleAttributeSet infoStyle;
   
-  public static void display(final SceneGraphNode n) {
+  public static JFrame display(final SceneGraphNode n) {
     initAWT();
     final ViewerApp app;
     try {
@@ -138,6 +148,7 @@ public class ViewerApp
         app.scene.setGeometry(g);
       }
     });
+    return app.frame;
   }
   
   public static void main(String[] args) throws Exception
@@ -401,7 +412,25 @@ public class ViewerApp
         }
       });
     fileMenu.add(mi);
-
+    
+    JMenu export = new JMenu("Export...");
+    fileMenu.add(export);
+    mi = new JMenuItem("RIB");
+    mi.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent arg0) {
+          File file = FileLoaderDialog.selectTargetFile(frame,"rib", " renderman RIB");
+          if (file == null) return;
+//          try {
+              String fileName = file.getPath();
+              RIBViewer rv = new RIBViewer();
+              rv.initializeFrom(viewerSwitch);
+              rv.setFileName(fileName);
+              rv.render();
+//              System.out.println("file name is "+fileName);
+        }
+      });
+    export.add(mi);
+    
     fileMenu.addSeparator();
     
     mi = new JMenuItem("Quit");
@@ -702,4 +731,5 @@ public class ViewerApp
   {
     return (Viewer)Class.forName(viewer).newInstance();
   }
+
 }
