@@ -213,7 +213,7 @@ public class TestNonConvexPoly implements KeyListener{
         SceneGraphComponent lightNode2= new SceneGraphComponent();
         Transformation lt2= new Transformation();
         //   lt2.assignScale(-1);
-        FactoredMatrix fm = new FactoredMatrix(lt);
+        fm = new FactoredMatrix(lt);
 		fm.setRotation(-Math.PI / 4, 1, 1, 0);
 		lt.setMatrix(fm.getArray());
         lightNode2.setTransformation(lt2);

@@ -215,7 +215,7 @@ public class TestJvx implements KeyListener{
 		fm.setRotation(.5* Math.PI/2, 0, 1, 0);
 		t.setMatrix(fm.getArray());
           Transformation t2 = new Transformation();
-          FactoredMatrix fm = new FactoredMatrix(t2);
+          fm = new FactoredMatrix(t2);
 		fm.setRotation(.5* Math.PI/4, 1, 0, 0);
 		t2.setMatrix(fm.getArray());
           t.multiplyOnLeft(t2.getMatrix());
@@ -274,7 +274,7 @@ public class TestJvx implements KeyListener{
         SceneGraphComponent lightNode2= new SceneGraphComponent();
         Transformation lt2= new Transformation();
         //   lt2.assignScale(-1);
-        FactoredMatrix fm = new FactoredMatrix(lt);
+        fm = new FactoredMatrix(lt);
 		fm.setRotation(-Math.PI / 4, 1, 1, 0);
 		lt.setMatrix(fm.getArray());
         lightNode2.setTransformation(lt2);
