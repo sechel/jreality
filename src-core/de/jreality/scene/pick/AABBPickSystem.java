@@ -63,9 +63,18 @@ public class AABBPickSystem implements PickSystem {
     public void visit(SceneGraphComponent c) {
       if (!c.isVisible()) return;
       path.push(c);
-      //c.childrenAccept(this);
-      c.childrenWriteAccept(this,false,false,false,false,true,false);
+      
+      Geometry g = c.getGeometry();
+      if(g != null && g instanceof IndexedFaceSet && !checkHasTree((IndexedFaceSet) g))
+          c.childrenWriteAccept(this,false,false,false,false,true,false);
+      else
+          c.childrenAccept(this);
       path.pop();
+    }
+    
+    private boolean checkHasTree(IndexedFaceSet ifs) {
+        AABBTree tree = (AABBTree) ifs.getGeometryAttributes(Attribute.attributeForName("AABBTree"));
+        return tree!=null;
     }
     
     public void visit() {
@@ -76,7 +85,7 @@ public class AABBPickSystem implements PickSystem {
       visit((IndexedLineSet)ifs);
       AABBTree tree = (AABBTree) ifs.getGeometryAttributes(Attribute.attributeForName("AABBTree"));
       if (tree==null) { 
-//        return;
+        //return;
           // at the moment we add a AABBTree if there is none and the ifs is pickable
         // unfortunately this causes a deadlock :-) so we leave the above return for now...
          Object pickable = ifs.getGeometryAttributes("pickable");
