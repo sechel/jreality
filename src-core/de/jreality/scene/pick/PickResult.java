@@ -28,7 +28,7 @@ import de.jreality.scene.SceneGraphPath;
  * @author brinkman
  *
  * TODO document PickResult
- * TODO add support for picking vertices, edges, faces, texture coordinates, etc.
+ * TODO add support for picking vertices, edges, faces, etc.
  */
 public interface PickResult {
   
@@ -67,4 +67,11 @@ public interface PickResult {
    * @return
    */
   public int getPickType();
+  
+  /**
+   * returns texture coordinates if available.
+   * @return the coordinates of null.
+   */
+  public double[] getTextureCoordinates();
+
 }

@@ -336,7 +336,7 @@ public class AABBTree {
                 double[] pointWorld = P3.lineIntersectPlane(null, from,
                     new double[] { dir[0], dir[1], dir[2], 0 }, plane);
                 if (sign(from, dir, pointWorld) == 1) {
-                  hits.add(new Object[]{pointWorld, new Integer(tempt.getIndex())});
+                  hits.add(new Object[]{pointWorld, new Integer(tempt.getIndex()),new Integer(j)});
                   hit = true;
                   break poly;
                 } else {

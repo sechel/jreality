@@ -1,10 +1,6 @@
 package de.jreality.scene.pick;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import de.jreality.math.Matrix;
 import de.jreality.math.P3;
@@ -13,6 +9,7 @@ import de.jreality.scene.*;
 import de.jreality.scene.data.*;
 import de.jreality.scene.pick.bounding.AABB;
 import de.jreality.scene.pick.bounding.AABBTree;
+import de.jreality.util.PickUtility;
 
 public class AABBPickSystem implements PickSystem {
   
@@ -66,7 +63,8 @@ public class AABBPickSystem implements PickSystem {
     public void visit(SceneGraphComponent c) {
       if (!c.isVisible()) return;
       path.push(c);
-      c.childrenAccept(this);
+      //c.childrenAccept(this);
+      c.childrenWriteAccept(this,false,false,false,false,true,false);
       path.pop();
     }
     
@@ -77,7 +75,20 @@ public class AABBPickSystem implements PickSystem {
     public void visit(IndexedFaceSet ifs) {
       visit((IndexedLineSet)ifs);
       AABBTree tree = (AABBTree) ifs.getGeometryAttributes(Attribute.attributeForName("AABBTree"));
-      if (tree==null) return;
+      if (tree==null) { 
+//        return;
+          // at the moment we add a AABBTree if there is none and the ifs is pickable
+        // unfortunately this causes a deadlock :-) so we leave the above return for now...
+         Object pickable = ifs.getGeometryAttributes("pickable");
+          if(pickable != null && pickable.equals(Boolean.FALSE))
+              return;
+          else {
+              System.out.println("make tree ....");
+              PickUtility.assignFaceAABBTree(ifs);
+              tree = (AABBTree) ifs.getGeometryAttributes(Attribute.attributeForName("AABBTree"));
+              System.out.println("made tree ...."+tree);
+          }
+      }
       Matrix m = new Matrix();
       path.getMatrix(m.getArray());
       localHits.clear();
@@ -86,7 +97,8 @@ public class AABBPickSystem implements PickSystem {
         Object[] val = (Object[]) i.next();
         double[] pointWorld = (double[])val[0];
         int index = ((Integer)val[1]).intValue();
-        Hit h = new Hit(path.pushNew(ifs), pointWorld, Rn.euclideanDistance(from, pointWorld), 0, PickResult.PICK_TYPE_FACE, index);
+        int triIndex = ((Integer)val[2]).intValue(); //index of the first point of triangle in pt sequence of the polygon
+        Hit h = new Hit(path.pushNew(ifs), pointWorld, Rn.euclideanDistance(from, pointWorld), 0, PickResult.PICK_TYPE_FACE, index,triIndex);
         if (h.getDist() <= maxDist) AABBPickSystem.this.hits.add(h);
       }
     }
@@ -127,7 +139,7 @@ public class AABBPickSystem implements PickSystem {
         p = m.multiplyVector(p);
         double[] pointWorld = new double[]{p[0], p[1], p[2]};
         double[] center = Rn.times(null, 0.5, Rn.add(p1, p1, p2));
-        Hit h = new Hit(path.pushNew(ils), center, Rn.euclideanDistance(from, pointWorld), 0, PickResult.PICK_TYPE_LINE, index);
+        Hit h = new Hit(path.pushNew(ils), center, Rn.euclideanDistance(from, pointWorld), 0, PickResult.PICK_TYPE_LINE, index,-1);
         if (h.getDist() <= maxDist) AABBPickSystem.this.hits.add(h);
       }
     }
@@ -149,7 +161,7 @@ public class AABBPickSystem implements PickSystem {
         if (p[3] == 0) throw new RuntimeException("pick at infinity");
         p = m.multiplyVector(p);
         double[] pointWorld = new double[]{p[0], p[1], p[2]};
-        Hit h = new Hit(path.pushNew(ps), pointWorld, Rn.euclideanDistance(from, pointWorld), 0, PickResult.PICK_TYPE_POINT, index);
+        Hit h = new Hit(path.pushNew(ps), pointWorld, Rn.euclideanDistance(from, pointWorld), 0, PickResult.PICK_TYPE_POINT, index,-1);
         if (h.getDist() <= maxDist) AABBPickSystem.this.hits.add(h);
       }
     }
@@ -163,7 +175,7 @@ public class AABBPickSystem implements PickSystem {
       if (tmpAABB.intersects(from, to)) {
         double[] p = tmpAABB.getExtent(null);
         double[] pointWorld = new double[]{p[0], p[1], p[2]};
-        Hit h = new Hit((SceneGraphPath) path.clone(), pointWorld, Rn.euclideanDistance(from, pointWorld), distFromRay(pointWorld), PickResult.PICK_TYPE_OBJECT, -1);
+        Hit h = new Hit((SceneGraphPath) path.clone(), pointWorld, Rn.euclideanDistance(from, pointWorld), distFromRay(pointWorld), PickResult.PICK_TYPE_OBJECT, -1,-1);
         if (h.getDist() <= maxDist) AABBPickSystem.this.hits.add(h);
       }
     }
@@ -181,12 +193,14 @@ public class AABBPickSystem implements PickSystem {
     final SceneGraphPath path;
     final double[] pointWorld;
     final double[] pointObject;
+    double[] texCoords = null;
     final int pickType;
     final int index;
+    final int triIndex;
     final double dist;
     final double distRay;
 
-    public Hit(SceneGraphPath path, double[] pointWorld, double dist, double distRay, int pickType, int index) {
+    public Hit(SceneGraphPath path, double[] pointWorld, double dist, double distRay, int pickType, int index,int triIndex) {
       this.path = (SceneGraphPath) path;
       Matrix m = new Matrix();
       path.getInverseMatrix(m.getArray());
@@ -196,6 +210,7 @@ public class AABBPickSystem implements PickSystem {
       this.distRay = distRay;
       this.pickType=pickType;
       this.index=index;
+      this.triIndex=triIndex;
     }
 
     public SceneGraphPath getPickPath() {
@@ -231,6 +246,99 @@ public class AABBPickSystem implements PickSystem {
 
     public double getDistRay() {
       return distRay;
+    }
+
+    private int hasTextureCoordinates() {
+        if(texCoords== null) {
+            if(triIndex > -1) {
+            SceneGraphNode end = path.getLastElement();
+            if (end instanceof IndexedFaceSet) {
+                IndexedFaceSet ifs = (IndexedFaceSet) end;
+                DataList txc = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+                if(txc != null) {
+                    DataList indices=ifs.getFaceAttributes(Attribute.INDICES);
+                    if(indices != null){
+                        DoubleArrayArray points
+                        =ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
+                        IntArray faceIndices = indices.item(index).toIntArray();
+                        int ptIndex0 = faceIndices.getValueAt(triIndex);
+                        int ptIndex1 = faceIndices.getValueAt(triIndex+1);
+                        int ptIndex2 = faceIndices.getValueAt(triIndex+2);
+                        DoubleArray tc0 = txc.item(ptIndex0).toDoubleArray();
+                        DoubleArray tc1 = txc.item(ptIndex1).toDoubleArray();
+                        DoubleArray tc2 = txc.item(ptIndex2).toDoubleArray();
+                        final int textureLength = tc0.getLength();
+                        texCoords = new double[textureLength];
+                        
+                        // get the points
+//                        DoubleArray     pt = points.item(ptIndex2).toDoubleArray();
+//                        final double cx = pt.getValueAt(0);
+//                        final double cy = pt.getValueAt(1);
+//                        final double cz = pt.getValueAt(2);
+//                        
+//                        final double px = cx-pointObject[0];
+//                        final double py = cx-pointObject[1];
+//                        final double pz = cx-pointObject[2];
+//                    
+//                        pt = points.item(ptIndex0).toDoubleArray();
+//                        final double ax = pt.getValueAt(0)-cx;
+//                        final double ay = pt.getValueAt(1)-cy;
+//                        final double az = pt.getValueAt(2)-cz;
+//                        pt = points.item(ptIndex1).toDoubleArray();
+//                        final double bx = pt.getValueAt(0)-cx;
+//                        final double by = pt.getValueAt(1)-cy;
+//                        final double bz = pt.getValueAt(2)-cz;
+//                        
+//                      // p = u a + v b + w c :
+//                        
+//                        final double u = (bx*(py+pz) -pz*(ay+bz))/(ax*(by+bz)-bx*(ay+az));
+//                        final double v = (ax*(py+pz) -pz*(ay+az))/(bx*(by+bz)-ax*(ay+az));
+//                        final double w = 1-u-v;
+//                                  
+                        DoubleArray     pt = points.item(ptIndex2).toDoubleArray();
+                        final double cx = pt.getValueAt(0);
+                        final double cy = pt.getValueAt(1);
+                        final double cz = pt.getValueAt(2);
+                        
+                        final double c = cx-pointObject[0];
+                        final double f = cy-pointObject[1];
+                        final double i = cz-pointObject[2];
+                    
+                        pt = points.item(ptIndex0).toDoubleArray();
+                        final double a = pt.getValueAt(0)-cx;
+                        final double d = pt.getValueAt(1)-cy;
+                        final double g = pt.getValueAt(2)-cz;
+                        pt = points.item(ptIndex1).toDoubleArray();
+                        final double b = pt.getValueAt(0)-cx;
+                        final double e = pt.getValueAt(1)-cy;
+                        final double h = pt.getValueAt(2)-cz;
+                        
+                      // p = u a + v b + w c :
+                        
+                        final double u = (b*(f+i)-c*(e+h))/(a*(e+h)-b*(d+g));
+                        final double v = (a*(f+i)-c*(d+g))/(b*(d+g)-a*(e+h));
+                        final double w = 1-u-v;
+          
+//                        System.err.println("tc "+tc0.getValueAt(0)+" "+tc0.getValueAt(1));
+//                        System.err.println("tc "+tc1.getValueAt(0)+" "+tc1.getValueAt(1));
+//                        System.err.println("tc "+tc2.getValueAt(0)+" "+tc2.getValueAt(1));
+                        for(int j = 0 ; j<textureLength;j++) {
+                            texCoords[j] = u*tc0.getValueAt(j) + v * tc1.getValueAt(j) + + w * tc2.getValueAt(j);
+                        }
+//                        System.err.println("tc "+texCoords[0]+" "+texCoords[1]);
+                        return texCoords.length;
+                    }
+                }
+            }
+        }
+        texCoords = new double[0];
+        }
+        return texCoords.length;
+    }
+
+    public double[] getTextureCoordinates() {
+        hasTextureCoordinates();
+            return texCoords;
     }
   }
   
