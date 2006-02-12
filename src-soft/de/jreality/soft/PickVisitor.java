@@ -25,6 +25,7 @@ package de.jreality.soft;
 import java.util.*;
 import java.util.logging.Logger;
 
+
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.math.VecMat;
@@ -381,7 +382,7 @@ public void setPipeline(PolygonPipeline pipeline) {
     /* (non-Javadoc)
      * @see de.jreality.soft.NewDoublePolygonRasterizer.Colorizer#colorize(int[], double[], int, double[])
      */
-    public void colorize(int[] pixels, double[] zBuff, int pos, double[] data) {
+    public void colorize(int[] pixels, double[] zBuff, int pos, double[] data,boolean interpolateUV) {
         //System.out.println(" current Geometry is "+path.getLastElement());
         double[] pointNDC = new double[] {0,0,data[2],1};
         double[] pointCamera = new double[4];
@@ -395,8 +396,12 @@ public void setPipeline(PolygonPipeline pipeline) {
         
         Rn.matrixTimesVector(pointObject,path.getInverseMatrix(null),pointWorld);
         Pn.dehomogenize(pointObject,pointObject);
-        
-        list.add(new Hit((SceneGraphPath)path.clone(),pointNDC, pointCamera, pointWorld,pointObject));
+        double[] texCoords =null;
+        if(interpolateUV) {
+            texCoords = new double[] {data[Polygon.U],data[Polygon.V]};
+        }
+            
+        list.add(new Hit((SceneGraphPath)path.clone(),pointNDC, pointCamera, pointWorld,pointObject,texCoords));
     }
     protected void clear() {
         list = new ArrayList();
@@ -421,12 +426,14 @@ public void setPipeline(PolygonPipeline pipeline) {
       double[] pointWorld;
       double[] pointNDC;
       double[] pointObject;
-      public Hit(SceneGraphPath path, double[] pointNDC, double[] pointCamera, double[] pointWorld, double[] pointObject) {
+      double[] textureCoords;
+      public Hit(SceneGraphPath path, double[] pointNDC, double[] pointCamera, double[] pointWorld, double[] pointObject,double[] textureCoords) {
           this.path = (SceneGraphPath) path;
           this.pointCamera = (double[]) pointCamera;
           this.pointWorld= (double[]) pointWorld;
           this.pointNDC= (double[]) pointNDC;
           this.pointObject= (double[]) pointObject;
+          this.textureCoords = textureCoords;
       }
     public SceneGraphPath getPickPath() {
         return path;
@@ -462,6 +469,15 @@ public void setPipeline(PolygonPipeline pipeline) {
     public int getPickType() {
       // TODO Auto-generated method stub
       return -1;
+    }
+    public int hasTextureCoordinates() {
+        if(textureCoords== null)
+            return 0;
+        else
+            return textureCoords.length;
+    }
+    public double[] getTextureCoordinates() {
+        return textureCoords;
     }
   }
       public static class HitComparator implements Comparator {

@@ -481,7 +481,7 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
     private final int[] color = new int[4];
     
     public static abstract class Colorizer {
-        public abstract void colorize(final int[] pixels, final double[] zBuff, final int pos, final double[] data);
+        public abstract void colorize(final int[] pixels, final double[] zBuff, final int pos, final double[] data,boolean interpolateUV);
     }
     final double [] data = new double[Polygon.VERTEX_LENGTH];
     private final void colorize(final int pos) {
@@ -542,7 +542,7 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
             data[Polygon.A] = aaa.value/ww;
             data[Polygon.U] = uuu.value/ww;
             data[Polygon.V] = vvv.value/ww;
-            colorizer.colorize(pixels,zBuffer, pos, data);
+            colorizer.colorize(pixels,zBuffer, pos, data,interpolateUV);
         } else {
         pixels[pos]  = OPAQUE |  ((int)r <<16) |  ((int)g <<8) | (int)b;
         zBuffer[pos]= z;
@@ -630,6 +630,9 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
     }
 
     public final  void stop() {
+    }
+    public boolean isInterpolateUV() {
+        return interpolateUV;
     }
 
 }
