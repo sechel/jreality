@@ -49,19 +49,28 @@ public class DefaultGeometryShader  implements Shader {
 		if(faceDraw) {
 //		    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"polygonShader"), eap))
 //		        polygonShaderNew = (DefaultPolygonShader) AttributeEntityUtility.createAttributeEntity(DefaultPolygonShader.class, ShaderUtility.nameSpace(name,"polygonShader"), eap);
-	        	polygonShader =(PolygonShader) ShaderLookup.getShaderAttr(eap, geomShaderName, CommonAttributes.POLYGON_SHADER);
+	        	if (polygonShader == null) 
+	        		polygonShader =(PolygonShader) ShaderLookup.getShaderAttr(eap, geomShaderName, CommonAttributes.POLYGON_SHADER);
+	        	else 
+	        		polygonShader.setFromEffectiveAppearance(eap, ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER));
 	    } else {
 //	    		polygonShaderNew = null;
 	    		polygonShader = null;
 	    }
 	    if(edgeDraw) {
+	    	if (lineShader == null)
 	    		lineShader =(LineShader) ShaderLookup.getShaderAttr(eap, geomShaderName, CommonAttributes.LINE_SHADER);
+	    	else
+	    		lineShader.setFromEffectiveAppearance( eap,ShaderUtility.nameSpace(name,CommonAttributes.LINE_SHADER) );
 	    } else {
 	        	lineShader = null;
 	    }
 	       
 	    if(vertexDraw) {
-	        pointShader=(PointShader) ShaderLookup.getShaderAttr(eap, geomShaderName, CommonAttributes.POINT_SHADER);
+	        if (pointShader == null)
+	        	pointShader=(PointShader) ShaderLookup.getShaderAttr(eap, geomShaderName, CommonAttributes.POINT_SHADER);
+	        else
+	        	pointShader.setFromEffectiveAppearance(eap, ShaderUtility.nameSpace(name,CommonAttributes.POINT_SHADER) );
 	    } else {
 	        pointShader=null;
 	    }

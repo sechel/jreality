@@ -1295,24 +1295,43 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 
 		
 		private void updateAppearance()	{
+			Appearance thisAp = goBetween.getOriginalComponent().getAppearance(); 
 			if (parent == null)	{
-				if (eAp == null) eAp = EffectiveAppearance.create();
-				if (goBetween.getOriginalComponent().getAppearance() != null )	
-					eAp = eAp.create(goBetween.getOriginalComponent().getAppearance());
-				// TODO figure out why I put this here in the first place
-				//else eAp = eAp.create(new Appearance());				
+				if (eAp == null) {
+					eAp = EffectiveAppearance.create();
+					if (goBetween.getOriginalComponent().getAppearance() != null )	
+						eAp = eAp.create(goBetween.getOriginalComponent().getAppearance());
+				}
 			} else {
 				if ( parent.eAp == null)	{
 					theLog.log(Level.WARNING,"No effective appearance in parent "+parent.getName());
 					return;
 				}
-				if (goBetween.getOriginalComponent().getAppearance() != null )	
-					eAp = parent.eAp.create(goBetween.getOriginalComponent().getAppearance());
-				else eAp = parent.eAp;				
+				// TODO when Appearance's are added or removed, have to set eAp to null
+				if (eAp == null)	{
+					if (thisAp != null )	
+						eAp = parent.eAp.create(thisAp);
+					else {
+						eAp = parent.eAp;	
+					}
+				}
 			}
-			geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
-			//theLog.log(Level.FINE,"component "+goBetween.getOriginalComponent().getName()+" vertex draw is "+geometryShader.isVertexDraw());
-			renderingHints = RenderingHintsShader.createFromEffectiveAppearance(eAp, "");
+			if (thisAp == null && parent != null)	{
+				geometryShader = parent.geometryShader;
+				renderingHints = parent.renderingHints;
+			} else {
+				if (geometryShader == null)
+					geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
+				else 
+					geometryShader.setFromEffectiveAppearance(eAp, "");
+				
+				
+				//theLog.log(Level.FINE,"component "+goBetween.getOriginalComponent().getName()+" vertex draw is "+geometryShader.isVertexDraw());
+				if (renderingHints == null)
+					renderingHints = RenderingHintsShader.createFromEffectiveAppearance(eAp, "");
+				else
+					renderingHints.setFromEffectiveAppearance(eAp, "");				
+			}
 			useDisplayLists = renderingHints.isUseDisplayLists();
 			appearanceIsDirty = false;
 		}
