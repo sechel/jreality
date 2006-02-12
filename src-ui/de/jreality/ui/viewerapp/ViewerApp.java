@@ -430,7 +430,24 @@ public class ViewerApp
         }
       });
     export.add(mi);
-    
+
+    mi = new JMenuItem("SVG");
+    mi.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent arg0) {
+          File file = FileLoaderDialog.selectTargetFile(frame,"svg", " svg export");
+          if (file == null) return;
+//          try {
+              String fileName = file.getPath();
+              de.jreality.soft.SVGViewer rv = new de.jreality.soft.SVGViewer(fileName);
+              rv.initializeFrom(viewerSwitch);
+              rv.setWidth(viewerSwitch.getViewingComponent().getWidth());
+              rv.setHeight(viewerSwitch.getViewingComponent().getHeight());
+              rv.render();
+//              System.out.println("file name is "+fileName);
+        }
+      });
+    export.add(mi);
+
     fileMenu.addSeparator();
     
     mi = new JMenuItem("Quit");
