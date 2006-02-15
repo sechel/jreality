@@ -97,7 +97,7 @@ public class SoftPickSystem implements PickSystem {
         
 
         perspective.setFieldOfViewDeg(0.1);
-        perspective.setNear(0);
+        perspective.setNear(1);
         perspective.setFar(far);
         pickVisitor.getHitDetector().setNdcToCamera(perspective.getInverseMatrix(null));
         

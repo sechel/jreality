@@ -30,9 +30,7 @@ import de.jreality.scene.*;
 import de.jreality.scene.Viewer;
 
 /**
- * This is an experimental PS viewer for jReality.
- * It is still verry rudimentary and rather a 
- * proof of concept thatn a full featured PS writer.
+ * 
  * @version 1.0
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
  *
@@ -64,10 +62,6 @@ public  class PickViewer implements Viewer {
         pickVisitor.setPipeline(pipeline);
     }
 
-//    public void setBackgroundColor(int c) {
-//        argbBackground=c;
-//        rasterizer.setBackground(c);
-//    }
     
     void render(int width, int height) {
         

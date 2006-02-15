@@ -28,8 +28,11 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
+import java.io.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.*;
 
 import javax.imageio.ImageIO;
@@ -87,7 +90,36 @@ public class RIBVisitor extends SceneGraphVisitor {
         Camera camera =(Camera) path.getLastElement();
         this.name =name;
         double[] cam =path.getInverseMatrix(null);
+<<<<<<< RIBVisitor.java
+        try {
+            File file = new File(name);
+            System.out.println("writing in  "+file);
+            file = new File(file.getParent(),"transformedpaintedplastic.sl");
+            System.out.println("checking on "+file+" exists "+file.exists());
+            if(!file.exists()) {
+               // file.createNewFile();
+            OutputStream os = new FileOutputStream(file);
+            InputStream is = getClass().getResourceAsStream("transformedpaintedplastic.sl");
+            
+            int c = 0;
+            while((c =is.read())!=-1) {
+                os.write(c);
+////                System.out.print((char)c);
+            }
+            os.close();
+            is.close();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if(!name.endsWith(".rib"))
+            name = name+".rib";
+        Ri.begin(name);
+=======
         Ri.begin(name+(name.endsWith(".rib") ? "" : ".rib"));
+>>>>>>> 1.19
         HashMap map = new HashMap();
         map.put("shader", (shaderPath!=null?(shaderPath+":"):"")+".:&");
         //map.put("shader", (fullSpotLight!=null?(fullSpotLight+":"):"")+".:&");
@@ -260,14 +292,14 @@ public class RIBVisitor extends SceneGraphVisitor {
            
             for (int y = 0, ptr = 0; y < dataHeight; y++)
                 for (int x = 0; x < dataWidth; x++, ptr += 4) {
-                    /*pix[3] = byteArray[ptr + 3];
+                    pix[3] = byteArray[ptr + 3];
                     pix[0] = byteArray[ptr];
                     pix[1] = byteArray[ptr + 1];
-                    pix[2] = byteArray[ptr + 2];*/
-                	pix[3] = byteArray[ptr + 0];
-                    pix[0] = byteArray[ptr + 3];
-                    pix[1] = byteArray[ptr + 2];
-                    pix[2] = byteArray[ptr + 1];
+                    pix[2] = byteArray[ptr + 2];
+//                	pix[3] = byteArray[ptr + 0];
+//                    pix[0] = byteArray[ptr + 3];
+//                    pix[1] = byteArray[ptr + 2];
+//                    pix[2] = byteArray[ptr + 1];
                     raster.setPixel(x, y, pix);
                 }
             img = bi;

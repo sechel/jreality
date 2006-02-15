@@ -391,7 +391,7 @@ public class PolygonPipeline
             //boolean isTransparent = (shader.getVertexShader().getTransparency() != 0.)||shader.hasTexture()||shader.interpolateAlpha();
             //shader might have changed after lighting:
             boolean isTransparent = p.getShader().needsSorting(); 
-            
+////            isTransparent = false;
             if(triangulate) {
                 PolygonShader ps = p.getShader();
                 if (polygonCount + 1 >= this.polygons.length)

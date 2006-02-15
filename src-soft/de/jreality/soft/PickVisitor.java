@@ -215,6 +215,8 @@ public void setPipeline(PolygonPipeline pipeline) {
 //  }
 
   public void visit(IndexedLineSet g) {
+      hitDetector.path.push(g);
+
     if(!shaderUptodate) setupShader();
     DataList dl  = g.getEdgeAttributes(Attribute.INDICES);
         if(lineShader != null&& dl!= null) {
@@ -237,6 +239,7 @@ public void setPipeline(PolygonPipeline pipeline) {
           //pipeline.processLine(p1, p2);
         }
     }
+      hitDetector.path.pop();
     visit((PointSet)g);
   }
   
@@ -244,6 +247,8 @@ public void setPipeline(PolygonPipeline pipeline) {
   private IntArray fnia =new IntArray(fni);
   
   public void visit(IndexedFaceSet ifs) {
+      hitDetector.path.push(ifs);
+
     if(!shaderUptodate) setupShader();
 
           if(polygonShader != null) {
@@ -279,10 +284,12 @@ public void setPipeline(PolygonPipeline pipeline) {
         }
     }
     }
+      hitDetector.path.pop();
     visit((IndexedLineSet)ifs);
   }
 
   public void visit(PointSet p) {
+      hitDetector.path.push(p);
     if(!shaderUptodate) setupShader();
     DoubleArrayArray a = null;
     int n= p.getNumPoints();
@@ -294,20 +301,25 @@ public void setPipeline(PolygonPipeline pipeline) {
             pipeline.processPoint(a, i);
         
     }
+      hitDetector.path.pop();
     
   }
 
   
   public void visit(Sphere s) {
+      hitDetector.path.push(s);
     if(!shaderUptodate) setupShader();
     pipeline.startGeometry(s);
     Geometries.unitSphere().apply(pipeline);
+      hitDetector.path.pop();
   }
   
   public void visit(Cylinder c) {
-      if(!shaderUptodate) setupShader();
+      hitDetector.path.push(c);
+    if(!shaderUptodate) setupShader();
       pipeline.startGeometry(c);
       Geometries.cylinder().apply(pipeline);
+      hitDetector.path.pop();
   }
 
   //
@@ -488,8 +500,10 @@ public void setPipeline(PolygonPipeline pipeline) {
         public int compare(Object o1, Object o2) {
             double a = ((Hit) o1).getPointNDC()[2];
             double b = ((Hit) o2).getPointNDC()[2];
-            
             return a>b? 1 : (b>a? -1:0);    
+//            double a = ((Hit) o1).getPointCamera()[2];
+//            double b = ((Hit) o2).getPointCamera()[2];
+//            return a>b? 1 : (b>a? -1:0);    
         }
           
       }
