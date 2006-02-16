@@ -965,7 +965,8 @@ public class IndexedFaceSetUtility {
          * TODO optimize in case its a QuadMesh (u+v curves instead of u*v segments)
          * @param faces
          * @return
-         */public static IntArrayArray edgesFromFaces( IntArrayArray faces )
+         */
+        public static IntArrayArray edgesFromFaces( IntArrayArray faces )
         {
             HashSet set =new HashSet();
            

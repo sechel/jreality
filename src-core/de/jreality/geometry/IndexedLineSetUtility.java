@@ -7,6 +7,8 @@ package de.jreality.geometry;
 
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.Scene;
+import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.IntArray;
@@ -109,42 +111,58 @@ public class IndexedLineSetUtility {
 	}
 
 	
+	public static IndexedLineSet createCurveFromPoints(double[][] points, boolean closed)	{
+		return createCurveFromPoints(null, points,  closed);
+	}
+		
 	/**
 	 * @param points
 	 * @param closed
 	 * @return
 	 */
-	public static IndexedLineSet createCurveFromPoints(double[][] points, boolean closed)	{
+	public static IndexedLineSet createCurveFromPoints(IndexedLineSet g, final double[][] points, boolean closed)	{
 		int n = points.length;
 		int size = (closed) ? n+1 : n;
-		IndexedLineSet g = new IndexedLineSet(n,1);
+		if (g==null) g = new IndexedLineSet(n,1);
+		final IndexedLineSet ils = g;
 		// TODO replace this with different call if IndexedLineSet exists.
-		int[][] ind = new int[1][size];
+		final int[][] ind = new int[1][size];
 		for (int i = 0; i<size ; ++i)	{
 			ind[0][i] = (i%n);
 		}
 		//if (closed) ind[0][n] = 0;
-		g.setEdgeCountAndAttributes(Attribute.INDICES, new IntArrayArray.Array(ind));
-
-		int vectorLength = points[0].length;
-		g.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(vectorLength).createWritableDataList(points));
+		final int vectorLength = points[0].length;
+		
+		Scene.executeWriter(ils, new Runnable () {
+			public void run() {
+				ils.setEdgeCountAndAttributes(Attribute.INDICES, new IntArrayArray.Array(ind));
+				ils.setVertexCountAndAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(vectorLength).createWritableDataList(points));
+				}
+		});
 		return g;
 	}
 
-	public static IndexedLineSet createCurveFromPoints(double[] points, int fiber, boolean closed)	{
+	public static IndexedLineSet createCurveFromPoints( double[] points, int fiber, boolean closed)	{
+		return createCurveFromPoints(null, points, fiber, closed);
+	}
+		
+	public static IndexedLineSet createCurveFromPoints(IndexedLineSet g, final double[] points, int fiber, boolean closed)	{
 		int n = points.length/fiber;
 		int size = (closed) ? n+1 : n;
-		IndexedLineSet g = new IndexedLineSet(n,1);
+		if (g == null) g = new IndexedLineSet(n,1);
+		final IndexedLineSet ils = g;
 		// TODO replace this with different call if IndexedLineSet exists.
-		int[][] ind = new int[1][size];
+		final int[][] ind = new int[1][size];
 		for (int i = 0; i<size ; ++i)	{
 			ind[0][i] = (i%n);
 		}
-		//if (closed) ind[0][n] = 0;
-		g.setEdgeCountAndAttributes(Attribute.INDICES, new IntArrayArray.Array(ind));
-
-		int vectorLength = fiber;
-		g.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.inlined(vectorLength).createWritableDataList(points));
+		final int vectorLength = fiber;
+		Scene.executeWriter(ils, new Runnable () {
+			public void run() {
+				ils.setEdgeCountAndAttributes(Attribute.INDICES, new IntArrayArray.Array(ind));
+				ils.setVertexCountAndAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.inlined(vectorLength).createWritableDataList(points));
+				}
+		});
 		return g;
 	}
 

@@ -26,7 +26,7 @@ public class SphereUtility {
 		super();
 	}
 	protected static int numberOfTessellatedCubes = 16;
-	protected static int numberOfTessellatedIcosahedra = 6;
+	protected static int numberOfTessellatedIcosahedra = 8;
 	protected static IndexedFaceSet[] tessellatedIcosahedra = new IndexedFaceSet[numberOfTessellatedIcosahedra];
 	protected static SceneGraphComponent[] tessellatedCubes = new SceneGraphComponent[numberOfTessellatedCubes];
 	public static int SPHERE_COARSE=0, SPHERE_FINE=1, SPHERE_FINER=2, SPHERE_FINEST=3, SPHERE_SUPERFINE=4, SPHERE_WAYFINE=5;
