@@ -759,7 +759,7 @@ INT_OR_FLOAT:
 //   optional sign   either integer w/exponent or   real number with optional exponent
 //  this rule doesn't accept simple integers, only integers with exponents
 //	('+'|'-')? ( ( (DIGIT)+ EXPONENT) | ( (DIGIT)* '.' (DIGIT)+   (EXPONENT)?) )
-	('+'|'-')? ((DIGIT)* {$setType(INT);}) ('.' {$setType(FLOAT); }  (DIGIT)+   (EXPONENT)?)?
+	('+'|'-')? ((DIGIT)* (EXPONENT)? {$setType(INT);}) ('.' {$setType(FLOAT); }  (DIGIT)+   (EXPONENT)?)?
 	;
 	
 protected

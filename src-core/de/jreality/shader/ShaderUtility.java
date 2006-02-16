@@ -51,7 +51,15 @@ public class ShaderUtility {
       return (DefaultGeometryShader) AttributeEntityUtility.createAttributeEntity(DefaultGeometryShader.class, "", ea);
     }
 
-  public static RootAppearance createRootAppearance(Appearance a) {
+  public static RenderingHintsShader createDefaultRenderingHintsShader(Appearance a, boolean readDefaults) {
+	    return (RenderingHintsShader) AttributeEntityUtility.createAttributeEntity(RenderingHintsShader.class, "", a, readDefaults);
+	  }
+
+  public static RenderingHintsShader createRenderingHintsShader(EffectiveAppearance ea) {
+      return (RenderingHintsShader) AttributeEntityUtility.createAttributeEntity(RenderingHintsShader.class, "", ea);
+    }
+
+ public static RootAppearance createRootAppearance(Appearance a) {
       return (RootAppearance) AttributeEntityUtility.createAttributeEntity(RootAppearance.class, "", a, true);
     }
   

@@ -9,7 +9,7 @@ public interface RootAppearance extends AttributeEntity {
   public final static Color  BACKGROUND_COLOR_DEFAULT = new java.awt.Color(225, 225, 225);
   public final static boolean  FOG_ENABLED_DEFAULT = false;
   public final static Color  FOG_COLOR_DEFAULT = new java.awt.Color(225, 225, 225);
-  public final static double FOG_DENSITY_DEFAULT = 0.4;
+  public final static double FOG_DENSITY_DEFAULT = 0.1;
 
 
   Color getBackgroundColor();

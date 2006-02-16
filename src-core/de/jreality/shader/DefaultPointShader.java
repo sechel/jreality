@@ -16,7 +16,7 @@ public interface DefaultPointShader extends PointShader {
 
 	public static final Color DIFFUSE_COLOR_DEFAULT = Color.RED;
   public final static boolean SPHERES_DRAW_DEFAULT = true;
-  public final static boolean NORMALS_DRAW_DEFAULT = false;
+//  public final static boolean NORMALS_DRAW_DEFAULT = false;
   public final static double POINT_RADIUS_DEFAULT = 0.025;
   public final static double POINT_SIZE_DEFAULT = 3.0;
   
@@ -24,10 +24,10 @@ public interface DefaultPointShader extends PointShader {
 	public abstract void setDiffuseColor(Color c);
   
   Boolean getSpheresDraw();
-  void setShperesDraw(Boolean value);
+  void setSpheresDraw(Boolean value);
   
-  Boolean getNormalsDraw();
-  void setNormalsDraw(Boolean value);
+//  Boolean getNormalsDraw();
+//  void setNormalsDraw(Boolean value);
   
   Double getPointRadius();
   void setPointRadius(Double radius);

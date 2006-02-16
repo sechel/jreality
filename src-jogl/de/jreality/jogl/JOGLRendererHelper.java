@@ -208,7 +208,8 @@ public class JOGLRendererHelper {
 	 * @param sg
 	 */
 	public static void drawLines(IndexedLineSet sg, JOGLRenderer jr , boolean pickMode, boolean interpolateVertexColors, double alpha) {
-	        if (sg.getNumEdges() == 0) return;
+	     if (sg.getNumEdges() == 0) return;
+	     
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);

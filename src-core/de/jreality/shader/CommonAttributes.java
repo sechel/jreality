@@ -42,7 +42,7 @@ public class CommonAttributes {
     public final static boolean  FOG_ENABLED_DEFAULT = false;
     public final static String FOG_COLOR = "fogColor";
     public final static String FOG_DENSITY = "fogDensity";
-    public final static double FOG_DENSITY_DEFAULT = 0.4;
+    public final static double FOG_DENSITY_DEFAULT = 0.1;
     
     public final static String NAME ="name";
 	// rendering hints

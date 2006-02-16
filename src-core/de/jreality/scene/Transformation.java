@@ -186,7 +186,8 @@ public class Transformation extends SceneGraphNode implements Cloneable {
 		  startWriter();
 		  try {
 			  Rn.times(theMatrix, theMatrix, T);
-		  } 
+			  fireTransformationChanged();
+			 } 
 		  finally {
 			  finishWriter();		  
 		  }
@@ -196,6 +197,7 @@ public class Transformation extends SceneGraphNode implements Cloneable {
 		  startWriter();
 		  try {
 			  Rn.times(theMatrix, T, theMatrix);
+			  fireTransformationChanged();
 		  } 
 		  finally {
 			  finishWriter();		  

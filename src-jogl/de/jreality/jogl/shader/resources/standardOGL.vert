@@ -10,7 +10,7 @@
 uniform bool lightingEnabled;
 uniform int reflectionTextureUnit;
 uniform int numLights;
-#pragma optimize(on)
+#pragma optimize(off)
 
 float calculateAttenuation(in float d, in vec3 surfaceToLightVector,  in int i)	{
     float spotDot;
@@ -43,15 +43,15 @@ void Light(in int i,
     vec3 surfaceToLightVector;
     vec3 halfVector;
    	if (gl_LightSource[i].position.w == 0.0)	{
-     		nDotVP = max(0.0, dot(normal, normalize(vec3 (gl_LightSource[i].position))));
+     	nDotVP = max(0.0, dot(normal, normalize(vec3 (gl_LightSource[i].position))));
     		nDotHV = max(0.0, dot(normal, normalize(vec3 (gl_LightSource[i].halfVector))));
      } else {
 	    	 // compute vector from surface to light position
 	    	surfaceToLightVector = (vec3 (gl_LightSource[i].position))/gl_LightSource[i].position.w - surfaceCameraCoordinates;
-			d = length(surfaceToLightVector);
-			surfaceToLightVector = normalize(surfaceToLightVector);
+		d = length(surfaceToLightVector);
+		surfaceToLightVector = normalize(surfaceToLightVector);
 	    	attenuation = calculateAttenuation(d, surfaceToLightVector, i);
-			halfVector = normalize(surfaceToLightVector+surfaceToCameraVector);
+		halfVector = normalize(surfaceToLightVector+surfaceToCameraVector);
 	    	nDotVP = max(0.0, (dot(normal, surfaceToLightVector)));
 	    	nDotHV = max(0.0, (dot(normal, halfVector))); 
    }
@@ -70,20 +70,20 @@ void doLighting(in vec3 normal, in vec3 surfaceToCameraVector, in vec3 surfaceCa
     gl_MaterialParameters mp;
     gl_LightModelProducts lmp;
     if (front) {
-    	mp = gl_FrontMaterial;
-    	lmp = gl_FrontLightModelProduct;
+   		mp = gl_FrontMaterial;
+    		lmp = gl_FrontLightModelProduct;
     } else {
-    	mp = gl_BackMaterial;
-    	lmp = gl_BackLightModelProduct;
+    		mp = gl_BackMaterial;
+    		lmp = gl_BackLightModelProduct;
     }
     
     int i;
     int count = gl_MaxLights;
     if (!lightingEnabled)	{
-    	color = gl_Color;
+    		color = gl_Color;
     }  else {
     	// loop through lights
-    	for (i = 0; i<count; ++i)    {
+    	for (i = 0; i<1; ++i)    {
     	    // Hack to workaround problem with knowing which lights are enabled
     	    //if (gl_LightSource[i].spotCutoff == 0.0)  break;
  			Light(i, surfaceToCameraVector, surfaceCameraCoordinates, normal, mp.shininess, amb, diff, spec);
@@ -91,9 +91,9 @@ void doLighting(in vec3 normal, in vec3 surfaceToCameraVector, in vec3 surfaceCa
  		color = lmp.sceneColor + amb*mp.ambient+diff * gl_Color; //mp.diffuse; 
  
     	if (SeparateSpecular)
-       		sc  = spec * mp.specular;
+       	sc  = spec * mp.specular;
     	else 
-       		color += spec * mp.specular;   
+       	color += spec * mp.specular;   
     }
  }
 
