@@ -90,7 +90,6 @@ public class RIBVisitor extends SceneGraphVisitor {
         Camera camera =(Camera) path.getLastElement();
         this.name =name;
         double[] cam =path.getInverseMatrix(null);
-<<<<<<< RIBVisitor.java
         try {
             File file = new File(name);
             System.out.println("writing in  "+file);
@@ -117,9 +116,6 @@ public class RIBVisitor extends SceneGraphVisitor {
         if(!name.endsWith(".rib"))
             name = name+".rib";
         Ri.begin(name);
-=======
-        Ri.begin(name+(name.endsWith(".rib") ? "" : ".rib"));
->>>>>>> 1.19
         HashMap map = new HashMap();
         map.put("shader", (shaderPath!=null?(shaderPath+":"):"")+".:&");
         //map.put("shader", (fullSpotLight!=null?(fullSpotLight+":"):"")+".:&");
