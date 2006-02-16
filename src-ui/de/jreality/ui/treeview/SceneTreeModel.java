@@ -80,26 +80,26 @@ public class SceneTreeModel extends AbstractTreeModel {
         Object[] ents = (Object[]) entities.get(sn);
         if (ents == null) {
           Object o1 = ShaderUtility.createDefaultGeometryShader((Appearance) sn.getNode(), false);
+          Object o11 = ShaderUtility.createDefaultRenderingHintsShader((Appearance) sn.getNode(), false);
           Object o2 = null;
           if (AttributeEntityUtility.hasAttributeEntity(RootAppearance.class, "", (Appearance)sn.getNode()))
             o2 = ShaderUtility.createRootAppearance((Appearance) sn.getNode());
-          ents = new Object[o2 == null ? 1 : 2];
-          ents[0] = o1;
-          if (o2 != null) ents[1] = o2;
+          ents = new Object[o2 == null ? 2 : 3];
+          ents[0] = o1; ents[1] = o11;
+          if (o2 != null) ents[2] = o2;
           entities.put(sn, ents);
           for (int i = 0; i < ents.length; i++)
             parents.put(ents[i], sn);
         }
         return ents.length;
-      } else {
-        int ret = sn.getChildren().size(); 
-        if (sn.getNode() instanceof SceneGraphComponent) {
-          ret += ((SceneGraphComponent)sn.getNode()).getTools().size();
-        }
-        return ret;
       }
-    } else {
-      // entity
+	int ret = sn.getChildren().size(); 
+	if (sn.getNode() instanceof SceneGraphComponent) {
+	  ret += ((SceneGraphComponent)sn.getNode()).getTools().size();
+	}
+	return ret;
+    }
+	// entity
       Object[] ents = (Object[]) entities.get(parent);
       if (ents == null) {
         BeanInfo bi=null;
@@ -127,7 +127,6 @@ public class SceneTreeModel extends AbstractTreeModel {
         entities.put(parent, ents);
       }
       return ents.length;
-    }
   }
 
   public Object getParent(Object o) {
