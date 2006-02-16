@@ -4,7 +4,7 @@
   </description>
   
   <!-- the following should belong to core... -->
-  <property name="core" location="src" />
+  <property name="core" location="src-core" />
   <property name="attic" location="src-attic" />
   <property name="io" location="src-io" />
 
@@ -45,7 +45,8 @@
   <path id="ui.classpath">
     <path refid="backend.classpath"/>
     <fileset dir="dist">
-      <include name="jReality-io.jar"/>
+        <include name="jReality-soft.jar"/>
+        <include name="jReality-io.jar"/>
     </fileset>
     <fileset dir="lib">
         <include name="jterm.jar"/>
