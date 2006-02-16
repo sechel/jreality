@@ -45,14 +45,15 @@ public class HatchTexture implements Texture {
     public void getColor(double u, double v,int x, int y, int[] color) {
         int value  = (color[0] + color[1] + color[2])/3;
 
-        if(value>50) {
+        if(value>90) {
             color[0] = color[1] = color[2] = 255;
             color[3] = transparency;
             return;
         }
         
         int m = value >20? 4:(value>5? 2:1);
-        int iu = ((int) ((x+y)/4))%m;
+        //int iu = ((int) ((x+y)/4))%m;
+        int iu = x%m;
         //int iu = ((int) ((v/scaleV)+(u/scaleU)))%m;
         if(iu ==0 ) {
             color[0] = color[1] = color[2] = 0;

@@ -46,6 +46,6 @@ public class HatchPolygonShader extends DefaultPolygonShader {
         outline = eAppearance.getAttribute(ShaderUtility.nameSpace(name, "outline"), outline);
         setVertexShader(ShaderLookup.getVertexShaderAttr(eAppearance, name, "vertexShader"));
       }
-    
+    public boolean needsSorting() {return interpolateAlpha();}
  
 }

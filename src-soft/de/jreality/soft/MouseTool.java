@@ -259,6 +259,7 @@ public static final String MOUSE_DONE = "mouseDone";
 			 }
 			 oldX = x;
 			 oldY = y;
+             ((SceneGraphComponent)cameraPath.getLastComponent()).getTransformation().setMatrix(transformation.getArray());
 			 //transformation.setNotifyChanges(true);
 			 trigger.forceRender();
 
@@ -306,7 +307,7 @@ public static final String MOUSE_DONE = "mouseDone";
 			 }
 			 oldX = x;
 			 oldY = y;
-
+             ((SceneGraphComponent)cameraPath.getLastComponent()).getTransformation().setMatrix(transformation.getArray());
 			 //transformation.setNotifyChanges(true);
 			 trigger.forceRender();
 
@@ -418,7 +419,7 @@ public static final String MOUSE_DONE = "mouseDone";
 //			 transformation.setNotifyChanges(true);
 			 oldX = x;
 			 oldY = y;
-			
+             ((SceneGraphComponent)cameraPath.getLastComponent()).getTransformation().setMatrix(transformation.getArray());
 			 trigger.forceRender();
 
 		 }

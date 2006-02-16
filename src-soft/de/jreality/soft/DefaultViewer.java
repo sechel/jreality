@@ -52,6 +52,7 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
   private boolean backgroundExplicitlySet;
   private boolean imageValid;
   private boolean useDouble = false;
+  private Image bgImage;
   
   public DefaultViewer() {
       this(false);
@@ -64,14 +65,17 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
     if(ENFORCE_PAINT_ON_MOUSEEVENTS)
       enableEvents(AWTEvent.MOUSE_MOTION_EVENT_MASK);
     new Thread(this, "jReality render thread").start();
-
   }
 
   public boolean isFocusable() {
     return true;
   }
-
-  /* (non-Javadoc)
+  
+  //TODO should we claim to be opaque?
+//  public boolean isOpaque() {
+//    return true;
+//}
+/* (non-Javadoc)
    * @see de.jreality.soft.Viewer#getViewingComponent()
    */
   public Component getViewingComponent() {
@@ -93,16 +97,6 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
     return root;
   }
 
-
-//  public void setCamera(Camera c) {
-//    camera=c;
-//    if(renderer!=null) renderer.setCamera(c);
-//  }
-//
-//
-//  public Camera getCamera() {
-//    return camera;
-//  }
 
   /* (non-Javadoc)
    * @see de.jreality.soft.Viewer#render()
@@ -136,6 +130,8 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
     synchronized(this) {
       if(imageValid) {
         if(offscreen != null) {
+            if(bgImage != null)
+                g.drawImage(bgImage, 0, 0,Color.GREEN, null);
           g.drawImage(offscreen, 0, 0, null);
           return;
         } else System.err.println("paint: no offscreen in paint");
@@ -261,7 +257,7 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
     super.setBackground(c);
     backgroundExplicitlySet=c!=null;
     if(backgroundExplicitlySet&&renderer!=null)
-      renderer.setBackgroundColor(c.getRGB());
+      renderer.setBackgroundColor( c.getRGB());
   }
 
   public Renderer getRenderer() {
@@ -337,6 +333,12 @@ public void setAuxiliaryRoot(SceneGraphComponent ar) {
  */
 public SceneGraphComponent getAuxiliaryRoot() {
     throw new UnsupportedOperationException("not implemented");
+}
+public Image getBackgroundImage() {
+    return bgImage;
+}
+public void setBackgroundImage(Image bgImage) {
+    this.bgImage = bgImage;
 }
 
 }

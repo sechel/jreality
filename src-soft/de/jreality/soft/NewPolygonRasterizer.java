@@ -567,14 +567,14 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
             texture.getColor(
                     uuu.value /WW, vvv.value /WW,pos%w,pos/w, color);
             //This is now done in getColor:
-//            omt = (omt*color[3]*COLOR_CH_SCALE)>>FIXP;
-//            r   = (r  *color[0]*COLOR_CH_SCALE)>>FIXP;
-//            g   = (g  *color[1]*COLOR_CH_SCALE)>>FIXP;
-//            b   = (b  *color[2]*COLOR_CH_SCALE)>>FIXP;   
-              r   = color[0];
-              g   = color[1];
-              b   = color[2];
-              omt = color[3];
+            omt = (omt*color[3]*COLOR_CH_SCALE)>>FIXP;
+            r   = (r  *color[0]*COLOR_CH_SCALE)>>FIXP;
+            g   = (g  *color[1]*COLOR_CH_SCALE)>>FIXP;
+            b   = (b  *color[2]*COLOR_CH_SCALE)>>FIXP;   
+//              r   = color[0];
+//              g   = color[1];
+//              b   = color[2];
+//              omt = color[3];
         }
         if(omt<255) {
             final int sample = pixels[pos];
