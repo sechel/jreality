@@ -144,7 +144,7 @@ public class SceneGraphNode {
    * are executed. So the state of the node will not be changed
    * during the read operation @see finishReader;
    */
-  protected final void startReader() {
+  public final void startReader() {
     nodeLock.readLock();
   }
   
@@ -152,7 +152,7 @@ public class SceneGraphNode {
    * this method is called after a sequence of read operations
    * are executed.
    */
-  protected final void finishReader() {
+  public final void finishReader() {
     nodeLock.readUnlock();
   }
   

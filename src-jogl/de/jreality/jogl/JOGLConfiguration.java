@@ -1,7 +1,5 @@
 package de.jreality.jogl;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,12 +31,12 @@ public class JOGLConfiguration {
 	private JOGLConfiguration() { 
 		super(); 
 		theLog	= LoggingSystem.getLogger(this);
-	    AccessController.doPrivileged(new PrivilegedAction() {
-	        public Object run() {
-	          if (System.getProperty("os.name").indexOf("Linux") != -1) isLinux = true; else isLinux = false;
-	          return null;
-	        }
-	      });
+//	    AccessController.doPrivileged(new PrivilegedAction() {
+//	        public Object run() {
+//	          if (System.getProperty("os.name").indexOf("Linux") != -1) isLinux = true; else isLinux = false;
+//	          return null;
+//	        }
+//	      });
 		try {
 			//theLog.setLevel(Level.INFO);
 			String foo = System.getProperty("jreality.jogl.debugGL");
@@ -61,15 +59,15 @@ public class JOGLConfiguration {
 //			foo = System.getProperty("os.name");
 //			if (foo != null && foo.indexOf("Linux") != -1) isLinux = true;
 			// allocate a GLCanvas to be the "sharer": it will never be destroyed
-			foo = System.getProperty("jreality.jogl.sharedContexts");
-			if (foo != null && foo.indexOf("true") != -1) sharedContexts = true;
-			if (sharedContexts)	{
+//			foo = System.getProperty("jreality.jogl.sharedContexts");
+//			if (foo != null && foo.indexOf("true") != -1) sharedContexts = true;
+//			if (sharedContexts)	{
 //				GLCapabilities capabilities = new GLCapabilities();
 //				firstOne = GLDrawableFactory.getFactory().createGLCanvas(capabilities, null, null);	
-				JOGLConfiguration.theLog.log(Level.WARNING,"Not allowing shared contexts now");
-				sharedContexts=false;
-				theLog.log(Level.INFO,"Using shared contexts: "+sharedContexts);
-			}
+//				JOGLConfiguration.theLog.log(Level.WARNING,"Not allowing shared contexts now");
+//				sharedContexts=false;
+//				theLog.log(Level.INFO,"Using shared contexts: "+sharedContexts);
+//			}
 			foo = System.getProperty("jreality.jogl.resourceDir");
 			if (foo != null) saveResourceDir = resourceDir = foo; 			
 		} catch(SecurityException se)	{

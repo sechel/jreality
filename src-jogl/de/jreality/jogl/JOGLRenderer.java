@@ -733,6 +733,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		 */
 		public void render(JOGLPeerComponent jpc) {
 			//theLog.log(Level.FINER,"In JOGLPeerGeometry render() for "+originalGeometry.getName());
+			originalGeometry.startReader();
 			RenderingHintsShader renderingHints = jpc.renderingHints;
 			DefaultGeometryShader geometryShader = jpc.geometryShader;
 			renderingHints.render(globalHandle);
@@ -875,7 +876,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 				geometryShader.polygonShader.postRender(globalHandle);
 			}
 			renderingHints.postRender(globalHandle);
-
+			originalGeometry.finishReader();
 		}
 
 		private boolean useDisplayLists(DisplayListInfo dl, JOGLPeerComponent jpc)	{
