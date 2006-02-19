@@ -45,7 +45,7 @@ public class QuadMeshFactory extends AbstractQuadMeshFactory {
 	public void setVertexCoordinates(double[][][] points) {
 		int lengthv = points.length;
 		int lengthu = points[0].length;
-		setMeshSize(lengthv, lengthu);
+		setMeshSize(lengthu, lengthv);
 		int lengthf = points[0][0].length;
 		if (lengthv != getVLineCount() || lengthu != getULineCount() ) {
 			throw new IllegalArgumentException("Bad dimension for 3D array");
