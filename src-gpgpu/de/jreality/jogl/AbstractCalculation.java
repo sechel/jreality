@@ -26,15 +26,15 @@ public abstract class AbstractCalculation implements GLEventListener {
   "  gl_FragColor = abs(col/col.w); //vec4(scale*rescale*a, 1.);\n" + 
   "}\n";
 
-  private boolean doIntegrate;
+  protected boolean doIntegrate;
   
   private boolean tex2D;
   protected int TEX_TARGET;
   private int TEX_INTERNAL_FORMAT;
-  private static int TEX_FORMAT = GL.GL_RGBA;
+  protected static int TEX_FORMAT = GL.GL_RGBA;
   private boolean atiHack;
   
-  private GlslProgram program;
+  protected GlslProgram program;
   
   private GlslProgram renderer;
   
@@ -42,9 +42,11 @@ public abstract class AbstractCalculation implements GLEventListener {
   private int[] vbo = new int[1]; // 1 vertexbuffer
   private int[] valueTextures = new int[2]; // ping pong textures
   private int[] attachments = {GL.GL_COLOR_ATTACHMENT0_EXT, GL.GL_COLOR_ATTACHMENT1_EXT};
-  private int readTex, writeTex = 1;
+  protected int readTex;
 
-  private FloatBuffer valueBuffer;
+  private int writeTex = 1;
+
+  protected FloatBuffer valueBuffer;
   private int valueTextureSize;
   protected int numValues;
 
@@ -207,7 +209,7 @@ public abstract class AbstractCalculation implements GLEventListener {
   protected void calculationFinished() {
   }
   
-  private void renderQuad(GL gl) {
+  protected void renderQuad(GL gl) {
     gl.glColor3f(1,0,0);
     gl.glPolygonMode(GL.GL_FRONT, GL.GL_FILL);
     gl.glBegin(GL.GL_QUADS);
@@ -233,7 +235,7 @@ public abstract class AbstractCalculation implements GLEventListener {
     }
   }
 
-  private void initPrograms(GL gl) {
+  protected void initPrograms(GL gl) {
     String src = program == null ? initSource() : updateSource();
     if (src == null) return;
     if (program != null) GlslLoader.dispose(gl, program);
@@ -324,7 +326,7 @@ public abstract class AbstractCalculation implements GLEventListener {
     hasValidVBO=true;
   }
 
-  private void initFBO(GL gl) {
+  protected void initFBO(GL gl) {
     if (fbos[0] == 0) {
       gl.glGenFramebuffersEXT(1, fbos);
       System.out.println("created FBO=" + fbos[0]);
@@ -339,7 +341,7 @@ public abstract class AbstractCalculation implements GLEventListener {
 //    }
 //  }
   
-  private void initViewport(GL gl, GLU glu, boolean gpgpu) {
+  protected void initViewport(GL gl, GLU glu, boolean gpgpu) {
     gl.glMatrixMode(GL.GL_PROJECTION);
     gl.glLoadIdentity();
     glu.gluOrtho2D(0, valueTextureSize, 0, valueTextureSize);

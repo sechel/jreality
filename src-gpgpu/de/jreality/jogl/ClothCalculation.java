@@ -17,8 +17,7 @@ public class ClothCalculation extends AbstractCalculation {
   private static int NUM_ROWS=64;
   private static int NUM_COLS=64;
   
-  private FloatBuffer positions=ByteBuffer.allocateDirect(NUM_COLS*4*4).asFloatBuffer();
-  private FloatBuffer valueBuffer=ByteBuffer.allocateDirect(NUM_COLS*NUM_ROWS*4*4).asFloatBuffer();
+  private FloatBuffer positions=ByteBuffer.allocateDirect(NUM_COLS*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
   private int dataTextureSize=8;
   
   private int[] texIDsPositions = new int[NUM_ROWS*2];
@@ -31,8 +30,12 @@ public class ClothCalculation extends AbstractCalculation {
   private int pongPing=1;
 
   private double[] gravity=new double[]{0,0,-1};
-  private double damping;
-  private double factor;
+  private double damping=0.01;
+  private double factor=1;
+  
+  public ClothCalculation() {
+    valueBuffer = ByteBuffer.allocateDirect(NUM_COLS*NUM_ROWS*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+  }
   
   protected String initSource() {
     return "" +
@@ -51,7 +54,7 @@ public class ClothCalculation extends AbstractCalculation {
     "  vec4 upperPos = textureRect(upper, pos); \n" + 
     "  vec4 vel = textureRect(velocity, pos); \n" + 
     " \n" +
-    " vec4 dir = prevPos - upperPos + factor*(velocity+gravity)\n" +
+    " vec4 dir = prevPos - upperPos + factor*(vel+gravity); \n" +
     " dir = 0.1*normalize(dir);\n" +
     "  if (point) {\n" +
     " \n" +
@@ -59,26 +62,29 @@ public class ClothCalculation extends AbstractCalculation {
     " \n" +
     "  } else {\n" +
     " \n" +
-    " gl_FragColor = damping*(vel- dot(vel,dir)*dir)\n" +
+    " gl_FragColor = damping*(vel- dot(vel,dir)*dir); \n" +
     "  }\n" +
     "} \n";
   }
   
-  protected String updateSource() {
-    return null;
+  protected void initViewport(GL gl, GLU glu) {
+    gl.glMatrixMode(GL.GL_PROJECTION);
+    gl.glLoadIdentity();
+    glu.gluOrtho2D(0, dataTextureSize, 0, dataTextureSize);
+    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glLoadIdentity();
+    gl.glViewport(0, 0, dataTextureSize, dataTextureSize);
   }
-  
+
   public void display(GLDrawable drawable) {
     GL gl = new DebugGL(drawable.getGL());
     //GL gl = drawable.getGL();
     GLU glu = drawable.getGLU();
     if (hasData && doIntegrate) {
       
-      gl.glEnable(TEX_TARGET);
-      
       initPrograms(gl);
       initFBO(gl);
-      initViewport(gl, glu, true);
+      initViewport(gl, glu);
 
       initDataTextures(gl);
 
@@ -90,6 +96,8 @@ public class ClothCalculation extends AbstractCalculation {
       program.setUniform("damping", damping);
       program.setUniform("factor", factor);
 
+      gl.glEnable(TEX_TARGET);
+      
       for(int i = 0; i < NUM_ROWS-1; i++) {
       
         gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
@@ -133,7 +141,7 @@ public class ClothCalculation extends AbstractCalculation {
       // do swap
       int tmp = pingPong;
       pingPong = pongPing;
-      pongPing = pingPong;
+      pongPing = tmp;
     
       GlslLoader.postRender(program, drawable); // any postRender just resets the shader pipeline
     
@@ -165,6 +173,7 @@ public class ClothCalculation extends AbstractCalculation {
     assert(data.length == positions.capacity());
     positions.put(data);
     hasData = true;
+    dataChanged = true;
   }
 
   public void triggerCalculation() {
@@ -196,13 +205,18 @@ public class ClothCalculation extends AbstractCalculation {
   }
 
   protected void calculationFinished() {
-    System.out.println("ClothCalculation.calculationFinished()");
+    FloatBuffer fb = getCurrentValues();
+    fb.limit(fb.capacity());
+    fb.position(fb.capacity()-12);
+    GpgpuUtility.dumpSelectedData(fb);
     triggerCalculation();
   }
   
   public static void main(String[] args) {
     ClothCalculation cc = new ClothCalculation();
-    cc.setPositions(new float[NUM_COLS]);
+    cc.setPositions(GpgpuUtility.makeGradient(8));
+    cc.setDisplayTexture(false);
+    cc.triggerCalculation();
     GpgpuUtility.run(cc);
   }
 }
