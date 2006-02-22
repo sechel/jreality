@@ -1,0 +1,208 @@
+package de.jreality.jogl;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+
+import net.java.games.jogl.DebugGL;
+import net.java.games.jogl.GL;
+import net.java.games.jogl.GLDrawable;
+import net.java.games.jogl.GLEventListener;
+import net.java.games.jogl.GLU;
+import de.jreality.jogl.shader.GlslLoader;
+import de.jreality.shader.GlslProgram;
+
+public class ClothCalculation extends AbstractCalculation {
+  
+  private static int NUM_ROWS=64;
+  private static int NUM_COLS=64;
+  
+  private FloatBuffer positions=ByteBuffer.allocateDirect(NUM_COLS*4*4).asFloatBuffer();
+  private FloatBuffer valueBuffer=ByteBuffer.allocateDirect(NUM_COLS*NUM_ROWS*4*4).asFloatBuffer();
+  private int dataTextureSize=8;
+  
+  private int[] texIDsPositions = new int[NUM_ROWS*2];
+  private int[] texIDsVelocities = new int[NUM_ROWS*2];
+  
+  private boolean hasData;
+  private boolean dataChanged;
+  
+  private int pingPong;
+  private int pongPing=1;
+
+  private double[] gravity=new double[]{0,0,-1};
+  private double damping;
+  private double factor;
+  
+  protected String initSource() {
+    return "" +
+    "uniform bool point; \n" +
+    "uniform vec4 gravity; \n" +
+    "uniform float damping; \n" +
+    "uniform float factor; \n" +
+    " \n" +
+    "uniform samplerRect upper; \n" +
+    "uniform samplerRect prev; \n" +
+    "uniform samplerRect velocity; \n" +
+    " \n" +
+    "void main(void) { \n" +
+    "  vec2 pos = gl_TexCoord[0].st; \n" + 
+    "  vec4 prevPos = textureRect(prev, pos); \n" + 
+    "  vec4 upperPos = textureRect(upper, pos); \n" + 
+    "  vec4 vel = textureRect(velocity, pos); \n" + 
+    " \n" +
+    " vec4 dir = prevPos - upperPos + factor*(velocity+gravity)\n" +
+    " dir = 0.1*normalize(dir);\n" +
+    "  if (point) {\n" +
+    " \n" +
+    " gl_FragColor =  prevPos +dir;\n" +
+    " \n" +
+    "  } else {\n" +
+    " \n" +
+    " gl_FragColor = damping*(vel- dot(vel,dir)*dir)\n" +
+    "  }\n" +
+    "} \n";
+  }
+  
+  protected String updateSource() {
+    return null;
+  }
+  
+  public void display(GLDrawable drawable) {
+    GL gl = new DebugGL(drawable.getGL());
+    //GL gl = drawable.getGL();
+    GLU glu = drawable.getGLU();
+    if (hasData && doIntegrate) {
+      
+      gl.glEnable(TEX_TARGET);
+      
+      initPrograms(gl);
+      initFBO(gl);
+      initViewport(gl, glu, true);
+
+      initDataTextures(gl);
+
+
+      valueBuffer.clear();
+
+      // values fixed for this step
+      program.setUniform("gravity", gravity);
+      program.setUniform("damping", damping);
+      program.setUniform("factor", factor);
+
+      for(int i = 0; i < NUM_ROWS-1; i++) {
+      
+        gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+            GL.GL_COLOR_ATTACHMENT0_EXT, TEX_TARGET, texIDsPositions[pingPong*NUM_COLS+i+1], 0);
+        gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+            GL.GL_COLOR_ATTACHMENT1_EXT, TEX_TARGET, texIDsVelocities[pingPong*NUM_COLS+i+1], 0);
+    
+        GpgpuUtility.checkBuf(gl);
+        
+        gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+        
+        // set all values
+        // ping pong - current values
+        gl.glActiveTexture(GL.GL_TEXTURE0);
+        gl.glBindTexture(TEX_TARGET, texIDsPositions[pingPong*NUM_COLS+i]);
+        program.setUniform("upper", 0);
+  
+        gl.glActiveTexture(GL.GL_TEXTURE1);
+        gl.glBindTexture(TEX_TARGET, texIDsPositions[pongPing*NUM_COLS+i+1]);
+        program.setUniform("prev", 1);
+        
+        gl.glActiveTexture(GL.GL_TEXTURE2);
+        gl.glBindTexture(TEX_TARGET, texIDsVelocities[pongPing*NUM_COLS+i+1]);
+        program.setUniform("velocity", 2);
+
+        program.setUniform("point", false);
+        GlslLoader.render(program, drawable);
+        renderQuad(gl);
+        gl.glFinish();
+        valueBuffer.position(i*NUM_COLS*4).limit((i+1)*NUM_COLS*4);
+        gl.glReadBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+        gl.glReadPixels(0, 0, dataTextureSize, dataTextureSize, TEX_FORMAT, GL.GL_FLOAT, valueBuffer);
+        
+        gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT1_EXT);
+        program.setUniform("point", true);
+        GlslLoader.render(program, drawable);
+        renderQuad(gl);
+        gl.glFinish();
+      }
+      
+      // do swap
+      int tmp = pingPong;
+      pingPong = pongPing;
+      pongPing = pingPong;
+    
+      GlslLoader.postRender(program, drawable); // any postRender just resets the shader pipeline
+    
+      // switch back to old buffer
+      gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, 0);
+    
+      calculationFinished();
+      gl.glDisable(TEX_TARGET);
+    }
+  }
+  
+  protected void initDataTextures(GL gl) {
+    if (texIDsPositions[0] == 0) {
+      gl.glGenTextures(texIDsPositions.length, texIDsPositions);
+      gl.glGenTextures(texIDsVelocities.length, texIDsVelocities);
+      for (int i = 0; i < texIDsPositions.length; i++) {
+        setupTexture(gl, texIDsPositions[i], dataTextureSize);
+        setupTexture(gl, texIDsVelocities[i], dataTextureSize);
+      }
+    }
+    if (dataChanged) {
+      transferToTexture(gl, positions, texIDsPositions[pingPong*NUM_COLS], dataTextureSize);
+      dataChanged = false;
+    }
+  }
+  
+  public void setPositions(float[] data) {
+    positions.clear();
+    assert(data.length == positions.capacity());
+    positions.put(data);
+    hasData = true;
+  }
+
+  public void triggerCalculation() {
+    if (hasData) super.triggerCalculation();
+  }
+
+  public double getDamping() {
+    return damping;
+  }
+
+  public void setDamping(double damping) {
+    this.damping = damping;
+  }
+
+  public double getFactor() {
+    return factor;
+  }
+
+  public void setFactor(double factor) {
+    this.factor = factor;
+  }
+
+  public double[] getGravity() {
+    return gravity;
+  }
+
+  public void setGravity(double[] gravity) {
+    this.gravity = gravity;
+  }
+
+  protected void calculationFinished() {
+    System.out.println("ClothCalculation.calculationFinished()");
+    triggerCalculation();
+  }
+  
+  public static void main(String[] args) {
+    ClothCalculation cc = new ClothCalculation();
+    cc.setPositions(new float[NUM_COLS]);
+    GpgpuUtility.run(cc);
+  }
+}
