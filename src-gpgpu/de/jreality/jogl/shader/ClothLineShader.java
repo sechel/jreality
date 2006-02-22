@@ -8,16 +8,20 @@ import java.util.WeakHashMap;
 
 import net.java.games.jogl.GL;
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.jogl.*;
 import de.jreality.jogl.ClothCalculation;
 import de.jreality.jogl.GpgpuViewer;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.SmokeCalculation;
+import de.jreality.math.*;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.shader.*;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
@@ -28,10 +32,10 @@ import de.jreality.util.Rectangle3D;
  * @author weissman
  * 
  */
-public class ClothGeometryShader implements LineShader {
+public class ClothLineShader implements LineShader {
 
-  static Texture2D tex;
-  
+  Texture2D tex;
+    
   private double pointRadius;
 
   private Color diffuseColor;
@@ -45,7 +49,6 @@ public class ClothGeometryShader implements LineShader {
     mat[15] = 1;
   }
 
-  protected static boolean renderCheap;
   protected static double pointSize;
   
   boolean debug;
@@ -91,6 +94,9 @@ public class ClothGeometryShader implements LineShader {
   private static double factor;
   private static double[] DEFAULT_GRAVITY = new double[] {0.-0.001,0};
   
+  
+  private int rows;
+  private int columns;
   public boolean providesProxyGeometry() {
     return true;
   }
@@ -113,15 +119,13 @@ public class ClothGeometryShader implements LineShader {
       folder = (String) eap.getAttribute(ShaderUtility.nameSpace(name, "folder"), folder);
       fileName = (String) eap.getAttribute(ShaderUtility.nameSpace(name, "fileName"), fileName);
     }
-    renderCheap = eap.getAttribute(
-        ShaderUtility.nameSpace(name, "renderCheap"), false);
     sprites = eap.getAttribute(
         ShaderUtility.nameSpace(name, "sprites"), sprites);
     if (sprites) {
       if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "pointSprite"), eap)) {
         tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "pointSprite"), eap);
       } else {
-        tex = DefaultPointShader.tex;        
+          tex = null;
       }
     }
     diffuseColor = (Color) eap
@@ -153,7 +157,10 @@ public class ClothGeometryShader implements LineShader {
     }
 
   ////
-  
+    rows = (int) eap.getAttribute(ShaderUtility.nameSpace(name, "rows"), 64);
+    
+    columns = (int) eap.getAttribute(ShaderUtility.nameSpace(name, "columns"), 64);
+    
     double currFactor = (double) eap.getAttribute(ShaderUtility.nameSpace(name, "factor"), 1);
   if(factor != currFactor) {
       factor = currFactor;
@@ -164,7 +171,7 @@ public class ClothGeometryShader implements LineShader {
     damping = currDamping;
     setDamping = true;
   }
-  double[] currGravity = (double[]) eap.getAttribute(ShaderUtility.nameSpace(name, "gravity"), float[].class);
+  double[] currGravity = (double[]) eap.getAttribute(ShaderUtility.nameSpace(name, "gravity"), DEFAULT_GRAVITY);
   if(gravity != currGravity) {
       gravity = currGravity;
       setGravity = true;
@@ -193,7 +200,7 @@ public class ClothGeometryShader implements LineShader {
   public void updateData(JOGLRenderer jr) {
     calc = (ClothCalculation) ((GpgpuViewer) jr.theViewer).getCalculation();
     if (calc == null) {
-      calc = new ClothCalculation();
+      calc = new ClothCalculation(rows,columns);
       calc.setDisplayTexture(false);
       calc.setMeasureCPS(false);
       calc.setReadData(true);
@@ -231,55 +238,27 @@ public class ClothGeometryShader implements LineShader {
     if(setInitialPositions) {
         calc.setPositions(initialPositions);
         calc.triggerCalculation();
-        setInitialPositions = false;
+        //setInitialPositions = false;
     }
     
     data = calc.getCurrentValues();
   }
 
   static WeakHashMap displayLists=new WeakHashMap();
-  
-  private static int getDisplayList(JOGLRenderer jr) {
-    if (displayLists.get(jr) != null) return ((int[])displayLists.get(jr))[0];
-    GL gl = jr.getCanvas().getGL();
-    int[] dlist = new int[]{gl.glGenLists(1)};
-    displayLists.put(jr, dlist);
-    gl.glNewList(dlist[0], GL.GL_COMPILE);
-    gl.glBegin(GL.GL_TRIANGLE_FAN);
-    gl.glColor3d(1,1,1);
-    gl.glVertex3d(1,1,1);
-    gl.glColor3d(0,0,.5);
-    gl.glVertex3d(1,-1,1);
-    gl.glColor3d(0,0,0);
-    gl.glVertex3d(-1,-1,1);
-    gl.glColor3d(0,0,.5);
-    gl.glVertex3d(-1,1,1);
-    gl.glColor3d(0,0,0);
-    gl.glVertex3d(-1,1,-1);
-    gl.glColor3d(0,0,.5);
-    gl.glVertex3d(1,1,-1);
-    gl.glColor3d(0,0,0);
-    gl.glVertex3d(1,-1,-1);
-    gl.glColor3d(0,0,.5);
-    gl.glVertex3d(1,-1,1);
-    gl.glEnd();
-    gl.glEndList();
-    return dlist[0];
-  }
-  
-public void render(JOGLRenderer jr) {
+    
+  public void render(JOGLRenderer jr) {
     updateData(jr);
-    if (particles.length == 0) return;
-    if (calc == null) return;
+
+    if (data == null) return;
+        
     GL gl = jr.globalGL;
         
     gl.glPushAttrib(GL.GL_LIGHTING_BIT);
     gl.glDisable(GL.GL_LIGHTING);
 
-    if (data == null) {
       gl.glColor3fv(difCol);
       gl.glPointSize((float) pointSize);
-      if (sprites) {
+      if (sprites && tex != null) {
         gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, pointAttenuation);
         gl.glEnable(GL.GL_POINT_SPRITE_ARB);
         gl.glActiveTexture(GL.GL_TEXTURE0);
@@ -287,124 +266,21 @@ public void render(JOGLRenderer jr) {
         gl.glEnable(GL.GL_TEXTURE_2D);
         Texture2DLoaderJOGL.render(jr.getCanvas(), tex);
       }
-      calc.renderPoints(jr);
-      gl.glPopAttrib();
-      return;
-    }
-
-    int n = data.remaining()/4;
-    int nanCnt=0;
-
-    if (write && newFrame) {
-      StringBuffer fn = new StringBuffer(folder);
-      fn.append('/').append(fileName);
-      if (framecnt < 1000) fn.append(0);
-      if (framecnt < 100) fn.append(0);
-      if (framecnt < 10) fn.append(0);
-      fn.append(framecnt);
-      try {
-        FileWriter fw = new FileWriter(fn.toString());
-        double [] tmp = new double[4];
-        for (int i=0; i<n; i++) {
-          tmp[0]=data.get(4*i);
-          tmp[1]=data.get(4*i+1);
-          tmp[2]=data.get(4*i+2);
-          tmp[3]=data.get(4*i+3);
-          tmp = rootToObject.multiplyVector(tmp);
-          if (Double.isNaN(tmp[0]) || Double.isNaN(tmp[1]) || Double.isNaN(tmp[2])) continue;
-          fw.write(tmp[0]+" "+tmp[1]+" "+tmp[2]+"\n");
-        }
-        fw.close();
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    }
-    
-    if (!renderCheap) {
-      resetBounds();
-      double[] orientation = P3.extractOrientationMatrix(null, jr.getContext().getCameraToObject(), Pn.originP3, Pn.EUCLIDEAN);
-      MatrixBuilder.euclidean(new Matrix(orientation)).rotateY(-Math.PI/4).rotateX(Math.PI/4);
-      int dlist = getDisplayList(jr); //JOGLSphereHelper.getSphereDLists(sphereDetail, jr);
-      mat[0] = mat[5] = mat[10] = (float) pointRadius;
-      for (int i = 0; i< n; i++) {
-        if (Float.isNaN(data.get(4*i)) || Float.isNaN(data.get(4*i+1)) || Float.isNaN(data.get(4*i+2)) ) {
-          nanCnt++;
-          continue;
-        }
-        mat[3] = data.get(4*i);
-        mat[7] = data.get(4*i+1);
-        mat[11] = data.get(4*i+2);
-        
-        bounds(i);
-        
-        gl.glPushMatrix();
-        gl.glMultTransposeMatrixf(mat);
-        gl.glMultTransposeMatrixd(orientation);
-        gl.glCallList(dlist);
-        gl.glPopMatrix();
-      }
-      setBounds();    
-    } else {
-      gl.glColor3fv(difCol);
-      gl.glPointSize((float) pointSize);
-      if (sprites) {
-        gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, pointAttenuation);
-        gl.glEnable(GL.GL_POINT_SPRITE_ARB);
-        gl.glActiveTexture(GL.GL_TEXTURE0);
-        gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
-        gl.glEnable(GL.GL_TEXTURE_2D);
-        Texture2DLoaderJOGL.render(jr.getCanvas(), tex);
-      }
+      //System.out.println(data);
+      //GpgpuUtility.dumpData(data);
+      data.clear();
       int cnt=data.remaining();
-      if (array) {
+
         gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
         gl.glVertexPointer(4, GL.GL_FLOAT, 0, data);
         gl.glDrawArrays(GL.GL_POINTS, 0, cnt/4);
         gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
-      } else {
-        gl.glBegin(GL.GL_POINTS);
-        for (int i=0; i<cnt; ) {
-          gl.glVertex4f(data.get(i++), data.get(i++), data.get(i++), data.get(i++));
-        }
-        gl.glEnd();
-      }
-    } 
-    if (nanCnt > 0) System.out.println("nanCnt="+nanCnt);
+
     gl.glPopAttrib();
   }
 
-private void setBounds() {
-	double[][] bds = new double[2][3];
-    bds[0][0]=(double) bounds[0][0];
-    bds[0][1]=(double) bounds[0][1];
-    bds[0][2]=(double) bounds[0][2];
-    bds[1][0]=(double) bounds[1][0];
-    bds[1][1]=(double) bounds[1][1];
-    bds[1][2]=(double) bounds[1][2];
-    bb.setBounds(bds);
-}
-
-private void bounds(int i) {
-	bounds[0][0]=Math.min(bounds[0][0], data.get(4*i));
-	bounds[0][1]=Math.min(bounds[0][1], data.get(4*i+1));
-	bounds[0][2]=Math.min(bounds[0][2], data.get(4*i+2));
-	bounds[1][0]=Math.max(bounds[1][0], data.get(4*i));
-	bounds[1][1]=Math.max(bounds[1][1], data.get(4*i+1));
-	bounds[1][2]=Math.max(bounds[1][2], data.get(4*i+2));
-}
-
-private void resetBounds() {
-	bounds[0][0]=Float.MAX_VALUE;
-    bounds[0][1]=Float.MAX_VALUE;
-    bounds[0][2]=Float.MAX_VALUE;
-    bounds[1][0]=Float.MIN_VALUE;
-    bounds[1][1]=Float.MIN_VALUE;
-    bounds[1][2]=Float.MIN_VALUE;
-}  
-
   public void postRender(JOGLRenderer jr) {
-    if (sprites && (renderCheap || data == null)) {
+    if (sprites) {
       GL gl = jr.globalGL;
       gl.glDisable(GL.GL_POINT_SPRITE_ARB);
       gl.glActiveTexture(GL.GL_TEXTURE0);
@@ -413,4 +289,7 @@ private void resetBounds() {
     }
   }
 
+  public static void main(String[] args) {
+    new ClothLineShader();
+}
 }

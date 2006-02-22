@@ -13,10 +13,10 @@ import de.jreality.jogl.shader.GlslLoader;
 public class ClothCalculation extends AbstractCalculation {
   
   private static int NUM_ROWS=4;
-  private static int NUM_COLS=4;
+  private static int NUM_COLS=64;
   
-  private FloatBuffer positions=ByteBuffer.allocateDirect(NUM_COLS*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
-  private int dataTextureSize=2;
+  private FloatBuffer positions;
+  private int dataTextureSize=8;
   
   private int[] texIDsPositions = new int[NUM_ROWS*2];
   private int[] texIDsVelocities = new int[NUM_ROWS*2];
@@ -31,7 +31,11 @@ public class ClothCalculation extends AbstractCalculation {
   private double damping=0.01;
   private double factor=1;
   
-  public ClothCalculation() {
+  public ClothCalculation(int rows, int columns) {
+      NUM_ROWS = rows;
+      NUM_COLS = columns*columns;
+      dataTextureSize=columns;
+      positions=ByteBuffer.allocateDirect(NUM_COLS*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
     valueBuffer = ByteBuffer.allocateDirect(NUM_COLS*NUM_ROWS*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
   }
   
@@ -115,9 +119,9 @@ public class ClothCalculation extends AbstractCalculation {
       for(int i = 0; i < NUM_ROWS-1; i++) {
       
         gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-            GL.GL_COLOR_ATTACHMENT0_EXT, TEX_TARGET, texIDsPositions[pingPong*NUM_COLS+i+1], 0);
+            GL.GL_COLOR_ATTACHMENT0_EXT, TEX_TARGET, texIDsPositions[pingPong*NUM_ROWS+i+1], 0);
         gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-            GL.GL_COLOR_ATTACHMENT1_EXT, TEX_TARGET, texIDsVelocities[pingPong*NUM_COLS+i+1], 0);
+            GL.GL_COLOR_ATTACHMENT1_EXT, TEX_TARGET, texIDsVelocities[pingPong*NUM_ROWS+i+1], 0);
     
         GpgpuUtility.checkBuf(gl);
         
@@ -126,15 +130,15 @@ public class ClothCalculation extends AbstractCalculation {
         // set all values
         // ping pong - current values
         gl.glActiveTexture(GL.GL_TEXTURE0);
-        gl.glBindTexture(TEX_TARGET, texIDsPositions[pingPong*NUM_COLS+i]);
+        gl.glBindTexture(TEX_TARGET, texIDsPositions[pingPong*NUM_ROWS+i]);
         program.setUniform("upper", 0);
   
         gl.glActiveTexture(GL.GL_TEXTURE1);
-        gl.glBindTexture(TEX_TARGET, texIDsPositions[pongPing*NUM_COLS+i+1]);
+        gl.glBindTexture(TEX_TARGET, texIDsPositions[pongPing*NUM_ROWS+i+1]);
         program.setUniform("prev", 1);
         
         gl.glActiveTexture(GL.GL_TEXTURE2);
-        gl.glBindTexture(TEX_TARGET, texIDsVelocities[pongPing*NUM_COLS+i+1]);
+        gl.glBindTexture(TEX_TARGET, texIDsVelocities[pongPing*NUM_ROWS+i+1]);
         program.setUniform("velocity", 2);
 
         program.setUniform("point", true);
@@ -142,7 +146,7 @@ public class ClothCalculation extends AbstractCalculation {
         renderQuad(gl);
         gl.glFinish();
         valueBuffer.position((i+1)*NUM_COLS*4).limit((i+2)*NUM_COLS*4);
-        System.out.println(valueBuffer);
+        //System.out.println(valueBuffer);
         gl.glReadBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
         gl.glReadPixels(0, 0, dataTextureSize, dataTextureSize, TEX_FORMAT, GL.GL_FLOAT, valueBuffer.slice());
         
@@ -179,15 +183,19 @@ public class ClothCalculation extends AbstractCalculation {
       }
     }
     if (dataChanged) {
-      transferToTexture(gl, positions, texIDsPositions[pongPing*NUM_COLS], dataTextureSize);
+      transferToTexture(gl, positions, texIDsPositions[pongPing*NUM_ROWS], dataTextureSize);
       dataChanged = false;
     }
   }
   
-  public void setPositions(float[] data) {
+  public void setPositions(double[] data) {
     positions.clear();
-    assert(data.length == positions.capacity());
-    positions.put(data);
+    assert(data.length*4 == positions.capacity()*3);
+    for (int i = 0; i < data.length; i++) {
+    positions.put((float) data[i]);    
+    if(i%3==2) positions.put(1f);
+    }
+    positions.clear();
     hasData = true;
     dataChanged = true;
   }
@@ -220,10 +228,10 @@ public class ClothCalculation extends AbstractCalculation {
     this.gravity = gravity;
   }
 
-  protected void calculationFinished() {
-    FloatBuffer fb = getCurrentValues();
-    fb.clear();
-    GpgpuUtility.dumpData(fb);
+//  protected void calculationFinished() {
+//    FloatBuffer fb = getCurrentValues();
+//    fb.clear();
+//    GpgpuUtility.dumpData(fb);
 //    System.out.println(fb);
 //    fb.clear();
 //    fb.limit(12);
@@ -234,16 +242,16 @@ public class ClothCalculation extends AbstractCalculation {
 //    fb.position(fb.capacity()-12);
 //    GpgpuUtility.dumpSelectedData(fb);
 //    
-    triggerCalculation();
-  }
+//    triggerCalculation();
+//  }
   
   public static void main(String[] args) {
-    ClothCalculation cc = new ClothCalculation();
-    float[] f = GpgpuUtility.makeGradient(2);
-    GpgpuUtility.dumpData(f);
-    cc.setPositions(f);
-    cc.setDisplayTexture(false);
-    cc.triggerCalculation();
-    GpgpuUtility.run(cc);
+    //ClothCalculation cc = new ClothCalculation();
+    //float[] f = GpgpuUtility.makeGradient(2);
+    //GpgpuUtility.dumpData(f);
+    //cc.setPositions(f);
+    //cc.setDisplayTexture(false);
+    //cc.triggerCalculation();
+    //GpgpuUtility.run(cc);
   }
 }

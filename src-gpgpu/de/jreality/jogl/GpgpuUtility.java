@@ -28,6 +28,7 @@ public class GpgpuUtility {
   }
 
   public static void dumpData(FloatBuffer data) {
+      data.clear();
     for (int i = 0; i < data.capacity(); i++)
       System.out.print(data.get(i) + ", ");
     System.out.println();
