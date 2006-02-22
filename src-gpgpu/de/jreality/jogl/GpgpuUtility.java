@@ -3,6 +3,7 @@ package de.jreality.jogl;
 import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 import javax.swing.JFrame;
 
@@ -27,13 +28,20 @@ public class GpgpuUtility {
     System.out.println();
   }
 
+  public static void dumpData(IntBuffer data) {
+    data.clear();
+  for (int i = 0; i < data.capacity(); i++)
+    System.out.print(data.get(i) + ", ");
+  System.out.println();
+}
+
   public static void dumpData(FloatBuffer data) {
-      data.clear();
-    for (int i = 0; i < data.capacity(); i++)
-      System.out.print(data.get(i) + ", ");
-    System.out.println();
-  }
-  
+    data.clear();
+  for (int i = 0; i < data.capacity(); i++)
+    System.out.print(data.get(i) + ", ");
+  System.out.println();
+}
+
   public static void dumpSelectedData(FloatBuffer data) {
     while (data.hasRemaining())
       System.out.print(data.get() + ", ");

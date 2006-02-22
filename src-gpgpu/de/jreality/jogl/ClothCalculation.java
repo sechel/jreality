@@ -12,14 +12,14 @@ import de.jreality.jogl.shader.GlslLoader;
 
 public class ClothCalculation extends AbstractCalculation {
   
-  private static int NUM_ROWS=4;
-  private static int NUM_COLS=64;
+  private static int NUM_ROWS;
+  private static int NUM_COLS;
   
   private FloatBuffer positions;
-  private int dataTextureSize=8;
+  private int dataTextureSize;
   
-  private int[] texIDsPositions = new int[NUM_ROWS*2];
-  private int[] texIDsVelocities = new int[NUM_ROWS*2];
+  private int[] texIDsPositions;
+  private int[] texIDsVelocities;
   
   private boolean hasData;
   private boolean dataChanged;
@@ -37,6 +37,8 @@ public class ClothCalculation extends AbstractCalculation {
       dataTextureSize=columns;
       positions=ByteBuffer.allocateDirect(NUM_COLS*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
     valueBuffer = ByteBuffer.allocateDirect(NUM_COLS*NUM_ROWS*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+    texIDsPositions = new int[NUM_ROWS*2];
+    texIDsVelocities = new int[NUM_ROWS*2];
   }
   
   protected String initSource() {
@@ -60,7 +62,7 @@ public class ClothCalculation extends AbstractCalculation {
     " dir = 0.1*normalize(dir);\n" +
     "  if (point) {\n" +
     " \n" +
-    " gl_FragColor =  vec4(prevPos +dir, 1.);\n" +
+    " gl_FragColor =  vec4(upperPos +dir, 1.);\n" +
     " \n" +
     "  } else {\n" +
     " \n" +
@@ -94,8 +96,8 @@ public class ClothCalculation extends AbstractCalculation {
   }
 
   public void display(GLDrawable drawable) {
-    GL gl = new DebugGL(drawable.getGL());
-    //GL gl = drawable.getGL();
+    //GL gl = new DebugGL(drawable.getGL());
+    GL gl = drawable.getGL();
     GLU glu = drawable.getGLU();
     if (hasData && doIntegrate) {
       
@@ -183,7 +185,8 @@ public class ClothCalculation extends AbstractCalculation {
       }
     }
     if (dataChanged) {
-      transferToTexture(gl, positions, texIDsPositions[pongPing*NUM_ROWS], dataTextureSize);
+      transferToTexture(gl, positions, texIDsPositions[0], dataTextureSize);
+      transferToTexture(gl, positions, texIDsPositions[NUM_ROWS], dataTextureSize);
       dataChanged = false;
     }
   }
@@ -195,6 +198,15 @@ public class ClothCalculation extends AbstractCalculation {
     positions.put((float) data[i]);    
     if(i%3==2) positions.put(1f);
     }
+    positions.clear();
+    hasData = true;
+    dataChanged = true;
+  }
+
+  public void setPositions(float[] data) {
+    positions.clear();
+    assert(data.length == positions.capacity());
+    positions.put(data);
     positions.clear();
     hasData = true;
     dataChanged = true;
@@ -228,7 +240,7 @@ public class ClothCalculation extends AbstractCalculation {
     this.gravity = gravity;
   }
 
-//  protected void calculationFinished() {
+  protected void calculationFinished() {
 //    FloatBuffer fb = getCurrentValues();
 //    fb.clear();
 //    GpgpuUtility.dumpData(fb);
@@ -242,16 +254,17 @@ public class ClothCalculation extends AbstractCalculation {
 //    fb.position(fb.capacity()-12);
 //    GpgpuUtility.dumpSelectedData(fb);
 //    
+    measure();
 //    triggerCalculation();
-//  }
+  }
   
   public static void main(String[] args) {
-    //ClothCalculation cc = new ClothCalculation();
-    //float[] f = GpgpuUtility.makeGradient(2);
-    //GpgpuUtility.dumpData(f);
-    //cc.setPositions(f);
-    //cc.setDisplayTexture(false);
-    //cc.triggerCalculation();
-    //GpgpuUtility.run(cc);
+    ClothCalculation cc = new ClothCalculation(40, 64);
+    float[] f = GpgpuUtility.makeGradient(8);
+    GpgpuUtility.dumpData(f);
+    cc.setPositions(f);
+    cc.setDisplayTexture(false);
+    cc.triggerCalculation();
+    GpgpuUtility.run(cc);
   }
 }

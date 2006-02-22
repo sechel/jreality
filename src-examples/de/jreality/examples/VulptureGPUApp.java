@@ -52,13 +52,13 @@ import de.jreality.util.Input;
  * @author timh
  *
  */
-public class VulptureGPUApp implements Runnable,VideoImageDataProvider.ImageDataReceiver {
+public class VulptureGPUApp implements Runnable {
     private static final boolean USE_VIDEO = false;
-    private VideoImageDataProvider vip;
+    
     de.jreality.shader.Texture2D tex;
     Appearance appearance = new Appearance();
-    private static final int COLS = 2;
-    private static final int ROWS = 4;
+    private static final int COLS = 10;
+    private static final int ROWS = 40;
     private static final int SIZEC = COLS*COLS;
     private static final int SIZEL = 1;
     
@@ -96,7 +96,7 @@ public class VulptureGPUApp implements Runnable,VideoImageDataProvider.ImageData
     
     GameTrak gt = new GameTrak();
     
-    MouseButtonTrak mb = new MouseButtonTrak();
+    //MouseButtonTrak mb = new MouseButtonTrak();
 
     
    
@@ -106,8 +106,7 @@ public class VulptureGPUApp implements Runnable,VideoImageDataProvider.ImageData
      */
     public VulptureGPUApp() {
         super();
-        if(USE_VIDEO)
-            vip = new VideoImageDataProvider(new Frame(),this);
+ 
         
         sphere1Component = new SceneGraphComponent();
         sphere1Component.setGeometry(new Sphere());
@@ -137,37 +136,38 @@ public class VulptureGPUApp implements Runnable,VideoImageDataProvider.ImageData
        a.setAttribute(CommonAttributes.SPHERES_DRAW, false);
        
  
-       //// skybox ?
-        try {
-            ImageData id;
-            id = ImageData.load(new Input(getClass().getResource("caustic2.gif")));
-            TextureUtility.createSkyBox(a,new ImageData[] {
-                    id,id,id,id,id,id});
-            a.setAttribute(CommonAttributes.AT_INFINITY,true);
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+//       //// skybox ?
+//        try {
+//            ImageData id;
+////            id = ImageData.load(new Input(getClass().getResource("caustic2.gif")));
+//            id = ImageData.load(new Input(getClass().getResource("/net/MathVis/data/testData3D/textures/grid.jpeg")));
+//            TextureUtility.createSkyBox(a,new ImageData[] {
+//                    id,id,id,id,id,id});
+//            a.setAttribute(CommonAttributes.AT_INFINITY,true);
+//        } catch (MalformedURLException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
         
        
        
        // reflectionmap...
        a = new Appearance();
-       try {
-           ImageData id = ImageData.load(new Input(getClass().getResource("caustic2.gif")));
-//                   new URL("file:///tmp/caustic2.gif")));
-        TextureUtility.createReflectionMap(a,"polygonShader",new ImageData[] {id,id,id,id,id,id});
-        
-    } catch (MalformedURLException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-    } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-    }
+//       try {
+//           ImageData id = ImageData.load(new Input(getClass().getResource("caustic2.gif")));
+////                   new URL("file:///tmp/caustic2.gif")));
+//        TextureUtility.createReflectionMap(a,"polygonShader",new ImageData[] {id,id,id,id,id,id});
+//        
+//    } catch (MalformedURLException e) {
+//        // TODO Auto-generated catch block
+//        e.printStackTrace();
+//    } catch (IOException e) {
+//        // TODO Auto-generated catch block
+//        e.printStackTrace();
+//    }
     
        root.setAppearance(a);
        
@@ -249,7 +249,14 @@ public class VulptureGPUApp implements Runnable,VideoImageDataProvider.ImageData
         appearance.setAttribute(CommonAttributes.LINE_SHADER,"cloth");
         appearance.setAttribute("rows",ROWS);
         appearance.setAttribute("columns",COLS);
-        
+        appearance.setAttribute("gravity",G);
+        appearance.setAttribute("diffuseColor", new java.awt.Color(180, 200, 220));
+        try {
+          TextureUtility.createTexture(appearance, "lineShader", "/net/MathVis/data/testData3D/textures/grid.jpeg");
+        } catch (IOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
         return root;
     }
     private final SceneGraphComponent buildFish(SceneGraphComponent root) {
@@ -302,7 +309,7 @@ public class VulptureGPUApp implements Runnable,VideoImageDataProvider.ImageData
 
   //  private final static double RHOSQ = 0.0;
     private final static double D = .9;
-    private final static double G = -.001;    
+    private final static double[] G = {-.02,-.01,0};    
     
     
   //  private double strech = 40.1;
@@ -608,9 +615,9 @@ public class VulptureGPUApp implements Runnable,VideoImageDataProvider.ImageData
                 double oy = fts[pos+1-3*FISHC];
                 double oz = fts[pos+2-3*FISHC];
 
-                ftsm[pos] += 0.0004*Math.sin(System.currentTimeMillis()/2000.);
-                ftsm[pos+1]+= G;
-                ftsm[pos+2] += 0.0001*Math.cos((System.currentTimeMillis()+fts[pos+1]*fts[pos])/1005.);
+                ftsm[pos] += 0.0004*Math.sin(System.currentTimeMillis()/2000.)+G[0];
+                ftsm[pos+1]+= G[1];
+                ftsm[pos+2] += 0.0001*Math.cos((System.currentTimeMillis()+fts[pos+1]*fts[pos])/1005.)+ G[2];
                 
                 double dirx = (fts[pos  ]-ox) + factor*ftsm[pos  ];
                 double diry = (fts[pos+1]-oy) + factor*ftsm[pos+1];

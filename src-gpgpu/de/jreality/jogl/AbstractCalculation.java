@@ -158,7 +158,7 @@ public abstract class AbstractCalculation implements GLEventListener {
   int cnt;
   long st;
 
-  private void measure() {
+  protected void measure() {
     if (measureCPS) {
       if (st == 0) st = System.currentTimeMillis();
       cnt++;
