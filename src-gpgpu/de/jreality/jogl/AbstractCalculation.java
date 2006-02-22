@@ -418,7 +418,7 @@ public abstract class AbstractCalculation implements GLEventListener {
     doIntegrate=true;
   }
   
-  private boolean isTex2D() {
+  protected boolean isTex2D() {
     return tex2D;
   }
   

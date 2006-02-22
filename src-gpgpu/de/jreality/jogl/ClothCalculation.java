@@ -7,18 +7,16 @@ import java.nio.FloatBuffer;
 import net.java.games.jogl.DebugGL;
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
-import net.java.games.jogl.GLEventListener;
 import net.java.games.jogl.GLU;
 import de.jreality.jogl.shader.GlslLoader;
-import de.jreality.shader.GlslProgram;
 
 public class ClothCalculation extends AbstractCalculation {
   
-  private static int NUM_ROWS=64;
-  private static int NUM_COLS=64;
+  private static int NUM_ROWS=4;
+  private static int NUM_COLS=4;
   
   private FloatBuffer positions=ByteBuffer.allocateDirect(NUM_COLS*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
-  private int dataTextureSize=8;
+  private int dataTextureSize=2;
   
   private int[] texIDsPositions = new int[NUM_ROWS*2];
   private int[] texIDsVelocities = new int[NUM_ROWS*2];
@@ -40,7 +38,7 @@ public class ClothCalculation extends AbstractCalculation {
   protected String initSource() {
     return "" +
     "uniform bool point; \n" +
-    "uniform vec4 gravity; \n" +
+    "uniform vec3 gravity; \n" +
     "uniform float damping; \n" +
     "uniform float factor; \n" +
     " \n" +
@@ -50,19 +48,19 @@ public class ClothCalculation extends AbstractCalculation {
     " \n" +
     "void main(void) { \n" +
     "  vec2 pos = gl_TexCoord[0].st; \n" + 
-    "  vec4 prevPos = textureRect(prev, pos); \n" + 
-    "  vec4 upperPos = textureRect(upper, pos); \n" + 
-    "  vec4 vel = textureRect(velocity, pos); \n" + 
+    "  vec3 prevPos = textureRect(prev, pos).xyz; \n" + 
+    "  vec3 upperPos = textureRect(upper, pos).xyz; \n" + 
+    "  vec3 vel = textureRect(velocity, pos).xyz; \n" + 
     " \n" +
-    " vec4 dir = prevPos - upperPos + factor*(vel+gravity); \n" +
+    " vec3 dir = prevPos - upperPos + factor*(vel+gravity); \n" +
     " dir = 0.1*normalize(dir);\n" +
     "  if (point) {\n" +
     " \n" +
-    " gl_FragColor =  prevPos +dir;\n" +
+    " gl_FragColor =  vec4(prevPos +dir, 1.);\n" +
     " \n" +
     "  } else {\n" +
     " \n" +
-    " gl_FragColor = damping*(vel- dot(vel,dir)*dir); \n" +
+    " gl_FragColor = vec4(damping*(vel- dot(vel,dir)*dir),1.); \n" +
     "  }\n" +
     "} \n";
   }
@@ -74,6 +72,21 @@ public class ClothCalculation extends AbstractCalculation {
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glLoadIdentity();
     gl.glViewport(0, 0, dataTextureSize, dataTextureSize);
+  }
+
+  protected void renderQuad(GL gl) {
+    gl.glColor3f(1,0,0);
+    gl.glPolygonMode(GL.GL_FRONT, GL.GL_FILL);
+    gl.glBegin(GL.GL_QUADS);
+      gl.glTexCoord2d(0.0, 0.0);
+      gl.glVertex2d(0.0,0.0);
+      gl.glTexCoord2d(isTex2D() ? 1 : dataTextureSize, 0.0);
+      gl.glVertex2d(dataTextureSize, 0.0);
+      gl.glTexCoord2d(isTex2D() ? 1 : dataTextureSize, isTex2D() ? 1 : dataTextureSize);
+      gl.glVertex2d(dataTextureSize, dataTextureSize);
+      gl.glTexCoord2d(0.0, isTex2D() ? 1 : dataTextureSize);
+      gl.glVertex2d(0.0, dataTextureSize);
+    gl.glEnd();
   }
 
   public void display(GLDrawable drawable) {
@@ -90,7 +103,8 @@ public class ClothCalculation extends AbstractCalculation {
 
 
       valueBuffer.clear();
-
+      valueBuffer.put(positions);
+      positions.clear();
       // values fixed for this step
       program.setUniform("gravity", gravity);
       program.setUniform("damping", damping);
@@ -123,19 +137,21 @@ public class ClothCalculation extends AbstractCalculation {
         gl.glBindTexture(TEX_TARGET, texIDsVelocities[pongPing*NUM_COLS+i+1]);
         program.setUniform("velocity", 2);
 
-        program.setUniform("point", false);
-        GlslLoader.render(program, drawable);
-        renderQuad(gl);
-        gl.glFinish();
-        valueBuffer.position(i*NUM_COLS*4).limit((i+1)*NUM_COLS*4);
-        gl.glReadBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
-        gl.glReadPixels(0, 0, dataTextureSize, dataTextureSize, TEX_FORMAT, GL.GL_FLOAT, valueBuffer);
-        
-        gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT1_EXT);
         program.setUniform("point", true);
         GlslLoader.render(program, drawable);
         renderQuad(gl);
         gl.glFinish();
+        valueBuffer.position((i+1)*NUM_COLS*4).limit((i+2)*NUM_COLS*4);
+        System.out.println(valueBuffer);
+        gl.glReadBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+        gl.glReadPixels(0, 0, dataTextureSize, dataTextureSize, TEX_FORMAT, GL.GL_FLOAT, valueBuffer.slice());
+        
+        gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT1_EXT);
+        program.setUniform("point", false);
+        GlslLoader.render(program, drawable);
+        renderQuad(gl);
+        gl.glFinish();
+        gl.glDrawBuffer(0);
       }
       
       // do swap
@@ -163,7 +179,7 @@ public class ClothCalculation extends AbstractCalculation {
       }
     }
     if (dataChanged) {
-      transferToTexture(gl, positions, texIDsPositions[pingPong*NUM_COLS], dataTextureSize);
+      transferToTexture(gl, positions, texIDsPositions[pongPing*NUM_COLS], dataTextureSize);
       dataChanged = false;
     }
   }
@@ -206,15 +222,26 @@ public class ClothCalculation extends AbstractCalculation {
 
   protected void calculationFinished() {
     FloatBuffer fb = getCurrentValues();
-    fb.limit(fb.capacity());
-    fb.position(fb.capacity()-12);
-    GpgpuUtility.dumpSelectedData(fb);
+    fb.clear();
+    GpgpuUtility.dumpData(fb);
+//    System.out.println(fb);
+//    fb.clear();
+//    fb.limit(12);
+//    fb.position(0);
+//    GpgpuUtility.dumpSelectedData(fb);
+//    
+//    fb.limit(fb.capacity());
+//    fb.position(fb.capacity()-12);
+//    GpgpuUtility.dumpSelectedData(fb);
+//    
     triggerCalculation();
   }
   
   public static void main(String[] args) {
     ClothCalculation cc = new ClothCalculation();
-    cc.setPositions(GpgpuUtility.makeGradient(8));
+    float[] f = GpgpuUtility.makeGradient(2);
+    GpgpuUtility.dumpData(f);
+    cc.setPositions(f);
     cc.setDisplayTexture(false);
     cc.triggerCalculation();
     GpgpuUtility.run(cc);
