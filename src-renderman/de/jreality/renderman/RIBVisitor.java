@@ -430,7 +430,8 @@ public class RIBVisitor extends SceneGraphVisitor {
             int npolys =i.getNumFaces();
             if(npolys!= 0) {
         HashMap map = new HashMap();
-        boolean smooth = !((String)eAppearance.getAttribute(CommonAttributes.POLYGON_SHADER,"default")).startsWith("flat");
+        //boolean smooth = !((String)eAppearance.getAttribute(CommonAttributes.POLYGON_SHADER,"default")).startsWith("flat");
+        boolean smooth = eAppearance.getAttribute(CommonAttributes.SMOOTH_SHADING,true);
         DataList coords = i.getVertexAttributes(Attribute.COORDINATES);
         DoubleArrayArray da = coords.toDoubleArrayArray();
         float[] fcoords =new float[3*da.getLength()];
