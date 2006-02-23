@@ -90,84 +90,6 @@ public final class Readers
   
   /**
    * reads the given file with the matching reader for the file ending.
-   * @deprecated use {@link Readers#read(File)}
-   *
-  public static SceneGraphComponent readFile(File file) {
-    SceneGraphComponent sgc = null;
-    String lc = file.getName().toLowerCase();
-    if (lc.endsWith(".top")) {
-        sgc = PolymakeParser.readFromFile(file);
-        IndexedFaceSet ifs = (IndexedFaceSet) sgc.getGeometry();
-        ifs = IndexedFaceSetUtility.binaryRefine(ifs);
-        GeometryUtility.calculateAndSetFaceNormals(ifs);
-        ifs.buildEdgesFromFaces();
-        sgc.setGeometry(ifs);
-    } else if (lc.endsWith(".pov")) {
-      try {
-          ReaderPOV rBsh = new ReaderPOV(); 
-          sgc = Readers.read(rBsh, Readers.getInput(file));
-      } catch (Exception e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-      }
-    } else if (lc.endsWith(".bsh")) {
-        try {
-            ReaderBSH rBsh = new ReaderBSH(); 
-            sgc = Readers.read(rBsh, Readers.getInput(file));
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-    } else if (lc.endsWith(".bsp")) {
-        try {
-            sgc = new ReaderBSP().read(file);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    } else if (lc.endsWith(".ase")) {
-        try {
-            sgc = new ReaderASE().read(file);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    } else if (lc.endsWith(".obj")) {
-        try {
-            sgc = new ReaderOBJ().read(file);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    } else if (lc.endsWith(".3ds")) {
-      try {
-          //sgc = new Reader3DS().read(file);
-          sgc = Parser3DS.readFromFile(file.getAbsolutePath());
-      } catch (Exception e1) {
-          // TODO Auto-generated catch block
-          e1.printStackTrace();
-      }
-    } else if (lc.endsWith(".jvx")) {
-      try {
-          //sgc = new Reader3DS().read(file);
-          sgc = JvxReader.read(file);
-      } catch (Exception e1) {
-          // TODO Auto-generated catch block
-          e1.printStackTrace();
-      }
-    } else if (lc.endsWith("off") || lc.endsWith("mesh") || lc.endsWith("vect") || lc.endsWith("bez") 
-    		|| lc.endsWith(".grp") || lc.endsWith(".oogl") || lc.endsWith(".list")){
-            OOGLReader or = new OOGLReader();   
-            or.setResourceDir(file.getParent()+"/");
-            sgc = or.readFromFile(file);
-        }
-        return sgc;
-    }
-*/
-  
-  /**
-   * reads the given file with the matching reader for the file ending.
    * @param file the file to read.
    * 
    * @throws IOException
@@ -229,7 +151,9 @@ public static String findFormat(String resourceName) {
     } else if (lcName.endsWith(".jrs")) {
       format = "JRS";
     } else if (lcName.endsWith(".wrl")) {
-        format = "VRML";
+      format = "VRML";
+    } else if (lcName.endsWith(".m")) {
+      format = "MATHEMATICA";
     } else if (lcName.endsWith("off") || lcName.endsWith("quad") || lcName.endsWith("mesh") || lcName.endsWith("vect") || lcName.endsWith("bez") 
         || lcName.endsWith(".grp") || lcName.endsWith(".oogl") || lcName.endsWith(".list") || lcName.endsWith("inst")){
       format = "OOGL";
