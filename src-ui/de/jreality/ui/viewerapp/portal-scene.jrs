@@ -130,7 +130,16 @@
               <perspective>true</perspective>
               <stereo>false</stereo>
             </camera>
-            <light/>
+            <light type="DirectionalLight">
+              <name>light 2</name>
+              <color>
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+                <alpha>255</alpha>
+              </color>
+              <intensity>0.75</intensity>
+            </light>
             <geometry/>
             <children/>
             <tools>
