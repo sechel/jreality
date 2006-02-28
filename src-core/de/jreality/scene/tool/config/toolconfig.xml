@@ -50,10 +50,6 @@
     <mapping src="PrimaryMenu" target="DragActivation"/>
     <mapping src="PrimarySelection" target="ScaleActivation"/>
 
-    <mapping src="PrimaryAction" target="CGGActionFake"/>
-    <mapping src="PrimaryMenu" target="CGGMenuFake"/>
-    <mapping src="PrimarySelection" target="CGGSelectionFake"/>
-
     <mapping src="Meta" target="Accelertation"/>
     <mapping src="Meta" target="DragAlongViewDirection"/>
     
