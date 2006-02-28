@@ -12,8 +12,6 @@ import net.java.games.jogl.GLDrawable;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.PolygonalTubeFactory;
-import de.jreality.geometry.Primitives;
-import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.QuadMeshUtility;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.JOGLRenderer;
@@ -25,7 +23,6 @@ import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DataItem;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.IntArray;
@@ -239,16 +236,17 @@ public class DefaultLineShader implements LineShader  {
 			gl.glNewList(nextDL, GL.GL_COMPILE);
 		}
 		boolean isQuadMesh = false;
-		QuadMeshShape  qms = null;
+//		QuadMeshShape  qms = null;
 		Object qmatt = ils.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
 		Dimension dm = null;
 		if (qmatt != null && qmatt instanceof Dimension)	{
 			dm = (Dimension) qmatt;
 			isQuadMesh = true;
-		} else if (ils instanceof QuadMeshShape) {
-			qms = (QuadMeshShape) ils;
-			isQuadMesh = true;
-		}
+		} 
+//		else if (ils instanceof QuadMeshShape) {
+//			qms = (QuadMeshShape) ils;
+//			isQuadMesh = true;
+//		}
 		//JOGLConfiguration.theLog.log(Level.FINE,"Tube radius is "+tubeRadius);
 		//gl.glEnable(GL.GL_COLOR_MATERIAL);
 		//gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK, GL.GL_DIFFUSE);
@@ -257,12 +255,13 @@ public class DefaultLineShader implements LineShader  {
 		if (!pickMode && isQuadMesh)	{
 			int u, v, count=0;
 			boolean closedU, closedV;
-			if (qms != null)	{
-				u = qms.getMaxU();
-				v = qms.getMaxV();
-				closedU = qms.isClosedInUDirection();
-				closedV = qms.isClosedInVDirection();				
-			} else {
+//			if (qms != null)	{
+//				u = qms.getMaxU();
+//				v = qms.getMaxV();
+//				closedU = qms.isClosedInUDirection();
+//				closedV = qms.isClosedInVDirection();				
+//			} else 
+			{
 				u = dm.width;
 				v = dm.height;
 				closedU = closedV = false;

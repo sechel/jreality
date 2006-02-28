@@ -3,7 +3,6 @@
  */
 package de.jreality.scene;
 
-import de.jreality.geometry.QuadMeshShape;
 
 
 /**
@@ -72,9 +71,9 @@ public class SceneGraphVisitor {
     IndexedFaceSet.superAccept(i, this);
   }
 
-  public void visit(QuadMeshShape q) {
-    QuadMeshShape.superAccept(q, this);
-  }
+//  public void visit(QuadMeshShape q) {
+//    QuadMeshShape.superAccept(q, this);
+//  }
 
   public void visit(Camera c) {
     Camera.superAccept(c, this);

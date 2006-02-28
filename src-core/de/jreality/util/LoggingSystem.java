@@ -107,10 +107,11 @@ public class LoggingSystem {
         handler.setLevel(Level.ALL);
         // make debugging loggers noisy
 //        Logger.getLogger("de.jreality.scene.proxy.tree").setLevel(Level.CONFIG);
-//        Logger.getLogger("de.jreality.scene.tool").setLevel(Level.CONFIG);
+        Logger.getLogger("de.jreality.scene.tool").setLevel(Level.FINE);
+        Logger.getLogger("de.jreality.scene.pick").setLevel(Level.FINE);
 //        Logger.getLogger("de.jreality.geometry").setLevel(Level.INFO);
           Logger.getLogger("de.jreality.io").setLevel(Level.INFO);
-        Logger.getLogger("discreteGroup").setLevel(Level.FINE);
+//        Logger.getLogger("discreteGroup").setLevel(Level.FINE);
     }
 
 //    public void setLogToFile(String fileName) throws IOException {

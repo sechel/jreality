@@ -22,9 +22,8 @@ import net.java.games.jogl.GLDrawable;
 import net.java.games.jogl.util.BufferUtils;
 import net.java.games.jogl.util.GLUT;
 import de.jreality.geometry.GeometryUtility;
-import de.jreality.geometry.LabelSet;
-import de.jreality.geometry.QuadMeshShape;
 import de.jreality.geometry.HeightFieldFactory;
+import de.jreality.geometry.LabelSet;
 import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultPolygonShader;
@@ -51,7 +50,6 @@ import de.jreality.scene.data.IntArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.Texture2D;
-import de.jreality.shader.TextureUtility;
 
 /**
  * @author gunn
@@ -394,16 +392,17 @@ public class JOGLRendererHelper {
 				theDomain = (Rectangle2D) qmatt;
 				isRegularDomainQuadMesh = true;
 			}				
-		} else if (sg instanceof QuadMeshShape) {
-			QuadMeshShape qm = (QuadMeshShape) sg;
-			isQuadMesh = true;
-			maxU = qm.getMaxU();
-			maxV = qm.getMaxV();
-			numV = maxU * maxV;
-			maxFU = qm.isClosedInUDirection() ? maxU : maxU - 1;
-			maxFV = qm.isClosedInVDirection() ? maxV : maxV - 1;
-			numF = qm.getNumFaces();
-		}
+		} 
+//		else if (sg instanceof QuadMeshShape) {
+//			QuadMeshShape qm = (QuadMeshShape) sg;
+//			isQuadMesh = true;
+//			maxU = qm.getMaxU();
+//			maxV = qm.getMaxV();
+//			numV = maxU * maxV;
+//			maxFU = qm.isClosedInUDirection() ? maxU : maxU - 1;
+//			maxFV = qm.isClosedInVDirection() ? maxV : maxV - 1;
+//			numF = qm.getNumFaces();
+//		}
 
 		numF = sg.getNumFaces();
 		if (!pickMode && isQuadMesh)	{

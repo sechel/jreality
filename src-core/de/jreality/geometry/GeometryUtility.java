@@ -250,35 +250,6 @@ public class GeometryUtility {
         }
     }
 
-	/**
-	 * @deprecated
-	 * @param qm
-	 */public static void calculateAndSetTextureCoordinates(QuadMeshShape qm) {
-		double[][] vn = calculateTextureCoordinates(qm);
-		qm.setVertexAttributes(Attribute.TEXTURE_COORDINATES, StorageModel.DOUBLE_ARRAY.array(vn[0].length).createReadOnly(vn));		
-	}
-	
-	/**
-	 * @deprecated
-	 * @param qm
-	 * @return
-	 */public static double[][] calculateTextureCoordinates(QuadMeshShape qm) {
-		int usize, vsize;
-		usize = qm.getMaxU();
-		vsize = qm.getMaxV();
-		double du = 1.0/(usize-1.0);
-		double dv = 1.0/(vsize-1.0);
-		double[][] tc = new double[vsize*usize][2];
-		for (int i = 0; i<vsize; ++i)	{
-			double v = i *dv;
-			for (int j=0; j<usize; ++j)	{
-				tc[i*usize + j][0] = j * du;
-				tc[i*usize + j][1] = v;
-			}
-		}
-		return tc;
-	}
-
 
 	public static Rectangle3D calculateBoundingBox(double[][] verts)	{
 		double[][] bnds = new double[2][3];

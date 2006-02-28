@@ -321,7 +321,7 @@ public class ViewerApp
     					final SceneGraphComponent f = Readers.read(files[i]);
               f.setName(files[i].getName());
               System.out.println("READ finished.");
-              attatch(currSceneNode, f);
+              attach(currSceneNode, f);
     				} catch (IOException e) {
     					// TODO Auto-generated catch block
     					e.printStackTrace();
@@ -472,7 +472,7 @@ public class ViewerApp
           if (ret == JOptionPane.OK_OPTION) {
             int[] idx = list.getSelectedIndices();
             for (int i = 0; i < idx.length; i++) {
-              detatch(currSceneNode, (SceneGraphNode) children.get(idx[i]));
+              detach(currSceneNode, (SceneGraphNode) children.get(idx[i]));
             }
           }
         }
@@ -736,11 +736,11 @@ public class ViewerApp
     }
   }
 
-  private void attatch(final SceneGraphComponent parent, final SceneGraphNode child) {
+  private void attach(final SceneGraphComponent parent, final SceneGraphNode child) {
     SceneGraphUtility.addChildNode(parent, child);
   }
 
-  private void detatch(final SceneGraphComponent parent, final SceneGraphNode child) {
+  private void detach(final SceneGraphComponent parent, final SceneGraphNode child) {
     SceneGraphUtility.removeChildNode(parent, child);
   }
 

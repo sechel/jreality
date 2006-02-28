@@ -42,8 +42,8 @@ public class DefaultPointShader  implements PointShader {
 	float[] specularColorAsFloat = {0f,1f,1f,1f};		// for texturing point sprite to simulate sphere
 	boolean sphereDraw = false, lighting = true;
 	PolygonShader polygonShader = null;
-	static Appearance a=new Appearance();
-	static Texture2D tex=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a, true);
+	Appearance a=new Appearance();
+	Texture2D tex=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a, true);
   static Texture2D currentTex;
 	double specularExponent = 60.0;
 	
@@ -67,21 +67,21 @@ public class DefaultPointShader  implements PointShader {
 		polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
 
 		if (!sphereDraw)	{
-      if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "pointSprite"), eap))
-        currentTex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "pointSprite"), eap);
-      else {
-  			Rn.normalize(lightDirection, lightDirection);
-  			specularColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COLOR), CommonAttributes.SPECULAR_COLOR_DEFAULT);
-  			specularColorAsFloat = specularColor.getRGBComponents(null);
-  			specularExponent = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_EXPONENT), CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
-  			setupTexture();
-        currentTex=tex;
-      }
+	      if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "pointSprite"), eap))
+	    	  currentTex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "pointSprite"), eap);
+	      else {
+	  			Rn.normalize(lightDirection, lightDirection);
+	  			specularColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COLOR), CommonAttributes.SPECULAR_COLOR_DEFAULT);
+	  			specularColorAsFloat = specularColor.getRGBComponents(null);
+	  			specularExponent = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_EXPONENT), CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
+	  			setupTexture();
+	  			currentTex=tex;
+	      }
 	  }
 	}
 
 
-	static byte[] sphereTex;
+	byte[] sphereTex;
 	double[] lightDirection = {1,-1,2};
 	
 	private void setupTexture() {
@@ -185,8 +185,6 @@ public class DefaultPointShader  implements PointShader {
 			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
 //		}
 		
-//		if (sphereDraw)	{
-//		} else {
 		if (!sphereDraw)	{
 			lighting = false;
 			gl.glPointSize((float) getPointSize());
@@ -201,16 +199,9 @@ public class DefaultPointShader  implements PointShader {
 		} else
 		polygonShader.render(jr);
 		
-		//if (jr.openGLState.lighting != lighting)	{
 			jr.openGLState.lighting = lighting;
 			if (lighting) gl.glEnable(GL.GL_LIGHTING);
 			else gl.glDisable(GL.GL_LIGHTING);
-		//}
-
-//		if (jr.openGLState.transparencyEnabled)	{
-//			gl.glDepthMask(true);
-//			gl.glDisable(GL.GL_BLEND);			
-//		}
 		
 	}
 
@@ -219,7 +210,7 @@ public class DefaultPointShader  implements PointShader {
 		if (!sphereDraw)	{
 			GL gl = jr.globalGL;
 			jr.globalGL.glDisable(GL.GL_POINT_SPRITE_ARB);
-      gl.glActiveTexture(GL.GL_TEXTURE0);
+			gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_FALSE);
 			gl.glDisable(GL.GL_TEXTURE_2D);
 		}

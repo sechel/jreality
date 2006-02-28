@@ -101,7 +101,6 @@ public class ToolSystemViewer implements Viewer {
   
   public void setCameraPath(SceneGraphPath p) {
     viewer.setCameraPath(p);
-    toolSystem.initializeSceneTools();
   }
   
   public void setSceneRoot(SceneGraphComponent r) {
@@ -159,5 +158,9 @@ public class ToolSystemViewer implements Viewer {
 
   public SceneGraphPath getEmptyPickPath() {
     return emptyPickPath;
+  }
+  
+  public void initializeTools() {
+	toolSystem.initializeSceneTools();
   }
 }

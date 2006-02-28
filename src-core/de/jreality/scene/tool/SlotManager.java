@@ -372,6 +372,7 @@ public class SlotManager {
      * @return the sourceSlot or the mapped slot (which is handled by the tool)
      */
     InputSlot resolveSlotForTool(Tool tool, InputSlot sourceSlot) {
-      return (InputSlot) getMappingsForTool(tool).get(sourceSlot);
+    	InputSlot ret = (InputSlot) getMappingsForTool(tool).get(sourceSlot);
+    	return ret == null ? sourceSlot : ret;
     }
 }
