@@ -216,14 +216,14 @@ public class SimpleTexture implements Texture {
         
         
         
-        color[0] =255&((int)tmpColor[0]);
-        color[1] =255&((int)tmpColor[1]);
-        color[2] =255&((int)tmpColor[2]);
+        color[0] *=255&((int)tmpColor[0]);
+        color[1] *=255&((int)tmpColor[1]);
+        color[2] *=255&((int)tmpColor[2]);
         if(incr == 4)
-            color[3] =255&((int)tmpColor[3]);
+            color[3] *=255&((int)tmpColor[3]);
         
         else
-            color[3] = 255;
+            color[3] *= 255;
         
     }
 

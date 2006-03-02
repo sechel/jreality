@@ -255,6 +255,39 @@ public abstract class Renderer {
       }
 
   }
+  public static class IntArrayFloat extends Renderer
+  {
+      final BufferedImage img;
+      final Dimension d;
+      final int[] pixels;
+
+      IntArrayFloat(BufferedImage bi) {
+          this(bi, new int[bi.getWidth() * bi.getHeight()]);
+      }
+      private IntArrayFloat(BufferedImage bi, int[] bBuffer) {
+          this(bi, createRasterizer(bBuffer), bBuffer);
+      }
+      private IntArrayFloat(BufferedImage bi, PolygonRasterizer r, int[] bBuffer) {
+          super(createPipeline(bi, r), r);
+          d=new Dimension(bi.getWidth(), bi.getHeight());
+          pixels=bBuffer;
+          img=bi;
+      }
+      private static PolygonRasterizer createRasterizer(int[] pixels) {
+          //return new DoubleRasterizerInt(pixels);
+          return new NewFloatPolygonRasterizer(pixels);
+      }
+      static PolygonPipeline createPipeline(BufferedImage bi, PolygonRasterizer r) {
+          return new PolygonPipeline(r);
+      }
+      public void render() {
+          render(d.width, d.height);
+      }
+      public void update() {
+          img.getRaster().setDataElements(0, 0, d.width, d.height, pixels);
+      }
+
+  }
   public static class ByteArrayDouble extends Renderer
   {
       final BufferedImage img;

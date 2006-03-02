@@ -43,7 +43,7 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
     protected final static int HIGH_BITS = (0xffffffff << FIXP);
     protected final static int MAX_RANGE_FACTOR = (Integer.MAX_VALUE>>(FIXP+1));
     
-    public static final int  COLOR_CH_SCALE = fpInverse(255<<FIXP);
+    public static final int  COLOR_CH_SCALE = fpInverse(254<<FIXP);
     public static final int     COLOR_CH_MASK  = 255;
     private static final int     OPAQUE         = (COLOR_CH_MASK << 24);
     protected static final int R_MASK = (0xff0000 );
@@ -59,6 +59,7 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
     	try {
     		String img = System.getProperty("jreality.soft.imager");
             if (img != null && img.equals("hatch")) imager = new HatchImager();
+            if (img != null && img.equals("toon")) imager = new ToonImager();
     	} catch (SecurityException se) {
  			//webstart
 		}
@@ -455,27 +456,33 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
     private final void scanline(final int y) {
         final int l = xxx.leftValue, r = xxx.rightValue;
         final boolean lr = l<r;
-        int lx, rx;
+        int lx, rx,inc;
         //final int inc;
         if(lr) {
             lx = fpCeil (l - FIXPS/2);
             rx = fpFloor(r - FIXPS/2);
+            //TODO are these bound checks really unnecessary or
+            // can we get in trouble?
             if(lx < xmin) lx = xmin;
             if(rx >= xmax) rx = xmax-1;
             if(lx > rx) return;
+            inc = 1;
         }else {
             lx = fpFloor(l - FIXPS/2);
             rx = fpCeil (r - FIXPS/2);
             if(rx < xmin) rx = xmin;
             if(lx >= xmax) lx = xmax-1;
             if(rx > lx) return;
+            inc = -1;
         }
         
         makeXincrement(lx);
-        final int inc=(lr)? 1: -1;
+        //final int inc=(lr)? 1: -1;
         final int posOff=y*w;
         colorize(lx+posOff);
-        for(int x = lx+inc+posOff; lr? (x <= rx+posOff): (x >= rx+posOff); x+=inc) {
+        //for(int x = lx+inc+posOff; lr? (x <= rx+posOff): (x >= rx+posOff); x+=inc) {
+        final int end = inc*(rx+posOff);
+        for(int x = lx+inc+posOff; x*inc <=end; x+=inc) {
             //colorize(x+posOff);
             zzz.incrementX();
             if(interpolateW) www.incrementX();
@@ -538,6 +545,7 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
     private final void colorize(final int pos) {
         final int z = zzz.value;
         if (z >= zBuffer[pos]) return;
+        
         final int ww = www.value;
         
         final double factor = interpolateColor ? (255./ww) : (255./(FIXPS*MAX_RANGE_FACTOR));
@@ -564,13 +572,18 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
             color[0] = r;
             color[1] = g;
             color[2] = b;
+            color[3] = omt;
             texture.getColor(
                     uuu.value /WW, vvv.value /WW,pos%w,pos/w, color);
             //This is now done in getColor:
-            omt = (omt*color[3]*COLOR_CH_SCALE)>>FIXP;
-            r   = (r  *color[0]*COLOR_CH_SCALE)>>FIXP;
-            g   = (g  *color[1]*COLOR_CH_SCALE)>>FIXP;
-            b   = (b  *color[2]*COLOR_CH_SCALE)>>FIXP;   
+//            omt = (omt*color[3]*COLOR_CH_SCALE)>>FIXP;
+//            r   = (r  *color[0]*COLOR_CH_SCALE)>>FIXP;
+//            g   = (g  *color[1]*COLOR_CH_SCALE)>>FIXP;
+//            b   = (b  *color[2]*COLOR_CH_SCALE)>>FIXP;   
+          omt = (color[3]*COLOR_CH_SCALE)>>FIXP;
+          r   = (color[0]*COLOR_CH_SCALE)>>FIXP;
+          g   = (color[1]*COLOR_CH_SCALE)>>FIXP;
+          b   = (color[2]*COLOR_CH_SCALE)>>FIXP;   
 //              r   = color[0];
 //              g   = color[1];
 //              b   = color[2];

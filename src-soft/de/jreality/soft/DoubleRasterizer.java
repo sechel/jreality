@@ -29,7 +29,7 @@ import java.util.Arrays;
  * 
  * @version 1.0
  * @author timh
- *
+ * @deprecated
  */
 public class DoubleRasterizer extends ModularDoublePolygonRasterizer {
 

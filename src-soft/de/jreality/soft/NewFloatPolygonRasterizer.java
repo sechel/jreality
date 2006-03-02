@@ -33,8 +33,8 @@ import java.util.Arrays;
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
  *  
  */
-public class NewDoublePolygonRasterizer implements PolygonRasterizer {
-    private static final double  COLOR_CH_SCALE = 1/255.;
+public class NewFloatPolygonRasterizer implements PolygonRasterizer {
+    private static final float  COLOR_CH_SCALE = 1/255.f;
     private static final int     COLOR_CH_MASK  = 255;
     private static final int     OPAQUE         = (COLOR_CH_MASK << 24);
     //private static final boolean[] interpolate = new boolean[Polygon.VERTEX_LENGTH];
@@ -51,12 +51,12 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
 
     // store half the size of the screen:
     //minDim is the min of wh and hh;
-    private double wh;
-    private double hh;
-    private double minDim;
-    private double maxDim;
-    private double[][] polygon =
-        new double[Polygon.MAXPOLYVERTEX][Polygon.VERTEX_LENGTH];
+    private float wh;
+    private float hh;
+    private float minDim;
+    private float maxDim;
+    private float[][] polygon =
+        new float[Polygon.MAXPOLYVERTEX][Polygon.VERTEX_LENGTH];
     
     private final Quantity xxx = new Quantity();
     private final Quantity yyy = new Quantity();
@@ -76,11 +76,11 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
     private boolean interpolateA;
     private boolean interpolateUV;
 
-    protected double transparency = 0;
+    protected float transparency = 0;
 
     private Texture texture = null;
 
-    private double zBuffer[];
+    private float zBuffer[];
     private int w;
     private int h;
 
@@ -91,16 +91,16 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
     /**
      *  
      */
-    public NewDoublePolygonRasterizer(int[] pixelBuf,boolean interpolateY, boolean interpolateFullX, Colorizer colorizer) {
+    public NewFloatPolygonRasterizer(int[] pixelBuf,boolean interpolateY, boolean interpolateFullX, Colorizer colorizer) {
         super();
         this.colorizer = colorizer;
         this.interpolateY = interpolateY;
         this.interpolateFullX = interpolateFullX;
         pixels=pixelBuf;
-        System.out.println(">NEW DOUBLE RASTERIZER<");
+        System.out.println(">NEW FLOAT RASTERIZER<");
         System.out.println("(correct interpolation = "+correctInterpolation+")");
     }
-    public NewDoublePolygonRasterizer(int[] pixelBuf) {
+    public NewFloatPolygonRasterizer(int[] pixelBuf) {
         this(pixelBuf, false, false,null);
     }
 
@@ -119,7 +119,7 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
                                */
     ) {
         transparency =
-             p.getShader().getVertexShader().getTransparency() ;
+             (float) p.getShader().getVertexShader().getTransparency() ;
         
         
         texture = p.getShader().getTexture();
@@ -134,52 +134,52 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
         final int pLength = p.length;
         for (int i = 0; i < pLength; i++) {
             int pos = p.vertices[i];
-            double[] pi = polygon[i];
+            float[] pi = polygon[i];
 
-            double w = 1 / vertexData[pos + Polygon.SW];
-            double wxy = w * minDim;
-            pi[Polygon.SX] =  (wh + vertexData[pos + Polygon.SX] * wxy);
-            pi[Polygon.SY] = (hh - vertexData[pos + Polygon.SY] * wxy);
-            pi[Polygon.SZ] =  (vertexData[pos + Polygon.SZ] * w );
+            float w = (float) (1 / vertexData[pos + Polygon.SW]);
+            float wxy = w * minDim;
+            pi[Polygon.SX] =   (wh + (float)vertexData[pos + Polygon.SX] * wxy);
+            pi[Polygon.SY] =  (hh - (float)vertexData[pos + Polygon.SY] * wxy);
+            pi[Polygon.SZ] =   ((float)vertexData[pos + Polygon.SZ] * w );
 
             if (p.getShader() instanceof SkyboxPolygonShader)
-                pi[Polygon.SZ] = 2 + 0*Double.MAX_VALUE;
+                pi[Polygon.SZ] = 2 + 0*Float.MAX_VALUE;
 
             
-            final double iw = (interpolateW? w: 1);
+            final float iw = (interpolateW? w: 1);
             
                 pi[Polygon.SW] = iw;
                 pi[Polygon.U] =
-                    (vertexData[pos + Polygon.U] *  iw);
+                    ((float) vertexData[pos + Polygon.U] *  iw);
                 pi[Polygon.V] =
-                     (vertexData[pos + Polygon.V] *  iw);
+                     ((float)vertexData[pos + Polygon.V] *  iw);
                 pi[Polygon.A] =
-                     (vertexData[pos + Polygon.A] *  iw);
+                     ((float)vertexData[pos + Polygon.A] *  iw);
                 
                 if(interpolateColor) {
                     pi[Polygon.R] =
                          ((vertexData[pos + Polygon.R] >= 1
                             ? 1
-                            : (vertexData[pos + Polygon.R] ))
+                            : ((float)vertexData[pos + Polygon.R] ))
                             * iw);
                     pi[Polygon.G] =
                          ((vertexData[pos + Polygon.G] >= 1
                             ? 1
-                            : (vertexData[pos + Polygon.G] ))
+                            : ((float)vertexData[pos + Polygon.G] ))
                             * iw);
                     pi[Polygon.B] =
                          ((vertexData[pos + Polygon.B] >= 1
                             ? 1
-                            : (vertexData[pos + Polygon.B] ))
+                            : ((float)vertexData[pos + Polygon.B] ))
                             * iw);
                 }
         }
         
             if( !interpolateColor) {
                 int pos = p.vertices[0];
-                rrr.value = Math.min(1,vertexData[pos + Polygon.R]);
-                ggg.value = Math.min(1,vertexData[pos + Polygon.G]);
-                bbb.value = Math.min(1,vertexData[pos + Polygon.B]);
+                rrr.value = (float) Math.min(1,vertexData[pos + Polygon.R]);
+                ggg.value = (float) Math.min(1,vertexData[pos + Polygon.G]);
+                bbb.value = (float) Math.min(1,vertexData[pos + Polygon.B]);
            }
             www.value = polygon[0][Polygon.SW];
             
@@ -227,25 +227,25 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
      *
      */
     private final class Quantity {
-        double leftValue;
-        double leftYIncrement;
-        double rightValue;
-        double rightYIncrement;
-        double value;
-        double xIncrement;
+        float leftValue;
+        float leftYIncrement;
+        float rightValue;
+        float rightYIncrement;
+        float value;
+        float xIncrement;
         
         Quantity() {
             super();
         }
         
-        final  void makeXIncrement(final double dx, final double frac) {
+        final  void makeXIncrement(final float dx, final float frac) {
             
                 xIncrement = ((rightValue- leftValue)) * dx;
                 value = leftValue + xIncrement * frac;
           
         }
         
-        final void makeLeftYIncrement(final double start, final double end, final double dy, final double frac) {
+        final void makeLeftYIncrement(final float start, final float end, final float dy, final float frac) {
             
                 leftYIncrement = ((end - start)) * dy;
                 leftValue = start + leftYIncrement * frac;
@@ -255,7 +255,7 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
 //                System.out.println("1*dy = " +(dy));
                 
         }
-        final void makeRightYIncrement(final double start, final double end, final double dy, final double frac) {
+        final void makeRightYIncrement(final float start, final float end, final float dy, final float frac) {
                 rightYIncrement = ((end - start)) * dy;
                 rightValue = start + rightYIncrement * frac;
         }
@@ -282,7 +282,7 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
    
 
     private final void scanPolygon(
-        final double[][] p,
+        final float[][] p,
         final int plength
         ) {
         int  y, ly, ry;
@@ -296,7 +296,7 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
         }
         //System.out.println("scan poly");
 
-        double minY = Double.MAX_VALUE;
+        float minY = Float.MAX_VALUE;
         for (int i = 0; i < plength; i++) {
             if (p[i][Polygon.SY] < minY) {
                 minY = p[i][Polygon.SY];
@@ -370,14 +370,14 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
  
 
     
-    private final void makeYIncrement(final double[] p1, final double[] p2, final int y, final boolean left) {
+    private final void makeYIncrement(final float[] p1, final float[] p2, final int y, final boolean left) {
         
-        final double p1y = p1[Polygon.SY];
-        final double dy = 1/Math.max(1, p2[Polygon.SY] - p1y);
+        final float p1y = p1[Polygon.SY];
+        final float dy = 1/Math.max(1, p2[Polygon.SY] - p1y);
         //if (dy <1) 
         //    dy = 1;
         //dy =1/dy;
-        final double frac = y+ .5 - p1y;
+        final float frac = y+ .5f - p1y;
         if(left) {
             xxx.makeLeftYIncrement(p1[Polygon.SX],p2[Polygon.SX],dy,frac);
             if(interpolateY) 
@@ -414,7 +414,7 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
     }
 
     private final void scanline(final int y) {
-        final double l = xxx.leftValue, r = xxx.rightValue;
+        final float l = xxx.leftValue, r = xxx.rightValue;
         final boolean lr = l<r;
         int lx, rx;
         if(lr) {
@@ -459,9 +459,9 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
     }
     
     private final void makeXincrement(final int leftBound) {
-        final double dx = 1/Math.max(1, Math.abs(xxx.rightValue - xxx.leftValue));
+        final float dx = 1/Math.max(1, Math.abs(xxx.rightValue - xxx.leftValue));
         
-        final double frac = Math.abs( (leftBound  + .5 - xxx.leftValue));
+        final float frac = Math.abs( (leftBound  + .5f - xxx.leftValue));
         if(interpolateFullX) xxx.makeXIncrement(dx,frac);
         if(interpolateY) yyy.makeXIncrement(dx,frac);
         zzz.makeXIncrement(dx,frac);
@@ -481,22 +481,22 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
     private final int[] color = new int[4];
     
     public static abstract class Colorizer {
-        public abstract void colorize(final int[] pixels, final double[] zBuff, final int pos, final double[] data,boolean interpolateUV);
+        public abstract void colorize(final int[] pixels, final float[] zBuff, final int pos, final float[] data,boolean interpolateUV);
     }
-    final double [] data = new double[Polygon.VERTEX_LENGTH];
+    final float [] data = new float[Polygon.VERTEX_LENGTH];
     private final void colorize(final int pos) {
         
-        final double z = zzz.value;
+        final float z = zzz.value;
         if (z >= zBuffer[pos]) return;
         
-        final double ww =www.value;
+        final float ww =www.value;
 
-        final double factor = interpolateColor ?(255./ww):255.;
-        double r = /*(int)*/(rrr.value*factor);
-        double g = /*(int)*/(ggg.value*factor);
-        double b = /*(int)*/(bbb.value*factor);
+        final float factor = interpolateColor ?(255.f/ww):255.f;
+        float r = /*(int)*/(rrr.value*factor);
+        float g = /*(int)*/(ggg.value*factor);
+        float b = /*(int)*/(bbb.value*factor);
         
-        double omt = (1 - transparency);
+        float omt = (1 - transparency);
         if(interpolateA) omt = (omt*aaa.value) / ww;
 
 //        if(r<0||r>255) System.out.println("R: "+r+" W "+ww);
@@ -506,7 +506,7 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
 
         if (interpolateUV) {
             final int[] color=this.color;
-            final double WW = ((double)ww);
+            final float WW = ((float)ww);
             color[0] = (int)r;
             color[1] = (int)g;
             color[2] = (int)b;
@@ -524,10 +524,10 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
         }
        
 
-        if(omt<1.D) {
+        if(omt<1.f) {
             final int sample = pixels[pos];
 
-            double t = (1.-omt);
+            float t = (1.f-omt);
             
             int sb =  sample      & COLOR_CH_MASK;
             int sg = (sample>>8)  & COLOR_CH_MASK;
@@ -565,19 +565,19 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
     // line with z
     //
     //
-    private static final double ZEPS = -.0001;
+    private static final float ZEPS = -.0001f;
     private final void line(
-            final double x1,
-            final double y1,
-            final double z1,
-            final double x2,
-            final double y2,
-            final double z2, final int xmin, final int xmax, final int ymin, final int ymax) {
-        double dirX = x2-x1;
-        double dirY = y2-y1;
-        double dirZ = z2-z1;
-        double l = ((double)dirX)*dirX + ((double)dirY)*dirY;
-        l = Math.sqrt(l);
+            final float x1,
+            final float y1,
+            final float z1,
+            final float x2,
+            final float y2,
+            final float z2, final int xmin, final int xmax, final int ymin, final int ymax) {
+        float dirX = x2-x1;
+        float dirY = y2-y1;
+        float dirZ = z2-z1;
+        float l = ((float)dirX)*dirX + ((float)dirY)*dirY;
+        l = (float) Math.sqrt(l);
         if(l <1) return;
         dirX /= l;
         dirY /= l;
@@ -585,14 +585,14 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
 
 //          scanPolyNoColor(new double[][] {{x1-dirY,y1+dirX,z1+ZEPS,0,0,0,0,0,1},{x1+dirY,y1-dirX,z1-ZEPS,0,0,0,0,0,1},
 //              {x2+dirY,y2-dirX,z2-ZEPS,0,0,0,0,0,1},{x2-dirY,y2+dirX,z2+ZEPS,0,0,0,0,0,1}},4,xmin,xmax-1,ymin,ymax-1);
-        double zz1 =z1-dirZ+ZEPS;
-        double zz2 = z2+dirZ+ZEPS;
+        float zz1 =z1-dirZ+ZEPS;
+        float zz2 = z2+dirZ+ZEPS;
         
         //TODO: find a replacement for the following two lines:
         //interpolateColor   = false;
         //interpolateTexture = false;
         
-        scanPolygon(new double[][] {
+        scanPolygon(new float[][] {
                 {x1-dirX-dirY,y1-dirY+dirX,zz1,0,0,0,0,0,1},
                 {x1-dirX+dirY,y1-dirY-dirX,zz1,0,0,0,0,0,1},
                 {x2+dirX+dirY,y2+dirY-dirX,zz2,0,0,0,0,0,1},
@@ -612,13 +612,13 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
             w=nw;
             h=nh;
             final int numPx=w*h;
-            zBuffer=new double[numPx];
+            zBuffer=new float[numPx];
         }
 
     }
     public final void setSize(double width, double height) {
-        wh = ( width)  / 2.;
-        hh = ( height)  / 2.;
+        wh = (float) (( width)  / 2.f);
+        hh = (float) (( height)  / 2.f);
         minDim = Math.min(wh, hh);
         maxDim = Math.max(wh, hh);
        

@@ -51,20 +51,40 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
   private boolean upToDate= false;
   private boolean backgroundExplicitlySet;
   private boolean imageValid;
-  private boolean useDouble = false;
+  private boolean useDouble;
+  private boolean useFloat;
   private Image bgImage;
   
-  public DefaultViewer() {
-      this(false);
-  }
-  public DefaultViewer(boolean useDouble) {
-    super();
-    this.useDouble = useDouble;
+  public DefaultViewer(int type) {
+      super();
+      switch (type) {
+    case 0:
+        useDouble = false;
+        useFloat = false;
+        break;
+    case 1:
+        useFloat = true;
+        useDouble = false;        
+        break;
+    case 2:
+        useFloat = false;
+        useDouble = true;        
+        break;
+        
+    default:
+        break;
+    }
     //backgroundExplicitlySet=getBackground()!=null;
     setBackground(Color.white);
     if(ENFORCE_PAINT_ON_MOUSEEVENTS)
       enableEvents(AWTEvent.MOUSE_MOTION_EVENT_MASK);
     new Thread(this, "jReality render thread").start();
+  }
+  public DefaultViewer() {
+      this(0);
+  }
+  public DefaultViewer(boolean useDouble) {
+    this(useDouble?2:0);
   }
 
   public boolean isFocusable() {
@@ -97,19 +117,23 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
     return root;
   }
 
-
+  private Runnable runner = new Runnable() {
+      public void run() {
+          synchronized(renderLock) {
+            renderLock.notify();
+          }
+        }};
+        //TODO is it really better to postpone the notify on the EventQueue ?
   /* (non-Javadoc)
    * @see de.jreality.soft.Viewer#render()
    */
   public void render() {
     if(upToDate) {
     upToDate= false;
-    EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        synchronized(renderLock) {
-          renderLock.notify();
-        }
-      }});
+    EventQueue.invokeLater(runner);
+//    synchronized(renderLock) {
+//        renderLock.notify();
+//    }
     }
   }
 
@@ -200,6 +224,10 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
                 new BufferedImage(d.width, d.height, BufferedImage.TYPE_INT_ARGB);
             renderer=new Renderer.IntArrayDouble(offscreen);
         
+        } else if(useFloat) {
+            offscreen=
+                new BufferedImage(d.width, d.height, BufferedImage.TYPE_INT_ARGB);
+            renderer=new Renderer.IntArrayFloat(offscreen);
         } else {
             offscreen=
                 new BufferedImage(d.width, d.height, BufferedImage.TYPE_INT_ARGB);

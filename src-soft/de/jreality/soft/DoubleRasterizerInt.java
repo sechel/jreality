@@ -29,7 +29,7 @@ import java.util.Arrays;
  * 
  * @version 1.0
  * @author timh
- *
+ * @deprecated
  */
 public class DoubleRasterizerInt extends ModularDoublePolygonRasterizer {
     private static final int OPAQUE = (255 << 24);

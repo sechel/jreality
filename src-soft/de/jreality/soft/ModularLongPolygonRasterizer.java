@@ -27,7 +27,8 @@ package de.jreality.soft;
  * 
  * @version 1.0
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
- *
+ * @deprecated
+ * 
  */
 public abstract class ModularLongPolygonRasterizer implements PolygonRasterizer {
 	//For fixpoint math:

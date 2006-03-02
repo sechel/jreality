@@ -26,6 +26,7 @@ package de.jreality.soft;
  * 
  * @version 1.0
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
+ * @deprecated
  * TODO:Needs update make similar to Integer version again...
  */
 public abstract class ModularDoublePolygonRasterizer implements PolygonRasterizer {
