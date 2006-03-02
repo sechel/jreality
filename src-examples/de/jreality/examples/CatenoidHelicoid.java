@@ -73,6 +73,7 @@ private int[][] faceIndices;
     computeVertices();
     computeNormals();
     computeTexCoords();
+    generateFaceIndices();
     
     vertexAttributes.addWritable(Attribute.COORDINATES,
       StorageModel.DOUBLE3_INLINED, vertices);
@@ -87,24 +88,28 @@ private int[][] faceIndices;
   }
 
   private void generateFaceIndices() {
-	  
-    final int uLineCount = d;
-	final int vLineCount = d;
-	
-	final int numUFaces = uLineCount-1;
-	final int numVFaces = vLineCount-1;
-	
-	final int numPoints = d*d;
-	
-	for (int i = 0, k=0; i<numVFaces; ++i) {
-		for (int j = 0; j< numUFaces; ++j, k++)	{
-			final int [] face = faceIndices[k];
-			face[0] = (i * uLineCount + j);
-			face[1] = (((i+1) * uLineCount) + j) % numPoints;
-			face[2] = (((i+1) * uLineCount) + (j+1)%uLineCount) % numPoints;
-			face[3] = ((i* uLineCount) + (j+1)%uLineCount) % numPoints;				
-		}
-	}
+	  startWriter();
+    try {
+      final int uLineCount = d;
+      final int vLineCount = d;
+  	
+    	final int numUFaces = uLineCount-1;
+    	final int numVFaces = vLineCount-1;
+    	
+    	final int numPoints = d*d;
+    	
+    	for (int i = 0, k=0; i<numVFaces; ++i) {
+    		for (int j = 0; j< numUFaces; ++j, k++)	{
+    			final int [] face = faceIndices[k];
+    			face[0] = (i * uLineCount + j);
+    			face[1] = (((i+1) * uLineCount) + j) % numPoints;
+    			face[2] = (((i+1) * uLineCount) + (j+1)%uLineCount) % numPoints;
+    			face[3] = ((i* uLineCount) + (j+1)%uLineCount) % numPoints;				
+    		}
+    	}
+    } finally {
+      finishWriter();
+    }
   }
   
   private void computeTexCoords() {

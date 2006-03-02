@@ -36,6 +36,8 @@ public class Attribute implements Serializable {
           target.append('{').append(d[index]).append(" }");
       }
   };
+  public static final Attribute LABELS = new Attribute("labels", StorageModel.STRING_ARRAY);
+  
   private Attribute(String name, StorageModel defStore) {
     attrName= name;
     storageModel= defStore;
@@ -50,6 +52,7 @@ public class Attribute implements Serializable {
     if(name.equals("indices")) return Attribute.INDICES;
     if(name.equals("texture coordinates")) return Attribute.TEXTURE_COORDINATES;
     if(name.equals("pointSize")) return Attribute.POINT_SIZE;
+    if(name.equals("labels")) return Attribute.LABELS;
   	return attributeForName(name, null);
   }
   public static Attribute attributeForName(String name, StorageModel defaultSM)	{
@@ -75,6 +78,7 @@ public class Attribute implements Serializable {
     if(attrName.equals("indices")) return INDICES;
     if(attrName.equals("texture coordinates")) return TEXTURE_COORDINATES;
     if(attrName.equals("pointSize")) return POINT_SIZE;
+    if(attrName.equals("labels")) return LABELS;
     return this;
   }
 }

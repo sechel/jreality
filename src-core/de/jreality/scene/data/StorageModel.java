@@ -11,6 +11,7 @@ import java.lang.reflect.Array;
  */
 public abstract class StorageModel implements Serializable {
   static Primitive[] PRIMITIVES=new Primitive[8];
+  static ObjectType[] OBJECT_TYPES=new ObjectType[1];
 
   /**
    * Get the single-item storage model for a primitive data
@@ -37,6 +38,16 @@ public abstract class StorageModel implements Serializable {
     StorageModel sm=PRIMITIVES[ix];
     return sm!=null? sm: (PRIMITIVES[ix]=new Primitive(cl));
   }
+  
+  public static StorageModel objectType(Class cl) {
+    if(cl.isPrimitive()) throw new IllegalArgumentException();
+    int ix=-1;
+    if (cl == String.class) ix = 0;
+    if (ix == -1) throw new IllegalArgumentException("unsupported type: "+cl.getName());
+    StorageModel sm=OBJECT_TYPES[ix];
+    return sm!=null? sm: (OBJECT_TYPES[ix]=new ObjectType(cl));
+  }
+
   transient StorageModel[] inlined, arrayof;
   /**
    * Create a storage model that inlines an additional dimension
@@ -89,6 +100,8 @@ public abstract class StorageModel implements Serializable {
                                    = DOUBLE_ARRAY.inlined(3);
   public static final StorageModel DOUBLE3_ARRAY
                                    = DOUBLE_ARRAY.array(3);
+  public static final StorageModel STRING_ARRAY
+                                   = new StringArrayStorage();
   private transient String string;
   StorageModel(String str) { string=str; }
   abstract Object create(int size);
@@ -254,6 +267,41 @@ public abstract class StorageModel implements Serializable {
       return primitive(primitiveType);
     }
   }
+
+  static final class ObjectType extends StorageModel {
+    static final ObjectType STRING = new ObjectType(String.class);
+
+    final Class objectType;
+
+    public ObjectType(Class type) {
+      super(type.getName());
+      objectType=type;
+    }
+
+    Object create(int size) {
+      throw new UnsupportedOperationException();
+    }
+
+    Object getAsObject(Object data, int index) {
+      if(data!=null&&data.getClass().isArray())
+        return Array.get(data, 0);
+      return data;
+    }
+
+    public int getLength(Object data) {
+      return 1;
+    }
+
+    public DataItem item(Object data, int i) {
+      // TODO Auto-generated method stub
+      return null;
+    }
+    private Object readResolve() throws ObjectStreamException
+    {
+      return objectType(objectType);
+    }
+  }
+
   public IntArray getAsIntArray(Object data, int index) {
     try {
       return new IntArray((int[])getAsObject(data, index));
