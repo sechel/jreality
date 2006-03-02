@@ -4,19 +4,24 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import antlr.DumpASTVisitor;
+
 import net.java.games.jogl.DebugGL;
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
 import net.java.games.jogl.GLU;
 import de.jreality.jogl.shader.GlslLoader;
 
-public class ClothCalculation extends AbstractCalculation {
+public class ClothCalculation2 extends AbstractCalculation {
   
   private static int NUM_ROWS;
   private static int NUM_COLS;
-  
+
+////  protected static int TEX_FORMAT = GL.GL_BGRA;
+
   private FloatBuffer positions;
-  private int dataTextureSize;
+  private FloatBuffer nulls;
+  //private int dataTextureSize;
   
   private int[] texIDsPositions;
   private int[] texIDsVelocities;
@@ -30,15 +35,27 @@ public class ClothCalculation extends AbstractCalculation {
   private double[] gravity=new double[]{0,0,-1};
   private double damping=0.01;
   private double factor=1;
+private boolean hasValidVBO;
   
-  public ClothCalculation(int rows, int columns) {
+
+    private int[] vbo = new int[1]; // 1 vertexbuffer
+    
+    
+  public ClothCalculation2(int rows, int columns) {
       NUM_ROWS = rows;
-      NUM_COLS = columns*columns;
-      dataTextureSize=columns;
+      NUM_COLS = columns;
+      //dataTextureSize=columns;
       positions=ByteBuffer.allocateDirect(NUM_COLS*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+      nulls=ByteBuffer.allocateDirect(NUM_COLS*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+      nulls.clear();
+      for (int i = 0; i < nulls.capacity(); i++) {
+        nulls.put(0f);
+    }
+      
+      
     valueBuffer = ByteBuffer.allocateDirect(NUM_COLS*NUM_ROWS*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
-    texIDsPositions = new int[NUM_ROWS*2];
-    texIDsVelocities = new int[NUM_ROWS*2];
+    texIDsPositions = new int[2];
+    texIDsVelocities = new int[2];
   }
   
   protected String initSource() {
@@ -48,25 +65,27 @@ public class ClothCalculation extends AbstractCalculation {
     "uniform float damping; \n" +
     "uniform float factor; \n" +
     " \n" +
-    "uniform samplerRect upper; \n" +
-    "uniform samplerRect prev; \n" +
-    "uniform samplerRect velocity; \n" +
+    "uniform samplerRect prevPoint; \n" +
+    "uniform samplerRect prevVelocity; \n" +
     " \n" +
     "void main(void) { \n" +
     "  vec2 pos = gl_TexCoord[0].st; \n" + 
-    "  vec3 prevPos = textureRect(prev, pos).xyz; \n" + 
-    "  vec3 upperPos = textureRect(upper, pos).xyz; \n" + 
-    "  vec3 vel = textureRect(velocity, pos).xyz; \n" + 
+    "  vec2 posUp = pos - vec2(0,1);" +
+    "  vec3 prevPos = textureRect(prevPoint, pos).xyz; \n" + 
+    "  vec3 prevVel = textureRect(prevVelocity, pos).xyz; \n" + 
+    "  vec3 upperPos = textureRect(prevPoint, posUp).xyz; \n" + 
+    "  vec3 upperVel = textureRect(prevVelocity, posUp).xyz; \n" + 
     " \n" +
-    " vec3 dir = prevPos - upperPos + factor*(vel+gravity); \n" +
+    " vec3 up = upperPos + upperVel;" +
+    " vec3 dir = prevPos - up + factor*(damping*prevVel+gravity); \n" +
     " dir = 0.1*normalize(dir);\n" +
     "  if (point) {\n" +
     " \n" +
-    " gl_FragColor =  vec4(upperPos +dir, 1.);\n" +
+    " gl_FragColor =  vec4(up + dir, 1.);\n" +
     " \n" +
     "  } else {\n" +
     " \n" +
-    " gl_FragColor = vec4(damping*(vel- dot(vel,dir)*dir),1.); \n" +
+    " gl_FragColor = vec4(up + dir - prevPos, 1.); \n" +
     "  }\n" +
     "} \n";
   }
@@ -74,26 +93,46 @@ public class ClothCalculation extends AbstractCalculation {
   protected void initViewport(GL gl, GLU glu) {
     gl.glMatrixMode(GL.GL_PROJECTION);
     gl.glLoadIdentity();
-    glu.gluOrtho2D(0, dataTextureSize, 0, dataTextureSize);
+    glu.gluOrtho2D(0, NUM_ROWS, 0, NUM_COLS);
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glLoadIdentity();
-    gl.glViewport(0, 0, dataTextureSize, dataTextureSize);
+    gl.glViewport(0, 0, NUM_ROWS, NUM_COLS);
   }
 
+  private void initVBO(GL gl) {
+      if (vbo[0] == 0) {
+        gl.glGenBuffersARB(1, vbo);
+        System.out.println("created VBO=" + vbo[0]);
+        gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, vbo[0]);
+        gl.glBufferDataARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 1024*1024*4*4, (float[])null, GL.GL_STREAM_COPY);
+        gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 0);
+        hasValidVBO=true;
+      }
+    }
+
+  
   protected void renderQuad(GL gl) {
     gl.glColor3f(1,0,0);
     gl.glPolygonMode(GL.GL_FRONT, GL.GL_FILL);
     gl.glBegin(GL.GL_QUADS);
       gl.glTexCoord2d(0.0, 0.0);
       gl.glVertex2d(0.0,0.0);
-      gl.glTexCoord2d(isTex2D() ? 1 : dataTextureSize, 0.0);
-      gl.glVertex2d(dataTextureSize, 0.0);
-      gl.glTexCoord2d(isTex2D() ? 1 : dataTextureSize, isTex2D() ? 1 : dataTextureSize);
-      gl.glVertex2d(dataTextureSize, dataTextureSize);
-      gl.glTexCoord2d(0.0, isTex2D() ? 1 : dataTextureSize);
-      gl.glVertex2d(0.0, dataTextureSize);
+      gl.glTexCoord2d(isTex2D() ? 1 : NUM_ROWS, 0.0);
+      gl.glVertex2d(NUM_ROWS, 0.0);
+      gl.glTexCoord2d(isTex2D() ? 1 : NUM_ROWS, isTex2D() ? 1 : NUM_COLS);
+      gl.glVertex2d(NUM_ROWS, NUM_COLS);
+      gl.glTexCoord2d(0.0, isTex2D() ? 1 : NUM_COLS);
+      gl.glVertex2d(0.0, NUM_COLS);
     gl.glEnd();
   }
+  
+  protected void transferFromTextureToVBO(GL gl) {
+      gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, vbo[0]);
+      gl.glReadBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+      gl.glReadPixels(0, 0, NUM_ROWS, NUM_COLS, TEX_FORMAT, GL.GL_FLOAT, (float[]) null);
+      gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 0);
+      hasValidVBO=true;
+    }
 
   public void display(GLDrawable drawable) {
     //GL gl = new DebugGL(drawable.getGL());
@@ -106,7 +145,9 @@ public class ClothCalculation extends AbstractCalculation {
       initViewport(gl, glu);
 
       initDataTextures(gl);
-
+      
+      gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE);
+      gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE);
 
       valueBuffer.clear();
       valueBuffer.put(positions);
@@ -115,16 +156,16 @@ public class ClothCalculation extends AbstractCalculation {
       program.setUniform("gravity", gravity);
       program.setUniform("damping", damping);
       program.setUniform("factor", factor);
-
       gl.glEnable(TEX_TARGET);
       
-      for(int i = 0; i < NUM_ROWS-1; i++) {
+      if(true) {
       
         gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-            GL.GL_COLOR_ATTACHMENT0_EXT, TEX_TARGET, texIDsPositions[pingPong*NUM_ROWS+i+1], 0);
+            GL.GL_COLOR_ATTACHMENT0_EXT, TEX_TARGET, texIDsPositions[pingPong], 0);
         gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-            GL.GL_COLOR_ATTACHMENT1_EXT, TEX_TARGET, texIDsVelocities[pingPong*NUM_ROWS+i+1], 0);
+            GL.GL_COLOR_ATTACHMENT1_EXT, TEX_TARGET, texIDsVelocities[pingPong], 0);
     
+        
         GpgpuUtility.checkBuf(gl);
         
         gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
@@ -132,35 +173,54 @@ public class ClothCalculation extends AbstractCalculation {
         // set all values
         // ping pong - current values
         gl.glActiveTexture(GL.GL_TEXTURE0);
-        gl.glBindTexture(TEX_TARGET, texIDsPositions[pingPong*NUM_ROWS+i]);
-        program.setUniform("upper", 0);
-  
-        gl.glActiveTexture(GL.GL_TEXTURE1);
-        gl.glBindTexture(TEX_TARGET, texIDsPositions[pongPing*NUM_ROWS+i+1]);
-        program.setUniform("prev", 1);
+        gl.glBindTexture(TEX_TARGET, texIDsPositions[pongPing]);
+        program.setUniform("prevPoint", 0);
         
-        gl.glActiveTexture(GL.GL_TEXTURE2);
-        gl.glBindTexture(TEX_TARGET, texIDsVelocities[pongPing*NUM_ROWS+i+1]);
-        program.setUniform("velocity", 2);
+        gl.glActiveTexture(GL.GL_TEXTURE1);
+        gl.glBindTexture(TEX_TARGET, texIDsVelocities[pongPing]);
+        program.setUniform("prevVelocity",1);
 
+        //TODO DO WE NEED THIS?
+        //initDataTextures(gl);
+        
         program.setUniform("point", true);
         GlslLoader.render(program, drawable);
         renderQuad(gl);
-        //expensive;
-        gl.glFinish();
-        valueBuffer.position((i+1)*NUM_COLS*4).limit((i+2)*NUM_COLS*4);
-        //System.out.println(valueBuffer);
+        //valueBuffer.position((i+1)*NUM_COLS*4).limit((i+2)*NUM_COLS*4);
+        
+        // very expensive:
+        //gl.glFinish();
+        
+       // gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 8);
+        //gl.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 8);
         gl.glReadBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
-        //expensive;
-        gl.glReadPixels(0, 0, dataTextureSize, dataTextureSize, TEX_FORMAT, GL.GL_FLOAT, valueBuffer.slice());
+        
+        if(false) {
+            initVBO(gl);
+            transferFromTextureToVBO(gl);
+        gl.glBindBufferARB(GL.GL_ARRAY_BUFFER, vbo[0]);
+        gl.glReadBuffer(GL.GL_ARRAY_BUFFER);
+        gl.glReadPixels(0, 0, NUM_ROWS, NUM_COLS, TEX_FORMAT, GL.GL_UNSIGNED_BYTE, valueBuffer.slice());
+        } else
+        {
+        // very expensive:
+        gl.glReadPixels(0, 0, NUM_ROWS, NUM_COLS, TEX_FORMAT, GL.GL_FLOAT, valueBuffer.slice());
+            //gl.glReadPixels(0, 0, dataTextureSize, dataTextureSize, TEX_FORMAT, GL.GL_UNSIGNED_BYTE, valueBuffer.slice());
+//        ////gl.glBindTexture(TEX_TARGET,  texIDsPositions[pingPong*NUM_ROWS+i]);
+//        ////gl.glGetTexImage(TEX_TARGET, 0, TEX_FORMAT, GL.GL_FLOAT, data.clear());
+            //gl.glGetTexImage(TEX_TARGET, 0, TEX_FORMAT, GL.GL_FLOAT, valueBuffer.slice());
+        }
+        //GpgpuUtility.dumpData(valueBuffer);
+
         
         gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT1_EXT);
         program.setUniform("point", false);
         GlslLoader.render(program, drawable);
         renderQuad(gl);
-        //expensive;
+        // very expensive:
         //gl.glFinish();
         gl.glDrawBuffer(0);
+      
       }
       
       // do swap
@@ -170,11 +230,11 @@ public class ClothCalculation extends AbstractCalculation {
     
       GlslLoader.postRender(program, drawable); // any postRender just resets the shader pipeline
     
+      gl.glDisable(TEX_TARGET);
       // switch back to old buffer
       gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, 0);
     
       calculationFinished();
-      gl.glDisable(TEX_TARGET);
     }
   }
   
@@ -183,17 +243,31 @@ public class ClothCalculation extends AbstractCalculation {
       gl.glGenTextures(texIDsPositions.length, texIDsPositions);
       gl.glGenTextures(texIDsVelocities.length, texIDsVelocities);
       for (int i = 0; i < texIDsPositions.length; i++) {
-        setupTexture(gl, texIDsPositions[i], dataTextureSize);
-        setupTexture(gl, texIDsVelocities[i], dataTextureSize);
+        setupTexture(gl, texIDsPositions[i], NUM_COLS*NUM_ROWS);
+        setupTexture(gl, texIDsVelocities[i], NUM_COLS*NUM_ROWS);
       }
     }
     if (dataChanged) {
-      transferToTexture(gl, positions, texIDsPositions[0], dataTextureSize);
-      transferToTexture(gl, positions, texIDsPositions[NUM_ROWS], dataTextureSize);
+        transferToTexture(gl, positions, texIDsPositions[0], NUM_COLS,1);
+        transferToTexture(gl, positions, texIDsPositions[1], NUM_COLS,1);
+        transferToTexture(gl, nulls, texIDsVelocities[0], NUM_COLS,1);
+        transferToTexture(gl, nulls, texIDsVelocities[1], NUM_COLS,1);
       dataChanged = false;
     }
   }
-  
+  protected void transferToTexture(GL gl, FloatBuffer buffer, int texID, int w, int h) {
+      // version (a): HW-accelerated on NVIDIA
+      gl.glBindTexture(TEX_TARGET, texID);
+      gl.glTexSubImage2D(TEX_TARGET, 0, 0, 0, w, h, TEX_FORMAT,
+          GL.GL_FLOAT, buffer);
+
+      // version (b): HW-accelerated on ATI
+      //    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, textureParameters.texTarget, texID, 0);
+      //    glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+      //    glRasterPos2i(0,0);
+      //    glDrawPixels(texSize,texSize,textureParameters.texFormat,GL_FLOAT,data);
+    }
+
   public void setPositions(double[] data) {
     positions.clear();
     assert(data.length*4 == positions.capacity()*3);
@@ -262,7 +336,7 @@ public class ClothCalculation extends AbstractCalculation {
   }
   
   public static void main(String[] args) {
-    ClothCalculation cc = new ClothCalculation(40, 64);
+    ClothCalculation2 cc = new ClothCalculation2(40, 64);
     float[] f = GpgpuUtility.makeGradient(8);
     GpgpuUtility.dumpData(f);
     cc.setPositions(f);

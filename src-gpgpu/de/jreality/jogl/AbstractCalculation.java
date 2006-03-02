@@ -80,8 +80,8 @@ public abstract class AbstractCalculation implements GLEventListener {
   }
   
   public void display(GLDrawable drawable) {
-    GL gl = new DebugGL(drawable.getGL());
-    //GL gl = drawable.getGL();
+    //GL gl = new DebugGL(drawable.getGL());
+    GL gl = drawable.getGL();
     GLU glu = drawable.getGLU();
     if (doIntegrate && hasValues) {
       
