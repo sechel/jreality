@@ -28,7 +28,6 @@ import java.util.logging.Logger;
 
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
-import de.jreality.math.VecMat;
 import de.jreality.scene.*;
 import de.jreality.scene.data.*;
 import de.jreality.scene.pick.PickResult;

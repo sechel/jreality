@@ -16,7 +16,6 @@ import java.util.logging.Logger;
 
 import net.java.games.jogl.*;
 import net.java.games.jogl.util.BufferUtils;
-import de.jreality.geometry.LabelSet;
 import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.*;
@@ -786,14 +785,14 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 				return;
 				
 			}
-			else 	if (originalGeometry instanceof LabelSet)	{
-				// NOTE we don't use display lists here because the text rendering is done in screen
-				// coordinates and must be recalculated for each frame
-				TextShader textShader = new TextShader();
-				textShader.setFromEffectiveAppearance(jpc.eAp, "textShader");
-				textShader.render(globalHandle);
-				JOGLRendererHelper.drawLabels(((LabelSet) originalGeometry), globalHandle);
-			}
+//			else 	if (originalGeometry instanceof LabelSet)	{
+//				// NOTE we don't use display lists here because the text rendering is done in screen
+//				// coordinates and must be recalculated for each frame
+//				TextShader textShader = new TextShader();
+//				textShader.setFromEffectiveAppearance(jpc.eAp, "textShader");
+//				textShader.render(globalHandle);
+//				JOGLRendererHelper.drawLabels(((LabelSet) originalGeometry), globalHandle);
+//			}
 
 			boolean useDisplayLists = useDisplayLists(activeDL, jpc);
 			if (geometryShader.isEdgeDraw() && ils != null)	{

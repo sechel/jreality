@@ -23,7 +23,6 @@ import net.java.games.jogl.util.BufferUtils;
 import net.java.games.jogl.util.GLUT;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.HeightFieldFactory;
-import de.jreality.geometry.LabelSet;
 import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultPolygonShader;
@@ -546,53 +545,53 @@ public class JOGLRendererHelper {
 		correctionNDC[10] = correctionNDC[11] = .5;
 	}
 	
-	public static void drawLabels(LabelSet lb, JOGLRenderer jr)	{
-		GL gl = jr.getCanvas().getGL();
-		String[] labels = lb.getLabels();
-		DataList positions = lb.getPositions();
-		double[][] objectVerts, screenVerts;
-		int bitmapFont = lb.getBitmapFont();
-		
-		objectVerts = positions.toDoubleArrayArray(null);
-		screenVerts = new double[objectVerts.length][objectVerts[0].length];
-		
-		Graphics3D gc = jr.getContext();
-		
-		double[] objectToScreen = Rn.times(null, correctionNDC, gc.getObjectToScreen(jr.theViewer.getViewingComponent()));
-//		System.out.println("object to Screen is \n"+Rn.matrixToString(objectToScreen));
-		Rn.matrixTimesVector(screenVerts, objectToScreen, objectVerts);
-		// It's important that the last coordinate is 0 when we transform to get screen coordinates:
-		// don't want to pick up any translation
-		double[] screenOffset = new double[4];
-		System.arraycopy(lb.getNDCOffset(), 0, screenOffset,0,3);
-		Rn.matrixTimesVector(screenOffset, Graphics3D.getNDCToScreen(jr.theViewer.getViewingComponent()), screenOffset);
-		//System.out.println("Screen offset is "+Rn.toString(screenOffset));
-		Rn.matrixTimesVector(screenVerts, objectToScreen, objectVerts);
-		if (screenVerts[0].length == 4) Pn.dehomogenize(screenVerts, screenVerts);
-		int np = objectVerts.length;
-
-		// Store enabled state and disable lighting, texture mapping and the depth buffer
-		gl.glPushAttrib(GL.GL_ENABLE_BIT);
-		gl.glDisable(GL.GL_BLEND);
-		gl.glDisable(GL.GL_LIGHTING);
-		gl.glDisable(GL.GL_TEXTURE_2D);
-		for (int i = 0; i< 6; ++i) gl.glDisable(i + GL.GL_CLIP_PLANE0);
-
-//		float[] cras = new float[4];
-//		double[] dras = new double[4];
-		for (int i = 0; i<np; ++i)	{
-//			gl.glRasterPos3d(objectVerts[i][0], objectVerts[i][1], objectVerts[i][2]);
-//			gl.glGetFloatv(GL.GL_CURRENT_RASTER_POSITION, cras);
-//			for (int j = 0; j<4; ++j) dras[j] = cras[j];
-			// TODO This is not available on ATI graphics card!      
-			gl.glWindowPos3d(screenVerts[i][0]+screenOffset[0], screenVerts[i][1] +screenOffset[1], screenVerts[i][2]+screenOffset[2]);
-			String label = (labels == null) ? Integer.toString(i) : labels[i];
-			//bitmapFont = 2 + (i%6);
-			glut.glutBitmapString(gl, bitmapFont, label);
-		}
-
-		gl.glPopAttrib();
-	}
+//	public static void drawLabels(LabelSet lb, JOGLRenderer jr)	{
+//		GL gl = jr.getCanvas().getGL();
+//		String[] labels = lb.getLabels();
+//		DataList positions = lb.getPositions();
+//		double[][] objectVerts, screenVerts;
+//		int bitmapFont = lb.getBitmapFont();
+//		
+//		objectVerts = positions.toDoubleArrayArray(null);
+//		screenVerts = new double[objectVerts.length][objectVerts[0].length];
+//		
+//		Graphics3D gc = jr.getContext();
+//		
+//		double[] objectToScreen = Rn.times(null, correctionNDC, gc.getObjectToScreen(jr.theViewer.getViewingComponent()));
+////		System.out.println("object to Screen is \n"+Rn.matrixToString(objectToScreen));
+//		Rn.matrixTimesVector(screenVerts, objectToScreen, objectVerts);
+//		// It's important that the last coordinate is 0 when we transform to get screen coordinates:
+//		// don't want to pick up any translation
+//		double[] screenOffset = new double[4];
+//		System.arraycopy(lb.getNDCOffset(), 0, screenOffset,0,3);
+//		Rn.matrixTimesVector(screenOffset, Graphics3D.getNDCToScreen(jr.theViewer.getViewingComponent()), screenOffset);
+//		//System.out.println("Screen offset is "+Rn.toString(screenOffset));
+//		Rn.matrixTimesVector(screenVerts, objectToScreen, objectVerts);
+//		if (screenVerts[0].length == 4) Pn.dehomogenize(screenVerts, screenVerts);
+//		int np = objectVerts.length;
+//
+//		// Store enabled state and disable lighting, texture mapping and the depth buffer
+//		gl.glPushAttrib(GL.GL_ENABLE_BIT);
+//		gl.glDisable(GL.GL_BLEND);
+//		gl.glDisable(GL.GL_LIGHTING);
+//		gl.glDisable(GL.GL_TEXTURE_2D);
+//		for (int i = 0; i< 6; ++i) gl.glDisable(i + GL.GL_CLIP_PLANE0);
+//
+////		float[] cras = new float[4];
+////		double[] dras = new double[4];
+//		for (int i = 0; i<np; ++i)	{
+////			gl.glRasterPos3d(objectVerts[i][0], objectVerts[i][1], objectVerts[i][2]);
+////			gl.glGetFloatv(GL.GL_CURRENT_RASTER_POSITION, cras);
+////			for (int j = 0; j<4; ++j) dras[j] = cras[j];
+//			// TODO This is not available on ATI graphics card!      
+//			gl.glWindowPos3d(screenVerts[i][0]+screenOffset[0], screenVerts[i][1] +screenOffset[1], screenVerts[i][2]+screenOffset[2]);
+//			String label = (labels == null) ? Integer.toString(i) : labels[i];
+//			//bitmapFont = 2 + (i%6);
+//			glut.glutBitmapString(gl, bitmapFont, label);
+//		}
+//
+//		gl.glPopAttrib();
+//	}
 
 	double mat[] = new double[16];
 	int lightCount =  GL.GL_LIGHT0;

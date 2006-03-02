@@ -25,8 +25,11 @@ package de.jreality.renderman;
 import java.util.HashMap;
 
 import de.jreality.math.Rn;
-import de.jreality.math.VecMat;
-import de.jreality.scene.*;
+import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphVisitor;
+import de.jreality.scene.SpotLight;
+import de.jreality.scene.Transformation;
 
 /**
  * This is a utility for the RIBVisitor. It collects all the lights in the scene
@@ -75,8 +78,8 @@ public class LightCollector extends SceneGraphVisitor {
     public void visit(Transformation t) {
         if (initialTrafo == currentTrafo)
             currentTrafo= new double[16];
-        VecMat.copyMatrix(initialTrafo, currentTrafo);
-        VecMat.multiplyFromRight(currentTrafo, t.getMatrix());
+		Rn.copy(currentTrafo, initialTrafo);
+		Rn.times(currentTrafo, currentTrafo, t.getMatrix());
     }
     /* (non-Javadoc)
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.DirectionalLightSoft)

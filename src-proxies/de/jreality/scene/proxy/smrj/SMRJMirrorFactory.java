@@ -6,11 +6,38 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
-import de.jreality.geometry.QuadMeshShape;
 import de.jreality.scene.data.ByteBufferList;
 import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.proxy.ProxyFactory;
-import de.jreality.scene.proxy.scene.*;
+import de.jreality.scene.proxy.scene.Appearance;
+import de.jreality.scene.proxy.scene.Camera;
+import de.jreality.scene.proxy.scene.ClippingPlane;
+import de.jreality.scene.proxy.scene.Cylinder;
+import de.jreality.scene.proxy.scene.DirectionalLight;
+import de.jreality.scene.proxy.scene.IndexedFaceSet;
+import de.jreality.scene.proxy.scene.IndexedLineSet;
+import de.jreality.scene.proxy.scene.PointLight;
+import de.jreality.scene.proxy.scene.PointSet;
+import de.jreality.scene.proxy.scene.RemoteAppearance;
+import de.jreality.scene.proxy.scene.RemoteCamera;
+import de.jreality.scene.proxy.scene.RemoteClippingPlane;
+import de.jreality.scene.proxy.scene.RemoteCylinder;
+import de.jreality.scene.proxy.scene.RemoteDirectionalLight;
+import de.jreality.scene.proxy.scene.RemoteGeometry;
+import de.jreality.scene.proxy.scene.RemoteIndexedFaceSet;
+import de.jreality.scene.proxy.scene.RemoteIndexedLineSet;
+import de.jreality.scene.proxy.scene.RemoteLight;
+import de.jreality.scene.proxy.scene.RemotePointLight;
+import de.jreality.scene.proxy.scene.RemotePointSet;
+import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
+import de.jreality.scene.proxy.scene.RemoteSceneGraphNode;
+import de.jreality.scene.proxy.scene.RemoteSphere;
+import de.jreality.scene.proxy.scene.RemoteSpotLight;
+import de.jreality.scene.proxy.scene.RemoteTransformation;
+import de.jreality.scene.proxy.scene.SceneGraphComponent;
+import de.jreality.scene.proxy.scene.Sphere;
+import de.jreality.scene.proxy.scene.SpotLight;
+import de.jreality.scene.proxy.scene.Transformation;
 import de.smrj.RemoteFactory;
 
 /**
@@ -73,10 +100,6 @@ public class SMRJMirrorFactory extends ProxyFactory {
         created=createRemote(PointSet.class);
         copyAttr(p, (RemotePointSet)created);
     }
-
-    public void visit(QuadMeshShape q) {
-    	visit((de.jreality.scene.IndexedFaceSet) q);
-    }    
 
     public void visit(de.jreality.scene.SceneGraphComponent c) {
         created=createRemote(SceneGraphComponent.class);

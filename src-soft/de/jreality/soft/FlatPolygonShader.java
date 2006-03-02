@@ -153,9 +153,6 @@ public class FlatPolygonShader implements PolygonShader {
       // we do not need to interpolate the colors:
       //interpolateColor=!(vertexShader instanceof ConstantVertexShader);
 
-      de.jreality.scene.Texture2D tex = (de.jreality.scene.Texture2D)eAppearance.getAttribute(ShaderUtility.nameSpace(name, "texture"),null,de.jreality.scene.Texture2D.class);
-      if(tex != null) texture = new SimpleTexture(tex);     
-      
       if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eAppearance))
           texture = new SimpleTexture((Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eAppearance));
      

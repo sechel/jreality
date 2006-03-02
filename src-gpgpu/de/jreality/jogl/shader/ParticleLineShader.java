@@ -107,8 +107,6 @@ public class ParticleLineShader implements LineShader {
     if (sprites) {
       if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "pointSprite"), eap)) {
         tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "pointSprite"), eap);
-      } else {
-        tex = DefaultPointShader.tex;        
       }
     }
     diffuseColor = (Color) eap

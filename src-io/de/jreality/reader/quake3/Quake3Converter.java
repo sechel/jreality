@@ -66,8 +66,12 @@ import de.jreality.reader.quake3.lumps.tBSPLeaf;
 import de.jreality.reader.quake3.lumps.tBSPVertex;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.ImageData;
+import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
 import de.jreality.reader.vecmath.Vector3f;
 import de.jreality.util.*;
 import de.jreality.util.LoggingSystem;
@@ -86,8 +90,8 @@ public class Quake3Converter {
     private SceneGraphComponent cluster[];      // all the clusters in the BSP file (contains leaves)
     private SceneGraphComponent clusterSwitch;       // massive switch for all the clusters
 
-    private Texture2D lightTextures[];
-    private Texture2D textures[];
+    private ImageData lightTextures[];
+    private ImageData textures[];
     private Quake3Loader loader;
     private int numShapes;
     private int numUniqueShapes;
@@ -271,13 +275,16 @@ public class Quake3Converter {
 //
 //            a.setTextureUnitState(new TextureUnitState[]{base, light});
         }
-        
-        if (textures[face.textureID] != null) a.setAttribute(CommonAttributes.TEXTURE_2D, textures[face.textureID]);
+        Texture2D tex = null;
+        if (textures[face.textureID] != null) //a.setAttribute(CommonAttributes.TEXTURE_2D, textures[face.textureID]);
+			tex = TextureUtility.createTexture(a, "polygonShader", textures[face.textureID]);
         if (loader.textures[face.textureID].indexOf("flame1side")>=0 ||
                 loader.textures[face.textureID].indexOf("flame1dark")>=0) {
-            textures[face.textureID].setCombineMode(Texture2D.GL_MODULATE);
+            if (tex != null) tex.setCombineMode(Texture2D.GL_MODULATE);
         }
-        if (face.lightmapID >=0 && lightTextures[face.lightmapID] != null) a.setAttribute("lightMap", lightTextures[face.lightmapID]);
+        if (face.lightmapID >=0 && lightTextures[face.lightmapID] != null) {
+			Texture2D lm = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "lightMap", a, false);
+        }
         
         a.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.AMBIENT_COLOR, new Color(1,1,1));
         a.setAttribute(CommonAttributes.LIGHTING_ENABLED, true);
@@ -361,31 +368,30 @@ public class Quake3Converter {
      */
     private void convertLightMaps() {
 
-        lightTextures = new Texture2D[loader.lightmaps.length];
+        lightTextures = new ImageData[loader.lightmaps.length];
         LoggingSystem.getLogger(this).finer("Converting "+loader.lightmaps.length+" lightmaps.");
         for (int i = 0; i < loader.lightmaps.length; i++) {
             changeGamma(loader.lightmaps[i],1.2f);
-            lightTextures[i] = new Texture2D(loader.lightmaps[i]);
-            lightTextures[i].setCombineMode(Texture2D.GL_MODULATE);
+            lightTextures[i] = new ImageData(loader.lightmaps[i]);
         }
 
     }
 
-    private static Texture2D defTexture;
+    private static ImageData defTexture;
 
-    private static Texture2D getDefaultTexture() {
+    private static ImageData getDefaultTexture() {
         if (defTexture != null) return defTexture;
         BufferedImage im = new BufferedImage(256, 256, BufferedImage.TYPE_4BYTE_ABGR);
         Graphics g = im.getGraphics();
         g.setColor(Color.gray);
         g.fillRect(0, 0, 256, 256);
         g.dispose();
-        defTexture = new Texture2D(im);
+        defTexture = new ImageData(im);
         return defTexture;
     }
 
     private void convertTextures() {
-        textures = new Texture2D[loader.textures.length];
+        textures = new ImageData[loader.textures.length];
         for (int i = 0; i < loader.textures.length; i++) {
             String tFull = loader.textures[i];
             String tFile = tFull.substring(tFull.lastIndexOf("/") + 1);
@@ -396,7 +402,7 @@ public class Quake3Converter {
                 } catch (FileNotFoundException nfe) {
                     in = input.resolveInput(tFile+".jpg");
                 }
-                textures[i] = new Texture2D(in);
+                textures[i] = ImageData.load(in);
             } catch (IOException ioe) {
                 try {
                     try {
@@ -412,10 +418,9 @@ public class Quake3Converter {
                 } else {
                     LoggingSystem.getLogger(this).finer("reading tga file: "+in.toString());
                     BufferedImage bufferedImage = TargaFile.getBufferedImage(in.getInputStream());
-                    textures[i] = new Texture2D(bufferedImage);
+                    textures[i] = new ImageData(bufferedImage);
                 }
             }
-            textures[i].setApplyMode(Texture2D.GL_REPLACE);
         }
     }
 

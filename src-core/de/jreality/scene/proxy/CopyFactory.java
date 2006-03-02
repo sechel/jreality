@@ -4,8 +4,22 @@ package de.jreality.scene.proxy;
 import java.util.Iterator;
 import java.util.Set;
 
-import de.jreality.geometry.QuadMeshShape;
-import de.jreality.scene.*;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.Camera;
+import de.jreality.scene.ClippingPlane;
+import de.jreality.scene.Cylinder;
+import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.Geometry;
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.Light;
+import de.jreality.scene.PointLight;
+import de.jreality.scene.PointSet;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.Sphere;
+import de.jreality.scene.SpotLight;
+import de.jreality.scene.Transformation;
 
 /**
  * 
@@ -58,12 +72,6 @@ public class CopyFactory extends ProxyFactory {
         PointSet newPS=new PointSet();
         copyAttr(p, newPS);
         created=newPS;
-    }
-
-    public void visit(QuadMeshShape q) {
-        QuadMeshShape newQMS=new QuadMeshShape();
-        copyAttr(q, newQMS);
-        created=newQMS;
     }
 
     public void visit(SceneGraphComponent c) {

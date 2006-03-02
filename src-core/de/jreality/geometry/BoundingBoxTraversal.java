@@ -26,9 +26,17 @@ import java.awt.geom.Rectangle2D;
 
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
-import de.jreality.math.VecMat;
-import de.jreality.scene.*;
-import de.jreality.scene.data.*;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.ClippingPlane;
+import de.jreality.scene.Cylinder;
+import de.jreality.scene.Geometry;
+import de.jreality.scene.PointSet;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphVisitor;
+import de.jreality.scene.Sphere;
+import de.jreality.scene.Transformation;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.DataList;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.Rectangle3D;
 
@@ -108,7 +116,7 @@ class BoundingBoxTraversal extends SceneGraphVisitor {
 //    if (initialTransformation != null)
 //      initialTransformation.getMatrix(initialTrafo);
 //    else
-      VecMat.assignIdentity(initialTrafo);
+      Rn.setIdentityMatrix(initialTrafo);
     }
     currentTrafo= initialTrafo;
     visit(root);
@@ -123,8 +131,8 @@ class BoundingBoxTraversal extends SceneGraphVisitor {
   public void visit(Transformation t) {
     if (initialTrafo == currentTrafo)
       currentTrafo= new double[16];
-    VecMat.copyMatrix(initialTrafo, currentTrafo);
-    VecMat.multiplyFromRight(currentTrafo, t.getMatrix());
+    Rn.copy(currentTrafo, initialTrafo);
+    Rn.times(currentTrafo, currentTrafo, t.getMatrix());
     //pipeline.setMatrix(currentTrafo);
   }
 
@@ -219,23 +227,6 @@ class BoundingBoxTraversal extends SceneGraphVisitor {
 	bound.zmin = Math.min(bound.zmin,tmpVec[0][2]);
 	bound.zmax = Math.max(bound.zmax,tmpVec[1][2]);
  }
-  
-  private final void unionVectors(DoubleArrayArray daa) {
-	for(int ix=0, numVec=daa.getLength(); ix < numVec; ix++) {
-	  DoubleArray da=daa.getValueAt(ix);
-	  unionVector(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
-	}
-  }
-  
-  private final void unionVector(double x, double y, double z) {
-    VecMat.transform(currentTrafo,x,y,z,tmpVec);
-    bound.xmin = Math.min(bound.xmin,tmpVec[0]);
-    bound.xmax = Math.max(bound.xmax,tmpVec[0]);
-    bound.ymin = Math.min(bound.ymin,tmpVec[1]);
-    bound.ymax = Math.max(bound.ymax,tmpVec[1]);
-    bound.zmin = Math.min(bound.zmin,tmpVec[2]);
-    bound.zmax = Math.max(bound.zmax,tmpVec[2]);
-  }
   
   private final void unionBox(Rectangle3D bbox) {
 	if (bbox.isEmpty()) return;

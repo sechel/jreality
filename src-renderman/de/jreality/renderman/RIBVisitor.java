@@ -28,21 +28,42 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
-import java.io.*;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import de.jreality.math.VecMat;
-import de.jreality.scene.*;
-import de.jreality.scene.data.*;
-import de.jreality.shader.*;
+import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Rn;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.Camera;
+import de.jreality.scene.ClippingPlane;
+import de.jreality.scene.Cylinder;
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.PointSet;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.SceneGraphVisitor;
+import de.jreality.scene.Sphere;
+import de.jreality.scene.Transformation;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.scene.data.DataList;
+import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.data.DoubleArrayArray;
+import de.jreality.scene.data.IntArray;
+import de.jreality.scene.data.IntArrayArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 
@@ -143,10 +164,10 @@ public class RIBVisitor extends SceneGraphVisitor {
         float[] f = col.getRGBColorComponents(null);
         map.put("color background", f);
         Ri.imager("background",map);
-        double[] mir= new double[16];
-        VecMat.assignScale(mir,1,1,-1);
+        cam = MatrixBuilder.euclidean().scale(1,1,-1).times(cam).getArray();
+//        VecMat.assignScale(mir,1,1,-1);
         //icam.scale(1.);
-        VecMat.multiplyFromLeft(cam,mir);
+//        VecMat.multiplyFromLeft(cam,mir);
         Ri.transform(fTranspose(cam));
         Ri.worldBegin();
         new LightCollector(root);
@@ -394,15 +415,12 @@ public class RIBVisitor extends SceneGraphVisitor {
         d[0] = p2.getValueAt(0) - p1.getValueAt(0);
         d[1] = p2.getValueAt(1) - p1.getValueAt(1);
         d[2] = p2.getValueAt(2) - p1.getValueAt(2);
-        float l =(float) VecMat.norm(d);
+        float l =(float) Rn.euclideanNorm(d);
         d[0]/= l;
         d[1]/= l;
         d[2]/= l;
-        double[] mat = new double[16];
-//        VecMat.assignTranslation(mat,ds);
-        VecMat.assignTranslation(mat,new double[] {p1.getValueAt(0),p1.getValueAt(1),p1.getValueAt(2)});
-        double[] rot = new double[16];
-        VecMat.assignIdentity(rot);
+		double[] mat = MatrixBuilder.euclidean().translate(p1.getValueAt(0),p1.getValueAt(1),p1.getValueAt(2)).getMatrix().getArray();
+        
         dirToEuler(d);
 //        t.rotateZ(disk[5]);
 //        t.rotateY(disk[4]);
@@ -411,13 +429,15 @@ public class RIBVisitor extends SceneGraphVisitor {
         //VecMat.assignRotationX(rot,Math.PI/2.);
         //VecMat.multiplyFromRight(mat,rot);
         
-        VecMat.assignRotationZ(rot,d[2]);
-        VecMat.multiplyFromRight(mat,rot);
-        VecMat.assignRotationY(rot,d[1]);
-        VecMat.multiplyFromRight(mat,rot);
-        VecMat.assignRotationX(rot,d[0] - Math.PI/2.);
-        VecMat.multiplyFromRight(mat,rot);
+//        VecMat.assignRotationZ(rot,d[2]);
+//        VecMat.multiplyFromRight(mat,rot);
+//        VecMat.assignRotationY(rot,d[1]);
+//        VecMat.multiplyFromRight(mat,rot);
+//        VecMat.assignRotationX(rot,d[0] - Math.PI/2.);
+//        VecMat.multiplyFromRight(mat,rot);
 
+		double[] rot = MatrixBuilder.euclidean().rotateZ(d[2]).rotateY(d[1]).rotateX(d[0] - Math.PI/2.).getMatrix().getArray();
+		
         Ri.transformBegin();
         Ri.concatTransform(fTranspose(mat));
         Ri.cylinder(r,0,l,360,null);
@@ -547,7 +567,7 @@ public class RIBVisitor extends SceneGraphVisitor {
             DoubleArrayArray a=coord.toDoubleArrayArray();
             double[] trns = new double[16];
             for (int i= 0; i < n; i++) { 
-                VecMat.assignTranslation(trns,new double[] {a.getValueAt(i, 0),a.getValueAt(i, 1),a.getValueAt(i, 2)});
+                trns = MatrixBuilder.euclidean().translate(a.getValueAt(i, 0),a.getValueAt(i, 1),a.getValueAt(i, 2)).getArray();
                 Ri.transformBegin();
                 Ri.concatTransform(fTranspose(trns));
                 HashMap map =new HashMap();
@@ -633,7 +653,7 @@ public class RIBVisitor extends SceneGraphVisitor {
     
     
     private static void dirToEuler(double r[]) {
-        double d =VecMat.norm(r);
+        double d =Rn.euclideanNorm(r);
         double x = r[0]/d;
         double y = r[1]/d;
         double z = r[2]/d;

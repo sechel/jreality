@@ -7,20 +7,24 @@ package de.jreality.scene.tool;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.logging.Level;
 
 import javax.swing.JFrame;
 
-import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
-import de.jreality.math.Matrix;
 import de.jreality.math.P3;
-import de.jreality.scene.*;
+import de.jreality.scene.Camera;
+import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
-import de.jreality.scene.pick.*;
-import de.jreality.soft.SoftPickSystem;
+import de.jreality.scene.pick.AABBPickSystem;
+import de.jreality.scene.pick.PickSystem;
 import de.jreality.scene.pick.bounding.AABBTree;
+import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
 /**
@@ -30,11 +34,6 @@ import de.jreality.util.SceneGraphUtility;
  * Preferences - Java - Code Style - Code Templates
  */
 public class ToolTestScene {
-
-  final ToolSystemViewer viewer = new ToolSystemViewer(new de.jreality.jogl.Viewer());
-
-  //final Viewer viewer = new de.jreality.soft.DefaultViewer();
-  JFrame frame = new JFrame("viewer");
 
   public static SceneGraphComponent makeLights() {
     SceneGraphComponent lights = new SceneGraphComponent();
@@ -64,112 +63,29 @@ public class ToolTestScene {
     return lights;
   }
 
-  void createScene() {
-    SceneGraphComponent root = new SceneGraphComponent();
-    root.setName("test root");
-    SceneGraphComponent avatarNode = new SceneGraphComponent();
-    avatarNode.setName("avatar motion");
-    avatarNode.setTransformation(new Transformation());
-    avatarNode.getTransformation().setTranslation(0, 0, 3);
-    avatarNode.addChild(makeLights());
-    //        dummy.addChild(camNode);
-
-    SceneGraphComponent camNode = new SceneGraphComponent();
-    camNode.setName("avatar look orientation");
-    camNode.setTransformation(new Transformation());
-
-    avatarNode.addChild(camNode);
-    
-    Camera camera = new Camera();
-    camera.setFar(20);
-    camera.setNear(0.1f);
-    camNode.setCamera(camera);
-
+  SceneGraphComponent createScene() {
     SceneGraphComponent scene = new SceneGraphComponent();
-    root.addChild(scene);
    
     /************ CREATE SCENE ***********/
     //scene.addChild(new JOGLSkyBox().makeWorld());
     
-    IndexedFaceSet ifs = //Primitives.icosahedron(); 
-      new CatenoidHelicoid(4);
+    IndexedFaceSet ifs = Primitives.torus(2, .5, 10, 10);
+	IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs);
     
     GeometryUtility.calculateAndSetFaceNormals(ifs);
-    AABBTree obbTree = AABBTree.constructEdgeAABB(ifs, 0.1);
-    ifs.setGeometryAttributes(Attribute.attributeForName("AABBTreeEdge"), obbTree);
-    AABBTree.constructAndRegister(ifs, null, 5);
+    //AABBTree obbTree = AABBTree.constructEdgeAABB(ifs, 0.1);
+    //ifs.setGeometryAttributes(Attribute.attributeForName("AABBTreeEdge"), obbTree);
+    //AABBTree.constructAndRegister(ifs, null, 5);
     SceneGraphComponent comp = new SceneGraphComponent();
     comp.setGeometry(ifs);
-    comp.addChild(obbTree.display());
+    //comp.addChild(obbTree.display());
     
     scene.addChild(comp);
-    
-    /********** SCENE DONE ***********/
-    
-    root.addChild(avatarNode);
-    
-    ToolRotateTool toolSelection = new ToolRotateTool();
-    toolSelection.setComponent(scene);
-    
-    toolSelection.addTool(new DraggingTool());
-    //scene.addTool(new PickShowTool("PickShowActivation"));
-    RotateTool rotateTool = new RotateTool();
-    rotateTool.setMoveChildren(true);
-    toolSelection.addTool(rotateTool);
-
-    root.addTool(toolSelection);
-    
-    SceneGraphPath camPath = new SceneGraphPath();
-    camPath.push(root);
-    camPath.push(avatarNode);
-    camPath.push(camNode);
-    camPath.push(camera);
-    ShipNavigationTool shipNavigationTool = new ShipNavigationTool();
-    shipNavigationTool.setGravity(0);
-    shipNavigationTool.setJumpSpeed(0);
-    avatarNode.addTool(shipNavigationTool);
-    camNode.addTool(new HeadTransformationTool());
-    frame.setVisible(true);
-    frame.setSize(640, 480);
-    frame.getContentPane().add(viewer.getViewingComponent());
-    viewer.setSceneRoot(root);
-    viewer.setCameraPath(camPath);
-    SceneGraphPath avatarPath = camPath.popNew(); //cam
-    avatarPath.pop();//camNode
-    viewer.setAvatarPath(avatarPath);
-    frame.validate();
-
-    System.out.println(viewer.getViewingComponent().getSize());
-    frame.addWindowListener(new WindowAdapter() {
-      public void windowClosing(WindowEvent arg0) {
-        System.exit(0);
-      }
-    });
-    try {
-      //PickSystem ps = (PickSystem) Class.forName("de.jreality.jme.intersection.proxy.JmePickSystem").newInstance();
-      PickSystem ps = new AABBPickSystem();
-      viewer.setPickSystem(ps);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-  }
-
-  public void render() {
-    while (true) {
-      viewer.render();
-      try {
-        Thread.sleep(20);
-      } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    }
+    return scene;
   }
 
   public static void main(String[] args) {
     ToolTestScene tts = new ToolTestScene();
-    tts.createScene();
-    tts.render();
+	ViewerApp.display(tts.createScene());
   }
 }

@@ -27,7 +27,6 @@ import java.awt.event.MouseEvent;
 
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Rn;
-import de.jreality.math.VecMat;
 import de.jreality.scene.Viewer;
 
 /**

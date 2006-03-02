@@ -101,9 +101,6 @@ public class SkyboxPolygonShader implements PolygonShader {
         outline = eAppearance.getAttribute(ShaderUtility.nameSpace(name, "outline"), outline);
         setVertexShader(ShaderLookup.getVertexShaderAttr(eAppearance, name, "vertexShader"));
 
-        de.jreality.scene.Texture2D tex = (de.jreality.scene.Texture2D)eAppearance.getAttribute(ShaderUtility.nameSpace(name, "texture"),null,de.jreality.scene.Texture2D.class);
-        if(tex != null) texture = new SimpleTexture(tex);
-        
         if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eAppearance))
             texture = new SimpleTexture((Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eAppearance));
        

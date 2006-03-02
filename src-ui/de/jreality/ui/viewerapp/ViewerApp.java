@@ -136,7 +136,7 @@ public class ViewerApp
     initAWT();
     final ViewerApp app;
     try {
-      app = new ViewerApp(true);
+      app = new ViewerApp();
     } catch (Exception e) {
       throw new RuntimeException("creating viewer failed: "+e.getMessage());
     }
@@ -154,7 +154,7 @@ public class ViewerApp
   public static void main(String[] args) throws Exception
   {
     initAWT();
-    new ViewerApp(true);
+    new ViewerApp();
   }
 
   private static void initAWT() {
@@ -167,7 +167,7 @@ public class ViewerApp
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
   }
   
-  public ViewerApp(boolean initScene) throws Exception {
+  public ViewerApp() throws Exception {
     
     bshEval = new BshEvaluator();
     
@@ -661,6 +661,7 @@ public class ViewerApp
     currViewer.setSceneRoot(root);
     SceneGraphPath p = s.getPath("cameraPath");
     if (p != null) currViewer.setCameraPath(p);
+	currViewer.initializeTools();
     p = s.getPath("avatarPath");
     if (p != null) currViewer.setAvatarPath(p);
     emptyPick = s.getPath("emptyPickPath");

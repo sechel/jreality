@@ -20,7 +20,7 @@
  * Boston, MA 02111-1307
  * USA 
  */
-package de.jreality.math;
+package de.jreality.soft;
 
 /**
  * This class is a collection of useful methods for dealing with vectors
@@ -29,7 +29,7 @@ package de.jreality.math;
  * @author <a href="mailto:timh@math.umass.edu">Tim Hoffmann</a>
  *
  */
-public class VecMat {
+class VecMat {
 
   public static final void vecAssign(double[] to, double[] from) {
     to[0]= from[0];

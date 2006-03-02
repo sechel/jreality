@@ -22,7 +22,6 @@
  */
 package de.jreality.soft;
 
-import de.jreality.math.VecMat;
 import de.jreality.scene.*;
 
 /**

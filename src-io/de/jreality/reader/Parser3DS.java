@@ -7,11 +7,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Rn;
 import de.jreality.scene.*;
 import de.jreality.scene.data.*;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.ImageData;
+import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
+import de.jreality.util.Input;
 
 
 /**
@@ -251,16 +256,13 @@ public class Parser3DS {
                         Texture2D tex2d = null;
                         Image theImage = null;
                         try {
-                            tex2d = new Texture2D(textName);
+                            tex2d = TextureUtility.createTexture(getCurrentApperance(), "polygonShader", ImageData.load(Input.getInput(textName)));
+	                        tex2d.setTextureMatrix(MatrixBuilder.euclidean().scale(stretch).getMatrix());
                         } catch (Exception e) {
                             // Just ignore invalid zextures
                             Logger.getLogger("de.jreality").log(Level.WARNING, "Could not find the Texture "+textName);
                             break;
                         }
-                        theImage = tex2d.getImage();
-                        getCurrentApperance().setAttribute("tryTexture2D", true);
-                        getCurrentApperance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"texture2d",tex2d);
-                        tex2d.setTextureTransformation(new Transformation(P3.makeStretchMatrix(null, stretch)));
                     }
                     else {
                         getCurrentApperance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"textureFile", textName);

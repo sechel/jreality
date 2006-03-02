@@ -191,9 +191,14 @@ public final class MatrixBuilder {
   }
   
   public MatrixBuilder scale(double scale) {
-    matrix.multiplyOnRight(P3.makeStretchMatrix(tmp, scale));
-    return this;
-  }
+	    matrix.multiplyOnRight(P3.makeStretchMatrix(tmp, scale));
+	    return this;
+	  }
+
+  public MatrixBuilder scale(double[] scale) {
+	    scale(scale[0], scale[1], scale[2]);
+		return this;
+	  }
   
   public MatrixBuilder scale(double scaleX, double scaleY, double scaleZ) {
     // TODO: is this right for non-euclidian geoms?
@@ -292,4 +297,8 @@ public final class MatrixBuilder {
   public void assignTo(Matrix m) {
     matrix.assignTo(m);
   }
+
+public double[] getArray() {
+	return matrix.getArray();
+}
 }

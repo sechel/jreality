@@ -31,7 +31,6 @@ import java.util.logging.Logger;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
-import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Lock;
 import de.jreality.scene.data.Attribute;
@@ -88,13 +87,12 @@ public class SMRJMirrorFactoryTest extends TestCase {
 
     SMRJMirrorScene proxyScene;
     
-    CatenoidHelicoid ch;
+    IndexedFaceSet ch;
     
     public void testVisitIndexedFaceSet() throws Exception {
         proxyScene = new SMRJMirrorScene(rf, new Lock());
-        ch = new CatenoidHelicoid(3);
+        ch = new IndexedFaceSet();
         ch.setName("my own proxy test node");
-        ch.buildEdgesFromFaces();
         Object proxy = proxyScene.createProxyScene(ch);
         //System.out.println("proxy: "+(Arrays.asList(proxy.getClass().getInterfaces())));
         //System.out.println(proxy);
@@ -114,7 +112,6 @@ public class SMRJMirrorFactoryTest extends TestCase {
 //        assertEquals(ch.getVertexAttributes(), copy.getVertexAttributes());
         for (int i =0; i < 10; i++) { 
         	System.out.println(i+". mal");
-        	ch.setAlpha(i*0.1);
         	assertEquals(ch.getVertexAttributes(), copy.getVertexAttributes());
         }
     	IndexedFaceSet ifs = new IndexedFaceSet();
@@ -122,8 +119,7 @@ public class SMRJMirrorFactoryTest extends TestCase {
     	key = rf.getProxyKey(proxy2);
     	copy = (IndexedFaceSet) rec[0].getClientFactory().getLocal(key);
         for (int i = 201; i > 191; i--) {
-        	CatenoidHelicoid src= new CatenoidHelicoid(i);
-        	src.buildEdgesFromFaces();
+        	IndexedFaceSet src= new IndexedFaceSet();
         	System.out.println(src.getVertexAttributes().storedAttributes());
         	ifs.setVertexCountAndAttributes(src.getVertexAttributes());
         	//System.out.println("SMRJMirrorFactoryTest.testVisitIndexedFaceSet() 1");

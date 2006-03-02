@@ -1,13 +1,9 @@
 package de.jreality.writer;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.logging.Level;
 
-import de.jreality.geometry.CatenoidHelicoid;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
@@ -124,35 +120,5 @@ public class WriterOBJ {
 		out.flush();
 	}
 	
-	static public void main( String [] arg ) {
-		
-		SceneGraphComponent s1 = new SceneGraphComponent();
-		s1.setName( "s1" );
-		s1.setGeometry(new IndexedFaceSet());
-		SceneGraphComponent s11 = new SceneGraphComponent();
-		s11.setName( "s11" );
-		s11.setGeometry(new CatenoidHelicoid(10));
-		s1.addChild(s11);
-		SceneGraphComponent s12 = new SceneGraphComponent();
-		s12.setName( "s12" );
-		s12.setGeometry(new IndexedFaceSet());
-		s1.addChild(s12);
-		
-		
-		
-		write( s1, System.out );
-
-        try {
-			FileOutputStream stream = new FileOutputStream("/tmp/gaga.obj");
-			write( new CatenoidHelicoid(10), stream );
-			stream.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 	
 }

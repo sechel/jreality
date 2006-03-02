@@ -30,7 +30,6 @@ import java.util.List;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Rn;
-import de.jreality.math.VecMat;
 import de.jreality.renderman.RIBVisitor;
 import de.jreality.scene.*;
 import de.jreality.scene.Viewer;
