@@ -8,7 +8,7 @@ import java.net.URL;
 
 import javax.swing.JFrame;
 
-import com.sun.corba.se.impl.protocol.SpecialMethod;
+
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.MatrixBuilder;
@@ -57,7 +57,7 @@ public class VulptureGPUApp implements Runnable {
     
     de.jreality.shader.Texture2D tex;
     Appearance appearance = new Appearance();
-    private static final int COLS = 10;
+    private static final int COLS = 8;
     private static final int ROWS = 40;
     private static final int SIZEC = COLS*COLS;
     private static final int SIZEL = 1;
@@ -66,7 +66,7 @@ public class VulptureGPUApp implements Runnable {
     private static final int FISHL = 40;
 
     
-    private static final boolean SURFACE = true;
+//    private static final boolean SURFACE = true;
 
     private SceneGraphComponent sphere1Component;
     private SceneGraphComponent sphere2Component;
@@ -204,15 +204,16 @@ public class VulptureGPUApp implements Runnable {
 //            System.out.println("mb 0"+mb.getButton1());
             //repaint();
             long d = System.currentTimeMillis()-ts;
-        if(d<2) {
-            ts =  System.currentTimeMillis();
             try {
-                //System.out.println("sleep");
-                    Thread.sleep(2-d);
+                if(d<400) {
+                    ts =  System.currentTimeMillis();
+                    //System.out.println("sleep");
+                    Thread.sleep(400-d);
+                } else //time for other things...
+                    Thread.sleep(10);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            }
         }
         
     }
@@ -250,9 +251,11 @@ public class VulptureGPUApp implements Runnable {
         appearance.setAttribute("rows",ROWS);
         appearance.setAttribute("columns",COLS);
         appearance.setAttribute("gravity",G);
+        appearance.setAttribute("damping",.9);
+////        appearance.setAttribute("factor",.9);
         appearance.setAttribute("diffuseColor", new java.awt.Color(180, 200, 220));
         try {
-          TextureUtility.createTexture(appearance, "lineShader", "/net/MathVis/data/testData3D/textures/grid.jpeg");
+          TextureUtility.createTexture(appearance, "lineShader", "/home/timh/jRdata/testData3D/textures/grid.jpeg");
         } catch (IOException e) {
           // TODO Auto-generated catch block
           e.printStackTrace();
@@ -309,7 +312,7 @@ public class VulptureGPUApp implements Runnable {
 
   //  private final static double RHOSQ = 0.0;
     private final static double D = .9;
-    private final static double[] G = {-.02,-.01,0};    
+    private final static double[] G = {-.0,-.02,0};    
     
     
   //  private double strech = 40.1;
@@ -687,6 +690,13 @@ public class VulptureGPUApp implements Runnable {
         coords2[3] = 5*f[0];
         coords2[4] = 5*f[1];
         coords2[5] = 5*f[2];
+//        coords[0] = -4; 
+//        coords[1] = 1; 
+//        coords[2] = 0;
+//        coords[3] = 4; 
+//        coords[4] = 1.5; 
+//        coords[5] = 0;
+        
     }
 
     

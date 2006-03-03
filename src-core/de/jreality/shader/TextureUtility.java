@@ -267,6 +267,7 @@ public class TextureUtility {
 
   // TODO: colors seem to have no effect!
   public static ImageData createPointSprite(int textureSize, double[] lightDirection, Color diffuseColor, Color specularColor, double specularExponent) {
+      if (lightDirection == null) lightDirection = new double[]{1,-1,2};
     double[][] sphereVertices = new double[textureSize * textureSize][3];
     double x,y,z;
     int I = 0, II = 0;

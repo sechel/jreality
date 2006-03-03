@@ -254,12 +254,12 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
      *
      */
     private final static class Quantity {
-        private int leftValue;
-        private int leftYIncrement;
-        private int rightValue;
-        private int rightYIncrement;
-        private int value;
-        private int xIncrement;
+        public int leftValue;
+        public int leftYIncrement;
+        public int rightValue;
+        public int rightYIncrement;
+        public int value;
+        public int xIncrement;
         
         Quantity() {
             super();
@@ -267,8 +267,8 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
         
         final  void makeXIncrement(final int dxi, final int frac) {
             
-                xIncrement = fpTimes((rightValue- leftValue), dxi);
-                value = leftValue + fpTimes(xIncrement , frac);
+                xIncrement = NewPolygonRasterizer.fpTimes((rightValue- leftValue), dxi);
+                value = leftValue + NewPolygonRasterizer.fpTimes(xIncrement , frac);
                 
 //                System.out.println("value "+(value/(double)FIXPS)+" incr "+(xIncrement/(double)FIXPS)+" frac "+(frac/(double)FIXPS)+" leftV "+(leftValue/(double)FIXPS));
          
@@ -276,8 +276,8 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
         
         final void makeLeftYIncrement(final int start, final int end, final int dyi, final int frac) {
             
-                leftYIncrement = fpTimes((end - start), dyi);
-                leftValue = start + fpTimes(leftYIncrement, frac);
+                leftYIncrement = NewPolygonRasterizer.fpTimes((end - start), dyi);
+                leftValue = start + NewPolygonRasterizer.fpTimes(leftYIncrement, frac);
 //                System.out.println("YINC: leftValue "+(leftValue/(double)FIXPS)+" leftYIncr "+(leftYIncrement/(double)FIXPS));
            //     System.out.println("   start "+(( start)/(double)FIXPS));
 //                System.out.println("    (end - start)*dy "+(fpTimes((end - start),dy)/(double)FIXPS));
@@ -289,8 +289,8 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
         }
         final void makeRightYIncrement(final int start, final int end, final int dy, final int frac) {
            
-                rightYIncrement = fpTimes((end - start),dy);
-                rightValue = start + fpTimes(rightYIncrement, frac);
+                rightYIncrement = NewPolygonRasterizer.fpTimes((end - start),dy);
+                rightValue = start + NewPolygonRasterizer.fpTimes(rightYIncrement, frac);
             
         }
         final void incrementY() {
@@ -716,7 +716,7 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
     public static final int fpTimes(final int x, final int y) {
         
         
-        if(false) {
+        if(true) {
             // This would give the correct result and it is faster than computing
             // the correct answer in the below way.
             // Here in long seems better than double:
@@ -744,7 +744,7 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
         return ( ( x * y)>>FIXP);
     }
     
-    public static int  fpInverse( final int x) {
+    public static final int  fpInverse( final int x) {
         //return (int) (LONG_DFIXPS/x);
         // On my machine it turns out to be a little faster to use 
         // double division than long division.
