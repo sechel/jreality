@@ -7,10 +7,7 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-
-import com.sun.media.sound.Toolkit;
 
 public class LabelUtility {
 	
@@ -39,4 +36,5 @@ public class LabelUtility {
     g.drawString(s,0,r.height-(int)(border/2.));
 	  return img;
   }
+  
 }
