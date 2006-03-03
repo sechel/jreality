@@ -24,13 +24,13 @@ public  class TubeFactory {
 		static int debug = 0;
 		static Logger theLogger = LoggingSystem.getLogger(TubeFactory.class);
 		
-		double[][] theCurve, vertexColors, edgeColors, crossSection = TubeUtility.octagonalCrossSection;
-		double radius = .05;
-		int frameFieldType = TubeUtility.PARALLEL;
-		int signature = Pn.EUCLIDEAN;
-		int twists = 0;
+		public double[][] theCurve, vertexColors, edgeColors, crossSection = TubeUtility.octagonalCrossSection;
+		public double radius = .05;
+		public int frameFieldType = TubeUtility.PARALLEL;
+		public int signature = Pn.EUCLIDEAN;
+		public int twists = 0;
 		
-		boolean closedCurve = false,
+		public boolean closedCurve = false,
 			vertexColorsEnabled = false;
 		
 		public TubeFactory()	{

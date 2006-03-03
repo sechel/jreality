@@ -40,10 +40,10 @@ public class TubeUtility {
 		}
 		
 		public static class FrameInfo		{
-			double[] frame;				// the frame itself
+			public double[] frame;				// the frame itself
 			double length;				// curve length (as a fraction of 1) to this point
-			double theta,				// angle between adjacent segments
-					phi;					// angle required to rotate the frenet normal vector (intrinsic)
+			public double theta;
+			public double phi;					// angle required to rotate the frenet normal vector (intrinsic)
 										// to the parallel one
 			public FrameInfo(double[] f, double l, double t, double p)	{
 				super();

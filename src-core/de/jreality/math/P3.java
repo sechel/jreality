@@ -489,6 +489,16 @@ public class P3 extends Pn {
 			return makeStretchMatrix(dst, stretchV);
 		}
 
+		private static double[] makeStretchMatrix(double[] dst, double xscale, double yscale, double zscale) {
+			// TODO Auto-generated method stub
+			if (dst == null) dst = new double[16];
+			Rn.setIdentityMatrix(dst);
+			dst[0] = xscale;
+			dst[5] = yscale;
+			dst[10] = zscale;
+			return dst;
+		}
+
 	/**
 	 * Calculate a translation matrix in the given metric which carries the point <i>from</i> to the point <i>to</i>.
 	 * @param dst
@@ -760,6 +770,16 @@ public class P3 extends Pn {
 		return dst;
 	}
 
+	public static double[] calculateBillboardMatrix(double[] result, double xscale, double yscale, double[] cameraToObject, double[] point, int signature)	{
+		if (result == null) result = new double[16];
+	    double[] orientation = extractOrientationMatrix(null, cameraToObject, Pn.originP3, signature);
+	    // WARNING: notice the minus sign in following call
+	    double[] scale = makeStretchMatrix(null, xscale, yscale, 1.0);
+	    double[] translate = makeTranslationMatrix(null, point, signature);  
+	    Rn.times(result, orientation, Rn.times(null, translate, scale));
+		return result;
+	}
+	
 	public static double[] pluckerToMatrix(double[] m, double[] pl) {
 		if (m == null) m = new double[16];
 		m[0] = m[5] = m[10] = m[15] = 0.0;
