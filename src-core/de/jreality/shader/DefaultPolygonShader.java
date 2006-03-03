@@ -52,4 +52,7 @@ public interface DefaultPolygonShader extends PolygonShader {
 
   Texture2D getTexture2d();
   Texture2D createTexture2d();
+
+  TextShader getTextShader();
+  TextShader createTextShader(String name);
 }

@@ -5,6 +5,8 @@ import java.awt.Font;
 
 public interface DefaultTextShader extends TextShader {
 
+  Object CREATE_DEFAULT=new Object();
+  
 	final static Color DIFFUSE_COLOR_DEFAULT = Color.BLACK;
 	final static double SCALE_DEFAULT = 1.;
 	
@@ -13,8 +15,8 @@ public interface DefaultTextShader extends TextShader {
 	Color getDiffuseColor();
 	void setDiffuseColor(Color c);
 	  
-	double getScale();
-	void setScale(double s);
+	Double getScale();
+	void setScale(Double s);
 	
 	Font getFont();
 	void setFont(Font f);

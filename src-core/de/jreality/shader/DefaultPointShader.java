@@ -38,4 +38,6 @@ public interface DefaultPointShader extends PointShader {
   PolygonShader getPolygonShader();
   PolygonShader createPolygonShader(String shaderName);
   
+  TextShader getTextShader();
+  TextShader createTextShader(String name);
 }

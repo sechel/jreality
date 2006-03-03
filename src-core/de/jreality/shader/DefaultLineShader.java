@@ -49,4 +49,6 @@ public interface DefaultLineShader extends LineShader {
   PolygonShader getPolygonShader();
   PolygonShader createPolygonShader(String shaderName);
 
+  TextShader getTextShader();
+  TextShader createTextShader(String name);
 }
