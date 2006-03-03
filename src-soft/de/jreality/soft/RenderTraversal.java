@@ -305,7 +305,7 @@ public class RenderTraversal extends SceneGraphVisitor {
 			DefaultTextShader ts = (DefaultTextShader) AttributeEntityUtility.createAttributeEntity(shaderType, ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,"textShader"), eAppearance);
 			Font font = ts.getFont();
 			Color c = ts.getDiffuseColor();
-			double scale = ts.getScale();
+			double scale = ts.getScale().doubleValue();
 			
 			PolygonShader storePS = this.polygonShader;
 			PointShader storePtS = this.pointShader;
@@ -319,6 +319,11 @@ public class RenderTraversal extends SceneGraphVisitor {
 				eAppearance = EffectiveAppearance.create();
 			double[] m = new double[16];
 			VecMat.invert(currentTrafo,m);
+
+//      BufferedImage[] imgs = LabelUtility.createPointImages(p, font, c);
+//      for(int i = 0, max=imgs.length; i<max;i++) {
+//        BufferedImage img = imgs[i];
+
 			for(int i = 0; i<labels.getLength();i++) {
 				String li = labels.getValueAt(i);
 				BufferedImage img = LabelUtility.createImageFromString(li,font,c);
