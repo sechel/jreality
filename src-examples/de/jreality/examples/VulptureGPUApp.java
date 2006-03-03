@@ -281,7 +281,7 @@ public class VulptureGPUApp implements Runnable {
         }
         ifsf.setVertexCountAndAttributes(Attribute.COORDINATES,StorageModel.DOUBLE3_INLINED.createReadOnly(fts));
         ifsf.setFaceCountAndAttributes(Attribute.INDICES,StorageModel.INT_ARRAY_ARRAY.createReadOnly(idx));
-        ifsf.setVertexAttributes(Attribute.TEXTURE_COORDINATES,Attribute.TEXTURE_COORDINATES.getDefaultStorageModel().createReadOnly(tc));
+        ifsf.setVertexAttributes(Attribute.TEXTURE_COORDINATES,StorageModel.DOUBLE2_INLINED.createReadOnly(tc));
 
         fish.setGeometry(ifsf);
         fish.setName("fish");
