@@ -22,6 +22,8 @@
  */
 package de.jreality.soft;
 
+import de.jreality.math.Matrix;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 
 /**
@@ -56,6 +58,16 @@ public class SimpleTexture implements Texture {
 //        interpolate =(texture.getMinFilter()==Texture2D.GL_LINEAR);
 //    }
 
+	
+	public SimpleTexture(ImageData id) {
+		this.bytes = (byte[]) id.getByteArray().clone();
+	      this.width=id.getWidth();
+	      this.height = id.getHeight();
+		this.matrix = new Matrix().getArray();
+	      this.clampU = true;
+	      this.clampV = true;
+		interpolate = true;
+	}
     public SimpleTexture(Texture2D texture) {
       this.bytes = (byte[]) texture.getImage().getByteArray().clone();
       this.width=texture.getImage().getWidth();

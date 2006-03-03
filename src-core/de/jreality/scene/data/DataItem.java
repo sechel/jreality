@@ -67,6 +67,27 @@ public abstract class DataItem extends AbstractList {
   public int[][] toIntArrayArray(int[][] target) {
     return (int[][])copyTo(StorageModel.INT_ARRAY_ARRAY, target);
   }
+  
+  
+  public StringArray toStringArray() {
+	    return getStorageModel().toStringArray(this);
+	  }
+	  public StringArrayArray toStringArrayArray() {
+	    return getStorageModel().toStringArrayArray(this);
+	  }
+	  public String[] toStringArray(String[] target) {
+		    return (String[])copyTo(StorageModel.STRING_ARRAY, target);
+		  }
+		  /**
+		   * Copy the data into the specified array or into a new one
+		   * if the target parameter is <code>null</code>. Returns
+		   * the filled array.
+		   */
+		  public String[][] toStringArrayArray(String[][] target) {
+		    return (String[][])copyTo(StorageModel.STRING_ARRAY_ARRAY, target);
+		  }
+		  
+  
   /**
    * Copy the data into the specified array or into a new one
    * if the target parameter is <code>null</code>. Returns

@@ -39,7 +39,7 @@ public class LabelUtility {
   
   private static Color TRANSPARENT = new Color(0,0,0,0);
   
-  public static Image createImageFromString(String s, Font f,Color color) {
+  public static BufferedImage createImageFromString(String s, Font f,Color color) {
 	  //Rectangle r = f.getStringBounds(s,frc).getBounds();
 	  TextLayout tl = new TextLayout(s,f,frc);
 	  Rectangle r = tl.getBounds().getBounds();
@@ -58,11 +58,12 @@ public class LabelUtility {
 	  return img;
   }
  
+  private static IndexedFaceSet bb = Primitives.texturedSquare(new double[]{0,1,0,1,1,0,1,0,0,0,0,0});
 
   	public static SceneGraphComponent sceneGraphForLabel(SceneGraphComponent sgc, double xscale, double yscale,double[] offset, double[] camToObj, double[] position)  {
   		if (sgc == null) sgc = new SceneGraphComponent();
   		if (sgc.getGeometry() == null) {
-  			IndexedFaceSet bb = Primitives.texturedSquare(new double[]{0,1,0,1,1,0,1,0,0,0,0,0});
+  			//IndexedFaceSet bb = Primitives.texturedSquare(new double[]{0,1,0,1,1,0,1,0,0,0,0,0});
   			sgc.setGeometry(bb);
   		}
   		if (sgc.getTransformation() == null)	sgc.setTransformation(new Transformation());

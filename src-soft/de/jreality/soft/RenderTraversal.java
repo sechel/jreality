@@ -22,14 +22,26 @@
  */
 package de.jreality.soft;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
+import javax.swing.plaf.LabelUI;
+
+import de.jreality.backends.label.LabelUtility;
+import de.jreality.math.Matrix;
+import de.jreality.math.P3;
 import de.jreality.scene.*;
 import de.jreality.scene.data.*;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.shader.TextShader;
+import de.jreality.shader.Texture2D;
 
 /**
  * This class traverses a scene graph starting from the given "root" scene
@@ -99,6 +111,7 @@ public class RenderTraversal extends SceneGraphVisitor {
     pipeline.setFaceShader(polygonShader=p.polygonShader);
     pipeline.setLineShader(lineShader=p.lineShader);
     pipeline.setPointShader(pointShader=p.pointShader);
+	shaderUptodate= p.shaderUptodate;
     //pipeline.setPointOutlineShader(pointOutlineShader=p.pointOutlineShader);
     pipeline.setMatrix(currentTrafo=initialTrafo=parentContext.currentTrafo);
   }
@@ -115,7 +128,12 @@ public class RenderTraversal extends SceneGraphVisitor {
   RenderTraversal subContext() {
     if (reclaimableSubcontext != null) {
       reclaimableSubcontext.initializeFromParentContext(this);
-      reclaimableSubcontext.shaderUptodate = false;
+      //TODO is this o.k. ?
+	  //reclaimableSubcontext.shaderUptodate = false;
+//	  reclaimableSubcontext.shaderUptodate = this.shaderUptodate;
+//	  reclaimableSubcontext.pointShader   = this.pointShader;
+//	  reclaimableSubcontext.lineShader    = this.lineShader;
+//	  reclaimableSubcontext.polygonShader = this.polygonShader;
       return reclaimableSubcontext;
     } else
       return reclaimableSubcontext= new RenderTraversal(this);
@@ -276,33 +294,74 @@ public class RenderTraversal extends SceneGraphVisitor {
         for (int i= 0; i < n; i++) 
             pipeline.processPoint(a, i);
         
+		// Labels
+		
+		DataList dl = p.getVertexAttributes(Attribute.LABELS);
+		if(dl != null) {
+			StringArray labels = dl.toStringArray();
+			Class shaderType =  (Class) eAppearance.getAttribute(
+					ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,"textShader"),DefaultTextShader.class);
+			
+			DefaultTextShader ts = (DefaultTextShader) AttributeEntityUtility.createAttributeEntity(shaderType, ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,"textShader"), eAppearance);
+			Font font = ts.getFont();
+			Color c = ts.getDiffuseColor();
+			double scale = ts.getScale();
+			
+			PolygonShader storePS = this.polygonShader;
+			PointShader storePtS = this.pointShader;
+			LineShader storeLS = this.lineShader;
+			DefaultPolygonShader labelShader = new DefaultPolygonShader();
+			pipeline.setFaceShader(this.polygonShader=labelShader);
+			pipeline.setPointShader(this.pointShader = null);
+			pipeline.setLineShader(this.lineShader = null);
+			//pipeline.setMatrix(new Matrix().getArray());
+				EffectiveAppearance storeEA = eAppearance;
+				eAppearance = EffectiveAppearance.create();
+			double[] m = new double[16];
+			VecMat.invert(currentTrafo,m);
+			for(int i = 0; i<labels.getLength();i++) {
+				String li = labels.getValueAt(i);
+				BufferedImage img = LabelUtility.createImageFromString(li,font,c);
+				
+				SceneGraphComponent sgc = LabelUtility.sceneGraphForLabel(null,img.getWidth()*scale, img.getHeight()*scale,new double[]{0,0,0},
+						m,a.getValueAt(i).toDoubleArray(null));
+				labelShader = new DefaultPolygonShader();
+				labelShader.texture = new SimpleTexture(new ImageData(img));
+				pipeline.setFaceShader(this.polygonShader=labelShader);
+				sgc.accept(this);
+			}
+			pipeline.setFaceShader(this.polygonShader=storePS);
+			pipeline.setPointShader(this.pointShader=storePtS);
+			pipeline.setLineShader(this.lineShader=storeLS);
+			eAppearance = storeEA;
+		}
     }
     
-    if(false) {
-        if(a == null) 
-            a = p.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
-        DoubleArrayArray normals
-            =p.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray();
-        if(a == null || normals == null) 
-            return;
-        
-        double scale = .2;
-        LineShader l =pipeline.getLineShader();
-        DefaultLineShader ns =new DefaultLineShader();
-        ns.setup(eAppearance,"");
-        pipeline.setLineShader(ns);
-        for (int i= 0; i < n; i++) {
-            DoubleArray pi=a.item(i).toDoubleArray();
-            DoubleArray ni= normals.item(i).toDoubleArray();
-            double[] q = new double[3];
-            q[0] =pi.getValueAt(0) + scale * ni.getValueAt(0);
-            q[1] =pi.getValueAt(1) + scale * ni.getValueAt(1);
-            q[2] =pi.getValueAt(2) + scale * ni.getValueAt(2);
-            DoubleArray qi = new DoubleArray(q);
-            pipeline.processLine(pi,qi);
-        }
-        pipeline.setLineShader(l);
-    }
+//    if(false) {
+//        if(a == null) 
+//            a = p.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
+//        DoubleArrayArray normals
+//            =p.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray();
+//        if(a == null || normals == null) 
+//            return;
+//        
+//        double scale = .2;
+//        LineShader l =pipeline.getLineShader();
+//        DefaultLineShader ns =new DefaultLineShader();
+//        ns.setup(eAppearance,"");
+//        pipeline.setLineShader(ns);
+//        for (int i= 0; i < n; i++) {
+//            DoubleArray pi=a.item(i).toDoubleArray();
+//            DoubleArray ni= normals.item(i).toDoubleArray();
+//            double[] q = new double[3];
+//            q[0] =pi.getValueAt(0) + scale * ni.getValueAt(0);
+//            q[1] =pi.getValueAt(1) + scale * ni.getValueAt(1);
+//            q[2] =pi.getValueAt(2) + scale * ni.getValueAt(2);
+//            DoubleArray qi = new DoubleArray(q);
+//            pipeline.processLine(pi,qi);
+//        }
+//        pipeline.setLineShader(l);
+//    }
   }
 
   

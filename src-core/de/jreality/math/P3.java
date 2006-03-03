@@ -783,7 +783,7 @@ public class P3 extends Pn {
 	    double[] scale = makeStretchMatrix(null, xscale, yscale, 1.0);
 	    double[] offset = makeTranslationMatrix(null, xyzOffset, EUCLIDEAN);  
 	    double[] translate = makeTranslationMatrix(null, point, signature);  
-	    translate = Rn.inverse(null, translate);
+	    //translate = Rn.inverse(null, translate);
 	    Rn.times(result, translate, Rn.times(null, orientation, Rn.times(null, offset, scale)));
 		return result;
 	}

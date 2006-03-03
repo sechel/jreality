@@ -13,7 +13,7 @@ public class TestLabelImages extends JPanel {
 	
 	public void paintComponent(Graphics g) {
 		Image i = LabelUtility.createImageFromString("hello World p g",
-				new Font("Times New Roman",Font.ITALIC,23), Color.RED );
+				new Font("Serif",Font.PLAIN,64), Color.RED );
 		g.drawImage(i,0,0,null);
 	}
 
