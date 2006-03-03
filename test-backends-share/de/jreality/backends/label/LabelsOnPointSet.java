@@ -1,7 +1,5 @@
 package de.jreality.backends.label;
 
-import javax.media.StopAtTimeEvent;
-
 import de.jreality.scene.Appearance;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
