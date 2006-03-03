@@ -4,8 +4,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import antlr.DumpASTVisitor;
-
 import net.java.games.jogl.DebugGL;
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;

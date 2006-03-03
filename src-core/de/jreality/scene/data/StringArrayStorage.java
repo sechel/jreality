@@ -68,13 +68,13 @@ final class StringArrayStorage extends StorageModel {
   }
 
   public DataItem item(Object data, int i) {
-    final int[] iarray=(int[])data;
+    final String[] iarray=(String[])data;
     return new DataItem(iarray, i) {
       public StorageModel getStorageModel() {
-        return StorageModel.Primitive.INT;
+        return StorageModel.ObjectType.STRING;
       }
       public Object get(int arg0) {
-        return new Integer(iarray[offset]);
+        return iarray[offset];
       }
       public int size() {
         return 1;
@@ -88,7 +88,7 @@ final class StringArrayStorage extends StorageModel {
     if(numPerEntry<1) throw new IllegalArgumentException();
     if(inlined!=null&&inlined.length>numPerEntry&&inlined[numPerEntry]!=null)
       return inlined[numPerEntry];
-    return new StorageModel.IAI(numPerEntry);
+    return new StorageModel.SAI(numPerEntry);
   }
   /**
    * {@inheritdoc}
@@ -96,14 +96,14 @@ final class StringArrayStorage extends StorageModel {
   public StorageModel array(int numPerEntry) {
     if(arrayof!=null&&arrayof.length>numPerEntry&&arrayof[numPerEntry]!=null)
       return arrayof[numPerEntry];
-    return new StorageModel.IAA(numPerEntry);
+    return new StorageModel.SAA(numPerEntry);
   }
   /**
    * {@inheritdoc}
    */
   public StorageModel array() {
     StorageModel sm=arrayof!=null? arrayof[0]: null;
-    return sm!=null? sm: new StorageModel.IAA();
+    return sm!=null? sm: new StorageModel.SAA();
   }
   Object readResolve() throws ObjectStreamException
   {

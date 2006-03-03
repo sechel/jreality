@@ -96,12 +96,16 @@ public abstract class StorageModel implements Serializable {
                                    = INT_ARRAY.array();
   public static final StorageModel DOUBLE_ARRAY_ARRAY
                                    = DOUBLE_ARRAY.array();
+  public static final StorageModel DOUBLE2_INLINED
+                                   = DOUBLE_ARRAY.inlined(2);
   public static final StorageModel DOUBLE3_INLINED
                                    = DOUBLE_ARRAY.inlined(3);
   public static final StorageModel DOUBLE3_ARRAY
                                    = DOUBLE_ARRAY.array(3);
   public static final StorageModel STRING_ARRAY
                                    = new StringArrayStorage();
+  public static final StorageModel STRING_ARRAY_ARRAY
+                                   = STRING_ARRAY.array();
   private transient String string;
   StorageModel(String str) { string=str; }
   abstract Object create(int size);
@@ -316,6 +320,13 @@ public abstract class StorageModel implements Serializable {
       throw new UnsupportedOperationException();
     }
   }
+  public StringArray getAsStringArray(Object data, int index) {
+    try {
+      return new StringArray((String[])getAsObject(data, index));
+    } catch (ClassCastException ex) {
+      throw new UnsupportedOperationException();
+    }
+  }
   public IntArray toIntArray(Object data) {
     if (data instanceof IntArray)
       return (IntArray)data;
@@ -348,6 +359,24 @@ public abstract class StorageModel implements Serializable {
       return (DoubleArrayArray)data;
     try {
       return new DoubleArrayArray.Array((double[][])data);
+    } catch (ClassCastException ex) {
+      throw new UnsupportedOperationException();
+    }
+  }
+  public StringArray toStringArray(Object data) {
+    if (data instanceof StringArray)
+      return (StringArray)data;
+    try {
+      return new StringArray((String[])data);
+    } catch (ClassCastException ex) {
+      throw new UnsupportedOperationException();
+    }
+  }
+  public StringArrayArray toStringArrayArray(Object data) {
+    if (data instanceof StringArrayArray)
+      return (StringArrayArray)data;
+    try {
+      return new StringArrayArray.Array((String[][])data);
     } catch (ClassCastException ex) {
       throw new UnsupportedOperationException();
     }
@@ -634,6 +663,33 @@ public abstract class StorageModel implements Serializable {
     public DataList createReadOnly(Object v, int start, int length) {
       final double[] value= (double[])v;
       return new DoubleArrayArray.Inlined(value, numPerEntry, start, length);
+    }
+  }
+
+  static class SAA extends ArrayOf {
+    SAA() {
+      super(STRING_ARRAY);
+    }
+    SAA(int num) {
+      super(STRING_ARRAY, num);
+    }
+    public DataList createReadOnly(Object v, int start, int length) {
+      final String[][] value= (String[][])v;
+      if(start!=0||length!=value.length)
+        throw new UnsupportedOperationException("["+start+", "+(start+length)+'[');
+      return new StringArrayArray.Array(value);
+//      return super.numPerEntry==-1?
+//        new IntArrayArray.Array(value):
+//        new IntArrayArray.Array(value, super.numPerEntry);
+    }
+  }
+  static class SAI extends InlinedArray {
+    SAI(int num) {
+      super(STRING_ARRAY, num);
+    }
+    public DataList createReadOnly(Object v, int start, int length) {
+      final String[] value= (String[])v;
+      return new StringArrayArray.Inlined(value, numPerEntry, start, length);
     }
   }
 

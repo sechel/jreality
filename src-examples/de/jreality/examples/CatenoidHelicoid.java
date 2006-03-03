@@ -80,7 +80,7 @@ private int[][] faceIndices;
     vertexAttributes.addWritable(Attribute.NORMALS,
             StorageModel.DOUBLE3_INLINED, normals);
     vertexAttributes.addWritable(Attribute.TEXTURE_COORDINATES,
-            Attribute.TEXTURE_COORDINATES.getDefaultStorageModel(), texCoords);
+            StorageModel.DOUBLE2_INLINED, texCoords);
 	faceAttributes.addWritable(Attribute.INDICES, StorageModel.INT_ARRAY_ARRAY, faceIndices);
 	
 	IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(this);

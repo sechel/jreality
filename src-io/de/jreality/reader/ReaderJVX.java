@@ -24,6 +24,7 @@ package de.jreality.reader;
 
 import java.io.IOException;
 import java.util.Stack;
+import java.util.Vector;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -133,7 +134,7 @@ public class ReaderJVX extends AbstractReader {
             //vertexAttributes.add(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY_ARRAY.createReadOnly(currentPoints));
             vertexAttributes.addWritable(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY_ARRAY,currentPoints);
             if(currentColors!= null) {
-                vertexAttributes.add(Attribute.COLORS,currentColors);
+                vertexAttributes.addWritable(Attribute.COLORS,StorageModel.DOUBLE3_INLINED, currentColors);
                 currentColors = null;
             }
             return;

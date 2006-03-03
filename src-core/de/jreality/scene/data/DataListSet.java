@@ -36,15 +36,15 @@ public class DataListSet implements Serializable {
    	attr2attrDataList.remove(a);
   }
   
-  public DataList add(Attribute a, Object v) {
-    DataList dList=a.getDefaultStorageModel()
-                    .createWritableDataList(v).readOnlyList();
-    attr2attrDataList.put(a, dList);
-    return dList;
-  }
-  public WritableDataList addWritable(Attribute a) {
-    return addWritable(a, a.getDefaultStorageModel());
-  }
+//  public DataList add(Attribute a, Object v) {
+//    DataList dList=a.getDefaultStorageModel()
+//                    .createWritableDataList(v).readOnlyList();
+//    attr2attrDataList.put(a, dList);
+//    return dList;
+//  }
+//  public WritableDataList addWritable(Attribute a) {
+//    return addWritable(a, a.getDefaultStorageModel());
+//  }
   public WritableDataList addWritable(Attribute a, StorageModel sm) {
     return addWritable(a, sm, sm.create(dataSize));
   }

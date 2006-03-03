@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.font.FontRenderContext;
+import java.awt.font.LineMetrics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -33,8 +34,9 @@ public class LabelUtility {
 	  g.clearRect(0,0,r.width,r.height);
 	  g.setColor(color);
 	  g.setFont(f);
-	  float desc = f.getLineMetrics(s,frc).getDescent();
-	  g.drawString(s,0,r.height-desc);
+    LineMetrics lineMetrics = f.getLineMetrics(s,frc);
+    float border = lineMetrics.getAscent()-lineMetrics.getDescent();
+    g.drawString(s,0,r.height-(int)(border/2.));
 	  return img;
   }
 }
