@@ -770,13 +770,21 @@ public class P3 extends Pn {
 		return dst;
 	}
 
-	public static double[] calculateBillboardMatrix(double[] result, double xscale, double yscale, double[] cameraToObject, double[] point, int signature)	{
+	public static double[] calculateBillboardMatrix(double[] result, 
+			double xscale, 
+			double yscale, 				// scaling factors for the billboard
+			double[] xyzOffset,			// an offset in "billboard" coordinate system
+			double[] cameraToObject, 	// the transformation from camera to object coordinates
+			double[] point, 			// the positio of the anchor point in object coordinate system
+			int signature)	{
 		if (result == null) result = new double[16];
 	    double[] orientation = extractOrientationMatrix(null, cameraToObject, Pn.originP3, signature);
 	    // WARNING: notice the minus sign in following call
 	    double[] scale = makeStretchMatrix(null, xscale, yscale, 1.0);
+	    double[] offset = makeTranslationMatrix(null, xyzOffset, EUCLIDEAN);  
 	    double[] translate = makeTranslationMatrix(null, point, signature);  
-	    Rn.times(result, orientation, Rn.times(null, translate, scale));
+	    translate = Rn.inverse(null, translate);
+	    Rn.times(result, translate, Rn.times(null, orientation, Rn.times(null, offset, scale)));
 		return result;
 	}
 	

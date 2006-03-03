@@ -10,6 +10,21 @@ import java.awt.font.LineMetrics;
 import java.awt.font.TextLayout;
 import java.awt.image.BufferedImage;
 
+import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetFactory;
+import de.jreality.geometry.Primitives;
+import de.jreality.math.P3;
+import de.jreality.math.Pn;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Transformation;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.scene.data.StorageModel;
+import de.jreality.shader.ImageData;
+import de.jreality.shader.Texture2D;
+
 public class LabelUtility {
 	
 	private static FontRenderContext frc;
@@ -42,5 +57,18 @@ public class LabelUtility {
     g.drawString(s,0,border);
 	  return img;
   }
-  
-}
+ 
+
+  	public static SceneGraphComponent sceneGraphForLabel(SceneGraphComponent sgc, double xscale, double yscale,double[] offset, double[] camToObj, double[] position)  {
+  		if (sgc == null) sgc = new SceneGraphComponent();
+  		if (sgc.getGeometry() == null) {
+  			IndexedFaceSet bb = Primitives.texturedSquare(new double[]{0,1,0,1,1,0,1,0,0,0,0,0});
+  			sgc.setGeometry(bb);
+  		}
+  		if (sgc.getTransformation() == null)	sgc.setTransformation(new Transformation());
+  		// TODO the following method isn't working correctly for the position argument!
+  		sgc.getTransformation().setMatrix(P3.calculateBillboardMatrix(null, xscale, yscale, offset, camToObj,position, Pn.EUCLIDEAN ));
+
+  		return sgc;
+  	}
+  }
