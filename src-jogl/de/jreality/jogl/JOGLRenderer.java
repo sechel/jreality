@@ -738,9 +738,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			if (originalGeometry instanceof Billboard)	{
 				Billboard bb = (Billboard) originalGeometry;
 				double[] mat = P3.calculateBillboardMatrix(null,bb.getXscale(), bb.getYscale(), bb.getOffset(), context.getCameraToObject(), bb.getPosition(), Pn.EUCLIDEAN);
-				//globalGL.glPushMatrix();
+				globalGL.glPushMatrix();
 				globalGL.glMultTransposeMatrixd(mat);
-				//globalGL.glPopMatrix();
 			}
 			RenderingHintsShader renderingHints = jpc.renderingHints;
 			DefaultGeometryShader geometryShader = jpc.geometryShader;
@@ -888,6 +887,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			}
 			renderingHints.postRender(globalHandle);
 			//originalGeometry.finishReader();
+			if (originalGeometry instanceof Billboard)
+				globalGL.glPopMatrix();
+
 		}
 
 		private boolean useDisplayLists(DisplayListInfo dl, JOGLPeerComponent jpc)	{
