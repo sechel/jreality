@@ -451,7 +451,7 @@ public class AttributeEntityUtility {
           descriptor.setValue("default", defaultClass);
         } else {
           reader.put(descriptor.getReadMethod(), descriptor);
-          if (write) writer.put(descriptor.getWriteMethod(), descriptor);
+          writer.put(descriptor.getWriteMethod(), descriptor);
           try {
             descriptor.setValue("default", clazz.getField(defaultFieldName(attrName)));
           } catch (NoSuchFieldException e) {
