@@ -30,7 +30,7 @@ public class GlslDefaultPolygonShader extends SimpleJOGLShader {
 		boolean changed = true;
 
 		public GlslDefaultPolygonShader() {
-			super("standardOGL.vert",null);
+			super("standard3dlabs.vert",null);
 		}
 
 

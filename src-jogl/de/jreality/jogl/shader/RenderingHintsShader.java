@@ -20,7 +20,7 @@ public class RenderingHintsShader  {
 	double levelOfDetail = 0.0;		// hack for drawing lines in opengl
 	boolean 
 	   transparencyEnabled = false, 
-	   zBufferEnabled = true,
+	   zBufferEnabled = false,
 	   lightingEnabled = true, 
 	   atInfinity = false,
 	   antiAliasingEnabled = false,
