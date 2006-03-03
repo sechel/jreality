@@ -850,9 +850,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 						JOGLRendererHelper.drawVertices(ps, globalHandle, pickMode, alpha);
 					if (useDisplayLists)		cleanupDisplayLists(activeDL, type);
 				}
-				if (ps.getVertexAttributes(Attribute.LABELS) != null)	{
-					JOGLRendererHelper.drawLabels(ps, globalHandle);
-				}
+//				if (ps.getVertexAttributes(Attribute.LABELS) != null)	{
+//					JOGLRendererHelper.drawLabels(ps, globalHandle);
+//				}
 				geometryShader.pointShader.postRender(globalHandle);
 			}
 			// do I need this?Yes, the point and line shader can turn off lighting

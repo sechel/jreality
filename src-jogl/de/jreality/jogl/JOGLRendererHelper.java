@@ -26,7 +26,6 @@ import net.java.games.jogl.util.GLUT;
 import de.jreality.backends.label.LabelUtility;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.HeightFieldFactory;
-import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultPolygonShader;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
@@ -208,37 +207,37 @@ public class JOGLRendererHelper {
 		if (pickMode) gl.glPopName();
 	}
 	
-	static double[] OFFSET = {0,0,0};
-	public static void drawLabels(PointSet ps, JOGLRenderer jr) {
-		double[] c2o = jr.context.getCameraToObject();
-		DataList labels = ps.getVertexAttributes(Attribute.LABELS);
-		DataList vertices = ps.getVertexAttributes(Attribute.COORDINATES);
-		int n = ps.getNumPoints();
-		SceneGraphComponent sgc = null;
-		Appearance ap = new Appearance();
-		sgc.setAppearance(ap);
-		
-		Image im = LabelUtility.createImageFromString("hello World p g",
-				new Font("Times New Roman",Font.ITALIC,64), Color.RED );
-		Texture2D tex2d = null;
-		tex2d = (Texture2D) AttributeEntityUtility
-		       .createAttributeEntity(Texture2D.class, "polygonShader.texture2d", ap, true);		
-		tex2d.setImage(new ImageData(im));
-		tex2d.setRepeatS(Texture2D.GL_CLAMP);
-		tex2d.setRepeatT(Texture2D.GL_CLAMP);
-		for (int i = 0; i<n; ++i)	{
-			DoubleArray da = vertices.item(i).toDoubleArray();
-			double[] pos = {da.getValueAt(0), da.getValueAt(1), da.getValueAt(2)};
-			double[] mat = P3.calculateBillboardMatrix(null,1.0, 1.0, OFFSET, c2o, pos, Pn.EUCLIDEAN);
-			jr.globalGL.glPushMatrix();
-			jr.globalGL.glMultTransposeMatrixd(mat);
-
-			jr.globalGL.glPopMatrix();			
-		}
-
-		
-	}
-
+//	static double[] OFFSET = {0,0,0};
+//	public static void drawLabels(PointSet ps, JOGLRenderer jr) {
+//		double[] c2o = jr.context.getCameraToObject();
+//		DataList labels = ps.getVertexAttributes(Attribute.LABELS);
+//		DataList vertices = ps.getVertexAttributes(Attribute.COORDINATES);
+//		int n = ps.getNumPoints();
+//		SceneGraphComponent sgc = null;
+//		Appearance ap = new Appearance();
+//		sgc.setAppearance(ap);
+//		
+//		Image im = LabelUtility.createImageFromString("hello World p g",
+//				new Font("Times New Roman",Font.ITALIC,64), Color.RED );
+//		Texture2D tex2d = null;
+//		tex2d = (Texture2D) AttributeEntityUtility
+//		       .createAttributeEntity(Texture2D.class, "polygonShader.texture2d", ap, true);		
+//		tex2d.setImage(new ImageData(im));
+//		tex2d.setRepeatS(Texture2D.GL_CLAMP);
+//		tex2d.setRepeatT(Texture2D.GL_CLAMP);
+//		for (int i = 0; i<n; ++i)	{
+//			DoubleArray da = vertices.item(i).toDoubleArray();
+//			double[] pos = {da.getValueAt(0), da.getValueAt(1), da.getValueAt(2)};
+//			double[] mat = P3.calculateBillboardMatrix(null,1.0, 1.0, OFFSET, c2o, pos, Pn.EUCLIDEAN);
+//			jr.globalGL.glPushMatrix();
+//			jr.globalGL.glMultTransposeMatrixd(mat);
+//
+//			jr.globalGL.glPopMatrix();			
+//		}
+//
+//		
+//	}
+//
 
 	/**
 	 * @param sg
