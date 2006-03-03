@@ -21,6 +21,7 @@ import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.*;
 import de.jreality.math.*;
 import de.jreality.scene.*;
+import de.jreality.scene.data.Attribute;
 import de.jreality.scene.event.*;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.shader.CommonAttributes;
@@ -733,6 +734,14 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		public void render(JOGLPeerComponent jpc) {
 			//theLog.log(Level.FINER,"In JOGLPeerGeometry render() for "+originalGeometry.getName());
 			//originalGeometry.startReader();
+			// test billboarding
+			if (originalGeometry instanceof Billboard)	{
+				Billboard bb = (Billboard) originalGeometry;
+				double[] mat = P3.calculateBillboardMatrix(null,bb.getXscale(), bb.getYscale(), bb.getOffset(), context.getCameraToObject(), bb.getPosition(), Pn.EUCLIDEAN);
+				//globalGL.glPushMatrix();
+				globalGL.glMultTransposeMatrixd(mat);
+				//globalGL.glPopMatrix();
+			}
 			RenderingHintsShader renderingHints = jpc.renderingHints;
 			DefaultGeometryShader geometryShader = jpc.geometryShader;
 			renderingHints.render(globalHandle);
@@ -841,6 +850,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 					if (!useDisplayLists || activeDL.isInsideDisplayList()) 
 						JOGLRendererHelper.drawVertices(ps, globalHandle, pickMode, alpha);
 					if (useDisplayLists)		cleanupDisplayLists(activeDL, type);
+				}
+				if (ps.getVertexAttributes(Attribute.LABELS) != null)	{
+					JOGLRendererHelper.drawLabels(ps, globalHandle);
 				}
 				geometryShader.pointShader.postRender(globalHandle);
 			}

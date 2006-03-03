@@ -6,6 +6,8 @@ package de.jreality.jogl;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Image;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -21,12 +23,14 @@ import net.java.games.jogl.GLCanvas;
 import net.java.games.jogl.GLDrawable;
 import net.java.games.jogl.util.BufferUtils;
 import net.java.games.jogl.util.GLUT;
+import de.jreality.backends.label.LabelUtility;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.HeightFieldFactory;
 import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultPolygonShader;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
+import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -37,6 +41,7 @@ import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.Light;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.PointSet;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
@@ -48,6 +53,7 @@ import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 
 /**
@@ -201,6 +207,39 @@ public class JOGLRendererHelper {
 		if (!pickMode) gl.glEnd();
 		if (pickMode) gl.glPopName();
 	}
+	
+	static double[] OFFSET = {0,0,0};
+	public static void drawLabels(PointSet ps, JOGLRenderer jr) {
+		double[] c2o = jr.context.getCameraToObject();
+		DataList labels = ps.getVertexAttributes(Attribute.LABELS);
+		DataList vertices = ps.getVertexAttributes(Attribute.COORDINATES);
+		int n = ps.getNumPoints();
+		SceneGraphComponent sgc = null;
+		Appearance ap = new Appearance();
+		sgc.setAppearance(ap);
+		
+		Image im = LabelUtility.createImageFromString("hello World p g",
+				new Font("Times New Roman",Font.ITALIC,64), Color.RED );
+		Texture2D tex2d = null;
+		tex2d = (Texture2D) AttributeEntityUtility
+		       .createAttributeEntity(Texture2D.class, "polygonShader.texture2d", ap, true);		
+		tex2d.setImage(new ImageData(im));
+		tex2d.setRepeatS(Texture2D.GL_CLAMP);
+		tex2d.setRepeatT(Texture2D.GL_CLAMP);
+		for (int i = 0; i<n; ++i)	{
+			DoubleArray da = vertices.item(i).toDoubleArray();
+			double[] pos = {da.getValueAt(0), da.getValueAt(1), da.getValueAt(2)};
+			double[] mat = P3.calculateBillboardMatrix(null,1.0, 1.0, OFFSET, c2o, pos, Pn.EUCLIDEAN);
+			jr.globalGL.glPushMatrix();
+			jr.globalGL.glMultTransposeMatrixd(mat);
+
+			jr.globalGL.glPopMatrix();			
+		}
+
+		
+	}
+
+
 	/**
 	 * @param sg
 	 */
