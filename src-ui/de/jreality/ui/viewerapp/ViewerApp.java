@@ -284,21 +284,18 @@ public class ViewerApp
         }
         System.out.println("setting "+(o==null? "null": o.getClass().getName()));
         inspector.setObject(o);
-        if (o instanceof SceneGraphNode) {
+        try {
+          bshEval.getInterpreter().set("self", o);
+          String info="\nself="+((o instanceof SceneGraphNode) ? ((SceneGraphNode)o).getName() : "noname")+"["+o.getClass().getName()+"]\n";
           try {
-            SceneGraphNode sn = (SceneGraphNode) o;
-            bshEval.getInterpreter().set("self", sn);
-            String info="\nself="+sn.getName()+"["+sn.getClass().getName()+"]\n";
-            try {
-              jterm.getSession().displayAndPrompt(info, infoStyle);
-              jterm.setCaretPosition(jterm.getDocument().getLength());
-            } catch (Exception ex) {
-              // unpatched jterm
-            }
-          } catch (EvalError e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            jterm.getSession().displayAndPrompt(info, infoStyle);
+            jterm.setCaretPosition(jterm.getDocument().getLength());
+          } catch (Exception ex) {
+            // unpatched jterm
           }
+        } catch (EvalError e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
         }
         if (o instanceof SceneGraphComponent) {
         	  currSceneNode = (SceneGraphComponent) o;
