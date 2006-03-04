@@ -115,11 +115,12 @@ public class RIBViewer implements Viewer {
         if (v.hasViewingComponent()){
 			setHeight(v.getViewingComponent().getHeight());
 			setWidth(v.getViewingComponent().getWidth());
+            System.out.println(" w "+v.getViewingComponent().getWidth()+ " h "+v.getViewingComponent().getHeight());
         }
         if(v.getCameraPath().getLastComponent().getCamera().isPerspective()){
-        	projection(new String("perspective"));
+        	projection("perspective");
         }else{
-        	projection(new String("orthographic"));
+        	projection("orthographic");
         }
     }
 

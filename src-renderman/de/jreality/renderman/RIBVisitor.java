@@ -145,15 +145,23 @@ public class RIBVisitor extends SceneGraphVisitor {
         HashMap map2 = new HashMap();
         map2.put("eyesplits",maximumEyeSplits);
         Ri.option("limits",map2);
-        
-        Ri.display(name+".tif", "tiff", "rgb",null);
+        //We ensured that name ends with .rib so :
+        String outputName = name.substring(0,name.length()-3)+"tif";
+        Ri.display(outputName, "tiff", "rgb",null);
         
         Ri.format(width,height,1);
+        System.out.println("ww "+width+" hh "+height);
         Ri.shadingRate(1f);
         map = new HashMap();
-        map.put("fov", new Float(camera.getFieldOfView()));
-        Ri.projection(proj,map);
-        
+        float fov = (float) camera.getFieldOfView();
+        if(proj.equals("perspective")) {
+            map.put("fov", new Float(fov));
+            Ri.projection(proj,map);
+        } else {
+            Ri.projection(proj,map);    
+            float a =(float) (1/((Math.tan((Math.PI/180.0)*camera.getFieldOfView()/2.0)*camera.getFocus())));
+            Ri.transform(new float[] {a,0,0,0,0,a,0,0,0,0,1,0,0,0,0,1});
+        }
         map = new HashMap();
         Appearance ap = root.getAppearance();
         Color col = Color.WHITE;
@@ -168,7 +176,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 //        VecMat.assignScale(mir,1,1,-1);
         //icam.scale(1.);
 //        VecMat.multiplyFromLeft(cam,mir);
-        Ri.transform(fTranspose(cam));
+        if(proj.equals("perspective"))
+            Ri.transform(fTranspose(cam));
+        else
+            Ri.concatTransform(fTranspose(cam));
         Ri.worldBegin();
         new LightCollector(root);
         root.accept(this);
