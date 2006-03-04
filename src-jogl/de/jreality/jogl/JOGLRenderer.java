@@ -22,10 +22,14 @@ import de.jreality.jogl.shader.*;
 import de.jreality.math.*;
 import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.event.*;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
+import de.jreality.shader.Texture2D;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rectangle3D;
@@ -514,14 +518,15 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
     private final static int ALL_CHANGED = 7;
 	static Color[] cdbg = {Color.BLUE, Color.GREEN, Color.YELLOW,  Color.RED,Color.GRAY, Color.WHITE};
    
-	private class DisplayListInfo	{
+	protected class CachedGeometryInfo	{
 		private boolean useDisplayList, 	// can decide based on dynamic evaluation whether it makes sense 
 					insideDisplayList,
 					realDLDirty[] = new boolean[NUM_DLISTS];
 		private int dl[];
 		private int changeCount;
 		private long frameCountAtLastChange;
-		DisplayListInfo()	{
+		Texture2D[][] labelTexs = new Texture2D[3][];
+		CachedGeometryInfo()	{
 			super();
 			dl = new int[NUM_DLISTS];
 			for (int i = 0; i<NUM_DLISTS; ++i) { realDLDirty[i] = true; dl[i] = -1;}
@@ -588,6 +593,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 					dl[i] = -1;
 				}
 			}	
+			// TODO delete texture objects if present in labelTexs
 		}
 		public void geometryChanged(int type) {
 			
@@ -688,7 +694,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		Geometry originalGeometry;
 		Geometry[] tubeGeometry, proxyPolygonGeometry;
 		Vector proxyGeometry;
-		DisplayListInfo dlInfo;
+		CachedGeometryInfo dlInfo;
 		IndexedFaceSet ifs;
 		IndexedLineSet ils;
 		PointSet ps;
@@ -698,7 +704,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			super();
 			originalGeometry = g;
 			name = "JOGLPeer:"+g.getName();
-			dlInfo = new DisplayListInfo();
+			dlInfo = new CachedGeometryInfo();
 			ifs = null; ils = null; ps = null;
 			if (g instanceof IndexedFaceSet) ifs = (IndexedFaceSet) g;
 			if (g instanceof IndexedLineSet) ils = (IndexedLineSet) g;
@@ -744,7 +750,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			RenderingHintsShader renderingHints = jpc.renderingHints;
 			DefaultGeometryShader geometryShader = jpc.geometryShader;
 			renderingHints.render(globalHandle);
-			DisplayListInfo activeDL = manyDisplayLists ? jpc.dlInfo : dlInfo;
+			CachedGeometryInfo activeDL = manyDisplayLists ? jpc.dlInfo : dlInfo;
 			if (geometryShader.isFaceDraw() && originalGeometry instanceof Sphere)	{
 //				IndexedFaceSet foo = getProxyFor((Sphere) originalGeometry);
 //				ifs = foo;
@@ -850,9 +856,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 						JOGLRendererHelper.drawVertices(ps, globalHandle, pickMode, alpha);
 					if (useDisplayLists)		cleanupDisplayLists(activeDL, type);
 				}
-//				if (ps.getVertexAttributes(Attribute.LABELS) != null)	{
-//					JOGLRendererHelper.drawLabels(ps, globalHandle);
-//				}
+				if (ps.getVertexAttributes(Attribute.LABELS) != null)	{
+					JOGLRendererHelper.drawLabels(ps, globalHandle, activeDL, jpc.textShader);
+				}
 				geometryShader.pointShader.postRender(globalHandle);
 			}
 			// do I need this?Yes, the point and line shader can turn off lighting
@@ -892,11 +898,11 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 
 		}
 
-		private boolean useDisplayLists(DisplayListInfo dl, JOGLPeerComponent jpc)	{
+		private boolean useDisplayLists(CachedGeometryInfo dl, JOGLPeerComponent jpc)	{
 			return jpc.useDisplayLists && dl.useDisplayList();
 		}
 		
-		private void setupDisplayLists(DisplayListInfo dl, int type)	{
+		private void setupDisplayLists(CachedGeometryInfo dl, int type)	{
 			if (!dl.isDisplayListDirty(type))	{
 				//JOGLConfiguration.theLog.log(Level.INFO,"Using display list");
 				globalGL.glCallList(dl.getDisplayListID(type));
@@ -920,7 +926,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		 * @param activeDL
 		 * @param type
 		 */
-		private void cleanupDisplayLists(DisplayListInfo activeDL, int type) {
+		private void cleanupDisplayLists(CachedGeometryInfo activeDL, int type) {
 			if (!activeDL.isInsideDisplayList()) return;
 			globalGL.glEndList();	
 			globalGL.glCallList(activeDL.getDisplayListID(type));
@@ -1152,7 +1158,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		JOGLPeerComponent parent;
 		int childIndex;
 		GoBetween goBetween;
-		DisplayListInfo dlInfo = new DisplayListInfo();
+		CachedGeometryInfo dlInfo = new CachedGeometryInfo();
 		
 		Rectangle3D childrenBound;
 		Rectangle2D ndcExtent;
@@ -1162,6 +1168,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		
 		RenderingHintsShader renderingHints;
 		DefaultGeometryShader geometryShader;
+		DefaultTextShader textShader;
 		
 		Object childLock = new Object();		
 		Runnable renderGeometry = null;
@@ -1308,6 +1315,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			if (thisAp == null && parent != null)	{
 				geometryShader = parent.geometryShader;
 				renderingHints = parent.renderingHints;
+				textShader = parent.textShader;
 			} else {
 				if (geometryShader == null)
 					geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
@@ -1320,6 +1328,14 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 					renderingHints = RenderingHintsShader.createFromEffectiveAppearance(eAp, "");
 				else
 					renderingHints.setFromEffectiveAppearance(eAp, "");				
+				//if (textShader == null)
+					//textShader = RenderingHintsShader.createFromEffectiveAppearance(eAp, "");
+					textShader = (DefaultTextShader) AttributeEntityUtility.createAttributeEntity(DefaultTextShader.class, ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,"textShader"), eAp);
+				//else
+					//renderingHints.setFromEffectiveAppearance(eAp, "");				
+//				Class shaderType =  (Class) eAp.getAttribute(
+//						ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,"textShader"),DefaultTextShader.class);
+				
 			}
 			useDisplayLists = renderingHints.isUseDisplayLists();
 			appearanceIsDirty = false;

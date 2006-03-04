@@ -95,7 +95,7 @@ public class Texture2DLoaderJOGL {
             g.glDeleteTextures(1, new int[]{id.intValue()});
           }
        }
-        LoggingSystem.getLogger(Texture2DLoaderJOGL.class).info("creating texture... ");
+        LoggingSystem.getLogger(Texture2DLoaderJOGL.class).fine("creating texture... ");
       }
       // create the texture ID for this texture
       if (textureID == -1) textureID = createTextureID(gl);

@@ -7,7 +7,6 @@ package de.jreality.jogl;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Image;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -26,6 +25,8 @@ import net.java.games.jogl.util.GLUT;
 import de.jreality.backends.label.LabelUtility;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.HeightFieldFactory;
+import de.jreality.geometry.Primitives;
+import de.jreality.jogl.JOGLRenderer.CachedGeometryInfo;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultPolygonShader;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
@@ -49,9 +50,12 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
+import de.jreality.scene.data.StringArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
+import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 
@@ -207,37 +211,62 @@ public class JOGLRendererHelper {
 		if (pickMode) gl.glPopName();
 	}
 	
-//	static double[] OFFSET = {0,0,0};
-//	public static void drawLabels(PointSet ps, JOGLRenderer jr) {
-//		double[] c2o = jr.context.getCameraToObject();
-//		DataList labels = ps.getVertexAttributes(Attribute.LABELS);
-//		DataList vertices = ps.getVertexAttributes(Attribute.COORDINATES);
-//		int n = ps.getNumPoints();
+	static Appearance a=new Appearance();
+//	static Texture2D tex2d=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a, true); 
+	static IndexedFaceSet bb = Primitives.texturedSquare(new double[]{0,1,0, 1,1,0, 1,0,0,  0,0,0});
+//	static {
+//		tex2d.setRepeatS(Texture2D.GL_CLAMP);
+//		tex2d.setRepeatT(Texture2D.GL_CLAMP);
+//	}
+
+	static double[] OFFSET = {0,0,0};
+	public static void drawLabels(PointSet ps, JOGLRenderer jr, CachedGeometryInfo cginfo, DefaultTextShader ts) {
+		GL gl = jr.globalGL;
+		double[] c2o = jr.context.getCameraToObject();
+		DataList dl = ps.getVertexAttributes(Attribute.LABELS);
+		DoubleArrayArray  vertices = ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
+		int n = ps.getNumPoints();
+		Texture2D tex2d;
 //		SceneGraphComponent sgc = null;
 //		Appearance ap = new Appearance();
 //		sgc.setAppearance(ap);
-//		
-//		Image im = LabelUtility.createImageFromString("hello World p g",
-//				new Font("Times New Roman",Font.ITALIC,64), Color.RED );
-//		Texture2D tex2d = null;
-//		tex2d = (Texture2D) AttributeEntityUtility
-//		       .createAttributeEntity(Texture2D.class, "polygonShader.texture2d", ap, true);		
-//		tex2d.setImage(new ImageData(im));
-//		tex2d.setRepeatS(Texture2D.GL_CLAMP);
-//		tex2d.setRepeatT(Texture2D.GL_CLAMP);
-//		for (int i = 0; i<n; ++i)	{
-//			DoubleArray da = vertices.item(i).toDoubleArray();
-//			double[] pos = {da.getValueAt(0), da.getValueAt(1), da.getValueAt(2)};
-//			double[] mat = P3.calculateBillboardMatrix(null,1.0, 1.0, OFFSET, c2o, pos, Pn.EUCLIDEAN);
-//			jr.globalGL.glPushMatrix();
-//			jr.globalGL.glMultTransposeMatrixd(mat);
-//
-//			jr.globalGL.glPopMatrix();			
-//		}
-//
-//		
-//	}
-//
+		StringArray labels = dl.toStringArray();
+		Font font = ts.getFont();
+		Color c = ts.getDiffuseColor();
+		double scale = ts.getScale();
+		double[] offset = ts.getOffset();
+
+		if (cginfo.labelTexs[0] == null)	{
+			cginfo.labelTexs[0] = new Texture2D[n];
+			for (int i  = 0; i<n ; ++i)	{
+				Appearance ap = new Appearance();
+				tex2d = cginfo.labelTexs[0][i] =(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", ap, true);
+				tex2d.setRepeatS(Texture2D.GL_CLAMP);
+				tex2d.setRepeatT(Texture2D.GL_CLAMP);
+				String li = labels.getValueAt(i);
+				BufferedImage img = LabelUtility.createImageFromString(li,font,c);
+				tex2d.setImage(new ImageData(img));				
+			}
+		}
+		
+		gl.glEnable(GL.GL_TEXTURE_2D);
+		for(int i = 0; i<n;i++) {
+			//sgc = LabelUtility.sceneGraphForLabel(null,img.getWidth()*scale, img.getHeight()*scale,new double[]{0,0,0},
+					//c2o,vertices.getValueAt(i).toDoubleArray(null));
+			int w = cginfo.labelTexs[0][i].getImage().getWidth();
+			int h = cginfo.labelTexs[0][i].getImage().getHeight();
+			double[] mat = P3.calculateBillboardMatrix(null,w*scale, h*scale,offset,
+					c2o,vertices.getValueAt(i).toDoubleArray(null), Pn.EUCLIDEAN);
+			gl.glActiveTexture(GL.GL_TEXTURE0);
+			Texture2DLoaderJOGL.render(jr.theCanvas, cginfo.labelTexs[0][i]);
+			gl.glPushMatrix();
+			gl.glMultTransposeMatrixd(mat);
+			drawFaces(bb, jr, true, 1.0, false);
+			gl.glPopMatrix();			
+		}
+		gl.glDisable(GL.GL_TEXTURE_2D);
+	}
+
 
 	/**
 	 * @param sg

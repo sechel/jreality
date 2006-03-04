@@ -31,6 +31,7 @@ public class LabelsOnPointSet {
 		a.setAttribute(CommonAttributes.VERTEX_DRAW,true);
 		a.setAttribute(CommonAttributes.EDGE_DRAW,false);
 		a.setAttribute("pointShader.scale", .01);
+		a.setAttribute("pointShader.offset", new double[]{.2,0,0});
 		SceneGraphComponent sgc = new SceneGraphComponent();
 		sgc.setAppearance(a);
 		sgc.setGeometry(pSet);
