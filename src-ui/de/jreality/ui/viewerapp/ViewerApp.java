@@ -33,6 +33,7 @@ import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedList;
@@ -68,14 +69,6 @@ import de.jreality.reader.ReaderJRS;
 import de.jreality.reader.Readers;
 import de.jreality.renderman.RIBViewer;
 import de.jreality.scene.*;
-import de.jreality.scene.Geometry;
-import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.Scene;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.SceneGraphVisitor;
-import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
@@ -282,11 +275,12 @@ public class ViewerApp
             o = p.getLastPathComponent();
           }
         }
-        System.out.println("setting "+(o==null? "null": o.getClass().getName()));
         inspector.setObject(o);
-        try {
+        if (o != null) try {
           bshEval.getInterpreter().set("self", o);
-          String info="\nself="+((o instanceof SceneGraphNode) ? ((SceneGraphNode)o).getName() : "noname")+"["+o.getClass().getName()+"]\n";
+          String name = (o instanceof SceneGraphNode) ? ((SceneGraphNode)o).getName() : "";
+          String type = Proxy.isProxyClass(o.getClass()) ? o.getClass().getInterfaces()[0].getName() : o.getClass().getName();
+          String info="\nself="+name+"["+type+"]\n";
           try {
             jterm.getSession().displayAndPrompt(info, infoStyle);
             jterm.setCaretPosition(jterm.getDocument().getLength());

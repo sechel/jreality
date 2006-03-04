@@ -320,18 +320,18 @@ public class RenderTraversal extends SceneGraphVisitor {
 			double[] m = new double[16];
 			VecMat.invert(currentTrafo,m);
 
-//      BufferedImage[] imgs = LabelUtility.createPointImages(p, font, c);
-//      for(int i = 0, max=imgs.length; i<max;i++) {
-//        BufferedImage img = imgs[i];
+      ImageData[] imgs = LabelUtility.createPointImages(p, font, c);
+      for(int i = 0, max=imgs.length; i<max;i++) {
+        ImageData img = imgs[i];
 
-			for(int i = 0; i<labels.getLength();i++) {
-				String li = labels.getValueAt(i);
-				BufferedImage img = LabelUtility.createImageFromString(li,font,c);
+//			for(int i = 0; i<labels.getLength();i++) {
+//				String li = labels.getValueAt(i);
+//				ImageData img = new ImageData(LabelUtility.createImageFromString(li,font,c));
 				
 				SceneGraphComponent sgc = LabelUtility.sceneGraphForLabel(null,img.getWidth()*scale, img.getHeight()*scale,new double[]{0,0,0},
 						m,a.getValueAt(i).toDoubleArray(null));
 				labelShader = new DefaultPolygonShader();
-				labelShader.texture = new SimpleTexture(new ImageData(img));
+				labelShader.texture = new SimpleTexture(img);
 				pipeline.setFaceShader(this.polygonShader=labelShader);
 				sgc.accept(this);
 			}

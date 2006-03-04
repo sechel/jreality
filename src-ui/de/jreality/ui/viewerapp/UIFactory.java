@@ -26,6 +26,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Container;
+import java.awt.Font;
 import java.beans.PropertyEditorManager;
 
 import javax.swing.BorderFactory;
@@ -42,6 +43,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.beans.BooleanEditor;
 import de.jreality.ui.beans.ColorEditor;
 import de.jreality.ui.beans.DoubleEditor;
+import de.jreality.ui.beans.FontEditor;
 import de.jreality.ui.beans.IntegerEditor;
 import de.jreality.ui.treeview.JTreeRenderer;
 import de.jreality.ui.treeview.SceneTreeModel;
@@ -56,6 +58,7 @@ public class UIFactory
     PropertyEditorManager.registerEditor(Boolean.class, BooleanEditor.class);
     PropertyEditorManager.registerEditor(Double.class, DoubleEditor.class);
     PropertyEditorManager.registerEditor(Integer.class, IntegerEditor.class);
+    PropertyEditorManager.registerEditor(Font.class, FontEditor.class);
   }
   private SceneGraphComponent root;
   private Component viewer;
