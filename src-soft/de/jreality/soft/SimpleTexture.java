@@ -33,43 +33,30 @@ import de.jreality.shader.Texture2D;
  *
  */
 public class SimpleTexture implements Texture {
-    byte[] bytes;
-    int width;
-    int height;
+    protected final  byte[] bytes;
+    protected final int width;
+    protected final int height;
 
-//    double vscale = 1.;
-//    double uscale=1.;
-    double matrix[];
-    protected boolean clampU =false;
-    protected boolean clampV =false;
-    protected int incr =4;
-    private final boolean interpolate;
+    protected final double matrix[];
+    protected final boolean clampU;
+    protected final boolean clampV;
+    protected final int incr;
+    protected final boolean interpolate;
     
-//    public SimpleTexture(de.jreality.shader.Texture2D texture) {
-//        this.bytes = texture.getByteArray();
-//        this.width=texture.getWidth();
-//        this.height = texture.getHeight();
-//        //this.uscale = texture.getSScale();
-//        //this.vscale = texture.getTScale();
-//        this.matrix = texture.getTextureMatrix();
-//        this.clampU = texture.getRepeatS()==Texture2D.CLAMP;
-//        this.clampV = texture.getRepeatT()==Texture2D.CLAMP;
-//        incr =3*width*height== bytes.length?3:4;
-//        interpolate =(texture.getMinFilter()==Texture2D.GL_LINEAR);
-//    }
-
+    private static final double[] identity = new Matrix().getArray();
 	
 	public SimpleTexture(ImageData id) {
-		this.bytes = (byte[]) id.getByteArray().clone();
+		this.bytes = (byte[]) id.getByteArray();//.clone();
 	      this.width=id.getWidth();
 	      this.height = id.getHeight();
-		this.matrix = new Matrix().getArray();
+		this.matrix = identity;
 	      this.clampU = true;
 	      this.clampV = true;
 		interpolate = true;
+        incr =3*width*height== bytes.length?3:4;
 	}
     public SimpleTexture(Texture2D texture) {
-      this.bytes = (byte[]) texture.getImage().getByteArray().clone();
+      this.bytes = (byte[]) texture.getImage().getByteArray();//.clone();
       this.width=texture.getImage().getWidth();
       this.height = texture.getImage().getHeight();
       //this.uscale = texture.getSScale();
@@ -114,19 +101,19 @@ public class SimpleTexture implements Texture {
         //c = pixels[a +width*b];
         //c = pixels[((int)(u*width*uscale))%width +width*(((int)(v*height*vscale))%height)];
         int pos =incr *(a +width*b);
-        color[0]   = ((255&bytes[pos+0])  *color[0]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
-        color[1]   = ((255&bytes[pos+1])  *color[1]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
-        color[2]   = ((255&bytes[pos+2])  *color[2]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
-//        color[0]  = 255&bytes[pos+0];
-//        color[1]  = 255&bytes[pos+1];
-//        color[2]  = 255&bytes[pos+2];
+//        color[0]   = ((255&bytes[pos+0])  *color[0]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
+//        color[1]   = ((255&bytes[pos+1])  *color[1]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
+//        color[2]   = ((255&bytes[pos+2])  *color[2]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
+        color[0]  *= 255&bytes[pos+0];
+        color[1]  *= 255&bytes[pos+1];
+        color[2]  *= 255&bytes[pos+2];
         
         if(incr == 4)
-            color[3] = (255&bytes[pos+3]*color[3]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
-//            color[3]  = 255&bytes[pos+3];
+//            color[3] = (255&bytes[pos+3]*color[3]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
+            color[3]  *= 255&bytes[pos+3];
         else
-            color[3] = (255*color[3]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
-//            color[3] = 255;
+//            color[3] = (255*color[3]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
+            color[3] *= 255;
     
         
         //color[0]  =255;
@@ -137,7 +124,11 @@ public class SimpleTexture implements Texture {
     
     protected final void getPixelInterpolate(final double uu, final double vv,  final int[] color) {
         int ap,am, bp, bm;
-        double[] tmpColor =new double[4];
+        //double[] tmpColor =new double[4];
+        double r=0;
+        double g=0;
+        double b=0;
+        double a=0;
         double dam;
         double dap;
         double dbm;
@@ -183,43 +174,43 @@ public class SimpleTexture implements Texture {
         
         int pos =incr *(am +width*bm);
         double fac=dam*dbm;
-        tmpColor[0]  += fac*(255&bytes[pos+0]);
-        tmpColor[1]  += fac*(255&bytes[pos+1]);
-        tmpColor[2]  += fac*(255&bytes[pos+2]);
-        if(incr == 4)
-            tmpColor[3]  += fac*(255&bytes[pos+3]);
+        r  += fac*(255&bytes[pos+0]);
+        g  += fac*(255&bytes[pos+1]);
+        b  += fac*(255&bytes[pos+2]);
+        if(incr == 4) 
+            a  += fac*(255&bytes[pos+3]);
         
         pos =incr *(ap +width*bm);
         fac=dap*dbm;
-        tmpColor[0]  += fac*(255&bytes[pos+0]);
-        tmpColor[1]  += fac*(255&bytes[pos+1]);
-        tmpColor[2]  += fac*(255&bytes[pos+2]);
+        r  += fac*(255&bytes[pos+0]);
+        g  += fac*(255&bytes[pos+1]);
+        b  += fac*(255&bytes[pos+2]);
         if(incr == 4)
-            tmpColor[3]  += fac*(255&bytes[pos+3]);
+            a  += fac*(255&bytes[pos+3]);
 
         pos =incr *(ap +width*bp);
         fac=dap*dbp;
-        tmpColor[0]  += fac*(255&bytes[pos+0]);
-        tmpColor[1]  += fac*(255&bytes[pos+1]);
-        tmpColor[2]  += fac*(255&bytes[pos+2]);
+        r  += fac*(255&bytes[pos+0]);
+        g  += fac*(255&bytes[pos+1]);
+        b  += fac*(255&bytes[pos+2]);
         if(incr == 4)
-            tmpColor[3]  += fac*(255&bytes[pos+3]);
+            a  += fac*(255&bytes[pos+3]);
         
         pos =incr *(am +width*bp);
         fac=dam*dbp;
-        tmpColor[0]  += fac*(255&bytes[pos+0]);
-        tmpColor[1]  += fac*(255&bytes[pos+1]);
-        tmpColor[2]  += fac*(255&bytes[pos+2]);
+        r  += fac*(255&bytes[pos+0]);
+        g  += fac*(255&bytes[pos+1]);
+        b  += fac*(255&bytes[pos+2]);
         if(incr == 4)
-            tmpColor[3]  += fac*(255&bytes[pos+3]);
+            a  += fac*(255&bytes[pos+3]);
         
         
         
-        color[0] *=255&((int)tmpColor[0]);
-        color[1] *=255&((int)tmpColor[1]);
-        color[2] *=255&((int)tmpColor[2]);
+        color[0] *=255&((int)r);
+        color[1] *=255&((int)g);
+        color[2] *=255&((int)b);
         if(incr == 4)
-            color[3] *=255&((int)tmpColor[3]);
+            color[3] *=255&((int)a);
         
         else
             color[3] *= 255;
