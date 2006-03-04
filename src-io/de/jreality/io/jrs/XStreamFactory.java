@@ -1,6 +1,7 @@
 package de.jreality.io.jrs;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.util.HashSet;
 
 import com.thoughtworks.xstream.XStream;
@@ -66,6 +67,7 @@ public class XStreamFactory {
     knownClasses.add(Class.class);
     
     knownClasses.add(Color.class);
+    knownClasses.add(Font.class);
     
     knownClasses.add(Matrix.class);
     knownClasses.add(FactoredMatrix.class);
@@ -147,8 +149,10 @@ public class XStreamFactory {
     ret.registerConverter(new DataListConverter(ret.getClassMapper()));
     ret.registerConverter(new DoubleArrayConverter(ret.getClassMapper()));
     ret.registerConverter(new IntArrayConverter(ret.getClassMapper()));
+    ret.registerConverter(new StringArrayConverter(ret.getClassMapper()));
     ret.registerConverter(new InputSlotConverter());
     ret.registerConverter(new MatrixConverter(ret.getClassMapper()));
+    ret.registerConverter(new FontConverter(ret.getClassMapper()));
     
     return ret;
   }

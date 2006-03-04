@@ -28,6 +28,9 @@ public interface DefaultGeometryShader extends AttributeCollection {
   PolygonShader getPolygonShader();
   PolygonShader createPolygonShader(String name);
  
+//  RenderingHintsShader getRenderingHintsShader();
+//  RenderingHintsShader createRenderingHintsShader(String name);
+  
 //  TextShader getTextShader();
 //  TextShader createTextShader(String name);
 }

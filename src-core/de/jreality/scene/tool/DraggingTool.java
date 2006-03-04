@@ -79,7 +79,6 @@ public class DraggingTool extends Tool {
     transient protected SceneGraphComponent comp;
     
     public void activate(ToolContext tc) {
-    	System.out.println("DraggingTool.activate()");
       comp = (moveChildren ? tc.getRootToLocal() : tc.getRootToToolComponent()).getLastComponent();
       if (comp.getTransformation() == null) comp.setTransformation(new Transformation());
       try {

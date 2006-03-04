@@ -24,20 +24,16 @@ package de.jreality.ui.viewerapp;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.ComponentOrientation;
 import java.awt.Container;
 import java.awt.Font;
 import java.beans.PropertyEditorManager;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTree;
 import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.beans.BooleanEditor;

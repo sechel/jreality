@@ -15,6 +15,8 @@ import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
+import de.jreality.scene.data.StringArray;
+import de.jreality.scene.data.StringArrayArray;
 
 class DataListConverter implements Converter {
 
@@ -54,6 +56,14 @@ class DataListConverter implements Converter {
         int[][] data = dl.toIntArrayArray(null);
         dst = data;
       }
+    } else if (sm.startsWith("String")) {
+      if (isArray(sm) || isInlined(sm)) {
+        String[] data = dl.toStringArray(null);
+        dst = data;
+      } else if (isArrayArray(sm)) {
+        String[][] data = dl.toStringArrayArray(null);
+        dst = data;
+      }
     } else {
       throw new UnsupportedOperationException("cannot write: "+sm);
     }
@@ -89,6 +99,17 @@ class DataListConverter implements Converter {
         int[][] data = (int[][]) context.convertAnother(null, int[][].class);
         ret = new IntArrayArray.Array(data);
       }
+    } else if (sm.startsWith("String")) {
+      if (isArray(sm)) {
+        String[] data = (String[]) context.convertAnother(null, String[].class);
+        ret = new StringArray(data);
+      } else if (isInlined(sm)) {
+        String[] data = (String[]) context.convertAnother(null, String[].class);
+        ret = new StringArrayArray.Inlined(data, slotLength(sm));
+      } else if (isArrayArray(sm)) {
+        String[][] data = (String[][]) context.convertAnother(null, String[][].class);
+        ret = new StringArrayArray.Array(data);
+      }
     } else {
       throw new UnsupportedOperationException("cannot read: "+sm);
     }
@@ -100,7 +121,6 @@ class DataListConverter implements Converter {
     Matcher m = arrayArrayInlinedPattern.matcher(sm);
     if (!m.find()) throw new IllegalArgumentException("no length!");
     return Integer.parseInt(m.group(1));
-    
   }
 
   private boolean isArrayArray(String sm) {

@@ -22,6 +22,7 @@
  */
 package de.jreality.scene.data;
 
+import java.awt.Color;
 import java.beans.*;
 import java.lang.reflect.*;
 import java.text.MessageFormat;
@@ -131,6 +132,8 @@ public class AttributeEntityUtility {
       }
     }
 
+    private static final Object DUMMY=new Object();
+    
     private Object getAttribute(PropertyDescriptor pd, Object proxy)
         throws IllegalAccessException {
       Object result = Appearance.INHERITED, defValue;
@@ -139,12 +142,11 @@ public class AttributeEntityUtility {
       if (AttributeEntity.class.isAssignableFrom(attrType)) attrType = Class.class;
       if (attrType.isPrimitive()) attrType = wrapperType(attrType);
       if (app != null) result = app.getAttribute(prefix + attrName, attrType);
+      else result = effApp.getAttribute(prefix + attrName, Appearance.INHERITED);
       if (result != Appearance.INHERITED && result != Appearance.DEFAULT)
-          return result;
-      if (!readDefaults) {
-        result = null;
-      }
-      // else {
+        return result;
+      if (!readDefaults) return null;
+      // now read default value
       Object defaultVal = pd.getValue("default");
       if (defaultVal instanceof Class) {
         return defaultVal;
@@ -208,7 +210,13 @@ public class AttributeEntityUtility {
         throws Throwable {
       PropertyDescriptor pd = (PropertyDescriptor) readMethod.get(method);
       if (pd != null) {
-        return getAttribute(pd, proxy);
+        Object ret = getAttribute(pd, proxy);
+        if (ret instanceof Color) {
+          if (!readDefaults) {
+            System.out.println("readDefaults="+readDefaults+" app="+app);
+          }
+        }
+        return ret;
       }
       pd = (PropertyDescriptor) writeMethod.get(method);
       if (pd != null) {
@@ -254,7 +262,7 @@ public class AttributeEntityUtility {
       if (app != null) return AttributeEntityUtility.createAttributeEntity(type, pref, app, readDefaults);
       if (AttributeEntityUtility.hasAttributeEntity(type, pref, effApp)) {
         try {
-          return AttributeEntityUtility.createProxy(AttributeEntityUtility.resolveType(type), pref, effApp, false, true);
+          return AttributeEntityUtility.createProxy(AttributeEntityUtility.resolveType(type), pref, effApp, true);
         } catch (IntrospectionException e) {
           throw new Error();
         }
@@ -338,7 +346,7 @@ public class AttributeEntityUtility {
       Appearance a, boolean readDefaults) {
     if (prefix == null) prefix = "";
     try {
-      AttributeEntity proxy = (AttributeEntity) createProxy(clazz, prefix, a, true, readDefaults);
+      AttributeEntity proxy = (AttributeEntity) createProxy(clazz, prefix, a, readDefaults);
       if (!hasAttributeEntity(clazz, prefix, a)) {
         // tag the appearance
         a.setAttribute(getTaggingPrefix(prefix, clazz), clazz);
@@ -361,7 +369,7 @@ public class AttributeEntityUtility {
     try {
       if (!hasAttributeEntity(clazz, prefix, ea))
         throw new IllegalStateException("no such entity");
-      AttributeEntity proxy = (AttributeEntity) createProxy(resolveType(clazz), prefix, ea, false, true);
+      AttributeEntity proxy = (AttributeEntity) createProxy(resolveType(clazz), prefix, ea, true);
       return proxy;
     } catch (IntrospectionException e) {
       IllegalStateException ise = new IllegalStateException(e.getMessage());
@@ -417,7 +425,7 @@ public class AttributeEntityUtility {
   }
 
   private static Object createProxy(Class clazz, String prefix, Object target,
-      boolean write, boolean readDefaults) throws IntrospectionException {
+      /*boolean write,*/ boolean readDefaults) throws IntrospectionException {
     if (!descriptors.containsKey(clazz)) {
       LoggingSystem.getLogger(AttributeEntityUtility.class).log(Level.INFO,
           "creating reader {0} with prefix {1}", new Object[] { clazz, prefix });
