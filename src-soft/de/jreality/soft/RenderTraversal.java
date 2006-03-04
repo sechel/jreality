@@ -237,6 +237,21 @@ public class RenderTraversal extends SceneGraphVisitor {
           //DoubleArray p2=vertices.item(ix2).toDoubleArray();
           //pipeline.processLine(p1, p2);
         }
+        // Labels
+        if (g.getEdgeAttributes(Attribute.LABELS) != null) {
+          Class shaderType =  (Class) eAppearance.getAttribute(
+              ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER,"textShader"),DefaultTextShader.class);
+          
+          DefaultTextShader ts = (DefaultTextShader) AttributeEntityUtility.createAttributeEntity(
+              shaderType,
+              ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER,"textShader"),
+              eAppearance);
+          Font font = ts.getFont();
+          Color c = ts.getDiffuseColor();
+          double scale = ts.getScale().doubleValue();
+          
+          renderLabels(scale, ts.getOffset(), LabelUtility.createEdgeImages(g, font, c), g.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), g.getEdgeAttributes(Attribute.INDICES).toIntArrayArray());
+        }
     }
     visit((PointSet)g);
   }
@@ -279,6 +294,20 @@ public class RenderTraversal extends SceneGraphVisitor {
             }
         }
     }
+        // Labels
+        if (ifs.getEdgeAttributes(Attribute.LABELS) != null) {
+          Class shaderType =  (Class) eAppearance.getAttribute(
+              ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER,"textShader"),DefaultTextShader.class);
+          
+          DefaultTextShader ts = (DefaultTextShader) AttributeEntityUtility.createAttributeEntity(
+              shaderType, ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER,"textShader"),
+              eAppearance);
+          Font font = ts.getFont();
+          Color c = ts.getDiffuseColor();
+          double scale = ts.getScale().doubleValue();
+          
+          renderLabels(scale, ts.getOffset(), LabelUtility.createFaceImages(ifs, font, c), ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray());
+        }
     }
     visit((IndexedLineSet)ifs);
   }
@@ -295,52 +324,20 @@ public class RenderTraversal extends SceneGraphVisitor {
             pipeline.processPoint(a, i);
         
 		// Labels
-		
-		DataList dl = p.getVertexAttributes(Attribute.LABELS);
-		if(dl != null) {
-			StringArray labels = dl.toStringArray();
-			Class shaderType =  (Class) eAppearance.getAttribute(
-					ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,"textShader"),DefaultTextShader.class);
-			
-			DefaultTextShader ts = (DefaultTextShader) AttributeEntityUtility.createAttributeEntity(shaderType, ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,"textShader"), eAppearance);
-			Font font = ts.getFont();
-			Color c = ts.getDiffuseColor();
-			double scale = ts.getScale().doubleValue();
-			
-			PolygonShader storePS = this.polygonShader;
-			PointShader storePtS = this.pointShader;
-			LineShader storeLS = this.lineShader;
-			DefaultPolygonShader labelShader = new DefaultPolygonShader();
-			pipeline.setFaceShader(this.polygonShader=labelShader);
-			pipeline.setPointShader(this.pointShader = null);
-			pipeline.setLineShader(this.lineShader = null);
-			//pipeline.setMatrix(new Matrix().getArray());
-				EffectiveAppearance storeEA = eAppearance;
-				eAppearance = EffectiveAppearance.create();
-			double[] m = new double[16];
-			VecMat.invert(currentTrafo,m);
-
-      ImageData[] imgs = LabelUtility.createPointImages(p, font, c);
-      for(int i = 0, max=imgs.length; i<max;i++) {
-        ImageData img = imgs[i];
-
-//			for(int i = 0; i<labels.getLength();i++) {
-//				String li = labels.getValueAt(i);
-//				ImageData img = new ImageData(LabelUtility.createImageFromString(li,font,c));
-				
-				SceneGraphComponent sgc = LabelUtility.sceneGraphForLabel(null,img.getWidth()*scale, img.getHeight()*scale,new double[]{0,0,0},
-						m,a.getValueAt(i).toDoubleArray(null));
-				labelShader = new DefaultPolygonShader();
-				labelShader.texture = new SimpleTexture(img);
-				pipeline.setFaceShader(this.polygonShader=labelShader);
-				sgc.accept(this);
-			}
-			pipeline.setFaceShader(this.polygonShader=storePS);
-			pipeline.setPointShader(this.pointShader=storePtS);
-			pipeline.setLineShader(this.lineShader=storeLS);
-			eAppearance = storeEA;
+      if (p.getVertexAttributes(Attribute.LABELS) != null) {
+        Class shaderType =  (Class) eAppearance.getAttribute(
+            ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,"textShader"),DefaultTextShader.class);
+        
+        DefaultTextShader ts = (DefaultTextShader) AttributeEntityUtility.createAttributeEntity(
+            shaderType, ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,"textShader"),
+            eAppearance);
+        Font font = ts.getFont();
+        Color c = ts.getDiffuseColor();
+        double scale = ts.getScale().doubleValue();
+        
+			  renderLabels(scale, ts.getOffset(), LabelUtility.createPointImages(p, font, c), a, null);
+      }
 		}
-    }
     
 //    if(false) {
 //        if(a == null) 
@@ -367,6 +364,44 @@ public class RenderTraversal extends SceneGraphVisitor {
 //        }
 //        pipeline.setLineShader(l);
 //    }
+  }
+
+  private final SceneGraphComponent labelComp = new SceneGraphComponent();
+  private void renderLabels(double scale, double[] offset, ImageData[] imgs, DoubleArrayArray vertices, IntArrayArray indices) {
+    if (imgs == null) return;
+    double[] storeMatrix = (double[]) this.currentTrafo.clone();
+    PolygonShader storePS = this.polygonShader;
+    PointShader storePtS = this.pointShader;
+    LineShader storeLS = this.lineShader;
+    DefaultPolygonShader labelShader = new DefaultPolygonShader();
+    pipeline.setFaceShader(this.polygonShader=labelShader);
+    pipeline.setPointShader(this.pointShader = null);
+    pipeline.setLineShader(this.lineShader = null);
+    //pipeline.setMatrix(new Matrix().getArray());
+    	EffectiveAppearance storeEA = eAppearance;
+    	eAppearance = EffectiveAppearance.create();
+    double[] m = new double[16];
+    VecMat.invert(currentTrafo,m);
+
+    for(int i = 0, max=imgs.length; i<max;i++) {
+      ImageData img = imgs[i];
+
+//			for(int i = 0; i<labels.getLength();i++) {
+//				String li = labels.getValueAt(i);
+//				ImageData img = new ImageData(LabelUtility.createImageFromString(li,font,c));
+    	
+    	SceneGraphComponent sgc = LabelUtility.sceneGraphForLabel(labelComp,img.getWidth()*scale, img.getHeight()*scale, offset,
+    			m, LabelUtility.positionFor(i, vertices, indices));
+    	labelShader = new DefaultPolygonShader();
+    	labelShader.texture = new SimpleTexture(img);
+    	pipeline.setFaceShader(this.polygonShader=labelShader);
+    	sgc.accept(this);
+    }
+    pipeline.setFaceShader(this.polygonShader=storePS);
+    pipeline.setPointShader(this.pointShader=storePtS);
+    pipeline.setLineShader(this.lineShader=storeLS);
+    eAppearance = storeEA;
+    pipeline.setMatrix(this.currentTrafo=storeMatrix);
   }
 
   

@@ -11,7 +11,8 @@ public interface DefaultTextShader extends TextShader {
 	final static double SCALE_DEFAULT = 0.05;
 	
 	final static Font FONT_DEFAULT = new Font("Sans Serif",Font.PLAIN,12);
-	
+	final static double[] OFFSET_DEFAULT = new double[]{0,0,0,1};
+  
 	Color getDiffuseColor();
 	void setDiffuseColor(Color c);
 	  
@@ -20,5 +21,8 @@ public interface DefaultTextShader extends TextShader {
 	
 	Font getFont();
 	void setFont(Font f);
+  
+  double[] getOffset();
+  void setOffset(double[] o);
 	
 }

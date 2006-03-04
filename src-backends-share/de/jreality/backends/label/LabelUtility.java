@@ -28,6 +28,9 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
+import de.jreality.scene.data.DoubleArrayArray;
+import de.jreality.scene.data.IntArray;
+import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StringArray;
 import de.jreality.shader.ImageData;
 import de.jreality.util.LoggingSystem;
@@ -192,7 +195,7 @@ public class LabelUtility {
   }
   
   public static ImageData[] createEdgeImages(IndexedLineSet ls, Font f, Color c) {
-    DataList dl = ls.getVertexAttributes(Attribute.LABELS);
+    DataList dl = ls.getEdgeAttributes(Attribute.LABELS);
     if (dl == null) return null;
     StringArray sa = dl.toStringArray();
     return createImages(ls, Key.TYPE_EDGES, sa, c, f);
@@ -210,23 +213,28 @@ public class LabelUtility {
 	  TextLayout tl = new TextLayout(s,f,frc);
 	  Rectangle r = tl.getBounds().getBounds();
 	  
-	  BufferedImage img = new BufferedImage(r.width,r.height,BufferedImage.TYPE_INT_ARGB);
+	  // HACK: the previous implementation failed for strings without descent...
+	  // I got cut-off in the vertical dir, so i added a border of width 2
+	  int height = new TextLayout("fg", f, frc).getBounds().getBounds().height;
+    int width = r.width+4;
+    
+    BufferedImage img = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
 	  Graphics2D g = (Graphics2D) img.getGraphics();
 	  g.setBackground(TRANSPARENT);
-	  g.clearRect(0,0,r.width,r.height);
+	  g.clearRect(0,0,width,height);
 	  g.setColor(color);
 	  g.setFont(f);
 	  LineMetrics lineMetrics = f.getLineMetrics(s,frc);
 		
-	  final float border = r.height - tl.getDescent();
+	  final float border = height - tl.getDescent();
 
-    g.drawString(s,0,border);
+    g.drawString(s,2,border);
 	  return img;
   }
  
-  private static IndexedFaceSet bb = Primitives.texturedSquare(new double[]{0,1,0,1,1,0,1,0,0,0,0,0});
+  private static final IndexedFaceSet bb = Primitives.texturedSquare(new double[]{0,1,0,1,1,0,1,0,0,0,0,0});
 
-  	public static SceneGraphComponent sceneGraphForLabel(SceneGraphComponent sgc, double xscale, double yscale,double[] offset, double[] camToObj, double[] position)  {
+  public static SceneGraphComponent sceneGraphForLabel(SceneGraphComponent sgc, double xscale, double yscale,double[] offset, double[] camToObj, double[] position)  {
   		if (sgc == null) sgc = new SceneGraphComponent();
   		if (sgc.getGeometry() == null) {
   			//IndexedFaceSet bb = Primitives.texturedSquare(new double[]{0,1,0,1,1,0,1,0,0,0,0,0});
@@ -238,5 +246,21 @@ public class LabelUtility {
 
   		return sgc;
   	}
+
+  public static double[] positionFor(int ind, DoubleArrayArray a, IntArrayArray indexed) {
+    if (indexed == null) return a.getValueAt(ind).toDoubleArray(null);
+    double[] ret = null;
+    IntArray part = indexed.getValueAt(ind);
+    double[] tmp=null;
+    for (int i = 0; i < part.getLength(); i++) {
+      tmp = a.getValueAt(part.getValueAt(i)).toDoubleArray(tmp);
+      if (ret == null) ret = (double[]) tmp.clone();
+      else {
+        for (int j = 0; j < tmp.length; j++) ret[j] += tmp[j];
+      }
+    }
+    for (int j = 0; j < tmp.length; j++) ret[j] /= part.getLength();
+    return ret;
+  }
 
 }
