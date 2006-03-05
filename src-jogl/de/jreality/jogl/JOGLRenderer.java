@@ -26,6 +26,7 @@ import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.event.*;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
@@ -832,9 +833,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 						JOGLRendererHelper.drawLines(ils, globalHandle, pickMode, smooth, alpha);
 					if (useDisplayLists)		cleanupDisplayLists(activeDL, type);
 				}
-        if (ils.getEdgeAttributes(Attribute.LABELS) != null) {
-          JOGLRendererHelper.drawEdgeLabels(ils, globalHandle, jpc.edgeTextShader);
-        }
 				geometryShader.lineShader.postRender(globalHandle);
 			}
 			if (geometryShader.isVertexDraw() && ps != null)	{
@@ -859,10 +857,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 						JOGLRendererHelper.drawVertices(ps, globalHandle, pickMode, alpha);
 					if (useDisplayLists)		cleanupDisplayLists(activeDL, type);
 				}
-				if (ps.getVertexAttributes(Attribute.LABELS) != null)	{
-					//JOGLRendererHelper.drawLabels(ps, globalHandle, activeDL, jpc.textShader);
-          JOGLRendererHelper.drawPointLabels(ps, globalHandle, jpc.pointTextShader);
-				}
+//				if (ps.getVertexAttributes(Attribute.LABELS) != null)	{
+//					JOGLRendererHelper.drawLabels(ps, globalHandle, activeDL, jpc.textShader);
+//				}
 				geometryShader.pointShader.postRender(globalHandle);
 			}
 			// do I need this?Yes, the point and line shader can turn off lighting
@@ -893,11 +890,17 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 						JOGLRendererHelper.drawFaces(ifs, globalHandle,ss, alpha, pickMode);
 					if (useDisplayLists)		cleanupDisplayLists(activeDL, type);
 				}
-        if (ils.getEdgeAttributes(Attribute.LABELS) != null) {
-          JOGLRendererHelper.drawFaceLabels(ifs, globalHandle, jpc.faceTextShader);
-        }
 				geometryShader.polygonShader.postRender(globalHandle);
 			}
+      if (ps != null && ps.getVertexAttributes(Attribute.LABELS) != null) {
+        JOGLRendererHelper.drawPointLabels(ps, globalHandle, jpc.pointTextShader);
+      }
+      if (ils != null && ils.getEdgeAttributes(Attribute.LABELS) != null) {
+        JOGLRendererHelper.drawEdgeLabels(ils, globalHandle, jpc.edgeTextShader);
+      }
+      if (ifs != null && ifs.getFaceAttributes(Attribute.LABELS) != null) {
+        JOGLRendererHelper.drawFaceLabels(ifs, globalHandle, jpc.faceTextShader);
+      }
 			renderingHints.postRender(globalHandle);
 			//originalGeometry.finishReader();
 			if (originalGeometry instanceof Billboard)
