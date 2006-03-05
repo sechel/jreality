@@ -316,6 +316,7 @@ public class JOGLRendererHelper {
   private static void renderLabels(ImageData[] labels, DoubleArrayArray vertices, IntArrayArray indices, double[] offset, double scale, JOGLRenderer jr) {
     GL gl = jr.globalGL;
     gl.glEnable (GL.GL_BLEND);
+    gl.glDisable(GL.GL_LIGHTING);
     gl.glDepthMask(true);
     gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
     gl.glColor3d(1,1,1);
@@ -333,7 +334,6 @@ public class JOGLRendererHelper {
       drawFaces(bb, jr, true, 1.0, false);
       gl.glPopMatrix();     
     }
-    gl.glDepthMask(true);
     gl.glDisable(GL.GL_BLEND);
     gl.glDisable(GL.GL_TEXTURE_2D);
   }
