@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.Map.Entry;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.math.P3;
@@ -116,12 +117,14 @@ public class LabelUtility {
       // for several font/color/type combinations (mapped with Keys)
       HashMap keyToImageMap = (HashMap) refsToImageMaps.get(wref);
       if (keyToImageMap == null) {
+        LoggingSystem.getLogger(LabelUtility.class).fine("create keyToImageMap");
         keyToImageMap = new HashMap();
         refsToImageMaps.put(wref, keyToImageMap);
       }
       
       HashMap keyToAccess = (HashMap) refsToAccessTimeMaps.get(wref);
       if (keyToAccess == null) {
+        LoggingSystem.getLogger(LabelUtility.class).fine("create keyToAccess");
         keyToAccess = new HashMap();
         refsToAccessTimeMaps.put(wref, keyToAccess);
       }
@@ -133,11 +136,9 @@ public class LabelUtility {
         keyToImageMap.put(key, strToImages);
         keyToAccess.put(key, new int[1]);
         LoggingSystem.getLogger(LabelUtility.class).fine("created key "+key);
-      }
-      
+      }      
       int[] accessCount = (int[]) keyToAccess.get(key);
-      
-      
+           
       LinkedList remainingStrings=new LinkedList();
       for (int i = 0, n=labels.getLength(); i < n; i++) {
         String str = labels.getValueAt(i);
@@ -166,11 +167,13 @@ public class LabelUtility {
       }
       
       // delete old strings
-      for (Iterator iter = keyToImageMap.values().iterator(); iter.hasNext();) {
-        HashMap strToImgs = (HashMap) iter.next();
+      for (Iterator iter = keyToImageMap.entrySet().iterator(); iter.hasNext();) {
+        Entry e = (Entry) iter.next();
+        Key k = (Key) e.getKey();
+        if (key.type != k.type) continue;
+        HashMap strToImgs = (HashMap) e.getValue();
         strToImgs.keySet().retainAll(remainingStrings);
-      }
-      
+      }      
       strToImages.keySet().retainAll(remainingStrings);
     }
     return ret;
