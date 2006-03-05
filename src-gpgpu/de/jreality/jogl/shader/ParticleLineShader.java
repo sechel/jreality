@@ -343,4 +343,9 @@ private void resetBounds() {
     }
   }
 
+  public TextShader getTextShader() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
 }

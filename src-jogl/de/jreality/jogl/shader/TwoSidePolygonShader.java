@@ -68,4 +68,10 @@ public class TwoSidePolygonShader implements PolygonShader {
 		return  -1;
 	}
 
+
+  public TextShader getTextShader() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
 }

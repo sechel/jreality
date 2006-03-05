@@ -344,4 +344,9 @@ public class Cloth2LineShader implements LineShader {
   public static void main(String[] args) {
     new Cloth2LineShader();
 }
+
+  public TextShader getTextShader() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }
