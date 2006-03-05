@@ -218,7 +218,7 @@ public class LabelUtility {
 	  
 	  // HACK: the previous implementation failed for strings without descent...
 	  // I got cut-off in the vertical dir, so i added a border of width 2
-	  int height = new TextLayout("fg", f, frc).getBounds().getBounds().height;
+	  int height = (int) f.getLineMetrics(s,frc).getHeight();//new TextLayout("fg", f, frc).getBounds().getBounds().height;
     int width = r.width+4;
     
     BufferedImage img = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
@@ -227,11 +227,11 @@ public class LabelUtility {
 	  g.clearRect(0,0,width,height);
 	  g.setColor(color);
 	  g.setFont(f);
-	  LineMetrics lineMetrics = f.getLineMetrics(s,frc);
+//	  LineMetrics lineMetrics = f.getLineMetrics(s,frc).getHeight();
 		
 	  final float border = height - tl.getDescent();
 
-    g.drawString(s,2,border);
+    g.drawString(s,0,border);
 	  return img;
   }
  
