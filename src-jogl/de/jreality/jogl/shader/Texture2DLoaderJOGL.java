@@ -58,12 +58,15 @@ public class Texture2DLoaderJOGL {
 
    /******************* new Textures *******************/
   
-  public static void render(GLDrawable drawable, Texture2D tex) {
+    public static void render(GLDrawable drawable, Texture2D tex) {
+      render(drawable, tex, true);
+    }
+    public static void render(GLDrawable drawable, Texture2D tex, boolean mipmapped) {
     //  render(drawable, tex, 0);
     //}
     //public static void render(GLCanvas drawable, Texture2D tex, int level) {
     boolean first = true;
-    boolean mipmapped = true;
+
     boolean replace = false;
     
     GL gl = drawable.getGL();
