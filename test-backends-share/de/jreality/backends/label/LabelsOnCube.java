@@ -7,6 +7,7 @@ import de.jreality.scene.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.geometry.*;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
@@ -45,6 +46,7 @@ public class LabelsOnCube {
     IndexedFaceSet ifs = new IndexedFaceSet();
     GeometryUtility.calculateAndSetFaceNormals(ifs);
     IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs);
+    //ifs = new CatenoidHelicoid(7);
 		label(ifs);
     
     SceneGraphComponent cmp = new SceneGraphComponent();
@@ -73,7 +75,7 @@ public class LabelsOnCube {
     
     dgs.setShowPoints(Boolean.TRUE);
     
-		String viewer=System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
+		//String viewer=System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
 
 		ViewerApp.display(cmp);
 
