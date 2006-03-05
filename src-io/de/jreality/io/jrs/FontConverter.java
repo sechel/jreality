@@ -36,8 +36,8 @@ class FontConverter implements Converter {
     int size = Integer.parseInt(reader.getAttribute("size"));
     String family = reader.getAttribute("family");
     String name = reader.getAttribute("name");
-    boolean bold = Boolean.parseBoolean(reader.getAttribute("bold"));
-    boolean italic = Boolean.parseBoolean(reader.getAttribute("italic"));
+    boolean bold = Boolean.valueOf(reader.getAttribute("bold")).booleanValue();
+    boolean italic = Boolean.valueOf(reader.getAttribute("italic")).booleanValue();
     int style = Font.PLAIN;
     if (bold) style = Font.BOLD;
     if (italic) style |= Font.ITALIC;
