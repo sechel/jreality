@@ -55,6 +55,7 @@ public class CommonAttributes {
 	public final static String LEVEL_OF_DETAIL = 			"levelOfDetail";
 	public final static double LEVEL_OF_DETAIL_DEFAULT = 			1.0;
 	public final static boolean DIFFUSE_COLOR_ONLY	= false;
+	public static final String DEEP_TRANSFORMATION_STACK = "deepTransformationStack";
 	
 	// these hints are heavily OpenGL specific
 	public final static String DEPTH_FUDGE_FACTOR = 		"depthFudgeFactor";

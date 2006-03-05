@@ -41,4 +41,9 @@ public void setProgram(GlslProgram program) {
 	this.program = program;
 }
 
+public TextShader getTextShader() {
+	// TODO Auto-generated method stub
+	return null;
+}
+
 }

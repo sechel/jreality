@@ -231,9 +231,6 @@ public class JOGLRendererHelper {
 		DoubleArrayArray  vertices = ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
 		int n = ps.getNumPoints();
 		Texture2D tex2d;
-//		SceneGraphComponent sgc = null;
-//		Appearance ap = new Appearance();
-//		sgc.setAppearance(ap);
 		StringArray labels = dl.toStringArray();
 		Font font = ts.getFont();
 		Color c = ts.getDiffuseColor();
@@ -253,6 +250,11 @@ public class JOGLRendererHelper {
 			}
 		}
 		
+		gl.glEnable (GL.GL_BLEND);
+		gl.glDisable(GL.GL_LIGHTING);
+		gl.glDepthMask(true);
+		gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		gl.glColor3d(1,1,1);
 		gl.glEnable(GL.GL_TEXTURE_2D);
 		for(int i = 0; i<n;i++) {
 			//sgc = LabelUtility.sceneGraphForLabel(null,img.getWidth()*scale, img.getHeight()*scale,new double[]{0,0,0},
@@ -327,7 +329,6 @@ public class JOGLRendererHelper {
       tex2d.setImage(img);
       double[] mat = P3.calculateBillboardMatrix(null,img.getWidth()*scale, img.getHeight()*scale,offset,
           c2o, LabelUtility.positionFor(i, vertices, indices), Pn.EUCLIDEAN);
-      gl.glActiveTexture(GL.GL_TEXTURE0);
       Texture2DLoaderJOGL.render(jr.theCanvas, tex2d, false);
       gl.glPushMatrix();
       gl.glMultTransposeMatrixd(mat);

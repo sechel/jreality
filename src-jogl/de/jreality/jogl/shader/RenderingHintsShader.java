@@ -20,13 +20,13 @@ public class RenderingHintsShader  {
 	double levelOfDetail = 0.0;		// hack for drawing lines in opengl
 	boolean 
 	   transparencyEnabled = false, 
-	   zBufferEnabled = false,
+	   zBufferEnabled = false,			// this only matters when transparencyEnabled == true
 	   lightingEnabled = true, 
-	   atInfinity = false,
 	   antiAliasingEnabled = false,
 	   backFaceCullingEnabled = false,
 	   isFastAndDirty = false,
-	   useDisplayLists = true;
+	   useDisplayLists = true,
+	   deepTransformationStack = false; 	// set true when scene has is deeper than 28 levels
 	   
 
 	/**
@@ -52,19 +52,20 @@ public class RenderingHintsShader  {
 		ap.setAttribute(CommonAttributes.AT_INFINITY,false);
 		ap.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false);
 		ap.setAttribute(CommonAttributes.FAST_AND_DIRTY_ENABLED,false);
+		ap.setAttribute(CommonAttributes.Z_BUFFER_ENABLED,false);
 		ap.setAttribute(CommonAttributes.LEVEL_OF_DETAIL, 0.0);
 	}
 	
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		lightingEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHTING_ENABLED), true);
 		transparencyEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY_ENABLED), false);
-		zBufferEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.Z_BUFFER_ENABLED), true);
+		zBufferEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.Z_BUFFER_ENABLED), false);
 		antiAliasingEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.ANTIALIASING_ENABLED), false);
 		backFaceCullingEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.BACK_FACE_CULLING_ENABLED), false);
-		atInfinity = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.AT_INFINITY), false);
 		isFastAndDirty = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.FAST_AND_DIRTY_ENABLED), false);
 		useDisplayLists = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.ANY_DISPLAY_LISTS), true);
 		levelOfDetail = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LEVEL_OF_DETAIL),CommonAttributes.LEVEL_OF_DETAIL_DEFAULT);
+		deepTransformationStack = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DEEP_TRANSFORMATION_STACK),false);
 		//if (isFastAndDirty) levelOfDetail = 0.0;
 	}
 
@@ -96,13 +97,6 @@ public class RenderingHintsShader  {
 	/**
 	 * @return
 	 */
-	public boolean isAtInfinity() {
-		return atInfinity;
-	}
-
-	/**
-	 * @return
-	 */
 	public boolean isFastAndDirty() {
 		return isFastAndDirty;
 	}
@@ -110,6 +104,11 @@ public class RenderingHintsShader  {
 	public boolean isBackFaceCullingEnabled() {
 		return backFaceCullingEnabled;
 	}
+	
+	public boolean isDeepTransformationStack() {
+		return deepTransformationStack;
+	}
+
 	public void render(JOGLRenderer jr)	{
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();

@@ -56,5 +56,10 @@ public class SimpleLineShader implements LineShader {
 		super();
 	}
 
+	public TextShader getTextShader() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 }

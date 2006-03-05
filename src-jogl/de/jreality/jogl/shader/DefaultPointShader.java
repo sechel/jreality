@@ -282,5 +282,10 @@ public class DefaultPointShader  implements PointShader {
 		return polygonShader;
 	}
 
+	public TextShader getTextShader() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 }

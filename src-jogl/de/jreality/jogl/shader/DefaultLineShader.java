@@ -354,4 +354,9 @@ public class DefaultLineShader implements LineShader  {
 		return nextDL;
 	}
 
+	public TextShader getTextShader() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

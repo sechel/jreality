@@ -10,23 +10,58 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.nio.IntBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.Vector;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.java.games.jogl.*;
+import net.java.games.jogl.DebugGL;
+import net.java.games.jogl.GL;
+import net.java.games.jogl.GLCanvas;
+import net.java.games.jogl.GLDrawable;
+import net.java.games.jogl.GLPbuffer;
+import net.java.games.jogl.GLU;
 import net.java.games.jogl.util.BufferUtils;
 import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.JOGLPickAction;
-import de.jreality.jogl.shader.*;
-import de.jreality.math.*;
-import de.jreality.scene.*;
+import de.jreality.jogl.shader.DefaultGeometryShader;
+import de.jreality.jogl.shader.DefaultVertexShader;
+import de.jreality.jogl.shader.RenderingHintsShader;
+import de.jreality.jogl.shader.Texture2DLoaderJOGL;
+import de.jreality.math.MatrixBuilder;
+import de.jreality.math.P3;
+import de.jreality.math.Pn;
+import de.jreality.math.Rn;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.Camera;
+import de.jreality.scene.Cylinder;
+import de.jreality.scene.Geometry;
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.PointSet;
+import de.jreality.scene.Scene;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.SceneGraphVisitor;
+import de.jreality.scene.Sphere;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
-import de.jreality.scene.event.*;
+import de.jreality.scene.event.AppearanceEvent;
+import de.jreality.scene.event.AppearanceListener;
+import de.jreality.scene.event.GeometryEvent;
+import de.jreality.scene.event.GeometryListener;
+import de.jreality.scene.event.SceneGraphComponentEvent;
+import de.jreality.scene.event.SceneGraphComponentListener;
+import de.jreality.scene.event.TransformationEvent;
+import de.jreality.scene.event.TransformationListener;
 import de.jreality.scene.pick.PickPoint;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
@@ -70,6 +105,7 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 	boolean  //useDisplayLists = true, 
 		manyDisplayLists = false, forceResidentTextures = true;
 	private boolean globalIsReflection = false;
+	private boolean deepTransformationStack = false;
 	int currentSignature = Pn.EUCLIDEAN;
 
 	// pick-related stuff
@@ -143,6 +179,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		if (obj instanceof Boolean) manyDisplayLists = ((Boolean)obj).booleanValue();
 		obj = ap.getAttribute(CommonAttributes.ANY_DISPLAY_LISTS, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) thePeerRoot.useDisplayLists = ((Boolean)obj).booleanValue();
+		obj = ap.getAttribute(CommonAttributes.DEEP_TRANSFORMATION_STACK, Boolean.class);		// assume the best ...
+		if (obj instanceof Boolean) deepTransformationStack = ((Boolean)obj).booleanValue();
 		theLog.fine("forceResTex = "+forceResidentTextures);
 		theLog.fine("many display lists = "+manyDisplayLists);
 		theLog.fine(" any display lists = "+thePeerRoot.useDisplayLists);
@@ -741,13 +779,6 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		public void render(JOGLPeerComponent jpc) {
 			//theLog.log(Level.FINER,"In JOGLPeerGeometry render() for "+originalGeometry.getName());
 			//originalGeometry.startReader();
-			// test billboarding
-			if (originalGeometry instanceof Billboard)	{
-				Billboard bb = (Billboard) originalGeometry;
-				double[] mat = P3.calculateBillboardMatrix(null,bb.getXscale(), bb.getYscale(), bb.getOffset(), context.getCameraToObject(), bb.getPosition(), Pn.EUCLIDEAN);
-				globalGL.glPushMatrix();
-				globalGL.glMultTransposeMatrixd(mat);
-			}
 			RenderingHintsShader renderingHints = jpc.renderingHints;
 			DefaultGeometryShader geometryShader = jpc.geometryShader;
 			renderingHints.render(globalHandle);
@@ -857,16 +888,11 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 						JOGLRendererHelper.drawVertices(ps, globalHandle, pickMode, alpha);
 					if (useDisplayLists)		cleanupDisplayLists(activeDL, type);
 				}
-//				if (ps.getVertexAttributes(Attribute.LABELS) != null)	{
-//					JOGLRendererHelper.drawLabels(ps, globalHandle, activeDL, jpc.textShader);
-//				}
 				geometryShader.pointShader.postRender(globalHandle);
 			}
 			// do I need this?Yes, the point and line shader can turn off lighting
 			renderingHints.render(globalHandle);
 			if (geometryShader.isFaceDraw() && ifs != null)	{
-//				if (geometryShader.polygonShaderNew != null) DefaultPolygonShader.renderNew(geometryShader.polygonShaderNew, globalHandle);
-//				else 
 				geometryShader.polygonShader.render(globalHandle);
 				double alpha = openGLState.diffuseColor[3];
 				boolean ss = openGLState.smoothShading;
@@ -892,9 +918,12 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 				}
 				geometryShader.polygonShader.postRender(globalHandle);
 			}
-      if (ps != null && ps.getVertexAttributes(Attribute.LABELS) != null) {
-        JOGLRendererHelper.drawPointLabels(ps, globalHandle, jpc.pointTextShader);
-      }
+//      if (ps != null && ps.getVertexAttributes(Attribute.LABELS) != null) {
+//        JOGLRendererHelper.drawPointLabels(ps, globalHandle, jpc.pointTextShader);
+//      }
+		if (ps != null && ps.getVertexAttributes(Attribute.LABELS) != null)	{
+				JOGLRendererHelper.drawLabels(ps, globalHandle, activeDL, jpc.pointTextShader);
+			}
       if (ils != null && ils.getEdgeAttributes(Attribute.LABELS) != null) {
         JOGLRendererHelper.drawEdgeLabels(ils, globalHandle, jpc.edgeTextShader);
       }
@@ -1239,9 +1268,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			context.setCurrentPath(currentPath);
 			Transformation thisT = goBetween.getOriginalComponent().getTransformation();
 			
-			theLog.log(Level.FINE,"In JOGLPeerComponent render() for "+goBetween.getOriginalComponent().getName());
+			//theLog.log(Level.FINE,"In JOGLPeerComponent render() for "+goBetween.getOriginalComponent().getName());
 			if (thisT != null)	{
-				if (stackDepth <= MAX_STACK_DEPTH) {
+				if ( stackDepth < MAX_STACK_DEPTH) {
 					globalGL.glPushMatrix();
 					globalGL.glMultTransposeMatrixd(thisT.getMatrix(tform));
 					stackDepth++;
@@ -1261,10 +1290,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 
 			if (appearanceChanged)  	propagateAppearanceChanged();
 			if (appearanceIsDirty)		updateAppearance();
-			JOGLConfiguration.theLog.log(Level.FINEST, goBetween.getOriginalComponent().getName()+"Using display list: "+useDisplayLists);
+			//JOGLConfiguration.theLog.log(Level.FINEST, goBetween.getOriginalComponent().getName()+"Using display list: "+useDisplayLists);
 			if (goBetween.getPeerGeometry() != null)	{
 				Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
-				//goBetween.peerGeometry.render(this);
 			}
 			
 			synchronized(childLock)	{

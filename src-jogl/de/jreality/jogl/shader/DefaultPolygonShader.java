@@ -187,6 +187,11 @@ public class DefaultPolygonShader implements PolygonShader {
 		return -1;
 	}
 
+	public TextShader getTextShader() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 //	public static void renderNew(de.jreality.shader.DefaultPolygonShader polygonShaderNew, JOGLRenderer globalHandle) {
 //		

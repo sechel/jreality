@@ -31,5 +31,10 @@ public class SimpleJOGLShader extends AbstractJOGLShader {
 			e.printStackTrace();
 		}
 	}
+
+	public TextShader getTextShader() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }
