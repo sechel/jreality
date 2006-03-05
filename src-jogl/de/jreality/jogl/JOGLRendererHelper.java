@@ -329,6 +329,7 @@ public class JOGLRendererHelper {
       tex2d.setImage(img);
       double[] mat = P3.calculateBillboardMatrix(null,img.getWidth()*scale, img.getHeight()*scale,offset,
           c2o, LabelUtility.positionFor(i, vertices, indices), Pn.EUCLIDEAN);
+      gl.glActiveTexture(GL.GL_TEXTURE0);
       Texture2DLoaderJOGL.render(jr.theCanvas, tex2d, false);
       gl.glPushMatrix();
       gl.glMultTransposeMatrixd(mat);
