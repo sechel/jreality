@@ -15,9 +15,10 @@ public class BooleanEditor extends PropertyEditorSupport {
     return true;
   }
   
+  final JComboBox box = new JComboBox(new Object[]{Boolean.TRUE, Boolean.FALSE, "Inherit"});
+  
   public Component getCustomEditor() {
     JPanel comp = new JPanel(new BorderLayout());
-    final JComboBox box = new JComboBox(new Object[]{Boolean.TRUE, Boolean.FALSE, "Inherit"});
     box.setSelectedItem(selected());
     box.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent arg0) {
@@ -31,6 +32,7 @@ public class BooleanEditor extends PropertyEditorSupport {
   public void setValue(Object arg0) {
     Object value = arg0 == "Inherit" ? (Boolean) null : arg0;
     super.setValue(value);
+    box.setSelectedItem(selected());
   }
   
   private Object selected() {

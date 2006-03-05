@@ -188,7 +188,11 @@ public class DefaultPointShader  implements PointShader {
 		if (!sphereDraw)	{
 			lighting = false;
 			gl.glPointSize((float) getPointSize());
-			gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, pointAttenuation);
+      try {
+        gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, pointAttenuation);
+      } catch (Exception e){
+      //TODO: i dont know - got error on ati radeon 9800
+      }
 			 //gl.glPointParameterf(GL.GL_POINT_DISTANCE_ATTENUATION, ))
 			gl.glEnable(GL.GL_POINT_SMOOTH);
 			gl.glEnable(GL.GL_POINT_SPRITE_ARB);
