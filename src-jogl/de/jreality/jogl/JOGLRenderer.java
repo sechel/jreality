@@ -832,6 +832,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 						JOGLRendererHelper.drawLines(ils, globalHandle, pickMode, smooth, alpha);
 					if (useDisplayLists)		cleanupDisplayLists(activeDL, type);
 				}
+        if (ils.getEdgeAttributes(Attribute.LABELS) != null) {
+          JOGLRendererHelper.drawEdgeLabels(ils, globalHandle, jpc.edgeTextShader);
+        }
 				geometryShader.lineShader.postRender(globalHandle);
 			}
 			if (geometryShader.isVertexDraw() && ps != null)	{
@@ -857,7 +860,8 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 					if (useDisplayLists)		cleanupDisplayLists(activeDL, type);
 				}
 				if (ps.getVertexAttributes(Attribute.LABELS) != null)	{
-					JOGLRendererHelper.drawLabels(ps, globalHandle, activeDL, jpc.textShader);
+					//JOGLRendererHelper.drawLabels(ps, globalHandle, activeDL, jpc.textShader);
+          JOGLRendererHelper.drawPointLabels(ps, globalHandle, jpc.pointTextShader);
 				}
 				geometryShader.pointShader.postRender(globalHandle);
 			}
@@ -889,6 +893,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 						JOGLRendererHelper.drawFaces(ifs, globalHandle,ss, alpha, pickMode);
 					if (useDisplayLists)		cleanupDisplayLists(activeDL, type);
 				}
+        if (ils.getEdgeAttributes(Attribute.LABELS) != null) {
+          JOGLRendererHelper.drawFaceLabels(ifs, globalHandle, jpc.faceTextShader);
+        }
 				geometryShader.polygonShader.postRender(globalHandle);
 			}
 			renderingHints.postRender(globalHandle);
@@ -1168,8 +1175,11 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 		
 		RenderingHintsShader renderingHints;
 		DefaultGeometryShader geometryShader;
-		DefaultTextShader textShader;
-		
+
+    DefaultTextShader pointTextShader;
+    DefaultTextShader edgeTextShader;
+    DefaultTextShader faceTextShader;
+    
 		Object childLock = new Object();		
 		Runnable renderGeometry = null;
 		final JOGLPeerComponent self = this;
@@ -1315,7 +1325,10 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 			if (thisAp == null && parent != null)	{
 				geometryShader = parent.geometryShader;
 				renderingHints = parent.renderingHints;
-				textShader = parent.textShader;
+        
+        pointTextShader = parent.pointTextShader;
+        edgeTextShader = parent.edgeTextShader;
+        faceTextShader = parent.faceTextShader;
 			} else {
 				if (geometryShader == null)
 					geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
@@ -1330,7 +1343,9 @@ public class JOGLRenderer extends SceneGraphVisitor implements AppearanceListene
 					renderingHints.setFromEffectiveAppearance(eAp, "");				
 				//if (textShader == null)
 					//textShader = RenderingHintsShader.createFromEffectiveAppearance(eAp, "");
-					textShader = (DefaultTextShader) AttributeEntityUtility.createAttributeEntity(DefaultTextShader.class, ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,"textShader"), eAp);
+        pointTextShader = (DefaultTextShader) AttributeEntityUtility.createAttributeEntity(DefaultTextShader.class, ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,"textShader"), eAp);
+        edgeTextShader = (DefaultTextShader) AttributeEntityUtility.createAttributeEntity(DefaultTextShader.class, ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER,"textShader"), eAp);
+        faceTextShader = (DefaultTextShader) AttributeEntityUtility.createAttributeEntity(DefaultTextShader.class, ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER,"textShader"), eAp);
 				//else
 					//renderingHints.setFromEffectiveAppearance(eAp, "");				
 //				Class shaderType =  (Class) eAp.getAttribute(

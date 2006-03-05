@@ -36,6 +36,7 @@ import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.Light;
@@ -52,6 +53,7 @@ import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
+import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StringArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
@@ -219,7 +221,9 @@ public class JOGLRendererHelper {
 //		tex2d.setRepeatT(Texture2D.GL_CLAMP);
 //	}
 
-	static double[] OFFSET = {0,0,0};
+//	static double[] OFFSET = {0,0,0};
+	
+	// currently not used
 	public static void drawLabels(PointSet ps, JOGLRenderer jr, CachedGeometryInfo cginfo, DefaultTextShader ts) {
 		GL gl = jr.globalGL;
 		double[] c2o = jr.context.getCameraToObject();
@@ -233,7 +237,7 @@ public class JOGLRendererHelper {
 		StringArray labels = dl.toStringArray();
 		Font font = ts.getFont();
 		Color c = ts.getDiffuseColor();
-		double scale = ts.getScale();
+		double scale = ts.getScale().doubleValue();
 		double[] offset = ts.getOffset();
 
 		if (cginfo.labelTexs[0] == null)	{
@@ -267,6 +271,66 @@ public class JOGLRendererHelper {
 		gl.glDisable(GL.GL_TEXTURE_2D);
 	}
 
+  private static final Texture2D tex2d = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
+  static {
+    tex2d.setRepeatS(Texture2D.GL_CLAMP);
+    tex2d.setRepeatT(Texture2D.GL_CLAMP);
+  }
+  
+  public static void drawPointLabels(PointSet ps, JOGLRenderer jr, DefaultTextShader ts) {
+
+    Font font = ts.getFont();
+    Color c = ts.getDiffuseColor();
+    double scale = ts.getScale().doubleValue();
+    double[] offset = ts.getOffset();
+    ImageData[] img = LabelUtility.createPointImages(ps, font, c);
+    
+    renderLabels(img, ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), null, offset, scale, jr );
+    
+  }
+  
+  public static void drawEdgeLabels(IndexedLineSet ils, JOGLRenderer jr, DefaultTextShader ts) {
+
+    Font font = ts.getFont();
+    Color c = ts.getDiffuseColor();
+    double scale = ts.getScale().doubleValue();
+    double[] offset = ts.getOffset();
+    ImageData[] img = LabelUtility.createEdgeImages(ils, font, c);
+    
+    renderLabels(img, ils.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), ils.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(), offset, scale, jr );
+    
+  }
+
+  public static void drawFaceLabels(IndexedFaceSet ifs, JOGLRenderer jr, DefaultTextShader ts) {
+
+    Font font = ts.getFont();
+    Color c = ts.getDiffuseColor();
+    double scale = ts.getScale().doubleValue();
+    double[] offset = ts.getOffset();
+    ImageData[] img = LabelUtility.createFaceImages(ifs, font, c);
+    
+    renderLabels(img, ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(), offset, scale, jr );
+    
+  }
+
+  private static void renderLabels(ImageData[] labels, DoubleArrayArray vertices, IntArrayArray indices, double[] offset, double scale, JOGLRenderer jr) {
+    GL gl = jr.globalGL;
+    double[] c2o = jr.context.getCameraToObject();
+    gl.glEnable(GL.GL_TEXTURE_2D);
+    for (int i=0,n=labels.length; i<n; i++) {
+      ImageData img = labels[i];
+      tex2d.setImage(img);
+      double[] mat = P3.calculateBillboardMatrix(null,img.getWidth()*scale, img.getHeight()*scale,offset,
+          c2o, LabelUtility.positionFor(i, vertices, indices), Pn.EUCLIDEAN);
+      gl.glActiveTexture(GL.GL_TEXTURE0);
+      Texture2DLoaderJOGL.render(jr.theCanvas, tex2d, false);
+      gl.glPushMatrix();
+      gl.glMultTransposeMatrixd(mat);
+      drawFaces(bb, jr, true, 1.0, false);
+      gl.glPopMatrix();     
+    }
+    gl.glDisable(GL.GL_TEXTURE_2D);
+  }
 
 	/**
 	 * @param sg
