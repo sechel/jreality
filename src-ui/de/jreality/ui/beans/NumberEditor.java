@@ -16,9 +16,10 @@ public abstract class NumberEditor extends PropertyEditorSupport {
     return true;
   }
   
+  final JTextField field = new JTextField();
+  
   public Component getCustomEditor() {
     JPanel comp = new JPanel(new BorderLayout());
-    final JTextField field = new JTextField();
     field.setText(getAsText());
     field.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent arg0) {
@@ -32,5 +33,8 @@ public abstract class NumberEditor extends PropertyEditorSupport {
   public abstract String getAsText();
   public abstract void setAsText(String text);
   
-   
+  public void setValue(Object value) {    
+    super.setValue(value);
+    field.setText(getAsText());
+  }
 }
