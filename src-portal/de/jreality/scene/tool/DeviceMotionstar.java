@@ -142,7 +142,11 @@ public class DeviceMotionstar implements RawDevice {
             InputSlot slot = (InputSlot) usedSources.get("wandMatrix");
             if (slot == null) return;
             matrixWand = Rn.transposeF2D(matrixWand, event.getMatrix());
-            queue.addEvent(new ToolEvent(DeviceMotionstar.this, slot, new DoubleArray(Rn.copy(null, matrixWand))));
+            queue.addEvent(new ToolEvent(DeviceMotionstar.this, slot, new DoubleArray(Rn.copy(null, matrixWand))) {
+              boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
+                return true;
+              }
+            });
         }
 
         double[] matrixHead = new double[16];
@@ -151,7 +155,11 @@ public class DeviceMotionstar implements RawDevice {
             if (!usedSources.containsKey("headMatrix")) return;
             InputSlot slot = (InputSlot) usedSources.get("headMatrix");
             matrixHead = Rn.transposeF2D(matrixHead, event.getMatrix());
-            queue.addEvent(new ToolEvent(DeviceMotionstar.this, slot, new DoubleArray(Rn.copy(null, matrixHead))));
+            queue.addEvent(new ToolEvent(DeviceMotionstar.this, slot, new DoubleArray(Rn.copy(null, matrixHead))) {
+              boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
+                return true;
+              }
+            });
         }
     }
     

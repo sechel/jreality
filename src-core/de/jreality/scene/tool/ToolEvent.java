@@ -113,8 +113,8 @@ public class ToolEvent extends EventObject {
         if (trafo1 == trafo2) return true;
         if (trafo1 == null || trafo1 == null) return false;
         //return Rn.equals(trafo1.toDoubleArray(null), trafo2.toDoubleArray(null), 0.00000001);
-        //return false;
-        return true;
+        return false;
+        //return true;
     }
 
 }
