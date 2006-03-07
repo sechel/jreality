@@ -10,6 +10,7 @@ import net.java.games.jogl.GL;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.GpgpuViewer;
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.jogl.SmokeCalculation;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
@@ -18,6 +19,7 @@ import de.jreality.math.Pn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
@@ -27,7 +29,7 @@ import de.jreality.util.Rectangle3D;
  * @author weissman
  * 
  */
-public class ParticleLineShader implements LineShader {
+public class ParticleLineShader extends AbstractPrimitiveShader implements LineShader {
 
   static Texture2D tex;
   
@@ -82,8 +84,8 @@ public class ParticleLineShader implements LineShader {
     return true;
   }
 
-  public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig,
-      boolean useDisplayLists) {
+  public int proxyGeometryFor(JOGLRenderingState jrs)	{
+		Geometry original = jrs.getCurrentGeometry();
     if (original.getGeometryAttributes(GeometryUtility.BOUNDING_BOX) != bb)
       original.setGeometryAttributes(GeometryUtility.BOUNDING_BOX, bb);
     return -1;
@@ -197,7 +199,8 @@ public class ParticleLineShader implements LineShader {
     return dlist[0];
   }
   
-public void render(JOGLRenderer jr) {
+public void render(JOGLRenderingState jrs)	{
+	JOGLRenderer jr = jrs.getRenderer();
     updateData(jr);
     if (particles.length == 0) return;
     if (calc == null) return;
@@ -333,7 +336,8 @@ private void resetBounds() {
     bounds[1][2]=Float.MIN_VALUE;
 }  
 
-  public void postRender(JOGLRenderer jr) {
+  public void postRender(JOGLRenderingState jrs)	{
+		JOGLRenderer jr = jrs.getRenderer();
     if (sprites && (renderCheap || data == null)) {
       GL gl = jr.globalGL;
       gl.glDisable(GL.GL_POINT_SPRITE_ARB);
@@ -343,9 +347,5 @@ private void resetBounds() {
     }
   }
 
-  public TextShader getTextShader() {
-    // TODO Auto-generated method stub
-    return null;
-  }
 
 }

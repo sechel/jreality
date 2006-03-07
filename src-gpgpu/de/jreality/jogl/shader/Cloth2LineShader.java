@@ -23,7 +23,7 @@ import de.jreality.util.Rectangle3D;
  * @author weissman
  * 
  */
-public class Cloth2LineShader implements LineShader {
+public class Cloth2LineShader extends AbstractPrimitiveShader implements LineShader {
 
   Texture2D spriteTex;
   
@@ -96,8 +96,7 @@ public class Cloth2LineShader implements LineShader {
     return true;
   }
 
-  public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig,
-      boolean useDisplayLists) {
+  public int proxyGeometryFor(JOGLRenderingState jrs) {
 //    if (original.getGeometryAttributes(GeometryUtility.BOUNDING_BOX) != bb)
 //      original.setGeometryAttributes(GeometryUtility.BOUNDING_BOX, bb);
     return -1;
@@ -269,7 +268,7 @@ public class Cloth2LineShader implements LineShader {
 
   static WeakHashMap displayLists=new WeakHashMap();
     
-  public void render(JOGLRenderer jr) {
+  public void renderOld(JOGLRenderer jr) {
     updateData(jr);
 
     if (data == null || inited) {
@@ -327,7 +326,8 @@ public class Cloth2LineShader implements LineShader {
     gl.glPopAttrib();
   }
 
-  public void postRender(JOGLRenderer jr) {
+  public void postRender(JOGLRenderingState jrs) {
+	  JOGLRenderer jr = jrs.getRenderer();
     GL gl = jr.globalGL;
     if (sprites) {
       gl.glDisable(GL.GL_POINT_SPRITE_ARB);
@@ -345,8 +345,4 @@ public class Cloth2LineShader implements LineShader {
     new Cloth2LineShader();
 }
 
-  public TextShader getTextShader() {
-    // TODO Auto-generated method stub
-    return null;
-  }
 }
