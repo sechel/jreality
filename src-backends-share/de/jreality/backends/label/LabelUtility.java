@@ -240,12 +240,10 @@ public class LabelUtility {
   public static SceneGraphComponent sceneGraphForLabel(SceneGraphComponent sgc, double xscale, double yscale,double[] offset, double[] camToObj, double[] position)  {
   		if (sgc == null) sgc = new SceneGraphComponent();
   		if (sgc.getGeometry() == null) {
-  			//IndexedFaceSet bb = Primitives.texturedSquare(new double[]{0,1,0,1,1,0,1,0,0,0,0,0});
   			sgc.setGeometry(bb);
   		}
   		if (sgc.getTransformation() == null)	sgc.setTransformation(new Transformation());
-  		// TODO the following method isn't working correctly for the position argument!
-  		sgc.getTransformation().setMatrix(P3.calculateBillboardMatrix(null, xscale, yscale, offset, camToObj,position, Pn.EUCLIDEAN ));
+   		sgc.getTransformation().setMatrix(P3.calculateBillboardMatrix(null, xscale, yscale, offset, camToObj,position, Pn.EUCLIDEAN ));
 
   		return sgc;
   	}
