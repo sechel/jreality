@@ -18,6 +18,7 @@ public interface RenderingHintsShader extends AttributeEntity {
 	  final static boolean ANY_DISPLAY_LISTS_DEFAULT = true;			// use display lists at all?
 	  final static boolean MANY_DISPLAY_LISTS_DEFAULT = true;			// if so, one display list per instance?
 	  final static boolean BACK_FACE_CULLING_DEFAULT = false;			// if so, one display list per instance?
+	  final static boolean CLEAR_COLOR_BUFFER = true;
 	final static double LEVEL_OF_DETAIL_DEFAULT = 			1.0;
 	final static double DEPTH_FUDGE_FACTOR_DEFAULT = 1.0;
 
@@ -44,6 +45,9 @@ public interface RenderingHintsShader extends AttributeEntity {
 
 	  Boolean getBackFaceCulling();
 	  void setBackFaceCulling(Boolean d);
+
+	  Boolean getClearColorBuffer();
+	  void setClearColorBuffer(Boolean d);
 
 	  Double getLevelOfDetail();
 	  void setLevelOfDetail(Double d);
