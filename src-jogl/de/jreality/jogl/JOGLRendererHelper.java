@@ -330,7 +330,7 @@ public class JOGLRendererHelper {
       double[] mat = P3.calculateBillboardMatrix(null,img.getWidth()*scale, img.getHeight()*scale,offset,
           c2o, LabelUtility.positionFor(i, vertices, indices), Pn.EUCLIDEAN);
       gl.glActiveTexture(GL.GL_TEXTURE0);
-      Texture2DLoaderJOGL.render(jr.theCanvas, tex2d, false);
+      Texture2DLoaderJOGL.render(jr.theCanvas, tex2d);
       gl.glPushMatrix();
       gl.glMultTransposeMatrixd(mat);
       drawFaces(bb, jr, true, 1.0, false);
