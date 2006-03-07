@@ -26,7 +26,6 @@ import de.jreality.backends.label.LabelUtility;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.HeightFieldFactory;
 import de.jreality.geometry.Primitives;
-import de.jreality.jogl.JOGLRenderer.CachedGeometryInfo;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultPolygonShader;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
@@ -36,13 +35,11 @@ import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.DirectionalLight;
-import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.Light;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.PointSet;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
@@ -54,7 +51,6 @@ import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
-import de.jreality.scene.data.StringArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.DefaultTextShader;
@@ -72,10 +68,18 @@ public class JOGLRendererHelper {
 	public final static int PER_VERTEX = 4;
 	public final static int PER_EDGE = 8;
 
-	static float [] backgroundColor = {0f, 0f, 0f, 1f};
-	static float val = 1f;
-	static float[][] unitsquare = {{val,val},{-val,val},{-val, -val},{val,-val}};
-	public static void handleBackground(GLDrawable theCanvas, int width, int height, Appearance topAp)	{
+	float [] backgroundColor = {0f, 0f, 0f, 1f};
+	float val = 1f;
+	float[][] unitsquare = {{val,val},{-val,val},{-val, -val},{val,-val}};
+	
+	JOGLRenderer jr = null;
+	public JOGLRendererHelper(JOGLRenderer renderer) {
+		super();
+		jr = renderer;
+	}
+
+	protected void handleBackground(int width, int height, Appearance topAp)	{
+			GLDrawable theCanvas = jr.getCanvas();
 			GL gl = theCanvas.getGL();
 			Object bgo = null;
 			if (topAp == null) return;
@@ -151,7 +155,7 @@ public class JOGLRendererHelper {
 			} else gl.glDisable(GL.GL_FOG);
 	}
   
-	public static void handleSkyBox(GLDrawable theCanvas, Appearance topAp, JOGLRenderer r) {
+	public void handleSkyBox(GLDrawable theCanvas, Appearance topAp, JOGLRenderer r) {
 		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, CommonAttributes.SKY_BOX, topAp)) {
 			CubeMap cm = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, CommonAttributes.SKY_BOX, topAp, true);
 			JOGLSkyBox.render(theCanvas, r, cm);
@@ -159,12 +163,13 @@ public class JOGLRendererHelper {
 
 	}
 
-	static boolean testArrays = false;
-	static ByteBuffer vBuffer, vcBuffer, vnBuffer, fcBuffer, fnBuffer, tcBuffer;
-	static DataList vLast = null, vcLast = null, vnLast = null;
-	public static void drawVertices( PointSet sg, JOGLRenderer jr, boolean pickMode, double alpha) {
-	        if (sg.getNumPoints() == 0) return;
-		GLDrawable theCanvas = jr.theCanvas;
+	boolean testArrays = false;
+	ByteBuffer vBuffer, vcBuffer, vnBuffer, fcBuffer, fnBuffer, tcBuffer;
+	DataList vLast = null, vcLast = null, vnLast = null;
+	public void drawVertices( PointSet sg, double alpha) {
+	    if (sg.getNumPoints() == 0) return;
+	    boolean pickMode = jr.pickMode;
+	    GLDrawable theCanvas = jr.theCanvas;
 		GL gl = theCanvas.getGL(); 
 //		gl.glPointSize((float) currentGeometryShader.pointShader.getPointSize());
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
@@ -221,57 +226,53 @@ public class JOGLRendererHelper {
 //		tex2d.setRepeatT(Texture2D.GL_CLAMP);
 //	}
 
-//	static double[] OFFSET = {0,0,0};
-	
-	// currently not used
-	public static void drawLabels(PointSet ps, JOGLRenderer jr, CachedGeometryInfo cginfo, DefaultTextShader ts) {
-		GL gl = jr.globalGL;
-		double[] c2o = jr.context.getCameraToObject();
-		DataList dl = ps.getVertexAttributes(Attribute.LABELS);
-		DoubleArrayArray  vertices = ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
-		int n = ps.getNumPoints();
-		Texture2D tex2d;
-		StringArray labels = dl.toStringArray();
-		Font font = ts.getFont();
-		Color c = ts.getDiffuseColor();
-		double scale = ts.getScale().doubleValue();
-		double[] offset = ts.getOffset();
-
-		if (cginfo.labelTexs[0] == null)	{
-			cginfo.labelTexs[0] = new Texture2D[n];
-			for (int i  = 0; i<n ; ++i)	{
-				Appearance ap = new Appearance();
-				tex2d = cginfo.labelTexs[0][i] =(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", ap, true);
-				tex2d.setRepeatS(Texture2D.GL_CLAMP);
-				tex2d.setRepeatT(Texture2D.GL_CLAMP);
-				String li = labels.getValueAt(i);
-				BufferedImage img = LabelUtility.createImageFromString(li,font,c);
-				tex2d.setImage(new ImageData(img));				
-			}
-		}
-		
-		gl.glEnable (GL.GL_BLEND);
-		gl.glDisable(GL.GL_LIGHTING);
-		gl.glDepthMask(true);
-		gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-		gl.glColor3d(1,1,1);
-		gl.glEnable(GL.GL_TEXTURE_2D);
-		for(int i = 0; i<n;i++) {
-			//sgc = LabelUtility.sceneGraphForLabel(null,img.getWidth()*scale, img.getHeight()*scale,new double[]{0,0,0},
-					//c2o,vertices.getValueAt(i).toDoubleArray(null));
-			int w = cginfo.labelTexs[0][i].getImage().getWidth();
-			int h = cginfo.labelTexs[0][i].getImage().getHeight();
-			double[] mat = P3.calculateBillboardMatrix(null,w*scale, h*scale,offset,
-					c2o,vertices.getValueAt(i).toDoubleArray(null), Pn.EUCLIDEAN);
-			gl.glActiveTexture(GL.GL_TEXTURE0);
-			Texture2DLoaderJOGL.render(jr.theCanvas, cginfo.labelTexs[0][i]);
-			gl.glPushMatrix();
-			gl.glMultTransposeMatrixd(mat);
-			drawFaces(bb, jr, true, 1.0, false);
-			gl.glPopMatrix();			
-		}
-		gl.glDisable(GL.GL_TEXTURE_2D);
-	}
+//	public void drawLabels(PointSet ps,  CachedGeometryInfo cginfo, DefaultTextShader ts) {
+//		GL gl = jr.globalGL;
+//		double[] c2o = jr.context.getCameraToObject();
+//		DataList dl = ps.getVertexAttributes(Attribute.LABELS);
+//		DoubleArrayArray  vertices = ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
+//		int n = ps.getNumPoints();
+//		Texture2D tex2d;
+//		StringArray labels = dl.toStringArray();
+//		Font font = ts.getFont();
+//		Color c = ts.getDiffuseColor();
+//		double scale = ts.getScale().doubleValue();
+//		double[] offset = ts.getOffset();
+//
+//		if (cginfo.labelTexs[0] == null)	{
+//			cginfo.labelTexs[0] = new Texture2D[n];
+//			for (int i  = 0; i<n ; ++i)	{
+//				Appearance ap = new Appearance();
+//				tex2d = cginfo.labelTexs[0][i] =(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", ap, true);
+//				tex2d.setRepeatS(Texture2D.GL_CLAMP);
+//				tex2d.setRepeatT(Texture2D.GL_CLAMP);
+//				String li = labels.getValueAt(i);
+//				BufferedImage img = LabelUtility.createImageFromString(li,font,c);
+//				tex2d.setImage(new ImageData(img));				
+//			}
+//		}
+////		gl.glPushAttrib(GL.GL_DEPTH_BUFFER_BIT | GL.GL_ENABLE_BIT);
+//		gl.glEnable (GL.GL_BLEND);
+//		gl.glDisable(GL.GL_LIGHTING);
+//		gl.glDepthMask(true);
+//		gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+//		gl.glColor3d(1,1,1);
+//		gl.glEnable(GL.GL_TEXTURE_2D);
+//		for(int i = 0; i<n;i++) {
+//			int w = cginfo.labelTexs[0][i].getImage().getWidth();
+//			int h = cginfo.labelTexs[0][i].getImage().getHeight();
+//			double[] mat = P3.calculateBillboardMatrix(null,w*scale, h*scale,offset,
+//					c2o,vertices.getValueAt(i).toDoubleArray(null), Pn.EUCLIDEAN);
+//			gl.glActiveTexture(GL.GL_TEXTURE0);
+//			Texture2DLoaderJOGL.render(jr.theCanvas, cginfo.labelTexs[0][i]);
+//			gl.glPushMatrix();
+//			gl.glMultTransposeMatrixd(mat);
+//			drawFaces(bb, true, 1.0, false);
+//			gl.glPopMatrix();			
+//		}
+//		gl.glDisable(GL.GL_TEXTURE_2D);
+////		gl.glPopAttrib();
+//	}
 
   private static final Texture2D tex2d = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
   static {
@@ -279,7 +280,7 @@ public class JOGLRendererHelper {
     tex2d.setRepeatT(Texture2D.GL_CLAMP);
   }
   
-  public static void drawPointLabels(PointSet ps, JOGLRenderer jr, DefaultTextShader ts) {
+  public  void drawPointLabels(PointSet ps,  DefaultTextShader ts) {
 
     Font font = ts.getFont();
     Color c = ts.getDiffuseColor();
@@ -291,7 +292,7 @@ public class JOGLRendererHelper {
     
   }
   
-  public static void drawEdgeLabels(IndexedLineSet ils, JOGLRenderer jr, DefaultTextShader ts) {
+  public void drawEdgeLabels(IndexedLineSet ils, DefaultTextShader ts) {
 
     Font font = ts.getFont();
     Color c = ts.getDiffuseColor();
@@ -303,7 +304,7 @@ public class JOGLRendererHelper {
     
   }
 
-  public static void drawFaceLabels(IndexedFaceSet ifs, JOGLRenderer jr, DefaultTextShader ts) {
+  public void drawFaceLabels(IndexedFaceSet ifs,  DefaultTextShader ts) {
 
     Font font = ts.getFont();
     Color c = ts.getDiffuseColor();
@@ -315,7 +316,7 @@ public class JOGLRendererHelper {
     
   }
 
-  private static void renderLabels(ImageData[] labels, DoubleArrayArray vertices, IntArrayArray indices, double[] offset, double scale, JOGLRenderer jr) {
+  private void renderLabels(ImageData[] labels, DoubleArrayArray vertices, IntArrayArray indices, double[] offset, double scale, JOGLRenderer jr) {
     GL gl = jr.globalGL;
     gl.glEnable (GL.GL_BLEND);
     gl.glDisable(GL.GL_LIGHTING);
@@ -330,10 +331,10 @@ public class JOGLRendererHelper {
       double[] mat = P3.calculateBillboardMatrix(null,img.getWidth()*scale, img.getHeight()*scale,offset,
           c2o, LabelUtility.positionFor(i, vertices, indices), Pn.EUCLIDEAN);
       gl.glActiveTexture(GL.GL_TEXTURE0);
-      Texture2DLoaderJOGL.render(jr.theCanvas, tex2d);
+      Texture2DLoaderJOGL.render(jr.theCanvas, tex2d, true);
       gl.glPushMatrix();
       gl.glMultTransposeMatrixd(mat);
-      drawFaces(bb, jr, true, 1.0, false);
+      drawFaces(bb, true, 1.0);
       gl.glPopMatrix();     
     }
     gl.glDisable(GL.GL_BLEND);
@@ -343,11 +344,12 @@ public class JOGLRendererHelper {
 	/**
 	 * @param sg
 	 */
-	public static void drawLines(IndexedLineSet sg, JOGLRenderer jr , boolean pickMode, boolean interpolateVertexColors, double alpha) {
+	public void drawLines(IndexedLineSet sg, boolean interpolateVertexColors, double alpha) {
 	     if (sg.getNumEdges() == 0) return;
 	     
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
+		boolean pickMode = jr.pickMode;
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		int vertexLength = GeometryUtility.getVectorLength(vertices);
@@ -452,13 +454,11 @@ public class JOGLRendererHelper {
 //		gl.glDepthRange(0d, 1d);
 	}
 
-	public static void drawFaces( IndexedFaceSet sg,JOGLRenderer jr,  boolean smooth, double alpha) {
-		drawFaces(sg, jr, smooth, alpha, false);
-	}
-	public static void drawFaces( IndexedFaceSet sg, JOGLRenderer jr,  boolean smooth, double alpha, boolean pickMode) {
+	public void drawFaces( IndexedFaceSet sg,  boolean smooth, double alpha) {
 	        if (sg.getNumFaces() == 0) return;
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
+		boolean pickMode = jr.pickMode;
 		
 		int colorBind = -1,normalBind, colorLength=3;
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
@@ -531,25 +531,9 @@ public class JOGLRendererHelper {
 				isRegularDomainQuadMesh = true;
 			}				
 		} 
-//		else if (sg instanceof QuadMeshShape) {
-//			QuadMeshShape qm = (QuadMeshShape) sg;
-//			isQuadMesh = true;
-//			maxU = qm.getMaxU();
-//			maxV = qm.getMaxV();
-//			numV = maxU * maxV;
-//			maxFU = qm.isClosedInUDirection() ? maxU : maxU - 1;
-//			maxFV = qm.isClosedInVDirection() ? maxV : maxV - 1;
-//			numF = qm.getNumFaces();
-//		}
 
 		numF = sg.getNumFaces();
 		if (!pickMode && isQuadMesh)	{
-			//System.out.println("Is quad mesh");
-//			RegularDomainQuadMesh rdqm = null;
-//			if (qm instanceof RegularDomainQuadMesh) {
-//				rdqm = (RegularDomainQuadMesh) qm;
-//				type = rdqm.getType();
-//			}
 			double[] pt = new double[3];
 			// this loops through the "rows" of  the mesh (v is constant on each row)
 			for (int i = 0; i< maxFV ; ++i)	{
@@ -684,53 +668,6 @@ public class JOGLRendererHelper {
 		correctionNDC[10] = correctionNDC[11] = .5;
 	}
 	
-//	public static void drawLabels(LabelSet lb, JOGLRenderer jr)	{
-//		GL gl = jr.getCanvas().getGL();
-//		String[] labels = lb.getLabels();
-//		DataList positions = lb.getPositions();
-//		double[][] objectVerts, screenVerts;
-//		int bitmapFont = lb.getBitmapFont();
-//		
-//		objectVerts = positions.toDoubleArrayArray(null);
-//		screenVerts = new double[objectVerts.length][objectVerts[0].length];
-//		
-//		Graphics3D gc = jr.getContext();
-//		
-//		double[] objectToScreen = Rn.times(null, correctionNDC, gc.getObjectToScreen(jr.theViewer.getViewingComponent()));
-////		System.out.println("object to Screen is \n"+Rn.matrixToString(objectToScreen));
-//		Rn.matrixTimesVector(screenVerts, objectToScreen, objectVerts);
-//		// It's important that the last coordinate is 0 when we transform to get screen coordinates:
-//		// don't want to pick up any translation
-//		double[] screenOffset = new double[4];
-//		System.arraycopy(lb.getNDCOffset(), 0, screenOffset,0,3);
-//		Rn.matrixTimesVector(screenOffset, Graphics3D.getNDCToScreen(jr.theViewer.getViewingComponent()), screenOffset);
-//		//System.out.println("Screen offset is "+Rn.toString(screenOffset));
-//		Rn.matrixTimesVector(screenVerts, objectToScreen, objectVerts);
-//		if (screenVerts[0].length == 4) Pn.dehomogenize(screenVerts, screenVerts);
-//		int np = objectVerts.length;
-//
-//		// Store enabled state and disable lighting, texture mapping and the depth buffer
-//		gl.glPushAttrib(GL.GL_ENABLE_BIT);
-//		gl.glDisable(GL.GL_BLEND);
-//		gl.glDisable(GL.GL_LIGHTING);
-//		gl.glDisable(GL.GL_TEXTURE_2D);
-//		for (int i = 0; i< 6; ++i) gl.glDisable(i + GL.GL_CLIP_PLANE0);
-//
-////		float[] cras = new float[4];
-////		double[] dras = new double[4];
-//		for (int i = 0; i<np; ++i)	{
-////			gl.glRasterPos3d(objectVerts[i][0], objectVerts[i][1], objectVerts[i][2]);
-////			gl.glGetFloatv(GL.GL_CURRENT_RASTER_POSITION, cras);
-////			for (int j = 0; j<4; ++j) dras[j] = cras[j];
-//			// TODO This is not available on ATI graphics card!      
-//			gl.glWindowPos3d(screenVerts[i][0]+screenOffset[0], screenVerts[i][1] +screenOffset[1], screenVerts[i][2]+screenOffset[2]);
-//			String label = (labels == null) ? Integer.toString(i) : labels[i];
-//			//bitmapFont = 2 + (i%6);
-//			glut.glutBitmapString(gl, bitmapFont, label);
-//		}
-//
-//		gl.glPopAttrib();
-//	}
 
 	double mat[] = new double[16];
 	int lightCount =  GL.GL_LIGHT0;
@@ -796,7 +733,7 @@ public class JOGLRendererHelper {
 	}
 	private static float[] zDirection = {0,0,1,0}; //(float)10E-10};
 	private static float[] origin = {0,0,0,1};
-	public static void wisit(Light dl, GL globalGL, int lightCount)	{
+	public void wisit(Light dl, GL globalGL, int lightCount)	{
 		 globalGL.glLightf(lightCount, GL.GL_SPOT_CUTOFF, 180f);			// use cutoff == 0 as marker for invalid lights in glsl
 		  globalGL.glLightfv(lightCount, GL.GL_DIFFUSE, dl.getScaledColorAsFloat());
 		  float f = (float) dl.getIntensity();
@@ -805,12 +742,12 @@ public class JOGLRendererHelper {
 		  globalGL.glLightfv(lightCount, GL.GL_AMBIENT, dl.getScaledColorAsFloat());	
 	}
 	
-	public static void wisit(DirectionalLight dl, GL globalGL, int lightCount)		{
+	public void wisit(DirectionalLight dl, GL globalGL, int lightCount)		{
 		  wisit( (Light) dl, globalGL, lightCount);
 		  globalGL.glLightfv(lightCount, GL.GL_POSITION, zDirection);
 	}
 	
-	public static  void wisit(PointLight dl, GL globalGL, int lightCount)		{
+	public  void wisit(PointLight dl, GL globalGL, int lightCount)		{
 		  //gl.glLightfv(lightCount, GL.GL_AMBIENT, lightAmbient);
 		  wisit((Light) dl, globalGL, lightCount);
 		  globalGL.glLightfv(lightCount, GL.GL_POSITION, origin);
@@ -819,7 +756,7 @@ public class JOGLRendererHelper {
 		  globalGL.glLightf(lightCount, GL.GL_QUADRATIC_ATTENUATION, (float) dl.getFalloffA2());
 	}
 	
-	public static void wisit(SpotLight dl, GL globalGL, int lightCount)		{
+	public void wisit(SpotLight dl, GL globalGL, int lightCount)		{
 		  wisit((PointLight) dl, globalGL, lightCount);
 		  globalGL.glLightf(lightCount, GL.GL_SPOT_CUTOFF, (float) ((180.0/Math.PI) * dl.getConeAngle()));
 		  globalGL.glLightfv(lightCount, GL.GL_SPOT_DIRECTION, zDirection);
@@ -931,65 +868,5 @@ public class JOGLRendererHelper {
 		JOGLConfiguration.theLog.log(Level.INFO, "Screenshot saved to "
 				+ file.getName());
 	}
-// private static GLPbuffer getPbuffer(int width, int height, GLDrawable d) {
-// GLPbuffer pbuffer = null;
-// GLCapabilities caps = new GLCapabilities();
-//        // doesn't seem to support anti-aliasing; just creates junk
-////		caps.setSampleBuffers(true);
-////		caps.setNumSamples(4);
-//        //caps.setOffscreenRenderToTexture(true);
-//		  caps.setDoubleBuffered(false); 
-//		  JOGLConfiguration.getLogger().log(Level.INFO, "Caps is "+caps.toString());
-//		  pbuffer = d.createOffscreenDrawable(caps, width, height);
-//		  return pbuffer;
-//	  }
-//	  public static void renderOffscreen(int w, int h,final File file, final GLDrawable d)	{
-//		  GLPbuffer pbuffer = null;
-//		  File pbufferFile = null;
-//		  pbufferFile = file;  
-//		  final int width;
-//		  if (w > 2048)	{
-//			  JOGLConfiguration.getLogger().log(Level.WARNING,"Width being truncated to 2048");
-//			  width = 2048;
-//		  } else width = w;
-//		  final int height;
-//		  if (h > 2048)	{
-//			  JOGLConfiguration.getLogger().log(Level.WARNING,"Height being truncated to 2048");
-//			  height = 2048;
-//		  } else height = w;
-//		  pbuffer = getPbuffer(width, height, d);
-//		  pbuffer.addGLEventListener(new  GLEventListener() {
-//        		boolean done = false;
-//			public void init(GLDrawable arg0) {
-//	        	JOGLConfiguration.getLogger().log(Level.INFO,"PBuffer init");
-//				
-//			}
-//
-//			public void display(GLDrawable arg0) {
-//				if (done) return;
-//			   	JOGLConfiguration.getLogger().log(Level.INFO,"PBuffer display");
-//			   	//JOGLRenderer renderer = new JOGLRenderer(me, pbuffer);
-//			   	// have to set the rendering size since the jogl implementations of GLPbuffer
-//			   	// don't implement getSize() (!!)
-//			   	// we piggyback on the canvas's renderer.  To be safe, we need to put a lock around the
-//			   	// following 3 lines of code.
-//			   	renderer.setSize(width, height);
-//			   	renderer.display(arg0);
-//			   	renderer.setSize(d.getWidth(), d.getHeight());
-//			   	JOGLRendererHelper.saveScreenShot(pbuffer,width, height, file);
-//			   	done = true;
-//			}
-//
-//			public void reshape(GLDrawable arg0, int arg1, int arg2, int arg3, int arg4) {
-//			   	JOGLConfiguration.getLogger().log(Level.INFO,"PBuffer reshape");
-//			}
-//
-//			public void displayChanged(GLDrawable arg0, boolean arg1, boolean arg2) {
-//			   	JOGLConfiguration.getLogger().log(Level.INFO,"PBuffer displayChanged");
-//			}
-//        });
-//        System.err.println("Pbuffer created"); 
-// 	    JOGLConfiguration.getLogger().log(Level.INFO,"Pbuffer is initialized: "+pbuffer.isInitialized());
-//	  }
 
 }

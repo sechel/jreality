@@ -68,10 +68,10 @@ public class GlslDefaultPolygonShader extends SimpleJOGLShader {
 	// we use openGL state (as set by the DefaultVertexShader) inside the
 	// glsl shader, so we don't need to ship over those values here
 	// only the lighting/no lighting flag is required.
-	public void render(JOGLRenderer jr)	{
+	public void renderOld(JOGLRenderer jr)	{
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
-		super.render(jr);
+		super.renderOld(jr);
 		if (!changed) return;
 		//System.err.println("Writing glsl values");
 		// this seems to override the diffuse color

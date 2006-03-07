@@ -10,8 +10,5 @@ package de.jreality.jogl.shader;
  *
  */
 public interface PolygonShader extends PrimitiveShader {
-//	public void setSmoothShading(boolean b);
-//	public boolean isSmoothShading();
-//	public Color getDiffuseColor();
 	public void setFrontBack(int f);
 }

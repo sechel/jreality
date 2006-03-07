@@ -5,6 +5,7 @@
 package de.jreality.jogl.shader;
 
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.shader.EffectiveAppearance;
 
 /**
@@ -13,6 +14,6 @@ import de.jreality.shader.EffectiveAppearance;
  */
 public interface Shader {
 	public void  setFromEffectiveAppearance(EffectiveAppearance eap, String name);
-	public void render(JOGLRenderer jr);
-	public void postRender(JOGLRenderer jr);
+	public void render(JOGLRenderingState jrs);
+	public void postRender(JOGLRenderingState jrs);
 }

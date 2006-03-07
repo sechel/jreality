@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import net.java.games.jogl.GL;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.math.Rn;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
@@ -54,9 +55,10 @@ public class BrickPolygonShader extends SimpleJOGLShader {
 		specularContribution = eap.getAttribute(ShaderUtility.nameSpace(name,"specularCoefficient"), specularContribution);
 		changed = true;
 	}
-	public void render(JOGLRenderer jr) {
+	public void render(JOGLRenderingState jrs)	{
+		JOGLRenderer jr = jrs.getRenderer();
 		GL gl = jr.getCanvas().getGL();
-		super.render(jr);
+		super.renderOld(jr);
 		if (changed)	{
 		    gl.glUniform1fvARB(getUniLoc(program, "rtable",gl),100, rtable);
 		    gl.glUniform1fARB(getUniLoc(program, "SpecularContribution",gl),(float) specularContribution);

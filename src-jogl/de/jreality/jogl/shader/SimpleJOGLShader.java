@@ -6,6 +6,8 @@ package de.jreality.jogl.shader;
 
 import java.io.IOException;
 
+import de.jreality.shader.DefaultTextShader;
+
 /**
  * @author gunn
  *
@@ -30,11 +32,6 @@ public class SimpleJOGLShader extends AbstractJOGLShader {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-
-	public TextShader getTextShader() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 	
 }

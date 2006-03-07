@@ -7,6 +7,7 @@ package de.jreality.jogl.shader;
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.scene.Appearance;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
@@ -26,7 +27,7 @@ public class RenderingHintsShader  {
 	   backFaceCullingEnabled = false,
 	   isFastAndDirty = false,
 	   useDisplayLists = true,
-	   deepTransformationStack = false; 	// set true when scene has is deeper than 28 levels
+	   clearColorBuffer = true; 
 	   
 
 	/**
@@ -65,7 +66,7 @@ public class RenderingHintsShader  {
 		isFastAndDirty = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.FAST_AND_DIRTY_ENABLED), false);
 		useDisplayLists = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.ANY_DISPLAY_LISTS), true);
 		levelOfDetail = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LEVEL_OF_DETAIL),CommonAttributes.LEVEL_OF_DETAIL_DEFAULT);
-		deepTransformationStack = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DEEP_TRANSFORMATION_STACK),false);
+		clearColorBuffer = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.CLEAR_COLOR_BUFFER),true);
 		//if (isFastAndDirty) levelOfDetail = 0.0;
 	}
 
@@ -105,11 +106,12 @@ public class RenderingHintsShader  {
 		return backFaceCullingEnabled;
 	}
 	
-	public boolean isDeepTransformationStack() {
-		return deepTransformationStack;
+	public boolean isClearColorBuffer() {
+		return clearColorBuffer;
 	}
 
-	public void render(JOGLRenderer jr)	{
+	public void render(JOGLRenderingState jrs)	{
+		JOGLRenderer jr = jrs.getRenderer();
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		//gl.glDisable(GL.GL_TEXTURE_2D);
@@ -142,6 +144,9 @@ public class RenderingHintsShader  {
 //			jr.openGLState.backFaceCullingEnabled = backFaceCullingEnabled;
 //		}
 		jr.openGLState.levelOfDetail = levelOfDetail;
+//		if (jr.openGLState.clearColorBuffer != clearColorBuffer)
+//			System.err.println("Setting clear color buffer to "+clearColorBuffer);
+//		jr.openGLState.clearColorBuffer = clearColorBuffer;
 		// TODO: implement a handle for this front/back color flag
 		//gl.glEnable(GL.GL_COLOR_MATERIAL);
 		//gl.glColorMaterial(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE);
@@ -149,7 +154,8 @@ public class RenderingHintsShader  {
 
 	}
 
-	public void postRender(JOGLRenderer jr)	{
+	public void postRender(JOGLRenderingState jrs)	{
+		JOGLRenderer jr = jrs.getRenderer();
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		if (transparencyEnabled)	{

@@ -1,6 +1,7 @@
 package de.jreality.jogl.shader;
 
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.scene.Geometry;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.GlslProgram;
@@ -11,39 +12,31 @@ import de.jreality.shader.GlslProgram;
  * @author gollwas
  *
  */
-public class GlslPolygonShader implements PolygonShader {
+public class GlslPolygonShader extends AbstractPrimitiveShader implements PolygonShader {
 
   GlslProgram program;
   
   public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
-    program = new GlslProgram(eap, name);
+	super.setFromEffectiveAppearance(eap, name);
+   program = new GlslProgram(eap, name);
   }
 
-  public void render(JOGLRenderer jr) {
+  public void render(JOGLRenderingState jrs) {
+	  JOGLRenderer jr = jrs.getRenderer();
     GlslLoader.render(program, jr.getCanvas());
   }
 
-  public void postRender(JOGLRenderer jr) {
+  public void postRender(JOGLRenderingState jrs) {
+	  JOGLRenderer jr = jrs.getRenderer();
     GlslLoader.postRender(program, jr.getCanvas());
   }
 
-  public boolean providesProxyGeometry() {
-    return false;
-  }
-
-  public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int signature, boolean useDisplayLists) {
-    return 0;
-  }
-  public void setFrontBack(int f) {
+public void setFrontBack(int f) {
   }
 
 public void setProgram(GlslProgram program) {
 	this.program = program;
 }
 
-public TextShader getTextShader() {
-	// TODO Auto-generated method stub
-	return null;
-}
 
 }

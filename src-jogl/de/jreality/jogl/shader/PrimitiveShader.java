@@ -5,7 +5,9 @@
 package de.jreality.jogl.shader;
 
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.scene.Geometry;
+import de.jreality.shader.DefaultTextShader;
 
 /**
  * @author gunn
@@ -13,6 +15,8 @@ import de.jreality.scene.Geometry;
  */
 public interface PrimitiveShader extends Shader {
 	public boolean providesProxyGeometry();
-	public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int signature, boolean useDisplayLists);
-	public TextShader getTextShader();
+	public int proxyGeometryFor(JOGLRenderingState jrs);
+	public DefaultTextShader getTextShader();
+	public void render(JOGLRenderingState jrs);
+	public void flushCachedState(JOGLRenderer jr);
 }

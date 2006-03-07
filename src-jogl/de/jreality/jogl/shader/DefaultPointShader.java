@@ -11,12 +11,13 @@ import net.java.games.jogl.GLDrawable;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLSphereHelper;
-import de.jreality.jogl.OpenGLState;
+import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.math.P3;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
+import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
@@ -32,7 +33,7 @@ import de.jreality.shader.Texture2D;
  * @author Charles Gunn
  *
  */
-public class DefaultPointShader  implements PointShader {
+public class DefaultPointShader  extends AbstractPrimitiveShader implements PointShader {
 	double pointSize = 1.0;
 	// on my mac, the only value for the following array that seems to "work" is {1,0,0}.  WHY?
 	float[] pointAttenuation = {1.0f, .0f, 0.00000f};
@@ -55,6 +56,7 @@ public class DefaultPointShader  implements PointShader {
 	}
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
+		super.setFromEffectiveAppearance(eap, name);
 		sphereDraw = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SPHERES_DRAW), CommonAttributes.SPHERES_DRAW_DEFAULT);
 		lightDirection = (double[]) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHT_DIRECTION),lightDirection);
 		lighting = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHTING_ENABLED), true);
@@ -177,7 +179,8 @@ public class DefaultPointShader  implements PointShader {
 			}
 		}
 	}
-	public void render(JOGLRenderer jr) {
+	private void preRender(JOGLRenderingState jrs)	{
+		JOGLRenderer jr = jrs.getRenderer();
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 //		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
@@ -200,8 +203,12 @@ public class DefaultPointShader  implements PointShader {
 			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
 			Texture2DLoaderJOGL.render(theCanvas, currentTex);
 			gl.glEnable(GL.GL_TEXTURE_2D);
-		} else
-		polygonShader.render(jr);
+		} else	{
+			Geometry g = jrs.getCurrentGeometry();
+			jrs.setCurrentGeometry(null);
+			polygonShader.render(jrs);
+			jrs.setCurrentGeometry(g);
+		}
 		
 			jr.openGLState.lighting = lighting;
 			if (lighting) gl.glEnable(GL.GL_LIGHTING);
@@ -209,8 +216,9 @@ public class DefaultPointShader  implements PointShader {
 		
 	}
 
-	public void postRender(JOGLRenderer jr) {
-		polygonShader.postRender(jr);
+	public void postRender(JOGLRenderingState jrs)	{
+		JOGLRenderer jr = jrs.getRenderer(); 
+		polygonShader.postRender(jrs);
 		if (!sphereDraw)	{
 			GL gl = jr.globalGL;
 			jr.globalGL.glDisable(GL.GL_POINT_SPRITE_ARB);
@@ -224,7 +232,11 @@ public class DefaultPointShader  implements PointShader {
 		return sphereDraw;
 	}
 	
-	public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig, boolean useDisplayLists) {
+	public int proxyGeometryFor(JOGLRenderingState jrs)	{
+		Geometry original = jrs.getCurrentGeometry();
+		JOGLRenderer jr = jrs.getRenderer();
+		int sig = jrs.getCurrentSignature();
+		boolean useDisplayLists = jrs.isUseDisplayLists();
 		GL gl = 	jr.globalGL;
 		if (original instanceof PointSet)	{
 			PointSet ps = (PointSet) original;
@@ -282,10 +294,45 @@ public class DefaultPointShader  implements PointShader {
 		return polygonShader;
 	}
 
-	public TextShader getTextShader() {
-		// TODO Auto-generated method stub
-		return null;
+	int dList = -1, dListProxy =- 1;
+	public void render(JOGLRenderingState jrs)	{
+		Geometry g = jrs.getCurrentGeometry();
+		JOGLRenderer jr = jrs.getRenderer();
+		boolean useDisplayLists = jrs.isUseDisplayLists();
+		if ( !(g instanceof PointSet))	{
+			throw new IllegalArgumentException("Must be PointSet");
+		}
+		preRender(jrs);
+		if (g != null)	{
+			if (providesProxyGeometry())	{
+				if (!useDisplayLists || jr.pickMode || dListProxy == -1) {
+					dListProxy  = proxyGeometryFor(jrs);
+				}
+				jr.globalGL.glCallList(dListProxy);
+			}
+			else {
+				if (!useDisplayLists || jr.pickMode) {
+					jr.helper.drawVertices((PointSet) g,   jr.openGLState.diffuseColor[3]);
+				} else {
+					if (useDisplayLists && dList == -1)	{
+						dList = jr.globalGL.glGenLists(1);
+						jr.globalGL.glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
+						jr.helper.drawVertices((PointSet) g,  jr.openGLState.diffuseColor[3]);
+						jr.globalGL.glEndList();	
+					}
+					jr.globalGL.glCallList(dList);
+				} 
+			}			
+		}
 	}
+
+	public void flushCachedState(JOGLRenderer jr) {
+		if (dList != -1) jr.globalGL.glDeleteLists(dList, 1);
+		if (dListProxy != -1) jr.globalGL.glDeleteLists(dListProxy,1);
+		dList = dListProxy = -1;
+	}
+	
+
 
 
 }

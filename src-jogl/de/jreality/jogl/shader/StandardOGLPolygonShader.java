@@ -27,9 +27,9 @@ public class StandardOGLPolygonShader extends SimpleJOGLShader {
 		changed = true;
 	}
 
-	public void render(JOGLRenderer jr) {
+	public void renderOld(JOGLRenderer jr) {
 		GL gl = jr.getCanvas().getGL();
-		super.render(jr);
+		super.renderOld(jr);
 		if (changed) {
 			changed = false;
 		}

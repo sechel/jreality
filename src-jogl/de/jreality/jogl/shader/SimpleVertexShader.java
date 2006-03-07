@@ -12,6 +12,7 @@ import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.GlslProgram;
@@ -35,10 +36,10 @@ public class SimpleVertexShader implements VertexShader {
 	public void setFrontBack(int f) {
 		frontBack = f;
 	}
-	public void postRender(JOGLRenderer jr) {
-		
+	public void postRender(JOGLRenderingState jrs)	{
 	}
-	public void render(JOGLRenderer jr) {
+	public void render(JOGLRenderingState jrs)	{
+		JOGLRenderer jr = jrs.getRenderer();
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 //		JOGLConfiguration.theLog.log(Level.FINER,"Rendering simple vertex shader");

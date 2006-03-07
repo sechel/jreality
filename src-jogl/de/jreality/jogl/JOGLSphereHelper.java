@@ -45,7 +45,7 @@ public class JOGLSphereHelper extends SphereUtility {
 			for (int j = 0; j<SphereUtility.cubeSyms.length; ++j)	{
 				gl.glPushMatrix();
 				gl.glMultTransposeMatrixd(SphereUtility.cubeSyms[j].getMatrix());
-				JOGLRendererHelper.drawFaces(qms,jr, true, 1.0);
+				jr.helper.drawFaces(qms,true, 1.0);
 				gl.glPopMatrix();
 			}				
 			gl.glEndList();

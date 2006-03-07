@@ -11,6 +11,8 @@ import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.JOGLRendererHelper;
+import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.math.Rn;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
@@ -111,7 +113,8 @@ public class DefaultVertexShader implements VertexShader {
 		this.frontBack = frontBack;
 	}
 	
-	public void render(JOGLRenderer jr)	{
+	public void render(JOGLRenderingState jrs)	{
+		JOGLRenderer jr = jrs.getRenderer();
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 
@@ -130,7 +133,7 @@ public class DefaultVertexShader implements VertexShader {
 //		JOGLConfiguration.theLog.log(Level.FINEST,"VertexShader: Setting diffuse color to: "+Rn.toString(getDiffuseColorAsFloat()));
 	}
 
-	public void postRender(JOGLRenderer jr) {
+	public void postRender(JOGLRenderingState jrs) {
 	}
 
 	public void setGlsl( GlslProgram glProgram)	{

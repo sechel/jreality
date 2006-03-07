@@ -8,6 +8,7 @@ package de.jreality.jogl.shader;
 import java.util.logging.Level;
 
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.scene.Geometry;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
@@ -17,7 +18,7 @@ import de.jreality.util.LoggingSystem;
  * @author gunn
  *
  */
-public class TwoSidePolygonShader implements PolygonShader {
+public class TwoSidePolygonShader extends AbstractPrimitiveShader implements PolygonShader {
 	   private PolygonShader front;
 	   private PolygonShader back;
 
@@ -31,15 +32,19 @@ public class TwoSidePolygonShader implements PolygonShader {
 	}
 
 
-	public void render(JOGLRenderer jr) {
-		if (front != null) front.render(jr);
-		if (back != null) back.render(jr);
+	public void render(JOGLRenderingState jrs) {
+		Geometry g = jrs.getCurrentGeometry();
+		jrs.setCurrentGeometry(null);
+		if (back != null) back.render(jrs);
+		jrs.setCurrentGeometry(g);
+		if (front != null) front.render(jrs);
 	}
 	
-	public void postRender(JOGLRenderer jr) {
-		if (front != null) front.postRender(jr);
-		if (back != null) back.postRender(jr);
+	public void postRender(JOGLRenderingState jrs) {
+		if (front != null) front.postRender(jrs);
+		if (back != null) back.postRender(jrs);
 	}
+	
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String shaderName) {
 	      front = (PolygonShader) ShaderLookup.getShaderAttr(eap, shaderName, CommonAttributes.POLYGON_SHADER, "front");
 	      LoggingSystem.getLogger(this).log(Level.FINER,"Front shader is "+front.getClass().toString());
@@ -58,20 +63,19 @@ public class TwoSidePolygonShader implements PolygonShader {
 		return false;
 	}
 
-	public  int proxyGeometryFor(Geometry original, JOGLRenderer jr, int sig, boolean useDisplayLists) {
+	public  int proxyGeometryFor(JOGLRenderingState jrs)	{
 		int dp = 0;
 		if (front != null) {
-			dp = front.proxyGeometryFor(original, jr, sig, useDisplayLists);
+			dp = front.proxyGeometryFor(jrs);
 			LoggingSystem.getLogger(this).log(Level.FINER,"Providing dl "+dp);
 			return dp;
 		}
 		return  -1;
 	}
 
-
-  public TextShader getTextShader() {
-    // TODO Auto-generated method stub
-    return null;
-  }
+	public void flushCachedState(JOGLRenderer jr) {
+		if (front != null) front.flushCachedState(jr);
+		if (back != null) back.flushCachedState(jr);
+	}
 
 }

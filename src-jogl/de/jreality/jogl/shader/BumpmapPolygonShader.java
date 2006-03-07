@@ -13,6 +13,7 @@ import net.java.games.jogl.GL;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.shader.EffectiveAppearance;
 
 /**
@@ -43,9 +44,10 @@ public class BumpmapPolygonShader extends SimpleJOGLShader {
 		specularFactor = eap.getAttribute(ShaderUtility.nameSpace(name,"specularFactor"), specularFactor);
 		changed = true;
 	}
-	public void render(JOGLRenderer jr) {
+	public void render(JOGLRenderingState jrs)	{
+		JOGLRenderer jr = jrs.getRenderer();
 		GL gl = jr.getCanvas().getGL();
-		super.render(jr);
+		super.renderOld(jr);
 		if (changed)	{
 		    gl.glUniform1fARB(getUniLoc(program, "SpecularFactor",gl),(float) specularFactor);
 		    gl.glUniform1fARB(getUniLoc(program, "BumpDensity",gl),(float) bumpDensity);

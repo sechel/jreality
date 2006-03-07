@@ -56,8 +56,8 @@ public class JOGLConfiguration {
 				else if (foo.indexOf("info") != -1) level = Level.INFO;
 				theLog.setLevel(level);
 			}
-//			foo = System.getProperty("os.name");
-//			if (foo != null && foo.indexOf("Linux") != -1) isLinux = true;
+			foo = System.getProperty("os.name");
+			if (foo != null && foo.indexOf("Linux") != -1) isLinux = true;
 			// allocate a GLCanvas to be the "sharer": it will never be destroyed
 //			foo = System.getProperty("jreality.jogl.sharedContexts");
 //			if (foo != null && foo.indexOf("true") != -1) sharedContexts = true;

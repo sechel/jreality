@@ -25,19 +25,13 @@ import de.jreality.util.LoggingSystem;
  * @author gunn
  *
  */
-public abstract class AbstractJOGLShader implements PolygonShader {
+public abstract class AbstractJOGLShader extends AbstractPrimitiveShader implements PolygonShader {
 	String[] vertexSource, fragmentSource;
 	int program = -1;
 	static String resourceDir = "./";
 	static {
 		String foo = System.getProperty("jreality.jogl.resourceDir");
 		if (foo != null) resourceDir = foo;
-	}
-	/**
-	 * 
-	 */
-	public AbstractJOGLShader() {
-		super();
 	}
 
 	public void setupShader(GLDrawable theCanvas)	{
@@ -81,7 +75,7 @@ public abstract class AbstractJOGLShader implements PolygonShader {
 		}
 	}
 	
-	public void render(JOGLRenderer jr) {
+	public void renderOld(JOGLRenderer jr) {
 		GL gl = jr.getCanvas().getGL();
 		activate(jr.getCanvas());
 	}
@@ -99,7 +93,7 @@ public abstract class AbstractJOGLShader implements PolygonShader {
 		JOGLConfiguration.theLog.log(Level.FINE,"Setting GLSL program to "+program);
 	}
 	
-	public void postRender(JOGLRenderer jr) {
+	public void postRenderOld(JOGLRenderer jr) {
 		deactivate(jr.getCanvas());
 	}
 	
@@ -181,14 +175,5 @@ public abstract class AbstractJOGLShader implements PolygonShader {
 	public void setFrontBack(int f) {
 		// TODO Auto-generated method stub
 
-	}
-	public boolean providesProxyGeometry() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	public int proxyGeometryFor(Geometry original, JOGLRenderer jr,
-			int signature, boolean useDisplayLists) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 }

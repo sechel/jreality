@@ -19,25 +19,14 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 
-public class SimpleLineShader implements LineShader {
+public class SimpleLineShader extends AbstractPrimitiveShader implements LineShader {
 
 	Color	diffuseColor;		
 	double 	transparency, diffuseCoefficient;	
 	float[] diffuseColorAsFloat;
 
-	public boolean providesProxyGeometry() {
-		return false;
-	}
 
-	public int proxyGeometryFor(Geometry original, JOGLRenderer jr, int signature, boolean useDisplayLists) {
-		return -1;
-	}
-
-	public void postRender(JOGLRenderer jr) {
-		
-	}
-
-	public void render(JOGLRenderer jr) {
+	public void renderOld(JOGLRenderer jr) {
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
 		gl.glColor4fv( diffuseColorAsFloat);
@@ -51,15 +40,5 @@ public class SimpleLineShader implements LineShader {
 		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transparency);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);		
 	}
-
-	public SimpleLineShader() {
-		super();
-	}
-
-	public TextShader getTextShader() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 
 }

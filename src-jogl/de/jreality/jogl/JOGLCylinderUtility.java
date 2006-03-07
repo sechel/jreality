@@ -54,7 +54,7 @@ public class JOGLCylinderUtility  {
 			//gl.glDisable(GL.GL_SMOOTH);
 			IndexedFaceSet cyl = Primitives.cylinder(nv);
 			nv *= 2;
-			JOGLRendererHelper.drawFaces(cyl,jr, true, 1.0);
+			jr.helper.drawFaces(cyl, true, 1.0);
 			gl.glEndList();
 		}
 		if (!sharedDisplayLists) cylinderDListsTable.put(jr, dlists);
