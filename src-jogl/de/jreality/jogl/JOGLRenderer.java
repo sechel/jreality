@@ -577,7 +577,6 @@ public class JOGLRenderer  implements AppearanceListener {
 			RenderingHintsShader renderingHints = jpc.renderingHints;
 			DefaultGeometryShader geometryShader = jpc.geometryShader;
 			openGLState.setUseDisplayLists(renderingHints.isUseDisplayLists()); //(); //useDisplayLists(activeDL, jpc);
-System.err.println("use display list is "+openGLState.useDisplayLists);
 			openGLState.setCurrentGeometry(originalGeometry);
 			renderingHints.render(openGLState);
 			theLog.fine("Rendering sgc "+jpc.getOriginalComponent().getName());
