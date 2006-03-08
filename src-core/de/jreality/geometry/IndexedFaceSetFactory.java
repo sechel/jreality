@@ -72,6 +72,10 @@ public class IndexedFaceSetFactory extends AbstractIndexedFaceSetFactory {
 		super.setVertexTextureCoordinates( data );
 	}
 
+	public void setVertexLabels( String [] data ) {
+		super.setVertexLabels( data );
+	}
+
 	/* face attributes */
 	
 	public void setFaceCount( int count ) {
@@ -126,5 +130,8 @@ public class IndexedFaceSetFactory extends AbstractIndexedFaceSetFactory {
 		super.setFaceColors(data);
 	}
 
-	
+	public void setFaceLabels( String [] data ) {
+		super.setFaceLabels( data );
+	}
+
 }

@@ -13,20 +13,23 @@ import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.scene.data.StringArray;
 
 class AbstractIndexedFaceSetFactory extends AbstractPointSetFactory {
 	
 	final OoNode faceNormals = new OoNode( "face.normals" );
 	final OoNode faceIndices = new OoNode( "face.indices" );
+	final OoNode faceLabels  = new OoNode( "face.labels" );
+
 	final OoNode edgeIndices = new OoNode( "edge.indices" );
 	
 	final OoNode vertexCoordinates = new OoNode( "vertex.coordinates" );
 	final OoNode vertexNormals     = new OoNode( "vertex.normals" );
-	
-	
+
 	
 	boolean generateVertexNormals  = false;
 	boolean generateFaceNormals    = false;
+	boolean generateFaceLabels	   = false;
 	boolean generateEdgesFromFaces = false;
 	
 	DataListSet faceDLS = new DataListSet(0);
@@ -151,7 +154,42 @@ class AbstractIndexedFaceSetFactory extends AbstractPointSetFactory {
 		setFaceAttribute( Attribute.COLORS, new DoubleArrayArray.Array( data ) );
 	}
 
+
+	protected void setFaceLabels( DataList data ) {
+		setVertexAttribute( Attribute.LABELS, data );
+	}
 	
+	protected void setFaceLabels( String[] data ) {
+		if( data.length != nof() )
+			throw new IllegalArgumentException( "array has wrong length" );
+		setFaceAttribute( Attribute.LABELS, new StringArray(data));
+	}
+	
+
+	String [] faceLabels() {
+		return (String[])faceLabels.getObject();
+	}
+	
+	String [] generateFaceLabels() {
+		if( faceDLS.containsAttribute(Attribute.LABELS)) {
+			return faceDLS.getList(Attribute.LABELS)
+			.toStringArray((String[])faceLabels.getObject());
+		} else {
+			log( "compute", Attribute.LABELS, "face");
+			return indexString(nof());
+		}
+	}
+	
+
+	{
+		faceLabels.setUpdateMethod(
+				new OoNode.UpdateMethod() {
+					public Object update( Object object) {					
+						return generateFaceLabels();		
+					}					
+				}
+		);
+	}
 	{
 		faceIndices.addIngr( faceAttributeNode( Attribute.INDICES ) );
 		faceIndices.setUpdateMethod(
@@ -261,8 +299,14 @@ class AbstractIndexedFaceSetFactory extends AbstractPointSetFactory {
 		}
 	}
 	
+	
 	void recompute() {		
 			
+		super.recompute();
+		
+		if( isGenerateFaceLabels() )
+			faceLabels.update();
+		
 		if( isGenerateEdgesFromFaces() ) 
 			edgeIndices.update();
 		
@@ -333,6 +377,17 @@ class AbstractIndexedFaceSetFactory extends AbstractPointSetFactory {
 				}
 			}
 		}
+		
+		if( generateFaceLabels ) { 
+			if( nodeWasUpdated(faceLabels) ) { 
+				log( "set", Attribute.LABELS, "labels");
+				ifs.setFaceAttributes(Attribute.LABELS, StorageModel.STRING_ARRAY.createReadOnly(faceLabels()));
+			} 
+		} else if( ifs.getFaceAttributes().containsAttribute(Attribute.LABELS ) ) {
+			log( "cancle", Attribute.LABELS, "labels");
+			ifs.setVertexAttributes(Attribute.LABELS, null );
+		}
+		
 	}
 
 	
@@ -362,6 +417,14 @@ class AbstractIndexedFaceSetFactory extends AbstractPointSetFactory {
 
 	public void setGenerateFaceNormals(boolean generateFaceNormals) {
 		this.generateFaceNormals=generateFaceNormals;
+	}
+
+	public boolean isGenerateFaceLabels() {
+		return generateFaceLabels;
+	}
+
+	public void setGenerateFaceLabels(boolean generateFaceLabels) {
+		this.generateFaceLabels = generateFaceLabels;
 	}
 
 }

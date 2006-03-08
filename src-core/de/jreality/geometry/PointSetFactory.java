@@ -71,6 +71,10 @@ public class PointSetFactory extends AbstractPointSetFactory {
 		super.setVertexTextureCoordinates( data );
 	}
 
+	public void setVertexLabels( String [] data ) {
+		super.setVertexLabels( data );
+	}
+
 	public PointSet getPointSet() {
 		return ps;
 	}

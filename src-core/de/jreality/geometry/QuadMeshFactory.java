@@ -95,6 +95,9 @@ public class QuadMeshFactory extends AbstractQuadMeshFactory {
 		super.setVertexTextureCoordinates( data );
 	}
 
+	public void setVertexLabels( String [] data ) {
+		super.setVertexLabels( data );
+	}
 	/* face attributes */
 	
 	public void setFaceAttribute( Attribute attr, DataList data) {
@@ -129,4 +132,7 @@ public class QuadMeshFactory extends AbstractQuadMeshFactory {
 		super.setFaceColors(data);
 	}
 	
+	public void setFaceLabels( String [] data ) {
+		super.setFaceLabels( data );
+	}
 }

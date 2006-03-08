@@ -15,11 +15,16 @@ import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.scene.data.StringArray;
 import de.jreality.scene.data.WritableDataList;
 
 class AbstractPointSetFactory {
 	
 	final OoNode signature;
+
+	boolean generateVertexLabels = false;
+	
+	final OoNode vertexLabels = new OoNode( "vertex.labels" );
 	
 	DataListSet vertexDLS = new DataListSet(0);
 
@@ -170,7 +175,53 @@ class AbstractPointSetFactory {
 		setVertexAttribute( Attribute.TEXTURE_COORDINATES, new DoubleArrayArray.Array( data, data[0].length ) );
 	}
 
+	protected void setVertexLabels( DataList data ) {
+		setVertexAttribute( Attribute.LABELS, data );
+	}
+	
+	protected void setVertexLabels( String[] data ) {
+		if( data.length != nov() )
+			throw new IllegalArgumentException( "array has wrong length" );
+		setVertexAttribute( Attribute.LABELS, new StringArray(data));
+	}
+	
+
+	String [] vertexLabels() {
+		return (String[])vertexLabels.getObject();
+	}
+	
+	String [] generateVertexLabels() {
+		if( vertexDLS.containsAttribute(Attribute.LABELS)) {
+			return vertexDLS.getList(Attribute.LABELS)
+			.toStringArray((String[])vertexLabels.getObject());
+		} else {
+			log( "compute", Attribute.LABELS, "vertex");
+			return indexString(nov());
+		}
+	}
+	
+	String [] indexString(int nov) {
+		String [] labels = new String[nov];
+		for( int i=0; i<nov; i++ ) {
+			labels[i]=Integer.toString(i);
+		}
+		return labels;
+	}
+
+	{
+		vertexLabels.setUpdateMethod(
+				new OoNode.UpdateMethod() {
+					public Object update( Object object) {					
+						return generateVertexLabels();		
+					}					
+				}
+		);
+	}
+	
 	void recompute() {
+		
+		if( isGenerateVertexLabels() ) 
+			vertexLabels.update();
 		
 	}
 
@@ -210,6 +261,18 @@ class AbstractPointSetFactory {
 			updateVertexAttributes();
 			ps.setVertexCountAndAttributes(vertexDLS);		
 		}
+		
+
+		if( generateVertexLabels ) { 
+			if( nodeWasUpdated(vertexLabels) ) { 
+				log( "set", Attribute.LABELS, "labels");
+				ps.setVertexAttributes(Attribute.LABELS, StorageModel.STRING_ARRAY.createReadOnly(vertexLabels()));
+			} 
+		} else if( ps.getVertexAttributes().containsAttribute(Attribute.LABELS ) ) {
+			log( "cancle", Attribute.LABELS, "labels");
+			ps.setVertexAttributes(Attribute.LABELS, null );
+		}
+		
 	}
 	
 	public PointSet getPointSet() {
@@ -235,5 +298,13 @@ class AbstractPointSetFactory {
 			actionLogger.log( Level.INFO, logMessage(action, attr, cathegory),
 					new Object[] {action, attr, cathegory } );
 		}
+	}
+
+	public boolean isGenerateVertexLabels() {
+		return generateVertexLabels;
+	}
+
+	public void setGenerateVertexLabels(boolean generateVertexLabels) {
+		this.generateVertexLabels = generateVertexLabels;
 	}
 }
