@@ -112,7 +112,7 @@ public class LoggingSystem {
 //        Logger.getLogger("de.jreality.geometry").setLevel(Level.INFO);
         Logger.getLogger("de.jreality.io").setLevel(Level.INFO);
         Logger.getLogger("de.jreality.backends").setLevel(Level.FINE);
-        Logger.getLogger("de.jreality.jogl").setLevel(Level.FINE);
+//        Logger.getLogger("de.jreality.jogl").setLevel(Level.FINE);
     }
 
 //    public void setLogToFile(String fileName) throws IOException {
