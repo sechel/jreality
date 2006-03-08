@@ -4,6 +4,7 @@
   */
 package de.jreality.jogl;
 
+import java.awt.PageAttributes.OriginType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
@@ -146,9 +147,6 @@ public class JOGLRenderer  implements AppearanceListener {
 		// TODO set up a separate mechanism for controlling these top-level attributes
 		theLog.info("setSceneRoot");
 		Appearance ap = theRoot.getAppearance();
-		if (ap == null) return;
-		ap.addAppearanceListener(this);
-		extractGlobalParameters();
 	}
 	
 	public void appearanceChanged(AppearanceEvent ev) {
@@ -586,25 +584,25 @@ public class JOGLRenderer  implements AppearanceListener {
 			if (geometryShader.isEdgeDraw() && ils != null)	{
 				geometryShader.lineShader.render(openGLState);
 				geometryShader.lineShader.postRender(openGLState);
-			    if (ils.getEdgeAttributes(Attribute.LABELS) != null) {
-			        helper.drawEdgeLabels(ils, jpc.geometryShader.lineShader.getTextShader());
-			       }
 			}
 			if (geometryShader.isVertexDraw() && ps != null)	{
 				geometryShader.pointShader.render(openGLState);
 				geometryShader.pointShader.postRender(openGLState);
-				if (ps.getVertexAttributes(Attribute.LABELS) != null) {
-					helper.drawPointLabels(ps,  jpc.geometryShader.pointShader.getTextShader());
-				}
 			}
 			renderingHints.render(openGLState);
 			if (geometryShader.isFaceDraw() && ifs != null) {
 				geometryShader.polygonShader.render(openGLState);
 				geometryShader.polygonShader.postRender(openGLState);
-			    if (ifs.getFaceAttributes(Attribute.LABELS) != null) {
-			    	helper.drawFaceLabels(ifs,  jpc.geometryShader.polygonShader.getTextShader());
-			    }
 			}	
+			if (geometryShader.isVertexDraw() && ps!=null && ps.getVertexAttributes(Attribute.LABELS) != null) {
+				helper.drawPointLabels(ps,  jpc.geometryShader.pointShader.getTextShader());
+			}
+		    if (geometryShader.isEdgeDraw() &&ils != null && ils.getEdgeAttributes(Attribute.LABELS) != null) {
+		        helper.drawEdgeLabels(ils, jpc.geometryShader.lineShader.getTextShader());
+		       }
+		    if (geometryShader.isFaceDraw() &&ifs != null && ifs.getFaceAttributes(Attribute.LABELS) != null) {
+		    	helper.drawFaceLabels(ifs,  jpc.geometryShader.polygonShader.getTextShader());
+		    }
 			renderingHints.postRender(openGLState);
 		}
 	}
@@ -651,6 +649,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			} else peerGeometry = null;
 			originalComponent.addSceneGraphComponentListener(this);
 			if (originalComponent.getAppearance() != null) 
+				//originalComponent.getAppearance().removeAppearanceListener(this);				
 				originalComponent.getAppearance().addAppearanceListener(this);				
 		}
 		
@@ -979,6 +978,10 @@ public class JOGLRenderer  implements AppearanceListener {
 			}
 		}
 
+		public void appearanceChanged(AppearanceEvent ev) {
+			appearanceChanged = true;
+		}
+		
 		private void propagateAppearanceChanged()	{
 			Appearance thisAp = goBetween.getOriginalComponent().getAppearance(); 
 			if (parent == null)	{
@@ -1016,14 +1019,14 @@ public class JOGLRenderer  implements AppearanceListener {
 				else
 					renderingHints.setFromEffectiveAppearance(eAp, "");								
 			}
-			if (appearanceChanged)	{
+			//if (appearanceChanged)	{
 				int n = children.size();
 				for (int i = 0; i<n; ++i)	{		
 					JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
 					child.propagateAppearanceChanged();
 				}	
-				appearanceChanged=false;
-			}
+				//appearanceChanged=false;
+			//}
 		}
 		
 		/**
@@ -1067,10 +1070,6 @@ public class JOGLRenderer  implements AppearanceListener {
 					propagateGeometryChanged(changed);	
 					appearanceChanged = true;
 					theLog.log(Level.FINE,"Propagating geometry change due to added appearance");
-					if (this == thePeerRoot) {
-						theRoot.getAppearance().addAppearanceListener(globalHandle);
-						extractGlobalParameters();
-					}
 					break;				
 				case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
 					lightListDirty = true;
@@ -1138,7 +1137,6 @@ public class JOGLRenderer  implements AppearanceListener {
 					propagateGeometryChanged(changed);	
 					appearanceChanged = true;
 					if (this == thePeerRoot) {
-						theRoot.getAppearance().addAppearanceListener(globalHandle);
 						extractGlobalParameters();
 					}
 					theLog.log(Level.INFO,"Propagating geometry change due to replaced appearance");
@@ -1173,10 +1171,6 @@ public class JOGLRenderer  implements AppearanceListener {
 			}
 		}
 
-		public void appearanceChanged(AppearanceEvent ev) {
-			appearanceChanged = true;
-		}
-		
 		public void propagateGeometryChanged(int changed) {
 //			if (goBetween != null && goBetween.getPeerGeometry() != null) 
 //				goBetween.getPeerGeometry().geometryChanged(changed);
