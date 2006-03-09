@@ -18,12 +18,12 @@ import de.jreality.shader.ShaderUtility;
  *
  */
 public class RenderingHintsShader  {
-	double levelOfDetail = 0.0;		// hack for drawing lines in opengl
+	double levelOfDetail = 0.0;			// a number between 0= min and 1=max level and detail.
 	boolean 
 	   transparencyEnabled = false, 
-	   zBufferEnabled = false,			// this only matters when transparencyEnabled == true
+	   zBufferEnabled = false,					// this only matters when transparencyEnabled == true
 	   lightingEnabled = true, 
-	   antiAliasingEnabled = false,
+	   antiAliasingEnabled = false,				// do we need this anymore?
 	   backFaceCullingEnabled = false,
 	   isFastAndDirty = false,
 	   useDisplayLists = true,
@@ -41,20 +41,6 @@ public class RenderingHintsShader  {
 		RenderingHintsShader drh = new RenderingHintsShader();
 		drh.setFromEffectiveAppearance(eap, name);
 		return drh;
-	}
-	
-	/* (non-Javadoc)
-	 * @see de.jreality.jogl.Shader#setFromEffectiveAppearance(de.jreality.util.EffectiveAppearance)
-	 */
-	public void setDefaultValues(Appearance ap)	{
-		ap.setAttribute(CommonAttributes.LIGHTING_ENABLED,true);
-		ap.setAttribute(CommonAttributes.ANTIALIASING_ENABLED,false);
-		ap.setAttribute(CommonAttributes.BACK_FACE_CULLING_ENABLED, false);
-		ap.setAttribute(CommonAttributes.AT_INFINITY,false);
-		ap.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false);
-		ap.setAttribute(CommonAttributes.FAST_AND_DIRTY_ENABLED,false);
-		ap.setAttribute(CommonAttributes.Z_BUFFER_ENABLED,false);
-		ap.setAttribute(CommonAttributes.LEVEL_OF_DETAIL, 0.0);
 	}
 	
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
@@ -114,9 +100,6 @@ public class RenderingHintsShader  {
 		JOGLRenderer jr = jrs.getRenderer();
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
-		//gl.glDisable(GL.GL_TEXTURE_2D);
-		//gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
-		//if (transparencyEnabled != jr.openGLState.transparencyEnabled)	{
 			if (transparencyEnabled)	{
 			  gl.glEnable (GL.GL_BLEND);
 			  gl.glDepthMask(zBufferEnabled);
@@ -126,31 +109,14 @@ public class RenderingHintsShader  {
 			  gl.glDisable(GL.GL_BLEND);
 			}
 			jr.openGLState.transparencyEnabled = transparencyEnabled;
-		//}
-		// problems with using the openGLState:  possibly related to
-		// the fact that we're not doing any "popping" so the last value set
-		// remains even if we leave the subtree where the set took placce..
-		//if (lightingEnabled != jr.openGLState.lighting)	{
 			if (lightingEnabled)			gl.glEnable(GL.GL_LIGHTING);
 			else							gl.glDisable(GL.GL_LIGHTING);
-			//jr.openGLState.lighting = lightingEnabled;
-		//}
-//		if (backFaceCullingEnabled != jr.openGLState.backFaceCullingEnabled)	{
 			if (backFaceCullingEnabled)  {
 				gl.glEnable(GL.GL_CULL_FACE);
 				gl.glCullFace(GL.GL_BACK);
 			} else
 				gl.glDisable(GL.GL_CULL_FACE);
-//			jr.openGLState.backFaceCullingEnabled = backFaceCullingEnabled;
-//		}
-		jr.openGLState.levelOfDetail = levelOfDetail;
-//		if (jr.openGLState.clearColorBuffer != clearColorBuffer)
-//			System.err.println("Setting clear color buffer to "+clearColorBuffer);
-//		jr.openGLState.clearColorBuffer = clearColorBuffer;
-		// TODO: implement a handle for this front/back color flag
-		//gl.glEnable(GL.GL_COLOR_MATERIAL);
-		//gl.glColorMaterial(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE);
-			
+			jr.openGLState.levelOfDetail = levelOfDetail;
 
 	}
 

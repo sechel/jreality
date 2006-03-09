@@ -43,30 +43,6 @@ public class JOGLRenderingState {
 		this.renderer = jr;
 		gl=jr.globalGL;
 	}
-	private void render()	{
-		if (backFaceCullingEnabled)  {
-			gl.glEnable(GL.GL_CULL_FACE);
-			gl.glCullFace(GL.GL_BACK);
-		} else
-			gl.glDisable(GL.GL_CULL_FACE);
-		if (transparencyEnabled)	{
-			  gl.glEnable (GL.GL_BLEND);
-			  gl.glDepthMask(false);
-			  gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-			} else	{
-			  gl.glDepthMask(true);
-			  gl.glDisable(GL.GL_BLEND);
-			}
-		if (lighting)			gl.glEnable(GL.GL_LIGHTING);
-		else						gl.glDisable(GL.GL_LIGHTING);
-		if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
-		else		gl.glShadeModel(GL.GL_FLAT);
-		
-		if (flipped) gl.glFrontFace( GL.GL_CW);
-		else 		gl.glFrontFace( GL.GL_CCW);
-		gl.glEnable(GL.GL_COLOR_MATERIAL);
-		gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
-	}
 	public static boolean equals(float[] a, float[] b, float tol)	{
 		int n = a.length;
 		for (int i = 0; i<n ; ++i)	if (Math.abs(a[i]-b[i]) > tol) return false;
@@ -101,7 +77,14 @@ public class JOGLRenderingState {
 			gl.glMaterialfv(frontBack, GL.GL_DIFFUSE, new float[]{1,0,0});
 			gl.glMaterialfv(frontBack, GL.GL_SPECULAR, spec);
 			gl.glMaterialf(frontBack, GL.GL_SHININESS, 60f);
-			render();
+			gl.glEnable(GL.GL_COLOR_MATERIAL);
+			gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
+
+			if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
+			else		gl.glShadeModel(GL.GL_FLAT);
+					
+			if (flipped) gl.glFrontFace( GL.GL_CW);
+			else 		gl.glFrontFace( GL.GL_CCW);
 		}
 	public int getCylinderDisplayLists(int i) {
 		if (cylinderDisplayLists == null) cylinderDisplayLists = JOGLCylinderUtility.getCylinderDLists(renderer);

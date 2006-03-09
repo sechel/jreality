@@ -75,7 +75,7 @@ public class LabelsOnCube {
     
     dgs.setShowPoints(Boolean.TRUE);
     
-		//String viewer=System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
+		String viewer=System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer  de.jreality.jogl.Viewer"); // de.jreality.portal.DesktopPortalViewer");
 
 		ViewerApp.display(cmp);
 
