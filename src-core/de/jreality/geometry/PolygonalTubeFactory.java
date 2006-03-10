@@ -81,7 +81,7 @@ public class PolygonalTubeFactory extends TubeFactory {
 			//LoggingSystem.getLogger().log(Level.FINE,"Theta is "+frames[i].theta);
 			int m = xsec.length;
 			for (int j = 0; j < m; ++j) {
-				int p = m - j - 1;
+				int p = j; //m - j - 1;
 				Rn.matrixTimesVector(vals[(i) * m + j], scaledFrame, xsec[p]);
 			}
 		}

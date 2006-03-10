@@ -12,6 +12,7 @@ import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.math.Rn;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
@@ -30,7 +31,7 @@ public class GlslDefaultPolygonShader extends SimpleJOGLShader {
 		boolean changed = true;
 
 		public GlslDefaultPolygonShader() {
-			super("standard3dlabs.vert",null);
+			super("standard3dlabs.vert","standard3dlabs.frag");
 		}
 
 
@@ -68,18 +69,19 @@ public class GlslDefaultPolygonShader extends SimpleJOGLShader {
 	// we use openGL state (as set by the DefaultVertexShader) inside the
 	// glsl shader, so we don't need to ship over those values here
 	// only the lighting/no lighting flag is required.
-	public void renderOld(JOGLRenderer jr)	{
+	public void render(JOGLRenderingState jrs)	{
+		JOGLRenderer jr = jrs.getRenderer();
 		GLDrawable theCanvas = jr.getCanvas();
 		GL gl = theCanvas.getGL();
-		super.renderOld(jr);
+		super.render(jrs);
 		if (!changed) return;
 		//System.err.println("Writing glsl values");
 		// this seems to override the diffuse color
 		//gl.glColor4fv( diffuseColorAsFloat);
 //		JOGLConfiguration.theLog.fine("Writing "+numLights+" lights");
 //	    gl.glUniform1iARB(getUniLoc(program, "numLights",gl),jr.openGLState.numLights );
-	    gl.glUniform1iARB(getUniLoc(program, "lightingEnabled",gl), lightingEnabled ? 1 : 0 );
-	    gl.glUniform1iARB(getUniLoc(program, "reflectionTextureUnit",gl), reflectionTextureUnit);
+//	    gl.glUniform1iARB(getUniLoc(program, "lightingEnabled",gl), lightingEnabled ? 1 : 0 );
+//	    gl.glUniform1iARB(getUniLoc(program, "reflectionTextureUnit",gl), reflectionTextureUnit);
 //	    gl.glUniform1fvARB(getUniLoc(program, "ambientColor",gl), 4,ambientColorAsFloat);
 //	    gl.glUniform1fvARB(getUniLoc(program, "diffuseColor",gl), 4,diffuseColorAsFloat);
 //	    gl.glUniform1fvARB(getUniLoc(program, "specularColor",gl), 4,specularColorAsFloat);

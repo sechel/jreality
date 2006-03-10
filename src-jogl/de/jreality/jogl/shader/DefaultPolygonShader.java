@@ -239,7 +239,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 			gl.glDisable(GL.GL_TEXTURE_GEN_R);
 		}
 		if (useGLSL)
-			glslShader.postRenderOld(jr);
+			glslShader.postRender(jrs);
 	}
 
 

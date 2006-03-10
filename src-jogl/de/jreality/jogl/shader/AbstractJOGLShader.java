@@ -15,6 +15,7 @@ import net.java.games.jogl.GLDrawable;
 import net.java.games.jogl.GLU;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.scene.Geometry;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.Input;
@@ -75,7 +76,8 @@ public abstract class AbstractJOGLShader extends AbstractPrimitiveShader impleme
 		}
 	}
 	
-	public void renderOld(JOGLRenderer jr) {
+	public void render(JOGLRenderingState jrs) {
+		JOGLRenderer jr = jrs.getRenderer();
 		GL gl = jr.getCanvas().getGL();
 		activate(jr.getCanvas());
 	}
@@ -93,7 +95,8 @@ public abstract class AbstractJOGLShader extends AbstractPrimitiveShader impleme
 		JOGLConfiguration.theLog.log(Level.FINE,"Setting GLSL program to "+program);
 	}
 	
-	public void postRenderOld(JOGLRenderer jr) {
+	public void postRender(JOGLRenderingState jrs) {
+		JOGLRenderer jr = jrs.getRenderer();
 		deactivate(jr.getCanvas());
 	}
 	

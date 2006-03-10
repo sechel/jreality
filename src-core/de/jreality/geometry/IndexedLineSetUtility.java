@@ -145,25 +145,30 @@ public class IndexedLineSetUtility {
 	public static IndexedLineSet createCurveFromPoints( double[] points, int fiber, boolean closed)	{
 		return createCurveFromPoints(null, points, fiber, closed);
 	}
+
+	public static IndexedLineSet createCurveFromPoints(IndexedLineSet g, final double[] points, final int fiber, final int[][] indices)	{
+		int n = points.length/fiber;
+		if (g == null) g = new IndexedLineSet(n,indices.length);
+		final IndexedLineSet ils = g;
+		Scene.executeWriter(ils, new Runnable () {
+			public void run() {
+				ils.setEdgeCountAndAttributes(Attribute.INDICES, new IntArrayArray.Array(indices));
+				ils.setVertexCountAndAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.inlined(fiber).createWritableDataList(points));
+				}
+		});
+		return g;
 		
+	}
+
 	public static IndexedLineSet createCurveFromPoints(IndexedLineSet g, final double[] points, int fiber, boolean closed)	{
 		int n = points.length/fiber;
 		int size = (closed) ? n+1 : n;
-		if (g == null) g = new IndexedLineSet(n,1);
-		final IndexedLineSet ils = g;
 		// TODO replace this with different call if IndexedLineSet exists.
 		final int[][] ind = new int[1][size];
 		for (int i = 0; i<size ; ++i)	{
 			ind[0][i] = (i%n);
 		}
-		final int vectorLength = fiber;
-		Scene.executeWriter(ils, new Runnable () {
-			public void run() {
-				ils.setEdgeCountAndAttributes(Attribute.INDICES, new IntArrayArray.Array(ind));
-				ils.setVertexCountAndAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.inlined(vectorLength).createWritableDataList(points));
-				}
-		});
-		return g;
+		return createCurveFromPoints(g, points, fiber, ind);
 	}
 
 	/**
