@@ -47,7 +47,7 @@ public class BumpmapPolygonShader extends SimpleJOGLShader {
 	public void render(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.getRenderer();
 		GL gl = jr.getCanvas().getGL();
-		super.renderOld(jr);
+		super.render(jrs);
 		if (changed)	{
 		    gl.glUniform1fARB(getUniLoc(program, "SpecularFactor",gl),(float) specularFactor);
 		    gl.glUniform1fARB(getUniLoc(program, "BumpDensity",gl),(float) bumpDensity);

@@ -58,7 +58,7 @@ public class BrickPolygonShader extends SimpleJOGLShader {
 	public void render(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.getRenderer();
 		GL gl = jr.getCanvas().getGL();
-		super.renderOld(jr);
+		super.render(jrs);
 		if (changed)	{
 		    gl.glUniform1fvARB(getUniLoc(program, "rtable",gl),100, rtable);
 		    gl.glUniform1fARB(getUniLoc(program, "SpecularContribution",gl),(float) specularContribution);
