@@ -11,18 +11,9 @@ import de.jreality.ui.viewerapp.ViewerApp;
 
 import junit.framework.TestCase;
 
-public class IndexedFaceSetFactoryTest extends TestCase {
+public class IndexedLineSetFactoryTest extends TestCase {
 
-	IndexedFaceSetFactory factory;
-
-	static double [] faceNormalse  = new double[] {
-	0, 0, 1,
-	-1, 0, 0,
-	1, 0, 0,
-	0, 1, 0,
-	-1, 0, 0,
-	0, -1, 0
-	};
+	IndexedLineSetFactory factory;
 	
 	static double [] vertices  = new double[] {
 
@@ -63,7 +54,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		actionLogger.addHandler( actionHandler );
 		
 		
-		factory=new de.jreality.geometry.IndexedFaceSetFactory();
+		factory=new de.jreality.geometry.IndexedLineSetFactory();
 
 	}
 	
@@ -78,26 +69,23 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 	public void test() {
 
 		factory.setVertexCount( 8 );
-		factory.setFaceCount( 6 );	
 		factory.setVertexCoordinates( vertices );
-		factory.setFaceIndices( indices );
-		factory.setGenerateFaceNormals( true );
-		factory.setGenerateVertexNormals( true );
-		factory.setGenerateEdgesFromFaces( true );
+		factory.setLineCount(6);
+		factory.setEdgeIndices( indices );
+		
 		factory.update();
 		
-		ViewerApp.display( factory.getIndexedFaceSet() );
+		ViewerApp.display( factory.getIndexedLineSet() );
 		
 		actionHandler.clear();
 		
-		factory.setFaceIndices( indices );
+		factory.setEdgeIndices( indices );
 		
 		factory.update();
 		
 		actionHandler.clear();
 		
 		factory.setVertexCoordinates( vertices );
-		factory.setGenerateVertexNormals( false);
 		
 		factory.update();
 		
@@ -140,22 +128,19 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 	
 	public static void main( String [] arg ) {
 
-		IndexedFaceSetFactory factory = new IndexedFaceSetFactory();
+		IndexedLineSetFactory factory = new IndexedLineSetFactory();
 
 
 		factory.setVertexCount( 8 );
-		factory.setFaceCount( 6 );	
+		factory.setLineCount( 6 );	
 		factory.setVertexCoordinates( vertices );
-		factory.setFaceIndices( indices );
-		factory.setGenerateFaceNormals( true );
-		factory.setGenerateVertexNormals( true );
-		factory.setGenerateEdgesFromFaces( true );
-		factory.setGenerateVertexLabels(true);
-		factory.setLineCount( 1 );
-		factory.setEdgeIndices( new int[][] {{0,1}} );
-		factory.setEdgeLabels( new String[] {"A"} );
+		factory.setEdgeIndices( indices );
+	
+//		factory.setLineCount( 1 );
+//		factory.setEdgeIndices( new int[][] {{0,1}} );
+//		factory.setEdgeLabels( new String[] {"A"} );
 		factory.update();
 		
-		ViewerApp.display(factory.getIndexedFaceSet());
+		ViewerApp.display(factory.getIndexedLineSet());
 	}
 }

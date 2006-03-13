@@ -15,7 +15,7 @@ import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.data.StringArray;
 
-class AbstractIndexedFaceSetFactory extends AbstractPointSetFactory {
+class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	
 	final OoNode faceNormals = new OoNode( "face.normals" );
 	final OoNode faceIndices = new OoNode( "face.indices" );
@@ -337,17 +337,19 @@ class AbstractIndexedFaceSetFactory extends AbstractPointSetFactory {
 			updateFaceAttributes();
 			ifs.setFaceCountAndAttributes(faceDLS);
 		}
-		
-		if( generateEdgesFromFaces ) { 
-			if( nodeWasUpdated(edgeIndices) ) { 
-				log( "set", Attribute.INDICES, "edge");
-				ifs.setEdgeCountAndAttributes(Attribute.INDICES, edgeIndices() );
-			} else if( nof() == 0 ) {
-				ifs.setNumEdges(0);
+	
+		if( !edgeDLS.containsAttribute(Attribute.INDICES) ) {
+			if( generateEdgesFromFaces ) { 
+				if( nodeWasUpdated(edgeIndices) ) { 
+					log( "set", Attribute.INDICES, "edge");
+					ifs.setEdgeCountAndAttributes(Attribute.INDICES, edgeIndices() );
+				} else if( nof() == 0 ) {
+					ifs.setNumEdges(0);
+				}
+			} else if( ifs.getEdgeAttributes().containsAttribute(Attribute.INDICES) ) {
+				log( "cancle", Attribute.INDICES, "edge");
+				ifs.setEdgeAttributes(Attribute.INDICES, null );
 			}
-		} else if( ifs.getEdgeAttributes().containsAttribute(Attribute.INDICES) ) {
-			log( "cancle", Attribute.INDICES, "edge");
-			ifs.setEdgeAttributes(Attribute.INDICES, null );
 		}
 		
 		if( !faceDLS.containsAttribute(Attribute.NORMALS) ) {

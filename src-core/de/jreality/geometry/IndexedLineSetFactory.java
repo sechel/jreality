@@ -6,9 +6,9 @@ import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StringArrayArray;
 
-public class IndexedFaceSetFactory extends AbstractIndexedFaceSetFactory {
+public class IndexedLineSetFactory extends AbstractIndexedLineSetFactory {
 
-	public IndexedFaceSetFactory() {
+	public IndexedLineSetFactory() {
 		super();
 	}
 
@@ -79,7 +79,7 @@ public class IndexedFaceSetFactory extends AbstractIndexedFaceSetFactory {
 	}
 
 	/* edge attributes */
-
+	
 	public void setLineCount( int count ) {
 		super.setLineCount(count);
 	}
@@ -104,62 +104,4 @@ public class IndexedFaceSetFactory extends AbstractIndexedFaceSetFactory {
 		super.setEdgeLabels( data );
 	}
 	
-	/* face attributes */
-	
-	public void setFaceCount( int count ) {
-		super.setFaceCount( count );
-	}
-	
-	public void setFaceAttribute( Attribute attr, DataList data) {
-		super.setFaceAttribute( attr, data );
-	}
-	
-	public void setFaceAttributes(DataListSet dls ) {
-		super.setFaceAttributes(dls);
-	}
-	
-	public void setFaceIndices( DataList data ) {
-		super.setFaceIndices(data);
-	}
-	
-	public void setFaceIndices( int[][] data ) {
-		super.setFaceIndices(data);
-	}
-	
-	public void setFaceIndices( int[] data, int pointCountPerFace ) {
-		super.setFaceIndices(data, pointCountPerFace );
-	}
-	
-	public void setFaceIndices( int[] data ) {
-		super.setFaceIndices(data);
-	}
-	
-	public void setFaceNormals( DataList data ) {
-		super.setFaceNormals(data);
-	}
-	
-	public void setFaceNormals( double [] data ) {
-		super.setFaceNormals(data);
-	}
-	
-	public void setFaceNormals( double [][] data ) {
-		super.setFaceNormals(data);
-	}
-	
-	public void setFaceColors( DataList data ) {
-		super.setFaceColors(data);
-	}
-	
-	public void setFaceColors( double [] data ) {
-		super.setFaceColors(data);
-	}
-	
-	public void setFaceColors( double [][] data ) {
-		super.setFaceColors(data);
-	}
-
-	public void setFaceLabels( String [] data ) {
-		super.setFaceLabels( data );
-	}
-
 }
