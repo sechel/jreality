@@ -70,6 +70,9 @@
     <fileset dir="dist">
         <include name="jReality-gpgpu.jar"/>
     </fileset>
+    <fileset dir="lib">
+        <include name="jogl.jar"/>
+    </fileset>
   </path>
 	
 	<path id="proxies.classpath">
