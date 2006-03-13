@@ -45,6 +45,7 @@
   <path id="io.classpath">
     <path refid="backend.classpath"/>
     <fileset dir="lib">
+      <include name="jogl.jar"/>
       <include name="antlr-2.7.5.jar"/>
       <include name="xstream-1.1.2.jar"/>
       <include name="xpp3-1.1.3.4.O.jar"/>
