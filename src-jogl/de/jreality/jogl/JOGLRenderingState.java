@@ -66,7 +66,7 @@ public class JOGLRenderingState {
 			gl.glClearDepth(1.0f);  
 			gl.glEnable(GL.GL_NORMALIZE);
 			gl.glEnable(GL.GL_MULTISAMPLE_ARB);	
-			//gl.glEnable(GL.GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
+			gl.glEnable(GL.GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_LOCAL_VIEWER, GL.GL_FALSE);
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE);
 			float[] white = {1f, 1f, 1f, 1f};

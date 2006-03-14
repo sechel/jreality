@@ -109,6 +109,7 @@ public class SceneGraphUtility {
 //		  		c.setSignature(sig);
 //		  	}
 		  	public void visit(Geometry g)	{
+		  		
 		  		if (sig == Pn.EUCLIDEAN) return;
 		  		Integer s = new Integer(sig);
                  map.put(g,s);

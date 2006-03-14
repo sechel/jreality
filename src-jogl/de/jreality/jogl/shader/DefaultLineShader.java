@@ -228,45 +228,6 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			nextDL = gl.glGenLists(1);
 			gl.glNewList(nextDL, GL.GL_COMPILE);
 		}
-		boolean isQuadMesh = false;
-		Object qmatt = ils.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
-		Dimension dm = null;
-		if (qmatt != null && qmatt instanceof Dimension)	{
-			dm = (Dimension) qmatt;
-			isQuadMesh = true;
-		} 
-		if (pickMode)	gl.glPushName(JOGLPickAction.GEOMETRY_LINE);
-		if (!pickMode && isQuadMesh)	{
-			int u, v, count=0;
-			boolean closedU, closedV;
-			u = dm.width;
-			v = dm.height;
-			closedU = closedV = false;
-			double[][] curve = null;
-			IndexedFaceSet tube = null;
-			for (int i = 0; i<u+v; ++i)	{
-				int uv = 0;
-				int curvenum = i;
-				boolean closed = closedU;
-				if (i>=u) { 
-					uv = 1; curvenum = i-u; 
-					closed = closedV;
-				}
-				curve = QuadMeshUtility.extractParameterCurve(curve,(IndexedFaceSet) ils, u, v, curvenum,uv);
-				PolygonalTubeFactory ptf = new PolygonalTubeFactory(curve);
-				ptf.setClosed(closed);
-				ptf.setCrossSection(crossSection);
-				ptf.setFrameFieldType(tubeStyle);
-				ptf.setSignature(sig);
-				ptf.setRadius(rad);
-				ptf.update();
-				tube = ptf.getTube();
-				//JOGLConfiguration.theLog.log(Level.FINE,"Tube has "+tube.getNumPoints()+" points");
-				if (pickMode)	gl.glPushName(count++);
-				jr.helper.drawFaces(tube,smoothShading, alpha);
-				if (pickMode) 	gl.glPopName();
-			}
-		} else {
 			int  k, l;
 			DoubleArray da;
 			double[] mat = new double[16];
@@ -319,7 +280,6 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				}
 			}
 			if (pickMode) 	gl.glPopName();					
-		}
 		}
 		if (pickMode) gl.glPopName();
 		

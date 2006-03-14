@@ -160,6 +160,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
     vertexShader.setFrontBack(frontBack);
 	vertexShader.render(jrs);    	
     if (useGLSL)		{
+    	//if (frontBack == FRONT_AND_BACK)	gl.glDisable(GL.GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
+    	//else gl.glEnable(GL.GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
     	glslShader.render(jrs);
     } //else {
    // }

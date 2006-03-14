@@ -31,7 +31,7 @@ public class GlslDefaultPolygonShader extends SimpleJOGLShader {
 		boolean changed = true;
 
 		public GlslDefaultPolygonShader() {
-			super("standard3dlabs.vert","standard3dlabs.frag");
+			super("standard3dlabs.vert",null);
 		}
 
 

@@ -150,6 +150,7 @@ public class GeometryUtility {
 				double[] normal = Pn.polarizePlane(null, osculatingPlane,signature);					
 				Pn.setToLength(normal, normal, 1.0, signature);
 				normal[0] *= -1; normal[1] *= -1; normal[2] *= -1;
+				//Pn.dehomogenize(normal, normal);
 				System.arraycopy(normal, 0, fn[i], 0, normalLength);				
 			}
 		}
