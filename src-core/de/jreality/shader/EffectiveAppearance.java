@@ -1,7 +1,12 @@
 
 package de.jreality.shader;
 
+import java.util.Iterator;
+
 import de.jreality.scene.Appearance;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.SceneGraphPath;
 
 /**
  * Manages effective attributes.
@@ -19,12 +24,24 @@ public class EffectiveAppearance {
   {
     return new EffectiveAppearance(null, new Appearance());
   }
-
+  public static EffectiveAppearance create(SceneGraphPath p) {
+    EffectiveAppearance eap = create();
+    for (Iterator i = p.iterator(); i.hasNext(); ) {
+      SceneGraphNode n = (SceneGraphNode) i.next();
+      if (n instanceof SceneGraphComponent) {
+        SceneGraphComponent sgc = (SceneGraphComponent) n;
+        Appearance app = sgc.getAppearance();
+        if (app != null) eap = eap.create(app);
+      }
+    }
+    return eap;
+  }
+  
   public EffectiveAppearance create(Appearance app)
   {
     return new EffectiveAppearance(this, app);
   }
-
+  
   public Object getAttribute(String key, Object defaultValue)
   {
     return getAttribute(key, defaultValue, defaultValue.getClass());
