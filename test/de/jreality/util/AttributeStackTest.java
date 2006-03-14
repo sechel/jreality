@@ -8,6 +8,8 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import de.jreality.scene.Appearance;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.proxy.scene.SceneGraphComponent;
 import de.jreality.shader.EffectiveAppearance;
 
 /**
@@ -108,4 +110,34 @@ public class AttributeStackTest extends TestCase {
       stack.getAttribute("test", new Double(0.815), Number.class));
   }
 
+  public void testPathEffectiveAttributes() {
+    SceneGraphPath path = new SceneGraphPath();
+
+    SceneGraphComponent sgc = new SceneGraphComponent();
+    sgc.setAppearance(app1);
+    path.push(sgc);
+    
+    sgc.addChild(sgc = new SceneGraphComponent());
+    sgc.setAppearance(app2);
+    path.push(sgc);
+    
+    sgc.addChild(sgc = new SceneGraphComponent());
+    sgc.setAppearance(app3);
+    path.push(sgc);
+    
+    EffectiveAppearance eap = EffectiveAppearance.create(path);
+    
+    app1.setAttribute("hello", "world");
+    assertEquals(eap.getAttribute("hello", "failed"), stack.getAttribute("hello", "failed"));
+    app1.setAttribute("hello", Appearance.INHERITED);
+    assertEquals(eap.getAttribute("hello", "others"), stack.getAttribute("hello", "others"));
+    app1.setAttribute("hello", "overridden");
+    app2.setAttribute("hello", Appearance.DEFAULT);
+    assertEquals(eap.getAttribute("hello", "world"), stack.getAttribute("hello", "world"));
+    app3.setAttribute("hello", "others");
+    assertEquals(eap.getAttribute("hello", "others"), stack.getAttribute("hello", "others"));
+    app3.setAttribute("hello", Appearance.INHERITED);
+    assertEquals(eap.getAttribute("hello", "universe"), stack.getAttribute("hello", "universe"));
+  }
+  
 }
