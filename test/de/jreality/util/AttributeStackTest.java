@@ -8,8 +8,9 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import de.jreality.scene.Appearance;
+import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.proxy.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.EffectiveAppearance;
 
 /**
@@ -113,17 +114,19 @@ public class AttributeStackTest extends TestCase {
   public void testPathEffectiveAttributes() {
     SceneGraphPath path = new SceneGraphPath();
 
-    SceneGraphComponent sgc = new SceneGraphComponent();
-    sgc.setAppearance(app1);
-    path.push(sgc);
+    SceneGraphComponent sgc1 = new SceneGraphComponent();
+    sgc1.setAppearance(app1);
+    path.push(sgc1);
     
-    sgc.addChild(sgc = new SceneGraphComponent());
-    sgc.setAppearance(app2);
-    path.push(sgc);
+    SceneGraphComponent sgc2 = new SceneGraphComponent();
+    sgc1.addChild(sgc2);
+    sgc2.setAppearance(app2);
+    path.push(sgc2);
     
-    sgc.addChild(sgc = new SceneGraphComponent());
-    sgc.setAppearance(app3);
-    path.push(sgc);
+    SceneGraphComponent sgc3 = new SceneGraphComponent();
+    sgc2.addChild(sgc3);
+    sgc3.setAppearance(app3);
+    path.push(sgc3);
     
     EffectiveAppearance eap = EffectiveAppearance.create(path);
     
@@ -138,6 +141,46 @@ public class AttributeStackTest extends TestCase {
     assertEquals(eap.getAttribute("hello", "others"), stack.getAttribute("hello", "others"));
     app3.setAttribute("hello", Appearance.INHERITED);
     assertEquals(eap.getAttribute("hello", "universe"), stack.getAttribute("hello", "universe"));
+    
+    assertTrue(EffectiveAppearance.matches(eap, path));
+    
+    
+    SceneGraphPath p2 = path.popNew();
+    assertFalse(EffectiveAppearance.matches(eap, p2));
+    
+    SceneGraphPath longerPath = new SceneGraphPath();
+    SceneGraphComponent r = new SceneGraphComponent();
+    r.setAppearance(new Appearance());
+    longerPath.push(r);
+    for (Iterator i = path.iterator(); i.hasNext(); )
+      longerPath.push((SceneGraphNode) i.next());
+    
+    assertFalse(EffectiveAppearance.matches(eap, longerPath));
+    
+    SceneGraphPath shorterPath = new SceneGraphPath();
+
+    Iterator i = path.iterator();
+    for (i.next(); i.hasNext(); )
+      shorterPath.push((SceneGraphNode) i.next());
+
+    assertFalse(EffectiveAppearance.matches(eap, shorterPath));
+    
+    SceneGraphPath emptyPath = new SceneGraphPath();
+    assertFalse(EffectiveAppearance.matches(eap, emptyPath));
+    
+    SceneGraphPath differentPath = new SceneGraphPath();
+    differentPath.push(sgc2);
+    differentPath.push(sgc1);
+    differentPath.push(sgc3);
+    
+    assertFalse(EffectiveAppearance.matches(eap, differentPath));
+
+    differentPath.push(sgc2);
+    differentPath.push(sgc1);
+    differentPath.push(sgc3);
+   
+    assertFalse(EffectiveAppearance.matches(eap, differentPath));
+    
   }
   
 }

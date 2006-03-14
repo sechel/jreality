@@ -2,6 +2,7 @@
 package de.jreality.shader;
 
 import java.util.Iterator;
+import java.util.ListIterator;
 
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
@@ -93,4 +94,28 @@ public class EffectiveAppearance {
   {
     return ((Character)getAttribute(key, new Character(value))).charValue();
   }
+  
+  public static boolean matches(final EffectiveAppearance eap, final SceneGraphPath p) {
+    EffectiveAppearance ea=eap;
+    for (Iterator li = p.reverseIterator(); li.hasNext(); ) {
+      SceneGraphNode n = (SceneGraphNode) li.next();
+      if (n instanceof SceneGraphComponent) {
+        SceneGraphComponent sgc = (SceneGraphComponent) n;
+        Appearance app = sgc.getAppearance();
+        if (app != null) {
+          if (ea.app != app) return false;
+          ea = ea.parentApp; 
+        }
+      }
+    }
+    assert(ea != null); // must not happen since .create() 
+                                  // creates a new Appearance that
+                                  // nobody else can see
+    if (ea.parentApp != null) {
+      // eap has a non trivial prefix before path
+      return false;
+    }
+    return true;
+  }
+  
 }

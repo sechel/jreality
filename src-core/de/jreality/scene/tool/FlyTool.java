@@ -29,9 +29,11 @@ import java.util.List;
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
+import de.jreality.shader.EffectiveAppearance;
 
 /**
  * @author weissman
@@ -64,6 +66,8 @@ public class FlyTool extends Tool {
     return Collections.EMPTY_LIST;
   }
 
+  EffectiveAppearance eap;
+  
   private transient double[] tmp = new double[16];
   public void perform(ToolContext tc) {
 	if (tc.getSource() == forwardBackwardSlot) {
@@ -92,7 +96,13 @@ public class FlyTool extends Tool {
     double val = tc.getAxisState(timerSlot).intValue()*0.001;    
     Rn.times(dir, val*gain*velocity, dir);
     dir[3]=1;
-    MatrixBuilder.euclidean(shipMatrix).translate(dir).assignTo(ship);
+    
+    if (eap == null || !EffectiveAppearance.matches(eap, tc.getRootToToolComponent())) {
+      eap = EffectiveAppearance.create(tc.getRootToToolComponent());
+    }
+    int signature = eap.getAttribute("signature", Pn.EUCLIDEAN);
+    
+    MatrixBuilder.init(shipMatrix, signature).translate(dir).assignTo(ship);
   }
 
   public void activate(ToolContext tc) {
