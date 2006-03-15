@@ -173,8 +173,12 @@ public class AABBTree {
       ifs.addGeometryListener(new GeometryListener() {
         public void geometryChanged(GeometryEvent ev) {
           if (ev.getChangedVertexAttributes().contains(Attribute.COORDINATES)) {
-            AABBTree newAABB = constructVertexAABB(ifs, eps);
-            ifs.setGeometryAttributes("AABBTreeVertex", newAABB);
+            final AABBTree newAABB = constructVertexAABB(ifs, eps);
+            ev.enqueueWriter(new Runnable() {
+              public void run() {
+                ifs.setGeometryAttributes("AABBTreeVertex", newAABB);
+              }
+            });
           }
         }
       });
@@ -191,8 +195,12 @@ public class AABBTree {
       ifs.addGeometryListener(new GeometryListener() {
         public void geometryChanged(GeometryEvent ev) {
           if (ev.getChangedVertexAttributes().contains(Attribute.COORDINATES) || ev.getChangedEdgeAttributes().contains(Attribute.INDICES)) {
-            AABBTree newAABB = constructEdgeAABB(ifs, eps);
-            ifs.setGeometryAttributes("AABBTreeEdge", newAABB);
+            final AABBTree newAABB = constructEdgeAABB(ifs, eps);
+            ev.enqueueWriter(new Runnable() {
+              public void run() {
+                ifs.setGeometryAttributes("AABBTreeEdge", newAABB);
+              }
+            });
           }
         }
       });
