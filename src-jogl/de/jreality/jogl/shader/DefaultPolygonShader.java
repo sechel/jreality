@@ -10,10 +10,8 @@ import java.util.logging.Level;
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLDrawable;
 import de.jreality.jogl.JOGLConfiguration;
-import de.jreality.jogl.JOGLCylinderUtility;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
-import de.jreality.jogl.JOGLSphereHelper;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -189,16 +187,16 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		if (g != null)	{
 			if (g instanceof Sphere || g instanceof Cylinder)	{	
 				int i = 3;
-				if (jr.debugGL)	{
-					double lod = jr.openGLState.levelOfDetail;
-					i = JOGLSphereHelper.getResolutionLevel(jr.context.getObjectToNDC(), lod);
-				}
+//				if (jr.debugGL)	{
+//					double lod = jr.openGLState.levelOfDetail;
+//					i = JOGLSphereHelper.getResolutionLevel(jr.context.getObjectToNDC(), lod);
+//				}
 				int dlist;
 				if (g instanceof Sphere) dlist = jr.openGLState.getSphereDisplayLists(i);
 				else 			 dlist = jr.openGLState.getCylinderDisplayLists(i);
 				if (jr.pickMode) jr.globalGL.glPushName(JOGLPickAction.GEOMETRY_BASE);
-				if (jr.debugGL) 
-					jr.globalGL.glColor4fv(cdbg[i].getRGBComponents(null));
+//				if (jr.debugGL) 
+//					jr.globalGL.glColor4fv(cdbg[i].getRGBComponents(null));
 				jr.globalGL.glCallList(dlist);
 				if (jr.pickMode) jr.globalGL.glPopName();
 			}

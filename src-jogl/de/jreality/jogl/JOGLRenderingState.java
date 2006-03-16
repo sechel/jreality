@@ -95,7 +95,7 @@ public class JOGLRenderingState {
 	}
 	public int getSphereDisplayLists(int i) {
 		if (sphereDisplayLists == null) sphereDisplayLists = JOGLSphereHelper.getSphereDLists(renderer);
-		return 0;
+		return sphereDisplayLists[i];
 	}
 	public double getCurrentAlpha() {
 		return currentAlpha;
