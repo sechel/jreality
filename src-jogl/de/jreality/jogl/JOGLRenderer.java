@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
@@ -39,6 +38,7 @@ import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
+import de.jreality.scene.Cylinder;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -48,6 +48,7 @@ import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
+import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.event.AppearanceEvent;
@@ -551,6 +552,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		PointSet ps;
 		int refCount = 0;
 		int signature = Pn.EUCLIDEAN;
+		boolean isSurface = false;
 		
 		protected JOGLPeerGeometry(Geometry g)	{
 			super();
@@ -561,6 +563,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			if (g instanceof IndexedLineSet) ils = (IndexedLineSet) g;
 			if (g instanceof PointSet) ps = (PointSet) g;
 			originalGeometry.addGeometryListener(this);
+			if (ifs != null || g instanceof Sphere || g instanceof Cylinder) isSurface = true;
 		}
 		
 		public void dispose()		{
@@ -593,7 +596,7 @@ public class JOGLRenderer  implements AppearanceListener {
 				geometryShader.pointShader.postRender(openGLState);
 			}
 			renderingHints.render(openGLState);
-			if (geometryShader.isFaceDraw() && ifs != null) {
+			if (geometryShader.isFaceDraw() && isSurface) {
 				geometryShader.polygonShader.render(openGLState);
 				geometryShader.polygonShader.postRender(openGLState);
 			}	
@@ -876,7 +879,6 @@ public class JOGLRenderer  implements AppearanceListener {
 		JOGLPeerComponent parent;
 		int childIndex;
 		GoBetween goBetween;
-//		CachedGeometryInfo dlInfo = new CachedGeometryInfo();
 		
 		boolean isReflection = false, cumulativeIsReflection = false;
 		double determinant = 0.0;
@@ -1028,7 +1030,7 @@ public class JOGLRenderer  implements AppearanceListener {
 					}
 				}
 			}
-			if (thisAp == null && parent != null)	{
+			if (thisAp == null && goBetween.getOriginalComponent().getGeometry() == null && parent != null)	{
 				geometryShader = parent.geometryShader;
 				renderingHints = parent.renderingHints;
 			

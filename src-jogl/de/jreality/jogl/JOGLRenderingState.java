@@ -5,6 +5,9 @@
  */
 package de.jreality.jogl;
 
+import java.util.WeakHashMap;
+
+import de.jreality.jogl.JOGLRenderer.JOGLPeerComponent;
 import de.jreality.math.Pn;
 import de.jreality.scene.Geometry;
 import net.java.games.jogl.GL;

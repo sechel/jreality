@@ -45,7 +45,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	PolygonShader polygonShader = null;
 	Appearance a=new Appearance();
 	Texture2D tex=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a, true);
-  static Texture2D currentTex;
+	Texture2D currentTex;
 	double specularExponent = 60.0;
 	
 	/**
@@ -185,7 +185,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		GL gl = theCanvas.getGL();
 //		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
 			gl.glColor4fv( diffuseColorAsFloat);
-			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
+//			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
 //		}
 		
 		if (!sphereDraw)	{
