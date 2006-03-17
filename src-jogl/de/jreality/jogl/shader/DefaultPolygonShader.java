@@ -163,6 +163,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
     	glslShader.render(jrs);
     } //else {
    // }
+    jrs.setCurrentAlpha(vertexShader.getDiffuseColorAsFloat()[3]);
+    jrs.setSmoothShading(smoothShading);
 }
 	
 	private void testTextureResident(JOGLRenderer jr, GL gl) {
@@ -242,7 +244,30 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 			glslShader.postRender(jrs);
 	}
 
+    public static void defaultPolygonRender(JOGLRenderingState jrs)	{
+    	Geometry g = jrs.getCurrentGeometry();
+    	JOGLRenderer jr = jrs.getRenderer();
+    	
+		if (g instanceof Sphere || g instanceof Cylinder)	{	
+			int i = 3;
+//			if (jr.debugGL)	{
+//				double lod = jr.openGLState.levelOfDetail;
+//				i = JOGLSphereHelper.getResolutionLevel(jr.context.getObjectToNDC(), lod);
+//			}
+			int dlist;
+			if (g instanceof Sphere) dlist = jr.openGLState.getSphereDisplayLists(i);
+			else 			 dlist = jr.openGLState.getCylinderDisplayLists(i);
+			if (jr.pickMode) jr.globalGL.glPushName(JOGLPickAction.GEOMETRY_BASE);
+//			if (jr.debugGL) 
+//				jr.globalGL.glColor4fv(cdbg[i].getRGBComponents(null));
+			jr.globalGL.glCallList(dlist);
+			if (jr.pickMode) jr.globalGL.glPopName();
+		}
+		else if ( g instanceof IndexedFaceSet)	{
+			jr.helper.drawFaces((IndexedFaceSet) g, jrs.isSmoothShading(), jrs.getDiffuseColor()[3]);			
+		}
 
+    }
 	public void flushCachedState(JOGLRenderer jr) {
 		if (dList != -1) jr.globalGL.glDeleteLists(dList, 1);
 		if (dListProxy != -1) jr.globalGL.glDeleteLists(dListProxy,1);

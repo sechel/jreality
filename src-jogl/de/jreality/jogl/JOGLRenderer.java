@@ -203,9 +203,10 @@ public class JOGLRenderer  implements AppearanceListener {
 		// for pick mode the aspect ratio has to be set to that of the viewer component
 		if (pickMode) aspectRatio = CameraUtility.getAspectRatio(theViewer);
 		// load the camera transformation
-		globalGL.glMultTransposeMatrixd(CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), 
+		double[] c2ndc = CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), 
 				aspectRatio,
-				whichEye));
+				whichEye);
+		globalGL.glMultTransposeMatrixd(c2ndc);
 
 		
 		// prepare for rendering the geometry
@@ -217,7 +218,8 @@ public class JOGLRenderer  implements AppearanceListener {
 		globalGL.glLoadTransposeMatrixd(w2c);
 		globalIsReflection = (theViewer.isFlipped() != (Rn.determinant(w2c) < 0.0));
 
-		if (theRoot.getAppearance() != null) helper.handleSkyBox(theCanvas, theRoot.getAppearance(), globalHandle);
+		if (theRoot.getAppearance() != null) 
+			helper.handleSkyBox(theCanvas, theRoot.getAppearance(), globalHandle);
 		
 		if (!pickMode) processLights();
 		
@@ -225,6 +227,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		
 		nodeCount = 0;			// for profiling info
 		texResident=true;
+		currentPath.clear();
 		thePeerRoot.render();		
 		if (!pickMode && thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.render();
 		if (backSphere) globalGL.glPopMatrix();
@@ -393,7 +396,7 @@ public class JOGLRenderer  implements AppearanceListener {
 				//JOGLConfiguration.theLog.log(Level.INFO,"Picking "+frameCount);
 				double[] pp3 = new double[3];
 				pp3[0] = -pickScale * pickPoint[0]; pp3[1] = -pickScale * pickPoint[1]; pp3[2] = 0.0;
-				MatrixBuilder.euclidian().translate(pp3).scale(pickScale, pickScale, 1.0).assignTo(pickT);
+				MatrixBuilder.euclidean().translate(pp3).scale(pickScale, pickScale, 1.0).assignTo(pickT);
 				thePeerRoot.propagateGeometryChanged(POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
 				globalGL.glSelectBuffer(bufsize, selectBuffer);		
 				globalGL.glRenderMode(GL.GL_SELECT);
@@ -912,6 +915,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		
 		private void updateRenderRunnable() {
 			flushCachedInfo();
+			updateShaders();
 			if (goBetween.peerGeometry == null) renderGeometry = null;
 			else	renderGeometry = new Runnable() {
 				public void run() {
@@ -1030,11 +1034,27 @@ public class JOGLRenderer  implements AppearanceListener {
 					}
 				}
 			}
+			updateShaders();
+			int n = children.size();
+			for (int i = 0; i<n; ++i)	{		
+				JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
+				child.propagateAppearanceChanged();
+			}	
+			appearanceChanged=false;
+		}
+
+		/**
+		 * @param thisAp
+		 */
+		private void updateShaders() {
+//			 can happen that the effective appearance isn't initialized yet; skip
+			if (eAp == null) return;
+			Appearance thisAp = goBetween.getOriginalComponent().getAppearance(); 
 			if (thisAp == null && goBetween.getOriginalComponent().getGeometry() == null && parent != null)	{
 				geometryShader = parent.geometryShader;
 				renderingHints = parent.renderingHints;
 			
-			} else {
+			} else  {		
 				if (geometryShader == null)
 					geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
 				else 
@@ -1045,12 +1065,6 @@ public class JOGLRenderer  implements AppearanceListener {
 				else
 					renderingHints.setFromEffectiveAppearance(eAp, "");								
 			}
-			int n = children.size();
-			for (int i = 0; i<n; ++i)	{		
-				JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
-				child.propagateAppearanceChanged();
-			}	
-			appearanceChanged=false;
 		}
 		
 		public void childAdded(SceneGraphComponentEvent ev) {

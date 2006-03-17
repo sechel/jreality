@@ -268,7 +268,7 @@ public class CameraUtility {
 		cam.setViewPort(new Rectangle2D.Double(-xmin, -ymin, xmin+xmax, ymin+ymax));
 	}
 
-  public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath) {
+  public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath, double margin, int signature) {
     Rectangle3D bounds = GeometryUtility.calculateBoundingBox(scene.getLastComponent());
     if (bounds.isEmpty()) return;
     Matrix rootToScene = new Matrix();
@@ -279,14 +279,16 @@ public class CameraUtility {
     double radius = Math.sqrt(e[0]*e[0] + e[2]*e[2] + e[1]*e[1]);
     double [] c = avatarBounds.getCenter();
     c[2] += radius;
+    Rn.times(c, margin, c);
     // add head height to c[1]
     Matrix camMatrix = new Matrix();
     cameraPath.getInverseMatrix(camMatrix.getArray(), avatarPath.getLength());
     
-    ((Camera)cameraPath.getLastElement()).setFar(2*radius);
+    ((Camera)cameraPath.getLastElement()).setFar(margin*5*radius);
     ((Camera)cameraPath.getLastElement()).setNear(.002*radius);
     SceneGraphComponent avatar = avatarPath.getLastComponent();
-    MatrixBuilder.euclidean(avatar.getTransformation()).translate(c).translate(camMatrix.getColumn(3)).assignTo(avatar);
+    Matrix m = new Matrix(avatar.getTransformation());
+    MatrixBuilder.init(m, signature).translate(c).translate(camMatrix.getColumn(3)).assignTo(avatar);
   }
 
 }
