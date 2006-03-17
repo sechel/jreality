@@ -139,8 +139,6 @@ public class GeometryUtility {
 			if (indices[i].length < 3) continue;
 			if (signature == Pn.EUCLIDEAN)	{		
 				// not necessary but probably a bit faster
-				// assumes that the vertices are dehomogenized (last coord == 1) in case
-				// they are 4D
 				double[] v1 = Rn.subtract(null, verts[indices[i][1]], verts[indices[i][0]]);
 				double[] v2 = Rn.subtract(null, verts[indices[i][2]], verts[indices[i][0]]);
 				Rn.crossProduct(fn[i], v1,v2);
@@ -150,7 +148,6 @@ public class GeometryUtility {
 				double[] normal = Pn.polarizePlane(null, osculatingPlane,signature);					
 				Pn.setToLength(normal, normal, 1.0, signature);
 				normal[0] *= -1; normal[1] *= -1; normal[2] *= -1;
-				//Pn.dehomogenize(normal, normal);
 				System.arraycopy(normal, 0, fn[i], 0, normalLength);				
 			}
 		}

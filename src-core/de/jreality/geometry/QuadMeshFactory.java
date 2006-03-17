@@ -43,6 +43,20 @@ public class QuadMeshFactory extends AbstractQuadMeshFactory {
 	 * the number of v-lines (@link getVLineCount) and u-lines (@link getULineCount).
 	 */
 	public void setVertexCoordinates(double[][][] points) {
+		double[][] npoints = convertDDDtoDD(points);
+		setVertexCoordinates(npoints);
+	}
+
+	public void setVertexColors(double[][][] cs) {
+		double[][] ncs = convertDDDtoDD(cs);
+		setVertexColors(ncs);
+	}
+
+	/**
+	 * @param points
+	 * @return
+	 */
+	private double[][] convertDDDtoDD(double[][][] points) {
 		int lengthv = points.length;
 		int lengthu = points[0].length;
 		setMeshSize(lengthu, lengthv);
@@ -56,7 +70,7 @@ public class QuadMeshFactory extends AbstractQuadMeshFactory {
 				System.arraycopy(points[i][j], 0, npoints[i*lengthu+j],0,lengthf);
 			}
 		}
-		setVertexCoordinates(npoints);
+		return npoints;
 	}
 	
 	public void setVertexNormals( DataList data ) {

@@ -612,12 +612,22 @@ public class P3 extends Pn {
 		return mat;
 	}
 
-	public static double[] extractOrientationMatrix(double[] dst, double[] src, double[] point, int signature)	{
+	/**
+	 * Extract a matrix from the <i>src</i> input matrix, such that it fixes the input position <i>point</i>.
+	 * @param dst
+	 * @param src
+	 * @param point
+	 * @param signature
+	 * @return
+	 */public static double[] extractOrientationMatrix(double[] dst, double[] src, double[] point, int signature)	{
 		if (dst == null) dst = new double[16];
 
 		double[] image = Rn.matrixTimesVector(null, src, point);
 		double[] translate = P3.makeTranslationMatrix(null, image, signature);
-		return Rn.times(dst, Rn.inverse(null, translate), src );
+		Rn.times(dst, Rn.inverse(null, translate), src );
+//		System.out.println("The input matrix is "+Rn.matrixToString(src));
+//		System.out.println("The orientation matrix is "+Rn.matrixToString(dst));
+		return dst;
 	}
 	
 	private static double[] perpendicularBisector(double[] dst, double[] p1, double[]p2)	{
@@ -778,6 +788,7 @@ public class P3 extends Pn {
 			double[] point, 			// the positio of the anchor point in object coordinate system
 			int signature)	{
 		if (result == null) result = new double[16];
+		// TODO the following call perhaps should return a determinant-1 matrix (throw out scaling)
 	    double[] orientation = extractOrientationMatrix(null, cameraToObject, Pn.originP3, signature);
 	    double[] scale = makeStretchMatrix(null, xscale, yscale, 1.0);
 	    double[] offset = makeTranslationMatrix(null, xyzOffset, EUCLIDEAN);  
