@@ -41,6 +41,8 @@ import de.jreality.util.LoggingSystem;
  *
  */
 public class EncompassTool extends Tool {
+	
+	double margin = 1.0;		// value greater than one creates a margin around the encompassed object  
 
   transient List usedSlots = new LinkedList();
 
@@ -76,11 +78,18 @@ public class EncompassTool extends Tool {
       if (false) {
         CameraUtility.encompass(tc.getViewer());
       }
-      CameraUtility.encompass(tc.getToolSystem().getAvatarPath(), tc.getRootToLocal(), tc.getViewer().getCameraPath());
+      CameraUtility.encompass(tc.getToolSystem().getAvatarPath(), tc.getRootToLocal(), tc.getViewer().getCameraPath(), margin, tc.getViewer().getSignature());
     }
   }
 
   public void deactivate(ToolContext tc) {
   }
   
+  public void setMargin(double p)	{
+	  margin = p;
+  }
+  
+  public double getMargin()	{
+	  return margin;
+  }
 }
