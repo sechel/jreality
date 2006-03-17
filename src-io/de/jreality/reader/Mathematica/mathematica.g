@@ -89,7 +89,7 @@ pointBlock :
 		psf.setVertexCoordinates(data);
 		SceneGraphComponent geo=new SceneGraphComponent();
 		current.addChild(geo);
-		//geo.setGeometry(psf);
+		geo.setGeometry(psf.getPointSet());
 	}
 	;  
 
@@ -130,24 +130,19 @@ lineBlock :				// liest erst eine, dann alle direkt folgenden Lines ein
 	 CLOSE_BRACKET 
 	)*
 	{
-		double [] data= new double[coordinates.size()*3];
-		for(int i=0;i<coordinates.size();i++){				// Punkte zum flachen DoubleArray machen
-			data[i*3]=((double[])coordinates.get(i))[0];
-			data[i*3+1]=((double[])coordinates.get(i))[1];
-			data[i*3+2]=((double[])coordinates.get(i))[2];
+			double[][] data= new double[coordinates.size()][];
+			for(int i=0;i<coordinates.size();i++)
+				data[i]= (double[])coordinates.get(i);
+			int[][] indices= new int[linesIndices.size()][];
+			for(int i=0;i<linesIndices.size();i++)		// Indices als doppelListe von Doubles machen
+				indices[i]=(int [])linesIndices.get(i);
+			SceneGraphComponent geo=new SceneGraphComponent();	// Komponenten erstellen und einhaengen
+			current.addChild(geo);
+			IndexedLineSetFactory lineset=new IndexedLineSetFactory();
+			lineset.setVertexCoordinates(data);
+			lineset.setEdgeIndices(indices);
+			geo.setGeometry(lineset.getIndexedLineSet());
 		}
-		int[][] indices= new int[linesIndices.size()][];
-		for(int i=0;i<linesIndices.size();i++)		// Indices als doppelListe von Doubles machen
-			indices[i]=(int [])linesIndices.get(i);
-		SceneGraphComponent geo=new SceneGraphComponent();	// Komponenten erstellen und einhaengen
-		current.addChild(geo);
-		IndexedLineSet lineset=new IndexedLineSet();
-		lineset.setVertexCountAndAttributes(Attribute.COORDINATES,
-				new DoubleArrayArray.Inlined(data, 3));
-		lineset.setEdgeCountAndAttributes(Attribute.INDICES,
-				new IntArrayArray.Array(indices));
-		geo.setGeometry(lineset);
-	}
 	;  
 
 protected

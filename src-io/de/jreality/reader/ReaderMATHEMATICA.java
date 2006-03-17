@@ -51,6 +51,7 @@ public class ReaderMATHEMATICA extends AbstractReader {
       
       Expression parse = new Expression(parser, "start", null);
       root = (SceneGraphComponent) parse.getValue();
+      
     } catch (ClassNotFoundException e) {
       LoggingSystem.getLogger(this).severe("Mathematica parsing failed, call ANTLR first!");
       e.printStackTrace();
@@ -68,5 +69,5 @@ public class ReaderMATHEMATICA extends AbstractReader {
       LoggingSystem.getLogger(this).severe("parsing "+input+" failed: "+e.getMessage());
     }
   }
-
+  
 }

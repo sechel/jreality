@@ -85,8 +85,6 @@ public class XStreamFactory {
     try {
 		knownClasses.add(Class.forName("de.jreality.scene.tool.PortalHeadMoveTool"));
 	} catch (ClassNotFoundException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
 	}
   }
   
