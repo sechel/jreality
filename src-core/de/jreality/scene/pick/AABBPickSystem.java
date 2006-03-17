@@ -25,7 +25,7 @@ public class AABBPickSystem implements PickSystem {
   
   private Comparator cmp = new Hit.HitComparator();
   
-  final boolean defaultBuildTree=true;
+  static boolean defaultBuildTree=true;
   
   private double[] from;
   private double[] to;
@@ -103,7 +103,7 @@ public class AABBPickSystem implements PickSystem {
       
       localHits.clear();
       
-      BruteForcePicking.intersectSphere(Pn.EUCLIDEAN, m, from, to, localHits);
+      BruteForcePicking.intersectSphere(signature, path, from, to, localHits);
       AABBPickSystem.this.hits.addAll(localHits);
     };
     
@@ -112,7 +112,7 @@ public class AABBPickSystem implements PickSystem {
       
       localHits.clear();
       
-      BruteForcePicking.intersectCylinder(Pn.EUCLIDEAN, m, from, to, localHits);
+      BruteForcePicking.intersectCylinder(signature, path, from, to, localHits);
       AABBPickSystem.this.hits.addAll(localHits);
     };
     
@@ -134,7 +134,7 @@ public class AABBPickSystem implements PickSystem {
       localHits.clear();
       
       if (tree == null) {
-        BruteForcePicking.intersectPolygons(ifs, signature, m, from, to, localHits);
+        BruteForcePicking.intersectPolygons(ifs, signature, path, from, to, localHits);
         AABBPickSystem.this.hits.addAll(localHits);
       } else {
         tree.intersect(m, fromEuclidean, dirEuclidean, localHits);
@@ -152,7 +152,7 @@ public class AABBPickSystem implements PickSystem {
       localHits.clear();
 
       if (tree == null) {
-        BruteForcePicking.intersectEdges(ils, signature, m, from, to, tubeRadius, localHits);
+        BruteForcePicking.intersectEdges(ils, signature, path, from, to, tubeRadius, localHits);
         AABBPickSystem.this.hits.addAll(localHits);
       } else {
         tree.intersect(m, fromEuclidean, dirEuclidean, localHits);
@@ -169,7 +169,7 @@ public class AABBPickSystem implements PickSystem {
       localHits.clear();
 
       if (tree == null) {
-        BruteForcePicking.intersectPoints(ps, signature, m, from, to, pointRadius, localHits);
+        BruteForcePicking.intersectPoints(ps, signature, path, from, to, pointRadius, localHits);
         AABBPickSystem.this.hits.addAll(localHits);        
       } else {
         tree.intersect(m, fromEuclidean, dirEuclidean, localHits);

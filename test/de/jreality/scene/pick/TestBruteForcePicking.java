@@ -36,7 +36,7 @@ public class TestBruteForcePicking implements Runnable{
 		MatrixBuilder.euclidean().translate(1,1,1).scale(1.5).assignTo(cmpSp);
 		MatrixBuilder.euclidean().translate(-1,1,1).assignTo(cmpCyl);
 		
-		//cmpCH.setGeometry(ch);
+		cmpCH.setGeometry(ch);
 		cmpSp.setGeometry(sp);
 		cmpCyl.setGeometry(cyl);
 		
