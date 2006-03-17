@@ -36,6 +36,8 @@ public class AABBPickSystem implements PickSystem {
   }
   
   public List computePick(double[] from, double[] to) {
+    this.from=from;
+    this.to=to;
     if (to.length < 4 || to[3] == 0) return computePickImpl(from, to, 1000);
     double[] dir = new double[3];
     if (from.length > 3) P3.dehomogenize(from, from);
@@ -43,8 +45,6 @@ public class AABBPickSystem implements PickSystem {
     dir[0] = to[0]-from[0];
     dir[1] = to[1]-from[1];
     dir[2] = to[2]-from[2];
-    this.from=from;
-    this.to=to;
     return computePickImpl(from, dir, Rn.euclideanNorm(dir));
   }
   
