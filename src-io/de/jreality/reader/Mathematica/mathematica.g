@@ -27,12 +27,14 @@ options {
 }
 
 
-start 
+start returns [SceneGraphComponent r]
+{ r = null;}
 	:"Graphics3D"
 	  OPEN_BRACKET  
 	  	object
 	  	(optionen)? 
 	  CLOSE_BRACKET 
+		{ r = root; }
 	;
 
 // Objects ---------------------------------------------
