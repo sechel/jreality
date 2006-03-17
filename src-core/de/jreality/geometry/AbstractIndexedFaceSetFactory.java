@@ -380,16 +380,17 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 			}
 		}
 		
-		if( generateFaceLabels ) { 
-			if( nodeWasUpdated(faceLabels) ) { 
-				log( "set", Attribute.LABELS, "labels");
-				ifs.setFaceAttributes(Attribute.LABELS, StorageModel.STRING_ARRAY.createReadOnly(faceLabels()));
-			} 
-		} else if( ifs.getFaceAttributes().containsAttribute(Attribute.LABELS ) ) {
-			log( "cancle", Attribute.LABELS, "labels");
-			ifs.setVertexAttributes(Attribute.LABELS, null );
+		if( !faceDLS.containsAttribute(Attribute.LABELS) ) {
+			if( generateFaceLabels ) { 
+				if( nodeWasUpdated(faceLabels) ) { 
+					log( "set", Attribute.LABELS, "labels");
+					ifs.setFaceAttributes(Attribute.LABELS, StorageModel.STRING_ARRAY.createReadOnly(faceLabels()));
+				} 
+			} else if( ifs.getFaceAttributes().containsAttribute(Attribute.LABELS ) ) {
+				log( "cancle", Attribute.LABELS, "labels");
+				ifs.setVertexAttributes(Attribute.LABELS, null );
+			}
 		}
-		
 	}
 
 	

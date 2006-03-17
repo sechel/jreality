@@ -262,15 +262,16 @@ class AbstractPointSetFactory {
 			ps.setVertexCountAndAttributes(vertexDLS);		
 		}
 		
-
-		if( generateVertexLabels ) { 
-			if( nodeWasUpdated(vertexLabels) ) { 
-				log( "set", Attribute.LABELS, "labels");
-				ps.setVertexAttributes(Attribute.LABELS, StorageModel.STRING_ARRAY.createReadOnly(vertexLabels()));
-			} 
-		} else if( ps.getVertexAttributes().containsAttribute(Attribute.LABELS ) ) {
-			log( "cancle", Attribute.LABELS, "labels");
-			ps.setVertexAttributes(Attribute.LABELS, null );
+		if( !vertexDLS.containsAttribute(Attribute.LABELS) ) {
+			if( generateVertexLabels ) { 
+				if( nodeWasUpdated(vertexLabels) ) { 
+					log( "set", Attribute.LABELS, "labels");
+					ps.setVertexAttributes(Attribute.LABELS, StorageModel.STRING_ARRAY.createReadOnly(vertexLabels()));
+				} 
+			} else if( ps.getVertexAttributes().containsAttribute(Attribute.LABELS ) ) {
+				log( "cancle", Attribute.LABELS, "labels");
+				ps.setVertexAttributes(Attribute.LABELS, null );
+			}
 		}
 		
 	}
