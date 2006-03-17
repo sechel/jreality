@@ -180,6 +180,9 @@
 	  <antlr target="${io}/de/jreality/reader/vrml/vrml-v2.0.g">
 	    <classpath refid="io.classpath"/>
 	  </antlr>
+	  <antlr target="${io}/de/jreality/reader/Mathematica/mathematica.g">
+	    <classpath refid="io.classpath"/>
+	  </antlr>
     <javac excludesfile="excludes.txt" srcdir="${io}" destdir="${build}/io" debug="true">
       <compilerarg line="-source 1.4"/>
       <classpath refid="io.classpath"/>
