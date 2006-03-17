@@ -509,11 +509,18 @@ public class AABBTree {
 
         TreePolygon(double[][] verts, int index) {
           this.verts = verts;
-          this.index=index;
+          // handle 4-vectors
+          if (verts[0].length == 4)	
+        	  this.verts = Pn.dehomogenize(new double[verts.length][3], verts);
+        
+           this.index=index;
         }
         TreePolygon(double[][] verts, int index, int subIndex) {
           this.verts = verts;
-          this.index=index;
+          if (verts[0].length == 4)	
+        	  this.verts = Pn.dehomogenize(new double[verts.length][3], verts);
+       
+         this.index=index;
           this.subIndex=subIndex;
         }
 
