@@ -22,17 +22,19 @@
  */
 package de.jreality.reader;
 
+import java.beans.Expression;
 import java.io.IOException;
-import java.io.LineNumberReader;
-import java.io.Reader;
-import java.io.StreamTokenizer;
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.util.Input;
+import de.jreality.util.LoggingSystem;
 
 /**
  *
- * simple reader for the Mathematica [SurfaceGraphics,...] file format. 
+ * reader for the Mathematica [SurfaceGraphics,...] file format. 
  * 
  * @author gonska
  *
@@ -40,52 +42,31 @@ import de.jreality.util.Input;
 public class ReaderMATHEMATICA extends AbstractReader {
 
   public void setInput(Input input) throws IOException {
-    super.setInput(input);
-    load();
-  }
-
-  private StreamTokenizer globalSyntax(StreamTokenizer st) {
-    st.resetSyntax();
-    st.eolIsSignificant(true);
-    st.wordChars('0', '9');
-    st.wordChars('A', 'Z');
-    st.wordChars('a', 'z');
-    st.wordChars('_', '_');
-    st.wordChars('.', '.');
-    st.wordChars('-', '-');
-    st.wordChars('+', '+');
-    st.wordChars('*', '*');
-    st.wordChars('^', '^');
-    st.wordChars('\u00A0', '\u00FF');
-    st.whitespaceChars('\u0000', '\u0020');
-    st.commentChar('#');
-    st.ordinaryChar('/');
-    //st.parseNumbers();
-    return st;
-  }
-
-  private void load() throws IOException {
-    StreamTokenizer st = new StreamTokenizer(input.getReader());
-    globalSyntax(st);
-    System.out.println("Start reading...");
-    
-    root = new SceneGraphComponent();
-    
-    // add content to root!
-    while (st.nextToken() != StreamTokenizer.TT_EOF) {
-      if (st.ttype == StreamTokenizer.TT_WORD) {
-        System.out.println("word="+st.sval);
-      }
-//      else if (st.ttype == StreamTokenizer.TT_NUMBER) {
-//        System.out.println("number="+st.nval);
-//      }
-      else if (st.ttype == StreamTokenizer.TT_EOL) {
-        continue;
-      } else {
-        System.out.println("unknown="+st.ttype);
-      }
-    } 
-    System.out.println("...finish reading!");
+    try {
+      Constructor lexC = Class.forName("de.jreality.reader.Mathematica.MathematicaLexer").getConstructor(new Class[]{InputStream.class});
+      Object lexer = lexC.newInstance(new Object[]{input.getInputStream()});
+      
+      Constructor parseC = Class.forName("de.jreality.reader.Mathematica.MathematicaParser").getConstructor(new Class[]{Class.forName("antlr.TokenStream")});
+      Object parser = parseC.newInstance(new Object[]{lexer});
+      
+      Expression parse = new Expression(parser, "start", null);
+      root = (SceneGraphComponent) parse.getValue();
+    } catch (ClassNotFoundException e) {
+      LoggingSystem.getLogger(this).severe("Mathematica parsing failed, call ANTLR first!");
+      e.printStackTrace();
+    } catch (NoSuchMethodException e) {
+      throw new Error();
+//    } catch (IllegalArgumentException e) {
+//      throw new Error();
+    } catch (InstantiationException e) {
+      throw new Error();
+    } catch (IllegalAccessException e) {
+      throw new Error();
+    } catch (InvocationTargetException e) {
+      throw new Error();
+    } catch (Exception e) {
+      LoggingSystem.getLogger(this).severe("parsing "+input+" failed: "+e.getMessage());
+    }
   }
 
 }
