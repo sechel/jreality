@@ -313,10 +313,9 @@ if(false) {
       // distance from ray
       Hit hit1 = (Hit) o1;
       Hit hit2 = (Hit) o2;
-      double a = hit1.getDistRay();
-      double b = hit2.getDistRay();
-      if (a>b) return 1;
-      return b>a ? -1:0;
+      double a = hit1.getDist();
+      double b = hit2.getDist();
+      return a>b ? 1 : b>a ? -1:0;
       
     }
   }
