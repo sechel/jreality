@@ -85,6 +85,7 @@ import de.jreality.scene.tool.config.ToolSystemConfiguration;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.TextureUtility;
+import de.jreality.ui.beans.InspectorPanel;
 import de.jreality.ui.treeview.JListRenderer;
 import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
 import de.jreality.util.Input;

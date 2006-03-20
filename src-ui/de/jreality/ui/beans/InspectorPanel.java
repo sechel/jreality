@@ -20,7 +20,7 @@
  * Boston, MA 02111-1307
  * USA 
  */
-package de.jreality.ui.viewerapp;
+package de.jreality.ui.beans;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -65,7 +65,7 @@ public class InspectorPanel extends JPanel
   ArrayList editors, properties;
   ChangeListener listener;//XXX hack
 
-  InspectorPanel()
+  public InspectorPanel()
   {
     super(new BorderLayout());
   }
