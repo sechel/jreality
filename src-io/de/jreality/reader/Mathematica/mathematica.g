@@ -24,17 +24,28 @@ options {
 	// this is what is returned from the parsing process
 	public SceneGraphComponent root = new SceneGraphComponent();	
 	SceneGraphComponent current = root;
+	Appearance globalApp =new Appearance();
 }
 
 
 start returns [SceneGraphComponent r]
-{ r = null;}
+{ r = null;
+	root.setAppearance(globalApp);
+	globalApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
+		globalApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
+		globalApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
+		globalApp.setAttribute(CommonAttributes.POINT_RADIUS, .1);
+		globalApp.setAttribute(CommonAttributes.POINT_SIZE, 5);
+		
+		globalApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
+		globalApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
+}
 	:"Graphics3D"
 	  OPEN_BRACKET  
 	  	object
 	  	(optionen)? 
 	  CLOSE_BRACKET 
-		{ r = root; }
+		{ r = root;}
 	;
 
 // Objects ---------------------------------------------
@@ -65,8 +76,9 @@ objectList
 	;	
 	
 protected
-pointBlock :
+pointBlock 
 {Vector points= new Vector(); double[] v;}
+	:
 	"Point"
 	 OPEN_BRACKET
 				{v=new double[3];}
@@ -86,7 +98,9 @@ pointBlock :
 		double[][] data = new double [points.size()][];
 		for(int i=0;i<points.size();i++)
 			data[i]=(double [])points.get(i);
+		psf.setVertexCount(points.size());
 		psf.setVertexCoordinates(data);
+		psf.update();
 		SceneGraphComponent geo=new SceneGraphComponent();
 		current.addChild(geo);
 		geo.setGeometry(psf.getPointSet());
@@ -94,13 +108,13 @@ pointBlock :
 	;  
 
 protected
-lineBlock :				// liest erst eine, dann alle direkt folgenden Lines ein
+lineBlock				// liest erst eine, dann alle direkt folgenden Lines ein
 {Vector coordinates= new Vector();			// alle Punkte in einer Liste
  Vector line=new Vector();					// alle Punkte einer Linie
  int count=0;								// Anzahl aller bisher gesammelten Punkte
  int[] lineIndices;							// liste aller Indices einer Linie
  Vector linesIndices= new Vector();}		// Liste aller IndiceeListen
- 
+ :
 	"Line"
 	 OPEN_BRACKET
 				line=lineset 			// das ist ein Vector von double[3]
@@ -115,14 +129,14 @@ lineBlock :				// liest erst eine, dann alle direkt folgenden Lines ein
 				}
 	 CLOSE_BRACKET 
 	(
-	 COLLON "Line"
+	 COLLON "Line"	
 	 OPEN_BRACKET
 				line=lineset 			// das ist ein Vector von double[3]
 				{
 					lineIndices=new int[line.size()];
 					for(int i=0;i<line.size();i++){			// mithilfe von 'count' weiterzaehlen
-						coordinates.add(line.get(i));  //Punkte zu einer Liste machen
-				    	lineIndices[i]=i+count;			   // indizirung merken
+						coordinates.add(line.get(i));  		//Punkte zu einer Liste machen
+				    	lineIndices[i]=i+count;			    // indizirung merken
 				    }
 			    	count+=line.size();
 					linesIndices.add(lineIndices);
@@ -131,16 +145,23 @@ lineBlock :				// liest erst eine, dann alle direkt folgenden Lines ein
 	)*
 	{
 			double[][] data= new double[coordinates.size()][];
-			for(int i=0;i<coordinates.size();i++)
+			
+			for(int i=0;i<coordinates.size();i++){
 				data[i]= (double[])coordinates.get(i);
+			}
 			int[][] indices= new int[linesIndices.size()][];
-			for(int i=0;i<linesIndices.size();i++)		// Indices als doppelListe von Doubles machen
+			
+			for(int i=0;i<linesIndices.size();i++){		// Indices als doppelListe von Doubles machen
 				indices[i]=(int [])linesIndices.get(i);
+			}
 			SceneGraphComponent geo=new SceneGraphComponent();	// Komponenten erstellen und einhaengen
 			current.addChild(geo);
 			IndexedLineSetFactory lineset=new IndexedLineSetFactory();
-			lineset.setVertexCoordinates(data);
+			lineset.setLineCount(linesIndices.size());
+			lineset.setVertexCount(coordinates.size());
 			lineset.setEdgeIndices(indices);
+			lineset.setVertexCoordinates(data);
+			lineset.update();
 			geo.setGeometry(lineset.getIndexedLineSet());
 		}
 	;  
@@ -247,6 +268,7 @@ text
 				CLOSE_BRACKET 
 					{t=s.getText();}
 	;
+	
 protected
 vektor returns[double[] res]
 {res =new double [3];
@@ -279,7 +301,7 @@ directiveBlock
 protected 
 directive[Appearance appGiven] returns [Appearance app]
 {app = appGiven;}
-	:"AbsoluteDashing" OPEN_BRACKET  "{......}" CLOSE_BRACKET 
+	:"AbsoluteDashing" OPEN_BRACKET  dumb CLOSE_BRACKET 
 	|"AbsolutePointsize" 
 				OPEN_BRACKET
 					{int d=0;} d=integerthing 
@@ -295,9 +317,9 @@ directive[Appearance appGiven] returns [Appearance app]
 					c=doublething m=doublething y=doublething k=doublething 
 				CLOSE_BRACKET 
 					{}
-	|"Dashing" OPEN_BRACKET "{w1,...}" CLOSE_BRACKET // speziell
-	|"EdgeForm" OPEN_BRACKET spec CLOSE_BRACKET 	// speziell
-	|"FaceForm" OPEN_BRACKET spec CLOSE_BRACKET 	// speziell
+	|"Dashing" OPEN_BRACKET dumb CLOSE_BRACKET
+	|"EdgeForm" OPEN_BRACKET dumb CLOSE_BRACKET
+	|"FaceForm" OPEN_BRACKET dumb CLOSE_BRACKET
 	|"GrayLevel" OPEN_BRACKET 
 					{double i=0;} i=doublething 
 				CLOSE_BRACKET 
@@ -324,8 +346,8 @@ directive[Appearance appGiven] returns [Appearance app]
 				CLOSE_BRACKET 
 					{}
 	|"SurfaceColor" OPEN_BRACKET
-					spec // -> dcol |dcol,scol|dcol,scol,n // komnpliziert !!!
-				CLOSE_BRACKET 
+							dumb
+					CLOSE_BRACKET 
 	|"Thickness" OPEN_BRACKET 
 					{double w=0;} w=doublething
 				CLOSE_BRACKET 
@@ -336,9 +358,11 @@ directive[Appearance appGiven] returns [Appearance app]
 protected
 optionen
 	: COLLON 
-	  OPEN_BRACE 
-	  		( option (COLLON option)* )? 
-	  CLOSE_BRACE
+//
+		dumb
+//	  OPEN_BRACE 
+//	  		( option (COLLON option)* )? 
+//	  CLOSE_BRACE
 	;
 
 protected
@@ -388,37 +412,16 @@ optionPrimitive
 	;
 	
 	
-	
 integerthing returns[int i]
 {i=0;}
-	: s:INTLINE {i=Integer.parseInt(s.getText());}
+	: s:DOUBLETHING {i=Integer.parseInt(s.getText());}
 	;
 	
 doublething returns[double d]
-{
- d=0;
- int i=0;
- double dez=0;
- int e=0;
- }
-
-	: (s:INTLINE 
-			{i=Integer.parseInt(s.getText());}
-	  )?
-	  (DOT 
-	  	(s2:INTLINE 
-	  		{
-	  		 dez=Integer.parseInt(s2.getText());
-	  		 dez=dez/(Math.pow(10,s2.getText().length()));
-	  	})? 
-	  )?
-
-	  (	STARHAD s3:INTLINE 
-	  		{e=Integer.parseInt(s3.getText());}
-	  )?
-		  	{d=(i+dez)*Math.pow(10,e);}
-	;
-	
+	{d=0; double e=0;}
+    : s:DOUBLE_THING {d=Double.parseDouble(s.getText());}
+      (s2:EXPONENT_THING {e=Double.parseDouble(s2.getText()); d=d*Math.pow(10,e);})?
+    ;
 	
 protected 
 spec
@@ -428,12 +431,27 @@ spec
 	| OptionPrimitive
 	;
 	
+	
+protected
+dumb:
+			(~(  OPEN_BRACE
+			   | OPEN_BRACKET 
+			   | CLOSE_BRACE 
+			   | CLOSE_BRACKET) )*
+			(  OPEN_BRACE   (dumb)* CLOSE_BRACE 
+			 | OPEN_BRACKET (dumb)* CLOSE_BRACKET )
+	  ;
+	
+	
 // Doubles werden hier geparst!	
 // Integers unten gelext!
+// Problem: ein Integer sieht bis zum Ende aus wie ein Double !!!!!
+// Moeglichkeit: es gibt nur Doubles Integers koennen aus doubles geparst werden!!!!!
+
 /** **********************************************************************************
  * The Mathematica Lexer
  ************************************************************************************
- */
+*/
 class MathematicaLexer extends Lexer;
 options {
 	k=2;
@@ -448,8 +466,6 @@ CLOSE_BRACKET:	']';
 PFEIL :			"->";
 PFEIL_NACH :	":>";
 COLLON:			',';
-DOT:			'.';
-STARHAD:		"*^";
 
 ID
 options {
@@ -464,14 +480,18 @@ ID_LETTER:
 	('a'..'z'|'A'..'Z'|'_'|'0'..'9')
 	;
 
-
-
-
-	
-INTLINE
-	: ('-'|'+'!)? (DIGIT)+
+DOUBLE_THING
+	: ('-' | '+'!)?
+	  ( 
+	  	  (DIGIT)+ ('.' (DIGIT)* )?
+		| '.' (DIGIT)+	
+	  )
 	;
-
+	
+EXPONENT_THING
+	: "*^"! ('-'|'+'!)? (DIGIT)+
+	;
+	
 protected
 DIGIT:
 	('0'..'9')
@@ -499,4 +519,3 @@ WS_:
 			{newline(); } )	
 		)+ { $setType(Token.SKIP); }
 ;
-	
