@@ -343,7 +343,7 @@ public class JOGLRendererHelper {
 	}
 
 	public void drawPointLabels(PointSet ps, DefaultTextShader ts) {
-		if (!ts.getActive().booleanValue())
+		if (!ts.getShowLabels().booleanValue())
 			return;
 
 		Font font = ts.getFont();
@@ -358,7 +358,7 @@ public class JOGLRendererHelper {
 	}
 
 	public void drawEdgeLabels(IndexedLineSet ils, DefaultTextShader ts) {
-		if (!ts.getActive().booleanValue())
+		if (!ts.getShowLabels().booleanValue())
 			return;
 
 		Font font = ts.getFont();
@@ -374,7 +374,7 @@ public class JOGLRendererHelper {
 	}
 
 	public void drawFaceLabels(IndexedFaceSet ifs, DefaultTextShader ts) {
-		if (!ts.getActive().booleanValue())
+		if (!ts.getShowLabels().booleanValue())
 			return;
 		Font font = ts.getFont();
 		Color c = ts.getDiffuseColor();

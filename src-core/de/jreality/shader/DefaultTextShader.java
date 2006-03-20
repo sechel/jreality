@@ -12,7 +12,7 @@ public interface DefaultTextShader extends TextShader {
 	
 	final static Font FONT_DEFAULT = new Font("Sans Serif",Font.PLAIN,12);
 	final static double[] OFFSET_DEFAULT = new double[]{0,0,0,1};
-	final static boolean active = true;
+	final static Boolean SHOW_LABELS_DEFAULT = Boolean.TRUE;
   
 	Color getDiffuseColor();
 	void setDiffuseColor(Color c);
@@ -26,7 +26,13 @@ public interface DefaultTextShader extends TextShader {
 	  double[] getOffset();
 	  void setOffset(double[] o);
 		
-	  Boolean getActive();
-	  void setActive(boolean b);
+    /**
+     * @deprecated
+     */
+	  Boolean getShowLabels();
+    /**
+     * @deprecated
+     */
+	  void setShowLabels(Boolean b);
 		
 }
