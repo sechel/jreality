@@ -1,5 +1,5 @@
 /*
- * $Id: IndexedSomethingSets.java,v 1.5 2005/08/05 10:22:28 pinkall Exp $
+ * $Id: IndexedSomethingSets.java,v 1.6 2006/03/21 08:02:27 gunn Exp $
  * 
  * A short illustration of how to use Indexed*Set.
  * 
@@ -84,8 +84,8 @@ public class IndexedSomethingSets {
         cameraNode.setCamera(camera);
         lightNode.setLight(light);
         
-        MatrixBuilder.euclidian().translate(0, 0, 4).assignTo(cameraNode);
-        MatrixBuilder.euclidian().rotate(-Math.PI/4, 1, 1, 0).assignTo(lightNode);
+        MatrixBuilder.euclidean().translate(0, 0, 4).assignTo(cameraNode);
+        MatrixBuilder.euclidean().rotate(-Math.PI/4, 1, 1, 0).assignTo(lightNode);
 
     	Appearance rootApp= new Appearance();
         rootApp.setAttribute(CommonAttributes.BACKGROUND_COLOR, new Color(0f, .1f, .1f));

@@ -346,6 +346,6 @@ public class AseGeom extends AseNode {
          * Sets up a translation so that the objects will be in their correct palces.
          *
          */
-        MatrixBuilder.euclidian().translate(translation.x, translation.y, translation.z).assignTo(group);
+        MatrixBuilder.euclidean().translate(translation.x, translation.y, translation.z).assignTo(group);
     }
 }

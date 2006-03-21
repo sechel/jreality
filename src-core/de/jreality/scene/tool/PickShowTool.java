@@ -53,7 +53,7 @@ public class PickShowTool extends Tool {
       return;
     }
     double[] worldCoordinates = pr.getWorldCoordinates();
-    MatrixBuilder.euclidian().translate(worldCoordinates).assignTo(c);
+    MatrixBuilder.euclidean().translate(worldCoordinates).assignTo(c);
   }
 
   public void deactivate(ToolContext tc) {

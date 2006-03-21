@@ -38,7 +38,7 @@ public class VirtualRotationAboutAxis implements VirtualDevice {
   InputSlot angle;
   InputSlot out;
   
-  MatrixBuilder mb = MatrixBuilder.euclidian();
+  MatrixBuilder mb = MatrixBuilder.euclidean();
   DoubleArray da = new DoubleArray(mb.getMatrix().getArray());
   
   double[] axis;

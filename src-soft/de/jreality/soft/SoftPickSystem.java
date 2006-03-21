@@ -112,7 +112,7 @@ public class SoftPickSystem implements PickSystem {
 //        VecMat.assignRotationX(tmp,disk[3]+Math.PI/2.);
 //        t.multiplyOnRight(tmp);
         
-        MatrixBuilder mb = MatrixBuilder.euclidian();
+        MatrixBuilder mb = MatrixBuilder.euclidean();
         mb.translate(foot[0],foot[1],foot[2]);
         mb.rotateFromTo(new double[] {0,0,-1},direction);
         //cameraWorld.resetMatrix();

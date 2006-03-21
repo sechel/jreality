@@ -205,7 +205,7 @@ public class ToolRotateTool extends Tool {
   public void setOffset(double[] offset) {
     if (offset.length != 3 && offset.length != 4) throw new IllegalArgumentException("not a translation vector!");
     this.offset = offset;
-    MatrixBuilder.euclidian()
+    MatrixBuilder.euclidean()
     .translate(offset)
     .assignTo(displayComponent);
   }

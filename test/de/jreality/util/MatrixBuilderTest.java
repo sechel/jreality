@@ -42,7 +42,7 @@ public class MatrixBuilderTest extends TestCase {
 
   public void testOne() {
     OldTransformation o = new OldTransformation();
-    Matrix m = MatrixBuilder.euclidian()
+    Matrix m = MatrixBuilder.euclidean()
     .translate(3,3,3)
     .rotate(Math.PI, new double[]{-3,3,0})
     .translate(3,3,3)
@@ -52,7 +52,7 @@ public class MatrixBuilderTest extends TestCase {
   }
   public void testTwo() {
     OldTransformation o = new OldTransformation();
-    Matrix m = MatrixBuilder.euclidian()
+    Matrix m = MatrixBuilder.euclidean()
     .translate(21,3,9)
     .scale(7,1,3)
     .translate(-3,-3,-3)

@@ -71,7 +71,7 @@ public class HeadTransformationTool extends Tool {
     double dAngle = tc.getAxisState(verticalRotation).doubleValue();
     if (currentAngle + dAngle > maxAngle || currentAngle + dAngle < minAngle) return;
     SceneGraphComponent myComponent = tc.getRootToLocal().getLastComponent();
-    MatrixBuilder.euclidian(tc.getRootToLocal().getLastComponent().getTransformation()).translate(0, -headHeight, 0).rotateX(dAngle).translate(0, headHeight, 0).assignTo(myComponent);
+    MatrixBuilder.euclidean(tc.getRootToLocal().getLastComponent().getTransformation()).translate(0, -headHeight, 0).rotateX(dAngle).translate(0, headHeight, 0).assignTo(myComponent);
     currentAngle+=dAngle;
   }
 

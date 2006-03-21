@@ -77,7 +77,7 @@ public class TranslateTool extends Tool {
     }
 
     public void perform(ToolContext tc) {
-        MatrixBuilder.euclidian(comp.getTransformation())
+        MatrixBuilder.euclidean(comp.getTransformation())
         .times(tc.getTransformationMatrix(trafo).toDoubleArray(null))
         .assignTo(comp);
     }

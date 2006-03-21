@@ -281,7 +281,7 @@ public class Reader3DS extends AbstractReader {
             tex2d = TextureUtility.createTexture(getCurrentApperance(),
                 CommonAttributes.POLYGON_SHADER,
                 imgData, false);
-            tex2d.setTextureMatrix(MatrixBuilder.euclidian().scale(1,-1,0).getMatrix());
+            tex2d.setTextureMatrix(MatrixBuilder.euclidean().scale(1,-1,0).getMatrix());
           }
         } catch (Exception e) {
           // Just ignore invalid zextures

@@ -67,7 +67,7 @@ public class ReaderPOV extends AbstractReader {
       disk.setGeometry(new UnitDisk(UNIT_DISK_DETAIL));
     }
     
-    MatrixBuilder.euclidian().scale(1,1,0.2).assignTo(disk);
+    MatrixBuilder.euclidean().scale(1,1,0.2).assignTo(disk);
     
     StreamTokenizer st = new StreamTokenizer(r);
 

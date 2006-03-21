@@ -78,6 +78,7 @@ public class EncompassTool extends Tool {
       if (false) {
         CameraUtility.encompass(tc.getViewer());
       }
+      // TODO get the signature from the effective appearance of avatar path
       CameraUtility.encompass(tc.getToolSystem().getAvatarPath(), tc.getRootToLocal(), tc.getViewer().getCameraPath(), margin, tc.getViewer().getSignature());
     }
   }

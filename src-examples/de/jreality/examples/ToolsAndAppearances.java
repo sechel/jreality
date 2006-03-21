@@ -1,5 +1,5 @@
 /*
- * $Id: ToolsAndAppearances.java,v 1.3 2005/08/05 10:22:28 pinkall Exp $
+ * $Id: ToolsAndAppearances.java,v 1.4 2006/03/21 08:02:28 gunn Exp $
  * As simple example using appearances and tools.
  */
 package de.jreality.examples;
@@ -48,7 +48,7 @@ public class ToolsAndAppearances {
     RotateTool rotateTool = new RotateTool();
     geometryNode.addTool(rotateTool);
 
-    MatrixBuilder.euclidian().translate(0, 0, 3).assignTo(cameraNode);
+    MatrixBuilder.euclidean().translate(0, 0, 3).assignTo(cameraNode);
 
 	Appearance rootApp= new Appearance();
     rootApp.setAttribute(CommonAttributes.BACKGROUND_COLOR, new Color(0f, .1f, .1f));

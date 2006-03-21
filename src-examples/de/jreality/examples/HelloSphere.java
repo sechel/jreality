@@ -1,5 +1,5 @@
 /*
- * $Id: HelloSphere.java,v 1.3 2005/08/05 10:22:28 pinkall Exp $
+ * $Id: HelloSphere.java,v 1.4 2006/03/21 08:02:27 gunn Exp $
  * 
  * Some sort of "Hello World" for jReality. The idea is to put something meaningful
  * on the screen, in as few lines as possible.
@@ -41,8 +41,8 @@ public class HelloSphere {
         cameraNode.setCamera(camera);
         lightNode.setLight(light);
         
-        MatrixBuilder.euclidian().translate(0, 0, 4).assignTo(cameraNode);
-        MatrixBuilder.euclidian().rotate(-Math.PI/4, 1, 1, 0).assignTo(lightNode);
+        MatrixBuilder.euclidean().translate(0, 0, 4).assignTo(cameraNode);
+        MatrixBuilder.euclidean().rotate(-Math.PI/4, 1, 1, 0).assignTo(lightNode);
 
         DefaultViewer viewer=new DefaultViewer();
         viewer.setSceneRoot(rootNode);
