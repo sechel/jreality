@@ -274,7 +274,7 @@ public class Primitives {
 			_camIcon.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, true);
 			_camIcon.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.white);
 			_camIcon.setGeometry(cube());
-			MatrixBuilder.euclidian().scale(.3,1.0,1.0).assignTo(_camIcon.getTransformation());
+			MatrixBuilder.euclidean().scale(.3,1.0,1.0).assignTo(_camIcon.getTransformation());
 
 			SceneGraphComponent viewer = new SceneGraphComponent();
 			viewer.setGeometry(pyramid(viewerVerts, tip));
@@ -283,7 +283,7 @@ public class Primitives {
 		
 		public static SceneGraphComponent cameraIcon(double scale)		{
 			SceneGraphComponent ci = SceneGraphUtility.createFullSceneGraphComponent("cameraIcon");
-			MatrixBuilder.euclidian().scale(scale).assignTo(ci.getTransformation());
+			MatrixBuilder.euclidean().scale(scale).assignTo(ci.getTransformation());
 			ci.addChild(_camIcon);
 			return ci;
 		}

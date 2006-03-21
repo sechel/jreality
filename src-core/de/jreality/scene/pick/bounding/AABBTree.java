@@ -582,7 +582,7 @@ public class AABBTree {
         double[] t = bounds.center;
         double[] s = bounds.extent;
         double[] z=new double[]{0,0,1};
-        Matrix m = MatrixBuilder.euclidian().translate(t).rotateFromTo(z, bounds.zAxis).scale(s[0], s[1], s[2]).getMatrix();
+        Matrix m = MatrixBuilder.euclidean().translate(t).rotateFromTo(z, bounds.zAxis).scale(s[0], s[1], s[2]).getMatrix();
         boolean printed = false;
         IndexedFaceSet box = new IndexedFaceSet();
         double[][] verts = new double[8][3];

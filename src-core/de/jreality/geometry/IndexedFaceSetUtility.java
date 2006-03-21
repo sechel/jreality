@@ -20,6 +20,7 @@ import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.PointSet;
+import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.data.Attribute;
@@ -116,6 +117,26 @@ public class IndexedFaceSetUtility {
 		return ifsf.getIndexedFaceSet();
 	}
 
+	public static IndexedFaceSet representAsSceneGraph(final IndexedFaceSet exists, Rectangle3D box)	{
+		if (exists == null) return representAsSceneGraph(box);
+		final double[][] verts = new double[8][3];
+		double[][] bnds = box.getBounds();
+		for (int i = 0; i<2; ++i)	
+			for (int j = 0; j<2; ++j)	
+				for (int k = 0; k<2; ++k)	{
+					verts[4*i + 2 * j + k][0] = bnds[i][0];
+					verts[4*i + 2 * j + k][1] = bnds[j][1];
+					verts[4*i + 2 * j + k][2] = bnds[k][2];
+				}
+		Scene.executeWriter(exists, new Runnable() {
+
+			public void run() {
+				exists.setVertexAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(verts));	
+			}
+			
+		});
+		return exists;
+	}
 	public static IndexedFaceSet representAsSceneGraph(Rectangle3D box)	{
 		double[][] verts = new double[8][3];
 		double[][] bnds = box.getBounds();
