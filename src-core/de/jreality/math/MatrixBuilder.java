@@ -43,7 +43,7 @@ import de.jreality.scene.Transformation;
  * many calls in a row.
  * 
  * <code>
- * Matrix m = MatrixBuilder.euclidian()
+ * Matrix m = MatrixBuilder.euclidean()
  *            .translate(2,2,2)
  *            .rotate(Math.PI/2, 1, 1, 1)
  *            .scale(3,1,2)
@@ -52,7 +52,7 @@ import de.jreality.scene.Transformation;
  * 
  * <code>
  * SceneGraphComponent camCom = new SceneGraphComponent();
- * MatrixBuilder.euclidian().translate(0,2,3)
+ * MatrixBuilder.euclidean().translate(0,2,3)
  *              .rotateFromTo(new double[]{0,0,-1}, new double[]{0,-2,-3})
  *              .scale(2)
  *              .assignTo(camComp); // Transformation gets set and assigned
@@ -67,15 +67,27 @@ public final class MatrixBuilder {
 
   private final double[] tmp = new double[16];
   
+  /**
+   * @deprecated Use {@link #euclidean(Transformation)}
+   * Britannican on-line finds 159 matches for "euclidean" and 3 for "euclidian",
+   * making clear that the preferred spelling is "euclidean" -- which is also
+   * consistent with the spelling used in the class P3.
+   */
   public static MatrixBuilder euclidian(Transformation m) {
 	Matrix mat=(m!=null) ? new Matrix(m) : new Matrix();
     return new MatrixBuilder(mat, Pn.EUCLIDEAN);
   }
 
+  /**
+   * @deprecated Use {@link #euclidean(Matrix)}
+   */
   public static MatrixBuilder euclidian(Matrix m) {
     return new MatrixBuilder(m, Pn.EUCLIDEAN);
   }
   
+  /**
+   * @deprecated Use {@link #euclidean()}
+   */
   public static MatrixBuilder euclidian() {
     return euclidian(new Matrix());
   }
@@ -201,7 +213,7 @@ public final class MatrixBuilder {
 	  }
   
   public MatrixBuilder scale(double scaleX, double scaleY, double scaleZ) {
-    // TODO: is this right for non-euclidian geoms?
+    // TODO: is this right for non-euclidean geoms?
     P3.makeStretchMatrix(tmp, new double[]{scaleX, scaleY, scaleZ, 1});
     matrix.multiplyOnRight(tmp);
     return this;
