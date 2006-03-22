@@ -22,33 +22,18 @@
  */
 package de.jreality.ui.beans;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyDescriptor;
-import java.beans.PropertyEditor;
-import java.beans.PropertyEditorManager;
+import java.beans.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
+import javax.swing.*;
+import javax.swing.event.*;
 import javax.swing.text.JTextComponent;
 
 import de.jreality.util.LoggingSystem;
@@ -58,13 +43,24 @@ import de.jreality.util.LoggingSystem;
  */
 public class InspectorPanel extends JPanel
 {
+	static {
+	    PropertyEditorManager.registerEditor(Color.class, ColorEditor.class);
+	    PropertyEditorManager.registerEditor(Paint.class, ColorEditor.class);
+	    PropertyEditorManager.registerEditor(Boolean.class, BooleanEditor.class);
+	    PropertyEditorManager.registerEditor(Double.class, DoubleEditor.class);
+	    PropertyEditorManager.registerEditor(Integer.class, IntegerEditor.class);
+	    PropertyEditorManager.registerEditor(Font.class, FontEditor.class);
+	  }
+
   private boolean reading;
   private Object currObject;
   static final HashMap CLASS_TO_PANEL = new HashMap();
   Class type;
   ArrayList editors, properties;
-  ChangeListener listener;//XXX hack
+  ChangeListener changeListener;//XXX hack
 
+  HashSet currentProperties=new HashSet();
+  
   public InspectorPanel()
   {
     super(new BorderLayout());
@@ -79,6 +75,7 @@ public class InspectorPanel extends JPanel
   }
   private void setup() throws IntrospectionException
   {
+      currentProperties.clear();
     BeanInfo bi=Introspector.getBeanInfo(type);
     PropertyDescriptor[] pd=bi.getPropertyDescriptors();
     setLayout(new GridBagLayout());
@@ -112,8 +109,8 @@ public class InspectorPanel extends JPanel
             if(!reading) try
             {
               m.invoke(currObject, new Object[]{ pe.getValue() });
-              if(listener!=null)
-                listener.stateChanged(new ChangeEvent(currObject));
+              if(changeListener!=null)
+                changeListener.stateChanged(new ChangeEvent(currObject));
             } catch (IllegalArgumentException e)
             {
               // TODO Auto-generated catch block
@@ -175,7 +172,7 @@ public class InspectorPanel extends JPanel
       else try
       {
         CLASS_TO_PANEL.put(clazz, ip=new InspectorPanel(clazz));
-        ip.listener=listener;
+        ip.changeListener=changeListener;
       } catch (IntrospectionException e)
       {
         e.printStackTrace();
@@ -280,4 +277,12 @@ public class InspectorPanel extends JPanel
     });
     return cb;
   }
+
+  public void addChangeListener(ChangeListener listener) {
+    changeListener=ChangeEventMulticaster.add(changeListener, listener);
+  }
+  public void removeChangeListener(ChangeListener listener) {
+    changeListener=ChangeEventMulticaster.remove(changeListener, listener);
+  }
+
 }

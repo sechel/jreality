@@ -22,25 +22,13 @@
  */
 package de.jreality.ui.viewerapp;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Font;
-import java.beans.PropertyEditorManager;
 
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTree;
+import javax.swing.*;
 import javax.swing.border.Border;
 
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.beans.BooleanEditor;
-import de.jreality.ui.beans.ColorEditor;
-import de.jreality.ui.beans.DoubleEditor;
-import de.jreality.ui.beans.FontEditor;
-import de.jreality.ui.beans.IntegerEditor;
 import de.jreality.ui.treeview.JTreeRenderer;
 import de.jreality.ui.treeview.SceneTreeModel;
 
@@ -49,13 +37,6 @@ import de.jreality.ui.treeview.SceneTreeModel;
  */
 public class UIFactory
 {
-  static {
-    PropertyEditorManager.registerEditor(Color.class, ColorEditor.class);
-    PropertyEditorManager.registerEditor(Boolean.class, BooleanEditor.class);
-    PropertyEditorManager.registerEditor(Double.class, DoubleEditor.class);
-    PropertyEditorManager.registerEditor(Integer.class, IntegerEditor.class);
-    PropertyEditorManager.registerEditor(Font.class, FontEditor.class);
-  }
   private SceneGraphComponent root;
   private Component viewer;
   private Component console;
