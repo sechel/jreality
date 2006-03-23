@@ -228,10 +228,10 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			nextDL = gl.glGenLists(1);
 			gl.glNewList(nextDL, GL.GL_COMPILE);
 		}
-			int  k, l;
-			DoubleArray da;
-			double[] mat = new double[16];
-			for (int i = 0; i<n; ++i)	{
+		int  k, l;
+		DoubleArray da;
+		double[] mat = new double[16];
+		for (int i = 0; i<n; ++i)	{
 			IntArray ia = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray();
 			DataList edgec =  ils.getEdgeAttributes(Attribute.COLORS);
 			int m = ia.size();
@@ -279,9 +279,8 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 					jr.helper.drawFaces(tube, smoothShading, alpha);			
 				}
 			}
-			if (pickMode) 	gl.glPopName();					
+			if (pickMode) gl.glPopName();
 		}
-		if (pickMode) gl.glPopName();
 		
 		if (useDisplayLists) gl.glEndList();
 		return nextDL;
