@@ -278,63 +278,6 @@ public class JOGLRendererHelper {
 	static IndexedFaceSet bb = Primitives.texturedSquare(new double[] { 0, 1,
 			0, 1, 1, 0, 1, 0, 0, 0, 0, 0 });
 
-	// static {
-	// tex2d.setRepeatS(Texture2D.GL_CLAMP);
-	// tex2d.setRepeatT(Texture2D.GL_CLAMP);
-	// }
-
-	// public void drawLabels(PointSet ps, CachedGeometryInfo cginfo,
-	// DefaultTextShader ts) {
-	// GL gl = jr.globalGL;
-	// double[] c2o = jr.context.getCameraToObject();
-	// DataList dl = ps.getVertexAttributes(Attribute.LABELS);
-	// DoubleArrayArray vertices =
-	// ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
-	// int n = ps.getNumPoints();
-	// Texture2D tex2d;
-	// StringArray labels = dl.toStringArray();
-	// Font font = ts.getFont();
-	// Color c = ts.getDiffuseColor();
-	// double scale = ts.getScale().doubleValue();
-	// double[] offset = ts.getOffset();
-	//
-	// if (cginfo.labelTexs[0] == null) {
-	// cginfo.labelTexs[0] = new Texture2D[n];
-	// for (int i = 0; i<n ; ++i) {
-	// Appearance ap = new Appearance();
-	// tex2d = cginfo.labelTexs[0][i] =(Texture2D)
-	// AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", ap,
-	// true);
-	// tex2d.setRepeatS(Texture2D.GL_CLAMP);
-	// tex2d.setRepeatT(Texture2D.GL_CLAMP);
-	// String li = labels.getValueAt(i);
-	// BufferedImage img = LabelUtility.createImageFromString(li,font,c);
-	// tex2d.setImage(new ImageData(img));
-	// }
-	// }
-	// // gl.glPushAttrib(GL.GL_DEPTH_BUFFER_BIT | GL.GL_ENABLE_BIT);
-	// gl.glEnable (GL.GL_BLEND);
-	// gl.glDisable(GL.GL_LIGHTING);
-	// gl.glDepthMask(true);
-	// gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-	// gl.glColor3d(1,1,1);
-	// gl.glEnable(GL.GL_TEXTURE_2D);
-	// for(int i = 0; i<n;i++) {
-	// int w = cginfo.labelTexs[0][i].getImage().getWidth();
-	// int h = cginfo.labelTexs[0][i].getImage().getHeight();
-	// double[] mat = P3.calculateBillboardMatrix(null,w*scale, h*scale,offset,
-	// c2o,vertices.getValueAt(i).toDoubleArray(null), Pn.EUCLIDEAN);
-	// gl.glActiveTexture(GL.GL_TEXTURE0);
-	// Texture2DLoaderJOGL.render(jr.theCanvas, cginfo.labelTexs[0][i]);
-	// gl.glPushMatrix();
-	// gl.glMultTransposeMatrixd(mat);
-	// drawFaces(bb, true, 1.0, false);
-	// gl.glPopMatrix();
-	// }
-	// gl.glDisable(GL.GL_TEXTURE_2D);
-	// // gl.glPopAttrib();
-	// }
-
 	private static final Texture2D tex2d = (Texture2D) AttributeEntityUtility
 			.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
 	static {
@@ -585,9 +528,6 @@ public class JOGLRendererHelper {
 		// "+((vertexNormals != null) ? vertexNormals.size() : 0));
 		// JOGLConfiguration.theLog.log(Level.INFO,"alpha value is "+alpha);
 
-		// signal a geometry
-		if (pickMode)
-			gl.glPushName(JOGLPickAction.GEOMETRY_FACE); // pickName);
 
 		// vertex color has priority over face color
 		vertices = sg.getVertexAttributes(Attribute.COORDINATES);
@@ -657,8 +597,6 @@ public class JOGLRendererHelper {
 			// this loops through the "rows" of the mesh (v is constant on each
 			// row)
 			for (int i = 0; i < maxFV; ++i) {
-				if (pickMode)
-					gl.glPushName(i);
 				gl.glBegin(GL.GL_QUAD_STRIP);
 				// each iteration of this loop draws one quad strip consisting
 				// of 2 * (maxFU + 1) vertices
@@ -738,12 +676,12 @@ public class JOGLRendererHelper {
 					}
 				}
 				gl.glEnd();
-				if (pickMode) {
-					// JOGLConfiguration.theLog.log(Level.INFO,"-");
-					gl.glPopName();
-				}
 			}
-		} else
+		} else {
+			// signal a geometry
+			if (pickMode)
+				gl.glPushName(JOGLPickAction.GEOMETRY_FACE); // pickName);
+
 			for (int i = 0; i < sg.getNumFaces(); ++i) {
 				if (colorBind == PER_FACE) {
 					da = faceColors.item(i).toDoubleArray();
@@ -812,6 +750,7 @@ public class JOGLRendererHelper {
 		// pop to balance the glPushName(10000) above
 		if (pickMode)
 			gl.glPopName();
+		}
 	}
 
 	private static GLUT glut = new GLUT();
