@@ -7,14 +7,15 @@ package de.jreality.util;
 
 import java.util.Vector;
 
+import charlesgunn.jreality.pick.PickAction;
+import charlesgunn.jreality.pick.PickPoint;
+
 import de.jreality.geometry.Primitives;
 import de.jreality.math.P3;
 import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
-import de.jreality.scene.pick.PickAction;
-import de.jreality.scene.pick.PickPoint;
 import junit.framework.TestCase;
 
 /**
