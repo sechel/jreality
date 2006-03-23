@@ -7,7 +7,7 @@ import de.jreality.scene.tool.Tool;
 
 /**
  * A component of the scene graph: the only node that can have another
- * SceneGraphComponent instances as it's children.
+ * SceneGraphComponent instances as its children.
  */
 public class SceneGraphComponent extends SceneGraphNode {
   
