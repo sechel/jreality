@@ -40,6 +40,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JMenu;
@@ -47,6 +48,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import javax.swing.event.TreeSelectionEvent;
@@ -578,22 +580,26 @@ public class ViewerApp
 
     mb.add(compMenu);
 
-    JMenu viewerMenu = new JMenu("Viewer");
+    final JMenu viewerMenu = new JMenu("Viewer");
     String[] viewerNames = viewerSwitch.getViewerNames();
+    ButtonGroup bg = new ButtonGroup();
     for (int i = 0; i < viewerSwitch.getNumViewers(); i++) {
-      mi = new JMenuItem(viewerNames[i]);
+      final JRadioButtonMenuItem mi2 = new JRadioButtonMenuItem(viewerNames[i], i==0);
+       bg.add(mi2);
       final int ind = i;
-      mi.addActionListener(new ActionListener(){
+      mi2.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent arg0) {
           viewerSwitch.selectViewer(ind);
+//          mi2.setSelected(true);
+          viewerMenu.repaint();
           frame.validate();
           currViewer.render();
           frame.repaint();
         }
       });
-      viewerMenu.add(mi);
+      viewerMenu.add(mi2);
     }
-    viewerMenu.addSeparator();
+     viewerMenu.addSeparator();
     mi = new JMenuItem("force render");
     mi.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent arg0) {
