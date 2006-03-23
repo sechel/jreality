@@ -6,6 +6,7 @@ package de.jreality.scene.pick;
 
 import de.jreality.math.Rn;
 import de.jreality.scene.*;
+import de.jreality.util.CameraUtility;
 
 /**
  * @author gunn
@@ -99,7 +100,7 @@ public class Graphics3D {
 	 */
 	public double[] getCameraToNDC() {
 		if (cameraPath == null) throw new IllegalStateException("No camera path set for this context");
-		return camera.getCameraToNDC();
+		return CameraUtility.getCameraToNDC(camera, camera.aspectRatio, CameraUtility.MIDDLE_EYE);
 	}
 
 	/**
@@ -170,7 +171,7 @@ public class Graphics3D {
 	public double[] getObjectToNDC() {
 		if (camera == null) 
 			throw new IllegalStateException("No camera for this context");
-		return Rn.times(null,camera.getCameraToNDC(), getObjectToCamera());
+		return Rn.times(null,CameraUtility.getCameraToNDC(camera, camera.aspectRatio, CameraUtility.MIDDLE_EYE), getObjectToCamera());
 	}
 
 	/**
@@ -179,7 +180,7 @@ public class Graphics3D {
 	public double[] getNDCToObject() {
 		if (camera == null) 
 			throw new IllegalStateException("No camera for this context");
-		return Rn.inverse(null, Rn.times(null, camera.getCameraToNDC(), getObjectToCamera()));
+		return Rn.inverse(null, Rn.times(null, CameraUtility.getCameraToNDC(camera, camera.aspectRatio, CameraUtility.MIDDLE_EYE), getObjectToCamera()));
 	}
 	
 	/**

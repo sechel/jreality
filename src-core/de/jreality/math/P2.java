@@ -10,10 +10,11 @@ import java.util.logging.Level;
 import de.jreality.util.LoggingSystem;
 
 /**
+ * Library class for holding static methods related to doing projective geometry in
+ * two dimensions.  
+ * 
  * @author gunn
  *
- * "Library" class for holding static methods related to doing projective geometry in
- * two dimensions.  
  */
 final public class P2 {
 

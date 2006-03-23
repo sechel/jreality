@@ -49,7 +49,6 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	public static final int 	HARDWARE_BUFFER_STEREO = 23;
 	int stereoType = 		CROSS_EYED_STEREO;	
 	private boolean debug = false;
-  private JPanel component;
 
 	public Viewer() {
 		this(null, null);
@@ -117,55 +116,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 
 
 	public Component getViewingComponent() {
-    if (component == null) {
-      component=new javax.swing.JPanel();
-      component.setLayout(new java.awt.BorderLayout());
-      component.setMaximumSize(new java.awt.Dimension(32768,32768));
-      component.setMinimumSize(new java.awt.Dimension(10,10));
-      component.add("Center", canvas);
-      canvas.addKeyListener(new KeyListener() {
-        public void keyPressed(KeyEvent e) {
-          component.dispatchEvent(e);
-        }
-        public void keyReleased(KeyEvent e) {
-          component.dispatchEvent(e);
-        }
-        public void keyTyped(KeyEvent e) {
-          component.dispatchEvent(e);
-        }
-      });
-      canvas.addMouseListener(new MouseListener() {
-        public void mouseClicked(MouseEvent e) {
-          component.dispatchEvent(e);
-        }
-        public void mouseEntered(MouseEvent e) {
-          component.dispatchEvent(e);
-        }
-        public void mouseExited(MouseEvent e) {
-          component.dispatchEvent(e);
-        }
-        public void mousePressed(MouseEvent e) {
-          component.dispatchEvent(e);
-        }
-        public void mouseReleased(MouseEvent e) {
-          component.dispatchEvent(e);
-        }
-      });
-      canvas.addMouseMotionListener(new MouseMotionListener() {
-        public void mouseDragged(MouseEvent e) {
-          component.dispatchEvent(e);
-        }
-        public void mouseMoved(MouseEvent e) {
-          component.dispatchEvent(e);
-        }
-      });
-      canvas.addMouseWheelListener(new MouseWheelListener() {
-        public void mouseWheelMoved(MouseWheelEvent e) {
-          component.dispatchEvent(e);
-        }
-      });
-    }
-		return component;
+		return canvas;
 	}
 
 	/* (non-Javadoc)
@@ -292,8 +243,8 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 			canvas = GLDrawableFactory.getFactory().createGLCanvas(caps, null, firstOne);			
 		}
         JOGLConfiguration.getLogger().log(Level.INFO, "Caps is "+caps.toString());
- 		canvas.addGLEventListener(this);
-		canvas.requestFocus();
+		canvas.addGLEventListener(this);
+//		canvas.requestFocus();
 		if (JOGLConfiguration.sharedContexts && firstOne == null) firstOne = canvas;
 	}
 

@@ -155,16 +155,7 @@ public class CameraUtility {
 			*/
 		LoggingSystem.getLogger(CameraUtility.class).log(Level.FINER,"Aspect ratio is "+aspectRatio);
 //		System.out.println("Aspect ratio is "+aspectRatio);
-		Rectangle2D viewPort = new Rectangle2D.Double();
-		double hwidth = Math.tan((Math.PI/180.0)*cam.getFieldOfView()/2.0);
-		if (!cam.isPerspective())	hwidth *= cam.getFocus();
-		if (cam.isOnAxis())	{
-			if (aspectRatio > 1.0)	{
-				viewPort.setFrameFromDiagonal(-hwidth*aspectRatio, -hwidth,hwidth*aspectRatio,  hwidth);
-			} else {
-				viewPort.setFrameFromDiagonal(-hwidth,-hwidth/aspectRatio, hwidth,  hwidth/aspectRatio);
-			}	
-		} else viewPort = cam.getViewPort();
+		Rectangle2D viewPort = getViewport(cam, aspectRatio);
 		if (which == CameraUtility.MIDDLE_EYE)		{
 			double[] cameraToNDC = null;
 			if (cam.isPerspective())
@@ -210,6 +201,26 @@ public class CameraUtility {
 		//LoggingSystem.getLogger().log(Level.FINER,"iMoveToEye is \n"+Rn.matrixToString(iMoveToEye));
 		double[] ret = Rn.times(null, c2ndc, iMoveToEye);
 		return ret;
+	}
+
+	/**
+	 * @param cam
+	 * @param aspectRatio
+	 * @return
+	 */
+	public static Rectangle2D getViewport(Camera cam, double aspectRatio) {
+		Rectangle2D viewPort = null;
+		if (cam.isOnAxis())	{
+			viewPort = new Rectangle2D.Double();
+			double hwidth = Math.tan((Math.PI/180.0)*cam.getFieldOfView()/2.0);
+			if (!cam.isPerspective())	hwidth *= cam.getFocus();
+			if (aspectRatio > 1.0)	{
+				viewPort.setFrameFromDiagonal(-hwidth*aspectRatio, -hwidth,hwidth*aspectRatio,  hwidth);
+			} else {
+				viewPort.setFrameFromDiagonal(-hwidth,-hwidth/aspectRatio, hwidth,  hwidth/aspectRatio);
+			}	
+		} else viewPort = cam.getViewPort();
+		return viewPort;
 	}
 	
 
