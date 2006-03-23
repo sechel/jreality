@@ -92,8 +92,8 @@ public class Graphics3D {
 	 * @return
 	 */
 	public double[] getObjectToWorld() {
+		if (objectToWorld != null)	return objectToWorld;
 		if (currentPath != null) return currentPath.getMatrix(null);
-		else if (objectToWorld != null)	return objectToWorld;
 		return Rn.identityMatrix(4);
 	}
 

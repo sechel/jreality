@@ -7,18 +7,28 @@ package de.jreality.jogl.pick;
 
 
 import java.nio.IntBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Vector;
 import java.util.logging.Level;
 
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.Viewer;
-import de.jreality.math.*;
-import de.jreality.scene.*;
+import de.jreality.math.P2;
+import de.jreality.math.P3;
+import de.jreality.math.Pn;
+import de.jreality.math.Rn;
+import de.jreality.scene.Geometry;
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.PointSet;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
-import de.jreality.scene.pick.PickAction;
-import de.jreality.scene.pick.PickPoint;
-import de.jreality.scene.pick.PickPointComparator;
 /**
  * @author gunn
  *
@@ -33,11 +43,9 @@ public class JOGLPickAction extends PickAction  {
 	static public int PROXY_GEOMETRY_LINE = GEOMETRY_BASE+4;
 	static public int PROXY_GEOMETRY_FACE = GEOMETRY_BASE+5;
 	static boolean useOpenGL = true;
-	static boolean debug = false;
-	Viewer theViewer = null;
+	static boolean debug = true;
 	public JOGLPickAction(Viewer v) {
 		super(v);
-		theViewer = v;
 	}
 	
 	/* (non-Javadoc)
@@ -45,8 +53,8 @@ public class JOGLPickAction extends PickAction  {
 	 */
 	
 	public Object visit() {
-		if (useOpenGL)	{
-			PickPoint[] hits = theViewer.getRenderer().performPick(pickPointNDC);	
+		if (useOpenGL && theViewer instanceof de.jreality.jogl.Viewer)	{
+			PickPoint[] hits =  ((de.jreality.jogl.Viewer)theViewer).getRenderer().performPick(pickPointNDC);	
 			int n = 0;
 			if (hits != null)	n = hits.length;
 			pickHits = new Vector();
