@@ -100,7 +100,7 @@ public class Graphics3D {
 	 */
 	public double[] getCameraToNDC() {
 		if (cameraPath == null) throw new IllegalStateException("No camera path set for this context");
-		return CameraUtility.getCameraToNDC(camera, camera.aspectRatio, CameraUtility.MIDDLE_EYE);
+		return CameraUtility.getCameraToNDC(camera, 1.0, CameraUtility.MIDDLE_EYE); //camera.aspectRatio, CameraUtility.MIDDLE_EYE);
 	}
 
 	/**
@@ -171,7 +171,8 @@ public class Graphics3D {
 	public double[] getObjectToNDC() {
 		if (camera == null) 
 			throw new IllegalStateException("No camera for this context");
-		return Rn.times(null,CameraUtility.getCameraToNDC(camera, camera.aspectRatio, CameraUtility.MIDDLE_EYE), getObjectToCamera());
+		return Rn.times(null,CameraUtility.getCameraToNDC(camera, 1.0, CameraUtility.MIDDLE_EYE), //camera.aspectRatio, CameraUtility.MIDDLE_EYE), 
+			getObjectToCamera());
 	}
 
 	/**
@@ -180,7 +181,8 @@ public class Graphics3D {
 	public double[] getNDCToObject() {
 		if (camera == null) 
 			throw new IllegalStateException("No camera for this context");
-		return Rn.inverse(null, Rn.times(null, CameraUtility.getCameraToNDC(camera, camera.aspectRatio, CameraUtility.MIDDLE_EYE), getObjectToCamera()));
+		return Rn.inverse(null, Rn.times(null, CameraUtility.getCameraToNDC(camera, 1.0, CameraUtility.MIDDLE_EYE), //camera.aspectRatio, CameraUtility.MIDDLE_EYE), 
+			getObjectToCamera()));
 	}
 	
 	/**
