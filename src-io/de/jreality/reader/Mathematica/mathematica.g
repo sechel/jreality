@@ -1,12 +1,10 @@
 //**************************************************
 // * Mathematica Parser
-
-
 // */
 
 header {
 package de.jreality.reader.Mathematica;
-import java.awt.Color;
+import java.awt.*;
 import java.util.*;
 import de.jreality.geometry.*;
 import de.jreality.math.*;
@@ -29,16 +27,10 @@ options {
 
 
 start returns [SceneGraphComponent r]
-{ r = null;
+{ r = null;	
+	globalApp.setName("global");
 	root.setAppearance(globalApp);
-	globalApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
-		globalApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
-		globalApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
-		globalApp.setAttribute(CommonAttributes.POINT_RADIUS, .1);
-		globalApp.setAttribute(CommonAttributes.POINT_SIZE, 5);
-		
-		globalApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
-		globalApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
+	root.setName("Mathematica");
 }
 	:"Graphics3D"
 	  OPEN_BRACKET  
@@ -55,6 +47,7 @@ object
 	:	OPEN_BRACE				// Liste von Graphischen Objekten
 			{
 			SceneGraphComponent newPart = new SceneGraphComponent();
+			newPart.setName("Object");
 			SceneGraphComponent oldPart = current;
 			current.addChild(newPart);
 			current=newPart;
@@ -101,9 +94,15 @@ pointBlock
 		psf.setVertexCount(points.size());
 		psf.setVertexCoordinates(data);
 		psf.update();
-		SceneGraphComponent geo=new SceneGraphComponent();
-		current.addChild(geo);
+		
+		SceneGraphComponent geo=new SceneGraphComponent();		
+		Appearance pointApp =new Appearance();
+		pointApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
+	    pointApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
+		geo.setAppearance(pointApp);
 		geo.setGeometry(psf.getPointSet());
+		geo.setName("Points");
+		current.addChild(geo);
 	}
 	;  
 
@@ -154,15 +153,26 @@ lineBlock				// liest erst eine, dann alle direkt folgenden Lines ein
 			for(int i=0;i<linesIndices.size();i++){		// Indices als doppelListe von Doubles machen
 				indices[i]=(int [])linesIndices.get(i);
 			}
-			SceneGraphComponent geo=new SceneGraphComponent();	// Komponenten erstellen und einhaengen
-			current.addChild(geo);
+
 			IndexedLineSetFactory lineset=new IndexedLineSetFactory();
 			lineset.setLineCount(linesIndices.size());
 			lineset.setVertexCount(coordinates.size());
 			lineset.setEdgeIndices(indices);
 			lineset.setVertexCoordinates(data);
 			lineset.update();
+			
+			SceneGraphComponent geo=new SceneGraphComponent();
+			Appearance lineApp =new Appearance();
+			lineApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
+			lineApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
+	//	<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Punkte an den Enden anzeigen >
+			lineApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
+		    lineApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
+	//
+			geo.setAppearance(lineApp);
 			geo.setGeometry(lineset.getIndexedLineSet());
+			geo.setName("Lines");
+			current.addChild(geo);
 		}
 	;  
 
@@ -237,6 +247,7 @@ polygonBlock
     	GeometryUtility.calculateAndSetNormals(faceset);
 		SceneGraphComponent geo=new SceneGraphComponent();	// Komponenten erstellen und einhaengen
 		current.addChild(geo);
+		geo.setName("Faces");
 		geo.setGeometry(faceset);
 	}
 	;
@@ -255,6 +266,7 @@ cubic
 			 SceneGraphComponent geo=new SceneGraphComponent();
 			 current.addChild(geo);
 			 geo.setGeometry(Primitives.cube());
+	 		 geo.setName("Cube");
 			 MatrixBuilder.euclidian().scale(v2[0],v2[1],v2[2])
 			    .translate(v[0],v[1],v[2]).assignTo(geo);
  			}
@@ -287,6 +299,7 @@ protected
 directiveBlock
 	{
 	 SceneGraphComponent dir=new SceneGraphComponent();
+	 dir.setName("Directive");
 	 current.addChild(dir);
 	 Appearance app =new Appearance();
 	}
@@ -295,12 +308,14 @@ directiveBlock
 	  	COLLON
 	  	app=directive[app]
 	  )*
-	{current=dir;}
+	{current=dir;
+	 dir.setAppearance(app);}
 	;
 
 protected 
 directive[Appearance appGiven] returns [Appearance app]
-{app = appGiven;}
+{app = appGiven; 
+Color col;}
 	:"AbsoluteDashing" OPEN_BRACKET  dumb CLOSE_BRACKET 
 	|"AbsolutePointsize" 
 				OPEN_BRACKET
@@ -312,47 +327,94 @@ directive[Appearance appGiven] returns [Appearance app]
 					{int w=0;} w=integerthing
 				CLOSE_BRACKET 
 					{}
-	|"CMYKColor" OPEN_BRACKET 
-					{double c,m,y,k; c=m=y=k=0; }
-					c=doublething m=doublething y=doublething k=doublething 
-				CLOSE_BRACKET 
-					{}
 	|"Dashing" OPEN_BRACKET dumb CLOSE_BRACKET
 	|"EdgeForm" OPEN_BRACKET dumb CLOSE_BRACKET
 	|"FaceForm" OPEN_BRACKET dumb CLOSE_BRACKET
-	|"GrayLevel" OPEN_BRACKET 
-					{double i=0;} i=doublething 
-				CLOSE_BRACKET 
-					{}
-	|"Hue" 		OPEN_BRACKET 
-					{double h; double s; double b; h=s=b=0.5;}
-					h= doublething 
-					(COLLON s=doublething COLLON b=doublething )?
-				CLOSE_BRACKET 
-					{
-					 float hue; float sat; float bri;	 // konvert to float
-					 hue=(float) h; sat=(float) s; bri=(float) b;
-					 Color c=Color.getHSBColor(hue,sat,bri);
-					 app.setAttribute(CommonAttributes.DIFFUSE_COLOR, c);
-					}
 	|"Pointsize" OPEN_BRACKET 
 					{double d=0;} d=doublething
 				 CLOSE_BRACKET 
 				 	{			 	
 				 	}
-	|"RGBColor" OPEN_BRACKET 
-					{double r; double g; double b;r=b=g=0;}
-					r=doublething COLLON g=doublething COLLON b=doublething
-				CLOSE_BRACKET 
-					{}
+
+
 	|"SurfaceColor" OPEN_BRACKET
-							dumb
+					{ Color diff,spec; double d;int n;}
+					diff=color
+						{
+						app.setAttribute(CommonAttributes.POLYGON_SHADER+"."
+								+CommonAttributes.DIFFUSE_COLOR, diff);
+						}
+					( COLLON spec=color
+						{
+						 app.setAttribute(CommonAttributes.POLYGON_SHADER+"."
+						 		+CommonAttributes.SPECULAR_COLOR, spec);
+						}
+					  (	COLLON 	d=doublething
+					  	{
+					  		n=(int) d;
+			  				app.setAttribute(CommonAttributes.POLYGON_SHADER+"."
+			  					+CommonAttributes.SPECULAR_EXPONENT, n);			  		
+					  	}
+					  )?
+					 )?
 					CLOSE_BRACKET 
 	|"Thickness" OPEN_BRACKET 
 					{double w=0;} w=doublething
 				CLOSE_BRACKET 
 					{}
+	|col=color {	
+			 app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, col);
+			 app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, col);
+			 }
 	;
+
+
+protected
+color returns[Color c]
+{c= new Color(100,100,100);
+}
+
+		: "RGBColor" OPEN_BRACKET 
+					{double r,g,b; r=b=g=0;}
+					r=doublething COLLON g=doublething COLLON b=doublething
+				CLOSE_BRACKET 
+					{
+					 float red,green,blue;
+					 red=(float) r; green=(float) g; blue=(float) b;
+					 c= new Color(red,green,blue);
+					 }
+		| "Hue" 	OPEN_BRACKET 
+					{double h; double s; double b; h=s=b=0.5;}
+					h= doublething 
+					(COLLON s=doublething COLLON b=doublething )?
+				CLOSE_BRACKET 
+					{
+					 float hue,sat,bri;	 // konvert to float
+					 hue=(float) h; sat=(float) s; bri=(float) b;
+					 c = Color.getHSBColor(hue,sat,bri);
+					}
+		| "GrayLevel" OPEN_BRACKET 
+					{double gr=0;} gr=doublething 
+				CLOSE_BRACKET 
+					{
+					float grey=(float) gr;
+					c= new Color(grey,grey,grey);
+					}
+		| "CMYKColor" OPEN_BRACKET 
+					{double cy,ma,ye,k; cy=ma=ye=k=0; }
+					cy=doublething COLLON 
+					ma=doublething COLLON 
+					ye=doublething COLLON 
+					k=doublething 
+				CLOSE_BRACKET 
+					{
+					 float r,g,b;
+					 r=(float) ((1-cy)*(1-k));
+					 g=(float) ((1-ma)*(1-k));
+					 b=(float) ((1-ye)*(1-k));
+					 c= new Color(r,g,b);
+					}
+		;
 
 // Optionen ------------------------------------------
 protected
@@ -376,7 +438,7 @@ option
 protected
 optionPrimitive
 	:	"PlotRange" 		PFEIL 			SPECIAL
-	|	"DisplayFunction"	PFEIL_NACH 		"$" ID
+	|	"DisplayFunction"	PFEIL_NACH 		DOLLAR ID
 	|	"ColorOutput" 		PFEIL 			SPECIAL
 	|	"Axes" 				PFEIL 			SPECIAL
 	|	"PlotLabel" 		PFEIL 			SPECIAL
@@ -387,7 +449,7 @@ optionPrimitive
 	|	"AxesStyle"			PFEIL 			SPECIAL
 	|	"Backround"			PFEIL 			SPECIAL
 	|	"DefaultColor"		PFEIL 			SPECIAL
-	|	"DefaultFond"		PFEIL_NACH 		"$" ID
+	|	"DefaultFond"		PFEIL_NACH 		DOLLAR ID
 	|	"AspectRatio"		PFEIL 			SPECIAL
 	|	"ViewPoint"			PFEIL 			SPECIAL_SET
 	|	"Boxed"				PFEIL 			SPECIAL
@@ -399,8 +461,8 @@ optionPrimitive
 	|	"ViewCenter"		PFEIL 			SPECIAL
 	|	"PlotRegion"		PFEIL 			SPECIAL
 	|	"Imagesize"			PFEIL 			SPECIAL
-	|	"TextStyle"			PFEIL_NACH 		"$" ID
-	|	"FormatType"		PFEIL_NACH 		"$" ID
+	|	"TextStyle"			PFEIL_NACH 		DOLLAR ID
+	|	"FormatType"		PFEIL_NACH 		DOLLAR ID
 	|	"ViewVertical"		PFEIL 			SPECIAL_SET
 	|	"FaceGrids"			PFEIL 			SPECIAL
 	|	"Shading"			PFEIL 			SPECIAL
@@ -433,13 +495,13 @@ spec
 	
 	
 protected
-dumb:
-			(~(  OPEN_BRACE
-			   | OPEN_BRACKET 
-			   | CLOSE_BRACE 
-			   | CLOSE_BRACKET) )*
-			(  OPEN_BRACE   (dumb)* CLOSE_BRACE 
-			 | OPEN_BRACKET (dumb)* CLOSE_BRACKET )
+dumb
+		:(~(	  OPEN_BRACE
+				| OPEN_BRACKET 
+		  		| CLOSE_BRACE 
+		  		| CLOSE_BRACKET))+
+		|	OPEN_BRACE	 	(dumb)*	CLOSE_BRACE   
+		|	OPEN_BRACKET 	(dumb)*	CLOSE_BRACKET 
 	  ;
 	
 	
@@ -462,6 +524,11 @@ OPEN_BRACE:		'{';
 CLOSE_BRACE:	'}';
 OPEN_BRACKET:	'[';
 CLOSE_BRACKET:	']';
+LPAREN:			'(';
+RPAREN:			')';
+DOLLAR:			'$';
+HASH:			'#';
+AND:			'&';
 
 PFEIL :			"->";
 PFEIL_NACH :	":>";
