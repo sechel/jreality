@@ -36,7 +36,8 @@ class BruteForcePicking {
 
   public static void intersectPoints(PointSet ps, int signature, SceneGraphPath path, double[] from, double[] to, double pointRadius, ArrayList localHits) {
 	  path.getMatrix(m.getArray());
-	  path.getInverseMatrix(mInv.getArray());	  
+	  path.getInverseMatrix(mInv.getArray());	
+	  
 	  double[] fromOb=mInv.multiplyVector(from);
 	  double[] toOb=mInv.multiplyVector(to);
 	  
@@ -135,7 +136,7 @@ class BruteForcePicking {
    * @param hits
    * @param vertex null or translation in object coordinates
    * @param from in local coordinates
-   * @param dir in local coordinates
+   * @param dir in local coordinates !!!!!MUST BE NORMALIZED !!!!
    * @param r in local coordinates
    */
   private static void intersectSphere(List hits, final double[] vertex, final double[] f, final double[] dir, double r) {

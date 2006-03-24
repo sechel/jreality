@@ -17,7 +17,7 @@ public class TestBruteForcePicking implements Runnable{
 	public static void main(String[] args) {
 
 		TestBruteForcePicking test=new TestBruteForcePicking();		
-		test.animate();
+		//test.animate();
 	}
 	
 	public TestBruteForcePicking(){
@@ -30,11 +30,13 @@ public class TestBruteForcePicking implements Runnable{
 		SceneGraphComponent cmpCyl = new SceneGraphComponent();
 		
 		ch = new CatenoidHelicoid(20);
+		ch.setGeometryAttributes("vertices.pickable", Boolean.TRUE);
+		
 		Sphere sp = new Sphere();
 		Cylinder cyl = new Cylinder();
 		
-		MatrixBuilder.euclidean().translate(1,1,1).scale(1.5).assignTo(cmpSp);
-		MatrixBuilder.euclidean().translate(-1,1,1).assignTo(cmpCyl);
+		MatrixBuilder.euclidean().translate(1,1,1).scale(1.5,0.5,2).assignTo(cmpSp);
+		MatrixBuilder.euclidean().rotate(Math.PI/2,1,0,0).assignTo(cmpCyl);
 		
 		cmpCH.setGeometry(ch);
 		cmpSp.setGeometry(sp);
