@@ -11,6 +11,8 @@ import javax.swing.JTree;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
+import de.jreality.ui.treeview.JTreeRenderer;
+import de.jreality.ui.treeview.SceneTreeModel;
 import de.jreality.util.LoggingSystem;
 
 /**
@@ -99,7 +101,7 @@ public class SceneTreeViewer extends JTree implements de.jreality.scene.Viewer
    */
   public SceneTreeViewer(SceneGraphComponent root)
   {
-    super(new SceneTreeModel(root));
+   super(new SceneTreeModel(root));
     setCellRenderer(new SimpleSGCellRenderer());
     SimpleSGCellRenderer cr = (SimpleSGCellRenderer) getCellRenderer();
     Font f = cr.getFont();

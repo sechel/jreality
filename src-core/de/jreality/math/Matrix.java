@@ -328,6 +328,8 @@ public class Matrix implements Serializable {
   /**
    * TODO: !!! that doesn't return a rotation matrix!!!
    * TODO: this is implicitly euclidean.  I don't think it belongs in a "signature-neutral" class [charles gunn]
+   * In fact, it's not well-defined in the absence of a signature field.
+   * @deprecated
    * @return
    */
 	public Matrix getRotation() {

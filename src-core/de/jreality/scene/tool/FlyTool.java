@@ -73,6 +73,7 @@ public class FlyTool extends Tool {
   public void perform(ToolContext tc) {
 	if (tc.getSource() == forwardBackwardSlot) {
 		velocity = tc.getAxisState(forwardBackwardSlot).doubleValue();
+		// TODO make this transformation an option 
 		velocity = velocity*velocity*velocity;
 		if (tc.getAxisState(forwardBackwardSlot).isReleased()) {
 			isFlying = false;

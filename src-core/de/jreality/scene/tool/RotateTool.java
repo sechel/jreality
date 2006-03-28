@@ -29,6 +29,7 @@ import java.util.List;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
@@ -75,16 +76,16 @@ public class RotateTool extends Tool {
 
   transient Matrix center=new Matrix();
   
-  EffectiveAppearance eap;
+  transient EffectiveAppearance eap;
   public void activate(ToolContext tc) {
     startTime = tc.getTime();
     comp = (moveChildren ? tc.getRootToLocal():tc.getRootToToolComponent()).getLastComponent();
     // stop possible animation
     tc.deschedule(comp);
+    // TODO is this legitimate?  perhaps we should introduce a boolean "forceNewTransformation"
     if (comp.getTransformation() == null)
       comp.setTransformation(new Transformation());
-    if (!fixOrigin)
-    	center = getCenter(comp);
+    if (!fixOrigin)	center = getCenter(comp);
     if (eap == null || !EffectiveAppearance.matches(eap, tc.getRootToToolComponent())) {
         eap = EffectiveAppearance.create(tc.getRootToToolComponent());
       }
@@ -101,6 +102,7 @@ public class RotateTool extends Tool {
 	    //centerTranslation.setEntry(3,3,1);
 	    return centerTranslation;
   }
+  transient private int signature;
 
   transient Matrix result = new Matrix();
   transient Matrix evolution = new Matrix();
@@ -112,8 +114,6 @@ public class RotateTool extends Tool {
   private double animTimeMin=250;
   private double animTimeMax=750;
   private boolean updateCenter;
-private int signature;
-
   public void perform(ToolContext tc) {
     Matrix object2avatar = objToAvatar(tc);
     evolution.assignFrom(tc.getTransformationMatrix(evolutionSlot));
@@ -138,7 +138,8 @@ private int signature;
     MatrixBuilder.init(null, signature).translate(tmp.getColumn(3)).assignTo(avatarTrans);
 //    avatarTrans.setColumn(3, tmp.getColumn(3));
     object2avatar.multiplyOnLeft(avatarTrans);
-    object2avatar = object2avatar.getRotation();
+    //object2avatar = object2avatar.getRotation();
+    object2avatar.assignFrom(P3.extractOrientationMatrix(null, object2avatar.getArray(), P3.originP3, signature));
     return object2avatar;
   }
 

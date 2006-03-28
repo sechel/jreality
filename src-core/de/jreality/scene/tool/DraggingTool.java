@@ -28,6 +28,7 @@ import java.util.List;
 
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -36,6 +37,7 @@ import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.LoggingSystem;
 
 
@@ -92,8 +94,14 @@ public class DraggingTool extends Tool {
         // no drag in zaxis
         dragInViewDirection = false;
       }
+      if (eap == null || !EffectiveAppearance.matches(eap, tc.getRootToToolComponent())) {
+          eap = EffectiveAppearance.create(tc.getRootToToolComponent());
+        }
+        signature = eap.getAttribute("signature", Pn.EUCLIDEAN);
     }
 
+    transient EffectiveAppearance eap;
+    transient private int signature;
     transient Matrix result = new Matrix();
     transient Matrix local2world = new Matrix();
     transient Matrix dragFrame;
@@ -111,13 +119,17 @@ public class DraggingTool extends Tool {
       }
 
       Matrix evolution = new Matrix(tc.getTransformationMatrix(evolutionSlot));
-      
+      // need to convert from euclidean to possibly non-euclidean translation
+	  if (signature != Pn.EUCLIDEAN)
+		  MatrixBuilder.init(null, signature).translate(evolution.getColumn(3)).assignTo(evolution);
+    
       (moveChildren ? tc.getRootToLocal():tc.getRootToToolComponent()).getMatrix(local2world.getArray());
       
       comp.getTransformation().getMatrix(result.getArray());
       
       if (dragInViewDirection) {
         tc.getTransformationMatrix(InputSlot.getDevice("CameraToWorld")).toDoubleArray(pointer.getArray());
+        // TODO non-euclideanize this (once you understand it!)
         double dz = evolution.getEntry(0,3)+evolution.getEntry(1,3);
         evolution.assignIdentity();
         evolution.setColumn(3, Rn.times(null, dz, pointer.getColumn(2)));

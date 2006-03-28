@@ -22,6 +22,7 @@
  */
 package de.jreality.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -98,7 +99,9 @@ public class SceneGraphUtility {
   
  	public static void setSignature(SceneGraphComponent r, int signature)	{
  		final int sig = signature;
-         final HashMap map =new HashMap();
+ 		 if (r.getAppearance() == null) r.setAppearance(new Appearance());
+ 		 r.getAppearance().setAttribute("signature",sig);
+        final HashMap gmap =new HashMap();
 	  	final class SetSignatureVisitor extends SceneGraphVisitor	{
 		  	public void visit(SceneGraphComponent c)	{
 			  	Transformation t = c.getTransformation();
@@ -112,18 +115,18 @@ public class SceneGraphUtility {
 		  		
 		  		if (sig == Pn.EUCLIDEAN) return;
 		  		Integer s = new Integer(sig);
-                 map.put(g,s);
+                 gmap.put(g,s);
 		  	}
 	  	}
 	  	SetSignatureVisitor rmv = new SetSignatureVisitor();
 	  rmv.visit(r);
-      Set keys = map.keySet();
+      Set keys = gmap.keySet();
       for (Iterator iter = keys.iterator(); iter.hasNext();) {
           Geometry g = (Geometry) iter.next();
-          int s = ((Integer) map.get(g)).intValue();
+          int s = ((Integer) gmap.get(g)).intValue();
           GeometryUtility.setSignature(g,s);
       }
-  	}
+    	}
   
   	public static List collectLights(SceneGraphComponent rootNode) {
   	    return (List) new LightCollector(rootNode).visit();
