@@ -166,4 +166,28 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 		
 	}
 
+	public abstract static class DefaultImmersion implements Immersion {
+
+		public boolean isImmutable() {
+			return false;
+		}
+
+		public int getDimensionOfAmbientSpace() {
+			return 3;
+		}
+
+		public void evaluate(double u, double v, double[] xyz, int index) {
+			x=u;
+			y=v;
+			z=0;
+			evaluate( u, v );
+			xyz[3*index+0] = x;
+			xyz[3*index+1] = y;
+			xyz[3*index+2] = z;
+		}
+		
+		protected double x, y, z;
+		
+		abstract public void evaluate( double u, double v );
+	}
 }
