@@ -42,7 +42,7 @@ import de.jreality.util.LoggingSystem;
  */
 public class EncompassTool extends Tool {
 	
-	double margin = 1.0;		// value greater than one creates a margin around the encompassed object  
+	double margin = 1.25;		// value greater than one creates a margin around the encompassed object  
 
   transient List usedSlots = new LinkedList();
 

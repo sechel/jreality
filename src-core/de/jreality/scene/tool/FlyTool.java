@@ -29,6 +29,7 @@ import java.util.List;
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
@@ -84,25 +85,31 @@ public class FlyTool extends Tool {
 		}
 		return;
 	}
-    SceneGraphComponent ship = tc.getRootToToolComponent().getLastComponent();
+    if (eap == null || !EffectiveAppearance.matches(eap, tc.getRootToToolComponent())) {
+        eap = EffectiveAppearance.create(tc.getRootToToolComponent());
+      }
+      int signature = eap.getAttribute("signature", Pn.EUCLIDEAN);
 
-    Matrix pointerMatrix = new Matrix(tc.getTransformationMatrix(InputSlot.getDevice("PointerTransformation")));
+      SceneGraphComponent ship = tc.getRootToToolComponent().getLastComponent();
+
+   Matrix pointerMatrix = new Matrix(tc.getTransformationMatrix(InputSlot.getDevice("PointerTransformation")));
     Matrix localPointer = ToolUtility.worldToTool(tc, pointerMatrix);
     double[] dir = localPointer.getColumn(2); // z-axis ( modulo +/- )
-    
+    // don't need the following correction anymore
+    //    if (signature == Pn.EUCLIDEAN) dir[3] = 1.0;
+   
     Matrix shipMatrix = new Matrix();
     if (ship.getTransformation() != null) shipMatrix.assignFrom(ship.getTransformation());
-
+      
+    // the new position also depends on the signature;
+    // val is the distance we have moved in the direction dir
+    // use dragTowards to calculate the resulting point
     double val = tc.getAxisState(timerSlot).intValue()*0.001;    
-    Rn.times(dir, val*gain*velocity, dir);
-    dir[3]=1;
+    //Rn.times(dir, val*gain*velocity, dir);
+    val = val*gain*velocity;
+    double[] newShipPosition = P3.dragTowards(null, P3.originP3, dir, val, signature);
     
-    if (eap == null || !EffectiveAppearance.matches(eap, tc.getRootToToolComponent())) {
-      eap = EffectiveAppearance.create(tc.getRootToToolComponent());
-    }
-    int signature = eap.getAttribute("signature", Pn.EUCLIDEAN);
-    
-    MatrixBuilder.init(shipMatrix, signature).translate(dir).assignTo(ship);
+    MatrixBuilder.init(shipMatrix, signature).translate(newShipPosition).assignTo(ship);
   }
 
   public void activate(ToolContext tc) {

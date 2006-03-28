@@ -28,8 +28,11 @@ import java.util.List;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Pn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
+import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.Rectangle3D;
 
 /**
@@ -72,6 +75,7 @@ public class RotateTool extends Tool {
 
   transient Matrix center=new Matrix();
   
+  EffectiveAppearance eap;
   public void activate(ToolContext tc) {
     startTime = tc.getTime();
     comp = (moveChildren ? tc.getRootToLocal():tc.getRootToToolComponent()).getLastComponent();
@@ -81,14 +85,20 @@ public class RotateTool extends Tool {
       comp.setTransformation(new Transformation());
     if (!fixOrigin)
     	center = getCenter(comp);
+    if (eap == null || !EffectiveAppearance.matches(eap, tc.getRootToToolComponent())) {
+        eap = EffectiveAppearance.create(tc.getRootToToolComponent());
+      }
+      signature = eap.getAttribute("signature", Pn.EUCLIDEAN);
+
   }
   
   private Matrix getCenter(SceneGraphComponent comp) {
 	  Matrix centerTranslation = new Matrix();
 	    Rectangle3D bb = GeometryUtility.calculateChildrenBoundingBox(comp);
-
-	    centerTranslation.setColumn(3, bb.getCenter());
-	    centerTranslation.setEntry(3,3,1);
+	    // need to respect the signature here
+	    MatrixBuilder.init(null, signature).translate(bb.getCenter()).assignTo(centerTranslation);
+	    //centerTranslation.setColumn(3, bb.getCenter());
+	    //centerTranslation.setEntry(3,3,1);
 	    return centerTranslation;
   }
 
@@ -102,6 +112,7 @@ public class RotateTool extends Tool {
   private double animTimeMin=250;
   private double animTimeMax=750;
   private boolean updateCenter;
+private int signature;
 
   public void perform(ToolContext tc) {
     Matrix object2avatar = objToAvatar(tc);
@@ -124,7 +135,8 @@ public class RotateTool extends Tool {
     // TODO: see if we can't remove head dependency from Rotate device
     Matrix tmp = new Matrix(tc.getTransformationMatrix(camPath));
     Matrix avatarTrans = new Matrix();
-    avatarTrans.setColumn(3, tmp.getColumn(3));
+    MatrixBuilder.init(null, signature).translate(tmp.getColumn(3)).assignTo(avatarTrans);
+//    avatarTrans.setColumn(3, tmp.getColumn(3));
     object2avatar.multiplyOnLeft(avatarTrans);
     object2avatar = object2avatar.getRotation();
     return object2avatar;
