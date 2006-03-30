@@ -30,7 +30,8 @@ public class TestBruteForcePicking implements Runnable{
 		SceneGraphComponent cmpCyl = new SceneGraphComponent();
 		
 		ch = new CatenoidHelicoid(20);
-		ch.setGeometryAttributes("vertices.pickable", Boolean.TRUE);
+		ch.setGeometryAttributes("vertices.pickable", Boolean.FALSE);
+		ch.setGeometryAttributes("edges.pickable", Boolean.TRUE);
 		
 		Sphere sp = new Sphere();
 		Cylinder cyl = new Cylinder();
