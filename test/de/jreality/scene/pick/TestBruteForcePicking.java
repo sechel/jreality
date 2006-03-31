@@ -70,7 +70,7 @@ static private int[][] icoIndices = {
 	private CatenoidHelicoid ch;
 	double t=0;
 	double speed=0.001;
-	int sleeptime=25;
+	int sleeptime=50;
 
   public static IndexedFaceSet ico(double[][] verts) {
     IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
@@ -94,7 +94,8 @@ static private int[][] icoIndices = {
 	public TestBruteForcePicking(){
 		SceneGraphComponent geoNode=new  SceneGraphComponent();
 		
-		SceneGraphComponent cmpCH = new SceneGraphComponent();
+    SceneGraphComponent cmpCH = new SceneGraphComponent();
+    SceneGraphComponent cmpIco = new SceneGraphComponent();
 		SceneGraphComponent cmpSp = new SceneGraphComponent();
 		SceneGraphComponent cmpCyl = new SceneGraphComponent();
 		
@@ -106,21 +107,24 @@ static private int[][] icoIndices = {
 		MatrixBuilder.euclidean().translate(1,1,1).scale(1.5,0.5,2).assignTo(cmpSp);
 		MatrixBuilder.euclidean().rotate(Math.PI/2,1,0,0).assignTo(cmpCyl);
 		
-//    cmpCH.setGeometry(ch);
-    cmpCH.setGeometry(ico(icoVerts4));
+    MatrixBuilder.euclidean().translate(1,1,-1).scale(1.5,0.5,2).assignTo(cmpIco);
+    
+    cmpCH.setGeometry(ch);
+    cmpIco.setGeometry(ico(icoVerts4));
 		cmpSp.setGeometry(sp);
 		cmpCyl.setGeometry(cyl);
 		
 		geoNode.addChild(cmpCH);
+    geoNode.addChild(cmpIco);
 		geoNode.addChild(cmpSp);
 		geoNode.addChild(cmpCyl);
 		
-    geoNode.addTool(new PickShowTool("PrimaryAction", 0.07));
+    geoNode.addTool(new PickShowTool("PrimarySelection", 0.07));
     geoNode.setAppearance(new Appearance());
     geoNode.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
     geoNode.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS, 0.04);
     
-		ViewerApp.display(geoNode);		
+		ViewerApp.display(geoNode);
 	}
 
 	private void animate() {
