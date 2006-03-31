@@ -1,10 +1,14 @@
 package de.jreality.scene.pick;
 
 import de.jreality.examples.CatenoidHelicoid;
+import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.Cylinder;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
+import de.jreality.scene.tool.PickShowTool;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class TestBruteForcePicking implements Runnable{
@@ -30,8 +34,6 @@ public class TestBruteForcePicking implements Runnable{
 		SceneGraphComponent cmpCyl = new SceneGraphComponent();
 		
 		ch = new CatenoidHelicoid(20);
-		ch.setGeometryAttributes("vertices.pickable", Boolean.FALSE);
-		ch.setGeometryAttributes("edges.pickable", Boolean.TRUE);
 		
 		Sphere sp = new Sphere();
 		Cylinder cyl = new Cylinder();
@@ -39,7 +41,8 @@ public class TestBruteForcePicking implements Runnable{
 		MatrixBuilder.euclidean().translate(1,1,1).scale(1.5,0.5,2).assignTo(cmpSp);
 		MatrixBuilder.euclidean().rotate(Math.PI/2,1,0,0).assignTo(cmpCyl);
 		
-		cmpCH.setGeometry(ch);
+//    cmpCH.setGeometry(ch);
+    cmpCH.setGeometry(Primitives.icosahedron());
 		cmpSp.setGeometry(sp);
 		cmpCyl.setGeometry(cyl);
 		
@@ -47,6 +50,11 @@ public class TestBruteForcePicking implements Runnable{
 		geoNode.addChild(cmpSp);
 		geoNode.addChild(cmpCyl);
 		
+    geoNode.addTool(new PickShowTool("PrimaryAction", 0.07));
+    geoNode.setAppearance(new Appearance());
+    geoNode.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
+    geoNode.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS, 0.04);
+    
 		ViewerApp.display(geoNode);		
 	}
 

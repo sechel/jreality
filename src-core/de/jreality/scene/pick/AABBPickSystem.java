@@ -10,6 +10,8 @@ import de.jreality.scene.*;
 import de.jreality.scene.data.*;
 import de.jreality.scene.pick.bounding.AABB;
 import de.jreality.scene.pick.bounding.AABBTree;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.PickUtility;
 
 public class AABBPickSystem implements PickSystem {
@@ -63,18 +65,32 @@ public class AABBPickSystem implements PickSystem {
 
   private class Impl extends SceneGraphVisitor {
 
+    private Stack appStack = new Stack();
+    
+    private EffectiveAppearance eap = EffectiveAppearance.create();
+    
     private SceneGraphPath path=new SceneGraphPath();
     private ArrayList localHits=new ArrayList();
 
     private Matrix m=new Matrix();
     
-    private double tubeRadius=0.01;
-    private double pointRadius=0.015;
+    private double tubeRadius=CommonAttributes.TUBE_RADIUS_DEFAULT;
+    private double pointRadius=CommonAttributes.POINT_RADIUS_DEFAULT;
     private int signature=Pn.EUCLIDEAN;
+
+    private boolean pickPoints=false;
+    private boolean pickEdges=true;
+    private boolean pickFaces=true;
     
     public void visit(SceneGraphComponent c) {
       if (!c.isVisible()) return;
       path.push(c);
+      if (c.getAppearance()!=null) {
+        EffectiveAppearance eapNew = eap.create(c.getAppearance());
+        appStack.push(eap);
+        eap=eapNew;
+        readEApp();
+      }
       path.getMatrix(m.getArray());
       Geometry g = c.getGeometry();
       if(defaultBuildTree && g != null && g instanceof IndexedFaceSet && !checkHasTree((IndexedFaceSet) g))
@@ -82,6 +98,21 @@ public class AABBPickSystem implements PickSystem {
       else
           c.childrenAccept(this);
       path.pop();
+      if (c.getAppearance()!=null) {
+        eap=(EffectiveAppearance) appStack.pop();
+        readEApp();
+      }
+    }
+
+    private void readEApp() {
+      pickPoints=eap.getAttribute(CommonAttributes.VERTEX_DRAW, false)
+        && eap.getAttribute(CommonAttributes.POINT_SHADER+".pickable", true);
+      pickEdges=eap.getAttribute(CommonAttributes.EDGE_DRAW, true)
+        && eap.getAttribute(CommonAttributes.LINE_SHADER+".pickable", true);
+      pickFaces=eap.getAttribute(CommonAttributes.FACE_DRAW, true)
+      && eap.getAttribute(CommonAttributes.POLYGON_SHADER+".pickable", true);
+      pointRadius=eap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, CommonAttributes.POINT_RADIUS_DEFAULT);
+      tubeRadius=eap.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, CommonAttributes.TUBE_RADIUS_DEFAULT);
     }
     
     private boolean checkHasTree(IndexedFaceSet ifs) {
@@ -99,7 +130,7 @@ public class AABBPickSystem implements PickSystem {
     }
 
     public void visit(Sphere s) {
-      if (defaultBuildTree || !isPickable(s)) return;
+      if (!pickFaces || defaultBuildTree || !isPickable(s)) return;
       
       localHits.clear();
       
@@ -108,7 +139,7 @@ public class AABBPickSystem implements PickSystem {
     };
     
     public void visit(Cylinder c) {
-      if (defaultBuildTree || !isPickable(c)) return;
+      if (!pickFaces || defaultBuildTree || !isPickable(c)) return;
       
       localHits.clear();
       
@@ -117,9 +148,12 @@ public class AABBPickSystem implements PickSystem {
     };
     
     public void visit(IndexedFaceSet ifs) {
-      if (!isPickable(ifs)) return;
       
       visit((IndexedLineSet)ifs);
+
+      if (!pickFaces || !isPickable(ifs)) return;      
+
+      if (!eap.getAttribute(CommonAttributes.FACE_DRAW, true)) return;
       
       AABBTree tree = (AABBTree) ifs.getGeometryAttributes(Attribute.attributeForName("AABBTree"));
       if (tree==null) { 
@@ -144,37 +178,24 @@ public class AABBPickSystem implements PickSystem {
     
     public void visit(IndexedLineSet ils) {
       visit((PointSet)ils);
-      Object o = ils.getGeometryAttributes("edges.pickable");
-      boolean pickable = (o != null && o.equals(Boolean.TRUE));
-      AABBTree tree = (AABBTree) ils.getGeometryAttributes(Attribute.attributeForName("AABBTreeEdge"));
-      if (!pickable && tree==null) return;
+      
+      if (!pickEdges || !isPickable(ils)) return;
 
       localHits.clear();
 
-      if (tree == null) {
-        BruteForcePicking.intersectEdges(ils, signature, path, from, to, tubeRadius, localHits);
-        AABBPickSystem.this.hits.addAll(localHits);
-      } else {
-        tree.intersect(m, fromEuclidean, dirEuclidean, localHits);
-        extractEdgeTreeHits(ils, m);
-      }
+      BruteForcePicking.intersectEdges(ils, signature, path, from, to, tubeRadius, localHits);
+      AABBPickSystem.this.hits.addAll(localHits);
+
     }
 
     public void visit(PointSet ps) {
-      Object o = ps.getGeometryAttributes("vertices.pickable");
-      boolean pickable = (o != null && o.equals(Boolean.TRUE));
-      AABBTree tree = (AABBTree) ps.getGeometryAttributes(Attribute.attributeForName("AABBTreeVertex"));
-      if (!pickable && tree==null) return;
+      
+      if (!pickPoints || !isPickable(ps)) return;
 
       localHits.clear();
 
-      if (tree == null) {
-        BruteForcePicking.intersectPoints(ps, signature, path, from, to, pointRadius, localHits);
-        AABBPickSystem.this.hits.addAll(localHits);        
-      } else {
-        tree.intersect(m, fromEuclidean, dirEuclidean, localHits);
-        extractVertexTreeHits(ps, m);
-      }
+      BruteForcePicking.intersectPoints(ps, signature, path, from, to, pointRadius, localHits);
+      AABBPickSystem.this.hits.addAll(localHits);        
     }
 
     private void extractFaceTreeHits(IndexedFaceSet ifs) {

@@ -189,7 +189,7 @@ if(false) {
    * calc barycentric coordinates bary for point x in anElement el, not
    * necessarily 0 <= b[i] <= 1
    */
-  private boolean  convertToBary(
+  static boolean  convertToBary(
       double[] bary,
       double[] x0,
       double[] x1,
@@ -280,7 +280,7 @@ if(false) {
 
       return true;
   }
-  final  void correct(double[] bary) {
+  final static void correct(double[] bary) {
 
       double sum = 0;
       int j, k, i = 0;

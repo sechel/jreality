@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import de.jreality.math.Matrix;
-import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
@@ -20,19 +19,89 @@ import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
 
+// TODO: currently 3vectors are NOT supported
+
 class BruteForcePicking {
 
 	private static Matrix m=new Matrix();
 	private static Matrix mInv=new Matrix();
 	
+  //private static double[] bary = new double[4], p1=new double[4], p2=new double[4], p3=new double[4], plane=new double[4], pobj=new double[4];
   public static void intersectPolygons(IndexedFaceSet ifs, int signature, SceneGraphPath path, double[] from, double[] to, ArrayList hits) {
-	path.getMatrix(m.getArray());
-    System.out.println("BruteForcePicking.intersectPolygons()");
+    path.getMatrix(m.getArray());
+    path.getInverseMatrix(mInv.getArray()); 
+    
+    double[] from4=mInv.multiplyVector(from);
+    double[] dir4=mInv.multiplyVector(to);
+    double[] bary = new double[4], p1=new double[4], p2=new double[4], p3=new double[4], plane=new double[4], pobj=new double[4];
+    p1[3]=p2[3]=p3[3]=1;
+    IntArrayArray faces=ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray();
+    DoubleArrayArray points = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
+    if (faces.getLength() == 0 || points.getLength() == 0 ) return;
+        
+    for (int i = 0, n=faces.getLength(); i<n; i++) {
+      IntArray face = faces.getValueAt(i);
+      // simple triangulation:
+      tris: for (int j=0, c=face.getLength()-2; j<c; j++) {
+        p1=points.getValueAt(face.getValueAt(0)).toDoubleArray(p1);
+        p2=points.getValueAt(face.getValueAt(1+j)).toDoubleArray(p2);
+        p3=points.getValueAt(face.getValueAt(2+j)).toDoubleArray(p3);
+        
+        plane = P3.planeFromPoints(plane, p1, p2, p3);
+        pobj = P3.lineIntersectPlane(pobj, from4, dir4, plane);
+        if(pobj[3]*pobj[3]<Rn.TOLERANCE) continue; // parallel
+
+        // check if inside triangle
+        //TODO: convertToBary must work for homogenious coordinates
+        if (!Hit.convertToBary(bary, p1, p2, p3, pobj)) continue;
+        if (
+            (     (bary[0]<0||bary[0]>1)
+                ||(bary[1]<0||bary[1]>1)
+                ||(bary[2]<0||bary[2]>1)
+            )||((bary[0]+bary[1]+bary[2]-1)*(bary[0]+bary[1]+bary[2]-1)> Rn.TOLERANCE)) {
+          continue tris;          
+        }
+        
+        // check if for pobj = from4 + lambda * dir4: lambda >= 0
+        if (Rn.innerProduct(from4, dir4) > Rn.innerProduct(pobj, dir4)) continue tris;
+        double[] pw = m.multiplyVector(pobj);
+        hits.add(new Hit(path.pushNew(ifs), pw, Rn.euclideanDistance(from, pw), 0, PickResult.PICK_TYPE_FACE, i,j));
+      }
+    }
+
   }
 
+//  /**
+//   * tests if the triangle intersects the the given ray 
+//   * @param from ray start
+//   * @param dir ray dir
+//   * @param v0 triag p0
+//   * @param v1 triag p1
+//   * @param v2 triag p2
+//   * @return true if intersects
+//   */
+//  private static boolean intersect(double[]from, double[] dir, double[] v0,double[] v1,double[] v2){
+//    double[] edge1=Rn.subtract(null, v1, v0);
+//    double[] edge2=Rn.subtract(null, v2, v0);
+//    double[] pvec=Rn.crossProduct(null, dir, edge2);
+//    double det=Rn.innerProduct(edge1, pvec);
+//    if (det > -Rn.TOLERANCE && det < Rn.TOLERANCE)
+//        return false;
+//    det=1/det;
+//    double[] tvec=Rn.subtract(null, from, v0);
+//    double u=Rn.innerProduct(tvec, pvec)*det;
+//    if (u <0.0 || u>1.0)
+//        return false;
+//    //System.out.println("BruteForcePicking.intersect() 1");
+//    double[] qvec=Rn.crossProduct(null, tvec, edge1);
+//    double v=Rn.innerProduct(dir, qvec) * det;
+//    if (v <0.0 || v + u >1.0)
+//        return false;
+//    //System.out.println("BruteForcePicking.intersect() 2");
+//    return true;
+//  }
 
   public static void intersectEdges(IndexedLineSet ils, int signature, SceneGraphPath path, double[] from, double[] to, double tubeRadius, ArrayList localHits) {
-	  System.out.println("BruteForcePicking.intersectEdges()");
 	  path.getMatrix(m.getArray());
 	  path.getInverseMatrix(mInv.getArray());	
 	  
@@ -84,8 +153,9 @@ class BruteForcePicking {
 			  for (Iterator it = MY_HITS.iterator(); it.hasNext(); ) {
 				  double[] hitPoint = (double[]) it.next();
 				  it.remove();
-		    	  double dist=Rn.euclideanNorm(Rn.subtract(null,hitPoint,from));
-				  Hit h = new Hit(SceneGraphPath.fromList(path.toList()), hitPoint, dist ,0 , PickResult.PICK_TYPE_POINT, j,-1);
+      	  double dist=Rn.euclideanNorm(Rn.subtract(null,hitPoint,from));
+      	  // TODO: pass index j (index in the edge) to the Hit?
+				  Hit h = new Hit(SceneGraphPath.fromList(path.toList()), hitPoint, dist ,0 , PickResult.PICK_TYPE_LINE, i, -1);
 				  localHits.add(h);
 			  }			  
 		  } 
@@ -93,7 +163,6 @@ class BruteForcePicking {
   }
 
   public static void intersectPoints(PointSet ps, int signature, SceneGraphPath path, double[] from, double[] to, double pointRadius, ArrayList localHits) {
-	  System.out.println("BruteForcePicking.intersectPoints()");
 	  path.getMatrix(m.getArray());
 	  path.getInverseMatrix(mInv.getArray());	
 	  
@@ -126,17 +195,19 @@ class BruteForcePicking {
 		  points.getValueAt(j).toDoubleArray(vertex);
 		  if (!vec3) {
 			  Pn.dehomogenize(vertex, vertex);
-			  if (vertex[4]==0) continue;
+			  if (vertex[3]==0) continue;
 		  }
 		  intersectSphere(MY_HITS, vertex, fromOb3, dirOb3, pointRadius);
 		  for (Iterator i = MY_HITS.iterator(); i.hasNext(); ) {
 			  double[] hitPoint = (double[]) i.next();
+        hitPoint = m.multiplyVector(hitPoint);
 			  i.remove();
-	    	  double dist=Rn.euclideanNorm(Rn.subtract(null,hitPoint,from));
+    	  double dist=Rn.euclideanNorm(Rn.subtract(null,hitPoint,from));
 			  Hit h = new Hit(SceneGraphPath.fromList(path.toList()), hitPoint, dist ,0 , PickResult.PICK_TYPE_POINT, j,-1);
 			  localHits.add(h);
 		  }	  	  
 	  }
+    
   }
 
 
@@ -167,6 +238,7 @@ class BruteForcePicking {
 	  
 	  for (Iterator i = SPHERE_HIT_LIST.iterator(); i.hasNext(); ) {
 		  double[] hitPoint = (double[]) i.next();
+      hitPoint = m.multiplyVector(hitPoint);
 		  i.remove();
     	  double dist=Rn.euclideanNorm(Rn.subtract(null,hitPoint,from));
 		  Hit h = new Hit(SceneGraphPath.fromList(path.toList()), hitPoint, dist ,0 , PickResult.PICK_TYPE_OBJECT, -1,-1);
@@ -188,38 +260,31 @@ class BruteForcePicking {
 	  if(vertex!=null){ 
 		  from=Rn.subtract(null,from,vertex);
 	  }
+    
 	  double b=2*Rn.innerProduct(dir,from);
-	  double c=Rn.euclideanNormSquared(from)-r;	  
+	  double c=Rn.euclideanNormSquared(from)-r*r;	  
 	  double dis=Math.pow(b,2)-4*c;
 	  if(dis>=0){
 		  dis=Math.sqrt(dis);
 		  double t=(-b-dis)/2;
-		  if(t>=0){
-			  double[] hitPointOb3=new double[3];
-			  Rn.times(hitPointOb3,t,dir);
-			  Rn.add(hitPointOb3,hitPointOb3,from); //from+t*dir
-			  double[] hitPoint=new double[4];
-			  Pn.homogenize(hitPoint,hitPointOb3);
-			  hitPoint=m.multiplyVector(hitPoint);
-			  hits.add(hitPoint);	
-		  }
-		  t=t+dis; //t=(-b+dis)/2;
-		  if(t>=0){
-			  double[] hitPointOb3=new double[3];
-			  Rn.times(hitPointOb3,t,dir);
-			  Rn.add(hitPointOb3,hitPointOb3,from); //from+t*dir
-			  double[] hitPoint=new double[4];
-			  Pn.homogenize(hitPoint,hitPointOb3);
-			  hitPoint=m.multiplyVector(hitPoint);
-			  hits.add(hitPoint);
-		  }
-	  }
+      for (int i=0; i<2; i++) { // avoid duplicate code
+        t+=i*dis;
+  		  if(t>=0){
+  			  double[] hitPointOb3=new double[3];
+  			  Rn.times(hitPointOb3,t,dir);
+  			  Rn.add(hitPointOb3,hitPointOb3,from); //from+t*dir
+          if (vertex != null) Rn.add(hitPointOb3, hitPointOb3, vertex);
+  			  double[] hitPoint=new double[4];
+  			  Pn.homogenize(hitPoint,hitPointOb3);
+  			  //hitPoint=m.multiplyVector(hitPoint);
+  			  hits.add(hitPoint);	
+  		  }
+      }
+    }
   }
   
   private static final List CYLINDER_HIT_LIST=new LinkedList();
   public static void intersectCylinder(int signature, SceneGraphPath path, double[] from, double[] to, ArrayList localHits) {
-	  System.out.println("BruteForcePicking.intersectCylinder()");
-	  
 	  path.getMatrix(m.getArray());
 	  path.getInverseMatrix(mInv.getArray());
 		
