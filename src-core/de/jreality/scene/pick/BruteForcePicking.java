@@ -19,7 +19,7 @@ import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
 
-// TODO: currently 3vectors are NOT supported
+// TODO: currently 3vectors (from, to) are NOT supported
 
 class BruteForcePicking {
 
@@ -55,8 +55,6 @@ class BruteForcePicking {
         Pn.dehomogenize(p2, p2);
         Pn.dehomogenize(p3, p3);
         
-        // check if inside triangle
-        //TODO: convertToBary must work for homogenious coordinates
         if (!Hit.convertToBary(bary, p1, p2, p3, pobj)) continue;
         if (
             (     (bary[0]<0||bary[0]>1)

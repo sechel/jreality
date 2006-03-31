@@ -92,8 +92,6 @@ static private int[][] icoIndices = {
 	}
 	
 	public TestBruteForcePicking(){
-		AABBPickSystem.defaultBuildTree=false;
-		
 		SceneGraphComponent geoNode=new  SceneGraphComponent();
 		
 		SceneGraphComponent cmpCH = new SceneGraphComponent();

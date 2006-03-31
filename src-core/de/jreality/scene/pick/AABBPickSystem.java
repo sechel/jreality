@@ -27,7 +27,7 @@ public class AABBPickSystem implements PickSystem {
   
   private Comparator cmp = new Hit.HitComparator();
   
-  static boolean defaultBuildTree=true;
+  static boolean defaultBuildTree=false;
   
   private double[] from;
   private double[] to;
