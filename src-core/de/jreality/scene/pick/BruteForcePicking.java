@@ -51,6 +51,10 @@ class BruteForcePicking {
         pobj = P3.lineIntersectPlane(pobj, from4, dir4, plane);
         if(pobj[3]*pobj[3]<Rn.TOLERANCE) continue; // parallel
 
+        Pn.dehomogenize(p1, p1);
+        Pn.dehomogenize(p2, p2);
+        Pn.dehomogenize(p3, p3);
+        
         // check if inside triangle
         //TODO: convertToBary must work for homogenious coordinates
         if (!Hit.convertToBary(bary, p1, p2, p3, pobj)) continue;
@@ -131,23 +135,27 @@ class BruteForcePicking {
 	  
 	  DoubleArray point = points.getValueAt(0);
 	  boolean vec3 = point.getLength() == 3;
-	  double[] vertex1 = vec3 ? new double[3] : new double[4];
-	  double[] vertex2 = vec3 ? new double[3] : new double[4];  
-	  if(edge.getLength()>=2){
-		  points.getValueAt(edge.getValueAt(0)).toDoubleArray(vertex1);
-		  points.getValueAt(edge.getValueAt(1)).toDoubleArray(vertex2);
-	  }
+    double[] vertex1 = new double[3];
+    double[] vertex2 = new double[3];
+    double[] vecRaw=vec3?null:new double[4];
+//	  if(edge.getLength()>=2){
+//		  points.getValueAt(edge.getValueAt(0)).toDoubleArray(vertex1);
+//		  points.getValueAt(edge.getValueAt(1)).toDoubleArray(vertex2);
+//	  }
 	  
 	  LinkedList MY_HITS = new LinkedList();
 	  
 	  for(int i=0, m=edges.getLength();i<m;i++){
 		  edge = edges.getValueAt(i);
 		  for(int j=0, n=edge.getLength()-1;j<n;j++){
-			  points.getValueAt(edge.getValueAt(j)).toDoubleArray(vertex1);
-			  points.getValueAt(edge.getValueAt(j+1)).toDoubleArray(vertex2);
-			  if (!vec3) {
-				  Pn.dehomogenize(vertex1, vertex1);
-				  Pn.dehomogenize(vertex2, vertex2);
+        if (vec3) {
+  			  points.getValueAt(edge.getValueAt(j)).toDoubleArray(vertex1);
+	  		  points.getValueAt(edge.getValueAt(j+1)).toDoubleArray(vertex2);
+        } else {
+          points.getValueAt(edge.getValueAt(j)).toDoubleArray(vecRaw);
+          Pn.dehomogenize(vertex1, vecRaw);
+          points.getValueAt(edge.getValueAt(j+1)).toDoubleArray(vecRaw);
+				  Pn.dehomogenize(vertex2, vecRaw);
 			  }
 			  intersectCylinder(MY_HITS,fromOb3,dirOb3,vertex1,vertex2,tubeRadius);
 			  for (Iterator it = MY_HITS.iterator(); it.hasNext(); ) {
