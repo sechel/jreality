@@ -188,15 +188,19 @@ class BruteForcePicking {
 	  if (points.getLength() == 0) return;
 	  DoubleArray point = points.getValueAt(0);
 	  boolean vec3 = point.getLength() == 3;
-	  double[] vertex = vec3 ? new double[3] : new double[4];
-	  
+	  double[] vertexRaw = vec3 ? new double[3] : new double[4];
+	  double[] vertex = new double[3];
+    
 	  LinkedList MY_HITS = new LinkedList();
+    
 	  for (int j = 0, n=points.getLength(); j<n; j++) {
-		  points.getValueAt(j).toDoubleArray(vertex);
 		  if (!vec3) {
-			  Pn.dehomogenize(vertex, vertex);
-			  if (vertex[3]==0) continue;
-		  }
+        points.getValueAt(j).toDoubleArray(vertexRaw);  
+			  if (vertexRaw[3]==0) continue;
+        Pn.dehomogenize(vertex, vertexRaw);
+		  } else {
+        points.getValueAt(j).toDoubleArray(vertex);  
+      }
 		  intersectSphere(MY_HITS, vertex, fromOb3, dirOb3, pointRadius);
 		  for (Iterator i = MY_HITS.iterator(); i.hasNext(); ) {
 			  double[] hitPoint = (double[]) i.next();
@@ -257,9 +261,7 @@ class BruteForcePicking {
   private static void intersectSphere(List hits, final double[] vertex, final double[] f, final double[] dir, double r) {
 	  double[] from=f;
 	  Rn.normalize(dir,dir);
-	  if(vertex!=null){ 
-		  from=Rn.subtract(null,from,vertex);
-	  }
+	  if(vertex!=null) from=Rn.subtract(null,from,vertex);
     
 	  double b=2*Rn.innerProduct(dir,from);
 	  double c=Rn.euclideanNormSquared(from)-r*r;	  
@@ -270,7 +272,7 @@ class BruteForcePicking {
       for (int i=0; i<2; i++) { // avoid duplicate code
         t+=i*dis;
   		  if(t>=0){
-  			  double[] hitPointOb3=new double[3];
+  		    double[] hitPointOb3=new double[3];
   			  Rn.times(hitPointOb3,t,dir);
   			  Rn.add(hitPointOb3,hitPointOb3,from); //from+t*dir
           if (vertex != null) Rn.add(hitPointOb3, hitPointOb3, vertex);
