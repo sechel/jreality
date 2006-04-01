@@ -11,7 +11,6 @@ import javax.swing.JTree;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
-import de.jreality.ui.treeview.JTreeRenderer;
 import de.jreality.ui.treeview.SceneTreeModel;
 import de.jreality.util.LoggingSystem;
 

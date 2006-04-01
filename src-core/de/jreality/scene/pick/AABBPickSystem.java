@@ -134,7 +134,7 @@ public class AABBPickSystem implements PickSystem {
       
       localHits.clear();
       
-      BruteForcePicking.intersectSphere(signature, path, from, to, localHits);
+      BruteForcePicking.intersectSphere(s, signature, path, from, to, localHits);
       AABBPickSystem.this.hits.addAll(localHits);
     };
     
@@ -143,7 +143,7 @@ public class AABBPickSystem implements PickSystem {
       
       localHits.clear();
       
-      BruteForcePicking.intersectCylinder(signature, path, from, to, localHits);
+      BruteForcePicking.intersectCylinder(c, signature, path, from, to, localHits);
       AABBPickSystem.this.hits.addAll(localHits);
     };
     

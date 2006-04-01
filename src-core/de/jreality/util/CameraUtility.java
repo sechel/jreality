@@ -279,6 +279,10 @@ public class CameraUtility {
 		cam.setViewPort(new Rectangle2D.Double(-xmin, -ymin, xmin+xmax, ymin+ymax));
 	}
 
+  public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath) {
+    encompass(avatarPath, scene, cameraPath, 0, Pn.EUCLIDEAN);
+  }
+  
   public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath, double margin, int signature) {
     Rectangle3D bounds = GeometryUtility.calculateBoundingBox(scene.getLastComponent());
     if (bounds.isEmpty()) return;
