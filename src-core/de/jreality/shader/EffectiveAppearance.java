@@ -2,7 +2,9 @@
 package de.jreality.shader;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
+import java.util.Vector;
 
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
@@ -118,4 +120,13 @@ public class EffectiveAppearance {
     return true;
   }
   
+  public List getAppearanceHierarchy()	{
+	  Vector v = new Vector();
+	  EffectiveAppearance pa = this;
+	  if (pa.app != null) v.add(pa.app);
+	  while ( (pa = pa.parentApp) != null)	{
+		  if (pa.app != null) v.add(pa.app);
+	  }
+	  return v;
+  }
 }
