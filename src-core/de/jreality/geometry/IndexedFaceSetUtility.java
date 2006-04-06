@@ -13,7 +13,8 @@ import java.util.Iterator;
 import java.util.Vector;
 import java.util.logging.Level;
 
-.import de.jreality.math.Pn;
+import de.jreality.math.Matrix;
+import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
