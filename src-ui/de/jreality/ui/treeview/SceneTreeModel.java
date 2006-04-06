@@ -37,7 +37,7 @@ public class SceneTreeModel extends AbstractTreeModel {
     setSceneRoot(root);
   }
 
-  void dispose() {
+  public void dispose() {
     builder.dispose();
     builder = null;
   }
