@@ -34,8 +34,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -58,8 +56,6 @@ import javax.swing.text.StyleConstants;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import org.w3c.dom.Attr;
-
 import jterm.BshEvaluator;
 import jterm.JTerm;
 import jterm.Session;
@@ -70,8 +66,14 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.ReaderJRS;
 import de.jreality.reader.Readers;
 import de.jreality.renderman.RIBViewer;
-import de.jreality.scene.*;
-import de.jreality.scene.data.Attribute;
+import de.jreality.scene.Geometry;
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.Scene;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.SceneGraphVisitor;
+import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.scene.tool.DraggingTool;
@@ -84,9 +86,6 @@ import de.jreality.scene.tool.ShipNavigationTool;
 import de.jreality.scene.tool.Tool;
 import de.jreality.scene.tool.ToolSystemViewer;
 import de.jreality.scene.tool.config.ToolSystemConfiguration;
-import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.ImageData;
-import de.jreality.shader.TextureUtility;
 import de.jreality.ui.beans.InspectorPanel;
 import de.jreality.ui.treeview.JListRenderer;
 import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
@@ -163,7 +162,15 @@ public class ViewerApp
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
   }
   
+  public ViewerApp(Viewer viewer) throws Exception	{
+    this(null, viewer);
+  }
+
   public ViewerApp() throws Exception {
+    this(loadDefaultScene(), null);
+  }
+  
+  private ViewerApp(JrScene scene, Viewer template) throws Exception {
     
     bshEval = new BshEvaluator();
     
@@ -194,9 +201,10 @@ public class ViewerApp
     uiFactory.setInspector(inspector);
     uiFactory.setConsole(jterm);
 
-    String env = System.getProperty("de.jreality.viewerapp.env", "desktop");
-    initDefaultScene(env);
-
+    if (scene !=null) loadScene(scene);
+    else if (template != null) loadScene(template);
+    else throw new Error();
+    
     createFrame(uiFactory.createViewerContent());
     initFrame();
     initTree();
@@ -683,6 +691,44 @@ public class ViewerApp
 //    CameraUtility.encompass(currViewer.getAvatarPath(), emptyPick, currViewer.getCameraPath());
   }
   
+  private void loadScene(Viewer template) {
+	    try {
+	      currViewer = createViewer();
+	    } catch (Exception e) {
+	      e.printStackTrace();
+	    }
+	    
+	    if (autoRender && root != null)
+	      renderTrigger.removeSceneGraphComponent(root);
+
+	    root = template.getSceneRoot();
+	    currViewer.setSceneRoot(root);
+	    SceneGraphPath p = template.getCameraPath();
+	    if (p != null) currViewer.setCameraPath(p);
+		currViewer.initializeTools();
+//	    p = s.getPath("avatarPath");
+//	    if (p != null) currViewer.setAvatarPath(p);
+//	    emptyPick = s.getPath("emptyPickPath");
+//	    if (emptyPick != null) {
+//	      currSceneNode = scene = emptyPick.getLastComponent();
+//	      currViewer.setEmptyPickPath(emptyPick);
+//	    }
+
+	    uiFactory.setViewer(currViewer.getViewingComponent());
+	    uiFactory.setRoot(root);
+	    createFrame(uiFactory.createViewerContent());
+	    initFrame();
+	    initTree();
+	    
+	    if (autoRender)
+	      renderTrigger.addSceneGraphComponent(root);
+
+	    renderTrigger.forceRender();
+
+//	    frame.repaint();
+//	    CameraUtility.encompass(currViewer.getAvatarPath(), emptyPick, currViewer.getCameraPath());
+	  }
+
   private ToolSystemViewer createViewer() throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
   {
     if (viewers == null) {
@@ -721,20 +767,35 @@ public class ViewerApp
     if (cfg == null) throw new IllegalStateException("couldn't load config ["+config+"]");
     ToolSystemViewer v = new ToolSystemViewer(viewerSwitch, cfg);
     v.setPickSystem(new AABBPickSystem());
+    try {
+        bshEval.getInterpreter().set("_toolSystemViewer", v);
+      } catch (EvalError e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
     return v;
   }
-  private void initDefaultScene(String environment) {
+  private static JrScene loadDefaultScene() {
+	String environment = System.getProperty("de.jreality.viewerapp.env", "desktop");
+	return loadDefaultScene(environment);
+  }
+	
+  private static JrScene loadDefaultScene(String environment) {
     if (!environment.equals("desktop") && !environment.equals("portal"))
       throw new IllegalArgumentException("unknown environment!");
     try {
       ReaderJRS r = new ReaderJRS();
       r.setInput(new Input(ViewerApp.class.getResource(environment+"-scene.jrs")));
-      loadScene(r.getScene());
+      return r.getScene();
     } catch (IOException ioe) {
-      JOptionPane.showMessageDialog(frame, "Load failed: "+ioe.getMessage());
+      throw new Error();
     }
   }
 
+  private void initDefaultScene(String env) {
+	  loadScene(loadDefaultScene(env));
+  }
+  
   private void attach(final SceneGraphComponent parent, final SceneGraphNode child) {
     SceneGraphUtility.addChildNode(parent, child);
   }
@@ -747,5 +808,9 @@ public class ViewerApp
   {
     return (Viewer)Class.forName(viewer).newInstance();
   }
+
+public ToolSystemViewer getCurrViewer() {
+	return currViewer;
+}
 
 }
