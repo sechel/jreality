@@ -24,7 +24,6 @@ import javax.swing.JPanel;
 import net.java.games.jogl.*;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
 
 /**
