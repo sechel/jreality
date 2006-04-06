@@ -13,7 +13,7 @@ import java.util.Iterator;
 import java.util.Vector;
 import java.util.logging.Level;
 
-import de.jreality.math.Pn;
+.import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
@@ -1124,4 +1124,26 @@ public class IndexedFaceSetUtility {
         	sgc.setGeometry(ifs);
         	return sgc;
         }
+       
+       /**
+        * applies the given matrix to each vector in <code>data</code>.
+        * <br> If the columns of <code>data</code> are not 4 vectors, then the
+        * vectors are assumed to have w=1, and the result is dehomogenized before
+        * writing back.
+        * @param data array of dimension [n][1-4]
+        * @param matrix the matrix to transform all the vectors
+        */
+       public static void transformVertexData(double[][] data, Matrix matrix) {
+         final double[] p = new double[4];
+         int j;
+         for (int i = 0; i < data.length; i++) {
+           boolean dehomogenize = data[i].length < 4;
+           for (j = 0; j<data[i].length; j++) p[j] = data[i][j];
+           for (; j<4; j++) p[j] = j == 3 ? 1 : 0;
+           double[] transformed = matrix.multiplyVector(p);
+           double w = dehomogenize ? transformed[3] : 1;
+           for (j = 0; j<data[i].length; j++) data[i][j] = transformed[j]/w;           
+         }
+       }
+       
 }
