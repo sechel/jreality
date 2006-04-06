@@ -5,12 +5,17 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.LinkedList;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
-import de.jreality.math.*;
-import de.jreality.scene.*;
+import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
+import de.jreality.math.P3;
+import de.jreality.math.Pn;
+import de.jreality.math.Rn;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
@@ -65,42 +70,10 @@ public class AABBTree {
       createTree(start, end);
     }
     
-    public static AABBTree constructVertexAABB(PointSet pointSet, double eps) {
-      return constructVertexAABB(pointSet, eps, false);
-    }    
-    
-    public static AABBTree constructVertexAABB(PointSet pointSet, double eps, boolean debug) {
-      double[][][] polygons = getPointsAsPolygons(pointSet, eps);
-      TreePolygon[] tris = new TreePolygon[polygons.length];
-      for (int i = 0; i < tris.length; i++) {
-        tris[i] = new TreePolygon(polygons[i], i);
-        tris[i].putCentriod();
-        tris[i].index = i;
-      }
-      // eps is hacked for line picking - should be used for vertices as well...
-      AABBTree ret = new AABBTree(tris, 1, 0, tris.length-1, false, false, 0, debug);
-      for (int i = 0; i < tris.length; i++) {
-          tris[i].centroid = null;
-      }
-      return ret;
-  }
-
-    public static AABBTree constructEdgeAABB(IndexedLineSet lineSet, double eps) {
-      return constructEdgeAABB(lineSet, eps, false);
-    }    
-    
-    public static AABBTree constructEdgeAABB(IndexedLineSet lineSet, double eps, boolean debug) {
-      TreePolygon[] tris = getEdgesAsPolygons(lineSet, eps);
-      AABBTree ret = new AABBTree(tris, 1, 0, tris.length-1, false, true, eps, debug);
-      for (int i = 0; i < tris.length; i++) {
-          tris[i].centroid = null;
-      }
-      return ret;
-  }
-
     public static AABBTree construct(IndexedFaceSet faceSet, int maxPolysPerLeaf) {
       return construct(faceSet, maxPolysPerLeaf, false);
     }
+
     /**
      * Recreates this OBBTree's information for the given TriMesh.
      *
@@ -162,50 +135,6 @@ public class AABBTree {
       });
     }
 
-    /**
-     * 
-     * @param ifs
-     * @param maxPolys
-     */
-    public static void constructAndRegisterVertexAABB(final PointSet ifs, final double eps) {
-      final AABBTree first = constructVertexAABB(ifs, eps);
-      ifs.setGeometryAttributes("AABBTreeVertex", first);
-      ifs.addGeometryListener(new GeometryListener() {
-        public void geometryChanged(GeometryEvent ev) {
-          if (ev.getChangedVertexAttributes().contains(Attribute.COORDINATES)) {
-            final AABBTree newAABB = constructVertexAABB(ifs, eps);
-            ev.enqueueWriter(new Runnable() {
-              public void run() {
-                ifs.setGeometryAttributes("AABBTreeVertex", newAABB);
-              }
-            });
-          }
-        }
-      });
-    }
-
-    /**
-     * 
-     * @param ifs
-     * @param maxPolys
-     */
-    public static void constructAndRegisterEdgeAABB(final IndexedLineSet ifs, final double eps) {
-      final AABBTree first = constructEdgeAABB(ifs, eps);
-      ifs.setGeometryAttributes("AABBTreeEdge", first);
-      ifs.addGeometryListener(new GeometryListener() {
-        public void geometryChanged(GeometryEvent ev) {
-          if (ev.getChangedVertexAttributes().contains(Attribute.COORDINATES) || ev.getChangedEdgeAttributes().contains(Attribute.INDICES)) {
-            final AABBTree newAABB = constructEdgeAABB(ifs, eps);
-            ev.enqueueWriter(new Runnable() {
-              public void run() {
-                ifs.setGeometryAttributes("AABBTreeEdge", newAABB);
-              }
-            });
-          }
-        }
-      });
-    }
-
     private static double[][][] getMeshAsPolygons(IndexedFaceSet faceSet) {
       int numFaces = faceSet.getNumFaces();
       double[][][] ret = new double[numFaces][][];
@@ -221,48 +150,6 @@ public class AABBTree {
         }
       }
       return ret;
-    }
-
-    private static double[][][] getPointsAsPolygons(PointSet pointSet, double eps) {
-      int numPoints = pointSet.getNumPoints();
-      double[][][] ret = new double[numPoints][][];
-      DoubleArrayArray verts = pointSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
-      double[] epsVec = new double[verts.getLengthAt(0)];
-      for (int i = 0; i < epsVec.length; i++) epsVec[i]=eps;
-      double[] tmp = new double[verts.getLengthAt(0)];
-      for (int i = 0; i < numPoints; i++) {
-        ret[i] = new double[2][];
-        DoubleArray vertex = verts.getValueAt(i);
-        tmp = vertex.toDoubleArray(tmp);
-        ret[i][0]=Rn.subtract(null, tmp, epsVec);
-        ret[i][1]=Rn.add(null, tmp, epsVec);
-      }
-      return ret;
-    }
-
-    private static TreePolygon[] getEdgesAsPolygons(IndexedLineSet lineSet, double eps) {
-      int numEdges = lineSet.getNumEdges();
-      LinkedList ret = new LinkedList();
-      IntArrayArray edges = lineSet.getEdgeAttributes(Attribute.INDICES).toIntArrayArray();
-      DoubleArrayArray verts = lineSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
-      double[][] tmp = new double[2][]; // tmp storage for line segments
-      for (int i = 0; i < numEdges; i++) {
-        IntArray edge = edges.getValueAt(i);
-        int faceLength = edge.getLength();
-        DoubleArray startVertex = verts.getValueAt(edge.getValueAt(0));
-        tmp[1]=startVertex.toDoubleArray(null);
-        for (int j = 1; j < faceLength; j++) {
-          DoubleArray endVertex = verts.getValueAt(edge.getValueAt(j));
-          tmp[0] = tmp[1];
-          tmp[1] = endVertex.toDoubleArray(null);
-          TreePolygon tp = new TreePolygon((double[][]) tmp.clone(), i, j-1);
-          tp.putCentriod();
-          ret.add(tp);
-        }
-      }
-      TreePolygon[] tris = new TreePolygon[ret.size()];
-      tris = (TreePolygon[]) ret.toArray(tris);
-      return tris;
     }
 
     /**

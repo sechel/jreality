@@ -27,8 +27,6 @@ public class AABBPickSystem implements PickSystem {
   
   private Comparator cmp = new Hit.HitComparator();
   
-  static boolean defaultBuildTree=false;
-  
   private double[] from;
   private double[] to;
   
@@ -92,11 +90,7 @@ public class AABBPickSystem implements PickSystem {
         readEApp();
       }
       path.getMatrix(m.getArray());
-      Geometry g = c.getGeometry();
-      if(defaultBuildTree && g != null && g instanceof IndexedFaceSet && !checkHasTree((IndexedFaceSet) g))
-          c.childrenWriteAccept(this,false,false,false,false,true,false);
-      else
-          c.childrenAccept(this);
+      c.childrenAccept(this);
       path.pop();
       if (c.getAppearance()!=null) {
         eap=(EffectiveAppearance) appStack.pop();
@@ -130,7 +124,7 @@ public class AABBPickSystem implements PickSystem {
     }
 
     public void visit(Sphere s) {
-      if (!pickFaces || defaultBuildTree || !isPickable(s)) return;
+      if (!pickFaces || !isPickable(s)) return;
       
       localHits.clear();
       
@@ -139,7 +133,7 @@ public class AABBPickSystem implements PickSystem {
     };
     
     public void visit(Cylinder c) {
-      if (!pickFaces || defaultBuildTree || !isPickable(c)) return;
+      if (!pickFaces || !isPickable(c)) return;
       
       localHits.clear();
       
@@ -153,17 +147,7 @@ public class AABBPickSystem implements PickSystem {
 
       if (!pickFaces || !isPickable(ifs)) return;      
 
-      if (!eap.getAttribute(CommonAttributes.FACE_DRAW, true)) return;
-      
       AABBTree tree = (AABBTree) ifs.getGeometryAttributes(Attribute.attributeForName("AABBTree"));
-      if (tree==null) { 
-          if (defaultBuildTree) {
-              System.out.println("make tree ....");
-              PickUtility.assignFaceAABBTree(ifs);
-              tree = (AABBTree) ifs.getGeometryAttributes(Attribute.attributeForName("AABBTree"));
-              System.out.println("made tree ...."+tree);
-          } 
-      }
       
       localHits.clear();
       
@@ -209,65 +193,6 @@ public class AABBPickSystem implements PickSystem {
       }
     }
 
-    /******************** ugly stuff start *******************/
-    
-    private void extractEdgeTreeHits(IndexedLineSet ils, Matrix m) {
-      for (Iterator i = localHits.iterator(); i.hasNext(); ) {
-        DoubleArrayArray vertices = ils.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
-        int[] indices = (int[]) i.next();
-        int index = indices[0];
-        int subIndex = indices[1];
-        IntArray line = ils.getEdgeAttributes(Attribute.INDICES).toIntArrayArray().getValueAt(index);
-        DoubleArray point1 = vertices.getValueAt(line.getValueAt(subIndex));
-        DoubleArray point2 = vertices.getValueAt(line.getValueAt(subIndex+1));
-        // for the distance we choose the farest point of the lineSegment
-        // so that a conflict with this vertex is resolved by sorting the vertex before this edge
-        double[] p1 = point1.toDoubleArray(new double[4]);
-        double[] p2 = point2.toDoubleArray(new double[4]);
-        
-        double[] p;
-        if (distFromRay(p1) < distFromRay(p2))
-          p=p1;
-        else
-          p=p2;
-        
-        if (point1.getLength() == 4) {
-          p1 = P3.dehomogenize(p1, p1);
-          p2 = P3.dehomogenize(p2, p2);
-        }
-        else p[3] = 1;
-        if (p[3] == 0) throw new RuntimeException("pick at infinity");
-        p = m.multiplyVector(p);
-        double[] pointWorld = new double[]{p[0], p[1], p[2]};
-        double[] center = Rn.times(null, 0.5, Rn.add(p1, p1, p2));
-        Hit h = new Hit(path.pushNew(ils), center, Rn.euclideanDistance(fromEuclidean, pointWorld), 0, PickResult.PICK_TYPE_LINE, index,-1);
-        if (h.getDist() <= maxDist) AABBPickSystem.this.hits.add(h);
-      }
-    }
-
-    private void extractVertexTreeHits(PointSet ps, Matrix m) {
-      for (Iterator i = localHits.iterator(); i.hasNext(); ) {
-        int index = ((Integer)i.next()).intValue();
-        DoubleArray point = ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray().getValueAt(index);
-        double[] p = point.toDoubleArray(new double[4]);
-        if (point.getLength() == 4) p = P3.dehomogenize(p, p);
-        else p[3] = 1;
-        if (p[3] == 0) throw new RuntimeException("pick at infinity");
-        p = m.multiplyVector(p);
-        double[] pointWorld = new double[]{p[0], p[1], p[2]};
-        Hit h = new Hit(path.pushNew(ps), pointWorld, Rn.euclideanDistance(fromEuclidean, pointWorld), 0, PickResult.PICK_TYPE_POINT, index,-1);
-        if (h.getDist() <= maxDist) AABBPickSystem.this.hits.add(h);
-      }
-    }
-
-    private double distFromRay(double[] pickPoint) {
-      double[] tf = Rn.subtract(null, dirEuclidean, fromEuclidean);
-      double[] pf = Rn.subtract(null, pickPoint, fromEuclidean);
-      double k = Rn.innerProduct(pf, tf) / Rn.euclideanNorm(tf);
-      double[] pp = Rn.subtract(null, pf, Rn.times(null, k, tf));
-      return Rn.euclideanNorm(pp);
-    }
-    /******************** ugly stuff end *******************/
   }
   
 }
