@@ -212,6 +212,7 @@ class BoundingBoxTraversal extends SceneGraphVisitor {
   	double[][] data = dl.toDoubleArrayArray(null);
 	double[][] tmpVec = new double[2][3];
 	int length = data.length;
+  if (length == 0) return;
 	int vectorLength = data[0].length;
 	if (vectorLength<3 || vectorLength > 4) return;
 	Rn.matrixTimesVector(data, currentTrafo, data);
