@@ -23,7 +23,6 @@
 package de.jreality.scene.tool;
 
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import de.jreality.math.Matrix;
@@ -44,15 +43,16 @@ public class PointDragEventTool extends Tool {
 
   protected PointDragListener dragListener;
   
-    List activationSlots = new LinkedList();
-    List usedSlots = new LinkedList();
+    List activationSlots;
+    private static final InputSlot pointerSlot = InputSlot.getDevice("PointerTransformation");
+    List usedSlots = Collections.singletonList(pointerSlot);
     
-    InputSlot activationSlot = InputSlot.getDevice("PointDragActivation");
-    InputSlot pointerSlot = InputSlot.getDevice("PointerTransformation");
+    public PointDragEventTool(String dragSlotName) {
+      activationSlots = Collections.singletonList(InputSlot.getDevice(dragSlotName));
+    }
     
     public PointDragEventTool() {
-        activationSlots.add(activationSlot);
-        usedSlots.add(pointerSlot);
+      this("PointDragActivation");
     }
     
     public List getActivationSlots() {
