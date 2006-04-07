@@ -12,7 +12,6 @@ import de.jreality.scene.data.StorageModel;
 import de.jreality.geometry.Primitives;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.util.SceneGraphUtility;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Pn;
 
@@ -413,7 +412,9 @@ public class CoordinateSystemFactory {
 		component.addChild(coords.getAxes());
 			
 //		ViewerApp.display(coords.getBox());
-		ViewerApp.display(component);
+
+// does not compile with ant - move this into a test/... file 
+//		ViewerApp.display(component);
 	}
 	
 }
