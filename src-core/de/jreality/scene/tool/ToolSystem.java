@@ -343,7 +343,6 @@ private SceneGraphPath avatarPath;
       if (toolContext.isRejected()) {
         iter.remove();
         toolContext.rejected=false;
-        System.out.println("ToolSystem.activateToolSet() rejected:"+tool);
       }
     }
   }
