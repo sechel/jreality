@@ -66,7 +66,7 @@ class NodeWriter extends SceneGraphVisitor {
   }
 
   public void visit(IndexedLineSet ils) {
-    writer.addAttribute("type", mapper.serializedClass(DirectionalLight.class));
+    writer.addAttribute("type", mapper.serializedClass(IndexedLineSet.class));
     copyAttr(ils);
   }
 
