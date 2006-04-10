@@ -12,6 +12,7 @@ import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
+import de.jreality.util.LoggingSystem;
 
 public class Hit implements PickResult {
   final SceneGraphPath path;
@@ -222,9 +223,8 @@ if(false) {
               i0 = 1;
               i2 = 0;
           } else {
-
-              System.out.println(
-                  "mBaryInElementConvertFromVec3: triangle degenerated?");
+              
+            LoggingSystem.getLogger(Hit.class).info("mBaryInElementConvertFromVec3: triangle degenerated?");
               //              
               //              fprintf(stderr, "gmBaryInElementConvertFromVec3: triangle
               // degenerated?\n");
@@ -264,8 +264,7 @@ if(false) {
       if (Math
           .abs(x0[i2] * bary[0] + x1[i2] * bary[1] + x2[i2] * bary[2] - x[i2])
           > 1.e-3) {
-          System.out.println(
-              "gmBaryInElementConvertFromVec3: test for third row failed."
+        LoggingSystem.getLogger(Hit.class).info("gmBaryInElementConvertFromVec3: test for third row failed."
                   +Math.abs(x0[i2] * bary[0] + x1[i2] * bary[1] + x2[i2] * bary[2] - x[i2])
                   );
           //          fprintf(stderr, "gmBaryInElementConvertFromVec3: test for third
@@ -298,11 +297,6 @@ if(false) {
       bary[i] = 1. - bary[j] - bary[k];
   }
   
-  
-  
-  
-  
-
   public double[] getTextureCoordinates() {
       hasTextureCoordinates();
           return texCoords;

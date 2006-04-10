@@ -67,7 +67,6 @@ class BruteForcePicking {
           continue tris;          
         }
         // TODO: the barycentric coordinates should be used in the PickResult for tex coordindates
-        
         // check if for pobj = from4 + lambda * dir4: lambda >= 0
         if (Rn.innerProduct(from4, dir4) > Rn.innerProduct(pobj, dir4)) continue tris;
         double[] pw = m.multiplyVector(pobj);
