@@ -102,7 +102,7 @@ faceColor returns[Color fC]
 {Color specular; double d; fC= new Color(255,0,0);}
 	: "SurfaceColor" OPEN_BRACKET
 			fC=color
-			( COLLON specular=color	(	COLLON 	d=doublething )?)?	// ignore !
+			( COLON specular=color	(	COLON 	d=doublething )?)?	// ignore !
 		CLOSE_BRACKET 
 	;
 
@@ -114,7 +114,7 @@ objectList [Color plC, Color fC]
 		| plC=plThing[plC]
 		| appThing
 	 )
-	 ( COLLON 
+	 ( COLON 
 		(	
 			  list[ plC, fC]
 			| fC =faceThing[fC]
@@ -132,7 +132,7 @@ color returns[Color c]
 
 		: "RGBColor" OPEN_BRACKET 
 					{double r,g,b; r=b=g=0;}
-					r=doublething COLLON g=doublething COLLON b=doublething
+					r=doublething COLON g=doublething COLON b=doublething
 				CLOSE_BRACKET 
 					{
 					 float red,green,blue;
@@ -142,7 +142,7 @@ color returns[Color c]
 		| "Hue" 	OPEN_BRACKET 
 					{double h; double s; double b; h=s=b=0.5;}
 					h= doublething 
-					(COLLON s=doublething COLLON b=doublething )?
+					(COLON s=doublething COLON b=doublething )?
 				CLOSE_BRACKET 
 					{
 					 float hue,sat,bri;	 // konvert to float
@@ -158,9 +158,9 @@ color returns[Color c]
 					}
 		| "CMYKColor" OPEN_BRACKET 
 					{double cy,ma,ye,k; cy=ma=ye=k=0; }
-					cy=doublething COLLON 
-					ma=doublething COLLON 
-					ye=doublething COLLON 
+					cy=doublething COLON 
+					ma=doublething COLON 
+					ye=doublething COLON 
 					k=doublething 
 				CLOSE_BRACKET 
 					{
@@ -180,7 +180,7 @@ v=new Vector();}
 		: OPEN_BRACE
 		  point=vektor
 			{v.add(point);}
-		  (COLLON 
+		  (COLON 
 			{point= new double[3];}
 			point=vektor
 			{v.add(point);}
@@ -194,7 +194,7 @@ vektor returns[double[] res]
 {res =new double [3];
 double res1,res2,res3;}
 	: 	OPEN_BRACE 
-			res1=doublething COLLON res2=doublething COLLON res3=doublething 
+			res1=doublething COLON res2=doublething COLON res3=doublething 
 		CLOSE_BRACE
 			{res[0]=res1;
 			res[1]=res2;
@@ -218,14 +218,19 @@ pointBlock [Color plCgiven] returns [Color plC]
 	   CLOSE_BRACKET 
 	)
 	(
+	COLON
+	(
+	
 	   plC=color
-	 | COLLON "Point"
+	 |( "Point"
 	   OPEN_BRACKET
 				{v=new double [3];}
 				v=vektor
 				{points.add(v);
 				 colors.add(getRGBColor(plC));}
 	   CLOSE_BRACKET 
+	   )
+	 )
 	)*
 	{
 		PointSetFactory psf = new PointSetFactory();
@@ -279,7 +284,7 @@ lineBlock [Color plCgiven] returns[Color plC]			// liest erst eine, dann alle di
 	 CLOSE_BRACKET 
 	(
 	   plC=color
-	 | COLLON "Line"	
+	 | COLON "Line"	
 	   OPEN_BRACKET
 				line=lineset 			// das ist ein Vector von double[3]
 				{
@@ -342,7 +347,7 @@ polygonBlock [Color fCgiven] returns[Color fC]
  Vector polysIndices= new Vector();
  int count=0;						// zaehlt die Punkte mit
  }
-	:"Polygon"
+	:"Polygon"{System.out.println("ok1");}
 	 OPEN_BRACKET
 				poly=lineset 			// das ist ein Vector von double[3]
 				{
@@ -357,10 +362,11 @@ polygonBlock [Color fCgiven] returns[Color fC]
 				    colors.add(getRGBColor(fC));
 				}
 	 CLOSE_BRACKET 
-	(
-	   fC=color
-	 | COLLON "Polygon"
-	   OPEN_BRACKET
+	( COLON
+	 (
+	   (fC=faceColor {System.out.println("ok");})
+	  |("Polygon"{System.out.println("ok2");}
+	    OPEN_BRACKET
 				poly=lineset 			// das ist ein Vector von double[3]
 				{
 					polyIndices=new int[poly.size()+1];
@@ -373,7 +379,8 @@ polygonBlock [Color fCgiven] returns[Color fC]
 					polysIndices.add(polyIndices);
 					colors.add(getRGBColor(fC));
 				}
-	   CLOSE_BRACKET 
+	    CLOSE_BRACKET
+	  ))
 	)*
 	{
 		double [][] data= new double[count][];
@@ -416,7 +423,7 @@ cubic [ Color fC]
 			v2[0]=v2[1]=v2[2]=1;
 			double[] v=new double[3];
 			}
-			v=vektor ( COLLON v2=vektor )? 
+			v=vektor ( COLON v2=vektor )? 
 	 CLOSE_BRACKET 
 			{
 			 SceneGraphComponent geo=new SceneGraphComponent();
@@ -432,7 +439,7 @@ protected
 text [ Color plC ]
 {double[] v=new double[3]; String t;}
 	:"Text"		OPEN_BRACKET 
-					s:STRING COLLON v=vektor 	
+					s:STRING COLON v=vektor 	
 				CLOSE_BRACKET 
 					{t=s.getText();}
 	;
@@ -451,7 +458,7 @@ directiveBlock
 	}
 	: app=directive[app]
 	  (
-	  	COLLON
+	  	COLON
 	  	app=directive[app]
 	  )*
 	{current=dir;
@@ -491,18 +498,18 @@ Color col;}
 
 protected
 optionen
-	: COLLON 
+	: COLON 
 //
 		dumb
 //	  OPEN_BRACE 
-//	  		( option (COLLON option)* )? 
+//	  		( option (COLON option)* )? 
 //	  CLOSE_BRACE
 	;
 
 protected
 option
 	: OPEN_BRACE 
-	  		( Option (COLLON Option)* )? 
+	  		( Option (COLON Option)* )? 
 	  CLOSE_BRACE
 	| OptionPrimitive
 	;
@@ -560,7 +567,7 @@ doublething returns[double d]
 protected 
 spec
 	: OPEN_BRACE 
-	  		( Option (COLLON Option)* )? 
+	  		( Option (COLON Option)* )? 
 	  CLOSE_BRACE
 	| OptionPrimitive
 	;
@@ -568,20 +575,17 @@ spec
 	
 protected
 dumb
-		:(~(	  OPEN_BRACE
-				| OPEN_BRACKET 
-		  		| CLOSE_BRACE 
-		  		| CLOSE_BRACKET))+
-		|	OPEN_BRACE	 	(dumb)*	CLOSE_BRACE   
-		|	OPEN_BRACKET 	(dumb)*	CLOSE_BRACKET 
-	  ;
+	:(  (~(		  OPEN_BRACE | OPEN_BRACKET | CLOSE_BRACE | CLOSE_BRACKET))+
+		(   OPEN_BRACE	 	(dumb)*	CLOSE_BRACE   
+		 |	OPEN_BRACKET 	(dumb)*	CLOSE_BRACKET )?  )
+	 |  (   OPEN_BRACE	 	(dumb)*	CLOSE_BRACE   
+		 |  OPEN_BRACKET 	(dumb)*	CLOSE_BRACKET )
+  ;
 	
 	
 // Doubles werden hier geparst!	
 // Es gibt nur Doubles!
 // Integers koennen aus doubles in Java erkannt, und geparst werden!!!
-
-
 
 /** **********************************************************************************
  * The Mathematica Lexer
@@ -599,13 +603,35 @@ OPEN_BRACKET:	'[';
 CLOSE_BRACKET:	']';
 LPAREN:			'(';
 RPAREN:			')';
-DOLLAR:			'$';
-HASH:			'#';
-AND:			'&';
+BACKS:			'\\';
+SLASH:			'/';
+COLON:			',';
 
-PFEIL :			"->";
-PFEIL_NACH :	":>";
-COLLON:			',';
+T1: '!';
+T2: '@';
+T3: '#';
+T4: '$';
+T5: '%';
+T6: '^';
+T7: '&';
+T8: '*';
+T13: '=';
+T15: ':';
+T16: ';';
+T17: '"';
+T19: '?';
+T20: '<';
+T21: '>';
+
+//protected
+//dumb
+//	:  (  ~('{' | '}' | '[' | '}' )!)+
+//	  (	
+//			OPEN_BRACE!	 	(dumb)*	CLOSE_BRACE!	
+//		|	OPEN_BRACKET! 	(dumb)*	CLOSE_BRACKET!
+//		|
+//	  )
+//	;
 
 ID
 options {
@@ -619,7 +645,7 @@ protected
 ID_LETTER:
 	('a'..'z'|'A'..'Z'|'_'|'0'..'9')
 	;
-
+	
 DOUBLE_THING
 	: ('-' | '+'!)?
 	  ( 
