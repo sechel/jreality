@@ -20,14 +20,13 @@ public class CoordinateSystemTest {
     
     //add box as a child
     component.addChild(coords.getBox());
+//    component.addChild(coords.getBox(new double[]{-1,-1,-1}));
     
     //add axes as a child
-    component.addChild(coords.getAxes());
+//    component.addChild(coords.getAxes());
       
-    ViewerApp.display(coords.getBox());
-
-// does not compile with ant - move this into a test/... file 
-//    ViewerApp.display(component);
+//    ViewerApp.display(coords.getBox());
+    ViewerApp.display(component);
   }
 
 }
