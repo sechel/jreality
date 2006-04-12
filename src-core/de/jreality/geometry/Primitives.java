@@ -515,4 +515,30 @@ public class Primitives {
 		    
 		    return factory.getIndexedFaceSet();
 		}
+    
+    public static IndexedFaceSet plainQuadMesh(double xStep, double yStep, int xDetail, int yDetail) {
+      ParametricSurfaceFactory factory = new ParametricSurfaceFactory(new ParametricSurfaceFactory.DefaultImmersion() {
+        public double evaluate(double u, double v) {
+          return 0;
+        }
+      });
+      
+      factory.setULineCount(xDetail+1);
+      factory.setVLineCount(yDetail+1);
+      
+      factory.setClosedInUDirection(false);
+      factory.setClosedInVDirection(false);
+      
+      factory.setUMin(-xStep*xDetail/2);
+      factory.setUMax(xStep*xDetail/2);
+      factory.setVMin(-yStep*yDetail/2);
+      factory.setVMax(yStep*yDetail/2);
+      
+      factory.setGenerateFaceNormals(true);
+      factory.setGenerateVertexNormals(false); // ??
+      
+      factory.update();
+      
+      return factory.getIndexedFaceSet();      
+    }
 }

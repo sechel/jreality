@@ -179,8 +179,7 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 		public void evaluate(double u, double v, double[] xyz, int index) {
 			x=u;
 			y=v;
-			z=0;
-			evaluate( u, v );
+			z=evaluate( u, v );
 			xyz[3*index+0] = x;
 			xyz[3*index+1] = y;
 			xyz[3*index+2] = z;
@@ -188,6 +187,6 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 		
 		protected double x, y, z;
 		
-		abstract public void evaluate( double u, double v );
+		abstract public double evaluate( double u, double v );
 	}
 }
