@@ -26,13 +26,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Transformation;
 import de.jreality.shader.EffectiveAppearance;
 
 /**
