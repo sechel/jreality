@@ -1,18 +1,15 @@
 package de.jreality.geometry;
 
 import java.awt.Color;
+import java.util.HashMap;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.PointSet;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.IntArrayArray;
-import de.jreality.scene.data.StorageModel;
 import de.jreality.geometry.Primitives;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.util.SceneGraphUtility;
 import de.jreality.math.FactoredMatrix;
+import de.jreality.math.Rn;
 import de.jreality.math.Pn;
 
 
@@ -28,8 +25,7 @@ public class CoordinateSystemFactory {
 	
 	private double[][][] axesVertices, boxVertices;
 	
-	private final String[] axesLabels = {
-			"x-axis", "y-axis", "z-axis"};
+	private final String[] axesNames = {"x", "y", "z"};
 	
 	private double[][] octagonalCrossSection = {
 			{1,0,0}, 
@@ -45,7 +41,7 @@ public class CoordinateSystemFactory {
 	private IndexedFaceSet urCone = null;
 	{
 		urCone = Primitives.pyramid(octagonalCrossSection, new double[]{0,0,3});
-		GeometryUtility.calculateAndSetVertexNormals(urCone);
+		//GeometryUtility.calculateAndSetVertexNormals(urCone);
 	}
 	
 	int signature = Pn.EUCLIDEAN;
@@ -53,6 +49,7 @@ public class CoordinateSystemFactory {
 	private final double urStretch = 0.02; //stretch of arrows and marks of axes (octagonalCrossSection)
 	private final double markScale = 0.5;  //the distance between two marks on an axis
 	
+	private HashMap hashMap = new HashMap();
 	
 	
 	
@@ -109,18 +106,24 @@ public class CoordinateSystemFactory {
 		//create SceneGraphComponent which has each coordinate axis as its child
 		SceneGraphComponent box = new SceneGraphComponent();
 		box.setName("Box");
+		hashMap.put("box", box);
 		
 		for (int axis=0; axis<=2; axis++) {  //for each coordinate axis
 			
 			SceneGraphComponent singleAxis = new SceneGraphComponent();
-			singleAxis.setName(axesLabels[axis]);
+			singleAxis.setName(axesNames[axis] +"-axis");
+			hashMap.put(axesNames[axis] +"Box", singleAxis);  //e.g. xBox
 			
 			for (int k=0; k<4; k++) {
 				
 				//create SceneGraphComponent with children line, arrow, marks
 				SceneGraphComponent singleAxisK = new SceneGraphComponent();
-				singleAxisK.setName(k+"");
+				//assign binary value of k to the name of the SGC
+				if (k<2) singleAxisK.setName("0"+k);
+				else singleAxisK.setName(Integer.toBinaryString(k));
 
+				hashMap.put(axesNames[axis]+singleAxisK.getName(), singleAxisK);  //e.g. x00
+				
 				//create line with label
 				SceneGraphComponent line = getAxisLine(axis, boxVertices[axis][2*k],boxVertices[axis][2*k+1], true);
 				//create arrow
@@ -136,6 +139,7 @@ public class CoordinateSystemFactory {
 			}
 			box.addChild(singleAxis);
 		}
+
 		
 		//set appearance of box node
 		Appearance app = new Appearance();
@@ -173,7 +177,7 @@ public class CoordinateSystemFactory {
 
 			//create SceneGraphComponent with children line, arrow, marks
 			SceneGraphComponent singleAxis = new SceneGraphComponent();
-			singleAxis.setName(axesLabels[axis]);
+			singleAxis.setName(axesNames[axis] +"-axis");
 			
 			//create line with label
 			SceneGraphComponent line = getAxisLine(axis, axesVertices[axis][0], axesVertices[axis][1], false);
@@ -235,9 +239,9 @@ public class CoordinateSystemFactory {
 		
 		this.boxVertices = new double[][][] {
 			{boxMin, {boxMax[0], boxMin[1], boxMin[2]},  //04
+			 {boxMin[0], boxMin[1], boxMax[2]}, {boxMax[0], boxMin[1], boxMax[2]},  //37
 			 {boxMin[0], boxMax[1], boxMin[2]}, {boxMax[0], boxMax[1], boxMin[2]},  //15
-			 {boxMin[0], boxMax[1], boxMax[2]}, boxMax,  //26
-			 {boxMin[0], boxMin[1], boxMax[2]}, {boxMax[0], boxMin[1], boxMax[2]}  //37
+			 {boxMin[0], boxMax[1], boxMax[2]}, boxMax  //26
 			},
 			{boxMin, {boxMin[0], boxMax[1], boxMin[2]},  //01
 			 {boxMin[0], boxMin[1], boxMax[2]}, {boxMin[0], boxMax[1], boxMax[2]},  //32
@@ -249,14 +253,14 @@ public class CoordinateSystemFactory {
 			 {boxMax[0], boxMin[1], boxMin[2]}, {boxMax[0], boxMin[1], boxMax[2]},  //47
 			 {boxMax[0], boxMax[1], boxMin[2]}, boxMax  //56			 
 			}
-		};	
+		}; //note that the ordering of the copies of each coordinate axis is significant
 
 	//  0    boxMin
 	//	1	{boxMin[0], boxMax[1], boxMin[2]}
-	//	2	{boxMin[0], boxMax[1], boxMax[2]}    1   ---   5
-	//	3	{boxMin[0], boxMin[1], boxMax[2]}  2   ---   6
-	//	4	{boxMax[0], boxMin[1], boxMin[2]}    0   - -   4
-	//	5	{boxMax[0], boxMax[1], boxMin[2]}  3   ---   7
+	//	2	{boxMin[0], boxMax[1], boxMax[2]}    1   ---   5     y
+	//	3	{boxMin[0], boxMin[1], boxMax[2]}  2   ---   6       |_ x
+	//	4	{boxMax[0], boxMin[1], boxMin[2]}    0   - -   4     /
+	//	5	{boxMax[0], boxMax[1], boxMin[2]}  3   ---   7      z
 	//	6	 boxMax
 	//	7	{boxMax[0], boxMin[1], boxMax[2]}
 	}	
@@ -276,24 +280,29 @@ public class CoordinateSystemFactory {
 		//line through min and max has to be parallel to the coordinate axis specified by axis 
 	
 		SceneGraphComponent line = SceneGraphUtility.createFullSceneGraphComponent("line");
-		IndexedLineSet lineSet = new IndexedLineSet(2,1);
-		lineSet.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(new double[][]{min, max}));
-		lineSet.setEdgeAttributes(Attribute.INDICES, new IntArrayArray.Array(new int[][]{{0,1}}));
-		line.setGeometry(lineSet);
+		IndexedLineSetFactory lineLSF = new IndexedLineSetFactory();
+		lineLSF.setVertexCount(2);
+		lineLSF.setLineCount(1);
+		lineLSF.setVertexCoordinates(new double[][]{min, max});
+		lineLSF.setEdgeIndices(new int[]{0,1});
+		
 		//create line label
-		if (forBox) lineSet.setEdgeAttributes(Attribute.LABELS, StorageModel.STRING_ARRAY.createReadOnly(new String[]{axesLabels[axis]}));
+		if (forBox) lineLSF.setEdgeLabels(new String[]{axesNames[axis]});
 		else {
-			PointSet labelPS = new PointSet(1);
-			labelPS.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(new double[][]{max}));
-			labelPS.setVertexAttributes(Attribute.LABELS, StorageModel.STRING_ARRAY.createReadOnly(new String[]{axesLabels[axis]}));
+			PointSetFactory labelPSF = new PointSetFactory();
+			labelPSF.setVertexCount(1);
+			labelPSF.setVertexCoordinates(max);
+			labelPSF.setVertexLabels(new String[]{axesNames[axis]});
+			labelPSF.update();
 			SceneGraphComponent label = SceneGraphUtility.createFullSceneGraphComponent("label");
-			label.setGeometry(labelPS);
+			label.setGeometry(labelPSF.getPointSet());
 			Appearance a = new Appearance();  //for label offset
 			a.setAttribute("pointShader.offset", new double[]{.15,0,0});
 			line.setAppearance(a);
 			line.addChild(label);
 		}
-		
+		lineLSF.update();
+		line.setGeometry(lineLSF.getIndexedLineSet());
 		return line;
 	}
 		
@@ -344,11 +353,12 @@ public class CoordinateSystemFactory {
 					new IndexedFaceSet[]{ marksIFS, 
 					Primitives.pyramid(octagonalCrossSection(level), new double[]{0,0,level}) });
 		}
-		GeometryUtility.calculateAndSetVertexNormals(marksIFS);
+		//GeometryUtility.calculateAndSetVertexNormals(marksIFS);
 		
 		//create labels
 		final int numOfMarks = marksIFS.getNumPoints()/10;  //each mark has 10 points
-		PointSet labelsPS = new PointSet(numOfMarks);
+		PointSetFactory labelPSF = new PointSetFactory();
+		labelPSF.setVertexCount(numOfMarks);
 		double[][] labelPoints = new double[numOfMarks][];
 		String[] labelStr = new String[numOfMarks];
 		double level = minLevel;
@@ -357,10 +367,11 @@ public class CoordinateSystemFactory {
 			labelPoints[i] = new double[]{0, 0, level};
 			labelStr[i] = Math.round(level*1000)/1000. + "";  //3 decimal places
 		}
-		labelsPS.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(labelPoints));
-		labelsPS.setVertexAttributes(Attribute.LABELS, StorageModel.STRING_ARRAY.createReadOnly(labelStr));
+		labelPSF.setVertexCoordinates(labelPoints);
+		labelPSF.setVertexLabels(labelStr);
+		labelPSF.update();
 		SceneGraphComponent labels = SceneGraphUtility.createFullSceneGraphComponent("labels");
-		labels.setGeometry(labelsPS);
+		labels.setGeometry(labelPSF.getPointSet());
 		
 		//create the SceneGraphComponent and rotate the marks onto the corresponding coordinate axis
 		SceneGraphComponent marks = SceneGraphUtility.createFullSceneGraphComponent("marks");
@@ -371,7 +382,6 @@ public class CoordinateSystemFactory {
 		m.assignTo(marks);
 		
 		marks.addChild(labels);
-			
 		return marks;
 	}
 	
@@ -389,32 +399,55 @@ public class CoordinateSystemFactory {
 	}
 	
 	
-	
-	
-	//---------------------------------------------------
 	/**
-	 * for testing
-	 * (add axes or box as children of a given SceneGraphComponent)
+	 * returns the SGC to which the specified key is mapped in hashMap
+	 * @param key the key specifying the SGC
+	 * @return the SGC 
 	 */
-	public static void main(String[] args) {
-		
-		//create a component
-		SceneGraphComponent component = SphereUtility.tessellatedCubeSphere(2);
-		component.setName("Sphere");
-		
-		//create coordinate system
-		CoordinateSystemFactory coords = new CoordinateSystemFactory(component);
-		
-		//add box as a child
-		component.addChild(coords.getBox());
-		
-		//add axes as a child
-		component.addChild(coords.getAxes());
-			
-//		ViewerApp.display(coords.getBox());
+	private SceneGraphComponent getSGC(Object key) {
+		return (SceneGraphComponent)hashMap.get(key);
+	}
 
-// does not compile with ant - move this into a test/... file 
-//		ViewerApp.display(component);
+	
+	/**
+	 * get a box vertex which is "closest to the screen" when looking in a specified direction
+	 * @param direction the direction
+	 * @return a closest box vertex
+	 */
+	private double[] getClosestBoxVertex(double[] direction) {
+		
+		int closest = 0;
+		double tmp = Rn.innerProduct(boxVertices[0][closest], direction);
+		
+		for (int k=1; k<8; k++) {
+			if ( Rn.innerProduct(boxVertices[0][k], direction) < tmp) {
+				closest = k;
+				tmp = Rn.innerProduct(boxVertices[0][k], direction);
+			}
+		}
+		return boxVertices[0][closest];
 	}
 	
+	
+	public SceneGraphComponent getBox(double[] direction) {
+		
+		SceneGraphComponent box = getBox();
+		double[] closest = getClosestBoxVertex(direction);
+		int[] edgeCriteria = new int[3];
+		
+		//get the 3 edges belonging to a closest box vertex
+		for (int i=0; i<=2; i++) {
+			if (closest[i] == boxMin[i]) edgeCriteria[i] = 0; 
+			else edgeCriteria[i] = 1; 
+		}
+		//set those edges invisible which don't have copies of same "distance to the screen"
+		if (direction[1]!=0 && direction[2]!=0)
+			getSGC("x" + edgeCriteria[1] + edgeCriteria[2]).setVisible(false);
+		if (direction[0]!=0 && direction[2]!=0)
+			getSGC("y" + edgeCriteria[0] + edgeCriteria[2]).setVisible(false);
+		if (direction[0]!=0 && direction[1]!=0)
+			getSGC("z" + edgeCriteria[0] + edgeCriteria[1]).setVisible(false);
+		
+		return box;
+	}
 }
