@@ -1,6 +1,7 @@
 package de.jreality.examples;
 
-import net.java.games.jogl.GL;
+import javax.media.opengl.GL;
+
 import de.jreality.jogl.AbstractCalculation;
 import de.jreality.jogl.GpgpuUtility;
 import de.jreality.jogl.IntegratorFactory;
