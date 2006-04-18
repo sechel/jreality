@@ -96,8 +96,8 @@ public class FlyTool extends Tool {
     Matrix pointerMatrix = new Matrix(tc.getTransformationMatrix(InputSlot.getDevice("PointerTransformation")));
     Matrix localPointer = ToolUtility.worldToTool(tc, pointerMatrix);
     double[] dir = localPointer.getColumn(2); // z-axis ( modulo +/- )
-    System.out.println("");
-    System.out.println("FlyTool: dir is "+Rn.toString(dir));
+    //System.out.println("");
+    //System.out.println("FlyTool: dir is "+Rn.toString(dir));
  //   if (dir[3]*dir[2] > 0) for (int i = 0; i<3; ++i) dir[i] = -dir[i];
     double[] shipPosition = localPointer.getColumn(3);
    //System.out.println("FlyTool: dir is "+Rn.toString(dir));
@@ -114,8 +114,8 @@ public class FlyTool extends Tool {
     //Rn.times(dir, val*gain*velocity, dir);
     val = val*gain*velocity;
     double[] newShipPosition = P3.dragTowards(null, shipPosition, dir, val, signature);
-    System.out.println("FlyTool: old position is "+Rn.toString(Pn.normalize(shipPosition, shipPosition,signature)));
-    System.out.println("FlyTool: new position is "+Rn.toString(Pn.normalize(newShipPosition,newShipPosition, signature)));
+    //System.out.println("FlyTool: old position is "+Rn.toString(Pn.normalize(shipPosition, shipPosition,signature)));
+    //System.out.println("FlyTool: new position is "+Rn.toString(Pn.normalize(newShipPosition,newShipPosition, signature)));
     MatrixBuilder.init(shipMatrix, signature).translateFromTo(shipPosition,newShipPosition).assignTo(ship);
   }
 
