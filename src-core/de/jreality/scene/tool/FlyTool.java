@@ -50,6 +50,7 @@ public class FlyTool extends Tool {
   private transient boolean isFlying;
   
   private double gain=1;
+  private boolean raiseToThirdPower = true;
   
   public FlyTool() {
 	  used.add(forwardBackwardSlot);
@@ -69,12 +70,11 @@ public class FlyTool extends Tool {
 
   EffectiveAppearance eap;
   
-  private transient double[] tmp = new double[16];
   public void perform(ToolContext tc) {
 	if (tc.getSource() == forwardBackwardSlot) {
 		velocity = tc.getAxisState(forwardBackwardSlot).doubleValue();
 		// TODO make this transformation an option 
-		velocity = velocity*velocity*velocity;
+		if (raiseToThirdPower) velocity = velocity*velocity*velocity;
 		if (tc.getAxisState(forwardBackwardSlot).isReleased()) {
 			isFlying = false;
 			used.remove(timerSlot);
@@ -89,14 +89,19 @@ public class FlyTool extends Tool {
     if (eap == null || !EffectiveAppearance.matches(eap, tc.getRootToToolComponent())) {
         eap = EffectiveAppearance.create(tc.getRootToToolComponent());
       }
-      int signature = eap.getAttribute("signature", Pn.EUCLIDEAN);
+    int signature = eap.getAttribute("signature", Pn.EUCLIDEAN);
 
-      SceneGraphComponent ship = tc.getRootToToolComponent().getLastComponent();
+    SceneGraphComponent ship = tc.getRootToToolComponent().getLastComponent();
 
-   Matrix pointerMatrix = new Matrix(tc.getTransformationMatrix(InputSlot.getDevice("PointerTransformation")));
+    Matrix pointerMatrix = new Matrix(tc.getTransformationMatrix(InputSlot.getDevice("PointerTransformation")));
     Matrix localPointer = ToolUtility.worldToTool(tc, pointerMatrix);
     double[] dir = localPointer.getColumn(2); // z-axis ( modulo +/- )
-    // don't need the following correction anymore
+    System.out.println("");
+    System.out.println("FlyTool: dir is "+Rn.toString(dir));
+ //   if (dir[3]*dir[2] > 0) for (int i = 0; i<3; ++i) dir[i] = -dir[i];
+    double[] shipPosition = localPointer.getColumn(3);
+   //System.out.println("FlyTool: dir is "+Rn.toString(dir));
+        // don't need the following correction anymore
     //    if (signature == Pn.EUCLIDEAN) dir[3] = 1.0;
    
     Matrix shipMatrix = new Matrix();
@@ -108,9 +113,10 @@ public class FlyTool extends Tool {
     double val = tc.getAxisState(timerSlot).intValue()*0.001;    
     //Rn.times(dir, val*gain*velocity, dir);
     val = val*gain*velocity;
-    double[] newShipPosition = P3.dragTowards(null, P3.originP3, dir, val, signature);
-    
-    MatrixBuilder.init(shipMatrix, signature).translate(newShipPosition).assignTo(ship);
+    double[] newShipPosition = P3.dragTowards(null, shipPosition, dir, val, signature);
+    System.out.println("FlyTool: old position is "+Rn.toString(Pn.normalize(shipPosition, shipPosition,signature)));
+    System.out.println("FlyTool: new position is "+Rn.toString(Pn.normalize(newShipPosition,newShipPosition, signature)));
+    MatrixBuilder.init(shipMatrix, signature).translateFromTo(shipPosition,newShipPosition).assignTo(ship);
   }
 
   public void activate(ToolContext tc) {
@@ -125,6 +131,7 @@ public double getGain() {
 
 public void setGain(double gain) {
 	this.gain = gain;
+	System.err.println("Gain is "+gain);
 }
 
 }

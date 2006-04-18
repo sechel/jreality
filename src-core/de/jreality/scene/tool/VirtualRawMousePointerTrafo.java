@@ -36,12 +36,12 @@ import de.jreality.scene.data.DoubleArray;
  * @author brinkman
  *
  */
-public class VirtualMousePointerTrafo implements VirtualDevice {
+public class VirtualRawMousePointerTrafo implements VirtualDevice {
 
   InputSlot outSlot;
   InputSlot ndcToWorldSlot;
   InputSlot pointerNdcSlot;
- 
+  
   double[] ndcToWorld = new double[16];
   double[] pointerNdc = new double[16];
   double[] pointerTrafo = new double[16];
@@ -55,7 +55,7 @@ public class VirtualMousePointerTrafo implements VirtualDevice {
   	} catch (Exception e) {
 		return null;
 	}
-
+  
   	double x = pointerNdc[3];
   	double y = pointerNdc[7];
   	
