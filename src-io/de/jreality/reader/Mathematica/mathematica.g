@@ -259,10 +259,11 @@ pointBlock [Color plCgiven] returns [Color plC]
 
 protected
 lineBlock [Color plCgiven] returns[Color plC]			// liest erst eine, dann alle direkt folgenden Lines ein
-{plC=plCgiven;
+{
+ plC=plCgiven;								// Punkt und Linienfarbe
  Vector coordinates= new Vector();			// alle Punkte in einer Liste
  Vector line=new Vector();					// alle Punkte einer Linie
- Vector colors= new Vector();
+ Vector colors= new Vector();				// FarbListe
  int count=0;								// Anzahl aller bisher gesammelten Punkte
  int[] lineIndices;							// liste aller Indices einer Linie
  Vector linesIndices= new Vector();}		// Liste aller IndiceeListen
@@ -279,13 +280,14 @@ lineBlock [Color plCgiven] returns[Color plC]			// liest erst eine, dann alle di
 			    	count=line.size();
 					linesIndices.add(lineIndices);
 				    colors.add(getRGBColor(plC));
-				    System.err.println("Color is "+Rn.toString(getRGBColor(plC)));
 				}
 	 CLOSE_BRACKET 
 	(
-	   plC=color
-	 | COLON "Line"	
-	   OPEN_BRACKET
+	  COLON
+	  (
+	    (plC=color)
+	   |( "Line"	
+	     OPEN_BRACKET
 				line=lineset 			// das ist ein Vector von double[3]
 				{
 					lineIndices=new int[line.size()];
@@ -296,9 +298,10 @@ lineBlock [Color plCgiven] returns[Color plC]			// liest erst eine, dann alle di
 			    	count+=line.size();
 					linesIndices.add(lineIndices);
 					colors.add(getRGBColor(plC));
-					System.err.println("Color is "+Rn.toString(getRGBColor(plC)));
+					// System.err.println("Color is "+Rn.toString(getRGBColor(plC)));
 				}
-	   CLOSE_BRACKET 
+	     CLOSE_BRACKET )
+	  )   
 	)*
 	{
 			double [][] data= new double[coordinates.size()][];
@@ -312,20 +315,21 @@ lineBlock [Color plCgiven] returns[Color plC]			// liest erst eine, dann alle di
 				indices[i]=(int [])linesIndices.get(i);
 				colorData[i]=(double [])colors.get(i);
 			}
-
 			IndexedLineSetFactory lineset=new IndexedLineSetFactory();
+						
 			lineset.setLineCount(linesIndices.size());
 			lineset.setVertexCount(coordinates.size());
 			lineset.setEdgeIndices(indices);
 			lineset.setVertexCoordinates(data);
 			lineset.setVertexColors(colorData);
+//			lineset.getIndexedLineSet().setEdgeAttributes(Attribute.COLORS,new DoubleArrayArray.Array( colorData ));
 			lineset.update();
 			
 			SceneGraphComponent geo=new SceneGraphComponent();
 			Appearance lineApp =new Appearance();
 			lineApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
 			lineApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
-	//	<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Punkte an den Enden anzeigen >
+//	<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Punkte an den Enden anzeigen >
 			lineApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
 		    lineApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
 	//
@@ -347,7 +351,7 @@ polygonBlock [Color fCgiven] returns[Color fC]
  Vector polysIndices= new Vector();
  int count=0;						// zaehlt die Punkte mit
  }
-	:"Polygon"{System.out.println("ok1");}
+	:"Polygon"
 	 OPEN_BRACKET
 				poly=lineset 			// das ist ein Vector von double[3]
 				{
@@ -364,8 +368,8 @@ polygonBlock [Color fCgiven] returns[Color fC]
 	 CLOSE_BRACKET 
 	( COLON
 	 (
-	   (fC=faceColor {System.out.println("ok");})
-	  |("Polygon"{System.out.println("ok2");}
+	   (fC=faceColor )
+	  |("Polygon"
 	    OPEN_BRACKET
 				poly=lineset 			// das ist ein Vector von double[3]
 				{
