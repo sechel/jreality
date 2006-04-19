@@ -67,9 +67,9 @@ public class ParticleLineShader extends AbstractPrimitiveShader implements LineS
 
   static boolean setVortexData;
 
-  static double ro = 0.01;
+  static double a = 0.01;
 
-  static boolean setRo = true;
+  static boolean setA = true;
   
   private static Rectangle3D bb=new Rectangle3D();
   
@@ -94,7 +94,7 @@ public class ParticleLineShader extends AbstractPrimitiveShader implements LineS
   public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
     pointRadius = eap.getAttribute(ShaderUtility.nameSpace(name,
         CommonAttributes.POINT_RADIUS), CommonAttributes.POINT_RADIUS_DEFAULT);
-    double curRo = eap.getAttribute(ShaderUtility.nameSpace(name, "ro"), ro);
+    double curA = eap.getAttribute(ShaderUtility.nameSpace(name, "a"), a);
     pointSize = eap.getAttribute(ShaderUtility.nameSpace(name, "size"), 2.);
     debug = eap.getAttribute(ShaderUtility.nameSpace(name, "debug"), false);
     write = eap.getAttribute(ShaderUtility.nameSpace(name, "write"), false);
@@ -128,9 +128,9 @@ public class ParticleLineShader extends AbstractPrimitiveShader implements LineS
       vortexData = rkData;
       setVortexData = true;
     }
-    if (curRo != ro) {
-      ro = curRo;
-      setRo = true;
+    if (curA != a) {
+      a = curA;
+      setA = true;
     }
     eap.getAttribute("objectToRoot", rootToObject.getArray());
     int fcnt = eap.getAttribute("frameCnt", framecnt);
@@ -162,9 +162,9 @@ public class ParticleLineShader extends AbstractPrimitiveShader implements LineS
       calc.triggerCalculation();
       setVortexData = false;
     }
-    if (setRo) {
-      calc.setRo(ro);
-      setRo = false;
+    if (setA) {
+      calc.setA(a);
+      setA = false;
     }
     data = calc.getCurrentValues();
   }

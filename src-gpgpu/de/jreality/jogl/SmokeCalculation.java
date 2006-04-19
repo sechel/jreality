@@ -51,7 +51,7 @@ public class SmokeCalculation extends AbstractCalculation {
       "    \n" + 
       "  for (int i=0; i < $CNT; i++) {\n" + 
       "    for (int j=0; j < $CNT; j++) {\n" + 
-      "      // add biot savart on for one edge" + 
+      "      // add biot savart on for one edge\n" + 
       "      data=textureRect(vort, vec2(j+.5, i+.5));\n" + 
       "      \n" + 
       "      float strength=data.w;\n" + 

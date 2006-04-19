@@ -283,6 +283,11 @@ public abstract class AbstractCalculation implements GLEventListener {
     gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP);
     gl.glTexImage2D(TEX_TARGET, 0, TEX_INTERNAL_FORMAT, size, size, 0,
         TEX_FORMAT, GL.GL_FLOAT, (Buffer) null);
+    System.out.println("created texture: id="+texID+" size="+size+".");
+    FloatBuffer fb = ByteBuffer.allocateDirect(size*size*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+    System.out.println(texID+" test transfer: "+fb);
+    transferToTexture(gl, fb, texID, size);
+    System.out.println(texID+" worked...");
   }
 
   /**
