@@ -127,7 +127,7 @@ public class ViewerApp
   private BshEvaluator bshEval;
   private SimpleAttributeSet infoStyle;
   
-  public static JFrame display(final SceneGraphNode n) {
+  public static Object[] display(final SceneGraphNode n) {
     initAWT();
     final ViewerApp app;
     try {
@@ -143,7 +143,10 @@ public class ViewerApp
         app.scene.setGeometry(g);
       }
     });
-    return app.frame;
+    Object[] ret = new Object[2];
+    ret[0]=app.frame;
+    ret[1]=app.currViewer;
+    return ret;
   }
   
   public static void main(String[] args) throws Exception
