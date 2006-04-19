@@ -3,15 +3,17 @@ package de.jreality.jogl;
 import java.awt.BorderLayout;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Random;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 import javax.swing.JFrame;
 
 import com.sun.opengl.util.Animator;
+
+import de.jreality.math.Rn;
 
 
 public class GpgpuUtility {
@@ -128,4 +130,22 @@ public class GpgpuUtility {
     }
     return f;
   }
+  
+  public static float[] makeSphere(int numPoints, double[] origin, double radius1, double radius2) {
+    float[] points = new float[numPoints*4];
+    Random r = new Random(System.currentTimeMillis());
+    double[] tmp = new double[3];
+    for (int i = 0; i < numPoints; i++) {
+      Rn.setToValue(tmp, -.5+r.nextDouble(), -.5+r.nextDouble(), -.5+r.nextDouble());
+      Rn.normalize(tmp, tmp);
+      Rn.times(tmp, radius1+r.nextDouble()*(radius2-radius1), tmp);
+      if (origin != null) Rn.add(tmp, origin, tmp);
+      points[4*i+0]=(float) tmp[0];
+      points[4*i+1]=(float) tmp[1];
+      points[4*i+2]=(float) tmp[2];
+      points[4*i+3]=1;
+    }
+    return points;
+  }
+
 }
