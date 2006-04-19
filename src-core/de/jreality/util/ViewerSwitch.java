@@ -55,6 +55,10 @@ public class ViewerSwitch implements Viewer {
     }
   }
 
+  public Viewer getCurrentViewer() {
+    return currentViewer;
+  }
+  
   private void registerComponent(Component c) {
     c.addKeyListener(eventDispatcher);
     c.addMouseListener(eventDispatcher);
