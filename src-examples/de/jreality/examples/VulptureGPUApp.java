@@ -712,7 +712,7 @@ public class VulptureGPUApp implements Runnable {
 
        System.setProperty("de.jreality.scene.Viewer", "de.jreality.jogl.GpgpuViewer"); // de.jreality.portal.DesktopPortalViewer");
        
-        JFrame f = ViewerApp.display(st.root) ;
+        ViewerApp.display(st.root) ;
         
         
         System.out.println("-> go!");
