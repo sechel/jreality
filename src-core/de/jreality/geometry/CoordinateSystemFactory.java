@@ -9,6 +9,7 @@ import de.jreality.geometry.Primitives;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.util.SceneGraphUtility;
 import de.jreality.math.FactoredMatrix;
+import de.jreality.math.Quaternion;
 import de.jreality.math.Rn;
 import de.jreality.math.Pn;
 
@@ -47,7 +48,7 @@ public class CoordinateSystemFactory {
 	int signature = Pn.EUCLIDEAN;
 	
 	private final double urStretch = 0.02; //stretch of arrows and marks of axes (octagonalCrossSection)
-	private final double markScale = 0.5;  //the distance between two marks on an axis
+	private double axisScale = 0.5;  //the distance between two marks on an axis
 	
 	private HashMap hashMap = new HashMap();
 	
@@ -83,6 +84,15 @@ public class CoordinateSystemFactory {
 		double[][] minMax = GeometryUtility.calculateBoundingBox(component).getBounds();
 		this.boxMin = minMax[0];
 		this.boxMax = minMax[1];
+		
+		//enlarge box if graphic is 2d
+		for (int axis=0; axis<=2; axis++) {
+			if (boxMin[axis] == boxMax[axis]) {
+				boxMin[axis] -= 0.5;
+				boxMax[axis] += 0.5;
+			}
+		}
+		
 		update();
 	}
 
@@ -130,7 +140,8 @@ public class CoordinateSystemFactory {
 				//SceneGraphComponent arrow = getAxisArrow(axis, boxVertices[axis][2*k],boxVertices[axis][2*k+1], true);
 				//create marks with labels
 				SceneGraphComponent marks = getAxisMarks(axis, boxVertices[axis][2*k],boxVertices[axis][2*k+1], true);
-
+				hashMap.put(axesNames[axis]+singleAxisK.getName()+"label", marks);  //e.g. x00label
+				
 				singleAxisK.addChild(line);
 				//singleAxisK.addChild(arrow);
 				singleAxisK.addChild(marks);
@@ -220,12 +231,12 @@ public class CoordinateSystemFactory {
 	private void calculateAxesVertices(){
 		
 		this.axesVertices = new double[][][] {
-			{{Math.min(boxMin[0], 0)-1,0,0},
-			 {Math.max(boxMax[0], 0)+1,0,0}},
-			{{0,Math.min(boxMin[1]-1, 0),0},
-			 {0,Math.max(boxMax[1]+1, 0),0}},
-			{{0,0,Math.min(boxMin[2]-1, 0)},
-			 {0,0,Math.max(boxMax[2]+1, 0)}}
+			{{Math.min(boxMin[0]-0.5, 0),0,0},
+			 {Math.max(boxMax[0]+0.5, 0),0,0}},
+			{{0,Math.min(boxMin[1]-0.5, 0),0},
+			 {0,Math.max(boxMax[1]+0.5, 0),0}},
+			{{0,0,Math.min(boxMin[2]-0.5, 0)},
+			 {0,0,Math.max(boxMax[2]+0.5, 0)}}
 		};
 	}
 	
@@ -320,9 +331,11 @@ public class CoordinateSystemFactory {
 	
 		SceneGraphComponent arrow = SceneGraphUtility.createFullSceneGraphComponent("arrow");
 		arrow.setGeometry(urCone);
-		//get rotation from TubeUtility
-		FactoredMatrix m = new FactoredMatrix(TubeUtility.tubeOneEdge(
-				min, max, 0.025, null, signature).getTransformation());
+		//get rotation for axis
+		//FactoredMatrix m = new FactoredMatrix(TubeUtility.tubeOneEdge(min, max, 0.025, null, signature).getTransformation());
+		//above method results in incorrect translation
+		FactoredMatrix m = new FactoredMatrix();
+		m.setRotation(getRotation(axis));
 		m.setStretch(2*urStretch); //stretch urCone
 		m.setTranslation(max); //translate to axis tip
 		m.assignTo(arrow);
@@ -342,13 +355,16 @@ public class CoordinateSystemFactory {
 	 */
 	private SceneGraphComponent getAxisMarks(int axis, double[] min, double[] max, boolean forBox) {
 		
-		//create the marks on a line in z-direction 
-		final double minLevel = markScale*Math.ceil( min[axis]/markScale );
-		final double maxLevel = markScale*Math.floor( (max[axis]-3*urStretch)/markScale );  //give space for axis arrow
+		//create the marks on a line in z-direction
+		//determine minimum and maximum value of the mark level
+		final double minLevel = axisScale*Math.ceil( min[axis]/axisScale + 0.5);  //give space for box corner
+		final double maxLevel = axisScale*Math.floor( (max[axis]-3*urStretch)/axisScale -0.5);  //give space for axis arrow and box corner
+		
+		//if (minLevel>maxLevel) return SceneGraphUtility.createFullSceneGraphComponent("marks");
 		
 		IndexedFaceSet marksIFS = Primitives.pyramid(octagonalCrossSection(minLevel), new double[]{0,0,minLevel});  //init
-		for (double level=minLevel+markScale; level<=maxLevel; level+=markScale) {
-			if (!forBox && Math.abs(level)<markScale/2) continue;  //no mark at origin (there level may not be exactly 0)
+		for (double level=minLevel+axisScale; level<=maxLevel; level+=axisScale) {
+			if (!forBox && Math.abs(level)<axisScale/2) continue;  //no mark at origin (there level may not be exactly 0)
 			marksIFS = IndexedFaceSetUtility.mergeIndexedFaceSets(
 					new IndexedFaceSet[]{ marksIFS, 
 					Primitives.pyramid(octagonalCrossSection(level), new double[]{0,0,level}) });
@@ -362,8 +378,8 @@ public class CoordinateSystemFactory {
 		double[][] labelPoints = new double[numOfMarks][];
 		String[] labelStr = new String[numOfMarks];
 		double level = minLevel;
-		for (int i=0; i<numOfMarks; i++, level+=markScale) {
-			if (!forBox && level==0) level+=markScale;  //skip mark at origin (there level may not be exactly 0)
+		for (int i=0; i<numOfMarks; i++, level+=axisScale) {
+			if (!forBox && Math.abs(level)<axisScale/2) level+=axisScale;  //skip mark at origin (there level may not be exactly 0)
 			labelPoints[i] = new double[]{0, 0, level};
 			labelStr[i] = Math.round(level*1000)/1000. + "";  //3 decimal places
 		}
@@ -376,8 +392,13 @@ public class CoordinateSystemFactory {
 		//create the SceneGraphComponent and rotate the marks onto the corresponding coordinate axis
 		SceneGraphComponent marks = SceneGraphUtility.createFullSceneGraphComponent("marks");
 		marks.setGeometry(marksIFS);
-		FactoredMatrix m = new FactoredMatrix(TubeUtility.tubeOneEdge(
-				min, max, 0.025, null, signature).getTransformation());
+		//FactoredMatrix m = new FactoredMatrix(TubeUtility.tubeOneEdge(min, max, 0.025, null, signature).getTransformation());
+		//above method results in incorrect translation
+		FactoredMatrix m = new FactoredMatrix();
+		m.setRotation(getRotation(axis));
+		double[] translation = (double[])min.clone();
+		translation[axis] = 0;
+		m.setTranslation(translation);
 		m.setStretch(urStretch, urStretch, 1); //stretch marks
 		m.assignTo(marks);
 		
@@ -396,6 +417,17 @@ public class CoordinateSystemFactory {
 		for (int i=0; i<octagonalCrossSection.length; i++)
 			octagonalCrossSection[i][2] = level;
 		return octagonalCrossSection;
+	}
+	
+	
+	private Quaternion getRotation(int axis) {
+	
+		FactoredMatrix m = new FactoredMatrix();
+		switch(axis) {
+		case 0 : m.setRotation(Math.PI/2,0,1,0); break;
+		case 1 : m.setRotation(-Math.PI/2,1,0,0);
+		}
+		return Quaternion.rotationMatrixToQuaternion(new Quaternion(), m.getArray());
 	}
 	
 	
@@ -449,5 +481,11 @@ public class CoordinateSystemFactory {
 			getSGC("z" + edgeCriteria[0] + edgeCriteria[1]).setVisible(false);
 		
 		return box;
+	}
+	
+	
+	public void setAxisScale(double axisScale) {
+		
+		this.axisScale = axisScale;
 	}
 }
