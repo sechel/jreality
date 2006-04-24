@@ -48,7 +48,17 @@ options {
 		}
 	}
 // ------------------------------------------------------------------------------
-
+	public static Appearance copyApp(Appearance appOld){// copiert eine Appearance
+		Appearance appNew= new Appearance();
+		Set s=appOld.getStoredAttributes();
+		Iterator ite= s.iterator();
+		while (ite.hasNext()){
+			String key=(String)ite.next();
+			appNew.setAttribute(key,appOld.getAttribute(key));
+		}
+	 	return appNew;
+	}
+	
 	public double[] getRGBColor(Color c){
 	// retuns a array that represents a color (needed for colored faces)
 		double[] fl= new double[3];
@@ -66,15 +76,20 @@ options {
 start returns [SceneGraphComponent r]
 { r = null;	
 	globalApp.setName("global");
+	globalApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
+	globalApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
+	globalApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
+	globalApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
+	
 	root.setAppearance(globalApp);
 	root.setName("Mathematica");
 }
 	:"Graphics3D"
 	  OPEN_BRACKET  
-	  	( 	  list[plCDefault,fCDefault]
-	  		| fCDefault=faceThing[fCDefault]
-	  		| plCDefault=plThing[plCDefault]
-	  		| appThing
+	  	( 	  list[plCDefault,fCDefault,globalApp]
+	  		| fCDefault=faceThing[fCDefault,globalApp]
+	  		| plCDefault=plThing[plCDefault,globalApp]
+	  		| globalApp=appThing[globalApp]
 	  	)
 	  	(optionen)? 
 	  CLOSE_BRACKET 
@@ -83,63 +98,283 @@ start returns [SceneGraphComponent r]
 
 // Objects ---------------------------------------------
 protected
-list[Color plC, Color fC]
+list[Color plC, Color fC, Appearance app]
 	:	OPEN_BRACE				// Liste von Graphischen Objekten
 			{
 			SceneGraphComponent newPart = new SceneGraphComponent();
 			newPart.setName("Object");
+			newPart.setAppearance(app);
 			SceneGraphComponent oldPart = current;
 			current.addChild(newPart);
 			current=newPart;
 			}
-	        (objectList[plC,fC])?
+	        (objectList[plC,fC,app])?
 	    CLOSE_BRACE
 			{current=oldPart;}
 	;
 	
 protected
-objectList [Color plC, Color fC]
+objectList [Color plC, Color fC, Appearance app]
 	:(
-		  list[ plC, fC]
-		| fC=faceThing[fC]
-		| plC=plThing[plC]
-		| appThing
+		  list[ plC, fC, app]
+		| fC=faceThing[fC, app]
+		| plC=plThing[plC, app]
+		| app=appThing [app]
 	 )
 	 ( COLON 
 		(	
-			  list[ plC, fC]
-			| fC =faceThing[fC]
-			| plC=plThing[plC]
-			| appThing
+			  list[ plC, fC, app]
+			| fC =faceThing[fC,app]
+			| plC=plThing[plC,app]
+			| app=appThing[app]
 	 	)
 	 )*
 	;	
 	
 protected
-faceThing [Color fCgiven] returns[Color fC]
+faceThing [Color fCgiven, Appearance app] returns[Color fC ]
 {fC=fCgiven;
  }
-	:	cubic[fC]					// Wuerfel 
-	|	fC=polygonBlock[fC]			// Abfolge von Polygonen (indexed FaceSetFactory)
+	:	cubic[fC, app]					// Wuerfel 
+	|	fC=polygonBlock[fC, app]			// Abfolge von Polygonen (indexed FaceSetFactory)
 	|	fC=faceColor
 	;
 
 
 protected
-plThing [Color plCgiven] returns[Color plC]
+plThing [Color plCgiven, Appearance app] returns[Color plC]
 {plC=plCgiven;}
 	:	plC= color			// Farbe fuer Punkte Linien und Texte
-	|	plC= lineBlock [plC]	// Abfolge von Linien (LineSetFactory)
-	|	plC= pointBlock [plC]	// Abfolge von Punkten (PointSetFactory)
-	|	text [plC]					// Text an einem Punkt im Raum
+	|	plC= lineBlock [plC, app]	// Abfolge von Linien (LineSetFactory)
+	|	plC= pointBlock [plC, app]	// Abfolge von Punkten (PointSetFactory)
+	|	text [plC, app]					// Text an einem Punkt im Raum
 	;
 	
 protected
-appThing
-	{}
-	:	directiveBlock			// Abfolge von graphischen Direktiven (erzeugt eine Appearance)
+appThing [Appearance appOld] returns [ Appearance app]
+{app=appOld;}
+	:	app=directiveBlock[app]			// Abfolge von graphischen Direktiven (erzeugt eine Appearance)
 	;
+
+
+protected
+pointBlock [Color plCgiven,Appearance app] returns [Color plC]
+{Vector points= new Vector(); 
+ double[] v;
+ Vector colors= new Vector();
+ plC=plCgiven;
+}
+	:
+	( "Point"
+	   OPEN_BRACKET
+				{v=new double[3];}
+				v=vektor
+				{points.add(v);
+				 colors.add(getRGBColor(plC));}
+	   CLOSE_BRACKET 
+	)
+	(
+	COLON
+	(
 	
+	   plC=color
+	 |( "Point"
+	   OPEN_BRACKET
+				{v=new double [3];}
+				v=vektor
+				{points.add(v);
+				 colors.add(getRGBColor(plC));}
+	   CLOSE_BRACKET 
+	   )
+	 )
+	)*
+	{
+		PointSetFactory psf = new PointSetFactory();
+		double [][] data = new double [points.size()][];
+		double [][] colorData = new double[points.size()][];
+		for(int i=0;i<points.size();i++){
+			data[i]=(double [])points.get(i);
+			colorData[i]=(double [])colors.get(i);
+		}
+
+		psf.setVertexCount(points.size());
+		psf.setVertexCoordinates(data);
+		psf.setVertexColors(colorData);
+		psf.update();
+		
+		SceneGraphComponent geo=new SceneGraphComponent();
+		Appearance pointApp =copyApp(app);
+		geo.setAppearance(pointApp);
+		geo.setGeometry(psf.getPointSet());
+		geo.setName("Points");
+		current.addChild(geo);
+	}
+	;  
+
+protected
+lineBlock [Color plCgiven, Appearance app] returns[Color plC]			// liest erst eine, dann alle direkt folgenden Lines ein
+{
+ plC=plCgiven;								// Punkt und Linienfarbe
+ Vector coordinates= new Vector();			// alle Punkte in einer Liste
+ Vector line=new Vector();					// alle Punkte einer Linie
+ Vector colors= new Vector();				// FarbListe
+ int count=0;								// Anzahl aller bisher gesammelten Punkte
+ int[] lineIndices;							// liste aller Indices einer Linie
+ Vector linesIndices= new Vector();}		// Liste aller IndiceeListen
+ :
+	"Line"
+	 OPEN_BRACKET
+				line=lineset 			// das ist ein Vector von double[3]
+				{
+					lineIndices=new int[line.size()];
+					for(int i=0;i<line.size();i++){
+						coordinates.add(line.get(i));  //Punkte zu einer Liste machen
+				    	lineIndices[i]=i;			   // indizirung merken
+				    }
+			    	count=line.size();
+					linesIndices.add(lineIndices);
+				    colors.add(getRGBColor(plC));
+				}
+	 CLOSE_BRACKET 
+	(
+	  COLON
+	  (
+	    (plC=color)
+	   |( "Line"	
+	     OPEN_BRACKET
+				line=lineset 			// das ist ein Vector von double[3]
+				{
+					lineIndices=new int[line.size()];
+					for(int i=0;i<line.size();i++){			// mithilfe von 'count' weiterzaehlen
+						coordinates.add(line.get(i));  		// Punkte zu einer Liste machen
+				    	lineIndices[i]=i+count;			    // indizirung merken
+				    }
+			    	count+=line.size();
+					linesIndices.add(lineIndices);
+					colors.add(getRGBColor(plC));
+				}
+	     CLOSE_BRACKET )
+	  )   
+	)*
+	{
+			double [][] data= new double[coordinates.size()][];
+			double [][] colorData = new double[linesIndices.size()][];
+			for(int i=0;i<coordinates.size();i++){
+				data[i]= (double[])coordinates.get(i);
+			}
+			int[][] indices= new int[linesIndices.size()][];
+			
+			for(int i=0;i<linesIndices.size();i++){		// Indices als doppelListe von Doubles machen
+				indices[i]=(int [])linesIndices.get(i);
+				colorData[i]=(double [])colors.get(i);
+			}
+			IndexedLineSetFactory lineset=new IndexedLineSetFactory();
+						
+			lineset.setLineCount(linesIndices.size());
+			lineset.setVertexCount(coordinates.size());
+			lineset.setEdgeIndices(indices);
+			lineset.setVertexCoordinates(data);
+			lineset.update();
+
+
+			// Achtung ist gehackt, weil noch keine Methoden in der LineSetFactory dafuer da : 
+			lineset.getIndexedLineSet().setEdgeAttributes(Attribute.COLORS,new DoubleArrayArray.Array( colorData ));
+			// 
+
+
+			SceneGraphComponent geo=new SceneGraphComponent();
+			Appearance lineApp =copyApp(app);
+			lineApp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+			lineApp.setAttribute(CommonAttributes.SPHERES_DRAW, false);
+			
+			geo.setAppearance(lineApp);
+			geo.setGeometry(lineset.getIndexedLineSet());
+			geo.setName("Lines");
+			current.addChild(geo);
+		}
+	;  
+
+
+protected 
+polygonBlock [Color fCgiven, Appearance app] returns[Color fC]
+{fC=fCgiven;
+ Vector coordinates= new Vector(); 	// alle PunktListen vereint in einer
+ Vector poly=new Vector();			// alle Punkte in einem Polygon
+ int[] polyIndices;					// alle indices eines Polygons
+ Vector colors= new Vector();
+ Vector polysIndices= new Vector();
+ int count=0;						// zaehlt die Punkte mit
+ }
+	:"Polygon"
+	 OPEN_BRACKET
+				poly=lineset 			// das ist ein Vector von double[3]
+				{
+					polyIndices=new int[poly.size()+1];
+					for(int i=0;i<poly.size();i++){
+						coordinates.add(poly.get(i));  //Punkte zu einer Liste machen
+				    	polyIndices[i]=i;			   // indizirung merken
+				    }
+				    polyIndices[poly.size()]=0;
+			    	count=poly.size();
+					polysIndices.add(polyIndices);
+				    colors.add(getRGBColor(fC));
+				}
+	 CLOSE_BRACKET 
+	( COLON
+	 (
+	   (fC=faceColor )
+	  |("Polygon"
+	    OPEN_BRACKET
+				poly=lineset 			// das ist ein Vector von double[3]
+				{
+					polyIndices=new int[poly.size()+1];
+					for(int i=0;i<poly.size();i++){
+						coordinates.add(poly.get(i));  //Punkte zu einer Liste machen
+				    	polyIndices[i]=i+count;			   // indizirung merken
+				    }
+				    polyIndices[poly.size()]=count;
+			    	count+=poly.size();
+					polysIndices.add(polyIndices);
+					colors.add(getRGBColor(fC));
+				}
+	    CLOSE_BRACKET
+	  ))
+	)*
+	{
+		double [][] data= new double[count][];
+		double [][] colorData = new double[polysIndices.size()][];
+		for(int i=0;i<count;i++){				// Punkte zum flachen DoubleArray machen
+			data[i]=((double[]) coordinates.get(i));
+		}
+		int[][] indices= new int[polysIndices.size()][];
+		for(int i=0;i<polysIndices.size();i++){		// Indices als doppelListe von Doubles machen
+			indices[i]=(int[])polysIndices.get(i);
+			colorData[i]=(double [])colors.get(i);
+		}
+		IndexedFaceSetFactory faceSet = new IndexedFaceSetFactory();
+		faceSet.setVertexCount(count);
+		faceSet.setFaceCount(polysIndices.size());
+		faceSet.setFaceIndices(indices);
+		faceSet.setVertexCoordinates(data);
+		faceSet.setFaceColors(colorData);
+		faceSet.setGenerateFaceNormals(true);
+		faceSet.update();
+		SceneGraphComponent geo=new SceneGraphComponent();	// Komponenten erstellen und einhaengen
+		Appearance faceApp =copyApp(app);
+		faceApp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+		faceApp.setAttribute(CommonAttributes.SPHERES_DRAW, false);
+		faceApp.setAttribute(CommonAttributes.EDGE_DRAW, false);
+		faceApp.setAttribute(CommonAttributes.TUBES_DRAW, false);
+		
+		geo.setAppearance(faceApp);
+		current.addChild(geo);
+		geo.setName("Faces");
+		geo.setGeometry(faceSet.getIndexedFaceSet());
+	}
+	;
+
+	
+// 	Farben	
 protected
 faceColor returns[Color fC]
 {Color specular; double d; fC= new Color(255,0,0);}
@@ -149,8 +384,6 @@ faceColor returns[Color fC]
 		CLOSE_BRACKET 
 	;
 
-	
-// 	Farben
 protected
 color returns[Color c]
 {c= new Color(0,255,0);
@@ -260,217 +493,6 @@ double res1,res2,res3;}
 			}
 	;
 
-protected
-pointBlock [Color plCgiven] returns [Color plC]
-{Vector points= new Vector(); 
- double[] v;
- Vector colors= new Vector();
- plC=plCgiven;
-}
-	:
-	( "Point"
-	   OPEN_BRACKET
-				{v=new double[3];}
-				v=vektor
-				{points.add(v);
-				 colors.add(getRGBColor(plC));}
-	   CLOSE_BRACKET 
-	)
-	(
-	COLON
-	(
-	
-	   plC=color
-	 |( "Point"
-	   OPEN_BRACKET
-				{v=new double [3];}
-				v=vektor
-				{points.add(v);
-				 colors.add(getRGBColor(plC));}
-	   CLOSE_BRACKET 
-	   )
-	 )
-	)*
-	{
-		PointSetFactory psf = new PointSetFactory();
-		double [][] data = new double [points.size()][];
-		double [][] colorData = new double[points.size()][];
-		for(int i=0;i<points.size();i++){
-			data[i]=(double [])points.get(i);
-			colorData[i]=(double [])colors.get(i);
-		}
-
-		psf.setVertexCount(points.size());
-		psf.setVertexCoordinates(data);
-		psf.setVertexColors(colorData);
-		psf.update();
-		
-		SceneGraphComponent geo=new SceneGraphComponent();		
-		Appearance pointApp =new Appearance();
-		pointApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
-	    pointApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
-		geo.setAppearance(pointApp);
-		geo.setGeometry(psf.getPointSet());
-		geo.setName("Points");
-		current.addChild(geo);
-	}
-	;  
-
-protected
-lineBlock [Color plCgiven] returns[Color plC]			// liest erst eine, dann alle direkt folgenden Lines ein
-{
- plC=plCgiven;								// Punkt und Linienfarbe
- Vector coordinates= new Vector();			// alle Punkte in einer Liste
- Vector line=new Vector();					// alle Punkte einer Linie
- Vector colors= new Vector();				// FarbListe
- int count=0;								// Anzahl aller bisher gesammelten Punkte
- int[] lineIndices;							// liste aller Indices einer Linie
- Vector linesIndices= new Vector();}		// Liste aller IndiceeListen
- :
-	"Line"
-	 OPEN_BRACKET
-				line=lineset 			// das ist ein Vector von double[3]
-				{
-					lineIndices=new int[line.size()];
-					for(int i=0;i<line.size();i++){
-						coordinates.add(line.get(i));  //Punkte zu einer Liste machen
-				    	lineIndices[i]=i;			   // indizirung merken
-				    }
-			    	count=line.size();
-					linesIndices.add(lineIndices);
-				    colors.add(getRGBColor(plC));
-				}
-	 CLOSE_BRACKET 
-	(
-	  COLON
-	  (
-	    (plC=color)
-	   |( "Line"	
-	     OPEN_BRACKET
-				line=lineset 			// das ist ein Vector von double[3]
-				{
-					lineIndices=new int[line.size()];
-					for(int i=0;i<line.size();i++){			// mithilfe von 'count' weiterzaehlen
-						coordinates.add(line.get(i));  		// Punkte zu einer Liste machen
-				    	lineIndices[i]=i+count;			    // indizirung merken
-				    }
-			    	count+=line.size();
-					linesIndices.add(lineIndices);
-					colors.add(getRGBColor(plC));
-				}
-	     CLOSE_BRACKET )
-	  )   
-	)*
-	{
-			double [][] data= new double[coordinates.size()][];
-			double [][] colorData = new double[linesIndices.size()][];
-			for(int i=0;i<coordinates.size();i++){
-				data[i]= (double[])coordinates.get(i);
-			}
-			int[][] indices= new int[linesIndices.size()][];
-			
-			for(int i=0;i<linesIndices.size();i++){		// Indices als doppelListe von Doubles machen
-				indices[i]=(int [])linesIndices.get(i);
-				colorData[i]=(double [])colors.get(i);
-			}
-			IndexedLineSetFactory lineset=new IndexedLineSetFactory();
-						
-			lineset.setLineCount(linesIndices.size());
-			lineset.setVertexCount(coordinates.size());
-			lineset.setEdgeIndices(indices);
-			lineset.setVertexCoordinates(data);
-			lineset.setVertexColors(colorData);
-//			lineset.getIndexedLineSet().setEdgeAttributes(Attribute.COLORS,new DoubleArrayArray.Array( colorData ));
-			lineset.update();
-			
-			SceneGraphComponent geo=new SceneGraphComponent();
-			Appearance lineApp =new Appearance();
-			lineApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
-			lineApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
-//	<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Punkte an den Enden anzeigen >
-			lineApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
-		    lineApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
-	//
-			geo.setAppearance(lineApp);
-			geo.setGeometry(lineset.getIndexedLineSet());
-			geo.setName("Lines");
-			current.addChild(geo);
-		}
-	;  
-
-
-protected 
-polygonBlock [Color fCgiven] returns[Color fC]
-{fC=fCgiven;
- Vector coordinates= new Vector(); 	// alle PunktListen vereint in einer
- Vector poly=new Vector();			// alle Punkte in einem Polygon
- int[] polyIndices;					// alle indices eines Polygons
- Vector colors= new Vector();
- Vector polysIndices= new Vector();
- int count=0;						// zaehlt die Punkte mit
- }
-	:"Polygon"
-	 OPEN_BRACKET
-				poly=lineset 			// das ist ein Vector von double[3]
-				{
-					polyIndices=new int[poly.size()+1];
-					for(int i=0;i<poly.size();i++){
-						coordinates.add(poly.get(i));  //Punkte zu einer Liste machen
-				    	polyIndices[i]=i;			   // indizirung merken
-				    }
-				    polyIndices[poly.size()]=0;
-			    	count=poly.size();
-					polysIndices.add(polyIndices);
-				    colors.add(getRGBColor(fC));
-				}
-	 CLOSE_BRACKET 
-	( COLON
-	 (
-	   (fC=faceColor )
-	  |("Polygon"
-	    OPEN_BRACKET
-				poly=lineset 			// das ist ein Vector von double[3]
-				{
-					polyIndices=new int[poly.size()+1];
-					for(int i=0;i<poly.size();i++){
-						coordinates.add(poly.get(i));  //Punkte zu einer Liste machen
-				    	polyIndices[i]=i+count;			   // indizirung merken
-				    }
-				    polyIndices[poly.size()]=count;
-			    	count+=poly.size();
-					polysIndices.add(polyIndices);
-					colors.add(getRGBColor(fC));
-				}
-	    CLOSE_BRACKET
-	  ))
-	)*
-	{
-		double [][] data= new double[count][];
-		double [][] colorData = new double[polysIndices.size()][];
-		for(int i=0;i<count;i++){				// Punkte zum flachen DoubleArray machen
-			data[i]=((double[]) coordinates.get(i));
-		}
-		int[][] indices= new int[polysIndices.size()][];
-		for(int i=0;i<polysIndices.size();i++){		// Indices als doppelListe von Doubles machen
-			indices[i]=(int[])polysIndices.get(i);
-			colorData[i]=(double [])colors.get(i);
-		}
-		IndexedFaceSetFactory faceSet = new IndexedFaceSetFactory();
-		faceSet.setVertexCount(count);
-		faceSet.setFaceCount(polysIndices.size());
-		faceSet.setFaceIndices(indices);
-		faceSet.setVertexCoordinates(data);
-		faceSet.setFaceColors(colorData);
-		faceSet.setGenerateFaceNormals(true);
-		faceSet.update();
-		
-		
-		SceneGraphComponent geo=new SceneGraphComponent();	// Komponenten erstellen und einhaengen
-		current.addChild(geo);
-		geo.setName("Faces");
-		geo.setGeometry(faceSet.getIndexedFaceSet());
-	}
-	;
 
 // ----------------------------------------------- neu ---------------------------------------------
 // -------------------------------------------------------------------------------------------------
@@ -478,7 +500,7 @@ polygonBlock [Color fCgiven] returns[Color fC]
 
 
 protected 
-cubic [ Color fC]
+cubic [ Color fC,Appearance app]
 	:"Cubic"
 	 OPEN_BRACKET 
 			{double[] v2=new double [3]; 
@@ -492,39 +514,45 @@ cubic [ Color fC]
 			 current.addChild(geo);
 			 geo.setGeometry(Primitives.cube());
 	 		 geo.setName("Cube");
+	 		 Appearance cubicApp =copyApp(app);
+			 cubicApp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+			 cubicApp.setAttribute(CommonAttributes.SPHERES_DRAW, false);
+			 cubicApp.setAttribute(CommonAttributes.EDGE_DRAW, false);
+			 cubicApp.setAttribute(CommonAttributes.TUBES_DRAW, false);
+			 geo.setAppearance(cubicApp);
 			 MatrixBuilder.euclidean().scale(v2[0],v2[1],v2[2])
 			    .translate(v[0],v[1],v[2]).assignTo(geo);
  			}
  	;
  	
 protected
-text [ Color plC ]
+text [ Color plC,Appearance app]
 {double[] v=new double[3]; String t;}
 	:"Text"		OPEN_BRACKET 
 					s:STRING COLON v=vektordata 	
 				CLOSE_BRACKET 
 					{t=s.getText();}
 	;
-
 	
-	
-// Directives ---------------------------------------- Phase 2: keine neuen Knoten, sondern app mitschleifen
+// Directives ---------------------------------------- 
 
 protected 
-directiveBlock
+directiveBlock[Appearance appOld] returns [ Appearance app]
 	{
-	 SceneGraphComponent dir=new SceneGraphComponent();
-	 dir.setName("Directive");
-	 current.addChild(dir);
-	 Appearance app =new Appearance();
+//	 SceneGraphComponent dir=new SceneGraphComponent();
+//	 dir.setName("Directive");
+//	 current.addChild(dir);
+	 app =appOld;
 	}
 	: app=directive[app]
 	  (
 	  	COLON
 	  	app=directive[app]
 	  )*
-	{current=dir;
-	 dir.setAppearance(app);}
+	{
+	 //current=dir;
+	 //dir.setAppearance(app);
+	}
 	;
 
 protected 
@@ -534,9 +562,12 @@ Color col;}
 	:"AbsoluteDashing" OPEN_BRACKET  dumb CLOSE_BRACKET 
 	|"AbsolutePointsize" 
 				OPEN_BRACKET
-					{int d=0;} d=integerthing 
+					{double d=0;} d=doublething
+					{
+					app.setAttribute(CommonAttributes.POINT_RADIUS,d/2);
+//					app.setAttribute(CommonAttributes.POINT_SIZE,d/2);
+					}
 				CLOSE_BRACKET 
-					{}
 	|"AbsoluteThickness"
 				OPEN_BRACKET  
 					{int w=0;} w=integerthing
