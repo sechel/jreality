@@ -87,7 +87,7 @@ public class ScaleTool extends Tool {
     		return;
     	}
     }
-    SceneGraphComponent scale = (isMoveChilderen() ? tc.getRootToLocal() : tc.getRootToToolComponent()).getLastComponent();
+    SceneGraphComponent scale = (isMoveChildren() ? tc.getRootToLocal() : tc.getRootToToolComponent()).getLastComponent();
 
     Matrix shipMatrix = new Matrix();
     if (scale.getTransformation() != null) shipMatrix.assignFrom(scale.getTransformation());
@@ -99,7 +99,7 @@ public class ScaleTool extends Tool {
 
   private double acceleration(ToolContext tc) {
     try {
-      if (tc.getAxisState(InputSlot.getDevice("Accelertation")).isPressed()) return 50;
+      if (tc.getAxisState(InputSlot.getDevice("Acceleration")).isPressed()) return 50;
     } catch (Exception e) {
     }
     return 1;
@@ -119,7 +119,7 @@ public void setGain(double gain) {
 	this.gain = gain;
 }
 
-public boolean isMoveChilderen() {
+public boolean isMoveChildren() {
   return moveChilderen;
 }
 

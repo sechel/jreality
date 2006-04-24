@@ -75,32 +75,6 @@ public class VirtualRawMousePointerTrafo implements VirtualDevice {
   	pointerNdc[14] = 1;
   	
   	pointerTrafo = Rn.times(pointerTrafo, ndcToWorld, pointerNdc);
-//    for(int i=0; i<4; i++)
-//    	if (Math.abs(pointerTrafo[12+i])>Rn.TOLERANCE)
-//    		scaleColumn(pointerTrafo, i, 1/pointerTrafo[i+12]);
-//    for(int i = 0; i<3; i++)
-//    	columnTrafo(pointerTrafo, i, 3, -1);
-//    
-//    double nrm = columnNorm(pointerTrafo, 2);
-//	if (nrm>Rn.TOLERANCE)
-//	    scaleColumn(pointerTrafo, 2, -1/nrm);
-//    for(int i = 1; i>=0; i--) {
-//    	columnTrafo(pointerTrafo, i, i+1, -scalarColumnProduct(pointerTrafo, i, i+1));
-// 
-//    }
-//    columnTrafo(pointerTrafo, 1, 2, -scalarColumnProduct(pointerTrafo, 1, 2));
-//   	nrm = columnNorm(pointerTrafo, 1);
-//	if (nrm>Rn.TOLERANCE)
-//	    scaleColumn(pointerTrafo, 1, 1/nrm);
-//	columnTrafo(pointerTrafo, 0, 2, -scalarColumnProduct(pointerTrafo, 0, 2));
-//	columnTrafo(pointerTrafo, 0, 1, -scalarColumnProduct(pointerTrafo, 0, 1));
-//	nrm = columnNorm(pointerTrafo, 0);
-//	if (nrm>Rn.TOLERANCE)
-//	    scaleColumn(pointerTrafo, 0, 1/nrm);
-//	
-//  pointerTrafo[12]=pointerTrafo[13]=pointerTrafo[14]=0;
-//  pointerTrafo[15]=1;
-
 	return new ToolEvent(context.getEvent().getSource(), outSlot, outArray);
   }
 

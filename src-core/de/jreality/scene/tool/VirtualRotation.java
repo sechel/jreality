@@ -74,8 +74,9 @@ public class VirtualRotation implements VirtualDevice {
     double angle = gain*Math.asin(Rn.euclideanNorm(cross));
     
     // TODO: can't we get rid of the camera position here?
-    Matrix camToWorldRot = new Matrix(context.getTransformationMatrix(cameraToWorld)).getRotation();
-    cross = camToWorldRot.multiplyVector(cross);
+    //Matrix camToWorldRot = new Matrix(context.getTransformationMatrix(cameraToWorld)).getRotation();
+    double[] cross4 = {cross[0], cross[1], cross[2], 0};
+    cross = new Matrix(context.getTransformationMatrix(cameraToWorld)).multiplyVector(cross4);
     
    double s = Math.sin(angle);
    double c = Math.cos(angle);
