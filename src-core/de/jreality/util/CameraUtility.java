@@ -30,7 +30,7 @@ public class CameraUtility {
 
 	public static Camera getCamera(Viewer v)	{
 		if (v == null || v.getCameraPath() == null || !(v.getCameraPath().getLastElement() instanceof Camera)) 
-			return null;
+			throw new IllegalStateException("Viewer has no camera!");
 		return ((Camera) v.getCameraPath().getLastElement());
 	}
 
