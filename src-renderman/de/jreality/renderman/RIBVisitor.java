@@ -40,7 +40,10 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import de.jreality.geometry.BallAndStickFactory;
+import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -78,6 +81,8 @@ import de.jreality.shader.Texture2D;
  * <li>clipping planes are written but Icould not test them since neither 
  * 3delight<sup>TM</sup>  nor aqsis do support them at the moment</li>
  * <li>lots of other stuff I just did not check...</li>
+ * <li>...</li>
+ * <li>face colors on IndexedFaceSets ignored</li>
  * </ul>
  *  * @version 1.0
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
@@ -95,9 +100,6 @@ public class RIBVisitor extends SceneGraphVisitor {
     
     public static boolean fullSpotLight = true;
     public static String shaderPath = null;
-    
-    private double sScale=1;
-    private double tScale=1;
     
     /**
      * 
@@ -173,9 +175,6 @@ public class RIBVisitor extends SceneGraphVisitor {
         map.put("color background", f);
         Ri.imager("background",map);
         cam = MatrixBuilder.euclidean().scale(1,1,-1).times(cam).getArray();
-//        VecMat.assignScale(mir,1,1,-1);
-        //icam.scale(1.);
-//        VecMat.multiplyFromLeft(cam,mir);
         if(proj.equals("perspective"))
             Ri.transform(fTranspose(cam));
         else
@@ -361,6 +360,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         }
         return fname;
     }
+    boolean testBallStick = true;
     /* (non-Javadoc)
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.IndexedLineSet)
      */
@@ -380,35 +380,51 @@ public class RIBVisitor extends SceneGraphVisitor {
 //        for(int i = 0;i<n;i++) {
 //            cylinder(g.getEdgeData(i),r);
 //        }
-//        
-            IntArrayArray edgeIndices= dl.toIntArrayArray();
-            DoubleArrayArray edgeColors=null;
-            dl = g.getEdgeAttributes(Attribute.COLORS);
-            if(dl != null) 
-                edgeColors = dl.toDoubleArrayArray();
-            DoubleArrayArray vertices=g.getVertexAttributes(Attribute.COORDINATES)
-            .toDoubleArrayArray();
-            double[] edgeData = new double[6];
-            for (int i= 0, n=edgeIndices.size(); i < n; i++)
-            {
-                if(edgeColors!= null) {
-                    float[] f = new float[3];
-                    f[0] = (float) edgeColors.getValueAt(i,0);
-                    f[1] = (float) edgeColors.getValueAt(i,1);
-                    f[2] = (float) edgeColors.getValueAt(i,2);
-                    Ri.color(f);
-                }
-                IntArray edge=edgeIndices.item(i).toIntArray();
-                for(int j = 0; j<edge.getLength()-1;j++) {
-                    DoubleArray p1=vertices.item(edge.getValueAt(j)).toDoubleArray();
-                    DoubleArray p2=vertices.item(edge.getValueAt(j+1)).toDoubleArray();
-                //pipeline.processLine(p1, p2);
-                //pipeline.processPseudoTube(p1, p2);
-                    cylinder(p1,p2,r);
-                }
-            }
+//        	
+          // A test to get tubes drawn correctly for non-euclidean case (also fixes some problems I've noticed with
+          // the euclidean case too.  -gunn 20.04.06
+          // can't use the Renderman Cylinder primitive since it doesn't correspond to equidistant surfaces in non-euclidean cases.
+          if (testBallStick)		{
+        	    int sig = eAppearance.getAttribute("signature", Pn.EUCLIDEAN);
+             Color cc = (Color) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,  CommonAttributes.DIFFUSE_COLOR_DEFAULT );
+             BallAndStickFactory bsf = new BallAndStickFactory(g);
+        	  	bsf.setSignature(sig);
+        	  	bsf.setStickRadius(r);
+        	  	bsf.setShowBalls(false);	// need to actually omit the balls
+        	  	bsf.setStickColor(cc);
+        	  	bsf.update();
+        	  	visit(bsf.getSceneGraphComponent());
+          } else {
+              IntArrayArray edgeIndices= dl.toIntArrayArray();
+              DoubleArrayArray edgeColors=null;
+              dl = g.getEdgeAttributes(Attribute.COLORS);
+              if(dl != null) 
+                  edgeColors = dl.toDoubleArrayArray();
+              DoubleArrayArray vertices=g.getVertexAttributes(Attribute.COORDINATES)
+              .toDoubleArrayArray();
+              for (int i= 0, n=edgeIndices.size(); i < n; i++)
+              {
+                  if(edgeColors!= null) {
+                      float[] f = new float[3];
+                      f[0] = (float) edgeColors.getValueAt(i,0);
+                      f[1] = (float) edgeColors.getValueAt(i,1);
+                      f[2] = (float) edgeColors.getValueAt(i,2);
+                      Ri.color(f);
+                  }
+                  IntArray edge=edgeIndices.item(i).toIntArray();
+                  for(int j = 0; j<edge.getLength()-1;j++) {
+                      DoubleArray p1=vertices.item(edge.getValueAt(j)).toDoubleArray();
+                      DoubleArray p2=vertices.item(edge.getValueAt(j+1)).toDoubleArray();
+                  //pipeline.processLine(p1, p2);
+                  //pipeline.processPseudoTube(p1, p2);
+                      cylinder(p1,p2,r);
+                  }
+              }
 
-            Ri.attributeEnd();
+          }
+          Ri.attributeEnd();
+       	  
+
         }
         }
         super.visit(g);
@@ -462,18 +478,42 @@ public class RIBVisitor extends SceneGraphVisitor {
             if(npolys!= 0) {
         HashMap map = new HashMap();
         //boolean smooth = !((String)eAppearance.getAttribute(CommonAttributes.POLYGON_SHADER,"default")).startsWith("flat");
-        boolean smooth = eAppearance.getAttribute(CommonAttributes.SMOOTH_SHADING,true);
+        boolean smooth = eAppearance.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING,true);
         DataList coords = i.getVertexAttributes(Attribute.COORDINATES);
         DoubleArrayArray da = coords.toDoubleArrayArray();
-        float[] fcoords =new float[3*da.getLength()];
-        for (int j = 0; j < da.getLength(); j++) {
-            fcoords[3*j+0] =(float)da.getValueAt(j,0);
-            fcoords[3*j+1] =(float)da.getValueAt(j,1);
-            fcoords[3*j+2] =(float)da.getValueAt(j,2);
-        }
-        map.put("P",fcoords);
-        DataList normals = i.getVertexAttributes(Attribute.NORMALS);
-        if(smooth&& normals!=null) {
+        int pointlength = GeometryUtility.getVectorLength(coords);
+   	 	// We'd like to be able to use the "Pw" attribute which accepts 4-vectors for point coordinates, but 3Delight-5.0.1
+	 	// does not support it ...  
+	 	// TODO figure out how to allow Pw output if desired, for example, if you have Pixar renderman renderer.
+//        if (pointlength == 3)	{
+            float[] fcoords =new float[3*da.getLength()];
+            for (int j = 0; j < da.getLength(); j++) {
+            	 	if (pointlength == 4)	{
+                  	 float w =(float)da.getValueAt(j,3);
+                  	 if (w != 0) w = 1.0f/w;
+                  	 else w = 10E10f;		// hack! but what else can you do?
+                  	fcoords[3*j+0] =(float)da.getValueAt(j,0)*w;
+            	 		fcoords[3*j+1] =(float)da.getValueAt(j,1)*w;
+            	 		fcoords[3*j+2] =(float)da.getValueAt(j,2)*w;
+            	 	} else {
+            	 		fcoords[3*j+0] =(float)da.getValueAt(j,0);
+            	 		fcoords[3*j+1] =(float)da.getValueAt(j,1);
+            	 		fcoords[3*j+2] =(float)da.getValueAt(j,2);
+            	 	}
+            }
+            map.put("P",fcoords);       	
+//        } else if (pointlength == 4)	{
+//            float[] fcoords =new float[4*da.getLength()];
+//            for (int j = 0; j < da.getLength(); j++) {
+//                fcoords[3*j+0] =(float)da.getValueAt(j,0);
+//                fcoords[3*j+1] =(float)da.getValueAt(j,1);
+//                fcoords[3*j+2] =(float)da.getValueAt(j,2);
+//                fcoords[3*j+3] =(float)da.getValueAt(j,3);
+//            }
+//            map.put("Pw",fcoords);       	
+//        }
+       DataList normals = i.getVertexAttributes(Attribute.NORMALS);
+        if(smooth && normals!=null) {
             da = normals.toDoubleArrayArray();
             float[] fnormals =new float[3*da.getLength()];
             for (int j = 0; j < da.getLength(); j++) {
@@ -484,14 +524,16 @@ public class RIBVisitor extends SceneGraphVisitor {
             map.put("N",fnormals);
         } else { //face normals
             normals = i.getFaceAttributes(Attribute.NORMALS);
-            da = normals.toDoubleArrayArray();
-            float[] fnormals =new float[3*da.getLength()];
-            for (int j = 0; j < da.getLength(); j++) {
-                fnormals[3*j+0] =(float)da.getValueAt(j,0);
-                fnormals[3*j+1] =(float)da.getValueAt(j,1);
-                fnormals[3*j+2] =(float)da.getValueAt(j,2);
+            if (normals != null)	{
+                da = normals.toDoubleArrayArray();
+                float[] fnormals =new float[3*da.getLength()];
+                for (int j = 0; j < da.getLength(); j++) {
+                    fnormals[3*j+0] =(float)da.getValueAt(j,0);
+                    fnormals[3*j+1] =(float)da.getValueAt(j,1);
+                    fnormals[3*j+2] =(float)da.getValueAt(j,2);
+                }
+                map.put("uniform normal N",fnormals);            	
             }
-            map.put("uniform normal N",fnormals);
         }
         // texture coords:
         DataList texCoords = i.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
@@ -523,16 +565,16 @@ public class RIBVisitor extends SceneGraphVisitor {
                 vCol[3*j]   =(float)rgba.getValueAt(0);
                 vCol[3*j+1] =(float)rgba.getValueAt(1);
                 vCol[3*j+2] =(float)rgba.getValueAt(2);
-                if(vertexColorLength ==4)
-                vOp[3*j]    =(float)rgba.getValueAt(3);
-                vOp[3*j+1]  =(float)rgba.getValueAt(3);
-                vOp[3*j+2]  =(float)rgba.getValueAt(3);
-                
+                if(vertexColorLength ==4) {
+                		vOp[3*j]    =(float)rgba.getValueAt(3);
+                		vOp[3*j+1]  =(float)rgba.getValueAt(3);
+                		vOp[3*j+2]  =(float)rgba.getValueAt(3);
+                }
                 //ftex[2*j] =(float)d.getValueAt(j,0);
                 //ftex[2*j+1] =(float)d.getValueAt(j,1);
             }
             map.put("varying color Cs",vCol);
-            if(vertexColorLength == 4 ) map.put("varying color Os",vCol);
+            if(vertexColorLength == 4 ) map.put("varying color Os",vOp);
         }
         
         
@@ -575,10 +617,14 @@ public class RIBVisitor extends SceneGraphVisitor {
         setupShader(eAppearance,CommonAttributes.POINT_SHADER);
         boolean drawSpheres = eAppearance.getAttribute(CommonAttributes.SPHERES_DRAW,CommonAttributes.SPHERES_DRAW_DEFAULT);
         if(drawSpheres) {
-            DoubleArrayArray a=coord.toDoubleArrayArray();
-            double[] trns = new double[16];
+        	    int sig = eAppearance.getAttribute("signature", Pn.EUCLIDEAN);
+             Color cc = (Color) eAppearance.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,  CommonAttributes.DIFFUSE_COLOR_DEFAULT );
+             //DoubleArrayArray a=coord.toDoubleArrayArray();
+             double[][] a=coord.toDoubleArrayArray(null);
+             Ri.color(cc.getRGBColorComponents(null));
+           double[] trns = new double[16];
             for (int i= 0; i < n; i++) { 
-                trns = MatrixBuilder.euclidean().translate(a.getValueAt(i, 0),a.getValueAt(i, 1),a.getValueAt(i, 2)).getArray();
+                trns = MatrixBuilder.init(null, sig).translate(a[i]).getArray();
                 Ri.transformBegin();
                 Ri.concatTransform(fTranspose(trns));
                 HashMap map =new HashMap();
