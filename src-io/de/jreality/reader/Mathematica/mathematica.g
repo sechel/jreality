@@ -21,14 +21,35 @@ options {
 {
 	// this is what is returned from the parsing process
 	public SceneGraphComponent root = new SceneGraphComponent();	
+	
 	SceneGraphComponent current = root;
+	
 	Appearance globalApp =new Appearance();
 	Color plCDefault= new Color(255,0,0);
 	Color fCDefault = new Color(0,255,0);
 	
-//	System.err.println("Color is "+Rn.toString(colorData[i]));
-	
-	public  double[] getRGBColor(Color c){
+	double[][] borderValue= new double [3][];
+
+// ---------------------------- total Sizes of Scene --------------------------
+	boolean gotFirstPoint =false;
+	public void resetBorder (double [] v){
+		if (gotFirstPoint){ // set Borders for viewed size
+			for (int i=0;i<3;i++){
+				if (v[i] < borderValue[0][i])
+					borderValue[0][i] = v[i];
+				if (borderValue[1][i] < v[i])
+					borderValue[1][i] = v[i];
+			}
+		}
+		else{
+			borderValue[0]=v;
+			borderValue[1]=v;
+			gotFirstPoint=true;		
+		}
+	}
+// ------------------------------------------------------------------------------
+
+	public double[] getRGBColor(Color c){
 	// retuns a array that represents a color (needed for colored faces)
 		double[] fl= new double[3];
 		fl[0]=c.getRed()/255.0;
@@ -39,6 +60,9 @@ options {
 }
 
 
+// ------------------------------------------------------------------------------
+// -------------------------------- Parser --------------------------------------
+// ------------------------------------------------------------------------------
 start returns [SceneGraphComponent r]
 { r = null;	
 	globalApp.setName("global");
@@ -72,6 +96,25 @@ list[Color plC, Color fC]
 	    CLOSE_BRACE
 			{current=oldPart;}
 	;
+	
+protected
+objectList [Color plC, Color fC]
+	:(
+		  list[ plC, fC]
+		| fC=faceThing[fC]
+		| plC=plThing[plC]
+		| appThing
+	 )
+	 ( COLON 
+		(	
+			  list[ plC, fC]
+			| fC =faceThing[fC]
+			| plC=plThing[plC]
+			| appThing
+	 	)
+	 )*
+	;	
+	
 protected
 faceThing [Color fCgiven] returns[Color fC]
 {fC=fCgiven;
@@ -106,23 +149,6 @@ faceColor returns[Color fC]
 		CLOSE_BRACKET 
 	;
 
-protected
-objectList [Color plC, Color fC]
-	:(
-		  list[ plC, fC]
-		| fC=faceThing[fC]
-		| plC=plThing[plC]
-		| appThing
-	 )
-	 ( COLON 
-		(	
-			  list[ plC, fC]
-			| fC =faceThing[fC]
-			| plC=plThing[plC]
-			| appThing
-	 	)
-	 )*
-	;	
 	
 // 	Farben
 protected
@@ -175,17 +201,33 @@ color returns[Color c]
 // Koordinaten in einer Liste 
 protected
 lineset returns[Vector v]
-{double [] point=new double[3];
+{
+double [] point =new double[3];
+double [] point2=new double[3];
+double [] point3=new double [3];
+v=new Vector();
+v.add(5);
 v=new Vector();}
 		: OPEN_BRACE
 		  point=vektor
-			{v.add(point);}
+		    {
+		    v.addElement(point);
+		    point3[0]=point[0];// have to save first point seperate and insert later again to first position (dont ask !)
+		    point3[1]=point[1];
+		    point3[2]=point[2];		    
+			}
 		  (COLON 
-			{point= new double[3];}
-			point=vektor
-			{v.add(point);}
+			{point2= new double[3];
+			}
+			point2=vektor
+			{
+		    v.addElement(point2);
+			}
 		  )*
 		 CLOSE_BRACE
+		 {
+		 v.setElementAt(point3,0);
+		 }
 		;
 
 // ein KoordinatenTripel
@@ -196,9 +238,26 @@ double res1,res2,res3;}
 	: 	OPEN_BRACE 
 			res1=doublething COLON res2=doublething COLON res3=doublething 
 		CLOSE_BRACE
-			{res[0]=res1;
-			res[1]=res2;
-			res[2]=res3;}
+			{
+			 res[0]=res1;
+			 res[1]=res2;
+			 res[2]=res3;
+			 resetBorder (res);
+			}
+	;
+
+protected	// das ist dasselbe wie vektor, wird aber nicht in die Borderberechnung eingefuegt
+vektordata returns[double[] res]
+{res =new double [3];
+double res1,res2,res3;}
+	: 	OPEN_BRACE 
+			res1=doublething COLON res2=doublething COLON res3=doublething 
+		CLOSE_BRACE
+			{
+			 res[0]=res1;
+			 res[1]=res2;
+			 res[2]=res3;
+			}
 	;
 
 protected
@@ -298,7 +357,6 @@ lineBlock [Color plCgiven] returns[Color plC]			// liest erst eine, dann alle di
 			    	count+=line.size();
 					linesIndices.add(lineIndices);
 					colors.add(getRGBColor(plC));
-					// System.err.println("Color is "+Rn.toString(getRGBColor(plC)));
 				}
 	     CLOSE_BRACKET )
 	  )   
@@ -427,14 +485,14 @@ cubic [ Color fC]
 			v2[0]=v2[1]=v2[2]=1;
 			double[] v=new double[3];
 			}
-			v=vektor ( COLON v2=vektor )? 
+			v=vektor ( COLON v2=vektordata )? 
 	 CLOSE_BRACKET 
 			{
 			 SceneGraphComponent geo=new SceneGraphComponent();
 			 current.addChild(geo);
 			 geo.setGeometry(Primitives.cube());
 	 		 geo.setName("Cube");
-			 MatrixBuilder.euclidian().scale(v2[0],v2[1],v2[2])
+			 MatrixBuilder.euclidean().scale(v2[0],v2[1],v2[2])
 			    .translate(v[0],v[1],v[2]).assignTo(geo);
  			}
  	;
@@ -443,7 +501,7 @@ protected
 text [ Color plC ]
 {double[] v=new double[3]; String t;}
 	:"Text"		OPEN_BRACKET 
-					s:STRING COLON v=vektor 	
+					s:STRING COLON v=vektordata 	
 				CLOSE_BRACKET 
 					{t=s.getText();}
 	;
@@ -503,11 +561,10 @@ Color col;}
 protected
 optionen
 	: COLON 
-//
-		dumb
-//	  OPEN_BRACE 
-//	  		( option (COLON option)* )? 
-//	  CLOSE_BRACE
+//		dumb
+	  OPEN_BRACE 
+	  		( option (COLON option)* )? 
+	  CLOSE_BRACE
 	;
 
 protected
@@ -515,58 +572,108 @@ option
 	: OPEN_BRACE 
 	  		( Option (COLON Option)* )? 
 	  CLOSE_BRACE
-	| OptionPrimitive
+	| optionPrimitive
 	;
 
 protected
 optionPrimitive
-	:	"PlotRange" 		PFEIL 			SPECIAL
-	|	"DisplayFunction"	PFEIL_NACH 		DOLLAR ID
-	|	"ColorOutput" 		PFEIL 			SPECIAL
-	|	"Axes" 				PFEIL 			SPECIAL
-	|	"PlotLabel" 		PFEIL 			SPECIAL
-	|	"AxesLabel"			PFEIL 			SPECIAL
-	|	"Ticks"				PFEIL 			SPECIAL
-	|	"Prolog"			PFEIL 			SPECIAL_SET
-	|	"Epilog"			PFEIL 			SPECIAL_SET
-	|	"AxesStyle"			PFEIL 			SPECIAL
-	|	"Backround"			PFEIL 			SPECIAL
-	|	"DefaultColor"		PFEIL 			SPECIAL
-	|	"DefaultFond"		PFEIL_NACH 		DOLLAR ID
-	|	"AspectRatio"		PFEIL 			SPECIAL
-	|	"ViewPoint"			PFEIL 			SPECIAL_SET
-	|	"Boxed"				PFEIL 			SPECIAL
-	|	"BoxRatios"			PFEIL 			SPECIAL
-	|	"Plot3Matrix"		PFEIL 			SPECIAL
-	|	"Lighting"			PFEIL 			SPECIAL
-	|	"AmbientLight"		PFEIL 			SPECIAL
-	|	"LightSources"		PFEIL 			SPECIAL_SET
-	|	"ViewCenter"		PFEIL 			SPECIAL
-	|	"PlotRegion"		PFEIL 			SPECIAL
-	|	"Imagesize"			PFEIL 			SPECIAL
-	|	"TextStyle"			PFEIL_NACH 		DOLLAR ID
-	|	"FormatType"		PFEIL_NACH 		DOLLAR ID
-	|	"ViewVertical"		PFEIL 			SPECIAL_SET
-	|	"FaceGrids"			PFEIL 			SPECIAL
-	|	"Shading"			PFEIL 			SPECIAL
-	|	"RenderAll"			PFEIL 			SPECIAL
-	|	"PolygonIntersections"	PFEIL 		SPECIAL
-	|	"AxesEdge"			PFEIL 			SPECIAL
-	|	"BoxStyle"			PFEIL 			SPECIAL
-	|	"SphericalRegion"	PFEIL 			SPECIAL
+	:	"PlotRange" 			MINUS LARGER	// Anpassen der Groesse
+//	
+								egal
+//	
+//				( "Automatic" 	
+//				   {double[][] v=borderValue;
+//				    double eps=0.01;
+//					MatrixBuilder.euclidean()
+//					    .scale(  1/((v[1][0]-v[0][0])+eps),1/((v[1][1]-v[0][1])+eps),1/((v[1][2]-v[0][2])+eps))
+//						.translate((v[1][0]-v[0][0])/2,(v[1][1]-v[0][1])/2,(v[1][2]-v[0][2])/2)
+//						.assignTo(root);
+//					}
+//				 | "ALL" // wie Automatic
+//				 | OPEN_BRACKET 
+//				 	{double [] v;}
+//				    v=vektor
+//				    {
+//				      MatrixBuilder.euclidean().scale(1/v[0],1/v[1],1/v[2]).assignTo(root);
+//			  		}
+//				   CLOSE_BRACKET		)
+	|	"Boxed"					MINUS LARGER 			egal
+	|	"Axes" 					MINUS LARGER 			egal
+	|	"PlotLabel" 			MINUS LARGER			egal
+	|	"AxesLabel"				MINUS LARGER			egal
+	|	"AmbientLight"			MINUS LARGER			egal
+	|	"DefaultColor"			MINUS LARGER			egal // Problem:kann nicht mehr die Farbe in einem Block aendern
+
+	|	"DisplayFunction"		(":>" 		DOLLAR ID | MINUS LARGER	egal)
+	|	"ColorOutput" 			MINUS LARGER			egal
+	|	"Ticks"					MINUS LARGER			egal
+	|	"Prolog"				MINUS LARGER			egal
+	|	"Epilog"				MINUS LARGER			egal
+	|	"AxesStyle"				MINUS LARGER			egal
+	|	"Background"				MINUS LARGER			egal
+	|	"DefaultFont"			(":>" 		DOLLAR ID | MINUS LARGER	egal)
+	|	"AspectRatio"			MINUS LARGER			egal
+	|	"ViewPoint"				MINUS LARGER			egal
+	|	"BoxRatios"				MINUS LARGER			egal
+	|	"Plot3Matrix"			MINUS LARGER			egal
+	|	"Lighting"				MINUS LARGER			egal
+	|	"LightSources"			MINUS LARGER			egal
+	|	"ViewCenter"			MINUS LARGER			egal
+	|	"PlotRegion"			MINUS LARGER			egal
+	|	"ImageSize"				MINUS LARGER			egal
+	|	"TextStyle"				(":>" 		DOLLAR ID | MINUS LARGER	egal)
+	|	"FormatType"			(":>" 		DOLLAR ID | MINUS LARGER	egal)
+	|	"ViewVertical"			MINUS LARGER			egal
+	|	"FaceGrids"				MINUS LARGER			egal
+	|	"Shading"				MINUS LARGER			egal
+	|	"RenderAll"				MINUS LARGER			egal
+	|	"PolygonIntersections"	MINUS LARGER			egal
+	|	"AxesEdge"				MINUS LARGER			egal
+	|	"BoxStyle"				MINUS LARGER			egal
+	|	"SphericalRegion"		MINUS LARGER			egal
 	;
-	
+
+
+protected 		// ueberliest den Rest bis zur naechsten Option. Laest das Komma stehen!
+egal
+	: (~(  COLON | OPEN_BRACE | OPEN_BRACKET | CLOSE_BRACE | LPAREN ))*
+		(   OPEN_BRACE	 	(dumb)*		CLOSE_BRACE   		(egal)?
+		 |	OPEN_BRACKET 	(dumb)*		CLOSE_BRACKET   	(egal)?
+		 |  LPAREN			(dumb)*		RPAREN				(egal)?  	)?
+  ;
 	
 integerthing returns[int i]
-{i=0;}
-	: s:DOUBLETHING {i=Integer.parseInt(s.getText());}
+{i=0;String sig="";}
+	: (PLUS | MINUS {sig="-";} )?
+	  s:INTEGER_THING {i=Integer.parseInt(sig + s.getText());}
 	;
 	
 doublething returns[double d]
-	{d=0; double e=0;}
-    : s:DOUBLE_THING {d=Double.parseDouble(s.getText());}
-      (s2:EXPONENT_THING {e=Double.parseDouble(s2.getText()); d=d*Math.pow(10,e);})?
+	{d=0; double e=0; String sig="";}
+    : (PLUS | MINUS {sig="-";} )?
+    ( s:INTEGER_THING 
+    		{d=Double.parseDouble(sig + s.getText());}
+      (DOT
+      	(s2:INTEGER_THING 
+    		{ d=Double.parseDouble(sig + s.getText()+ "." + s2.getText());}
+         )?
+      )?
+	| DOT s3:INTEGER_THING 
+			{d=Double.parseDouble(sig + "0." + s3.getText());}
+    )
+    (e=exponent_thing {d=d*Math.pow(10,e);})?
     ;
+protected 
+exponent_thing returns[int e]
+{e=0; String sig="";}
+    : STAR HAT 
+    (PLUS | MINUS {sig="-";} )?
+     s:INTEGER_THING
+     	{e=Integer.parseInt(sig + s.getText() );}
+	;
+
+    
+    
 	
 protected 
 spec
@@ -579,16 +686,18 @@ spec
 	
 protected
 dumb
-	:(  (~(		  OPEN_BRACE | OPEN_BRACKET | CLOSE_BRACE | CLOSE_BRACKET))+
+	:(  (~(	LPAREN | RPAREN | OPEN_BRACE | OPEN_BRACKET | CLOSE_BRACE | CLOSE_BRACKET))+
 		(   OPEN_BRACE	 	(dumb)*	CLOSE_BRACE   
-		 |	OPEN_BRACKET 	(dumb)*	CLOSE_BRACKET )?  )
+		 |	OPEN_BRACKET 	(dumb)*	CLOSE_BRACKET 
+		 |  LPAREN			(dumb)*		RPAREN	)?  )
 	 |  (   OPEN_BRACE	 	(dumb)*	CLOSE_BRACE   
-		 |  OPEN_BRACKET 	(dumb)*	CLOSE_BRACKET )
+		 |  OPEN_BRACKET 	(dumb)*	CLOSE_BRACKET
+		 |  LPAREN			(dumb)*		RPAREN  )
   ;
 	
 	
 // Doubles werden hier geparst!	
-// Es gibt nur Doubles!
+// Es gibt nur Nummern
 // Integers koennen aus doubles in Java erkannt, und geparst werden!!!
 
 /** **********************************************************************************
@@ -597,8 +706,10 @@ dumb
 */
 class MathematicaLexer extends Lexer;
 options {
+	charVocabulary = '\3'..'\377';
 	k=2;
 	testLiterals=false;
+	
 }
 	/** Terminal Symbols */
 OPEN_BRACE:		'{';
@@ -610,32 +721,25 @@ RPAREN:			')';
 BACKS:			'\\';
 SLASH:			'/';
 COLON:			',';
+DOLLAR: 		'$';
+MINUS:			'-';
+PLUS:			'+';
+LARGER:			'>';
+SMALER:			'<';
+DOT:			'.';
+HAT:			'^';
+STAR:			'*';
 
 T1: '!';
 T2: '@';
 T3: '#';
-T4: '$';
 T5: '%';
-T6: '^';
 T7: '&';
-T8: '*';
 T13: '=';
 T15: ':';
 T16: ';';
 T17: '"';
 T19: '?';
-T20: '<';
-T21: '>';
-
-//protected
-//dumb
-//	:  (  ~('{' | '}' | '[' | '}' )!)+
-//	  (	
-//			OPEN_BRACE!	 	(dumb)*	CLOSE_BRACE!	
-//		|	OPEN_BRACKET! 	(dumb)*	CLOSE_BRACKET!
-//		|
-//	  )
-//	;
 
 ID
 options {
@@ -650,18 +754,10 @@ ID_LETTER:
 	('a'..'z'|'A'..'Z'|'_'|'0'..'9')
 	;
 	
-DOUBLE_THING
-	: ('-' | '+'!)?
-	  ( 
-	  	  (DIGIT)+ ('.' (DIGIT)* )?
-		| '.' (DIGIT)+	
-	  )
+INTEGER_THING
+	: (DIGIT)+
 	;
-	
-EXPONENT_THING
-	: "*^"! ('-'|'+'!)? (DIGIT)+
-	;
-	
+		
 protected
 DIGIT:
 	('0'..'9')
