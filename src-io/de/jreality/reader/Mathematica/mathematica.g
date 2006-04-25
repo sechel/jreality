@@ -436,8 +436,6 @@ lineset returns[Vector v]
 double [] point =new double[3];
 double [] point2=new double[3];
 double [] point3=new double [3];
-v=new Vector();
-v.add(5);
 v=new Vector();}
 		: OPEN_BRACE
 		  point=vektor
