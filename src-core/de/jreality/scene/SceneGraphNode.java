@@ -27,7 +27,6 @@ public class SceneGraphNode {
   
   private boolean readOnly;
   private String  name;
-  
   private transient List writers=Collections.EMPTY_LIST, writersSwap=Collections.EMPTY_LIST;
   
   /**
@@ -145,7 +144,8 @@ public class SceneGraphNode {
    * during the read operation @see finishReader;
    */
   protected final void startReader() {
-    nodeLock.readLock();
+	  if (!threadsafe)   return;
+      nodeLock.readLock();
   }
   
   /**
@@ -153,6 +153,7 @@ public class SceneGraphNode {
    * are executed.
    */
   protected final void finishReader() {
+	if (!threadsafe)   return;
     nodeLock.readUnlock();
   }
   
@@ -206,4 +207,14 @@ public class SceneGraphNode {
       nodeLock.readUnlock();
     }
   }
+  
+  // currently cost of threadsafe for non-euclidean manifold demos is a factor of 2:
+  // 60 fps not thread safe   vs  30 fps for thread-safe
+  // We want to show these at Lange Nacht on May 13: please leave following method in place until then
+  // -gunn
+  private static boolean threadsafe = true;
+  public static void setThreadSafe(boolean b)	{
+	  threadsafe = b;
+  }
+
 }
