@@ -76,10 +76,10 @@ options {
 start returns [SceneGraphComponent r]
 { r = null;	
 	globalApp.setName("global");
-	globalApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
-	globalApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
-	globalApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
-	globalApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
+	globalApp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+	globalApp.setAttribute(CommonAttributes.SPHERES_DRAW, false);
+	globalApp.setAttribute(CommonAttributes.EDGE_DRAW, false);
+	globalApp.setAttribute(CommonAttributes.TUBES_DRAW, false);
 	
 	root.setAppearance(globalApp);
 	root.setName("Mathematica");
@@ -115,6 +115,7 @@ list[Color plC, Color fC, Appearance app]
 	
 protected
 objectList [Color plC, Color fC, Appearance app]
+
 	:(
 		  list[ plC, fC, app]
 		| fC=faceThing[fC, app]
@@ -135,7 +136,7 @@ protected
 faceThing [Color fCgiven, Appearance app] returns[Color fC ]
 {fC=fCgiven;
  }
-	:	cubic[fC, app]					// Wuerfel 
+	:	cuboid[fC, app]					// Wuerfel 
 	|	fC=polygonBlock[fC, app]			// Abfolge von Polygonen (indexed FaceSetFactory)
 	|	fC=faceColor
 	;
@@ -204,6 +205,8 @@ pointBlock [Color plCgiven,Appearance app] returns [Color plC]
 		
 		SceneGraphComponent geo=new SceneGraphComponent();
 		Appearance pointApp =copyApp(app);
+		pointApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
+		pointApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
 		geo.setAppearance(pointApp);
 		geo.setGeometry(psf.getPointSet());
 		geo.setName("Points");
@@ -228,7 +231,7 @@ lineBlock [Color plCgiven, Appearance app] returns[Color plC]			// liest erst ei
 				{
 					lineIndices=new int[line.size()];
 					for(int i=0;i<line.size();i++){
-						coordinates.add(line.get(i));  //Punkte zu einer Liste machen
+						coordinates.add(line.get(i));  // Punkte zu einer Liste machen
 				    	lineIndices[i]=i;			   // indizirung merken
 				    }
 			    	count=line.size();
@@ -284,8 +287,8 @@ lineBlock [Color plCgiven, Appearance app] returns[Color plC]			// liest erst ei
 
 			SceneGraphComponent geo=new SceneGraphComponent();
 			Appearance lineApp =copyApp(app);
-			lineApp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
-			lineApp.setAttribute(CommonAttributes.SPHERES_DRAW, false);
+			lineApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
+			lineApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
 			
 			geo.setAppearance(lineApp);
 			geo.setGeometry(lineset.getIndexedLineSet());
@@ -361,11 +364,6 @@ polygonBlock [Color fCgiven, Appearance app] returns[Color fC]
 		faceSet.update();
 		SceneGraphComponent geo=new SceneGraphComponent();	// Komponenten erstellen und einhaengen
 		Appearance faceApp =copyApp(app);
-		faceApp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
-		faceApp.setAttribute(CommonAttributes.SPHERES_DRAW, false);
-		faceApp.setAttribute(CommonAttributes.EDGE_DRAW, false);
-		faceApp.setAttribute(CommonAttributes.TUBES_DRAW, false);
-		
 		geo.setAppearance(faceApp);
 		current.addChild(geo);
 		geo.setName("Faces");
@@ -500,8 +498,8 @@ double res1,res2,res3;}
 
 
 protected 
-cubic [ Color fC,Appearance app]
-	:"Cubic"
+cuboid [ Color fC,Appearance app]
+	:"Cuboid"
 	 OPEN_BRACKET 
 			{double[] v2=new double [3]; 
 			v2[0]=v2[1]=v2[2]=1;
@@ -513,12 +511,9 @@ cubic [ Color fC,Appearance app]
 			 SceneGraphComponent geo=new SceneGraphComponent();
 			 current.addChild(geo);
 			 geo.setGeometry(Primitives.cube());
-	 		 geo.setName("Cube");
+	 		 geo.setName("Cuboid");
 	 		 Appearance cubicApp =copyApp(app);
-			 cubicApp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
-			 cubicApp.setAttribute(CommonAttributes.SPHERES_DRAW, false);
-			 cubicApp.setAttribute(CommonAttributes.EDGE_DRAW, false);
-			 cubicApp.setAttribute(CommonAttributes.TUBES_DRAW, false);
+	 		 cubicApp.setAttribute(CommonAttributes.DIFFUSE_COLOR, fC);
 			 geo.setAppearance(cubicApp);
 			 MatrixBuilder.euclidean().scale(v2[0],v2[1],v2[2])
 			    .translate(v[0],v[1],v[2]).assignTo(geo);
@@ -557,34 +552,47 @@ directiveBlock[Appearance appOld] returns [ Appearance app]
 
 protected 
 directive[Appearance appGiven] returns [Appearance app]
-{app = appGiven; 
+{app = copyApp(appGiven); 
 Color col;}
 	:"AbsoluteDashing" OPEN_BRACKET  dumb CLOSE_BRACKET 
-	|"AbsolutePointsize" 
+	|"AbsolutePointSize" 
 				OPEN_BRACKET
-					{double d=0;} d=doublething
+					{double d=0;} d=integerthing
 					{
-					app.setAttribute(CommonAttributes.POINT_RADIUS,d/2);
-//					app.setAttribute(CommonAttributes.POINT_SIZE,d/2);
+					app.setAttribute(CommonAttributes.POINT_RADIUS,d/40);
+					app.setAttribute(CommonAttributes.POINT_SIZE,d);
 					}
 				CLOSE_BRACKET 
 	|"AbsoluteThickness"
 				OPEN_BRACKET  
-					{int w=0;} w=integerthing
+					{double d=0;} d=integerthing
 				CLOSE_BRACKET 
-					{}
-	|"Dashing" OPEN_BRACKET dumb CLOSE_BRACKET
-	|"EdgeForm" OPEN_BRACKET dumb CLOSE_BRACKET
-	|"FaceForm" OPEN_BRACKET dumb CLOSE_BRACKET
-	|"Pointsize" OPEN_BRACKET 
+					{
+					app.setAttribute(CommonAttributes.TUBE_RADIUS,d/40);
+					app.setAttribute(CommonAttributes.LINE_WIDTH,d);
+					}
+	|"Dashing" OPEN_BRACKET dumb CLOSE_BRACKET	// only for 2 Dimensional
+	|"EdgeForm" OPEN_BRACKET 
+				{Color c= Color.MAGENTA;}
+					c=color
+				{
+			 	app.setAttribute(CommonAttributes.EDGE_DRAW, true);
+			 	app.setAttribute(CommonAttributes.TUBES_DRAW, true);
+			 	app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
+        		}
+				CLOSE_BRACKET 
+	|"FaceForm" OPEN_BRACKET dumb CLOSE_BRACKET // kann keine Flaeche oben anders faerben als unten
+	|"PointSize" OPEN_BRACKET // groese eines Punktes als Anteil an der Graphengroese
 					{double d=0;} d=doublething
 				 CLOSE_BRACKET 
-				 	{			 	
+				 	{// schlecht: brauche die Groese des Graphen in der Mitte der Auswertung
 				 	}
-	|"Thickness" OPEN_BRACKET 
+	|"Thickness" OPEN_BRACKET // siehe Pointsize
 					{double w=0;} w=doublething
 				CLOSE_BRACKET 
-					{}
+				 	{// schlecht: brauche die Groese des Graphen in der Mitte der Auswertung
+				 	}
+					
 	;
 
 // Optionen ------------------------------------------
