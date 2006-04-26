@@ -5,10 +5,13 @@ import java.util.HashMap;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Transformation;
 import de.jreality.geometry.Primitives;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.util.SceneGraphUtility;
 import de.jreality.math.FactoredMatrix;
+import de.jreality.math.Matrix;
 import de.jreality.math.Quaternion;
 import de.jreality.math.Rn;
 import de.jreality.math.Pn;
@@ -22,9 +25,12 @@ import de.jreality.math.Pn;
  */
 public class CoordinateSystemFactory {
 
+	
+	
 	private double[] boxMin, boxMax;
 	
 	private double[][][] axesVertices, boxVertices;
+	private SceneGraphComponent box, axes;
 	
 	private final String[] axesNames = {"x", "y", "z"};
 	
@@ -67,10 +73,15 @@ public class CoordinateSystemFactory {
 	 * @param extent the extent of the coordinate system
 	 */
 	public CoordinateSystemFactory(int extent) {
+		//To DO: validate extent
 		
-		this.boxMin = new double[]{-extent, -extent, -extent};
-		this.boxMax = new double[]{ extent,  extent,  extent};
-		update();
+		boxMin = new double[]{-extent, -extent, -extent};
+		boxMax = new double[]{ extent,  extent,  extent};
+		
+		box = calculateBox();
+		box.setVisible(false);
+		axes = calculateAxes();
+		axes.setVisible(false);
 	}
 	
 	
@@ -79,7 +90,11 @@ public class CoordinateSystemFactory {
 	 * @param component the SceneGraphComponent specifying the extent of the coordinate system
 	 */
 	public CoordinateSystemFactory(SceneGraphComponent component) {
-	
+		
+		//need to calculate bounding box without transformation of component
+		Transformation tmp = component.getTransformation();
+		component.setTransformation(new Transformation());
+				
 		//get boundingbox from componment
 		double[][] minMax = GeometryUtility.calculateBoundingBox(component).getBounds();
 		this.boxMin = minMax[0];
@@ -93,25 +108,28 @@ public class CoordinateSystemFactory {
 			}
 		}
 		
-		update();
+		box = calculateBox();
+		box.setVisible(false);
+		axes = calculateAxes();
+		axes.setVisible(false);
+		component.addChild(box);
+		component.addChild(axes);
+		component.setTransformation(tmp);
 	}
 
-	
+		
 	/**
-	 * re-calculate the vertices of axes and bounding box
+	 * show the bounding box of the coordinate system, which is specified by the choice of the constructor
+	 * (either by an existing SceneGraphComponent or by a given extent)
 	 */
-	private void update() {
-		calculateBoxVertices();
-		calculateAxesVertices();
+	public void displayBox() {
+		box.setVisible(true);
 	}
 	
-	
-	/**
-	 * get the bounding box of the coordinate system, which is specified by the choice of the constructor
-	 * (either by an existing SceneGraphComponent or by a given extent)
-	 * @return the bounding box
-	 */
-	public SceneGraphComponent getBox() {
+		
+	private SceneGraphComponent calculateBox() {
+		
+		calculateBoxVertices();
 		
 		//create SceneGraphComponent which has each coordinate axis as its child
 		SceneGraphComponent box = new SceneGraphComponent();
@@ -174,12 +192,18 @@ public class CoordinateSystemFactory {
 	
 	
 	/**
-	 * get the axes of the coordinate system, whose extent is specified by the choice of the constructor
+	 * display the axes of the coordinate system, whose extent is specified by the choice of the constructor
 	 * (either by an existing SceneGraphComponent or by a given extent)
-	 * @return the axes
 	 */
-	public SceneGraphComponent getAxes() {
+	public void displayAxes() {
+		axes.setVisible(true);
+	}
+	
+	
+	private SceneGraphComponent calculateAxes() {
 
+		calculateAxesVertices();
+		
 		//create SceneGraphComponent which has each coordinate axis as its child
 		SceneGraphComponent axes = new SceneGraphComponent();
 		axes.setName("Axes");
@@ -442,12 +466,29 @@ public class CoordinateSystemFactory {
 
 	
 	/**
+	 * set the axis scale of the coordinate system (distance between two marks on axes)
+	 * default value is 0.5
+	 * @param axisScale the axis scale
+	 */
+	public void setAxisScale(double axisScale) {
+		
+		this.axisScale = axisScale;
+	}
+	
+	
+//-----------------------------------------------------------------------------------
+//the foolowing methods are intended to be used in a tool 
+//to hide specific box vertices, axes or labels
+//-----------------------------------------------------------------------------------
+	
+	/**
 	 * get a box vertex which is "closest to the screen" when looking in a specified direction
 	 * @param direction the direction
 	 * @return a closest box vertex
 	 */
 	private double[] getClosestBoxVertex(double[] direction) {
 		
+		//closest box vertex has minimal inner product with direction
 		int closest = 0;
 		double tmp = Rn.innerProduct(boxVertices[0][closest], direction);
 		
@@ -461,9 +502,12 @@ public class CoordinateSystemFactory {
 	}
 	
 	
-	public SceneGraphComponent getBox(double[] direction) {
+	/**
+	 * specify a direction to look at in a viewer
+	 * => hide closest box vertex (or edges if there are more than one closest box vertices)
+	 */
+	public void updateBox(double[] direction) {
 		
-		SceneGraphComponent box = getBox();
 		double[] closest = getClosestBoxVertex(direction);
 		int[] edgeCriteria = new int[3];
 		
@@ -479,13 +523,23 @@ public class CoordinateSystemFactory {
 			getSGC("y" + edgeCriteria[0] + edgeCriteria[2]).setVisible(false);
 		if (direction[0]!=0 && direction[1]!=0)
 			getSGC("z" + edgeCriteria[0] + edgeCriteria[1]).setVisible(false);
-		
-		return box;
 	}
 	
-	
-	public void setAxisScale(double axisScale) {
+
+	/**
+	 * calculate direction of view via the paths of camera and the component (object)
+	 * uses method updateBox(direction)
+	 */
+	public void updateBox(SceneGraphPath objectPath, SceneGraphPath cameraPath) {
 		
-		this.axisScale = axisScale;
+		//direction of view in camera coordinates is (0,0,-1)
+		//transform camera coordinates to local coordinates
+		Matrix cameraTrans = new Matrix( cameraPath.getInverseMatrix(null) );
+		Matrix objectTrans = new Matrix( objectPath.getMatrix(null) );
+		Matrix c2oTrans = new Matrix( Matrix.product( cameraTrans.getInverse(), objectTrans )); 
+		double[] direction = c2oTrans.multiplyVector(new double[]{0,0,-1});  //for testing
+		for (int i=0; i<=2; i++) System.out.println(direction[i]);
+		
+		updateBox(direction);
 	}
 }
