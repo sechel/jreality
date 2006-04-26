@@ -67,6 +67,18 @@ options {
 		fl[2]=c.getBlue()/255.0;
 		return fl ;
 	}
+	public void printColor( Color c){
+		double[] fl= new double[3];
+		fl[0]=c.getRed()/255.0;
+		fl[1]=c.getGreen()/255.0;
+		fl[2]=c.getBlue()/255.0;
+	System.out.println("Farbe: "+ fl[0] + "|"+ fl[1] + "|"+ fl[2]);
+	}
+	public void printCol( double[] c){
+		double[] fl= new double[3];
+		fl=c;
+	System.out.println("Farbe: "+ fl[0] + "|"+ fl[1] + "|"+ fl[2]);
+	}
 }
 
 
@@ -96,7 +108,7 @@ start returns [SceneGraphComponent r]
 		{ r = root;}
 	;
 
-// Objects ---------------------------------------------
+// ---------------------------------- Objects ---------------------------------------------
 protected
 list[Color plC, Color fC, Appearance app]
 	:	OPEN_BRACE				// Liste von Graphischen Objekten
@@ -134,8 +146,7 @@ objectList [Color plC, Color fC, Appearance app]
 	
 protected
 faceThing [Color fCgiven, Appearance app] returns[Color fC ]
-{fC=fCgiven;
- }
+{fC=fCgiven;}
 	:	cuboid[fC, app]					// Wuerfel 
 	|	fC=polygonBlock[fC, app]			// Abfolge von Polygonen (indexed FaceSetFactory)
 	|	fC=faceColor
@@ -156,7 +167,62 @@ appThing [Appearance appOld] returns [ Appearance app]
 {app=appOld;}
 	:	app=directiveBlock[app]			// Abfolge von graphischen Direktiven (erzeugt eine Appearance)
 	;
+// ----------------------------- Graphic Primitives ------------------------------------------------------------
+protected 
+cuboid [ Color fC,Appearance app]
+	:"Cuboid"
+	 OPEN_BRACKET 
+			{double[] v2=new double [3]; 
+			v2[0]=v2[1]=v2[2]=1;
+			double[] v=new double[3];
+			}
+			v=vektor ( COLON v2=vektordata )? 
+	 CLOSE_BRACKET 
+			{
+			 SceneGraphComponent geo=new SceneGraphComponent();
+			 current.addChild(geo);
+			 geo.setGeometry(Primitives.cube());
+	 		 geo.setName("Cuboid");
+	 		 Appearance cubicApp =copyApp(app);
+	 		 cubicApp.setAttribute(CommonAttributes.DIFFUSE_COLOR, fC);
+			 geo.setAppearance(cubicApp);
+			 MatrixBuilder.euclidean().scale(v2[0],v2[1],v2[2])
+			    .translate(v[0],v[1],v[2]).assignTo(geo);
+ 			}
+ 	;
+ 	
+protected
+text [ Color plC,Appearance app]
+{double[] v=new double[3]; String t;}
+	:"Text"		OPEN_BRACKET 
+					s:STRING COLON v=vektordata 	
+				CLOSE_BRACKET 
+					{
+					 t=s.getText();
+					
+					PointSetFactory psf = new PointSetFactory();
+					double [][] data = new double [1][];
+					data[0]=v;
+					psf.setVertexCount(1);
+					psf.setVertexCoordinates(data);
+					String [] labs= new String[1];
+					labs[0]=s.getText();
+					psf.setVertexLabels(labs);
+					psf.update();
+		
+					SceneGraphComponent geo=new SceneGraphComponent();
+					Appearance pointApp =copyApp(app);
+					pointApp.setAttribute(CommonAttributes.SPHERES_DRAW, false);
+					pointApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
+					pointApp.setAttribute(CommonAttributes.POINT_RADIUS, 0.0001);
 
+				
+					geo.setAppearance(pointApp);
+					geo.setGeometry(psf.getPointSet());
+					geo.setName("Label");
+					current.addChild(geo);
+					}
+	;
 
 protected
 pointBlock [Color plCgiven,Appearance app] returns [Color plC]
@@ -266,10 +332,10 @@ lineBlock [Color plCgiven, Appearance app] returns[Color plC]			// liest erst ei
 				data[i]= (double[])coordinates.get(i);
 			}
 			int[][] indices= new int[linesIndices.size()][];
-			
+			System.out.println("Farben der Linien:");
 			for(int i=0;i<linesIndices.size();i++){		// Indices als doppelListe von Doubles machen
 				indices[i]=(int [])linesIndices.get(i);
-				colorData[i]=(double [])colors.get(i);
+				colorData[i]=(double [])colors.get(i);		
 			}
 			IndexedLineSetFactory lineset=new IndexedLineSetFactory();
 						
@@ -283,6 +349,9 @@ lineBlock [Color plCgiven, Appearance app] returns[Color plC]			// liest erst ei
 			// Achtung ist gehackt, weil noch keine Methoden in der LineSetFactory dafuer da : 
 			lineset.getIndexedLineSet().setEdgeAttributes(Attribute.COLORS,new DoubleArrayArray.Array( colorData ));
 			// 
+			for (int i=0;i<linesIndices.size();i++)
+				System.out.println(colorData[i][0]+"|"+colorData[i][1]+"|"+colorData[i][2]);
+
 
 
 			SceneGraphComponent geo=new SceneGraphComponent();
@@ -372,7 +441,7 @@ polygonBlock [Color fCgiven, Appearance app] returns[Color fC]
 	;
 
 	
-// 	Farben	
+// -------------------------------------------------- Farben --------------------------------------------
 protected
 faceColor returns[Color fC]
 {Color specular; double d; fC= new Color(255,0,0);}
@@ -428,7 +497,7 @@ color returns[Color c]
 					 c= new Color(r,g,b);
 					}
 		;
-		
+// -------------------------------------------- Daten ------------------------------------
 // Koordinaten in einer Liste 
 protected
 lineset returns[Vector v]
@@ -488,46 +557,8 @@ double res1,res2,res3;}
 			 res[2]=res3;
 			}
 	;
-
-
-// ----------------------------------------------- neu ---------------------------------------------
-// -------------------------------------------------------------------------------------------------
-// ----------------------------------------------- alt ---------------------------------------------
-
-
-protected 
-cuboid [ Color fC,Appearance app]
-	:"Cuboid"
-	 OPEN_BRACKET 
-			{double[] v2=new double [3]; 
-			v2[0]=v2[1]=v2[2]=1;
-			double[] v=new double[3];
-			}
-			v=vektor ( COLON v2=vektordata )? 
-	 CLOSE_BRACKET 
-			{
-			 SceneGraphComponent geo=new SceneGraphComponent();
-			 current.addChild(geo);
-			 geo.setGeometry(Primitives.cube());
-	 		 geo.setName("Cuboid");
-	 		 Appearance cubicApp =copyApp(app);
-	 		 cubicApp.setAttribute(CommonAttributes.DIFFUSE_COLOR, fC);
-			 geo.setAppearance(cubicApp);
-			 MatrixBuilder.euclidean().scale(v2[0],v2[1],v2[2])
-			    .translate(v[0],v[1],v[2]).assignTo(geo);
- 			}
- 	;
- 	
-protected
-text [ Color plC,Appearance app]
-{double[] v=new double[3]; String t;}
-	:"Text"		OPEN_BRACKET 
-					s:STRING COLON v=vektordata 	
-				CLOSE_BRACKET 
-					{t=s.getText();}
-	;
 	
-// Directives ---------------------------------------- 
+// ------------------------------------------------------- Directives ---------------------------------------- 
 
 protected 
 directiveBlock[Appearance appOld] returns [ Appearance app]
@@ -574,9 +605,9 @@ Color col;}
 				{Color c= Color.MAGENTA;}
 					c=color
 				{
-			 	app.setAttribute(CommonAttributes.EDGE_DRAW, true);
-			 	app.setAttribute(CommonAttributes.TUBES_DRAW, true);
-			 	app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
+			 	//app.setAttribute(CommonAttributes.EDGE_DRAW, true);
+			 	//app.setAttribute(CommonAttributes.TUBES_DRAW, true);
+			 	//app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
         		}
 				CLOSE_BRACKET 
 	|"FaceForm" OPEN_BRACKET dumb CLOSE_BRACKET // kann keine Flaeche oben anders faerben als unten
@@ -593,7 +624,7 @@ Color col;}
 					
 	;
 
-// Optionen ------------------------------------------
+// ----------------------------------------------- Optionen ------------------------------------------
 
 protected
 optionen
@@ -634,12 +665,20 @@ optionPrimitive
 //				      MatrixBuilder.euclidean().scale(1/v[0],1/v[1],1/v[2]).assignTo(root);
 //			  		}
 //				   CLOSE_BRACKET		)
-	|	"Boxed"					MINUS LARGER 			egal
-	|	"Axes" 					MINUS LARGER 			egal
+	|	"Boxed"					MINUS LARGER 
+						(	 "True"	{}	
+							|"False"{}
+						)
+	|	"Axes" 					MINUS LARGER 			
+						(	 "True"	{}	
+							|"False" {}
+							|"Automatic"{}
+						)
 	|	"PlotLabel" 			MINUS LARGER			egal
 	|	"AxesLabel"				MINUS LARGER			egal
 	|	"AmbientLight"			MINUS LARGER			egal
 	|	"DefaultColor"			MINUS LARGER			egal // Problem:kann nicht mehr die Farbe in einem Block aendern
+	
 
 	|	"DisplayFunction"		(":>" 		DOLLAR ID | MINUS LARGER	egal)
 	|	"ColorOutput" 			MINUS LARGER			egal
@@ -669,7 +708,7 @@ optionPrimitive
 	|	"BoxStyle"				MINUS LARGER			egal
 	|	"SphericalRegion"		MINUS LARGER			egal
 	;
-
+// -------------------------------------------------- Kleinkram -------------------------------------------
 
 protected 		// ueberliest den Rest bis zur naechsten Option. Laest das Komma stehen!
 egal
