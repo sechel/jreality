@@ -224,7 +224,7 @@ if(false) {
               i2 = 0;
           } else {
               
-            LoggingSystem.getLogger(Hit.class).info("mBaryInElementConvertFromVec3: triangle degenerated?");
+            LoggingSystem.getLogger(Hit.class).fine("mBaryInElementConvertFromVec3: triangle degenerated?");
               //              
               //              fprintf(stderr, "gmBaryInElementConvertFromVec3: triangle
               // degenerated?\n");
