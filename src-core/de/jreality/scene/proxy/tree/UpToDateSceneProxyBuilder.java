@@ -58,6 +58,7 @@ public class UpToDateSceneProxyBuilder extends SceneProxyTreeBuilder implements 
   
   protected EntityFactory entityFactory;
   
+  protected final Level loglevel = Level.FINE;		// somebody set this to INFO, which generates just too much -gunn
   public UpToDateSceneProxyBuilder(SceneGraphComponent root) {
     super(root);
   }
@@ -93,7 +94,7 @@ public class UpToDateSceneProxyBuilder extends SceneProxyTreeBuilder implements 
       sge = entityFactory.createEntity(node);
       nodeEntityMap.put(node, sge);
       node.accept(attatchListeners);
-      LoggingSystem.getLogger(this).log(Level.INFO, 
+      LoggingSystem.getLogger(this).log(loglevel, 
           "adding entity+listener for {0}", node.getName());
     }
     sge.addTreeNode(proxy2);
@@ -103,7 +104,7 @@ public class UpToDateSceneProxyBuilder extends SceneProxyTreeBuilder implements 
     synchronized (mutex) {
       SceneGraphComponent parent = (SceneGraphComponent) ev.getSceneGraphComponent();
       SceneGraphNode newChild = (SceneGraphNode) ev.getNewChildElement();
-      LoggingSystem.getLogger(this).log(Level.INFO, 
+      LoggingSystem.getLogger(this).log(loglevel, 
           "handling add event: {0} added to {1} [ {2} ]", new Object[]{newChild.getName(), parent.getName(), ev.getSourceNode().getName()});
       SceneGraphNodeEntity sge = (SceneGraphNodeEntity) nodeEntityMap.get(parent);
       if (sge == null) {
@@ -119,7 +120,7 @@ public class UpToDateSceneProxyBuilder extends SceneProxyTreeBuilder implements 
       // of the parent entity
       for (Iterator i = sge.getTreeNodes(); i.hasNext(); ) {
         traversal.proxyParent = (SceneTreeNode) i.next();
-        LoggingSystem.getLogger(this).log(Level.INFO, 
+        LoggingSystem.getLogger(this).log(loglevel, 
             "attatching child {0} to {1}", new Object[]{newChild.getName(), parent.getName()});
         ev.getNewChildElement().accept(traversal);
       }
@@ -131,7 +132,7 @@ public class UpToDateSceneProxyBuilder extends SceneProxyTreeBuilder implements 
       SceneGraphComponent parent = (SceneGraphComponent) ev.getSceneGraphComponent();
       SceneGraphNode prevChild = (SceneGraphNode) ev.getOldChildElement();
       SceneGraphNodeEntity parentEntity = (SceneGraphNodeEntity) nodeEntityMap.get(parent);
-      LoggingSystem.getLogger(this).log(Level.INFO, 
+      LoggingSystem.getLogger(this).log(loglevel, 
           "handling remove event: {0} removed from {1}", new Object[]{prevChild.getName(), parent.getName()});
       if (parentEntity == null) {
         throw new Error("event from unknown container");
@@ -154,7 +155,7 @@ public class UpToDateSceneProxyBuilder extends SceneProxyTreeBuilder implements 
    */
   private void disposeEntity(SceneGraphNodeEntity entity, boolean assertEmpty) {
     if (assertEmpty && !entity.isEmpty()) throw new IllegalStateException("not empty");
-    LoggingSystem.getLogger(this).log(Level.INFO, 
+    LoggingSystem.getLogger(this).log(loglevel, 
         "disposing entity+listener for removed child {0}", new Object[]{entity.getNode().getName()});
     nodeEntityMap.remove(entity.getNode());
     if (entity.getNode() instanceof SceneGraphComponent)
