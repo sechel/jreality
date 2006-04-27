@@ -24,8 +24,10 @@ package de.jreality.ui.viewerapp;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -243,22 +245,31 @@ public class ViewerApp
   private JMenuBar mb;
   
   void toggleFullScreen() {
-    isFullScreen = !isFullScreen;
-    if(isFullScreen) {
+	   isFullScreen = !isFullScreen;
+	   handleFullScreen(isFullScreen, (Frame) frame,  currViewer.getViewingComponent());
+	   if (!isFullScreen) {
+		      frame.setJMenuBar(mb);
+		      frame.setContentPane(uiFactory.createViewerContent());
+		      initTree();
+		    }
+	    currViewer.render();
+ }
+  
+  public static void handleFullScreen(boolean isFullScreen, Frame frame, Component c)	{
+     if(isFullScreen) {
       frame.dispose();
       frame.setUndecorated(true);
     }
     if (isFullScreen) {
-      frame.setJMenuBar(null);
-      frame.setContentPane(new Container());
-      frame.getContentPane().setLayout(new BorderLayout());
-      frame.getContentPane().add("Center", currViewer.getViewingComponent());
-    } else {
-      frame.setJMenuBar(mb);
-      frame.setContentPane(uiFactory.createViewerContent());
-      initTree();
-    }
-
+    	if (frame instanceof JFrame)	{
+    		JFrame jframe = (JFrame) frame;
+    	      jframe.setJMenuBar(null);
+    	      jframe.setContentPane(new Container());
+    	      jframe.getContentPane().setLayout(new BorderLayout());
+    	      jframe.getContentPane().add("Center",c);
+    	} else 
+    		frame.add("center",c);
+    } 
     frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(
       isFullScreen ? frame : null
     );
@@ -268,7 +279,6 @@ public class ViewerApp
     }
     frame.validate();
     frame.show();
-    currViewer.render();
   }
   
   private void initTree() {
