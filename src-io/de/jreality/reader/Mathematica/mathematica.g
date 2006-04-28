@@ -466,7 +466,7 @@ polygonBlock [Color fCgiven, Appearance app] returns[Color fC]
 		faceSet.setFaceIndices(indices);
 		faceSet.setVertexCoordinates(data);
 		Appearance faceApp =copyApp(app);
-		
+		faceApp.setAttribute(CommonAttributes.SMOOTH_SHADING, true);
 		// ------------
 	    if (colorNeeded)
 			faceSet.setFaceColors(colorData);
@@ -476,6 +476,7 @@ polygonBlock [Color fCgiven, Appearance app] returns[Color fC]
 		
 		
 		faceSet.setGenerateFaceNormals(true);
+		faceSet.setGenerateVertexNormals(true);
 		faceSet.update();
 		
 		SceneGraphComponent geo=new SceneGraphComponent();	// Komponenten erstellen und einhaengen
