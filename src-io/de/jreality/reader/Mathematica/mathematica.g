@@ -449,6 +449,17 @@ polygonBlock [Color fCgiven, Appearance app] returns[Color fC]
 			indices[i]=(int[])polysIndices.get(i);
 			colorData[i]=getRGBColor((Color)colors.get(i));
 		}
+		
+		
+		
+		//	melt:	  if it dos not work simply take it out
+			Vector temp= FaceMelt.meltCoords(data,indices);
+			data= (double[][]) temp.elementAt(0);
+			indices= (int[][]) temp.elementAt(1);
+			count=data.length;
+		//  end melt
+		
+		
 		IndexedFaceSetFactory faceSet = new IndexedFaceSetFactory();
 		faceSet.setVertexCount(count);
 		faceSet.setFaceCount(polysIndices.size());
@@ -466,10 +477,14 @@ polygonBlock [Color fCgiven, Appearance app] returns[Color fC]
 		
 		faceSet.setGenerateFaceNormals(true);
 		faceSet.update();
+		
 		SceneGraphComponent geo=new SceneGraphComponent();	// Komponenten erstellen und einhaengen
 		geo.setAppearance(faceApp);
 		current.addChild(geo);
 		geo.setName("Faces");
+		
+		//IndexedFaceSet faces= faceSet.getIndexedFaceSet();
+		//faces=FaceMelt.meltFace(faces);
 		geo.setGeometry(faceSet.getIndexedFaceSet());
 	}
 	;
