@@ -193,6 +193,17 @@ public class IndexedLineSetUtility {
 		}
 		return createCurveFromPoints(vertices, true);
 	}
+
+	public static IndexedLineSet circle(int n)	{
+		double[][] verts = new double[n][3];
+		double angle = 0, delta = Math.PI*2/(n);
+		for (int i = 0 ;i<n; ++i)	{
+			angle = i*delta;
+			verts[i][0] = Math.cos(angle);
+			verts[i][1] = Math.sin(angle);
+		}
+		return createCurveFromPoints(verts, true);
+	}
 	
 
 }
