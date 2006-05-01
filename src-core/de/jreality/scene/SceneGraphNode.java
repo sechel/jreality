@@ -216,5 +216,8 @@ public class SceneGraphNode {
   public static void setThreadSafe(boolean b)	{
 	  threadsafe = b;
   }
+  public static boolean getThreadSafe()	{
+	  return threadsafe;
+  }
 
 }
