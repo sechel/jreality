@@ -121,8 +121,24 @@ public class DeviceMouse implements RawDevice, MouseListener,
     }
   }
 
+  // e.getButton() doesn't work properly on 1-button mouse, such as MacOS laptops
+	public static int getRealButton(MouseEvent e)	{
+		int button = e.getButton();
+		if (button == 0)	{		// Linux!
+			int mods = e.getModifiersEx();
+			if ((mods & InputEvent.BUTTON1_DOWN_MASK) != 0)		button = 1;
+			else if ((mods & InputEvent.BUTTON2_DOWN_MASK) != 0)  button = 2;
+			else button = 3;
+		} else {					// Mac OS X Laptop (no 3-mouse button)!!
+			int mods = e.getModifiers();
+			if (e.isAltDown() && ((mods & InputEvent.BUTTON2_MASK) != 0) ) button = 2;
+			else if (button == 1 &&  ((mods & InputEvent.BUTTON3_MASK) != 0) ) button = 3;
+		}
+		return button;
+	}
+
   private InputSlot findButton(MouseEvent e) {
-    int button = e.getButton();
+    int button = getRealButton(e); //e.getButton();
     int modifiers = e.getModifiersEx();
     String mods = "";
     if (e.isShiftDown()) {
