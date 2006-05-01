@@ -101,7 +101,8 @@ public class CameraUtility {
 		if (debug) LoggingSystem.getLogger(CameraUtility.class).log(Level.FINER,"Bbox: "+cameraBox.toString());
 		double zmin = cameraBox.getMinZ();
 		double zmax = cameraBox.getMaxZ();
-		if ( zmax < 0.0 && -zmax > .1*cam.getFar() )  cam.setFar(-10*zmax);
+		
+		if ( cam.getFar() > 0.0 && zmax < 0.0 && -zmax > .1*cam.getFar() )  cam.setFar(-10*zmax);
 		if ( zmin < 0.0 && -zmin < 10*cam.getNear() )  cam.setNear(-.1*zmin);
 		//cam.update();
 		
