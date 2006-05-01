@@ -190,7 +190,7 @@ if(false) {
    * calc barycentric coordinates bary for point x in anElement el, not
    * necessarily 0 <= b[i] <= 1
    */
-  static boolean  convertToBary(
+  public static boolean  convertToBary(
       double[] bary,
       double[] x0,
       double[] x1,
