@@ -147,7 +147,7 @@ public class ParticleLineShader extends AbstractPrimitiveShader implements LineS
     if (calc == null) {
       calc = new SmokeCalculation();
       calc.setDisplayTexture(false);
-      calc.setMeasureCPS(false);
+      calc.setMeasureCPS(true);
       calc.setReadData(true);
       ((GpgpuViewer) jr.theViewer).setCalculation(calc);
       System.out.println("setting calculation.");
@@ -259,7 +259,7 @@ public void render(JOGLRenderingState jrs)	{
       double[] orientation = P3.extractOrientationMatrix(null, jr.getContext().getCameraToObject(), Pn.originP3, Pn.EUCLIDEAN);
       MatrixBuilder.euclidean(new Matrix(orientation)).rotateY(-Math.PI/4).rotateX(Math.PI/4);
       int dlist = getDisplayList(jr); //JOGLSphereHelper.getSphereDLists(sphereDetail, jr);
-      mat[0] = mat[5] = mat[10] = (float) pointRadius;
+      mat[0] = mat[5] = mat[10] = (float) ((pointSize+1)*pointRadius);
       for (int i = 0; i< n; i++) {
         if (Float.isNaN(data.get(4*i)) || Float.isNaN(data.get(4*i+1)) || Float.isNaN(data.get(4*i+2)) ) {
           nanCnt++;

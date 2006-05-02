@@ -21,33 +21,34 @@ import de.jreality.util.ViewerSwitch;
 public class Smoke extends SmokeCalculation {
   
   protected void calculationFinished() {
+    super.calculationFinished();
     triggerCalculation();
   }
   
   public static void main(String[] args) {
-    int sl = 512;
+    int sl = 3;
 //    float[] f = GpgpuUtility.makeGradient(sl);
     float[] f = GpgpuUtility.makeSphere(sl*sl, null, 0, 1);
-    int n=3;
+    int n=13;
     float[] data = new float[1+n*4*2];
-    data[0]=0.01f;
+    data[0]=0.1f;
     for (int i = 0; i<n; i++) {
       data[1+4*i]=(float) Math.sin(i*2*Math.PI/n);
       data[1+8*i]=(float) Math.sin(i*2*Math.PI/n);
       data[1+4*i+1]=(float) Math.cos(i*2*Math.PI/n);
       data[1+8*i+1]=(float) Math.cos(i*2*Math.PI/n);
-      data[1+8*i+3]=data[1+4*i+3]=1f;
+      data[1+8*i+3]=data[1+4*i+3]=i==(n-1)?0f:1f;
     }
 
-    if (true) {
+    if (false) {
       
       Smoke ev = new Smoke();
       ev.setDisplayTexture(true);
-      ev.setReadData(false);
+      ev.setReadData(true);
       ev.setValues(f);
       ev.setData(data);
       ev.triggerCalculation();
-      
+      ev.setA(0.1);
       GpgpuUtility.run(ev);
     } else {
       Appearance self = new Appearance();
@@ -69,7 +70,7 @@ public class Smoke extends SmokeCalculation {
   
       try {
   //    ImageData img = TextureUtility.createPointSprite(64, new double[]{1,-1,1}, java.awt.Color.blue, java.awt.Color.white, 10);
-      ImageData img = ImageData.load(Input.getInput("I:/testData3D/textures/bubble.png"));
+      ImageData img = ImageData.load(Input.getInput("/net/MathVis/data/testData3D/textures/bubble.png"));
       Texture2D tex=(Texture2D)AttributeEntityUtility.createAttributeEntity(Texture2D.class, "pointSprite", self, true);
       tex.setImage(img);
   

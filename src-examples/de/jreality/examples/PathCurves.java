@@ -46,8 +46,9 @@ public class PathCurves extends AbstractCalculation {
   public static void main(String[] args) {
     PathCurves ev = new PathCurves();
     ev.setDisplayTexture(true);
-    int sl = 512;
-    float[] f = GpgpuUtility.makeGradient(sl);
+    ev.setReadData(true);
+    int sl = 128;
+    float[] f = GpgpuUtility.makeGradient(sl, 254);
     ev.setValues(f);
     ev.triggerCalculation();
     GpgpuUtility.run(ev);

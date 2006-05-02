@@ -130,7 +130,23 @@ public class GpgpuUtility {
     }
     return f;
   }
-  
+
+  public static float[] makeGradient(int sl, int dismissCnt) {
+    float[] f = new float[(sl*sl-dismissCnt)*4];
+    int remaining = sl*sl;
+    for (int i = 0; i < sl; i++) {
+      for (int j = 0; j < sl; j++) {
+        remaining--;
+        if (remaining<=dismissCnt) return f;
+        f[4*(sl*i+j)+0]=((float)i)/sl;
+        f[4*(sl*i+j)+1]=((float)j)/sl;
+        f[4*(sl*i+j)+2]=0;
+        f[4*(sl*i+j)+3]=1;
+      }
+    }
+    return f;
+  }
+
   public static float[] makeSphere(int numPoints, double[] origin, double radius1, double radius2) {
     float[] points = new float[numPoints*4];
     Random r = new Random(System.currentTimeMillis());

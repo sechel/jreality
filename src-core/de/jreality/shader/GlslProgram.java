@@ -1,6 +1,7 @@
 package de.jreality.shader;
 
 import java.io.IOException;
+import java.nio.FloatBuffer;
 
 import de.jreality.scene.Appearance;
 import de.jreality.shader.GlslSource.UniformParameter;
@@ -109,7 +110,17 @@ public class GlslProgram {
   public void setUniform(String name, double[] values) {
     float[] floats = new float[values.length];
     for (int i = 0; i < values.length; i++) floats[i] = (float) values[i];
-    setUniform(name, floats);
+    checkWrite();
+    checkParam(name, null, true, false);
+    assign(name, floats);
+  }
+
+  public void setUniform(String name, FloatBuffer data) {
+    float[] floats = new float[data.remaining()];
+    data.get(floats);
+    checkWrite();
+    checkParam(name, null, true, false);
+    assign(name, floats);
   }
 
   public void setUniformMatrix(String name, float[] matrix) {
@@ -150,4 +161,5 @@ public class GlslProgram {
       return value;
     }
   }
+
 }

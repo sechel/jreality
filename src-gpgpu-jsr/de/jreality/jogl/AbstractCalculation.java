@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import javax.media.opengl.DebugGL;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
@@ -70,6 +71,7 @@ public abstract class AbstractCalculation implements GLEventListener {
       JOptionPane.showMessageDialog(null, "<html><center>Driver does not support OpenGL Shading Language!<br>Cannot execute program.</center></html>");
       System.exit(-1);
     }
+   drawable.setGL(new DebugGL(drawable.getGL()));
    String vendor = drawable.getGL().glGetString(GL.GL_VENDOR);
    tex2D = !vendor.startsWith("NVIDIA");
    atiHack=tex2D;
@@ -284,10 +286,6 @@ public abstract class AbstractCalculation implements GLEventListener {
     gl.glTexImage2D(TEX_TARGET, 0, TEX_INTERNAL_FORMAT, size, size, 0,
         TEX_FORMAT, GL.GL_FLOAT, (Buffer) null);
     System.out.println("created texture: id="+texID+" size="+size+".");
-    FloatBuffer fb = ByteBuffer.allocateDirect(size*size*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
-    System.out.println(texID+" test transfer: "+fb);
-    transferToTexture(gl, fb, texID, size);
-    System.out.println(texID+" worked...");
   }
 
   /**

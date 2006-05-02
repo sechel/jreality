@@ -26,9 +26,11 @@ public class SmokeCalculation extends AbstractCalculation {
   
   static {
     IntegratorFactory rk = IntegratorFactory.rk2();
+    rk.addConstant("const float PI = 3.141592653589793;");
     rk.addUniform("vorts0", "samplerRect");
     rk.addUniform("vorts1", "samplerRect");
     rk.addUniform("a2", "float");
+    rk.addUniform("CNT", "int");
     
     rk.srcT0(
       "  return vec4(biotSavart(point.xyz, vorts0), 0);\n"
@@ -41,7 +43,7 @@ public class SmokeCalculation extends AbstractCalculation {
     rk.addMethod("biotSavart", "vec3", "const vec3 pt, const samplerRect vorts", 
         "  vec3 ret;\n" + 
         "  \n" + 
-        "  vec2 texCoord=vec2(0.,0.);\n" +
+        "  vec2 texCoord=vec2(0.5,0.5);\n" +
         "  vec4 data=textureRect(vorts, texCoord);\n" + 
         "  \n" + 
         "  vec3 v1=data.xyz-pt;\n" + 
@@ -50,11 +52,11 @@ public class SmokeCalculation extends AbstractCalculation {
         "  float norm1=dot(v1, v1);\n" + 
         "  float norm2;\n" + 
         "    \n" + 
-        "  for (int i=0; i < $CNT; i++) {\n" + 
-        "    for (int j=0; j < $CNT; j++) {\n" + 
+        "  for (int i=0; i < CNT; i++) {\n" + 
+        "    for (int j=i>0?0:1; j < CNT; j++) {\n" + 
         "      // add biot savart on for one edge \n" +
-        "      texCoord.x=float(j); \n" +
-        "      texCoord.y=float(i); \n" +
+        "      texCoord.x=float(j)+0.5; \n" +
+        "      texCoord.y=float(i)+0.5; \n" +
         "      data=textureRect(vorts, texCoord);\n" + 
         "      \n" + 
         "      float strength=data.w;\n" + 
@@ -65,7 +67,7 @@ public class SmokeCalculation extends AbstractCalculation {
         "      vec3 e = v2-v1;\n" + 
         "      \n" + 
         "      if (strength != 0.0) {\n" + 
-        "        ret += strength*biotSavartEdge(e, v1, norm1, v2, norm2);\n" + 
+        "        ret += strength/(4.*PI)*biotSavartEdge(e, v1, norm1, v2, norm2);\n" + 
         "      }\n" + 
         "      vec3 swap = v1;\n" + 
         "      v1 = v2;\n" + 
@@ -86,19 +88,19 @@ public class SmokeCalculation extends AbstractCalculation {
       "  vec3 ret = cross(v1, v2);\n" + 
       "  \n" + 
       "  float denom = dot(edge, edge) * a2 + dot(ret, ret);\n" + 
-      "  \n" + 
-      "  return (fac2 - fac1)/denom * ret;\n"
+      "  return (denom > 1.E-9 ? (fac2 - fac1)/denom : 0.) * ret;\n"
     );
     src = rk.toString();
   }
   
   protected String initSource() {
-    return src.replaceAll("\\$CNT", ""+dataTextureSize);
+    return src; //.replaceAll("\\$CNT", ""+dataTextureSize);
   }
   
   protected String updateSource() {
-    if (!dataTextureSizeChanged) return null;
-    return initSource();
+    //if (!dataTextureSizeChanged)
+      return null;
+    //return initSource();
   }
   
   protected void initDataTextures(GL gl) {
@@ -128,34 +130,40 @@ public class SmokeCalculation extends AbstractCalculation {
     
     gl.glActiveTexture(GL.GL_TEXTURE2);
     gl.glBindTexture(TEX_TARGET, texIDs[1]);
-    prog.setUniform("vorts1", 2);
+    prog.setUniform("vorts1", 2);    
     
     prog.setUniform("a2", a*a);
     prog.setUniform("h", h);
     prog.setUniform("r3", true);
+    prog.setUniform("CNT", dataTextureSize);
+
   }
   
   public void setData(float[] data) {
-    if (data == null || data.length == 0) {
+    if (data == null || data.length == 1) {
       hasData = false;
       return;
     }
     int dataLen = (data.length-1)/2;
-    if (dataT0 == null || dataT0.capacity() < dataLen) {
+    if (dataT0 == null || dataT0.capacity() != dataLen) {
       int texSize = GpgpuUtility.texSize(dataLen/4);
       if (texSize != dataTextureSize) {
         System.out.println("[setVortexData] new vortex tex size="+texSize+" data.length="+data.length);
         dataTextureSize=texSize;
         dataTextureSizeChanged=true;
+        dataT0 = ByteBuffer.allocateDirect(texSize*texSize*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        dataT0_H2 = ByteBuffer.allocateDirect(texSize*texSize*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
       }
-      dataChanged=true;
-      dataT0 = ByteBuffer.allocateDirect(texSize*texSize*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
-      dataT0_H2 = ByteBuffer.allocateDirect(texSize*texSize*4*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
     }
     h=data[0];
+    dataT0.clear();
+    dataT0_H2.clear();
     dataT0.put(data, 1, dataLen);
     dataT0_H2.put(data, 1+dataLen, dataLen);
-    hasData = true;
+    while (dataT0.hasRemaining()) {
+      dataT0.put(0f); dataT0_H2.put(0f);
+    }
+    dataChanged=hasData=true;
   }
 
   public void setA(double a) {

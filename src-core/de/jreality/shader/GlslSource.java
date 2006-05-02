@@ -169,7 +169,7 @@ public class GlslSource implements Serializable {
     }
     
     public String toString() {
-      return "uniform: "+type+" "+name+" [array="+isArray+" matrix="+isMatrix+" primitive="+primitiveType+" size="+primitiveSize+"]";
+      return "uniform: "+type+" "+name+" ["+(isArray? ("arrayLength="+arrayLength) : "")+" matrix="+isMatrix+" primitive="+primitiveType+" size="+primitiveSize+"]";
     }
 
 	public String getStringRep() {
