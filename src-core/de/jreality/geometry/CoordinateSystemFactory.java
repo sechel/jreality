@@ -134,7 +134,7 @@ public class CoordinateSystemFactory {
 		//create SceneGraphComponent which has each coordinate axis as its child
 		SceneGraphComponent box = new SceneGraphComponent();
 		box.setName("Box");
-		hashMap.put("box", box);
+		//hashMap.put("box", box);
 		
 		for (int axis=0; axis<=2; axis++) {  //for each coordinate axis
 			
@@ -174,7 +174,7 @@ public class CoordinateSystemFactory {
 		Appearance app = new Appearance();
 	    app.setAttribute("tubeDraw", false);
 	    app.setAttribute(CommonAttributes.VERTEX_DRAW, true);  //show labels
-	    app.setAttribute("pointShader.diffuseColor",Color.BLACK);
+	    //app.setAttribute("pointShader.diffuseColor",Color.BLACK);
 	    app.setAttribute("pointShader.specularColor",Color.BLACK);
 	    app.setAttribute("pointShader.scale", .01);  //label scale
 	    app.setAttribute("lineShader.scale", .01);  //label scale
@@ -182,9 +182,11 @@ public class CoordinateSystemFactory {
 	    app.setAttribute("lineShader.offset", new double[]{0,-.2,0});  //label offset of axes lines
 	    //app.setAttribute("pointShader.diffuseColor",Color.RED);
 		app.setAttribute("pointRadius",0.001);  //don't show label points
-		app.setAttribute("lineShader.diffuseColor",Color.BLACK);
-	    app.setAttribute("polygonShader.diffuseColor",Color.BLACK);
+		//app.setAttribute("lineShader.diffuseColor",Color.BLACK);
+		//app.setAttribute("polygonShader.diffuseColor",Color.BLACK);
+		app.setAttribute("diffuseColor",Color.BLACK);
 	    app.setAttribute("polygonShader.specularColor",Color.BLACK);
+	    app.setAttribute("depthFudgeFactor", 1);
 	    box.setAppearance(app);
 		
 		return box;
@@ -486,10 +488,18 @@ public class CoordinateSystemFactory {
 	 * @param direction the direction
 	 * @return a closest box vertex
 	 */
-	private double[] getClosestBoxVertex(double[] direction) {
-		
+	private double[] getClosestBoxVertex(double[] dir) {
+		double[] direction;
+		if (dir.length==3) direction=dir;
+		else {
+			direction=new double[3];
+			direction[0]=dir[0]/dir[3];
+			direction[1]=dir[1]/dir[3];
+			direction[2]=dir[2]/dir[3];
+		}
 		//closest box vertex has minimal inner product with direction
 		int closest = 0;
+		
 		double tmp = Rn.innerProduct(boxVertices[0][closest], direction);
 		
 		for (int k=1; k<8; k++) {
@@ -508,6 +518,14 @@ public class CoordinateSystemFactory {
 	 */
 	public void updateBox(double[] direction) {
 		
+		//set all vertices to visible
+		for (int i=0; i<=1; i++)
+			for (int j=0; j<=1; j++) {
+				getSGC("x"+i+j).setVisible(true);
+				getSGC("y"+i+j).setVisible(true);
+				getSGC("z"+i+j).setVisible(true);
+			}
+				
 		double[] closest = getClosestBoxVertex(direction);
 		int[] edgeCriteria = new int[3];
 		
@@ -534,11 +552,12 @@ public class CoordinateSystemFactory {
 		
 		//direction of view in camera coordinates is (0,0,-1)
 		//transform camera coordinates to local coordinates
-		Matrix cameraTrans = new Matrix( cameraPath.getInverseMatrix(null) );
+		Matrix cameraTrans = new Matrix( cameraPath.getMatrix(null) );
 		Matrix objectTrans = new Matrix( objectPath.getMatrix(null) );
 		Matrix c2oTrans = new Matrix( Matrix.product( cameraTrans.getInverse(), objectTrans )); 
-		double[] direction = c2oTrans.multiplyVector(new double[]{0,0,-1});  //for testing
-		for (int i=0; i<=2; i++) System.out.println(direction[i]);
+		double[] direction = c2oTrans.multiplyVector(new double[]{0,0,-1, 0});
+		direction[3]=1;		
+		//for (int i=0; i<=2; i++) System.out.println(direction[i]);
 		
 		updateBox(direction);
 	}
