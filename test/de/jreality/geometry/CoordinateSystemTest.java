@@ -3,12 +3,16 @@ package de.jreality.geometry;
 import de.jreality.math.FactoredMatrix;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.SceneGraphPathObserver;
+import de.jreality.scene.event.TransformationEvent;
+import de.jreality.scene.event.TransformationListener;
 import de.jreality.scene.tool.ToolSystemViewer;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
 public class CoordinateSystemTest {
 
+		
   /**
    * for testing
    * (add axes or box as children of a given SceneGraphComponent)
@@ -17,7 +21,7 @@ public class CoordinateSystemTest {
     
     //create a component
 //  SceneGraphComponent component = SphereUtility.tessellatedCubeSphere(2); component.setName("Sphere");
-    SceneGraphComponent component = parametricSurface();  //see below
+	SceneGraphComponent component = parametricSurface();
 
     FactoredMatrix trans = new FactoredMatrix();
     trans.setRotation(Math.PI, 1, 1, 1);
@@ -25,35 +29,38 @@ public class CoordinateSystemTest {
     trans.assignTo(component);
     
     //create coordinate system
-    CoordinateSystemFactory coords = new CoordinateSystemFactory(component);
-    coords.setAxisScale(0.5);
+    final CoordinateSystemFactory coords = new CoordinateSystemFactory(component);
+    coords.setAttribute("axisScale", 0.5);
     
-    //display axes and box
-    coords.displayAxes();
+    //display axes/box
+    //coords.displayAxes();
     coords.displayBox();
         
     //display component
     ToolSystemViewer currViewer = (ToolSystemViewer)ViewerApp.display(component)[1];
     
     
-    //--------------------------------------------------
-    //for testing the tool methods:
-    
     //get paths of camera and object
-    SceneGraphPath cameraPath = currViewer.getCameraPath();
-    SceneGraphPath objectPath = new SceneGraphPath();
+    final SceneGraphPath cameraPath = currViewer.getCameraPath();
+    final SceneGraphPath objectPath = new SceneGraphPath();
     SceneGraphComponent root = currViewer.getSceneRoot();
     SceneGraphComponent scene = root.getChildComponent(0);
     objectPath.push(root);
     objectPath.push(scene);
     objectPath.push(component);
 
-    
-    coords.updateBox(new double[]{-1,-1,1});  //specify a direction
-//    coords.updateBox(cameraPath, objectPath);  //specify paths in scene graph
-//    not working yet
+    coords.updateBox(cameraPath, objectPath);
+
+    //SceneGraphPathObserver cpObserver = new SceneGraphPathObserver(cameraPath);
+    SceneGraphPathObserver opObserver = new SceneGraphPathObserver(objectPath);
+    opObserver.addTransformationListener(new TransformationListener(){
+    	public void transformationMatrixChanged(TransformationEvent ev){
+    		coords.updateBox(cameraPath, objectPath);
+    	}
+    });
   }
-  
+   
+ 
   
   
   
@@ -84,6 +91,7 @@ public class CoordinateSystemTest {
 	  };
 	  
 	  ParametricSurfaceFactory psf = new ParametricSurfaceFactory();
+	  //psf.setMeshSize(5, 5);
 	  psf.setGenerateVertexNormals( true );
 	  psf.setGenerateEdgesFromFaces( true );
 
