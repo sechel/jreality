@@ -12,8 +12,8 @@
   <property name="ui" location="src-ui" />
   <property name="soft" location="src-soft" />
   <property name="renderman" location="src-renderman" />
-  <property name="jogl" location="src-jogl" />
-  <property name="gpgpu" location="src-gpgpu" />
+  <property name="jogl" location="src-jogl-jsr" />
+  <property name="gpgpu" location="src-gpgpu-jsr" />
   <property name="jsyzygy" location="src-jsyzygy" />
   <property name="portal" location="src-portal" />
   <property name="proxies" location="src-proxies" />
@@ -68,10 +68,10 @@
   <path id="examples.classpath">
     <path refid="ui.classpath"/>
     <fileset dir="dist">
-        <include name="jReality-gpgpu.jar"/>
+        <include name="*.jar"/>
     </fileset>
     <fileset dir="lib">
-        <include name="jogl.jar"/>
+        <include name="*.jar"/>
     </fileset>
   </path>
 	
