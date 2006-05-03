@@ -2,6 +2,7 @@ package de.jreality.geometry;
 
 // TODO:  no support for setting edge attributes
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -20,7 +21,7 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 	
 //	final OoNode edgeNormals = new OoNode( "edge.normals" );
 //	final OoNode edgeIndices = new OoNode( "edge.indices" );
-//	final OoNode edgeLabels  = new OoNode( "edge.labels" );
+	final OoNode edgeLabels  = new OoNode( "edge.labels" );
 
 //	final OoNode vertexCoordinates = new OoNode( "vertex.coordinates" );
 //	final OoNode vertexNormals     = new OoNode( "vertex.normals" );
@@ -28,7 +29,7 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 	
 //	boolean generateVertexNormals     = false;
 //	boolean generateEdgeNormals       = false;
-//	boolean generateEdgeLabels	      = false;
+	boolean generateEdgeLabels	      = false;
 //	boolean generateEdgesFromVertices = false;
 	
 	DataListSet edgeDLS = new DataListSet(0);
@@ -127,61 +128,60 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 //		setEdgeAttribute( Attribute.NORMALS, new DoubleArrayArray.Array( data ) );
 //	}
 //	
-//	protected void setEdgeColors( DataList data ) {
-//		setEdgeAttribute( Attribute.COLORS, data );
-//	}
-//	
-//	protected void setEdgeColors( double [] data ) {
-//		if( data.length % noe() != 0 )
-//			throw new IllegalArgumentException( "array has wrong length" );	
-//		setEdgeAttribute( Attribute.COLORS, new DoubleArrayArray.Inlined( data, data.length / noe() ) );
-//	}
-//	
-//	protected void setEdgeColors( double [][] data ) {
-//		setEdgeAttribute( Attribute.COLORS, new DoubleArrayArray.Array( data ) );
-//	}
-//
-//
+	protected void setEdgeColors( DataList data ) {
+		setEdgeAttribute( Attribute.COLORS, data );
+	}
+	
+	protected void setEdgeColors( double [] data ) {
+		if( data.length % noe() != 0 )
+			throw new IllegalArgumentException( "array has wrong length" );	
+		setEdgeAttribute( Attribute.COLORS, new DoubleArrayArray.Inlined( data, data.length / noe() ) );
+	}
+	
+	protected void setEdgeColors( Color [] data ) {
+		setEdgeColors( toDoubleArray(data));
+	}
+	
+	protected void setEdgeColors( double [][] data ) {
+		setEdgeAttribute( Attribute.COLORS, new DoubleArrayArray.Array( data ) );
+	}
+
+
 	protected void setEdgeLabels( DataList data ) {
 		setVertexAttribute( Attribute.LABELS, data );
 	}
 	
-//	protected void setEdgeLabels( String[][] data ) {
-////		if( data.length != noe() )
-////			throw new IllegalArgumentException( "array has wrong length" );
-//		setEdgeAttribute( Attribute.LABELS, new StringArrayArray.Array(data));
-//	}
 	
 	protected void setEdgeLabels( String[] data ) {
-//		if( data.length != noe() )
-//			throw new IllegalArgumentException( "array has wrong length" );
+		if( data.length != noe() )
+			throw new IllegalArgumentException( "array has wrong length" );
 		setEdgeAttribute( Attribute.LABELS, new StringArray(data));
 	}
 
-//	String [] edgeLabels() {
-//		return (String[])edgeLabels.getObject();
-//	}
-//	
-//	String [] generateEdgeLabels() {
-//		if( edgeDLS.containsAttribute(Attribute.LABELS)) {
-//			return edgeDLS.getList(Attribute.LABELS)
-//			.toStringArray((String[])edgeLabels.getObject());
-//		} else {
-//			log( "compute", Attribute.LABELS, "edge");
-//			return indexString(noe());
-//		}
-//	}
-//	
-//
-//	{
-//		edgeLabels.setUpdateMethod(
-//				new OoNode.UpdateMethod() {
-//					public Object update( Object object) {					
-//						return generateLineLabels();		
-//					}					
-//				}
-//		);
-//	}
+	String [] edgeLabels() {
+		return (String[])edgeLabels.getObject();
+	}
+	
+	String [] generateEdgeLabels() {
+		if( edgeDLS.containsAttribute(Attribute.LABELS)) {
+			return edgeDLS.getList(Attribute.LABELS)
+			.toStringArray((String[])edgeLabels.getObject());
+		} else {
+			log( "compute", Attribute.LABELS, "edge");
+			return indexString(noe());
+		}
+	}
+	
+
+	{
+		edgeLabels.setUpdateMethod(
+				new OoNode.UpdateMethod() {
+					public Object update( Object object) {					
+						return generateEdgeLabels();		
+					}					
+				}
+		);
+	}
 	
 //	{
 //		edgeIndices.addIngr( edgeAttributeNode( Attribute.INDICES ) );
@@ -262,9 +262,9 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 			
 		super.recompute();
 		
-//		if( isGenerateEdgeLabels() )
-//			edgeLabels.update();
-//		
+		if( isGenerateEdgeLabels() )
+			edgeLabels.update();
+		
 //		if( isGenerateEdgesFromVertices() ) 
 //			edgeIndices.update();
 //		
@@ -336,16 +336,16 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 //			}
 //		}
 //		
-//		if( generateEdgeLabels ) { 
-//			if( nodeWasUpdated(edgeLabels) ) { 
-//				log( "set", Attribute.LABELS, "labels");
-//				ils.setEdgeAttributes(Attribute.LABELS, StorageModel.STRING_ARRAY.createReadOnly(edgeLabels()));
-//			} 
-//		} else if( ils.getEdgeAttributes().containsAttribute(Attribute.LABELS ) ) {
-//			log( "cancle", Attribute.LABELS, "labels");
-//			ils.setVertexAttributes(Attribute.LABELS, null );
-//		}
-//		
+		if( generateEdgeLabels ) { 
+			if( nodeWasUpdated(edgeLabels) ) { 
+				log( "set", Attribute.LABELS, "labels");
+				ils.setEdgeAttributes(Attribute.LABELS, StorageModel.STRING_ARRAY.createReadOnly(edgeLabels()));
+			} 
+		} else if( ils.getEdgeAttributes().containsAttribute(Attribute.LABELS ) ) {
+			log( "cancle", Attribute.LABELS, "labels");
+			ils.setVertexAttributes(Attribute.LABELS, null );
+		}
+		
 	}
 
 	
@@ -377,12 +377,12 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 //		this.generateEdgeNormals=generateEdgeNormals;
 //	}
 
-//	public boolean isGenerateEdgeLabels() {
-//		return generateEdgeLabels;
-//	}
-//
-//	public void setGenerateEdgeLabels(boolean generateEdgeLabels) {
-//		this.generateEdgeLabels = generateEdgeLabels;
-//	}
+	public boolean isGenerateEdgeLabels() {
+		return generateEdgeLabels;
+	}
+
+	public void setGenerateEdgeLabels(boolean generateEdgeLabels) {
+		this.generateEdgeLabels = generateEdgeLabels;
+	}
 
 }

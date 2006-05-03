@@ -1,11 +1,14 @@
 package de.jreality.geometry;
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import sun.security.krb5.internal.crypto.c;
 
 import de.jreality.math.Pn;
 import de.jreality.scene.PointSet;
@@ -153,6 +156,10 @@ class AbstractPointSetFactory {
 		if( data.length % nov() != 0 )
 			throw new IllegalArgumentException( "array has wrong length" );
 		setVertexAttribute( Attribute.COLORS, new DoubleArrayArray.Inlined( data, data.length / nov() )  );
+	}
+	
+	protected void setVertexColors( Color [] data ) {
+		setVertexColors( toDoubleArray( data ) );
 	}
 	
 	protected void setVertexColors( double [][] data ) {
@@ -307,5 +314,18 @@ class AbstractPointSetFactory {
 
 	public void setGenerateVertexLabels(boolean generateVertexLabels) {
 		this.generateVertexLabels = generateVertexLabels;
+	}
+	
+	static double [] toDoubleArray( Color [] color ) {
+		float [] c = new float[5];
+		double [] array = new double[color.length * 4 ];
+		for( int i=0, j=0; i<array.length; i+=4, j++ ) {
+			color[j].getComponents(c);
+			array[i+0] = c[0];
+			array[i+1] = c[1];
+			array[i+2] = c[2];
+			array[i+3] = c[3];
+		}		
+		return array;
 	}
 }

@@ -1,8 +1,11 @@
 package de.jreality.geometry;
 
+import java.awt.Color;
+
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
+import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StringArrayArray;
 
@@ -58,6 +61,10 @@ public class IndexedLineSetFactory extends AbstractIndexedLineSetFactory {
 		super.setVertexColors( data );
 	}
 	
+	public void setVertexColors( Color [] data ) {
+		super.setVertexColors( data );
+	}
+	
 	public void setVertexColors( double [][] data ) {
 		super.setVertexColors( data );
 	}
@@ -96,10 +103,22 @@ public class IndexedLineSetFactory extends AbstractIndexedLineSetFactory {
 		super.setEdgeIndices( data );
 	}
 	
-//	public void setEdgeLabels( String[][] data ) {
-//		super.setEdgeLabels( data );
-//	}
+	public void setEdgeColors( DataList data ) {
+		super.setEdgeColors( data );
+	}
 	
+	public void setEdgeColors( double [] data ) {
+		super.setEdgeColors(data);
+	}
+	
+	public void setEdgeColors( Color [] data ) {
+		super.setEdgeColors(data);
+	}
+	
+	public void setEdgeColors( double [][] data ) {
+		super.setEdgeColors(data);
+	}
+
 	public void setEdgeLabels( String[] data ) {
 		super.setEdgeLabels( data );
 	}

@@ -1,5 +1,7 @@
 package de.jreality.geometry;
 
+import java.awt.Color;
+
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
@@ -58,6 +60,10 @@ public class IndexedFaceSetFactory extends AbstractIndexedFaceSetFactory {
 		super.setVertexColors( data );
 	}
 	
+	public void setVertexColors( Color [] data ) {
+		super.setVertexColors( data );
+	}
+	
 	public void setVertexColors( double [][] data ) {
 		super.setVertexColors( data );
 	}
@@ -96,10 +102,23 @@ public class IndexedFaceSetFactory extends AbstractIndexedFaceSetFactory {
 		super.setEdgeIndices( data );
 	}
 	
-//	public void setEdgeLabels( String[][] data ) {
-//		super.setEdgeLabels( data );
-//	}
 	
+	public void setEdgeColors( DataList data ) {
+		super.setEdgeColors( data );
+	}
+	
+	public void setEdgeColors( double [] data ) {
+		super.setEdgeColors(data);
+	}
+	
+	public void setEdgeColors( Color [] data ) {
+		super.setEdgeColors( data );
+	}
+	
+	public void setEdgeColors( double [][] data ) {
+		super.setEdgeColors(data);
+	}
+
 	public void setEdgeLabels( String[] data ) {
 		super.setEdgeLabels( data );
 	}
@@ -152,6 +171,10 @@ public class IndexedFaceSetFactory extends AbstractIndexedFaceSetFactory {
 	
 	public void setFaceColors( double [] data ) {
 		super.setFaceColors(data);
+	}
+	
+	public void setFaceColors( Color [] data ) {
+		super.setFaceColors( data );
 	}
 	
 	public void setFaceColors( double [][] data ) {

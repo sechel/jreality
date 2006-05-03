@@ -2,6 +2,7 @@ package de.jreality.geometry;
 
 // TODO:  no support for setting edge attributes
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -148,6 +149,10 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		if( data.length % nof() != 0 )
 			throw new IllegalArgumentException( "array has wrong length" );	
 		setFaceAttribute( Attribute.COLORS, new DoubleArrayArray.Inlined( data, data.length / nof() ) );
+	}
+	
+	protected void setFaceColors( Color [] data ) {
+		setEdgeColors( toDoubleArray(data));
 	}
 	
 	protected void setFaceColors( double [][] data ) {

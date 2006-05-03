@@ -1,5 +1,7 @@
 package de.jreality.geometry;
 
+import java.awt.Color;
+
 import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
@@ -52,6 +54,10 @@ public class PointSetFactory extends AbstractPointSetFactory {
 	}
 	
 	public void setVertexColors( double [] data ) {
+		super.setVertexColors( data );
+	}
+	
+	public void setVertexColors( Color [] data ) {
 		super.setVertexColors( data );
 	}
 	
