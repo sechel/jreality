@@ -54,13 +54,15 @@ public class CoordinateSystemFactory {
 	int signature = Pn.EUCLIDEAN;
 	
 	private final double urStretch = 0.02; //stretch of arrows and ticks of axes (octagonalCrossSection)
+	private int currentClosestBoxVertex = -1;  //index of a currently closest box vertex in boxVertices[0] 
 	
 	private HashMap nodes = new HashMap();
-	private HashMap attributes = new HashMap();
 	
 	//attributes
-	private double axisScale;  //the distance between two ticks on an axis
-	private boolean axesArrows, boxArrows;  //show or hide arrows on axes and box
+	private double axisScale = 0.5;  //the distance between two ticks on an axis
+	private double labelScale = 0.01;  //size of labels
+	private boolean showAxesArrows = true;  //show or hide arrows on axes
+	private boolean showBoxArrows = false;  //show or hide arrows on box
 	
 	
 	
@@ -79,8 +81,6 @@ public class CoordinateSystemFactory {
 	public CoordinateSystemFactory(int extent) {
 		//To DO: validate extent
 		
-		initAttributes();
-		
 		boxMin = new double[]{-extent, -extent, -extent};
 		boxMax = new double[]{ extent,  extent,  extent};
 		
@@ -96,8 +96,6 @@ public class CoordinateSystemFactory {
 	 * @param component the SceneGraphComponent specifying the extent of the coordinate system
 	 */
 	public CoordinateSystemFactory(SceneGraphComponent component) {
-		
-		initAttributes();
 		
 		//need to calculate bounding box without transformation of component
 		Transformation tmp = component.getTransformation();
@@ -134,6 +132,10 @@ public class CoordinateSystemFactory {
 		box.setVisible(true);
 	}
 	
+	public void hideBox() {
+		box.setVisible(false);
+	}
+	
 		
 	private SceneGraphComponent calculateBox() {
 		
@@ -150,26 +152,27 @@ public class CoordinateSystemFactory {
 			singleAxis.setName(axesNames[axis] +"-axis");
 			nodes.put(axesNames[axis] +"Box", singleAxis);  //e.g. xBox
 			
-			for (int k=0; k<4; k++) {
+			for (int k=0; k<=3; k++) {
 				
 				//create SceneGraphComponent with children line, arrow, ticks
 				SceneGraphComponent singleAxisK = new SceneGraphComponent();
 				//assign binary value of k to the name of the SGC
-				if (k<2) singleAxisK.setName("0"+k);
-				else singleAxisK.setName(Integer.toBinaryString(k));
+				singleAxisK.setName(toBinaryString(k));
 
 				nodes.put(axesNames[axis]+singleAxisK.getName(), singleAxisK);  //e.g. x00
 				
 				//create line with label
 				SceneGraphComponent line = getAxisLine(axis, boxVertices[axis][2*k],boxVertices[axis][2*k+1], true);
 				//create arrow
-				//SceneGraphComponent arrow = getAxisArrow(axis, boxVertices[axis][2*k],boxVertices[axis][2*k+1], true);
+				SceneGraphComponent arrow = getAxisArrow(axis, boxVertices[axis][2*k],boxVertices[axis][2*k+1], true);
+				arrow.setVisible(showBoxArrows);
+				nodes.put(axesNames[axis]+singleAxisK.getName()+"arrow", arrow);  //e.g. x00arrow
 				//create ticks with labels
 				SceneGraphComponent ticks = getAxisTicks(axis, boxVertices[axis][2*k],boxVertices[axis][2*k+1], true);
 				nodes.put(axesNames[axis]+singleAxisK.getName()+"label", ticks);  //e.g. x00label
 				
 				singleAxisK.addChild(line);
-				//singleAxisK.addChild(arrow);
+				singleAxisK.addChild(arrow);
 				singleAxisK.addChild(ticks);
 
 				singleAxis.addChild(singleAxisK);
@@ -184,8 +187,8 @@ public class CoordinateSystemFactory {
 	    app.setAttribute(CommonAttributes.VERTEX_DRAW, true);  //show labels
 	    //app.setAttribute("pointShader.diffuseColor",Color.BLACK);
 	    //app.setAttribute("pointShader.specularColor",Color.BLACK);
-	    app.setAttribute("pointShader.scale", .01);  //label scale
-	    app.setAttribute("lineShader.scale", .01);  //label scale
+	    app.setAttribute("pointShader.scale", labelScale);  //label scale
+	    app.setAttribute("lineShader.scale", labelScale);  //label scale
 	    app.setAttribute("pointShader.offset", new double[]{0.04,-0.07,0});  //label offset of ticks
 	    app.setAttribute("lineShader.offset", new double[]{0,-.2,0});  //label offset of axes lines
 		app.setAttribute("pointRadius",0.001);  //don't show label points
@@ -209,6 +212,10 @@ public class CoordinateSystemFactory {
 		axes.setVisible(true);
 	}
 	
+	public void hideAxes() {
+		axes.setVisible(false);
+	}
+
 	
 	private SceneGraphComponent calculateAxes() {
 
@@ -223,14 +230,18 @@ public class CoordinateSystemFactory {
 			//create SceneGraphComponent with children line, arrow, ticks
 			SceneGraphComponent singleAxis = new SceneGraphComponent();
 			singleAxis.setName(axesNames[axis] +"-axis");
+			nodes.put(axesNames[axis] +"Axis", singleAxis);  //e.g. xAxis
 			
 			//create line with label
 			SceneGraphComponent line = getAxisLine(axis, axesVertices[axis][0], axesVertices[axis][1], false);
 			// create arrow
 			SceneGraphComponent arrow = getAxisArrow(axis, axesVertices[axis][0], axesVertices[axis][1], false);
+			arrow.setVisible(showAxesArrows);
+			nodes.put(axesNames[axis]+"Arrow", arrow);  //e.g. xArrow
 			// create ticks with labels
 			SceneGraphComponent ticks = getAxisTicks(axis, axesVertices[axis][0], axesVertices[axis][1], false);
-				
+			nodes.put(axesNames[axis]+"Label", ticks);  //e.g. xLabel
+			
 			singleAxis.addChild(line);
 			singleAxis.addChild(arrow);
 			singleAxis.addChild(ticks);
@@ -244,7 +255,7 @@ public class CoordinateSystemFactory {
 	    app.setAttribute(CommonAttributes.VERTEX_DRAW, true);  //show labels
 	    //app.setAttribute("pointShader.diffuseColor",Color.BLACK);
 	    //app.setAttribute("pointShader.specularColor",Color.BLACK);
-	    app.setAttribute("pointShader.scale", .01);  //label scale
+	    app.setAttribute("pointShader.scale", labelScale);  //label scale
 		app.setAttribute("pointShader.offset", new double[]{0.04,-0.07,0});  //label offset
 		app.setAttribute("pointRadius",0.001);  //don't show label points
 		//app.setAttribute("lineShader.diffuseColor",Color.BLACK);
@@ -373,7 +384,9 @@ public class CoordinateSystemFactory {
 		FactoredMatrix m = new FactoredMatrix();
 		m.setRotation(getRotation(axis));
 		m.setStretch(2*urStretch); //stretch urCone
-		m.setTranslation(max); //translate to axis tip
+		//translate to axis tip
+		if (forBox) max[axis] -= 3*2*urStretch;  //arrow tip has to be the box vertex
+		m.setTranslation(max);
 		m.assignTo(arrow);
 		
 		return arrow;
@@ -477,6 +490,10 @@ public class CoordinateSystemFactory {
 	}
 
 
+	private String toBinaryString(int k) {
+		if (k<2) return ("0"+k);
+		else return Integer.toBinaryString(k);
+	}
 	
 //-----------------------------------------------------------------------------------
 //the following methods are intended to be used 
@@ -484,11 +501,11 @@ public class CoordinateSystemFactory {
 //-----------------------------------------------------------------------------------
 	
 	/**
-	 * get a box vertex which is "closest to the screen" when looking in a specified direction
+	 * get index of a box vertex which is "closest to the screen" when looking in a specified direction
 	 * @param direction the direction
-	 * @return a closest box vertex
+	 * @return the index of a closest box vertex in boxVertices[0]
 	 */
-	private double[] getClosestBoxVertex(double[] dir) {
+	private int getClosestBoxVertex(double[] dir) {
 		double[] direction;
 		if (dir.length==3) direction=dir;
 		else {
@@ -508,31 +525,35 @@ public class CoordinateSystemFactory {
 				tmp = Rn.innerProduct(boxVertices[0][k], direction);
 			}
 		}
-		return boxVertices[0][closest];
+		return closest;
 	}
 	
 	
 	/**
 	 * specify a direction to look at in a viewer
-	 * => hide closest box vertex (or edges if there are more than one closest box vertices)
+	 * => hide closest box vertex (resp. only edges if there are more than one closest box vertices)
 	 */
 	public void updateBox(double[] direction) {
 		
+		//only do something if closest box vertex changed
+		final int index = getClosestBoxVertex(direction);
+		if (currentClosestBoxVertex == index) return;
+		
 		//set all vertices to visible
-		for (int i=0; i<=1; i++)
-			for (int j=0; j<=1; j++) {
-				getSGC("x"+i+j).setVisible(true);
-				getSGC("y"+i+j).setVisible(true);
-				getSGC("z"+i+j).setVisible(true);
-			}
-				
-		double[] closest = getClosestBoxVertex(direction);
+		for (int k=0; k<=3; k++) {
+			getSGC("x"+toBinaryString(k)).setVisible(true);
+			getSGC("y"+toBinaryString(k)).setVisible(true);
+			getSGC("z"+toBinaryString(k)).setVisible(true);
+		}
+		
+		currentClosestBoxVertex = index;
+		double[] closest = boxVertices[0][currentClosestBoxVertex];
 		int[] edgeCriteria = new int[3];
 		
 		//get the 3 edges belonging to a closest box vertex
 		for (int i=0; i<=2; i++) {
-			if (closest[i] == boxMin[i]) edgeCriteria[i] = 0; 
-			else edgeCriteria[i] = 1; 
+			if (closest[i] == boxMin[i]) edgeCriteria[i] = 0;  //0 corresponds to vertex with minimum value on axis i
+			else edgeCriteria[i] = 1;  //1 corresponds to vertex with maximum value on axis i 
 		}
 		//set those edges invisible which don't have copies of same "distance to the screen"
 		if (direction[1]!=0 && direction[2]!=0)
@@ -565,46 +586,103 @@ public class CoordinateSystemFactory {
 	
 	
 //-----------------------------------------------------------------------------------
-//for setting attributes
+//set and get attributes
 //-----------------------------------------------------------------------------------
 		
+	public void setAxisScale(double axisScale) {
+		if (this.axisScale == axisScale) return;
+		//else
+		this.axisScale = axisScale;
+
+		//update ticks and labels
+		for (int axis = 0; axis <= 2; axis++) { // for each coordinate axis
+
+			//for box:
+			for (int k = 0; k <= 3; k++) {
+				//remove old ticks and labels
+				SceneGraphComponent singleAxisK = getSGC(axesNames[axis]+ toBinaryString(k));  //e.g. x00
+				singleAxisK.removeChild(getSGC(singleAxisK.getName() + "label"));  //e.g. x00label
+				//create new ticks with labels
+				SceneGraphComponent ticks = getAxisTicks(axis, 
+						boxVertices[axis][2 * k], boxVertices[axis][2 * k + 1], true);
+				//update hash table
+				nodes.put(axesNames[axis] + singleAxisK.getName() + "label", ticks);  //e.g. x00label
+				//add new ticks and labels to SceneGraph
+				singleAxisK.addChild(ticks);
+			}
+
+			//for axes:
+
+			//remove old ticks and labels
+			SceneGraphComponent singleAxis = getSGC(axesNames[axis] +"Axis");  //e.g. xAxis
+			singleAxis.removeChild(getSGC(axesNames[axis]+"Label"));  //e.g. xLabel
+			//create new ticks with labels
+			SceneGraphComponent ticks = getAxisTicks(axis,
+					axesVertices[axis][0], axesVertices[axis][1], false);
+			//update hash table
+			nodes.put(axesNames[axis] + "Label", ticks);  //e.g. xLabel
+			//add new ticks and labels to SceneGraph
+			singleAxis.addChild(ticks);
+		}
+	}
 	
-	public void setAttribute(String key, Object value) {
-		
-		attributes.put(key, value);
-		axisScale = ((Double)attributes.get("axisScale")).doubleValue();
-		axesArrows = ((Boolean)attributes.get("axesArrows")).booleanValue();
-		boxArrows = ((Boolean)attributes.get("boxArrows")).booleanValue();
-	}
-
-	public void setAttribute(String key, double value) {
-		setAttribute(key, new Double(value));
-	}
-
-	public void setAttribute(String key, float value) {
-		setAttribute(key, new Float(value));
-	}
-
-	public void setAttribute(String key, int value) {
-		setAttribute(key, new Integer(value));
-	}
-
-	public void setAttribute(String key, long value) {
-		setAttribute(key, new Long(value));
-	}
-
-	public void setAttribute(String key, boolean value) {
-		setAttribute(key, Boolean.valueOf(value));
-	}
-
-	public void setAttribute(String key, char value) {
-		setAttribute(key, new Character(value));
+	public double getAxisScale() {
+		return axisScale;
 	}
 	
-	private void initAttributes() {
-		attributes.put("axesArrows", new Boolean(true));
-		attributes.put("boxArrows", new Boolean(false));
+	
+	public void setLabelScale(double labelScale) {
+		if (this.labelScale == labelScale) return;
+		//else
+		this.labelScale = labelScale;
 		
-		setAttribute("axisScale", 0.5);  //global variables are set in this method
+		box.getAppearance().setAttribute("pointShader.scale", labelScale);
+		box.getAppearance().setAttribute("lineShader.scale", labelScale);
+		axes.getAppearance().setAttribute("pointShader.scale", labelScale);
 	}
+	
+	public double getLabelScale() {
+		return labelScale;
+	}
+	
+	
+	public void showAxesArrows() {
+		if (showAxesArrows) return;
+		showAxesArrows = true;
+		//set visiblity of all arrows
+		for (int axis=0; axis<=2; axis++)
+			getSGC(axesNames[axis]+"Arrow").setVisible(true);
+	}
+	
+	public void hideAxesArrows() {
+		if (!showAxesArrows) return;
+		showAxesArrows = false;
+		//set visiblity of all arrows
+		for (int axis=0; axis<=2; axis++)
+			getSGC(axesNames[axis]+"Arrow").setVisible(false);
+	}
+	
+
+	public void showBoxArrows() {
+		if (showBoxArrows) return;
+		showBoxArrows = true;
+		//set visiblity of all arrows
+		for (int k=0; k<=3; k++) {
+			getSGC("x"+toBinaryString(k)+"arrow").setVisible(true);
+			getSGC("y"+toBinaryString(k)+"arrow").setVisible(true);
+			getSGC("z"+toBinaryString(k)+"arrow").setVisible(true);
+		}
+	}
+	
+	public void hideBoxArrows() {
+		if (!showBoxArrows) return;
+		showBoxArrows = false;
+		//set visiblity of all arrows
+		for (int k=0; k<=3; k++) {
+			getSGC("x"+toBinaryString(k)+"arrow").setVisible(false);
+			getSGC("y"+toBinaryString(k)+"arrow").setVisible(false);
+			getSGC("z"+toBinaryString(k)+"arrow").setVisible(false);
+		}
+	}
+
 }
