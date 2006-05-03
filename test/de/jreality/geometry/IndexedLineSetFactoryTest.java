@@ -1,5 +1,6 @@
 package de.jreality.geometry;
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Handler;
@@ -135,10 +136,12 @@ public class IndexedLineSetFactoryTest extends TestCase {
 		factory.setLineCount( 6 );	
 		factory.setVertexCoordinates( vertices );
 		factory.setEdgeIndices( indices );
-	
-//		factory.setLineCount( 1 );
-//		factory.setEdgeIndices( new int[][] {{0,1}} );
-//		factory.setEdgeLabels( new String[] {"A"} );
+	    factory.setGenerateEdgeLabels(true);
+	    factory.setGenerateVertexLabels(true);
+		factory.setLineCount( 2 );
+		factory.setEdgeIndices( new int[][] {{0,1},{2,3}} );
+		factory.setEdgeColors( new Color[] {Color.RED, Color.YELLOW} );
+		//factory.setEdgeLabels( new String[] {"A","B"} );
 		factory.update();
 		
 		ViewerApp.display(factory.getIndexedLineSet());
