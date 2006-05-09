@@ -66,7 +66,7 @@ options {
 	public SceneGraphComponent root = new SceneGraphComponent();	
 	
 	SceneGraphComponent current = root;		// aktuell zu erweiternder Knoten 
-	
+	CoordinateSystemFactory box;
 	Appearance globalApp =new Appearance();	// App. der root
 	Color plCDefault= new Color(255,0,0);	// default- Punkt und Linienfarbe
 	Color fCDefault = new Color(0,255,0);	// default- Flaechenfarbe
@@ -125,12 +125,7 @@ options {
 // ------------------------------------------------------------------------------
 start returns [SceneGraphComponent r]
 { r = null;	
-	globalApp.setName("global");
-	globalApp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
-	globalApp.setAttribute(CommonAttributes.SPHERES_DRAW, false);
-	globalApp.setAttribute(CommonAttributes.EDGE_DRAW, false);
-	globalApp.setAttribute(CommonAttributes.TUBES_DRAW, false);
-	
+	globalApp.setName("global");	
 	root.setAppearance(globalApp);
 	root.setName("Mathematica");
 }
@@ -141,9 +136,18 @@ start returns [SceneGraphComponent r]
 	  		| plCDefault=plThing[plCDefault,globalApp]  // ein Punkt/Linien-beeinflussendes Object
 	  		| globalApp=appThing[globalApp]				// ein App.-beeinflussendes Object
 	  	)
+	  	{
+	  	// Box und Axen ermoeglichen:
+	  	box=new CoordinateSystemFactory(root);
+		}
 	  	(optionen)? 									// Die in der 2."{}"-Klammer folgenden Optionen sind optional
 	  CLOSE_BRACKET 
-		{ r = root;}
+		{
+		globalApp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+		globalApp.setAttribute(CommonAttributes.SPHERES_DRAW, false);
+		globalApp.setAttribute(CommonAttributes.EDGE_DRAW, false);
+		globalApp.setAttribute(CommonAttributes.TUBES_DRAW, false);
+		r = root;}
 	;
 
 // ---------------------------------- 3D Objects ---------------------------------------------
@@ -165,7 +169,7 @@ list[Color plC, Color fC, Appearance app]
 			// neuen Knoten erstellen der die Listenelemente haelt, 
 			SceneGraphComponent newPart = new SceneGraphComponent();
 			newPart.setName("Object");
-			newPart.setAppearance(app2);
+//			newPart.setAppearance(app2);
 			SceneGraphComponent oldPart = current;
 			current.addChild(newPart);
 			current=newPart;
@@ -516,13 +520,14 @@ polygonBlock [Color fCgiven, Appearance app] returns[Color fC]
 		faceSet.setFaceIndices(indices);
 		faceSet.setVertexCoordinates(data);
 		Appearance faceApp =copyApp(app);
-		faceApp.setAttribute(CommonAttributes.SMOOTH_SHADING, true);
+		//faceApp.setAttribute(CommonAttributes.SMOOTH_SHADING, true);// smoth ist eh default
 	    if (colorNeeded)
 			faceSet.setFaceColors(colorData);
 		else
 			faceApp.setAttribute(CommonAttributes.DIFFUSE_COLOR, colors.get(0));
 		faceSet.setGenerateFaceNormals(true);
 		faceSet.setGenerateVertexNormals(true);
+		faceSet.setGenerateEdgesFromFaces(true);
 		faceSet.update();
 		SceneGraphComponent geo=new SceneGraphComponent();	// Komponenten erstellen und einhaengen
 		geo.setAppearance(faceApp);
@@ -694,12 +699,13 @@ Color col;}
 		// 2D: strichelt Linien
 	|"EdgeForm" OPEN_BRACKET 							
 		// Zeichnet die Randlinien eines Polygons in der angegebenen Farbe
-		{Color c= Color.MAGENTA;}
-			c=color
+
+		{Color c= Color.BLACK;}
+			(c=color)?
 		{
-	 	//app.setAttribute(CommonAttributes.EDGE_DRAW, true);
-	 	//app.setAttribute(CommonAttributes.TUBES_DRAW, true);
-	 	//app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
+	 	app.setAttribute(CommonAttributes.EDGE_DRAW, true);
+	 	app.setAttribute(CommonAttributes.TUBES_DRAW, true);
+	 	app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
    		}
 				CLOSE_BRACKET 
 	|"FaceForm" OPEN_BRACKET dumb CLOSE_BRACKET
@@ -747,15 +753,13 @@ optionPrimitive
 			// Abschneiden bei zu extremen Werten. Wie soll man abschneiden?
 	|	"Boxed"			(		MINUS LARGER 
 			// eine Box um die Scene
-						 (	 "True"	{
-												
-						 }	
-							|"False"
+						 (	 "True"	{box.displayBox();}	
+							|"False"{box.hideBox();}
 						)| DDOT LARGER	egal)
 	|	"Axes" 			(		MINUS LARGER
 			// Achsen an der Scene
-						 (	 "True"	{}	
-							|"False" {}
+						 (	 "True"	{box.displayAxes();}	
+							|"False" {box.hideAxes();}
 							|"Automatic"{}
 						)| DDOT LARGER	egal)
 	|	"PlotLabel" 			(DDOT LARGER	egal | MINUS LARGER	egal)
@@ -764,6 +768,10 @@ optionPrimitive
 			// 3D: Label an den Achsen
 	|	"AxesStyle"				(DDOT LARGER	egal | MINUS LARGER	egal)
 	|	"AmbientLight"			(DDOT LARGER	egal | MINUS LARGER	egal)
+	
+	
+	
+	// --------------------------------------------------
 			// spezielle Lichtquelle 
 	|	"DefaultColor"			(DDOT LARGER	egal | MINUS LARGER	egal)
 			// Problem: kann nicht mehr die Farbe in einem Block aendern
@@ -781,7 +789,7 @@ optionPrimitive
 	|	"ViewPoint"				(DDOT LARGER	egal | MINUS LARGER	egal)
 	|	"BoxRatios"				(DDOT LARGER	egal | MINUS LARGER	egal)
 	|	"Plot3Matrix"			(DDOT LARGER	egal | MINUS LARGER	egal)
-	|	"Lighting"				(DDOT LARGER	egal | MINUS LARGER	egal)
+ 	|	"Lighting"				(DDOT LARGER	egal | MINUS LARGER	egal)
 	|	"LightSources"			(DDOT LARGER	egal | MINUS LARGER	egal)
 	|	"ViewCenter"			(DDOT LARGER	egal | MINUS LARGER	egal)
 	|	"PlotRegion"			(DDOT LARGER	egal | MINUS LARGER	egal)
