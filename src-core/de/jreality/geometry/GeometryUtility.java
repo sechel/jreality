@@ -132,6 +132,8 @@ public class GeometryUtility {
 	public static double[][] calculateFaceNormals(int[][] indices, double[][] verts, int signature)	{
 		if (indices == null) return null;
 		int normalLength = 4;
+		// TODO fix this when non-euclidean shading is working!
+		signature = Pn.EUCLIDEAN;
 		if (signature == Pn.EUCLIDEAN)	normalLength = 3;
 		double[][] fn = new double[indices.length][normalLength];
 		if (signature == Pn.EUCLIDEAN && verts[0].length == 4) Pn.dehomogenize(verts,verts);

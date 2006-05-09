@@ -765,6 +765,15 @@ final public class Rn {
 		return (strb.toString());
 	}
 
+
+	public static String matrixToStringFloat(double[] m, int prec) {
+		double[] n = new double[m.length];
+		for (int i = 0; i<m.length; ++i) {
+			float f = (float) m[i];
+			n[i] = (double) f;
+		}
+		return matrixToString(n, prec);
+	}
 	/**
 	 * Calculate the maximum of two vectors, coordinate-wise.
 	 * @param dst

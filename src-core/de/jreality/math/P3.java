@@ -740,12 +740,12 @@ public class P3 extends Pn {
 //		if (Rn.maxNorm(diagnosis) < tolerance)		{
 //			return null;
 //		}
-		boolean mydebug = false;
+		boolean mydebug = true;
 		if (mydebug)	{
 			LoggingSystem.getLogger(P3.class).log(Level.FINER,"m =");
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(m, -1));
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,"Original is");
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(diagnosis, -1));			
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToStringFloat(m, -1));
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,"Error is");
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToStringFloat(diagnosis, -1));			
 		}
 		double[][] basis = new double[4][4];
 		double[] Q = Q_LIST[signature+1];

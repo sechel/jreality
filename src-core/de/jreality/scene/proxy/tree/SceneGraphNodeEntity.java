@@ -64,7 +64,7 @@ public class SceneGraphNodeEntity {
   }
   
   protected void addTreeNode(SceneTreeNode tn) {
-    LoggingSystem.getLogger(this).log(Level.INFO,
+    LoggingSystem.getLogger(this).log(Level.FINE,
         "adding new TreeNode[{1}] for {0}", new Object[]{node.getName(), new Integer(treeNodes.size())});
     if (tn == null) throw new IllegalStateException("tree node is null");
     treeNodes.add(tn);
@@ -72,7 +72,7 @@ public class SceneGraphNodeEntity {
   }
   
   protected void removeTreeNode(SceneTreeNode tn) {
-  	LoggingSystem.getLogger(this).log(Level.INFO,
+  	LoggingSystem.getLogger(this).log(Level.FINE,
         "removing TreeNode for {0}", node.getName());
     if (tn == null) throw new IllegalStateException("tree node is null");
     treeNodes.remove(tn);

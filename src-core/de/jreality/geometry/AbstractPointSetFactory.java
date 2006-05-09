@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import sun.security.krb5.internal.crypto.c;
 
 import de.jreality.math.Pn;
 import de.jreality.scene.PointSet;

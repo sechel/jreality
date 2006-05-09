@@ -117,6 +117,9 @@ public class FlyTool extends Tool {
     //System.out.println("FlyTool: old position is "+Rn.toString(Pn.normalize(shipPosition, shipPosition,signature)));
     //System.out.println("FlyTool: new position is "+Rn.toString(Pn.normalize(newShipPosition,newShipPosition, signature)));
     MatrixBuilder.init(shipMatrix, signature).translateFromTo(shipPosition,newShipPosition).assignTo(ship);
+    // demo madness: can't get render trigger to work, so do it by hand.  
+    // TODO remove when demo is over
+    tc.getViewer().render();
   }
 
   public void activate(ToolContext tc) {
