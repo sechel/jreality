@@ -2,6 +2,9 @@ package de.jreality.geometry;
 
 import java.awt.Color;
 import java.util.HashMap;
+
+import javax.swing.SwingConstants;
+
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Appearance;
@@ -171,13 +174,13 @@ public class CoordinateSystemFactory {
 				nodes.put(axesNames[axis]+singleAxisK.getName(), singleAxisK);  //e.g. x00
 				
 				//create line with label
-				SceneGraphComponent line = getAxisLine(axis, boxVertices[axis][2*k],boxVertices[axis][2*k+1], true);
+				SceneGraphComponent line = getAxisLine(axis, boxVertices[axis][2*k], boxVertices[axis][2*k+1], true);
 				//create arrow
-				SceneGraphComponent arrow = getAxisArrow(axis, boxVertices[axis][2*k],boxVertices[axis][2*k+1]);
+				SceneGraphComponent arrow = getAxisArrow(axis, boxVertices[axis][2*k], boxVertices[axis][2*k+1]);
 				arrow.setVisible(showBoxArrows);
 				nodes.put(axesNames[axis]+singleAxisK.getName()+"arrow", arrow);  //e.g. x00arrow
 				//create ticks with labels
-				SceneGraphComponent ticks = getAxisTicks(axis, boxVertices[axis][2*k],boxVertices[axis][2*k+1], true);
+				SceneGraphComponent ticks = getAxisTicks(axis, boxVertices[axis][2*k], boxVertices[axis][2*k+1], true);
 				nodes.put(axesNames[axis]+singleAxisK.getName()+"label", ticks);  //e.g. x00label
 				
 				singleAxisK.addChild(line);
@@ -194,15 +197,19 @@ public class CoordinateSystemFactory {
 		Appearance app = new Appearance();
 	    app.setAttribute(CommonAttributes.TUBES_DRAW, false);
 	    app.setAttribute(CommonAttributes.EDGE_DRAW, true);
+	    app.setAttribute(CommonAttributes.SPHERES_DRAW, true);
 	    app.setAttribute(CommonAttributes.VERTEX_DRAW, true);  //show labels
-	    app.setAttribute("pointShader.scale", labelScale);  //label scale
-	    app.setAttribute("lineShader.scale", labelScale);  //label scale
-	    app.setAttribute("pointShader.offset", new double[]{0.04,-0.07,0});  //label offset of ticks
-	    app.setAttribute("lineShader.offset", new double[]{0,-.2,0});  //label offset of axes lines
 		app.setAttribute(CommonAttributes.POINT_RADIUS, 0.001);  //don't show label points
 		app.setAttribute(CommonAttributes.DIFFUSE_COLOR,Color.BLACK);
 		app.setAttribute(CommonAttributes.SPECULAR_COLOR,Color.BLACK);
 	    app.setAttribute(CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
+	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"scale", labelScale);  //label scale
+	    app.setAttribute(CommonAttributes.LINE_SHADER+"."+"scale", labelScale);  //label scale
+	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"offset", new double[]{0.04,-0.07,0});  //label offset of ticks
+	    app.setAttribute(CommonAttributes.LINE_SHADER+"."+"offset", new double[]{0,-.2,0});  //label offset of axes lines
+	    //app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
+	    //app.setAttribute(CommonAttributes.LINE_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
+	    
 	    box.setAppearance(app);
 		
 		return box;
@@ -258,14 +265,18 @@ public class CoordinateSystemFactory {
 		Appearance app = new Appearance();
 	    app.setAttribute(CommonAttributes.TUBES_DRAW, false);
 	    app.setAttribute(CommonAttributes.EDGE_DRAW, true);
+	    app.setAttribute(CommonAttributes.SPHERES_DRAW, true);
 	    app.setAttribute(CommonAttributes.VERTEX_DRAW, true);  //show labels
-	    app.setAttribute("pointShader.scale", labelScale);  //label scale
-		app.setAttribute("pointShader.offset", new double[]{0.04,-0.07,0});  //label offset
 		app.setAttribute(CommonAttributes.POINT_RADIUS, 0.001);  //don't show label points
 		app.setAttribute(CommonAttributes.DIFFUSE_COLOR,Color.BLACK);
 		app.setAttribute(CommonAttributes.SPECULAR_COLOR,Color.BLACK);
 	    app.setAttribute(CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
-		axes.setAppearance(app);
+	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"scale", labelScale);  //label scale
+		app.setAttribute(CommonAttributes.POINT_SHADER+"."+"offset", new double[]{0.04,-0.07,0});  //label offset
+	    //app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
+	    //app.setAttribute(CommonAttributes.LINE_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
+
+	    axes.setAppearance(app);
 		
 		return axes;
 	}
@@ -441,8 +452,6 @@ public class CoordinateSystemFactory {
 		//create the SceneGraphComponent and rotate the ticks onto the corresponding coordinate axis
 		SceneGraphComponent ticks = SceneGraphUtility.createFullSceneGraphComponent("ticks");
 		ticks.setGeometry(ticksIFS);
-		//FactoredMatrix m = new FactoredMatrix(TubeUtility.tubeOneEdge(min, max, 0.025, null, signature).getTransformation());
-		//above method results in incorrect translation
 		FactoredMatrix m = new FactoredMatrix();
 		m.setRotation(getRotation(axis));
 		double[] translation = (double[])min.clone();
@@ -450,7 +459,7 @@ public class CoordinateSystemFactory {
 		m.setTranslation(translation);
 		m.setStretch(tickStretch, tickStretch, 1); //stretch ticks
 		m.assignTo(ticks);
-		
+
 		ticks.addChild(labels);
 		return ticks;
 	}
@@ -474,7 +483,8 @@ public class CoordinateSystemFactory {
 		FactoredMatrix m = new FactoredMatrix();
 		switch(axis) {
 		case 0 : m.setRotation(Math.PI/2,0,1,0); break;
-		case 1 : m.setRotation(-Math.PI/2,1,0,0);
+		case 1 : m.setRotation(-Math.PI/2,1,0,0); break;
+		//case 2 : z-axis => no rotation
 		}
 		return Quaternion.rotationMatrixToQuaternion(new Quaternion(), m.getArray());
 	}
@@ -551,9 +561,9 @@ public class CoordinateSystemFactory {
 		int[] edgeCriteria = new int[3];
 		
 		//get the 3 edges belonging to a closest box vertex
-		for (int i=0; i<=2; i++) {
-			if (closest[i] == boxMin[i]) edgeCriteria[i] = 0;  //0 corresponds to vertex with minimum value on axis i
-			else edgeCriteria[i] = 1;  //1 corresponds to vertex with maximum value on axis i 
+		for (int axis=0; axis<=2; axis++) {
+			if (closest[axis] == boxMin[axis]) edgeCriteria[axis] = 0;  //0 corresponds to vertex with minimum value on axis i
+			else edgeCriteria[axis] = 1;  //1 corresponds to vertex with maximum value on axis i 
 		}
 		//set those edges invisible which don't have copies of same "distance to the screen"
 		if (direction[1]!=0 && direction[2]!=0)
