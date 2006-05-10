@@ -393,10 +393,10 @@ public abstract class StorageModel implements Serializable {
       {
         if(compModel.inlined.length<num)
           System.arraycopy(compModel.inlined, 0, compModel.inlined
-            =new StorageModel[num+10], 0, compModel.inlined.length);
+            =new StorageModel[num+32], 0, compModel.inlined.length);
         else if(compModel.inlined[num]!=null)
           throw new IllegalStateException("redefinition of"+this);
-      } else compModel.inlined=new StorageModel[num+10];
+      } else compModel.inlined=new StorageModel[num+32];
       compModel.inlined[num]=this;
     }
 
@@ -496,10 +496,10 @@ public abstract class StorageModel implements Serializable {
       {
         if(compModel.arrayof.length<num)
           System.arraycopy(compModel.arrayof, 0, compModel.arrayof
-            =new StorageModel[num+10], 0, compModel.arrayof.length);
+            =new StorageModel[num+32], 0, compModel.arrayof.length);
         else if(compModel.arrayof[num]!=null)
           throw new IllegalStateException("redefinition of"+this);
-      } else compModel.arrayof=new StorageModel[num+10];
+      } else compModel.arrayof=new StorageModel[num+32];
       compModel.arrayof[num]=this;
     }
     ArrayOf(StorageModel compModel) {//non-constant
@@ -511,7 +511,7 @@ public abstract class StorageModel implements Serializable {
       {
         if(compModel.arrayof[0]!=null)
           throw new IllegalStateException("redefinition of"+this);
-      } else compModel.arrayof=new StorageModel[10];
+      } else compModel.arrayof=new StorageModel[32];
       compModel.arrayof[0]=this;
      }
 
