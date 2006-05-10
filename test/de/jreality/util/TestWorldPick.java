@@ -7,9 +7,6 @@ package de.jreality.util;
 
 import java.util.Vector;
 
-import charlesgunn.jreality.pick.PickAction;
-import charlesgunn.jreality.pick.PickPoint;
-
 import de.jreality.geometry.Primitives;
 import de.jreality.math.P3;
 import de.jreality.math.Rn;
