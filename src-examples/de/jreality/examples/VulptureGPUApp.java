@@ -549,7 +549,7 @@ public class VulptureGPUApp implements Runnable {
             
             double dd = Math.sqrt(sx*sx+sy*sy+sz*sz);
             if(dd> 0.) {
-                dd = (0.02*Math.signum(dd - prox) - vv/dd)/dd;
+                dd = (0.02*signum(dd - prox) - vv/dd)/dd;
                 sx *=dd;
                 sy *=dd;
                 sz *=dd;
@@ -562,7 +562,7 @@ public class VulptureGPUApp implements Runnable {
             
             double dpd = Math.sqrt(spx*spx+spy*spy+spz*spz);
             if(dpd> 0.) {
-                dpd = (0.02*Math.signum(dpd - prox) - pvv/dpd)/dpd;
+                dpd = (0.02*signum(dpd - prox) - pvv/dpd)/dpd;
                 spx *=dpd;
                 spy *=dpd;
                 spz *=dpd;
@@ -667,7 +667,10 @@ public class VulptureGPUApp implements Runnable {
         );
     }
 
-    /**
+    private double signum(double e) {
+		return e > 0 ? 1 : -1;
+	}
+	/**
      * @param coords2
      */
     private static double t = 0;

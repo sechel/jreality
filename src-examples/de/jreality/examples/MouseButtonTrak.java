@@ -1,8 +1,7 @@
 package de.jreality.examples;
-import net.java.games.input.*;
+import net.java.games.input.Component;
 import net.java.games.input.Controller;
-import net.java.games.input.LinuxDevice;
-import net.java.games.input.LinuxEnvironmentPlugin;
+import net.java.games.input.ControllerEnvironment;
 
 /*
  * Created on 14.01.2006
@@ -28,19 +27,20 @@ import net.java.games.input.LinuxEnvironmentPlugin;
  */
 
 public class MouseButtonTrak {
-    private static final LinuxEnvironmentPlugin LEP =new LinuxEnvironmentPlugin();
+
     private Controller mouse;
     private Component b1;
     private Component b2;
     private Component b3;
     
     public MouseButtonTrak() {
-        super();Controller[] cts = LEP.getControllers();
-        
+        ControllerEnvironment env = ControllerEnvironment.getDefaultEnvironment();
+        Controller[] cts = env.getControllers();
+
         for(int i = 0; i< cts.length; i++) {
             String name = cts[i].getName();
             System.out.print(" controller "+i+"'s name is "+name);
-            if(name.contains("USB")&& name.contains("Mouse")) {
+            if(contains(name, "USB")&& contains(name, "Mouse")) {
                 mouse = cts[i];
                 System.out.println(" <- we use this one!");
             } 
@@ -54,13 +54,11 @@ public class MouseButtonTrak {
         b2 = a[1];
         b3 = a[2];
         
-        
-        if(mouse instanceof LinuxDevice) {
-            LinuxDevice ld = (LinuxDevice) mouse;
-            int bts[] = new int[20];
-            
-        }
-}
+    }
+
+    private boolean contains(String name, String string) {
+		return name.indexOf(string) != -1;
+	}
 
     public final void poll() {
         mouse.poll();

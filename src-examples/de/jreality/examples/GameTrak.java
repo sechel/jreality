@@ -1,8 +1,5 @@
 package de.jreality.examples;
 import net.java.games.input.*;
-import net.java.games.input.Controller;
-import net.java.games.input.LinuxDevice;
-import net.java.games.input.LinuxEnvironmentPlugin;
 
 /*
  * Created on 14.01.2006
@@ -28,7 +25,7 @@ import net.java.games.input.LinuxEnvironmentPlugin;
  */
 
 public class GameTrak {
-    private static final LinuxEnvironmentPlugin LEP =new LinuxEnvironmentPlugin();
+
     private Controller gameTrak;
     private Component phi1;
     private Component phi2;
@@ -37,13 +34,13 @@ public class GameTrak {
     private Component height1;
     private Component height2;
     public GameTrak() {
-        super();
-        Controller[] cts = LEP.getControllers();
+        ControllerEnvironment env = ControllerEnvironment.getDefaultEnvironment();
+        Controller[] cts = env.getControllers();
         
         for(int i = 0; i< cts.length; i++) {
             String name = cts[i].getName();
             System.out.print(" controller "+i+"'s name is "+name);
-            if(name.contains("Game-Trak")) {
+            if(contains(name, "Game-Trak")) {
                 gameTrak = cts[i];
                 System.out.println(" <- we use this one!");
             } 
@@ -60,16 +57,13 @@ public class GameTrak {
         theta2 = a[4];
         height2 = a[5];
         
-        
-        if(gameTrak instanceof LinuxDevice) {
-            LinuxDevice ld = (LinuxDevice) gameTrak;
-            int bts[] = new int[20];
-            
-        }
-        
 }
 
-    public void poll() {
+    private boolean contains(String name, String string) {
+		return name.indexOf(string) != -1;
+	}
+
+	public void poll() {
         gameTrak.poll();
     }
     
@@ -108,11 +102,6 @@ public class GameTrak {
         p[1] = (float) (h*Math.cos(phi)*Math.cos(theta));
         p[2] = (float) (-h*Math.sin(theta));
         
-        if(gameTrak instanceof LinuxDevice) {
-            LinuxDevice ld = (LinuxDevice) gameTrak;
-//            System.out.println("button 7: "+ld.getButtonValue(7));
-        }
-
     }
     /**
      * second (right) point.
