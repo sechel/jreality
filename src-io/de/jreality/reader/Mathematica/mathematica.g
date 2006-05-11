@@ -42,8 +42,18 @@
 //   Farben werden je nach Bedarf als Farbliste in Line-, Point-, und Face- Sets eingebunden.
 //   	Vorzugsweise aber als Farbe in der Appearance des Unterknotens.
 
-// Interes:
+// Internes:
 // ueberall die aktuelle Appearance, FlaechenFarbe(fC), und Punkt/LinienFarbe(plC) durchreichen
+
+// TO DO:
+// viele Optionen sind noch unbehandelt (siehe dort: "optionPrimitives")
+// Standard Licheter und Camera werden nicht uebernommen 
+// 		(der Scenegraph hat keine Lichter oder Camera)
+// ein paar Directiven werden auch ignoriert (siehe dort: "directive")
+// die Root hat Linien und Punkte ausgeschaltet. 
+//		Sie werden bei den entsprechenden Knoten der Geometrieen wieder eingeschaltet.
+// Auch wenn Appearances wie Directiven fuer ganze gruppen gelten koennen,
+//		werden sie erst im Knoten der Geometrie eingesetzt.
 
 header {
 package de.jreality.reader.Mathematica;
@@ -675,8 +685,16 @@ directive[Appearance appGiven] returns [Appearance app]
 // Bemerkung: Der Aufruf 'dumb' ignoriert alles in der Klammer.
 {app = copyApp(appGiven); 
 Color col;}
-	:"AbsoluteDashing" OPEN_BRACKET  dumb CLOSE_BRACKET 
-		// 3D: strichelt Lienien
+	:"EdgeForm" OPEN_BRACKET 							
+		// Zeichnet die Randlinien eines Polygons in der angegebenen Farbe
+		{Color c= Color.BLACK;}
+			(c=color)?
+		{
+	 	app.setAttribute(CommonAttributes.EDGE_DRAW, true);
+	 	app.setAttribute(CommonAttributes.TUBES_DRAW, true);
+	 	app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
+   		}
+				CLOSE_BRACKET 
 	|"AbsolutePointSize" 								
 		// Dicke der Punkte
 		OPEN_BRACKET
@@ -695,33 +713,25 @@ Color col;}
 			app.setAttribute(CommonAttributes.TUBE_RADIUS,d/40);
 			app.setAttribute(CommonAttributes.LINE_WIDTH,d);
 			}
+// -- ab hier nicht behandelte directives
 	|"Dashing" OPEN_BRACKET dumb CLOSE_BRACKET
-		// 2D: strichelt Linien
-	|"EdgeForm" OPEN_BRACKET 							
-		// Zeichnet die Randlinien eines Polygons in der angegebenen Farbe
-
-		{Color c= Color.BLACK;}
-			(c=color)?
-		{
-	 	app.setAttribute(CommonAttributes.EDGE_DRAW, true);
-	 	app.setAttribute(CommonAttributes.TUBES_DRAW, true);
-	 	app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
-   		}
-				CLOSE_BRACKET 
+		// 2D: strichelt Linien (unnoetig da wir im 3d sind)
 	|"FaceForm" OPEN_BRACKET dumb CLOSE_BRACKET
-		// faerbt Flaechen 2-seitig verschieden
+		// faerbt Flaechen 2-seitig verschieden (koennen wir garnicht)
 	|"PointSize" OPEN_BRACKET
-		// Groese eines Punktes als Anteil an der Graphengroese
+		// Groese eines Punktes als Anteil an der Graphengroese (zu aufwendig)
 					{double d=0;} d=doublething
 				 CLOSE_BRACKET 
 				 	{// schlecht: brauche die Groese des Graphen in der Mitte der Auswertung
 				 	}
 	|"Thickness" OPEN_BRACKET 
-		// Dicke einer Linie als Anteil an der Graphengroese 
+		// Dicke einer Linie als Anteil an der Graphengroese (zu aufwendig)
 					{double w=0;} w=doublething
 				CLOSE_BRACKET 
 				 	{// schlecht: brauche die Groese des Graphen in der Mitte der Auswertung
 				 	}
+	|"AbsoluteDashing" OPEN_BRACKET  dumb CLOSE_BRACKET 
+		// 3D: strichelt Lienien (sehr aufwendig)
 	;
 
 // ----------------------------------------------- Optionen ------------------------------------------
@@ -749,9 +759,10 @@ optionPrimitive
 // einfache Optionen
 // die meisten werden schlicht ignoriert
 // Bemerkung: egal ueberspring alles bis zur naechsten Option bzw dem Ende des Blocks
-	:	"PlotRange" 			(DDOT LARGER	egal | MINUS LARGER	egal)
-			// Abschneiden bei zu extremen Werten. Wie soll man abschneiden?
-	|	"Boxed"			(		MINUS LARGER 
+// Bemerkung: man kann offensichtlich auch auf Quellen verweisen (option :> $Identifier)
+//		ich habe aber keine Ahnung was das bedeutet. ignoriere es also
+// -- geht bereits:
+	:	"Boxed"			(		MINUS LARGER 
 			// eine Box um die Scene
 						 (	 "True"	{box.displayBox();}	
 							|"False"{box.hideBox();}
@@ -762,49 +773,90 @@ optionPrimitive
 							|"False" {box.hideAxes();}
 							|"Automatic"{}
 						)| DDOT LARGER	egal)
-	|	"PlotLabel" 			(DDOT LARGER	egal | MINUS LARGER	egal)
-			// 2D: Label an den Achsen
+
+// -- moeglich/Sinnvoll:
 	|	"AxesLabel"				(DDOT LARGER	egal | MINUS LARGER	egal)
-			// 3D: Label an den Achsen
-	|	"AxesStyle"				(DDOT LARGER	egal | MINUS LARGER	egal)
-	|	"AmbientLight"			(DDOT LARGER	egal | MINUS LARGER	egal)
-	
-	
-	
-	// --------------------------------------------------
-			// spezielle Lichtquelle 
-	|	"DefaultColor"			(DDOT LARGER	egal | MINUS LARGER	egal)
-			// Problem: kann nicht mehr die Farbe in einem Block aendern
-	|	"DisplayFunction"		(DDOT LARGER	egal | MINUS LARGER	egal)
-	|	"ColorOutput" 			(DDOT LARGER	egal | MINUS LARGER	egal)
-	|	"Ticks"					(DDOT LARGER	egal | MINUS LARGER	egal)
+			// 3D: Label an den Achsen (waere moeglich)
 	|	"Prolog"				(DDOT LARGER	egal | MINUS LARGER	egal)
 			// irgendwelche graphischen objekte die zuerst berechnet werden
+			// (gut koennte ich auch noch Parsen und extra an die Root haengen)
 	|	"Epilog"				(DDOT LARGER	egal | MINUS LARGER	egal)
 			// irgendwelche graphischen objekte die zuletzt berechnet werden
-	|	"Background"			(DDOT LARGER	egal | MINUS LARGER	egal)
-			// Hintergrundfarbe
-	|	"DefaultFont"			(DDOT LARGER	egal | MINUS LARGER	egal)				
-	|	"AspectRatio"			(DDOT LARGER	egal | MINUS LARGER	egal)
+			// (gut koennte ich auch noch Parsen und extra an die Root haengen)
+			
 	|	"ViewPoint"				(DDOT LARGER	egal | MINUS LARGER	egal)
-	|	"BoxRatios"				(DDOT LARGER	egal | MINUS LARGER	egal)
-	|	"Plot3Matrix"			(DDOT LARGER	egal | MINUS LARGER	egal)
- 	|	"Lighting"				(DDOT LARGER	egal | MINUS LARGER	egal)
-	|	"LightSources"			(DDOT LARGER	egal | MINUS LARGER	egal)
+			// CameraFokus (sollen wir das ueberhaupt uebernehmen)
 	|	"ViewCenter"			(DDOT LARGER	egal | MINUS LARGER	egal)
-	|	"PlotRegion"			(DDOT LARGER	egal | MINUS LARGER	egal)
-	|	"ImageSize"				(DDOT LARGER	egal | MINUS LARGER	egal)
-	|	"TextStyle"				(DDOT LARGER	egal | MINUS LARGER	egal)
-	|	"FormatType"			(DDOT LARGER	egal | MINUS LARGER	egal)
-	|	"ViewVertical"			(DDOT LARGER	egal | MINUS LARGER	egal)
+			//	???
 	|	"FaceGrids"				(DDOT LARGER	egal | MINUS LARGER	egal)
-	|	"Shading"				(DDOT LARGER	egal | MINUS LARGER	egal)
-	|	"RenderAll"				(DDOT LARGER	egal | MINUS LARGER	egal)
-	|	"PolygonIntersections"	(DDOT LARGER	egal | MINUS LARGER	egal)
+			//	3d Linien-Gitter in der bounding-box
+	|	"Ticks"					(DDOT LARGER	egal | MINUS LARGER	egal)
+			// Ticks sind die Markierungen an den Achsen.
+			// Farbe, Dicke, Abstaende, Labels... alles einstellbar
+			// (sehr viele moegliche Angaben, manche ganz sinnvoll)
+	|	"TextStyle"				(DDOT LARGER	egal | MINUS LARGER	egal)
+			//	SchriftDarstellung(brauch man das?)
+	|	"BoxRatios"				(DDOT LARGER	egal | MINUS LARGER	egal)
+			//3D: Laengenverzerrung der Achsen in der Darstellung(linear)
+
+ 	|	"Lighting"				(DDOT LARGER	egal | MINUS LARGER	egal)
+ 			// soll es Lichtquellen geben (ja/nein), oder gar eine Farbfunktionen
+	|	"LightSources"			(DDOT LARGER	egal | MINUS LARGER	egal)
+			// Liste von orientierten Lichtquellen
+	|	"AmbientLight"			(DDOT LARGER	egal | MINUS LARGER	egal)
+			// 
 	|	"AxesEdge"				(DDOT LARGER	egal | MINUS LARGER	egal)
+			//	welche Axen der Box sollen gezeichnet werden
+
+// -- eher schwierig:
+	|	"PlotRange" 			(DDOT LARGER	egal | MINUS LARGER	egal)
+			// Abschneiden bei zu extremen Werten. Wie soll man abschneiden?(durch die Polygone?)
+	|	"DefaultColor"			(DDOT LARGER	egal | MINUS LARGER	egal)
+			// StandardFarbe (kann nicht mehr die gesetzten Farben in einem Block aendern)
+	|	"Background"			(DDOT LARGER	egal | MINUS LARGER	egal)
+			// Hintergrundfarbe (fuer den Viewer schlecht da file.m nur Teil der Scene ist)
+			// wie sollte ich das Aendern?
+	|	"ColorOutput" 			(DDOT LARGER	egal | MINUS LARGER	egal)
+			// wie Farben ausgegeben werden sollen (sehr speziell)
+	|	"AxesStyle"				(DDOT LARGER	egal | MINUS LARGER	egal)
+			// gibt den Axen Directiven(Farbe,dicke ...) brauchen wir das wir das?
 	|	"BoxStyle"				(DDOT LARGER	egal | MINUS LARGER	egal)
+			// gibt wie "AxesStyle" der Bounding Box graphische Direktiven
+
+// -- unsinnig/unmoeglich
+	|	"PlotLabel" 			(DDOT LARGER	egal | MINUS LARGER	egal)
+			// 2D: Label an den Achsen (wir sind im 3d !!!)
+	|	"AspectRatio"			(DDOT LARGER	egal | MINUS LARGER	egal)
+			//2D: Laengenverzerrung der Achsen in der Darstellung(2d ist egal)
+	|	"DefaultFont"			(DDOT LARGER	egal | MINUS LARGER	egal)
+			// SchriftArt (veraltete Mathematica Version)
+	|	"PlotRegion"			(DDOT LARGER	egal | MINUS LARGER	egal)
+			// groese des Fensters in Mathematica (ist egal) 			
+	|	"ViewVertical"			(DDOT LARGER	egal | MINUS LARGER	egal)
+			// dreht irgendwie das dargestellte Bild
 	|	"SphericalRegion"		(DDOT LARGER	egal | MINUS LARGER	egal)
+			//	merkwuerdige Art die mit Graphic ausgefuellte Flaeche im Fenster zu setzen
+			// (ist mathematica speziefisch, brauchen wir nicht)
+	|	"Shading"				(DDOT LARGER	egal | MINUS LARGER	egal)
+			// irgendwas mit Farbe anzeigen (eigentlich fuer SurfaceGraphics nicht fuer Graphics3D)
+	|	"RenderAll"				(DDOT LARGER	egal | MINUS LARGER	egal)
+			// berechnet Alles oder nur sichtbare Teile bei der Bilderzeugung in Mathematica
+			// (ist egal da wir ja keine Bilder sondern eine Scene erzeugen wollen)
+	|	"PolygonIntersections"	(DDOT LARGER	egal | MINUS LARGER	egal)
+			// Teilt Polygone so das sie sich nicht mehr schneiden.
+			// Fuer die PostScript-Erzeugung fuer das Bild.
+
+// -- keine Ahnung
+	|	"DisplayFunction"		(DDOT LARGER	egal | MINUS LARGER	egal)
+			// ???
+	|	"Plot3Matrix"			(DDOT LARGER	egal | MINUS LARGER	egal)
+			// (Alte mathematica Version)
+	|	"ImageSize"				(DDOT LARGER	egal | MINUS LARGER	egal)
+			// Render Informationen
+	|	"FormatType"			(DDOT LARGER	egal | MINUS LARGER	egal)
+			// irgendwas fuer OutputStreams 			
 	;
+	
 // -------------------------------------------------- Kleinkram -------------------------------------------
 
 protected
