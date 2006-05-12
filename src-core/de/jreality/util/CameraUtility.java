@@ -121,6 +121,8 @@ public class CameraUtility {
 	public static double[] getCameraToNDC(Viewer v)			{
 		Camera cam = getCamera(v);
 		double aspectRatio = (v.hasViewingComponent() ? getAspectRatio(v.getViewingComponent()) : 1.0);
+		// TODO figure out a better way to do this:  This is only correct in crosseyed stereo mode.
+		if (cam.isStereo()) aspectRatio *= .5;
 		return getCameraToNDC(cam, aspectRatio);
 	}
 	

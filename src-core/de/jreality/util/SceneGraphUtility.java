@@ -145,7 +145,7 @@ public class SceneGraphUtility {
     public static List getPathsToNamedNodes(final SceneGraphComponent root, final String name) {
       final PathCollector.Matcher matcher = new PathCollector.Matcher() {
         public boolean matches(SceneGraphPath p) {
-          System.out.println("compare="+p);
+ //         System.out.println("compare="+p);
           return p.getLastElement().getName().equals(name);
         }
       };
