@@ -24,15 +24,9 @@ package de.jreality.soft;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.logging.Logger;
-
-import javax.swing.plaf.LabelUI;
-
 import de.jreality.backends.label.LabelUtility;
-import de.jreality.math.Matrix;
-import de.jreality.math.P3;
 import de.jreality.scene.*;
 import de.jreality.scene.data.*;
 import de.jreality.shader.CommonAttributes;
@@ -40,8 +34,6 @@ import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.shader.TextShader;
-import de.jreality.shader.Texture2D;
 
 /**
  * This class traverses a scene graph starting from the given "root" scene
@@ -249,8 +241,10 @@ public class RenderTraversal extends SceneGraphVisitor {
           Font font = ts.getFont();
           Color c = ts.getDiffuseColor();
           double scale = ts.getScale().doubleValue();
+          double[] offset = ts.getOffset();
+          int alignment = ts.getAlignment();
           
-          renderLabels(scale, ts.getOffset(), LabelUtility.createEdgeImages(g, font, c), g.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), g.getEdgeAttributes(Attribute.INDICES).toIntArrayArray());
+          renderLabels(scale, offset, alignment, LabelUtility.createEdgeImages(g, font, c), g.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), g.getEdgeAttributes(Attribute.INDICES).toIntArrayArray());
         }
     }
     visit((PointSet)g);
@@ -305,8 +299,10 @@ public class RenderTraversal extends SceneGraphVisitor {
           Font font = ts.getFont();
           Color c = ts.getDiffuseColor();
           double scale = ts.getScale().doubleValue();
+          double[] offset = ts.getOffset();
+          int alignment = ts.getAlignment();
           
-          renderLabels(scale, ts.getOffset(), LabelUtility.createFaceImages(ifs, font, c), ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray());
+          renderLabels(scale, offset, alignment, LabelUtility.createFaceImages(ifs, font, c), ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray());
         }
     }
     visit((IndexedLineSet)ifs);
@@ -334,8 +330,10 @@ public class RenderTraversal extends SceneGraphVisitor {
         Font font = ts.getFont();
         Color c = ts.getDiffuseColor();
         double scale = ts.getScale().doubleValue();
+        double[] offset = ts.getOffset();
+        int alignment = ts.getAlignment();
         
-			  renderLabels(scale, ts.getOffset(), LabelUtility.createPointImages(p, font, c), a, null);
+        renderLabels(scale, offset, alignment, LabelUtility.createPointImages(p, font, c), a, null);
       }
 		}
     
@@ -367,7 +365,7 @@ public class RenderTraversal extends SceneGraphVisitor {
   }
 
   private final SceneGraphComponent labelComp = new SceneGraphComponent();
-  private void renderLabels(double scale, double[] offset, ImageData[] imgs, DoubleArrayArray vertices, IntArrayArray indices) {
+  private void renderLabels(double scale, double[] offset, int alignment, ImageData[] imgs, DoubleArrayArray vertices, IntArrayArray indices) {
     if (imgs == null) return;
     double[] storeMatrix = (double[]) this.currentTrafo.clone();
     PolygonShader storePS = this.polygonShader;
@@ -391,7 +389,7 @@ public class RenderTraversal extends SceneGraphVisitor {
 //				ImageData img = new ImageData(LabelUtility.createImageFromString(li,font,c));
     	
     	SceneGraphComponent sgc = LabelUtility.sceneGraphForLabel(labelComp,img.getWidth()*scale, img.getHeight()*scale, offset,
-    			m, LabelUtility.positionFor(i, vertices, indices));
+    			alignment, m, LabelUtility.positionFor(i, vertices, indices));
     	labelShader = new DefaultPolygonShader();
     	labelShader.texture = new SimpleTexture(img);
     	pipeline.setFaceShader(this.polygonShader=labelShader);

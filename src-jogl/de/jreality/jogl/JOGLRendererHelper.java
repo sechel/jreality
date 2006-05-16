@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
+import javax.swing.SwingConstants;
 
 import net.java.games.jogl.GL;
 import net.java.games.jogl.GLCanvas;
@@ -293,10 +294,11 @@ public class JOGLRendererHelper {
 		Color c = ts.getDiffuseColor();
 		double scale = ts.getScale().doubleValue();
 		double[] offset = ts.getOffset();
+		int alignment = ts.getAlignment();
 		ImageData[] img = LabelUtility.createPointImages(ps, font, c);
 
 		renderLabels(img, ps.getVertexAttributes(Attribute.COORDINATES)
-				.toDoubleArrayArray(), null, offset, scale, jr);
+				.toDoubleArrayArray(), null, offset, alignment, scale, jr);
 
 	}
 
@@ -308,11 +310,12 @@ public class JOGLRendererHelper {
 		Color c = ts.getDiffuseColor();
 		double scale = ts.getScale().doubleValue();
 		double[] offset = ts.getOffset();
+		int alignment = ts.getAlignment();
 		ImageData[] img = LabelUtility.createEdgeImages(ils, font, c);
 
 		renderLabels(img, ils.getVertexAttributes(Attribute.COORDINATES)
 				.toDoubleArrayArray(), ils.getEdgeAttributes(Attribute.INDICES)
-				.toIntArrayArray(), offset, scale, jr);
+				.toIntArrayArray(), offset, alignment, scale, jr);
 
 	}
 
@@ -323,16 +326,17 @@ public class JOGLRendererHelper {
 		Color c = ts.getDiffuseColor();
 		double scale = ts.getScale().doubleValue();
 		double[] offset = ts.getOffset();
+		int alignment = ts.getAlignment();
 		ImageData[] img = LabelUtility.createFaceImages(ifs, font, c);
 
 		renderLabels(img, ifs.getVertexAttributes(Attribute.COORDINATES)
 				.toDoubleArrayArray(), ifs.getFaceAttributes(Attribute.INDICES)
-				.toIntArrayArray(), offset, scale, jr);
+				.toIntArrayArray(), offset, alignment, scale, jr);
 
 	}
 
 	private void renderLabels(ImageData[] labels, DoubleArrayArray vertices,
-			IntArrayArray indices, double[] offset, double scale,
+			IntArrayArray indices, double[] offset, int alignment, double scale,
 			JOGLRenderer jr) {
 		GL gl = jr.globalGL;
 		gl.glEnable(GL.GL_BLEND);
@@ -354,7 +358,7 @@ public class JOGLRendererHelper {
 			tex2d.setImage(img);
 			P3.calculateBillboardMatrix(bbm, img.getWidth() * scale, img
 					.getHeight()
-					* scale, offset, c2o, LabelUtility.positionFor(i, vertices,
+					* scale, offset, alignment, c2o, LabelUtility.positionFor(i, vertices,
 					indices), Pn.EUCLIDEAN);
 			gl.glActiveTexture(GL.GL_TEXTURE0);
 			Texture2DLoaderJOGL.render(jr.theCanvas, tex2d, true);

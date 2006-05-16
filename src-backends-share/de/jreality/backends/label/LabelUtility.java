@@ -105,8 +105,8 @@ public class LabelUtility {
     synchronized(CACHE_MUTEX) {
       for (Object ref=refQueue.poll(); ref != null; ref=refQueue.poll()) {
         HashMap del = (HashMap) refsToImageMaps.remove(ref);
-        for (Iterator i = del.keySet().iterator(); i.hasNext(); )
-          LoggingSystem.getLogger(LabelUtility.class).fine("deleted "+i.next());
+        //for (Iterator i = del.keySet().iterator(); i.hasNext(); )
+          //LoggingSystem.getLogger(LabelUtility.class).fine("deleted "+i.next());
      }
       WeakReference wref = (WeakReference) geometryToRefs.get(geom);
       if (wref == null) {
@@ -117,14 +117,14 @@ public class LabelUtility {
       // for several font/color/type combinations (mapped with Keys)
       HashMap keyToImageMap = (HashMap) refsToImageMaps.get(wref);
       if (keyToImageMap == null) {
-        LoggingSystem.getLogger(LabelUtility.class).fine("create keyToImageMap");
+        //LoggingSystem.getLogger(LabelUtility.class).fine("create keyToImageMap");
         keyToImageMap = new HashMap();
         refsToImageMaps.put(wref, keyToImageMap);
       }
       
       HashMap keyToAccess = (HashMap) refsToAccessTimeMaps.get(wref);
       if (keyToAccess == null) {
-        LoggingSystem.getLogger(LabelUtility.class).fine("create keyToAccess");
+        //LoggingSystem.getLogger(LabelUtility.class).fine("create keyToAccess");
         keyToAccess = new HashMap();
         refsToAccessTimeMaps.put(wref, keyToAccess);
       }
@@ -135,7 +135,7 @@ public class LabelUtility {
         strToImages = new HashMap();
         keyToImageMap.put(key, strToImages);
         keyToAccess.put(key, new int[1]);
-        LoggingSystem.getLogger(LabelUtility.class).fine("created key "+key);
+        //LoggingSystem.getLogger(LabelUtility.class).fine("created key "+key);
       }      
       int[] accessCount = (int[]) keyToAccess.get(key);
            
@@ -147,7 +147,7 @@ public class LabelUtility {
         if (ret[i] == null) {
           ret[i] = new ImageData(createImageFromString(str, font, color));
           strToImages.put(str, ret[i]);
-          LoggingSystem.getLogger(LabelUtility.class).finer("created imgData for ["+str+"]");
+          //LoggingSystem.getLogger(LabelUtility.class).finer("created imgData for ["+str+"]");
         }
       }
       // store last access
@@ -162,7 +162,7 @@ public class LabelUtility {
           iter.remove();
           Key removeKey = (Key) e.getKey();
           keyToImageMap.remove(removeKey);
-          LoggingSystem.getLogger(LabelUtility.class).fine("removed images for "+e.getKey());
+          //LoggingSystem.getLogger(LabelUtility.class).fine("removed images for "+e.getKey());
         }
       }
       
@@ -237,13 +237,13 @@ public class LabelUtility {
  
   private static final IndexedFaceSet bb = Primitives.texturedSquare(new double[]{0,1,0,1,1,0,1,0,0,0,0,0});
 
-  public static SceneGraphComponent sceneGraphForLabel(SceneGraphComponent sgc, double xscale, double yscale,double[] offset, double[] camToObj, double[] position)  {
+  public static SceneGraphComponent sceneGraphForLabel(SceneGraphComponent sgc, double xscale, double yscale,double[] offset, int alignment, double[] camToObj, double[] position)  {
   		if (sgc == null) sgc = new SceneGraphComponent();
   		if (sgc.getGeometry() == null) {
   			sgc.setGeometry(bb);
   		}
   		if (sgc.getTransformation() == null)	sgc.setTransformation(new Transformation());
-   		sgc.getTransformation().setMatrix(P3.calculateBillboardMatrix(null, xscale, yscale, offset, camToObj,position, Pn.EUCLIDEAN ));
+   		sgc.getTransformation().setMatrix(P3.calculateBillboardMatrix(null, xscale, yscale, offset, alignment, camToObj, position, Pn.EUCLIDEAN ));
 
   		return sgc;
   	}

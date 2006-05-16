@@ -7,7 +7,7 @@ package de.jreality.math;
 import java.awt.geom.Rectangle2D;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import javax.swing.SwingConstants;
 import de.jreality.util.*;
 
 /**
@@ -740,12 +740,12 @@ public class P3 extends Pn {
 //		if (Rn.maxNorm(diagnosis) < tolerance)		{
 //			return null;
 //		}
-		boolean mydebug = true;
+		boolean mydebug = false;
 		if (mydebug)	{
 			LoggingSystem.getLogger(P3.class).log(Level.FINER,"m =");
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToStringFloat(m, -1));
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,"Error is");
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToStringFloat(diagnosis, -1));			
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(m, -1));
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,"Original is");
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(diagnosis, -1));			
 		}
 		double[][] basis = new double[4][4];
 		double[] Q = Q_LIST[signature+1];
@@ -784,20 +784,35 @@ public class P3 extends Pn {
 			double xscale, 
 			double yscale, 				// scaling factors for the billboard
 			double[] xyzOffset,			// an offset in "billboard" coordinate system
+			int alignment,	     		// alignment of billboard in compass-direction from anchor point (using SwingConstants)
 			double[] cameraToObject, 	// the transformation from camera to object coordinates
-			double[] point, 			// the positio of the anchor point in object coordinate system
+			double[] point, 			// the position of the anchor point in object coordinate system
 			int signature)	{
 		if (result == null) result = new double[16];
 		// TODO the following call perhaps should return a determinant-1 matrix (throw out scaling)
 	    double[] orientation = extractOrientationMatrix(null, cameraToObject, Pn.originP3, signature);
 	    double[] scale = makeStretchMatrix(null, xscale, yscale, 1.0);
 	    double[] offset = makeTranslationMatrix(null, xyzOffset, EUCLIDEAN);  
-	    double[] translate = makeTranslationMatrix(null, point, signature);  
-//	    double[] anchorTrans = makeTranslationMatrix(null, new double[]{-1,-1,0}, Pn.EUCLIDEAN );
+	    
+	    //calculate translation for alignment
+	    double align=0, valign=0;  // default
+	    switch (alignment) {
+	    	case SwingConstants.NORTH  : align=-xscale/2; break;
+	    	case SwingConstants.EAST   : valign=-yscale/2; break;
+	    	case SwingConstants.SOUTH  : align=-xscale/2; valign=-yscale; break;
+	    	case SwingConstants.WEST   : align=-xscale;   valign=-yscale/2; break;
+	    	case SwingConstants.CENTER : align=-xscale/2; valign=-yscale/2; break;
+	    	//case SwingConstants.NORTH_EAST : default
+	    	case SwingConstants.SOUTH_EAST : valign=-yscale; break;
+	    	case SwingConstants.SOUTH_WEST : align=-xscale; valign=-yscale; break;
+	    	case SwingConstants.NORTH_WEST : align=-xscale; break;
+	    }
+	    double[] translate = makeTranslationMatrix(null, Rn.add(null, point, new double[]{align, valign, 0}), signature);
+
 	    Rn.times(result, translate, Rn.times(null, orientation, Rn.times(null, offset, scale)));
 		return result;
 	}
-	
+
 	public static double[] pluckerToMatrix(double[] m, double[] pl) {
 		if (m == null) m = new double[16];
 		m[0] = m[5] = m[10] = m[15] = 0.0;
