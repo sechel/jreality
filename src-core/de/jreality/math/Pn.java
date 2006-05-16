@@ -682,4 +682,15 @@ public class Pn {
 		return Rn.subtract(result, victim, projectOnto(null, master, victim, signature));
 	}
 
+	public double[] makeHarmonicHarmology(double[] dst, double[] center, double[] axis, int signature){ 
+		if (dst == null) dst = new double[center.length*center.length];
+	     double f = 1.0/Rn.innerProduct(center, axis); 
+	     for (int i = 0; i<3; ++i)  {    
+	         for (int j = 0; j<3; ++j) {
+	              dst[3*i+j] = (i==j? 1 : 0) - 2 * f * center[i] * axis[j];
+	         }
+	     }
+	     return dst;
+	 
+	}
 }		
