@@ -30,8 +30,9 @@ public class CoordinateSystemTest {
     
     //create coordinate system
     final CoordinateSystemFactory coords = new CoordinateSystemFactory(component);
-    coords.setAxisScale(0.5);
-    coords.setLabelScale(0.01);
+    //coords.setAxisScale(0.5);
+    //coords.setLabelScale(0.02);
+    //coords.showBoxArrows();
     
     //display axes/box
     //coords.displayAxes();
