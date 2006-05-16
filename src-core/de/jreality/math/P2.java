@@ -10,8 +10,7 @@ import java.util.logging.Level;
 import de.jreality.util.LoggingSystem;
 
 /**
- * Library class for holding static methods related to doing projective geometry in
- * two dimensions.  
+ * Library class for holding static methods for geometry of the real projective plane.
  * 
  * @author gunn
  *
@@ -58,12 +57,18 @@ final public class P2 {
 	}
 	
 	public static double[] pointFromLines(double[] point, double[] l1, double[] l2)	{
+		if (l1.length < 3 || l2.length < 3)	{
+			throw new IllegalArgumentException("Input arrays too short");
+		}
 		if (point == null) point = new double[3];	
-		return Rn.crossProduct(point, l1, l2);
+		point[0] = l1[1]*l2[2] - l1[2]*l2[1];
+		point[1] = l1[2]*l2[0] - l1[0]*l2[2];
+		point[2] = l1[0]*l2[1] - l1[1]*l2[0];
+		return point;
 	}
+	
 	public static double[] lineFromPoints(double[] line, double[] p1, double[] p2)	{
-		if (line == null) line = new double[3];
-		return Rn.crossProduct(line, p1, p2);
+		return pointFromLines(line, p1, p2);
 	}
 		
 	public static boolean polygonContainsPoint(double[][] polygon, double[] point)	{
