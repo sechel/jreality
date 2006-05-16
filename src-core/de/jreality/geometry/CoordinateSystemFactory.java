@@ -207,8 +207,8 @@ public class CoordinateSystemFactory {
 	    app.setAttribute(CommonAttributes.LINE_SHADER+"."+"scale", labelScale);  //label scale
 	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"offset", new double[]{0.04,-0.07,0});  //label offset of ticks
 	    app.setAttribute(CommonAttributes.LINE_SHADER+"."+"offset", new double[]{0,-.2,0});  //label offset of axes lines
-	    //app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
-	    //app.setAttribute(CommonAttributes.LINE_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
+	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
+	    app.setAttribute(CommonAttributes.LINE_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
 	    
 	    box.setAppearance(app);
 		
@@ -273,8 +273,8 @@ public class CoordinateSystemFactory {
 	    app.setAttribute(CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
 	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"scale", labelScale);  //label scale
 		app.setAttribute(CommonAttributes.POINT_SHADER+"."+"offset", new double[]{0.04,-0.07,0});  //label offset
-	    //app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
-	    //app.setAttribute(CommonAttributes.LINE_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
+	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
+	    app.setAttribute(CommonAttributes.LINE_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
 
 	    axes.setAppearance(app);
 		
