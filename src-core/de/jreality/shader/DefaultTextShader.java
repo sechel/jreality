@@ -3,16 +3,19 @@ package de.jreality.shader;
 import java.awt.Color;
 import java.awt.Font;
 
+import javax.swing.SwingConstants;
+
 public interface DefaultTextShader extends TextShader {
 
-  Object CREATE_DEFAULT=new Object();
+	Object CREATE_DEFAULT = new Object();
   
 	final static Color DIFFUSE_COLOR_DEFAULT = Color.BLACK;
 	final static double SCALE_DEFAULT = 0.05;
-	
 	final static Font FONT_DEFAULT = new Font("Sans Serif",Font.PLAIN,12);
 	final static double[] OFFSET_DEFAULT = new double[]{0,0,0,1};
 	final static Boolean SHOW_LABELS_DEFAULT = Boolean.TRUE;
+	final static int ALIGNMENT_DEFAULT = SwingConstants.NORTH_EAST;
+	
   
 	Color getDiffuseColor();
 	void setDiffuseColor(Color c);
@@ -23,9 +26,13 @@ public interface DefaultTextShader extends TextShader {
 	Font getFont();
 	void setFont(Font f);
   
-	  double[] getOffset();
-	  void setOffset(double[] o);
-		
+	double[] getOffset();
+	void setOffset(double[] o);
+
+	int getAlignment();
+	void setAlignment(int a);
+	
+	
     /**
      * @deprecated
      */
