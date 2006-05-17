@@ -792,8 +792,7 @@ public class P3 extends Pn {
 		// TODO the following call perhaps should return a determinant-1 matrix (throw out scaling)
 	    double[] orientation = extractOrientationMatrix(null, cameraToObject, Pn.originP3, signature);
 	    double[] scale = makeStretchMatrix(null, xscale, yscale, 1.0);
-	    double[] offset = makeTranslationMatrix(null, xyzOffset, EUCLIDEAN);  
-	    
+	    	    
 	    //calculate translation for alignment
 	    double align=0, valign=0;  // default
 	    switch (alignment) {
@@ -807,9 +806,11 @@ public class P3 extends Pn {
 	    	case SwingConstants.SOUTH_WEST : align=-xscale; valign=-yscale; break;
 	    	case SwingConstants.NORTH_WEST : align=-xscale; break;
 	    }
-	    double[] translate = makeTranslationMatrix(null, Rn.add(null, point, new double[]{align, valign, 0}), signature);
+	    
+	    double[] euclideanTranslation = makeTranslationMatrix(null, Rn.add(null, xyzOffset, new double[]{align, valign, 0, 0}), EUCLIDEAN);
+	    double[] pointTranslation = makeTranslationMatrix(null, point, signature);
 
-	    Rn.times(result, translate, Rn.times(null, orientation, Rn.times(null, offset, scale)));
+	    Rn.times(result, pointTranslation, Rn.times(null, orientation, Rn.times(null, euclideanTranslation, scale)));
 		return result;
 	}
 
