@@ -2,14 +2,15 @@ package de.jreality.geometry;
 
 import java.awt.Color;
 import java.util.HashMap;
-
 import javax.swing.SwingConstants;
-
+import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.data.Attribute;
 import de.jreality.geometry.Primitives;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.util.SceneGraphUtility;
@@ -38,6 +39,8 @@ public class CoordinateSystemFactory {
 	
 	
 	private double[] boxMin, boxMax;
+	
+	public final static int X = 0, Y = 1, Z = 2;
 	
 	private double[][][] axesVertices, boxVertices;
 	private SceneGraphComponent box, axes;
@@ -119,7 +122,7 @@ public class CoordinateSystemFactory {
 		this.boxMax = minMax[1];
 		
 		//enlarge box if graphic is 2d
-		for (int axis=0; axis<=2; axis++) {
+		for (int axis=X; axis<=Z; axis++) {
 			if (boxMin[axis] == boxMax[axis]) {
 				boxMin[axis] -= 0.5;
 				boxMax[axis] += 0.5;
@@ -158,7 +161,7 @@ public class CoordinateSystemFactory {
 		box.setName("Box");
 		//hashMap.put("box", box);
 		
-		for (int axis=0; axis<=2; axis++) {  //for each coordinate axis
+		for (int axis=X; axis<=Z; axis++) {  //for each coordinate axis
 			
 			SceneGraphComponent singleAxis = new SceneGraphComponent();
 			singleAxis.setName(axesNames[axis] +"-axis");
@@ -174,13 +177,13 @@ public class CoordinateSystemFactory {
 				nodes.put(axesNames[axis]+singleAxisK.getName(), singleAxisK);  //e.g. x00
 				
 				//create line with label
-				SceneGraphComponent line = getAxisLine(axis, boxVertices[axis][2*k], boxVertices[axis][2*k+1], true);
+				SceneGraphComponent line = getLine(axis, boxVertices[axis][2*k], boxVertices[axis][2*k+1], true);
 				//create arrow
-				SceneGraphComponent arrow = getAxisArrow(axis, boxVertices[axis][2*k], boxVertices[axis][2*k+1]);
+				SceneGraphComponent arrow = getArrow(axis, boxVertices[axis][2*k], boxVertices[axis][2*k+1]);
 				arrow.setVisible(showBoxArrows);
 				nodes.put(axesNames[axis]+singleAxisK.getName()+"arrow", arrow);  //e.g. x00arrow
 				//create ticks with labels
-				SceneGraphComponent ticks = getAxisTicks(axis, boxVertices[axis][2*k], boxVertices[axis][2*k+1], true);
+				SceneGraphComponent ticks = getBoxTicks(axis, k, boxVertices[axis][2*k], boxVertices[axis][2*k+1]);
 				nodes.put(axesNames[axis]+singleAxisK.getName()+"label", ticks);  //e.g. x00label
 				
 				singleAxisK.addChild(line);
@@ -237,7 +240,7 @@ public class CoordinateSystemFactory {
 		SceneGraphComponent axes = new SceneGraphComponent();
 		axes.setName("Axes");
 		
-		for (int axis=0; axis<=2; axis++) {  //for each coordinate axis
+		for (int axis=X; axis<=Z; axis++) {  //for each coordinate axis
 
 			//create SceneGraphComponent with children line, arrow, ticks
 			SceneGraphComponent singleAxis = new SceneGraphComponent();
@@ -245,13 +248,13 @@ public class CoordinateSystemFactory {
 			nodes.put(axesNames[axis] +"Axis", singleAxis);  //e.g. xAxis
 			
 			//create line with label
-			SceneGraphComponent line = getAxisLine(axis, axesVertices[axis][0], axesVertices[axis][1], false);
+			SceneGraphComponent line = getLine(axis, axesVertices[axis][0], axesVertices[axis][1], false);
 			// create arrow
-			SceneGraphComponent arrow = getAxisArrow(axis, axesVertices[axis][0], axesVertices[axis][1]);
+			SceneGraphComponent arrow = getArrow(axis, axesVertices[axis][0], axesVertices[axis][1]);
 			arrow.setVisible(showAxesArrows);
 			nodes.put(axesNames[axis]+"Arrow", arrow);  //e.g. xArrow
 			// create ticks with labels
-			SceneGraphComponent ticks = getAxisTicks(axis, axesVertices[axis][0], axesVertices[axis][1], false);
+			SceneGraphComponent ticks = getAxesTicks(axis, axesVertices[axis][0], axesVertices[axis][1]);
 			nodes.put(axesNames[axis]+"Label", ticks);  //e.g. xLabel
 			
 			singleAxis.addChild(line);
@@ -290,12 +293,12 @@ public class CoordinateSystemFactory {
 	private void calculateAxesVertices(){
 		
 		this.axesVertices = new double[][][] {
-			{{Math.min(boxMin[0]-0.5, 0),0,0},
-			 {Math.max(boxMax[0]+0.5, 0),0,0}},
-			{{0,Math.min(boxMin[1]-0.5, 0),0},
-			 {0,Math.max(boxMax[1]+0.5, 0),0}},
-			{{0,0,Math.min(boxMin[2]-0.5, 0)},
-			 {0,0,Math.max(boxMax[2]+0.5, 0)}}
+			{{Math.min(boxMin[X]-0.5, 0),0,0},
+			 {Math.max(boxMax[X]+0.5, 0),0,0}},
+			{{0,Math.min(boxMin[Y]-0.5, 0),0},
+			 {0,Math.max(boxMax[Y]+0.5, 0),0}},
+			{{0,0,Math.min(boxMin[Z]-0.5, 0)},
+			 {0,0,Math.max(boxMax[Z]+0.5, 0)}}
 		};
 	}
 	
@@ -308,31 +311,31 @@ public class CoordinateSystemFactory {
 	private void calculateBoxVertices(){
 		
 		this.boxVertices = new double[][][] {
-			{boxMin, {boxMax[0], boxMin[1], boxMin[2]},  //04
-			 {boxMin[0], boxMin[1], boxMax[2]}, {boxMax[0], boxMin[1], boxMax[2]},  //37
-			 {boxMin[0], boxMax[1], boxMin[2]}, {boxMax[0], boxMax[1], boxMin[2]},  //15
-			 {boxMin[0], boxMax[1], boxMax[2]}, boxMax  //26
+			{boxMin, {boxMax[X], boxMin[Y], boxMin[Z]},  //04
+			 {boxMin[X], boxMin[Y], boxMax[Z]}, {boxMax[X], boxMin[Y], boxMax[Z]},  //37
+			 {boxMin[X], boxMax[Y], boxMin[Z]}, {boxMax[X], boxMax[Y], boxMin[Z]},  //15
+			 {boxMin[X], boxMax[Y], boxMax[Z]}, boxMax  //26
 			},
-			{boxMin, {boxMin[0], boxMax[1], boxMin[2]},  //01
-			 {boxMin[0], boxMin[1], boxMax[2]}, {boxMin[0], boxMax[1], boxMax[2]},  //32
-			 {boxMax[0], boxMin[1], boxMin[2]}, {boxMax[0], boxMax[1], boxMin[2]},  //45
-			 {boxMax[0], boxMin[1], boxMax[2]}, boxMax  //76
+			{boxMin, {boxMin[X], boxMax[Y], boxMin[Z]},  //01
+			 {boxMin[X], boxMin[Y], boxMax[Z]}, {boxMin[X], boxMax[Y], boxMax[Z]},  //32
+			 {boxMax[X], boxMin[Y], boxMin[Z]}, {boxMax[X], boxMax[Y], boxMin[Z]},  //45
+			 {boxMax[X], boxMin[Y], boxMax[Z]}, boxMax  //76
 			},
-			{boxMin, {boxMin[0], boxMin[1], boxMax[2]},  //03
-			 {boxMin[0], boxMax[1], boxMin[2]}, {boxMin[0], boxMax[1], boxMax[2]},  //12
-			 {boxMax[0], boxMin[1], boxMin[2]}, {boxMax[0], boxMin[1], boxMax[2]},  //47
-			 {boxMax[0], boxMax[1], boxMin[2]}, boxMax  //56			 
+			{boxMin, {boxMin[X], boxMin[Y], boxMax[Z]},  //03
+			 {boxMin[X], boxMax[Y], boxMin[Z]}, {boxMin[X], boxMax[Y], boxMax[Z]},  //12
+			 {boxMax[X], boxMin[Y], boxMin[Z]}, {boxMax[X], boxMin[Y], boxMax[Z]},  //47
+			 {boxMax[X], boxMax[Y], boxMin[Z]}, boxMax  //56			 
 			}
 		}; //note that the ordering of the copies of each coordinate axis is significant
 
 	//  0    boxMin
-	//	1	{boxMin[0], boxMax[1], boxMin[2]}
-	//	2	{boxMin[0], boxMax[1], boxMax[2]}    1   ---   5     y
-	//	3	{boxMin[0], boxMin[1], boxMax[2]}  2   ---   6       |_ x
-	//	4	{boxMax[0], boxMin[1], boxMin[2]}    0   - -   4     /
-	//	5	{boxMax[0], boxMax[1], boxMin[2]}  3   ---   7      z
+	//	1	{boxMin[X], boxMax[Y], boxMin[Z]}
+	//	2	{boxMin[X], boxMax[Y], boxMax[Z]}    1   ---   5     y
+	//	3	{boxMin[X], boxMin[Y], boxMax[Z]}  2   ---   6       |_ x
+	//	4	{boxMax[X], boxMin[Y], boxMin[Z]}    0   - -   4     /
+	//	5	{boxMax[X], boxMax[Y], boxMin[Z]}  3   ---   7      z
 	//	6	 boxMax
-	//	7	{boxMax[0], boxMin[1], boxMax[2]}
+	//	7	{boxMax[X], boxMin[Y], boxMax[Z]}
 	}	
 	
 
@@ -346,7 +349,7 @@ public class CoordinateSystemFactory {
 	 * @param forBox is the line intended for a box (line is labelled differently then)
 	 * @return the line
 	 */
-	private SceneGraphComponent getAxisLine(int axis, double[] min, double[] max, boolean forBox) {
+	private SceneGraphComponent getLine(int axis, double[] min, double[] max, boolean forBox) {
 		//line through min and max has to be parallel to the coordinate axis specified by axis 
 	
 		SceneGraphComponent line = SceneGraphUtility.createFullSceneGraphComponent("line");
@@ -386,7 +389,7 @@ public class CoordinateSystemFactory {
 	 * @param max the endpoint of the line
 	 * @return the arrow
 	 */
-	private SceneGraphComponent getAxisArrow(int axis, double[] min, double[] max) {
+	private SceneGraphComponent getArrow(int axis, double[] min, double[] max) {
 	
 		SceneGraphComponent arrow = SceneGraphUtility.createFullSceneGraphComponent("arrow");
 		arrow.setGeometry(urCone);
@@ -394,7 +397,7 @@ public class CoordinateSystemFactory {
 		//FactoredMatrix m = new FactoredMatrix(TubeUtility.tubeOneEdge(min, max, 0.025, null, signature).getTransformation());
 		//above method results in incorrect translation
 		FactoredMatrix m = new FactoredMatrix();
-		m.setRotation(getRotation(axis));
+		m.setRotation(getAxisRotation(axis));
 		m.setStretch(arrowStretch); //stretch urCone
 		//translate to axis tip
 		m.setTranslation(max);
@@ -410,36 +413,37 @@ public class CoordinateSystemFactory {
 	 * @param axis the coordinate axis (0,1,2)
 	 * @param min the starting point of the line
 	 * @param max the endpoint of the line
-	 * @param forBox are the ticks intended for a box ((0,0,0) is included in ticks then)
 	 * @return the ticks
 	 */
-	private SceneGraphComponent getAxisTicks(int axis, double[] min, double[] max, boolean forBox) {
+	private SceneGraphComponent getAxesTicks(int axis, double[] min, double[] max) {
 		
 		//create the ticks on a line in z-direction
 		//determine minimum and maximum value of the tick level
-		final double minLevel = axisScale*Math.ceil( min[axis]/axisScale + 0.5);  //give space for box corner
-		final double maxLevel = axisScale*Math.floor( (max[axis]-arrowHeight*arrowStretch)/axisScale -0.5);  //give space for axis arrow and box corner
+		final double minLevel = axisScale*Math.ceil( min[axis]/axisScale);
+		final double maxLevel = axisScale*Math.floor( (max[axis]-arrowHeight*arrowStretch)/axisScale);  //give space for axis arrow
 		
-		//if (minLevel>maxLevel) return SceneGraphUtility.createFullSceneGraphComponent("ticks");
+		if (minLevel>maxLevel) return SceneGraphUtility.createFullSceneGraphComponent("ticks");
 		
-		IndexedFaceSet ticksIFS = Primitives.pyramid(octagonalCrossSection(minLevel), new double[]{0,0,minLevel});  //init
+		IndexedFaceSet ticksGeom = Primitives.pyramid(octagonalCrossSection(minLevel), new double[]{0,0,minLevel});  //init
+		int levelNum = 1;
 		for (double level=minLevel+axisScale; level<=maxLevel; level+=axisScale) {
-			if (!forBox && Math.abs(level)<axisScale/2) continue;  //no tick at origin (there level may not be exactly 0)
-			ticksIFS = IndexedFaceSetUtility.mergeIndexedFaceSets(
-					new IndexedFaceSet[]{ ticksIFS, 
-					Primitives.pyramid(octagonalCrossSection(level), new double[]{0,0,level}) });
+			if (Math.abs(level)<axisScale/2) continue;  //no tick at origin (there level may not be exactly 0)
+			ticksGeom = IndexedFaceSetUtility.mergeIndexedFaceSets(
+				new IndexedFaceSet[]{ ticksGeom, 
+				Primitives.pyramid(octagonalCrossSection(level), new double[]{0,0,level}) });
+			levelNum++;
 		}
 		//GeometryUtility.calculateAndSetVertexNormals(ticksIFS);
 		
 		//create labels
-		final int numOfTicks = ticksIFS.getNumPoints()/10;  //each tick has 10 points
+		final int numOfTicks = levelNum;
 		PointSetFactory labelPSF = new PointSetFactory();
 		labelPSF.setVertexCount(numOfTicks);
 		double[][] labelPoints = new double[numOfTicks][];
 		String[] labelStr = new String[numOfTicks];
 		double level = minLevel;
 		for (int i=0; i<numOfTicks; i++, level+=axisScale) {
-			if (!forBox && Math.abs(level)<axisScale/2) level+=axisScale;  //skip tick at origin (there level may not be exactly 0)
+			if (Math.abs(level)<axisScale/2) level+=axisScale;  //skip tick at origin (there level may not be exactly 0)
 			labelPoints[i] = new double[]{0, 0, level};
 			labelStr[i] = Math.round(level*1000)/1000. + "";  //3 decimal places
 		}
@@ -451,9 +455,74 @@ public class CoordinateSystemFactory {
 		
 		//create the SceneGraphComponent and rotate the ticks onto the corresponding coordinate axis
 		SceneGraphComponent ticks = SceneGraphUtility.createFullSceneGraphComponent("ticks");
-		ticks.setGeometry(ticksIFS);
+		ticks.setGeometry(ticksGeom);
 		FactoredMatrix m = new FactoredMatrix();
-		m.setRotation(getRotation(axis));
+		m.setRotation(getAxisRotation(axis));
+		double[] translation = (double[])min.clone();
+		translation[axis] = 0;
+		m.setTranslation(translation);
+		m.setStretch(tickStretch, tickStretch, 1); //stretch ticks
+		m.assignTo(ticks);
+
+		ticks.addChild(labels);
+		return ticks;
+	}
+	
+	
+	/**
+	 * get the ticks on the box for coordinate axis specified by <code>axis</code> 
+	 * between min and max as a SceneGraphComponent (IndexedFaceSet)
+	 * @param axis the coordinate axis (0,1,2)
+	 * @param min the starting point of the line
+	 * @param max the endpoint of the line
+	 * @return the ticks
+	 */
+	private SceneGraphComponent getBoxTicks(int axis, int k, double[] min, double[] max) {
+		
+		//create the ticks on a line in z-direction
+		//determine minimum and maximum value of the tick level
+		final double minLevel = axisScale*Math.ceil( min[axis]/axisScale + 0.5);  //give space for box corner
+		final double maxLevel = axisScale*Math.floor( (max[axis]-arrowHeight*arrowStretch)/axisScale -0.5);  //give space for axis arrow and box corner
+		
+		if (minLevel>maxLevel) return SceneGraphUtility.createFullSceneGraphComponent("ticks");
+		
+		IndexedLineSet ticksGeom = new IndexedLineSet();
+		IndexedLineSetFactory newTick;
+		int levelNum = 0;
+		
+		for (double level=minLevel; level<=maxLevel; level+=axisScale) {
+			newTick = new IndexedLineSetFactory();
+			newTick.setVertexCount(3);
+			newTick.setLineCount(2);
+			newTick.setVertexCoordinates(new double[][]{{5,0,level},{0,0,level},{0,5,level}});
+			newTick.setEdgeIndices(new int[][]{{0,1},{1,2}});
+			newTick.update();
+			ticksGeom = mergeIndexedLineSets(ticksGeom, newTick.getIndexedLineSet());
+			levelNum++;
+		}
+		
+		//create labels
+		final int numOfTicks = levelNum;
+		PointSetFactory labelPSF = new PointSetFactory();
+		labelPSF.setVertexCount(numOfTicks);
+		double[][] labelPoints = new double[numOfTicks][];
+		String[] labelStr = new String[numOfTicks];
+		double level = minLevel;
+		for (int i=0; i<numOfTicks; i++, level+=axisScale) {
+			labelPoints[i] = new double[]{0, 0, level};
+			labelStr[i] = Math.round(level*1000)/1000. + "";  //3 decimal places
+		}
+		labelPSF.setVertexCoordinates(labelPoints);
+		labelPSF.setVertexLabels(labelStr);
+		labelPSF.update();
+		SceneGraphComponent labels = SceneGraphUtility.createFullSceneGraphComponent("labels");
+		labels.setGeometry(labelPSF.getPointSet());
+		
+		//create the SceneGraphComponent and rotate the ticks onto the corresponding coordinate axis
+		SceneGraphComponent ticks = SceneGraphUtility.createFullSceneGraphComponent("ticks");
+		ticks.setGeometry(ticksGeom);
+		FactoredMatrix m = new FactoredMatrix();
+		m.setRotation(getTickRotation(axis, k));
 		double[] translation = (double[])min.clone();
 		translation[axis] = 0;
 		m.setTranslation(translation);
@@ -478,16 +547,85 @@ public class CoordinateSystemFactory {
 	}
 	
 	
-	private Quaternion getRotation(int axis) {
+	//merges two LineSets into a single one
+	private IndexedLineSet mergeIndexedLineSets(IndexedLineSet a, IndexedLineSet b) {
+		
+		if (a==null) a = new IndexedLineSet();
+		if (b==null) b = new IndexedLineSet();
+		
+		double[] aVertices = new double[0];
+		double[] bVertices = new double[0];
+		int[] aIndices = new int[0];
+		int[] bIndices = new int[0];
+		
+		if (a.getNumPoints() != 0) aVertices=a.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null);
+		if (b.getNumPoints() != 0) bVertices=b.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null);
+		if (a.getNumEdges() != 0) aIndices=a.getEdgeAttributes(Attribute.INDICES).toIntArray(null);
+		if (b.getNumEdges() != 0) bIndices=b.getEdgeAttributes(Attribute.INDICES).toIntArray(null);
+		
+		double[] vertices = new double[aVertices.length+bVertices.length];
+		int[] indices = new int[aIndices.length+bIndices.length];
+		
+		for (int i=0; i<aVertices.length; i++)
+			vertices[i] = aVertices[i];
+		for (int i=0; i<bVertices.length; i++)
+			vertices[i+aVertices.length] = bVertices[i];
+		
+		for (int i=0; i<aIndices.length; i++)
+			indices[i] = aIndices[i];
+		for (int i=0; i<bIndices.length; i++)
+			indices[i+aIndices.length] = bIndices[i]+aVertices.length/3;
+		
+		IndexedLineSetFactory fac = new IndexedLineSetFactory();
+		fac.setVertexCount(vertices.length/3);
+		fac.setLineCount(indices.length/2);
+		fac.setVertexCoordinates(vertices);
+		fac.setEdgeIndices(indices);
+		fac.update();
+		
+		return fac.getIndexedLineSet();		
+	}
+	
+	
+	//calculates the rotation from z-axis on specified axis
+	private Quaternion getAxisRotation(int axis) {
 	
 		FactoredMatrix m = new FactoredMatrix();
 		switch(axis) {
-		case 0 : m.setRotation(Math.PI/2,0,1,0); break;
-		case 1 : m.setRotation(-Math.PI/2,1,0,0); break;
-		//case 2 : z-axis => no rotation
+		case X : m.setRotation(Math.PI/2,0,1,0); break;
+		case Y : m.setRotation(-Math.PI/2,1,0,0); break;
+		//case Z : z-axis => no rotation
 		}
 		return Quaternion.rotationMatrixToQuaternion(new Quaternion(), m.getArray());
 	}
+	
+	//calculates the rotation from z-axis on specified box axis
+	private Quaternion getTickRotation(int axis, int k) {
+		
+		int c = 0;
+
+		switch(k) {
+		//case 0 : c=0; break;
+		case 1 : if (axis==Y) c=1; else c=3; break;
+		case 2 : if (axis==Y) c=3; else c=1; break;
+		case 3 : c=2; break;
+		}
+		switch(axis) {
+		case X : c++; break;
+		case Y : c--; break;
+		}
+		
+		double[] rotationAxis = new double[3];
+		rotationAxis[axis] = 1;
+		FactoredMatrix m = new FactoredMatrix();
+		m.setRotation(c*Math.PI/2, rotationAxis);
+		
+		FactoredMatrix rotation = new FactoredMatrix(Rn.times(null, 
+				m.getArray(), Quaternion.quaternionToRotationMatrix(null, getAxisRotation(axis))));
+
+		return Quaternion.rotationMatrixToQuaternion(new Quaternion(), rotation.getArray());
+	}
+	
 	
 	
 	/**
@@ -520,9 +658,9 @@ public class CoordinateSystemFactory {
 		if (dir.length==3) direction=dir;
 		else {
 			direction=new double[3];
-			direction[0]=dir[0]/dir[3];
-			direction[1]=dir[1]/dir[3];
-			direction[2]=dir[2]/dir[3];
+			direction[X]=dir[X]/dir[3];
+			direction[Y]=dir[Y]/dir[3];
+			direction[Z]=dir[Z]/dir[3];
 		}
 		//closest box vertex has minimal inner product with direction
 		int closest = 0;
@@ -561,17 +699,17 @@ public class CoordinateSystemFactory {
 		int[] edgeCriteria = new int[3];
 		
 		//get the 3 edges belonging to a closest box vertex
-		for (int axis=0; axis<=2; axis++) {
+		for (int axis=X; axis<=Z; axis++) {
 			if (closest[axis] == boxMin[axis]) edgeCriteria[axis] = 0;  //0 corresponds to vertex with minimum value on axis i
 			else edgeCriteria[axis] = 1;  //1 corresponds to vertex with maximum value on axis i 
 		}
 		//set those edges invisible which don't have copies of same "distance to the screen"
-		if (direction[1]!=0 && direction[2]!=0)
-			getSGC("x" + edgeCriteria[1] + edgeCriteria[2]).setVisible(false);
-		if (direction[0]!=0 && direction[2]!=0)
-			getSGC("y" + edgeCriteria[0] + edgeCriteria[2]).setVisible(false);
-		if (direction[0]!=0 && direction[1]!=0)
-			getSGC("z" + edgeCriteria[0] + edgeCriteria[1]).setVisible(false);
+		if (direction[Y]!=0 && direction[Z]!=0)
+			getSGC("x" + edgeCriteria[Y] + edgeCriteria[Z]).setVisible(false);
+		if (direction[X]!=0 && direction[Z]!=0)
+			getSGC("y" + edgeCriteria[X] + edgeCriteria[Z]).setVisible(false);
+		if (direction[X]!=0 && direction[Y]!=0)
+			getSGC("z" + edgeCriteria[X] + edgeCriteria[Y]).setVisible(false);
 	}
 	
 
@@ -598,14 +736,16 @@ public class CoordinateSystemFactory {
 //-----------------------------------------------------------------------------------
 //set and get attributes
 //-----------------------------------------------------------------------------------
-		
+	
+	
+	//set distance between two ticks
 	public void setAxisScale(double axisScale) {
 		if (this.axisScale == axisScale) return;
 		//else
 		this.axisScale = axisScale;
 
 		//update ticks and labels
-		for (int axis = 0; axis <= 2; axis++) { // for each coordinate axis
+		for (int axis = X; axis <= Z; axis++) { // for each coordinate axis
 
 			//for box:
 			for (int k = 0; k <= 3; k++) {
@@ -613,8 +753,8 @@ public class CoordinateSystemFactory {
 				SceneGraphComponent singleAxisK = getSGC(axesNames[axis]+ toBinaryString(k));  //e.g. x00
 				singleAxisK.removeChild(getSGC(axesNames[axis]+ toBinaryString(k) + "label"));  //e.g. x00label
 				//create new ticks with labels
-				SceneGraphComponent ticks = getAxisTicks(axis, 
-						boxVertices[axis][2 * k], boxVertices[axis][2 * k + 1], true);
+				SceneGraphComponent ticks = getBoxTicks(axis, k, 
+						boxVertices[axis][2 * k], boxVertices[axis][2 * k + 1]);
 				//update hash table
 				nodes.put(axesNames[axis] + toBinaryString(k) + "label", ticks);  //e.g. x00label
 				//add new ticks and labels to SceneGraph
@@ -627,8 +767,8 @@ public class CoordinateSystemFactory {
 			SceneGraphComponent singleAxis = getSGC(axesNames[axis] +"Axis");  //e.g. xAxis
 			singleAxis.removeChild(getSGC(axesNames[axis]+"Label"));  //e.g. xLabel
 			//create new ticks with labels
-			SceneGraphComponent ticks = getAxisTicks(axis,
-					axesVertices[axis][0], axesVertices[axis][1], false);
+			SceneGraphComponent ticks = getAxesTicks(axis,
+					axesVertices[axis][0], axesVertices[axis][1]);
 			//update hash table
 			nodes.put(axesNames[axis] + "Label", ticks);  //e.g. xLabel
 			//add new ticks and labels to SceneGraph
@@ -636,11 +776,13 @@ public class CoordinateSystemFactory {
 		}
 	}
 	
+	//get distance between two ticks
 	public double getAxisScale() {
 		return axisScale;
 	}
 	
 	
+	//set stretch size of arrows, ticks and tick labels
 	public void setLabelScale(double labelScale) {
 		if (this.labelScale == labelScale) return;
 		//else
@@ -653,10 +795,10 @@ public class CoordinateSystemFactory {
 		//update size of arrows and ticks
 		arrowStretch = 4*labelScale;
 		tickStretch = 2*labelScale;
-		for (int axis=0; axis<=2; axis++) {
-			SceneGraphComponent arrow, ticks;
-			FactoredMatrix m;
+		SceneGraphComponent arrow, ticks;
+		FactoredMatrix m;
 
+		for (int axis=X; axis<=Z; axis++) {
 			//for box:
 			for (int k=0; k<=3; k++) {
 				arrow = getSGC(axesNames[axis]+toBinaryString(k)+"arrow");  //e.g. x00arrow
@@ -681,6 +823,7 @@ public class CoordinateSystemFactory {
 		// recalculate tick levels since arrow size changed ???
 	}
 	
+	//set stretch size of arrows, ticks and tick labels
 	public double getLabelScale() {
 		return labelScale;
 	}
@@ -690,7 +833,7 @@ public class CoordinateSystemFactory {
 		if (showAxesArrows) return;
 		showAxesArrows = true;
 		//set visiblity of all arrows
-		for (int axis=0; axis<=2; axis++)
+		for (int axis=X; axis<=Z; axis++)
 			getSGC(axesNames[axis]+"Arrow").setVisible(true);
 	}
 	
@@ -698,7 +841,7 @@ public class CoordinateSystemFactory {
 		if (!showAxesArrows) return;
 		showAxesArrows = false;
 		//set visiblity of all arrows
-		for (int axis=0; axis<=2; axis++)
+		for (int axis=X; axis<=Z; axis++)
 			getSGC(axesNames[axis]+"Arrow").setVisible(false);
 	}
 	
@@ -707,7 +850,7 @@ public class CoordinateSystemFactory {
 		if (showBoxArrows) return;
 		showBoxArrows = true;
 		//set visiblity of all arrows
-		for (int axis=0; axis<=2; axis++) {
+		for (int axis=X; axis<=Z; axis++) {
 			for (int k=0; k<=3; k++) {
 				getSGC(axesNames[axis]+toBinaryString(k)+"arrow").setVisible(true);
 			}
@@ -718,11 +861,42 @@ public class CoordinateSystemFactory {
 		if (!showBoxArrows) return;
 		showBoxArrows = false;
 		//set visiblity of all arrows
-		for (int axis=0; axis<=2; axis++) {
+		for (int axis=X; axis<=Z; axis++) {
 			for (int k=0; k<=3; k++) {
 				getSGC(axesNames[axis]+toBinaryString(k)+"arrow").setVisible(false);
 			}
 		}
 	}
 
+	
+	//hide tick labels of axes and box
+	//only axis labels of box remain
+	public void hideLabels() {
+		box.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
+		axes.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
+	}
+	
+	//show all tick labels of axes and box
+	public void showLabels() {
+		box.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
+		axes.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
+	}
+
+	
+	//show box grid
+	private void showGrid() {
+		
+		//update size of box ticks
+		SceneGraphComponent ticks;
+		FactoredMatrix m;
+		
+		for (int axis=X; axis<=Z; axis++) {
+			for (int k=0; k<=3; k++) {
+				ticks = getSGC(axesNames[axis]+toBinaryString(k)+"label");  //e.g. x00label
+				m = new FactoredMatrix(ticks.getTransformation());
+				m.setStretch(20*tickStretch, 20*tickStretch, 1); //stretch ticks
+				m.assignTo(ticks);
+			}
+		}
+	}
 }
