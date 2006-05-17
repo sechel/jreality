@@ -43,10 +43,10 @@ public class ReaderMATHEMATICA extends AbstractReader {
 
   public void setInput(Input input) throws IOException {
     try {
-      Constructor lexC = Class.forName("de.jreality.reader.Mathematica.MathematicaLexer").getConstructor(new Class[]{InputStream.class});
+      Constructor lexC = Class.forName("de.jreality.reader.mathematica.MathematicaLexer").getConstructor(new Class[]{InputStream.class});
       Object lexer = lexC.newInstance(new Object[]{input.getInputStream()});
       
-      Constructor parseC = Class.forName("de.jreality.reader.Mathematica.MathematicaParser").getConstructor(new Class[]{Class.forName("antlr.TokenStream")});
+      Constructor parseC = Class.forName("de.jreality.reader.mathematica.MathematicaParser").getConstructor(new Class[]{Class.forName("antlr.TokenStream")});
       Object parser = parseC.newInstance(new Object[]{lexer});
       
       Expression parse = new Expression(parser, "start", null);
