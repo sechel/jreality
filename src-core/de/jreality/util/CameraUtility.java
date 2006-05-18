@@ -122,7 +122,7 @@ public class CameraUtility {
 		Camera cam = getCamera(v);
 		double aspectRatio = (v.hasViewingComponent() ? getAspectRatio(v.getViewingComponent()) : 1.0);
 		// TODO figure out a better way to do this:  This is only correct in crosseyed stereo mode.
-		if (cam.isStereo()) aspectRatio *= .5;
+//		if (cam.isStereo()) aspectRatio *= .5;
 		return getCameraToNDC(cam, aspectRatio);
 	}
 	
@@ -280,6 +280,7 @@ public class CameraUtility {
 		ymin = (y - y0)/z;
 		ymax = (( y1 - y0) - (y - y0))/z;
 		cam.setViewPort(new Rectangle2D.Double(-xmin, -ymin, xmin+xmax, ymin+ymax));
+//		LoggingSystem.getLogger(CameraUtility.class).info("Setting camera viewport to "+cam.getViewPort().toString());
 	}
 
   public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath) {
