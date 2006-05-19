@@ -11,6 +11,10 @@ import javax.swing.SwingConstants;
 import de.jreality.util.*;
 
 /**
+ * Static methods for geometry of  real projective space.
+ * 
+ * @see de.jreality.math.Rn  for method conventions and representation of matrices.
+ * @see de.jreality.math.Pn  for other methods applicable in n-dimensional projective space.
  * @author Charles Gunn
  *
  */
@@ -792,7 +796,6 @@ public class P3 extends Pn {
 		// TODO the following call perhaps should return a determinant-1 matrix (throw out scaling)
 	    double[] orientation = extractOrientationMatrix(null, cameraToObject, Pn.originP3, signature);
 	    double[] scale = makeStretchMatrix(null, xscale, yscale, 1.0);
-	    	    
 	    //calculate translation for alignment
 	    double align=0, valign=0;  // default
 	    switch (alignment) {
@@ -806,7 +809,6 @@ public class P3 extends Pn {
 	    	case SwingConstants.SOUTH_WEST : align=-xscale; valign=-yscale; break;
 	    	case SwingConstants.NORTH_WEST : align=-xscale; break;
 	    }
-	    
 	    double[] euclideanTranslation = makeTranslationMatrix(null, Rn.add(null, xyzOffset, new double[]{align, valign, 0, 0}), EUCLIDEAN);
 	    double[] pointTranslation = makeTranslationMatrix(null, point, signature);
 

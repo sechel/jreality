@@ -10,14 +10,13 @@ import de.jreality.scene.SceneGraphComponent;
 
 
 /**
- * @author Charles Gunn
  * 
  * <p>
  * The Transformation class is built around a 4x4 matrix. The class provides a
  * variety of methods for setting and getting the transformation. One instance
  * can handle a series of transformations, based on the so-called polar
  * decomposition. See
- * {@link <a href="www.cs.wisc.edu/graphics/Courses/cs-838-2002/ Papers/polar-decomp.pdf">Duff and Shoemaker paper</a>.
+ * @link <a href="www.cs.wisc.edu/graphics/Courses/cs-838-2002/ Papers/polar-decomp.pdf">Duff and Shoemaker paper</a>.
  * To be exact, the matrix M is factored as the matrix product M=T*R*S. Note
  * that matrices act on column vectors which stand to the right of the matrix. S
  * is a "stretch" or "scale" matrix -- a diagonal matrix. R is an arbitrary
@@ -72,6 +71,7 @@ import de.jreality.scene.SceneGraphComponent;
  * a "stretch" transformation.
  * <p>
  *  
+ * @author Charles Gunn
  */
 public class FactoredMatrix extends Matrix {
 
@@ -187,7 +187,6 @@ public class FactoredMatrix extends Matrix {
      * <i>translation </i> factor will be adjusted to achieve this effect. If it
      * is not, then the other factors will be left unchanged and the resulting
      * matrix will take on a new value. Side effect:
-     * {@link #setUseCenter(boolean)}is called with parameter <code>true</code>.
      * 
      * @param aVec
      *            the position of the center (as a 3-vector or homogeneous

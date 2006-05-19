@@ -12,10 +12,10 @@ import java.util.logging.Level;
 import de.jreality.util.LoggingSystem;
 
 /**
- * This class allows no instances; it exists to provide a set of static methods for Euclidean 
- * vector space.  All vectors are of type double[]. 
+ * A set of static methods for n-dimensional Euclidean vector space.  
+ * All vectors are of type double[]. 
  * <p>
- * There are also a set of methods related to linear transformations of Rn.  Because of the 
+ * This includes a set of methods related to linear transformations of Rn.  Because of the 
  * need to have matrices stored in contiguous memory (rather than Java-style as an array of
  * pointers), matrices are also of type double[].  Since all the matrices  that occur here are square
  * ones, the actual dimensions can be calculated easily from the over-all length.  For example, 
@@ -60,7 +60,7 @@ import de.jreality.util.LoggingSystem;
  * notes this.
  * <p>
  * @author Charles Gunn
- * @see de.jreality.de.Pn
+ * @see de.jreality.math.Pn
  */
 final public class Rn {
 

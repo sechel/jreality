@@ -8,22 +8,24 @@ package de.jreality.math;
 
 
 /**
- * @author Charles Gunn
  * <p>
- * 	A set of static methods related to real projective n-space P^n.
+ * 	A set of static methods related to real n-dimensional projective space.
  *  This includes a number of methods related to the classical 
  *  homogeneous metric spaces (euclidean, hyperbolic, and elliptic)
  *  which are based on a projective model for these spaces.
+ *  <p>
+ *  In general, points and vectors are represented in homogeneous coordinates by arrays of length <i>n+1</i>.  
+ *  By duality, hyperplanes are represented in the same fashion.
  *	<p>
  *	The methods related to metric geometries generally have a final argument
  * which identifies the geometry.  This can be one of the 3 pre-defined values
  * HYPERBOLIC, EUCLIDEAN, or ELLIPTIC.
  *  <p>
  * @see de.jreality.math.Rn for more on method conventions.
+ * @author Charles Gunn
  */
 public class Pn {
 
-	// TODO split off P3 from this, put all methods that expect vectors and matrices in P3.	
 	public static final int HYPERBOLIC = -1;
 	public static final int EUCLIDEAN	= 0;
 	public static final int ELLIPTIC	= 1;

@@ -10,12 +10,14 @@ import java.util.logging.Level;
 import de.jreality.util.LoggingSystem;
 
 /**
- * Library class for holding static methods for geometry of the real projective plane.
+ * Static methods for geometry of the real projective plane.
  * 
+ * @see de.jreality.math.Rn  for method conventions and discussion of the ubiquitous <i>signature</i> parameter.
+ * @see de.jreality.math.Pn  for other methods applicable in n-dimensional projective space.
  * @author gunn
  *
  */
-final public class P2 {
+final public class P2 extends Pn {
 
 	/**
 	 * 
@@ -24,6 +26,13 @@ final public class P2 {
 		super();
 	}
 
+	/**
+	 * Calculate the Euclidean perpendicular bisector of the segment from <i>p1</i> to <i>p2</i>.
+	 * @param dst
+	 * @param p1
+	 * @param p2
+	 * @return
+	 */
 	private static double[] perpendicularBisector(double[] dst, double[] p1, double[]p2)	{
 		if (p1.length != 3 || p2.length != 3)	{
 			throw new IllegalArgumentException("Input points must be homogeneous vectors");
@@ -40,6 +49,14 @@ final public class P2 {
 		return dst;
 	}
 	
+	/**
+	 * Calculate the perpendicular bisector of the segment <i>p1</i> and <i>p2</i> with signature <i>signature</i>
+	 * @param dst
+	 * @param p1
+	 * @param p2
+	 * @param signature
+	 * @return
+	 */
 	public static double[] perpendicularBisector(double[] dst, double[] p1, double[]p2, int signature)	{
 		if (p1.length != 3 || p2.length != 3)	{
 			throw new IllegalArgumentException("Input points must be homogeneous vectors");
@@ -56,6 +73,13 @@ final public class P2 {
 		return dst;
 	}
 	
+	/**
+	 * Calculate the homogeneous coordinates of the point of intersection  of the two  lines <i>l1</i> and <i>l2</i>.
+	 * @param point
+	 * @param l1
+	 * @param l2
+	 * @return
+	 */
 	public static double[] pointFromLines(double[] point, double[] l1, double[] l2)	{
 		if (l1.length < 3 || l2.length < 3)	{
 			throw new IllegalArgumentException("Input arrays too short");
@@ -67,11 +91,24 @@ final public class P2 {
 		return point;
 	}
 	
+	/**
+	 * Calculate the line coordinates of the line connecting the two points <i>p1</i> and <i>p2</i>.
+	 * @param point
+	 * @param l1
+	 * @param l2
+	 * @return
+	 */
 	public static double[] lineFromPoints(double[] line, double[] p1, double[] p2)	{
 		return pointFromLines(line, p1, p2);
 	}
 		
-	public static boolean polygonContainsPoint(double[][] polygon, double[] point)	{
+	/**
+	 * Returns true if and only if <i>point</i> is  within the polygon determined by the
+	 * points contained in the array <i>polygon</i>.
+	 * @param polygon
+	 * @param point
+	 * @return
+	 */public static boolean polygonContainsPoint(double[][] polygon, double[] point)	{
 		if (point.length != 3)	{
 			throw new IllegalArgumentException("Input point must be homogeneous vector");
 		}
@@ -97,7 +134,12 @@ final public class P2 {
 		return true;
 	}
 	
-	public static boolean isConvex(double[][] polygon)	{
+	/**
+	 * Returns true if and only if the polygon described by the point series <i>polygon</i> is convex.
+	 * @param polygon
+	 * @return
+	 */
+	 public static boolean isConvex(double[][] polygon)	{
 		int n = polygon.length, j;
 		double sign = 0.0;
 		double[][] diffs = new double[n][polygon[0].length];
@@ -122,7 +164,9 @@ final public class P2 {
 	}
 	/**
 	 * The assumption is that the line is specified in such a way that vertices to be cut away
-	 * have a negative inner product with the line coordinates.
+	 * have a negative inner product with the line coordinates.  The result is a new point array that
+	 * defines the polygon obtained by cutting off all points with negative inner product with the
+	 * given <i>line</i>.  The polygon is assumed  to be convex.
 	 * @param polygon
 	 * @param line
 	 * @return
@@ -174,7 +218,12 @@ final public class P2 {
 		return newPolygon;
 	}
 	
-	public static double[] projectP3ToP2(double[] vec3, double[] vec4)	{
+	/**
+	 * Convert the input (x,y,z,w) into (x,y,w).
+	 * @param vec3
+	 * @param vec4
+	 * @return
+	 */public static double[] projectP3ToP2(double[] vec3, double[] vec4)	{
 		double[] dst;
 		if (vec3 == null)	dst = new double[3];
 		else dst = vec3;
@@ -184,7 +233,12 @@ final public class P2 {
 		return dst;
 	}
 	
-	public static double[] imbedP2InP3(double[] vec4, double[] vec3)	{
+	/**
+	 * Convert (x,y,z) into (x,y,0,z)
+	 * @param vec4
+	 * @param vec3
+	 * @return
+	 */public static double[] imbedP2InP3(double[] vec4, double[] vec3)	{
 		double[] dst;
 		if (vec4 == null)	dst = new double[4];
 		else dst = vec4;

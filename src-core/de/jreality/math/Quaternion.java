@@ -9,11 +9,13 @@ import java.io.Serializable;
 
 
 /**
- * @author Charles Gunn
  * <p>
- * You cannot make instances of this class. It exists to provide a set of static methods related 
- * to quaternions.
- */
+ * A simple quaternion class.  Some instance methods, mostly static methods.
+ * </p><p>
+ * The generic calling convention is <code>public static Quaternion method(Quaternion result, Quaternion q1, Quaternion q2)</code>
+ * where if <i>result</i> is null, a new instance is created and the result is returned in it. 
+ * @author Charles Gunn
+  */
 final public class Quaternion implements Cloneable, Serializable {
 	public double re, x, y, z;
 	/**

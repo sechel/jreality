@@ -264,7 +264,8 @@ if(false) {
       if (Math
           .abs(x0[i2] * bary[0] + x1[i2] * bary[1] + x2[i2] * bary[2] - x[i2])
           > 1.e-3) {
-        LoggingSystem.getLogger(Hit.class).info("gmBaryInElementConvertFromVec3: test for third row failed."
+    	  // this is not an error and should not in my opinion be set to info level -gunn 18.5.6
+        LoggingSystem.getLogger(Hit.class).fine("gmBaryInElementConvertFromVec3: test for third row failed."
                   +Math.abs(x0[i2] * bary[0] + x1[i2] * bary[1] + x2[i2] * bary[2] - x[i2])
                   );
           //          fprintf(stderr, "gmBaryInElementConvertFromVec3: test for third

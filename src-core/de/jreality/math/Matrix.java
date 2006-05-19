@@ -7,12 +7,19 @@ import de.jreality.scene.Transformation;
 import de.jreality.scene.data.DoubleArray;
 
 /**
- * 
- * Note: This class is not supposed to be a replaced for a full-fledged mathematical
+ * A simple wrapper class for 4x4 real matrices.  The matrix is represented as a
+ * linear array of 16 values (<tt>double[16]</tt> in order to avoid problems with Java's
+ * multi-dimensional arrays.
+ * </p>
+ * <p>
+ * This class is not supposed to be a replacement for a full-fledged mathematical
  * package. It provides a convenient wrapper for double arrays that offers some basic
  * functionality for multiplying and inverting matrices and such, but if you want to
  * do more involved stuff, you probably want to use a dedicated math library.
  * 
+ * @see de.jreality.math.Rn
+ * @see de.jreality.math.P3
+ * @see de.jreality.math.Pn
  * @author weissman
  *
  **/
