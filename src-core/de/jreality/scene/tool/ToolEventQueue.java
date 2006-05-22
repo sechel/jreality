@@ -82,7 +82,7 @@ public class ToolEventQueue {
      * @param event the event to post
      * @return true if the event was added false if not
      */
-    boolean addEvent(ToolEvent event) {
+    public boolean addEvent(ToolEvent event) {
       if (!started) return false;
       placeEvent(event);
       return true;
