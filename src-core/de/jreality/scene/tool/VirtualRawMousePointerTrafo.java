@@ -45,7 +45,7 @@ public class VirtualRawMousePointerTrafo implements VirtualDevice {
   double[] ndcToWorld = new double[16];
   double[] pointerNdc = new double[16];
   double[] pointerTrafo = new double[16];
-  private DoubleArray outArray = new DoubleArray(pointerTrafo);
+  DoubleArray outArray = new DoubleArray(pointerTrafo);
   
   
   public ToolEvent process(VirtualDeviceContext context) {
@@ -88,35 +88,11 @@ public class VirtualRawMousePointerTrafo implements VirtualDevice {
   }
 
   public String getName() {
-    return "MousePointerTrafo";
+    return "RawMousePointerTrafo";
   }
 
   public String toString() {
     return "VirtualDevice: "+getName();
   }
   
-  private void scaleColumn(double[] matrix, int col, double factor) {
-  	matrix[col]*=factor;
-  	matrix[col+4]*=factor;
-  	matrix[col+8]*=factor;
-  	matrix[col+12]*=factor;
-  }
-  
-  private void columnTrafo(double[] matrix, int i, int j, double factor) {
-  	matrix[i]+=matrix[j]*factor;
-  	matrix[i+4]+=matrix[j+4]*factor;
-  	matrix[i+8]+=matrix[j+8]*factor;
-  	matrix[i+12]+=matrix[j+12]*factor;
-  }
-  
-  private double scalarColumnProduct(double[] matrix, int i, int j) {
-  	return matrix[i]*matrix[j]+
-		   matrix[i+4]*matrix[j+4]+
-		   matrix[i+8]*matrix[j+8]+
-		   matrix[i+12]*matrix[j+12]; 
-  }
-  
-  private double columnNorm(double[] matrix, int i) {
-  	return Math.sqrt(scalarColumnProduct(matrix, i, i));
-  }
-}
+ }
