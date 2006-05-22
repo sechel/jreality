@@ -22,6 +22,7 @@ import de.jreality.scene.Viewer;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
+import de.jreality.util.LoggingSystem;
 import de.smrj.ClientFactory;
 
 /**
@@ -191,7 +192,17 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     // DONT CHANGE SCENEGRAPH
 //    camPath.getLastComponent().addChild(cameraTranslationNode);
     cameraOrientationNode.setCamera(cam);
-    
+    if (cam.isOnAxis()) {
+        LoggingSystem.getLogger(CameraUtility.class).info("portal camera is on-axis: changing to off-axis");
+        cam.setOnAxis(false);
+      }
+      
+    if (!cam.isStereo()) {
+        LoggingSystem.getLogger(CameraUtility.class).info("portal camera is not stereo: changing to stereo");
+        cam.setStereo(true);
+      }
+      
+   
     // build the right camera path
     camPath.push(cameraTranslationNode);
     camPath.push(cameraOrientationNode);
