@@ -132,6 +132,10 @@ public class CommonAttributes {
     public final static String SPECULAR_COEFFICIENT =  "specularCoefficient";
     public final static double SPECULAR_COEFFICIENT_DEFAULT =  .7;
 	public static final String LIGHT_DIRECTION = "lightDirection";
+
+	// miscellaneous
+	public static final String PICKABLE = "pickable";
+	public static final String SIGNATURE= "signature";
 	
     /**
      * 
