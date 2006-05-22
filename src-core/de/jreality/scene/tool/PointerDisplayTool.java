@@ -30,13 +30,6 @@ public class PointerDisplayTool extends Tool {
   public PointerDisplayTool(double radius) {
     currentSlots.add(pointer);
     SceneGraphComponent stick=new SceneGraphComponent();
-//    QuadMeshFactory qmf = new QuadMeshFactory(Pn.EUCLIDEAN, 16, 2, false, false);
-//    double[][] points = Primitives.surfaceOfRevolution(
-//      new double[][]{{0,0,radius,1}, {1,0,radius,1}}, 16, Math.PI 		
-//    );
-//    qmf.setVertexCoordinates(points);
-//    qmf.refactor();
-//    MatrixBuilder.euclidean().rotateFromTo(new double[]{1,0,0}, new double[]{0,0,1}).assignTo(stick);
     MatrixBuilder.euclidean().translate(0,0,-1).scale(radius, radius, 1).assignTo(stick);
     IndexedFaceSet cube = new IndexedFaceSet();
     GeometryUtility.calculateAndSetFaceNormals(cube);
