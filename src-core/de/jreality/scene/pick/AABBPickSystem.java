@@ -100,11 +100,11 @@ public class AABBPickSystem implements PickSystem {
 
     private void readEApp() {
       pickPoints=eap.getAttribute(CommonAttributes.VERTEX_DRAW, false)
-        && eap.getAttribute(CommonAttributes.POINT_SHADER+".pickable", true);
+        && eap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE, true);
       pickEdges=eap.getAttribute(CommonAttributes.EDGE_DRAW, true)
-        && eap.getAttribute(CommonAttributes.LINE_SHADER+".pickable", true);
+        && eap.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.PICKABLE, true);
       pickFaces=eap.getAttribute(CommonAttributes.FACE_DRAW, true)
-      && eap.getAttribute(CommonAttributes.POLYGON_SHADER+".pickable", true);
+      && eap.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.PICKABLE, true);
       pointRadius=eap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, CommonAttributes.POINT_RADIUS_DEFAULT);
       tubeRadius=eap.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, CommonAttributes.TUBE_RADIUS_DEFAULT);
     }
