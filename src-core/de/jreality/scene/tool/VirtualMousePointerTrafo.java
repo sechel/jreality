@@ -22,11 +22,7 @@
  */
 package de.jreality.scene.tool;
 
-import java.util.List;
-import java.util.Map;
-
 import de.jreality.math.Rn;
-import de.jreality.scene.data.DoubleArray;
 
 
 /**
@@ -36,46 +32,12 @@ import de.jreality.scene.data.DoubleArray;
  * @author brinkman
  *
  */
-public class VirtualMousePointerTrafo implements VirtualDevice {
+public class VirtualMousePointerTrafo extends VirtualRawMousePointerTrafo {
 
-  InputSlot outSlot;
-  InputSlot ndcToWorldSlot;
-  InputSlot pointerNdcSlot;
- 
-  double[] ndcToWorld = new double[16];
-  double[] pointerNdc = new double[16];
-  double[] pointerTrafo = new double[16];
-  private DoubleArray outArray = new DoubleArray(pointerTrafo);
-  
-  
-  public ToolEvent process(VirtualDeviceContext context) {
-  	try {
-    ndcToWorld = context.getTransformationMatrix(ndcToWorldSlot).toDoubleArray(ndcToWorld);
-    pointerNdc = context.getTransformationMatrix(pointerNdcSlot).toDoubleArray(pointerNdc);
-  	} catch (Exception e) {
-		return null;
-	}
-
-  	double x = pointerNdc[3];
-  	double y = pointerNdc[7];
-  	
-  	pointerNdc[0] = x+1;
-  	pointerNdc[4] = y;
-  	pointerNdc[8] = -1;
-  	pointerNdc[12] = 1;
-  	
-  	pointerNdc[1] = x;
-  	pointerNdc[5] = y+1;
-  	pointerNdc[9] = -1;
-  	pointerNdc[13] = 1;
-  	
-  	pointerNdc[2] = x;
-  	pointerNdc[6] = y;
-  	pointerNdc[10] = 1;
-  	pointerNdc[14] = 1;
-  	
-  	pointerTrafo = Rn.times(pointerTrafo, ndcToWorld, pointerNdc);
-    for(int i=0; i<4; i++)
+   public ToolEvent process(VirtualDeviceContext context) {
+	   ToolEvent te = super.process(context);
+	   // this is the normalization code that VirtualRawMousePointerTrafo lacks
+     for(int i=0; i<4; i++)
     	if (Math.abs(pointerTrafo[12+i])>Rn.TOLERANCE)
     		scaleColumn(pointerTrafo, i, 1/pointerTrafo[i+12]);
     for(int i = 0; i<3; i++)
@@ -101,26 +63,13 @@ public class VirtualMousePointerTrafo implements VirtualDevice {
   pointerTrafo[12]=pointerTrafo[13]=pointerTrafo[14]=0;
   pointerTrafo[15]=1;
 
-	return new ToolEvent(context.getEvent().getSource(), outSlot, outArray);
-  }
-
-  public void initialize(List inputSlots, InputSlot result, Map configuration) {
-    outSlot = result;
-    ndcToWorldSlot = (InputSlot) inputSlots.get(0);
-    pointerNdcSlot = (InputSlot) inputSlots.get(1);
-  }
-
-  public void dispose() {
+	return te;
   }
 
   public String getName() {
     return "MousePointerTrafo";
   }
 
-  public String toString() {
-    return "VirtualDevice: "+getName();
-  }
-  
   private void scaleColumn(double[] matrix, int col, double factor) {
   	matrix[col]*=factor;
   	matrix[col+4]*=factor;
