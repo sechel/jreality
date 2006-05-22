@@ -26,6 +26,8 @@ public class P3 extends Pn {
 	final static double[] yaxis = {0,1,0};
 	final static double[] zaxis = {0,0,-1};
 
+	public static double[] p3involution = makeStretchMatrix(null, new double[]{-1d,-1d,-1d,1d});
+
 	 
    private P3()	{
 		super();
