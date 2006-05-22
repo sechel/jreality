@@ -252,11 +252,6 @@ public class CameraUtility {
 	//TODO think about moving this to a different class (PORTALUtilities)
 	public static void setPORTALViewport(Matrix world2cam, FactoredMatrix portalMatrix, Camera cam) {
     
-    if (cam.isOnAxis()) {
-      LoggingSystem.getLogger(CameraUtility.class).info("portal camera is on-axis: changing to off-axis");
-      cam.setOnAxis(false);
-    }
-    
 		double xmin=0, xmax=0, ymin=0, ymax=0;
 		double x0 = -xDimPORTAL;
 		double x1 = xDimPORTAL;
