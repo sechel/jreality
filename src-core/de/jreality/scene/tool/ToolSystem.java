@@ -301,6 +301,10 @@ private final Object mutex=new Object();
 private SceneGraphPath avatarPath;
 
   private void performPick() {
+	  if (pickSystem == null) {
+		  pickResults = Collections.EMPTY_LIST;
+		  return;
+	  }
     currentPointer = deviceManager.getTransformationMatrix(
           InputSlot.getDevice("PointerTransformation")).toDoubleArray(
           currentPointer);
@@ -412,7 +416,7 @@ private SceneGraphPath avatarPath;
 
   public void setPickSystem(PickSystem pickSystem) {
     this.pickSystem = pickSystem;
-    pickSystem.setSceneRoot(viewer.getSceneRoot());
+	if (pickSystem != null) pickSystem.setSceneRoot(viewer.getSceneRoot());
   }
 
   public PickSystem getPickSystem() {
