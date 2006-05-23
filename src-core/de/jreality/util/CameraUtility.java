@@ -6,6 +6,7 @@ package de.jreality.util;
 
 import java.awt.Component;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.Rectangle2D.Double;
 import java.util.logging.Level;
 
 import de.jreality.geometry.GeometryUtility;
@@ -236,49 +237,7 @@ public class CameraUtility {
 	}
 	
     
-//  static double xDimPORTAL = 4.068;   // half PORTAL screen x-dim in feet
-//  static double yDimPORTAL = 6.561;   // full PORTAL screen y-dim in feet
-  static double xDimPORTAL = 4.068*0.3048;   // half PORTAL screen x-dim in METER
-  static double yDimPORTAL = 6.561*0.3048;   // full PORTAL screen y-dim in METER
-  static double yOffsetPORTAL = 0.4;
-  /*
-	 * comment from arMotionstarDriverPORTAL.cpp:
-	 *   x -= 4.068; // move x=0 to the middle
-	 * 	 y -= 1.36;  // move y=0 to the bottom of the visible screen (instead of the bottom)
-	 * 	 z -= 4.068; // move z=0 to the center of the floor
-	 */
-	//TODO read values and correction from ConfigurationAttributes
-	//TODO change to multiplication with correction matrix
-	//TODO think about moving this to a different class (PORTALUtilities)
-	public static void setPORTALViewport(Matrix world2cam, FactoredMatrix portalMatrix, Camera cam) {
-    
-		double xmin=0, xmax=0, ymin=0, ymax=0;
-		double x0 = -xDimPORTAL;
-		double x1 = xDimPORTAL;
-		double y0 = yOffsetPORTAL;
-		double y1 = yDimPORTAL+yOffsetPORTAL;
-		//double[] world2cam = v.getCameraPath().getInverseMatrix(null);
-		//double[] pos1 = Rn.matrixTimesVector(null, cam2world, P3.originP3);
-		double[] portalOriginInCamCoordinates = world2cam.multiplyVector(portalMatrix.getTranslation());
-		//double[] pos1 = Rn.matrixTimesVector(null, world2cam, Pn.originP3);
-		Pn.dehomogenize(portalOriginInCamCoordinates, portalOriginInCamCoordinates);
-		
-    // TODO: 
-    // The world coordinate system and the one we want differ only
-		// by moving the origin forward so it lies on front wall.
-		double x = -portalOriginInCamCoordinates[0];
-		double y = -portalOriginInCamCoordinates[1];
-		double z = -portalOriginInCamCoordinates[2] + xDimPORTAL;  // make wall z=0
-		cam.setFocus(z);
-		xmin = (x - x0)/z;
-		xmax = ((x1 - x0) - (x - x0))/z;
-		ymin = (y - y0)/z;
-		ymax = (( y1 - y0) - (y - y0))/z;
-		cam.setViewPort(new Rectangle2D.Double(-xmin, -ymin, xmin+xmax, ymin+ymax));
-//		LoggingSystem.getLogger(CameraUtility.class).info("Setting camera viewport to "+cam.getViewPort().toString());
-	}
-
-  public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath) {
+	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath) {
     encompass(avatarPath, scene, cameraPath, 0, Pn.EUCLIDEAN);
   }
   
