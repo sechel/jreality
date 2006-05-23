@@ -20,6 +20,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
+import de.jreality.scene.tool.PortalCoordinateSystem;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.LoggingSystem;
@@ -247,7 +248,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     
     portalMatrix.assignFrom(portalPath.getMatrix(tmp1));
     world2cam.assignFrom(viewer.getCameraPath().getInverseMatrix(tmp2));
-    CameraUtility.setPORTALViewport(world2cam, portalMatrix, cam);
+    PortalCoordinateSystem.setPORTALViewport(world2cam, portalMatrix, cam);
   }
 
   Statement waitStatement;
