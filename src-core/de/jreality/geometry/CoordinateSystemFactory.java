@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.util.HashMap;
 import javax.swing.SwingConstants;
 import de.jreality.scene.IndexedLineSet;
-import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Appearance;
@@ -71,7 +70,7 @@ public class CoordinateSystemFactory {
 	
 	private HashMap nodes = new HashMap();
 	
-	//attributes
+	//attributes and default values
 	private double axisScale = 0.5;  //the distance between two ticks on an axis
 	private double labelScale = 0.01;  //size of labels
 	private double arrowStretch = 4*labelScale; //stretch of arrows of axes (octagonalCrossSection)
@@ -159,7 +158,6 @@ public class CoordinateSystemFactory {
 		//create SceneGraphComponent which has each coordinate axis as its child
 		SceneGraphComponent box = new SceneGraphComponent();
 		box.setName("Box");
-		//hashMap.put("box", box);
 		
 		for (int axis=X; axis<=Z; axis++) {  //for each coordinate axis
 			
@@ -522,7 +520,7 @@ public class CoordinateSystemFactory {
 		SceneGraphComponent ticks = SceneGraphUtility.createFullSceneGraphComponent("ticks");
 		ticks.setGeometry(ticksGeom);
 		FactoredMatrix m = new FactoredMatrix();
-		m.setRotation(getTickRotation(axis, k));
+		m.setRotation(Quaternion.times(new Quaternion(), getTickRotation(axis, k), getAxisRotation(axis)));
 		double[] translation = (double[])min.clone();
 		translation[axis] = 0;
 		m.setTranslation(translation);
@@ -590,40 +588,30 @@ public class CoordinateSystemFactory {
 	//calculates the rotation from z-axis on specified axis
 	private Quaternion getAxisRotation(int axis) {
 	
-		FactoredMatrix m = new FactoredMatrix();
+		FactoredMatrix rot = new FactoredMatrix();
 		switch(axis) {
-		case X : m.setRotation(Math.PI/2,0,1,0); break;
-		case Y : m.setRotation(-Math.PI/2,1,0,0); break;
+		case X : rot.setRotation(Math.PI/2,0,1,0); break;
+		case Y : rot.setRotation(-Math.PI/2,1,0,0); break;
 		//case Z : z-axis => no rotation
 		}
-		return Quaternion.rotationMatrixToQuaternion(new Quaternion(), m.getArray());
+		return Quaternion.rotationMatrixToQuaternion(new Quaternion(), rot.getArray());
 	}
 	
-	//calculates the rotation from z-axis on specified box axis
+	//calculates the rotation of ticks for specified box edge
 	private Quaternion getTickRotation(int axis, int k) {
 		
-		int c = 0;
-
-		switch(k) {
-		//case 0 : c=0; break;
-		case 1 : if (axis==Y) c=1; else c=3; break;
-		case 2 : if (axis==Y) c=3; else c=1; break;
-		case 3 : c=2; break;
-		}
-		switch(axis) {
+		int c = new int[]{0,3,1,2}[k];
+		switch(axis) {  //regard axis
 		case X : c++; break;
-		case Y : c--; break;
+		case Y : c*=-1; c--;  //first statement: switch 1 and 3
 		}
 		
 		double[] rotationAxis = new double[3];
 		rotationAxis[axis] = 1;
-		FactoredMatrix m = new FactoredMatrix();
-		m.setRotation(c*Math.PI/2, rotationAxis);
-		
-		FactoredMatrix rotation = new FactoredMatrix(Rn.times(null, 
-				m.getArray(), Quaternion.quaternionToRotationMatrix(null, getAxisRotation(axis))));
+		FactoredMatrix rot = new FactoredMatrix();
+		rot.setRotation(c*Math.PI/2, rotationAxis);
 
-		return Quaternion.rotationMatrixToQuaternion(new Quaternion(), rotation.getArray());
+		return Quaternion.rotationMatrixToQuaternion(new Quaternion(), rot.getArray());
 	}
 	
 	
@@ -651,7 +639,7 @@ public class CoordinateSystemFactory {
 	/**
 	 * get index of a box vertex which is "closest to the screen" when looking in a specified direction
 	 * @param direction the direction
-	 * @return the index of a closest box vertex in boxVertices[0]
+	 * @return the index of a closest box vertex in boxVertices[X]
 	 */
 	private int getClosestBoxVertex(double[] dir) {
 		double[] direction;
@@ -665,23 +653,27 @@ public class CoordinateSystemFactory {
 		//closest box vertex has minimal inner product with direction
 		int closest = 0;
 		
-		double tmp = Rn.innerProduct(boxVertices[0][closest], direction);
+		double tmp = Rn.innerProduct(boxVertices[X][closest], direction);
 		
-		for (int k=1; k<8; k++) {
-			if ( Rn.innerProduct(boxVertices[0][k], direction) < tmp) {
+		for (int k=1; k<8; k++) { //boxVertices[X] contains all box vertices
+			if ( Rn.innerProduct(boxVertices[X][k], direction) < tmp) {
 				closest = k;
-				tmp = Rn.innerProduct(boxVertices[0][k], direction);
+				tmp = Rn.innerProduct(boxVertices[X][k], direction);
 			}
 		}
-		return closest;
+		return closest; //index of closest box vertex in boxVertices[X]
 	}
 	
 	
 	/**
-	 * specify a direction to look at in a viewer
-	 * => hide closest box vertex (resp. only edges if there are more than one closest box vertices)
+	 * hide closest box vertex (resp. only edges if there are more than one closest box vertices)
 	 */
-	public void updateBox(double[] direction) {
+	public void updateBox(double[] cameraToObject) {
+		
+		//direction of view in camera coordinates is (0,0,-1)
+		//transform camera coordinates to local coordinates
+		double[] direction = new Matrix(cameraToObject).multiplyVector(new double[]{0,0,-1, 0});
+		direction[3]=1;
 		
 		//only do something if closest box vertex changed
 		final int index = getClosestBoxVertex(direction);
@@ -695,7 +687,7 @@ public class CoordinateSystemFactory {
 		}
 		
 		currentClosestBoxVertex = index;
-		double[] closest = boxVertices[0][currentClosestBoxVertex];
+		double[] closest = boxVertices[X][currentClosestBoxVertex];
 		int[] edgeCriteria = new int[3];
 		
 		//get the 3 edges belonging to a closest box vertex
@@ -710,25 +702,6 @@ public class CoordinateSystemFactory {
 			getSGC("y" + edgeCriteria[X] + edgeCriteria[Z]).setVisible(false);
 		if (direction[X]!=0 && direction[Y]!=0)
 			getSGC("z" + edgeCriteria[X] + edgeCriteria[Y]).setVisible(false);
-	}
-	
-
-	/**
-	 * calculate direction of view via the paths of camera and the component (object)
-	 * uses method updateBox(direction)
-	 */
-	public void updateBox(SceneGraphPath objectPath, SceneGraphPath cameraPath) {
-		
-		//direction of view in camera coordinates is (0,0,-1)
-		//transform camera coordinates to local coordinates
-		Matrix cameraTrans = new Matrix( cameraPath.getMatrix(null) );
-		Matrix objectTrans = new Matrix( objectPath.getMatrix(null) );
-		Matrix c2oTrans = new Matrix( Matrix.product( cameraTrans.getInverse(), objectTrans )); 
-		double[] direction = c2oTrans.multiplyVector(new double[]{0,0,-1, 0});
-		direction[3]=1;		
-		//for (int i=0; i<=2; i++) System.out.println(direction[i]);
-		
-		updateBox(direction);
 	}
 	
 	
