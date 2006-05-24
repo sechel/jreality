@@ -7,7 +7,6 @@ import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.geometry.Primitives;
@@ -77,6 +76,9 @@ public class CoordinateSystemFactory {
 	private double tickStretch = 2*labelScale; //stretch of ticks of axes (octagonalCrossSection)
 	private boolean showAxesArrows = true;  //show or hide arrows on axes
 	private boolean showBoxArrows = false;  //show or hide arrows on box
+	private Color axesColor = Color.BLACK;
+	private Color boxColor = Color.BLACK;
+	private Color labelColor = Color.BLACK;
 	
 	
 	
@@ -182,7 +184,7 @@ public class CoordinateSystemFactory {
 				nodes.put(axesNames[axis]+singleAxisK.getName()+"arrow", arrow);  //e.g. x00arrow
 				//create ticks with labels
 				SceneGraphComponent ticks = getBoxTicks(axis, k, boxVertices[axis][2*k], boxVertices[axis][2*k+1]);
-				nodes.put(axesNames[axis]+singleAxisK.getName()+"label", ticks);  //e.g. x00label
+				nodes.put(axesNames[axis]+singleAxisK.getName()+"ticks", ticks);  //e.g. x00ticks
 				
 				singleAxisK.addChild(line);
 				singleAxisK.addChild(arrow);
@@ -201,15 +203,13 @@ public class CoordinateSystemFactory {
 	    app.setAttribute(CommonAttributes.SPHERES_DRAW, true);
 	    app.setAttribute(CommonAttributes.VERTEX_DRAW, true);  //show labels
 		app.setAttribute(CommonAttributes.POINT_RADIUS, 0.001);  //don't show label points
-		app.setAttribute(CommonAttributes.DIFFUSE_COLOR,Color.BLACK);
-		app.setAttribute(CommonAttributes.SPECULAR_COLOR,Color.BLACK);
+		app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, labelColor);
+		app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, boxColor);
+		//app.setAttribute(CommonAttributes.SPECULAR_COLOR, Color.BLACK);
 	    app.setAttribute(CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
 	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"scale", labelScale);  //label scale
-	    app.setAttribute(CommonAttributes.LINE_SHADER+"."+"scale", labelScale);  //label scale
 	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"offset", new double[]{0.04,-0.07,0});  //label offset of ticks
-	    app.setAttribute(CommonAttributes.LINE_SHADER+"."+"offset", new double[]{0,-.2,0});  //label offset of axes lines
 	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
-	    app.setAttribute(CommonAttributes.LINE_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
 	    
 	    box.setAppearance(app);
 		
@@ -253,7 +253,7 @@ public class CoordinateSystemFactory {
 			nodes.put(axesNames[axis]+"Arrow", arrow);  //e.g. xArrow
 			// create ticks with labels
 			SceneGraphComponent ticks = getAxesTicks(axis, axesVertices[axis][0], axesVertices[axis][1]);
-			nodes.put(axesNames[axis]+"Label", ticks);  //e.g. xLabel
+			nodes.put(axesNames[axis]+"Ticks", ticks);  //e.g. xTicks
 			
 			singleAxis.addChild(line);
 			singleAxis.addChild(arrow);
@@ -269,14 +269,14 @@ public class CoordinateSystemFactory {
 	    app.setAttribute(CommonAttributes.SPHERES_DRAW, true);
 	    app.setAttribute(CommonAttributes.VERTEX_DRAW, true);  //show labels
 		app.setAttribute(CommonAttributes.POINT_RADIUS, 0.001);  //don't show label points
-		app.setAttribute(CommonAttributes.DIFFUSE_COLOR,Color.BLACK);
-		app.setAttribute(CommonAttributes.SPECULAR_COLOR,Color.BLACK);
+		app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, labelColor);
+		app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, axesColor);
+		//app.setAttribute(CommonAttributes.SPECULAR_COLOR, Color.BLACK);
 	    app.setAttribute(CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
 	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"scale", labelScale);  //label scale
 		app.setAttribute(CommonAttributes.POINT_SHADER+"."+"offset", new double[]{0.04,-0.07,0});  //label offset
 	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
-	    app.setAttribute(CommonAttributes.LINE_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
-
+	    
 	    axes.setAppearance(app);
 		
 		return axes;
@@ -356,24 +356,28 @@ public class CoordinateSystemFactory {
 		lineLSF.setLineCount(1);
 		lineLSF.setVertexCoordinates(new double[][]{min, max});
 		lineLSF.setEdgeIndices(new int[]{0,1});
+		lineLSF.update();
 		
 		//create line label
-		if (forBox) lineLSF.setEdgeLabels(new String[]{axesNames[axis]});
-		else {
-			PointSetFactory labelPSF = new PointSetFactory();
-			labelPSF.setVertexCount(1);
-			labelPSF.setVertexCoordinates(max);
-			labelPSF.setVertexLabels(new String[]{axesNames[axis]});
-			labelPSF.update();
-			SceneGraphComponent label = SceneGraphUtility.createFullSceneGraphComponent("label");
-			label.setGeometry(labelPSF.getPointSet());
-			Appearance a = new Appearance();  //for label offset
-			a.setAttribute("pointShader.offset", new double[]{.15,0,0});
-			line.setAppearance(a);
-			line.addChild(label);
+		PointSetFactory labelPSF = new PointSetFactory();
+		labelPSF.setVertexCount(1);
+		if (forBox) {
+			double[] p = (double[])max.clone();
+			p[axis] = min[axis]+(max[axis]-min[axis])/2;
+			labelPSF.setVertexCoordinates(p);
 		}
+		else labelPSF.setVertexCoordinates(max);
+
+		labelPSF.setVertexLabels(new String[]{axesNames[axis]});
+		labelPSF.update();
+
+		SceneGraphComponent label = SceneGraphUtility.createFullSceneGraphComponent("label");
+		Appearance a = new Appearance();  //for label offset
+		a.setAttribute(CommonAttributes.POINT_SHADER+"."+"offset", new double[]{0,-.2,0});  //label offset
+		line.setAppearance(a);
+		label.setGeometry(labelPSF.getPointSet());
+		line.addChild(label);
 		
-		lineLSF.update();
 		line.setGeometry(lineLSF.getIndexedLineSet());
 		return line;
 	}
@@ -417,31 +421,30 @@ public class CoordinateSystemFactory {
 		
 		//create the ticks on a line in z-direction
 		//determine minimum and maximum value of the tick level
-		final double minLevel = axisScale*Math.ceil( min[axis]/axisScale);
-		final double maxLevel = axisScale*Math.floor( (max[axis]-arrowHeight*arrowStretch)/axisScale);  //give space for axis arrow
+		final double minLevel = round(axisScale*Math.ceil( (min[axis])/axisScale ));  //round to 3 decimal places
+		final double maxLevel = round(axisScale*Math.floor( (max[axis]-arrowHeight*arrowStretch)/axisScale ));  //give space for arrow
 		
 		if (minLevel>maxLevel) return SceneGraphUtility.createFullSceneGraphComponent("ticks");
 		
 		IndexedFaceSet ticksGeom = Primitives.pyramid(octagonalCrossSection(minLevel), new double[]{0,0,minLevel});  //init
-		int levelNum = 1;
-		for (double level=minLevel+axisScale; level<=maxLevel; level+=axisScale) {
-			if (Math.abs(level)<axisScale/2) continue;  //no tick at origin (there level may not be exactly 0)
+		int numOfTicks = 1;
+		for (double level=round(minLevel+axisScale); level<=maxLevel; level=round(level+axisScale) ) {
+			if (level==0) continue;  //no tick at origin
 			ticksGeom = IndexedFaceSetUtility.mergeIndexedFaceSets(
 				new IndexedFaceSet[]{ ticksGeom, 
 				Primitives.pyramid(octagonalCrossSection(level), new double[]{0,0,level}) });
-			levelNum++;
+			numOfTicks++;
 		}
 		//GeometryUtility.calculateAndSetVertexNormals(ticksIFS);
 		
 		//create labels
-		final int numOfTicks = levelNum;
 		PointSetFactory labelPSF = new PointSetFactory();
 		labelPSF.setVertexCount(numOfTicks);
 		double[][] labelPoints = new double[numOfTicks][];
 		String[] labelStr = new String[numOfTicks];
 		double level = minLevel;
-		for (int i=0; i<numOfTicks; i++, level+=axisScale) {
-			if (Math.abs(level)<axisScale/2) level+=axisScale;  //skip tick at origin (there level may not be exactly 0)
+		for (int i=0; i<numOfTicks; i++, level=round(level+axisScale) ) {
+			if (level==0) level+=axisScale;  //skip tick at origin
 			labelPoints[i] = new double[]{0, 0, level};
 			labelStr[i] = Math.round(level*1000)/1000. + "";  //3 decimal places
 		}
@@ -479,16 +482,16 @@ public class CoordinateSystemFactory {
 		
 		//create the ticks on a line in z-direction
 		//determine minimum and maximum value of the tick level
-		final double minLevel = axisScale*Math.ceil( min[axis]/axisScale + 0.5);  //give space for box corner
-		final double maxLevel = axisScale*Math.floor( (max[axis]-arrowHeight*arrowStretch)/axisScale -0.5);  //give space for axis arrow and box corner
+		final double minLevel = round(axisScale*Math.ceil( (min[axis]+0.05)/axisScale ));  //round to 3 decimal places
+		final double maxLevel = round(axisScale*Math.floor( (max[axis]-0.05)/axisScale));  //give space for box corners
 		
 		if (minLevel>maxLevel) return SceneGraphUtility.createFullSceneGraphComponent("ticks");
 		
 		IndexedLineSet ticksGeom = new IndexedLineSet();
 		IndexedLineSetFactory newTick;
-		int levelNum = 0;
+		int numOfTicks = 0;
 		
-		for (double level=minLevel; level<=maxLevel; level+=axisScale) {
+		for (double level=minLevel; level<=maxLevel; level=round(level+axisScale) ) {
 			newTick = new IndexedLineSetFactory();
 			newTick.setVertexCount(3);
 			newTick.setLineCount(2);
@@ -496,17 +499,16 @@ public class CoordinateSystemFactory {
 			newTick.setEdgeIndices(new int[][]{{0,1},{1,2}});
 			newTick.update();
 			ticksGeom = mergeIndexedLineSets(ticksGeom, newTick.getIndexedLineSet());
-			levelNum++;
+			numOfTicks++;
 		}
 		
 		//create labels
-		final int numOfTicks = levelNum;
 		PointSetFactory labelPSF = new PointSetFactory();
 		labelPSF.setVertexCount(numOfTicks);
 		double[][] labelPoints = new double[numOfTicks][];
 		String[] labelStr = new String[numOfTicks];
 		double level = minLevel;
-		for (int i=0; i<numOfTicks; i++, level+=axisScale) {
+		for (int i=0; i<numOfTicks; i++, level=round(level+axisScale) ) {
 			labelPoints[i] = new double[]{0, 0, level};
 			labelStr[i] = Math.round(level*1000)/1000. + "";  //3 decimal places
 		}
@@ -631,8 +633,16 @@ public class CoordinateSystemFactory {
 		else return Integer.toBinaryString(k);
 	}
 	
+	
+	//round d to 3 decimal places
+	private double round(double d) {
+		return Math.round(d*1000)/1000.;
+	}
+	
+	
+	
 //-----------------------------------------------------------------------------------
-//the following methods are intended to be used 
+//the following methods are intended to be used in a tool
 //to hide specific box vertices, axes or labels
 //-----------------------------------------------------------------------------------
 	
@@ -724,12 +734,12 @@ public class CoordinateSystemFactory {
 			for (int k = 0; k <= 3; k++) {
 				//remove old ticks and labels
 				SceneGraphComponent singleAxisK = getSGC(axesNames[axis]+ toBinaryString(k));  //e.g. x00
-				singleAxisK.removeChild(getSGC(axesNames[axis]+ toBinaryString(k) + "label"));  //e.g. x00label
+				singleAxisK.removeChild(getSGC(axesNames[axis]+ toBinaryString(k) + "ticks"));  //e.g. x00ticks
 				//create new ticks with labels
 				SceneGraphComponent ticks = getBoxTicks(axis, k, 
 						boxVertices[axis][2 * k], boxVertices[axis][2 * k + 1]);
 				//update hash table
-				nodes.put(axesNames[axis] + toBinaryString(k) + "label", ticks);  //e.g. x00label
+				nodes.put(axesNames[axis] + toBinaryString(k) + "ticks", ticks);  //e.g. x00ticks
 				//add new ticks and labels to SceneGraph
 				singleAxisK.addChild(ticks);
 			}
@@ -738,12 +748,12 @@ public class CoordinateSystemFactory {
 
 			//remove old ticks and labels
 			SceneGraphComponent singleAxis = getSGC(axesNames[axis] +"Axis");  //e.g. xAxis
-			singleAxis.removeChild(getSGC(axesNames[axis]+"Label"));  //e.g. xLabel
+			singleAxis.removeChild(getSGC(axesNames[axis]+"Ticks"));  //e.g. xTicks
 			//create new ticks with labels
 			SceneGraphComponent ticks = getAxesTicks(axis,
 					axesVertices[axis][0], axesVertices[axis][1]);
 			//update hash table
-			nodes.put(axesNames[axis] + "Label", ticks);  //e.g. xLabel
+			nodes.put(axesNames[axis] + "Ticks", ticks);  //e.g. xTicks
 			//add new ticks and labels to SceneGraph
 			singleAxis.addChild(ticks);
 		}
@@ -778,7 +788,7 @@ public class CoordinateSystemFactory {
 				m = new FactoredMatrix(arrow.getTransformation());
 				m.setStretch(arrowStretch); //stretch urCone
 				m.assignTo(arrow);
-				ticks = getSGC(axesNames[axis]+toBinaryString(k)+"label");  //e.g. x00label
+				ticks = getSGC(axesNames[axis]+toBinaryString(k)+"ticks");  //e.g. x00ticks
 				m = new FactoredMatrix(ticks.getTransformation());
 				m.setStretch(tickStretch, tickStretch, 1); //stretch ticks
 				m.assignTo(ticks);
@@ -788,7 +798,7 @@ public class CoordinateSystemFactory {
 			m = new FactoredMatrix(arrow.getTransformation());
 			m.setStretch(arrowStretch); //stretch urCone
 			m.assignTo(arrow);
-			ticks = getSGC(axesNames[axis]+"Label");  //e.g. xLabel
+			ticks = getSGC(axesNames[axis]+"Ticks");  //e.g. xTicks
 			m = new FactoredMatrix(ticks.getTransformation());
 			m.setStretch(tickStretch, tickStretch, 1); //stretch ticks
 			m.assignTo(ticks);
@@ -842,34 +852,41 @@ public class CoordinateSystemFactory {
 	}
 
 	
-	//hide tick labels of axes and box
-	//only axis labels of box remain
+	//hide tick & axis labels of axes and box
 	public void hideLabels() {
 		box.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
 		axes.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
 	}
 	
-	//show all tick labels of axes and box
+	//show tick & axis labels of axes and box
 	public void showLabels() {
 		box.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
 		axes.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
 	}
 
+
+	//set color of box
+	public void setBoxColor(Color boxColor) {
+		box.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, boxColor);
+	}
+	
+	//get color of box
+	public Color getBoxColor() {
+		return boxColor;
+	}
+	
+	//set color of labels
+	public void setLabelColor(Color labelColor) {
+		box.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, labelColor);
+		axes.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, labelColor);
+	}
+	
+	//get color of labels
+	public Color getLabelColor() {
+		return labelColor;
+	}
+	
 	
 	//show box grid
-	private void showGrid() {
-		
-		//update size of box ticks
-		SceneGraphComponent ticks;
-		FactoredMatrix m;
-		
-		for (int axis=X; axis<=Z; axis++) {
-			for (int k=0; k<=3; k++) {
-				ticks = getSGC(axesNames[axis]+toBinaryString(k)+"label");  //e.g. x00label
-				m = new FactoredMatrix(ticks.getTransformation());
-				m.setStretch(20*tickStretch, 20*tickStretch, 1); //stretch ticks
-				m.assignTo(ticks);
-			}
-		}
-	}
+	//private void showGrid() {}
 }
