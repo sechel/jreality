@@ -1,11 +1,14 @@
 package de.jreality.geometry;
 
+import java.awt.Color;
 import de.jreality.math.FactoredMatrix;
+import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphPathObserver;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
+import de.jreality.scene.tool.CoordinateSystemBeautifier;
 import de.jreality.scene.tool.ToolSystemViewer;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
@@ -27,20 +30,27 @@ public class CoordinateSystemTest {
     trans.setRotation(Math.PI, 1, 1, 1);
     //trans.setTranslation(1,0,0);
     trans.assignTo(component);
-    
+
     //create coordinate system
     final CoordinateSystemFactory coords = new CoordinateSystemFactory(component);
-    //coords.setAxisScale(0.5);
+    //coords.setAxisScale(0.3);
     //coords.setLabelScale(0.02);
     //coords.showBoxArrows();
+    coords.setBoxColor(Color.RED);
+    //coords.setLabelColor(Color.MAGENTA);
+    
     
     //display axes/box
     //coords.displayAxes();
     coords.displayBox();
-        
+
+    
+    
     //display component
     ToolSystemViewer currViewer = (ToolSystemViewer)ViewerApp.display(component)[1];
     
+    //component.addTool(new CoordinateSystemBeautifier(coords));
+
     
     //get paths of camera and object
     final SceneGraphPath cameraPath = currViewer.getCameraPath();
@@ -51,13 +61,19 @@ public class CoordinateSystemTest {
     objectPath.push(scene);
     objectPath.push(component);
 
-    coords.updateBox(cameraPath, objectPath);
-
+    double[] cameraToRoot = cameraPath.getMatrix(null);
+    double[] rootToObject = objectPath.getInverseMatrix(null);
+    double[] cameraToObject = Rn.times(null, rootToObject, cameraToRoot);
+	coords.updateBox(cameraToObject);
+    
     //SceneGraphPathObserver cpObserver = new SceneGraphPathObserver(cameraPath);
     SceneGraphPathObserver opObserver = new SceneGraphPathObserver(objectPath);
     opObserver.addTransformationListener(new TransformationListener(){
     	public void transformationMatrixChanged(TransformationEvent ev){
-    		coords.updateBox(cameraPath, objectPath);
+    	    double[] cameraToRoot = cameraPath.getMatrix(null);
+    	    double[] rootToObject = objectPath.getInverseMatrix(null);
+    	    double[] cameraToObject = Rn.times(null, rootToObject, cameraToRoot);
+    		coords.updateBox(cameraToObject);
     	}
     });
   }
