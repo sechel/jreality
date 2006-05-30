@@ -234,7 +234,6 @@ public class FaceMelt {
 				// benutze durchgelaufenen Teil der Datenliste fuer neue Daten 
 				index=searchIndex(oldVertexCoordsArray,oldVertexCoordsArray[i],curr);
 				refferenceTabel[i]=index; //Indizes vermerken 
-				//System.out.println("reff["+i+"]="+index);
 				if(curr==index){
 					oldVertexCoordsArray[curr]=oldVertexCoordsArray[i];
 					if (oldVertexColorArray!=null)
@@ -280,40 +279,25 @@ public class FaceMelt {
 		
 		if (numOfVerticesNew>0){
 			if (oldVertexCoordsArray!=null){
-				System.out.println("coords");
-				System.out.println("vorm update VertAttr:"+result.getVertexAttributes().toString());
 				result.setVertexAttributes(Attribute.COORDINATES, new DoubleArrayArray.Array(newVertexCoordsArray));
-				System.out.println("vorm update VertAttr:"+result.getVertexAttributes().toString());
 			}
 			if (oldVertexColorArray!=null){
-				System.out.println("color");
-				//result.setVertexColors(newVertexColorArray);
 				result.setVertexAttributes(Attribute.COLORS, new DoubleArrayArray.Array(newVertexColorArray));
 			}
 			if (oldVertexLabelsArray!=null){
-				System.out.println("labels");
 				result.setVertexAttributes(Attribute.LABELS, new StringArray(newVertexLabelsArray));
-				//result.setVertexLabels(newVertexLabelsArray);
 			}
 			if (oldVertexNormalsArray!=null){
-				System.out.println("normals");
 				result.setVertexAttributes(Attribute.NORMALS, new DoubleArrayArray.Array(newVertexNormalsArray));
-				//result.setVertexNormals(newVertexNormalsArray);
 			}
 			if (oldVertexTextureCoordsArray!=null){
-				System.out.println("texture");
 				result.setVertexAttributes(Attribute.TEXTURE_COORDINATES, new DoubleArrayArray.Array(newVertexCoordsArray));
-				//result.setVertexTextureCoordinates(newVertexTextureCoordsArray);
 			}
 			if (oldVertexSizeArray!=null){
-				System.out.println("size");
 				result.setVertexAttributes(Attribute.POINT_SIZE, new DoubleArray(newVertexSizeArray));
-				//result.setVertexAttribute(Attribute.POINT_SIZE, new DoubleArray(newVertexSizeArray));
 			}
 			if (oldVertexIndizeesArray!=null){
-				System.out.println("indicees");
 				result.setVertexAttributes(Attribute.INDICES, new IntArrayArray.Array(newVertexIndizeesArray));
-				//result.setVertexAttribute(Attribute.INDICES,new IntArrayArray.Array(newVertexIndizeesArray));
 			}
 		}
 		
@@ -382,7 +366,6 @@ public class FaceMelt {
 				// benutze durchgelaufenen Teil der Datenliste fuer neue Daten 
 				index=searchIndex(oldVertexCoordsArray,oldVertexCoordsArray[i],curr);
 				refferenceTabel[i]=index; //Indizes vermerken 
-				//System.out.println("reff["+i+"]="+index);
 				if(curr==index){
 					oldVertexCoordsArray[curr]=oldVertexCoordsArray[i];
 					if (oldVertexColorArray!=null)
@@ -428,40 +411,25 @@ public class FaceMelt {
 		
 		if (numOfVerticesNew>0){
 			if (oldVertexCoordsArray!=null){
-				System.out.println("coords");
-				System.out.println("vorm update VertAttr:"+result.getVertexAttributes().toString());
 				result.setVertexAttributes(Attribute.COORDINATES, new DoubleArrayArray.Array(newVertexCoordsArray));
-				System.out.println("vorm update VertAttr:"+result.getVertexAttributes().toString());
 			}
 			if (oldVertexColorArray!=null){
-				System.out.println("color");
-				//result.setVertexColors(newVertexColorArray);
 				result.setVertexAttributes(Attribute.COLORS, new DoubleArrayArray.Array(newVertexColorArray));
 			}
 			if (oldVertexLabelsArray!=null){
-				System.out.println("labels");
 				result.setVertexAttributes(Attribute.LABELS, new StringArray(newVertexLabelsArray));
-				//result.setVertexLabels(newVertexLabelsArray);
 			}
 			if (oldVertexNormalsArray!=null){
-				System.out.println("normals");
 				result.setVertexAttributes(Attribute.NORMALS, new DoubleArrayArray.Array(newVertexNormalsArray));
-				//result.setVertexNormals(newVertexNormalsArray);
 			}
 			if (oldVertexTextureCoordsArray!=null){
-				System.out.println("texture");
 				result.setVertexAttributes(Attribute.TEXTURE_COORDINATES, new DoubleArrayArray.Array(newVertexCoordsArray));
-				//result.setVertexTextureCoordinates(newVertexTextureCoordsArray);
 			}
 			if (oldVertexSizeArray!=null){
-				System.out.println("size");
 				result.setVertexAttributes(Attribute.POINT_SIZE, new DoubleArray(newVertexSizeArray));
-				//result.setVertexAttribute(Attribute.POINT_SIZE, new DoubleArray(newVertexSizeArray));
 			}
 			if (oldVertexIndizeesArray!=null){
-				System.out.println("indicees");
 				result.setVertexAttributes(Attribute.INDICES, new IntArrayArray.Array(newVertexIndizeesArray));
-				//result.setVertexAttribute(Attribute.INDICES,new IntArrayArray.Array(newVertexIndizeesArray));
 			}
 		}
 		
@@ -563,40 +531,25 @@ public class FaceMelt {
 		
 		if (numOfVerticesNew>0){
 			if (oldVertexCoordsArray!=null){
-				System.out.println("coords");
-				System.out.println("vorm update VertAttr:"+result.getVertexAttributes().toString());
 				result.setVertexAttributes(Attribute.COORDINATES, new DoubleArrayArray.Array(newVertexCoordsArray));
-				System.out.println("vorm update VertAttr:"+result.getVertexAttributes().toString());
 			}
 			if (oldVertexColorArray!=null){
-				System.out.println("color");
-				//result.setVertexColors(newVertexColorArray);
 				result.setVertexAttributes(Attribute.COLORS, new DoubleArrayArray.Array(newVertexColorArray));
 			}
 			if (oldVertexLabelsArray!=null){
-				System.out.println("labels");
 				result.setVertexAttributes(Attribute.LABELS, new StringArray(newVertexLabelsArray));
-				//result.setVertexLabels(newVertexLabelsArray);
 			}
 			if (oldVertexNormalsArray!=null){
-				System.out.println("normals");
 				result.setVertexAttributes(Attribute.NORMALS, new DoubleArrayArray.Array(newVertexNormalsArray));
-				//result.setVertexNormals(newVertexNormalsArray);
 			}
 			if (oldVertexTextureCoordsArray!=null){
-				System.out.println("texture");
 				result.setVertexAttributes(Attribute.TEXTURE_COORDINATES, new DoubleArrayArray.Array(newVertexCoordsArray));
-				//result.setVertexTextureCoordinates(newVertexTextureCoordsArray);
 			}
 			if (oldVertexSizeArray!=null){
-				System.out.println("size");
 				result.setVertexAttributes(Attribute.POINT_SIZE, new DoubleArray(newVertexSizeArray));
-				//result.setVertexAttribute(Attribute.POINT_SIZE, new DoubleArray(newVertexSizeArray));
 			}
 			if (oldVertexIndizeesArray!=null){
-				System.out.println("indicees");
 				result.setVertexAttributes(Attribute.INDICES, new IntArrayArray.Array(newVertexIndizeesArray));
-				//result.setVertexAttribute(Attribute.INDICES,new IntArrayArray.Array(newVertexIndizeesArray));
 			}
 		}
 		
