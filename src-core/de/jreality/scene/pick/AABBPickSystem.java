@@ -82,7 +82,8 @@ public class AABBPickSystem implements PickSystem {
     
     public void visit(SceneGraphComponent c) {
       if (!c.isVisible()) return;
-      path.push(c);
+//      System.err.println("visiting "+c.getName());
+     path.push(c);
       if (c.getAppearance()!=null) {
         EffectiveAppearance eapNew = eap.create(c.getAppearance());
         appStack.push(eap);
@@ -162,12 +163,12 @@ public class AABBPickSystem implements PickSystem {
     
     public void visit(IndexedLineSet ils) {
       visit((PointSet)ils);
-      
       if (!pickEdges || !isPickable(ils)) return;
 
       localHits.clear();
 
-      BruteForcePicking.intersectEdges(ils, signature, path, from, to, tubeRadius, localHits);
+ //     System.err.println("Picking indexed line set "+ils.getName());
+     BruteForcePicking.intersectEdges(ils, signature, path, from, to, tubeRadius, localHits);
       AABBPickSystem.this.hits.addAll(localHits);
 
     }

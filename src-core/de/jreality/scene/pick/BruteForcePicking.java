@@ -431,7 +431,7 @@ class BruteForcePicking {
     double[] nearest=Rn.add(null,from,Rn.times(null,lambda,dir));
     double dist=Math.abs(Rn.innerProduct(dir_cyl_x_dir,from_min_v1))/Rn.euclideanNorm(dir_cyl_x_dir);
     
-    if(dist<=r && (nearest[0]-from[0])/dir[0]>=0){        
+    if(dist<=r) { // && (nearest[0]-from[0])/dir[0]>=0){        
       double angle=Math.abs(Rn.euclideanAngle(dir,dir_cyl));
       if(Math.cos(angle)!=0){  //sonst Sehstrahl parallel zu Zylinder-Achse
         if(angle>Math.PI) angle=2*Math.PI-angle;
@@ -442,7 +442,8 @@ class BruteForcePicking {
         double[] hitPointOb3=new double[3];
         Rn.times(hitPointOb3,-factor,dir);
         Rn.add(hitPointOb3,hitPointOb3,nearest); //nearest-factor*dir       
-        if((hitPointOb3[0]-from[0])/dir[0]>=0 && (Rn.euclideanDistance(hitPointOb3,v1)<maxDist && Rn.euclideanDistance(hitPointOb3,v2)<maxDist)){ //vor oder hinter from && hitPoint zwischen v1 und v2 auf Cylinder    
+//        if((hitPointOb3[0]-from[0])/dir[0]>=0 && (Rn.euclideanDistance(hitPointOb3,v1)<maxDist && Rn.euclideanDistance(hitPointOb3,v2)<maxDist)){ //vor oder hinter from && hitPoint zwischen v1 und v2 auf Cylinder    
+        if((Rn.euclideanDistance(hitPointOb3,v1)<maxDist && Rn.euclideanDistance(hitPointOb3,v2)<maxDist)){ //vor oder hinter from && hitPoint zwischen v1 und v2 auf Cylinder    
           
           if(debug){
             System.out.println("Methode2: cylinder matched_1");
@@ -457,7 +458,8 @@ class BruteForcePicking {
 
         Rn.times(hitPointOb3,factor,dir);
         Rn.add(hitPointOb3,hitPointOb3,nearest); //nearest+factor*dir
-        if((hitPointOb3[0]-from[0])/dir[0]>=0 && (Rn.euclideanDistance(hitPointOb3,v1)<maxDist && Rn.euclideanDistance(hitPointOb3,v2)<maxDist)){ //vor oder hinter from && hitPoint zwischen v1 und v2 auf Cylinder  
+//        if((hitPointOb3[0]-from[0])/dir[0]>=0 && (Rn.euclideanDistance(hitPointOb3,v1)<maxDist && Rn.euclideanDistance(hitPointOb3,v2)<maxDist)){ //vor oder hinter from && hitPoint zwischen v1 und v2 auf Cylinder  
+        if((Rn.euclideanDistance(hitPointOb3,v1)<maxDist && Rn.euclideanDistance(hitPointOb3,v2)<maxDist)){ //vor oder hinter from && hitPoint zwischen v1 und v2 auf Cylinder  
           
           if(debug){
             System.out.println("Methode2: cylinder matched_2");
