@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.HashMap;
 import javax.swing.SwingConstants;
 import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Appearance;
@@ -28,7 +29,6 @@ import de.jreality.math.Pn;
  * TO DO:
  * - determine default value of labelScale via bounding box of the component
  * - more factory attributes
- * - new tick shape
  * - grid
  * 
  */
@@ -69,16 +69,18 @@ public class CoordinateSystemFactory {
 	
 	private HashMap nodes = new HashMap();
 	
-	//attributes and default values
+	//ATTRIBUTES AND DEFAULT VALUES			
 	private double axisScale = 0.5;  //the distance between two ticks on an axis
 	private double labelScale = 0.01;  //size of labels
 	private double arrowStretch = 4*labelScale; //stretch of arrows of axes (octagonalCrossSection)
 	private double tickStretch = 2*labelScale; //stretch of ticks of axes (octagonalCrossSection)
 	private boolean showAxesArrows = true;  //show or hide arrows on axes
 	private boolean showBoxArrows = false;  //show or hide arrows on box
+	private boolean showLabels = true;  //show or hide labels of ticks & axes
 	private Color axesColor = Color.BLACK;
 	private Color boxColor = Color.BLACK;
 	private Color labelColor = Color.BLACK;
+	private Color gridColor = Color.GRAY;
 	
 	
 	
@@ -101,9 +103,7 @@ public class CoordinateSystemFactory {
 		boxMax = new double[]{ extent,  extent,  extent};
 		
 		box = calculateBox();
-		box.setVisible(false);
 		axes = calculateAxes();
-		axes.setVisible(false);
 	}
 	
 	
@@ -131,25 +131,20 @@ public class CoordinateSystemFactory {
 		}
 		
 		box = calculateBox();
-		box.setVisible(false);
 		axes = calculateAxes();
-		axes.setVisible(false);
-		component.addChild(box);
-		component.addChild(axes);
+		component.addChild(box);  //invisible child, use displayBox()
+		component.addChild(axes); //invisible child, use displayAxes()
+		
 		component.setTransformation(tmp);
 	}
 
 		
 	/**
-	 * show the bounding box of the coordinate system, which is specified by the choice of the constructor
+	 * show or hide the bounding box of the coordinate system, which is specified by the choice of the constructor
 	 * (either by an existing SceneGraphComponent or by a given extent)
 	 */
-	public void displayBox() {
-		box.setVisible(true);
-	}
-	
-	public void hideBox() {
-		box.setVisible(false);
+	public void showBox(boolean b) {
+		box.setVisible(b);
 	}
 	
 		
@@ -201,7 +196,7 @@ public class CoordinateSystemFactory {
 	    app.setAttribute(CommonAttributes.TUBES_DRAW, false);
 	    app.setAttribute(CommonAttributes.EDGE_DRAW, true);
 	    app.setAttribute(CommonAttributes.SPHERES_DRAW, true);
-	    app.setAttribute(CommonAttributes.VERTEX_DRAW, true);  //show labels
+	    app.setAttribute(CommonAttributes.VERTEX_DRAW, showLabels);  //label visibility
 		app.setAttribute(CommonAttributes.POINT_RADIUS, 0.001);  //don't show label points
 		app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, labelColor);
 		app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, boxColor);
@@ -212,21 +207,21 @@ public class CoordinateSystemFactory {
 	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
 	    
 	    box.setAppearance(app);
-		
+	    box.setVisible(false);
+	    
+	    //calculate grid and add to box
+	    box.addChild(calculate2DGrid());
+	    
 		return box;
 	}
 	
 	
 	/**
-	 * display the axes of the coordinate system, whose extent is specified by the choice of the constructor
+	 * show or hide the axes of the coordinate system, whose extent is specified by the choice of the constructor
 	 * (either by an existing SceneGraphComponent or by a given extent)
 	 */
-	public void displayAxes() {
-		axes.setVisible(true);
-	}
-	
-	public void hideAxes() {
-		axes.setVisible(false);
+	public void showAxes(boolean b) {
+		axes.setVisible(b);
 	}
 
 	
@@ -267,7 +262,7 @@ public class CoordinateSystemFactory {
 	    app.setAttribute(CommonAttributes.TUBES_DRAW, false);
 	    app.setAttribute(CommonAttributes.EDGE_DRAW, true);
 	    app.setAttribute(CommonAttributes.SPHERES_DRAW, true);
-	    app.setAttribute(CommonAttributes.VERTEX_DRAW, true);  //show labels
+	    app.setAttribute(CommonAttributes.VERTEX_DRAW, showLabels);  //label visibilty
 		app.setAttribute(CommonAttributes.POINT_RADIUS, 0.001);  //don't show label points
 		app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, labelColor);
 		app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, axesColor);
@@ -278,8 +273,9 @@ public class CoordinateSystemFactory {
 	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
 	    
 	    axes.setAppearance(app);
-		
-		return axes;
+
+	    axes.setVisible(false);
+	    return axes;
 	}
 	
 
@@ -534,6 +530,81 @@ public class CoordinateSystemFactory {
 	}
 	
 	
+	private SceneGraphComponent calculate2DGrid() {
+		
+		PointSet ps;
+		double[] points, current, translation, result;
+		FactoredMatrix trans;
+		IndexedLineSet[] gridComp = new IndexedLineSet[6];
+		for (int i=0; i<gridComp.length; i++)
+			gridComp[i] = new IndexedLineSet();
+		
+		for (int axis=X; axis<=Z; axis++) {
+			
+			//get number of ticks on axis
+			final int n = ((PointSet)getSGC(axesNames[axis]+"00ticks").getChildComponent(0).getGeometry()).getNumPoints();  //child.name="labels"
+			
+			for (int k=0; k<=3; k++) {
+				
+				double[][] vertices = new double[2*n][3];
+				int[][] indices = new int[n][2];
+				final int next = new int[]{1,2,-2,-1}[k]; //toBinaryString(k+next) = name of axis copy to which grid lines are to be drawn
+				
+				for (int i=0; i<n; i++) {
+					for (int line=0; line<=1; line++) {
+						//get anchor points of tick labels
+						ps = (PointSet)getSGC(axesNames[axis]+toBinaryString(k+line*next)+"ticks").getChildComponent(0).getGeometry();  //child.name="labels"
+						points = ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null);
+						current = new double[]{points[3*i], points[3*i+1], points[3*i+2], 0};
+						translation = (double[])boxVertices[axis][2*(k+line*next)].clone();  //minimum end point
+						translation[axis] = 0;
+						trans = new FactoredMatrix(getSGC(axesNames[axis]+toBinaryString(k+line*next)+"ticks").getTransformation());
+						result = trans.multiplyVector(current);  
+						vertices[n*line+i][0] = result[0]+translation[0];
+						vertices[n*line+i][1] = result[1]+translation[1];
+						vertices[n*line+i][2] = result[2]+translation[2];
+					}
+					
+					indices[i] = new int[]{i, n+i};
+				}
+				
+				//create line set
+				IndexedLineSetFactory fac = new IndexedLineSetFactory();
+				fac.setVertexCount(vertices.length);
+				fac.setLineCount(indices.length);
+				fac.setVertexCoordinates(vertices);
+				fac.setEdgeIndices(indices);
+				fac.update();
+				
+				//determine face and add to gridComp
+				//0=xMin, 1=xMax, 2=yMin, 3=yMax, 4=zMin, 5=zMax
+				int face = 0;
+				switch (axis) {
+				case X: face = new int[]{2,5,4,3}[k]; break;
+				case Y: face = new int[]{0,5,4,1}[k]; break;
+				case Z: face = new int[]{0,3,2,1}[k];
+				}
+				gridComp[face] = mergeIndexedLineSets(gridComp[face], fac.getIndexedLineSet());
+				
+			} //end loop for k
+		} //end loop for axis
+		
+		//create SceneGraphNodes
+		SceneGraphComponent grid = SceneGraphUtility.createFullSceneGraphComponent("grid");
+		nodes.put("grid", grid);
+		for (int i=0; i<gridComp.length; i++) {
+			SceneGraphComponent face = new SceneGraphComponent();
+			face.setName("face"+i);
+			face.setGeometry(gridComp[i]);
+			nodes.put("face"+i, face);
+			grid.addChild(face);
+		}
+		
+		grid.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, gridColor);
+		return grid;
+	}
+	
+	
 	/**
 	 * get the octagonalCrossSection on a different level than 0
 	 * @param level the level of the octagonalCrossSection (z-value) 
@@ -605,7 +676,7 @@ public class CoordinateSystemFactory {
 		int c = new int[]{0,3,1,2}[k];
 		switch(axis) {  //regard axis
 		case X : c++; break;
-		case Y : c*=-1; c--;  //first statement: switch 1 and 3
+		case Y : c*=-1; c--;  //*-1 => switch 1 and 3
 		}
 		
 		double[] rotationAxis = new double[3];
@@ -689,11 +760,13 @@ public class CoordinateSystemFactory {
 		final int index = getClosestBoxVertex(direction);
 		if (currentClosestBoxVertex == index) return;
 		
-		//set all vertices to visible
-		for (int k=0; k<=3; k++) {
-			getSGC("x"+toBinaryString(k)).setVisible(true);
-			getSGC("y"+toBinaryString(k)).setVisible(true);
-			getSGC("z"+toBinaryString(k)).setVisible(true);
+		//set all adges and grid faces to visible
+		for (int axis=X; axis<=Z; axis++) {
+			for (int k=0; k<=3; k++) {
+				getSGC(axesNames[axis]+toBinaryString(k)).setVisible(true);
+			}
+			getSGC("face"+2*axis).setVisible(true);
+			getSGC("face"+(2*axis+1)).setVisible(true);
 		}
 		
 		currentClosestBoxVertex = index;
@@ -705,13 +778,18 @@ public class CoordinateSystemFactory {
 			if (closest[axis] == boxMin[axis]) edgeCriteria[axis] = 0;  //0 corresponds to vertex with minimum value on axis i
 			else edgeCriteria[axis] = 1;  //1 corresponds to vertex with maximum value on axis i 
 		}
-		//set those edges invisible which don't have copies of same "distance to the screen"
+
+		//hide edges which don't have copies of same "distance to the screen"
 		if (direction[Y]!=0 && direction[Z]!=0)
 			getSGC("x" + edgeCriteria[Y] + edgeCriteria[Z]).setVisible(false);
 		if (direction[X]!=0 && direction[Z]!=0)
 			getSGC("y" + edgeCriteria[X] + edgeCriteria[Z]).setVisible(false);
 		if (direction[X]!=0 && direction[Y]!=0)
 			getSGC("z" + edgeCriteria[X] + edgeCriteria[Y]).setVisible(false);
+		
+		//hide corresponding grid faces
+		for (int axis=X; axis<=Z; axis++) 
+			getSGC("face"+(2*axis+edgeCriteria[axis])).setVisible(false);
 	}
 	
 	
@@ -757,6 +835,10 @@ public class CoordinateSystemFactory {
 			//add new ticks and labels to SceneGraph
 			singleAxis.addChild(ticks);
 		}
+		
+		//update grid
+		box.removeChild(getSGC("grid"));
+		box.addChild(calculate2DGrid());
 	}
 	
 	//get distance between two ticks
@@ -812,81 +894,67 @@ public class CoordinateSystemFactory {
 	}
 	
 	
-	public void showAxesArrows() {
-		if (showAxesArrows) return;
-		showAxesArrows = true;
+	public void showAxesArrows(boolean b) {
+		//if (showAxesArrows==b) return;
+		showAxesArrows = b;
 		//set visiblity of all arrows
 		for (int axis=X; axis<=Z; axis++)
-			getSGC(axesNames[axis]+"Arrow").setVisible(true);
+			getSGC(axesNames[axis]+"Arrow").setVisible(b);
 	}
-	
-	public void hideAxesArrows() {
-		if (!showAxesArrows) return;
-		showAxesArrows = false;
-		//set visiblity of all arrows
-		for (int axis=X; axis<=Z; axis++)
-			getSGC(axesNames[axis]+"Arrow").setVisible(false);
-	}
-	
 
-	public void showBoxArrows() {
-		if (showBoxArrows) return;
-		showBoxArrows = true;
+	
+	public void showBoxArrows(boolean b) {
+		//if (showBoxArrows==b) return;
+		showBoxArrows = b;
 		//set visiblity of all arrows
 		for (int axis=X; axis<=Z; axis++) {
 			for (int k=0; k<=3; k++) {
-				getSGC(axesNames[axis]+toBinaryString(k)+"arrow").setVisible(true);
+				getSGC(axesNames[axis]+toBinaryString(k)+"arrow").setVisible(b);
 			}
 		}
 	}
 	
-	public void hideBoxArrows() {
-		if (!showBoxArrows) return;
-		showBoxArrows = false;
-		//set visiblity of all arrows
-		for (int axis=X; axis<=Z; axis++) {
-			for (int k=0; k<=3; k++) {
-				getSGC(axesNames[axis]+toBinaryString(k)+"arrow").setVisible(false);
-			}
-		}
-	}
-
 	
-	//hide tick & axis labels of axes and box
-	public void hideLabels() {
-		box.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
-		axes.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
-	}
-	
-	//show tick & axis labels of axes and box
-	public void showLabels() {
-		box.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
-		axes.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
+	//show or hide tick & axis labels of axes and box
+	public void showLabels(boolean b) {
+		//if (showLabels==b) return;
+		showLabels = b;
+		box.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, b);
+		axes.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, b);
 	}
 
 
 	//set color of box
-	public void setBoxColor(Color boxColor) {
-		box.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, boxColor);
+	public void setBoxColor(Color c) {
+		boxColor = c;
+		box.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
 	}
-	
 	//get color of box
 	public Color getBoxColor() {
 		return boxColor;
 	}
+
 	
 	//set color of labels
-	public void setLabelColor(Color labelColor) {
-		box.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, labelColor);
-		axes.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, labelColor);
+	public void setLabelColor(Color c) {
+		labelColor = c;
+		box.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
+		axes.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
 	}
-	
 	//get color of labels
 	public Color getLabelColor() {
 		return labelColor;
 	}
+
 	
+	//set color of grid
+	public void setGridColor(Color c) {
+		gridColor = c;
+		getSGC("grid").getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
+	}
+	//get color of grid
+	public Color getGridColor() {
+		return gridColor;
+	}
 	
-	//show box grid
-	//private void showGrid() {}
 }
