@@ -33,17 +33,17 @@ public class CoordinateSystemTest {
 
     //create coordinate system
     final CoordinateSystemFactory coords = new CoordinateSystemFactory(component);
+    //SET PROPERTIES:
     //coords.setAxisScale(0.3);
     //coords.setLabelScale(0.02);
-    //coords.showBoxArrows();
-    coords.setBoxColor(Color.RED);
+    //coords.showBoxArrows(true);
+    //coords.setBoxColor(Color.RED);
     //coords.setLabelColor(Color.MAGENTA);
-    
+    //coords.setGridColor(Color.GRAY);
     
     //display axes/box
-    //coords.displayAxes();
-    coords.displayBox();
-
+    coords.showAxes(false);
+    coords.showBox(true);
     
     
     //display component
@@ -52,6 +52,7 @@ public class CoordinateSystemTest {
     //component.addTool(new CoordinateSystemBeautifier(coords));
 
     
+    //COORDINATE SYSTEM BEAUTIFIER:
     //get paths of camera and object
     final SceneGraphPath cameraPath = currViewer.getCameraPath();
     final SceneGraphPath objectPath = new SceneGraphPath();
