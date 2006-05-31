@@ -41,9 +41,10 @@ public class CoordinateSystemTest {
     //coords.setLabelColor(Color.MAGENTA);
     //coords.setGridColor(Color.GRAY);
     
-    //display axes/box
+    //display axes/box/grid
     coords.showAxes(false);
     coords.showBox(true);
+    coords.showGrid(true);
     
     
     //display component
