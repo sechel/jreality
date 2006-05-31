@@ -69,11 +69,15 @@ public class CoordinateSystemFactory {
 	
 	private HashMap nodes = new HashMap();
 	
-	//ATTRIBUTES AND DEFAULT VALUES			
+	
+	//DEFAULT VALUES OF PROPERTIES			
 	private double axisScale = 0.5;  //the distance between two ticks on an axis
 	private double labelScale = 0.01;  //size of labels
 	private double arrowStretch = 4*labelScale; //stretch of arrows of axes (octagonalCrossSection)
 	private double tickStretch = 2*labelScale; //stretch of ticks of axes (octagonalCrossSection)
+	private boolean showAxes = false;  //show or hide axes
+	private boolean showBox = false;  //show or hide box
+	private boolean showGrid = false;  //show or hide grid on box
 	private boolean showAxesArrows = true;  //show or hide arrows on axes
 	private boolean showBoxArrows = false;  //show or hide arrows on box
 	private boolean showLabels = true;  //show or hide labels of ticks & axes
@@ -83,6 +87,8 @@ public class CoordinateSystemFactory {
 	private Color gridColor = Color.GRAY;
 	
 	
+	
+	//CONSTRUCTORS
 	
 	/**
 	 * coordinate system with extent 4
@@ -138,16 +144,10 @@ public class CoordinateSystemFactory {
 		component.setTransformation(tmp);
 	}
 
-		
-	/**
-	 * show or hide the bounding box of the coordinate system, which is specified by the choice of the constructor
-	 * (either by an existing SceneGraphComponent or by a given extent)
-	 */
-	public void showBox(boolean b) {
-		box.setVisible(b);
-	}
 	
-		
+	
+	//METHODS
+	
 	private SceneGraphComponent calculateBox() {
 		
 		calculateBoxVertices();
@@ -207,7 +207,7 @@ public class CoordinateSystemFactory {
 	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
 	    
 	    box.setAppearance(app);
-	    box.setVisible(false);
+	    box.setVisible(showBox);
 	    
 	    //calculate grid and add to box
 	    box.addChild(calculate2DGrid());
@@ -215,15 +215,6 @@ public class CoordinateSystemFactory {
 		return box;
 	}
 	
-	
-	/**
-	 * show or hide the axes of the coordinate system, whose extent is specified by the choice of the constructor
-	 * (either by an existing SceneGraphComponent or by a given extent)
-	 */
-	public void showAxes(boolean b) {
-		axes.setVisible(b);
-	}
-
 	
 	private SceneGraphComponent calculateAxes() {
 
@@ -274,7 +265,7 @@ public class CoordinateSystemFactory {
 	    
 	    axes.setAppearance(app);
 
-	    axes.setVisible(false);
+	    axes.setVisible(showAxes);
 	    return axes;
 	}
 	
@@ -601,6 +592,7 @@ public class CoordinateSystemFactory {
 		}
 		
 		grid.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, gridColor);
+		grid.setVisible(showGrid);
 		return grid;
 	}
 	
@@ -795,7 +787,7 @@ public class CoordinateSystemFactory {
 	
 	
 //-----------------------------------------------------------------------------------
-//set and get attributes
+//SETTING PROPERTIES
 //-----------------------------------------------------------------------------------
 	
 	
@@ -891,6 +883,32 @@ public class CoordinateSystemFactory {
 	//set stretch size of arrows, ticks and tick labels
 	public double getLabelScale() {
 		return labelScale;
+	}
+	
+	
+	/**
+	 * show or hide the axes of the coordinate system, whose extent is specified by the choice of the constructor
+	 * (either by an existing SceneGraphComponent or by a given extent)
+	 */
+	public void showAxes(boolean b) {
+		showAxes = b;
+		axes.setVisible(b);
+	}
+
+	
+	/**
+	 * show or hide the bounding box of the coordinate system, which is specified by the choice of the constructor
+	 * (either by an existing SceneGraphComponent or by a given extent)
+	 */
+	public void showBox(boolean b) {
+		showBox = b;
+		box.setVisible(b);
+	}
+
+
+	public void showGrid(boolean b) {
+		showGrid = b;
+		getSGC("grid").setVisible(b);
 	}
 	
 	
