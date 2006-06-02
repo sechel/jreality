@@ -1084,19 +1084,19 @@ public class IndexedFaceSetUtility {
         		if (child.getGeometry() == null) continue;
         		Geometry geom = child.getGeometry();
          		if (geom instanceof IndexedFaceSet)	{
-        			ifslist.add(geom);
-            		toRemove.add(child);
-                	ifs = (IndexedFaceSet) geom;
+         			ifslist.add(geom);
+         			toRemove.add(child);
+         			ifs = (IndexedFaceSet) geom;
                		lengths.add(new Integer(ifs.getNumPoints()));
-            		vcount += ifs.getNumPoints();
+               		vcount += ifs.getNumPoints();
               		ap = child.getAppearance();
-            		if (ap != null)	{
-            			EffectiveAppearance ceap = eap.create(ap);
-                    	Object dc =  ceap.getAttribute("polygonShader.diffuseColor",Color.WHITE, Color.class);
-                    	if (dc instanceof Color)		{
-                    		colorList.add(dc);
-                    	}  else 
-                    		colorList.add(Color.WHITE);	
+              		if (ap != null)	{
+              			EffectiveAppearance ceap = eap.create(ap);
+              			Object dc =  ceap.getAttribute("polygonShader.diffuseColor",Color.WHITE, Color.class);
+              			if (dc instanceof Color)		{
+              				colorList.add(dc);
+              			}  else 
+              				colorList.add(Color.WHITE);	
             		}
         		}
         	}
