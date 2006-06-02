@@ -711,6 +711,14 @@ public class P3 extends Pn {
 		return planeFromPoints(point, p1, p2, p3);
 	}
 	
+	public static double[] planeIntersectLine(double[] point, double[] plane, double[] p1, double[] p2)	{
+		if (point == null) point = new double[4];
+		double s1 = -Rn.innerProduct(plane, p1);
+		double s2 = Rn.innerProduct(plane, p2);
+		Rn.linearCombination(point, s2, p1, s1, p2);
+		return point;
+	}
+	
 	public static double[] pluckerCoordinates(double[] dst, double[] p0, double[] p1)	{
 		if (p0.length != 4 || p1.length != 4) {
 			throw new IllegalArgumentException("Input points must be homogeneous vectors");
