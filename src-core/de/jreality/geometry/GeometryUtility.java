@@ -329,6 +329,8 @@ public class GeometryUtility {
             	   CopyFactory cf = new CopyFactory();
             	   oldi.accept(cf);
             	   PointSet i = (PointSet) cf.getProxy();
+            	   //System.err.println("point set is "+i);
+            	   if (i.getVertexAttributes(Attribute.COORDINATES) == null) return;
            	   double[][] v = i.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
             	   double[] currentMatrix = thePath.getMatrix(null);
             	   double[][] nv = Rn.matrixTimesVector(null, currentMatrix, v);
