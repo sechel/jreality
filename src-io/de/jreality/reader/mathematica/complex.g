@@ -9,7 +9,7 @@ header {
 * @author Bernd Gonska
 * @version 1.0
 */
-package de.jreality.test.reader.mathematica;
+package de.jreality.reader.mathematica;
 import java.awt.*;
 import java.util.*;
 import de.jreality.geometry.*;
@@ -50,7 +50,7 @@ options {
 	private Vector getDim(Vector dimLength , Vector data){
 		// rekursiv
 		if (data==null) return null;// FehlerFall
-		dimLength.add(data.size());
+		dimLength.add(new Integer(data.size()));
 		try{
 			Complex c=(Complex)data.get(0); // ist das naechste eine Complexe Zahl?
 			return dimLength;				// dann: RekursionsEnde
