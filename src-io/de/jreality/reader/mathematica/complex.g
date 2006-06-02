@@ -47,7 +47,7 @@ options {
 	// depth max : in den Blaettern die hoffentlich nur complexe Zahlen enthalten
 	// depth max ist dimenson-1
 
-	private Vector getDim(Vector dimLength , Vector data){
+	public Vector getDim(Vector dimLength , Vector data){
 		// rekursiv
 		if (data==null) return null;// FehlerFall
 		dimLength.add(new Integer(data.size()));
@@ -64,7 +64,7 @@ options {
 	
 	// dim=0 -> erste Tiefe
 	// informatisch zaehlen
-	private boolean checkSize(int dim, Vector dimLength, Vector data){
+	public boolean checkSize(int dim, Vector dimLength, Vector data){
 		// rekursiv
 		if (data==null) return false;				// FehlerFall
 		int len=data.size();						// Laenge des aktuellen Vectors
