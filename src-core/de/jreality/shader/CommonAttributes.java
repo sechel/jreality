@@ -133,6 +133,11 @@ public class CommonAttributes {
     public final static double SPECULAR_COEFFICIENT_DEFAULT =  .7;
 	public static final String LIGHT_DIRECTION = "lightDirection";
 
+	// implode polygon shader
+	public static final String IMPLODE = "implode";
+	public static final String IMPLODE_FACTOR = "implodeFactor";
+	public static final double IMPLODE_FACTOR_DEFAULT = 0.6;
+	
 	// miscellaneous
 	public static final String PICKABLE = "pickable";
 	public static final String SIGNATURE= "signature";
