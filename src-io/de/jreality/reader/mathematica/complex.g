@@ -194,16 +194,16 @@ complexThing returns[Complex c]
 	: 	
 	( PLUS{sign=1;}|MINUS{sign=-1;})?
 	(
-		 "i"							{re=0;im=sign*1;} 
+		 "I"								{re=0;im=sign*1;} 
 	 	|
-	 	 temp1=doubleThing 				{re=sign*temp1; im=0;}
+	 	 temp1=doubleThing 					{re=sign*temp1; im=0;}
 	 	 (
-	 	 	"i"							{re=0; im=sign*temp1;}
+	 	 	(STAR)? "I"						{re=0; im=sign*temp1;}
 	 	 	|
-	 	 	(PLUS						{sign2=1;} 
-	 	 	|MINUS						{sign2=-1;}		)?
-	 	 	(temp2=doubleThing "i"		{im=sign2*temp2;}
-	 	 	 | "i"						{im=sign2*1;}
+	 	 	(PLUS							{sign2=1;} 
+	 	 	|MINUS							{sign2=-1;}		)?
+	 	 	(temp2=doubleThing (STAR)? "I"	{im=sign2*temp2;}
+	 	 	 | "I"							{im=sign2*1;}
 	 	 	)
 	 	 	
 	 	 )?
