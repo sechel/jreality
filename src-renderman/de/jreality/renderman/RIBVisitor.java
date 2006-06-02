@@ -485,7 +485,7 @@ public class RIBVisitor extends SceneGraphVisitor {
    	 	// We'd like to be able to use the "Pw" attribute which accepts 4-vectors for point coordinates, but 3Delight-5.0.1
 	 	// does not support it ...  
 	 	// TODO figure out how to allow Pw output if desired, for example, if you have Pixar renderman renderer.
-//        if (pointlength == 3)	{
+        if (true) { //pointlength == 3)	{
             float[] fcoords =new float[3*da.getLength()];
             for (int j = 0; j < da.getLength(); j++) {
             	 	if (pointlength == 4)	{
@@ -502,16 +502,16 @@ public class RIBVisitor extends SceneGraphVisitor {
             	 	}
             }
             map.put("P",fcoords);       	
-//        } else if (pointlength == 4)	{
-//            float[] fcoords =new float[4*da.getLength()];
-//            for (int j = 0; j < da.getLength(); j++) {
-//                fcoords[3*j+0] =(float)da.getValueAt(j,0);
-//                fcoords[3*j+1] =(float)da.getValueAt(j,1);
-//                fcoords[3*j+2] =(float)da.getValueAt(j,2);
-//                fcoords[3*j+3] =(float)da.getValueAt(j,3);
-//            }
-//            map.put("Pw",fcoords);       	
-//        }
+        } else if (false) { //pointlength == 4)	{
+            float[] fcoords =new float[4*da.getLength()];
+            for (int j = 0; j < da.getLength(); j++) {
+                fcoords[3*j+0] =(float)da.getValueAt(j,0);
+                fcoords[3*j+1] =(float)da.getValueAt(j,1);
+                fcoords[3*j+2] =(float)da.getValueAt(j,2);
+                fcoords[3*j+3] =(float)da.getValueAt(j,3);
+            }
+            map.put("Pw",fcoords);       	
+        }
        DataList normals = i.getVertexAttributes(Attribute.NORMALS);
         if(smooth && normals!=null) {
             da = normals.toDoubleArrayArray();
