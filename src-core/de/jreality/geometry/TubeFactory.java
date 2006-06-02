@@ -250,21 +250,22 @@ public  class TubeFactory {
 							projectedN = parallelNormalField[i-2];		// try something!
 						}
 						parallelNormalField[i-1] = Pn.normalizePlane(null, projectedN, signature);
-						//if (Rn.innerProduct(pN[i-1], pN[i-2]) < 0) Rn.times(pN[i-1], -1.0, pN[i-1]);
 						if ((debug & 128) != 0)	theLogger.log(Level.FINE,"Parallel normal is "+Rn.toString(parallelNormalField[i-1],6));
 					}
-				} 
-//				size = Rn.euclideanNormSquared(pN[i-1]);
-				if (size < 10E-16)	{
-					if ((debug & 2) != 0) theLogger.log(Level.FINE,"degenerate parallel normal");
-					if (i > 1) parallelNormalField[i-1] = parallelNormalField[i-2];
-				}
-				Pn.setToLength(parallelNormalField[i-1], parallelNormalField[i-1], 1.0, signature);
-				if (type == TubeUtility.PARALLEL)		{
+//					if (size < 10E-16)	{
+//						if ((debug & 2) != 0) theLogger.log(Level.FINE,"degenerate parallel normal");
+//						if (i > 1) parallelNormalField[i-1] = parallelNormalField[i-2];
+//					}
+					if (parallelNormalField[i-1] == null)	{
+						parallelNormalField[i-1] = parallelNormalField[i-2];
+//						throw new IllegalStateException("Null vector");
+					} else 
+						Pn.setToLength(parallelNormalField[i-1], parallelNormalField[i-1], 1.0, signature);
 					phi = Pn.angleBetween(frenetNormalField[i-1],parallelNormalField[i-1],signature);
 					double a = Pn.angleBetween(parallelNormalField[i-1],binormalField[i-1],signature);
 					if (a > Math.PI/2) phi = -phi;
-				}
+				} 
+//				size = Rn.euclideanNormSquared(pN[i-1]);
 				else phi = 0.0;
 				
 				System.arraycopy(frenetNormalField[i-1], 0, frame, 0, 4);
