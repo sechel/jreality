@@ -3,15 +3,15 @@ package de.jreality.geometry;
 import java.awt.Color;
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Rn;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphPathObserver;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
-//import de.jreality.scene.tool.CoordinateSystemBeautifier;
 import de.jreality.scene.tool.ToolSystemViewer;
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.SceneGraphUtility;
+
 
 public class CoordinateSystemTest {
 
@@ -37,12 +37,14 @@ public class CoordinateSystemTest {
     //coords.setAxisScale(0.3);
     //coords.setLabelScale(0.02);
     //coords.showBoxArrows(true);
-    //coords.setBoxColor(Color.RED);
+    //coords.showAxesArrows(false);
+    //coords.showLabels(false);
+    //coords.setColor(Color.RED);
     //coords.setLabelColor(Color.MAGENTA);
-    //coords.setGridColor(Color.GRAY);
+    coords.setGridColor(Color.GRAY);
     
     //display axes/box/grid
-    coords.showAxes(false);
+    coords.showAxes(true);
     coords.showBox(true);
     coords.showGrid(true);
     
@@ -50,7 +52,6 @@ public class CoordinateSystemTest {
     //display component
     ToolSystemViewer currViewer = (ToolSystemViewer)ViewerApp.display(component)[1];
     
-    //component.addTool(new CoordinateSystemBeautifier(coords));
 
     
     //COORDINATE SYSTEM BEAUTIFIER:
@@ -123,8 +124,11 @@ public class CoordinateSystemTest {
 	  psf.setImmersion( immersion );
 	  psf.update();
 	  
-	  SceneGraphComponent parametricSurface = SceneGraphUtility.createFullSceneGraphComponent("ParametricSurface");
-	  parametricSurface.setGeometry(psf.getIndexedFaceSet());
+	  SceneGraphComponent parametricSurface = new SceneGraphComponent();
+	  parametricSurface.setName("ParametricSurface");
+	  Geometry geom = psf.getIndexedFaceSet();
+	  geom.setName("parametricSurface");
+	  parametricSurface.setGeometry(geom);
 	  
 	  return parametricSurface;
   }
