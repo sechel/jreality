@@ -3,6 +3,7 @@ package de.jreality.geometry;
 import java.awt.Color;
 import java.util.HashMap;
 import javax.swing.SwingConstants;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -12,12 +13,10 @@ import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.geometry.Primitives;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.util.SceneGraphUtility;
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.Quaternion;
 import de.jreality.math.Rn;
-import de.jreality.math.Pn;
 
 
 /**
@@ -28,8 +27,8 @@ import de.jreality.math.Pn;
  * 
  * TO DO:
  * - determine default value of labelScale via bounding box of the component
- * - more factory attributes
- * - grid
+ * - CoordinateSystemBeautifier
+ * - documentation
  * 
  */
 public class CoordinateSystemFactory {
@@ -41,7 +40,7 @@ public class CoordinateSystemFactory {
 	public final static int X = 0, Y = 1, Z = 2;
 	
 	private double[][][] axesVertices, boxVertices;
-	private SceneGraphComponent box, axes;
+	private SceneGraphComponent coordinateSystem, box, axes;
 	
 	private final String[] axesNames = {"x", "y", "z"};
 	
@@ -63,7 +62,7 @@ public class CoordinateSystemFactory {
 		//GeometryUtility.calculateAndSetVertexNormals(urCone);
 	}
 	
-	int signature = Pn.EUCLIDEAN;
+	//private int signature = Pn.EUCLIDEAN;
 	
 	private int currentClosestBoxVertex = -1;  //index of a currently closest box vertex in boxVertices[0] 
 	
@@ -81,8 +80,7 @@ public class CoordinateSystemFactory {
 	private boolean showAxesArrows = true;  //show or hide arrows on axes
 	private boolean showBoxArrows = false;  //show or hide arrows on box
 	private boolean showLabels = true;  //show or hide labels of ticks & axes
-	private Color axesColor = Color.BLACK;
-	private Color boxColor = Color.BLACK;
+	private Color coordinateSystemColor = Color.BLACK;
 	private Color labelColor = Color.BLACK;
 	private Color gridColor = Color.GRAY;
 	
@@ -110,6 +108,7 @@ public class CoordinateSystemFactory {
 		
 		box = calculateBox();
 		axes = calculateAxes();
+		coordinateSystem = createCoordinateSystem();
 	}
 	
 	
@@ -138,8 +137,8 @@ public class CoordinateSystemFactory {
 		
 		box = calculateBox();
 		axes = calculateAxes();
-		component.addChild(box);  //invisible child, use displayBox()
-		component.addChild(axes); //invisible child, use displayAxes()
+		coordinateSystem = createCoordinateSystem();
+		component.addChild(coordinateSystem);
 		
 		component.setTransformation(tmp);
 	}
@@ -147,6 +146,36 @@ public class CoordinateSystemFactory {
 	
 	
 	//METHODS
+
+	private SceneGraphComponent createCoordinateSystem() {
+		
+		coordinateSystem = new SceneGraphComponent();
+		coordinateSystem.setName("CoordinateSystem");
+		
+		coordinateSystem.addChild(box);  //invisible child, use displayBox(boolean)
+		coordinateSystem.addChild(axes); //invisible child, use displayBox(boolean)
+		
+		//set appearance of coordinate system node
+		Appearance app = new Appearance();
+		app.setName("Appearance");
+	    app.setAttribute(CommonAttributes.EDGE_DRAW, true);
+	    app.setAttribute(CommonAttributes.SPHERES_DRAW, true);
+	    app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
+	    app.setAttribute(CommonAttributes.VERTEX_DRAW, showLabels);  //label visibility
+		app.setAttribute(CommonAttributes.POINT_RADIUS, 0.001);  //don't show label points
+		app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, labelColor);
+		app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, coordinateSystemColor);
+		app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, coordinateSystemColor);
+		//app.setAttribute(CommonAttributes.SPECULAR_COLOR, Color.BLACK);
+	    app.setAttribute(CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
+	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"scale", labelScale);  //label scale
+	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"offset", new double[]{0.04, 0, 0});  //label offset of ticks
+	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.EAST);
+	    coordinateSystem.setAppearance(app);
+		
+		return coordinateSystem;
+	}
+	
 	
 	private SceneGraphComponent calculateBox() {
 		
@@ -189,30 +218,16 @@ public class CoordinateSystemFactory {
 			}
 			box.addChild(singleAxis);
 		}
-
 		
-		//set appearance of box node
-		Appearance app = new Appearance();
-	    app.setAttribute(CommonAttributes.TUBES_DRAW, false);
-	    app.setAttribute(CommonAttributes.EDGE_DRAW, true);
-	    app.setAttribute(CommonAttributes.SPHERES_DRAW, true);
-	    app.setAttribute(CommonAttributes.VERTEX_DRAW, showLabels);  //label visibility
-		app.setAttribute(CommonAttributes.POINT_RADIUS, 0.001);  //don't show label points
-		app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, labelColor);
-		app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, boxColor);
-		//app.setAttribute(CommonAttributes.SPECULAR_COLOR, Color.BLACK);
-	    app.setAttribute(CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
-	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"scale", labelScale);  //label scale
-	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"offset", new double[]{0.04,-0.07,0});  //label offset of ticks
-	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
-	    
-	    box.setAppearance(app);
-	    box.setVisible(showBox);
-	    
 	    //calculate grid and add to box
 	    box.addChild(calculate2DGrid());
 	    
-		return box;
+	    //Appearance app = new Appearance();
+	    //app.setName("boxAppearance");
+	    //box.setAppearance(app);
+	    box.setVisible(showBox);
+
+	    return box;
 	}
 	
 	
@@ -248,24 +263,11 @@ public class CoordinateSystemFactory {
 			axes.addChild(singleAxis);
 		}
 		
-		//set appearance of axes node
-		Appearance app = new Appearance();
-	    app.setAttribute(CommonAttributes.TUBES_DRAW, false);
-	    app.setAttribute(CommonAttributes.EDGE_DRAW, true);
-	    app.setAttribute(CommonAttributes.SPHERES_DRAW, true);
-	    app.setAttribute(CommonAttributes.VERTEX_DRAW, showLabels);  //label visibilty
-		app.setAttribute(CommonAttributes.POINT_RADIUS, 0.001);  //don't show label points
-		app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, labelColor);
-		app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, axesColor);
-		//app.setAttribute(CommonAttributes.SPECULAR_COLOR, Color.BLACK);
-	    app.setAttribute(CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
-	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"scale", labelScale);  //label scale
-		app.setAttribute(CommonAttributes.POINT_SHADER+"."+"offset", new double[]{0.04,-0.07,0});  //label offset
-	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.NORTH_EAST);
-	    
-	    axes.setAppearance(app);
-
+	    //Appearance app = new Appearance();
+	    //app.setName("axesAppearance");
+	    //box.setAppearance(app);
 	    axes.setVisible(showAxes);
+	    
 	    return axes;
 	}
 	
@@ -337,7 +339,6 @@ public class CoordinateSystemFactory {
 	private SceneGraphComponent getLine(int axis, double[] min, double[] max, boolean forBox) {
 		//line through min and max has to be parallel to the coordinate axis specified by axis 
 	
-		SceneGraphComponent line = SceneGraphUtility.createFullSceneGraphComponent("line");
 		IndexedLineSetFactory lineLSF = new IndexedLineSetFactory();
 		lineLSF.setVertexCount(2);
 		lineLSF.setLineCount(1);
@@ -357,15 +358,26 @@ public class CoordinateSystemFactory {
 
 		labelPSF.setVertexLabels(new String[]{axesNames[axis]});
 		labelPSF.update();
-
-		SceneGraphComponent label = SceneGraphUtility.createFullSceneGraphComponent("label");
-		Appearance a = new Appearance();  //for label offset
-		a.setAttribute(CommonAttributes.POINT_SHADER+"."+"offset", new double[]{0,-.2,0});  //label offset
-		line.setAppearance(a);
-		label.setGeometry(labelPSF.getPointSet());
-		line.addChild(label);
 		
-		line.setGeometry(lineLSF.getIndexedLineSet());
+		SceneGraphComponent label = new SceneGraphComponent();
+		label.setName("label");
+		Geometry geom = labelPSF.getPointSet();
+		geom.setName("anchorPoint");
+		label.setGeometry(geom);
+		
+		SceneGraphComponent line = new SceneGraphComponent();
+		line.setName("line");
+		line.addChild(label);
+		//set axis label offset
+		Appearance app =  new Appearance();
+		app.setName("lineAppearance");
+		app.setAttribute(CommonAttributes.POINT_SHADER+"."+"offset", new double[]{0,-.2,0});
+		//app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.EAST);  //inherited
+		line.setAppearance(app);
+		geom = lineLSF.getIndexedLineSet();
+		geom.setName("line");
+		line.setGeometry(geom);
+		
 		return line;
 	}
 		
@@ -380,8 +392,11 @@ public class CoordinateSystemFactory {
 	 */
 	private SceneGraphComponent getArrow(int axis, double[] min, double[] max) {
 	
-		SceneGraphComponent arrow = SceneGraphUtility.createFullSceneGraphComponent("arrow");
-		arrow.setGeometry(urCone);
+		SceneGraphComponent arrow = new SceneGraphComponent();
+		arrow.setName("arrow");
+		Geometry geom = urCone;
+		geom.setName("arrow");
+		arrow.setGeometry(geom);
 		//get rotation for axis
 		//FactoredMatrix m = new FactoredMatrix(TubeUtility.tubeOneEdge(min, max, 0.025, null, signature).getTransformation());
 		//above method results in incorrect translation
@@ -390,7 +405,10 @@ public class CoordinateSystemFactory {
 		m.setStretch(arrowStretch); //stretch urCone
 		//translate to axis tip
 		m.setTranslation(max);
-		m.assignTo(arrow);
+		Transformation trans = new Transformation(m.getArray());
+		trans.setName("arrowTransformation");
+		trans.setReadOnly(true);
+		arrow.setTransformation(trans);
 		
 		return arrow;
 	}
@@ -411,7 +429,9 @@ public class CoordinateSystemFactory {
 		final double minLevel = round(axisScale*Math.ceil( (min[axis])/axisScale ));  //round to 3 decimal places
 		final double maxLevel = round(axisScale*Math.floor( (max[axis]-arrowHeight*arrowStretch)/axisScale ));  //give space for arrow
 		
-		if (minLevel>maxLevel) return SceneGraphUtility.createFullSceneGraphComponent("ticks");
+		SceneGraphComponent ticks = new SceneGraphComponent();
+		ticks.setName("ticks");
+		if (minLevel>maxLevel) return ticks;
 		
 		IndexedFaceSet ticksGeom = Primitives.pyramid(octagonalCrossSection(minLevel), new double[]{0,0,minLevel});  //init
 		int numOfTicks = 1;
@@ -438,11 +458,14 @@ public class CoordinateSystemFactory {
 		labelPSF.setVertexCoordinates(labelPoints);
 		labelPSF.setVertexLabels(labelStr);
 		labelPSF.update();
-		SceneGraphComponent labels = SceneGraphUtility.createFullSceneGraphComponent("labels");
-		labels.setGeometry(labelPSF.getPointSet());
-		
+		SceneGraphComponent labels = new SceneGraphComponent();
+		labels.setName("label");
+		Geometry geom = labelPSF.getPointSet();
+		geom.setName("anchorPoints");
+		labels.setGeometry(geom);
+
 		//create the SceneGraphComponent and rotate the ticks onto the corresponding coordinate axis
-		SceneGraphComponent ticks = SceneGraphUtility.createFullSceneGraphComponent("ticks");
+		ticksGeom.setName("ticks");
 		ticks.setGeometry(ticksGeom);
 		FactoredMatrix m = new FactoredMatrix();
 		m.setRotation(getAxisRotation(axis));
@@ -450,7 +473,10 @@ public class CoordinateSystemFactory {
 		translation[axis] = 0;
 		m.setTranslation(translation);
 		m.setStretch(tickStretch, tickStretch, 1); //stretch ticks
-		m.assignTo(ticks);
+		Transformation trans = new Transformation(m.getArray());
+		trans.setName("tickTransformation");
+		trans.setReadOnly(true);
+		ticks.setTransformation(trans);
 
 		ticks.addChild(labels);
 		return ticks;
@@ -472,7 +498,9 @@ public class CoordinateSystemFactory {
 		final double minLevel = round(axisScale*Math.ceil( (min[axis]+0.05)/axisScale ));  //round to 3 decimal places
 		final double maxLevel = round(axisScale*Math.floor( (max[axis]-0.05)/axisScale));  //give space for box corners
 		
-		if (minLevel>maxLevel) return SceneGraphUtility.createFullSceneGraphComponent("ticks");
+		SceneGraphComponent ticks = new SceneGraphComponent();
+		ticks.setName("ticks");
+		if (minLevel>maxLevel) return ticks;
 		
 		IndexedLineSet ticksGeom = new IndexedLineSet();
 		IndexedLineSetFactory newTick;
@@ -502,11 +530,14 @@ public class CoordinateSystemFactory {
 		labelPSF.setVertexCoordinates(labelPoints);
 		labelPSF.setVertexLabels(labelStr);
 		labelPSF.update();
-		SceneGraphComponent labels = SceneGraphUtility.createFullSceneGraphComponent("labels");
-		labels.setGeometry(labelPSF.getPointSet());
+		SceneGraphComponent labels = new SceneGraphComponent();
+		labels.setName("label");
+		Geometry geom = labelPSF.getPointSet();
+		geom.setName("anchorPoints");
+		labels.setGeometry(geom);
 		
 		//create the SceneGraphComponent and rotate the ticks onto the corresponding coordinate axis
-		SceneGraphComponent ticks = SceneGraphUtility.createFullSceneGraphComponent("ticks");
+		ticksGeom.setName("ticks");
 		ticks.setGeometry(ticksGeom);
 		FactoredMatrix m = new FactoredMatrix();
 		m.setRotation(Quaternion.times(new Quaternion(), getTickRotation(axis, k), getAxisRotation(axis)));
@@ -514,7 +545,10 @@ public class CoordinateSystemFactory {
 		translation[axis] = 0;
 		m.setTranslation(translation);
 		m.setStretch(tickStretch, tickStretch, 1); //stretch ticks
-		m.assignTo(ticks);
+		Transformation trans = new Transformation(m.getArray());
+		trans.setName("tickTransformation");
+		trans.setReadOnly(true);
+		ticks.setTransformation(trans);
 
 		ticks.addChild(labels);
 		return ticks;
@@ -549,7 +583,7 @@ public class CoordinateSystemFactory {
 						current = new double[]{points[3*i], points[3*i+1], points[3*i+2], 0};
 						translation = (double[])boxVertices[axis][2*(k+line*next)].clone();  //minimum end point
 						translation[axis] = 0;
-						trans = new FactoredMatrix(getSGC(axesNames[axis]+toBinaryString(k+line*next)+"ticks").getTransformation());
+						trans = new FactoredMatrix(getSGC(axesNames[axis]+toBinaryString(k+line*next)+"ticks").getTransformation());  //e.g. x00ticks
 						result = trans.multiplyVector(current);  
 						vertices[n*line+i][0] = result[0]+translation[0];
 						vertices[n*line+i][1] = result[1]+translation[1];
@@ -581,17 +615,22 @@ public class CoordinateSystemFactory {
 		} //end loop for axis
 		
 		//create SceneGraphNodes
-		SceneGraphComponent grid = SceneGraphUtility.createFullSceneGraphComponent("grid");
+		SceneGraphComponent grid = new SceneGraphComponent();
+		grid.setName("grid");
 		nodes.put("grid", grid);
 		for (int i=0; i<gridComp.length; i++) {
 			SceneGraphComponent face = new SceneGraphComponent();
 			face.setName("face"+i);
+			gridComp[i].setName("face");
 			face.setGeometry(gridComp[i]);
 			nodes.put("face"+i, face);
 			grid.addChild(face);
 		}
 		
-		grid.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, gridColor);
+		Appearance app = new Appearance();
+		app.setName("gridAppearance");
+		app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, gridColor);
+		grid.setAppearance(app);
 		grid.setVisible(showGrid);
 		return grid;
 	}
@@ -787,8 +826,15 @@ public class CoordinateSystemFactory {
 	
 	
 //-----------------------------------------------------------------------------------
-//SETTING PROPERTIES
+//SETTING & GETTING PROPERTIES
 //-----------------------------------------------------------------------------------
+	
+	
+	public SceneGraphComponent getCoordinateSystem() {
+		
+		return coordinateSystem;
+	}
+	
 	
 	
 	//set distance between two ticks
@@ -845,9 +891,7 @@ public class CoordinateSystemFactory {
 		//else
 		this.labelScale = labelScale;
 		
-		box.getAppearance().setAttribute("pointShader.scale", labelScale);
-		box.getAppearance().setAttribute("lineShader.scale", labelScale);
-		axes.getAppearance().setAttribute("pointShader.scale", labelScale);
+		coordinateSystem.getAppearance().setAttribute("pointShader.scale", labelScale);
 		
 		//update size of arrows and ticks
 		arrowStretch = 4*labelScale;
@@ -861,21 +905,35 @@ public class CoordinateSystemFactory {
 				arrow = getSGC(axesNames[axis]+toBinaryString(k)+"arrow");  //e.g. x00arrow
 				m = new FactoredMatrix(arrow.getTransformation());
 				m.setStretch(arrowStretch); //stretch urCone
-				m.assignTo(arrow);
+				Transformation trans = new Transformation(m.getArray());
+				trans.setName("arrowTransformation");
+				trans.setReadOnly(true);
+				arrow.setTransformation(trans);
+				
 				ticks = getSGC(axesNames[axis]+toBinaryString(k)+"ticks");  //e.g. x00ticks
 				m = new FactoredMatrix(ticks.getTransformation());
 				m.setStretch(tickStretch, tickStretch, 1); //stretch ticks
-				m.assignTo(ticks);
+				trans = new Transformation(m.getArray());
+				trans.setName("tickTransformation");
+				trans.setReadOnly(true);
+				ticks.setTransformation(trans);
 			}
 			//for axes:
 			arrow = getSGC(axesNames[axis]+"Arrow");  //e.g. xArrow
 			m = new FactoredMatrix(arrow.getTransformation());
 			m.setStretch(arrowStretch); //stretch urCone
-			m.assignTo(arrow);
+			Transformation trans = new Transformation(m.getArray());
+			trans.setName("arrowTransformation");
+			trans.setReadOnly(true);
+			arrow.setTransformation(trans);
+			
 			ticks = getSGC(axesNames[axis]+"Ticks");  //e.g. xTicks
 			m = new FactoredMatrix(ticks.getTransformation());
 			m.setStretch(tickStretch, tickStretch, 1); //stretch ticks
-			m.assignTo(ticks);
+			trans = new Transformation(m.getArray());
+			trans.setName("tickTransformation");
+			trans.setReadOnly(true);
+			ticks.setTransformation(trans);
 		}
 		// recalculate tick levels since arrow size changed ???
 	}
@@ -937,27 +995,26 @@ public class CoordinateSystemFactory {
 	public void showLabels(boolean b) {
 		//if (showLabels==b) return;
 		showLabels = b;
-		box.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, b);
-		axes.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, b);
+		coordinateSystem.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, b);
 	}
 
 
-	//set color of box
-	public void setBoxColor(Color c) {
-		boxColor = c;
-		box.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
+	//set color of coordinate system
+	public void setColor(Color c) {
+		coordinateSystemColor = c;
+		coordinateSystem.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
+		coordinateSystem.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
 	}
 	//get color of box
-	public Color getBoxColor() {
-		return boxColor;
+	public Color setColor() {
+		return coordinateSystemColor;
 	}
 
 	
 	//set color of labels
 	public void setLabelColor(Color c) {
 		labelColor = c;
-		box.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
-		axes.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
+		coordinateSystem.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
 	}
 	//get color of labels
 	public Color getLabelColor() {
