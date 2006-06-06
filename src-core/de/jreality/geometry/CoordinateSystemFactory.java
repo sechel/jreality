@@ -1,6 +1,7 @@
 package de.jreality.geometry;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.util.HashMap;
 import javax.swing.SwingConstants;
 import de.jreality.scene.Geometry;
@@ -71,9 +72,9 @@ public class CoordinateSystemFactory {
 	
 	//DEFAULT VALUES OF PROPERTIES			
 	private double axisScale = 0.5;  //the distance between two ticks on an axis
-	private double labelScale = 0.01;  //size of labels
-	private double arrowStretch = 4*labelScale; //stretch of arrows of axes (octagonalCrossSection)
-	private double tickStretch = 2*labelScale; //stretch of ticks of axes (octagonalCrossSection)
+	private double labelScale = 0.0035;  //size of labels
+	private double arrowStretch = 16*labelScale; //stretch of arrows of axes (octagonalCrossSection)
+	private double tickStretch = 8*labelScale; //stretch of ticks of axes (octagonalCrossSection)
 	private boolean showAxes = false;  //show or hide axes
 	private boolean showBox = false;  //show or hide box
 	private boolean showGrid = false;  //show or hide grid on box
@@ -81,8 +82,9 @@ public class CoordinateSystemFactory {
 	private boolean showBoxArrows = false;  //show or hide arrows on box
 	private boolean showLabels = true;  //show or hide labels of ticks & axes
 	private Color coordinateSystemColor = Color.BLACK;
-	private Color labelColor = Color.BLACK;
 	private Color gridColor = Color.GRAY;
+	private Color labelColor = Color.BLACK;
+	private Font labelFont = new Font("Sans Serif", Font.PLAIN, 48);
 	
 	
 	
@@ -168,6 +170,7 @@ public class CoordinateSystemFactory {
 		app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, coordinateSystemColor);
 		//app.setAttribute(CommonAttributes.SPECULAR_COLOR, Color.BLACK);
 	    app.setAttribute(CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
+	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"font", labelFont);  //label font
 	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"scale", labelScale);  //label scale
 	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"offset", new double[]{0.04, 0, 0});  //label offset of ticks
 	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.EAST);
@@ -894,8 +897,9 @@ public class CoordinateSystemFactory {
 		coordinateSystem.getAppearance().setAttribute("pointShader.scale", labelScale);
 		
 		//update size of arrows and ticks
-		arrowStretch = 4*labelScale;
-		tickStretch = 2*labelScale;
+		arrowStretch = 16*labelScale;
+		tickStretch = 8*labelScale;
+		
 		SceneGraphComponent arrow, ticks;
 		FactoredMatrix m;
 
@@ -1005,11 +1009,22 @@ public class CoordinateSystemFactory {
 		coordinateSystem.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
 		coordinateSystem.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
 	}
-	//get color of box
-	public Color setColor() {
+	//get color of coordinate system
+	public Color getColor() {
 		return coordinateSystemColor;
 	}
 
+
+	//set color of grid
+	public void setGridColor(Color c) {
+		gridColor = c;
+		getSGC("grid").getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
+	}
+	//get color of grid
+	public Color getGridColor() {
+		return gridColor;
+	}
+	
 	
 	//set color of labels
 	public void setLabelColor(Color c) {
@@ -1022,14 +1037,14 @@ public class CoordinateSystemFactory {
 	}
 
 	
-	//set color of grid
-	public void setGridColor(Color c) {
-		gridColor = c;
-		getSGC("grid").getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
+	//set font of labels
+	public void setLabelFont(Font f) {
+		labelFont = f;
+		coordinateSystem.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+"font", f);
 	}
-	//get color of grid
-	public Color getGridColor() {
-		return gridColor;
+	//get font of labels
+	public Font getLabelFontr() {
+		return labelFont;
 	}
-	
+
 }
