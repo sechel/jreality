@@ -1,6 +1,7 @@
 package de.jreality.geometry;
 
 import java.awt.Color;
+import java.awt.Font;
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
@@ -35,16 +36,18 @@ public class CoordinateSystemTest {
     final CoordinateSystemFactory coords = new CoordinateSystemFactory(component);
     //SET PROPERTIES:
     //coords.setAxisScale(0.3);
-    //coords.setLabelScale(0.02);
+    //coords.setLabelScale(0.005);
     //coords.showBoxArrows(true);
     //coords.showAxesArrows(false);
     //coords.showLabels(false);
     //coords.setColor(Color.RED);
-    //coords.setLabelColor(Color.MAGENTA);
     coords.setGridColor(Color.GRAY);
+    //coords.setLabelColor(Color.MAGENTA);
+    //coords.setLabelFont(new Font("Sans Serif", Font.PLAIN, 72));
+    
     
     //display axes/box/grid
-    coords.showAxes(true);
+    coords.showAxes(false);
     coords.showBox(true);
     coords.showGrid(true);
     
@@ -52,8 +55,7 @@ public class CoordinateSystemTest {
     //display component
     ToolSystemViewer currViewer = (ToolSystemViewer)ViewerApp.display(component)[1];
     
-
-    
+        
     //COORDINATE SYSTEM BEAUTIFIER:
     //get paths of camera and object
     final SceneGraphPath cameraPath = currViewer.getCameraPath();
