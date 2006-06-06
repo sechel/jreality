@@ -8,7 +8,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphPathObserver;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
-import de.jreality.scene.tool.CoordinateSystemBeautifier;
+//import de.jreality.scene.tool.CoordinateSystemBeautifier;
 import de.jreality.scene.tool.ToolSystemViewer;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
