@@ -21,21 +21,36 @@ import de.jreality.math.Rn;
 
 
 /**
- * Represents a coordinate system in Euclidean space and is
- * either created for an existing SceneGraphComponent or for a given extent. 
- *  
- * @author msommer
+ * Factory for a coordinate system in Euclidean space, which is
+ * created for an existing SceneGraphComponent (or for a given extent).<br> 
+ * For a given SceneGraphComponent the factory creates a bounding box
+ * and axes through the origin including ticks with their labels.<br>
+ * A new SceneGraphNode containing the coordinate system is added to 
+ * the children of the given SceneGraphComponent.
+ * <p>
+ * Use it the following way:<br>
+ * <i>SceneGraphCompontent component;<br>
+ * [...]<br>
+ * CoordinateSystemFactory factory = new CoordinateSystemFactory(component);<br>
+ * factory.showAxes(false);<br>
+ * factory.showBox(true);<br>
+ * [more properties]</i>
+ * <p>
+ * The coordinate system may be removed from the SceneGraph by<br>
+ * <i>component.removeChild(factory.getCoordinateSystem())</i>;
  * 
- * TO DO:
- * - determine default value of labelScale via bounding box of the component
- * - CoordinateSystemBeautifier
- * - documentation
  * 
+ * @author Martin Sommer
  */
+
+//TO DO:
+// * - determine default value of labelScale via bounding box of the component
+// * - CoordinateSystemBeautifier
+// * - documentation
+
 public class CoordinateSystemFactory {
 
-	
-	
+
 	private double[] boxMin, boxMax;
 	
 	public final static int X = 0, Y = 1, Z = 2;
@@ -67,10 +82,12 @@ public class CoordinateSystemFactory {
 	
 	private int currentClosestBoxVertex = -1;  //index of a currently closest box vertex in boxVertices[0] 
 	
-	private HashMap nodes = new HashMap();
+	private HashMap nodes = new HashMap();  //keep references to SceneGraphNodes
 	
 	
-	//DEFAULT VALUES OF PROPERTIES			
+//-------------------------------------------------------------
+//DEFAULT VALUES OF PROPERTIES
+//-------------------------------------------------------------
 	private double axisScale = 0.5;  //the distance between two ticks on an axis
 	private double labelScale = 0.0035;  //size of labels
 	private double arrowStretch = 16*labelScale; //stretch of arrows of axes (octagonalCrossSection)
@@ -87,27 +104,36 @@ public class CoordinateSystemFactory {
 	private Font labelFont = new Font("Sans Serif", Font.PLAIN, 48);
 	
 	
-	
-	//CONSTRUCTORS
+//-------------------------------------------------------------
+//CONSTRUCTORS
+//-------------------------------------------------------------
 	
 	/**
-	 * coordinate system with extent 4
+	 * Creates a coordinate system where min and max values of each coordinate
+	 * axis are specified by <code>extent</code>, 
+	 * i.e. x,y,z are within [-<code>extent</code>, <code>extent</code>].
+	 * @param extent extent of each coordinate axis
 	 */
-	public CoordinateSystemFactory() {
-		this(4);
+	public CoordinateSystemFactory(double extent) {
+		//To DO: validate extent (extent > 0)
+		
+		this(new double[]{extent, extent, extent});
 	}
 	
 	
 	/**
-	 * coordinate system with given extent
-	 * @param extent the extent of the coordinate system
+	 * Creates a coordinate system where min and max values of each coordinate
+	 * axis are specified by <code>extent</code>, 
+	 * i.e. x is within [-<code>extent[0]</code>, <code>extent[0]</code>] etc.
+	 * @param extent contains the extent of each coordinate axis
 	 */
-	public CoordinateSystemFactory(int extent) {
-		//To DO: validate extent
+	public CoordinateSystemFactory(double[] extent) {
+		//To DO: validate extent (extent[i] > 0, extent.length == 3)
 		
-		boxMin = new double[]{-extent, -extent, -extent};
-		boxMax = new double[]{ extent,  extent,  extent};
+		boxMin = new double[]{-extent[X], -extent[Y], -extent[Z]};
+		boxMax = new double[]{ extent[X],  extent[Y],  extent[Z]};
 		
+		//create the coordinate system
 		box = calculateBox();
 		axes = calculateAxes();
 		coordinateSystem = createCoordinateSystem();
@@ -115,7 +141,10 @@ public class CoordinateSystemFactory {
 	
 	
 	/**
-	 * coordinate system for an existing SceneGraphComponent
+	 * Creates a coordinate system  where min and max values of each coordinate
+	 * axis are specified by a given SceneGraphComponent.<br>
+	 * A new SceneGraphNode containing the coordinate system is added to 
+	 * the children of <code>component</code>.
 	 * @param component the SceneGraphComponent specifying the extent of the coordinate system
 	 */
 	public CoordinateSystemFactory(SceneGraphComponent component) {
@@ -137,18 +166,28 @@ public class CoordinateSystemFactory {
 			}
 		}
 		
+		//create the coordinate system
 		box = calculateBox();
 		axes = calculateAxes();
 		coordinateSystem = createCoordinateSystem();
 		component.addChild(coordinateSystem);
 		
+		//set original transformation
 		component.setTransformation(tmp);
 	}
 
 	
 	
-	//METHODS
+//-------------------------------------------------------------
+//PRIVATE METHODS FOR CALCULATING THE SYSTEM
+//-------------------------------------------------------------
 
+	
+	/**
+	 * creates a new SceneGraphNode containing the coordinate system
+	 * and sets basic appearance attributes
+	 * @return the coordinate system
+	 */
 	private SceneGraphComponent createCoordinateSystem() {
 		
 		coordinateSystem = new SceneGraphComponent();
@@ -180,11 +219,15 @@ public class CoordinateSystemFactory {
 	}
 	
 	
+	/**
+	 * creates a new SceneGraphNode containing the box
+	 * @return the box
+	 */
 	private SceneGraphComponent calculateBox() {
 		
 		calculateBoxVertices();
 		
-		//create SceneGraphComponent which has each coordinate axis as its child
+		//create SceneGraphComponent and add each coordinate axis to its children
 		SceneGraphComponent box = new SceneGraphComponent();
 		box.setName("Box");
 		
@@ -234,11 +277,15 @@ public class CoordinateSystemFactory {
 	}
 	
 	
+	/**
+	 * creates a new SceneGraphNode containing the axes through the origin
+	 * @return the axes
+	 */
 	private SceneGraphComponent calculateAxes() {
 
 		calculateAxesVertices();
 		
-		//create SceneGraphComponent which has each coordinate axis as its child
+		//create SceneGraphComponent and add each coordinate axis to its children
 		SceneGraphComponent axes = new SceneGraphComponent();
 		axes.setName("Axes");
 		
@@ -276,8 +323,8 @@ public class CoordinateSystemFactory {
 	
 
 	/**
-	 * calculate the vertices of the axes (specified by the choice of the constructor)
- 	 * first index specifies the coordinate axis (0,1,2)
+	 * calculate the vertices of the axes (specified by the choice of the constructor)<br>
+ 	 * first index specifies the coordinate axis (0,1,2)<br>
 	 * second index specifies starting and endpoint of each coordinate axis {start, end}
 	 */
 	private void calculateAxesVertices(){
@@ -294,8 +341,8 @@ public class CoordinateSystemFactory {
 	
 		
 	/**
-	 * calculate the vertices of the bounding box (specified by the choice of the constructor)
-	 * first index specifies the coordinate axis (0,1,2)
+	 * calculate the vertices of the bounding box (specified by the choice of the constructor)<br>
+	 * first index specifies the coordinate axis (0,1,2)<br>
 	 * second index specifies starting and endpoint for each of the 4 copies of each coordinate axis {start1, end1, start2, end2,...}
 	 */
 	private void calculateBoxVertices(){
@@ -316,24 +363,25 @@ public class CoordinateSystemFactory {
 			 {boxMax[X], boxMin[Y], boxMin[Z]}, {boxMax[X], boxMin[Y], boxMax[Z]},  //47
 			 {boxMax[X], boxMax[Y], boxMin[Z]}, boxMax  //56			 
 			}
-		}; //note that the ordering of the copies of each coordinate axis is significant
+		}; 
+		//note that the ordering of the copies of each coordinate axis is significant
 
-	//  0    boxMin
-	//	1	{boxMin[X], boxMax[Y], boxMin[Z]}
-	//	2	{boxMin[X], boxMax[Y], boxMax[Z]}    1   ---   5     y
-	//	3	{boxMin[X], boxMin[Y], boxMax[Z]}  2   ---   6       |_ x
-	//	4	{boxMax[X], boxMin[Y], boxMin[Z]}    0   - -   4     /
-	//	5	{boxMax[X], boxMax[Y], boxMin[Z]}  3   ---   7      z
-	//	6	 boxMax
-	//	7	{boxMax[X], boxMin[Y], boxMax[Z]}
+		//  0    boxMin
+		//	1	{boxMin[X], boxMax[Y], boxMin[Z]}
+		//	2	{boxMin[X], boxMax[Y], boxMax[Z]}    1   ---   5     y
+		//	3	{boxMin[X], boxMin[Y], boxMax[Z]}  2   ---   6       |_ x
+		//	4	{boxMax[X], boxMin[Y], boxMin[Z]}    0   - -   4     /
+		//	5	{boxMax[X], boxMax[Y], boxMin[Z]}  3   ---   7      z
+		//	6	 boxMax
+		//	7	{boxMax[X], boxMin[Y], boxMax[Z]}
 	}	
 	
 
 	/**
 	 * get the line for the coordinate axis specified by <code>axis</code> 
-	 * between min and max as a SceneGraphComponent (IndexedLineSet)
-	 * (the line thru min and max has to be parallel to the coordinate axis)
-	 * @param axis the coordinate axis (0,1,2)
+	 * between min and max as a SceneGraphComponent (IndexedLineSet)<br>
+	 * (the line through min and max has to be parallel to the coordinate axis)
+	 * @param axis the coordinate axis (X, Y, Z)
 	 * @param min the starting point of the line
 	 * @param max the endpoint of the line
 	 * @param forBox is the line intended for a box (line is labelled differently then)
@@ -388,10 +436,10 @@ public class CoordinateSystemFactory {
 	/**
 	 * get the arrow for the coordinate axis specified by <code>axis</code> 
 	 * between min and max as a SceneGraphComponent (IndexedFaceSet)
-	 * @param axis the coordinate axis (0,1,2)
+	 * @param axis the coordinate axis (X, Y, Z)
 	 * @param min the starting point of the line
 	 * @param max the endpoint of the line
-	 * @return the arrow
+	 * @return the axis arrow
 	 */
 	private SceneGraphComponent getArrow(int axis, double[] min, double[] max) {
 	
@@ -420,10 +468,10 @@ public class CoordinateSystemFactory {
 	/**
 	 * get the ticks on the coordinate axis specified by <code>axis</code> 
 	 * between min and max as a SceneGraphComponent (IndexedFaceSet)
-	 * @param axis the coordinate axis (0,1,2)
+	 * @param axis the coordinate axis (X, Y, Z)
 	 * @param min the starting point of the line
 	 * @param max the endpoint of the line
-	 * @return the ticks
+	 * @return the axis ticks
 	 */
 	private SceneGraphComponent getAxesTicks(int axis, double[] min, double[] max) {
 		
@@ -488,11 +536,11 @@ public class CoordinateSystemFactory {
 	
 	/**
 	 * get the ticks on the box for coordinate axis specified by <code>axis</code> 
-	 * between min and max as a SceneGraphComponent (IndexedFaceSet)
-	 * @param axis the coordinate axis (0,1,2)
+	 * between min and max as a SceneGraphComponent (IndexedLineSet)
+	 * @param axis the coordinate axis (X, Y, Z)
 	 * @param min the starting point of the line
 	 * @param max the endpoint of the line
-	 * @return the ticks
+	 * @return the box ticks
 	 */
 	private SceneGraphComponent getBoxTicks(int axis, int k, double[] min, double[] max) {
 		
@@ -558,6 +606,11 @@ public class CoordinateSystemFactory {
 	}
 	
 	
+	/**
+	 * get a 2d grid on the 6 box faces determined by the box ticks 
+	 * as a SceneGraphComponent (IndexedLineSet)
+	 * @return the grid
+	 */
 	private SceneGraphComponent calculate2DGrid() {
 		
 		PointSet ps;
@@ -640,8 +693,9 @@ public class CoordinateSystemFactory {
 	
 	
 	/**
-	 * get the octagonalCrossSection on a different level than 0
-	 * @param level the level of the octagonalCrossSection (z-value) 
+	 * get the octagonalCrossSection at a different level than 0
+	 * @param level the level of the octagonalCrossSection (z-value)
+	 * @return the octagonalCrossSection at specified level
 	 */
 	private double[][] octagonalCrossSection(double level) {
 		
@@ -652,12 +706,18 @@ public class CoordinateSystemFactory {
 	}
 	
 	
-	//merges two LineSets into a single one
+	/**
+	 * merges two IndexedLineSets into a single one
+	 * @param a first IndexedLineSet
+	 * @param b second IndexedLineSet
+	 * @return the merged IndexedLineSet
+	 */
 	private IndexedLineSet mergeIndexedLineSets(IndexedLineSet a, IndexedLineSet b) {
 		
-		if (a==null) a = new IndexedLineSet();
-		if (b==null) b = new IndexedLineSet();
+		if (a==null) a = new IndexedLineSet();  //empty line set
+		if (b==null) b = new IndexedLineSet();  //empty line set
 		
+		//extract vertices and indices of a & b
 		double[] aVertices = new double[0];
 		double[] bVertices = new double[0];
 		int[] aIndices = new int[0];
@@ -668,6 +728,7 @@ public class CoordinateSystemFactory {
 		if (a.getNumEdges() != 0) aIndices=a.getEdgeAttributes(Attribute.INDICES).toIntArray(null);
 		if (b.getNumEdges() != 0) bIndices=b.getEdgeAttributes(Attribute.INDICES).toIntArray(null);
 		
+		//create merged vertices and indices arrays
 		double[] vertices = new double[aVertices.length+bVertices.length];
 		int[] indices = new int[aIndices.length+bIndices.length];
 		
@@ -681,6 +742,7 @@ public class CoordinateSystemFactory {
 		for (int i=0; i<bIndices.length; i++)
 			indices[i+aIndices.length] = bIndices[i]+aVertices.length/3;
 		
+		//create new IndexedLineSet
 		IndexedLineSetFactory fac = new IndexedLineSetFactory();
 		fac.setVertexCount(vertices.length/3);
 		fac.setLineCount(indices.length/2);
@@ -692,7 +754,12 @@ public class CoordinateSystemFactory {
 	}
 	
 	
-	//calculates the rotation from z-axis on specified axis
+	/**
+	 * calculates the rotation from z-axis onto specified axis<br>
+	 * used for rotating axes and box ticks
+	 * @param axis the coordinate axis (X, Y, Z)
+	 * @return a quaternion specifying the rotation 
+	 */
 	private Quaternion getAxisRotation(int axis) {
 	
 		FactoredMatrix rot = new FactoredMatrix();
@@ -704,16 +771,24 @@ public class CoordinateSystemFactory {
 		return Quaternion.rotationMatrixToQuaternion(new Quaternion(), rot.getArray());
 	}
 	
-	//calculates the rotation of ticks for specified box edge
+
+	/**
+	 * calculates the additional rotation of box ticks onto specified box edge<br>
+	 * used for rotating box ticks (additionally to getAxisRotation())
+	 * @param axis the coordinate axis (X, Y, Z)
+	 * @param k the copy of the coordinate axis (0..3)
+	 * @return a quaternion specifying the rotation 
+	 */
 	private Quaternion getTickRotation(int axis, int k) {
 		
+		//determine the factor of pi/2-rotation
 		int c = new int[]{0,3,1,2}[k];
-		switch(axis) {  //regard axis
+		switch(axis) {
 		case X : c++; break;
-		case Y : c*=-1; c--;  //*-1 => switch 1 and 3
+		case Y : c*=-1; c--;  // *-1 => switch 1 and 3
 		}
 		
-		double[] rotationAxis = new double[3];
+		double[] rotationAxis = new double[]{0,0,0};
 		rotationAxis[axis] = 1;
 		FactoredMatrix rot = new FactoredMatrix();
 		rot.setRotation(c*Math.PI/2, rotationAxis);
@@ -721,10 +796,10 @@ public class CoordinateSystemFactory {
 		return Quaternion.rotationMatrixToQuaternion(new Quaternion(), rot.getArray());
 	}
 	
-	
-	
+		
 	/**
-	 * returns the SGC to which the specified key is mapped in hashMap
+	 * get the SceneGraphComponent(SGC) to which the specified key 
+	 * is mapped in hashMap (i.e. parse hashMap-Objects)
 	 * @param key the key specifying the SGC
 	 * @return the SGC 
 	 */
@@ -733,33 +808,46 @@ public class CoordinateSystemFactory {
 	}
 
 
+	/**
+	 * get the binary representation of <code>k</code> using (at least) 2 digits<br> 
+	 * (intended for <code>k</code>=0..3)
+	 * @param k integer
+	 * @return binary representation as String
+	 */
 	private String toBinaryString(int k) {
 		if (k<2) return ("0"+k);
 		else return Integer.toBinaryString(k);
 	}
 	
 	
-	//round d to 3 decimal places
+	/**
+	 * round a double to 3 decimal places
+	 * @param d double
+	 * @return rounded double
+	 */
 	private double round(double d) {
 		return Math.round(d*1000)/1000.;
 	}
 	
 	
 	
-//-----------------------------------------------------------------------------------
-//the following methods are intended to be used in a tool
+//-------------------------------------------------------------
+//the following methods are intended to be used in a TOOL
 //to hide specific box vertices, axes or labels
-//-----------------------------------------------------------------------------------
+//-------------------------------------------------------------
 	
 	/**
-	 * get index of a box vertex which is "closest to the screen" when looking in a specified direction
-	 * @param direction the direction
+	 * get index of a box vertex which is "closest to the screen" 
+	 * when looking along specified direction vector<br>
+	 * note that there could be more than one closest box vertices, 
+	 * this method returns the first
+	 * @param dir the direction vector
 	 * @return the index of a closest box vertex in boxVertices[X]
 	 */
 	private int getClosestBoxVertex(double[] dir) {
 		double[] direction;
 		if (dir.length==3) direction=dir;
-		else {
+		else {  //dir.length==4
 			direction=new double[3];
 			direction[X]=dir[X]/dir[3];
 			direction[Y]=dir[Y]/dir[3];
@@ -779,9 +867,11 @@ public class CoordinateSystemFactory {
 		return closest; //index of closest box vertex in boxVertices[X]
 	}
 	
-	
+
 	/**
-	 * hide closest box vertex (resp. only edges if there are more than one closest box vertices)
+	 * Beautifies the box regarding the current transformation from camera coordinates to local coordinates of the coordiante system,  
+	 * i.e. hides certain box vertices including box edges and grid faces.
+	 * @param cameraToObject the transformation matrix from camera coordinates to local coordinates of the coordinate system within the SceneGraph
 	 */
 	public void updateBox(double[] cameraToObject) {
 		
@@ -790,11 +880,13 @@ public class CoordinateSystemFactory {
 		double[] direction = new Matrix(cameraToObject).multiplyVector(new double[]{0,0,-1, 0});
 		direction[3]=1;
 		
-		//only do something if closest box vertex changed
+		//calculate closest box vertex
 		final int index = getClosestBoxVertex(direction);
+		//only do something if closest box vertex changed
 		if (currentClosestBoxVertex == index) return;
 		
-		//set all adges and grid faces to visible
+		
+		//set all box edges and grid faces to visible
 		for (int axis=X; axis<=Z; axis++) {
 			for (int k=0; k<=3; k++) {
 				getSGC(axesNames[axis]+toBinaryString(k)).setVisible(true);
@@ -828,19 +920,26 @@ public class CoordinateSystemFactory {
 	
 	
 	
-//-----------------------------------------------------------------------------------
+//-------------------------------------------------------------
 //SETTING & GETTING PROPERTIES
-//-----------------------------------------------------------------------------------
+//-------------------------------------------------------------
 	
 	
+	/**
+	 * Get the coordinate system specified in this factory.<br> 
+	 * (The coordinate system may be removed from the SceneGraph using this method.)
+	 * @return the coordinate system
+	 */
 	public SceneGraphComponent getCoordinateSystem() {
 		
 		return coordinateSystem;
 	}
 	
 	
-	
-	//set distance between two ticks
+	/**
+	 * Set the axis scale, i.e. the distance between two ticks on the coordinate axes.
+	 * @param axisScale the axis scale
+	 */
 	public void setAxisScale(double axisScale) {
 		if (this.axisScale == axisScale) return;
 		//else
@@ -882,13 +981,21 @@ public class CoordinateSystemFactory {
 		box.addChild(calculate2DGrid());
 	}
 	
-	//get distance between two ticks
+	
+	/**
+	 * Get the current axis scale, i.e. the distance between two ticks on the coordinate axes.
+	 * @return the current axis scale
+	 */
 	public double getAxisScale() {
 		return axisScale;
 	}
 	
 	
-	//set stretch size of arrows, ticks and tick labels
+	/**
+	 * Set the label scale, i.e. the size of labels of axes and ticks<br>
+	 * (including the size of arrows and ticks).
+	 * @param labelScale the label scale
+	 */
 	public void setLabelScale(double labelScale) {
 		if (this.labelScale == labelScale) return;
 		//else
@@ -942,15 +1049,19 @@ public class CoordinateSystemFactory {
 		// recalculate tick levels since arrow size changed ???
 	}
 	
-	//set stretch size of arrows, ticks and tick labels
+
+	/**
+	 * Get the current label scale, i.e. the size of labels of axes and ticks.
+	 * @return the current label scale
+	 */
 	public double getLabelScale() {
 		return labelScale;
 	}
 	
 	
 	/**
-	 * show or hide the axes of the coordinate system, whose extent is specified by the choice of the constructor
-	 * (either by an existing SceneGraphComponent or by a given extent)
+	 * Show or hide the axes of the coordinate system going through the origin.
+	 * @param b true iff axes are to be shown
 	 */
 	public void showAxes(boolean b) {
 		showAxes = b;
@@ -959,8 +1070,8 @@ public class CoordinateSystemFactory {
 
 	
 	/**
-	 * show or hide the bounding box of the coordinate system, which is specified by the choice of the constructor
-	 * (either by an existing SceneGraphComponent or by a given extent)
+	 * Show or hide the bounding box of the coordinate system.
+	 * @param b true iff the box is to be shown
 	 */
 	public void showBox(boolean b) {
 		showBox = b;
@@ -968,12 +1079,20 @@ public class CoordinateSystemFactory {
 	}
 
 
+	/**
+	 * Show or hide the grid on the bounding box faces.
+	 * @param b true iff the grid is to be shown
+	 */
 	public void showGrid(boolean b) {
 		showGrid = b;
 		getSGC("grid").setVisible(b);
 	}
 	
 	
+	/**
+	 * Show or hide the arrows of the axes of the coordinate system going through the origin.
+	 * @param b true iff the arrows are to be shown
+	 */
 	public void showAxesArrows(boolean b) {
 		//if (showAxesArrows==b) return;
 		showAxesArrows = b;
@@ -982,7 +1101,11 @@ public class CoordinateSystemFactory {
 			getSGC(axesNames[axis]+"Arrow").setVisible(b);
 	}
 
-	
+
+	/**
+	 * Show or hide the arrows of the bounding box of the coordinate system.
+	 * @param b true iff the arrows are to be shown
+	 */
 	public void showBoxArrows(boolean b) {
 		//if (showBoxArrows==b) return;
 		showBoxArrows = b;
@@ -995,7 +1118,10 @@ public class CoordinateSystemFactory {
 	}
 	
 	
-	//show or hide tick & axis labels of axes and box
+	/**
+	 * Show or hide the tick & axis labels of axes and bounding box of the coordinate system.
+	 * @param b true iff the labels are to be shown
+	 */
 	public void showLabels(boolean b) {
 		//if (showLabels==b) return;
 		showLabels = b;
@@ -1003,47 +1129,79 @@ public class CoordinateSystemFactory {
 	}
 
 
-	//set color of coordinate system
+	/**
+	 * Set the color of the coordinate system (axes and bounding box).
+	 * @param c the color
+	 */
 	public void setColor(Color c) {
 		coordinateSystemColor = c;
 		coordinateSystem.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
 		coordinateSystem.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
 	}
-	//get color of coordinate system
+
+
+	/**
+	 * Get the current color of the coordinate system (axes and bounding box).
+	 * @return the current color
+	 */
 	public Color getColor() {
 		return coordinateSystemColor;
 	}
 
 
-	//set color of grid
+	/**
+	 * Set the color of the grid on the bounding box faces.
+	 * @param c the color
+	 */
 	public void setGridColor(Color c) {
 		gridColor = c;
 		getSGC("grid").getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
 	}
-	//get color of grid
+
+
+	/**
+	 * Get the current color of the grid on the bounding box faces.
+	 * @return the current color
+	 */
 	public Color getGridColor() {
 		return gridColor;
 	}
 	
 	
-	//set color of labels
+	/**
+	 * Set the color of all labels of the coordinate system.
+	 * @param c the color
+	 */
 	public void setLabelColor(Color c) {
 		labelColor = c;
 		coordinateSystem.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
 	}
-	//get color of labels
+
+
+	/**
+	 * Get the current color of all labels of the coordinate system.
+	 * @return the current color
+	 */
 	public Color getLabelColor() {
 		return labelColor;
 	}
 
 	
-	//set font of labels
+	/**
+	 * Set the font of all labels of the coordinate system.
+	 * @param f the font
+	 */
 	public void setLabelFont(Font f) {
 		labelFont = f;
 		coordinateSystem.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+"font", f);
 	}
-	//get font of labels
-	public Font getLabelFontr() {
+
+
+	/**
+	 * Get the current font of all labels of the coordinate system.
+	 * @return the current font
+	 */
+	public Font getLabelFont() {
 		return labelFont;
 	}
 
