@@ -55,7 +55,9 @@ public class CoordinateSystemTest {
     //display component
     ToolSystemViewer currViewer = (ToolSystemViewer)ViewerApp.display(component)[1];
     
-        
+
+
+    
     //COORDINATE SYSTEM BEAUTIFIER:
     //get paths of camera and object
     final SceneGraphPath cameraPath = currViewer.getCameraPath();
