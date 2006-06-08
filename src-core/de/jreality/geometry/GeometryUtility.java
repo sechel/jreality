@@ -138,11 +138,20 @@ public class GeometryUtility {
 		double[][] fn = new double[indices.length][normalLength];
 		if (signature == Pn.EUCLIDEAN && verts[0].length == 4) Pn.dehomogenize(verts,verts);
 		for (int i=0; i<indices.length; ++i)	{
-			if (indices[i].length < 3) continue;
+			int n = indices[i].length;
+			if (n < 3) continue;
 			if (signature == Pn.EUCLIDEAN)	{		
 				// not necessary but probably a bit faster
-				double[] v1 = Rn.subtract(null, verts[indices[i][1]], verts[indices[i][0]]);
-				double[] v2 = Rn.subtract(null, verts[indices[i][2]], verts[indices[i][0]]);
+				int count = 1;
+				double[] v1 = null;
+				do {
+					v1 = Rn.subtract(null, verts[indices[i][count++]], verts[indices[i][0]]);
+				} while (Rn.euclideanNorm(v1) < 10E-16 && count < (n-1));
+				double[] v2 = null;
+				do {
+					v2 = Rn.subtract(null, verts[indices[i][count++]], verts[indices[i][0]]);
+				} while (Rn.euclideanNorm(v2) < 10E-16 && count < (n));
+				if (count > n) continue;
 				Rn.crossProduct(fn[i], v1,v2);
 				Rn.normalize(fn[i], fn[i]);
 			} else {
