@@ -798,13 +798,13 @@ optionPrimitive
 // -- geht bereits:
 	:	"Boxed"			(		MINUS LARGER 
 			// eine Box um die Scene
-						 (	 "True"	{box.displayBox();}	
-							|"False"{box.hideBox();}
+						 (	 "True"	{box.showBox(true);}	
+							|"False"{box.showBox(false);}
 						)| DDOT LARGER	egal {log.fine(" 'Boxed :> $<name>' not implemented");})
 	|	"Axes" 			(		MINUS LARGER
 			// Achsen an der Scene
-						 (	 "True"	{box.displayAxes();}	
-							|"False" {box.hideAxes();}
+						 (	 "True"	{box.showAxes(true);}	
+							|"False" {box.showAxes(false);}
 							|"Automatic"{log.fine("Axes -> Automatic not implemented");}
 						)| DDOT LARGER	egal{log.fine(" 'Axes :> $<name>' not implemented");})
 
