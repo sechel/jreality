@@ -180,7 +180,7 @@
 	  <antlr target="${io}/de/jreality/reader/vrml/vrml-v2.0.g">
 	    <classpath refid="io.classpath"/>
 	  </antlr>
-	  <antlr target="${io}/de/jreality/reader/Mathematica/mathematica.g">
+	  <antlr target="${io}/de/jreality/reader/mathematica/mathematica.g">
 	    <classpath refid="io.classpath"/>
 	  </antlr>
     <javac excludesfile="excludes.txt" srcdir="${io}" destdir="${build}/io" debug="true">
@@ -254,7 +254,7 @@
       <classpath refid="jogl.classpath"/>
     </javac>
     <copy todir="build/jogl"> <!-- copy shader progs -->
-      <fileset dir="src-jogl">
+      <fileset dir="${jogl}">
         <exclude name="**/*.java"/>
         <exclude name="**/*.gif"/>
       </fileset>
@@ -269,7 +269,7 @@
       <classpath refid="gpgpu.classpath"/>
     </javac>
     <copy todir="build/gpgpu"> <!-- copy shader progs -->
-      <fileset dir="src-gpgpu">
+      <fileset dir="${gpgpu}">
         <exclude name="**/*.java"/>
         <exclude name="**/*.gif"/>
       </fileset>
