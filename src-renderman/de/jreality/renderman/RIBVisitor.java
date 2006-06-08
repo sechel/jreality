@@ -64,6 +64,7 @@ import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
+import de.jreality.scene.data.StringArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
@@ -470,138 +471,225 @@ public class RIBVisitor extends SceneGraphVisitor {
         Ri.cylinder(r,0,l,360,null);
         Ri.transformEnd();
     }
-        public void visit(IndexedFaceSet i) {
-            String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
-            if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.FACE_DRAW),true)) {
-                
-            int npolys =i.getNumFaces();
-            if(npolys!= 0) {
-        HashMap map = new HashMap();
-        //boolean smooth = !((String)eAppearance.getAttribute(CommonAttributes.POLYGON_SHADER,"default")).startsWith("flat");
-        boolean smooth = eAppearance.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING,true);
-        DataList coords = i.getVertexAttributes(Attribute.COORDINATES);
-        DoubleArrayArray da = coords.toDoubleArrayArray();
-        int pointlength = GeometryUtility.getVectorLength(coords);
-   	 	// We'd like to be able to use the "Pw" attribute which accepts 4-vectors for point coordinates, but 3Delight-5.0.1
-	 	// does not support it ...  
-	 	// TODO figure out how to allow Pw output if desired, for example, if you have Pixar renderman renderer.
-        if (true) { //pointlength == 3)	{
-            float[] fcoords =new float[3*da.getLength()];
-            for (int j = 0; j < da.getLength(); j++) {
-            	 	if (pointlength == 4)	{
-                  	 float w =(float)da.getValueAt(j,3);
-                  	 if (w != 0) w = 1.0f/w;
-                  	 else w = 10E10f;		// hack! but what else can you do?
-                  	fcoords[3*j+0] =(float)da.getValueAt(j,0)*w;
-            	 		fcoords[3*j+1] =(float)da.getValueAt(j,1)*w;
-            	 		fcoords[3*j+2] =(float)da.getValueAt(j,2)*w;
-            	 	} else {
-            	 		fcoords[3*j+0] =(float)da.getValueAt(j,0);
-            	 		fcoords[3*j+1] =(float)da.getValueAt(j,1);
-            	 		fcoords[3*j+2] =(float)da.getValueAt(j,2);
-            	 	}
-            }
-            map.put("P",fcoords);       	
-        } else if (false) { //pointlength == 4)	{
-            float[] fcoords =new float[4*da.getLength()];
-            for (int j = 0; j < da.getLength(); j++) {
-                fcoords[3*j+0] =(float)da.getValueAt(j,0);
-                fcoords[3*j+1] =(float)da.getValueAt(j,1);
-                fcoords[3*j+2] =(float)da.getValueAt(j,2);
-                fcoords[3*j+3] =(float)da.getValueAt(j,3);
-            }
-            map.put("Pw",fcoords);       	
-        }
-       DataList normals = i.getVertexAttributes(Attribute.NORMALS);
-        if(smooth && normals!=null) {
-            da = normals.toDoubleArrayArray();
-            float[] fnormals =new float[3*da.getLength()];
-            for (int j = 0; j < da.getLength(); j++) {
-                fnormals[3*j+0] =(float)da.getValueAt(j,0);
-                fnormals[3*j+1] =(float)da.getValueAt(j,1);
-                fnormals[3*j+2] =(float)da.getValueAt(j,2);
-            }
-            map.put("N",fnormals);
-        } else { //face normals
-            normals = i.getFaceAttributes(Attribute.NORMALS);
-            if (normals != null)	{
-                da = normals.toDoubleArrayArray();
-                float[] fnormals =new float[3*da.getLength()];
-                for (int j = 0; j < da.getLength(); j++) {
-                    fnormals[3*j+0] =(float)da.getValueAt(j,0);
-                    fnormals[3*j+1] =(float)da.getValueAt(j,1);
-                    fnormals[3*j+2] =(float)da.getValueAt(j,2);
-                }
-                map.put("uniform normal N",fnormals);            	
-            }
-        }
-        // texture coords:
-        DataList texCoords = i.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
-        if(texCoords!= null) {
-            float[] ftex =new float[2*texCoords.size()];
-            for (int j = 0; j < texCoords.size(); j++) {
-                //ftex[j] =(float)d.getValueAt(j);
-                DoubleArray l =texCoords.item(j).toDoubleArray();
-                
-                ftex[2*j] =(float)l.getValueAt(0);
-                ftex[2*j+1] =(float)l.getValueAt(1);
-                //ftex[2*j] =(float)d.getValueAt(j,0);
-                //ftex[2*j+1] =(float)d.getValueAt(j,1);
-            }
-            map.put("st",ftex);
-        }
         
-// texture coords:
-        DataList vertexColors = i.getVertexAttributes(Attribute.COLORS);
-        if(vertexColors!= null) {
-            int vertexColorLength=vertexColors.getStorageModel().getDimensions()[1];
-            float[] vCol =new float[3*vertexColors.size()];
-            float[] vOp=null;
-            if(vertexColorLength == 4 ) vOp = new float[3*vertexColors.size()];
-            for (int j = 0; j < vertexColors.size(); j++) {
-                //ftex[j] =(float)d.getValueAt(j);
-                DoubleArray rgba = vertexColors.item(j).toDoubleArray();
-                
-                vCol[3*j]   =(float)rgba.getValueAt(0);
-                vCol[3*j+1] =(float)rgba.getValueAt(1);
-                vCol[3*j+2] =(float)rgba.getValueAt(2);
-                if(vertexColorLength ==4) {
-                		vOp[3*j]    =(float)rgba.getValueAt(3);
-                		vOp[3*j+1]  =(float)rgba.getValueAt(3);
-                		vOp[3*j+2]  =(float)rgba.getValueAt(3);
-                }
-                //ftex[2*j] =(float)d.getValueAt(j,0);
-                //ftex[2*j+1] =(float)d.getValueAt(j,1);
-            }
-            map.put("varying color Cs",vCol);
-            if(vertexColorLength == 4 ) map.put("varying color Os",vOp);
-        }
-        
-        
-        int[] nvertices =new int[npolys];
-        int verticesLength =0;
-        for(int k =0; k<npolys;k++) {
-            IntArray fi = i.getFaceAttributes(Attribute.INDICES).item(k).toIntArray();
-            nvertices[k] =fi.getLength();
-            verticesLength+= nvertices[k];
-        }
-        int[] vertices =new int[verticesLength];
-        int l =0;
-        for(int k= 0;k<npolys;k++) {
-            for(int m =0; m<nvertices[k];m++,l++) {
-                IntArray fi = i.getFaceAttributes(Attribute.INDICES).item(k).toIntArray();
-                vertices[l] = fi.getValueAt(m);
-            }
-        }
-        Ri.attributeBegin();
-        setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
-        Ri.pointsPolygons(npolys,nvertices,vertices,map);
-        Ri.attributeEnd();
-            }
-            }
-        super.visit(i);
+    
+    
+    private IndexedFaceSet [] splitIfsToPrimitiveFaces(IndexedFaceSet ifs){
+    	// Author Bernd Gonska
+    	int num=ifs.getNumFaces();
+    	IndexedFaceSet [] parts= new IndexedFaceSet[num];
+    	for (int i=0;i<num;i++){
+    		parts[i]= new IndexedFaceSet();
+    		parts[i].setNumFaces(1);
+    		parts[i].setNumPoints(ifs.getNumPoints());
+    		parts[i].setVertexAttributes(ifs.getVertexAttributes());
+    		
+    		int[][]    oldIndizeesArray=null;
+    		String[]   oldLabelsArray=null;
+    		double[][] oldNormalsArray=null;
+    		double[][] oldTextureCoordsArray=null;
+    		int[][]    newIndizeesArray= new int[1][];
+    		String[]   newLabelsArray=new String[1];
+    		double[][] newNormalsArray=new double[1][];
+    		double[][] newTextureCoordsArray=new double[1][];
+    		
+    		DataList temp=ifs.getFaceAttributes( Attribute.INDICES );
+    		if (temp !=null){
+    			oldIndizeesArray	= temp.toIntArrayArray(null);
+    			newIndizeesArray[0] = oldIndizeesArray[i]; 
+    			parts[i].setFaceAttributes(Attribute.INDICES,
+    					new IntArrayArray.Array(newIndizeesArray));
+    		}
+    		
+    		temp= ifs.getVertexAttributes( Attribute.LABELS );
+    		if (temp!=null){
+    			oldLabelsArray 		= temp.toStringArray(null);
+    			newLabelsArray[0]	= oldLabelsArray[i];
+    			parts[i].setFaceAttributes(Attribute.LABELS,
+    					new StringArray(newLabelsArray));
+    		}
+    		temp= ifs.getVertexAttributes( Attribute.NORMALS );
+    		if (temp!=null){
+    			oldNormalsArray 	= temp.toDoubleArrayArray(null);
+    			newNormalsArray[0] = oldNormalsArray[i]; 
+    			parts[i].setFaceAttributes(Attribute.NORMALS,
+    					new DoubleArrayArray.Array(newNormalsArray));
+    		}
+    		temp= ifs.getVertexAttributes( Attribute.TEXTURE_COORDINATES );
+    		if (temp!=null){
+    			oldTextureCoordsArray = temp.toDoubleArrayArray(null);
+    			newTextureCoordsArray[0] = oldTextureCoordsArray[i]; 
+    			parts[i].setFaceAttributes(Attribute.TEXTURE_COORDINATES,
+    					new DoubleArrayArray.Array(newTextureCoordsArray));
+    		}
+    	}
+    	return parts;
     }
-
+    
+    public void visit(IndexedFaceSet i) {
+    	visit(i,null);
+    }
+    
+  
+    public void visit(IndexedFaceSet i,float[] color) {
+// dieser teil ist neu:    	
+    	DataList colors=i.getFaceAttributes( Attribute.COLORS );
+    	if (colors !=null){
+    		double[][] colorArray = colors.toDoubleArrayArray(null);
+    		int numFaces=i.getNumFaces();
+    		float[][] colorArrayf= new float[numFaces][3];
+    		for (int k=0;k<numFaces;k++){
+    			for (int j=0;j<3;j++)
+    				colorArrayf[k][j]=(float)colorArray[k][j];
+    		}
+    		IndexedFaceSet[] faceList=splitIfsToPrimitiveFaces(i);
+    		for (int k=0;k<numFaces;k++){			
+    			visit(faceList[k],colorArrayf[k]);
+    		}
+    	}
+    	else{
+ // Neues ist hier zu ende
+    		String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
+    		if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.FACE_DRAW),true)) {
+                
+    			int npolys =i.getNumFaces();
+    			if(npolys!= 0) {
+    				HashMap map = new HashMap();
+    				//boolean smooth = !((String)eAppearance.getAttribute(CommonAttributes.POLYGON_SHADER,"default")).startsWith("flat");
+    				boolean smooth = eAppearance.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING,true);
+    				DataList coords = i.getVertexAttributes(Attribute.COORDINATES);
+    				DoubleArrayArray da = coords.toDoubleArrayArray();
+    				int pointlength = GeometryUtility.getVectorLength(coords);
+    				// We'd like to be able to use the "Pw" attribute which accepts 4-vectors for point coordinates, but 3Delight-5.0.1
+    				// does not support it ...  
+    				// TODO figure out how to allow Pw output if desired, for example, if you have Pixar renderman renderer.
+//        if (pointlength == 3)	{
+    				float[] fcoords =new float[3*da.getLength()];
+    				for (int j = 0; j < da.getLength(); j++) {
+    					if (pointlength == 4)	{
+    						float w =(float)da.getValueAt(j,3);
+    						if (w != 0) w = 1.0f/w;
+    						else w = 10E10f;		// hack! but what else can you do?
+    						fcoords[3*j+0] =(float)da.getValueAt(j,0)*w;
+    						fcoords[3*j+1] =(float)da.getValueAt(j,1)*w;
+    						fcoords[3*j+2] =(float)da.getValueAt(j,2)*w;
+    					} else {
+    						fcoords[3*j+0] =(float)da.getValueAt(j,0);
+    						fcoords[3*j+1] =(float)da.getValueAt(j,1);
+    						fcoords[3*j+2] =(float)da.getValueAt(j,2);
+    					}
+    				}
+    				map.put("P",fcoords);       	
+//        } else if (pointlength == 4)	{
+//            float[] fcoords =new float[4*da.getLength()];
+//            for (int j = 0; j < da.getLength(); j++) {
+//                fcoords[3*j+0] =(float)da.getValueAt(j,0);
+//                fcoords[3*j+1] =(float)da.getValueAt(j,1);
+//                fcoords[3*j+2] =(float)da.getValueAt(j,2);
+//                fcoords[3*j+3] =(float)da.getValueAt(j,3);
+//            }
+//            map.put("Pw",fcoords);       	
+//        }
+    				DataList normals = i.getVertexAttributes(Attribute.NORMALS);
+    				if(smooth && normals!=null) {
+    					da = normals.toDoubleArrayArray();
+    					float[] fnormals =new float[3*da.getLength()];
+    					for (int j = 0; j < da.getLength(); j++) {
+    						fnormals[3*j+0] =(float)da.getValueAt(j,0);
+    						fnormals[3*j+1] =(float)da.getValueAt(j,1);
+    						fnormals[3*j+2] =(float)da.getValueAt(j,2);
+    					}
+    					map.put("N",fnormals);
+    				} else { //face normals
+    					normals = i.getFaceAttributes(Attribute.NORMALS);
+    					if (normals != null)	{
+    						da = normals.toDoubleArrayArray();
+    						float[] fnormals =new float[3*da.getLength()];
+    						for (int j = 0; j < da.getLength(); j++) {
+    							fnormals[3*j+0] =(float)da.getValueAt(j,0);
+    							fnormals[3*j+1] =(float)da.getValueAt(j,1);
+    							fnormals[3*j+2] =(float)da.getValueAt(j,2);
+    						}
+    						map.put("uniform normal N",fnormals);            	
+    					}
+    				}
+    				// texture coords:
+    				DataList texCoords = i.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+    				if(texCoords!= null) {
+    					float[] ftex =new float[2*texCoords.size()];
+    					for (int j = 0; j < texCoords.size(); j++) {
+    						//ftex[j] =(float)d.getValueAt(j);
+    						DoubleArray l =texCoords.item(j).toDoubleArray();
+                
+    						ftex[2*j] =(float)l.getValueAt(0);
+    						ftex[2*j+1] =(float)l.getValueAt(1);
+    						//ftex[2*j] =(float)d.getValueAt(j,0);
+    						//ftex[2*j+1] =(float)d.getValueAt(j,1);
+    					}
+    					map.put("st",ftex);
+    				}
+        
+    				// texture coords:
+    				DataList vertexColors = i.getVertexAttributes(Attribute.COLORS);
+    				if(vertexColors!= null) {
+    					int vertexColorLength=vertexColors.getStorageModel().getDimensions()[1];
+    					float[] vCol =new float[3*vertexColors.size()];
+    					float[] vOp=null;
+    					if(vertexColorLength == 4 ) vOp = new float[3*vertexColors.size()];
+    					for (int j = 0; j < vertexColors.size(); j++) {
+    						//ftex[j] =(float)d.getValueAt(j);
+    						DoubleArray rgba = vertexColors.item(j).toDoubleArray();
+                
+    						vCol[3*j]   =(float)rgba.getValueAt(0);
+    						vCol[3*j+1] =(float)rgba.getValueAt(1);
+    						vCol[3*j+2] =(float)rgba.getValueAt(2);
+    						if(vertexColorLength ==4) {
+    							vOp[3*j]    =(float)rgba.getValueAt(3);
+    							vOp[3*j+1]  =(float)rgba.getValueAt(3);
+    							vOp[3*j+2]  =(float)rgba.getValueAt(3);
+    						}
+    						//ftex[2*j] =(float)d.getValueAt(j,0);
+    						//ftex[2*j+1] =(float)d.getValueAt(j,1);
+    					}
+    					map.put("varying color Cs",vCol);
+    					if(vertexColorLength == 4 ) map.put("varying color Os",vOp);
+    				}
+        
+        
+    				int[] nvertices =new int[npolys];
+    				int verticesLength =0;
+    				for(int k =0; k<npolys;k++) {
+    					IntArray fi = i.getFaceAttributes(Attribute.INDICES).item(k).toIntArray();
+    					nvertices[k] =fi.getLength();
+    					verticesLength+= nvertices[k];
+    				}
+    				int[] vertices =new int[verticesLength];
+    				int l =0;
+    				for(int k= 0;k<npolys;k++) {
+    					for(int m =0; m<nvertices[k];m++,l++) {
+    						IntArray fi = i.getFaceAttributes(Attribute.INDICES).item(k).toIntArray();
+    						vertices[l] = fi.getValueAt(m);
+    					}
+    				}
+    				Ri.attributeBegin();
+    				setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
+    				if(color!=null){
+    					float[] f=new float[3];
+						f[0]=color[0];f[1]=color[1];f[2]=color[2];
+						Ri.color(f);
+    					if (color.length==4){
+    						f[0]=color[3];f[1]=color[3];f[2]=color[3];
+    						Ri.opacity(f);
+    						}	
+    				}
+    				Ri.pointsPolygons(npolys,nvertices,vertices,map);
+    				Ri.attributeEnd();
+    			}
+    		}
+    		super.visit(i);
+    	}// neu
+    }
+    
     /* (non-Javadoc)
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.PointSet)
      */
