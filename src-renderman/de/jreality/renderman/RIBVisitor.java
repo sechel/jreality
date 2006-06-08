@@ -34,8 +34,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
@@ -85,6 +88,10 @@ import de.jreality.shader.Texture2D;
  * <li>...</li>
  * <li>face colors on IndexedFaceSets ignored</li>
  * </ul>
+ * Other TODO's (more on the software engineering side)
+ *   put constant strings into CommonAttributes so people can write 
+ *     into Appearances and "be heard" (or make an interface with AttributeEntity)
+ *   Reduce use of static fields here and in Ri.java (not thread safe!)
  *  * @version 1.0
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
  *
@@ -96,8 +103,11 @@ public class RIBVisitor extends SceneGraphVisitor {
     protected EffectiveAppearance eAppearance;
     private int textureCount = 0;
     private Map textures =new HashMap();
+    private Hashtable pointsets = new Hashtable();
+    int pointsetCount = 0;
     private String proj = "perspective";
     private int[] maximumEyeSplits={10};
+    boolean insidePointset = false;
     
     public static boolean fullSpotLight = true;
     public static String shaderPath = null;
@@ -111,7 +121,8 @@ public class RIBVisitor extends SceneGraphVisitor {
     }
     public void visit(SceneGraphComponent root, SceneGraphPath path, String name) {
         //SceneGraphPath path =SceneGraphPath.getFirstPathBetween(root,camera);
-        Camera camera =(Camera) path.getLastElement();
+    	
+          Camera camera =(Camera) path.getLastElement();
         this.name =name;
         double[] cam =path.getInverseMatrix(null);
         try {
@@ -182,6 +193,7 @@ public class RIBVisitor extends SceneGraphVisitor {
             Ri.concatTransform(fTranspose(cam));
         Ri.worldBegin();
         new LightCollector(root);
+//        new GeometryCollector(root,  this);
         root.accept(this);
         Ri.worldEnd();
         Ri.end();
@@ -200,6 +212,7 @@ public class RIBVisitor extends SceneGraphVisitor {
     }
     
     public void  visit(SceneGraphComponent c) {
+    	if (!c.isVisible()) return;
         Ri.comment(c.getName());        
         Ri.attributeBegin();
         EffectiveAppearance tmp =eAppearance;
@@ -243,13 +256,16 @@ public class RIBVisitor extends SceneGraphVisitor {
         }
         
         Object color = a.getAttribute(type+"."+CommonAttributes.DIFFUSE_COLOR,CommonAttributes.DIFFUSE_COLOR_DEFAULT);
+        float colorAlpha = 1.0f;
         if(color!=Appearance.INHERITED) {
-            float[] c =((Color)color).getComponents(null);
+            float[] c =((Color)color).getRGBComponents(null);
             Ri.color(new float[] {c[0],c[1],c[2]});
+            if (c.length == 4) colorAlpha = c[3];
         }
     
     double transparency = a.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
         float f = 1f - (float)transparency;
+        f *= colorAlpha;
         Ri.opacity(new float[] {f,f,f});
         //System.out.println("transparency is "+type+" is "+transparency);
         Object shader = a.getAttribute(type,"default");
@@ -264,11 +280,14 @@ public class RIBVisitor extends SceneGraphVisitor {
             if(true || shader.equals("default")) {
                 float phongSize =(float) a.getAttribute(type+"."+CommonAttributes.SPECULAR_EXPONENT,CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
                 float phong =(float) a.getAttribute(type+"."+CommonAttributes.SPECULAR_COEFFICIENT,CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);
-                HashMap map =new HashMap(); 
+                float Kd =(float) a.getAttribute(type+"."+CommonAttributes.DIFFUSE_COEFFICIENT,CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
+                float Ka =(float) a.getAttribute(type+"."+CommonAttributes.AMBIENT_COEFFICIENT,CommonAttributes.AMBIENT_COEFFICIENT_DEFAULT);
+              HashMap map =new HashMap(); 
                 map.put("roughness",new Float(1/phongSize));
                 map.put("Ks",new Float(phong));
-                map.put("Kd",new Float(1));
-                
+                map.put("Kd",new Float(Kd));
+                map.put("Ka",new Float(Ka));
+               
                 //System.out.println("has texture "+AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), a));
                 if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), a)) {
                     Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), a);
@@ -366,7 +385,20 @@ public class RIBVisitor extends SceneGraphVisitor {
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.IndexedLineSet)
      */
     public void visit(IndexedLineSet g) {
-        String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
+      	if (!insidePointset)	{
+    		// p is not a subclass of PointSet
+    		Object which = pointsets.get(g);
+    		if (which != null)	{
+    			Ri.ObjectInstance(((Integer) which).intValue());
+    		} else  
+    			_visit(g);
+    	} else
+    			_visit(g);
+    }
+    
+    private void _visit(IndexedLineSet g)	{
+    	insidePointset = true;
+       String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
         if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW),true)) {
         
         DataList dl = g.getEdgeAttributes(Attribute.INDICES);
@@ -429,6 +461,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         }
         }
         super.visit(g);
+        insidePointset = false;
     }
 
     /**
@@ -527,11 +560,20 @@ public class RIBVisitor extends SceneGraphVisitor {
     }
     
     public void visit(IndexedFaceSet i) {
-    	visit(i,null);
+       	if (!insidePointset)	{
+    		// p is not a subclass of PointSet
+    		Object which = pointsets.get(i);
+    		if (which != null)	{
+    			Ri.ObjectInstance(((Integer) which).intValue());
+    		} else  
+    			_visit(i, null);
+    	} else
+    			_visit(i,null);
     }
     
   
-    public void visit(IndexedFaceSet i,float[] color) {
+    public void _visit(IndexedFaceSet i,float[] color) {
+    	insidePointset = true;
 // dieser teil ist neu:    	
     	DataList colors=i.getFaceAttributes( Attribute.COLORS );
     	if (colors !=null){
@@ -544,7 +586,7 @@ public class RIBVisitor extends SceneGraphVisitor {
     		}
     		IndexedFaceSet[] faceList=splitIfsToPrimitiveFaces(i);
     		for (int k=0;k<numFaces;k++){			
-    			visit(faceList[k],colorArrayf[k]);
+    			_visit(faceList[k],colorArrayf[k]);
     		}
     	}
     	else{
@@ -610,7 +652,7 @@ public class RIBVisitor extends SceneGraphVisitor {
     							fnormals[3*j+1] =(float)da.getValueAt(j,1);
     							fnormals[3*j+2] =(float)da.getValueAt(j,2);
     						}
-    						map.put("uniform normal N",fnormals);            	
+    						map.put("uniform N",fnormals);            	
     					}
     				}
     				// texture coords:
@@ -686,14 +728,29 @@ public class RIBVisitor extends SceneGraphVisitor {
     				Ri.attributeEnd();
     			}
     		}
-    		super.visit(i);
-    	}// neu
-    }
+     	}// neu
+   		super.visit(i);
+   		insidePointset = false;
+   }
     
     /* (non-Javadoc)
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.PointSet)
      */
     public void visit(PointSet p) {
+    	if (!insidePointset)	{
+    		// p is not a subclass of PointSet
+    		Object which = pointsets.get(p);
+    		if (which != null)	{
+    			Ri.ObjectInstance(((Integer) which).intValue());
+    		} else  
+    			_visit(p);
+    	} else 
+    			_visit(p);
+    }
+    
+    public void _visit(PointSet p) {
+
+    	 insidePointset = true;
         String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
         if(!eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.VERTEX_DRAW),CommonAttributes.VERTEX_DRAW_DEFAULT)) return;
         int n= p.getNumPoints();
@@ -733,6 +790,7 @@ public class RIBVisitor extends SceneGraphVisitor {
             Ri.points(n,map);
         }
             Ri.attributeEnd();
+            insidePointset = false;
     }
     
     public void visit(ClippingPlane p) {
@@ -824,4 +882,50 @@ public class RIBVisitor extends SceneGraphVisitor {
         r[2] = zrot;
     }
 
+    private class GeometryCollector extends SceneGraphVisitor	{
+    	SceneGraphComponent root = null;
+    	RIBVisitor rib = null;
+    	GeometryCollector(SceneGraphComponent r, RIBVisitor b)	{
+    		super();
+    		root  = r;
+    		rib = b;
+    		Ri.comment("'\nBeginning of retained geometry\n");
+    		visit(root);
+       		Ri.comment("'\nEnd of retained geometry\n\n");
+       	    	}
+        public void visit(SceneGraphComponent c) {
+            c.childrenAccept(this);
+        }
+        
+		public void visit(IndexedFaceSet i) {
+			if (pointsets.get(i) != null) return;
+			Ri.comment("Retained geometry "+i.getName());
+			Ri.ObjectBegin(pointsetCount);
+			rib.visit(i);
+			Ri.ObjectEnd();
+			pointsets.put(i, new Integer(pointsetCount));
+			pointsetCount++;
+		}
+
+		public void visit(IndexedLineSet i) {
+			if (pointsets.get(i) != null) return;
+			Ri.comment("Retained geometry "+i.getName());
+			Ri.ObjectBegin(pointsetCount);
+			rib.visit(i);
+			Ri.ObjectEnd();
+			pointsets.put(i, new Integer(pointsetCount));
+			pointsetCount++;
+		}
+
+		public void visit(PointSet i) {
+			if (pointsets.get(i) != null) return;
+			Ri.comment("Retained geometry "+i.getName());
+			Ri.ObjectBegin(pointsetCount);
+			rib.visit(i);
+			Ri.ObjectEnd();
+			pointsets.put(i, new Integer(pointsetCount));
+			pointsetCount++;
+		}
+    	
+    }
 }
