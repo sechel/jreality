@@ -24,13 +24,15 @@ public class SmokeCalculation extends AbstractCalculation {
   
   static String src;
   
+  static boolean geforce6=false;
+  
   static {
     IntegratorFactory rk = IntegratorFactory.rk2();
     rk.addConstant("const float PI = 3.141592653589793;");
     rk.addUniform("vorts0", "samplerRect");
     rk.addUniform("vorts1", "samplerRect");
     rk.addUniform("a2", "float");
-    rk.addUniform("CNT", "int");
+    if (geforce6) rk.addUniform("CNT", "int");
     
     rk.srcT0(
       "  return vec4(biotSavart(point.xyz, vorts0), 0);\n"
@@ -94,13 +96,12 @@ public class SmokeCalculation extends AbstractCalculation {
   }
   
   protected String initSource() {
-    return src; //.replaceAll("\\$CNT", ""+dataTextureSize);
+    return geforce6 ? src : src.replaceAll("CNT", ""+dataTextureSize);
   }
   
   protected String updateSource() {
-    //if (!dataTextureSizeChanged)
-      return null;
-    //return initSource();
+    if (geforce6 || !dataTextureSizeChanged) return null;
+    return initSource();
   }
   
   protected void initDataTextures(GL gl) {
@@ -135,7 +136,7 @@ public class SmokeCalculation extends AbstractCalculation {
     prog.setUniform("a2", a*a);
     prog.setUniform("h", h);
     prog.setUniform("r3", true);
-    prog.setUniform("CNT", dataTextureSize);
+    if (geforce6) prog.setUniform("CNT", dataTextureSize);
 
   }
   
