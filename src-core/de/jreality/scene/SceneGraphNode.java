@@ -17,7 +17,6 @@ import de.jreality.util.LoggingSystem;
  * and a read-only flag.
  */
 public class SceneGraphNode {
-  private static final Object writerMutex = new Object();
   private static int UNNAMED_ID;
   /** PENDING: <b>work in progress</b>, the lock for this component,
    * subclasses should always use try{}finally{} statements when
