@@ -1,16 +1,9 @@
 package de.jreality.geometry;
 
 import java.awt.Color;
-import java.awt.Font;
 import de.jreality.math.FactoredMatrix;
-import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.SceneGraphPathObserver;
-import de.jreality.scene.event.TransformationEvent;
-import de.jreality.scene.event.TransformationListener;
-import de.jreality.scene.tool.ToolSystemViewer;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 
@@ -35,7 +28,7 @@ public class CoordinateSystemTest {
     //create coordinate system
     final CoordinateSystemFactory coords = new CoordinateSystemFactory(component);
     //SET PROPERTIES:
-    //coords.setAxisScale(0.3);
+    //coords.setAxisScale(0.25);
     //coords.setLabelScale(0.005);
     //coords.showBoxArrows(true);
     //coords.showAxesArrows(false);
@@ -47,46 +40,17 @@ public class CoordinateSystemTest {
     
     
     //display axes/box/grid
-    coords.showAxes(false);
+    //coords.showAxes(false);
     coords.showBox(true);
-    coords.showGrid(true);
+    //coords.showGrid(false);
+    
+    //beautify box
+    coords.beautify(true);
     
     
     //display component
-    ToolSystemViewer currViewer = (ToolSystemViewer)ViewerApp.display(component)[1];
-    
-
-
-    
-    //COORDINATE SYSTEM BEAUTIFIER:
-    //get paths of camera and object
-    final SceneGraphPath cameraPath = currViewer.getCameraPath();
-    final SceneGraphPath objectPath = new SceneGraphPath();
-    SceneGraphComponent root = currViewer.getSceneRoot();
-    SceneGraphComponent scene = root.getChildComponent(0);
-    objectPath.push(root);
-    objectPath.push(scene);
-    objectPath.push(component);
-
-    double[] cameraToRoot = cameraPath.getMatrix(null);
-    double[] rootToObject = objectPath.getInverseMatrix(null);
-    double[] cameraToObject = Rn.times(null, rootToObject, cameraToRoot);
-	coords.updateBox(cameraToObject);
-    
-    //SceneGraphPathObserver cpObserver = new SceneGraphPathObserver(cameraPath);
-    SceneGraphPathObserver opObserver = new SceneGraphPathObserver(objectPath);
-    opObserver.addTransformationListener(new TransformationListener(){
-    	public void transformationMatrixChanged(TransformationEvent ev){
-    	    double[] cameraToRoot = cameraPath.getMatrix(null);
-    	    double[] rootToObject = objectPath.getInverseMatrix(null);
-    	    double[] cameraToObject = Rn.times(null, rootToObject, cameraToRoot);
-    		coords.updateBox(cameraToObject);
-    	}
-    });
+    ViewerApp.display(component);
   }
-   
- 
-  
   
   
   
