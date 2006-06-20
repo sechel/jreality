@@ -45,11 +45,6 @@ import de.jreality.math.Rn;
  * @author Martin Sommer
  */
 
-//TODO:
-// * - determine default value of labelScale via bounding box of the component
-// * - CoordinateSystemBeautifier
-// * - documentation
-
 public class CoordinateSystemFactory {
 
 
