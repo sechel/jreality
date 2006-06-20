@@ -35,6 +35,7 @@ import de.jreality.math.Rn;
  * CoordinateSystemFactory factory = new CoordinateSystemFactory(component);<br>
  * factory.showAxes(false);<br>
  * factory.showBox(true);<br>
+ * factory.beautify(true);<br>
  * [more properties]</i>
  * <p>
  * The coordinate system may be removed from the SceneGraph by<br>
@@ -54,7 +55,12 @@ public class CoordinateSystemFactory {
 
 	private double[] boxMin, boxMax;
 	
-	public final static int X = 0, Y = 1, Z = 2;
+	/** Index of coordinate x (use in arrays). */
+	public final static int X = 0;
+	/** Index of coordinate y (use in arrays). */
+	public final static int Y = 1;
+	/** Index of coordinate z (use in arrays). */
+	public final static int Z = 2;
 	
 	private double[][][] axesVertices, boxVertices;
 	private SceneGraphComponent coordinateSystem;
@@ -1258,6 +1264,8 @@ public class CoordinateSystemFactory {
 			}
 		}
 	}
+	
+	
 	
 //-------------------------------------------------------------
 //IN PROCESS...
