@@ -12,6 +12,7 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.tool.CoordinateSystemBeautifier;
 import de.jreality.geometry.Primitives;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.math.FactoredMatrix;
@@ -28,7 +29,7 @@ import de.jreality.math.Rn;
  * A new SceneGraphNode containing the coordinate system is added to 
  * the children of the given SceneGraphComponent.
  * <p>
- * Use it the following way:<br>
+ * Use the factory as following:<br>
  * <i>SceneGraphCompontent component;<br>
  * [...]<br>
  * CoordinateSystemFactory factory = new CoordinateSystemFactory(component);<br>
@@ -43,7 +44,7 @@ import de.jreality.math.Rn;
  * @author Martin Sommer
  */
 
-//TO DO:
+//TODO:
 // * - determine default value of labelScale via bounding box of the component
 // * - CoordinateSystemBeautifier
 // * - documentation
@@ -56,7 +57,7 @@ public class CoordinateSystemFactory {
 	public final static int X = 0, Y = 1, Z = 2;
 	
 	private double[][][] axesVertices, boxVertices;
-	private SceneGraphComponent coordinateSystem, box, axes;
+	private SceneGraphComponent coordinateSystem;
 	
 	private final String[] axesNames = {"x", "y", "z"};
 	
@@ -84,6 +85,7 @@ public class CoordinateSystemFactory {
 	
 	private HashMap nodes = new HashMap();  //keep references to SceneGraphNodes
 	
+	private CoordinateSystemBeautifier beautifier = new CoordinateSystemBeautifier(this);
 	
 //-------------------------------------------------------------
 //DEFAULT VALUES OF PROPERTIES
@@ -94,7 +96,7 @@ public class CoordinateSystemFactory {
 	private double tickStretch = 8*labelScale; //stretch of ticks of axes (octagonalCrossSection)
 	private boolean showAxes = false;  //show or hide axes
 	private boolean showBox = false;  //show or hide box
-	private boolean showGrid = false;  //show or hide grid on box
+	private boolean showGrid = true;  //show or hide grid on box
 	private boolean showAxesArrows = true;  //show or hide arrows on axes
 	private boolean showBoxArrows = false;  //show or hide arrows on box
 	private boolean showLabels = true;  //show or hide labels of ticks & axes
@@ -102,6 +104,8 @@ public class CoordinateSystemFactory {
 	private Color gridColor = Color.GRAY;
 	private Color labelColor = Color.BLACK;
 	private Font labelFont = new Font("Sans Serif", Font.PLAIN, 48);
+	private boolean beautify = true;  //for adding tool CoordinateSystemBeautifier
+
 	
 	
 //-------------------------------------------------------------
@@ -115,7 +119,7 @@ public class CoordinateSystemFactory {
 	 * @param extent extent of each coordinate axis
 	 */
 	public CoordinateSystemFactory(double extent) {
-		//To DO: validate extent (extent > 0)
+		//TODO: validate extent (extent > 0)
 		
 		this(new double[]{extent, extent, extent});
 	}
@@ -128,14 +132,12 @@ public class CoordinateSystemFactory {
 	 * @param extent contains the extent of each coordinate axis
 	 */
 	public CoordinateSystemFactory(double[] extent) {
-		//To DO: validate extent (extent[i] > 0, extent.length == 3)
+		//TODO: validate extent (extent[i] > 0, extent.length == 3)
 		
 		boxMin = new double[]{-extent[X], -extent[Y], -extent[Z]};
 		boxMax = new double[]{ extent[X],  extent[Y],  extent[Z]};
 		
 		//create the coordinate system
-		box = calculateBox();
-		axes = calculateAxes();
 		coordinateSystem = createCoordinateSystem();
 	}
 	
@@ -167,8 +169,6 @@ public class CoordinateSystemFactory {
 		}
 		
 		//create the coordinate system
-		box = calculateBox();
-		axes = calculateAxes();
 		coordinateSystem = createCoordinateSystem();
 		component.addChild(coordinateSystem);
 		
@@ -193,8 +193,8 @@ public class CoordinateSystemFactory {
 		coordinateSystem = new SceneGraphComponent();
 		coordinateSystem.setName("CoordinateSystem");
 		
-		coordinateSystem.addChild(box);  //invisible child, use displayBox(boolean)
-		coordinateSystem.addChild(axes); //invisible child, use displayBox(boolean)
+		coordinateSystem.addChild(calculateBox());  //invisible child, use displayBox(boolean)
+		coordinateSystem.addChild(calculateAxes()); //invisible child, use displayBox(boolean)
 		
 		//set appearance of coordinate system node
 		Appearance app = new Appearance();
@@ -215,6 +215,10 @@ public class CoordinateSystemFactory {
 	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.EAST);
 	    coordinateSystem.setAppearance(app);
 		
+	    if (beautify) {
+	    	beautify = false;
+	    	beautify(true); }
+	    
 		return coordinateSystem;
 	}
 	
@@ -235,7 +239,7 @@ public class CoordinateSystemFactory {
 			
 			SceneGraphComponent singleAxis = new SceneGraphComponent();
 			singleAxis.setName(axesNames[axis] +"-axis");
-			nodes.put(axesNames[axis] +"Box", singleAxis);  //e.g. xBox
+			//nodes.put(axesNames[axis] +"Box", singleAxis);  //e.g. xBox
 			
 			for (int k=0; k<=3; k++) {
 				
@@ -244,17 +248,18 @@ public class CoordinateSystemFactory {
 				//assign binary value of k to the name of the SGC
 				singleAxisK.setName(toBinaryString(k));
 
-				nodes.put(axesNames[axis]+singleAxisK.getName(), singleAxisK);  //e.g. x00
+				nodes.put(axesNames[axis]+toBinaryString(k), singleAxisK);  //e.g. x00
 				
 				//create line with label
 				SceneGraphComponent line = getLine(axis, boxVertices[axis][2*k], boxVertices[axis][2*k+1], true);
+				nodes.put(axesNames[axis]+toBinaryString(k)+"label", line.getChildComponent(0));  //e.g. x00label
 				//create arrow
 				SceneGraphComponent arrow = getArrow(axis, boxVertices[axis][2*k], boxVertices[axis][2*k+1]);
 				arrow.setVisible(showBoxArrows);
-				nodes.put(axesNames[axis]+singleAxisK.getName()+"arrow", arrow);  //e.g. x00arrow
+				nodes.put(axesNames[axis]+toBinaryString(k)+"arrow", arrow);  //e.g. x00arrow
 				//create ticks with labels
 				SceneGraphComponent ticks = getBoxTicks(axis, k, boxVertices[axis][2*k], boxVertices[axis][2*k+1]);
-				nodes.put(axesNames[axis]+singleAxisK.getName()+"ticks", ticks);  //e.g. x00ticks
+				nodes.put(axesNames[axis]+toBinaryString(k)+"ticks", ticks);  //e.g. x00ticks
 				
 				singleAxisK.addChild(line);
 				singleAxisK.addChild(arrow);
@@ -273,6 +278,7 @@ public class CoordinateSystemFactory {
 	    //box.setAppearance(app);
 	    box.setVisible(showBox);
 
+	    nodes.put("box", box);
 	    return box;
 	}
 	
@@ -318,6 +324,7 @@ public class CoordinateSystemFactory {
 	    //box.setAppearance(app);
 	    axes.setVisible(showAxes);
 	    
+	    nodes.put("axes", axes);
 	    return axes;
 	}
 	
@@ -586,6 +593,7 @@ public class CoordinateSystemFactory {
 		Geometry geom = labelPSF.getPointSet();
 		geom.setName("anchorPoints");
 		labels.setGeometry(geom);
+		nodes.put(axesNames[axis]+toBinaryString(k)+"ticklabels", labels);  //e.g. x00ticklabels
 		
 		//create the SceneGraphComponent and rotate the ticks onto the corresponding coordinate axis
 		ticksGeom.setName("ticks");
@@ -623,7 +631,7 @@ public class CoordinateSystemFactory {
 		for (int axis=X; axis<=Z; axis++) {
 			
 			//get number of ticks on axis
-			final int n = ((PointSet)getSGC(axesNames[axis]+"00ticks").getChildComponent(0).getGeometry()).getNumPoints();  //child.name="labels"
+			final int n = ((PointSet)getSGC(axesNames[axis]+"00ticklabels").getGeometry()).getNumPoints();
 			
 			for (int k=0; k<=3; k++) {
 				
@@ -634,7 +642,7 @@ public class CoordinateSystemFactory {
 				for (int i=0; i<n; i++) {
 					for (int line=0; line<=1; line++) {
 						//get anchor points of tick labels
-						ps = (PointSet)getSGC(axesNames[axis]+toBinaryString(k+line*next)+"ticks").getChildComponent(0).getGeometry();  //child.name="labels"
+						ps = (PointSet)getSGC(axesNames[axis]+toBinaryString(k+line*next)+"ticklabels").getGeometry();  //e.g. x00ticklabels
 						points = ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null);
 						current = new double[]{points[3*i], points[3*i+1], points[3*i+2], 0};
 						translation = (double[])boxVertices[axis][2*(k+line*next)].clone();  //minimum end point
@@ -906,16 +914,22 @@ public class CoordinateSystemFactory {
 		}
 
 		//hide edges which don't have copies of same "distance to the screen"
-		if (direction[Y]!=0 && direction[Z]!=0)
+		int[] invisibleEdges = new int[3];
+		if (direction[Y]!=0 && direction[Z]!=0) {
 			getSGC("x" + edgeCriteria[Y] + edgeCriteria[Z]).setVisible(false);
-		if (direction[X]!=0 && direction[Z]!=0)
+			invisibleEdges[X] = edgeCriteria[Y]*2 + edgeCriteria[Z]; }
+		if (direction[X]!=0 && direction[Z]!=0) {
 			getSGC("y" + edgeCriteria[X] + edgeCriteria[Z]).setVisible(false);
-		if (direction[X]!=0 && direction[Y]!=0)
+			invisibleEdges[Y] = edgeCriteria[X]*2 + edgeCriteria[Z]; }
+		if (direction[X]!=0 && direction[Y]!=0) {
 			getSGC("z" + edgeCriteria[X] + edgeCriteria[Y]).setVisible(false);
+			invisibleEdges[Z] = edgeCriteria[X]*2 + edgeCriteria[Y]; }
 		
 		//hide corresponding grid faces
 		for (int axis=X; axis<=Z; axis++) 
 			getSGC("face"+(2*axis+edgeCriteria[axis])).setVisible(false);
+		
+		if (beautifyBoxLabels) updateLabelsOfBoxEdges(cameraToObject, invisibleEdges);
 	}
 	
 	
@@ -977,8 +991,8 @@ public class CoordinateSystemFactory {
 		}
 		
 		//update grid
-		box.removeChild(getSGC("grid"));
-		box.addChild(calculate2DGrid());
+		getSGC("box").removeChild(getSGC("grid"));
+		getSGC("box").addChild(calculate2DGrid());
 	}
 	
 	
@@ -1065,7 +1079,7 @@ public class CoordinateSystemFactory {
 	 */
 	public void showAxes(boolean b) {
 		showAxes = b;
-		axes.setVisible(b);
+		getSGC("axes").setVisible(b);
 	}
 
 	
@@ -1075,7 +1089,7 @@ public class CoordinateSystemFactory {
 	 */
 	public void showBox(boolean b) {
 		showBox = b;
-		box.setVisible(b);
+		getSGC("box").setVisible(b);
 	}
 
 
@@ -1205,4 +1219,89 @@ public class CoordinateSystemFactory {
 		return labelFont;
 	}
 
+
+	/**
+	 * Beautify the coordinate system automatically iff set to true,  
+	 * i.e. hide certain box vertices including box edges and grid faces.<br>
+	 * (Adds or removes the tool CoordinateSystemBeautifier to the coordinate system.)
+	 * @param b true iff coordinate system is to be beautified automatically
+	 */
+	public void beautify(boolean b) {
+		if (beautify==b) return;
+		beautify = b;
+		if (b) coordinateSystem.addTool(beautifier);
+		else coordinateSystem.removeTool(beautifier);
+	}
+
+	
+	/**
+	 * Set the box edges on which labels are to be shown. <br>
+	 * Edges={{dir_y, dir_z}, {dir_x, dir_z}, {dir_x, dir_y}} specifies
+	 * on which three edges of the bounding box labels are shown. 
+	 * The dir_i must be either -1 or +1 and specifies whether labels are shown on
+	 * the edge of the box with a larger or smaller value of coordinate i, respectively.<br>
+	 * (This method is analogous to the Mathematica Graphics3D directive 'AxesEdges'.) 
+	 * @param edges specifies on which edges of the bounding box labels are to be shown
+	 */
+	public void setLabelBoxEdges(int[][] edges) {
+				
+		String a, b;
+		SceneGraphComponent labels;
+		for (int axis=X; axis<=Z; axis++) {
+			a = (edges[axis][0] == -1)? "0":"1";
+			b = (edges[axis][1] == -1)? "0":"1";
+			for (int k=0; k<=3; k++) {
+				labels = getSGC(axesNames[axis]+toBinaryString(k)+"ticklabels");  //e.g. x00ticklabels
+				if ( toBinaryString(k).equals(a+b) )
+					labels.setVisible(true);
+				else labels.setVisible(false);
+			}
+		}
+	}
+	
+//-------------------------------------------------------------
+//IN PROCESS...
+//-------------------------------------------------------------
+
+	private boolean beautifyBoxLabels = false;  //do or do not beautify labels of box edges
+	
+	private void updateLabelsOfBoxEdges(double[] cameraToObject, int[] invisibleEdges) {
+		
+		//direction of x-axis in camera coordinates is (1,0,0)
+		//transform camera coordinates to local coordinates
+		double[] tmp = new Matrix(cameraToObject).multiplyVector(new double[]{1,0,0,0});
+		double[] direction = new double[]{tmp[0], tmp[1], tmp[2]};
+
+		//determine neighbour edges of invisible edge
+		int[][] neighbourEdges = new int[3][2];
+		for (int axis=X; axis<=Z; axis++) {
+			neighbourEdges[axis] = ( invisibleEdges[axis]==0 || invisibleEdges[axis]==3 )?
+				new int[]{1,2} : new int[]{0,3};
+		}
+		
+		//middle point of rightest box edge of neighbour edges has maximum inner product with direction
+		int[] result = new int[3];
+		for (int axis=X; axis<=Z; axis++) {
+			//get coordinates of the middle points of the two neighbour edges via anchor point of label 
+			PointSet ps = (PointSet)getSGC(axesNames[axis]+toBinaryString(neighbourEdges[axis][0])+"label").getGeometry();
+			double[] first = ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null);
+			ps = (PointSet)getSGC(axesNames[axis]+toBinaryString(neighbourEdges[axis][1])+"label").getGeometry();
+			double[] second = ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null);
+			
+			//determine the rightest between the two
+			result[axis] = ( Rn.innerProduct(second, direction) > Rn.innerProduct(first, direction) )?
+				neighbourEdges[axis][1] : neighbourEdges[axis][0];
+		}
+
+		//translate result into directive for setAxesEdges()
+		int[][] directive = new int[3][2];
+		for (int axis=X; axis<=Z; axis++) {
+			directive[axis][0] = ( toBinaryString(result[axis]).substring(0,1).equals("0") )? -1 : 1;
+			directive[axis][1] = ( toBinaryString(result[axis]).substring(1,2).equals("0") )? -1 : 1;
+		}
+
+		//set visibility of box edges
+		setLabelBoxEdges(directive);
+	}
+	
 }
