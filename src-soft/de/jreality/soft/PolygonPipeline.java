@@ -295,6 +295,7 @@ public class PolygonPipeline
             increaseVertexCapacity(vertices.getLength() / 3);
 
         int vc = vertexCount;
+        if(vd.getLengthAt(0)==3)        
         for (int i = 0; i < vertices.getLength(); i++) {
             int vi = vertices.getValueAt(i);
             DoubleArray vertex=vd.item(vi).toDoubleArray();
@@ -313,6 +314,51 @@ public class PolygonPipeline
                 normal.getValueAt(0),
                 normal.getValueAt(1),
                 normal.getValueAt(2),
+                vertexData,
+                vc + Polygon.NX);
+            if(vertexColors) {
+                DoubleArray color=vertexColor.item(vi).toDoubleArray();
+                vertexData[vc+Polygon.R]=color.getValueAt(0);
+                vertexData[vc+Polygon.G]=color.getValueAt(1);
+                vertexData[vc+Polygon.B]=color.getValueAt(2);
+                vertexData[vc+Polygon.A]=(vertexColorLength==4
+                   ||(vertexColorLength==-1&&color.getLength()>3))?
+                  color.getValueAt(3): 1.;
+            }
+            if(useTexCoords && texCoords != null) {
+                DoubleArray tc = texCoords.item(vi).toDoubleArray();
+                vertexData[vc + Polygon.U] = tc.getValueAt(0);
+                vertexData[vc + Polygon.V] = tc.getValueAt(1);
+                
+            }
+            vc += Polygon.VERTEX_LENGTH;
+        } else // vertices are 4 tupel
+        for (int i = 0; i < vertices.getLength(); i++) {
+            int vi = vertices.getValueAt(i);
+            DoubleArray vertex=vd.item(vi).toDoubleArray();
+            VecMat.transform(
+                matrix,
+                vertex.getValueAt(0),
+                vertex.getValueAt(1),
+                vertex.getValueAt(2),
+                vertex.getValueAt(3),
+                vertexData,
+                vc + Polygon.SX);
+                if(vertexData[vc + Polygon.SW] != 0) {
+                    final double d = vertexData[vc + Polygon.SW];
+                    vertexData[vc + Polygon.SX] /= d;    
+                    vertexData[vc + Polygon.SY] /= d;    
+                    vertexData[vc + Polygon.SZ] /= d;    
+                    vertexData[vc + Polygon.SW] = 1;    
+                }
+                int ni = normals.getValueAt(i);
+            DoubleArray normal=nd.item(ni).toDoubleArray();
+            VecMat.transformNormal(
+                inverseTransposeMatrix,
+                normal.getValueAt(0),
+                normal.getValueAt(1),
+                normal.getValueAt(2),
+                //normal.getValueAt(3),
                 vertexData,
                 vc + Polygon.NX);
             if(vertexColors) {
@@ -695,22 +741,28 @@ public class PolygonPipeline
     /* (non-Javadoc)
      * @see de.jreality.soft.PointProcessor#processPoint(double[], int)
      */
-    public final void processPoint(final double[] data, int index) {
+    public final void processPoint(final double[] data, int index, int length) {
         if (pointShader == null)
             return;
-        processPoint(data[index], data[index + 1], data[index + 2]);
+        if(length == 4)
+            processPoint(data[index], data[index + 1], data[index + 2], data[index + 3]);
+        else
+            processPoint(data[index], data[index + 1], data[index + 2],1);
     }
     public final void processPoint(final DoubleArrayArray data, int index) {
         DoubleArray da=data.item(index).toDoubleArray();
-        processPoint(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
+        double w = 1;
+        if(da.size()==4) w = da.getValueAt(3);
+        processPoint(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2),w);
     }
     public final void processPoint(
         final double x,
         final double y,
-        final double z) {
+        final double z,
+        final double w) {
         if (pointShader == null)
             return;
-        VecMat.transform(matrix, x, y, z,1, point0, 0);
+        VecMat.transform(matrix, x, y, z,w, point0, 0);
         VecMat.transformUnNormalized(matrix, 0, 0, pointRadius, normal0, 0);
         double[] mat = matrix;
         double[] tmat = inverseTransposeMatrix;
@@ -763,12 +815,16 @@ public class PolygonPipeline
         if (lineShader == null)
             return;
         shader = lineShader.getPolygonShader();
+        double w = 1;
+        if(from.size()==4) w = from.getValueAt(3); 
         VecMat.transform(matrix,
             from.getValueAt(0), from.getValueAt(1), from.getValueAt(2),
             1, point0, 0);
         
         VecMat.transformUnNormalized(matrix, 0, 0, lineWidth, normal0, 0);
 
+        w = 1;
+        if(to.size()==4) w = from.getValueAt(3); 
         VecMat.transform(matrix,
             to.getValueAt(0), to.getValueAt(1), to.getValueAt(2),
             1, point1, 0);
@@ -842,15 +898,18 @@ public class PolygonPipeline
         if (lineShader == null)
             return;
         shader = lineShader.getPolygonShader();
+        double w = 1;
+        if(from.size()==4) w = from.getValueAt(3); 
         VecMat.transform(matrix,
                 from.getValueAt(0), from.getValueAt(1), from.getValueAt(2),
-                1, point0, 0);
+                w, point0, 0);
         
         VecMat.transformUnNormalized(matrix, 0, 0, lineWidth, normal0, 0);
-
+        w = 1;
+        if(to.size()==4) w = to.getValueAt(3); 
         VecMat.transform(matrix,
                 to.getValueAt(0), to.getValueAt(1), to.getValueAt(2),
-                1, point1, 0);
+                w, point1, 0);
        
 
         double[] mat = matrix;

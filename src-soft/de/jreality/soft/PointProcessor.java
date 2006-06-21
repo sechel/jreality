@@ -30,5 +30,5 @@ package de.jreality.soft;
  *
  */
 public interface PointProcessor {
-	public void processPoint(double[] data, int index);
+	public void processPoint(double[] data, int index, int length);
 }
