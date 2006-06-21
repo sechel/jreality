@@ -115,7 +115,7 @@ public abstract class AbstractCalculation implements GLEventListener {
       // user uniforms
       setUniformValues(gl, program);
       
-      GlslLoader.render(program, drawable);
+      GlslLoader.render(program, gl);
       
       renderQuad(gl);
       
@@ -134,7 +134,7 @@ public abstract class AbstractCalculation implements GLEventListener {
       readTex = writeTex;
       writeTex = tmp;
   
-      GlslLoader.postRender(program, drawable); // any postRender just resets the shader pipeline
+      GlslLoader.postRender(program, gl); // any postRender just resets the shader pipeline
 
       // switch back to old buffer
       gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, 0);
@@ -148,9 +148,9 @@ public abstract class AbstractCalculation implements GLEventListener {
         gl.glBindTexture(TEX_TARGET, valueTextures[writeTex]);
         renderer.setUniform("values", 0);
         renderer.setUniform("scale", 1.); //findScale());
-        GlslLoader.render(renderer, drawable);
+        GlslLoader.render(renderer, gl);
         renderQuad(gl);
-        GlslLoader.postRender(renderer, drawable);
+        GlslLoader.postRender(renderer, gl);
       }
       gl.glDisable(TEX_TARGET);
     }
@@ -467,7 +467,7 @@ public abstract class AbstractCalculation implements GLEventListener {
    */
   public void renderPoints(JOGLRenderer jr) {
     if (!hasValidVBO || readData) return;
-    GL gl = jr.globalGL;
+    GL gl = jr.getGL();
     
     gl.glBindBufferARB(GL.GL_ARRAY_BUFFER, vbo[0]);
     gl.glVertexPointer(4, GL.GL_FLOAT, 0, (Buffer) null);

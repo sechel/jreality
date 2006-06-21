@@ -144,7 +144,7 @@ public class ClothCalculation extends AbstractCalculation {
         program.setUniform("velocity", 2);
 
         program.setUniform("point", true);
-        GlslLoader.render(program, drawable);
+        GlslLoader.render(program, gl);
         renderQuad(gl);
         //expensive;
         gl.glFinish();
@@ -156,7 +156,7 @@ public class ClothCalculation extends AbstractCalculation {
         
         gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT1_EXT);
         program.setUniform("point", false);
-        GlslLoader.render(program, drawable);
+        GlslLoader.render(program, gl);
         renderQuad(gl);
         //expensive;
         //gl.glFinish();
@@ -168,7 +168,7 @@ public class ClothCalculation extends AbstractCalculation {
       pingPong = pongPing;
       pongPing = tmp;
     
-      GlslLoader.postRender(program, drawable); // any postRender just resets the shader pipeline
+      GlslLoader.postRender(program, gl); // any postRender just resets the shader pipeline
     
       // switch back to old buffer
       gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, 0);

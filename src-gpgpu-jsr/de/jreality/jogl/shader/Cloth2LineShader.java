@@ -201,13 +201,13 @@ public class Cloth2LineShader extends AbstractPrimitiveShader implements LineSha
   private static boolean inited;
   
   public void updateData(JOGLRenderer jr) {
-    calc = (ClothCalculation2) ((GpgpuViewer) jr.theViewer).getCalculation();
+    calc = (ClothCalculation2) ((GpgpuViewer) jr.getViewer()).getCalculation();
     if (calc == null) {
       calc = new ClothCalculation2(rows,columns);
       calc.setDisplayTexture(false);
       calc.setMeasureCPS(false);
       calc.setReadData(true);
-      ((GpgpuViewer) jr.theViewer).setCalculation(calc);
+      ((GpgpuViewer) jr.getViewer()).setCalculation(calc);
       System.out.println("setting calculation.");
       inited=true;
       // prepare index buffer and tex coord buffer:
@@ -278,7 +278,7 @@ public class Cloth2LineShader extends AbstractPrimitiveShader implements LineSha
       return;
     }
         
-    GL gl = jr.globalGL;
+    GL gl = jr.getGL();
         
     gl.glPushAttrib(GL.GL_LIGHTING_BIT);
     gl.glDisable(GL.GL_LIGHTING);
@@ -291,7 +291,7 @@ public class Cloth2LineShader extends AbstractPrimitiveShader implements LineSha
         gl.glActiveTexture(GL.GL_TEXTURE0);
         gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
         gl.glEnable(GL.GL_TEXTURE_2D);
-        Texture2DLoaderJOGL.render(jr.getCanvas(), spriteTex);
+        Texture2DLoaderJOGL.render(jr.getGL(), spriteTex);
       }
       //System.out.println(data);
       //GpgpuUtility.dumpData(data);
@@ -303,7 +303,7 @@ public class Cloth2LineShader extends AbstractPrimitiveShader implements LineSha
       if (tex != null) {
         gl.glEnable(GL.GL_TEXTURE_2D);
         gl.glActiveTexture(GL.GL_TEXTURE0);
-        Texture2DLoaderJOGL.render(jr.getCanvas(), tex);
+        Texture2DLoaderJOGL.render(jr.getGL(), tex);
       }
       
         gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
@@ -330,7 +330,7 @@ public class Cloth2LineShader extends AbstractPrimitiveShader implements LineSha
 
   public void postRender(JOGLRenderingState jrs) {
 	  JOGLRenderer jr = jrs.getRenderer();
-    GL gl = jr.globalGL;
+    GL gl = jr.getGL();
     if (sprites) {
       gl.glDisable(GL.GL_POINT_SPRITE_ARB);
       gl.glActiveTexture(GL.GL_TEXTURE0);

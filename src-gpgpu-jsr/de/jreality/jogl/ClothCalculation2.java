@@ -183,7 +183,7 @@ private boolean hasValidVBO;
         //initDataTextures(gl);
         
         program.setUniform("point", true);
-        GlslLoader.render(program, drawable);
+        GlslLoader.render(program, gl);
         renderQuad(gl);
         //valueBuffer.position((i+1)*NUM_COLS*4).limit((i+2)*NUM_COLS*4);
         
@@ -214,7 +214,7 @@ private boolean hasValidVBO;
         
         gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT1_EXT);
         program.setUniform("point", false);
-        GlslLoader.render(program, drawable);
+        GlslLoader.render(program, gl);
         renderQuad(gl);
         // very expensive:
         //gl.glFinish();
@@ -227,7 +227,7 @@ private boolean hasValidVBO;
       pingPong = pongPing;
       pongPing = tmp;
     
-      GlslLoader.postRender(program, drawable); // any postRender just resets the shader pipeline
+      GlslLoader.postRender(program, gl); // any postRender just resets the shader pipeline
     
       gl.glDisable(TEX_TARGET);
       // switch back to old buffer
