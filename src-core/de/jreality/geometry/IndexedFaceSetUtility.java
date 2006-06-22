@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
+import de.jreality.renderman.Ri;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
@@ -32,6 +33,7 @@ import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.scene.data.StringArray;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rectangle3D;
@@ -1145,6 +1147,57 @@ public class IndexedFaceSetUtility {
            double w = dehomogenize ? transformed[3] : 1;
            for (j = 0; j<data[i].length; j++) data[i][j] = transformed[j]/w;           
          }
+       }
+       public static IndexedFaceSet [] splitIfsToPrimitiveFaces(IndexedFaceSet ifs){
+       	// Author Bernd Gonska
+       	int num=ifs.getNumFaces();
+       	IndexedFaceSet [] parts= new IndexedFaceSet[num];
+       	for (int i=0;i<num;i++){
+       		parts[i]= new IndexedFaceSet();
+       		parts[i].setNumFaces(1);
+       		parts[i].setNumPoints(ifs.getNumPoints());
+       		parts[i].setVertexAttributes(ifs.getVertexAttributes());
+       		
+       		int[][]    oldIndizeesArray=null;
+       		String[]   oldLabelsArray=null;
+       		double[][] oldNormalsArray=null;
+       		double[][] oldTextureCoordsArray=null;
+       		int[][]    newIndizeesArray= new int[1][];
+       		String[]   newLabelsArray=new String[1];
+       		double[][] newNormalsArray=new double[1][];
+       		double[][] newTextureCoordsArray=new double[1][];
+       		
+       		DataList temp=ifs.getFaceAttributes( Attribute.INDICES );
+       		if (temp !=null){
+       			oldIndizeesArray	= temp.toIntArrayArray(null);
+       			newIndizeesArray[0] = oldIndizeesArray[i]; 
+       			parts[i].setFaceAttributes(Attribute.INDICES,
+       					new IntArrayArray.Array(newIndizeesArray));
+       		}
+       		
+       		temp= ifs.getVertexAttributes( Attribute.LABELS );
+       		if (temp!=null){
+       			oldLabelsArray 		= temp.toStringArray(null);
+       			newLabelsArray[0]	= oldLabelsArray[i];
+       			parts[i].setFaceAttributes(Attribute.LABELS,
+       					new StringArray(newLabelsArray));
+       		}
+       		temp= ifs.getVertexAttributes( Attribute.NORMALS );
+       		if (temp!=null){
+       			oldNormalsArray 	= temp.toDoubleArrayArray(null);
+       			newNormalsArray[0] = oldNormalsArray[i]; 
+       			parts[i].setFaceAttributes(Attribute.NORMALS,
+       					new DoubleArrayArray.Array(newNormalsArray));
+       		}
+       		temp= ifs.getVertexAttributes( Attribute.TEXTURE_COORDINATES );
+       		if (temp!=null){
+       			oldTextureCoordsArray = temp.toDoubleArrayArray(null);
+       			newTextureCoordsArray[0] = oldTextureCoordsArray[i]; 
+       			parts[i].setFaceAttributes(Attribute.TEXTURE_COORDINATES,
+       					new DoubleArrayArray.Array(newTextureCoordsArray));
+       		}
+       	}
+       	return parts;
        }
        
 }

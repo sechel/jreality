@@ -63,6 +63,7 @@ public class BallAndStickFactory {
 				if (arrowsAp == null) arrowsAp = new Appearance();
 				arrowsAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, arrowColor);
 				DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
+				DataList edgeColors = ils.getEdgeAttributes(Attribute.COLORS);
 				int n = ils.getNumEdges();
 				for (int i = 0; i<n; ++i)	{
 					int[] ed = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
@@ -73,6 +74,15 @@ public class BallAndStickFactory {
 						k = ed[j+1];
 						double[] p2 = vertices.item(k).toDoubleArray(null);	
 						SceneGraphComponent cc = TubeUtility.tubeOneEdge(p1, p2, stickRadius, null, signature);
+						if (edgeColors != null) {
+							Color ccc = null;
+							double[] dcc = edgeColors.item(i).toDoubleArray(null);
+							if (dcc.length == 4) ccc = new Color((float) dcc[0], (float) dcc[1], (float) dcc[2], (float) dcc[3]);
+							else ccc = new Color((float) dcc[0], (float) dcc[1], (float) dcc[2]);
+							Appearance ap = new Appearance();
+							ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ccc);
+							cc.setAppearance(ap);
+						}
 						if (cc != null) sticks.addChild(cc);
 						if (drawArrows)		{
 							FactoredMatrix arrowM = new FactoredMatrix(signature);

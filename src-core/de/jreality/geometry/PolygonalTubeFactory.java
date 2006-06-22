@@ -9,6 +9,7 @@ import java.util.logging.Level;
 
 import de.jreality.geometry.TubeUtility.FrameInfo;
 import de.jreality.math.P3;
+import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -45,6 +46,16 @@ public class PolygonalTubeFactory extends TubeFactory {
 	protected  double[][] makeTube(double[][] polygon, double radius, double[][] xsec, int type, boolean closed, int signature, int twists)	{
 		int n = polygon.length;
 		int vl = xsec[0].length;
+		// have to handle the situation here that the first and last points are the same but the closed flag isn't set.
+		// We assume for now that the user wants to treat this as a closed curve but we have to ignore the last point
+		// Here's how we do that
+		boolean autoClosed = false;
+		double d = Rn.euclideanDistance(polygon[0], polygon[n-1]);
+		autoClosed =  d < 10E-8;
+		if (autoClosed)	{
+			closed = true;
+			n = n-1;
+		}
 		int realLength = (closed ? n+1 : n)*xsec.length;
 		if (vals == null || vals.length != realLength || vals[0].length != vl)
 			vals = new double[realLength][vl];
@@ -54,7 +65,7 @@ public class PolygonalTubeFactory extends TubeFactory {
 		}
 		
 		int usedVerts = closed ? n+3 : n+2;
-		if (polygon2 == null || polygon2.length != polygon.length)  
+		if (polygon2 == null || polygon2.length != usedVerts)  
 			polygon2 = new double[usedVerts][];
 		for (int i = 0; i<n; ++i)	polygon2[i+1] = polygon[i];
 		if (closed)	{
@@ -101,6 +112,13 @@ public class PolygonalTubeFactory extends TubeFactory {
 		qmf.setVertexCoordinates(theTubeVertices);
 		qmf.setGenerateFaceNormals(true);
 		qmf.setGenerateVertexNormals(true);
+		if (generateTextureCoordinates)	{
+			if (!arcLengthTextureCoordinates) qmf.setGenerateTextureCoordinates(true);
+			else {
+				qmf.setVertexTextureCoordinates(arcLengthTextureCoordinates(theCurve, crossSection, signature));
+			}
+		}
+		qmf.setGenerateTextureCoordinates(generateTextureCoordinates && !arcLengthTextureCoordinates);
 		qmf.update();
 		theTube = qmf.getIndexedFaceSet();
 		if (vertexColors != null || edgeColors != null)	{
@@ -143,6 +161,38 @@ public class PolygonalTubeFactory extends TubeFactory {
 		}
 	}
 	
+	private double[][] arcLengthTextureCoordinates(double[][] theCurve, double[][] crossSection, int signature) {
+			
+			final int vLineCount = theCurve.length;
+			final int uLineCount = crossSection.length;
+			double[][] textureCoordinates = new double[uLineCount*vLineCount][2];
+			int vLength = theCurve[0].length;			// 3 or 4?
+			// create a list of v-parameter values parametrized by arc-length
+			double[] lengths = new double[vLineCount];
+			lengths[0] = 0.0;
+			for (int i = 1; i<vLineCount; ++i)	{
+				if (vLength == 3)		lengths[i] = lengths[i-1] + Rn.euclideanDistance(theCurve[i], theCurve[i-1]);
+				else lengths[i] = lengths[i-1] + Pn.distanceBetween(theCurve[i], theCurve[i-1], signature);
+			}
+			final double dv= 1.0 / (vLineCount - 1);
+			final double du= 1.0 / (uLineCount - 1);
+			
+			double v=0;
+			double curveLength = lengths[vLineCount-1];
+			for(int iv=0, firstIndexInULine=0;
+			iv < vLineCount;
+			iv++,  firstIndexInULine+=uLineCount) {
+				double u=0;
+				for(int iu=0; iu < uLineCount; iu++, u+=du) {
+					final int indexOfUV=firstIndexInULine + iu;
+					textureCoordinates[indexOfUV][0] = u;
+					textureCoordinates[indexOfUV][1] = lengths[iv] / curveLength;
+				}
+			}
+					
+			return textureCoordinates;
+		}
+
 	public IndexedFaceSet getTube()	{
 		return theTube;
 	}

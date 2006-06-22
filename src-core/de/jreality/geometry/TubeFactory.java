@@ -29,6 +29,8 @@ public  class TubeFactory {
 		public int frameFieldType = TubeUtility.PARALLEL;
 		public int signature = Pn.EUCLIDEAN;
 		public int twists = 0;
+		public boolean generateTextureCoordinates = false;
+		boolean arcLengthTextureCoordinates = false;
 		
 		public boolean closedCurve = false,
 			vertexColorsEnabled = false;
@@ -295,6 +297,22 @@ public  class TubeFactory {
 			}
 			B = new double[] {Math.random(), Math.random(), Math.random(), 1.0};
 			return Pn.polarizePlane(null, P3.planeFromPoints(null, B, polygon[1], polygon[2]),signature);
+		}
+
+		public boolean isGenerateTextureCoordinates() {
+			return generateTextureCoordinates;
+		}
+
+		public void setGenerateTextureCoordinates(boolean generateTextureCoordinates) {
+			this.generateTextureCoordinates = generateTextureCoordinates;
+		}
+
+		public boolean isArcLengthTextureCoordinates() {
+			return arcLengthTextureCoordinates;
+		}
+
+		public void setArcLengthTextureCoordinates(boolean arcLengthTextureCoordinates) {
+			this.arcLengthTextureCoordinates = arcLengthTextureCoordinates;
 		}
 
 }
