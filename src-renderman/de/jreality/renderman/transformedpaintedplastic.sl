@@ -22,8 +22,8 @@ transformedpaintedplastic ( float Ka = 1, Kd = .5, Ks = .5, roughness = .1;
   if (texturename != ""){
 	float ss = s;
 	point a = point (s,t,0);
-	point b = vtransform("world","object",a);
-	point p = transform( textureMatrix , b);
+/*	point b = transform("world","object",a); */
+	point p = transform( textureMatrix , a);
 
 /*	printf("%p -> %p -> %p\n\n%m\n\n",a,b,p,textureMatrix);*/
 	

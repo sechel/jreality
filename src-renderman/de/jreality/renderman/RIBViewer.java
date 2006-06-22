@@ -40,6 +40,12 @@ public class RIBViewer implements Viewer {
     private String fileName="test.rib";
     private String proj = "perspective";
     private int maximumEyeSplits = 10;
+    private int rendererType = TYPE_PIXAR;
+    
+    // features depend on the type of renderman renderer being used
+    public final static int TYPE_PIXAR = 1;
+    public final static int TYPE_3DELIGHT = 2;
+    
     /**
      * 
      */
@@ -76,6 +82,7 @@ public class RIBViewer implements Viewer {
      */
     public void render() {
         RIBVisitor rv =new RIBVisitor();
+        rv.setRendererType(rendererType);
         rv.setWidth(width);
         rv.setHeight(height);
         rv.projection(proj);
@@ -124,23 +131,26 @@ public class RIBViewer implements Viewer {
         }
     }
 
-    /* (non-Javadoc)
-     * @see de.jreality.scene.Viewer#getSignature()
-     */
-    public int getSignature() {
+     public int getSignature() {
         // TODO Auto-generated method stub
         return 0;
     }
 
-    /* (non-Javadoc)
-     * @see de.jreality.scene.Viewer#setSignature(int)
-     */
-    public void setSignature(int sig) {
-        // TODO Auto-generated method stub
-        
+     public void setSignature(int sig) {
+     }
+
+    public void setAuxiliaryRoot(SceneGraphComponent ar) {
+        throw new UnsupportedOperationException("not implemented");
     }
 
-    /**
+    public SceneGraphComponent getAuxiliaryRoot() {
+        throw new UnsupportedOperationException("not implemented");
+    }
+    
+    public void setRendererType(int type)	{
+    	rendererType = type;
+    }
+   /**
      * @return Returns the fileName.
      */
     public String getFileName() {
@@ -191,18 +201,4 @@ public class RIBViewer implements Viewer {
     	this.maximumEyeSplits=maximumEyeSplits;
     }
 
-    /* (non-Javadoc)
-     * @see de.jreality.scene.Viewer#setAuxiliaryRoot(de.jreality.scene.SceneGraphComponent)
-     */
-    public void setAuxiliaryRoot(SceneGraphComponent ar) {
-        throw new UnsupportedOperationException("not implemented");
-    }
-
-    /* (non-Javadoc)
-     * @see de.jreality.scene.Viewer#getAuxiliaryRoot()
-     */
-    public SceneGraphComponent getAuxiliaryRoot() {
-        throw new UnsupportedOperationException("not implemented");
-    }
-    
 }

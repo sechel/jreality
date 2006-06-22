@@ -25,6 +25,7 @@ package de.jreality.renderman;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
@@ -43,8 +44,15 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import com.sun.opengl.impl.mipmap.Type_Widget;
+
 import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetFactory;
+import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.geometry.IndexedLineSetUtility;
+import de.jreality.geometry.PolygonalTubeFactory;
+import de.jreality.geometry.TubeUtility;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
@@ -67,12 +75,14 @@ import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
+import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.data.StringArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
+import de.jreality.util.CameraUtility;
 
 
 /**
@@ -86,11 +96,11 @@ import de.jreality.shader.Texture2D;
  * 3delight<sup>TM</sup>  nor aqsis do support them at the moment</li>
  * <li>lots of other stuff I just did not check...</li>
  * <li>...</li>
- * <li>face colors on IndexedFaceSets ignored</li>
  * </ul>
  * Other TODO's (more on the software engineering side)
  *   put constant strings into CommonAttributes so people can write 
  *     into Appearances and "be heard" (or make an interface with AttributeEntity)
+ *   add control over global options using "renderingHints" shader
  *   Reduce use of static fields here and in Ri.java (not thread safe!)
  *  * @version 1.0
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
@@ -108,9 +118,13 @@ public class RIBVisitor extends SceneGraphVisitor {
     private String proj = "perspective";
     private int[] maximumEyeSplits={10};
     boolean insidePointset = false;
-    
-    public static boolean fullSpotLight = true;
+    // setting this true doesn't seem to work with the Renderman renderer.
+    public static boolean fullSpotLight = false;
+    public static boolean retainGeometry = false;		// use "ObjectBegin/End"?
     public static String shaderPath = null;
+    private int rendererType = RIBViewer.TYPE_PIXAR;
+    // features related to renderer type
+    private boolean hasPw;
     
     /**
      * 
@@ -119,12 +133,17 @@ public class RIBVisitor extends SceneGraphVisitor {
         super();
         eAppearance=EffectiveAppearance.create();
     }
-    public void visit(SceneGraphComponent root, SceneGraphPath path, String name) {
+    
+    public void setRendererType(int rendererType) {
+		this.rendererType = rendererType;
+	}
+    
+	public void visit(SceneGraphComponent root, SceneGraphPath path, String name) {
         //SceneGraphPath path =SceneGraphPath.getFirstPathBetween(root,camera);
     	
           Camera camera =(Camera) path.getLastElement();
         this.name =name;
-        double[] cam =path.getInverseMatrix(null);
+        double[] world2Camera =path.getInverseMatrix(null);
         try {
             File file = new File(name);
             System.out.println("writing in  "+file);
@@ -151,6 +170,14 @@ public class RIBVisitor extends SceneGraphVisitor {
         if(!name.endsWith(".rib"))
             name = name+".rib";
         Ri.begin(name);
+      Appearance ap = root.getAppearance();
+      if (ap != null) {
+      		Object global = ap.getAttribute(CommonAttributes.RMAN_SEARCHPATH_SHADER);
+      		if (global instanceof String)	{
+      			shaderPath = (String) global;
+      		}
+      }
+      
         HashMap map = new HashMap();
         map.put("shader", (shaderPath!=null?(shaderPath+":"):"")+".:&");
         //map.put("shader", (fullSpotLight!=null?(fullSpotLight+":"):"")+".:&");
@@ -161,48 +188,103 @@ public class RIBVisitor extends SceneGraphVisitor {
         Ri.option("limits",map2);
         //We ensured that name ends with .rib so :
         String outputName = name.substring(0,name.length()-3)+"tif";
-        Ri.display(outputName, "tiff", "rgb",null);
+        String outputDisplayFormat = "rgb";
+        Object foo = ap.getAttribute(CommonAttributes.RMAN_OUTPUT_DISPLAY_FORMAT);
+        if (foo != null && foo instanceof String)		{
+        	outputDisplayFormat = (String) foo;
+        }
+        Ri.display(outputName, "tiff", outputDisplayFormat,null);
+        
+//        Appearance ap = root.getAppearance();
+//        if (ap != null) {
+//        	Object global = ap.getAttribute(CommonAttributes.RMAN_GLOBAL_INCLUDE_FILE);
+//        	if (global instanceof String)	{
+//        		Ri.archiveRecord((String) global);
+//        	}
+//        }
+        
         
         Ri.format(width,height,1);
         System.out.println("ww "+width+" hh "+height);
         Ri.shadingRate(1f);
         map = new HashMap();
         float fov = (float) camera.getFieldOfView();
+        float a = 1.0f;
+        Ri.clipping(camera.getNear(), camera.getFar());
         if(proj.equals("perspective")) {
             map.put("fov", new Float(fov));
             Ri.projection(proj,map);
         } else {
             Ri.projection(proj,map);    
-            float a =(float) (1/((Math.tan((Math.PI/180.0)*camera.getFieldOfView()/2.0)*camera.getFocus())));
-            Ri.transform(new float[] {a,0,0,0,0,a,0,0,0,0,1,0,0,0,0,1});
+            a =(float) (1/((Math.tan((Math.PI/180.0)*camera.getFieldOfView()/2.0)*camera.getFocus())));
         }
-        map = new HashMap();
-        Appearance ap = root.getAppearance();
-        Color col = Color.WHITE;
-        if(ap!=null) { 
-            Object o = ap.getAttribute(CommonAttributes.BACKGROUND_COLOR,Color.class);
-            if(o instanceof Color) col = (Color) o;
-        }
-        float[] f = col.getRGBColorComponents(null);
-        map.put("color background", f);
-        Ri.imager("background",map);
-        cam = MatrixBuilder.euclidean().scale(1,1,-1).times(cam).getArray();
-        if(proj.equals("perspective"))
-            Ri.transform(fTranspose(cam));
-        else
-            Ri.concatTransform(fTranspose(cam));
+        Ri.transform(new float[] {a,0,0,0,0,a,0,0,0,0,1,0,0,0,0,1});
+        // flip the z-direction
+        Ri.concatTransform(fTranspose(MatrixBuilder.euclidean().scale(1,1,-1).getArray()));
+       
+        Ri.comment("world to camera");
+        //       world2Camera = MatrixBuilder.euclidean().scale(1,1,-1).times(world2Camera).getArray();
+        Ri.concatTransform(fTranspose(world2Camera));
         Ri.worldBegin();
-        new LightCollector(root);
-//        new GeometryCollector(root,  this);
+       // alpha in the output format means skip over any background settings
+        if (outputDisplayFormat != "rgba")	{
+            map = new HashMap();
+            Color col = Color.WHITE;
+           if(ap!=null) { 
+        	         Object o = ap.getAttribute(CommonAttributes.BACKGROUND_COLORS);
+	      	          if (o != null && o instanceof Color[])	
+	      	        	  // insert a polygon at the back of the viewing frustrum
+  	      	        	  handleBackgroundColors((Color[]) o, camera, path.getMatrix(null));
+	      	          else {
+	         	         o = ap.getAttribute(CommonAttributes.BACKGROUND_COLOR,Color.class);
+	      	        	  if(o instanceof Color) {
+	        	            	col = (Color) o;   		
+	      	        	  }
+	           	         float[] f = col.getRGBColorComponents(null);     
+	           	         map.put("color background", f);
+	           	         Ri.imager("background",map);        
+      	            } 
+       		}
+         }
+         new LightCollector(root);
+ //       new GeometryCollector(root,  this);
         root.accept(this);
         Ri.worldEnd();
         Ri.end();
     }
+	
+    private void handleBackgroundColors(Color[] colors, Camera camera, double[] w2c) {
+		Rectangle2D vp = CameraUtility.getViewport(camera, ((double) width)/height);      	
+		double z = camera.getFar() - 10E-4;
+		double xmin = vp.getMinX();
+		double xmax = vp.getMaxX();
+		double ymin = vp.getMinY();
+		double ymax = vp.getMaxY();
+		double[][] pts = {
+				{z*xmin, z*ymin, -z},
+				{z*xmax, z*ymin, -z},
+				{z*xmax, z*ymax, -z},
+				{z*xmin, z*ymax, -z}
+		};
+		double[][] cd = new double[4][3];
+		for (int i = 0; i<4; ++i)		{
+			float[] foo = colors[i].getRGBComponents(null);
+			for (int  j = 0; j<3; ++j) cd[(i+2)%4][j] = foo[j];
+		}
+		IndexedFaceSet bkgd = IndexedFaceSetUtility.constructPolygon(pts);
+		bkgd.setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(cd));
+		Ri.attributeBegin();
+		Ri.concatTransform(fTranspose(w2c));
+		Ri.surface("constant",null);
+		pointPolygon(bkgd, null);
+		Ri.attributeEnd();
+	}
+
      /**
      * @param cam
      * @return
      */
-    private static float[] fTranspose(double[] mat) {
+    protected static float[] fTranspose(double[] mat) {
         float[] tmat = new float[16];
         for (int i = 0; i < 4; i++) 
             for (int j = 0;j<4;j++){
@@ -214,27 +296,27 @@ public class RIBVisitor extends SceneGraphVisitor {
     public void  visit(SceneGraphComponent c) {
     	if (!c.isVisible()) return;
         Ri.comment(c.getName());        
-        Ri.attributeBegin();
         EffectiveAppearance tmp =eAppearance;
         Appearance a = c.getAppearance();
-        if(a!= null) {
+        boolean attrblock = false;
+        Ri.attributeBegin();
+        if(a!= null ) {
             eAppearance = eAppearance.create(a);
-            //FIXME: omit this call to avoid writing attributes twice???
-            setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
-        }
+ //           if (c.getGeometry() != null)	{
+ //               setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);    
+ //               attrblock = true;
+ //           }
+             //FIXME: omit this call to avoid writing attributes twice???
+         }
         c.childrenAccept(this);
-        Ri.attributeEnd();
+ //       if (attrblock) 
+        	Ri.attributeEnd();
         
         eAppearance= tmp;
     }
      public void visit(Transformation t) {
          double[] mat = t.getMatrix();
-         float[] tmat = new float[16];
-         for (int i = 0; i < 4; i++) 
-         	for (int j = 0;j<4;j++){
-            tmat[i + 4*j] = (float) mat[j+4*i];
-        }
-         Ri.concatTransform(tmat);
+          Ri.concatTransform(fTranspose(mat));
      }
     /* (non-Javadoc)
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.Appearance)
@@ -262,20 +344,26 @@ public class RIBVisitor extends SceneGraphVisitor {
             Ri.color(new float[] {c[0],c[1],c[2]});
             if (c.length == 4) colorAlpha = c[3];
         }
-    
-    double transparency = a.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
+ 
+        // interpret rendering hints to decide whether to do object instancing
+        boolean anyDisplayLists = a.getAttribute(CommonAttributes.ANY_DISPLAY_LISTS,true);
+        boolean manyDisplayLists = a.getAttribute(CommonAttributes.MANY_DISPLAY_LISTS,false);
+        retainGeometry = false; //anyDisplayLists && !manyDisplayLists;
+        
+      transparencyEnabled = a.getAttribute(type+"."+CommonAttributes.TRANSPARENCY_ENABLED,true);
+double transparency = a.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
         float f = 1f - (float)transparency;
         f *= colorAlpha;
-        Ri.opacity(new float[] {f,f,f});
+        if (transparencyEnabled) Ri.opacity(new float[] {f,f,f});
         //System.out.println("transparency is "+type+" is "+transparency);
         Object shader = a.getAttribute(type,"default");
         //System.out.println("shader for "+type+" is "+shader);
 
-        SLShader slShader = (SLShader) a.getAttribute(type+".rendermanDisplacement",null,SLShader.class);
+        SLShader slShader = (SLShader) a.getAttribute(type+CommonAttributes.RMAN_DISPLACEMENT,null,SLShader.class);
         if(slShader != null) {
             Ri.displacement(slShader.getName(),slShader.getParameters());
         }
-        slShader = (SLShader) a.getAttribute(type+".rendermanSurface",null,SLShader.class);
+        slShader = (SLShader) a.getAttribute(type+"."+CommonAttributes.RMAN_SURFACE,null,SLShader.class);
         if(slShader == null) {
             if(true || shader.equals("default")) {
                 float phongSize =(float) a.getAttribute(type+"."+CommonAttributes.SPECULAR_EXPONENT,CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
@@ -294,19 +382,22 @@ public class RIBVisitor extends SceneGraphVisitor {
                //System.out.println("texture is "+tex);
 //                Texture2D tex = (Texture2D) a.getAttribute(type+".texture",null,Texture2D.class);
 //                if(tex != null) {
-                    String fname = writeTexture(tex);
+              
+                    String fname = null;
+                    if (rendererType == RIBViewer.TYPE_PIXAR)	{
+                    		fname = (String) a.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE,"");
+                    		if (fname == "")	{
+                    			fname = null;
+                    		} 
+                    } 
+                    if (fname == null) {
+                    	fname = writeTexture(tex);
+                    }
                     map.put("string texturename",fname);
                     double[] mat = tex.getTextureMatrix().getArray();
                     if(mat != null) {
-                    float[] tmat = new float[16];
-                    for (int i = 0; i < 4; i++) 
-                        for (int j = 0;j<4;j++){
-                       tmat[i + 4*j] = (float) mat[j+4*i];
-                   }
-                    map.put("matrix textureMatrix",tmat);
+                    	map.put("matrix textureMatrix",fTranspose(mat));
                     }
-                    //map.put("sScale",new Float(tex.getTextureTransformation().getStretch()[0]));
-                    //map.put("tScale",new Float(tex.getTextureTransformation().getStretch()[1]));
                     Ri.surface("transformedpaintedplastic",map);
                 } else {
                     Ri.surface("plastic",map);
@@ -381,88 +472,124 @@ public class RIBVisitor extends SceneGraphVisitor {
         return fname;
     }
     boolean testBallStick = true;
+	private boolean transparencyEnabled;
     /* (non-Javadoc)
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.IndexedLineSet)
      */
     public void visit(IndexedLineSet g) {
-      	if (!insidePointset)	{
-    		// p is not a subclass of PointSet
-    		Object which = pointsets.get(g);
-    		if (which != null)	{
-    			Ri.ObjectInstance(((Integer) which).intValue());
-    		} else  
+		Ri.comment("IndexedLineSet "+g.getName());
+     	if (!insidePointset)	{
+      		insidePointset = true;
+    		// p is not a proper subclass of IndexedLineSet
+    		if (retainGeometry) {
+   	    		Object which = pointsets.get(g);
+   	  			if (which != null)	{
+     	    		Ri.ObjectInstance(((Integer) which).intValue());
+    			} else {
+    				Ri.comment("Retained geometry "+g.getName());
+    				Ri.ObjectBegin(pointsetCount);
+    				_visit(g);
+    				Ri.ObjectEnd();
+    	    		Ri.ObjectInstance(pointsetCount);
+    				pointsets.put(g, new Integer(pointsetCount));
+    				pointsetCount++;
+    			} 
+   		}
+       		else
     			_visit(g);
-    	} else
+   		}
+    	else
     			_visit(g);
     }
     
     private void _visit(IndexedLineSet g)	{
-    	insidePointset = true;
        String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
-        if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW),true)) {
+         if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW),true)) {
         
         DataList dl = g.getEdgeAttributes(Attribute.INDICES);
         if(dl!=null){
-//            String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
-//            if(!eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW),true)) return;
-            Ri.attributeBegin();
+            boolean tubesDraw = eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.TUBES_DRAW),CommonAttributes.TUBES_DRAW_DEFAULT);
+            if (tubesDraw)  {
+           Ri.attributeBegin();
             setupShader(eAppearance,CommonAttributes.LINE_SHADER);
-        
-            float r = (float) eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER,CommonAttributes.TUBE_RADIUS),CommonAttributes.TUBE_RADIUS_DEFAULT);
-//        int n= g.getNumEdges();
-//        for(int i = 0;i<n;i++) {
-//            cylinder(g.getEdgeData(i),r);
-//        }
-//        	
-          // A test to get tubes drawn correctly for non-euclidean case (also fixes some problems I've noticed with
-          // the euclidean case too.  -gunn 20.04.06
-          // can't use the Renderman Cylinder primitive since it doesn't correspond to equidistant surfaces in non-euclidean cases.
-          if (testBallStick)		{
-        	    int sig = eAppearance.getAttribute("signature", Pn.EUCLIDEAN);
-             Color cc = (Color) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,  CommonAttributes.DIFFUSE_COLOR_DEFAULT );
-             BallAndStickFactory bsf = new BallAndStickFactory(g);
-        	  	bsf.setSignature(sig);
-        	  	bsf.setStickRadius(r);
-        	  	bsf.setShowBalls(false);	// need to actually omit the balls
-        	  	bsf.setStickColor(cc);
-        	  	bsf.update();
-        	  	visit(bsf.getSceneGraphComponent());
-          } else {
-              IntArrayArray edgeIndices= dl.toIntArrayArray();
-              DoubleArrayArray edgeColors=null;
-              dl = g.getEdgeAttributes(Attribute.COLORS);
-              if(dl != null) 
-                  edgeColors = dl.toDoubleArrayArray();
-              DoubleArrayArray vertices=g.getVertexAttributes(Attribute.COORDINATES)
-              .toDoubleArrayArray();
-              for (int i= 0, n=edgeIndices.size(); i < n; i++)
-              {
-                  if(edgeColors!= null) {
-                      float[] f = new float[3];
-                      f[0] = (float) edgeColors.getValueAt(i,0);
-                      f[1] = (float) edgeColors.getValueAt(i,1);
-                      f[2] = (float) edgeColors.getValueAt(i,2);
-                      Ri.color(f);
-                  }
-                  IntArray edge=edgeIndices.item(i).toIntArray();
-                  for(int j = 0; j<edge.getLength()-1;j++) {
-                      DoubleArray p1=vertices.item(edge.getValueAt(j)).toDoubleArray();
-                      DoubleArray p2=vertices.item(edge.getValueAt(j+1)).toDoubleArray();
-                  //pipeline.processLine(p1, p2);
-                  //pipeline.processPseudoTube(p1, p2);
-                      cylinder(p1,p2,r);
-                  }
-              }
+               float r = (float) eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER,CommonAttributes.TUBE_RADIUS),CommonAttributes.TUBE_RADIUS_DEFAULT);
+               // A test to get tubes drawn correctly for non-euclidean case (also fixes some problems I've noticed with
+               // the euclidean case too.  -gunn 20.04.06
+               // can't use the Renderman Cylinder primitive since it doesn't correspond to equidistant surfaces in non-euclidean cases.
+               if (testBallStick)		{
+             	    int sig = eAppearance.getAttribute("signature", Pn.EUCLIDEAN);
+                    Color cc = (Color) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,  CommonAttributes.DIFFUSE_COLOR_DEFAULT );
+             	    if (g instanceof IndexedFaceSet)	{
+                    BallAndStickFactory bsf = new BallAndStickFactory(g);
+               	  	bsf.setSignature(sig);
+               	  	bsf.setStickRadius(r);
+                	  	bsf.setShowBalls(false);	// need to actually omit the balls
+               	  	bsf.setStickColor(cc);
+               	  	bsf.update();
+               	  	visit(bsf.getSceneGraphComponent());
+            	   } else {
+           				DataList edgec =  g.getEdgeAttributes(Attribute.COLORS);
+            		   int n = g.getNumEdges();
+            		   Ri.color(cc);
+            		   double[][] crossSection = TubeUtility.octagonalCrossSection;
+            			Object foo = eAppearance.getAttribute("lineShader.crossSection", crossSection);
+            			if (foo != crossSection)	{
+            				crossSection = (double[][]) foo;
+            			}
+           		   for (int i = 0; i<n; ++i)	{
+             				if (edgec != null) {
+               					double[] edgecolor = edgec.item(i).toDoubleArray(null);
+               					Ri.comment("Edge color");
+               					Ri.color(edgecolor);
+               				}
+          				double[][] oneCurve = null;
+            				oneCurve = IndexedLineSetUtility.extractCurve(oneCurve, g, i);
+            				PolygonalTubeFactory ptf = new PolygonalTubeFactory(oneCurve);
+//            				ptf.setClosed(true);
+            				ptf.setCrossSection(crossSection);
+//            				ptf.setFrameFieldType(tubeStyle);
+            				ptf.setSignature(sig);
+            				ptf.setRadius(r);
+            				ptf.update();
+            				IndexedFaceSet tube = ptf.getTube();
+            				pointPolygon(tube, null);            			   
+            		   }
+              	   }
+                } else {
+                   IntArrayArray edgeIndices= dl.toIntArrayArray();
+                   DoubleArrayArray edgeColors=null;
+                   dl = g.getEdgeAttributes(Attribute.COLORS);
+                   if(dl != null) 
+                       edgeColors = dl.toDoubleArrayArray();
+                   DoubleArrayArray vertices=g.getVertexAttributes(Attribute.COORDINATES) .toDoubleArrayArray();
+                   for (int i= 0, n=edgeIndices.size(); i < n; i++)
+                   {
+                       if(edgeColors!= null) {
+                           float[] f = new float[3];
+                           f[0] = (float) edgeColors.getValueAt(i,0);
+                           f[1] = (float) edgeColors.getValueAt(i,1);
+                           f[2] = (float) edgeColors.getValueAt(i,2);
+                           Ri.color(f);
+                       }
+                       IntArray edge=edgeIndices.item(i).toIntArray();
+                       for(int j = 0; j<edge.getLength()-1;j++) {
+                           DoubleArray p1=vertices.item(edge.getValueAt(j)).toDoubleArray();
+                           DoubleArray p2=vertices.item(edge.getValueAt(j+1)).toDoubleArray();
+                       //pipeline.processLine(p1, p2);
+                       //pipeline.processPseudoTube(p1, p2);
+                           cylinder(p1,p2,r);
+                       }
+                   }
 
-          }
-          Ri.attributeEnd();
-       	  
-
+               }
+               Ri.attributeEnd();
+           }
+ 
+         }
         }
-        }
-        super.visit(g);
-        insidePointset = false;
-    }
+ //       super.visit(g);
+         _visit((PointSet) g);
+     }
 
     /**
      * @param ds
@@ -483,19 +610,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 		double[] mat = MatrixBuilder.euclidean().translate(p1.getValueAt(0),p1.getValueAt(1),p1.getValueAt(2)).getMatrix().getArray();
         
         dirToEuler(d);
-//        t.rotateZ(disk[5]);
-//        t.rotateY(disk[4]);
-//        t.rotateX(disk[3]);
-//        t.rotateX(Math.PI/2.);
-        //VecMat.assignRotationX(rot,Math.PI/2.);
-        //VecMat.multiplyFromRight(mat,rot);
-        
-//        VecMat.assignRotationZ(rot,d[2]);
-//        VecMat.multiplyFromRight(mat,rot);
-//        VecMat.assignRotationY(rot,d[1]);
-//        VecMat.multiplyFromRight(mat,rot);
-//        VecMat.assignRotationX(rot,d[0] - Math.PI/2.);
-//        VecMat.multiplyFromRight(mat,rot);
 
 		double[] rot = MatrixBuilder.euclidean().rotateZ(d[2]).rotateY(d[1]).rotateX(d[0] - Math.PI/2.).getMatrix().getArray();
 		
@@ -507,290 +621,297 @@ public class RIBVisitor extends SceneGraphVisitor {
         
     
     
-    private IndexedFaceSet [] splitIfsToPrimitiveFaces(IndexedFaceSet ifs){
-    	// Author Bernd Gonska
-    	int num=ifs.getNumFaces();
-    	IndexedFaceSet [] parts= new IndexedFaceSet[num];
-    	for (int i=0;i<num;i++){
-    		parts[i]= new IndexedFaceSet();
-    		parts[i].setNumFaces(1);
-    		parts[i].setNumPoints(ifs.getNumPoints());
-    		parts[i].setVertexAttributes(ifs.getVertexAttributes());
-    		
-    		int[][]    oldIndizeesArray=null;
-    		String[]   oldLabelsArray=null;
-    		double[][] oldNormalsArray=null;
-    		double[][] oldTextureCoordsArray=null;
-    		int[][]    newIndizeesArray= new int[1][];
-    		String[]   newLabelsArray=new String[1];
-    		double[][] newNormalsArray=new double[1][];
-    		double[][] newTextureCoordsArray=new double[1][];
-    		
-    		DataList temp=ifs.getFaceAttributes( Attribute.INDICES );
-    		if (temp !=null){
-    			oldIndizeesArray	= temp.toIntArrayArray(null);
-    			newIndizeesArray[0] = oldIndizeesArray[i]; 
-    			parts[i].setFaceAttributes(Attribute.INDICES,
-    					new IntArrayArray.Array(newIndizeesArray));
-    		}
-    		
-    		temp= ifs.getVertexAttributes( Attribute.LABELS );
-    		if (temp!=null){
-    			oldLabelsArray 		= temp.toStringArray(null);
-    			newLabelsArray[0]	= oldLabelsArray[i];
-    			parts[i].setFaceAttributes(Attribute.LABELS,
-    					new StringArray(newLabelsArray));
-    		}
-    		temp= ifs.getVertexAttributes( Attribute.NORMALS );
-    		if (temp!=null){
-    			oldNormalsArray 	= temp.toDoubleArrayArray(null);
-    			newNormalsArray[0] = oldNormalsArray[i]; 
-    			parts[i].setFaceAttributes(Attribute.NORMALS,
-    					new DoubleArrayArray.Array(newNormalsArray));
-    		}
-    		temp= ifs.getVertexAttributes( Attribute.TEXTURE_COORDINATES );
-    		if (temp!=null){
-    			oldTextureCoordsArray = temp.toDoubleArrayArray(null);
-    			newTextureCoordsArray[0] = oldTextureCoordsArray[i]; 
-    			parts[i].setFaceAttributes(Attribute.TEXTURE_COORDINATES,
-    					new DoubleArrayArray.Array(newTextureCoordsArray));
-    		}
-    	}
-    	return parts;
-    }
-    
-    public void visit(IndexedFaceSet i) {
-       	if (!insidePointset)	{
+     public void visit(IndexedFaceSet g) {
+			Ri.comment("IndexedFaceSet "+g.getName());
+     	if (!insidePointset)	{
+      		insidePointset = true;
     		// p is not a subclass of PointSet
-    		Object which = pointsets.get(i);
-    		if (which != null)	{
-    			Ri.ObjectInstance(((Integer) which).intValue());
-    		} else  
-    			_visit(i, null);
-    	} else
-    			_visit(i,null);
+    		if (retainGeometry) {
+   	    		Object which = pointsets.get(g);
+   	  			if (which != null)	{
+     				Ri.ObjectInstance(((Integer) which).intValue());
+    	    	} else {
+    				Ri.comment("Retained geometry "+g.getName());
+    				Ri.ObjectBegin(pointsetCount);
+    				_visit(g, null);
+    				Ri.ObjectEnd();
+       	    		Ri.ObjectInstance(pointsetCount);
+       	    		pointsets.put(g, new Integer(pointsetCount));
+    				pointsetCount++;
+    	      	} 
+   		}
+       		else
+    			_visit(g, null);
+   		}
+    	else
+    			_visit(g, null);
     }
     
   
-    public void _visit(IndexedFaceSet i,float[] color) {
-    	insidePointset = true;
-// dieser teil ist neu:    	
-    	DataList colors=i.getFaceAttributes( Attribute.COLORS );
-    	if (colors !=null){
-    		double[][] colorArray = colors.toDoubleArrayArray(null);
-    		int numFaces=i.getNumFaces();
-    		float[][] colorArrayf= new float[numFaces][3];
-    		for (int k=0;k<numFaces;k++){
-    			for (int j=0;j<3;j++)
-    				colorArrayf[k][j]=(float)colorArray[k][j];
+    /**
+     * The second argument here is a short-term solution to an apparent bug in the Renderman renderer
+     * which makes it impossible to pass the transparency ("Os") field to the pointspolygon command on a
+     * per-face basis.  ("Cs" works on a per face basis but any value for "Os" (even all 1's corresponding to
+     * opaque surface) results in odd, incorrect results.  -gunn 9.6.6
+     * @param i
+     * @param color
+     */public void _visit(IndexedFaceSet i, float[] color) {
+ 		String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
+		if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.FACE_DRAW),true)) {
+			Ri.attributeBegin();
+			setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
+ 		   	DataList colors=i.getFaceAttributes( Attribute.COLORS );
+    	    	if (colors !=null && GeometryUtility.getVectorLength(colors) == 4){
+    	    		double[][] colorArray = colors.toDoubleArrayArray(null);
+    	    		int numFaces=i.getNumFaces();
+    	    		float[][] colorArrayf= new float[numFaces][4];
+    	    		for (int k=0;k<numFaces;k++){
+    	    			for (int j=0;j<4;j++)
+    	    				colorArrayf[k][j]=(float)colorArray[k][j];
+    	    		}
+    	    		IndexedFaceSet[] faceList=IndexedFaceSetUtility.splitIfsToPrimitiveFaces(i);
+    	    		for (int k=0;k<numFaces;k++){			
+    	    			pointPolygon(faceList[k],colorArrayf[k]);
+    	    		}
+    	    	}
+    	    	else{       
+    	    		pointPolygon(i, color);
     		}
-    		IndexedFaceSet[] faceList=splitIfsToPrimitiveFaces(i);
-    		for (int k=0;k<numFaces;k++){			
-    			_visit(faceList[k],colorArrayf[k]);
-    		}
+    	    	Ri.attributeEnd();
+    	    	 
     	}
-    	else{
- // Neues ist hier zu ende
-    		String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
-    		if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.FACE_DRAW),true)) {
-                
-    			int npolys =i.getNumFaces();
-    			if(npolys!= 0) {
-    				HashMap map = new HashMap();
-    				//boolean smooth = !((String)eAppearance.getAttribute(CommonAttributes.POLYGON_SHADER,"default")).startsWith("flat");
-    				boolean smooth = eAppearance.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING,true);
-    				DataList coords = i.getVertexAttributes(Attribute.COORDINATES);
-    				DoubleArrayArray da = coords.toDoubleArrayArray();
-    				int pointlength = GeometryUtility.getVectorLength(coords);
-    				// We'd like to be able to use the "Pw" attribute which accepts 4-vectors for point coordinates, but 3Delight-5.0.1
-    				// does not support it ...  
-    				// TODO figure out how to allow Pw output if desired, for example, if you have Pixar renderman renderer.
-//        if (pointlength == 3)	{
-    				float[] fcoords =new float[3*da.getLength()];
-    				for (int j = 0; j < da.getLength(); j++) {
-    					if (pointlength == 4)	{
-    						float w =(float)da.getValueAt(j,3);
-    						if (w != 0) w = 1.0f/w;
-    						else w = 10E10f;		// hack! but what else can you do?
-    						fcoords[3*j+0] =(float)da.getValueAt(j,0)*w;
-    						fcoords[3*j+1] =(float)da.getValueAt(j,1)*w;
-    						fcoords[3*j+2] =(float)da.getValueAt(j,2)*w;
-    					} else {
-    						fcoords[3*j+0] =(float)da.getValueAt(j,0);
-    						fcoords[3*j+1] =(float)da.getValueAt(j,1);
-    						fcoords[3*j+2] =(float)da.getValueAt(j,2);
-    					}
-    				}
-    				map.put("P",fcoords);       	
-//        } else if (pointlength == 4)	{
-//            float[] fcoords =new float[4*da.getLength()];
-//            for (int j = 0; j < da.getLength(); j++) {
-//                fcoords[3*j+0] =(float)da.getValueAt(j,0);
-//                fcoords[3*j+1] =(float)da.getValueAt(j,1);
-//                fcoords[3*j+2] =(float)da.getValueAt(j,2);
-//                fcoords[3*j+3] =(float)da.getValueAt(j,3);
-//            }
-//            map.put("Pw",fcoords);       	
-//        }
-    				DataList normals = i.getVertexAttributes(Attribute.NORMALS);
-    				if(smooth && normals!=null) {
-    					da = normals.toDoubleArrayArray();
-    					float[] fnormals =new float[3*da.getLength()];
-    					for (int j = 0; j < da.getLength(); j++) {
-    						fnormals[3*j+0] =(float)da.getValueAt(j,0);
-    						fnormals[3*j+1] =(float)da.getValueAt(j,1);
-    						fnormals[3*j+2] =(float)da.getValueAt(j,2);
-    					}
-    					map.put("N",fnormals);
-    				} else { //face normals
-    					normals = i.getFaceAttributes(Attribute.NORMALS);
-    					if (normals != null)	{
-    						da = normals.toDoubleArrayArray();
-    						float[] fnormals =new float[3*da.getLength()];
-    						for (int j = 0; j < da.getLength(); j++) {
-    							fnormals[3*j+0] =(float)da.getValueAt(j,0);
-    							fnormals[3*j+1] =(float)da.getValueAt(j,1);
-    							fnormals[3*j+2] =(float)da.getValueAt(j,2);
-    						}
-    						map.put("uniform N",fnormals);            	
-    					}
-    				}
-    				// texture coords:
-    				DataList texCoords = i.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
-    				if(texCoords!= null) {
-    					float[] ftex =new float[2*texCoords.size()];
-    					for (int j = 0; j < texCoords.size(); j++) {
-    						//ftex[j] =(float)d.getValueAt(j);
-    						DoubleArray l =texCoords.item(j).toDoubleArray();
-                
-    						ftex[2*j] =(float)l.getValueAt(0);
-    						ftex[2*j+1] =(float)l.getValueAt(1);
-    						//ftex[2*j] =(float)d.getValueAt(j,0);
-    						//ftex[2*j+1] =(float)d.getValueAt(j,1);
-    					}
-    					map.put("st",ftex);
-    				}
-        
-    				// texture coords:
-    				DataList vertexColors = i.getVertexAttributes(Attribute.COLORS);
-    				if(vertexColors!= null) {
-    					int vertexColorLength=vertexColors.getStorageModel().getDimensions()[1];
-    					float[] vCol =new float[3*vertexColors.size()];
-    					float[] vOp=null;
-    					if(vertexColorLength == 4 ) vOp = new float[3*vertexColors.size()];
-    					for (int j = 0; j < vertexColors.size(); j++) {
-    						//ftex[j] =(float)d.getValueAt(j);
-    						DoubleArray rgba = vertexColors.item(j).toDoubleArray();
-                
-    						vCol[3*j]   =(float)rgba.getValueAt(0);
-    						vCol[3*j+1] =(float)rgba.getValueAt(1);
-    						vCol[3*j+2] =(float)rgba.getValueAt(2);
-    						if(vertexColorLength ==4) {
-    							vOp[3*j]    =(float)rgba.getValueAt(3);
-    							vOp[3*j+1]  =(float)rgba.getValueAt(3);
-    							vOp[3*j+2]  =(float)rgba.getValueAt(3);
-    						}
-    						//ftex[2*j] =(float)d.getValueAt(j,0);
-    						//ftex[2*j+1] =(float)d.getValueAt(j,1);
-    					}
-    					map.put("varying color Cs",vCol);
-    					if(vertexColorLength == 4 ) map.put("varying color Os",vOp);
-    				}
-        
-        
-    				int[] nvertices =new int[npolys];
-    				int verticesLength =0;
-    				for(int k =0; k<npolys;k++) {
-    					IntArray fi = i.getFaceAttributes(Attribute.INDICES).item(k).toIntArray();
-    					nvertices[k] =fi.getLength();
-    					verticesLength+= nvertices[k];
-    				}
-    				int[] vertices =new int[verticesLength];
-    				int l =0;
-    				for(int k= 0;k<npolys;k++) {
-    					for(int m =0; m<nvertices[k];m++,l++) {
-    						IntArray fi = i.getFaceAttributes(Attribute.INDICES).item(k).toIntArray();
-    						vertices[l] = fi.getValueAt(m);
-    					}
-    				}
-    				Ri.attributeBegin();
-    				setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
-    				if(color!=null){
-    					float[] f=new float[3];
-						f[0]=color[0];f[1]=color[1];f[2]=color[2];
-						Ri.color(f);
-    					if (color.length==4){
-    						f[0]=color[3];f[1]=color[3];f[2]=color[3];
-    						Ri.opacity(f);
-    						}	
-    				}
-    				Ri.pointsPolygons(npolys,nvertices,vertices,map);
-    				Ri.attributeEnd();
-    			}
-    		}
-     	}// neu
-   		super.visit(i);
-   		insidePointset = false;
-   }
+   		if (color == null) _visit((IndexedLineSet) i);
+    }
+
+	private void pointPolygon(IndexedFaceSet i, float[] color) {
+		int npolys =i.getNumFaces();
+			if(npolys!= 0) {
+				HashMap map = new HashMap();
+				//boolean smooth = !((String)eAppearance.getAttribute(CommonAttributes.POLYGON_SHADER,"default")).startsWith("flat");
+				boolean smooth = eAppearance.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING,true);
+				DataList coords = i.getVertexAttributes(Attribute.COORDINATES);
+				DoubleArrayArray da = coords.toDoubleArrayArray();
+				int pointlength = GeometryUtility.getVectorLength(coords);
+				// We'd like to be able to use the "Pw" attribute which accepts 4-vectors for point coordinates, but 3Delight-5.0.1
+				// does not support it ...  
+				// TODO figure out how to allow Pw output if desired, for example, if you have Pixar renderman renderer.
+      if (!hasPw || pointlength == 3)	{
+				float[] fcoords =new float[3*da.getLength()];
+				for (int j = 0; j < da.getLength(); j++) {
+					if (pointlength == 4)	{
+						float w =(float)da.getValueAt(j,3);
+						if (w != 0) w = 1.0f/w;
+						else w = 10E10f;		// hack! but what else can you do?
+						fcoords[3*j+0] =(float)da.getValueAt(j,0)*w;
+						fcoords[3*j+1] =(float)da.getValueAt(j,1)*w;
+						fcoords[3*j+2] =(float)da.getValueAt(j,2)*w;
+					} else {
+						fcoords[3*j+0] =(float)da.getValueAt(j,0);
+						fcoords[3*j+1] =(float)da.getValueAt(j,1);
+						fcoords[3*j+2] =(float)da.getValueAt(j,2);
+					}
+				}
+				map.put("P",fcoords);       	
+      } else if (pointlength == 4)	{
+		float[] fcoords =new float[4*da.getLength()];
+		for (int j = 0; j < da.getLength(); j++) {
+		    fcoords[3*j+0] =(float)da.getValueAt(j,0);
+		    fcoords[3*j+1] =(float)da.getValueAt(j,1);
+		    fcoords[3*j+2] =(float)da.getValueAt(j,2);
+		    fcoords[3*j+3] =(float)da.getValueAt(j,3);
+		}
+		map.put("Pw",fcoords);       	
+      }
+				DataList normals = i.getVertexAttributes(Attribute.NORMALS);
+				if(smooth && normals!=null) {
+					da = normals.toDoubleArrayArray();
+					float[] fnormals =new float[3*da.getLength()];
+					for (int j = 0; j < da.getLength(); j++) {
+						fnormals[3*j+0] =(float)da.getValueAt(j,0);
+						fnormals[3*j+1] =(float)da.getValueAt(j,1);
+						fnormals[3*j+2] =(float)da.getValueAt(j,2);
+					}
+					map.put("N",fnormals);
+				} 
+				else { //face normals
+					normals = i.getFaceAttributes(Attribute.NORMALS);
+					if (normals != null)	{
+						da = normals.toDoubleArrayArray();
+						float[] fnormals =new float[3*da.getLength()];
+						for (int j = 0; j < da.getLength(); j++) {
+							fnormals[3*j+0] =(float)da.getValueAt(j,0);
+							fnormals[3*j+1] =(float)da.getValueAt(j,1);
+							fnormals[3*j+2] =(float)da.getValueAt(j,2);
+						}
+						map.put("uniform normal N",fnormals);            	
+					}
+				}
+				// texture coords:
+				DataList texCoords = i.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+				if(texCoords!= null) {
+					float[] ftex =new float[2*texCoords.size()];
+					for (int j = 0; j < texCoords.size(); j++) {
+						//ftex[j] =(float)d.getValueAt(j);
+						DoubleArray l =texCoords.item(j).toDoubleArray();
+		    
+						ftex[2*j] =(float)l.getValueAt(0);
+						ftex[2*j+1] =(float)l.getValueAt(1);
+						//ftex[2*j] =(float)d.getValueAt(j,0);
+						//ftex[2*j+1] =(float)d.getValueAt(j,1);
+					}
+					map.put("st",ftex);
+				}
+      
+				DataList vertexColors = i.getVertexAttributes(Attribute.COLORS);
+			   	DataList faceColors=i.getFaceAttributes( Attribute.COLORS );
+			if((smooth || faceColors == null) && vertexColors!= null) {
+					int vertexColorLength=GeometryUtility.getVectorLength(vertexColors);
+					float[] vCol =new float[3*vertexColors.size()];
+					float[] vOp=null;
+					if(vertexColorLength == 4 ) vOp = new float[3*vertexColors.size()];
+					for (int j = 0; j < vertexColors.size(); j++) {
+						//ftex[j] =(float)d.getValueAt(j);
+						DoubleArray rgba = vertexColors.item(j).toDoubleArray();
+		    
+						vCol[3*j]   =(float)rgba.getValueAt(0);
+						vCol[3*j+1] =(float)rgba.getValueAt(1);
+						vCol[3*j+2] =(float)rgba.getValueAt(2);
+						if(vertexColorLength ==4) {
+							vOp[3*j]    =(float)rgba.getValueAt(3);
+							vOp[3*j+1]  =(float)rgba.getValueAt(3);
+							vOp[3*j+2]  =(float)rgba.getValueAt(3);
+						}
+						//ftex[2*j] =(float)d.getValueAt(j,0);
+						//ftex[2*j+1] =(float)d.getValueAt(j,1);
+					}
+					map.put("varying color Cs",vCol);
+					if(transparencyEnabled && vertexColorLength == 4 ) map.put("varying color Os",vOp);
+				}
+			else if (faceColors != null)		{
+				int faceColorLength=GeometryUtility.getVectorLength(faceColors);
+				float[] vCol =new float[3*faceColors.size()];
+				float[] vOp=null;
+				if(faceColorLength == 4 ) vOp = new float[3*faceColors.size()];
+				for (int j = 0; j < faceColors.size(); j++) {
+					//ftex[j] =(float)d.getValueAt(j);
+					DoubleArray rgba = faceColors.item(j).toDoubleArray();
+		
+					vCol[3*j]   =(float)rgba.getValueAt(0);
+					vCol[3*j+1] =(float)rgba.getValueAt(1);
+					vCol[3*j+2] =(float)rgba.getValueAt(2);
+					if(faceColorLength ==4) {
+						vOp[3*j]    =(float)rgba.getValueAt(3);
+						vOp[3*j+1]  =(float)rgba.getValueAt(3);
+						vOp[3*j+2]  =(float)rgba.getValueAt(3);
+					}
+					//ftex[2*j] =(float)d.getValueAt(j,0);
+					//ftex[2*j+1] =(float)d.getValueAt(j,1);
+				}
+				map.put("uniform color Cs",vCol);
+				if(transparencyEnabled && faceColorLength == 4 ) map.put("uniform color Os",vOp);
+			}
+      
+				int[] nvertices =new int[npolys];
+				int verticesLength =0;
+				for(int k =0; k<npolys;k++) {
+					IntArray fi = i.getFaceAttributes(Attribute.INDICES).item(k).toIntArray();
+					nvertices[k] =fi.getLength();
+					verticesLength+= nvertices[k];
+				}
+				int[] vertices =new int[verticesLength];
+				int l =0;
+				for(int k= 0;k<npolys;k++) {
+					for(int m =0; m<nvertices[k];m++,l++) {
+						IntArray fi = i.getFaceAttributes(Attribute.INDICES).item(k).toIntArray();
+						vertices[l] = fi.getValueAt(m);
+					}
+				}
+				// the following implements the work-around mentioned above caused by problems with 
+				// setting opacity as a uniform color parameter inside the geometry
+				if(color!=null){
+					float[] f=new float[3];
+					f[0]=color[0];f[1]=color[1];f[2]=color[2];
+					Ri.color(f);
+					if (transparencyEnabled && color.length==4){
+						f[0]=color[3];f[1]=color[3];f[2]=color[3];
+						Ri.opacity(f);
+						}	
+				}
+			Ri.pointsPolygons(npolys,nvertices,vertices,map);
+			}
+	}
     
     /* (non-Javadoc)
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.PointSet)
      */
-    public void visit(PointSet p) {
-    	if (!insidePointset)	{
+    public void visit(PointSet g) {
+		Ri.comment("PointSet "+g.getName());
+     	if (!insidePointset)	{
     		// p is not a subclass of PointSet
-    		Object which = pointsets.get(p);
-    		if (which != null)	{
-    			Ri.ObjectInstance(((Integer) which).intValue());
-    		} else  
-    			_visit(p);
-    	} else 
-    			_visit(p);
+     		insidePointset = true;
+    		if (retainGeometry) {
+   	    		Object which = pointsets.get(g);
+   	  			if (which != null)	{
+     	    		Ri.ObjectInstance(((Integer) which).intValue());
+    			} else {
+    				Ri.comment("Retained geometry "+g.getName());
+    				Ri.ObjectBegin(pointsetCount);
+    				_visit(g);
+    				Ri.ObjectEnd();
+       	    		Ri.ObjectInstance(pointsetCount);
+       	    		pointsets.put(g, new Integer(pointsetCount));
+    				pointsetCount++;
+    			} 
+   		}
+       		else
+    			_visit(g);
+   		}
+    	else
+    			_visit(g);
+     	insidePointset = false;
     }
     
     public void _visit(PointSet p) {
-
-    	 insidePointset = true;
         String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
-        if(!eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.VERTEX_DRAW),CommonAttributes.VERTEX_DRAW_DEFAULT)) return;
-        int n= p.getNumPoints();
-        DataList coord=p.getVertexAttributes(Attribute.COORDINATES);
-        if(coord == null) return;
-        Ri.attributeBegin();
-        float r = (float) eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
-        //System.out.println("point radius is "+r);
-        setupShader(eAppearance,CommonAttributes.POINT_SHADER);
-        boolean drawSpheres = eAppearance.getAttribute(CommonAttributes.SPHERES_DRAW,CommonAttributes.SPHERES_DRAW_DEFAULT);
-        if(drawSpheres) {
-        	    int sig = eAppearance.getAttribute("signature", Pn.EUCLIDEAN);
-             Color cc = (Color) eAppearance.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,  CommonAttributes.DIFFUSE_COLOR_DEFAULT );
-             //DoubleArrayArray a=coord.toDoubleArrayArray();
-             double[][] a=coord.toDoubleArrayArray(null);
-             Ri.color(cc.getRGBColorComponents(null));
-           double[] trns = new double[16];
-            for (int i= 0; i < n; i++) { 
-                trns = MatrixBuilder.init(null, sig).translate(a[i]).getArray();
-                Ri.transformBegin();
-                Ri.concatTransform(fTranspose(trns));
+        if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.VERTEX_DRAW),CommonAttributes.VERTEX_DRAW_DEFAULT)) {
+            int n= p.getNumPoints();
+            DataList coord=p.getVertexAttributes(Attribute.COORDINATES);
+            if(coord == null) return;
+            Ri.attributeBegin();
+            float r = (float) eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
+            //System.out.println("point radius is "+r);
+            setupShader(eAppearance,CommonAttributes.POINT_SHADER);
+            boolean drawSpheres = eAppearance.getAttribute(CommonAttributes.SPHERES_DRAW,CommonAttributes.SPHERES_DRAW_DEFAULT);
+            if(drawSpheres) {
+            	    int sig = eAppearance.getAttribute("signature", Pn.EUCLIDEAN);
+                 Color cc = (Color) eAppearance.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,  CommonAttributes.DIFFUSE_COLOR_DEFAULT );
+                 //DoubleArrayArray a=coord.toDoubleArrayArray();
+                 double[][] a=coord.toDoubleArrayArray(null);
+                 Ri.color(cc.getRGBColorComponents(null));
+               double[] trns = new double[16];
+                for (int i= 0; i < n; i++) { 
+                    trns = MatrixBuilder.init(null, sig).translate(a[i]).getArray();
+                    Ri.transformBegin();
+                    Ri.concatTransform(fTranspose(trns));
+                    HashMap map =new HashMap();
+                    Ri.sphere(r,-r,r,360f,map);
+                    Ri.transformEnd();
+                    //pipeline.processPoint(a, i);            
+                }
+            } else {
                 HashMap map =new HashMap();
-                Ri.sphere(r,-r,r,360f,map);
-                Ri.transformEnd();
-                //pipeline.processPoint(a, i);            
+                double[] pc = new double[3*n];
+                coord.toDoubleArray(pc);
+                float[] pcf = new float[3*n];
+                for (int i = 0; i < pcf.length; i++) {
+                    pcf[i] = (float) pc[i];
+                }
+                map.put("P",pcf);
+                map.put("constant float constantwidth",new Float(r));
+                Ri.points(n,map);
             }
-        } else {
-            HashMap map =new HashMap();
-            double[] pc = new double[3*n];
-            coord.toDoubleArray(pc);
-            float[] pcf = new float[3*n];
-            for (int i = 0; i < pcf.length; i++) {
-                pcf[i] = (float) pc[i];
-            }
-            map.put("P",pcf);
-            map.put("constant float constantwidth",new Float(r));
-            Ri.points(n,map);
+                Ri.attributeEnd();       	
         }
-            Ri.attributeEnd();
-            insidePointset = false;
     }
     
     public void visit(ClippingPlane p) {
@@ -800,12 +921,12 @@ public class RIBVisitor extends SceneGraphVisitor {
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.UnitSphere)
      */
     public void visit(Sphere s) {
-        //setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
+        setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
         Ri.sphere(1f,-1f,1f,360f,null);
     }
     
     public void visit(Cylinder c) {
-        //setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
+        setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
         Ri.cylinder(1f,-1f,1f,360f,null);
         Ri.disk(-1f,1f,360f,null);
         Ri.disk(1f,1f,360f,null);

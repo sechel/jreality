@@ -22,6 +22,7 @@
  */
 package de.jreality.renderman;
 
+import java.awt.Color;
 import java.io.*;
 import java.util.Iterator;
 import java.util.Map;
@@ -71,6 +72,7 @@ public class Ri {
     public static  void end() {
         w.close();
     }
+    
     public static void comment(String s) {
         String[] ss = s.split("\\n");
         for (int i = 0; i < ss.length; i++) {
@@ -167,7 +169,10 @@ public class Ri {
         w.println("ShadingRate "+rate);
     }
     
-    public static void projection(String name, Map map) {
+	public static void clipping(double near, double far) {
+		w.println("Clipping "+near+" "+far);
+	}
+   public static void projection(String name, Map map) {
 //        String[]  tokens = keysFromMap(map);
 //        Object[] values = valuesFromMap(map, tokens);
 //        projection(name, tokens, values);
@@ -247,11 +252,26 @@ public class Ri {
         writeMap(w,map);
     }
 //    public static  void imager(String name, String[] tokens, Object[] values);
+ 
+    public static  void color(Color color) {
+        float[] cc = color.getRGBComponents(null);
+        color(cc[0], cc[1], cc[2]);
+        if (cc.length == 4) opacity(cc[3]);
+    }
     
+    public static  void color(double[] color) {
+    	color((float) color[0], (float) color[1], (float) color[2]);
+    	if (color.length == 4) opacity((float) color[3]);
+    }
+    
+   public static void color(float r, float g, float b){
+    	color( new float[]{r,g,b});
+    }
     public static  void color(float[] color) {
         w.print("Color ");
         writeObject(w,color);
         w.println("");
+       if (color.length == 4) opacity(color[3]);
     }
     
     public static  void opacity(float[] color) {
@@ -260,7 +280,14 @@ public class Ri {
         w.println("");
     }
     
-    public static  void concatTransform(float[] transform) {
+    public static  void opacity(float color) {
+        w.print("Opacity ");
+        float[] opa = {color, color, color};
+        writeObject(w, opa);
+        w.println("");
+    }
+    
+   public static  void concatTransform(float[] transform) {
         w.print("ConcatTransform ");
         writeObject(w,transform);
         w.println("");

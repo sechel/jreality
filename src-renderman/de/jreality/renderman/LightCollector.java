@@ -26,6 +26,7 @@ import java.util.HashMap;
 
 import de.jreality.math.Rn;
 import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.SpotLight;
@@ -107,6 +108,27 @@ public class LightCollector extends SceneGraphVisitor {
         //super.visit(l);
     }
 
+    public void visit(PointLight l) {
+        Ri.transformBegin();
+        // write the transform for this light:
+        //double[] mat = t.getMatrix();
+        double[] mat = currentTrafo;
+        float[] tmat = new float[16];
+        for (int i = 0; i < 4; i++) 
+            for (int j = 0;j<4;j++){
+                tmat[i + 4*j] = (float) mat[j+4*i];
+            }
+        Ri.concatTransform(tmat);
+        // now write the light:
+        HashMap map =new HashMap();
+        map.put("intensity",new Float(l.getIntensity()));
+        map.put("lightcolor",l.getColor().getRGBColorComponents(null));
+        map.put("from",new float[] {0f,0f,1f});
+        map.put("to",new float[] {0f,0f,0f});
+       Ri.lightSource("pointlight",map);
+        
+        Ri.transformEnd();
+    }
     /* (non-Javadoc)
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.SpotLightSoft)
      */
