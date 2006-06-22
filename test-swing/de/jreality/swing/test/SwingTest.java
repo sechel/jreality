@@ -28,6 +28,7 @@ import java.io.IOException;
 import javax.swing.JButton;
 
 import de.jreality.examples.CatenoidHelicoid;
+import de.jreality.examples.PaintComponent;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.swing.JRJComponent;

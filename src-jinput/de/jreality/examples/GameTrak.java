@@ -1,5 +1,3 @@
-package de.jreality.examples;
-import net.java.games.input.*;
 
 /*
  * Created on 14.01.2006
@@ -23,6 +21,9 @@ import net.java.games.input.*;
  * Boston, MA 02111-1307
  * USA 
  */
+
+package de.jreality.examples;
+import net.java.games.input.*;
 
 public class GameTrak {
 

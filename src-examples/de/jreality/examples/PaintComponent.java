@@ -20,7 +20,7 @@
  * Boston, MA 02111-1307
  * USA 
  */
-package de.jreality.swing.test;
+package de.jreality.examples;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -37,6 +37,12 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+
+import de.jreality.math.MatrixBuilder;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Transformation;
+import de.jreality.swing.JRJComponent;
+import de.jreality.ui.viewerapp.ViewerApp;
 
 public class PaintComponent extends JPanel implements MouseListener, MouseMotionListener,ActionListener {
     BufferedImage myoff;
@@ -137,5 +143,32 @@ public class PaintComponent extends JPanel implements MouseListener, MouseMotion
     }
 
     
+    public static void main(String[] args) {
+      PaintComponent pc = new PaintComponent();
+
+      CatenoidHelicoid catenoid = new CatenoidHelicoid(50);
+      catenoid.setAlpha(Math.PI/2.-0.3);
+      
+      SceneGraphComponent catComp= new SceneGraphComponent();
+      
+      Transformation gt= new Transformation();
+      catComp.setTransformation(gt);
+      MatrixBuilder.euclidean().rotateX(Math.PI).assignTo(catComp);
+      
+      
+      catComp.setGeometry(catenoid);
+      SceneGraphComponent c;  
+      
+      JRJComponent jrj = new JRJComponent();
+      jrj.add(pc);
+      
+      catComp.addTool(jrj.getTool());
+      
+   System.out.print("setting appearance ");
+      catComp.setAppearance(jrj.getAppearance());
+      System.out.println("done");
+      ViewerApp.display(catComp);
+      
+   }
 
 }
