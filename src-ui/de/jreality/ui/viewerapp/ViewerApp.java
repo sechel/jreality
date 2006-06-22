@@ -79,6 +79,7 @@ import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
+import de.jreality.scene.tool.LookAtTool;
 import de.jreality.scene.tool.DraggingTool;
 import de.jreality.scene.tool.FlyTool;
 import de.jreality.scene.tool.HeadTransformationTool;
@@ -507,6 +508,7 @@ public class ViewerApp
           tools.add(HeadTransformationTool.class);
           tools.add(ShipNavigationTool.class);
           tools.add(PointerDisplayTool.class);
+          tools.add(LookAtTool.class);
           try {
             tools.add(Class.forName("de.jreality.scene.tool.PortalHeadMoveTool"));
           } catch (ClassNotFoundException e) {}
