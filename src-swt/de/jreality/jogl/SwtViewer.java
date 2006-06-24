@@ -4,11 +4,9 @@
  */
 package de.jreality.jogl;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.util.logging.Level;
 
-import javax.media.opengl.DebugGL;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawableFactory;
@@ -24,6 +22,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
 import de.jreality.examples.CatenoidHelicoid;
+import de.jreality.examples.PaintComponent;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -31,7 +30,13 @@ import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.Light;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.shader.CommonAttributes;
+import de.jreality.scene.pick.AABBPickSystem;
+import de.jreality.scene.tool.DraggingTool;
+import de.jreality.scene.tool.RotateTool;
+import de.jreality.scene.tool.ToolSystem;
+import de.jreality.scene.tool.config.ToolSystemConfiguration;
+import de.jreality.swing.JRJComponent;
+import de.jreality.util.RenderTrigger;
 import de.jreality.util.SceneGraphUtility;
 /**
  * @author Charles Gunn
@@ -198,43 +203,43 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
   
   int rot = 0;
 
+  public void init() {
+    shell.setLayout(new FillLayout());
+    Composite comp = new Composite(shell, SWT.NONE);
+    comp.setLayout(new FillLayout());
+    GLData data = new GLData ();
+    data.doubleBuffer = true;
+    System.out.println("data.depthSize="+data.depthSize);
+    data.depthSize = 8;
+    canvas = new GLCanvas(comp, SWT.NONE, data);
+    canvas.setCurrent();
+    shell.setText("jReality SWT/JOGL Test");
+    shell.setSize(640, 480);
+    shell.open();
+    canvas.addListener(SWT.Resize, new Listener() {
+      public void handleEvent(Event event) {
+        Rectangle bounds = canvas.getBounds();
+        renderer.setSize(bounds.width, bounds.height);
+      }
+    });
+    context = GLDrawableFactory.getFactory().createExternalGLContext();
+    Rectangle bounds = canvas.getBounds();
+    renderer.setSize(bounds.width, bounds.height);
+    context.makeCurrent();
+    GL gl = context.getGL();
+    renderer.init(gl);
+    context.release();
+  }
+  
 	public void run() {
     if (shell.isDisposed()) return;
 		if (Thread.currentThread() != shell.getDisplay().getThread())
 			throw new IllegalStateException();
 		synchronized (renderLock) {
 			pendingUpdate = false;
-      if (init) {
-        shell.setLayout(new FillLayout());
-        Composite comp = new Composite(shell, SWT.NONE);
-        comp.setLayout(new FillLayout());
-        GLData data = new GLData ();
-        data.doubleBuffer = true;
-        canvas = new GLCanvas(comp, SWT.NONE, data);
-      }
       canvas.setCurrent();
-      if (init) {
-        shell.setText("jReality SWT/JOGL Test");
-        shell.setSize(640, 480);
-        shell.open();
-        canvas.addListener(SWT.Resize, new Listener() {
-          public void handleEvent(Event event) {
-            Rectangle bounds = canvas.getBounds();
-            renderer.setSize(bounds.width, bounds.height);
-            //render();
-          }
-        });
-        context = GLDrawableFactory.getFactory().createExternalGLContext();
-        context.setGL(new DebugGL(context.getGL()));
-      }
       context.makeCurrent();
       GL gl = context.getGL();
-      if (init) {
-        Rectangle bounds = canvas.getBounds();
-        renderer.setSize(bounds.width, bounds.height);
-        renderer.init(gl);
-        init = false;
-      }
       renderer.display(gl);
       canvas.swapBuffers();
       context.release();
@@ -242,7 +247,16 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
 		}
 	}
 
-  public static void main(String[] args) {
+  public Shell getShell() {
+    return shell;
+  }
+  
+  public GLCanvas getGLCanvas() {
+    return canvas;
+  }
+  
+  public static void main(String[] args) throws Exception {
+    
     SceneGraphComponent rootNode=new SceneGraphComponent();
     SceneGraphComponent geometryNode=new SceneGraphComponent();
     SceneGraphComponent cameraNode=new SceneGraphComponent();
@@ -252,7 +266,9 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
     rootNode.addChild(cameraNode);
     cameraNode.addChild(lightNode);
     
-    final CatenoidHelicoid geom=new CatenoidHelicoid(20);
+    final CatenoidHelicoid geom=new CatenoidHelicoid(50);
+    geom.setAlpha(Math.PI/2.-0.3);
+    
     Camera camera=new Camera();
     Light light=new DirectionalLight();
     
@@ -261,8 +277,11 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
     lightNode.setLight(light);
 
     Appearance app=new Appearance();
-    app.setAttribute("diffuseColor", Color.red);
-    app.setAttribute(CommonAttributes.BACKGROUND_COLOR, Color.blue);
+    //app.setAttribute(CommonAttributes.FACE_DRAW, false);
+    //app.setAttribute("diffuseColor", Color.red);
+    //app.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, true);
+    //app.setAttribute(CommonAttributes.TRANSPARENCY, 0.4);
+    //app.setAttribute(CommonAttributes.BACKGROUND_COLOR, Color.blue);
     rootNode.setAppearance(app);
     
     MatrixBuilder.euclidean().rotateY(Math.PI/6).assignTo(geometryNode);
@@ -270,8 +289,8 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
     MatrixBuilder.euclidean().rotate(-Math.PI/4, 1, 1, 0).assignTo(lightNode);
 
     //DefaultViewer viewer=new DefaultViewer();
-    SwtFrame f = new SwtFrame();
-    SwtViewer viewer=new SwtViewer(f.getShell());
+    SwtFrame f = SwtFrame.getInstance();
+    final SwtViewer viewer=new SwtViewer(f.createShell());
     viewer.setSceneRoot(rootNode);
     
     SceneGraphPath cameraPath=new SceneGraphPath();
@@ -280,17 +299,45 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
     cameraPath.push(camera);
     viewer.setCameraPath(cameraPath);
 
-        while (true) {
-          geom.setAlpha(geom.getAlpha()+0.005);
-          viewer.render();
-          try {
-            Thread.sleep(20);
-          } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-        }
+    geometryNode.addTool(new RotateTool());
+    geometryNode.addTool(new DraggingTool());
+    
+    SwtFrame.getInstance().waitFor(new Runnable() {
+      public void run() {viewer.init();};
+    });
+    
+    ToolSystem ts = new ToolSystem(viewer, ToolSystemConfiguration.loadDefaultConfiguration());
+    ts.setPickSystem(new AABBPickSystem());
+    
+    PaintComponent pc = new PaintComponent();
+    JRJComponent jrj = new JRJComponent();
+    jrj.add(pc);
+    
+    geometryNode.setAppearance(jrj.getAppearance());
+    geometryNode.addTool(jrj.getTool());
+    
+    RenderTrigger rt = new RenderTrigger();
+    rt.addViewer(viewer);
+    rt.addSceneGraphComponent(rootNode);
+    
+    ts.initializeSceneTools();
+    
+//    while (!viewer.getShell().isDisposed()) {
+//      geom.setAlpha(geom.getAlpha()+0.005);
+////      viewer.render();
+//      try {
+//        Thread.sleep(20);
+//      } catch (InterruptedException e) {
+//        // TODO Auto-generated catch block
+//        e.printStackTrace();
+//      }
+//    }
+//    
+//    System.exit(0);
+  }
 
+  public double getAspectRatio() {
+    return renderer.getAspectRatio(); 
   }
 
 }

@@ -22,16 +22,32 @@
  */
 package de.jreality.scene.tool;
 
-import java.util.*;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 
 import de.jreality.math.Matrix;
 import de.jreality.math.Rn;
+import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.DoubleArray;
-import de.jreality.scene.tool.config.*;
-import de.jreality.util.*;
+import de.jreality.scene.tool.config.RawDeviceConfig;
+import de.jreality.scene.tool.config.RawMapping;
+import de.jreality.scene.tool.config.ToolSystemConfiguration;
+import de.jreality.scene.tool.config.VirtualConstant;
+import de.jreality.scene.tool.config.VirtualDeviceConfig;
+import de.jreality.scene.tool.config.VirtualMapping;
+import de.jreality.util.CameraUtility;
+import de.jreality.util.ConfigurationAttributes;
+import de.jreality.util.LoggingSystem;
 
 
 /**
@@ -109,6 +125,8 @@ class DeviceManager {
 
   private SceneGraphPath avatarPath;
 
+  private Method aspectRatioRead;
+
   DeviceManager(ToolSystemConfiguration config, ToolEventQueue queue, Viewer viewer) {
 
 //    debugSlots.add(InputSlot.getDevice("Meta"));
@@ -118,6 +136,15 @@ class DeviceManager {
 //      debugSlots.add(InputSlot.getDevice("HorizontalShipRotationEvolution"));
       
     this.viewer=viewer;
+    
+    try {
+
+      Method m = viewer.getClass().getMethod("getAspectRatio", null);
+      aspectRatioRead = m;
+    } catch (Exception e) {
+      // no such method
+    }
+    
     eventQueue=queue;
     
     // raw devices
@@ -322,7 +349,16 @@ public List updateImplicitDevices() {
 	          worldToCamChanged = true;
 	      }
         try {
-          matrix = CameraUtility.getCameraToNDC(viewer);
+          if (aspectRatioRead != null) {
+            double asp=1;
+            try {
+              asp = ((Double) aspectRatioRead.invoke(viewer, null)).doubleValue();
+            } catch (Exception e) {
+              LoggingSystem.getLogger(this).warning("calling getAspectRatio on viewer failed!");
+            }
+            matrix = CameraUtility.getCameraToNDC((Camera) viewer.getCameraPath().getLastElement(), asp);
+            
+          } else matrix = CameraUtility.getCameraToNDC(viewer);
         } catch (RuntimeException e) {
           LoggingSystem.getLogger(this).info("CameraToNDC failed - assigning ID");
           Rn.setIdentityMatrix(matrix);
