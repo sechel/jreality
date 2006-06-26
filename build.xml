@@ -12,7 +12,7 @@
   <property name="ui" location="src-ui" />
   <property name="soft" location="src-soft" />
   <property name="renderman" location="src-renderman" />
-  <property name="jogl" location="src-jogl-jsr" />
+  <property name="jogl" location="src-jogl-jsr-new" />
   <property name="gpgpu" location="src-gpgpu-jsr" />
   <property name="jsyzygy" location="src-jsyzygy" />
   <property name="portal" location="src-portal" />
@@ -20,6 +20,7 @@
   <property name="testjogl" location="test-jogl" />
 
   <property name="examples" location="src-examples" />
+  <property name="swing" location="src-swing" />
 	
   <!-- these folders will be created -->
   <property name="build" location="build" />
@@ -30,6 +31,12 @@
   <property environment="env"/>
 
   <path id="backends-share.classpath">
+    <fileset dir="dist">
+      <include name="jReality-core.jar"/>
+    </fileset>
+  </path>
+
+  <path id="swing.classpath">
     <fileset dir="dist">
       <include name="jReality-core.jar"/>
     </fileset>
@@ -86,9 +93,6 @@
     <path refid="backend.classpath"/>
     <fileset dir="lib">
       <include name="jogl.jar"/>
-    </fileset>
-    <fileset dir="dist">
-      <include name="jReality-proxies.jar"/>
     </fileset>
   </path>
 
@@ -172,6 +176,15 @@
     <jar jarfile="${dist}/jReality-backends-share.jar" basedir="${build}/backends-share" />
   </target>
 
+  <target name="swing" depends="core" description="compile the swing widget integration">
+    <mkdir dir="${build}/swing" />
+    <javac excludesfile="excludes.txt" srcdir="${swing}" destdir="${build}/swing" debug="true">
+      <compilerarg line="-source 1.4" />
+      <classpath refid="swing.classpath"/>
+    </javac>
+    <jar jarfile="${dist}/jReality-swing.jar" basedir="${build}/swing" />
+  </target>
+
   <target name="io" depends="core, io-deps" description="build readers and writers">
     <mkdir dir="${build}/io" />
 	  <antlr target="${io}/de/jreality/reader/vrml/vrml-v1.0.g">
@@ -215,7 +228,7 @@
     <jar jarfile="${dist}/jReality-ui.jar" basedir="${build}/ui" />
   </target>
 
-  <target name="examples" depends="core" description="compile the examples">
+  <target name="examples" depends="core, ui, swing" description="compile the examples">
     <mkdir dir="${build}/examples" />
     <javac excludesfile="excludes.txt" srcdir="${examples}" destdir="${build}/examples" debug="true">
       <compilerarg line="-source 1.4" />
@@ -337,7 +350,20 @@
 	
   <target name="dist" depends="core,io,jogl,soft,renderman,portal,gpgpu,examples" description="generate the distribution">
   </target>
-	
+
+  <target name="base-jar" depends="dist" description="generate a big jar that contains all classes needed for the tutorial - no jogl">
+    <jar jarfile="${dist}/jReality.jar">
+      <fileset dir="${build}/core" />
+      <fileset dir="${build}/backends-share" />
+      <fileset dir="${build}/io" />
+      <fileset dir="${build}/soft" />
+      <fileset dir="${build}/ui" />
+      <fileset dir="${build}/examples" />
+      <fileset dir="${build}/renderman" />
+      <fileset dir="${build}/swing" />
+    </jar>
+  </target>
+
   <target name="check_cvs" description="check the current cvs state">
 	<mkdir dir="check_cvs_tmp"/>
   	<cvs cvsroot="${env.CVSROOT}" package="jReality" dest="check_cvs_tmp"/>
