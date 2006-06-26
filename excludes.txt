@@ -10,3 +10,5 @@ de/jreality/portal/tools/*.java
 de/jreality/examples/GameTrak.java
 de/jreality/examples/MouseButtonTrak.java
 de/jreality/examples/VulptureGPUApp.java
+
+**/SwtExample.java
