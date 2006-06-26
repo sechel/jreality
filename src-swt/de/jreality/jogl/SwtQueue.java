@@ -52,7 +52,7 @@ public class SwtQueue implements Runnable {
         });
       };
     };
-    display.syncExec(r);
+    waitFor(r);
     return (shell[0]);
   }
 
