@@ -65,8 +65,7 @@ public class DeviceMouseSWT implements RawDevice, MouseListener, MouseMoveListen
     ToolEvent toolEvent = new ToolEvent(DeviceMouseSWT.this, button,
             AxisState.PRESSED);
     if (button != null) {
-     queue.addEvent(toolEvent);
-     System.out.println(toolEvent);
+      queue.addEvent(toolEvent);
     }
   }
 
@@ -128,7 +127,6 @@ public class DeviceMouseSWT implements RawDevice, MouseListener, MouseMoveListen
     this.component = component;
     Runnable r = new Runnable() {
       public void run() {
-        System.out.println("DeviceMouseSWT.attatching listeners");
         component.addMouseListener(DeviceMouseSWT.this);
         component.addMouseMoveListener(DeviceMouseSWT.this);
       }

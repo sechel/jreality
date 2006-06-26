@@ -16,12 +16,15 @@ public class SwtQueue implements Runnable {
   private boolean inited = false;
   private final Object initLock=new Object();
   
+  private final Thread swtThread;
+  
   public static SwtQueue getInstance() {
     return instance;
   }
   
   private SwtQueue() {
-    new Thread(this).start();
+    swtThread = new Thread(this);
+    swtThread.start();
     synchronized(initLock) {
       try {
         while (!inited) initLock.wait();
@@ -86,16 +89,19 @@ public class SwtQueue implements Runnable {
     synchronized (tasks) {
       tasks.addLast(r);
       display.wake();
-    }    
+    }
   }
    
   public void waitFor(Runnable r) {
-    TrackedRunnable rr = new TrackedRunnable(r);
-    synchronized (tasks) {
-      tasks.addLast(rr);
-      display.wake();
+    if (Thread.currentThread() == swtThread) r.run();
+    else {
+      TrackedRunnable rr = new TrackedRunnable(r);
+      synchronized (tasks) {
+        tasks.addLast(rr);
+        display.wake();
+      }
+      rr.waitFor();
     }
-    rr.waitFor();
   }
   
   private static final class TrackedRunnable implements Runnable {

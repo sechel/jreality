@@ -79,10 +79,10 @@ import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
-import de.jreality.scene.tool.LookAtTool;
 import de.jreality.scene.tool.DraggingTool;
 import de.jreality.scene.tool.FlyTool;
 import de.jreality.scene.tool.HeadTransformationTool;
+import de.jreality.scene.tool.LookAtTool;
 import de.jreality.scene.tool.PointerDisplayTool;
 import de.jreality.scene.tool.RotateTool;
 import de.jreality.scene.tool.ScaleTool;
@@ -752,15 +752,22 @@ public class ViewerApp
 
       String viewer=System.getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
       StringTokenizer st = new StringTokenizer(viewer);
-      viewers = new Viewer[st.countTokens()];
-      for (int i = 0; i < viewers.length; i++) {
-        viewers[i] = createViewer(st.nextToken());
+      List viewerList = new LinkedList();
+      String viewerClassName;
+      while (st.hasMoreTokens()) {
+        viewerClassName = st.nextToken();
+        try {
+          Viewer v = createViewer(viewerClassName);
+          viewerList.add(v);
+        } catch (Exception e) {
+          LoggingSystem.getLogger(this).info("could not create viewer instance of ["+viewerClassName+"]");
+        }
       }
+      viewers = (Viewer[]) viewerList.toArray(new Viewer[viewerList.size()]);
       viewerSwitch = new ViewerSwitch(viewers);
       try {
         bshEval.getInterpreter().set("_viewer", viewerSwitch);
       } catch (EvalError e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
       renderTrigger.addViewer(viewerSwitch);

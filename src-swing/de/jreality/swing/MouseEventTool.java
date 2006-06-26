@@ -98,7 +98,6 @@ public class MouseEventTool extends Tool {
     }
 
     public void activate(ToolContext e) {
-        System.out.println(" pick activate in MouseEventTool");
         try {
             current = (Geometry) e.getCurrentPick().getPickPath()
                     .getLastElement();

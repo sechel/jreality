@@ -242,6 +242,7 @@ public class FakeToolKit extends Toolkit {
     }
 
     public class FakeFramePeer implements FramePeer {
+        private static final boolean DUMP = false;
         private BufferedImage bi;
         private Frame frame;
         private Runnable repaintAction;
@@ -292,14 +293,14 @@ public class FakeToolKit extends Toolkit {
         }
 
         public void endLayout() {
-            System.err.println("JFakeFramePeer end layout");
+            if (DUMP) System.err.println("JFakeFramePeer end layout");
             frame.paint(bi.getGraphics());
             if(repaintAction != null)
                 repaintAction.run();
         }
 
         public void endValidate() {
-            System.err.println("JFakeFramePeer end validate");
+          if (DUMP) System.err.println("JFakeFramePeer end validate");
             frame.paint(bi.getGraphics());
             if(repaintAction != null)
                 repaintAction.run();
@@ -356,11 +357,11 @@ public class FakeToolKit extends Toolkit {
         }
 
         public void reshape(int x, int y, int width, int height) {
-            System.err.println("JFakeFramePeer reshape");
+          if (DUMP) System.err.println("JFakeFramePeer reshape");
         }
 
         public void setBounds(int x, int y, int width, int height) {
-            System.out.println("JFakeFrame set Bounds "+x+" "+y+" "+width+" "+height);
+          if (DUMP) System.out.println("JFakeFrame set Bounds "+x+" "+y+" "+width+" "+height);
             bounds.setBounds(x, y, width, height);
             if(bi.getWidth()!=width || bi.getHeight()!= height) {
                 bi =new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
@@ -368,7 +369,7 @@ public class FakeToolKit extends Toolkit {
         }
 
         public void repaint(long tm, int x, int y, int width, int height) {
-            System.err.println("JFakeFramePeer repaint");
+          if (DUMP) System.err.println("JFakeFramePeer repaint");
         }
 
         public void setEnabled(boolean b) {
@@ -441,8 +442,8 @@ public class FakeToolKit extends Toolkit {
         }
 
         public Image getBackBuffer() {
-          System.out.println("FakeFramePeer.getBackBuffer()");
-            return null;
+          if (DUMP) System.out.println("FakeFramePeer.getBackBuffer()");
+          return null;
         }
 
         public Image createImage(int width, int height) {
@@ -458,7 +459,7 @@ public class FakeToolKit extends Toolkit {
         }
 
         public void coalescePaintEvent(PaintEvent e) {
-            System.err.println("JFakeFramePeer coalescePaintEvent");
+          if (DUMP) System.err.println("JFakeFramePeer coalescePaintEvent");
             frame.paint(bi.getGraphics());
             if(repaintAction != null)
                 repaintAction.run();
@@ -496,7 +497,7 @@ public class FakeToolKit extends Toolkit {
         }
 
         public void setBoundsPrivate(int x, int y, int width, int height) {
-          System.out.println("FakeFramePeer.setBoundsPrivate()");
+          if (DUMP) System.out.println("FakeFramePeer.setBoundsPrivate()");
         }
         public void updateAlwaysOnTop() {
         }
@@ -511,7 +512,7 @@ public class FakeToolKit extends Toolkit {
           return false;
         }
         public void setBounds(int x, int y, int width, int height, int op) {
-          System.out.println("FakeFramePeer.setBounds() op="+op);
+          if (DUMP) System.out.println("FakeFramePeer.setBounds() op="+op);
           setBounds(x, y, width, height);
         }
         public void reparent(ContainerPeer newContainer) {

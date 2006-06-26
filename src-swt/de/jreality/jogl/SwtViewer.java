@@ -13,31 +13,12 @@ import javax.media.opengl.GLDrawableFactory;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.opengl.GLCanvas;
-import org.eclipse.swt.opengl.GLData;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
 
-import de.jreality.examples.CatenoidHelicoid;
-import de.jreality.examples.PaintComponent;
-import de.jreality.math.MatrixBuilder;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.Camera;
-import de.jreality.scene.DirectionalLight;
-import de.jreality.scene.Light;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.pick.AABBPickSystem;
-import de.jreality.scene.tool.DraggingTool;
-import de.jreality.scene.tool.RotateTool;
-import de.jreality.scene.tool.ToolSystem;
-import de.jreality.scene.tool.ToolSystemViewer;
-import de.jreality.scene.tool.config.ToolSystemConfiguration;
-import de.jreality.swing.JRJComponent;
-import de.jreality.util.RenderTrigger;
 import de.jreality.util.SceneGraphUtility;
 /**
  * @author Charles Gunn
@@ -60,19 +41,21 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
 	int stereoType = 		CROSS_EYED_STEREO;	
 	
 
-  Shell shell;
   GLCanvas canvas;
   private int signature;
 
-	public SwtViewer(Shell myShell) {
-		this(null, null, myShell);
+	public SwtViewer(GLCanvas canvas) {
+		this(null, null, canvas);
 	}
   
-	public SwtViewer(SceneGraphPath camPath, SceneGraphComponent root, Shell myShell) {
+	public SwtViewer(SceneGraphPath camPath, SceneGraphComponent root, GLCanvas canvas) {
 		super();
-    shell=myShell;
+    this.canvas=canvas;
     setAuxiliaryRoot(SceneGraphUtility.createFullSceneGraphComponent("AuxiliaryRoot"));
 		initializeFrom(root, camPath);
+    SwtQueue.getInstance().waitFor(new Runnable() {
+      public void run() {init();};
+    });
 	}
 
 	public SceneGraphComponent getSceneRoot() {
@@ -110,10 +93,11 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
 //		}
 	    synchronized (renderLock) {
 				if (!pendingUpdate) {
-          if (Thread.currentThread() == shell.getDisplay().getThread())
+          if (canvas.isDisposed()) return;
+          if (Thread.currentThread() == canvas.getDisplay().getThread())
             run();
           else {
-            shell.getDisplay().asyncExec(this);
+            canvas.getDisplay().asyncExec(this);
 	  				pendingUpdate = true;
           }
 				}
@@ -205,18 +189,6 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
   int rot = 0;
 
   public void init() {
-    shell.setLayout(new FillLayout());
-    Composite comp = new Composite(shell, SWT.NONE);
-    comp.setLayout(new FillLayout());
-    GLData data = new GLData ();
-    data.doubleBuffer = true;
-    System.out.println("data.depthSize="+data.depthSize);
-    data.depthSize = 8;
-    canvas = new GLCanvas(comp, SWT.NONE, data);
-    canvas.setCurrent();
-    shell.setText("jReality SWT/JOGL Test");
-    shell.setSize(640, 480);
-    shell.open();
     canvas.addListener(SWT.Resize, new Listener() {
       public void handleEvent(Event event) {
         Rectangle bounds = canvas.getBounds();
@@ -233,8 +205,8 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
   }
   
 	public void run() {
-    if (shell.isDisposed()) return;
-		if (Thread.currentThread() != shell.getDisplay().getThread())
+    if (canvas.isDisposed()) return;
+		if (Thread.currentThread() != canvas.getDisplay().getThread())
 			throw new IllegalStateException();
 		synchronized (renderLock) {
 			pendingUpdate = false;
@@ -248,100 +220,10 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
 		}
 	}
 
-  public Shell getShell() {
-    return shell;
-  }
-  
   public GLCanvas getGLCanvas() {
     return canvas;
   }
   
-  public static void main(String[] args) throws Exception {
-    
-    SceneGraphComponent rootNode=new SceneGraphComponent();
-    SceneGraphComponent geometryNode=new SceneGraphComponent();
-    SceneGraphComponent cameraNode=new SceneGraphComponent();
-    SceneGraphComponent lightNode=new SceneGraphComponent();
-    
-    rootNode.addChild(geometryNode);
-    rootNode.addChild(cameraNode);
-    cameraNode.addChild(lightNode);
-    
-    final CatenoidHelicoid geom=new CatenoidHelicoid(50);
-    geom.setAlpha(Math.PI/2.-0.3);
-    
-    Camera camera=new Camera();
-    Light light=new DirectionalLight();
-    
-    geometryNode.setGeometry(geom);
-    cameraNode.setCamera(camera);
-    lightNode.setLight(light);
-
-    Appearance app=new Appearance();
-    //app.setAttribute(CommonAttributes.FACE_DRAW, false);
-    //app.setAttribute("diffuseColor", Color.red);
-    //app.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, true);
-    //app.setAttribute(CommonAttributes.TRANSPARENCY, 0.4);
-    //app.setAttribute(CommonAttributes.BACKGROUND_COLOR, Color.blue);
-    rootNode.setAppearance(app);
-    
-    MatrixBuilder.euclidean().rotateY(Math.PI/6).assignTo(geometryNode);
-    MatrixBuilder.euclidean().translate(0, 0, 12).assignTo(cameraNode);
-    MatrixBuilder.euclidean().rotate(-Math.PI/4, 1, 1, 0).assignTo(lightNode);
-
-    //DefaultViewer viewer=new DefaultViewer();
-    SwtQueue f = SwtQueue.getInstance();
-    final SwtViewer swtViewer=new SwtViewer(f.createShell());
-    SwtQueue.getInstance().waitFor(new Runnable() {
-      public void run() {swtViewer.init();};
-    });
-    
-    final ToolSystemViewer viewer = new ToolSystemViewer(swtViewer);
-    viewer.setSceneRoot(rootNode);
-    
-    viewer.setPickSystem(new AABBPickSystem());
-    
-    SceneGraphPath cameraPath=new SceneGraphPath();
-    cameraPath.push(rootNode);
-    cameraPath.push(cameraNode);
-    cameraPath.push(camera);
-    viewer.setCameraPath(cameraPath);
-
-    viewer.initializeTools();
-    
-    geometryNode.addTool(new RotateTool());
-    geometryNode.addTool(new DraggingTool());
-    
-/*    ToolSystem ts = new ToolSystem(viewer, ToolSystemConfiguration.loadDefaultConfiguration());
-    ts.setPickSystem(new AABBPickSystem());
-*/    
-    PaintComponent pc = new PaintComponent();
-    JRJComponent jrj = new JRJComponent();
-    jrj.add(pc);
-    
-    geometryNode.setAppearance(jrj.getAppearance());
-    geometryNode.addTool(jrj.getTool());
-    
-    RenderTrigger rt = new RenderTrigger();
-    rt.addViewer(viewer);
-    rt.addSceneGraphComponent(rootNode);
-    
-/*    ts.initializeSceneTools(); */
-    
-//    while (!viewer.getShell().isDisposed()) {
-//      geom.setAlpha(geom.getAlpha()+0.005);
-////      viewer.render();
-//      try {
-//        Thread.sleep(20);
-//      } catch (InterruptedException e) {
-//        // TODO Auto-generated catch block
-//        e.printStackTrace();
-//      }
-//    }
-//    
-//    System.exit(0);
-  }
-
   public double getAspectRatio() {
     return renderer.getAspectRatio(); 
   }
