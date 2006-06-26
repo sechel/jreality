@@ -3,6 +3,7 @@
   <rawdevices>
     <rawdevice id="Keyboard" type="de.jreality.scene.tool.DeviceKeyboard"/>
     <rawdevice id="Mouse" type="de.jreality.scene.tool.DeviceMouse"/>
+    <rawdevice id="Mouse" type="de.jreality.scene.tool.DeviceMouseSWT"/>
     <rawdevice id="SystemTimer" type="de.jreality.scene.tool.DeviceSystemTimer"/>
     <!--rawdevice id="Joystick" type="de.jreality.scene.tool.DeviceJoystick"/-->
   </rawdevices>

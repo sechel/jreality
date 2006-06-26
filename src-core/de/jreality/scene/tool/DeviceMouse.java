@@ -57,10 +57,6 @@ public class DeviceMouse implements RawDevice, MouseListener,
   private Matrix axesMatrix = new Matrix();
   private DoubleArray da = new DoubleArray(axesMatrix.getArray());
 
-  public boolean needsComponent() {
-    return true;
-  }
-
   public void mouseClicked(MouseEvent e) {
   }
 
@@ -179,6 +175,7 @@ public class DeviceMouse implements RawDevice, MouseListener,
   }
 
   public void initialize(Viewer viewer) {
+    if (!viewer.hasViewingComponent() || viewer.getViewingComponent() == null) throw new UnsupportedOperationException("need AWT component");
     setComponent(viewer.getViewingComponent());
   }
 

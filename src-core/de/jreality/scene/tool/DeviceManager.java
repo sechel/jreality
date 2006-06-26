@@ -170,11 +170,16 @@ class DeviceManager {
       }
       else {
         // map and set initial value for InputSlot
-        ToolEvent initialValue = rd.mapRawDevice(rm.getSourceSlot(), rm.getTargetSlot());
-        if (initialValue.getInputSlot() != rm.getTargetSlot()) throw new IllegalStateException("different slot not allowed in init");
-        setTransformationMatrix(initialValue.getInputSlot(), initialValue.getTransformation());
-        setAxisState(initialValue.getInputSlot(), initialValue.getAxisState());
-        LoggingSystem.getLogger(this).config("Mapped "+rm);
+        try {
+          ToolEvent initialValue = rd.mapRawDevice(rm.getSourceSlot(), rm.getTargetSlot());
+          if (initialValue.getInputSlot() != rm.getTargetSlot()) throw new IllegalStateException("different slot not allowed in init");
+          setTransformationMatrix(initialValue.getInputSlot(), initialValue.getTransformation());
+          setAxisState(initialValue.getInputSlot(), initialValue.getAxisState());
+          LoggingSystem.getLogger(this).config("Mapped "+rm);
+        } catch (Exception e) {
+          // ignore unknown slots
+          LoggingSystem.getLogger(this).config("cannot map slot "+rm);
+        }
       }
     }
     

@@ -16,7 +16,7 @@ See de.jreality.scene.tool.config.ToolSystemConfiguration
         <xsl:for-each select="rawdevices/rawdevice">
         <void method="add">
           <object class="de.jreality.scene.tool.config.RawDeviceConfig">
-            <class><xsl:value-of select="@type"/></class>
+            <string><xsl:value-of select="@type"/></string>
             <string><xsl:value-of select="@id"/></string>
           </object>
         </void>

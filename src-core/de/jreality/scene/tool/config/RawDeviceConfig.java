@@ -42,14 +42,14 @@ public class RawDeviceConfig {
   );
   
   private final String deviceID;
-  private final Class rawDevice;
+  private final String rawDevice;
   
-  public RawDeviceConfig(Class type, String deviceID) {
+  public RawDeviceConfig(String type, String deviceID) {
     this.deviceID=deviceID;
     this.rawDevice = type;
   }
   
-  public Class getRawDevice() {
+  public String getRawDevice() {
     return rawDevice;
   }
   
@@ -58,11 +58,11 @@ public class RawDeviceConfig {
   }
   
   public String toString() {
-    return deviceID + "["+rawDevice.getName()+"]";
+    return deviceID + "["+rawDevice+"]";
   }
   
-  public RawDevice createDevice() throws InstantiationException, IllegalAccessException {
-    RawDevice dev = (RawDevice) rawDevice.newInstance();
+  public RawDevice createDevice() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+    RawDevice dev = (RawDevice) Class.forName(rawDevice).newInstance();
     return dev;
   }
 }

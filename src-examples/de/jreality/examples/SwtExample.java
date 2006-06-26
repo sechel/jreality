@@ -1,5 +1,7 @@
 package de.jreality.examples;
 
+import javax.swing.JFrame;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.opengl.GLCanvas;
@@ -65,31 +67,44 @@ public class SwtExample {
     cameraPath.push(cameraNode);
     cameraPath.push(camera);
     
-    // create Shell, GLCanvas and SwtViewer 
-    SwtQueue f = SwtQueue.getInstance();
-    final Shell shell = f.createShell();
-    final GLCanvas[] can = new GLCanvas[1];
+    final ToolSystemViewer viewer;
     
-    f.waitFor(new Runnable() {
-    public void run() {
-      shell.setLayout(new FillLayout());
-      Composite comp = new Composite(shell, SWT.NONE);
-      comp.setLayout(new FillLayout());
-      GLData data = new GLData ();
-      data.doubleBuffer = true;
-      System.out.println("data.depthSize="+data.depthSize);
-      data.depthSize = 8;
-      can[0] = new GLCanvas(comp, SWT.NONE, data);
-      can[0].setCurrent();
-      shell.setText("jReality SWT/JOGL Test");
-      shell.setSize(640, 480);
-      shell.open();
+    // true for SWT, false for AWT
+    if (true) {
+      // create Shell, GLCanvas and SwtViewer 
+      SwtQueue f = SwtQueue.getInstance();
+      final Shell shell = f.createShell();
+      final GLCanvas[] can = new GLCanvas[1];
+      
+      f.waitFor(new Runnable() {
+      public void run() {
+        shell.setLayout(new FillLayout());
+        Composite comp = new Composite(shell, SWT.NONE);
+        comp.setLayout(new FillLayout());
+        GLData data = new GLData ();
+        data.doubleBuffer = true;
+        System.out.println("data.depthSize="+data.depthSize);
+        data.depthSize = 8;
+        can[0] = new GLCanvas(comp, SWT.NONE, data);
+        can[0].setCurrent();
+        shell.setText("SWT");
+        shell.setSize(640, 480);
+        shell.open();
+      }
+      });
+      final SwtViewer swtViewer=new SwtViewer(can[0]);
+      
+      // enable tools
+      viewer = new ToolSystemViewer(swtViewer);
     }
-    });
-    final SwtViewer swtViewer=new SwtViewer(can[0]);
-    
-    // enable tools
-    final ToolSystemViewer viewer = new ToolSystemViewer(swtViewer);
+    else {
+      viewer = new ToolSystemViewer(new de.jreality.jogl.Viewer());
+      JFrame f = new JFrame("AWT");
+      f.setSize(640, 480);
+      f.getContentPane().add(viewer.getViewingComponent());
+      f.setVisible(true);
+      f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
     viewer.setPickSystem(new AABBPickSystem());
     
     viewer.setSceneRoot(rootNode);
