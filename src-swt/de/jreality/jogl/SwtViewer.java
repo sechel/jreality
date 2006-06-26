@@ -34,6 +34,7 @@ import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.tool.DraggingTool;
 import de.jreality.scene.tool.RotateTool;
 import de.jreality.scene.tool.ToolSystem;
+import de.jreality.scene.tool.ToolSystemViewer;
 import de.jreality.scene.tool.config.ToolSystemConfiguration;
 import de.jreality.swing.JRJComponent;
 import de.jreality.util.RenderTrigger;
@@ -289,9 +290,16 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
     MatrixBuilder.euclidean().rotate(-Math.PI/4, 1, 1, 0).assignTo(lightNode);
 
     //DefaultViewer viewer=new DefaultViewer();
-    SwtFrame f = SwtFrame.getInstance();
-    final SwtViewer viewer=new SwtViewer(f.createShell());
+    SwtQueue f = SwtQueue.getInstance();
+    final SwtViewer swtViewer=new SwtViewer(f.createShell());
+    SwtQueue.getInstance().waitFor(new Runnable() {
+      public void run() {swtViewer.init();};
+    });
+    
+    final ToolSystemViewer viewer = new ToolSystemViewer(swtViewer);
     viewer.setSceneRoot(rootNode);
+    
+    viewer.setPickSystem(new AABBPickSystem());
     
     SceneGraphPath cameraPath=new SceneGraphPath();
     cameraPath.push(rootNode);
@@ -299,16 +307,14 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
     cameraPath.push(camera);
     viewer.setCameraPath(cameraPath);
 
+    viewer.initializeTools();
+    
     geometryNode.addTool(new RotateTool());
     geometryNode.addTool(new DraggingTool());
     
-    SwtFrame.getInstance().waitFor(new Runnable() {
-      public void run() {viewer.init();};
-    });
-    
-    ToolSystem ts = new ToolSystem(viewer, ToolSystemConfiguration.loadDefaultConfiguration());
+/*    ToolSystem ts = new ToolSystem(viewer, ToolSystemConfiguration.loadDefaultConfiguration());
     ts.setPickSystem(new AABBPickSystem());
-    
+*/    
     PaintComponent pc = new PaintComponent();
     JRJComponent jrj = new JRJComponent();
     jrj.add(pc);
@@ -320,7 +326,7 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
     rt.addViewer(viewer);
     rt.addSceneGraphComponent(rootNode);
     
-    ts.initializeSceneTools();
+/*    ts.initializeSceneTools(); */
     
 //    while (!viewer.getShell().isDisposed()) {
 //      geom.setAlpha(geom.getAlpha()+0.005);

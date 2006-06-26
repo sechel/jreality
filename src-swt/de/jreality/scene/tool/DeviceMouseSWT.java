@@ -31,7 +31,7 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.widgets.Canvas;
 
-import de.jreality.jogl.SwtFrame;
+import de.jreality.jogl.SwtQueue;
 import de.jreality.jogl.SwtViewer;
 import de.jreality.math.Matrix;
 import de.jreality.scene.Viewer;
@@ -133,7 +133,7 @@ public class DeviceMouseSWT implements RawDevice, MouseListener, MouseMoveListen
         component.addMouseMoveListener(DeviceMouseSWT.this);
       }
     };
-    SwtFrame.getInstance().waitFor(r);
+    SwtQueue.getInstance().waitFor(r);
   }
 
   public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
