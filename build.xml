@@ -17,6 +17,7 @@
   <property name="jsyzygy" location="src-jsyzygy" />
   <property name="portal" location="src-portal" />
   <property name="proxies" location="src-proxies" />
+  <property name="swt" location="src-swt" />
   <property name="testjogl" location="test-jogl" />
 
   <property name="examples" location="src-examples" />
@@ -96,13 +97,23 @@
     </fileset>
   </path>
 
-  <path id="gpgpu.classpath">
+	<path id="gpgpu.classpath">
     <path refid="jogl.classpath"/>
     <fileset dir="dist">
       <include name="jReality-jogl.jar"/>
     </fileset>
   </path>
 	
+  <path id="swt.classpath">
+    <path refid="jogl.classpath"/>
+    <fileset dir="lib">
+      <include name="swt.jar"/>
+    </fileset>
+    <fileset dir="dist">
+      <include name="jReality-jogl.jar"/>
+    </fileset>
+  </path>
+
   <path id="tests.classpath">
     <path refid="proxies.classpath"/>
     <fileset dir="lib">
@@ -301,6 +312,15 @@
 
   <target name="jogl-deps" unless="env.NO_FETCH_DEPS">
     <get dest="lib/jogl.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/jogl.jar" usetimestamp="true" verbose="true"/>
+  </target>
+
+  <target name="swt" depends="jogl" description="build swt viewer for the jogl backend">
+    <mkdir dir="${build}/swt" />
+    <javac excludesfile="excludes.txt" srcdir="${swt}"  destdir="${build}/swt" debug="true">
+      <compilerarg line="-source 1.4" />
+      <classpath refid="swt.classpath"/>
+    </javac>
+    <jar jarfile="${dist}/jReality-swt.jar" basedir="${build}/swt" />
   </target>
 
   <target name="renderman" depends="core,soft" description="build renderman backend">
