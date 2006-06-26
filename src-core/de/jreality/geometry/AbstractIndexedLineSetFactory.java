@@ -15,7 +15,6 @@ import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.data.StringArray;
-import de.jreality.scene.data.StringArrayArray;
 
 class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 	

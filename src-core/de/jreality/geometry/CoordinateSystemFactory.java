@@ -3,22 +3,23 @@ package de.jreality.geometry;
 import java.awt.Color;
 import java.awt.Font;
 import java.util.HashMap;
+
 import javax.swing.SwingConstants;
-import de.jreality.scene.Geometry;
-import de.jreality.scene.IndexedLineSet;
-import de.jreality.scene.PointSet;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.Transformation;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.tool.CoordinateSystemBeautifier;
-import de.jreality.geometry.Primitives;
-import de.jreality.shader.CommonAttributes;
+
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.Quaternion;
 import de.jreality.math.Rn;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.Geometry;
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.PointSet;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Transformation;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.tool.CoordinateSystemBeautifier;
+import de.jreality.shader.CommonAttributes;
 
 
 /**

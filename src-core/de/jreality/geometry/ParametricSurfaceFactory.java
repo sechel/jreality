@@ -1,7 +1,6 @@
 package de.jreality.geometry;
 
 import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArrayArray;
 
 public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {

@@ -3,11 +3,9 @@ package de.jreality.geometry;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 import de.jreality.math.Pn;
 import de.jreality.scene.PointSet;

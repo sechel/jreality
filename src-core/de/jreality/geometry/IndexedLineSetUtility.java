@@ -8,7 +8,6 @@ package de.jreality.geometry;
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.Scene;
-import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.IntArray;

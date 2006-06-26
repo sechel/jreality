@@ -5,8 +5,6 @@ import java.awt.Color;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
-import de.jreality.scene.data.IntArrayArray;
-import de.jreality.scene.data.StringArrayArray;
 
 public class IndexedFaceSetFactory extends AbstractIndexedFaceSetFactory {
 

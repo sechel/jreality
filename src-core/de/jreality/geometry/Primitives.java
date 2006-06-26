@@ -20,7 +20,6 @@ import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
-import de.jreality.scene.pick.bounding.AABBTree;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.util.SceneGraphUtility;
 

@@ -7,13 +7,10 @@ package de.jreality.geometry;
 
 import java.awt.Dimension;
 
-import de.jreality.math.Pn;
-import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
-import de.jreality.scene.data.StorageModel;
 
 /**
  * @author gunn

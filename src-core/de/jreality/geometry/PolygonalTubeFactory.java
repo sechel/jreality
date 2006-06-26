@@ -12,10 +12,7 @@ import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DataList;
-import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.StorageModel;
 
 public class PolygonalTubeFactory extends TubeFactory {
