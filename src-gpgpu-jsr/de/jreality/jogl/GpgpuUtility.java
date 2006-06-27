@@ -137,7 +137,7 @@ public class GpgpuUtility {
     for (int i = 0; i < sl; i++) {
       for (int j = 0; j < sl; j++) {
         remaining--;
-        if (remaining<=dismissCnt) return f;
+        if (remaining<dismissCnt) return f;
         f[4*(sl*i+j)+0]=((float)i)/sl;
         f[4*(sl*i+j)+1]=((float)j)/sl;
         f[4*(sl*i+j)+2]=0;
