@@ -35,20 +35,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import com.sun.opengl.impl.mipmap.Type_Widget;
+import com.sun.opengl.util.FileUtil;
 
 import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.GeometryUtility;
-import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.PolygonalTubeFactory;
@@ -56,6 +53,8 @@ import de.jreality.geometry.TubeUtility;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
+import de.jreality.renderman.shader.RendermanShader;
+import de.jreality.renderman.shader.ShaderLookup;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.ClippingPlane;
@@ -76,7 +75,6 @@ import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
-import de.jreality.scene.data.StringArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
@@ -102,6 +100,9 @@ import de.jreality.util.CameraUtility;
  *     into Appearances and "be heard" (or make an interface with AttributeEntity)
  *   add control over global options using "renderingHints" shader
  *   Reduce use of static fields here and in Ri.java (not thread safe!)
+ *   minimize use of SLShader class as an Appearance attribute:
+ *   	as in other backends, the RIB backend shaders should set themselves by reading
+ *   	from an effective appearance.  The attributes should be set there.
  *  * @version 1.0
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
  *
@@ -206,7 +207,10 @@ public class RIBVisitor extends SceneGraphVisitor {
         
         Ri.format(width,height,1);
         System.out.println("ww "+width+" hh "+height);
-        Ri.shadingRate(1f);
+        Ri.shadingRate(1f);        	
+        foo = ap.getAttribute(CommonAttributes.RMAN_PREAMBLE);
+        if (foo != null && foo instanceof String)	Ri.verbatim((String) foo);
+     
         map = new HashMap();
         float fov = (float) camera.getFieldOfView();
         float a = 1.0f;
@@ -284,7 +288,7 @@ public class RIBVisitor extends SceneGraphVisitor {
      * @param cam
      * @return
      */
-    protected static float[] fTranspose(double[] mat) {
+    public static float[] fTranspose(double[] mat) {
         float[] tmat = new float[16];
         for (int i = 0; i < 4; i++) 
             for (int j = 0;j<4;j++){
@@ -327,9 +331,9 @@ public class RIBVisitor extends SceneGraphVisitor {
         //super.visit(a);
     }
 
-    private void setupShader(EffectiveAppearance a, String type) {
+    private void setupShader(EffectiveAppearance eap, String type) {
         // Attribute
-        Map m = (Map) a.getAttribute("rendermanAttribute",null, Map.class);
+        Map m = (Map) eap.getAttribute("rendermanAttribute",null, Map.class);
         if(m!=null) {
             for (Iterator i = m.keySet().iterator(); i.hasNext();) {
                 String key = (String) i.next();
@@ -337,7 +341,7 @@ public class RIBVisitor extends SceneGraphVisitor {
             }
         }
         
-        Object color = a.getAttribute(type+"."+CommonAttributes.DIFFUSE_COLOR,CommonAttributes.DIFFUSE_COLOR_DEFAULT);
+        Object color = eap.getAttribute(type+"."+CommonAttributes.DIFFUSE_COLOR,CommonAttributes.DIFFUSE_COLOR_DEFAULT);
         float colorAlpha = 1.0f;
         if(color!=Appearance.INHERITED) {
             float[] c =((Color)color).getRGBComponents(null);
@@ -346,113 +350,132 @@ public class RIBVisitor extends SceneGraphVisitor {
         }
  
         // interpret rendering hints to decide whether to do object instancing
-        boolean anyDisplayLists = a.getAttribute(CommonAttributes.ANY_DISPLAY_LISTS,true);
-        boolean manyDisplayLists = a.getAttribute(CommonAttributes.MANY_DISPLAY_LISTS,false);
+        // currently there's a problem with instancing combined with face colors 
+        // due to a bug in the renderman proserver renderer (I believe so anyway)
+        // so I've disabled this feature until I figure that out. -gunn
+        boolean anyDisplayLists = eap.getAttribute(CommonAttributes.ANY_DISPLAY_LISTS,true);
+        boolean manyDisplayLists = eap.getAttribute(CommonAttributes.MANY_DISPLAY_LISTS,false);
         retainGeometry = false; //anyDisplayLists && !manyDisplayLists;
         
-      transparencyEnabled = a.getAttribute(type+"."+CommonAttributes.TRANSPARENCY_ENABLED,true);
-double transparency = a.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
-        float f = 1f - (float)transparency;
-        f *= colorAlpha;
-        if (transparencyEnabled) Ri.opacity(new float[] {f,f,f});
+       double transparency = eap.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
+        currentOpacity = 1f - (float)transparency;
+		//currentOpacity *= colorAlpha;
+        Ri.opacity(new float[] 
+           {currentOpacity*colorAlpha,currentOpacity*colorAlpha,currentOpacity*colorAlpha});
         //System.out.println("transparency is "+type+" is "+transparency);
-        Object shader = a.getAttribute(type,"default");
-        //System.out.println("shader for "+type+" is "+shader);
-
-        SLShader slShader = (SLShader) a.getAttribute(type+CommonAttributes.RMAN_DISPLACEMENT,null,SLShader.class);
+        SLShader slShader = (SLShader) eap.getAttribute(type+CommonAttributes.RMAN_DISPLACEMENT,null,SLShader.class);
         if(slShader != null) {
             Ri.displacement(slShader.getName(),slShader.getParameters());
         }
-        slShader = (SLShader) a.getAttribute(type+"."+CommonAttributes.RMAN_SURFACE,null,SLShader.class);
-        if(slShader == null) {
-            if(true || shader.equals("default")) {
-                float phongSize =(float) a.getAttribute(type+"."+CommonAttributes.SPECULAR_EXPONENT,CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
-                float phong =(float) a.getAttribute(type+"."+CommonAttributes.SPECULAR_COEFFICIENT,CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);
-                float Kd =(float) a.getAttribute(type+"."+CommonAttributes.DIFFUSE_COEFFICIENT,CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
-                float Ka =(float) a.getAttribute(type+"."+CommonAttributes.AMBIENT_COEFFICIENT,CommonAttributes.AMBIENT_COEFFICIENT_DEFAULT);
-              HashMap map =new HashMap(); 
-                map.put("roughness",new Float(1/phongSize));
-                map.put("Ks",new Float(phong));
-                map.put("Kd",new Float(Kd));
-                map.put("Ka",new Float(Ka));
-               
-                //System.out.println("has texture "+AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), a));
-                if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), a)) {
-                    Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), a);
-               //System.out.println("texture is "+tex);
-//                Texture2D tex = (Texture2D) a.getAttribute(type+".texture",null,Texture2D.class);
-//                if(tex != null) {
-              
-                    String fname = null;
-                    if (rendererType == RIBViewer.TYPE_PIXAR)	{
-                    		fname = (String) a.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE,"");
-                    		if (fname == "")	{
-                    			fname = null;
-                    		} 
-                    } 
-                    if (fname == null) {
-                    	fname = writeTexture(tex);
+        boolean testNewShaderStuff = true;
+    	if (testNewShaderStuff)	{
+            RendermanShader polygonShader =(RendermanShader) ShaderLookup.getShaderAttr(this,eap, "", CommonAttributes.POLYGON_SHADER);        		
+            Ri.shader(polygonShader);
+    	} else {
+            Object shader = eap.getAttribute(type,"default");
+            slShader = (SLShader) eap.getAttribute(type+"."+CommonAttributes.RMAN_SURFACE,null,SLShader.class);
+            if(slShader == null) {
+                if(shader.equals("default")) {
+                    float phongSize =(float) eap.getAttribute(type+"."+CommonAttributes.SPECULAR_EXPONENT,CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
+                    float phong =(float) eap.getAttribute(type+"."+CommonAttributes.SPECULAR_COEFFICIENT,CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);
+                    float Kd =(float) eap.getAttribute(type+"."+CommonAttributes.DIFFUSE_COEFFICIENT,CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
+                    float Ka =(float) eap.getAttribute(type+"."+CommonAttributes.AMBIENT_COEFFICIENT,CommonAttributes.AMBIENT_COEFFICIENT_DEFAULT);
+                  HashMap map =new HashMap(); 
+                    map.put("roughness",new Float(1/phongSize));
+                    map.put("Ks",new Float(phong));
+                    map.put("Kd",new Float(Kd));
+                    map.put("Ka",new Float(Ka));
+                   
+                    //System.out.println("has texture "+AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), a));
+                    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), eap)) {
+                        Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), eap);
+                   //System.out.println("texture is "+tex);
+//                        Texture2D tex = (Texture2D) a.getAttribute(type+".texture",null,Texture2D.class);
+//                        if(tex != null) {
+                  
+                        String fname = null;
+                        if (rendererType == RIBViewer.TYPE_PIXAR)	{
+                        		fname = (String) eap.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE,"");
+                        		if (fname == "")	{
+                        			fname = null;
+                        		} 
+                        } 
+                        if (fname == null) {
+                        	fname = writeTexture(tex);
+                        }
+                        map.put("string texturename",fname);
+                        double[] mat = tex.getTextureMatrix().getArray();
+                        if(mat != null) {
+                        	map.put("matrix textureMatrix",fTranspose(mat));
+                        }
+                        Ri.surface("transformedpaintedplastic",map);
+                    } else {
+                        Ri.surface("plastic",map);
                     }
-                    map.put("string texturename",fname);
-                    double[] mat = tex.getTextureMatrix().getArray();
-                    if(mat != null) {
-                    	map.put("matrix textureMatrix",fTranspose(mat));
-                    }
-                    Ri.surface("transformedpaintedplastic",map);
-                } else {
-                    Ri.surface("plastic",map);
                 }
-            }
-        } else {
-            Ri.surface(slShader.getName(),slShader.getParameters());
-        }
+             } else 
+            	 Ri.surface(slShader.getName(),slShader.getParameters());
+    	}
     }
     /**
      * @param tex
      * @return
      */
-    private String writeTexture(Texture2D tex) {
+    public String writeTexture(Texture2D tex) {
             Image img;
             ImageData data = tex.getImage();
         String fname = (String) textures.get(data);
+//        Iterator iter = ImageIO.getImageWritersByMIMEType("image/tiff");
+//        while (iter.hasNext())	{
+//        	System.err.println("Writer: "+((ImageWriter) iter.next()).getClass().getName());
+//        }
         if(fname == null) {
-            fname = name+"_texture"+(textureCount++)+".tiff";
-            File f = new File(fname);
-            //Image img = tex.getImage().getImage();
-            // TODO temporary as long as ImageData does not return a propper BufferedImage
-            byte[] byteArray = data.getByteArray();
-            int dataHeight = data.getHeight();
-            int dataWidth = data.getWidth();
-            BufferedImage bi = new BufferedImage(dataWidth, dataHeight,
-                    BufferedImage.TYPE_INT_ARGB);
-            WritableRaster raster = bi.getRaster();
-            int[] pix = new int[4];
-           
-            for (int y = 0, ptr = 0; y < dataHeight; y++)
-                for (int x = 0; x < dataWidth; x++, ptr += 4) {
-                    pix[3] = byteArray[ptr + 3];
-                    pix[0] = byteArray[ptr];
-                    pix[1] = byteArray[ptr + 1];
-                    pix[2] = byteArray[ptr + 2];
-//                	pix[3] = byteArray[ptr + 0];
-//                    pix[0] = byteArray[ptr + 3];
-//                    pix[1] = byteArray[ptr + 2];
-//                    pix[2] = byteArray[ptr + 1];
-                    raster.setPixel(x, y, pix);
-                }
-            img = bi;
-            //END of temp code...
-            
             RenderedImage rImage =null;
-            if( img instanceof RenderedImage )
-                rImage = (RenderedImage) img;
-            else {
-                BufferedImage bImage =new BufferedImage(img.getWidth(null),img.getHeight(null),BufferedImage.TYPE_INT_ARGB);
-                Graphics g =bImage.getGraphics();
-                g.drawImage(img,0,0,null);
-                rImage =bImage;
+            BufferedImage bImage = null;
+            fname = name+"_texture"+(textureCount++)+".tiff"; //".png"; //
+            File f = new File(fname);
+            if (true)	{
+                //Image img = tex.getImage().getImage();
+                // TODO temporary as long as ImageData does not return a propper BufferedImage
+                byte[] byteArray = data.getByteArray();
+                int dataHeight = data.getHeight();
+                int dataWidth = data.getWidth();
+                BufferedImage bi = new BufferedImage(dataWidth, dataHeight,
+                        BufferedImage.TYPE_INT_ARGB);
+                WritableRaster raster = bi.getRaster();
+                int[] pix = new int[4];
+               
+                for (int y = 0, ptr = 0; y < dataHeight; y++)
+                    for (int x = 0; x < dataWidth; x++, ptr += 4) {
+                        pix[3] = byteArray[ptr + 3];
+                        pix[0] = byteArray[ptr];
+                        pix[1] = byteArray[ptr + 1];
+                        pix[2] = byteArray[ptr + 2];
+//                    	pix[3] = byteArray[ptr + 0];
+//                        pix[0] = byteArray[ptr + 3];
+//                        pix[1] = byteArray[ptr + 2];
+//                        pix[2] = byteArray[ptr + 1];
+                        raster.setPixel(x, y, pix);
+                    }
+                img = bi;
+                //END of temp code...
+                
+                if( img instanceof RenderedImage )
+                    rImage = (RenderedImage) img;
+                else {
+                    bImage =new BufferedImage(img.getWidth(null),img.getHeight(null),BufferedImage.TYPE_INT_ARGB);
+                    Graphics g =bImage.getGraphics();
+                    g.drawImage(img,0,0,null);
+                    rImage =bImage;
+                    img = (Image) rImage;
+                }
+           	
+            } else {
+            	bImage = (BufferedImage) data.getImage();
+            	rImage = bImage;
+            	img = (Image) bImage;
             }
-            //System.out.println( Arrays.asList(ImageIO.getWriterFormatNames()));
+             //System.out.println( Arrays.asList(ImageIO.getWriterFormatNames()));
 //            RenderedImage image = tex.getImage();
 //            String format = "tiff";
 //
@@ -460,7 +483,7 @@ double transparency = a.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,Comm
 //                    fname, format);
             try {
                 //OutputStream os = new FileOutputStream(f);
-                boolean worked =ImageIO.write(rImage,"tiff",f);
+                boolean worked =ImageIO.write(rImage,FileUtil.getFileSuffix(f),f);
                 if(!worked) System.err.println("writing of "+fname+" did not work!");
                 //os.close();
                 textures.put(data,fname);
@@ -472,7 +495,7 @@ double transparency = a.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,Comm
         return fname;
     }
     boolean testBallStick = true;
-	private boolean transparencyEnabled;
+	private float currentOpacity;
     /* (non-Javadoc)
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.IndexedLineSet)
      */
@@ -785,7 +808,7 @@ double transparency = a.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,Comm
 						//ftex[2*j+1] =(float)d.getValueAt(j,1);
 					}
 					map.put("varying color Cs",vCol);
-					if(transparencyEnabled && vertexColorLength == 4 ) map.put("varying color Os",vOp);
+					if(vertexColorLength == 4 ) map.put("varying color Os",vOp);
 				}
 			else if (faceColors != null)		{
 				int faceColorLength=GeometryUtility.getVectorLength(faceColors);
@@ -808,7 +831,7 @@ double transparency = a.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,Comm
 					//ftex[2*j+1] =(float)d.getValueAt(j,1);
 				}
 				map.put("uniform color Cs",vCol);
-				if(transparencyEnabled && faceColorLength == 4 ) map.put("uniform color Os",vOp);
+				if(faceColorLength == 4 ) map.put("uniform color Os",vOp);
 			}
       
 				int[] nvertices =new int[npolys];
@@ -832,8 +855,8 @@ double transparency = a.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,Comm
 					float[] f=new float[3];
 					f[0]=color[0];f[1]=color[1];f[2]=color[2];
 					Ri.color(f);
-					if (transparencyEnabled && color.length==4){
-						f[0]=color[3];f[1]=color[3];f[2]=color[3];
+					if (color.length==4){
+						f[0]=color[3]*currentOpacity;f[1]=color[3]*currentOpacity;f[2]=color[3]*currentOpacity;
 						Ri.opacity(f);
 						}	
 				}
@@ -1049,4 +1072,8 @@ double transparency = a.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,Comm
 		}
     	
     }
+
+	public int getRendererType() {
+		return rendererType;
+	}
 }

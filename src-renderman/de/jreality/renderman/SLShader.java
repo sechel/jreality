@@ -37,7 +37,6 @@ HashMap parameters = new HashMap();
 public SLShader(String name) {
     this.name  = name;
 }
-
 /**
  * @return Returns the name.
  */

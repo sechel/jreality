@@ -28,6 +28,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import de.jreality.math.Rn;
+import de.jreality.renderman.shader.RendermanShader;
+
 /**
  * 
  * @version 1.0
@@ -73,6 +76,9 @@ public class Ri {
         w.close();
     }
     
+    public static void verbatim(String s)	{
+    	w.println(s);
+    }
     public static void comment(String s) {
         String[] ss = s.split("\\n");
         for (int i = 0; i < ss.length; i++) {
@@ -127,6 +133,9 @@ public class Ri {
      */
     private static void writeObject(PrintWriter w2, Object object) {
         //TODO:This will be tricky...
+        if(object instanceof double[]) {
+        	object = Rn.convertDoubleToFloatArray((double[]) object);
+        }
         if(object instanceof float[]) {
             float[] f = (float[]) object;
             w2.print("[");
@@ -145,6 +154,16 @@ public class Ri {
             w2.print("]");
             return;
         }
+        if(object instanceof Color) {
+            w2.print("[");
+            float[] rgb = ((Color)object).getRGBComponents(null);
+            for (int i = 0; i < 3; i++) {
+                w2.print(rgb[i]+" ");
+            }
+            w2.print("]");
+            return;
+        }
+
         if(object instanceof String) {
             w2.print("\""+object+"\"");
             return;
@@ -401,5 +420,11 @@ public class Ri {
         String[] tokens;
         Object[] values;
     }
+	public static void shader(RendermanShader sh) {
+        w.print(sh.getType()+" "+str(sh.getName())+" ");
+        writeMap(w,sh.getAttributes());
+
+		
+	}
     
 }

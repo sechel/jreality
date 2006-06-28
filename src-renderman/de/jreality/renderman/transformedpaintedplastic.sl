@@ -12,7 +12,7 @@ transformedpaintedplastic ( float Ka = 1, Kd = .5, Ks = .5, roughness = .1;
      		 matrix textureMatrix = 1;
 		 color specularcolor = 1;
 		 string texturename = ""; 
-		 float useTextureAlpha = 0;)
+		 float useTextureAlpha = 1;)
 {
   normal Nf;
   vector V;
