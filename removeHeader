@@ -1,12 +1,9 @@
 #!/bin/bash
 export TMP_FILE=/tmp/foo.gaga
-echo $1;
-gr=$(grep -n "package " $1 | grep -o "[0-9]*" );
-# echo $gr;
+gr=$(grep -n "package \(de.jreality\|szg.\)" $1 | grep -o "[0-9]*" );
 topLine=$(expr "$gr" - 1);
-# echo $gr $topLine;
 
-cat ~/jRealityHeader > $TMP_FILE;
+cat jRealityHeader > $TMP_FILE;
 
 if [ "$gr" = "1" ]; then
   cat $1 >> $TMP_FILE;

@@ -23,7 +23,7 @@
  *   products derived from this software without specific prior written
  *   permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ?AS IS?
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
@@ -37,34 +37,21 @@
  *
  */
 
+
 package de.jreality.portal;
 
 
 import java.awt.Color;
 
-import de.jreality.geometry.GeometryUtility;
-import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.IndexedLineSetFactory;
-import de.jreality.geometry.Primitives;
-import de.jreality.math.MatrixBuilder;
-import de.jreality.math.Pn;
-import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DataList;
-import de.jreality.scene.data.DoubleArray;
-import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.tool.PortalCoordinateSystem;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.Rectangle3D;
-import de.jreality.util.SceneGraphUtility;
 
 /**
  * @author weissman
