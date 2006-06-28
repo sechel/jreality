@@ -151,8 +151,17 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		setFaceAttribute( Attribute.COLORS, new DoubleArrayArray.Inlined( data, data.length / nof() ) );
 	}
 	
-	protected void setFaceColors( Color [] data ) {
-		setEdgeColors( toDoubleArray(data));
+	protected void setFaceColors( Color [] colors ) {
+    double[] data = new double[colors.length*4];
+    float[] col = new float[4];
+    for (int i = 0; i < colors.length; i++) {
+      colors[i].getRGBComponents(col);
+      data[4*i  ] = col[0];
+      data[4*i+1] = col[1];
+      data[4*i+2] = col[2];
+      data[4*i+3] = col[3];
+    }
+    setFaceAttribute( Attribute.COLORS, new DoubleArrayArray.Inlined( data, 4 ) );
 	}
 	
 	protected void setFaceColors( double [][] data ) {
