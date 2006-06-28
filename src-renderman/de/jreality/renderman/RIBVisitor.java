@@ -42,8 +42,6 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import com.sun.opengl.util.FileUtil;
-
 import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
@@ -483,7 +481,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 //                    fname, format);
             try {
                 //OutputStream os = new FileOutputStream(f);
-                boolean worked =ImageIO.write(rImage,FileUtil.getFileSuffix(f),f);
+                boolean worked =ImageIO.write(rImage,".tiff",f);
                 if(!worked) System.err.println("writing of "+fname+" did not work!");
                 //os.close();
                 textures.put(data,fname);
