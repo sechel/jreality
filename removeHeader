@@ -1,0 +1,17 @@
+#!/bin/bash
+export TMP_FILE=/tmp/foo.gaga
+echo $1;
+gr=$(grep -n "package " $1 | grep -o "[0-9]*" );
+# echo $gr;
+topLine=$(expr "$gr" - 1);
+# echo $gr $topLine;
+
+cat ~/jRealityHeader > $TMP_FILE;
+
+if [ "$gr" = "1" ]; then
+  cat $1 >> $TMP_FILE;
+else
+  sed -e "1,${topLine}d" $1 >> $TMP_FILE
+fi
+cp $TMP_FILE $1
+
