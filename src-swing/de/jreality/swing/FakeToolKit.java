@@ -1,28 +1,82 @@
-/*
- * Created on 12.02.2006
+/**
  *
- * This file is part of the de.jreality.swing package.
- * 
- * This program is free software; you can redistribute and/or modify 
- * it under the terms of the GNU General Public License as published 
- * by the Free Software Foundation; either version 2 of the license, or
- * any later version.
- * 
- * This program is distributed in the hope that it will be useful, 
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITTNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License 
- * along with this program; if not, write to the 
- * Free Software Foundation, Inc.,
- * 59 Temple Place, Suite 330,
- * Boston, MA 02111-1307
- * USA 
+ * This file is part of jReality. jReality is open source software, made
+ * available under a BSD license:
+ *
+ * Copyright (c) 2003-2006, jReality Group: Charles Gunn, Tim Hoffmann, Markus
+ * Schmies, Steffen Weissmann.
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * - Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * - Neither the name of jReality nor the names of its contributors nor the
+ *   names of their associated organizations may be used to endorse or promote
+ *   products derived from this software without specific prior written
+ *   permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ?AS IS?
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
  */
+
 package de.jreality.swing;
 
-import java.awt.*;
+import java.awt.AWTEvent;
+import java.awt.AWTException;
+import java.awt.BufferCapabilities;
+import java.awt.Button;
+import java.awt.Canvas;
+import java.awt.Checkbox;
+import java.awt.CheckboxMenuItem;
+import java.awt.Choice;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.FileDialog;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.GraphicsConfiguration;
+import java.awt.HeadlessException;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.Label;
+import java.awt.List;
+import java.awt.Menu;
+import java.awt.MenuBar;
+import java.awt.MenuItem;
+import java.awt.Panel;
+import java.awt.Point;
+import java.awt.PopupMenu;
+import java.awt.PrintJob;
+import java.awt.Rectangle;
+import java.awt.ScrollPane;
+import java.awt.Scrollbar;
+import java.awt.TextArea;
+import java.awt.TextField;
+import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.BufferCapabilities.FlipContents;
 import java.awt.datatransfer.Clipboard;
 import java.awt.dnd.DragGestureEvent;
@@ -30,8 +84,33 @@ import java.awt.dnd.InvalidDnDOperationException;
 import java.awt.dnd.peer.DragSourceContextPeer;
 import java.awt.event.PaintEvent;
 import java.awt.im.InputMethodHighlight;
-import java.awt.image.*;
-import java.awt.peer.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ImageObserver;
+import java.awt.image.ImageProducer;
+import java.awt.image.VolatileImage;
+import java.awt.peer.ButtonPeer;
+import java.awt.peer.CanvasPeer;
+import java.awt.peer.CheckboxMenuItemPeer;
+import java.awt.peer.CheckboxPeer;
+import java.awt.peer.ChoicePeer;
+import java.awt.peer.ContainerPeer;
+import java.awt.peer.DialogPeer;
+import java.awt.peer.FileDialogPeer;
+import java.awt.peer.FontPeer;
+import java.awt.peer.FramePeer;
+import java.awt.peer.LabelPeer;
+import java.awt.peer.ListPeer;
+import java.awt.peer.MenuBarPeer;
+import java.awt.peer.MenuItemPeer;
+import java.awt.peer.MenuPeer;
+import java.awt.peer.PanelPeer;
+import java.awt.peer.PopupMenuPeer;
+import java.awt.peer.ScrollPanePeer;
+import java.awt.peer.ScrollbarPeer;
+import java.awt.peer.TextAreaPeer;
+import java.awt.peer.TextFieldPeer;
+import java.awt.peer.WindowPeer;
 import java.net.URL;
 import java.util.Map;
 import java.util.Properties;

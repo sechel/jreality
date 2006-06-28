@@ -1,32 +1,48 @@
-/*
- * Created on 12-Nov-2004
+/**
  *
- * This file is part of the jReality package.
- * 
- * This program is free software; you can redistribute and/or modify 
- * it under the terms of the GNU General Public License as published 
- * by the Free Software Foundation; either version 2 of the license, or
- * any later version.
- * 
- * This program is distributed in the hope that it will be useful, 
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITTNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License 
- * along with this program; if not, write to the 
- * Free Software Foundation, Inc.,
- * 59 Temple Place, Suite 330,
- * Boston, MA 02111-1307
- * USA 
+ * This file is part of jReality. jReality is open source software, made
+ * available under a BSD license:
+ *
+ * Copyright (c) 2003-2006, jReality Group: Charles Gunn, Tim Hoffmann, Markus
+ * Schmies, Steffen Weissmann.
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * - Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * - Neither the name of jReality nor the names of its contributors nor the
+ *   names of their associated organizations may be used to endorse or promote
+ *   products derived from this software without specific prior written
+ *   permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ?AS IS?
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
  */
+
 package de.jreality.scene.proxy.smrj;
 
 import java.io.Serializable;
 import java.util.Iterator;
 
 import de.jreality.math.Matrix;
-import de.jreality.scene.*;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Geometry;
@@ -36,13 +52,36 @@ import de.jreality.scene.Light;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.ByteBufferList;
 import de.jreality.scene.data.DataList;
-import de.jreality.scene.event.*;
-import de.jreality.scene.proxy.scene.*;
+import de.jreality.scene.event.AppearanceEvent;
+import de.jreality.scene.event.AppearanceListener;
+import de.jreality.scene.event.CameraEvent;
+import de.jreality.scene.event.CameraListener;
+import de.jreality.scene.event.GeometryEvent;
+import de.jreality.scene.event.GeometryListener;
+import de.jreality.scene.event.LightEvent;
+import de.jreality.scene.event.LightListener;
+import de.jreality.scene.event.SceneGraphComponentEvent;
+import de.jreality.scene.event.SceneGraphComponentListener;
+import de.jreality.scene.event.TransformationEvent;
+import de.jreality.scene.event.TransformationListener;
+import de.jreality.scene.proxy.scene.RemoteAppearance;
+import de.jreality.scene.proxy.scene.RemoteCamera;
+import de.jreality.scene.proxy.scene.RemoteGeometry;
+import de.jreality.scene.proxy.scene.RemoteIndexedFaceSet;
+import de.jreality.scene.proxy.scene.RemoteIndexedLineSet;
+import de.jreality.scene.proxy.scene.RemoteLight;
+import de.jreality.scene.proxy.scene.RemotePointLight;
+import de.jreality.scene.proxy.scene.RemotePointSet;
+import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
+import de.jreality.scene.proxy.scene.RemoteSceneGraphNode;
+import de.jreality.scene.proxy.scene.RemoteSpotLight;
+import de.jreality.scene.proxy.scene.RemoteTransformation;
 
 /**
  * 

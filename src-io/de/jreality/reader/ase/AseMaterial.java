@@ -61,12 +61,12 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 
 import de.jreality.scene.Appearance;
-import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
-import de.jreality.util.*;
+import de.jreality.util.Input;
+import de.jreality.util.LoggingSystem;
 
 
 /**

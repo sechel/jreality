@@ -1,12 +1,20 @@
 package de.jreality.reader.quake3;
 
-import java.awt.*;
-import java.awt.color.*;
-import java.awt.image.*;
-import java.nio.*;
-import java.net.*;
-import java.io.*;
-import javax.imageio.*;
+import java.awt.Graphics2D;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
+import java.io.File;
+import java.net.URL;
+import java.nio.ByteBuffer;
+
+import javax.imageio.ImageIO;
 
 
 /**

@@ -36,11 +36,9 @@
 package de.jreality.reader.quake3;
 
 import java.awt.image.BufferedImage;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import de.jreality.util.LoggingSystem;
 /**

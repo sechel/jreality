@@ -40,10 +40,10 @@ package de.jreality.reader.ase;
 
 import java.util.logging.Level;
 
+import de.jreality.reader.vecmath.Vector3f;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
-import de.jreality.reader.vecmath.Vector3f;
 import de.jreality.util.LoggingSystem;
 
 

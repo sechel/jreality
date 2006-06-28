@@ -46,8 +46,6 @@
 
 package de.jreality.reader.quake3;
 
-import java.util.logging.Logger;
-
 import de.jreality.reader.quake3.lumps.tBSPVertex;
 import de.jreality.reader.vecmath.Point3f;
 import de.jreality.util.LoggingSystem;

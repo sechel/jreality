@@ -46,18 +46,25 @@
 
 package de.jreality.reader.quake3;
 
-import de.jreality.reader.quake3.lumps.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 
-import de.jreality.reader.quake3.lumps.*;
+import de.jreality.reader.quake3.lumps.tBSPDirectory;
+import de.jreality.reader.quake3.lumps.tBSPFace;
+import de.jreality.reader.quake3.lumps.tBSPLeaf;
+import de.jreality.reader.quake3.lumps.tBSPLump;
+import de.jreality.reader.quake3.lumps.tBSPModel;
+import de.jreality.reader.quake3.lumps.tBSPNode;
+import de.jreality.reader.quake3.lumps.tBSPPlane;
+import de.jreality.reader.quake3.lumps.tBSPVertex;
+import de.jreality.reader.quake3.lumps.tBSPVisData;
 import de.jreality.util.LoggingSystem;
-//import com.xith3d.image.DirectBufferedImage;
-//import com.xith3d.utility.image.ImageUtility;
-
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.nio.channels.FileChannel;
-import java.nio.*;
-import java.util.logging.Logger;
 
 /**
  * Loads the quake 3 BSP file according to spec.  It is not expected that it would be

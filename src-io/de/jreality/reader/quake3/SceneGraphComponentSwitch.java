@@ -23,7 +23,9 @@
 
 package de.jreality.reader.quake3;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.List;
 
 import de.jreality.scene.SceneGraphComponent;
 

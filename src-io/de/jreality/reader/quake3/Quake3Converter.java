@@ -50,21 +50,20 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.logging.Logger;
 
-
-import de.jreality.math.Matrix;
-import de.jreality.reader.AbstractReader;
 import de.jreality.reader.quake3.lumps.tBSPFace;
 import de.jreality.reader.quake3.lumps.tBSPLeaf;
 import de.jreality.reader.quake3.lumps.tBSPVertex;
-import de.jreality.scene.*;
+import de.jreality.reader.vecmath.Vector3f;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.Geometry;
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.StorageModel;
@@ -72,8 +71,7 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
-import de.jreality.reader.vecmath.Vector3f;
-import de.jreality.util.*;
+import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 
 /**
