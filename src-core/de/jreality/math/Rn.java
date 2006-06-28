@@ -1373,6 +1373,13 @@ final public class Rn {
 	    return dst;
 	}
 
+	public static Object convertDoubleToFloatArray(double[] ds) {
+		int n = ds.length;
+		float[] fs = new float[n];
+		for (int i = 0; i<n; ++i)	fs[i] = (float) ds[i];
+		return fs;
+	}
+
 
 }
 

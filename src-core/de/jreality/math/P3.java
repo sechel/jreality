@@ -495,7 +495,7 @@ public class P3 extends Pn {
 			return makeStretchMatrix(dst, stretchV);
 		}
 
-		private static double[] makeStretchMatrix(double[] dst, double xscale, double yscale, double zscale) {
+		public static double[] makeStretchMatrix(double[] dst, double xscale, double yscale, double zscale) {
 			// TODO Auto-generated method stub
 			if (dst == null) dst = new double[16];
 			Rn.setIdentityMatrix(dst);
