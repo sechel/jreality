@@ -19,7 +19,7 @@ public class Cube05 {
     
     int [][] faceIndices = new int [][] {
       {0, 1, 2, 3}, {7, 6, 5, 4}, {0, 1, 5, 4}, 
-      {1, 2, 6, 5}, {2, 3, 7, 6}, {3, 0, 4, 7} 
+      {2, 3, 7, 6}, {1, 2, 6, 5}, {3, 0, 4, 7} 
     };
     
     ifsf.setVertexCount( vertices.length );
@@ -27,14 +27,14 @@ public class Cube05 {
     ifsf.setFaceCount( faceIndices.length);
     ifsf.setFaceIndices( faceIndices );
     
-    ifsf.setGenerateEdgesFromFaces( true );
     ifsf.setGenerateFaceNormals( true );
 
+    ifsf.setGenerateEdgesFromFaces( false );
+    
     ifsf.setFaceColors(new Color[]{
-        Color.BLUE, Color.RED, Color.GREEN, Color.BLUE, Color.RED, Color.GREEN 
+        Color.BLUE, Color.BLUE, Color.GREEN, Color.GREEN, Color.RED, Color.RED 
     });
-
-        
+    
     ifsf.update();
     
     SceneGraphComponent sgc = new SceneGraphComponent();
