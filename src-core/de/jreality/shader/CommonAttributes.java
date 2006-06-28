@@ -149,6 +149,7 @@ public class CommonAttributes {
 	public final static String RMAN_GLOBAL_INCLUDE_FILE = "rendermanGlobalIncludeFile";
 	public final static String RMAN_SEARCHPATH_SHADER = "rendermanSearchpathShader";
 	public static final String RMAN_OUTPUT_DISPLAY_FORMAT = "rendermanOutputDisplayFormat";
+	public static final String RMAN_PREAMBLE = "rendermanPreamble";
     /**
      * 
      * @param ap
