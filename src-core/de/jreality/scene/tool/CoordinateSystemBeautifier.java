@@ -53,12 +53,10 @@ import de.jreality.scene.event.TransformationListener;
 
 public class CoordinateSystemBeautifier extends Tool {
 
-	transient List activationSlots = new LinkedList();
-	transient List usedSlots = new LinkedList();
+	private transient List usedSlots = new LinkedList();
 
 	//from RotateTool:
-	static InputSlot evolutionSlot = InputSlot.getDevice("TrackballTransformation");
-	static InputSlot camPath = InputSlot.getDevice("WorldToCamera");
+	private static InputSlot evolutionSlot = InputSlot.getDevice("TrackballTransformation");
 	
 	private CoordinateSystemFactory factory = null;;
 	private boolean initialized = false;
@@ -66,9 +64,7 @@ public class CoordinateSystemBeautifier extends Tool {
 	
 	public CoordinateSystemBeautifier(CoordinateSystemFactory factory) {
 		this.factory = factory;
-		
 		usedSlots.add(evolutionSlot);
-		usedSlots.add(camPath);  //not necessary
 	}
 
 	public void perform(ToolContext tc) {
@@ -99,8 +95,9 @@ public class CoordinateSystemBeautifier extends Tool {
 	}
 	
 
+	//always active
 	public List getActivationSlots() {
-		return activationSlots;
+		return Collections.EMPTY_LIST;
 	}
 
 	public List getCurrentSlots() {
