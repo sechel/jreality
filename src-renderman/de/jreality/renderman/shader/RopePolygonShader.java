@@ -60,7 +60,7 @@ public class RopePolygonShader extends DefaultPolygonShader {
         bandwidth = eap.getAttribute(name+"."+"bandwidth", .7);
         shadowwidth = eap.getAttribute(name+"."+"shadowwidth", .12);
         blendfactor = eap.getAttribute(name+"."+"blendfactor", 1.0);
-        gapalpha = eap.getAttribute(name+"."+"gapalpha", 1.0);
+        gapalpha = eap.getAttribute(name+"."+"gapalpha", 0.0);
         band1color =(Color) eap.getAttribute(name+"."+"band1color", band1color);
         band2color =(Color) eap.getAttribute(name+"."+"band2color", band2color);
         shadowcolor =(Color) eap.getAttribute(name+"."+"shadowcolor", shadowcolor);

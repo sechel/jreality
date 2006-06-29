@@ -77,7 +77,8 @@ public class Ri {
     
     public static  void begin(String name) {
         try {
-            w =new PrintWriter(new FileWriter(new File(name)));
+             w =new PrintWriter(new FileWriter(new File(name)));
+            
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

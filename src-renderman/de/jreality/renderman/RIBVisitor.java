@@ -155,34 +155,37 @@ public class RIBVisitor extends SceneGraphVisitor {
 		this.rendererType = rendererType;
 	}
     
+    boolean copyShader = false;
 	public void visit(SceneGraphComponent root, SceneGraphPath path, String name) {
         //SceneGraphPath path =SceneGraphPath.getFirstPathBetween(root,camera);
     	
           Camera camera =(Camera) path.getLastElement();
         this.name =name;
         double[] world2Camera =path.getInverseMatrix(null);
-        try {
-            File file = new File(name);
-            System.out.println("writing in  "+file);
-            file = new File(file.getParent(),"transformedpaintedplastic.sl");
-            System.out.println("checking on "+file+" exists "+file.exists());
-            if(!file.exists()) {
-               // file.createNewFile();
-            OutputStream os = new FileOutputStream(file);
-            InputStream is = getClass().getResourceAsStream("transformedpaintedplastic.sl");
-            
-            int c = 0;
-            while((c =is.read())!=-1) {
-                os.write(c);
-////                System.out.print((char)c);
-            }
-            os.close();
-            is.close();
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (copyShader)	{
+            try {
+                File file = new File(name);
+                System.out.println("writing in  "+file);
+                file = new File(file.getParent(),"transformedpaintedplastic.sl");
+                System.out.println("checking on "+file+" exists "+file.exists());
+                if(!file.exists()) {
+                   // file.createNewFile();
+                OutputStream os = new FileOutputStream(file);
+                InputStream is = getClass().getResourceAsStream("transformedpaintedplastic.sl");
+                
+                int c = 0;
+                while((c =is.read())!=-1) {
+                    os.write(c);
+////                    System.out.print((char)c);
+                }
+                os.close();
+                is.close();
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }        	
         }
         if(!name.endsWith(".rib"))
             name = name+".rib";
@@ -315,7 +318,7 @@ public class RIBVisitor extends SceneGraphVisitor {
     
     public void  visit(SceneGraphComponent c) {
     	if (!c.isVisible()) return;
-        Ri.comment(c.getName());        
+        Ri.comment("SceneGraphComponent "+c.getName());        
         EffectiveAppearance tmp =eAppearance;
         Appearance a = c.getAppearance();
         boolean attrblock = false;
