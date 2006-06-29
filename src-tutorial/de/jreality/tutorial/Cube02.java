@@ -41,7 +41,6 @@
 package de.jreality.tutorial;
 
 import de.jreality.geometry.IndexedLineSetFactory;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class Cube02 {
@@ -65,9 +64,6 @@ public class Cube02 {
     
     ilsf.update();
     
-    SceneGraphComponent sgc = new SceneGraphComponent();
-    sgc.setGeometry(ilsf.getIndexedLineSet());
-    
-    ViewerApp.display(sgc);
+    ViewerApp.display(ilsf.getIndexedLineSet());
   }
 }

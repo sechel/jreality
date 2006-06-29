@@ -41,7 +41,6 @@
 package de.jreality.tutorial;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class Cube04 {
@@ -70,9 +69,6 @@ public class Cube04 {
 
     ifsf.update();
     
-    SceneGraphComponent sgc = new SceneGraphComponent();
-    sgc.setGeometry(ifsf.getIndexedFaceSet());
-    
-    ViewerApp.display(sgc);
+    ViewerApp.display(ifsf.getIndexedFaceSet());
   }
 }

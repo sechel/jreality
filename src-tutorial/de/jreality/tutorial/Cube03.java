@@ -42,7 +42,6 @@ package de.jreality.tutorial;
 
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.geometry.IndexedLineSetUtility;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class Cube03 {
@@ -55,9 +54,6 @@ public class Cube03 {
     
     IndexedLineSet ils = IndexedLineSetUtility.createCurveFromPoints(vertices, true);
     
-    SceneGraphComponent sgc = new SceneGraphComponent();
-    sgc.setGeometry(ils);
-    
-    ViewerApp.display(sgc);
+    ViewerApp.display(ils);
   }
 }

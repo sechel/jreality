@@ -40,10 +40,11 @@
 
 package de.jreality.tutorial;
 
-import java.awt.Color;
-
 import de.jreality.geometry.IndexedFaceSetFactory;
+import java.awt.Color;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Appearance;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class Cube05 {
@@ -72,13 +73,17 @@ public class Cube05 {
     ifsf.setGenerateEdgesFromFaces( false );
     
     ifsf.setFaceColors(new Color[]{
-        Color.BLUE, Color.BLUE, Color.GREEN, Color.GREEN, Color.RED, Color.RED 
+      Color.BLUE, Color.BLUE, Color.GREEN, Color.GREEN, Color.RED, Color.RED 
     });
     
     ifsf.update();
     
     SceneGraphComponent sgc = new SceneGraphComponent();
     sgc.setGeometry(ifsf.getIndexedFaceSet());
+    
+    Appearance app = new Appearance();
+    app.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+    sgc.setAppearance(app);
     
     ViewerApp.display(sgc);
   }
