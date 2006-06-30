@@ -82,7 +82,7 @@ public class CommonAttributes {
 	public final static String BACK_FACE_CULLING_ENABLED = 		"backFaceCulling";
 	public final static String FORCE_RESIDENT_TEXTURES = "forceResidentTextures";
 	public final static String MANY_DISPLAY_LISTS = "manyDisplayLists";		// if true, one display list per scene graph path
-	public final static String ANY_DISPLAY_LISTS = "anyDisplayLists";		// if true, use no Display lists.
+	public final static String ANY_DISPLAY_LISTS = "anyDisplayLists";		// if true, use Display lists.
 	public static final String CLEAR_COLOR_BUFFER = "clearColorBuffer";
    // default geometry shader
 	public final static String FACE_DRAW = 		"showFaces";
@@ -90,7 +90,7 @@ public class CommonAttributes {
 	public final static String EDGE_DRAW = 		"showLines";
 	public final static boolean EDGE_DRAW_DEFAULT = true;
 	public final static String VERTEX_DRAW = 		"showPoints";
-	public final static boolean VERTEX_DRAW_DEFAULT = false;
+	public final static boolean VERTEX_DRAW_DEFAULT = true;
 	public final static String POINT = 		"point";
 	public final static String LINE = 		"line";
 	public final static String POLYGON = 	"polygon";

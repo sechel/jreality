@@ -79,10 +79,6 @@ public class DeviceKeyboard implements RawDevice, KeyListener {
     // maps InputDevices to Timers performing "keyReleased"
     private HashMap pendingReleases=new HashMap();
 
-    public DeviceKeyboard() {
-      new Exception().printStackTrace();
-    }
-    
     public void initialize(Viewer viewer) {
       if (viewer.hasViewingComponent()) {
         this.component = viewer.getViewingComponent();
