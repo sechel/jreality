@@ -481,7 +481,7 @@ public class PolygonPipeline
                         pi.setShader(null);
                         //TODO:check wether this is save
                         //vertexCount -= p.length * Polygon.VERTEX_LENGTH;
-                        //polygonCount--;
+                        polygonCount--;
                     }
                 }
                 return;
