@@ -167,7 +167,7 @@ public class AABBPickSystem implements PickSystem {
     }
     
     private boolean isPickable(Geometry g) {
-      Object o = g.getGeometryAttributes("pickable");
+      Object o = g.getGeometryAttributes(CommonAttributes.PICKABLE);
       return !(o != null && o.equals(Boolean.FALSE));
     }
 
