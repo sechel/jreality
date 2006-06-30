@@ -528,7 +528,7 @@ public class Primitives {
 		    
             factory.setGenerateFaceNormals(true);
             factory.setGenerateVertexNormals(true);
-        
+            factory.setGenerateTextureCoordinates(true);
 		    factory.update();
 		    
 		    return factory.getIndexedFaceSet();
