@@ -58,12 +58,14 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.logging.Level;
 
 import javax.swing.ImageIcon;
 
 import de.jreality.math.Matrix;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.DoubleArray;
+import de.jreality.util.LoggingSystem;
 
 /**
  * @author weissman
@@ -87,7 +89,7 @@ public class DeviceMouse implements RawDevice, MouseListener,
   static {
     try {
       robot = new Robot();
-    } catch (AWTException e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
     knownSources.add("left");
@@ -179,7 +181,11 @@ public class DeviceMouse implements RawDevice, MouseListener,
       ToolEvent evolutionEvent = new ToolEvent(DeviceMouse.this, slot, daEvolution);
       queue.addEvent(evolutionEvent);
       if (isCenter()) {
-        robot.mouseMove(centerX, centerY);
+        try {
+          robot.mouseMove(centerX, centerY);
+        } catch (Exception ex) {
+          LoggingSystem.getLogger(this).log(Level.CONFIG, "cannot use robot: ", ex);
+        }
       } else {
         lastX=e.getX();
         lastY=e.getY();
@@ -209,20 +215,20 @@ public class DeviceMouse implements RawDevice, MouseListener,
   }
 
   // e.getButton() doesn't work properly on 1-button mouse, such as MacOS laptops
-	public static int getRealButton(MouseEvent e)	{
-		int button = e.getButton();
-		if (button == 0)	{		// Linux!
-			int mods = e.getModifiersEx();
-			if ((mods & InputEvent.BUTTON1_DOWN_MASK) != 0)		button = 1;
-			else if ((mods & InputEvent.BUTTON2_DOWN_MASK) != 0)  button = 2;
-			else button = 3;
-		} else {					// Mac OS X Laptop (no 3-mouse button)!!
-			int mods = e.getModifiers();
-			if (e.isAltDown() && ((mods & InputEvent.BUTTON2_MASK) != 0) ) button = 2;
-			else if (button == 1 &&  ((mods & InputEvent.BUTTON3_MASK) != 0) ) button = 3;
-		}
-		return button;
-	}
+  public static int getRealButton(MouseEvent e) {
+    int button = e.getButton();
+    if (button == 0)  {   // Linux!
+      int mods = e.getModifiersEx();
+      if ((mods & InputEvent.BUTTON1_DOWN_MASK) != 0)   button = 1;
+      else if ((mods & InputEvent.BUTTON2_DOWN_MASK) != 0)  button = 2;
+      else button = 3;
+    } else {          // Mac OS X Laptop (no 3-mouse button)!!
+      int mods = e.getModifiers();
+      if (e.isAltDown() && ((mods & InputEvent.BUTTON2_MASK) != 0) ) button = 2;
+      else if (button == 1 &&  ((mods & InputEvent.BUTTON3_MASK) != 0) ) button = 3;
+    }
+    return button;
+  }
 
   private InputSlot findButton(MouseEvent e) {
     int button = getRealButton(e); //e.getButton();
@@ -311,18 +317,25 @@ public class DeviceMouse implements RawDevice, MouseListener,
     }
   }
   
-  public void installGrabs()
-  {
-    if (emptyCursor == null) {
-      ImageIcon emptyIcon = new ImageIcon(new byte[0]);
-      emptyCursor = component.getToolkit().createCustomCursor(emptyIcon.getImage(), new Point(0, 0), "emptyCursor");
+  public void installGrabs() {
+    try {
+      if (emptyCursor == null) {
+        ImageIcon emptyIcon = new ImageIcon(new byte[0]);
+        emptyCursor = component.getToolkit().createCustomCursor(emptyIcon.getImage(), new Point(0, 0), "emptyCursor");
+      }
+      component.setCursor(emptyCursor);
+    } catch (Exception e) {
+      LoggingSystem.getLogger(this).log(Level.WARNING, "cannot grab mouse", e);
     }
-    component.setCursor(emptyCursor);
   }
   
   public void uninstallGrabs()
   {
-    component.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+    try {
+      component.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+    } catch (Exception e) {
+      LoggingSystem.getLogger(this).log(Level.WARNING, "cannot grab mouse", e);
+    }
   }
 
 
