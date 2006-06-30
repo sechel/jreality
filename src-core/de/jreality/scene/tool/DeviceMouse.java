@@ -40,8 +40,17 @@
 
 package de.jreality.scene.tool;
 
+import java.awt.AWTException;
 import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.Robot;
+import java.awt.Toolkit;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -49,6 +58,8 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.HashMap;
 import java.util.HashSet;
+
+import javax.swing.ImageIcon;
 
 import de.jreality.math.Matrix;
 import de.jreality.scene.Viewer;
@@ -63,22 +74,34 @@ public class DeviceMouse implements RawDevice, MouseListener,
 
   private ToolEventQueue queue;
   private Component component;
-
+  
+  private boolean center;
+  private boolean sentCenter;
+  
+  private static Robot robot;
+  
+  private int lastX=-1, lastY=-1, centerX=200, centerY=200;
+  
   private HashMap usedSources = new HashMap();
   static HashSet knownSources = new HashSet();
   static {
+    try {
+      robot = new Robot();
+    } catch (AWTException e) {
+      e.printStackTrace();
+    }
     knownSources.add("left");
     knownSources.add("center");
     knownSources.add("right");
-    knownSources.add("left_shift");
-    knownSources.add("center_shift");
-    knownSources.add("right_shift");
     knownSources.add("axes");
+    knownSources.add("axesEvolution");
     knownSources.add("wheel_up");
     knownSources.add("wheel_down");
   }
   private Matrix axesMatrix = new Matrix();
+  private Matrix axesEvolutionMatrix = new Matrix();
   private DoubleArray da = new DoubleArray(axesMatrix.getArray());
+  private DoubleArray daEvolution = new DoubleArray(axesEvolutionMatrix.getArray());
 
   public void mouseClicked(MouseEvent e) {
   }
@@ -106,17 +129,62 @@ public class DeviceMouse implements RawDevice, MouseListener,
     mouseMoved(e);
   }
 
+  private Cursor emptyCursor;
   public void mouseMoved(MouseEvent e) {
     InputSlot slot = (InputSlot) usedSources.get("axes");
-    if (slot == null) return;
-    double xndc = -1. + 2. * e.getX() / component.getWidth();
-    double yndc = 1. - 2. * e.getY() / component.getHeight();
-
-    axesMatrix.setEntry(0, 3, xndc);
-    axesMatrix.setEntry(1, 3, yndc);
-    axesMatrix.setEntry(2, 3, -1);
-
-    queue.addEvent(new ToolEvent(DeviceMouse.this, slot, da));
+    if (slot != null) {
+      if (!isCenter()) {
+        double xndc = -1. + (2. * e.getX()) / component.getWidth();
+        double yndc = 1. - (2. * e.getY()) / component.getHeight();
+    
+        axesMatrix.setEntry(0, 3, xndc);
+        axesMatrix.setEntry(1, 3, yndc);
+        axesMatrix.setEntry(2, 3, -1);
+        queue.addEvent(new ToolEvent(DeviceMouse.this, slot, da));
+      } else if (!sentCenter) {
+        axesMatrix.setEntry(0, 3, 0);
+        axesMatrix.setEntry(1, 3, 0);
+        axesMatrix.setEntry(2, 3, -1);
+        queue.addEvent(new ToolEvent(DeviceMouse.this, slot, da));
+      }
+    }
+    slot = (InputSlot) usedSources.get("axesEvolution");
+    if (slot != null) {
+      if (lastX==-1) { lastX=e.getX(); lastY=e.getY(); return; }
+      
+      int x, y, w, h;
+      if (isCenter()) {
+        Point p = MouseInfo.getPointerInfo().getLocation();
+        x = p.x;
+        y = p.y;
+      } else { 
+        x = e.getX();
+        y = e.getY();
+      }
+      w = component.getWidth();
+      h = component.getHeight();
+      
+      int dx = x - lastX;
+      int dy = y - lastY;
+      
+      if (dx == 0 && dy == 0) return;
+      
+      double dxndc = (2. * dx) / w;
+      double dyndc = -(2. * dy) / h;
+  
+      axesEvolutionMatrix.setEntry(0, 3, dxndc);
+      axesEvolutionMatrix.setEntry(1, 3, dyndc);
+      axesEvolutionMatrix.setEntry(2, 3, -1);
+  
+      ToolEvent evolutionEvent = new ToolEvent(DeviceMouse.this, slot, daEvolution);
+      queue.addEvent(evolutionEvent);
+      if (isCenter()) {
+        robot.mouseMove(centerX, centerY);
+      } else {
+        lastX=e.getX();
+        lastY=e.getY();
+      }
+    }
   }
 
   public void mouseWheelMoved(MouseWheelEvent e) {
@@ -177,6 +245,17 @@ public class DeviceMouse implements RawDevice, MouseListener,
     component.addMouseListener(this);
     component.addMouseMotionListener(this);
     component.addMouseWheelListener(this);
+    component.addKeyListener(new KeyListener() {
+      public void keyTyped(KeyEvent e) {
+      }
+      public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_F11 || e.getKeyCode() == KeyEvent.VK_F10) {
+          setCenter(!isCenter());
+        }
+      }
+      public void keyReleased(KeyEvent e) {
+      }
+    });
   }
 
   public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
@@ -184,6 +263,11 @@ public class DeviceMouse implements RawDevice, MouseListener,
         throw new IllegalArgumentException("no such raw device");
     usedSources.put(rawDeviceName, inputDevice);
     if (rawDeviceName.equals("axes")) return new ToolEvent(this, inputDevice, new DoubleArray(new Matrix().getArray()));
+    if (rawDeviceName.equals("axesEvolution")) {
+      Matrix initM = new Matrix();
+      initM.setEntry(2, 3, -1);
+      return new ToolEvent(this, inputDevice, new DoubleArray(initM.getArray()));
+    }
     return new ToolEvent(this, inputDevice, AxisState.ORIGIN);
   }
 
@@ -209,5 +293,37 @@ public class DeviceMouse implements RawDevice, MouseListener,
   public String toString() {
     return "RawDevice: Mouse";
   }
+
+  public boolean isCenter() {
+    return center;
+  }
+
+  public void setCenter(boolean center) {
+    if (this.center != center) sentCenter = false;
+    this.center = center;
+    if (center) {
+      Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+      centerX=lastX=dim.width/2; centerY=lastY=dim.height/2;
+      robot.mouseMove(centerX, centerY);
+      installGrabs();
+    } else {
+      uninstallGrabs();
+    }
+  }
+  
+  public void installGrabs()
+  {
+    if (emptyCursor == null) {
+      ImageIcon emptyIcon = new ImageIcon(new byte[0]);
+      emptyCursor = component.getToolkit().createCustomCursor(emptyIcon.getImage(), new Point(0, 0), "emptyCursor");
+    }
+    component.setCursor(emptyCursor);
+  }
+  
+  public void uninstallGrabs()
+  {
+    component.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+  }
+
 
 }

@@ -62,8 +62,10 @@ public class ToolUpdateProxy {
   }
 
   void dispose() {
-    builder.dispose();
-    builder = null;
+    if (builder != null) {
+      builder.dispose();
+      builder = null;
+    }
   }
   
   void setSceneRoot(SceneGraphComponent comp) {

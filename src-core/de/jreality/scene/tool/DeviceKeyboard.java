@@ -79,6 +79,10 @@ public class DeviceKeyboard implements RawDevice, KeyListener {
     // maps InputDevices to Timers performing "keyReleased"
     private HashMap pendingReleases=new HashMap();
 
+    public DeviceKeyboard() {
+      new Exception().printStackTrace();
+    }
+    
     public void initialize(Viewer viewer) {
       if (viewer.hasViewingComponent()) {
         this.component = viewer.getViewingComponent();
@@ -111,7 +115,7 @@ public class DeviceKeyboard implements RawDevice, KeyListener {
             } 
             ToolEvent ev = new ToolEvent(this, id, AxisState.PRESSED);
             queue.addEvent(ev);
-            LoggingSystem.getLogger(this).fine("added key pressed ["+id+"] "+e.getWhen());
+            LoggingSystem.getLogger(this).fine(this.hashCode()+" added key pressed ["+id+"] "+e.getWhen());
         }
     }
     

@@ -63,9 +63,9 @@ public class VirtualExtractAxis implements VirtualDevice {
 	double gain = 1;
 	
 	public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
+    if ( index == -1 ) return null;
 		double newVal;
         newVal = gain * context.getTransformationMatrix(inSlot).getValueAt(index);
-		if ( index == -1 || Math.abs(lastVal - newVal) < Rn.TOLERANCE ) return null;
 		lastVal = newVal;
 		return new ToolEvent(context.getEvent().getSource(), outSlot, new AxisState(newVal));
 	}

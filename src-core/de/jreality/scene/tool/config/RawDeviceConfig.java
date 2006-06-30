@@ -42,8 +42,10 @@ package de.jreality.scene.tool.config;
 
 import java.beans.DefaultPersistenceDelegate;
 import java.beans.PersistenceDelegate;
+import java.util.logging.Level;
 
 import de.jreality.scene.tool.RawDevice;
+import de.jreality.util.LoggingSystem;
 
 
 /**
@@ -79,8 +81,13 @@ public class RawDeviceConfig {
     return deviceID + "["+rawDevice+"]";
   }
   
-  public RawDevice createDevice() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-    RawDevice dev = (RawDevice) Class.forName(rawDevice).newInstance();
-    return dev;
+  public RawDevice createDevice() throws InstantiationException {
+    try {
+      RawDevice dev = (RawDevice) Class.forName(rawDevice).newInstance();
+      return dev;
+    } catch (Throwable t) {
+      LoggingSystem.getLogger(this).log(Level.CONFIG, "cannot create raw device", t);
+      throw new InstantiationException("cannot create raw device:"+rawDevice);
+    }
   }
 }

@@ -66,7 +66,6 @@ public class VirtualCoupledAxis implements VirtualDevice {
         initialized = true;
         return new ToolEvent(context.getEvent().getSource(), out, AxisState.ORIGIN);
       }
-        ToolEvent e = context.getEvent();
         boolean state = context.getAxisState(in1).isPressed() && context.getAxisState(in2).isPressed();
         if (state != currentState) {
           currentState = state;
