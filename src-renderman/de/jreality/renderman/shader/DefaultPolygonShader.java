@@ -43,7 +43,6 @@ package de.jreality.renderman.shader;
 import java.awt.Color;
 import java.util.Map;
 
-import javax.media.opengl.GL;
 
 import de.jreality.renderman.RIBViewer;
 import de.jreality.renderman.RIBVisitor;
@@ -60,9 +59,9 @@ import de.jreality.shader.Texture2D;
 public class DefaultPolygonShader extends AbstractRendermanShader {
 
 	// maybe use these somedays for a two-sided shader
-	public static final int FRONT_AND_BACK = GL.GL_FRONT_AND_BACK;
-	public static final int FRONT = GL.GL_FRONT;
-	public static final int BACK = GL.GL_BACK;
+	//public static final int FRONT_AND_BACK = GL.GL_FRONT_AND_BACK;
+	//public static final int FRONT = GL.GL_FRONT;
+	//public static final int BACK = GL.GL_BACK;
 	
 		
 	static int count = 0;
