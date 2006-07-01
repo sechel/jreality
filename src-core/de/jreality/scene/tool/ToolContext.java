@@ -76,13 +76,6 @@ public interface ToolContext
     
     PickResult getCurrentPick();
     
-    /**
-     * Posts a new event to the tool event queue
-     * @param event
-     */
-    void send(ToolEvent event);
-    
-    
     public void schedule(Object key, AnimatorTask task);
     
     public void deschedule(Object key);

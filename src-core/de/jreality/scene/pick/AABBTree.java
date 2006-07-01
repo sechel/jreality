@@ -38,7 +38,7 @@
  */
 
 
-package de.jreality.scene.pick.bounding;
+package de.jreality.scene.pick;
 
 
 import java.awt.Color;
@@ -62,8 +62,6 @@ import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
-import de.jreality.scene.event.GeometryEvent;
-import de.jreality.scene.event.GeometryListener;
 import de.jreality.shader.CommonAttributes;
 
 /**
@@ -76,7 +74,7 @@ import de.jreality.shader.CommonAttributes;
 public class AABBTree {
 
     /** The max number of triangles in a leaf. */
-    public final int maxPerLeaf;
+    private final int maxPerLeaf;
 
     /** Left tree. */
     private AABBTree left;
@@ -85,7 +83,7 @@ public class AABBTree {
     private AABBTree right;
 
     /** Untransformed bounds of this tree. */
-    public AABB bounds;
+    private AABB bounds;
 
     /** Array of triangles this tree is indexing. */
     private TreePolygon[] tris;
@@ -95,18 +93,10 @@ public class AABBTree {
 
     private boolean debug;
     
-    private final double eps;
-    
-    private final boolean pickFaces;
-    private final boolean pickEdges;
-
-    private AABBTree(TreePolygon[] polygons, int maxPolysPerLeaf, int start, int end, boolean pickFaces, boolean pickEdges, double eps, boolean debug) {
+    private AABBTree(TreePolygon[] polygons, int maxPolysPerLeaf, int start, int end, boolean debug) {
       this.debug = debug;
       this.maxPerLeaf = maxPolysPerLeaf;
       this.tris = polygons;
-      this.pickFaces=pickFaces;
-      this.pickEdges=pickEdges;
-      this.eps = eps;
       createTree(start, end);
     }
     
@@ -128,53 +118,13 @@ public class AABBTree {
           tris[i].putCentriod();
           tris[i].index = i;
         }
-        AABBTree ret = new AABBTree(tris, maxPolysPerLeaf, 0, tris.length-1, true, false, 0, debug);
+        AABBTree ret = new AABBTree(tris, maxPolysPerLeaf, 0, tris.length-1, debug);
         for (int i = 0; i < tris.length; i++) {
             tris[i].centroid = null;
         }
         return ret;
     }
     
-    public static void constructAndRegister(final IndexedFaceSet ifs, final SceneGraphComponent displayComponent, final int maxPolys) {
-      constructAndRegister(ifs, displayComponent, maxPolys, false);
-    }
-
-    /**
-     * 
-     * @param ifs
-     * @param maxPolys
-     * @deprecated don't use this for dynamic geometries..
-     */
-    public static void constructAndRegister(final IndexedFaceSet ifs, final SceneGraphComponent displayComponent, final int maxPolys, final boolean debug) {
-      final AABBTree first = construct(ifs, maxPolys, debug);
-      ifs.setGeometryAttributes("AABBTree", first);
-      ifs.addGeometryListener(new GeometryListener() {
-        SceneGraphComponent displ;
-        {
-          if (displayComponent != null) {
-            displ = first.display();
-            displayComponent.addChild(displ);
-          }
-        }
-        public void geometryChanged(GeometryEvent ev) {
-          if (ev.getChangedVertexAttributes().contains(Attribute.COORDINATES)
-              || ev.getChangedFaceAttributes().contains(Attribute.INDICES)) {
-            final AABBTree newAABB = construct(ifs, maxPolys, debug);
-            if (displayComponent != null) {
-              if (displ != null) displayComponent.removeChild(displ);
-              displ = newAABB.display();
-              displayComponent.addChild(displ);
-            }
-            ev.enqueueWriter(new Runnable() {
-              public void run() {
-                ifs.setGeometryAttributes("AABBTree", newAABB);
-              }
-            });
-          }
-        }
-      });
-    }
-
     private static double[][][] getMeshAsPolygons(IndexedFaceSet faceSet) {
       int numFaces = faceSet.getNumFaces();
       double[][][] ret = new double[numFaces][][];
@@ -204,15 +154,13 @@ public class AABBTree {
         myStart = start;
         myEnd = end;
   			bounds = new AABB();
-        bounds.computeFromTris(tris, start, end, eps);
-        if (end - start < maxPerLeaf) {
-          if (pickEdges) bounds.computeFromEdge(tris[start].verts, eps);
-          return;
-        } else {
-            splitTris(start, end);
-						int half = (start + end) / 2;
-            this.left = new AABBTree(tris, maxPerLeaf, start, half, pickFaces, pickEdges, eps, debug);
-						if (half < end) this.right = new AABBTree(tris, maxPerLeaf, half + 1, end, pickFaces, pickEdges, eps, debug);
+        bounds.computeFromTris(tris, start, end);
+        if (end - start < maxPerLeaf) return;
+        else {
+          splitTris(start, end);
+					int half = (start + end) / 2;
+          this.left = new AABBTree(tris, maxPerLeaf, start, half, debug);
+					if (half < end) this.right = new AABBTree(tris, maxPerLeaf, half + 1, end, debug);
         }
     }
 
@@ -226,73 +174,44 @@ public class AABBTree {
      *            The arraylist to hold indexes of this OBBTree's triangle
      *            intersections.
      */
-    public void intersect(Matrix mat, double[] from, double[] dir, ArrayList hits) {
-      if (debug) System.out.println("intersect");
-      intersectImpl(mat, from, dir, hits, new AABB());
-    }
-    
-    private void intersectImpl(Matrix mat, double[] from, double[] dir, ArrayList hits, AABB worldBounds) {
-      bounds.transform(mat, worldBounds);
-      if (!worldBounds.intersects(from, dir)) {
-        boolean leaf = (left == null && right == null);
-        if (debug) System.out.println("Missed world bounds ["+(leaf?"leaf]":"no leaf]"));
-        if (debug && leaf) {
-          System.out.println("************");
-          System.out.println("Matrix:\n"+mat);
-          System.out.println("************");
-          System.out.println("Bounds:\n"+bounds);
-          System.out.println("************");
-          System.out.println("WorldBounds:\n"+worldBounds);
-          System.out.println("************");
-          System.out.println("************");
-        }
+    void intersect(double[] from, double[] dir, ArrayList hits) {
+      if (!bounds.intersects(from, dir)) {
         return;
       }
       if (left != null) {
-        left.intersectImpl(mat, from, dir, hits, worldBounds);
+        left.intersect(from, dir, hits);
       }
   
       if (right != null) {
-        right.intersectImpl(mat, from, dir, hits, worldBounds);
+        right.intersect(from, dir, hits);
       } else if (left == null) { // left == right == null
-        if (pickFaces) {
-          boolean hit = false;
-          TreePolygon tempt;
-          double[] tempVa, tempVb, tempVc;
-          for (int i = myStart; i <= myEnd; i++) {
-            tempt = tris[i];
-            poly: for (int j = 0; j < tempt.getNumTriangles(); j++) {
-              double[][] tri = tempt.getTriangle(j);
-              tempVa = mat.multiplyVector(tri[0]);
-              tempVb = mat.multiplyVector(tri[1]);
-              tempVc = mat.multiplyVector(tri[2]);
-              if (intersect(from, dir, tempVa, tempVb, tempVc)) {
-                double[] plane = P3.planeFromPoints(null, tempVa, tempVb, tempVc);
-                double[] pointWorld = P3.lineIntersectPlane(null, from,
-                    new double[] { dir[0], dir[1], dir[2], 0 }, plane);
-                if (sign(from, dir, pointWorld) == 1) {
-                  hits.add(new Object[]{pointWorld, new Integer(tempt.getIndex()),new Integer(j)});
-                  hit = true;
-                  break poly;
-                } else {
-                  if (debug) 
-                    System.out.println("negative hit!");
-                }
+        boolean hit = false;
+        TreePolygon tempt;
+        double[] tempVa, tempVb, tempVc;
+        for (int i = myStart; i <= myEnd; i++) {
+          tempt = tris[i];
+          poly: for (int j = 0; j < tempt.getNumTriangles(); j++) {
+            double[][] tri = tempt.getTriangle(j);
+            tempVa = tri[0];
+            tempVb = tri[1];
+            tempVc = tri[2];
+            if (intersect(from, dir, tempVa, tempVb, tempVc)) {
+              double[] plane = P3.planeFromPoints(null, tempVa, tempVb, tempVc);
+              double[] pointObject = P3.lineIntersectPlane(null, from,
+                  new double[] { dir[0], dir[1], dir[2], 0 }, plane);
+              if (sign(from, dir, pointObject) == 1) {
+                hits.add(new Object[]{pointObject, new Integer(tempt.getIndex()),new Integer(j)});
+                hit = true;
+                break poly;
+              } else {
+                if (debug) 
+                  System.out.println("negative hit!");
               }
             }
           }
-          if (debug) {
-            System.out.println("scanned polys: "+((hit)?"hit":"no hit"));
-          }
-        } else {
-          TreePolygon tp = tris[myStart];
-          if (pickEdges) {
-            // pick edges
-            hits.add(new int[]{tp.index, tp.subIndex});
-          } else {
-            // pick vertex
-            hits.add(new Integer(tp.getIndex()));
-          }
+        }
+        if (debug) {
+          System.out.println("scanned polys: "+((hit)?"hit":"no hit"));
         }
       }
     }
@@ -374,12 +293,7 @@ public class AABBTree {
      *            the end index of the triangle list.
      */
     private void sortZ(int start, int end) {
-      double[] tmp=null;
-        for (int i = start; i < end; i++) {
-            tmp = Rn.subtract(tmp, tris[i].centroid, bounds.center);
-            tris[i].projection = Rn.innerProduct(bounds.zAxis, tmp);
-        }
-        Arrays.sort(tris, start, end, new TreeCompare());
+      sort(start, end, 2);
     }
 
     /**
@@ -392,16 +306,10 @@ public class AABBTree {
      *            the end index of the triangle list.
      */
     private void sortY(int start, int end) {
-      double[] tmp=null;
-      for (int i = start; i < end; i++) {
-          tmp = Rn.subtract(tmp, tris[i].centroid, bounds.center);
-          tris[i].projection = Rn.innerProduct(bounds.yAxis, tmp);
-      }
-      Arrays.sort(tris, start, end, new TreeCompare());
-        Arrays.sort(tris, start, end, new TreeCompare());
+      sort(start, end, 1);
     }
 
-    /**
+   /**
      *
      * <code>sortX</code> sorts the x bounds of the tree.
      *
@@ -411,14 +319,27 @@ public class AABBTree {
      *            the end index of the triangle list.
      */
     private void sortX(int start, int end) {
-      double[] tmp=null;
-      for (int i = start; i < end; i++) {
-          tmp = Rn.subtract(tmp, tris[i].centroid, bounds.center);
-          tris[i].projection = Rn.innerProduct(bounds.xAxis, tmp);
-      }
-      Arrays.sort(tris, start, end, new TreeCompare());
-        Arrays.sort(tris, start, end, new TreeCompare());
+      sort(start, end, 0);
     }
+
+    /**
+    *
+    * <code>sort</code> sorts the bounds of the tree.
+    *
+    * @param start
+    *            the start index of the triangle list.
+    * @param end
+    *            the end index of the triangle list.
+    */
+   private void sort(int start, int end, int index) {
+     double[] tmp=null;
+     for (int i = start; i < end; i++) {
+         tmp = Rn.subtract(tmp, tris[i].centroid, bounds.center);
+         tris[i].projection = tmp[index];
+     }
+     Arrays.sort(tris, start, end, treeCompare);
+       Arrays.sort(tris, start, end, treeCompare);
+   }
 
     /**
      * This class is simply a container for a triangle.
@@ -479,7 +400,7 @@ public class AABBTree {
     /**
      * Class to sort TreeTriangle acording to projection.
      */
-    static class TreeCompare implements Comparator {
+    private Comparator treeCompare = new Comparator() {
 
         public int compare(Object o1, Object o2) {
             TreePolygon a = (TreePolygon) o1;
@@ -488,20 +409,20 @@ public class AABBTree {
             if (a.projection > b.projection) { return 1; }
             return 0;
         }
-    }
+    };
     
     public SceneGraphComponent display() {
-      SceneGraphComponent ret = new SceneGraphComponent();
-      Appearance a = new Appearance();
-      a.setAttribute(CommonAttributes.FACE_DRAW, false);
-      a.setAttribute(CommonAttributes.EDGE_DRAW, true);
-      a.setAttribute("lineShader."+CommonAttributes.TUBES_DRAW, true);
-      ret.setAppearance(a);
-      display(ret, Color.green, Color.green, true, 0.005, 1);
-      return ret;
+      SceneGraphComponent cmp = new SceneGraphComponent();
+      Appearance app = new Appearance();
+      app.setAttribute("showPoints", false);
+      app.setAttribute("showLines", true);
+      app.setAttribute("showFaces", false);
+      cmp.setAppearance(app);
+      display(cmp, Color.BLUE, Color.RED, true, 0.0001, 0.99);
+      return cmp;
     }
     
-    public void display(SceneGraphComponent parent, Color leftColor, Color rightColor, boolean isLeft, double radius, double factor) {
+    void display(SceneGraphComponent parent, Color leftColor, Color rightColor, boolean isLeft, double radius, double factor) {
       if (left != null) left.display(parent, leftColor.brighter(), rightColor.brighter(), true, radius*factor, factor);
       if (right != null) right.display(parent, leftColor.darker(), rightColor.darker(), false, radius*factor, factor);
       else if (left == null) { // leaf
@@ -509,7 +430,7 @@ public class AABBTree {
         double[] t = bounds.center;
         double[] s = bounds.extent;
         double[] z=new double[]{0,0,1};
-        Matrix m = MatrixBuilder.euclidean().translate(t).rotateFromTo(z, bounds.zAxis).scale(s[0], s[1], s[2]).getMatrix();
+        Matrix m = MatrixBuilder.euclidean().translate(t)./*rotateFromTo(z, bounds.zAxis).*/scale(s[0], s[1], s[2]).getMatrix();
         boolean printed = false;
         IndexedFaceSet box = new IndexedFaceSet();
         double[][] verts = new double[8][3];

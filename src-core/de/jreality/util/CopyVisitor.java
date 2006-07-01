@@ -38,7 +38,7 @@
  */
 
 
-package de.jreality.scene.proxy;
+package de.jreality.util;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -56,18 +56,24 @@ import de.jreality.scene.PointLight;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.proxy.ProxyFactory;
 
 /**
- * 
+ * Creates a copy of the visited SceneGraphNode. The copy may be accessed with getCopy().
+ * Note: The copied attributes do not include children (for SceneGraphComponents).
+ *  
+ * @author Steffen Weissmann
+ *
  */
-public class CopyFactory extends ProxyFactory {
+class CopyVisitor extends SceneGraphVisitor {
 
-    Object created;
+    SceneGraphNode created;
 
-    public Object getProxy() {
+    public SceneGraphNode getCopy() {
         return created;
     }
 

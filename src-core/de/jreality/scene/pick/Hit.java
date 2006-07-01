@@ -54,7 +54,7 @@ import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.util.LoggingSystem;
 
-public class Hit implements PickResult {
+class Hit implements PickResult {
   final SceneGraphPath path;
   final double[] pointWorld;
   final double[] pointObject;

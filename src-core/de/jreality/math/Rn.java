@@ -472,7 +472,8 @@ final public class Rn {
 	public static double innerProduct(double[]  u, double[]  v)	{
 		// assert dim check
 		if (u.length != v.length)	{
-			throw new IllegalArgumentException("Vectors must have same length");
+		  // allow inner product for homogenious and dehomogenized vectors
+      if (Math.abs(u.length-v.length) != 1) throw new IllegalArgumentException("Vectors must have same length");
 		}
 		double norm = 0.0;
 		int n = Math.min(u.length, v.length);

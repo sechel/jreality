@@ -59,9 +59,9 @@ import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.StorageModel;
-import de.jreality.scene.proxy.CopyFactory;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rectangle3D;
+import de.jreality.util.SceneGraphUtility;
 
 /*
   * 
@@ -371,9 +371,7 @@ public class GeometryUtility {
             }
             public void visit(PointSet oldi) {
             	// have to copy the geometry in case it is reused!
-            	   CopyFactory cf = new CopyFactory();
-            	   oldi.accept(cf);
-            	   PointSet i = (PointSet) cf.getProxy();
+            	   PointSet i = (PointSet) SceneGraphUtility.copy(oldi);
             	   //System.err.println("point set is "+i);
             	   if (i.getVertexAttributes(Attribute.COORDINATES) == null) return;
            	   double[][] v = i.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);

@@ -61,7 +61,6 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
-import de.jreality.scene.pick.bounding.AABBTree;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 
@@ -122,6 +121,7 @@ public class AABBPickSystem implements PickSystem {
     private ArrayList localHits=new ArrayList();
 
     private Matrix m=new Matrix();
+    private Matrix mInv=new Matrix();
     
     private double tubeRadius=CommonAttributes.TUBE_RADIUS_DEFAULT;
     private double pointRadius=CommonAttributes.POINT_RADIUS_DEFAULT;
@@ -130,6 +130,10 @@ public class AABBPickSystem implements PickSystem {
     private boolean pickPoints=false;
     private boolean pickEdges=true;
     private boolean pickFaces=true;
+
+    /* local ray */
+    private double[] from4;
+    private double[] dir4;
     
     public void visit(SceneGraphComponent c) {
       if (!c.isVisible()) return;
@@ -142,6 +146,12 @@ public class AABBPickSystem implements PickSystem {
         readEApp();
       }
       path.getMatrix(m.getArray());
+      path.getInverseMatrix(mInv.getArray());
+      
+      from4=mInv.multiplyVector(from);
+      dir4=mInv.multiplyVector(to);
+
+      
       c.childrenAccept(this);
       path.pop();
       if (c.getAppearance()!=null) {
@@ -207,7 +217,8 @@ public class AABBPickSystem implements PickSystem {
         BruteForcePicking.intersectPolygons(ifs, signature, path, from, to, localHits);
         AABBPickSystem.this.hits.addAll(localHits);
       } else {
-        tree.intersect(m, fromEuclidean, dirEuclidean, localHits);
+
+        tree.intersect(from4, dir4, localHits);
         extractFaceTreeHits(ifs);
       }
     }
@@ -237,7 +248,7 @@ public class AABBPickSystem implements PickSystem {
     private void extractFaceTreeHits(IndexedFaceSet ifs) {
       for (Iterator i = localHits.iterator(); i.hasNext(); ) {
         Object[] val = (Object[]) i.next();
-        double[] pointWorld = (double[])val[0];
+        double[] pointWorld = m.multiplyVector((double[])val[0]);
         int index = ((Integer)val[1]).intValue();
         int triIndex = ((Integer)val[2]).intValue(); //index of the first point of triangle in pt sequence of the polygon
         Hit h = new Hit(path.pushNew(ifs), pointWorld, Rn.euclideanDistance(fromEuclidean, pointWorld), 0, PickResult.PICK_TYPE_FACE, index,triIndex);

@@ -250,4 +250,9 @@ public class SceneGraphUtility {
       });
     }
 
+    public static SceneGraphNode copy(SceneGraphNode template) {
+      CopyVisitor cv = new CopyVisitor();
+      template.accept(cv);
+      return cv.getCopy();
+    }
 }

@@ -43,7 +43,7 @@ package de.jreality.util;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphVisitor;
-import de.jreality.scene.pick.bounding.AABBTree;
+import de.jreality.scene.pick.AABBTree;
 
 public class PickUtility {
 
