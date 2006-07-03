@@ -98,6 +98,9 @@ public class Ri {
         w.close();
     }
     
+	public static void readArchive(String foo) {
+		w.println("ReadArchive "+str(foo));
+	}
     public static void verbatim(String s)	{
     	w.println(s);
     }

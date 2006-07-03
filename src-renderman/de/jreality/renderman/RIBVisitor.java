@@ -228,7 +228,9 @@ public class RIBVisitor extends SceneGraphVisitor {
         System.out.println("ww "+width+" hh "+height);
         Ri.shadingRate(1f);        	
         foo = ap.getAttribute(CommonAttributes.RMAN_PREAMBLE);
-        if (foo != null && foo instanceof String)	Ri.verbatim((String) foo);
+        if (foo != null && foo instanceof String)	
+        	//Ri.verbatim((String) foo);
+        	Ri.readArchive((String) foo);
      
         map = new HashMap();
         float fov = (float) camera.getFieldOfView();
@@ -364,8 +366,9 @@ public class RIBVisitor extends SceneGraphVisitor {
         float colorAlpha = 1.0f;
         if(color!=Appearance.INHERITED) {
             float[] c =((Color)color).getRGBComponents(null);
-            Ri.color(new float[] {c[0],c[1],c[2]});
             if (c.length == 4) colorAlpha = c[3];
+            // Renderman colors are always "pre-multiplied" wrt alpha channel
+           Ri.color(new float[] {c[0]*colorAlpha,c[1]*colorAlpha,c[2]*colorAlpha});
         }
  
         // interpret rendering hints to decide whether to do object instancing
@@ -561,11 +564,12 @@ public class RIBVisitor extends SceneGraphVisitor {
                if (testBallStick)		{
              	    int sig = eAppearance.getAttribute("signature", Pn.EUCLIDEAN);
                     Color cc = (Color) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,  CommonAttributes.DIFFUSE_COLOR_DEFAULT );
-             	    if (g instanceof IndexedFaceSet)	{
+                    //TODO take into account  alpha channel of cc
+                    if (g instanceof IndexedFaceSet)	{
                     BallAndStickFactory bsf = new BallAndStickFactory(g);
                	  	bsf.setSignature(sig);
                	  	bsf.setStickRadius(r);
-                	  	bsf.setShowBalls(false);	// need to actually omit the balls
+                	bsf.setShowBalls(false);	// need to actually omit the balls
                	  	bsf.setStickColor(cc);
                	  	bsf.update();
                	  	visit(bsf.getSceneGraphComponent());
@@ -872,12 +876,14 @@ public class RIBVisitor extends SceneGraphVisitor {
 				// setting opacity as a uniform color parameter inside the geometry
 				if(color!=null){
 					float[] f=new float[3];
-					f[0]=color[0];f[1]=color[1];f[2]=color[2];
-					Ri.color(f);
+					float thisOpacity = 1.0f;
 					if (color.length==4){
-						f[0]=color[3]*currentOpacity;f[1]=color[3]*currentOpacity;f[2]=color[3]*currentOpacity;
+						thisOpacity = color[3]*currentOpacity;
+						f[0]=f[1] = f[2] = thisOpacity ;
 						Ri.opacity(f);
-						}	
+					}	
+					f[0]=thisOpacity*color[0];f[1]=thisOpacity*color[1];f[2]=thisOpacity*color[2];
+					Ri.color(f);
 				}
 			Ri.pointsPolygons(npolys,nvertices,vertices,map);
 			}
@@ -929,6 +935,7 @@ public class RIBVisitor extends SceneGraphVisitor {
                  Color cc = (Color) eAppearance.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,  CommonAttributes.DIFFUSE_COLOR_DEFAULT );
                  //DoubleArrayArray a=coord.toDoubleArrayArray();
                  double[][] a=coord.toDoubleArrayArray(null);
+                 // TODO pre-multiply color with current alpha
                  Ri.color(cc.getRGBColorComponents(null));
                double[] trns = new double[16];
                 for (int i= 0; i < n; i++) { 
