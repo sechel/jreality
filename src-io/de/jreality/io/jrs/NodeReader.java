@@ -156,7 +156,8 @@ class NodeReader extends SceneGraphVisitor {
     reader.moveUp();
     reader.moveDown();
     while (reader.hasMoreChildren()) {
-      src.addTool((Tool) readUnknown());
+      Tool tool = (Tool) readUnknown();
+      if (tool != null) src.addTool(tool);
     }
     reader.moveUp();
   }
