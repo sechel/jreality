@@ -127,8 +127,8 @@ import de.jreality.writer.WriterJRS;
 class ViewerAppOld
 {
   
-  public static final String ABOUT_MESSAGE="<html><body><center><b>jReality viewer</b></center><br>preview version</body></html>";
-  public static final String HELP_MESSAGE="<html>jReality viewer help<ul>"+"<li>left mouse - rotate</li>"+"<li>middle mouse - drag</li>"+"<li>CRTL + middle mouse - drag along view direction</li>"+"<li>e - encompass</li>"+"<li>BACKSPACE - toggle fullscreen</li>"+"</ul></html>";
+  private static final String ABOUT_MESSAGE="<html><body><center><b>jReality viewer</b></center><br>preview version</body></html>";
+  private static final String HELP_MESSAGE="<html>jReality viewer help<ul>"+"<li>left mouse - rotate</li>"+"<li>middle mouse - drag</li>"+"<li>CRTL + middle mouse - drag along view direction</li>"+"<li>e - encompass</li>"+"<li>BACKSPACE - toggle fullscreen</li>"+"</ul></html>";
   private static Viewer[] viewers;
   private static ViewerSwitch viewerSwitch;
   
@@ -145,13 +145,13 @@ class ViewerAppOld
   private SceneGraphPath emptyPick;
   private RenderTrigger renderTrigger = new RenderTrigger();
   
-  boolean autoRender=true;
+  private boolean autoRender = true;
   
-  JTerm jterm;
+  private JTerm jterm;
   private BshEvaluator bshEval;
   private SimpleAttributeSet infoStyle;
   
-  public static Object[] display(final SceneGraphNode n) {
+  static Object[] display(final SceneGraphNode n) {
     initAWT();
     final ViewerAppOld app;
     try {
@@ -173,7 +173,7 @@ class ViewerAppOld
     return ret;
   }
   
-  public static void main(String[] args) throws Exception
+  static void main(String[] args) throws Exception
   {
     initAWT();
     new ViewerAppOld();
@@ -189,11 +189,11 @@ class ViewerAppOld
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
   }
   
-  public ViewerAppOld(Viewer viewer) throws Exception	{
+  ViewerAppOld(Viewer viewer) throws Exception	{
     this(null, viewer);
   }
   
-  public ViewerAppOld() throws Exception {
+  ViewerAppOld() throws Exception {
     this(loadDefaultScene(), null);
   }
   
@@ -240,7 +240,7 @@ class ViewerAppOld
     sceneTree.setCellRenderer(new JTreeRenderer());
     uiFactory.setSceneTree(sceneTree);
     
-    createFrame(uiFactory.getContent());
+    createFrame(uiFactory.getViewer());
     initFrame();
     initTree();
     createMenu();
@@ -272,7 +272,7 @@ class ViewerAppOld
     frame.validate();
   }
   
-  boolean isFullScreen;
+  private boolean isFullScreen;
   private JMenuBar mb;
   
   void toggleFullScreen() {
@@ -280,13 +280,13 @@ class ViewerAppOld
     handleFullScreen(isFullScreen, (Frame) frame,  currViewer.getViewingComponent());
     if (!isFullScreen) {
       frame.setJMenuBar(mb);
-      frame.getContentPane().add(uiFactory.getContent());
+      frame.getContentPane().add(uiFactory.getViewer());
       initTree();
     }
     currViewer.render();
   }
   
-  public static void handleFullScreen(boolean isFullScreen, Frame frame, Component c)	{
+  static void handleFullScreen(boolean isFullScreen, Frame frame, Component c)	{
     if(isFullScreen) {
       frame.dispose();
       frame.setUndecorated(true);
@@ -864,7 +864,7 @@ class ViewerAppOld
     return (Viewer)Class.forName(viewer).newInstance();
   }
   
-  public ToolSystemViewer getCurrViewer() {
+  ToolSystemViewer getCurrViewer() {
     return currViewer;
   }
   
