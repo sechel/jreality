@@ -71,19 +71,24 @@ import de.jreality.shader.CommonAttributes;
  * the children of the given SceneGraphComponent.
  * <p>
  * Use the factory as following:<br>
- * <i>SceneGraphCompontent component;<br>
- * [...]<br>
- * CoordinateSystemFactory factory = new CoordinateSystemFactory(component);<br>
- * factory.showAxes(false);<br>
- * factory.showBox(true);<br>
- * factory.beautify(true);<br>
- * [more properties]</i>
+ * <code><b><pre>
+ * SceneGraphCompontent component;
+ * [...]
+ * CoordinateSystemFactory factory = new CoordinateSystemFactory(component);</pre></b></code>
+ * Above line creates the coordinate system using default properties and adds it to the scene.<br>
+ * You can change properties afterwards:
+ * <code><b><pre>
+ * factory.showAxes(false);
+ * factory.showBox(true);
+ * factory.beautify(true);
+ * [setting more properties]
+ * </pre></b></code>
  * <p>
  * The coordinate system may be removed from the SceneGraph by<br>
- * <i>component.removeChild(factory.getCoordinateSystem())</i>;
+ * <code><b><pre>component.removeChild(factory.getCoordinateSystem());</pre></b></code>
  * 
  * 
- * @author Martin Sommer
+ * @author msommer
  */
 
 public class CoordinateSystemFactory {
