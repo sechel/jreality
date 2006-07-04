@@ -67,7 +67,7 @@ class UIFactory {
   private boolean attachBeanShell = false;  //default
   
 
-  Component getContent() {
+  protected Component getViewer() {
     if (!attachNavigator && !attachBeanShell)
       return viewer;
     
@@ -103,7 +103,7 @@ class UIFactory {
   
   
   //used in ViewerAppOld
-  JScrollPane scroll(Component comp)
+  protected JScrollPane scroll(Component comp)
   {
     JScrollPane scroll = new JScrollPane(comp);
     scroll.setBorder(emptyBorder);
@@ -111,40 +111,37 @@ class UIFactory {
   }
 
   
-  void setViewer(Component component) {
+  protected void setViewer(Component component) {
     viewer = component;
   }
+
   
-  Component getViewer() {
-    return viewer;
-  }
-  
-  void setBeanShell(Component component) {
+  protected void setBeanShell(Component component) {
     beanShell =component;
   }
 
 
-  void setInspector(JComponent component) {
+  protected void setInspector(JComponent component) {
     component.setBorder(BorderFactory.createEmptyBorder(1,1,1,1));
     inspector = component;
   }
 
-  void setSceneTree(JTree sceneTree) {
+  protected void setSceneTree(JTree sceneTree) {
     this.sceneTree = sceneTree;
   }
   
   
   //for ViewerAppOld
-  JTree getSceneTree() {
+  protected JTree getSceneTree() {
     return sceneTree;
   }
   
   
-  void setAttachNavigator(boolean b) {
+  protected void setAttachNavigator(boolean b) {
     attachNavigator = b;
   }
 
-  void setAttachBeanShell(boolean b) {
+  protected void setAttachBeanShell(boolean b) {
     attachBeanShell = b;
   }
 
