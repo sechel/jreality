@@ -41,8 +41,6 @@
 package de.jreality.ui.viewerapp;
 
 import java.awt.Component;
-import java.awt.Container;
-
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
@@ -50,99 +48,104 @@ import javax.swing.JSplitPane;
 import javax.swing.JTree;
 import javax.swing.border.Border;
 
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.treeview.JTreeRenderer;
-import de.jreality.ui.treeview.SceneTreeModel;
+
+
 
 /**
  * TODO: comment UIFactory
  */
-public class UIFactory
-{
-  private SceneGraphComponent root;
-  private Component viewer;
-  private Component console;
-  private Component inspector;
-  final Border emptyBorder=BorderFactory.createEmptyBorder();
-  JTree sceneTree;
-
-  JSplitPane content;
+class UIFactory {
   
-  Container createViewerContent()
-  {
-    JSplitPane main = createLHS();
-    content=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-      main, createViewerPanel());
-    content.setContinuousLayout(true);
-    content.setDividerLocation(260);
-    content.setOneTouchExpandable(true);
-    return content;
-  }
+  
+  private Component viewer;
+  private Component beanShell;
+  private Component inspector;
+  private JTree sceneTree;
+  private final Border emptyBorder=BorderFactory.createEmptyBorder();
+  
+  private boolean attachNavigator = false;  //default
+  private boolean attachBeanShell = false;  //default
+  
 
-  private JSplitPane createLHS() {
-    JSplitPane main=new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-        createNavigation(), createInspectorPanel());
-      main.setContinuousLayout(true);
-      main.setResizeWeight(.1);
-      return main;
-  }
-
-  Component createNavigation()
-  {
-    sceneTree=new JTree();
-    SceneTreeModel model = new SceneTreeModel(root);
-    sceneTree.setModel(model);
-    sceneTree.setCellRenderer(new JTreeRenderer());
-    return scroll(sceneTree);
-  }
-
-  Component createViewerPanel()
-  {
-    JSplitPane main=new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-        viewer, scroll(console));
-
-    main.setContinuousLayout(true);
-    main.setOneTouchExpandable(true);
+  Component getContent() {
+    if (!attachNavigator && !attachBeanShell)
+      return viewer;
     
-    main.setResizeWeight(.01);
+    Component right = viewer;
+    if (attachBeanShell) {
+      JSplitPane jsp = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+          viewer, scroll(beanShell));
+      jsp.setContinuousLayout(true);
+      jsp.setOneTouchExpandable(true);
+      jsp.setResizeWeight(.01);
+      jsp.setDividerLocation(420);
+      jsp.setDividerLocation(Integer.MAX_VALUE);
+      right = jsp;
+    }
     
-    main.setDividerLocation(420);
-    main.setDividerLocation(Integer.MAX_VALUE);
-    return main;
-  }
+    if (attachNavigator) {
+      JSplitPane left = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+          scroll(sceneTree), scroll(inspector));
+      left.setContinuousLayout(true);
+      left.setResizeWeight(.1);
+      
+      JSplitPane content = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, 
+          left, right);
+      content.setContinuousLayout(true);
+      content.setOneTouchExpandable(true);
+      content.setDividerLocation(260);
+      
+      return content;
+    }
 
-  Component createInspectorPanel()
-  {
-    JScrollPane scroll = scroll(inspector);
-    return scroll;
+    return right;
   }
-
-  JScrollPane scroll(Component tree)
+  
+  
+  //used in ViewerAppOld
+  JScrollPane scroll(Component comp)
   {
-    JScrollPane scroll=new JScrollPane(tree);
+    JScrollPane scroll = new JScrollPane(comp);
     scroll.setBorder(emptyBorder);
     return scroll;
   }
 
-  public void setViewer(Component component)
-  {
-    viewer=component;
+  
+  void setViewer(Component component) {
+    viewer = component;
+  }
+  
+  Component getViewer() {
+    return viewer;
+  }
+  
+  void setBeanShell(Component component) {
+    beanShell =component;
   }
 
-  public void setConsole(Component component)
-  {
-    console=component;
-  }
 
-  public void setRoot(SceneGraphComponent component)
-  {
-    root= component;
-  }
-
-  public void setInspector(JComponent component)
-  {
+  void setInspector(JComponent component) {
     component.setBorder(BorderFactory.createEmptyBorder(1,1,1,1));
-    inspector= component;
+    inspector = component;
+  }
+
+  void setSceneTree(JTree sceneTree) {
+    this.sceneTree = sceneTree;
+  }
+  
+  
+  //for ViewerAppOld
+  JTree getSceneTree() {
+    return sceneTree;
+  }
+  
+  
+  void setAttachNavigator(boolean b) {
+    attachNavigator = b;
+  }
+
+  void setAttachBeanShell(boolean b) {
+    attachBeanShell = b;
   }
 
 }
