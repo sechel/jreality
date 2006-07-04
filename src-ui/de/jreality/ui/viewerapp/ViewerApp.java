@@ -82,7 +82,24 @@ import de.jreality.util.RenderTrigger;
 import de.jreality.util.ViewerSwitch;
 
 
-
+/**
+ * Factory for the jReality Viewer application, which displays a {@link Geometry} or a {@link SceneGraphComponent}.<br>
+ * Use the factory as following:<br>
+ * <code><b><pre>
+ * SceneGraphComponent node;
+ * //or
+ * Geometry node;
+ * [...]<br>
+ * ViewerApp viewer = new ViewerApp(node);
+ * viewer.setAttachNavigator(true);
+ * viewer.setAttachBeanShell(false);
+ * [setting more properties]<br>
+ * viewer.update();
+ * viewer.display();
+ * </pre></b></code>
+ * 
+ * @author msommer
+ */
 public class ViewerApp {
   
   private SceneGraphNode displayedNode;  //the node which is displayed in viewer
@@ -110,13 +127,14 @@ public class ViewerApp {
   
 
   /**
-   * Loads the default scene and includes specified SceneGraphComponent or Geometry.
-   * @param node the node (SceneGraphComponent or Geometry) which is displayed in the viewer
+   * constructor
+   * @param node the SceneGraphNode (SceneGraphComponent or Geometry) which is displayed in the viewer
    */
-  public ViewerApp(final SceneGraphNode node) {
+  public ViewerApp(SceneGraphNode node) {
 
-    if (!(node instanceof Geometry) && !(node instanceof SceneGraphComponent))
-      throw new IllegalArgumentException("Only Geometry or SceneGraphComponent allowed!");
+    if (node != null)  //create default scene if null
+      if (!(node instanceof Geometry) && !(node instanceof SceneGraphComponent))
+        throw new IllegalArgumentException("Only Geometry or SceneGraphComponent allowed!");
     
     displayedNode = node;
     
@@ -131,7 +149,8 @@ public class ViewerApp {
     initFrame();
   }
   
-  
+
+//  NOT WORKING
 //  /**
 //   * Copy constructor.
 //   */
@@ -143,7 +162,7 @@ public class ViewerApp {
   
   
   /**
-   * Display scene.
+   * display the scene
    */
   public void display() {
 
@@ -183,7 +202,7 @@ public class ViewerApp {
   
   
   /**
-   * Update frame (including viewer, properties and layout).
+   * Update the frame (including viewer, properties and layout).
    */
   public void update() {
     
@@ -199,7 +218,7 @@ public class ViewerApp {
   
   
   /**
-   * Set general properties of UI 
+   * Set general properties of UI. 
    */
   private void initAWT() {
     try {
@@ -209,7 +228,9 @@ public class ViewerApp {
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
   }
 
-  
+  /**
+   * Init frame properties.
+   */
   private void initFrame() {
     
     frame = new JFrame("jReality Viewer");
@@ -241,7 +262,7 @@ public class ViewerApp {
   
   
   /**
-   * Set up the viewer depending on which display method was chosen.<br>
+   * Set up the viewer depending on chosen properties.<br>
    * (Creates ToolSystemViewer, Navigator, BeanShell and UIFactory.)
    * @param sc the scene to load
    */  
@@ -283,15 +304,17 @@ public class ViewerApp {
     //renderTrigger.forceRender();
     
     //add node to this scene depending on its type
-    final SceneGraphNode node = displayedNode;
-    node.accept(new SceneGraphVisitor() {
-      public void visit(SceneGraphComponent sc) {
-        scene.addChild(sc);
-      }
-      public void visit(Geometry g) {
-        scene.setGeometry(g);
-      }
-    });
+    if (displayedNode != null) {  //show scene even if displayedNode=null
+      final SceneGraphNode node = displayedNode;
+      node.accept(new SceneGraphVisitor() {
+        public void visit(SceneGraphComponent sc) {
+          scene.addChild(sc);
+        }
+        public void visit(Geometry g) {
+          scene.setGeometry(g);
+        }
+      });
+    }
     
     //set up bshEval, jterm, infoStyle and uiFactory.beanShell
     //call before setting up navigator
@@ -340,7 +363,9 @@ public class ViewerApp {
   }
  
   
-  
+  /**
+   * Set up the BeanShell.
+   */
   private void setupBeanShell() {
     
     bshEval = new BshEvaluator();
@@ -387,6 +412,9 @@ public class ViewerApp {
   }
   
   
+  /**
+   * Set up the navigator (sceneTree and inspector).
+   */
   private void setupNavigator() {
     
     inspector = new InspectorPanel();
@@ -445,34 +473,60 @@ public class ViewerApp {
   }
 
   
+  /**
+   * Use to attach a navigator (sceneTree and inspector) to the viewer.
+   * @param b true iff navigator is to be attached
+   */
   public void setAttachNavigator(boolean b) {
     attachNavigator = b;
   }
 
+  /**
+   * Use to attach a bean shell to the viewer. 
+   * @param b true iff bean shell is to be attached
+   */
   public void setAttachBeanShell(boolean b) {
     attachBeanShell = b;
   }
   
+  /**
+   * Get current ToolSystemViewer.
+   * @return the viewer
+   */
   public ToolSystemViewer getCurrentViewer() {
     return currViewer;
   }
   
+  /**
+   * Get the frame containing the viewer.
+   * @return the frame
+   */
   public Frame getFrame() {
     return frame;
   }
 
+  /**
+   * Get the viewer component displaying the scene.
+   * @return the viewer component
+   */
   public Component getViewerComponent() {
     return uiFactory.getViewer();
   }
 
-//  public boolean isAttachBeanShell() {
-//    return attachBeanShell;
-//  }
-//
-//  public boolean isAttachNavigator() {
-//    return attachNavigator;
-//  }
-//
+  /**
+   * Returns true iff a navigator is attached to the viewer.
+   */
+  public boolean isAttachBeanShell() {
+    return attachBeanShell;
+  }
+
+  /**
+   * Returns true iff a bean shell is attached to the viewer. 
+   */
+  public boolean isAttachNavigator() {
+    return attachNavigator;
+  }
+
 //  public SceneGraphNode getDisplayedNode() {
 //    return displayedNode;
 //  }
