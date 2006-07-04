@@ -43,7 +43,6 @@ package de.jreality.ui.viewerapp;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.beans.Beans;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
@@ -105,7 +104,6 @@ public class ViewerApp {
   private SceneGraphNode displayedNode;  //the node which is displayed in viewer
   
   private UIFactory uiFactory;  //frame layout factory depending on viewer
-  private JFrame frame;  //the frame containing viewer and accessories
   
   private RenderTrigger renderTrigger = new RenderTrigger();
   private static Viewer[] viewers;  //containing possible viewers (jogl, soft, portal)
@@ -127,8 +125,7 @@ public class ViewerApp {
   
 
   /**
-   * constructor
-   * @param node the SceneGraphNode (SceneGraphComponent or Geometry) which is displayed in the viewer
+   * @param node the SceneGraphNode (SceneGraphComponent or Geometry) to be displayed in the viewer
    */
   public ViewerApp(SceneGraphNode node) {
 
@@ -143,66 +140,68 @@ public class ViewerApp {
     if (autoRenderProp.equalsIgnoreCase("false")) {
       autoRender = false;
     }
-    
-    //set general properties of UI and init frame
-    initAWT();
-    initFrame();
   }
-  
-
-//  NOT WORKING
-//  /**
-//   * Copy constructor.
-//   */
-//  public ViewerApp(ViewerApp app) {
-//    this(app.getDisplayedNode());
-//    setAttachNavigator(app.isAttachNavigator());
-//    setAttachBeanShell(app.isAttachBeanShell());
-//  }
   
   
   /**
-   * display the scene
+   * Displays the scene in a JFrame.
    */
   public void display() {
-
+    
+    Component content = getViewerComponent();
+    
+    //set general properties of UI
+    try {
+      UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+    } catch (Exception e) {}
+    System.setProperty("sun.awt.noerasebackground", "true");
+    JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+    
+    //init frame
+    JFrame frame = new JFrame("jReality Viewer");
+    if (!Beans.isDesignTime()) 
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    
+    Dimension size = frame.getToolkit().getScreenSize();
+    size.width*=.7;
+    size.height*=.7;
+    frame.setSize(size);
+    
+    //set content of frame
+    frame.getContentPane().add(content);
+    frame.validate();
     frame.setVisible(true);
   }
   
  
-//  public static ViewerApp display(SceneGraphNode n) {
-//    
-//    ViewerApp app = new ViewerApp(n);
-//    app.setAttachNavigator(false);
-//    app.setAttachBeanShell(false);
-//    app.update();
-//    app.display();
-//    
-//    return app;
-//  }
+  /**
+   * Displays a specified SceneGraphComponent or Geometry using the jReality viewer.
+   * @param node the SceneGraphNode (SceneGraphComponent or Geometry) to be displayed in the viewer
+   * @return the ViewerApp factory instantiated to display the node
+   */
+  public static ViewerApp display(SceneGraphNode node) {
+    
+    ViewerApp app = new ViewerApp(node);
+    app.setAttachNavigator(false);
+    app.setAttachBeanShell(false);
+    app.update();
+    app.display();
+    
+    return app;
+  }
 
   
-  //calls ViewerAppOld.display()
-  public static void display(SceneGraphNode n) {
+  /**
+   * Calls ViewerAppOld.display(), use if menu is needed.
+   */
+  public static void displayOld(SceneGraphNode node) {
     
-    ViewerAppOld.display(n);
+    ViewerAppOld.display(node);
   }
   
   
-//  public static ViewerApp displayFull(SceneGraphNode n) {
-//    
-//    ViewerApp app = new ViewerApp(n);
-//    app.setAttachNavigator(true);
-//    app.setAttachBeanShell(true);
-//    app.update();
-//    app.display();
-//    
-//    return app;
-//  }
-  
-  
   /**
-   * Update the frame (including viewer, properties and layout).
+   * Update the factory (needs to be invoked before calling display or getter methods). 
    */
   public void update() {
     
@@ -212,38 +211,9 @@ public class ViewerApp {
     
     uiFactory.setAttachNavigator(attachNavigator);
     uiFactory.setAttachBeanShell(attachBeanShell);
-    frame.getContentPane().add(uiFactory.getContent());
-    frame.validate();
   }
   
-  
-  /**
-   * Set general properties of UI. 
-   */
-  private void initAWT() {
-    try {
-      UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-    } catch (Exception e) {}
-    System.setProperty("sun.awt.noerasebackground", "true");
-    JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-  }
 
-  /**
-   * Init frame properties.
-   */
-  private void initFrame() {
-    
-    frame = new JFrame("jReality Viewer");
-    if (!Beans.isDesignTime()) 
-      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    
-    Dimension size = frame.getToolkit().getScreenSize();
-    size.width*=.7;
-    size.height*=.7;
-    frame.setSize(size);
-  }
-  
-  
   /**
    * Get the default Scene depending on the environment (desktop or portal).
    * @return the default scene
@@ -481,6 +451,7 @@ public class ViewerApp {
     attachNavigator = b;
   }
 
+  
   /**
    * Use to attach a bean shell to the viewer. 
    * @param b true iff bean shell is to be attached
@@ -488,31 +459,32 @@ public class ViewerApp {
   public void setAttachBeanShell(boolean b) {
     attachBeanShell = b;
   }
+
   
   /**
    * Get current ToolSystemViewer.
    * @return the viewer
    */
   public ToolSystemViewer getCurrentViewer() {
+    if (currViewer == null)
+      throw new UnsupportedOperationException("No viewer instantiated, call update()!");
+    
     return currViewer;
   }
   
-  /**
-   * Get the frame containing the viewer.
-   * @return the frame
-   */
-  public Frame getFrame() {
-    return frame;
-  }
 
   /**
-   * Get the viewer component displaying the scene.
+   * Get the viewer as a component.
    * @return the viewer component
    */
   public Component getViewerComponent() {
+    if (uiFactory == null)
+      throw new UnsupportedOperationException("No viewer instantiated, call update()!");
+    
     return uiFactory.getViewer();
   }
-
+  
+   
   /**
    * Returns true iff a navigator is attached to the viewer.
    */
@@ -520,6 +492,7 @@ public class ViewerApp {
     return attachBeanShell;
   }
 
+  
   /**
    * Returns true iff a bean shell is attached to the viewer. 
    */
@@ -527,7 +500,4 @@ public class ViewerApp {
     return attachNavigator;
   }
 
-//  public SceneGraphNode getDisplayedNode() {
-//    return displayedNode;
-//  }
 }
