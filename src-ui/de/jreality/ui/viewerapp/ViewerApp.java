@@ -151,33 +151,35 @@ public class ViewerApp {
   }
   
  
-  public static ViewerApp display(SceneGraphNode n) {
-    
-    ViewerApp app = new ViewerApp(n);
-    app.setAttachNavigator(false);
-    app.setAttachBeanShell(false);
-    app.update();
-    app.display();
-    
-    return app;
-  }
+//  public static ViewerApp display(SceneGraphNode n) {
+//    
+//    ViewerApp app = new ViewerApp(n);
+//    app.setAttachNavigator(false);
+//    app.setAttachBeanShell(false);
+//    app.update();
+//    app.display();
+//    
+//    return app;
+//  }
 
+  
   //calls ViewerAppOld.display()
-  public static void displayOld(SceneGraphNode n) {
+  public static void display(SceneGraphNode n) {
     
     ViewerAppOld.display(n);
   }
   
-  public static ViewerApp displayFull(SceneGraphNode n) {
-    
-    ViewerApp app = new ViewerApp(n);
-    app.setAttachNavigator(true);
-    app.setAttachBeanShell(true);
-    app.update();
-    app.display();
-    
-    return app;
-  }
+  
+//  public static ViewerApp displayFull(SceneGraphNode n) {
+//    
+//    ViewerApp app = new ViewerApp(n);
+//    app.setAttachNavigator(true);
+//    app.setAttachBeanShell(true);
+//    app.update();
+//    app.display();
+//    
+//    return app;
+//  }
   
   
   /**
