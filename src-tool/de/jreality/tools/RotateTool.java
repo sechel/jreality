@@ -153,21 +153,16 @@ public class RotateTool extends AbstractTool {
         Matrix e = new Matrix(evolution);
         Matrix cen = new Matrix(center); 
         SceneGraphComponent c = comp;
-        double t=System.currentTimeMillis();
         public boolean run(double time, double dt) {
-          //System.out.println("dt="+dt);
-          if (System.currentTimeMillis()-t < 12) return true;
           if (updateCenter) cen = getCenter(c);
           Matrix m=new Matrix(c.getTransformation().getMatrix());
     		  m.multiplyOnRight(cen);
     		  m.multiplyOnRight(e);
     		  m.multiplyOnRight(cen.getInverse());
     		  m.assignTo(c.getTransformation());
-          t=System.currentTimeMillis();
           return true;
         }
       };
-      System.out.println("scheduling animation");
       AnimatorTool.getInstance().schedule(comp, task);
     }
   }

@@ -86,12 +86,14 @@ public class ToolEventQueue {
     }
 
     private volatile boolean started = false;
+    private Thread thread = new Thread(eventThread);
+    {
+      thread.setName("jReality ToolSystem EventQueue");
+    }
     void start() {
       if (started) throw new IllegalStateException("already started");
       started = true;
-      Thread myThread = new Thread(eventThread);
-      myThread.setName("jReality ToolSystem EventQueue");
-      myThread.start();
+      thread.start();
     }
     
     /**
@@ -136,7 +138,13 @@ public class ToolEventQueue {
         running = false;
         synchronized (mutex) {
             mutex.notifyAll();
+        }
+        synchronized (mutex) {
             queue.clear();
         }
+    }
+
+    public Thread getThread() {
+      return thread;
     }
 }

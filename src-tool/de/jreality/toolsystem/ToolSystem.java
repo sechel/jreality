@@ -75,7 +75,7 @@ import de.jreality.util.RenderTrigger;
  */
 public class ToolSystem implements ToolEventReceiver {
 
-  boolean synchRender = true;
+  boolean synchRender = false;
   private RenderTrigger renderTrigger = new RenderTrigger(!synchRender);
   
   private final LinkedList compQueue = new LinkedList();
@@ -209,7 +209,7 @@ public class ToolSystem implements ToolEventReceiver {
     // register animator
     SceneGraphPath rootPath = new SceneGraphPath();
     rootPath.push(viewer.getSceneRoot());
-    addTool(AnimatorTool.getInstance(), rootPath);
+    addTool(AnimatorTool.getInstance(eventQueue.getThread()), rootPath);
     if (emptyPickPath.getLength() == 0) {
       emptyPickPath.push(viewer.getSceneRoot());
     }
@@ -226,13 +226,12 @@ public class ToolSystem implements ToolEventReceiver {
     if (synchRender) renderTrigger.startCollect();
     synchronized (mutex) {
     	executing=true;
-      if (event.getInputSlot() == InputSlot.getDevice("SystemTime")) {
-        int dt = (int) (System.currentTimeMillis()-event.getTimeStamp());
-        if (dt > 5) {
-          event.axis=new AxisState(event.getAxisState().intValue()+dt);
-          System.out.println("dt was "+dt);
-        }
-      }
+//      if (event.getInputSlot() == InputSlot.getDevice("SystemTime")) {
+//        int dt = (int) (System.currentTimeMillis()-event.getTimeStamp());
+//        if (dt > 1) {
+//          event.axis=new AxisState(event.getAxisState().intValue()+dt);
+//        }
+//      }
 	    compQueue.add(event);
       int itarCnt=0;
 	    do {
@@ -487,6 +486,8 @@ private SceneGraphPath avatarPath;
   }
 
   public void dispose() {
+    renderTrigger.removeSceneGraphComponent(viewer.getSceneRoot());
+    renderTrigger.removeViewer(viewer);
     eventQueue.dispose();
     deviceManager.dispose();
     updater.dispose();

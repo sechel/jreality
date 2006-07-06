@@ -42,6 +42,7 @@ package de.jreality.tools;
 
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.WeakHashMap;
 
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
@@ -60,7 +61,24 @@ public class AnimatorTool extends AbstractTool {
 
   private static InputSlot timer = InputSlot.getDevice("SystemTime");
 
+  private static WeakHashMap instances=new WeakHashMap();
+  
   public static AnimatorTool getInstance() {
+    if (!instances.containsKey(Thread.currentThread())) throw new IllegalStateException("wrong thread");
+    return getInstance(Thread.currentThread());
+  }
+  
+  /**
+   * WARNING: do not use this unless you write a tool system!!
+   */
+  public static AnimatorTool getInstance(Thread thread) {
+    if (!thread.getName().equals("jReality ToolSystem EventQueue"))
+        throw new RuntimeException("no tool system event thread!");
+    AnimatorTool instance = (AnimatorTool) instances.get(thread);
+    if (instance == null) {
+      instance = new AnimatorTool();
+      instances.put(thread, instance);
+    }
     return instance;
   }
   
@@ -99,8 +117,6 @@ public class AnimatorTool extends AbstractTool {
       animators.remove(key);
     }
   }
-
-  private static AnimatorTool instance = new AnimatorTool();
 
   public double getIntervall() {
     return intervall;

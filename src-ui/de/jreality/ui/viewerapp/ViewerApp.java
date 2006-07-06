@@ -107,8 +107,8 @@ public class ViewerApp {
   
   private UIFactory uiFactory;  //frame layout factory depending on viewer
   
-  private static Viewer[] viewers;  //containing possible viewers (jogl, soft, portal)
-  private static ViewerSwitch viewerSwitch;
+  private Viewer[] viewers;  //containing possible viewers (jogl, soft, portal)
+  private ViewerSwitch viewerSwitch;
   private ToolSystemViewer currViewer;  //the current viewer
   
   private SceneGraphComponent sceneRoot;
@@ -256,7 +256,7 @@ public class ViewerApp {
   private void setupViewer(JrScene sc) {
 
     uiFactory = new UIFactory();
-
+    if (currViewer != null) currViewer.dispose();
     try { currViewer = createViewer(); } 
     catch (Exception exc) { exc.printStackTrace(); }
     
@@ -506,4 +506,7 @@ public class ViewerApp {
     return attachNavigator;
   }
 
+  public void dispose() {
+    if (currViewer != null) currViewer.dispose();
+  }
 }

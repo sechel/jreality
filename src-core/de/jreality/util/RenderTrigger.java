@@ -40,6 +40,8 @@
 
 package de.jreality.util;
 
+import java.awt.EventQueue;
+
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.Light;
@@ -152,9 +154,9 @@ public class RenderTrigger implements SceneGraphComponentListener,
     private void fireRender() {
       if (collect) needsRender=true;
       else {
-        //if (EventQueue.isDispatchThread())
+        if (!async || EventQueue.isDispatchThread())
           renderRunnable.run();
-        //else EventQueue.invokeLater(renderRunnable);
+        else EventQueue.invokeLater(renderRunnable);
       }
     }
 

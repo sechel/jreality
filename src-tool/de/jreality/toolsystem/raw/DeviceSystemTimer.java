@@ -54,21 +54,25 @@ public class DeviceSystemTimer implements RawDevice {
 
     private ToolEventQueue queue;
     
-    volatile int delay = 1; // delay in ms
+    volatile int delay = 10; // delay in ms
     volatile boolean running = true;
     
     String myDeviceName = "tick";
     
     private Thread timer = new Thread(new Runnable() {
-
+      boolean meRunning;
       public void run() {
-        while (running) {
+        meRunning=running;
+        while (meRunning) {
           try {
             Thread.sleep(delay);
           } catch (InterruptedException e) {
             throw new Error();
           }
-          if (running) generateEvent();
+          if (meRunning) generateEvent();
+          synchronized (this) {
+            meRunning=running;
+          }
         }
       }
       
@@ -107,7 +111,9 @@ public class DeviceSystemTimer implements RawDevice {
     }
 
     public void dispose() {
+      synchronized (this) {
         running = false;
+      }
     }
 
     public void initialize(Viewer viewer) {
