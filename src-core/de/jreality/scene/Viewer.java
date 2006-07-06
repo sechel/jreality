@@ -40,23 +40,129 @@
 
 package de.jreality.scene;
 
-import java.awt.Component;
+import java.awt.Dimension;
 
 
 /**
- * @author Charles Gunn
- *
+ * All backends should implement this interface - this makes
+ * backends exchangable.
+ * 
+ * @author Charles Gunn, Steffen Weissmann
  */
 public interface Viewer {
+  
+  /**
+   * Get the scene root.
+   * @return the scene root
+   */
 	public SceneGraphComponent getSceneRoot();
-	public void setSceneRoot(SceneGraphComponent r);
-	public SceneGraphPath getCameraPath();
-	public void setCameraPath(SceneGraphPath p);
+	
+  /**
+   * Set the scene root.
+   * @param root the scene root
+   */
+  public void setSceneRoot(SceneGraphComponent root);
+	
+  /**
+   * Get the camera path.
+   * @return the camera path
+   */
+  public SceneGraphPath getCameraPath();
+  
+  /**
+   * Set the camera path. Some backends assume that this
+   * is a valid (existing) path starting at the scene root.
+   * This implies that one first needs to set the scene root.
+   * 
+   * A camera path must have a Camera as the last element.
+   * 
+   * @param cameraPath the camera path.
+   */
+	public void setCameraPath(SceneGraphPath cameraPath);
+  
+  /**
+   * This method triggers rendering of the viewer. The method returns
+   * as soon as the rendering is finished.
+   */
 	public void render();
+  
+  /**
+   * Has this viewer a viewing component?
+   * @return true if the viewer has a viewing component,
+   * false otherwise.
+   */
 	public boolean hasViewingComponent();
-	public Component getViewingComponent();
-	public int getSignature();		// See de.jreality.util.Pn for definitions
+  
+  /**
+   * Gives the viewing component. This is a java.awt.Component for
+   * an AWT viewer, or an org.eclipse.swt.Widget for an SWT viewer.
+   * Maybe there will be other types of viewing components that we
+   * do not know yet.
+   * 
+   * @return for now: a java.awt.Component or a org.eclipse.swt.Widget
+   */
+	public Object getViewingComponent();
+  
+  /**
+   * Gives the dimension of the viewing component in pixel.
+   * 
+   * @return the Dimension of the viewing component when
+   * hasViewingComponent() returns true - null otherwise.
+   */
+  public Dimension getViewingComponentSize();
+  
+  /**
+   * Some viewers (at least the jogl viewer) support rendering
+   * of non-euclidean geometries. The definition of the signature is
+   * in de.jreality.math.Pn.
+   * 
+   * @return the signature of the viewer.
+   * @see de.jreality.math.Pn
+   */
+	public int getSignature();
+  
+  /**
+   * Some viewers (at least the jogl viewer) support rendering
+   * of non-euclidean geometries. The definition of the signature is
+   * in de.jreality.math.Pn.
+   * 
+   * @param the signature of the viewer as defined in de.jreality.math.Pn
+   * @see de.jreality.math.Pn
+   */
 	public void setSignature(int sig);
-	public void setAuxiliaryRoot(SceneGraphComponent ar);
+  
+  /**
+   * Some viewers (at least the jogl viewer) support an auxilary
+   * root - for things to display that are no part of the scene itself.
+   * I. e. bounding boxes should go here.
+   *
+   * @param auxRoot the auxiliary root
+   */
+  public void setAuxiliaryRoot(SceneGraphComponent auxRoot);
+  
+  /**
+   * Some viewers (at least the jogl viewer) support an auxilary
+   * root - for things to display that are no part of the scene itself.
+   * I. e. bounding boxes should go here.
+   *
+   * @return the auxiliary root
+   */
 	public SceneGraphComponent getAuxiliaryRoot();
+
+  /**
+   * Tells wether this viewer supports asyncronous rendering.
+   * 
+   * @return true if the viewer supports renderAsync() false otherwise
+   */
+  public boolean canRenderAsync();
+  
+  /**
+   * Some viewers support asyncronous rendering. This means: when
+   * this method is called, it returns immediately and the viewer
+   * renders again as soon as possible: either right now or
+   * when the current rendering has finished. Multiple calls
+   * of this method while the viewer is rendering trigger one
+   * single rendering after the current one (optional operation).
+   */
+  public void renderAsync();
 }
