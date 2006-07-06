@@ -69,8 +69,6 @@ public class AABBPickSystem implements PickSystem {
   private Impl impl;
   private SceneGraphComponent root;
   
-  private double[] fromEuclidean;
-  private double[] dirEuclidean;
   private double maxDist;
   
   private ArrayList hits = new ArrayList();
@@ -79,28 +77,28 @@ public class AABBPickSystem implements PickSystem {
   
   private double[] from;
   private double[] to;
+  private double[] dir;
   
   public void setSceneRoot(SceneGraphComponent root) {
     impl= new Impl();
     this.root=root;
   }
   
-  public List computePick(double[] from, double[] to) {
-    this.from=from;
-    this.to=to;
-    if (to.length < 4 || to[3] == 0) return computePickImpl(from, to, 1000);
+  public List computePick(double[] f, double[] t) {
+    if (f.length == 4) P3.dehomogenize(f, f);
+    if (t.length == 4) P3.dehomogenize(t, t);
+    if (t.length == 3 || t[3] == 0) return computePickImpl(f, t, t, 1000);
     double[] dir = new double[3];
-    if (from.length > 3) P3.dehomogenize(from, from);
-    P3.dehomogenize(to, to);
-    dir[0] = to[0]-from[0];
-    dir[1] = to[1]-from[1];
-    dir[2] = to[2]-from[2];
-    return computePickImpl(from, dir, Rn.euclideanNorm(dir));
+    dir[0] = t[0]-f[0];
+    dir[1] = t[1]-f[1];
+    dir[2] = t[2]-f[2];
+    return computePickImpl(f, t, dir, Rn.euclideanNorm(dir));
   }
   
-  private List computePickImpl(double[] from, double[] dir, double maxDist) {
-    this.fromEuclidean=new double[]{from[0], from[1], from[2]};
-    this.dirEuclidean=new double[]{dir[0], dir[1], dir[2]};
+  private List computePickImpl(double[] from, double[] to, double[] dir, double maxDist) {
+    this.from=(double[]) from.clone();
+    this.to=(double[]) to.clone();
+    this.dir=(double[]) dir.clone();
     this.maxDist=maxDist;
     impl.visit();
     if (hits.isEmpty()) return Collections.EMPTY_LIST;
@@ -127,13 +125,15 @@ public class AABBPickSystem implements PickSystem {
     private double pointRadius=CommonAttributes.POINT_RADIUS_DEFAULT;
     private int signature=Pn.EUCLIDEAN;
 
-    private boolean pickPoints=false;
+    private boolean pickPoints=true;
     private boolean pickEdges=true;
     private boolean pickFaces=true;
 
     /* local ray */
-    private double[] from4;
-    private double[] dir4;
+    private double[] fromLocal;
+    private double[] dirLocal;
+
+    private double[] toLocal;
     
     public void visit(SceneGraphComponent c) {
       if (!c.isVisible()) return;
@@ -148,10 +148,10 @@ public class AABBPickSystem implements PickSystem {
       path.getMatrix(m.getArray());
       path.getInverseMatrix(mInv.getArray());
       
-      from4=mInv.multiplyVector(from);
-      dir4=mInv.multiplyVector(to);
+      fromLocal=mInv.multiplyVector(from);
+      toLocal=mInv.multiplyVector(to);
+      dirLocal=mInv.multiplyVector(dir);
 
-      
       c.childrenAccept(this);
       path.pop();
       if (c.getAppearance()!=null) {
@@ -169,11 +169,6 @@ public class AABBPickSystem implements PickSystem {
       && eap.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.PICKABLE, true);
       pointRadius=eap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, CommonAttributes.POINT_RADIUS_DEFAULT);
       tubeRadius=eap.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, CommonAttributes.TUBE_RADIUS_DEFAULT);
-    }
-    
-    private boolean checkHasTree(IndexedFaceSet ifs) {
-        AABBTree tree = (AABBTree) ifs.getGeometryAttributes(Attribute.attributeForName("AABBTree"));
-        return tree!=null;
     }
     
     private boolean isPickable(Geometry g) {
@@ -217,8 +212,7 @@ public class AABBPickSystem implements PickSystem {
         BruteForcePicking.intersectPolygons(ifs, signature, path, from, to, localHits);
         AABBPickSystem.this.hits.addAll(localHits);
       } else {
-
-        tree.intersect(from4, dir4, localHits);
+        tree.intersect(fromLocal, dirLocal, localHits); 
         extractFaceTreeHits(ifs);
       }
     }
@@ -246,13 +240,16 @@ public class AABBPickSystem implements PickSystem {
     }
 
     private void extractFaceTreeHits(IndexedFaceSet ifs) {
+      int k = 0;
       for (Iterator i = localHits.iterator(); i.hasNext(); ) {
         Object[] val = (Object[]) i.next();
         double[] pointWorld = m.multiplyVector((double[])val[0]);
         int index = ((Integer)val[1]).intValue();
         int triIndex = ((Integer)val[2]).intValue(); //index of the first point of triangle in pt sequence of the polygon
-        Hit h = new Hit(path.pushNew(ifs), pointWorld, Rn.euclideanDistance(fromEuclidean, pointWorld), 0, PickResult.PICK_TYPE_FACE, index,triIndex);
-        if (h.getDist() <= maxDist) AABBPickSystem.this.hits.add(h);
+        Hit h = new Hit(path.pushNew(ifs), pointWorld, Rn.euclideanDistance(from, pointWorld), 0, PickResult.PICK_TYPE_FACE, index,triIndex);
+        if (h.getDist() <= maxDist) {
+          AABBPickSystem.this.hits.add(h);
+        }
       }
     }
 
