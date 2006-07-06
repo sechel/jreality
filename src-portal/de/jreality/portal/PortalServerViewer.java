@@ -41,6 +41,7 @@
 package de.jreality.portal;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.io.IOException;
 
 import de.jreality.scene.Lock;
@@ -108,7 +109,7 @@ public class PortalServerViewer implements Viewer {
 		return false;
 	}
 
-	public Component getViewingComponent() {
+	public Object getViewingComponent() {
 		return null;
 	}
 
@@ -150,5 +151,17 @@ public class PortalServerViewer implements Viewer {
   void renderEnd() {
     clients.waitForRenderFinish();
     renderLock.writeUnlock();
+  }
+
+  public Dimension getViewingComponentSize() {
+    return null;
+  }
+
+  public boolean canRenderAsync() {
+    return false;
+  }
+
+  public void renderAsync() {
+    throw new UnsupportedOperationException();
   }
 }

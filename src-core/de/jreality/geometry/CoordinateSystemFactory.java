@@ -58,7 +58,6 @@ import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
-import de.jreality.scene.tool.CoordinateSystemBeautifier;
 import de.jreality.shader.CommonAttributes;
 
 

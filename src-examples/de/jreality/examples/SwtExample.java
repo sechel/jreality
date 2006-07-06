@@ -40,6 +40,8 @@
 
 package de.jreality.examples;
 
+import java.awt.Component;
+
 import javax.swing.JFrame;
 
 import org.eclipse.swt.SWT;
@@ -59,10 +61,12 @@ import de.jreality.scene.Light;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.pick.AABBPickSystem;
-import de.jreality.scene.tool.DraggingTool;
-import de.jreality.scene.tool.RotateTool;
-import de.jreality.scene.tool.ToolSystemViewer;
 import de.jreality.swing.JRJComponent;
+import de.jreality.tools.DraggingTool;
+import de.jreality.tools.EncompassTool;
+import de.jreality.tools.RotateTool;
+import de.jreality.tools.ShipNavigationTool;
+import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.util.RenderTrigger;
 
 public class SwtExample {
@@ -141,7 +145,7 @@ public class SwtExample {
       viewer = new ToolSystemViewer(new de.jreality.jogl.Viewer());
       JFrame f = new JFrame("AWT");
       f.setSize(640, 480);
-      f.getContentPane().add(viewer.getViewingComponent());
+      f.getContentPane().add((Component) viewer.getViewingComponent());
       f.setVisible(true);
       f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
@@ -155,6 +159,11 @@ public class SwtExample {
     // add tools
     geometryNode.addTool(new RotateTool());
     geometryNode.addTool(new DraggingTool());
+    geometryNode.addTool(new EncompassTool());
+    
+    ShipNavigationTool shipNavigationTool = new ShipNavigationTool();
+    shipNavigationTool.setGravity(0);
+    cameraNode.addTool(shipNavigationTool);
     
     PaintComponent pc = new PaintComponent();
     JRJComponent jrj = new JRJComponent();

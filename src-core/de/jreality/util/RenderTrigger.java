@@ -40,8 +40,6 @@
 
 package de.jreality.util;
 
-import java.awt.EventQueue;
-
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.Light;
@@ -77,12 +75,19 @@ import de.jreality.scene.event.TransformationListener;
 public class RenderTrigger implements SceneGraphComponentListener,
   TransformationListener, AppearanceListener, GeometryListener, LightListener {
 
+  private boolean collect;
+  private final boolean async;
+  
     private RenderTriggerCaster viewer;
     //private HashMap map = new HashMap();
     public RenderTrigger() {
-        super();
+      this(true);
     }
 
+    public RenderTrigger(boolean async) {
+      this.async=async;
+    }
+    
     public void forceRender() {
         fireRender();
     }
@@ -142,13 +147,20 @@ public class RenderTrigger implements SceneGraphComponentListener,
       }
     };
     
+    boolean needsRender;
+    
     private void fireRender() {
-      if (EventQueue.isDispatchThread()) renderRunnable.run();
-      else EventQueue.invokeLater(renderRunnable);
+      if (collect) needsRender=true;
+      else {
+        //if (EventQueue.isDispatchThread())
+          renderRunnable.run();
+        //else EventQueue.invokeLater(renderRunnable);
+      }
     }
 
     public void addViewer(Viewer v) {
         viewer = RenderTriggerCaster.add(viewer,v);
+        viewer.async=async;
     }
     
     public void removeViewer(Viewer v) {
@@ -190,6 +202,7 @@ public class RenderTrigger implements SceneGraphComponentListener,
 
     static abstract class RenderTriggerCaster
     {
+      boolean async;
         abstract RenderTriggerCaster remove(Viewer oldl);
         abstract void render();
         static RenderTriggerCaster add(RenderTriggerCaster a, Viewer b)
@@ -221,7 +234,8 @@ public class RenderTrigger implements SceneGraphComponentListener,
         }
         void render()
         {
-            v.render();
+            if (async) v.renderAsync();
+            else v.render();
         }
     }
     static final class RenderTriggerMulticaster extends RenderTriggerCaster
@@ -245,4 +259,18 @@ public class RenderTrigger implements SceneGraphComponentListener,
       // TODO Auto-generated method stub
       
     }
+    
+    public void startCollect() {
+      collect = true;
+      needsRender = false;
+    }
+    
+    public void finishCollect() {
+      collect = false;
+      if (needsRender) {
+        needsRender=false;
+        fireRender();
+      }
+    }
+
 }

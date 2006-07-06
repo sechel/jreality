@@ -59,6 +59,8 @@ import javax.swing.JPanel;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.pick.AABBTree;
+import de.jreality.swing.JFakeFrame;
 import de.jreality.swing.JRJComponent;
 import de.jreality.ui.viewerapp.ViewerApp;
 
@@ -167,7 +169,13 @@ public class PaintComponent extends JPanel implements MouseListener, MouseMotion
       CatenoidHelicoid catenoid = new CatenoidHelicoid(50);
       catenoid.setAlpha(Math.PI/2.-0.3);
       
+      AABBTree aabb = AABBTree.construct(catenoid, 10);
+      
+      catenoid.setGeometryAttributes("AABBTree", aabb);
+      
       SceneGraphComponent catComp= new SceneGraphComponent();
+      
+      //catComp.addChild(aabb.display());
       
       Transformation gt= new Transformation();
       catComp.setTransformation(gt);
@@ -177,8 +185,11 @@ public class PaintComponent extends JPanel implements MouseListener, MouseMotion
       catComp.setGeometry(catenoid);
       SceneGraphComponent c;  
       
-      JRJComponent jrj = new JRJComponent();
+      //JRJComponent jrj = new JRJComponent();
+      JFakeFrame jrj = new JFakeFrame("bla blubb");
       jrj.add(pc);
+      jrj.pack();
+      jrj.setVisible(true);
       
       catComp.addTool(jrj.getTool());
       

@@ -7,10 +7,10 @@ import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
-import de.jreality.scene.tool.PointDragEvent;
-import de.jreality.scene.tool.PointDragEventTool;
-import de.jreality.scene.tool.PointDragListener;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.tools.PointDragEvent;
+import de.jreality.tools.PointDragEventTool;
+import de.jreality.tools.PointDragListener;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class PointDragExample {

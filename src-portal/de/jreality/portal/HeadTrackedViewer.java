@@ -42,6 +42,7 @@ package de.jreality.portal;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
@@ -54,13 +55,13 @@ import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
+import de.jreality.portal.tools.PortalCoordinateSystem;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
-import de.jreality.scene.tool.PortalCoordinateSystem;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.LoggingSystem;
@@ -108,7 +109,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     if (frame == null) {
     frame = new JFrame("no title");
     hv = new HeadTrackedViewer();
-    frame.getContentPane().add(hv.getViewingComponent());
+    frame.getContentPane().add((Component) hv.getViewingComponent());
     // disable mouse cursor in fullscreen mode
     BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
     Graphics2D gfx = cursorImg.createGraphics();
@@ -121,7 +122,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     frame.setUndecorated(true);
     frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(frame);
     frame.validate();
-    frame.show();
+    frame.setVisible(true);
     }
     return hv;
   }
@@ -186,7 +187,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     return viewer.getSignature();
   }
 
-  public Component getViewingComponent() {
+  public Object getViewingComponent() {
     return viewer.getViewingComponent();
   }
 
@@ -314,9 +315,21 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
   }
 
   public void resetCalled() {
-	frame.hide();
+	frame.setVisible(false);
 	frame.dispose();
 	frame = null;
+  }
+
+  public Dimension getViewingComponentSize() {
+    return viewer.getViewingComponentSize();
+  }
+
+  public boolean canRenderAsync() {
+    return viewer.canRenderAsync();
+  }
+
+  public void renderAsync() {
+    viewer.renderAsync();
   }
 
 //  Statement swapStatement;

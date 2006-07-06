@@ -41,6 +41,8 @@
 package de.jreality.io;
 
 import java.awt.Color;
+import java.util.logging.Level;
+
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -49,11 +51,12 @@ import de.jreality.scene.Light;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
-import de.jreality.scene.tool.DraggingTool;
-import de.jreality.scene.tool.EncompassTool;
-import de.jreality.scene.tool.FlyTool;
-import de.jreality.scene.tool.PortalHeadMoveTool;
-import de.jreality.scene.tool.RotateTool;
+import de.jreality.scene.tool.Tool;
+import de.jreality.tools.DraggingTool;
+import de.jreality.tools.EncompassTool;
+import de.jreality.tools.FlyTool;
+import de.jreality.tools.RotateTool;
+import de.jreality.util.LoggingSystem;
 
 
 public class JrSceneFactory {
@@ -288,8 +291,13 @@ public class JrSceneFactory {
     light.setColor(new Color(255,255,255,255));
     light.setIntensity(0.75);
     cameraNode.setLight(light);
-    PortalHeadMoveTool portalHeadMoveTool = new PortalHeadMoveTool();
-    avatar.addTool(portalHeadMoveTool);
+    Tool portalHeadMoveTool;
+    try {
+      portalHeadMoveTool = (Tool) Class.forName("de.jreality.portal.tools.PortalHeadMoveTool").newInstance();
+      avatar.addTool(portalHeadMoveTool);
+    } catch (Exception e) {
+      LoggingSystem.getLogger(JrSceneFactory.class).log(Level.WARNING, "failed to create PortalHeadMoveTool", e);
+    }
     avatar.addChild(cameraNode);
     
     //create JrScene

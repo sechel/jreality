@@ -41,6 +41,7 @@
 package de.jreality.examples;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -57,10 +58,10 @@ import de.jreality.scene.Light;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.pick.PickSystem;
-import de.jreality.scene.tool.RotateTool;
-import de.jreality.scene.tool.ToolSystemViewer;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.soft.SoftPickSystem;
+import de.jreality.tools.RotateTool;
+import de.jreality.toolsystem.ToolSystemViewer;
 
 public class ToolsAndAppearances {
   public static void main(String[] args) {
@@ -106,9 +107,9 @@ public class ToolsAndAppearances {
     JFrame frame = new JFrame();
     frame.setVisible(true);
     frame.setSize(640, 480);
-    frame.getContentPane().add(viewer.getViewingComponent());
+    frame.getContentPane().add((Component) viewer.getViewingComponent());
     frame.validate();
-    System.out.println(viewer.getViewingComponent().getSize());
+    System.out.println(viewer.getViewingComponentSize());
     frame.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent arg0) {
         System.exit(0);

@@ -42,6 +42,7 @@ package de.jreality.util;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -90,8 +91,8 @@ public class ViewerSwitch implements Viewer {
     this.viewers = viewers;
     this.viewerNames = names;
     currentViewer = viewers[0];
-    if (currentViewer.hasViewingComponent()) {
-      registerComponent(currentViewer.getViewingComponent());
+    if (currentViewer.hasViewingComponent() && currentViewer.getViewingComponent() instanceof Component) {
+      registerComponent((Component) currentViewer.getViewingComponent());
     }
   }
 
@@ -132,11 +133,11 @@ public class ViewerSwitch implements Viewer {
       currentViewer.setAuxiliaryRoot(null);
     } catch (Exception e) {}
 
-    if (currentViewer.hasViewingComponent()) unregisterComponent(currentViewer.getViewingComponent());
-    if (newViewer.hasViewingComponent()) {
-      if (currentViewer.hasViewingComponent())
-        newViewer.getViewingComponent().setSize(currentViewer.getViewingComponent().getSize());
-      registerComponent(newViewer.getViewingComponent());
+    if (currentViewer.hasViewingComponent()  && currentViewer.getViewingComponent() instanceof Component) unregisterComponent((Component) currentViewer.getViewingComponent());
+    if (newViewer.hasViewingComponent()  && newViewer.getViewingComponent() instanceof Component) {
+      if (currentViewer.hasViewingComponent()  && currentViewer.getViewingComponent() instanceof Component)
+        ((Component) newViewer.getViewingComponent()).setSize(currentViewer.getViewingComponentSize());
+      registerComponent((Component) newViewer.getViewingComponent());
     }
     currentViewer = newViewer;
   }
@@ -175,7 +176,7 @@ public class ViewerSwitch implements Viewer {
     return currentViewer.getSignature();
   }
 
-  public Component getViewingComponent() {
+  public Object getViewingComponent() {
     return component;
   }
 
@@ -238,6 +239,18 @@ public class ViewerSwitch implements Viewer {
       public void mouseWheelMoved(MouseWheelEvent e) {
         component.dispatchEvent(e);
       }
+  }
+
+  public boolean canRenderAsync() {
+    return currentViewer.canRenderAsync();
+  }
+
+  public Dimension getViewingComponentSize() {
+    return currentViewer.getViewingComponentSize();
+  }
+
+  public void renderAsync() throws UnsupportedOperationException {
+    currentViewer.renderAsync();
   }
 
 }

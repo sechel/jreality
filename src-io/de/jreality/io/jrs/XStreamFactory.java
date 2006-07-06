@@ -74,19 +74,19 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.data.StorageModel;
-import de.jreality.scene.tool.DraggingTool;
-import de.jreality.scene.tool.EncompassTool;
-import de.jreality.scene.tool.FlyTool;
-import de.jreality.scene.tool.HeadTransformationTool;
 import de.jreality.scene.tool.InputSlot;
-import de.jreality.scene.tool.RotateTool;
-import de.jreality.scene.tool.ShipNavigationTool;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
+import de.jreality.tools.DraggingTool;
+import de.jreality.tools.EncompassTool;
+import de.jreality.tools.FlyTool;
+import de.jreality.tools.HeadTransformationTool;
+import de.jreality.tools.RotateTool;
+import de.jreality.tools.ShipNavigationTool;
 
 public class XStreamFactory {
 
@@ -122,7 +122,7 @@ public class XStreamFactory {
     knownClasses.add(FlyTool.class);
     
     try {
-		knownClasses.add(Class.forName("de.jreality.scene.tool.PortalHeadMoveTool"));
+		knownClasses.add(Class.forName("de.jreality.toolsystem.tools.PortalHeadMoveTool"));
 	} catch (ClassNotFoundException e) {
 	}
   }
@@ -197,8 +197,10 @@ public class XStreamFactory {
   static Object readUnknown(HierarchicalStreamReader reader, UnmarshallingContext context, Mapper mapper) {
     Object ret = null;
     reader.moveDown();
-    Class type = mapper.realClass(reader.getNodeName());
-    ret = context.convertAnother(null, type);
+    try {
+      Class type = mapper.realClass(reader.getNodeName());
+      ret = context.convertAnother(null, type);
+    } catch (Exception e) { /* signal error */ }
     reader.moveUp();
     return ret;
   }

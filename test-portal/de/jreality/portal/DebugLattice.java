@@ -44,11 +44,11 @@ package de.jreality.portal;
 import java.awt.Color;
 
 import de.jreality.geometry.IndexedLineSetFactory;
+import de.jreality.portal.tools.PortalCoordinateSystem;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
-import de.jreality.scene.tool.PortalCoordinateSystem;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Rectangle3D;

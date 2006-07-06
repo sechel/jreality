@@ -48,8 +48,8 @@ import de.jreality.scene.Cylinder;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
-import de.jreality.scene.tool.PickShowTool;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.tools.PickShowTool;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class TestBruteForcePicking implements Runnable{
