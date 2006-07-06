@@ -41,6 +41,7 @@
 package de.jreality.util;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
 import java.util.logging.Level;
 
@@ -151,21 +152,15 @@ public class CameraUtility {
 		
 	}
 
-	private static double getAspectRatio(java.awt.Component vc)		{
-		return ((double) vc.getWidth())/(vc.getHeight());
-	}
-	
 	public static double getAspectRatio(Viewer v)		{
 		if (!v.hasViewingComponent()) return 1.0;
-		Component c = v.getViewingComponent();
-		return ((double) c.getWidth())/ c.getHeight();
+    Dimension d = v.getViewingComponentSize();
+		return ((double) d.getWidth())/ d.getHeight();
 	}
 	
 	public static double[] getCameraToNDC(Viewer v)			{
 		Camera cam = getCamera(v);
-		double aspectRatio = (v.hasViewingComponent() ? getAspectRatio(v.getViewingComponent()) : 1.0);
-		// TODO figure out a better way to do this:  This is only correct in crosseyed stereo mode.
-//		if (cam.isStereo()) aspectRatio *= .5;
+		double aspectRatio = getAspectRatio(v);
 		return getCameraToNDC(cam, aspectRatio);
 	}
 	

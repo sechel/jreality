@@ -41,7 +41,7 @@
 package de.jreality.soft;
 
 import java.awt.Color;
-import java.awt.Component;
+import java.awt.Dimension;
 
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -179,10 +179,13 @@ public abstract class AbstractViewer implements Viewer {
     /* (non-Javadoc)
      * @see de.jreality.soft.Viewer#getViewingComponent()
      */
-    public Component getViewingComponent() {
+    public Object getViewingComponent() {
         return null;
     }
 
+    public Dimension getViewingComponentSize() {
+      return null;
+    }
 
     /* (non-Javadoc)
      * @see de.jreality.soft.Viewer#render()
@@ -236,4 +239,11 @@ public abstract class AbstractViewer implements Viewer {
         setCameraPath(v.getCameraPath());
     }
 
+    public boolean canRenderAsync() {
+      return false;
+    }
+    
+    public void renderAsync() {
+      throw new UnsupportedOperationException();
+    }
 }

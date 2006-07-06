@@ -41,6 +41,7 @@
 package de.jreality.renderman;
 
 import java.awt.Component;
+import java.awt.Dimension;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -78,7 +79,7 @@ public class RIBViewer implements Viewer {
      * for aqsis in the future.
      * @see de.jreality.soft.Viewer#getViewingComponent()
      */
-    public Component getViewingComponent() {
+    public Object getViewingComponent() {
         return null;
     }
 
@@ -140,9 +141,9 @@ public class RIBViewer implements Viewer {
         cameraPath = v.getCameraPath();
         sceneRoot = v.getSceneRoot();
         if (v.hasViewingComponent()){
-			setHeight(v.getViewingComponent().getHeight());
-			setWidth(v.getViewingComponent().getWidth());
-            System.out.println(" w "+v.getViewingComponent().getWidth()+ " h "+v.getViewingComponent().getHeight());
+			setHeight((int) v.getViewingComponentSize().getHeight());
+			setWidth((int) v.getViewingComponentSize().getWidth());
+            System.out.println(" w "+v.getViewingComponentSize().getWidth()+ " h "+v.getViewingComponentSize().getHeight());
         }
         if(v.getCameraPath().getLastComponent().getCamera().isPerspective()){
         	projection("perspective");
@@ -219,6 +220,18 @@ public class RIBViewer implements Viewer {
      */
     public void setMaximumEyeSplits(int maximumEyeSplits){
     	this.maximumEyeSplits=maximumEyeSplits;
+    }
+
+    public Dimension getViewingComponentSize() {
+      return null;
+    }
+
+    public boolean canRenderAsync() {
+      return false;
+    }
+
+    public void renderAsync() {
+      throw new UnsupportedOperationException();
     }
 
 }

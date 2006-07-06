@@ -124,7 +124,7 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
 /* (non-Javadoc)
    * @see de.jreality.soft.Viewer#getViewingComponent()
    */
-  public Component getViewingComponent() {
+  public Object getViewingComponent() {
     return this;
   }
 
@@ -143,23 +143,24 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
     return root;
   }
 
-  private Runnable runner = new Runnable() {
-      public void run() {
-          synchronized(renderLock) {
-            renderLock.notify();
-          }
-        }};
-        //TODO is it really better to postpone the notify on the EventQueue ?
-  /* (non-Javadoc)
-   * @see de.jreality.soft.Viewer#render()
-   */
+  private final Object renderSynchMutex=new Object();
+  private boolean rendering;
+  
   public void render() {
-    if(upToDate) {
-    upToDate= false;
-    EventQueue.invokeLater(runner);
-//    synchronized(renderLock) {
-//        renderLock.notify();
-//    }
+    synchronized (renderSynchMutex) {
+      if (EventQueue.isDispatchThread()) {
+        renderImpl();
+        if (imageValid) paintImmediately();
+      } else {
+        rendering=true;
+        renderAsync();
+        while (rendering)
+          try {
+            renderSynchMutex.wait();
+          } catch (InterruptedException e) {
+            throw new Error();
+        }
+      }
     }
   }
 
@@ -198,6 +199,10 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
   public void run() {
     if(EventQueue.isDispatchThread()) {
       paintImmediately();
+      synchronized (renderSynchMutex) {
+        rendering=false;
+        renderSynchMutex.notify();
+      }
     }
     else while (true) try {
       if(upToDate) {
@@ -230,10 +235,10 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
     renderImpl();
   }
 
-  private void renderImpl() {
-      synchronized(this) {
+  private synchronized void renderImpl() {
+      //synchronized(this) {
         upToDate=true;
-      }
+      //}
     Dimension d= getSize();
     if (d.width > 0 && d.height > 0) {
       //System.out.println("render: off="+offscreen);
@@ -393,6 +398,25 @@ public Image getBackgroundImage() {
 }
 public void setBackgroundImage(Image bgImage) {
     this.bgImage = bgImage;
+}
+public Dimension getViewingComponentSize() {
+  return getSize();
+}
+public boolean canRenderAsync() {
+  return true;
+}
+
+public void renderAsync() {
+  boolean needRender;
+  synchronized (this) {
+    needRender=upToDate;
+  }
+  if (needRender) {
+    synchronized(renderLock) {
+      upToDate=false;
+      renderLock.notify();
+    }
+  }
 }
 
 }

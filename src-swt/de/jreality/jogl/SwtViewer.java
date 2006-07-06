@@ -40,7 +40,7 @@
 
 package de.jreality.jogl;
 
-import java.awt.Component;
+import java.awt.Dimension;
 import java.util.logging.Level;
 
 import javax.media.opengl.GL;
@@ -48,6 +48,7 @@ import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawableFactory;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.opengl.GLCanvas;
 import org.eclipse.swt.widgets.Event;
@@ -122,7 +123,7 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
 		cameraPath = p;
 	}
 
-	public void render() {
+	public void renderAsync() {
 //		if (isLinux)	{
 //		    canvas.setIgnoreRepaint(false);
 //			canvas.setNoAutoRedrawMode(false);			
@@ -145,8 +146,8 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
 	}
 
 
-	public Component getViewingComponent() {
-		return null;
+	public Object getViewingComponent() {
+		return canvas;
 	}
 
 	/* (non-Javadoc)
@@ -262,6 +263,19 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
   
   public double getAspectRatio() {
     return renderer.getAspectRatio(); 
+  }
+
+  public Dimension getViewingComponentSize() {
+    Point p = canvas.getSize();
+    return new Dimension(p.x, p.y);
+  }
+
+  public boolean canRenderAsync() {
+    return true;
+  }
+  
+  public void render() {
+    SwtQueue.getInstance().waitFor(this);
   }
 
 }
