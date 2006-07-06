@@ -94,7 +94,7 @@ options {
 	private Appearance globalApp =new Appearance();	// App. der root
 	private Color plCDefault= new Color(255,0,0);	// default- Punkt und Linienfarbe
 	private Color fCDefault = new Color(0,255,0);	// default- Flaechenfarbe
-	private Color defaultFaceForm= Color.black;
+	private Color defaultEdgeForm= Color.black;
 	
 
 // ---------------------------- total Sizes of Scene --------------------------
@@ -116,6 +116,55 @@ options {
 		}
 	}
 	
+// -------------------------------- default Lights ----------------------------
+	public static SceneGraphComponent getDefaultLigthNode (){
+		SceneGraphComponent lightNode= new SceneGraphComponent();
+		SceneGraphComponent light1Node= new SceneGraphComponent();
+		SceneGraphComponent light2Node= new SceneGraphComponent();
+		SceneGraphComponent light3Node= new SceneGraphComponent();
+		SceneGraphComponent light4Node= new SceneGraphComponent();
+		SceneGraphComponent light5Node= new SceneGraphComponent();
+		SceneGraphComponent light6Node= new SceneGraphComponent();
+		Light light1 = new PointLight();
+		Light light2 = new PointLight();
+		Light light3 = new PointLight();
+		Light light4 = new PointLight();
+		Light light5 = new PointLight();
+		Light light6 = new PointLight();
+		lightNode.addChild(light1Node);
+		lightNode.addChild(light2Node);
+		lightNode.addChild(light3Node);
+		lightNode.addChild(light4Node);
+		lightNode.addChild(light5Node);
+		lightNode.addChild(light6Node);
+		light1.setColor(new Color(255,0,0));
+		light2.setColor(new Color(0,255,0));
+		light3.setColor(new Color(0,0,255));
+		light4.setColor(new Color(255,0,0));
+		light5.setColor(new Color(0,255,0));
+		light6.setColor(new Color(0,0,255));
+		light1.setIntensity(1);
+		light2.setIntensity(1);
+		light3.setIntensity(1);
+		light4.setIntensity(1);
+		light5.setIntensity(1);
+		light6.setIntensity(1);
+		light1Node.setLight(light1);
+		light2Node.setLight(light2);
+		light3Node.setLight(light3);
+		light4Node.setLight(light4);
+		light5Node.setLight(light5);
+		light6Node.setLight(light6);
+		MatrixBuilder.euclidean().translate(1,0,1).assignTo(light1Node);
+		MatrixBuilder.euclidean().translate(1,1,1).assignTo(light2Node);
+		MatrixBuilder.euclidean().translate(0,1,1).assignTo(light3Node);
+		MatrixBuilder.euclidean().translate(-1,0,-1).assignTo(light4Node);
+		MatrixBuilder.euclidean().translate(-1,-1,-1).assignTo(light5Node);
+		MatrixBuilder.euclidean().translate(0,-1,-1).assignTo(light6Node);
+		return lightNode; 
+	} 
+
+
 // ------------------------------------------------------------------------------
 	private static Appearance copyApp(Appearance appOld){
 		// kopiert eine Appearance um doppelt-Verzeigerung zu vermeiden
@@ -171,8 +220,8 @@ start returns [SceneGraphComponent r]
 }
 	:"Graphics3D"
 	  OPEN_BRACKET  
-	  	( 	  firstList[plCDefault,fCDefault,globalApp,defaultFaceForm]	// bei nur einem Objekt sind Klammern optional
-	  		| fCDefault=faceThing[fCDefault,globalApp,defaultFaceForm]	// ein Flaechen-beeinflussendes Object
+	  	( 	  firstList[plCDefault,fCDefault,globalApp,defaultEdgeForm]	// bei nur einem Objekt sind Klammern optional
+	  		| fCDefault=faceThing[fCDefault,globalApp,defaultEdgeForm]	// ein Flaechen-beeinflussendes Object
 	  		| plCDefault=plThing[plCDefault,globalApp]  // ein Punkt/Linien-beeinflussendes Object
 	  		| globalApp=appThing[globalApp]				// ein App.-beeinflussendes Object
 	  	)
@@ -192,16 +241,16 @@ start returns [SceneGraphComponent r]
 
 // ---------------------------------- 3D Objects ---------------------------------------------
 private
-firstList[Color plC, Color fC, Appearance app, Color faceF]
+firstList[Color plC, Color fC, Appearance app, Color edgeF]
 // firstList ist wie list, nur das hier kein neuer Sc.Gr.Co. erstellt wird da wir ja schon die Root haben
 // (wird nur am Anfang benutzt!)
 	:	OPEN_BRACE
-			(objectList[plC,fC,app,faceF])?	// eine Abfolge graphischer Objecte
+			(objectList[plC,fC,app,edgeF])?	// eine Abfolge graphischer Objecte
 	    CLOSE_BRACE
 	;
 
 private
-list[Color plC, Color fC, Appearance app, Color faceF]
+list[Color plC, Color fC, Appearance app, Color edgeF]
 {Appearance app2=copyApp(app);}
 	// eine Klammer mit mglw. einer Abfolge von 3d-Objekten
 	:	OPEN_BRACE						
@@ -214,27 +263,27 @@ list[Color plC, Color fC, Appearance app, Color faceF]
 			current.addChild(newPart);
 			current=newPart;
 			}
-	        (objectList[plC,fC,app2, faceF])?	// das innere der Klammer einhaengen
+	        (objectList[plC,fC,app2, edgeF])?	// das innere der Klammer einhaengen
 	    CLOSE_BRACE
 			{current=oldPart;}
 	;
 	
 private
-objectList [Color plC, Color fC, Appearance app, Color faceF]
+objectList [Color plC, Color fC, Appearance app, Color edgeF]
 // abarbeiten einer Abfolge von 3d-Objecten(und Directiven)
 {Appearance app2=copyApp(app);}
 	:(
-		  list[ plC, fC, app2 ,faceF]		// Listen koennen Listen enthalten
-		| faceF=faceFormThing
-		| fC=faceThing[fC, app2,faceF]	// FlaechenElemente
+		  list[ plC, fC, app2 ,edgeF]		// Listen koennen Listen enthalten
+		| edgeF=edgeFormThing
+		| fC=faceThing[fC, app2,edgeF]	// FlaechenElemente
 		| plC=plThing[plC, app2]	// Punkt/Linien Elemente
 		| app2=appThing [app2]		// Directiven die Appearance beeinflussen sollen
 	 )
 	 ( COLON 
 		(	
-			  list[ plC, fC, app2,faceF]
-		 	| faceF=faceFormThing
-			| fC =faceThing[fC,app2,faceF]
+			  list[ plC, fC, app2,edgeF]
+		 	| edgeF=edgeFormThing
+			| fC =faceThing[fC,app2,edgeF]
 			| plC=plThing[plC,app2]
 			| app2=appThing[app2]
 	 	)
@@ -242,11 +291,11 @@ objectList [Color plC, Color fC, Appearance app, Color faceF]
 	;	
 	
 private
-faceThing [Color fCgiven, Appearance app, Color faceF] returns[Color fC ]
+faceThing [Color fCgiven, Appearance app, Color edgeF] returns[Color fC ]
 {fC=copyColor(fCgiven);
  Appearance app2=copyApp(app);}
-	:	cuboid[fC, app2,faceF]					// Wuerfel 
-	|	fC=polygonBlock[fC, app2,faceF]			// Abfolge von Polygonen (IndexedFaceSet)
+	:	cuboid[fC, app2,edgeF]					// Wuerfel 
+	|	fC=polygonBlock[fC, app2,edgeF]			// Abfolge von Polygonen (IndexedFaceSet)
 	|	fC=faceColor						// Farbe die Flaechen beeinflusst
 	;
 
@@ -269,7 +318,7 @@ appThing [Appearance appOld] returns [ Appearance app]
 	
 // ----------------------------- Graphic Primitives ------------------------------------------------------------
 private 
-cuboid [ Color fC,Appearance app,Color faceF]
+cuboid [ Color fC,Appearance app,Color edgeF]
 	// ein achsenparalleler Wuerfel, gegeben durch Zentrum(Kantenlaenge 1) oder zusaetslich durch leangen
 	:"Cuboid"
 	 OPEN_BRACKET 
@@ -288,16 +337,16 @@ cuboid [ Color fC,Appearance app,Color faceF]
 	 		 Appearance cubicApp =copyApp(app);
 			 cubicApp.setAttribute(CommonAttributes.POLYGON_SHADER+
 			 	CommonAttributes.DIFFUSE_COLOR, fC);
-	 		 if (faceF!=null){
+	 		 if (edgeF!=null){
 	 		 	cubicApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
 			 	cubicApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
 				cubicApp.setAttribute(CommonAttributes.TUBE_RADIUS,1/150);
 				cubicApp.setAttribute(CommonAttributes.LINE_WIDTH,1);	 	
 			 	cubicApp.setAttribute(CommonAttributes.LINE_SHADER+"."+
 				 	CommonAttributes.POLYGON_SHADER+"."+
-				 	CommonAttributes.DIFFUSE_COLOR, faceF);
+				 	CommonAttributes.DIFFUSE_COLOR, edgeF);
 			 	cubicApp.setAttribute(CommonAttributes.LINE_SHADER+"."+
-				 	CommonAttributes.DIFFUSE_COLOR, faceF);				 	
+				 	CommonAttributes.DIFFUSE_COLOR, edgeF);				 	
 			 }
 	 		 else{
 		 		 cubicApp.setAttribute(CommonAttributes.EDGE_DRAW, false);
@@ -505,7 +554,7 @@ lineBlock [Color plCgiven, Appearance app] returns[Color plC]
 
 
 private 
-polygonBlock [Color fCgiven, Appearance app, Color faceF] returns[Color fC]
+polygonBlock [Color fCgiven, Appearance app, Color edgeF] returns[Color fC]
 // liest eine Abfolge von Polygonen 
 // schmeist doppelte Punkte durch umindizierung raus
 // Farben wie pointBlock und lineBlock
@@ -583,16 +632,16 @@ polygonBlock [Color fCgiven, Appearance app, Color faceF] returns[Color fC]
 			faceSet.setFaceColors(colorData);
 		else
 			faceApp.setAttribute(CommonAttributes.DIFFUSE_COLOR, colors.get(0));
-		if (faceF!=null){
+		if (edgeF!=null){
 	 	 	faceApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
 		 	faceApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
 			faceApp.setAttribute(CommonAttributes.TUBE_RADIUS,1/150);
 			faceApp.setAttribute(CommonAttributes.LINE_WIDTH,1);	 	
 		 	faceApp.setAttribute(CommonAttributes.LINE_SHADER+"."+
 			 	CommonAttributes.POLYGON_SHADER+"."+
-			 	CommonAttributes.DIFFUSE_COLOR, faceF);
+			 	CommonAttributes.DIFFUSE_COLOR, edgeF);
 		 	faceApp.setAttribute(CommonAttributes.LINE_SHADER+"."+
-			 	CommonAttributes.DIFFUSE_COLOR, faceF);				 	
+			 	CommonAttributes.DIFFUSE_COLOR, edgeF);				 	
 			faceSet.setGenerateEdgesFromFaces(true);
 		}
 		else {faceSet.setGenerateEdgesFromFaces(false);}
@@ -609,11 +658,11 @@ polygonBlock [Color fCgiven, Appearance app, Color faceF] returns[Color fC]
 	
 // -------------------------------------------------- Farben --------------------------------------------
 private
-faceFormThing returns[Color c]
+edgeFormThing returns[Color c]
 // gibt die Farbe der PolygonRaender an
 // keine Farbe bedeutet keine Raender
 {c=null;}
-	: "FaceForm" OPEN_BRACKET
+	: "EdgeForm" OPEN_BRACKET
 			(c=color)?
 				CLOSE_BRACKET 
 	;
