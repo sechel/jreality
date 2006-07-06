@@ -553,8 +553,8 @@ public class Primitives {
     
     public static IndexedFaceSet plainQuadMesh(double xStep, double yStep, int xDetail, int yDetail) {
       ParametricSurfaceFactory factory = new ParametricSurfaceFactory(new ParametricSurfaceFactory.DefaultImmersion() {
-        public double evaluate(double u, double v) {
-          return 0;
+        public void evaluate(double u, double v) {
+          // leave x, y, z 0
         }
       });
       

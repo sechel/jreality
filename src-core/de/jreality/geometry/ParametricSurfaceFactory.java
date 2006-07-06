@@ -205,6 +205,12 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 		
 	}
 
+  /**
+   * An immersion in 3-space. override the abstract
+   * method evaluate and assign the protected variables
+   * x, y, and z there depending on the given u, v values.
+   * 
+   */
 	public abstract static class DefaultImmersion implements Immersion {
 
 		public boolean isImmutable() {
@@ -216,9 +222,7 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 		}
 
 		public void evaluate(double u, double v, double[] xyz, int index) {
-			x=u;
-			y=v;
-			z=evaluate( u, v );
+			evaluate( u, v );
 			xyz[3*index+0] = x;
 			xyz[3*index+1] = y;
 			xyz[3*index+2] = z;
@@ -226,6 +230,12 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 		
 		protected double x, y, z;
 		
-		abstract public double evaluate( double u, double v );
+    /**
+     * Assign the protected variables x, y, z here.
+     * 
+     * @param u 
+     * @param v
+     */
+		abstract public void evaluate( double u, double v );
 	}
 }
