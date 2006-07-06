@@ -47,6 +47,7 @@ import java.beans.Beans;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.util.StringTokenizer;
+
 import javax.swing.JFrame;
 import javax.swing.JPopupMenu;
 import javax.swing.JTree;
@@ -57,10 +58,11 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-import bsh.EvalError;
+
 import jterm.BshEvaluator;
 import jterm.JTerm;
 import jterm.Session;
+import bsh.EvalError;
 import de.jreality.io.JrScene;
 import de.jreality.io.JrSceneFactory;
 import de.jreality.scene.Geometry;
@@ -71,8 +73,8 @@ import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
-import de.jreality.scene.tool.ToolSystemViewer;
-import de.jreality.scene.tool.config.ToolSystemConfiguration;
+import de.jreality.toolsystem.ToolSystemViewer;
+import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.ui.beans.InspectorPanel;
 import de.jreality.ui.treeview.JTreeRenderer;
 import de.jreality.ui.treeview.SceneTreeModel;
@@ -105,7 +107,6 @@ public class ViewerApp {
   
   private UIFactory uiFactory;  //frame layout factory depending on viewer
   
-  private RenderTrigger renderTrigger = new RenderTrigger();
   private static Viewer[] viewers;  //containing possible viewers (jogl, soft, portal)
   private static ViewerSwitch viewerSwitch;
   private ToolSystemViewer currViewer;  //the current viewer
@@ -118,28 +119,28 @@ public class ViewerApp {
   private JTerm jterm;
   private SimpleAttributeSet infoStyle;
   
-  private boolean autoRender = true;
-  
   private boolean attachNavigator = false;  //default
   private boolean attachBeanShell = false;  //default
   
+  private JrScene jrScene;
 
   /**
    * @param node the SceneGraphNode (SceneGraphComponent or Geometry) to be displayed in the viewer
    */
   public ViewerApp(SceneGraphNode node) {
+    this(node, null);
+  }
+  
+  public ViewerApp(SceneGraphNode node, JrScene jrScene) {
 
     if (node != null)  //create default scene if null
       if (!(node instanceof Geometry) && !(node instanceof SceneGraphComponent))
         throw new IllegalArgumentException("Only Geometry or SceneGraphComponent allowed!");
     
-    displayedNode = node;
+    if (jrScene == null) this.jrScene = getDefaultScene();
+    else this.jrScene = jrScene;
     
-    //update autoRender
-    String autoRenderProp = System.getProperty("de.jreality.ui.viewerapp.autorender", "true");
-    if (autoRenderProp.equalsIgnoreCase("false")) {
-      autoRender = false;
-    }
+    displayedNode = node;
   }
   
   
@@ -190,6 +191,22 @@ public class ViewerApp {
     return app;
   }
 
+  public static ViewerApp display(SceneGraphComponent root, SceneGraphPath cameraPath, SceneGraphPath emptyPick, SceneGraphPath avatar) {
+    JrScene s = new JrScene();
+    s.setSceneRoot(root);
+    if (cameraPath!= null) s.addPath("cameraPath", cameraPath);
+    if (avatar != null) s.addPath("avatarPath", avatar);
+    if (emptyPick != null) s.addPath("emptyPickPath", emptyPick);
+
+    ViewerApp app = new ViewerApp(null, s);
+    app.setAttachNavigator(false);
+    app.setAttachBeanShell(false);
+    app.update();
+    app.display();
+    
+    return app;
+
+  }
   
   /**
    * Calls ViewerAppOld.display(), use if menu is needed.
@@ -207,7 +224,7 @@ public class ViewerApp {
     
     //load the default scene depending on environment (desktop | portal)
     //and with chosen options (attachNavigator | attachBeanShell)
-    setupViewer(getDefaultScene());
+    setupViewer(jrScene);
     
     uiFactory.setAttachNavigator(attachNavigator);
     uiFactory.setAttachBeanShell(attachBeanShell);
@@ -243,10 +260,6 @@ public class ViewerApp {
     try { currViewer = createViewer(); } 
     catch (Exception exc) { exc.printStackTrace(); }
     
-    //remove old sceneRoot if already called setupViewer()
-    if (autoRender && sceneRoot != null)
-      renderTrigger.removeSceneGraphComponent(sceneRoot);
-    
     //set sceneRoot and paths of viewer
     sceneRoot = sc.getSceneRoot();
     currViewer.setSceneRoot(sceneRoot);
@@ -265,14 +278,8 @@ public class ViewerApp {
     currViewer.initializeTools();
     
     //set viewer and sceneRoot of uiFactory
-    uiFactory.setViewer(currViewer.getViewingComponent());
-    
-    
-    //add new sceneRoot
-    if (autoRender) renderTrigger.addSceneGraphComponent(sceneRoot);
-
-    //renderTrigger.forceRender();
-    
+    uiFactory.setViewer((Component) currViewer.getViewingComponent());
+        
     //add node to this scene depending on its type
     if (displayedNode != null) {  //show scene even if displayedNode=null
       final SceneGraphNode node = displayedNode;
@@ -308,7 +315,6 @@ public class ViewerApp {
         viewers[i] = createViewer(st.nextToken());
       }
       viewerSwitch = new ViewerSwitch(viewers);
-      renderTrigger.addViewer(viewerSwitch);
     }
     
     //create ToolSystemViewer with configuration corresp. to environment

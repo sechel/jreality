@@ -39,17 +39,17 @@
         <geometry/>
         <children/>
         <tools>
-          <de.jreality.scene.tool.EncompassTool/>
-          <de.jreality.scene.tool.RotateTool>
+          <de.jreality.tools.EncompassTool/>
+          <de.jreality.tools.RotateTool>
             <fixOrigin>false</fixOrigin>
             <moveChildren>false</moveChildren>
             <animTimeMin>250.0</animTimeMin>
             <animTimeMax>750.0</animTimeMax>
             <updateCenter>false</updateCenter>
-          </de.jreality.scene.tool.RotateTool>
-          <de.jreality.scene.tool.DraggingTool>
+          </de.jreality.tools.RotateTool>
+          <de.jreality.tools.DraggingTool>
             <moveChildren>false</moveChildren>
-          </de.jreality.scene.tool.DraggingTool>
+          </de.jreality.tools.DraggingTool>
         </tools>
       </child>
       <child>
@@ -143,14 +143,14 @@
             <geometry/>
             <children/>
             <tools>
-              <de.jreality.scene.tool.PortalHeadMoveTool/>
+              <de.jreality.tools.PortalHeadMoveTool/>
             </tools>
           </child>
         </children>
         <tools>
-          <de.jreality.scene.tool.FlyTool>
+          <de.jreality.tools.FlyTool>
             <gain>1.0</gain>
-          </de.jreality.scene.tool.FlyTool>
+          </de.jreality.tools.FlyTool>
         </tools>
       </child>
     </children>

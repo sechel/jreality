@@ -58,6 +58,7 @@ import java.lang.reflect.Proxy;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
+
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -76,6 +77,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+
 import jterm.BshEvaluator;
 import jterm.JTerm;
 import jterm.Session;
@@ -97,17 +99,17 @@ import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
-import de.jreality.scene.tool.DraggingTool;
-import de.jreality.scene.tool.FlyTool;
-import de.jreality.scene.tool.HeadTransformationTool;
-import de.jreality.scene.tool.LookAtTool;
-import de.jreality.scene.tool.PointerDisplayTool;
-import de.jreality.scene.tool.RotateTool;
-import de.jreality.scene.tool.ScaleTool;
-import de.jreality.scene.tool.ShipNavigationTool;
 import de.jreality.scene.tool.Tool;
-import de.jreality.scene.tool.ToolSystemViewer;
-import de.jreality.scene.tool.config.ToolSystemConfiguration;
+import de.jreality.tools.DraggingTool;
+import de.jreality.tools.FlyTool;
+import de.jreality.tools.HeadTransformationTool;
+import de.jreality.tools.LookAtTool;
+import de.jreality.tools.PointerDisplayTool;
+import de.jreality.tools.RotateTool;
+import de.jreality.tools.ScaleTool;
+import de.jreality.tools.ShipNavigationTool;
+import de.jreality.toolsystem.ToolSystemViewer;
+import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.ui.beans.InspectorPanel;
 import de.jreality.ui.treeview.JListRenderer;
 import de.jreality.ui.treeview.JTreeRenderer;
@@ -143,10 +145,7 @@ class ViewerAppOld
   private ToolSystemViewer currViewer;
   
   private SceneGraphPath emptyPick;
-  private RenderTrigger renderTrigger = new RenderTrigger();
-  
-  private boolean autoRender = true;
-  
+    
   private JTerm jterm;
   private BshEvaluator bshEval;
   private SimpleAttributeSet infoStyle;
@@ -173,7 +172,7 @@ class ViewerAppOld
     return ret;
   }
   
-  static void main(String[] args) throws Exception
+  public static void main(String[] args) throws Exception
   {
     initAWT();
     new ViewerAppOld();
@@ -226,7 +225,7 @@ class ViewerAppOld
     uiFactory.setAttachNavigator(true);
     uiFactory.setAttachBeanShell(true);
     
-    uiFactory.setViewer(currViewer.getViewingComponent());
+    uiFactory.setViewer((Component) currViewer.getViewingComponent());
     uiFactory.setInspector(inspector);
     uiFactory.setBeanShell(jterm);
     
@@ -245,12 +244,6 @@ class ViewerAppOld
     initTree();
     createMenu();
     frame.setVisible(true);
-    
-    String autoRenderProp = System.getProperty("de.jreality.ui.viewerapp.autorender", "true");
-    if (autoRenderProp.equalsIgnoreCase("false")) {
-      autoRender = false;
-    }
-    
   }
   
   void createFrame(Component comp)
@@ -277,7 +270,7 @@ class ViewerAppOld
   
   void toggleFullScreen() {
     isFullScreen = !isFullScreen;
-    handleFullScreen(isFullScreen, (Frame) frame,  currViewer.getViewingComponent());
+    handleFullScreen(isFullScreen, (Frame) frame,  (Component) currViewer.getViewingComponent());
     if (!isFullScreen) {
       frame.setJMenuBar(mb);
       frame.getContentPane().add(uiFactory.getViewer());
@@ -487,8 +480,8 @@ class ViewerAppOld
         String fileName = file.getPath();
         de.jreality.soft.SVGViewer rv = new de.jreality.soft.SVGViewer(fileName);
         rv.initializeFrom(viewerSwitch);
-        rv.setWidth(viewerSwitch.getViewingComponent().getWidth());
-        rv.setHeight(viewerSwitch.getViewingComponent().getHeight());
+        rv.setWidth((int) viewerSwitch.getViewingComponentSize().getWidth());
+        rv.setHeight((int) viewerSwitch.getViewingComponentSize().getHeight());
         rv.render();
 //      System.out.println("file name is "+fileName);
       }
@@ -648,7 +641,7 @@ class ViewerAppOld
 //        mi2.setSelected(true);
           viewerMenu.repaint();
           frame.validate();
-          currViewer.render();
+          currViewer.renderAsync();
           frame.repaint();
         }
       });
@@ -706,10 +699,6 @@ class ViewerAppOld
     } catch (Exception e) {
       e.printStackTrace();
     }
-    
-    if (autoRender && root != null)
-      renderTrigger.removeSceneGraphComponent(root);
-    
     root = s.getSceneRoot();
     currViewer.setSceneRoot(root);
     SceneGraphPath p = s.getPath("cameraPath");
@@ -723,19 +712,7 @@ class ViewerAppOld
       currViewer.setEmptyPickPath(emptyPick);
     }
     
-    uiFactory.setViewer(currViewer.getViewingComponent());
-    //uiFactory.setRoot(root);
-//    createFrame(uiFactory.getFullViewer());
-//    initFrame();
-//    initTree();
-    
-    if (autoRender)
-      renderTrigger.addSceneGraphComponent(root);
-    
-    renderTrigger.forceRender();
-    
-//  frame.repaint();
-//  CameraUtility.encompass(currViewer.getAvatarPath(), emptyPick, currViewer.getCameraPath());
+    uiFactory.setViewer((Component) currViewer.getViewingComponent());
   }
   
   private void loadScene(Viewer template) {
@@ -745,35 +722,12 @@ class ViewerAppOld
       e.printStackTrace();
     }
     
-    if (autoRender && root != null)
-      renderTrigger.removeSceneGraphComponent(root);
-    
     root = template.getSceneRoot();
     currViewer.setSceneRoot(root);
     SceneGraphPath p = template.getCameraPath();
     if (p != null) currViewer.setCameraPath(p);
     currViewer.initializeTools();
-//  p = s.getPath("avatarPath");
-//  if (p != null) currViewer.setAvatarPath(p);
-//  emptyPick = s.getPath("emptyPickPath");
-//  if (emptyPick != null) {
-//  currSceneNode = scene = emptyPick.getLastComponent();
-//  currViewer.setEmptyPickPath(emptyPick);
-//  }
-    
-    uiFactory.setViewer(currViewer.getViewingComponent());
-    //uiFactory.setRoot(root);
-//    createFrame(uiFactory.getFullViewer());
-//    initFrame();
-//    initTree();
-    
-    if (autoRender)
-      renderTrigger.addSceneGraphComponent(root);
-    
-    renderTrigger.forceRender();
-    
-//  frame.repaint();
-//  CameraUtility.encompass(currViewer.getAvatarPath(), emptyPick, currViewer.getCameraPath());
+    uiFactory.setViewer((Component) currViewer.getViewingComponent());
   }
   
   
@@ -801,8 +755,7 @@ class ViewerAppOld
       } catch (EvalError e) {
         e.printStackTrace();
       }
-      renderTrigger.addViewer(viewerSwitch);
-      viewerSwitch.getViewingComponent().addKeyListener(new KeyListener() {
+      ((Component) viewerSwitch.getViewingComponent()).addKeyListener(new KeyListener() {
         public void keyTyped(KeyEvent arg0) {
         }
         public void keyPressed(KeyEvent arg0) {
