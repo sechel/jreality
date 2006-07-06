@@ -38,49 +38,73 @@
  */
 
 
-package de.jreality.scene.tool;
+package de.jreality.toolsystem.virtual;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import de.jreality.scene.tool.AxisState;
+import de.jreality.scene.tool.InputSlot;
+import de.jreality.toolsystem.MissingSlotException;
+import de.jreality.toolsystem.ToolEvent;
+import de.jreality.toolsystem.VirtualDevice;
+import de.jreality.toolsystem.VirtualDeviceContext;
+
 /**
- * Abstract input device, addressed via a logical name.
+ * 
+ * TODO: implement this ;-)
+ *
  */
-public class InputSlot implements Serializable
-{
-    private static final Map name2device = new HashMap();
-    private final String name;
-    private InputSlot(String name)
-    {
-        this.name=name;
-    }
-    /**
-     * Get the canonical device for the logical name. Devices with the
-     * same name are meant to represent the same device and yield the
-     * same instance.
-     */
-    public static InputSlot getDevice(String name)
-    {
-      synchronized (name2device) {
-        Object old=name2device.get(name);
-        if(old!=null) return (InputSlot)old;
-        InputSlot dev=new InputSlot(name);
-        name2device.put(name, dev);
-        return dev;
-      }
-    }
-    public String getName() {
-      return name;
-    }
-    //TODO: something better here?
-    public String toString()
-    {
-        return name;
-    }
-    
-    Object readResolve() throws ObjectStreamException {
-      return getDevice(getName());
-    }
+public class VirtualExtractAxis implements VirtualDevice {
+
+	InputSlot inSlot, outSlot;
+	
+	private int index = -1;
+	double maxVal=1;
+	
+	AxisState state;
+	double lastVal=Double.MAX_VALUE;
+	
+	double gain = 1;
+	
+	public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
+    if ( index == -1 ) return null;
+		double newVal;
+        newVal = gain * context.getTransformationMatrix(inSlot).getValueAt(index);
+		lastVal = newVal;
+		return new ToolEvent(context.getEvent().getSource(), outSlot, new AxisState(newVal));
+	}
+
+	public void initialize(List inputSlots, InputSlot result,
+			Map configuration) {
+		inSlot = (InputSlot) inputSlots.get(0);
+		outSlot = result;
+		try {
+			gain = ((Double)configuration.get("gain")).doubleValue();
+		} catch (Exception e) {
+			// no gain set...
+		}
+		if (configuration.get("axis").equals("translationX")) {
+			index=3; return;
+		}
+		if (configuration.get("axis").equals("translationY")) {
+			index=7; return;
+		}
+		if (configuration.get("axis").equals("translationZ")) {
+			index=11; return;
+		}
+		try {
+			index = ((Integer)configuration.get("index")).intValue();
+		} catch (NumberFormatException nfe) {
+			throw new IllegalArgumentException("unsupported config string");
+		}
+	}
+
+	public void dispose() {
+	}
+
+	public String getName() {
+		return "ExtractAxis";
+	}
+
 }

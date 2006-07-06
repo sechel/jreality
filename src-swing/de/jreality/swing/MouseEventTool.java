@@ -52,8 +52,8 @@ import java.util.List;
 
 import de.jreality.scene.Geometry;
 import de.jreality.scene.pick.PickResult;
+import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
-import de.jreality.scene.tool.Tool;
 import de.jreality.scene.tool.ToolContext;
 
 /**
@@ -69,127 +69,118 @@ import de.jreality.scene.tool.ToolContext;
  * @author timh
  *
  */
-public class MouseEventTool extends Tool {
-    private Point oldPoint;
-    private Component comp;
+class MouseEventTool extends AbstractTool {
+  private Point oldPoint;
+  private Component comp;
+  
+  private Geometry current;
+  
+  private static InputSlot drag = InputSlot.getDevice("SecondaryAction");
+  private List activationSlots = new LinkedList();
+  private List usedSlots = new LinkedList();
+  
+  private int width;
+  private int height;
+  
+  private boolean dispatchLater = true;
+  
+  public MouseEventTool(Component c, boolean dispatchLater) {
+    super(drag);
+    this.comp = c;
+    this.dispatchLater = dispatchLater;
+    usedSlots.add(InputSlot.getDevice("PointerTransformation"));
+  }
+  
+  public MouseEventTool(Component c) {
+    this(c,true);
+  }
+  
+  public List getOutputSlots() {
+    return Collections.EMPTY_LIST;
+  }
 
-    private Geometry current;
+  public List getActivationSlots() {
+    return activationSlots;
+  }
+  
+  public List getCurrentSlots() {
+    return usedSlots;
+  }
 
-//    private InputSlot drag = InputSlot.getDevice("RotateActivation");
-//    private InputSlot drag = InputSlot.getDevice("SecondaryAction");
-    private InputSlot drag = InputSlot.getDevice("PrimarySelection");
-
-    private List activationSlots = new LinkedList();
-
-    private List usedSlots = new LinkedList();
-
-    private int width;
-
-    private int height;
-    private boolean dispatchLater = true;
-    
-    public MouseEventTool(Component c,boolean dispatchLater) {
-        super();
-        this.comp = c;
-        this.dispatchLater = dispatchLater;
+  public void activate(ToolContext e) {
+    try {
+      current = (Geometry) e.getCurrentPick().getPickPath().getLastElement();
+    } catch (Exception ex) {
+      // TODO:
     }
+    Point newPoint = generatePoint(e.getCurrentPick());
+    oldPoint = newPoint;
+    dispatchMouseEvent(newPoint, MouseEvent.MOUSE_PRESSED);
+  }
 
-    public MouseEventTool(Component c) {
-        this(c,true);
-    }
-    
-    {
-        activationSlots.add(drag);
-        usedSlots.add(InputSlot.getDevice("PointerTransformation"));
-    }
-
-    public List getOutputSlots() {
-        return Collections.EMPTY_LIST;
-    }
-
-    public List getActivationSlots() {
-        return activationSlots;
-    }
-
-    public List getCurrentSlots() {
-        return usedSlots;
-    }
-
-    public void activate(ToolContext e) {
-        try {
-            current = (Geometry) e.getCurrentPick().getPickPath()
-                    .getLastElement();
-        } catch (Exception ex) {
-        }
+  public void perform(ToolContext e) {
+    try {
+      if (current == (Geometry) e.getCurrentPick().getPickPath().getLastElement()) {
         Point newPoint = generatePoint(e.getCurrentPick());
-        oldPoint = newPoint;
-        dispatchMouseEvent(newPoint, MouseEvent.MOUSE_PRESSED);
+        dispatchMouseEvent(newPoint, MouseEvent.MOUSE_DRAGGED);
+      }
+    } catch (Exception ex) {
+      // TODO:
     }
+  }
 
-    public void perform(ToolContext e) {
-        try {
-            if (current == (Geometry) e.getCurrentPick().getPickPath()
-                    .getLastElement()) {
-                Point newPoint = generatePoint(e.getCurrentPick());
-                //oldPoint = newPoint;
-                dispatchMouseEvent(newPoint, MouseEvent.MOUSE_DRAGGED);
-            }
-        } catch (Exception ex) {
-        }
+  public void deactivate(ToolContext e) {
+    Point newPoint = generatePoint(e.getCurrentPick());
+    dispatchMouseEvent(newPoint, MouseEvent.MOUSE_RELEASED);
+    if(oldPoint.equals(newPoint)) {
+      dispatchMouseEvent(newPoint, MouseEvent.MOUSE_CLICKED);
     }
+    current = null;
+  }
 
-    public void deactivate(ToolContext e) {
-        Point newPoint = generatePoint(e.getCurrentPick());
-        dispatchMouseEvent(newPoint, MouseEvent.MOUSE_RELEASED);
-        if(oldPoint.equals(newPoint))
-            dispatchMouseEvent(newPoint, MouseEvent.MOUSE_CLICKED);
-        current = null;
+  private Point generatePoint(PickResult pr) {
+    Point newPoint = null;
+    if(pr != null) {
+      double tc[] = pr.getTextureCoordinates();
+      // if there are no texture coordinates use x, y in object space:
+      if(tc== null || tc.length<2) {
+        tc =  pr.getObjectCoordinates();
+        newPoint = new Point((int) ((1 - tc[0]) * width), (int) ((1 - tc[1]) * height));
+      } else {
+        newPoint = new Point((int) ((tc[0]) * width), (int) ((tc[1]) * height));
+      }
+    } else {// TODO better to remember the last Point and use that?
+      newPoint = new Point(0,0);
     }
+    return newPoint;
+  }    
+  
+  void dispatchMouseEvent(Point newPoint, int type) {
+    final MouseEvent newEvent = new MouseEvent(comp,
+        (int) type, System.currentTimeMillis(), InputEvent.BUTTON1_DOWN_MASK, newPoint.x,
+        newPoint.y, 1, false, MouseEvent.BUTTON1);
+    dispatchEvent(newEvent);
+  }
 
-    private Point generatePoint(PickResult pr) {
-        Point newPoint = null;
-        if(pr != null) {
-            double tc[] = pr.getTextureCoordinates();
-            
-            // if there are no texture coordinates use x, y in object space:
-            if(tc== null || tc.length<2) {
-                tc =  pr.getObjectCoordinates();
-            newPoint = new Point((int) ((1 - tc[0]) * width),
-                    (int) ((1 - tc[1]) * height));
-            } else
-                newPoint = new Point((int) ((tc[0]) * width),
-                        (int) ((tc[1]) * height));
-            } else // TODO better to remember the last Point and use that?
-            newPoint = new Point(0,0);
-        return newPoint;
-    }    
-        
-    void dispatchMouseEvent(Point newPoint, int type) {
-        final MouseEvent newEvent = new MouseEvent(comp,
-                (int) type, System.currentTimeMillis(), InputEvent.BUTTON1_DOWN_MASK, newPoint.x,
-                newPoint.y, 1, false, MouseEvent.BUTTON1);
-        //System.out.println("dispatching "+newEvent);
-        this.dispatchEvent(newEvent);
-    }
-
-    public void setSize(int width, int height) {
-        this.width = width;
-        this.height = height;
-    }
+  public void setSize(int width, int height) {
+    this.width = width;
+    this.height = height;
+  }
     
-    /**
-     * this method is safe as it executes in the DispatchThread.
-     * @param e
-     */
-    public void dispatchEvent(final AWTEvent e) {
-        if(dispatchLater)
-            EventQueue.invokeLater(new Runnable() {
-                public void run() {
-                    comp.dispatchEvent(e);
-                }
-            });
-        else
-            comp.dispatchEvent(e);
+  /**
+   * this method is safe as it executes in the DispatchThread.
+   * @param e
+   */
+  public void dispatchEvent(final AWTEvent e) {
+    if (dispatchLater) {
+      EventQueue.invokeLater(new Runnable() {
+        public void run() {
+          comp.dispatchEvent(e);
+        }
+      });
+    } else {
+      comp.dispatchEvent(e);
     }
+  }
 
 }

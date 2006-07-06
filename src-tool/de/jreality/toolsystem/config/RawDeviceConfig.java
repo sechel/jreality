@@ -38,49 +38,56 @@
  */
 
 
-package de.jreality.scene.tool;
+package de.jreality.toolsystem.config;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.beans.DefaultPersistenceDelegate;
+import java.beans.PersistenceDelegate;
+import java.util.logging.Level;
+
+import de.jreality.toolsystem.raw.RawDevice;
+import de.jreality.util.LoggingSystem;
+
 
 /**
- * Abstract input device, addressed via a logical name.
+ *
+ * TODO: comment this
+ *
+ * @author weissman
+ *
  */
-public class InputSlot implements Serializable
-{
-    private static final Map name2device = new HashMap();
-    private final String name;
-    private InputSlot(String name)
-    {
-        this.name=name;
+public class RawDeviceConfig {
+
+  public static final PersistenceDelegate DELEGATE = new DefaultPersistenceDelegate(
+      new String[]{"rawDevice", "deviceID"}
+  );
+  
+  private final String deviceID;
+  private final String rawDevice;
+  
+  public RawDeviceConfig(String type, String deviceID) {
+    this.deviceID=deviceID;
+    this.rawDevice = type;
+  }
+  
+  public String getRawDevice() {
+    return rawDevice;
+  }
+  
+  public String getDeviceID() {
+    return deviceID;
+  }
+  
+  public String toString() {
+    return deviceID + "["+rawDevice+"]";
+  }
+  
+  public RawDevice createDevice() throws InstantiationException {
+    try {
+      RawDevice dev = (RawDevice) Class.forName(rawDevice).newInstance();
+      return dev;
+    } catch (Throwable t) {
+      LoggingSystem.getLogger(this).log(Level.CONFIG, "cannot create raw device", t);
+      throw new InstantiationException("cannot create raw device:"+rawDevice);
     }
-    /**
-     * Get the canonical device for the logical name. Devices with the
-     * same name are meant to represent the same device and yield the
-     * same instance.
-     */
-    public static InputSlot getDevice(String name)
-    {
-      synchronized (name2device) {
-        Object old=name2device.get(name);
-        if(old!=null) return (InputSlot)old;
-        InputSlot dev=new InputSlot(name);
-        name2device.put(name, dev);
-        return dev;
-      }
-    }
-    public String getName() {
-      return name;
-    }
-    //TODO: something better here?
-    public String toString()
-    {
-        return name;
-    }
-    
-    Object readResolve() throws ObjectStreamException {
-      return getDevice(getName());
-    }
+  }
 }

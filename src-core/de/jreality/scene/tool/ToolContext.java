@@ -40,17 +40,21 @@
 
 package de.jreality.scene.tool;
 
+import java.util.Iterator;
+
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.pick.PickResult;
+import de.jreality.scene.pick.PickSystem;
 
-/**
- */
 public interface ToolContext
 {
     Viewer getViewer();
     
+    /**
+     * @return the source that triggers activation/perform/deactivate.
+     */
     InputSlot getSource();
     
     DoubleArray getTransformationMatrix(InputSlot slot);
@@ -76,11 +80,9 @@ public interface ToolContext
     
     PickResult getCurrentPick();
     
-    public void schedule(Object key, AnimatorTask task);
+    public SceneGraphPath getAvatarPath();
     
-    public void deschedule(Object key);
-
-    public ToolSystem getToolSystem();
+    public PickSystem getPickSystem();
     
     /**
      * a tool calls this method during activation
@@ -89,9 +91,14 @@ public interface ToolContext
      * the activate call. calling this method at any other
      * time than activation, it has absolutely no effect.
      * 
-     * PENDING: possibly we should put this as a boolean return
-     * value for activate(TC);
-     *
      */
     public void reject();
+    
+    /**
+     * Selection is not implemented, but the ToolContext already contains
+     * it - to avoid future code incompatibilities.
+     * 
+     * @return an Iterator over the currently selected paths.
+     */
+    public Iterator getSelection();
 }

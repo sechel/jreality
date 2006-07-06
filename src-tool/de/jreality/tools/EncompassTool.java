@@ -38,49 +38,52 @@
  */
 
 
-package de.jreality.scene.tool;
+package de.jreality.tools;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import de.jreality.math.Matrix;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.tool.AbstractTool;
+import de.jreality.scene.tool.InputSlot;
+import de.jreality.scene.tool.ToolContext;
+import de.jreality.util.CameraUtility;
 
 /**
- * Abstract input device, addressed via a logical name.
+ *
+ * TODO: document this
+ *
+ * @author brinkman
+ *
  */
-public class InputSlot implements Serializable
-{
-    private static final Map name2device = new HashMap();
-    private final String name;
-    private InputSlot(String name)
-    {
-        this.name=name;
-    }
-    /**
-     * Get the canonical device for the logical name. Devices with the
-     * same name are meant to represent the same device and yield the
-     * same instance.
-     */
-    public static InputSlot getDevice(String name)
-    {
-      synchronized (name2device) {
-        Object old=name2device.get(name);
-        if(old!=null) return (InputSlot)old;
-        InputSlot dev=new InputSlot(name);
-        name2device.put(name, dev);
-        return dev;
+public class EncompassTool extends AbstractTool {
+	
+	double margin = 1.25;		// value greater than one creates a margin around the encompassed object  
+
+  static InputSlot encompassSlot = InputSlot.getDevice("EncompassActivation");
+
+  public EncompassTool() {
+    super(null);
+    addCurrentSlot(encompassSlot);
+  }
+
+  transient SceneGraphComponent comp;
+
+  transient Matrix centerTranslation = new Matrix();
+
+  public void perform(ToolContext tc) {
+    if (tc.getAxisState(encompassSlot).isPressed()) {
+      if (false) {
+        CameraUtility.encompass(tc.getViewer());
       }
+      // TODO get the signature from the effective appearance of avatar path
+      CameraUtility.encompass(tc.getAvatarPath(), tc.getRootToLocal(), tc.getViewer().getCameraPath(), margin, tc.getViewer().getSignature());
     }
-    public String getName() {
-      return name;
-    }
-    //TODO: something better here?
-    public String toString()
-    {
-        return name;
-    }
-    
-    Object readResolve() throws ObjectStreamException {
-      return getDevice(getName());
-    }
+  }
+
+  public void setMargin(double p)	{
+	  margin = p;
+  }
+  
+  public double getMargin()	{
+	  return margin;
+  }
 }

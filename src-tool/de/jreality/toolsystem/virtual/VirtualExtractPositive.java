@@ -38,49 +38,71 @@
  */
 
 
-package de.jreality.scene.tool;
+package de.jreality.toolsystem.virtual;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import de.jreality.scene.tool.AxisState;
+import de.jreality.scene.tool.InputSlot;
+import de.jreality.toolsystem.MissingSlotException;
+import de.jreality.toolsystem.ToolEvent;
+import de.jreality.toolsystem.VirtualDevice;
+import de.jreality.toolsystem.VirtualDeviceContext;
+
+
 /**
- * Abstract input device, addressed via a logical name.
+ *
+ * TODO: comment this
+ *
+ * @author weissman
+ *
  */
-public class InputSlot implements Serializable
-{
-    private static final Map name2device = new HashMap();
-    private final String name;
-    private InputSlot(String name)
-    {
-        this.name=name;
+public class VirtualExtractPositive implements VirtualDevice {
+
+  InputSlot inAxis, outSlot;
+  
+  AxisState state = AxisState.ORIGIN;
+  
+  double min;
+  
+  public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
+    double val = context.getAxisState(inAxis).doubleValue();
+    if (updateState(val)) return new ToolEvent(context.getEvent().getSource(), outSlot, state);
+    else return null;
+  }
+
+  /**
+   * @param val
+   * @return true if the state has changed
+   */
+  protected boolean updateState(double val) {
+    if (state == AxisState.ORIGIN && val > min) {
+      state = AxisState.PRESSED;
+      return true;
     }
-    /**
-     * Get the canonical device for the logical name. Devices with the
-     * same name are meant to represent the same device and yield the
-     * same instance.
-     */
-    public static InputSlot getDevice(String name)
-    {
-      synchronized (name2device) {
-        Object old=name2device.get(name);
-        if(old!=null) return (InputSlot)old;
-        InputSlot dev=new InputSlot(name);
-        name2device.put(name, dev);
-        return dev;
-      }
+    if (state == AxisState.PRESSED && val <= min) {
+      state = AxisState.ORIGIN;
+      return true;
     }
-    public String getName() {
-      return name;
-    }
-    //TODO: something better here?
-    public String toString()
-    {
-        return name;
-    }
-    
-    Object readResolve() throws ObjectStreamException {
-      return getDevice(getName());
-    }
+    return false;
+  }
+
+  public void initialize(List inputSlots, InputSlot result, Map configuration) {
+    inAxis = (InputSlot) inputSlots.get(0);
+    outSlot = result;
+    min = ((Double)configuration.get("threshold")).doubleValue();
+  }
+
+  public void dispose() {
+  }
+
+  public String getName() {
+    return "ExtractPositive";
+  }
+  
+  public String toString() {
+    return "Virtual Device: "+getName();
+  }
+
 }

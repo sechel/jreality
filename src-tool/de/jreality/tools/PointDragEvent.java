@@ -38,49 +38,53 @@
  */
 
 
-package de.jreality.scene.tool;
+package de.jreality.tools;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.EventObject;
 
-/**
- * Abstract input device, addressed via a logical name.
- */
-public class InputSlot implements Serializable
-{
-    private static final Map name2device = new HashMap();
-    private final String name;
-    private InputSlot(String name)
-    {
-        this.name=name;
-    }
-    /**
-     * Get the canonical device for the logical name. Devices with the
-     * same name are meant to represent the same device and yield the
-     * same instance.
-     */
-    public static InputSlot getDevice(String name)
-    {
-      synchronized (name2device) {
-        Object old=name2device.get(name);
-        if(old!=null) return (InputSlot)old;
-        InputSlot dev=new InputSlot(name);
-        name2device.put(name, dev);
-        return dev;
-      }
-    }
-    public String getName() {
-      return name;
-    }
-    //TODO: something better here?
-    public String toString()
-    {
-        return name;
-    }
+import de.jreality.scene.PointSet;
+
+/** The event that signals that some Point of a pointset is being dragged. */
+
+public class PointDragEvent extends EventObject {
     
-    Object readResolve() throws ObjectStreamException {
-      return getDevice(getName());
-    }
+	private static final long serialVersionUID = 1984L;
+
+  private final int index;
+  private final double[] position;
+	private final PointSet pointSet;
+  
+	public PointDragEvent(PointSet pointSet, int index, double[] position) {
+		super(pointSet);
+    this.pointSet=pointSet;
+    this.index=index;
+    this.position = (double[])position.clone();
+	}
+	
+	/** The x-coordinate of this event's position. */
+	public double getX() {
+		return position[0];
+	}
+	
+	/** The y-coordinate of this event's position. */
+	public double getY() {
+		return position[1];
+	}
+	
+	/** The z-coordinate of this event's position. */
+	public double getZ() {
+		return position[2];
+	}
+
+  public double[] getPosition() {
+    return (double[]) position.clone();
+  }
+  
+  public int getIndex() {
+    return index;
+  }
+  public PointSet getPointSet() {
+    return pointSet;
+  }
 }
+

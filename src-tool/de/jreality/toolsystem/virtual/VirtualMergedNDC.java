@@ -38,49 +38,64 @@
  */
 
 
-package de.jreality.scene.tool;
+package de.jreality.toolsystem.virtual;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import de.jreality.math.Matrix;
+import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.tool.InputSlot;
+import de.jreality.toolsystem.MissingSlotException;
+import de.jreality.toolsystem.ToolEvent;
+import de.jreality.toolsystem.VirtualDevice;
+import de.jreality.toolsystem.VirtualDeviceContext;
+
+
 /**
- * Abstract input device, addressed via a logical name.
+ *
+ * TODO: comment this
+ *
+ * @author weissman
+ *
  */
-public class InputSlot implements Serializable
-{
-    private static final Map name2device = new HashMap();
-    private final String name;
-    private InputSlot(String name)
-    {
-        this.name=name;
+public class VirtualMergedNDC implements VirtualDevice {
+
+  InputSlot inX, inY, outSlot;
+  DoubleArray da;
+  Matrix mat = new Matrix();
+  
+  public VirtualMergedNDC() {
+    da = new DoubleArray(mat.getArray());
+    // set Z to -1
+    mat.setEntry(2, 3, -1);
+  }
+  
+  public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
+    try {
+    mat.setEntry(0, 3, context.getAxisState(inX).doubleValue());
+    mat.setEntry(1, 3, context.getAxisState(inY).doubleValue());
+    return new ToolEvent(context.getEvent().getSource(), outSlot, da);
+    } catch (NullPointerException ne) {
+      return null;
     }
-    /**
-     * Get the canonical device for the logical name. Devices with the
-     * same name are meant to represent the same device and yield the
-     * same instance.
-     */
-    public static InputSlot getDevice(String name)
-    {
-      synchronized (name2device) {
-        Object old=name2device.get(name);
-        if(old!=null) return (InputSlot)old;
-        InputSlot dev=new InputSlot(name);
-        name2device.put(name, dev);
-        return dev;
-      }
-    }
-    public String getName() {
-      return name;
-    }
-    //TODO: something better here?
-    public String toString()
-    {
-        return name;
-    }
-    
-    Object readResolve() throws ObjectStreamException {
-      return getDevice(getName());
-    }
+  }
+
+  public void initialize(List inputSlots, InputSlot result, Map configuration) {
+    inX = (InputSlot) inputSlots.get(0);
+    inY = (InputSlot) inputSlots.get(1);
+    outSlot = result;
+  }
+
+  public void dispose() {
+  }
+
+  public String getName() {
+    return "MergedNDC";
+  }
+  
+  public String toString() {
+    return "Virtual Device: "+getName();
+  }
+
 }

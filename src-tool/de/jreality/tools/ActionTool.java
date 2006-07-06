@@ -38,49 +38,71 @@
  */
 
 
-package de.jreality.scene.tool;
+package de.jreality.tools;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import de.jreality.scene.tool.AbstractTool;
+import de.jreality.scene.tool.InputSlot;
+import de.jreality.scene.tool.ToolContext;
 
 /**
- * Abstract input device, addressed via a logical name.
+ * @author Ulrich
  */
-public class InputSlot implements Serializable
-{
-    private static final Map name2device = new HashMap();
-    private final String name;
-    private InputSlot(String name)
-    {
-        this.name=name;
-    }
-    /**
-     * Get the canonical device for the logical name. Devices with the
-     * same name are meant to represent the same device and yield the
-     * same instance.
-     */
-    public static InputSlot getDevice(String name)
-    {
-      synchronized (name2device) {
-        Object old=name2device.get(name);
-        if(old!=null) return (InputSlot)old;
-        InputSlot dev=new InputSlot(name);
-        name2device.put(name, dev);
-        return dev;
-      }
-    }
-    public String getName() {
-      return name;
-    }
-    //TODO: something better here?
-    public String toString()
-    {
-        return name;
+
+public class ActionTool extends AbstractTool {
+
+    private int numListener;
+    private ActionListener[] listener;
+    private final Object mutex=new Object();
+    
+    public ActionTool(InputSlot activationSlot) {
+      super(activationSlot);
+      numListener=0;
+      listener = new ActionListener[10];
     }
     
-    Object readResolve() throws ObjectStreamException {
-      return getDevice(getName());
+    public ActionTool(String activationSlotName) {
+      this(InputSlot.getDevice(activationSlotName));
+    }
+    
+    public void activate(ToolContext tc) {
+      fire(tc);
+    }
+    
+    public void fire(Object obj) {
+      synchronized(mutex) {
+        ActionEvent ev = new ActionEvent(obj,0,"ActionTool");
+        for(int i=0; i<numListener; i++) {
+          listener[i].actionPerformed(ev);
+        }
+      }
+    }
+    public void addActionListener(ActionListener l) {
+      synchronized(mutex) {
+        if(numListener==listener.length) {
+          ActionListener[] newListener=new ActionListener[numListener+10];
+          System.arraycopy(listener,0,newListener,0,numListener);
+          listener=newListener;
+        }
+        listener[numListener++]=l;
+      }
+    }
+    
+    public void removeActionListener(ActionListener l) {
+      synchronized(mutex) {
+        int i;
+        find: {
+          for(i=0; i<numListener; i++)
+            if(listener[i]==l) break find;
+          return;
+        }
+        numListener--;
+        if(i!=numListener) {
+          System.arraycopy(listener,i+1,listener,i,numListener-i);
+        }
+        listener[numListener]=null;
+      }
     }
 }

@@ -38,49 +38,73 @@
  */
 
 
-package de.jreality.scene.tool;
+package de.jreality.toolsystem.virtual;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import de.jreality.math.MatrixBuilder;
+import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.tool.InputSlot;
+import de.jreality.toolsystem.MissingSlotException;
+import de.jreality.toolsystem.ToolEvent;
+import de.jreality.toolsystem.VirtualDevice;
+import de.jreality.toolsystem.VirtualDeviceContext;
+import de.jreality.util.LoggingSystem;
+
+
 /**
- * Abstract input device, addressed via a logical name.
+ *
+ * TODO: comment this
+ *
+ * @author weissman
+ *
  */
-public class InputSlot implements Serializable
-{
-    private static final Map name2device = new HashMap();
-    private final String name;
-    private InputSlot(String name)
-    {
-        this.name=name;
-    }
-    /**
-     * Get the canonical device for the logical name. Devices with the
-     * same name are meant to represent the same device and yield the
-     * same instance.
-     */
-    public static InputSlot getDevice(String name)
-    {
-      synchronized (name2device) {
-        Object old=name2device.get(name);
-        if(old!=null) return (InputSlot)old;
-        InputSlot dev=new InputSlot(name);
-        name2device.put(name, dev);
-        return dev;
-      }
-    }
-    public String getName() {
-      return name;
-    }
-    //TODO: something better here?
-    public String toString()
-    {
-        return name;
-    }
+public class VirtualPortalRotation implements VirtualDevice {
+
+    InputSlot inSlot;
+    InputSlot outSlot;
     
-    Object readResolve() throws ObjectStreamException {
-      return getDevice(getName());
+    double oldAxis;
+    boolean isFirst = true;
+    
+    double slotValue[] = new double[16];
+    DoubleArray outTrafo = new DoubleArray(slotValue);
+    
+    MatrixBuilder mb = MatrixBuilder.euclidean();
+    
+    double gain = 1;
+    
+    public ToolEvent process(VirtualDeviceContext context)
+      throws MissingSlotException {
+    	try {
+    	if (!context.getAxisState(inSlot).isReleased()) {
+          mb.reset().rotateY(gain*context.getAxisState(inSlot).doubleValue()).assignTo(slotValue);
+          return new ToolEvent(context.getEvent().getSource(), outSlot, outTrafo);
+    	}
+    	} catch (Exception e) {
+    		throw new MissingSlotException(inSlot);
+    	}
+    	return null;
+  }
+
+    public void initialize(List inputSlots, InputSlot result, Map configuration) {
+        inSlot = (InputSlot) inputSlots.get(0);
+        outSlot = result;
+        try {
+            gain = ((Double)configuration.get("gain")).doubleValue();
+          } catch (NumberFormatException nfe) {
+            LoggingSystem.getLogger(this).warning("unsupported config string");
+          }
     }
+
+    public void dispose() {
+        // TODO Auto-generated method stub
+
+    }
+
+    public String getName() {
+        return "DeltaTrafo";
+    }
+
 }

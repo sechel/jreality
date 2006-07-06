@@ -38,49 +38,65 @@
  */
 
 
-package de.jreality.scene.tool;
+package de.jreality.tools;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.tool.AbstractTool;
+import de.jreality.scene.tool.InputSlot;
+import de.jreality.scene.tool.ToolContext;
 
 /**
- * Abstract input device, addressed via a logical name.
- */
-public class InputSlot implements Serializable
-{
-    private static final Map name2device = new HashMap();
-    private final String name;
-    private InputSlot(String name)
-    {
-        this.name=name;
-    }
-    /**
-     * Get the canonical device for the logical name. Devices with the
-     * same name are meant to represent the same device and yield the
-     * same instance.
-     */
-    public static InputSlot getDevice(String name)
-    {
-      synchronized (name2device) {
-        Object old=name2device.get(name);
-        if(old!=null) return (InputSlot)old;
-        InputSlot dev=new InputSlot(name);
-        name2device.put(name, dev);
-        return dev;
-      }
-    }
-    public String getName() {
-      return name;
-    }
-    //TODO: something better here?
-    public String toString()
-    {
-        return name;
-    }
-    
-    Object readResolve() throws ObjectStreamException {
-      return getDevice(getName());
-    }
+ * @author weissman
+ *
+ **/
+public class ShipRotateTool extends AbstractTool {
+  
+  InputSlot leftRightSlot = InputSlot.getDevice("LeftRightAxis");
+  InputSlot timerSlot = InputSlot.getDevice("SystemTime");
+  
+  double angle;
+  boolean isRotating;
+  
+  double gain=1;
+  
+  public ShipRotateTool() {
+    super(null);
+	  addCurrentSlot(leftRightSlot);
+  }
+  
+  double[] tmp = new double[16];
+  public void perform(ToolContext tc) {
+	if (tc.getSource() == leftRightSlot) {
+		angle = tc.getAxisState(leftRightSlot).doubleValue();
+		angle = angle*angle*angle;
+		if (tc.getAxisState(leftRightSlot).isReleased()) {
+			isRotating = false;
+			removeCurrentSlot(timerSlot);
+			return;
+		}
+		if (!isRotating) {
+			isRotating = true;
+			addCurrentSlot(timerSlot);
+		}
+		return;
+	}
+    SceneGraphComponent ship = tc.getRootToToolComponent().getLastComponent();
+
+    Matrix shipMatrix = new Matrix();
+    if (ship.getTransformation() != null) shipMatrix.assignFrom(ship.getTransformation());
+
+    double val = tc.getAxisState(timerSlot).intValue()*0.001;
+    MatrixBuilder.euclidean(shipMatrix).rotateY(val*angle*gain).assignTo(ship);
+  }
+
+  public double getGain() {
+  	return gain;
+  }
+  
+  public void setGain(double gain) {
+  	this.gain = gain;
+  }
+
 }

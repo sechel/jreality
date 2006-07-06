@@ -38,49 +38,61 @@
  */
 
 
-package de.jreality.scene.tool;
+package de.jreality.toolsystem.config;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.beans.DefaultPersistenceDelegate;
+import java.beans.PersistenceDelegate;
+
+import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.tool.AxisState;
+import de.jreality.scene.tool.InputSlot;
+
 
 /**
- * Abstract input device, addressed via a logical name.
+ *
+ * TODO: comment this
+ *
+ * @author weissman
+ *
  */
-public class InputSlot implements Serializable
-{
-    private static final Map name2device = new HashMap();
-    private final String name;
-    private InputSlot(String name)
-    {
-        this.name=name;
+public class VirtualConstant {
+  
+  public static final PersistenceDelegate DELEGATE = new DefaultPersistenceDelegate(new String[]{
+    "slot", "value"
+  });
+
+  private InputSlot slot;
+  private double[] trafo;
+  private Double axis;
+  private boolean isTrafo;
+
+  public VirtualConstant(InputSlot slot, Object value) {
+    this.slot=slot;
+    if (value instanceof Double) {
+      axis = (Double)value;
+    } else {
+      trafo = (double[]) value;
+      if (trafo.length != 16) throw new IllegalArgumentException("no 4x4 matrix");
+      isTrafo=true;
     }
-    /**
-     * Get the canonical device for the logical name. Devices with the
-     * same name are meant to represent the same device and yield the
-     * same instance.
-     */
-    public static InputSlot getDevice(String name)
-    {
-      synchronized (name2device) {
-        Object old=name2device.get(name);
-        if(old!=null) return (InputSlot)old;
-        InputSlot dev=new InputSlot(name);
-        name2device.put(name, dev);
-        return dev;
-      }
-    }
-    public String getName() {
-      return name;
-    }
-    //TODO: something better here?
-    public String toString()
-    {
-        return name;
-    }
-    
-    Object readResolve() throws ObjectStreamException {
-      return getDevice(getName());
-    }
+  }
+  
+  public InputSlot getSlot() {
+    return slot;
+  }
+  public boolean isTrafo() {
+    return isTrafo;
+  }
+  public AxisState getAxisState() {
+    if (isTrafo) return null;
+    return new AxisState(axis.doubleValue());
+  }
+  public DoubleArray getTransformationMatrix() {
+    if (!isTrafo) return null;
+    return new DoubleArray(trafo);
+  }
+  public String toString() {
+    return "VirtualConstant: "+slot+"->"+(isTrafo ? new DoubleArray(trafo).toString() : new AxisState(axis.doubleValue()).toString());
+  }
+
 }

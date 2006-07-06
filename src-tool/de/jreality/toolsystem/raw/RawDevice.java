@@ -38,49 +38,30 @@
  */
 
 
-package de.jreality.scene.tool;
+package de.jreality.toolsystem.raw;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import de.jreality.scene.Viewer;
+import de.jreality.scene.tool.InputSlot;
+import de.jreality.toolsystem.AbstractDevice;
+import de.jreality.toolsystem.ToolEvent;
+import de.jreality.toolsystem.ToolEventQueue;
 
 /**
- * Abstract input device, addressed via a logical name.
- */
-public class InputSlot implements Serializable
-{
-    private static final Map name2device = new HashMap();
-    private final String name;
-    private InputSlot(String name)
-    {
-        this.name=name;
-    }
+ * @author weissman
+ *
+ **/
+public interface RawDevice extends AbstractDevice {
+
+    public void setEventQueue(ToolEventQueue queue);
+    public void initialize(Viewer viewer);
     /**
-     * Get the canonical device for the logical name. Devices with the
-     * same name are meant to represent the same device and yield the
-     * same instance.
+     * 
+     * @param rawDeviceName
+     * @param inputDevice
+     * @return a ToolEvent representing a reasonable initial 
+     *         value for the mapping - that means the source
+     *         must be the given input slot!
      */
-    public static InputSlot getDevice(String name)
-    {
-      synchronized (name2device) {
-        Object old=name2device.get(name);
-        if(old!=null) return (InputSlot)old;
-        InputSlot dev=new InputSlot(name);
-        name2device.put(name, dev);
-        return dev;
-      }
-    }
-    public String getName() {
-      return name;
-    }
-    //TODO: something better here?
-    public String toString()
-    {
-        return name;
-    }
+    public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice);
     
-    Object readResolve() throws ObjectStreamException {
-      return getDevice(getName());
-    }
 }

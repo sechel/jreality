@@ -38,49 +38,76 @@
  */
 
 
-package de.jreality.scene.tool;
+package de.jreality.tools;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+
+import de.jreality.scene.tool.AbstractTool;
+import de.jreality.scene.tool.InputSlot;
+import de.jreality.scene.tool.ToolContext;
+import de.jreality.toolsystem.AnimatorTask;
+
 
 /**
- * Abstract input device, addressed via a logical name.
+ *
+ * TODO: comment this
+ *
+ * @author weissman
+ *
  */
-public class InputSlot implements Serializable
-{
-    private static final Map name2device = new HashMap();
-    private final String name;
-    private InputSlot(String name)
-    {
-        this.name=name;
-    }
-    /**
-     * Get the canonical device for the logical name. Devices with the
-     * same name are meant to represent the same device and yield the
-     * same instance.
-     */
-    public static InputSlot getDevice(String name)
-    {
-      synchronized (name2device) {
-        Object old=name2device.get(name);
-        if(old!=null) return (InputSlot)old;
-        InputSlot dev=new InputSlot(name);
-        name2device.put(name, dev);
-        return dev;
+public class AnimatorTool extends AbstractTool {
+
+  private static InputSlot timer = InputSlot.getDevice("SystemTime");
+
+  public static AnimatorTool getInstance() {
+    return instance;
+  }
+  
+  private IdentityHashMap animators = new IdentityHashMap();
+  private final Object mutex = new Object();
+
+  private AnimatorTool() {
+    super(null);
+    addCurrentSlot(timer);
+  }
+
+  private double dtime;
+  private double intervall=15;
+  
+  public void perform(ToolContext tc) {
+    dtime += tc.getAxisState(timer).intValue();
+    if (dtime < intervall) return; 
+    synchronized (mutex) {
+      for (Iterator i = animators.values().iterator(); i.hasNext(); ) {
+        AnimatorTask task = (AnimatorTask)i.next();
+        if (!task.run(System.currentTimeMillis(), dtime)) {
+          i.remove();
+        }
       }
     }
-    public String getName() {
-      return name;
+  }
+
+  public void schedule(Object key, AnimatorTask task) {
+    synchronized (mutex) {
+      animators.put(key, task);
     }
-    //TODO: something better here?
-    public String toString()
-    {
-        return name;
+  }
+  
+  public void deschedule(Object key) {
+    synchronized (mutex) {
+      animators.remove(key);
     }
-    
-    Object readResolve() throws ObjectStreamException {
-      return getDevice(getName());
-    }
+  }
+
+  private static AnimatorTool instance = new AnimatorTool();
+
+  public double getIntervall() {
+    return intervall;
+  }
+
+  public void setIntervall(double intervall) {
+    this.intervall = intervall;
+  }
+  
 }

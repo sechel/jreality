@@ -38,49 +38,51 @@
  */
 
 
-package de.jreality.scene.tool;
+package de.jreality.toolsystem.virtual;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import de.jreality.scene.tool.AxisState;
+import de.jreality.scene.tool.InputSlot;
+import de.jreality.toolsystem.MissingSlotException;
+import de.jreality.toolsystem.ToolEvent;
+import de.jreality.toolsystem.VirtualDevice;
+import de.jreality.toolsystem.VirtualDeviceContext;
+
+
 /**
- * Abstract input device, addressed via a logical name.
+ *
+ * TODO: comment this
+ *
+ * @author weissman
+ *
  */
-public class InputSlot implements Serializable
-{
-    private static final Map name2device = new HashMap();
-    private final String name;
-    private InputSlot(String name)
-    {
-        this.name=name;
-    }
-    /**
-     * Get the canonical device for the logical name. Devices with the
-     * same name are meant to represent the same device and yield the
-     * same instance.
-     */
-    public static InputSlot getDevice(String name)
-    {
-      synchronized (name2device) {
-        Object old=name2device.get(name);
-        if(old!=null) return (InputSlot)old;
-        InputSlot dev=new InputSlot(name);
-        name2device.put(name, dev);
-        return dev;
-      }
-    }
-    public String getName() {
-      return name;
-    }
-    //TODO: something better here?
-    public String toString()
-    {
-        return name;
-    }
-    
-    Object readResolve() throws ObjectStreamException {
-      return getDevice(getName());
-    }
+public class VirtualMergedAxis implements VirtualDevice {
+
+  InputSlot inPlus, inMinus, outSlot;
+  
+  public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
+    AxisState minus = context.getAxisState(inMinus) == null ? AxisState.ORIGIN : context.getAxisState(inMinus);
+    AxisState plus = context.getAxisState(inPlus) == null ? AxisState.ORIGIN : context.getAxisState(inPlus);
+    return new ToolEvent(context.getEvent().getSource(), outSlot, new AxisState(plus.intValue()-minus.intValue()));
+  }
+
+  public void initialize(List inputSlots, InputSlot result, Map configuration) {
+    inMinus = (InputSlot) inputSlots.get(0);
+    inPlus = (InputSlot) inputSlots.get(1);
+    outSlot = result;
+  }
+
+  public void dispose() {
+  }
+
+  public String getName() {
+    return "MergedAxis";
+  }
+  
+  public String toString() {
+    return "Virtual Device: "+getName();
+  }
+
 }

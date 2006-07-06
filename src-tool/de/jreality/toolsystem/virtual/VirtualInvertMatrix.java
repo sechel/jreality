@@ -38,49 +38,52 @@
  */
 
 
-package de.jreality.scene.tool;
+package de.jreality.toolsystem.virtual;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import de.jreality.math.Rn;
+import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.tool.InputSlot;
+import de.jreality.toolsystem.MissingSlotException;
+import de.jreality.toolsystem.ToolEvent;
+import de.jreality.toolsystem.VirtualDevice;
+import de.jreality.toolsystem.VirtualDeviceContext;
+
+
 /**
- * Abstract input device, addressed via a logical name.
+ *
+ * TODO: comment this
+ *
+ * @author weissman
+ *
  */
-public class InputSlot implements Serializable
-{
-    private static final Map name2device = new HashMap();
-    private final String name;
-    private InputSlot(String name)
-    {
-        this.name=name;
-    }
-    /**
-     * Get the canonical device for the logical name. Devices with the
-     * same name are meant to represent the same device and yield the
-     * same instance.
-     */
-    public static InputSlot getDevice(String name)
-    {
-      synchronized (name2device) {
-        Object old=name2device.get(name);
-        if(old!=null) return (InputSlot)old;
-        InputSlot dev=new InputSlot(name);
-        name2device.put(name, dev);
-        return dev;
-      }
-    }
-    public String getName() {
-      return name;
-    }
-    //TODO: something better here?
-    public String toString()
-    {
-        return name;
-    }
-    
-    Object readResolve() throws ObjectStreamException {
-      return getDevice(getName());
-    }
+public class VirtualInvertMatrix implements VirtualDevice {
+
+  InputSlot outSlot;
+  InputSlot matrixIn;
+  
+  public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
+    DoubleArray matrixDAA = context.getTransformationMatrix(matrixIn);
+    double[] matrix = matrixDAA.toDoubleArray(null);
+    double[] inverse = Rn.inverse(null, matrix);
+    return new ToolEvent(context.getEvent().getSource(), outSlot, new DoubleArray(inverse));
+  }
+
+  public void initialize(List inputSlots, InputSlot result, Map configuration) {
+    outSlot = result;
+    matrixIn = (InputSlot) inputSlots.get(0);
+  }
+
+  public void dispose() {
+  }
+
+  public String getName() {
+    return "InvertMatrix";
+  }
+
+  public String toString() {
+    return "VirtualDevice: "+getName();
+  }
 }

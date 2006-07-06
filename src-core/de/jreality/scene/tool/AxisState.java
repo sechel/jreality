@@ -41,7 +41,7 @@
 package de.jreality.scene.tool;
 
 /**
- * 
+ * Represents a button or a double value for tools.
  */
 public final class AxisState
 {

@@ -83,6 +83,7 @@ public class JFakeFrame extends JFrame {
               
               appearance = new Appearance();
               appearance.setAttribute(CommonAttributes.DIFFUSE_COLOR,Color.WHITE);
+              appearance.setAttribute(CommonAttributes.VERTEX_DRAW, false);
               appearance.setAttribute(CommonAttributes.EDGE_DRAW, false);
               appearance.setAttribute(CommonAttributes.TUBES_DRAW, false);
               System.out.println(RepaintManager.currentManager(this));

@@ -38,49 +38,43 @@
  */
 
 
-package de.jreality.scene.tool;
+package de.jreality.toolsystem.config;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.beans.DefaultPersistenceDelegate;
+import java.beans.PersistenceDelegate;
+
+import de.jreality.scene.tool.InputSlot;
+
 
 /**
- * Abstract input device, addressed via a logical name.
+ *
+ * TODO: comment this
+ *
+ * @author weissman
+ *
  */
-public class InputSlot implements Serializable
-{
-    private static final Map name2device = new HashMap();
-    private final String name;
-    private InputSlot(String name)
-    {
-        this.name=name;
-    }
-    /**
-     * Get the canonical device for the logical name. Devices with the
-     * same name are meant to represent the same device and yield the
-     * same instance.
-     */
-    public static InputSlot getDevice(String name)
-    {
-      synchronized (name2device) {
-        Object old=name2device.get(name);
-        if(old!=null) return (InputSlot)old;
-        InputSlot dev=new InputSlot(name);
-        name2device.put(name, dev);
-        return dev;
-      }
-    }
-    public String getName() {
-      return name;
-    }
-    //TODO: something better here?
-    public String toString()
-    {
-        return name;
-    }
-    
-    Object readResolve() throws ObjectStreamException {
-      return getDevice(getName());
-    }
+public class VirtualMapping {
+  
+  public static final PersistenceDelegate DELEGATE = new DefaultPersistenceDelegate(new String[]{
+    "sourceSlot", "targetSlot"
+  });
+
+  private InputSlot sourceSlot;
+  private InputSlot targetSlot;
+
+  public VirtualMapping(InputSlot sourceSlot, InputSlot targetSlot) {
+    this.sourceSlot=sourceSlot;
+    this.targetSlot=targetSlot;
+  }
+  
+  public InputSlot getSourceSlot() {
+    return sourceSlot;
+  }
+  public InputSlot getTargetSlot() {
+    return targetSlot;
+  }
+  public String toString() {
+    return "VirtualMapping: "+sourceSlot+"->"+targetSlot;
+  }
+
 }

@@ -116,7 +116,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
 
-public class FakeToolKit extends Toolkit {
+class FakeToolKit extends Toolkit {
     private static  FakeToolKit ftk = new FakeToolKit();
     public static Toolkit getDefaultToolkit() {
         return ftk;
