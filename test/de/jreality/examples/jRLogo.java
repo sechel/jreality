@@ -63,7 +63,6 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.soft.DefaultViewer;
-import de.jreality.soft.MouseTool;
 import de.jreality.util.SceneGraphUtility;
 
 /**
@@ -208,11 +207,12 @@ static {
          frameSoft.setLayout(new BorderLayout());
          frameSoft.add(softViewer, BorderLayout.CENTER);
 
+         /* TODO: mouse tool is removed...
          MouseTool mouseTool= new MouseTool(softViewer);
          mouseTool.setViewer(softViewer.getViewingComponent());
          mouseTool.setRoot(root);
          mouseTool.setCamera(firstCamera);
-         
+         */
          //softViewer.getViewingComponent().addKeyListener(this);
          softViewer.setSceneRoot(root);
          softViewer.setCameraPath(((SceneGraphPath) SceneGraphUtility.getPathsBetween(root, firstCamera).get(0)));
@@ -222,7 +222,10 @@ static {
          frameSoft.setVisible(true);
 
          softViewer.render();
+         
+         /* TODO: mouse tool removed
          mouseTool.encompass();
+         */
          
          RIBViewer rv = new RIBViewer();
          rv.initializeFrom(softViewer);
