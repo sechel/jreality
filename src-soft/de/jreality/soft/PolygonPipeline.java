@@ -45,6 +45,7 @@ import java.util.Arrays;
 import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.PointSet;
+import de.jreality.scene.data.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
@@ -110,6 +111,8 @@ public class PolygonPipeline
             18, 42, 45, 21 }, {
             21, 45, 24, 0 }
     };
+    private static double[][] pointColors = new double[16][4];
+    private DataList pointColorDataList = StorageModel.DOUBLE_ARRAY_ARRAY.createWritableDataList(pointColors);
     private static int[] pointNormals = { 0, 0, 0, 0, 0, 0, 0, 0 };
     private static int[][] pointOutlineNormals = { {0, 3, 6, 0}, {0, 6, 9, 0},
             {0, 9, 12, 0}, {0, 12 ,15 ,0}, {0, 15, 18, 0}, {0, 18, 21, 0},
@@ -266,7 +269,7 @@ public class PolygonPipeline
                 vc + Polygon.NX);
             vc += Polygon.VERTEX_LENGTH;
             if(vertexColors) {
-                DoubleArray color=vertexColor.item(vi).toDoubleArray();
+                DoubleArray color=vertexColor.item(vi/3).toDoubleArray();
                 vertexData[vc+Polygon.R]=color.getValueAt(0);
                 vertexData[vc+Polygon.G]=color.getValueAt(1);
                 vertexData[vc+Polygon.B]=color.getValueAt(2);
@@ -775,6 +778,18 @@ public class PolygonPipeline
         DoubleArray da=data.item(index).toDoubleArray();
         double w = 1;
         if(da.size()==4) w = da.getValueAt(3);
+        if(vertexColors) {
+            DoubleArray color=vertexColor.item(index).toDoubleArray();
+            for(int i = 0; i<16;i++) {
+            pointColors[i][0]=color.getValueAt(0);
+            pointColors[i][1]=color.getValueAt(1);
+            pointColors[i][2]=color.getValueAt(2);
+            pointColors[i][3]=(vertexColorLength==4
+                    ||(vertexColorLength==-1&&color.getLength()>3))?
+                                                                    color.getValueAt(3): 1.;
+            }
+            vertexColor = pointColorDataList;
+        }
         processPoint(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2),w);
     }
     public final void processPoint(
