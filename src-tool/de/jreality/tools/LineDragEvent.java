@@ -1,0 +1,60 @@
+package de.jreality.tools;
+
+import java.util.EventObject;
+
+import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.data.Attribute;
+
+public class LineDragEvent extends EventObject {
+    
+	private static final long serialVersionUID = 19823L;
+
+    private final int index;
+    private final double[] translation;
+	private final IndexedLineSet lineSet;
+	private int[] lineIndices;
+	private double[][] lineVertices;
+  
+	public LineDragEvent(IndexedLineSet lineSet, int index, double[] translation) {
+		super(lineSet);
+    this.lineSet=lineSet;
+    this.index=index;
+    this.translation = (double[])translation.clone();
+    this.lineIndices = lineSet.getEdgeAttributes(Attribute.INDICES).toIntArrayArray().getValueAt(index).toIntArray(null);
+	this.lineVertices=new double[lineIndices.length][];
+	for(int i=0;i<lineIndices.length;i++)
+		lineVertices[i]=lineSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray().getValueAt(lineIndices[i]).toDoubleArray(null);
+	}
+	
+	/** The x-coordinate of this event's translation. */
+	public double getX() {
+		return translation[0];
+	}
+	
+	/** The y-coordinate of this event's translation. */
+	public double getY() {
+		return translation[1];
+	}
+	
+	/** The z-coordinate of this event's translation. */
+	public double getZ() {
+		return translation[2];
+	}
+
+  public double[] getTranslation() {
+    return (double[]) translation.clone();
+  }
+  
+  public int getIndex() {
+	  return index;
+  }
+  public int[] getLineIndices() {
+	  return lineIndices;
+  }  
+  public double[][] getLineVertices(){
+	  return lineVertices;
+  }  
+  public IndexedLineSet getIndexedLineSet() {
+    return lineSet;
+  }
+}
