@@ -267,6 +267,8 @@ class ViewerAppOld
   
   private boolean isFullScreen;
   private JMenuBar mb;
+  private boolean autoRender=true;
+  private RenderTrigger renderTrigger;
   
   void toggleFullScreen() {
     isFullScreen = !isFullScreen;
@@ -694,11 +696,24 @@ class ViewerAppOld
   }
   
   private void loadScene(JrScene s) {
+    if (currViewer != null) {
+      if (autoRender) {
+        renderTrigger.removeViewer(currViewer);
+        if (currViewer.getSceneRoot() != null)
+          renderTrigger.removeSceneGraphComponent(currViewer.getSceneRoot());
+      }
+      currViewer.dispose();
+    }
     try {
       currViewer = createViewer();
     } catch (Exception e) {
       e.printStackTrace();
     }
+    if (autoRender) {
+      renderTrigger.addViewer(currViewer);
+      renderTrigger.addSceneGraphComponent(root);
+    }
+
     root = s.getSceneRoot();
     currViewer.setSceneRoot(root);
     SceneGraphPath p = s.getPath("cameraPath");
@@ -773,7 +788,7 @@ class ViewerAppOld
     if (config.equals("portal")) cfg = ToolSystemConfiguration.loadDefaultPortalConfiguration();
     if (config.equals("default+portal")) cfg = ToolSystemConfiguration.loadDefaultDesktopAndPortalConfiguration();
     if (cfg == null) throw new IllegalStateException("couldn't load config ["+config+"]");
-    ToolSystemViewer v = new ToolSystemViewer(viewerSwitch, cfg);
+    ToolSystemViewer v = new ToolSystemViewer(viewerSwitch, cfg, false);
     v.setPickSystem(new AABBPickSystem());
     try {
       bshEval.getInterpreter().set("_toolSystemViewer", v);
@@ -821,4 +836,15 @@ class ViewerAppOld
     return currViewer;
   }
   
+  public void dispose() {
+    if (autoRender) {
+      if (currViewer != null) {
+        renderTrigger.removeViewer(currViewer);
+        if (currViewer.getSceneRoot() != null)
+          renderTrigger.removeSceneGraphComponent(currViewer.getSceneRoot());
+      }
+    }
+    if (currViewer != null) currViewer.dispose();
+  }
+
 }

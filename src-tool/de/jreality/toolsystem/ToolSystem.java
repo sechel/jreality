@@ -75,8 +75,7 @@ import de.jreality.util.RenderTrigger;
  */
 public class ToolSystem implements ToolEventReceiver {
 
-  boolean synchRender = false;
-  private RenderTrigger renderTrigger = new RenderTrigger(!synchRender);
+  private RenderTrigger renderTrigger;
   
   private final LinkedList compQueue = new LinkedList();
 
@@ -192,6 +191,9 @@ public class ToolSystem implements ToolEventReceiver {
    * @param viewer
    */
   public ToolSystem(Viewer viewer, ToolSystemConfiguration config) {
+    this(viewer, config, false);
+  }
+  public ToolSystem(Viewer viewer, ToolSystemConfiguration config, boolean synchRender) {
     this.viewer = viewer;
     toolContext = new ToolContextImpl();
     toolManager = new ToolManager();
@@ -199,11 +201,19 @@ public class ToolSystem implements ToolEventReceiver {
     deviceManager = new DeviceManager(config, eventQueue, viewer);
     slotManager = new SlotManager(config);
     updater = new ToolUpdateProxy(this);
+    if (synchRender) {
+      renderTrigger = new RenderTrigger(!synchRender);
+    }
   }
 
+  private boolean initialized;
   public void initializeSceneTools() {
-    renderTrigger.addSceneGraphComponent(viewer.getSceneRoot());
-    renderTrigger.addViewer(viewer);
+    if (initialized) throw new IllegalStateException("already initialized!");
+    initialized=true;
+    if (renderTrigger != null) {
+      renderTrigger.addSceneGraphComponent(viewer.getSceneRoot());
+      renderTrigger.addViewer(viewer);
+    }
     toolManager.cleanUp();
     updater.setSceneRoot(viewer.getSceneRoot());
     // register animator
@@ -223,7 +233,7 @@ public class ToolSystem implements ToolEventReceiver {
   List l;
   
   public void processToolEvent(ToolEvent event) {
-    if (synchRender) renderTrigger.startCollect();
+    if (renderTrigger != null) renderTrigger.startCollect();
     synchronized (mutex) {
     	executing=true;
 //      if (event.getInputSlot() == InputSlot.getDevice("SystemTime")) {
@@ -259,7 +269,7 @@ public class ToolSystem implements ToolEventReceiver {
       }
 	    executing=false;
     }
-    if (synchRender) renderTrigger.finishCollect();
+    if (renderTrigger != null) renderTrigger.finishCollect();
   }
 
   private void processComputationalQueue() {
@@ -486,8 +496,10 @@ private SceneGraphPath avatarPath;
   }
 
   public void dispose() {
-    renderTrigger.removeSceneGraphComponent(viewer.getSceneRoot());
-    renderTrigger.removeViewer(viewer);
+    if (renderTrigger != null) {
+      renderTrigger.removeSceneGraphComponent(viewer.getSceneRoot());
+      renderTrigger.removeViewer(viewer);
+    }
     eventQueue.dispose();
     deviceManager.dispose();
     updater.dispose();

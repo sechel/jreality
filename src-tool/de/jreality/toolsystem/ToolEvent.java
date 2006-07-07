@@ -105,7 +105,7 @@ public class ToolEvent extends EventObject {
    * sets the 
    * @param replacement
    */
-  void replaceWith(ToolEvent replacement) {
+  protected void replaceWith(ToolEvent replacement) {
       this.axis = replacement.axis;
       this.trafo = replacement.trafo;
       this.time = replacement.time;
@@ -114,14 +114,14 @@ public class ToolEvent extends EventObject {
  * 
  *  TODO improve this!
  */
-  boolean canReplace(ToolEvent e) {
+  protected boolean canReplace(ToolEvent e) {
       return (device == e.device) 
           && (getSource() == e.getSource())
           && compareTransformation(trafo, e.trafo)
           && compareAxisStates(axis, e.axis);
   }
 
-    boolean compareAxisStates(AxisState axis1, AxisState axis2) {
+  protected boolean compareAxisStates(AxisState axis1, AxisState axis2) {
         if (axis1 == axis2) return true;
         if (axis1 == null || axis2 == null) return false;
         // sign changed
@@ -135,7 +135,7 @@ public class ToolEvent extends EventObject {
         return (axis1.doubleValue() - axis2.doubleValue() < 0.0001);
     }
     
-    boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
+  protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
         if (trafo1 == trafo2) return true;
         if (trafo1 == null || trafo1 == null) return false;
         //return Rn.equals(trafo1.toDoubleArray(null), trafo2.toDoubleArray(null), 0.00000001);

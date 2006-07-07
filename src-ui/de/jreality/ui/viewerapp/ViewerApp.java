@@ -107,6 +107,7 @@ public class ViewerApp {
   
   private UIFactory uiFactory;  //frame layout factory depending on viewer
   
+  private RenderTrigger renderTrigger = new RenderTrigger();
   private Viewer[] viewers;  //containing possible viewers (jogl, soft, portal)
   private ViewerSwitch viewerSwitch;
   private ToolSystemViewer currViewer;  //the current viewer
@@ -123,6 +124,8 @@ public class ViewerApp {
   private boolean attachBeanShell = false;  //default
   
   private JrScene jrScene;
+
+  private boolean autoRender = true;
 
   /**
    * @param node the SceneGraphNode (SceneGraphComponent or Geometry) to be displayed in the viewer
@@ -141,6 +144,12 @@ public class ViewerApp {
     else this.jrScene = jrScene;
     
     displayedNode = node;
+
+    //update autoRender
+    String autoRenderProp = System.getProperty("de.jreality.ui.viewerapp.autorender", "true");
+    if (autoRenderProp.equalsIgnoreCase("false")) {
+      autoRender = false;
+    }
   }
   
   
@@ -254,16 +263,27 @@ public class ViewerApp {
    * @param sc the scene to load
    */  
   private void setupViewer(JrScene sc) {
-
+    if (currViewer != null) {
+      if (autoRender) {
+        renderTrigger.removeViewer(currViewer);
+        if (currViewer.getSceneRoot() != null)
+          renderTrigger.removeSceneGraphComponent(currViewer.getSceneRoot());
+      }
+      currViewer.dispose();
+    }
     uiFactory = new UIFactory();
-    if (currViewer != null) currViewer.dispose();
     try { currViewer = createViewer(); } 
     catch (Exception exc) { exc.printStackTrace(); }
-    
+
     //set sceneRoot and paths of viewer
     sceneRoot = sc.getSceneRoot();
     currViewer.setSceneRoot(sceneRoot);
-    
+
+    if (autoRender) {
+      renderTrigger.addViewer(currViewer);
+      renderTrigger.addSceneGraphComponent(sceneRoot);
+    }
+
     SceneGraphPath path = sc.getPath("cameraPath");
     if (path != null) currViewer.setCameraPath(path);
     path = sc.getPath("avatarPath");
@@ -279,7 +299,7 @@ public class ViewerApp {
     
     //set viewer and sceneRoot of uiFactory
     uiFactory.setViewer((Component) currViewer.getViewingComponent());
-        
+    
     //add node to this scene depending on its type
     if (displayedNode != null) {  //show scene even if displayedNode=null
       final SceneGraphNode node = displayedNode;
@@ -325,7 +345,7 @@ public class ViewerApp {
     if (config.equals("default+portal")) cfg = ToolSystemConfiguration.loadDefaultDesktopAndPortalConfiguration();
     if (cfg == null) throw new IllegalStateException("couldn't load config ["+config+"]");
     
-    ToolSystemViewer viewer = new ToolSystemViewer(viewerSwitch, cfg);
+    ToolSystemViewer viewer = new ToolSystemViewer(viewerSwitch, cfg, false);
     viewer.setPickSystem(new AABBPickSystem());
     
     return viewer;
@@ -507,6 +527,10 @@ public class ViewerApp {
   }
 
   public void dispose() {
+    if (autoRender) {
+      renderTrigger.removeSceneGraphComponent(sceneRoot);
+      renderTrigger.removeViewer(currViewer);
+    }
     if (currViewer != null) currViewer.dispose();
   }
 }

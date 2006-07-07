@@ -60,8 +60,8 @@ import de.jreality.util.LoggingSystem;
  * There is also support for off-axis cameras.  Use the {@link #setViewPort(Rectangle2D)} method to
  * specify the desired viewport.  In this case the field of view is ignored.
  * 
- * The camera also supports stereo viewing @link #setStereo(boolean).  For CAVE-like environments where there are not traditional on-axis camera, one 
- * can also set  an orientation 
+ * The camera also supports stereo viewing @link #setStereo(boolean).  For CAVE-like environments
+ * where there are not traditional on-axis camera, one can also set  an orientation 
  * matrix (@link #setOrientationMatrix(double[]))  to specify the orientation of the eye axis in camera coordinates.  
  * Default eye positions are (-eyeSeparation/2,0,0) and (eyeSeparation, 0,0) in the coordinate system of the
  * mono-optic camera.  Use @link de.jreality.util.CameraUtility#getNDCToCamera(Camera, double, int) to generate 
@@ -69,20 +69,11 @@ import de.jreality.util.LoggingSystem;
  * 
  * Due to refactoring, the camera no longer has enough state to provide the projective viewing transformation
  * from/to camera to/from Normalized Device Coordinates (NDC). It basically lacks the aspect ratio of the
- * output device.
+ * output device. This allows to use the same camera for different viewers with
+ * i. e. different window sizes.
  * 
  * @author Charles Gunn
  * 
- * TODO: IMPORTANT: remove setEye stuff +setViewPort +setFocus (everything that depends on screen etc.)
- * 
- *  Refactoring ideas:
- *  - eye separation - ?
- *  - stereo - ?
- *  - the orientation matrix should be removed, also viewer-dependent config
- *  - focus / field of view: i guess these should be removed also
- *  - aspect ratio isnt written at all...
- *  - isOnAxis might be implicit, if the frustum matrix is calculated, the viewer/renderer needs to decide whether onaxis or not ?
- *  		-- weissmann
  */
 public class Camera extends SceneGraphNode {
 	double near, 
@@ -143,8 +134,8 @@ public class Camera extends SceneGraphNode {
 	}
 
 	public void setFar(double d) {
+    if (far == d) return;
 		far = d;
-    // TODO: compare with old value?
     fireCameraChanged();
 	}
 
@@ -164,8 +155,8 @@ public class Camera extends SceneGraphNode {
 	}
 
 	public void setFocus(double d) {
+    if (focus == d) return;
 		focus = d;
-    // TODO: compare with old value?
     fireCameraChanged();
 	}
 
@@ -177,7 +168,7 @@ public class Camera extends SceneGraphNode {
 		if (isOnAxis)	
 			throw new IllegalStateException("Can't set viewport for an on-axis camera");
 		viewPort = rectangle2D;
-    // TODO: compare with old value?
+    // TODO: maybe compare with old value?
     fireCameraChanged();
 	}
 
@@ -186,8 +177,8 @@ public class Camera extends SceneGraphNode {
 	}
 
 	public void setOnAxis(boolean b) {
+    if (isOnAxis == b) return;
 		isOnAxis = b;
-    // TODO: compare with old value?
     fireCameraChanged();
 	}
 
@@ -196,8 +187,8 @@ public class Camera extends SceneGraphNode {
 	}
 
 	public void setPerspective(boolean b) {
+    if (isPerspective == b) return;
 		isPerspective = b;
-    // TODO: compare with old value?
     fireCameraChanged();
 	}
 
@@ -208,8 +199,8 @@ public class Camera extends SceneGraphNode {
 	 * @param eyeSeparation The eyeSeparation to set.
 	 */
 	public void setEyeSeparation(double eyeSeparation) {
+    if (this.eyeSeparation == eyeSeparation) return;
 		this.eyeSeparation = eyeSeparation;
-    // TODO: compare with old value?
     fireCameraChanged();
 	}
 	/**
@@ -227,7 +218,7 @@ public class Camera extends SceneGraphNode {
 
 	public void setOrientationMatrix(double[] orientationMatrix) {
 		this.orientationMatrix = orientationMatrix;
-    // TODO: compare with old value?
+    // TODO: maybe compare with old value?
     fireCameraChanged();
 	}
 
@@ -237,12 +228,13 @@ public class Camera extends SceneGraphNode {
 
 
 	public void setStereo(boolean isStereo) {
+    if (this.isStereo == isStereo) return;
 		this.isStereo = isStereo;
 		if (!isPerspective)	{
+      // TODO: implicit change of properties!! to check
 			LoggingSystem.getLogger(this).log(Level.WARNING,"Stereo camera must be perspective, setting it so.");
 			isPerspective = true;
 		}
-    // TODO: compare with old value?
     fireCameraChanged();
 	}
 	

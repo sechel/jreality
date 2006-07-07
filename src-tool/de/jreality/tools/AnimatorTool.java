@@ -63,6 +63,14 @@ public class AnimatorTool extends AbstractTool {
 
   private static WeakHashMap instances=new WeakHashMap();
   
+  /**
+   * Use this only from inside a Tool's activate/perform/dectivate method!
+   * There is exactly one instance for each ToolSystem, mapped to the
+   * corresponding thread. Calling this from any other Thread will result in
+   * an IllegalStateException.
+   * 
+   * @return the AnimatorTool instance for the current ToolSystem
+   */
   public static AnimatorTool getInstance() {
     if (!instances.containsKey(Thread.currentThread())) throw new IllegalStateException("wrong thread");
     return getInstance(Thread.currentThread());

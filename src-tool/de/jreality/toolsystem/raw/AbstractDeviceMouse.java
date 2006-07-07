@@ -94,7 +94,17 @@ public abstract class AbstractDeviceMouse {
       axesEvolutionMatrix.setEntry(1, 3, dyndc);
       axesEvolutionMatrix.setEntry(2, 3, -1);
   
-      ToolEvent evolutionEvent = new ToolEvent(AbstractDeviceMouse.this, slot, daEvolution);
+      ToolEvent evolutionEvent = new ToolEvent(AbstractDeviceMouse.this, slot, daEvolution){
+        protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
+          return true;
+        }
+        protected void replaceWith(ToolEvent replacement) {
+          Matrix m = new Matrix(replacement.getTransformation());
+          m.multiplyOnRight(getTransformation().toDoubleArray(null));
+          trafo = new DoubleArray(m.getArray());
+          time = replacement.getTimeStamp();
+        }
+      };
       queue.addEvent(evolutionEvent);
       if (isCenter()) {
         try {

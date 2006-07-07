@@ -1,9 +1,13 @@
 package de.jreality.examples.tooldemo;
 
+import java.awt.Component;
 import java.io.IOException;
+
+import javax.swing.JFrame;
 
 import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.jogl.Viewer;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
@@ -12,14 +16,17 @@ import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.soft.DefaultViewer;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.PickShowTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.tools.ShipNavigationTool;
-import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.toolsystem.ToolSystemViewer;
+import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
+import de.jreality.util.RenderTrigger;
 
 public class ToolDemoScene {
 
@@ -80,9 +87,9 @@ public class ToolDemoScene {
         
     // add tools
     ShipNavigationTool shipNavigationTool = new ShipNavigationTool();
-    shipNavigationTool.setGain(30);
-    shipNavigationTool.setGravity(100);
-    shipNavigationTool.setJumpSpeed(20);
+    shipNavigationTool.setGain(7);
+    //shipNavigationTool.setGravity(100);
+    //shipNavigationTool.setJumpSpeed(20);
     avatarNode.addTool(shipNavigationTool);
     camNode.addTool(new HeadTransformationTool());
     
@@ -104,7 +111,27 @@ public class ToolDemoScene {
   public static void main(String[] args) throws IOException {
     ToolDemoScene tds = new ToolDemoScene();
     //System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer");
-    ViewerApp.display(tds.rootNode, tds.camPath, tds.emptyPickPath, tds.avatarPath);
-  }
+    //Viewer viewer = new Viewer();
+    de.jreality.scene.Viewer viewer = new DefaultViewer();
+    boolean syncRender=false;
+    ToolSystemViewer ts = new ToolSystemViewer(viewer, ToolSystemConfiguration.loadDefaultConfiguration(), syncRender);
+    ts.setSceneRoot(tds.rootNode);
+    ts.setCameraPath(tds.camPath);
+    ts.setEmptyPickPath(tds.emptyPickPath);
+    ts.setAvatarPath(tds.avatarPath);
+    
+    JFrame f = new JFrame("[syncRender="+syncRender+"]");
+    f.setSize(400, 260);
+    f.getContentPane().add((Component) ts.getViewingComponent());
+    f.setVisible(true);
+    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+    if (!syncRender) {
+      RenderTrigger rt = new RenderTrigger();
+      rt.addSceneGraphComponent(tds.rootNode);
+      rt.addViewer(ts);
+    }
+    ts.initializeTools();
+}
 
 }

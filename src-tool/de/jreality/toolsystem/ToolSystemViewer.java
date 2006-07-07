@@ -45,6 +45,7 @@ import java.awt.Dimension;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
+import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.pick.PickSystem;
 import de.jreality.tools.AnimatorTool;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
@@ -53,10 +54,24 @@ import de.jreality.util.LoggingSystem;
 
 
 /**
+ * <p>
+ * This class delegates a given viewer and cares about
+ * the creation and initialization of a ToolSystem.
+ * </p>
+ * 
+ * <b>Usage:</b><br />
+ * <ul>
+ * <li>create a viewer instance, i. e. a de.jreality.soft.DefaultViewer</li>
+ * <li>create a ToolSystemViewer and give it your viewer instance</li>
+ * <li>set scene root and camera path on the viewer (either on the
+ *     ToolSystemViewer or on the given instance)</li>
+ * <li><em>Optional:</em> set the avatar path - default is the camera path</li>
+ * <li><em>Optional:</em> set an empty pick path (pick path if nothing was picked) - default is the scene root</li>
+ * <li>call <code>initializeTools()</code></li>
+ * </ul>
  *
- * TODO: comment this
- *
- * @author weissman
+ * 
+ * @author Steffen Weissmann
  *
  */
 public class ToolSystemViewer implements Viewer {
@@ -81,12 +96,13 @@ public class ToolSystemViewer implements Viewer {
   }
 
   public ToolSystemViewer(Viewer viewer) {
-    this(viewer, loadConfiguration());
+    this(viewer, loadConfiguration(), false);
   }
   
-  public ToolSystemViewer(Viewer viewer, ToolSystemConfiguration config) {
+  public ToolSystemViewer(Viewer viewer, ToolSystemConfiguration config, boolean syncRender) {
     this.viewer = viewer;
-    toolSystem = new ToolSystem(viewer, config);
+    toolSystem = new ToolSystem(viewer, config, syncRender);
+    setPickSystem(new AABBPickSystem());
   }
   
   public SceneGraphPath getCameraPath() {

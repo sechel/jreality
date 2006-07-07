@@ -94,10 +94,10 @@ public class DeviceSystemTimer implements RawDevice {
       int delta = (int)(lastEvent == -1l ? 0 : ct - lastEvent);
       lastEvent = ct;
       ToolEvent e = new ToolEvent(this, device, new AxisState(delta)) {
-          boolean compareAxisStates(AxisState axis1, AxisState axis2) {
+          protected boolean compareAxisStates(AxisState axis1, AxisState axis2) {
               return true;
           }
-        void replaceWith(ToolEvent replacement) {
+          protected void replaceWith(ToolEvent replacement) {
             this.axis = new AxisState(this.axis.intValue() + replacement.getAxisState().intValue());
             this.trafo = replacement.getTransformation();
             this.time = replacement.getTimeStamp();
