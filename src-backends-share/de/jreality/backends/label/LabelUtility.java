@@ -248,7 +248,7 @@ public class LabelUtility {
     return createImages(fs, Key.TYPE_FACES, sa, c, f);
   }
 
-  public static BufferedImage createImageFromString(String s, Font f,Color color) {
+  public static BufferedImage createImageFromString(String s, Font f, Color color) {
 	  //Rectangle r = f.getStringBounds(s,frc).getBounds();
 	  TextLayout tl = new TextLayout(s,f,frc);
 	  Rectangle r = tl.getBounds().getBounds();
