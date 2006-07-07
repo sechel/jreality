@@ -113,7 +113,7 @@ public class ToolDemoScene {
     //System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer");
     //Viewer viewer = new Viewer();
     de.jreality.scene.Viewer viewer = new DefaultViewer();
-    boolean syncRender=false;
+    boolean syncRender=true;
     ToolSystemViewer ts = new ToolSystemViewer(viewer, ToolSystemConfiguration.loadDefaultConfiguration(), syncRender);
     ts.setSceneRoot(tds.rootNode);
     ts.setCameraPath(tds.camPath);
