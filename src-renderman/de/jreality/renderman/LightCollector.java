@@ -42,13 +42,19 @@ package de.jreality.renderman;
 
 import java.util.HashMap;
 
+import antlr.CommonAST;
+
 import de.jreality.math.Rn;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.Light;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.Transformation;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.EffectiveAppearance;
 
 /**
  * This is a utility for the RIBVisitor. It collects all the lights in the scene
@@ -59,18 +65,24 @@ import de.jreality.scene.Transformation;
  */
 public class LightCollector extends SceneGraphVisitor {
     double[]  initialTrafo,   currentTrafo;
+    RIBVisitor ribv = null;
 //    private   Transformation  initialTransformation;
+    float[] zdirection = new float[] {0f,0f,-1f};
     protected LightCollector reclaimableSubcontext;
+    EffectiveAppearance eAppearance = null;
+    boolean shadowEnabled = false;
     /**
      * 
      */
-    public LightCollector(SceneGraphComponent root) {
+    public LightCollector(SceneGraphComponent root, RIBVisitor v) {
         super();
+        ribv = v;
         initialTrafo = new double[16];
         //currentTrafo = new double[16];
         Rn.setIdentityMatrix(initialTrafo);
         //Rn.setIdentityMatrix(currentTrafo);
         currentTrafo =initialTrafo;
+        eAppearance=EffectiveAppearance.create();
         visit(root);
     }
     protected LightCollector(LightCollector parentContext) {
@@ -87,11 +99,17 @@ public class LightCollector extends SceneGraphVisitor {
     protected void initializeFromParentContext(LightCollector parentContext) {
         LightCollector p=parentContext;
         currentTrafo=initialTrafo=parentContext.currentTrafo;
+        ribv = parentContext.ribv;
 
     }
     
     public void visit(SceneGraphComponent c) {
-        c.childrenAccept(subContext());
+        EffectiveAppearance tmp =eAppearance;
+        Appearance a = c.getAppearance();
+        if(a!= null ) eAppearance = eAppearance.create(a);
+        shadowEnabled = eAppearance.getAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, false);
+        c.childrenAccept(this); //subContext());
+        eAppearance= tmp;
     }
     
     public void visit(Transformation t) {
@@ -107,43 +125,36 @@ public class LightCollector extends SceneGraphVisitor {
         Ri.transformBegin();
         // write the transform for this light:
         //double[] mat = t.getMatrix();
-        double[] mat = currentTrafo;
-        float[] tmat = new float[16];
-        for (int i = 0; i < 4; i++) 
-            for (int j = 0;j<4;j++){
-                tmat[i + 4*j] = (float) mat[j+4*i];
-            }
+       
+        float[] tmat = RIBVisitor.fTranspose(currentTrafo);
         Ri.concatTransform(tmat);
         // now write the light:
         HashMap map =new HashMap();
-        map.put("intensity",new Float(l.getIntensity()));
-        map.put("lightcolor",l.getColor().getRGBColorComponents(null));
-        map.put("from",new float[] {0f,0f,1f});
-        map.put("to",new float[] {0f,0f,0f});
-        Ri.lightSource("distantlight",map);
+        handleCommon(l, map);
+        Ri.lightSource(shadowEnabled ? "shadowdistant":"distantlight",map);
         
         Ri.transformEnd();
         //super.visit(l);
     }
+	private void handleCommon(Light l, HashMap map) {
+		map.put("intensity",new Float(l.getIntensity()));
+        map.put("lightcolor",l.getColor().getRGBColorComponents(null));
+        map.put("from",new float[] {0f,0f,0f});
+        map.put("to",zdirection);
+        if (shadowEnabled)
+        	map.put("string shadowname", "raytrace");
+	}
 
     public void visit(PointLight l) {
         Ri.transformBegin();
         // write the transform for this light:
         //double[] mat = t.getMatrix();
-        double[] mat = currentTrafo;
-        float[] tmat = new float[16];
-        for (int i = 0; i < 4; i++) 
-            for (int j = 0;j<4;j++){
-                tmat[i + 4*j] = (float) mat[j+4*i];
-            }
+        float[] tmat = RIBVisitor.fTranspose(currentTrafo);
         Ri.concatTransform(tmat);
         // now write the light:
         HashMap map =new HashMap();
-        map.put("intensity",new Float(l.getIntensity()));
-        map.put("lightcolor",l.getColor().getRGBColorComponents(null));
-        map.put("from",new float[] {0f,0f,1f});
-        map.put("to",new float[] {0f,0f,0f});
-       Ri.lightSource("pointlight",map);
+        handleCommon(l, map);
+        Ri.lightSource(shadowEnabled ? "shadowpoint":"pointlight",map);
         
         Ri.transformEnd();
     }
@@ -154,19 +165,11 @@ public class LightCollector extends SceneGraphVisitor {
         Ri.transformBegin();
         // write the transform for this light:
         //double[] mat = t.getMatrix();
-        double[] mat = currentTrafo;
-        float[] tmat = new float[16];
-        for (int i = 0; i < 4; i++) 
-            for (int j = 0;j<4;j++){
-                tmat[i + 4*j] = (float) mat[j+4*i];
-            }
+        float[] tmat = RIBVisitor.fTranspose(currentTrafo);
         Ri.concatTransform(tmat);
         // now write the light:
         HashMap map =new HashMap();
-        map.put("intensity",new Float(l.getIntensity()));
-        map.put("lightcolor",l.getColor().getRGBColorComponents(null));
-        map.put("from",new float[] {0f,0f,1f});
-        map.put("to",new float[] {0f,0f,0f});
+        handleCommon(l, map);
         map.put("coneangle",new Float(l.getConeAngle()));
         map.put("conedeltaangle",new Float(l.getConeDeltaAngle()));
         map.put("beamdistribution",new Float(l.getDistribution()));
@@ -176,7 +179,7 @@ public class LightCollector extends SceneGraphVisitor {
             map.put("float a2", new Float(l.getFalloffA2()));
             Ri.lightSource("spotlightFalloff",map);
         } else
-            Ri.lightSource("spotlight",map);
+            Ri.lightSource(shadowEnabled ? "shadowspot": "spotlight",map);
         
         Ri.transformEnd();
         //super.visit(l);

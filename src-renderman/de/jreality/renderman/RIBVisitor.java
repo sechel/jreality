@@ -75,6 +75,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.Cylinder;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.PointSet;
@@ -136,8 +137,10 @@ public class RIBVisitor extends SceneGraphVisitor {
     private int[] maximumEyeSplits={10};
     boolean insidePointset = false;
     // setting this true doesn't seem to work with the Renderman renderer.
+    public boolean shadowEnabled = false;
     public static boolean fullSpotLight = false;
     public static boolean retainGeometry = false;		// use "ObjectBegin/End"?
+    public static boolean useProxyCommands = true;
     public static String shaderPath = null;
     private int rendererType = RIBViewer.TYPE_PIXAR;
     // features related to renderer type
@@ -196,6 +199,10 @@ public class RIBVisitor extends SceneGraphVisitor {
       		if (global instanceof String)	{
       			shaderPath = (String) global;
       		}
+      		global = ap.getAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED);
+      		if (global instanceof Boolean)	{
+      			shadowEnabled = ((Boolean)global).booleanValue();
+      		}
       }
       
         HashMap map = new HashMap();
@@ -207,7 +214,11 @@ public class RIBVisitor extends SceneGraphVisitor {
         map2.put("eyesplits",maximumEyeSplits);
         Ri.option("limits",map2);
         //We ensured that name ends with .rib so :
-        String outputName = name.substring(0,name.length()-3)+"tif";
+//        String outputName = name.substring(0,name.length()-3)+"tif";
+        // It seems to make more sense to write the tiff file into the same directory as
+        // the rib file. For example, in case the rib files have to be moved.
+        int index = name.lastIndexOf('/');
+        String outputName = name.substring(index+1,name.length()-3)+"tif";
         String outputDisplayFormat = "rgb";
         Object foo = ap.getAttribute(CommonAttributes.RMAN_OUTPUT_DISPLAY_FORMAT);
         if (foo != null && foo instanceof String)		{
@@ -271,7 +282,7 @@ public class RIBVisitor extends SceneGraphVisitor {
       	            } 
        		}
          }
-         new LightCollector(root);
+         new LightCollector(root, this);
  //       new GeometryCollector(root,  this);
         root.accept(this);
         Ri.worldEnd();
@@ -516,6 +527,17 @@ public class RIBVisitor extends SceneGraphVisitor {
         }
         return fname;
     }
+    
+    public boolean hasProxy(Geometry g)		{
+    	if (!useProxyCommands) return false;
+    	Object proxy = g.getGeometryAttributes("rendermanProxyCommand");
+    	if (proxy != null && proxy instanceof String)  {
+       		Ri.verbatim((String) proxy);
+       		return true;
+    	}
+   	return false;
+     }
+    
     boolean testBallStick = true;
 	private float currentOpacity;
     /* (non-Javadoc)
@@ -523,20 +545,25 @@ public class RIBVisitor extends SceneGraphVisitor {
      */
     public void visit(IndexedLineSet g) {
 		Ri.comment("IndexedLineSet "+g.getName());
+		if (hasProxy((Geometry) g))	{
+			insidePointset = false;
+			return;
+		}
      	if (!insidePointset)	{
       		insidePointset = true;
     		// p is not a proper subclass of IndexedLineSet
     		if (retainGeometry) {
    	    		Object which = pointsets.get(g);
    	  			if (which != null)	{
-     	    		Ri.ObjectInstance(((Integer) which).intValue());
+     	    		Ri.readArchive((String) which);
     			} else {
     				Ri.comment("Retained geometry "+g.getName());
-    				Ri.ObjectBegin(pointsetCount);
+    				String finalname = g.getName()+pointsetCount;
+    				Ri.archiveBegin(finalname);
     				_visit(g);
-    				Ri.ObjectEnd();
-    	    		Ri.ObjectInstance(pointsetCount);
-    				pointsets.put(g, new Integer(pointsetCount));
+    				Ri.archiveEnd();
+    	    		Ri.readArchive(finalname);
+    				pointsets.put(g, finalname );
     				pointsetCount++;
     			} 
    		}
@@ -564,7 +591,12 @@ public class RIBVisitor extends SceneGraphVisitor {
                if (testBallStick)		{
              	    int sig = eAppearance.getAttribute("signature", Pn.EUCLIDEAN);
                     Color cc = (Color) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,  CommonAttributes.DIFFUSE_COLOR_DEFAULT );
-                    //TODO take into account  alpha channel of cc
+                     //TODO take into account  alpha channel of cc
+                     // Following is an attempt to do so, but ignores the alpha of the color!
+                    float[] raw = new float[4];
+                    cc.getRGBComponents(raw);
+                    for (int k=0;k<4; ++k)	raw[k] = (float) (raw[k]*currentOpacity);
+                    cc = new Color(raw[0], raw[1], raw[2], raw[3]); 
                     if (g instanceof IndexedFaceSet)	{
                     BallAndStickFactory bsf = new BallAndStickFactory(g);
                	  	bsf.setSignature(sig);
@@ -668,23 +700,24 @@ public class RIBVisitor extends SceneGraphVisitor {
     
     
      public void visit(IndexedFaceSet g) {
-			Ri.comment("IndexedFaceSet "+g.getName());
+		Ri.comment("IndexedFaceSet "+g.getName());
      	if (!insidePointset)	{
       		insidePointset = true;
     		// p is not a subclass of PointSet
     		if (retainGeometry) {
    	    		Object which = pointsets.get(g);
    	  			if (which != null)	{
-     				Ri.ObjectInstance(((Integer) which).intValue());
-    	    	} else {
+     	    		Ri.readArchive((String) which);
+    			} else {
     				Ri.comment("Retained geometry "+g.getName());
-    				Ri.ObjectBegin(pointsetCount);
+    				String finalname = g.getName()+pointsetCount;
+    				Ri.archiveBegin(finalname);
     				_visit(g, null);
-    				Ri.ObjectEnd();
-       	    		Ri.ObjectInstance(pointsetCount);
-       	    		pointsets.put(g, new Integer(pointsetCount));
+    				Ri.archiveEnd();
+    	    		Ri.readArchive(finalname);
+    				pointsets.put(g, finalname );
     				pointsetCount++;
-    	      	} 
+    			} 
    		}
        		else
     			_visit(g, null);
@@ -707,26 +740,29 @@ public class RIBVisitor extends SceneGraphVisitor {
 			Ri.attributeBegin();
 			setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
  		   	DataList colors=i.getFaceAttributes( Attribute.COLORS );
-    	    	if (colors !=null && GeometryUtility.getVectorLength(colors) == 4){
-    	    		double[][] colorArray = colors.toDoubleArrayArray(null);
-    	    		int numFaces=i.getNumFaces();
-    	    		float[][] colorArrayf= new float[numFaces][4];
-    	    		for (int k=0;k<numFaces;k++){
-    	    			for (int j=0;j<4;j++)
-    	    				colorArrayf[k][j]=(float)colorArray[k][j];
-    	    		}
-    	    		IndexedFaceSet[] faceList=IndexedFaceSetUtility.splitIfsToPrimitiveFaces(i);
-    	    		for (int k=0;k<numFaces;k++){			
-    	    			pointPolygon(faceList[k],colorArrayf[k]);
-    	    		}
-    	    	}
-    	    	else{       
-    	    		pointPolygon(i, color);
+	    	if (colors !=null && GeometryUtility.getVectorLength(colors) == 4){
+	    		double[][] colorArray = colors.toDoubleArrayArray(null);
+	    		int numFaces=i.getNumFaces();
+	    		float[][] colorArrayf= new float[numFaces][4];
+	    		for (int k=0;k<numFaces;k++){
+	    			for (int j=0;j<4;j++)
+	    				colorArrayf[k][j]=(float)colorArray[k][j];
+	    		}
+	    		IndexedFaceSet[] faceList=IndexedFaceSetUtility.splitIfsToPrimitiveFaces(i);
+	    		for (int k=0;k<numFaces;k++){			
+	    			pointPolygon(faceList[k],colorArrayf[k]);
+	    		}
+	    	}
+	    	else{       
+	    		if (hasProxy((Geometry) i))	{
+	    			insidePointset = false;
+	    		}
+	    		else pointPolygon(i, color);
     		}
     	    	Ri.attributeEnd();
     	    	 
     	}
-   		if (color == null) _visit((IndexedLineSet) i);
+   		if (color == null && insidePointset) _visit((IndexedLineSet) i);
     }
 
 	private void pointPolygon(IndexedFaceSet i, float[] color) {
@@ -900,14 +936,15 @@ public class RIBVisitor extends SceneGraphVisitor {
     		if (retainGeometry) {
    	    		Object which = pointsets.get(g);
    	  			if (which != null)	{
-     	    		Ri.ObjectInstance(((Integer) which).intValue());
+     	    		Ri.readArchive((String) which);
     			} else {
     				Ri.comment("Retained geometry "+g.getName());
-    				Ri.ObjectBegin(pointsetCount);
+    				String finalname = g.getName()+pointsetCount;
+    				Ri.archiveBegin(finalname);
     				_visit(g);
-    				Ri.ObjectEnd();
-       	    		Ri.ObjectInstance(pointsetCount);
-       	    		pointsets.put(g, new Integer(pointsetCount));
+    				Ri.archiveEnd();
+    	    		Ri.readArchive(finalname);
+    				pointsets.put(g, finalname );
     				pointsetCount++;
     			} 
    		}
@@ -1052,54 +1089,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         r[2] = zrot;
     }
 
-    private class GeometryCollector extends SceneGraphVisitor	{
-    	SceneGraphComponent root = null;
-    	RIBVisitor rib = null;
-    	GeometryCollector(SceneGraphComponent r, RIBVisitor b)	{
-    		super();
-    		root  = r;
-    		rib = b;
-    		Ri.comment("'\nBeginning of retained geometry\n");
-    		visit(root);
-       		Ri.comment("'\nEnd of retained geometry\n\n");
-       	    	}
-        public void visit(SceneGraphComponent c) {
-            c.childrenAccept(this);
-        }
-        
-		public void visit(IndexedFaceSet i) {
-			if (pointsets.get(i) != null) return;
-			Ri.comment("Retained geometry "+i.getName());
-			Ri.ObjectBegin(pointsetCount);
-			rib.visit(i);
-			Ri.ObjectEnd();
-			pointsets.put(i, new Integer(pointsetCount));
-			pointsetCount++;
-		}
-
-		public void visit(IndexedLineSet i) {
-			if (pointsets.get(i) != null) return;
-			Ri.comment("Retained geometry "+i.getName());
-			Ri.ObjectBegin(pointsetCount);
-			rib.visit(i);
-			Ri.ObjectEnd();
-			pointsets.put(i, new Integer(pointsetCount));
-			pointsetCount++;
-		}
-
-		public void visit(PointSet i) {
-			if (pointsets.get(i) != null) return;
-			Ri.comment("Retained geometry "+i.getName());
-			Ri.ObjectBegin(pointsetCount);
-			rib.visit(i);
-			Ri.ObjectEnd();
-			pointsets.put(i, new Integer(pointsetCount));
-			pointsetCount++;
-		}
-    	
-    }
-
-	public int getRendererType() {
+    public int getRendererType() {
 		return rendererType;
 	}
 }

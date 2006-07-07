@@ -98,9 +98,6 @@ public class Ri {
         w.close();
     }
     
-	public static void readArchive(String foo) {
-		w.println("ReadArchive "+str(foo));
-	}
     public static void verbatim(String s)	{
     	w.println(s);
     }
@@ -260,15 +257,16 @@ public class Ri {
     public static  void transformEnd() {
         w.println("TransformEnd");
     }
-    public static  void ObjectBegin(int n) {
-        w.println("ObjectBegin " +n);
+    public static  void archiveBegin(String name) {
+        w.println("ArchiveBegin " +str(name));
     }
-    public static  void ObjectEnd() {
-        w.println("ObjectEnd");
+    public static  void archiveEnd() {
+        w.println("ArchiveEnd");
     }
-    public static void ObjectInstance(int n)	{
-    	w.println("ObjectInstance "+n);
-    }
+	public static void readArchive(String foo) {
+		w.println("ReadArchive "+str(foo));
+	}
+
     public static void surface(String name, Map map) {
 //        String[] tokens = keysFromMap(map);
 //        Object[] values = valuesFromMap(map, tokens);
