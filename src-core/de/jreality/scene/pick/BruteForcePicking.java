@@ -127,8 +127,8 @@ class BruteForcePicking {
     double[] toOb3=new double[3];
     double[] dirOb3=new double[3];
     if(from.length > 3){
-      P3.dehomogenize(fromOb3, fromOb);
-      P3.dehomogenize(toOb3, toOb);
+      Pn.dehomogenize(fromOb3, fromOb);
+      Pn.dehomogenize(toOb3, toOb);
       if(toOb[3]==0){
         dirOb3=toOb3;
       }else{
@@ -210,8 +210,8 @@ class BruteForcePicking {
     double[] toOb3=new double[3];
     double[] dirOb3=new double[3];
     if(from.length > 3){
-      P3.dehomogenize(fromOb3, fromOb);
-      P3.dehomogenize(toOb3, toOb);
+      Pn.dehomogenize(fromOb3, fromOb);
+      Pn.dehomogenize(toOb3, toOb);
       if(toOb[3]==0){
         dirOb3=toOb3;
       }else{
@@ -264,8 +264,8 @@ class BruteForcePicking {
     double[] toOb3=new double[3];
     double[] dirOb3=new double[3];
     if(from.length > 3){
-      P3.dehomogenize(fromOb3, fromOb);
-      P3.dehomogenize(toOb3, toOb);
+      Pn.dehomogenize(fromOb3, fromOb);
+      Pn.dehomogenize(toOb3, toOb);
       if(toOb[3]==0){
         dirOb3=toOb3;
       }else{
@@ -334,8 +334,8 @@ class BruteForcePicking {
     double[] toOb3=new double[3];
     double[] dirOb3=new double[3];
     if(from.length > 3){
-      P3.dehomogenize(fromOb3, fromOb);
-      P3.dehomogenize(toOb3, toOb);
+      Pn.dehomogenize(fromOb3, fromOb);
+      Pn.dehomogenize(toOb3, toOb);
       if(toOb[3]==0){
         dirOb3=toOb3;
       }else{

@@ -142,7 +142,7 @@ public class RotateTool extends AbstractTool {
 //    avatarTrans.setColumn(3, tmp.getColumn(3));
     object2avatar.multiplyOnLeft(avatarTrans);
     //object2avatar = object2avatar.getRotation();
-    object2avatar.assignFrom(P3.extractOrientationMatrix(null, object2avatar.getArray(), P3.originP3, signature));
+    object2avatar.assignFrom(P3.extractOrientationMatrix(null, object2avatar.getArray(), Pn.originP3, signature));
     return object2avatar;
   }
 

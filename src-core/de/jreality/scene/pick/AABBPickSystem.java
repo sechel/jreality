@@ -93,8 +93,8 @@ public class AABBPickSystem implements PickSystem {
   }
   
   public List computePick(double[] f, double[] t) {
-    if (f.length == 4) P3.dehomogenize(f, f);
-    if (t.length == 4) P3.dehomogenize(t, t);
+    if (f.length == 4) Pn.dehomogenize(f, f);
+    if (t.length == 4) Pn.dehomogenize(t, t);
     if (t.length == 3 || t[3] == 0) return computePickImpl(f, t, t, 1000);
     double[] dir = new double[3];
     dir[0] = t[0]-f[0];

@@ -116,7 +116,7 @@ public class FlyTool extends AbstractTool {
     double val = tc.getAxisState(timerSlot).intValue()*0.001;    
     //Rn.times(dir, val*gain*velocity, dir);
     val = val*gain*velocity;
-    double[] newShipPosition = P3.dragTowards(null, shipPosition, dir, val, signature);
+    double[] newShipPosition = Pn.dragTowards(null, shipPosition, dir, val, signature);
     //System.out.println("FlyTool: old position is "+Rn.toString(Pn.normalize(shipPosition, shipPosition,signature)));
     //System.out.println("FlyTool: new position is "+Rn.toString(Pn.normalize(newShipPosition,newShipPosition, signature)));
     MatrixBuilder.init(shipMatrix, signature).translateFromTo(shipPosition,newShipPosition).assignTo(ship);

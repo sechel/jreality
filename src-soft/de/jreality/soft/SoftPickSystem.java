@@ -43,7 +43,7 @@ package de.jreality.soft;
 import java.util.List;
 
 import de.jreality.math.MatrixBuilder;
-import de.jreality.math.P3;
+import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
@@ -85,8 +85,8 @@ public class SoftPickSystem implements PickSystem {
     public List computePick(double[] from, double[] to) {
       if (to.length < 4 || to[3] == 0) return computePickImpl(from, to, 1000);
       double[] dir = new double[3];
-      P3.dehomogenize(from, from);
-      P3.dehomogenize(to, to);
+      Pn.dehomogenize(from, from);
+      Pn.dehomogenize(to, to);
       dir[0] = to[0]-from[0];
       dir[1] = to[1]-from[1];
       dir[2] = to[2]-from[2];

@@ -283,7 +283,7 @@ directionalLightAttribute[SceneGraphComponent sgc]
         |        "direction" dir=sfvec3fValue               
                 { 
                     Transformation tt = new Transformation();
-                    tt.setMatrix(P3.makeLookatMatrix(null, P3.originP3, dir, 0.0, Pn.EUCLIDEAN));
+                    tt.setMatrix(P3.makeLookatMatrix(null, Pn.originP3, dir, 0.0, Pn.EUCLIDEAN));
                     sgc.setTransformation(tt);
                     if (VRMLHelper.verbose)      System.err.println("Got direction"); 
                 }
