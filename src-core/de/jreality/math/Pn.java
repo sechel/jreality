@@ -62,6 +62,7 @@ package de.jreality.math;
  */
 public class Pn {
 
+  
 	public static final int HYPERBOLIC = -1;
 	public static final int EUCLIDEAN	= 0;
 	public static final int ELLIPTIC	= 1;
@@ -71,12 +72,7 @@ public class Pn {
 	public static double[] originP3 = {0.0, 0.0, 0.0, 1.0};
 	public static double[] zDirectionP3 = {0.0, 0.0, 1.0, 0.0};
 	
-	/**
-	 * no instances allowed
-	 */
-	protected Pn() {
-		super();
-	}
+  private Pn() {}
 
 	/**
 	 * Dehomogenize the src array into the dst array.  Both must be the same length.

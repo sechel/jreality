@@ -52,14 +52,9 @@ import de.jreality.util.LoggingSystem;
  * @author gunn
  *
  */
-final public class P2 extends Pn {
+final public class P2 {
 
-	/**
-	 * 
-	 */
-	private P2() {
-		super();
-	}
+  private P2() {}
 
 	/**
 	 * Calculate the Euclidean perpendicular bisector of the segment from <i>p1</i> to <i>p2</i>.

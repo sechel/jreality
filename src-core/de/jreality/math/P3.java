@@ -56,7 +56,7 @@ import de.jreality.util.LoggingSystem;
  * @author Charles Gunn
  *
  */
-public class P3 extends Pn {
+public class P3 {
 
 	private final static double[] hzaxis = {0,0,1,1};
 
@@ -67,9 +67,7 @@ public class P3 extends Pn {
 	public static double[] p3involution = makeStretchMatrix(null, new double[]{-1d,-1d,-1d,1d});
 
 	 
-   private P3()	{
-		super();
-	}
+   private P3()	{}
 
 	/**
 	 * 
@@ -627,7 +625,7 @@ public class P3 extends Pn {
 		double[] to = null;
 		if (t.length == 3)	to = Pn.homogenize(null, t);
 		else if (t.length == 4) to = (double[]) t.clone();
-		if (to == null || (sig == EUCLIDEAN && to[3] == 0.0))	{
+		if (to == null || (sig == Pn.EUCLIDEAN && to[3] == 0.0))	{
 			throw new IllegalArgumentException("Infinite euclidean translation vector");
 		}
 		Pn.normalize(to, to, sig);
@@ -817,7 +815,7 @@ public class P3 extends Pn {
 			for (int j = 0; j<4; ++j)		dst[j*4+i] = basis[i][j];
 		}
 		// TODO figure out how to avoid this clean-up for euclidean case
-		if (signature == EUCLIDEAN)	{
+		if (signature == Pn.EUCLIDEAN)	{
 			for (int i = 0; i<4; ++i)	{dst[12+i] = 0.0;  dst[4*i+3] = m[4*i+3]; }
 		}
 		// for now just print out the table of inner products
@@ -857,7 +855,7 @@ public class P3 extends Pn {
 	    	case SwingConstants.SOUTH_WEST : align=-xscale; valign=-yscale; break;
 	    	case SwingConstants.NORTH_WEST : align=-xscale; break;
 	    }
-	    double[] euclideanTranslation = makeTranslationMatrix(null, Rn.add(null, xyzOffset, new double[]{align, valign, 0, 0}), EUCLIDEAN);
+	    double[] euclideanTranslation = makeTranslationMatrix(null, Rn.add(null, xyzOffset, new double[]{align, valign, 0, 0}), Pn.EUCLIDEAN);
 	    double[] pointTranslation = makeTranslationMatrix(null, point, signature);
 
 	    Rn.times(result, pointTranslation, Rn.times(null, orientation, Rn.times(null, euclideanTranslation, scale)));
