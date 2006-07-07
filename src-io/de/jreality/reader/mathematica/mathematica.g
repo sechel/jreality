@@ -117,7 +117,7 @@ options {
 	}
 	
 // -------------------------------- default Lights ----------------------------
-	public static SceneGraphComponent getDefaultLigthNode (){
+	public static SceneGraphComponent getDefaultLightNode (){
 		SceneGraphComponent lightNode= new SceneGraphComponent();
 		SceneGraphComponent light1Node= new SceneGraphComponent();
 		SceneGraphComponent light2Node= new SceneGraphComponent();
