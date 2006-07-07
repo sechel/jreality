@@ -59,6 +59,8 @@ import de.jreality.util.LoggingSystem;
  */
 public class ReaderMATHEMATICA extends AbstractReader {
 
+	SceneGraphComponent lightNode;
+	
   public void setInput(Input input) throws IOException {
     try {
       Constructor lexC = Class.forName("de.jreality.reader.mathematica.MathematicaLexer").getConstructor(new Class[]{InputStream.class});
@@ -69,6 +71,9 @@ public class ReaderMATHEMATICA extends AbstractReader {
       
       Expression parse = new Expression(parser, "start", null);
       root = (SceneGraphComponent) parse.getValue();
+      
+      Expression extractLights = new Expression(parser, "getDefaultLightNode", null);
+      lightNode = (SceneGraphComponent) extractLights.getValue();
       
     } catch (ClassNotFoundException e) {
       LoggingSystem.getLogger(this).severe("Mathematica parsing failed, call ANTLR first!");
@@ -87,5 +92,9 @@ public class ReaderMATHEMATICA extends AbstractReader {
       LoggingSystem.getLogger(this).severe("parsing "+input+" failed: "+e.getMessage());
     }
   }
+
+public SceneGraphComponent getLightNode() {
+	return lightNode;
+}
   
 }
