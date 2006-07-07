@@ -101,8 +101,7 @@ public class ToolsAndAppearances {
     ToolSystemViewer viewer = new ToolSystemViewer(new Viewer());
     viewer.setSceneRoot(rootNode);
     viewer.setCameraPath(camPath);
-    PickSystem ps = new SoftPickSystem();
-    viewer.setPickSystem(ps);
+    viewer.initializeTools();
     
     JFrame frame = new JFrame();
     frame.setVisible(true);
