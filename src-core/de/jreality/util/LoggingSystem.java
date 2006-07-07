@@ -125,10 +125,10 @@ public class LoggingSystem {
         // make debugging loggers noisy
 //        Logger.getLogger("de.jreality.scene.proxy.tree").setLevel(Level.CONFIG);
 //        Logger.getLogger("de.jreality.toolsystem").setLevel(Level.FINER);
-        Logger.getLogger("de.jreality.scene.pick").setLevel(Level.FINE);
-        Logger.getLogger("de.jreality.math").setLevel(Level.FINER);
-        Logger.getLogger("de.jreality.io").setLevel(Level.INFO);
-        Logger.getLogger("de.jreality.backends").setLevel(Level.FINE);
+//        Logger.getLogger("de.jreality.scene.pick").setLevel(Level.FINE);
+//        Logger.getLogger("de.jreality.math").setLevel(Level.FINER);
+//        Logger.getLogger("de.jreality.io").setLevel(Level.INFO);
+//        Logger.getLogger("de.jreality.backends").setLevel(Level.FINE);
 //        Logger.getLogger("de.jreality.jogl").setLevel(Level.FINE);
     }
 
