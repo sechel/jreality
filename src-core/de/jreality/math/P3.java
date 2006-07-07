@@ -276,7 +276,6 @@ public class P3 {
 		double[] newto = new double[4];
 		double[] tm1 = new double[16];
 		double[] tm2 = new double[16];
-		double[] tm3 = new double[16];
 		if (m == null) m = new double[16];
 
 		P3.makeTranslationMatrix(tm1, from,  sig);
@@ -886,7 +885,6 @@ public class P3 {
 	}
 
 	public static double orientation(double[] to, double[] up, double[] upNoRoll) {
-		double det = 0.0;
 		double[] mat = new double[16];
 		System.arraycopy(to, 0, mat,0,4);
 		System.arraycopy(up, 0, mat, 4, 4);

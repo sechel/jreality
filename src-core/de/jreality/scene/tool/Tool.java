@@ -7,18 +7,17 @@ import java.util.List;
  * Tools are attatched to a SceneGraphComponent and are intended to
  * to perform interactive changes to the Scene - usually driven by
  * user input. The corresponding methods are 
- * <@link #activate(ToolContext)><code>activate(ToolContext)</code></link>,
- * <@link #perform(ToolContext)><code>perform(ToolContext)</code></link>,
- * and <@link #deactivate(ToolContext)><code>deactivate(ToolContext)</code></link>.
+ * {@link #activate(ToolContext)},
+ * {@link #perform(ToolContext)} and {@link #deactivate(ToolContext)}.
  * </p>
  * <p>
  * User input is passed to the Tool either as an AxisState, which represents
  * a double value (i.e. a Button) or a DoubleArray of length 16, which
  * represents a 4 by 4 matrix. These inputs are called virtual devices,
  * since they are usually hardware independent and "live in the scene".
- * These virtual devices are mapped to <code>InputSlot</code>s, which
- * should represent them under a meaningful name. Some examples (which are
- * available in the default setting):
+ * These virtual devices are mapped to {@link de.jreality.scene.tool.InputSlot}s,
+ * which should represent them under a meaningful name. Some examples (which
+ * are available in the default setting):
  * <ul>
  * <li><code>PointerTransformation</code> A pointer device in scene coordinates.
  *     On a desktop this represents the mouse pointer at the near clipping plane,
@@ -36,7 +35,7 @@ import java.util.List;
  * </p>
  * <p>
  * Tools may be always active or activated by some virtual device.
- * A Tool which is not always active (getActivationSlot() returns
+ * A Tool which is not always active ({@link getActivationSlot()} returns
  * not null) will be activated as soon as it's activation slot reaches
  * the state AxisState.PRESSED. If the activation slot does not
  * represent an AxisState, the tool will never become active. 
@@ -45,8 +44,10 @@ import java.util.List;
  * A single Tool instance can be attatched to different components, and there
  * are also multiple implicit instances of a tool when it is attatched to a
  * component that has several paths from the scene root. The current path is
- * always available via the ToolContext: tc.getRootToLocal() and
- * tc.getRootToToolComponent() return the paths for the current perform(tc) call.
+ * always available via the ToolContext: {@link de.jreality.scene.tool.ToolContext.getRootToLocal()}
+ * and {@link de.jreality.scene.tool.ToolContext.getRootToToolComponent()}
+ * return the paths for the current {@link #activate(ToolContext)}/{@link #perform(ToolContext)}/
+ * {@link #deactivate(ToolContext)} call.
  * </p>
  *  
  * 

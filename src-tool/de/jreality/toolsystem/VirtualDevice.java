@@ -50,9 +50,12 @@ import de.jreality.scene.tool.InputSlot;
  * @author weissman
  *
  **/
-public interface VirtualDevice extends AbstractDevice {
+public interface VirtualDevice {
 
     public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException;
     public abstract void initialize(List inputSlots, InputSlot result, Map configuration);
+
+    public void dispose();
+    public String getName();
 
 }

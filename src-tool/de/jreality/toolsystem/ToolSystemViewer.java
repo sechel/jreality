@@ -47,6 +47,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.pick.PickSystem;
+import de.jreality.tools.AnimatorTask;
 import de.jreality.tools.AnimatorTool;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.util.Input;

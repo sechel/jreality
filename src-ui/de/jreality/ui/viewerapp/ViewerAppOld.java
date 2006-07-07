@@ -120,7 +120,6 @@ import de.jreality.util.LoggingSystem;
 import de.jreality.util.PickUtility;
 import de.jreality.util.RenderTrigger;
 import de.jreality.util.SceneGraphUtility;
-import de.jreality.util.ViewerSwitch;
 import de.jreality.writer.WriterJRS;
 
 /**

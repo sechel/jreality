@@ -48,6 +48,10 @@ import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 
 /**
+ * 
+ * Tool that generates an {@link java.awt.event.ActionEvent} on activation.
+ * This can be used to trigger arbitrary things when a geometry is picked.
+ * 
  * @author Ulrich
  */
 

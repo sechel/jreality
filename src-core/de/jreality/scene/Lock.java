@@ -49,6 +49,8 @@ import java.util.Map.Entry;
 
 
 /**
+ * Be careful - this class might become package private in future.
+ * 
  * @author pietsch + weissman
  */
 public final class Lock

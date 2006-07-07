@@ -38,7 +38,7 @@
  */
 
 
-package de.jreality.util;
+package de.jreality.ui.viewerapp;
 
 import java.awt.BorderLayout;
 import java.awt.Component;

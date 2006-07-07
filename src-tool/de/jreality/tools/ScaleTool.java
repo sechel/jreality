@@ -63,7 +63,7 @@ public class ScaleTool extends AbstractTool {
   boolean moveChilderen;
   boolean slotPolling;
   
-  double gain=1;
+  double gain=1000;
   
   public ScaleTool() {
     super(scaleActivation);

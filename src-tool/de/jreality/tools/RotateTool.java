@@ -51,7 +51,6 @@ import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.shader.EffectiveAppearance;
-import de.jreality.toolsystem.AnimatorTask;
 import de.jreality.util.Rectangle3D;
 
 /**

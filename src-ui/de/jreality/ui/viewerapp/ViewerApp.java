@@ -80,7 +80,6 @@ import de.jreality.ui.treeview.JTreeRenderer;
 import de.jreality.ui.treeview.SceneTreeModel;
 import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
 import de.jreality.util.RenderTrigger;
-import de.jreality.util.ViewerSwitch;
 
 
 /**

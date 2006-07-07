@@ -42,7 +42,6 @@ package de.jreality.toolsystem.raw;
 
 import de.jreality.scene.Viewer;
 import de.jreality.scene.tool.InputSlot;
-import de.jreality.toolsystem.AbstractDevice;
 import de.jreality.toolsystem.ToolEvent;
 import de.jreality.toolsystem.ToolEventQueue;
 
@@ -50,7 +49,7 @@ import de.jreality.toolsystem.ToolEventQueue;
  * @author weissman
  *
  **/
-public interface RawDevice extends AbstractDevice {
+public interface RawDevice {
 
     public void setEventQueue(ToolEventQueue queue);
     public void initialize(Viewer viewer);
@@ -64,4 +63,7 @@ public interface RawDevice extends AbstractDevice {
      */
     public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice);
     
+    public void dispose();
+    public String getName();
+
 }

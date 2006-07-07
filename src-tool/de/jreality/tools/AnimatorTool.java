@@ -47,7 +47,6 @@ import java.util.WeakHashMap;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
-import de.jreality.toolsystem.AnimatorTask;
 
 
 /**
