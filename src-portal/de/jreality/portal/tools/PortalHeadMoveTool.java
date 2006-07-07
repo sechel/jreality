@@ -48,7 +48,9 @@ import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 
 /**
- * @author weissman
+ * A tool that sets the head matrix from the head tracker.
+ * 
+ * @author Steffen Weissman
  *
  **/
 public class PortalHeadMoveTool extends AbstractTool {

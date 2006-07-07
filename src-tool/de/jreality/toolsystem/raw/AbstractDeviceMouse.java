@@ -62,10 +62,6 @@ public abstract class AbstractDeviceMouse {
           protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
             return true;
           }
-          protected void replaceWith(ToolEvent replacement) {
-            trafo = replacement.getTransformation();
-            time = replacement.getTimeStamp();
-          }
         });
       } else if (!sentCenter) {
         axesMatrix.setEntry(0, 3, 0);

@@ -63,10 +63,11 @@ import de.jreality.util.LoggingSystem;
 
 /**
  *
- * TODO: comment this
+ * A device to get input from a MotionStar. This uses syzygy
+ * and will be removed as soon as possible...
  *
- * @author weissman
- *
+ * @author Steffen Weissman
+ * @deprecated will be replaced by the TrackD driver.
  */
 public class DeviceMotionstar implements RawDevice {
 	
@@ -166,7 +167,7 @@ public class DeviceMotionstar implements RawDevice {
             if (slot == null) return;
             matrixWand = Rn.transposeF2D(matrixWand, event.getMatrix());
             queue.addEvent(new ToolEvent(DeviceMotionstar.this, slot, new DoubleArray(Rn.copy(null, matrixWand))) {
-              boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
+              protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
                 return true;
               }
             });
@@ -179,7 +180,7 @@ public class DeviceMotionstar implements RawDevice {
             InputSlot slot = (InputSlot) usedSources.get("headMatrix");
             matrixHead = Rn.transposeF2D(matrixHead, event.getMatrix());
             queue.addEvent(new ToolEvent(DeviceMotionstar.this, slot, new DoubleArray(Rn.copy(null, matrixHead))) {
-              boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
+              protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
                 return true;
               }
             });

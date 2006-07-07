@@ -57,7 +57,6 @@ import java.net.URL;
 /**
  * Abstraction of an input source. Technically an instance covers an {@link java.io.InputStream}.
  * 
- * To create an Input instance, use the factory methods in {@link de.jreality.reader.Readers}.
  */
 public final class Input
 {

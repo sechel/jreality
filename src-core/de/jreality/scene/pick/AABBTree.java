@@ -65,10 +65,12 @@ import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
 
 /**
- * TODO: the pick algorithm assumes that polygons are konvex...
+ * An AABB tree for IndexedFaceSets.
+ * <p>
+ * <b>TODO:</b> the pick algorithm assumes that polygons are konvex...
  * this is easy to change, steal code from tims triangulate non convex poly...
- * 
- * @author gollwas
+ * </p>
+ * @author Steffen Weissmann
  *
  */
 public class AABBTree {
@@ -411,6 +413,11 @@ public class AABBTree {
         }
     };
     
+    /**
+     * this is only for debugging and might be removed in future.
+     * @return A component that contains the AABBs of the tree as
+     * IndexedLineSets.
+     */
     public SceneGraphComponent display() {
       SceneGraphComponent cmp = new SceneGraphComponent();
       Appearance app = new Appearance();

@@ -38,7 +38,7 @@
  */
 
 
-package de.jreality.portal.tools;
+package de.jreality.portal;
 
 import java.awt.geom.Rectangle2D;
 

@@ -44,7 +44,6 @@ package de.jreality.portal;
 import java.awt.Color;
 
 import de.jreality.geometry.IndexedLineSetFactory;
-import de.jreality.portal.tools.PortalCoordinateSystem;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;

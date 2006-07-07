@@ -64,6 +64,14 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 
+/**
+ * 
+ * Our pick system implementation. Uses Brute-force as default
+ * and AABBTrees if available.
+ * 
+ * @author Steffen Weissmann
+ *
+ */
 public class AABBPickSystem implements PickSystem {
   
   private Impl impl;

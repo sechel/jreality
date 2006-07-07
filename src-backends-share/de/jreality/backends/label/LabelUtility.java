@@ -91,8 +91,6 @@ public class LabelUtility {
   
   /**
    * maybe we should reuse all keys...
-   * @author gollwas
-   *
    */
   private static class Key {
     

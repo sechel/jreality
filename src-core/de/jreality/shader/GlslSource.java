@@ -52,9 +52,13 @@ import java.util.regex.Pattern;
 import de.jreality.util.Input;
 
 /**
+ * 
+ * An abstraction of OpenGL shading language (GLSL) programs.
+ * 
  * program parsing is very poor!!
  * 
- * @author gollwas
+ * @see de.jreality.shader.GlslProgram
+ * @author Steffen Weissmann
  *
  */
 public class GlslSource implements Serializable {

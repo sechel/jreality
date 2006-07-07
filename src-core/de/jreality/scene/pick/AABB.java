@@ -42,6 +42,13 @@ package de.jreality.scene.pick;
 
 import de.jreality.math.Rn;
 
+/**
+ * 
+ * An Axis Aligned Bounding Box.
+ * 
+ * @author Steffen Weissmann
+ *
+ */
 class AABB {
 
 	/** Center of the Box. */

@@ -40,8 +40,6 @@
 
 package de.jreality.scene.tool;
 
-import java.util.Iterator;
-
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.DoubleArray;
@@ -94,11 +92,4 @@ public interface ToolContext
      */
     public void reject();
     
-    /**
-     * Selection is not implemented, but the ToolContext already contains
-     * it - to avoid future code incompatibilities.
-     * 
-     * @return an Iterator over the currently selected paths.
-     */
-    public Iterator getSelection();
 }
