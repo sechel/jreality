@@ -149,7 +149,6 @@ public class SwtExample {
       f.setVisible(true);
       f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
-    viewer.setPickSystem(new AABBPickSystem());
     
     viewer.setSceneRoot(rootNode);
     viewer.setCameraPath(cameraPath);
