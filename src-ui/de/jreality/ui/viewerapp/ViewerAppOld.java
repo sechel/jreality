@@ -268,7 +268,7 @@ class ViewerAppOld
   private boolean isFullScreen;
   private JMenuBar mb;
   private boolean autoRender=true;
-  private RenderTrigger renderTrigger;
+  private RenderTrigger renderTrigger=new RenderTrigger();
   
   void toggleFullScreen() {
     isFullScreen = !isFullScreen;
@@ -709,10 +709,6 @@ class ViewerAppOld
     } catch (Exception e) {
       e.printStackTrace();
     }
-    if (autoRender) {
-      renderTrigger.addViewer(currViewer);
-      renderTrigger.addSceneGraphComponent(root);
-    }
 
     root = s.getSceneRoot();
     currViewer.setSceneRoot(root);
@@ -727,6 +723,10 @@ class ViewerAppOld
       currViewer.setEmptyPickPath(emptyPick);
     }
     
+    if (autoRender) {
+        renderTrigger.addViewer(currViewer);
+        renderTrigger.addSceneGraphComponent(root);
+      }
     uiFactory.setViewer((Component) currViewer.getViewingComponent());
   }
   
