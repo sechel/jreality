@@ -90,7 +90,6 @@ public class VirtualDeviceConfig {
     this.inSlots = inSlots;
     this.config = config;
     this.mapped = mapped.trim().equals("") ? null : InputSlot.getDevice(mapped);
-    System.out.println("mapped="+this.mapped);
   }
 
   public VirtualDevice createDevice() throws InstantiationException {
