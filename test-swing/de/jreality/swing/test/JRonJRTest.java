@@ -41,6 +41,7 @@
 package de.jreality.swing.test;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.io.IOException;
 
 import de.jreality.examples.CatenoidHelicoid;
@@ -53,11 +54,11 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
-import de.jreality.scene.tool.RotateTool;
-import de.jreality.scene.tool.ToolSystemViewer;
-import de.jreality.scene.tool.config.ToolSystemConfiguration;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.swing.JFakeFrame;
+import de.jreality.tools.RotateTool;
+import de.jreality.toolsystem.ToolSystemViewer;
+import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.RenderTrigger;
 import de.jreality.util.SceneGraphUtility;
@@ -96,7 +97,7 @@ public class JRonJRTest {
         catComp2.setAppearance(a);
         Viewer v2 = createViewer(catComp2);
         JFakeFrame f = new JFakeFrame();
-        f.getContentPane().add(v2.getViewingComponent());
+        f.getContentPane().add((Component) v2.getViewingComponent());
 
         catComp.addTool(f.getTool());
         f.setSize(512, 512);
@@ -125,7 +126,7 @@ public class JRonJRTest {
         }
         if (cfg == null)
             throw new IllegalStateException("couldn't load tool config");
-        ToolSystemViewer v = new ToolSystemViewer(viewer, cfg);
+        ToolSystemViewer v = new ToolSystemViewer(viewer, cfg, false);
         v.setPickSystem(new AABBPickSystem());
         SceneGraphComponent scene = new SceneGraphComponent();
 
