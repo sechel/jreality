@@ -30,11 +30,11 @@ public class DragExample {
 		t.addPointDragListener(new PointDragListener() {
 
 			public void pointDragStart(PointDragEvent e) {
-				System.out.println("drag start of vertex no "+e.getIndex());				
+				System.out.println("start dragging vertex "+e.getIndex());				
 			}
 
 			public void pointDragged(PointDragEvent e) {
-				System.out.println("dragging vertex no "+e.getIndex()+"; new Position: "+Rn.toString(e.getPosition()));
+				//System.out.println("dragging vertex "+e.getIndex()+"; new Position: "+Rn.toString(e.getPosition()));
 				PointSet pointSet = e.getPointSet();
 				double[][] points=new double[pointSet.getNumPoints()][];
 		        pointSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(points);
@@ -43,7 +43,7 @@ public class DragExample {
 			}
 
 			public void pointDragEnd(PointDragEvent e) {
-				System.out.println("drag end of vertex no "+e.getIndex());
+				//System.out.println("drag end of vertex "+e.getIndex());
 			}
 			
 		});
@@ -53,7 +53,7 @@ public class DragExample {
 			private double[][] points;
 			
 			public void lineDragStart(LineDragEvent e) {
-				System.out.println("drag start of line no "+e.getIndex());
+				System.out.println("start dragging line "+e.getIndex());
 				
 				lineSet = e.getIndexedLineSet();
 				points=new double[lineSet.getNumPoints()][];
@@ -61,7 +61,7 @@ public class DragExample {
 			}
 
 			public void lineDragged(LineDragEvent e) {
-				System.out.println("dragging line no "+e.getIndex()+"; translation: "+Rn.toString(e.getTranslation()));
+				//System.out.println("dragging line "+e.getIndex()+"; translation: "+Rn.toString(e.getTranslation()));
 				
 				double[][] newPoints=(double[][])points.clone();
 				Matrix trafo=new Matrix();
@@ -74,7 +74,6 @@ public class DragExample {
 			}
 
 			public void lineDragEnd(LineDragEvent e) {
-				System.out.println("drag end of line no "+e.getIndex());
 			}			
 		});
 		t.addFaceDragListener(new FaceDragListener() {
@@ -83,7 +82,7 @@ public class DragExample {
 			private double[][] points;
 			
 			public void faceDragStart(FaceDragEvent e) {
-				System.out.println("drag start of face no "+e.getIndex());
+				System.out.println("start dragging face "+e.getIndex());
 				
 				faceSet = e.getIndexedFaceSet();
 				points=new double[faceSet.getNumPoints()][];
@@ -91,7 +90,7 @@ public class DragExample {
 			}
 
 			public void faceDragged(FaceDragEvent e) {
-				//System.out.println("dragging face no "+e.getIndex()+"; translation: "+Rn.toString(e.getTranslation()));
+				//System.out.println("dragging face "+e.getIndex()+"; translation: "+Rn.toString(e.getTranslation()));
 				
 				double[][] newPoints=(double[][])points.clone();
 				Matrix trafo=new Matrix();
@@ -104,7 +103,6 @@ public class DragExample {
 			}
 
 			public void faceDragEnd(FaceDragEvent e) {
-				//System.out.println("drag end of face no "+e.getIndex());
 			}			
 		});
 		
