@@ -49,6 +49,10 @@ public class DragEventTool extends AbstractTool {
           pointerToPoint.multiplyOnRight(tc.getRootToLocal().getMatrix(null));
           
 	      if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_POINT) {
+          if (pointDragListener == null) {
+            tc.reject();
+            return;
+          }
 	    	  pickType=PickResult.PICK_TYPE_POINT;
 	          pointSet = (PointSet) tc.getCurrentPick().getPickPath().getLastElement();
 	          index=tc.getCurrentPick().getIndex();
@@ -56,6 +60,10 @@ public class DragEventTool extends AbstractTool {
 	          MatrixBuilder.euclidean(pointerToPoint).translate(point);      
 	          firePointDragStart(point);        
 	      }else if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_LINE) {	            
+          if (lineDragListener == null) {
+            tc.reject();
+            return;
+          }
 	    	  pickType=PickResult.PICK_TYPE_LINE;
 	    	  lineSet = (IndexedLineSet) tc.getCurrentPick().getPickPath().getLastElement();
 	    	  index=tc.getCurrentPick().getIndex();	            
@@ -64,6 +72,10 @@ public class DragEventTool extends AbstractTool {
 	    	  MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint);	            
 	    	  fireLineDragStart(new double[]{0,0,0,1});        
 	      }else if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_FACE) {
+          if (faceDragListener == null) {
+            tc.reject();
+            return;
+          }
 	    	  pickType=PickResult.PICK_TYPE_FACE;
 	    	  faceSet = (IndexedFaceSet) tc.getCurrentPick().getPickPath().getLastElement();
 	    	  index=tc.getCurrentPick().getIndex();
