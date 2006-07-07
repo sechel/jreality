@@ -58,7 +58,15 @@ public abstract class AbstractDeviceMouse {
         axesMatrix.setEntry(0, 3, xndc);
         axesMatrix.setEntry(1, 3, yndc);
         axesMatrix.setEntry(2, 3, -1);
-        queue.addEvent(new ToolEvent(AbstractDeviceMouse.this, slot, da));
+        queue.addEvent(new ToolEvent(AbstractDeviceMouse.this, slot, da) {
+          protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
+            return true;
+          }
+          protected void replaceWith(ToolEvent replacement) {
+            trafo = replacement.getTransformation();
+            time = replacement.getTimeStamp();
+          }
+        });
       } else if (!sentCenter) {
         axesMatrix.setEntry(0, 3, 0);
         axesMatrix.setEntry(1, 3, 0);
