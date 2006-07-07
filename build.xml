@@ -425,7 +425,7 @@
   </target>
 
   <target name="viewer" depends="dist,viewer-deps" description="launch a standalone viewer">
-    <java classname="de.jreality.ui.viewerapp.ViewerApp" maxmemory="1024M" failonerror="true" fork="true">
+    <java classname="de.jreality.ui.viewerapp.ViewerAppOld" maxmemory="1024M" failonerror="true" fork="true">
       <classpath>
       	<path refid="apps.classpath"/>
       	<pathelement path="${java.class.path}"/>
