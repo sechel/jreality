@@ -64,7 +64,13 @@ import de.jreality.util.LoggingSystem;
  * @author Holger Pietsch
  */
 public class DefaultViewer extends Component implements Runnable, Viewer {
+
+  // TODO: remove ENFORCE_... ?
+  // TODO: somehow dispose the renderthread
+
   private static final boolean ENFORCE_PAINT_ON_MOUSEEVENTS= false;
+  
+  // synchronizes the render thread
   private final Object renderLock= new Object();
   //private Camera camera;
   private SceneGraphPath cameraPath;
@@ -143,22 +149,45 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
     return root;
   }
 
-  private final Object renderSynchMutex=new Object();
-  private boolean rendering;
+  // notification when rendering has finished
+  private final Object renderFinishLock=new Object();
+  
+  //synchronize render calls
+  private final Object renderSynch=new Object();
+  
+  private boolean synchRendering;
   
   public void render() {
-    synchronized (renderSynchMutex) {
-      if (EventQueue.isDispatchThread()) {
-        renderImpl();
-        if (imageValid) paintImmediately();
-      } else {
-        rendering=true;
-        renderAsync();
-        while (rendering)
+    if (EventQueue.isDispatchThread() && synchRendering) {
+      // avoid deadlock
+      return;
+    }
+    synchronized (renderSynch) { // block until finished
+      synchronized (renderFinishLock) { // wait until finished
+        synchronized(renderLock) { // synchronize with renderAsync() call
+          synchRendering=true;
+          if (upToDate) {
+            upToDate=false;
+            renderLock.notify();
+          } else {
+            // else someone else triggered a render
+            // which did not start yet - ok
+          }
+        }
+        while (synchRendering) {
           try {
-            renderSynchMutex.wait();
+            renderFinishLock.wait();
           } catch (InterruptedException e) {
             throw new Error();
+          }
+        }
+        if (EventQueue.isDispatchThread()) run();
+        else {
+          try {
+            EventQueue.invokeAndWait(this);
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
         }
       }
     }
@@ -199,31 +228,27 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
   public void run() {
     if(EventQueue.isDispatchThread()) {
       paintImmediately();
-      synchronized (renderSynchMutex) {
-        rendering=false;
-        renderSynchMutex.notify();
-      }
     }
     else while (true) try {
-      if(upToDate) {
-        try {
-          synchronized(renderLock) {
+      synchronized(renderLock) {
+        while (upToDate) {
+          try {
             renderLock.wait();
+          } catch(InterruptedException e) {
+            e.printStackTrace();
           }
-        } catch(InterruptedException e) {
-          e.printStackTrace();
         }
+        upToDate=true;
       }
-
       renderImpl();
       //repaint();
-      if(imageValid) EventQueue.invokeLater(this);
-      else try {
-        synchronized(renderLock) {
-          renderLock.wait();
+      if (!synchRendering) {
+        if(imageValid) EventQueue.invokeLater(this);
+      } else {
+        synchronized (renderFinishLock) {
+          synchRendering=false;
+          renderFinishLock.notify();
         }
-      } catch(InterruptedException e) {
-        e.printStackTrace();
       }
     } catch(Exception ex) {
       Thread t= Thread.currentThread();
@@ -236,9 +261,6 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
   }
 
   private synchronized void renderImpl() {
-      //synchronized(this) {
-        upToDate=true;
-      //}
     Dimension d= getSize();
     if (d.width > 0 && d.height > 0) {
       //System.out.println("render: off="+offscreen);
@@ -407,12 +429,8 @@ public boolean canRenderAsync() {
 }
 
 public void renderAsync() {
-  boolean needRender;
-  synchronized (this) {
-    needRender=upToDate;
-  }
-  if (needRender) {
-    synchronized(renderLock) {
+  synchronized(renderLock) {
+    if (upToDate) {
       upToDate=false;
       renderLock.notify();
     }

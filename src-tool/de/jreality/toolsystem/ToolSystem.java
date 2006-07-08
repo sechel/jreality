@@ -191,9 +191,17 @@ public class ToolSystem implements ToolEventReceiver {
    * @param viewer
    */
   public ToolSystem(Viewer viewer, ToolSystemConfiguration config) {
-    this(viewer, config, false);
+    this(viewer, config, null);
   }
-  public ToolSystem(Viewer viewer, ToolSystemConfiguration config, boolean synchRender) {
+  
+  /**
+   * 
+   * @param viewer the viewer
+   * @param config the config
+   * @param renderTrigger a rendertrigger to synch or null - the ToolSystem does not take care of
+   * setting/removing the triggers viewer and scene root (on initialize/dispose)
+   */
+  public ToolSystem(Viewer viewer, ToolSystemConfiguration config, RenderTrigger renderTrigger) {
     this.viewer = viewer;
     toolContext = new ToolContextImpl();
     toolManager = new ToolManager();
@@ -201,19 +209,13 @@ public class ToolSystem implements ToolEventReceiver {
     deviceManager = new DeviceManager(config, eventQueue, viewer);
     slotManager = new SlotManager(config);
     updater = new ToolUpdateProxy(this);
-    if (synchRender) {
-      renderTrigger = new RenderTrigger(!synchRender);
-    }
+    this.renderTrigger = renderTrigger;
   }
 
   private boolean initialized;
   public void initializeSceneTools() {
     if (initialized) throw new IllegalStateException("already initialized!");
     initialized=true;
-    if (renderTrigger != null) {
-      renderTrigger.addSceneGraphComponent(viewer.getSceneRoot());
-      renderTrigger.addViewer(viewer);
-    }
     toolManager.cleanUp();
     updater.setSceneRoot(viewer.getSceneRoot());
     // register animator
@@ -496,10 +498,6 @@ private SceneGraphPath avatarPath;
   }
 
   public void dispose() {
-    if (renderTrigger != null) {
-      renderTrigger.removeSceneGraphComponent(viewer.getSceneRoot());
-      renderTrigger.removeViewer(viewer);
-    }
     eventQueue.dispose();
     deviceManager.dispose();
     updater.dispose();

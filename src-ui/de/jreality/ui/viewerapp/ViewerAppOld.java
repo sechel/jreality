@@ -787,7 +787,7 @@ class ViewerAppOld
     if (config.equals("portal")) cfg = ToolSystemConfiguration.loadDefaultPortalConfiguration();
     if (config.equals("default+portal")) cfg = ToolSystemConfiguration.loadDefaultDesktopAndPortalConfiguration();
     if (cfg == null) throw new IllegalStateException("couldn't load config ["+config+"]");
-    ToolSystemViewer v = new ToolSystemViewer(viewerSwitch, cfg, false);
+    ToolSystemViewer v = new ToolSystemViewer(viewerSwitch, cfg, null);
     v.setPickSystem(new AABBPickSystem());
     try {
       bshEval.getInterpreter().set("_toolSystemViewer", v);

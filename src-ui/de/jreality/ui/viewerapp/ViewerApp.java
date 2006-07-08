@@ -79,6 +79,7 @@ import de.jreality.ui.beans.InspectorPanel;
 import de.jreality.ui.treeview.JTreeRenderer;
 import de.jreality.ui.treeview.SceneTreeModel;
 import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
+import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
 
 
@@ -106,7 +107,8 @@ public class ViewerApp {
   
   private UIFactory uiFactory;  //frame layout factory depending on viewer
   
-  private RenderTrigger renderTrigger = new RenderTrigger();
+  private RenderTrigger renderTrigger;
+  
   private Viewer[] viewers;  //containing possible viewers (jogl, soft, portal)
   private ViewerSwitch viewerSwitch;
   private ToolSystemViewer currViewer;  //the current viewer
@@ -125,6 +127,7 @@ public class ViewerApp {
   private JrScene jrScene;
 
   private boolean autoRender = true;
+  private boolean synchRender = true;
 
   /**
    * @param node the SceneGraphNode (SceneGraphComponent or Geometry) to be displayed in the viewer
@@ -145,9 +148,18 @@ public class ViewerApp {
     displayedNode = node;
 
     //update autoRender
-    String autoRenderProp = System.getProperty("de.jreality.ui.viewerapp.autorender", "true");
+    String autoRenderProp = System.getProperty("de.jreality.ui.viewerapp.autoRender", "true");
     if (autoRenderProp.equalsIgnoreCase("false")) {
       autoRender = false;
+    }
+    String synchRenderProp = System.getProperty("de.jreality.ui.viewerapp.synchRender", "true");
+    if (synchRenderProp.equalsIgnoreCase("false")) {
+      synchRender = false;
+    }
+    if (autoRender) renderTrigger=new RenderTrigger();
+    if (synchRender) {
+      if (autoRender) renderTrigger.setAsync(false);
+      else LoggingSystem.getLogger(this).config("Inconsistant settings: no autoRender but synchRender!!");
     }
   }
   
@@ -344,7 +356,7 @@ public class ViewerApp {
     if (config.equals("default+portal")) cfg = ToolSystemConfiguration.loadDefaultDesktopAndPortalConfiguration();
     if (cfg == null) throw new IllegalStateException("couldn't load config ["+config+"]");
     
-    ToolSystemViewer viewer = new ToolSystemViewer(viewerSwitch, cfg, false);
+    ToolSystemViewer viewer = new ToolSystemViewer(viewerSwitch, cfg, synchRender ? renderTrigger : null);
     viewer.setPickSystem(new AABBPickSystem());
     
     return viewer;

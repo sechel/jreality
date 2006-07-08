@@ -108,7 +108,7 @@ public class ToolEvent extends EventObject {
   protected void replaceWith(ToolEvent replacement) {
       this.axis = replacement.axis;
       this.trafo = replacement.trafo;
-      this.time = replacement.time;
+      //this.time = replacement.time;
   }
 /**
  * 

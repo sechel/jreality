@@ -52,6 +52,7 @@ import de.jreality.tools.AnimatorTool;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
+import de.jreality.util.RenderTrigger;
 
 
 /**
@@ -97,12 +98,12 @@ public class ToolSystemViewer implements Viewer {
   }
 
   public ToolSystemViewer(Viewer viewer) {
-    this(viewer, loadConfiguration(), false);
+    this(viewer, loadConfiguration(), null);
   }
   
-  public ToolSystemViewer(Viewer viewer, ToolSystemConfiguration config, boolean syncRender) {
+  public ToolSystemViewer(Viewer viewer, ToolSystemConfiguration config, RenderTrigger trigger) {
     this.viewer = viewer;
-    toolSystem = new ToolSystem(viewer, config, syncRender);
+    toolSystem = new ToolSystem(viewer, config, trigger);
     setPickSystem(new AABBPickSystem());
   }
   

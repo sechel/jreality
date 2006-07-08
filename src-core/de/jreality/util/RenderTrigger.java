@@ -78,16 +78,16 @@ public class RenderTrigger implements SceneGraphComponentListener,
   TransformationListener, AppearanceListener, GeometryListener, LightListener {
 
   private boolean collect;
-  private final boolean async;
+  private boolean async=true;
   
     private RenderTriggerCaster viewer;
-    //private HashMap map = new HashMap();
-    public RenderTrigger() {
-      this(true);
-    }
 
-    public RenderTrigger(boolean async) {
-      this.async=async;
+    public boolean isAsync() {
+      return async;
+    }
+    
+    public void setAsync(boolean async) {
+      this.async = async;
     }
     
     public void forceRender() {
@@ -142,27 +142,15 @@ public class RenderTrigger implements SceneGraphComponentListener,
         n.accept(v);
     }
     
-    Runnable renderRunnable = new Runnable() {
-      public void run() {
-        if(viewer!= null)
-          viewer.render();
-      }
-    };
-    
     boolean needsRender;
     
     private void fireRender() {
       if (collect) needsRender=true;
-      else {
-        if (!async || EventQueue.isDispatchThread())
-          renderRunnable.run();
-        else EventQueue.invokeLater(renderRunnable);
-      }
+      else if(viewer!= null) viewer.render(async);
     }
 
     public void addViewer(Viewer v) {
         viewer = RenderTriggerCaster.add(viewer,v);
-        viewer.async=async;
     }
     
     public void removeViewer(Viewer v) {
@@ -204,9 +192,8 @@ public class RenderTrigger implements SceneGraphComponentListener,
 
     static abstract class RenderTriggerCaster
     {
-      boolean async;
         abstract RenderTriggerCaster remove(Viewer oldl);
-        abstract void render();
+        abstract void render(boolean async);
         static RenderTriggerCaster add(RenderTriggerCaster a, Viewer b)
         {
           return add(a, new RenderTriggerSingleCaster(b));
@@ -234,7 +221,7 @@ public class RenderTrigger implements SceneGraphComponentListener,
         {
           return oldl!=v? this: null;
         }
-        void render()
+        void render(boolean async)
         {
             if (async) v.renderAsync();
             else v.render();
@@ -252,9 +239,9 @@ public class RenderTrigger implements SceneGraphComponentListener,
             if(a2 == a && b2 == b) return this;
             return add(a2, b2);
         }
-        void render()
+        void render(boolean async)
         {
-            a.render(); b.render();
+            a.render(async); b.render(async);
         }
     }
     public void lightChanged(LightEvent ev) {
