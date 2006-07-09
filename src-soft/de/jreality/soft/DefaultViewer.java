@@ -441,6 +441,8 @@ public void renderAsync() {
     if (upToDate) {
       upToDate=false;
       renderLock.notify();
+      // TODO: Bloch warns of using Thread.yield()... but this
+      // makes the rendering smooth in oorange (with jgimmick timer)
       Thread.yield(); // encourage the render thread to do it's work
     }
   }
