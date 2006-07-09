@@ -46,6 +46,8 @@ import java.awt.Dimension;
 import java.beans.Beans;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import javax.swing.JFrame;
@@ -127,7 +129,7 @@ public class ViewerApp {
   private JrScene jrScene;
 
   private boolean autoRender = true;
-  private boolean synchRender = true;
+  private boolean synchRender = false;
 
   /**
    * @param node the SceneGraphNode (SceneGraphComponent or Geometry) to be displayed in the viewer
@@ -333,18 +335,23 @@ public class ViewerApp {
   }
   
   
-  private ToolSystemViewer createViewer() 
-    throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
-  {
+  private ToolSystemViewer createViewer() throws IOException {
     if (viewers == null) {
       
-      //get list of viewers and create viewer switch
-      String availableViewers = System.getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
-      StringTokenizer st = new StringTokenizer(availableViewers);
-      viewers = new Viewer[st.countTokens()];
-      for (int i = 0; i < viewers.length; i++) {
-        viewers[i] = createViewer(st.nextToken());
+      String viewer=System.getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
+      StringTokenizer st = new StringTokenizer(viewer);
+      List viewerList = new LinkedList();
+      String viewerClassName;
+      while (st.hasMoreTokens()) {
+        viewerClassName = st.nextToken();
+        try {
+          Viewer v = createViewer(viewerClassName);
+          viewerList.add(v);
+        } catch (Exception e) {
+          LoggingSystem.getLogger(this).info("could not create viewer instance of ["+viewerClassName+"]");
+        }
       }
+      viewers = (Viewer[]) viewerList.toArray(new Viewer[viewerList.size()]);
       viewerSwitch = new ViewerSwitch(viewers);
     }
     
