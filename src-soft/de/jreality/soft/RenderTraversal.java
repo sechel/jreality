@@ -180,7 +180,7 @@ public class RenderTraversal extends SceneGraphVisitor {
       VecMat.assignIdentity(initialTrafo);
     currentTrafo= initialTrafo;
     environment.traverse(root);
-    visit(root);
+    root.accept(this);
     pipeline.setMatrix(initialTrafo);
   }
 
