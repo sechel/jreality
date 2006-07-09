@@ -110,7 +110,9 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
     setBackground(Color.white);
     if(ENFORCE_PAINT_ON_MOUSEEVENTS)
       enableEvents(AWTEvent.MOUSE_MOTION_EVENT_MASK);
-    new Thread(this, "jReality render thread").start();
+    Thread renderThread = new Thread(this, "jReality render thread");
+    //renderThread.setPriority(Thread.NORM_PRIORITY+1);
+    renderThread.start();
   }
   public DefaultViewer() {
       this(0);
@@ -158,9 +160,11 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
   private boolean synchRendering;
   
   public void render() {
-    if (EventQueue.isDispatchThread() && synchRendering) {
-      // avoid deadlock
-      return;
+    synchronized (renderLock) {
+      if (EventQueue.isDispatchThread() && synchRendering) {
+        // avoid deadlock
+        return;
+      }
     }
     synchronized (renderSynch) { // block until finished
       synchronized (renderFinishLock) { // wait until finished
@@ -225,6 +229,8 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
     paint(g);
   }
 
+  private boolean disposed;
+  
   public void run() {
     if(EventQueue.isDispatchThread()) {
       paintImmediately();
@@ -237,17 +243,19 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
           } catch(InterruptedException e) {
             e.printStackTrace();
           }
+          if (disposed) return;
         }
         upToDate=true;
       }
       renderImpl();
-      //repaint();
       if (!synchRendering) {
         if(imageValid) EventQueue.invokeLater(this);
       } else {
-        synchronized (renderFinishLock) {
+        synchronized (renderLock) {
           synchRendering=false;
-          renderFinishLock.notify();
+          synchronized (renderFinishLock) {
+            renderFinishLock.notify();
+          }
         }
       }
     } catch(Exception ex) {
@@ -429,12 +437,19 @@ public boolean canRenderAsync() {
 }
 
 public void renderAsync() {
-  synchronized(renderLock) {
+  synchronized (renderLock) {
     if (upToDate) {
       upToDate=false;
       renderLock.notify();
+      Thread.yield(); // encourage the render thread to do it's work
     }
   }
 }
 
+public void dispose() {
+  synchronized (renderLock) {
+    disposed=true;
+    renderLock.notify();
+  }
+}
 }
