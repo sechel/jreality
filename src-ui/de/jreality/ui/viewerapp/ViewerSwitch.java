@@ -50,6 +50,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.beans.Statement;
 
 import javax.swing.JPanel;
 
@@ -251,6 +252,17 @@ public class ViewerSwitch implements Viewer {
 
   public void renderAsync() throws UnsupportedOperationException {
     currentViewer.renderAsync();
+  }
+  
+  public void dispose() {
+    for (int i = 0; i < viewers.length; i++) {
+      Statement stm = new Statement(viewers[i], "dispose", null);
+      try {
+        stm.execute();
+      } catch (Exception e) {
+        //e.printStackTrace();
+      }
+    }
   }
 
 }

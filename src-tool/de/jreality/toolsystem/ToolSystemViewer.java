@@ -41,6 +41,7 @@
 package de.jreality.toolsystem;
 
 import java.awt.Dimension;
+import java.beans.Statement;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -183,6 +184,12 @@ public class ToolSystemViewer implements Viewer {
   
   public void dispose() {
     toolSystem.dispose();
+    Statement stm = new Statement(viewer, "dispose", null);
+    try {
+      stm.execute();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   public SceneGraphPath getAvatarPath() {
