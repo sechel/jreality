@@ -745,7 +745,7 @@ class ViewerAppOld
   }
   
   
-  private ToolSystemViewer createViewer() throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
+  private ToolSystemViewer createViewer() throws IOException 
   {
     if (viewers == null) {
       

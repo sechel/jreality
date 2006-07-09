@@ -97,16 +97,11 @@ public class AnimatorTool extends AbstractTool {
     addCurrentSlot(timer);
   }
 
-  private double dtime;
-  private double intervall=15;
-  
   public void perform(ToolContext tc) {
-    dtime += tc.getAxisState(timer).intValue();
-    if (dtime < intervall) return; 
     synchronized (mutex) {
       for (Iterator i = animators.values().iterator(); i.hasNext(); ) {
         AnimatorTask task = (AnimatorTask)i.next();
-        if (!task.run(System.currentTimeMillis(), dtime)) {
+        if (!task.run(System.currentTimeMillis(), tc.getAxisState(timer).intValue())) {
           i.remove();
         }
       }
@@ -125,12 +120,4 @@ public class AnimatorTool extends AbstractTool {
     }
   }
 
-  public double getIntervall() {
-    return intervall;
-  }
-
-  public void setIntervall(double intervall) {
-    this.intervall = intervall;
-  }
-  
 }
