@@ -43,7 +43,6 @@ package de.jreality.renderman.shader;
 import java.awt.Color;
 import java.util.Map;
 
-
 import de.jreality.renderman.RIBViewer;
 import de.jreality.renderman.RIBVisitor;
 import de.jreality.scene.data.AttributeEntityUtility;

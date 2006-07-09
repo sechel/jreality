@@ -42,8 +42,6 @@ package de.jreality.renderman;
 
 import java.util.HashMap;
 
-import antlr.CommonAST;
-
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.DirectionalLight;

@@ -40,7 +40,6 @@
 
 package de.jreality.renderman;
 
-import java.awt.Component;
 import java.awt.Dimension;
 
 import de.jreality.scene.SceneGraphComponent;
