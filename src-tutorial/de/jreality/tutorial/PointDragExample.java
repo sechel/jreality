@@ -11,7 +11,6 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.tools.DragEventTool;
 import de.jreality.tools.PointDragEvent;
 import de.jreality.tools.PointDragListener;
-import de.jreality.tools.ShowPropertiesTool;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class PointDragExample {
@@ -41,13 +40,12 @@ public class PointDragExample {
 		});
 		
 		cmp.addTool(t);
-    //cmp.addTool(new ShowPropertiesTool());
 		cmp.setGeometry(Primitives.icosahedron());
 		cmp.setAppearance(new Appearance());
 		cmp.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW,true);
 		cmp.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW,true);
 		cmp.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS,0.05);
-    System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer");
+    //System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer");
     System.setProperty("de.jreality.ui.viewerapp.ViewerApp.synchRender", "true");
     ViewerApp.display(cmp);
 	}
