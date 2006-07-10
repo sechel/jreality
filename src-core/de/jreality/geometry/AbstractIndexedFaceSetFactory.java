@@ -372,9 +372,13 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		
 	}
 	
+  //HACK: control edges always as soon as we did that once 
+  boolean didEverGenerateEdgesFromFaces;
+  
 	protected void updateImpl() {
     // HACK:
-    if( generateEdgesFromFaces ) { 
+    if( generateEdgesFromFaces ) {
+      didEverGenerateEdgesFromFaces=true;
       if( nodeWasUpdated(edgeIndices) ) {
         IntArrayArray ei = edgeIndices();
         super.setLineCount(ei.size());
@@ -385,7 +389,7 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
           ifs.setNumEdges(0);
         }
       }
-    } else if( super.getLineCount() != 0 ) { // !!!!!!!
+    } else if( didEverGenerateEdgesFromFaces && super.getLineCount() != 0 ) { // !!!!!!!
       log( "cancle", Attribute.INDICES, "edge");
       super.setLineCount(0);
     }
