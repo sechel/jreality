@@ -373,7 +373,24 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	}
 	
 	protected void updateImpl() {
-		super.updateImpl();
+    // HACK:
+    if( generateEdgesFromFaces ) { 
+      if( nodeWasUpdated(edgeIndices) ) {
+        IntArrayArray ei = edgeIndices();
+        super.setLineCount(ei.size());
+        log( "set", Attribute.INDICES, "edge");
+        super.setEdgeIndices( ei );
+      } else {
+        if( nof() == 0 ) {
+          ifs.setNumEdges(0);
+        }
+      }
+    } else if( super.getLineCount() != 0 ) { // !!!!!!!
+      log( "cancle", Attribute.INDICES, "edge");
+      super.setLineCount(0);
+    }
+    
+    super.updateImpl();
 		
 		if( ifs.getNumFaces() == nof() ) {
 
@@ -392,19 +409,19 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 			ifs.setFaceCountAndAttributes(faceDLS);
 		}
 	
-		if( !edgeDLS.containsAttribute(Attribute.INDICES) ) {
-			if( generateEdgesFromFaces ) { 
-				if( nodeWasUpdated(edgeIndices) ) { 
-					log( "set", Attribute.INDICES, "edge");
-					ifs.setEdgeCountAndAttributes(Attribute.INDICES, edgeIndices() );
-				} else if( nof() == 0 ) {
-					ifs.setNumEdges(0);
-				}
-			} else if( ifs.getEdgeAttributes().containsAttribute(Attribute.INDICES) ) {
-				log( "cancle", Attribute.INDICES, "edge");
-				ifs.setEdgeAttributes(Attribute.INDICES, null );
-			}
-		}
+//		if( !edgeDLS.containsAttribute(Attribute.INDICES) ) {
+//			if( generateEdgesFromFaces ) { 
+//				if( nodeWasUpdated(edgeIndices) ) { 
+//					log( "set", Attribute.INDICES, "edge");
+//					ifs.setEdgeCountAndAttributes(Attribute.INDICES, edgeIndices() );
+//				} else if( nof() == 0 ) {
+//					ifs.setNumEdges(0);
+//				}
+//			} else if( ifs.getEdgeAttributes().containsAttribute(Attribute.INDICES) ) {
+//				log( "cancle", Attribute.INDICES, "edge");
+//				ifs.setEdgeAttributes(Attribute.INDICES, null );
+//			}
+//		}
 		
 		if( !faceDLS.containsAttribute(Attribute.NORMALS) ) {
 			if( generateFaceNormals ) {
