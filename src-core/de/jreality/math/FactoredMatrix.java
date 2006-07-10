@@ -141,6 +141,25 @@ public class FactoredMatrix extends Matrix {
         update();
     }
 
+    /**
+     * copy constructor
+     * 
+     * @param signature the signature
+     * @param m the matrixc to copy
+     */
+    public FactoredMatrix(Matrix m, int signature) {
+      this(signature, (double[]) m.getArray().clone());
+    }
+    
+    /**
+     * copy constructor
+     *
+     * @param fm the FactoredMatrix to copy
+     */
+    public FactoredMatrix(FactoredMatrix fm) {
+      this(fm, fm.getSignature());
+    }
+    
     public FactoredMatrix(int signature) {
         this(signature, null);
     }
