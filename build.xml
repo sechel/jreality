@@ -408,6 +408,8 @@
       <fileset dir="${build}/examples" />
       <fileset dir="${build}/renderman" />
       <fileset dir="${build}/swing" />
+      <fileset dir="${build}/jogl" />
+      <fileset dir="${build}/tools" />
     </jar>
   </target>
 
@@ -432,7 +434,11 @@
       </classpath>
     </java>
   </target>
-
+  
+  <target name="tutorial-src" description="create a zip file containing tutorial src">
+	<zip destfile="${dist}/tutorial.zip" basedir="." includes="src-tutorial/**/*" defaultexcludes="yes"/>
+  </target>
+  	
   <target name="clean" description="clean up">
     <delete dir="${build}" />
     <delete dir="${dist}" />
