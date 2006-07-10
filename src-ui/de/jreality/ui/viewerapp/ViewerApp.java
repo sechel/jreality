@@ -40,31 +40,18 @@
 
 package de.jreality.ui.viewerapp;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.beans.Beans;
 import java.io.IOException;
-import java.lang.reflect.Proxy;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
 import javax.swing.JFrame;
 import javax.swing.JPopupMenu;
-import javax.swing.JTree;
 import javax.swing.UIManager;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
 
-import jterm.BshEvaluator;
-import jterm.JTerm;
-import jterm.Session;
-import bsh.EvalError;
 import de.jreality.io.JrScene;
 import de.jreality.io.JrSceneFactory;
 import de.jreality.scene.Geometry;
@@ -74,13 +61,8 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
-import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
-import de.jreality.ui.beans.InspectorPanel;
-import de.jreality.ui.treeview.JTreeRenderer;
-import de.jreality.ui.treeview.SceneTreeModel;
-import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
 
@@ -118,11 +100,7 @@ public class ViewerApp {
   private SceneGraphComponent sceneRoot;
   private SceneGraphComponent scene;
   //private SceneGraphComponent currSceneNode;
-  private InspectorPanel inspector;
-  private BshEvaluator bshEval;
-  private JTerm jterm;
-  private SimpleAttributeSet infoStyle;
-  
+
   private boolean attachNavigator = false;  //default
   private boolean attachBeanShell = false;  //default
   
@@ -326,12 +304,6 @@ public class ViewerApp {
       });
     }
     
-    //set up bshEval, jterm, infoStyle and uiFactory.beanShell
-    //call before setting up navigator
-    if (attachBeanShell) setupBeanShell();
-
-    //setup inspector, uiFactory.inspector and uiFactory.sceneTree
-    if (attachNavigator) setupNavigator();
   }
   
   
@@ -347,8 +319,12 @@ public class ViewerApp {
         try {
           Viewer v = createViewer(viewerClassName);
           viewerList.add(v);
-        } catch (Exception e) {
+        } catch (Exception e) { // catches creation problems - i. e. no jogl in classpath
           LoggingSystem.getLogger(this).info("could not create viewer instance of ["+viewerClassName+"]");
+        } catch (NoClassDefFoundError ndfe) {
+          System.out.println("Possibly no jogl in classpath!");
+        } catch (UnsatisfiedLinkError le) {
+          System.out.println("Possibly no jogl libraries in java.library.path!");
         }
       }
       viewers = (Viewer[]) viewerList.toArray(new Viewer[viewerList.size()]);
@@ -375,118 +351,7 @@ public class ViewerApp {
   {
     return (Viewer)Class.forName(viewer).newInstance();
   }
- 
-  
-  /**
-   * Set up the BeanShell.
-   */
-  private void setupBeanShell() {
-    
-    bshEval = new BshEvaluator();
-    try {
-      bshEval.getInterpreter().eval("import de.jreality.scene.*;");
-      bshEval.getInterpreter().eval("import de.jreality.scene.tool.*;");
-      bshEval.getInterpreter().eval("import de.jreality.scene.data.*;");
-      bshEval.getInterpreter().eval("import de.jreality.geometry.*;");
-      bshEval.getInterpreter().eval("import de.jreality.math.*;");    
-      bshEval.getInterpreter().eval("import de.jreality.shader.*;");
-      bshEval.getInterpreter().eval("import de.jreality.util.*;");
-    } catch (EvalError error) {
-      error.printStackTrace();
-    }
-    jterm = new JTerm(new Session(bshEval));
-    jterm.setMaximumSize(new Dimension(10, 10));
-    
-    infoStyle = new SimpleAttributeSet();
-    StyleConstants.setForeground(infoStyle, new Color(165, 204, 0));
-    StyleConstants.setFontFamily(infoStyle, "Monospaced");
-    StyleConstants.setBold(infoStyle, true);
-    StyleConstants.setFontSize(infoStyle, 12);
-    
-    uiFactory.setBeanShell(jterm);
-    
-    if (!attachNavigator) {  //set self to sceneRoot
-      try {
-        bshEval.getInterpreter().set("self", sceneRoot);
-        String info="\nself="+sceneRoot.getName()+"["+sceneRoot.getClass().getName()+"]\n";
-        try {
-          jterm.getSession().displayAndPrompt(info, infoStyle);
-          jterm.setCaretPosition(jterm.getDocument().getLength());
-        } catch (Exception exc) {}  // unpatched jterm
-      } catch (EvalError error) { error.printStackTrace(); }
-    }  // else self is set in setupNavigator()
-    
-    if (attachBeanShell) {
-      try { 
-        bshEval.getInterpreter().set("_viewer", viewerSwitch);
-        bshEval.getInterpreter().set("_toolSystemViewer", currViewer);
-      } 
-      catch (EvalError error) { error.printStackTrace(); }
-    }
-  }
-  
-  
-  /**
-   * Set up the navigator (sceneTree and inspector).
-   */
-  private void setupNavigator() {
-    
-    inspector = new InspectorPanel();
-    uiFactory.setInspector(inspector);
-
-    JTree sceneTree = new JTree();
-    SceneTreeModel model = new SceneTreeModel(sceneRoot);
-    sceneTree.setModel(model);
-    sceneTree.setCellRenderer(new JTreeRenderer());
-    uiFactory.setSceneTree(sceneTree);
-    
-    
-    TreeSelectionModel sm = sceneTree.getSelectionModel();
-    sm.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-    sm.addTreeSelectionListener(new TreeSelectionListener() {
-      
-      public void valueChanged(TreeSelectionEvent e) {
-        Object obj = null;
-        TreePath path = e.getNewLeadSelectionPath();
-        
-        if (path!=null) {
-          if (path.getLastPathComponent() instanceof SceneTreeNode) {
-            obj = ((SceneTreeNode)path.getLastPathComponent()).getNode();
-          } else if (path.getLastPathComponent() instanceof TreeTool) {
-            obj = ((TreeTool)path.getLastPathComponent()).getTool();
-          } else {
-            obj = path.getLastPathComponent();
-          }
-        }
-        
-        inspector.setObject(obj);
-        
-        if ( attachBeanShell && obj!=null) { 
-          try {
-            bshEval.getInterpreter().set("self", obj);
-            String name = (obj instanceof SceneGraphNode) ? ((SceneGraphNode)obj).getName() : "";
-            String type = Proxy.isProxyClass(obj.getClass()) ? obj.getClass().getInterfaces()[0].getName() : obj.getClass().getName();
-            String info="\nself="+name+"["+type+"]\n";
-            try {
-              jterm.getSession().displayAndPrompt(info, infoStyle);
-              jterm.setCaretPosition(jterm.getDocument().getLength());
-            } catch (Exception exc) {
-              // unpatched jterm
-            }
-          } catch (EvalError error) {
-            error.printStackTrace();
-          }
-        }
-        
-//        //needed for menu
-//        if (obj instanceof SceneGraphComponent)
-//          currSceneNode = (SceneGraphComponent)obj;
-//        else currSceneNode = scene;
-      }
-    });
-  }
-
-  
+   
   /**
    * Use to attach a navigator (sceneTree and inspector) to the viewer.
    * @param b true iff navigator is to be attached
