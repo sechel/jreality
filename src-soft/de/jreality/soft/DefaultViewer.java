@@ -66,7 +66,6 @@ import de.jreality.util.LoggingSystem;
 public class DefaultViewer extends Component implements Runnable, Viewer {
 
   // TODO: remove ENFORCE_... ?
-  // TODO: somehow dispose the renderthread
 
   private static final boolean ENFORCE_PAINT_ON_MOUSEEVENTS= false;
   
@@ -316,7 +315,7 @@ public class DefaultViewer extends Component implements Runnable, Viewer {
       }
 //      System.out.println("end rendering "+new java.util.Date());
     } else {
-      System.out.println("no area to paint");
+      //System.out.println("no area to paint");
     }
   }
 

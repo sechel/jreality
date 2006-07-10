@@ -137,8 +137,8 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
     public NewPolygonRasterizer(int[] pixelBuf) {
         super();
         pixels=pixelBuf;
-        System.out.println(">NEW INTEGER RASTERIZER<");
-        System.out.println("(correct interpolation = "+correctInterpolation+")");
+        //System.out.println(">NEW INTEGER RASTERIZER<");
+        //System.out.println("(correct interpolation = "+correctInterpolation+")");
     }
 
     /*

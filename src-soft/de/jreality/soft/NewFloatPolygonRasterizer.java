@@ -119,8 +119,8 @@ public class NewFloatPolygonRasterizer implements PolygonRasterizer {
         this.interpolateY = interpolateY;
         this.interpolateFullX = interpolateFullX;
         pixels=pixelBuf;
-        System.out.println(">NEW FLOAT RASTERIZER<");
-        System.out.println("(correct interpolation = "+correctInterpolation+")");
+        //System.out.println(">NEW FLOAT RASTERIZER<");
+        //System.out.println("(correct interpolation = "+correctInterpolation+")");
     }
     public NewFloatPolygonRasterizer(int[] pixelBuf) {
         this(pixelBuf, false, false,null);

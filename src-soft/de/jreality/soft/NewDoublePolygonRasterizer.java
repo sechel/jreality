@@ -119,8 +119,8 @@ public class NewDoublePolygonRasterizer implements PolygonRasterizer {
         this.interpolateY = interpolateY;
         this.interpolateFullX = interpolateFullX;
         pixels=pixelBuf;
-        System.out.println(">NEW DOUBLE RASTERIZER<");
-        System.out.println("(correct interpolation = "+correctInterpolation+")");
+        //System.out.println(">NEW DOUBLE RASTERIZER<");
+        //System.out.println("(correct interpolation = "+correctInterpolation+")");
     }
     public NewDoublePolygonRasterizer(int[] pixelBuf) {
         this(pixelBuf, false, false,null);
