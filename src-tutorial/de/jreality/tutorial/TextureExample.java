@@ -40,19 +40,24 @@
 
 package de.jreality.tutorial;
 
+import java.awt.Color;
 import java.io.IOException;
 
 import de.jreality.examples.CatenoidHelicoid;
-import de.jreality.geometry.Primitives;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
+import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
 
-public class Icosahedron {
+public class TextureExample {
+  
+  // java de.jreality.tutorial.TextureExample grid.jpeg
   
   public static void main(String[] args) throws IOException {
     IndexedFaceSet ico = new CatenoidHelicoid(10);
@@ -60,7 +65,9 @@ public class Icosahedron {
     sgc.setGeometry(ico);
     if (args.length > 0) {
       sgc.setAppearance(new Appearance());
-      TextureUtility.createTexture(sgc.getAppearance(), "polygonShader", ImageData.load(Input.getInput(args[0])));
+      sgc.getAppearance().setAttribute(CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
+      Texture2D tex = TextureUtility.createTexture(sgc.getAppearance(), CommonAttributes.POLYGON_SHADER, ImageData.load(Input.getInput(args[0])));
+      tex.setTextureMatrix(MatrixBuilder.euclidean().scale(3).getMatrix());
     }
     ViewerApp.display(sgc);
   }
