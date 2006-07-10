@@ -41,6 +41,7 @@
 package de.jreality.tools;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
@@ -149,15 +150,21 @@ public class RotateTool extends AbstractTool {
 	  double t = tc.getTime()-startTime; 
     if (t > animTimeMin && t < animTimeMax) {
       AnimatorTask task = new AnimatorTask() {
-        Matrix e = new Matrix(evolution);
-        Matrix cen = new Matrix(center); 
+        FactoredMatrix e = new FactoredMatrix(evolution, Pn.EUCLIDEAN);
+        double rotAngle = e.getRotationAngle();
+        double[] axis = e.getRotationAxis();
+        {
+          if (rotAngle > Math.PI) rotAngle = -2*Math.PI+rotAngle;
+        }
+        Matrix cen = new Matrix(center);
         SceneGraphComponent c = comp;
         public boolean run(double time, double dt) {
           if (updateCenter) cen = getCenter(c);
-          Matrix m=new Matrix(c.getTransformation().getMatrix());
-    		  m.multiplyOnRight(cen);
-    		  m.multiplyOnRight(e);
-    		  m.multiplyOnRight(cen.getInverse());
+          MatrixBuilder m=MatrixBuilder.euclidean(c.getTransformation());
+    		  m.times(cen);
+    		  //m.multiplyOnRight(e);
+    		  m.rotate(0.05*dt*rotAngle, axis);
+          m.times(cen.getInverse());
     		  m.assignTo(c.getTransformation());
           return true;
         }
