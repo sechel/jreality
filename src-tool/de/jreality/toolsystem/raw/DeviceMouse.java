@@ -41,10 +41,10 @@
 package de.jreality.toolsystem.raw;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Cursor;
-import java.awt.MouseInfo;
+import java.awt.Insets;
 import java.awt.Point;
-import java.awt.Robot;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -56,7 +56,6 @@ import java.awt.event.MouseWheelListener;
 import java.util.logging.Level;
 
 import javax.swing.ImageIcon;
-
 
 import de.jreality.math.Matrix;
 import de.jreality.scene.Viewer;
@@ -229,6 +228,22 @@ public class DeviceMouse extends AbstractDeviceMouse implements RawDevice, Mouse
 
   protected int getHeight() {
     return component.getHeight();
+  }
+
+  protected void calculateCenter() {
+    Component currentCmp = component;
+    winCenterX=getWidth() / 2;
+    winCenterY=getHeight() / 2;
+    while (currentCmp != null) {
+      if (currentCmp instanceof Container) {
+        Insets insets = ((Container)currentCmp).getInsets();
+        winCenterX += insets.left;
+        winCenterY += insets.top;
+      }
+      winCenterX += currentCmp.getX();
+      winCenterY += currentCmp.getY();
+      currentCmp = currentCmp.getParent();
+    }
   }
 
 

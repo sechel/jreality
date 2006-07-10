@@ -193,5 +193,9 @@ public class DeviceMouseSWT extends AbstractDeviceMouse implements RawDevice, Mo
   protected int getHeight() {
     return component.getSize().y;
   }
+
+  protected void calculateCenter() {
+    throw new UnsupportedOperationException("Not yet implemented");
+  }
   
 }

@@ -564,15 +564,17 @@ private SceneGraphPath avatarPath;
    */
   void removeToolImpl(Tool tool, SceneGraphPath path) {
     boolean last = toolManager.removeTool(tool, path);
-    SceneGraphPath activePath = (SceneGraphPath) getActivePathsForTool(tool);
-    if (path.isEqual(activePath)) {
-      ToolEvent te = new ToolEvent(this, InputSlot.getDevice("remove"), null,
-          null);
-      toolContext.setCurrentTool(tool);
-      toolContext.setRootToLocal(path);
-      toolContext.event = te;
-      tool.deactivate(toolContext);
-      toolToPath.remove(tool);
+    for (Iterator i = getActivePathsForTool(tool).iterator(); i.hasNext(); ) {
+      SceneGraphPath activePath = (SceneGraphPath) i.next();
+      if (path.isEqual(activePath)) {
+        ToolEvent te = new ToolEvent(this, InputSlot.getDevice("remove"), null,
+            null);
+        toolContext.setCurrentTool(tool);
+        toolContext.setRootToLocal(path);
+        toolContext.event = te;
+        tool.deactivate(toolContext);
+        toolToPath.remove(tool);
+      }
     }
     if (last)
       slotManager.unregisterTool(tool);

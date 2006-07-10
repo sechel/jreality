@@ -1,10 +1,6 @@
 package de.jreality.toolsystem.raw;
 
-import java.awt.Dimension;
-import java.awt.MouseInfo;
-import java.awt.Point;
 import java.awt.Robot;
-import java.awt.Toolkit;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Level;
@@ -24,8 +20,9 @@ public abstract class AbstractDeviceMouse {
   protected static Robot robot;
   private int lastX = -1;
   private int lastY = -1;
-  private int centerX = 200;
-  private int centerY = 200;
+  protected int winCenterX;
+  protected int winCenterY;
+  
   protected HashMap usedSources = new HashMap();
   protected static HashSet knownSources = new HashSet();
   private Matrix axesMatrix = new Matrix();
@@ -48,7 +45,7 @@ public abstract class AbstractDeviceMouse {
     knownSources.add("wheel_down");
   }
 
-  protected void mouseMoved(int ex, int ey) {
+  protected synchronized void mouseMoved(int ex, int ey) {
     InputSlot slot = (InputSlot) usedSources.get("axes");
     if (slot != null) {
       if (!isCenter()) {
@@ -68,31 +65,23 @@ public abstract class AbstractDeviceMouse {
         axesMatrix.setEntry(1, 3, 0);
         axesMatrix.setEntry(2, 3, -1);
         queue.addEvent(new ToolEvent(AbstractDeviceMouse.this, slot, da));
+        sentCenter=true;
+        // XXX HACK !!! this should be getWidth()/2 but differs by border frame
+        lastX=ex;
+        lastY=ey;
       }
     }
     slot = (InputSlot) usedSources.get("axesEvolution");
     if (slot != null) {
       if (lastX==-1) { lastX=ex; lastY=ey; return; }
       
-      int x, y, w, h;
-      if (isCenter()) {
-        Point p = MouseInfo.getPointerInfo().getLocation();
-        x = p.x;
-        y = p.y;
-      } else { 
-        x = ex;
-        y = ey;
-      }
-      w = getWidth();
-      h = getHeight();
-      
-      int dx = x - lastX;
-      int dy = y - lastY;
+      int dx = ex - lastX;
+      int dy = ey - lastY;
       
       if (dx == 0 && dy == 0) return;
       
-      double dxndc = (2. * dx) / w;
-      double dyndc = -(2. * dy) / h;
+      double dxndc = (2. * dx) / getWidth();
+      double dyndc = -(2. * dy) / getHeight();
   
       axesEvolutionMatrix.setEntry(0, 3, dxndc);
       axesEvolutionMatrix.setEntry(1, 3, dyndc);
@@ -112,7 +101,7 @@ public abstract class AbstractDeviceMouse {
       queue.addEvent(evolutionEvent);
       if (isCenter()) {
         try {
-          robot.mouseMove(centerX, centerY);
+          robot.mouseMove(winCenterX, winCenterY);
         } catch (Exception exc) {
           LoggingSystem.getLogger(this).log(Level.CONFIG, "cannot use robot: ", exc);
         }
@@ -130,19 +119,20 @@ public abstract class AbstractDeviceMouse {
   public boolean isCenter() {
     return center;
   }
-
-  public void setCenter(boolean center) {
+  
+  public synchronized void setCenter(boolean center) {
     if (this.center != center) sentCenter = false;
     this.center = center;
     if (center) {
-      Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-      centerX=lastX=dim.width/2; centerY=lastY=dim.height/2;
-      robot.mouseMove(centerX, centerY);
+      calculateCenter();
+      robot.mouseMove(winCenterX, winCenterY);
       installGrabs();
     } else {
       uninstallGrabs();
     }
   }
+
+  protected abstract void calculateCenter();
 
   protected abstract void uninstallGrabs();
   protected abstract void installGrabs();
