@@ -60,7 +60,7 @@ public class ScaleTool extends AbstractTool {
   double factor;
   boolean isScaling;
   
-  boolean moveChilderen;
+  boolean moveChildren;
   boolean slotPolling;
   
   double gain=1000;
@@ -117,11 +117,11 @@ public class ScaleTool extends AbstractTool {
   }
   
   public boolean isMoveChildren() {
-    return moveChilderen;
+    return moveChildren;
   }
   
-  public void setMoveChilderen(boolean moveChilderen) {
-    this.moveChilderen = moveChilderen;
+  public void setMoveChildren(boolean moveChilderen) {
+    this.moveChildren = moveChilderen;
   }
   
   public boolean isSlotPolling() {
