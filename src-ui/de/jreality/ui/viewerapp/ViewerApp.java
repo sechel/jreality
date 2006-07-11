@@ -103,6 +103,9 @@ public class ViewerApp {
 
   private boolean attachNavigator = false;  //default
   private boolean attachBeanShell = false;  //default
+  private BeanShell beanShell;
+  private Navigator navigator;
+  
   
   private JrScene jrScene;
 
@@ -127,7 +130,7 @@ public class ViewerApp {
     
     displayedNode = node;
 
-    //update autoRender
+    //update autoRender & synchRender
     String autoRenderProp = System.getProperty("de.jreality.ui.viewerapp.autoRender", "true");
     if (autoRenderProp.equalsIgnoreCase("false")) {
       autoRender = false;
@@ -136,7 +139,7 @@ public class ViewerApp {
     if (synchRenderProp.equalsIgnoreCase("false")) {
       synchRender = false;
     }
-    if (autoRender) renderTrigger=new RenderTrigger();
+    if (autoRender) renderTrigger = new RenderTrigger();
     if (synchRender) {
       if (autoRender) renderTrigger.setAsync(false);
       else LoggingSystem.getLogger(this).config("Inconsistant settings: no autoRender but synchRender!!");
@@ -191,6 +194,14 @@ public class ViewerApp {
     return app;
   }
 
+  /**
+   * Displays a scene specified by the following parameters.
+   * @param root the scene root
+   * @param cameraPath the camera path
+   * @param emptyPick the empty pick path
+   * @param avatar the avatar path
+   * @return the ViewerApp factory instantiated to display the scene
+   */
   public static ViewerApp display(SceneGraphComponent root, SceneGraphPath cameraPath, SceneGraphPath emptyPick, SceneGraphPath avatar) {
     JrScene s = new JrScene();
     s.setSceneRoot(root);
@@ -225,6 +236,12 @@ public class ViewerApp {
     //load the default scene depending on environment (desktop | portal)
     //and with chosen options (attachNavigator | attachBeanShell)
     setupViewer(jrScene);
+    
+    //set up bshEval, jterm, infoStyle and uiFactory.beanShell
+    if (attachBeanShell) setupBeanShell();
+
+    //setup inspector, uiFactory.inspector and uiFactory.sceneTree
+    if (attachNavigator) setupNavigator();
     
     uiFactory.setAttachNavigator(attachNavigator);
     uiFactory.setAttachBeanShell(attachBeanShell);
@@ -262,7 +279,9 @@ public class ViewerApp {
       }
       currViewer.dispose();
     }
+    
     uiFactory = new UIFactory();
+    
     try { currViewer = createViewer(); } 
     catch (Exception exc) { exc.printStackTrace(); }
 
@@ -310,7 +329,7 @@ public class ViewerApp {
   private ToolSystemViewer createViewer() throws IOException {
     if (viewers == null) {
       
-      String viewer=System.getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
+      String viewer = System.getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
       StringTokenizer st = new StringTokenizer(viewer);
       List viewerList = new LinkedList();
       String viewerClassName;
@@ -352,6 +371,43 @@ public class ViewerApp {
     return (Viewer)Class.forName(viewer).newInstance();
   }
    
+  
+  /**
+   * Set up the BeanShell.
+   */
+  private void setupBeanShell() {
+    
+    beanShell = new BeanShell();
+    
+    beanShell.eval("import de.jreality.scene.*;");
+    beanShell.eval("import de.jreality.scene.tool.*;");
+    beanShell.eval("import de.jreality.scene.data.*;");
+    beanShell.eval("import de.jreality.geometry.*;");
+    beanShell.eval("import de.jreality.math.*;");    
+    beanShell.eval("import de.jreality.shader.*;");
+    beanShell.eval("import de.jreality.tools.*;");
+    beanShell.eval("import de.jreality.util.*;");
+    
+    beanShell.setCurrViewer(currViewer);
+    beanShell.setViewerSwitch(viewerSwitch);
+    beanShell.setSelf(sceneRoot);
+    
+    uiFactory.setBeanShell(beanShell.getJTerm());
+  }
+  
+  
+  /**
+   * Set up the navigator (sceneTree and inspector).
+   */
+  private void setupNavigator() {
+    navigator = new Navigator(sceneRoot);
+    if (attachBeanShell) navigator.assignBeanShell(beanShell);
+    
+    uiFactory.setInspector(navigator.getInspector());
+    uiFactory.setSceneTree(navigator.getSceneTree());
+  }
+  
+  
   /**
    * Use to attach a navigator (sceneTree and inspector) to the viewer.
    * @param b true iff navigator is to be attached
@@ -409,6 +465,7 @@ public class ViewerApp {
     return attachNavigator;
   }
 
+  
   public void dispose() {
     if (autoRender) {
       renderTrigger.removeSceneGraphComponent(sceneRoot);
@@ -416,4 +473,5 @@ public class ViewerApp {
     }
     if (currViewer != null) currViewer.dispose();
   }
+
 }
