@@ -378,8 +378,9 @@ public class RIBVisitor extends SceneGraphVisitor {
         if(color!=Appearance.INHERITED) {
             float[] c =((Color)color).getRGBComponents(null);
             if (c.length == 4) colorAlpha = c[3];
-            // Renderman colors are always "pre-multiplied" wrt alpha channel
-           Ri.color(new float[] {c[0]*colorAlpha,c[1]*colorAlpha,c[2]*colorAlpha});
+//           Ri.color(new float[] {c[0]*colorAlpha,c[1]*colorAlpha,c[2]*colorAlpha});
+            c[3] *= currentOpacity;
+          Ri.color(c);
         }
  
         // interpret rendering hints to decide whether to do object instancing
@@ -388,7 +389,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         // so I've disabled this feature until I figure that out. -gunn
         boolean anyDisplayLists = eap.getAttribute(CommonAttributes.ANY_DISPLAY_LISTS,true);
         boolean manyDisplayLists = eap.getAttribute(CommonAttributes.MANY_DISPLAY_LISTS,false);
-        retainGeometry = false; //anyDisplayLists && !manyDisplayLists;
+        retainGeometry = false; //anyDisplayLists; // && !manyDisplayLists;
         
        double transparency = eap.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
         currentOpacity = 1f - (float)transparency;
@@ -595,8 +596,8 @@ public class RIBVisitor extends SceneGraphVisitor {
                      // Following is an attempt to do so, but ignores the alpha of the color!
                     float[] raw = new float[4];
                     cc.getRGBComponents(raw);
-                    for (int k=0;k<4; ++k)	raw[k] = (float) (raw[k]*currentOpacity);
-                    cc = new Color(raw[0], raw[1], raw[2], raw[3]); 
+//                    for (int k=0;k<4; ++k)	raw[k] = (float) (raw[k]*currentOpacity);
+                    cc = new Color(raw[0], raw[1], raw[2], raw[3]*currentOpacity); 
                     if (g instanceof IndexedFaceSet)	{
                     BallAndStickFactory bsf = new BallAndStickFactory(g);
                	  	bsf.setSignature(sig);
@@ -918,8 +919,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 						f[0]=f[1] = f[2] = thisOpacity ;
 						Ri.opacity(f);
 					}	
-					f[0]=thisOpacity*color[0];f[1]=thisOpacity*color[1];f[2]=thisOpacity*color[2];
-					Ri.color(f);
+//					f[0]=thisOpacity*color[0];f[1]=thisOpacity*color[1];f[2]=thisOpacity*color[2];
+					Ri.color(new float[]{color[0], color[1], color[2]});
 				}
 			Ri.pointsPolygons(npolys,nvertices,vertices,map);
 			}
@@ -973,7 +974,13 @@ public class RIBVisitor extends SceneGraphVisitor {
                  //DoubleArrayArray a=coord.toDoubleArrayArray();
                  double[][] a=coord.toDoubleArrayArray(null);
                  // TODO pre-multiply color with current alpha
-                 Ri.color(cc.getRGBColorComponents(null));
+                 // Following is an attempt to do so, but ignores the alpha of the color!
+                 float[] raw = new float[4];
+                 cc.getRGBComponents(raw);
+//                 for (int k=0;k<4; ++k)	raw[k] = (float) (raw[k]*currentOpacity);
+// 					cc = new Color(raw[0], raw[1], raw[2], raw[3]); 
+                 raw[3] = raw[3] * currentOpacity;
+                Ri.color(raw);
                double[] trns = new double[16];
                 for (int i= 0; i < n; i++) { 
                     trns = MatrixBuilder.init(null, sig).translate(a[i]).getArray();

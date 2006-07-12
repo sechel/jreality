@@ -311,7 +311,8 @@ public class Ri {
     }
     public static  void color(float[] color) {
         w.print("Color ");
-        writeObject(w,color);
+       if (color.length == 3) writeObject(w,color);
+       else writeObject(w, new float[]{color[0], color[1], color[2]});
         w.println("");
        if (color.length == 4) opacity(color[3]);
     }
