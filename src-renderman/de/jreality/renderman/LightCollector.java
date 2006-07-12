@@ -42,7 +42,6 @@ package de.jreality.renderman;
 
 import java.util.HashMap;
 
-import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.Light;
@@ -50,7 +49,7 @@ import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.SpotLight;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.proxy.scene.SceneGraphPath;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 
@@ -66,21 +65,20 @@ public class LightCollector extends SceneGraphVisitor {
     RIBVisitor ribv = null;
 //    private   Transformation  initialTransformation;
     float[] zdirection = new float[] {0f,0f,-1f};
+    float[] fCurrentTrafo = null;
     protected LightCollector reclaimableSubcontext;
     EffectiveAppearance eAppearance = null;
     boolean shadowEnabled = false;
+    SceneGraphPath currentPath = null;
     /**
      * 
      */
     public LightCollector(SceneGraphComponent root, RIBVisitor v) {
         super();
         ribv = v;
-        initialTrafo = new double[16];
-        //currentTrafo = new double[16];
-        Rn.setIdentityMatrix(initialTrafo);
-        //Rn.setIdentityMatrix(currentTrafo);
-        currentTrafo =initialTrafo;
+        currentTrafo = new double[16];
         eAppearance=EffectiveAppearance.create();
+        currentPath = new SceneGraphPath();
         visit(root);
     }
     protected LightCollector(LightCollector parentContext) {
@@ -96,7 +94,7 @@ public class LightCollector extends SceneGraphVisitor {
     
     protected void initializeFromParentContext(LightCollector parentContext) {
         LightCollector p=parentContext;
-        currentTrafo=initialTrafo=parentContext.currentTrafo;
+        currentTrafo=parentContext.currentTrafo;
         ribv = parentContext.ribv;
 
     }
@@ -105,36 +103,45 @@ public class LightCollector extends SceneGraphVisitor {
         EffectiveAppearance tmp =eAppearance;
         Appearance a = c.getAppearance();
         if(a!= null ) eAppearance = eAppearance.create(a);
+        currentPath.push(c);
         shadowEnabled = eAppearance.getAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, false);
         c.childrenAccept(this); //subContext());
         eAppearance= tmp;
+        currentPath.pop();
     }
     
-    public void visit(Transformation t) {
-        if (initialTrafo == currentTrafo)
-            currentTrafo= new double[16];
-		Rn.copy(currentTrafo, initialTrafo);
-		Rn.times(currentTrafo, currentTrafo, t.getMatrix());
-    }
+//    public void visit(Transformation t) {
+//        if (initialTrafo == currentTrafo)
+//            currentTrafo= new double[16];
+//		Rn.copy(currentTrafo, initialTrafo);
+//		Rn.times(currentTrafo, currentTrafo, t.getMatrix());
+//    }
     /* (non-Javadoc)
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.DirectionalLightSoft)
      */
+    private static double[] zdir = {0,0,-1,0};
     public void visit(DirectionalLight l) {
         Ri.transformBegin();
         // write the transform for this light:
         //double[] mat = t.getMatrix();
        
-        float[] tmat = RIBVisitor.fTranspose(currentTrafo);
-        Ri.concatTransform(tmat);
+//        float[] tmat = RIBVisitor.fTranspose(currentTrafo);/        Ri.concatTransform(tmat);
+    	// it looks like directional lights don't get handled correctly when the 
+    	// transformation is used with "to"=(0,0,1).  Instead, calculate "to" explicitly.
+//		double[] direction = Rn.matrixTimesVector(null, currentTrafo, zdir);
         // now write the light:
         HashMap map =new HashMap();
         handleCommon(l, map);
-        Ri.lightSource(shadowEnabled ? "shadowdistant":"distantlight",map);
+        Ri.concatTransform(fCurrentTrafo);
+//        map.put("to", direction);
+       Ri.lightSource(shadowEnabled ? "shadowdistant":"distantlight",map);
         
         Ri.transformEnd();
         //super.visit(l);
     }
 	private void handleCommon(Light l, HashMap map) {
+		currentPath.getMatrix(currentTrafo);
+        fCurrentTrafo = RIBVisitor.fTranspose(currentTrafo);
 		map.put("intensity",new Float(l.getIntensity()));
         map.put("lightcolor",l.getColor().getRGBColorComponents(null));
         map.put("from",new float[] {0f,0f,0f});
@@ -147,11 +154,10 @@ public class LightCollector extends SceneGraphVisitor {
         Ri.transformBegin();
         // write the transform for this light:
         //double[] mat = t.getMatrix();
-        float[] tmat = RIBVisitor.fTranspose(currentTrafo);
-        Ri.concatTransform(tmat);
         // now write the light:
         HashMap map =new HashMap();
         handleCommon(l, map);
+        Ri.concatTransform(fCurrentTrafo);
         Ri.lightSource(shadowEnabled ? "shadowpoint":"pointlight",map);
         
         Ri.transformEnd();
@@ -163,11 +169,10 @@ public class LightCollector extends SceneGraphVisitor {
         Ri.transformBegin();
         // write the transform for this light:
         //double[] mat = t.getMatrix();
-        float[] tmat = RIBVisitor.fTranspose(currentTrafo);
-        Ri.concatTransform(tmat);
         // now write the light:
         HashMap map =new HashMap();
         handleCommon(l, map);
+        Ri.concatTransform(fCurrentTrafo);
         map.put("coneangle",new Float(l.getConeAngle()));
         map.put("conedeltaangle",new Float(l.getConeDeltaAngle()));
         map.put("beamdistribution",new Float(l.getDistribution()));
