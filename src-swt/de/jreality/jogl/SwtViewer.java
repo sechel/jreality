@@ -80,6 +80,8 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
 
   GLCanvas canvas;
   private int signature;
+  
+  private Dimension myDimension = new Dimension();
 
 	public SwtViewer(GLCanvas canvas) {
 		this(null, null, canvas);
@@ -227,14 +229,19 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
 
   public void init() {
     canvas.addListener(SWT.Resize, new Listener() {
+
       public void handleEvent(Event event) {
         Rectangle bounds = canvas.getBounds();
-        renderer.setSize(bounds.width, bounds.height);
+        myDimension.width=bounds.width;
+        myDimension.height=bounds.height;
+        renderer.setSize(myDimension.width, myDimension.height);
       }
     });
     context = GLDrawableFactory.getFactory().createExternalGLContext();
     Rectangle bounds = canvas.getBounds();
-    renderer.setSize(bounds.width, bounds.height);
+    myDimension.width=bounds.width;
+    myDimension.height=bounds.height;
+    renderer.setSize(myDimension.width, myDimension.height);
     context.makeCurrent();
     GL gl = context.getGL();
     renderer.init(gl);
@@ -266,8 +273,7 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
   }
 
   public Dimension getViewingComponentSize() {
-    Point p = canvas.getSize();
-    return new Dimension(p.x, p.y);
+    return new Dimension(myDimension);
   }
 
   public boolean canRenderAsync() {

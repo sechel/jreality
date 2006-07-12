@@ -102,6 +102,10 @@ public class ToolSystemViewer implements Viewer {
     this(viewer, loadConfiguration(), null);
   }
   
+  public ToolSystemViewer(Viewer viewer, RenderTrigger rt) {
+    this(viewer, loadConfiguration(), rt);
+  }
+  
   public ToolSystemViewer(Viewer viewer, ToolSystemConfiguration config, RenderTrigger trigger) {
     this.viewer = viewer;
     toolSystem = new ToolSystem(viewer, config, trigger);
