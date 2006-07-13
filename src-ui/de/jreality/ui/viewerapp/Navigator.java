@@ -47,6 +47,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.ui.beans.InspectorPanel;
 import de.jreality.ui.treeview.JTreeRenderer;
@@ -62,6 +63,9 @@ public class Navigator {
   private TreeSelectionListener selectionListener;
   private BeanShell beanShell;
   
+  private SceneGraphComponent sceneRoot;  //the scene root
+  private SceneGraphNode currentNode;  //the selected node
+  
   
   public Navigator(SceneGraphComponent sceneRoot) {
   
@@ -76,6 +80,10 @@ public class Navigator {
     tsm.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     selectionListener = new ListenerWithoutBeanShell();
     tsm.addTreeSelectionListener(selectionListener);
+    //tsm.setSelectionPath(model.getPathTo(model.getRoot()));  //select sceneRoot in tree by default
+    
+    this.sceneRoot = sceneRoot;
+    currentNode = sceneRoot;
   }
   
   
@@ -88,6 +96,11 @@ public class Navigator {
     return sceneTree;
   }
   
+  
+  public TreeSelectionModel getTreeSelectionModel() {
+    return tsm;
+  }
+  
 
   public void assignBeanShell(BeanShell beanShell) {
     
@@ -97,6 +110,27 @@ public class Navigator {
     tsm.removeTreeSelectionListener(selectionListener);
     selectionListener = new ListenerWithBeanShell();
     tsm.addTreeSelectionListener(selectionListener);    
+  }
+  
+  
+  public SceneGraphNode getCurrentNode() {
+    
+    return currentNode;
+  }
+  
+  
+//  public void setCurrentNode(SceneGraphNode currentNode) {
+//    
+//    this.currentNode = currentNode;
+//    //TODO: select currentNode in tree
+//    //SceneTreeModel model = (SceneTreeModel) sceneTree.getModel();
+//    //TreePath newPath = model.getPathTo(currentNode);  => NO TERMINATION
+//    //tsm.setSelectionPath(newPath);
+//  }
+  
+  
+  public SceneGraphComponent getRoot() {
+    return sceneRoot;
   }
   
   
@@ -120,6 +154,9 @@ public class Navigator {
       }
       
       inspector.setObject(obj);
+      
+      if (obj instanceof SceneGraphNode)
+        currentNode = (SceneGraphNode) obj;
     }
     
   }
@@ -143,6 +180,9 @@ public class Navigator {
       
       inspector.setObject(obj);
       beanShell.setSelf(obj);
+      
+      if (obj instanceof SceneGraphNode)
+        currentNode = (SceneGraphNode) obj;
     }
     
   }

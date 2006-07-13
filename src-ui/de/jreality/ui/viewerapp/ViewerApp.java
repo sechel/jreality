@@ -149,8 +149,9 @@ public class ViewerApp {
   
   /**
    * Displays the scene in a JFrame.
+   * @return the frame
    */
-  public void display() {
+  public JFrame display() {
     
     Component content = getViewerComponent();
     
@@ -175,6 +176,8 @@ public class ViewerApp {
     frame.getContentPane().add(content);
     frame.validate();
     frame.setVisible(true);
+    
+    return frame;
   }
   
  
@@ -379,11 +382,11 @@ public class ViewerApp {
     
     beanShell = new BeanShell();
     
-    beanShell.eval("import de.jreality.scene.*;");
-    beanShell.eval("import de.jreality.scene.tool.*;");
-    beanShell.eval("import de.jreality.scene.data.*;");
     beanShell.eval("import de.jreality.geometry.*;");
     beanShell.eval("import de.jreality.math.*;");    
+    beanShell.eval("import de.jreality.scene.*;");
+    beanShell.eval("import de.jreality.scene.data.*;");
+    beanShell.eval("import de.jreality.scene.tool.*;");
     beanShell.eval("import de.jreality.shader.*;");
     beanShell.eval("import de.jreality.tools.*;");
     beanShell.eval("import de.jreality.util.*;");
@@ -464,7 +467,17 @@ public class ViewerApp {
   public boolean isAttachNavigator() {
     return attachNavigator;
   }
+  
 
+  /**
+   * @return the navigator (creates one if not done already)
+   */
+  public Navigator getNavigator() {
+    if (navigator == null)
+      return new Navigator(sceneRoot);  //TODO: reasonable?
+    else return navigator;
+  }
+  
   
   public void dispose() {
     if (autoRender) {
