@@ -75,6 +75,7 @@ public class RopePolygonShader extends DefaultPolygonShader {
         map.put("shadowcolor", shadowcolor);
         map.put("gapcolor", gapcolor);
         map.put("textureMatrix", textureMatrix);
+        map.remove("string texturename");
 	}
 
 }

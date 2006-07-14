@@ -59,6 +59,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriter;
 
 import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.GeometryUtility;
@@ -466,7 +467,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         if(fname == null) {
             RenderedImage rImage =null;
             BufferedImage bImage = null;
-            fname = name+"_texture"+(textureCount++)+".tiff"; //".png"; //
+            fname = name+"_texture"+(textureCount++)+".png"; //".tiff"; //
             File f = new File(fname);
             if (true)	{
                 //Image img = tex.getImage().getImage();
@@ -517,7 +518,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 //                    fname, format);
             try {
                 //OutputStream os = new FileOutputStream(f);
-                boolean worked =ImageIO.write(rImage,".tiff",f);
+                boolean worked =ImageIO.write(rImage,"PNG",f);
                 if(!worked) System.err.println("writing of "+fname+" did not work!");
                 //os.close();
                 textures.put(data,fname);
