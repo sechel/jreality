@@ -389,7 +389,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         // so I've disabled this feature until I figure that out. -gunn
         boolean anyDisplayLists = eap.getAttribute(CommonAttributes.ANY_DISPLAY_LISTS,true);
         boolean manyDisplayLists = eap.getAttribute(CommonAttributes.MANY_DISPLAY_LISTS,false);
-        retainGeometry = false; //anyDisplayLists; // && !manyDisplayLists;
+        retainGeometry =  eap.getAttribute(CommonAttributes.RMAN_RETAIN_GEOMETRY,false); //false; //anyDisplayLists; // && !manyDisplayLists;
         
        double transparency = eap.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
         currentOpacity = 1f - (float)transparency;
