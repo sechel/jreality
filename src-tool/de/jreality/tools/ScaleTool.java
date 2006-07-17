@@ -23,7 +23,7 @@ public class ScaleTool extends DragEventTool{
 			}
 			public void pointDragged(PointDragEvent e) {	
 				translation=Rn.subtract(null,e.getPosition(),pickPoint);
-		        if(translation[3]==0) translation[3]=0;
+		        if(translation[3]==0) translation[3]=1;
 			}
 			public void pointDragEnd(PointDragEvent e) {
 			}			
