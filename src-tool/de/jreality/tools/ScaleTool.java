@@ -1,135 +1,80 @@
-/**
- *
- * This file is part of jReality. jReality is open source software, made
- * available under a BSD license:
- *
- * Copyright (c) 2003-2006, jReality Group: Charles Gunn, Tim Hoffmann, Markus
- * Schmies, Steffen Weissmann.
- *
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * - Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
- * - Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
- * - Neither the name of jReality nor the names of its contributors nor the
- *   names of their associated organizations may be used to endorse or promote
- *   products derived from this software without specific prior written
- *   permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- */
-
-
 package de.jreality.tools;
 
+import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.tool.AbstractTool;
-import de.jreality.scene.tool.InputSlot;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.tool.ToolContext;
 
 /**
- * @author weissman
+ * @author bleicher
  *
- **/
-public class ScaleTool extends AbstractTool {
-  
-  private static InputSlot scaleActivation = InputSlot.getDevice("ScaleActivation");
-  private static InputSlot scaleSlot = InputSlot.getDevice("ScaleAxis");
-  private static InputSlot timerSlot = InputSlot.getDevice("SystemTime");
+ */
 
-  double factor;
-  boolean isScaling;
-  
-  boolean moveChildren;
-  boolean slotPolling;
-  
-  double gain=1000;
-  
-  public ScaleTool() {
-    super(scaleActivation);
-	  addCurrentSlot(scaleSlot);
-  }
-  
-  double[] tmp = new double[16];
-  public void perform(ToolContext tc) {
-    if (tc.getSource() == scaleSlot) {
-      factor = tc.getAxisState(scaleSlot).doubleValue();
-      factor = factor*factor*factor;
-    }
-    if (!slotPolling) {
-    	if (tc.getSource() == scaleSlot) {
-    		if (tc.getAxisState(scaleSlot).isReleased()) {
-    			isScaling = false;
-    			removeCurrentSlot(timerSlot);
-    			return;
-    		}
-    		if (!isScaling) {
-    			isScaling = true;
-    			addCurrentSlot(timerSlot);
-    		}
-    		return;
-    	}
-    }
-    SceneGraphComponent scale = (isMoveChildren() ? tc.getRootToLocal() : tc.getRootToToolComponent()).getLastComponent();
-
-    Matrix shipMatrix = new Matrix();
-    if (scale.getTransformation() != null) shipMatrix.assignFrom(scale.getTransformation());
-
-    double dt = slotPolling ? 1 : tc.getAxisState(timerSlot).intValue()*0.001;
-    dt *=acceleration(tc);
-    MatrixBuilder.euclidean(shipMatrix).scale(1+(factor*dt*gain)).assignTo(scale);
-  }
-
-  private double acceleration(ToolContext tc) {
-    try {
-      if (tc.getAxisState(InputSlot.getDevice("Acceleration")).isPressed()) return 50;
-    } catch (Exception e) {
-    }
-    return 1;
-  }
-
-  public double getGain() {
-  	return gain;
-  }
-  
-  public void setGain(double gain) {
-  	this.gain = gain;
-  }
-  
-  public boolean isMoveChildren() {
-    return moveChildren;
-  }
-  
-  public void setMoveChildren(boolean moveChilderen) {
-    this.moveChildren = moveChilderen;
-  }
-  
-  public boolean isSlotPolling() {
-    return slotPolling;
-  }
-  
-  public void setSlotPolling(boolean slotPolling) {
-    this.slotPolling = slotPolling;
-  }
-
+public class ScaleTool extends DragEventTool{
+	
+	double[] translation;
+	public ScaleTool(){
+		super("ScaleActivation");
+		addPointDragListener(new PointDragListener(){
+			public void pointDragStart(PointDragEvent e) {	
+			}
+			public void pointDragged(PointDragEvent e) {	
+				translation=Rn.subtract(null,e.getPosition(),pickPoint);
+		        if(translation[3]==0) translation[3]=0;
+			}
+			public void pointDragEnd(PointDragEvent e) {
+			}			
+		});
+		addLineDragListener(new LineDragListener(){
+			public void lineDragStart(LineDragEvent e) {				
+			}
+			public void lineDragged(LineDragEvent e) {
+				translation=e.getTranslation();
+			}
+			public void lineDragEnd(LineDragEvent e) {
+			}			
+		});
+		addFaceDragListener(new FaceDragListener(){
+			public void faceDragStart(FaceDragEvent e) {
+			}
+			public void faceDragged(FaceDragEvent e) {
+				translation=e.getTranslation();
+			}
+			public void faceDragEnd(FaceDragEvent e) {
+			}			
+		});
+	}
+	
+	boolean active;
+	double[] pickPoint;
+	double[] objCenter;
+	SceneGraphComponent pickedSGC;
+	Transformation oldSGCTrafo;
+	
+	public void activate(ToolContext tc){
+		active=true;
+		pickPoint=tc.getCurrentPick().getObjectCoordinates();
+		super.activate(tc);
+		pickedSGC=tc.getCurrentPick().getPickPath().getLastComponent();
+		oldSGCTrafo=pickedSGC.getTransformation();
+		if(oldSGCTrafo==null) oldSGCTrafo=new Transformation();
+		objCenter=GeometryUtility.calculateBoundingBox(pickedSGC).getCenter();		
+		Matrix mtx=new Matrix(oldSGCTrafo);
+		mtx.invert();
+		objCenter=mtx.multiplyVector(objCenter);
+	}
+	public void perform(ToolContext tc){
+		if(!active) return;
+		super.perform(tc);
+		double factor=Rn.euclideanNorm(Rn.subtract(null,Rn.add(null,pickPoint,translation),objCenter))/Rn.euclideanNorm(Rn.subtract(null,pickPoint,objCenter));
+		MatrixBuilder.euclidean(oldSGCTrafo).translate(objCenter).scale(factor).translate(Rn.times(null,-1,objCenter)).assignTo(pickedSGC);
+	}
+	public void deactivate(ToolContext tc){
+		super.deactivate(tc);
+		active=false;
+	}
+	
 }
