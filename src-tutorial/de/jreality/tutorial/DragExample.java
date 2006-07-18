@@ -3,7 +3,6 @@ package de.jreality.tutorial;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -24,7 +23,19 @@ import de.jreality.ui.viewerapp.ViewerApp;
 public class DragExample {
 
 	public static void main(String[] args) {
-		SceneGraphComponent cmp = new SceneGraphComponent();
+		SceneGraphComponent cmp = new SceneGraphComponent();		
+		cmp.setGeometry(Primitives.icosahedron());	
+		
+		cmp.setAppearance(new Appearance());
+		cmp.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW,true);
+		cmp.getAppearance().setAttribute(CommonAttributes.TUBES_DRAW,true);
+		cmp.getAppearance().setAttribute(CommonAttributes.TUBE_RADIUS,0.025);
+		cmp.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW,true);
+		cmp.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW,true);
+		cmp.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS,0.05);
+		cmp.getAppearance().setAttribute(CommonAttributes.SMOOTH_SHADING,false);
+		
+		/**tool:*/
 		DragEventTool t = new DragEventTool();
 		
 		t.addPointDragListener(new PointDragListener() {
@@ -34,7 +45,6 @@ public class DragExample {
 			}
 
 			public void pointDragged(PointDragEvent e) {
-				//System.out.println("dragging vertex "+e.getIndex()+"; new Position: "+Rn.toString(e.getPosition()));
 				PointSet pointSet = e.getPointSet();
 				double[][] points=new double[pointSet.getNumPoints()][];
 		        pointSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(points);
@@ -43,9 +53,7 @@ public class DragExample {
 			}
 
 			public void pointDragEnd(PointDragEvent e) {
-				//System.out.println("drag end of vertex "+e.getIndex());
-			}
-			
+			}			
 		});
 		t.addLineDragListener(new LineDragListener() {
 			
@@ -61,8 +69,6 @@ public class DragExample {
 			}
 
 			public void lineDragged(LineDragEvent e) {
-				//System.out.println("dragging line "+e.getIndex()+"; translation: "+Rn.toString(e.getTranslation()));
-				
 				double[][] newPoints=(double[][])points.clone();
 				Matrix trafo=new Matrix();
 				MatrixBuilder.euclidean().translate(e.getTranslation()).assignTo(trafo);
@@ -90,8 +96,6 @@ public class DragExample {
 			}
 
 			public void faceDragged(FaceDragEvent e) {
-				//System.out.println("dragging face "+e.getIndex()+"; translation: "+Rn.toString(e.getTranslation()));
-				
 				double[][] newPoints=(double[][])points.clone();
 				Matrix trafo=new Matrix();
 				MatrixBuilder.euclidean().translate(e.getTranslation()).assignTo(trafo);
@@ -107,14 +111,7 @@ public class DragExample {
 		});
 		
 		cmp.addTool(t);		
-		cmp.setGeometry(Primitives.icosahedron());	
-		cmp.setAppearance(new Appearance());
-		cmp.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW,true);
-		cmp.getAppearance().setAttribute(CommonAttributes.TUBES_DRAW,true);
-		cmp.getAppearance().setAttribute(CommonAttributes.TUBE_RADIUS,0.025);
-		cmp.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW,true);
-		cmp.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW,true);
-		cmp.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS,0.05);
+
 	    ViewerApp.display(cmp);
 	}
 }
