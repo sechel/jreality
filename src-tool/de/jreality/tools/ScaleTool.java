@@ -16,8 +16,8 @@ import de.jreality.scene.tool.ToolContext;
 public class ScaleTool extends DragEventTool{
 	
 	double[] translation;
-	public ScaleTool(){
-		super("ScaleActivation");
+	public ScaleTool(String activationSlotName){
+		super(activationSlotName);
 		addPointDragListener(new PointDragListener(){
 			public void pointDragStart(PointDragEvent e) {	
 			}
@@ -46,6 +46,10 @@ public class ScaleTool extends DragEventTool{
 			public void faceDragEnd(FaceDragEvent e) {
 			}			
 		});
+	}
+	
+	public ScaleTool(){
+		this("ScaleActivation");
 	}
 	
 	boolean active;
