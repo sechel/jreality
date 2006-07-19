@@ -82,8 +82,6 @@ import de.jreality.util.RenderTrigger;
  * viewer.update();
  * viewer.display();
  * </pre></b></code>
- * 
- * @author msommer
  */
 public class ViewerApp {
   
@@ -153,7 +151,7 @@ public class ViewerApp {
    */
   public JFrame display() {
     
-    Component content = getViewerComponent();
+    Component content = getComponent();
     
     //set general properties of UI
     try {
@@ -177,7 +175,7 @@ public class ViewerApp {
     frame.validate();
     frame.setVisible(true);
     
-    return frame;
+    return frame;  //TODO: global variable currentFrame with getter?
   }
   
  
@@ -404,7 +402,7 @@ public class ViewerApp {
    */
   private void setupNavigator() {
     navigator = new Navigator(sceneRoot);
-    if (attachBeanShell) navigator.assignBeanShell(beanShell);
+    if (attachBeanShell) navigator.setBeanShell(beanShell);
     
     uiFactory.setInspector(navigator.getInspector());
     uiFactory.setSceneTree(navigator.getSceneTree());
@@ -433,7 +431,7 @@ public class ViewerApp {
    * Get current ToolSystemViewer.
    * @return the viewer
    */
-  public ToolSystemViewer getCurrentViewer() {
+  public ToolSystemViewer getViewer() {
     if (currViewer == null)
       throw new UnsupportedOperationException("No viewer instantiated, call update()!");
     
@@ -445,7 +443,7 @@ public class ViewerApp {
    * Get the viewer as a component.
    * @return the viewer component
    */
-  public Component getViewerComponent() {
+  public Component getComponent() {
     if (uiFactory == null)
       throw new UnsupportedOperationException("No viewer instantiated, call update()!");
     
