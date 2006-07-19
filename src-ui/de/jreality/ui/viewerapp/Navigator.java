@@ -41,18 +41,14 @@
 package de.jreality.ui.viewerapp;
 
 import javax.swing.JTree;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.ui.beans.InspectorPanel;
 import de.jreality.ui.treeview.JTreeRenderer;
 import de.jreality.ui.treeview.SceneTreeModel;
-import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
+import de.jreality.ui.treeview.SelectionEvent;
+import de.jreality.ui.treeview.SelectionListener;
 
 
 public class Navigator {
@@ -60,11 +56,9 @@ public class Navigator {
   private InspectorPanel inspector;
   private JTree sceneTree;
   private TreeSelectionModel tsm;
-  private TreeSelectionListener selectionListener;
   private BeanShell beanShell;
   
   private SceneGraphComponent sceneRoot;  //the scene root
-  private SceneGraphNode currentNode;  //the selected node
   
   
   public Navigator(SceneGraphComponent sceneRoot) {
@@ -78,12 +72,25 @@ public class Navigator {
     
     tsm = sceneTree.getSelectionModel();
     tsm.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-    selectionListener = new ListenerWithoutBeanShell();
-    tsm.addTreeSelectionListener(selectionListener);
-    //tsm.setSelectionPath(model.getPathTo(model.getRoot()));  //select sceneRoot in tree by default
+    
+    tsm.addTreeSelectionListener(new SelectionListener(){
+
+      public void selectionChanged(SelectionEvent e) {
+
+        Object selection = null;
+        
+        if (e.selectionIsSGNode()) selection = e.selectionAsSGNode();
+        else if (e.selectionIsTool()) selection = e.selectionAsTool();
+        else selection = e.getSelection();  //e.g. shader
+        
+        inspector.setObject(selection);
+        if (beanShell != null) beanShell.setSelf(selection);
+      }
+    });
+    
+    tsm.setSelectionPath(model.getPathTo(model.getRoot()));  //select sceneRoot in tree by default
     
     this.sceneRoot = sceneRoot;
-    currentNode = sceneRoot;
   }
   
   
@@ -102,89 +109,13 @@ public class Navigator {
   }
   
 
-  public void assignBeanShell(BeanShell beanShell) {
-    
-    if (beanShell == null) return;
+  public void setBeanShell(BeanShell beanShell) {
     this.beanShell = beanShell;
-    
-    tsm.removeTreeSelectionListener(selectionListener);
-    selectionListener = new ListenerWithBeanShell();
-    tsm.addTreeSelectionListener(selectionListener);    
   }
-  
-  
-  public SceneGraphNode getCurrentNode() {
-    
-    return currentNode;
-  }
-  
-  
-//  public void setCurrentNode(SceneGraphNode currentNode) {
-//    
-//    this.currentNode = currentNode;
-//    //TODO: select currentNode in tree
-//    //SceneTreeModel model = (SceneTreeModel) sceneTree.getModel();
-//    //TreePath newPath = model.getPathTo(currentNode);  => NO TERMINATION
-//    //tsm.setSelectionPath(newPath);
-//  }
   
   
   public SceneGraphComponent getRoot() {
     return sceneRoot;
   }
-  
-  
-  
-//TreeSelectionListeners ------------------------------------------------
-  private class ListenerWithoutBeanShell implements TreeSelectionListener {
-    
-    public void valueChanged(TreeSelectionEvent e) {
-      
-      Object obj = null;
-      TreePath path = e.getNewLeadSelectionPath();
-      
-      if (path != null) {
-        if (path.getLastPathComponent() instanceof SceneTreeNode) {
-          obj = ((SceneTreeNode)path.getLastPathComponent()).getNode();
-        } else if (path.getLastPathComponent() instanceof TreeTool) {
-          obj = ((TreeTool)path.getLastPathComponent()).getTool();
-        } else {
-          obj = path.getLastPathComponent();
-        }
-      }
-      
-      inspector.setObject(obj);
-      
-      if (obj instanceof SceneGraphNode)
-        currentNode = (SceneGraphNode) obj;
-    }
-    
-  }
-  
-  private class ListenerWithBeanShell implements TreeSelectionListener {
-    
-    public void valueChanged(TreeSelectionEvent e) {
-      
-      Object obj = null;
-      TreePath path = e.getNewLeadSelectionPath();
-      
-      if (path != null) {
-        if (path.getLastPathComponent() instanceof SceneTreeNode) {
-          obj = ((SceneTreeNode)path.getLastPathComponent()).getNode();
-        } else if (path.getLastPathComponent() instanceof TreeTool) {
-          obj = ((TreeTool)path.getLastPathComponent()).getTool();
-        } else {
-          obj = path.getLastPathComponent();
-        }
-      }
-      
-      inspector.setObject(obj);
-      beanShell.setSelf(obj);
-      
-      if (obj instanceof SceneGraphNode)
-        currentNode = (SceneGraphNode) obj;
-    }
-    
-  }
-  
+
 }
