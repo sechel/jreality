@@ -703,9 +703,11 @@ public class RIBVisitor extends SceneGraphVisitor {
     
      public void visit(IndexedFaceSet g) {
 		Ri.comment("IndexedFaceSet "+g.getName());
+		Ri.attributeBegin();
+		setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
      	if (!insidePointset)	{
       		insidePointset = true;
-    		// p is not a subclass of PointSet
+  		// p is not a subclass of PointSet
     		if (retainGeometry) {
    	    		Object which = pointsets.get(g);
    	  			if (which != null)	{
@@ -726,6 +728,7 @@ public class RIBVisitor extends SceneGraphVisitor {
    		}
     	else
     			_visit(g, null);
+     	Ri.attributeEnd();
     }
     
   
@@ -739,8 +742,8 @@ public class RIBVisitor extends SceneGraphVisitor {
      */public void _visit(IndexedFaceSet i, float[] color) {
  		String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
 		if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.FACE_DRAW),true)) {
-			Ri.attributeBegin();
-			setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
+//			Ri.attributeBegin();
+//			setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
  		   	DataList colors=i.getFaceAttributes( Attribute.COLORS );
 	    	if (colors !=null && GeometryUtility.getVectorLength(colors) == 4){
 	    		double[][] colorArray = colors.toDoubleArrayArray(null);
@@ -761,7 +764,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	    		}
 	    		else pointPolygon(i, color);
     		}
-    	    	Ri.attributeEnd();
+//    	    Ri.attributeEnd();
     	    	 
     	}
    		if (color == null && insidePointset) _visit((IndexedLineSet) i);
