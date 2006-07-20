@@ -51,6 +51,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTree;
 import javax.swing.tree.TreePath;
 
+import de.jreality.geometry.Primitives;
 import de.jreality.ui.viewerapp.actions.LoadFile;
 import de.jreality.ui.viewerapp.actions.Remove;
 
@@ -86,6 +87,19 @@ public class MenuFactory {
     frame.validate();
   }
   
+  
+  public static void main(String[] args) {
+    ViewerApp factory = new ViewerApp(Primitives.icosahedron());
+    factory.setAttachNavigator(true);
+    factory.setAttachBeanShell(true);
+    factory.update();
+    JFrame frame = (JFrame) factory.display();
+   
+    MenuFactory menu = new MenuFactory(frame, factory.getNavigator());
+    menu.addMenu(frame);
+    menu.addContextMenuToNavigator(); 
+  }
+    
   
   public JMenuBar getMenu() {
     
