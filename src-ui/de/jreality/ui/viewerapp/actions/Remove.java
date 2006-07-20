@@ -42,55 +42,86 @@ package de.jreality.ui.viewerapp.actions;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.io.File;
-import java.io.IOException;
 
-import javax.swing.JOptionPane;
-
-import de.jreality.reader.Readers;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.Camera;
+import de.jreality.scene.Geometry;
+import de.jreality.scene.Light;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.SceneGraphVisitor;
+import de.jreality.scene.Transformation;
+import de.jreality.scene.tool.Tool;
 import de.jreality.ui.treeview.SelectionEvent;
-import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.Navigator;
 
 
-public class LoadFile extends AbstractAction {
-  
+public class Remove extends AbstractAction {
+
   private static final long serialVersionUID = 1L;
   
+  private Object obj = null;
   
-  public LoadFile(String name, Navigator navigator) {
+  
+  public Remove(String name, Navigator navigator) {
     super(name, navigator);
   }
   
   
-  public LoadFile(String name, Navigator n, Component frame) {
+  public Remove(String name, Navigator n, Component frame) {
     super(name, n, frame);
   }
 
   
   public void actionPerformed(ActionEvent e) {
   
-    File[] files = FileLoaderDialog.loadFiles(frame);
-    for (int i = 0; i < files.length; i++) {
-      try {
-        final SceneGraphComponent sgc = Readers.read(files[i]);
-        sgc.setName(files[i].getName());
-        System.out.println("READ finished.");
-        ((SceneGraphComponent) actee).addChild(sgc);
-      } 
-      catch (IOException ioe) {
-        JOptionPane.showMessageDialog(frame, "Failed to load file: "+ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-      }
+    final SceneGraphComponent parent = (SceneGraphComponent) actee;
+    
+    if (obj instanceof SceneGraphNode) {
+      ((SceneGraphNode) obj).accept(new SceneGraphVisitor() {
+        
+        public void visit(SceneGraphComponent sc) {
+          parent.removeChild(sc);
+        }
+        public void visit(Geometry g) {
+          parent.setGeometry(null);
+        }
+        public void visit(Transformation t) {
+          parent.setTransformation(null);
+        }
+        public void visit(Appearance a) {
+          parent.setAppearance(null);
+        }
+        public void visit(Camera c) {
+          parent.setCamera(null);
+        }
+        public void visit(Light l) {
+         parent.setLight(null); 
+        }
+      });
     }
+    else if (obj instanceof Tool) {
+      parent.removeTool((Tool) obj);
+    }
+    
   }
 
 
   void selectionChanged(SelectionEvent e) {
     
-    if (e.selectionIsSGComp()) actee = e.selectionAsSGComp();
-    else actee = getDefaultActee();
-    //alternatively this.setEnabled(false);
+    SceneGraphComponent parent = e.getParentOfSelection();
+    
+    if (parent != null) {
+      setEnabled(true);
+      actee = parent;
+      
+      if (e.selectionIsSGNode())
+        obj = e.selectionAsSGNode();
+      else if (e.selectionIsTool())
+        obj = e.selectionAsTool();
+      //else parent == null
+    }
+    else setEnabled(false);
   }
 
 

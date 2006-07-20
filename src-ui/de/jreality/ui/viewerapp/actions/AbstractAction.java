@@ -42,59 +42,43 @@ package de.jreality.ui.viewerapp.actions;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.io.File;
-import java.io.IOException;
 
-import javax.swing.JOptionPane;
-
-import de.jreality.reader.Readers;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.treeview.SelectionEvent;
-import de.jreality.ui.viewerapp.FileLoaderDialog;
+import de.jreality.ui.treeview.SelectionListener;
 import de.jreality.ui.viewerapp.Navigator;
 
 
-public class LoadFile extends AbstractAction {
+public abstract class AbstractAction extends javax.swing.AbstractAction {
+
+  Component frame;
+  Navigator navigator;
+  Object actee;
   
-  private static final long serialVersionUID = 1L;
   
-  
-  public LoadFile(String name, Navigator navigator) {
-    super(name, navigator);
+  public AbstractAction(String name, Navigator navigator) {
+    this(name, navigator, null);
   }
   
   
-  public LoadFile(String name, Navigator n, Component frame) {
-    super(name, n, frame);
-  }
-
-  
-  public void actionPerformed(ActionEvent e) {
-  
-    File[] files = FileLoaderDialog.loadFiles(frame);
-    for (int i = 0; i < files.length; i++) {
-      try {
-        final SceneGraphComponent sgc = Readers.read(files[i]);
-        sgc.setName(files[i].getName());
-        System.out.println("READ finished.");
-        ((SceneGraphComponent) actee).addChild(sgc);
-      } 
-      catch (IOException ioe) {
-        JOptionPane.showMessageDialog(frame, "Failed to load file: "+ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-      }
-    }
-  }
-
-
-  void selectionChanged(SelectionEvent e) {
+  public AbstractAction(String name, Navigator n, Component frame) {
+    super(name);
+    this.frame = frame;
+    navigator = n;
+    actee = getDefaultActee();
     
-    if (e.selectionIsSGComp()) actee = e.selectionAsSGComp();
-    else actee = getDefaultActee();
-    //alternatively this.setEnabled(false);
+    navigator.getTreeSelectionModel().addTreeSelectionListener(
+        new SelectionListener(){
+          public void selectionChanged(SelectionEvent e) {
+            AbstractAction.this.selectionChanged(e);
+          }
+        });
   }
-
-
-  Object getDefaultActee() {
-    return navigator.getRoot();
-  }
+  
+  
+  abstract void selectionChanged(SelectionEvent e);
+  
+  abstract Object getDefaultActee();
+  
+  public abstract void actionPerformed(ActionEvent e);
+  
 }
