@@ -81,6 +81,7 @@ public class Remove extends AbstractAction {
       ((SceneGraphNode) obj).accept(new SceneGraphVisitor() {
         
         public void visit(SceneGraphComponent sc) {
+          //TODO: remove tools of sc?
           parent.removeChild(sc);
         }
         public void visit(Geometry g) {
@@ -101,7 +102,11 @@ public class Remove extends AbstractAction {
       });
     }
     else if (obj instanceof Tool) {
-      parent.removeTool((Tool) obj);
+//      Scene.executeWriter(parent, new Runnable() {
+//        public void run() {
+          parent.removeTool((Tool) obj);
+//        }
+//      });
     }
     
   }
