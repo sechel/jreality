@@ -106,4 +106,19 @@ public class SelectionEvent extends TreeSelectionEvent{
   }
 
   
+  public SceneGraphComponent getParentOfSelection() {
+    
+    SceneGraphComponent parent = null;
+    
+    if (selectionIsSGNode()) {
+      SceneTreeNode p = ((SceneTreeNode) selection).getParent();
+      if (p != null)
+        parent = (SceneGraphComponent) p.getNode();
+        //could parent be something different than SGComponent?
+    }
+    else if (selectionIsTool())
+      parent = (SceneGraphComponent) ((TreeTool) selection).getTreeNode().getNode();
+      
+    return parent;  //returns null if no parent or selection other than SGNode or tool (e.g. shader)
+  }
 }
