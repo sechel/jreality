@@ -52,6 +52,7 @@ import javax.swing.JTree;
 import javax.swing.tree.TreePath;
 
 import de.jreality.ui.viewerapp.actions.LoadFile;
+import de.jreality.ui.viewerapp.actions.Remove;
 
 
 /**
@@ -66,6 +67,9 @@ import de.jreality.ui.viewerapp.actions.LoadFile;
  */
 public class MenuFactory {
 
+  public static String LOAD_FILE = "Load File...";
+  public static String REMOVE = "Remove";
+  
   private Navigator navigator;
   private JFrame frame;
   
@@ -88,7 +92,8 @@ public class MenuFactory {
     JMenuBar menu = new JMenuBar();
     JMenu fileMenu = new JMenu("File");
     
-    fileMenu.add(new JMenuItem(new LoadFile(navigator, frame)));
+    fileMenu.add(new JMenuItem(new LoadFile(LOAD_FILE, navigator, frame)));
+    fileMenu.add(new JMenuItem(new Remove(REMOVE, navigator, frame)));
     menu.add(fileMenu);
     
     return menu;
@@ -126,7 +131,8 @@ public class MenuFactory {
   
   private JPopupMenu createContextMenu() {
     JPopupMenu cm = new JPopupMenu();
-    cm.add(new JMenuItem(new LoadFile(navigator, frame)));
+    cm.add(new JMenuItem(new LoadFile(LOAD_FILE, navigator, frame)));
+    cm.add(new JMenuItem(new Remove(REMOVE, navigator, frame)));
     return cm;
   }
 }
