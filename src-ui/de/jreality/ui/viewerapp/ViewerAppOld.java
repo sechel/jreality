@@ -433,7 +433,7 @@ class ViewerAppOld
     
     fileMenu.addSeparator();
     
-    mi = new JMenuItem("Save...");
+    mi = new JMenuItem("Save scene...");
     mi.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent arg0) {
         File file = FileLoaderDialog.selectTargetFile(frame);
@@ -446,6 +446,23 @@ class ViewerAppOld
           s.addPath("avatarPath", currViewer.getAvatarPath());
           s.addPath("emptyPickPath", currViewer.getEmptyPickPath());
           writer.writeScene(s, fw);
+          fw.close();
+        } catch (IOException ioe) {
+          JOptionPane.showMessageDialog(frame, "Save failed: "+ioe.getMessage());
+        }
+      }
+    });
+    fileMenu.add(mi);
+    
+    mi = new JMenuItem("Save node...");
+    mi.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent arg0) {
+        File file = FileLoaderDialog.selectTargetFile(frame);
+        if (file == null) return;
+        try {
+          FileWriter fw = new FileWriter(file);
+          WriterJRS writer = new WriterJRS();
+          writer.write(scene, fw);
           fw.close();
         } catch (IOException ioe) {
           JOptionPane.showMessageDialog(frame, "Save failed: "+ioe.getMessage());
