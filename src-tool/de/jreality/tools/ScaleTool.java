@@ -23,7 +23,7 @@ public class ScaleTool extends DragEventTool {
 			}
 			public void pointDragged(PointDragEvent e) {	
 				translation=Rn.subtract(null,e.getPosition(),pickPoint);
-		        if(translation[3]==0) translation[3]=1;
+		        //if(translation[3]==0) translation[3]=1;
 			}
 			public void pointDragEnd(PointDragEvent e) {
 			}			
@@ -59,13 +59,16 @@ public class ScaleTool extends DragEventTool {
 	Transformation oldSGCTrafo;
 	
 	public void activate(ToolContext tc){
-		active=true;
+    active=true;
 		pickPoint=tc.getCurrentPick().getObjectCoordinates();
 		super.activate(tc);
-		pickedSGC=tc.getCurrentPick().getPickPath().getLastComponent();
-		oldSGCTrafo=pickedSGC.getTransformation();
-		if(oldSGCTrafo==null) oldSGCTrafo=new Transformation();
-		objCenter=GeometryUtility.calculateBoundingBox(pickedSGC).getCenter();		
+        
+    pickedSGC=tc.getRootToLocal().getLastComponent();
+    
+    if (pickedSGC.getTransformation() == null) pickedSGC.setTransformation(new Transformation());
+    oldSGCTrafo=pickedSGC.getTransformation();
+    
+    objCenter=GeometryUtility.calculateBoundingBox(pickedSGC).getCenter();		
 		Matrix mtx=new Matrix(oldSGCTrafo);
 		mtx.invert();
 		objCenter=mtx.multiplyVector(objCenter);
