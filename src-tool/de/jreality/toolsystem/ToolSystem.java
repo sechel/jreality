@@ -444,7 +444,8 @@ private SceneGraphPath avatarPath;
   }
 
   private List getActivePathsForTool(Tool tool) {
-    return (List) toolToPath.get(tool);
+    List l = (List) toolToPath.get(tool);
+    return l == null ? Collections.EMPTY_LIST : l;
   }
 
   /**

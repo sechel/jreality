@@ -50,8 +50,8 @@ import java.util.List;
 public abstract class AbstractTool implements Tool {
 
   private InputSlot activationSlot;
-  private List currentSlots=Collections.EMPTY_LIST;
-  private final HashMap descriptions=new HashMap();
+  private transient List currentSlots=Collections.EMPTY_LIST;
+  private final transient HashMap descriptions=new HashMap();
   
   public AbstractTool(InputSlot activationSlot) {
     this.activationSlot=activationSlot;
