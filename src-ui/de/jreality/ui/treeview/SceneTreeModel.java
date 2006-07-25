@@ -212,7 +212,7 @@ public class SceneTreeModel extends AbstractTreeModel {
   }
   
   private class SceneTreeNodeWithToolListener extends SceneTreeNode implements ToolListener {
-
+    
     SceneGraphComponent cmp;
     List tools=new LinkedList();
     

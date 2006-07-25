@@ -46,6 +46,7 @@ import com.thoughtworks.xstream.XStream;
 
 import de.jreality.io.JrScene;
 import de.jreality.io.jrs.XStreamFactory;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.util.Input;
 
 public class ReaderJRS extends AbstractReader {
@@ -55,8 +56,13 @@ public class ReaderJRS extends AbstractReader {
   public void setInput(Input input) throws IOException {
     super.setInput(input);
     XStream xstr = XStreamFactory.forVersion(0.1);
-    read = (JrScene) xstr.fromXML(input.getReader());
-    root = read.getSceneRoot();
+    Object stuff = xstr.fromXML(input.getReader());
+    if (stuff instanceof JrScene) {
+      read = (JrScene) stuff; 
+      root = read.getSceneRoot();
+    } else {
+      root = (SceneGraphComponent) stuff;
+    }
   }
   
   public JrScene getScene() {

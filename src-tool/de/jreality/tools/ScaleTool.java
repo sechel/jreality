@@ -13,7 +13,7 @@ import de.jreality.scene.tool.ToolContext;
  *
  */
 
-public class ScaleTool extends DragEventTool{
+public class ScaleTool extends DragEventTool {
 	
 	double[] translation;
 	public ScaleTool(String activationSlotName){

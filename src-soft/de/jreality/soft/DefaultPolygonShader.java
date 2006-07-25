@@ -112,7 +112,8 @@ public class DefaultPolygonShader implements PolygonShader {
     setVertexShader(ShaderLookup.getVertexShaderAttr(eAppearance, name, "vertexShader"));
     
     if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eAppearance)) {
-      texture = new SimpleTexture((Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eAppearance));
+      Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eAppearance);
+      if (tex.getImage() != null) texture = new SimpleTexture(tex);
     }
     }
 

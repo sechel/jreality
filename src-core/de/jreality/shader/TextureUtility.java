@@ -274,13 +274,31 @@ public class TextureUtility {
    * @throws IOException if the resources fail to load
    */
   public static CubeMap createCubeMap(Appearance app, String prefix, String resourcePrefix, String[] sides, String resourceEnding) throws IOException {
+    return createCubeMap(app, prefix, createCubeMapData(resourcePrefix, sides, resourceEnding));
+  }
+
+  /**
+   * Convienience Method to load 6 images for a CubeMap.
+   * The 6 images are created by looking for the resources named 
+   * <pre>resourcePrefix+sides[i=0..5]+resourceEnding</pre>
+   * 
+   * The order of the 6 images is the same as for the other
+   * CubeMap methods: {"bk","ft","dn","up","lf","rt"}
+   *
+   * @param resourcePrefix part of the resource names
+   * @param sides part of the resource names
+   * @param resourceEnding part of the resource names
+   * @return an array of length 6 containing all <code>ImageData</code>s
+   * @throws IOException if the resources fail to load
+   */
+  public static ImageData[] createCubeMapData(String resourcePrefix, String[] sides, String resourceEnding) throws IOException {
     Input[] data = new Input[sides.length];
     ImageData[] imgs = new ImageData[data.length];
     for (int i = 0; i < sides.length; i++) {
       data[i] = Input.getInput(resourcePrefix+sides[i]+resourceEnding);
       imgs[i] = ImageData.load(data[i]);
    }
-    return createCubeMap(app, prefix, imgs);
+    return imgs;
   }
 
   // TODO: colors seem to have no effect!

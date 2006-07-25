@@ -134,8 +134,8 @@ public class ViewerApp {
       autoRender = false;
     }
     String synchRenderProp = System.getProperty("de.jreality.ui.viewerapp.synchRender", "true");
-    if (synchRenderProp.equalsIgnoreCase("false")) {
-      synchRender = false;
+    if (synchRenderProp.equalsIgnoreCase("true")) {
+      synchRender = true;
     }
     if (autoRender) renderTrigger = new RenderTrigger();
     if (synchRender) {

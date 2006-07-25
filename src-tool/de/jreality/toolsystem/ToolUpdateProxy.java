@@ -58,7 +58,7 @@ public class ToolUpdateProxy {
 
   private Builder builder;
 
-  ToolUpdateProxy(ToolSystem ts) {
+  public ToolUpdateProxy(ToolSystem ts) {
     toolSystem = ts;
   }
 
@@ -69,7 +69,7 @@ public class ToolUpdateProxy {
     }
   }
   
-  void setSceneRoot(SceneGraphComponent comp) {
+  public void setSceneRoot(SceneGraphComponent comp) {
     if (builder != null) {
       throw new IllegalStateException("twice called");
     }
@@ -106,24 +106,24 @@ public class ToolUpdateProxy {
 
     protected void addTreeNode(SceneTreeNode tn) {
       super.addTreeNode(tn);
-      for (Iterator i = comp.getTools().iterator(); i.hasNext();)
+      if (toolSystem != null) for (Iterator i = comp.getTools().iterator(); i.hasNext();)
         toolSystem.addTool((Tool) i.next(), tn.toPath());
     }
 
     protected void removeTreeNode(SceneTreeNode tn) {
       super.removeTreeNode(tn);
-      for (Iterator i = comp.getTools().iterator(); i.hasNext();)
+      if (toolSystem != null) for (Iterator i = comp.getTools().iterator(); i.hasNext();)
         toolSystem.removeTool((Tool) i.next(), tn.toPath());
     }
 
     public void toolAdded(ToolEvent ev) {
-      for (Iterator i = getTreeNodes(); i.hasNext();) {
+      if (toolSystem != null) for (Iterator i = getTreeNodes(); i.hasNext();) {
         toolSystem.addTool(ev.getTool(), ((SceneTreeNode) i.next()).toPath());
       }
     }
 
     public void toolRemoved(ToolEvent ev) {
-      for (Iterator i = getTreeNodes(); i.hasNext();) {
+      if (toolSystem != null) for (Iterator i = getTreeNodes(); i.hasNext();) {
         toolSystem.removeTool(ev.getTool(), ((SceneTreeNode) i.next()).toPath());
       }
     }
