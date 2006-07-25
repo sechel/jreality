@@ -45,36 +45,35 @@ import de.jreality.scene.Transformation;
 
 /**
  *
+ * <p>
  * This class wraps a Matrix instance.
  * <br> All the static methods are factory methods that
  * create an instance for a selected geometry/metric.
  * <br> <b>Note:</b> the factory methods with Transformation as a
- * parameter copy the underlying double[] and wrap the copy 
- * into a new Matrix instance - the factory methods that
+ * parameter copy the underlying <code>double[]</code> and wrap
+ * the copy into a new Matrix instance - the factory methods that
  * take a Matrix as a parameter simply wor on the given Matrix.
  * Finally, the factorymethods without parameters create a
- * new identity matrix to act on. 
+ * new identity matrix to act on.
+ * </p>
  * <p>
- * The instance methods are always applyed from rhs, so
- * they are operations "in the local coordinate system". All
+ * The instance methods are always applyed from rhs. All
  * these methods return a this reference, so that one can do
  * many calls in a row.
- * 
- * <code>
+ * </p>
+ * <pre>
  * Matrix m = MatrixBuilder.euclidean()
  *            .translate(2,2,2)
  *            .rotate(Math.PI/2, 1, 1, 1)
  *            .scale(3,1,2)
  *            .getMatrix();
- * </code>
  * 
- * <code>
  * SceneGraphComponent camCom = new SceneGraphComponent();
  * MatrixBuilder.euclidean().translate(0,2,3)
  *              .rotateFromTo(new double[]{0,0,-1}, new double[]{0,-2,-3})
  *              .scale(2)
  *              .assignTo(camComp); // Transformation gets set and assigned
- * </code>
+ * </pre>
  * 
  * @author weissman
  */
