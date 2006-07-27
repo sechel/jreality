@@ -60,6 +60,8 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
+//import javax.media.jai.JAI;
+import javax.media.jai.RenderedOp;
 
 import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.GeometryUtility;
@@ -268,19 +270,19 @@ public class RIBVisitor extends SceneGraphVisitor {
             map = new HashMap();
             Color col = Color.WHITE;
            if(ap!=null) { 
-        	         Object o = ap.getAttribute(CommonAttributes.BACKGROUND_COLORS);
-	      	          if (o != null && o instanceof Color[])	
-	      	        	  // insert a polygon at the back of the viewing frustrum
-  	      	        	  handleBackgroundColors((Color[]) o, camera, path.getMatrix(null));
-	      	          else {
-	         	         o = ap.getAttribute(CommonAttributes.BACKGROUND_COLOR,Color.class);
-	      	        	  if(o instanceof Color) {
-	        	            	col = (Color) o;   		
-	      	        	  }
-	           	         float[] f = col.getRGBColorComponents(null);     
-	           	         map.put("color background", f);
-	           	         Ri.imager("background",map);        
-      	            } 
+   	         Object o = ap.getAttribute(CommonAttributes.BACKGROUND_COLORS);
+      	          if (o != null && o instanceof Color[])	 
+      	        	  // insert a polygon at the back of the viewing frustrum
+      	        	  handleBackgroundColors((Color[]) o, camera, path.getMatrix(null));
+      	          else {
+         	         o = ap.getAttribute(CommonAttributes.BACKGROUND_COLOR,Color.class);
+      	        	  if(o instanceof Color) {
+        	            	col = (Color) o;   		
+      	        	  }
+           	         float[] f = col.getRGBColorComponents(null);     
+           	         map.put("color background", f);
+           	         Ri.imager("background",map);        
+  	            } 
        		}
          }
          new LightCollector(root, this);
@@ -312,6 +314,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 		bkgd.setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(cd));
 		Ri.attributeBegin();
 		Ri.concatTransform(fTranspose(w2c));
+ 	    Ri.comment("Disable shadows for background");
+	    Ri.verbatim("Attribute \"visibility\"  \"int transmission\" [0]");
 		Ri.surface("constant",null);
 		pointPolygon(bkgd, null);
 		Ri.attributeEnd();
@@ -402,55 +406,9 @@ public class RIBVisitor extends SceneGraphVisitor {
         if(slShader != null) {
             Ri.displacement(slShader.getName(),slShader.getParameters());
         }
-        boolean testNewShaderStuff = true;
-    	if (testNewShaderStuff)	{
-            RendermanShader polygonShader =(RendermanShader) ShaderLookup.getShaderAttr(this,eap, "", CommonAttributes.POLYGON_SHADER);        		
-            Ri.shader(polygonShader);
-    	} else {
-            Object shader = eap.getAttribute(type,"default");
-            slShader = (SLShader) eap.getAttribute(type+"."+CommonAttributes.RMAN_SURFACE,null,SLShader.class);
-            if(slShader == null) {
-                if(shader.equals("default")) {
-                    float phongSize =(float) eap.getAttribute(type+"."+CommonAttributes.SPECULAR_EXPONENT,CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
-                    float phong =(float) eap.getAttribute(type+"."+CommonAttributes.SPECULAR_COEFFICIENT,CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);
-                    float Kd =(float) eap.getAttribute(type+"."+CommonAttributes.DIFFUSE_COEFFICIENT,CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
-                    float Ka =(float) eap.getAttribute(type+"."+CommonAttributes.AMBIENT_COEFFICIENT,CommonAttributes.AMBIENT_COEFFICIENT_DEFAULT);
-                  HashMap map =new HashMap(); 
-                    map.put("roughness",new Float(1/phongSize));
-                    map.put("Ks",new Float(phong));
-                    map.put("Kd",new Float(Kd));
-                    map.put("Ka",new Float(Ka));
-                   
-                    //System.out.println("has texture "+AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), a));
-                    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), eap)) {
-                        Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), eap);
-                   //System.out.println("texture is "+tex);
-//                        Texture2D tex = (Texture2D) a.getAttribute(type+".texture",null,Texture2D.class);
-//                        if(tex != null) {
-                  
-                        String fname = null;
-                        if (rendererType == RIBViewer.TYPE_PIXAR)	{
-                        		fname = (String) eap.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE,"");
-                        		if (fname == "")	{
-                        			fname = null;
-                        		} 
-                        } 
-                        if (fname == null) {
-                        	fname = writeTexture(tex);
-                        }
-                        map.put("string texturename",fname);
-                        double[] mat = tex.getTextureMatrix().getArray();
-                        if(mat != null) {
-                        	map.put("matrix textureMatrix",fTranspose(mat));
-                        }
-                        Ri.surface("transformedpaintedplastic",map);
-                    } else {
-                        Ri.surface("plastic",map);
-                    }
-                }
-             } else 
-            	 Ri.surface(slShader.getName(),slShader.getParameters());
-    	}
+        RendermanShader polygonShader =(RendermanShader) ShaderLookup.getShaderAttr(this,eap, "", CommonAttributes.POLYGON_SHADER);        		
+        Ri.shader(polygonShader);
+
     }
     /**
      * @param tex
@@ -459,15 +417,17 @@ public class RIBVisitor extends SceneGraphVisitor {
     public String writeTexture(Texture2D tex) {
             Image img;
             ImageData data = tex.getImage();
-        String fname = (String) textures.get(data);
+        String noSuffix = (String) textures.get(data);
+        String fname = null;
 //        Iterator iter = ImageIO.getImageWritersByMIMEType("image/tiff");
 //        while (iter.hasNext())	{
 //        	System.err.println("Writer: "+((ImageWriter) iter.next()).getClass().getName());
 //        }
-        if(fname == null) {
+        if(noSuffix == null) {
             RenderedImage rImage =null;
             BufferedImage bImage = null;
-            fname = name+"_texture"+(textureCount++)+".png"; //".tiff"; //
+            noSuffix = name+"_texture"+(textureCount++);
+            fname = noSuffix+".tiff"; //".png"; //
             File f = new File(fname);
             if (true)	{
                 //Image img = tex.getImage().getImage();
@@ -493,7 +453,9 @@ public class RIBVisitor extends SceneGraphVisitor {
                         raster.setPixel(x, y, pix);
                     }
                 img = bi;
-                //END of temp code...
+                // force alpha channel to be "pre-multiplied"
+    		    bi.coerceData(true);
+               //END of temp code...
                 
                 if( img instanceof RenderedImage )
                     rImage = (RenderedImage) img;
@@ -516,18 +478,22 @@ public class RIBVisitor extends SceneGraphVisitor {
 //
 //            RenderedOp op = JAI.create("filestore", image,
 //                    fname, format);
-            try {
-                //OutputStream os = new FileOutputStream(f);
-                boolean worked =ImageIO.write(rImage,"PNG",f);
-                if(!worked) System.err.println("writing of "+fname+" did not work!");
-                //os.close();
-                textures.put(data,fname);
-            } catch (IOException e) {
-                e.printStackTrace();
-                fname = null;
-            }
-        }
-        return fname;
+            String format = "tiff";
+//            JAI.create("filestore", rImage,fname, format);
+            System.err.println("writing "+fname);
+//            try {
+//                //OutputStream os = new FileOutputStream(f);
+//                boolean worked =ImageIO.write(rImage,"PNG",f);
+//                if(!worked) System.err.println("writing of "+fname+" did not work!");
+//                //os.close();
+//                textures.put(data,noSuffix);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                noSuffix = null;
+//            }
+        } 
+        return noSuffix+".tex";		// should be dependent on the final renderman renderer
+        							// prman from Pixar only knows the proprietary "tex" format
     }
     
     public boolean hasProxy(Geometry g)		{
@@ -547,33 +513,36 @@ public class RIBVisitor extends SceneGraphVisitor {
      */
     public void visit(IndexedLineSet g) {
 		Ri.comment("IndexedLineSet "+g.getName());
+		Ri.attributeBegin();
+		setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
 		if (hasProxy((Geometry) g))	{
 			insidePointset = false;
-			return;
+		} else {
+	    	if (!insidePointset)	{
+	      		insidePointset = true;
+	    		// p is not a proper subclass of IndexedLineSet
+	    		if (retainGeometry) {
+	   	    		Object which = pointsets.get(g);
+	   	  			if (which != null)	{
+	     	    		Ri.readArchive((String) which);
+	    			} else {
+	    				Ri.comment("Retained geometry "+g.getName());
+	    				String finalname = g.getName()+pointsetCount;
+	    				Ri.archiveBegin(finalname);
+	    				_visit(g);
+	    				Ri.archiveEnd();
+	    	    		Ri.readArchive(finalname);
+	    				pointsets.put(g, finalname );
+	    				pointsetCount++;
+	    			} 
+	   		}
+	       		else
+	    			_visit(g);
+	   		}
+	    	else
+	    			_visit(g);			
 		}
-     	if (!insidePointset)	{
-      		insidePointset = true;
-    		// p is not a proper subclass of IndexedLineSet
-    		if (retainGeometry) {
-   	    		Object which = pointsets.get(g);
-   	  			if (which != null)	{
-     	    		Ri.readArchive((String) which);
-    			} else {
-    				Ri.comment("Retained geometry "+g.getName());
-    				String finalname = g.getName()+pointsetCount;
-    				Ri.archiveBegin(finalname);
-    				_visit(g);
-    				Ri.archiveEnd();
-    	    		Ri.readArchive(finalname);
-    				pointsets.put(g, finalname );
-    				pointsetCount++;
-    			} 
-   		}
-       		else
-    			_visit(g);
-   		}
-    	else
-    			_visit(g);
+       	Ri.attributeEnd();
     }
     
     private void _visit(IndexedLineSet g)	{
@@ -584,8 +553,8 @@ public class RIBVisitor extends SceneGraphVisitor {
         if(dl!=null){
             boolean tubesDraw = eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.TUBES_DRAW),CommonAttributes.TUBES_DRAW_DEFAULT);
             if (tubesDraw)  {
-           Ri.attributeBegin();
-            setupShader(eAppearance,CommonAttributes.LINE_SHADER);
+//           Ri.attributeBegin();
+//            setupShader(eAppearance,CommonAttributes.LINE_SHADER);
                float r = (float) eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER,CommonAttributes.TUBE_RADIUS),CommonAttributes.TUBE_RADIUS_DEFAULT);
                // A test to get tubes drawn correctly for non-euclidean case (also fixes some problems I've noticed with
                // the euclidean case too.  -gunn 20.04.06
@@ -599,14 +568,14 @@ public class RIBVisitor extends SceneGraphVisitor {
                     cc.getRGBComponents(raw);
 //                    for (int k=0;k<4; ++k)	raw[k] = (float) (raw[k]*currentOpacity);
                     cc = new Color(raw[0], raw[1], raw[2], raw[3]*currentOpacity); 
-                    if (g instanceof IndexedFaceSet)	{
-                    BallAndStickFactory bsf = new BallAndStickFactory(g);
-               	  	bsf.setSignature(sig);
-               	  	bsf.setStickRadius(r);
-                	bsf.setShowBalls(false);	// need to actually omit the balls
-               	  	bsf.setStickColor(cc);
-               	  	bsf.update();
-               	  	visit(bsf.getSceneGraphComponent());
+                    if (g instanceof IndexedLineSet)	{
+	                    BallAndStickFactory bsf = new BallAndStickFactory(g);
+	               	  	bsf.setSignature(sig);
+	               	  	bsf.setStickRadius(r);
+	                	bsf.setShowBalls(false);	// need to actually omit the balls
+	               	  	bsf.setStickColor(cc);
+	                	bsf.update();
+	               	  	visit(bsf.getSceneGraphComponent());
             	   } else {
            				DataList edgec =  g.getEdgeAttributes(Attribute.COLORS);
             		   int n = g.getNumEdges();
@@ -662,7 +631,7 @@ public class RIBVisitor extends SceneGraphVisitor {
                    }
 
                }
-               Ri.attributeEnd();
+//               Ri.attributeEnd();
            }
  
          }
@@ -705,30 +674,35 @@ public class RIBVisitor extends SceneGraphVisitor {
 		Ri.comment("IndexedFaceSet "+g.getName());
 		Ri.attributeBegin();
 		setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
-     	if (!insidePointset)	{
-      		insidePointset = true;
-  		// p is not a subclass of PointSet
-    		if (retainGeometry) {
-   	    		Object which = pointsets.get(g);
-   	  			if (which != null)	{
-     	    		Ri.readArchive((String) which);
-    			} else {
-    				Ri.comment("Retained geometry "+g.getName());
-    				String finalname = g.getName()+pointsetCount;
-    				Ri.archiveBegin(finalname);
-    				_visit(g, null);
-    				Ri.archiveEnd();
-    	    		Ri.readArchive(finalname);
-    				pointsets.put(g, finalname );
-    				pointsetCount++;
-    			} 
-   		}
-       		else
-    			_visit(g, null);
-   		}
-    	else
-    			_visit(g, null);
-     	Ri.attributeEnd();
+		if (hasProxy((Geometry) g))	{
+			insidePointset = false;
+		} else {
+	    	if (!insidePointset)	{
+	      		insidePointset = true;
+	  		// p is not a subclass of PointSet
+	    		if (retainGeometry) {
+	   	    		Object which = pointsets.get(g);
+	   	  			if (which != null)	{
+	     	    		Ri.readArchive((String) which);
+	    			} else {
+	    				Ri.comment("Retained geometry "+g.getName());
+	    				String finalname = g.getName()+"_"+pointsetCount;
+	    				Ri.archiveBegin(finalname);
+	    				_visit(g, null);
+	    				Ri.archiveEnd();
+	    	    		Ri.readArchive(finalname);
+	    				pointsets.put(g, finalname );
+	    				pointsetCount++;
+	    			} 
+	   		}
+	       		else
+	    			_visit(g, null);
+	    		insidePointset = false;
+	   		}
+	    	else
+	    			_visit(g, null);			
+		}
+      	Ri.attributeEnd();
     }
     
   
