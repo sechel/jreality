@@ -61,7 +61,7 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
 //import javax.media.jai.JAI;
-import javax.media.jai.RenderedOp;
+//import javax.media.jai.RenderedOp;
 
 import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.GeometryUtility;
