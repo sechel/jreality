@@ -95,7 +95,12 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
             if (fname == null) {
             	fname = ribv.writeTexture(tex);
             }
-            map.put("string texturename",fname);
+            // strip off leading path of absolute paths 
+            // (use texture path in rib file to look up such textures
+            if (fname.indexOf('/') == 0)	{
+            	fname = fname.substring(fname.lastIndexOf('/')+1);
+            }
+             map.put("string texturename",fname);
             double[] mat = tex.getTextureMatrix().getArray();
             if(mat != null) {
             	map.put("matrix textureMatrix",RIBVisitor.fTranspose(mat));
