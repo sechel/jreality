@@ -265,7 +265,7 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		vertexCoordinates.addIngr( vertexAttributeNode( Attribute.COORDINATES)) ;
 		vertexCoordinates.setUpdateMethod(
 				new OoNode.UpdateMethod() {
-					public Object update( Object object) {					
+					public Object update( Object object) {		
 						return vertexDLS.getList(Attribute.COORDINATES)
 							.toDoubleArrayArray(null);			
 					}					

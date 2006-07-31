@@ -40,6 +40,7 @@
 
 package de.jreality.geometry;
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Handler;
@@ -124,8 +125,10 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		factory.setGenerateVertexNormals( true );
 		factory.setGenerateEdgesFromFaces( true );
 		factory.update();
-		
-		ViewerApp.display( factory.getIndexedFaceSet() );
+		ViewerApp.display(factory.getIndexedFaceSet());
+		factory.setFaceColors( new Color[] {Color.RED, Color.YELLOW, Color.RED, Color.YELLOW, Color.RED, Color.YELLOW })  ;
+		factory.update();
+		ViewerApp.display(factory.getIndexedFaceSet());
 		
 		actionHandler.clear();
 		
@@ -192,9 +195,11 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		factory.setGenerateVertexLabels(true);
 		factory.setLineCount( 1 );
 		factory.setEdgeIndices( new int[][] {{0,1}} );
-		factory.setEdgeLabels( new String[] {"A"} );
+		factory.setFaceColors( new Color[] {Color.RED, Color.GREEN, Color.RED, Color.GREEN, Color.RED, Color.GREEN })  ;
 		factory.update();
-		
+		ViewerApp.display(factory.getIndexedFaceSet());
+		factory.setFaceColors( new Color[] {Color.RED, Color.YELLOW, Color.RED, Color.YELLOW, Color.RED, Color.YELLOW })  ;
+		factory.update();
 		ViewerApp.display(factory.getIndexedFaceSet());
 	}
 }

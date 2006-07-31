@@ -100,7 +100,7 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 		vertexCoordinates.addIngr(immersion);
 		vertexCoordinates.setUpdateMethod(
 				new OoNode.UpdateMethod() {
-					public Object update( Object object) {					
+					public Object update( Object object) {	
 						return generateVertexCoordinates( (double[][])object);	
 					}					
 				}
@@ -108,7 +108,7 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 	}
 	
 	double [][] generateVertexCoordinates( double [][] vertexCoordinates ) {
-	
+		
 		log( "compute", Attribute.COORDINATES, "vertex ");
 		
 		final Immersion immersion = getImmersion();
@@ -132,7 +132,7 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 			double u=uMin;
 			for(int iu=0; iu < uLineCount; iu++, u+=du) {
 				final int indexOfUV=firstIndexInULine + iu;
-				immersion.evaluate(u, v, vertexCoordinates[indexOfUV], 0);
+				immersion.evaluate(u, v, vertexCoordinates[ uLineCount*iv + iu ], 0 ); //indexOfUV], 0);
 			}
 		}
 			
@@ -187,10 +187,8 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 		if( !getImmersion().isImmutable() )
 			immersion.outdate();
 
-		vertexCoordinates.update();
-		
 		super.recompute();
-		
+
 		
 	}
 	
@@ -199,6 +197,7 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 		super.updateImpl();
 	
 		if( nodeWasUpdated(vertexCoordinates) ) { 
+			System.out.println( "node was updated" );
 			log( "set", Attribute.COORDINATES, "vertex" );
 			ifs.setVertexAttributes(Attribute.COORDINATES, new DoubleArrayArray.Array(vertexCoordinates()));
 		}
