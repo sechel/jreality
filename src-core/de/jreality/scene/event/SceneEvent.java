@@ -70,12 +70,4 @@ public class SceneEvent extends EventObject
     return sourceElement;
   }
   
-  /**
-   * this is for event triggered write operations on the source node
-   * 
-   * @param runnable
-   */
-  public void enqueueWriter(Runnable runnable) {
-    sourceElement.enqueueWriter(this, runnable);
-  }
 }

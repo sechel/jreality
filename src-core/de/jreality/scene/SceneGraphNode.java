@@ -65,20 +65,7 @@ public class SceneGraphNode {
   
   private boolean readOnly;
   private String  name;
-  private transient List writers=Collections.EMPTY_LIST, writersSwap=Collections.EMPTY_LIST;
-  
-  /**
-   * use this ONLY from inside a listener via event.enqueueWriter( runner );
-   *
-   * @param event
-   * @param runnable
-   */
-  public void enqueueWriter(SceneEvent event, Runnable runnable) {
-    if (Thread.currentThread() != nodeLock.lastWriter) throw new IllegalStateException("only allowed via event");
-    if (writers == Collections.EMPTY_LIST) writers = new LinkedList();
-    writers.add(runnable);
-  }
-  
+    
   /**
    * Returns the readOnly flag
    * @return boolean
@@ -145,21 +132,7 @@ public class SceneGraphNode {
     try {
       writingFinished(); // broadcast events
     } finally {
-      if (!writers.isEmpty()) {
-        if (!nodeLock.canSwitchBack()) throw new IllegalStateException("sth wrong");
-        nodeLock.switchBackToWriteLock();
-        final List w=writers;
-        writers=writersSwap;
-        try {
-          processWriters(w);            
-        } finally {
-          w.clear();
-          writersSwap=w;
-          finishWriter();
-        }
-      } else {
-        nodeLock.readUnlock();
-      }
+      nodeLock.readUnlock();
     }
   }
   
