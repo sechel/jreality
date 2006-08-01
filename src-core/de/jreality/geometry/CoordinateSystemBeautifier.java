@@ -49,19 +49,21 @@ import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 
+
 public class CoordinateSystemBeautifier extends AbstractTool {
 
-	//from RotateTool:
 	private static InputSlot evolutionSlot = InputSlot.getDevice("SystemTime");
 	
-	private CoordinateSystemFactory factory = null;;	
+	private CoordinateSystemFactory factory = null;
 	
+  
 	public CoordinateSystemBeautifier(CoordinateSystemFactory factory) {
     super(null);
 		this.factory = factory;
 		addCurrentSlot(evolutionSlot, "Need notification to add path listeners.");
 	}
 
+  
 	public void perform(ToolContext tc) {
 		//add SceneGraphPathObserver to RootToToolPath
 		//and only perform something if TransformationEvent is thrown
@@ -85,7 +87,10 @@ public class CoordinateSystemBeautifier extends AbstractTool {
     opObserver.transformationMatrixChanged(null);
 
     removeCurrentSlot(evolutionSlot);
-		
 	}
 
+  
+  public String getDescription() {
+    return "CoordinateSystemBeautifier";
+  }
 }
