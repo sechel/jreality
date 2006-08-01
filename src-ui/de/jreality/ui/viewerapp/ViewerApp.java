@@ -477,6 +477,14 @@ public class ViewerApp {
   }
   
   
+  /**
+   * @return the viewer switch
+   */
+  public ViewerSwitch getViewerSwitch() {
+    return viewerSwitch;
+  }
+  
+  
   public void dispose() {
     if (autoRender) {
       renderTrigger.removeSceneGraphComponent(sceneRoot);

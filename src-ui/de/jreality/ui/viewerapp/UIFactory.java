@@ -61,7 +61,7 @@ class UIFactory {
   private Component beanShell;
   private Component inspector;
   private JTree sceneTree;
-  private final Border emptyBorder=BorderFactory.createEmptyBorder();
+  private final Border emptyBorder = BorderFactory.createEmptyBorder();
   
   private boolean attachNavigator = false;  //default
   private boolean attachBeanShell = false;  //default

@@ -50,67 +50,86 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTree;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
 import de.jreality.geometry.Primitives;
+import de.jreality.ui.viewerapp.actions.AddTool;
 import de.jreality.ui.viewerapp.actions.LoadFile;
+import de.jreality.ui.viewerapp.actions.Quit;
 import de.jreality.ui.viewerapp.actions.Remove;
 
 
 /**
  * at present to use the following way:<br>
  * 
- * ViewerApp factory = new ViewerApp(SceneGraphNode);
- * JFrame frame = (JFrame) factory.display();
+ * ViewerApp viewerApp = new ViewerApp(SceneGraphNode);
+ * JFrame frame = viewerApp.display();
  *
- * MenuFactory menu = new MenuFactory(frame, factory.getNavigator());
- * menu.addMenu(frame);
+ * MenuFactory menu = new MenuFactory(frame, viewerApp.getNavigator());
+ * menu.addMenuToFrame();
  * menu.addContextMenuToNavigator(); 
  */
 public class MenuFactory {
 
-  public static String LOAD_FILE = "Load File...";
+  public static String LOAD_FILE = "Load File";
   public static String REMOVE = "Remove";
+  public static String ADD_TOOL = "Add Tool";
+  public static String QUIT = "Quit";
   
-  private Navigator navigator;
-  private JFrame frame;
+  private JFrame frame = null;
+  private Navigator navigator = null;
+//  private ViewerSwitch viewerSwitch = null;
   
   
   public MenuFactory(JFrame frame, Navigator navigator) {
-    this.frame= frame;
-    this.navigator = navigator;
+    this(frame, navigator, null);
   }
   
   
-  public void addMenu(JFrame frame) {
-    
+  public MenuFactory(JFrame frame, Navigator navigator, ViewerSwitch viewerSwitch) {
+    this.frame = frame;
+    this.navigator = navigator;
+//    this.viewerSwitch = viewerSwitch;
+  }
+  
+  
+  public static void main(String[] args) {
+    ViewerApp viewerApp = new ViewerApp(Primitives.icosahedron());
+    viewerApp.setAttachNavigator(true);
+    viewerApp.setAttachBeanShell(true);
+    viewerApp.update();
+    JFrame frame = viewerApp.display();
+   
+    MenuFactory menu = new MenuFactory(frame, viewerApp.getNavigator(), viewerApp.getViewerSwitch());
+    menu.addMenuToFrame();
+    menu.addContextMenuToNavigator(); 
+  }
+  
+  
+  public void addMenuToFrame() {
     frame.setJMenuBar(getMenu());
     frame.validate();
   }
   
   
-  public static void main(String[] args) {
-    ViewerApp factory = new ViewerApp(Primitives.icosahedron());
-    factory.setAttachNavigator(true);
-    factory.setAttachBeanShell(true);
-    factory.update();
-    JFrame frame = (JFrame) factory.display();
-   
-    MenuFactory menu = new MenuFactory(frame, factory.getNavigator());
-    menu.addMenu(frame);
-    menu.addContextMenuToNavigator(); 
-  }
-    
-  
   public JMenuBar getMenu() {
     
     JMenuBar menu = new JMenuBar();
-    JMenu fileMenu = new JMenu("File");
+    JMenu fileMenu = new JMenu("Menu");
     
     fileMenu.add(new JMenuItem(new LoadFile(LOAD_FILE, navigator, frame)));
     fileMenu.add(new JMenuItem(new Remove(REMOVE, navigator, frame)));
+    fileMenu.add(new JMenuItem(new AddTool(ADD_TOOL, navigator, frame)));
+    fileMenu.add(new JMenuItem(new Quit(QUIT, navigator, frame)));
     menu.add(fileMenu);
     
     return menu;
+  }
+  
+  
+  public static void addMenu(JFrame frame, Navigator navigator) {
+    MenuFactory menu = new MenuFactory(frame, navigator);
+    menu.addMenuToFrame();
   }
 
   
@@ -133,7 +152,9 @@ public class MenuFactory {
         if ( e.isPopupTrigger() ) {
           TreePath path = sceneTree.getPathForLocation( e.getX(), e.getY() );
           if ( path != null ) {
-            sceneTree.getSelectionModel().setSelectionPath( path );
+            TreeSelectionModel selectionModel = sceneTree.getSelectionModel();
+            selectionModel.clearSelection();  //ensures that SelectionListeners are notified even if path did not change
+            selectionModel.setSelectionPath( path );
             cm.show( e.getComponent(), e.getX(), e.getY()+10 );
           }
         }
@@ -147,6 +168,13 @@ public class MenuFactory {
     JPopupMenu cm = new JPopupMenu();
     cm.add(new JMenuItem(new LoadFile(LOAD_FILE, navigator, frame)));
     cm.add(new JMenuItem(new Remove(REMOVE, navigator, frame)));
+    cm.add(new JMenuItem(new AddTool(ADD_TOOL, navigator, frame)));
     return cm;
+  }
+  
+  
+  public static void addContextMenu(JFrame frame, Navigator navigator) {
+    MenuFactory menu = new MenuFactory(frame, navigator);
+    menu.addContextMenuToNavigator();
   }
 }

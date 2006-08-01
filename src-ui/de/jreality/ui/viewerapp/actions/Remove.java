@@ -108,7 +108,6 @@ public class Remove extends AbstractAction {
 //        }
 //      });
     }
-    
   }
 
 
@@ -133,4 +132,5 @@ public class Remove extends AbstractAction {
   Object getDefaultActee() {
     return navigator.getRoot();
   }
+  
 }
