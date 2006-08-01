@@ -169,7 +169,7 @@ public class AABBPickSystem implements PickSystem {
     }
 
     private void readEApp() {
-      pickPoints=eap.getAttribute(CommonAttributes.VERTEX_DRAW, false)
+      pickPoints=eap.getAttribute(CommonAttributes.VERTEX_DRAW, true)
         && eap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE, true);
       pickEdges=eap.getAttribute(CommonAttributes.EDGE_DRAW, true)
         && eap.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.PICKABLE, true);
