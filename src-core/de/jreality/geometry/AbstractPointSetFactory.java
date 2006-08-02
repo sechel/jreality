@@ -47,7 +47,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import de.jreality.geometry.IndexedFaceSetFactoryTest.ActionHandler;
 import de.jreality.math.Pn;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.Scene;
