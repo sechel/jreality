@@ -40,52 +40,43 @@
 
 package de.jreality.scene;
 
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 
 /**
- * a ReadWriteLock
+ * Delegates a {@link java.util.concurrent.locks.ReentrantReadWriteLock}.
  * 
  * @author Steffen Weissman
  */
-public final class Lock {
-
-  final OldLock lock=new OldLock();
-  //final NewLock lock=new NewLock();
-
-  public boolean equals(Object obj) {
-    return lock.equals(obj);
-  }
-
-  public int hashCode() {
-    return lock.hashCode();
-  }
+final class NewLock
+{
+  
+  final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(false);
 
   public void readLock() {
-    lock.readLock();
+     lock.readLock().lock();
+  }
+  
+  public void writeLock() {
+    lock.writeLock().lock();
   }
 
   public void readUnlock() {
-    lock.readUnlock();
-  }
-
-  public String toString() {
-    return lock.toString();
-  }
-
-  public void writeLock() {
-    lock.writeLock();
+    lock.readLock().unlock();
   }
 
   public void writeUnlock() {
-    lock.writeUnlock();
+    lock.writeLock().unlock();
   }
-
+  
   public boolean canSwitch() {
-    return lock.canSwitch();
+    return lock.getWriteHoldCount() == 1;
   }
-
+  
   public void switchToReadLock() {
-    lock.switchToReadLock();
+    if (!canSwitch()) throw new Error();
+    readLock();
+    writeUnlock();
   }
   
 }
