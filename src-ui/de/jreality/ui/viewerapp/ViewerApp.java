@@ -114,19 +114,30 @@ public class ViewerApp {
    * @param node the SceneGraphNode (SceneGraphComponent or Geometry) to be displayed in the viewer
    */
   public ViewerApp(SceneGraphNode node) {
-    this(node, null);
+    this(node, null, null, null, null);
   }
   
-  public ViewerApp(SceneGraphNode node, JrScene jrScene) {
+  public ViewerApp(SceneGraphComponent root, SceneGraphPath cameraPath, SceneGraphPath emptyPick, SceneGraphPath avatar) {
+    this(null, root, cameraPath, emptyPick, avatar);
+  }
+  
+  private ViewerApp(SceneGraphNode contentNode, SceneGraphComponent root, SceneGraphPath cameraPath, SceneGraphPath emptyPick, SceneGraphPath avatar) {
 
-    if (node != null)  //create default scene if null
-      if (!(node instanceof Geometry) && !(node instanceof SceneGraphComponent))
+    if (contentNode != null)  //create default scene if null
+      if (!(contentNode instanceof Geometry) && !(contentNode instanceof SceneGraphComponent))
         throw new IllegalArgumentException("Only Geometry or SceneGraphComponent allowed!");
     
-    if (jrScene == null) this.jrScene = getDefaultScene();
-    else this.jrScene = jrScene;
+    if (root == null) this.jrScene = getDefaultScene();
+    else {
+      JrScene s = new JrScene();
+      s.setSceneRoot(root);
+      if (cameraPath!= null) s.addPath("cameraPath", cameraPath);
+      if (avatar != null) s.addPath("avatarPath", avatar);
+      if (emptyPick != null) s.addPath("emptyPickPath", emptyPick);
+      this.jrScene = s;
+    }
     
-    displayedNode = node;
+    displayedNode = contentNode;
 
     //update autoRender & synchRender
     String autoRenderProp = System.getProperty("de.jreality.ui.viewerapp.autoRender", "true");
@@ -204,13 +215,8 @@ public class ViewerApp {
    * @return the ViewerApp factory instantiated to display the scene
    */
   public static ViewerApp display(SceneGraphComponent root, SceneGraphPath cameraPath, SceneGraphPath emptyPick, SceneGraphPath avatar) {
-    JrScene s = new JrScene();
-    s.setSceneRoot(root);
-    if (cameraPath!= null) s.addPath("cameraPath", cameraPath);
-    if (avatar != null) s.addPath("avatarPath", avatar);
-    if (emptyPick != null) s.addPath("emptyPickPath", emptyPick);
 
-    ViewerApp app = new ViewerApp(null, s);
+    ViewerApp app = new ViewerApp(null, root, cameraPath, emptyPick, avatar);
     app.setAttachNavigator(false);
     app.setAttachBeanShell(false);
     app.update();
