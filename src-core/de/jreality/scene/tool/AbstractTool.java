@@ -52,6 +52,7 @@ public abstract class AbstractTool implements Tool {
   private InputSlot activationSlot;
   private transient List currentSlots=Collections.EMPTY_LIST;
   private final transient HashMap descriptions=new HashMap();
+  private String description = "No description!";
   
   public AbstractTool(InputSlot activationSlot) {
     this.activationSlot=activationSlot;
@@ -106,6 +107,9 @@ public abstract class AbstractTool implements Tool {
     return (String) descriptions.get(slot);
   }
   public String getDescription() {
-    return "No description!";
+    return description;
+  }
+  public void setDescription(String description) {
+	this.description=description;
   }
 }
