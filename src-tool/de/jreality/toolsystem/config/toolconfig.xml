@@ -67,6 +67,7 @@
     <mapping src="PrimaryAction" target="EdgeDragActivation"/>
     <mapping src="PrimaryAction" target="FaceDragActivation"/>
     <mapping src="PrimaryMenu" target="DragActivation"/>
+    <mapping src="PrimaryMenu" target="PanelActivation"/>
     <mapping src="PrimarySelection" target="ScaleActivation"/>
     <mapping src="PrimaryAction" target="DeformActivation"/>
 
