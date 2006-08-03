@@ -282,6 +282,7 @@ public  class TubeFactory {
 			return frameInfo;
 		 }
 
+		static double[] B = new double[] {Math.random(), Math.random(), Math.random(), 1.0};
 		/**
 		 * 
 		 * @param polygon
@@ -290,7 +291,6 @@ public  class TubeFactory {
 		 */
 		 protected static double[] getInitialBinormal(double[][] polygon, int signature)	{
 			int n = polygon.length;
-			double[] B = new double[4];
 			for (int i = 1; i<n-1; ++i)	{
 				Pn.polarize(B, P3.planeFromPoints(null, polygon[i-1], polygon[i], polygon[i+1]),signature);	
 				if (Rn.euclideanNormSquared(B) > 10E-16) {
@@ -303,7 +303,6 @@ public  class TubeFactory {
 					return B;
 				}
 			}
-			B = new double[] {Math.random(), Math.random(), Math.random(), 1.0};
 			return Pn.polarizePlane(null, P3.planeFromPoints(null, B, polygon[1], polygon[2]),signature);
 		}
 
