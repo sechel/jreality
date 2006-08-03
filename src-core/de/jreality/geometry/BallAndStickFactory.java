@@ -94,9 +94,10 @@ public class BallAndStickFactory {
 				sticksAp.setAttribute(CommonAttributes.EDGE_DRAW, false);
 				sticksAp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
 				if (stickColor != null) sticksAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, stickColor);
+   //       	  	System.err.println("Setting polygon color to "+stickColor);
 				sticks.setAppearance(sticksAp);
 				if (arrowsAp == null) arrowsAp = new Appearance();
-				arrowsAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, arrowColor);
+				if (arrowColor != null) arrowsAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, arrowColor);
 				DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
 				DataList edgeColors = ils.getEdgeAttributes(Attribute.COLORS);
 				int n = ils.getNumEdges();
@@ -116,6 +117,7 @@ public class BallAndStickFactory {
 							else ccc = new Color((float) dcc[0], (float) dcc[1], (float) dcc[2]);
 							Appearance ap = new Appearance();
 							ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ccc);
+			         	  	System.err.println("Setting polygon color to "+ccc);
 							cc.setAppearance(ap);
 						}
 						if (cc != null) sticks.addChild(cc);
