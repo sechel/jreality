@@ -47,6 +47,7 @@
   <path id="swing.classpath">
     <fileset dir="dist">
       <include name="jReality-core.jar"/>
+      <include name="jReality-tools.jar"/>
     </fileset>
   </path>
 
@@ -273,6 +274,11 @@
       <compilerarg line="-source 1.4" />
       <classpath refid="examples.classpath"/>
     </javac>
+    <copy todir="${build}/examples">
+      <fileset dir="src-examples">
+        <exclude name="**/*.java"/>
+      </fileset>
+    </copy>
     <jar jarfile="${dist}/jReality-examples.jar" basedir="${build}/examples" />
   </target>
 	
