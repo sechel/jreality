@@ -82,7 +82,7 @@ public class PickShowTool extends AbstractTool {
       return;
     }
     assureAttached(tc);
-    switch (tc.getCurrentPick().getPickType()) {
+    switch (pr.getPickType()) {
     case PickResult.PICK_TYPE_FACE:
       c.getAppearance().setAttribute("diffuseColor", Color.yellow);
       break;
