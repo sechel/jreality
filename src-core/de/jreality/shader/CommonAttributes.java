@@ -160,19 +160,17 @@ public class CommonAttributes {
 	public static final String PICKABLE = "pickable";
 	public static final String SIGNATURE= "signature";
 	
-  // renderman backend
-  public final static String RMAN_SHADOWS_ENABLED = "rendermanShadowsEnabled";
-  public final static String RMAN_SURFACE = "rendermanSurface";
-  public final static String RMAN_DISPLACEMENT = "rendermanDisplacement";
-  public final static String RMAN_TEXTURE_FILE = "rendermanTexFile";
-  public final static String RMAN_GLOBAL_INCLUDE_FILE = "rendermanGlobalIncludeFile";
-  public final static String RMAN_SEARCHPATH_SHADER = "rendermanSearchpathShader";
-  public static final String RMAN_OUTPUT_DISPLAY_FORMAT = "rendermanOutputDisplayFormat";
-  public static final String RMAN_PREAMBLE = "rendermanPreamble";
-  public static final String RMAN_PROXY_COMMAND = "rendermanProxyCommand";
- 
-    /**
-     * 
+	public final static String RMAN_SHADOWS_ENABLED = "rendermanShadowsEnabled";
+	public final static String RMAN_SURFACE = "rendermanSurface";
+	public final static String RMAN_DISPLACEMENT = "rendermanDisplacement";
+	public final static String RMAN_TEXTURE_FILE = "rendermanTexFile";
+	public final static String RMAN_GLOBAL_INCLUDE_FILE = "rendermanGlobalIncludeFile";
+	public final static String RMAN_SEARCHPATH_SHADER = "rendermanSearchpathShader";
+	public static final String RMAN_OUTPUT_DISPLAY_FORMAT = "rendermanOutputDisplayFormat";
+	public static final String RMAN_PREAMBLE = "rendermanPreamble";
+	public static final String RMAN_PROXY_COMMAND = "rendermanProxyCommand";
+	public static final String RMAN_RETAIN_GEOMETRY = "rendermanRetainGeometry";
+    /* 
      * @param ap
      * 
      * @deprecated

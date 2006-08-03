@@ -762,6 +762,19 @@ final public class Rn {
     return sb.toString();
   }
 
+	public static String matrixToJavaString(double[] v) {
+	    StringBuffer sb = new StringBuffer();
+	    sb.append("{");
+	    for (int i = 0; i < 4; i++) {
+	      for (int j = 0; j < 4; j++) {
+	        sb.append(df.format(v[4*i+j])).append(i*4+j != 15 ? "," : "").append(j == 3 ? "\n":"\t");
+	      }
+	    }
+	    sb.append("};");
+	    return sb.toString();
+	  }
+
+
   
 //	public static String matrixToString(double[] v) {
 //		return matrixToString(v, 6);
@@ -1146,6 +1159,18 @@ final public class Rn {
 		return dst;
 	}
 	
+	public static double[][] times(double[][] dst, double factor, double[][] src) {
+		if (dst == null) dst = new double[src.length][src[0].length];
+		if (dst.length != src.length) {
+			throw new IllegalArgumentException("Vectors must be same length");
+		}
+		int n = src.length;
+		for (int i = 0; i<n; ++i)	{
+			times(dst[i], factor, src[i]);
+		}
+		return dst;
+	}
+
 	/**
 	 * Multiply the square matrices according to the equation <i>dst = src1 * src2 </i>.
 	 * @param dst		double[n*n]		may be null
