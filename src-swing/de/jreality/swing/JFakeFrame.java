@@ -71,6 +71,8 @@ public class JFakeFrame extends JFrame {
     private Texture2D tex;
     private String praefix = "polygonShader";
 
+    private boolean mute=false; // if true the image is not updated
+    
     public JFakeFrame() throws HeadlessException {
         super();
         init();
@@ -106,7 +108,7 @@ public class JFakeFrame extends JFrame {
         fire();
     }
     private void fire() {
- //           System.out.println("fire");
+      if (isMute()) return;
         FakeToolKit.FakeFramePeer peer = (FakeToolKit.FakeFramePeer)getPeer();
         if(peer != null) {
             bufferedImage = peer.getRootImage();
@@ -154,6 +156,26 @@ public class JFakeFrame extends JFrame {
 
     public Toolkit getToolkit() {
         return FakeToolKit.getDefaultToolkit();
+    }
+
+    /**
+     * When the frame is muted, then the texture image is not
+     * updated.
+     * @return the mute state of this frame.
+     */
+    public boolean isMute() {
+      return mute;
+    }
+    
+    /**
+     * When the frame is muted, then the texture image is not
+     * updated.
+     * 
+     * @param mute set the mute state of this frame.
+     */
+    public void setMute(boolean mute) {
+      this.mute = mute;
+      fire();
     }
 
 }
