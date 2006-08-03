@@ -33,30 +33,34 @@ import de.jreality.util.Rectangle3D;
 
 public class ToolDemoScene {
 
-  private SceneGraphComponent rootNode=new SceneGraphComponent(),
+  private SceneGraphComponent sceneRoot=new SceneGraphComponent(),
                       sceneNode=new SceneGraphComponent(),
                       avatarNode=new SceneGraphComponent(),
                       camNode=new SceneGraphComponent(),
                       lightNode=new SceneGraphComponent(),
+                      lightNode2=new SceneGraphComponent(),
+                      lightNode3=new SceneGraphComponent(),
                       terrainNode;
   
   private Appearance terrainAppearance=new Appearance(),
                      rootAppearance=new Appearance();
   
-  private SceneGraphPath camPath, avatarPath, emptyPickPath;
+  private DirectionalLight light = new DirectionalLight();
+  
+  private SceneGraphPath cameraPath, avatarPath, emptyPickPath;
   
   private boolean terrain=true;
   
   public ToolDemoScene() {
 
-    rootNode.setName("root");
+    sceneRoot.setName("root");
     sceneNode.setName("scene");
     avatarNode.setName("avatar");
     camNode.setName("camNode");
     lightNode.setName("lights");
-    rootNode.addChild(sceneNode);
+    sceneRoot.addChild(sceneNode);
     
-    rootNode.setAppearance(rootAppearance);
+    sceneRoot.setAppearance(rootAppearance);
 
     terrainAppearance.setAttribute("showLines", false);
     terrainAppearance.setAttribute("showPoints", false);
@@ -66,22 +70,34 @@ public class ToolDemoScene {
     cam.setFar(1500);
 
     // lights
-    DirectionalLight dl = new DirectionalLight();
-    lightNode.setLight(dl);
+    light.setIntensity(0.4);
+    lightNode.setLight(light);
     MatrixBuilder.euclidean().rotateFromTo(new double[]{0,0,1}, new double[]{-1,1,-1}).assignTo(lightNode);
-    rootNode.addChild(lightNode);
+    sceneRoot.addChild(lightNode);
+
+    lightNode2.setLight(light);
+    MatrixBuilder.euclidean().rotateFromTo(new double[]{0,0,1}, new double[]{1,1,-1}).assignTo(lightNode2);
+    sceneRoot.addChild(lightNode2);
+    
+    lightNode3.setLight(light);
+    MatrixBuilder.euclidean().rotateFromTo(new double[]{0,0,1}, new double[]{1,1,1}).assignTo(lightNode3);
+    sceneRoot.addChild(lightNode3);
+
+    lightNode3.setLight(light);
+    MatrixBuilder.euclidean().rotateFromTo(new double[]{0,0,1}, new double[]{-1,1,1}).assignTo(lightNode3);
+    sceneRoot.addChild(lightNode3);
 
     // prepare paths
-    rootNode.addChild(avatarNode);
+    sceneRoot.addChild(avatarNode);
     avatarNode.addChild(camNode);
     camNode.setCamera(cam);
-    camPath = new SceneGraphPath();
-    camPath.push(rootNode);
-    emptyPickPath=camPath.pushNew(sceneNode);
-    camPath.push(avatarNode);
-    camPath.push(camNode);
-    avatarPath=camPath.popNew();
-    camPath.push(cam);
+    cameraPath = new SceneGraphPath();
+    cameraPath.push(sceneRoot);
+    emptyPickPath=cameraPath.pushNew(sceneNode);
+    cameraPath.push(avatarNode);
+    cameraPath.push(camNode);
+    avatarPath=cameraPath.popNew();
+    cameraPath.push(cam);
     
     MatrixBuilder.euclidean().translate(0,1.7,0).assignTo(camNode);
         
@@ -93,19 +109,19 @@ public class ToolDemoScene {
     avatarNode.addTool(shipNavigationTool);
     camNode.addTool(new HeadTransformationTool());
     
-    rootNode.addTool(new PickShowTool(null));
+    //sceneRoot.addTool(new PickShowTool(null));
     //avatarNode.addTool(new PointerDisplayTool());
     
-    sceneNode.addTool(new RotateTool());
-    DraggingTool draggingTool = new DraggingTool();
-    draggingTool.setMoveChildren(true);
-    sceneNode.addTool(draggingTool);
+    //sceneNode.addTool(new RotateTool());
+    //DraggingTool draggingTool = new DraggingTool();
+    //draggingTool.setMoveChildren(true);
+    //sceneNode.addTool(draggingTool);
 
   }
   
   public void update() throws IOException {
     if (terrainNode != null) {
-      rootNode.removeChild(terrainNode);
+      sceneRoot.removeChild(terrainNode);
     }
     // prepare terrain
     if (terrain) {
@@ -123,7 +139,7 @@ public class ToolDemoScene {
     PickUtility.assignFaceAABBTree(terrainGeom);
 
     terrainNode.setAppearance(terrainAppearance);
-    rootNode.addChild(terrainNode);
+    sceneRoot.addChild(terrainNode);
   }
   
   public void setTerrainTexture(ImageData tex, double scale) {
@@ -167,7 +183,7 @@ public class ToolDemoScene {
     contentBounds = GeometryUtility.calculateBoundingBox(content);
     System.out.println("cb:\n"+contentBounds+"\n\nbb:\n"+bounds);
     
-    rootNode.addChild(bounds(bounds));
+    //sceneRoot.addChild(bounds(bounds));
   }
   
   SceneGraphComponent bounds(Rectangle3D bounds) {
@@ -188,18 +204,26 @@ public class ToolDemoScene {
     mb.translate(t).assignTo(ret);
     return ret;
   }
+ 
+  public ViewerApp display() {
+    return new ViewerApp(sceneRoot, cameraPath, emptyPickPath, avatarPath);
+  }
   
   public static void main(String[] args) throws IOException {
-    System.setProperty("jreality.data", "/net/MathVis/data/testData3D");
+    System.out.println(Thread.currentThread().getContextClassLoader().getResource("terrain.3ds"));
+    //System.setProperty("jreality.data", "/net/MathVis/data/testData3D");
     //System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer");
     //System.setProperty("de.jreality.ui.viewerapp.autoRender", "false");
     System.setProperty("de.jreality.ui.viewerapp.synchRender", "true");
     
     ToolDemoScene tds = new ToolDemoScene();
-    tds.terrain=false;
+    //tds.terrain=false;
     tds.update();
-    ViewerApp.display(tds.rootNode, tds.camPath, tds.emptyPickPath, tds.avatarPath);
-    
+
+    ViewerApp vApp = tds.display();
+    vApp.update();
+    vApp.display();
+
     Landscape l = new Landscape();
     l.setToolScene(tds);
     
@@ -220,6 +244,18 @@ public class ToolDemoScene {
     tds.setContent(schwarz2, bounds, false);
     
     //ViewerApp.displayOld(schwarz1);
+  }
+
+  public SceneGraphComponent getSceneRoot() {
+    return sceneRoot;
+  }
+  
+  public void setLightIntensity(double intensity) {
+    light.setIntensity(intensity);
+  }
+
+  public double getLightIntensity() {
+    return light.getIntensity();
   }
 
 }
