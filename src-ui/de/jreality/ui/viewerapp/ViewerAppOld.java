@@ -125,7 +125,7 @@ import de.jreality.writer.WriterJRS;
 /**
  * TODO: comment ViewerApp
  */
-class ViewerAppOld
+public class ViewerAppOld
 {
   
   private static final String ABOUT_MESSAGE="<html><body><center><b>jReality viewer</b></center><br>preview version</body></html>";
@@ -187,7 +187,7 @@ class ViewerAppOld
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
   }
   
-  ViewerAppOld(Viewer viewer) throws Exception	{
+  public ViewerAppOld(Viewer viewer) throws Exception	{
     this(null, viewer);
   }
   
@@ -280,7 +280,7 @@ class ViewerAppOld
     currViewer.render();
   }
   
-  static void handleFullScreen(boolean isFullScreen, Frame frame, Component c)	{
+  public static void handleFullScreen(boolean isFullScreen, Frame frame, Component c)	{
     if(isFullScreen) {
       frame.dispose();
       frame.setUndecorated(true);
