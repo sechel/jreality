@@ -99,6 +99,8 @@ public class ScenePanel {
     rackNode.addChild(panelNode);
 
     MatrixBuilder.euclidean().rotateY(Math.PI).assignTo(rackNode);
+    
+    rootNode.setVisible(false);
   }
   
   public void setPanelWidth(double panelWidth) {
