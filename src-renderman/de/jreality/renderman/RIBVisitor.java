@@ -60,6 +60,7 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
+import javax.media.jai.JAI;
 //import javax.media.jai.JAI;
 //import javax.media.jai.RenderedOp;
 
@@ -116,6 +117,9 @@ import de.jreality.util.CameraUtility;
  * <li>...</li>
  * </ul>
  * Other TODO's (more on the software engineering side)
+ *   it should be possible to avoid using the "transformedpaintedplastic" shader by careful use
+ *   	of the "shader" coordinate system (i.e., wrap the shader in TransformBegin/TransformEnd 
+ *   	and include the texture matrix within this block).
  *   put constant strings into CommonAttributes so people can write 
  *     into Appearances and "be heard" (or make an interface with AttributeEntity)
  *   add control over global options using "renderingHints" shader
@@ -161,6 +165,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		this.rendererType = rendererType;
 	}
     
+    // TODO create an appearance attribute to control following boolean
     boolean copyShader = false;
 	public void visit(SceneGraphComponent root, SceneGraphPath path, String name) {
         //SceneGraphPath path =SceneGraphPath.getFirstPathBetween(root,camera);
@@ -392,8 +397,8 @@ public class RIBVisitor extends SceneGraphVisitor {
         // currently there's a problem with instancing combined with face colors 
         // due to a bug in the renderman proserver renderer (I believe so anyway)
         // so I've disabled this feature until I figure that out. -gunn
-        boolean anyDisplayLists = eap.getAttribute(CommonAttributes.ANY_DISPLAY_LISTS,true);
-        boolean manyDisplayLists = eap.getAttribute(CommonAttributes.MANY_DISPLAY_LISTS,false);
+//        boolean anyDisplayLists = eap.getAttribute(CommonAttributes.ANY_DISPLAY_LISTS,true);
+//        boolean manyDisplayLists = eap.getAttribute(CommonAttributes.MANY_DISPLAY_LISTS,false);
         retainGeometry =  eap.getAttribute(CommonAttributes.RMAN_RETAIN_GEOMETRY,false); //false; //anyDisplayLists; // && !manyDisplayLists;
         
        double transparency = eap.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
@@ -479,7 +484,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 //            RenderedOp op = JAI.create("filestore", image,
 //                    fname, format);
             String format = "tiff";
-//            JAI.create("filestore", rImage,fname, format);
+            JAI.create("filestore", rImage,fname, format);
             System.err.println("writing "+fname);
 //            try {
 //                //OutputStream os = new FileOutputStream(f);
@@ -499,13 +504,24 @@ public class RIBVisitor extends SceneGraphVisitor {
     public boolean hasProxy(Geometry g)		{
     	if (!useProxyCommands) return false;
     	Object proxy = g.getGeometryAttributes("rendermanProxyCommand");
-    	if (proxy != null && proxy instanceof String)  {
-       		Ri.verbatim((String) proxy);
+    	if (proxy != null)	{
+    		if  (proxy instanceof String)  {
+          		Ri.verbatim((String) proxy);
+    		}
+    		else if (proxy instanceof SceneGraphComponent) {
+    			visit((SceneGraphComponent) proxy);
+    			System.err.println("RIBVisitor: Found sgc proxy");
+    		}
        		return true;
     	}
-   	return false;
+    	return false;
      }
     
+    public void visit(Geometry g)	{
+    	hasProxy(g);
+    	super.visit(g);
+    	System.err.println("Visiting geometry RIBVisitor");
+    }
     boolean testBallStick = true;
 	private float currentOpacity;
     /* (non-Javadoc)
@@ -992,6 +1008,7 @@ public class RIBVisitor extends SceneGraphVisitor {
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.UnitSphere)
      */
     public void visit(Sphere s) {
+    	if (hasProxy(s)) return;
         setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
         Ri.sphere(1f,-1f,1f,360f,null);
     }
