@@ -141,7 +141,7 @@ public class AABBPickSystem implements PickSystem {
     private double[] fromLocal;
     private double[] dirLocal;
 
-    private double[] toLocal;
+//    private double[] toLocal;
     
     public void visit(SceneGraphComponent c) {
       if (!c.isVisible()) return;
@@ -157,7 +157,7 @@ public class AABBPickSystem implements PickSystem {
       path.getInverseMatrix(mInv.getArray());
       
       fromLocal=mInv.multiplyVector(from);
-      toLocal=mInv.multiplyVector(to);
+//      toLocal=mInv.multiplyVector(to);
       dirLocal=mInv.multiplyVector(dir);
 
       c.childrenAccept(this);
@@ -194,8 +194,9 @@ public class AABBPickSystem implements PickSystem {
       localHits.clear();
       
       BruteForcePicking.intersectSphere(s, signature, path, from, to, localHits);
-      AABBPickSystem.this.hits.addAll(localHits);
-    };
+      
+      extractHits();
+    }
     
     public void visit(Cylinder c) {
       if (!pickFaces || !isPickable(c)) return;
@@ -203,8 +204,9 @@ public class AABBPickSystem implements PickSystem {
       localHits.clear();
       
       BruteForcePicking.intersectCylinder(c, signature, path, from, to, localHits);
-      AABBPickSystem.this.hits.addAll(localHits);
-    };
+
+      extractHits();
+    }
     
     public void visit(IndexedFaceSet ifs) {
       
@@ -218,10 +220,10 @@ public class AABBPickSystem implements PickSystem {
       
       if (tree == null) {
         BruteForcePicking.intersectPolygons(ifs, signature, path, from, to, localHits);
-        AABBPickSystem.this.hits.addAll(localHits);
+        extractHits();
       } else {
         tree.intersect(fromLocal, dirLocal, localHits); 
-        extractFaceTreeHits(ifs);
+        extractFaceTreeHits(ifs, localHits);
       }
     }
     
@@ -232,9 +234,8 @@ public class AABBPickSystem implements PickSystem {
       localHits.clear();
 
  //     System.err.println("Picking indexed line set "+ils.getName());
-     BruteForcePicking.intersectEdges(ils, signature, path, from, to, tubeRadius, localHits);
-      AABBPickSystem.this.hits.addAll(localHits);
-
+       BruteForcePicking.intersectEdges(ils, signature, path, from, to, tubeRadius, localHits);
+       extractHits();
     }
 
     public void visit(PointSet ps) {
@@ -244,10 +245,17 @@ public class AABBPickSystem implements PickSystem {
       localHits.clear();
 
       BruteForcePicking.intersectPoints(ps, signature, path, from, to, pointRadius, localHits);
-      AABBPickSystem.this.hits.addAll(localHits);        
+      extractHits();        
     }
 
-    private void extractFaceTreeHits(IndexedFaceSet ifs) {
+    private void extractHits() {
+      for (Iterator i = localHits.iterator(); i.hasNext(); ) {
+        Hit h = (Hit) i.next();
+        if (h.getDist() <= maxDist) AABBPickSystem.this.hits.add(h);
+      }
+    }
+    
+    private void extractFaceTreeHits(IndexedFaceSet ifs, List target) {
       int k = 0;
       for (Iterator i = localHits.iterator(); i.hasNext(); ) {
         Object[] val = (Object[]) i.next();
@@ -257,6 +265,7 @@ public class AABBPickSystem implements PickSystem {
         Hit h = new Hit(path.pushNew(ifs), pointWorld, Rn.euclideanDistance(from, pointWorld), 0, PickResult.PICK_TYPE_FACE, index,triIndex);
         if (h.getDist() <= maxDist) {
           AABBPickSystem.this.hits.add(h);
+          if (target != null) target.add(h);
         }
       }
     }

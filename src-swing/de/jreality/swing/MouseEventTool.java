@@ -75,7 +75,7 @@ class MouseEventTool extends AbstractTool {
   
   private Geometry current;
   
-  private static InputSlot drag = InputSlot.getDevice("SecondaryAction");
+  private static InputSlot drag = InputSlot.getDevice("PanelAction");
   private List activationSlots = new LinkedList();
   private List usedSlots = new LinkedList();
   

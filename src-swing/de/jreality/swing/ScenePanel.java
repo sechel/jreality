@@ -31,7 +31,7 @@ public class ScenePanel {
   IndexedFaceSetFactory panel = new IndexedFaceSetFactory();
   IndexedLineSetFactory rack = new IndexedLineSetFactory();
 
-  double[][] panelVerts = { { 0, 0, 0 }, { 0, 1, 0 }, { 1, 1, 0 }, { 1, 0, 0 } };
+  double[][] panelVerts = { { -.5, 0, 0 }, { -.5, 1, 0 }, { .5, 1, 0 }, { .5, 0, 0 } };
   double[][] tcs = { { 1, 1 }, { 1, 0 }, { 0, 0 }, { 0, 1 } };
   int[][] rackEdgeIndices = { { 4, 0 }, { 0, 1 }, { 1, 5 }, { 5, 4 }, { 0, 3 }, { 1, 2 }, { 4, 7 }, { 5, 6 } };
 
@@ -125,42 +125,42 @@ public class ScenePanel {
     double[][] verts = new double[8][3];
 
     // upper right back
-    verts[0][0] = panelWidth;
+    verts[0][0] = panelWidth/2;
     verts[0][1] = aboveGround;
     verts[0][2] = cos * panelHeight;
 
     // upper right front
-    verts[1][0] = panelWidth;
+    verts[1][0] = panelWidth/2;
     verts[1][1] = aboveGround - sin * panelHeight;
     verts[1][2] = 0;
 
     // lower right front
-    verts[2][0] = panelWidth;
+    verts[2][0] = panelWidth/2;
     verts[2][1] = belowGround;
     verts[2][2] = 0;
 
     // lower right back
-    verts[3][0] = panelWidth;
+    verts[3][0] = panelWidth/2;
     verts[3][1] = belowGround;
     verts[3][2] = cos * panelHeight;
 
     // upper left back
-    verts[4][0] = 0;
+    verts[4][0] = -panelWidth/2;
     verts[4][1] = aboveGround;
     verts[4][2] = cos * panelHeight;
 
     // upper left front
-    verts[5][0] = 0;
+    verts[5][0] = -panelWidth/2;
     verts[5][1] = aboveGround - sin * panelHeight;
     verts[5][2] = 0;
 
     // lower left front
-    verts[6][0] = 0;
+    verts[6][0] = -panelWidth/2;
     verts[6][1] = belowGround;
     verts[6][2] = 0;
 
     // lower left back
-    verts[7][0] = 0;
+    verts[7][0] = -panelWidth/2;
     verts[7][1] = belowGround;
     verts[7][2] = cos * panelHeight;
 
@@ -179,14 +179,16 @@ public class ScenePanel {
     Matrix avatar = new Matrix(tc.getTransformationMatrix(InputSlot.getDevice("AvatarTransformation")));
     MatrixBuilder.euclidean(avatar).translate(0, 0, zOffset).assignTo(rootNode);
     frame.setVisible(true);
+    tc.getViewer().getSceneRoot().addChild(getComponent());
   }
   
-  public void hide() {
+  public void hide(ToolContext tc) {
     frame.setVisible(false);
+    tc.getViewer().getSceneRoot().removeChild(getComponent());
   }
 
   public void toggle(ToolContext tc) {
-    if (frame.isVisible()) hide();
+    if (frame.isVisible()) hide(tc);
     else show(tc, getZOffset());
   }  
   

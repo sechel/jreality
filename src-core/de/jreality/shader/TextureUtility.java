@@ -45,6 +45,7 @@ import java.io.IOException;
 
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.Scene;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.util.Input;
 
@@ -212,16 +213,22 @@ public class TextureUtility {
    * @param imgs
    * @return a proxy implementation of ReflectionMap
    */
-  public static CubeMap createCubeMap(Appearance app, String prefix, ImageData[] imgs) {
+  public static CubeMap createCubeMap(final Appearance app, final String prefix, final ImageData[] imgs) {
     if (imgs.length != 6) throw new IllegalArgumentException("need 6 images for reflection map");
-    CubeMap ret = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, prefix, app, true);
-    ret.setBack(imgs[0]);
-    ret.setFront(imgs[1]);
-    ret.setBottom(imgs[2]);
-    ret.setTop(imgs[3]);
-    ret.setLeft(imgs[4]);
-    ret.setRight(imgs[5]);
-    return ret;
+    final CubeMap[] cm=new CubeMap[1];
+    Scene.executeWriter(app, new Runnable() {
+      public void run() {
+        CubeMap ret = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, prefix, app, true);
+        ret.setBack(imgs[0]);
+        ret.setFront(imgs[1]);
+        ret.setBottom(imgs[2]);
+        ret.setTop(imgs[3]);
+        ret.setLeft(imgs[4]);
+        ret.setRight(imgs[5]);
+        cm[0]=ret;
+      }
+    });
+    return cm[0];
   }
   
   /***************************** Sky box **************************/

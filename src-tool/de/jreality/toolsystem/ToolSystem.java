@@ -63,6 +63,7 @@ import de.jreality.scene.tool.Tool;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.tools.AnimatorTool;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
+import de.jreality.toolsystem.raw.DeviceSystemTimer;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
 
@@ -235,7 +236,6 @@ public class ToolSystem implements ToolEventReceiver {
   List l;
   
   public void processToolEvent(ToolEvent event) {
-    if (renderTrigger != null) renderTrigger.startCollect();
     synchronized (mutex) {
     	executing=true;
 //      if (event.getInputSlot() == InputSlot.getDevice("SystemTime")) {
@@ -271,7 +271,10 @@ public class ToolSystem implements ToolEventReceiver {
       }
 	    executing=false;
     }
-    if (renderTrigger != null) renderTrigger.finishCollect();
+    if (renderTrigger != null && event.getSource() instanceof DeviceSystemTimer) {
+      renderTrigger.finishCollect();
+      renderTrigger.startCollect();
+    }
   }
 
   private void processComputationalQueue() {

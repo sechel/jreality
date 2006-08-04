@@ -18,12 +18,16 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.tool.AbstractTool;
+import de.jreality.scene.tool.InputSlot;
+import de.jreality.scene.tool.ToolContext;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.PickShowTool;
+import de.jreality.tools.PointerDisplayTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.tools.ShipNavigationTool;
 import de.jreality.ui.viewerapp.ViewerApp;
@@ -67,6 +71,7 @@ public class ToolDemoScene {
     terrainAppearance.setAttribute("diffuseColor", Color.white);
 
     Camera cam = new Camera();
+    cam.setNear(0.01);
     cam.setFar(1500);
 
     // lights
@@ -103,13 +108,10 @@ public class ToolDemoScene {
         
     // add tools
     ShipNavigationTool shipNavigationTool = new ShipNavigationTool();
-    shipNavigationTool.setGain(7);
-    //shipNavigationTool.setGravity(100);
-    //shipNavigationTool.setJumpSpeed(20);
     avatarNode.addTool(shipNavigationTool);
     camNode.addTool(new HeadTransformationTool());
     
-    //sceneRoot.addTool(new PickShowTool(null));
+    sceneRoot.addTool(new PickShowTool(null, 0.01));
     //avatarNode.addTool(new PointerDisplayTool());
     
     //sceneNode.addTool(new RotateTool());
@@ -125,7 +127,7 @@ public class ToolDemoScene {
     }
     // prepare terrain
     if (terrain) {
-      terrainNode = Readers.read(Input.getInput("terrain.3ds")).getChildComponent(0);
+      terrainNode = Readers.read(Input.getInput("de/jreality/examples/tooldemo/resources/terrain.3ds")).getChildComponent(0);
       MatrixBuilder.euclidean().scale(1/3.).translate(0,9,0).assignTo(terrainNode);
       System.out.println(GeometryUtility.calculateBoundingBox(terrainNode).getMinY());
       } else {
@@ -136,10 +138,11 @@ public class ToolDemoScene {
     terrainNode.setName("terrain");
     IndexedFaceSet terrainGeom = (IndexedFaceSet) terrainNode.getGeometry();
     GeometryUtility.calculateAndSetNormals(terrainGeom);
-    PickUtility.assignFaceAABBTree(terrainGeom);
+    //PickUtility.assignFaceAABBTree(terrainGeom);
 
     terrainNode.setAppearance(terrainAppearance);
     sceneRoot.addChild(terrainNode);
+    
   }
   
   public void setTerrainTexture(ImageData tex, double scale) {
@@ -210,8 +213,8 @@ public class ToolDemoScene {
   }
   
   public static void main(String[] args) throws IOException {
-    System.out.println(Thread.currentThread().getContextClassLoader().getResource("terrain.3ds"));
-    //System.setProperty("jreality.data", "/net/MathVis/data/testData3D");
+    
+    System.setProperty("jreality.data", "/net/MathVis/data/testData3D");
     //System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer");
     //System.setProperty("de.jreality.ui.viewerapp.autoRender", "false");
     System.setProperty("de.jreality.ui.viewerapp.synchRender", "true");
@@ -235,6 +238,7 @@ public class ToolDemoScene {
     Rectangle3D bounds = new Rectangle3D(new double[][]{{-1,1,1},{1,14,-1}});
     SceneGraphComponent schwarz1 = Readers.read(Input.getInput("3ds/schwarz.3ds"));
     SceneGraphComponent schwarz2 = Readers.read(Input.getInput("3ds/schwarz.3ds"));
+    
     Appearance app = new Appearance();
     app.setAttribute("showPoints", false);
     schwarz1.setAppearance(app);
@@ -256,6 +260,10 @@ public class ToolDemoScene {
 
   public double getLightIntensity() {
     return light.getIntensity();
+  }
+
+  public SceneGraphComponent getTerrainNode() {
+    return terrainNode;
   }
 
 }

@@ -45,7 +45,6 @@ import java.util.List;
 
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.pick.PickResult;
@@ -53,7 +52,6 @@ import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.AxisState;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
-import de.jreality.toolsystem.ToolUtility;
 import de.jreality.util.LoggingSystem;
 
 /**
@@ -68,11 +66,13 @@ public class ShipNavigationTool extends AbstractTool {
   private final InputSlot rotateActivation = InputSlot.getDevice("ShipRotateActivation");
   private final InputSlot horizontalRotation = InputSlot.getDevice("HorizontalShipRotationAngleEvolution");
   private final InputSlot timer = InputSlot.getDevice("SystemTime");
+  private final InputSlot run = InputSlot.getDevice("RunActivation");
   
   private double[] velocity = {0,0,0};
   private boolean touchGround;
   
-  double gain = 3;
+  double gain = 4;
+  private double runFactor=2;
   private double gravity = 9.81;
   private double jumpSpeed = 8;
   private double lastJumpSpeed;
@@ -120,6 +120,10 @@ public class ShipNavigationTool extends AbstractTool {
       }
       if ((axis = tc.getAxisState(leftRight)) != null) {
         velocity[0] = -gain*axis.doubleValue();
+      }
+      if (/*tc.getAxisState(run) != null &&*/ tc.getAxisState(run).isPressed()) {
+        velocity[0]*=runFactor;
+        velocity[2]*=runFactor;
       }
       if (!(touchGround && velocity[0] == 0 && velocity[1] == 0 && velocity[2] == 0)) {
 
@@ -225,5 +229,13 @@ public class ShipNavigationTool extends AbstractTool {
 
   public void setPollingDevice(boolean pollingDevice) {
     this.pollingDevice = pollingDevice;
+  }
+
+  public double getRunFactor() {
+    return runFactor;
+  }
+
+  public void setRunFactor(double runFactor) {
+    this.runFactor = runFactor;
   }
 }

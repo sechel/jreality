@@ -106,4 +106,8 @@ public class Landscape implements ActionListener {
       e1.printStackTrace();
     }
   }
+
+  public Box getSelectionComponent() {
+    return selectionComponent;
+  }
 }
