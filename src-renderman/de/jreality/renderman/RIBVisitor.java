@@ -47,6 +47,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
+import java.beans.Statement;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -57,12 +58,10 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
-import javax.media.jai.JAI;
-//import javax.media.jai.JAI;
-//import javax.media.jai.RenderedOp;
 
 import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.GeometryUtility;
@@ -102,6 +101,7 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.LoggingSystem;
 
 
 /**
@@ -483,9 +483,24 @@ public class RIBVisitor extends SceneGraphVisitor {
 //
 //            RenderedOp op = JAI.create("filestore", image,
 //                    fname, format);
-            String format = "tiff";
-            JAI.create("filestore", rImage,fname, format);
-            System.err.println("writing "+fname);
+
+// TODO: implemented this using reflection, please check if it workes...
+
+            try {
+              String format = "tiff";
+              Statement stm = new Statement(Class.forName("javax.media.jai.JAI"),
+                                            "create",
+                                            new Object[]{"filestore", rImage, fname, format}
+              );
+              try {
+                stm.execute();
+              } catch (Exception e) {
+                if (e instanceof RuntimeException) throw (RuntimeException) e;
+                LoggingSystem.getLogger(this).log(Level.CONFIG, "writing tiff failed", e);
+              }
+            } catch (ClassNotFoundException e) {
+              LoggingSystem.getLogger(this).config("no JAI in classpath - cannot write tiff");
+            }
 //            try {
 //                //OutputStream os = new FileOutputStream(f);
 //                boolean worked =ImageIO.write(rImage,"PNG",f);
