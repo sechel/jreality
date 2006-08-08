@@ -28,6 +28,8 @@ public class DragEventTool extends AbstractTool {
 		addCurrentSlot(pointerSlot, "triggers drag events");
 	}
 	
+	// TODO: active flag should be unnecessary
+	
 	public DragEventTool(){
 		  this("AllDragActivation");
 	}
@@ -50,6 +52,7 @@ public class DragEventTool extends AbstractTool {
           
 	      if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_POINT) {
           if (pointDragListener == null) {
+            active=false;
             tc.reject();
             return;
           }
@@ -61,6 +64,7 @@ public class DragEventTool extends AbstractTool {
 	          firePointDragStart(point);        
 	      }else if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_LINE) {	            
           if (lineDragListener == null) {
+            active=false;
             tc.reject();
             return;
           }
@@ -73,6 +77,7 @@ public class DragEventTool extends AbstractTool {
 	    	  fireLineDragStart(new double[]{0,0,0,1});        
 	      }else if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_FACE) {
           if (faceDragListener == null) {
+            active=false;
             tc.reject();
             return;
           }
@@ -83,13 +88,16 @@ public class DragEventTool extends AbstractTool {
 	    	  if(pickPoint.length==3) Pn.homogenize(pickPoint,pickPoint);
 	    	  MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint); 	            
 	    	  fireFaceDragStart(new double[]{0,0,0,1});        
-	      }else tc.reject();
+	      }else {
+          active=false;
+          tc.reject();
+        }
 	}
 
 	Matrix result=new Matrix();
 	
 	public void perform(ToolContext tc) {		
-		if (!active) return;
+ 		if (!active) return;
         tc.getTransformationMatrix(pointerSlot).toDoubleArray(result.getArray());
         result.multiplyOnRight(pointerToPoint);
         result.multiplyOnLeft(tc.getRootToLocal().getInverseMatrix(null));

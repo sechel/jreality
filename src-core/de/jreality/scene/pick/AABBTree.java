@@ -226,9 +226,9 @@ public class AABBTree {
       double ry = dir[1];
       double rz = dir[2];
       int sign = 1;
-      if (rx != 0) sign = (int) ( (dx/rx) / Math.abs(dx/rx) ); 
-      if (ry != 0) sign = (int) ( (dy/ry) / Math.abs(dy/ry) ); 
-      if (rz != 0) sign = (int) ( (dz/rz) / Math.abs(dz/rz) ); 
+      if (rx != 0 && dx != 0) sign = (int) ( (dx/rx) / Math.abs(dx/rx) ); 
+      if (ry != 0 && dy != 0) sign = (int) ( (dy/ry) / Math.abs(dy/ry) ); 
+      if (rz != 0 && dz != 0) sign = (int) ( (dz/rz) / Math.abs(dz/rz) ); 
       return sign;
     }
 

@@ -223,7 +223,7 @@ public class AABBPickSystem implements PickSystem {
         extractHits();
       } else {
         tree.intersect(fromLocal, dirLocal, localHits); 
-        extractFaceTreeHits(ifs, localHits);
+        extractFaceTreeHits(ifs);
       }
     }
     
@@ -255,7 +255,7 @@ public class AABBPickSystem implements PickSystem {
       }
     }
     
-    private void extractFaceTreeHits(IndexedFaceSet ifs, List target) {
+    private void extractFaceTreeHits(IndexedFaceSet ifs) {
       int k = 0;
       for (Iterator i = localHits.iterator(); i.hasNext(); ) {
         Object[] val = (Object[]) i.next();
@@ -265,7 +265,6 @@ public class AABBPickSystem implements PickSystem {
         Hit h = new Hit(path.pushNew(ifs), pointWorld, Rn.euclideanDistance(from, pointWorld), 0, PickResult.PICK_TYPE_FACE, index,triIndex);
         if (h.getDist() <= maxDist) {
           AABBPickSystem.this.hits.add(h);
-          if (target != null) target.add(h);
         }
       }
     }

@@ -73,10 +73,10 @@ class BruteForcePicking {
   //private static double[] bary = new double[4], p1=new double[4], p2=new double[4], p3=new double[4], plane=new double[4], pobj=new double[4];
   public static void intersectPolygons(IndexedFaceSet ifs, int signature, SceneGraphPath path, double[] from, double[] to, ArrayList hits) {
     path.getMatrix(m.getArray());
-    path.getInverseMatrix(mInv.getArray()); 
+    path.getInverseMatrix(mInv.getArray());
     
-    double[] from4=mInv.multiplyVector(from);
-    double[] to4=mInv.multiplyVector(to);
+    double[] fromLocal=mInv.multiplyVector(from);
+    double[] toLocal=mInv.multiplyVector(to);
     double[] bary = new double[4], p1=new double[4], p2=new double[4], p3=new double[4], plane=new double[4], pobj=new double[4];
     p1[3]=p2[3]=p3[3]=1;
     IntArrayArray faces=getFaces(ifs);
@@ -92,7 +92,7 @@ class BruteForcePicking {
         p3=points.getValueAt(face.getValueAt(2+j)).toDoubleArray(p3);
         
         plane = P3.planeFromPoints(plane, p1, p2, p3);
-        pobj = P3.lineIntersectPlane(pobj, from4, to4, plane);
+        pobj = P3.lineIntersectPlane(pobj, fromLocal, toLocal, plane);
         if(pobj[3]*pobj[3]<Rn.TOLERANCE) continue; // parallel
 
         Pn.dehomogenize(p1, p1);
@@ -109,10 +109,10 @@ class BruteForcePicking {
         }
         // TODO: the barycentric coordinates should be used in the PickResult for tex coordindates
         
-        // check if for pobj = from4 + lambda * dir4: lambda >= 0
-        double[] d1 = Rn.subtract(null, to4, from4);
-        double[] d2 = Rn.subtract(null, pobj, from4);
-        if (Rn.innerProduct(d1, d2) < 0) continue tris;
+        // check if for fromLocal + lambda * dirLocal = pobj: lambda > 0
+        double[] d1 = Rn.subtract(null, pobj, fromLocal);
+        double[] dir = (toLocal[3]==0) ? toLocal : Rn.subtract(null, toLocal, fromLocal); 
+        if (Rn.innerProduct(d1, dir)<0) continue tris;
         
         double[] pw = m.multiplyVector(pobj);
         hits.add(new Hit(path.pushNew(ifs), pw, Rn.euclideanDistance(from, pw), 0, PickResult.PICK_TYPE_FACE, i,j));

@@ -111,7 +111,7 @@ public class ToolDemoScene {
     avatarNode.addTool(shipNavigationTool);
     camNode.addTool(new HeadTransformationTool());
     
-    sceneRoot.addTool(new PickShowTool(null, 0.01));
+    //sceneRoot.addTool(new PickShowTool(null, 0.015));
     //avatarNode.addTool(new PointerDisplayTool());
     
     //sceneNode.addTool(new RotateTool());
@@ -138,6 +138,7 @@ public class ToolDemoScene {
     terrainNode.setName("terrain");
     IndexedFaceSet terrainGeom = (IndexedFaceSet) terrainNode.getGeometry();
     GeometryUtility.calculateAndSetNormals(terrainGeom);
+    terrainGeom.setName("terrain Geometry");
     //PickUtility.assignFaceAABBTree(terrainGeom);
 
     terrainNode.setAppearance(terrainAppearance);
@@ -157,6 +158,10 @@ public class ToolDemoScene {
   public void setContent(SceneGraphComponent content, Rectangle3D bounds, boolean keepRatio) {
     Rectangle3D contentBounds = GeometryUtility.calculateBoundingBox(content);
     setContent(content, contentBounds, bounds, keepRatio);
+  }
+  
+  public void removeContent(SceneGraphComponent cmp) {
+    sceneNode.removeChild(cmp);
   }
   
   public void setContent(SceneGraphComponent content, Rectangle3D contentBounds, Rectangle3D bounds, boolean keepRatio) {
