@@ -40,10 +40,12 @@
 
 package de.jreality.util;
 
+import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.pick.AABBTree;
+import de.jreality.shader.CommonAttributes;
 
 public class PickUtility {
 
@@ -72,6 +74,26 @@ public class PickUtility {
         c.childrenAccept(this);
       }
     });
+  }
+
+  /**
+   * sets the pickable flag for the whole sub-tree of <code>cmp</code>.
+   * 
+   * @param cmp the root node
+   */
+  public static void setPickable(SceneGraphComponent cmp, final boolean pickable) {
+    cmp.accept(new SceneGraphVisitor() {
+      public void visit(SceneGraphComponent c) {
+        c.childrenWriteAccept(this, false, false, false, false, true, false);
+      };
+      public void visit(de.jreality.scene.Geometry g) {
+        setPickable(g, pickable);
+      };
+    });
+  }
+
+  public static void setPickable(Geometry g, boolean pickable) {
+    g.setGeometryAttributes(CommonAttributes.PICKABLE, pickable);
   }
 
 }
