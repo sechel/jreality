@@ -64,6 +64,10 @@ public class Landscape implements ActionListener {
     }
   }
 
+  public Landscape(String selected) {
+	  this(defaultLandscapes,selected);
+  }
+  
   public Landscape() {
     this(defaultLandscapes, null);
   }
