@@ -48,6 +48,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import de.jreality.math.Matrix;
@@ -84,21 +85,21 @@ class DeviceManager {
   /**
    * contains a up-to-date map of (used) slots to used virtual devices
    */
-  private final HashMap slot2virtual = new HashMap();
+  private final HashMap<InputSlot, HashSet<VirtualDevice>> slot2virtual = new HashMap<InputSlot, HashSet<VirtualDevice>>();
   
   /**
    * contains the current axis states
    * (used for VirtualDevice-/Tool-Context)
    */
-  private final HashMap slot2axis = new HashMap();
+  private final HashMap<InputSlot, AxisState> slot2axis = new HashMap<InputSlot, AxisState>();
   
   /**
    * contains the current transformations
    * (used for VirtualDevice-/Tool-Context)
    */
-  private final HashMap slot2transformation = new HashMap();
+  private final HashMap<InputSlot, DoubleArray> slot2transformation = new HashMap<InputSlot, DoubleArray>();
   
-  private HashMap slots2virtualMappings = new HashMap();
+  private HashMap<InputSlot, LinkedList<InputSlot>> slots2virtualMappings = new HashMap<InputSlot, LinkedList<InputSlot>>();
   
   private VirtualDeviceContextImpl virtualDeviceContext = new VirtualDeviceContextImpl();
   
@@ -129,7 +130,7 @@ class DeviceManager {
   ConfigurationAttributes toolConfig;
   
   // maps raw devices via name. e.g.: Mouse->de.jreality.scene.tool.DeviceMouse
-  private Map rawDevices = new HashMap();
+  private Map<String, RawDevice> rawDevices = new HashMap<String, RawDevice>();
 
   private final ToolEventQueue eventQueue;
   
@@ -141,7 +142,7 @@ class DeviceManager {
   private double[] camToNDCTrafo = new Matrix().getArray();
 
   // TODO: remove this
-  HashSet debugSlots=new HashSet();
+  HashSet<InputSlot> debugSlots=new HashSet<InputSlot>();
 
   private SceneGraphPath avatarPath;
 
@@ -160,8 +161,7 @@ class DeviceManager {
     eventQueue=queue;
     
     // raw devices
-    for (Iterator i = config.getRawConfigs().iterator(); i.hasNext(); ) {
-      RawDeviceConfig rdc = (RawDeviceConfig) i.next();
+    for (RawDeviceConfig rdc : config.getRawConfigs()) {
       try {
         RawDevice rd = rdc.createDevice();
         rd.initialize(viewer);
@@ -244,19 +244,15 @@ class DeviceManager {
       LoggingSystem.getLogger(this).config("Created virtual device: "+vc);
     }
     
-    List mappings = config.getVirtualMappings();
-    for (Iterator i = mappings.iterator(); i.hasNext(); ) {
-      VirtualMapping vm = (VirtualMapping) i.next();
+    List<VirtualMapping> mappings = config.getVirtualMappings();
+    for (VirtualMapping vm : mappings)
       getMappingsTargetToSources(vm.getTargetSlot()).add(vm.getSourceSlot());
-    }
+
     // set values for virtual mappings
     // NOTE: this is not well defined - from now on always the latest value for
     // a mapping is the resulting value for the mapping..
-    for (Iterator i = mappings.iterator(); i.hasNext(); ) {
-      VirtualMapping vm = (VirtualMapping) i.next();
-      List slots = resolveSlot(vm.getTargetSlot());
-      for (Iterator j = slots.iterator(); j.hasNext(); ) {
-        InputSlot rawSlot = (InputSlot) j.next();
+    for (VirtualMapping vm : mappings) {
+      for (InputSlot rawSlot : resolveSlot(vm.getTargetSlot())) {
         getVirtualMappingsForSlot(rawSlot).add(vm.getTargetSlot());
         setTransformationMatrix(vm.getTargetSlot(), getTransformationMatrix(rawSlot));
         setAxisState(vm.getTargetSlot(), getAxisState(rawSlot));
@@ -271,7 +267,7 @@ class DeviceManager {
    * @return
    */
   AxisState getAxisState(InputSlot slot) {
-    return (AxisState) slot2axis.get(slot);
+    return slot2axis.get(slot);
   }
 
   /**
@@ -279,7 +275,7 @@ class DeviceManager {
    * @return
    */
   DoubleArray getTransformationMatrix(InputSlot slot) {
-    return (DoubleArray) slot2transformation.get(slot);
+    return slot2transformation.get(slot);
   }
 
   /**
@@ -300,15 +296,14 @@ class DeviceManager {
     if (transformation != null && debugSlots.contains(slot)) LoggingSystem.getLogger(this).fine(slot+"\n"+Rn.matrixToString(transformation.toDoubleArray(null)));
   }
   
-  Set getDevicesForSlot(InputSlot slot) {
-    if (!slot2virtual.containsKey(slot)) slot2virtual.put(slot, new HashSet());
-    return (Set) slot2virtual.get(slot);
+  Set<VirtualDevice> getDevicesForSlot(InputSlot slot) {
+    if (!slot2virtual.containsKey(slot)) slot2virtual.put(slot, new HashSet<VirtualDevice>());
+    return slot2virtual.get(slot);
   }
 
-  List getVirtualMappingsForSlot(InputSlot slot) {
-    if (!slots2virtualMappings.containsKey(slot))
-      slots2virtualMappings.put(slot, new LinkedList());
-    return (List) slots2virtualMappings.get(slot);
+  List<InputSlot> getVirtualMappingsForSlot(InputSlot slot) {
+    if (!slots2virtualMappings.containsKey(slot)) slots2virtualMappings.put(slot, new LinkedList<InputSlot>());
+    return slots2virtualMappings.get(slot);
   }
   
   /**
@@ -320,19 +315,17 @@ class DeviceManager {
    * @param event the event to evaluate
    * @param compQueue the queue to post new events to
    */
-  void evaluateEvent(ToolEvent event, LinkedList compQueue) {
+  void evaluateEvent(ToolEvent event, LinkedList<ToolEvent> compQueue) {
     LoggingSystem.getLogger(this).finest("evaluating event: "+event);
     InputSlot slot = event.getInputSlot();
     setAxisState(slot, event.getAxisState());
     setTransformationMatrix(slot, event.getTransformation());
-    for (Iterator i = getVirtualMappingsForSlot(slot).iterator(); i.hasNext(); ) {
-      InputSlot mapSlot = (InputSlot) i.next();
+    for (InputSlot mapSlot : getVirtualMappingsForSlot(slot)) {
       setAxisState(mapSlot, event.getAxisState());
       setTransformationMatrix(mapSlot, event.getTransformation());
     }
     virtualDeviceContext.setEvent(event);
-    for(Iterator iter = getDevicesForSlot(slot).iterator(); iter.hasNext();) {
-      VirtualDevice device = (VirtualDevice) iter.next();
+    for(VirtualDevice device : getDevicesForSlot(slot)) {
       try {
         ToolEvent newEvent = device.process(virtualDeviceContext);
         if (newEvent!=null) compQueue.add(newEvent);
@@ -355,7 +348,7 @@ class DeviceManager {
  * way of obtaining this matrix, e.g., by adding this functionality
  * to camera utilities
  */
-public List updateImplicitDevices() {
+public List<ToolEvent> updateImplicitDevices() {
 	    boolean worldToCamChanged=false, camToNDCChanged=false, avatarChanged = false;
       double[] matrix;
       if (viewer.getCameraPath() != null) {
@@ -378,8 +371,8 @@ public List updateImplicitDevices() {
           Rn.copy(avatarTrafo, matrix);
           avatarChanged = true;
       }
-	    if (!worldToCamChanged && !camToNDCChanged && !avatarChanged) return Collections.EMPTY_LIST;
-	    List ret = new LinkedList();
+	    if (!worldToCamChanged && !camToNDCChanged && !avatarChanged) return Collections.emptyList();
+	    List<ToolEvent> ret = new LinkedList<ToolEvent>();
 	    if (worldToCamChanged) ret.add(new ToolEvent(this, worldToCamSlot, new DoubleArray(worldToCamTrafo)));
       if (camToNDCChanged) ret.add(new ToolEvent(this, camToNDCSlot, new DoubleArray(camToNDCTrafo)));
       if (avatarChanged) ret.add(new ToolEvent(this, avatarSlot, new DoubleArray(avatarTrafo)));
@@ -398,35 +391,32 @@ public List updateImplicitDevices() {
    * @param slot
    * @return
    */
-  List resolveSlot(InputSlot slot) {
-    List ret = new LinkedList();
+  List<InputSlot> resolveSlot(InputSlot slot) {
+    List<InputSlot> ret = new LinkedList<InputSlot>();
     findTriggerSlots(ret, slot);
     return ret;
   }
-  private void findTriggerSlots(List l, InputSlot slot) {
-    Set sources = getMappingsTargetToSources(slot);
+  private void findTriggerSlots(List<InputSlot> l, InputSlot slot) {
+    Set<InputSlot> sources = getMappingsTargetToSources(slot);
     if (sources.isEmpty()) {
       l.add(slot);
       return;
     }
-    for (Iterator i = sources.iterator(); i.hasNext(); )
-      findTriggerSlots(l, (InputSlot) i.next());
+    for (InputSlot is : sources ) findTriggerSlots(l, is);
   }
 
-  private Set getMappingsTargetToSources(InputSlot slot) {
+  private Set<InputSlot> getMappingsTargetToSources(InputSlot slot) {
     if (!virtualMappingsInv.containsKey(slot))
-      virtualMappingsInv.put(slot, new HashSet());
-    return (Set) virtualMappingsInv.get(slot);
+      virtualMappingsInv.put(slot, new HashSet<InputSlot>());
+    return virtualMappingsInv.get(slot);
   }
   
-  private final HashMap virtualMappingsInv = new HashMap();
+  private final HashMap<InputSlot, HashSet<InputSlot>> virtualMappingsInv = new HashMap<InputSlot, HashSet<InputSlot>>();
 
   public void dispose() {
-    for (Iterator rawDevs = rawDevices.keySet().iterator(); rawDevs.hasNext(); ) {
-      String devName = (String) rawDevs.next();
-      RawDevice dev = (RawDevice) rawDevices.get(devName);
-      LoggingSystem.getLogger(this).fine("disposing raw device ["+devName+"]"+dev);
-      dev.dispose();
+    for (Entry<String, RawDevice> entry : rawDevices.entrySet()) {
+      LoggingSystem.getLogger(this).fine("disposing raw device ["+entry.getKey()+"]"+entry.getValue());
+      entry.getValue().dispose();
     }
     slot2axis.clear();
     slot2transformation.clear();

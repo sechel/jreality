@@ -82,7 +82,7 @@ public class ToolSystemConfiguration {
   }
   
   public static ToolSystemConfiguration loadDefaultDesktopAndPortalConfiguration() throws IOException {
-    List all = new LinkedList();
+    List<ToolSystemConfiguration> all = new LinkedList<ToolSystemConfiguration>();
     all.add(loadDefaultPortalConfiguration());
     all.add(loadDefaultDesktopConfiguration());
     return merge(all);
@@ -92,9 +92,9 @@ public class ToolSystemConfiguration {
     return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig.xml")));
   }
   
-  public static ToolSystemConfiguration loadDefaultDesktopConfiguration(List additionalInputs) throws IOException {
+  public static ToolSystemConfiguration loadDefaultDesktopConfiguration(List<Input> additionalInputs) throws IOException {
     if (additionalInputs.isEmpty()) return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig.xml")));
-    List all = new LinkedList();
+    List<ToolSystemConfiguration> all = new LinkedList<ToolSystemConfiguration>();
     all.add(loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig.xml"))));
     all.add(loadConfiguration(additionalInputs));
     return merge(all);
@@ -104,9 +104,9 @@ public class ToolSystemConfiguration {
     return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig-portal.xml")));
   }
   
-  public static ToolSystemConfiguration loadDefaultPortalConfiguration(List additionalInputs) throws IOException {
+  public static ToolSystemConfiguration loadDefaultPortalConfiguration(List<Input> additionalInputs) throws IOException {
     if (additionalInputs.isEmpty()) return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig-portal.xml")));
-    List all = new LinkedList();
+    List<ToolSystemConfiguration> all = new LinkedList<ToolSystemConfiguration>();
     all.add(loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig.xml"))));
     all.add(loadConfiguration(additionalInputs));
     return merge(all);
@@ -132,19 +132,17 @@ public class ToolSystemConfiguration {
     return tsc;
   }
   
-  public static ToolSystemConfiguration loadConfiguration(List inputs) throws IOException {
-    List confs = new LinkedList();
-    for (Iterator i = inputs.iterator(); i.hasNext(); ) {
-      Input in = (Input) i.next();
+  public static ToolSystemConfiguration loadConfiguration(List<Input> inputs) throws IOException {
+    List<ToolSystemConfiguration> confs = new LinkedList<ToolSystemConfiguration>();
+    for (Input in : inputs) {
       confs.add(loadConfiguration(in));
     }
     return merge(confs);
   }
   
-  private static ToolSystemConfiguration merge(List list) {
+  private static ToolSystemConfiguration merge(List<ToolSystemConfiguration> list) {
     ToolSystemConfiguration result = new ToolSystemConfiguration();
-    for (Iterator i = list.iterator(); i.hasNext(); ) {
-      ToolSystemConfiguration conf = (ToolSystemConfiguration) i.next();
+    for (ToolSystemConfiguration conf : list) {
       result.rawConfigs.addAll(conf.rawConfigs);
       result.rawMappings.addAll(conf.rawMappings);
       result.virtualConfigs.addAll(conf.virtualConfigs);
@@ -154,40 +152,40 @@ public class ToolSystemConfiguration {
     return result;
   }
 
-  private List rawConfigs = new LinkedList();
-  private List rawMappings = new LinkedList();
-  private List virtualConfigs = new LinkedList();
-  private List virtualMappings = new LinkedList();
-  private List virtualConstants = new LinkedList();
+  private List<RawDeviceConfig> rawConfigs = new LinkedList<RawDeviceConfig>();
+  private List<RawMapping> rawMappings = new LinkedList<RawMapping>();
+  private List<VirtualDeviceConfig> virtualConfigs = new LinkedList<VirtualDeviceConfig>();
+  private List<VirtualMapping> virtualMappings = new LinkedList<VirtualMapping>();
+  private List<VirtualConstant> virtualConstants = new LinkedList<VirtualConstant>();
   
-  public List getRawConfigs() {
+  public List<RawDeviceConfig> getRawConfigs() {
     return rawConfigs;
   }
-  public List getRawMappings() {
+  public List<RawMapping> getRawMappings() {
     return rawMappings;
   }
-  public List getVirtualConfigs() {
+  public List<VirtualDeviceConfig> getVirtualConfigs() {
     return virtualConfigs;
   }
-  public List getVirtualMappings() {
+  public List<VirtualMapping> getVirtualMappings() {
     return virtualMappings;
   }
-  public List getVirtualConstants() {
+  public List<VirtualConstant> getVirtualConstants() {
     return virtualConstants;
   }
-  public void setRawConfigs(List rawConfigs) {
+  public void setRawConfigs(List<RawDeviceConfig> rawConfigs) {
     this.rawConfigs = rawConfigs;
   }
-  public void setRawMappings(List rawMappings) {
+  public void setRawMappings(List<RawMapping> rawMappings) {
     this.rawMappings = rawMappings;
   }
-  public void setVirtualConfigs(List virtualConfigs) {
+  public void setVirtualConfigs(List<VirtualDeviceConfig> virtualConfigs) {
     this.virtualConfigs = virtualConfigs;
   }
-  public void setVirtualMappings(List virtualMappings) {
+  public void setVirtualMappings(List<VirtualMapping> virtualMappings) {
     this.virtualMappings = virtualMappings;
   }
-  public void setVirtualConstants(List virtualConstants) {
+  public void setVirtualConstants(List<VirtualConstant> virtualConstants) {
     this.virtualConstants = virtualConstants;
   }
   public void addRawDeviceConfig(RawDeviceConfig config) {

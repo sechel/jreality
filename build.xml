@@ -181,7 +181,7 @@
   <target name="core" depends="init" description="compile the source ">
     <mkdir dir="${build}/core" />
     <javac excludesfile="excludes.txt" srcdir="${core}" destdir="${build}/core" debug="true">
-      <compilerarg line="-source 1.4" />
+      <compilerarg line="-source 1.5" />
     </javac>
     <copy todir="${build}/core">
       <fileset dir="${core}">
@@ -195,7 +195,7 @@
   <target name="tools" depends="core" description="compile the source ">
     <mkdir dir="${build}/tools" />
     <javac excludesfile="excludes.txt" srcdir="${tools}" destdir="${build}/tools" debug="true">
-      <compilerarg line="-source 1.4" />
+      <compilerarg line="-source 1.5" />
       <classpath refid="tools.classpath"/>
     </javac>
     <copy todir="${build}/tools">
@@ -210,7 +210,7 @@
   <target name="backends-share" depends="core" description="compile the backends-share">
     <mkdir dir="${build}/backends-share" />
     <javac excludesfile="excludes.txt" srcdir="${backends-share}" destdir="${build}/backends-share" debug="true">
-      <compilerarg line="-source 1.4" />
+      <compilerarg line="-source 1.5" />
       <classpath refid="backends-share.classpath"/>
     </javac>
     <jar jarfile="${dist}/jReality-backends-share.jar" basedir="${build}/backends-share" />
@@ -219,7 +219,7 @@
   <target name="swing" depends="core" description="compile the swing widget integration">
     <mkdir dir="${build}/swing" />
     <javac excludesfile="excludes.txt" srcdir="${swing}" destdir="${build}/swing" debug="true">
-      <compilerarg line="-source 1.4" />
+      <compilerarg line="-source 1.5" />
       <classpath refid="swing.classpath"/>
     </javac>
     <jar jarfile="${dist}/jReality-swing.jar" basedir="${build}/swing" />
@@ -237,7 +237,7 @@
 	    <classpath refid="io.classpath"/>
 	  </antlr>
     <javac excludesfile="excludes.txt" srcdir="${io}" destdir="${build}/io" debug="true">
-      <compilerarg line="-source 1.4"/>
+      <compilerarg line="-source 1.5"/>
       <classpath refid="io.classpath"/>
     </javac>
     <jar jarfile="${dist}/jReality-io.jar" basedir="${build}/io"/>
@@ -257,7 +257,7 @@
   <target name="ui" depends="core, tools, io, ui-deps" description="compile the ui">
     <mkdir dir="${build}/ui" />
     <javac excludesfile="excludes.txt" srcdir="${ui}" destdir="${build}/ui" debug="true">
-      <compilerarg line="-source 1.4" />
+      <compilerarg line="-source 1.5" />
       <classpath refid="ui.classpath"/>
     </javac>
     <copy todir="${build}/ui">
@@ -271,7 +271,7 @@
   <target name="examples" depends="core, ui, swing" description="compile the examples">
     <mkdir dir="${build}/examples" />
     <javac excludesfile="excludes.txt" srcdir="${examples}" destdir="${build}/examples" debug="true">
-      <compilerarg line="-source 1.4" />
+      <compilerarg line="-source 1.5" />
       <classpath refid="examples.classpath"/>
     </javac>
     <copy todir="${build}/examples">
@@ -286,7 +286,7 @@
   <target name="proxies" depends="core, proxies-deps" description="compile the proxies">
     <mkdir dir="${build}/proxies" />
     <javac excludesfile="excludes.txt" srcdir="${proxies}" destdir="${build}/proxies" debug="true">
-      <compilerarg line="-source 1.4" />
+      <compilerarg line="-source 1.5" />
       <classpath refid="proxies.classpath"/>
     </javac>
     <jar jarfile="${dist}/jReality-proxies.jar" basedir="${build}/proxies" />
@@ -299,7 +299,7 @@
   <target name="soft" depends="backends-share" description="build soft backend">
   <mkdir dir="${build}/soft" />
     <javac excludesfile="excludes.txt" srcdir="${soft}:${renderman}" destdir="${build}/soft" debug="true">
-      <compilerarg line="-source 1.4" />
+      <compilerarg line="-source 1.5" />
       <classpath refid="backend.classpath"/>
     </javac>
     <jar jarfile="${dist}/jReality-soft.jar" basedir="${build}/soft" />
@@ -308,7 +308,7 @@
   <target name="jogl" depends="backends-share, proxies, jogl-deps" description="build jogl backend">
     <mkdir dir="${build}/jogl" />
     <javac excludesfile="excludes.txt" srcdir="${jogl}"  destdir="${build}/jogl" debug="true">
-      <compilerarg line="-source 1.4" />
+      <compilerarg line="-source 1.5" />
       <classpath refid="jogl.classpath"/>
     </javac>
     <copy todir="build/jogl"> <!-- copy shader progs -->
@@ -323,7 +323,7 @@
   <target name="gpgpu" depends="jogl" description="build gpgpu backend">
     <mkdir dir="${build}/gpgpu" />
     <javac excludesfile="excludes.txt" srcdir="${gpgpu}"  destdir="${build}/gpgpu" debug="true">
-      <compilerarg line="-source 1.4" />
+      <compilerarg line="-source 1.5" />
       <classpath refid="gpgpu.classpath"/>
     </javac>
     <copy todir="build/gpgpu"> <!-- copy shader progs -->
@@ -338,7 +338,7 @@
 	<!--target name="testjogl" depends="core, soft, jogl, jogl-deps" description="build jogl tests">
     <mkdir dir="${build}/testjogl" />
     <javac excludesfile="excludes.txt" srcdir="${testjogl}"  destdir="${build}/testjogl" debug="true">
-      <compilerarg line="-source 1.4" />
+      <compilerarg line="-source 1.5" />
       <classpath refid="tests.classpath"/>
     </javac>
     <jar jarfile="${dist}/jReality-testjogl.jar" basedir="${build}/testjogl" />
@@ -351,7 +351,7 @@
   <target name="swt" depends="jogl, tools" description="build swt viewer for the jogl backend">
     <mkdir dir="${build}/swt" />
     <javac excludesfile="excludes.txt" srcdir="${swt}"  destdir="${build}/swt" debug="true">
-      <compilerarg line="-source 1.4" />
+      <compilerarg line="-source 1.5" />
       <classpath refid="swt.classpath"/>
     </javac>
     <jar jarfile="${dist}/jReality-swt.jar" basedir="${build}/swt" />
@@ -360,7 +360,7 @@
   <target name="renderman" depends="core,soft" description="build renderman backend">
     <mkdir dir="${build}/renderman" />
     <javac excludesfile="excludes.txt" srcdir="${renderman}" destdir="${build}/renderman" debug="true">
-      <compilerarg line="-source 1.4"/>
+      <compilerarg line="-source 1.5"/>
       <classpath refid="backend.classpath"/>
     </javac>
     <jar jarfile="${dist}/jReality-renderman.jar" basedir="${build}/renderman" />
@@ -382,7 +382,7 @@
 
   <target name="javadoc" description="generate javadoc in docs/api">
       <mkdir dir="${javadoc}" />
-    <javadoc destdir="${javadoc}" access="public" author="true" version="true" use="true" windowtitle="jReality API" source="1.4">
+    <javadoc destdir="${javadoc}" access="public" author="true" version="true" use="true" windowtitle="jReality API" source="1.5">
       <fileset dir="${core}" defaultexcludes="yes">
         <include name="de/jreality/**/*.java" />
       </fileset>
@@ -397,7 +397,7 @@
       <fileset dir="${ui}" defaultexcludes="yes">
         <include name="de/jreality/**/*.java" />
       </fileset>
-      <link href="http://java.sun.com/j2se/1.4.2/docs/api/"/>
+      <link href="http://java.sun.com/j2se/1.5/docs/api/"/>
     </javadoc>
   </target>
 	
