@@ -160,12 +160,12 @@ public class RotateTool extends AbstractTool {
         SceneGraphComponent c = comp;
         public boolean run(double time, double dt) {
           if (updateCenter) cen = getCenter(c);
-          MatrixBuilder m=MatrixBuilder.euclidean(c.getTransformation());
+          MatrixBuilder m = MatrixBuilder.euclidean(c.getTransformation());
     		  m.times(cen);
     		  //m.multiplyOnRight(e);
     		  m.rotate(0.05*dt*rotAngle, axis);
           m.times(cen.getInverse());
-    		  m.assignTo(c.getTransformation());
+    		  m.assignTo(c);
           return true;
         }
       };
