@@ -40,11 +40,10 @@
 
 package de.jreality.ui.viewerapp.actions;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.treeview.SelectionEvent;
-import de.jreality.ui.viewerapp.Navigator;
 
 
 public class Quit extends AbstractAction {
@@ -52,16 +51,11 @@ public class Quit extends AbstractAction {
   private static final long serialVersionUID = 1L;
 
 
-  public Quit(String name, Navigator navigator) {
-    super(name, navigator);
+  public Quit(String name) {
+    super(name, new SceneGraphComponent(), null);
   }
   
   
-  public Quit(String name, Navigator n, Component frame) {
-    super(name, n, frame);
-  }
-
-
   void selectionChanged(SelectionEvent e) {
     //do nothing
   }
@@ -70,10 +64,5 @@ public class Quit extends AbstractAction {
   public void actionPerformed(ActionEvent e) {
     System.exit(0);
   }
-  
-  
-  Object getDefaultActee() {
-    return navigator.getRoot();
-  }
-
+ 
 }

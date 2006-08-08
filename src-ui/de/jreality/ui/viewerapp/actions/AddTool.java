@@ -77,14 +77,14 @@ public class AddTool extends AbstractAction {
   private JScrollPane scrollPane = null;
   
   
-  public AddTool(String name, Navigator navigator) {
-    super(name, navigator);
+  public AddTool(String name, Navigator navigator, Component frame) {
+    super(name, navigator, frame);
     setupToolList();
   }
   
   
-  public AddTool(String name, Navigator n, Component frame) {
-    super(name, n, frame);
+  public AddTool(String name, SceneGraphComponent node, Component frame) {
+    super(name, node, frame);
     setupToolList();
   }
 
@@ -116,15 +116,10 @@ public class AddTool extends AbstractAction {
     toolList.clearSelection();
   }
   
-  
-  Object getDefaultActee() {
-    return navigator.getRoot();
-  }
-  
-  
+ 
   private void setupToolList() {
     
-    List tools = new LinkedList();
+    List<Class> tools = new LinkedList<Class>();
     
     tools.add(DraggingTool.class);
     tools.add(EncompassTool.class);
@@ -149,4 +144,5 @@ public class AddTool extends AbstractAction {
 
     scrollPane = new JScrollPane(toolList);
   }
+  
 }

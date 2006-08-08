@@ -42,84 +42,35 @@ package de.jreality.ui.viewerapp.actions;
 
 import java.awt.event.ActionEvent;
 
-import de.jreality.scene.Appearance;
-import de.jreality.scene.Camera;
-import de.jreality.scene.Geometry;
-import de.jreality.scene.Light;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.SceneGraphVisitor;
-import de.jreality.scene.Transformation;
-import de.jreality.scene.tool.Tool;
+import de.jreality.scene.Viewer;
 import de.jreality.ui.treeview.SelectionEvent;
-import de.jreality.ui.viewerapp.Navigator;
 
 
-public class Remove extends AbstractAction {
+public class Render extends AbstractAction {
 
   private static final long serialVersionUID = 1L;
+
+  private Viewer currViewer;
   
-  private Object obj = null;
   
-  
-  public Remove(String name, Navigator navigator) {
-    super(name, navigator, null);
+  public Render(String name, Viewer currViewer) {
+    super(name, new SceneGraphComponent(), null);
+    
+    if (currViewer == null) 
+      throw new IllegalArgumentException("Viewer is null!");
+    
+    this.currViewer = currViewer;
   }
   
   
-  public Remove(String name, SceneGraphComponent node) {
-    super(name, node, null);
+  void selectionChanged(SelectionEvent e) {
+    //do nothing
   }
 
   
   public void actionPerformed(ActionEvent e) {
-  
-    final SceneGraphComponent parent = (SceneGraphComponent) actee;
-    
-    if (obj instanceof SceneGraphNode) {
-      ((SceneGraphNode) obj).accept(new SceneGraphVisitor() {
-        
-        public void visit(SceneGraphComponent sc) {
-          parent.removeChild(sc);
-        }
-        public void visit(Geometry g) {
-          parent.setGeometry(null);
-        }
-        public void visit(Transformation t) {
-          parent.setTransformation(null);
-        }
-        public void visit(Appearance a) {
-          parent.setAppearance(null);
-        }
-        public void visit(Camera c) {
-          parent.setCamera(null);
-        }
-        public void visit(Light l) {
-         parent.setLight(null); 
-        }
-      });
-    }
-    else if (obj instanceof Tool) {
-        parent.removeTool((Tool) obj);
-    }
- }
-
-
-  void selectionChanged(SelectionEvent e) {
-    
-    SceneGraphComponent parent = e.getParentOfSelection();
-    
-    if (parent != null) {
-      setEnabled(true);
-      actee = parent;
-      
-      if (e.selectionIsSGNode())
-        obj = e.selectionAsSGNode();
-      else if (e.selectionIsTool())
-        obj = e.selectionAsTool();
-      //else parent == null
-    }
-    else setEnabled(false);
+    currViewer.render();
   }
 
 }

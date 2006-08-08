@@ -94,10 +94,10 @@ public class ViewerApp {
   private Viewer[] viewers;  //containing possible viewers (jogl, soft, portal)
   private ViewerSwitch viewerSwitch;
   private ToolSystemViewer currViewer;  //the current viewer
+  private JFrame frame;
   
   private SceneGraphComponent sceneRoot;
   private SceneGraphComponent scene;
-  //private SceneGraphComponent currSceneNode;
 
   private boolean attachNavigator = false;  //default
   private boolean attachBeanShell = false;  //default
@@ -172,7 +172,7 @@ public class ViewerApp {
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
     
     //init frame
-    JFrame frame = new JFrame("jReality Viewer");
+    frame = new JFrame("jReality Viewer");
     if (!Beans.isDesignTime()) 
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     
@@ -186,7 +186,7 @@ public class ViewerApp {
     frame.validate();
     frame.setVisible(true);
     
-    return frame;  //TODO: global variable currentFrame with getter?
+    return frame;
   }
   
  
@@ -307,8 +307,7 @@ public class ViewerApp {
     if (path != null) currViewer.setAvatarPath(path);
     path = sc.getPath("emptyPickPath");
     if (path != null) {
-      //init scene and current scene node
-      //currSceneNode = 
+      //init scene 
       scene = path.getLastComponent();
       currViewer.setEmptyPickPath(path);
     }
@@ -338,7 +337,7 @@ public class ViewerApp {
       
       String viewer = System.getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
       StringTokenizer st = new StringTokenizer(viewer);
-      List viewerList = new LinkedList();
+      List<Viewer> viewerList = new LinkedList<Viewer>();
       String viewerClassName;
       while (st.hasMoreTokens()) {
         viewerClassName = st.nextToken();
@@ -353,7 +352,7 @@ public class ViewerApp {
           System.out.println("Possibly no jogl libraries in java.library.path!");
         }
       }
-      viewers = (Viewer[]) viewerList.toArray(new Viewer[viewerList.size()]);
+      viewers = viewerList.toArray(new Viewer[viewerList.size()]);
       viewerSwitch = new ViewerSwitch(viewers);
     }
     
@@ -446,6 +445,15 @@ public class ViewerApp {
   
 
   /**
+   * Get current frame displaying the scene.
+   * @return the frame
+   */
+  public JFrame getFrame() {
+    return frame;
+  }
+  
+  
+  /**
    * Get the viewer as a component.
    * @return the viewer component
    */
@@ -474,12 +482,12 @@ public class ViewerApp {
   
 
   /**
-   * @return the navigator (creates one if not done already)
+   * @return the navigator
    */
   public Navigator getNavigator() {
     if (navigator == null)
-      return new Navigator(sceneRoot);  //TODO: reasonable?
-    else return navigator;
+      throw new UnsupportedOperationException("No navigator attached!");  //TODO: reasonable?
+    return navigator;
   }
   
   

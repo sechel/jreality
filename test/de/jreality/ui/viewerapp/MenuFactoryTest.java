@@ -38,58 +38,28 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions;
+package de.jreality.ui.viewerapp;
 
-import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.io.File;
-import java.io.IOException;
-
-import javax.swing.JOptionPane;
-
-import de.jreality.reader.Readers;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.treeview.SelectionEvent;
-import de.jreality.ui.viewerapp.FileLoaderDialog;
-import de.jreality.ui.viewerapp.Navigator;
+import de.jreality.geometry.Primitives;
 
 
-public class LoadFile extends AbstractAction {
-
-  private static final long serialVersionUID = 1L;
-  
-  
-  public LoadFile(String name, Navigator n, Component frame) {
-    super(name, n, frame);
-  }  
-  
-  public LoadFile(String name, SceneGraphComponent node, Component frame) {
-    super(name, node, frame);
-  }
+public class MenuFactoryTest {
 
   
-  public void actionPerformed(ActionEvent e) {
-  
-    File[] files = FileLoaderDialog.loadFiles(frame);
-    for (int i = 0; i < files.length; i++) {
-      try {
-        final SceneGraphComponent sgc = Readers.read(files[i]);
-        sgc.setName(files[i].getName());
-        System.out.println("READ finished.");
-        ((SceneGraphComponent) actee).addChild(sgc);
-      } 
-      catch (IOException ioe) {
-        JOptionPane.showMessageDialog(frame, "Failed to load file: "+ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-      }
-    }
-  }
-
-
-  void selectionChanged(SelectionEvent e) {
+  public static void main(String[] args) {
+   
+    ViewerApp viewerApp = new ViewerApp(Primitives.icosahedron());
+    viewerApp.setAttachNavigator(true);
+    viewerApp.setAttachBeanShell(true);
+    viewerApp.update();
+    viewerApp.display();
     
-    if (e.selectionIsSGComp()) actee = e.selectionAsSGComp();
-    else actee = getDefaultActee();
-    //alternatively this.setEnabled(false);
+    MenuFactory menu = new MenuFactory(viewerApp);
+    menu.addMenuToFrame();
+    menu.addContextMenuToNavigator();
+    
+    //ViewerAppOld.display(Primitives.icosahedron());
+   
   }
 
 }

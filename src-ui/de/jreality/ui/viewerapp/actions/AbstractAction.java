@@ -43,6 +43,7 @@ package de.jreality.ui.viewerapp.actions;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.treeview.SelectionEvent;
 import de.jreality.ui.treeview.SelectionListener;
 import de.jreality.ui.viewerapp.Navigator;
@@ -52,18 +53,31 @@ public abstract class AbstractAction extends javax.swing.AbstractAction {
 
   Component frame;
   Navigator navigator;
+  SceneGraphComponent node;
   Object actee;
   
   
-  public AbstractAction(String name, Navigator navigator) {
-    this(name, navigator, null);
+  public AbstractAction(String name, SceneGraphComponent node, Component frame) {
+    super(name);
+    
+    if (node == null) 
+      throw new IllegalArgumentException("Node is null!");
+    
+    this.frame = frame;
+    this.node = node;
+    actee = getDefaultActee();
   }
   
   
   public AbstractAction(String name, Navigator n, Component frame) {
     super(name);
+    
+    if (n == null) 
+      throw new IllegalArgumentException("Navigator is null!");
+    
     this.frame = frame;
     navigator = n;
+    node = navigator.getRoot();
     actee = getDefaultActee();
     
     navigator.getTreeSelectionModel().addTreeSelectionListener(
@@ -75,9 +89,14 @@ public abstract class AbstractAction extends javax.swing.AbstractAction {
   }
   
   
-  abstract void selectionChanged(SelectionEvent e);
+  Object getDefaultActee() {
+    if (navigator != null)
+      return navigator.getRoot();
+    return node;
+  }
   
-  abstract Object getDefaultActee();
+  
+  abstract void selectionChanged(SelectionEvent e);
   
   public abstract void actionPerformed(ActionEvent e);
   
