@@ -2,15 +2,20 @@ package de.jreality.examples.tooldemo;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeSupport;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import de.jreality.shader.ImageData;
 import de.jreality.shader.TextureUtility;
@@ -36,7 +41,12 @@ public class Landscape implements ActionListener {
   ToolDemoScene toolScene;
   String selectedBox;
 
+  private int selectionIndex;
+  
   private String[][] skyboxes;
+  
+  private ImageData terrainTexture;
+  private ImageData[] cubeMap;
   /**
    * 
    * @param skyboxes an array of skybox descriptions:
@@ -57,11 +67,18 @@ public class Landscape implements ActionListener {
       if ( (selected == null && i==0) || skyboxes[i][0].equals(selected)) {
         selectedBox=skyboxes[i][0];
         button.setSelected(true);
+        selectionIndex=i;
       }
       buttonGroupComponent.add(button);
       group.add(button);
       boxes.put(skyboxes[i][0], new Integer(i));
     }
+    try {
+		load();
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
   }
 
   public Landscape(String selected) {
@@ -74,20 +91,22 @@ public class Landscape implements ActionListener {
 
   public void setToolScene(ToolDemoScene scene) {
     toolScene=scene;
-    try {
-      applySelection();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    applySelection();
   }
   
-  private void applySelection() throws IOException {
-    int i = ((Integer)boxes.get(selectedBox)).intValue();
-    toolScene.setSkyBox(TextureUtility.createCubeMapData(skyboxes[i][1], skyboxes[i][2].split(","), skyboxes[i][3]));
-    toolScene.setTerrainTexture(ImageData.load(Input.getInput(skyboxes[i][4])), Integer.parseInt(skyboxes[i][5]));
+  private void applySelection() {
+    toolScene.setSkyBox(getSelectedCubeMap());
+    toolScene.setTerrainTexture(getSelectedTexture(), Integer.parseInt(skyboxes[selectionIndex][5]));
   }
 
+  public ImageData[] getSelectedCubeMap() {
+    return cubeMap;
+  }
+
+  public ImageData getSelectedTexture() {
+    return terrainTexture;
+  }
+  
   public static void main(String[] args) {    
     Landscape l=new Landscape();
     JFrame f = new JFrame("test");
@@ -101,17 +120,48 @@ public class Landscape implements ActionListener {
 
 
   public void actionPerformed(ActionEvent e) {
-    if (toolScene==null) {return;}
     selectedBox = e.getActionCommand();
-    try {
-      applySelection();
+    selectionIndex = ((Integer)boxes.get(selectedBox)).intValue();
+	try {
+	    load();
     } catch (IOException e1) {
       // TODO Auto-generated catch block
       e1.printStackTrace();
     }
+    applySelection();
+    fireChange();
   }
 
-  public Box getSelectionComponent() {
+	private void load() throws IOException {
+		cubeMap=TextureUtility.createCubeMapData(skyboxes[selectionIndex][1], skyboxes[selectionIndex][2].split(","), skyboxes[selectionIndex][3]);
+		terrainTexture=ImageData.load(Input.getInput(skyboxes[selectionIndex][4]));
+	}
+
+  public JComponent getSelectionComponent() {
     return selectionComponent;
   }
+  
+  private final transient ArrayList<ChangeListener> listeners=new ArrayList<ChangeListener>();
+  
+  public void addChangeListener(ChangeListener listener) {
+    synchronized (listeners) {
+      listeners.add(listener);
+    }
+  }
+
+  public void removeChangeListener(ChangeListener listener) {
+    synchronized (listeners) {
+      listeners.remove(listener);
+    }
+  }
+  
+  void fireChange() {
+    synchronized (listeners) {
+      ChangeEvent e = new ChangeEvent(this);
+      for (ChangeListener l : listeners) {
+        l.stateChanged(e);
+      }
+    }
+  }
+
 }
