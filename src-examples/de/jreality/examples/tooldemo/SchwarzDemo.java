@@ -1,5 +1,6 @@
 package de.jreality.examples.tooldemo;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -12,6 +13,7 @@ import de.jreality.scene.pick.PickResult;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.swing.ScenePanel;
@@ -74,16 +76,20 @@ public class SchwarzDemo extends ToolDemoContent {
     getContent().setAppearance(app);
     getContent().addChild(domain);
     Texture2D tex = TextureUtility.createTexture(app, "polygonShader", Input.getInput("textures/schwarz.png"));
+    tex.setBlendColor(Color.blue);
   }
   
   public static void main(String[] args) throws IOException {
-    System.setProperty("jreality.data", "/net/MathVis/data/testData3D");
+    //System.setProperty("jreality.data", "/net/MathVis/data/testData3D");
     //System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer");
     //System.setProperty("de.jreality.ui.viewerapp.autoRender", "false");
     System.setProperty("de.jreality.ui.viewerapp.synchRender", "true");
     ToolDemoScene tds = new ToolDemoScene();
     tds.update();
-    tds.setContent(new SchwarzDemo());
+    
+    SchwarzDemo schwarzDemo = new SchwarzDemo();
+    tds.setContent(schwarzDemo);
+    
     ViewerApp va = tds.display();
     //va.setAttachBeanShell(true);
     //va.setAttachNavigator(true);
@@ -99,6 +105,8 @@ public class SchwarzDemo extends ToolDemoContent {
     sp.getFrame().getContentPane().add(l.getSelectionComponent());
     sp.getFrame().pack();
     tds.getTerrainNode().addTool(sp.getPanelTool());
+    
+    
     
 //    MenuFactory menu = new MenuFactory(va);
 //    menu.addMenuToFrame();
