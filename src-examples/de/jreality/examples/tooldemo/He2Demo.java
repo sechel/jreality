@@ -54,7 +54,7 @@ public class He2Demo implements ChangeListener {
   
   public He2Demo() throws IOException {
     init();
-    content = new ToolDemoContent(cmp, new Rectangle3D(new double[][]{{-20,0,-5},{20,40,-45}}));
+    content = new ToolDemoContent(cmp, new Rectangle3D(new double[][]{{-20,0, 20},{20,30,-20}}));
     content.setKeepAspectRatio(false);
   }
   
@@ -74,11 +74,12 @@ public class He2Demo implements ChangeListener {
   }
 
   public static void main(String[] args) throws IOException {
-    System.setProperty("jreality.data", "/net/MathVis/data/testData3D");
+    //System.setProperty("jreality.data", "/net/MathVis/data/testData3D");
     //System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer");
     //System.setProperty("de.jreality.ui.viewerapp.autoRender", "false");
     System.setProperty("de.jreality.ui.viewerapp.synchRender", "true");
     ToolDemoScene tds = new ToolDemoScene();
+    tds.setAvatarPosition(0, 0, 25);
     tds.update();
     
     He2Demo he2 = new He2Demo();

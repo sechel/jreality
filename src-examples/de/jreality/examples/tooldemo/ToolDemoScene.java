@@ -248,6 +248,10 @@ public class ToolDemoScene {
   public SceneGraphComponent getTerrainNode() {
     return terrainNode;
   }
+  
+  public void setAvatarPosition(double x, double y, double z) {
+	  MatrixBuilder.euclidean().translate(x, y, z).assignTo(avatarNode);
+  }
 
   public static void main(String[] args) throws IOException {
     
