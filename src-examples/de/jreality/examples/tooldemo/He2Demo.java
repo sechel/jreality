@@ -36,7 +36,7 @@ public class He2Demo extends ToolDemoContent {
     Texture2D tex = TextureUtility.createTexture(he.getAppearance(), "polygonShader", img, false);
     tex.setTextureMatrix(MatrixBuilder.euclidean().scale(10).getMatrix());
     tex = TextureUtility.createTexture(boundary.getAppearance(), "polygonShader", img, false);
-    tex.setTextureMatrix(MatrixBuilder.euclidean().scale(2/3,100,1).getMatrix());
+    tex.setTextureMatrix(MatrixBuilder.euclidean().scale(2,400,1).getMatrix());
     PickUtility.assignFaceAABBTrees(cmp);
     MatrixBuilder.euclidean()
 //      .rotateY(-1)

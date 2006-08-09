@@ -40,6 +40,7 @@
 
 package de.jreality.tools;
 
+import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.tool.AbstractTool;
@@ -58,10 +59,12 @@ public class HeadTransformationTool extends AbstractTool {
   private double maxAngle = Math.PI*0.35;
   private double minAngle = -Math.PI*0.35;
   
-  private double headHeight=1.7;
+  private double[] headTranslation;
   
   private double currentAngle;
   private boolean rotate;
+  
+  private final transient Matrix m=new Matrix();
   
   public HeadTransformationTool() {
     super(null);
@@ -81,20 +84,17 @@ public class HeadTransformationTool extends AbstractTool {
       }
     }
     if (tc.getSource() == rotateActivation) return;
-
+    if (tc.getRootToToolComponent().getLastComponent().getTransformation() != null) {
+      tc.getRootToToolComponent().getLastComponent().getTransformation().getMatrix(m.getArray());
+      headTranslation=m.getColumn(3);     
+    } else {
+      headTranslation=new double[]{0,1.7,0};
+    }
     double dAngle = tc.getAxisState(verticalRotation).doubleValue();
     if (currentAngle + dAngle > maxAngle || currentAngle + dAngle < minAngle) return;
-    SceneGraphComponent myComponent = tc.getRootToLocal().getLastComponent();
-    MatrixBuilder.euclidean(tc.getRootToLocal().getLastComponent().getTransformation()).translate(0, -headHeight, 0).rotateX(dAngle).translate(0, headHeight, 0).assignTo(myComponent);
+    SceneGraphComponent myComponent = tc.getRootToToolComponent().getLastComponent();
+    MatrixBuilder.euclidean().translate(headTranslation).rotateX(currentAngle).assignTo(myComponent);
     currentAngle+=dAngle;
-  }
-
-  public double getHeadHeight() {
-    return headHeight;
-  }
-
-  public void setHeadHeight(double headHeight) {
-    this.headHeight = headHeight;
   }
 
   public double getMaxAngle() {

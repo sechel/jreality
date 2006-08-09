@@ -251,7 +251,7 @@ public class ToolDemoScene {
 
   public static void main(String[] args) throws IOException {
     
-    System.setProperty("jreality.data", "/net/MathVis/data/testData3D");
+    //System.setProperty("jreality.data", "/net/MathVis/data/testData3D");
     //System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer");
     //System.setProperty("de.jreality.ui.viewerapp.autoRender", "false");
     System.setProperty("de.jreality.ui.viewerapp.synchRender", "true");
