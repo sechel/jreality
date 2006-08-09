@@ -41,7 +41,6 @@ public class SchwarzDemo extends ToolDemoContent {
     domain.setName("domain");
     PickUtility.assignFaceAABBTrees(domain);
     domain.getGeometry().setName("schwarz");
-    System.out.println("domain bounds="+GeometryUtility.calculateBoundingBox(domain));
     // now domain is aligned along x,y,z axes and scaled to size 1,1,1
     return domain;
   }
