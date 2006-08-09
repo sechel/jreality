@@ -12,8 +12,9 @@ import de.jreality.scene.pick.PickResult;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
+import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
 import de.jreality.swing.ScenePanel;
-import de.jreality.ui.viewerapp.MenuFactory;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
@@ -47,9 +48,9 @@ public class SchwarzDemo extends ToolDemoContent {
 
   final SceneGraphComponent domain=domain();
 
-  public SchwarzDemo() {
+  public SchwarzDemo() throws IOException {
     super(new SceneGraphComponent(),
-        new Rectangle3D(new double[][]{{0,0,0},{10,10,10}}),  
+        new Rectangle3D(new double[][]{{-5,0,-5},{5,10,-15}}),  
         new Rectangle3D(new double[][]{{-.5,-.5,-.5},{.5,.5,.5}})
     );
     domain.addTool(new AbstractTool(InputSlot.getDevice("PanelActivation")) {
@@ -73,6 +74,7 @@ public class SchwarzDemo extends ToolDemoContent {
     app.setAttribute("showPoints", false);
     getContent().setAppearance(app);
     getContent().addChild(domain);
+    Texture2D tex = TextureUtility.createTexture(app, "polygonShader", Input.getInput("textures/schwarz.png"));
   }
   
   public static void main(String[] args) throws IOException {

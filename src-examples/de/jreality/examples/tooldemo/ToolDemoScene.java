@@ -117,7 +117,7 @@ public class ToolDemoScene {
     avatarNode.addTool(shipNavigationTool);
     camNode.addTool(new HeadTransformationTool());
     
-    sceneRoot.addTool(new PickShowTool(null, 0.003));
+    sceneRoot.addTool(new PickShowTool(null, 0.005));
     //avatarNode.addTool(new PointerDisplayTool());
     
     //sceneNode.addTool(new RotateTool());
