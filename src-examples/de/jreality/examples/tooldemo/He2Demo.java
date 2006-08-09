@@ -54,7 +54,7 @@ public class He2Demo implements ChangeListener {
   
   public He2Demo() throws IOException {
     init();
-    content = new ToolDemoContent(cmp, new Rectangle3D(new double[][]{{-20,0, 20},{20,30,-20}}));
+    content = new ToolDemoContent(cmp, new Rectangle3D(new double[][]{{-20,0, -20},{20,30,20}}));
     content.setKeepAspectRatio(false);
   }
   
@@ -89,7 +89,7 @@ public class He2Demo implements ChangeListener {
     //va.setAttachBeanShell(true);
     //va.setAttachNavigator(true);
     
-    Landscape l = new Landscape("night");
+    Landscape l = new Landscape("dusk");
     l.addChangeListener(he2);
     he2.setReflectionMap(l.getSelectedCubeMap());
     l.setToolScene(tds);

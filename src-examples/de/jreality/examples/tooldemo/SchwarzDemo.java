@@ -4,6 +4,9 @@ import java.awt.Color;
 import java.io.IOException;
 import java.util.Arrays;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.Readers;
@@ -14,6 +17,8 @@ import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.CubeMap;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.swing.ScenePanel;
@@ -22,8 +27,10 @@ import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
 import de.jreality.util.Rectangle3D;
 
-public class SchwarzDemo extends ToolDemoContent {
+public class SchwarzDemo extends ToolDemoContent implements ChangeListener {
   
+  Appearance app = new Appearance();
+	
   private static SceneGraphComponent domain() {
     SceneGraphComponent domain;
     try {
@@ -71,7 +78,6 @@ public class SchwarzDemo extends ToolDemoContent {
         tc.getRootToLocal().getLastComponent().addChild(newCmp);
       }
     });
-    Appearance app = new Appearance();
     app.setAttribute("showPoints", false);
     getContent().setAppearance(app);
     getContent().addChild(domain);
@@ -79,8 +85,20 @@ public class SchwarzDemo extends ToolDemoContent {
     tex.setBlendColor(Color.blue);
   }
   
+  public void stateChanged(ChangeEvent e) {
+    Landscape l = (Landscape) e.getSource();
+    setReflectionMap(l.getSelectedCubeMap());
+  }
+
+  public void setReflectionMap(ImageData[] selectedCubeMap) {
+    System.out.println("creating reflection map");
+    CubeMap cm = TextureUtility.createReflectionMap(app, "polygonShader", selectedCubeMap);
+    cm.setBlendColor(new java.awt.Color(1.0f, 0.0f, 0.0f, 1f));
+  }
+
+  
   public static void main(String[] args) throws IOException {
-    System.setProperty("jreality.data", "/net/MathVis/data/testData3D");
+    //System.setProperty("jreality.data", "/net/MathVis/data/testData3D");
     //System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer");
     //System.setProperty("de.jreality.ui.viewerapp.autoRender", "false");
     System.setProperty("de.jreality.ui.viewerapp.synchRender", "true");
@@ -94,10 +112,9 @@ public class SchwarzDemo extends ToolDemoContent {
     //va.setAttachBeanShell(true);
     //va.setAttachNavigator(true);
     
-    va.update();
-    va.display();
-
     Landscape l = new Landscape("night");
+    schwarzDemo.setReflectionMap(l.getSelectedCubeMap());
+    l.addChangeListener(schwarzDemo);
     l.setToolScene(tds);
     
     ScenePanel sp = new ScenePanel();
@@ -106,7 +123,8 @@ public class SchwarzDemo extends ToolDemoContent {
     sp.getFrame().pack();
     tds.getTerrainNode().addTool(sp.getPanelTool());
     
-    
+    va.update();
+    va.display();
     
 //    MenuFactory menu = new MenuFactory(va);
 //    menu.addMenuToFrame();
