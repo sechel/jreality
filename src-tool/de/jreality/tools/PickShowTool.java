@@ -43,7 +43,9 @@ package de.jreality.tools;
 import java.awt.Color;
 
 import de.jreality.geometry.Primitives;
+import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.pick.PickResult;
@@ -58,11 +60,13 @@ public class PickShowTool extends AbstractTool {
   Appearance a = new Appearance();
   
   private boolean attached;
+  private double radius;
   
   public PickShowTool(String activationAxis, double radius) {
     super(activationAxis == null ? null : InputSlot.getDevice(activationAxis));
+    this.radius=radius;
     addCurrentSlot(InputSlot.getDevice("PointerTransformation"));
-    c.addChild(Primitives.sphere(radius, 0, 0, 0));
+    c.addChild(Primitives.sphere(1, 0, 0, 0));
     c.setAppearance(a);
     a.setAttribute("pickable", false);
     a.setAttribute(CommonAttributes.FACE_DRAW, true);
@@ -99,7 +103,10 @@ public class PickShowTool extends AbstractTool {
       c.getAppearance().setAttribute("diffuseColor", Color.black);
     }
     double[] worldCoordinates = pr.getWorldCoordinates();
+    double[] cp = new Matrix(tc.getViewer().getCameraPath().getMatrix(null)).getColumn(3);
+    double scale=Rn.euclideanDistance(cp, worldCoordinates);
     MatrixBuilder.euclidean().translate(worldCoordinates).assignTo(c);
+    MatrixBuilder.euclidean().scale(scale*radius).assignTo(c.getChildComponent(0));
   }
 
   public void deactivate(ToolContext tc) {
