@@ -40,10 +40,10 @@
 
 package de.jreality.scene.pick;
 
+import java.util.Arrays;
 import java.util.Comparator;
 
 import de.jreality.math.Matrix;
-import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
@@ -98,10 +98,12 @@ public class Hit implements PickResult {
   public String toString() {
     StringBuffer sb = new StringBuffer();
     sb.append("AABB-Pick: ");
-    sb.append(" distRay=").append(distRay);
     sb.append(" dist=").append(dist);
-    sb.append(" world=").append(Rn.toString(pointWorld));
+    sb.append(" index=").append(index);
+    sb.append(" tc=").append(Arrays.toString(getTextureCoordinates()));
+    sb.append(" world=").append(Arrays.toString(pointWorld));
     sb.append(" path=").append(path.toString());
+    sb.append(" distRay=").append(distRay);
     return sb.toString();
   }
 
@@ -343,11 +345,9 @@ if(false) {
           return texCoords;
   }
   
-  public static class HitComparator implements Comparator {
-    public int compare(Object o1, Object o2) {
+  public static class HitComparator implements Comparator<Hit> {
+    public int compare(Hit hit1, Hit hit2) {
       // distance from ray
-      Hit hit1 = (Hit) o1;
-      Hit hit2 = (Hit) o2;
       double a = hit1.getDist();
       double b = hit2.getDist();
       return a>b ? 1 : b>a ? -1:0;

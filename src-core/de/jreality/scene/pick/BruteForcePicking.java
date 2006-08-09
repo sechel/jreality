@@ -71,13 +71,13 @@ class BruteForcePicking {
   private static Matrix mInv=new Matrix();
   
   //private static double[] bary = new double[4], p1=new double[4], p2=new double[4], p3=new double[4], plane=new double[4], pobj=new double[4];
-  public static void intersectPolygons(IndexedFaceSet ifs, int signature, SceneGraphPath path, double[] from, double[] to, ArrayList hits) {
+  public static void intersectPolygons(IndexedFaceSet ifs, int signature, SceneGraphPath path, double[] from, double[] to, ArrayList<Hit> hits) {
     path.getMatrix(m.getArray());
     path.getInverseMatrix(mInv.getArray());
     
     double[] fromLocal=mInv.multiplyVector(from);
     double[] toLocal=mInv.multiplyVector(to);
-    double[] bary = new double[4], p1=new double[4], p2=new double[4], p3=new double[4], plane=new double[4], pobj=new double[4];
+    double[] p1=new double[4], p2=new double[4], p3=new double[4], pobj=new double[4];
     p1[3]=p2[3]=p3[3]=1;
     IntArrayArray faces=getFaces(ifs);
     DoubleArrayArray points = getPoints(ifs);
@@ -91,33 +91,40 @@ class BruteForcePicking {
         p2=points.getValueAt(face.getValueAt(1+j)).toDoubleArray(p2);
         p3=points.getValueAt(face.getValueAt(2+j)).toDoubleArray(p3);
         
-        plane = P3.planeFromPoints(plane, p1, p2, p3);
-        pobj = P3.lineIntersectPlane(pobj, fromLocal, toLocal, plane);
-        if(pobj[3]*pobj[3]<Rn.TOLERANCE) continue; // parallel
-
-        Pn.dehomogenize(p1, p1);
-        Pn.dehomogenize(p2, p2);
-        Pn.dehomogenize(p3, p3);
-        
-        if (!Hit.convertToBary(bary, p1, p2, p3, pobj)) continue;
-        if (
-            (     (bary[0]<0||bary[0]>1)
-                ||(bary[1]<0||bary[1]>1)
-                ||(bary[2]<0||bary[2]>1)
-            )||((bary[0]+bary[1]+bary[2]-1)*(bary[0]+bary[1]+bary[2]-1)> Rn.TOLERANCE)) {
-          continue tris;          
+        if (intersects(pobj, fromLocal, toLocal, p1, p2, p3)) {
+          double[] pw = m.multiplyVector(pobj);
+          hits.add(new Hit(path.pushNew(ifs), pw, Rn.euclideanDistance(from, pw), 0, PickResult.PICK_TYPE_FACE, i,j));
         }
-        // TODO: the barycentric coordinates should be used in the PickResult for tex coordindates
         
-        // check if for fromLocal + lambda * dirLocal = pobj: lambda > 0
-        double[] d1 = Rn.subtract(null, pobj, fromLocal);
-        double[] dir = (toLocal[3]==0) ? toLocal : Rn.subtract(null, toLocal, fromLocal); 
-        if (Rn.innerProduct(d1, dir)<0) continue tris;
-        
-        double[] pw = m.multiplyVector(pobj);
-        hits.add(new Hit(path.pushNew(ifs), pw, Rn.euclideanDistance(from, pw), 0, PickResult.PICK_TYPE_FACE, i,j));
       }
     }
+
+  }
+
+  static boolean intersects(double[] pobj, double[] fromLocal, double[] toLocal, double[] p1, double[] p2, double[] p3) {
+    double[] plane = P3.planeFromPoints(null, p1, p2, p3);
+    pobj = P3.lineIntersectPlane(pobj, fromLocal, toLocal, plane);
+    //if(pobj[3]*pobj[3]<Rn.TOLERANCE) return false; // parallel
+
+    Pn.dehomogenize(p1, p1);
+    Pn.dehomogenize(p2, p2);
+    Pn.dehomogenize(p3, p3);
+    
+    double[] bary = new double[3];
+    if (!Hit.convertToBary(bary, p1, p2, p3, pobj)) return false;
+    if (
+        (     (bary[0]<0||bary[0]>1)
+            ||(bary[1]<0||bary[1]>1)
+            ||(bary[2]<0||bary[2]>1)
+        )||((bary[0]+bary[1]+bary[2]-1)*(bary[0]+bary[1]+bary[2]-1)> Rn.TOLERANCE)) {
+      return false;
+    }
+    // TODO: the barycentric coordinates should be used in the PickResult for tex coordindates
+    
+    // check if for fromLocal + lambda * dirLocal = pobj: lambda > 0
+    double[] d1 = Rn.subtract(null, pobj, fromLocal);
+    double[] dir = (toLocal[3]==0) ? toLocal : Rn.subtract(null, toLocal, fromLocal); 
+    return (Rn.innerProduct(d1, dir)>0);
 
   }
 

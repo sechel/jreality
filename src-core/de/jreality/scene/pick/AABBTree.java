@@ -45,6 +45,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
@@ -56,6 +57,7 @@ import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
@@ -166,6 +168,9 @@ public class AABBTree {
         }
     }
 
+    private static Matrix m=new Matrix();
+    private static Matrix mInv=new Matrix();
+
     /**
      * Stores in the given array list all indexes of triangle intersection
      * between this tree and a given ray.
@@ -176,91 +181,40 @@ public class AABBTree {
      *            The arraylist to hold indexes of this OBBTree's triangle
      *            intersections.
      */
-    void intersect(double[] from, double[] dir, ArrayList hits) {
-      if (!bounds.intersects(from, dir)) {
+    void intersect(IndexedFaceSet ifs, int signature, SceneGraphPath path, double[] from, double[] to, List<Hit> hits) {
+      path.getMatrix(m.getArray());
+      path.getInverseMatrix(mInv.getArray());
+      
+      double[] fromLocal=mInv.multiplyVector(from);
+      double[] toLocal=mInv.multiplyVector(to);
+      double[] dir = toLocal.length==3 || toLocal[3]==0 ? toLocal : Rn.subtract(null, toLocal, fromLocal);
+      
+      if (!bounds.intersects(fromLocal, dir)) {
         return;
       }
       if (left != null) {
-        left.intersect(from, dir, hits);
+        left.intersect(ifs, signature, path, from, to, hits);
       }
   
       if (right != null) {
-        right.intersect(from, dir, hits);
+        right.intersect(ifs, signature, path, from, to, hits);
       } else if (left == null) { // left == right == null
-        boolean hit = false;
+        double[] p1=new double[4], p2=new double[4], p3=new double[4], pobj=new double[4];
+        p1[3]=p2[3]=p3[3]=1;
         TreePolygon tempt;
-        double[] tempVa, tempVb, tempVc;
         for (int i = myStart; i <= myEnd; i++) {
           tempt = tris[i];
-          poly: for (int j = 0; j < tempt.getNumTriangles(); j++) {
-            double[][] tri = tempt.getTriangle(j);
-            tempVa = tri[0];
-            tempVb = tri[1];
-            tempVc = tri[2];
-            if (intersect(from, dir, tempVa, tempVb, tempVc)) {
-              double[] plane = P3.planeFromPoints(null, tempVa, tempVb, tempVc);
-              double[] pointObject = P3.lineIntersectPlane(null, from,
-                  new double[] { dir[0], dir[1], dir[2], 0 }, plane);
-              if (sign(from, dir, pointObject) == 1) {
-                hits.add(new Object[]{pointObject, new Integer(tempt.getIndex()),new Integer(j)});
-                hit = true;
-                break poly;
-              } else {
-                if (debug) 
-                  System.out.println("negative hit!");
-              }
+          for (int j = 0; j < tempt.getNumTriangles(); j++) {
+            tempt.getTriangle(j, p1, p2, p3);
+            if (BruteForcePicking.intersects(pobj, fromLocal, toLocal, p1, p2, p3)) {
+              double[] pw = m.multiplyVector(pobj);
+              hits.add(new Hit(path.pushNew(ifs), pw, Rn.euclideanDistance(from, pw), 0, PickResult.PICK_TYPE_FACE, tempt.getIndex(),j));
             }
           }
-        }
-        if (debug) {
-          System.out.println("scanned polys: "+((hit)?"hit":"no hit"));
         }
       }
     }
 
-    private int sign(double[] camPos, double[] dir, double[] pointWorld) {
-      double dx = pointWorld[0]-camPos[0];
-      double dy = pointWorld[1]-camPos[1];
-      double dz = pointWorld[2]-camPos[2];
-      double rx = dir[0];
-      double ry = dir[1];
-      double rz = dir[2];
-      int sign = 1;
-      if (rx != 0 && dx != 0) sign = (int) ( (dx/rx) / Math.abs(dx/rx) ); 
-      if (ry != 0 && dy != 0) sign = (int) ( (dy/ry) / Math.abs(dy/ry) ); 
-      if (rz != 0 && dz != 0) sign = (int) ( (dz/rz) / Math.abs(dz/rz) ); 
-      return sign;
-    }
-
-    /**
-     * tests if the triangle intersects the the given ray 
-     * @param from ray start
-     * @param dir ray dir
-     * @param v0 triag p0
-     * @param v1 triag p1
-     * @param v2 triag p2
-     * @return true if intersects
-     */
-    private boolean intersect(double[]from, double[] dir, double[] v0,double[] v1,double[] v2){
-      double[] edge1=Rn.subtract(null, v1, v0);
-      double[] edge2=Rn.subtract(null, v2, v0);
-      double[] pvec=Rn.crossProduct(null, dir, edge2);
-      double det=Rn.innerProduct(edge1, pvec);
-      if (det > -Rn.TOLERANCE && det < Rn.TOLERANCE)
-          return false;
-      det=1/det;
-      double[] tvec=Rn.subtract(null, from, v0);
-      double u=Rn.innerProduct(tvec, pvec)*det;
-      if (u <0.0 || u>1.0)
-          return false;
-      double[] qvec=Rn.crossProduct(null, tvec, edge1);
-      double v=Rn.innerProduct(dir, qvec) * det;
-      if (v <0.0 || v + u >1.0)
-          return false;
-      return true;
-    }
-
-    
     /**
      * Splits the root obb acording to the largest bounds extent.
      *
@@ -353,7 +307,6 @@ public class AABBTree {
         private double projection;
 
         private int index;
-        private int subIndex; // for lines
 
         double[] centroid;
 
@@ -364,14 +317,6 @@ public class AABBTree {
         	  this.verts = Pn.dehomogenize(new double[verts.length][3], verts);
         
            this.index=index;
-        }
-        TreePolygon(double[][] verts, int index, int subIndex) {
-          this.verts = verts;
-          if (verts[0].length == 4)	
-        	  this.verts = Pn.dehomogenize(new double[verts.length][3], verts);
-       
-         this.index=index;
-          this.subIndex=subIndex;
         }
 
         void putCentriod() {
@@ -385,8 +330,10 @@ public class AABBTree {
           return verts.length-2;
         }
         
-        double[][] getTriangle(int i) {
-          return new double[][]{verts[0], verts[i+1], verts[i+2]};
+        void getTriangle(int i, double[] p1, double[] p2, double[] p3) {
+          System.arraycopy(verts[0], 0, p1, 0, 3);
+          System.arraycopy(verts[i+1], 0, p2, 0, 3);
+          System.arraycopy(verts[i+2], 0, p3, 0, 3);
         }
         
         double[][] getVertices() {
@@ -402,11 +349,9 @@ public class AABBTree {
     /**
      * Class to sort TreeTriangle acording to projection.
      */
-    private Comparator treeCompare = new Comparator() {
+    private Comparator<TreePolygon> treeCompare = new Comparator<TreePolygon>() {
 
-        public int compare(Object o1, Object o2) {
-            TreePolygon a = (TreePolygon) o1;
-            TreePolygon b = (TreePolygon) o2;
+        public int compare(TreePolygon a, TreePolygon b) {
             if (a.projection < b.projection) { return -1; }
             if (a.projection > b.projection) { return 1; }
             return 0;
