@@ -89,9 +89,6 @@ public class He2Demo implements ChangeListener {
     //va.setAttachBeanShell(true);
     //va.setAttachNavigator(true);
     
-    va.update();
-    va.display();
-
     Landscape l = new Landscape("night");
     l.addChangeListener(he2);
     he2.setReflectionMap(l.getSelectedCubeMap());
@@ -102,6 +99,9 @@ public class He2Demo implements ChangeListener {
     sp.getFrame().getContentPane().add(l.getSelectionComponent());
     sp.getFrame().pack();
     tds.getTerrainNode().addTool(sp.getPanelTool());
+    
+    va.update();
+    va.display();
   }
 
 }
