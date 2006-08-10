@@ -129,7 +129,7 @@ public class CoordinateSystemFactory {
 	
 	private int currentClosestBoxVertex = -1;  //index of a currently closest box vertex in boxVertices[0] 
 	
-	private HashMap nodes = new HashMap();  //keep references to SceneGraphNodes
+	private HashMap<String, SceneGraphComponent> nodes = new HashMap<String, SceneGraphComponent>();  //keep references to SceneGraphNodes
 	
 	private CoordinateSystemBeautifier beautifier = new CoordinateSystemBeautifier(this);
 	
@@ -677,7 +677,7 @@ public class CoordinateSystemFactory {
 		for (int axis=X; axis<=Z; axis++) {
 			
 			//get number of ticks on axis
-			final int n = ((PointSet)getSGC(axesNames[axis]+"00ticklabels").getGeometry()).getNumPoints();
+			final int n = ((PointSet)nodes.get(axesNames[axis]+"00ticklabels").getGeometry()).getNumPoints();
 			
 			for (int k=0; k<=3; k++) {
 				
@@ -688,12 +688,12 @@ public class CoordinateSystemFactory {
 				for (int i=0; i<n; i++) {
 					for (int line=0; line<=1; line++) {
 						//get anchor points of tick labels
-						ps = (PointSet)getSGC(axesNames[axis]+toBinaryString(k+line*next)+"ticklabels").getGeometry();  //e.g. x00ticklabels
+						ps = (PointSet)nodes.get(axesNames[axis]+toBinaryString(k+line*next)+"ticklabels").getGeometry();  //e.g. x00ticklabels
 						points = ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null);
 						current = new double[]{points[3*i], points[3*i+1], points[3*i+2], 0};
 						translation = (double[])boxVertices[axis][2*(k+line*next)].clone();  //minimum end point
 						translation[axis] = 0;
-						trans = new FactoredMatrix(getSGC(axesNames[axis]+toBinaryString(k+line*next)+"ticks").getTransformation());  //e.g. x00ticks
+						trans = new FactoredMatrix(nodes.get(axesNames[axis]+toBinaryString(k+line*next)+"ticks").getTransformation());  //e.g. x00ticks
 						result = trans.multiplyVector(current);  
 						vertices[n*line+i][0] = result[0]+translation[0];
 						vertices[n*line+i][1] = result[1]+translation[1];
@@ -850,17 +850,6 @@ public class CoordinateSystemFactory {
 		return Quaternion.rotationMatrixToQuaternion(new Quaternion(), rot.getArray());
 	}
 	
-		
-	/**
-	 * get the SceneGraphComponent(SGC) to which the specified key 
-	 * is mapped in hashMap (i.e. parse hashMap-Objects)
-	 * @param key the key specifying the SGC
-	 * @return the SGC 
-	 */
-	private SceneGraphComponent getSGC(Object key) {
-		return (SceneGraphComponent)nodes.get(key);
-	}
-
 
 	/**
 	 * get the binary representation of <code>k</code> using (at least) 2 digits<br> 
@@ -943,10 +932,10 @@ public class CoordinateSystemFactory {
 		//set all box edges and grid faces to visible
 		for (int axis=X; axis<=Z; axis++) {
 			for (int k=0; k<=3; k++) {
-				getSGC(axesNames[axis]+toBinaryString(k)).setVisible(true);
+				nodes.get(axesNames[axis]+toBinaryString(k)).setVisible(true);
 			}
-			getSGC("face"+2*axis).setVisible(true);
-			getSGC("face"+(2*axis+1)).setVisible(true);
+			nodes.get("face"+2*axis).setVisible(true);
+			nodes.get("face"+(2*axis+1)).setVisible(true);
 		}
 		
 		currentClosestBoxVertex = index;
@@ -962,18 +951,18 @@ public class CoordinateSystemFactory {
 		//hide edges which don't have copies of same "distance to the screen"
 		int[] invisibleEdges = new int[3];
 		if (direction[Y]!=0 && direction[Z]!=0) {
-			getSGC("x" + edgeCriteria[Y] + edgeCriteria[Z]).setVisible(false);
+			nodes.get("x" + edgeCriteria[Y] + edgeCriteria[Z]).setVisible(false);
 			invisibleEdges[X] = edgeCriteria[Y]*2 + edgeCriteria[Z]; }
 		if (direction[X]!=0 && direction[Z]!=0) {
-			getSGC("y" + edgeCriteria[X] + edgeCriteria[Z]).setVisible(false);
+			nodes.get("y" + edgeCriteria[X] + edgeCriteria[Z]).setVisible(false);
 			invisibleEdges[Y] = edgeCriteria[X]*2 + edgeCriteria[Z]; }
 		if (direction[X]!=0 && direction[Y]!=0) {
-			getSGC("z" + edgeCriteria[X] + edgeCriteria[Y]).setVisible(false);
+			nodes.get("z" + edgeCriteria[X] + edgeCriteria[Y]).setVisible(false);
 			invisibleEdges[Z] = edgeCriteria[X]*2 + edgeCriteria[Y]; }
 		
 		//hide corresponding grid faces
 		for (int axis=X; axis<=Z; axis++) 
-			getSGC("face"+(2*axis+edgeCriteria[axis])).setVisible(false);
+			nodes.get("face"+(2*axis+edgeCriteria[axis])).setVisible(false);
 		
 		if (beautifyBoxLabels) updateLabelsOfBoxEdges(cameraToObject, invisibleEdges);
 	}
@@ -1011,8 +1000,8 @@ public class CoordinateSystemFactory {
 			//for box:
 			for (int k = 0; k <= 3; k++) {
 				//remove old ticks and labels
-				SceneGraphComponent singleAxisK = getSGC(axesNames[axis]+ toBinaryString(k));  //e.g. x00
-				singleAxisK.removeChild(getSGC(axesNames[axis]+ toBinaryString(k) + "ticks"));  //e.g. x00ticks
+				SceneGraphComponent singleAxisK = nodes.get(axesNames[axis]+ toBinaryString(k));  //e.g. x00
+				singleAxisK.removeChild(nodes.get(axesNames[axis]+ toBinaryString(k) + "ticks"));  //e.g. x00ticks
 				//create new ticks with labels
 				SceneGraphComponent ticks = getBoxTicks(axis, k, 
 						boxVertices[axis][2 * k], boxVertices[axis][2 * k + 1]);
@@ -1025,8 +1014,8 @@ public class CoordinateSystemFactory {
 			//for axes:
 
 			//remove old ticks and labels
-			SceneGraphComponent singleAxis = getSGC(axesNames[axis] +"Axis");  //e.g. xAxis
-			singleAxis.removeChild(getSGC(axesNames[axis]+"Ticks"));  //e.g. xTicks
+			SceneGraphComponent singleAxis = nodes.get(axesNames[axis] +"Axis");  //e.g. xAxis
+			singleAxis.removeChild(nodes.get(axesNames[axis]+"Ticks"));  //e.g. xTicks
 			//create new ticks with labels
 			SceneGraphComponent ticks = getAxesTicks(axis,
 					axesVertices[axis][0], axesVertices[axis][1]);
@@ -1037,8 +1026,8 @@ public class CoordinateSystemFactory {
 		}
 		
 		//update grid
-		getSGC("box").removeChild(getSGC("grid"));
-		getSGC("box").addChild(calculate2DGrid());
+		nodes.get("box").removeChild(nodes.get("grid"));
+		nodes.get("box").addChild(calculate2DGrid());
 	}
 	
 	
@@ -1073,7 +1062,7 @@ public class CoordinateSystemFactory {
 		for (int axis=X; axis<=Z; axis++) {
 			//for box:
 			for (int k=0; k<=3; k++) {
-				arrow = getSGC(axesNames[axis]+toBinaryString(k)+"arrow");  //e.g. x00arrow
+				arrow = nodes.get(axesNames[axis]+toBinaryString(k)+"arrow");  //e.g. x00arrow
 				m = new FactoredMatrix(arrow.getTransformation());
 				m.setStretch(arrowStretch); //stretch urCone
 				Transformation trans = new Transformation(m.getArray());
@@ -1081,7 +1070,7 @@ public class CoordinateSystemFactory {
 				trans.setReadOnly(true);
 				arrow.setTransformation(trans);
 				
-				ticks = getSGC(axesNames[axis]+toBinaryString(k)+"ticks");  //e.g. x00ticks
+				ticks = nodes.get(axesNames[axis]+toBinaryString(k)+"ticks");  //e.g. x00ticks
 				m = new FactoredMatrix(ticks.getTransformation());
 				m.setStretch(tickStretch, tickStretch, 1); //stretch ticks
 				trans = new Transformation(m.getArray());
@@ -1090,7 +1079,7 @@ public class CoordinateSystemFactory {
 				ticks.setTransformation(trans);
 			}
 			//for axes:
-			arrow = getSGC(axesNames[axis]+"Arrow");  //e.g. xArrow
+			arrow = nodes.get(axesNames[axis]+"Arrow");  //e.g. xArrow
 			m = new FactoredMatrix(arrow.getTransformation());
 			m.setStretch(arrowStretch); //stretch urCone
 			Transformation trans = new Transformation(m.getArray());
@@ -1098,7 +1087,7 @@ public class CoordinateSystemFactory {
 			trans.setReadOnly(true);
 			arrow.setTransformation(trans);
 			
-			ticks = getSGC(axesNames[axis]+"Ticks");  //e.g. xTicks
+			ticks = nodes.get(axesNames[axis]+"Ticks");  //e.g. xTicks
 			m = new FactoredMatrix(ticks.getTransformation());
 			m.setStretch(tickStretch, tickStretch, 1); //stretch ticks
 			trans = new Transformation(m.getArray());
@@ -1125,7 +1114,7 @@ public class CoordinateSystemFactory {
 	 */
 	public void showAxes(boolean b) {
 		showAxes = b;
-		getSGC("axes").setVisible(b);
+		nodes.get("axes").setVisible(b);
 	}
 
 	
@@ -1135,7 +1124,7 @@ public class CoordinateSystemFactory {
 	 */
 	public void showBox(boolean b) {
 		showBox = b;
-		getSGC("box").setVisible(b);
+		nodes.get("box").setVisible(b);
 	}
 
 
@@ -1145,7 +1134,7 @@ public class CoordinateSystemFactory {
 	 */
 	public void showGrid(boolean b) {
 		showGrid = b;
-		getSGC("grid").setVisible(b);
+		nodes.get("grid").setVisible(b);
 	}
 	
 	
@@ -1158,7 +1147,7 @@ public class CoordinateSystemFactory {
 		showAxesArrows = b;
 		//set visiblity of all arrows
 		for (int axis=X; axis<=Z; axis++)
-			getSGC(axesNames[axis]+"Arrow").setVisible(b);
+			nodes.get(axesNames[axis]+"Arrow").setVisible(b);
 	}
 
 
@@ -1172,7 +1161,7 @@ public class CoordinateSystemFactory {
 		//set visiblity of all arrows
 		for (int axis=X; axis<=Z; axis++) {
 			for (int k=0; k<=3; k++) {
-				getSGC(axesNames[axis]+toBinaryString(k)+"arrow").setVisible(b);
+				nodes.get(axesNames[axis]+toBinaryString(k)+"arrow").setVisible(b);
 			}
 		}
 	}
@@ -1215,7 +1204,7 @@ public class CoordinateSystemFactory {
 	 */
 	public void setGridColor(Color c) {
 		gridColor = c;
-		getSGC("grid").getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
+		nodes.get("grid").getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
 	}
 
 
@@ -1297,7 +1286,7 @@ public class CoordinateSystemFactory {
 			a = (edges[axis][0] == -1)? "0":"1";
 			b = (edges[axis][1] == -1)? "0":"1";
 			for (int k=0; k<=3; k++) {
-				labels = getSGC(axesNames[axis]+toBinaryString(k)+"ticklabels");  //e.g. x00ticklabels
+				labels = nodes.get(axesNames[axis]+toBinaryString(k)+"ticklabels");  //e.g. x00ticklabels
 				if ( toBinaryString(k).equals(a+b) )
 					labels.setVisible(true);
 				else labels.setVisible(false);
@@ -1331,9 +1320,9 @@ public class CoordinateSystemFactory {
 		int[] result = new int[3];
 		for (int axis=X; axis<=Z; axis++) {
 			//get coordinates of the middle points of the two neighbour edges via anchor point of label 
-			PointSet ps = (PointSet)getSGC(axesNames[axis]+toBinaryString(neighbourEdges[axis][0])+"label").getGeometry();
+			PointSet ps = (PointSet)nodes.get(axesNames[axis]+toBinaryString(neighbourEdges[axis][0])+"label").getGeometry();
 			double[] first = ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null);
-			ps = (PointSet)getSGC(axesNames[axis]+toBinaryString(neighbourEdges[axis][1])+"label").getGeometry();
+			ps = (PointSet)nodes.get(axesNames[axis]+toBinaryString(neighbourEdges[axis][1])+"label").getGeometry();
 			double[] second = ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null);
 			
 			//determine the rightest between the two
