@@ -114,7 +114,7 @@ public class DragEventTool extends AbstractTool {
   
   private final double[][] dir2ScaleZDrag=new double[][]{{1,0,0},{0,1,0}};   //Richtung in Weltkoordinaten, die die Staerke des drag in z-Richtung bestimmt
   private double[][] distDir=new double[dir2ScaleZDrag.length][dir2ScaleZDrag[0].length];
-  private double f=2*Math.sin(Math.PI/4);
+  //private double f=2*Math.sin(Math.PI/4);
   private Matrix result=new Matrix();
 	
 	public void perform(ToolContext tc) {		
@@ -133,9 +133,9 @@ public class DragEventTool extends AbstractTool {
       Matrix root2local=new Matrix(tc.getRootToLocal().getMatrix(null));
       root2local.setColumn(3,new double[]{0,0,0,1});      
       Pn.dehomogenize(translation3,root2local.multiplyVector(Pn.homogenize(null,translation3)));        
-      double factor=(Rn.innerProduct(distDir[0],translation3)+Rn.innerProduct(distDir[1],translation3))/f;
+      double factor=(Rn.innerProduct(distDir[0],translation3)+Rn.innerProduct(distDir[1],translation3));// /f;
      //double factor=Rn.innerProduct(distDir[0],translation3);
-      factor=factor/Rn.euclideanNorm(root2local.multiplyVector(dir)); //teilen durch rueck-skalierung
+      factor=factor/Rn.euclideanNorm(root2local.multiplyVector(dir)); 
       Rn.times(translation3,factor,dir);
     }   
     double[] translation={translation3[0],translation3[1],translation3[2],1};
