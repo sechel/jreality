@@ -50,8 +50,8 @@ public class BoyDemo implements ChangeListener {
   
   public BoyDemo() throws IOException {
     init();
-    content = new ToolDemoContent(cmp, new Rectangle3D(new double[][]{{-20,0, -20},{20,30,20}}));
-    content.setKeepAspectRatio(false);
+    content = new ToolDemoContent(cmp, new Rectangle3D(new double[][]{{-20,0, -20},{20,35,20}}));
+    content.setKeepAspectRatio(true);
   }
   
   public ToolDemoContent getContent() {
