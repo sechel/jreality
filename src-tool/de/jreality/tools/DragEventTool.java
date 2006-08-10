@@ -21,97 +21,134 @@ public class DragEventTool extends AbstractTool {
 	protected LineDragListener lineDragListener;
 	protected FaceDragListener faceDragListener;
 	
-    private static final InputSlot pointerSlot = InputSlot.getDevice("PointerTransformation");
-	
+  private static final InputSlot pointerSlot = InputSlot.getDevice("PointerTransformation");
+  private static InputSlot alongZPointerSlot = InputSlot.getDevice("DragAlongViewDirection");
+  
 	public DragEventTool(String dragSlotName){
 		super(InputSlot.getDevice(dragSlotName));
 		addCurrentSlot(pointerSlot, "triggers drag events");
+    addCurrentSlot(alongZPointerSlot);
 	}
-	
-	// TODO: active flag should be unnecessary
 	
 	public DragEventTool(){
-		  this("AllDragActivation");
+		  this("AllDragActivation");      
 	}
 	
-    protected boolean active;
-    protected PointSet pointSet;
-    protected IndexedLineSet lineSet;
-    protected IndexedFaceSet faceSet;
-    protected int index=-1;
-    protected double[] pickPoint;
-    private int pickType=PickResult.PICK_TYPE_OBJECT;
+  protected boolean active;
+  private boolean dragInViewDirection;
+  protected PointSet pointSet;
+  protected IndexedLineSet lineSet;
+  protected IndexedFaceSet faceSet;
+  protected int index=-1;
+  protected double[] pickPoint=new double[4];;
+  private int pickType=PickResult.PICK_TYPE_OBJECT;
     
-    private Matrix pointerToPoint = new Matrix();
+  private Matrix pointerToPoint = new Matrix();
     
 	public void activate(ToolContext tc) {
-		  active = true;
-          tc.getTransformationMatrix(pointerSlot).toDoubleArray(pointerToPoint.getArray());
-          pointerToPoint.invert();
-          pointerToPoint.multiplyOnRight(tc.getRootToLocal().getMatrix(null));
+		active = true;    
+    try {
+      if (tc.getAxisState(alongZPointerSlot).isPressed()) 
+        dragInViewDirection = true;
+      else 
+        dragInViewDirection = false;
+    }catch (Exception me) {dragInViewDirection = false;}  
+    
+    tc.getTransformationMatrix(pointerSlot).toDoubleArray(pointerToPoint.getArray());     
+    pointerToPoint.invert();     
+    pointerToPoint.multiplyOnRight(tc.getRootToLocal().getMatrix(null));    
+    
+    Matrix root2cam=new Matrix(tc.getViewer().getCameraPath().getMatrix(null));
+    root2cam.setColumn(3,new double[]{0,0,0,1});  
+    distDir[0]=Rn.normalize(null,root2cam.multiplyVector(dir2ScaleZDrag[0]));
+    distDir[1]=Rn.normalize(null,root2cam.multiplyVector(dir2ScaleZDrag[1]));
           
-	      if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_POINT) {
-          if (pointDragListener == null) {
-            active=false;
-            tc.reject();
-            return;
-          }
-	    	  pickType=PickResult.PICK_TYPE_POINT;
-	          pointSet = (PointSet) tc.getCurrentPick().getPickPath().getLastElement();
-	          index=tc.getCurrentPick().getIndex();
-	          double[] point = pointSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray().getValueAt(index).toDoubleArray(null);
-	          MatrixBuilder.euclidean(pointerToPoint).translate(point);      
-	          firePointDragStart(point);        
-	      }else if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_LINE) {	            
-          if (lineDragListener == null) {
-            active=false;
-            tc.reject();
-            return;
-          }
-	    	  pickType=PickResult.PICK_TYPE_LINE;
-	    	  lineSet = (IndexedLineSet) tc.getCurrentPick().getPickPath().getLastElement();
-	    	  index=tc.getCurrentPick().getIndex();	            
-	    	  pickPoint=tc.getCurrentPick().getObjectCoordinates();
-	    	  if(pickPoint.length==3) Pn.homogenize(pickPoint,pickPoint);
-	    	  MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint);	            
-	    	  fireLineDragStart(new double[]{0,0,0,1});        
-	      }else if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_FACE) {
-          if (faceDragListener == null) {
-            active=false;
-            tc.reject();
-            return;
-          }
-	    	  pickType=PickResult.PICK_TYPE_FACE;
-	    	  faceSet = (IndexedFaceSet) tc.getCurrentPick().getPickPath().getLastElement();
-	    	  index=tc.getCurrentPick().getIndex();
-	    	  pickPoint=tc.getCurrentPick().getObjectCoordinates();
-	    	  if(pickPoint.length==3) Pn.homogenize(pickPoint,pickPoint);
-	    	  MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint); 	            
-	    	  fireFaceDragStart(new double[]{0,0,0,1});        
-	      }else {
-          active=false;
-          tc.reject();
-        }
+    if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_POINT) {
+      if (pointDragListener == null) {
+        active=false;
+        tc.reject();
+        return;
+      }
+	    pickType=PickResult.PICK_TYPE_POINT;
+	    pointSet = (PointSet) tc.getCurrentPick().getPickPath().getLastElement();
+	    index=tc.getCurrentPick().getIndex();  
+      double[] pickPointTemp = pointSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray().getValueAt(index).toDoubleArray(null);
+      if(pickPointTemp.length==3) Pn.homogenize(pickPoint,pickPointTemp);
+      else Pn.dehomogenize(pickPoint,pickPointTemp);
+      MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint);  
+	    firePointDragStart(pickPoint);        
+	  }else if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_LINE) {	            
+	    if (lineDragListener == null) {
+	      active=false;
+        tc.reject();
+        return;
+      }
+	    pickType=PickResult.PICK_TYPE_LINE;
+	    lineSet = (IndexedLineSet) tc.getCurrentPick().getPickPath().getLastElement();
+	    index=tc.getCurrentPick().getIndex();	            
+	    double[] pickPointTemp=tc.getCurrentPick().getObjectCoordinates();
+      if(pickPointTemp.length==3) Pn.homogenize(pickPoint,pickPointTemp);
+      else Pn.dehomogenize(pickPoint,pickPointTemp);
+	    MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint);	            
+	    fireLineDragStart(new double[]{0,0,0,1});        
+	  }else if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_FACE) {
+      if (faceDragListener == null) {
+        active=false;
+        tc.reject();
+        return;
+      }
+      pickType=PickResult.PICK_TYPE_FACE;
+	    faceSet = (IndexedFaceSet) tc.getCurrentPick().getPickPath().getLastElement();
+	    index=tc.getCurrentPick().getIndex();
+	    double[] pickPointTemp=tc.getCurrentPick().getObjectCoordinates();
+      if(pickPointTemp.length==3) Pn.homogenize(pickPoint,pickPointTemp);
+      else Pn.dehomogenize(pickPoint,pickPointTemp);
+	    MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint); 	            
+	    fireFaceDragStart(new double[]{0,0,0,1});        
+	  }else {
+      active=false;
+      tc.reject();
+    }
 	}
 
-	Matrix result=new Matrix();
+  
+  private final double[][] dir2ScaleZDrag=new double[][]{{1,0,0},{0,1,0}};   //Richtung in Weltkoordinaten, die die Staerke des drag in z-Richtung bestimmt
+  private double[][] distDir=new double[dir2ScaleZDrag.length][dir2ScaleZDrag[0].length];
+  private double f=2*Math.sin(Math.PI/4);
+  private Matrix result=new Matrix();
 	
 	public void perform(ToolContext tc) {		
- 		if (!active) return;
-        tc.getTransformationMatrix(pointerSlot).toDoubleArray(result.getArray());
-        result.multiplyOnRight(pointerToPoint);
-        result.multiplyOnLeft(tc.getRootToLocal().getInverseMatrix(null));
-	    if (pickType == PickResult.PICK_TYPE_POINT) {
-	        firePointDragged(result.getColumn(3));
-	    }else if (pickType == PickResult.PICK_TYPE_LINE) {	
-	        double[] translation=Rn.subtract(null,result.getColumn(3),pickPoint);
-	        if(translation[3]!=0) fireLineDragged(translation);
-	        else fireLineDragged(new double[] {translation[0],translation[1],translation[2],1});    	
-	    }else if (pickType == PickResult.PICK_TYPE_FACE) {
-	    	double[] translation=Rn.subtract(null,result.getColumn(3),pickPoint);
-	        if(translation[3]!=0) fireFaceDragged(translation);
-	        else fireFaceDragged(new double[] {translation[0],translation[1],translation[2],1});	    	
-	    }
+ 		if (!active) return;    
+    tc.getTransformationMatrix(pointerSlot).toDoubleArray(result.getArray());     
+    result.multiplyOnRight(pointerToPoint);
+    result.multiplyOnLeft(tc.getRootToLocal().getInverseMatrix(null));
+    
+    double[] newPoint3=new double[3];   Pn.dehomogenize(newPoint3,result.getColumn(3));
+    double[] pickPoint3=new double[3];  Pn.dehomogenize(pickPoint3,pickPoint); 
+    double[] translation3=Rn.subtract(null,newPoint3,pickPoint3);
+    if(dragInViewDirection){       
+      double[] dir=new double[3];
+      Pn.dehomogenize(dir,pointerToPoint.getInverse().getColumn(2));
+      Rn.normalize(dir,dir);
+      Matrix root2local=new Matrix(tc.getRootToLocal().getMatrix(null));
+      root2local.setColumn(3,new double[]{0,0,0,1});      
+      Pn.dehomogenize(translation3,root2local.multiplyVector(Pn.homogenize(null,translation3)));        
+      double factor=(Rn.innerProduct(distDir[0],translation3)+Rn.innerProduct(distDir[1],translation3))/f;
+     //double factor=Rn.innerProduct(distDir[0],translation3);
+      factor=factor/Rn.euclideanNorm(root2local.multiplyVector(dir)); //teilen durch rueck-skalierung
+      Rn.times(translation3,factor,dir);
+    }
+    
+   
+    double[] translation={translation3[0],translation3[1],translation3[2],1};
+    
+	  if (pickType == PickResult.PICK_TYPE_POINT) {      
+	    firePointDragged(Rn.add(translation,translation,pickPoint));
+	  }else if (pickType == PickResult.PICK_TYPE_LINE) {
+	    fireLineDragged(translation);    	
+	  }else if (pickType == PickResult.PICK_TYPE_FACE) {
+      fireFaceDragged(translation);	    	
+	  }
 	}
 
 	public void deactivate(ToolContext tc) {
