@@ -82,7 +82,6 @@ public class SchwarzDemo extends ToolDemoContent implements ChangeListener {
     getContent().setAppearance(app);
     getContent().addChild(domain);
     Texture2D tex = TextureUtility.createTexture(app, "polygonShader", Input.getInput("textures/schwarz.png"));
-    tex.setBlendColor(Color.blue);
   }
   
   public void stateChanged(ChangeEvent e) {
@@ -93,7 +92,7 @@ public class SchwarzDemo extends ToolDemoContent implements ChangeListener {
   public void setReflectionMap(ImageData[] selectedCubeMap) {
     System.out.println("creating reflection map");
     CubeMap cm = TextureUtility.createReflectionMap(app, "polygonShader", selectedCubeMap);
-    cm.setBlendColor(new java.awt.Color(1.0f, 0.0f, 0.0f, 1f));
+    cm.setBlendColor(new java.awt.Color(1.0f, 0.0f, 0.0f, 0f));
   }
 
   

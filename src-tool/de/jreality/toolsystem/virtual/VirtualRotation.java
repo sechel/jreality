@@ -73,6 +73,7 @@ public class VirtualRotation implements VirtualDevice {
   
   public ToolEvent process(VirtualDeviceContext context)
       throws MissingSlotException {
+	  if (context.getEvent().getInputSlot()==cameraToWorld) return null;
     DoubleArray pointer = context.getTransformationMatrix(pointerNDC);
     if (pointer == null) throw new MissingSlotException(pointerNDC);
     if (oldX == Integer.MAX_VALUE) {
