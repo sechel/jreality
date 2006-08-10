@@ -137,9 +137,7 @@ public class DragEventTool extends AbstractTool {
      //double factor=Rn.innerProduct(distDir[0],translation3);
       factor=factor/Rn.euclideanNorm(root2local.multiplyVector(dir)); //teilen durch rueck-skalierung
       Rn.times(translation3,factor,dir);
-    }
-    
-   
+    }   
     double[] translation={translation3[0],translation3[1],translation3[2],1};
     
 	  if (pickType == PickResult.PICK_TYPE_POINT) {      
