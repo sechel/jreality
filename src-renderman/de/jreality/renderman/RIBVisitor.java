@@ -47,7 +47,6 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
-import java.beans.Statement;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -58,10 +57,12 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
+import javax.media.jai.JAI;
+//import javax.media.jai.JAI;
+//import javax.media.jai.RenderedOp;
 
 import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.GeometryUtility;
@@ -96,12 +97,12 @@ import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.CubeMap;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.LoggingSystem;
 
 
 /**
@@ -275,20 +276,29 @@ public class RIBVisitor extends SceneGraphVisitor {
             map = new HashMap();
             Color col = Color.WHITE;
            if(ap!=null) { 
-   	         Object o = ap.getAttribute(CommonAttributes.BACKGROUND_COLORS);
-      	          if (o != null && o instanceof Color[])	 
-      	        	  // insert a polygon at the back of the viewing frustrum
-      	        	  handleBackgroundColors((Color[]) o, camera, path.getMatrix(null));
-      	          else {
-         	         o = ap.getAttribute(CommonAttributes.BACKGROUND_COLOR,Color.class);
-      	        	  if(o instanceof Color) {
-        	            	col = (Color) o;   		
-      	        	  }
-           	         float[] f = col.getRGBColorComponents(null);     
-           	         map.put("color background", f);
-           	         Ri.imager("background",map);        
-  	            } 
+       			if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
+       				CommonAttributes.SKY_BOX, ap)) {
+       			CubeMap cm = (CubeMap) AttributeEntityUtility
+       					.createAttributeEntity(CubeMap.class,
+       							CommonAttributes.SKY_BOX, ap, true);
+       			RendermanSkyBox.render(this, world2Camera, cm);
+       		} else {
+     	         Object o = ap.getAttribute(CommonAttributes.BACKGROUND_COLORS);
+     	          if (o != null && o instanceof Color[])	 
+     	        	  // insert a polygon at the back of the viewing frustrum
+     	        	  handleBackgroundColors((Color[]) o, camera, path.getMatrix(null));
+     	          else {
+        	         o = ap.getAttribute(CommonAttributes.BACKGROUND_COLOR,Color.class);
+     	        	  if(o instanceof Color) {
+       	            	col = (Color) o;   		
+     	        	  }
+          	         float[] f = col.getRGBColorComponents(null);     
+          	         map.put("color background", f);
+          	         Ri.imager("background",map);        
+ 	            }       			
        		}
+
+        		}
          }
          new LightCollector(root, this);
  //       new GeometryCollector(root,  this);
@@ -420,9 +430,12 @@ public class RIBVisitor extends SceneGraphVisitor {
      * @return
      */
     public String writeTexture(Texture2D tex) {
-            Image img;
-            ImageData data = tex.getImage();
-        String noSuffix = (String) textures.get(data);
+            ImageData data = tex.getImage(); 
+            return writeTexture(data);
+    }
+    public String writeTexture(ImageData data){
+        Image img;
+       String noSuffix = (String) textures.get(data);
         String fname = null;
 //        Iterator iter = ImageIO.getImageWritersByMIMEType("image/tiff");
 //        while (iter.hasNext())	{
@@ -483,24 +496,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 //
 //            RenderedOp op = JAI.create("filestore", image,
 //                    fname, format);
-
-// TODO: implemented this using reflection, please check if it workes...
-
-            try {
-              String format = "tiff";
-              Statement stm = new Statement(Class.forName("javax.media.jai.JAI"),
-                                            "create",
-                                            new Object[]{"filestore", rImage, fname, format}
-              );
-              try {
-                stm.execute();
-              } catch (Exception e) {
-                if (e instanceof RuntimeException) throw (RuntimeException) e;
-                LoggingSystem.getLogger(this).log(Level.CONFIG, "writing tiff failed", e);
-              }
-            } catch (ClassNotFoundException e) {
-              LoggingSystem.getLogger(this).config("no JAI in classpath - cannot write tiff");
-            }
+            String format = "tiff";
+            // TODO use compression when writing out file
+            JAI.create("filestore", rImage,fname, format);
+//            System.err.println("writing "+fname);
 //            try {
 //                //OutputStream os = new FileOutputStream(f);
 //                boolean worked =ImageIO.write(rImage,"PNG",f);
@@ -525,7 +524,7 @@ public class RIBVisitor extends SceneGraphVisitor {
     		}
     		else if (proxy instanceof SceneGraphComponent) {
     			visit((SceneGraphComponent) proxy);
-    			System.err.println("RIBVisitor: Found sgc proxy");
+    			//System.err.println("RIBVisitor: Found sgc proxy");
     		}
        		return true;
     	}
@@ -535,7 +534,7 @@ public class RIBVisitor extends SceneGraphVisitor {
     public void visit(Geometry g)	{
     	hasProxy(g);
     	super.visit(g);
-    	System.err.println("Visiting geometry RIBVisitor");
+    	//System.err.println("Visiting geometry RIBVisitor");
     }
     boolean testBallStick = true;
 	private float currentOpacity;
