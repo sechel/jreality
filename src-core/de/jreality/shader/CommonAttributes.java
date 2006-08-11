@@ -69,11 +69,10 @@ public class CommonAttributes {
 	public final static String FAST_AND_DIRTY_ENABLED = 	"isFastAndDirty";
 	public final static String TRANSPARENCY_ENABLED = 	"transparencyEnabled";
 	public final static String Z_BUFFER_ENABLED = 		"zBufferEnabled";
-	public final static String AT_INFINITY = 				"atInfinity";
 	public final static String LEVEL_OF_DETAIL = 			"levelOfDetail";
 	public final static double LEVEL_OF_DETAIL_DEFAULT = 			1.0;
-	public final static boolean DIFFUSE_COLOR_ONLY	= false;
-	public static final String DEEP_TRANSFORMATION_STACK = "deepTransformationStack";
+	public final static String OPAQUE_TUBES_AND_SPHERES = "opaqueTubesAndSpheres";
+	public final static boolean OPAQUE_TUBES_AND_SPHERES_DEFAULT = false;
 	
 	// these hints are heavily OpenGL specific
 	public final static String DEPTH_FUDGE_FACTOR = 		"depthFudgeFactor";
@@ -170,6 +169,7 @@ public class CommonAttributes {
 	public static final String RMAN_PREAMBLE = "rendermanPreamble";
 	public static final String RMAN_PROXY_COMMAND = "rendermanProxyCommand";
 	public static final String RMAN_RETAIN_GEOMETRY = "rendermanRetainGeometry";
+	public static final String RMAN_REFLECTIONMAP_FILE = "rendermanReflectionmapFile";
     /* 
      * @param ap
      * 
@@ -183,7 +183,6 @@ public class CommonAttributes {
 		ap.setAttribute(TRANSPARENCY_ENABLED,true);
 		ap.setAttribute(LIGHTING_ENABLED,true);
 		ap.setAttribute(FAST_AND_DIRTY_ENABLED,true);
-		ap.setAttribute(AT_INFINITY,false);
 		
 		ap.setAttribute(TRANSPARENCY, TRANSPARENCY_DEFAULT);
 		// default geometry shader

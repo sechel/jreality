@@ -47,9 +47,11 @@ import de.jreality.renderman.RIBViewer;
 import de.jreality.renderman.RIBVisitor;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.CubeMap;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
 
 /**
  * @author Charles Gunn
@@ -61,6 +63,7 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
 	//public static final int FRONT_AND_BACK = GL.GL_FRONT_AND_BACK;
 	//public static final int FRONT = GL.GL_FRONT;
 	//public static final int BACK = GL.GL_BACK;
+	  CubeMap reflectionMap;
 	
 		
 	static int count = 0;
@@ -81,17 +84,18 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
         map.put("Ka",new Float(Ka));
         map.put("specularcolor",specularcolor);
        
+        shaderName = "plastic";
         //System.out.println("has texture "+AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), a));
         if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, "polygonShader.texture2d", eap)) {
             Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), eap);
          
             String fname = null;
-            if (ribv.getRendererType() == RIBViewer.TYPE_PIXAR)	{
+//            if (ribv.getRendererType() == RIBViewer.TYPE_PIXAR)	{
             		fname = (String) eap.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE,"");
             		if (fname == "")	{
             			fname = null;
             		} 
-            } 
+//           } 
             if (fname == null) {
             	fname = ribv.writeTexture(tex);
             }
@@ -106,9 +110,21 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
             	map.put("matrix textureMatrix",RIBVisitor.fTranspose(mat));
             }
             shaderName = "transformedpaintedplastic";
-        } else {
-            shaderName = "plastic";
         }
+	    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))
+	    	{
+	    	reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));
+	    	// TODO figure out how to write out a reflection map so that a renderman renderer can digest it
+	    	// failing that, require user to hand-set the file name to be read
+	    	String fname = (String) eap.getAttribute(CommonAttributes.RMAN_REFLECTIONMAP_FILE,"");
+    		if (fname == "")	{
+    			fname = null;
+    		} 
+    		if (fname != null) {
+    	    	map.put("string reflectionmap", fname);
+    	    	shaderName = "transformedpaintedplastic";    			
+    		}
+	    	}
     }
 
 	public String getType() {

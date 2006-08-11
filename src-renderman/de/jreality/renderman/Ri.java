@@ -131,7 +131,7 @@ public class Ri {
      * @param name
      * @return
      */
-    private static String str(String name) {
+    public static String str(String name) {
         return "\""+name+"\"";
     }
     /**
@@ -388,6 +388,11 @@ public class Ri {
         writeMap(w,map);
     }
     
+    public static void patch(String type, Map map)	{
+    	w.print("Patch ");
+    	w.print(str(type)+" ");
+    	writeMap(w,map);
+    }
     public static void curves(String type, int ncurves,int[] nvertices, String wrap, Map map) {
 //        String[] tokens = keysFromMap(map);
 //        Object[] values = valuesFromMap(map, tokens);

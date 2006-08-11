@@ -52,8 +52,9 @@ public interface RenderingHintsShader extends AttributeEntity {
 	  final static boolean IGNORE_ALPHA0_DEFAULT = true;				// pseudo-transparency available in OpenGL
 	  final static boolean ANY_DISPLAY_LISTS_DEFAULT = true;			// use display lists at all?
 	  final static boolean MANY_DISPLAY_LISTS_DEFAULT = true;			// if so, one display list per instance?
-	  final static boolean BACK_FACE_CULLING_DEFAULT = false;			// if so, one display list per instance?
+	  final static boolean BACK_FACE_CULLING_DEFAULT = false;	
 	  final static boolean CLEAR_COLOR_BUFFER = true;
+	  final static boolean OPAQUE_TUBES_AND_SPHERES = false;
 	final static double LEVEL_OF_DETAIL_DEFAULT = 			1.0;
 	final static double DEPTH_FUDGE_FACTOR_DEFAULT = 1.0;
 
@@ -83,6 +84,9 @@ public interface RenderingHintsShader extends AttributeEntity {
 
 	  Boolean getClearColorBuffer();
 	  void setClearColorBuffer(Boolean d);
+
+	  Boolean getOpaqueTubesAndSpheres();
+	  void setOpaqueTubesAndSpheres(Boolean d);
 
 	  Double getLevelOfDetail();
 	  void setLevelOfDetail(Double d);
