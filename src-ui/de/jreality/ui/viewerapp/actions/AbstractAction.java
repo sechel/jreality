@@ -43,44 +43,28 @@ package de.jreality.ui.viewerapp.actions;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.treeview.SelectionEvent;
-import de.jreality.ui.treeview.SelectionListener;
-import de.jreality.ui.viewerapp.Navigator;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.SelectionManager.SelectionEvent;
+import de.jreality.ui.viewerapp.SelectionManager.SelectionListener;
 
 
 public abstract class AbstractAction extends javax.swing.AbstractAction {
 
   Component frame;
-  Navigator navigator;
-  SceneGraphComponent node;
-  Object actee;
+  SceneGraphPath selection;
   
   
-  public AbstractAction(String name, SceneGraphComponent node, Component frame) {
+  public AbstractAction(String name, final SelectionManager sm, Component frame) {
     super(name);
     
-    if (node == null) 
-      throw new IllegalArgumentException("Node is null!");
+    if (sm == null) 
+      throw new IllegalArgumentException("SelectionManager is null!");
     
     this.frame = frame;
-    this.node = node;
-    actee = getDefaultActee();
-  }
-  
-  
-  public AbstractAction(String name, Navigator n, Component frame) {
-    super(name);
+    selection = sm.getSelection();
     
-    if (n == null) 
-      throw new IllegalArgumentException("Navigator is null!");
-    
-    this.frame = frame;
-    navigator = n;
-    node = navigator.getRoot();
-    actee = getDefaultActee();
-    
-    navigator.getTreeSelectionModel().addTreeSelectionListener(
+    sm.addSelectionListener(
         new SelectionListener(){
           public void selectionChanged(SelectionEvent e) {
             AbstractAction.this.selectionChanged(e);
@@ -89,14 +73,20 @@ public abstract class AbstractAction extends javax.swing.AbstractAction {
   }
   
   
-  Object getDefaultActee() {
-    if (navigator != null)
-      return navigator.getRoot();
-    return node;
+  public AbstractAction(String name, final SelectionManager sm) {
+    this(name, sm, null);
   }
   
   
-  abstract void selectionChanged(SelectionEvent e);
+  public AbstractAction(String name) {
+    super(name);
+  }
+  
+  
+  public void selectionChanged(SelectionEvent e) {
+    selection = e.getSelection();
+  }
+  
   
   public abstract void actionPerformed(ActionEvent e);
   

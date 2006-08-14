@@ -42,9 +42,7 @@ package de.jreality.ui.viewerapp.actions;
 
 import java.awt.event.ActionEvent;
 
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
-import de.jreality.ui.treeview.SelectionEvent;
 
 
 public class Render extends AbstractAction {
@@ -55,7 +53,8 @@ public class Render extends AbstractAction {
   
   
   public Render(String name, Viewer currViewer) {
-    super(name, new SceneGraphComponent(), null);
+    super(name);
+    putValue(SHORT_DESCRIPTION, "Render");
     
     if (currViewer == null) 
       throw new IllegalArgumentException("Viewer is null!");
@@ -63,12 +62,7 @@ public class Render extends AbstractAction {
     this.currViewer = currViewer;
   }
   
-  
-  void selectionChanged(SelectionEvent e) {
-    //do nothing
-  }
-
-  
+    
   public void actionPerformed(ActionEvent e) {
     currViewer.render();
   }

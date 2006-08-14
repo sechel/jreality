@@ -41,85 +41,46 @@
 package de.jreality.ui.viewerapp.actions;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 
-import de.jreality.scene.Appearance;
-import de.jreality.scene.Camera;
-import de.jreality.scene.Geometry;
-import de.jreality.scene.Light;
+import javax.swing.KeyStroke;
+
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.SceneGraphVisitor;
-import de.jreality.scene.Transformation;
-import de.jreality.scene.tool.Tool;
-import de.jreality.ui.treeview.SelectionEvent;
-import de.jreality.ui.viewerapp.Navigator;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.SelectionManager.SelectionEvent;
 
 
 public class Remove extends AbstractAction {
 
   private static final long serialVersionUID = 1L;
   
-  private Object obj = null;
+  private SelectionManager sm;
   
   
-  public Remove(String name, Navigator navigator) {
-    super(name, navigator, null);
+  public Remove(String name, SelectionManager sm) {
+    super(name, sm);
+    this.sm = sm;
+    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
+    putValue(SHORT_DESCRIPTION, "Delete");
   }
   
-  
-  public Remove(String name, SceneGraphComponent node) {
-    super(name, node, null);
-  }
-
   
   public void actionPerformed(ActionEvent e) {
+    //selection.getLength() > 1
+    SceneGraphComponent child = selection.getLastComponent();
+    SceneGraphPath parentPath = selection.popNew();
+    parentPath.getLastComponent().removeChild(child);
+    sm.setSelection(parentPath);
+  }
   
-    final SceneGraphComponent parent = (SceneGraphComponent) actee;
-    
-    if (obj instanceof SceneGraphNode) {
-      ((SceneGraphNode) obj).accept(new SceneGraphVisitor() {
-        
-        public void visit(SceneGraphComponent sc) {
-          parent.removeChild(sc);
-        }
-        public void visit(Geometry g) {
-          parent.setGeometry(null);
-        }
-        public void visit(Transformation t) {
-          parent.setTransformation(null);
-        }
-        public void visit(Appearance a) {
-          parent.setAppearance(null);
-        }
-        public void visit(Camera c) {
-          parent.setCamera(null);
-        }
-        public void visit(Light l) {
-         parent.setLight(null); 
-        }
-      });
-    }
-    else if (obj instanceof Tool) {
-        parent.removeTool((Tool) obj);
-    }
- }
-
-
-  void selectionChanged(SelectionEvent e) {
-    
-    SceneGraphComponent parent = e.getParentOfSelection();
-    
-    if (parent != null) {
-      setEnabled(true);
-      actee = parent;
-      
-      if (e.selectionIsSGNode())
-        obj = e.selectionAsSGNode();
-      else if (e.selectionIsTool())
-        obj = e.selectionAsTool();
-      //else parent == null
-    }
-    else setEnabled(false);
+  
+  @Override
+  public void selectionChanged(SelectionEvent e) {
+      super.selectionChanged(e);
+      if (selection.getLength() == 1)
+        setEnabled(false);
+      else setEnabled(true);
   }
 
 }

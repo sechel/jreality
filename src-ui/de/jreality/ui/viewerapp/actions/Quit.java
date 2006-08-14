@@ -41,9 +41,9 @@
 package de.jreality.ui.viewerapp.actions;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.treeview.SelectionEvent;
+import javax.swing.KeyStroke;
 
 
 public class Quit extends AbstractAction {
@@ -52,14 +52,11 @@ public class Quit extends AbstractAction {
 
 
   public Quit(String name) {
-    super(name, new SceneGraphComponent(), null);
+    super(name);
+    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
+    putValue(SHORT_DESCRIPTION, "Quit");
   }
   
-  
-  void selectionChanged(SelectionEvent e) {
-    //do nothing
-  }
-
 
   public void actionPerformed(ActionEvent e) {
     System.exit(0);

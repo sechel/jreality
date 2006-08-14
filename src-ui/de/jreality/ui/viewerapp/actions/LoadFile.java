@@ -49,22 +49,18 @@ import javax.swing.JOptionPane;
 
 import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.treeview.SelectionEvent;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
-import de.jreality.ui.viewerapp.Navigator;
+import de.jreality.ui.viewerapp.SelectionManager;
 
 
 public class LoadFile extends AbstractAction {
 
   private static final long serialVersionUID = 1L;
   
-  
-  public LoadFile(String name, Navigator n, Component frame) {
-    super(name, n, frame);
-  }  
-  
-  public LoadFile(String name, SceneGraphComponent node, Component frame) {
-    super(name, node, frame);
+
+  public LoadFile(String name, SelectionManager sm, Component frame) {
+    super(name, sm, frame);
+    putValue(SHORT_DESCRIPTION, "Load a file");
   }
 
   
@@ -76,20 +72,12 @@ public class LoadFile extends AbstractAction {
         final SceneGraphComponent sgc = Readers.read(files[i]);
         sgc.setName(files[i].getName());
         System.out.println("READ finished.");
-        ((SceneGraphComponent) actee).addChild(sgc);
+        selection.getLastComponent().addChild(sgc);
       } 
       catch (IOException ioe) {
         JOptionPane.showMessageDialog(frame, "Failed to load file: "+ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
       }
     }
-  }
-
-
-  void selectionChanged(SelectionEvent e) {
-    
-    if (e.selectionIsSGComp()) actee = e.selectionAsSGComp();
-    else actee = getDefaultActee();
-    //alternatively this.setEnabled(false);
   }
 
 }

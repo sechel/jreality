@@ -41,21 +41,16 @@
 package de.jreality.ui.viewerapp;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.KeyEvent;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JTree;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
+import javax.swing.KeyStroke;
 
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.viewerapp.actions.AddTool;
 import de.jreality.ui.viewerapp.actions.LoadFile;
 import de.jreality.ui.viewerapp.actions.Quit;
@@ -79,11 +74,10 @@ public class MenuFactory {
   public static String REMOVE = "Remove";
   public static String ADD_TOOL = "Add Tool";
   public static String QUIT = "Quit";
-  public static String RENDER = "Render";
+  public static String RENDER = "Force Rendering";
   
   private JFrame frame = null;
-  private Navigator navigator = null;
-  private SceneGraphComponent node = null;
+  private SelectionManager sm = null;
   private ViewerSwitch viewerSwitch = null;
   
 
@@ -94,8 +88,7 @@ public class MenuFactory {
   
   public MenuFactory(ViewerApp v) {
     setFrame(v.getFrame());
-    setNavigator(v.getNavigator());
-    setNode(v.getNavigator().getRoot());
+    setSelectionManager(v.getSelectionManager());
     setViewerSwitch(v.getViewerSwitch());
   }
   
@@ -104,12 +97,8 @@ public class MenuFactory {
     this.frame = frame;
   }
 
-  public void setNavigator(Navigator navigator) {
-    this.navigator = navigator;
-  }
-
-  public void setNode(SceneGraphComponent node) {
-    this.node = node;
+  public void setSelectionManager(SelectionManager sm) {
+    this.sm = sm;
   }
 
   public void setViewerSwitch(ViewerSwitch viewerSwitch) {
@@ -117,131 +106,93 @@ public class MenuFactory {
   }
 
     
-  public void addMenuToFrame() {
-    frame.setJMenuBar(getMenu());
-    frame.validate();
-  }
-  
-  
-  public JMenuBar getMenu() {
-    
-    JMenuBar menu = new JMenuBar();
-    JMenu fileMenu = new JMenu("File");
-    fileMenu.add(new JMenuItem(new Quit(QUIT)));
-    menu.add(fileMenu);
 
-    if (navigator == null && node == null)
-      return menu;
+  public JMenuBar getMenuBar() {
     
-    JMenu editMenu = new JMenu("Edit");
-    menu.add(editMenu);
+    JMenuBar menuBar = new JMenuBar();
+    //create general actions
+    JMenu fileMenu = new JMenu("File");
+    fileMenu.setMnemonic(KeyEvent.VK_F);
+    fileMenu.add(new JMenuItem(new Quit(QUIT)));
+    menuBar.add(fileMenu);
+
+    if (sm == null) return menuBar;
     
-    if (navigator != null) {
-      fileMenu.insert(new JMenuItem(new LoadFile(LOAD_FILE, navigator, frame)), 0);
-      editMenu.add(new JMenuItem(new Remove(REMOVE, navigator)));
-      editMenu.add(new JMenuItem(new AddTool(ADD_TOOL, navigator, frame)));
-    }
-    else {
-      fileMenu.insert(new JMenuItem(new LoadFile(LOAD_FILE, navigator, frame)), 0);
-      //fileMenu.add(new JMenuItem(new Remove(REMOVE, navigator)));
-      editMenu.add(new JMenuItem(new AddTool(ADD_TOOL, navigator, frame)));
-    }
+    //create actions which require a SelectionManager
+    JMenu compMenu = new JMenu("Component");
+    compMenu.setMnemonic(KeyEvent.VK_C);
+    menuBar.add(compMenu);
     
+    fileMenu.insert(new JMenuItem(new LoadFile(LOAD_FILE, sm, frame)), 0);
+    compMenu.add(new JMenuItem(new Remove(REMOVE, sm)));
+    compMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, frame)));
+    
+    //create actions which require a ViewerSwitch
     if (viewerSwitch != null) {
       final JMenu viewerMenu = new JMenu("Viewer");
-      menu.add(viewerMenu);
+      viewerMenu.setMnemonic(KeyEvent.VK_V);
+      menuBar.add(viewerMenu);
       
       String[] viewerNames = viewerSwitch.getViewerNames();
       ButtonGroup bg = new ButtonGroup();
       for (int i=0; i<viewerSwitch.getNumViewers(); i++) {
-        final int ind = i;
+        final int index = i;
         final JRadioButtonMenuItem item = new JRadioButtonMenuItem(
-            new javax.swing.AbstractAction(viewerNames[ind]){
+            new javax.swing.AbstractAction(viewerNames[index]){
               private static final long serialVersionUID = 1L;
               
               public void actionPerformed(ActionEvent e) {
-                viewerSwitch.selectViewer(ind);
+                viewerSwitch.selectViewer(index);
                 viewerSwitch.getCurrentViewer().renderAsync();
               }
         });
-        item.setSelected(ind==0);
+        item.setSelected(index==0);
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1 + index, 0));
         bg.add(item);
         viewerMenu.add(item);
       }
 
       viewerMenu.addSeparator();
-      viewerMenu.add(new JMenuItem(new Render(RENDER, viewerSwitch.getCurrentViewer())));
+      JMenuItem mi = new JMenuItem(new Render(RENDER, viewerSwitch.getCurrentViewer()));
+      mi.setAccelerator(KeyStroke.getKeyStroke("R"));
+      viewerMenu.add(mi);
     }    
     
-    return menu;
+    return menuBar;
   }
   
   
-  public static void addMenu(Navigator navigator, JFrame frame) {
-    MenuFactory menu = new MenuFactory();
-    menu.setNavigator(navigator);
-    menu.setFrame(frame);
-    menu.addMenuToFrame();
+  /**
+   * Adds a JMenuBar to a specified JFrame containing actions 
+   * which can be performed on a SceneGraph.
+   * @param frame the JFrame to which the MenuBar is added 
+   * @param sm the SelectionManager required for most of the actions in the menu 
+   * (if sm equals null the menu bar does only contain a few general actions)
+   * @return the menu factory used to create the menu bar
+   */
+  public static MenuFactory addMenuBar(JFrame frame, SelectionManager sm) {
+    MenuFactory menuFac = new MenuFactory();
+    menuFac.setFrame(frame);
+    menuFac.setSelectionManager(sm);
+    frame.setJMenuBar( menuFac.getMenuBar() );
+    frame.validate();
+    
+    return menuFac;
   }
 
   
-  public static void addMenu(SceneGraphComponent node, JFrame frame) {
-    MenuFactory menu = new MenuFactory();
-    menu.setNode(node);
-    menu.setFrame(frame);
-    menu.addMenuToFrame();
-  }
-  
-  
-  public void addContextMenuToNavigator() {
+  /**
+   * Adds a JMenuBar to the specified ViewerApp containing actions 
+   * which can be performed on a SceneGraph.
+   * @param viewerApp the viewer application 
+   * @return the menu factory used to create the menu bar
+   */
+  public static MenuFactory addMenuBar(ViewerApp viewerApp) {
+    MenuFactory menuFac = new MenuFactory(viewerApp);
+    menuFac.frame.setJMenuBar( menuFac.getMenuBar() );
+    menuFac.frame.validate();
     
-    if (navigator == null)
-      throw new UnsupportedOperationException("No navigator instantiated, call setNavigator(navigator)!");
-    
-    final JPopupMenu cm = createContextMenu();  //creates TreeSelectionListener
-    final JTree sceneTree = navigator.getSceneTree();
-    
-    sceneTree.addMouseListener(new MouseAdapter() {
-      
-      public void mousePressed( MouseEvent e ) {
-        handlePopup( e );
-      }
-      
-      public void mouseReleased( MouseEvent e ) {
-        handlePopup( e );
-      }
-      
-      private void handlePopup( MouseEvent e ) {
-        if ( e.isPopupTrigger() ) {
-          TreePath path = sceneTree.getPathForLocation( e.getX(), e.getY() );
-          if ( path != null ) {
-            TreeSelectionModel selectionModel = sceneTree.getSelectionModel();
-            selectionModel.clearSelection();  //ensures that SelectionListeners are notified even if path did not change
-            selectionModel.setSelectionPath( path );
-            cm.show( e.getComponent(), e.getX(), e.getY()+10 );
-          }
-        }
-      }
-    });//end mouse listener
-    
-  }
-  
-  
-  private JPopupMenu createContextMenu() {
-    JPopupMenu cm = new JPopupMenu();
-    cm.add(new JMenuItem(new LoadFile(LOAD_FILE, navigator, frame)));  //frame is allowed to be null
-    cm.add(new JMenuItem(new Remove(REMOVE, navigator)));
-    cm.add(new JMenuItem(new AddTool(ADD_TOOL, navigator, frame)));
-    return cm;
-  }
-  
-  
-  public static void addContextMenu(Navigator navigator, JFrame frame) {
-    //frame is allowed to be null
-    MenuFactory menu = new MenuFactory();
-    menu.setNavigator(navigator);
-    menu.setFrame(frame);
-    menu.addContextMenuToNavigator();
+    return menuFac;
   }
 
 }

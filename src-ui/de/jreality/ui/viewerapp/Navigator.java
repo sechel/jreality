@@ -41,14 +41,21 @@
 package de.jreality.ui.viewerapp;
 
 import javax.swing.JTree;
+import javax.swing.KeyStroke;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.proxy.tree.SceneTreeNode;
+import de.jreality.scene.tool.Tool;
 import de.jreality.ui.beans.InspectorPanel;
 import de.jreality.ui.treeview.JTreeRenderer;
 import de.jreality.ui.treeview.SceneTreeModel;
-import de.jreality.ui.treeview.SelectionEvent;
-import de.jreality.ui.treeview.SelectionListener;
+import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
 
 
 public class Navigator {
@@ -68,8 +75,10 @@ public class Navigator {
     sceneTree = new JTree();
     SceneTreeModel model = new SceneTreeModel(sceneRoot);
     sceneTree.setModel(model);
+    sceneTree.setAnchorSelectionPath(new TreePath(model.getRoot()));
     sceneTree.setCellRenderer(new JTreeRenderer());
-    
+    sceneTree.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "toggle");  //collaps/expand nodes with ENTER
+
     tsm = sceneTree.getSelectionModel();
     tsm.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     
@@ -88,7 +97,7 @@ public class Navigator {
       }
     });
     
-    tsm.setSelectionPath(model.getPathTo(model.getRoot()));  //select sceneRoot in tree by default
+    tsm.setSelectionPath(sceneTree.getAnchorSelectionPath());  //select sceneRoot in tree by default
     
     this.sceneRoot = sceneRoot;
   }
@@ -117,5 +126,122 @@ public class Navigator {
   public SceneGraphComponent getRoot() {
     return sceneRoot;
   }
+  
+  
+  
+  public static abstract class SelectionListener implements TreeSelectionListener {
+    
+    public abstract void selectionChanged(SelectionEvent e);
+    
+    public void valueChanged(TreeSelectionEvent e) {
+      
+      boolean[] areNew = new boolean[e.getPaths().length];
+      for (int i = 0; i < areNew.length; i++)
+        areNew[i] = e.isAddedPath(i);
+      
+      SelectionEvent se = new SelectionEvent(e.getSource(), e.getPaths(), 
+          areNew, e.getOldLeadSelectionPath(), e.getNewLeadSelectionPath()); 
+      
+      selectionChanged(se);
+    }
+    
+    
+  }
+  
+  
+  public static class SelectionEvent extends TreeSelectionEvent{
 
+    private static final long serialVersionUID = 1L;
+
+    private Object selection;
+    
+
+    /** calls TreeSelectionEvent(...) */
+    public SelectionEvent(Object source, TreePath[] paths, boolean[] areNew, TreePath oldLeadSelectionPath, TreePath newLeadSelectionPath) {
+      super(source, paths, areNew, oldLeadSelectionPath, newLeadSelectionPath);
+      
+      TreePath path = getNewLeadSelectionPath();
+      if (path != null) selection = path.getLastPathComponent();
+    }
+    
+    
+    public Object getSelection() {
+      return selection;
+    }
+    
+
+    public boolean selectionIsSGNode() {
+      return (selection instanceof SceneTreeNode);
+    }
+    
+    
+    public SceneGraphNode selectionAsSGNode() {
+      if (selectionIsSGNode())
+        return ((SceneTreeNode) selection).getNode();
+      else return null;
+    }
+    
+    
+    public boolean selectionIsSGComp() {
+      return (selectionAsSGNode() instanceof SceneGraphComponent);
+    }
+    
+    
+    public SceneGraphComponent selectionAsSGComp() {
+      if (selectionIsSGComp())
+        return (SceneGraphComponent) selectionAsSGNode();
+      else return null;
+    }
+    
+    
+    public boolean selectionIsTool() {
+      return (selection instanceof TreeTool);
+    }
+    
+    
+    public Tool selectionAsTool() {
+      if (selectionIsTool())
+        return ((TreeTool) selection).getTool();
+      else return null;
+    }
+
+    
+    /**
+     * Returns null if the selection has no parent (i.e. selection is the root node) 
+     * or if the selection is not a SGNode or a tool (e.g. shader).
+     * @return the parent component
+     */
+    public SceneGraphComponent getParentOfSelection() {
+      
+      SceneGraphComponent parent = null;
+      
+      if (selectionIsSGNode()) {
+        SceneTreeNode p = ((SceneTreeNode) selection).getParent();
+        if (p != null)
+          parent = (SceneGraphComponent) p.getNode();
+          //could parent be something different than SGComponent?
+      }
+      else if (selectionIsTool())
+        parent = (SceneGraphComponent) ((TreeTool) selection).getTreeNode().getNode();
+        
+      return parent;  //returns null if no parent or selection other than SGNode or tool (e.g. shader)
+    }
+
+
+    /**
+     * Converts the TreePath of the current selection into a SceneGraphPath
+     * containing only nodes that are SceneGraphComponents.  
+     * @return a (sub)path of the currently selected TreePath
+     */
+    public SceneGraphPath getSGPath() {
+      SceneGraphPath sgPath = new SceneGraphPath();
+      Object[] treePath = getPath().getPath();
+      for (int i = 0; i < treePath.length; i++) {
+        selection = treePath[i];
+        if (selectionIsSGComp())
+          sgPath.push(selectionAsSGComp());
+      }
+      return sgPath;
+    }
+  }
 }

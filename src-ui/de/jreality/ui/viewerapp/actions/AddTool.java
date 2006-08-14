@@ -50,7 +50,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.tool.Tool;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.EncompassTool;
@@ -65,8 +64,7 @@ import de.jreality.tools.ShipRotateTool;
 import de.jreality.tools.ShipScaleTool;
 import de.jreality.tools.ShowPropertiesTool;
 import de.jreality.tools.TranslateTool;
-import de.jreality.ui.treeview.SelectionEvent;
-import de.jreality.ui.viewerapp.Navigator;
+import de.jreality.ui.viewerapp.SelectionManager;
 
 
 public class AddTool extends AbstractAction {
@@ -77,27 +75,13 @@ public class AddTool extends AbstractAction {
   private JScrollPane scrollPane = null;
   
   
-  public AddTool(String name, Navigator navigator, Component frame) {
-    super(name, navigator, frame);
-    setupToolList();
-  }
-  
-  
-  public AddTool(String name, SceneGraphComponent node, Component frame) {
-    super(name, node, frame);
-    setupToolList();
-  }
-
-
-  void selectionChanged(SelectionEvent e) {
+  public AddTool(String name, SelectionManager sm, Component frame) {
+    super(name, sm, frame);
+    putValue(SHORT_DESCRIPTION, "Add Tools");
     
-    if (e.selectionIsSGComp()) {
-      setEnabled(true);
-      actee = e.selectionAsSGComp();
-    }
-    else setEnabled(false);
+    setupToolList();
   }
-
+  
 
   public void actionPerformed(ActionEvent e) {
    
@@ -107,7 +91,7 @@ public class AddTool extends AbstractAction {
       for (int i=0; i<selectedTools.length; i++) {
         try {
           final Tool t = (Tool) ((Class)selectedTools[i]).newInstance();
-          ((SceneGraphComponent) actee).addTool(t);
+          selection.getLastComponent().addTool(t);
         } catch (Exception exc) {
           //System.out.println("Could not add tool!");
         }

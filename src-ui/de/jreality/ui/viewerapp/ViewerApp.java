@@ -44,6 +44,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.beans.Beans;
 import java.io.IOException;
+import java.security.AccessControlException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -103,7 +104,9 @@ public class ViewerApp {
   private boolean attachBeanShell = false;  //default
   private BeanShell beanShell;
   private Navigator navigator;
+  private SelectionManager selectionManager;
   
+  private boolean showMenu = true;  //default
   
   private JrScene jrScene;
 
@@ -140,11 +143,11 @@ public class ViewerApp {
     displayedNode = contentNode;
 
     //update autoRender & synchRender
-    String autoRenderProp = System.getProperty("de.jreality.ui.viewerapp.autoRender", "true");
+    String autoRenderProp = getProperty("de.jreality.ui.viewerapp.autoRender", "true");
     if (autoRenderProp.equalsIgnoreCase("false")) {
       autoRender = false;
     }
-    String synchRenderProp = System.getProperty("de.jreality.ui.viewerapp.synchRender", "true");
+    String synchRenderProp = getProperty("de.jreality.ui.viewerapp.synchRender", "true");
     if (synchRenderProp.equalsIgnoreCase("true")) {
       synchRender = true;
     }
@@ -183,6 +186,10 @@ public class ViewerApp {
     
     //set content of frame
     frame.getContentPane().add(content);
+    
+    //show menu
+    if (showMenu) MenuFactory.addMenuBar(this);
+    
     frame.validate();
     frame.setVisible(true);
     
@@ -244,23 +251,37 @@ public class ViewerApp {
     //and with chosen options (attachNavigator | attachBeanShell)
     setupViewer(jrScene);
     
-    //set up bshEval, jterm, infoStyle and uiFactory.beanShell
+    //set up beanShell and uiFactory.beanShell
     if (attachBeanShell) setupBeanShell();
+    else beanShell = null;
 
-    //setup inspector, uiFactory.inspector and uiFactory.sceneTree
+    //setup navigator, uiFactory.inspector and uiFactory.sceneTree
     if (attachNavigator) setupNavigator();
+    else navigator = null;
     
     uiFactory.setAttachNavigator(attachNavigator);
     uiFactory.setAttachBeanShell(attachBeanShell);
+    
+    selectionManager = new SelectionManager(this);
   }
   
 
+  private static String getProperty( String key, String def ) {
+    try {
+      return System.getProperty( key, def );
+    } 
+    catch( AccessControlException e ) {
+      return def;
+    }
+  }
+  
+  
   /**
    * Get the default Scene depending on the environment (desktop or portal).
    * @return the default scene
    */
   private JrScene getDefaultScene() {
-    String environment = System.getProperty("de.jreality.viewerapp.env", "desktop");
+    String environment = getProperty("de.jreality.viewerapp.env", "desktop");
     
     if (!environment.equals("desktop") && !environment.equals("portal"))
       throw new IllegalArgumentException("unknown environment!");
@@ -335,7 +356,7 @@ public class ViewerApp {
   private ToolSystemViewer createViewer() throws IOException {
     if (viewers == null) {
       
-      String viewer = System.getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
+      String viewer = getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
       StringTokenizer st = new StringTokenizer(viewer);
       List<Viewer> viewerList = new LinkedList<Viewer>();
       String viewerClassName;
@@ -358,7 +379,7 @@ public class ViewerApp {
     
     //create ToolSystemViewer with configuration corresp. to environment
     ToolSystemConfiguration cfg = null;
-    String config = System.getProperty("de.jreality.scene.tool.Config", "default");
+    String config = getProperty("de.jreality.scene.tool.Config", "default");
     if (config.equals("default")) cfg = ToolSystemConfiguration.loadDefaultDesktopConfiguration();
     if (config.equals("portal")) cfg = ToolSystemConfiguration.loadDefaultPortalConfiguration();
     if (config.equals("default+portal")) cfg = ToolSystemConfiguration.loadDefaultDesktopAndPortalConfiguration();
@@ -498,6 +519,33 @@ public class ViewerApp {
     return viewerSwitch;
   }
   
+
+  /**
+   * @return the JrScene
+   */
+  public JrScene getJrScene() {
+    return jrScene;
+  }
+
+  
+  
+  /**
+   * Use to include a MenuBar and context menus in ViewerApp.
+   * @param b true iff menu is to be shown
+   */
+  public void showMenu(boolean b) {
+    showMenu = b;
+  }
+  
+
+  /**
+   * Get the SelectionManager managing selections in the ViewerApp
+   * @return the SelectionManager
+   */
+  public SelectionManager getSelectionManager() {
+    return selectionManager;
+  }
+
   
   public void dispose() {
     if (autoRender) {
