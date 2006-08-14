@@ -250,6 +250,20 @@ public class SceneGraphUtility {
       });
     }
 
+    
+    /**
+     * Linear search for the child. Can be overridden
+     * if there is a more efficient way of determining the index.
+     */
+    public static int getIndexOfChild(SceneGraphComponent parent, SceneGraphComponent child)
+    {
+      final int l = parent.getChildComponentCount();
+      for(int i=0; i<l; i++)
+        if(parent.getChildComponent(i) == child) return i;
+      return -1;
+    }
+    
+    
     public static SceneGraphNode copy(SceneGraphNode template) {
       CopyVisitor cv = new CopyVisitor();
       template.accept(cv);
