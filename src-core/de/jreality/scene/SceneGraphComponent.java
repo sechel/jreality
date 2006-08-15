@@ -68,18 +68,18 @@ public class SceneGraphComponent extends SceneGraphNode {
   private Light light;
   private Geometry geometry;
   private boolean visible = true;
-  protected List children= Collections.EMPTY_LIST;
-  protected List tools = Collections.EMPTY_LIST;
+  protected List<SceneGraphComponent> children= Collections.emptyList();
+  protected List<Tool> tools = Collections.emptyList();
 
   private transient ToolListener toolListener;
   private transient SceneGraphComponentListener containerListener;
   
-  private transient List cachedEvents=new LinkedList();
+  private transient List<SceneEvent> cachedEvents=new LinkedList<SceneEvent>();
 
   public List getChildNodes() {
     startReader();
     try {
-      ArrayList list=new ArrayList();
+      ArrayList<SceneGraphNode> list=new ArrayList<SceneGraphNode>();
       if(transformation!=null) list.add(transformation);
       if(appearance!=null) list.add(appearance);
       if(camera!=null) list.add(camera);
@@ -95,7 +95,7 @@ public class SceneGraphComponent extends SceneGraphNode {
   public void addChild(SceneGraphComponent sgc) {
     //new Exception("addChild").printStackTrace();
     class CheckLoop extends SceneGraphVisitor {
-      final HashSet encountered=new HashSet();
+      final HashSet<SceneGraphComponent> encountered=new HashSet<SceneGraphComponent>();
       public void visit(SceneGraphComponent c)
       {
         if(c==SceneGraphComponent.this)
@@ -112,7 +112,7 @@ public class SceneGraphComponent extends SceneGraphNode {
       finishWriter();
       ex.fillInStackTrace(); throw ex;
     }
-    if (children == Collections.EMPTY_LIST) children= new ArrayList();
+    if (children == Collections.EMPTY_LIST) children= new ArrayList<SceneGraphComponent>();
     int index=children.size();
     children.add(sgc);
     fireSceneGraphElementAdded(sgc, SceneGraphComponentEvent.CHILD_TYPE_COMPONENT, index);
@@ -403,7 +403,7 @@ public class SceneGraphComponent extends SceneGraphNode {
   public void addTool(Tool tool) {
     startWriter();
     if(tools == Collections.EMPTY_LIST)
-    	tools= new ArrayList();
+    	tools= new ArrayList<Tool>();
     if (tools.contains(tool)) throw new IllegalStateException("duplicate tool");
     tools.add(tool);
     fireToolAdded(tool);
