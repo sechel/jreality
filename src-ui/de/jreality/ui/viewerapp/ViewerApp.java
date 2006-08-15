@@ -42,6 +42,11 @@ package de.jreality.ui.viewerapp;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Window;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.beans.Beans;
 import java.io.IOException;
 import java.security.AccessControlException;
@@ -192,6 +197,33 @@ public class ViewerApp {
     
     frame.validate();
     frame.setVisible(true);
+    
+    // TODO: see where/how to integrate that
+    content.addKeyListener(new KeyAdapter() {
+    	boolean isFullscreen = false;
+    	public void keyPressed(KeyEvent e) {
+    		if (e.getKeyCode() == KeyEvent.VK_F11) {
+    			Component parent = e.getComponent().getParent();
+    			while (!(parent instanceof Frame))
+    				parent = parent.getParent();
+    			Frame frame = (Frame) parent;
+    			if (isFullscreen) {
+    				frame.dispose();
+    				frame.setUndecorated(false);
+    				frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(null);
+    				frame.validate();
+    				frame.setVisible(true);
+    				isFullscreen=false;
+    			} else {
+    				frame.dispose();
+    				frame.setUndecorated(true);
+    				frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(frame);
+    				frame.validate();
+    				isFullscreen=true;
+    			}
+    		}
+    	}
+    });
     
     return frame;
   }
