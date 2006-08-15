@@ -126,10 +126,10 @@ public class JRonJRTest {
         camNode.setTransformation(new Transformation());
         MatrixBuilder.euclidean().translate(0, 0, 20).assignTo(camNode);
         RotateTool rt = new RotateTool();
-        rt.setMoveChildren(true);
-        root.addTool(rt);
+        //rt.setMoveChildren(true);
         DraggingTool dt = new DraggingTool();
-        dt.setMoveChildren(true);
+        //dt.setMoveChildren(true);
+        root.addTool(rt);
         root.addTool(dt);
         scene.addChild(camNode);
         SceneGraphPath cp = (SceneGraphPath) SceneGraphUtility.getPathsBetween(
@@ -164,8 +164,7 @@ public class JRonJRTest {
         RenderTrigger trigger = new RenderTrigger();
         trigger.addSceneGraphComponent(scene);
         trigger.addViewer(viewer);
-        ToolSystemViewer v = new ToolSystemViewer(viewer, trigger);
-
+        ToolSystemViewer v = new ToolSystemViewer(viewer);
         v.setSceneRoot(scene);
         v.setCameraPath(cp);
         v.setAvatarPath(cp);
