@@ -563,8 +563,12 @@ public class ViewerApp {
    * Use to include a MenuBar and context menus in ViewerApp.
    * @param b true iff menu is to be shown
    */
-  public void showMenu(boolean b) {
+  public void setShowMenu(boolean b) {
     showMenu = b;
+  }
+  
+  public boolean isShowMenu() {
+	  return showMenu;
   }
   
 
