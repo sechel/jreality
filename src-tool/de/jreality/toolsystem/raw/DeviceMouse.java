@@ -72,7 +72,9 @@ import de.jreality.util.LoggingSystem;
 public class DeviceMouse extends AbstractDeviceMouse implements RawDevice, MouseListener,
     MouseMotionListener, MouseWheelListener {
 
-  Component component;
+  private static int MOUSE_GRAB_TOGGLE = KeyEvent.VK_F10;
+  
+  private Component component;
   
   public void mouseClicked(MouseEvent e) {
   }
@@ -161,7 +163,7 @@ public class DeviceMouse extends AbstractDeviceMouse implements RawDevice, Mouse
       public void keyTyped(KeyEvent e) {
       }
       public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_F11 || e.getKeyCode() == KeyEvent.VK_F10) {
+        if (e.getKeyCode() == MOUSE_GRAB_TOGGLE) {
           setCenter(!isCenter());
         }
       }

@@ -24,7 +24,7 @@ public abstract class AbstractDeviceMouse {
   protected int winCenterY;
   
   protected HashMap usedSources = new HashMap();
-  protected static HashSet knownSources = new HashSet();
+  protected static HashSet<String> knownSources = new HashSet<String>();
   private Matrix axesMatrix = new Matrix();
   private Matrix axesEvolutionMatrix = new Matrix();
   private DoubleArray da = new DoubleArray(axesMatrix.getArray());
