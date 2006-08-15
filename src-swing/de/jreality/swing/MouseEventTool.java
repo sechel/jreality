@@ -76,8 +76,8 @@ class MouseEventTool extends AbstractTool {
   private Geometry current;
   
   private static InputSlot drag0 = InputSlot.getDevice("PanelAction");
-  private static InputSlot drag1 = InputSlot.getDevice("PanelSelection");
-  private static InputSlot drag2 = InputSlot.getDevice("PanelMenu");
+  private static InputSlot drag2 = InputSlot.getDevice("PanelSelection");
+  private static InputSlot drag1 = InputSlot.getDevice("PanelMenu");
   
   private int width;
   private int height;
@@ -106,7 +106,6 @@ class MouseEventTool extends AbstractTool {
     if (e.getSource() == drag0) currentButton=0;
     if (e.getSource() == drag1) currentButton=1;
     if (e.getSource() == drag2) currentButton=2;
-    System.out.println("button="+currentButton);
     Point newPoint = generatePoint(e.getCurrentPick());
     oldPoint = newPoint;
     dispatchMouseEvent(newPoint, MouseEvent.MOUSE_PRESSED, currentButton);

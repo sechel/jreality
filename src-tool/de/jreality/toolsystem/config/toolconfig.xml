@@ -2,9 +2,9 @@
 
   <rawdevices>
     <rawdevice id="Keyboard" type="de.jreality.toolsystem.raw.DeviceKeyboard"/>
-    <rawdevice id="KeyboardSWT" type="de.jreality.toolsystem.raw.DeviceKeyboardSWT"/>
+    <!--rawdevice id="KeyboardSWT" type="de.jreality.toolsystem.raw.DeviceKeyboardSWT"/-->
     <rawdevice id="Mouse" type="de.jreality.toolsystem.raw.DeviceMouse"/>
-    <rawdevice id="Mouse" type="de.jreality.toolsystem.raw.DeviceMouseSWT"/>
+    <!--rawdevice id="Mouse" type="de.jreality.toolsystem.raw.DeviceMouseSWT"/-->
     <rawdevice id="SystemTimer" type="de.jreality.toolsystem.raw.DeviceSystemTimer"/>
     <!--rawdevice id="Joystick" type="de.jreality.toolsystem.raw.DeviceJoystick"/-->
   </rawdevices>
@@ -61,7 +61,11 @@
   <virtualdevices>
   
     <mapping src="Secondary" target="RunActivation"/>
+    
     <mapping src="PrimaryAction" target="PanelAction"/>
+    <mapping src="PrimaryMenu" target="PanelMenu"/>
+    <mapping src="PrimarySelection" target="PanelSelection"/>
+    
     <mapping src="PrimarySelection" target="ShowPanel"/>
     <mapping src="PrimaryAction" target="RotateActivation"/>
     <mapping src="PrimaryAction" target="AllDragActivation"/>
