@@ -58,7 +58,6 @@ public class CoordinateSystemBeautifier extends AbstractTool {
 	
   
 	public CoordinateSystemBeautifier(CoordinateSystemFactory factory) {
-    super(null);
 		this.factory = factory;
 		addCurrentSlot(evolutionSlot, "Need notification to add path listeners.");
 	}

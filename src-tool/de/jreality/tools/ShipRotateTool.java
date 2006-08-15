@@ -62,7 +62,6 @@ public class ShipRotateTool extends AbstractTool {
   double gain=1;
   
   public ShipRotateTool() {
-    super(null);
 	  addCurrentSlot(leftRightSlot);
   }
   

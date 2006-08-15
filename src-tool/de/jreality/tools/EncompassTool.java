@@ -61,7 +61,6 @@ public class EncompassTool extends AbstractTool {
   static InputSlot encompassSlot = InputSlot.getDevice("EncompassActivation");
 
   public EncompassTool() {
-    super(null);
     addCurrentSlot(encompassSlot);
   }
 

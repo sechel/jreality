@@ -67,7 +67,6 @@ public class HeadTransformationTool extends AbstractTool {
   private final transient Matrix m=new Matrix();
   
   public HeadTransformationTool() {
-    super(null);
     addCurrentSlot(rotateActivation);
   }
 

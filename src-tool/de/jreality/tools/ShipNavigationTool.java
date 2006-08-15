@@ -81,7 +81,6 @@ public class ShipNavigationTool extends AbstractTool {
   private boolean pollingDevice=true; // should be true for mouse look, false for some axis/button device TODO!!
   
   public ShipNavigationTool() {
-    super(null);
     addCurrentSlot(forwardBackward);
     addCurrentSlot(leftRight);
     addCurrentSlot(rotateActivation);

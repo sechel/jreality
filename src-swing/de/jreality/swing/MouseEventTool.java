@@ -75,9 +75,9 @@ class MouseEventTool extends AbstractTool {
   
   private Geometry current;
   
-  private static InputSlot drag = InputSlot.getDevice("PanelAction");
-  private List activationSlots = new LinkedList();
-  private List usedSlots = new LinkedList();
+  private static InputSlot drag0 = InputSlot.getDevice("PanelAction");
+  private static InputSlot drag1 = InputSlot.getDevice("PanelSelection");
+  private static InputSlot drag2 = InputSlot.getDevice("PanelMenu");
   
   private int width;
   private int height;
@@ -85,44 +85,38 @@ class MouseEventTool extends AbstractTool {
   private boolean dispatchLater = true;
   
   public MouseEventTool(Component c, boolean dispatchLater) {
-    super(drag);
+    super(drag0, drag1, drag2);
     this.comp = c;
     this.dispatchLater = dispatchLater;
-    usedSlots.add(InputSlot.getDevice("PointerTransformation"));
+    addCurrentSlot(InputSlot.getDevice("PointerTransformation"), "moves the mouse pointer");
   }
   
   public MouseEventTool(Component c) {
     this(c,true);
   }
   
-  public List getOutputSlots() {
-    return Collections.EMPTY_LIST;
-  }
-
-  public List getActivationSlots() {
-    return activationSlots;
-  }
+  int currentButton=0;
   
-  public List getCurrentSlots() {
-    return usedSlots;
-  }
-
   public void activate(ToolContext e) {
     try {
       current = (Geometry) e.getCurrentPick().getPickPath().getLastElement();
     } catch (Exception ex) {
       // TODO:
     }
+    if (e.getSource() == drag0) currentButton=0;
+    if (e.getSource() == drag1) currentButton=1;
+    if (e.getSource() == drag2) currentButton=2;
+    System.out.println("button="+currentButton);
     Point newPoint = generatePoint(e.getCurrentPick());
     oldPoint = newPoint;
-    dispatchMouseEvent(newPoint, MouseEvent.MOUSE_PRESSED);
+    dispatchMouseEvent(newPoint, MouseEvent.MOUSE_PRESSED, currentButton);
   }
 
   public void perform(ToolContext e) {
     try {
       if (current == (Geometry) e.getCurrentPick().getPickPath().getLastElement()) {
         Point newPoint = generatePoint(e.getCurrentPick());
-        dispatchMouseEvent(newPoint, MouseEvent.MOUSE_DRAGGED);
+        dispatchMouseEvent(newPoint, MouseEvent.MOUSE_DRAGGED, currentButton);
       }
     } catch (Exception ex) {
       // TODO:
@@ -131,9 +125,9 @@ class MouseEventTool extends AbstractTool {
 
   public void deactivate(ToolContext e) {
     Point newPoint = generatePoint(e.getCurrentPick());
-    dispatchMouseEvent(newPoint, MouseEvent.MOUSE_RELEASED);
+    dispatchMouseEvent(newPoint, MouseEvent.MOUSE_RELEASED, currentButton);
     if(oldPoint.equals(newPoint)) {
-      dispatchMouseEvent(newPoint, MouseEvent.MOUSE_CLICKED);
+      dispatchMouseEvent(newPoint, MouseEvent.MOUSE_CLICKED, currentButton);
     }
     current = null;
   }
@@ -155,10 +149,16 @@ class MouseEventTool extends AbstractTool {
     return newPoint;
   }    
   
-  void dispatchMouseEvent(Point newPoint, int type) {
+  /**
+   * 
+   * @param newPoint
+   * @param type
+   * @param button 0, 1 or 2
+   */
+  void dispatchMouseEvent(Point newPoint, int type, int button) {
     final MouseEvent newEvent = new MouseEvent(comp,
-        (int) type, System.currentTimeMillis(), InputEvent.BUTTON1_DOWN_MASK, newPoint.x,
-        newPoint.y, 1, false, MouseEvent.BUTTON1);
+        (int) type, System.currentTimeMillis(), /*InputEvent.BUTTON1_DOWN_MASK*/ 1 << (10+button), newPoint.x,
+        newPoint.y, 1, false, MouseEvent.BUTTON1+button);
     dispatchEvent(newEvent);
   }
 

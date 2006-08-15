@@ -93,7 +93,6 @@ public class AnimatorTool extends AbstractTool {
   private final Object mutex = new Object();
 
   private AnimatorTool() {
-    super(null);
     addCurrentSlot(timer);
   }
 

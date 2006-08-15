@@ -68,27 +68,27 @@ public class SlotManager {
     /**
      * up-to-date map of (used) slots to activatable Tools
      */
-    private final HashMap slot2activation = new HashMap();
+    private final HashMap<InputSlot, HashSet<Tool>> slot2activation = new HashMap<InputSlot, HashSet<Tool>>();
     /**
      * up-to-date map of (used) slots to active Tools
      */
-    private final HashMap slot2active = new HashMap();
+    private final HashMap<InputSlot, HashSet<Tool>> slot2active = new HashMap<InputSlot, HashSet<Tool>>();
     /**
      * up-to-date map of (used) slots to active Tools
      */
-    private final HashMap tool2currentSlots = new HashMap();
+    private final HashMap<Tool, HashSet<InputSlot>> tool2currentSlots = new HashMap<Tool, HashSet<InputSlot>>();
 
     /**
      * up-to-date map of deactivation-slots to active Tools
      */
-    private final HashMap slot2deactivation = new HashMap();
+    private final HashMap<InputSlot, HashSet<Tool>> slot2deactivation = new HashMap<InputSlot, HashSet<Tool>>();
     
-    private final HashMap virtualMappings = new HashMap();
-    private final HashMap virtualMappingsInv = new HashMap();
+    private final HashMap<InputSlot, HashSet<InputSlot>> virtualMappings = new HashMap<InputSlot, HashSet<InputSlot>>();
+    private final HashMap<InputSlot, HashSet<InputSlot>> virtualMappingsInv = new HashMap<InputSlot, HashSet<InputSlot>>();
     
-    private final HashMap slotsToMappingsForTool = new HashMap();
+    private final HashMap<Tool, HashMap<InputSlot, InputSlot>> slotsToMappingsForTool = new HashMap<Tool, HashMap<InputSlot, InputSlot>>();
     
-    private final HashMap virtualSlotsForTool = new HashMap();
+    private final HashMap<Tool, HashSet<InputSlot>> virtualSlotsForTool = new HashMap<Tool, HashSet<InputSlot>>();
 
     SlotManager(ToolSystemConfiguration config) {
       List virtualMappings = config.getVirtualMappings();
@@ -99,16 +99,16 @@ public class SlotManager {
       }
     }
     
-    private Set getMappingsSourceToTargets(InputSlot slot) {
+    private Set<InputSlot> getMappingsSourceToTargets(InputSlot slot) {
       if (!virtualMappings.containsKey(slot))
-        virtualMappings.put(slot, new HashSet());
-      return (Set) virtualMappings.get(slot);
+        virtualMappings.put(slot, new HashSet<InputSlot>());
+      return virtualMappings.get(slot);
     }
     
-    private Set getMappingsTargetToSources(InputSlot slot) {
+    private Set<InputSlot> getMappingsTargetToSources(InputSlot slot) {
       if (!virtualMappingsInv.containsKey(slot))
-        virtualMappingsInv.put(slot, new HashSet());
-      return (Set) virtualMappingsInv.get(slot);
+        virtualMappingsInv.put(slot, new HashSet<InputSlot>());
+      return virtualMappingsInv.get(slot);
     }
 
     /**
@@ -120,46 +120,46 @@ public class SlotManager {
      * @param tool 
      * @return the map described above
      */
-    private Map getMappingsForTool(Tool tool) {
+    private Map<InputSlot, InputSlot> getMappingsForTool(Tool tool) {
       if (!slotsToMappingsForTool.containsKey(tool))
-        slotsToMappingsForTool.put(tool, new HashMap());
-      return (Map) slotsToMappingsForTool.get(tool);
+        slotsToMappingsForTool.put(tool, new HashMap<InputSlot, InputSlot>());
+      return slotsToMappingsForTool.get(tool);
     }
 
-    Set getToolsActivatedBySlot(InputSlot slot) {
+    Set<Tool> getToolsActivatedBySlot(InputSlot slot) {
         return Collections.unmodifiableSet(getSlot2activation(slot));
     }
 
-    private Set getSlot2activation(InputSlot slot) {
+    private Set<Tool> getSlot2activation(InputSlot slot) {
         if (!slot2activation.containsKey(slot))
-                slot2activation.put(slot, new HashSet());
-        return (Set) slot2activation.get(slot);
+                slot2activation.put(slot, new HashSet<Tool>());
+        return slot2activation.get(slot);
     }
 
-    Set getToolsDeactivatedBySlot(InputSlot slot) {
+    Set<Tool> getToolsDeactivatedBySlot(InputSlot slot) {
         return Collections.unmodifiableSet(getSlot2deactivation(slot));
     }
 
-    private Set getSlot2deactivation(InputSlot slot) {
+    private Set<Tool> getSlot2deactivation(InputSlot slot) {
         if (!slot2deactivation.containsKey(slot))
-                slot2deactivation.put(slot, new HashSet());
-        return (Set) slot2deactivation.get(slot);
+                slot2deactivation.put(slot, new HashSet<Tool>());
+        return slot2deactivation.get(slot);
     }
 
-    Set getActiveToolsForSlot(InputSlot slot) {
+    Set<Tool> getActiveToolsForSlot(InputSlot slot) {
         return Collections.unmodifiableSet(getSlot2active(slot));
     }
 
-    private Set getSlot2active(InputSlot slot) {
+    private Set<Tool> getSlot2active(InputSlot slot) {
         if (!slot2active.containsKey(slot))
-                slot2active.put(slot, new HashSet());
-        return (Set) slot2active.get(slot);
+                slot2active.put(slot, new HashSet<Tool>());
+        return slot2active.get(slot);
     }
 
-    private Set getTool2currentSlots(Tool tool) {
+    private Set<InputSlot> getTool2currentSlots(Tool tool) {
         if (!tool2currentSlots.containsKey(tool))
-            tool2currentSlots.put(tool, new HashSet());
-    return (Set) tool2currentSlots.get(tool);
+            tool2currentSlots.put(tool, new HashSet<InputSlot>());
+        return tool2currentSlots.get(tool);
     }
 
     boolean isActiveSlot(InputSlot slot) {
@@ -170,10 +170,10 @@ public class SlotManager {
         return slot2activation.containsKey(slot);
     }
 
-    private Set getVirtualSlotsForTool(Tool tool) {
+    private Set<InputSlot> getVirtualSlotsForTool(Tool tool) {
       if (!virtualSlotsForTool.containsKey(tool))
-        virtualSlotsForTool.put(tool, new HashSet());
-      return (Set) virtualSlotsForTool.get(tool);
+        virtualSlotsForTool.put(tool, new HashSet<InputSlot>());
+      return virtualSlotsForTool.get(tool);
   }
 
     /**
@@ -181,25 +181,25 @@ public class SlotManager {
      * @param slot
      * @return
      */
-    Set resolveSlot(InputSlot slot) {
-      Set ret = new HashSet();
+    Set<InputSlot> resolveSlot(InputSlot slot) {
+      HashSet<InputSlot> ret = new HashSet<InputSlot>();
       findTriggerSlots(ret, slot);
       return ret;
     }
-    private void findTriggerSlots(Set l, InputSlot slot) {
-      Set sources = getMappingsTargetToSources(slot);
+    private void findTriggerSlots(Set<InputSlot> l, InputSlot slot) {
+      Set<InputSlot> sources = getMappingsTargetToSources(slot);
       //Set sources = getMappingsSourceToTargets(slot);
       if (sources.isEmpty()) {
         l.add(slot);
         return;
       }
-      for (Iterator i = sources.iterator(); i.hasNext(); )
-        findTriggerSlots(l, (InputSlot) i.next());
+      for (InputSlot sl : sources)
+        findTriggerSlots(l, sl);
     }
-    private Set resolveSlots(List slotSet) {
-      Set ret = new HashSet();
-      for (Iterator i = slotSet.iterator(); i.hasNext(); )
-        findTriggerSlots(ret, (InputSlot) i.next());
+    private Set<InputSlot> resolveSlots(List<InputSlot> slotSet) {
+      Set<InputSlot> ret = new HashSet<InputSlot>();
+      for (InputSlot slot : slotSet )
+        findTriggerSlots(ret, slot);
       return ret;
     }
 
@@ -210,88 +210,74 @@ public class SlotManager {
      * @param activatedTools tools activated recently
      * @param deactivatedTools tools deactivated recently
      */
-    void updateMaps(final Set activeTools, final Set activatedTools, final Set deactivatedTools) {
+    void updateMaps(final Set<Tool> activeTools, final Set<Tool> activatedTools, final Set<Tool> deactivatedTools) {
         // handle newly activated tools
-        for (Iterator i = activatedTools.iterator(); i.hasNext();) {
-            final Tool tool = (Tool) i.next();
+        for (Tool tool : activatedTools) {
             // update slot2active
-            for (Iterator i2 = tool.getCurrentSlots().iterator(); i2.hasNext();) {
-                final InputSlot slot = (InputSlot) i2.next();
-                Set resolvedSlots = resolveSlot(slot);
-                for (Iterator i3 = resolvedSlots.iterator(); i3.hasNext(); ) {
-                  InputSlot resolvedSlot = (InputSlot) i3.next();
+            for (InputSlot slot : tool.getCurrentSlots()) {
+                for (InputSlot resolvedSlot : resolveSlot(slot)) {
                   getSlot2active(resolvedSlot).add(tool);
                   getMappingsForTool(tool).put(resolvedSlot, slot);
                 }
             }
             
             // remember all currently used slots for activated tool
-            Set currentSlots = resolveSlots(tool.getCurrentSlots());
+            Set<InputSlot> currentSlots = resolveSlots(tool.getCurrentSlots());
             getTool2currentSlots(tool).addAll(currentSlots);
             getVirtualSlotsForTool(tool).addAll(tool.getCurrentSlots());
 
             // update slot2activation
-            final InputSlot slot = tool.getActivationSlot();
-            final Set resolvedSlots = resolveSlot(slot);
-            for (Iterator i3 = resolvedSlots.iterator(); i3.hasNext(); ) {
-              InputSlot resolvedSlot = (InputSlot) i3.next();
-              getSlot2activation(resolvedSlot).remove(tool);
-              getSlot2deactivation(resolvedSlot).add(tool);
+            for (InputSlot slot : tool.getActivationSlot()) {
+	            for (InputSlot resolvedSlot : resolveSlot(slot)) {
+	              getSlot2activation(resolvedSlot).remove(tool);
+	              getSlot2deactivation(resolvedSlot).add(tool);
+	            }
             }
         }
 
         // handle newly deactivated tools
-        for (Iterator i = deactivatedTools.iterator(); i.hasNext();) {
-            final Tool tool = (Tool) i.next();
+        for (Tool tool : deactivatedTools) {
             // update slot2active
-            for (Iterator i2 = tool.getCurrentSlots().iterator(); i2.hasNext();) {
-              final InputSlot slot = (InputSlot) i2.next();
-              Set resolvedSlots = resolveSlot(slot);
-              for (Iterator i3 = resolvedSlots.iterator(); i3.hasNext(); ) {
-                InputSlot resolvedSlot = (InputSlot) i3.next();
+            for (InputSlot slot : tool.getCurrentSlots()) {
+                for (InputSlot resolvedSlot : resolveSlot(slot)) {
                 getSlot2active(resolvedSlot).remove(tool);
                 getMappingsForTool(tool).remove(resolvedSlot);
               }
             }
             // update slot2activation
-            final InputSlot slot = tool.getActivationSlot();
-            final Set resolvedSlots = resolveSlot(slot);
-            for (Iterator i3 = resolvedSlots.iterator(); i3.hasNext(); ) {
-              InputSlot resolvedSlot = (InputSlot) i3.next();
-              getSlot2activation(resolvedSlot).add(tool);
-              getSlot2deactivation(resolvedSlot).remove(tool);
-            }
-            
+            for (InputSlot slot : tool.getActivationSlot()) {
+	            for (InputSlot resolvedSlot : resolveSlot(slot)) {
+	              getSlot2activation(resolvedSlot).add(tool);
+	              getSlot2deactivation(resolvedSlot).remove(tool);
+	            }
+            }            
             getVirtualSlotsForTool(tool).clear();
-            if (tool.getActivationSlot() != null) getVirtualSlotsForTool(tool).add(tool.getActivationSlot());
+            getVirtualSlotsForTool(tool).addAll(tool.getActivationSlot());
         }
         
         //update used slots for still active tools
-        for (Iterator i = activeTools.iterator(); i.hasNext(); ) {
-            Tool tool = (Tool) i.next();
-            Set newUsed = resolveSlots(tool.getCurrentSlots());
-            Set oldUsed = getTool2currentSlots(tool);
+        for (Tool tool : activeTools) {
+            Set<InputSlot> newUsed = resolveSlots(tool.getCurrentSlots());
+            Set<InputSlot> oldUsed = getTool2currentSlots(tool);
             // contains all newly used slots for the tool
-            Set added = new HashSet(newUsed);
+            Set<InputSlot> added = new HashSet<InputSlot>(newUsed);
             added.removeAll(oldUsed);
             // contains all no-longer-used slots for the tool
-            Set removed = new HashSet(oldUsed);
+            Set<InputSlot> removed = new HashSet<InputSlot>(oldUsed);
             removed.removeAll(newUsed);
-            for (Iterator i2 = added.iterator(); i2.hasNext(); ) {
-                InputSlot slot = (InputSlot) i2.next();
+            for (InputSlot slot : added) 
                 getSlot2active(slot).add(tool);
-            }
-            for (Iterator i2 = removed.iterator(); i2.hasNext(); ) {
-                InputSlot slot = (InputSlot) i2.next();
+
+            for (InputSlot slot : removed)
                 getSlot2active(slot).remove(tool);
-            }
+            
             getTool2currentSlots(tool).removeAll(removed);
             getTool2currentSlots(tool).addAll(added);
             
-            Set oldUsedVirtual = new HashSet(getVirtualSlotsForTool(tool));
+            Set<InputSlot> oldUsedVirtual = new HashSet<InputSlot>(getVirtualSlotsForTool(tool));
 
-            Set newUsedVirtual = new HashSet();
-            if (tool.getActivationSlot() != null) newUsedVirtual.add(tool.getActivationSlot());
+            Set<InputSlot> newUsedVirtual = new HashSet<InputSlot>();
+            newUsedVirtual.addAll(tool.getActivationSlot());
             newUsedVirtual.addAll(tool.getCurrentSlots());
             
             oldUsedVirtual.removeAll(newUsedVirtual); // these are no longer used
@@ -301,10 +287,12 @@ public class SlotManager {
             // update the map
             getVirtualSlotsForTool(tool).removeAll(oldUsedVirtual);
             getVirtualSlotsForTool(tool).addAll(newUsedVirtual);
+
+            getMappingsForTool(tool).keySet().removeAll(oldUsedVirtual);
             
-            for (Iterator j = getMappingsForTool(tool).values().iterator(); j.hasNext(); ) {
-              if (oldUsedVirtual.contains(j.next())) j.remove();
-            }
+//            for (Iterator j = getMappingsForTool(tool).values().iterator(); j.hasNext(); ) {
+//              if (oldUsedVirtual.contains(j.next())) j.remove();
+//            }
 //            for (Iterator j = removed.iterator(); j.hasNext(); ) {
 //              InputSlot slot = (InputSlot) j.next();
 //              Set origSlots = resolveSlot(slot);
@@ -312,11 +300,9 @@ public class SlotManager {
 //                getMappingsForTool(tool).remove(k.next());
 //            }
 
-            for (Iterator j = newUsedVirtual.iterator(); j.hasNext(); ) {
-              InputSlot newSlot = (InputSlot) j.next();
-              Set sourceSlots = resolveSlot(newSlot);
-              for (Iterator k = sourceSlots.iterator(); k.hasNext(); )
-                getMappingsForTool(tool).put(k.next(), newSlot);
+            for (InputSlot newSlot : newUsedVirtual) {
+              for (InputSlot virtualSlot : resolveSlot(newSlot) )
+                getMappingsForTool(tool).put(virtualSlot, newSlot);
             }
             
         }
@@ -326,27 +312,29 @@ public class SlotManager {
      * @param tool
      */
   void registerTool(Tool tool) {
-    if (tool.getActivationSlot() == null) {
+    if (tool.getActivationSlot().isEmpty()) {
       // permanently active tool
       getVirtualSlotsForTool(tool).addAll(tool.getCurrentSlots());
       for (Iterator i = tool.getCurrentSlots().iterator(); i.hasNext();) {
         InputSlot mappedSlot = (InputSlot) i.next();
-        Set resolvedSlots = resolveSlot(mappedSlot);
-        getTool2currentSlots(tool).addAll(resolvedSlots);
-        for (Iterator i2 = resolvedSlots.iterator(); i2.hasNext();) {
+        getTool2currentSlots(tool).addAll(resolveSlot(mappedSlot));
+        for (Iterator i2 = resolveSlot(mappedSlot).iterator(); i2.hasNext();) {
           InputSlot resolvedSlot = (InputSlot) i2.next();
           getMappingsForTool(tool).put(resolvedSlot, mappedSlot);
           getSlot2active(resolvedSlot).add(tool);
         }
       }
     } else {
-      getVirtualSlotsForTool(tool).add(tool.getActivationSlot());
-      InputSlot mappedSlot = tool.getActivationSlot();
-      Set resolvedSlots = resolveSlot(mappedSlot);
-      for (Iterator i2 = resolvedSlots.iterator(); i2.hasNext();) {
-        InputSlot resolvedSlot = (InputSlot) i2.next();
-        getMappingsForTool(tool).put(resolvedSlot, mappedSlot);
-        getSlot2activation(resolvedSlot).add(tool);
+      getVirtualSlotsForTool(tool).addAll(tool.getActivationSlot());
+      
+      //InputSlot mappedSlot = tool.getActivationSlot();
+      for (InputSlot mappedSlot : tool.getActivationSlot()) {
+	      Set resolvedSlots = resolveSlot(mappedSlot);
+	      for (Iterator i2 = resolvedSlots.iterator(); i2.hasNext();) {
+	        InputSlot resolvedSlot = (InputSlot) i2.next();
+	        getMappingsForTool(tool).put(resolvedSlot, mappedSlot);
+	        getSlot2activation(resolvedSlot).add(tool);
+	      }
       }
     }
     LoggingSystem.getLogger(this).info(
@@ -354,7 +342,7 @@ public class SlotManager {
   }
 
   void unregisterTool(Tool tool) {
-    if (tool.getActivationSlot() == null) {
+    if (tool.getActivationSlot().isEmpty()) {
       // permanently active tool
       for (Iterator i = tool.getCurrentSlots().iterator(); i.hasNext();) {
         InputSlot mappedSlot = (InputSlot) i.next();
@@ -365,11 +353,13 @@ public class SlotManager {
         }
       }
     } else {
-      InputSlot mappedSlot = tool.getActivationSlot();
-      Set resolvedSlots = resolveSlot(mappedSlot);
-      for (Iterator i2 = resolvedSlots.iterator(); i2.hasNext();) {
-        InputSlot resolvedSlot = (InputSlot) i2.next();
-        getSlot2activation(resolvedSlot).remove(tool);
+      // InputSlot mappedSlot = tool.getActivationSlot();
+      for (InputSlot mappedSlot : tool.getActivationSlot()) {
+	      Set resolvedSlots = resolveSlot(mappedSlot);
+	      for (Iterator i2 = resolvedSlots.iterator(); i2.hasNext();) {
+	        InputSlot resolvedSlot = (InputSlot) i2.next();
+	        getSlot2activation(resolvedSlot).remove(tool);
+	      }
       }
     }
     getMappingsForTool(tool).clear();

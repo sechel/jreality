@@ -40,6 +40,7 @@
 
 package de.jreality.scene.tool;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,20 +50,23 @@ import java.util.List;
 
 public abstract class AbstractTool implements Tool {
 
-  private InputSlot activationSlot;
-  private transient List currentSlots=Collections.EMPTY_LIST;
-  private final transient HashMap descriptions=new HashMap();
+  private List<InputSlot> activationSlots;
+  private transient List<InputSlot> currentSlots=Collections.emptyList();
+  private final transient HashMap<InputSlot, String> descriptions=new HashMap<InputSlot, String>();
   private String description = "No description!";
   
-  public AbstractTool(InputSlot activationSlot) {
-    this.activationSlot=activationSlot;
+  public AbstractTool(InputSlot... activationSlots) {
+	if (activationSlots.length == 0 || activationSlots[0] == null)
+		this.activationSlots=Collections.emptyList();
+	else
+		this.activationSlots=Arrays.asList(activationSlots);
   }
   
-  public InputSlot getActivationSlot() {
-    return activationSlot;
+  public List<InputSlot> getActivationSlot() {
+	return activationSlots;
   }
-  public List getCurrentSlots() {
-    return currentSlots;
+  public List<InputSlot> getCurrentSlots() {
+    return Collections.unmodifiableList(currentSlots);
   }
   
   protected void addCurrentSlot(InputSlot slot) {
@@ -70,7 +74,7 @@ public abstract class AbstractTool implements Tool {
   }
   
   protected void addCurrentSlot(InputSlot slot, String description) {
-    if (currentSlots.isEmpty()) currentSlots = new LinkedList();
+    if (currentSlots.isEmpty()) currentSlots = new LinkedList<InputSlot>();
     if (!currentSlots.contains(slot)) currentSlots.add(slot);
     setDescription(slot, description);
   }
@@ -91,15 +95,16 @@ public abstract class AbstractTool implements Tool {
   public String getFullDescription() {
     StringBuffer sb = new StringBuffer();
     sb.append(getClass().getName()).append(": ").append(getDescription()).append('\n');
-    sb.append(": always active=").append(activationSlot==null).append('\n');
-    if (activationSlot != null) {
-      sb.append("activation="+activationSlot.getName());
-      sb.append(" [").append(getDescription(activationSlot)).append("]\n");
-    }
+    sb.append(": always active=").append(activationSlots==null).append('\n');
+//    if (!activationSlots.isEmpty()) {
+//      sb.append("activation: ");
+//      for (InputSlot slot : activationSlots)
+//      sb.append("\t[").append(slot.getName()).append(": ").append(getDescription(slot)).append("]\n");
+//    }
     sb.append("current slots:").append('\n');
     for (Iterator it = getCurrentSlots().iterator(); it.hasNext(); ) {
       InputSlot is = (InputSlot) it.next();
-      sb.append("  slot="+is.getName()).append(" [").append(getDescription(is)).append("]\n");
+      sb.append("\t["+is.getName()).append(": ").append(getDescription(is)).append("]\n");
     }
     return sb.toString();
   }

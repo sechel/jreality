@@ -67,7 +67,6 @@ public class FlyTool extends AbstractTool {
   private boolean raiseToThirdPower = true;
   
   public FlyTool() {
-    super(null);
 	  addCurrentSlot(forwardBackwardSlot);
   }
   

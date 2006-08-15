@@ -57,7 +57,7 @@ import de.jreality.util.LoggingSystem;
 public class ToolEventQueue {
     
     private ToolEventReceiver receiver;
-    private LinkedList queue = new LinkedList();
+    private LinkedList<ToolEvent> queue = new LinkedList<ToolEvent>();
     private final Object mutex = new Object();
     protected volatile boolean running = true;
     

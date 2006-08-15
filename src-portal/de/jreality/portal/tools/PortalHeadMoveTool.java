@@ -61,7 +61,6 @@ public class PortalHeadMoveTool extends AbstractTool {
   transient Viewer viewer;
 
   public PortalHeadMoveTool() {
-    super(null);
     addCurrentSlot(headSlot, "the current head matrix");
   }
   

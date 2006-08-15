@@ -62,7 +62,6 @@ public class ShipScaleTool extends AbstractTool {
   double gain=1;
   
   public ShipScaleTool() {
-    super(null);
 	  addCurrentSlot(scaleSlot);
   }
   

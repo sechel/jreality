@@ -61,7 +61,6 @@ public class PointerDisplayTool extends AbstractTool {
   SceneGraphComponent c = new SceneGraphComponent();
   
   public PointerDisplayTool(double radius) {
-    super(null);
     addCurrentSlot(pointer);
     SceneGraphComponent stick=new SceneGraphComponent();
     MatrixBuilder.euclidean().translate(0,0,-1.07).scale(radius, radius, 1).assignTo(stick);

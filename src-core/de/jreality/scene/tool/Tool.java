@@ -98,18 +98,22 @@ public interface Tool {
 
   /**
    * 
-   * If the result is <code>null</code>, then the tool is always active.
+   * If the result is empty, then the tool is always active.
    * 
-   * If the result is not <code>null</code>, then the tool is active if
-   * and only if the axis of the activation slot is pressed.
-   * This implies that the InputSlot must be associated to
-   * an AxisState, otherwise the Tool will never become active.
+   * If the result is not empty, then the tool becomes
+   * active as soon as the axis of one activation slot is pressed.
+   * This implies that the {@link InputSlot}s must be associated to
+   * {@link AxisState}s, otherwise the Tool will never become active.
+   * <br>The tool gets deactivated, as soon as the InputSlot that
+   * caused activation changes its state to {@link AxisState.RELEASED}.
+   * <br> When the tool is active, other activation axes are ignored
+   * and passed to other {@link Tool}s down the path.
    * 
    * The result must remain constant.
    * 
-   * @return slot for activating the tool
+   * @return List of InputSlots for activating the tool
    */
-  InputSlot getActivationSlot();
+	List<InputSlot> getActivationSlot();
 
   /**
    * This method will only be called for active tools. The
@@ -118,7 +122,7 @@ public interface Tool {
    * 
    * @return list of currently relevant input slots
    */
-  List getCurrentSlots();
+  List<InputSlot> getCurrentSlots();
 
   /**
    * this method is called when the tool gets activated. Note that

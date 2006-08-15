@@ -81,7 +81,6 @@ public class ShowPropertiesTool extends AbstractTool {
 	
 	
 	public ShowPropertiesTool() {
-    super(null);
 		addCurrentSlot(pointerSlot);
 		for(int i=0;i<log.length;i++)  	log[i]=new ShowPropertiesToolLogger();
 		initLogFrame();

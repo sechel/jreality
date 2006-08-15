@@ -78,11 +78,11 @@ public class ToolSystem implements ToolEventReceiver {
 
   private RenderTrigger renderTrigger;
   
-  private final LinkedList compQueue = new LinkedList();
+  private final LinkedList<ToolEvent> compQueue = new LinkedList<ToolEvent>();
 
-  private final LinkedList triggerQueue = new LinkedList();
-  private final HashMap toolToPath = new HashMap();
-  private List pickResults = Collections.EMPTY_LIST;
+  private final LinkedList<ToolEvent> triggerQueue = new LinkedList<ToolEvent>();
+  private final HashMap<Tool, List<SceneGraphPath>> toolToPath = new HashMap<Tool, List<SceneGraphPath>>();
+  private List<PickResult> pickResults = Collections.emptyList();
   
   private SceneGraphPath emptyPickPath=new SceneGraphPath();
   
@@ -138,7 +138,7 @@ public class ToolSystem implements ToolEventReceiver {
 
     public SceneGraphPath getRootToToolComponent() {
       if (rootToToolComponent == null) {
-        LinkedList list = new LinkedList();
+        LinkedList<SceneGraphNode> list = new LinkedList<SceneGraphNode>();
         Iterator i = rootToLocal.reverseIterator();
         for (; i.hasNext();) {
           SceneGraphNode cp = (SceneGraphNode) i.next();
@@ -147,7 +147,7 @@ public class ToolSystem implements ToolEventReceiver {
           if (((SceneGraphComponent) cp).getTools().contains(currentTool)) {
             list.addFirst(cp);
             while (i.hasNext())
-              list.addFirst(i.next());
+              list.addFirst((SceneGraphNode) i.next());
           }
         }
         rootToToolComponent = SceneGraphPath.fromList(list);
@@ -233,7 +233,7 @@ public class ToolSystem implements ToolEventReceiver {
   long renderInterval=20;
   long lastT = System.currentTimeMillis();
   
-  List l;
+  List<ToolEvent> l;
   
   public void processToolEvent(ToolEvent event) {
     synchronized (mutex) {
@@ -257,10 +257,10 @@ public class ToolSystem implements ToolEventReceiver {
       } while (true);
       // handle newly added/removed tools
       if (!toolsChanging.isEmpty()) {
-        final List l = new LinkedList(toolsChanging);
+        final List<Pair> l = new LinkedList<Pair>(toolsChanging);
         toolsChanging.clear();
-        for (Iterator i = l.iterator(); i.hasNext(); ) {
-          Pair p = (Pair) i.next();
+        for (Iterator<Pair> i = l.iterator(); i.hasNext(); ) {
+          Pair p = i.next();
           i.remove();
           if (p.added) {
             addToolImpl(p.tool, p.path);
@@ -294,9 +294,9 @@ public class ToolSystem implements ToolEventReceiver {
   private void processTriggerQueue() {
     if (triggerQueue.isEmpty())
       return;
-    HashSet activatedTools = new HashSet();
-    HashSet deactivatedTools = new HashSet();
-    HashSet stillActiveTools = new HashSet();
+    HashSet<Tool> activatedTools = new HashSet<Tool>();
+    HashSet<Tool> deactivatedTools = new HashSet<Tool>();
+    HashSet<Tool> stillActiveTools = new HashSet<Tool>();
     SceneGraphPath pickPath = null;
     for (Iterator iter = triggerQueue.iterator(); iter.hasNext();) {
       ToolEvent event = (ToolEvent) iter.next();
@@ -306,17 +306,17 @@ public class ToolSystem implements ToolEventReceiver {
 
       if (deviceManager.getAxisState(slot) != null
           && deviceManager.getAxisState(slot).isPressed()) {
-        Set candidates = new HashSet(slotManager.getToolsActivatedBySlot(slot));
+        Set<Tool> candidates = new HashSet<Tool>(slotManager.getToolsActivatedBySlot(slot));
 
         // contains the Tools sitting in the Scene that need a
         // PickPath to get activated - we will choose the Tool(s) closest to
         // the end of the path
-        HashSet candidatesForPick = new HashSet();
+        HashSet<Tool> candidatesForPick = new HashSet<Tool>();
 
         // TODO: see if activating more than one Tool for an axis
         // makes sense...
-        for (Iterator i = candidates.iterator(); i.hasNext();) {
-          Tool candidate = (Tool) i.next();
+        for (Iterator<Tool> i = candidates.iterator(); i.hasNext();) {
+          Tool candidate = i.next();
           if (!toolManager.needsPick(candidate))
             continue;
           candidatesForPick.add(candidate);
@@ -329,7 +329,7 @@ public class ToolSystem implements ToolEventReceiver {
           int level = pickPath.getLength();
           boolean foundPossibleTools;
           do {
-            Collection selection = toolManager.selectToolsForPath(pickPath, level--, candidatesForPick);
+            Collection<Tool> selection = toolManager.selectToolsForPath(pickPath, level--, candidatesForPick);
             foundPossibleTools=!selection.isEmpty();
             LoggingSystem.getLogger(this).finer(
                 "selected pick tools:" + selection);
@@ -346,12 +346,12 @@ public class ToolSystem implements ToolEventReceiver {
         }
       }
       // process all active tools
-      Set active = slotManager.getActiveToolsForSlot(slot);
+      Set<Tool> active = slotManager.getActiveToolsForSlot(slot);
       stillActiveTools.addAll(active);
       processToolSet(active);
       if (deviceManager.getAxisState(slot) != null
           && deviceManager.getAxisState(slot).isReleased()) {
-        Set deactivated = findDeactivatedTools(slot);
+        Set<Tool> deactivated = findDeactivatedTools(slot);
         deactivatedTools.addAll(deactivated);
         deactivateToolSet(deactivated);
       }
@@ -376,7 +376,7 @@ private SceneGraphPath avatarPath;
 
   private void performPick() {
 	  if (pickSystem == null) {
-		  pickResults = Collections.EMPTY_LIST;
+		  pickResults = Collections.emptyList();
 		  return;
 	  }
     currentPointer = deviceManager.getTransformationMatrix(
@@ -479,7 +479,7 @@ private SceneGraphPath avatarPath;
    * @param slot
    * @return
    */
-  private Set findDeactivatedTools(InputSlot slot) {
+  private Set<Tool> findDeactivatedTools(InputSlot slot) {
     return slotManager.getToolsDeactivatedBySlot(slot);
   }
 
@@ -507,7 +507,7 @@ private SceneGraphPath avatarPath;
     updater.dispose();
   }
   
-  final List toolsChanging = new LinkedList();
+  final List<Pair> toolsChanging = new LinkedList<Pair>();
   
   private static class Pair {
 	  final Tool tool;
@@ -544,9 +544,9 @@ private SceneGraphPath avatarPath;
   void addToolImpl(Tool tool, SceneGraphPath path) {
     boolean first = toolManager.addTool(tool, path);
     if (!toolManager.needsPick(tool)) {
-      List l = (List) toolToPath.get(tool);
+      List<SceneGraphPath> l = toolToPath.get(tool);
       if (l == null) {
-        l = new LinkedList();
+        l = new LinkedList<SceneGraphPath>();
         toolToPath.put(tool, l);
       }
       try {

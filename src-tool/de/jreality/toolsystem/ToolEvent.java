@@ -41,8 +41,6 @@
 package de.jreality.toolsystem;
 
 import java.util.EventObject;
-import java.util.LinkedList;
-import java.util.List;
 
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.tool.AxisState;
@@ -54,14 +52,14 @@ import de.jreality.scene.tool.InputSlot;
  **/
 public class ToolEvent extends EventObject {
     
-	  InputSlot device;
+	private static final long serialVersionUID = -574219336588808514L;
+
+	InputSlot device;
     
     // these must be accessable from sublasses replace-methods
     protected AxisState axis;
     protected DoubleArray trafo;
     protected long time;
-
-    private List overwrites=new LinkedList();
 
     private boolean consumed;
 

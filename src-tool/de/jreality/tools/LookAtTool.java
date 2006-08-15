@@ -71,7 +71,6 @@ public class LookAtTool extends AbstractTool {
   private boolean rotate;
   
   public LookAtTool() {
-    super(null);
     addCurrentSlot(myActivation);
     currentAngleV=(maxVerticalAngle+minVerticalAngle)/2;
   }

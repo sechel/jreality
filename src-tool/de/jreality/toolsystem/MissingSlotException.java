@@ -52,6 +52,8 @@ import de.jreality.scene.tool.InputSlot;
  */
 public class MissingSlotException extends Exception {
 
+	private static final long serialVersionUID = -8464386623089880193L;
+
   /**
    * @param leftSlot
    */

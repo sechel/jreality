@@ -316,7 +316,7 @@ class DeviceManager {
    * @param compQueue the queue to post new events to
    */
   void evaluateEvent(ToolEvent event, LinkedList<ToolEvent> compQueue) {
-    LoggingSystem.getLogger(this).finest("evaluating event: "+event);
+    if (event.getInputSlot() != InputSlot.getDevice("SystemTime")) LoggingSystem.getLogger(this).finest("evaluating event: "+event);
     InputSlot slot = event.getInputSlot();
     setAxisState(slot, event.getAxisState());
     setTransformationMatrix(slot, event.getTransformation());

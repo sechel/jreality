@@ -61,8 +61,8 @@ import de.jreality.scene.tool.Tool;
  */
 public class ToolManager {
 
-    private final HashSet toolsWithPick = new HashSet();
-    private final HashMap toolToPaths = new HashMap();
+    private final HashSet<Tool> toolsWithPick = new HashSet<Tool>();
+    private final HashMap<Tool, List<SceneGraphPath>> toolToPaths = new HashMap<Tool, List<SceneGraphPath>>();
     
     boolean addTool(Tool tool, SceneGraphPath path) {
     	boolean first = pathsForTool(tool).isEmpty();
@@ -70,8 +70,9 @@ public class ToolManager {
         	pathsForTool(tool).add(path);	// clone path, perhaps?
         else
             throw new IllegalStateException("Tool "+tool+" already registered with path="+path);
-        if ((tool.getActivationSlot() != null) && !toolsWithPick.contains(tool))
+        if (!tool.getActivationSlot().isEmpty() && !toolsWithPick.contains(tool)) {
         	toolsWithPick.add(tool);
+        }
         return first;
     }
     
@@ -81,7 +82,7 @@ public class ToolManager {
       else
         throw new IllegalStateException();
       if (pathsForTool(tool).isEmpty()) {
-      	if (tool.getActivationSlot() != null)
+      	if (!tool.getActivationSlot().isEmpty())
           toolsWithPick.remove(tool);
         return true;
       }
@@ -108,11 +109,11 @@ public class ToolManager {
         return toolsWithPick.contains(candidate);
     }
 
-    private List pathsForTool(Tool t) {
+    private List<SceneGraphPath> pathsForTool(Tool t) {
         if (!toolToPaths.containsKey(t)) {
-            toolToPaths.put(t, new LinkedList());
+            toolToPaths.put(t, new LinkedList<SceneGraphPath>());
         }
-        return (List) toolToPaths.get(t);
+        return toolToPaths.get(t);
     }
 
     SceneGraphPath getPathForTool(Tool tool, SceneGraphPath pickPath) {
@@ -120,28 +121,27 @@ public class ToolManager {
             if (pathsForTool(tool).size() != 1)
                     throw new IllegalStateException(
                             "ambigous path without pick");
-            return (SceneGraphPath) pathsForTool(tool).get(0);
+            return pathsForTool(tool).get(0);
         }
-        for (Iterator i = pathsForTool(tool).iterator(); i.hasNext();) {
-            SceneGraphPath path = (SceneGraphPath) i.next();
+        for (SceneGraphPath path : pathsForTool(tool)) {
             if (pickPath.startsWith(path)) return path;
         }
         return null;
     }
 
-    Collection selectToolsForPath(SceneGraphPath pickPath, int depth, HashSet candidates) {  
+    Collection<Tool> selectToolsForPath(SceneGraphPath pickPath, int depth, HashSet candidates) {  
         for(Iterator iter = pickPath.reverseIterator(depth); iter.hasNext();) {
             SceneGraphNode node = (SceneGraphNode) iter.next();
-            List tools;
+            List<Tool> tools;
             if (node instanceof SceneGraphComponent) {
               tools = ((SceneGraphComponent) node).getTools();
             } else continue;
-            List copy = new LinkedList();
+            List<Tool> copy = new LinkedList<Tool>();
             copy.addAll(tools);
             copy.retainAll(candidates);
             if (!copy.isEmpty()) return copy;
         }
-        return Collections.EMPTY_SET;
+        return Collections.emptySet();
     }
 
 }
