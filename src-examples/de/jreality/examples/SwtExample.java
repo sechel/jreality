@@ -61,7 +61,7 @@ import de.jreality.scene.Light;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.pick.AABBPickSystem;
-import de.jreality.swing.JRJComponent;
+import de.jreality.swing.JFakeFrame;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.EncompassTool;
 import de.jreality.tools.RotateTool;
@@ -165,8 +165,8 @@ public class SwtExample {
     cameraNode.addTool(shipNavigationTool);
     
     PaintComponent pc = new PaintComponent();
-    JRJComponent jrj = new JRJComponent();
-    jrj.add(pc);
+    JFakeFrame jrj = new JFakeFrame();
+    jrj.getContentPane().add(pc);
     
     geometryNode.setAppearance(jrj.getAppearance());
     geometryNode.addTool(jrj.getTool());

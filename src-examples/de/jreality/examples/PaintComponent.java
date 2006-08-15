@@ -61,7 +61,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.pick.AABBTree;
 import de.jreality.swing.JFakeFrame;
-import de.jreality.swing.JRJComponent;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class PaintComponent extends JPanel implements MouseListener, MouseMotionListener,ActionListener {
