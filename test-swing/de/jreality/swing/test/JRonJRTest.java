@@ -56,6 +56,7 @@ import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.swing.JFakeFrame;
+import de.jreality.tools.DraggingTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
@@ -116,18 +117,6 @@ public class JRonJRTest {
 
         // renderTrigger.addViewer(viewerSwitch);
 
-        ToolSystemConfiguration cfg = null;
-
-        try {
-            cfg = ToolSystemConfiguration.loadDefaultDesktopConfiguration();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        if (cfg == null)
-            throw new IllegalStateException("couldn't load tool config");
-        ToolSystemViewer v = new ToolSystemViewer(viewer, cfg, false);
-        v.setPickSystem(new AABBPickSystem());
         SceneGraphComponent scene = new SceneGraphComponent();
 
         scene.addChild(root);
@@ -139,9 +128,9 @@ public class JRonJRTest {
         RotateTool rt = new RotateTool();
         rt.setMoveChildren(true);
         root.addTool(rt);
-        //scene.addTool(new ScaleTool());
-        //scene.addTool(new TranslateTool());
-        //scene.addTool(new EncompassTool());
+        DraggingTool dt = new DraggingTool();
+        dt.setMoveChildren(true);
+        root.addTool(dt);
         scene.addChild(camNode);
         SceneGraphPath cp = (SceneGraphPath) SceneGraphUtility.getPathsBetween(
                 scene, c).get(0);
@@ -172,13 +161,15 @@ public class JRonJRTest {
         scene.addChild(lightNode);
         scene.addChild(lightNode2);
 
+        RenderTrigger trigger = new RenderTrigger();
+        trigger.addSceneGraphComponent(scene);
+        trigger.addViewer(viewer);
+        ToolSystemViewer v = new ToolSystemViewer(viewer, trigger);
+
         v.setSceneRoot(scene);
         v.setCameraPath(cp);
         v.setAvatarPath(cp);
         v.initializeTools();
-        RenderTrigger trigger = new RenderTrigger();
-        trigger.addSceneGraphComponent(root);
-        trigger.addViewer(v);
         return v;
     }
 

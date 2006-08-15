@@ -46,7 +46,7 @@ import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.examples.PaintComponent;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
-import de.jreality.swing.JRJComponent;
+import de.jreality.swing.JFakeFrame;
 import de.jreality.ui.viewerapp.ViewerApp;
 public class SwingTest {
 
@@ -84,9 +84,10 @@ public class SwingTest {
        //PickUtility.assignFaceAABBTree(catenoid);
    
        
-       JRJComponent jrj = new JRJComponent();
-       jrj.add(new JButton("my button"));
-       
+       JFakeFrame jrj = new JFakeFrame();
+       jrj.getContentPane().add(new JButton("my button"));
+       jrj.setSize(200, 200);
+       jrj.setVisible(true);
        catComp.addTool(jrj.getTool());
        
     System.out.print("setting appearance ");
