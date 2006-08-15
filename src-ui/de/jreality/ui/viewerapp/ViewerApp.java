@@ -43,10 +43,8 @@ package de.jreality.ui.viewerapp;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.Window;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.beans.Beans;
 import java.io.IOException;
 import java.security.AccessControlException;
@@ -111,7 +109,7 @@ public class ViewerApp {
   private Navigator navigator;
   private SelectionManager selectionManager;
   
-  private boolean showMenu = true;  //default
+  private boolean showMenu = false;  //default
   
   private JrScene jrScene;
 
