@@ -117,6 +117,9 @@ import java.util.Map;
 import java.util.Properties;
 
 class FakeToolKit extends Toolkit {
+	
+    private static final boolean DUMP = false;
+
     private static  FakeToolKit ftk = new FakeToolKit();
     public static Toolkit getDefaultToolkit() {
         return ftk;
@@ -239,7 +242,7 @@ class FakeToolKit extends Toolkit {
     }
 
     protected FramePeer createFrame(Frame target) throws HeadlessException {
-        System.out.println("new Frame peer");
+        if (DUMP) System.out.println("new Frame peer");
         return new FakeFramePeer(target) ;
         }
 
@@ -322,7 +325,6 @@ class FakeToolKit extends Toolkit {
     }
 
     public class FakeFramePeer implements FramePeer {
-        private static final boolean DUMP = false;
         private BufferedImage bi;
         private Frame frame;
         private Runnable repaintAction;

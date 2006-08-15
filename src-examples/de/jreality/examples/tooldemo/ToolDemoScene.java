@@ -135,7 +135,6 @@ public class ToolDemoScene {
     if (terrain) {
       terrainNode = Readers.read(Input.getInput("de/jreality/examples/tooldemo/resources/terrain.3ds")).getChildComponent(0);
       MatrixBuilder.euclidean().scale(1/3.).translate(0,9,0).assignTo(terrainNode);
-      System.out.println(GeometryUtility.calculateBoundingBox(terrainNode).getMinY());
       } else {
       terrainNode = new SceneGraphComponent();
       MatrixBuilder.euclidean().rotateX(Math.PI/2).assignTo(terrainNode);

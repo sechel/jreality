@@ -88,7 +88,6 @@ public class JFakeFrame extends JFrame {
               appearance.setAttribute(CommonAttributes.VERTEX_DRAW, false);
               appearance.setAttribute(CommonAttributes.EDGE_DRAW, false);
               appearance.setAttribute(CommonAttributes.TUBES_DRAW, false);
-              System.out.println(RepaintManager.currentManager(this));
               
     }
     public void addNotify() {
