@@ -40,12 +40,19 @@
 
 package de.jreality.scene.proxy.tree;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
 import java.util.Iterator;
 
 import junit.framework.TestCase;
+import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.proxy.ProxyFactory;
+import de.jreality.tools.RotateTool;
+import de.jreality.toolsystem.ToolUpdateProxy;
+import de.jreality.ui.treeview.SceneTreeModel;
+import de.jreality.ui.viewerapp.ViewerApp;
 
 
 /**
@@ -56,6 +63,8 @@ import de.jreality.scene.proxy.ProxyFactory;
  *
  */
 public class TreeProxyTest extends TestCase {
+
+  MemoryMXBean mbean = ManagementFactory.getMemoryMXBean();
 
   public static void main(String[] args) {
     junit.swingui.TestRunner.run(TreeProxyTest.class);
@@ -82,6 +91,7 @@ public class TreeProxyTest extends TestCase {
   }
 
   public void testTreeProxy() {
+    if (true) return;
     SceneGraphComponent root = new SceneGraphComponent();
     SceneProxyTreeBuilder ttp = new SceneProxyTreeBuilder(root);
     ttp.setProxyTreeFactory(new ProxyTreeFactory());
@@ -92,7 +102,72 @@ public class TreeProxyTest extends TestCase {
     System.out.println("++++++++++++++++++++++");
   }
 
+  public void testTreeProxyMemLeak() {
+    SceneGraphComponent root = new SceneGraphComponent();
+    SceneGraphComponent c1 = new SceneGraphComponent();
+    SceneGraphComponent c2 = new SceneGraphComponent();
+    SceneGraphComponent c3 = new SceneGraphComponent();
+    root.addChild(c1);
+    root.addChild(c2);
+    c1.addChild(c3);
+    c2.addChild(c3);
+    c1.addTool(new RotateTool());
+    SceneProxyTreeBuilder ttp = new SceneProxyTreeBuilder(root);
+    ttp.setProxyTreeFactory(new ProxyTreeFactory());
+    ttp.getProxyTreeFactory().setProxyFactory(new PrintFactory());
+    ttp.setProxyConnector(new ProxyConnector());
+    SceneTreeNode tn = ttp.createProxyTree();
+    for (int i = 0; i < 1000; i++) {
+      c3.setGeometry(new CatenoidHelicoid(10));
+      System.gc();
+      if ((i%100) == 0) System.out.println(mbean.getHeapMemoryUsage());
+    }
+  }
+
+  public void testTreeProxyMemLeakTreeView() {
+    SceneGraphComponent root = new SceneGraphComponent();
+    SceneGraphComponent c1 = new SceneGraphComponent();
+    SceneGraphComponent c2 = new SceneGraphComponent();
+    SceneGraphComponent c3 = new SceneGraphComponent();
+    root.addChild(c1);
+    root.addChild(c2);
+    c1.addChild(c3);
+    c2.addChild(c3);
+    c1.addTool(new RotateTool());
+    SceneTreeModel sm = new SceneTreeModel(root);
+    for (int i = 0; i < 1000; i++) {
+      c3.setGeometry(new CatenoidHelicoid(10));
+      System.gc();
+      if ((i%100) == 0) System.out.println(mbean.getHeapMemoryUsage());
+    }
+  }
+
+  public void testTreeProxyMemLeakToolProxy1() {
+    SceneGraphComponent root = new SceneGraphComponent();
+    SceneGraphComponent c1 = new SceneGraphComponent();
+    SceneGraphComponent c2 = new SceneGraphComponent();
+    SceneGraphComponent c3 = new SceneGraphComponent();
+    root.addChild(c1);
+    root.addChild(c2);
+    c1.addChild(c3);
+    c2.addChild(c3);
+    c1.addTool(new RotateTool());
+    if (false) {
+      ToolUpdateProxy sm = new ToolUpdateProxy(null);
+      sm.setSceneRoot(root);
+    } else {
+      ViewerApp.display(root);
+    }
+    for (int i = 0; i < 1000; i++) {
+      c3.setGeometry(new CatenoidHelicoid(10));
+      System.gc();
+      if ((i%100) == 0) 
+        System.out.println(mbean.getHeapMemoryUsage());
+    }
+  }
+
   public void testTreeUpToDateProxy() {
+    if (true) return;
     SceneGraphComponent root = new SceneGraphComponent();
     root.setName("root");
     SceneGraphComponent p1 = new SceneGraphComponent();
