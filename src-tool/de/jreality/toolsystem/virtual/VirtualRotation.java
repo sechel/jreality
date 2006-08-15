@@ -64,7 +64,7 @@ public class VirtualRotation implements VirtualDevice {
   InputSlot out;
 
   private double gain = 4;
-  private double aspectRatio = 1;
+//  private double aspectRatio = 1;
 
   private Matrix result = new Matrix();
   private DoubleArray da = new DoubleArray(result.getArray());

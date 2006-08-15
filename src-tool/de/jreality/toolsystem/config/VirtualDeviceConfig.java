@@ -82,14 +82,11 @@ public class VirtualDeviceConfig {
   private List inSlots;
   private Map config;
 
-  private InputSlot mapped;
-  
   public VirtualDeviceConfig(String virtualDevice, InputSlot outSlot, List inSlots, Map config, String mapped) {
     this.virtualDevice = virtualDevice;
     this.outSlot = outSlot;
     this.inSlots = inSlots;
     this.config = config;
-    this.mapped = mapped.trim().equals("") ? null : InputSlot.getDevice(mapped);
   }
 
   public VirtualDevice createDevice() throws InstantiationException {
