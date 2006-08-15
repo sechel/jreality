@@ -64,7 +64,7 @@ import de.jreality.scene.Viewer;
  * doesn't need to care about component replacement when switching
  * from one viewer to another...
  * 
- * @author gollwas
+ * @author Steffen Weissmann
  *
  */
 public class ViewerSwitch implements Viewer {
@@ -177,7 +177,7 @@ public class ViewerSwitch implements Viewer {
     return currentViewer.getSignature();
   }
 
-  public Object getViewingComponent() {
+  public Component getViewingComponent() {
     return component;
   }
 
