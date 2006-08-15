@@ -62,6 +62,6 @@ public interface PickSystem {
    *          end point of ray in world coordinates (can be at infinity)
    * @return list of PickResults sorted by distance from foot point
    */
-  public abstract List computePick(double[] from, double[] to);
+  public abstract List<PickResult> computePick(double[] from, double[] to);
 
 }

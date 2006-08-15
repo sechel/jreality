@@ -91,15 +91,15 @@ public class AABBPickSystem implements PickSystem {
     this.root=root;
   }
   
-  public List<Hit> computePick(double[] f, double[] t) {
+  public List<PickResult> computePick(double[] f, double[] t) {
     if (f.length == 4) Pn.dehomogenize(f, f);
     if (t.length == 4) Pn.dehomogenize(t, t);
-    if (t.length == 3 || t[3] == 0) return computePickImpl(f, t, t, 10000);
+    if (t.length == 3 || t[3] == 0) return new ArrayList<PickResult>(computePickImpl(f, t, t, 10000));
     double[] dir = new double[3];
     dir[0] = t[0]-f[0];
     dir[1] = t[1]-f[1];
     dir[2] = t[2]-f[2];
-    return computePickImpl(f, t, dir, Rn.euclideanNorm(dir));
+    return new ArrayList<PickResult>(computePickImpl(f, t, dir, Rn.euclideanNorm(dir)));
   }
   
   private List<Hit> computePickImpl(double[] from, double[] to, double[] dir, double maxDist) {

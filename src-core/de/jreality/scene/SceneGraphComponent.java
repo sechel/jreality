@@ -440,7 +440,7 @@ public class SceneGraphComponent extends SceneGraphNode {
    * use from inside Scene.executeReader(..)
    * @return
    */
-  public List getTools() {
+  public List<Tool> getTools() {
     startReader();
     try {
       return Collections.unmodifiableList(tools);
