@@ -46,6 +46,7 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.logging.Level;
 
 import de.jreality.scene.Appearance;
@@ -198,10 +199,10 @@ import de.jreality.util.LoggingSystem;
     for (SceneTreeNode n = this; n.getParent()!= null; n = n.getParent())
       ll.add(n.getParent().getNode());
     // fill arraylist in correct oder
-    ArrayList<SceneGraphNode> al = new ArrayList<SceneGraphNode>(ll);
-    int ind = ll.size()-1;
-    for (SceneGraphNode n : ll) {
-      al.set(ind, n);
+    ArrayList<SceneGraphNode> al = new ArrayList<SceneGraphNode>(ll.size());
+    ListIterator<SceneGraphNode> litar = ll.listIterator(ll.size());
+    for (int i = 0; litar.hasPrevious(); i++) {
+    	al.add(i, litar.previous());
     }
     return SceneGraphPath.fromList(al);
   }

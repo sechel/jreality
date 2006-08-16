@@ -42,9 +42,14 @@ package de.jreality.scene.proxy.tree;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import junit.framework.TestCase;
+import de.jreality.Debug;
 import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
@@ -103,6 +108,7 @@ public class TreeProxyTest extends TestCase {
   }
 
   public void testTreeProxyMemLeak() {
+    if (true) return;
     SceneGraphComponent root = new SceneGraphComponent();
     SceneGraphComponent c1 = new SceneGraphComponent();
     SceneGraphComponent c2 = new SceneGraphComponent();
@@ -116,33 +122,58 @@ public class TreeProxyTest extends TestCase {
     ttp.setProxyTreeFactory(new ProxyTreeFactory());
     ttp.getProxyTreeFactory().setProxyFactory(new PrintFactory());
     ttp.setProxyConnector(new ProxyConnector());
-    SceneTreeNode tn = ttp.createProxyTree();
+    @SuppressWarnings("unused") SceneTreeNode tn = ttp.createProxyTree();
     for (int i = 0; i < 1000; i++) {
-      c3.setGeometry(new CatenoidHelicoid(10));
-      System.gc();
-      if ((i%100) == 0) System.out.println(mbean.getHeapMemoryUsage());
-    }
+        CatenoidHelicoid ch = new CatenoidHelicoid(10);
+        c3.setGeometry(ch);
+        c3.setGeometry(new CatenoidHelicoid(10));
+        for (int j = 0; j < 15; j++) System.gc();
+        if ((i%100) == 0) { System.out.println(mbean.getHeapMemoryUsage());
+          Debug.ref(ttp, ch);
+          System.out.println("----");
+        }
+      }
   }
 
   public void testTreeProxyMemLeakTreeView() {
+    //if (true) return;
     SceneGraphComponent root = new SceneGraphComponent();
     SceneGraphComponent c1 = new SceneGraphComponent();
     SceneGraphComponent c2 = new SceneGraphComponent();
     SceneGraphComponent c3 = new SceneGraphComponent();
+    root.setName("root");
+    c1.setName("c1");
+    c2.setName("c2");
+    c3.setName("c3");
     root.addChild(c1);
     root.addChild(c2);
     c1.addChild(c3);
     c2.addChild(c3);
     c1.addTool(new RotateTool());
     SceneTreeModel sm = new SceneTreeModel(root);
-    for (int i = 0; i < 1000; i++) {
-      c3.setGeometry(new CatenoidHelicoid(10));
-      System.gc();
-      if ((i%100) == 0) System.out.println(mbean.getHeapMemoryUsage());
+    for (int i = 0; i < 500; i++) {
+      CatenoidHelicoid ch = new CatenoidHelicoid(10);
+      ch.setName("ch["+i+"]");
+      c3.setGeometry(ch);
+      //for (int j = 0; j < 15; j++)
+    	  System.gc();
+      if ((i%100) == 0) { System.out.println(mbean.getHeapMemoryUsage());
+//        Debug.ref(sm, ch);
+      }
     }
   }
 
-  public void testTreeProxyMemLeakToolProxy1() {
+  static ReferenceQueue<Object> QUEUE = new ReferenceQueue<Object>();
+  static List<X> REFS=new ArrayList<X>();
+  static class X extends WeakReference<Object> {
+    String s;
+    X(Object o) { super(o, QUEUE); s=o.toString(); }
+    @Override
+    public String toString() {
+      return s;
+    }
+  }
+  public void testTreeProxyMemLeakToolProxy() {
     SceneGraphComponent root = new SceneGraphComponent();
     SceneGraphComponent c1 = new SceneGraphComponent();
     SceneGraphComponent c2 = new SceneGraphComponent();
@@ -156,11 +187,18 @@ public class TreeProxyTest extends TestCase {
       ToolUpdateProxy sm = new ToolUpdateProxy(null);
       sm.setSceneRoot(root);
     } else {
+      //System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer");
       ViewerApp.display(root);
     }
-    for (int i = 0; i < 1000; i++) {
-      c3.setGeometry(new CatenoidHelicoid(10));
+    for (int i = 0; i < 500; i++) {
+      CatenoidHelicoid ch = new CatenoidHelicoid(10);
+      REFS.add(new X(ch));
+      c3.setGeometry(ch);
       System.gc();
+      for(Object o=QUEUE.poll(); o!=null; o=QUEUE.poll()) {
+//        System.out.println("collected: "+o);
+        REFS.remove(o);
+      }
       if ((i%100) == 0) 
         System.out.println(mbean.getHeapMemoryUsage());
     }
