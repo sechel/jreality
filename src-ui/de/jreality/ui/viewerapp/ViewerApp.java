@@ -197,7 +197,7 @@ public class ViewerApp {
     frame.setVisible(true);
     
     // TODO: see where/how to integrate that
-    content.addKeyListener(new KeyAdapter() {
+    getViewerSwitch().getViewingComponent().addKeyListener(new KeyAdapter() {
     	boolean isFullscreen = false;
     	public void keyPressed(KeyEvent e) {
     		if (e.getKeyCode() == KeyEvent.VK_F11) {
@@ -206,19 +206,18 @@ public class ViewerApp {
     				parent = parent.getParent();
     			Frame frame = (Frame) parent;
     			if (isFullscreen) {
+    				frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(null);
     				frame.dispose();
     				frame.setUndecorated(false);
-    				frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(null);
-    				frame.validate();
-    				frame.setVisible(true);
     				isFullscreen=false;
     			} else {
     				frame.dispose();
     				frame.setUndecorated(true);
     				frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(frame);
-    				frame.validate();
     				isFullscreen=true;
     			}
+				frame.validate();
+				frame.setVisible(true);
     		}
     	}
     });
