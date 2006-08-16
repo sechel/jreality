@@ -74,7 +74,7 @@ import de.jreality.util.LoggingSystem;
  */
 public class SceneGraphNodeEntity {
   
-  private List treeNodes = new ArrayList();
+  private List<SceneTreeNode> treeNodes = new ArrayList<SceneTreeNode>();
   private SceneGraphNode node;
   
   protected SceneGraphNodeEntity(SceneGraphNode node) {
@@ -96,12 +96,12 @@ public class SceneGraphNodeEntity {
     treeNodes.remove(tn);
   }
   
-  public Iterator getTreeNodes() {
+  public Iterator<SceneTreeNode> getTreeNodes() {
     return Collections.unmodifiableCollection(treeNodes).iterator();
   }
   
   boolean isEmpty() {
-    return treeNodes.size() == 0;
+    return treeNodes.isEmpty();
   }
   
   int size() {

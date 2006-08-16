@@ -76,9 +76,9 @@ import de.jreality.util.LoggingSystem;
   
   private SceneTreeNode parent=null;
   private SceneGraphNode node;
-  private IdentityHashMap childrenMap = new IdentityHashMap();
-  private List childList;
-  private List childrenRO;
+  private IdentityHashMap<SceneGraphNode, SceneTreeNode> childrenMap = new IdentityHashMap<SceneGraphNode, SceneTreeNode>();
+  private List<SceneTreeNode> childList=Collections.emptyList();
+  private List<SceneTreeNode> childrenRO=Collections.unmodifiableList(childList);
   private ProxyConnector connector;
   private Object proxy;
   private SceneGraphNodeEntity entity;
@@ -94,11 +94,8 @@ import de.jreality.util.LoggingSystem;
     this.node = node;
     isComponent = node instanceof SceneGraphComponent;
     if (isComponent) {
-      childList = new ArrayList(((SceneGraphComponent)node).getChildComponentCount()+5);
-      childrenRO  = Collections.unmodifiableList(childList);
-    } else {
-      childList = Collections.EMPTY_LIST;
-      childrenRO = Collections.EMPTY_LIST;
+    	childList = new ArrayList<SceneTreeNode>(((SceneGraphComponent)node).getChildComponentCount()+5);
+    	childrenRO = Collections.unmodifiableList(childList);
     }
   }
   
@@ -108,10 +105,10 @@ import de.jreality.util.LoggingSystem;
   }
 
   public boolean isLeaf() {
-    return childrenMap.size()==0;
+    return childrenMap.isEmpty();
   }
   
-  public List getChildren() {
+  public List<SceneTreeNode> getChildren() {
     return childrenRO;
   }
   
@@ -196,15 +193,15 @@ import de.jreality.util.LoggingSystem;
   }
   public SceneGraphPath toPath() {
     // fill list in reverse order
-    LinkedList ll = new LinkedList();
+    LinkedList<SceneGraphNode> ll = new LinkedList<SceneGraphNode>();
     ll.add(this.getNode());
     for (SceneTreeNode n = this; n.getParent()!= null; n = n.getParent())
       ll.add(n.getParent().getNode());
     // fill arraylist in correct oder
-    ArrayList al = new ArrayList(ll);
+    ArrayList<SceneGraphNode> al = new ArrayList<SceneGraphNode>(ll);
     int ind = ll.size()-1;
-    for (Iterator i = ll.iterator(); i.hasNext(); ind--) {
-      al.set(ind, i.next());
+    for (SceneGraphNode n : ll) {
+      al.set(ind, n);
     }
     return SceneGraphPath.fromList(al);
   }
@@ -229,9 +226,10 @@ import de.jreality.util.LoggingSystem;
     return ret;
   }
   protected int removeChild(SceneTreeNode prevChild) {
-    int ret = childList.indexOf(prevChild);
-    childrenMap.remove(prevChild);
-    childList.remove(ret);
+	int ret = childList.indexOf(prevChild);
+    SceneTreeNode fromMap = childrenMap.remove(prevChild.getNode());
+    SceneTreeNode fromList = childList.remove(ret);
+	assert (fromMap == prevChild && fromList == prevChild);
     return ret;
   }
   

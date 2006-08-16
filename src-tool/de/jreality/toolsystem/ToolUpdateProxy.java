@@ -130,6 +130,7 @@ public class ToolUpdateProxy {
 
     protected void dispose() {
       comp.removeToolListener(this);
+      super.dispose();
     }
 
   }

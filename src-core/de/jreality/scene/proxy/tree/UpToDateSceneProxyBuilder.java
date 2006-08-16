@@ -72,9 +72,9 @@ public class UpToDateSceneProxyBuilder extends SceneProxyTreeBuilder implements 
 
   private final Object mutex = new Object();
   
-  protected IdentityHashMap nodeEntityMap = new IdentityHashMap();
+  private IdentityHashMap<SceneGraphNode, SceneGraphNodeEntity> nodeEntityMap = new IdentityHashMap<SceneGraphNode, SceneGraphNodeEntity>();
   
-  protected EntityFactory entityFactory;
+  private EntityFactory entityFactory;
   
   protected final Level loglevel = Level.FINE;		// somebody set this to INFO, which generates just too much -gunn
   public UpToDateSceneProxyBuilder(SceneGraphComponent root) {

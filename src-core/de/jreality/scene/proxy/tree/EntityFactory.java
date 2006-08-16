@@ -129,7 +129,7 @@ public class EntityFactory {
   
   public void disposeEntity(SceneGraphNodeEntity entity) {
     produced=entity;
-    entity.getNode().accept(disposeTraversal);
+    entity.getNode().accept(disposeTraversal); // remove listeners
     entity.dispose();
   }
   
