@@ -481,15 +481,16 @@ public class RIBVisitor extends SceneGraphVisitor {
 
 		    System.out.println(Arrays.asList(ImageIO.getWriterFormatNames()));
 		    
-            boolean worked=false;
+            boolean worked=true;
 			try {
-				worked = ImageIO.write(img, "TIFF", new File(noSuffix+".tiff"));
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//worked = ImageIO.write(img, "TIFF", new File(noSuffix+".tiff"));
+				Statement stm = new Statement(Class.forName("javax.media.jai.JAI"), "create", new Object[]{"filestore", img, noSuffix+".tiff", "tiff"});
+				stm.execute();
+			} catch (Exception e) {
+				worked=false;
+	            LoggingSystem.getLogger(this).log(Level.CONFIG, "could not write TIFF: "+noSuffix+".tiff", e);
 			}
             if (!worked) {
-              LoggingSystem.getLogger(this).log(Level.CONFIG, "could not write TIFF: {0}.tiff", noSuffix);
               try {
 				worked =ImageIO.write(img, "PNG", new File(noSuffix+".png"));
 			} catch (IOException e) {
