@@ -80,7 +80,9 @@ public class Camera extends SceneGraphNode {
 			far, 
 			fieldOfView,
 			aspectRatio,
-			focus;
+			focus,
+			fstop = -1,		// set this non-negative to activate depth of field (in renderman backend)
+			focalLength = .1;
 	Rectangle2D viewPort;
 	private boolean 	isOnAxis = true,
 			isPerspective = true,
@@ -213,7 +215,8 @@ public class Camera extends SceneGraphNode {
 	 * @return Returns the orientationMatrix.
 	 */
 	public double[] getOrientationMatrix() {
-		return orientationMatrix;
+		return orientationMatrix;		// TODO Auto-generated method stub
+
 	}
 
 	public void setOrientationMatrix(double[] orientationMatrix) {
@@ -263,6 +266,22 @@ public class Camera extends SceneGraphNode {
 	}
 	private void superAccept(SceneGraphVisitor v) {
 	  super.accept(v);
+	}
+
+	public double getFocalLength() {
+		return focalLength;
+	}
+
+	public double getFStop() {
+		return fstop;
+	}
+
+	public void setFstop(double fstop) {
+		this.fstop = fstop;
+	}
+
+	public void setFocalLength(double focalLength) {
+		this.focalLength = focalLength;
 	}
 
 
