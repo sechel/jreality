@@ -170,6 +170,7 @@ public class CommonAttributes {
 	public static final String RMAN_PROXY_COMMAND = "rendermanProxyCommand";
 	public static final String RMAN_RETAIN_GEOMETRY = "rendermanRetainGeometry";
 	public static final String RMAN_REFLECTIONMAP_FILE = "rendermanReflectionmapFile";
+	public static final String RMAN_LIGHT_PREFIX = "";
     /* 
      * @param ap
      * 
