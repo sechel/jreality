@@ -47,6 +47,7 @@ import de.jreality.math.Rn;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationEventMulticaster;
 import de.jreality.scene.event.TransformationListener;
+import de.jreality.util.DefaultMatrixSupport;
 /**
  * 
  * A almost clean Transformation class, do not use anything else than set/getMatrix and multiplyOnRight/Left.
@@ -62,20 +63,8 @@ public class Transformation extends SceneGraphNode implements Cloneable {
 
   private transient TransformationListener transformationListener;
   
-  private static final double[] ID = Rn.identityMatrix(4);
+  protected double[] theMatrix;
   
-	protected double[] theMatrix;
-  
-  /**
-   * @deprecated
-   */
-	protected double[] defaultMatrix;
-
-  /**
-   * @deprecated
-   */
-  protected int signature;
-
   private transient boolean matrixChanged;
 
 	/**
@@ -84,99 +73,25 @@ public class Transformation extends SceneGraphNode implements Cloneable {
 	 * @param signature		See {@link Pn}.
 	 * @param m
 	 */
-	public Transformation(int signature, double[] m) {
+	public Transformation(double[] m) {
 		if (m == null)	theMatrix = Rn.identityMatrix(4);
-    else theMatrix = (double[]) m.clone();
-		this.signature = signature;
+		else theMatrix = (double[]) m.clone();
 	}
 	
-	public Transformation(int signature)	{
-		this(signature, null);
-	}
-	
-	public Transformation(double[] m)	{
-		this(Pn.EUCLIDEAN, m);
-	}
 	
 	public Transformation()	{
-		this(Pn.EUCLIDEAN, null);
+		this(null);
 	}
 
-	public static Transformation copyTransformation(Transformation t)	{
-		Transformation copy = new Transformation(t.signature,  t.theMatrix);
-		copy.setDefaultMatrix(t.getDefaultMatrix());
-		return copy;
-	}
 	/** 
 	 * @deprecated
 	 */
 	public Object clone() throws CloneNotSupportedException {
 		Transformation copy = (Transformation) super.clone();
 		if (theMatrix !=null) copy.theMatrix = (double[]) theMatrix.clone();
-		if (defaultMatrix !=null) copy.defaultMatrix = (double[]) defaultMatrix.clone();
-		copy.signature = signature;
 		return copy;
 	}
 	
-	/**
-	 * Reset the matrix to the currently stored default matrix. See {@link #setDefaultMatrix()}.
-	 * @deprecated
-	 */
-  public  void resetMatrix() {
-    startWriter(); // need to lock here since we check defaultMatrix == null
-    try {
-      setMatrix(defaultMatrix == null ? ID : defaultMatrix);
-    } finally {
-      finishWriter();
-    }
-	}
-
-
-	/**
-	 * Copies the current matrix into the default matrix, so it can be restored if necessary (see {@link #resetMatrix()}.
-   * @deprecated
-	 */
-  public void setDefaultMatrix() {
-    checkReadOnly();
-    startWriter();
-    try {
-  		setDefaultMatrix(theMatrix);
-    } finally {
-      finishWriter();
-    }
-	}
-
-	/**
-	 * Sets the default matrix for this Transformation to the contents of <i>aMatrix</i>.
-	 * @param aMatrix
-   * @deprecated
-	 */
-  public void setDefaultMatrix(double[] aMatrix) {
-     checkReadOnly();
-     startWriter();
-     try {
-       if (defaultMatrix == null) defaultMatrix=new double[16];
-       System.arraycopy(aMatrix, 0, defaultMatrix,0, theMatrix.length);
-       //fireTransformationChanged();
-     } finally {
-       finishWriter();
-     }
-	}
-
-	/**
-	 * 
-	 * @return 	the current default matrix
-   * @deprecated
-	 */
-  public double[] getDefaultMatrix() {
-     startReader();
-     try {
-       return (double[]) defaultMatrix.clone();
-     } finally {
-       finishReader();
-     }
-	}
-
 	/**
 	 * 
 	 * @return	a copy of the current matrix
@@ -241,36 +156,6 @@ public class Transformation extends SceneGraphNode implements Cloneable {
 		  }
 	  }
 
-	/**
-	 * See {@link Pn}, {@link Pn#ELLIPTIC}, {@link Pn#EUCLIDEAN}, and {@link Pn#HYPERBOLIC}.
-	 * @return	the metric signature
-	 * @deprecated
-	 */
-  public int getSignature()	{
-    startReader();
-    try {
-      return signature;
-    } finally {
-      finishReader();
-    }
-	}
-	
-	/**
-	 * Sets the metric signature of this transform. See {@link Pn}.
-	 * @param aSig
-	 * @deprecated
-	 */
-  public void setSignature( int aSig)	{
- 		checkReadOnly();
-    startWriter();
-    try {
-   		if (signature == aSig)	return;
-  		signature = aSig;
-      fireTransformationChanged();
-    } finally {
-      finishWriter();
-    }
-	}
 
 	public void addTransformationListener(TransformationListener listener) {
     startReader();
@@ -314,22 +199,5 @@ public class Transformation extends SceneGraphNode implements Cloneable {
       finishReader();
     }
 	}
-
-  
-  // COMPATIBILITY METHODS - - all deprecated!!
-
-  /**
-   * @deprecated
-   */
-  public void setTranslation(double[] translation) {
-    MatrixBuilder.init(new Matrix(this), signature).translate(translation).assignTo(theMatrix);
-  }
-
-  /**
-   * @deprecated
-   */
-  public void setTranslation(double x, double y, double z) {
-    setTranslation(new double[]{x, y, z});
-  }
 
 }

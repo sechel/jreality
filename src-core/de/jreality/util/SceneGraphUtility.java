@@ -43,7 +43,10 @@ package de.jreality.util;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
+
+import antlr.CommonAST;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Pn;
@@ -56,6 +59,8 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Transformation;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.EffectiveAppearance;
 
 
 /**
@@ -98,59 +103,10 @@ public class SceneGraphUtility {
 	  	while (c.getChildComponentCount() > 0) c.removeChild(c.getChildComponent(0));
   	}
 	
-  	public static void resetMatrix(SceneGraphComponent r)	{
-	  	final class ResetMatrixVisitor extends SceneGraphVisitor	{
-		  	public void visit(SceneGraphComponent c)	{
-			  	Transformation t = c.getTransformation();
-			  	if (t != null) t.resetMatrix();
-			  	c.childrenAccept(this);
-		  	}
-	  	}
-	  	ResetMatrixVisitor rmv = new ResetMatrixVisitor();
-	  	rmv.visit(r);
-  		}
-  
- 	public static void setDefaultMatrix(SceneGraphComponent r)	{
-	  	final class SetDefaultMatrixVisitor extends SceneGraphVisitor	{
-		  	public void visit(SceneGraphComponent c)	{
-			  	Transformation t = c.getTransformation();
-			  	if (t != null) t.setDefaultMatrix();
-			  	c.childrenAccept(this);
-		  	}
-	  	}
-	  	SetDefaultMatrixVisitor rmv = new SetDefaultMatrixVisitor();
-	  rmv.visit(r);
-  	}
-  
- 	public static void setSignature(SceneGraphComponent r, int signature)	{
+  	public static void setSignature(SceneGraphComponent r, int signature)	{
  		final int sig = signature;
  		 if (r.getAppearance() == null) r.setAppearance(new Appearance());
- 		 r.getAppearance().setAttribute("signature",sig);
-        final HashMap gmap =new HashMap();
-	  	final class SetSignatureVisitor extends SceneGraphVisitor	{
-		  	public void visit(SceneGraphComponent c)	{
-			  	Transformation t = c.getTransformation();
-			  	if (t != null) t.setSignature(sig);
-			  	c.childrenAccept(this);
-		  	}
-//		  	public void visit(Camera c)	{
-//		  		c.setSignature(sig);
-//		  	}
-		  	public void visit(Geometry g)	{
-		  		
-		  		if (sig == Pn.EUCLIDEAN) return;
-		  		Integer s = new Integer(sig);
-                 gmap.put(g,s);
-		  	}
-	  	}
-	  	SetSignatureVisitor rmv = new SetSignatureVisitor();
-	  rmv.visit(r);
-      Set keys = gmap.keySet();
-      for (Iterator iter = keys.iterator(); iter.hasNext();) {
-          Geometry g = (Geometry) iter.next();
-          int s = ((Integer) gmap.get(g)).intValue();
-          GeometryUtility.setSignature(g,s);
-      }
+ 		 r.getAppearance().setAttribute(CommonAttributes.SIGNATURE,sig);
     	}
   
   	public static List collectLights(SceneGraphComponent rootNode) {
@@ -269,4 +225,10 @@ public class SceneGraphUtility {
       template.accept(cv);
       return cv.getCopy();
     }
+    
+	public static int getSignature(SceneGraphPath sgp) {
+		EffectiveAppearance eap = EffectiveAppearance.create(sgp);
+		int sig = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
+		return sig;
+	}
 }
