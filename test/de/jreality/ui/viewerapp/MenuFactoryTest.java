@@ -51,15 +51,10 @@ public class MenuFactoryTest {
     ViewerApp viewerApp = new ViewerApp(Primitives.icosahedron());
     viewerApp.setAttachNavigator(true);
     viewerApp.setAttachBeanShell(true);
+    viewerApp.setShowMenu(true);
     viewerApp.update();
     viewerApp.display();
     
-    MenuFactory menu = new MenuFactory(viewerApp);
-    menu.addMenuToFrame();
-    menu.addContextMenuToNavigator();
-    
-    //ViewerAppOld.display(Primitives.icosahedron());
-   
   }
 
 }

@@ -53,6 +53,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.util.DefaultMatrixSupport;
 import de.jreality.util.SceneGraphUtility;
 
 /**
@@ -121,7 +122,7 @@ public abstract class Renderer {
       p.setFieldOfViewDeg(camera.getFieldOfView());
       p.setNear(camera.getNear());
       p.setFar(camera.getFar());
-      cameraWorld.resetMatrix();
+      DefaultMatrixSupport.getSharedInstance().restoreDefault(cameraWorld, true);
       //cameraPath.applyEffectiveTransformation(cameraWorld);
       cameraWorld.setMatrix(cameraPath.getMatrix(null));
       //SceneGraphUtilities.applyEffectiveTransformation(cameraWorld,(SceneGraphComponent) camera.getParentNode(),root);

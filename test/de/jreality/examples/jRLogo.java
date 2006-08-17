@@ -98,7 +98,7 @@ static {
     logo = new SceneGraphComponent();
     SceneGraphComponent cpc = new SceneGraphComponent();
     Transformation trans= new Transformation();
-    trans.setTranslation(-20,-12,0);
+//    trans.setTranslation(-20,-12,0);
     cpc.setTransformation(trans);
     cpc.setGeometry(ts);
     
@@ -126,7 +126,6 @@ static {
     SceneGraphComponent tpc = new SceneGraphComponent();
     trans= new Transformation();
     //trans.setRotation(-.2,0,1,0);
-    trans.setTranslation(0,0,0);
     //tpc.setTransformation(trans);
     tpc.setGeometry(t);
     
@@ -148,7 +147,7 @@ static {
          // scene View
          SceneGraphComponent cameraNode= new SceneGraphComponent();
          Transformation ct= new Transformation();
-         ct.setTranslation(0, 0, 16);
+//         ct.setTranslation(0, 0, 16);
          cameraNode.setTransformation(ct);
          Camera firstCamera= new Camera();
          firstCamera.setFieldOfView(30);

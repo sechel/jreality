@@ -51,6 +51,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.util.DefaultMatrixSupport;
 
 /**
  * This is an experimental PS viewer for jReality.
@@ -123,7 +124,7 @@ public abstract class AbstractViewer implements Viewer {
         p.setFieldOfViewDeg(camera.getFieldOfView());
         p.setNear(camera.getNear());
         p.setFar(camera.getFar());
-        cameraWorld.resetMatrix();
+        DefaultMatrixSupport.getSharedInstance().restoreDefault(cameraWorld, true);
         cameraWorld.multiplyOnLeft(cameraPath.getMatrix(null));
         
         //
