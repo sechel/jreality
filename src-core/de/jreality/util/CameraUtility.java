@@ -189,6 +189,10 @@ public class CameraUtility {
 	 * @return
 	 */
 	public static double[] getCameraToNDC(Camera cam, double aspectRatio, int which)		{
+		return getCameraToNDC(cam, aspectRatio, which, Pn.EUCLIDEAN);
+	}
+	
+	public static double[] getCameraToNDC(Camera cam, double aspectRatio, int which, int signature)		{
 			/** 
 			* If the projectoin is orthogonal, scales the viewPort by the \IT{focus}.
 			* This method won't be called if the value of \IT{isOnAxis} is FALSE;
@@ -205,6 +209,19 @@ public class CameraUtility {
 				cameraToNDC = P3.makeOrthographicProjectionMatrix(null, viewPort,cam.getNear(), cam.getFar());
 			return cameraToNDC;			
 		}  // else we're in a stereo mode
+		double[] eyePosition = getEyePosition(cam, which);
+		// TODO make this work also for non-euclidean cameras
+		double[] moveToEye = P3.makeTranslationMatrix(null, eyePosition, signature );
+		Rectangle2D newVP = getOffAxisViewPort(cam, viewPort, eyePosition);
+		// TODO should we adjust near and far ?
+		double[] c2ndc = P3.makePerspectiveProjectionMatrix(null, newVP, cam.getNear(), cam.getFar());		
+		double[] iMoveToEye = Rn.inverse(null, moveToEye);
+		//LoggingSystem.getLogger().log(Level.FINER,"iMoveToEye is \n"+Rn.matrixToString(iMoveToEye));
+		double[] ret = Rn.times(null, c2ndc, iMoveToEye);
+		return ret;
+	}
+
+	public static double[] getEyePosition(Camera cam, int which) {
 		double factor;
 		factor = (which == CameraUtility.LEFT_EYE) ? -1 : 1;
 		//if (eyeSeparation == 0.0) eyeSeparation = focus/6.0;
@@ -216,8 +233,10 @@ public class CameraUtility {
 			//LoggingSystem.getLogger().log(Level.FINER,((which == RIGHT_EYE)?"right":"left")+" eye position: "+Rn.toString(eyePosition));
 		}
 		if (eyePosition[3] == 0.0) eyePosition[3] = 1.0;
-		// TODO make this work also for non-euclidean cameras
-		double[] moveToEye = P3.makeTranslationMatrix(null, eyePosition, Pn.EUCLIDEAN );
+		return eyePosition;
+	}
+
+	public static Rectangle2D getOffAxisViewPort(Camera cam, Rectangle2D viewPort, double[] eyePosition) {
 		double x = eyePosition[0];
 		double y = eyePosition[1];
 		double z = eyePosition[2];
@@ -230,18 +249,11 @@ public class CameraUtility {
 		// Scale the camera viewport to lie in the z=focus plane, 
 		// translate it into the coordinates of the eye position (left or right),
 		// then project it onto the z=1 plane in this coordinate system.
-		//if (isOnAxis && needsViewport) updateViewport();
-		//Rectangle2D viewPort = cam.getViewPort();
 		newVP.setFrameFromDiagonal(fscale*(viewPort.getMinX()*focus-x), 
 								 fscale*(viewPort.getMinY()*focus-y), 
 								 fscale*(viewPort.getMaxX()*focus-x), 
 								 fscale*(viewPort.getMaxY()*focus-y));
-		// TODO should we adjust near and far ?
-		double[] c2ndc = P3.makePerspectiveProjectionMatrix(null, newVP, cam.getNear(), cam.getFar());		
-		double[] iMoveToEye = Rn.inverse(null, moveToEye);
-		//LoggingSystem.getLogger().log(Level.FINER,"iMoveToEye is \n"+Rn.matrixToString(iMoveToEye));
-		double[] ret = Rn.times(null, c2ndc, iMoveToEye);
-		return ret;
+		return newVP;
 	}
 
 	/**
