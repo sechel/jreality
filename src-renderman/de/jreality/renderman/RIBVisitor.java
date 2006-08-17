@@ -54,6 +54,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -62,10 +63,6 @@ import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
-import javax.media.jai.JAI;
-import javax.media.jai.RenderedOp;
-//import javax.media.jai.JAI;
-//import javax.media.jai.RenderedOp;
 
 import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.GeometryUtility;
@@ -142,7 +139,7 @@ public class RIBVisitor extends SceneGraphVisitor {
     private String name;
     protected EffectiveAppearance eAppearance;
     private int textureCount = 0;
-    private Map textures =new HashMap();
+    private Map<ImageData, String> textures =new HashMap<ImageData, String>();
     private Hashtable pointsets = new Hashtable();
     int pointsetCount = 0;
     private String proj = "perspective";
@@ -451,94 +448,57 @@ public class RIBVisitor extends SceneGraphVisitor {
             return writeTexture(data);
     }
     public String writeTexture(ImageData data){
-        Image img;
-       String noSuffix = (String) textures.get(data);
-        String fname = null;
-//        Iterator iter = ImageIO.getImageWritersByMIMEType("image/tiff");
-//        while (iter.hasNext())	{
-//        	System.err.println("Writer: "+((ImageWriter) iter.next()).getClass().getName());
-//        }
+        BufferedImage img;
+        String noSuffix = (String) textures.get(data);
+        for (Iterator iter = ImageIO.getImageWritersByMIMEType("image/tiff"); iter.hasNext(); ) {
+         	System.err.println("Writer: "+((ImageWriter) iter.next()).getClass().getName());
+        }
         if(noSuffix == null) {
-            RenderedImage rImage =null;
-            BufferedImage bImage = null;
             noSuffix = name+"_texture"+(textureCount++);
-            fname = noSuffix+".tiff"; //".png"; //
-            File f = new File(fname);
-            if (true)	{
-                //Image img = tex.getImage().getImage();
+            if (true) {
                 // TODO temporary as long as ImageData does not return a propper BufferedImage
                 byte[] byteArray = data.getByteArray();
                 int dataHeight = data.getHeight();
                 int dataWidth = data.getWidth();
-                BufferedImage bi = new BufferedImage(dataWidth, dataHeight,
+                img = new BufferedImage(dataWidth, dataHeight,
                         BufferedImage.TYPE_INT_ARGB);
-                WritableRaster raster = bi.getRaster();
+                WritableRaster raster = img.getRaster();
                 int[] pix = new int[4];
-               
-                for (int y = 0, ptr = 0; y < dataHeight; y++)
+                for (int y = 0, ptr = 0; y < dataHeight; y++) {
                     for (int x = 0; x < dataWidth; x++, ptr += 4) {
                         pix[3] = byteArray[ptr + 3];
                         pix[0] = byteArray[ptr];
                         pix[1] = byteArray[ptr + 1];
                         pix[2] = byteArray[ptr + 2];
-//                    	pix[3] = byteArray[ptr + 0];
-//                        pix[0] = byteArray[ptr + 3];
-//                        pix[1] = byteArray[ptr + 2];
-//                        pix[2] = byteArray[ptr + 1];
                         raster.setPixel(x, y, pix);
                     }
-                img = bi;
-                // force alpha channel to be "pre-multiplied"
-    		    bi.coerceData(true);
-               //END of temp code...
-                
-                if( img instanceof RenderedImage )
-                    rImage = (RenderedImage) img;
-                else {
-                    bImage =new BufferedImage(img.getWidth(null),img.getHeight(null),BufferedImage.TYPE_INT_ARGB);
-                    Graphics g =bImage.getGraphics();
-                    g.drawImage(img,0,0,null);
-                    rImage =bImage;
-                    img = (Image) rImage;
                 }
-           	
             } else {
-            	bImage = (BufferedImage) data.getImage();
-            	rImage = bImage;
-            	img = (Image) bImage;
+            	img = (BufferedImage) data.getImage();
             }
-             //System.out.println( Arrays.asList(ImageIO.getWriterFormatNames()));
-//            RenderedImage image = tex.getImage();
-            String format = "tiff";
+            // force alpha channel to be "pre-multiplied"
+		    img.coerceData(true);
 
-            RenderedOp op = JAI.create("filestore", rImage,
-                    fname, format);
-//            try {
-//                String format = "tiff";
-//                Statement stm = new Statement(Class.forName("javax.media.jai.JAI"),
-//                                              "create",
-//                                              new Object[]{"filestore", rImage, fname, format}
-//                );
-//                try {
-//                  stm.execute();
-//                } catch (Exception e) {
-//                  if (e instanceof RuntimeException) throw (RuntimeException) e;
-//                  LoggingSystem.getLogger(this).log(Level.CONFIG, "writing tiff failed", e);
-//                }
-//              } catch (ClassNotFoundException e) {
-//                LoggingSystem.getLogger(this).config("no JAI in classpath - cannot write tiff");
-//              }
-//            System.err.println("writing "+fname);
-//            try {
-//                //OutputStream os = new FileOutputStream(f);
-//                boolean worked =ImageIO.write(rImage,"PNG",f);
-//                if(!worked) System.err.println("writing of "+fname+" did not work!");
-//                //os.close();
-//                textures.put(data,noSuffix);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//                noSuffix = null;
-//            }
+		    System.out.println(Arrays.asList(ImageIO.getWriterFormatNames()));
+		    
+            boolean worked=false;
+			try {
+				worked = ImageIO.write(img, "TIFF", new File(noSuffix+".tiff"));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            if (!worked) {
+              LoggingSystem.getLogger(this).log(Level.CONFIG, "could not write TIFF: {0}.tiff", noSuffix);
+              try {
+				worked =ImageIO.write(img, "PNG", new File(noSuffix+".png"));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+              if (!worked) 
+                  LoggingSystem.getLogger(this).log(Level.CONFIG, "could not write PNG: {0}.png", noSuffix);
+            }
         } 
         textures.put(data,noSuffix);
         return noSuffix+".tex";		// should be dependent on the final renderman renderer
