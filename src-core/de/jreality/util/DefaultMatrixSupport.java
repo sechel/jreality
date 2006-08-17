@@ -77,8 +77,14 @@ public class DefaultMatrixSupport {
 	  	});
   	}
   
- 	public void storeDefaultMatrices(SceneGraphComponent r)	{
-	  	r.accept(new SceneGraphVisitor() {
+	
+	/**
+	 * Traverses thetree from the given root and calls {@link storeDefault}
+	 * for all {@link Transformation}s.
+	 * @param root the root of the subgraph to traverse
+	 */
+ 	public void storeDefaultMatrices(SceneGraphComponent root)	{
+	  	root.accept(new SceneGraphVisitor() {
 	  		@Override
 	  		public void visit(SceneGraphComponent c)	{
 			  	c.childrenAccept(this);
