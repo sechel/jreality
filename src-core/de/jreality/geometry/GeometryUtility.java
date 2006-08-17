@@ -169,7 +169,7 @@ public class GeometryUtility {
 		if (indices == null) return null;
 		int normalLength = 4;
 		// TODO fix this when non-euclidean shading is working!
-		signature = Pn.EUCLIDEAN;
+		//signature = Pn.EUCLIDEAN;
 		if (signature == Pn.EUCLIDEAN)	normalLength = 3;
 		double[][] fn = new double[indices.length][normalLength];
 		if (signature == Pn.EUCLIDEAN && verts[0].length == 4) Pn.dehomogenize(verts,verts);
@@ -178,6 +178,7 @@ public class GeometryUtility {
 			if (n < 3) continue;
 			if (signature == Pn.EUCLIDEAN)	{		
 				// not necessary but probably a bit faster
+				// have to find a non-degenerate set of 3 vertices
 				int count = 1;
 				double[] v1 = null;
 				do {
@@ -191,10 +192,17 @@ public class GeometryUtility {
 				Rn.crossProduct(fn[i], v1,v2);
 				Rn.normalize(fn[i], fn[i]);
 			} else {
+				// TODO find non-degenerate set of 3 vertices here also
 				double[] osculatingPlane = P3.planeFromPoints(null, verts[indices[i][0]], verts[indices[i][1]], verts[indices[i][2]]);
-				double[] normal = Pn.polarizePlane(null, osculatingPlane,signature);					
+				double[] normal = Pn.polarizePlane(null, osculatingPlane,signature);	
 				Pn.setToLength(normal, normal, 1.0, signature);
-				normal[0] *= -1; normal[1] *= -1; normal[2] *= -1;
+				if (normal[3] < 0) Rn.times(normal, -1, normal);
+				//normal[0] *= -1; normal[1] *= -1; normal[2] *= -1;
+//				double[] np = new double[3];
+//				for (int k = 0; k<3; ++k)	{
+//					np[k] = Pn.innerProduct(normal, verts[indices[i][k]], signature);
+//				}
+//				System.err.println("N.P "+Rn.toString(np));
 				System.arraycopy(normal, 0, fn[i], 0, normalLength);				
 			}
 		}
@@ -371,27 +379,27 @@ public class GeometryUtility {
             }
             public void visit(PointSet oldi) {
             	// have to copy the geometry in case it is reused!
-            	   PointSet i = (PointSet) SceneGraphUtility.copy(oldi);
-            	   //System.err.println("point set is "+i);
-            	   if (i.getVertexAttributes(Attribute.COORDINATES) == null) return;
-           	   double[][] v = i.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
-            	   double[] currentMatrix = thePath.getMatrix(null);
-            	   double[][] nv = Rn.matrixTimesVector(null, currentMatrix, v);
-            	   i.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
-               double[] cmp = null;
-         	   if (i instanceof IndexedFaceSet)	{
-            	       IndexedFaceSet ifs = (IndexedFaceSet) i;
+            	PointSet i = (PointSet) SceneGraphUtility.copy(oldi);
+            	//System.err.println("point set is "+i);
+            	if (i.getVertexAttributes(Attribute.COORDINATES) == null) return;
+           	    double[][] v = i.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+            	double[] currentMatrix = thePath.getMatrix(null);
+            	double[][] nv = Rn.matrixTimesVector(null, currentMatrix, v);
+            	i.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
+                double[] cmp = null;
+         	    if (i instanceof IndexedFaceSet)	{
+            	    IndexedFaceSet ifs = (IndexedFaceSet) i;
                     double[] mat = Rn.transpose(null, currentMatrix);          	
                     mat[12] = mat[13] = mat[14] = 0.0;
                     Rn.inverse(mat, mat);
 //             	   if (Rn.determinant(currentMatrix) < 0.0)	cmp = Rn.times(null, flipit, mat);
 //             	   else 
-             	   		cmp = mat;
-            	       if (ifs.getFaceAttributes(Attribute.NORMALS) != null)	{
-               	   		//System.out.println("Setting face normals");
-                       v = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
-                        nv = Rn.matrixTimesVector(null, cmp, v);
-                        ifs.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
+             	   cmp = mat;
+            	   if (ifs.getFaceAttributes(Attribute.NORMALS) != null)	{
+               	   //System.out.println("Setting face normals");
+            	v = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+                    nv = Rn.matrixTimesVector(null, cmp, v);
+                    ifs.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
             	       } else calculateAndSetFaceNormals(ifs);
                	   if (ifs.getVertexAttributes(Attribute.NORMALS) != null)	{
            	   		//System.out.println("Setting vertex normals");
