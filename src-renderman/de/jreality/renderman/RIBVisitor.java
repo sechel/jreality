@@ -484,7 +484,7 @@ public class RIBVisitor extends SceneGraphVisitor {
             boolean worked=true;
 			try {
 				//worked = ImageIO.write(img, "TIFF", new File(noSuffix+".tiff"));
-				Statement stm = new Statement(Class.forName("javax.media.jai.JAI"), "create", new Object[]{"filestore", img, noSuffix+".tiff", "tiff"});
+				Statement stm = new Statement(Class.forName("javax.media.jai.JAI").getClass(), "create", new Object[]{"filestore", img, noSuffix+".tiff", "tiff"});
 				stm.execute();
 			} catch (Exception e) {
 				worked=false;
