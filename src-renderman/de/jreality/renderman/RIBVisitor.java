@@ -54,6 +54,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -264,6 +265,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 //    		Ri.screenWindow(vp);
 //    		Ri.frameAspectRatio(aspectRatio);
         } else {
+        	map.clear();
             float fov = (float) camera.getFieldOfView();
             float a = 1.0f;
             Ri.clipping(camera.getNear(), camera.getFar());
@@ -479,14 +481,15 @@ public class RIBVisitor extends SceneGraphVisitor {
             // force alpha channel to be "pre-multiplied"
 		    img.coerceData(true);
 
-		    System.out.println(Arrays.asList(ImageIO.getWriterFormatNames()));
-		    
             boolean worked=true;
 			try {
+				// TODO: !!!
 				//worked = ImageIO.write(img, "TIFF", new File(noSuffix+".tiff"));
-				Statement stm = new Statement(Class.forName("javax.media.jai.JAI").getClass(), "create", new Object[]{"filestore", img, noSuffix+".tiff", "tiff"});
-				stm.execute();
-			} catch (Exception e) {
+				Method cm = Class.forName("javax.media.jai.JAI").getMethod("create", new Class[]{String.class, RenderedImage.class, Object.class, Object.class});
+				cm.invoke(null, new Object[]{"filestore", img, noSuffix+".tiff", "tiff"});
+//				Statement stm = new Statement(, "create", new Object[]{"filestore", img, noSuffix+".tiff", "tiff"});
+//				stm.execute();
+			} catch(Throwable e) {
 				worked=false;
 	            LoggingSystem.getLogger(this).log(Level.CONFIG, "could not write TIFF: "+noSuffix+".tiff", e);
 			}
