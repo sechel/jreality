@@ -44,28 +44,40 @@ public class DefaultMatrixSupport {
 	
 	/**
 	 * Restores the default matrix if there is any, otherwise
-	 * assigns the identity matrix.
+	 * assigns the identity matrix or does nothing, depending on the
+	 * <code>clear</code> flag.
 	 * @param trafo the trafo to restore
+	 * @param clear determines the behaviour for Transformations
+	 * without a default matrix: if true, set to the indentity - if
+	 * false, do nothing. 
 	 */
-	public void restoreDefault(Transformation trafo) {
+	public void restoreDefault(Transformation trafo, boolean clear) {
 		double[] defMatrix = store.get(trafo);
 		trafo.setMatrix(defMatrix != null ? defMatrix : IDENTITY);
 	}
 	
-  	public void restoreDefaultTransformations(SceneGraphComponent r) {
-	  	r.accept(new SceneGraphVisitor() {
+	/**
+	 * Traverses thetree from the given root and calls {@link restoreDefault}
+	 * for all {@link Transformation}s.
+	 * @param root the root of the subgraph to traverse.
+	 * @param clear determines the behaviour for Transformations
+	 * without a default matrix: if true, set to the indentity - if
+	 * false, do nothing. 
+	 */
+  	public void restoreDefaultMatrices(SceneGraphComponent root, final boolean clear) {
+	  	root.accept(new SceneGraphVisitor() {
 	  		@Override
 	  		public void visit(SceneGraphComponent c)	{
 			  	c.childrenWriteAccept(this, true, false, false, false, false, false);
 		  	}
 		  	@Override
 		  	public void visit(Transformation t) {
-		  		restoreDefault(t);
+		  		restoreDefault(t, clear);
 		  	}
 	  	});
   	}
   
- 	public void setDefaultMatrix(SceneGraphComponent r)	{
+ 	public void storeDefaultMatrices(SceneGraphComponent r)	{
 	  	r.accept(new SceneGraphVisitor() {
 	  		@Override
 	  		public void visit(SceneGraphComponent c)	{
