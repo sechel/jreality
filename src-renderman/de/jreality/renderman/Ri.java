@@ -107,6 +107,10 @@ public class Ri {
             w.println("# "+ss[i]);
         }
     }
+    
+    public static void declare(String name, String type)	{
+        w.println("Declare "+str(name)+" "+str(type));    	
+    }
     public static void option(String name, Map map) {
 //        String[] tokens = keysFromMap(map);
 //        Object[] values = valuesFromMap(map, tokens);
@@ -213,6 +217,12 @@ public class Ri {
 	public static void clipping(double near, double far) {
 		w.println("Clipping "+near+" "+far);
 	}
+	
+	public static void depthOfField(double fstop, double flength, double fdistance) {
+		if (fstop < 0) return;		// no depth of field
+		w.println("DepthOfField "+fstop+" "+flength+" "+fdistance);
+	}
+	
    public static void projection(String name, Map map) {
 //        String[]  tokens = keysFromMap(map);
 //        Object[] values = valuesFromMap(map, tokens);

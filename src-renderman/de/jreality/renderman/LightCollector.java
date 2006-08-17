@@ -42,6 +42,7 @@ package de.jreality.renderman;
 
 import java.util.HashMap;
 
+import de.jreality.math.Pn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.Light;
@@ -69,6 +70,7 @@ public class LightCollector extends SceneGraphVisitor {
     protected LightCollector reclaimableSubcontext;
     EffectiveAppearance eAppearance = null;
     boolean shadowEnabled = false;
+    int signature = Pn.EUCLIDEAN;
     SceneGraphPath currentPath = null;
     /**
      * 
@@ -105,6 +107,7 @@ public class LightCollector extends SceneGraphVisitor {
         if(a!= null ) eAppearance = eAppearance.create(a);
         currentPath.push(c);
         shadowEnabled = eAppearance.getAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, false);
+        signature = eAppearance.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
         c.childrenAccept(this); //subContext());
         eAppearance= tmp;
         currentPath.pop();
@@ -134,7 +137,8 @@ public class LightCollector extends SceneGraphVisitor {
         handleCommon(l, map);
         Ri.concatTransform(fCurrentTrafo);
 //        map.put("to", direction);
-       Ri.lightSource(shadowEnabled ? "shadowdistant":"distantlight",map);
+        map.put("to",zdirection);
+      Ri.lightSource(shadowEnabled ? "shadowdistant":"mydistantlight",map);
         
         Ri.transformEnd();
         //super.visit(l);
@@ -145,7 +149,7 @@ public class LightCollector extends SceneGraphVisitor {
 		map.put("intensity",new Float(l.getIntensity()));
         map.put("lightcolor",l.getColor().getRGBColorComponents(null));
         map.put("from",new float[] {0f,0f,0f});
-        map.put("to",zdirection);
+        map.put("signature", new Float(signature));
         if (shadowEnabled)
         	map.put("string shadowname", "raytrace");
 	}
@@ -157,8 +161,9 @@ public class LightCollector extends SceneGraphVisitor {
         // now write the light:
         HashMap map =new HashMap();
         handleCommon(l, map);
-        Ri.concatTransform(fCurrentTrafo);
-        Ri.lightSource(shadowEnabled ? "shadowpoint":"pointlight",map);
+        map.put("from",new float[] {0f,0f,0f});
+       Ri.concatTransform(fCurrentTrafo);
+        Ri.lightSource(shadowEnabled ? "shadowpoint":"mypointlight",map);
         
         Ri.transformEnd();
     }
@@ -173,6 +178,7 @@ public class LightCollector extends SceneGraphVisitor {
         HashMap map =new HashMap();
         handleCommon(l, map);
         Ri.concatTransform(fCurrentTrafo);
+        map.put("from",new float[] {0f,0f,0f});
         map.put("coneangle",new Float(l.getConeAngle()));
         map.put("conedeltaangle",new Float(l.getConeDeltaAngle()));
         map.put("beamdistribution",new Float(l.getDistribution()));
@@ -182,7 +188,7 @@ public class LightCollector extends SceneGraphVisitor {
             map.put("float a2", new Float(l.getFalloffA2()));
             Ri.lightSource("spotlightFalloff",map);
         } else
-            Ri.lightSource(shadowEnabled ? "shadowspot": "spotlight",map);
+            Ri.lightSource(shadowEnabled ? "shadowspot": "myspotlight",map);
         
         Ri.transformEnd();
         //super.visit(l);
