@@ -43,6 +43,8 @@ package de.jreality.renderman.shader;
 import java.awt.Color;
 import java.util.Map;
 
+import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.renderman.RIBViewer;
 import de.jreality.renderman.RIBVisitor;
 import de.jreality.scene.data.AttributeEntityUtility;
@@ -84,10 +86,14 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
         map.put("Ka",new Float(Ka));
         map.put("specularcolor",specularcolor);
        
-        shaderName = "plastic";
+        int signature = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
+        shaderName = (signature == Pn.EUCLIDEAN) ? "plastic" : "hplastic";
         //System.out.println("has texture "+AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), a));
-        if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, "polygonShader.texture2d", eap)) {
-            Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), eap);
+		boolean ignoreTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name,"ignoreTexture2d"), false);	
+        if (!ignoreTexture2d && AttributeEntityUtility.hasAttributeEntity(Texture2D.class, "polygonShader.texture2d", eap)) {
+//        	shaderName = "paintedplastic";
+            shaderName = (signature == Pn.EUCLIDEAN) ? "paintedplastic" : "hpaintedplastic";
+        	Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), eap);
          
             String fname = null;
 //            if (ribv.getRendererType() == RIBViewer.TYPE_PIXAR)	{
@@ -106,10 +112,11 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
             }
              map.put("string texturename",fname);
             double[] mat = tex.getTextureMatrix().getArray();
-            if(mat != null) {
+            if(mat != null && !Rn.isIdentityMatrix(mat, 10E-8)) {
             	map.put("matrix textureMatrix",RIBVisitor.fTranspose(mat));
-            }
-            shaderName = "transformedpaintedplastic";
+//                shaderName = "transformedpaintedplastic";
+                shaderName = (signature == Pn.EUCLIDEAN) ? "transformedpaintedplastic" : "hpaintedplastic";
+           }
         }
 	    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))
 	    	{
@@ -122,8 +129,9 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
     		} 
     		if (fname != null) {
     	    	map.put("string reflectionmap", fname);
-    	    	shaderName = "transformedpaintedplastic";    			
-    		}
+//    	    	shaderName = "transformedpaintedplastic";    			
+                shaderName = (signature == Pn.EUCLIDEAN) ? "transformedpaintedplastic" : "hpaintedplastic";
+   		}
 	    	}
     }
 
