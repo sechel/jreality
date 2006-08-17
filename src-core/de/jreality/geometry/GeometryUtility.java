@@ -59,6 +59,7 @@ import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
@@ -70,24 +71,12 @@ import de.jreality.util.SceneGraphUtility;
 public class GeometryUtility {
  
 	// TODO: Somewhere it would be good to register the attributes used in the jreality release.
-	 public static Attribute SIGNATURE;		// value:	Integer
-	 public static Attribute BOUNDING_BOX;		// value:	de.jreality.util.Rectangle3D
-	 public static Attribute QUAD_MESH_SHAPE;	// value:	java.awt.Dimension
-	 public static Attribute REGULAR_DOMAIN_QUAD_MESH_SHAPE;	// value:	java.awt.Rectangle2D
+	 public static String SIGNATURE=CommonAttributes.SIGNATURE;		// value:	Integer
+	 public static String BOUNDING_BOX="boundingBox";		// value:	de.jreality.util.Rectangle3D
+	 public static String QUAD_MESH_SHAPE="quadMeshShape";	// value:	java.awt.Dimension
+	 public static String REGULAR_DOMAIN_QUAD_MESH_SHAPE="regularDomainQuadMeshShape";	// value:	java.awt.Rectangle2D
 
-	 static {
-	  	BOUNDING_BOX = Attribute.attributeForName("boundingBox");
-	  	SIGNATURE = Attribute.attributeForName("signature");
-	  	QUAD_MESH_SHAPE = Attribute.attributeForName( "quadMeshShape"); // vlue is java.awt.Dimension
-	  	REGULAR_DOMAIN_QUAD_MESH_SHAPE = Attribute.attributeForName("regularDomainQuadMeshShape");
-	  }
-
-	/**
-	 * 
-	 */
-	private GeometryUtility() {
-		super();
-	}
+	private GeometryUtility() {}
 
 	   /**
      * inlines the given 2-dim array. Assumes equal length for sub-arrays

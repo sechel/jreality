@@ -40,15 +40,8 @@
 
 package de.jreality.util;
 
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.Set;
 
-import antlr.CommonAST;
-
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Pn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;

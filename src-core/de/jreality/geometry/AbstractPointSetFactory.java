@@ -333,11 +333,15 @@ class AbstractPointSetFactory {
 	
 	static Logger actionLogger = null;
 	
-	String logMessage( String action, Attribute attr, String cathegory ) {
+	String logMessage( String action, String attr, String cathegory ) {
 		return action + " " + cathegory + " " + attr;
 	}
 
 	void log( String action, Attribute attr, String cathegory ) {
+		log(action, attr.getName(), cathegory);
+	}
+
+	void log( String action, String attr, String cathegory ) {
 		if( actionLogger != null ) {
 			actionLogger.log( Level.INFO, logMessage(action, attr, cathegory),
 					new Object[] {action, attr, cathegory } );

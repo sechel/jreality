@@ -49,7 +49,7 @@ import java.util.HashMap;
  */
 public class Attribute implements Serializable {
   
-  private static HashMap addedAttributes = new HashMap();
+  private static final HashMap<String, Attribute> KNOWN_ATTRIBUTES = new HashMap<String, Attribute>();
 
   public static final Attribute COORDINATES=attributeForName("coordinates");
   public static final Attribute NORMALS=attributeForName("normals");
@@ -63,13 +63,14 @@ public class Attribute implements Serializable {
    * might be a threading problem
    */
   public static Attribute attributeForName(String name) {
-    if (addedAttributes.get(name) != null) return (Attribute) addedAttributes.get(name);
+	Attribute aa = KNOWN_ATTRIBUTES.get(name);
+    if (KNOWN_ATTRIBUTES.get(name) != null) return aa;
     Attribute att = new Attribute(name);
-    addedAttributes.put(name, att);
+    KNOWN_ATTRIBUTES.put(name, att);
     return att;
   }
 
-  String attrName;
+  private final String attrName;
 
   private Attribute(String name) {
     attrName=name;

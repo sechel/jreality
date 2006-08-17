@@ -45,6 +45,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import de.jreality.scene.Geometry;
+import de.jreality.scene.data.Attribute;
 
 /**
  * The event object containing information about the changed
@@ -55,50 +56,50 @@ import de.jreality.scene.Geometry;
  */
 public class GeometryEvent extends SceneEvent {
     private final Geometry geometry;
-    private Set vertexKeys;
-    private Set vertexView;
-    private Set edgeKeys;
-    private Set edgeView;
-    private Set faceKeys;
-    private Set faceView;
-    private Set geomKeys;
-    private Set geomView;
+    private Set<Attribute> vertexKeys;
+    private Set<Attribute> vertexView;
+    private Set<Attribute> edgeKeys;
+    private Set<Attribute> edgeView;
+    private Set<Attribute> faceKeys;
+    private Set<Attribute> faceView;
+    private Set<String> geomKeys;
+    private Set<String> geomView;
     /**
      * @param source
      */
-    public GeometryEvent(Geometry source, Set chgVertexAttrKeys,
-      Set chgEdgeAttrKeys, Set chgFaceAttrKeys, Set chgGeomAttrKeys) {
+    public GeometryEvent(Geometry source, Set<Attribute> chgVertexAttrKeys,
+      Set<Attribute> chgEdgeAttrKeys, Set<Attribute> chgFaceAttrKeys, Set<String> chgGeomAttrKeys) {
         super(source);
         geometry=source;
-        vertexKeys=chgVertexAttrKeys!=null?
-          new HashSet(chgVertexAttrKeys): Collections.EMPTY_SET;
-        edgeKeys  =chgEdgeAttrKeys!=null?
-          new HashSet(chgEdgeAttrKeys):   Collections.EMPTY_SET;
-        faceKeys  =chgFaceAttrKeys!=null?
-          new HashSet(chgFaceAttrKeys):   Collections.EMPTY_SET;
-        geomKeys  =chgGeomAttrKeys!=null?
-          new HashSet(chgGeomAttrKeys):   Collections.EMPTY_SET;
+        if (chgVertexAttrKeys!=null) vertexKeys=new HashSet<Attribute>(chgVertexAttrKeys);
+        else vertexKeys=Collections.emptySet();
+        if (chgEdgeAttrKeys!=null) edgeKeys=new HashSet<Attribute>(chgEdgeAttrKeys);
+        else edgeKeys=Collections.emptySet();
+        if (chgFaceAttrKeys!=null) faceKeys=new HashSet<Attribute>(chgFaceAttrKeys);
+        else faceKeys=Collections.emptySet();
+        if (chgGeomAttrKeys!=null) geomKeys=new HashSet<String>(chgGeomAttrKeys);
+        else geomKeys=Collections.emptySet();
     }
 
-    public Set getChangedVertexAttributes() {
+    public Set<Attribute> getChangedVertexAttributes() {
       if(vertexView==null)
         vertexView=Collections.unmodifiableSet(vertexKeys);
       return vertexView;
     }
 
-    public Set getChangedEdgeAttributes() {
+    public Set<Attribute> getChangedEdgeAttributes() {
       if(edgeView==null)
         edgeView=Collections.unmodifiableSet(edgeKeys);
       return edgeView;
     }
   
-    public Set getChangedFaceAttributes() {
+    public Set<Attribute> getChangedFaceAttributes() {
       if(faceView==null)
         faceView=Collections.unmodifiableSet(faceKeys);
       return faceView;
     }
   
-    public Set getChangedGeometryAttributes() {
+    public Set<String> getChangedGeometryAttributes() {
       if(geomView==null)
         geomView=Collections.unmodifiableSet(geomKeys);
       return geomView;

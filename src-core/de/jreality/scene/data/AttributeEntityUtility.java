@@ -353,10 +353,9 @@ public class AttributeEntityUtility {
   static {
     try {
       try {
-        hashCode = Object.class.getMethod("hashCode", null);
-        equals = Object.class.getMethod("equals",
-            new Class[] { Object.class });
-        toString = Object.class.getMethod("toString", null);
+        hashCode = Object.class.getMethod("hashCode");
+        equals = Object.class.getMethod("equals", Object.class);
+        toString = Object.class.getMethod("toString");
       } catch (SecurityException se) {
         //hash
       }

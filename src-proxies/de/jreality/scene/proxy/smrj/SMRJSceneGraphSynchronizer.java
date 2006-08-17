@@ -214,12 +214,10 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
                 rmc.writeLock.writeUnlock();
             }
         }
-        for (Iterator i = ev.getChangedGeometryAttributes().iterator(); i
-                .hasNext();) {
-            Attribute a = (Attribute) i.next();
-            if (src.getGeometryAttributes(a) instanceof Serializable) {
-                rmc.writeLock.writeLock();
-              dst.setGeometryAttributes(a, src.getGeometryAttributes(a));
+        for (String key : ev.getChangedGeometryAttributes()) {
+            if (src.getGeometryAttributes(key) instanceof Serializable) {
+              rmc.writeLock.writeLock();
+              dst.setGeometryAttributes(key, src.getGeometryAttributes(key));
               rmc.writeLock.writeUnlock();
             }
         }

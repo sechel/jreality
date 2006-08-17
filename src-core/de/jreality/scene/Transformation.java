@@ -40,14 +40,11 @@
 
 package de.jreality.scene;
 
-import de.jreality.math.Matrix;
-import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationEventMulticaster;
 import de.jreality.scene.event.TransformationListener;
-import de.jreality.util.DefaultMatrixSupport;
 /**
  * 
  * A almost clean Transformation class, do not use anything else than set/getMatrix and multiplyOnRight/Left.

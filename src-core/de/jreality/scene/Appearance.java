@@ -42,9 +42,8 @@ package de.jreality.scene;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import de.jreality.scene.data.AttributeEntity;
 import de.jreality.scene.event.AppearanceEvent;
@@ -65,10 +64,10 @@ public class Appearance extends SceneGraphNode
     public String toString() { return "inherited"; }
   };
   private transient AppearanceListener appearanceListener;
-  private HashMap attributes=new HashMap();
-  private Set storedAttributes = Collections.unmodifiableSet(attributes.keySet());
+  private HashMap<String, Object> attributes=new HashMap<String, Object>();
+  private Set<String> storedAttributes = Collections.unmodifiableSet(attributes.keySet());
   
-  private transient Set changedAttributes=new HashSet();
+  private transient HashMap<String, Object> changedAttributes=new HashMap<String, Object>();
   
   public Object getAttribute(String key)
   {
@@ -147,7 +146,7 @@ public class Appearance extends SceneGraphNode
     setAttribute(key, new Character(value));
   }
 
-   public void addAppearanceListener(AppearanceListener listener) {
+  public void addAppearanceListener(AppearanceListener listener) {
      startReader();
 	   appearanceListener=AppearanceEventMulticaster.add(appearanceListener, listener);
      finishReader();
@@ -163,9 +162,8 @@ public class Appearance extends SceneGraphNode
 	*/
    protected void writingFinished() {
      try {
-       for (Iterator i = changedAttributes.iterator(); i.hasNext(); ) {
-         appearanceListener.appearanceChanged((AppearanceEvent) i.next());
-         i.remove();
+       for (Entry<String, Object> e : changedAttributes.entrySet() ) {
+         appearanceListener.appearanceChanged(new AppearanceEvent(this, e.getKey(), e.getValue()));
        }
      } finally {
        changedAttributes.clear();
@@ -173,7 +171,7 @@ public class Appearance extends SceneGraphNode
    };
    
    protected void fireAppearanceChanged(String key, Object old) {
-	 	 if(appearanceListener != null) changedAttributes.add(new AppearanceEvent(this, key, old));
+	 	 if(appearanceListener != null) changedAttributes.put(key, old);
    }
 
    public Set getStoredAttributes() {

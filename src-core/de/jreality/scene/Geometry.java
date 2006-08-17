@@ -46,6 +46,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
@@ -59,14 +60,16 @@ import de.jreality.scene.event.GeometryListener;
  * A geometry leaf.
  */
 public abstract class Geometry extends SceneGraphNode {
-
-  protected Map geometryAttributes=Collections.EMPTY_MAP;
+	
+  private static final Map<String, Object> EMPTY_GEOMETRY_ATTRIBUTE_MAP=Collections.emptyMap();
+	
+  protected Map<String, Object> geometryAttributes=Collections.emptyMap();
   private transient GeometryListener geometryListener;
   
-  protected transient Set changedGeometryAttributes=new HashSet();
-  protected transient Set changedVertexAttributes=new HashSet();
-  protected transient Set changedEdgeAttributes=new HashSet();
-  protected transient Set changedFaceAttributes=new HashSet();
+  protected transient Set<String> changedGeometryAttributes=new HashSet<String>();
+  protected transient Set<Attribute> changedVertexAttributes=new HashSet<Attribute>();
+  protected transient Set<Attribute> changedEdgeAttributes=new HashSet<Attribute>();
+  protected transient Set<Attribute> changedFaceAttributes=new HashSet<Attribute>();
 
   /**
    * Returns a read-only view to all currently defined geometry attributes.
@@ -77,20 +80,11 @@ public abstract class Geometry extends SceneGraphNode {
    * source or target afterwards will not affect the other.
    * @see setGeometryAttributes(DataListSet)
    */
-  public Map getGeometryAttributes() {
+  public Map<String, Object> getGeometryAttributes() {
     startReader();
     try {
       return geometryAttributes.isEmpty()?
-        Collections.EMPTY_MAP: Collections.unmodifiableMap(geometryAttributes);
-    } finally {
-      finishReader();
-    }
-  }
-
-  public Object getGeometryAttributes(Attribute key) {
-    startReader();
-    try {
-      return geometryAttributes.get(key);
+    		  geometryAttributes : Collections.unmodifiableMap(geometryAttributes);
     } finally {
       finishReader();
     }
@@ -99,54 +93,47 @@ public abstract class Geometry extends SceneGraphNode {
   public Object getGeometryAttributes(String name) {
     startReader();
     try {
-      return getGeometryAttributes(Attribute.attributeForName(name));
+      return geometryAttributes.get(name);
     } finally {
       finishReader();
     }
   }
   
-  public void setGeometryAttributes(Map dls) {
+  public void setGeometryAttributes(Map<String, Object> attrSet) {
     checkReadOnly();
-    if(dls.isEmpty()) return;
+    if(attrSet.isEmpty()) return;
     startWriter();
     try {
-      if(geometryAttributes==Collections.EMPTY_MAP)
-        geometryAttributes=new HashMap(dls.size());
-      for (Iterator it= dls.entrySet().iterator(); it.hasNext();)
-      {
-        Map.Entry entry=(Map.Entry)it.next();
-        final Object key=entry.getKey(), value=entry.getValue();
-        if(value!=null)
-          geometryAttributes.put(key, value);
+      if(geometryAttributes==EMPTY_GEOMETRY_ATTRIBUTE_MAP)
+        geometryAttributes=new HashMap<String, Object>(attrSet.size());
+      for (Entry<String, Object> e : attrSet.entrySet()) {
+        if(e.getValue()!=null)
+          geometryAttributes.put(e.getKey(), e.getValue());
         else
-          geometryAttributes.remove(key);
+          geometryAttributes.remove(e.getKey());
       }
-      fireGeometryChanged(null, null, null, dls.keySet());
+      fireGeometryChanged(null, null, null, attrSet.keySet());
     } finally {
       finishWriter();
     }
   }
 
-  public void setGeometryAttributes(String attributeName, Object value) {
-    setGeometryAttributes(Attribute.attributeForName(attributeName), value);
+  public void setGeometryAttributes(String attr, Object value) {
+	    checkReadOnly();
+	    startWriter();
+	    try {
+	      if(geometryAttributes==Collections.EMPTY_MAP)
+	        geometryAttributes=new HashMap<String, Object>();
+	      if(value!=null)
+	        geometryAttributes.put(attr, value);
+	      else
+	        geometryAttributes.remove(attr);
+	      fireGeometryChanged(null, null, null, Collections.singleton(attr));
+	    } finally {
+	      finishWriter();
+	    }
   }
   
-  public void setGeometryAttributes(Attribute attr, Object value) {
-    checkReadOnly();
-    startWriter();
-    try {
-      if(geometryAttributes==Collections.EMPTY_MAP)
-        geometryAttributes=new HashMap();
-      if(value!=null)
-        geometryAttributes.put(attr, value);
-      else
-        geometryAttributes.remove(attr);
-      fireGeometryChanged(null, null, null, Collections.singleton(attr));
-    } finally {
-      finishWriter();
-    }
-  }
-
   final void setAttrImpl(DataListSet target, DataListSet data, boolean replace) {
     if(replace) target.reset(data.getListLength());
     for(Iterator i=data.storedAttributes().iterator(); i.hasNext(); ) {
@@ -183,8 +170,8 @@ public abstract class Geometry extends SceneGraphNode {
   /**
    * collect changed attributes
    */
-  protected void fireGeometryChanged(Set vertexAttributeKeys,
-    Set edgeAttributeKeys, Set faceAttributeKeys, Set geomAttributeKeys) {
+  protected void fireGeometryChanged(Set<Attribute> vertexAttributeKeys,
+    Set<Attribute> edgeAttributeKeys, Set<Attribute> faceAttributeKeys, Set<String> geomAttributeKeys) {
     if (vertexAttributeKeys != null) changedVertexAttributes.addAll(vertexAttributeKeys);
     if (edgeAttributeKeys != null) changedEdgeAttributes.addAll(edgeAttributeKeys);
     if (faceAttributeKeys != null) changedFaceAttributes.addAll(faceAttributeKeys);
@@ -202,8 +189,8 @@ public abstract class Geometry extends SceneGraphNode {
   /**
    * Tell the outside world that this geometry has changed.
    */
-  protected void fireGeometryChangedImpl(Set vertexAttributeKeys,
-    Set edgeAttributeKeys, Set faceAttributeKeys, Set geomAttributeKeys) {
+  protected void fireGeometryChangedImpl(Set<Attribute> vertexAttributeKeys,
+    Set<Attribute> edgeAttributeKeys, Set<Attribute> faceAttributeKeys, Set<String> geomAttributeKeys) {
     final GeometryListener l=geometryListener;
     if(l != null) l.geometryChanged(new GeometryEvent(this, vertexAttributeKeys,
       edgeAttributeKeys, faceAttributeKeys, geomAttributeKeys));

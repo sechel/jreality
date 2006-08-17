@@ -42,6 +42,7 @@ package de.jreality.io.jrs;
 
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
@@ -226,14 +227,11 @@ class NodeWriter extends SceneGraphVisitor {
   public void copyAttr(Geometry src) {
     copyAttr((SceneGraphNode) src);
     writer.startNode("attributes");
-    for (Iterator i = src.getGeometryAttributes().keySet().iterator(); i
-        .hasNext();) {
-      Attribute key = ((Attribute)i.next());
-      Object attr = src.getGeometryAttributes(key);
-      if (XStreamFactory.canWrite(attr)) {
+    for (Entry<String, Object> entry : src.getGeometryAttributes().entrySet() ) {
+      if (XStreamFactory.canWrite(entry.getValue())) {
         writer.startNode("attribute");
-        writer.addAttribute("name", key.getName());
-        writeUnknown(attr);
+        writer.addAttribute("name", entry.getKey());
+        writeUnknown(entry.getValue());
         writer.endNode();
       }
     }

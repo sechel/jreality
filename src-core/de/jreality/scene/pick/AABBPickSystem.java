@@ -84,7 +84,7 @@ public class AABBPickSystem implements PickSystem {
   
   private double[] from;
   private double[] to;
-  private double[] dir;
+//  private double[] dir;
   
   public void setSceneRoot(SceneGraphComponent root) {
     impl= new Impl();
@@ -105,7 +105,7 @@ public class AABBPickSystem implements PickSystem {
   private List<Hit> computePickImpl(double[] from, double[] to, double[] dir, double maxDist) {
     this.from=(double[]) from.clone();
     this.to=(double[]) to.clone();
-    this.dir=(double[]) dir.clone();
+//    this.dir=(double[]) dir.clone();
     this.maxDist=maxDist;
     impl.visit();
     if (hits.isEmpty()) return Collections.emptyList();
@@ -147,10 +147,10 @@ public class AABBPickSystem implements PickSystem {
     private boolean pickEdges=true;
     private boolean pickFaces=true;
 
-    /* local ray */
-    private double[] fromLocal;
-    private double[] dirLocal;
-    private double[] toLocal;
+//    /* local ray */
+//    private double[] fromLocal;
+//    private double[] dirLocal;
+//    private double[] toLocal;
     
     public void visit(SceneGraphComponent c) {
       if (!c.isVisible()) return;
@@ -165,9 +165,9 @@ public class AABBPickSystem implements PickSystem {
       path.getMatrix(m.getArray());
       path.getInverseMatrix(mInv.getArray());
       
-      fromLocal=mInv.multiplyVector(from);
-      toLocal=mInv.multiplyVector(to);
-      dirLocal=mInv.multiplyVector(dir);
+//      fromLocal=mInv.multiplyVector(from);
+//      toLocal=mInv.multiplyVector(to);
+//      dirLocal=mInv.multiplyVector(dir);
 
       c.childrenAccept(this);
       path.pop();
@@ -223,32 +223,16 @@ public class AABBPickSystem implements PickSystem {
 
       if (!pickFaces || !isPickable(ifs)) return;      
 
-      AABBTree tree = (AABBTree) ifs.getGeometryAttributes(Attribute.attributeForName("AABBTree"));
+      AABBTree tree = (AABBTree) ifs.getGeometryAttributes("AABBTree");
       
       localHits.clear();
       
-//      if (!ifs.getName().equals("schwarz") || to[3]==0 || tree == null || false) {
         if (tree == null) {
           BruteForcePicking.intersectPolygons(ifs, signature, path, from, to, localHits);
-          extractHits(localHits);
         } else {
           tree.intersect(ifs, signature, path, from, to, localHits);
-          extractHits(localHits);
         }
-//      } else { // compare aabb and brute force
-//        ArrayList<Hit> tmp = new ArrayList<Hit>();
-//        BruteForcePicking.intersectPolygons(ifs, signature, path, from, to, tmp);
-//        tree.intersect(ifs, signature, path, from, to, localHits);
-//        trim(localHits);
-//        trim(tmp);
-//        sort(tmp);
-//        sort(localHits);
-//        if (!tmp.isEmpty()) {
-//          System.out.println("bf="+tmp);
-//          System.out.println("ab="+localHits);
-//        }
-//        AABBPickSystem.this.hits.addAll(localHits);
-//      }
+        extractHits(localHits);
     }
     
     public void visit(IndexedLineSet ils) {
@@ -279,13 +263,6 @@ public class AABBPickSystem implements PickSystem {
       }
     }
 
-    private void trim(List l) {
-      for (Iterator i = l.iterator(); i.hasNext(); ) {
-        Hit h = (Hit) i.next();
-        if (h.getDist() > maxDist) i.remove();
-      }
-    }
-    
   }
   
 }
