@@ -40,7 +40,6 @@
 
 package de.jreality.scene.tool;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -50,7 +49,12 @@ import java.util.Set;
 
 import javax.swing.Timer;
 
+import net.java.games.input.Controller;
+import net.java.games.input.ControllerEnvironment;
 import de.jreality.scene.Viewer;
+import de.jreality.toolsystem.ToolEvent;
+import de.jreality.toolsystem.ToolEventQueue;
+import de.jreality.toolsystem.raw.RawDevice;
 
 /**
  * @author weissman
@@ -68,7 +72,7 @@ public class DeviceJinputJoystick implements RawDevice, ActionListener {
     private InputSlot device;
     
     private Controller controllers[];
-	private Component[][] components;
+	private net.java.games.input.Component[][] components;
 	
 	
 	public DeviceJinputJoystick() {
@@ -88,7 +92,7 @@ public class DeviceJinputJoystick implements RawDevice, ActionListener {
 		try {
 			int i = Integer.parseInt(nums[1]);
 			int j = Integer.parseInt(nums[2]);
-			Component c = components[i][j];
+            net.java.games.input.Component c = components[i][j];
 			componentMap.put(c,rawDeviceName);
 			return new ToolEvent(this, inputDevice, AxisState.ORIGIN);
 		} catch (Exception e) {
@@ -123,7 +127,7 @@ public class DeviceJinputJoystick implements RawDevice, ActionListener {
 		 Set entries = componentMap.entrySet();
 		for (Iterator iter = entries.iterator(); iter.hasNext();) {
 			Map.Entry element = (Map.Entry) iter.next();
-			Component c = (Component) element.getKey();
+            net.java.games.input.Component c = (net.java.games.input.Component) element.getKey();
 			InputSlot inputDevice = (InputSlot) element.getValue();
 			float data = c.getPollData();
 			ToolEvent oldEvent = (ToolEvent) lastValues.get(inputDevice);
