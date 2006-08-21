@@ -57,8 +57,8 @@ import java.util.LinkedList;
 public class ByteBufferList extends DataList implements Serializable
 {
   public static final class BufferPool {
-    final static LinkedList free = new java.util.LinkedList();
-    final static LinkedList used = new java.util.LinkedList();
+    final static LinkedList<ByteBuffer> free = new java.util.LinkedList<ByteBuffer>();
+    final static LinkedList<ByteBuffer> used = new java.util.LinkedList<ByteBuffer>();
     
     final static boolean debug = false;
     
@@ -69,8 +69,8 @@ public class ByteBufferList extends DataList implements Serializable
         int usedBytes=0;
         for (Iterator i = used.iterator(); i.hasNext(); ) usedBytes+=((ByteBuffer)i.next()).capacity();
         System.out.println("\n"+str);
-        System.out.println("/tfree Lists: "+free.size()+" bytes: "+freeBytes);
-        System.out.println("/tused Lists: "+used.size()+" bytes: "+usedBytes);
+        System.out.println("\tfree Lists: "+free.size()+" bytes: "+freeBytes);
+        System.out.println("\tused Lists: "+used.size()+" bytes: "+usedBytes+"\n");
     }
     
     public static ByteBuffer getBuffer(int length) {
@@ -128,7 +128,7 @@ public class ByteBufferList extends DataList implements Serializable
       this.coveredModel = coveredModel;
   }
 
-  public static LinkedList usedDataLists = new LinkedList();
+  public static LinkedList<ByteBufferList> usedDataLists = new LinkedList<ByteBufferList>();
   
   public static void freeDataList(ByteBufferList wdl) {
       BufferPool.release((ByteBuffer) wdl.data);

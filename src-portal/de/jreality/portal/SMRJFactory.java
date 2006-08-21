@@ -49,7 +49,7 @@ import de.smrj.tcp.TCPBroadcasterNIO;
 /**
  * TODO: maybe synch, configure via config file (at least the port)
  * 
- * @author gollwas
+ * @author Steffen Weissmann
  */
 class SMRJFactory {
 
