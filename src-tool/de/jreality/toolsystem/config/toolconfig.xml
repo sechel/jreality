@@ -7,6 +7,7 @@
     <!--rawdevice id="Mouse" type="de.jreality.toolsystem.raw.DeviceMouseSWT"/-->
     <rawdevice id="SystemTimer" type="de.jreality.toolsystem.raw.DeviceSystemTimer"/>
     <!--rawdevice id="Joystick" type="de.jreality.toolsystem.raw.DeviceJoystick"/-->
+    <!--rawdevice id="Joystick" type="de.jreality.toolsystem.raw.DeviceJinputJoystick"/-->
   </rawdevices>
 
   <rawslots>
@@ -55,6 +56,13 @@
     <mapping device="Joystick" src="axis_0" target="RightLeftAxis"/>
     <mapping device="Joystick" src="button_0" target="IncreaseSpeed"/>
     <mapping device="Joystick" src="button_1" target="DecreaseSpeed"/-->
+    
+    <!--mapping device="Joystick" src="axis_3_0" target="GtXaxis"/>
+    <mapping device="Joystick" src="axis_3_1" target="GtYaxis"/>
+    <mapping device="Joystick" src="axis_3_2" target="GtZaxis"/>
+    <mapping device="Joystick" src="axis_3_3" target="GtUaxis"/>
+    <mapping device="Joystick" src="axis_3_4" target="GtVaxis"/>
+    <mapping device="Joystick" src="axis_3_5" target="GtWaxis"/-->
   </rawslots>
   
   
@@ -225,5 +233,24 @@
       </prop>
     </virtualdevice>
 
+	<!--virtualdevice type="de.jreality.toolsystem.virtual.VirtualGameTrackTranslation">
+      <inputslot>GtXaxis</inputslot>
+      <inputslot>GtYaxis</inputslot>
+      <inputslot>GtZaxis</inputslot>
+      <outputslot>GameTrackTranslationL</outputslot>
+      <prop name="offset">
+        <double>0.05</double>
+      </prop>
+    </virtualdevice>
+
+	<virtualdevice type="de.jreality.toolsystem.virtual.VirtualGameTrackTranslation">
+      <inputslot>GtUaxis</inputslot>
+      <inputslot>GtVaxis</inputslot>
+      <inputslot>GtWaxis</inputslot>
+      <outputslot>GameTrackTranslationR</outputslot>
+      <prop name="offset">
+        <double>-0.05</double>
+      </prop>
+    </virtualdevice-->
   </virtualdevices>
 </toolconfig>
