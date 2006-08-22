@@ -59,7 +59,10 @@ import de.jreality.toolsystem.ToolEvent;
 import de.jreality.toolsystem.ToolEventQueue;
 
 /**
- * @author weissman
+ * A device that utilizes the jinput library for polling mice and joysticks.
+ * The k-th axis of the l-th device can be addressed via "axis_l_k"
+ * 
+ * @author weissman/hoffmann
  *
  **/
 public class DeviceJinputJoystick implements RawDevice, ActionListener {

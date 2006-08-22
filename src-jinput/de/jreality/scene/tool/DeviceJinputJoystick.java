@@ -59,6 +59,7 @@ import de.jreality.toolsystem.raw.RawDevice;
 /**
  * @author weissman
  *
+ * @deprecated this class will be removed soon.
  **/
 public class DeviceJinputJoystick implements RawDevice, ActionListener {
 

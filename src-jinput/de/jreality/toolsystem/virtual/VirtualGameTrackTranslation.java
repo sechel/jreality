@@ -37,7 +37,6 @@
  *
  */
 
-
 package de.jreality.toolsystem.virtual;
 
 import java.util.List;
@@ -52,12 +51,54 @@ import de.jreality.toolsystem.VirtualDevice;
 import de.jreality.toolsystem.VirtualDeviceContext;
 
 /**
- * An axis that has state == pressed iff both sources have state pressed.
- * 
- * 
+ * This virtual device translates the 3 of the axes of a GameTrack (as reported
+ * by the DevicejinputJoystick) into a translation. here are some snippets for
+ * the toolconfig.xml asuming that the GameTrack is the 4th device found by the
+ * jinput library:<br/> <code>
+ * <rawdevices>
+ * ...
+ * <rawdevice id="Joystick" type="de.jreality.toolsystem.raw.DeviceJinputJoystick"/>
+ </rawdevices>
+ 
+ <rawslots>
+ ...
+ <mapping device="Joystick" src="axis_3_0" target="GtXaxis"/>
+ <mapping device="Joystick" src="axis_3_1" target="GtYaxis"/>
+ <mapping device="Joystick" src="axis_3_2" target="GtZaxis"/>
+ <mapping device="Joystick" src="axis_3_3" target="GtUaxis"/>
+ <mapping device="Joystick" src="axis_3_4" target="GtVaxis"/>
+ <mapping device="Joystick" src="axis_3_5" target="GtWaxis"/>
+ </rawslots>
+ 
+ <virtualdevices>
+ ...
+ <virtualdevice type="de.jreality.toolsystem.virtual.VirtualGameTrackTranslation">
+ <inputslot>GtXaxis</inputslot>
+ <inputslot>GtYaxis</inputslot>
+ <inputslot>GtZaxis</inputslot>
+ <outputslot>GameTrackTranslationL</outputslot>
+ <prop name="offset">
+ <double>0.05</double>
+ </prop>
+ </virtualdevice>
+
+ <virtualdevice type="de.jreality.toolsystem.virtual.VirtualGameTrackTranslation">
+ <inputslot>GtUaxis</inputslot>
+ <inputslot>GtVaxis</inputslot>
+ <inputslot>GtWaxis</inputslot>
+ <outputslot>GameTrackTranslationR</outputslot>
+ <prop name="offset">
+ <double>-0.05</double>
+ </prop>
+ </virtualdevice>
+ </virtualdevices>
+ </code>
+ * The offset parameter for the virtual device is an offset in x direction and
+ * can be used to place the two GameTrack points at an distance equivalent to
+ * the real world spacing.
+ * The device has some heuristic for not sending only changes of all axes at once if possible.
  * @author weissman
- *
- **/
+ */
 public class VirtualGameTrackTranslation implements VirtualDevice {
     private double offset = .0;
     
@@ -67,6 +108,11 @@ public class VirtualGameTrackTranslation implements VirtualDevice {
 
     InputSlot out;
     
+    boolean initialized;
+    
+    double oldPhi;
+    int n = 0;
+// boolean phiCh, thCh, hCh;
     
     double[] trafo = new double[16];
     DoubleArray outArray = new DoubleArray(trafo);
@@ -74,15 +120,25 @@ public class VirtualGameTrackTranslation implements VirtualDevice {
     
     public ToolEvent process(VirtualDeviceContext context)
             throws MissingSlotException {
-          double phi = ( (context.getAxisState(in1).doubleValue())*Math.PI/4.f);
-          double theta = ( (context.getAxisState(in2).doubleValue())*Math.PI/4.f);
-          double h = 1-context.getAxisState(in3).doubleValue();
-          trafo[3] =  - offset+(float) (h*Math.sin(phi)*Math.cos(theta));
-          trafo[7] = (float) (h*Math.cos(phi)*Math.cos(theta));
-          trafo[11] = (float) (-h*Math.sin(theta));
-      
-          return new ToolEvent(context.getEvent().getSource(), out, outArray);
-      
+        
+        double phi = ( (context.getAxisState(in1).doubleValue())*Math.PI/4.f);
+        if (!initialized  || phi != oldPhi || n>2) {
+            initialized = true;
+            oldPhi = phi;
+            n = 0;
+            double theta = ( (context.getAxisState(in2).doubleValue())*Math.PI/4.f);
+            double h = 1-context.getAxisState(in3).doubleValue();
+
+            trafo[3] =  - offset+(float) (h*Math.sin(phi)*Math.cos(theta));
+            trafo[7] = (float) (h*Math.cos(phi)*Math.cos(theta));
+            trafo[11] = (float) (-h*Math.sin(theta));
+            
+            return new ToolEvent(context.getEvent().getSource(), out, outArray);
+            
+        } else {
+            n++;
+            return null;
+        }
     }
 
     public void initialize(List inputSlots, InputSlot result,
