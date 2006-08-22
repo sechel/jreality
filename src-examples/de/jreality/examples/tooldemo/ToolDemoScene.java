@@ -23,6 +23,7 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.tool.Tool;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
@@ -59,6 +60,8 @@ public class ToolDemoScene {
   private boolean terrain=true;
   
   public ToolDemoScene() {
+	  
+	  boolean portal = "portal".equals(System.getProperty("de.jreality.scene.tool.Config"));
 
     sceneRoot.setName("root");
     sceneNode.setName("scene");
@@ -79,6 +82,11 @@ public class ToolDemoScene {
     Camera cam = new Camera();
     cam.setNear(0.01);
     cam.setFar(1500);
+    
+    if (portal) {
+    	cam.setOnAxis(false);
+    	cam.setStereo(true);
+    }
 
     // lights
     light.setIntensity(0.4);
@@ -115,7 +123,17 @@ public class ToolDemoScene {
     // add tools
     ShipNavigationTool shipNavigationTool = new ShipNavigationTool();
     avatarNode.addTool(shipNavigationTool);
-    camNode.addTool(new HeadTransformationTool());
+    if (portal) shipNavigationTool.setPollingDevice(false);
+    
+    if (!portal) camNode.addTool(new HeadTransformationTool());
+    else {
+      try {
+        Tool t = (Tool) Class.forName("de.jreality.tools.PortalHeadMoveTool").newInstance();
+        camNode.addTool(t);
+      } catch (Throwable t) {
+        // XXX
+      }
+    }
     
     sceneRoot.addTool(new PickShowTool(null, 0.005));
     //avatarNode.addTool(new PointerDisplayTool());
