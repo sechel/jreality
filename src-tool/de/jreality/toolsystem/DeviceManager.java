@@ -40,6 +40,7 @@
 
 package de.jreality.toolsystem;
 
+import java.awt.Dimension;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -357,9 +358,14 @@ public List<ToolEvent> updateImplicitDevices() {
 	          Rn.copy(worldToCamTrafo, matrix);
 	          worldToCamChanged = true;
 	      }
-        double asp=viewer.getViewingComponentSize().getWidth()/viewer.getViewingComponentSize().getHeight();
-        if (Double.isNaN(asp)) matrix = Rn.identityMatrix(4);
-        else matrix = CameraUtility.getCameraToNDC((Camera) viewer.getCameraPath().getLastElement(), asp);
+  	    if (viewer.hasViewingComponent() && viewer.getViewingComponentSize() != null) {
+	        Dimension viewingComponentSize = viewer.getViewingComponentSize();
+			double asp=viewingComponentSize.getWidth()/viewingComponentSize.getHeight();
+	        if (Double.isNaN(asp)) matrix = Rn.identityMatrix(4);
+	        else matrix = CameraUtility.getCameraToNDC((Camera) viewer.getCameraPath().getLastElement(), asp);
+  	    } else {
+  	    	matrix = Rn.identityMatrix(4);
+  	    }
         if (!Rn.equals(matrix, camToNDCTrafo)) {
             Rn.copy(camToNDCTrafo, matrix);
             camToNDCChanged = true;
