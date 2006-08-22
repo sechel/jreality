@@ -92,7 +92,9 @@ public class ConfigurationAttributes extends Properties {
         return Double.parseDouble(getProperty(key));
     }
     public double[] getDoubleArray(String key) {
-        StringTokenizer toki= new StringTokenizer(getProperty(key));
+        String str = getProperty(key);
+        if (str == null) return null;
+		StringTokenizer toki= new StringTokenizer(str);
         double[] ret= new double[toki.countTokens()];
         for (int i= 0; i < ret.length; i++)
             ret[i]= Double.parseDouble(toki.nextToken());
@@ -115,6 +117,7 @@ public class ConfigurationAttributes extends Properties {
     }
     public Matrix getTransformation(String key) {
         double[] matrix= getDoubleArray(key);
+        if (matrix == null) return null;
         if (matrix.length != 16)
             throw new RuntimeException("wrong array length for transformation!");
         return new Matrix(matrix);
