@@ -1,11 +1,11 @@
 <toolconfig>
 
   <rawdevices>
-    <rawdevice id="Motionstar" type="de.jreality.toolsystem.DeviceMotionstar"/>
-    <rawdevice id="Keyboard" type="de.jreality.toolsystem.DeviceKeyboard"/>
-    <rawdevice id="Mouse" type="de.jreality.toolsystem.DeviceMouse"/>
-    <rawdevice id="SystemTimer" type="de.jreality.toolsystem.DeviceSystemTimer"/>
-    <!--rawdevice id="Joystick" type="de.jreality.toolsystem.DeviceJoystick"/-->
+    <rawdevice id="Motionstar" type="de.jreality.toolsystem.raw.DeviceMotionstar"/>
+    <rawdevice id="Keyboard" type="de.jreality.toolsystem.raw.DeviceKeyboard"/>
+    <rawdevice id="Mouse" type="de.jreality.toolsystem.raw.DeviceMouse"/>
+    <rawdevice id="SystemTimer" type="de.jreality.toolsystem.raw.DeviceSystemTimer"/>
+    <!--rawdevice id="Joystick" type="de.jreality.toolsystem.raw.DeviceJoystick"/-->
   </rawdevices>
 
   <rawslots>
@@ -45,14 +45,23 @@
   
   <virtualdevices>
 
-     <mapping src="PrimarySelection" target="ShowPanel"/>
+    <mapping src="PrimaryAction" target="PanelAction"/>
+    <mapping src="PrimaryMenu" target="PanelMenu"/>
+    <mapping src="PrimarySelection" target="PanelSelection"/>
+
+    <mapping src="PrimarySelection" target="ShowPanel"/>
     <mapping src="PrimaryAction" target="RotateActivation"/>
     <mapping src="PrimarySelection" target="JumpActivation"/>
     <mapping src="PrimaryMenu" target="DragActivation"/>
     <mapping src="PrimaryAction" target="PointDragActivation"/>
     
+    <virtualdevice type="de.jreality.toolsystem.virtual.VirtualDoubleClick">
+      <inputslot>PrimaryAction</inputslot>
+      <outputslot>PanelActivation</outputslot>
+    </virtualdevice>
+
     <constant name="FollowPointerSwitch">
-      <double>0</double>
+      <double>1</double>
     </constant>
     
     <constant name="ShipRotateActivation">

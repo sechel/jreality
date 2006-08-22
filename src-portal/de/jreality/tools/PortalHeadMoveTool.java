@@ -38,7 +38,7 @@
  */
 
 
-package de.jreality.portal.tools;
+package de.jreality.tools;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
@@ -71,7 +71,7 @@ public class PortalHeadMoveTool extends AbstractTool {
     SceneGraphComponent head = tc.getRootToToolComponent().getLastComponent();
     if (head.getTransformation() == null) head.setTransformation(new Transformation());
     head.getTransformation().setMatrix(tc.getTransformationMatrix(headSlot).toDoubleArray(tmp));
-    viewer.render();
+    //viewer.render();
   }
 
 }
