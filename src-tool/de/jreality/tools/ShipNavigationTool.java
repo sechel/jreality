@@ -120,7 +120,7 @@ public class ShipNavigationTool extends AbstractTool {
       if ((axis = tc.getAxisState(leftRight)) != null) {
         velocity[0] = -gain*axis.doubleValue();
       }
-      if (/*tc.getAxisState(run) != null &&*/ tc.getAxisState(run).isPressed()) {
+      if (tc.getAxisState(run) != null && tc.getAxisState(run).isPressed()) {
         velocity[0]*=runFactor;
         velocity[2]*=runFactor;
       }
@@ -128,8 +128,7 @@ public class ShipNavigationTool extends AbstractTool {
 
         double sec = 0.001* tc.getAxisState(timer).intValue(); // time since
     	if (!pollingDevice) {
-  	      MatrixBuilder.euclidean(myMatrix).rotateY(-tc.getAxisState(horizontalRotation).doubleValue()*sec);
-  	      myComponent.getTransformation().setMatrix(myMatrix.getArray());
+  	      MatrixBuilder.euclidean(myMatrix).rotateY(-tc.getAxisState(horizontalRotation).doubleValue()*sec).assignTo(myComponent);
       	}
         double[] trans = new double[]{sec*velocity[0], sec*velocity[1], sec*velocity[2], 1};
         double[] dest = myMatrix.multiplyVector(trans);
