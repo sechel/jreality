@@ -119,20 +119,16 @@ public class PortalServerViewer implements Viewer {
 		clients.setRemoteCameraPath(p == null ? null : proxyScene.getProxies(p.toList()));
 	}
 
-	JPanel vcmp = new JPanel();
-	
 	public boolean hasViewingComponent() {
-		//return false;
-		return true;
+		return false;
 	}
 
 	public Object getViewingComponent() {
-		//return null;
-		return vcmp;
+		return null;
 	}
 
     public Dimension getViewingComponentSize() {
-		return vcmp.getSize();
+		return null;
 	}
 
 	public void initializeFrom(Viewer v) {
