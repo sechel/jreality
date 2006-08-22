@@ -40,16 +40,23 @@
 
 package de.jreality.portal;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.io.IOException;
+import java.net.ServerSocket;
+
+import javax.swing.JPanel;
 
 import de.jreality.scene.Lock;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
+import de.jreality.scene.proxy.smrj.ClientFactory;
 import de.jreality.scene.proxy.smrj.SMRJMirrorScene;
+import de.smrj.Broadcaster;
+import de.smrj.tcp.TCPBroadcasterNIO;
+import de.smrj.tcp.management.JarServer;
+import de.smrj.tcp.management.Local;
 
 /**
  * @author weissman
@@ -71,11 +78,18 @@ public class PortalServerViewer implements Viewer {
     this(de.jreality.jogl.Viewer.class);
   }
   
-	public PortalServerViewer(Class viewerClass) throws IOException {
-    clients = (RemoteViewer) SMRJFactory.getRemoteFactory().createRemoteViaStaticMethod(
+	public PortalServerViewer(Class viewerClass) throws IOException {	
+		int port = 8844;
+		int cpPort = 8845;
+		JarServer js = new JarServer(new ServerSocket(cpPort));
+		Broadcaster bc = new TCPBroadcasterNIO(port);
+		Local.sendStart(port, cpPort, ClientFactory.class);
+		js.waitForDownloads();
+		
+    clients = bc.getRemoteFactory().createRemoteViaStaticMethod(
         HeadTrackedViewer.class, HeadTrackedViewer.class,
         "createFullscreen", new Class[]{Class.class}, new Object[]{viewerClass});
-    proxyScene = new SMRJMirrorScene(SMRJFactory.getRemoteFactory(), renderLock);
+    proxyScene = new SMRJMirrorScene(bc.getRemoteFactory(), renderLock);
   }
 
   public SceneGraphComponent getSceneRoot() {
@@ -105,12 +119,20 @@ public class PortalServerViewer implements Viewer {
 		clients.setRemoteCameraPath(p == null ? null : proxyScene.getProxies(p.toList()));
 	}
 
+	JPanel vcmp = new JPanel();
+	
 	public boolean hasViewingComponent() {
-		return false;
+		//return false;
+		return true;
 	}
 
 	public Object getViewingComponent() {
-		return null;
+		//return null;
+		return vcmp;
+	}
+
+    public Dimension getViewingComponentSize() {
+		return vcmp.getSize();
 	}
 
 	public void initializeFrom(Viewer v) {
@@ -153,10 +175,6 @@ public class PortalServerViewer implements Viewer {
     renderLock.writeUnlock();
   }
 
-  public Dimension getViewingComponentSize() {
-    return null;
-  }
-
   public boolean canRenderAsync() {
     return false;
   }
@@ -164,4 +182,5 @@ public class PortalServerViewer implements Viewer {
   public void renderAsync() {
     throw new UnsupportedOperationException();
   }
+  
 }

@@ -40,11 +40,8 @@
 
 package de.jreality.scene.proxy.smrj;
 
-import java.io.IOException;
-
 import de.jreality.scene.data.ByteBufferList;
 import de.smrj.RemoteCall;
-import de.smrj.tcp.TCPReceiverIO;
 
 public class ClientFactory extends de.smrj.ClientFactory
 {
@@ -54,8 +51,4 @@ public class ClientFactory extends de.smrj.ClientFactory
     ByteBufferList.BufferPool.releaseAll();
   }
 
-  public static void main(String[] args) throws IOException
-  {
-    new TCPReceiverIO(args[0], 8868, new ClientFactory()).start();
-  }
 }

@@ -163,10 +163,9 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     cameraOrientationNode.setName("cam Orientation");
     // set camera orientation to value from config file...
     double[] rot = config.getDoubleArray("camera.orientation");
-    MatrixBuilder.euclidean()
-      .rotate(rot[0] * ((Math.PI * 2.0) / 360.),
-        new double[] { rot[1], rot[2], rot[3] })
-      .assignTo(cameraOrientationNode);
+    MatrixBuilder mb = MatrixBuilder.euclidean();
+    if (rot != null)  mb.rotate(rot[0] * ((Math.PI * 2.0) / 360.), new double[] { rot[1], rot[2], rot[3] });
+    mb.assignTo(cameraOrientationNode);
 
     cameraTranslationNode.addChild(cameraOrientationNode);
   }
