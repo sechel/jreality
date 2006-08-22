@@ -41,6 +41,7 @@
 package de.jreality.util;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
@@ -63,7 +64,7 @@ public class PathCollector extends SceneGraphVisitor {
 
     SceneGraphComponent root;
     SceneGraphPath currentPath = new SceneGraphPath();
-    LinkedList collectedPaths = new LinkedList();
+    LinkedList<SceneGraphPath> collectedPaths = new LinkedList<SceneGraphPath>();
     Matcher matcher;
     
 	  public PathCollector(Matcher matcher, SceneGraphComponent root)	{
@@ -76,7 +77,7 @@ public class PathCollector extends SceneGraphVisitor {
 	   * SceneGraphNode to be final element of the path rather than segregated
 	   * into separate field.  -gunn 4.6.4
 	   */
-	   public Object visit()	{
+	   public List<SceneGraphPath> visit()	{
 		  visit(root);
       return collectedPaths;
 	  }
@@ -84,7 +85,7 @@ public class PathCollector extends SceneGraphVisitor {
 	  public void visit(SceneGraphNode m) {
       currentPath.push(m);
 			if (currentPath.getLength() > 0 && matcher.matches(currentPath)) {
-			  collectedPaths.add(currentPath.clone());
+			  collectedPaths.add((SceneGraphPath) currentPath.clone());
       }
       currentPath.pop();
 	  }

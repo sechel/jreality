@@ -108,13 +108,13 @@ public class SceneGraphUtility {
   	public static List collectClippingPlanes(SceneGraphComponent rootNode) {
   	    return (List) new ClippingPlaneCollector(rootNode).visit();
   	}
-    public static List getPathsBetween(final SceneGraphComponent begin, final SceneGraphNode end) {
+    public static List<SceneGraphPath> getPathsBetween(final SceneGraphComponent begin, final SceneGraphNode end) {
       final PathCollector.Matcher matcher = new PathCollector.Matcher() {
         public boolean matches(SceneGraphPath p) {
           return p.getLastElement() == end;
         }
       };
-      return (List) new PathCollector(matcher, begin).visit();
+      return new PathCollector(matcher, begin).visit();
     }
     public static List getPathsToNamedNodes(final SceneGraphComponent root, final String name) {
       final PathCollector.Matcher matcher = new PathCollector.Matcher() {
