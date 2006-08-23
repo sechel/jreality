@@ -56,9 +56,11 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.Map.Entry;
 
+import javax.swing.SwingConstants;
+
 import de.jreality.geometry.Primitives;
-import de.jreality.math.P3;
 import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -278,7 +280,7 @@ public class LabelUtility {
   			sgc.setGeometry(bb);
   		}
   		if (sgc.getTransformation() == null)	sgc.setTransformation(new Transformation());
-   		sgc.getTransformation().setMatrix(P3.calculateBillboardMatrix(null, xscale, yscale, offset, alignment, camToObj, position, Pn.EUCLIDEAN ));
+   		sgc.getTransformation().setMatrix(LabelUtility.calculateBillboardMatrix(null, xscale, yscale, offset, alignment, camToObj, position, Pn.EUCLIDEAN ));
 
   		return sgc;
   	}
@@ -298,5 +300,37 @@ public class LabelUtility {
     for (int j = 0; j < tmp.length; j++) ret[j] /= part.getLength();
     return ret;
   }
+
+public static double[] calculateBillboardMatrix(double[] result, 
+		double xscale, 
+		double yscale, 				// scaling factors for the billboard
+		double[] xyzOffset,			// an offset in "billboard" coordinate system
+		int alignment,	     		// alignment of billboard in compass-direction from anchor point (using SwingConstants)
+		double[] cameraToObject, 	// the transformation from camera to object coordinates
+		double[] point, 			// the position of the anchor point in object coordinate system
+		int signature)	{
+	if (result == null) result = new double[16];
+	// TODO the following call perhaps should return a determinant-1 matrix (throw out scaling)
+    double[] orientation = P3.extractOrientationMatrix(null, cameraToObject, Pn.originP3, signature);
+    double[] scale = P3.makeStretchMatrix(null, xscale, yscale, 1.0);
+    //calculate translation for alignment
+    double align=0, valign=0;  // default
+    switch (alignment) {
+    	case SwingConstants.NORTH  : align=-xscale/2; break;
+    	case SwingConstants.EAST   : valign=-yscale/2; break;
+    	case SwingConstants.SOUTH  : align=-xscale/2; valign=-yscale; break;
+    	case SwingConstants.WEST   : align=-xscale;   valign=-yscale/2; break;
+    	case SwingConstants.CENTER : align=-xscale/2; valign=-yscale/2; break;
+    	//case SwingConstants.NORTH_EAST : default
+    	case SwingConstants.SOUTH_EAST : valign=-yscale; break;
+    	case SwingConstants.SOUTH_WEST : align=-xscale; valign=-yscale; break;
+    	case SwingConstants.NORTH_WEST : align=-xscale; break;
+    }
+    double[] euclideanTranslation = P3.makeTranslationMatrix(null, Rn.add(null, xyzOffset, new double[]{align, valign, 0, 0}), Pn.EUCLIDEAN);
+    double[] pointTranslation = P3.makeTranslationMatrix(null, point, signature);
+
+    Rn.times(result, pointTranslation, Rn.times(null, orientation, Rn.times(null, euclideanTranslation, scale)));
+	return result;
+}
 
 }
