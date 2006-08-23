@@ -72,14 +72,9 @@ public interface DefaultTextShader extends TextShader {
 	int getAlignment();
 	void setAlignment(int a);
 	
-	
-    /**
-     * @deprecated
-     */
-	  Boolean getShowLabels();
-    /**
-     * @deprecated
-     */
-	  void setShowLabels(Boolean b);
+	// until there is an alternative for making labels invisible
+	// without completely deleting them, this stays undeprecated. -gunn
+	Boolean getShowLabels();
+ 	void setShowLabels(Boolean b);
 		
 }
