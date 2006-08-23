@@ -223,6 +223,7 @@ public class CameraUtility {
 
 	public static double[] getEyePosition(Camera cam, int which) {
 		double factor;
+		if (which == MIDDLE_EYE) return ( new double[]{0,0,0,1});
 		factor = (which == CameraUtility.LEFT_EYE) ? -1 : 1;
 		//if (eyeSeparation == 0.0) eyeSeparation = focus/6.0;
 		
