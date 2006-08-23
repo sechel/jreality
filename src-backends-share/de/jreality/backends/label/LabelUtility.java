@@ -59,6 +59,7 @@ import java.util.Map.Entry;
 import javax.swing.SwingConstants;
 
 import de.jreality.geometry.Primitives;
+import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
