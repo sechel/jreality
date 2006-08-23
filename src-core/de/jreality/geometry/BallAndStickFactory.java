@@ -68,10 +68,8 @@ import de.jreality.shader.CommonAttributes;
  * to be an octagon. The returned SceneGraphComponent has two children, containing the 
  * sticks and the balls, respectively.
  * <p>
- * The general cycle of use is ullustrated in the following code snippet:
+ * The general cycle of use is illustrated in the following code snippet:
  * <code><b><pre>
- * 		IndexedLineSet ils;
- * 		[...]
  *		BallAndStickFactory basf = new BallAndStickFactory(Primitives.sharedIcosahedron);
  *		basf.setBallRadius(.04);
  *		basf.setStickRadius(.02);

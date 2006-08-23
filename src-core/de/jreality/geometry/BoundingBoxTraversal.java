@@ -188,7 +188,7 @@ class BoundingBoxTraversal extends SceneGraphVisitor {
     	 	unionBox(box);		
     	 	return;
   	}
-  	Object domain = p.getGeometryAttributes(GeometryUtility.REGULAR_DOMAIN_QUAD_MESH_SHAPE);
+  	Object domain = p.getGeometryAttributes(GeometryUtility.HEIGHT_FIELD_SHAPE);
 	if (domain != null && domain instanceof Rectangle2D)	{
  		Rectangle2D box = (Rectangle2D) domain;
   	  	double[][] data = p.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);

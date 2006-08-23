@@ -283,7 +283,7 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 	protected void updateImpl() {
 	
 		super.updateImpl();
-		
+		System.err.println("In aqmf updateImpl");
 		if( nodeWasUpdated( faceIndices) ) { 
 			log( "set", Attribute.INDICES, "face");
 			ifs.setFaceAttributes( Attribute.INDICES, 
@@ -305,10 +305,10 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 			}
 		}
 		
-		if( nodeWasUpdated(uLineCount)|| nodeWasUpdated(vLineCount) ) {
+//		if( nodeWasUpdated(uLineCount)|| nodeWasUpdated(vLineCount) ) {
 			log( "set", GeometryUtility.QUAD_MESH_SHAPE, "vertex");
 			ifs.setGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE, new Dimension( getULineCount(), getVLineCount() ));
-		}
+//		}
 	}
 
 	public boolean isGenerateTextureCoordinates() {
