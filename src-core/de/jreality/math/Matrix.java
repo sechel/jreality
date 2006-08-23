@@ -49,7 +49,8 @@ import de.jreality.scene.data.DoubleArray;
 /**
  * A simple wrapper class for 4x4 real matrices.  The matrix is represented as a
  * linear array of 16 values (<tt>double[16]</tt> in order to avoid problems with Java's
- * multi-dimensional arrays.
+ * multi-dimensional arrays. The elements are listed in row/column order and act on column vectors
+ * sitting to the right of the matrix.
  * </p>
  * <p>
  * This class is not supposed to be a replacement for a full-fledged mathematical
@@ -66,44 +67,9 @@ import de.jreality.scene.data.DoubleArray;
 public class Matrix implements Serializable {
   
 	public final static double TOLERANCE = Rn.TOLERANCE;
-	
-	/**
-	 * @param A
-	 * @param B
-	 * @return A*B
-	 */
-	public static Matrix product(Matrix A, Matrix B) {
-		return new Matrix(Rn.times(null, A.matrix, B.matrix));
-	}
-
-	/**
-	 * @param A
-	 * @param B
-	 * @return A+B
-	 */
-	public static Matrix sum(Matrix A, Matrix B) {
-		return new Matrix(Rn.add(null, A.matrix, B.matrix));
-	}
-
-	/**
-	 * 
-	 * @param A
-	 * @param B
-	 * @return B * A * B^-1
-	 */
-	public static Matrix conjugate(Matrix A, Matrix B) {
-		return new Matrix(Rn.conjugateByMatrix(null, A.matrix, B.matrix));
-	}
-
 	protected double[] matrix;
-  
-  /**
-   * this flag is kept for extending classes, that need to know
-   * whether the matrix aray was changed. It's their responsibility
-   * to reset this flag.
-   */
-  protected transient boolean matrixChanged=true;
-
+	  
+	
 	public Matrix() {
 		this(Rn.setIdentityMatrix(new double[16]));
 	}
@@ -157,6 +123,41 @@ public class Matrix implements Serializable {
     public Matrix(Transformation data) {
         this(data.getMatrix());
     }
+
+	/**
+	 * @param A
+	 * @param B
+	 * @return A*B
+	 */
+	public static Matrix times(Matrix A, Matrix B) {
+		return new Matrix(Rn.times(null, A.matrix, B.matrix));
+	}
+
+	/**
+	 * @param A
+	 * @param B
+	 * @return A+B
+	 */
+	public static Matrix sum(Matrix A, Matrix B) {
+		return new Matrix(Rn.add(null, A.matrix, B.matrix));
+	}
+
+	/**
+	 * 
+	 * @param A
+	 * @param B
+	 * @return B * A * B^-1
+	 */
+	public static Matrix conjugate(Matrix A, Matrix B) {
+		return new Matrix(Rn.conjugateByMatrix(null, A.matrix, B.matrix));
+	}
+
+  /**
+   * this flag is kept for extending classes, that need to know
+   * whether the matrix aray was changed. It's their responsibility
+   * to reset this flag.
+   */
+  protected transient boolean matrixChanged=true;
 
 	/**
 	 * copies initValue
@@ -220,7 +221,11 @@ public class Matrix implements Serializable {
     trafo.setMatrix(matrix);
   }
 
-  public void assignTo(SceneGraphComponent comp) {
+  /**
+   * Set the matrix of the transformation of <i>comp</i> to be this instance.  If <i>comp</i> has 
+   * no Transformation, create one.
+   * @param comp
+   */public void assignTo(SceneGraphComponent comp) {
     Transformation t = comp.getTransformation();
     if (t == null) comp.setTransformation(new Transformation());
     assignTo(comp.getTransformation());
@@ -345,12 +350,12 @@ public class Matrix implements Serializable {
 	 * @param T
 	 */
 	public void conjugateBy(Matrix T) {
-    matrixChanged = true;
+		matrixChanged = true;
 		Rn.conjugateByMatrix(matrix, matrix, T.matrix);
 	}
 
 	public void add(Matrix T) {
-    matrixChanged = true;
+		matrixChanged = true;
 		Rn.add(matrix, matrix, T.matrix);
 	}
 
@@ -368,13 +373,13 @@ public class Matrix implements Serializable {
 	}
 
 	public void transpose() {
-    matrixChanged = true;
+		matrixChanged = true;
 		Rn.transpose(matrix, matrix);
 	}
 
   /**
-   * TODO: !!! that doesn't return a rotation matrix!!!
-   * TODO: this is implicitly euclidean.  I don't think it belongs in a "signature-neutral" class [charles gunn]
+   * WARNING: This doesn't return a rotation matrix if we're not in euclidean space.
+   * Since we don't know the metric, this method doesn't belong in this class.
    * In fact, it's not well-defined in the absence of a signature field.
    * @deprecated
    * @return
@@ -386,7 +391,11 @@ public class Matrix implements Serializable {
       return ret;
     }
   
-    public double[] multiplyVector(double[] vector) {
+    /**
+     * Form the matrix-vector product <i>M.v</i> (<i>v</i> is column vector on the right).
+     * @param vector
+     * @return
+     */public double[] multiplyVector(double[] vector) {
         return Rn.matrixTimesVector(null, matrix, vector);
     }
     

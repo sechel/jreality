@@ -47,15 +47,20 @@ import de.jreality.scene.data.DoubleArray;
 /**
  * 
  * <p>
- * The Transformation class is built around a 4x4 matrix. The class provides a
+ * The FactoredMatrix class is a subclass of {@link Matrix} supporting a canonical
+ * factorization of the matrix into simpler factors. The class provides a
  * variety of methods for setting and getting the transformation. One instance
  * can handle a series of transformations, based on the so-called polar
  * decomposition. See
- * @link <a href="www.cs.wisc.edu/graphics/Courses/cs-838-2002/ Papers/polar-decomp.pdf">Duff and Shoemaker paper</a>.
+ * {@link <a href="www.cs.wisc.edu/graphics/Courses/cs-838-2002/Papers/polar-decomp.pdf">Duff and Shoemaker paper</a>}.
  * To be exact, the matrix M is factored as the matrix product M=T*R*S. Note
  * that matrices act on column vectors which stand to the right of the matrix. S
  * is a "stretch" or "scale" matrix -- a diagonal matrix. R is an arbitrary
  * rotation of Euclidean 3-space, and T is a translation.
+ * <p>
+ * 
+ * NOTE: the current implementation omits part of the factorization described in the above
+ * paper.  There is only one scale matrix.
  * <p>
  * 
  * Users may set the matrix directly, then the factors will be computed and are
@@ -73,7 +78,7 @@ import de.jreality.scene.data.DoubleArray;
  * 
  * By default the origin (0,0,0,1) is the fixed point of the scale and rotation
  * part of the transformation. It is however possible to specity another
- * <i>center </i> (see {@link #setCenter}. The resulting matrix is then
+ * <i>center </i> (see {@link #setCenter(double[], boolean)}. The resulting matrix is then
  * T*C*R*S*IC where C is the translation taking the origin to C, and IC is its
  * inverse. The fixed point for the rotation and stretch is then <i>center </i>.
  * <p>
@@ -89,6 +94,12 @@ import de.jreality.scene.data.DoubleArray;
  * SL(4,R) of matrices with determinant +/- 1. See {@link #getIsSpecial()}.
  * <p>
  * 
+ * It is also possible to factor isometries of non-euclidean space.  In this case 
+ * use a constructor that allows specifying the <i>signature</i>.  See {@link Pn} for a
+ * more complete description of the non-euclidean isometries.  Then the above remarks
+ * should be extended whereever they refer to euclidean metric. 
+ * <p>
+ * 
  * See also {@link Pn}for a collection of static methods useful for generating
  * 4x4 matrices for specific purposes.
  * <p>
@@ -101,11 +112,6 @@ import de.jreality.scene.data.DoubleArray;
  * <b>Warning </b> Angles are measured in radians.
  * <p>
  * 
- * <b>Warning </b> The factorization will have to be modified to work with
- * non-Euclidean isometries. For example, non-euclidean geometries do not allow
- * a "stretch" transformation.
- * <p>
- *  
  * @author Charles Gunn
  */
 public class FactoredMatrix extends Matrix {
@@ -400,7 +406,7 @@ public class FactoredMatrix extends Matrix {
      */
     public void setRotation(Quaternion aQ) {
         Quaternion.copy(rotationQ, aQ);
-        Quaternion.normalizeRotation(rotationQ, rotationQ);
+		Quaternion.normalize(rotationQ, rotationQ);
         getRotationAxis();
         factorHasChanged = true;
         update();

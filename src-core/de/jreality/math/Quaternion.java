@@ -46,23 +46,30 @@ import java.io.Serializable;
 
 /**
  * <p>
- * A simple quaternion class.  Some instance methods, mostly static methods.
+ * A simple quaternion class for support for {@link de.jreality.math.FactoredMatrix} and isometry generation
+ * in {@link P3}.  Although the bulk of the methods are static, there are also some instance methods.
  * </p><p>
  * The generic calling convention is <code>public static Quaternion method(Quaternion result, Quaternion q1, Quaternion q2)</code>
  * where if <i>result</i> is null, a new instance is created and the result is returned in it. 
+ * <p>
+ * Consult also {@link Rn} for a description of conventions used in method design.
  * @author Charles Gunn
   */
 final public class Quaternion implements Cloneable, Serializable {
+	static Quaternion INFINITE_QUATERNION = new Quaternion(Double.POSITIVE_INFINITY, 0.0, 0.0, 0.0);
+
 	public double re, x, y, z;
 	/**
-	 * No transforms allowed
+	 * The default quaternion is 1.
 	 */
 	public Quaternion() {
 		this(1d, 0d, 0d, 0d);
-		// TODO Auto-generated constructor stub
 	}
 	
-	public Quaternion(Quaternion nq) {
+	/**
+	 * A copy constructor.
+	 * @param nq
+	 */public Quaternion(Quaternion nq) {
 		this(nq.re, nq.x, nq.y, nq.z);
 		// TODO Auto-generated constructor stub
 	}
@@ -75,35 +82,22 @@ final public class Quaternion implements Cloneable, Serializable {
 		z = dz;
 	}
 	
+	/**
+	 * 
+	 */
 	public String toString()	{
 		return "re: "+Double.toString(re)+
 		"i: "+Double.toString(x)+
 		"j: "+Double.toString(y)+
 		"k: "+Double.toString(z);
 	}
-	
-	public Object clone()	{
-		try {
-			Quaternion copy = (Quaternion) super.clone();
-			copy.re = re;
-			copy.x = x;
-			copy.y = y;
-			copy.z = z;
-			return copy;
-		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
+		
 	public void setValue(double r, double dx, double dy, double dz)	{
 		re = r;
 		x = dx;
 		y = dy;
 		z = dz;
 	}
-	static Quaternion INFINITE_QUATERNION = new Quaternion(Double.POSITIVE_INFINITY, 0.0, 0.0, 0.0);
 	
 	// static methods start here
 	public static Quaternion copy(Quaternion dst, Quaternion src)	{
@@ -115,6 +109,12 @@ final public class Quaternion implements Cloneable, Serializable {
 		return dst;
 	}
 	
+	/**
+	 * return imaginary part as a double array.
+	 * @param dst
+	 * @param q
+	 * @return
+	 */
 	public static double[] IJK(double[] dst, Quaternion q)	{
 		// assert dim checks
 		dst[0] = q.x;
@@ -123,6 +123,13 @@ final public class Quaternion implements Cloneable, Serializable {
 		return dst;
 	}
 	
+	/**
+	 * Check for numerical equality.
+	 * @param a
+	 * @param b
+	 * @param tol
+	 * @return
+	 */
 	public static boolean equals(Quaternion a, Quaternion b, double tol)	{
 		Quaternion tmp = new Quaternion();
 		subtract(tmp, a, b);
@@ -130,6 +137,13 @@ final public class Quaternion implements Cloneable, Serializable {
 		return ll < tol;
 	}
 
+	/**
+	 * Check if the rotations represented by the two quaternions are equal
+	 * @param a
+	 * @param b
+	 * @param tol
+	 * @return
+	 */
 	public static boolean equalsRotation(Quaternion a, Quaternion b, double tol)	{
 		Quaternion tmp = new Quaternion();
 		return (equals(a,b,tol) || equals(times(tmp,-1.0,a),b,tol));
@@ -216,7 +230,7 @@ final public class Quaternion implements Cloneable, Serializable {
 		Quaternion tmp = new Quaternion();
 		double ll = lengthSquared(src);
 		if (ll == 0.0)	{
-			dst = (Quaternion) INFINITE_QUATERNION.clone();
+			dst = new Quaternion(INFINITE_QUATERNION);
 		} else {		// q^-1 = q * (q bar)/<q,q>
 			ll = 1.0/ll;
 			conjugate(tmp, src);
@@ -232,6 +246,12 @@ final public class Quaternion implements Cloneable, Serializable {
 		return times(dst, a, tmp);
 	}
 
+	/**
+	 * The conjugate of the inverse, or do I mean the inverse of the conjugate???
+	 * @param dst
+	 * @param src
+	 * @return
+	 */
 	public static Quaternion star(Quaternion dst, Quaternion src)	{
 		Quaternion tmp = new Quaternion();
 		return conjugate(dst, invert(tmp, src));
@@ -239,7 +259,7 @@ final public class Quaternion implements Cloneable, Serializable {
 	
 	public static Quaternion normalize(Quaternion dst, Quaternion src)	{
 		double ll = length(src);
-		if (ll == 0) dst = (Quaternion) src.clone();
+		if (ll == 0) dst = new Quaternion(src);
 		else {
 			ll = 1.0/ll;
 			times(dst, ll, src);
@@ -247,15 +267,6 @@ final public class Quaternion implements Cloneable, Serializable {
 		return dst;
 	}
 	
-	// 4 different unit quaternions represent the same rotation:
-	// we choose the one such that the real part and the i component are positive
-	public static Quaternion normalizeRotation(Quaternion dst, Quaternion src)	{
-		normalize(dst, src);
-		//if (dst.x < 0)	times(dst, -1.0, dst);
-		//if (dst.re < 0)	times(dst, -1.0, dst);
-		return dst;
-	}
-
 	public static Quaternion makeRotationQuaternionAngle(Quaternion q, double angle, double[] axis)	{
 		double [] tmp = (double[] ) axis.clone();
 		double cos = Math.cos(angle/2.0);
@@ -263,13 +274,20 @@ final public class Quaternion implements Cloneable, Serializable {
 		Rn.normalize(tmp, axis);
 		Rn.times(tmp, sin, tmp);
 		q.setValue(cos, tmp[0], tmp[1], tmp[2]);
-		return normalizeRotation(q,q);
+		normalize(q, q);
+		return q;
 	}
 	
 	public static Quaternion makeRotationQuaternionCos(Quaternion q, double cos, double[] axis)	{
 		return makeRotationQuaternionAngle(q, 2*Math.acos(cos), axis);
 	}
 	
+	/**
+	 * Convert the 3x3 rotation matrix <i>mat</i> into a quaternion.
+	 * @param q
+	 * @param mat
+	 * @return
+	 */
 	public static Quaternion rotationMatrixToQuaternion(Quaternion q, double[] mat)		{
 		// assert dim checks
 		int n = Rn.sqrt(mat.length);
@@ -304,21 +322,22 @@ final public class Quaternion implements Cloneable, Serializable {
 				}
 			}
 		}
+		normalize(q, q);
 		// normalize the quaternion to have positive real part
-		normalizeRotation(q,q);
 		return q;
 	}
 	
+	/**
+	 * Convert the quaternion <i>qt</i> into a 3x3 rotation matrix.
+	 * @param rot
+	 * @param qt
+	 * @return
+	 */
 	public static double[] quaternionToRotationMatrix( double[] rot, Quaternion qt)	{		
-		// assert dim checks
 		if (rot == null) rot = new double[16];
 		double[] axis = new double[3];
 		Quaternion q = new Quaternion();
-		/* this is supposed to be a unit quaternion */
-		//if ( Math.abs(d-1.0) > .001) 
-			//ooError(OE_MISC, OE_WARNING, "Non-unit quaternion with length %G for rotation\n", sqrt(d));
-		normalizeRotation(q,qt);
-		
+		normalize(q, qt);
 		if (1.0 - Math.abs(q.re) < 10E-16)	{
 			Rn.setIdentityMatrix(rot);
 			return rot;
@@ -350,6 +369,7 @@ final public class Quaternion implements Cloneable, Serializable {
 	public double[] asDouble() { return asDouble(null); }
 	
 	/**
+	 * Convert the quaternion into a 4-vector
 	 * @return
 	 */
 	public double[] asDouble(double[] val) {
@@ -361,34 +381,6 @@ final public class Quaternion implements Cloneable, Serializable {
 		return val;
 	}
   
-    /**
-     * one of a million ways to interprete euler angles.
-     * 
-     * copied from: 
-     * http://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToQuaternion/index.htm
-     * 
-     * @param heading  // y-axis
-     * @param attitude // z-axis
-     * @param bank     // x-axis
-     * 
-     * @return the Quaternion representing the rotation from euler angles 
-     */
-  public static Quaternion fromEulerAngles(double heading, double attitude, double bank) {
-      // Assuming the angles are in radians.
-      double c1 = Math.cos(heading/2);
-      double s1 = Math.sin(heading/2);
-      double c2 = Math.cos(attitude/2);
-      double s2 = Math.sin(attitude/2);
-      double c3 = Math.cos(bank/2);
-      double s3 = Math.sin(bank/2);
-      double c1c2 = c1*c2;
-      double s1s2 = s1*s2;
-      return new Quaternion(c1c2*c3 - s1s2*s3,
-           c1c2*s3 + s1s2*c3,
-           s1*c2*c3 + c1*s2*s3,
-           c1*s2*c3 - s1*c2*s3);
-   
-  }
 
 
 }

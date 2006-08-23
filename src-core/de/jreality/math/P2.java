@@ -45,11 +45,11 @@ import java.util.logging.Level;
 import de.jreality.util.LoggingSystem;
 
 /**
- * Static methods for geometry of the real projective plane.
+ * Static methods for geometry of the real projective plane RP2.
  * 
- * @see de.jreality.math.Rn  for method conventions and discussion of the ubiquitous <i>signature</i> parameter.
- * @see de.jreality.math.Pn  for other methods applicable in n-dimensional projective space.
- * @author gunn
+ * {@see de.jreality.math.Rn}  for method conventions and discussion of the ubiquitous <i>signature</i> parameter.
+ * {@see de.jreality.math.Pn}  for other methods applicable in n-dimensional projective space.
+ * @author Charles Gunn
  *
  */
 final public class P2 {

@@ -40,15 +40,13 @@
 
 package de.jreality.math;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.logging.Level;
 
 import de.jreality.util.LoggingSystem;
 
 /**
- * A set of static methods for n-dimensional Euclidean vector space.  
+ * Static methods for n-dimensional Euclidean vector space R<sup>n</sup>.  
  * All vectors are of type double[]. 
  * <p>
  * This includes a set of methods related to linear transformations of Rn.  Because of the 
@@ -56,23 +54,39 @@ import de.jreality.util.LoggingSystem;
  * pointers), matrices are also of type double[].  Since all the matrices  that occur here are square
  * ones, the actual dimensions can be calculated easily from the over-all length.  For example, 
  * an array of length 16 corresponds to a 4x4 matrix.  Currently the limit on the size of these square matrices
- * is 10x10.
+ * is 10x10. Methods where there is a lower limit annotate this restriction.
  * <p>
- * Convention: matrices act on <b>column vectors</b> standing to the <b> right</b> of the matrix.
+ * Conventions: 
+ * <ul>
+ * <li>matrices act on <b>column vectors</b> standing to the <b> right</b> of the matrix.</li>
+ * <li>
+ * Some software packages of this type 
+ * attempt to provide many versions of the same
+ * method, for example, <c>add()</c>, which have different number of arguments 
+ * depending on whether one of the 
+ * arguments is re-used. This is <b>not</b> the policy here.  
+ * Each such method typically exists in only one form.
+ * For example, in the case of <c>add()</c>, 
+ * it has the form <code> public static double[] add(double[] dst, double[]src1, double[] src2) </code>.
+ * The operation is then given by <code> dst = src1 + src2 </code>.  
+ * Care has been taken to allow re-use of the same
+ * variable, for example, in the invocation <code> Rn.add(a, a, a) </code> which adds a vector <tt> a</tt> to itself and stores the 
+ * result back into itself. </li> 
+ * <li>
+ * Just as in the written form of the addition statement above, the destination 
+ * array comes <b>first</b> in the argument list. This is true for every method which calculates a vector or matrix. 
+ * </li>
+ * <li> These methods generally return this vector or matrix.  This allows nested used of these methods; for example to add
+ * three vectors <i>a,b,c</i> together into a fourth <i>d</i>: <code> Rn.add(d, c, Rn.add(null, a, b)) </code> 
+ * in the process.  </li>
+ * <li>
+ * Methods return the computed vector or matrix, in general. It is in general
+ * possible to pass in a <code>null</code> value for the destination vector or matrix.  
+ * The method itself in this case then allocates
+ * a new one, fills it accordingly, and returns it. 
+ * Unless otherwise noted, this is the behavior of the static methods in this class.
  * <p>
- * Method invocations involve some conventions. Some packages attempt to provide many versions of the same
- * method, for example, add(), which have different number of arguments depending on whether one of the 
- * arguments is re-used. This is NOT the policy here.  Each such method typically exists in only one form.
- * For example, in the case of add(), it has the form <tt> public static double[] add(double[] dst, double[]src1, double[] src2) </tt>.
- * The operation is then given by <tt> dst = src1 + src2 </tt>.  Care has been taken to allow re-use of the same
- * variable, for example, in the invocation <tt> Rn.add(a, a, a) </tt> which adds a vector <tt> a</tt> to itself and stores the 
- * result back into itself.  
- * <p>
- * Also note that, just as in the written form of the addition statement, the destination 
- * array comes first in the argument list. This is true for every method which calculates a vector or matrix. Furthermore, 
- * these methods generally return this vector or matrix.  This allows nested used of these methods; for example to add
- * three vectors <i>a,b,c</i> together into a fourth <i>d</i>: <tt> Rn.add(d, c, Rn.add(null, a, b)) </tt> 
- * in the process.  
+ * </ul>
  * <p>
  *  Methods try as much as possible to react reasonably to differing argument types. In general, the
  * methods check the lengths of the arguments, determine a minimum valid length on which the desired operation
@@ -86,32 +100,23 @@ import de.jreality.util.LoggingSystem;
  * In this case the method assumes an implicit final coordinate of 1.0 and carries out the multiplication
  * accordingly. At the same time, the method also operates correctly on 4-vectors.
  * <p>
- * Some commonly used methods come in two varieties: one acts on single vectors (<tt> double[] </tt>) and another
- * acts on array of vectors (<tt>double[][]</tt>).  Compare {@link #matrixTimesVector(double[], double[], double[])} and
+ * Some commonly used methods come in two varieties: one acts on single vectors (<code> double[] </code>) and another
+ * acts on array of vectors (<code>double[][]</code>).  Compare {@link #matrixTimesVector(double[], double[], double[])} and
  * {@link #matrixTimesVector(double[][], double[], double[][])}.
- * <p>
- * <b> Warning </b> As stated above, methods return the computed vector or matrix, in general. This would make it
- * possible to pass in a <tt>null</tt> value for the destination vector or matrix.  The method itself in this case would then allocate
- * a new one, fill it accordingly, and return it. If this is the case the documentation of the <tt>dst</tt> parameter
- * notes this.
  * <p>
  * @author Charles Gunn
  * @see de.jreality.math.Pn
  */
 final public class Rn {
 
-	/* no instance allowed */
-	private Rn (){
-		super();
-	}
-
-
 	/**
 	 * A table of identity matrices for quick access.
 	 */
 	final static double[][] identityMatrices = new double[5][];
+
+
 	/**
-	 * The default tolerance used for checking numerical equality
+	 * The default tolerance used for checking numerical equality = 10E-8.
 	 */
 	public static final double TOLERANCE = 10E-8;
 	/*
@@ -120,7 +125,25 @@ final public class Rn {
 	static {
 		for (int i=1; i<5; ++i) identityMatrices[i]=identityMatrix(i);
 	}
+
+	/* no instance allowed */
+	private Rn (){
+		super();
+	}
+
 	
+	/**
+	 * @param ds
+	 * @param ds2
+	 */
+	public static double[] abs(double[] dst, double[] src) {
+		int n = src.length;
+		if (dst == null) dst = new double[n];
+		for (int i =0; i<n ; ++i) dst[i] = Math.abs(src[i]);
+		return dst;
+		
+	}
+		
 	/**
 	 * Add the vector <i>src1</i> to the vector <i>src2</i> and put the result in <i>dst</i>.
 	 * @param dst
@@ -139,22 +162,11 @@ final public class Rn {
 		return ddst;
 	}
 		
-	public static double[]  average(double[]  dst, double[][]  vlist)	{
-		// assert dim check
-		if (dst == null) dst = new double[vlist[0].length];
-		if (vlist.length == 0) return null;
-		double[] tmp = new double[dst.length];
-		for (int i=0; i<vlist.length; ++i)	{
-			add(tmp, tmp, vlist[i]);
-		}
-		times(dst, 1.0/vlist.length, tmp);
-		return dst;
-	}
-		
 	/**
 	 * Calculate the adjoint of the square matrix <i>src</i> and put the result into <i>dst</i>. 
 	 * The adjoint of a matrix is a same-size matrix, whose (i,j)th entry is the determinant of the
 	 * sub-matrix of the original matrix obtained by deleting the (i)th row and (j)th column.
+	 * The dimension of the input matrix can be no greater than 4.
 	 * @param dst		may be null
 	 * @param src		may be = dst
 	 * @return	dst
@@ -184,6 +196,23 @@ final public class Rn {
 	}
 	
 	/**
+	 * Calculate the average of the elements in the vector list <i>vlist</i>.
+	 * @param dst
+	 * @param vlist
+	 * @return
+	 */public static double[]  average(double[]  dst, double[][]  vlist)	{
+		// assert dim check
+		if (dst == null) dst = new double[vlist[0].length];
+		if (vlist.length == 0) return null;
+		double[] tmp = new double[dst.length];
+		for (int i=0; i<vlist.length; ++i)	{
+			add(tmp, tmp, vlist[i]);
+		}
+		times(dst, 1.0/vlist.length, tmp);
+		return dst;
+	}
+	
+	/**
 	 * Calculate the euclidean coordinates of the point whose barycentric coordinates with respect to the triangle <i>corners</i> are 
 	 * <i>coords</i>.  This is just the weighted average of the corners of the triangle.  Return the result in <i>dst</i>.
 	 * @param dst		double[n]		(may be null)
@@ -207,7 +236,8 @@ final public class Rn {
 	
 	/**
 	 * Given a list of vectors, calculate the minimum and maximum values in each coordinate. Return
-	 * the result in <i>bounds</i>.
+	 * the result in <i>bounds</i>. For example <i>bounds[0][1]</i> is the
+	 * minimum y-value of the vectors in the list, etc.
 	 * @param bounds	double[2][n]
 	 * @param vlist		double[][n]
 	 * @return
@@ -235,9 +265,10 @@ final public class Rn {
 		}
 		return bounds;
 	}
-	
+
 	/**
 	 * Calculate the <i>(i,j)th cofactor</i> of the matrix <i>m</i> 
+	 * The dimension of the matrix <i>m</i> can be no greater than 5.
 	 * @param m			double[n][n]
 	 * @param row		
 	 * @param column
@@ -248,10 +279,9 @@ final public class Rn {
 		// assert dim check
 		return determinant(submatrix((double[]) null, m, row, column));		
 	}
-
+	
 	/**
 	 * Form the conjugate of the matrix <i>m</i> by the matrix <i>c</i>:
-	 * <p>
 	 * <c>dst = c . m . Inverse(c)</c>
 	 * @param dst	double[n][n]
 	 * @param m		double[n][n]
@@ -267,20 +297,61 @@ final public class Rn {
 	}
 	
 	/**
-	 * 
+	   * @param V
+	   * @return
+	   */
+	  public static double[] convertArray3DToArray1D(double[][][] V) {
+	    int n = V.length;
+	    int m = V[0].length;
+	    int p = V[0][0].length;
+	    double[] newV = new double[n*m*p];
+	    for (int i = 0, ind=0; i< n; i++)  {
+	      for (int j = 0; j<m; ++j) {
+	        for (int k = 0; k < p; k++, ind++)
+	          newV[ind] = V[i][j][k];
+	      }
+	    }
+	    return newV;
+	  }
+	
+	/**
+	 * @param V
+	 * @return
+	 */
+	public static double[][] convertArray3DToArray2D(double[][][] V) {
+		int n = V.length;
+		int m = V[0].length;
+		int p = V[0][0].length;
+		double[][] newV = new double[n*m][p];
+		for (int i = 0; i< n; i++)	{
+			for (int j = 0; j<m; ++j)	{
+				System.arraycopy(V[i][j], 0, newV[i*m+j], 0, p);
+			}
+		}
+		return newV;
+	}
+	
+	public static float[] convertDoubleToFloatArray(double[] ds) {
+		int n = ds.length;
+		float[] fs = new float[n];
+		for (int i = 0; i<n; ++i)	fs[i] = (float) ds[i];
+		return fs;
+	}
+	
+	/**
+	 * Make a copy of <i>src</i> in <i>dst</i>. The length of <i>dst</i> may be larger than that of <i>src</i>.
+	 * Excess terms will be left.
 	 * @param dst
 	 * @param src
 	 * @return
 	 */public static double[]  copy(double[]  dst, double[]  src)	{
-		// assert dim check
-		if (dst == null) dst = new double[src.length];
+		if (dst == null ) dst = new double[src.length];
 		System.arraycopy(src, 0, dst, 0, Math.min(dst.length,src.length));
 		return dst;
 	}
-	
 	/**
-	 * Calculate the cross product of the two vectors <i>u</i> and <i>v</i>. Note that the only valid dimension
-	 * is 3.
+	 * Calculate the cross product of the two vectors <i>u</i> and <i>v</i>. 
+	 * Note that the only valid dimension is 3.
 	 * @param dst	double[3]
 	 * @param u		double[3]
 	 * @param v		double[3]
@@ -338,9 +409,8 @@ final public class Rn {
 		}
 		return det;                                                      
 	}
-	
 	/**
-	 * Calculate whether the two arrays contain the same values.  
+	 * Calculate whether the two arrays contain exactly the same values.  
 	 * Returns true only if the  {@link Rn#manhattanNorm(double[] ) "manhattan norm"} of the difference of the two vectors  does not exceed  
 	 *the  default {@link Rn#TOLERANCE tolerance}. 
 	 * @param u		double[n]
@@ -349,7 +419,7 @@ final public class Rn {
 	 * @see #equals(double[], double[], double) equals()
 	 */
 	public static boolean equals(double[] u, double[] v)	{
-		return equals(u, v, TOLERANCE);
+		return equals(u, v, 0);
 	}
 	
 	/**
@@ -362,12 +432,34 @@ final public class Rn {
 	 * @return
 	 */
 	public static boolean equals(double[] u, double[] v, double tol)	{
-		// assert dim checks
 		double[] diff = new double[u.length];
 		subtract(diff, u, v);
 		double d = manhattanNorm(diff);
 		return (d < tol);
 	}
+	
+	/**
+	 * Calculate the euclidean angle between the vectors <i>u</i> and <i>v</i>.
+	 * @param u
+	 * @param v
+	 * @return
+	 */
+	public static double euclideanAngle(double[] u, double[]v)	{
+		if (u.length != v.length)	{
+			throw new IllegalArgumentException("Vectors must have same length");
+		}
+		double uu = innerProduct(u, u);
+		double vv = innerProduct(v, v);
+		double uv = innerProduct(u, v);
+		if (uu == 0 || vv == 0) 	// TODO: check for <epsilon rather than ==0
+			return (Double.MAX_VALUE);
+		double f =  uv/Math.sqrt(Math.abs(uu*vv));
+		if (f > 1.0) f = 1.0;
+		if (f < -1.0) f = -1.0;
+		double d = Math.acos(f);
+		return d;
+	}
+
 	/**
 	 * Calculates and returns the euclidean distance between the two points <i>u</i> and <i>v</i>.
 	 * @param u
@@ -389,6 +481,7 @@ final public class Rn {
 		subtract(tmp, u, v);
 		return euclideanNormSquared(tmp);		
 	}
+	
 	/**
 	 * Calculates and returns the euclidean  norm of the input vector.
 	 * @param vec	double[n]
@@ -408,22 +501,6 @@ final public class Rn {
 		return innerProduct(vec,vec);
 	}
 	
-	public static double euclideanAngle(double[] u, double[]v)	{
-		if (u.length != v.length)	{
-			throw new IllegalArgumentException("Vectors must have same length");
-		}
-		double uu = innerProduct(u, u);
-		double vv = innerProduct(v, v);
-		double uv = innerProduct(u, v);
-		if (uu == 0 || vv == 0) 	// TODO: check for <epsilon rather than ==0
-			return (Double.MAX_VALUE);
-		double f =  uv/Math.sqrt(Math.abs(uu*vv));
-		if (f > 1.0) f = 1.0;
-		if (f < -1.0) f = -1.0;
-		double d = Math.acos(f);
-		return d;
-	}
-
 	/**
 	 * Extract a rectangular submatrix of the input matrix.
 	 * @param subm		double[b-t][r-l]
@@ -451,7 +528,7 @@ final public class Rn {
 		}
 		return subm;
 	}
-	
+
 	/**
 	 * Create and return an identity matrix of dimension <i>dim</i>.
 	 * @param dim
@@ -464,7 +541,7 @@ final public class Rn {
 	}
 	
 	/**
-	 * Calculate and return the inner product of the  two vectors.
+	 * Calculate and return the euclidean inner product of the  two vectors.
 	 * @param u
 	 * @param v
 	 * @return
@@ -484,7 +561,8 @@ final public class Rn {
 	}
 	
 	/**
-	 * Calculate and return at most n terms of the inner product of the  two vectors.
+	 * Calculate and return at most n terms of the inner product of the  two vectors. Useful
+	 * when using homogenous coordinates but one wants to ignore the final coordinate.
 	 * @param u
 	 * @param v
 	 * @return
@@ -503,7 +581,7 @@ final public class Rn {
 	
 	/**
 	 * Use Gaussian pivoting to calculate the inverse matrix of the input matrix.
-	 * This method is safe when minv == m.
+	 * This method is safe when <i>minvIn == m</i>.
 	 * @param minv		double[n][n]
 	 * @param m			double[n][n]
 	 * @return		minv
@@ -576,7 +654,7 @@ final public class Rn {
 		return minv;
 
 	}
-
+	
 	private static double[] inverseSlow(double[] dst, double[] src)	{
 		// assert dim checks
 		if (dst == null) dst = new double[src.length];
@@ -605,7 +683,7 @@ final public class Rn {
 		if (error <= tol) return true;
 		return false;
 	}
-	
+
 	/**
 	 * Calculates whether the input matrix is within <i>tol</i> of being a "special" matrix.
 	 * To be exact, returns true if the absolute value of the determinant is
@@ -637,7 +715,7 @@ final public class Rn {
 		double[]  tmp = new double[dst.length];
 		return add(dst, times(tmp, a, aVec), times(dst, b, bVec));
 	}
-	
+
 	/**
 	 * Calculate the "manhattan norm" of the input vector.  This is the sum of the absolute values of the entries.
 	 * @param vec
@@ -650,44 +728,24 @@ final public class Rn {
 		return sum;
 	}
 	
-	/**
+  /**
 	 * Calculate the "manhattan norm" distance between the two input vectors.
+	 * 
 	 * @param u
 	 * @param v
 	 * @return
 	 */
-	public static double manhattanNormDistance(double[]  u, double[]  v)	{
-		double[]  tmp = new double[u.length];
+	public static double manhattanNormDistance(double[] u, double[] v) {
+		double[] tmp = new double[u.length];
 		subtract(tmp, u, v);
-		return manhattanNorm(tmp);		
-	}
-
-	private static void _matrixTimesVectorSafe(double[] dst, double[] m, double[] src)	{
-		int sl = src.length;
-		int ml = sqrt(m.length);
-		boolean dehomog = false;
-		if (ml == sl + 1)	dehomog = true;
-		if (sl + 1 < ml || sl > ml)	{
-			throw new IllegalArgumentException("Invalid dimension in _matrixTimesVectorSafe");
-		}
-		double[] out;
-		if (dehomog)	{
-			out = new double[ml];
-		}
-			else out = dst;
-		for (int i = 0; i< ml; ++i)	{		
-			out[i] = 0;
-			for (int j = 0 ; j < ml; ++j)
-				if (dehomog && j == ml - 1)	out[i] += m[i*ml+j];		// src[last] = 1.0
-				else						out[i] += m[i*ml+j] * src[j];
-		}
-		if (dehomog)	{
-			Pn.dehomogenize(dst, out);
-		}
+		return manhattanNorm(tmp);
 	}
 	
 	/**
 	 * Multiply the input vector <i>src</i> by the matrix <i>m</i> and put the result into <i>dst</i>.
+	 * This method works correctly when the vectors are given using 
+	 * homogeneous <b>or</b> dehomogenous coordinates 
+	 * (but this must be consistent for both <i>src</i> and <i>dst</i>).
 	 * @param dst		double[n]		(may be null)
 	 * @param m			double[n][n]
 	 * @param src		double[n]
@@ -717,7 +775,37 @@ final public class Rn {
 	}
 
 	/**
-	 * Multiply the input matrix by the input vector list and put the result into <i>dst</i>.
+	 * This behaves correctly even if <i>src=dst</i>.
+	 * @param dst
+	 * @param m
+	 * @param src
+	 */
+	private static void _matrixTimesVectorSafe(double[] dst, double[] m, double[] src)	{
+		int sl = src.length;
+		int ml = sqrt(m.length);
+		boolean dehomog = false;
+		if (ml == sl + 1)	dehomog = true;
+		if (sl + 1 < ml || sl > ml)	{
+			throw new IllegalArgumentException("Invalid dimension in _matrixTimesVectorSafe");
+		}
+		double[] out;
+		if (dehomog)	{
+			out = new double[ml];
+		}
+			else out = dst;
+		for (int i = 0; i< ml; ++i)	{		
+			out[i] = 0;
+			for (int j = 0 ; j < ml; ++j)
+				if (dehomog && j == ml - 1)	out[i] += m[i*ml+j];		// src[last] = 1.0
+				else						out[i] += m[i*ml+j] * src[j];
+		}
+		if (dehomog)	{
+			Pn.dehomogenize(dst, out);
+		}
+	}
+	
+	/**
+	 * A vectorized version of {@link #matrixTimesVector(double[], double[], double[])}.
 	 * @param dst		double[m][n]	(may be null)
 	 * @param m			double[n][n]
 	 * @param src		double[m][n]
@@ -745,85 +833,58 @@ final public class Rn {
 		} 
 		return out;
 	}
-	
-  private static NumberFormat nf = NumberFormat.getNumberInstance();
-  private static DecimalFormat df = (DecimalFormat) nf;
-  static {
-    df.applyPattern(" ###0.000000;-");
-  }
-  public static String matrixToString(double[] v) {
-    StringBuffer sb = new StringBuffer();
-    for (int i = 0; i < 4; i++) {
-      for (int j = 0; j < 4; j++) {
-        sb.append(df.format(v[4*i+j])).append(j == 3 ? "\n":"\t");
-      }
-    }
-      
-    return sb.toString();
-  }
 
+
+  
+	/**
+	 * Like {@link #matrixToString(double[])}, but formatted for direct insertion as java source code
+	 * @param v
+	 * @return
+	 */
 	public static String matrixToJavaString(double[] v) {
 	    StringBuffer sb = new StringBuffer();
 	    sb.append("{");
 	    for (int i = 0; i < 4; i++) {
 	      for (int j = 0; j < 4; j++) {
-	        sb.append(df.format(v[4*i+j])).append(i*4+j != 15 ? "," : "").append(j == 3 ? "\n":"\t");
+	    	  sb.append(String.format("%g", new Object[]{v[4*i+j]}));
+	    	  sb.append(j == 3 ? "\n":"\t");
 	      }
 	    }
 	    sb.append("};");
 	    return sb.toString();
 	  }
-
-
-  
-//	public static String matrixToString(double[] v) {
-//		return matrixToString(v, 6);
-//	}
+	
 	/**
-	 * A utility method for formatting a square matrix into an array on output
-	 * @param v		double[n][n]
+	   * Print the square matrix <i>m</i> into a string using default format from {@link String#format(java.lang.String, java.lang.Object[])}
+	   * and return the string.
+	   * @param m
+	   * @return
+	   */
+		public static String matrixToString(double[] m) {
+			return matrixToString(m, "%g");
+		}
+	
+	/**
+	 *Print the square matrix <i>m</i> into a string using <i>formatString</i> 
+	 * and return the string.
+	 * @param m
+	 * @param formatString
 	 * @return
+	 * @see String#format(java.lang.String, java.lang.Object[])}
 	 */
-	public static String matrixToString(double[] v, int prec) {
-		int n = sqrt(v.length), count = 0;
-		boolean rawFormat = false;
-		double lim = 0.0;
-		if (prec < 0) rawFormat = true;
-		else {
-			double exponent = (-(prec+1));
-			double base = 10.0;
-			lim = Math.pow(base,exponent);			
-		}
-		StringBuffer strb = new StringBuffer();
-		for (int i =0 ; i<n;++i)	{
-			for (int j =0 ; j<n;++j, count++)	{
-				if (rawFormat)	{
-					strb.append(Double.toString(v[count]));
-				} else {
-					String sv = Double.toString(v[count]);
-					//if (sv.indexOf("E") != -1 || Math.abs(v[count]) < lim) strb.append("0.0");
-					if (sv.indexOf("E") != -1) strb.append("0.0");
-					else {
-						int ll = Math.min(prec, sv.length());
-						strb.append(sv.substring(0,ll));
-					}					
-				}
-				strb.append("\t");					
+	public static String matrixToString(double[] m, String formatString) {
+		StringBuffer sb = new StringBuffer();
+		int n = sqrt(m.length);
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+//        sb.append(df.format(v[4*i+j])).append(j == 3 ? "\n":"\t");
+				sb.append(String.format(formatString, new Object[]{m[4*i+j]}));
+				sb.append(j == 3 ? "\n":"\t");
 			}
-			strb.append("\n");
-		}
-		return (strb.toString());
+		} 
+		return sb.toString();
 	}
-
-
-	public static String matrixToStringFloat(double[] m, int prec) {
-		double[] n = new double[m.length];
-		for (int i = 0; i<m.length; ++i) {
-			float f = (float) m[i];
-			n[i] = (double) f;
-		}
-		return matrixToString(n, prec);
-	}
+	
 	/**
 	 * Calculate the maximum of two vectors, coordinate-wise.
 	 * @param dst
@@ -842,7 +903,7 @@ final public class Rn {
 			dst[i] = Math.max(src1[i], src2[i]);
 		return dst;
 	}
-	
+
 	/**
 	 * Calculate the "max norm" of a vector.  That is the maximum of the absolute values of the entries.
 	 * @param vec
@@ -923,8 +984,20 @@ final public class Rn {
 		for (int i = 0; i<n; ++i)	Rn.normalize(dst[i], src[i]);
 		return dst;
 	}
-
-/**
+	
+	/**
+	 * @param plane
+	 * @param ds
+	 * @param ds2
+	 */
+	public static double[] planeParallelToPassingThrough(double[] plane, double[] ds, double[] ds2) {
+		if (plane == null) plane = new double[4];
+		System.arraycopy(ds, 0, plane, 0, 3);
+		plane[3] = -innerProduct(plane, ds2, 3);
+		return plane;
+	}
+	
+	/**
 	 * @param q
 	 * @param s
 	 * @param m
@@ -941,7 +1014,7 @@ final public class Rn {
 		double tol = 10E-12 ;
 		int count = 0;
 
-		/* there is an acceleration technique which should be used here in
+		/* TODO: there is an acceleration technique which should be used here in
 		 * Graphics Gems IV, p 216 */
 		do {
 			transpose(qit, inverse(qit, qq[old]));
@@ -959,11 +1032,41 @@ final public class Rn {
 	}
 	
 	/**
-	 * Construct and return a diagonal matrix with the entries given by the vector <i>diag</i>.
+	 * Project orthogonally <i>src</i> onto <i>fixed</i>.
+	 * @param dst
+	 * @param src
+	 * @param fixed
+	 * @return 
+	 */
+	public static double[] projectOnto(double[] dst, double[] src, double[] fixed)	{
+		if (dst == null) dst = new double[src.length];
+		// TODO check dimensions
+		double[] nfixed = Rn.normalize(null, fixed);
+		double f = Rn.innerProduct(nfixed, src);
+		Rn.times(dst, f, fixed);
+		return dst;
+	}
+	
+	/**
+	 * Project <i>src</i> onto the orthogonal complement of <i>fixed</i>.
+	 * 
+	 * @param dst
+	 * @param src
+	 * @param fixed
+	 * @return
+	 */public static double[] projectOntoComplement(double[] dst, double[] src, double[] fixed)	{
+		return Rn.subtract(dst, src, projectOnto(null, src, fixed));
+	}
+	
+	/**
+	 * Construct and return a diagonal matrix with the entries given by the vector <i>diag</i>. 
+	 * The number of entries of <i>diag</i> cannot be more than the dimension of the square matrix
+	 * <i>dst</i>.
 	 * @param dst
 	 * @param diag
 	 * @return
-	 */public static double[] setDiagonalMatrix(double[] dst, double[] diag)	{
+	 */
+	public static double[] setDiagonalMatrix(double[] dst, double[] diag)	{
 		int n2 = diag.length;
 		if (dst == null) dst = new double[n2*n2];
 		int n1 = sqrt(dst.length);
@@ -1053,7 +1156,7 @@ final public class Rn {
 		dst[2] = z;
 		return dst;
 	}
-	
+
 	/**
 	 * Initialize the 4-vector <i>dst</i>.
 	 * @param dst
@@ -1074,7 +1177,32 @@ final public class Rn {
 		return dst;
 	}
 	
-	/**
+	 /**
+     * Returns the square root of the <code>sq</code> parameter.
+     * Will return very fast for square roots of 0 to 10.
+     * @param sq
+     * @return
+     */
+    public static int sqrt(int sq) {
+        switch(sq) {
+            case 100: return 10;
+            case  81: return  9;
+            case  64: return  8;
+            case  49: return  7;
+            case  36: return  6;
+            case  25: return  5;
+            case  16: return  4;
+            case   9: return  3;
+            case   4: return  2;
+            case   1: return  1;
+            case   0: return  0;
+            default:
+              if(sq<0) throw new IllegalArgumentException(String.valueOf(sq));
+              return (int)Math.sqrt(sq);
+        }
+    }
+	 
+	 /**
 	 * Extract the submatrix gotten by deleting the given row and column.
 	 * @param subm	double[n-1 * n-1]
 	 * @param m		double[n*n]
@@ -1096,17 +1224,6 @@ final public class Rn {
 		}
 		return subm;
 	}
-	
-	/**
-	 * Allocates the desired submatrix and returns it.  See {@link #submatrix(double[], double[], int, int)}.
-	 * @param m
-	 * @param row
-	 * @param column
-	 * @return
-	 */public static double[] submatrix(double[] m, int row, int column)	{
-		return submatrix((double []) null, m, row, column);
-	}
-
 	/**
 	 * <i>dst[i] = src1[i] - src2[i]</i>
 	 * @param dst
@@ -1159,20 +1276,10 @@ final public class Rn {
 		return dst;
 	}
 	
-	public static double[][] times(double[][] dst, double factor, double[][] src) {
-		if (dst == null) dst = new double[src.length][src[0].length];
-		if (dst.length != src.length) {
-			throw new IllegalArgumentException("Vectors must be same length");
-		}
-		int n = src.length;
-		for (int i = 0; i<n; ++i)	{
-			times(dst[i], factor, src[i]);
-		}
-		return dst;
-	}
-
 	/**
 	 * Multiply the square matrices according to the equation <i>dst = src1 * src2 </i>.
+	 * This operation is overwrite-safe; that is, it gives correct results when <i>src1=dst</i> or
+	 * <i>src2=dst</i>.
 	 * @param dst		double[n*n]		may be null
 	 * @param src1		double[n*n]
 	 * @param src2		double[n*n]
@@ -1210,46 +1317,56 @@ final public class Rn {
 		return out;
 	}
 	
-	 public static String toString(float[] v)	{
-	 	double[] cp = new double[v.length];
-	 	for (int i = 0; i<v.length; ++i)	cp[i] =  v[i];
-	 	return toString(cp);
-	 }
-	 
-	 public static String toString(double[] v) {
-	 	return toString(v, 16);
-	 }
+    /**
+	 * A vectorized version of {@link #times(double[], double, double[])};
+	 * @param dst
+	 * @param factor
+	 * @param src
+	 * @return
+	 */public static double[][] times(double[][] dst, double factor, double[][] src) {
+		if (dst == null) dst = new double[src.length][src[0].length];
+		if (dst.length != src.length) {
+			throw new IllegalArgumentException("Vectors must be same length");
+		}
+		int n = src.length;
+		for (int i = 0; i<n; ++i)	{
+			times(dst[i], factor, src[i]);
+		}
+		return dst;
+	}
+
 	/**
-	 * Convert the vector to a printable form.
+	  * Print the array <i>v</i> into a string using default format from {@link String#format(java.lang.String, java.lang.Object[])}
+	  * and return the string.
+	  * @param v
+	  * @return
+	  */public static String toString(double[] v) {
+	 	return toString(v, "%g");
+	 }
+	
+	/**
+	 *	Print the array <i>v</i> into a string using <i>formatString</i> 
+	 * and return the string.
+	 * @param v
+	 * @return
+	 * @see String#format(java.lang.String, java.lang.Object[])}
+	 */
+	 public static String toString(double[] v, String formatString) {
+		int n = v.length;
+		StringBuffer strb = new StringBuffer();
+		for (int i =0 ; i<n;++i)	{
+			strb.append(String.format(formatString, new Object[]{v[i]}));
+			strb.append("\t");
+		}
+		return strb.toString();
+	}
+
+	/**
+	 * A vectorized version of {@link #toString(double[])}.
 	 * @param v
 	 * @return
 	 */
-	 public static String toString(double[] v, int prec) {
-		int n = v.length;
-		double exponent = -(prec+1);
-		double lim = Math.pow(10.0,exponent);
-		StringBuffer strb = new StringBuffer();
-		for (int i =0 ; i<n;++i)	{
-			if (Math.abs(v[i]) < lim) strb.append("0.0");
-			else {
-				String sv = Double.toString(v[i]);
-				if (sv.indexOf("E") != -1) strb.append("0.0");
-				else {
-					int ll = Math.min(prec, sv.length());
-					strb.append(sv.substring(0,ll));
-					
-				}
-			}
-			strb.append("\t");
-		}
-		return (new String(strb));
-	}
-	
-	/**
-	 * Convert the vector to a printable form.
-	 * @param v
-	 * @return
-	 */public static String toString(double[][] v) {
+	 public static String toString(double[][] v) {
 		int n = v.length;
 		StringBuffer strb = new StringBuffer();
 		for (int i =0 ; i<n;++i)	{
@@ -1258,24 +1375,34 @@ final public class Rn {
 		}
 		return (new String(strb));
 	}
-	
-	/**
+
+	public static String toString(float[] v)	{
+	 	double[] cp = new double[v.length];
+	 	for (int i = 0; i<v.length; ++i)	cp[i] =  v[i];
+	 	return toString(cp);
+	 }
+
+  /**
 	 * Calculate the trace of the given square matrix.
+	 * 
 	 * @param m
 	 * @return
-	 */public static double trace(double[] m)	{
+	 */
+	public static double trace(double[] m) {
 		int n = sqrt(m.length);
 		double t = 0;
-		for (int i =0; i<n; ++i)	t += m[i*n+i];
+		for (int i = 0; i < n; ++i)
+			t += m[i * n + i];
 		return t;
 	}
-	
 	/**
 	 * Transpose the given square matrix <i>src</i> into <i>dst</i>.
+	 * This operation is overwrite-safe; that is, it gives correct results when <i>src=dst</i>.
 	 * @param dst
 	 * @param src
 	 * @return
-	 */public static double[] transpose(double[] dst, double[] src)	{
+	 */
+	 public static double[] transpose(double[] dst, double[] src)	{
 		int n = sqrt(src.length);
 		// assert dim checks
 		double[] out;
@@ -1300,106 +1427,11 @@ final public class Rn {
 		if (rewrite) 	System.arraycopy(out, 0, dst, 0, dst.length);
 		return dst;
 	}
-	
-    /**
-     * Returns the square root of the <code>sq</code> parameter.
-     * Will return very fast for square roots of 0 to 10.
-     * @param sq
-     * @return
-     */
-    public static int sqrt(int sq) {
-        switch(sq) {
-            case 100: return 10;
-            case  81: return  9;
-            case  64: return  8;
-            case  49: return  7;
-            case  36: return  6;
-            case  25: return  5;
-            case  16: return  4;
-            case   9: return  3;
-            case   4: return  2;
-            case   1: return  1;
-            case   0: return  0;
-            default:
-              if(sq<0) throw new IllegalArgumentException(String.valueOf(sq));
-              return (int)Math.sqrt(sq);
-        }
-    }
-
-	/**
-	 * @param plane
-	 * @param ds
-	 * @param ds2
-	 */
-	public static double[] planeParallelToPassingThrough(double[] plane, double[] ds, double[] ds2) {
-		if (plane == null) plane = new double[4];
-		System.arraycopy(ds, 0, plane, 0, 3);
-		plane[3] = -innerProduct(plane, ds2, 3);
-		return plane;
-	}
-	
-	public static double[] projectOnto(double[] dst, double[] src, double[] fixed)	{
-		if (dst == null) dst = new double[src.length];
-		// TODO check dimensions
-		double[] nfixed = Rn.normalize(null, fixed);
-		double f = Rn.innerProduct(nfixed, src);
-		Rn.times(dst, f, fixed);
-		return dst;
-	}
-
-	public static double[] projectOntoComplement(double[] dst, double[] src, double[] fixed)	{
-		return Rn.subtract(dst, src, projectOnto(null, src, fixed));
-	}
-
-	/**
-	 * @param V
-	 * @return
-	 */
-	public static double[][] convertArray3DToArray2D(double[][][] V) {
-		int n = V.length;
-		int m = V[0].length;
-		int p = V[0][0].length;
-		double[][] newV = new double[n*m][p];
-		for (int i = 0; i< n; i++)	{
-			for (int j = 0; j<m; ++j)	{
-				System.arraycopy(V[i][j], 0, newV[i*m+j], 0, p);
-			}
-		}
-		return newV;
-	}
-
-  /**
-   * @param V
-   * @return
-   */
-  public static double[] convertArray3DToArray1D(double[][][] V) {
-    int n = V.length;
-    int m = V[0].length;
-    int p = V[0][0].length;
-    double[] newV = new double[n*m*p];
-    for (int i = 0, ind=0; i< n; i++)  {
-      for (int j = 0; j<m; ++j) {
-        for (int k = 0; k < p; k++, ind++)
-          newV[ind] = V[i][j][k];
-      }
-    }
-    return newV;
-  }
-	/**
-	 * @param ds
-	 * @param ds2
-	 */
-	public static double[] abs(double[] dst, double[] src) {
-		int n = src.length;
-		if (dst == null) dst = new double[n];
-		for (int i =0; i<n ; ++i) dst[i] = Math.abs(src[i]);
-		return dst;
-		
-	}
 
 	/**
 	 * Transpose the given 4x4 matrix <i>src </i> into <i>dst </i>.
-	 * <br> converts from <code>double</code> to <code>float</code>
+	 * <br> converts from <code>double</code> to <code>float</code>.
+	 * This is useful for hooking up to GL libraries, for example.
 	 * 
 	 * @param dst
 	 * @param src
@@ -1433,13 +1465,6 @@ final public class Rn {
 	        }
 	    }
 	    return dst;
-	}
-
-	public static Object convertDoubleToFloatArray(double[] ds) {
-		int n = ds.length;
-		float[] fs = new float[n];
-		for (int i = 0; i<n; ++i)	fs[i] = (float) ds[i];
-		return fs;
 	}
 
 

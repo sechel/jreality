@@ -44,30 +44,63 @@ import java.awt.geom.Rectangle2D;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.SwingConstants;
 
 import de.jreality.util.LoggingSystem;
 
 /**
- * Static methods for geometry of  real projective space.
+ * Static methods for geometry of  real projective 3-space (RP<sup>3</sup>). As with {@link Pn}, some methods 
+ * are purely projective, while others relate to the various metric geometries contained 
+ * within projective geometry. 
+ * <p>
+ * The bulk of the methods here fall into two categories:
+ * <ul>
+ * <li>Methods to generate isometries of a particular 3-dimensional metric geometry, 
+ * <li>Methods related to perspective transformations in 3D rendering, and </li>
+ * <li>Methods related to line (Pluecker) coordinates of lines in RP3.</li>
+ * </ul>
+ * <p>
+ * Only methods which are specific to 3-dimensional space are included here. Actually most of
+ * the methods of the first sort listed above could be generalized and moved to {@link Pn}. 
+ * Any volunteers?
+ * <p>
+ * Scaling transformations are included here even though scaling is not an isometry in any
+ * metric.
  * 
- * @see de.jreality.math.Rn  for method conventions and representation of matrices.
- * @see de.jreality.math.Pn  for other methods applicable in n-dimensional projective space.
+ * {@see de.jreality.math.Rn}  for method conventions and representation of matrices.
+ * {@see de.jreality.math.Pn}  for other methods applicable in n-dimensional real projective space.
  * @author Charles Gunn
  *
  */
 public class P3 {
 
+	private static boolean debug = false;
+
 	private final static double[] hzaxis = {0,0,1,1};
-
-	final static double[] xaxis = {1,0,0};
-	final static double[] yaxis = {0,1,0};
-	final static double[] zaxis = {0,0,-1};
-
 	public static double[] p3involution = makeStretchMatrix(null, new double[]{-1d,-1d,-1d,1d});
+	public static double[] Q_HYPERBOLIC, Q_EUCLIDEAN, Q_ELLIPTIC;
+
+	private static double[][] Q_LIST;
 
 	 
-   private P3()	{}
+   final static double[] xaxis = {1,0,0};
+
+	final static double[] yaxis = {0,1,0};
+
+	final static double[] zaxis = {0,0,-1};
+
+	static {
+		Q_HYPERBOLIC = Rn.identityMatrix(4);
+		Q_HYPERBOLIC[15] = -1.0;
+		Q_EUCLIDEAN = Rn.identityMatrix(4);
+		Q_EUCLIDEAN[15] = 0.0;
+		Q_ELLIPTIC = Rn.identityMatrix(4);
+		Q_LIST = new double[3][];
+		Q_LIST[0] = Q_HYPERBOLIC;
+		Q_LIST[1] = Q_EUCLIDEAN;
+		Q_LIST[2] = Q_ELLIPTIC;
+	}
+
+	private P3()	{}
 
 	/**
 	 * 
@@ -117,6 +150,23 @@ public class P3 {
 		Rn.times(m, transT, m);
 	
 		return m;
+	}
+	/**
+	 * Extract a matrix from the <i>src</i> input matrix, such that it fixes the input position <i>point</i>.
+	 * @param dst
+	 * @param src
+	 * @param point
+	 * @param signature
+	 * @return
+	 */public static double[] extractOrientationMatrix(double[] dst, double[] src, double[] point, int signature)	{
+		if (dst == null) dst = new double[16];
+
+		double[] image = Rn.matrixTimesVector(null, src, point);
+		double[] translate = P3.makeTranslationMatrix(null, image, signature);
+		Rn.times(dst, Rn.inverse(null, translate), src );
+//		System.out.println("The input matrix is "+Rn.matrixToString(src));
+//		System.out.println("The orientation matrix is "+Rn.matrixToString(dst));
+		return dst;
 	}
 
 	// TODO really diagonalize the quadratic form Q instead of assuming it's diagonal
@@ -192,6 +242,7 @@ public class P3 {
 		return m;
 	}
 
+
 	/**
 	 * Calculate the intersection point of the line determined by <i>p1</i> and <i>p2</i> with <i> plane</i>.
 	 * @param point
@@ -236,6 +287,7 @@ public class P3 {
 		return lineIntersectPlane(plane, p1, p2, point);
 	}
 
+
 	/**
 	 * Generate a glide reflection in the plane through the origin whose normal vector is given by vec
 	 * Under construction.
@@ -257,6 +309,25 @@ public class P3 {
 		double[] tm = P3.makeTranslationMatrix(null,v,Pn.EUCLIDEAN);
 		Rn.times(m,tm,mat);
 		return m;
+	}
+
+	/**
+	 * Construct a central projectivity with fixed point center and fixed plane axis.
+	 * @param dst
+	 * @param center
+	 * @param axis
+	 * @param signature
+	 * @return
+	 */
+	public static double[] makeHarmonicHarmology(double[] dst, double[] center, double[] axis){ 
+		if (dst == null) dst = new double[center.length*center.length];
+	     double f = 1.0/Rn.innerProduct(center, axis); 
+	     for (int i = 0; i<3; ++i)  {    
+	         for (int j = 0; j<3; ++j) {
+	              dst[3*i+j] = (i==j? 1 : 0) - 2 * f * center[i] * axis[j];
+	         }
+	     }
+	     return dst; 
 	}
 
 	/**
@@ -300,8 +371,6 @@ public class P3 {
 //		System.out.println("rotationMatrix: "+Rn.toString(Rn.matrixTimesVector(null, Rn.times(null, tm2, tm1), to)));
 		return m;
 	}
-
-
 	/**
 	 * 
 	 * @param m
@@ -326,7 +395,6 @@ public class P3 {
 		m[11] = -(far+near)/(far-near);
 		return m;
 	}
-
 	/**
 	 * Generate a 4x4 perspective projection matrix based on the parameters.
 	 * @param dst			matrix to put the result
@@ -353,8 +421,6 @@ public class P3 {
 		dst[14] = -1.0;
 		return dst;
 	}
-
-
 	/**
 	 * Construct a projective reflection that fixes the element <i>plane</i> considered
 	 * as a pole/polar point/plane pair.  That is, the fixed elements of the transformation are
@@ -387,7 +453,7 @@ public class P3 {
 				Pn.normalize(fixedPlane, fixedPlane,  sig);
 				break;
 			case Pn.EUCLIDEAN:		// this is not optimal, I think; but it works
-				Pn.normalizePlane(fixedPlane, fixedPlane);
+				Pn.normalizePlane(fixedPlane, fixedPlane, sig);
 				break;
 		}
 		
@@ -396,10 +462,11 @@ public class P3 {
 				reflectionMatrix[i*4 + j] = reflectionMatrix[i*4+j] - 2 * fixedPlane[j]*polarPoint[i];
 			}
 		}
+//		makeHarmonicHarmology(reflectionMatrix, polarPoint, fixedPlane);
 		return reflectionMatrix;
 	}
 
-	/**
+	 /**
 	 * Generate a rotation matrix fixing the origin (0,0,0,1) around the given axis with the given angle.
 	 * The matrix is a 4x4 matrix, which differs from the identity matrix only in the upper 3x3 corner.
 	 * 
@@ -436,112 +503,146 @@ public class P3 {
 		return m;
 	}
 
-	/**
-	 * @param object
-	 * @param earthPhi
-	 * @return
-	 */
-	public static double[] makeRotationMatrixX(double[] mat, double angle) {
-		double[] axis = {1.0, 0.0, 0.0};
-		return makeRotationMatrix(mat, axis, angle);
-	}
+		/**
+		 * Generate a rotation matrix which fixes the origin (0,0,0,1) and carries the vector <i>from</i> to the vector <i>to</i>.
+		 * The output matrix is 4x4.  <i>from</i> and <i>to</i> are 3-vectors.
+		 * 
+		 * @param m		double[16]
+		 * @param from	double[3]
+		 * @param to	double[3]
+		 * @return
+		 */
+		public static double[] makeRotationMatrix(double[] m, double[] from, double[] to)	{
+			// assert dim checks; only valid for P3
+			if (from.length < 3 || to.length < 3)	{
+				throw new IllegalArgumentException("Input vectors too short");
+			}
+			double[][] vecs = new double[3][3];
+			System.arraycopy(from,0,vecs[0],0,3);
+			System.arraycopy(to,0,vecs[1],0,3);
+			Rn.normalize(vecs[0], vecs[0]);
+			Rn.normalize(vecs[1], vecs[1]);
+			double angle = Math.acos(Rn.innerProduct(vecs[0], vecs[1]));
+			Rn.crossProduct(vecs[2], vecs[0], vecs[1]);
+			Rn.normalize(vecs[2], vecs[2]);
+			return P3.makeRotationMatrix(m, vecs[2], angle);
+		}
+		
+		/**
+		  * Calculate a rotation matrix in the given metric which rotates a given <i>angle</i> about the axis
+		  * determined by <i>p1</i> and <i>p2</i>.
+		  * @param m
+		  * @param p1
+		  * @param p2
+		  * @param angle
+		  * @param sig
+		  * @return
+		  */public static double[] makeRotationMatrix(double[] m, double[] p1, double[] p2, double angle, int sig)	{
+			// assert dim checks; only valid for P3
+			if (p1.length < 3 || p2.length < 3)	{
+				throw new IllegalArgumentException("Points too short");
+			}
+		 	if (m == null) m = new double[16];
+			double[] tmat = P3.makeTranslationMatrix(null, p1, sig);
+			double[] invtmat = Rn.inverse(null, tmat);
+			double[] ip2 = new double[4];
+			Rn.matrixTimesVector(ip2, invtmat, p2);
+			double[] foo = P3.makeRotationMatrix(null, ip2, angle);
+			Rn.conjugateByMatrix(m,foo,tmat);
+			return m;
+		}
+
+		/**
+		 * @param object
+		 * @param earthPhi
+		 * @return
+		 */
+		public static double[] makeRotationMatrixX(double[] mat, double angle) {
+			double[] axis = {1.0, 0.0, 0.0};
+			return makeRotationMatrix(mat, axis, angle);
+		}
+
 	public static double[] makeRotationMatrixY(double[] mat, double angle) {
 		double[] axis = {0.0, 1.0, 0.0};
 		return makeRotationMatrix(mat, axis, angle);
 	}
+
 	public static double[] makeRotationMatrixZ(double[] mat, double angle) {
 		double[] axis = {0.0, 0.0, 1.0};
 		return makeRotationMatrix(mat, axis, angle);
 	}
+
 	/**
-	 * Generate a rotation matrix which fixes the origin (0,0,0,1) and carries the vector <i>from</i> to the vector <i>to</i>.
-	 * The output matrix is 4x4.  <i>from</i> and <i>to</i> are 3-vectors.
-	 * 
-	 * @param m		double[16]
-	 * @param from	double[3]
-	 * @param to	double[3]
+	 * Create a diagonal matric with entries <i>(stretch, stretch,stretch, 1)</i>
+	 * @param dst
+	 * @param stretch
 	 * @return
 	 */
-	public static double[] makeRotationMatrix(double[] m, double[] from, double[] to)	{
-		// assert dim checks; only valid for P3
-		if (from.length < 3 || to.length < 3)	{
-			throw new IllegalArgumentException("Input vectors too short");
-		}
-		double[][] vecs = new double[3][3];
-		System.arraycopy(from,0,vecs[0],0,3);
-		System.arraycopy(to,0,vecs[1],0,3);
-		Rn.normalize(vecs[0], vecs[0]);
-		Rn.normalize(vecs[1], vecs[1]);
-		double angle = Math.acos(Rn.innerProduct(vecs[0], vecs[1]));
-		Rn.crossProduct(vecs[2], vecs[0], vecs[1]);
-		Rn.normalize(vecs[2], vecs[2]);
-		return P3.makeRotationMatrix(m, vecs[2], angle);
+	public static double[] makeStretchMatrix(double[] dst, double stretch)	{
+		// assert dim checks
+		if (dst == null) dst = new double[16];
+		int n = Rn.sqrt(dst.length);
+		double[] stretchV = new double[n];
+		Rn.setToValue(stretchV, stretch, stretch, stretch, 1.0);
+		return makeStretchMatrix(dst, stretchV);
 	}
-
-	 /**
-	  * Calculate a rotation matrix in the given metric which rotates a given <i>angle</i> about the axis
-	  * determined by <i>p1</i> and <i>p2</i>.
-	  * @param m
-	  * @param p1
-	  * @param p2
-	  * @param angle
-	  * @param sig
-	  * @return
-	  */public static double[] makeRotationMatrix(double[] m, double[] p1, double[] p2, double angle, int sig)	{
-		// assert dim checks; only valid for P3
-		if (p1.length < 3 || p2.length < 3)	{
-			throw new IllegalArgumentException("Points too short");
-		}
-	 	if (m == null) m = new double[16];
-		double[] tmat = P3.makeTranslationMatrix(null, p1, sig);
-		double[] invtmat = Rn.inverse(null, tmat);
-		double[] ip2 = new double[4];
-		Rn.matrixTimesVector(ip2, invtmat, p2);
-		double[] foo = P3.makeRotationMatrix(null, ip2, angle);
-		Rn.conjugateByMatrix(m,foo,tmat);
-		return m;
+	
+	/**
+	 * Create a diagonal matric with entries <i>(xscale, yscale, zscale, 1)</i>
+	 * 
+	 * @param dst
+	 * @param xscale
+	 * @param yscale
+	 * @param zscale
+	 * @return
+	 */
+	public static double[] makeStretchMatrix(double[] dst, double xscale, double yscale, double zscale) {
+		// TODO Auto-generated method stub
+		if (dst == null) dst = new double[16];
+		Rn.setIdentityMatrix(dst);
+		dst[0] = xscale;
+		dst[5] = yscale;
+		dst[10] = zscale;
+		return dst;
 	}
-
-		/**
-		 * Construct a diagonal matrix with the given entries.  They should be all positive.
-		 * @param dst
-		 * @param scales
-		 * @return	dst
-		 */
-		// isometries start here	
-		public static double[] makeStretchMatrix(double[] dst, double[] stretchV)	{
-			// assert dim checks
-			if (dst == null) dst = new double[16];
-			int n = Rn.sqrt(dst.length);
-			int ll = Math.min(n, stretchV.length);
-			Rn.setIdentityMatrix(dst);
-			for (int i = 0; i<ll; ++i)	{
-				dst[i*n+i] = stretchV[i];
-			}
-			return dst;
-		}
-		
-		public static double[] makeStretchMatrix(double[] dst, double stretch)	{
-			// assert dim checks
-			if (dst == null) dst = new double[16];
-			int n = Rn.sqrt(dst.length);
-			double[] stretchV = new double[n];
-			Rn.setToValue(stretchV, stretch, stretch, stretch, 1.0);
-			return makeStretchMatrix(dst, stretchV);
-		}
-
-		public static double[] makeStretchMatrix(double[] dst, double xscale, double yscale, double zscale) {
-			// TODO Auto-generated method stub
-			if (dst == null) dst = new double[16];
-			Rn.setIdentityMatrix(dst);
-			dst[0] = xscale;
-			dst[5] = yscale;
-			dst[10] = zscale;
-			return dst;
-		}
 
 	/**
-	 * Calculate a translation matrix in the given metric which carries the point <i>from</i> to the point <i>to</i>.
+	 * Construct a diagonal matrix with the given entries.  The length of <i>v</i> can be arbitrary.
+	 * @param dst
+	 * @param scales
+	 * @return	dst
+	 */
+	public static double[] makeStretchMatrix(double[] dst, double[] v)	{
+		// assert dim checks
+		if (dst == null) dst = new double[16];
+		int n = Rn.sqrt(dst.length);
+		int ll = Math.min(n, v.length);
+		Rn.setIdentityMatrix(dst);
+		for (int i = 0; i<ll; ++i)	{
+			dst[i*n+i] = v[i];
+		}
+		return dst;
+	}
+	
+	/**
+	 * For those who are uncomfortable with the word <i>stretch</i> -- even though
+	 * only euclidean geometry supports scaling (changing size without changing shape).
+	 * @param dst
+	 * @param s
+	 * @return
+	 */
+	public static double[] makeScaleMatrix(double[] dst, double s)	{
+		return makeStretchMatrix(dst, s);
+	}
+	public static double[] makeScaleMatrix(double[] dst, double[] s)	{
+		return makeStretchMatrix(dst, s);
+	}
+	public static double[] makeScaleMatrix(double[] dst, double sx, double sy, double sz)	{
+		return makeStretchMatrix(dst, sx, sy, sz);
+	}
+	/**
+	 * Calculate a translation matrix in the given metric 
+	 * which carries the point <i>from</i> to the point <i>to</i>.
 	 * @param dst
 	 * @param from
 	 * @param to
@@ -560,12 +661,54 @@ public class P3 {
 	}
 
 	/**
+	 * Calculate a translation matrix which carries the origin <i>(0,0,0,1</i> to 
+	 * the point <i>to</i>.
+	 * @param mat
+	 * @param to
+	 * @param sig
+	 * @return
+	 */public static double[] makeTranslationMatrix(double[] mat, double[] to, int sig)	{
+		if (mat == null) mat = new double[16];
+		double[] toL = null;
+		if (to.length == 3)	toL = Pn.homogenize(null, to);
+		else if (to.length == 4) toL = (double[]) to.clone();
+		if (toL == null || (sig == Pn.EUCLIDEAN && toL[3] == 0.0))	{
+			throw new IllegalArgumentException("Infinite euclidean translation vector");
+		}
+		Pn.normalize(toL, toL, sig);
+		if (toL[3] < 0) Rn.times(toL, -1.0, toL);
+		double f = 1.0/(1+toL[3]);
+		for (int i = 0; i<3; ++i)	{
+			for (int j = 0; j<3; ++j)	{
+				mat[i*4+j] = ((i == j) ? 1.0 : 0.0 ) - sig * f  * toL[i]*toL[j];
+			}
+		}
+		for (int i = 0; i<4; ++i)	mat[4*i+3] = toL[i];
+		for (int i = 0; i<3; ++i) mat[12+i] = -sig*mat[4*i+3];
+		if (debug)	{
+			double[] oldm = makeTranslationMatrixOld(null, to, sig);
+			if (! Rn.equals(mat, oldm, 10E-8)) {
+				Logger log = LoggingSystem.getLogger(P3.class);
+				log.log(Level.WARNING,"Incompatible results:");
+				log.log(Level.WARNING,"Signature is "+sig);
+				log.log(Level.WARNING,"To vector is "+Rn.toString(toL));
+				log.log(Level.WARNING,"New: \n"+Rn.matrixToString(mat));
+				log.log(Level.WARNING,"Old: \n"+Rn.matrixToString(oldm));
+				
+			}
+			
+		}
+		return mat;
+	}
+
+	/**
 	 * Calculate a translation in the given geometry which carries the origin of P3 (0,0,0,1) to the input <i>point</i>.
 	 * @param mat
 	 * @param tvec
 	 * @param sig
 	 * @return
-	 */public static double[] makeTranslationMatrixOld(double[] mat, double[] p, int sig)	{
+	 */
+	 private static double[] makeTranslationMatrixOld(double[] mat, double[] p, int sig)	{
 		// assert dim checks
 		double[] tmp = new double[4];		
 		double[] foo = new double[3];
@@ -618,60 +761,79 @@ public class P3 {
 		return m;
 	}
 
-	private static boolean debug = false;
-	public static double[] makeTranslationMatrix(double[] mat, double[] t, int sig)	{
-		if (mat == null) mat = new double[16];
-		double[] to = null;
-		if (t.length == 3)	to = Pn.homogenize(null, t);
-		else if (t.length == 4) to = (double[]) t.clone();
-		if (to == null || (sig == Pn.EUCLIDEAN && to[3] == 0.0))	{
-			throw new IllegalArgumentException("Infinite euclidean translation vector");
-		}
-		Pn.normalize(to, to, sig);
-		if (to[3] < 0) Rn.times(to, -1.0, to);
-		double f = 1.0/(1+to[3]);
-		for (int i = 0; i<3; ++i)	{
-			for (int j = 0; j<3; ++j)	{
-				mat[i*4+j] = ((i == j) ? 1.0 : 0.0 ) - sig * f  * to[i]*to[j];
-			}
-		}
-		for (int i = 0; i<4; ++i)	mat[4*i+3] = to[i];
-		for (int i = 0; i<3; ++i) mat[12+i] = -sig*mat[4*i+3];
-		if (debug)	{
-			double[] oldm = makeTranslationMatrixOld(null, t, sig);
-			if (! Rn.equals(mat, oldm, 10E-8)) {
-				Logger log = LoggingSystem.getLogger(P3.class);
-				log.log(Level.WARNING,"Incompatible results:");
-				log.log(Level.WARNING,"Signature is "+sig);
-				log.log(Level.WARNING,"To vector is "+Rn.toString(to));
-				log.log(Level.WARNING,"New: \n"+Rn.matrixToString(mat));
-				log.log(Level.WARNING,"Old: \n"+Rn.matrixToString(oldm));
-				
-			}
-			
-		}
-		return mat;
-	}
 
 	/**
-	 * Extract a matrix from the <i>src</i> input matrix, such that it fixes the input position <i>point</i>.
+	 * Calculate the determinant of the matrix spanned by the three input vectors
+	 * and the origin <i>(0,0,0,1)</i>.
+	 * @param to
+	 * @param up
+	 * @param upNoRoll
+	 * @return
+	 */public static double orientation(double[] to, double[] up, double[] upNoRoll) {
+		double[] mat = new double[16];
+		System.arraycopy(to, 0, mat,0,4);
+		System.arraycopy(up, 0, mat, 4, 4);
+		System.arraycopy(upNoRoll,0,mat,8,4);
+		mat[15] = 1.0;
+		return Rn.determinant(mat);
+	}
+	
+	/**
+	 * Attempt to convert a matrix <i>m</i> into an isometry with respect to signature <i>signature</i>.
+	 * This is useful if round-off errors have accumulated through a continuous sequence of motions.
 	 * @param dst
-	 * @param src
-	 * @param point
+	 * @param m
+	 * @param tolerance
 	 * @param signature
 	 * @return
-	 */public static double[] extractOrientationMatrix(double[] dst, double[] src, double[] point, int signature)	{
+	 */public static double[] orthonormalizeMatrix(double[] dst, double[] m, double tolerance, int signature)		{
 		if (dst == null) dst = new double[16];
-
-		double[] image = Rn.matrixTimesVector(null, src, point);
-		double[] translate = P3.makeTranslationMatrix(null, image, signature);
-		Rn.times(dst, Rn.inverse(null, translate), src );
-//		System.out.println("The input matrix is "+Rn.matrixToString(src));
-//		System.out.println("The orientation matrix is "+Rn.matrixToString(dst));
+		double[] diagnosis = Rn.subtract(null, Q_LIST[signature+1], 
+				Rn.times(null, Rn.transpose(null, m), Rn.times(null, Q_LIST[signature+1], m )));
+//		if (Rn.maxNorm(diagnosis) < tolerance)		{
+//			return null;
+//		}
+		boolean mydebug = false;
+		if (mydebug)	{
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,"m =");
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(m,"%16.10"));
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,"Original is");
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(diagnosis, "%16.10"));			
+		}
+		double[][] basis = new double[4][4];
+		double[] Q = Q_LIST[signature+1];
+		// the columns of m are the basis vectors (image of canonical basis under the isometry)
+		for (int i = 0; i<4; ++i)	 for (int j = 0; j<4; ++j)	basis[i][j] = m[j*4+i];
+		// first orthogonalize
+		for (int i = 0; i<3; ++i)		
+			for (int j = i+1; j<4; ++j)	{
+				if (Q[5*j] == 0.0) continue;
+				if (Math.abs(diagnosis[4*i+j]) > tolerance)	{
+					Pn.projectOntoComplement(basis[j], basis[i], basis[j], signature);
+				}
+			}
+		// then normalize
+		for (int i = 0; i<4; ++i)		{
+			if (Q[5*i] != 0.0)	Pn.normalizePlane(basis[i], basis[i],  signature);
+			for (int j = 0; j<4; ++j)		dst[j*4+i] = basis[i][j];
+		}
+		// TODO figure out how to avoid this clean-up for euclidean case
+		if (signature == Pn.EUCLIDEAN)	{
+			for (int i = 0; i<4; ++i)	{dst[12+i] = 0.0;  dst[4*i+3] = m[4*i+3]; }
+		}
+		// for now just print out the table of inner products
+		diagnosis = Rn.subtract(null, Q, 
+				Rn.times(null, Rn.transpose(null, dst), Rn.times(null, Q_LIST[signature+1],dst )));
+		if (mydebug)	{
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,"dst =");
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(dst, "%16.10"));
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,"Revised is");
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(diagnosis, "%16.10"));			
+		}
 		return dst;
 	}
 	
-	private static double[] perpendicularBisector(double[] dst, double[] p1, double[]p2)	{
+	 private static double[] perpendicularBisector(double[] dst, double[] p1, double[]p2)	{
 		// TODO assert dim checks
 		if (dst == null) dst = new double[4];
 		double[] midpoint = new double[4];
@@ -682,8 +844,19 @@ public class P3 {
 		dst[3] = -(dst[0]*midpoint[0] + dst[1] * midpoint[1] + dst[2]*midpoint[2]);
 		return dst;
 	}
-
-	public static double[] perpendicularBisector(double[] dst, double[] p1, double[]p2, int signature)	{
+	 
+	/**
+	 * Calculate the plane coordinates for the plane which lies midway between the input
+	 * planes <i>p1</i> and <i>p2</i>. Midway in this case means the distances (with respect to
+	 * <i>signature</i>) of <i>dst</i> to the two inputs are equal. There are generally two
+	 * such planes when the measure on the plane pencil spanned by the two inputs is elliptic;
+	 * we try to choose the one closer to both of the planes.
+	 * @param dst
+	 * @param p1
+	 * @param p2
+	 * @param signature
+	 * @return
+	 */public static double[] perpendicularBisector(double[] dst, double[] p1, double[]p2, int signature)	{
 		// TODO assert dim checks
 		if (p1.length != 4 || p2.length != 4)	{
 			throw new IllegalArgumentException("Input points must be homogeneous vectors");
@@ -698,7 +871,6 @@ public class P3 {
 		if (Rn.innerProduct(dst,p1) > 0)	Rn.times(dst, -1.0, dst);
 		return dst;
 	}
-
 	/**
 	 * Construct the homogeneous plane coordinates for the plane containing the three points <i>(p1, p2, p3)</i>.
 	 * The method does not check for degenerate conditions.
@@ -707,7 +879,8 @@ public class P3 {
 	 * @param p2	double[3] or double[4]
 	 * @param p3	double[3] or double[4]
 	 * @return		plane
-	 */public static double[] planeFromPoints(double[] planeIn, double[] p1, double[]p2, double[]p3)	{
+	 */
+	 public static double[] planeFromPoints(double[] planeIn, double[] p1, double[]p2, double[]p3)	{
 		if (p1.length < 3 || p2.length <3 || p3.length < 3)	{
 			throw new IllegalArgumentException("Input points must be homogeneous vectors");
 		}
@@ -740,13 +913,17 @@ public class P3 {
 		plane[2] *= -1;
 		return plane;
 	}
-
-
-	public static double[] pointFromPlanes(double[] point, double[] p1, double[]p2, double[]p3)	{
-		return planeFromPoints(point, p1, p2, p3);
-	}
 	
-	public static double[] planeIntersectLine(double[] point, double[] plane, double[] p1, double[] p2)	{
+	/**
+	 * Find the intersection point of <i>plane</i> with the line spanned by <i>p1</i> and <i>p2</i>.
+	 * The result can be invalid if the inputs are not linearly independent.
+	 * @param point
+	 * @param plane
+	 * @param p1
+	 * @param p2
+	 * @return
+	 */
+	 public static double[] planeIntersectLine(double[] point, double[] plane, double[] p1, double[] p2)	{
 		if (point == null) point = new double[4];
 		double s1 = -Rn.innerProduct(plane, p1);
 		double s2 = Rn.innerProduct(plane, p2);
@@ -754,7 +931,15 @@ public class P3 {
 		return point;
 	}
 	
-	public static double[] pluckerCoordinates(double[] dst, double[] p0, double[] p1)	{
+	 /**
+	  * Calculate Pluecker coordinates for the line spanned by <i>p0</i> and <i>p1</i>.
+	  * These are basically the six 2x2 minors of the 2x4 matrix formed by the two points.
+	  * @param dst
+	  * @param p0
+	  * @param p1
+	  * @return
+	  */
+	 public static double[] pluckerCoordinates(double[] dst, double[] p0, double[] p1)	{
 		if (p0.length != 4 || p1.length != 4) {
 			throw new IllegalArgumentException("Input points must be homogeneous vectors");
 		}
@@ -769,99 +954,16 @@ public class P3 {
 		coords[5] = p0[2]*p1[3] - p0[3]*p1[2];
 		return coords;
 	}
-	public static double[] Q_HYPERBOLIC, Q_EUCLIDEAN, Q_ELLIPTIC;
-	private static double[][] Q_LIST;
-	static {
-		Q_HYPERBOLIC = Rn.identityMatrix(4);
-		Q_HYPERBOLIC[15] = -1.0;
-		Q_EUCLIDEAN = Rn.identityMatrix(4);
-		Q_EUCLIDEAN[15] = 0.0;
-		Q_ELLIPTIC = Rn.identityMatrix(4);
-		Q_LIST = new double[3][];
-		Q_LIST[0] = Q_HYPERBOLIC;
-		Q_LIST[1] = Q_EUCLIDEAN;
-		Q_LIST[2] = Q_ELLIPTIC;
-	}
-	public static double[] orthonormalizeMatrix(double[] dst, double[] m, double tolerance, int signature)		{
-		if (dst == null) dst = new double[16];
-		double[] diagnosis = Rn.subtract(null, Q_LIST[signature+1], 
-				Rn.times(null, Rn.transpose(null, m), Rn.times(null, Q_LIST[signature+1], m )));
-//		if (Rn.maxNorm(diagnosis) < tolerance)		{
-//			return null;
-//		}
-		boolean mydebug = false;
-		if (mydebug)	{
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,"m =");
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(m, -1));
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,"Original is");
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(diagnosis, -1));			
-		}
-		double[][] basis = new double[4][4];
-		double[] Q = Q_LIST[signature+1];
-		// the columns of m are the basis vectors (image of canonical basis under the isometry)
-		for (int i = 0; i<4; ++i)	 for (int j = 0; j<4; ++j)	basis[i][j] = m[j*4+i];
-		// first orthogonalize
-		for (int i = 0; i<3; ++i)		
-			for (int j = i+1; j<4; ++j)	{
-				if (Q[5*j] == 0.0) continue;
-				if (Math.abs(diagnosis[4*i+j]) > tolerance)	{
-					Pn.projectOntoComplement(basis[j], basis[i], basis[j], signature);
-				}
-			}
-		// then normalize
-		for (int i = 0; i<4; ++i)		{
-			if (Q[5*i] != 0.0)	Pn.normalizePlane(basis[i], basis[i],  signature);
-			for (int j = 0; j<4; ++j)		dst[j*4+i] = basis[i][j];
-		}
-		// TODO figure out how to avoid this clean-up for euclidean case
-		if (signature == Pn.EUCLIDEAN)	{
-			for (int i = 0; i<4; ++i)	{dst[12+i] = 0.0;  dst[4*i+3] = m[4*i+3]; }
-		}
-		// for now just print out the table of inner products
-		diagnosis = Rn.subtract(null, Q, 
-				Rn.times(null, Rn.transpose(null, dst), Rn.times(null, Q_LIST[signature+1],dst )));
-		if (mydebug)	{
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,"dst =");
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(dst, -1));
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,"Revised is");
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(diagnosis, -1));			
-		}
-		return dst;
-	}
 
-	public static double[] calculateBillboardMatrix(double[] result, 
-			double xscale, 
-			double yscale, 				// scaling factors for the billboard
-			double[] xyzOffset,			// an offset in "billboard" coordinate system
-			int alignment,	     		// alignment of billboard in compass-direction from anchor point (using SwingConstants)
-			double[] cameraToObject, 	// the transformation from camera to object coordinates
-			double[] point, 			// the position of the anchor point in object coordinate system
-			int signature)	{
-		if (result == null) result = new double[16];
-		// TODO the following call perhaps should return a determinant-1 matrix (throw out scaling)
-	    double[] orientation = extractOrientationMatrix(null, cameraToObject, Pn.originP3, signature);
-	    double[] scale = makeStretchMatrix(null, xscale, yscale, 1.0);
-	    //calculate translation for alignment
-	    double align=0, valign=0;  // default
-	    switch (alignment) {
-	    	case SwingConstants.NORTH  : align=-xscale/2; break;
-	    	case SwingConstants.EAST   : valign=-yscale/2; break;
-	    	case SwingConstants.SOUTH  : align=-xscale/2; valign=-yscale; break;
-	    	case SwingConstants.WEST   : align=-xscale;   valign=-yscale/2; break;
-	    	case SwingConstants.CENTER : align=-xscale/2; valign=-yscale/2; break;
-	    	//case SwingConstants.NORTH_EAST : default
-	    	case SwingConstants.SOUTH_EAST : valign=-yscale; break;
-	    	case SwingConstants.SOUTH_WEST : align=-xscale; valign=-yscale; break;
-	    	case SwingConstants.NORTH_WEST : align=-xscale; break;
-	    }
-	    double[] euclideanTranslation = makeTranslationMatrix(null, Rn.add(null, xyzOffset, new double[]{align, valign, 0, 0}), Pn.EUCLIDEAN);
-	    double[] pointTranslation = makeTranslationMatrix(null, point, signature);
-
-	    Rn.times(result, pointTranslation, Rn.times(null, orientation, Rn.times(null, euclideanTranslation, scale)));
-		return result;
-	}
-
-	public static double[] pluckerToMatrix(double[] m, double[] pl) {
+	/**
+	 * Plucker line coordinates can be arranged in a 4x4 skew symmetric matrix <i>M</i> such
+	 * that <i>M</i> is the polarizing operator: it acts on points to give the plane spanned
+	 * by the point and the line. (or dual?)
+	 * @param m
+	 * @param pl
+	 * @return
+	 */
+	 public static double[] pluckerToMatrix(double[] m, double[] pl) {
 		if (m == null) m = new double[16];
 		m[0] = m[5] = m[10] = m[15] = 0.0;
 		m[4] = -(m[1] = pl[0]);
@@ -874,7 +976,27 @@ public class P3 {
 		
 	}
 
-	public static double[] polarizePlucker(double[] dst, double[] src) {
+	/**
+	 * Via duality, an alias for {@link #planeFromPoints(double[], double[], double[], double[])}.
+	 * @param point
+	 * @param p1
+	 * @param p2
+	 * @param p3
+	 * @return
+	 */
+	 public static double[] pointFromPlanes(double[] point, double[] p1, double[]p2, double[]p3)	{
+		return planeFromPoints(point, p1, p2, p3);
+	}
+
+	/**
+	 * Plucker coordinates for the same line are different depending on
+	 * whether the line is considered as the join of two points or the cut of two planes.
+	 * This method converts between the two coordinate systems.
+	 * @param dst
+	 * @param src
+	 * @return
+	 */
+	 public static double[] polarizePlucker(double[] dst, double[] src) {
 		if (dst == null) dst = new double[6];
 		double[] tmp = null;
 		if (dst == src)  tmp = new double[6];
@@ -882,15 +1004,6 @@ public class P3 {
 		for (int i = 0; i<6; ++i) tmp[5-i] = src[i];
 		if (src == dst) System.arraycopy(tmp, 0, dst, 0,  6);
 		return dst;
-	}
-
-	public static double orientation(double[] to, double[] up, double[] upNoRoll) {
-		double[] mat = new double[16];
-		System.arraycopy(to, 0, mat,0,4);
-		System.arraycopy(up, 0, mat, 4, 4);
-		System.arraycopy(upNoRoll,0,mat,8,4);
-		mat[15] = 1.0;
-		return Rn.determinant(mat);
 	}
 
 }

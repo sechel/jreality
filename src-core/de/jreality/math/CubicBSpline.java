@@ -45,9 +45,18 @@ import java.io.Serializable;
 import de.jreality.util.ArrayUtility;
 
 /**
-* Interpolates a sorted function table y[i] = f( x[i] ) by cubic b-splines.
-* The x values has to be sorted, e.g. x[i]<x[i+1].
-*
+* Interpolates a sorted function table <i>y[i] = f( x[i] )</i> by cubic B-splines.
+* The x values have to be sorted, that is, <i>x[i] <= x[i+1]</i>.
+* <p>
+* The underlying mathematics is described in the classic scientific computing cookbook,
+* <b>Numerical Recipes</b>.
+* <p>
+* There are three subclasses to choose from (TODO: document them):
+* <ul>
+* <li>Default: </li>
+* <li>Natural: </li>
+* <li>Periodic: </li>
+* </ul>
 */
 public class CubicBSpline
  implements Serializable {

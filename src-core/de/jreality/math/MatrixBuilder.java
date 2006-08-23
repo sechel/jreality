@@ -46,19 +46,21 @@ import de.jreality.scene.Transformation;
 /**
  *
  * <p>
- * This class wraps a Matrix instance.
+ * This class wraps a {@link de.jreality.math.Matrix} instance.
  * <br> All the static methods are factory methods that
- * create an instance for a selected geometry/metric.
+ * create an instance for a selected metric.
  * <br> <b>Note:</b> the factory methods with Transformation as a
  * parameter copy the underlying <code>double[]</code> and wrap
  * the copy into a new Matrix instance - the factory methods that
- * take a Matrix as a parameter simply wor on the given Matrix.
- * Finally, the factorymethods without parameters create a
+ * take a Matrix as a parameter simply work on the given Matrix.
+ * Finally, the factory methods without parameters create a
  * new identity matrix to act on.
  * </p>
  * <p>
- * The instance methods are always applyed from rhs. All
- * these methods return a this reference, so that one can do
+ * The instance methods which carry out matrix operations 
+ * are always applyed on the right hand side of the
+ * current value of the matrix. All
+ * these methods return this instance as value, so that one can do
  * many calls in a row.
  * </p>
  * <pre>
@@ -75,6 +77,7 @@ import de.jreality.scene.Transformation;
  *              .assignTo(camComp); // Transformation gets set and assigned
  * </pre>
  * 
+ * For explanation of signature, see [@link de.jreality.math.P3 P3}.
  * @author weissman
  */
 public final class MatrixBuilder {
@@ -84,32 +87,12 @@ public final class MatrixBuilder {
 
   private final double[] tmp = new double[16];
   
-  /**
-   * @deprecated Use {@link #euclidean(Transformation)}
-   * Britannican on-line finds 159 matches for "euclidean" and 3 for "euclidian",
-   * making clear that the preferred spelling is "euclidean" -- which is also
-   * consistent with the spelling used in the class P3.
-   */
-  public static MatrixBuilder euclidian(Transformation m) {
-	Matrix mat=(m!=null) ? new Matrix(m) : new Matrix();
-    return new MatrixBuilder(mat, Pn.EUCLIDEAN);
-  }
 
   /**
-   * @deprecated Use {@link #euclidean(Matrix)}
-   */
-  public static MatrixBuilder euclidian(Matrix m) {
-    return new MatrixBuilder(m, Pn.EUCLIDEAN);
-  }
-  
-  /**
-   * @deprecated Use {@link #euclidean()}
-   */
-  public static MatrixBuilder euclidian() {
-    return euclidian(new Matrix());
-  }
-
-  public static MatrixBuilder euclidean(Transformation m) {
+   * Create a matrix builder which generates isometries with respect to euclidean metric.
+   * @param m
+   * @return
+   */public static MatrixBuilder euclidean(Transformation m) {
 		Matrix mat=(m!=null) ? new Matrix(m) : new Matrix();
 	    return new MatrixBuilder(mat, Pn.EUCLIDEAN);
 	  }
@@ -118,7 +101,11 @@ public final class MatrixBuilder {
 	    return new MatrixBuilder(m, Pn.EUCLIDEAN);
 	  }
 	  
-  public static MatrixBuilder euclidean() {
+  /**
+   * Create a matrix builder which generates isometries with respect to euclidean metric.
+   * @param m
+   * @return
+   */public static MatrixBuilder euclidean() {
 	    return euclidean(new Matrix());
 	  }
 
@@ -131,7 +118,11 @@ public final class MatrixBuilder {
     return new MatrixBuilder(m, Pn.HYPERBOLIC);
   }
   
-  public static MatrixBuilder hyperbolic() {
+  /**
+   * Create a matrix builder which generates isometries with respect to hyperbolic (or (3,1)) metric.
+   * @param m
+   * @return
+   */public static MatrixBuilder hyperbolic() {
     return hyperbolic(new Matrix());
   }
 
@@ -144,7 +135,11 @@ public final class MatrixBuilder {
     return new MatrixBuilder(m, Pn.ELLIPTIC);
   }
   
-  public static MatrixBuilder elliptic() {
+  /**
+   * Create a matrix builder which generates isometries with respect to elliptic (or (4,0)) metric.
+   * @param m
+   * @return
+   */public static MatrixBuilder elliptic() {
     return elliptic(new Matrix());
   }
 
@@ -157,12 +152,20 @@ public final class MatrixBuilder {
     return new MatrixBuilder(m, Pn.PROJECTIVE);
   }
   
-  public static MatrixBuilder projective() {
+  /**
+   * Create a matrix builder which strictly speaking doesn't know about metric: purely projective.
+   * Results of using the isometry methods on this instance are undefined.
+   * @param m
+   * @return
+   */public static MatrixBuilder projective() {
     return projective(new Matrix());
   }
 
-  // It's often convenient to be able to specify the signature via integer rather than
-  // searching for the specific signature-specific method [gunn]
+  /**
+   * This constructor accepts the signature as an argument.
+   * It's often convenient to be able to specify the signature in this way rather than 
+   * searching for the specific signature-specific method.
+   */
   public static MatrixBuilder init(Matrix m, int signature)	{
   	return new MatrixBuilder(m==null ? new Matrix() : m, signature);
   }
@@ -188,6 +191,7 @@ public final class MatrixBuilder {
    * @param p2 second point on axis
    * @param angle the angle to rotate
    * @return a MatrixBuilder...
+   * @see P3#makeRotationMatrix(double[], double[], double[], double, int)
    */
   public MatrixBuilder rotate(double[] p1, double[] p2, double angle) {
     P3.makeRotationMatrix(tmp, p1, p2, angle, signature);
@@ -213,24 +217,51 @@ public final class MatrixBuilder {
     return this;
   }
   
+  /**
+   * A rotation which takes vector <i>v1</i> to vector <i>v2</i>. These vectors
+   * do not need to be normalized.
+   * @param v1
+   * @param v2
+   * @return
+   * @see P3#makeRotationMatrix(double[], double[], double[])
+   */
   public MatrixBuilder rotateFromTo(double[] v1, double[] v2) {
     P3.makeRotationMatrix(tmp, v1, v2);
     matrix.multiplyOnRight(tmp);
     return this;
   }
   
+  /**
+   * 
+   * @param scale
+   * @return
+   * @see P3#makeStretchMatrix(double[], double)
+   */
   public MatrixBuilder scale(double scale) {
 	    matrix.multiplyOnRight(P3.makeStretchMatrix(tmp, scale));
 	    return this;
 	  }
 
-  public MatrixBuilder scale(double[] scale) {
-	    scale(scale[0], scale[1], scale[2]);
-		return this;
+  /**
+   * 
+   * @param scale
+   * @return
+   * @see P3#makeStretchMatrix(double[], double[])
+   */public MatrixBuilder scale(double[] scale) {
+	    P3.makeStretchMatrix(tmp, scale);
+	    matrix.multiplyOnRight(tmp);
+	    return this;
 	  }
   
-  public MatrixBuilder scale(double scaleX, double scaleY, double scaleZ) {
-    // TODO: is this right for non-euclidean geoms?
+  /**
+   * 
+   * @param scaleX
+   * @param scaleY
+   * @param scaleZ
+   * @see P3#makeStretchMatrix(double[], double, double, double)
+   * @return
+   */
+   public MatrixBuilder scale(double scaleX, double scaleY, double scaleZ) {
     P3.makeStretchMatrix(tmp, new double[]{scaleX, scaleY, scaleZ, 1});
     matrix.multiplyOnRight(tmp);
     return this;
@@ -242,15 +273,24 @@ public final class MatrixBuilder {
     return this;
   }
   
-  public MatrixBuilder translate(double dx, double dy, double dz) {
+  /**
+   * 
+   * @param dx
+   * @param dy
+   * @param dz
+   * @return
+   * @see P3#makeTranslationMatrix(double[], double[], int)
+   */public MatrixBuilder translate(double dx, double dy, double dz) {
     return translate(new double[]{dx, dy, dz});
   }
   
   /**
    * 
-   * @return this
-   */
-  public MatrixBuilder translateFromTo(double[] p1, double[] p2) {
+   * @param p1
+   * @param p2
+   * @return
+   * @see P3#makeTranslationMatrix(double[], double[], int)
+   */public MatrixBuilder translateFromTo(double[] p1, double[] p2) {
     P3.makeTranslationMatrix(tmp, p1, p2, signature);
     matrix.multiplyOnRight(tmp);
     return this;
@@ -276,6 +316,7 @@ public final class MatrixBuilder {
    * @param plane
    * 
    * @return this
+   * @see P3#makeReflectionMatrix(double[], double[], int)
    */
   public MatrixBuilder reflect(double[] plane) {
     P3.makeReflectionMatrix(tmp, plane, signature);
