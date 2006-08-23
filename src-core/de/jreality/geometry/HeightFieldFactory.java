@@ -83,7 +83,7 @@ import java.awt.geom.Rectangle2D;
 		super.updateImpl();
 
 		if( domainHasChanged)
-			ifs.setGeometryAttributes(GeometryUtility.REGULAR_DOMAIN_QUAD_MESH_SHAPE, theDomain);
+			ifs.setGeometryAttributes(GeometryUtility.HEIGHT_FIELD_SHAPE, theDomain);
 		
 		domainHasChanged= false;
 	}
