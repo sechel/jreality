@@ -58,7 +58,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
-import de.jreality.util.DefaultMatrixSupport;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.SceneGraphUtility;
@@ -105,11 +104,7 @@ public class ReaderOOGL extends AbstractReader {
       //st.parseNumbers();
        
       SceneGraphComponent sgc = loadOneLevel(st, 0);
-      
-      // TODO: remove this:
-      DefaultMatrixSupport.getSharedInstance().storeDefaultMatrices(sgc);
-      
-    return sgc;
+     return sgc;
 
   }
   
