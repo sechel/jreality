@@ -435,7 +435,7 @@ final public class Rn {
 		double[] diff = new double[u.length];
 		subtract(diff, u, v);
 		double d = manhattanNorm(diff);
-		return (d < tol);
+		return (d <= tol);
 	}
 	
 	/**
