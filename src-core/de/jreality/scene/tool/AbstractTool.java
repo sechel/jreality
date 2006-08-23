@@ -56,7 +56,7 @@ public abstract class AbstractTool implements Tool {
   private String description = "No description!";
   
   public AbstractTool(InputSlot... activationSlots) {
-	if (activationSlots.length == 0 || activationSlots[0] == null)
+	if (activationSlots == null || activationSlots.length == 0 || activationSlots[0] == null)
 		this.activationSlots=Collections.emptyList();
 	else
 		this.activationSlots=Arrays.asList(activationSlots);

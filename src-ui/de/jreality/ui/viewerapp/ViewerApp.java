@@ -47,6 +47,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.beans.Beans;
 import java.io.IOException;
+import java.net.URL;
 import java.security.AccessControlException;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,6 +68,7 @@ import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
+import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
 
@@ -412,6 +414,9 @@ public class ViewerApp {
     if (config.equals("default")) cfg = ToolSystemConfiguration.loadDefaultDesktopConfiguration();
     if (config.equals("portal")) cfg = ToolSystemConfiguration.loadDefaultPortalConfiguration();
     if (config.equals("default+portal")) cfg = ToolSystemConfiguration.loadDefaultDesktopAndPortalConfiguration();
+    
+    cfg = ToolSystemConfiguration.loadConfiguration(new Input(new URL(config)));
+    
     if (cfg == null) throw new IllegalStateException("couldn't load config ["+config+"]");
     
     ToolSystemViewer viewer = new ToolSystemViewer(viewerSwitch, cfg, synchRender ? renderTrigger : null);
