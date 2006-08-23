@@ -44,7 +44,6 @@ import java.awt.geom.Rectangle2D;
 
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
-import de.jreality.scene.Appearance;
 import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.Cylinder;
 import de.jreality.scene.Geometry;
@@ -55,30 +54,42 @@ import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
-import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.Rectangle3D;
 
 /**
  * This class traverses a scene graph starting from the given "root" scene
- * graph component. The children of each sgc are visited in the following
- * order: First the appearance is visited then the current transformation
- * is popped to the transformationstack and a copy of it gets multiplied by
- * the transformation of the sgc. This copy is then visited. Then all
- * geometries are visited. 
- * Finally the transformation gets poped from the stack.
- * @version 1.0
- * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
+ * graph component and calculates the 3D bounding box. 
+ * <p>
+ * At any point of the traversal, there is a current transformation representing
+ * the transformation from the root.  Call this <i>M</i>. It can be initialized
+ * to a value using {@link #setInitialMatrix(double[])}. For the following,
+ * let the current state of the
+ * bounding box during the traversal be denoted by <i>B</i>.
+ * <p>
+ * Only instances of {@link Geometry} currently contribute to the bounding box.
+ * They can do this in three ways:
+ * <ul>j
+ * <li>When an instance of {@link PointSet} is found,
+ * <i>M</i>  is applied to it vertices, and <i>B</i> is set to the union of 
+ * the bounding box of these points
+ * is union-ed with <i>B</i>.</li>
+ * <li>Instances of build-in geometries such as {@link Sphere} have build-in bounding boxes
+ * which are transformed and union-ed with <i>B</i>
+ * <li>If an instance of {@link Geometry} has a geometry attribute with key {@link de.jreality.geometry.GeometryUtility#BOUNDING_BOX}
+ * then this value is expected to be an instance of {@link Rectangle3D} and is 
+ * union-ed with <i>B</i>. This overrides the first option given above.
+ * </ul>
+ *  <p>
+ *  One can obtain the bounding box using the methods {@link #getXmin()}, etc, or all at once using
+ *  {@link #getBoundingBox()}.
+ *  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>, Charles Gunn
  *
  */
 class BoundingBoxTraversal extends SceneGraphVisitor {
 
-  private boolean shaderUptodate;
-
   private Bound bound;
   private double tmpVec[] = new double[4];
 
-  protected EffectiveAppearance eAppearance;
-  
   double[]  initialTrafo,   currentTrafo;
   //private   Transformation  initialTransformation;
   protected BoundingBoxTraversal reclaimableSubcontext;
@@ -88,20 +99,16 @@ class BoundingBoxTraversal extends SceneGraphVisitor {
    */
   public BoundingBoxTraversal() {
     super();
-    eAppearance=EffectiveAppearance.create();
-    bound =new Bound();
+     bound =new Bound();
   }
 
   protected BoundingBoxTraversal(BoundingBoxTraversal parentContext) {
-    eAppearance=parentContext.eAppearance;
     initializeFromParentContext(parentContext);
   }
 
 
   protected void initializeFromParentContext(BoundingBoxTraversal parentContext) {
     BoundingBoxTraversal p=parentContext;
-
-    eAppearance=parentContext.eAppearance;
 
     currentTrafo=initialTrafo=parentContext.currentTrafo;
     this.bound = parentContext.bound;
@@ -119,8 +126,7 @@ class BoundingBoxTraversal extends SceneGraphVisitor {
   BoundingBoxTraversal subContext() {
     if (reclaimableSubcontext != null) {
       reclaimableSubcontext.initializeFromParentContext(this);
-      reclaimableSubcontext.shaderUptodate = false;
-      return reclaimableSubcontext;
+       return reclaimableSubcontext;
     } else
       return reclaimableSubcontext= new BoundingBoxTraversal(this);
   }
@@ -154,15 +160,6 @@ class BoundingBoxTraversal extends SceneGraphVisitor {
     //pipeline.setMatrix(currentTrafo);
   }
 
-  public void visit(Appearance app) {
-    eAppearance = eAppearance.create(app);
-    shaderUptodate = false;
-  }
-  private void setupShader()
-  {
-
-    shaderUptodate = true;
-  }
 
   public void visit(Geometry g) {
   	Object bbox = g.getGeometryAttributes(GeometryUtility.BOUNDING_BOX);
@@ -177,11 +174,11 @@ class BoundingBoxTraversal extends SceneGraphVisitor {
   }
   
   public void visit(Cylinder c) {
-      if(!shaderUptodate) setupShader();
       //TODO better to make this by transforming center and a
       // point on the sphere or something like that...
  	 unionBox(Rectangle3D.unitCube);
   }
+  
   public void visit(PointSet p) {
   // Following code should only be activated if we have listeners installed to update 
   // the bounding box when it goes out of date.
@@ -209,7 +206,6 @@ class BoundingBoxTraversal extends SceneGraphVisitor {
 	 	return;
 		
 	}
-  if(!shaderUptodate) setupShader();
     DataList vv = p.getVertexAttributes(Attribute.COORDINATES);
     if (vv == null)	{
     	//signal error
@@ -220,7 +216,6 @@ class BoundingBoxTraversal extends SceneGraphVisitor {
   }
   
   public void visit(Sphere s) {
-    if(!shaderUptodate) setupShader();
     //TODO better to make this by transforming center and a
     // point on the sphere or something like that...
 	 unionBox(Rectangle3D.unitCube);

@@ -53,7 +53,40 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.shader.CommonAttributes;
 
-public class BallAndStickFactory {
+/**
+ * This class constructs a ball-and-stick representation of an instance of {@link IndexedLineSet} 
+ * and returns
+ * it in the form of an instance of {@link SceneGraphComponent}.
+ * <p>
+ * In the default behavior, around each edge (vertex) of the IndexedLineSet is placed
+ * a cylinder (sphere).  The radius can be separately controlled for the cylinders and for the
+ * spheres, as can the colors.  Additionally, one can specify that arrow symbols be positioned
+ * along the tubes; here one can control the relative position, the size, and the steepness of the
+ * arrow head (which is essentially a cone). 
+ * <p>
+ * The cross section of the tube is currently fixed
+ * to be an octagon. The returned SceneGraphComponent has two children, containing the 
+ * sticks and the balls, respectively.
+ * <p>
+ * The general cycle of use is ullustrated in the following code snippet:
+ * <code><b><pre>
+ * 		IndexedLineSet ils;
+ * 		[...]
+ *		BallAndStickFactory basf = new BallAndStickFactory(Primitives.sharedIcosahedron);
+ *		basf.setBallRadius(.04);
+ *		basf.setStickRadius(.02);
+ * 		basf.setDrawArrows(true);
+ *		basf.setArrowScale(.1);
+ *		basf.setArrowSlope(1.5);
+ *		basf.setArrowPosition(.9);
+ *		basf.update();
+ *		SceneGraphComponent tubedIcosa = basf.getSceneGraphComponent();
+ * </pre></b></code>
+ * <p>
+ * @author Charles Gunn
+ * @see TubeUtility#tubeOneEdge(double[], double[], double, double[][], int)
+ *
+ */public class BallAndStickFactory {
 	 IndexedLineSet ils;
 	 double stickRadius=.025, ballRadius=.05;
 	 Color stickColor = Color.YELLOW, ballColor=Color.GREEN, arrowColor = Color.RED;
@@ -66,7 +99,7 @@ public class BallAndStickFactory {
 	 double arrowSlope = 1.0;			// bigger scale: more pointy arrow profile
 	 Appearance ballsAp, sticksAp, arrowsAp, topAp;
 	 private static IndexedFaceSet urCone = null;
-		public static double[][] octagonalCrossSection = {{1,0,-1}, 
+	 static double[][] octagonalCrossSection = {{1,0,-1}, 
 			{.707, .707, -1}, 
 			{0,1,-1},
 			{-.707, .707, -1},
@@ -234,14 +267,6 @@ public class BallAndStickFactory {
 
 	public void setDrawArrows(boolean drawArrows) {
 		this.drawArrows = drawArrows;
-	}
-
-	public IndexedLineSet getIls() {
-		return ils;
-	}
-
-	public void setIls(IndexedLineSet ils) {
-		this.ils = ils;
 	}
 
 	public boolean isShowBalls() {

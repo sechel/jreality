@@ -47,24 +47,63 @@ import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 
-public class PolygonalTubeFactory extends TubeFactory {
+/**
+ * This subclass of {@link TubeFactory} implements a simple tubing strategy
+ * based on fitting together cylindrical pieces around each segment of the underlying curve.
+ * The cylindrical segment which tubes the segment joining  vertex <i>v<sub>i</sub></i> to vertex  <i>v<sub>i+1</sub></i> is
+ * defined as follows. Let L be the line joining the two points, and let <i>P<sub>i</sub></i> 
+ * be the angle bisector of the segments which meet at <i>v<sub>i</sub></i>. Then C is the segment
+ * of the infinite cylinder around L cut out by the two planes 
+ * <i>P<sub>i</sub></i> and <i>P<sub>i+1</sub></i>.
+ * <p>
+ * The tube factory attempts to detect that the curve is closed by inspecting the first and 
+ * last points for equality (within a standard tolerance).  You can also force the
+ * curve to be closed with the {@link de.jreality.geometry.TubeFactory#setClosed(boolean)} method.
+ * Then the effect is as if a final point had been appended that is equal to the first one.
+ * <p>
+ * The cylinder's cross section is set by {@link TubeFactory#setCrossSection(double[][])}. 
+ * Other aspects of the resulting polygonal tube are controlled by the other
+ * set methods documented in {@link TubeFactory}.
+ * <p>
+ * The resulting geometry can be gotten after the call to {@link #update()}, via the
+ * {@link #getTube()} method.
+ * <code><b><pre>
+ 		IndexedLineSet ils = IndexedLineSetUtility.discreteTorusKnot(1,.25, 2, 9, 250)
+		PolygonalTubeFactory ptf = new PolygonalTubeFactory(ils, 0);
+		ptf.setClosed(true);
+		ptf.setVertexColorsEnabled(true);
+		ptf.setRadius(.04);
+		ptf.setCrossSection(mysection);
+		ptf.setTwists(6);
+		ptf.update();
+		IndexedFaceSet torus1Tubes = ptf.getTube();
+		SceneGraphComponent sgc = new SceneGraphComponent();
+		sgc.setGeometry(torus1Tubes); 
+ * </pre></b></code>
+ * 
+ * @author Charles Gunn
+ *
+ */public class PolygonalTubeFactory extends TubeFactory {
 	IndexedFaceSet theTube;
 	QuadMeshFactory qmf;
 	double[][] theTubeVertices;
 	
-//	public PolygonalTubeFactory(IndexedLineSet ils) {
-//		super(ils);
-//	}
-//
 	public PolygonalTubeFactory(double[][] curve) {
 		super(curve);
 	}
 	
+	public PolygonalTubeFactory(IndexedLineSet ils, int whichCurve) {
+		this(IndexedLineSetUtility.extractCurve(null, ils, whichCurve));
+	}
+	
 
 	/**
+	 * Generate and return the points of a quad mesh gotten by sweeping the cross  section curve <i>xsec</i>
+	 * along the line segments of <i>curve</i> in the manner described above.
 	 * 
 	 * @param polygon
 	 * @param radius
@@ -75,14 +114,14 @@ public class PolygonalTubeFactory extends TubeFactory {
 	 * @return
 	 */
 	private double[][] polygon2, vals;
-	protected  double[][] makeTube(double[][] polygon, double radius, double[][] xsec, int type, boolean closed, int signature, int twists)	{
-		int n = polygon.length;
+	protected  double[][] makeTube(double[][] curve, double radius, double[][] xsec, int type, boolean closed, int signature, int twists)	{
+		int n = curve.length;
 		int vl = xsec[0].length;
 		// have to handle the situation here that the first and last points are the same but the closed flag isn't set.
 		// We assume for now that the user wants to treat this as a closed curve but we have to ignore the last point
 		// Here's how we do that
 		boolean autoClosed = false;
-		double d = Rn.euclideanDistance(polygon[0], polygon[n-1]);
+		double d = Rn.euclideanDistance(curve[0], curve[n-1]);
 		autoClosed =  d < 10E-8;
 		if (autoClosed)	{
 			closed = true;
@@ -99,14 +138,14 @@ public class PolygonalTubeFactory extends TubeFactory {
 		int usedVerts = closed ? n+3 : n+2;
 		if (polygon2 == null || polygon2.length != usedVerts)  
 			polygon2 = new double[usedVerts][];
-		for (int i = 0; i<n; ++i)	polygon2[i+1] = polygon[i];
+		for (int i = 0; i<n; ++i)	polygon2[i+1] = curve[i];
 		if (closed)	{
-			polygon2[0] = polygon[n-1];
-			polygon2[n+1] = polygon[0];
-			polygon2[n+2] = polygon[1];				
+			polygon2[0] = curve[n-1];
+			polygon2[n+1] = curve[0];
+			polygon2[n+2] = curve[1];				
 		} else {
-			polygon2[0] = Rn.add(null, polygon[0],  Rn.subtract(null, polygon[0], polygon[1]));
-			polygon2[n+1] = Rn.add(null, polygon[n-1], Rn.subtract(null, polygon[n-1], polygon[n-2]));
+			polygon2[0] = Rn.add(null, curve[0],  Rn.subtract(null, curve[0], curve[1]));
+			polygon2[n+1] = Rn.add(null, curve[n-1], Rn.subtract(null, curve[n-1], curve[n-2]));
 			
 		}
 		FrameInfo[] frames = makeFrameField(polygon2, type, signature);
@@ -131,7 +170,10 @@ public class PolygonalTubeFactory extends TubeFactory {
 		return vals;
 	}
 	
-	 public void update() {
+	 /**
+	  * Update the state of the output tube to reflect the current state of all settable variables.
+	  */
+	public void update() {
 		theTubeVertices = makeTube(theCurve, radius, crossSection, frameFieldType, closedCurve, signature, twists);
 		qmf = new QuadMeshFactory();
 		qmf.setSignature(signature);
@@ -206,10 +248,8 @@ public class PolygonalTubeFactory extends TubeFactory {
 				if (vLength == 3)		lengths[i] = lengths[i-1] + Rn.euclideanDistance(theCurve[i], theCurve[i-1]);
 				else lengths[i] = lengths[i-1] + Pn.distanceBetween(theCurve[i], theCurve[i-1], signature);
 			}
-			final double dv= 1.0 / (vLineCount - 1);
 			final double du= 1.0 / (uLineCount - 1);
 			
-			double v=0;
 			double curveLength = lengths[vLineCount-1];
 			for(int iv=0, firstIndexInULine=0;
 			iv < vLineCount;
@@ -225,6 +265,10 @@ public class PolygonalTubeFactory extends TubeFactory {
 			return textureCoordinates;
 		}
 
+	/**
+	 * This returns the current state of the tube geometry, as of the last call to {@link #update()}.
+	 * @return
+	 */
 	public IndexedFaceSet getTube()	{
 		return theTube;
 	}

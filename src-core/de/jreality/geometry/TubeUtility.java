@@ -57,9 +57,11 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.util.LoggingSystem;
 
 /**
-  * TODO adjust the parameter which determines how the profile at the vertices of the curve
- * are "pulled back" towards the mid-segment profiles.
- * @author gunn
+ * Static methods related to tubing. 
+ * <p>
+ * @author Charles Gunn
+ * @see TubeFactory
+ * @see PolygonalTubeFactory
  * 
  */
 public class TubeUtility {
@@ -187,10 +189,10 @@ public class TubeUtility {
 			Pn.normalize(p1, p1, signature);
 			Pn.normalize(p2, p2, signature);
 			
-			if ((debug & 2) != 0) theLogger.log(Level.FINE,"p1 is "+Rn.toString(p1, 6));					
-			if ((debug & 2) != 0) theLogger.log(Level.FINE,"p2 is "+Rn.toString(p2, 6));					
+			if ((debug & 2) != 0) theLogger.log(Level.FINE,"p1 is "+Rn.toString(p1));					
+			if ((debug & 2) != 0) theLogger.log(Level.FINE,"p2 is "+Rn.toString(p2));					
 			double[] polarPlane = Pn.polarizePoint(null, p1, signature);
-			if ((debug & 2) != 0) theLogger.log(Level.FINE,"Polar plane is "+Rn.toString(polarPlane, 6));					
+			if ((debug & 2) != 0) theLogger.log(Level.FINE,"Polar plane is "+Rn.toString(polarPlane));					
 
 			double[] tangent = P3.lineIntersectPlane(null, p1, p2, polarPlane);	
 
@@ -249,7 +251,7 @@ public class TubeUtility {
 			// the matrix net should  be a transformation that takes the two input points
 			// to the (dehomogenized) points (0,0,+/-.5,1).
 			double[] net = Rn.times(null, frame, Rn.times(null, translateM, scaler));
-			if ((debug & 64) != 0) theLogger.log(Level.FINE,"net is \n"+Rn.matrixToString( net,6));
+			if ((debug & 64) != 0) theLogger.log(Level.FINE,"net is \n"+Rn.matrixToString( net));
 //			double[] inet = Rn.inverse(null, net);
 //			double[] inp1 = Rn.matrixTimesVector(null, inet, p1);
 //			double[] inp2 = Rn.matrixTimesVector(null, inet, p2);

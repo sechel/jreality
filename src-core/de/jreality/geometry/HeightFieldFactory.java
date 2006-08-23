@@ -42,9 +42,19 @@ package de.jreality.geometry;
 
 import java.awt.geom.Rectangle2D;
 
-// I know the official line is that this should inherit from AbstractQuadMeshFactory but 
-// there are just too many methods that I'd have to make public ... 
-public class HeightFieldFactory extends QuadMeshFactory {
+/**
+ * A factory for generating instances of {@link IndexedFaceSet} which
+ * are defined by a height field.  Use the {@link de.jreality.geometry.QuadMeshFactory#setVertexCoordinates(double[][])} 
+ * or some variation, to set the height field (with one entry per vector).
+ * Then use {@link #setRegularDomain(Rectangle2D)} to specify the domain of
+ * definition of the height field.  The resulting height field will
+ * have <i>(x,y)</i> values given by appropriately interpolated position in the
+ * domain, and z-value the appropriate element of the z-array.
+ * 
+ * <b>Warning</b>: Not all jReality backends can handle such height fields.  JOGL and PORTAL can.
+ * @author Charles Gunn
+ *
+ */public class HeightFieldFactory extends QuadMeshFactory {
 	Rectangle2D theDomain = new Rectangle2D.Double(-1.0, -1.0, 2.0, 2.0);
 	boolean domainHasChanged = true;
 	public HeightFieldFactory() {

@@ -37,7 +37,9 @@
  *
  */
 
-
+/**
+ * @author Bernd Gonska
+ */
 package de.jreality.geometry;
 
 import java.util.Iterator;

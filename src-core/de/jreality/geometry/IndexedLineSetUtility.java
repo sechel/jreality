@@ -50,17 +50,15 @@ import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
 
 /**
- * @author gunn
+ * Static methods for constructing, extracting, and modifying 
+ * instances of {@link IndexedLineSet}.
+ * @author Charles Gunn
+ * {@see IndexedLineSetUtility} for more ways to specify instances of {@link IndexedLineSet}.
  *
  */
 public class IndexedLineSetUtility {
 
-	/**
-	 * 
-	 */
 	private IndexedLineSetUtility() {
-		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public static IndexedLineSet refine(IndexedLineSet ils, int n)	{
@@ -88,40 +86,16 @@ public class IndexedLineSetUtility {
 				newIndices[i][j] = i*n+j;
 			}
 		}
-		IndexedFaceSetUtility.setIndexedLineSetFrom(newils, newIndices, newVerts, null, null);
-		return newils;
+//		IndexedFaceSetUtility.setIndexedLineSetFrom(newils, newIndices, newVerts, null, null);
+		IndexedLineSetFactory ifsf = new IndexedLineSetFactory();
+		ifsf.setVertexCount(newVerts.length);
+		ifsf.setVertexCoordinates(newVerts);
+		ifsf.setLineCount(newIndices.length);
+		ifsf.setEdgeIndices(newIndices);
+		ifsf.update();
+		return ifsf.getIndexedLineSet();
 	}
 
-	/**
-	 * @deprecated
-	 *  @param ifs
-	 * @param indices
-	 * @param verts
-	 * @param vcolors
-	 * @param ecolors
-	 * @return
-	 */public static IndexedLineSet setIndexedLineSetFrom(IndexedLineSet ifs, int[][] indices, 
-		double[][] verts, 
-		double[][] vcolors, 
-		double[][] ecolors)  
-	{
-		if (indices != null)	{
-			ifs.setEdgeCountAndAttributes(Attribute.INDICES, new IntArrayArray.Array(indices));
-		}
-		if (verts != null)	{
-			int vectorLength = verts[0].length;
-			ifs.setVertexCountAndAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(vectorLength).createReadOnly(verts));
-		}
-		if (vcolors != null)	{
-			int vectorLength = vcolors[0].length;
-			ifs.setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(vectorLength).createReadOnly(vcolors));
-		}
-		if (ecolors != null)	{
-			int vectorLength = ecolors[0].length;
-			ifs.setEdgeAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(vectorLength).createReadOnly(ecolors));
-		}
-		return ifs;
-	}
 
 	/**
 	 * @param curve
@@ -206,14 +180,14 @@ public class IndexedLineSetUtility {
 	}
 
 	/**
-	 * @deprecated
 	 * @param R
 	 * @param r
 	 * @param n
 	 * @param m
 	 * @param nPts
 	 * @return
-	 */public static IndexedLineSet discreteTorusKnot(double R, double r, int n, int m, int nPts)	{
+	 */
+	public static IndexedLineSet discreteTorusKnot(double R, double r, int n, int m, int nPts)	{
 		double[][] vertices = new double[nPts][3];
 		for (int i = 0; i<nPts; ++i)	{
 			double angle = ( i * 2.0 * Math.PI)/ nPts;
@@ -228,16 +202,5 @@ public class IndexedLineSetUtility {
 		return createCurveFromPoints(vertices, true);
 	}
 
-	public static IndexedLineSet circle(int n)	{
-		double[][] verts = new double[n][3];
-		double angle = 0, delta = Math.PI*2/(n);
-		for (int i = 0 ;i<n; ++i)	{
-			angle = i*delta;
-			verts[i][0] = Math.cos(angle);
-			verts[i][1] = Math.sin(angle);
-		}
-		return createCurveFromPoints(verts, true);
-	}
-	
 
 }
