@@ -53,6 +53,9 @@ public class CommonAttributes {
 	public final static String BACKGROUND_COLOR = 	"backgroundColor";
     public final static Color  BACKGROUND_COLOR_DEFAULT = new java.awt.Color(225, 225, 225);
 	public final static String BACKGROUND_COLORS = 	"backgroundColors";		// array of four colors for corners of background
+	// correct handling of background colors with stereo cameras requires stretching it to cover both views
+	public final static String BACKGROUND_COLORS_STRETCH_X = "backgroundColorsStretchX";
+	public final static String BACKGROUND_COLORS_STRETCH_Y = "backgroundColorsStretchY";
 	public final static String BACKGROUND_TEXTURE2D = "backgroundTexture2D";		// value is a Texture2D
 	public final static String SKY_BOX = "skyBox";	// the value is a de.jreality.shader.CubeMap
 	
@@ -170,7 +173,7 @@ public class CommonAttributes {
 	public static final String RMAN_PROXY_COMMAND = "rendermanProxyCommand";
 	public static final String RMAN_RETAIN_GEOMETRY = "rendermanRetainGeometry";
 	public static final String RMAN_REFLECTIONMAP_FILE = "rendermanReflectionmapFile";
-	public static final String RMAN_LIGHT_PREFIX = "";
+	public static final String RMAN_LIGHT_PREFIX = "rendermanLightPrefix";
     /* 
      * @param ap
      * 
