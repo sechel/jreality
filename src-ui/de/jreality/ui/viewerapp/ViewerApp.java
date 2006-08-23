@@ -410,13 +410,17 @@ public class ViewerApp {
     
     //create ToolSystemViewer with configuration corresp. to environment
     ToolSystemConfiguration cfg = null;
+    
     String config = getProperty("de.jreality.scene.tool.Config", "default");
-    if (config.equals("default")) cfg = ToolSystemConfiguration.loadDefaultDesktopConfiguration();
-    if (config.equals("portal")) cfg = ToolSystemConfiguration.loadDefaultPortalConfiguration();
-    if (config.equals("default+portal")) cfg = ToolSystemConfiguration.loadDefaultDesktopAndPortalConfiguration();
     
-    cfg = ToolSystemConfiguration.loadConfiguration(new Input(new URL(config)));
-    
+    // HACK: only works for "regular" URLs
+    if (config.contains("://")) {
+      cfg = ToolSystemConfiguration.loadConfiguration(new Input(new URL(config)));
+    } else {
+      if (config.equals("default")) cfg = ToolSystemConfiguration.loadDefaultDesktopConfiguration();
+      if (config.equals("portal")) cfg = ToolSystemConfiguration.loadDefaultPortalConfiguration();
+      if (config.equals("default+portal")) cfg = ToolSystemConfiguration.loadDefaultDesktopAndPortalConfiguration();
+    }    
     if (cfg == null) throw new IllegalStateException("couldn't load config ["+config+"]");
     
     ToolSystemViewer viewer = new ToolSystemViewer(viewerSwitch, cfg, synchRender ? renderTrigger : null);
