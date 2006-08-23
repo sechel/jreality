@@ -85,14 +85,14 @@ public class GeometryUtility {
 	 * Value: {@link Rectangle3D}.
 	 * @see Geometry#setGeometryAttributes(Attribute, Object).
 	 */
-	 public static String BOUNDING_BOX;		// value:	de.jreality.util.Rectangle3D
+	 public static String BOUNDING_BOX = "boundingBox";		// value:	de.jreality.util.Rectangle3D
 	/**
 	 * For identifying this IndexedFaceSet as a QuadMesh;
 	 * Value: {@link Rectangle3D}.
 	 * @see Geometry#setGeometryAttributes(Attribute, Object).
 	 * @see QuadMeshFactory
 	 */
-	 public static String QUAD_MESH_SHAPE;	// value:	java.awt.Dimension
+	 public static String QUAD_MESH_SHAPE = "quadMesh";	// value:	java.awt.Dimension
 	/**
 	 * For identifying this IndexedFaceSet as a QuadMesh with a single
 	 * value at each point (z-value on a regular x-y 2D domain);
@@ -100,21 +100,21 @@ public class GeometryUtility {
 	 * @see Geometry#setGeometryAttributes(Attribute, Object).
 	 * @see HeightFieldFactory
 	 */
-	 public static String REGULAR_DOMAIN_QUAD_MESH_SHAPE;	// value:	java.awt.Rectangle2D
+	 public static String HEIGHT_FIELD_SHAPE = "heightField";	// value:	java.awt.Rectangle2D
 	/**
 	 * For setting the signature ({@link Pn}) of the geometry; 
 	 * Value: {@link Integer}
 	 * @see Geometry#setGeometryAttributes(Attribute, Object).
 	 */
-	 public static String SIGNATURE;		// value:	Integer
+	 public static String SIGNATURE = "signature";		// value:	Integer
 
-	 static {
-	  	BOUNDING_BOX = "boundingBox";
-	  	SIGNATURE = "signature";
-	  	QUAD_MESH_SHAPE = "quadMeshShape"; // vlue is java.awt.Dimension
-	  	REGULAR_DOMAIN_QUAD_MESH_SHAPE = "regularDomainQuadMeshShape";
-	  }
-
+//	 static {
+//	  	BOUNDING_BOX = Attribute.attributeForName("boundingBox");
+//	  	SIGNATURE = Attribute.attributeForName("signature");
+//	  	QUAD_MESH_SHAPE = Attribute.attributeForName( "quadMeshShape"); // vlue is java.awt.Dimension
+//	  	REGULAR_DOMAIN_QUAD_MESH_SHAPE = Attribute.attributeForName("regularDomainQuadMeshShape");
+//	  }
+//
 	private GeometryUtility() {}
 	
 	public static void calculateAndSetFaceNormals(IndexedFaceSet ifs)   {
