@@ -72,14 +72,19 @@ public class LightCollector extends SceneGraphVisitor {
     boolean shadowEnabled = false;
     int signature = Pn.EUCLIDEAN;
     SceneGraphPath currentPath = null;
+    String lightPrefix = "";
+    Ri ribHelper = null;
     /**
      * 
      */
     public LightCollector(SceneGraphComponent root, RIBVisitor v) {
         super();
         ribv = v;
+        this.ribHelper = v.ribHelper;
         currentTrafo = new double[16];
         eAppearance=EffectiveAppearance.create();
+        lightPrefix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_LIGHT_PREFIX, "");
+        System.err.println("Light prefix is "+lightPrefix);
         currentPath = new SceneGraphPath();
         visit(root);
     }
@@ -124,23 +129,23 @@ public class LightCollector extends SceneGraphVisitor {
      */
     private static double[] zdir = {0,0,-1,0};
     public void visit(DirectionalLight l) {
-        Ri.transformBegin();
+        ribHelper.transformBegin();
         // write the transform for this light:
         //double[] mat = t.getMatrix();
        
-//        float[] tmat = RIBVisitor.fTranspose(currentTrafo);/        Ri.concatTransform(tmat);
+//        float[] tmat = RIBVisitor.fTranspose(currentTrafo);/        ribHelper.concatTransform(tmat);
     	// it looks like directional lights don't get handled correctly when the 
     	// transformation is used with "to"=(0,0,1).  Instead, calculate "to" explicitly.
 //		double[] direction = Rn.matrixTimesVector(null, currentTrafo, zdir);
         // now write the light:
         HashMap map =new HashMap();
         handleCommon(l, map);
-        Ri.concatTransform(fCurrentTrafo);
+        ribHelper.concatTransform(fCurrentTrafo);
 //        map.put("to", direction);
         map.put("to",zdirection);
-      Ri.lightSource(shadowEnabled ? "shadowdistant":"mydistantlight",map);
+      ribHelper.lightSource(shadowEnabled ? "shadowdistant":lightPrefix+"distantlight",map);
         
-        Ri.transformEnd();
+        ribHelper.transformEnd();
         //super.visit(l);
     }
 	private void handleCommon(Light l, HashMap map) {
@@ -155,29 +160,29 @@ public class LightCollector extends SceneGraphVisitor {
 	}
 
     public void visit(PointLight l) {
-        Ri.transformBegin();
+        ribHelper.transformBegin();
         // write the transform for this light:
         //double[] mat = t.getMatrix();
         // now write the light:
         HashMap map =new HashMap();
         handleCommon(l, map);
         map.put("from",new float[] {0f,0f,0f});
-       Ri.concatTransform(fCurrentTrafo);
-        Ri.lightSource(shadowEnabled ? "shadowpoint":"mypointlight",map);
+       ribHelper.concatTransform(fCurrentTrafo);
+        ribHelper.lightSource(shadowEnabled ? "shadowpoint":lightPrefix+"pointlight",map);
         
-        Ri.transformEnd();
+        ribHelper.transformEnd();
     }
     /* (non-Javadoc)
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.SpotLightSoft)
      */
     public void visit(SpotLight l) {
-        Ri.transformBegin();
+        ribHelper.transformBegin();
         // write the transform for this light:
         //double[] mat = t.getMatrix();
         // now write the light:
         HashMap map =new HashMap();
         handleCommon(l, map);
-        Ri.concatTransform(fCurrentTrafo);
+        ribHelper.concatTransform(fCurrentTrafo);
         map.put("from",new float[] {0f,0f,0f});
         map.put("coneangle",new Float(l.getConeAngle()));
         map.put("conedeltaangle",new Float(l.getConeDeltaAngle()));
@@ -186,11 +191,11 @@ public class LightCollector extends SceneGraphVisitor {
             map.put("float a0", new Float(l.getFalloffA0()));
             map.put("float a1", new Float(l.getFalloffA1()));
             map.put("float a2", new Float(l.getFalloffA2()));
-            Ri.lightSource("spotlightFalloff",map);
+            ribHelper.lightSource("spotlightFalloff",map);
         } else
-            Ri.lightSource(shadowEnabled ? "shadowspot": "myspotlight",map);
+            ribHelper.lightSource(shadowEnabled ? "shadowspot": lightPrefix+"spotlight",map);
         
-        Ri.transformEnd();
+        ribHelper.transformEnd();
         //super.visit(l);
     }
 

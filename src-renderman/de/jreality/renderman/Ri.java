@@ -41,6 +41,7 @@
 package de.jreality.renderman;
 
 import java.awt.Color;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -67,15 +68,15 @@ public class Ri {
         super();
     }
 
-    public static final int BEZIER_BASIS = 0;
-    public static final int BSPLINE_BASIS = 1;
-    public static final int CATMULL_ROM_BASIS = 2;
-    public static final int HERMITE_BASIS = 3;
-    public static final int POWER_BASIS = 4;
-    private static PrintWriter w;
-    private static int lightCount;
+    public  static final int BEZIER_BASIS = 0;
+    public  static final int BSPLINE_BASIS = 1;
+    public  static final int CATMULL_ROM_BASIS = 2;
+    public  static final int HERMITE_BASIS = 3;
+    public  static final int POWER_BASIS = 4;
+    private  PrintWriter w;
+    private  int lightCount;
     
-    public static  void begin(String name) {
+    public   void begin(String name) {
         try {
              w =new PrintWriter(new FileWriter(new File(name)));
             
@@ -85,7 +86,7 @@ public class Ri {
         }
         lightCount=0;
     }
-    public static  void begin(File file) {
+    public   void begin(File file) {
         try {
             w =new PrintWriter(new FileWriter(file));
         } catch (IOException e) {
@@ -94,24 +95,24 @@ public class Ri {
         }
         lightCount=0;
     }
-    public static  void end() {
+    public   void end() {
         w.close();
     }
     
-    public static void verbatim(String s)	{
+    public  void verbatim(String s)	{
     	w.println(s);
     }
-    public static void comment(String s) {
+    public  void comment(String s) {
         String[] ss = s.split("\\n");
         for (int i = 0; i < ss.length; i++) {
             w.println("# "+ss[i]);
         }
     }
     
-    public static void declare(String name, String type)	{
+    public  void declare(String name, String type)	{
         w.println("Declare "+str(name)+" "+str(type));    	
     }
-    public static void option(String name, Map map) {
+    public  void option(String name, Map map) {
 //        String[] tokens = keysFromMap(map);
 //        Object[] values = valuesFromMap(map, tokens);
 //       option(name, tokens, values);
@@ -119,9 +120,9 @@ public class Ri {
         writeMap(w, map);
         
     }
-//    public static  void option(String name, String[] tokens, Object[] values);
+//    public   void option(String name, String[] tokens, Object[] values);
     
-    public static void attribute(String name, Map map) {
+    public  void attribute(String name, Map map) {
 //      String[] tokens = keysFromMap(map);
 //      Object[] values = valuesFromMap(map, tokens);
 //     option(name, tokens, values);
@@ -129,20 +130,20 @@ public class Ri {
       writeMap(w, map);
       
   }
-//  public static  void attribute(String name, String[] tokens, Object[] values);
+//  public   void attribute(String name, String[] tokens, Object[] values);
 
     /**
      * @param name
      * @return
      */
-    public static String str(String name) {
+    public  String str(String name) {
         return "\""+name+"\"";
     }
     /**
      * @param w2
      * @param map
      */
-    private static void writeMap(PrintWriter w2, Map map) {
+    private  void writeMap(PrintWriter w2, Map map) {
         if(map!=null) {
         Set keys = map.keySet();
             for (Iterator key = keys.iterator(); key.hasNext();) {
@@ -157,7 +158,7 @@ public class Ri {
      * @param w2
      * @param object
      */
-    private static void writeObject(PrintWriter w2, Object object) {
+    private  void writeObject(PrintWriter w2, Object object) {
         //TODO:This will be tricky...
         if(object instanceof double[]) {
         	object = Rn.convertDoubleToFloatArray((double[]) object);
@@ -197,42 +198,45 @@ public class Ri {
         //if(object instanceof Float)
         w2.print(" "+object+" ");
     }
-    public static void display(String name, String type, String mode, Map map ) {
+    public  void display(String name, String type, String mode, Map map ) {
 //        String[]  tokens = keysFromMap(map);
 //        Object[] values = valuesFromMap(map, tokens);
 //        display(name, type, mode, tokens, values);
         w.print("Display "+str(name)+" "+str(type)+" "+str(mode)+" ");
         writeMap(w,map);
     }
-//    public static  void display(String name, String type, String mode, String[] tokens, Object[] values );
+//    public   void display(String name, String type, String mode, String[] tokens, Object[] values );
     
-    public static  void format(int xresolution, int yresolution, float pixelaspectratio) {
+    public   void format(int xresolution, int yresolution, float pixelaspectratio) {
         w.println("Format "+xresolution+" "+yresolution+" "+pixelaspectratio);
     }
     
-    public static  void shadingRate(float rate) {
+    public   void shadingRate(float rate) {
         w.println("ShadingRate "+rate);
     }
     
-	public static void clipping(double near, double far) {
+	public  void clipping(double near, double far) {
 		w.println("Clipping "+near+" "+far);
 	}
 	
-	public static void depthOfField(double fstop, double flength, double fdistance) {
+	public  void depthOfField(double fstop, double flength, double fdistance) {
 		if (fstop < 0) return;		// no depth of field
 		w.println("DepthOfField "+fstop+" "+flength+" "+fdistance);
 	}
 	
-   public static void projection(String name, Map map) {
+	public  void screenWindow(Rectangle2D sw)	{
+		w.println("ScreenWindow ["+sw.getMinX()+" "+ sw.getMaxX()+" "+sw.getMinY()+" "+sw.getMaxY()+"]");
+	}
+	public  void projection(String name, Map map) {
 //        String[]  tokens = keysFromMap(map);
 //        Object[] values = valuesFromMap(map, tokens);
 //        projection(name, tokens, values);
         w.print("Projection "+str(name)+" ");
         writeMap(w,map);
     }
-//    public static  void projection(String name,String[] tokens, Object[] values);
+//    public   void projection(String name,String[] tokens, Object[] values);
     
-    public static int lightSource(String name, Map map) {
+    public  int lightSource(String name, Map map) {
 //        String[]  tokens = keysFromMap(map);
 //        Object[] values = valuesFromMap(map, tokens);
 //        return lightSource(name, tokens, values);
@@ -241,85 +245,85 @@ public class Ri {
         writeMap(w,map);
         return lightCount;
     }
-//    public static  int lightSource(String name, String[] tokens, Object[] values);
+//    public   int lightSource(String name, String[] tokens, Object[] values);
     
-    public static  void worldBegin() {
+    public   void worldBegin() {
         w.println("WorldBegin");
     }
-    public static  void worldEnd() {
+    public   void worldEnd() {
         w.println("WorldEnd");
     }
-    public static  void frameBegin(int n) {
+    public   void frameBegin(int n) {
         w.println("FrameBegin "+n);
     }
-    public static  void frameEnd() {
+    public   void frameEnd() {
         w.println("FrameEnd");
     }
-    public static  void attributeBegin() {
+    public   void attributeBegin() {
         w.println("AttributeBegin");
     }
-    public static  void attributeEnd() {
+    public   void attributeEnd() {
         w.println("AttributeEnd");
     }
-    public static  void transformBegin() {
+    public   void transformBegin() {
         w.println("TransformBegin");
     }
-    public static  void transformEnd() {
+    public   void transformEnd() {
         w.println("TransformEnd");
     }
-    public static  void archiveBegin(String name) {
+    public   void archiveBegin(String name) {
         w.println("ArchiveBegin " +str(name));
     }
-    public static  void archiveEnd() {
+    public   void archiveEnd() {
         w.println("ArchiveEnd");
     }
-	public static void readArchive(String foo) {
+	public  void readArchive(String foo) {
 		w.println("ReadArchive "+str(foo));
 	}
 
-    public static void surface(String name, Map map) {
+    public  void surface(String name, Map map) {
 //        String[] tokens = keysFromMap(map);
 //        Object[] values = valuesFromMap(map, tokens);
 //        surface(name, tokens, values);
         w.print("Surface "+str(name)+" ");
         writeMap(w,map);
     }
-//    public static  void surface(String name, String[] tokens, Object[] values);
+//    public   void surface(String name, String[] tokens, Object[] values);
     
-    public static void displacement(String name, Map map) {
+    public  void displacement(String name, Map map) {
 //      String[] tokens = keysFromMap(map);
 //      Object[] values = valuesFromMap(map, tokens);
 //      surface(name, tokens, values);
       w.print("Displacement "+str(name)+" ");
       writeMap(w,map);
   }
-//  public static  void displacement(String name, String[] tokens, Object[] values);
+//  public   void displacement(String name, String[] tokens, Object[] values);
 
     
-    public static void imager(String name, Map map) {
+    public  void imager(String name, Map map) {
 //        String[] tokens = keysFromMap(map);
 //        Object[] values = valuesFromMap(map, tokens);
 //        imager(name, tokens, values);
         w.print("Imager "+str(name)+" ");
         writeMap(w,map);
     }
-//    public static  void imager(String name, String[] tokens, Object[] values);
+//    public   void imager(String name, String[] tokens, Object[] values);
  
-    public static  void color(Color color) {
+    public   void color(Color color) {
         float[] cc = color.getRGBComponents(null);
         color(cc[0], cc[1], cc[2]);
         if (cc.length == 4) opacity(cc[3]);
     }
     
-    public static  void color(double[] color) {
+    public   void color(double[] color) {
     	color((float) color[0], (float) color[1], (float) color[2]);
     	if (color.length == 4) opacity((float) color[3]);
     }
     
-   public static void color(float r, float g, float b){
+   public  void color(float r, float g, float b){
     	color( new float[]{r,g,b});
     }
-    public static  void color(float[] color) {
+    public   void color(float[] color) {
         w.print("Color ");
        if (color.length == 3) writeObject(w,color);
        else writeObject(w, new float[]{color[0], color[1], color[2]});
@@ -327,35 +331,35 @@ public class Ri {
        if (color.length == 4) opacity(color[3]);
     }
     
-    public static  void opacity(float[] color) {
+    public   void opacity(float[] color) {
         w.print("Opacity ");
         writeObject(w,color);
         w.println("");
     }
     
-    public static  void opacity(float color) {
+    public   void opacity(float color) {
         w.print("Opacity ");
         float[] opa = {color, color, color};
         writeObject(w, opa);
         w.println("");
     }
     
-   public static  void concatTransform(float[] transform) {
+   public   void concatTransform(float[] transform) {
         w.print("ConcatTransform ");
         writeObject(w,transform);
         w.println("");
     }
-    public static  void transform(float[] transform) {
+    public   void transform(float[] transform) {
         w.print("Transform ");
         writeObject(w,transform);
         w.println("");
     }
-    public static  void identity() {
+    public   void identity() {
         w.println("Identity");
     }
     
     
-    public static void sphere(float radius, float zmin, float zmax, float thetamax, Map map) {
+    public  void sphere(float radius, float zmin, float zmax, float thetamax, Map map) {
 //        String[] tokens = keysFromMap(map);
 //        Object[] values = valuesFromMap(map, tokens);
 //        sphere(radius, zmin,zmax, thetamax, tokens,values);
@@ -363,23 +367,23 @@ public class Ri {
         writeMap(w,map);
     }
     
-//    public static  void sphere(float radius, float zmin, float zmax, float thetamax, String[] tokens, Object[] values) ;
+//    public   void sphere(float radius, float zmin, float zmax, float thetamax, String[] tokens, Object[] values) ;
 
-    public static void cylinder(float radius, float zmin, float zmax, float thetamax, Map map) {
+    public  void cylinder(float radius, float zmin, float zmax, float thetamax, Map map) {
         w.print("Cylinder "+radius+" "+zmin+" "+zmax+" "+thetamax+" ");
         writeMap(w,map);
     }
     
-    public static void disk(float z, float radius, float thetamax, Map map) {
+    public  void disk(float z, float radius, float thetamax, Map map) {
         w.print("Disk "+z+" "+radius+" "+thetamax+" ");
         writeMap(w,map);
     }
     
-    public static void clippingPlane(float x, float y, float z, float nx, float ny, float nz) {
+    public  void clippingPlane(float x, float y, float z, float nx, float ny, float nz) {
         w.print("ClippingPlane "+x+" "+y+" "+z+" "+nx+" "+ny+" "+nz+"\n");
     }
 
-    public static void points(int npoints, Map map) {
+    public  void points(int npoints, Map map) {
 //        String[] tokens = keysFromMap(map);
 //        Object[] values = valuesFromMap(map, tokens);
 //        points(npoints,tokens,values);
@@ -387,9 +391,9 @@ public class Ri {
         w.print("Points ");
         writeMap(w,map);
     }
-//    public static  void points(int npoints, String[] tokens, Object[] values) ;
+//    public   void points(int npoints, String[] tokens, Object[] values) ;
     
-    public static void pointsPolygons(int npolys,int[] nvertices,int[] vertices,Map map) {
+    public  void pointsPolygons(int npolys,int[] nvertices,int[] vertices,Map map) {
         w.print("PointsPolygons ");
         writeObject(w,nvertices);
         w.print(" ");
@@ -398,12 +402,12 @@ public class Ri {
         writeMap(w,map);
     }
     
-    public static void patch(String type, Map map)	{
+    public  void patch(String type, Map map)	{
     	w.print("Patch ");
     	w.print(str(type)+" ");
     	writeMap(w,map);
     }
-    public static void curves(String type, int ncurves,int[] nvertices, String wrap, Map map) {
+    public  void curves(String type, int ncurves,int[] nvertices, String wrap, Map map) {
 //        String[] tokens = keysFromMap(map);
 //        Object[] values = valuesFromMap(map, tokens);
 //        curves(type,ncurves,nvertices,wrap,tokens,values);
@@ -412,15 +416,15 @@ public class Ri {
         w.print(" "+wrap+" ");
         writeMap(w,map);
     }
-//    public static  void curves(String type, int ncurves,int[] nvertices, String wrap, String[] tokens, Object[] values);
+//    public   void curves(String type, int ncurves,int[] nvertices, String wrap, String[] tokens, Object[] values);
     
-    public static  void basis(int ubasis, int ustep, int vbasis, int vstep) {
+    public   void basis(int ubasis, int ustep, int vbasis, int vstep) {
         w.print("Basis "+ubasis+" "+ustep+" "+vbasis+" "+vstep);
     }
     //
     // utility methods:
     //
-    private static String[] keysFromMap(Map map) {
+    private  String[] keysFromMap(Map map) {
         if(map == null) return new String[0];
         Object[] oa = map.keySet().toArray();
         String[] sa =new String[oa.length];
@@ -429,7 +433,7 @@ public class Ri {
         }
         return sa;
     }
-    private static Object[] valuesFromMap(Map map, String[] tokens) {
+    private  Object[] valuesFromMap(Map map, String[] tokens) {
         if(map == null) return new Object[0];
         Object[] values = new Object[map.size()];
         for (int i = 0; i < tokens.length; i++) {
@@ -439,7 +443,7 @@ public class Ri {
         return values;
     }
     
-    private static KeyValArrays tokensValuesFromMap(Map map) {
+    private  KeyValArrays tokensValuesFromMap(Map map) {
         KeyValArrays ret = new KeyValArrays();
         if(map == null) {
             ret.tokens = new String[0];
@@ -455,11 +459,11 @@ public class Ri {
             return ret;
         }
     }
-    static final class KeyValArrays {
+     final class KeyValArrays {
         String[] tokens;
         Object[] values;
     }
-	public static void shader(RendermanShader sh) {
+	public  void shader(RendermanShader sh) {
         w.print(sh.getType()+" "+str(sh.getName())+" ");
         writeMap(w,sh.getAttributes());
 

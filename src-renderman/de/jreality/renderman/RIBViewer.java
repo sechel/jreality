@@ -58,7 +58,6 @@ public class RIBViewer implements Viewer {
     private int width=100;
     private int height=100;
     private String fileName="test.rib";
-    private String proj = "perspective";
     private int maximumEyeSplits = 10;
     private int rendererType = TYPE_PIXAR;
     
@@ -105,10 +104,9 @@ public class RIBViewer implements Viewer {
         rv.setRendererType(rendererType);
         rv.setWidth(width);
         rv.setHeight(height);
-        rv.projection(proj);
         rv.setMaximumEyeSplits(maximumEyeSplits);
         System.out.print(" Rendering renderman RIB into "+fileName+"..");
-        rv.visit(sceneRoot,cameraPath,fileName);
+        rv.visit(this,fileName);
         System.out.println(".done."); 
     }
 
@@ -143,11 +141,6 @@ public class RIBViewer implements Viewer {
 			setHeight((int) v.getViewingComponentSize().getHeight());
 			setWidth((int) v.getViewingComponentSize().getWidth());
             System.out.println(" w "+v.getViewingComponentSize().getWidth()+ " h "+v.getViewingComponentSize().getHeight());
-        }
-        if(v.getCameraPath().getLastComponent().getCamera().isPerspective()){
-        	projection("perspective");
-        }else{
-        	projection("orthographic");
         }
     }
 
@@ -207,13 +200,6 @@ public class RIBViewer implements Viewer {
         this.width = width;
     }
     
-    /**
-     * @param proj The style of Projection.
-     */
-    public void projection(String proj) {
-        this.proj=proj;
-    }
-
     /**
      * @param maximumEyeSplits.
      */
