@@ -1,0 +1,77 @@
+package de.jreality.swing.jrwindows;
+
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
+import de.jreality.examples.PaintComponent;
+import de.jreality.examples.tooldemo.DeformTool;
+import de.jreality.geometry.Primitives;
+import de.jreality.io.JrScene;
+import de.jreality.io.JrSceneFactory;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.tools.RotateTool;
+import de.jreality.ui.viewerapp.ViewerApp;
+
+public class TestJRWindows {
+	public static void main(String[] args) {
+    
+    JrScene scene = JrSceneFactory.getDefaultDesktopScene();
+    SceneGraphComponent root = scene.getSceneRoot();
+    SceneGraphPath cameraPath = scene.getPath("cameraPath");
+    SceneGraphPath emptyPickPath = scene.getPath("emptyPickPath");
+    SceneGraphPath avatarPath = scene.getPath("avatarPath");
+    
+    SceneGraphComponent geoSgc=new SceneGraphComponent();
+    geoSgc.setGeometry(Primitives.icosahedron());
+    //geoSgc.addTool(new RotateTool());
+    geoSgc.addTool(new DeformTool());
+    root.addChild(geoSgc);
+
+//    System.setProperty("de.jreality.ui.viewerapp.synchRender", "true");
+    
+//    ViewerApp va = new ViewerApp(Primitives.icosahedron());
+//    va.update();
+//
+//    
+//    JRWindowManager wm=new JRWindowManager(va.getViewer().getAvatarPath());   
+//        
+//    va.display();
+
+//    ShowPropertiesTool spt=new ShowPropertiesTool(false);
+//    sgc.addTool(spt);
+//    JFrame frame1=wm.createFrame();
+//    frame1.getContentPane().add(spt.getLog());
+ 
+    JRWindowManager wm=new JRWindowManager(avatarPath);
+    
+    JFrame frame2=wm.createFrame();
+    frame2.getContentPane().add(new JTextArea("testarea",10,20));
+
+    JFrame frame3=wm.createFrame();
+    frame3.getContentPane().add("North",new JButton("test"));
+    frame3.getContentPane().add(new PaintComponent());
+    frame3.pack();
+  
+    JFrame frame4=wm.createFrame();
+    frame4.getContentPane().add("North",new JCheckBox());
+    frame4.getContentPane().add(new JCheckBox());
+    frame4.getContentPane().add("South",new JCheckBox());    
+  
+    JFrame frame5=wm.createFrame();
+    frame5.getContentPane().add("North",new JCheckBox());
+    frame5.getContentPane().add("South",new JCheckBox());    
+  
+    JFrame frame6=wm.createFrame();
+    frame6.getContentPane().add("North",new JCheckBox());  
+  
+    JFrame frame7=wm.createFrame();
+    frame7.getContentPane().add(new JLabel("labellabellabel"));   
+    
+    wm.pack();
+  
+    ViewerApp.display(root, cameraPath, emptyPickPath, avatarPath);    
+	}
+}
