@@ -1,4 +1,4 @@
-package de.jreality.swing.jrwindows;
+package de.jreality.swing.test;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -12,6 +12,7 @@ import de.jreality.io.JrScene;
 import de.jreality.io.JrSceneFactory;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.swing.jrwindows.JRWindowManager;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class TestJRWindows {
