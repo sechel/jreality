@@ -100,10 +100,8 @@ public class LightCollector extends SceneGraphVisitor {
     }
     
     protected void initializeFromParentContext(LightCollector parentContext) {
-        LightCollector p=parentContext;
         currentTrafo=parentContext.currentTrafo;
         ribv = parentContext.ribv;
-
     }
     
     public void visit(SceneGraphComponent c) {
@@ -127,7 +125,6 @@ public class LightCollector extends SceneGraphVisitor {
     /* (non-Javadoc)
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.DirectionalLightSoft)
      */
-    private static double[] zdir = {0,0,-1,0};
     public void visit(DirectionalLight l) {
         ribHelper.transformBegin();
         // write the transform for this light:
@@ -138,7 +135,7 @@ public class LightCollector extends SceneGraphVisitor {
     	// transformation is used with "to"=(0,0,1).  Instead, calculate "to" explicitly.
 //		double[] direction = Rn.matrixTimesVector(null, currentTrafo, zdir);
         // now write the light:
-        HashMap map =new HashMap();
+        HashMap<String, Object> map =new HashMap<String, Object>();
         handleCommon(l, map);
         ribHelper.concatTransform(fCurrentTrafo);
 //        map.put("to", direction);
@@ -148,7 +145,7 @@ public class LightCollector extends SceneGraphVisitor {
         ribHelper.transformEnd();
         //super.visit(l);
     }
-	private void handleCommon(Light l, HashMap map) {
+	private void handleCommon(Light l, HashMap<String, Object> map) {
 		currentPath.getMatrix(currentTrafo);
         fCurrentTrafo = RIBVisitor.fTranspose(currentTrafo);
 		map.put("intensity",new Float(l.getIntensity()));
@@ -164,7 +161,7 @@ public class LightCollector extends SceneGraphVisitor {
         // write the transform for this light:
         //double[] mat = t.getMatrix();
         // now write the light:
-        HashMap map =new HashMap();
+        HashMap<String, Object> map =new HashMap<String, Object>();
         handleCommon(l, map);
         map.put("from",new float[] {0f,0f,0f});
        ribHelper.concatTransform(fCurrentTrafo);
@@ -180,14 +177,14 @@ public class LightCollector extends SceneGraphVisitor {
         // write the transform for this light:
         //double[] mat = t.getMatrix();
         // now write the light:
-        HashMap map =new HashMap();
+        HashMap<String, Object> map =new HashMap<String, Object>();
         handleCommon(l, map);
         ribHelper.concatTransform(fCurrentTrafo);
         map.put("from",new float[] {0f,0f,0f});
         map.put("coneangle",new Float(l.getConeAngle()));
         map.put("conedeltaangle",new Float(l.getConeDeltaAngle()));
         map.put("beamdistribution",new Float(l.getDistribution()));
-        if(RIBVisitor.fullSpotLight ) {
+        if(ribv.fullSpotLight ) {
             map.put("float a0", new Float(l.getFalloffA0()));
             map.put("float a1", new Float(l.getFalloffA1()));
             map.put("float a2", new Float(l.getFalloffA2()));
