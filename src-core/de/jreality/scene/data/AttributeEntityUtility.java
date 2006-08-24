@@ -475,7 +475,7 @@ public class AttributeEntityUtility {
             creator = clazz.getMethod(createMethodName, new Class[]{String.class});
           } catch (NoSuchMethodException nsme) {
             try {
-              creator = clazz.getMethod(createMethodName, null);
+              creator = clazz.getMethod(createMethodName);
             } catch (NoSuchMethodException e) {
             }
           }
