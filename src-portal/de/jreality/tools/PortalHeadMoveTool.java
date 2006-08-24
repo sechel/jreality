@@ -55,7 +55,7 @@ import de.jreality.scene.tool.ToolContext;
  **/
 public class PortalHeadMoveTool extends AbstractTool {
   
-  final transient InputSlot headSlot = InputSlot.getDevice("AvatarShipTransformation");
+  final transient InputSlot headSlot = InputSlot.getDevice("ShipHeadTransformation");
   
   transient double[] tmp = new double[16];
   transient Viewer viewer;

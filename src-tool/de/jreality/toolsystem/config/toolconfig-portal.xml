@@ -48,7 +48,7 @@
     <mapping device="Trackd" src="valuator_0" target="PrimaryNavigationNDC_X"/>
     <mapping device="Trackd" src="valuator_1" target="PrimaryNavigationNDC_Y"/>
     <mapping device="Trackd" src="sensor_1" target="PointerShipTransformation"/>
-    <mapping device="Trackd" src="sensor_0" target="AvatarShipTransformation"/>
+    <mapping device="Trackd" src="sensor_0" target="ShipHeadTransformation"/>
     
   </rawslots>
   
