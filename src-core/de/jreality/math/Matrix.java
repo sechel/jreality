@@ -377,20 +377,6 @@ public class Matrix implements Serializable {
 		Rn.transpose(matrix, matrix);
 	}
 
-  /**
-   * WARNING: This doesn't return a rotation matrix if we're not in euclidean space.
-   * Since we don't know the metric, this method doesn't belong in this class.
-   * In fact, it's not well-defined in the absence of a signature field.
-   * @deprecated
-   * @return
-   */
-	public Matrix getRotation() {
-	  Matrix ret = new Matrix(this);
-      ret.setRow(3, new double[4]);
-      ret.setColumn(3, new double[]{0,0,0,1});
-      return ret;
-    }
-  
     /**
      * Form the matrix-vector product <i>M.v</i> (<i>v</i> is column vector on the right).
      * @param vector
