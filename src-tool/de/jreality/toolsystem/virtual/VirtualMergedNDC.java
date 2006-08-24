@@ -65,6 +65,8 @@ public class VirtualMergedNDC implements VirtualDevice {
   DoubleArray da;
   Matrix mat = new Matrix();
   
+  double factorX=1, factorY=1;
+  
   public VirtualMergedNDC() {
     da = new DoubleArray(mat.getArray());
     // set Z to -1
@@ -73,8 +75,8 @@ public class VirtualMergedNDC implements VirtualDevice {
   
   public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
     try {
-    mat.setEntry(0, 3, context.getAxisState(inX).doubleValue());
-    mat.setEntry(1, 3, context.getAxisState(inY).doubleValue());
+    mat.setEntry(0, 3, factorX*context.getAxisState(inX).doubleValue());
+    mat.setEntry(1, 3, factorY*context.getAxisState(inY).doubleValue());
     return new ToolEvent(context.getEvent().getSource(), outSlot, da);
     } catch (NullPointerException ne) {
       return null;
@@ -85,6 +87,10 @@ public class VirtualMergedNDC implements VirtualDevice {
     inX = (InputSlot) inputSlots.get(0);
     inY = (InputSlot) inputSlots.get(1);
     outSlot = result;
+    try {
+    	factorX=((Double)configuration.get("factorX"));
+    	factorY=((Double)configuration.get("factorY"));
+    } catch (Exception e) {}
   }
 
   public void dispose() {

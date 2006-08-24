@@ -1,9 +1,10 @@
 <toolconfig>
 
   <rawdevices>
-    <rawdevice id="Motionstar" type="de.jreality.toolsystem.raw.DeviceMotionstar"/>
-    <rawdevice id="Keyboard" type="de.jreality.toolsystem.raw.DeviceKeyboard"/>
-    <rawdevice id="Mouse" type="de.jreality.toolsystem.raw.DeviceMouse"/>
+    <!--rawdevice id="Motionstar" type="de.jreality.toolsystem.raw.DeviceMotionstar"/-->
+    <rawdevice id="Trackd" type="de.jreality.toolsystem.raw.DevicePortalTrackd"/>
+    <!--rawdevice id="Keyboard" type="de.jreality.toolsystem.raw.DeviceKeyboard"/-->
+    <!--rawdevice id="Mouse" type="de.jreality.toolsystem.raw.DeviceMouse"/-->
     <rawdevice id="SystemTimer" type="de.jreality.toolsystem.raw.DeviceSystemTimer"/>
     <!--rawdevice id="Joystick" type="de.jreality.toolsystem.raw.DeviceJoystick"/-->
   </rawdevices>
@@ -34,12 +35,21 @@
     
     <mapping device="SystemTimer" src="tick" target="SystemTime"/>
 
-    <mapping device="Motionstar" src="wand_left" target="PrimaryAction"/>
+    <!--mapping device="Motionstar" src="wand_left" target="PrimaryAction"/>
     <mapping device="Motionstar" src="wand_center" target="PrimaryMenu"/>
     <mapping device="Motionstar" src="wand_right" target="PrimarySelection"/>
     <mapping device="Motionstar" src="wand_axes" target="PrimaryNavigationNDC"/>
     <mapping device="Motionstar" src="wandMatrix" target="PointerShipTransformation"/>
-    <mapping device="Motionstar" src="headMatrix" target="AvatarShipTransformation"/>
+    <mapping device="Motionstar" src="headMatrix" target="AvatarShipTransformation"/-->
+    
+    <mapping device="Trackd" src="button_0" target="PrimaryAction"/>
+    <mapping device="Trackd" src="button_1" target="PrimaryMenu"/>
+    <mapping device="Trackd" src="button_2" target="PrimarySelection"/>
+    <mapping device="Trackd" src="valuator_0" target="PrimaryNavigationNDC_X"/>
+    <mapping device="Trackd" src="valuator_1" target="PrimaryNavigationNDC_Y"/>
+    <mapping device="Trackd" src="sensor_1" target="PointerShipTransformation"/>
+    <mapping device="Trackd" src="sensor_0" target="AvatarShipTransformation"/>
+    
   </rawslots>
   
   
@@ -104,6 +114,18 @@
       <inputslot>AvatarTransformation</inputslot>
       <inputslot>AvatarShipTransformation</inputslot>
       <outputslot>WorldToCamera</outputslot>
+    </virtualdevice>
+
+    <virtualdevice type="de.jreality.toolsystem.virtual.VirtualMergedNDC">
+      <inputslot>PrimaryNavigationNDC_X</inputslot>
+      <inputslot>PrimaryNavigationNDC_Y</inputslot>
+      <outputslot>PrimaryNavigationNDC</outputslot>
+      <prop name="factorX">
+        <double>-1</double>
+      </prop>
+      <prop name="factorY">
+        <double>-1</double>
+      </prop>
     </virtualdevice>
 
     <virtualdevice type="de.jreality.toolsystem.virtual.VirtualExtractAxis">

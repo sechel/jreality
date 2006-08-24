@@ -40,6 +40,11 @@
 
 package de.jreality.toolsystem.raw;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.Timer;
+
 import de.jreality.scene.Viewer;
 import de.jreality.scene.tool.AxisState;
 import de.jreality.scene.tool.InputSlot;
@@ -50,33 +55,13 @@ import de.jreality.toolsystem.ToolEventQueue;
  * @author weissman
  *
  **/
-public class DeviceSystemTimer implements RawDevice {
+public class DeviceSystemTimer implements RawDevice, ActionListener {
 
     private ToolEventQueue queue;
     
-    volatile int delay = 10; // delay in ms
-    volatile boolean running = true;
+    Timer timer;
     
     String myDeviceName = "tick";
-    
-    private Thread timer = new Thread(new Runnable() {
-      boolean meRunning;
-      public void run() {
-        meRunning=running;
-        while (meRunning) {
-          try {
-            Thread.sleep(delay);
-          } catch (InterruptedException e) {
-            throw new Error();
-          }
-          if (meRunning) generateEvent();
-          synchronized (this) {
-            meRunning=running;
-          }
-        }
-      }
-      
-    });
     
     private InputSlot device;
     
@@ -88,7 +73,7 @@ public class DeviceSystemTimer implements RawDevice {
         return new ToolEvent(this, inputDevice, AxisState.ORIGIN);
     }
 
-    protected void generateEvent() {
+    public void actionPerformed(ActionEvent event) {
       if (queue == null) return;
       long ct = System.currentTimeMillis();
       int delta = (int)(lastEvent == -1l ? 0 : ct - lastEvent);
@@ -111,14 +96,12 @@ public class DeviceSystemTimer implements RawDevice {
     }
 
     public void dispose() {
-      synchronized (this) {
-        running = false;
-      }
+    	timer.stop();
     }
 
     public void initialize(Viewer viewer) {
-      timer.setName("jReality ToolSystem Timer");
-      timer.start();
+    	timer  = new Timer(5, this);
+    	timer.start();
     }
 
     public String getName() {
