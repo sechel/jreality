@@ -43,7 +43,8 @@ package de.jreality.jogl.shader;
 import java.awt.Color;
 import java.util.logging.Level;
 
-import net.java.games.jogl.GL;
+import javax.media.opengl.GL;
+
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
@@ -90,10 +91,10 @@ public class BrickPolygonShader extends SimpleJOGLShader {
 	}
 	public void render(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.getRenderer();
-		GL gl = jr.getCanvas().getGL();
+		GL gl = jr.getGL();
 		super.render(jrs);
 		if (changed)	{
-		    gl.glUniform1fvARB(getUniLoc(program, "rtable",gl),100, rtable);
+		    gl.glUniform1fvARB(getUniLoc(program, "rtable",gl),100, rtable, 0);
 		    gl.glUniform1fARB(getUniLoc(program, "SpecularContribution",gl),(float) specularContribution);
 		    gl.glUniform1fARB(getUniLoc(program, "DiffuseContribution",gl),(float) (1f - specularContribution));
 			JOGLConfiguration.theLog.log(Level.INFO,"Setting specular coef to "+specularContribution);

@@ -88,6 +88,8 @@ public class IntegratorFactory {
   private HashSet signatures=new HashSet();
   private HashSet methods=new HashSet();
 
+  private HashSet constants=new HashSet();
+
   private IntegratorFactory(int order) {
     this.order=order;
     addUniform("h", "float");
@@ -129,6 +131,14 @@ public class IntegratorFactory {
     uniforms.add("uniform "+type+" "+name+";");
   }
   
+  /**
+   * add a constantto the src code
+   * @param definition the source line for the constant, i.e. <code> const float PI = 3.141592653589793; </code>
+   */
+  public void addConstant(String definition) {
+    constants.add(definition);
+  }
+  
   public void addMethod(String name, String retType, String params, String implementation) {
     String signature = retType+" "+name+"("+params+")";
     String impl = signature+"{\n"+implementation+"}\n";
@@ -158,6 +168,8 @@ public class IntegratorFactory {
   
   public String toString() {
     StringBuffer sb = new StringBuffer();
+    for(Iterator i = constants.iterator(); i.hasNext(); )
+      sb.append(i.next()).append('\n');
     for (Iterator i = uniforms.iterator(); i.hasNext(); )
       sb.append(i.next()).append('\n');
     sb.append('\n');

@@ -41,12 +41,15 @@
 package de.jreality.jogl.shader;
 
 import java.beans.Statement;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.WeakHashMap;
 
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLDrawable;
+import javax.media.opengl.GL;
+
+import de.jreality.jogl.JOGLRenderer;
 import de.jreality.shader.GlslProgram;
 import de.jreality.shader.GlslSource;
 import de.jreality.shader.GlslSource.UniformParameter;
@@ -55,8 +58,12 @@ public class GlslLoader {
 
   private static final WeakHashMap GL_TO_GLSL=new WeakHashMap();
   
-  public static void render(GlslProgram prog, GLDrawable drawable) {
-    GL gl = drawable.getGL();
+  public static void render(GlslProgram prog, JOGLRenderer jr) {
+    GL gl = jr.getGL();
+    render(prog, gl);
+  }
+  
+  public static void render(GlslProgram prog, GL gl) {
     ProgramContext context = getContext(gl, prog);
     context.linkProgram(gl);
     context.activateProgram(gl);
@@ -90,8 +97,12 @@ public class GlslLoader {
     return false;
   }
 
-  public static void postRender(GlslProgram prog, GLDrawable drawable) {
-    GL gl = drawable.getGL();
+  public static void postRender(GlslProgram prog, JOGLRenderer jr) {
+    GL gl = jr.getGL();
+    postRender(prog, gl);
+  }
+  
+  public static void postRender(GlslProgram prog, GL gl) {
     ProgramContext context = getContext(gl, prog);
     context.deactivateProgram(gl);
   }
@@ -134,7 +145,7 @@ public class GlslLoader {
     
     void writeValue(GL gl, UniformParameter param, Object value) {
       String rep = param.getStringRep();
-      Object[] params = new Object[param.isMatrix() ? 4 : 3];
+      Object[] params = new Object[param.isMatrix() ? 5 : 4];
       params[0] = uniLocation(param.getName(), gl);
       if (((Integer) params[0]).intValue() == -1)		{
     	  return;
@@ -142,6 +153,7 @@ public class GlslLoader {
       params[1] = new Integer(param.isArray() ? param.getArrayLength() : 1);
       if (param.isMatrix()) params[2]=Boolean.FALSE;
       params[param.isMatrix() ? 3 : 2] = value;
+      params[param.isMatrix() ? 4 : 3] = new Integer(0);
       Statement s = new Statement(gl, rep, params);
       //System.out.println("will call: "+s);
       try {
@@ -162,7 +174,7 @@ public class GlslLoader {
 
       if (source.getVertexProgram() != null) {
         int vertexProgID = gl.glCreateShaderObjectARB(GL.GL_VERTEX_SHADER_ARB);
-        gl.glShaderSourceARB(vertexProgID, source.getVertexProgram().length, source.getVertexProgram(), (int[]) null);
+        gl.glShaderSource(vertexProgID, source.getVertexProgram().length, source.getVertexProgram(), (int[]) null, 0);
         gl.glCompileShaderARB(vertexProgID);
         printInfoLog("vert compile", vertexProgID, gl);
         gl.glAttachObjectARB(progID.intValue(), vertexProgID);
@@ -170,7 +182,7 @@ public class GlslLoader {
       }
       if (source.getFragmentProgram() != null) {
         int fragmentProgID = gl.glCreateShaderObjectARB(GL.GL_FRAGMENT_SHADER_ARB);
-        gl.glShaderSourceARB(fragmentProgID, source.getFragmentProgram().length, source.getFragmentProgram(), (int[]) null);
+        gl.glShaderSourceARB(fragmentProgID, source.getFragmentProgram().length, source.getFragmentProgram(), (int[]) null, 0);
         gl.glCompileShaderARB(fragmentProgID);
         printInfoLog("frag compile", fragmentProgID, gl);
         gl.glAttachObjectARB(progID.intValue(), fragmentProgID);
@@ -201,11 +213,11 @@ public class GlslLoader {
     int[] charsWritten = new int[1];
     byte[] infoLog;
     
-    gl.glGetObjectParameterivARB(objectHandle, GL.GL_OBJECT_INFO_LOG_LENGTH_ARB, logLength);
+    gl.glGetObjectParameterivARB(objectHandle, GL.GL_OBJECT_INFO_LOG_LENGTH_ARB, IntBuffer.wrap(logLength));
     
     if (logLength[0] > 0) {
       infoLog = new byte[logLength[0]];
-      gl.glGetInfoLogARB(objectHandle, logLength[0], charsWritten, infoLog );
+      gl.glGetInfoLogARB(objectHandle, logLength[0], IntBuffer.wrap(charsWritten), ByteBuffer.wrap(infoLog ));
       StringBuffer foo = new StringBuffer(charsWritten[0]);
       
       for (int i = 0; i< charsWritten[0]; ++i)  foo.append((char) infoLog[i]);
@@ -225,7 +237,7 @@ public class GlslLoader {
       System.out.println("id NULL while disposing!!!");
       return;
     }
-    gl.glDeleteProgramsARB(1, new int[]{id.intValue()});
+    gl.glDeleteProgramsARB(1, new int[]{id.intValue()},0);
     WeakHashMap glContexts = (WeakHashMap) GL_TO_GLSL.get(gl);
     glContexts.remove(prog.getSource());
   }

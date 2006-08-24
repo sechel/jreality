@@ -41,7 +41,9 @@
 package de.jreality.jogl;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -55,13 +57,18 @@ import java.util.EventObject;
 import java.util.Vector;
 import java.util.logging.Level;
 
+import javax.media.opengl.DefaultGLCapabilitiesChooser;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLCanvas;
+import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLCapabilitiesChooser;
+import javax.media.opengl.GLContext;
+import javax.media.opengl.GLEventListener;
 import javax.swing.JPanel;
 
-import net.java.games.jogl.*;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.util.SceneGraphUtility;
-
 /**
  * @author Charles Gunn
  *
@@ -75,27 +82,24 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	JOGLRenderer renderer;
 	int signature;
 	boolean isFlipped = false;
-	static GLCanvas firstOne = null;		// for now, all display lists shared with this one
-	public static final int 	CROSS_EYED_STEREO = 1;
-	public static final int 	RED_BLUE_STEREO = 2;
-	public static final int 	RED_GREEN_STEREO = 3;
-	public static final int 	RED_CYAN_STEREO =  4;
-	// this is not used: it's "quad buffer"
-	public static final int 	HARDWARE_BUFFER_STEREO = 23;
+	static GLContext firstOne = null;		// for now, all display lists shared with this one
+	public static final int 	CROSS_EYED_STEREO = 0;
+	public static final int 	RED_BLUE_STEREO = 1;
+	public static final int 	RED_GREEN_STEREO = 2;
+	public static final int 	RED_CYAN_STEREO =  3;
+	public static final int 	HARDWARE_BUFFER_STEREO = 4;
+	public static final int 	STEREO_TYPES = 5;
 	int stereoType = 		CROSS_EYED_STEREO;	
 	private boolean debug = false;
-  
-  // this is to avoid layout problems when returning the plain glcanvas
-  private JPanel component;
 
 	public Viewer() {
 		this(null, null);
 	}
 
-	public Viewer(SceneGraphPath p, SceneGraphComponent r) {
-		super();
-		auxiliaryRoot = SceneGraphUtility.createFullSceneGraphComponent("AuxiliaryRoot");
-		initializeFrom(r, p);	
+	public Viewer(SceneGraphPath camPath, SceneGraphComponent root) {
+    renderer = new JOGLRenderer(this); 
+		setAuxiliaryRoot(SceneGraphUtility.createFullSceneGraphComponent("AuxiliaryRoot"));
+		initializeFrom(root, camPath);	
 		// for reasons unknown, have to be very careful on Linux not to try to draw too early.
 		// to avoid this, set the following variables 
 //		if (JOGLConfiguration.isLinux)	{
@@ -132,7 +136,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		cameraPath = p;
 	}
 
-	public void render() {
+	public void renderAsync() {
 //		if (isLinux)	{
 //		    canvas.setIgnoreRepaint(false);
 //			canvas.setNoAutoRedrawMode(false);			
@@ -152,8 +156,9 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		return true;
 	}
 
-
-	public Component getViewingComponent() {
+	private JPanel component;
+  
+  public Object getViewingComponent() {
     // this is to avoid layout problems when returning the plain glcanvas
     if (component == null) {
       component=new javax.swing.JPanel();
@@ -203,10 +208,10 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
         }
       });
     }
-		return component;
-	}
-
-	/* (non-Javadoc)
+    return component;
+  }
+  
+  /* (non-Javadoc)
 	 * @see de.jreality.scene.Viewer#initializeFrom(de.jreality.scene.Viewer)
 	 */
 	public void initializeFrom(de.jreality.scene.Viewer v) {
@@ -225,19 +230,19 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 /*********** Non-standard set/get ******************/
 	
 		public void setStereoType(int type)	{
-			stereoType = type;
+			renderer.setStereoType(type);
 		}
 		
 		// used in JOGLRenderer
 		public int getStereoType()	{
-			return stereoType;
+			return renderer.getStereoType();
 		}
 
 		public boolean isFlipped() {
-			return isFlipped;
+			return renderer.isFlipped();
 		}
 		public void setFlipped(boolean isFlipped) {
-			this.isFlipped = isFlipped;
+			renderer.setFlipped(isFlipped);
 		}
 
 		public JOGLRenderer getRenderer() {
@@ -320,133 +325,54 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		setCameraPath(p);
 		GLCapabilities caps = new GLCapabilities();
 		caps.setAlphaBits(8);
+//		caps.setStereo(JOGLConfiguration.portalUsage);
+//		caps.setDoubleBuffered(!JOGLConfiguration.portalUsage);
 		if (JOGLConfiguration.multiSample)	{
 			GLCapabilitiesChooser chooser = new MultisampleChooser();
 			caps.setSampleBuffers(true);
 			caps.setNumSamples(4);
-//			caps.setStereo(true);
-			canvas = GLDrawableFactory.getFactory().createGLCanvas(caps, chooser, firstOne);
+			caps.setStereo(JOGLConfiguration.portalUsage);
+			canvas = new GLCanvas(caps, chooser, firstOne,  GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice());
 		} else {
-			canvas = GLDrawableFactory.getFactory().createGLCanvas(caps, null, firstOne);			
+			canvas = new GLCanvas(caps);			
 		}
         JOGLConfiguration.getLogger().log(Level.INFO, "Caps is "+caps.toString());
-		canvas.addGLEventListener(this);
+ 		canvas.addGLEventListener(this);
 //		canvas.requestFocus();
-		if (JOGLConfiguration.sharedContexts && firstOne == null) firstOne = canvas;
+		if (JOGLConfiguration.sharedContexts && firstOne == null) firstOne = canvas.getContext();
 	}
 
 	  public void renderScreen(File file)	{
-	  	if (renderer != null) renderer.saveScreenShot(file);
+	  	if (renderer != null) renderer.saveScreenShot(file, canvas);
 	  	else JOGLConfiguration.getLogger().log(Level.WARNING,"Renderer not initialized");
 	  }
 	  
-//	  public void renderOffscreen(int w, int h, File file)	{
-//	        boolean supported = canvas.canCreateOffscreenDrawable();
-//	        if(!supported) 
-//	        {
-//	        	JOGLConfiguration.getLogger().log(Level.WARNING,"PBuffers not supported");
-//	              return;
-//	        }
-//		  	if (renderer != null) renderer.renderOffscreen(w,h,file);
-//		  	else JOGLConfiguration.getLogger().log(Level.WARNING,"Renderer not initialized");
-//		  }
-//	  
-	  private GLPbuffer getPbuffer(int width, int height, GLDrawable d)	{
-		  GLPbuffer pbuffer = null;
-		  GLCapabilities caps = new GLCapabilities();
-// doesn't seem to support anti-aliasing; just creates junk
-//		caps.setSampleBuffers(true);
-//		caps.setNumSamples(4);
-//		caps.setOffscreenRenderToTexture(true);
-		  caps.setDoubleBuffered(false); 
-		  JOGLConfiguration.getLogger().log(Level.INFO, "Caps is "+caps.toString());
-		  pbuffer = d.createOffscreenDrawable(caps, width, height);
-		  return pbuffer;
-	  }
+	  public void renderOffscreen(int w, int h, File file)	{
+		  if (renderer != null) renderer.renderOffscreen(w,h,file, canvas);
+		  else JOGLConfiguration.getLogger().log(Level.WARNING,"Renderer not initialized");
+		  }
 	  
-	  GLPbuffer pbuffer = null;
-	  File pbufferFile = null;
-	  JOGLRenderer pbufferRenderer = null;
-	  public void renderOffscreen(int w, int h,final File file)	{
-		  pbufferFile = file;  
-		  final int width;
-		  if (pbufferRenderer == null) pbufferRenderer = new JOGLRenderer(this);
-		  final JOGLRenderer pbufferrenderer = pbufferRenderer;
-		  if (w > 2048)	{
-			  JOGLConfiguration.getLogger().log(Level.WARNING,"Width being truncated to 2048");
-			  width = 2048;
-		  } else width = w;
-		  final int height;
-		  if (h > 2048)	{
-			  JOGLConfiguration.getLogger().log(Level.WARNING,"Height being truncated to 2048");
-			  height = 2048;
-		  } else height = w;
-		  pbuffer = getPbuffer(width, height, canvas);
-		  pbuffer.addGLEventListener(new  GLEventListener() {
-        		boolean done = false;
-			public void init(GLDrawable arg0) {
-	        	JOGLConfiguration.getLogger().log(Level.INFO,"PBuffer init");
-	        	pbufferrenderer.init(arg0);
-			}
-
-			public void display(GLDrawable arg0) {
-				if (done) return;
-			   	JOGLConfiguration.getLogger().log(Level.INFO,"PBuffer display");
-//				JOGLConfiguration.theLog.log(Level.INFO,"rendering "+renderer.frameCount);
-		 	    JOGLConfiguration.getLogger().log(Level.INFO,"Pbuffer is initialized: "+pbuffer.isInitialized());
-			   	//JOGLRenderer renderer = new JOGLRenderer(me, pbuffer);
-			   	// have to set the rendering size since the jogl implementations of GLPbuffer
-			   	// don't implement getSize() (!!)
-			   	// we piggyback on the canvas's renderer.  To be safe, we need to put a lock around the
-			   	// following 3 lines of code.
-			   	synchronized(renderLock)	{
-				   	pbufferrenderer.setSize(width, height);
-//					OpenGLState.initializeGLState(pbufferenderer);
-					pbufferrenderer.display(arg0);
-					pbufferrenderer.display(arg0);
-				   	pbufferrenderer.setSize(canvas.getWidth(), canvas.getHeight());
-				   	JOGLRendererHelper.saveScreenShot(pbuffer,width, height, file);
-				  	pbuffer = null;
-				  	pbufferFile = null;
-				   	done = true;			   		
-			   	}
-			}
-
-			public void reshape(GLDrawable arg0, int arg1, int arg2, int arg3, int arg4) {
-			   	JOGLConfiguration.getLogger().log(Level.INFO,"PBuffer reshape");
-			}
-
-			public void displayChanged(GLDrawable arg0, boolean arg1, boolean arg2) {
-			   	JOGLConfiguration.getLogger().log(Level.INFO,"PBuffer displayChanged");
-			}
-        });
-        System.err.println("Pbuffer created"); 
- 	    JOGLConfiguration.getLogger().log(Level.INFO,"Pbuffer is initialized: "+pbuffer.isInitialized());
-	  }
 	private boolean pendingUpdate;
 	
-	public void display(GLDrawable arg0) {
+	public void display(GLAutoDrawable arg0) {
 		renderer.display(arg0);
-		if (pbuffer != null) {
-			pbuffer.display();
-		}
 	}
 
-	public void displayChanged(GLDrawable arg0, boolean arg1, boolean arg2) {
+	public void displayChanged(GLAutoDrawable arg0, boolean arg1, boolean arg2) {
 		renderer.displayChanged(arg0, arg1, arg2);
 	}
 
-	public void init(GLDrawable arg0) {
+	public void init(GLAutoDrawable arg0) {
 		JOGLConfiguration.theLog.log(Level.INFO,"JOGL Context initialization, creating new renderer");
-		renderer =  new JOGLRenderer(this); 
+		renderer.setAuxiliaryRoot(auxiliaryRoot);
 		renderer.init(arg0);  
-	      byte[] foo = new byte[4];
-	        canvas.getGL().glGetBooleanv(GL.GL_STEREO, foo);
-	        JOGLConfiguration.getLogger().log(Level.INFO, "Stereo is:"+foo[0]);
+//	      byte[] foo = new byte[4];
+//	        canvas.getGL().glGetBooleanv(GL.GL_STEREO, foo,0);
+//	        JOGLConfiguration.getLogger().log(Level.INFO, "Stereo is:"+foo[0]);
 	}
 
 	public void reshape(
-		GLDrawable arg0,int arg1,int arg2,int arg3,int arg4) {
+		GLAutoDrawable arg0,int arg1,int arg2,int arg3,int arg4) {
 		renderer.reshape(arg0, arg1, arg2, arg3, arg4);
   }
 	private final Object renderLock=new Object();
@@ -506,5 +432,25 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 				e.printStackTrace();
 			}
 	}
+
+  public Dimension getViewingComponentSize() {
+    return ((Component) getViewingComponent()).getSize();
+  }
+
+  public boolean canRenderAsync() {
+    return true;
+  }
+
+  public void render() {
+    if (EventQueue.isDispatchThread()) run();
+    else
+      try {
+        EventQueue.invokeAndWait(this);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      } catch (InvocationTargetException e) {
+        e.printStackTrace();
+      }
+  }
 	
 }

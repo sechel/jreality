@@ -36,16 +36,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
-
+/*
+ * Created on Apr 29, 2004
+ *
+ */
 package de.jreality.jogl.shader;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.util.logging.Level;
 
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLDrawable;
+import javax.media.opengl.GL;
+import javax.media.opengl.GLAutoDrawable;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.PolygonalTubeFactory;
@@ -83,6 +85,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	 
 	boolean lineStipple = false;
 	boolean tubeDraw = false;
+	boolean opaqueTubes = false;
 			
 	Color diffuseColor = java.awt.Color.BLACK;
 	private PolygonShader polygonShader;
@@ -98,6 +101,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		super.setFromEffectiveAppearance(eap, name);
 		tubeDraw = eap.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.TUBES_DRAW), CommonAttributes.TUBES_DRAW_DEFAULT);
 		tubeRadius = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TUBE_RADIUS),CommonAttributes.TUBE_RADIUS_DEFAULT);
+		opaqueTubes = eap.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.OPAQUE_TUBES_AND_SPHERES), CommonAttributes.OPAQUE_TUBES_AND_SPHERES_DEFAULT);
 		tubeStyle = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TUBE_STYLE),CommonAttributes.TUBE_STYLE_DEFAULT);
 		depthFudgeFactor = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DEPTH_FUDGE_FACTOR), depthFudgeFactor);
 		interpolateVertexColors = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.INTERPOLATE_VERTEX_COLORS), CommonAttributes.INTERPOLATE_VERTEX_COLORS_DEFAULT);
@@ -171,11 +175,10 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	}
 	public void preRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.getRenderer();
-		GLDrawable theCanvas = jr.getCanvas();
-		GL gl = theCanvas.getGL();
-		gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, diffuseColorAsFloat);
-		gl.glColor4fv( diffuseColorAsFloat);
-		System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
+		GL gl = jrs.getGL();
+		gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, diffuseColorAsFloat,0);
+		gl.glColor4fv( diffuseColorAsFloat,0);
+		System.arraycopy(diffuseColorAsFloat, 0, jr.getRenderingState().diffuseColor, 0, 4);
 	
 		gl.glLineWidth((float) getLineWidth());
 		if (isLineStipple()) {
@@ -193,7 +196,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		} //else lighting = false;
 		//if (jr.openGLState.lighting != lighting)	{
 		//else {
-			jr.openGLState.lighting = lighting;
+			jr.getRenderingState().lighting = lighting;
 			if (lighting) gl.glEnable(GL.GL_LIGHTING);
 			else gl.glDisable(GL.GL_LIGHTING);
 			
@@ -201,15 +204,23 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 
 		// this little bit of code forces tubes to be opaque: could add
 		// transparency-enable flag to the line shader to allow this to be controlled
-		gl.glDepthMask(true);
-		gl.glDisable(GL.GL_BLEND);
+		if (opaqueTubes)	{
+//			gl.glPushAttrib(GL.GL_ENABLE_BIT);
+//			gl.glPushAttrib(GL.GL_DEPTH_BUFFER_BIT);
+			gl.glDepthMask(true);
+			gl.glDisable(GL.GL_BLEND);			
+		}
 
 		if (!tubeDraw) gl.glDepthRange(0.0d, depthFudgeFactor);
 	}
 
 	public void postRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.getRenderer();
-		if (!tubeDraw) jr.getCanvas().getGL().glDepthRange(0.0d, 1d);
+		if (opaqueTubes)	{
+//			jr.getGL().glPopAttrib();
+//			jr.getGL().glPopAttrib();
+		}
+		if (!tubeDraw) jr.getGL().glDepthRange(0.0d, 1d);
 	}
 
 	public boolean providesProxyGeometry() {		
@@ -239,13 +250,13 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	boolean testQMS = true;
 	boolean smoothShading = true;		// force tubes to be smooth shaded ?
 	public int createTubesOnEdgesAsDL(IndexedLineSet ils, double rad,  double alpha, JOGLRenderer jr, int sig, boolean pickMode, boolean useDisplayLists)	{
-		GL gl = jr.globalGL;
+		GL gl = jr.getGL();
 		double[] p1 = new double[4],
 			p2 = new double[4];
 		p1[3] = p2[3] = 1.0;
 		double[][] oneCurve = null;
 		double[][] crossSection = TubeUtility.octagonalCrossSection;
-		if (jr.openGLState.levelOfDetail == 0.0) crossSection = TubeUtility.diamondCrossSection;
+		if (jr.getRenderingState().levelOfDetail == 0.0) crossSection = TubeUtility.diamondCrossSection;
 		int n = ils.getNumEdges();
 		DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
 		if (ils.getNumPoints() <= 1) return -1;
@@ -256,7 +267,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		if (tubeDL[sig+1] == 0)	{
 			tubeDL[sig+1] = gl.glGenLists(1);
 			gl.glNewList(tubeDL[sig+1], GL.GL_COMPILE);
-			jr.helper.drawFaces(TubeUtility.urTube[sig+1], smoothShading , alpha );
+			JOGLRendererHelper.drawFaces(jr, TubeUtility.urTube[sig+1], smoothShading , alpha );
 			gl.glEndList();	
 		}
 		int nextDL = -1;
@@ -264,23 +275,23 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			nextDL = gl.glGenLists(1);
 			gl.glNewList(nextDL, GL.GL_COMPILE);
 		}
-		int  k, l;
-		DoubleArray da;
-		double[] mat = new double[16];
-		for (int i = 0; i<n; ++i)	{
+			int  k, l;
+			DoubleArray da;
+			double[] mat = new double[16];
+			for (int i = 0; i<n; ++i)	{
 			IntArray ia = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray();
 			DataList edgec =  ils.getEdgeAttributes(Attribute.COLORS);
 			int m = ia.size();
 			if (pickMode)	gl.glPushName(i);
+			DoubleArray edgecolor = null;
+			int clength = 3;
+			if (edgec != null) {
+				edgecolor = edgec.item(i).toDoubleArray();
+				clength = edgecolor.size();
+				if (clength == 3) gl.glColor3d(edgecolor.getValueAt(0), edgecolor.getValueAt(1), edgecolor.getValueAt(2));
+				else gl.glColor4d(edgecolor.getValueAt(0), edgecolor.getValueAt(1), edgecolor.getValueAt(2), edgecolor.getValueAt(3));
+			}
 			if (m == 2 || pickMode)	{		// probably an IndexedFaceSet 
-				DoubleArray edgecolor = null;
-				int clength = 3;
-				if (edgec != null) {
-					edgecolor = edgec.item(i).toDoubleArray();
-					clength = edgecolor.size();
-					if (clength == 3) gl.glColor3d(edgecolor.getValueAt(0), edgecolor.getValueAt(1), edgecolor.getValueAt(2));
-					else gl.glColor4d(edgecolor.getValueAt(0), edgecolor.getValueAt(1), edgecolor.getValueAt(2), edgecolor.getValueAt(3));
-				}
 				
 				for (int j = 0; j<m-1; ++j)	{
 					k = ia.getValueAt(j);
@@ -294,7 +305,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 					SceneGraphComponent cc = TubeUtility.tubeOneEdge(p1, p2, rad, crossSection, sig);
 					if (pickMode) gl.glPushName(j);
 					gl.glPushMatrix();
-					gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix(mat));
+					gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix(mat),0);
 					gl.glCallList(tubeDL[sig+1]);
 					gl.glPopMatrix();
 					if (pickMode) 	gl.glPopName();					
@@ -312,13 +323,14 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				ptf.update();
 				IndexedFaceSet tube = ptf.getTube();
 				if (tube != null)	{
-					jr.helper.drawFaces(tube, smoothShading, alpha);			
+					JOGLRendererHelper.drawFaces(jr, tube, smoothShading, alpha);			
 				}
 			}
-			if (pickMode) gl.glPopName();
+			if (pickMode) 	gl.glPopName();					
 		}
 		
 		if (useDisplayLists) gl.glEndList();
+		// problems with display list validity when switching to full-screen mode: kill them
 		return nextDL;
 	}
 
@@ -333,31 +345,37 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		preRender(jrs);
 		if (g != null)	{
 			if (providesProxyGeometry())	{
-				if (!useDisplayLists || jr.pickMode || dListProxy == -1) {
+				if (!useDisplayLists || jr.isPickMode() || dListProxy == -1) {
 					dListProxy  = proxyGeometryFor(jrs);
 				}
-				jr.globalGL.glCallList(dListProxy);
+				jr.getGL().glCallList(dListProxy);
 			}
 			else 	{
-				if (!useDisplayLists || jr.pickMode) {
-					jr.helper.drawLines((IndexedLineSet) g,  false, jr.openGLState.diffuseColor[3]);
+				if (!useDisplayLists || jr.isPickMode()) {
+					JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  false, jr.getRenderingState().diffuseColor[3]);
 				} else {
 					if (useDisplayLists && dList == -1)	{
-						dList = jr.globalGL.glGenLists(1);
-						jr.globalGL.glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
-						jr.helper.drawLines((IndexedLineSet) g,  false, jr.openGLState.diffuseColor[3]);
-						jr.globalGL.glEndList();	
+						dList = jr.getGL().glGenLists(1);
+						jr.getGL().glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
+						JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  false, jr.getRenderingState().diffuseColor[3]);
+						jr.getGL().glEndList();	
 					}
-					jr.globalGL.glCallList(dList);
+					jr.getGL().glCallList(dList);
 				} 
 			}
 		}
 	}
 
 	public void flushCachedState(JOGLRenderer jr) {
-		if (dList != -1) jr.globalGL.glDeleteLists(dList, 1);
-		if (dListProxy != -1) jr.globalGL.glDeleteLists(dListProxy,1);
+		if (dList != -1) jr.getGL().glDeleteLists(dList, 1);
+		if (dListProxy != -1) jr.getGL().glDeleteLists(dListProxy,1);
 		dList = dListProxy = -1;
+		if (tubeDL != null)
+			for (int i = 0; i<3; ++i)
+				if (tubeDL[i] != 0)	{
+					jr.getGL().glDeleteLists(tubeDL[i], 1);
+					tubeDL[i] = 0;
+				}
 	}
 	
 

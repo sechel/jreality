@@ -40,8 +40,9 @@
 
 package de.jreality.jogl;
 
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLDrawable;
+import javax.media.opengl.GL;
+import javax.media.opengl.GLAutoDrawable;
+
 
 public class GpgpuViewer extends Viewer {
 
@@ -53,7 +54,7 @@ public class GpgpuViewer extends Viewer {
     calculationInited=false;
   }
   
-  public void init(GLDrawable arg0) {
+  public void init(GLAutoDrawable arg0) {
     if (calculation != null) {
       calculationInited=true;
       calculation.init(arg0);
@@ -61,7 +62,7 @@ public class GpgpuViewer extends Viewer {
     super.init(arg0);
   }
   
-  public void display(GLDrawable arg0) {
+  public void display(GLAutoDrawable arg0) {
     if (calculation != null) {
       if (!calculationInited) {
         calculationInited=true;
@@ -76,7 +77,7 @@ public class GpgpuViewer extends Viewer {
     arg0.getGL().glPopAttrib();
   }
   
-  public void reshape(GLDrawable arg0, int arg1, int arg2, int arg3, int arg4) {
+  public void reshape(GLAutoDrawable arg0, int arg1, int arg2, int arg3, int arg4) {
     if (calculation != null) calculation.reshape(arg0, arg1, arg2, arg3, arg4);
     super.reshape(arg0, arg1, arg2, arg3, arg4);
   }

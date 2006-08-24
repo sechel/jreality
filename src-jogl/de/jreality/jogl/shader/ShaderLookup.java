@@ -40,10 +40,9 @@
 
 package de.jreality.jogl.shader;
 
+import java.util.HashMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.util.LoggingSystem;
@@ -59,20 +58,24 @@ public class ShaderLookup
   private ShaderLookup(){}
   private static Object lookup2(String shaderName, String type) {
 	    Object ps;
+	    HashMap unknowns = new HashMap();
 	    try
 	    {
 	      final String clName="de.jreality.jogl.shader."+Character.toUpperCase(
 	        shaderName.charAt(0))+shaderName.substring(1)+Character.toUpperCase(type.charAt(0))+type.substring(1);
-	      JOGLConfiguration.getLogger().log(Level.FINEST, "attempt to load {0}", clName);
+	      LoggingSystem.getLogger(ShaderLookup.class).log(Level.FINEST, "attempt to load {0}", clName);
 	      final Class cl= Class.forName(clName);
-	      JOGLConfiguration.getLogger().log(Level.FINEST, "loaded {0}", cl);
+	      LoggingSystem.getLogger(ShaderLookup.class).log(Level.FINEST, "loaded {0}", cl);
 	      ps=cl.newInstance();
-	      JOGLConfiguration.getLogger().log(Level.FINEST, "instantiated {0}", cl);
+	      LoggingSystem.getLogger(ShaderLookup.class).log(Level.FINEST, "instantiated {0}", cl);
 	    }
 	    catch(ClassNotFoundException ex)
 	    {
 	      type=Character.toUpperCase(type.charAt(0))+type.substring(1);
-	      LoggingSystem.getLogger(ShaderLookup.class).warning("unsupported shader "+shaderName);
+	      if ( unknowns.get(shaderName) != null ){
+		      unknowns.put(shaderName, shaderName);
+		      LoggingSystem.getLogger(ShaderLookup.class).warning("unsupported shader "+shaderName);	    	  
+	      }
 	      ps=new DefaultPolygonShader();
 	    }
 	    catch(Exception ex)

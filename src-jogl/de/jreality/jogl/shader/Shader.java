@@ -40,7 +40,6 @@
 
 package de.jreality.jogl.shader;
 
-import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.shader.EffectiveAppearance;
 

@@ -40,14 +40,15 @@
 
 package de.jreality.jogl;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import net.java.games.jogl.DebugGL;
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLDrawable;
-import net.java.games.jogl.GLU;
+import javax.media.opengl.GL;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.glu.GLU;
+
 import de.jreality.jogl.shader.GlslLoader;
 
 public class ClothCalculation2 extends AbstractCalculation {
@@ -139,10 +140,10 @@ private boolean hasValidVBO;
 
   private void initVBO(GL gl) {
       if (vbo[0] == 0) {
-        gl.glGenBuffersARB(1, vbo);
+        gl.glGenBuffersARB(1, vbo, 0);
         System.out.println("created VBO=" + vbo[0]);
         gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, vbo[0]);
-        gl.glBufferDataARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 1024*1024*4*4, (float[])null, GL.GL_STREAM_COPY);
+        gl.glBufferDataARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 1024*1024*4*4, (Buffer)null, GL.GL_STREAM_COPY);
         gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 0);
         hasValidVBO=true;
       }
@@ -167,15 +168,15 @@ private boolean hasValidVBO;
   protected void transferFromTextureToVBO(GL gl) {
       gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, vbo[0]);
       gl.glReadBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
-      gl.glReadPixels(0, 0, NUM_ROWS, NUM_COLS, TEX_FORMAT, GL.GL_FLOAT, (float[]) null);
+      gl.glReadPixels(0, 0, NUM_ROWS, NUM_COLS, TEX_FORMAT, GL.GL_FLOAT, (Buffer) null);
       gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 0);
       hasValidVBO=true;
     }
 
-  public void display(GLDrawable drawable) {
+  public void display(GLAutoDrawable drawable) {
     //GL gl = new DebugGL(drawable.getGL());
     GL gl = drawable.getGL();
-    GLU glu = drawable.getGLU();
+    GLU glu = new GLU(); // drawable.getGLU();
     if (hasData && doIntegrate) {
       
       initPrograms(gl);
@@ -222,7 +223,7 @@ private boolean hasValidVBO;
         //initDataTextures(gl);
         
         program.setUniform("point", true);
-        GlslLoader.render(program, drawable);
+        GlslLoader.render(program, gl);
         renderQuad(gl);
         //valueBuffer.position((i+1)*NUM_COLS*4).limit((i+2)*NUM_COLS*4);
         
@@ -253,7 +254,7 @@ private boolean hasValidVBO;
         
         gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT1_EXT);
         program.setUniform("point", false);
-        GlslLoader.render(program, drawable);
+        GlslLoader.render(program, gl);
         renderQuad(gl);
         // very expensive:
         //gl.glFinish();
@@ -266,7 +267,7 @@ private boolean hasValidVBO;
       pingPong = pongPing;
       pongPing = tmp;
     
-      GlslLoader.postRender(program, drawable); // any postRender just resets the shader pipeline
+      GlslLoader.postRender(program, gl); // any postRender just resets the shader pipeline
     
       gl.glDisable(TEX_TARGET);
       // switch back to old buffer
@@ -278,8 +279,8 @@ private boolean hasValidVBO;
   
   protected void initDataTextures(GL gl) {
     if (texIDsPositions[0] == 0) {
-      gl.glGenTextures(texIDsPositions.length, texIDsPositions);
-      gl.glGenTextures(texIDsVelocities.length, texIDsVelocities);
+      gl.glGenTextures(texIDsPositions.length, texIDsPositions, 0);
+      gl.glGenTextures(texIDsVelocities.length, texIDsVelocities, 0);
       for (int i = 0; i < texIDsPositions.length; i++) {
         setupTexture(gl, texIDsPositions[i], NUM_COLS*NUM_ROWS);
         setupTexture(gl, texIDsVelocities[i], NUM_COLS*NUM_ROWS);

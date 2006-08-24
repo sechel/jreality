@@ -42,11 +42,9 @@ package de.jreality.jogl.shader;
 
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
-import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.shader.Texture2D;
 
 /**
  * @author Charles Gunn

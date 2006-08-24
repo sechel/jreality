@@ -40,9 +40,16 @@
 
 package de.jreality.jogl;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.io.File;
+import java.io.IOException;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -54,18 +61,27 @@ import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.java.games.jogl.DebugGL;
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLCanvas;
-import net.java.games.jogl.GLDrawable;
-import net.java.games.jogl.GLPbuffer;
-import net.java.games.jogl.GLU;
-import net.java.games.jogl.util.BufferUtils;
+import javax.imageio.ImageIO;
+import javax.media.opengl.DebugGL;
+import javax.media.opengl.GL;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLCanvas;
+import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLContext;
+import javax.media.opengl.GLDrawableFactory;
+import javax.media.opengl.GLPbuffer;
+import javax.media.opengl.glu.GLU;
+
+import com.sun.opengl.util.BufferUtil;
+import com.sun.opengl.util.FileUtil;
+import com.sun.opengl.util.ImageUtil;
+
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.pick.PickPoint;
 import de.jreality.jogl.shader.DefaultGeometryShader;
+import de.jreality.jogl.shader.DefaultPolygonShader;
 import de.jreality.jogl.shader.DefaultVertexShader;
 import de.jreality.jogl.shader.RenderingHintsShader;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
@@ -87,6 +103,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
@@ -107,86 +124,77 @@ import de.jreality.util.SceneGraphUtility;
  */
 public class JOGLRenderer  implements AppearanceListener {
 
-	final static Logger theLog = JOGLConfiguration.theLog;
-	final public boolean debugGL = JOGLConfiguration.debugGL;
+	private final static Logger theLog = JOGLConfiguration.theLog;
+  private final boolean debugGL = JOGLConfiguration.debugGL;
 	
-	static boolean collectFrameRate = true;
-	public final static int MAX_STACK_DEPTH = 28;
-	protected int stackDepth;
+	private static boolean collectFrameRate = true;
+	private final static int MAX_STACK_DEPTH = 28;
+  private int stackDepth;
 
-	JOGLRenderer globalHandle = null;
-	GLDrawable theCanvas;
-	SceneGraphPath currentPath = new SceneGraphPath();
+	private SceneGraphPath currentPath = new SceneGraphPath();
 	
-	public Viewer theViewer;
-	SceneGraphComponent theRoot, auxiliaryRoot;
-	JOGLPeerComponent thePeerRoot = null;
-	JOGLPeerComponent thePeerAuxilliaryRoot = null;
-	public JOGLRendererHelper helper;
-	public JOGLRenderingState openGLState;
+	private SceneGraphComponent theRoot, auxiliaryRoot;
+  private JOGLPeerComponent thePeerRoot = null;
+  private JOGLPeerComponent thePeerAuxilliaryRoot = null;
+  private JOGLRenderingState openGLState;
 
-	int width, height;		// GLDrawable.getSize() isnt' implemented for GLPBuffer!
-	int whichEye = CameraUtility.MIDDLE_EYE;
-	int[] currentViewport = new int[4];
-	public Graphics3D context;
-	public GL globalGL;
-	GLU globalGLU;
-	public  boolean texResident = true;
-	int numberTries = 0;		// how many times we have tried to make textures resident
-	boolean  //useDisplayLists = true, 
-		manyDisplayLists = false, forceResidentTextures = true;
-	private boolean globalIsReflection = false;
-	public int currentSignature = Pn.EUCLIDEAN;
+  private int width, height;		// GLDrawable.getSize() isnt' implemented for GLPBuffer!
+  private int whichEye = CameraUtility.MIDDLE_EYE;
+  private int[] currentViewport = new int[4];
+  private Graphics3D context;
+  
+  private GL globalGL;
+	private boolean  manyDisplayLists = false;
+
+  private boolean texResident = true;
+  private int numberTries = 0;		// how many times we have tried to make textures resident
+  private boolean forceResidentTextures = true;
+
+  private boolean globalIsReflection = false;
+  private int currentSignature = Pn.EUCLIDEAN;
 
 	// pick-related stuff
-	public boolean pickMode = false;
+  private boolean pickMode = false, offscreenMode = false;
 	private final double pickScale = 10000.0;
-	Transformation pickT = new Transformation();
-	PickPoint[] hits;
+  private Transformation pickT = new Transformation();
+  private PickPoint[] hits;
 	// another eccentric mode: render in order to capture a screenshot
-	boolean screenShot = false;
-	boolean backSphere = false;
-	double framerate;
-	int lightCount = 0;
-	int nodeCount = 0;
+  private boolean screenShot = false;
+
+  private boolean backSphere = false;
+  private double framerate;
+  private int nodeCount = 0;
+    
 	WeakHashMap geometries = new WeakHashMap();
 	boolean geometryRemoved = false, lightListDirty = true;
-	static double[] p3involution = P3.makeStretchMatrix(null, new double[]{-1d,-1d,-1d,1d});
 	DefaultVertexShader dvs = new DefaultVertexShader();
+  private Viewer theViewer;
 
+  private int stereoType;
+  private boolean flipped;
+  
 	public JOGLRenderer(Viewer viewer) {
-		this(viewer, viewer.canvas);
+    theViewer=viewer;
 		javax.swing.Timer followTimer = new javax.swing.Timer(1000, new ActionListener()	{
 			public void actionPerformed(ActionEvent e) {updateGeometryHashtable(); } } );
 		followTimer.start();
-	}
-
-	public JOGLRenderer(Viewer viewer, GLDrawable d) {
-		super();
-		theViewer = viewer;
-		theCanvas = d;
-
-		globalHandle = this;
-		helper = new JOGLRendererHelper(this);
 		setAuxiliaryRoot(viewer.getAuxiliaryRoot());		
-
 	}
 
-	private void setSceneRoot(SceneGraphComponent sgc) {
-		if (theRoot != null) {
-			Appearance ap = theRoot.getAppearance();
-			if (ap != null) ap.removeAppearanceListener(this);
-		}
-		theRoot = sgc;
-		thePeerRoot = constructPeerForSceneGraphComponent(theRoot, null);		
-		// some top-level appearance attributes determine how we render; 
-		// TODO set up a separate mechanism for controlling these top-level attributes
-		theLog.info("setSceneRoot");
-		Appearance ap = theRoot.getAppearance();
-	}
-	
+  private void setSceneRoot(SceneGraphComponent sgc) {
+    if (theRoot != null) {
+      Appearance ap = theRoot.getAppearance();
+      if (ap != null) ap.removeAppearanceListener(this);
+    }
+    theRoot = sgc;
+    thePeerRoot = constructPeerForSceneGraphComponent(theRoot, null);   
+    // some top-level appearance attributes determine how we render; 
+    // TODO set up a separate mechanism for controlling these top-level attributes
+    theLog.info("setSceneRoot");
+  }
+  
 	public void appearanceChanged(AppearanceEvent ev) {
-		theLog.fine("top appearance changed");
+		theLog.info("top appearance changed");
 		extractGlobalParameters();
 	}
 	
@@ -230,11 +238,11 @@ public class JOGLRenderer  implements AppearanceListener {
 		globalGL.glLoadIdentity();
 
 		if (!pickMode)
-			helper.handleBackground( width, height, theRoot.getAppearance());
+			JOGLRendererHelper.handleBackground(this, width, height, theRoot.getAppearance());
 		if (pickMode)
-			globalGL.glMultTransposeMatrixd(pickT.getMatrix());
+			globalGL.glMultTransposeMatrixd(pickT.getMatrix(), 0);
 
-		theCanvas.setAutoSwapBufferMode(!pickMode);
+//		theCanvas.setAutoSwapBufferMode(!pickMode);
 		double aspectRatio = getAspectRatio();
 		// for pick mode the aspect ratio has to be set to that of the viewer component
 		if (pickMode) aspectRatio = CameraUtility.getAspectRatio(theViewer);
@@ -242,20 +250,24 @@ public class JOGLRenderer  implements AppearanceListener {
 		double[] c2ndc = CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), 
 				aspectRatio,
 				whichEye);
-		globalGL.glMultTransposeMatrixd(c2ndc);
+		globalGL.glMultTransposeMatrixd(c2ndc, 0);
+//		if (offscreenMode)	{
+//			System.err.println("Viewport is "+CameraUtility.getCamera(theViewer).getViewPort().toString());
+//			System.err.println("Matrix is "+Rn.matrixToString(c2ndc));
+//		}
 
 		
 		// prepare for rendering the geometry
 		globalGL.glMatrixMode(GL.GL_MODELVIEW);
 		globalGL.glLoadIdentity();
 
-		if (backSphere) {  globalGL.glLoadTransposeMatrixd(p3involution);	globalGL.glPushMatrix(); }
+		if (backSphere) {  globalGL.glLoadTransposeMatrixd(P3.p3involution, 0);	globalGL.glPushMatrix(); }
 		double[] w2c = context.getWorldToCamera();
-		globalGL.glLoadTransposeMatrixd(w2c);
-		globalIsReflection = (theViewer.isFlipped() != (Rn.determinant(w2c) < 0.0));
+		globalGL.glLoadTransposeMatrixd(w2c, 0);
+    globalIsReflection = ( isFlipped() != (Rn.determinant(w2c) < 0.0));
 
 		if (theRoot.getAppearance() != null) 
-			helper.handleSkyBox(theCanvas, theRoot.getAppearance(), globalHandle);
+			JOGLRendererHelper.handleSkyBox(this, theRoot.getAppearance());
 		
 		if (!pickMode) processLights();
 		
@@ -287,18 +299,18 @@ public class JOGLRenderer  implements AppearanceListener {
 		if (clipPlanes == null)	{
 			clipPlanes = SceneGraphUtility.collectClippingPlanes(theRoot);
 		}
-		helper.processClippingPlanes(globalGL, clipPlanes);
+		JOGLRendererHelper.processClippingPlanes(globalGL, clipPlanes);
 	}
 
 	List lights = null;
 	private void processLights( ) {
 		if (lights == null || lights.size() == 0 || lightListDirty) {
 			lights = SceneGraphUtility.collectLights(theRoot);
-			helper.resetLights(globalGL, lights);
+			JOGLRendererHelper.resetLights(globalGL, lights);
 			lightListDirty = false;
 			openGLState.numLights = lights.size();
 		}
-		helper.processLights(globalGL, lights);
+		JOGLRendererHelper.processLights(globalGL, lights);
 	}
 
 	private void forceResidentTextures() {
@@ -357,7 +369,8 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 		pickPoint[0] = p[0];  pickPoint[1] = p[1];
 		pickMode = true;
-		theCanvas.display();	// this calls out display() method  directly
+		// TODO!!!
+    //theCanvas.display();	// this calls our display() method  directly
 		return hits;
 	}
 	
@@ -372,41 +385,47 @@ public class JOGLRenderer  implements AppearanceListener {
 	/* (non-Javadoc)
 	 * @see net.java.games.jogl.GLEventListener#init(net.java.games.jogl.GLDrawable)
 	 */
-	public void init(GLDrawable drawable) {
+	public void init(GLAutoDrawable drawable) {
 		if (debugGL) {
 			drawable.setGL(new DebugGL(drawable.getGL()));
 		}
-
+    GLAutoDrawable theCanvas = drawable;
+    if (!(theCanvas instanceof GLPbuffer))  {  // workaround in bug in implementation of GLPbuffer
+      width = theCanvas.getWidth();
+      height = theCanvas.getHeight();
+    }
+    init(drawable.getGL());
+  }
+  
+  public void init(GL gl) {
 		openGLState = new JOGLRenderingState(this);
-		theCanvas = drawable;
-		if (!(theCanvas instanceof GLPbuffer))	{  // workaround in bug in implementation of GLPbuffer
-			width = theCanvas.getSize().width;
-			height = theCanvas.getSize().height;
-		}
 
-		globalGL = theCanvas.getGL();
-		globalGLU = theCanvas.getGLU();
+		globalGL = gl;
 
 		if (debugGL)	{
 			String vv = globalGL.glGetString(GL.GL_VERSION);
 			theLog.log(Level.INFO,"version: "+vv);			
 			int[] tu = new int[1];
-			globalGL.glGetIntegerv(GL.GL_MAX_TEXTURE_UNITS, tu);
+			globalGL.glGetIntegerv(GL.GL_MAX_TEXTURE_UNITS, tu,0);
 			theLog.info("# of texture units: "+tu[0]);			
 		}
 		
 
-		if (thePeerRoot != null) thePeerRoot.propagateGeometryChanged(ALL_CHANGED);
-		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.propagateGeometryChanged(ALL_CHANGED);
+		if (thePeerRoot != null) thePeerRoot.propagateGeometryChanged(ALL_GEOMETRY_CHANGED);
+		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.propagateGeometryChanged(ALL_GEOMETRY_CHANGED);
 		Texture2DLoaderJOGL.deleteAllTextures(globalGL);
 		if (debugGL)	theLog.log(Level.INFO,"Got new sphere display lists for context "+globalGL);
 }
-	public void display(GLDrawable drawable) {
+	public void display(GLAutoDrawable drawable) {
 		if (theViewer.getSceneRoot() == null || theViewer.getCameraPath() == null) {
 			LoggingSystem.getLogger(this).info("display called w/o scene root or camera path");
 		}
-	  
-		openGLState.initializeGLState();
+	    display(drawable.getGL());
+  }
+  
+  public void display(GL gl) {
+    globalGL=gl;
+ 		openGLState.initializeGLState();
       
 		long beginTime = 0;
 		if (collectFrameRate) beginTime = System.currentTimeMillis();
@@ -414,21 +433,21 @@ public class JOGLRenderer  implements AppearanceListener {
 		clearColorBits = (openGLState.clearColorBuffer ? GL.GL_COLOR_BUFFER_BIT : 0);
 		if (theCamera.isStereo())		{
 			setupRightEye();
+			//System.err.println("Right");
 			render();
 			setupLeftEye();
+			//System.err.println("Left");
 			render();
-	        globalGL.glColorMask(true, true, true, true);
+			openGLState.colorMask =15; //globalGL.glColorMask(true, true, true, true);
 		} 
 		else {
-			globalGL.glClear (clearColorBits | GL.GL_DEPTH_BUFFER_BIT);
+			//globalGL.glClear (clearColorBits | GL.GL_DEPTH_BUFFER_BIT);
+			openGLState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 			myglViewport(0,0,width, height);
 			whichEye=CameraUtility.MIDDLE_EYE;
-			if (!pickMode)	{
-				 	render();
-			}
-			else		{
+			if (pickMode)	{
 				myglViewport(0,0, 2,2);
-				IntBuffer selectBuffer = BufferUtils.newIntBuffer(bufsize);
+				IntBuffer selectBuffer = BufferUtil.newIntBuffer(bufsize);
 				//JOGLConfiguration.theLog.log(Level.INFO,"Picking "+frameCount);
 				double[] pp3 = new double[3];
 				pp3[0] = -pickScale * pickPoint[0]; pp3[1] = -pickScale * pickPoint[1]; pp3[2] = 0.0;
@@ -442,13 +461,64 @@ public class JOGLRenderer  implements AppearanceListener {
 				pickMode = false;
 				thePeerRoot.propagateGeometryChanged(POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
 				int numberHits = globalGL.glRenderMode(GL.GL_RENDER);
-				hits = JOGLPickAction.processOpenGLSelectionBuffer(numberHits, selectBuffer, pickPoint,theViewer);
-				display(drawable);
-			}
+        // HACK
+				//hits = JOGLPickAction.processOpenGLSelectionBuffer(numberHits, selectBuffer, pickPoint,theViewer);
+				display(globalGL);
+			}			
+			else	 if (offscreenMode) {
+			    GLContext context = offscreenPBuffer.getContext();
+			    if (context.makeCurrent() == GLContext.CONTEXT_NOT_CURRENT) {
+			    	JOGLConfiguration.getLogger().log(Level.WARNING,"Error making pbuffer's context current");
+			    		return;
+			    }
+			    GL oldGL = globalGL;
+			    globalGL = offscreenPBuffer.getGL();
+			    //context.setGL(globalGL);
+			      /* setup pixel store for glReadPixels */
+			    myglViewport(0,0,tileSizeX, tileSizeY);
+			    Rectangle2D vp = CameraUtility.getViewport(theCamera, getAspectRatio()); //CameraUtility.getAspectRatio(theViewer));
+			    double dx = vp.getWidth()/numTiles;
+			    double dy = vp.getHeight()/numTiles;
+			    boolean isOnAxis = theCamera.isOnAxis();
+			    theCamera.setOnAxis(false);
+			    forceNewDisplayLists();
+			    openGLState.initializeGLState();
+			    
+			    for (int i = 0; i<numTiles; ++i)	{
+			    	
+			    	for (int j = 0; j<numTiles; ++j)	{
+						openGLState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
+			    			Rectangle2D lr = new Rectangle2D.Double(vp.getX()+j*dx, vp.getY()+i*dy, dx, dy);
+			    			System.err.println("Setting vp to "+lr.toString());
+			    			theCamera.setViewPort(lr);
+						render();
+						globalGL.glPixelStorei(GL.GL_PACK_ROW_LENGTH,numTiles*tileSizeX);
+						globalGL.glPixelStorei(GL.GL_PACK_SKIP_ROWS, i*tileSizeY);
+						globalGL.glPixelStorei(GL.GL_PACK_SKIP_PIXELS, j*tileSizeX);
+						globalGL.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
+
+						globalGL.glReadPixels(0, 0, tileSizeX, tileSizeY,
+								GL.GL_BGR, GL.GL_UNSIGNED_BYTE, offscreenBuffer);
+			    	}
+			    }
+
+			    context.release();
+
+			    theCamera.setOnAxis(isOnAxis);
+          Dimension d = theViewer.getViewingComponentSize();
+			    myglViewport(0, 0, (int) d.getWidth(), (int) d.getHeight());
+			    //globalGL = oldGL;
+			   // theCanvas.getContext().makeCurrent();
+			    offscreenMode = false;
+			} else 
+				render();			
 		}
+
+    // TODO!!
 		if (screenShot)	{
-			if (theCanvas instanceof GLCanvas) helper.saveScreenShot((GLCanvas) theCanvas, screenShotFile);
-			else JOGLConfiguration.theLog.log(Level.WARNING, "Can't find the size of class "+theCanvas.getClass());
+//			if (theCanvas instanceof GLCanvas) 
+			JOGLRendererHelper.saveScreenShot(getGL(), width, height, screenShotFile);
+//			else JOGLConfiguration.theLog.log(Level.WARNING, "Can't find the size of class "+theCanvas.getClass());
 		}
 		
 		if (collectFrameRate)	{
@@ -471,28 +541,29 @@ public class JOGLRenderer  implements AppearanceListener {
 //	 else 
 
 	private void setupRightEye() {
-		int which = theViewer.getStereoType();
+		int which = getStereoType();
 		switch(which)	{
-		case Viewer.CROSS_EYED_STEREO:
-			globalGL.glClear (clearColorBits | GL.GL_DEPTH_BUFFER_BIT);
+		case de.jreality.jogl.Viewer.CROSS_EYED_STEREO:
+			openGLState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
+			//globalGL.glClear (clearColorBits | GL.GL_DEPTH_BUFFER_BIT);
 			int w = width/2;
 			int h = height;
 			myglViewport(0,0, w,h);
 			break;
 		
-		case Viewer.RED_BLUE_STEREO:
-		case Viewer.RED_CYAN_STEREO:
-		case Viewer.RED_GREEN_STEREO:
+		case de.jreality.jogl.Viewer.RED_BLUE_STEREO:
+		case de.jreality.jogl.Viewer.RED_CYAN_STEREO:
+		case de.jreality.jogl.Viewer.RED_GREEN_STEREO:
 			myglViewport(0,0, width, height);
-			globalGL.glClear (clearColorBits | GL.GL_DEPTH_BUFFER_BIT);
-	        if (which == Viewer.RED_GREEN_STEREO) globalGL.glColorMask(false, true, false, true);
-	        else if (which == Viewer.RED_BLUE_STEREO) globalGL.glColorMask(false, false, true, true);
-	        else if (which == Viewer.RED_CYAN_STEREO) globalGL.glColorMask(false, true, true, true);
+			openGLState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
+	        if (which == de.jreality.jogl.Viewer.RED_GREEN_STEREO) openGLState.colorMask = 10; //globalGL.glColorMask(false, true, false, true);
+	        else if (which == de.jreality.jogl.Viewer.RED_BLUE_STEREO) openGLState.colorMask = 12; //globalGL.glColorMask(false, false, true, true);
+	        else if (which == de.jreality.jogl.Viewer.RED_CYAN_STEREO) openGLState.colorMask = 14; //globalGL.glColorMask(false, true, true, true);
 			break;
 			
-		case Viewer.HARDWARE_BUFFER_STEREO:
+		case de.jreality.jogl.Viewer.HARDWARE_BUFFER_STEREO:
 			myglViewport(0,0, width, height);
-			globalGL.glClear (clearColorBits | GL.GL_DEPTH_BUFFER_BIT);
+			openGLState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 			globalGL.glDrawBuffer(GL.GL_BACK_RIGHT);
 			break;			
 		}
@@ -500,33 +571,35 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 
 	private void setupLeftEye() {
-		int which = theViewer.getStereoType();
+		int which = getStereoType();
 		switch(which)	{
-		case Viewer.CROSS_EYED_STEREO:
+		case de.jreality.jogl.Viewer.CROSS_EYED_STEREO:
 			int w = width/2;
 			int h = height;
+			openGLState.clearBufferBits = 0;
 			myglViewport(w, 0, w,h);
 			break;
 			
-		case Viewer.RED_BLUE_STEREO:
-		case Viewer.RED_CYAN_STEREO:
-		case Viewer.RED_GREEN_STEREO:
-	       globalGL.glColorMask(true, false, false, true);
-			globalGL.glClear (GL.GL_DEPTH_BUFFER_BIT);
+		case de.jreality.jogl.Viewer.RED_BLUE_STEREO:
+		case de.jreality.jogl.Viewer.RED_CYAN_STEREO:
+		case de.jreality.jogl.Viewer.RED_GREEN_STEREO:
+			openGLState.colorMask = 9; //globalGL.glColorMask(true, false, false, true);
+			openGLState.clearBufferBits = GL.GL_DEPTH_BUFFER_BIT;
 			break;
 			
-		case Viewer.HARDWARE_BUFFER_STEREO:
+		case de.jreality.jogl.Viewer.HARDWARE_BUFFER_STEREO:
 			globalGL.glDrawBuffer(GL.GL_BACK_LEFT);
-			globalGL.glClear (clearColorBits | GL.GL_DEPTH_BUFFER_BIT);
+			openGLState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
+//			globalGL.glClear (clearColorBits | GL.GL_DEPTH_BUFFER_BIT);
 			break;
 		}
 		whichEye=CameraUtility.LEFT_EYE;
 	}
 
-	public void displayChanged(GLDrawable arg0, boolean arg1, boolean arg2) {
+	public void displayChanged(GLAutoDrawable arg0, boolean arg1, boolean arg2) {
 	}
 
-	public void reshape(GLDrawable arg0,int arg1,int arg2,int arg3,int arg4) {
+	public void reshape(GLAutoDrawable arg0,int arg1,int arg2,int arg3,int arg4) {
 		width = arg3-arg1;
 		height = arg4-arg2;
 		myglViewport(0,0, width, height);
@@ -535,7 +608,12 @@ public class JOGLRenderer  implements AppearanceListener {
     private final static int POINTS_CHANGED = 1;
     private final static int LINES_CHANGED = 2;
     private final static int FACES_CHANGED = 4;
-    private final static int ALL_CHANGED = 7;
+    private final static int ALL_GEOMETRY_CHANGED = 7;
+    private final static int POINT_SHADER_CHANGED = 8;
+    private final static int LINE_SHADER_CHANGED = 16;
+    private final static int POLYGON_SHADER_CHANGED = 32;
+    private final static int ALL_SHADERS_CHANGED = POINT_SHADER_CHANGED | LINE_SHADER_CHANGED | POLYGON_SHADER_CHANGED;
+    private final static int ALL_CHANGED = ALL_GEOMETRY_CHANGED | ALL_SHADERS_CHANGED;
 	
 	protected class JOGLPeerNode	{
 		String name;
@@ -552,7 +630,6 @@ public class JOGLRenderer  implements AppearanceListener {
 	int geomDiff = 0;
 	protected void updateGeometryHashtable() {
 		JOGLConfiguration.theLog.log(Level.FINEST, "Memory usage: "+getMemoryUsage());
-		if (geometries == null) return;
 		if (!geometryRemoved) return;
 		final WeakHashMap newG = new WeakHashMap();
 		SceneGraphVisitor cleanup = new SceneGraphVisitor()	{
@@ -583,7 +660,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	
 	
 	protected class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
-		Geometry originalGeometry;
+		public Geometry originalGeometry;
 		Geometry[] tubeGeometry, proxyPolygonGeometry;
 		Vector proxyGeometry;
 		IndexedFaceSet ifs;
@@ -592,6 +669,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		int refCount = 0;
 		int signature = Pn.EUCLIDEAN;
 		boolean isSurface = false;
+		boolean preRender = false;
 		
 		protected JOGLPeerGeometry(Geometry g)	{
 			super();
@@ -603,6 +681,8 @@ public class JOGLRenderer  implements AppearanceListener {
 			if (g instanceof PointSet) ps = (PointSet) g;
 			originalGeometry.addGeometryListener(this);
 			if (ifs != null || g instanceof Sphere || g instanceof Cylinder) isSurface = true;
+			Object foo = originalGeometry.getGeometryAttributes(JOGLConfiguration.PRE_RENDER);
+			if (foo != null) preRender = true;
 		}
 		
 		public void dispose()		{
@@ -623,9 +703,13 @@ public class JOGLRenderer  implements AppearanceListener {
 			openGLState.setUseDisplayLists(renderingHints.isUseDisplayLists()); //(); //useDisplayLists(activeDL, jpc);
 			openGLState.setCurrentGeometry(originalGeometry);
 			openGLState.setCurrentSignature(signature);
+			if (preRender && geometryShader.polygonShader instanceof DefaultPolygonShader)	{
+				((DefaultPolygonShader) geometryShader.polygonShader).preRender(openGLState);		
+				return;
+			}
 			renderingHints.render(openGLState);
-			theLog.fine("Rendering sgc "+jpc.getOriginalComponent().getName());
-			theLog.fine("vertex:edge:face:"+geometryShader.isVertexDraw()+geometryShader.isEdgeDraw()+geometryShader.isFaceDraw());
+			//theLog.fine("Rendering sgc "+jpc.getOriginalComponent().getName());
+			//theLog.fine("vertex:edge:face:"+geometryShader.isVertexDraw()+geometryShader.isEdgeDraw()+geometryShader.isFaceDraw());
 			if (geometryShader.isEdgeDraw() && ils != null)	{
 				geometryShader.lineShader.render(openGLState);
 				geometryShader.lineShader.postRender(openGLState);
@@ -640,13 +724,13 @@ public class JOGLRenderer  implements AppearanceListener {
 				geometryShader.polygonShader.postRender(openGLState);
 			}	
 			if (geometryShader.isVertexDraw() && ps!=null && ps.getVertexAttributes(Attribute.LABELS) != null) {
-				helper.drawPointLabels(ps,  jpc.geometryShader.pointShader.getTextShader());
+				JOGLRendererHelper.drawPointLabels(JOGLRenderer.this, ps,  jpc.geometryShader.pointShader.getTextShader());
 			}
 		    if (geometryShader.isEdgeDraw() &&ils != null && ils.getEdgeAttributes(Attribute.LABELS) != null) {
-		        helper.drawEdgeLabels(ils, jpc.geometryShader.lineShader.getTextShader());
+		        JOGLRendererHelper.drawEdgeLabels(JOGLRenderer.this, ils, jpc.geometryShader.lineShader.getTextShader());
 		       }
 		    if (geometryShader.isFaceDraw() &&ifs != null && ifs.getFaceAttributes(Attribute.LABELS) != null) {
-		    	helper.drawFaceLabels(ifs,  jpc.geometryShader.polygonShader.getTextShader());
+		    	JOGLRendererHelper.drawFaceLabels(JOGLRenderer.this, ifs,  jpc.geometryShader.polygonShader.getTextShader());
 		    }
 			renderingHints.postRender(openGLState);
 		}
@@ -682,7 +766,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		GoBetween gb = null;
 		Object foo = goBetweenTable.get(sgc);
 		if (foo == null)	{
-			gb = globalHandle.new GoBetween(sgc);
+			gb = JOGLRenderer.this.new GoBetween(sgc);
 			goBetweenTable.put(sgc, gb);
 			return gb;
 		}
@@ -769,11 +853,11 @@ public class JOGLRenderer  implements AppearanceListener {
 			boolean propagates = true;
 			// TODO shaders should register keywords somehow and which geometries might be changed
 			if (key.indexOf("implodeFactor") != -1 ) changed |= (FACES_CHANGED);
-			else if (key.indexOf("transparency") != -1) changed |= (FACES_CHANGED);
-			else if (key.indexOf("tubeRadius") != -1) changed |= (
-					LINES_CHANGED);
+			else if (key.indexOf("transparency") != -1) changed |= (POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
+			else if (key.indexOf("tubeRadius") != -1) changed |= (LINES_CHANGED);
 			else if (key.indexOf("pointRadius") != -1) changed |= (POINTS_CHANGED);
 			else if (key.indexOf("anyDisplayLists") != -1) changed |= (POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
+			else if (key.endsWith("Shader")) changed |= LINE_SHADER_CHANGED | POINT_SHADER_CHANGED | POLYGON_SHADER_CHANGED;
 			// there are some appearances which we know aren't inherited, so don't propagate change event.
 			if (key.indexOf(CommonAttributes.BACKGROUND_COLOR) != -1	||
 				key.indexOf("fog") != -1) propagates = false;
@@ -910,29 +994,38 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 		
 	}
-	protected class JOGLPeerComponent extends JOGLPeerNode implements TransformationListener, AppearanceListener,SceneGraphComponentListener {
+	public class JOGLPeerComponent extends JOGLPeerNode implements TransformationListener, AppearanceListener,SceneGraphComponentListener {
 		
 		public int[] bindings = new int[2];
-		EffectiveAppearance eAp;
-		Vector children;
-		JOGLPeerComponent parent;
-		int childIndex;
-		GoBetween goBetween;
+		protected EffectiveAppearance eAp;
+		protected Vector children;
+		protected JOGLPeerComponent parent;
+		protected int childIndex;
+		protected GoBetween goBetween;
 		
-		boolean isReflection = false, cumulativeIsReflection = false;
+		protected boolean isReflection = false;
+		boolean isCopyCat = false;
+		protected boolean cumulativeIsReflection = false;
 		double determinant = 0.0;
+
 		
 		RenderingHintsShader renderingHints;
 		DefaultGeometryShader geometryShader;
 
-		Object childLock = new Object();		
-		Runnable renderGeometry = null;
+		//Object childLock = new Object();
+		Lock childlock = new Lock();
+		protected Runnable renderGeometry = null;
 		final JOGLPeerComponent self = this;
-		
-		boolean appearanceChanged = true,
+		double[][] matrices = null;
+		double minDistance = -1, maxDistance = -1;
+		protected boolean appearanceChanged = true;
+		boolean effectiveAppearanceDirty = true,
 			geometryIsDirty = true,
 			boundIsDirty = true,
-			flushCachedInfo  = false;
+			clipToCamera = true;
+		protected boolean flushCachedInfo  = false;
+		protected boolean renderRunnableDirty = true;
+		boolean[] matrixIsReflection = null;
 
 		double[] tform = new double[16];		// for optimized access to matrix
 		public JOGLPeerComponent(SceneGraphPath sgp, JOGLPeerComponent p)		{
@@ -943,24 +1036,33 @@ public class JOGLRenderer  implements AppearanceListener {
 			goBetween = goBetweenFor(sgp.getLastComponent());
 			goBetween.addJOGLPeer(this);
 			name = "JOGLPeer:"+goBetween.getOriginalComponent().getName();
+//			isCopyCat = goBetween.getOriginalComponent() instanceof JOGLMultipleComponent;
+			Geometry foo = goBetween.getOriginalComponent().getGeometry();
+			isCopyCat = (foo != null &&  foo instanceof PointSet && foo.getGeometryAttributes(JOGLConfiguration.COPY_CAT) != null);
+			if (isCopyCat)	{
+				matrices = ((PointSet) foo).getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null);
+				matrixIsReflection = new boolean[matrices.length];
+				for (int i = 0; i<matrices.length; ++i)	matrixIsReflection[i] = Rn.determinant(matrices[i]) < 0.0;
+			}
 			children = new Vector();		// always have a child list, even if it's empty
 			parent = p;
 			updateTransformationInfo();
-			updateRenderRunnable();
 		}
 		
-		private void updateRenderRunnable() {
+		protected void updateRenderRunnable() {
 			flushCachedInfo();
 			updateShaders();
 			if (goBetween.peerGeometry == null) renderGeometry = null;
-			else	renderGeometry = new Runnable() {
+			else	 renderGeometry = new Runnable() {
 				public void run() {
 					goBetween.peerGeometry.render(self);
 				}
 			};
+			renderRunnableDirty = false;
 		}
 
 		public void dispose()	{
+			    
 				int n = children.size();
 				for (int i = n-1; i>=0; --i)	{
 					JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
@@ -971,56 +1073,110 @@ public class JOGLRenderer  implements AppearanceListener {
 
 		public void render()		{
 			if (!goBetween.getOriginalComponent().isVisible()) return;
-						
+			Transformation thisT = preRender();
+			renderChildren();
+			postRender(thisT);
+		}
+
+
+		private Transformation preRender() {
+			Transformation thisT = null;						
 			nodeCount++;
+			if (renderRunnableDirty) updateRenderRunnable();
 			currentPath.push(goBetween.getOriginalComponent());
 			context.setCurrentPath(currentPath);
-			Transformation thisT = goBetween.getOriginalComponent().getTransformation();
+			thisT = goBetween.getOriginalComponent().getTransformation();
 			
-			if (thisT != null)	{
-				if ( stackDepth <= MAX_STACK_DEPTH) {
-					globalGL.glPushMatrix();
-					globalGL.glMultTransposeMatrixd(thisT.getMatrix(tform));
-					stackDepth++;
-				}
-				else {
-					globalGL.glLoadTransposeMatrixd(context.getObjectToCamera());	
-				}
-				currentSignature = thisT.getSignature();
-			}  
-			
+			if (thisT != null) {
+				pushTransformation(thisT.getMatrix());
+				if (eAp != null)
+					currentSignature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
+			}
+
 			if (parent != null) cumulativeIsReflection = (isReflection != parent.cumulativeIsReflection);
 			else cumulativeIsReflection = (isReflection != globalIsReflection);
 			if (cumulativeIsReflection != openGLState.flipped)	{
 				globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
 				openGLState.flipped  = cumulativeIsReflection;
 			}
-
 			if (appearanceChanged)  	propagateAppearanceChanged();
 			if (flushCachedInfo)		flushCachedInfo();
-			if (goBetween.getPeerGeometry() != null)	{
+			if (goBetween != null && goBetween.peerGeometry != null && goBetween.peerGeometry.originalGeometry != null )	{
 				Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
 			}
-			
+			return thisT;
+		}
+		protected void renderChildren() {
 			int n = children.size();
-			for (int i = 0; i<n; ++i)	{		
-				JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);					
-				if (pickMode)	globalGL.glPushName(JOGLPickAction.SGCOMP_BASE+child.childIndex);
-				child.render();
-				if (pickMode)	globalGL.glPopName();
-			}				
 			
-			if (thisT != null)	{
+			if (isCopyCat)		{
+//				Iterator iter = ((JOGLMultipleComponent) goBetween.getOriginalComponent()).getIterator();
+//				while (iter.hasNext())	{
+//					Transformation t = (Transformation.getMatrix() ) iter.next();
+//					pushTransformation(t);
+				boolean isReflectionBefore = cumulativeIsReflection;
+				minDistance = eAp.getAttribute("discreteGroup.minDistance", minDistance);
+				maxDistance = eAp.getAttribute("discreteGroup.maxDistance", maxDistance);
+				clipToCamera = eAp.getAttribute("discreteGroup.clipToCamera", clipToCamera);
+			
+				int nn = matrices.length;
+				double[] o2ndc = context.getObjectToNDC();
+				double[] o2c = context.getObjectToCamera();
+				int count = 0;
+				for (int j = 0; j<nn; ++j)	{
+					if (JOGLConfiguration.testMatrices)
+						if (clipToCamera && !JOGLRendererHelper.accept(o2ndc, o2c, minDistance, maxDistance, matrices[j], currentSignature)) continue;
+					count++;
+					cumulativeIsReflection = (isReflectionBefore != matrixIsReflection[j]);
+					if (cumulativeIsReflection != openGLState.flipped)	{
+						globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
+						openGLState.flipped  = cumulativeIsReflection;
+					}
+					pushTransformation(matrices[j]);
+					
+					for (int i = 0; i<n; ++i)	{		
+						JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);					
+						child.render();
+					}				
+					popTransformation();
+				}
+				//System.err.println("Matrix count: "+count);
+			} else {
+				for (int i = 0; i<n; ++i)	{		
+					JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);					
+					if (pickMode)	globalGL.glPushName(JOGLPickAction.SGCOMP_BASE+child.childIndex);
+					child.render();
+					if (pickMode)	globalGL.glPopName();
+				}								
+			}
+		}
+
+		private void postRender(Transformation thisT) {
+			if (thisT != null) popTransformation();			
+			currentPath.pop();
+		}
+
+
+		protected void popTransformation() {
 				if (stackDepth <= MAX_STACK_DEPTH) {
 					globalGL.glPopMatrix();			
 					stackDepth--;
 				}
-			}			
-			currentPath.pop();
+		}
+
+		protected void pushTransformation(double[] m) {
+				if ( stackDepth <= MAX_STACK_DEPTH) {
+					globalGL.glPushMatrix();
+					globalGL.glMultTransposeMatrixd(m,0);
+					stackDepth++;
+				}
+				else {
+					globalGL.glLoadTransposeMatrixd(context.getObjectToCamera(),0);	
+				}
 		}
 		
 		public void setIndexOfChildren()	{
-			synchronized(childLock){
+			childlock.readLock();
 				int n = goBetween.getOriginalComponent().getChildComponentCount();
 					for (int i = 0; i<n; ++i)	{
 						SceneGraphComponent sgc = goBetween.getOriginalComponent().getChildComponent(i);
@@ -1030,10 +1186,12 @@ public class JOGLRenderer  implements AppearanceListener {
 							jpc.childIndex = -1;
 						} else jpc.childIndex = i;
 					}									
-			}
+			childlock.readUnlock();
+		
 		}
 
 		private JOGLPeerComponent getPeerForChildComponent(SceneGraphComponent sgc) {
+			childlock.readLock();
 			int n = children.size();
 			for (int i = 0; i<n; ++i)	{
 				JOGLPeerComponent jpc = (JOGLPeerComponent) children.get(i);
@@ -1041,6 +1199,7 @@ public class JOGLRenderer  implements AppearanceListener {
 					return jpc;
 				}
 			}
+			childlock.readUnlock();
 			return null;
 		}
 
@@ -1048,7 +1207,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			appearanceChanged = true;
 		}
 		
-		private void propagateAppearanceChanged()	{
+		protected void propagateAppearanceChanged()	{
 			Appearance thisAp = goBetween.getOriginalComponent().getAppearance(); 
 			if (parent == null)	{
 				if (eAp == null) {
@@ -1058,24 +1217,33 @@ public class JOGLRenderer  implements AppearanceListener {
 				}
 			} else {
 				if ( parent.eAp == null)	{
-					//throw new IllegalStateException("Parent must have effective appearance");
-					return;
+					throw new IllegalStateException("Parent must have effective appearance");
+					//return;
 				}
 				// TODO when Appearance's are added or removed, have to set eAp to null
-				if (eAp == null)	{
-					if (thisAp != null )	
+				if (effectiveAppearanceDirty || eAp == null)	{
+					if (thisAp != null )	{
 						eAp = parent.eAp.create(thisAp);
-					else {
+//						theLog.log(Level.INFO,"creating new eap for "+goBetween.originalComponent.getName());
+//						List l = eAp.getAppearanceHierarchy();
+//						Iterator iter = l.iterator();
+//						while (iter.hasNext())	{
+//							System.err.println("\t"+((Appearance)iter.next()).toString());
+//						}
+					} else {
 						eAp = parent.eAp;	
 					}
+					effectiveAppearanceDirty = false;
 				}
 			}
 			updateShaders();
+			childlock.readLock();
 			int n = children.size();
 			for (int i = 0; i<n; ++i)	{		
 				JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
 				child.propagateAppearanceChanged();
 			}	
+			childlock.readUnlock();
 			appearanceChanged=false;
 		}
 
@@ -1091,6 +1259,7 @@ public class JOGLRenderer  implements AppearanceListener {
 				renderingHints = parent.renderingHints;
 			
 			} else  {		
+//				theLog.log(Level.FINER,"Updating shaders for "+goBetween.originalComponent.getName());
 				if (geometryShader == null)
 					geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
 				else 
@@ -1113,20 +1282,17 @@ public class JOGLRenderer  implements AppearanceListener {
 
 				case SceneGraphComponentEvent.CHILD_TYPE_COMPONENT:
 					SceneGraphComponent sgc = (SceneGraphComponent) ev.getNewChildElement();
-					JOGLPeerComponent pc = globalHandle.constructPeerForSceneGraphComponent(sgc, this);
-					synchronized(childLock)	{
+					JOGLPeerComponent pc = JOGLRenderer.this.constructPeerForSceneGraphComponent(sgc, this);
+					//childlock.writeLock();
 				    //theLog.log(Level.FINE,"Before adding child count is "+children.size());
 						children.add(pc);						
-					  
+					 //childlock.writeUnlock();
 					//theLog.log(Level.FINE,"After adding child count is "+children.size());
-					}
 					setIndexOfChildren();
 					lightListDirty = true;
 					break;
 				case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
-					int changed = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
-					propagateGeometryChanged(changed);	
-					appearanceChanged = true;
+					handleNewAppearance();
 					theLog.log(Level.FINE,"Propagating geometry change due to added appearance");
 					break;				
 				case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
@@ -1140,6 +1306,13 @@ public class JOGLRenderer  implements AppearanceListener {
 					break;
 			}
 		}
+
+		private void handleNewAppearance() {
+			int changed = ALL_CHANGED;
+			propagateGeometryChanged(changed);	
+			appearanceChanged = true;
+			effectiveAppearanceDirty=true;
+		}
 		
 		public void childRemoved(SceneGraphComponentEvent ev) {
 			//theLog.log(Level.FINE,"Container Child removed from: "+goBetween.getOriginalComponent().getName());
@@ -1152,18 +1325,16 @@ public class JOGLRenderer  implements AppearanceListener {
 					SceneGraphComponent sgc = (SceneGraphComponent) ev.getOldChildElement();
 				    JOGLPeerComponent jpc = getPeerForChildComponent(sgc);
 				    if (jpc == null) return;
-					synchronized(childLock)	{
+					//childlock.writeLock();
 					    children.remove(jpc);						
-					}
+					//childlock.writeUnlock();
 					//theLog.log(Level.FINE,"After removal child count is "+children.size());
 				    jpc.dispose();		// there are no other references to this child
 				    setIndexOfChildren();
 				    lightListDirty = true;
 					break;
 				case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
-					int changed = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
-					propagateGeometryChanged(changed);	
-					appearanceChanged = true;
+					handleNewAppearance();
 					theLog.log(Level.INFO,"Propagating geometry change due to removed appearance");
 					break;				
 				case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
@@ -1182,15 +1353,12 @@ public class JOGLRenderer  implements AppearanceListener {
 			//theLog.log(Level.FINE,"Container Child replaced at: "+goBetween.getOriginalComponent().getName());
 			switch(ev.getChildType())	{
 				case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
-					updateRenderRunnable();
+					renderRunnableDirty = true; 
 					break;
 
 				case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
-					int changed = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
-					propagateGeometryChanged(changed);	
+					handleNewAppearance();
 					theLog.log(Level.INFO,"Propagating geometry change due to replaced appearance");
-					appearanceChanged = true;
-					if (this == thePeerRoot) extractGlobalParameters();
 					break;
 				case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
 					lightListDirty = true;
@@ -1227,20 +1395,24 @@ public class JOGLRenderer  implements AppearanceListener {
 //				goBetween.getPeerGeometry().geometryChanged(changed);
 //			dlInfo.geometryChanged(changed);
 			geometryChanged(changed);
-			synchronized(childLock)	{
+			childlock.readLock();
 				int n = children.size();
 				for (int i = 0; i<n; ++i)	{		
 					JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
 					child.propagateGeometryChanged(changed);
-				}				
-			}
+				}	
+			childlock.readUnlock();
+
 		}
 
 		private void geometryChanged(int changed) {
 			if (geometryShader != null)	{
-				if (geometryShader.pointShader != null && (changed & POINTS_CHANGED) != 0) geometryShader.pointShader.flushCachedState(globalHandle);
-				if (geometryShader.lineShader != null && (changed & LINES_CHANGED) != 0) geometryShader.lineShader.flushCachedState(globalHandle);
-				if (geometryShader.polygonShader != null && (changed & FACES_CHANGED) != 0) geometryShader.polygonShader.flushCachedState(globalHandle);				
+				if (geometryShader.pointShader != null && (changed & POINTS_CHANGED) != 0) geometryShader.pointShader.flushCachedState(JOGLRenderer.this);
+				if (geometryShader.lineShader != null && (changed & LINES_CHANGED) != 0) geometryShader.lineShader.flushCachedState(JOGLRenderer.this);
+				if (geometryShader.polygonShader != null && (changed & FACES_CHANGED) != 0) geometryShader.polygonShader.flushCachedState(JOGLRenderer.this);				
+				if ((changed & POINT_SHADER_CHANGED) != 0) geometryShader.pointShader = null;
+				if ((changed & LINE_SHADER_CHANGED) != 0) geometryShader.lineShader = null;
+				if ((changed & POLYGON_SHADER_CHANGED) != 0) geometryShader.polygonShader = null;
 			}
 		}
 
@@ -1248,7 +1420,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			flushCachedInfo = true;
 		}
 
-		private void flushCachedInfo() {
+		protected void flushCachedInfo() {
 			geometryChanged(POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
 			flushCachedInfo = false;
 		}
@@ -1261,17 +1433,15 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 	}
 
-	
-	public GLDrawable getCanvas()	{
-		return theCanvas;
-	}
-
 	File screenShotFile = null;
 	private int clearColorBits;
-	public void saveScreenShot(File file)	{
+	private GLPbuffer offscreenPBuffer;
+	private Buffer offscreenBuffer;
+	public void saveScreenShot(File file, GLCanvas canvas)	{
 		screenShot = true;
 		screenShotFile = file;
-		theCanvas.display();
+    // TODO!!!
+		canvas.display();
 		screenShot = false;
 	}
 	public Graphics3D getContext() {
@@ -1291,4 +1461,78 @@ public class JOGLRenderer  implements AppearanceListener {
 	public double getAspectRatio() {
 		return ((double) currentViewport[2])/currentViewport[3];
 	}
+
+	private int tileSizeX=1024, tileSizeY=768,numTiles=4;
+	public void renderOffscreen(int imageWidth, int imageHeight, File file, GLCanvas canvas) {
+		 if (!GLDrawableFactory.getFactory().canCreateGLPbuffer()) {
+	        	JOGLConfiguration.getLogger().log(Level.WARNING,"PBuffers not supported");
+	              return;
+	      }
+		 
+		 numTiles = Math.max(imageWidth/1024, imageHeight/1024);
+		 if (imageWidth % 1024 != 0 ||  imageHeight % 1024 != 0) numTiles ++;
+		 tileSizeX = imageWidth/numTiles;
+		 tileSizeY = imageHeight/numTiles;
+		 imageWidth = (tileSizeX) * numTiles;
+		 imageHeight = (tileSizeY) * numTiles;
+		GLCapabilities caps = new GLCapabilities();
+		caps.setDoubleBuffered(false);
+		offscreenPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(
+						caps, null,
+				        tileSizeX, tileSizeY,
+				        canvas.getContext());
+		BufferedImage img = null;
+	    offscreenBuffer = null;
+//		imageWidth = numTiles*tileSizeX;
+//	    imageHeight = numTiles*tileSizeY;
+	    img = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_3BYTE_BGR);
+	    offscreenBuffer = ByteBuffer.wrap(((DataBufferByte) img.getRaster().getDataBuffer()).getData());
+
+	    offscreenMode = true;
+	    canvas.display();
+	    //display(offscreenPBuffer);
+
+	    ImageUtil.flipImageVertically(img);
+	    try {
+			if (!ImageIO.write(img, FileUtil.getFileSuffix(file), file)) {
+				JOGLConfiguration.getLogger().log(Level.WARNING,"Error writing file using ImageIO (unsupported file format?)");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+  public GL getGL() {
+    return globalGL;
+  }
+
+  public JOGLRenderingState getRenderingState() {
+    return openGLState;
+  }
+
+  public void setTextureResident(boolean b) {
+    texResident=b;
+  }
+
+  public int getStereoType() {
+    return stereoType;
+  }
+
+  public void setStereoType(int stereoType) {
+    this.stereoType = stereoType;
+  }
+
+  public boolean isFlipped() {
+    return flipped;
+  }
+
+  public void setFlipped(boolean flipped) {
+    this.flipped = flipped;
+  }
+
+  public Viewer getViewer() {
+    return theViewer;
+  }
+  
+  
 }

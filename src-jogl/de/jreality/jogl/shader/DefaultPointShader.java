@@ -42,18 +42,18 @@ package de.jreality.jogl.shader;
 
 import java.awt.Color;
 
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLDrawable;
+import javax.media.opengl.GL;
+
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.JOGLRenderer;
-import de.jreality.jogl.JOGLSphereHelper;
+import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
+import de.jreality.jogl.JOGLSphereHelper;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.math.P3;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
-import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
@@ -160,7 +160,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			}
 			ImageData id = new ImageData(sphereTex, textureSize, textureSize) ;
 			tex.setImage(id);
-			tex.setApplyMode(Texture2D.GL_REPLACE);
+			tex.setApplyMode(Texture2D.GL_MODULATE);
 	}
 
 	/**
@@ -217,10 +217,9 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	}
 	private void preRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.getRenderer();
-		GLDrawable theCanvas = jr.getCanvas();
-		GL gl = theCanvas.getGL();
+		GL gl = jrs.getGL();
 //		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
-			gl.glColor4fv( diffuseColorAsFloat);
+			gl.glColor4fv( diffuseColorAsFloat,0);
 //			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
 //		}
 		
@@ -228,25 +227,29 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			lighting = false;
 			gl.glPointSize((float) getPointSize());
       try {
-        gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, pointAttenuation);
+        gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, pointAttenuation,0);
       } catch (Exception e){
       //TODO: i dont know - got error on ati radeon 9800
       }
-			 //gl.glPointParameterf(GL.GL_POINT_DISTANCE_ATTENUATION, ))
 			gl.glEnable(GL.GL_POINT_SMOOTH);
 			gl.glEnable(GL.GL_POINT_SPRITE_ARB);
 			gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
-			Texture2DLoaderJOGL.render(theCanvas, currentTex);
+			if (currentTex == tex && (jrs.getCurrentGeometry() instanceof PointSet) && 
+					((PointSet)jrs.getCurrentGeometry()).getVertexAttributes(Attribute.COLORS) != null)
+				tex.setApplyMode(Texture2D.GL_MODULATE);
+			else tex.setApplyMode(Texture2D.GL_REPLACE);
+			Texture2DLoaderJOGL.render(gl, currentTex);
 			gl.glEnable(GL.GL_TEXTURE_2D);
 		} else	{
+			// really need to call the preRender() method on the polygonShader, but it doesn't exist.
 			Geometry g = jrs.getCurrentGeometry();
 			jrs.setCurrentGeometry(null);
 			polygonShader.render(jrs);
 			jrs.setCurrentGeometry(g);
 		}
 		
-			jr.openGLState.lighting = lighting;
+			jr.getRenderingState().lighting = lighting;
 			if (lighting) gl.glEnable(GL.GL_LIGHTING);
 			else gl.glDisable(GL.GL_LIGHTING);
 		
@@ -256,8 +259,8 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		JOGLRenderer jr = jrs.getRenderer(); 
 		polygonShader.postRender(jrs);
 		if (!sphereDraw)	{
-			GL gl = jr.globalGL;
-			jr.globalGL.glDisable(GL.GL_POINT_SPRITE_ARB);
+			GL gl = jr.getGL();
+			gl.glDisable(GL.GL_POINT_SPRITE_ARB);
 			gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_FALSE);
 			gl.glDisable(GL.GL_TEXTURE_2D);
@@ -273,7 +276,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		JOGLRenderer jr = jrs.getRenderer();
 		int sig = jrs.getCurrentSignature();
 		boolean useDisplayLists = jrs.isUseDisplayLists();
-		GL gl = 	jr.globalGL;
+		GL gl = 	jr.getGL();
 		if (original instanceof PointSet)	{
 			PointSet ps = (PointSet) original;
 			DataList vertices = ps.getVertexAttributes(Attribute.COORDINATES);
@@ -284,7 +287,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			DoubleArray da;
 			int n = ps.getNumPoints();
 			int resolution = 1;
-			if (jr.openGLState.levelOfDetail == 0.0) resolution = 0;
+			if (jr.getRenderingState().levelOfDetail == 0.0) resolution = 0;
 			int dlist = JOGLSphereHelper.getSphereDLists(resolution, jr);
 			int nextDL = -1;
 			if (useDisplayLists)	{
@@ -305,7 +308,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 				transVec =  vertices.item(i).toDoubleArray().toDoubleArray(null);	
 				P3.makeTranslationMatrix(mat, transVec,sig);
 				Rn.times(mat, mat, scale);
-				gl.glMultTransposeMatrixd(mat);
+				gl.glMultTransposeMatrixd(mat,0);
 				if (vertexColors != null)	{
 					da = vertexColors.item(i).toDoubleArray();
 					if (colorLength == 3) 	{
@@ -341,31 +344,33 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		preRender(jrs);
 		if (g != null)	{
 			if (providesProxyGeometry())	{
-				if (!useDisplayLists || jr.pickMode || dListProxy == -1) {
+				if (!useDisplayLists || jr.isPickMode() || dListProxy == -1) {
 					dListProxy  = proxyGeometryFor(jrs);
 				}
-				jr.globalGL.glCallList(dListProxy);
+				jr.getGL().glCallList(dListProxy);
 			}
 			else {
-				if (!useDisplayLists || jr.pickMode) {
-					jr.helper.drawVertices((PointSet) g,   jr.openGLState.diffuseColor[3]);
+				if (!useDisplayLists || jr.isPickMode()) {
+					JOGLRendererHelper.drawVertices(jr, (PointSet) g,   jr.getRenderingState().diffuseColor[3]);
 				} else {
 					if (useDisplayLists && dList == -1)	{
-						dList = jr.globalGL.glGenLists(1);
-						jr.globalGL.glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
-						jr.helper.drawVertices((PointSet) g,  jr.openGLState.diffuseColor[3]);
-						jr.globalGL.glEndList();	
+						dList = jr.getGL().glGenLists(1);
+						jr.getGL().glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
+						JOGLRendererHelper.drawVertices(jr, (PointSet) g,  jr.getRenderingState().diffuseColor[3]);
+						jr.getGL().glEndList();	
 					}
-					jr.globalGL.glCallList(dList);
+					jr.getGL().glCallList(dList);
 				} 
 			}			
 		}
 	}
 
 	public void flushCachedState(JOGLRenderer jr) {
-		if (dList != -1) jr.globalGL.glDeleteLists(dList, 1);
-		if (dListProxy != -1) jr.globalGL.glDeleteLists(dListProxy,1);
+		if (dList != -1) jr.getGL().glDeleteLists(dList, 1);
+		//TODO !!!
+    //if (dListProxy != -1) jr.getGL().glDeleteLists(dListProxy,1);
 		dList = dListProxy = -1;
+    //dList = -1;
 	}
 	
 

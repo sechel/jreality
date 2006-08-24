@@ -42,8 +42,6 @@ package de.jreality.jogl.shader;
 
 import java.io.IOException;
 
-import de.jreality.shader.DefaultTextShader;
-
 /**
  * @author gunn
  *

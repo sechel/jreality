@@ -43,11 +43,10 @@ package de.jreality.jogl.shader;
 import java.awt.Color;
 import java.util.logging.Level;
 
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLDrawable;
+import javax.media.opengl.GL;
+
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
-import de.jreality.scene.Geometry;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
@@ -60,9 +59,8 @@ public class SimpleLineShader extends AbstractPrimitiveShader implements LineSha
 
 
 	public void renderOld(JOGLRenderer jr) {
-		GLDrawable theCanvas = jr.getCanvas();
-		GL gl = theCanvas.getGL();
-		gl.glColor4fv( diffuseColorAsFloat);
+		GL gl = jr.getGL();
+		gl.glColor4fv( diffuseColorAsFloat,0);
 	}
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {

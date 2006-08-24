@@ -40,8 +40,8 @@
 
 package de.jreality.jogl.shader;
 
-import net.java.games.jogl.GL;
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.jogl.JOGLSphereHelper;
 import de.jreality.jogl.pick.JOGLPickAction;
@@ -55,7 +55,7 @@ import de.jreality.shader.GlslProgram;
 /**
  * it is assumed that the shader source code stayes FIXED!
  * 
- * @author gollwas
+ * @author Steffen Weissmann
  *
  */
 public class GlslPolygonShader extends AbstractPrimitiveShader implements PolygonShader {
@@ -69,32 +69,32 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 
   public void render(JOGLRenderingState jrs) {
 	  JOGLRenderer jr = jrs.getRenderer();
-    GlslLoader.render(program, jr.getCanvas());
+    GlslLoader.render(program, jr);
 	boolean useDisplayLists = jrs.isUseDisplayLists();
 	Geometry g = jrs.getCurrentGeometry();
 	if (g != null)	{
 		if (g instanceof Sphere || g instanceof Cylinder)	{	
 			int i = 3;
-			if (jr.debugGL)	{
-				double lod = jr.openGLState.levelOfDetail;
-				i = JOGLSphereHelper.getResolutionLevel(jr.context.getObjectToNDC(), lod);
+			if (false) {//jr.debugGL)	{
+				double lod = jr.getRenderingState().levelOfDetail;
+				i = JOGLSphereHelper.getResolutionLevel(jr.getContext().getObjectToNDC(), lod);
 			}
 			int dlist;
-			if (g instanceof Sphere) dlist = jr.openGLState.getSphereDisplayLists(i);
-			else 			 dlist = jr.openGLState.getCylinderDisplayLists(i);
-			if (jr.pickMode) jr.globalGL.glPushName(JOGLPickAction.GEOMETRY_BASE);
-			jr.globalGL.glCallList(dlist);
-			if (jr.pickMode) jr.globalGL.glPopName();
+			if (g instanceof Sphere) dlist = jr.getRenderingState().getSphereDisplayLists(i);
+			else 			 dlist = jr.getRenderingState().getCylinderDisplayLists(i);
+			if (jr.isPickMode()) jr.getGL().glPushName(JOGLPickAction.GEOMETRY_BASE);
+			jr.getGL().glCallList(dlist);
+			if (jr.isPickMode()) jr.getGL().glPopName();
 		}
 		else if ( g instanceof IndexedFaceSet)	{
-					jr.helper.drawFaces((IndexedFaceSet) g,true,1.0);			
+      JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g,true,1.0);			
 		}
 	}
   }
 
   public void postRender(JOGLRenderingState jrs) {
 	  JOGLRenderer jr = jrs.getRenderer();
-    GlslLoader.postRender(program, jr.getCanvas());
+    GlslLoader.postRender(program, jr);
   }
 
 public void setFrontBack(int f) {

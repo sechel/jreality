@@ -44,15 +44,16 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.logging.Level;
 
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLDrawable;
-import net.java.games.jogl.GLU;
+import javax.media.opengl.GL;
+import javax.media.opengl.glu.GLU;
+
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
-import de.jreality.scene.Geometry;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
@@ -71,41 +72,37 @@ public abstract class AbstractJOGLShader extends AbstractPrimitiveShader impleme
 		if (foo != null) resourceDir = foo;
 	}
 
-	public void setupShader(GLDrawable theCanvas)	{
-		if (theCanvas == null)	{
-			return;
-		}
-		GL gl = theCanvas.getGL();
-		GLU glu = theCanvas.getGLU();
+	public void setupShader(GL gl)	{
+		GLU glu = new GLU();
 		
 		int[] status = new int[1];
 		program = gl.glCreateProgramObjectARB();
 		if (vertexSource != null && vertexSource.length > 0)	{
 			int vertexHandle = gl.glCreateShaderObjectARB(GL.GL_VERTEX_SHADER_ARB);
-			gl.glShaderSourceARB(vertexHandle, 1, vertexSource, (int[]) null);
+			gl.glShaderSourceARB(vertexHandle, 1, vertexSource, (int[]) null, 0);
 			gl.glCompileShaderARB(vertexHandle);
 			printOpenGLError();		
-			gl.glGetObjectParameterivARB(vertexHandle, GL.GL_OBJECT_COMPILE_STATUS_ARB, status);
-			printInfoLog(vertexHandle, theCanvas);
+			gl.glGetObjectParameterivARB(vertexHandle, GL.GL_OBJECT_COMPILE_STATUS_ARB, status, 0);
+			printInfoLog(vertexHandle, gl);
 			if (status[0] == 0) return;
 			gl.glAttachObjectARB(program, vertexHandle);			
 		}
 		
 		if (fragmentSource != null && fragmentSource.length > 0)	{
 			int fragmentHandle = gl.glCreateShaderObjectARB(GL.GL_FRAGMENT_SHADER_ARB);
-			gl.glShaderSourceARB(fragmentHandle, 1, fragmentSource, (int[] ) null);
+			gl.glShaderSourceARB(fragmentHandle, 1, fragmentSource, (int[] ) null, 0);
 			gl.glCompileShaderARB(fragmentHandle);
 			printOpenGLError();
-			gl.glGetObjectParameterivARB(fragmentHandle, GL.GL_OBJECT_COMPILE_STATUS_ARB, status);
-			printInfoLog(fragmentHandle, theCanvas);
+			gl.glGetObjectParameterivARB(fragmentHandle, GL.GL_OBJECT_COMPILE_STATUS_ARB, status, 0);
+			printInfoLog(fragmentHandle, gl);
 			if (status[0] == 0) return;
 			gl.glAttachObjectARB(program, fragmentHandle);
 		}
 		
 		gl.glLinkProgramARB(program);
 		printOpenGLError();
-		gl.glGetObjectParameterivARB(program, GL.GL_OBJECT_LINK_STATUS_ARB, status);
-		printInfoLog(program, theCanvas);
+		gl.glGetObjectParameterivARB(program, GL.GL_OBJECT_LINK_STATUS_ARB, status, 0);
+		printInfoLog(program, gl);
 		if (status[0] == 0) {
 			program = -1;
 			return;
@@ -114,14 +111,13 @@ public abstract class AbstractJOGLShader extends AbstractPrimitiveShader impleme
 	
 	public void render(JOGLRenderingState jrs) {
 		JOGLRenderer jr = jrs.getRenderer();
-		GL gl = jr.getCanvas().getGL();
-		activate(jr.getCanvas());
+		GL gl = jr.getGL();
+		activate(jr.getGL());
 	}
 	
-	public void activate(GLDrawable theCanvas)	{
-		GL gl = theCanvas.getGL();
+	public void activate(GL gl)	{
 		if (program == -1)	{
-			setupShader(theCanvas);
+			setupShader(gl);
 			if (program == -1) {
 				JOGLConfiguration.theLog.log(Level.WARNING,"Can't  setup OpenGL shader "+vertexSource);
 				return;
@@ -129,32 +125,32 @@ public abstract class AbstractJOGLShader extends AbstractPrimitiveShader impleme
 		}
 		gl.glUseProgramObjectARB(program);
 		JOGLConfiguration.theLog.log(Level.FINE,"Setting GLSL program to "+program);
+		System.err.println("Activating glsl shader");
 	}
 	
 	public void postRender(JOGLRenderingState jrs) {
 		JOGLRenderer jr = jrs.getRenderer();
-		deactivate(jr.getCanvas());
+		deactivate(jr.getGL());
 	}
 	
-	public void deactivate(GLDrawable theCanvas)	{
+	public void deactivate(GL gl)	{
 		//TODO fix this
-		theCanvas.getGL().glUseProgramObjectARB(0);
+		gl.glUseProgramObjectARB(0);
 		LoggingSystem.getLogger(this).log(Level.FINE,"Deactivating GLSL program");
+		System.err.println("De-Activating glsl shader");
 	}
-	private void printInfoLog(int objectHandle, GLDrawable theCanvas)	{
-		GL gl = theCanvas.getGL();
-		
+	private void printInfoLog(int objectHandle, GL gl)	{
 		int[] logLength = new int[1];
 		int[] charsWritten = new int[1];
 		byte[] infoLog;
 		
 		printOpenGLError();
-		gl.glGetObjectParameterivARB(objectHandle, GL.GL_OBJECT_INFO_LOG_LENGTH_ARB, logLength);
+		gl.glGetObjectParameterivARB(objectHandle, GL.GL_OBJECT_INFO_LOG_LENGTH_ARB, logLength, 0);
 		printOpenGLError();
 		
 		if (logLength[0] > 0)	{
 			infoLog = new byte[logLength[0]];
-			gl.glGetInfoLogARB(objectHandle, logLength[0], charsWritten, infoLog );
+			gl.glGetInfoLogARB(objectHandle, logLength[0], IntBuffer.wrap(charsWritten), ByteBuffer.wrap(infoLog) );
 			StringBuffer foo = new StringBuffer(charsWritten[0]);
 			
 			for (int i = 0; i< charsWritten[0]; ++i)	foo.append((char) infoLog[i]);

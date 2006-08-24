@@ -44,10 +44,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import net.java.games.jogl.DebugGL;
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLDrawable;
-import net.java.games.jogl.GLU;
+import javax.media.opengl.GL;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.glu.GLU;
+
 import de.jreality.jogl.shader.GlslLoader;
 
 public class ClothCalculation extends AbstractCalculation {
@@ -135,10 +135,10 @@ public class ClothCalculation extends AbstractCalculation {
     gl.glEnd();
   }
 
-  public void display(GLDrawable drawable) {
+  public void display( GLAutoDrawable drawable) {
     //GL gl = new DebugGL(drawable.getGL());
     GL gl = drawable.getGL();
-    GLU glu = drawable.getGLU();
+    GLU glu = new GLU(); //drawable.getGLU();
     if (hasData && doIntegrate) {
       
       initPrograms(gl);
@@ -184,7 +184,7 @@ public class ClothCalculation extends AbstractCalculation {
         program.setUniform("velocity", 2);
 
         program.setUniform("point", true);
-        GlslLoader.render(program, drawable);
+        GlslLoader.render(program, gl);
         renderQuad(gl);
         //expensive;
         gl.glFinish();
@@ -196,7 +196,7 @@ public class ClothCalculation extends AbstractCalculation {
         
         gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT1_EXT);
         program.setUniform("point", false);
-        GlslLoader.render(program, drawable);
+        GlslLoader.render(program, gl);
         renderQuad(gl);
         //expensive;
         //gl.glFinish();
@@ -208,7 +208,7 @@ public class ClothCalculation extends AbstractCalculation {
       pingPong = pongPing;
       pongPing = tmp;
     
-      GlslLoader.postRender(program, drawable); // any postRender just resets the shader pipeline
+      GlslLoader.postRender(program, gl); // any postRender just resets the shader pipeline
     
       // switch back to old buffer
       gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, 0);
@@ -220,8 +220,8 @@ public class ClothCalculation extends AbstractCalculation {
   
   protected void initDataTextures(GL gl) {
     if (texIDsPositions[0] == 0) {
-      gl.glGenTextures(texIDsPositions.length, texIDsPositions);
-      gl.glGenTextures(texIDsVelocities.length, texIDsVelocities);
+      gl.glGenTextures(texIDsPositions.length, texIDsPositions, 0);
+      gl.glGenTextures(texIDsVelocities.length, texIDsVelocities, 0);
       for (int i = 0; i < texIDsPositions.length; i++) {
         setupTexture(gl, texIDsPositions[i], dataTextureSize);
         setupTexture(gl, texIDsVelocities[i], dataTextureSize);

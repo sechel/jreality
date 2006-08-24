@@ -43,7 +43,8 @@ package de.jreality.jogl;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 
-import net.java.games.jogl.GL;
+import javax.media.opengl.GL;
+
 import de.jreality.geometry.SphereUtility;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
@@ -65,7 +66,7 @@ public class JOGLSphereHelper extends SphereUtility {
 //		if (dlists != null)	{
 //			JOGLConfiguration.theLog.log(Level.WARNING,"Already have sphere display lists for this renderer "+jr);
 //		}
-		GL gl = jr.getCanvas().getGL();
+		GL gl = jr.getGL();
 		int n = SphereUtility.tessellatedIcosahedra.length;
 		dlists = null;
 		//if (!sharedDisplayLists)	dlists = (int[] ) sphereDListsTable.get(gl);
@@ -80,13 +81,13 @@ public class JOGLSphereHelper extends SphereUtility {
 			IndexedFaceSet qms = SphereUtility.cubePanels[i];
 			for (int j = 0; j<SphereUtility.cubeSyms.length; ++j)	{
 				gl.glPushMatrix();
-				gl.glMultTransposeMatrixd(SphereUtility.cubeSyms[j].getMatrix());
-				jr.helper.drawFaces(qms,true, 1.0);
+				gl.glMultTransposeMatrixd(SphereUtility.cubeSyms[j].getMatrix(),0);
+				JOGLRendererHelper.drawFaces(jr,qms,true, 1.0);
 				gl.glPopMatrix();
 			}				
 			gl.glEndList();
 		}
-		if (!sharedDisplayLists) sphereDListsTable.put(jr, dlists);
+		if (!sharedDisplayLists) sphereDListsTable.put(jr.getGL(), dlists);
 		else globalSharedSphereDisplayLists = dlists;
 	}
 	
@@ -110,12 +111,12 @@ public class JOGLSphereHelper extends SphereUtility {
 	public static int[] getSphereDLists( JOGLRenderer jr) {
 		int dlists[];
 		//if (!sharedDisplayLists)	
-			dlists =  (int[] ) sphereDListsTable.get(jr);
+			dlists =  (int[] ) sphereDListsTable.get(jr.getGL());
 		//else dlists = globalSharedSphereDisplayLists;
 		if (dlists == null) 	{
 			setupSphereDLists(jr);
 			//if (!sharedDisplayLists)	
-				dlists = (int[] ) sphereDListsTable.get(jr);
+				dlists = (int[] ) sphereDListsTable.get(jr.getGL());
 			//else dlists = globalSharedSphereDisplayLists;
 		}
 		if (dlists == null)	{

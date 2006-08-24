@@ -40,11 +40,10 @@
 
 package de.jreality.jogl.shader;
 
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLDrawable;
+import javax.media.opengl.GL;
+
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
-import de.jreality.scene.Appearance;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
@@ -134,8 +133,7 @@ public class RenderingHintsShader  {
 
 	public void render(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.getRenderer();
-		GLDrawable theCanvas = jr.getCanvas();
-		GL gl = theCanvas.getGL();
+		GL gl = jr.getGL();
 			if (transparencyEnabled)	{
 			  gl.glEnable (GL.GL_BLEND);
 			  gl.glDepthMask(zBufferEnabled);
@@ -144,7 +142,7 @@ public class RenderingHintsShader  {
 			  gl.glDepthMask(true);
 			  gl.glDisable(GL.GL_BLEND);
 			}
-			jr.openGLState.transparencyEnabled = transparencyEnabled;
+			jr.getRenderingState().transparencyEnabled = transparencyEnabled;
 			if (lightingEnabled)			gl.glEnable(GL.GL_LIGHTING);
 			else							gl.glDisable(GL.GL_LIGHTING);
 			if (backFaceCullingEnabled)  {
@@ -152,14 +150,13 @@ public class RenderingHintsShader  {
 				gl.glCullFace(GL.GL_BACK);
 			} else
 				gl.glDisable(GL.GL_CULL_FACE);
-			jr.openGLState.levelOfDetail = levelOfDetail;
+			jr.getRenderingState().levelOfDetail = levelOfDetail;
 
 	}
 
 	public void postRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.getRenderer();
-		GLDrawable theCanvas = jr.getCanvas();
-		GL gl = theCanvas.getGL();
+		GL gl = jr.getGL();
 		if (transparencyEnabled)	{
 			  gl.glDepthMask(true);
 			  gl.glDisable(GL.GL_BLEND);

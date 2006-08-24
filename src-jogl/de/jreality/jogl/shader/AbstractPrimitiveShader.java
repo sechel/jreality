@@ -42,12 +42,10 @@ package de.jreality.jogl.shader;
 
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
-import de.jreality.scene.Geometry;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.shader.Texture2D;
 
 public abstract class AbstractPrimitiveShader implements PrimitiveShader {
 	public DefaultTextShader textShader = null;

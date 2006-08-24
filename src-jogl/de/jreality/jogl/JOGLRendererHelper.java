@@ -52,21 +52,21 @@ import java.util.List;
 import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
+
+import javax.media.opengl.*;
 import javax.swing.SwingConstants;
 
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLCanvas;
-import net.java.games.jogl.GLDrawable;
-import net.java.games.jogl.util.BufferUtils;
-import net.java.games.jogl.util.GLUT;
+import com.sun.opengl.util.*;
+
+import com.sun.opengl.util.*;
 import de.jreality.backends.label.LabelUtility;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.HeightFieldFactory;
 import de.jreality.geometry.Primitives;
+import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultPolygonShader;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
-import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -101,33 +101,22 @@ import de.jreality.shader.Texture2D;
 public class JOGLRendererHelper {
 
 	public final static int PER_PART = 1;
-
 	public final static int PER_FACE = 2;
-
 	public final static int PER_VERTEX = 4;
-
 	public final static int PER_EDGE = 8;
-
-	float[] backgroundColor = { 0f, 0f, 0f, 1f };
-
-	float val = 1f;
-
-	float[][] unitsquare = { { val, val }, { -val, val }, { -val, -val },
+	static float val = 1f;
+	static float[][] unitsquare = { { val, val }, { -val, val }, { -val, -val },
 			{ val, -val } };
 
-	JOGLRenderer jr = null;
-
-	public JOGLRendererHelper(JOGLRenderer renderer) {
-		super();
-		jr = renderer;
-	}
-
-	protected void handleBackground(int width, int height, Appearance topAp) {
-		GLDrawable theCanvas = jr.getCanvas();
-		GL gl = theCanvas.getGL();
+	private JOGLRendererHelper() {}
+	static Appearance pseudoAp = new Appearance();
+	static void handleBackground(JOGLRenderer jr, int width, int height, Appearance topAp) {
+    GL gl = jr.getGL();
+    JOGLRenderingState openGLState = jr.getRenderingState();
 		Object bgo = null;
-		if (topAp == null)
-			return;
+    float[] backgroundColor;
+		if (topAp == null) topAp = pseudoAp;
+//			return;
 		for (int i = 0; i < 6; ++i) {
 			gl.glDisable(i + GL.GL_CLIP_PLANE0);
 		}
@@ -140,6 +129,17 @@ public class JOGLRendererHelper {
 					.getRGBComponents(null);
 		gl.glClearColor(backgroundColor[0], backgroundColor[1],
 				backgroundColor[2], 0.0f); // bg[3] ); //white
+		// Here is where we clear the screen and set the color mask
+		// It's a bit complicated by the various color masking required by
+		// color-channel stereo (see JOGLRenderer#display() ).
+		//System.err.println("clearbufferbits = "+jr.openGLState.clearBufferBits);
+		//System.err.println("colormask = "+jr.openGLState.colorMask);
+		// first set the color mask for the clear
+		if ((openGLState.clearBufferBits & GL.GL_COLOR_BUFFER_BIT) != 0) gl.glColorMask(true, true, true, true);
+		if (openGLState.clearBufferBits != 0) gl.glClear (openGLState.clearBufferBits);
+		// now set the color mask for pixel writing
+		int cm = openGLState.colorMask;
+		gl.glColorMask((cm&1) !=0, (cm&2) != 0, (cm&4) != 0, (cm&8) != 0);
 
 		boolean hasTexture = false, hasColors = false;
 		double textureAR = 1.0;
@@ -151,7 +151,7 @@ public class JOGLRendererHelper {
 			// "+tex.getWidth()+" "+tex.getHeight());
 			textureAR = tex.getImage().getWidth()
 					/ ((double) tex.getImage().getHeight());
-			Texture2DLoaderJOGL.render(theCanvas, tex);
+			Texture2DLoaderJOGL.render(gl, tex);
 			gl.glEnable(GL.GL_TEXTURE_2D);
 			hasTexture = true;
 		}
@@ -184,12 +184,12 @@ public class JOGLRendererHelper {
 			for (int q = 0; q < 4; ++q) {
 				if (hasTexture) {
 					gl.glColor3f(1f, 1f, 1f);
-					gl.glTexCoord2dv(texcoords[q]);
+					gl.glTexCoord2dv(texcoords[q], 0);
 				} else {
 					cornersf[q] = ((Color[]) bgo)[q].getComponents(null);
-					gl.glColor3fv(cornersf[q]);
+					gl.glColor3fv(cornersf[q],0);
 				}
-				gl.glVertex2fv(unitsquare[q]);
+				gl.glVertex2fv(unitsquare[q],0);
 			}
 			gl.glEnd();
 			gl.glEnable(GL.GL_DEPTH_TEST);
@@ -207,7 +207,7 @@ public class JOGLRendererHelper {
 				fogColor = ((Color) bgo).getRGBComponents(null);
 			}
 			gl.glFogi(GL.GL_FOG_MODE, GL.GL_EXP);
-			gl.glFogfv(GL.GL_FOG_COLOR, fogColor);
+			gl.glFogfv(GL.GL_FOG_COLOR, fogColor,0);
 			bgo = topAp.getAttribute(CommonAttributes.FOG_DENSITY);
 			float density = (float) CommonAttributes.FOG_DENSITY_DEFAULT;
 			if (bgo != null && bgo instanceof Double) {
@@ -218,30 +218,29 @@ public class JOGLRendererHelper {
 			gl.glDisable(GL.GL_FOG);
 	}
 
-	public void handleSkyBox(GLDrawable theCanvas, Appearance topAp,
-			JOGLRenderer r) {
+	public static void handleSkyBox(JOGLRenderer jr, Appearance topAp) {
+    GL gl = jr.getGL();
+    double[] w2c = jr.getContext().getWorldToCamera();
 		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
 				CommonAttributes.SKY_BOX, topAp)) {
 			CubeMap cm = (CubeMap) AttributeEntityUtility
 					.createAttributeEntity(CubeMap.class,
 							CommonAttributes.SKY_BOX, topAp, true);
-			JOGLSkyBox.render(theCanvas, r, cm);
+			JOGLSkyBox.render(gl, w2c, cm);
 		}
 
 	}
 
-	boolean testArrays = false;
+	private static ByteBuffer vBuffer, vcBuffer, vnBuffer, fcBuffer, fnBuffer, tcBuffer;
 
-	ByteBuffer vBuffer, vcBuffer, vnBuffer, fcBuffer, fnBuffer, tcBuffer;
+	private static DataList vLast = null, vcLast = null, vnLast = null;
 
-	DataList vLast = null, vcLast = null, vnLast = null;
-
-	public void drawVertices(PointSet sg, double alpha) {
+	public static void drawVertices(JOGLRenderer jr, PointSet sg, double alpha) {
+    GL gl = jr.getGL();
+    boolean pickMode=jr.isPickMode();
+    JOGLRenderingState openGLState = jr.getRenderingState();
 		if (sg.getNumPoints() == 0)
 			return;
-		boolean pickMode = jr.pickMode;
-		GLDrawable theCanvas = jr.theCanvas;
-		GL gl = theCanvas.getGL();
 		// gl.glPointSize((float)
 		// currentGeometryShader.pointShader.getPointSize());
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
@@ -251,10 +250,10 @@ public class JOGLRendererHelper {
 		int colorLength = 0;
 		if (vertexColors != null) {
 			colorLength = GeometryUtility.getVectorLength(vertexColors);
-			if (jr.openGLState.frontBack != DefaultPolygonShader.FRONT_AND_BACK) {
+			if (openGLState.frontBack != DefaultPolygonShader.FRONT_AND_BACK) {
 				gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK,
 						GL.GL_DIFFUSE);
-				jr.openGLState.frontBack = DefaultPolygonShader.FRONT_AND_BACK;
+				openGLState.frontBack = DefaultPolygonShader.FRONT_AND_BACK;
 			}
 		}
 
@@ -282,20 +281,16 @@ public class JOGLRendererHelper {
 			if (vertexColors != null) {
 				da = vertexColors.item(i).toDoubleArray();
 				if (colorLength == 3) {
-					gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da
-							.getValueAt(2), alpha);
+					gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
 				} else if (colorLength == 4) {
-					gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da
-							.getValueAt(2), alpha * da.getValueAt(3));
+					gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha * da.getValueAt(3));
 				}
 			}
 			da = vertices.item(i).toDoubleArray();
 			if (vertexLength == 3)
-				gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da
-						.getValueAt(2));
+				gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 			else if (vertexLength == 4)
-				gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da
-						.getValueAt(2), da.getValueAt(3));
+				gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
 			if (pickMode)
 				gl.glEnd();
 			if (pickMode)
@@ -307,13 +302,69 @@ public class JOGLRendererHelper {
 			gl.glPopName();
 	}
 
-	static Appearance a = new Appearance();
-
 	// static Texture2D tex2d=(Texture2D)
 	// AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a,
 	// true);
-	static IndexedFaceSet bb = Primitives.texturedSquare(new double[] { 0, 1,
+	// This is upside down since openGl textures are upside down.
+	private static IndexedFaceSet bb = Primitives.texturedSquare(new double[] { 0, 1,
 			0, 1, 1, 0, 1, 0, 0, 0, 0, 0 });
+
+	// static {
+	// tex2d.setRepeatS(Texture2D.GL_CLAMP);
+	// tex2d.setRepeatT(Texture2D.GL_CLAMP);
+	// }
+
+	// public void drawLabels(PointSet ps, CachedGeometryInfo cginfo,
+	// DefaultTextShader ts) {
+	// GL gl = jr.globalGL;
+	// double[] c2o = jr.context.getCameraToObject();
+	// DataList dl = ps.getVertexAttributes(Attribute.LABELS);
+	// DoubleArrayArray vertices =
+	// ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
+	// int n = ps.getNumPoints();
+	// Texture2D tex2d;
+	// StringArray labels = dl.toStringArray();
+	// Font font = ts.getFont();
+	// Color c = ts.getDiffuseColor();
+	// double scale = ts.getScale().doubleValue();
+	// double[] offset = ts.getOffset();
+	//
+	// if (cginfo.labelTexs[0] == null) {
+	// cginfo.labelTexs[0] = new Texture2D[n];
+	// for (int i = 0; i<n ; ++i) {
+	// Appearance ap = new Appearance();
+	// tex2d = cginfo.labelTexs[0][i] =(Texture2D)
+	// AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", ap,
+	// true);
+	// tex2d.setRepeatS(Texture2D.GL_CLAMP);
+	// tex2d.setRepeatT(Texture2D.GL_CLAMP);
+	// String li = labels.getValueAt(i);
+	// BufferedImage img = LabelUtility.createImageFromString(li,font,c);
+	// tex2d.setImage(new ImageData(img));
+	// }
+	// }
+	// // gl.glPushAttrib(GL.GL_DEPTH_BUFFER_BIT | GL.GL_ENABLE_BIT);
+	// gl.glEnable (GL.GL_BLEND);
+	// gl.glDisable(GL.GL_LIGHTING);
+	// gl.glDepthMask(true);
+	// gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+	// gl.glColor3d(1,1,1);
+	// gl.glEnable(GL.GL_TEXTURE_2D);
+	// for(int i = 0; i<n;i++) {
+	// int w = cginfo.labelTexs[0][i].getImage().getWidth();
+	// int h = cginfo.labelTexs[0][i].getImage().getHeight();
+	// double[] mat = P3.calculateBillboardMatrix(null,w*scale, h*scale,offset,
+	// c2o,vertices.getValueAt(i).toDoubleArray(null), Pn.EUCLIDEAN);
+	// gl.glActiveTexture(GL.GL_TEXTURE0);
+	// Texture2DLoaderJOGL.render(jr.theCanvas, cginfo.labelTexs[0][i]);
+	// gl.glPushMatrix();
+	// gl.glMultTransposeMatrixd(mat);
+	// drawFaces(bb, true, 1.0, false);
+	// gl.glPopMatrix();
+	// }
+	// gl.glDisable(GL.GL_TEXTURE_2D);
+	// // gl.glPopAttrib();
+	// }
 
 	private static final Texture2D tex2d = (Texture2D) AttributeEntityUtility
 			.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
@@ -322,23 +373,27 @@ public class JOGLRendererHelper {
 		tex2d.setRepeatT(Texture2D.GL_CLAMP);
 	}
 
-	public void drawPointLabels(PointSet ps, DefaultTextShader ts) {
+	public static void drawPointLabels(JOGLRenderer jr, PointSet ps, DefaultTextShader ts) {
 		if (!ts.getShowLabels().booleanValue())
 			return;
 
 		Font font = ts.getFont();
 		Color c = ts.getDiffuseColor();
 		double scale = ts.getScale().doubleValue();
+//		System.err.println("Scale is "+scale);
 		double[] offset = ts.getOffset();
 		int alignment = ts.getAlignment();
 		ImageData[] img = LabelUtility.createPointImages(ps, font, c);
 
-		renderLabels(img, ps.getVertexAttributes(Attribute.COORDINATES)
-				.toDoubleArrayArray(), null, offset, alignment, scale, jr);
+		renderLabels(jr, img, 
+				ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), 
+				null, 
+				offset, alignment,
+				scale);
 
 	}
 
-	public void drawEdgeLabels(IndexedLineSet ils, DefaultTextShader ts) {
+	public static void drawEdgeLabels(JOGLRenderer jr, IndexedLineSet ils, DefaultTextShader ts) {
 		if (!ts.getShowLabels().booleanValue())
 			return;
 
@@ -349,13 +404,13 @@ public class JOGLRendererHelper {
 		int alignment = ts.getAlignment();
 		ImageData[] img = LabelUtility.createEdgeImages(ils, font, c);
 
-		renderLabels(img, ils.getVertexAttributes(Attribute.COORDINATES)
+		renderLabels(jr, img, ils.getVertexAttributes(Attribute.COORDINATES)
 				.toDoubleArrayArray(), ils.getEdgeAttributes(Attribute.INDICES)
-				.toIntArrayArray(), offset, alignment, scale, jr);
+				.toIntArrayArray(), offset, alignment, scale);
 
 	}
 
-	public void drawFaceLabels(IndexedFaceSet ifs, DefaultTextShader ts) {
+	public static void drawFaceLabels(JOGLRenderer jr, IndexedFaceSet ifs, DefaultTextShader ts) {
 		if (!ts.getShowLabels().booleanValue())
 			return;
 		Font font = ts.getFont();
@@ -365,22 +420,21 @@ public class JOGLRendererHelper {
 		int alignment = ts.getAlignment();
 		ImageData[] img = LabelUtility.createFaceImages(ifs, font, c);
 
-		renderLabels(img, ifs.getVertexAttributes(Attribute.COORDINATES)
+		renderLabels(jr, img, ifs.getVertexAttributes(Attribute.COORDINATES)
 				.toDoubleArrayArray(), ifs.getFaceAttributes(Attribute.INDICES)
-				.toIntArrayArray(), offset, alignment, scale, jr);
+				.toIntArrayArray(), offset, alignment, scale);
 
 	}
 
-	private void renderLabels(ImageData[] labels, DoubleArrayArray vertices,
-			IntArrayArray indices, double[] offset, int alignment, double scale,
-			JOGLRenderer jr) {
-		GL gl = jr.globalGL;
+	private static void renderLabels(JOGLRenderer jr, ImageData[] labels, DoubleArrayArray vertices,
+			IntArrayArray indices, double[] offset, int alignment,  double scale) {
+    GL gl = jr.getGL();
 		gl.glEnable(GL.GL_BLEND);
 		gl.glDisable(GL.GL_LIGHTING);
 		gl.glDepthMask(true);
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glColor3d(1, 1, 1);
-		double[] c2o = jr.context.getCameraToObject();
+		double[] c2o = jr.getContext().getCameraToObject();
 		gl.glEnable(GL.GL_TEXTURE_2D);
 		double[] bbm = new double[16];
 		// float[] glc2o = new float[16];
@@ -392,15 +446,17 @@ public class JOGLRendererHelper {
 		for (int i = 0, n = labels.length; i < n; i++) {
 			ImageData img = labels[i];
 			tex2d.setImage(img);
-			P3.calculateBillboardMatrix(bbm, img.getWidth() * scale, img
-					.getHeight()
-					* scale, offset, alignment, c2o, LabelUtility.positionFor(i, vertices,
-					indices), Pn.EUCLIDEAN);
+			LabelUtility.calculateBillboardMatrix(bbm, 
+					img.getWidth() * scale, 
+					img.getHeight()* scale, 
+					offset, alignment,
+					c2o, 
+					LabelUtility.positionFor(i, vertices,indices), Pn.EUCLIDEAN);
 			gl.glActiveTexture(GL.GL_TEXTURE0);
-			Texture2DLoaderJOGL.render(jr.theCanvas, tex2d, true);
+			Texture2DLoaderJOGL.render(jr.getGL(), tex2d, true);
 			gl.glPushMatrix();
-			gl.glMultTransposeMatrixd(bbm);
-			drawFaces(bb, true, 1.0);
+			gl.glMultTransposeMatrixd(bbm, 0);
+			drawFaces(jr, bb, true, 1.0);
 			gl.glPopMatrix();
 		}
 		gl.glDisable(GL.GL_BLEND);
@@ -410,14 +466,12 @@ public class JOGLRendererHelper {
 	/**
 	 * @param sg
 	 */
-	public void drawLines(IndexedLineSet sg, boolean interpolateVertexColors,
-			double alpha) {
+	public static void drawLines(JOGLRenderer jr, IndexedLineSet sg, boolean interpolateVertexColors, double alpha) {
 		if (sg.getNumEdges() == 0)
 			return;
 
-		GLDrawable theCanvas = jr.getCanvas();
-		GL gl = theCanvas.getGL();
-		boolean pickMode = jr.pickMode;
+		GL gl = jr.getGL();
+    
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		int vertexLength = GeometryUtility.getVectorLength(vertices);
@@ -462,13 +516,13 @@ public class JOGLRendererHelper {
 		} else
 			colorBind = PER_PART;
 		if (colorBind != PER_PART) {
-			if (jr.openGLState.frontBack != DefaultPolygonShader.FRONT_AND_BACK) {
+			if (jr.getRenderingState().frontBack != DefaultPolygonShader.FRONT_AND_BACK) {
 				gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK,
 						GL.GL_DIFFUSE);
-				jr.openGLState.frontBack = DefaultPolygonShader.FRONT_AND_BACK;
+				jr.getRenderingState().frontBack = DefaultPolygonShader.FRONT_AND_BACK;
 			}
 		}
-		// pickMode = false;
+		boolean pickMode = jr.isPickMode();
 		if (pickMode)
 			gl.glPushName(JOGLPickAction.GEOMETRY_LINE);
 		int numEdges = sg.getNumEdges();
@@ -547,12 +601,11 @@ public class JOGLRendererHelper {
 		// gl.glDepthRange(0d, 1d);
 	}
 
-	public void drawFaces(IndexedFaceSet sg, boolean smooth, double alpha) {
+	public static void drawFaces(JOGLRenderer jr, IndexedFaceSet sg, boolean smooth, double alpha) {
 		if (sg.getNumFaces() == 0)
 			return;
-		GLDrawable theCanvas = jr.getCanvas();
-		GL gl = theCanvas.getGL();
-		boolean pickMode = jr.pickMode;
+		GL gl = jr.getGL();
+		boolean pickMode = jr.isPickMode();
 
 		int colorBind = -1, normalBind, colorLength = 3;
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
@@ -568,7 +621,6 @@ public class JOGLRendererHelper {
 		// "+((vertexNormals != null) ? vertexNormals.size() : 0));
 		// JOGLConfiguration.theLog.log(Level.INFO,"alpha value is "+alpha);
 
-
 		// vertex color has priority over face color
 		vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		int vertexLength = GeometryUtility.getVectorLength(vertices);
@@ -583,11 +635,11 @@ public class JOGLRendererHelper {
 		// JOGLConfiguration.theLog.log(Level.INFO,"Color binding is
 		// "+colorBind);
 		if (colorBind != PER_PART) {
-			if (jr.openGLState.frontBack != DefaultPolygonShader.FRONT_AND_BACK) {
+			if (jr.getRenderingState().frontBack != DefaultPolygonShader.FRONT_AND_BACK) {
 				gl.glEnable(GL.GL_COLOR_MATERIAL);
 				gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK,
 						GL.GL_DIFFUSE);
-				jr.openGLState.frontBack = DefaultPolygonShader.FRONT_AND_BACK;
+				jr.getRenderingState().frontBack = DefaultPolygonShader.FRONT_AND_BACK;
 			}
 		}
 		if (vertexNormals != null && smooth) {
@@ -612,8 +664,7 @@ public class JOGLRendererHelper {
 		boolean isRegularDomainQuadMesh = false;
 		Rectangle2D theDomain = null;
 		int maxU = 0, maxV = 0, maxFU = 0, maxFV = 0, numV = 0, numF;
-		Object qmatt = sg
-				.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
+		Object qmatt = sg.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
 		if (qmatt != null && qmatt instanceof Dimension) {
 			Dimension dm = (Dimension) qmatt;
 			isQuadMesh = true;
@@ -623,8 +674,7 @@ public class JOGLRendererHelper {
 			maxFU = maxU - 1;
 			maxFV = maxV - 1;
 			// Done with GeometryAttributes?
-			qmatt = sg
-					.getGeometryAttributes(GeometryUtility.REGULAR_DOMAIN_QUAD_MESH_SHAPE);
+			qmatt = sg.getGeometryAttributes(GeometryUtility.HEIGHT_FIELD_SHAPE);
 			if (qmatt != null && qmatt instanceof Rectangle2D) {
 				theDomain = (Rectangle2D) qmatt;
 				isRegularDomainQuadMesh = true;
@@ -717,7 +767,7 @@ public class JOGLRendererHelper {
 				}
 				gl.glEnd();
 			}
-		} else {
+		} else	{
 			// signal a geometry
 			if (pickMode)
 				gl.glPushName(JOGLPickAction.GEOMETRY_FACE); // pickName);
@@ -734,7 +784,6 @@ public class JOGLRendererHelper {
 					}
 				}
 				if (pickMode) {
-					// JOGLConfiguration.theLog.log(Level.INFO,"+G"+i+"\n");
 					gl.glPushName(i);
 				}
 				if (normalBind == PER_FACE) {
@@ -783,35 +832,47 @@ public class JOGLRendererHelper {
 				}
 				gl.glEnd();
 				if (pickMode) {
-					// JOGLConfiguration.theLog.log(Level.INFO,"-");
 					gl.glPopName();
 				}
 			}
-		// pop to balance the glPushName(10000) above
-		if (pickMode)
-			gl.glPopName();
+			if (pickMode)
+				gl.glPopName();
 		}
 	}
 
-	private static GLUT glut = new GLUT();
-
-	static double[] correctionNDC = null;
+	private static double[] correctionNDC = null;
 	static {
 		correctionNDC = Rn.identityMatrix(4);
 		correctionNDC[10] = correctionNDC[11] = .5;
 	}
 
-	double mat[] = new double[16];
+	private static double mat[] = new double[16];
 
-	int lightCount = GL.GL_LIGHT0;
+	private static int lightCount = GL.GL_LIGHT0;
 
-	GL lightGL = null;
+	private static GL lightGL = null;
 
-	static int maxLights = 8;
+	private static int maxLights = 8;
 
-	OpenGLLightVisitor ogllv = new OpenGLLightVisitor();
+  private static SceneGraphVisitor ogllv = new SceneGraphVisitor() {
+    public void visit(Light l) {
+      wisit(l, lightGL, lightCount);
+    }
 
-	public void resetLights(GL globalGL, List lights) {
+    public void visit(DirectionalLight l) {
+      wisit(l, lightGL, lightCount);
+    }
+
+    public void visit(PointLight l) {
+      wisit(l, lightGL, lightCount);
+    }
+
+    public void visit(SpotLight l) {
+      wisit(l, lightGL, lightCount);
+    }
+  };
+
+	public static void resetLights(GL globalGL, List lights) {
 		for (int i = 0; i < maxLights; ++i) {
 			globalGL.glLightf(GL.GL_LIGHT0 + i, GL.GL_SPOT_CUTOFF, 0f); // use
 																		// this
@@ -832,7 +893,7 @@ public class JOGLRendererHelper {
 		}
 	}
 
-	public void processLights(GL globalGL, List lights) {
+	public static void processLights(GL globalGL, List lights) {
 		for (int i = 0; i < lights.size(); ++i)
 			globalGL.glEnable(GL.GL_LIGHT0 + i);
 		lightCount = GL.GL_LIGHT0;
@@ -852,7 +913,7 @@ public class JOGLRendererHelper {
 			// JOGLConfiguration.theLog.log(Level.INFO,"Light"+i+":
 			// "+lp.toString());
 			globalGL.glPushMatrix();
-			globalGL.glMultTransposeMatrixd(mat);
+			globalGL.glMultTransposeMatrixd(mat, 0);
 			light.accept(ogllv);
 			globalGL.glPopMatrix();
 			lightCount++;
@@ -864,53 +925,34 @@ public class JOGLRendererHelper {
 		}
 	}
 
-	private class OpenGLLightVisitor extends SceneGraphVisitor {
-		public void visit(Light l) {
-			wisit(l, lightGL, lightCount);
-		}
-
-		public void visit(DirectionalLight l) {
-			wisit(l, lightGL, lightCount);
-		}
-
-		public void visit(PointLight l) {
-			wisit(l, lightGL, lightCount);
-		}
-
-		public void visit(SpotLight l) {
-			wisit(l, lightGL, lightCount);
-		}
-
-	}
-
 	private static float[] zDirection = { 0, 0, 1, 0 }; // (float)10E-10};
 
 	private static float[] origin = { 0, 0, 0, 1 };
 
-	public void wisit(Light dl, GL globalGL, int lightCount) {
+	private static void wisit(Light dl, GL globalGL, int lightCount) {
 		globalGL.glLightf(lightCount, GL.GL_SPOT_CUTOFF, 180f); // use cutoff ==
 																// 0 as marker
 																// for invalid
 																// lights in
 																// glsl
 		globalGL.glLightfv(lightCount, GL.GL_DIFFUSE, dl
-				.getScaledColorAsFloat());
+				.getScaledColorAsFloat(),0);
 		float f = (float) dl.getIntensity();
 		float[] specC = { f, f, f };
-		globalGL.glLightfv(lightCount, GL.GL_SPECULAR, specC);
+		globalGL.glLightfv(lightCount, GL.GL_SPECULAR, specC,0);
 		globalGL.glLightfv(lightCount, GL.GL_AMBIENT, dl
-				.getScaledColorAsFloat());
+				.getScaledColorAsFloat(),0);
 	}
 
-	public void wisit(DirectionalLight dl, GL globalGL, int lightCount) {
+  private static void wisit(DirectionalLight dl, GL globalGL, int lightCount) {
 		wisit((Light) dl, globalGL, lightCount);
-		globalGL.glLightfv(lightCount, GL.GL_POSITION, zDirection);
+		globalGL.glLightfv(lightCount, GL.GL_POSITION, zDirection,0);
 	}
 
-	public void wisit(PointLight dl, GL globalGL, int lightCount) {
+  private static void wisit(PointLight dl, GL globalGL, int lightCount) {
 		// gl.glLightfv(lightCount, GL.GL_AMBIENT, lightAmbient);
 		wisit((Light) dl, globalGL, lightCount);
-		globalGL.glLightfv(lightCount, GL.GL_POSITION, origin);
+		globalGL.glLightfv(lightCount, GL.GL_POSITION, origin,0);
 		globalGL.glLightf(lightCount, GL.GL_CONSTANT_ATTENUATION, (float) dl
 				.getFalloffA0());
 		globalGL.glLightf(lightCount, GL.GL_LINEAR_ATTENUATION, (float) dl
@@ -919,21 +961,21 @@ public class JOGLRendererHelper {
 				.getFalloffA2());
 	}
 
-	public void wisit(SpotLight dl, GL globalGL, int lightCount) {
+  private static void wisit(SpotLight dl, GL globalGL, int lightCount) {
 		wisit((PointLight) dl, globalGL, lightCount);
 		globalGL.glLightf(lightCount, GL.GL_SPOT_CUTOFF,
 				(float) ((180.0 / Math.PI) * dl.getConeAngle()));
-		globalGL.glLightfv(lightCount, GL.GL_SPOT_DIRECTION, zDirection);
+		globalGL.glLightfv(lightCount, GL.GL_SPOT_DIRECTION, zDirection, 0);
 		globalGL.glLightf(lightCount, GL.GL_SPOT_EXPONENT, (float) dl
 				.getDistribution());
 	}
 
-	static double[] clipPlane = { 0d, 0d, -1d, 0d };
+	private static double[] clipPlane = { 0d, 0d, -1d, 0d };
 
 	/**
 	 * 
 	 */
-	public void processClippingPlanes(GL globalGL, List clipPlanes) {
+	public static void processClippingPlanes(GL globalGL, List clipPlanes) {
 
 		int clipBase = GL.GL_CLIP_PLANE0;
 		// collect and process the lights
@@ -953,38 +995,60 @@ public class JOGLRendererHelper {
 			else {
 				double[] mat = lp.getMatrix(null);
 				globalGL.glPushMatrix();
-				globalGL.glMultTransposeMatrixd(mat);
-				globalGL.glClipPlane(clipBase + i, clipPlane);
+				globalGL.glMultTransposeMatrixd(mat,0);
+				globalGL.glClipPlane(clipBase + i, clipPlane,0);
 				globalGL.glEnable(clipBase + i);
 				globalGL.glPopMatrix();
 			}
 		}
 	}
 
-	public static void saveScreenShot(GLCanvas can, File file) {
-		saveScreenShot(can, can.getWidth(), can.getHeight(), file);
+	public static boolean accept(double[] objectToNDC, double[] o2c, double minDistance, double maxDistance, double[] m, int signature) {
+		double fudge = 1.3;
+		boolean ret = true;
+		double[] tmp2 = new double[4];
+		// we look at the image of the origin (0,0,0,1)
+		double[] mat = Rn.times(null, o2c, m);
+		tmp2[0] = mat[3];  tmp2[1] = mat[7];  tmp2[2] = mat[11];  tmp2[3] = mat[15];
+		double d = Pn.distanceBetween(tmp2, Pn.originP3, signature);
+		if (minDistance > 0.0 &&  d < minDistance) return true;
+		else if (maxDistance > 0 && d > maxDistance) return false;
+		mat = Rn.times(null, objectToNDC, m);
+		tmp2[0] = mat[3];  tmp2[1] = mat[7];  tmp2[2] = mat[11];  tmp2[3] = mat[15];
+		Pn.dehomogenize(tmp2,tmp2);
+		if (Math.abs(tmp2[0]) > fudge) ret = false;
+		if (Math.abs(tmp2[1]) > fudge) ret = false;
+		if (Math.abs(tmp2[2]) > 1.0) ret = false;
+		if (ret == false) {
+			return false;
+		}
+		return true;
 	}
 
+//	public static void saveScreenShot(GL gl, File file) {
+//		saveScreenShot(gl, theRenderer.getWidth(), can.getHeight(), file);
+//	}
+//
 	/**
 	 * @param globalGL
 	 * @param file
 	 */
-	public static void saveScreenShot(GLDrawable drawable, int width,
+	public static void saveScreenShot(GL gl, int width,
 			int height, File file) {
 
 		// TODO figure out why channels = 4 doesn't work: transparency
 		// getting written into fb even
 		// though transparency disabled.
 		int channels = 3;
-		ByteBuffer pixelsRGBA = BufferUtils.newByteBuffer(width * height
+		ByteBuffer pixelsRGBA = BufferUtil.newByteBuffer(width * height
 				* channels);
 
-		GL gl = drawable.getGL();
+//		GL gl = drawable.getGL();
 
-		if (drawable instanceof GLCanvas) {
+//		if (drawable instanceof GLCanvas) {
 			gl.glReadBuffer(GL.GL_BACK);
 			gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
-		}
+//		}
 
 		gl.glReadPixels(0, // GLint x
 				0, // GLint y

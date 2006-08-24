@@ -42,7 +42,8 @@ package de.jreality.jogl.shader;
 
 import java.util.logging.Level;
 
-import net.java.games.jogl.GL;
+import javax.media.opengl.GL;
+
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
@@ -80,8 +81,8 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 		final boolean useDisplayLists = jrs.isUseDisplayLists();
 		if (!(original instanceof IndexedFaceSet)) return -1;
 		if (implodeDL != -1) return implodeDL;
-		GL gl = jr.globalGL;
-		JOGLConfiguration.theLog.log(Level.INFO,this+"Providing proxy geometry "+implodeFactor);
+		GL gl = jr.getGL();
+		JOGLConfiguration.theLog.log(Level.FINE,this+"Providing proxy geometry "+implodeFactor);
 		IndexedFaceSet ifs =  IndexedFaceSetUtility.implode((IndexedFaceSet) original, implodeFactor);
 		double alpha = vertexShader == null ? 1.0 : vertexShader.getDiffuseColorAsFloat()[3];
 		if (useDisplayLists) {
@@ -89,7 +90,7 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 			gl.glNewList(implodeDL, GL.GL_COMPILE);
 		}
 		//if (jr.isPickMode())	gl.glPushName(JOGLPickAction.GEOMETRY_BASE);
-		jr.helper.drawFaces(ifs,  isSmoothShading(), alpha);
+    JOGLRendererHelper.drawFaces(jr, ifs,  isSmoothShading(), alpha);
 		//if (jr.isPickMode())	gl.glPopName();
 		if (useDisplayLists) gl.glEndList();
 		return implodeDL;
@@ -97,6 +98,6 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 
 	public void flushCachedState(JOGLRenderer jr) {
 		super.flushCachedState(jr);
-		if (implodeDL != -1) { jr.globalGL.glDeleteLists(implodeDL, 1);  implodeDL = -1; }
+		if (implodeDL != -1) { jr.getGL().glDeleteLists(implodeDL, 1);  implodeDL = -1; }
 	}
 }

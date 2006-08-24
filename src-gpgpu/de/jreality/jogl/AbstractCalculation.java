@@ -45,13 +45,13 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import javax.media.opengl.DebugGL;
+import javax.media.opengl.GL;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLEventListener;
+import javax.media.opengl.glu.GLU;
 import javax.swing.JOptionPane;
 
-import net.java.games.jogl.DebugGL;
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLDrawable;
-import net.java.games.jogl.GLEventListener;
-import net.java.games.jogl.GLU;
 import de.jreality.jogl.shader.GlslLoader;
 import de.jreality.scene.Appearance;
 import de.jreality.shader.GlslProgram;
@@ -103,7 +103,7 @@ public abstract class AbstractCalculation implements GLEventListener {
 
   private boolean measureCPS=true;
 
-  public void init(GLDrawable drawable) {
+  public void init(GLAutoDrawable drawable) {
     if (!drawable.getGL().isExtensionAvailable("GL_ARB_fragment_shader")
         || !drawable.getGL().isExtensionAvailable("GL_ARB_vertex_shader")
         || !drawable.getGL().isExtensionAvailable("GL_ARB_shader_objects")
@@ -111,6 +111,7 @@ public abstract class AbstractCalculation implements GLEventListener {
       JOptionPane.showMessageDialog(null, "<html><center>Driver does not support OpenGL Shading Language!<br>Cannot execute program.</center></html>");
       System.exit(-1);
     }
+   drawable.setGL(new DebugGL(drawable.getGL()));
    String vendor = drawable.getGL().glGetString(GL.GL_VENDOR);
    tex2D = !vendor.startsWith("NVIDIA");
    atiHack=tex2D;
@@ -119,10 +120,10 @@ public abstract class AbstractCalculation implements GLEventListener {
    renderer = new GlslProgram(new Appearance(), "foo", null, isTex2D() ? RENDER_PROGRAM.replaceAll("Rect", "2D") : RENDER_PROGRAM);
   }
   
-  public void display(GLDrawable drawable) {
+  public void display(GLAutoDrawable drawable) {
     //GL gl = new DebugGL(drawable.getGL());
     GL gl = drawable.getGL();
-    GLU glu = drawable.getGLU();
+    GLU glu = new GLU(); //drawable.getGLU();
     if (doIntegrate && hasValues) {
       
       gl.glEnable(TEX_TARGET);
@@ -154,7 +155,7 @@ public abstract class AbstractCalculation implements GLEventListener {
       // user uniforms
       setUniformValues(gl, program);
       
-      GlslLoader.render(program, drawable);
+      GlslLoader.render(program, gl);
       
       renderQuad(gl);
       
@@ -173,7 +174,7 @@ public abstract class AbstractCalculation implements GLEventListener {
       readTex = writeTex;
       writeTex = tmp;
   
-      GlslLoader.postRender(program, drawable); // any postRender just resets the shader pipeline
+      GlslLoader.postRender(program, gl); // any postRender just resets the shader pipeline
 
       // switch back to old buffer
       gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, 0);
@@ -187,9 +188,9 @@ public abstract class AbstractCalculation implements GLEventListener {
         gl.glBindTexture(TEX_TARGET, valueTextures[writeTex]);
         renderer.setUniform("values", 0);
         renderer.setUniform("scale", 1.); //findScale());
-        GlslLoader.render(renderer, drawable);
+        GlslLoader.render(renderer, gl);
         renderQuad(gl);
-        GlslLoader.postRender(renderer, drawable);
+        GlslLoader.postRender(renderer, gl);
       }
       gl.glDisable(TEX_TARGET);
     }
@@ -266,10 +267,10 @@ public abstract class AbstractCalculation implements GLEventListener {
 
   private void initVBO(GL gl) {
     if (vbo[0] == 0) {
-      gl.glGenBuffersARB(1, vbo);
+      gl.glGenBuffersARB(1, vbo, 0);
       System.out.println("created VBO=" + vbo[0]);
       gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, vbo[0]);
-      gl.glBufferDataARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 1024*1024*4*4, (float[])null, GL.GL_STREAM_COPY);
+      gl.glBufferDataARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 1024*1024*4*4, (Buffer)null, GL.GL_STREAM_COPY);
       gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 0);
       hasValidVBO=true;
     }
@@ -287,9 +288,9 @@ public abstract class AbstractCalculation implements GLEventListener {
     if (valueTextureSizeChanged) {
       gl.glEnable(TEX_TARGET);
       if (valueTextures[0] != 0) {
-        gl.glDeleteTextures(2, valueTextures);
+        gl.glDeleteTextures(2, valueTextures, 0);
       }
-      gl.glGenTextures(2, valueTextures);
+      gl.glGenTextures(2, valueTextures, 0);
       setupTexture(gl, valueTextures[0], valueTextureSize);
       setupTexture(gl, valueTextures[1], valueTextureSize);
       valueTextureSizeChanged=false;
@@ -323,7 +324,8 @@ public abstract class AbstractCalculation implements GLEventListener {
     gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP);
     gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP);
     gl.glTexImage2D(TEX_TARGET, 0, TEX_INTERNAL_FORMAT, size, size, 0,
-        TEX_FORMAT, GL.GL_FLOAT, (float[]) null);
+        TEX_FORMAT, GL.GL_FLOAT, (Buffer) null);
+    System.out.println("created texture: id="+texID+" size="+size+".");
   }
 
   /**
@@ -361,14 +363,14 @@ public abstract class AbstractCalculation implements GLEventListener {
   private void transferFromTextureToVBO(GL gl) {
     gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, vbo[0]);
     gl.glReadBuffer(attachments[writeTex]);
-    gl.glReadPixels(0, 0, valueTextureSize, valueTextureSize, TEX_FORMAT, GL.GL_FLOAT, (float[]) null);
+    gl.glReadPixels(0, 0, valueTextureSize, valueTextureSize, TEX_FORMAT, GL.GL_FLOAT, (Buffer) null);
     gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 0);
     hasValidVBO=true;
   }
 
   protected void initFBO(GL gl) {
     if (fbos[0] == 0) {
-      gl.glGenFramebuffersEXT(1, fbos);
+      gl.glGenFramebuffersEXT(1, fbos, 0);
       System.out.println("created FBO=" + fbos[0]);
     }
     gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, fbos[0]);
@@ -462,12 +464,12 @@ public abstract class AbstractCalculation implements GLEventListener {
     return tex2D;
   }
   
-  public void reshape(GLDrawable arg0, int arg1, int arg2, int arg3, int arg4) {
+  public void reshape(GLAutoDrawable arg0, int arg1, int arg2, int arg3, int arg4) {
     canvasViewport[0]=arg3;
     canvasViewport[1]=arg4;
   }
 
-  public void displayChanged(GLDrawable arg0, boolean arg1, boolean arg2) {
+  public void displayChanged(GLAutoDrawable arg0, boolean arg1, boolean arg2) {
   }
 
   /**
@@ -505,7 +507,7 @@ public abstract class AbstractCalculation implements GLEventListener {
    */
   public void renderPoints(JOGLRenderer jr) {
     if (!hasValidVBO || readData) return;
-    GL gl = jr.globalGL;
+    GL gl = jr.getGL();
     
     gl.glBindBufferARB(GL.GL_ARRAY_BUFFER, vbo[0]);
     gl.glVertexPointer(4, GL.GL_FLOAT, 0, (Buffer) null);

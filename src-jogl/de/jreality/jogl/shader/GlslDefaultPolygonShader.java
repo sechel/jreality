@@ -40,15 +40,10 @@
 
 package de.jreality.jogl.shader;
 
-import java.awt.Color;
-import java.util.logging.Level;
+import javax.media.opengl.GL;
 
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLDrawable;
-import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
-import de.jreality.math.Rn;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
@@ -66,7 +61,12 @@ public class GlslDefaultPolygonShader extends SimpleJOGLShader {
 		boolean changed = true;
 
 		public GlslDefaultPolygonShader() {
-			super("standard3dlabs.vert",null);
+			this("standard3dlabs.vert",null);
+		}
+
+
+	public GlslDefaultPolygonShader(String vertexShader, String fragmentShader) {
+			super(vertexShader, fragmentShader);
 		}
 
 
@@ -106,8 +106,7 @@ public class GlslDefaultPolygonShader extends SimpleJOGLShader {
 	// only the lighting/no lighting flag is required.
 	public void render(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.getRenderer();
-		GLDrawable theCanvas = jr.getCanvas();
-		GL gl = theCanvas.getGL();
+		GL gl = jr.getGL();
 		super.render(jrs);
 		if (!changed) return;
 		//System.err.println("Writing glsl values");

@@ -43,7 +43,10 @@ package de.jreality.jogl.pick;
 import java.awt.Component;
 
 import de.jreality.math.Rn;
-import de.jreality.scene.*;
+import de.jreality.scene.Camera;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Viewer;
 import de.jreality.util.CameraUtility;
 
 /**

@@ -43,6 +43,9 @@ package de.jreality.jogl;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.JPopupMenu;
+
+import de.jreality.scene.data.Attribute;
 import de.jreality.util.LoggingSystem;
 
 /*
@@ -62,8 +65,15 @@ public class JOGLConfiguration {
 	static boolean sharedContexts = false;
 	static boolean isLinux = false;
 	static boolean multiSample = true;
+	public static boolean testMatrices = false;
 	static boolean portalUsage = false;
 	public static String resourceDir = null, saveResourceDir = null;
+	public static String localScratchDisk = null;
+	 public static String COPY_CAT, PRE_RENDER;
+	 static {
+	  	COPY_CAT = "copyCat";	  
+	  	PRE_RENDER= "preRender";	  
+	 }
 	/**
 	 * 
 	 */
@@ -78,12 +88,15 @@ public class JOGLConfiguration {
 //	        }
 //	      });
 		try {
+		    System.setProperty("sun.awt.noerasebackground", "true");
+		    JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 			//theLog.setLevel(Level.INFO);
 			String foo = System.getProperty("jreality.jogl.debugGL");
 			if (foo != null) { if (foo.equals("false")) debugGL = false; else debugGL =true;}
-			foo = System.getProperty("jreality.jogl.multisample");
+			foo = System.getProperty("jreality.jogl.testMatrices");
 			if (foo != null) 
-				if (foo.indexOf("false") != -1) multiSample = false;
+				if (foo.indexOf("false") != -1) testMatrices = false;
+				else testMatrices = true;
 			foo = System.getProperty("jreality.jogl.portalUsage");
 			if (foo != null) 
 				if (foo.indexOf("true") != -1) portalUsage = true;
@@ -125,4 +138,5 @@ public class JOGLConfiguration {
 	public static Logger getLogger()	{
 		return theLog;
 	}
+
 }

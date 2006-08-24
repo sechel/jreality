@@ -40,8 +40,6 @@
 
 package de.jreality.jogl.shader;
 
-import net.java.games.jogl.GL;
-import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.shader.EffectiveAppearance;
 
@@ -64,13 +62,10 @@ public class StandardOGLPolygonShader extends SimpleJOGLShader {
 	}
 
 	public void render(JOGLRenderingState jrs)	{
-		JOGLRenderer jr = jrs.getRenderer();
-		GL gl = jr.getCanvas().getGL();
 		super.render(jrs);
 		if (changed) {
 			changed = false;
 		}
-
 	}
 
 }

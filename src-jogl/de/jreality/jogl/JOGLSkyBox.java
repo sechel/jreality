@@ -40,12 +40,11 @@
 
 package de.jreality.jogl;
 
-import net.java.games.jogl.GL;
-import net.java.games.jogl.GLDrawable;
+import javax.media.opengl.GL;
+
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
-import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CubeMap;
@@ -81,10 +80,9 @@ class JOGLSkyBox {
     tex.setRepeatT(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
   }
 
-  static void render(GLDrawable gd, JOGLRenderer glr, CubeMap cm)	{
+  static void render(GL gl, double[] w2c, CubeMap cm)	{
     ImageData[] imgs=TextureUtility.getCubeMapImages(cm);
     tex.setBlendColor(cm.getBlendColor());
-		GL gl = gd.getGL();
 		gl.glDepthMask(false);
 		gl.glDepthFunc(GL.GL_NEVER);
 		gl.glPushAttrib(GL.GL_ENABLE_BIT);
@@ -95,21 +93,21 @@ class JOGLSkyBox {
     gl.glEnable(GL.GL_TEXTURE_2D);
     float[] white = {1f,1f,1f,1f};
 //	    gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, white);
-    gl.glColor4fv( white);
+    gl.glColor4fv( white, 0);
     gl.glPushMatrix();
 	    
-	    double[] w2c = glr.context.getWorldToCamera();
+	    //double[] w2c = o.getWorldToCamera();
 	    //System.err.println("w2c: \n"+Rn.matrixToString(w2c));
       
-	    gl.glLoadTransposeMatrixd(P3.extractOrientationMatrix(null, w2c, Pn.originP3, Pn.EUCLIDEAN));
-	    gl.glMultTransposeMatrixd(P3.makeStretchMatrix(null, 500.0));
+	    gl.glLoadTransposeMatrixd(P3.extractOrientationMatrix(null, w2c, Pn.originP3, Pn.EUCLIDEAN), 0);
+	    gl.glMultTransposeMatrixd(P3.makeStretchMatrix(null, 500.0),0);
 		for (int i = 0; i<6; ++i)	{
 			tex.setImage(imgs[i]);
-		    Texture2DLoaderJOGL.render(gd, tex);
+		    Texture2DLoaderJOGL.render(gl, tex);
 			gl.glBegin(GL.GL_POLYGON);
 				for (int j = 0; j<4; ++j)	{
-					gl.glTexCoord2dv(texCoords[j]);
-					gl.glVertex3dv(cubeVerts3[i][j]);
+					gl.glTexCoord2dv(texCoords[j],0);
+					gl.glVertex3dv(cubeVerts3[i][j],0);
 				}
 			gl.glEnd();
 		}
