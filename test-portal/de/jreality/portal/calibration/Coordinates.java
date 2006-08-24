@@ -1,4 +1,4 @@
-package de.jreality.portal;
+package de.jreality.portal.calibration;
 
 import java.awt.Color;
 
@@ -73,6 +73,12 @@ public class Coordinates{
 	
 	public void kill(int axisNum){
 		rootNode.removeChild(systemNode[axisNum]);
+	}
+	
+	public void set(int axisNum, double[] vec){
+		axis[axisNum][1]=vec;
+		system[axisNum].setVertexCoordinates(axis[axisNum]);
+		system[axisNum].update();
 	}
 	
 	public SceneGraphComponent getSystem(){
