@@ -41,6 +41,7 @@
 package de.jreality.renderman;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
@@ -60,6 +61,7 @@ import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
+import javax.media.j3d.GeometryArray;
 
 import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.GeometryUtility;
@@ -141,11 +143,13 @@ public class RIBVisitor extends SceneGraphVisitor {
     int pointsetCount = 0;
     private int[] maximumEyeSplits={10};
     boolean insidePointset = false;
-    public boolean shadowEnabled = false;
-    public static boolean fullSpotLight = false;
-    public static boolean retainGeometry = false;
-    public static boolean useProxyCommands = true;
-    public  String shaderPath = null;
+    protected boolean shadowEnabled = false;
+    protected  boolean fullSpotLight = false;
+    protected  boolean retainGeometry = false;
+    protected  boolean useProxyCommands = true;
+    protected boolean opaqueTubes = false;
+    protected  String shaderPath = null;
+    protected boolean handlingProxyGeometry = false;
     private  String preamble = "";
     private int rendererType = RIBViewer.TYPE_PIXAR;
     private int currentSignature = Pn.EUCLIDEAN;
@@ -449,30 +453,27 @@ public class RIBVisitor extends SceneGraphVisitor {
             }
         }
         currentSignature = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
+        opaqueTubes = eap.getAttribute(CommonAttributes.OPAQUE_TUBES_AND_SPHERES, 
+        		CommonAttributes.OPAQUE_TUBES_AND_SPHERES_DEFAULT);
+        retainGeometry =  eap.getAttribute(CommonAttributes.RMAN_RETAIN_GEOMETRY,false); //false; //anyDisplayLists; // && !manyDisplayLists;
+        
         Object color = eap.getAttribute(type+"."+CommonAttributes.DIFFUSE_COLOR,CommonAttributes.DIFFUSE_COLOR_DEFAULT);
         float colorAlpha = 1.0f;
         if(color!=Appearance.INHERITED) {
             float[] c =((Color)color).getRGBComponents(null);
             if (c.length == 4) colorAlpha = c[3];
+            float[] rgb = new float[]{c[0],c[1],c[2]};
 //           ribHelper.color(new float[] {c[0]*colorAlpha,c[1]*colorAlpha,c[2]*colorAlpha});
-            c[3] *= currentOpacity;
-          ribHelper.color(c);
+            ribHelper.color(rgb);
         }
  
-        // interpret rendering hints to decide whether to do object instancing
-        // currently there's a problem with instancing combined with face colors 
-        // due to a bug in the renderman proserver renderer (I believe so anyway)
-        // so I've disabled this feature until I figure that out. -gunn
-//        boolean anyDisplayLists = eap.getAttribute(CommonAttributes.ANY_DISPLAY_LISTS,true);
-//        boolean manyDisplayLists = eap.getAttribute(CommonAttributes.MANY_DISPLAY_LISTS,false);
-        retainGeometry =  eap.getAttribute(CommonAttributes.RMAN_RETAIN_GEOMETRY,false); //false; //anyDisplayLists; // && !manyDisplayLists;
-        
-       double transparency = eap.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
+        double transparency = eap.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
         currentOpacity = 1f - (float)transparency;
+        currentOpacity *= colorAlpha;
 		//currentOpacity *= colorAlpha;
-        ribHelper.opacity(new float[] 
-           {currentOpacity*colorAlpha,currentOpacity*colorAlpha,currentOpacity*colorAlpha});
-        //System.out.println("transparency is "+type+" is "+transparency);
+        if ((handlingProxyGeometry && opaqueTubes)) currentOpacity = 1f;
+        ribHelper.opacity(currentOpacity);
+         //System.out.println("transparency is "+type+" is "+transparency);
         SLShader slShader = (SLShader) eap.getAttribute(type+CommonAttributes.RMAN_DISPLACEMENT,null,SLShader.class);
         if(slShader != null) {
             ribHelper.displacement(slShader.getName(),slShader.getParameters());
@@ -570,35 +571,7 @@ public class RIBVisitor extends SceneGraphVisitor {
     	super.visit(g);
     	//System.err.println("Visiting geometry RIBVisitor");
     }
-     /**
-     * @param ds
-     * @param r
-     */
-    private void cylinder(DoubleArray p1, DoubleArray p2, float r) {
-        double d[] =new double[3];
-//        d[0] =ds[3] - ds[0];
-//        d[1] =ds[4] - ds[1];
-//        d[2] =ds[5] - ds[2];
-        d[0] = p2.getValueAt(0) - p1.getValueAt(0);
-        d[1] = p2.getValueAt(1) - p1.getValueAt(1);
-        d[2] = p2.getValueAt(2) - p1.getValueAt(2);
-        float l =(float) Rn.euclideanNorm(d);
-        d[0]/= l;
-        d[1]/= l;
-        d[2]/= l;
-		double[] mat = MatrixBuilder.euclidean().translate(p1.getValueAt(0),p1.getValueAt(1),p1.getValueAt(2)).getMatrix().getArray();
-        
-        dirToEuler(d);
-
-		double[] rot = MatrixBuilder.euclidean().rotateZ(d[2]).rotateY(d[1]).rotateX(d[0] - Math.PI/2.).getMatrix().getArray();
-		
-        ribHelper.transformBegin();
-        ribHelper.concatTransform(fTranspose(mat));
-        ribHelper.cylinder(r,0,l,360,null);
-        ribHelper.transformEnd();
-    }
-        
-    
+      
     /* (non-Javadoc)
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.PointSet)
      */
@@ -646,13 +619,9 @@ public class RIBVisitor extends SceneGraphVisitor {
                  Color cc = (Color) eAppearance.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,  CommonAttributes.DIFFUSE_COLOR_DEFAULT );
                  //DoubleArrayArray a=coord.toDoubleArrayArray();
                  double[][] a=coord.toDoubleArrayArray(null);
-                 // TODO pre-multiply color with current alpha
-                 // Following is an attempt to do so, but ignores the alpha of the color!
                  float[] raw = new float[4];
                  cc.getRGBComponents(raw);
-//                 for (int k=0;k<4; ++k)	raw[k] = (float) (raw[k]*currentOpacity);
-// 					cc = new Color(raw[0], raw[1], raw[2], raw[3]); 
-                 raw[3] = raw[3] * currentOpacity;
+                if (!opaqueTubes) raw[3] = raw[3] * currentOpacity;
                 ribHelper.color(raw);
                double[] trns = new double[16];
                 for (int i= 0; i < n; i++) { 
@@ -741,16 +710,20 @@ public class RIBVisitor extends SceneGraphVisitor {
                      // Following is an attempt to do so, but ignores the alpha of the color!
                     float[] raw = new float[4];
                     cc.getRGBComponents(raw);
-//                    for (int k=0;k<4; ++k)	raw[k] = (float) (raw[k]*currentOpacity);
-                    cc = new Color(raw[0], raw[1], raw[2], raw[3]*currentOpacity); 
-                    if (g instanceof IndexedLineSet)	{
+                    if (!opaqueTubes) raw[3] *= currentOpacity;
+                    cc = new Color(raw[0], raw[1], raw[2], raw[3]); 
+                    Object ga = g.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
+                    
+                    if (ga == null || !( ga instanceof Dimension))	{
 	                    BallAndStickFactory bsf = new BallAndStickFactory(g);
 	               	  	bsf.setSignature(currentSignature);
 	               	  	bsf.setStickRadius(r);
 	                	bsf.setShowBalls(false);	// need to actually omit the balls
 	               	  	bsf.setStickColor(cc);
 	                	bsf.update();
+	                	handlingProxyGeometry = true;
 	               	  	visit(bsf.getSceneGraphComponent());
+	               	  	handlingProxyGeometry = false;
             	   } else {
            				DataList edgec =  g.getEdgeAttributes(Attribute.COLORS);
             		   int n = g.getNumEdges();
@@ -760,13 +733,13 @@ public class RIBVisitor extends SceneGraphVisitor {
             			if (foo != crossSection)	{
             				crossSection = (double[][]) foo;
             			}
-           		   for (int i = 0; i<n; ++i)	{
+            			for (int i = 0; i<n; ++i)	{
              				if (edgec != null) {
                					double[] edgecolor = edgec.item(i).toDoubleArray(null);
                					ribHelper.comment("Edge color");
                					ribHelper.color(edgecolor);
                				}
-          				double[][] oneCurve = null;
+             				double[][] oneCurve = null;
             				oneCurve = IndexedLineSetUtility.extractCurve(oneCurve, g, i);
             				PolygonalTubeFactory ptf = new PolygonalTubeFactory(oneCurve);
 //            				ptf.setClosed(true);
@@ -776,36 +749,12 @@ public class RIBVisitor extends SceneGraphVisitor {
             				ptf.setRadius(r);
             				ptf.update();
             				IndexedFaceSet tube = ptf.getTube();
-            				pointPolygon(tube, null);            			   
+            				handlingProxyGeometry = true;
+            				pointPolygon(tube, null);    
+            				handlingProxyGeometry = false;
             		   }
               	   }
-                } else {
-                   IntArrayArray edgeIndices= dl.toIntArrayArray();
-                   DoubleArrayArray edgeColors=null;
-                   dl = g.getEdgeAttributes(Attribute.COLORS);
-                   if(dl != null) 
-                       edgeColors = dl.toDoubleArrayArray();
-                   DoubleArrayArray vertices=g.getVertexAttributes(Attribute.COORDINATES) .toDoubleArrayArray();
-                   for (int i= 0, n=edgeIndices.size(); i < n; i++)
-                   {
-                       if(edgeColors!= null) {
-                           float[] f = new float[3];
-                           f[0] = (float) edgeColors.getValueAt(i,0);
-                           f[1] = (float) edgeColors.getValueAt(i,1);
-                           f[2] = (float) edgeColors.getValueAt(i,2);
-                           ribHelper.color(f);
-                       }
-                       IntArray edge=edgeIndices.item(i).toIntArray();
-                       for(int j = 0; j<edge.getLength()-1;j++) {
-                           DoubleArray p1=vertices.item(edge.getValueAt(j)).toDoubleArray();
-                           DoubleArray p2=vertices.item(edge.getValueAt(j+1)).toDoubleArray();
-                       //pipeline.processLine(p1, p2);
-                       //pipeline.processPseudoTube(p1, p2);
-                           cylinder(p1,p2,r);
-                       }
-                   }
-
-               }
+                } 
 //               ribHelper.attributeEnd();
            }
  

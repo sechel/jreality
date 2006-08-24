@@ -88,7 +88,7 @@ public class GeometryUtility {
 	 public static String BOUNDING_BOX = "boundingBox";		// value:	de.jreality.util.Rectangle3D
 	/**
 	 * For identifying this IndexedFaceSet as a QuadMesh;
-	 * Value: {@link Rectangle3D}.
+	 * Value: {@link java.awt.Dimension}.
 	 * @see Geometry#setGeometryAttributes(Attribute, Object).
 	 * @see QuadMeshFactory
 	 */
