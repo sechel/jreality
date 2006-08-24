@@ -41,22 +41,24 @@
 package de.jreality.jogl.shader;
 
 import java.awt.Color;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.WeakHashMap;
 
-import net.java.games.jogl.GL;
-import de.jreality.geometry.GeometryUtility;
-import de.jreality.jogl.*;
-import de.jreality.math.*;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.Geometry;
+import javax.media.opengl.GL;
+
+import de.jreality.jogl.ClothCalculation2;
+import de.jreality.jogl.GpgpuViewer;
+import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.JOGLRenderingState;
+import de.jreality.math.Matrix;
 import de.jreality.scene.data.AttributeEntityUtility;
-import de.jreality.shader.*;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
+import de.jreality.shader.Texture2D;
 import de.jreality.util.Rectangle3D;
 
 /**
@@ -239,13 +241,13 @@ public class Cloth2LineShader extends AbstractPrimitiveShader implements LineSha
   private static boolean inited;
   
   public void updateData(JOGLRenderer jr) {
-    calc = (ClothCalculation2) ((GpgpuViewer) jr.theViewer).getCalculation();
+    calc = (ClothCalculation2) ((GpgpuViewer) jr.getViewer()).getCalculation();
     if (calc == null) {
       calc = new ClothCalculation2(rows,columns);
       calc.setDisplayTexture(false);
       calc.setMeasureCPS(false);
       calc.setReadData(true);
-      ((GpgpuViewer) jr.theViewer).setCalculation(calc);
+      ((GpgpuViewer) jr.getViewer()).setCalculation(calc);
       System.out.println("setting calculation.");
       inited=true;
       // prepare index buffer and tex coord buffer:
@@ -316,20 +318,20 @@ public class Cloth2LineShader extends AbstractPrimitiveShader implements LineSha
       return;
     }
         
-    GL gl = jr.globalGL;
+    GL gl = jr.getGL();
         
     gl.glPushAttrib(GL.GL_LIGHTING_BIT);
     gl.glDisable(GL.GL_LIGHTING);
 
-      gl.glColor3fv(difCol);
+      gl.glColor3fv(difCol,0);
       gl.glPointSize((float) pointSize);
       if (sprites && spriteTex != null) {
-        gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, pointAttenuation);
+        gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, pointAttenuation, 0);
         gl.glEnable(GL.GL_POINT_SPRITE_ARB);
         gl.glActiveTexture(GL.GL_TEXTURE0);
         gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
         gl.glEnable(GL.GL_TEXTURE_2D);
-        Texture2DLoaderJOGL.render(jr.getCanvas(), spriteTex);
+        Texture2DLoaderJOGL.render(jr.getGL(), spriteTex);
       }
       //System.out.println(data);
       //GpgpuUtility.dumpData(data);
@@ -341,7 +343,7 @@ public class Cloth2LineShader extends AbstractPrimitiveShader implements LineSha
       if (tex != null) {
         gl.glEnable(GL.GL_TEXTURE_2D);
         gl.glActiveTexture(GL.GL_TEXTURE0);
-        Texture2DLoaderJOGL.render(jr.getCanvas(), tex);
+        Texture2DLoaderJOGL.render(jr.getGL(), tex);
       }
       
         gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
@@ -368,7 +370,7 @@ public class Cloth2LineShader extends AbstractPrimitiveShader implements LineSha
 
   public void postRender(JOGLRenderingState jrs) {
 	  JOGLRenderer jr = jrs.getRenderer();
-    GL gl = jr.globalGL;
+    GL gl = jr.getGL();
     if (sprites) {
       gl.glDisable(GL.GL_POINT_SPRITE_ARB);
       gl.glActiveTexture(GL.GL_TEXTURE0);

@@ -39,7 +39,10 @@
 
 
 package de.jreality.examples;
-import java.awt.Component;
+
+import net.java.games.input.Component;
+import net.java.games.input.Controller;
+import net.java.games.input.ControllerEnvironment;
 
 /*
  * Created on 14.01.2006

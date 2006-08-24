@@ -43,7 +43,6 @@ import java.util.List;
 import java.util.Map;
 
 import de.jreality.scene.data.DoubleArray;
-import de.jreality.scene.tool.AxisState;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.toolsystem.MissingSlotException;
 import de.jreality.toolsystem.ToolEvent;
