@@ -15,7 +15,6 @@
   <property name="renderman" location="src-renderman" />
   <property name="jogl" location="src-jogl-jsr-new" />
   <property name="gpgpu" location="src-gpgpu-jsr" />
-  <property name="jsyzygy" location="src-jsyzygy" />
   <property name="portal" location="src-portal" />
   <property name="proxies" location="src-proxies" />
   <property name="swt" location="src-swt" />
@@ -156,7 +155,6 @@
   <path id="portal.classpath">
     <path refid="backend.classpath"/>
     <fileset dir="lib">
-      <include name="jSyzygy.jar"/>
       <include name="smrj.jar"/>
       <include name="jogl.jar"/>
      </fileset>
@@ -366,17 +364,12 @@
     <jar jarfile="${dist}/jReality-renderman.jar" basedir="${build}/renderman" />
   </target>
 
-  <target name="jSyzygy_java">
-    <ant dir="jSyzygy" target="java" inheritAll="false" />
-    <copy file="jSyzygy/jSyzygy.jar" todir="${lib}" />
-  </target>
-
-  <target name="portal" depends="ui,jogl,jSyzygy_java,soft,proxies" description="build portal backend">
+  <target name="portal" depends="ui,jogl,soft,proxies" description="build portal backend">
     <mkdir dir="${build}/portal" />
     <javac excludesfile="excludes.txt" srcdir="${portal}" destdir="${build}/portal" debug="true">
       <classpath refid="portal.classpath"/>
     </javac>
-    <rmic base="${build}/portal" includes="**/*Impl.class" classpath="${lib}/jSyzygy.jar;${dist}/jReality-core.jar:${dist}/jReality-jogl.jar:${dist}/jReality-stubs.jar:${dist}/jReality-proxies.jar" />
+    <rmic base="${build}/portal" includes="**/*Impl.class" classpath="${dist}/jReality-core.jar:${dist}/jReality-jogl.jar:${dist}/jReality-stubs.jar:${dist}/jReality-proxies.jar" />
     <jar jarfile="${dist}/jReality-portal.jar" basedir="${build}/portal" />
   </target>
 
@@ -448,7 +441,6 @@
   <target name="clean" description="clean up">
     <delete dir="${build}" />
     <delete dir="${dist}" />
-    <!-- ant dir="jSyzygy" target="clean" inheritAll="false" / -->
     <delete dir="${javadoc}"/>
   </target>
 
