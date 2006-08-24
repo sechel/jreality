@@ -283,7 +283,7 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 	protected void updateImpl() {
 	
 		super.updateImpl();
-		System.err.println("In aqmf updateImpl");
+//		System.err.println("In aqmf updateImpl");
 		if( nodeWasUpdated( faceIndices) ) { 
 			log( "set", Attribute.INDICES, "face");
 			ifs.setFaceAttributes( Attribute.INDICES, 
