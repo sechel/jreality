@@ -56,7 +56,7 @@ import de.jreality.util.*;
  * @deprecated
  * 
  * */
-public class OldTransformation implements Cloneable, Serializable {
+class OldTransformation implements Serializable {
   protected double[] theMatrix,       // the matrix transform
       defaultMatrix,
       translationVector,  
@@ -122,30 +122,6 @@ public class OldTransformation implements Cloneable, Serializable {
     this(Pn.EUCLIDEAN, null);
   }
 
-  /* (non-Javadoc)
-   * @see java.lang.Object#clone()
-   */
-  public Object clone() throws CloneNotSupportedException {
-    try {
-      OldTransformation copy = (OldTransformation) super.clone();
-      if (theMatrix !=null) copy.theMatrix = (double[]) theMatrix.clone();
-      if (defaultMatrix !=null) copy.defaultMatrix = (double[]) defaultMatrix.clone();
-      if (centerMatrix !=null) copy.centerMatrix = (double[]) centerMatrix.clone();
-      if (invCenterMatrix !=null) copy.invCenterMatrix = (double[]) invCenterMatrix.clone();
-      if (translationVector != null) copy.translationVector = (double[]) translationVector.clone();
-      if (centerVector!= null) copy.centerVector = (double[]) centerVector.clone();
-      if (stretchVector != null) copy.stretchVector = (double[]) stretchVector.clone();
-      if (rotationAxis != null) copy.rotationAxis = (double[]) rotationAxis.clone();
-      if (rotationQ != null) copy.rotationQ = (Quaternion) rotationQ.clone();
-      if (stretchRotationQ != null) copy.stretchRotationQ = (Quaternion) stretchRotationQ.clone();
-      return copy;
-    } catch (CloneNotSupportedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    return null;
-  }
-  
   public OldTransformation getInverse()  {
     OldTransformation inv;
     try {
@@ -599,7 +575,7 @@ public class OldTransformation implements Cloneable, Serializable {
     //if ( Quaternion.equalsRotation(rotationQ, aQ, TOLERANCE)) return;
     synchronized(this)  {
       Quaternion.copy(rotationQ, aQ);
-      Quaternion.normalizeRotation(rotationQ, rotationQ);
+      Quaternion.normalize(rotationQ, rotationQ);
       getRotationAxis();
       factorHasChanged = true;
       update();     

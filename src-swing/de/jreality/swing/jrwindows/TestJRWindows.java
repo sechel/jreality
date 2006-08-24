@@ -5,14 +5,13 @@ import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
+
 import de.jreality.examples.PaintComponent;
-import de.jreality.examples.tooldemo.DeformTool;
 import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.io.JrSceneFactory;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.tools.RotateTool;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class TestJRWindows {
@@ -26,25 +25,8 @@ public class TestJRWindows {
     
     SceneGraphComponent geoSgc=new SceneGraphComponent();
     geoSgc.setGeometry(Primitives.icosahedron());
-    //geoSgc.addTool(new RotateTool());
-    geoSgc.addTool(new DeformTool());
     root.addChild(geoSgc);
 
-//    System.setProperty("de.jreality.ui.viewerapp.synchRender", "true");
-    
-//    ViewerApp va = new ViewerApp(Primitives.icosahedron());
-//    va.update();
-//
-//    
-//    JRWindowManager wm=new JRWindowManager(va.getViewer().getAvatarPath());   
-//        
-//    va.display();
-
-//    ShowPropertiesTool spt=new ShowPropertiesTool(false);
-//    sgc.addTool(spt);
-//    JFrame frame1=wm.createFrame();
-//    frame1.getContentPane().add(spt.getLog());
- 
     JRWindowManager wm=new JRWindowManager(avatarPath);
     
     JFrame frame2=wm.createFrame();

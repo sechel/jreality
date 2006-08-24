@@ -40,12 +40,7 @@
 
 package de.jreality.scene.proxy.smrj;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
@@ -58,46 +53,20 @@ import de.jreality.scene.data.DataListSet;
 import de.smrj.Receiver;
 import de.smrj.RemoteFactory;
 import de.smrj.RemoteKey;
-import de.smrj.tcp.TCPBroadcasterIO;
-import de.smrj.tcp.TCPReceiverIO;
 
 /**
  * 
- * TODO: comment this
+ * THIS CLASS IS CURRENTLY NOT WORKING!!!
  * 
- * @author weissman
+ * @author Steffen Weissmann
  *  
  */
 public class SMRJMirrorFactoryTest extends TestCase {
 
-    private final static String HOST;
-    private final static RemoteFactory rf;
+    private static String HOST;
+    private static RemoteFactory rf;
     private final static int localClients = 1;
     private final static Receiver[] rec = new Receiver[localClients*2]; 
-
-    static {
-        Logger.getLogger("SMRJ").setLevel(Level.ALL);
-        try {
-            HOST = InetAddress.getLocalHost().getHostName();
-            rf = new TCPBroadcasterIO(8868).getRemoteFactory();
-            for (int i = 0; i < localClients; i++) {
-                rec[2*i] = new TCPReceiverIO(HOST, 8868);
-                rec[2*i].start();
-//                rec[2*i+1] = new TCPReceiverNIO(HOST, 8868);
-//                rec[2*i+1].start();
-            }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-        } catch (UnknownHostException e) {
-            throw new ExceptionInInitializerError(e);
-        } catch (IOException e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
 
     public static void main(String[] args) {
         junit.swingui.TestRunner.run(SMRJMirrorFactoryTest.class);
