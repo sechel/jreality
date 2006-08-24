@@ -71,6 +71,10 @@ public class Coordinates{
 		rootNode.setAppearance(app);		
 	}
 	
+	public void kill(int axisNum){
+		rootNode.removeChild(systemNode[axisNum]);
+	}
+	
 	public SceneGraphComponent getSystem(){
 		return rootNode;
 	}
