@@ -306,7 +306,7 @@ public class JOGLRendererHelper {
 	// AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a,
 	// true);
 	// This is upside down since openGl textures are upside down.
-	private static IndexedFaceSet bb = Primitives.texturedSquare(new double[] { 0, 1,
+	private static IndexedFaceSet bb = Primitives.texturedQuadrilateral(new double[] { 0, 1,
 			0, 1, 1, 0, 1, 0, 0, 0, 0, 0 });
 
 	// static {

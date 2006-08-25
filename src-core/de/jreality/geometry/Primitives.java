@@ -537,7 +537,14 @@ public class Primitives {
 		    
 		    return factory.getIndexedFaceSet();
 		}
-		public static IndexedFaceSet texturedSquare(double[] points) {
+        
+    /**
+     * @deprecated use {@link Primitives.texturedQuadrilateral()}.
+     */
+ 		public static IndexedFaceSet texturedSquare(double[] points) {
+ 			return texturedQuadrilateral(points);
+ 		}
+		public static IndexedFaceSet texturedQuadrilateral(double[] points) {
 		    
 		    IndexedFaceSetFactory factory = new IndexedFaceSetFactory();
 		    
