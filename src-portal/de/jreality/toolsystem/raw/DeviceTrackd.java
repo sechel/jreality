@@ -25,7 +25,7 @@ import de.jreality.toolsystem.ToolEventQueue;
  * @author Steffen Weissmann
  *
  */
-public class DeviceTrackd implements RawDevice, ActionListener {
+public class DeviceTrackd implements RawDevice, PollingDevice {
 
 	private static TrackdJNI trackd;
 	int numSensors;
@@ -42,10 +42,7 @@ public class DeviceTrackd implements RawDevice, ActionListener {
 	private final float[] tmpMatrix = new float[16];
 	
 	
-	Timer timer;
-	
 	public void dispose() {
-		timer.stop();
 	}
 
 	public String getName() {
@@ -62,9 +59,6 @@ public class DeviceTrackd implements RawDevice, ActionListener {
             re.initCause(e);
             throw re;
         }
-        timer = new Timer(5, this);
-        timer.setRepeats(true);
-        timer.start();
 	}
 
 	public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
@@ -111,7 +105,7 @@ public class DeviceTrackd implements RawDevice, ActionListener {
 		this.queue=queue;
 	}
 
-	public void actionPerformed(ActionEvent event) {
+	public void poll() {
 		for (Entry<Integer, double[]> e : matrix.entrySet()) {
 			// for now don't check matrices
 			int i = e.getKey();
@@ -153,10 +147,4 @@ public class DeviceTrackd implements RawDevice, ActionListener {
 	protected void calibrate(double[] sensorMatrix, int index) {	
 	}
 	
-	public static void main(String[] args) {
-		DeviceTrackd td = new DeviceTrackd();
-		td.initialize(null);
-		System.out.println(td.mapRawDevice("matrix_0", InputSlot.getDevice("headMatrix")));
-		System.out.println(td.mapRawDevice("matrix_1", InputSlot.getDevice("wandMatrix")));
-	}
 }

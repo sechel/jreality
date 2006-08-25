@@ -66,6 +66,8 @@ import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.toolsystem.config.VirtualConstant;
 import de.jreality.toolsystem.config.VirtualDeviceConfig;
 import de.jreality.toolsystem.config.VirtualMapping;
+import de.jreality.toolsystem.raw.Poller;
+import de.jreality.toolsystem.raw.PollingDevice;
 import de.jreality.toolsystem.raw.RawDevice;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
@@ -168,6 +170,7 @@ class DeviceManager {
         rd.initialize(viewer);
         rd.setEventQueue(eventQueue);
         rawDevices.put(rdc.getDeviceID(), rd);
+        if (rd instanceof PollingDevice) Poller.getSharedInstance().addPollingDevice((PollingDevice) rd);
         LoggingSystem.getLogger(this).config("Started rawdevice "+rd);
       } catch (Exception e) {
         LoggingSystem.getLogger(this).info("Couldn't create RawDevice "+rdc);
@@ -421,8 +424,10 @@ public List<ToolEvent> updateImplicitDevices() {
 
   public void dispose() {
     for (Entry<String, RawDevice> entry : rawDevices.entrySet()) {
-      LoggingSystem.getLogger(this).fine("disposing raw device ["+entry.getKey()+"]"+entry.getValue());
-      entry.getValue().dispose();
+      RawDevice rd = entry.getValue();
+			LoggingSystem.getLogger(this).fine("disposing raw device ["+entry.getKey()+"]"+rd);
+			if (rd instanceof PollingDevice) Poller.getSharedInstance().removePollingDevice((PollingDevice) rd);
+      rd.dispose();
     }
     slot2axis.clear();
     slot2transformation.clear();

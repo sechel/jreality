@@ -40,14 +40,10 @@
 
 package de.jreality.toolsystem.raw;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
-import javax.swing.Timer;
 
 import net.java.games.input.Component;
 import net.java.games.input.Controller;
@@ -62,19 +58,16 @@ import de.jreality.toolsystem.ToolEventQueue;
  * A device that utilizes the jinput library for polling mice and joysticks.
  * The k-th axis of the l-th device can be addressed via "axis_l_k"
  * 
+ * TODO: rename this to DeviceJInput, since it provides access to ALL jinput devices
  * @author weissman/hoffmann
  *
  **/
-public class DeviceJinputJoystick implements RawDevice, ActionListener {
+public class DeviceJinputJoystick implements RawDevice, PollingDevice {
 
     private ToolEventQueue queue;
     
-    volatile int delay = 20; // delay in ms
-    
-	Timer timer = new Timer(delay,this);
 	private HashMap<Component,InputSlot> componentMap = new HashMap<Component,InputSlot>();
 	private HashMap<Component,AxisState> lastValues = new HashMap<Component,AxisState>();
-    private InputSlot device;
     
     private Controller controllers[];
 	private net.java.games.input.Component[][] components;
@@ -88,6 +81,7 @@ public class DeviceJinputJoystick implements RawDevice, ActionListener {
 			components[i] = controllers[i].getComponents();
 		}
 		 
+		System.out.println(Arrays.deepToString(components));
 		
 	}
 	
@@ -111,22 +105,16 @@ public class DeviceJinputJoystick implements RawDevice, ActionListener {
     }
 
     public void dispose() {
-		timer.stop();
     }
 
     public void initialize(Viewer viewer) {
-      timer.start();
     }
 
     public String getName() {
         return "jinputJoystick";
     }
     
-//    public String toString() {
-//      return "RawDevice: jinputJoystick";
-//    }
-
-	public void actionPerformed(ActionEvent ae) {
+	public void poll() {
 		if (queue == null) return;
 		for (int i = 0; i < controllers.length; i++) {
             controllers[i].poll();
@@ -141,6 +129,7 @@ public class DeviceJinputJoystick implements RawDevice, ActionListener {
             AxisState newState = new AxisState(c.getPollData());
 			AxisState oldState = lastValues.get(c);
 			if(newState.intValue() != oldState.intValue()) {
+				System.out.println("new event");
 				queue.addEvent(
 						new ToolEvent(this, element.getValue(), newState)
 						);

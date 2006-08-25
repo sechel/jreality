@@ -40,11 +40,6 @@
 
 package de.jreality.toolsystem.raw;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.Timer;
-
 import de.jreality.scene.Viewer;
 import de.jreality.scene.tool.AxisState;
 import de.jreality.scene.tool.InputSlot;
@@ -55,11 +50,9 @@ import de.jreality.toolsystem.ToolEventQueue;
  * @author weissman
  *
  **/
-public class DeviceSystemTimer implements RawDevice, ActionListener {
+public class DeviceSystemTimer implements RawDevice, PollingDevice {
 
     private ToolEventQueue queue;
-    
-    Timer timer;
     
     String myDeviceName = "tick";
     
@@ -73,7 +66,7 @@ public class DeviceSystemTimer implements RawDevice, ActionListener {
         return new ToolEvent(this, inputDevice, AxisState.ORIGIN);
     }
 
-    public void actionPerformed(ActionEvent event) {
+    public void poll() {
       if (queue == null) return;
       long ct = System.currentTimeMillis();
       int delta = (int)(lastEvent == -1l ? 0 : ct - lastEvent);
@@ -96,12 +89,9 @@ public class DeviceSystemTimer implements RawDevice, ActionListener {
     }
 
     public void dispose() {
-    	timer.stop();
     }
 
     public void initialize(Viewer viewer) {
-    	timer  = new Timer(5, this);
-    	timer.start();
     }
 
     public String getName() {
