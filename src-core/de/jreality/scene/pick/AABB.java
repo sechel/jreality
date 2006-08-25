@@ -51,37 +51,16 @@ import de.jreality.math.Rn;
  */
 class AABB {
 
-	/** Center of the Box. */
   final double[] center = new double[]{0, 0, 0};
 
-	/** X axis of the Box. */
-  private final double[] xAxis = new double[]{1, 0, 0, 0};
-
-	/** Y axis of the Box. */
-  private final double[] yAxis = new double[]{0, 1, 0, 0};
-
-	/** Z axis of the Box. */
-  private final double[] zAxis = new double[]{0, 0, 1, 0};
+  private static final double[] X = new double[]{1, 0, 0, 0};
+  private static final double[] Y = new double[]{0, 1, 0, 0};
+  private static final double[] Z = new double[]{0, 0, 1, 0};
 
 	/** Extents of the box along the x,y,z axis. */
   final double[] extent = new double[]{0, 0, 0};
 
-/*	AABB transform(Matrix mat, AABB store) {
-    FactoredMatrix m = new FactoredMatrix();
-    m.assignFrom(mat);
-    double[] scale = m.getStretch();
-		store.extent[0]=extent[0] * scale[0];
-    store.extent[1]=extent[1] * scale[1];
-    store.extent[2]=extent[2] * scale[2];
-    Matrix rot = m.getRotation();
-		Rn.copy(store.xAxis, rot.multiplyVector(xAxis));
-    Rn.copy(store.yAxis, rot.multiplyVector(yAxis));
-    Rn.copy(store.zAxis, rot.multiplyVector(zAxis));
-    Rn.copy(store.center, m.multiplyVector(center));
-    return store;
-	}*/
-  
-  void computeFromTris(AABBTree.TreePolygon[] tris, int start, int end) {
+  void compute(AABBTree.TreePolygon[] tris, int start, int end) {
 		double[] min = Rn.copy(null, tris[start].getVertices()[0]);
 		double[] max = Rn.copy(null, min);
 		double[] point;
@@ -108,57 +87,36 @@ class AABB {
     
 	}
 
-  private final double[] fAWdU = new double[3];
-  private final double[] fAWxDdU = new double[3];
+  private final double[] tmpVec1 = new double[3];
+  private final double[] tmpVec2 = new double[3];
 
   boolean intersects(double[] from, double[] dir) {
     
     double rhs;    
     double[] diff = Rn.subtract(null, from, center);
 
-    if (Math.abs(diff[0]) > extent[0] && diff[0] * dir[0] >= 0.0) {
-      return false;
-    }
-    if (Math.abs(diff[1]) > extent[1] && diff[1] * dir[1] >= 0.0) {
-      return false;
-    }
-    if (Math.abs(diff[2]) > extent[2] && diff[2] * dir[2] >= 0.0) {
-      return false;
-    }
+    if (Math.abs(diff[0]) > extent[0] && diff[0] * dir[0] >= 0.0) return false;
+    if (Math.abs(diff[1]) > extent[1] && diff[1] * dir[1] >= 0.0) return false;
+    if (Math.abs(diff[2]) > extent[2] && diff[2] * dir[2] >= 0.0) return false;
     
-    fAWdU[0] = Math.abs(dir[0]);
-    fAWdU[1] = Math.abs(dir[1]);
-    fAWdU[2] = Math.abs(dir[2]);    
+    tmpVec1[0] = Math.abs(dir[0]);
+    tmpVec1[1] = Math.abs(dir[1]);
+    tmpVec1[2] = Math.abs(dir[2]);    
     
     double[] wCrossD = Rn.crossProduct(null, dir, diff);
-    fAWxDdU[0] = Math.abs(Rn.innerProduct(wCrossD, xAxis));
-    rhs = extent[1] * fAWdU[2] + extent[2] * fAWdU[1];
-    if (fAWxDdU[0] > rhs) {
-      return false;
-    }
+    tmpVec2[0] = Math.abs(Rn.innerProduct(wCrossD, X));
+    rhs = extent[1] * tmpVec1[2] + extent[2] * tmpVec1[1];
+    if (tmpVec2[0] > rhs) return false;
 
-    fAWxDdU[1] = Math.abs(Rn.innerProduct(wCrossD, yAxis));
-    rhs = extent[0] * fAWdU[2] + extent[2] * fAWdU[0];
-    if (fAWxDdU[1] > rhs) {
-      return false;
-    }
+    tmpVec2[1] = Math.abs(Rn.innerProduct(wCrossD, Y));
+    rhs = extent[0] * tmpVec1[2] + extent[2] * tmpVec1[0];
+    if (tmpVec2[1] > rhs) return false;
 
-    fAWxDdU[2] = Math.abs(Rn.innerProduct(wCrossD, zAxis));
-    rhs = extent[0] * fAWdU[1] + extent[1] * fAWdU[0];
-    if (fAWxDdU[2] > rhs) {
-      return false;
-    }
+    tmpVec2[2] = Math.abs(Rn.innerProduct(wCrossD, Z));
+    rhs = extent[0] * tmpVec1[1] + extent[1] * tmpVec1[0];
+    if (tmpVec2[2] > rhs) return false;
+
     return true;
   }
   
-  public String toString() {
-    StringBuffer sb = new StringBuffer();
-    sb.append("AABB: \n").append("\tcenter: "+Rn.toString(center)).append('\n');
-    sb.append("\textent: "+Rn.toString(extent)).append('\n');
-    sb.append("\txAxis: "+Rn.toString(xAxis)).append('\n');
-    sb.append("\tyAxis: "+Rn.toString(yAxis)).append('\n');
-    sb.append("\tzAxis: "+Rn.toString(zAxis)).append('\n');
-    return sb.toString();
-  }
-
 }

@@ -42,7 +42,6 @@ package de.jreality.scene.pick;
 
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -51,7 +50,6 @@ import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -119,12 +117,10 @@ public class AABBTree {
         TreePolygon[] tris = new TreePolygon[polygons.length];
         for (int i = 0; i < tris.length; i++) {
         	tris[i] = new TreePolygon(polygons[i], i);
-          tris[i].putCentriod();
-          tris[i].index = i;
         }
         AABBTree ret = new AABBTree(tris, maxPolysPerLeaf, 0, tris.length-1, debug);
         for (int i = 0; i < tris.length; i++) {
-            tris[i].centroid = null;
+            tris[i].disposeCenter();
         }
         return ret;
     }
@@ -158,7 +154,7 @@ public class AABBTree {
         myStart = start;
         myEnd = end;
   			bounds = new AABB();
-        bounds.computeFromTris(tris, start, end);
+        bounds.compute(tris, start, end);
         if (end - start < maxPerLeaf) return;
         else {
           splitTris(start, end);
@@ -228,54 +224,15 @@ public class AABBTree {
     private void splitTris(int start, int end) {
         if (bounds.extent[0] > bounds.extent[1]) {
             if (bounds.extent[0] > bounds.extent[2])
-                sortX(start, end);
+                sort(start, end, 0);
             else
-                sortZ(start, end);
+                sort(start, end, 2);
         } else {
             if (bounds.extent[1] > bounds.extent[2])
-                sortY(start, end);
+                sort(start, end, 1);
             else
-                sortZ(start, end);
+                sort(start, end, 2);
         }
-    }
-
-    /**
-     *
-     * <code>sortZ</code> sorts the z bounds of the tree.
-     *
-     * @param start
-     *            the start index of the triangle list.
-     * @param end
-     *            the end index of the triangle list.
-     */
-    private void sortZ(int start, int end) {
-      sort(start, end, 2);
-    }
-
-    /**
-     *
-     * <code>sortY</code> sorts the y bounds of the tree.
-     *
-     * @param start
-     *            the start index of the triangle list.
-     * @param end
-     *            the end index of the triangle list.
-     */
-    private void sortY(int start, int end) {
-      sort(start, end, 1);
-    }
-
-   /**
-     *
-     * <code>sortX</code> sorts the x bounds of the tree.
-     *
-     * @param start
-     *            the start index of the triangle list.
-     * @param end
-     *            the end index of the triangle list.
-     */
-    private void sortX(int start, int end) {
-      sort(start, end, 0);
     }
 
     /**
@@ -315,15 +272,15 @@ public class AABBTree {
           // handle 4-vectors
           if (verts[0].length == 4)	
         	  this.verts = Pn.dehomogenize(new double[verts.length][3], verts);
-        
            this.index=index;
+           int count = verts.length;
+					centroid = Rn.copy(null, verts[0]);
+					for (int i = 1; i < count; i++) Rn.add(centroid, centroid, verts[i]);
+					Rn.times(centroid, 1./count, centroid);
         }
 
-        void putCentriod() {
-            int count = verts.length;
-            centroid = Rn.copy(null, verts[0]);
-            for (int i = 1; i < count; i++) Rn.add(centroid, centroid, verts[i]);
-            Rn.times(centroid, 1./count, centroid);
+        void disposeCenter() {
+        	centroid=null;
         }
         
         int getNumTriangles() {
@@ -381,7 +338,6 @@ public class AABBTree {
         SceneGraphComponent myComp = new SceneGraphComponent();
         double[] t = bounds.center;
         double[] s = bounds.extent;
-        double[] z=new double[]{0,0,1};
         Matrix m = MatrixBuilder.euclidean().translate(t)./*rotateFromTo(z, bounds.zAxis).*/scale(s[0], s[1], s[2]).getMatrix();
         boolean printed = false;
         IndexedFaceSet box = new IndexedFaceSet();
