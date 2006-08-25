@@ -465,7 +465,9 @@
   	<copy file="${lib}/smrj.jar" todir="release/tmp/lib" />
   	<copy file="${lib}/xstream-1.1.2.jar" todir="release/tmp/lib" />
   	<copy file="${lib}/xpp3-1.1.3.4.O.jar" todir="release/tmp/lib" />
-
+  	<copy todir="release/tmp/lib">
+  		<fileset dir="3rd-party" />
+  	</copy>
   	<zip destfile="release/jReality-3rd-party.zip" >
   		<fileset dir="release/tmp" />
   	</zip>
