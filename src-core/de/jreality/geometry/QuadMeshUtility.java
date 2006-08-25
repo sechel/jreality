@@ -56,45 +56,6 @@ public class QuadMeshUtility {
 	private QuadMeshUtility() {}
 
 
-//	public static IndexedFaceSet representBezierPatchMeshAsQuadMesh(BezierPatchMesh bpm)	{
-//		return representBezierPatchMeshAsQuadMesh(null, bpm);
-//	}
-//	
-//	public static IndexedFaceSet representBezierPatchMeshAsQuadMesh(IndexedFaceSet existing, BezierPatchMesh bpm)	{
-//		double[][][] thePoints = bpm.getControlPoints();
-//		//if (qmpatch == null) 
-//		AbstractQuadMeshFactory qmf = new AbstractQuadMeshFactory(existing, Pn.EUCLIDEAN, thePoints[0].length, thePoints.length, false, false);
-//        double[] verts1d = Rn.convertArray3DToArray1D(thePoints);
-//        qmf.setVertexCoordinates(verts1d);
-//        qmf.setGenerateFaceNormals(true);
-//        qmf.setGenerateVertexNormals(true);
-//        qmf.update();
-////		qmpatch.setVertexCountAndAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.inlined(thePoints[0][0].length).createReadOnly(verts1d));
-////		GeometryUtility.calculateAndSetNormals(qmpatch);
-//		existing = qmf.getIndexedFaceSet();
-//		return existing;
-//	}
-
-//	/**
-//	 * @deprecated
-//	 */
-//	 public static double[][] extractUParameterCurve(double[][] curve, QuadMeshShape qms, int which)	{
-//		return extractParameterCurve(curve, qms, which, 0);
-//	}
-//
-//		/**
-//		 * @deprecated
-//		 */
-//	public static double[][] extractVParameterCurve(double[][] curve, QuadMeshShape qms, int which)	{
-//		return extractParameterCurve(curve, qms, which, 1);
-//	}
-//
-//	/**
-//	 * @deprecated
-//	 */
-//	public static double[][] extractParameterCurve(double[][] curve, QuadMeshShape qms, int which, int type)	{
-//		return extractParameterCurve(curve, qms, qms.getMaxU(), qms.getMaxV(), which, type);
-//	}
 	public static double[][] extractUParameterCurve(double[][] curve, IndexedFaceSet ifs, int which)	{
 		return extractParameterCurve(curve, ifs, which, 0);
 	}

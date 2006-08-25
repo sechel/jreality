@@ -42,15 +42,45 @@ package de.jreality.geometry;
 
 import java.awt.geom.Rectangle2D;
 
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.data.Attribute;
+import de.jreality.util.SceneGraphUtility;
+
 /**
  * A factory for generating instances of {@link IndexedFaceSet} which
- * are defined by a height field.  Use the {@link de.jreality.geometry.QuadMeshFactory#setVertexCoordinates(double[][])} 
+ * are defined by a height field.  
+ * <p>
+ * Use the {@link QuadMeshFactory#setVertexCoordinates(double[][])} 
  * or some variation, to set the height field (with one entry per vector).
  * Then use {@link #setRegularDomain(Rectangle2D)} to specify the domain of
  * definition of the height field.  The resulting height field will
  * have <i>(x,y)</i> values given by appropriately interpolated position in the
  * domain, and z-value the appropriate element of the z-array.
- * 
+ * <p>
+ * The following code snippet illustrates a typical usage:
+ * <code><b><pre>
+			SceneGraphComponent theWorld = SceneGraphUtility.createFullSceneGraphComponent();
+			double[][] verts = new double[200][1];
+			for (int  i =0; i<20; ++i)	{
+				for (int  j =0; j<10; ++j)	{
+					verts[10*i+j][0] = 1.0 - (.25*(i-9.5)*(i-9.5)+(j-4.5)*(j-4.5))/50;
+				}
+			}
+			HeightFieldFactory hff = new HeightFieldFactory();
+			hff. setULineCount(10);
+			hff.setVLineCount(20);
+			hff.setClosedInUDirection(false);
+			hff.setClosedInVDirection(false);
+			hff.setVertexCoordinates(verts);
+			hff.setGenerateVertexNormals(true);
+			hff.setGenerateFaceNormals(true);
+			Rectangle2D.Double domain = new Rectangle2D.Double(-2, -2, 4, 4);
+			hff.setRegularDomain(domain);
+			hff.update();
+			IndexedFaceSet ifs = hff.getIndexedFaceSet();
+			theWorld.setGeometry( ifs);
+ * </pre></b></code>
  * <b>Warning</b>: Not all jReality backends can handle such height fields.  JOGL and PORTAL can.
  * @author Charles Gunn
  *
@@ -61,17 +91,11 @@ import java.awt.geom.Rectangle2D;
 		super();
 	}
 
-	public HeightFieldFactory(int signature, int mMaxU, int mMaxV,
-			boolean closeU, boolean closeV) {
-		super();
-		setSignature(signature);
-		setULineCount(mMaxU);
-		setVLineCount(mMaxV);
-		setClosedInUDirection(closeU);
-		setClosedInVDirection(closeV);
-	}
 
-	public void setRegularDomain(Rectangle2D r)	{
+	/**
+	 * Set the domain for this height field. Default: (xmin, ymin, width, height) = (-1, -1, 2, 2).
+	 * @param r
+	 */public void setRegularDomain(Rectangle2D r)	{
 		theDomain=r;
 	}
 	
@@ -86,6 +110,34 @@ import java.awt.geom.Rectangle2D;
 			ifs.setGeometryAttributes(GeometryUtility.HEIGHT_FIELD_SHAPE, theDomain);
 		
 		domainHasChanged= false;
+	}
+
+	double [][] generateFaceNormals() {
+		if( faceDLS.containsAttribute(Attribute.NORMALS)) {
+			return faceDLS.getList(Attribute.NORMALS)
+			.toDoubleArrayArray((double[][])faceNormals.getObject());
+		} else {
+			log( "compute", Attribute.NORMALS, "face");
+			return calculateFaceNormals( faceIndices(), vertexCoordinates(), getSignature() );
+		}
+	}
+	
+	private double[][] calculateFaceNormals(int[][] is, double[][] ds, int signature) {
+		double[][] fullcoords = new double[ds.length][3];
+		double[] foo = new double[2];
+		int maxu = getULineCount();
+		int maxv = getVLineCount();
+		for (int i = 0; i<maxv; ++i)	{
+			int k = i * maxu;
+			for (int j = 0; j<maxu; ++j)	{
+				getCoordinatesForUV(foo, theDomain, j, i, maxu, maxv);
+				fullcoords[k+j][0] = foo[0];
+				fullcoords[k+j][1] = foo[1];
+				fullcoords[k+j][2] = ds[k+j][0];
+			}
+		}
+		return GeometryUtility.calculateFaceNormals(is, fullcoords, signature);
+		
 	}
 
 	public static double[] getCoordinatesForUV(double[] store, Rectangle2D d, int u, int v, int uc, int vc)	{

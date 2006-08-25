@@ -179,27 +179,15 @@ public class IndexedLineSetUtility {
 		return createCurveFromPoints(g, points, fiber, ind);
 	}
 
-	/**
-	 * @param R
-	 * @param r
-	 * @param n
-	 * @param m
-	 * @param nPts
-	 * @return
-	 */
-	public static IndexedLineSet discreteTorusKnot(double R, double r, int n, int m, int nPts)	{
-		double[][] vertices = new double[nPts][3];
-		for (int i = 0; i<nPts; ++i)	{
-			double angle = ( i * 2.0 * Math.PI)/ nPts;
-			double a = m * angle, A = n * angle;
-			double C = Math.cos(A),				S = Math.sin(A);
-			double c = r*Math.cos(a), 			s = r*Math.sin(a);
-			
-			vertices[i][0] = C * (R + c);
-			vertices[i][1] = s;
-			vertices[i][2] = S * (R+c);
+	public static IndexedLineSet circle(int n) {
+		double[][] verts = new double[n][3];
+		double angle = 0, delta = Math.PI * 2 / (n);
+		for (int i = 0; i<n; ++i) {
+			angle = i * delta;
+			verts[i][0] = Math.cos(angle);
+			verts[i][1] = Math.sin(angle);
 		}
-		return createCurveFromPoints(vertices, true);
+		return createCurveFromPoints(verts, true);
 	}
 
 

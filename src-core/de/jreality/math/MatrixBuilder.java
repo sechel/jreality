@@ -46,7 +46,8 @@ import de.jreality.scene.Transformation;
 /**
  *
  * <p>
- * This class wraps a {@link de.jreality.math.Matrix} instance.
+ * This class wraps a {@link de.jreality.math.Matrix} instance for easy specification of
+ * concatenated operations.
  * <br> All the static methods are factory methods that
  * create an instance for a selected metric.
  * <br> <b>Note:</b> the factory methods with Transformation as a
@@ -77,7 +78,7 @@ import de.jreality.scene.Transformation;
  *              .assignTo(camComp); // Transformation gets set and assigned
  * </pre>
  * 
- * For explanation of signature, see [@link de.jreality.math.P3 P3}.
+ * For explanation of signature, see {@link de.jreality.math.P3 P3}.
  * @author weissman
  */
 public final class MatrixBuilder {
@@ -285,7 +286,6 @@ public final class MatrixBuilder {
   }
   
   /**
-   * 
    * @param p1
    * @param p2
    * @return
@@ -334,7 +334,7 @@ public final class MatrixBuilder {
   }
   
   /**
-   * multiplies the given array (length==16) on the right hand side
+   * multiplies <i>array</i> (considered as 4x4 matrix) on the right hand side
    * @param array
    * @return this
    */

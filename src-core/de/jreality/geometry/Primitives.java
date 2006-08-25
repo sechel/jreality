@@ -60,7 +60,19 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.util.SceneGraphUtility;
 
 /**
- * @author gunn
+ * Static methods for generating a variety of geometric primitives either as 
+ * instances of {@link Geometry} or {@link SceneGraphComponent}. The main cateegories of
+ * primitives are:
+ * <ul>
+ * <li>Polyhedra: cube, tetrahedron, icosahedron, pyramids, ...</li>
+ * <li>Approximations to smooth shapes: sphere, cylinder, torus, ... </li>
+ * <li>Points and rectangles</li>
+ * <li>Miscellaneous: clipping planes, ... </li>
+ * </ul>
+ * <p>
+ * Note: many of these methods could perhaps profitably be replaced with factory classes.
+ * 
+ * @author Charles Gunn
  *
  */
 public class Primitives {
@@ -90,6 +102,11 @@ public class Primitives {
 		public static IndexedFaceSet cube()	{return cube(false);}
 		public static IndexedFaceSet coloredCube()	{return cube(true);}
 		
+		/**
+		 * A cube.  If <i>colored</i> is true, then it has face colors.
+		 * @param colored
+		 * @return
+		 */
 		public static IndexedFaceSet cube(boolean colored)	{
 			
 			IndexedFaceSet cube = new IndexedFaceSet(8, 6);
@@ -123,7 +140,11 @@ public class Primitives {
 		public static IndexedFaceSet tetrahedron()	{return tetrahedron(false);}
 		public static IndexedFaceSet coloredTetrahedron()	{return tetrahedron(true);}
 		
-		public static IndexedFaceSet tetrahedron(boolean colored)	{
+		/**
+		 * A tetrahedron.  If <i>colored</i> is true, then it has face colors.
+		 * @param colored
+		 * @return
+		 */public static IndexedFaceSet tetrahedron(boolean colored)	{
 			
 			IndexedFaceSet tetrahedron = new IndexedFaceSet(4, 4);
 
@@ -193,6 +214,10 @@ public class Primitives {
 			sharedIcosahedron = icosahedron();
 		}
 				
+		/**
+		 * 
+		 * @return
+		 */
 		public static IndexedFaceSet icosahedron() {
 					
 			IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
@@ -207,6 +232,11 @@ public class Primitives {
 			return ifsf.getIndexedFaceSet();
 			}
 		
+		/**
+		 * A single point.
+		 * @param center
+		 * @return
+		 */
 		public static PointSet point( double[] center)	{
 			PointSet ps = new PointSet(1);
 			int n = center.length;
@@ -216,15 +246,34 @@ public class Primitives {
 			return ps;
 		}
 		
-		public static SceneGraphComponent sphere(double radius, double x, double y, double z)	{
+		/**
+		 * A euclidean sphere with given radius and center.
+		 * @param radius
+		 * @param x
+		 * @param y
+		 * @param z
+		 * @return
+		 */public static SceneGraphComponent sphere(double radius, double x, double y, double z)	{
 			return sphere(radius, new double[] {x,y,z}, Pn.EUCLIDEAN);
 		}
 		
-		public static SceneGraphComponent sphere(double radius, double[] center) {
+		/**
+		 * A euclidean sphere with given radius and center.
+		 * @param radius
+		 * @param center
+		 * @return
+		 */public static SceneGraphComponent sphere(double radius, double[] center) {
 			return sphere(radius, center, Pn.EUCLIDEAN);
 		}
 		
-		public static SceneGraphComponent sphere(double radius, double[] center, int signature) {
+		/**
+		 * A sphere with given radius and center, with the given metric signature.
+		 * @param radius
+		 * @param center
+		 * @param signature
+		 * @return
+		 */
+		 public static SceneGraphComponent sphere(double radius, double[] center, int signature) {
 			SceneGraphComponent sgc = SceneGraphUtility.createFullSceneGraphComponent("sphere");
 			if (center == null)  center = Pn.originP3;
 			MatrixBuilder.init(null,signature).translate(center).scale(radius).assignTo(sgc.getTransformation());
@@ -233,9 +282,10 @@ public class Primitives {
 		}
 		
 		/**
-		 * @return SceneGraphComponent with wire-frame sphere (azimuth/elevation coordinate mesh)
+		 *  A {@link SceneGraphComponent} with wire-frame sphere (azimuth/elevation coordinate mesh)
+		 * @return
 		 */
-		public static SceneGraphComponent wireframeSphere() {
+		 public static SceneGraphComponent wireframeSphere() {
 			SceneGraphComponent hypersphere = SceneGraphUtility.createFullSceneGraphComponent("hyperbolic sphere");
 			hypersphere.setGeometry(SphereUtility.sphericalPatch(0.0, 0.0, 360.0, 180.0, 40, 20, 1.0));
 			Appearance ap = hypersphere.getAppearance();
@@ -247,7 +297,14 @@ public class Primitives {
 			return hypersphere;
 		}
 		
-		public static IndexedFaceSet cylinder(int n) {
+		/**
+		 * A unit euclidean cylinder approximated by a prism with <i>n</i>sides.  The cylinder 
+		 * has radius 1, is centered on the z-axis, and goes from z=-1 to z=1.
+		 * @param n
+		 * @return
+		 * @see Cylinder  
+		 */
+		 public static IndexedFaceSet cylinder(int n) {
 			int rn = n+1;
 			double[] verts = new double[2*3*rn];
 			double angle = 0, delta = Math.PI*2/(n);
@@ -270,7 +327,14 @@ public class Primitives {
 			return qmf.getIndexedFaceSet();
 		}
 		
-		public static IndexedFaceSet pyramid(double[][] base, double[] tip)	{
+		/**
+		 * Construct a pyramid with vertex <i>tip</i> over the polygon <i>base</i>.
+		 * The polygon is assumed to be closed -- so the user need not set the last 
+		 * vertex to be the same as the first.
+		 * @param base
+		 * @param tip
+		 * @return
+		 */public static IndexedFaceSet pyramid(double[][] base, double[] tip)	{
 			int n = base.length;
 			int l = base[0].length;
 			if (l != tip.length)	{
@@ -300,30 +364,16 @@ public class Primitives {
 			return ifsf.getIndexedFaceSet();
 		}
 		
-		static double[][] viewerVerts = {{1d,0d,-1.5d},{1d,1d,-1.5d},{-1d,1d,-1.5d},{-1d, 0d, -1.5d}};
-		static double[] tip = {0,.5d,-1d};
-		private static SceneGraphComponent _camIcon = null;
-		static {
-			_camIcon = SceneGraphUtility.createFullSceneGraphComponent("cameraIcon");
-			_camIcon.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
-			_camIcon.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, true);
-			_camIcon.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.white);
-			_camIcon.setGeometry(cube());
-			MatrixBuilder.euclidean().scale(.3,1.0,1.0).assignTo(_camIcon.getTransformation());
-
-			SceneGraphComponent viewer = new SceneGraphComponent();
-			viewer.setGeometry(pyramid(viewerVerts, tip));
-			_camIcon.addChild(viewer);
-		}
-		
-		public static SceneGraphComponent cameraIcon(double scale)		{
-			SceneGraphComponent ci = SceneGraphUtility.createFullSceneGraphComponent("cameraIcon");
-			MatrixBuilder.euclidean().scale(scale).assignTo(ci.getTransformation());
-			ci.addChild(_camIcon);
-			return ci;
-		}
-		
-		public static IndexedLineSet discreteTorusKnot(double R, double r, int n, int m, int nPts)	{
+		/**
+		 * Generate a torus knot that winds around the given torus the given number of times.
+		 * @param R	major radius
+		 * @param r	minor radius
+		 * @param n	number of windings around the big circle
+		 * @param m	number of windings around the small (meridianal) circle
+		 * @param nPts	how many segments in the resulting curve.
+		 * @return
+		 */
+		 public static IndexedLineSet discreteTorusKnot(double R, double r, int n, int m, int nPts)	{
 			double[][] vertices = new double[nPts][3];
 			for (int i = 0; i<nPts; ++i)	{
 				double angle = ( i * 2.0 * Math.PI)/ nPts;
@@ -338,6 +388,8 @@ public class Primitives {
 			return IndexedLineSetUtility.createCurveFromPoints(vertices, true);
 		}
 		/**
+		 * Construct a regular polygon lying in the (x,y) plane, lying on the unit-circle there,
+		 * and having <i>order</i> edges.
 		 * @param order
 		 * @return
 		 */
@@ -351,9 +403,27 @@ public class Primitives {
 			}
 			return IndexedFaceSetUtility.constructPolygon(verts);
 		}
+		
+		/**
+		 * 
+		 * @return {@link #arrow(double, double, double, double, double, boolean)} with final parameter false.
+		 */
 		public static IndexedLineSet arrow(double x0, double y0, double x1, double y1, double tipSize)	{
 			return arrow(x0, y0, x1, y1, tipSize, false);
 		}
+		
+		/**
+		 * Generate an an arrow: a line segment joining (x0,y0) to (x1,y1) with a head at the
+		 * second point, each half making a 45 degree angle to the segment.  If <i>halfArrow</i>
+		 * is true, then only the left half of the arrow is drawn.
+		 * @param x0
+		 * @param y0
+		 * @param x1
+		 * @param y1
+		 * @param tipSize
+		 * @param halfArrow
+		 * @return
+		 */
 		public static IndexedLineSet arrow(double x0, double y0, double x1, double y1, double tipSize, boolean halfArrow)	{
 			IndexedLineSet ifs = new IndexedLineSet(4, 3);
 			double[][] verts = new double[4][3];
@@ -386,58 +456,31 @@ public class Primitives {
 			ifs.setEdgeCountAndAttributes(Attribute.INDICES, StorageModel.INT_ARRAY.array(2).createReadOnly(indices));
 			return ifs;
 		}
+		
 		/**
-		 * Create a surface of revolution surface by rotating the profile curve around the X-axis.
-		 * The resulting array with have the original curve twicee, once at the beginning and also
-		 * at the end.  This is necessary to be able to texture the surface under current conditions.
-		 * @param profile	a 3- or 4-d array of points (generally of form (x,y,0) or (x,y,0,1))
-		 * @param num		number of copies of the curve to make
+		 * Create a euclidean clipping plane with the given plane equation. 
+		 * @param plane	a 4-vector, the plane coordinates of the plane
 		 * @return
 		 */
-		public static double[][] surfaceOfRevolution(double[][] profile, int num, double angle) {
-			if (num <= 1 || profile[0].length < 3) {
-				throw new IllegalArgumentException("Bad parameters");
-			}
-			double[][] vals = new double[num * profile.length][profile[0].length];
-			for (int i = 0 ; i < num; ++i)	{
-				double a = i * angle/(num-1);
-				double[] rot = P3.makeRotationMatrixX(null, a);
-				for (int j = 0; j<profile.length; ++j)
-					Rn.matrixTimesVector(vals[i*profile.length+j], rot, profile[j]);
-			}
-			return vals;
-		}
-		
-		/*
-		 * @deprecated
-		 */
-		public static IndexedFaceSet surfaceOfRevolutionAsIFS(double[][] profile, int num, double angle)	{
-			QuadMeshFactory qmf = new QuadMeshFactory();//Pn.EUCLIDEAN, profile.length, num, false, false);
-//			QuadMeshShape qm = new QuadMeshShape( profile.length, num, false, false);
-			qmf.setULineCount(profile.length);
-			qmf.setVLineCount(num);
-			double[][] vals = surfaceOfRevolution(profile, num, angle);
-			qmf.setVertexCoordinates(vals);
-			qmf.setGenerateFaceNormals(true);
-			qmf.setGenerateVertexNormals(true);
-			qmf.update();
-//			qm.setVertexCountAndAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(vals[0].length).createReadOnly(vals));
-//			GeometryUtility.calculateAndSetNormals(qm);
-			return qmf.getIndexedFaceSet();
-		}
-		
-		public static SceneGraphComponent clippingPlane(double[] planeEquation)	{
-			return clippingPlane(planeEquation, Pn.EUCLIDEAN);
+		public static SceneGraphComponent clippingPlane(double[] plane)	{
+			return clippingPlane(plane, Pn.EUCLIDEAN);
 		}
 
-		public static SceneGraphComponent clippingPlane(double[] planeEquation, int sig)	{
+		/**
+		 * Create a  clipping plane with the given plane equation with the given signature. 
+		 * The points whose inner product with <i>plane</i> are negative, will be clipped away. 
+		 * @param plane
+		 * @param sig	
+		 * @return
+		 */
+		public static SceneGraphComponent clippingPlane(double[] plane, int sig)	{
 			double[] normal = new double[4];
-			System.arraycopy(planeEquation, 0, normal, 0, 3);
+			System.arraycopy(plane, 0, normal, 0, 3);
 			double[] rotation = P3.makeRotationMatrix(null, new double[]{0,0,1}, normal);
 			double l = Rn.euclideanNormSquared(normal);
 			double[] tform;
 			if (l != 0)	{
-				double f = -planeEquation[3]/l;
+				double f = -plane[3]/l;
 				double[] tlate = new double[4];
 				Rn.times(tlate, f, normal);
 				tlate[3] = 1.0;
@@ -450,6 +493,14 @@ public class Primitives {
 			return cp;
 		}
    
+		/**
+		 * Create a torus with the given parameters.
+		 * @param bR	Major radius
+		 * @param sR	Minor radius
+		 * @param bDetail	Number of sample points around major circle
+		 * @param sDetail	Number of sample points around minor circle
+		 * @return
+		 */
 		public static IndexedFaceSet torus(final double bR, final double sR, int bDetail, int sDetail) {
 		    
 		    ParametricSurfaceFactory.Immersion immersion =
@@ -496,7 +547,13 @@ public class Primitives {
 		    return factory.getIndexedFaceSet();
 		}
 		
-        public static IndexedFaceSet sphere(final int detail ) {
+        /**
+         * Create a unit sphere centered at the origin
+         * using latitude/longitude parametrization.  <i>detail</i> specifies how many samples to use
+         * in both directions.
+         * @param detail
+         * @return
+         */public static IndexedFaceSet sphere(final int detail ) {
 		    
 		    ParametricSurfaceFactory.Immersion immersion =
 		        new ParametricSurfaceFactory.Immersion() {
@@ -538,13 +595,13 @@ public class Primitives {
 		    return factory.getIndexedFaceSet();
 		}
         
-    /**
-     * @deprecated use {@link Primitives.texturedQuadrilateral()}.
-     */
- 		public static IndexedFaceSet texturedSquare(double[] points) {
- 			return texturedQuadrilateral(points);
- 		}
-		public static IndexedFaceSet texturedQuadrilateral(double[] points) {
+	/**
+	 * Generate a textured quadrilateral using the given array <i>points</i>.  This
+	 * should have length 12 or 16, depending on whether the point coordinates are dehomogenized 
+	 * or not.
+	 * @param points
+	 * @return
+	 */public static IndexedFaceSet texturedQuadrilateral(double[] points) {
 		    
 		    IndexedFaceSetFactory factory = new IndexedFaceSetFactory();
 		    
@@ -562,7 +619,16 @@ public class Primitives {
 		    return factory.getIndexedFaceSet();
 		}
     
-    public static IndexedFaceSet plainQuadMesh(double xStep, double yStep, int xDetail, int yDetail) {
+    /**
+     * Generate a rectangular quad mesh centered at the origin with a mesh of dimension
+     * <i>(xDetail,yDetail)</i>.
+     * 
+     * @param xStep
+     * @param yStep
+     * @param xDetail
+     * @param yDetail
+     * @return
+     */public static IndexedFaceSet plainQuadMesh(double xStep, double yStep, int xDetail, int yDetail) {
       ParametricSurfaceFactory factory = new ParametricSurfaceFactory(new ParametricSurfaceFactory.DefaultImmersion() {
         public void evaluate(double u, double v) {
           x=u;

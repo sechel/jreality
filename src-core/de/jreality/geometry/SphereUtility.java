@@ -50,17 +50,23 @@ import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rectangle3D;
 
 /**
- * @author gunn
+ * Static methods for generating approximations to spheres. The approximations are based
+ * either on subdividing a cube, or subdividing an icosahedron. These methods are used for
+ * example in the package {@link de.jreality.jogl} for quick rendering of
+ * spherical representations of points.
+ * <p>
+ * Warning: the approximation methods here have an upper limit on the fineness of the approximation
+ * which they are prepared to calculate.  These limits should problably be removed.
+ * 
+ * @author Charles Gunn
  *
  */
 public class SphereUtility {
 
-	/**
-	 * 
-	 */
 	protected SphereUtility() {
 		super();
 	}
+
 	protected static int numberOfTessellatedCubes = 16;
 	protected static int numberOfTessellatedIcosahedra = 8;
 	protected static IndexedFaceSet[] tessellatedIcosahedra = new IndexedFaceSet[numberOfTessellatedIcosahedra];
@@ -70,14 +76,22 @@ public class SphereUtility {
 	protected static Rectangle3D sphereBB = null;
 	protected static Transformation[] cubeSyms = null;
 	protected static IndexedFaceSet[] cubePanels = new IndexedFaceSet[numberOfTessellatedCubes];
-	/**
-	 * TODO add a flag to allow a non-shared copy of the geometry
-	 */
 	
 	public static IndexedFaceSet tessellatedIcosahedronSphere(int i)	{
 		return tessellatedIcosahedronSphere(i, false);
 	}
 	
+	/**
+	 * Return a tessellated icosahedron of order <i>i</i>. That is, the triangular faces of an
+	 * icosahedron are binary subdivided <i>i</i> times, the vertices are projected onto
+	 * the unit sphere, and the result is returned.  If <i>sharedInstance</i>
+	 * is true, then the returned copy is a shared instance which should not be written on.
+	 * The resulting polyhedra has 20*(4^i) faces. If <i>i>7</i>, it is clamped to 7 and the
+	 * result is returned.
+	 * @param i
+	 * @param sharedInstance
+	 * @return
+	 */
 	public static IndexedFaceSet tessellatedIcosahedronSphere(int i, boolean sharedInstance)	{
 		if (i<0 || i >= numberOfTessellatedIcosahedra) {
 			LoggingSystem.getLogger(SphereUtility.class).warning("Invalid index");
@@ -114,9 +128,20 @@ public class SphereUtility {
 	}
 	
 	/**
-	 * TODO add a flag to allow a non-shared copy of the geometry
-	 */
-	public static SceneGraphComponent tessellatedCubeSphere(int i)	{
+	 * Return a tessellated cube of order <i>i</i>. That is, the square faces of an
+	 * cube are evenly subdivided into <i>i<sup>2</sup></i> smaller squares, and the vertices are
+	 * projected onto the unit sphere.  If <i>sharedInstance</i>
+	 * is true, then the returned copy is a shared instance which should not be written on.
+	 * The resulting polyhedra has 6*(i<sup>2</sup>) faces.If <i>i>15</i>, 
+	 * it is clamped to 15 and the
+	 * result is returned.
+
+	 * @param i
+	 * @return
+	 */public static SceneGraphComponent tessellatedCubeSphere(int i)	{
+		/*
+		 * TODO add a flag to allow a non-shared copy of the geometry
+		 */
 		if (i<0 || i >= numberOfTessellatedCubes) {
 			LoggingSystem.getLogger(SphereUtility.class).warning("Invalid index");
 			if (i<0) i = 0; 
@@ -140,7 +165,11 @@ public class SphereUtility {
 		return tessellatedCubes[i];
 	}
 	
-	public static Rectangle3D getSphereBoundingBox()	{
+	/**
+	 * Return a standard bounding box for a unit sphere.
+	 * @return
+	 */
+	 public static Rectangle3D getSphereBoundingBox()	{
 		if (sphereBB == null)	{
 			double[][] bnds = {{-1d,-1d,-1d},{1d,1d,1d}};
 			sphereBB = new Rectangle3D();
@@ -151,14 +180,15 @@ public class SphereUtility {
 	
 
 	/**
-	 * 
+	 * Generate a spherical patch. <i>(cU, cV)</i> specify the center of the patch in
+	 * spherical angles (longitude, latitude) in radians. 
 	 * @param cU
 	 * @param cV
-	 * @param uSize
-	 * @param vSize
-	 * @param n
-	 * @param m
-	 * @param r
+	 * @param uSize		wdith of the patch	(longitude)
+	 * @param vSize		height of the patch (latitude)
+	 * @param n			number of sample points in u
+	 * @param m			number of sample points in v
+	 * @param r			radius of the sphere
 	 * @return
 	 */
 	public static IndexedFaceSet sphericalPatch(double cU, double cV, double uSize, double vSize, int xDetail, int yDetail, double radius)	{
@@ -196,15 +226,18 @@ public class SphereUtility {
 		qmf.setGenerateTextureCoordinates(true);
 		qmf.update();
 		return qmf.getIndexedFaceSet();
-//		qms.setVetexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE3_INLINED.createReadOnly(points));
-//		qms.buildEdgesFromFaces();
-//		qms.setVertexAttributes(Attribute.NORMALS, qms.getVertexAttributes(Attribute.COORDINATES));
-//		GeometryUtility.calculateAndSetFaceNormals(qms);
-//		GeometryUtility.calculateAndSetTextureCoordinates(qms);
-//		return  qms;
 	}
 	
-	public static IndexedFaceSet oneHalfSphere( int n)	{
+	/**
+	 * Generate half of a sphere: the half covered by three adjacent faces of a cube!
+	 * Two such pieces fit together to cover the sphere! (like a baseball). This is
+	 * an optimal rendering solution since it can be expressed as quadmeshes, while the
+	 * icosahedral subdivision consists of triangles ... and I can't find a good
+	 * decomposition as triangle mesh.
+	 * @param n
+	 * @return
+	 */
+	static IndexedFaceSet oneHalfSphere( int n)	{
 		AbstractQuadMeshFactory qmf = new AbstractQuadMeshFactory(3*n-2,n,false, false);
 		double[][] verts = new double[n*(3*n-2)][3];
 		for (int i = 0; i<n; ++i)	{
@@ -234,39 +267,4 @@ public class SphereUtility {
 //		return  qms;
 	}
 	
-	public static IndexedFaceSet sphereAsTriangStrip = null;
-	/*
-	static	{
-		sphereAsTriangStrip = new IndexedFaceSet(102, 10);
-		double[][] verts = new double[102][3];
-		int[][] indices = new int[10][];
-		
-		int count = 0, count2;
-		double theta = 0, phi = 0;
-		for (int i = 0; i<5; ++i)		{
-			phi = (Math.PI/2.0 ) * (i/5.0);
-			double cp = Math.cos(phi);
-			double sp = Math.sin(phi);
-			int lim = 4 * (5-i);
-			indices[i] = new int[lim];
-			indices[9-i] = new int[lim];
-			for (int j = 0; j < lim; ++j)	{
-				theta = (Math.PI * 2.0  * j)/lim;
-				double ct = Math.cos(theta);
-				double st = Math.sin(theta);
-				verts[count] = new double[] {cp * ct, cp * st, sp};
-				
-				count++;
-			}
-		}
-		verts[count++] = new double[] {0,0,1};
-		System.err.println("vertex in n hemisphere: "+count);
-		for (int i = 20; i<count; ++i)		{
-			Rn.copy(verts[i+count-20], verts[i]);
-			verts[i+count][2] *= -1.0;
-		}
-		for (int i = 0; i<5; ++i)	{
-		}
-	}
-	*/
 }

@@ -81,6 +81,13 @@ import de.jreality.shader.CommonAttributes;
  *		SceneGraphComponent tubedIcosa = basf.getSceneGraphComponent();
  * </pre></b></code>
  * <p>
+ * <b>Note:</b> The same effect (without the arrows) can be achieved 
+ * with the standard line and point shaders ({@link de.jreality.shader.DefaultLineShader}, etc),
+ * by setting {@link de.jreality.shader.CommonAttributes#TUBES_DRAW} and {@link de.jreality.shader.CommonAttributes#SPHERES_DRAW},
+ * resp., to <code>true</code> and setting the other shader parameters to control the
+ * color and radius of the rusulting tubes and spheres. However, there are some constraints on this;
+ * for example, it isn't possible to turn on flat shading and separate control of the
+ *  transparency is not possible.
  * @author Charles Gunn
  * @see TubeUtility#tubeOneEdge(double[], double[], double, double[][], int)
  *

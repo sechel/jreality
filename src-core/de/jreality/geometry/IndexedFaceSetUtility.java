@@ -93,7 +93,8 @@ public class IndexedFaceSetUtility {
 	}
        
 	/**
-	 * <i>ifs</i> is assumed to consist of triangles; then each triangle is broken into
+	 * Only applicable for <i>ifs</i> all of whose faces are triangles; then
+	 * each triangle is broken into
 	 * four smaller triangles by bisecting the edges.
 	 * 
 	 * @param ifs
