@@ -44,6 +44,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.lang.reflect.Proxy;
 
+import javax.swing.JComponent;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
@@ -85,7 +86,7 @@ public class BeanShell {
   }
   
   
-  public JTerm getJTerm() {
+  public JComponent getJTerm() {
     
     return jterm;
   }
