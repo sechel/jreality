@@ -66,7 +66,6 @@ import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.toolsystem.config.VirtualConstant;
 import de.jreality.toolsystem.config.VirtualDeviceConfig;
 import de.jreality.toolsystem.config.VirtualMapping;
-import de.jreality.toolsystem.raw.Poller;
 import de.jreality.toolsystem.raw.PollingDevice;
 import de.jreality.toolsystem.raw.RawDevice;
 import de.jreality.util.CameraUtility;

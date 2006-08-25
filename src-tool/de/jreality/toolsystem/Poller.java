@@ -1,10 +1,22 @@
-package de.jreality.toolsystem.raw;
+package de.jreality.toolsystem;
 
 import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class Poller {
+import de.jreality.toolsystem.raw.PollingDevice;
+
+/**
+ * Polling devices implement PollingDevice, and do their
+ * polling in the poll() method. Please write no raw
+ * devices that start extra timers.
+ * 
+ * This class is ONLY for internal usage in the ToolSystem.
+ * 
+ * @author Steffen Weissmann
+ *
+ */
+class Poller {
 
 	private final Timer timer;
 	private final TimerTask task;
@@ -15,7 +27,7 @@ public class Poller {
 	
 	private static Poller pollerInstance=new Poller();
 	
-	public static Poller getSharedInstance() {
+	static Poller getSharedInstance() {
 		return pollerInstance;
 	}
 	
@@ -30,13 +42,13 @@ public class Poller {
 		timer.scheduleAtFixedRate(task, period, period);
 	}
 
-	protected void pollDevices() {
+	private void pollDevices() {
 		synchronized (pollingDevices) {
 			for (PollingDevice pd : pollingDevices) pd.poll();
 		}
 	}
 	
-	public void addPollingDevice(final PollingDevice pd) {
+	void addPollingDevice(final PollingDevice pd) {
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
@@ -44,7 +56,7 @@ public class Poller {
 			}
 		}, 0);
 	}
-	public void removePollingDevice(final PollingDevice pd) {
+	void removePollingDevice(final PollingDevice pd) {
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
