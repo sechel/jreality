@@ -156,10 +156,6 @@ public static String findFormat(String resourceName) {
       format = "BSH";
     } else if (lcName.endsWith(".pov")) {
       format = "POV";
-    } else if (lcName.endsWith(".bsp")) {
-      format = "BSP";
-    } else if (lcName.endsWith(".ase")) {
-      format = "ASE";
     } else if (lcName.endsWith(".obj")) {
       format = "OBJ";
     } else if (lcName.endsWith(".3ds")) {
@@ -175,7 +171,15 @@ public static String findFormat(String resourceName) {
     } else if (lcName.endsWith("off") || lcName.endsWith("quad") || lcName.endsWith("mesh") || lcName.endsWith("vect") || lcName.endsWith("bez") 
         || lcName.endsWith(".grp") || lcName.endsWith(".oogl") || lcName.endsWith(".list") || lcName.endsWith("inst")){
       format = "OOGL";
+      
+      // currently removed (licensing unclear)
+      
+//    } else if (lcName.endsWith(".bsp")) {
+//      format = "BSP";
+//    } else if (lcName.endsWith(".ase")) {
+//    	format = "ASE";
     }
+    
 	return format;
 }
 
