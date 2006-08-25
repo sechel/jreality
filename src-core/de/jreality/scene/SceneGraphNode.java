@@ -40,20 +40,23 @@
 
 package de.jreality.scene;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 
-import de.jreality.scene.event.SceneEvent;
 import de.jreality.util.LoggingSystem;
 
 /**
  * Base class for scene graph member nodes.
  * Common features of all scene graph nodes are an optional name
  * and a read-only flag.
+ * <p>
+ * This class handles the thread-safe access to the state using a collection
+ * of protected and private methods for locked read and write access.
+ * <p>
+ * Many subclasses support specific listeners which notify interested parties
+ * of any change in state of the node.  See the specific subclasses for details.
  */
 public class SceneGraphNode {
   private static int UNNAMED_ID;
@@ -150,8 +153,8 @@ public class SceneGraphNode {
   }
 
   /**
-   * this method is called berfore a sequence of read operations
-   * are executed. So the state of the node will not be changed
+   * This method is called before a sequence of read operations
+   * are executed, so the state of the node will not be changed
    * during the read operation @see finishReader;
    */
   protected final void startReader() {
@@ -180,7 +183,7 @@ public class SceneGraphNode {
    * Return a string representation of the current state. Only for debugging
    * purposes.
    */
-  /* old: Emmit an XML representation, subject of further discussions.*/
+  /* old: Emit an XML representation, subject of further discussions.*/
   public String toString() {
     StringBuffer sb= new StringBuffer(200);
     toStringImpl(sb, new HashSet());
@@ -219,11 +222,13 @@ public class SceneGraphNode {
     }
   }
   
-  // currently cost of threadsafe for non-euclidean manifold demos is a factor of 2:
-  // 60 fps not thread safe   vs  30 fps for thread-safe
-  // We want to show these at Lange Nacht on May 13: please leave following method in place until then
-  // -gunn
   private static boolean threadsafe = true;
+  /**
+   * Allow thread-unsafe access to all scene graph nodes, to optimize performance
+   * in case there are no threading issues. Default is true.
+   * @deprecated
+   * @param b
+   */
   public static void setThreadSafe(boolean b)	{
 	  threadsafe = b;
   }

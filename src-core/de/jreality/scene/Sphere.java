@@ -42,7 +42,8 @@ package de.jreality.scene;
 
 
 /**
- * Sphere in (0, 0, 0) and r=1.0.
+ * Sphere cented at (0, 0, 0) with radius 1. Use scene graph transformations to
+ * change size and position.
  */
 public class Sphere extends Geometry
 {

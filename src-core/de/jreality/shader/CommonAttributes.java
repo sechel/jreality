@@ -45,7 +45,15 @@ import java.awt.Color;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.scene.Appearance;
 
-public class CommonAttributes {
+/**
+ * Standard attributes which appear in {@link Appearance} instances.
+ * <p>
+ * Since Appearance is based on <String, value> pairs, it's important to make sure that
+ * you are using the right strings as keys.  This class provides a list of all the standard
+ * attributes to help avoid mistakes in typing, etc.
+ * @author Charles Gunn
+ *
+ */public class CommonAttributes {
     
 	private CommonAttributes() {}
 

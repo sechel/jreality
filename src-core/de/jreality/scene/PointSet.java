@@ -47,8 +47,12 @@ import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
 
 /**
- * A set of points in 3 space.
- * @version 1.0
+ * A set of points in 3 space. 
+ * <p>
+ * Vertices can be specified with either 3- or 4-D coordinates.
+ *  
+ * End users are recommended to use {@link de.jreality.geometry.PointSetFactory}
+ * to construct instances of this class.
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
  *
  */

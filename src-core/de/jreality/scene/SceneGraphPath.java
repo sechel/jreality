@@ -51,22 +51,28 @@ import de.jreality.math.Rn;
 
 /**
  * A SceneGraphPath represents a directed connection in the scene graph. Technically it is a list of 
- * SceneGraphComponents. It may also include, optionally, a SceneGraphNode contained in the final SceneGraphComponent.
- * This allows addressing of the sub-nodes contained as fields in the SceneGraphComponent (such as lights, camera, 
- * geometry, appearance). But it is not required that the path ends in such a SceneGraphNode; it can also
+ * SceneGraphComponents. It may also include, optionally, a {@link #SceneGraphNode}
+ *  contained in the final {@link #SceneGraphComponent}.
+ * This allows addressing the sub-nodes contained as fields in the SceneGraphComponent 
+ * (such as lights, camera, geometry, appearance). 
+ * But it is not required that the path ends in such a SceneGraphNode; it can also
  * end in a SceneGraphComponent.
+ * <p>
+ * There are methods for pushing and popping elements onto the path, useful for instances
+ * of {@link SceneGraphVisitor}.
+ * <p>
+ * There are methods for ascertaining the matrix transformation associated to the path
+ * (by multiplying the instances of {@link Transformation} occurring on the path.
  * <b>Note:</b> This class takes no care of the elements being inserted. The method isValid()
  * gives information if this path exists in the scenegraph
- * @version 1.0
- * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
- * @author weissman cleanup
+ * @author Tim Hoffman, Charles Gunn, Steffen Weissman
  *
  */
 public class SceneGraphPath implements Cloneable {
 
-  protected LinkedList path = new LinkedList();			// a list of SceneGraphComponents
+  protected LinkedList<SceneGraphNode> path = new LinkedList<SceneGraphNode>();			// a list of SceneGraphComponents
 
-  public static SceneGraphPath fromList(List list) {
+  public static SceneGraphPath fromList(List<SceneGraphNode> list) {
     SceneGraphPath path=new SceneGraphPath();
     path.path.addAll(list);
     return path;
@@ -89,8 +95,8 @@ public class SceneGraphPath implements Cloneable {
     return path;
   }
   
-  public List toList() {
-    return new ArrayList(path);
+  public List<SceneGraphNode> toList() {
+    return new ArrayList<SceneGraphNode>(path);
   }
 
   // TODO write own Iterator classes...

@@ -47,8 +47,12 @@ import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
 
 /**
- * This class is not in its final form yet!
- * @version 1.0
+ * A geometric object consisting of a set of edges: lists of vertices joined by line
+ * segments.
+ * <p>
+ * End users are recommended to use {@link de.jreality.geometry.IndexedLineSetFactory}
+ * to construct instances of this class.
+
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
  */
 public class IndexedLineSet extends PointSet

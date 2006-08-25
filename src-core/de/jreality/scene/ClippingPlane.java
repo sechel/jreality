@@ -42,10 +42,10 @@ package de.jreality.scene;
 
 /**
  * A clipping plane through the origin with normal pointing in positive z direction.
+ * All points with positive z will be clipped away. Put into SceneGraphComponent and 
+ * use transformations to get clipping plane in arbitrary position.
+ * planes 
  * 
- * TODO: should that be a geometry? - appearance attribute?
- * 
- * @version 1.0
  * @author timh
  *
  */

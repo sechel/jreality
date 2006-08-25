@@ -57,7 +57,7 @@ import de.jreality.scene.event.GeometryEventMulticaster;
 import de.jreality.scene.event.GeometryListener;
 
 /**
- * A geometry leaf.
+ * A geometry leaf. Supports arbitrary attributes (@link #setGeometryAttributes(String, Object)).
  */
 public abstract class Geometry extends SceneGraphNode {
 	

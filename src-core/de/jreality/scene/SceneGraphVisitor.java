@@ -43,12 +43,12 @@ package de.jreality.scene;
 
 
 /**
- * A visitor for performing type-specific operations and/or
- * traversing the scene graph. All visit method are implemented
+ * A visitor for traversing the scene graph. All visit methods are implemented
  * as a call to the visit() method with the supertype parameter.
- * @author Holger
  * 
- * TODO: adapt to refactoring
+ * @author Holger Pietsch
+ * 
+ * TODO: explain how this works better
  */
 public class SceneGraphVisitor {
 

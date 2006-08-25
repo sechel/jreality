@@ -44,9 +44,11 @@ import java.awt.Dimension;
 
 
 /**
- * All backends should implement this interface - this makes
- * backends exchangable.
- * 
+ * The Viewer interface represents a renderable 3D scene.
+ * It consists of specifying a {@link SceneGraphComponent}, the scene root, 
+ * and a path in the scene graph to a {@link Camera}. 
+ * Each implementation of this interface 
+ * represents a different "backend".  See separate packages for details. 
  * @author Charles Gunn, Steffen Weissmann
  */
 public interface Viewer {

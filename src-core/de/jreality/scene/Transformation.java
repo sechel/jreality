@@ -46,15 +46,18 @@ import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationEventMulticaster;
 import de.jreality.scene.event.TransformationListener;
 /**
- * 
- * A almost clean Transformation class, do not use anything else than set/getMatrix and multiplyOnRight/Left.
- * 
- * For doing projective geometry, see {@link de.jreality.math.MatrixBuilder} and
+ * A simple transformation class which wraps a 4x4 real matrix. Access is read-only.
+ * When contained as a field in an instance of {@link de.jreality.scene.SceneGraphComponent},
+ * this transformation is applied to any geometry contained in the component as well as 
+ * to all children.
+ * <p>
+ * For generating and manipulating matrices meeting specific constraints
+ *  (isometries, etc.)
+ * see {@link P3}, {@link de.jreality.math.MatrixBuilder MatrixBuilder} and
  * {@link de.jreality.math.FactoredMatrix}.
- * 
- * TODO: finally solve defaultMatrix and signature! and remove Clonable!!
- * 
- * @author Charles Gunn, weissman
+ * <p>
+ * For other support, see {@link de.jreality.util.DefaultMatrixSupport}.
+ * @author Charles Gunn, Steffen Weissman
  */
 public class Transformation extends SceneGraphNode implements Cloneable {
 
@@ -65,7 +68,7 @@ public class Transformation extends SceneGraphNode implements Cloneable {
   private transient boolean matrixChanged;
 
 	/**
-	 * Generate a new transform with given signature and matrix
+	 * Generate a new transform with given matrix
 	 * If <i>m</i> is null, use identity matrix.  
 	 * @param signature		See {@link Pn}.
 	 * @param m
@@ -77,24 +80,23 @@ public class Transformation extends SceneGraphNode implements Cloneable {
 	
 	
 	public Transformation()	{
-		this(null);
+		this((double[]) null);
 	}
 
-	/** 
-	 * @deprecated
+	/**
+	 * A copy constructor.
+	 * @param t
 	 */
-	public Object clone() throws CloneNotSupportedException {
-		Transformation copy = (Transformation) super.clone();
-		if (theMatrix !=null) copy.theMatrix = (double[]) theMatrix.clone();
-		return copy;
+	public Transformation(Transformation t)	{
+		this(t.theMatrix);
 	}
 	
 	/**
 	 * 
 	 * @return	a copy of the current matrix
 	 */
-  public double[] getMatrix() {
-    return getMatrix(null);
+	public double[] getMatrix() {
+		return getMatrix(null);
 	}
 
 	/**
@@ -131,27 +133,25 @@ public class Transformation extends SceneGraphNode implements Cloneable {
     }
 	}
 
-	  public void multiplyOnRight( double[] T) {
-		  startWriter();
-		  try {
-			  Rn.times(theMatrix, theMatrix, T);
-			  fireTransformationChanged();
-			 } 
-		  finally {
-			  finishWriter();		  
-		  }
-	  }
-	    
-	  public void multiplyOnLeft( double[] T) {
-		  startWriter();
-		  try {
-			  Rn.times(theMatrix, T, theMatrix);
-			  fireTransformationChanged();
-		  } 
-		  finally {
-			  finishWriter();		  
-		  }
-	  }
+	public void multiplyOnRight(double[] T) {
+		startWriter();
+		try {
+			Rn.times(theMatrix, theMatrix, T);
+			fireTransformationChanged();
+		} finally {
+			finishWriter();
+		}
+	}
+
+	public void multiplyOnLeft(double[] T) {
+		startWriter();
+		try {
+			Rn.times(theMatrix, T, theMatrix);
+			fireTransformationChanged();
+		} finally {
+			finishWriter();
+		}
+	}
 
 
 	public void addTransformationListener(TransformationListener listener) {
@@ -170,12 +170,12 @@ public class Transformation extends SceneGraphNode implements Cloneable {
 	 * This methods takes no parameters and is equivalent
 	 * to "everything has/might have changed".
 	 */
-  protected void writingFinished() {
-    if (matrixChanged && transformationListener != null) 
-      transformationListener.transformationMatrixChanged(new TransformationEvent(this));
-    matrixChanged=false;
-  };
-  
+	protected void writingFinished() {
+	  if (matrixChanged && transformationListener != null) 
+	      transformationListener.transformationMatrixChanged(new TransformationEvent(this));
+	  matrixChanged=false;
+	};
+	  
 	protected void fireTransformationChanged() {
 	  matrixChanged=true;
 	}
@@ -189,12 +189,12 @@ public class Transformation extends SceneGraphNode implements Cloneable {
 	}
 
 	public void accept(SceneGraphVisitor v)	{
-    startReader();
-    try {
-      v.visit(this);
-    } finally {
-      finishReader();
-    }
+	    startReader();
+	    try {
+	      v.visit(this);
+	    } finally {
+	      finishReader();
+	    }
 	}
 
 }

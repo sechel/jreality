@@ -42,9 +42,17 @@ package de.jreality.scene;
 
 
 /**
- * A point light class.  Situated at the origin (0,0,0,1); use scene graph transformations to
+ * A point light class.  Situated at the origin (0,0,0,1); 
+ * use scene graph transformations to
  * position it where you want.
- * @author gunn
+ * <p>
+ * The attenuation of the point light is proportional to
+ * <i>1/(A0+A1*d+A2*d*d)</i> where <i>d</i> is the distant of the 
+ * illuminated point from the light.
+ * Set these attenuation factors using {@link #setFalloff(double, double, double)}.
+ * <p>
+ * TODO: Somebody needs to document what the shadow map settings are for.
+ * @author Charles Gunn
  *
  */
 public class PointLight extends Light {

@@ -47,8 +47,11 @@ import de.jreality.scene.event.LightEventMulticaster;
 import de.jreality.scene.event.LightListener;
 
 /**
- * LightSoft is the super class to all lights in the scene.
+ * Light is the abstract super class to all lights in the scene.
  * It carries a color and an intensity as the only common properties of all lights.
+ * <p>
+ * Warning: currently, all lights are considered to be global ({@link #setGlobal(boolean))
+ * in all backends.
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
  * 
  * TODO: make lights immutable - make a LightFactory

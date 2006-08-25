@@ -57,6 +57,8 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 
 /**
+ * A collection of static methods related to specifying camera transformations of various kinds.
+ * 
  * @author Charles Gunn
  *
  */
@@ -72,13 +74,22 @@ public class CameraUtility {
 		super();
 	}
 
+	/**
+	 * Determine the camera for this viewer.
+	 * @param v
+	 * @return
+	 */
 	public static Camera getCamera(Viewer v)	{
 		if (v == null || v.getCameraPath() == null || !(v.getCameraPath().getLastElement() instanceof Camera)) 
 			throw new IllegalStateException("Viewer has no camera!");
 		return ((Camera) v.getCameraPath().getLastElement());
 	}
 
-	public static SceneGraphComponent getCameraNode(Viewer v)	{
+	/**
+	 * Determine the SceneGraphComponent which contains the camera for this viewer.
+	 * @param v
+	 * @return
+	 */public static SceneGraphComponent getCameraNode(Viewer v)	{
 		return  v.getCameraPath().getLastComponent();
 	}
 
@@ -94,22 +105,29 @@ public class CameraUtility {
 		if (cp.getLength() < 3)	{
 		  throw new IllegalStateException("can't encompass: possibly Camera attached to root");
 		}
-    boolean removedCamera = false;
-    SceneGraphComponent cameraBranch = (SceneGraphComponent) cp.iterator(1).next();
-    SceneGraphComponent root = viewer.getSceneRoot();
-    try {
-      // TODO this is always true if camerapath starts at root
-  		if(root.isDirectAncestor(cameraBranch)) {
-  			root.removeChild(cameraBranch);
-  			removedCamera = true;
-  		} 
+		boolean removedCamera = false;
+		SceneGraphComponent cameraBranch = (SceneGraphComponent) cp.iterator(1).next();
+		SceneGraphComponent root = viewer.getSceneRoot();
+		try {
+			// TODO this is always true if camerapath starts at root
+			if(root.isDirectAncestor(cameraBranch)) {
+				root.removeChild(cameraBranch);
+				removedCamera = true;
+			} 
   		encompass(viewer, root, true);
-    } finally {
-      // if we miss that the camera path is invalid!
-		  if (removedCamera) root.addChild(cameraBranch);
-    }
+		} finally {
+			// if we miss that the camera path is invalid!
+			if (removedCamera) root.addChild(cameraBranch);
+		}
 	}
 	
+	/**
+	 * Encompass the world displayed by a viewer and possibly set derived parameters 
+	 * in the camera.
+	 * @param viewer
+	 * @param sgc
+	 * @param setStereoParameters
+	 */
 	public static void encompass(Viewer viewer, SceneGraphComponent sgc, boolean setStereoParameters)	{
 		Rectangle3D worldBox = GeometryUtility.calculateBoundingBox(sgc);//. bbv.getBoundingBox();
 		
@@ -152,18 +170,35 @@ public class CameraUtility {
 		
 	}
 
+	/**
+	 * Determine the aspect ratio of the output window of a viewer.
+	 * @param v
+	 * @return
+	 */
 	public static double getAspectRatio(Viewer v)		{
 		if (!v.hasViewingComponent()) return 1.0;
-    Dimension d = v.getViewingComponentSize();
+		Dimension d = v.getViewingComponentSize();
 		return ((double) d.getWidth())/ d.getHeight();
 	}
 	
+	/**
+	 * Calculate the camera to NDC (normalized device coordinates) transformation
+	 * for a given viewer. 
+	 * @param v
+	 * @return
+	 */
 	public static double[] getCameraToNDC(Viewer v)			{
 		Camera cam = getCamera(v);
 		double aspectRatio = getAspectRatio(v);
 		return getCameraToNDC(cam, aspectRatio);
 	}
 	
+	/**
+	 * 
+	 * @param cam
+	 * @param aspectRatio
+	 * @return
+	 */
 	public static double[] getCameraToNDC(Camera cam, double aspectRatio)		{
 		return getCameraToNDC(cam, aspectRatio, CameraUtility.MIDDLE_EYE);
 	}
@@ -173,17 +208,17 @@ public class CameraUtility {
 	 * normal "monocular" camera.  If <i>which</i> is <code>LEFT_EYE</code> or <code>RIGHT_EYE,</code>, calculate the
 	 * projection matrix corresponding to the given eye of a stere-ocular camera.  The stereo case can be derived 
 	 * from the monocular case as follows.  
-	 * 
+	 * <p>
 	 * Define V to be the intersection of the viewing frustum with the plane <i>z = focus</i> (See {@link #setFocus(double)}).
 	 * Second, define the positions <i>Pl = (d,0,0,0)</i> and <i>Pr = (-d,0,0,0)</i> where <i>d = eyeSeparation/2.0</i>  (See
 	 * {@link #setEyeSeparation(double)}). Then the position of the left eye in
 	 * camera coordinates is O.Pl (where O is the camera's orientation matrix (See {@link #setOrientationMatrix(double[])}), or the identity
 	 * matrix if none has been set) and similarly for the right eye. Then the viewing frustum for the left eye is the unique viewing frustum determined by 
 	 * the position at the left (right) eye and the rectangle V; similarly for the right eye.
-	 * 
+	 * <p>
 	 * In plain English, the monocular, left, and right views all show the same picture if the world lies in the <i>z = focus</i> plane.
 	 * This plane is in fact the focal plane in this sense.
-	 * 
+	 * <p>
 	 * Note that the <i>orientationMatrix</i> is only non-trivial in the case of virtual environments such as the PORTAL or CAVE. 	 * @deprecated
 	 * @param which
 	 * @return
@@ -221,7 +256,12 @@ public class CameraUtility {
 		return ret;
 	}
 
-	public static double[] getEyePosition(Camera cam, int which) {
+	/**
+	 * A method required for calculating cam2NDC for a CAVE-like environment.
+	 * @param cam
+	 * @param which
+	 * @return
+	 */public static double[] getEyePosition(Camera cam, int which) {
 		double factor;
 		if (which == MIDDLE_EYE) return ( new double[]{0,0,0,1});
 		factor = (which == CameraUtility.LEFT_EYE) ? -1 : 1;
@@ -237,7 +277,14 @@ public class CameraUtility {
 		return eyePosition;
 	}
 
-	public static Rectangle2D getOffAxisViewPort(Camera cam, Rectangle2D viewPort, double[] eyePosition) {
+	/**
+	 * A method required for calculating cam2NDC transformation for an off-axis camera.
+	 * NOTE: a stereo camera is an off-axis camera.
+	 * @param cam
+	 * @param viewPort
+	 * @param eyePosition
+	 * @return
+	 */public static Rectangle2D getOffAxisViewPort(Camera cam, Rectangle2D viewPort, double[] eyePosition) {
 		double x = eyePosition[0];
 		double y = eyePosition[1];
 		double z = eyePosition[2];
@@ -258,6 +305,8 @@ public class CameraUtility {
 	}
 
 	/**
+	 * Determine the viewport of the given camera: the intersection of the viewing frustum
+	 * with the z=1 plane.
 	 * @param cam
 	 * @param aspectRatio
 	 * @return
@@ -288,30 +337,37 @@ public class CameraUtility {
 	
     
 	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath) {
-    encompass(avatarPath, scene, cameraPath, 0, Pn.EUCLIDEAN);
-  }
+		encompass(avatarPath, scene, cameraPath, 0, Pn.EUCLIDEAN);
+	}
   
-  public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath, double margin, int signature) {
-    Rectangle3D bounds = GeometryUtility.calculateBoundingBox(scene.getLastComponent());
-    if (bounds.isEmpty()) return;
-    Matrix rootToScene = new Matrix();
-    scene.getMatrix(rootToScene.getArray(), 0, scene.getLength()-2);
-    Rectangle3D worldBounds = bounds.transformByMatrix(new Rectangle3D(), rootToScene.getArray());
-    Rectangle3D avatarBounds = worldBounds.transformByMatrix(new Rectangle3D(), avatarPath.getInverseMatrix(null));
-    double [] e = avatarBounds.getExtent();
-    double radius = Math.sqrt(e[0]*e[0] + e[2]*e[2] + e[1]*e[1]);
-    double [] c = avatarBounds.getCenter();
-    c[2] += radius;
-    Rn.times(c, margin, c);
-    // add head height to c[1]
-    Matrix camMatrix = new Matrix();
-    cameraPath.getInverseMatrix(camMatrix.getArray(), avatarPath.getLength());
-    
-    ((Camera)cameraPath.getLastElement()).setFar(margin*5*radius);
-    ((Camera)cameraPath.getLastElement()).setNear(.002*radius);
-    SceneGraphComponent avatar = avatarPath.getLastComponent();
-    Matrix m = new Matrix(avatar.getTransformation());
-    MatrixBuilder.init(m, signature).translate(c).translate(camMatrix.getColumn(3)).assignTo(avatar);
-  }
+	/**
+	 * A method for encompassing the scene.
+	 * @param avatarPath
+	 * @param scene
+	 * @param cameraPath
+	 * @param margin
+	 * @param signature
+	 */public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath, double margin, int signature) {
+	    Rectangle3D bounds = GeometryUtility.calculateBoundingBox(scene.getLastComponent());
+	    if (bounds.isEmpty()) return;
+	    Matrix rootToScene = new Matrix();
+	    scene.getMatrix(rootToScene.getArray(), 0, scene.getLength()-2);
+	    Rectangle3D worldBounds = bounds.transformByMatrix(new Rectangle3D(), rootToScene.getArray());
+	    Rectangle3D avatarBounds = worldBounds.transformByMatrix(new Rectangle3D(), avatarPath.getInverseMatrix(null));
+	    double [] e = avatarBounds.getExtent();
+	    double radius = Math.sqrt(e[0]*e[0] + e[2]*e[2] + e[1]*e[1]);
+	    double [] c = avatarBounds.getCenter();
+	    c[2] += radius;
+	    Rn.times(c, margin, c);
+	    // add head height to c[1]
+	    Matrix camMatrix = new Matrix();
+	    cameraPath.getInverseMatrix(camMatrix.getArray(), avatarPath.getLength());
+	    
+	    ((Camera)cameraPath.getLastElement()).setFar(margin*5*radius);
+	    ((Camera)cameraPath.getLastElement()).setNear(.002*radius);
+	    SceneGraphComponent avatar = avatarPath.getLastComponent();
+	    Matrix m = new Matrix(avatar.getTransformation());
+	    MatrixBuilder.init(m, signature).translate(c).translate(camMatrix.getColumn(3)).assignTo(avatar);
+	}
 
 }

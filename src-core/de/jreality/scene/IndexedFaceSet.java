@@ -45,11 +45,13 @@ import java.util.Collections;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
-import de.jreality.scene.data.StorageModel;
 
 /**
- * 
- * @version 1.0
+ * A geometry specified as a combinatorial set of faces. (See {@link PointSet}).
+ * <p>
+ * End users are recommended to use {@link de.jreality.geometry.IndexedFaceSetFactory}
+ * and its subclasses
+ * to construct instances of this class.
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
  *
  */
@@ -62,25 +64,7 @@ public class IndexedFaceSet extends IndexedLineSet {
   }
 
   public IndexedFaceSet() {
-    this(8, 6);
-    vertexAttributes.addWritable(Attribute.COORDINATES,
-     StorageModel.DOUBLE3_ARRAY, new double[][] {
-      { -1.00000e+00, -1.00000e+00, -1.00000e+00 },
-      { 1.00000e+00, -1.00000e+00, -1.00000e+00 },
-      { -1.00000e+00, 1.00000e+00, -1.00000e+00 },
-      { 1.00000e+00, 1.00000e+00, -1.00000e+00 },
-      { -1.00000e+00, -1.00000e+00, 1.00000e+00 },
-      { 1.00000e+00, -1.00000e+00, 1.00000e+00 },
-      { -1.00000e+00, 1.00000e+00, 1.00000e+00 },
-      { 1.00000e+00, 1.00000e+00, 1.00000e+00 }});
-    faceAttributes.addWritable(Attribute.INDICES,
-      StorageModel.INT_ARRAY.array(4), new int[][] {
-      { 2, 3, 1, 0 },
-      { 7, 6, 4, 5 },
-      { 6, 7, 3, 2 },
-      { 5, 4, 0, 1 },
-      { 3, 7, 5, 1 },
-      { 4, 6, 2, 0 }});
+	  this(0,0);
   }
 
   public int getNumFaces() {

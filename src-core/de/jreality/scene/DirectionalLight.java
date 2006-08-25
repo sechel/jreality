@@ -41,12 +41,13 @@
 package de.jreality.scene;
 
 /**
- * This is a directional (or parallel or distance) light. It does not decay with distance. The light direction is the z-axis.
+ * This is a directional (or parallel or distant) light. 
+ * It does not decay with distance. The light direction is the z-axis.
  * other directions may be obtained by changing the transformation associated with a parent component.
- * @version 1.0
+
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
  *
- *TODO: see @Light
+ * @see Light
  */
 public class DirectionalLight extends Light {
 

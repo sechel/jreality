@@ -51,9 +51,17 @@ import de.jreality.scene.event.AppearanceEventMulticaster;
 import de.jreality.scene.event.AppearanceListener;
 
 /**
- * The appearance node. Contains attributes of arbitrary type.
+ * The appearance node. Contains attributes of arbitrary type stored as <i>(key,value)</i>
+ * pairs in a HashMap<String, Object>.  There are special methods for setting attributes
+ * whose values are common built-in types: <code>double</code>, <code>float</code>,<code>int</code>,
+ * <code>boolean</code>,and <code>char</code>.
+ * <p>
+ * You can query the state of the Appearance by using {@link #getAttribute(String)}. If
+ * not attribute has been defined for this key, the special object {@link #INHERITED} is returned.
+ * Some wiser person will have to tell you when the special object {@link #DEFAULT} is returned.
  * 
  * TODO: fire ONE single event that reports all changed attributes
+ * @author Unknown
  */
 public class Appearance extends SceneGraphNode
 {

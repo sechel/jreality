@@ -51,22 +51,40 @@ import de.jreality.util.LoggingSystem;
 /**
  *
  * The camera represents essentially a projection from three dimensions into two, that is
- * a specification of a viewing frustrum.
+ * a specification of a viewing frustrum. The camera coordinate system is assumed to
+ * point down the positive z-axis. (Note: specific backends may flip the orientation of the
+ * z-axis. This issue is handled separately from the camera description here).
  * <p>
- * The viewing frustrum includes control over perspective/orthographic projection, field of view,
- * and focal length. 
- * The default camera is an on-axis camera.  
- * 
- * There is also support for off-axis cameras.  Use the {@link #setViewPort(Rectangle2D)} method to
- * specify the desired viewport.  In this case the field of view is ignored.
- * 
- * The camera also supports stereo viewing @link #setStereo(boolean).  For CAVE-like environments
- * where there are not traditional on-axis camera, one can also set  an orientation 
- * matrix (@link #setOrientationMatrix(double[]))  to specify the orientation of the eye axis in camera coordinates.  
- * Default eye positions are (-eyeSeparation/2,0,0) and (eyeSeparation, 0,0) in the coordinate system of the
- * mono-optic camera.  Use @link de.jreality.util.CameraUtility#getNDCToCamera(Camera, double, int) to generate 
+ * All instance of Camera require specifying the near and far clipping planes.
+ * <p>
+ * The camera can be either perspective or orthographic.  If it is perspective, then
+ * its viewing frustum can be specified by giving the field of view {@link #setFieldOfView(double)}. 
+ * This implies that the camera is on-axis,
+ * that is, the viewing frustum is centered on the z-axis.
+ * <p>
+ * There is also support for off-axis cameras (@link #setOnAxis(boolean)).  
+ * Use the {@link #setViewPort(Rectangle2D)} method to
+ * specify the desired viewport, which is assumed to lie in the <i>z=1</i> plane.  
+ * In this case the field of view is ignored.
+ * <p>
+ * The camera also supports stereo viewing @link #setStereo(boolean). For most desktop environments
+ * the only other required parameters are:
+ * <ul>
+ * <li>eye separation (@link #setEyeSeparation(double)}, a horizontal displacement in camera coordinates, and</li>
+ * <li>focus {@link #setFocus(double)}, the z-depth where the two images are identical.</li>
+ * </ul>  For CAVE-like environments
+ * where the eyes are not always oriented horizontally, there is an additional parameter:
+ *  an orientation matrix (@link #setOrientationMatrix(double[])), a 4x4 transformation matrix
+ *  which  defines the rotation that has to be applied to the x-axis to get the
+ *  line in camera coordinates on which the eyes lie. (This matrix should fix (0,0,0,1)!).
+ *  <p> 
+ * Default eye positions are (-eyeSeparation/2,0,0) and (eyeSeparation, 0,0) in the 
+ * camera coordinate system.  Use @link de.jreality.util.CameraUtility#getNDCToCamera(Camera, double, int) to generate 
  * the appropriate projection matrices.
- * 
+ * <p>
+ * Instances of {@link de.jreality.scene.event.CameraListener} can register to be notified 
+ * when the camera changes.
+ * <p>
  * Due to refactoring, the camera no longer has enough state to provide the projective viewing transformation
  * from/to camera to/from Normalized Device Coordinates (NDC). It basically lacks the aspect ratio of the
  * output device. This allows to use the same camera for different viewers with
@@ -149,7 +167,7 @@ public class Camera extends SceneGraphNode {
 		double f = (Math.PI/180.0)*d;
 		if (f == fieldOfView)  return;
 		fieldOfView = f;
-    fireCameraChanged();
+		fireCameraChanged();
 	}
 
 	public double getFocus() {
@@ -159,7 +177,7 @@ public class Camera extends SceneGraphNode {
 	public void setFocus(double d) {
     if (focus == d) return;
 		focus = d;
-    fireCameraChanged();
+		fireCameraChanged();
 	}
 
 	public Rectangle2D getViewPort() {
@@ -170,8 +188,7 @@ public class Camera extends SceneGraphNode {
 		if (isOnAxis)	
 			throw new IllegalStateException("Can't set viewport for an on-axis camera");
 		viewPort = rectangle2D;
-    // TODO: maybe compare with old value?
-    fireCameraChanged();
+		fireCameraChanged();
 	}
 
 	public boolean isOnAxis() {
@@ -179,9 +196,9 @@ public class Camera extends SceneGraphNode {
 	}
 
 	public void setOnAxis(boolean b) {
-    if (isOnAxis == b) return;
+		if (isOnAxis == b) return;
 		isOnAxis = b;
-    fireCameraChanged();
+		fireCameraChanged();
 	}
 
 	public boolean isPerspective() {
@@ -191,7 +208,7 @@ public class Camera extends SceneGraphNode {
 	public void setPerspective(boolean b) {
     if (isPerspective == b) return;
 		isPerspective = b;
-    fireCameraChanged();
+		fireCameraChanged();
 	}
 
 	public double getEyeSeparation() {
@@ -221,8 +238,8 @@ public class Camera extends SceneGraphNode {
 
 	public void setOrientationMatrix(double[] orientationMatrix) {
 		this.orientationMatrix = orientationMatrix;
-    // TODO: maybe compare with old value?
-    fireCameraChanged();
+	   // TODO: maybe compare with old value?
+		fireCameraChanged();
 	}
 
 	public boolean isStereo() {
@@ -234,11 +251,10 @@ public class Camera extends SceneGraphNode {
     if (this.isStereo == isStereo) return;
 		this.isStereo = isStereo;
 		if (!isPerspective)	{
-      // TODO: implicit change of properties!! to check
-			LoggingSystem.getLogger(this).log(Level.WARNING,"Stereo camera must be perspective, setting it so.");
+ 			LoggingSystem.getLogger(this).log(Level.WARNING,"Stereo camera must be perspective, setting it so.");
 			isPerspective = true;
 		}
-    fireCameraChanged();
+		fireCameraChanged();
 	}
 	
 	
@@ -268,10 +284,18 @@ public class Camera extends SceneGraphNode {
 	  super.accept(v);
 	}
 
+	/**
+	 * Values useful in Renderman backend.
+	 * @return
+	 */
 	public double getFocalLength() {
 		return focalLength;
 	}
 
+	/**
+	 * Values useful in Renderman backend.
+	 * @return
+	 */
 	public double getFStop() {
 		return fstop;
 	}

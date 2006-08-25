@@ -50,7 +50,25 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 
 /**
- * Manages effective attributes.
+ * The attributes of {@link Appearance}s arer designed to be inherited via the
+ * scene graph tree structure.  This class manages this inheritance mechanism.
+ * <p>
+ * To evaluate the actual state of the Appearance system at a point in a scene graph
+ * specified by a {@link SceneGraphPath}, one must essentially create a chain of 
+ * EffectiveAppearance's, one for each Appearance instance occurring on this path.
+ * Requests for the value of a given key ({@link #getAttribute(String, Object)} and related
+ * methods) cause a search "up" the tree towards the root, for an appearance which
+ * containing this key.
+ * <p>
+ * If such an appearance is found, then the value is returned. 
+ * If it is not found, the the special value {@link de.jreality.scene.Appearance#INHERITED}
+ * is returned. 
+ * <p>
+ * TODO: The details of this inheritance mechanism are quite complicated and need to be 
+ * further documented here.  In particular, the '.' character plays a special role in the
+ * key strings, allowing for example the key <code>"foo"</code> to match a request for
+ * the string <code>"bar.foo"</code>.
+ * 
  */
 public class EffectiveAppearance {
   private EffectiveAppearance parentApp;

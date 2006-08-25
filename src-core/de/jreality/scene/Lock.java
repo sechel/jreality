@@ -40,8 +40,6 @@
 
 package de.jreality.scene;
 
-
-
 /**
  * a ReadWriteLock
  * 

@@ -273,7 +273,7 @@ public class LabelUtility {
 	  return img;
   }
  
-  private static final IndexedFaceSet bb = Primitives.texturedSquare(new double[]{0,1,0,1,1,0,1,0,0,0,0,0});
+  private static final IndexedFaceSet bb = Primitives.texturedQuadrilateral(new double[]{0,1,0,1,1,0,1,0,0,0,0,0});
 
   public static SceneGraphComponent sceneGraphForLabel(SceneGraphComponent sgc, double xscale, double yscale,double[] offset, int alignment, double[] camToObj, double[] position)  {
   		if (sgc == null) sgc = new SceneGraphComponent();

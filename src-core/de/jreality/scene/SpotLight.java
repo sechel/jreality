@@ -41,10 +41,12 @@
 package de.jreality.scene;
 
 /**
- * This is a spot light.The light direction is the z-axis.
- * Other directions may be obtained by changing the transformation. The falloff is computed by 
- * the inverse of the polynomial with coefficients A0, A1 and A2.
- * @version 1.0
+ * This is a spot light. The light direction is the z-axis.
+ * Other directions may be obtained by changing the transformation. 
+ * <p>
+ * The cone angle is specified in radians; if it is Pi, then this
+ * becomes a simple point light. See set methods below for other parameters.
+ * <p>
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
  *
  */

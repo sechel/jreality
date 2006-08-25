@@ -57,8 +57,18 @@ import de.jreality.scene.event.ToolListener;
 import de.jreality.scene.tool.Tool;
 
 /**
- * A component of the scene graph: the only node that can have another
- * SceneGraphComponent instances as its children.
+ * This basic building block of the jReality scene graph. It's 
+ * the only node that can have another
+ * SceneGraphComponent instance as a child (see {@link #addChild(SceneGraphComponent)).
+ * <p>
+ * A SceneGraphComponent can contain other instances of {@link SceneGraphNode}. To be exact,
+ * it can have one each of the following: {@link Appearance}, {@link Transformation}, {@link Geometry}, {@link Light}, or
+ * {@link Camera}. It also has a list of {@link Tool} instances, which may be empty.
+ * <p>
+ * To traverse the resulting scene graph, 
+ * use subclasses of {@link de.jreality.scene.SceneGraphVisitor}.
+ * <p>
+ * 
  */
 public class SceneGraphComponent extends SceneGraphNode {
   

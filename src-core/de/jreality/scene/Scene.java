@@ -46,7 +46,8 @@ import java.util.HashSet;
 import java.util.TreeSet;
 
 /**
- * Scene control.
+ * A class used for applying a set of changes simultaneously to an element of the
+ * scene graph. It minimizes the amount of locking that is required to do this.
  */
 public class Scene
 {
