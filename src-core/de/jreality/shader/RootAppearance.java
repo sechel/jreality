@@ -46,6 +46,7 @@ import de.jreality.scene.data.AttributeEntity;
 
 public interface RootAppearance extends AttributeEntity {
 
+  public final static Color  BACKGROUND_COLORS_DEFAULT =  null;
   public final static Color  BACKGROUND_COLOR_DEFAULT = new java.awt.Color(225, 225, 225);
   public final static boolean  FOG_ENABLED_DEFAULT = false;
   public final static Color  FOG_COLOR_DEFAULT = new java.awt.Color(225, 225, 225);
@@ -54,6 +55,9 @@ public interface RootAppearance extends AttributeEntity {
 
   Color getBackgroundColor();
   void setBackgroundColor(Color color);
+  
+  Color getBackgroundColors();
+  void setBackgroundColors(Color[] color);
   
   Boolean getFogEnabled();
   void setFogEnabled(Boolean fog);

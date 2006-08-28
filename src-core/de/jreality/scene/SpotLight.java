@@ -44,8 +44,10 @@ package de.jreality.scene;
  * This is a spot light. The light direction is the z-axis.
  * Other directions may be obtained by changing the transformation. 
  * <p>
- * The cone angle is specified in radians; if it is Pi, then this
- * becomes a simple point light. See set methods below for other parameters.
+ * The cone angle is specified in radians. The <i>distribution</i> is
+ * an exponent specifying the distribution of the light directions
+ * around the axis.  A value of <i>0</i> implies the light is evenly
+ * distributed around the axis.  
  * <p>
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
  *

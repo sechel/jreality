@@ -48,7 +48,13 @@ import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 
 /**
- * @author gunn
+ * Static methods applicable to quad meshes. In
+ * jReality, quad meshes are indentified as instances of {@link IndexedFaceSet} 
+ * which have a non-null {@link Geometry Attribute} with 
+ * key {@link de.jreality.geometry.GeometryUtility#QUAD_MESH_SHAPE}.
+ * <p>
+ * These methods support extracting given <i>u</i> or <i>v</i> parameter curves.
+ * @author Charles Gunn
  *
  */
 public class QuadMeshUtility {
@@ -61,32 +67,42 @@ public class QuadMeshUtility {
 	}
 
 	public static double[][] extractVParameterCurve(double[][] curve, IndexedFaceSet ifs, int which)	{
-		return extractParameterCurve(curve, ifs, which, 1);
+		Dimension dim = (Dimension) ifs.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
+		return extractParameterCurve(curve, ifs,  which, 1);
 	}
 
-	public static double[][] extractParameterCurve(double[][] curve, IndexedFaceSet qms, int which, int type)	{
-		Dimension dim = (Dimension) qms.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
-		return extractParameterCurve(curve, qms, dim.width, dim.height, which, type);
-	}
-	// extract a curve for a given fixed u-value 
-	public static double[][] extractParameterCurve(double[][] curve, IndexedFaceSet ifs, int u, int v, int which, int type)	{
+	/**
+	 * Extracts the specified parameter curve from the quad mesh represented by <i>ifs</i>.
+	 * @param curve		where to store the output curve; null OK
+	 * @param ifs		the quad mesh
+	 * @param which		the index of the curve to extract
+	 * @param type		0: extract curve for fixed u-value; 1: fixed v-value
+	 * @return			the extracted curve
+	 */
+	public static double[][] extractParameterCurve(double[][] curve, IndexedFaceSet ifs,  int which, int type)	{
+		Object foo = ifs.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
+		if (foo == null)	
+			throw new IllegalArgumentException("Not a quad mesh");
+		Dimension dim = (Dimension) foo;
+		int uSize = dim.width;
+		int vSize = dim.height;
 		DataList verts = ifs.getVertexAttributes(Attribute.COORDINATES);
 //		int u = qms.getMaxU();
 //		int v = qms.getMaxV();
 		boolean closedU = false; //qms.isClosedInUDirection();
 		boolean closedV = false; //qms.isClosedInVDirection();
-		int numverts = u*v;
+		int numverts = uSize*vSize;
 		int lim = 0, begin = 0, stride = 0, modulo;
 		if (type == 0)	{
-			lim = (closedV) ? v+1 : v;
+			lim = (closedV) ? vSize+1 : vSize;
 			begin = which;
-			stride = u;
+			stride = uSize;
 			modulo = numverts;
 		} else {
-			lim = (closedU) ? u+1 : u;
-			begin = which * u;
+			lim = (closedU) ? uSize+1 : uSize;
+			begin = which * uSize;
 			stride = 1;
-			modulo = u;
+			modulo = uSize;
 		}
 		int n = GeometryUtility.getVectorLength(verts);
 		if (curve == null || curve.length != lim || curve[0].length != n)	 curve = new double[lim][n];

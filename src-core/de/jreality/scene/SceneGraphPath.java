@@ -50,9 +50,11 @@ import java.util.ListIterator;
 import de.jreality.math.Rn;
 
 /**
- * A SceneGraphPath represents a directed connection in the scene graph. Technically it is a list of 
- * SceneGraphComponents. It may also include, optionally, a {@link #SceneGraphNode}
- *  contained in the final {@link #SceneGraphComponent}.
+ * A SceneGraphPath represents a directed path between two nodes in the scene graph. 
+ * Technically it begins with list of 
+ * SceneGraphComponent's, but the final element may be a {@link SceneGraphNode} contained 
+ * in the final SceneGraphComponent. 
+ * <p>
  * This allows addressing the sub-nodes contained as fields in the SceneGraphComponent 
  * (such as lights, camera, geometry, appearance). 
  * But it is not required that the path ends in such a SceneGraphNode; it can also
@@ -65,6 +67,9 @@ import de.jreality.math.Rn;
  * (by multiplying the instances of {@link Transformation} occurring on the path.
  * <b>Note:</b> This class takes no care of the elements being inserted. The method isValid()
  * gives information if this path exists in the scenegraph
+ * <p>
+ * This class does not allow specifying a path that begins somewhere in a scene graph,
+ * goes <b>up</b> to the root, and then descends again.  All paths go <b>down</b> from the root.
  * @author Tim Hoffman, Charles Gunn, Steffen Weissman
  *
  */

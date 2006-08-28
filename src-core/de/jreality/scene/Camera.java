@@ -62,7 +62,7 @@ import de.jreality.util.LoggingSystem;
  * This implies that the camera is on-axis,
  * that is, the viewing frustum is centered on the z-axis.
  * <p>
- * There is also support for off-axis cameras (@link #setOnAxis(boolean)).  
+ * There is also support for off-axis cameras ({@link #setOnAxis(boolean)}).  
  * Use the {@link #setViewPort(Rectangle2D)} method to
  * specify the desired viewport, which is assumed to lie in the <i>z=1</i> plane.  
  * In this case the field of view is ignored.
@@ -70,27 +70,32 @@ import de.jreality.util.LoggingSystem;
  * The camera also supports stereo viewing @link #setStereo(boolean). For most desktop environments
  * the only other required parameters are:
  * <ul>
- * <li>eye separation (@link #setEyeSeparation(double)}, a horizontal displacement in camera coordinates, and</li>
+ * <li>eye separation ({@link #setEyeSeparation(double)}), 
+ * a horizontal displacement in camera coordinates, and</li>
  * <li>focus {@link #setFocus(double)}, the z-depth where the two images are identical.</li>
- * </ul>  For CAVE-like environments
+ * </ul>  
+ * For CAVE-like environments
  * where the eyes are not always oriented horizontally, there is an additional parameter:
  *  an orientation matrix (@link #setOrientationMatrix(double[])), a 4x4 transformation matrix
  *  which  defines the rotation that has to be applied to the x-axis to get the
  *  line in camera coordinates on which the eyes lie. (This matrix should fix (0,0,0,1)!).
  *  <p> 
  * Default eye positions are (-eyeSeparation/2,0,0) and (eyeSeparation, 0,0) in the 
- * camera coordinate system.  Use @link de.jreality.util.CameraUtility#getNDCToCamera(Camera, double, int) to generate 
+ * camera coordinate system.  Use {@link de.jreality.util.CameraUtility#getNDCToCamera(Camera, double, int)} to generate 
  * the appropriate projection matrices.
  * <p>
- * Instances of {@link de.jreality.scene.event.CameraListener} can register to be notified 
+ * Instances of {@link de.jreality.scene.event.CameraListener} can register with the camera
+ * to be notified 
  * when the camera changes.
  * <p>
- * Due to refactoring, the camera no longer has enough state to provide the projective viewing transformation
+ * Due to refactoring, the camera no longer has enough state to provide the perspective viewing transformation
  * from/to camera to/from Normalized Device Coordinates (NDC). It basically lacks the aspect ratio of the
  * output device. This allows to use the same camera for different viewers with
- * i. e. different window sizes.
+ * i. e. different window sizes. See {@link CameraUtility} for methods which provide this functionality.
+ * 
  * 
  * @author Charles Gunn
+ * @see de.jreality.util.CameraUtility
  * 
  */
 public class Camera extends SceneGraphNode {
@@ -112,34 +117,14 @@ public class Camera extends SceneGraphNode {
   private CameraListener cameraListener;
 
 
-	public Camera(int sig) {
+	public Camera() {
 		super();
-		switch (sig)	{
-			  case Pn.EUCLIDEAN:
-				  near = .5;
-				  far = 50.0;
-				  fieldOfView = Math.toRadians(60.0);
-				  focus = 3.0;
-				  break;
-			  case Pn.HYPERBOLIC:
-				  near = .05;
-				  far = 100.0;
-				  fieldOfView = Math.toRadians(90.0);
-				  focus = 2.5;
-				  break;
-			  case Pn.ELLIPTIC:
-				  near = .05;
-				  far = -.05;
-				  fieldOfView = Math.toRadians(90.0);
-				  focus = 0.5;
-				  break;
-			  }
+		near = .5;
+		far = 50.0;
+		fieldOfView = Math.toRadians(60.0);
+		focus = 3.0;
 	}
 	
-	public Camera()	{
-		this(Pn.EUCLIDEAN);
-	}
-
 	public double getNear() {
 		return near;
 	}

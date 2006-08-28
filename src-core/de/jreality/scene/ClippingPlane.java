@@ -42,8 +42,10 @@ package de.jreality.scene;
 
 /**
  * A clipping plane through the origin with normal pointing in positive z direction.
- * All points with positive z will be clipped away. Put into SceneGraphComponent and 
- * use transformations to get clipping plane in arbitrary position.
+ * All points with <b>positive</b> z will be clipped away. Insert into scene graph using
+ * {@link de.jreality.scene.SceneGraphComponent#setGeometry(Geometry)} and 
+ * use transformations to get clipping plane into arbitrary position. To flip the clipped
+ * side, attach a reflection in <i>z=0</i> to the ScneGraphComponent containing the clipping plane.
  * planes 
  * 
  * @author timh

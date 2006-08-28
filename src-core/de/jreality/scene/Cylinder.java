@@ -43,7 +43,8 @@ package de.jreality.scene;
 /**
  * Cylinder with axis from (0,0,-1) to (0,0,1) and  radius 1. Put into SceneGraphComponent and 
  * use transformations to get a scaled cylinder in arbitrary position.
- * Backends differ on whether it is a closed or an open cylinder.
+ * <p>
+ * TODO: Resolve the fact that backends differ on whether it is a closed or an open cylinder.
  * 
  */
 public class Cylinder extends Geometry

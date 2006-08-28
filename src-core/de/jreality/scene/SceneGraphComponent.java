@@ -59,7 +59,7 @@ import de.jreality.scene.tool.Tool;
 /**
  * This basic building block of the jReality scene graph. It's 
  * the only node that can have another
- * SceneGraphComponent instance as a child (see {@link #addChild(SceneGraphComponent)).
+ * SceneGraphComponent instance as a child (see {{@link #addChild(SceneGraphComponent)}).
  * <p>
  * A SceneGraphComponent can contain other instances of {@link SceneGraphNode}. To be exact,
  * it can have one each of the following: {@link Appearance}, {@link Transformation}, {@link Geometry}, {@link Light}, or
@@ -68,6 +68,7 @@ import de.jreality.scene.tool.Tool;
  * To traverse the resulting scene graph, 
  * use subclasses of {@link de.jreality.scene.SceneGraphVisitor}.
  * <p>
+ * @author Unknown
  * 
  */
 public class SceneGraphComponent extends SceneGraphNode {

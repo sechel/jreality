@@ -53,6 +53,8 @@ import de.jreality.util.LoggingSystem;
  * This class calculates tubes around curves. A tube of radius <i>r</i>
  * around a curve <i>C</i> can be defined as the locus of points
  * which lie at distant <i>r</i> from the curve (ignoring endpoints).
+ * We are interested only in imbedded tubes, that is, tubes which do not intersect themselves.
+ * <p>
  * Example: in euclidean space, a tube around a line is an infinite cylinder. And, a tube
  * around a line segment is a finite cylinder.
  * <p>
@@ -259,10 +261,15 @@ public  class TubeFactory {
 		 * The input curve <i>polygon</i> is assumed to have an initial and terminal point with the following properties:
 		 *     1) if the curve is closed, <i>polygon[0]=polygon[n-2]</i> and <i>polygon[n-1]=polygon[1]</i>
 		 *     2) if the curve is not closed, then polygon[0] is the mirror of polygon[2] wrt polygon[1], similarly for polygon[n-1]. 
-		 *  The tubing factories do this automatically, but if you want to use this method directly, you'll
-		 *  need to know this.
+		 *  The tubing factories perform this setup automatically before calling this method, 
+		 *  but if you want to use this method directly, you'll
+		 *  need to do this setup yourself.
 		 * <p>
-		 * The return array is of length <i>n-2</i>.
+		 * The returned frame array (of type {@link TubeUtility.FrameInfo} is of length <i>n-2</i>.
+		 * <p>
+		 * The input curve can consist of either 3- or 4-d vectors; in the latter case they are assumed 
+		 * to be homogeneous projective coordinates.
+		 * <p>
 		 * The basic idea is: first calculate the Frenet frame for the curve. That is, in the best case,
 		 * a simple matter at each point <i>P[i]</i> of the curve:
 		 * <ul>
@@ -301,26 +308,27 @@ public  class TubeFactory {
 		 * </ul>
 		 * This algorithm calculates the Frenet frame. To get the parallel frame, first
 		 * calculate the Frenet frame. Then the 
-		 * normal vector has to parallel transported along the curve:</li>
+		 * normal vector N has to be parallel transported along the curve:</li>
 		 * <ul>
-		 * <li>At the first point P<sub>0</i>, 
+		 * <li>At the first point P<sub>0</sub></i>, 
 		 * define the parallel field to be the same as the Frenet field.</li>
 		 * <li>At each further point P<sub>i</sub>, calculate the plane spanned by P<sub>i-1</sub>,
 		 * P<sub>i</sub>, and the previous parallel normal vector. </li>
-		 * <li>Calculate the point of intersection of this plane, the polar plane (tangent plane),
-		 * and the mid-plane (calculated above).</li>
-		 * <li>The result is the desired parallel normal vector.</li>
+		 * <li>Calculate the point of intersection of this plane, the polar plane (tangent plane) of P<sub>i</sub>,
+		 * and the mid-plane of P<sub>i</sub> (both the latter two have already been calculated above).</li>
+		 * <li>The result is the desired parallel normal vector N.</li>
 		 * <li>The rest of the frame at P<sub>i</sub> is gotten by rotating the Frenet frame so
 		 * that the tangent vector is fixed and the Frenet normal rotates into the parallel normal.</i>
 		 * </ul>
 		 *  At points where three or more consecutive curve vertices are collinear, \
 		 *  some of the steps of the above algorithm aren't  well-defined.  In that case, the
-		 *  correct behavior is basically to tube as if these points were not there.
-		 *   If type=PARALLEL, calculate the adjustment needed to rotate the Frenet frame to the parallel one
-		 * @param polygon
-		 * @param type		PARALLEL or FRENET
-		 * @param signature	Pn.EUCLIDEAN, Pn.HYPERBOLIC, or Ph.ELLIPTIC
-		 * @return	an array of length (n-2) of type FrameInfo containing an orthonormal frame for each internal point in the initial polygon array.
+		 *  correct behavior is basically to tube as if these points had been deleted before
+		 *  the processing began.
+		 *  <p>
+		 * @param polygon	the curve to frame (as array of 3- or 4-d points)
+		 * @param type		{@link TubeUtility.PARALLEL} or {TubeUtility.FRENET}
+		 * @param signature	the metric signature {@link Pn}
+		 * @return	an array of length (n-2) of type {@link TubeUtility.FrameInfo} containing an orthonormal frame for each internal point in the initial polygon array.
 		 */
 		public  FrameInfo[] makeFrameField(double[][] polygon, int type, int signature)		{
 		 	int n = polygon.length;
