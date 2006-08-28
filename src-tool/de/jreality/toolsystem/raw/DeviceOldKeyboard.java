@@ -41,10 +41,12 @@
 package de.jreality.toolsystem.raw;
 
 import java.awt.Component;
-import java.awt.Toolkit;
+import java.awt.EventQueue;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.logging.Level;
 
 import de.jreality.scene.Viewer;
 import de.jreality.scene.tool.AxisState;
@@ -54,11 +56,26 @@ import de.jreality.toolsystem.ToolEventQueue;
 import de.jreality.util.LoggingSystem;
 
 /**
+ * This class contains an ugly workaround for linux keyboard auto-repeat.
+ * 
+ * When a key released event arrives, it is noted and rescheduled,
+ * whith a short sleep - so that there is time for the corresponding keyTyped
+ * event to check in.
+ * 
+ * in the keyTyped method we mark a matching release event so that it is not executed.
+ * so neither the keyPressed nor the keyReleased are processed.
+ * 
+ * This works for me much better than the previous version - anyway,
+ * I guess one needs to tweak the sleep value depending on the machine...
+ * 
+ * TODO: use configuration attributes to configure raw devices if needed.
+ * 
  * @author weissman
+ *
  **/
-public class DeviceNewKeyboard implements RawDevice, KeyListener {
+public class DeviceOldKeyboard implements RawDevice, KeyListener {
   
-    private HashMap<Integer, InputSlot> keysToVirtual = new HashMap<Integer, InputSlot>();
+    private HashMap keysToVirtual = new HashMap();
     
     private ToolEventQueue queue;
     private Component component;
@@ -66,39 +83,70 @@ public class DeviceNewKeyboard implements RawDevice, KeyListener {
     public void initialize(Viewer viewer) {
       if (!viewer.hasViewingComponent() || !(viewer.getViewingComponent() instanceof Component) ) throw new UnsupportedOperationException("need AWT component");
       this.component = (Component) viewer.getViewingComponent();
-      this.component.addKeyListener(this);
+      component.addKeyListener(this);
     }
 
+    // store last release events
+    HashMap lastReleased = new HashMap();
+    HashSet cancelEvents = new HashSet();
+    HashSet seenReleases = new HashSet();
+    
     public synchronized void keyPressed(KeyEvent e) {
-    	if (e.isConsumed()) return;
         InputSlot id = (InputSlot) keysToVirtual.get(new Integer(e.getKeyCode()));
+        // we assume that the released event is not older than 1 ms
         if (id != null) {
-          ToolEvent ev = new ToolEvent(this, id, AxisState.PRESSED);
-          queue.addEvent(ev);
-          LoggingSystem.getLogger(this).fine(this.hashCode()+" added key pressed ["+id+"] "+e.getWhen());
+            Long timestamp = new Long(e.getWhen());
+            if (((HashMap)lastReleased.get(id)).containsKey(timestamp)) {
+                KeyEvent releaseEvent = (KeyEvent) ((HashMap)lastReleased.get(id)).get(timestamp);
+                cancelEvents.add(releaseEvent);
+                return;
+            } 
+            timestamp = new Long(e.getWhen()-1);
+            if (((HashMap)lastReleased.get(id)).containsKey(timestamp)) {
+                KeyEvent releaseEvent = (KeyEvent) ((HashMap)lastReleased.get(id)).get(timestamp);
+                cancelEvents.add(releaseEvent);
+                return;
+            } 
+            ToolEvent ev = new ToolEvent(this, id, AxisState.PRESSED);
+            queue.addEvent(ev);
+            LoggingSystem.getLogger(this).fine(this.hashCode()+" added key pressed ["+id+"] "+e.getWhen());
         }
     }
     
     public synchronized void keyReleased(final KeyEvent e) {
-        InputSlot id = (InputSlot) keysToVirtual.get(e.getKeyCode());
+        InputSlot id = (InputSlot) keysToVirtual.get(new Integer(e.getKeyCode()));
         if (id != null) {
-        	// check for a next key-pressed
-        	KeyEvent nextEvent = (KeyEvent) Toolkit.getDefaultToolkit().getSystemEventQueue().peekEvent(KeyEvent.KEY_PRESSED);
-        	if (nextEvent != null && nextEvent.getKeyCode() == e.getKeyCode()) {
-        		nextEvent.consume();
-        		return;
-        	}
-        	queue.addEvent(new ToolEvent(this, id, AxisState.ORIGIN));
-            LoggingSystem.getLogger(this).finer("added key released ["+id+"] "+e.getWhen());
+            if (!seenReleases.contains(e)) {
+                LoggingSystem.getLogger(this).log(Level.FINEST, "release first");
+                seenReleases.add(e);
+                ((HashMap)lastReleased.get(id)).put(new Long(e.getWhen()), e);
+                try {
+                    Thread.sleep(1);
+                } catch (Exception e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+                EventQueue.invokeLater(new Runnable() {
+                    public void run() {
+                        DeviceOldKeyboard.this.keyReleased(e);
+                    }
+                });
+            } else {
+                LoggingSystem.getLogger(this).log(Level.FINEST, "release second");
+                if (cancelEvents.contains(e)) cancelEvents.remove(id);
+                else {
+                    queue.addEvent(new ToolEvent(this, id, AxisState.ORIGIN));
+                    LoggingSystem.getLogger(this).finer("added key released ["+id+"] "+e.getWhen());
+                }
+                ((HashMap)lastReleased.get(id)).remove(new Long(e.getWhen()));
+            }
         }
     }
 
-	public void keyTyped(KeyEvent e) {
-	}
-
-	public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
+    public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
         // rawDeviceName = VK_W (e.g.)
         keysToVirtual.put(resolveKeyCode(rawDeviceName), inputDevice);
+        lastReleased.put(inputDevice, new HashMap());
         return new ToolEvent(this, inputDevice, AxisState.ORIGIN);
     }
     
@@ -117,7 +165,7 @@ public class DeviceNewKeyboard implements RawDevice, KeyListener {
     }
 
     public void dispose() {
-    	component.removeKeyListener(this);
+        component.removeKeyListener(this);   
     }
     
     public String getName() {
@@ -128,4 +176,8 @@ public class DeviceNewKeyboard implements RawDevice, KeyListener {
       return "RawDevice: Keyboard";
     }
 
+    public void keyTyped(KeyEvent e) {
+        // not used
+    }
+    
 }
