@@ -13,20 +13,23 @@ import de.jreality.io.JrSceneFactory;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.swing.jrwindows.JRWindowManager;
+import de.jreality.tools.PointerDisplayTool;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class TestJRWindows {
 	public static void main(String[] args) {
     
-    JrScene scene = JrSceneFactory.getDefaultDesktopScene();
+    JrScene scene = JrSceneFactory.getDefaultPortalScene();
     SceneGraphComponent root = scene.getSceneRoot();
     SceneGraphPath cameraPath = scene.getPath("cameraPath");
     SceneGraphPath emptyPickPath = scene.getPath("emptyPickPath");
     SceneGraphPath avatarPath = scene.getPath("avatarPath");
     
+    avatarPath.getLastComponent().addTool(new PointerDisplayTool());
+    
     SceneGraphComponent geoSgc=new SceneGraphComponent();
     geoSgc.setGeometry(Primitives.icosahedron());
-    root.addChild(geoSgc);
+    emptyPickPath.getLastComponent().addChild(geoSgc);
 
     JRWindowManager wm=new JRWindowManager(avatarPath);
     
@@ -55,6 +58,10 @@ public class TestJRWindows {
     
     wm.pack();
   
-    ViewerApp.display(root, cameraPath, emptyPickPath, avatarPath);    
+    ViewerApp va = new ViewerApp(root, cameraPath, emptyPickPath, avatarPath);
+    va.setAttachNavigator(true);
+    va.setShowMenu(true);
+    va.update();
+    va.display();
 	}
 }
