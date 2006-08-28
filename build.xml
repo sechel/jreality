@@ -473,7 +473,14 @@
   	</zip>
 
   	<delete dir="release/tmp"/>
-  	
+  
+  	<mkdir dir="release/tmp/tutorial" />
+	<copy todir="release/tmp/tutorial">
+  		<fileset dir="src-tutorial" />
+  	</copy>
+  	<zip destfile="release/jReality-tutorial.zip" basedir="release/tmp"/>
+  	<delete dir="release/tmp"/>
+
   </target>
 
   <target name="check_cvs" description="check the current cvs state">
