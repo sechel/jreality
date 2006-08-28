@@ -52,6 +52,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.tool.Tool;
+import de.jreality.shader.ShaderUtility;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.EncompassTool;
 import de.jreality.tools.FlyTool;
@@ -75,6 +76,7 @@ public class JrSceneFactory {
     sceneRoot.setVisible(true);
     Appearance app = new Appearance();
     app.setName("root appearance");
+    ShaderUtility.createRootAppearance(app);
     sceneRoot.setAppearance(app);
     //children of sceneRoot
     //scene
