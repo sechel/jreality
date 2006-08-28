@@ -51,7 +51,7 @@ import de.jreality.scene.SceneGraphVisitor;
  * @author gunn
  * @deprecated use {@link SceneGraphUtility.collectLights(node)}
  */
-public class LightCollector extends SceneGraphVisitor {
+class LightCollector extends SceneGraphVisitor {
 
 	SceneGraphComponent sgc;
 	SceneGraphPath currentPath;

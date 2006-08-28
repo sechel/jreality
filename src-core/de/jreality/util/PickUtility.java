@@ -53,6 +53,9 @@ public class PickUtility {
 
   private PickUtility() {}
   
+  /*
+   * Do thiese methods perhaps belong in the de.jreality.pick package
+   */
   public static void assignFaceAABBTree(IndexedFaceSet ifs) {
     assignFaceAABBTree(ifs, DEFAULT_TRIANGLES_PER_BOX);
   }
@@ -80,6 +83,7 @@ public class PickUtility {
    * sets the pickable flag for the whole sub-tree of <code>cmp</code>.
    * 
    * @param cmp the root node
+   * TODO: decide if this belongs in SceneGraphUtility
    */
   public static void setPickable(SceneGraphComponent cmp, final boolean pickable) {
     cmp.accept(new SceneGraphVisitor() {

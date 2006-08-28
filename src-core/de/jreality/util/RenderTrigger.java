@@ -62,14 +62,13 @@ import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
 
 /**
- * RenderTrigger is a class for managing render requests for a scene ()or parts of it)
- * One can add subtrees of a scene (SceneGraphComponents ad their children) to be watched
+ * RenderTrigger is a class for managing render requests for a scene (or parts of it)
+ * One can add subtrees of a scene (SceneGraphComponents and their children) to be watched
  * for changes. On the other side one can add Viewers on which render() will be called
- * for any chage that is reported.
+ * for any change that is reported.
  * 
  * If one adds only Viewers and no scene it can be used to simply dispatch render requests
  * to several viewers (via the forceRender() method).
- * @version 1.0
  * @author timh
  *
  * TODO: fix problems maybe use Proxy (remove/add doesn't work how it should)

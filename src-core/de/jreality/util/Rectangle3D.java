@@ -45,14 +45,13 @@ import java.util.logging.Level;
 
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
-/**	   @author Charles Gunn
- * <p>
+/**
 	* A Rectangle3D represents a rectangular parallelopiped in three dimensional space: a "box".
 	* <p>
-	* <b>Warning</b> At some point this class
-	*  should be brought into more consistency with the standard {@link java.awt.geom.Rectangle2D}.
-	* It exists now primarily to provide bounding boxes for 3D geometry.
+	* It exists  primarily to provide bounding boxes for 3D geometry. 
 	* <p>
+	* @author Charles Gunn
+	* 
 	* @see java.awt.geom.Rectangle2D
 	* 
 	* TODO: add dirty flag to avoid unnecessary recalculation of extent and center

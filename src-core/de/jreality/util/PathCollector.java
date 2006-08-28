@@ -49,9 +49,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 
 /**
- * @author gunn
- *
- * This visitor traverses a scene graph searching for {@link Path the first path}from the given 
+ * This visitor traverses a scene graph searching for {@link Path all paths} betweenthe given 
  * {@link SceneGraphComponent} and the given {@link SceneGraphNode}.
  * 
  * TODO: make this a collector, put methods in SceneGraphUtility (get all paths as well)
@@ -59,7 +57,9 @@ import de.jreality.scene.SceneGraphVisitor;
  * TODO: return list of ALL paths
  * 
  * make singleton 
- */
+ * @author Charles Gunn
+ *
+*/
 public class PathCollector extends SceneGraphVisitor {
 
     SceneGraphComponent root;
@@ -69,25 +69,20 @@ public class PathCollector extends SceneGraphVisitor {
     
 	  public PathCollector(Matcher matcher, SceneGraphComponent root)	{
 	  	this.matcher=matcher;
-      this.root=root;
+	  	this.root=root;
 	  }
 
-	  /*
-	   * Changed this method to reflect new policy on SceneGraphPath to allow
-	   * SceneGraphNode to be final element of the path rather than segregated
-	   * into separate field.  -gunn 4.6.4
-	   */
 	   public List<SceneGraphPath> visit()	{
 		  visit(root);
-      return collectedPaths;
+		  return collectedPaths;
 	  }
 	  
 	  public void visit(SceneGraphNode m) {
-      currentPath.push(m);
+		  	currentPath.push(m);
 			if (currentPath.getLength() > 0 && matcher.matches(currentPath)) {
 			  collectedPaths.add((SceneGraphPath) currentPath.clone());
-      }
-      currentPath.pop();
+			}
+			currentPath.pop();
 	  }
 	
 	  public void visit(SceneGraphComponent c) {

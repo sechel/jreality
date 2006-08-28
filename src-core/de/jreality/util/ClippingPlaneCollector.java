@@ -50,9 +50,8 @@ import de.jreality.scene.SceneGraphVisitor;
 /**
  * @author gunn
  *
- *@deprecated use {@link de.jreality.util.SceneGraphUtility.collectClippingPlanes(node)}
   */
-public class ClippingPlaneCollector extends SceneGraphVisitor {
+class ClippingPlaneCollector extends SceneGraphVisitor {
 
 	SceneGraphComponent sgc;
 	SceneGraphPath currentPath;
