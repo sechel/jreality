@@ -316,7 +316,7 @@ public class JRWindow {
     }
   }
   
-  private final double distance=6;
+  private final double distance=JRWindowManager.windowPos[2]/2;
   private final double alpha=Math.PI/3;
   private boolean isFoldAway;
   

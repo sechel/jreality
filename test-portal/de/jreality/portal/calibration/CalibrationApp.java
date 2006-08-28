@@ -25,9 +25,9 @@ public class CalibrationApp {
 		va.setShowMenu(true);
 		va.update();
 		MatrixBuilder.euclidean().translate(0, 1.7, 0).assignTo(va.getViewer().getCameraPath().getLastComponent());
-		CameraUtility.getCamera(va.getViewer()).setOnAxis(false);
-		CameraUtility.getCamera(va.getViewer()).setStereo(true);
-		CameraUtility.getCamera(va.getViewer()).setNear(0.1);
+//		CameraUtility.getCamera(va.getViewer()).setOnAxis(false);
+//		CameraUtility.getCamera(va.getViewer()).setStereo(true);
+//		CameraUtility.getCamera(va.getViewer()).setNear(0.1);
 		va.display();
 		
 		//scene.addChild(DebugLattice.makeWorld());

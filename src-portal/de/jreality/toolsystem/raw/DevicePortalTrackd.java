@@ -16,8 +16,7 @@ public class DevicePortalTrackd extends DeviceTrackd {
 										.getMatrix();
 	static final Matrix WAND_CALIB = MatrixBuilder.euclidean()
 										.rotateZ(Math.PI)
-										//.rotateZ(rad(-2))										
-										//.rotateX(rad(-9))
+										.rotateX(rad(-5))
 										.getMatrix();
 	
 	private static double rad(double deg) {
@@ -30,10 +29,11 @@ public class DevicePortalTrackd extends DeviceTrackd {
 	@Override
 	protected void calibrate(double[] sensorMatrix, int index) {
 		Matrix m = new Matrix(sensorMatrix);
+		
 		m.setEntry(0, 3, m.getEntry(0, 3)/100-1.24);
 		m.setEntry(1, 3, m.getEntry(1, 3)/100);
 		m.setEntry(2, 3, m.getEntry(2, 3)/100-1.24);
-		//System.out.println(m);
+
 		// rotate:
 		if (index == 1) m.multiplyOnRight(WAND_CALIB); // wand
 		if (index == 0) m.multiplyOnRight(HEAD_CALIB); // head

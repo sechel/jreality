@@ -8,9 +8,11 @@ import javax.swing.JFrame;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.tools.DragEventTool;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.FaceDragEvent;
@@ -27,7 +29,7 @@ import de.jreality.tools.PointDragListener;
 
 public class JRWindowManager implements ActionListener{
   
-  private double[] windowPos={0,0,12};
+  static double[] windowPos={0,1.5,-1.2};
   
   private SceneGraphComponent sgc;
   private ArrayList<JRWindow> windowList;
@@ -35,8 +37,10 @@ public class JRWindowManager implements ActionListener{
   private DragEventTool dragTool;
   
   public JRWindowManager(SceneGraphComponent avatar){
-    System.setProperty("de.jreality.ui.viewerapp.synchRender", "true");
-    sgc=new SceneGraphComponent();    
+    sgc=new SceneGraphComponent();
+    Appearance app = new Appearance();
+    app.setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
+    sgc.setAppearance(app);
     avatar.addChild(sgc);
     windowList=new ArrayList<JRWindow>();
     foldAwayWindowList=new ArrayList<JRWindow>();
