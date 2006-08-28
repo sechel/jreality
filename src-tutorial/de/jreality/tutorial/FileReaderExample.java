@@ -15,8 +15,12 @@ public class FileReaderExample {
     // To read .bsh files, you need beanshell in the classpath, to
     // read .jrs files, you need xstream.jar and xpp3.jar.
     //
-    SceneGraphComponent scp = Readers.read(Input.getInput(args[0]));
-    ViewerApp.display(scp);
+	if (args.length > 0) {
+		SceneGraphComponent scp = Readers.read(Input.getInput(args[0]));
+		ViewerApp.display(scp);
+	} else {
+		System.out.println("usage: java de.jreality.tutorial.FileReaderExample <3d-data-file>");
+	}
   }
 
 }

@@ -67,8 +67,10 @@ public class TextureExample {
       sgc.setAppearance(new Appearance());
       sgc.getAppearance().setAttribute(CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
       Texture2D tex = TextureUtility.createTexture(sgc.getAppearance(), CommonAttributes.POLYGON_SHADER, ImageData.load(Input.getInput(args[0])));
-      tex.setTextureMatrix(MatrixBuilder.euclidean().scale(3).getMatrix());
+      tex.setTextureMatrix(MatrixBuilder.euclidean().scale(1.2).getMatrix());
+      ViewerApp.display(sgc);
+    } else {
+    	System.out.println("usage: java de.jreality.tutorial.TextureExample <image-file>");
     }
-    ViewerApp.display(sgc);
   }
 }
