@@ -601,4 +601,12 @@ public class ViewerApp {
     if (currViewer != null) currViewer.dispose();
   }
 
+  public static void main(String[] args) {
+	ViewerApp va = new ViewerApp(null, null, null, null, null);
+	va.setShowMenu(true);
+	va.setAttachNavigator(true);
+	//va.setAttachBeanShell(true);
+	va.update();
+	va.display();
+  }
 }
