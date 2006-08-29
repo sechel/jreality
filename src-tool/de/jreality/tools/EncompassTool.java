@@ -58,7 +58,8 @@ public class EncompassTool extends AbstractTool {
 	
 	double margin = 1.25;		// value greater than one creates a margin around the encompassed object  
 
-  static InputSlot encompassSlot = InputSlot.getDevice("EncompassActivation");
+  final static InputSlot encompassSlot = InputSlot.getDevice("EncompassActivation");
+  final static InputSlot SHIFT = InputSlot.getDevice("Secondary");
 
   public EncompassTool() {
     addCurrentSlot(encompassSlot);
@@ -69,6 +70,8 @@ public class EncompassTool extends AbstractTool {
   transient Matrix centerTranslation = new Matrix();
 
   public void perform(ToolContext tc) {
+    // HACK: otherwise collision with viewerapp key bindings
+    if (tc.getAxisState(SHIFT).isPressed()) return;
     if (tc.getAxisState(encompassSlot).isPressed()) {
       if (false) {
         CameraUtility.encompass(tc.getViewer());
