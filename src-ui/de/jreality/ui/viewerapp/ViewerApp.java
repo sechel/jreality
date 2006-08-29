@@ -129,6 +129,10 @@ public class ViewerApp {
     this(null, root, cameraPath, emptyPick, avatar);
   }
   
+  public ViewerApp(JrScene scene) {
+	  this(scene.getSceneRoot(), scene.getPath("cameraPath"), scene.getPath("emptyPickPath"), scene.getPath("avatarPath"));
+  }
+  
   private ViewerApp(SceneGraphNode contentNode, SceneGraphComponent root, SceneGraphPath cameraPath, SceneGraphPath emptyPick, SceneGraphPath avatar) {
 
     if (contentNode != null)  //create default scene if null
