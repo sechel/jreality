@@ -59,6 +59,7 @@ import de.jreality.tools.EncompassTool;
 import de.jreality.tools.FlyTool;
 import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.PickShowTool;
+import de.jreality.tools.PointerDisplayTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.tools.ShipNavigationTool;
 import de.jreality.util.LoggingSystem;
@@ -176,6 +177,8 @@ public class JrSceneFactory {
 		}
 
 		sceneRoot.addTool(new PickShowTool(null, 0.005));
+		
+		avatarNode.addTool(new PointerDisplayTool());
 
 		JrScene scene = new JrScene(sceneRoot);
 		
