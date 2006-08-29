@@ -84,7 +84,6 @@
     <mapping src="PrimarySelection" target="ScaleActivation"/>
     <mapping src="PrimaryAction" target="DeformActivation"/>
 
-    <mapping src="Meta" target="Accelertation"/>
     <mapping src="Meta" target="DragAlongViewDirection"/>
     
     <mapping src="PointerNdcXevolution" target="HorizontalShipRotationAngleEvolution"/>
