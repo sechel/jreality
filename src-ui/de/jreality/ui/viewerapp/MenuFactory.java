@@ -51,32 +51,45 @@ import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 
+import de.jreality.scene.Appearance;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphVisitor;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.ui.viewerapp.Navigator.SelectionEvent;
 import de.jreality.ui.viewerapp.actions.AddTool;
 import de.jreality.ui.viewerapp.actions.LoadFile;
 import de.jreality.ui.viewerapp.actions.Quit;
 import de.jreality.ui.viewerapp.actions.Remove;
 import de.jreality.ui.viewerapp.actions.Render;
+import de.jreality.ui.viewerapp.actions.ToggleAppearance;
+import de.jreality.ui.viewerapp.actions.ToggleFullScreen;
+import de.jreality.ui.viewerapp.actions.ToggleViewerFullScreen;
 
 
 /**
  * at present to use the following way:<br>
- * 
+ * <code><b><pre>
  * ViewerApp viewerApp = new ViewerApp(SceneGraphNode);
  * viewerApp.display();
- *
- * MenuFactory menu = new MenuFactory(viewerApp);
- * menu.addMenuToFrame();
- * menu.addContextMenuToNavigator(); 
+ * <p>
+ * MenuFactory.addMenuBar(viewerApp);
+ * </pre></b></code>
  */
 public class MenuFactory {
 
   public static String LOAD_FILE = "Load File";
+  public static String QUIT = "Quit";
   public static String REMOVE = "Remove";
   public static String ADD_TOOL = "Add Tool";
-  public static String QUIT = "Quit";
+  public static String TOGGLE_VERTEX_DRAWING = "Toggle vertex drawing";
+  public static String TOGGLE_EDGE_DRAWING = "Toggle egde drawing";
+  public static String TOGGLE_FACE_DRAWING = "Toggle face drawing";
+  public static String TOGGLE_FULL_SCREEN = "Toggle full screen";
+  public static String TOGGLE_FULL_VIEWER = "Toggle viewer full screen";
   public static String RENDER = "Force Rendering";
   
   private JFrame frame = null;
+  private ViewerApp viewerApp = null;
   private SelectionManager sm = null;
   private ViewerSwitch viewerSwitch = null;
   
@@ -88,6 +101,7 @@ public class MenuFactory {
   
   public MenuFactory(ViewerApp v) {
     setFrame(v.getFrame());
+    setViewerApp(v);
     setSelectionManager(v.getSelectionManager());
     setViewerSwitch(v.getViewerSwitch());
   }
@@ -95,6 +109,10 @@ public class MenuFactory {
   
   public void setFrame(JFrame frame) {
     this.frame = frame;
+  }
+  
+  public void setViewerApp(ViewerApp viewerApp) {
+    this.viewerApp = viewerApp;
   }
 
   public void setSelectionManager(SelectionManager sm) {
@@ -109,9 +127,9 @@ public class MenuFactory {
 
   public JMenuBar getMenuBar() {
     
-    JMenuBar menuBar = new JMenuBar();
+    final JMenuBar menuBar = new JMenuBar();
     //create general actions
-    JMenu fileMenu = new JMenu("File");
+    final JMenu fileMenu = new JMenu("File");
     fileMenu.setMnemonic(KeyEvent.VK_F);
     fileMenu.add(new JMenuItem(new Quit(QUIT)));
     menuBar.add(fileMenu);
@@ -119,7 +137,7 @@ public class MenuFactory {
     if (sm == null) return menuBar;
     
     //create actions which require a SelectionManager
-    JMenu compMenu = new JMenu("Component");
+    final JMenu compMenu = new JMenu("Component");
     compMenu.setMnemonic(KeyEvent.VK_C);
     menuBar.add(compMenu);
     
@@ -127,11 +145,23 @@ public class MenuFactory {
     compMenu.add(new JMenuItem(new Remove(REMOVE, sm)));
     compMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, frame)));
     
+    final JMenu appMenu = new JMenu("Appearance");
+    appMenu.setMnemonic(KeyEvent.VK_A);
+    menuBar.add(appMenu);
+    appMenu.add(new JMenuItem(new ToggleAppearance(TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm)));
+    appMenu.add(new JMenuItem(new ToggleAppearance(TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm)));
+    appMenu.add(new JMenuItem(new ToggleAppearance(TOGGLE_FACE_DRAWING, CommonAttributes.FACE_DRAW, sm)));
+    
+    final JMenu viewerMenu = new JMenu("Viewer");
+    viewerMenu.setMnemonic(KeyEvent.VK_V);
+    menuBar.add(viewerMenu);
+    if (viewerApp != null)
+      viewerMenu.add(new JMenuItem(ToggleViewerFullScreen.sharedInstance(TOGGLE_FULL_VIEWER, viewerApp)));
+    viewerMenu.add(new JMenuItem(ToggleFullScreen.sharedInstance(TOGGLE_FULL_SCREEN, frame)));
+    
     //create actions which require a ViewerSwitch
     if (viewerSwitch != null) {
-      final JMenu viewerMenu = new JMenu("Viewer");
-      viewerMenu.setMnemonic(KeyEvent.VK_V);
-      menuBar.add(viewerMenu);
+      viewerMenu.addSeparator();
       
       String[] viewerNames = viewerSwitch.getViewerNames();
       ButtonGroup bg = new ButtonGroup();
@@ -153,10 +183,38 @@ public class MenuFactory {
       }
 
       viewerMenu.addSeparator();
-      JMenuItem mi = new JMenuItem(new Render(RENDER, viewerSwitch.getCurrentViewer()));
+      JMenuItem mi = new JMenuItem(new Render(RENDER, viewerSwitch));
       mi.setAccelerator(KeyStroke.getKeyStroke("R"));
       viewerMenu.add(mi);
     }    
+    
+    //enable or disable menus depending on navigator selection
+    if (viewerApp != null) {
+      Navigator navigator = (Navigator) viewerApp.getNavigator();
+      if (navigator != null) {
+        navigator.getTreeSelectionModel().addTreeSelectionListener(
+            new Navigator.SelectionListener() {
+              @Override
+              public void selectionChanged(SelectionEvent e) {
+                compMenu.setEnabled(false);
+                appMenu.setEnabled(false);
+                if (e.selectionIsSGNode()) {
+                  e.selectionAsSGNode().accept(new SceneGraphVisitor(){
+                    @Override
+                    public void visit(SceneGraphComponent c) {
+                      compMenu.setEnabled(true);
+                      appMenu.setEnabled(true);
+                    }
+                    @Override
+                    public void visit(Appearance a) {
+                      appMenu.setEnabled(true);
+                    }
+                  });
+                }
+              }
+            });
+      }
+    }
     
     return menuBar;
   }
@@ -194,5 +252,48 @@ public class MenuFactory {
     
     return menuFac;
   }
+  
+   
+//  public void setupNavigatorContextMenu() {
+//    
+//    if (navigator == null)
+//      throw new UnsupportedOperationException("No navigator instantiated, call setNavigator(navigator)!");
+//    
+//    final JPopupMenu cm = createContextMenu();  //creates TreeSelectionListener
+//    final JTree sceneTree = navigator.getSceneTree();
+//    
+//    sceneTree.addMouseListener(new MouseAdapter() {
+//      
+//      public void mousePressed( MouseEvent e ) {
+//        handlePopup( e );
+//      }
+//      
+//      public void mouseReleased( MouseEvent e ) {
+//        handlePopup( e );
+//      }
+//      
+//      private void handlePopup( MouseEvent e ) {
+//        if ( e.isPopupTrigger() ) {
+//          TreePath path = sceneTree.getPathForLocation( e.getX(), e.getY() );
+//          if ( path != null ) {
+//            TreeSelectionModel selectionModel = sceneTree.getSelectionModel();
+//            selectionModel.clearSelection();  //ensures that SelectionListeners are notified even if path did not change
+//            selectionModel.setSelectionPath( path );
+//            cm.show( e.getComponent(), e.getX(), e.getY()+10 );
+//          }
+//        }
+//      }
+//    });//end mouse listener
+//    
+//  }
+//  
+//  
+//  private JPopupMenu createContextMenu() {
+//    JPopupMenu cm = new JPopupMenu();
+//    cm.add(new JMenuItem(new LoadFile(LOAD_FILE, navigator, frame)));  //frame is allowed to be null
+//    cm.add(new JMenuItem(new Remove(REMOVE, navigator)));
+//    cm.add(new JMenuItem(new AddTool(ADD_TOOL, navigator, frame)));
+//    return cm;
+//  }
 
 }

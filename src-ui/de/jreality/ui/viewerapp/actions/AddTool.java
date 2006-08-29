@@ -69,8 +69,6 @@ import de.jreality.ui.viewerapp.SelectionManager;
 
 public class AddTool extends AbstractAction {
 
-  private static final long serialVersionUID = 1L;
-  
   private JList toolList = null;
   private JScrollPane scrollPane = null;
   

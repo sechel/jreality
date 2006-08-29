@@ -43,6 +43,8 @@ package de.jreality.ui.viewerapp.actions;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 
+import javax.swing.KeyStroke;
+
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.SelectionManager.SelectionEvent;
@@ -73,7 +75,7 @@ public abstract class AbstractAction extends javax.swing.AbstractAction {
   }
   
   
-  public AbstractAction(String name, final SelectionManager sm) {
+  public AbstractAction(String name, SelectionManager sm) {
     this(name, sm, null);
   }
   
@@ -89,5 +91,15 @@ public abstract class AbstractAction extends javax.swing.AbstractAction {
   
   
   public abstract void actionPerformed(ActionEvent e);
+  
+  
+  public void setAcceleratorKey(KeyStroke key) {
+    putValue(ACCELERATOR_KEY, key);
+  }
+  
+  
+  public void setName(String name) {
+    putValue(NAME, name);
+  }
   
 }

@@ -48,8 +48,6 @@ import javax.swing.KeyStroke;
 
 public class Quit extends AbstractAction {
 
-  private static final long serialVersionUID = 1L;
-
 
   public Quit(String name) {
     super(name);

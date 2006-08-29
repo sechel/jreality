@@ -55,8 +55,6 @@ import de.jreality.ui.viewerapp.SelectionManager;
 
 public class LoadFile extends AbstractAction {
 
-  private static final long serialVersionUID = 1L;
-  
 
   public LoadFile(String name, SelectionManager sm, Component frame) {
     super(name, sm, frame);

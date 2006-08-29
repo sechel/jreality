@@ -53,8 +53,6 @@ import de.jreality.ui.viewerapp.SelectionManager.SelectionEvent;
 
 public class Remove extends AbstractAction {
 
-  private static final long serialVersionUID = 1L;
-  
   private SelectionManager sm;
   
   
