@@ -40,9 +40,9 @@
 
 package de.jreality.ui.viewerapp;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.beans.Beans;
@@ -55,6 +55,7 @@ import java.util.StringTokenizer;
 
 import javax.swing.JFrame;
 import javax.swing.JPopupMenu;
+import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 
 import de.jreality.io.JrScene;
@@ -178,10 +179,19 @@ public class ViewerApp {
     
     //set general properties of UI
     try {
-      UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch (Exception e) {}
-    System.setProperty("sun.awt.noerasebackground", "true");
+    //System.setProperty("sun.awt.noerasebackground", "true");
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+    ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
+    
+    //set viewer background colors
+    if (sceneRoot.getAppearance() != null) {
+      Color[] bg = new Color[]{
+          new Color(225, 225, 225), new Color(225, 225, 225),
+          new Color(255, 225, 180), new Color(255, 225, 180), };
+      sceneRoot.getAppearance().setAttribute("backgroundColors", bg);
+    }
     
     //init frame
     frame = new JFrame("jReality Viewer");
@@ -202,28 +212,31 @@ public class ViewerApp {
     frame.validate();
     frame.setVisible(true);
     
-    // TODO: see where/how to integrate that
-    getViewerSwitch().getViewingComponent().addKeyListener(new KeyAdapter() {
+    //integrate full screen action if menu is not shown
+    if (!isShowMenu()) viewerSwitch.getViewingComponent().addKeyListener(new KeyAdapter() {
     	boolean isFullscreen = false;
-    	public void keyPressed(KeyEvent e) {
+      JFrame fsf = new JFrame();
+      {
+        fsf.setUndecorated(true);
+      }
+      public void keyPressed(KeyEvent e) {
     		if (e.getKeyCode() == KeyEvent.VK_F11) {
-    			Component parent = e.getComponent().getParent();
-    			while (!(parent instanceof Frame))
-    				parent = parent.getParent();
-    			Frame frame = (Frame) parent;
     			if (isFullscreen) {
-    				frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(null);
-    				frame.dispose();
-    				frame.setUndecorated(false);
-    				isFullscreen=false;
+            fsf.dispose();
+    				fsf.getGraphicsConfiguration().getDevice().setFullScreenWindow(null);
+            frame.getContentPane().removeAll();
+            frame.getContentPane().add(getComponent());
+    				frame.validate();
+    				frame.setVisible(true);
+    				isFullscreen = false;
     			} else {
-    				frame.dispose();
-    				frame.setUndecorated(true);
-    				frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(frame);
-    				isFullscreen=true;
+            fsf.getContentPane().removeAll();
+            fsf.getContentPane().add(viewerSwitch.getViewingComponent());
+    				fsf.getGraphicsConfiguration().getDevice().setFullScreenWindow(fsf);
+            fsf.validate();
+            fsf.requestFocusInWindow();
+    				isFullscreen = true;
     			}
-				frame.validate();
-				frame.setVisible(true);
     		}
     	}
     });
@@ -601,6 +614,7 @@ public class ViewerApp {
     if (currViewer != null) currViewer.dispose();
   }
 
+
   public static void main(String[] args) {
 	ViewerApp va = new ViewerApp(null, null, null, null, null);
 	va.setShowMenu(true);
@@ -609,4 +623,5 @@ public class ViewerApp {
 	va.update();
 	va.display();
   }
+  
 }
