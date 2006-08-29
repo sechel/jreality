@@ -57,9 +57,7 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Light;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.pick.PickSystem;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.soft.SoftPickSystem;
 import de.jreality.tools.RotateTool;
 import de.jreality.toolsystem.ToolSystemViewer;
 
