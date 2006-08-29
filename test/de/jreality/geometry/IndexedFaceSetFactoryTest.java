@@ -49,6 +49,8 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import junit.framework.TestCase;
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.data.Attribute;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class IndexedFaceSetFactoryTest extends TestCase {
@@ -113,37 +115,74 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 	}
 	
 	
-	
-	
-	public void test() {
+	public void testFaceColors()	{
+		double[][] jitterbugEdgeVerts = new double[][] {{0,0,0,1},{1,0,0,1},{1,1,0,1},{0,1,0,1}};
+		int[][] jitterbugSegmentIndices1 = {{0,1},{2,3}}; //,{{{0,1,2,3,0,1},{4,5,6,7,4,5},{8,9,10,11,8,9}};
+		int[][] jitterbugFaceIndices = {{0,1,2,3}};
+		double[][] borromeanRectColors = {{1.0, 1.0, 200/255.0, 1}};
 
-		factory.setVertexCount( 8 );
-		factory.setFaceCount( 6 );	
-		factory.setVertexCoordinates( vertices );
-		factory.setFaceIndices( indices );
-		factory.setGenerateFaceNormals( true );
-		factory.setGenerateVertexNormals( true );
-		factory.setGenerateEdgesFromFaces( true );
-		factory.update();
-		ViewerApp.display(factory.getIndexedFaceSet());
-		factory.setFaceColors( new Color[] {Color.RED, Color.YELLOW, Color.RED, Color.YELLOW, Color.RED, Color.YELLOW })  ;
-		factory.update();
-		ViewerApp.display(factory.getIndexedFaceSet());
-		
-		actionHandler.clear();
-		
-		factory.setFaceIndices( indices );
-		
+		factory = new IndexedFaceSetFactory();
+		factory.setVertexCount(jitterbugEdgeVerts.length);
+		factory.setVertexCoordinates(jitterbugEdgeVerts);	
+		factory.setFaceCount(1);
+		factory.setFaceIndices(jitterbugFaceIndices);	
+		factory.setFaceColors(new double[][]{{0,1,0}});
+		factory.setGenerateFaceNormals(true);
+		factory.setLineCount(jitterbugSegmentIndices1.length);
+		factory.setEdgeIndices(jitterbugSegmentIndices1);
 		factory.update();
 		
-		actionHandler.clear();
+		IndexedFaceSet ifs = factory.getIndexedFaceSet();
+			
+		assertEquals( ifs.getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null)[0][0], 0, 0);
+		assertEquals( ifs.getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null)[0][1], 1, 0);
+		assertEquals( ifs.getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null)[0][2], 0, 0);
+		//System.err.println("Alpha channel is "+borromeanRectFactory.getIndexedFaceSet().getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null)[0][3]);
 		
-		factory.setVertexCoordinates( vertices );
-		factory.setGenerateVertexNormals( false);
+		// now we try to change the alpha channel of the face color
+		// just to be safe, we don't use the old array but create a new one.
+		factory.setFaceColors(new double[][]{{1,0,0}});
 		
 		factory.update();
 		
+		assertEquals( ifs.getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null)[0][0], 1, 0);
+		assertEquals( ifs.getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null)[0][1], 0, 0);
+		assertEquals( ifs.getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null)[0][2], 0, 0);
+		
+		//System.err.println("Alpha channel is "+borromeanRectFactory.getIndexedFaceSet().getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null)[0][3]);
+		
+		//ViewerApp.display(factory.getIndexedFaceSet());
 	}
+	
+//	public void test() {
+//
+//		factory.setVertexCount( 8 );
+//		factory.setFaceCount( 6 );	
+//		factory.setVertexCoordinates( vertices );
+//		factory.setFaceIndices( indices );
+//		factory.setGenerateFaceNormals( true );
+//		factory.setGenerateVertexNormals( true );
+//		factory.setGenerateEdgesFromFaces( true );
+//		factory.update();
+//		ViewerApp.display(factory.getIndexedFaceSet());
+//		factory.setFaceColors( new Color[] {Color.RED, Color.YELLOW, Color.RED, Color.YELLOW, Color.RED, Color.YELLOW })  ;
+//		factory.update();
+//		ViewerApp.display(factory.getIndexedFaceSet());
+//		
+//		actionHandler.clear();
+//		
+//		factory.setFaceIndices( indices );
+//		
+//		factory.update();
+//		
+//		actionHandler.clear();
+//		
+//		factory.setVertexCoordinates( vertices );
+//		factory.setGenerateVertexNormals( false);
+//		
+//		factory.update();
+//		
+//	}
 	
 	static class ActionHandler extends Handler {
 

@@ -395,17 +395,17 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
     }
     
     super.updateImpl();
-		
+	
 		if( ifs.getNumFaces() == nof() ) {
 
 			for( Iterator iter = faceDLS.storedAttributes().iterator(); iter.hasNext(); ) {
 				Attribute attr = (Attribute)iter.next();
-				
+				log( "have", attr, "face" );
 				faceAttributeNode( attr ).update();
 				
 				if(  nodeWasUpdated(faceAttributeNode( attr ))  ) {
 					log( "set", attr, "face" );
-					ifs.setVertexAttributes( attr, vertexDLS.getWritableList(attr));			
+					ifs.setFaceAttributes( attr, faceDLS.getWritableList(attr));			
 				}				
 			}
 		} else {

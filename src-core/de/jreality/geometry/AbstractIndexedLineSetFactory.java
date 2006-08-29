@@ -327,7 +327,7 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 				
 				if(  nodeWasUpdated(edgeAttributeNode( attr ))  ) {
 					log( "set", attr, "edge" );
-					ils.setVertexAttributes( attr, vertexDLS.getWritableList(attr));			
+					ils.setEdgeAttributes( attr, edgeDLS.getWritableList(attr));			
 				}				
 			}
 		} else {
