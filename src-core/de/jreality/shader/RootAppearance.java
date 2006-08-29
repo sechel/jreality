@@ -66,5 +66,5 @@ public interface RootAppearance extends AttributeEntity {
   void setFogColor(Color fogColor);
   
   Double getFogDensity();
-  void setFogDensitiy(Double density);
+  void setFogDensity(Double density);
 }
