@@ -1,8 +1,11 @@
 package de.jreality.toolsystem;
 
+import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.LinkedList;
-import java.util.Timer;
-import java.util.TimerTask;
+
+import javax.swing.Timer;
 
 import de.jreality.toolsystem.raw.PollingDevice;
 
@@ -16,10 +19,9 @@ import de.jreality.toolsystem.raw.PollingDevice;
  * @author Steffen Weissmann
  *
  */
-class Poller {
+class Poller implements ActionListener {
 
 	private final Timer timer;
-	private final TimerTask task;
 	
 	private final LinkedList<PollingDevice> pollingDevices=new LinkedList<PollingDevice>();
 	
@@ -32,14 +34,9 @@ class Poller {
 	}
 	
 	private Poller() {
-		task = new TimerTask() {
-			@Override
-			public void run() {
-				pollDevices();
-			}
-		};
-		timer = new Timer("jReality device poller");
-		timer.scheduleAtFixedRate(task, period, period);
+		timer=new Timer((int) period, this);
+		timer.setCoalesce(true);
+		timer.start();
 	}
 
 	private void pollDevices() {
@@ -49,20 +46,22 @@ class Poller {
 	}
 	
 	void addPollingDevice(final PollingDevice pd) {
-		timer.schedule(new TimerTask() {
-			@Override
+		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				pollingDevices.add(pd);
 			}
-		}, 0);
+		});
 	}
 	void removePollingDevice(final PollingDevice pd) {
-		timer.schedule(new TimerTask() {
-			@Override
+		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				pollingDevices.remove(pd);
 			}
-		}, 0);
+		});
+	}
+	
+	public void actionPerformed(ActionEvent e) {
+		pollDevices();
 	}
 	
 }

@@ -63,7 +63,7 @@ public class PointerDisplayTool extends AbstractTool {
   public PointerDisplayTool(double radius) {
     addCurrentSlot(pointer);
     SceneGraphComponent stick=new SceneGraphComponent();
-    MatrixBuilder.euclidean().translate(0,0,-1.07).scale(radius, radius, 1).assignTo(stick);
+    MatrixBuilder.euclidean().translate(0,0,-1).scale(radius, radius, 1).assignTo(stick);
     IndexedFaceSet cube = Primitives.cube();
     GeometryUtility.calculateAndSetFaceNormals(cube);
 	stick.setGeometry(cube);
@@ -71,14 +71,14 @@ public class PointerDisplayTool extends AbstractTool {
     c.getAppearance().setAttribute("diffuseColor", Color.yellow);
     c.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
     c.getAppearance().setAttribute("showPoints", false);
-    c.getAppearance().setAttribute("showFaces", false);
-    c.getAppearance().setAttribute("showLines", true);
+    c.getAppearance().setAttribute("showFaces", true);
+    c.getAppearance().setAttribute("showLines", false);
     c.getAppearance().setAttribute(CommonAttributes.PICKABLE, false);
     c.setTransformation(new Transformation());
     c.addChild(stick);
   }
   public PointerDisplayTool() {
-    this(0.05);
+    this(0.01);
   }
   
   boolean isAssigned;
