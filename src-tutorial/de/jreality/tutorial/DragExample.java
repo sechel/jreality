@@ -1,5 +1,7 @@
 package de.jreality.tutorial;
 
+import java.awt.Color;
+
 import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
@@ -33,7 +35,11 @@ public class DragExample {
 		cmp.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW,true);
 		cmp.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW,true);
 		cmp.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS,0.05);
-		cmp.getAppearance().setAttribute(CommonAttributes.SMOOTH_SHADING,false);
+		// set differing diffuse colors for tubes and spheres
+		cmp.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+
+				CommonAttributes.DIFFUSE_COLOR,new Color(250, 250, 0));
+		cmp.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+
+				CommonAttributes.DIFFUSE_COLOR,new Color(250, 0, 0));
 		
 		/**tool:*/
 		DragEventTool t = new DragEventTool();

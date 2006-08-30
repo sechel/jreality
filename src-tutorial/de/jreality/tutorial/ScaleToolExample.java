@@ -1,5 +1,7 @@
 package de.jreality.tutorial;
 
+import java.awt.Color;
+
 import de.jreality.geometry.Primitives;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
@@ -15,7 +17,10 @@ public class ScaleToolExample {
 		cmp.addTool(tool);		
 		cmp.setGeometry(Primitives.icosahedron());
 		cmp.setAppearance(new Appearance());
-		cmp.getAppearance().setAttribute(CommonAttributes.SMOOTH_SHADING,false);
+		cmp.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+
+				CommonAttributes.DIFFUSE_COLOR,new Color(250, 250, 0));
+		cmp.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+
+				CommonAttributes.DIFFUSE_COLOR,new Color(250, 0, 0));
 	    ViewerApp.display(cmp);
 	}
 }
