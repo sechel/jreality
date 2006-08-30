@@ -58,6 +58,7 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.Navigator.SelectionEvent;
 import de.jreality.ui.viewerapp.actions.AddTool;
 import de.jreality.ui.viewerapp.actions.LoadFile;
+import de.jreality.ui.viewerapp.actions.LoadFileMerged;
 import de.jreality.ui.viewerapp.actions.Quit;
 import de.jreality.ui.viewerapp.actions.Remove;
 import de.jreality.ui.viewerapp.actions.Render;
@@ -77,7 +78,8 @@ import de.jreality.ui.viewerapp.actions.ToggleViewerFullScreen;
  */
 public class MenuFactory {
 
-  public static String LOAD_FILE = "Load File";
+  public static String LOAD_FILE = "Load files";
+  public static String LOAD_FILE_MERGED = "Load merged files";
   public static String QUIT = "Quit";
   public static String REMOVE = "Remove";
   public static String ADD_TOOL = "Add Tool";
@@ -142,6 +144,7 @@ public class MenuFactory {
     menuBar.add(compMenu);
     
     fileMenu.insert(new JMenuItem(new LoadFile(LOAD_FILE, sm, frame)), 0);
+    fileMenu.insert(new JMenuItem(new LoadFileMerged(LOAD_FILE_MERGED, sm, frame)), 1);
     compMenu.add(new JMenuItem(new Remove(REMOVE, sm)));
     compMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, frame)));
     
