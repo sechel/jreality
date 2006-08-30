@@ -59,7 +59,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
-import de.jreality.scene.data.Attribute;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 
@@ -94,7 +93,9 @@ public class AABBPickSystem implements PickSystem {
   public List<PickResult> computePick(double[] f, double[] t) {
     if (f.length == 4) Pn.dehomogenize(f, f);
     if (t.length == 4) Pn.dehomogenize(t, t);
-    if (t.length == 3 || t[3] == 0) return new ArrayList<PickResult>(computePickImpl(f, t, t, 10000));
+    // XXX: somehow calculate maxDist depending on the far clipping plane
+    double maxDist = 1E9;
+    if (t.length == 3 || t[3] == 0) return new ArrayList<PickResult>(computePickImpl(f, t, t, maxDist));
     double[] dir = new double[3];
     dir[0] = t[0]-f[0];
     dir[1] = t[1]-f[1];
