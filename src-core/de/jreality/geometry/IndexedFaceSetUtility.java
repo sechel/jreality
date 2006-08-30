@@ -54,6 +54,7 @@ import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
@@ -375,6 +376,18 @@ public class IndexedFaceSetUtility {
 		}
 		return N;
 	}
+	/**
+	 * Returns the total nubmer of lines in array of indexed line sets.
+	 * @param ifs array of indexed line sets
+	 * @return total number of lines in array of indexed line sets.
+	 */
+	public static int getTotalNumLines( IndexedLineSet [] ils ) {
+		int N =0;
+		for( int i=0; i<ils.length; i++ ) {
+			N += ils[i].getNumEdges();
+		}
+		return N;
+	}
 	
 	/**
 	 * Returns the total number of points in array of point sets.
@@ -513,17 +526,29 @@ public class IndexedFaceSetUtility {
 	 * @param attr a face attribute, e.g., @link de.jreality.scene.data.Attribute.NORMALS
 	 * @return array containing all data of face attribute of an array of indexed face set.
 	 */
-	public static double [][] mergeDoubleArrayArrayFaceAttribute( IndexedFaceSet [] ifs , Attribute attr) {
-		
-		double [][] result = new double[getTotalNumFaces(ifs)][];
-		
-		for( int i=0, n=0; i<ifs.length; n += ifs[i].getNumFaces(), i++ ) {
-			double[][] values = ifs[i].getFaceAttributes( attr ).toDoubleArrayArray(null);
-			System.arraycopy(values, 0, result, n, values.length );
+		public static double [][] mergeDoubleArrayArrayFaceAttribute( IndexedFaceSet [] ifs , Attribute attr) {
+			
+			double [][] result = new double[getTotalNumFaces(ifs)][];
+			
+			for( int i=0, n=0; i<ifs.length; n += ifs[i].getNumFaces(), i++ ) {
+				double[][] values = ifs[i].getFaceAttributes( attr ).toDoubleArrayArray(null);
+				System.arraycopy(values, 0, result, n, values.length );
+			}
+			
+			return result;  
 		}
-		
-		return result;  
-	}
+		// Anfang Bernd
+		public static double [][] mergeDoubleArrayArrayEdgeAttribute( IndexedLineSet [] ils , Attribute attr) {
+			
+			double [][] result = new double[getTotalNumLines(ils)][];
+			
+			for( int i=0, n=0; i<ils.length; n += ils[i].getNumEdges(), i++ ) {
+				double[][] values = ils[i].getEdgeAttributes( attr ).toDoubleArrayArray(null);
+				System.arraycopy(values, 0, result, n, values.length );
+			}
+			
+			return result;  
+		}// ende Bernd
 	
 	private static void mergeDoubleArrayArrayFaceAttributes(IndexedFaceSet[] ifs, IndexedFaceSet result, boolean firstTime ) {
 		Object [] faceAttr = ifs[0].getFaceAttributes().storedAttributes().toArray();
@@ -543,6 +568,25 @@ public class IndexedFaceSetUtility {
 			}
 		}
 	}
+	// anfang Bernd
+	private static void mergeDoubleArrayArrayEdgeAttributes(IndexedLineSet[] ils, IndexedLineSet result, boolean firstTime ) {
+		Object [] edgeAttr = ils[0].getEdgeAttributes().storedAttributes().toArray();
+		for( int i=0; i<edgeAttr.length; i++ ) {
+			Attribute attr = (Attribute)edgeAttr[i];
+			if( ils[0].getEdgeAttributes(attr) instanceof DoubleArrayArray  ) {
+				try {
+					DataList dataList = new DoubleArrayArray.Array(mergeDoubleArrayArrayEdgeAttribute(ils, attr ));
+					if( firstTime ) {
+						result.setEdgeCountAndAttributes( attr, dataList );
+						firstTime = false;
+					} else {
+						result.setEdgeAttributes( attr, dataList );
+					}
+			} catch (Exception e) {}
+				
+			}
+		}
+	}// ende Bernd
 	
 	/**
 	 * Merges the data for a vertex attribute for an array of point set into a single trivial type array.
@@ -620,7 +664,34 @@ public class IndexedFaceSetUtility {
 		
 		return result;
 	}
-
+	
+	// bernd
+	public static IndexedLineSet mergeIndexedLineSets( IndexedLineSet [] ils ) {
+		
+		IndexedLineSet result = new IndexedLineSet();
+		
+		final int [][] lineIndices = mergeIntArrayArrayEdgeAttribute( ils, Attribute.INDICES );
+		
+		for( int i=1, n=ils[0].getNumPoints(), k=ils[0].getNumEdges(); i<ils.length; n += ils[i].getNumPoints(), i++ ) {
+			final int nof = ils[i].getNumEdges();
+			for( int f=0; f<nof; f++, k++ ) {
+				final int [] line = lineIndices[k];
+				for( int j=0; j<line.length; j++) {
+					line[j] += n;
+				}
+			}	
+		}
+			
+		result.setEdgeCountAndAttributes(
+				Attribute.INDICES,
+				new IntArrayArray.Array( lineIndices )
+		);
+		
+		mergeDoubleArrayArrayVertexAttributes(ils, result, true );
+		mergeDoubleArrayArrayEdgeAttributes(ils, result, false );
+		
+		return result;
+	}// ende Bernd
 	
 	/**
      * Merge all IndexedFaceSet's which occur as the geometry field of 
@@ -735,7 +806,79 @@ public class IndexedFaceSetUtility {
     	sgc.setGeometry(ifs);
     	return sgc;
     }
+	// Anfang Bernd
+	private static SceneGraphComponent _mergeIndexedLineSets(SceneGraphComponent sgc)	{
+    	Vector ilslist = new Vector();
+    	Vector colorList = new Vector();
+    	Vector lengths = new Vector();
+    	Vector toRemove = new Vector(); // ?
+    	int n = sgc.getChildComponentCount();
+    	Appearance ap = sgc.getAppearance();
+    	EffectiveAppearance eap = EffectiveAppearance.create();
+    	if (ap != null) eap = eap.create(ap);
 
+    	IndexedLineSet ils;
+    	int vcount = 0;
+
+    	if (sgc.getGeometry()!= null && sgc.getGeometry() instanceof IndexedLineSet) {
+    		ils = (IndexedLineSet) sgc.getGeometry(); 
+    		ilslist.add(ils);
+    		lengths.add(new Integer(ils.getNumPoints()));
+    		vcount += ils.getNumPoints();
+        	Object dc =  eap.getAttribute("polygonShader.diffuseColor",Color.WHITE, Color.class);
+        	if (dc instanceof Color)		{
+        		colorList.add(dc);
+        	}  else 
+        		colorList.add(Color.WHITE); 
+    	}
+    	for (int i = 0; i<n; ++i)	{
+    		SceneGraphComponent child = sgc.getChildComponent(i);
+    		if (child.getTransformation() != null) continue;
+    		if (child.getChildComponentCount() != 0) continue;
+    		if (child.getGeometry() == null) continue;
+    		Geometry geom = child.getGeometry();
+     		if (geom instanceof IndexedLineSet)	{
+     			ilslist.add(geom);
+     			toRemove.add(child);
+     			ils = (IndexedFaceSet) geom;
+           		lengths.add(new Integer(ils.getNumPoints()));
+           		vcount += ils.getNumPoints();
+          		ap = child.getAppearance();
+          		if (ap != null)	{
+          			EffectiveAppearance ceap = eap.create(ap);
+          			Object dc =  ceap.getAttribute("polygonShader.diffuseColor",Color.WHITE, Color.class);
+          			if (dc instanceof Color)		{
+          				colorList.add(dc);
+          			}  else 
+          				colorList.add(Color.WHITE);	
+        		}
+    		}
+    	}
+    	Iterator iter = toRemove.iterator();
+    	while (iter.hasNext())	{ sgc.removeChild( (SceneGraphComponent) iter.next()); }
+    	
+    	n = ilslist.size();
+    	if (n <= 1) return sgc;
+    	IndexedLineSet[] list = new IndexedLineSet[ilslist.size()];
+    	list = (IndexedLineSet[]) ilslist.toArray(list);
+    	ils = mergeIndexedLineSets(list);
+    	// construct vertex color list
+    	double[] carray = new double[vcount*4];
+    	iter = colorList.iterator();
+    	int i = 0;
+    	int cptr = 0;
+    	while (iter.hasNext())	{
+    		Color c = (Color) iter.next();
+    		int howMany = ((Integer) lengths.get(i++)).intValue();
+    		float[] rgba = c.getRGBComponents(null);
+    		for (int j= 0; j<howMany; ++j)	{
+    			for (int k=0; k<4; ++k)		carray[cptr++] = rgba[k];
+    		}
+    	}
+    	ils.setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.inlined(4).createReadOnly(carray));
+    	sgc.setGeometry(ils);
+    	return sgc;
+    }// Ende Bernd
     /**
 	 * Merges the data for a face attribute for an array of indexed face set into a single trivial type array.
 	 * If a single entry of the array fails to have the prescribed attribute a NullPointerException is
@@ -754,7 +897,19 @@ public class IndexedFaceSetUtility {
 		}
 		
 		return result;  
-	} 
+	}
+	// anfang Bernd
+	public static int [][] mergeIntArrayArrayEdgeAttribute( IndexedLineSet [] ils , Attribute attr) {
+		
+		int [][] result = new int[getTotalNumLines(ils)][];
+		
+		for( int i=0, n=0; i<ils.length; n += ils[i].getNumEdges(), i++ ) {
+			int[][] values = ils[i].getEdgeAttributes( attr ).toIntArrayArray(null);
+			System.arraycopy(values, 0, result, n, values.length );
+		}
+		
+		return result;  
+	} // ende Bernd
 
 	/**
 	 * A special purpose code for the Buddy-Baer project which might be useful for other situations
