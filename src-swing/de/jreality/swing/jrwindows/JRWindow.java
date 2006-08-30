@@ -304,24 +304,25 @@ public class JRWindow {
     return cornerPos;
   }  
 
+  private double[] smallCenter;
+  
   public void setSmall(boolean setSmall){    
     if(setSmall&&!isSmall){
       for(int i=0;i<cornerPos.length;i++)
-        Rn.copy(cornerPosBak[i],cornerPos[i]);  
-      double[] center=getCenter(cornerPos);
-      Rn.add(cornerPos[0],center,Rn.times(null,(decoControlSize+borderRadius)/borderRadius,dirX));
+        Rn.copy(cornerPosBak[i],cornerPos[i]); 
+      if(smallCenter==null)
+        smallCenter=getCenter(cornerPos);
+      Rn.add(cornerPos[0],smallCenter,Rn.times(null,(decoControlSize+borderRadius)/borderRadius,dirX));
       Rn.add(cornerPos[0],cornerPos[0],Rn.times(null,(decoSize/2+borderRadius)/borderRadius,dirY));
-      Rn.add(cornerPos[1],center,Rn.times(null,(decoControlSize+borderRadius)/borderRadius,dirX));
+      Rn.add(cornerPos[1],smallCenter,Rn.times(null,(decoControlSize+borderRadius)/borderRadius,dirX));
       Rn.add(cornerPos[1],cornerPos[1],Rn.times(null,-((decoSize/2+borderRadius)/borderRadius),dirY));
-      Rn.add(cornerPos[2],center,Rn.times(null,-(decoControlSize+borderRadius)/borderRadius,dirX));
+      Rn.add(cornerPos[2],smallCenter,Rn.times(null,-(decoControlSize+borderRadius)/borderRadius,dirX));
       Rn.add(cornerPos[2],cornerPos[2],Rn.times(null,-(decoSize/2+borderRadius)/borderRadius,dirY));
-      Rn.add(cornerPos[3],center,Rn.times(null,-(decoControlSize+borderRadius)/borderRadius,dirX));
+      Rn.add(cornerPos[3],smallCenter,Rn.times(null,-(decoControlSize+borderRadius)/borderRadius,dirX));
       Rn.add(cornerPos[3],cornerPos[3],Rn.times(null,(decoSize/2+borderRadius)/borderRadius,dirY));
       isSmall=true;
     }else if((!setSmall)&&isSmall){
-//      double[] centerTrans=Rn.subtract(null,getCenter(cornerPos),getCenter(cornerPosBak));
-//      for(int i=0;i<cornerPos.length;i++){
-//        Rn.add(cornerPos[i],cornerPosBak[i],centerTrans);
+      smallCenter=getCenter(cornerPos);      
       for(int i=0;i<cornerPos.length;i++){
        Rn.copy(cornerPos[i],cornerPosBak[i]);
       }

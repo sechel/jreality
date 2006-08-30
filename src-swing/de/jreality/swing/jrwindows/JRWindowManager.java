@@ -11,7 +11,6 @@ import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.tools.DragEventTool;
 import de.jreality.tools.DraggingTool;
