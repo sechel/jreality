@@ -38,7 +38,7 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions;
+package de.jreality.ui.viewerapp.actions.viewer;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -50,6 +50,7 @@ import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
 import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.ui.viewerapp.actions.AbstractAction;
 
 
 public class ToggleViewerFullScreen extends AbstractAction {

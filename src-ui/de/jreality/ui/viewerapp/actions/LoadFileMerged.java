@@ -59,7 +59,7 @@ public class LoadFileMerged extends AbstractAction {
 
   public LoadFileMerged(String name, SelectionManager sm, Component frame) {
     super(name, sm, frame);
-    putValue(SHORT_DESCRIPTION, "Load a file and merge IndexedFaceSets");
+    putValue(SHORT_DESCRIPTION, "Load one or more files and merge IndexedFaceSets");
   }
 
   
@@ -70,6 +70,7 @@ public class LoadFileMerged extends AbstractAction {
       try {
         SceneGraphComponent sgc = Readers.read(files[i]);
         sgc = IndexedFaceSetUtility.mergeIndexedFaceSets(sgc);
+        //TODO: merge LineSets
         sgc.setName(files[i].getName());
         System.out.println("READ finished.");
         selection.getLastComponent().addChild(sgc);

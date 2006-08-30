@@ -38,31 +38,43 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions;
+package de.jreality.ui.viewerapp.actions.camera;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 
-import de.jreality.scene.Viewer;
+import javax.swing.KeyStroke;
+
+import de.jreality.scene.Camera;
+import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.ui.viewerapp.actions.AbstractAction;
 
 
-public class Render extends AbstractAction {
+public class DecreaseFieldOfView extends AbstractAction {
 
-  private Viewer viewer;
+  private Camera camera;
+  private double step = 1.0;
   
-  
-  public Render(String name, Viewer viewer) {
+  //TODO: only use viewerSwitch (->global) instead of viewerApp
+  public DecreaseFieldOfView(String name, ViewerApp v) {
     super(name);
-    putValue(SHORT_DESCRIPTION, "Render");
+    camera = (Camera) v.getViewerSwitch().getCameraPath().getLastElement();
     
-    if (viewer == null) 
-      throw new IllegalArgumentException("Viewer is null!");
-    
-    this.viewer = viewer;
+    putValue(SHORT_DESCRIPTION, "Decrease the field of view of the camera");
+    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F1, InputEvent.SHIFT_MASK));
   }
   
-    
+  
+  @Override
   public void actionPerformed(ActionEvent e) {
-    viewer.render();
+    camera.setFieldOfView(camera.getFieldOfView() - step);
+    //render()
+  }
+
+
+  public void setStep(double step) {
+    this.step = step;
   }
 
 }

@@ -61,10 +61,10 @@ import de.jreality.ui.viewerapp.actions.LoadFile;
 import de.jreality.ui.viewerapp.actions.LoadFileMerged;
 import de.jreality.ui.viewerapp.actions.Quit;
 import de.jreality.ui.viewerapp.actions.Remove;
-import de.jreality.ui.viewerapp.actions.Render;
 import de.jreality.ui.viewerapp.actions.ToggleAppearance;
-import de.jreality.ui.viewerapp.actions.ToggleFullScreen;
-import de.jreality.ui.viewerapp.actions.ToggleViewerFullScreen;
+import de.jreality.ui.viewerapp.actions.viewer.Render;
+import de.jreality.ui.viewerapp.actions.viewer.ToggleFullScreen;
+import de.jreality.ui.viewerapp.actions.viewer.ToggleViewerFullScreen;
 
 
 /**
@@ -89,6 +89,8 @@ public class MenuFactory {
   public static String TOGGLE_FULL_SCREEN = "Toggle full screen";
   public static String TOGGLE_FULL_VIEWER = "Toggle viewer full screen";
   public static String RENDER = "Force Rendering";
+  public static String DECREASE_FIELD_OF_VIEW = "Decrease field of view";
+  public static String DECREASE_FOCUS = "Decrease focus";
   
   private JFrame frame = null;
   private ViewerApp viewerApp = null;
@@ -154,6 +156,15 @@ public class MenuFactory {
     appMenu.add(new JMenuItem(new ToggleAppearance(TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm)));
     appMenu.add(new JMenuItem(new ToggleAppearance(TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm)));
     appMenu.add(new JMenuItem(new ToggleAppearance(TOGGLE_FACE_DRAWING, CommonAttributes.FACE_DRAW, sm)));
+    
+//    //create camera actions which require a viewerApp
+//    if (viewerApp != null) {
+//      final JMenu cameraMenu = new JMenu("Camera");
+//      cameraMenu.setMnemonic(KeyEvent.VK_M);
+//      menuBar.add(cameraMenu);
+//      cameraMenu.add(new JMenuItem(new DecreaseFieldOfView(DECREASE_FIELD_OF_VIEW, viewerApp)));
+//      cameraMenu.add(new JMenuItem(new DecreaseFocus(DECREASE_FOCUS, viewerApp)));
+//    }
     
     final JMenu viewerMenu = new JMenu("Viewer");
     viewerMenu.setMnemonic(KeyEvent.VK_V);
