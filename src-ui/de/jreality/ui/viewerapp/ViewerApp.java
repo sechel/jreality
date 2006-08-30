@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import javax.swing.JFrame;
+import javax.swing.JMenuBar;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
@@ -206,8 +207,13 @@ public class ViewerApp {
     //set content of frame
     frame.getContentPane().add(content);
     
-    //show menu
-    if (showMenu) MenuFactory.addMenuBar(this);
+    //setup menu
+    MenuFactory.addMenuBar(this);  //now frame has a menu bar
+    if (!showMenu) {  //hide all menus, then keystrokes for actions are still working
+    	JMenuBar menuBar = frame.getJMenuBar();
+    	for (int i = 0; i < menuBar.getComponentCount(); i++)
+			menuBar.getMenu(i).setVisible(false);
+    }
     
     frame.validate();
     frame.setVisible(true);

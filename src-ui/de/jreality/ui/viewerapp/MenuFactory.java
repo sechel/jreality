@@ -215,7 +215,7 @@ public class MenuFactory {
     }    
     
     //enable or disable menus depending on navigator selection
-    if (viewerApp != null) {
+    if (viewerApp != null && viewerApp.isAttachNavigator()) {
       Navigator navigator = (Navigator) viewerApp.getNavigator();
       if (navigator != null) {
         navigator.getTreeSelectionModel().addTreeSelectionListener(
