@@ -62,6 +62,10 @@ import de.jreality.ui.viewerapp.actions.LoadFileMerged;
 import de.jreality.ui.viewerapp.actions.Quit;
 import de.jreality.ui.viewerapp.actions.Remove;
 import de.jreality.ui.viewerapp.actions.ToggleAppearance;
+import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
+import de.jreality.ui.viewerapp.actions.camera.ShiftFieldOfView;
+import de.jreality.ui.viewerapp.actions.camera.ShiftFocus;
+import de.jreality.ui.viewerapp.actions.camera.TogglePerspective;
 import de.jreality.ui.viewerapp.actions.viewer.Render;
 import de.jreality.ui.viewerapp.actions.viewer.ToggleFullScreen;
 import de.jreality.ui.viewerapp.actions.viewer.ToggleViewerFullScreen;
@@ -89,8 +93,13 @@ public class MenuFactory {
   public static String TOGGLE_FULL_SCREEN = "Toggle full screen";
   public static String TOGGLE_FULL_VIEWER = "Toggle viewer full screen";
   public static String RENDER = "Force Rendering";
-  public static String DECREASE_FIELD_OF_VIEW = "Decrease field of view";
+  public static String DECREASE_FIELD_OF_VIEW = "Decrease fieldOfView";
+  public static String INCREASE_FIELD_OF_VIEW = "Increase fieldOfView";
   public static String DECREASE_FOCUS = "Decrease focus";
+  public static String INCREASE_FOCUS = "Increase focus";
+  public static String DECREASE_EYE_SEPARATION = "Decrease eyeSeparation";
+  public static String INCREASE_EYE_SEPARATION = "Increase eyeSeparation";
+  public static String TOGGLE_PERSPECTIVE = "Toggle perspective";
   
   private JFrame frame = null;
   private ViewerApp viewerApp = null;
@@ -157,15 +166,6 @@ public class MenuFactory {
     appMenu.add(new JMenuItem(new ToggleAppearance(TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm)));
     appMenu.add(new JMenuItem(new ToggleAppearance(TOGGLE_FACE_DRAWING, CommonAttributes.FACE_DRAW, sm)));
     
-//    //create camera actions which require a viewerApp
-//    if (viewerApp != null) {
-//      final JMenu cameraMenu = new JMenu("Camera");
-//      cameraMenu.setMnemonic(KeyEvent.VK_M);
-//      menuBar.add(cameraMenu);
-//      cameraMenu.add(new JMenuItem(new DecreaseFieldOfView(DECREASE_FIELD_OF_VIEW, viewerApp)));
-//      cameraMenu.add(new JMenuItem(new DecreaseFocus(DECREASE_FOCUS, viewerApp)));
-//    }
-    
     final JMenu viewerMenu = new JMenu("Viewer");
     viewerMenu.setMnemonic(KeyEvent.VK_V);
     menuBar.add(viewerMenu);
@@ -173,7 +173,7 @@ public class MenuFactory {
       viewerMenu.add(new JMenuItem(ToggleViewerFullScreen.sharedInstance(TOGGLE_FULL_VIEWER, viewerApp)));
     viewerMenu.add(new JMenuItem(ToggleFullScreen.sharedInstance(TOGGLE_FULL_SCREEN, frame)));
     
-    //create actions which require a ViewerSwitch
+    //create actions which require a Viewer
     if (viewerSwitch != null) {
       viewerMenu.addSeparator();
       
@@ -200,6 +200,18 @@ public class MenuFactory {
       JMenuItem mi = new JMenuItem(new Render(RENDER, viewerSwitch));
       mi.setAccelerator(KeyStroke.getKeyStroke("R"));
       viewerMenu.add(mi);
+      
+      //camera actions
+      final JMenu cameraMenu = new JMenu("Camera");
+      cameraMenu.setMnemonic(KeyEvent.VK_M);
+      menuBar.add(cameraMenu, 3);
+      cameraMenu.add(new JMenuItem(new ShiftFieldOfView(DECREASE_FIELD_OF_VIEW, viewerSwitch, true)));
+      cameraMenu.add(new JMenuItem(new ShiftFieldOfView(INCREASE_FIELD_OF_VIEW, viewerSwitch, false)));
+      cameraMenu.add(new JMenuItem(new ShiftFocus(DECREASE_FOCUS, viewerSwitch, true)));
+      cameraMenu.add(new JMenuItem(new ShiftFocus(INCREASE_FOCUS, viewerSwitch, false)));
+      cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(DECREASE_EYE_SEPARATION, viewerSwitch, true)));
+      cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(INCREASE_EYE_SEPARATION, viewerSwitch, false)));
+      cameraMenu.add(new JMenuItem(new TogglePerspective(TOGGLE_PERSPECTIVE, viewerSwitch)));
     }    
     
     //enable or disable menus depending on navigator selection

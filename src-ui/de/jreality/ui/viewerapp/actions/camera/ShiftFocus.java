@@ -47,34 +47,43 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import de.jreality.scene.Camera;
-import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
 
 
-public class DecreaseFieldOfView extends AbstractAction {
+public class ShiftFocus extends AbstractAction {
+	
+	private Viewer viewer;
+	private Camera camera;
+	private double step = 0.5;
+	
 
-  private Camera camera;
-  private double step = 1.0;
-  
-  //TODO: only use viewerSwitch (->global) instead of viewerApp
-  public DecreaseFieldOfView(String name, ViewerApp v) {
-    super(name);
-    camera = (Camera) v.getViewerSwitch().getCameraPath().getLastElement();
-    
-    putValue(SHORT_DESCRIPTION, "Decrease the field of view of the camera");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F1, InputEvent.SHIFT_MASK));
-  }
-  
-  
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    camera.setFieldOfView(camera.getFieldOfView() - step);
-    //render()
-  }
-
-
-  public void setStep(double step) {
-    this.step = step;
-  }
-
+	public ShiftFocus(String name, Viewer v, boolean decrease) {
+		super(name);
+		viewer = v;
+		camera = (Camera) v.getCameraPath().getLastElement();
+		
+		if (decrease) {
+			step = -step;
+			putValue(SHORT_DESCRIPTION, "Decrease the focus of the camera");
+			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F3, InputEvent.SHIFT_MASK));
+		}
+		else {
+			putValue(SHORT_DESCRIPTION, "Increase the focus of the camera");
+			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.SHIFT_MASK));
+		}
+	}
+	
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		camera.setFocus(camera.getFocus() + step);
+		viewer.render();
+	}
+	
+	
+	public void setStep(double step) {
+		this.step = step;
+	}
+	
 }
