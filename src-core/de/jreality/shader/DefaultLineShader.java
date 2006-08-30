@@ -42,7 +42,7 @@ package de.jreality.shader;
 
 import java.awt.Color;
 
-import de.jreality.geometry.TubeUtility;
+import de.jreality.geometry.FrameFieldType;
 
 /**
  * This is the default line shader used in jReality. 
@@ -83,7 +83,7 @@ import de.jreality.geometry.TubeUtility;
   
 	public final static boolean TUBE_DRAW_DEFAULT = true;
     public final static double TUBE_RADIUS_DEFAULT = 0.025;
-    public final static int TUBE_STYLE_DEFAULT = TubeUtility.PARALLEL;
+    public final static FrameFieldType TUBE_STYLE_DEFAULT = FrameFieldType.PARALLEL;
 	public static final boolean SMOOTH_LINE_SHADING_DEFAULT = false;	// if true, then interpolate vertex colors
     public final static double LINE_WIDTH_DEFAULT = 1.0;
 	public final static boolean LINE_STIPPLE_DEFAULT = false;
@@ -95,8 +95,8 @@ import de.jreality.geometry.TubeUtility;
 	public abstract void setTubeDraw(Boolean b);
 	public abstract Double getTubeRadius();
 	public abstract void setTubeRadius(Double d);
-	public abstract Integer getTubeStyle();
-	public abstract void setTubeStyle(Integer i);
+	public abstract FrameFieldType getTubeStyle();
+	public abstract void setTubeStyle(FrameFieldType i);
 	public abstract Double getLineWidth();
 	public abstract void setLineWidth(Double d);
 	public abstract Boolean getLineStipple();
