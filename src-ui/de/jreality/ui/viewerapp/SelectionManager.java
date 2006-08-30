@@ -47,6 +47,7 @@ import javax.swing.tree.TreeSelectionModel;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.ui.treeview.SceneTreeModel;
 import de.jreality.util.SceneGraphUtility;
 
@@ -117,6 +118,11 @@ public class SelectionManager {
   }
 
 
+  /**
+   * converts the path of the current selection into the 
+   * corresponding treepath in the scene tree model
+   * (model of the viewerApp's navigator)
+   */
   private TreePath getTreePath(SceneTreeModel model) {
     Object[] path = selection.toList().toArray();
     Object[] newPath = new Object[path.length];
@@ -124,7 +130,13 @@ public class SelectionManager {
     for (int i = 1; i < newPath.length; i++) {
       final int index = SceneGraphUtility.getIndexOfChild(
           (SceneGraphComponent) path[i-1], (SceneGraphComponent) path[i]);
-      newPath[i] = model.getChild(newPath[i-1], index+1);
+      //get SceneTreeNodes which are no components
+      int offset = 0;
+      while(!(((SceneTreeNode)model.getChild(newPath[i-1], offset)).getNode() 
+          instanceof SceneGraphComponent))
+        offset++;
+      
+      newPath[i] = model.getChild(newPath[i-1], index+offset);
     }
     return new TreePath(newPath);
   }
