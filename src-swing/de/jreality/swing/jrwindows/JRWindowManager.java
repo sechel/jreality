@@ -29,11 +29,16 @@ import de.jreality.tools.PointDragListener;
 
 public class JRWindowManager implements ActionListener{
   
-  static double[] windowPos={0,1.5,-1.2};
+  private final double[] defaultDesktopWindowPos={0,0,-5};
+  private double defaultDesktopBorderRadius=0.01;
+  private double defaultDesktopDecoSize=0.08;
+  
+  private final double[] defaultPortalWindowPos={0,1.5,-1.2};
+  private double defaultPortalBorderRadius=0.05;
+  private double defaultPortalDecoSize=0.15;
   
   private SceneGraphComponent sgc;
   private ArrayList<JRWindow> windowList;
-  private ArrayList<JRWindow> foldAwayWindowList;
   private DragEventTool dragTool;
   
   public JRWindowManager(SceneGraphComponent avatar){
@@ -43,8 +48,7 @@ public class JRWindowManager implements ActionListener{
     sgc.setAppearance(app);
     avatar.addChild(sgc);
     windowList=new ArrayList<JRWindow>();
-    foldAwayWindowList=new ArrayList<JRWindow>();
-    MatrixBuilder.euclidean().translate(windowPos).assignTo(sgc);
+    setPosition(defaultDesktopWindowPos);
 
     sgc.addTool(new DraggingTool());
     dragTool=new DragEventTool("PrimaryAction");
@@ -54,13 +58,13 @@ public class JRWindowManager implements ActionListener{
       public void pointDragStart(PointDragEvent e) {
         windowNum=searchWindowNum(e.getPointSet());
         if(windowNum==-1) return;
-        if(windowList.get(windowNum).isFoldAway()) return;
+        if(windowList.get(windowNum).isSmall()) return;
         setWindowInFront(windowNum);
         points=windowList.get(windowNum).getCornerPos();
       }
       public void pointDragged(PointDragEvent e) { 
         if(windowNum==-1) return;
-        if(windowList.get(windowNum).isFoldAway()) return;
+        if(windowList.get(windowNum).isSmall()) return;
         double[] translation={e.getPosition()[0]-points[e.getIndex()][0],e.getPosition()[1]-points[e.getIndex()][1],0,0};    //stimmt nicht ganz..
         double[][] newPoints=new double[points.length][points[0].length];
         for(int i=0; i<points.length;i++){
@@ -82,7 +86,7 @@ public class JRWindowManager implements ActionListener{
       public void lineDragStart(LineDragEvent e) {
         windowNum=searchWindowNum(e.getIndexedLineSet());
         if(windowNum==-1) return;
-        if(windowList.get(windowNum).isFoldAway()) return;
+        if(windowList.get(windowNum).isSmall()) return;
         setWindowInFront(windowNum);
         points=windowList.get(windowNum).getCornerPos();        
         lineIndices=e.getLineIndices();
@@ -90,7 +94,8 @@ public class JRWindowManager implements ActionListener{
       }
       public void lineDragged(LineDragEvent e) {
         if(windowNum==-1) return;
-        if(windowList.get(windowNum).isFoldAway()) return;        
+        if(windowList.get(windowNum).isSmall()) return;
+//        if(windowList.get(windowNum).isFoldAway()) return;        
         double[][] newPoints=new double[points.length][points[0].length];
         for(int n=0;n<newPoints.length;n++)
           for(int c=0;c<newPoints[0].length;c++)
@@ -111,22 +116,15 @@ public class JRWindowManager implements ActionListener{
     }});    
     dragTool.addFaceDragListener(new FaceDragListener(){ 
       private int windowNum;
-      private double[][] points;    
-      private boolean wasFoldAway=false;
+      private double[][] points;   
       public void faceDragStart(FaceDragEvent e) { 
         windowNum=searchWindowNum(e.getIndexedFaceSet()); 
-        setWindowInFront(windowNum);
-        if(windowNum==-1) return;
-        if(windowList.get(windowNum).isFoldAway()) {
-          wasFoldAway=true; 
-          foldAway(windowNum,false);
-          return;
-        }else wasFoldAway=false;        
+        if(windowNum==-1) return;        
+        setWindowInFront(windowNum);      
         points=windowList.get(windowNum).getCornerPos();
       }
       public void faceDragged(FaceDragEvent e) {
         if(windowNum==-1) return;
-        if(wasFoldAway) return;
         double[] translation=e.getTranslation();
         double[][] newPoints=new double[points.length][points[0].length];
         Pn.dehomogenize(translation,translation);        
@@ -141,19 +139,7 @@ public class JRWindowManager implements ActionListener{
       }});
     
     sgc.addTool(dragTool);
-  }
-  public JRWindowManager(SceneGraphPath avatarPath){
-    this(avatarPath.getLastComponent());
-  }
-  
-  public JFrame createFrame(){ 
-    JRWindow window=new JRWindow(getWindowCount());
-    window.addActionListeners(this);    
-    sgc.addChild(window.getSgc());     
-    windowList.add(window);
-    setWindowInFront(getWindowCount()-1);
-    return window.getFrame();
-  }  
+  } 
   
   private int searchWindowNum(Geometry matchedGeo){
     int matchedWindowNum=0;
@@ -166,22 +152,13 @@ public class JRWindowManager implements ActionListener{
     return -1; 
   }
   private void setWindowInFront(int windowNum){
-    for(JRWindow win : windowList)
-      win.setInFront(false);
-    windowList.get(windowNum).setInFront(true);
-    foldAway(windowNum,false);
+    int i=0;
+    for(JRWindow win : windowList){
+      if(i==windowNum) win.setInFront(true);
+      else win.setInFront(false);   
+      i++;
+    }
   }
-  
-  public JFrame getFrame(int i){
-    return (JFrame)(windowList.get(i).getFrame());
-  }
-  public int getWindowCount(){
-    return windowList.size();
-  }
-  public void pack(){
-    for(JRWindow win : windowList)
-      win.getFrame().pack();
-  }  
   
   public void actionPerformed(ActionEvent e) {    
     if(e.getActionCommand().startsWith("X")){
@@ -193,41 +170,22 @@ public class JRWindowManager implements ActionListener{
     else if(e.getActionCommand().startsWith("O")){
       String command=e.getActionCommand();
       command=command.replaceFirst(String.valueOf(command.charAt(0)),"");
-      int windowNum=Integer.parseInt(command);     
-      foldAway(windowNum,false);
-      windowList.get(windowNum).setStartSize();
-      setWindowInFront(windowNum);
+      int windowNum=Integer.parseInt(command);    
+      if(windowList.get(windowNum).isSmall()){
+        windowList.get(windowNum).setSmall(false);
+        setWindowInFront(windowNum);
+      }
     } 
     else if(e.getActionCommand().startsWith("_")){
       String command=e.getActionCommand();
       command=command.replaceFirst(String.valueOf(command.charAt(0)),"");
-      int windowNum=Integer.parseInt(command);      
-      foldAway(windowNum,!windowList.get(windowNum).isFoldAway());
+      int windowNum=Integer.parseInt(command);    
+      if(!windowList.get(windowNum).isSmall())
+        windowList.get(windowNum).setSmall(true);
     } 
-  }
-  
-  private void foldAway(int windowNum, boolean foldAway){
-    if((foldAway&&windowList.get(windowNum).isFoldAway())||((!foldAway)&&(!windowList.get(windowNum).isFoldAway()))) return;
-    
-    if(foldAway){
-      foldAwayWindowList.add(windowList.get(windowNum));
-      windowList.get(windowNum).setInFront(false);
-    }else{
-      foldAwayWindowList.remove(windowList.get(windowNum));
-      windowList.get(windowNum).foldAway(-1,foldAwayWindowList.size(),false);
-      setWindowInFront(windowNum);
-    }    
-    int i=0;
-    for(JRWindow win : foldAwayWindowList){
-      win.foldAway(i,foldAwayWindowList.size(),true);
-      i++;
-    }    
   }  
-  
   private void kill(int windowNum,boolean kill){
-    JRWindow win2kill=windowList.get(windowNum);
-    if(win2kill.isFoldAway())
-      foldAway(windowNum,false);      
+    JRWindow win2kill=windowList.get(windowNum);     
     sgc.removeChild(win2kill.getSgc());    
     int windowCount=0;
     for(JRWindow win : windowList){
@@ -239,4 +197,47 @@ public class JRWindowManager implements ActionListener{
     windowList.remove(windowNum); 
     win2kill=null;
   }
+  
+  public JFrame createFrame(){ 
+    JRWindow window=new JRWindow(getWindowCount());
+    window.addActionListeners(this);    
+    sgc.addChild(window.getSgc());     
+    windowList.add(window);
+    setWindowInFront(getWindowCount()-1);
+    return window.getFrame();
+  }   
+  public JFrame getFrame(int i){
+    return (JFrame)(windowList.get(i).getFrame());
+  }
+  public int getWindowCount(){
+    return windowList.size();
+  }
+  public void pack(){
+    for(JRWindow win : windowList)
+      win.getFrame().pack();
+  }    
+  
+  public void setBorderRadius(double r){
+    defaultDesktopBorderRadius=r;
+    for(JRWindow win : windowList)
+      win.setBorderRadius(r);
+  }
+  public void setDecoSize(double s){
+    defaultDesktopDecoSize=s;
+    for(JRWindow win : windowList)
+      win.setDecoSize(s);
+  }  
+  public void setPosition(double[] pos){
+    MatrixBuilder.euclidean().translate(pos).assignTo(sgc);
+  }  
+  public void setPortalDefaultValues(){
+    setBorderRadius(defaultPortalBorderRadius);
+    setDecoSize(defaultPortalDecoSize);
+    setPosition(defaultPortalWindowPos);
+  }
+  public void setDesktopDefaultValues(){
+    setBorderRadius(defaultDesktopBorderRadius);
+    setDecoSize(defaultDesktopDecoSize);
+    setPosition(defaultDesktopWindowPos);
+  }  
 }
