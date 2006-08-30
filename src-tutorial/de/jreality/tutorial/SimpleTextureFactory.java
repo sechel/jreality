@@ -27,13 +27,13 @@ public class SimpleTextureFactory {
 	
 	public void update()	{
 		byte[] im = new byte[size*size* 4];
-		byte[][] colors = {{(byte)0x0,(byte)0x0,(byte)0x0,(byte)0x0},
+		byte[][] colors = {{(byte)0xff,(byte)0x0,(byte)0x0,(byte)0xff},
 				{(byte)200,(byte)200,(byte)200,(byte)0xff},
 				{(byte)255,(byte)255,(byte)255,(byte)255},
-				{(byte)0,(byte)0, (byte) 0, (byte) 255}};
+				{(byte)0xff,(byte)0, (byte) 0, (byte) 255}};
 
 		switch(type)	{
-		case(ANTI_DISK):
+		case ANTI_DISK:
 		    for (int i = 0; i<size; ++i)	{
 		        for (int j = 0; j< size; ++j)	{
 					int I = 4*(i*size+j);
@@ -46,7 +46,7 @@ public class SimpleTextureFactory {
 			    }
 			}
 			break;
-		case(DISK):
+		case DISK:
 		    for (int i = 0; i<size; ++i)	{
 		        for (int j = 0; j< size; ++j)	{
 					int I = 4*(i*size+j);
@@ -59,7 +59,7 @@ public class SimpleTextureFactory {
 			    }
 			}
 			break;
-		case(WEAVE):
+		case WEAVE:
 			int margin = size/16;
 			int bandwidth = 16;
 			int gapwidth =16;
@@ -94,7 +94,7 @@ public class SimpleTextureFactory {
 				}
 		    }
 			break;
-		case(GRAPH_PAPER):
+		case GRAPH_PAPER:
 			int bands = 4;
 			int[] widths = {4,2,2,2};
 
