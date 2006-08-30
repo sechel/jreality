@@ -27,10 +27,10 @@ public class SimpleTextureFactory {
 	
 	public void update()	{
 		byte[] im = new byte[size*size* 4];
-		byte[][] colors = {{(byte)0xff,(byte)0x0,(byte)0x0,(byte)0xff},
+		byte[][] colors = {{(byte)0x0,(byte)0x0,(byte)0x0,(byte)0x0},
 				{(byte)200,(byte)200,(byte)200,(byte)0xff},
 				{(byte)255,(byte)255,(byte)255,(byte)255},
-				{(byte)0xff,(byte)0, (byte) 0, (byte) 255}};
+				{(byte)0,(byte)0, (byte) 0, (byte) 255}};
 
 		switch(type)	{
 		case ANTI_DISK:
