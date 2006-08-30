@@ -44,22 +44,54 @@ import java.awt.Color;
 
 import de.jreality.geometry.TubeUtility;
 
-public interface DefaultLineShader extends LineShader {
+/**
+ * This is the default line shader used in jReality. 
+ * <p>
+ * There is an option to draw tubes around the edges, for improved visibility and 
+ * "3D readability".  The radius of the tubes can be specified using {@link #setTubeRadius(Double)}.
+ * These tubes (which are of course surfaces) will be shaded using
+ * with the current polygon shader. In this way you can control the surface qualities of
+ * the tubes.
+ * <p>
+ * If tubes are not requested, then the shader draws a more primitive version of the edges,
+ * perhaps using a Bresenham algorithm.  Here the parameters include the line width 
+ * (in pixel coordinates, default = 1), and some options for drawing dashed lines ({@link #setLineLineStipplePattern(Integer)}).
+ * The color of the lines is set via {@link #setDiffuseColor(Color)}.
+ * <p>
+ * Different backends implement different versions of this shader. For example, the
+ * software renderer (@link de.jreality.soft} always draws tubes; the specification of the tube radius is in world coordinates.
+ * On the other hand, the JOGL backend {@link de.jreality.jogl} can draw traditional Bresenham edges. In this case,
+ * lighting is disabled so no shading effects are present. If tubes are enabled, then lighting is enabled, --- and the 
+ * tube radius is in object coordinates.  
+ * <p>
+ * If the underlying geometry has vertex colors and/or edge colors attached to it, then the diffuse color is determined as
+ * follows: if {@link #isSmoothLineShading()} returns <code>true</code> then vertex colors are used and are interpolated;
+ * if not, then edge colors, if present are used, and are constant per edge; otherwise the value of {@link #getDiffuseColor()}
+ * is used.
+ * <p>
+ * Note: the above explanation of coloring is not extended to the tubes, if they are requested. 
+ * Here the vertex colors are ignored and the edge colors if present are used; otherwise as above.
+ * <p>
+ * Note: the different backends implement this shader somewhat differently.
+ * 
+ * @author Charles Gunn
+ * @see DefaultPolygonShader  for general remarks on these shader interfaces.
+ *
+ */public interface DefaultLineShader extends LineShader {
 
   Object CREATE_DEFAULT=new Object();
   
 	public final static boolean TUBE_DRAW_DEFAULT = true;
-  public final static double TUBE_RADIUS_DEFAULT = 0.025;
-  public final static int TUBE_STYLE_DEFAULT = TubeUtility.PARALLEL;
-  public final static boolean VERTEX_COLORS_ENABLED_DEFAULT = false;
-	public static final boolean INTERPOLATE_VERTEX_COLORS_DEFAULT = false;	// if true, then interpolate vertex colors
-  public final static double LINE_WIDTH_DEFAULT = 1.0;
+    public final static double TUBE_RADIUS_DEFAULT = 0.025;
+    public final static int TUBE_STYLE_DEFAULT = TubeUtility.PARALLEL;
+	public static final boolean SMOOTH_LINE_SHADING_DEFAULT = false;	// if true, then interpolate vertex colors
+    public final static double LINE_WIDTH_DEFAULT = 1.0;
 	public final static boolean LINE_STIPPLE_DEFAULT = false;
 	public final static int LINE_STIPPLE_PATTERN_DEFAULT = 0x7e7e;
 	public final static int LINE_FACTOR_DEFAULT = 	1;
 	public static final Color DIFFUSE_COLOR_DEFAULT = Color.BLACK;
 	
-	public abstract Boolean getTubeDraw();
+	public abstract Boolean isTubeDraw();
 	public abstract void setTubeDraw(Boolean b);
 	public abstract Double getTubeRadius();
 	public abstract void setTubeRadius(Double d);
@@ -73,10 +105,8 @@ public interface DefaultLineShader extends LineShader {
 	public abstract void setLineLineStipplePattern(Integer i);
 	public abstract Integer getLineFactor();
 	public abstract void setLineLineFactor(Integer i);
-	public abstract Boolean isVertexColorsEnabled();
-	public abstract void setVertexColorsEnabled(Boolean d);
-	public abstract Boolean getInterpolateVertexColors();
-	public abstract void setInterpolateVertexColors(Boolean b);
+	public abstract Boolean isSmoothLineShading();
+	public abstract void setSmoothLineShading(Boolean d);
 	public abstract Color getDiffuseColor();
 	public abstract void setDiffuseColor(Color c);
   

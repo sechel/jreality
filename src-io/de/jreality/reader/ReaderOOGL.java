@@ -65,9 +65,13 @@ import de.jreality.util.SceneGraphUtility;
 
 /**
  *
- * Reader for OOGL files (Geomview format).
- *
- * @author weissman
+ * A rudimentary reader for OOGL files (Geomview format). 
+ * <p>
+ * Needs to be converted to a real parser, e.g., by
+ * using the antlr parsing package.
+ * <p>
+ * Current limitations: handles only following types: "OFF", "MESH", "VECT",  "LIST", "inst", "tlist".
+ * @author Charles Gunn
  *
  */
 public class ReaderOOGL extends AbstractReader {

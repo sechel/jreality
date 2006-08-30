@@ -42,7 +42,12 @@ package de.jreality.shader;
 
 import java.awt.Color;
 
-public interface DefaultPointShader extends PointShader {
+/**
+ * The default point shader for jReality. 
+ * @author Charles Gunn
+ * @see DefaultPolygonShader  for general remarks on these shader interfaces.
+ *
+ */public interface DefaultPointShader extends PointShader {
 
   Object CREATE_DEFAULT=new Object();
 

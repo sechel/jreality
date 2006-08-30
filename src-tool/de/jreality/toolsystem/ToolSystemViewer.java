@@ -58,13 +58,15 @@ import de.jreality.util.RenderTrigger;
 
 /**
  * <p>
- * This class delegates a given viewer and cares about
- * the creation and initialization of a ToolSystem.
+ * This class serves as the delegate for a given viewer, to manage
+ * the creation and initialization of a {@link de.jreality.toolsystem.ToolSystem}.
+ * Without an instance of this class or a similar class, the tools present in the
+ * scene graph will not be properly initialized and activated.
  * </p>
  * 
  * <b>Usage:</b><br />
  * <ul>
- * <li>create a viewer instance, i. e. a de.jreality.soft.DefaultViewer</li>
+ * <li>create a viewer instance, i. e. a {@link de.jreality.soft.DefaultViewer}</li>
  * <li>create a ToolSystemViewer and give it your viewer instance</li>
  * <li>set scene root and camera path on the viewer (either on the
  *     ToolSystemViewer or on the given instance)</li>

@@ -130,8 +130,8 @@ import de.jreality.scene.Appearance;
     public final static int TUBE_STYLE_DEFAULT = TubeUtility.PARALLEL;
 	public final static String VERTEX_COLORS_ENABLED = 		"vertexColorsEnabled";	// get colors from vertices?
     public final static boolean VERTEX_COLORS_ENABLED_DEFAULT = false;
-	public static final String INTERPOLATE_VERTEX_COLORS = "interpolateVertexColors";	
-	public static final boolean INTERPOLATE_VERTEX_COLORS_DEFAULT = false;	// if true, then interpolate vertex colors
+	public static final String SMOOTH_LINE_SHADING = "smoothLineShading";	
+	public static final boolean SMOOTH_LINE_SHADING_DEFAULT = false;	// if true, then interpolate vertex colors
 	public final static String LINE_WIDTH = 		"lineWidth";			// pixel coordinates
     public final static double LINE_WIDTH_DEFAULT = 1.0;
 	public final static String NORMAL_SCALE = 		"normalScale";
@@ -220,7 +220,7 @@ import de.jreality.scene.Appearance;
 		//ap.setAttribute(LINE_SHADER+"."+DIFFUSE_COLOR,Color.BLACK);
 		ap.setAttribute(LINE_SHADER+"."+LIGHTING_ENABLED,false);
 		ap.setAttribute(LINE_SHADER+"."+POLYGON_SHADER+"."+DIFFUSE_COLOR,Color.BLUE);
-		ap.setAttribute(LINE_SHADER+"."+INTERPOLATE_VERTEX_COLORS, INTERPOLATE_VERTEX_COLORS_DEFAULT);
+		ap.setAttribute(LINE_SHADER+"."+SMOOTH_LINE_SHADING, SMOOTH_LINE_SHADING_DEFAULT);
 		// default polygon shader
 		ap.setAttribute(POLYGON_SHADER+"."+SMOOTH_SHADING, SMOOTH_SHADING_DEFAULT);
 		ap.setAttribute(POLYGON_SHADER+"."+AMBIENT_COLOR,AMBIENT_COLOR_DEFAULT);

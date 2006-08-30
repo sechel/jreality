@@ -79,7 +79,8 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	double	tubeRadius = 0.05,
 		 	lineWidth = 1.0,
 			depthFudgeFactor = 0.9999d;
-	boolean interpolateVertexColors = false, lighting;
+	boolean smoothLineShading = false, lighting;
+	boolean smoothShading = true;		// this applies to the tubes, not the edges
 	int	lineFactor = 1;
 	int 	lineStipplePattern = 0x1c47; 
 	 
@@ -104,7 +105,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		opaqueTubes = eap.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.OPAQUE_TUBES_AND_SPHERES), CommonAttributes.OPAQUE_TUBES_AND_SPHERES_DEFAULT);
 		tubeStyle = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TUBE_STYLE),CommonAttributes.TUBE_STYLE_DEFAULT);
 		depthFudgeFactor = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DEPTH_FUDGE_FACTOR), depthFudgeFactor);
-		interpolateVertexColors = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.INTERPOLATE_VERTEX_COLORS), CommonAttributes.INTERPOLATE_VERTEX_COLORS_DEFAULT);
+		smoothLineShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_LINE_SHADING), CommonAttributes.SMOOTH_LINE_SHADING_DEFAULT);
 		lighting = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHTING_ENABLED), false);
 		lineStipple = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LINE_STIPPLE), lineStipple);
 		lineWidth = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LINE_WIDTH), CommonAttributes.LINE_WIDTH_DEFAULT);
@@ -114,6 +115,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		double transp = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
 		setDiffuseColor( ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transp));
 		polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
+		//smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_LINE_SHADING_DEFAULT);
 		//JOGLConfiguration.theLog.log(Level.FINE,"Line shader is smooth: "+smoothShading);
 		//JOGLConfiguration.theLog.log(Level.FINE,"Line shader's polygon shader is smooth: "+(polygonShader.isSmoothShading() ? "true" : "false"));
 		//polygonShader.setDiffuseColor(diffuseColor);
@@ -248,7 +250,6 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	
 	int[] tubeDL = null;
 	boolean testQMS = true;
-	boolean smoothShading = true;		// force tubes to be smooth shaded ?
 	public int createTubesOnEdgesAsDL(IndexedLineSet ils, double rad,  double alpha, JOGLRenderer jr, int sig, boolean pickMode, boolean useDisplayLists)	{
 		GL gl = jr.getGL();
 		double[] p1 = new double[4],
@@ -352,12 +353,12 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			}
 			else 	{
 				if (!useDisplayLists || jr.isPickMode()) {
-					JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  false, jr.getRenderingState().diffuseColor[3]);
+					JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  smoothLineShading, jr.getRenderingState().diffuseColor[3]);
 				} else {
 					if (useDisplayLists && dList == -1)	{
 						dList = jr.getGL().glGenLists(1);
 						jr.getGL().glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
-						JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  false, jr.getRenderingState().diffuseColor[3]);
+						JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  smoothLineShading, jr.getRenderingState().diffuseColor[3]);
 						jr.getGL().glEndList();	
 					}
 					jr.getGL().glCallList(dList);

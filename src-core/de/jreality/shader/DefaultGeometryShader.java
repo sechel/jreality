@@ -42,7 +42,14 @@ package de.jreality.shader;
 
 import de.jreality.scene.data.AttributeCollection;
 
-public interface DefaultGeometryShader extends AttributeCollection {
+/**
+ * This interface represents the default geometry shader in jReality.
+ * It consists of three sub-shaders, for polygons, lines, and points,
+ * and three corresponding boolean values to control whether these three elements
+ * are to be drawn.
+ * @author Charles Gunn
+ *
+ */public interface DefaultGeometryShader extends AttributeCollection {
 
   static final Class DEFAULT_ENTITY = DefaultGeometryShader.class;
   
