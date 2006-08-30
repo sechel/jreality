@@ -70,15 +70,15 @@ public class ReaderVRML extends AbstractReader {
       LoggingSystem.getLogger(this).severe("VRML 1 parsing failed, call ANTLR first!");
       e.printStackTrace();
     } catch (NoSuchMethodException e) {
-      throw new Error();
+      throw new Error(e);
 //    } catch (IllegalArgumentException e) {
 //      throw new Error();
     } catch (InstantiationException e) {
-      throw new Error();
+      throw new Error(e);
     } catch (IllegalAccessException e) {
-      throw new Error();
+      throw new Error(e);
     } catch (InvocationTargetException e) {
-      throw new Error();
+      throw new Error(e);
     } catch (Exception e) {
       LoggingSystem.getLogger(this).severe("parsing "+input+" failed: "+e.getMessage());
     }
