@@ -45,29 +45,36 @@ import java.util.List;
 /**
  * <p>
  * Tools are attatched to a SceneGraphComponent and are intended to
- * to perform interactive changes to the Scene - usually driven by
+ * to perform interactive changes to the scene - usually driven by
  * user input. The corresponding methods are 
  * {@link #activate(ToolContext)},
  * {@link #perform(ToolContext)} and {@link #deactivate(ToolContext)}.
  * </p>
  * <p>
- * User input is passed to the Tool either as an AxisState, which represents
- * a double value (i.e. a Button) or a DoubleArray of length 16, which
- * represents a 4 by 4 matrix. These inputs are called virtual devices,
+ * User input is passed to the Tool either as an {@link AxisState}, which represents
+ * a double value (i.e. a mouse button position) or a DoubleArray of length 16, which
+ * represents a 4 by 4 matrix. This matrix typically represents a <i>euclidean</i>
+ * isometry that represents the original user input converted into a suitable coordinate
+ * system.  (Tool writers for non-euclidean settings need to be careful to convert
+ * these matrices if necessary.) 
+ * <p>
+ * These inputs are called <i>virtual devices</i>,
  * since they are usually hardware independent and "live in the scene".
  * These virtual devices are mapped to {@link de.jreality.scene.tool.InputSlot}s,
  * which should represent them under a meaningful name. Some examples (which
- * are available in the default setting):
+ * are available in the default configuration file <i>toolconfig.xml</i>):
  * <ul>
- * <li><code>PointerTransformation</code> A pointer device in scene coordinates.
- *     On a desktop this represents the mouse pointer at the near clipping plane,
- *     in a traditional immersive environment this would be the position and
- *     direction of the Wand. This is represented as a DoubleArray,
- *     the direction of the pointer is the -Z axis.</li>
- * <li><code>PrimaryActivation</code> An axis state for main interaction
- *     with the scene. On a desktop per default the left mouse button,
- *     in the Portal the left Wand button.</li>
- * <li><code>SystemTime</code> is an axis state which is permanently triggered.
+ * <li><code>"PointerTransformation"</code> A pointer device in scene coordinates.
+ *     On a desktop this represents the mouse pointer as a free vector whose base
+ *     point is on the near clipping plane, and whose direction points away from the camera;
+ *     in a traditional immersive environment this would be the actual 3D position and
+ *     direction of the wand. Both are represented by 4x4 matrices as indicated above. 
+ *     The direction of the pointer is the -Z axis.[steffen: is this last sentence correct, or only
+ *     for non-perspective cameras?]</li>
+ * <li><code>"PrimaryActivation"</code> An axis state used for default interaction
+ *     with the scene. On a desktop per default it is the left mouse button;
+ *     in the Portal the left wand button.</li>
+ * <li><code>"SystemTime"</code> is an axis state which is permanently triggered.
  *     The intValue() of its AxisState gives the time in milli-seconds since the
  *     last emission of the SystemTime device.</li>
  * <li>TODO... </li>
@@ -76,14 +83,15 @@ import java.util.List;
  * <p>
  * Tools may be always active or activated by some virtual device.
  * A Tool which is not always active ({@link getActivationSlot()} returns
- * not null) will be activated as soon as it's activation slot reaches
- * the state AxisState.PRESSED. If the activation slot does not
+ * not null) will be activated as soon as one of its activation slots reaches
+ * the state AxisState.PRESSED. <b>Warning</b>: If the activation slot does not
  * represent an AxisState, the tool will never become active. 
  * </p>
  * <p>
- * A single Tool instance can be attatched to different components, and there
- * are also multiple implicit instances of a tool when it is attatched to a
- * component that has several paths from the scene root. The current path is
+ * A single Tool instance can be attached to different scene graph components. A tool
+ * attached to a scene graph component that appears at multiple positions in the scene graph
+ * will also, implicitly, be instanced multiple times; each instance will have its own local state
+ * not shared with other instances. [steffen: is this right?] The current path is
  * always available via the ToolContext: {@link de.jreality.scene.tool.ToolContext.getRootToLocal()}
  * and {@link de.jreality.scene.tool.ToolContext.getRootToToolComponent()}
  * return the paths for the current {@link #activate(ToolContext)}/{@link #perform(ToolContext)}/
@@ -125,15 +133,15 @@ public interface Tool {
   List<InputSlot> getCurrentSlots();
 
   /**
-   * this method is called when the tool gets activated. Note that
-   * it will never be called for always active tools.
+   * This method is called when the tool gets activated. Note that
+   * it will never be called if the tool is always active.
    * 
    * @param tc The current tool context
    */
   void activate(ToolContext tc);
 
   /**
-   * this method is called when the tool is activate and any
+   * This method is called when the tool is activated and any
    * AxisState or TransformationMatrix of the current slots changes.
    * 
    * @param tc The current tool context
@@ -151,7 +159,7 @@ public interface Tool {
 
   /**
    * Gives a description of the meaning of the given InputSlot.
-   * This may depend i. e. on the current state of the Tool.
+   * This may depend on the current state of the Tool.
    * 
    * @param slot to describe
    * @return A description of the current meaning of the given

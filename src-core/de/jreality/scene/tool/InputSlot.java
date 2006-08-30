@@ -50,7 +50,7 @@ import java.util.Map;
  */
 public class InputSlot implements Serializable
 {
-    private static final Map name2device = new HashMap();
+    private static final Map<String, InputSlot> name2device = new HashMap<String,InputSlot>();
     private final String name;
     private InputSlot(String name)
     {
