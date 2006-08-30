@@ -58,8 +58,6 @@ import de.jreality.shader.EffectiveAppearance;
 
 /**
  * This class holds static methods that make the parsing/traversal etc of a scene graph more comfortable.
- * This class is out of order at the moment!
- * @version 1.0
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
  *
  */
@@ -68,17 +66,27 @@ public class SceneGraphUtility {
 	public static SceneGraphComponent createFullSceneGraphComponent()	{
 		return createFullSceneGraphComponent("unnamed");
 	}
-	public static SceneGraphComponent createFullSceneGraphComponent(String name)	{
+	
+	/**
+	 * Allocate and return an instance of {@link SceneGraphComponent} fitted out with an instance
+	 * of {@link Transformation} and {@link Appearance}.
+	 * @author Charles Gunn
+	 * @param name
+	 * @return
+	 */public static SceneGraphComponent createFullSceneGraphComponent(String name)	{
 		SceneGraphComponent c = new SceneGraphComponent();
 		c.setTransformation(new Transformation());
 		c.setAppearance(new Appearance());
 		c.setName(name);
 		return c;
 	}
-  /**
-   * Replace the first child with the given component
-  */
-    public static void replaceChild(SceneGraphComponent c, SceneGraphComponent ch)  {
+    /**
+    * Replace the first child with the given component.
+    * @author Charles Gunn
+      * @param c
+     * @param ch
+     */
+	 public static void replaceChild(SceneGraphComponent c, SceneGraphComponent ch)  {
       int n = c.getChildComponentCount();
       if (n == 0) { c.addChild(ch); return; } 
       SceneGraphComponent och = c.getChildComponent(0);
@@ -88,6 +96,7 @@ public class SceneGraphUtility {
   }
 	
   /**
+   * Remove all children (i.e., instances of {@link SceneGraphComponent} from this node.
    * @param component
    * 
    * TODO: this should be called removeChildComponents!
@@ -96,19 +105,49 @@ public class SceneGraphUtility {
 	  	while (c.getChildComponentCount() > 0) c.removeChild(c.getChildComponent(0));
   	}
 	
-  	public static void setSignature(SceneGraphComponent r, int signature)	{
+  	/**
+  	 * Set the signature of this sub-graph by setting the appearance attribute
+  	 * {@link CommonAttributes.SIGNATURE}.
+  	 * @param r
+  	 * @param signature
+  	 */public static void setSignature(SceneGraphComponent r, int signature)	{
  		final int sig = signature;
  		 if (r.getAppearance() == null) r.setAppearance(new Appearance());
  		 r.getAppearance().setAttribute(CommonAttributes.SIGNATURE,sig);
     	}
   
-  	public static List collectLights(SceneGraphComponent rootNode) {
-  	    return (List) new LightCollector(rootNode).visit();
+     
+ 	/**
+ 	 * Return the metric signature at the end of the path <i>sgp</i> by evaluating
+ 	 * effective appearance for the attribute {@link CommonAttributes#SIGNATURE}.
+ 	 * @param sgp
+ 	 * @return
+ 	 */
+  	 public static int getSignature(SceneGraphPath sgp) {
+ 		EffectiveAppearance eap = EffectiveAppearance.create(sgp);
+ 		int sig = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
+ 		return sig;
+ 	}
+ 	
+  	/**
+  	 * Return list of paths from <i>rootNode</i> to an instance of {@link Light}.
+  	 * @param rootNode
+  	 * @return
+  	 */
+  	 public static List<SceneGraphPath> collectLights(SceneGraphComponent rootNode) {
+  	    return (List<SceneGraphPath>) new LightCollector(rootNode).visit();
   	}
-  	public static List collectClippingPlanes(SceneGraphComponent rootNode) {
-  	    return (List) new ClippingPlaneCollector(rootNode).visit();
+  	
+   	/**
+   	 * Return list of paths from <i>rootNode</i> to an instance of {@link ClippingPlane},
+   	 * @param rootNode
+   	 * @return
+   	 */
+ 	 public static List<SceneGraphPath> collectClippingPlanes(SceneGraphComponent rootNode) {
+  	    return (List<SceneGraphPath>) new ClippingPlaneCollector(rootNode).visit();
   	}
-    public static List<SceneGraphPath> getPathsBetween(final SceneGraphComponent begin, final SceneGraphNode end) {
+    
+  	 public static List<SceneGraphPath> getPathsBetween(final SceneGraphComponent begin, final SceneGraphNode end) {
       final PathCollector.Matcher matcher = new PathCollector.Matcher() {
         public boolean matches(SceneGraphPath p) {
           return p.getLastElement() == end;
@@ -116,18 +155,25 @@ public class SceneGraphUtility {
       };
       return new PathCollector(matcher, begin).visit();
     }
-    public static List getPathsToNamedNodes(final SceneGraphComponent root, final String name) {
+  	 
+    /**
+     * Find and return all paths fomr <i>root</i> to node with name <i>name</i>.
+     * @param root
+     * @param name
+     * @return
+     */
+  	 public static List<SceneGraphPath> getPathsToNamedNodes(final SceneGraphComponent root, final String name) {
       final PathCollector.Matcher matcher = new PathCollector.Matcher() {
         public boolean matches(SceneGraphPath p) {
  //         System.out.println("compare="+p);
           return p.getLastElement().getName().equals(name);
         }
       };
-      return (List) new PathCollector(matcher, root).visit();
+      return (List<SceneGraphPath>) new PathCollector(matcher, root).visit();
     }
     
     /**
-     * method to remove a child of arbitrary type
+     * Remove a child of arbitrary type.
      * 
      * @param node the child to remove
      * @throws IllegalArgumentException if node is no child
@@ -201,10 +247,13 @@ public class SceneGraphUtility {
 
     
     /**
-     * Linear search for the child. Can be overridden
+     * Linear search for the index of <i>child<i> in childlist of <i>parent</i>. 
+     * Can be overridden
      * if there is a more efficient way of determining the index.
-     */
-    public static int getIndexOfChild(SceneGraphComponent parent, SceneGraphComponent child)
+    * @param parent
+    * @param child
+    * @return  index, or -1 if not found.
+    */public static int getIndexOfChild(SceneGraphComponent parent, SceneGraphComponent child)
     {
       final int l = parent.getChildComponentCount();
       for(int i=0; i<l; i++)
@@ -213,15 +262,15 @@ public class SceneGraphUtility {
     }
     
     
+    /**
+     * Return a copy of the scene graph rooted at <i>template</i>. 
+     * @param template
+     * @return
+     * @see CopyVisitor
+     */
     public static SceneGraphNode copy(SceneGraphNode template) {
       CopyVisitor cv = new CopyVisitor();
       template.accept(cv);
       return cv.getCopy();
     }
-    
-	public static int getSignature(SceneGraphPath sgp) {
-		EffectiveAppearance eap = EffectiveAppearance.create(sgp);
-		int sig = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-		return sig;
-	}
-}
+ }

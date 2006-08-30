@@ -55,7 +55,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 /**
- * Abstraction of an input source. Technically an instance covers an {@link java.io.InputStream}.
+ * Abstraction of an input source, whether given as a file on the local file system, 
+ * a URL, or as a Java resource.
+ * Technically an instance covers an {@link java.io.InputStream}.
  * 
  * @author Steffen Weissman
  * TODO: document this.
