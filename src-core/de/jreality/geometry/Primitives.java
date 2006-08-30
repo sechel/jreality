@@ -224,7 +224,7 @@ public class Primitives {
 			ifsf.setVertexCount(12);
 			ifsf.setFaceCount(20);
 			ifsf.setVertexCoordinates(icoVerts3);
-			ifsf.setVertexNormals(icoVerts3);
+			//ifsf.setVertexNormals(icoVerts3);
 			ifsf.setFaceIndices(icoIndices);
 			ifsf.setGenerateEdgesFromFaces(true);
 			ifsf.setGenerateFaceNormals(true);

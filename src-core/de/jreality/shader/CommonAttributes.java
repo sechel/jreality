@@ -42,6 +42,7 @@ package de.jreality.shader;
 
 import java.awt.Color;
 
+import de.jreality.geometry.FrameFieldType;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.scene.Appearance;
 
@@ -127,7 +128,7 @@ import de.jreality.scene.Appearance;
 	public final static String TUBE_RADIUS = 		"tubeRadius";		// object coordinates
     public final static double TUBE_RADIUS_DEFAULT = 0.025;
 	public final static String TUBE_STYLE = 		"tubeStyle";		// parallel or frenet?
-    public final static int TUBE_STYLE_DEFAULT = TubeUtility.PARALLEL;
+    public final static FrameFieldType TUBE_STYLE_DEFAULT = FrameFieldType.PARALLEL;
 	public final static String VERTEX_COLORS_ENABLED = 		"vertexColorsEnabled";	// get colors from vertices?
     public final static boolean VERTEX_COLORS_ENABLED_DEFAULT = false;
 	public static final String SMOOTH_LINE_SHADING = "smoothLineShading";	

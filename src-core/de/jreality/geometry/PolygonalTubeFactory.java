@@ -114,7 +114,7 @@ import de.jreality.scene.data.StorageModel;
 	 * @return
 	 */
 	private double[][] polygon2, vals;
-	protected  double[][] makeTube(double[][] curve, double radius, double[][] xsec, int type, boolean closed, int signature, int twists)	{
+	protected  double[][] makeTube(double[][] curve, double radius, double[][] xsec, FrameFieldType type, boolean closed, int signature, int twists)	{
 		int n = curve.length;
 		int vl = xsec[0].length;
 		// have to handle the situation here that the first and last points are the same but the closed flag isn't set.

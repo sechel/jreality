@@ -48,6 +48,8 @@ import java.util.logging.Level;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
+
+import de.jreality.geometry.FrameFieldType;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.PolygonalTubeFactory;
@@ -75,7 +77,7 @@ import de.jreality.shader.ShaderUtility;
  *
  */
 public class DefaultLineShader extends AbstractPrimitiveShader implements LineShader  {
-	int 	tubeStyle = TubeUtility.PARALLEL;
+	FrameFieldType 	tubeStyle = FrameFieldType.PARALLEL;
 	double	tubeRadius = 0.05,
 		 	lineWidth = 1.0,
 			depthFudgeFactor = 0.9999d;
@@ -103,7 +105,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		tubeDraw = eap.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.TUBES_DRAW), CommonAttributes.TUBES_DRAW_DEFAULT);
 		tubeRadius = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TUBE_RADIUS),CommonAttributes.TUBE_RADIUS_DEFAULT);
 		opaqueTubes = eap.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.OPAQUE_TUBES_AND_SPHERES), CommonAttributes.OPAQUE_TUBES_AND_SPHERES_DEFAULT);
-		tubeStyle = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TUBE_STYLE),CommonAttributes.TUBE_STYLE_DEFAULT);
+		tubeStyle = (FrameFieldType) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TUBE_STYLE),CommonAttributes.TUBE_STYLE_DEFAULT);
 		depthFudgeFactor = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DEPTH_FUDGE_FACTOR), depthFudgeFactor);
 		smoothLineShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_LINE_SHADING), CommonAttributes.SMOOTH_LINE_SHADING_DEFAULT);
 		lighting = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHTING_ENABLED), false);
