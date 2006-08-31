@@ -30,11 +30,12 @@ public class Landscape implements ActionListener {
   private static String[][] defaultLandscapes = {
     {"desert","textures/desertstormNew/desertstorm_", sideNames, ".JPG","textures/desertstormNew/desertstorm_dnSeamless.JPG","10"},
     {"plain sky","textures/null_plainsky/desertstorm_", sideNames, ".JPG","textures/grid.jpeg","4"},
-    {"mountain","textures/malrav11/malrav11sky_", sideNames, ".jpg", "textures/mxsnow0.jpg","20"},
+    {"mountain","textures/malrav11/malrav11sky_", sideNames, ".jpg", "textures/jms/jms_dn_seamless.JPG","20"},
     {"tropic","textures/tropseadusk/tropseadusk512_", sideNames, ".jpg","textures/tropseadusk/tropseadusk512_dnSeamless.jpg","10"},
     {"dusk","textures/dragonvale/dragonvale_", sideNames, ".jpg","textures/dragonvale/dragonvale_dnSeamless.jpg","10"},
-    {"snow","textures/hangingstone/hangingstone512_", sideNames, ".jpg","textures/hangingstone/hangingstone512_dnSeamless.jpg","10"},
-    {"night","textures/dragonmoon/dragonmoon_", sideNames, ".jpg","textures/dragonmoon/dragonmoon_dnSeamless.jpg","10"}
+    //{"snow","textures/hangingstone/hangingstone512_", sideNames, ".jpg","textures/hangingstone/hangingstone512_dnSeamless.jpg","10"},
+    {"night","textures/dragonmoon/dragonmoon_", sideNames, ".jpg","textures/dragonmoon/dragonmoon_dnSeamless.jpg","10"},
+    {"snow","textures/jms/jms_", sideNames, ".JPG","textures/jms/jms_dn_seamless.JPG","10"}
   };
   
   Box selectionComponent;
