@@ -43,8 +43,6 @@ package de.jreality.ui.viewerapp;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.beans.Beans;
 import java.io.IOException;
 import java.net.URL;
@@ -180,10 +178,10 @@ public class ViewerApp {
     
     //set general properties of UI
     try {
-      // XXX: looks ugly on windows and linux:
-      //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+      //XXX: changed back from System to CrossPlatform Look&Feel (SystemL&F looks ugly on windows & linux)
+      UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
     } catch (Exception e) {}
-    //System.setProperty("sun.awt.noerasebackground", "true");
+    //System.setProperty("sun.awt.noerasebackground", "true");  //XXX: unnecessary
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
     ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
     
@@ -210,7 +208,9 @@ public class ViewerApp {
     
     //setup menu
     MenuFactory.addMenuBar(this);  //now frame has a menu bar
-    if (!showMenu) {  //hide all menus, then keystrokes for actions are still working
+    if (!showMenu) {  
+    	//hide all menus, then keystrokes for actions are still working,
+    	//which is not the case when hiding menuBar
     	JMenuBar menuBar = frame.getJMenuBar();
     	for (int i = 0; i < menuBar.getComponentCount(); i++)
 			menuBar.getMenu(i).setVisible(false);
@@ -218,35 +218,6 @@ public class ViewerApp {
     
     frame.validate();
     frame.setVisible(true);
-    
-    //integrate full screen action if menu is not shown
-    if (!isShowMenu()) viewerSwitch.getViewingComponent().addKeyListener(new KeyAdapter() {
-    	boolean isFullscreen = false;
-      JFrame fsf = new JFrame();
-      {
-        fsf.setUndecorated(true);
-      }
-      public void keyPressed(KeyEvent e) {
-    		if (e.getKeyCode() == KeyEvent.VK_F11) {
-    			if (isFullscreen) {
-            fsf.dispose();
-    				fsf.getGraphicsConfiguration().getDevice().setFullScreenWindow(null);
-            frame.getContentPane().removeAll();
-            frame.getContentPane().add(getComponent());
-    				frame.validate();
-    				frame.setVisible(true);
-    				isFullscreen = false;
-    			} else {
-            fsf.getContentPane().removeAll();
-            fsf.getContentPane().add(viewerSwitch.getViewingComponent());
-    				fsf.getGraphicsConfiguration().getDevice().setFullScreenWindow(fsf);
-            fsf.validate();
-            fsf.requestFocusInWindow();
-    				isFullscreen = true;
-    			}
-    		}
-    	}
-    });
     
     return frame;
   }
