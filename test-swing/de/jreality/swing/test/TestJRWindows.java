@@ -62,9 +62,9 @@ public class TestJRWindows {
     wm.pack(); 
   
     ViewerApp va = new ViewerApp(root, cameraPath, emptyPickPath, avatarPath);
-    //va.setShowMenu(true);
-    //va.setAttachNavigator(true);
-    //va.setAttachBeanShell(true);
+//    va.setShowMenu(true);
+//    va.setAttachNavigator(true);
+//    va.setAttachBeanShell(true);
     va.update();
     va.display();
   }

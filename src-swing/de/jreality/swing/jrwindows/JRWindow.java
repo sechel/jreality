@@ -59,8 +59,8 @@ class JRWindow {
   private JButton minButton;
   private final Color activeColor=new Color(62,139,210);
   private final Color inactiveColor=new Color(138,182,225);
-  private final Color borderLineColor=new Color(21,60,95);
-  private final Color borderEdgeColor=new Color(148,192,235);
+  private final Color borderLineColor=activeColor;
+  private final Color borderEdgeColor=inactiveColor;
   
   protected JRWindow(int windowNumber){    
     super();  
