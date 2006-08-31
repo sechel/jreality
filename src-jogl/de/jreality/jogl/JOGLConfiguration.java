@@ -87,9 +87,9 @@ public class JOGLConfiguration {
 //	          return null;
 //	        }
 //	      });
+	    JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		try {
 		    System.setProperty("sun.awt.noerasebackground", "true");
-		    JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 			//theLog.setLevel(Level.INFO);
 			String foo = System.getProperty("jreality.jogl.debugGL");
 			if (foo != null) { if (foo.equals("false")) debugGL = false; else debugGL =true;}
