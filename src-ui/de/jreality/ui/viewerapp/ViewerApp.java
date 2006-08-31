@@ -180,7 +180,8 @@ public class ViewerApp {
     
     //set general properties of UI
     try {
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+      // XXX: looks ugly on windows and linux:
+      //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch (Exception e) {}
     //System.setProperty("sun.awt.noerasebackground", "true");
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
@@ -625,7 +626,7 @@ public class ViewerApp {
 	ViewerApp va = new ViewerApp(null, null, null, null, null);
 	va.setShowMenu(true);
 	va.setAttachNavigator(true);
-	//va.setAttachBeanShell(true);
+	va.setAttachBeanShell(true);
 	va.update();
 	va.display();
   }
