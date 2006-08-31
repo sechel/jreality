@@ -138,7 +138,4 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
 	public String getType() {
 		return "Surface";
 	}
-	public String getName() {
-		return shaderName;
-	}
 }

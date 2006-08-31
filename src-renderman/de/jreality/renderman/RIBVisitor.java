@@ -477,6 +477,8 @@ public class RIBVisitor extends SceneGraphVisitor {
         if(slShader != null) {
             ribHelper.displacement(slShader.getName(),slShader.getParameters());
         }
+        // check to see if RMAN_SURFACE attribute is non-null and is of class SLShader; if so,
+        // use it instead of the following call.
         RendermanShader polygonShader =(RendermanShader) ShaderLookup.getShaderAttr(this,eap, "", CommonAttributes.POLYGON_SHADER);        		
         ribHelper.shader(polygonShader);
 
