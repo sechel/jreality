@@ -325,8 +325,8 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		setCameraPath(p);
 		GLCapabilities caps = new GLCapabilities();
 		caps.setAlphaBits(8);
-//		caps.setStereo(JOGLConfiguration.portalUsage);
-//		caps.setDoubleBuffered(!JOGLConfiguration.portalUsage);
+		caps.setStereo(JOGLConfiguration.quadBufferedStereo);
+		caps.setDoubleBuffered(true);
 		if (JOGLConfiguration.multiSample)	{
 			GLCapabilitiesChooser chooser = new MultisampleChooser();
 			caps.setSampleBuffers(true);
@@ -334,10 +334,11 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 			caps.setStereo(JOGLConfiguration.portalUsage);
 			canvas = new GLCanvas(caps, chooser, firstOne,  GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice());
 		} else {
-			canvas = new GLCanvas(caps);			
+			canvas = new GLCanvas(caps);
 		}
         JOGLConfiguration.getLogger().log(Level.INFO, "Caps is "+caps.toString());
  		canvas.addGLEventListener(this);
+ 		if (JOGLConfiguration.quadBufferedStereo) setStereoType(HARDWARE_BUFFER_STEREO);
 //		canvas.requestFocus();
 		if (JOGLConfiguration.sharedContexts && firstOne == null) firstOne = canvas.getContext();
 	}

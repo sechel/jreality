@@ -69,9 +69,10 @@ public class JOGLConfiguration {
 	static boolean portalUsage = false;
 	public static String resourceDir = null, saveResourceDir = null;
 	public static String localScratchDisk = null;
+	public static boolean quadBufferedStereo = false;
 	 public static String COPY_CAT, PRE_RENDER;
 	 static {
-	  	COPY_CAT = "copyCat";	  
+	  	COPY_CAT = "copyCat";
 	  	PRE_RENDER= "preRender";	  
 	 }
 	/**
@@ -122,7 +123,12 @@ public class JOGLConfiguration {
 //				theLog.log(Level.INFO,"Using shared contexts: "+sharedContexts);
 //			}
 			foo = System.getProperty("jreality.jogl.resourceDir");
-			if (foo != null) saveResourceDir = resourceDir = foo; 			
+			if (foo != null) saveResourceDir = resourceDir = foo;
+			quadBufferedStereo = "true".equals(System.getProperty("jreality.jogl.quadBufferedStereo"));
+			if (quadBufferedStereo) {
+				// hack, otherwise one side of swing gui will not be drawn
+				System.setProperty("sun.java2d.noddraw", "true");
+			}
 		} catch(SecurityException se)	{
 			theLog.log(Level.WARNING,"Security exception in setting configuration options",se);
 		}
