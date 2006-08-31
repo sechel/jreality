@@ -183,6 +183,7 @@ import de.jreality.scene.Appearance;
 	public static final String RMAN_RETAIN_GEOMETRY = "rendermanRetainGeometry";
 	public static final String RMAN_REFLECTIONMAP_FILE = "rendermanReflectionmapFile";
 	public static final String RMAN_LIGHT_PREFIX = "rendermanLightPrefix";
+	public static final String RMAN_SL_SHADER = "rendermanSLShader";
     /* 
      * @param ap
      * 
