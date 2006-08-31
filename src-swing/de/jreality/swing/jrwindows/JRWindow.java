@@ -23,7 +23,7 @@ import de.jreality.swing.JFakeFrame;
  *
  */
 
-public class JRWindow {    
+class JRWindow {    
   private int windowNumber;  
 
   private IndexedFaceSet frameFace;
@@ -62,7 +62,7 @@ public class JRWindow {
   private final Color borderLineColor=new Color(21,60,95);
   private final Color borderEdgeColor=new Color(148,192,235);
   
-  public JRWindow(int windowNumber){    
+  protected JRWindow(int windowNumber){    
     super();  
     this.windowNumber=windowNumber; 
     setBorderRadius(borderRadius);   
@@ -200,7 +200,7 @@ public class JRWindow {
     borderSgc.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
   }   
     
-  public void addActionListeners(ActionListener actionListener){
+  protected void addActionListeners(ActionListener actionListener){
     killButton.addActionListener(actionListener);    
     maxButton.addActionListener(actionListener);    
     minButton.addActionListener(actionListener);
@@ -212,7 +212,7 @@ public class JRWindow {
     minButton.setActionCommand("_"+windowNumber);
   }
   
-  public void setCornerPos(double[][] newCornerPos){ 
+  protected void setCornerPos(double[][] newCornerPos){ 
     if(newCornerPos[0][0]-newCornerPos[3][0]>=decoControlSize+borderRadius&&newCornerPos[0][1]-newCornerPos[1][1]>=decoSize+borderRadius){
       cornerPos=newCornerPos;    
     }else if(newCornerPos[0][0]-newCornerPos[3][0]>=decoControlSize+borderRadius||newCornerPos[0][1]-newCornerPos[1][1]>=decoSize+borderRadius){ 
@@ -300,13 +300,13 @@ public class JRWindow {
     Rn.add(decoDragCorners[3],cornerPos[3],dirX);
     Rn.add(decoDragCorners[3],decoDragCorners[3],Rn.times(null,-1,dirY));
   }
-  public double[][] getCornerPos(){
+  protected double[][] getCornerPos(){
     return cornerPos;
   }  
 
   private double[] smallCenter;
   
-  public void setSmall(boolean setSmall){    
+  protected void setSmall(boolean setSmall){    
     if(setSmall&&!isSmall){
       for(int i=0;i<cornerPos.length;i++)
         Rn.copy(cornerPosBak[i],cornerPos[i]); 
@@ -337,11 +337,11 @@ public class JRWindow {
     Rn.times(center,1/(double)box.length,center);  
     return center;
   }
-  public boolean isSmall(){
+  protected boolean isSmall(){
     return isSmall;
   }
   
-  public void setInFront(boolean setInFront){
+  protected void setInFront(boolean setInFront){
     if(setInFront){
       decoDragSgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,activeColor);
       panel.setBackground(activeColor);
@@ -353,7 +353,7 @@ public class JRWindow {
     }
   }
 
-  public void setBorderRadius(double r) {
+  protected void setBorderRadius(double r) {
     borderRadius=r;
     cornerRadius=borderRadius*1.5;
     translateFactor=1.1*cornerRadius;
@@ -364,7 +364,7 @@ public class JRWindow {
       setCornerPos(cornerPos);
     } 
   }  
-  public void setDecoSize(double s){
+  protected void setDecoSize(double s){
     decoSize=s;
     decoControlSize=s*decoControlSizeFactor; 
     if(borderSgc!=null){
@@ -372,30 +372,30 @@ public class JRWindow {
     }
   }
   
-  public void setWindowNumber(int windowNumber){
+  protected void setWindowNumber(int windowNumber){
     this.windowNumber=windowNumber;
     updateActionCommands();
   }
   
-  public int getWindowNumber(){
+  protected int getWindowNumber(){
     return windowNumber;
   }  
-  public SceneGraphComponent getSgc(){
+  protected SceneGraphComponent getSgc(){
     return positionSgc;
   }  
-  public JFrame getFrame(){
+  protected JFrame getFrame(){
     return frame;
   }  
-  public IndexedFaceSet getFrameFace(){
+  protected IndexedFaceSet getFrameFace(){
     return frameFace;
   }  
-  public IndexedFaceSet getDecoControlFace(){
+  protected IndexedFaceSet getDecoControlFace(){
     return decoControlFace;
   }
-  public IndexedFaceSet getDecoDragFace(){
+  protected IndexedFaceSet getDecoDragFace(){
     return decoDragFace;
   }
-  public IndexedLineSet getBorders(){
+  protected IndexedLineSet getBorders(){
     return borders;
   }  
 }

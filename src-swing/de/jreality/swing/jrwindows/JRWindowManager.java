@@ -42,14 +42,15 @@ public class JRWindowManager implements ActionListener{
   
   public JRWindowManager(SceneGraphComponent avatar){
     sgc=new SceneGraphComponent();
-    Appearance app = new Appearance();
-    app.setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
-    sgc.setAppearance(app);
+    sgc.setAppearance(new Appearance());
+    sgc.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, false);    
     avatar.addChild(sgc);
     windowList=new ArrayList<JRWindow>();
     setPosition(defaultDesktopWindowPos);
-
-    sgc.addTool(new DraggingTool());
+    initDragTool(); 
+  } 
+  
+  private void initDragTool(){
     dragTool=new DragEventTool("PrimaryAction");
     dragTool.addPointDragListener(new PointDragListener(){
       private int windowNum;
@@ -93,8 +94,7 @@ public class JRWindowManager implements ActionListener{
       }
       public void lineDragged(LineDragEvent e) {
         if(windowNum==-1) return;
-        if(windowList.get(windowNum).isSmall()) return;
-//        if(windowList.get(windowNum).isFoldAway()) return;        
+        if(windowList.get(windowNum).isSmall()) return;       
         double[][] newPoints=new double[points.length][points[0].length];
         for(int n=0;n<newPoints.length;n++)
           for(int c=0;c<newPoints[0].length;c++)
@@ -138,7 +138,7 @@ public class JRWindowManager implements ActionListener{
       }});
     
     sgc.addTool(dragTool);
-  } 
+  }
   
   private int searchWindowNum(Geometry matchedGeo){
     int matchedWindowNum=0;
@@ -164,7 +164,7 @@ public class JRWindowManager implements ActionListener{
       String command=e.getActionCommand();
       command=command.replaceFirst(String.valueOf(command.charAt(0)),"");
       int windowNum=Integer.parseInt(command); 
-      kill(windowNum,true);  
+      kill(windowNum);  
     }
     else if(e.getActionCommand().startsWith("O")){
       String command=e.getActionCommand();
@@ -183,7 +183,7 @@ public class JRWindowManager implements ActionListener{
         windowList.get(windowNum).setSmall(true);
     } 
   }  
-  private void kill(int windowNum,boolean kill){
+  private void kill(int windowNum){
     JRWindow win2kill=windowList.get(windowNum);     
     sgc.removeChild(win2kill.getSgc());    
     int windowCount=0;
@@ -228,15 +228,19 @@ public class JRWindowManager implements ActionListener{
   }  
   public void setPosition(double[] pos){
     MatrixBuilder.euclidean().translate(pos).assignTo(sgc);
-  }  
-  public void setPortalDefaultValues(){
-    setBorderRadius(defaultPortalBorderRadius);
-    setDecoSize(defaultPortalDecoSize);
-    setPosition(defaultPortalWindowPos);
+  }
+  public void setDragAllWindowsTool(){
+    sgc.addTool(new DraggingTool());
   }
   public void setDesktopDefaultValues(){
     setBorderRadius(defaultDesktopBorderRadius);
     setDecoSize(defaultDesktopDecoSize);
     setPosition(defaultDesktopWindowPos);
   }  
+  public void setPortalDefaultValues(){
+    setBorderRadius(defaultPortalBorderRadius);
+    setDecoSize(defaultPortalDecoSize);
+    setPosition(defaultPortalWindowPos);
+    setDragAllWindowsTool();
+  }
 }
