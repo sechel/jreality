@@ -307,10 +307,11 @@ materialAttribute[Appearance ap]
 {	Color[] c=null; double[] d = null; }
 	:
 	// TODO check whether there are multiple values returned; may need to set the color per face or vertex
+	// make true emissive color
 	 	"ambientColor"	c=mfcolorValue 	{ap.setAttribute(CommonAttributes.AMBIENT_COLOR, c[0]);}
 	 |	"diffuseColor"	c=mfcolorValue {ap.setAttribute(CommonAttributes.DIFFUSE_COLOR, c[0]);}
 	 |	"specularColor"	c=mfcolorValue {ap.setAttribute(CommonAttributes.SPECULAR_COLOR, c[0]);}
-	 | 	"emissiveColor" c=mfcolorValue //{ap.setAttribute(CommonAttributes.EMISSIVE_COLOR, c[0]);}
+	 | 	"emissiveColor" c=mfcolorValue {ap.setAttribute(CommonAttributes.SPECULAR_COLOR, c[0]);}
 	 | 	"transparency"	d=mffloatValue {ap.setAttribute(CommonAttributes.TRANSPARENCY, d[0]);}
 	 | 	"shininess"	d=mffloatValue {ap.setAttribute(CommonAttributes.SPECULAR_EXPONENT, d[0]);}
 	 ;
@@ -452,22 +453,63 @@ indexedFaceSetAttribute
 					if (VRMLHelper.verbose) System.err.println("Got normal "+indices.length+"indices");
 					currentNormalIndex = VRMLHelper.convertIndices(indices); 
 				}
-	|	"materialIndex" indices=mfint32Value
+	|	"materialIndex" indices=mfint32Value  // hier egal
 				{
 					if (VRMLHelper.verbose) System.err.println("Got material "+indices.length+"indices");
 					currentMaterialIndex = VRMLHelper.convertIndices(indices); 
 				}
 	;
 
-indexedLineSetNode:
-	"IndexedLineSet"	OPEN_BRACE	(indexedLineSetAttribute)+ CLOSE_BRACE	
-	{if (VRMLHelper.verbose)	System.err.println("Got IndexedLineSet"); }
+indexedLineSetNode  returns [IndexedLineSet ils]
+{ ils = null; 
+}
+	:
+		"IndexedLineSet"	OPEN_BRACE	(indexedLineSetAttribute)+ CLOSE_BRACE	
+		{
+		// TODO move this into VRMLHelper somehow
+		if (VRMLHelper.verbose) System.err.println("Got IndexedLineSet"); 
+		IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
+		ilsf.setVertexCount(currentCoordinate3.size());
+		ilsf.setLineCount(currentCoordinateIndex.length);
+		ilsf.setVertexCoordinates(currentCoordinate3);
+		ilsf.setEdgeIndices(currentCoordinateIndex);
+		// TODO handle other attributes, decide whether they are face/vertex attributes, etc.
+		ilsf.update();
+		ils = ilsf.getIndexedLineSet();
+		//ils.setName("IFS:LineNo "+g.getLine());
+		// collect some statistics
+		primitiveCount++;
+		//polygonCount += ifs.getNumFaces();
+		if (currentSGC.getGeometry() != null) currentSGC.setGeometry(ils);
+		else		{
+			SceneGraphComponent sgc = new SceneGraphComponent();
+			//sgc.setName("LineNo "+g.getLine());		// for looking up later
+			sgc.setGeometry(ils);
+			sgc.setAppearance(currentAp);
+			currentSGC.addChild(sgc);
+		}
+		}
 	;
 	
-indexedLineSetAttribute:
-		"coordIndex"	mfint32Value
+indexedLineSetAttribute  // hier ok
+{ int[] indices = null; }
+	:
+		"coordIndex"	indices = mfint32Value		
+				{
+					if (VRMLHelper.verbose) System.err.println("Got coord "+indices.length+"indices");
+					currentCoordinateIndex = VRMLHelper.convertIndices(indices); 
+				}
+	|	"normalIndex" indices=mfint32Value // hier egal
+				{
+					// ignore
+				}
+	|	"materialIndex" indices=mfint32Value // hier egal
+				{
+					// ignore
+				}
 	;
-
+	
+	
 // TODO hook this up
 perspectiveCameraNode returns [SceneGraphComponent cn]
 {	cn = new SceneGraphComponent();
