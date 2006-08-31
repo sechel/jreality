@@ -70,7 +70,7 @@ public class LoadFileMerged extends AbstractAction {
       try {
         SceneGraphComponent sgc = Readers.read(files[i]);
         sgc = IndexedFaceSetUtility.mergeIndexedFaceSets(sgc);
-        //TODO: merge LineSets
+        sgc = IndexedFaceSetUtility.mergeIndexedLineSets(sgc);
         sgc.setName(files[i].getName());
         System.out.println("READ finished.");
         selection.getLastComponent().addChild(sgc);

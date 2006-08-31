@@ -705,7 +705,7 @@ public class IndexedFaceSetUtility {
 	 * @return
 	 */
 	public static SceneGraphComponent mergeIndexedFaceSets(SceneGraphComponent sgc)	{
-	
+		
 		// collects sgc's which themselves have children
 		class CollectComponents extends SceneGraphVisitor {
 			SceneGraphComponent root;
@@ -728,12 +728,57 @@ public class IndexedFaceSetUtility {
 		CollectComponents cc = new CollectComponents(sgc);
 		Vector sgclist = (Vector) cc.visit();
 		Iterator iter = sgclist.iterator();
+		// HACK:
+		SceneGraphComponent result=null;
 		while (iter.hasNext())	{
 			SceneGraphComponent next = (SceneGraphComponent) iter.next();
-			_mergeIndexedFaceSets(next);
+			result=_mergeIndexedFaceSets(next);
 		}
+		
+		// HACK continued
+		SceneGraphComponent mergedIFS = new SceneGraphComponent();
+		mergedIFS.setGeometry(result.getGeometry());
+		result.setGeometry(null);
+		result.addChild(mergedIFS);
 		return sgc;
 	}
+	// Anfang Bernd 
+	public static SceneGraphComponent mergeIndexedLineSets(SceneGraphComponent sgc)	{	
+		// collects sgc's which themselves have children
+		class CollectComponents extends SceneGraphVisitor {
+			SceneGraphComponent root;
+			Vector sgclist;
+			CollectComponents(SceneGraphComponent r)	{
+				root = r;
+			}
+			Object visit()	{
+				sgclist = new Vector();
+				visit(root);
+				return sgclist;
+			}
+			
+			public void visit(SceneGraphComponent c) {
+				if (c.getChildComponentCount() > 0) sgclist.add(c);
+				c.childrenAccept(this);
+			}
+	    }
+		
+		CollectComponents cc = new CollectComponents(sgc);
+		Vector sgclist = (Vector) cc.visit();
+		Iterator iter = sgclist.iterator();
+		// HACK:
+		SceneGraphComponent result=null;
+		while (iter.hasNext())	{
+			SceneGraphComponent next = (SceneGraphComponent) iter.next();
+			result=_mergeIndexedLineSets(next);
+		}
+		// HACK continued
+		SceneGraphComponent mergedIFS = new SceneGraphComponent();
+		mergedIFS.setGeometry(result.getGeometry());
+		result.setGeometry(null);
+		result.addChild(mergedIFS);
+		return sgc;
+	} // ende Bernd
 
 	private static SceneGraphComponent _mergeIndexedFaceSets(SceneGraphComponent sgc)	{
     	Vector ifslist = new Vector();
@@ -820,7 +865,7 @@ public class IndexedFaceSetUtility {
     	IndexedLineSet ils;
     	int vcount = 0;
 
-    	if (sgc.getGeometry()!= null && sgc.getGeometry() instanceof IndexedLineSet) {
+    	if ((sgc.getGeometry()!= null) && (sgc.getGeometry() instanceof IndexedLineSet)&&(!(sgc.getGeometry() instanceof IndexedFaceSet))) {
     		ils = (IndexedLineSet) sgc.getGeometry(); 
     		ilslist.add(ils);
     		lengths.add(new Integer(ils.getNumPoints()));
@@ -837,10 +882,10 @@ public class IndexedFaceSetUtility {
     		if (child.getChildComponentCount() != 0) continue;
     		if (child.getGeometry() == null) continue;
     		Geometry geom = child.getGeometry();
-     		if (geom instanceof IndexedLineSet)	{
+     		if ((geom instanceof IndexedLineSet)&&(!(geom instanceof IndexedFaceSet)))	{
      			ilslist.add(geom);
      			toRemove.add(child);
-     			ils = (IndexedFaceSet) geom;
+     			ils = (IndexedLineSet) geom;
            		lengths.add(new Integer(ils.getNumPoints()));
            		vcount += ils.getNumPoints();
           		ap = child.getAppearance();
