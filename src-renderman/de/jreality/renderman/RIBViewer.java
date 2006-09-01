@@ -202,6 +202,7 @@ public class RIBViewer implements Viewer {
     
     /**
      * @param maximumEyeSplits.
+     * @deprecated	Use top level appearance and CommonAttributes.RMAN_MAX_EYE_SPLITS
      */
     public void setMaximumEyeSplits(int maximumEyeSplits){
     	this.maximumEyeSplits=maximumEyeSplits;

@@ -47,7 +47,7 @@ import de.jreality.renderman.RIBVisitor;
 import de.jreality.shader.EffectiveAppearance;
 
 public abstract class AbstractRendermanShader implements RendermanShader {
-	protected Map map = new HashMap();
+	protected Map<String, Object> map = new HashMap<String, Object>();
 	protected String shaderName;
 	protected String type;
 	protected RIBVisitor ribV = null;

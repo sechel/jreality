@@ -45,6 +45,7 @@ import java.util.Map;
 
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
+import de.jreality.renderman.RIBHelper;
 import de.jreality.renderman.RIBViewer;
 import de.jreality.renderman.RIBVisitor;
 import de.jreality.scene.data.AttributeEntityUtility;
@@ -113,7 +114,7 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
              map.put("string texturename",fname);
             double[] mat = tex.getTextureMatrix().getArray();
             if(mat != null && !Rn.isIdentityMatrix(mat, 10E-8)) {
-            	map.put("matrix textureMatrix",RIBVisitor.fTranspose(mat));
+            	map.put("matrix textureMatrix",RIBHelper.fTranspose(mat));
 //                shaderName = "transformedpaintedplastic";
                 shaderName = (signature == Pn.EUCLIDEAN) ? "transformedpaintedplastic" : "hpaintedplastic";
            }
@@ -129,7 +130,8 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
     		} 
     		if (fname != null) {
     	    	map.put("string reflectionmap", fname);
-//    	    	shaderName = "transformedpaintedplastic";    			
+//    	    	shaderName = "transformedpaintedplastic";   
+    	    	map.put("reflectionBlend", new Float(reflectionMap.getBlendColor().getAlpha()/255.0));
                 shaderName = (signature == Pn.EUCLIDEAN) ? "transformedpaintedplastic" : "hpaintedplastic";
    		}
 	    	}

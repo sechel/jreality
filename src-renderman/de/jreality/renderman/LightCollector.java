@@ -55,36 +55,40 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 
 /**
- * This is a utility for the RIBVisitor. It collects all the lights in the scene
- * and writes them directly.
- * @version 1.0
- * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
+ * This is a utility for the {@link RIBVisitor}. It collects all the lights in the scene
+ * and writes them using the {@link de.jreality.renderman.Ri} instance <i>ri</i>. Currently supports {@link de.jreality.scene.DirectionalLight},
+ * {@link de.jreality.scene.PointLight}, and {@link de.jreality.scene.SpotLight}.  If the
+ * current effective appearance {@link de.jreality.shader.EffectiveAppearance} evaluates 
+ * {@link de.jreality.shader.CommonAttributes#RMAN_SHADOWS_ENABLED} is <code>true</code> then
+ * corresponding shadow-casting shaders are written out into the RIB file instead of the 
+ * standard RenderMan lights.
+ * <p>
+ * Todo: look at the {@link de.jreality.scene.Appearance} attached to the SceneGraphComponent 
+ * containing the light for {@link de.jreality.shader.CommonAttributes#RMAN_LIGHT_SHADER}. If 
+ * found, its value should be an instance of {@link de.jreality.renderman.SLShader}, and this 
+ * should be substituted for the standard light as generated now by this visitor.
+ * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>, Charles Gunn
  *
  */
 public class LightCollector extends SceneGraphVisitor {
     double[]  initialTrafo,   currentTrafo;
     RIBVisitor ribv = null;
-//    private   Transformation  initialTransformation;
     float[] zdirection = new float[] {0f,0f,-1f};
     float[] fCurrentTrafo = null;
     protected LightCollector reclaimableSubcontext;
     EffectiveAppearance eAppearance = null;
     boolean shadowEnabled = false;
-    int signature = Pn.EUCLIDEAN;
     SceneGraphPath currentPath = null;
-    String lightPrefix = "";
-    Ri ribHelper = null;
+    Ri ri = null;
     /**
      * 
      */
     public LightCollector(SceneGraphComponent root, RIBVisitor v) {
         super();
         ribv = v;
-        this.ribHelper = v.ribHelper;
+        this.ri = v.ri;
         currentTrafo = new double[16];
         eAppearance=EffectiveAppearance.create();
-        lightPrefix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_LIGHT_PREFIX, "");
-        System.err.println("Light prefix is "+lightPrefix);
         currentPath = new SceneGraphPath();
         visit(root);
     }
@@ -110,76 +114,55 @@ public class LightCollector extends SceneGraphVisitor {
         if(a!= null ) eAppearance = eAppearance.create(a);
         currentPath.push(c);
         shadowEnabled = eAppearance.getAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, false);
-        signature = eAppearance.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
         c.childrenAccept(this); //subContext());
         eAppearance= tmp;
         currentPath.pop();
     }
     
-//    public void visit(Transformation t) {
-//        if (initialTrafo == currentTrafo)
-//            currentTrafo= new double[16];
-//		Rn.copy(currentTrafo, initialTrafo);
-//		Rn.times(currentTrafo, currentTrafo, t.getMatrix());
-//    }
-    /* (non-Javadoc)
-     * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.DirectionalLightSoft)
-     */
     public void visit(DirectionalLight l) {
-        ribHelper.transformBegin();
-        // write the transform for this light:
-        //double[] mat = t.getMatrix();
-       
-//        float[] tmat = RIBVisitor.fTranspose(currentTrafo);/        ribHelper.concatTransform(tmat);
-    	// it looks like directional lights don't get handled correctly when the 
-    	// transformation is used with "to"=(0,0,1).  Instead, calculate "to" explicitly.
-//		double[] direction = Rn.matrixTimesVector(null, currentTrafo, zdir);
-        // now write the light:
+        ri.transformBegin();
         HashMap<String, Object> map =new HashMap<String, Object>();
         handleCommon(l, map);
-        ribHelper.concatTransform(fCurrentTrafo);
-//        map.put("to", direction);
+        ri.concatTransform(fCurrentTrafo);
         map.put("to",zdirection);
-      ribHelper.lightSource(shadowEnabled ? "shadowdistant":lightPrefix+"distantlight",map);
-        
-        ribHelper.transformEnd();
-        //super.visit(l);
-    }
+        ri.lightSource(shadowEnabled ? "shadowdistant":"distantlight",map);
+        ri.transformEnd();
+     }
 	private void handleCommon(Light l, HashMap<String, Object> map) {
 		currentPath.getMatrix(currentTrafo);
-        fCurrentTrafo = RIBVisitor.fTranspose(currentTrafo);
+        fCurrentTrafo = RIBHelper.fTranspose(currentTrafo);
 		map.put("intensity",new Float(l.getIntensity()));
         map.put("lightcolor",l.getColor().getRGBColorComponents(null));
         map.put("from",new float[] {0f,0f,0f});
-        map.put("signature", new Float(signature));
+//       map.put("signature", new Float(signature));
         if (shadowEnabled)
         	map.put("string shadowname", "raytrace");
 	}
 
     public void visit(PointLight l) {
-        ribHelper.transformBegin();
+        ri.transformBegin();
         // write the transform for this light:
         //double[] mat = t.getMatrix();
         // now write the light:
         HashMap<String, Object> map =new HashMap<String, Object>();
         handleCommon(l, map);
         map.put("from",new float[] {0f,0f,0f});
-       ribHelper.concatTransform(fCurrentTrafo);
-        ribHelper.lightSource(shadowEnabled ? "shadowpoint":lightPrefix+"pointlight",map);
+       ri.concatTransform(fCurrentTrafo);
+        ri.lightSource(shadowEnabled ? "shadowpoint": "pointlight",map);
         
-        ribHelper.transformEnd();
+        ri.transformEnd();
     }
     /* (non-Javadoc)
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.SpotLightSoft)
      */
     public void visit(SpotLight l) {
-        ribHelper.transformBegin();
+        ri.transformBegin();
         // write the transform for this light:
         //double[] mat = t.getMatrix();
         // now write the light:
         HashMap<String, Object> map =new HashMap<String, Object>();
         handleCommon(l, map);
-        ribHelper.concatTransform(fCurrentTrafo);
+        ri.concatTransform(fCurrentTrafo);
         map.put("from",new float[] {0f,0f,0f});
         map.put("coneangle",new Float(l.getConeAngle()));
         map.put("conedeltaangle",new Float(l.getConeDeltaAngle()));
@@ -188,11 +171,11 @@ public class LightCollector extends SceneGraphVisitor {
             map.put("float a0", new Float(l.getFalloffA0()));
             map.put("float a1", new Float(l.getFalloffA1()));
             map.put("float a2", new Float(l.getFalloffA2()));
-            ribHelper.lightSource("spotlightFalloff",map);
+            ri.lightSource("spotlightFalloff",map);
         } else
-            ribHelper.lightSource(shadowEnabled ? "shadowspot": lightPrefix+"spotlight",map);
+            ri.lightSource(shadowEnabled ? "shadowspot": "spotlight",map);
         
-        ribHelper.transformEnd();
+        ri.transformEnd();
         //super.visit(l);
     }
 

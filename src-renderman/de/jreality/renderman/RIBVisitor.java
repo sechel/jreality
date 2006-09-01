@@ -72,6 +72,7 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
+import de.jreality.renderman.shader.DefaultPolygonShader;
 import de.jreality.renderman.shader.RendermanShader;
 import de.jreality.renderman.shader.ShaderLookup;
 import de.jreality.scene.Appearance;
@@ -107,74 +108,69 @@ import de.jreality.util.LoggingSystem;
 
 
 /**
- * A Visitor for writing renderman<sup>TM</sup> rib files. At the moment the following 
- * things do not work as expected:
+ * A {@link de.jreality.scene.SceneGraphVisitor} for writing RenderMan<sup>TM</sup> rib files. 
+ * <p>
+ * <b>TODO list and Known issues</b>: 
  * <ul>
- * <li>twoside shading is not supported</li>
- * <li>clipping planes are written but Icould not test them since neither 
- * 3delight<sup>TM</sup>  nor aqsis do support them at the moment</li>
- * <li>lots of other stuff I just did not check...</li>
- * <li>...</li>
+ * <li> "twoSided", "implode", "flat" polygon shaders not supported</li>
+ * <li> Toplevel {@link de.jreality.scene.Appearance} fog attributes not implemented</li>
+ * <li> Clipping planes written but not tested</li>
+ * <li> Add control over global options using (something like) "renderingHints" shader {@link de.jreality.shader.RenderingHintsShader}</li>
+ * <li> Add support for the differences between the various RenderMan renderers (Pixar, 3DLight, Asis)</li>
+ * <li> Writing ordinary texture files: 
+ * <ul>
+ * <li>Currently tries to write TIFF, if can't then writes PNG.</li>
+ * <li> When TIFF is written, then it should be compressed (isn't currently)</li>
+ * <li> Figure out how to write out the right filename suffix as a shader parameter: prman for example expects .tex format,
+ * even though the file we write out is a .tiff file (which gets converted later to .tex)</li>
  * </ul>
- * Other TODO's (more on the software engineering side)
- *   put constant strings into CommonAttributes so people can write 
- *     into Appearances and "be heard" (or make an interface with AttributeEntity)
- *   add control over global options using (something like) "renderingHints" shader
- *   minimize use of SLShader class as an Appearance attribute:
- *   	as in other backends, the RIB backend shaders should set themselves by reading
- *   	from an effective appearance.  The attributes should be set there.
- *  * @version 1.0
- * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
- *
+ * <li>Writing reflection maps: 
+ * </ul>
+ * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>, Charles Gunn
+ * @see de.jreality.shader.CommonAttributes
  */
 public class RIBVisitor extends SceneGraphVisitor {
 	private SceneGraphComponent root;
 	private SceneGraphPath cameraPath;
 	private double[] world2Camera;
 	private Camera camera;
-     private int width =640;
+    private int width =640;
     private int height = 480;
     private String ribFileName;
-    protected EffectiveAppearance eAppearance;
-    private int textureCount = 0;
-    private Map<ImageData, String> textures =new HashMap<ImageData, String>();
-    private Hashtable pointsets = new Hashtable();
-    int pointsetCount = 0;
     private int[] maximumEyeSplits={10};
-    boolean insidePointset = false;
+    boolean insidePointset = false;		// life gets complicated with appearance-generated tubes and spheres
     protected boolean shadowEnabled = false;
     protected  boolean fullSpotLight = false;
     protected  boolean retainGeometry = false;
     protected  boolean useProxyCommands = true;
+    // user can specify that tubes and spheres drawn by the appearances are to be opaque
+    // reqardless of the current transparency value
     protected boolean opaqueTubes = false;
     protected  String shaderPath = null;
     protected boolean handlingProxyGeometry = false;
-    private  String preamble = "";
+    private boolean writeShadersToFile = true;
+    private  String globalIncludeFile = "";
     private int rendererType = RIBViewer.TYPE_PIXAR;
     private int currentSignature = Pn.EUCLIDEAN;
-    String outputDisplayFormat = "rgb";
+    private String outputDisplayFormat = "rgb";
+    protected String textureFileSuffix = "tex";  // When it's not prman, set to "tiff" probably.
     private boolean hasPw = false;
-    int whichEye = CameraUtility.MIDDLE_EYE;
-    protected Ri ribHelper = new Ri();
-    
-    /**
-     * 
-     */
-    public RIBVisitor() {
-        super();
-        eAppearance=EffectiveAppearance.create();
-    }
-    
-    public void setRendererType(int rendererType) {
-		this.rendererType = rendererType;
-	}
-    
-    // TODO create an appearance attribute to control following boolean
-    boolean copyShader = false;
-	public void visit(Viewer viewer, String name)	{
+ 
+    transient protected EffectiveAppearance eAppearance = EffectiveAppearance.create();
+    transient private int textureCount = 0;
+    transient private Map<ImageData, String> textures =new HashMap<ImageData, String>();
+    transient private Hashtable<PointSet, String> pointsets = new Hashtable<PointSet, String>();
+    transient int pointsetCount = 0;
+    transient protected Ri ri = new Ri();
+    transient int whichEye = CameraUtility.MIDDLE_EYE;
+
+ 	public void visit(Viewer viewer, String name)	{
+ 		// handle the file name
 		ribFileName = name;
 	    if(!ribFileName.endsWith(".rib"))	ribFileName = ribFileName+".rib";
-
+        int index = ribFileName.lastIndexOf('/');
+        outputFileName = ribFileName.substring(index+1,ribFileName.length()-3)+"tif";
+     
 	    root = viewer.getSceneRoot();
 		cameraPath = viewer.getCameraPath();
 		camera = CameraUtility.getCamera(viewer);
@@ -185,29 +181,26 @@ public class RIBVisitor extends SceneGraphVisitor {
 
         world2Camera = cameraPath.getInverseMatrix(null);
 
- 		if (copyShader)		writeStandardShader(ribFileName);        	
+ 		if (writeShadersToFile)		writeStandardShaders(ribFileName);        	
 		if (rootAppearance != null) 	handleRootAppearance();
    
-        int index = ribFileName.lastIndexOf('/');
-        outputFileName = ribFileName.substring(index+1,ribFileName.length()-3)+"tif";
-     
-		ribHelper.begin(ribFileName);
+		ri.begin(ribFileName);
 		if (camera.isStereo())	{
 			// Careful: the rest of the code expects left eye to be rendered first!
 			whichEye = CameraUtility.LEFT_EYE;
 		    index = ribFileName.lastIndexOf('/');
 		    outputFileName = ribFileName.substring(index+1,ribFileName.length()-4)+"L.tif";	
-			ribHelper.frameBegin(0);
+			ri.frameBegin(0);
 			render();
-			ribHelper.frameEnd();
+			ri.frameEnd();
 			whichEye = CameraUtility.RIGHT_EYE;
 		    outputFileName = ribFileName.substring(index+1,ribFileName.length()-4)+"R.tif";	
-			ribHelper.frameBegin(1);
+			ri.frameBegin(1);
 			render();
-			ribHelper.frameEnd();
+			ri.frameEnd();
 		} else
 			render();
-		ribHelper.end();
+		ri.end();
     }
 
 	private void render() {
@@ -215,100 +208,108 @@ public class RIBVisitor extends SceneGraphVisitor {
         handleGlobalSettings();
      
        // 
-        // TODO handle negative far clipping plane (by generating your own matrices?
+        // TODO handle negative far clipping plane as used in elliptic geometry
+        //	(OpenGL supports this) (can we do this here by generating our own matrices?)
         // TODO figure out how to specify RI_INFINITY in a RIB file
-        ribHelper.clipping(camera.getNear(), (camera.getFar() > 0) ? camera.getFar() : 1000.0 );
-        ribHelper.depthOfField(camera.getFStop(), camera.getFocalLength(), camera.getFocus());
+        ri.clipping(camera.getNear(), (camera.getFar() > 0) ? camera.getFar() : 1000.0 );
+        ri.depthOfField(camera.getFStop(), camera.getFocalLength(), camera.getFocus());
        boolean testCameraExplicit = false;
        double aspectRatio = ((double)width)/height;
        if (testCameraExplicit)	{
+    	   // following experiment to set the camera to NDC transformation explicitly without
+    	   // using RenderMan commands for doing that.  Doesn't work. -gunn 01.09.06
  //   	   camera.setNear( camera.getNear() * -1);
  //   	   camera.setFar(camera.getFar() * -1);
            // flip the z-direction
-           ribHelper.transform(fTranspose(MatrixBuilder.euclidean().scale(1,1,-1).getArray()));
-           ribHelper.comment("Home-grown camera transformation");
+           ri.transform(RIBHelper.fTranspose(MatrixBuilder.euclidean().scale(1,1,-1).getArray()));
+           ri.comment("Home-grown camera transformation");
     	   double[] c2ndc = CameraUtility.getCameraToNDC(camera, 1.0, currentSignature);
-    	   ribHelper.concatTransform(fTranspose(c2ndc));
+    	   ri.concatTransform(RIBHelper.fTranspose(c2ndc));
  //   	   camera.setNear( camera.getNear() * -1);
  //   	   camera.setFar( camera.getFar() * -1);
        } else {
            if (camera.isStereo())	{
                	double[] eyeP = CameraUtility.getEyePosition(camera, whichEye);
        			Rectangle2D vp = CameraUtility.getOffAxisViewPort(camera, CameraUtility.getViewport(camera, aspectRatio), eyeP);
-       			ribHelper.comment("Testing left eye stereo");
+       			ri.comment("Testing left eye stereo");
        			// can a stereo camera be non-perspective?
-       			ribHelper.projection(camera.isPerspective() ? "perspective" : "orthographic", null);
-       			ribHelper.screenWindow(vp);
-                ribHelper.concatTransform(fTranspose(MatrixBuilder.euclidean().scale(1,1,-1).getArray()));
+       			ri.projection(camera.isPerspective() ? "perspective" : "orthographic", null);
+       			ri.screenWindow(vp);
+                ri.concatTransform(RIBHelper.fTranspose(MatrixBuilder.euclidean().scale(1,1,-1).getArray()));
        			double[] moveToEye = Rn.inverse(null, 
        					P3.makeTranslationMatrix(null, eyeP, currentSignature ));
-       			ribHelper.concatTransform(fTranspose(moveToEye));
+       			ri.concatTransform(RIBHelper.fTranspose(moveToEye));
            } else {
-           		HashMap map = new HashMap();
+           		HashMap<String, Object> map = new HashMap<String, Object>();
            		float fov = (float) camera.getFieldOfView();
            		float a = 1.0f;
            		if(camera.isPerspective()) {
            			map.put("fov", new Float(fov));
-           			ribHelper.projection("perspective",map);
+           			ri.projection("perspective",map);
            		} else {
-           			ribHelper.projection("orthographic",map);    
+           			ri.projection("orthographic",map);    
            			a =(float) (1/((Math.tan((Math.PI/180.0)*camera.getFieldOfView()/2.0)*camera.getFocus())));
-           			ribHelper.concatTransform(new float[] {a,0,0,0,0,a,0,0,0,0,1,0,0,0,0,1});
+           			ri.concatTransform(new float[] {a,0,0,0,0,a,0,0,0,0,1,0,0,0,0,1});
            		}        	
-                ribHelper.concatTransform(fTranspose(MatrixBuilder.euclidean().scale(1,1,-1).getArray()));
+                ri.concatTransform(RIBHelper.fTranspose(MatrixBuilder.euclidean().scale(1,1,-1).getArray()));
            }    	   
       }
   
        if (whichEye == CameraUtility.LEFT_EYE)	{
-    	   ribHelper.archiveBegin("world");
+    	   ri.archiveBegin("world");
        } else if (whichEye == CameraUtility.RIGHT_EYE)	{
-    	   ribHelper.readArchive("world");
+    	   ri.readArchive("world");
     	   return;
        }
-        ribHelper.comment("world to camera");
+        ri.comment("world to camera");
         //       world2Camera = MatrixBuilder.euclidean().scale(1,1,-1).times(world2Camera).getArray();
-        ribHelper.concatTransform(fTranspose(world2Camera));
-        ribHelper.worldBegin();
+        ri.concatTransform(RIBHelper.fTranspose(world2Camera));
+        ri.worldBegin();
        // alpha in the output format means skip over any background settings
         if (outputDisplayFormat != "rgba")		handleBackground();
         new LightCollector(root, this);
         root.accept(this);
-        ribHelper.comment("end world to camera");
-        ribHelper.worldEnd();
+        ri.worldEnd();
         if (whichEye == CameraUtility.LEFT_EYE)	{
-        	ribHelper.archiveEnd();
-        	ribHelper.readArchive("world");
+        	ri.archiveEnd();
+        	ri.readArchive("world");
         }
 	}
 
 	private void handleGlobalSettings() {
-		HashMap map = new HashMap();
+		HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("shader", (shaderPath!=null?(shaderPath+":"):"")+".:&");
-        ribHelper.option( "searchpath", map);
+        ri.option( "searchpath", map);
         
         map.clear();
         map.put("eyesplits",maximumEyeSplits);
-        ribHelper.option("limits",map);
-		ribHelper.display(outputFileName, "tiff", outputDisplayFormat,null);
+        ri.option("limits",map);
+		ri.display(outputFileName, "tiff", outputDisplayFormat,null);
         
-        ribHelper.format(width,height,1);
+        ri.format(width,height,1);
         // TODO make this a variable
-        ribHelper.shadingRate(1f);        	
-        if (preamble != "") ribHelper.readArchive((String) preamble);
+        ri.shadingRate(1f);        	
+        if (globalIncludeFile != "") ri.readArchive((String) globalIncludeFile);
 	}
 
 	private void handleRootAppearance() {
+		maximumEyeSplits[0] = ((Integer) eAppearance.getAttribute(CommonAttributes.RMAN_MAX_EYE_SPLITS, new Integer(maximumEyeSplits[0]))).intValue();
 		shaderPath = (String) eAppearance.getAttribute(CommonAttributes.RMAN_SEARCHPATH_SHADER, "");
+		textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");
 		shadowEnabled = eAppearance.getAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, false);
 		currentSignature = eAppearance.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
       	outputDisplayFormat = (String) eAppearance.getAttribute(CommonAttributes.RMAN_OUTPUT_DISPLAY_FORMAT, "rgb");
-      	preamble = (String) eAppearance.getAttribute(CommonAttributes.RMAN_PREAMBLE, "");
-      	System.err.println("Preamble is "+preamble);
+      	globalIncludeFile = (String) eAppearance.getAttribute(CommonAttributes.RMAN_GLOBAL_INCLUDE_FILE, "");
+      	System.err.println("Preamble is "+globalIncludeFile);
 	}
 
+	/**
+	 * Handle background specifications contained in the top-level appearance
+	 * TODO: fog
+	 * @see de.jreality.shader.RootAppearance
+	 */
 	private void handleBackground() {
-		HashMap map;
-		map = new HashMap();
+		HashMap<String, Object> map = new HashMap<String, Object>();
 		Appearance ap = root.getAppearance();
          if(ap!=null) { 
 			if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
@@ -332,40 +333,22 @@ public class RIBVisitor extends SceneGraphVisitor {
 		         		CommonAttributes.BACKGROUND_COLOR_DEFAULT);
 		         float[] f = clr.getRGBColorComponents(null);     
 		         map.put("color background", f);
-		         ribHelper.imager("background",map);        
+		         ri.imager("background",map);        
 		    }       			
 		}
 
 			}
 	}
 
-	private void writeStandardShader(String name) {
-		try {
-		    File file = new File(name);
-		    System.out.println("writing in  "+name);
-		    file = new File(file.getParent(),"transformedpaintedplastic.sl");
-		    System.out.println("checking on "+file+" exists "+file.exists());
-		    if(!file.exists()) {
-		       // file.createNewFile();
-		    OutputStream os = new FileOutputStream(file);
-		    InputStream is = getClass().getResourceAsStream("transformedpaintedplastic.sl");
-		    
-		    int c = 0;
-		    while((c =is.read())!=-1) {
-		        os.write(c);
-////                    System.out.print((char)c);
-		    }
-		    os.close();
-		    is.close();
-		    }
-		} catch (FileNotFoundException e) {
-		    e.printStackTrace();
-		} catch (IOException e) {
-		    e.printStackTrace();
-		}
-	}
-	
-    private void handleBackgroundColors(Color[] colors, double sx, double sy, Camera camera, double[] w2c) {
+    /**
+     * Handle request for gradient like background image
+     * @param colors
+     * @param sx
+     * @param sy
+     * @param camera
+     * @param w2c
+     */
+	private void handleBackgroundColors(Color[] colors, double sx, double sy, Camera camera, double[] w2c) {
 		Rectangle2D vp = CameraUtility.getViewport(camera, ((double) width)/height);      	
 		double z = camera.getFar() - 10E-4;
 		double xmin = sx*vp.getMinX();
@@ -385,72 +368,54 @@ public class RIBVisitor extends SceneGraphVisitor {
 		}
 		IndexedFaceSet bkgd = IndexedFaceSetUtility.constructPolygon(pts);
 		bkgd.setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(cd));
-		ribHelper.attributeBegin();
-		ribHelper.concatTransform(fTranspose(w2c));
- 	    ribHelper.comment("Disable shadows for background");
-	    ribHelper.verbatim("Attribute \"visibility\"  \"int transmission\" [0]");
-		ribHelper.surface("constant",null);
+		ri.attributeBegin();
+		ri.concatTransform(RIBHelper.fTranspose(w2c));
+ 	    ri.comment("Disable shadows for background");
+	    ri.verbatim("Attribute \"visibility\"  \"int transmission\" [0]");
+		ri.surface("constant",null);
 		pointPolygon(bkgd, null);
-		ribHelper.attributeEnd();
+		ri.attributeEnd();
 	}
 
-     /**
-     * @param cam
-     * @return
+	private static void writeStandardShaders(String name) {
+		RIBHelper.writeShader(name, "transformedpaintedplastic.sl");
+		RIBHelper.writeShader(name, "constantTexture.sl");
+	}
+
+    /* 
+     * Visit methods start here
      */
-    public static float[] fTranspose(double[] mat) {
-        float[] tmat = new float[16];
-        for (int i = 0; i < 4; i++) 
-            for (int j = 0;j<4;j++){
-                tmat[i + 4*j] = (float) mat[j+4*i];
-            }
-        return tmat;
-    }
-    
-    public void  visit(SceneGraphComponent c) {
+	public void  visit(SceneGraphComponent c) {
     	if (!c.isVisible()) return;
-        ribHelper.comment("Begin "+c.getName());        
         EffectiveAppearance tmp =eAppearance;
         Appearance a = c.getAppearance();
-        boolean attrblock = false;
-        ribHelper.attributeBegin();
+        ri.attributeBegin(c.getName());
         if(a!= null ) {
             eAppearance = eAppearance.create(a);
- //           if (c.getGeometry() != null)	{
- //               setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);    
- //               attrblock = true;
- //           }
-             //FIXME: omit this call to avoid writing attributes twice???
          }
         c.childrenAccept(this);
- //       if (attrblock) 
-        ribHelper.comment("End "+c.getName());        
-        ribHelper.attributeEnd();
-        
+        ri.attributeEnd(c.getName());
+        // restore effective appearance
         eAppearance= tmp;
     }
-     public void visit(Transformation t) {
+	
+    public void visit(Transformation t) {
          double[] mat = t.getMatrix();
-          ribHelper.concatTransform(fTranspose(mat));
+          ri.concatTransform(RIBHelper.fTranspose(mat));
      }
-    /* (non-Javadoc)
-     * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.Appearance)
-     */
+ 
     public void visit(Appearance a) {
-       /// eAppearance = eAppearance.create(a);
-        
-        //super.visit(a);
     }
 
     private void setupShader(EffectiveAppearance eap, String type) {
-        // Attribute
         Map m = (Map) eap.getAttribute("rendermanAttribute",null, Map.class);
         if(m!=null) {
             for (Iterator i = m.keySet().iterator(); i.hasNext();) {
                 String key = (String) i.next();
-                ribHelper.attribute(key,(Map)m.get(key));
+                ri.attribute(key,(Map)m.get(key));
             }
         }
+        // read current values from the effective appearance
         currentSignature = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
         opaqueTubes = eap.getAttribute(CommonAttributes.OPAQUE_TUBES_AND_SPHERES, 
         		CommonAttributes.OPAQUE_TUBES_AND_SPHERES_DEFAULT);
@@ -462,8 +427,7 @@ public class RIBVisitor extends SceneGraphVisitor {
             float[] c =((Color)color).getRGBComponents(null);
             if (c.length == 4) colorAlpha = c[3];
             float[] rgb = new float[]{c[0],c[1],c[2]};
-//           ribHelper.color(new float[] {c[0]*colorAlpha,c[1]*colorAlpha,c[2]*colorAlpha});
-            ribHelper.color(rgb);
+            ri.color(rgb);
         }
  
         double transparency = eap.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
@@ -471,16 +435,16 @@ public class RIBVisitor extends SceneGraphVisitor {
         currentOpacity *= colorAlpha;
 		//currentOpacity *= colorAlpha;
         if ((handlingProxyGeometry && opaqueTubes)) currentOpacity = 1f;
-        ribHelper.opacity(currentOpacity);
+        ri.opacity(currentOpacity);
          //System.out.println("transparency is "+type+" is "+transparency);
-        SLShader slShader = (SLShader) eap.getAttribute(type+CommonAttributes.RMAN_DISPLACEMENT,null,SLShader.class);
+        SLShader slShader = (SLShader) eap.getAttribute(type+CommonAttributes.RMAN_DISPLACEMENT_SHADER,null,SLShader.class);
         if(slShader != null) {
-            ribHelper.displacement(slShader.getName(),slShader.getParameters());
+            ri.displacement(slShader.getName(),slShader.getParameters());
         }
         // check to see if RMAN_SURFACE attribute is non-null and is of class SLShader; if so,
         // use it instead of the following call.
         RendermanShader polygonShader =(RendermanShader) ShaderLookup.getShaderAttr(this,eap, "", CommonAttributes.POLYGON_SHADER);        		
-        ribHelper.shader(polygonShader);
+        ri.shader(polygonShader);
 
     }
     /**
@@ -491,15 +455,24 @@ public class RIBVisitor extends SceneGraphVisitor {
             ImageData data = tex.getImage(); 
             return writeTexture(data);
     }
-    public String writeTexture(ImageData data){
+
+	String writeTexture(ImageData data) {
+		String noSuffix = (String) textures.get(data);
+		if(noSuffix == null) {
+			noSuffix = ribFileName+"_texture"+(textureCount++);
+		    writeTexture(data, noSuffix);
+			textures.put(data, noSuffix);
+         }
+		return noSuffix+"."+textureFileSuffix;		// should be dependent on the final renderman renderer
+	}
+    
+    public static void writeTexture(ImageData data, String noSuffix){
         BufferedImage img;
-        String noSuffix = (String) textures.get(data);
         for (Iterator iter = ImageIO.getImageWritersByMIMEType("image/tiff"); iter.hasNext(); ) {
          	System.err.println("Writer: "+((ImageWriter) iter.next()).getClass().getName());
         }
-        if(noSuffix == null) {
-            noSuffix = ribFileName+"_texture"+(textureCount++);
-            if (true) {
+        
+        if (true) {
                 // TODO temporary as long as ImageData does not return a propper BufferedImage
                 byte[] byteArray = data.getByteArray();
                 int dataHeight = data.getHeight();
@@ -533,7 +506,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 //				stm.execute();
 			} catch(Throwable e) {
 				worked=false;
-	            LoggingSystem.getLogger(this).log(Level.CONFIG, "could not write TIFF: "+noSuffix+".tiff", e);
+	            LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write TIFF: "+noSuffix+".tiff", e);
 			}
             if (!worked) {
               try {
@@ -543,12 +516,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 				e.printStackTrace();
 			}
               if (!worked) 
-                  LoggingSystem.getLogger(this).log(Level.CONFIG, "could not write PNG: {0}.png", noSuffix);
+                  LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write PNG: {0}.png", noSuffix);
             }
-        } 
-        textures.put(data,noSuffix);
-        return noSuffix+".tex";		// should be dependent on the final renderman renderer
-        							// prman from Pixar only knows the proprietary "tex" format
     }
     
     public boolean hasProxy(Geometry g)		{
@@ -556,7 +525,7 @@ public class RIBVisitor extends SceneGraphVisitor {
     	Object proxy = g.getGeometryAttributes("rendermanProxyCommand");
     	if (proxy != null)	{
     		if  (proxy instanceof String)  {
-          		ribHelper.verbatim((String) proxy);
+          		ri.verbatim((String) proxy);
     		}
     		else if (proxy instanceof SceneGraphComponent) {
     			visit((SceneGraphComponent) proxy);
@@ -577,21 +546,21 @@ public class RIBVisitor extends SceneGraphVisitor {
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.PointSet)
      */
     public void visit(PointSet g) {
-		ribHelper.comment("PointSet "+g.getName());
+		ri.comment("PointSet "+g.getName());
      	if (!insidePointset)	{
     		// p is not a subclass of PointSet
      		insidePointset = true;
     		if (retainGeometry) {
    	    		Object which = pointsets.get(g);
    	  			if (which != null)	{
-     	    		ribHelper.readArchive((String) which);
+     	    		ri.readArchive((String) which);
     			} else {
-    				ribHelper.comment("Retained geometry "+g.getName());
+    				ri.comment("Retained geometry "+g.getName());
     				String finalname = g.getName()+pointsetCount;
-    				ribHelper.archiveBegin(finalname);
+    				ri.archiveBegin(finalname);
     				_visit(g);
-    				ribHelper.archiveEnd();
-    	    		ribHelper.readArchive(finalname);
+    				ri.archiveEnd();
+    	    		ri.readArchive(finalname);
     				pointsets.put(g, finalname );
     				pointsetCount++;
     			} 
@@ -610,7 +579,7 @@ public class RIBVisitor extends SceneGraphVisitor {
             int n= p.getNumPoints();
             DataList coord=p.getVertexAttributes(Attribute.COORDINATES);
             if(coord == null) return;
-            ribHelper.attributeBegin();
+            ri.attributeBegin();
             float r = (float) eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
             //System.out.println("point radius is "+r);
             setupShader(eAppearance,CommonAttributes.POINT_SHADER);
@@ -623,15 +592,15 @@ public class RIBVisitor extends SceneGraphVisitor {
                  float[] raw = new float[4];
                  cc.getRGBComponents(raw);
                 if (!opaqueTubes) raw[3] = raw[3] * currentOpacity;
-                ribHelper.color(raw);
+                ri.color(raw);
                double[] trns = new double[16];
                 for (int i= 0; i < n; i++) { 
                     trns = MatrixBuilder.init(null, sig).translate(a[i]).getArray();
-                    ribHelper.transformBegin();
-                    ribHelper.concatTransform(fTranspose(trns));
+                    ri.transformBegin();
+                    ri.concatTransform(RIBHelper.fTranspose(trns));
                     HashMap map =new HashMap();
-                    ribHelper.sphere(r,-r,r,360f,map);
-                    ribHelper.transformEnd();
+                    ri.sphere(r,-r,r,360f,map);
+                    ri.transformEnd();
                     //pipeline.processPoint(a, i);            
                 }
             } else {
@@ -644,9 +613,9 @@ public class RIBVisitor extends SceneGraphVisitor {
                 }
                 map.put("P",pcf);
                 map.put("constant float constantwidth",new Float(r));
-                ribHelper.points(n,map);
+                ri.points(n,map);
             }
-                ribHelper.attributeEnd();       	
+                ri.attributeEnd();       	
         }
     }
     
@@ -658,8 +627,8 @@ public class RIBVisitor extends SceneGraphVisitor {
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.IndexedLineSet)
      */
     public void visit(IndexedLineSet g) {
-		ribHelper.comment("IndexedLineSet "+g.getName());
-		ribHelper.attributeBegin();
+		ri.comment("IndexedLineSet "+g.getName());
+		ri.attributeBegin();
 		setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
 		if (hasProxy((Geometry) g))	{
 			insidePointset = false;
@@ -670,14 +639,14 @@ public class RIBVisitor extends SceneGraphVisitor {
 	    		if (retainGeometry) {
 	   	    		Object which = pointsets.get(g);
 	   	  			if (which != null)	{
-	     	    		ribHelper.readArchive((String) which);
+	     	    		ri.readArchive((String) which);
 	    			} else {
-	    				ribHelper.comment("Retained geometry "+g.getName());
+	    				ri.comment("Retained geometry "+g.getName());
 	    				String finalname = g.getName()+pointsetCount;
-	    				ribHelper.archiveBegin(finalname);
+	    				ri.archiveBegin(finalname);
 	    				_visit(g);
-	    				ribHelper.archiveEnd();
-	    	    		ribHelper.readArchive(finalname);
+	    				ri.archiveEnd();
+	    	    		ri.readArchive(finalname);
 	    				pointsets.put(g, finalname );
 	    				pointsetCount++;
 	    			} 
@@ -688,7 +657,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	    	else
 	    			_visit(g);			
 		}
-       	ribHelper.attributeEnd();
+       	ri.attributeEnd();
     }
     
     private void _visit(IndexedLineSet g)	{
@@ -728,7 +697,7 @@ public class RIBVisitor extends SceneGraphVisitor {
             	   } else {
            				DataList edgec =  g.getEdgeAttributes(Attribute.COLORS);
             		   int n = g.getNumEdges();
-            		   ribHelper.color(cc);
+            		   ri.color(cc);
             		   double[][] crossSection = TubeUtility.octagonalCrossSection;
             			Object foo = eAppearance.getAttribute("lineShader.crossSection", crossSection);
             			if (foo != crossSection)	{
@@ -737,8 +706,8 @@ public class RIBVisitor extends SceneGraphVisitor {
             			for (int i = 0; i<n; ++i)	{
              				if (edgec != null) {
                					double[] edgecolor = edgec.item(i).toDoubleArray(null);
-               					ribHelper.comment("Edge color");
-               					ribHelper.color(edgecolor);
+               					ri.comment("Edge color");
+               					ri.color(edgecolor);
                				}
              				double[][] oneCurve = null;
             				oneCurve = IndexedLineSetUtility.extractCurve(oneCurve, g, i);
@@ -768,8 +737,8 @@ public class RIBVisitor extends SceneGraphVisitor {
     
     
     public void visit(IndexedFaceSet g) {
-		ribHelper.comment("IndexedFaceSet "+g.getName());
-		ribHelper.attributeBegin();
+		ri.comment("IndexedFaceSet "+g.getName());
+		ri.attributeBegin();
 		setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
 		if (hasProxy((Geometry) g))	{
 			insidePointset = false;
@@ -780,14 +749,14 @@ public class RIBVisitor extends SceneGraphVisitor {
 	    		if (retainGeometry) {
 	   	    		Object which = pointsets.get(g);
 	   	  			if (which != null)	{
-	     	    		ribHelper.readArchive((String) which);
+	     	    		ri.readArchive((String) which);
 	    			} else {
-	    				ribHelper.comment("Retained geometry "+g.getName());
+	    				ri.comment("Retained geometry "+g.getName());
 	    				String finalname = g.getName()+"_"+pointsetCount;
-	    				ribHelper.archiveBegin(finalname);
+	    				ri.archiveBegin(finalname);
 	    				_visit(g, null);
-	    				ribHelper.archiveEnd();
-	    	    		ribHelper.readArchive(finalname);
+	    				ri.archiveEnd();
+	    	    		ri.readArchive(finalname);
 	    				pointsets.put(g, finalname );
 	    				pointsetCount++;
 	    			} 
@@ -799,7 +768,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	    	else
 	    			_visit(g, null);			
 		}
-     	ribHelper.attributeEnd();
+     	ri.attributeEnd();
    }
    
  
@@ -843,17 +812,20 @@ public class RIBVisitor extends SceneGraphVisitor {
 
 	private void pointPolygon(IndexedFaceSet i, float[] color) {
 		int npolys =i.getNumFaces();
-			if(npolys!= 0) {
-				HashMap map = new HashMap();
-				//boolean smooth = !((String)eAppearance.getAttribute(CommonAttributes.POLYGON_SHADER,"default")).startsWith("flat");
-				boolean smooth = eAppearance.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING,true);
-				DataList coords = i.getVertexAttributes(Attribute.COORDINATES);
-				DoubleArrayArray da = coords.toDoubleArrayArray();
-				int pointlength = GeometryUtility.getVectorLength(coords);
-				// We'd like to be able to use the "Pw" attribute which accepts 4-vectors for point coordinates, but 3Delight-5.0.1
-				// does not support it ...  
-				// TODO figure out how to allow Pw output if desired, for example, if you have Pixar renderman renderer.
-     if (!hasPw || pointlength == 3)	{
+		if(npolys!= 0) {
+			HashMap<String, Object> map = new HashMap<String, Object>();
+			boolean smooth = eAppearance.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING,true);
+			DataList coords = i.getVertexAttributes(Attribute.COORDINATES);
+			DoubleArrayArray da = coords.toDoubleArrayArray();
+			int pointlength = GeometryUtility.getVectorLength(coords);
+			// We'd like to be able to use the "Pw" attribute which accepts 4-vectors for point coordinates, but 3Delight-5.0.1
+			// does not support it ...  
+			// As of now, now pixar renderer seems to able to handle the "Pw" parameter
+			// correctly. 
+			// See https://renderman.pixar.com/forum/showthread.php?s=&threadid=5935&highlight=tuberlin 
+			// for a bug description
+			// As a result, we set hasPw to false.
+			if (!hasPw || pointlength == 3)	{
 				float[] fcoords =new float[3*da.getLength()];
 				for (int j = 0; j < da.getLength(); j++) {
 					if (pointlength == 4)	{
@@ -869,19 +841,19 @@ public class RIBVisitor extends SceneGraphVisitor {
 						fcoords[3*j+2] =(float)da.getValueAt(j,2);
 					}
 				}
-				map.put("P",fcoords);       	
-     } else if (pointlength == 4)	{
-		float[] fcoords =new float[4*da.getLength()];
-		for (int j = 0; j < da.getLength(); j++) {
-		    fcoords[4*j+0] =(float)da.getValueAt(j,0);
-		    fcoords[4*j+1] =(float)da.getValueAt(j,1);
-		    fcoords[4*j+2] =(float)da.getValueAt(j,2);
-		    fcoords[4*j+3] =(float)da.getValueAt(j,3);
-		}
-		map.put("vertex hpoint P",fcoords);       	
-     }
-		DataList normals = i.getVertexAttributes(Attribute.NORMALS);
-		if(smooth && normals!=null) {
+			map.put("P",fcoords);       	
+	     } else if (pointlength == 4)	{
+			float[] fcoords =new float[4*da.getLength()];
+			for (int j = 0; j < da.getLength(); j++) {
+			    fcoords[4*j+0] =(float)da.getValueAt(j,0);
+			    fcoords[4*j+1] =(float)da.getValueAt(j,1);
+			    fcoords[4*j+2] =(float)da.getValueAt(j,2);
+			    fcoords[4*j+3] =(float)da.getValueAt(j,3);
+			}
+			map.put("vertex hpoint P",fcoords);       	
+	     }
+ 		 DataList normals = i.getVertexAttributes(Attribute.NORMALS);
+		 if(smooth && normals!=null) {
 			da = normals.toDoubleArrayArray();
 			int n = da.getLengthAt(0);
 			if (n == 4 && currentSignature == Pn.EUCLIDEAN)	{
@@ -898,8 +870,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			}
 			if (currentSignature == Pn.EUCLIDEAN) map.put("N",fnormals);
 			else map.put("vertex hpoint Nw", fnormals);
-		} 
-		else { //face normals
+		} else { //face normals
 			normals = i.getFaceAttributes(Attribute.NORMALS);
 			if (normals != null)	{
 				da = normals.toDoubleArrayArray();
@@ -931,33 +902,33 @@ public class RIBVisitor extends SceneGraphVisitor {
 				//ftex[2*j+1] =(float)d.getValueAt(j,1);
 			}
 			map.put("st",ftex);
-			}
+		}
  
-			DataList vertexColors = i.getVertexAttributes(Attribute.COLORS);
-		   	DataList faceColors=i.getFaceAttributes( Attribute.COLORS );
-			if((smooth || faceColors == null) && vertexColors!= null) {
-					int vertexColorLength=GeometryUtility.getVectorLength(vertexColors);
-					float[] vCol =new float[3*vertexColors.size()];
-					float[] vOp=null;
-					if(vertexColorLength == 4 ) vOp = new float[3*vertexColors.size()];
-					for (int j = 0; j < vertexColors.size(); j++) {
-						//ftex[j] =(float)d.getValueAt(j);
-					DoubleArray rgba = vertexColors.item(j).toDoubleArray();
-	    
-					vCol[3*j]   =(float)rgba.getValueAt(0);
-					vCol[3*j+1] =(float)rgba.getValueAt(1);
-					vCol[3*j+2] =(float)rgba.getValueAt(2);
-					if(vertexColorLength ==4) {
-						vOp[3*j]    =(float)rgba.getValueAt(3);
-						vOp[3*j+1]  =(float)rgba.getValueAt(3);
-						vOp[3*j+2]  =(float)rgba.getValueAt(3);
-					}
-					//ftex[2*j] =(float)d.getValueAt(j,0);
-					//ftex[2*j+1] =(float)d.getValueAt(j,1);
+		DataList vertexColors = i.getVertexAttributes(Attribute.COLORS);
+	   	DataList faceColors=i.getFaceAttributes( Attribute.COLORS );
+		if((smooth || faceColors == null) && vertexColors!= null) {
+				int vertexColorLength=GeometryUtility.getVectorLength(vertexColors);
+				float[] vCol =new float[3*vertexColors.size()];
+				float[] vOp=null;
+				if(vertexColorLength == 4 ) vOp = new float[3*vertexColors.size()];
+				for (int j = 0; j < vertexColors.size(); j++) {
+					//ftex[j] =(float)d.getValueAt(j);
+				DoubleArray rgba = vertexColors.item(j).toDoubleArray();
+    
+				vCol[3*j]   =(float)rgba.getValueAt(0);
+				vCol[3*j+1] =(float)rgba.getValueAt(1);
+				vCol[3*j+2] =(float)rgba.getValueAt(2);
+				if(vertexColorLength ==4) {
+					vOp[3*j]    =(float)rgba.getValueAt(3);
+					vOp[3*j+1]  =(float)rgba.getValueAt(3);
+					vOp[3*j+2]  =(float)rgba.getValueAt(3);
 				}
-				map.put("varying color Cs",vCol);
-				if(vertexColorLength == 4 ) map.put("varying color Os",vOp);
+				//ftex[2*j] =(float)d.getValueAt(j,0);
+				//ftex[2*j+1] =(float)d.getValueAt(j,1);
 			}
+			map.put("varying color Cs",vCol);
+			if(vertexColorLength == 4 ) map.put("varying color Os",vOp);
+		}
 		else if (faceColors != null)		{
 			int faceColorLength=GeometryUtility.getVectorLength(faceColors);
 			float[] vCol =new float[3*faceColors.size()];
@@ -975,11 +946,9 @@ public class RIBVisitor extends SceneGraphVisitor {
 					vOp[3*j+1]  =(float)rgba.getValueAt(3);
 					vOp[3*j+2]  =(float)rgba.getValueAt(3);
 				}
-				//ftex[2*j] =(float)d.getValueAt(j,0);
-				//ftex[2*j+1] =(float)d.getValueAt(j,1);
 			}
 			map.put("uniform color Cs",vCol);
-			//if(faceColorLength == 4 ) map.put("uniform color Os",vOp);
+			if(faceColorLength == 4 ) map.put("uniform color Os",vOp);
 		}
  
 			int[] nvertices =new int[npolys];
@@ -1005,33 +974,36 @@ public class RIBVisitor extends SceneGraphVisitor {
 				if (color.length==4){
 					thisOpacity = color[3]*currentOpacity;
 					f[0]=f[1] = f[2] = thisOpacity ;
-					ribHelper.opacity(f);
+					ri.opacity(f);
 				}	
 //					f[0]=thisOpacity*color[0];f[1]=thisOpacity*color[1];f[2]=thisOpacity*color[2];
 				// TODO figure out work-around: this doesn't work
 				// with PRMAN 12.5
-				ribHelper.color(new float[]{color[0], color[1], color[2]});
+				// Since there is a bug in PRMAN 12.5: see RenderMan Forums
+				// https://renderman.pixar.com/forum/showthread.php?s=&threadid=5935&highlight=tuberlin
+				ri.color(new float[]{color[0], color[1], color[2]});
 			}
-		ribHelper.pointsPolygons(npolys,nvertices,vertices,map);
+		ri.pointsPolygons(npolys,nvertices,vertices,map);
 		}
 	}
+	// TODO figure out if this works!
     public void visit(ClippingPlane p) {
-        ribHelper.clippingPlane(0,0,0,0,0,1);
+        ri.clippingPlane(0,0,1,0,0,0);
     }
-    /* (non-Javadoc)
-     * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.UnitSphere)
-     */
+
     public void visit(Sphere s) {
     	if (hasProxy(s)) return;
         setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
-        ribHelper.sphere(1f,-1f,1f,360f,null);
+        ri.sphere(1f,-1f,1f,360f,null);
     }
     
     public void visit(Cylinder c) {
+    	if (hasProxy(c)) return;
         setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
-        ribHelper.cylinder(1f,-1f,1f,360f,null);
-        ribHelper.disk(-1f,1f,360f,null);
-        ribHelper.disk(1f,1f,360f,null);
+        ri.cylinder(1f,-1f,1f,360f,null);
+        // TODO Decide whether a jReality Cylinder is closed or not!
+        ri.disk(-1f,1f,360f,null);
+        ri.disk(1f,1f,360f,null);
         
     }
 
@@ -1065,38 +1037,20 @@ public class RIBVisitor extends SceneGraphVisitor {
         
     /**
      * @param maximumEyeSplits.
+     * @deprecated Use {@link CommonAttributes#RMAN_MAX_EYE_SPLITS} in root Appearance
      */
     public void setMaximumEyeSplits(int maximumEyeSplits){
     	this.maximumEyeSplits[0]=maximumEyeSplits;
     }
     
+    /** 
+     * The beginning of support for different renderers: currently not used for anything
+     * @param rendererType
+     */
+    public void setRendererType(int rendererType) {
+		this.rendererType = rendererType;
+	}
     
-    private static void dirToEuler(double r[]) {
-        double d =Rn.euclideanNorm(r);
-        double x = r[0]/d;
-        double y = r[1]/d;
-        double z = r[2]/d;
-        
-        double xrot = 0;
-        double zrot = 0;
-        double yrot = 0;
-        
-//  if(x*x+y*y -0.0001> 0.) {
-//      xrot =  -Math.acos(z);
-//      zrot =  Math.atan2(y,x);
-//  }
-        if(z*z +x*x -0.000000001> 0.) {
-            xrot =  Math.acos(y);
-            yrot =  Math.atan2(x,z);
-        } else {
-            xrot =  (y>0?0:Math.PI);
-            yrot = 0;
-        }    
-        
-        r[0] = xrot;
-        r[1] = yrot;
-        r[2] = zrot;
-    }
 
     public int getRendererType() {
 		return rendererType;

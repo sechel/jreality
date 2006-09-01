@@ -84,13 +84,13 @@ class RendermanSkyBox {
   static int[] vertices = {0,1,2,3};
   static void render(RIBVisitor ribv, double[] w2c, CubeMap cm)	{
     ImageData[] imgs=TextureUtility.getCubeMapImages(cm);
-    ribv.ribHelper.color(Color.WHITE);
-    ribv.ribHelper.comment("Skybox ");
-    ribv.ribHelper.transformBegin();
-    ribv.ribHelper.concatTransform(RIBVisitor.fTranspose(Rn.times(null, 
+    ribv.ri.color(Color.WHITE);
+    ribv.ri.comment("Skybox ");
+    ribv.ri.transformBegin();
+    ribv.ri.concatTransform(RIBHelper.fTranspose(Rn.times(null, 
     		Rn.inverse(null, w2c),
     		P3.extractOrientationMatrix(null, w2c, Pn.originP3, Pn.EUCLIDEAN))));
-	ribv.ribHelper.concatTransform(RIBVisitor.fTranspose(P3.makeStretchMatrix(null, 500.0)));
+	ribv.ri.concatTransform(RIBHelper.fTranspose(P3.makeStretchMatrix(null, 500.0)));
 	ConstantTexture ct = new ConstantTexture();
 	float[] vvv = new float[12];
 	float[] tc = new float[8];
@@ -104,15 +104,15 @@ class RendermanSkyBox {
 	for (int i = 0; i<6; ++i)	{
 		String name = ribv.writeTexture(imgs[i]);
 		ct.getAttributes().put("texturename",name);
-		ribv.ribHelper.shader(ct);
+		ribv.ri.shader(ct);
 		int m = 0;
 		for (int j = 0; j<4; ++j)	{
 			for (int k = 0; k<3; ++k) 
 				vvv[m++] = (float) cubeVerts3[i][j][k];
 		}
-		ribv.ribHelper.pointsPolygons(1,nvertices, vertices, map);
+		ribv.ri.pointsPolygons(1,nvertices, vertices, map);
 	}
-	ribv.ribHelper.transformEnd();
+	ribv.ri.transformEnd();
 	}
 	
 }
