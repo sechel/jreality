@@ -43,24 +43,15 @@ package de.jreality.renderman;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
-import java.awt.image.WritableRaster;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Level;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriter;
 
 import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.GeometryUtility;
@@ -104,7 +95,6 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.LoggingSystem;
 
 
 /**
@@ -117,6 +107,9 @@ import de.jreality.util.LoggingSystem;
  * <li> Clipping planes written but not tested</li>
  * <li> Add control over global options using (something like) "renderingHints" shader {@link de.jreality.shader.RenderingHintsShader}</li>
  * <li> Add support for the differences between the various RenderMan renderers (Pixar, 3DLight, Asis)</li>
+ * <li> Use the {@link de.jreality.shader.CommonAttributes#RMAN_GLOBAL_INCLUDE_FILE} to set global options: this is 
+ * rib file that is read in at the top of the output rib file, and can be used to set all kinds of global
+ * variables.  We should minimize trying to handle all these possibilities in this backend.</li>
  * <li> Writing ordinary texture files: 
  * <ul>
  * <li>Currently tries to write TIFF, if can't then writes PNG.</li>
@@ -124,7 +117,9 @@ import de.jreality.util.LoggingSystem;
  * <li> Figure out how to write out the right filename suffix as a shader parameter: prman for example expects .tex format,
  * even though the file we write out is a .tiff file (which gets converted later to .tex)</li>
  * </ul>
- * <li>Writing reflection maps: 
+ * <li>Writing reflection maps: </li>
+ * <li>Make sure users understand what the "rgba" output format implies (no background)</li>
+ * <li>Resolve issue with the alpha channel of colors appearing in shaders (see jReality Talk)</li>
  * </ul>
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>, Charles Gunn
  * @see de.jreality.shader.CommonAttributes
@@ -141,7 +136,7 @@ public class RIBVisitor extends SceneGraphVisitor {
     boolean insidePointset = false;		// life gets complicated with appearance-generated tubes and spheres
     protected boolean shadowEnabled = false;
     protected  boolean fullSpotLight = false;
-    protected  boolean retainGeometry = false;
+    protected  boolean retainGeometry = false;	// should geometry be saved using "Begin/EndArchive"?
     protected  boolean useProxyCommands = true;
     // user can specify that tubes and spheres drawn by the appearances are to be opaque
     // reqardless of the current transparency value
@@ -203,10 +198,15 @@ public class RIBVisitor extends SceneGraphVisitor {
 		ri.end();
     }
 
-	private void render() {
+	/**
+	 * Does the work in rendering the scene graph.
+	 *
+	 */
+ 	private void render() {
 
         handleGlobalSettings();
      
+        // handle the camera model next
        // 
         // TODO handle negative far clipping plane as used in elliptic geometry
         //	(OpenGL supports this) (can we do this here by generating our own matrices?)
@@ -261,13 +261,16 @@ public class RIBVisitor extends SceneGraphVisitor {
     	   ri.readArchive("world");
     	   return;
        }
+       // handle the world
         ri.comment("world to camera");
         //       world2Camera = MatrixBuilder.euclidean().scale(1,1,-1).times(world2Camera).getArray();
         ri.concatTransform(RIBHelper.fTranspose(world2Camera));
         ri.worldBegin();
        // alpha in the output format means skip over any background settings
         if (outputDisplayFormat != "rgba")		handleBackground();
+        // handle the lights
         new LightCollector(root, this);
+        // finally render the scene graph
         root.accept(this);
         ri.worldEnd();
         if (whichEye == CameraUtility.LEFT_EYE)	{
@@ -276,7 +279,22 @@ public class RIBVisitor extends SceneGraphVisitor {
         }
 	}
 
-	private void handleGlobalSettings() {
+	private void handleRootAppearance() {
+		maximumEyeSplits[0] = ((Integer) eAppearance.getAttribute(CommonAttributes.RMAN_MAX_EYE_SPLITS, new Integer(maximumEyeSplits[0]))).intValue();
+		shaderPath = (String) eAppearance.getAttribute(CommonAttributes.RMAN_SEARCHPATH_SHADER, "");
+		textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");
+		shadowEnabled = eAppearance.getAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, false);
+		currentSignature = eAppearance.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
+      	outputDisplayFormat = (String) eAppearance.getAttribute(CommonAttributes.RMAN_OUTPUT_DISPLAY_FORMAT, "rgb");
+      	globalIncludeFile = (String) eAppearance.getAttribute(CommonAttributes.RMAN_GLOBAL_INCLUDE_FILE, "");
+      	System.err.println("Preamble is "+globalIncludeFile);
+	}
+
+	/**
+	 * Write the top of the rib file
+	 *
+	 */
+ 	private void handleGlobalSettings() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("shader", (shaderPath!=null?(shaderPath+":"):"")+".:&");
         ri.option( "searchpath", map);
@@ -292,19 +310,9 @@ public class RIBVisitor extends SceneGraphVisitor {
         if (globalIncludeFile != "") ri.readArchive((String) globalIncludeFile);
 	}
 
-	private void handleRootAppearance() {
-		maximumEyeSplits[0] = ((Integer) eAppearance.getAttribute(CommonAttributes.RMAN_MAX_EYE_SPLITS, new Integer(maximumEyeSplits[0]))).intValue();
-		shaderPath = (String) eAppearance.getAttribute(CommonAttributes.RMAN_SEARCHPATH_SHADER, "");
-		textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");
-		shadowEnabled = eAppearance.getAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, false);
-		currentSignature = eAppearance.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-      	outputDisplayFormat = (String) eAppearance.getAttribute(CommonAttributes.RMAN_OUTPUT_DISPLAY_FORMAT, "rgb");
-      	globalIncludeFile = (String) eAppearance.getAttribute(CommonAttributes.RMAN_GLOBAL_INCLUDE_FILE, "");
-      	System.err.println("Preamble is "+globalIncludeFile);
-	}
-
 	/**
-	 * Handle background specifications contained in the top-level appearance
+	 * Handle background specifications contained in the top-level appearance: skybox,
+	 * flat background color, or gradient background colors
 	 * TODO: fog
 	 * @see de.jreality.shader.RootAppearance
 	 */
@@ -336,9 +344,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 		         ri.imager("background",map);        
 		    }       			
 		}
-
-			}
 	}
+}
 
     /**
      * Handle request for gradient like background image
@@ -456,71 +463,22 @@ public class RIBVisitor extends SceneGraphVisitor {
             return writeTexture(data);
     }
 
-	String writeTexture(ImageData data) {
+	public String writeTexture(ImageData data) {
 		String noSuffix = (String) textures.get(data);
 		if(noSuffix == null) {
 			noSuffix = ribFileName+"_texture"+(textureCount++);
-		    writeTexture(data, noSuffix);
+		    RIBHelper.writeTexture(data, noSuffix);
 			textures.put(data, noSuffix);
          }
 		return noSuffix+"."+textureFileSuffix;		// should be dependent on the final renderman renderer
 	}
     
-    public static void writeTexture(ImageData data, String noSuffix){
-        BufferedImage img;
-        for (Iterator iter = ImageIO.getImageWritersByMIMEType("image/tiff"); iter.hasNext(); ) {
-         	System.err.println("Writer: "+((ImageWriter) iter.next()).getClass().getName());
-        }
-        
-        if (true) {
-                // TODO temporary as long as ImageData does not return a propper BufferedImage
-                byte[] byteArray = data.getByteArray();
-                int dataHeight = data.getHeight();
-                int dataWidth = data.getWidth();
-                img = new BufferedImage(dataWidth, dataHeight,
-                        BufferedImage.TYPE_INT_ARGB);
-                WritableRaster raster = img.getRaster();
-                int[] pix = new int[4];
-                for (int y = 0, ptr = 0; y < dataHeight; y++) {
-                    for (int x = 0; x < dataWidth; x++, ptr += 4) {
-                        pix[3] = byteArray[ptr + 3];
-                        pix[0] = byteArray[ptr];
-                        pix[1] = byteArray[ptr + 1];
-                        pix[2] = byteArray[ptr + 2];
-                        raster.setPixel(x, y, pix);
-                    }
-                }
-            } else {
-            	img = (BufferedImage) data.getImage();
-            }
-            // force alpha channel to be "pre-multiplied"
-		    img.coerceData(true);
-
-            boolean worked=true;
-			try {
-				// TODO: !!!
-				//worked = ImageIO.write(img, "TIFF", new File(noSuffix+".tiff"));
-				Method cm = Class.forName("javax.media.jai.JAI").getMethod("create", new Class[]{String.class, RenderedImage.class, Object.class, Object.class});
-				cm.invoke(null, new Object[]{"filestore", img, noSuffix+".tiff", "tiff"});
-//				Statement stm = new Statement(, "create", new Object[]{"filestore", img, noSuffix+".tiff", "tiff"});
-//				stm.execute();
-			} catch(Throwable e) {
-				worked=false;
-	            LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write TIFF: "+noSuffix+".tiff", e);
-			}
-            if (!worked) {
-              try {
-				worked =ImageIO.write(img, "PNG", new File(noSuffix+".png"));
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-              if (!worked) 
-                  LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write PNG: {0}.png", noSuffix);
-            }
-    }
-    
-    public boolean hasProxy(Geometry g)		{
+    /**
+     * Check to see if the Geometry has a proxy rib command attached to it.
+     * @param g
+     * @return
+     */
+	public boolean hasProxy(Geometry g)		{
     	if (!useProxyCommands) return false;
     	Object proxy = g.getGeometryAttributes("rendermanProxyCommand");
     	if (proxy != null)	{
@@ -573,7 +531,7 @@ public class RIBVisitor extends SceneGraphVisitor {
      	insidePointset = false;
     }
     
-    public void _visit(PointSet p) {
+    private void _visit(PointSet p) {
         String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
         if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.VERTEX_DRAW),CommonAttributes.VERTEX_DRAW_DEFAULT)) {
             int n= p.getNumPoints();
@@ -779,7 +737,8 @@ public class RIBVisitor extends SceneGraphVisitor {
     * opaque surface) results in odd, incorrect results.  -gunn 9.6.6
     * @param i
     * @param color
-    */public void _visit(IndexedFaceSet i, float[] color) {
+    */
+    protected void _visit(IndexedFaceSet i, float[] color) {
 		String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
 		if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.FACE_DRAW),true)) {
 //			ribHelper.attributeBegin();

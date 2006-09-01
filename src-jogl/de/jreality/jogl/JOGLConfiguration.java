@@ -127,6 +127,7 @@ public class JOGLConfiguration {
 			quadBufferedStereo = "true".equals(System.getProperty("jreality.jogl.quadBufferedStereo"));
 			if (quadBufferedStereo) {
 				// hack, otherwise one side of swing gui will not be drawn
+				// only for windows
 				System.setProperty("sun.java2d.noddraw", "true");
 			}
 		} catch(SecurityException se)	{

@@ -56,6 +56,7 @@ import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 
 /**
+ * Render a sky box in RenderMan rib format.
  * @author Charles Gunn
  *
  */

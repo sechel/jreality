@@ -171,22 +171,22 @@ import de.jreality.scene.Appearance;
 	public static final String PICKABLE = "pickable";
 	public static final String SIGNATURE= "signature";
 	
+	// RenderMan backend attributes
 	public final static String RMAN_SHADOWS_ENABLED = "rendermanShadowsEnabled";
-	public final static String RMAN_SURFACE = "rendermanSurface";
-	public final static String RMAN_DISPLACEMENT = "rendermanDisplacement";
+	public static final String RMAN_SL_SHADER = "rendermanSLShader";
+	public final static String RMAN_SURFACE_SHADER = "rendermanSurfaceShader";
+	public final static String RMAN_LIGHT_SHADER = "rendermanLightShader";
+	public final static String RMAN_DISPLACEMENT_SHADER = "rendermanDisplacementShader";
 	public final static String RMAN_TEXTURE_FILE = "rendermanTexFile";
+	public static final String RMAN_REFLECTIONMAP_FILE = "rendermanReflectionmapFile";
 	public final static String RMAN_GLOBAL_INCLUDE_FILE = "rendermanGlobalIncludeFile";
 	public final static String RMAN_SEARCHPATH_SHADER = "rendermanSearchpathShader";
 	public static final String RMAN_OUTPUT_DISPLAY_FORMAT = "rendermanOutputDisplayFormat";
-	public static final String RMAN_PREAMBLE = "rendermanPreamble";
 	public static final String RMAN_PROXY_COMMAND = "rendermanProxyCommand";
 	public static final String RMAN_RETAIN_GEOMETRY = "rendermanRetainGeometry";
-	public static final String RMAN_REFLECTIONMAP_FILE = "rendermanReflectionmapFile";
-	public static final String RMAN_LIGHT_PREFIX = "rendermanLightPrefix";
-	public static final String RMAN_SL_SHADER = "rendermanSLShader";
-    /* 
-     * @param ap
-     * 
+	public static final String RMAN_MAX_EYE_SPLITS  = "rendermanMaxEyeSplits";
+	public static final String RMAN_TEXTURE_FILE_SUFFIX = "rendermanTextureFileSuffix";  
+	/* 
      * @deprecated
      */
 	public static void setDefaultValues(Appearance ap)	{

@@ -540,7 +540,7 @@ public class Primitives {
         
 		    factory.update();
 		    String rmanproxy = String.format("TransformBegin\n"+
-		    		"ConcatTransform 90 1 0 0\n"+
+		    		"Rotate 90 1 0 0\n"+
 		    		"Torus %f %f 0 360 360\n"+
 		    		"TransformEnd\n",new Object[]{new Double(bR), new Double(sR)});
 		    factory.getIndexedFaceSet().setGeometryAttributes(CommonAttributes.RMAN_PROXY_COMMAND,rmanproxy);
