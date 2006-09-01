@@ -325,7 +325,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 			GLCapabilitiesChooser chooser = new MultisampleChooser();
 			caps.setSampleBuffers(true);
 			caps.setNumSamples(4);
-			caps.setStereo(JOGLConfiguration.portalUsage);
+			caps.setStereo(JOGLConfiguration.quadBufferedStereo);
 			canvas = new GLCanvas(caps, chooser, firstOne,  GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice());
 		} else {
 			canvas = new GLCanvas(caps);
