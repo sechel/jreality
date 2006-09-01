@@ -51,39 +51,26 @@ import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
 
 
-public class ShiftFieldOfView extends AbstractAction {
+public class ToggleStereo extends AbstractAction {
 	
 	private Viewer viewer;
 	private Camera camera;
-	private double step = 0.05;
 	
 
-	public ShiftFieldOfView(String name, Viewer v, boolean decrease) {
+	public ToggleStereo(String name, Viewer v) {
 		super(name);
 		viewer = v;
 		camera = (Camera) v.getCameraPath().getLastElement();
 		
-		if (decrease) {
-			step = -step;
-			putValue(SHORT_DESCRIPTION, "Decrease the field of view of the camera");
-			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F1, InputEvent.SHIFT_MASK));
-		}
-		else {
-			putValue(SHORT_DESCRIPTION, "Increase the field of view of the camera");
-			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F2, InputEvent.SHIFT_MASK));
-		}
+		putValue(SHORT_DESCRIPTION, "Toggle stereo of the camera");
+		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F8, InputEvent.SHIFT_MASK));
 	}
 	
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		camera.setFieldOfView(camera.getFieldOfView() + step);
+		camera.setStereo(!camera.isStereo());
 		viewer.render();
 	}
-	
-	
-	public void setStep(double step) {
-		this.step = step;
-	}
-	
+
 }

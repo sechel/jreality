@@ -55,7 +55,7 @@ public class ShiftFocus extends AbstractAction {
 	
 	private Viewer viewer;
 	private Camera camera;
-	private double step = 0.5;
+	private double step = 0.05;
 	
 
 	public ShiftFocus(String name, Viewer v, boolean decrease) {

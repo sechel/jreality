@@ -66,6 +66,7 @@ import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFieldOfView;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFocus;
 import de.jreality.ui.viewerapp.actions.camera.TogglePerspective;
+import de.jreality.ui.viewerapp.actions.camera.ToggleStereo;
 import de.jreality.ui.viewerapp.actions.viewer.Render;
 import de.jreality.ui.viewerapp.actions.viewer.ToggleFullScreen;
 import de.jreality.ui.viewerapp.actions.viewer.ToggleViewerFullScreen;
@@ -100,6 +101,7 @@ public class MenuFactory {
   public static String DECREASE_EYE_SEPARATION = "Decrease eyeSeparation";
   public static String INCREASE_EYE_SEPARATION = "Increase eyeSeparation";
   public static String TOGGLE_PERSPECTIVE = "Toggle perspective";
+  public static String TOGGLE_STEREO = "Toggle stereo";
   
   private JFrame frame = null;
   private ViewerApp viewerApp = null;
@@ -212,6 +214,7 @@ public class MenuFactory {
       cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(DECREASE_EYE_SEPARATION, viewerSwitch, true)));
       cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(INCREASE_EYE_SEPARATION, viewerSwitch, false)));
       cameraMenu.add(new JMenuItem(new TogglePerspective(TOGGLE_PERSPECTIVE, viewerSwitch)));
+      cameraMenu.add(new JMenuItem(new ToggleStereo(TOGGLE_STEREO, viewerSwitch)));
     }    
     
     //enable or disable menus depending on navigator selection

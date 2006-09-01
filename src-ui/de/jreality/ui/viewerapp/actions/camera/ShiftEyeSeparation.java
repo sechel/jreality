@@ -55,7 +55,7 @@ public class ShiftEyeSeparation extends AbstractAction {
 	
 	private Viewer viewer;
 	private Camera camera;
-	private double step = 0.1;
+	private double step = 0.005;
 	
 
 	public ShiftEyeSeparation(String name, Viewer v, boolean decrease) {
