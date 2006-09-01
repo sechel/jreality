@@ -296,7 +296,7 @@
 
   <target name="soft" depends="backends-share" description="build soft backend">
   <mkdir dir="${build}/soft" />
-    <javac excludesfile="excludes.txt" srcdir="${soft}:${renderman}" destdir="${build}/soft" debug="true">
+    <javac excludesfile="excludes.txt" srcdir="${soft}" destdir="${build}/soft" debug="true">
       <compilerarg line="-source 1.5" />
       <classpath refid="backend.classpath"/>
     </javac>
