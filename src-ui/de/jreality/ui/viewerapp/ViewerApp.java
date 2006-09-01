@@ -260,15 +260,6 @@ public class ViewerApp {
   }
   
   /**
-   * Calls ViewerAppOld.display(), use if menu is needed.
-   */
-  public static void displayOld(SceneGraphNode node) {
-    
-    ViewerAppOld.display(node);
-  }
-  
-  
-  /**
    * Update the factory (needs to be invoked before calling display or getter methods). 
    */
   public void update() {
