@@ -97,15 +97,9 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	}
 
 	public Viewer(SceneGraphPath camPath, SceneGraphComponent root) {
-    renderer = new JOGLRenderer(this); 
+		renderer = new JOGLRenderer(this); 
 		setAuxiliaryRoot(SceneGraphUtility.createFullSceneGraphComponent("AuxiliaryRoot"));
 		initializeFrom(root, camPath);	
-		// for reasons unknown, have to be very careful on Linux not to try to draw too early.
-		// to avoid this, set the following variables 
-//		if (JOGLConfiguration.isLinux)	{
-//		    canvas.setIgnoreRepaint(true);
-//			canvas.setNoAutoRedrawMode(true);			
-//		}
 	}
 
 	public SceneGraphComponent getSceneRoot() {
