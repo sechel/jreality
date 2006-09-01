@@ -851,7 +851,8 @@ public class IndexedFaceSetUtility {
     	sgc.setGeometry(ifs);
     	return sgc;
     }
-	// Anfang Bernd
+	// XXX: reads specular (!) color as vertex colors for IndexedLineSets - bug in VRML reader? 
+	// Anfang Bernd 
 	private static SceneGraphComponent _mergeIndexedLineSets(SceneGraphComponent sgc)	{
     	Vector ilslist = new Vector();
     	Vector colorList = new Vector();
@@ -870,7 +871,7 @@ public class IndexedFaceSetUtility {
     		ilslist.add(ils);
     		lengths.add(new Integer(ils.getNumPoints()));
     		vcount += ils.getNumPoints();
-        	Object dc =  eap.getAttribute("polygonShader.diffuseColor",Color.WHITE, Color.class);
+        	Object dc =  eap.getAttribute("specularColor",Color.WHITE, Color.class);
         	if (dc instanceof Color)		{
         		colorList.add(dc);
         	}  else 
@@ -891,7 +892,7 @@ public class IndexedFaceSetUtility {
           		ap = child.getAppearance();
           		if (ap != null)	{
           			EffectiveAppearance ceap = eap.create(ap);
-          			Object dc =  ceap.getAttribute("polygonShader.diffuseColor",Color.WHITE, Color.class);
+          			Object dc =  ceap.getAttribute("specularColor",Color.WHITE, Color.class);
           			if (dc instanceof Color)		{
           				colorList.add(dc);
           			}  else 
