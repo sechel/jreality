@@ -353,7 +353,7 @@ class DeviceManager {
  */
 public List<ToolEvent> updateImplicitDevices() {
 	    boolean worldToCamChanged=false, camToNDCChanged=false, avatarChanged = false;
-      double[] matrix;
+      double[] matrix = null;
       if (viewer.getCameraPath() != null) {
         matrix = viewer.getCameraPath().getInverseMatrix(null);
   	    if (!Rn.equals(matrix, worldToCamTrafo)) {
@@ -374,8 +374,8 @@ public List<ToolEvent> updateImplicitDevices() {
         }
       }
       if (avatarPath != null) matrix = avatarPath.getMatrix(null);
-      else matrix = viewer.getCameraPath().getMatrix(null);
-      if (!Rn.equals(matrix, avatarTrafo)) {
+      else if (viewer.getCameraPath() != null) matrix = viewer.getCameraPath().getMatrix(null);
+      if (matrix != null && !Rn.equals(matrix, avatarTrafo)) {
           Rn.copy(avatarTrafo, matrix);
           avatarChanged = true;
       }
