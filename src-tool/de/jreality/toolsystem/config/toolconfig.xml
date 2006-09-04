@@ -96,6 +96,11 @@
       <outputslot>PanelActivation</outputslot>
     </virtualdevice>
     
+    <virtualdevice type="de.jreality.toolsystem.virtual.VirtualToggleAxis">
+      <inputslot>JumpActivation</inputslot>
+      <outputslot>RotationToggle</outputslot>
+    </virtualdevice>
+
     <virtualdevice type="de.jreality.toolsystem.virtual.VirtualMap">
       <inputslot>PrimaryAction</inputslot>
       <outputslot>PickShowActivation</outputslot>
