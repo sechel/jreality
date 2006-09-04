@@ -213,7 +213,7 @@ public class ViewerApp {
     	//which is not the case when hiding menuBar
     	JMenuBar menuBar = frame.getJMenuBar();
     	for (int i = 0; i < menuBar.getComponentCount(); i++)
-			menuBar.getMenu(i).setVisible(false);
+    	  menuBar.getMenu(i).setVisible(false);
     }
     
     frame.validate();
@@ -581,6 +581,8 @@ public class ViewerApp {
       renderTrigger.removeViewer(currViewer);
     }
     if (currViewer != null) currViewer.dispose();
+    
+    frame.dispose();
   }
 
 
