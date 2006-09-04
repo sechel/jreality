@@ -38,35 +38,48 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.viewer;
+package de.jreality.ui.viewerapp.actions.file;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.IOException;
 
-import javax.swing.KeyStroke;
+import javax.swing.JOptionPane;
 
-import de.jreality.scene.Viewer;
+import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.reader.Readers;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.ui.viewerapp.FileLoaderDialog;
+import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
 
 
-public class Render extends AbstractAction {
+public class LoadFileMerged extends AbstractAction {
 
-  private Viewer viewer;
-  
-  
-  public Render(String name, Viewer viewer) {
-    super(name);
-    putValue(SHORT_DESCRIPTION, "Render");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("R"));
-    
-    if (viewer == null) 
-      throw new IllegalArgumentException("Viewer is null!");
-    
-    this.viewer = viewer;
+
+  public LoadFileMerged(String name, SelectionManager sm, Component frame) {
+    super(name, sm, frame);
+    putValue(SHORT_DESCRIPTION, "Load one or more files and merge IndexedFaceSets");
   }
+
   
-    
   public void actionPerformed(ActionEvent e) {
-    viewer.render();
+  
+    File[] files = FileLoaderDialog.loadFiles(frame);
+    for (int i = 0; i < files.length; i++) {
+      try {
+        SceneGraphComponent sgc = Readers.read(files[i]);
+        sgc = IndexedFaceSetUtility.mergeIndexedFaceSets(sgc);
+        sgc = IndexedFaceSetUtility.mergeIndexedLineSets(sgc);
+        sgc.setName(files[i].getName());
+        System.out.println("READ finished.");
+        selection.getLastComponent().addChild(sgc);
+      } 
+      catch (IOException ioe) {
+        JOptionPane.showMessageDialog(frame, "Failed to load file: "+ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      }
+    }
   }
 
 }

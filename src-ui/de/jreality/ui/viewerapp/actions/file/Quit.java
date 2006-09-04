@@ -38,44 +38,28 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions;
+package de.jreality.ui.viewerapp.actions.file;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.io.File;
-import java.io.IOException;
+import java.awt.event.KeyEvent;
 
-import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 
-import de.jreality.reader.Readers;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.viewerapp.FileLoaderDialog;
-import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.actions.AbstractAction;
 
 
-public class LoadFile extends AbstractAction {
+public class Quit extends AbstractAction {
 
 
-  public LoadFile(String name, SelectionManager sm, Component frame) {
-    super(name, sm, frame);
-    putValue(SHORT_DESCRIPTION, "Load one or more files");
+  public Quit(String name) {
+    super(name);
+    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
+    putValue(SHORT_DESCRIPTION, "Quit");
   }
-
   
+
   public void actionPerformed(ActionEvent e) {
-  
-    File[] files = FileLoaderDialog.loadFiles(frame);
-    for (int i = 0; i < files.length; i++) {
-      try {
-        final SceneGraphComponent sgc = Readers.read(files[i]);
-        sgc.setName(files[i].getName());
-        System.out.println("READ finished.");
-        selection.getLastComponent().addChild(sgc);
-      } 
-      catch (IOException ioe) {
-        JOptionPane.showMessageDialog(frame, "Failed to load file: "+ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-      }
-    }
+    System.exit(0);
   }
-
+ 
 }

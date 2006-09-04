@@ -38,35 +38,62 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.viewer;
+package de.jreality.ui.viewerapp.actions.file;
 
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
 
+import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
-import de.jreality.scene.Viewer;
+import de.jreality.io.JrScene;
+import de.jreality.reader.ReaderJRS;
+import de.jreality.ui.viewerapp.FileLoaderDialog;
+import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.util.Input;
 
 
-public class Render extends AbstractAction {
+public class LoadScene extends AbstractAction {
 
-  private Viewer viewer;
+  private ViewerApp viewerApp;
   
-  
-  public Render(String name, Viewer viewer) {
+
+  public LoadScene(String name, ViewerApp viewerApp, Frame frame) {
     super(name);
-    putValue(SHORT_DESCRIPTION, "Render");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("R"));
+    this.frame = frame;
+    putValue(SHORT_DESCRIPTION, "Open saved scene");
+    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
     
-    if (viewer == null) 
-      throw new IllegalArgumentException("Viewer is null!");
+    if (viewerApp == null) 
+      throw new IllegalArgumentException("ViewerApp is null!");
     
-    this.viewer = viewer;
+    this.viewerApp = viewerApp;
   }
-  
-    
+
+  @Override
   public void actionPerformed(ActionEvent e) {
-    viewer.render();
+    File[] fs = FileLoaderDialog.loadFiles(frame);
+    if (fs == null || fs.length == 0) return;
+    File f = fs[0];
+    JrScene scene = null;
+    try {
+      ReaderJRS r = new ReaderJRS();
+      r.setInput(new Input(f));
+      scene = r.getScene();
+      ViewerApp v = new ViewerApp(scene);
+      v.setAttachNavigator(viewerApp.isAttachNavigator());
+      v.setAttachBeanShell(viewerApp.isAttachBeanShell());
+      v.update();
+      viewerApp.dispose();
+      v.display();
+    } catch (IOException ioe) {
+      JOptionPane.showMessageDialog(frame, "Load failed: "+ioe.getMessage());
+    }
   }
 
 }

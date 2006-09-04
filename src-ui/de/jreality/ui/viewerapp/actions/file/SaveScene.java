@@ -38,35 +38,59 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.viewer;
+package de.jreality.ui.viewerapp.actions.file;
 
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
+import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
-import de.jreality.scene.Viewer;
+import de.jreality.io.JrScene;
+import de.jreality.toolsystem.ToolSystemViewer;
+import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.writer.WriterJRS;
 
 
-public class Render extends AbstractAction {
+public class SaveScene extends AbstractAction {
 
-  private Viewer viewer;
+  private ToolSystemViewer viewer;
   
-  
-  public Render(String name, Viewer viewer) {
+
+  public SaveScene(String name, ToolSystemViewer viewer, Frame frame) {
     super(name);
-    putValue(SHORT_DESCRIPTION, "Render");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("R"));
+    this.frame = frame;
+    putValue(SHORT_DESCRIPTION, "Save scene as a file");
+    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
     
     if (viewer == null) 
       throw new IllegalArgumentException("Viewer is null!");
     
     this.viewer = viewer;
   }
-  
-    
+
+  @Override
   public void actionPerformed(ActionEvent e) {
-    viewer.render();
+    File file = FileLoaderDialog.selectTargetFile(frame);
+    if (file == null) return;
+    try {
+      FileWriter fw = new FileWriter(file);
+      WriterJRS writer = new WriterJRS();
+      JrScene s = new JrScene(viewer.getSceneRoot());
+      s.addPath("cameraPath", viewer.getCameraPath());
+      s.addPath("avatarPath", viewer.getAvatarPath());
+      s.addPath("emptyPickPath", viewer.getEmptyPickPath());
+      writer.writeScene(s, fw);
+      fw.close();
+    } catch (IOException ioe) {
+      JOptionPane.showMessageDialog(frame, "Save failed: "+ioe.getMessage());
+    }
   }
 
 }

@@ -38,7 +38,7 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions;
+package de.jreality.ui.viewerapp.actions.comp;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -65,6 +65,7 @@ import de.jreality.tools.ShipScaleTool;
 import de.jreality.tools.ShowPropertiesTool;
 import de.jreality.tools.TranslateTool;
 import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.actions.AbstractAction;
 
 
 public class AddTool extends AbstractAction {

@@ -38,47 +38,48 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions;
+package de.jreality.ui.viewerapp.actions.comp;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.io.File;
-import java.io.IOException;
+import java.awt.event.KeyEvent;
 
-import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 
-import de.jreality.geometry.IndexedFaceSetUtility;
-import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.viewerapp.FileLoaderDialog;
+import de.jreality.scene.SceneGraphPath;
 import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.SelectionManager.SelectionEvent;
+import de.jreality.ui.viewerapp.actions.AbstractAction;
 
 
-public class LoadFileMerged extends AbstractAction {
+public class Remove extends AbstractAction {
 
-
-  public LoadFileMerged(String name, SelectionManager sm, Component frame) {
-    super(name, sm, frame);
-    putValue(SHORT_DESCRIPTION, "Load one or more files and merge IndexedFaceSets");
+  private SelectionManager sm;
+  
+  
+  public Remove(String name, SelectionManager sm) {
+    super(name, sm);
+    this.sm = sm;
+    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
+    putValue(SHORT_DESCRIPTION, "Delete");
   }
-
+  
   
   public void actionPerformed(ActionEvent e) {
+    //selection.getLength() > 1
+    SceneGraphComponent child = selection.getLastComponent();
+    SceneGraphPath parentPath = selection.popNew();
+    parentPath.getLastComponent().removeChild(child);
+    sm.setSelection(parentPath);
+  }
   
-    File[] files = FileLoaderDialog.loadFiles(frame);
-    for (int i = 0; i < files.length; i++) {
-      try {
-        SceneGraphComponent sgc = Readers.read(files[i]);
-        sgc = IndexedFaceSetUtility.mergeIndexedFaceSets(sgc);
-        sgc = IndexedFaceSetUtility.mergeIndexedLineSets(sgc);
-        sgc.setName(files[i].getName());
-        System.out.println("READ finished.");
-        selection.getLastComponent().addChild(sgc);
-      } 
-      catch (IOException ioe) {
-        JOptionPane.showMessageDialog(frame, "Failed to load file: "+ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-      }
-    }
+  
+  @Override
+  public void selectionChanged(SelectionEvent e) {
+      super.selectionChanged(e);
+      if (selection.getLength() == 1)
+        setEnabled(false);
+      else setEnabled(true);
   }
 
 }

@@ -56,17 +56,21 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.Navigator.SelectionEvent;
-import de.jreality.ui.viewerapp.actions.AddTool;
-import de.jreality.ui.viewerapp.actions.LoadFile;
-import de.jreality.ui.viewerapp.actions.LoadFileMerged;
-import de.jreality.ui.viewerapp.actions.Quit;
-import de.jreality.ui.viewerapp.actions.Remove;
 import de.jreality.ui.viewerapp.actions.ToggleAppearance;
 import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFieldOfView;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFocus;
 import de.jreality.ui.viewerapp.actions.camera.TogglePerspective;
 import de.jreality.ui.viewerapp.actions.camera.ToggleStereo;
+import de.jreality.ui.viewerapp.actions.comp.AddTool;
+import de.jreality.ui.viewerapp.actions.comp.AssignFaceAABBTree;
+import de.jreality.ui.viewerapp.actions.comp.Remove;
+import de.jreality.ui.viewerapp.actions.comp.TogglePickable;
+import de.jreality.ui.viewerapp.actions.file.LoadFile;
+import de.jreality.ui.viewerapp.actions.file.LoadFileMerged;
+import de.jreality.ui.viewerapp.actions.file.LoadScene;
+import de.jreality.ui.viewerapp.actions.file.Quit;
+import de.jreality.ui.viewerapp.actions.file.SaveScene;
 import de.jreality.ui.viewerapp.actions.viewer.Render;
 import de.jreality.ui.viewerapp.actions.viewer.ToggleFullScreen;
 import de.jreality.ui.viewerapp.actions.viewer.ToggleViewerFullScreen;
@@ -85,9 +89,13 @@ public class MenuFactory {
 
   public static String LOAD_FILE = "Load files";
   public static String LOAD_FILE_MERGED = "Load merged files";
+  public static String LOAD_SCENE = "Load scene";
+  public static String SAVE_SCENE = "Save scene";
   public static String QUIT = "Quit";
   public static String REMOVE = "Remove";
   public static String ADD_TOOL = "Add Tool";
+  public static String TOGGLE_PICKABLE = "Toggle pickable";
+  public static String ASSIGN_FACE_AABBTREE = "Assign AABBTree";
   public static String TOGGLE_VERTEX_DRAWING = "Toggle vertex drawing";
   public static String TOGGLE_EDGE_DRAWING = "Toggle egde drawing";
   public static String TOGGLE_FACE_DRAWING = "Toggle face drawing";
@@ -158,8 +166,15 @@ public class MenuFactory {
     
     fileMenu.insert(new JMenuItem(new LoadFile(LOAD_FILE, sm, frame)), 0);
     fileMenu.insert(new JMenuItem(new LoadFileMerged(LOAD_FILE_MERGED, sm, frame)), 1);
+    if (viewerApp != null) {
+      fileMenu.insert(new JMenuItem(new LoadScene(LOAD_SCENE, viewerApp, frame)), 2);
+      fileMenu.insert(new JMenuItem(new SaveScene(SAVE_SCENE, viewerApp.getViewer(), frame)), 3);
+    }
     compMenu.add(new JMenuItem(new Remove(REMOVE, sm)));
     compMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, frame)));
+    compMenu.addSeparator();
+    compMenu.add(new JMenuItem(new TogglePickable(TOGGLE_PICKABLE, sm)));
+    compMenu.add(new JMenuItem(new AssignFaceAABBTree(ASSIGN_FACE_AABBTREE, sm)));
     
     final JMenu appMenu = new JMenu("Appearance");
     appMenu.setMnemonic(KeyEvent.VK_A);
@@ -199,9 +214,7 @@ public class MenuFactory {
       }
 
       viewerMenu.addSeparator();
-      JMenuItem mi = new JMenuItem(new Render(RENDER, viewerSwitch));
-      mi.setAccelerator(KeyStroke.getKeyStroke("R"));
-      viewerMenu.add(mi);
+      viewerMenu.add(new JMenuItem(new Render(RENDER, viewerSwitch)));
       
       //camera actions
       final JMenu cameraMenu = new JMenu("Camera");

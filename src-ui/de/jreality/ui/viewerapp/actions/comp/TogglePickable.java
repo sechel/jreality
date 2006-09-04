@@ -38,35 +38,32 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.viewer;
+package de.jreality.ui.viewerapp.actions.comp;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.KeyStroke;
-
-import de.jreality.scene.Viewer;
+import de.jreality.scene.Geometry;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.util.PickUtility;
 
 
-public class Render extends AbstractAction {
-
-  private Viewer viewer;
+public class TogglePickable extends AbstractAction {
   
-  
-  public Render(String name, Viewer viewer) {
-    super(name);
-    putValue(SHORT_DESCRIPTION, "Render");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("R"));
-    
-    if (viewer == null) 
-      throw new IllegalArgumentException("Viewer is null!");
-    
-    this.viewer = viewer;
+  public TogglePickable(String name, SelectionManager sm) {
+    super(name, sm);
+    putValue(SHORT_DESCRIPTION, "Toggle pickability of selection");
   }
   
-    
+  @Override
   public void actionPerformed(ActionEvent e) {
-    viewer.render();
+    Geometry g = selection.getLastComponent().getGeometry();
+    if (g!=null) {
+      Boolean b = (Boolean)g.getGeometryAttributes(CommonAttributes.PICKABLE);
+      if (b==null) b = true;  //default
+      PickUtility.setPickable(g, !b);
+    }
   }
 
 }

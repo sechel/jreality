@@ -38,26 +38,25 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions;
+package de.jreality.ui.viewerapp.actions.comp;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 
-import javax.swing.KeyStroke;
-
-
-public class Quit extends AbstractAction {
+import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.util.PickUtility;
 
 
-  public Quit(String name) {
-    super(name);
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
-    putValue(SHORT_DESCRIPTION, "Quit");
+public class AssignFaceAABBTree extends AbstractAction {
+
+  public AssignFaceAABBTree(String name, SelectionManager sm) {
+    super(name, sm);
+    putValue(SHORT_DESCRIPTION, "Assign AABBTree to faces");
   }
-  
 
+  @Override
   public void actionPerformed(ActionEvent e) {
-    System.exit(0);
+    PickUtility.assignFaceAABBTrees(selection.getLastComponent());
   }
- 
+
 }

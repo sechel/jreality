@@ -47,14 +47,15 @@ import javax.swing.KeyStroke;
 
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.SelectionManager.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManager.SelectionListener;
 
 
 public abstract class AbstractAction extends javax.swing.AbstractAction {
 
-  Component frame;
-  SceneGraphPath selection;
+  protected Component frame;
+  protected SceneGraphPath selection;
   
   
   public AbstractAction(String name, final SelectionManager sm, Component frame) {
@@ -77,6 +78,11 @@ public abstract class AbstractAction extends javax.swing.AbstractAction {
   
   public AbstractAction(String name, SelectionManager sm) {
     this(name, sm, null);
+  }
+  
+  
+  public AbstractAction(String name, ViewerApp viewerApp) {
+    this(name, viewerApp.getSelectionManager(), viewerApp.getFrame());
   }
   
   
