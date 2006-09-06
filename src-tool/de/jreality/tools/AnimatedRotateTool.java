@@ -51,50 +51,59 @@ import de.jreality.scene.tool.ToolContext;
  * Instantly starts an animated rotation of a SceneGraphComponent after initialization of the tool system
  * when it is added to the components tools.<br>
  * The rotation angle and axis can be set using the corresponding methods.<br>
- * The animation stops with a left mouse click.
+ * The animation stops with a right mouse click.
  */
 public class AnimatedRotateTool  extends AbstractTool {
 	
 	private static InputSlot actSlot = InputSlot.getDevice("SystemTime");
-	private static InputSlot deactSlot = InputSlot.getDevice("RotateActivation");
+	private static InputSlot deactSlot = InputSlot.getDevice("PrimarySelection");
+  private static InputSlot pause = InputSlot.getDevice("RotationToggle");
 	
 	
 	public AnimatedRotateTool() {
 		addCurrentSlot(actSlot, "Need notification to perform once.");
+    addCurrentSlot(pause);
+    addCurrentSlot(deactSlot);
 	}
 	
 	
 	private double angle = 0.007;
 	private double[] axis = new double[]{0, 1, 0};
-	private boolean isRunning = false;
-	
+	private AnimatorTask task = null;
+  private SceneGraphComponent cmp = null;
+  
+  
 	public void perform(ToolContext tc) {
 		
-		final SceneGraphComponent cmp = tc.getRootToToolComponent().getLastComponent();
-		
-		if (isRunning) {
+    if (task == null) {  //first performance
+      cmp = tc.getRootToToolComponent().getLastComponent();
+      task = new AnimatorTask() {
+
+        public boolean run(double time, double dt) {
+          MatrixBuilder m = MatrixBuilder.euclidean(cmp.getTransformation());
+          m.rotate(0.05*dt*angle, axis);
+          m.assignTo(cmp);
+          return true;
+        }
+      };
+      removeCurrentSlot(actSlot);
+      //task is scheduled in the following
+    }
+    
+    //deactivation
+		if (tc.getAxisState(deactSlot).isPressed()) {
 			removeCurrentSlot(deactSlot);
+      removeCurrentSlot(pause);
 			AnimatorTool.getInstance().deschedule(cmp);
 			cmp.removeTool(this);
 			return; 
 		}
-		
-		isRunning = true;
-		
-		AnimatorTask task = new AnimatorTask() {
-			
-			public boolean run(double time, double dt) {
-				MatrixBuilder m = MatrixBuilder.euclidean(cmp.getTransformation());
-				m.rotate(0.05*dt*angle, axis);
-				m.assignTo(cmp);
-				return true;
-			}
-		};
-		
-		AnimatorTool.getInstance().schedule(cmp, task);
-		
-		removeCurrentSlot(actSlot);
-		addCurrentSlot(deactSlot);
+    
+		//pause
+    if (tc.getAxisState(pause).isReleased())
+      AnimatorTool.getInstance().schedule(cmp, task);
+    if (tc.getAxisState(pause).isPressed())
+      AnimatorTool.getInstance().deschedule(cmp);
 	}
 	
 	
@@ -125,7 +134,7 @@ public class AnimatedRotateTool  extends AbstractTool {
 		return "Instantly starts an animated rotation of a SceneGraphComponent " +
 				"after initialization of the tool system when it is added to the components tools. " +
 				"The rotation angle and axis can be set using the corresponding methods. " +
-				"The animation stops with a left mouse click.";
+				"The animation stops with a right mouse click.";
 	}
 	
 }
