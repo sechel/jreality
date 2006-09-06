@@ -87,6 +87,7 @@ public class ScenePanel {
     rack.setEdgeIndices(rackEdgeIndices);
     rackNode.setGeometry(rack.getIndexedLineSet());
 
+    app.setAttribute("showLines", true);
     app.setAttribute("lineShader.tubeRadius", 0.008);
     app.setAttribute("lineShader.diffuseColor", java.awt.Color.gray);
     app.setAttribute("pointShader.pointRadius", 0.016);
