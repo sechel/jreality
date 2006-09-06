@@ -62,8 +62,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -92,9 +94,10 @@ public class InspectorPanel extends JPanel
 
   private boolean reading;
   private Object currObject;
-  static final HashMap CLASS_TO_PANEL = new HashMap();
+  static final HashMap <Class, InspectorPanel> CLASS_TO_PANEL = new HashMap<Class, InspectorPanel>();
   Class type;
-  ArrayList editors, properties;
+  List <PropertyDescriptor> properties;
+  List <PropertyEditor> editors;
   ChangeListener changeListener;//XXX hack
 
   HashSet currentProperties=new HashSet();
@@ -107,8 +110,8 @@ public class InspectorPanel extends JPanel
   {
     if(cl==null) throw new NullPointerException("class==null");
     type=cl;
-    editors=new ArrayList();
-    properties=new ArrayList();
+    editors=new ArrayList<PropertyEditor>();
+    properties=new ArrayList<PropertyDescriptor>();
     setup();
   }
   private void setup() throws IntrospectionException
@@ -133,7 +136,10 @@ public class InspectorPanel extends JPanel
       if(c==null) continue;
       JLabel l=new JLabel(descriptor.getDisplayName());
       l.setLabelFor(c);
-      properties.add(pd[ix]);
+      String sd = descriptor.getShortDescription();
+      if(sd!=null&&!sd.equals(descriptor.getDisplayName()))
+        l.setToolTipText(sd);
+      properties.add(descriptor);
       editors.add(pe);
       this.add(l, label);
       this.add(c, editor);
@@ -266,6 +272,10 @@ public class InspectorPanel extends JPanel
       if(tags!=null) c=choices(pe, tags, editable);
       else c=textual(pe, editable);
     }
+    String sd = pd.getShortDescription();
+    if(sd!=null&&!sd.equals(pd.getDisplayName())&&
+      (c instanceof JComponent))
+      ((JComponent)c).setToolTipText(sd);
     return c;
   }
   private Component textual(final PropertyEditor pe, boolean editable)
