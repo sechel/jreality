@@ -191,7 +191,7 @@ public class InspectorPanel extends JPanel
         Method m=pd.getReadMethod();
         if(m==null) continue;
         PropertyEditor pe=(PropertyEditor)editors.get(ix);
-        pe.setValue(m.invoke(o, null));
+        pe.setValue(m.invoke(o));
       } catch(Exception ex){}//TODO
     } finally
     {
