@@ -72,9 +72,11 @@ import de.jreality.shader.CommonAttributes;
  * Use the factory as following:<br>
  * <code><b><pre>
  * SceneGraphCompontent component;
+ * double axisScale = 10.0;
  * [...]
- * CoordinateSystemFactory factory = new CoordinateSystemFactory(component);</pre></b></code>
+ * CoordinateSystemFactory factory = new CoordinateSystemFactory(component, axisScale);</pre></b></code>
  * Above line creates the coordinate system using default properties and adds it to the scene.<br>
+ * <code>axisScale</code> (i.e. the distance between two ticks on the coordinate axes) depends on size of component.<br>
  * You can change properties afterwards:
  * <code><b><pre>
  * factory.showAxes(false);
@@ -136,7 +138,7 @@ public class CoordinateSystemFactory {
 //-------------------------------------------------------------
 //DEFAULT VALUES OF PROPERTIES
 //-------------------------------------------------------------
-	private double axisScale = 0.5;  //the distance between two ticks on an axis
+	private double axisScale = 1.0;  //the distance between two ticks on an axis
 	private double labelScale = 0.0035;  //size of labels
 	private double arrowStretch = 16*labelScale; //stretch of arrows of axes (octagonalCrossSection)
 	private double tickStretch = 8*labelScale; //stretch of ticks of axes (octagonalCrossSection)
@@ -148,6 +150,7 @@ public class CoordinateSystemFactory {
 	private boolean showLabels = true;  //show or hide labels of ticks & axes
 	private Color coordinateSystemColor = Color.BLACK;
 	private Color gridColor = Color.GRAY;
+  private Color boxColor = Color.BLACK;
 	private Color labelColor = Color.BLACK;
 	private Font labelFont = new Font("Sans Serif", Font.PLAIN, 48);
 	private boolean beautify = true;  //for adding tool CoordinateSystemBeautifier
@@ -163,30 +166,49 @@ public class CoordinateSystemFactory {
 	 * axis are specified by <code>extent</code>, 
 	 * i.e. x,y,z are within [-<code>extent</code>, <code>extent</code>].
 	 * @param extent extent of each coordinate axis
+   * @param axisScale the axis scale, i.e. the distance between two ticks on the coordinate axes
 	 */
-	public CoordinateSystemFactory(double extent) {
+	public CoordinateSystemFactory(double extent, double axisScale) {
 		//TODO: validate extent (extent > 0)
 		
-		this(new double[]{extent, extent, extent});
+		this(new double[]{extent, extent, extent}, axisScale);
 	}
 	
+  /**
+   * see <code>CoordinateSystemFactory(double extent, double axisScale)</code><br>
+   * here axisScale is set to 1.0
+   */
+  public CoordinateSystemFactory(double extent) {
+    this(extent, 1.0);
+  }
+  
 	
 	/**
 	 * Creates a coordinate system where min and max values of each coordinate
 	 * axis are specified by <code>extent</code>, 
 	 * i.e. x is within [-<code>extent[0]</code>, <code>extent[0]</code>] etc.
 	 * @param extent contains the extent of each coordinate axis
+   * @param axisScale the axis scale, i.e. the distance between two ticks on the coordinate axes
 	 */
-	public CoordinateSystemFactory(double[] extent) {
+	public CoordinateSystemFactory(double[] extent, double axisScale) {
 		//TODO: validate extent (extent[i] > 0, extent.length == 3)
 		
 		boxMin = new double[]{-extent[X], -extent[Y], -extent[Z]};
 		boxMax = new double[]{ extent[X],  extent[Y],  extent[Z]};
-		
+		this.axisScale = axisScale;
+    
 		//create the coordinate system
 		coordinateSystem = createCoordinateSystem();
 	}
-	
+
+  /**
+   * see <code>CoordinateSystemFactory(double[] extent, double axisScale)</code><br>
+   * here axisScale is set to 1.0
+   */
+  public CoordinateSystemFactory(double[] extent) {
+    this(extent, 1.0);
+  }
+  
 	
 	/**
 	 * Creates a coordinate system  where min and max values of each coordinate
@@ -194,8 +216,9 @@ public class CoordinateSystemFactory {
 	 * A new SceneGraphNode containing the coordinate system is added to 
 	 * the children of <code>component</code>.
 	 * @param component the SceneGraphComponent specifying the extent of the coordinate system
+   * @param axisScale the axis scale, i.e. the distance between two ticks on the coordinate axes
 	 */
-	public CoordinateSystemFactory(SceneGraphComponent component) {
+	public CoordinateSystemFactory(SceneGraphComponent component, double axisScale) {
 		
 		//need to calculate bounding box without transformation of component
 		Transformation tmp = component.getTransformation();
@@ -213,7 +236,9 @@ public class CoordinateSystemFactory {
 				boxMax[axis] += 0.5;
 			}
 		}
-		
+    
+    this.axisScale = axisScale;
+    
 		//create the coordinate system
 		coordinateSystem = createCoordinateSystem();
 		component.addChild(coordinateSystem);
@@ -222,7 +247,15 @@ public class CoordinateSystemFactory {
 		component.setTransformation(tmp);
 	}
 
+  /**
+   * see <code>CoordinateSystemFactory(SceneGraphComponent component, double axisScale)</code><br>
+   * here axisScale is set to 1.0
+   */
+  public CoordinateSystemFactory(SceneGraphComponent component) {
+    this(component, 1.0);
+  }
 	
+  
 	
 //-------------------------------------------------------------
 //PRIVATE METHODS FOR CALCULATING THE SYSTEM
@@ -319,11 +352,12 @@ public class CoordinateSystemFactory {
 	    //calculate grid and add to box
 	    box.addChild(calculate2DGrid());
 	    
-	    //Appearance app = new Appearance();
-	    //app.setName("boxAppearance");
-	    //box.setAppearance(app);
+	    Appearance app = new Appearance();
+      app.setName("boxAppearance");
+      app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, boxColor);
+      box.setAppearance(app);
+      
 	    box.setVisible(showBox);
-
 	    nodes.put("box", box);
 	    return box;
 	}
@@ -1217,6 +1251,25 @@ public class CoordinateSystemFactory {
 	}
 	
 	
+  /**
+   * Set the color of the bounding box.
+   * @param c the color
+   */
+  public void setBoxColor(Color c) {
+    boxColor = c;
+    nodes.get("box").getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
+  }
+
+
+  /**
+   * Get the current color of the bounding box.
+   * @return the current color
+   */
+  public Color getBoxColor() {
+    return boxColor;
+  }
+  
+  
 	/**
 	 * Set the color of all labels of the coordinate system.
 	 * @param c the color
