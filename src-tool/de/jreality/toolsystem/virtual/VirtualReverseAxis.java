@@ -66,7 +66,7 @@ public class VirtualReverseAxis implements VirtualDevice {
     public ToolEvent process(VirtualDeviceContext context)
             throws MissingSlotException {
         ToolEvent e = context.getEvent();
-        return new ToolEvent(context.getEvent().getSource(), out, new AxisState(-e.getAxisState().doubleValue()));
+        return new ToolEvent(e.getSource(), out, e.getAxisState() == null ? AxisState.ORIGIN : new AxisState(-e.getAxisState().doubleValue()));
     }
 
     public void initialize(List inputSlots, InputSlot result,
