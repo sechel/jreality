@@ -42,6 +42,10 @@
     <mapping device="Keyboard" src="VK_P" target="ShowPick"/>
     <mapping device="Keyboard" src="VK_0" target="IncreaseSpeed"/>
     <mapping device="Keyboard" src="VK_9" target="DecreaseSpeed"/>
+    
+    <mapping device="Keyboard" src="VK_PAGE_DOWN" target="pageDown"/>
+    <mapping device="Keyboard" src="VK_PAGE_UP" target="pageUp"/>
+    
     <mapping device="Mouse" src="left" target="PrimaryAction"/>
     <mapping device="Mouse" src="right" target="PrimarySelection"/>
     <mapping device="Mouse" src="center" target="PrimaryMenu"/>
@@ -97,7 +101,7 @@
     </virtualdevice>
     
     <virtualdevice type="de.jreality.toolsystem.virtual.VirtualToggleAxis">
-      <inputslot>JumpActivation</inputslot>
+      <inputslot>JumpActivation</inputslot>    <!-- SPACE -->
       <outputslot>RotationToggle</outputslot>
     </virtualdevice>
 
