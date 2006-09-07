@@ -65,6 +65,7 @@ import de.jreality.shader.ImageData;
 import de.jreality.swing.ScenePanel;
 import de.jreality.tools.AnimatorTask;
 import de.jreality.tools.AnimatorTool;
+import de.jreality.tools.EncompassTool;
 import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
 
@@ -72,204 +73,225 @@ import de.jreality.util.PickUtility;
 public class GFZTool  extends AbstractTool {
 	
 	private static InputSlot actSlot = InputSlot.getDevice("SystemTime");
-  private static InputSlot pause = InputSlot.getDevice("RotationToggle");
-  private static InputSlot minus = InputSlot.getDevice("pageDown");
-  private static InputSlot plus = InputSlot.getDevice("pageUp");
+	private static InputSlot pause = InputSlot.getDevice("RotationToggle");
+	private static InputSlot minus = InputSlot.getDevice("pageDown");
+	private static InputSlot plus = InputSlot.getDevice("pageUp");
 	
-  
+	
 	public GFZTool() {
 		addCurrentSlot(actSlot, "Need notification to perform once.");
-    addCurrentSlot(pause);
-    addCurrentSlot(minus);
-    addCurrentSlot(plus);
+		addCurrentSlot(pause);
+		addCurrentSlot(minus);
+		addCurrentSlot(plus);
 	}
 	
-
+	
 	private double angle = 0.001;  //angle of rotation
 	private double[] axis = new double[]{0, 0, 1};  //axis of rotation
-  private double layerTimer = 1500.0;  //time in millis between layer change
-  
+	private double layerTimer = 1500.0;  //time in millis between layer change
+	
 	private AnimatorTask task = null;
-  private SceneGraphComponent cmp = null;
-  private int layerCount, topLayer, direction;
-  
-  
+	private SceneGraphComponent cmp = null;
+	private int layerCount, topLayer, direction;
+	
+	
 	public void perform(ToolContext tc) {
-    
-    if (task == null) {  //first performance
-      cmp = tc.getRootToToolComponent().getLastComponent();
-      layerCount = 24;
-      topLayer = 1;  //skip first child of gfz
-      direction = -1;  //start with hiding labels
-      
-      task = new AnimatorTask() {
-        double sum = 0;
-        
-        public boolean run(double time, double dt) {
-          //rotate cmp
-          MatrixBuilder m = MatrixBuilder.euclidean(cmp.getTransformation());
-          m.rotate(0.05*dt*angle, axis);
-          m.assignTo(cmp);
-          //set visibility of layers
-          if (sum > layerTimer) {
-            if ( direction<0 && topLayer < layerCount ) {
-              cmp.getChildComponent(topLayer++).setVisible(false);
-              if (topLayer == layerCount) direction = 1;
-            }
-            else if ( direction>0 && topLayer > 1 ) {
-              cmp.getChildComponent(--topLayer).setVisible(true);
-              if (topLayer == 1) direction = -1;
-            }
-            sum = 0;
-          }
-          else sum += dt; 
-            
-          return true;
-        }
-      };
-      removeCurrentSlot(actSlot);
-      //task is scheduled in the following
-    }
-    
-    //don't perform if minus or plus are released
-    if (tc.getSource().equals(minus) && tc.getAxisState(minus).isReleased()) 
-      return;
-    if (tc.getSource().equals(plus) && tc.getAxisState(plus).isReleased()) 
-      return;
-    
-    if (tc.getAxisState(minus).isPressed()) {
-      if (topLayer < layerCount) {
-        cmp.getChildComponent(topLayer++).setVisible(false);
-        if (topLayer == layerCount) direction = 1;
-      }
-      return;
-    }
-    if (tc.getAxisState(plus).isPressed()) {
-      if (topLayer > 1) {
-        cmp.getChildComponent(--topLayer).setVisible(true);
-        if (topLayer == 1) direction = -1;
-      }
-      return;
-    }
-    
+		
+		if (task == null) {  //first performance
+			cmp = tc.getRootToToolComponent().getLastComponent();
+			layerCount = 24;
+			topLayer = 1;  //skip first child of gfz
+			direction = -1;  //start with hiding labels
+			
+			task = new AnimatorTask() {
+				double sum = 0;
+				
+				public boolean run(double time, double dt) {
+					//rotate cmp
+					MatrixBuilder m = MatrixBuilder.euclidean(cmp.getTransformation());
+					m.rotate(0.05*dt*angle, axis);
+					m.assignTo(cmp);
+					//set visibility of layers
+					if (sum > layerTimer) {
+						if ( direction<0 && topLayer < layerCount ) {
+							cmp.getChildComponent(topLayer++).setVisible(false);
+							if (topLayer == layerCount) direction = 1;
+						}
+						else if ( direction>0 && topLayer > 1 ) {
+							cmp.getChildComponent(--topLayer).setVisible(true);
+							if (topLayer == 1) direction = -1;
+						}
+						sum = 0;
+					}
+					else sum += dt; 
+					
+					return true;
+				}
+			};
+			removeCurrentSlot(actSlot);
+			//task is scheduled in the following
+		}
+		
+		//don't perform if minus or plus are released
+		if (tc.getSource().equals(minus) && tc.getAxisState(minus).isReleased()) 
+			return;
+		if (tc.getSource().equals(plus) && tc.getAxisState(plus).isReleased()) 
+			return;
+		
+		if (tc.getAxisState(minus).isPressed()) {
+			if (topLayer < layerCount) {
+				cmp.getChildComponent(topLayer++).setVisible(false);
+				if (topLayer == layerCount) direction = 1;
+			}
+			return;
+		}
+		if (tc.getAxisState(plus).isPressed()) {
+			if (topLayer > 1) {
+				cmp.getChildComponent(--topLayer).setVisible(true);
+				if (topLayer == 1) direction = -1;
+			}
+			return;
+		}
+		
 		//pause
-    if (tc.getAxisState(pause).isReleased())
-      AnimatorTool.getInstance().schedule(cmp, task);
-    if (tc.getAxisState(pause).isPressed())
-      AnimatorTool.getInstance().deschedule(cmp);
+		if (tc.getAxisState(pause).isReleased())
+			AnimatorTool.getInstance().schedule(cmp, task);
+		if (tc.getAxisState(pause).isPressed())
+			AnimatorTool.getInstance().deschedule(cmp);
 	}
 	
-  
-  public static void main(String[] args) throws FileNotFoundException, IOException {
-
-    File file = new File("/homes/geometer/msommer/gfz/gfz.jrs");
-    ReaderJRS r = new ReaderJRS();
-    r.setInput(new Input(file));
-    JrScene scene = r.getScene();
-    
-    final SceneGraphComponent root = scene.getSceneRoot();
-    final SceneGraphComponent sceneCmp = scene.getPath("emptyPickPath").getLastComponent();
-    final SceneGraphComponent gfz = sceneCmp.getChildComponent(0);
-    
-    PickUtility.assignFaceAABBTrees(gfz);  //allows fast picking
-    gfz.addTool(new GFZTool());
-    //gfz transformation
-    MatrixBuilder.euclidean().rotateX(-Math.PI/2.3).assignTo(sceneCmp);
-    
-    
-// BOTTOM RIGHT PANEL
-    final ScenePanel pan1 = createImagePanel("/homes/geometer/msommer/gfz/img/steckbrief_klein.jpg");
-    final ScenePanel pan2 = createImagePanel("/homes/geometer/msommer/gfz/img/DrillTec.jpg");
-    final SceneGraphComponent panCmp = new SceneGraphComponent();
-    panCmp.setName("panel");
-    final SceneGraphComponent child1 = pan1.getComponent();
-    final SceneGraphComponent child2 = pan2.getComponent();
-    child2.setVisible(false);
-    panCmp.addChild(child1);
-    panCmp.addChild(child2);
-    //panel transformation
-    MatrixBuilder.euclidean().translate(2700, -2800, 5000).scale(1750).rotateY(-Math.PI/5).assignTo(panCmp);
-    root.addChild(panCmp);
-    new Thread(new Runnable(){
-      public void run() {
-        while (true) {
-          try { Thread.sleep(5000); } 
-          catch (InterruptedException e) { e.printStackTrace(); }
-          child1.setVisible(!child1.isVisible());
-          child2.setVisible(!child2.isVisible());
-        }
-      }
-    }).start();
-    
-    
-//  LEGEND
-    double[][] points = new double[][]{{0,0,0}, {1,0,0}, {1,1,0}, {0,1,0}}; 
-    SceneGraphComponent legend = new SceneGraphComponent();
-    legend.setName("billboard");
-    root.addChild(legend);
-    legend.setGeometry(IndexedFaceSetUtility.constructPolygon(points));
-    Appearance app = new Appearance();
-    app.setAttribute(CommonAttributes.VERTEX_DRAW, false);
-    app.setAttribute(CommonAttributes.EDGE_DRAW, true);
-    app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
-//    app.setAttribute(CommonAttributes.LINE_WIDTH, 10.0);
-    app.setAttribute(CommonAttributes.FACE_DRAW, true);
-//    app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.GRAY);
-    app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
-    app.setAttribute(CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
-    legend.setAppearance(app);
-    ImageData img = new ImageData(new ImageIcon("/homes/geometer/msommer/gfz/img/legende_klein.jpg").getImage());
-    //TODO: add texture to component
-//  Texture2D tex = TextureUtility.createTexture(app, "polygonShader", img);
-    //legend transformation
-    final double ratio = 2.0;
-    MatrixBuilder.euclidean().scale(ratio*img.getWidth(), ratio*img.getHeight(), 0).translate(-3,-0.5,0).assignTo(legend);
-    
-    
-    
-// START VIEWERAPP
-    ViewerApp viewerApp = new ViewerApp(scene);
-//    viewerApp.setShowMenu(true);
-    viewerApp.setAttachNavigator(true);
-    viewerApp.setAttachBeanShell(true);
-    viewerApp.update();
-    viewerApp.display();
-    
-//    root.addTool(new SelectionTool(viewerApp));
-  }
-
-
-  private static ScenePanel createImagePanel(String fileName) {
-    
-    ScenePanel pan = new ScenePanel();
-    
-    final Image img = new ImageIcon(fileName).getImage();
-    final int w = img.getWidth(null);
-    final int h = img.getHeight(null);
-    JPanel imgPanel = new JPanel() {
-      @Override
-      public void paint(Graphics g) {
-        g.drawImage(img, 0, 0, w, h, null);
-      }
-    };
-    Dimension d = new Dimension(w, h);
-    imgPanel.setSize(w, h);
-    imgPanel.setPreferredSize(d);
-    imgPanel.setMinimumSize(d);
-    imgPanel.setMaximumSize(d);
-    
-    pan.getFrame().getContentPane().add(imgPanel);
-    pan.getFrame().pack();
-    
-    pan.getFrame().setVisible(true);
-    pan.setPanelWidth(1);
-    
-    return pan;
-  }
+	
+	
+	
+//	PROPERTIES
+	static final String gfzDir = "/homes/geometer/msommer/gfz";
+	static final int slideInterval = 5000;  //time after which the slide changes in millis
+	static final double scenePanelWidth = 1.0;
+	
+	public static void main(String[] args) throws FileNotFoundException, IOException {
+		
+		
+//		LOAD GFZ DATA
+		File file = new File(gfzDir + "/gfz.jrs");
+		ReaderJRS r = new ReaderJRS();
+		r.setInput(new Input(file));
+		JrScene scene = r.getScene();
+		
+		final SceneGraphComponent root = scene.getSceneRoot();
+		final SceneGraphComponent sceneCmp = scene.getPath("emptyPickPath").getLastComponent();
+		final SceneGraphComponent gfz = sceneCmp.getChildComponent(0);
+		
+		PickUtility.assignFaceAABBTrees(gfz);  //allows fast picking
+		gfz.addTool(new GFZTool());
+		//gfz transformation
+		MatrixBuilder.euclidean().rotateX(-Math.PI/2.3).assignTo(sceneCmp);
+		
+		
+//		BOTTOM RIGHT PANEL
+		final SceneGraphComponent panCmp = new SceneGraphComponent();
+		panCmp.setName("scenePanel");
+		addSlide(gfzDir + "/img/Steckbrief1_ms.jpg", panCmp);
+		addSlide(gfzDir + "/img/Steckbrief2_ms.jpg", panCmp);
+		addSlide(gfzDir + "/img/DrillTec_ms.jpg", panCmp);
+		//panel transformation
+		MatrixBuilder.euclidean().translate(2700, -2800, 5000).scale(1750).rotateY(-Math.PI/5).assignTo(panCmp);
+		root.addChild(panCmp);
+		new Thread(new Runnable(){
+			public void run() {
+				final int children = panCmp.getChildComponentCount();
+				int index = 0;
+				panCmp.getChildComponent(index).setVisible(true);
+				while (true) {
+					try { Thread.sleep(slideInterval); } 
+					catch (InterruptedException e) { e.printStackTrace(); }
+					panCmp.getChildComponent(index).setVisible(false);
+					index = ++index % children;
+					panCmp.getChildComponent(index).setVisible(true);
+				}
+			}
+		}).start();
+//		panCmp.addTool(new DraggingTool());
+		
+		
+//		LEGEND
+		double[][] points = new double[][]{{0,0,0}, {1,0,0}, {1,1,0}, {0,1,0}}; 
+		SceneGraphComponent legend = new SceneGraphComponent();
+		legend.setName("legend");
+		root.addChild(legend);
+		legend.setGeometry(IndexedFaceSetUtility.constructPolygon(points));
+		Appearance app = new Appearance();
+		app.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+		app.setAttribute(CommonAttributes.EDGE_DRAW, true);
+		app.setAttribute(CommonAttributes.LINE_WIDTH, 2.0);
+		app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.GRAY);
+		app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
+		app.setAttribute(CommonAttributes.FACE_DRAW, true);
+		app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
+		app.setAttribute(CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
+		legend.setAppearance(app);
+		ImageData img = ImageData.load(Input.getInput(gfzDir + "/img/Legende.jpg"));
+		//TODO: add texture to component
+//		Texture2D tex = TextureUtility.createTexture(app, CommonAttributes.POLYGON_SHADER, img);
+//		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(1).getMatrix());
+//		tex.setApplyMode(Texture2D.GL_MODULATE);
+		//legend transformation
+		final double ratio = 1.0;  //size of billboard
+		MatrixBuilder.euclidean().scale(ratio*img.getWidth(), ratio*img.getHeight(), 0).translate(-3,-0.2,0).assignTo(legend);
+		legend.addTool(new EncompassTool());
+		
+		
+//		START VIEWERAPP
+		ViewerApp viewerApp = new ViewerApp(scene);
+//		viewerApp.setShowMenu(true);
+//		viewerApp.setAttachNavigator(true);
+//		viewerApp.setAttachBeanShell(true);
+		viewerApp.update();
+		viewerApp.display();
+		
+//		root.addTool(new SelectionTool(viewerApp));
+	}
+	
+	
+	
+	private static ScenePanel createImagePanel(String fileName) {
+		
+		ScenePanel pan = new ScenePanel();
+		
+		final Image img = new ImageIcon(fileName).getImage();
+		final int w = img.getWidth(null);
+		final int h = img.getHeight(null);
+		JPanel imgPanel = new JPanel() {
+			@Override
+			public void paint(Graphics g) {
+				g.drawImage(img, 0, 0, w, h, null);
+			}
+		};
+		Dimension d = new Dimension(w, h);
+		imgPanel.setSize(w, h);
+		imgPanel.setPreferredSize(d);
+		imgPanel.setMinimumSize(d);
+		imgPanel.setMaximumSize(d);
+		
+		pan.getFrame().getContentPane().add(imgPanel);
+		pan.getFrame().pack();
+		
+		pan.getFrame().setVisible(true);
+		pan.setPanelWidth(scenePanelWidth);
+		
+		return pan;
+	}
+	
+	
+	private static void addSlide(String filename, SceneGraphComponent parent) {
+		final ScenePanel pan = createImagePanel(filename);
+		final SceneGraphComponent child = pan.getComponent();
+		child.setVisible(false);
+		parent.addChild(child);
+	}
 }
 
 
-//------ OLD STUFF -------------------------------
+//------ OLD STUFF ---------------------------------------------------------------------
 //COORDINATE SYSTEM (bounding box)
 //final CoordinateSystemFactory coords = new CoordinateSystemFactory(gfz, 500.0);
 //coords.showLabels(false);
@@ -314,9 +336,9 @@ public class GFZTool  extends AbstractTool {
 //final double sqrt = Math.sqrt(0.5*Math.pow(offset, 2.0));
 //final double labelScale = 5.0;
 //double[][] vertices = new double[][]{
-//  {-1222-sqrt, -400-sqrt, 800},  //red 
-//  {-1160, -347+offset, 1000},     //blue
-//  {-1139+sqrt, -429-sqrt, 1200}}; //green
+//{-1222-sqrt, -400-sqrt, 800},  //red 
+//{-1160, -347+offset, 1000},     //blue
+//{-1139+sqrt, -429-sqrt, 1200}}; //green
 //String[] labels = new String[]{"red", "blue", "green"};
 //Color[] colors = new Color[]{Color.RED, Color.BLUE, Color.GREEN};
 //final SceneGraphComponent pipeLabels = new SceneGraphComponent();
@@ -341,21 +363,3 @@ public class GFZTool  extends AbstractTool {
 //pipeLabels.addChild(cmp);
 //}
 //gfz.addChild(pipeLabels);
-
-
-//WHITE FACE FOR TEXTURES
-//double[][] points = new double[][]{{1,1,0}, {-1,1,0}, {-1,-1,0}, {1,-1,0}}; 
-//SceneGraphComponent c = new SceneGraphComponent();
-//c.setName("billboard");
-//c.setGeometry(IndexedFaceSetUtility.constructPolygon(points));
-//((IndexedFaceSet)c.getGeometry()).setFaceAttributes(Attribute.LABELS, new StringArray(new String[]{"hello"}));
-//app = new Appearance();
-//app.setAttribute(CommonAttributes.VERTEX_DRAW, false);
-//app.setAttribute(CommonAttributes.EDGE_DRAW, true);
-//app.setAttribute(CommonAttributes.FACE_DRAW, true);
-//app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.BLACK);
-//app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
-//app.setAttribute(CommonAttributes.POINT_SHADER+"."+"scale", labelScale);  //label scale
-//c.setAppearance(app);
-//MatrixBuilder.euclidean().scale(400, 800, 0).translate(0,-10,0).assignTo(c);
-//root.addChild(c);
