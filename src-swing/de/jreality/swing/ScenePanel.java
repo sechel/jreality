@@ -120,6 +120,8 @@ public class ScenePanel {
         panelNode);
   }
 
+  boolean showFeet=true;
+  
   double[][] rackVerts(double panelHeight) {
     double cos = Math.cos(angle);
     double sin = Math.sin(angle);
@@ -137,12 +139,12 @@ public class ScenePanel {
 
     // lower right front
     verts[2][0] = panelWidth/2;
-    verts[2][1] = belowGround;
+    verts[2][1] = showFeet ? belowGround : aboveGround - sin * panelHeight;;
     verts[2][2] = 0;
 
     // lower right back
     verts[3][0] = panelWidth/2;
-    verts[3][1] = belowGround;
+    verts[3][1] = showFeet ? belowGround : aboveGround;
     verts[3][2] = cos * panelHeight;
 
     // upper left back
@@ -157,12 +159,12 @@ public class ScenePanel {
 
     // lower left front
     verts[6][0] = -panelWidth/2;
-    verts[6][1] = belowGround;
+    verts[6][1] = showFeet ? belowGround : aboveGround - sin * panelHeight;
     verts[6][2] = 0;
 
     // lower left back
     verts[7][0] = -panelWidth/2;
-    verts[7][1] = belowGround;
+    verts[7][1] = showFeet ? belowGround : aboveGround;
     verts[7][2] = cos * panelHeight;
 
     return verts;
@@ -241,5 +243,13 @@ public class ScenePanel {
   public double getPanelWidth() {
     return panelWidth;
   }
+
+	public boolean isShowFeet() {
+		return showFeet;
+	}
+
+	public void setShowFeet(boolean showFeet) {
+		this.showFeet = showFeet;
+	}
   
 }
