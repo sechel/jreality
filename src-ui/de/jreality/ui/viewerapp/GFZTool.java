@@ -193,9 +193,10 @@ public class GFZTool  extends AbstractTool {
 //		BOTTOM RIGHT PANEL
 		final SceneGraphComponent panCmp = new SceneGraphComponent();
 		panCmp.setName("scenePanel");
-		addSlide(gfzDir + "/img/Steckbrief1_ms.jpg", panCmp);
-		addSlide(gfzDir + "/img/Steckbrief2_ms.jpg", panCmp);
-		addSlide(gfzDir + "/img/DrillTec_ms.jpg", panCmp);
+		addSlide(gfzDir + "/sheet1.jpg", panCmp);
+		addSlide(gfzDir + "/sheet2.jpg", panCmp);
+		addSlide(gfzDir + "/sheet3.jpg", panCmp);
+		addSlide(gfzDir + "/sheet4.jpg", panCmp);
 		//panel transformation
 		MatrixBuilder.euclidean().translate(4500, -2800, 1000).scale(2500).rotateY(-Math.PI/5).assignTo(panCmp);
 		root.addChild(panCmp);
@@ -263,14 +264,16 @@ public class GFZTool  extends AbstractTool {
 		final Image img = new ImageIcon(fileName).getImage();
 		final int w = img.getWidth(null);
 		final int h = img.getHeight(null);
+		final int border=20;
 		JPanel imgPanel = new JPanel() {
 			@Override
 			public void paint(Graphics g) {
-				g.drawImage(img, 0, 0, w, h, null);
+				g.clearRect(0, 0, w+2*border, h+2*border);
+				g.drawImage(img, border, border, w, h, null);
 			}
 		};
-		Dimension d = new Dimension(w, h);
-		imgPanel.setSize(w, h);
+		Dimension d = new Dimension(w+2*border, h+2*border);
+		imgPanel.setSize(w+2*border, h+2*border);
 		imgPanel.setPreferredSize(d);
 		imgPanel.setMinimumSize(d);
 		imgPanel.setMaximumSize(d);
