@@ -52,6 +52,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.ReaderJRS;
@@ -62,6 +63,8 @@ import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
+import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
 import de.jreality.swing.ScenePanel;
 import de.jreality.tools.AnimatorTask;
 import de.jreality.tools.AnimatorTool;
@@ -164,7 +167,7 @@ public class GFZTool  extends AbstractTool {
 	
 	
 //	PROPERTIES
-	static final String gfzDir = "/homes/geometer/msommer/gfz";
+	static final String gfzDir = "/net/MathVis/gfz";
 	static final int slideInterval = 5000;  //time after which the slide changes in millis
 	static final double scenePanelWidth = 1.0;
 	
@@ -194,7 +197,7 @@ public class GFZTool  extends AbstractTool {
 		addSlide(gfzDir + "/img/Steckbrief2_ms.jpg", panCmp);
 		addSlide(gfzDir + "/img/DrillTec_ms.jpg", panCmp);
 		//panel transformation
-		MatrixBuilder.euclidean().translate(2700, -2800, 5000).scale(1750).rotateY(-Math.PI/5).assignTo(panCmp);
+		MatrixBuilder.euclidean().translate(4500, -2800, 1000).scale(2500).rotateY(-Math.PI/5).assignTo(panCmp);
 		root.addChild(panCmp);
 		new Thread(new Runnable(){
 			public void run() {
@@ -204,9 +207,10 @@ public class GFZTool  extends AbstractTool {
 				while (true) {
 					try { Thread.sleep(slideInterval); } 
 					catch (InterruptedException e) { e.printStackTrace(); }
+					int nextIndex = (index+1) % children;
+					panCmp.getChildComponent(nextIndex).setVisible(true);
 					panCmp.getChildComponent(index).setVisible(false);
-					index = ++index % children;
-					panCmp.getChildComponent(index).setVisible(true);
+					index = nextIndex;
 				}
 			}
 		}).start();
@@ -214,14 +218,13 @@ public class GFZTool  extends AbstractTool {
 		
 		
 //		LEGEND
-		double[][] points = new double[][]{{0,0,0}, {1,0,0}, {1,1,0}, {0,1,0}}; 
 		SceneGraphComponent legend = new SceneGraphComponent();
 		legend.setName("legend");
 		root.addChild(legend);
-		legend.setGeometry(IndexedFaceSetUtility.constructPolygon(points));
+		legend.setGeometry(Primitives.texturedQuadrilateral(new double[]{0,1,0,1,1,0,1,0,0,0,0,0}));
 		Appearance app = new Appearance();
 		app.setAttribute(CommonAttributes.VERTEX_DRAW, false);
-		app.setAttribute(CommonAttributes.EDGE_DRAW, true);
+		app.setAttribute(CommonAttributes.EDGE_DRAW, false);
 		app.setAttribute(CommonAttributes.LINE_WIDTH, 2.0);
 		app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.GRAY);
 		app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
@@ -229,14 +232,13 @@ public class GFZTool  extends AbstractTool {
 		app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
 		app.setAttribute(CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
 		legend.setAppearance(app);
-		ImageData img = ImageData.load(Input.getInput(gfzDir + "/img/Legende.jpg"));
+		ImageData img = ImageData.load(Input.getInput(gfzDir + "/img/Legende.png"));
 		//TODO: add texture to component
-//		Texture2D tex = TextureUtility.createTexture(app, CommonAttributes.POLYGON_SHADER, img);
-//		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(1).getMatrix());
-//		tex.setApplyMode(Texture2D.GL_MODULATE);
+		Texture2D tex = TextureUtility.createTexture(app, CommonAttributes.POLYGON_SHADER, img);
+		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(1).getMatrix());
 		//legend transformation
 		final double ratio = 1.0;  //size of billboard
-		MatrixBuilder.euclidean().scale(ratio*img.getWidth(), ratio*img.getHeight(), 0).translate(-3,-0.2,0).assignTo(legend);
+		MatrixBuilder.euclidean().translate(-6500, -2800, 0).scale(5).scale(ratio*img.getWidth(), ratio*img.getHeight(), 0).assignTo(legend);
 		legend.addTool(new EncompassTool());
 		
 		
@@ -256,7 +258,8 @@ public class GFZTool  extends AbstractTool {
 	private static ScenePanel createImagePanel(String fileName) {
 		
 		ScenePanel pan = new ScenePanel();
-		
+		pan.setShowFeet(false);
+		pan.setAngle(Math.PI/2);
 		final Image img = new ImageIcon(fileName).getImage();
 		final int w = img.getWidth(null);
 		final int h = img.getHeight(null);
