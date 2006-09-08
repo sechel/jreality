@@ -1,3 +1,42 @@
+/**
+*
+* This file is part of jReality. jReality is open source software, made
+* available under a BSD license:
+*
+* Copyright (c) 2003-2006, jReality Group: Charles Gunn, Tim Hoffmann, Markus
+* Schmies, Steffen Weissmann.
+*
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met:
+*
+* - Redistributions of source code must retain the above copyright notice, this
+*   list of conditions and the following disclaimer.
+*
+* - Redistributions in binary form must reproduce the above copyright notice,
+*   this list of conditions and the following disclaimer in the documentation
+*   and/or other materials provided with the distribution.
+*
+* - Neither the name of jReality nor the names of its contributors nor the
+*   names of their associated organizations may be used to endorse or promote
+*   products derived from this software without specific prior written
+*   permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+* POSSIBILITY OF SUCH DAMAGE.
+*
+*/
+
 package de.jreality.softviewer;
 
 import java.util.Arrays;
@@ -373,10 +412,18 @@ public class TrianglePipeline {
 
         double[] center = polygon.getCenter();
         if(faceNormal != null) {
-            center[Polygon.NX] = faceNormal.getValueAt(0);
-            center[Polygon.NY] = faceNormal.getValueAt(1);
-            center[Polygon.NZ] = faceNormal.getValueAt(2);
+            if(transform) {
+                VecMat.transformNormal(inverseTransposeMatrix,
+                        faceNormal.getValueAt(0), faceNormal.getValueAt(1), faceNormal
+                                .getValueAt(2), center, AbstractPolygon.NX);
+            } else {
+                center[Polygon.NX] = faceNormal.getValueAt(0);
+                center[Polygon.NY] = faceNormal.getValueAt(1);
+                center[Polygon.NZ] = faceNormal.getValueAt(2);
+            }
         }
+        boolean buildFaceNormal = faceNormal== null && !shader.interpolateColor();
+
         if(faceColor != null) { 
             center[Polygon.R] = faceColor.getValueAt(0);
             center[Polygon.G] = faceColor.getValueAt(1);
@@ -386,7 +433,8 @@ public class TrianglePipeline {
         }
         // iterate over vertives
         // to get world coordinates into vertexData
-        for (int i = 0; i < vertices.getLength(); i++) {
+        final int n = vertices.getLength();
+        for (int i = 0; i < n; i++) {
             // int vc = i* Triangle.VERTEX_LENGTH;
             int vi = vertices.getValueAt(i);
             DoubleArray vertex = vd.item(vi).toDoubleArray();
@@ -399,7 +447,6 @@ public class TrianglePipeline {
             } else {
                 normal = faceNormal;
             }
-            
             if(transform) {
             if (r3) {
                 VecMat.transform(matrix, vertex.getValueAt(0), vertex
@@ -422,6 +469,7 @@ public class TrianglePipeline {
             VecMat.transformNormal(inverseTransposeMatrix,
                     normal.getValueAt(0), normal.getValueAt(1), normal
                             .getValueAt(2), vertexData, AbstractPolygon.NX);
+            
             } else {
                 vertexData[Polygon.WX] = vertex.getValueAt(0);
                  vertexData[Polygon.WY] = vertex.getValueAt(1);
@@ -431,6 +479,16 @@ public class TrianglePipeline {
                  vertexData[Polygon.NY] = normal.getValueAt(1);
                  vertexData[Polygon.NZ] = normal.getValueAt(2);
                  //VecMat.normalize(vertexData, vc + Polygon.NX);
+            }
+            
+            if(buildFaceNormal) {
+                center[AbstractPolygon.NX] = 0;
+                center[AbstractPolygon.NY] = 0;
+                center[AbstractPolygon.NZ] = 0;
+                center[AbstractPolygon.NX] +=vertexData[Polygon.NX];                center[AbstractPolygon.NX] +=vertexData[Polygon.NX];
+                center[AbstractPolygon.NY] +=vertexData[Polygon.NY];
+                center[AbstractPolygon.NZ] +=vertexData[Polygon.NZ];
+                
             }
             if (vertexColors != null) {
                 DoubleArray color = vertexColors.item(vi).toDoubleArray();
@@ -452,6 +510,12 @@ public class TrianglePipeline {
                 vertexData[AbstractPolygon.V] = tc.getValueAt(1);
 
             }
+        }
+        if(buildFaceNormal) {
+//            center[AbstractPolygon.NX] /= n;
+//            center[AbstractPolygon.NY] /= n;
+//            center[AbstractPolygon.NZ] /= n;
+            VecMat.normalize(center,AbstractPolygon.NX);
         }
         // compute(vertices.getLength());
 

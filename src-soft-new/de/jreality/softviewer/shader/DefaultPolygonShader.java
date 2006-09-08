@@ -58,14 +58,14 @@ import de.jreality.softviewer.Texture;
  */
 public class DefaultPolygonShader extends PolygonShader {
     private boolean interpolateColor=true;
-    private VertexShader vertexShader;
+    private DefaultVertexShader vertexShader;
     protected boolean outline = false;
     private final boolean smooth;
     
     final private double[] d1;
     final private double[] d2;
     final private double[] d3;
-    final private double[] v;
+    //final private double[] v;
     
     final de.jreality.shader.DefaultPolygonShader ps;
     public DefaultPolygonShader() {
@@ -75,7 +75,7 @@ public class DefaultPolygonShader extends PolygonShader {
         d1 = null;
         d2 = null;
         d3 = null;
-        v = null;
+        //v = null;
         ps = null;
     }
     
@@ -90,12 +90,12 @@ public class DefaultPolygonShader extends PolygonShader {
             d1 = null;
             d2 = null;
             d3 = null;
-            v = null;
+            //v = null;
         } else {
             d1 = new double[3];
             d2 = new double[3];
             d3 = new double[3];
-            v = new double[Polygon.VERTEX_LENGTH]; 
+            //v = new double[Polygon.VERTEX_LENGTH]; 
         }
         
     }
@@ -107,16 +107,17 @@ public class DefaultPolygonShader extends PolygonShader {
                 vertexShader.shadeVertex(p.getPoint(i),environment);
             }
         } else {
+            double[] v = p.getCenter();
             v[Polygon.SX] = 0;
             v[Polygon.SY] = 0;
             v[Polygon.SZ] = 0;
-            v[Polygon.R] = 0;
-            v[Polygon.G] = 0;
-            v[Polygon.B] = 0;
-            v[Polygon.A] = 0;
-            v[Polygon.NX] = 0;
-            v[Polygon.NY] = 0;
-            v[Polygon.NZ] = 0;
+            //v[Polygon.R] = 0;
+            //v[Polygon.G] = 0;
+            //v[Polygon.B] = 0;
+            //v[Polygon.A] = 0;
+            //v[Polygon.NX] = 0;
+            //v[Polygon.NY] = 0;
+            //v[Polygon.NZ] = 0;
             for(int i = 0; i< n;i++) {
                 double vertexData[] = p.getPoint(i);
                 v[Polygon.SX] += vertexData[Polygon.SX];
@@ -134,12 +135,13 @@ public class DefaultPolygonShader extends PolygonShader {
             v[Polygon.G ] /=n;
             v[Polygon.B ] /=n;
             v[Polygon.A ] /=n;
-
             double[] vertexData = p.getPoint(0);
+
+            /*
             v[Polygon.NX] = vertexData[Polygon.NX];
             v[Polygon.NY] = vertexData[Polygon.NY];
             v[Polygon.NZ] = vertexData[Polygon.NZ];
-            
+            */
             
             vertexShader.shadeVertex(v,environment);
             
@@ -156,15 +158,8 @@ public class DefaultPolygonShader extends PolygonShader {
         return vertexShader;
     }
 
-    public final void setVertexShader(VertexShader s) {
-      if(vertexShader!=s) {
-		vertexShader = s;
-        interpolateColor=!(s instanceof ConstantVertexShader);
-      }
-    }
-
     public final boolean interpolateColor() {
-        return interpolateColor;
+        return smooth ||vertexShader.isVertexColors();
     }
 
     public boolean interpolateAlpha() {
@@ -194,7 +189,7 @@ public class DefaultPolygonShader extends PolygonShader {
     }
 
     public boolean needsSorting() {
-        return (getVertexShader().getTransparency() != 0.)||hasTexture()||interpolateAlpha(); 
+        return (vertexShader.getTransparency() != 0.)||hasTexture()||interpolateAlpha(); 
     }
 
 }

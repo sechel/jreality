@@ -78,4 +78,7 @@ public abstract class VertexShader {
                           (geom instanceof IndexedFaceSet) && ((IndexedFaceSet)geom).getFaceAttributes(Attribute.COLORS)!=null);
         //System.out.println(vertexColors+": colors: "+colors+" interpolate alpha: "+interpolateAlpha);
     }
+    public boolean isVertexColors() {
+        return vertexColors;
+    }
 }

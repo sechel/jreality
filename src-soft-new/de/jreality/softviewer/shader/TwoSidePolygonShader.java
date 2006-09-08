@@ -96,14 +96,6 @@ public class TwoSidePolygonShader extends PolygonShader {
         }
     }
 
-    public final VertexShader getVertexShader() {
-        return null;
-    }
-
-    public final void setVertexShader(VertexShader s) {
-     
-    }
-
     public final boolean interpolateColor() {
         return false;
     }

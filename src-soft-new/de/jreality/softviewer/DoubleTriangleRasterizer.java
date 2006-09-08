@@ -196,6 +196,7 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
                 rrr.value = Math.min(1,vertexData[Polygon.R]);
                 ggg.value = Math.min(1,vertexData[Polygon.G]);
                 bbb.value = Math.min(1,vertexData[Polygon.B]);
+                aaa.value = Math.min(1,vertexData[Polygon.A]);
            }
             www.value = polygon[0][Polygon.SW];
             

@@ -55,8 +55,6 @@ public abstract class PolygonShader {
 	protected Texture texture;
 
     public abstract  void shadePolygon(final Polygon p, final Environment environment);
-	public abstract VertexShader getVertexShader();
-	public abstract void setVertexShader(VertexShader s);
 	public abstract boolean interpolateColor();
 	public abstract boolean isOutline();
     public abstract boolean hasTexture();
