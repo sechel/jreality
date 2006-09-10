@@ -351,7 +351,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
 
             }
             // Labels
-            if (ifs.getEdgeAttributes(Attribute.LABELS) != null) {
+            if (ifs.getFaceAttributes(Attribute.LABELS) != null) {
                 Class shaderType = (Class) eAppearance.getAttribute(
                         ShaderUtility.nameSpace(
                                 CommonAttributes.POLYGON_SHADER, "textShader"),
@@ -451,8 +451,8 @@ public class RenderingVisitor extends SceneGraphVisitor {
         PolygonShader storePS = this.polygonShader;
         PointShader storePtS = this.pointShader;
         LineShader storeLS = this.lineShader;
-        DefaultPolygonShader labelShader = new DefaultPolygonShader();
-        pipeline.setFaceShader(this.polygonShader = labelShader);
+        //DefaultPolygonShader labelShader = new DefaultPolygonShader();
+        //pipeline.setFaceShader(this.polygonShader = labelShader);
         pipeline.setPointShader(this.pointShader = null);
         pipeline.setLineShader(this.lineShader = null);
         // pipeline.setMatrix(new Matrix().getArray());
@@ -473,7 +473,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
                     labelComp, img.getWidth() * scale, img.getHeight() * scale,
                     offset, alignment, m, LabelUtility.positionFor(i, vertices,
                             indices));
-            labelShader = new DefaultPolygonShader();
+            DefaultPolygonShader labelShader = new DefaultPolygonShader();
             labelShader.setTexture(new SimpleTexture(img));
             pipeline.setFaceShader(this.polygonShader = labelShader);
             sgc.accept(this);

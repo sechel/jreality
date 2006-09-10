@@ -56,7 +56,7 @@ public class DefaultPointShader extends PointShader {
     private PolygonShader outlineShader = null;
     //private double pointRadius =0.025;
     private double pointRadius;
-    private double outlineFraction =.9;
+    private double outlineFraction;
     
 //    public DefaultPointShader(PolygonShader coreShader, PolygonShader outlineShader) {
 //        super();
@@ -69,7 +69,7 @@ public class DefaultPointShader extends PointShader {
         
         
         this.coreShader = this.outlineShader = PolygonShader.createFrom(pts.getPolygonShader());
-        this.outlineFraction = .9;
+        this.outlineFraction = .6;
         this.pointRadius = pts.getPointRadius();
     }
 

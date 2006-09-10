@@ -49,8 +49,8 @@ public class TriangleComparator implements Comparator {
     }
 
     public int compare(Object o1, Object o2) {
-        double z = ( (Triangle)o1).getCenterZ();
-        z -= ( (Triangle)o2).getCenterZ();
+        double z = ( (Triangle)o2).getCenterZ();
+        z -= ( (Triangle)o1).getCenterZ();
         return z<0?1:(z>0?-1:0);
         }
 }

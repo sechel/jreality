@@ -146,6 +146,7 @@ public class Renderer {
       if(auxiliaryRoot!= null)
           renderTraversal.traverse(auxiliaryRoot);
     }    
+    pipeline.finish();
     rasterizer.stop();
   }    
 	
@@ -191,17 +192,6 @@ public class Renderer {
         }
   }
 
-
-  
-
-
-      private static TriangleRasterizer createRasterizer(int[] pixels) {
-          //return new DoubleRasterizerInt(pixels);
-          return new DoubleTriangleRasterizer(pixels);
-      }
-      static TrianglePipeline createPipeline(BufferedImage bi, TriangleRasterizer r) {
-          return new TrianglePipeline(r);
-      }
       public void render() {
           render(d.width, d.height);
       }

@@ -37,7 +37,6 @@
  *
  */
 
-
 package de.jreality.softviewer;
 
 import java.awt.AWTEvent;
@@ -59,367 +58,389 @@ import de.jreality.util.LoggingSystem;
 
 /**
  * The software renderer component.
+ * 
  * @version 1.0
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
  */
 public class SoftViewer extends Component implements Runnable, Viewer {
 
-  // TODO: remove ENFORCE_... ?
+    private static final long serialVersionUID = 1L;
 
-  private static final boolean ENFORCE_PAINT_ON_MOUSEEVENTS= false;
-  
-  // synchronizes the render thread
-  private final Object renderLock= new Object();
-  //private Camera camera;
-  private SceneGraphPath cameraPath;
-  private SceneGraphComponent root;
-  private SceneGraphComponent auxiliaryRoot;
+    // TODO: remove ENFORCE_... ?
 
-  private transient BufferedImage offscreen;
+    private static final boolean ENFORCE_PAINT_ON_MOUSEEVENTS = false;
 
-  private Renderer renderer;
+    // synchronizes the render thread
+    private final Object renderAsyncLock = new Object();
 
-  
-  private boolean upToDate= false;
-  private boolean backgroundExplicitlySet;
-  private boolean imageValid;
-  private Image bgImage;
-  
-  public SoftViewer() {
-      super();
+    //  synchronizes the rendering
+    private final Object renderImplLock = new Object();
+    
+    private SceneGraphPath cameraPath;
 
-    //backgroundExplicitlySet=getBackground()!=null;
-    setBackground(Color.white);
-    if(ENFORCE_PAINT_ON_MOUSEEVENTS)
-      enableEvents(AWTEvent.MOUSE_MOTION_EVENT_MASK);
-    Thread renderThread = new Thread(this, "jReality render thread");
-    //renderThread.setPriority(Thread.NORM_PRIORITY+1);
-    renderThread.start();
-  }
+    private SceneGraphComponent root;
 
-  public boolean isFocusable() {
-    return true;
-  }
-  
-  //TODO should we claim to be opaque?
-//  public boolean isOpaque() {
-//    return true;
-//}
-/* (non-Javadoc)
-   * @see de.jreality.soft.Viewer#getViewingComponent()
-   */
-  public Object getViewingComponent() {
-    return this;
-  }
+    private SceneGraphComponent auxiliaryRoot;
 
-  /* (non-Javadoc)
-   * @see de.jreality.soft.Viewer#setSceneRoot(de.jreality.scene.SceneGraphComponent)
-   */
-  public void setSceneRoot(SceneGraphComponent c) {
-    root=c;
-    if(renderer!=null) renderer.setSceneRoot(c);
-  }
+    private transient BufferedImage offscreen;
 
-  /* (non-Javadoc)
-   * @see de.jreality.soft.Viewer#getSceneRoot()
-   */
-  public SceneGraphComponent getSceneRoot() {
-    return root;
-  }
+    private Renderer renderer;
 
-  // notification when rendering has finished
-  private final Object renderFinishLock=new Object();
-  
-  //synchronize render calls
-  private final Object renderSynch=new Object();
-  
-  private boolean synchRendering;
-  
-  public void render() {
-    synchronized (renderLock) {
-      if (EventQueue.isDispatchThread() && synchRendering) {
-        // avoid deadlock
-        return;
-      }
-    }
-    synchronized (renderSynch) { // block until finished
-      synchronized (renderFinishLock) { // wait until finished
-        synchronized(renderLock) { // synchronize with renderAsync() call
-          synchRendering=true;
-          if (upToDate) {
-            upToDate=false;
-            renderLock.notify();
-          } else {
-            // else someone else triggered a render
-            // which did not start yet - ok
-          }
-        }
-        while (synchRendering) {
-          try {
-            renderFinishLock.wait();
-          } catch (InterruptedException e) {
-            throw new Error();
-          }
-        }
-        if (EventQueue.isDispatchThread()) run();
-        else {
-          try {
-            EventQueue.invokeAndWait(this);
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-        }
-      }
-    }
-  }
+    private boolean upToDate = false;
 
-  public void invalidate() {
-    super.invalidate();
-    imageValid = false;
-    upToDate = false;
-  }
+    private boolean backgroundExplicitlySet;
 
-  public boolean isDoubleBuffered() {
-    return true;
-  }
+    private boolean imageValid;
 
-  public void paint(Graphics g) {
-  	if(!isShowing()) return;
-  	Rectangle clip = g.getClipBounds();
-    if(clip!=null && clip.isEmpty()) return;
-    synchronized(this) {
-      if(imageValid) {
-        if(offscreen != null) {
-            if(bgImage != null)
-                g.drawImage(bgImage, 0, 0,Color.GREEN, null);
-          g.drawImage(offscreen, 0, 0, null);
-          return;
-        } else System.err.println("paint: no offscreen in paint");
-      } else if(!upToDate) synchronized(renderLock) {
-        renderLock.notify();
-      }
+    private Image bgImage;
+
+    // be lazy in synchronous render: if there is a request but renderImpl is
+    // still busy just return...
+    private final boolean lazy;
+
+    // TODO should lazy be the default?
+
+    public SoftViewer() {
+        this(false);
     }
 
-  }
-
-  public void update(Graphics g) {
-    paint(g);
-  }
-
-  private boolean disposed;
-
-private int signature;
-  
-  public void run() {
-    if(EventQueue.isDispatchThread()) {
-      paintImmediately();
+    /**
+     * create a soft viewer. possibly with lazy behaviour in synchronous
+     * rendering: if there is a request but renderImpl is still busy just
+     * return.
+     * 
+     * @param lazy
+     *            if true lazy behaviour is enforced
+     */
+    public SoftViewer(boolean lazy) {
+        super();
+        this.lazy = lazy;
+        setBackground(Color.white);
+        if (ENFORCE_PAINT_ON_MOUSEEVENTS)
+            enableEvents(AWTEvent.MOUSE_MOTION_EVENT_MASK);
+        Thread renderThread = new Thread(this, "jReality render thread");
+        // renderThread.setPriority(Thread.NORM_PRIORITY+1);
+        renderThread.start();
     }
-    else while (true) try {
-      synchronized(renderLock) {
-        while (upToDate) {
-          try {
-            renderLock.wait();
-          } catch(InterruptedException e) {
-            e.printStackTrace();
-          }
-          if (disposed) return;
-        }
-        upToDate=true;
-      }
-      renderImpl();
-      if (!synchRendering) {
-        if(imageValid) EventQueue.invokeLater(this);
-      } else {
-        synchronized (renderLock) {
-          synchRendering=false;
-          synchronized (renderFinishLock) {
-            renderFinishLock.notify();
-          }
-        }
-      }
-    } catch(Exception ex) {
-      Thread t= Thread.currentThread();
-      t.getThreadGroup().uncaughtException(t, ex);
-    }
-  }
-//  // TODO: add a structure lock to the scene graph
-//  public final synchronized void renderSync() {
-//    renderImpl();
-//  }
 
-  private synchronized void renderImpl() {
-    Dimension d= getSize();
-    if (d.width > 0 && d.height > 0) {
-      //System.out.println("render: off="+offscreen);
-      if (offscreen == null
-        || offscreen.getWidth() != d.width
-        || offscreen.getHeight() != d.height) {
+    public boolean isFocusable() {
+        return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.jreality.soft.Viewer#getViewingComponent()
+     */
+    public Object getViewingComponent() {
+        return this;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.jreality.soft.Viewer#setSceneRoot(de.jreality.scene.SceneGraphComponent)
+     */
+    public void setSceneRoot(SceneGraphComponent c) {
+        root = c;
+        if (renderer != null)
+            renderer.setSceneRoot(c);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.jreality.soft.Viewer#getSceneRoot()
+     */
+    public SceneGraphComponent getSceneRoot() {
+        return root;
+    }
+
+    public void render() {
+        // System.out.println("render sync");
+
+        if (EventQueue.isDispatchThread() || (lazy && isRendering)) {
+            // avoid deadlock
+            return;
+        }
+        renderImpl();
+        paintImmediately();
+    }
+
+    public void invalidate() {
+        super.invalidate();
         imageValid = false;
-       
-            offscreen=
-                new BufferedImage(d.width, d.height, BufferedImage.TYPE_INT_ARGB);
-            renderer=new Renderer(offscreen);
-        
-        Color c = getBackground();
-        renderer.setBackgroundColor(c !=null? c.getRGB(): 0);
-        renderer.setCameraPath(cameraPath);
-        renderer.setSceneRoot(root);
-      } else if(!backgroundExplicitlySet) {
-        Color c = getBackground();//inherited from parent
-        renderer.setBackgroundColor(c !=null? c.getRGB(): 0);
-      }
-//      System.out.println("start rendering "+new java.util.Date());
-      try {
-        renderer.render();
-      } catch (Exception e) {
-        LoggingSystem.getLogger(this).log(Level.SEVERE, "renderer.render() failed! ", e);
-        
-      }
-      synchronized(this) {
-        //imageValid = false;
-        renderer.update();
-        imageValid=true;
-      }
-//      System.out.println("end rendering "+new java.util.Date());
-    } else {
-      //System.out.println("no area to paint");
+        upToDate = false;
     }
-  }
 
-  protected void processMouseMotionEvent(MouseEvent e) {
-    super.processMouseMotionEvent(e);
-    if (ENFORCE_PAINT_ON_MOUSEEVENTS)
-      render();
-  }
+    public boolean isDoubleBuffered() {
+        return true;
+    }
 
-  public void addNotify() {
-    super.addNotify();
-    requestFocus();
-  }
+    public void paint(Graphics g) {
+        if (!isShowing())
+            return;
+        Rectangle clip = g.getClipBounds();
+        if (clip != null && clip.isEmpty())
+            return;
+        synchronized (this) {
+            if (imageValid) {
+                if (offscreen != null) {
+                    if (bgImage != null)
+                        g.drawImage(bgImage, 0, 0, Color.GREEN, null);
+                    g.drawImage(offscreen, 0, 0, null);
+                    return;
+                } else
+                    System.err.println("paint: no offscreen in paint");
+            } else if (!upToDate)
+                synchronized (renderAsyncLock) {
+                    renderAsyncLock.notify();
+                }
+        }
 
-  protected void processMouseEvent(MouseEvent e) {
-    super.processMouseEvent(e);
-    switch(e.getID()) {
-      case MouseEvent.MOUSE_CLICKED: case MouseEvent.MOUSE_PRESSED:
-      case MouseEvent.MOUSE_RELEASED:
+    }
+
+    public void update(Graphics g) {
+        paint(g);
+    }
+
+    private boolean disposed;
+
+    private int signature;
+
+    public void run() {
+        if (EventQueue.isDispatchThread()) {
+            paintImmediately();
+        } else
+            while (true)
+                try {
+                    while (upToDate) {
+                        try {
+                            synchronized (renderAsyncLock) {
+                                renderAsyncLock.wait();
+                            }
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        if (disposed)
+                            return;
+                    }
+                    upToDate = true;
+                    renderImpl();
+
+                    // upToDate=true;
+                    if (imageValid)
+                        EventQueue.invokeLater(this);
+                } catch (Exception ex) {
+                    Thread t = Thread.currentThread();
+                    t.getThreadGroup().uncaughtException(t, ex);
+                }
+    }
+
+    private boolean isRendering = false;
+    
+    private void renderImpl() {
+        synchronized (renderImplLock) {
+        isRendering = true;
+        Dimension d = getSize();
+        if (d.width > 0 && d.height > 0) {
+            // System.out.println("render: off="+offscreen);
+            if (offscreen == null || offscreen.getWidth() != d.width
+                    || offscreen.getHeight() != d.height) {
+                imageValid = false;
+
+                offscreen = new BufferedImage(d.width, d.height,
+                        BufferedImage.TYPE_INT_ARGB);
+                // TODO: findout if there is a way to keep the renderer...
+                renderer = new Renderer(offscreen);
+
+                Color c = getBackground();
+                renderer.setBackgroundColor(c != null ? c.getRGB() : 0);
+                renderer.setCameraPath(cameraPath);
+                renderer.setSceneRoot(root);
+                renderer.setAuxiliaryRoot(auxiliaryRoot);
+            } else if (!backgroundExplicitlySet) {
+                Color c = getBackground();// inherited from parent
+                renderer.setBackgroundColor(c != null ? c.getRGB() : 0);
+            }
+
+            try {
+                renderer.render();
+            } catch (Exception e) {
+                LoggingSystem.getLogger(this).log(Level.SEVERE,
+                        "renderer.render() failed! ", e);
+
+            }
+            synchronized (this) {
+                renderer.update();
+                imageValid = true;
+            }
+        }
+        isRendering = false;
+        }
+    }
+
+    protected void processMouseMotionEvent(MouseEvent e) {
+        super.processMouseMotionEvent(e);
+        if (ENFORCE_PAINT_ON_MOUSEEVENTS)
+            render();
+    }
+
+    public void addNotify() {
+        super.addNotify();
         requestFocus();
     }
-    if (ENFORCE_PAINT_ON_MOUSEEVENTS)
-      render();
-  }
 
-  public void setBackground(Color c) {
-    super.setBackground(c);
-    backgroundExplicitlySet=c!=null;
-    if(backgroundExplicitlySet&&renderer!=null)
-      renderer.setBackgroundColor( c.getRGB());
-  }
-
-  public Renderer getRenderer() {
-    return renderer;
-  }
-  private void paintImmediately() {
-    if(!isShowing()) return;
-
-    Component c=this;
-    Component parent;
-    Rectangle bounds=new Rectangle(0, 0, getWidth(), getHeight());
-
-    for(parent=c.getParent();
-        parent!=null && c.isLightweight();
-        parent=c.getParent()) {
-      bounds.x+=c.getX();
-      bounds.y+=c.getY();
-      c=parent;
+    protected void processMouseEvent(MouseEvent e) {
+        super.processMouseEvent(e);
+        switch (e.getID()) {
+        case MouseEvent.MOUSE_CLICKED:
+        case MouseEvent.MOUSE_PRESSED:
+        case MouseEvent.MOUSE_RELEASED:
+            requestFocus();
+        }
+        if (ENFORCE_PAINT_ON_MOUSEEVENTS)
+            render();
     }
-    Graphics gfx=c.getGraphics();
-    gfx.setClip(bounds);
-    c.paint(gfx);
-  }
-/* (non-Javadoc)
- * @see de.jreality.scene.Viewer#getCameraPath()
- */
-public SceneGraphPath getCameraPath() {
-    return cameraPath;
-}
-/* (non-Javadoc)
- * @see de.jreality.scene.Viewer#setCameraPath(de.jreality.util.SceneGraphPath)
- */
-public void setCameraPath(SceneGraphPath p) {
-    cameraPath = p;
-    //camera = (Camera) p.getLastElement();
-    
-}
-/* (non-Javadoc)
- * @see de.jreality.scene.Viewer#hasViewingComponent()
- */
-public boolean hasViewingComponent() {
-    return true;
-}
-/* (non-Javadoc)
- * @see de.jreality.scene.Viewer#initializeFrom(de.jreality.scene.Viewer)
- */
-public void initializeFrom(Viewer v) {
-    setSceneRoot(v.getSceneRoot());
-    setCameraPath(v.getCameraPath());
-    setAuxiliaryRoot(v.getAuxiliaryRoot());
-    setSignature(v.getSignature());
-}
-/* (non-Javadoc)
- * @see de.jreality.scene.Viewer#getSignature()
- */
-public int getSignature() {
-    return signature;
-}
-/* (non-Javadoc)
- * @see de.jreality.scene.Viewer#setSignature(int)
- */
-public void setSignature(int sig) {
-signature = sig;    
-}
-/* (non-Javadoc)
- * @see de.jreality.scene.Viewer#setAuxiliaryRoot(de.jreality.scene.SceneGraphComponent)
- */
-public void setAuxiliaryRoot(SceneGraphComponent ar) {
-    auxiliaryRoot = ar;
-}
-/* (non-Javadoc)
- * @see de.jreality.scene.Viewer#getAuxiliaryRoot()
- */
-public SceneGraphComponent getAuxiliaryRoot() {
-    return auxiliaryRoot;
-}
-public Image getBackgroundImage() {
-    return bgImage;
-}
-public void setBackgroundImage(Image bgImage) {
-    this.bgImage = bgImage;
-}
 
-public Dimension getViewingComponentSize() {
-  return getSize();
-}
-
-public boolean canRenderAsync() {
-  return true;
-}
-
-public void renderAsync() {
-  synchronized (renderLock) {
-    if (upToDate) {
-      upToDate=false;
-      renderLock.notify();
-      // TODO: Bloch warns of using Thread.yield()... but this
-      // makes the rendering smooth in oorange (with jgimmick timer)
-      Thread.yield(); // encourage the render thread to do it's work
+    public void setBackground(Color c) {
+        super.setBackground(c);
+        backgroundExplicitlySet = c != null;
+        if (backgroundExplicitlySet && renderer != null)
+            renderer.setBackgroundColor(c.getRGB());
     }
-  }
-}
 
-public void dispose() {
-  synchronized (renderLock) {
-    disposed=true;
-    renderLock.notify();
-  }
-}
+    private void paintImmediately() {
+        if (!isShowing())
+            return;
+
+        Component c = this;
+        Component parent;
+        Rectangle bounds = new Rectangle(0, 0, getWidth(), getHeight());
+
+        for (parent = c.getParent(); parent != null && c.isLightweight(); parent = c
+                .getParent()) {
+            bounds.x += c.getX();
+            bounds.y += c.getY();
+            c = parent;
+        }
+        Graphics gfx = c.getGraphics();
+        gfx.setClip(bounds);
+        c.paint(gfx);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.jreality.scene.Viewer#getCameraPath()
+     */
+    public SceneGraphPath getCameraPath() {
+        return cameraPath;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.jreality.scene.Viewer#setCameraPath(de.jreality.util.SceneGraphPath)
+     */
+    public void setCameraPath(SceneGraphPath p) {
+        cameraPath = p;
+        if (renderer != null)
+            renderer.setCameraPath(p);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.jreality.scene.Viewer#hasViewingComponent()
+     */
+    public boolean hasViewingComponent() {
+        return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.jreality.scene.Viewer#initializeFrom(de.jreality.scene.Viewer)
+     */
+    public void initializeFrom(Viewer v) {
+        setSceneRoot(v.getSceneRoot());
+        setCameraPath(v.getCameraPath());
+        setAuxiliaryRoot(v.getAuxiliaryRoot());
+        setSignature(v.getSignature());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.jreality.scene.Viewer#getSignature()
+     */
+    public int getSignature() {
+        return signature;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.jreality.scene.Viewer#setSignature(int)
+     */
+    public void setSignature(int sig) {
+        signature = sig;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.jreality.scene.Viewer#setAuxiliaryRoot(de.jreality.scene.SceneGraphComponent)
+     */
+    public void setAuxiliaryRoot(SceneGraphComponent ar) {
+        auxiliaryRoot = ar;
+        if (renderer != null)
+            renderer.setAuxiliaryRoot(ar);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see de.jreality.scene.Viewer#getAuxiliaryRoot()
+     */
+    public SceneGraphComponent getAuxiliaryRoot() {
+        return auxiliaryRoot;
+    }
+
+    public Image getBackgroundImage() {
+        return bgImage;
+    }
+
+    public void setBackgroundImage(Image bgImage) {
+        this.bgImage = bgImage;
+    }
+
+    public Dimension getViewingComponentSize() {
+        return getSize();
+    }
+
+    public boolean canRenderAsync() {
+        return true;
+    }
+
+    public void renderAsync() {
+        // System.out.println("->render async<-");
+        synchronized (renderAsyncLock) {
+            if (upToDate) {
+                upToDate = false;
+                renderAsyncLock.notify();
+            }
+            // TODO: Bloch warns of using Thread.yield()... but this
+            // makes the rendering smooth in oorange (with jgimmick timer)
+            Thread.yield(); // encourage the render thread to do it's work
+        }
+    }
+
+    public void dispose() {
+        synchronized (renderAsyncLock) {
+            disposed = true;
+            renderAsyncLock.notify();
+        }
+    }
 }

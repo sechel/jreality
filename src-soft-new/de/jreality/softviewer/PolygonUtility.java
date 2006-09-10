@@ -152,7 +152,10 @@ private static int once = 0;
         
         int newTriVertex = 0;
         Triangle newTri = a;
-        for (int i = 0; i < 3; i++, u = v, tu = tv, v = tri.getPoint(i)) {
+        for (int i = 0; i < 3; i++) {
+            u = v;
+            tu = tv;
+            v = tri.getPoint(i);
             tv = sign*(VecMat.dot(v,Triangle.SX,planeNormal,0)
             - k * v[Triangle.SW]);
             if(DEBUG) System.out.println(" new tv "+tv);
@@ -259,7 +262,10 @@ private static int once = 0;
         //HERE!!!!!
         dst.setLength(0);
         int pos = 0;
-        for (int i = 0; i < length; i++, u = v, tu = tv, v = p.getPoint(i)) {
+        for (int i = 0; i < length; i++) {
+            u = v;
+            tu = tv;
+            v = p.getPoint(i);
             tv = sign*(VecMat.dot(v,off,planeNormal,0)
             - k * v[off+3]);
             if(DEBUG) System.out.println(" new tv "+tv);

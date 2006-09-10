@@ -443,7 +443,9 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
         makeXincrement(lx);
         final int inc=(lr)? 1: -1;
         final int posOff=y*w;
+        
         colorize(lx+posOff);
+        //blur(lx+posOff,-inc);
         for(int x = lx+inc+posOff; lr? (x <= rx+posOff): (x >= rx+posOff); x+=inc) {
             //colorize(x+posOff);
             if(interpolateFullX) xxx.incrementX();
@@ -462,11 +464,36 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
                 vvv.incrementX();
             }
             colorize(x/*+posOff*/);
+            //blur(x,+inc);
 //            for(int k = 2; k<INTERPOLATION_LENGTH; k++) 
 //            quantities[k].incrementX();
         }
     }
     
+    private void blur(int i, int j) {
+        int k = i+j;
+        if(k <0 |k>=zBuffer.length) return;
+        if(zBuffer[k]-zBuffer[i] > 0.00 ) {
+            final int sample = pixels[i];
+            final int sample2 = pixels[k];
+            
+            int sb =  sample      & COLOR_CH_MASK;
+            int sg = (sample>>8)  & COLOR_CH_MASK;
+            int sr = (sample>>16) & COLOR_CH_MASK;
+            int sa = (sample>>24) & COLOR_CH_MASK;
+            int sb2 =  sample2      & COLOR_CH_MASK;
+            int sg2 = (sample2>>8)  & COLOR_CH_MASK;
+            int sr2 = (sample2>>16) & COLOR_CH_MASK;
+            int sa2 = (sample2>>24) & COLOR_CH_MASK;
+
+            int a = (sa2 + sa)/2;
+            int r = (sr2 + sr)/2;
+            int g = (sg2 + sg)/2;
+            int b = (sb2 + sb)/2;
+            pixels[k]  = ((int)a<<24) |  ((int)r <<16) |  ((int)g <<8) | (int)b;
+        }
+        
+    }
     private final void makeXincrement(final int leftBound) {
         final double dx = 1/Math.max(1, Math.abs(xxx.rightValue - xxx.leftValue));
         
@@ -564,6 +591,10 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
         pixels[pos]  = OPAQUE |  ((int)r <<16) |  ((int)g <<8) | (int)b;
         zBuffer[pos]= z;
         }
+//        blur(pos,1);
+//        blur(pos,-1);
+//        blur(pos,+w);
+//        blur(pos,-w);
     }
     
 

@@ -241,17 +241,15 @@ public class TrianglePipeline {
         polygon.setInterpolateColor(shader.interpolateColor());
         // return early if polygon is clipped out
         //TODO: debug clipPlanes
-//        if (clipPlanes())
-//            return;
+        if (clipPlanes())
+            return;
         computePerspective();
         // clip to frustum:
         // TODO: debug clipPlanes
-//        if (clipFrustum())
-//            return;
+        if (clipFrustum())
+            return;
 
         triangulateAndRaster();
-        sortTriangles();
-        rasterRemaining();
     }
 
     Triangle[] trisFromPoly = new Triangle[6];
@@ -315,81 +313,6 @@ public class TrianglePipeline {
         }
 
     }
-
-    // private final void computeArray(
-    // final double[] vd,
-    // final int[] vertices,
-    // final double[] nd,
-    // final int[] normals) {
-    // if (2 * vertices.length + 6
-    // >= (vertexData.length - vertexCount) / Polygon.VERTEX_LENGTH)
-    // increaseVertexCapacity(vertices.length / 3);
-    //
-    // int vc = vertexCount;
-    // for (int i = 0; i < vertices.length; i++) {
-    // int vi = vertices[i];
-    // VecMat.transform(
-    // matrix,
-    // vd[vi++],
-    // vd[vi++],
-    // vd[vi],
-    // vertexData,
-    // vc + Polygon.SX);
-    // vertexData[vc + Polygon.SW] = 1;
-    // int ni = normals[i];
-    // VecMat.transformNormal(
-    // inverseTransposeMatrix,
-    // nd[ni++],
-    // nd[ni++],
-    // nd[ni],
-    // vertexData,
-    // vc + Polygon.NX);
-    // vc += Polygon.VERTEX_LENGTH;
-    // if(vertexColors) {
-    // DoubleArray color=vertexColor.item(vi/3).toDoubleArray();
-    // vertexData[vc+Polygon.R]=color.getValueAt(0);
-    // vertexData[vc+Polygon.G]=color.getValueAt(1);
-    // vertexData[vc+Polygon.B]=color.getValueAt(2);
-    // vertexData[vc+Polygon.A]=(vertexColorLength==4
-    // ||(vertexColorLength==-1&&color.getLength()>3))?
-    // color.getValueAt(3): 1.;
-    // }
-    // }
-    // compute(vertices.length);
-    // }
-
-    // private final void computeArrayNoTransform(
-    // final double[] vd,
-    // final int[] vertices,
-    // final double[] nd,
-    // final int[] normals) {
-    // if (2 * vertices.length + 6
-    // >= (vertexData.length - vertexCount) / Polygon.VERTEX_LENGTH)
-    // increaseVertexCapacity(vertices.length / 3);
-    //
-    // int vc = vertexCount;
-    // for (int i = 0; i < vertices.length; i++) {
-    // int vi = vertices[i];
-    //            
-    // vertexData[vc + Polygon.SX] = vd[vi++];
-    // vertexData[vc + Polygon.SY] = vd[vi++];
-    // vertexData[vc + Polygon.SZ] = vd[vi];
-    // vertexData[vc + Polygon.SW] = 1;
-    // int ni = normals[i];
-    //            
-    // vertexData[vc + Polygon.NX] = nd[ni++];
-    // vertexData[vc + Polygon.NY] = nd[ni++];
-    // vertexData[vc + Polygon.NZ] = nd[ni];
-    // //VecMat.normalize(vertexData, vc + Polygon.NX);
-    //            
-    // vc += Polygon.VERTEX_LENGTH;
-    // }
-    // compute(vertices.length);
-    // }
-
-    // private double[] a0 = new double[Triangle.VERTEX_LENGTH];
-    // private double[] a1 = new double[Triangle.VERTEX_LENGTH];
-    //    
 
     private final void fillVertexData(final DoubleArrayArray vd,
             final IntArray vertices, final DoubleArrayArray nd,
@@ -540,10 +463,9 @@ public class TrianglePipeline {
         // for (int v = p1.vertices[0], i = n;
         // i > 0;
         // i--, v += Polygon.VERTEX_LENGTH) {
-        int i = 0;
-        for (double[] v = polygon.getPoint(0); i < n; i++, v = polygon
-                .getPoint(i)) {
-
+        
+        for (int i = 0; i < n; i++) {
+            double[] v = polygon.getPoint(i);
             double vsw = v[AbstractPolygon.SW];
             if (v[AbstractPolygon.SX] < perspective.getFrustumXmin() * vsw)
                 x0out++;
@@ -574,7 +496,7 @@ public class TrianglePipeline {
         // shader.shadePolygon(p1, vertexData, environment);
         // now clip:
         // if (x0out) CLIP_AND_SWAP(sx, -1., box->x0, p, q, r);
-        tmpPolygon.setLength(0);
+        tmpPolygon.setShadingFrom(polygon);
         if (x0out != 0)
             clipToHalfspace(AbstractPolygon.SX, -1, -perspective
                     .getFrustumXmin());
@@ -592,12 +514,9 @@ public class TrianglePipeline {
                     .getFrustumZmin());
         if (z1out != 0)
             clipToHalfspace(AbstractPolygon.SZ, 1, perspective.getFrustumZmax());
-        // It is left to swap:
-        Polygon r = polygon;
-        polygon = tmpPolygon;
-        tmpPolygon = r;
+        
         if (polygon.getLength() == 0)
-            return true;
+            return true; //should not happen...
         else
             return false;
     }
@@ -614,7 +533,7 @@ public class TrianglePipeline {
      *            the location of the halfspace --- e.g. ClippingBox.x0
      */
     private void clipToHalfspace(int index, int sign, double k) {
-
+        tmpPolygon.setLength(0);
         int length = polygon.getLength();
         if (length == 0)
             return;
@@ -641,7 +560,9 @@ public class TrianglePipeline {
                 tmpPolygon.setPointFrom(pos++, v);
             }
         }
-
+        Polygon r = polygon;
+        polygon = tmpPolygon;
+        tmpPolygon = r;
     }
 
     /**
@@ -658,8 +579,8 @@ public class TrianglePipeline {
     }
 
     public final void sortTriangles() {
-//        int n = triangles.getSize();
-//        System.err.println(" "+n+" sorted trinagles to render");
+        //int n = triangles.getSize();
+        //System.err.println(" "+n+" sorted trinagles to render");
         // eSystem.out.println("scheduled polys "+polygonCount);
         // it might be better to sort the non transparent polygons too
         // since the setPixel call is one of the most speed relevant. If the
@@ -704,9 +625,9 @@ public class TrianglePipeline {
     }
 
     /**
-     * @param renderer
+     * 
      */
-public final void rasterRemaining() {
+private final void rasterRemaining() {
         // we render the polygons front to back in order to have less to do in
         // setPixel. transparent polys are
         // sorted in reverse order and at the beginning, so we know, that they
@@ -716,7 +637,7 @@ public final void rasterRemaining() {
         // renderer.renderPolygon(polygons[--i],vertexData,polygons[i].getShader().isOutline());
         // polygons[i].setShader(null);
         // }
-        
+        sortTriangles();
         while(! triangles.isEmpty()) {
             Triangle tri = triangles.pop();
             rasterizer.renderTriangle(tri,false);
@@ -1108,6 +1029,11 @@ public final void rasterRemaining() {
         this.pointShader = pointShader;
         if (pointShader != null) {
         }
+    }
+
+    public void finish() {
+        rasterRemaining();
+        
     }
 
     /**

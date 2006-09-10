@@ -101,6 +101,8 @@ public class DefaultPolygonShader extends PolygonShader {
     }
     
     public final void shadePolygon(Polygon p, Environment environment) {
+        p.setTransparency(vertexShader.getTransparency());
+        p.setTexture(texture);
         int n = p.getLength();
 		if(smooth) {
             for(int i = 0; i< n;i++) {
