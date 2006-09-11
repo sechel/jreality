@@ -120,7 +120,36 @@ public class Primitives {
 			GeometryUtility.calculateAndSetFaceNormals(cube);		
 			return cube;
 	}
-		
+		/**
+		 * A dimensioned cube.  If <i>colored</i> is true, then it has face colors.
+		 * @author Gonska
+		 * @param width: size in X-dimension 
+		 * @param higth: size in Y-dimension
+		 * @param depth: size in Z-dimension
+		 * @param colored
+		 * @return
+		 */		
+		public static IndexedFaceSet cube(double width,double hight,double depth,boolean colored){
+			double w=width/2;	double h=hight/2;	double d=depth/2;
+			IndexedFaceSet cube = new IndexedFaceSet(8, 6);
+			double[][] points =  
+			 {{w,h,d},{w,h,-d},{w,-h,d},{w,-h,-d},
+			 {-w,h,d},{-w,h,-d},{-w,-h,d},{-w,-h,-d}};
+			cube.setFaceAttributes(Attribute.INDICES, new IntArrayArray.Array(cubeIndices));
+			cube.setVertexAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(points));
+			if (colored)	{
+				cube.setFaceAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(cubeColors));
+			}
+			IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(cube);
+			GeometryUtility.calculateAndSetFaceNormals(cube);		
+			return cube;
+		}
+		public static IndexedFaceSet coloredCube(double width,double hight,double depth){
+			return cube(width,hight,depth,true);
+		}
+		public static IndexedFaceSet Cube(double width,double hight,double depth){
+			return cube(width,hight,depth,false);
+		}
 		static private double[][] tetrahedronVerts3 =  
 		{{1,1,1},{1,-1,-1},{-1,1,-1},{-1,-1,1}};
 
