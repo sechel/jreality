@@ -147,7 +147,7 @@ public class Primitives {
 		public static IndexedFaceSet coloredCube(double width,double hight,double depth){
 			return cube(width,hight,depth,true);
 		}
-		public static IndexedFaceSet Cube(double width,double hight,double depth){
+		public static IndexedFaceSet cube(double width,double hight,double depth){
 			return cube(width,hight,depth,false);
 		}
 		static private double[][] tetrahedronVerts3 =  
