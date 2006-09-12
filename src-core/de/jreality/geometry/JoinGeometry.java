@@ -484,7 +484,7 @@ public class JoinGeometry {
 		// die alten Daten auslesen
 		System.out.println("JoinGeometry.meltFace()");
 		int [][] indicesOld = ifs.getFaceAttributes( Attribute.INDICES ).toIntArrayArray(null);
-		double [][] coordsOld = ifs.getFaceAttributes( Attribute.COORDINATES ).toDoubleArrayArray(null);
+		double [][] coordsOld = ifs.getVertexAttributes( Attribute.COORDINATES ).toDoubleArrayArray(null);
 		int iOldSize=indicesOld.length;
 		//	 die neuen Typen Daten erstellen
 		int [][] indicesNew = new int[iOldSize][];
@@ -521,7 +521,8 @@ public class JoinGeometry {
 		ifsf.setFaceAttributes(ifs.getFaceAttributes());	
 		ifsf.setFaceCount(iOldSize);
 		ifsf.setVertexCount(curr);
-		ifsf.setFaceIndices(indicesNew);
+		ifsf.setFaceAttribute(Attribute.INDICES ,new IntArrayArray.Array(indicesNew));
+		//ifsf.setFaceIndices(indicesNew);
 		ifsf.setVertexCoordinates(Points);
 		
 		ifsf.setGenerateFaceNormals(true);
@@ -536,7 +537,7 @@ public class JoinGeometry {
 	 * @param ifs
 	 * @return IndexedFaceSet
 	 */
-	public static IndexedFaceSet removeDublicatePoints(IndexedFaceSet ifs){
+	public static IndexedFaceSet removeDuplicatePoints(IndexedFaceSet ifs){
 		// die alten Daten auslesen	
 		double [][] oldVertexCoordsArray=null;
 		double[][] oldVertexColorArray=null;
