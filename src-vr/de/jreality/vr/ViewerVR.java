@@ -7,6 +7,7 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
@@ -14,6 +15,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -22,6 +24,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileSystemView;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Matrix;
@@ -76,6 +79,8 @@ public class ViewerVR {
 	private double diam=20, offset=.3;
 	
 	Landscape landscape = new Landscape();
+
+	private JFileChooser chooser;
 	
 	public ViewerVR() throws IOException {
 		
@@ -297,16 +302,25 @@ public class ViewerVR {
 		rotateBox.add(zRotateRight);
 		
 		JPanel p = new JPanel(new BorderLayout());
-		JPanel dummy = new JPanel();
-		Dimension  d = new Dimension(50, 30);
-		dummy.setPreferredSize(d);
-		dummy.setMaximumSize(d);
-		dummy.setMinimumSize(d);
+		JPanel dummy = new JPanel(new BorderLayout());
+		JButton loadButton = new JButton("load ...");
+		loadButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				load();
+			}
+		});
+		loadButton.setMargin(insets);
+		dummy.add(loadButton);
+//		Dimension  d = new Dimension(50, 60);
+//		dummy.setPreferredSize(d);
+//		dummy.setMaximumSize(d);
+//		dummy.setMinimumSize(d);
+		dummy.setBorder(new EmptyBorder(5,30,20,30));
 		p.add("North", dummy );
 		dummy = new JPanel();
-		dummy.setPreferredSize(d);
-		dummy.setMaximumSize(d);
-		dummy.setMinimumSize(d);
+//		dummy.setPreferredSize(d);
+//		dummy.setMaximumSize(d);
+//		dummy.setMinimumSize(d);
 		p.add("South", dummy );
 		p.add("Center", rotateBox);
 		
@@ -317,11 +331,26 @@ public class ViewerVR {
 		tabs.add("placement", placementPanel);
 		
 		tabs.add("landscape",l.getSelectionComponent());
+		
 		sp.getFrame().getContentPane().add(tabs);
 		sp.getFrame().setSize(200,190);
 		
 		getTerrainNode().addTool(sp.getPanelTool());
 		
+		FileSystemView view = FileSystemView.getFileSystemView();
+		chooser = new JFileChooser(view.getHomeDirectory());
+		
+	}
+	
+	public void load() {
+		chooser.showOpenDialog(null);
+		File file = chooser.getSelectedFile();
+		try {
+			setContent(Readers.read(Input.getInput(file)));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void setTerrainTexture(ImageData tex, double scale) {
@@ -417,8 +446,8 @@ public class ViewerVR {
 		ViewerApp vApp = tds.display();
 		vApp.setAttachNavigator(true);
 		vApp.setAttachBeanShell(true);
+		vApp.setShowMenu(true);
 		vApp.update();
 		vApp.display();
-		
 	}
 }
