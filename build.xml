@@ -20,6 +20,7 @@
   <property name="swt" location="src-swt" />
   <property name="testjogl" location="test-jogl" />
 
+  <property name="vr" location="src-vr" />
   <property name="examples" location="src-examples" />
   <property name="swing" location="src-swing" />
 	
@@ -84,8 +85,16 @@
     </fileset>
   </path>
 
-  <path id="examples.classpath">
+  <path id="vr.classpath">
     <path refid="ui.classpath"/>
+    <fileset dir="dist">
+        <include name="jReality-ui.jar"/>
+        <include name="jReality-swing.jar"/>
+    </fileset>
+  </path>
+
+  <path id="examples.classpath">
+    <path refid="vr.classpath"/>
     <fileset dir="dist">
         <include name="*.jar"/>
     </fileset>
@@ -266,7 +275,21 @@
     <jar jarfile="${dist}/jReality-ui.jar" basedir="${build}/ui" />
   </target>
 
-  <target name="examples" depends="core, ui, swing" description="compile the examples">
+  <target name="vr" depends="core, ui, swing" description="compile vr">
+    <mkdir dir="${build}/vr" />
+    <javac excludesfile="excludes.txt" srcdir="${vr}" destdir="${build}/vr" debug="true">
+      <compilerarg line="-source 1.5" />
+      <classpath refid="vr.classpath"/>
+    </javac>
+    <copy todir="${build}/vr">
+      <fileset dir="src-vr">
+        <exclude name="**/*.java"/>
+      </fileset>
+    </copy>
+    <jar jarfile="${dist}/jReality-vr.jar" basedir="${build}/vr" />
+  </target>
+
+	<target name="examples" depends="vr" description="compile the examples">
     <mkdir dir="${build}/examples" />
     <javac excludesfile="excludes.txt" srcdir="${examples}" destdir="${build}/examples" debug="true">
       <compilerarg line="-source 1.5" />

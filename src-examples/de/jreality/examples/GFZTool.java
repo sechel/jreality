@@ -38,7 +38,7 @@
  */
 
 
-package de.jreality.ui.viewerapp;
+package de.jreality.examples;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -69,6 +69,7 @@ import de.jreality.swing.ScenePanel;
 import de.jreality.tools.AnimatorTask;
 import de.jreality.tools.AnimatorTool;
 import de.jreality.tools.EncompassTool;
+import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
 
