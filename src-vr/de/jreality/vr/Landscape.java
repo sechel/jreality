@@ -1,8 +1,7 @@
-package de.jreality.examples.tooldemo;
+package de.jreality.vr;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,19 +27,19 @@ public class Landscape implements ActionListener {
   private static String sideNames= "rt,lf,up,dn,bk,ft";
   
   private static String[][] defaultLandscapes = {
+	{"snow","textures/jms/jms_", sideNames, ".JPG","textures/jms/jms_dn_seamless.JPG","10"},
     {"desert","textures/desertstormNew/desertstorm_", sideNames, ".JPG","textures/desertstormNew/desertstorm_dnSeamless.JPG","10"},
-    {"plain sky","textures/null_plainsky/desertstorm_", sideNames, ".JPG","textures/grid.jpeg","4"},
+    //{"plain sky","textures/null_plainsky/desertstorm_", sideNames, ".JPG","textures/grid.jpeg","4"},
     {"mountain","textures/malrav11/malrav11sky_", sideNames, ".jpg", "textures/mxsnow0.jpg","10"},
     {"tropic","textures/tropseadusk/tropseadusk512_", sideNames, ".jpg","textures/tropseadusk/tropseadusk512_dnSeamless.jpg","10"},
     {"dusk","textures/dragonvale/dragonvale_", sideNames, ".jpg","textures/dragonvale/dragonvale_dnSeamless.jpg","10"},
     //{"snow","textures/hangingstone/hangingstone512_", sideNames, ".jpg","textures/hangingstone/hangingstone512_dnSeamless.jpg","10"},
-    {"night","textures/dragonmoon/dragonmoon_", sideNames, ".jpg","textures/dragonmoon/dragonmoon_dnSeamless.jpg","10"},
-    {"snow","textures/jms/jms_", sideNames, ".JPG","textures/jms/jms_dn_seamless.JPG","10"},
-    {"planet","textures/hexagon512/hexagon512_", sideNames, ".jpg","textures/hexagon512/hexagon512_dn_seamless.jpg","10"}
+    {"night","textures/dragonmoon/dragonmoon_", sideNames, ".jpg","textures/dragonmoon/dragonmoon_dnSeamless.jpg","10"}
+    //{"planet","textures/hexagon512/hexagon512_", sideNames, ".jpg","textures/hexagon512/hexagon512_dn_seamless.jpg","10"}
   };
   
   Box selectionComponent;
-  ToolDemoScene toolScene;
+  ViewerVR toolScene;
   String selectedBox;
 
   private int selectionIndex;
@@ -91,7 +90,7 @@ public class Landscape implements ActionListener {
     this(defaultLandscapes, null);
   }
 
-  public void setToolScene(ToolDemoScene scene) {
+  public void setToolScene(ViewerVR scene) {
     toolScene=scene;
     applySelection();
   }
