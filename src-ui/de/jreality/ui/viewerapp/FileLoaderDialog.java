@@ -51,11 +51,9 @@ import de.jreality.reader.Readers;
 
 public class FileLoaderDialog {
 	
-  static File lastDir=new File("/net/MathVis/data/testData3D");
+  static File lastDir = new File(System.getProperty("jreality.data", "/net/MathVis/data/testData3D"));
   
-  
-  
-  static JFileChooser createFileChooser() {
+  public static JFileChooser createFileChooser() {
       FileFilter ff = new FileFilter(){
             public boolean accept(File arg0) {
                 if (arg0.isDirectory()) return true;
