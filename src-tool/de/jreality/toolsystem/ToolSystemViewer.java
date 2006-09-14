@@ -164,11 +164,11 @@ public class ToolSystemViewer implements Viewer {
   }
   
   public void schedule(Object key, AnimatorTask task) {
-	  AnimatorTool.getInstance().schedule(key, task);
+	  AnimatorTool.getInstance(toolSystem.getThread()).schedule(key, task);
   }
   
   public void deschedule(Object key) {
-	  AnimatorTool.getInstance().deschedule(key);
+	  AnimatorTool.getInstance(toolSystem.getThread()).deschedule(key);
   }
 
   public PickSystem getPickSystem() {

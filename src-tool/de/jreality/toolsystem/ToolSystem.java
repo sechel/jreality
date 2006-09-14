@@ -213,6 +213,10 @@ public class ToolSystem implements ToolEventReceiver {
     this.renderTrigger = renderTrigger;
   }
 
+  Thread getThread() {
+  	return eventQueue.getThread();
+  }
+  
   private boolean initialized;
   public void initializeSceneTools() {
     if (initialized) throw new IllegalStateException("already initialized!");
