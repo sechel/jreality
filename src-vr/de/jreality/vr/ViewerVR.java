@@ -27,6 +27,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileSystemView;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.JoinGeometry;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.Readers;
@@ -37,6 +38,8 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.SceneGraphVisitor;
+import de.jreality.scene.data.Attribute;
 import de.jreality.scene.tool.Tool;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
@@ -47,6 +50,7 @@ import de.jreality.swing.ScenePanel;
 import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.PickShowTool;
 import de.jreality.tools.ShipNavigationTool;
+import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
@@ -61,9 +65,6 @@ public class ViewerVR {
 	avatarNode=new SceneGraphComponent(),
 	camNode=new SceneGraphComponent(),
 	lightNode=new SceneGraphComponent(),
-	lightNode2=new SceneGraphComponent(),
-	lightNode3=new SceneGraphComponent(),
-	lightNode4=new SceneGraphComponent(),
 	terrainNode;
 	
 	private SceneGraphComponent currentContent;
@@ -81,6 +82,10 @@ public class ViewerVR {
 	Landscape landscape = new Landscape();
 
 	private JFileChooser chooser;
+
+	private JSlider sizeSlider;
+
+	private JSlider groundSlider;
 	
 	public ViewerVR() throws IOException {
 		
@@ -90,12 +95,13 @@ public class ViewerVR {
 		sceneNode.setName("scene");
 		avatarNode.setName("avatar");
 		camNode.setName("camNode");
-		lightNode.setName("light 1");
-		lightNode2.setName("light 2");
-		lightNode3.setName("light 3");
-		lightNode4.setName("light 4");
+		lightNode.setName("sun");
 		sceneRoot.addChild(sceneNode);
 		
+		rootAppearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.AMBIENT_COEFFICIENT, 0.1);
+		rootAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.AMBIENT_COEFFICIENT, 0.03);
+		rootAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.PICKABLE, false);
+		rootAppearance.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE, false);
 		sceneRoot.setAppearance(rootAppearance);
 		
 		terrainAppearance.setAttribute("showLines", false);
@@ -112,22 +118,10 @@ public class ViewerVR {
 		}
 		
 		// lights
-		light.setIntensity(0.4);
+		light.setIntensity(2);
 		lightNode.setLight(light);
-		MatrixBuilder.euclidean().rotateFromTo(new double[]{0,0,1}, new double[]{-1,1,-1}).assignTo(lightNode);
+		MatrixBuilder.euclidean().rotateFromTo(new double[]{0,0,1}, new double[]{0,1,1}).assignTo(lightNode);
 		sceneRoot.addChild(lightNode);
-		
-		lightNode2.setLight(light);
-		MatrixBuilder.euclidean().rotateFromTo(new double[]{0,0,1}, new double[]{1,1,-1}).assignTo(lightNode2);
-		sceneRoot.addChild(lightNode2);
-		
-		lightNode3.setLight(light);
-		MatrixBuilder.euclidean().rotateFromTo(new double[]{0,0,1}, new double[]{1,1,1}).assignTo(lightNode3);
-		sceneRoot.addChild(lightNode3);
-		
-		lightNode4.setLight(light);
-		MatrixBuilder.euclidean().rotateFromTo(new double[]{0,0,1}, new double[]{-1,1,1}).assignTo(lightNode3);
-		sceneRoot.addChild(lightNode4);
 		
 		// prepare paths
 		sceneRoot.addChild(avatarNode);
@@ -200,10 +194,10 @@ public class ViewerVR {
 		Box sizeBox = new Box(BoxLayout.Y_AXIS);
 		sizeBox.setBorder(new EmptyBorder(5,5,5,5));
 		JLabel sizeLabel = new JLabel("size");
-		final JSlider sizeSlider = new JSlider(SwingConstants.VERTICAL,100,10000,(int)(diam*100));
+		sizeSlider = new JSlider(SwingConstants.VERTICAL,100,10000,(int)(diam*100));
 		sizeSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
-				diam = 0.01*sizeSlider.getValue();
+				setDiam(0.01*sizeSlider.getValue());
 				alignContent(diam, offset, null);
 			}
 		});
@@ -213,10 +207,10 @@ public class ViewerVR {
 		Box groundBox = new Box(BoxLayout.Y_AXIS);
 		groundBox.setBorder(new EmptyBorder(5,5,5,5));
 		JLabel groundLabel = new JLabel("level");
-		final JSlider groundSlider = new JSlider(SwingConstants.VERTICAL,0,200,(int)(offset*100));
+		groundSlider = new JSlider(SwingConstants.VERTICAL,0,200,(int)(offset*100));
 		groundSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
-				offset = 0.01*groundSlider.getValue();
+				setOffset(0.01*groundSlider.getValue());
 				alignContent(diam, offset, null);
 			}
 		});
@@ -337,8 +331,7 @@ public class ViewerVR {
 		
 		getTerrainNode().addTool(sp.getPanelTool());
 		
-		FileSystemView view = FileSystemView.getFileSystemView();
-		chooser = new JFileChooser(view.getHomeDirectory());
+		chooser = FileLoaderDialog.createFileChooser();
 		
 	}
 	
@@ -371,11 +364,41 @@ public class ViewerVR {
 		currentContent=content;
 		sceneNode.addChild(currentContent);
 		alignContent(diam, offset, null);
+		PickUtility.assignFaceAABBTrees(currentContent);
+		currentContent.accept(new SceneGraphVisitor() {
+			@Override
+			public void visit(SceneGraphComponent c) {
+				c.childrenWriteAccept(this, false, false, false, false, true, false);
+			}
+			@Override
+			public void visit(IndexedFaceSet i) {
+				//JoinGeometry.meltFaceHack(i);
+				if (i.getVertexAttributes(Attribute.NORMALS) == null) {
+					GeometryUtility.calculateAndSetVertexNormals(i);
+				}
+			}
+		});
 	}
 	
-	public void alignContent(final double diam, final double offset, final Matrix rotation) {
-		this.diam=diam;
-		this.offset=offset;
+	public double getDiam() {
+		return diam;
+	}
+
+	public void setDiam(double diam) {
+		this.diam = diam;
+		sizeSlider.setValue((int) (diam*100));
+	}
+
+	public double getOffset() {
+		return offset;
+	}
+
+	public void setOffset(double offset) {
+		this.offset = offset;
+		groundSlider.setValue((int) (offset*100));
+	}
+
+	private void alignContent(final double diam, final double offset, final Matrix rotation) {
 		Scene.executeWriter(sceneNode, new Runnable() {
 			public void run() {
 				if (rotation != null) MatrixBuilder.euclidean(rotation).times(new Matrix(sceneNode.getTransformation())).assignTo(sceneNode);
@@ -429,8 +452,6 @@ public class ViewerVR {
 		System.setProperty("de.jreality.ui.viewerapp.synchRender", "true");
 		
 		ViewerVR tds = new ViewerVR();
-		//tds.terrain=false;
-		tds.init();
 		
 		final SceneGraphComponent he2 = Readers.read(Input.getInput("obj/He2SmallTower.obj"));
 		final SceneGraphComponent he2bd = Readers.read(Input.getInput("obj/He2SmallTowerBoundary.obj"));
@@ -440,13 +461,15 @@ public class ViewerVR {
 		he2.addChild(he2bd);
 		he2.setAppearance(app);
 		
+		MatrixBuilder.euclidean().rotateX(Math.PI/2).assignTo(he2);
+		
 		tds.setContent(he2);
-		tds.alignContent(40,.3,MatrixBuilder.euclidean().rotateX(Math.PI/2).getMatrix());
+		tds.setDiam(40);
 		
 		ViewerApp vApp = tds.display();
 		vApp.setAttachNavigator(true);
 		vApp.setAttachBeanShell(true);
-		vApp.setShowMenu(true);
+		//vApp.setShowMenu(true);
 		vApp.update();
 		vApp.display();
 	}

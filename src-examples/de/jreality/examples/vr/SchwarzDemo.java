@@ -79,7 +79,7 @@ public class SchwarzDemo {
 		System.setProperty("de.jreality.ui.viewerapp.synchRender", "true");
 		ViewerVR tds = new ViewerVR();
 		tds.setContent(new SchwarzDemo().cmp);
-		tds.alignContent(5, 0.3, null);
+		tds.setDiam(5);
 		
 		ViewerApp va = tds.display();
 		//va.setAttachBeanShell(true);
