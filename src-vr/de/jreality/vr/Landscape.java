@@ -96,8 +96,12 @@ public class Landscape implements ActionListener {
   }
   
   private void applySelection() {
-    toolScene.setSkyBox(getSelectedCubeMap());
-    toolScene.setTerrainTexture(getSelectedTexture(), Integer.parseInt(skyboxes[selectionIndex][5]));
+	if (getSelectedCubeMap() != null) {
+		toolScene.setSkyBox(getSelectedCubeMap());
+	} 
+	if (getSelectedTexture() != null) {
+		toolScene.setTerrainTexture(getSelectedTexture(), Integer.parseInt(skyboxes[selectionIndex][5]));
+	}
   }
 
   public ImageData[] getSelectedCubeMap() {
