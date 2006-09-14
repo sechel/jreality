@@ -110,6 +110,11 @@ public final class MatrixBuilder {
 	    return euclidean(new Matrix());
 	  }
 
+   public static MatrixBuilder euclidean(SceneGraphComponent cmp) {
+		if (cmp.getTransformation() == null) return euclidean();
+		else return euclidean(cmp.getTransformation());
+	}
+
   public static MatrixBuilder hyperbolic(Transformation m) {
 	Matrix mat=(m!=null) ? new Matrix(m) : new Matrix();
     return new MatrixBuilder(mat, Pn.HYPERBOLIC);
@@ -126,6 +131,11 @@ public final class MatrixBuilder {
    */public static MatrixBuilder hyperbolic() {
     return hyperbolic(new Matrix());
   }
+
+   public static MatrixBuilder hyperbolic(SceneGraphComponent cmp) {
+		if (cmp.getTransformation() == null) return hyperbolic();
+		else return hyperbolic(cmp.getTransformation());
+	}
 
   public static MatrixBuilder elliptic(Transformation m) {
 	Matrix mat=(m!=null) ? new Matrix(m) : new Matrix();
@@ -144,7 +154,12 @@ public final class MatrixBuilder {
     return elliptic(new Matrix());
   }
 
-  public static MatrixBuilder projective(Transformation m) {
+   public static MatrixBuilder elliptic(SceneGraphComponent cmp) {
+		if (cmp.getTransformation() == null) return elliptic();
+		else return elliptic(cmp.getTransformation());
+	}
+
+   public static MatrixBuilder projective(Transformation m) {
 	Matrix mat=(m!=null) ? new Matrix(m) : new Matrix();
     return new MatrixBuilder(mat, Pn.PROJECTIVE);
   }
@@ -368,7 +383,8 @@ public final class MatrixBuilder {
     matrix.assignTo(m);
   }
 
-public double[] getArray() {
-	return matrix.getArray();
-}
+	public double[] getArray() {
+		return matrix.getArray();
+	}
+
 }

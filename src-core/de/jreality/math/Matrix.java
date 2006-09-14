@@ -121,7 +121,7 @@ public class Matrix implements Serializable {
      * @param the Transformation to copy and wrap
      */
     public Matrix(Transformation data) {
-        this(data.getMatrix());
+        this(data == null ? null : data.getMatrix());
     }
 
 	/**
