@@ -134,11 +134,11 @@ class AbstractPointSetFactory {
 		vertexAttributeNode(attr).setObject( data );
 	}
 	
-	protected void setVertexAttributes(DataListSet dls ) {
-		vertexDLS = dls;	
+	protected void setVertexAttributes( DataListSet dls ) {
+		setAttrImpl(vertexDLS, dls);
 		for( Iterator iter = dls.storedAttributes().iterator(); iter.hasNext(); ) {
 			Attribute attr = (Attribute)iter.next();
-			vertexAttributeNode(attr).setObject( dls.getList(attr));
+			vertexAttributeNode(attr).setObject( vertexDLS.getList(attr));
 		}
 	}
 	
@@ -154,6 +154,12 @@ class AbstractPointSetFactory {
 		}
 	} 
 	
+	  final void setAttrImpl(DataListSet target, DataListSet data) {
+		    for (Iterator i=data.storedAttributes().iterator(); i.hasNext(); ) {
+		      Attribute a=(Attribute)i.next();
+		      setAttrImpl(target, a, data.getList(a));
+		    }
+		  }
 
 	protected void setVertexCoordinates( DataList data ) {
 		setVertexAttribute( Attribute.COORDINATES, data );

@@ -142,10 +142,10 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	}
 	
 	protected void setFaceAttributes(DataListSet dls ) {
-		faceDLS = dls;	
+		setAttrImpl(faceDLS, dls);
 		for( Iterator iter = dls.storedAttributes().iterator(); iter.hasNext(); ) {
 			Attribute attr = (Attribute)iter.next();
-			faceAttributeNode(attr).setObject( dls.getList(attr));
+			faceAttributeNode(attr).setObject( faceDLS.getList(attr));
 		}
 	}
 	

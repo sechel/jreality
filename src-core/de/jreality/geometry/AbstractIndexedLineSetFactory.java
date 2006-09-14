@@ -128,10 +128,10 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 	}
 	
 	protected void setEdgeAttributes(DataListSet dls ) {
-		edgeDLS = dls;	
+		setAttrImpl(edgeDLS, dls);	
 		for( Iterator iter = dls.storedAttributes().iterator(); iter.hasNext(); ) {
 			Attribute attr = (Attribute)iter.next();
-			edgeAttributeNode(attr).setObject( dls.getList(attr));
+			edgeAttributeNode(attr).setObject( edgeDLS.getList(attr));
 		}
 	}
 	
