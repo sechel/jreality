@@ -139,16 +139,6 @@ public class SceneGraphNode {
     }
   }
   
-  private void processWriters(List w) {
-    for (Iterator i = w.iterator(); i.hasNext(); ) {
-      try {
-        ((Runnable)i.next()).run();
-      } catch (Exception e) {
-        LoggingSystem.getLogger(this).log(Level.SEVERE, "writer failed", e);
-      }
-    }
-  }
-
   protected void writingFinished() {
   }
 

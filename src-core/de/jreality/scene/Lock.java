@@ -47,8 +47,8 @@ package de.jreality.scene;
  */
 public final class Lock {
 
-  final OldLock lock=new OldLock();
-  //final NewLock lock=new NewLock();
+  //final OldLock lock=new OldLock();
+  final NewLock lock=new NewLock();
 
   public boolean equals(Object obj) {
     return lock.equals(obj);
