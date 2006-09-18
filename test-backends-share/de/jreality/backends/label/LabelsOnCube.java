@@ -44,6 +44,7 @@ import java.awt.Color;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.geometry.Primitives;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -82,7 +83,7 @@ public class LabelsOnCube {
 	 */
 	public static void main(String[] args) {
 
-    IndexedFaceSet ifs = new IndexedFaceSet();
+    IndexedFaceSet ifs = Primitives.cube();
     GeometryUtility.calculateAndSetFaceNormals(ifs);
     IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs);
     //ifs = new CatenoidHelicoid(7);

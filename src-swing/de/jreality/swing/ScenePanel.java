@@ -44,6 +44,7 @@ public class ScenePanel {
   ActionTool myActionTool=new ActionTool("PanelActivation");
 
   public ScenePanel() {
+  	rootNode.setName("panel");
     panel.setVertexCount(4);
     panel.setFaceCount(1);
     panel.setVertexCoordinates(panelVerts);
@@ -181,13 +182,13 @@ public class ScenePanel {
   public void show(ToolContext tc, double zOffset) {
     Matrix avatar = new Matrix(tc.getTransformationMatrix(InputSlot.getDevice("AvatarTransformation")));
     MatrixBuilder.euclidean(avatar).translate(0, 0, zOffset).assignTo(rootNode);
-    frame.setVisible(true);
     tc.getViewer().getSceneRoot().addChild(getComponent());
+    frame.setVisible(true);
   }
   
   public void hide(ToolContext tc) {
-    frame.setVisible(false);
     tc.getViewer().getSceneRoot().removeChild(getComponent());
+    frame.setVisible(false);
   }
 
   public void toggle(ToolContext tc) {

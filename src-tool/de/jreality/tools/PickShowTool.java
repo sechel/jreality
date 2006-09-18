@@ -67,6 +67,7 @@ public class PickShowTool extends AbstractTool {
     this.radius=radius;
     addCurrentSlot(InputSlot.getDevice("PointerTransformation"));
     c.addChild(Primitives.sphere(1, 0, 0, 0));
+    c.setName("pick display");
     c.setAppearance(a);
     a.setAttribute("pickable", false);
     a.setAttribute(CommonAttributes.FACE_DRAW, true);
@@ -116,13 +117,10 @@ public class PickShowTool extends AbstractTool {
   private void assureAttached(ToolContext tc) {
     if (!attached) tc.getViewer().getSceneRoot().addChild(c);
     attached = true;
+    c.setVisible(true);
   }
-  public void assureDetached(ToolContext tc) {
-    if (attached) {
-      tc.getViewer().getSceneRoot().removeChild(c);
-      tc.getViewer().render();
-    }
-    attached = false;
+  private void assureDetached(ToolContext tc) {
+    c.setVisible(false);
   }
 
 }

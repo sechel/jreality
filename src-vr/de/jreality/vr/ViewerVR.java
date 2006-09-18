@@ -24,10 +24,8 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.filechooser.FileSystemView;
 
 import de.jreality.geometry.GeometryUtility;
-import de.jreality.geometry.JoinGeometry;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.Readers;
@@ -44,6 +42,7 @@ import de.jreality.scene.tool.Tool;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.ImageData;
+import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.swing.ScenePanel;
@@ -98,6 +97,8 @@ public class ViewerVR {
 		lightNode.setName("sun");
 		sceneRoot.addChild(sceneNode);
 		
+		rootAppearance.setName("root app");
+		ShaderUtility.createRootAppearance(rootAppearance);
 		rootAppearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.AMBIENT_COEFFICIENT, 0.1);
 		rootAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.AMBIENT_COEFFICIENT, 0.03);
 		rootAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.PICKABLE, false);

@@ -40,7 +40,6 @@
 
 package de.jreality.scene.data;
 
-import java.awt.Color;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -133,18 +132,24 @@ public class AttributeEntityUtility {
     private final Appearance app;
     private final EffectiveAppearance effApp;
     private final String ifClassName, prefix;
-    private final HashMap nameToProperty, readMethod, writeMethod, subReader, subCreator;
+    private final HashMap<Method, PropertyDescriptor> readMethod, writeMethod, subReader, subCreator;
     private final PropertyDescriptor[] properties;
     private final boolean readDefaults;
     private final String seperator;
     
-    Handler(Class ifClass, PropertyDescriptor[] pd, String prefix,
-        HashMap prop, HashMap reader, HashMap writer, HashMap subReader, HashMap subCreator, Object target, boolean readDefaults) {
+    Handler(Class ifClass,
+    		PropertyDescriptor[] pd,
+    		String prefix,
+        HashMap<Method, PropertyDescriptor> reader,
+        HashMap<Method, PropertyDescriptor> writer,
+        HashMap<Method, PropertyDescriptor> subReader,
+        HashMap<Method, PropertyDescriptor> subCreator,
+        Object target,
+        boolean readDefaults) {
       ifClassName = ifClass.getName();
       properties = pd;
       this.seperator = AttributeCollection.class.isAssignableFrom(ifClass) ? "." : ":";
       this.prefix = prefix == null || prefix.length() == 0 ? "" : prefix + seperator;
-      nameToProperty = prop;
       readMethod = reader;
       writeMethod = writer;
       this.subReader = subReader;
@@ -159,8 +164,6 @@ public class AttributeEntityUtility {
       }
     }
 
-    private static final Object DUMMY=new Object();
-    
     private Object getAttribute(PropertyDescriptor pd, Object proxy)
         throws IllegalAccessException {
       Object result = Appearance.INHERITED, defValue;
@@ -238,11 +241,6 @@ public class AttributeEntityUtility {
       PropertyDescriptor pd = (PropertyDescriptor) readMethod.get(method);
       if (pd != null) {
         Object ret = getAttribute(pd, proxy);
-        if (ret instanceof Color) {
-          if (!readDefaults) {
-            System.out.println("readDefaults="+readDefaults+" app="+app);
-          }
-        }
         return ret;
       }
       pd = (PropertyDescriptor) writeMethod.get(method);
@@ -286,7 +284,7 @@ public class AttributeEntityUtility {
       Class type = (Class) getSubEntityAttribute(pd, proxy);
       if (type == null) return null;
       String pref = prefix+pd.getName();
-      if (app != null) return AttributeEntityUtility.createAttributeEntity(type, pref, app, readDefaults);
+      if (app != null) return AttributeEntityUtility.getAttributeEntity(type, pref, app, readDefaults);
       if (AttributeEntityUtility.hasAttributeEntity(type, pref, effApp)) {
         try {
           return AttributeEntityUtility.createProxy(AttributeEntityUtility.resolveType(type), pref, effApp, true);
@@ -342,13 +340,13 @@ public class AttributeEntityUtility {
   private static Method hashCode;
   private static Method toString;
   
-  private static final HashMap descriptors=new HashMap();
-  private static final HashMap properties=new HashMap();
-  private static final HashMap readers=new HashMap();
-  private static final HashMap writers=new HashMap();
-  private static final HashMap proxyConstructors=new HashMap();
-  private static HashMap subEntityReaders=new HashMap();
-  private static HashMap subEntityCreators=new HashMap();
+  private static final HashMap<Class, PropertyDescriptor[]> descriptors=new HashMap<Class, PropertyDescriptor[]>();
+  private static final HashMap<Class, HashMap<String, PropertyDescriptor>> properties=new HashMap<Class, HashMap<String,PropertyDescriptor>>();
+  private static final HashMap<Class, HashMap<Method, PropertyDescriptor>> readers=new HashMap<Class, HashMap<Method, PropertyDescriptor>>();
+  private static final HashMap<Class, HashMap<Method, PropertyDescriptor>> writers=new HashMap<Class, HashMap<Method, PropertyDescriptor>>();
+  private static final HashMap<Class, Constructor<?>> proxyConstructors=new HashMap<Class, Constructor<?>>();
+  private static HashMap<Class, HashMap<Method, PropertyDescriptor>> subEntityReaders=new HashMap<Class, HashMap<Method, PropertyDescriptor>>();
+  private static HashMap<Class, HashMap<Method, PropertyDescriptor>> subEntityCreators=new HashMap<Class, HashMap<Method, PropertyDescriptor>>();
 
   static {
     try {
@@ -366,17 +364,27 @@ public class AttributeEntityUtility {
 
   /**
    * Create an implementation of the {@link AttributeEntity}for reading from
-   * and/or writing to an {@link Appearance}.
+   * and/or writing to an {@link Appearance} - writes tag to the appearance.
    */
   public static AttributeEntity createAttributeEntity(Class clazz, String prefix,
       Appearance a, boolean readDefaults) {
-    if (prefix == null) prefix = "";
-    try {
-      AttributeEntity proxy = (AttributeEntity) createProxy(clazz, prefix, a, readDefaults);
+      AttributeEntity proxy =  getAttributeEntity(clazz, prefix, a, readDefaults);
       if (!hasAttributeEntity(clazz, prefix, a)) {
         // tag the appearance
         a.setAttribute(getTaggingPrefix(prefix, clazz), clazz);
       }
+      return proxy;
+  }
+  
+  /**
+   * Create an implementation of the {@link AttributeEntity}for reading from
+   * and/or writing to an {@link Appearance} - this does not tag the appearance.
+   */
+  public static AttributeEntity getAttributeEntity(Class clazz, String prefix,
+      Appearance a, boolean readDefaults) {
+    if (prefix == null) prefix = "";
+    try {
+      AttributeEntity proxy = (AttributeEntity) createProxy(clazz, prefix, a, readDefaults);
       return proxy;
     } catch (IntrospectionException e) {
       IllegalStateException ise = new IllegalStateException(e.getMessage());
@@ -384,7 +392,7 @@ public class AttributeEntityUtility {
       throw ise;
     }
   }
-  
+
   /**
    * Create an implementation of the {@link AttributeEntity}for reading from an
    * {@link EffectiveAppearance}.
@@ -455,8 +463,12 @@ public class AttributeEntityUtility {
     if (!descriptors.containsKey(clazz)) {
       LoggingSystem.getLogger(AttributeEntityUtility.class).log(Level.INFO,
           "creating reader {0} with prefix {1}", new Object[] { clazz, prefix });
-      HashMap prop = new HashMap(), reader = new HashMap(), writer = new HashMap(), subEntityReader = new HashMap(), subEntityWriter = new HashMap();
-      HashSet pds = new HashSet();
+      HashMap<String, PropertyDescriptor> prop = new HashMap<String, PropertyDescriptor>();
+      HashMap<Method, PropertyDescriptor> reader = new HashMap<Method, PropertyDescriptor>(),
+      	writer = new HashMap<Method, PropertyDescriptor>(),
+      	subEntityReader = new HashMap<Method, PropertyDescriptor>(),
+      	subEntityWriter = new HashMap<Method, PropertyDescriptor>();
+      HashSet<PropertyDescriptor> pds = new HashSet<PropertyDescriptor>();
       BeanInfo bi = Introspector.getBeanInfo(clazz);
       PropertyDescriptor[] pd = bi.getPropertyDescriptors();
       pds.addAll(Arrays.asList(pd));
@@ -508,7 +520,7 @@ public class AttributeEntityUtility {
         }
       }
 
-      Class proxyClass = Proxy.getProxyClass(clazz.getClassLoader(), new Class[]{clazz});
+      Class proxyClass = Proxy.getProxyClass(clazz.getClassLoader(), clazz);
       descriptors.put(clazz, pds.toArray(new PropertyDescriptor[pds.size()]));
       properties.put(clazz, prop);
       readers.put(clazz, reader);
@@ -516,23 +528,21 @@ public class AttributeEntityUtility {
       subEntityReaders.put(clazz, subEntityReader);
       subEntityCreators.put(clazz, subEntityWriter);
       try {
-        proxyConstructors.put(clazz, proxyClass.getConstructor(new Class[] { InvocationHandler.class }));
+        proxyConstructors.put(clazz, proxyClass.getConstructor(InvocationHandler.class));
       } catch (NoSuchMethodException e) {
         throw new Error();
       }
     }
     Handler h = new Handler(clazz,
-        (PropertyDescriptor[])descriptors.get(clazz),
+        descriptors.get(clazz),
         prefix,
-        (HashMap)properties.get(clazz),
-        (HashMap)readers.get(clazz),
-        (HashMap)writers.get(clazz),
-        (HashMap)subEntityReaders.get(clazz),
-        (HashMap)subEntityCreators.get(clazz),
+        readers.get(clazz),
+        writers.get(clazz),
+        subEntityReaders.get(clazz),
+        subEntityCreators.get(clazz),
         target, readDefaults);
     try {
-      return ((Constructor)proxyConstructors.get(clazz))
-        .newInstance(new Object[]{h});
+      return proxyConstructors.get(clazz).newInstance(h);
     } catch (Exception e) {
       IllegalStateException ie = new IllegalStateException(e.getMessage());
       ie.initCause(e.getCause());
