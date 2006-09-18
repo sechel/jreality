@@ -80,7 +80,7 @@ public class ShaderUtility {
   }
 
   public static DefaultGeometryShader createDefaultGeometryShader(Appearance a, boolean readDefaults) {
-    return (DefaultGeometryShader) AttributeEntityUtility.createAttributeEntity(DefaultGeometryShader.class, "", a, readDefaults);
+    return (DefaultGeometryShader) AttributeEntityUtility.getAttributeEntity(DefaultGeometryShader.class, "", a, readDefaults);
   }
 
   public static DefaultGeometryShader createDefaultGeometryShader(EffectiveAppearance ea) {
@@ -88,7 +88,7 @@ public class ShaderUtility {
     }
 
   public static RenderingHintsShader createDefaultRenderingHintsShader(Appearance a, boolean readDefaults) {
-	    return (RenderingHintsShader) AttributeEntityUtility.createAttributeEntity(RenderingHintsShader.class, "", a, readDefaults);
+	    return (RenderingHintsShader) AttributeEntityUtility.getAttributeEntity(RenderingHintsShader.class, "", a, readDefaults);
 	  }
 
   public static RenderingHintsShader createRenderingHintsShader(EffectiveAppearance ea) {
