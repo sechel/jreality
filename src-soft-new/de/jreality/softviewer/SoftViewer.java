@@ -251,6 +251,7 @@ public class SoftViewer extends Component implements Runnable, Viewer {
 
                 offscreen = new BufferedImage(d.width, d.height,
                         BufferedImage.TYPE_INT_ARGB);
+                offscreen.setAccelerationPriority(1.f);
                 // TODO: findout if there is a way to keep the renderer...
                 renderer = new Renderer(offscreen);
 

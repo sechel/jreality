@@ -1,5 +1,4 @@
-/*
- /**
+/**
  *
  * This file is part of jReality. jReality is open source software, made
  * available under a BSD license:
@@ -38,56 +37,46 @@
  *
  */
 
+
 package de.jreality.softviewer;
 
 
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.awt.image.MemoryImageSource;
+import java.awt.image.VolatileImage;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 
-public class ArrayStack {
-    private Triangle[] data;
-    int position = -1;
-    private final int increment;
-    public ArrayStack(int initialCapacity) {
-        super();
-        data = new Triangle[initialCapacity];
-        increment = initialCapacity;
-    }
-    public boolean isEmpty() {
-        return position == -1;
-    }
-    public int getSize() {
-        return position+1;
-    }
-    /**
-     * pop allways returns a triangle. If the stack is empty a new one is generated
-     * @return a triangle
-     */
-    public Triangle pop() {
-        if(position > -1) { 
-            Triangle result =  data[position];
-        data[position--] = null;
-        return result;
-        } else 
-            return new Triangle();
-    }
-    public Triangle peek() {
-        return data[position];
-    }
-    public void push(Triangle element) {
-        if(++position >=data.length) {
-            Triangle[] tmp = new Triangle[data.length + increment];
-            System.arraycopy(data,0,tmp,0,data.length);
-            data = tmp;
-        }
-        data[position] = element;
-            
-    }
-    public Triangle[] getArray() {
-        return data;
-    }
-    public void set(int i, Triangle e) {
-        data[i] = e;
-    }
-    public Triangle get(int i) {
-        return data[i];
-    }
+
+/**
+ * 
+ * @version 1.0
+ * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
+ *
+ */
+public class SVGRenderer  extends AbstractRenderer {
+    private final Dimension d;
+    private final  PrintWriter writer;
+    
+    public SVGRenderer(PrintWriter writer, int width, int height ) throws FileNotFoundException {
+        super(new SVGRasterizer(writer),true);
+        d = new Dimension (width,height);
+        this.writer = writer;
+    } 
+  
+   
+	public void render() {
+          render(d.width, d.height);
+          writer.close();
+          System.out.println("done");
+      }
+      public void update() {
+      }
+
+
 }
+

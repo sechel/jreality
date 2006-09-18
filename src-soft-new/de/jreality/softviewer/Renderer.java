@@ -41,20 +41,13 @@
 package de.jreality.softviewer;
 
 
-import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
-import java.util.List;
+import java.awt.image.MemoryImageSource;
+import java.awt.image.VolatileImage;
 
-import de.jreality.math.Rn;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.Camera;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Transformation;
-import de.jreality.shader.CommonAttributes;
-import de.jreality.util.DefaultMatrixSupport;
-import de.jreality.util.SceneGraphUtility;
 
 /**
  * 
@@ -62,141 +55,33 @@ import de.jreality.util.SceneGraphUtility;
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
  *
  */
-public class Renderer {
-  protected Camera              camera;
-  protected SceneGraphComponent root;
-  protected SceneGraphComponent auxiliaryRoot;
-  private SceneGraphPath cameraPath;
-  private Transformation cameraWorld = new Transformation();
-
-  private TrianglePipeline pipeline;
-  private TriangleRasterizer rasterizer;
-  private RenderingVisitor renderTraversal;
-
-  final BufferedImage img;
-  final Dimension d;
-  final int[] pixels;
-
-  Renderer(BufferedImage bi) {
+public class Renderer  extends AbstractRenderer {
+    final BufferedImage img;
+    protected final Dimension d;
+    protected final int[] pixels;
+    
+    
+    public Renderer(BufferedImage bi ) {
+        this(bi,new int[bi.getWidth()* bi.getHeight()]);
+    }
+  private Renderer(BufferedImage bi,int[] pixels ) {
+    super(new DoubleTriangleRasterizer(pixels),false);
+    //pixels = new int[bi.getWidth()* bi.getHeight()];
+    this.pixels = pixels;
     img = bi;
     d = new Dimension(bi.getWidth(), bi.getHeight());
-    pixels = new int[d.width * d.height];
-    rasterizer = new DoubleTriangleRasterizer(pixels);
-    pipeline = new TrianglePipeline(rasterizer);
-    renderTraversal = new RenderingVisitor();
-    renderTraversal.setPipeline(pipeline);
+    
     } 
   
    
-	public void setBackgroundColor(int c) {
-        rasterizer.setBackground(c);
-  }
-    
-  public int getBackgroundColor() {
-    return rasterizer.getBackground();
-  }
-
- 
-  void render(int width, int height) {
-    //
-    //make sure that the buffered image is of correct size:
-    //
-//    if( (width != w || height != h) ) {
-      rasterizer.setWindow(0, width, 0, height);
-      rasterizer.setSize(width, height);
-      
-      pipeline.getPerspective().setWidth(width);
-      pipeline.getPerspective().setHeight(height);
-//    }
-    Appearance a = root == null ? null : root.getAppearance();
-      Color background;
-      if(a != null) {
-          Object o = a.getAttribute(CommonAttributes.BACKGROUND_COLOR);
-
-          if( o instanceof Color) background = (Color) o;
-          else background = Color.WHITE;
-      } else
-          background = Color.WHITE;
-    rasterizer.setBackground(background.getRGB());
-    rasterizer.clear();
-    //
-    // set camera settings:
-    //
-    
-    if (root != null && camera != null) {
-      PerspectiveProjection p =( (PerspectiveProjection)pipeline.getPerspective());
-      p.setFieldOfViewDeg(camera.getFieldOfView());
-      p.setNear(camera.getNear());
-      p.setFar(camera.getFar());
-      DefaultMatrixSupport.getSharedInstance().restoreDefault(cameraWorld, true);
-      //cameraPath.applyEffectiveTransformation(cameraWorld);
-      cameraWorld.setMatrix(cameraPath.getMatrix(null));
-      //SceneGraphUtilities.applyEffectiveTransformation(cameraWorld,(SceneGraphComponent) camera.getParentNode(),root);
-      
-      //
-      // traverse   
-      //
-      pipeline.clearPipeline();
-  	double[] im = new double[16];
-  	Rn.inverse(im,cameraWorld.getMatrix());
-  	//cameraWorld.getInverseMatrix(im);
-  	cameraWorld.setMatrix(im);
-      renderTraversal.setInitialTransformation(cameraWorld);
-      renderTraversal.traverse(root);
-      if(auxiliaryRoot!= null)
-          renderTraversal.traverse(auxiliaryRoot);
-    }    
-    pipeline.finish();
-    rasterizer.stop();
-  }    
-	
-  public SceneGraphPath getCameraPath() {
-    return cameraPath;
-  }
-
-  public void setCameraPath(SceneGraphPath p) {
-    cameraPath = p;
-    camera= p == null ? null : (Camera) p.getLastElement();
-  }
-
-  public SceneGraphComponent getSceneRoot() {
-    return root;
-  }
-
-  public void setSceneRoot(SceneGraphComponent component) {
-    root=component;
-    if(root!= null && camera !=null) {
-        //cameraPath = new SceneGraphPath(root,camera); 
-        List camPaths = SceneGraphUtility.getPathsBetween(root, camera);
-        if (camPaths.size() > 0) cameraPath = (SceneGraphPath) camPaths.get(0);
-        else {
-          camera = null;
-          cameraPath = null;
-        }
-    }
-  }
-    public SceneGraphComponent getAuxiliaryRoot() {
-        return auxiliaryRoot;
-      }
-
-      public void setAuxiliaryRoot(SceneGraphComponent component) {
-          auxiliaryRoot=component;
-        if(root!= null && camera !=null) {
-            //cameraPath = new SceneGraphPath(root,camera); 
-            List camPaths = SceneGraphUtility.getPathsBetween(root, camera);
-            if (camPaths.size() > 0) cameraPath = (SceneGraphPath) camPaths.get(0);
-            else {
-              camera = null;
-              cameraPath = null;
-            }
-        }
-  }
-
-      public void render() {
+	public void render() {
           render(d.width, d.height);
       }
       public void update() {
           img.getRaster().setDataElements(0, 0, d.width, d.height, pixels);
+          //img.setRGB(0, 0, d.width, d.height, pixels,0,d.width);
+          //Image img  = Toolkit.getDefaultToolkit().createImage(new MemoryImageSource(d.width,d.height,pixels,0,d.width));
+          //System.out.println(" image type "+(img instanceof VolatileImage));
       }
 
 

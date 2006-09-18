@@ -70,14 +70,15 @@ public abstract class AbstractPolygon {
         return center;
     }
 
-    public final Triangle[] triangulate(Triangle[] ta, ArrayStack<Triangle> stack) {
+    public final Triangle[] triangulate(Triangle[] ta, ArrayStack stack) {
         final int length = getLength()-2;
+        if (length < 0) return ta == null? new Triangle[0]:ta;
         if(ta == null|| ta.length < length) ta = new Triangle[length];
         double[] start = getPoint(length+1);
         double[] next = getPoint(0);
         for (int i = 0; i < length; i++) {
             Triangle t = stack.pop();
-            if(t== null) t = new Triangle();
+            //if(t== null) t = new Triangle();
             t.setShadingFrom(this);
             ta[i] = t;
             

@@ -110,5 +110,33 @@ public class Triangle extends AbstractPolygon {
     public int getLength() {
         return 3;
     }
+    
+    public String toString() {
+        StringBuilder b = new StringBuilder("t[\n");
+        b.append(p0[0]);
+        b.append(", ");
+        b.append(p0[1]);
+        b.append(", ");
+        b.append(p0[2]);
+        b.append(",\n");
+
+    
+        b.append(p1[0]);
+        b.append(", ");
+        b.append(p1[1]);
+        b.append(", ");
+        b.append(p1[2]);
+        b.append(",\n");
+
+    
+        b.append(p2[0]);
+        b.append(", ");
+        b.append(p2[1]);
+        b.append(", ");
+        b.append(p2[2]);
+        b.append("\n]");
+
+        return b.toString();
+    }
 
 }

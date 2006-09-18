@@ -195,6 +195,11 @@ class VecMat {
   public static final double[] difference(double a[], double b[]) {
 	  return new double[] { a[0]-b[0], a[1]-b[1], a[2]-b[2] };
   }
+  
+  public static final double[] difference(final double a[],final int ia, final double b[],final int ib) {
+      return new double[] { a[ia]-b[ib], a[ia+1]-b[ib+1], a[ia+2]-b[ib+2] };
+  }
+  
   public static final double[] crossproduct(double a[], double b[]) {
 	  double axb[]=new double[3];
 	  cross(a, b, axb);

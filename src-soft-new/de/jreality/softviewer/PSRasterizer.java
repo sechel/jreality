@@ -139,7 +139,7 @@ public class PSRasterizer extends TriangleRasterizer {
             writer.print(" " + polygon[i][Polygon.G] / 255.);
             writer.println(" " + polygon[i][Polygon.B] / 255.);
         }
-        writer.print("]\n>> shfill");
+        writer.print("]\n>> shfill\n");
 
     }
 

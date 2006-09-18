@@ -95,9 +95,9 @@ public class TrianglePipeline {
     // needed for clipping
     Polygon tmpPolygon = new Polygon(4);
 
-    ArrayStack<Triangle> freeTriangles = new ArrayStack<Triangle>(1000);
+    ArrayStack freeTriangles = new ArrayStack(1000);
 
-    ArrayStack<Triangle> triangles = new ArrayStack<Triangle>(1000);
+    ArrayStack triangles = new ArrayStack(1000);
 
     // Polygon polygons[] = new Polygon[0];
     // private int vertexCount = 0;
@@ -171,7 +171,7 @@ public class TrianglePipeline {
     private static int[] lineIndices = { 0, 1, 2, 3 };
     private IntArray lineIndicesDataList = new IntArray(lineIndices);
     
-    private final TriangleRasterizer rasterizer;
+    protected final TriangleRasterizer rasterizer;
 
     // static {
     // }
@@ -246,6 +246,7 @@ public class TrianglePipeline {
         computePerspective();
         // clip to frustum:
         // TODO: debug clipPlanes
+
         if (clipFrustum())
             return;
 
@@ -262,6 +263,7 @@ public class TrianglePipeline {
 
         for (int i = 0; i < n; i++) {
             Triangle tri = trisFromPoly[i];
+
             if (queueOpaque || isTransparent) {
                 if (sortOpaque || isTransparent)
                     // tri.computeCenterZ(vertexData);
@@ -483,6 +485,7 @@ public class TrianglePipeline {
                 z1out++;
 
         }
+
         if (x0out + x1out + y0out + y1out + z0out + z1out == 0) {
             // shader.shadePolygon(p1, vertexData, environment);
             return false; /* POLY_CLIP_IN */
@@ -514,7 +517,7 @@ public class TrianglePipeline {
                     .getFrustumZmin());
         if (z1out != 0)
             clipToHalfspace(AbstractPolygon.SZ, 1, perspective.getFrustumZmax());
-        
+
         if (polygon.getLength() == 0)
             return true; //should not happen...
         else
@@ -544,8 +547,8 @@ public class TrianglePipeline {
         double tv = 0;
         
         int pos = 0;
-        for (int i = 0; i < length; i++, u = v, tu = tv, v = polygon
-                .getPoint(i)) {
+        for (int i = 0; i < length; i++, u = v, tu = tv ){
+            v = polygon.getPoint(i);
             tv = sign * v[index] - k * v[AbstractPolygon.SW];
             if (tu <= 0. ^ tv <= 0.) { // edge crosses plane...
                 double t = tu / (tu - tv);

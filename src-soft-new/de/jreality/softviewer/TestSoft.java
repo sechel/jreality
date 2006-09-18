@@ -23,12 +23,22 @@
 package de.jreality.softviewer;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Viewer;
 import de.jreality.shader.*;
+import de.jreality.soft.PSViewer;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class TestSoft {
@@ -37,13 +47,18 @@ public class TestSoft {
         super();
         // TODO Auto-generated constructor stub
     }
+    
+    static Viewer  viewer;
 
     /**
      * @param args
      */
     public static void main(String[] args) {
-        double[][] points = {{0, 1, 0},{1, 0, 0},{0, -1, 0}, {-1, 0, 0}};
-        int[][] faces = {{0, 1, 2, 3}};
+        double[][] points = {{0, 1, 0.1},{1, 0, 1},{0, -1, -0.1}};
+//        double[][] points = {{0, 1, 0},{1, 0, 0},{0, -1, 0}, 
+//                {.5, 0, -0.1}, {0, 0, -.5}, {0, 0, -1}};
+
+        int[][] faces = {{0, 1, 2}};
 
         IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
 
@@ -51,7 +66,7 @@ public class TestSoft {
         ifsf.setGenerateFaceNormals(true);
         ifsf.setGenerateVertexNormals(false);
 
-        ifsf.setVertexCount(4);
+        ifsf.setVertexCount(3);
         ifsf.setFaceCount(1);
         ifsf.setVertexCoordinates(points);
         ifsf.setFaceIndices(faces);
@@ -70,26 +85,77 @@ public class TestSoft {
 //        app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, 0.07);
         
         DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(app, true);
-        dgs.setShowPoints(Boolean.TRUE);
-        dgs.setShowLines(Boolean.TRUE);
+        dgs.setShowPoints(true);
+        dgs.setShowLines(true );
         DefaultPolygonShader polyShader = (DefaultPolygonShader) dgs.getPolygonShader();
         DefaultPointShader pointShader = (DefaultPointShader) dgs.getPointShader();
         DefaultLineShader lineShader = (DefaultLineShader) dgs.getLineShader();
         
-        polyShader.setDiffuseColor(Color.green);
+        //polyShader.setDiffuseColor(Color.green);
         lineShader.setDiffuseColor(Color.yellow);
         lineShader.setTubeRadius(new Double(0.07));
         pointShader.setPointRadius(new Double(0.07));
         
         SceneGraphComponent cmp = new SceneGraphComponent();
-        
+        SceneGraphComponent cmp1 = new SceneGraphComponent();
+        SceneGraphComponent cmp2 = new SceneGraphComponent();
+        SceneGraphComponent cmp3 = new SceneGraphComponent();
+
         cmp.setAppearance(app);
-        cmp.setGeometry(faceSet);
+        cmp.addChild(cmp1);
+        cmp.addChild(cmp2);
+        cmp.addChild(cmp3);
+        cmp1.setGeometry(faceSet);
+        cmp2.setGeometry(faceSet);
+        cmp3.setGeometry(faceSet);
+        
+        MatrixBuilder.euclidean().rotate(2. * Math.PI/3.,0,0,1).translate(.2,0,0).assignTo(cmp1);
+        MatrixBuilder.euclidean().rotate(4. * Math.PI/3.,0,0,1).translate(.2,0,0).assignTo(cmp2);
+        
+        app = new Appearance();
+        app.setAttribute(CommonAttributes.DIFFUSE_COLOR,Color.RED);
+        cmp2.setAppearance(app);
+
+        app = new Appearance();
+        app.setAttribute(CommonAttributes.DIFFUSE_COLOR,Color.GREEN);
+        cmp3.setAppearance(app);
         
         System.setProperty("de.jreality.scene.Viewer", "de.jreality.softviewer.SoftViewer");
         //System.setProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer");
-        ViewerApp.display(cmp);
+        ViewerApp va = ViewerApp.display(cmp);
+        viewer =  va.getViewer();
+        Component c = (Component) va.getViewer().getViewingComponent();
+        c.addKeyListener(new KeyListener() {
 
+            public void keyTyped(KeyEvent e) {
+                System.out.println(" typed");
+                if(e.getKeyChar() =='p') {
+                    System.out.println("writing");
+                    Dimension d = viewer.getViewingComponentSize();
+                    PSRenderer ps;
+                    try {
+                        ps = new PSRenderer(new PrintWriter(new File("/tmp/test.ps")),d.width,d.height);
+                        ps.setSceneRoot(viewer.getSceneRoot());
+                        ps.setCameraPath(viewer.getCameraPath());
+                        ps.render();
+                    } catch (FileNotFoundException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+                }
+            }
+
+            public void keyPressed(KeyEvent e) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            public void keyReleased(KeyEvent e) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+        });
     }
 
 }
