@@ -607,6 +607,10 @@ class FakeToolKit extends Toolkit {
         public Rectangle getBounds() {
           return bounds;
         }
+        public void updateFocusableWindowState() {
+          // TODO Auto-generated method stub
+          
+        }
 
     };
 
