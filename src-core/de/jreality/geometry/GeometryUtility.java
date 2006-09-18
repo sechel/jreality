@@ -521,7 +521,7 @@ public class GeometryUtility {
      * 
      * @return the target array (a new one if target == null)
      */
-    private static double[] inline(double[] target, double[][] src) {
+    static double[] inline(double[] target, double[][] src) {
     		// TODO decide if this belongs here -- doesn't have anything to do with Geometry per se.
         final int slotLength = src[0].length;
         if(target==null) target=new double[src.length*slotLength];

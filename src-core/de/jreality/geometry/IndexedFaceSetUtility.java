@@ -1350,4 +1350,82 @@ public class IndexedFaceSetUtility {
 //		truncated.buildEdgesFromFaces();
 //		return truncated;
 	}
+    
+  	public static void assignVertexTangents(IndexedFaceSet ifs) {
+  		double[][] tangents = calculateVertexTangents(
+  				ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(),
+  				ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(),
+  				ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(),
+  				ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray());
+  		ifs.setVertexAttributes(Attribute.attributeForName("TANGENTS"), new DoubleArrayArray.Array(tangents, 4));
+  	}
+  	
+  	/**
+  	 * calculates face tangents, converted from
+  	 * http://www.terathon.com/code/tangent.php
+  	 * 
+  	 * @param texCoords
+  	 * @param vertexCoordinates
+  	 * @param vertexNormals
+  	 * @param faceIndices
+  	 * @return a double[verts.length][4] array containing the face tangents and the orienation (sign of 4th coordinate).
+  	 */
+  	public static double[][] calculateVertexTangents(DoubleArrayArray texCoords, DoubleArrayArray vertexCoordinates, DoubleArrayArray vertexNormals, IntArrayArray faceIndices) {
+  		double[][] ret=new double[texCoords.getLength()][4];
+  		double[][] tan1 = new double[texCoords.getLength()][3];
+  		double[][] tan2 = new double[texCoords.getLength()][3];
+  		for (int i=0; i < faceIndices.getLength(); i++) {
+  			IntArray face = faceIndices.getValueAt(i);
+  			for (int j = 0, n = face.getLength()-2; j < n; j++) {
+  				int i1 = face.getValueAt(0);
+  				int i2 = face.getValueAt(j);
+  				int i3 = face.getValueAt((j+1)%n);
+  				double[] v1 = vertexCoordinates.getValueAt(i1).toDoubleArray(null);
+  				double[] v2 = vertexCoordinates.getValueAt(i2).toDoubleArray(null);
+  				double[] v3 = vertexCoordinates.getValueAt(i3).toDoubleArray(null);
+  				double[] w1 = texCoords.getValueAt(i1).toDoubleArray(null);
+  				double[] w2 = texCoords.getValueAt(i2).toDoubleArray(null);
+  				double[] w3 = texCoords.getValueAt(i3).toDoubleArray(null);
+  				
+          double x1 = v2[0] - v1[0];
+          double x2 = v3[0] - v1[0];
+          double y1 = v2[1] - v1[1];
+          double y2 = v3[1] - v1[1];
+          double z1 = v2[2] - v1[2];
+          double z2 = v3[2] - v1[2];
+          
+          double s1 = w2[0] - w1[0];
+          double s2 = w3[0] - w1[0];
+          double t1 = w2[1] - w1[1];
+          double t2 = w3[1] - w1[1];
+          
+          double r = 1. / (s1 * t2 - s2 * t1);
+          double[] sdir = new double[]{(t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r,
+                  (t2 * z1 - t1 * z2) * r};
+          double[] tdir = new double[]{(s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r,
+                  (s1 * z2 - s2 * z1) * r};
+          
+          Rn.add(tan1[i1], tan1[i1], sdir);
+          Rn.add(tan1[i2], tan1[i2], sdir);
+          Rn.add(tan1[i3], tan1[i3], sdir);
+          
+          Rn.add(tan2[i1], tan2[i1], tdir);
+          Rn.add(tan2[i2], tan2[i2], tdir);
+          Rn.add(tan2[i3], tan2[i3], tdir);
+  			}
+  		}
+  		
+  		for (int a = 0; a < texCoords.getLength(); a++) {
+        double[] n = vertexNormals.getValueAt(a).toDoubleArray(null);
+        double[] t = tan1[a];
+
+        // Gram-Schmidt orthogonalize
+        ret[a] = Rn.normalize(ret[a], Rn.times(ret[a], Rn.innerProduct(n, t), Rn.subtract(ret[a], t, n)));
+          
+          // Calculate handedness
+        ret[a][3] = (Rn.innerProduct(Rn.crossProduct(null, n, t), tan2[a]) < 0) ? -1 : 1;
+      }
+  		return ret;
+  	}
+
 }
