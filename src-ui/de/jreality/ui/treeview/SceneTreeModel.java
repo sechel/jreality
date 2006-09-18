@@ -239,7 +239,7 @@ public class SceneTreeModel extends AbstractTreeModel {
         EventQueue.invokeAndWait(runner);
 //      EventQueue.invokeLater(runner);
       } catch (Exception e) {
-        throw new Error(";-(");
+        throw new Error(e);
       }
       return ret[0];
     }

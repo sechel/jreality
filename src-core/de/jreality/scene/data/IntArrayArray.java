@@ -97,6 +97,11 @@ public abstract class IntArrayArray extends DataList {
       super(StorageModel.INT_ARRAY_ARRAY, data, 0, data.length);
       this.data= data;
     }
+    
+    public Array(final int[][] data, int numPerEntry) {
+      super(StorageModel.INT_ARRAY.array(numPerEntry), data);
+      this.data=data;
+    }
 
     public int getValueAt(int n, int i) {
       return data[n][i];
