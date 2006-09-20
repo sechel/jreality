@@ -42,6 +42,7 @@ package de.jreality.geometry;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -1378,8 +1379,8 @@ public class IndexedFaceSetUtility {
   			IntArray face = faceIndices.getValueAt(i);
   			for (int j = 0, n = face.getLength()-2; j < n; j++) {
   				int i1 = face.getValueAt(0);
-  				int i2 = face.getValueAt(j);
-  				int i3 = face.getValueAt((j+1)%n);
+  				int i2 = face.getValueAt(j+1);
+  				int i3 = face.getValueAt(j+2);
   				double[] v1 = vertexCoordinates.getValueAt(i1).toDoubleArray(null);
   				double[] v2 = vertexCoordinates.getValueAt(i2).toDoubleArray(null);
   				double[] v3 = vertexCoordinates.getValueAt(i3).toDoubleArray(null);
@@ -1420,7 +1421,12 @@ public class IndexedFaceSetUtility {
         double[] t = tan1[a];
 
         // Gram-Schmidt orthogonalize
-        ret[a] = Rn.normalize(ret[a], Rn.times(ret[a], Rn.innerProduct(n, t), Rn.subtract(ret[a], t, n)));
+        double l=Rn.innerProduct(n, t);
+        ret[a][0]=l*(t[0]-n[0]);
+        ret[a][1]=l*(t[1]-n[1]);
+        ret[a][2]=l*(t[2]-n[2]);
+        
+        Rn.normalize(ret[a], ret[a]);
           
           // Calculate handedness
         ret[a][3] = (Rn.innerProduct(Rn.crossProduct(null, n, t), tan2[a]) < 0) ? -1 : 1;

@@ -52,6 +52,7 @@ import javax.media.opengl.GL;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.shader.GlslProgram;
 import de.jreality.shader.GlslSource;
+import de.jreality.shader.GlslSource.AttributeParameter;
 import de.jreality.shader.GlslSource.UniformParameter;
 
 public class GlslLoader {
@@ -68,8 +69,7 @@ public class GlslLoader {
     context.linkProgram(gl);
     context.activateProgram(gl);
     // now set all (changed) values
-    for (Iterator it = prog.getSource().getUniformParameters().iterator(); it.hasNext(); ) {
-      UniformParameter param = (UniformParameter) it.next();
+    for (UniformParameter param : prog.getSource().getUniformParameters()) {
       Object value = prog.getUniform(param.getName());
       Object oldValue = context.getUniform(param);
 //      System.out.println("checking "+param);
@@ -77,6 +77,11 @@ public class GlslLoader {
       if (compare(oldValue, value, param.getPrimitiveType())) {
         context.writeValue(gl, param, value);
       }
+    }
+    int k = 9;
+    for (AttributeParameter param : prog.getSource().getAttributes()) {
+    	gl.glBindAttribLocation(context.progID.intValue(), k, param.getName());
+    	k++;
     }
   }
   
