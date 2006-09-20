@@ -45,7 +45,6 @@ import java.io.IOException;
 import java.io.StreamTokenizer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -74,15 +73,16 @@ import de.jreality.util.LoggingSystem;
  */
 public class ReaderOBJ extends AbstractReader {
 
-  private HashMap materials = new HashMap();
-  private HashMap groups = new HashMap();
-  private List v, vNorms, vTexs, currentGroups;
+  private HashMap<String, Appearance> materials = new HashMap<String, Appearance>();
+  private HashMap<String, Group> groups = new HashMap<String, Group>();
+  private List<double[]> v, vNorms, vTexs;
+  private LinkedList<String> currentGroups;
 
   public ReaderOBJ() {
-    v = new ArrayList(1000);
-    vNorms = new ArrayList(1000);
-    vTexs = new ArrayList(1000);
-    currentGroups = new LinkedList();
+    v = new ArrayList<double[]>(1000);
+    vNorms = new ArrayList<double[]>(1000);
+    vTexs = new ArrayList<double[]>(1000);
+    currentGroups = new LinkedList<String>();
     currentGroups.add("default");
     groups.put("default", new Group("default"));
     root = new SceneGraphComponent();
@@ -366,7 +366,7 @@ public class ReaderOBJ extends AbstractReader {
 
   private class Group {
 
-    final List faces;
+    final List<int[]> faces;
     final String name;
     final Appearance material;
     boolean smooth;
@@ -377,7 +377,7 @@ public class ReaderOBJ extends AbstractReader {
 
     Group(String name) {
       this.name = name;
-      faces = new ArrayList(11);
+      faces = new ArrayList<int[]>(11);
       material = ParserMTL.createDefault();
       setSmoothening(smoothShading);
       setMaterial(currMat);
@@ -438,41 +438,38 @@ public class ReaderOBJ extends AbstractReader {
                 vertexTex.toArray(new double[vertexTex.size()][])));
       } if (vertexNorms != null) {
         ifs.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE3_ARRAY.createReadOnly(vertexNorms.toArray(new double[vertexNorms.size()][])));
-        System.out.println("using VERTEX normals!");
       }
       boolean hasVertexNormals = ifs.getVertexAttributes(Attribute.NORMALS) != null;
       if (!hasVertexNormals && smooth) {
         GeometryUtility.calculateAndSetVertexNormals(ifs);
-        System.out.println("using calculated VERTEX normals!");
       }
       if (!smooth && !hasVertexNormals) {
         GeometryUtility.calculateAndSetFaceNormals(ifs);
-        System.out.println("using FACE normals!");
       }
       IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs);
       return ifs;
     }
 
-    private ArrayList extractNormals() {
+    private ArrayList<double[]> extractNormals() {
       if (fd.normalId(0) == -1) return null;
-      ArrayList list = new ArrayList(fd.size());
+      ArrayList<double[]> list = new ArrayList<double[]>(fd.size());
       for (int i = 0; i < fd.size(); i++) {
         list.add(i, vNorms.get(fd.normalId(i)));
       }
       return list;
     }
 
-    private ArrayList extractTexCoords() {
+    private ArrayList<double[]> extractTexCoords() {
       if (fd.texId(0) == -1) return null;
-      ArrayList list = new ArrayList(fd.size());
+      ArrayList<double[]> list = new ArrayList<double[]>(fd.size());
       for (int i = 0; i < fd.size(); i++) {
         list.add(i, vTexs.get(fd.texId(i)));
       }
       return list;
     }
 
-    private ArrayList extractVertices() {
-      ArrayList list = new ArrayList(fd.size());
+    private ArrayList<double[]> extractVertices() {
+      ArrayList<double[]> list = new ArrayList<double[]>(fd.size());
       for (int i = 0; i < fd.size(); i++) {
         list.add(i, v.get(fd.vertexId(i)));
       }
@@ -492,8 +489,8 @@ public class ReaderOBJ extends AbstractReader {
    * creates indices for triples of vertex/tex/normal
    */
   private static class FaceData {
-    private IdentityHashMap storedData=new IdentityHashMap();
-    private ArrayList list=new ArrayList();
+    private HashMap<String, Integer> storedData=new HashMap<String, Integer>();
+    private ArrayList<Triple> list=new ArrayList<Triple>();
     
     private class Triple {
       int v, t, n;
@@ -504,11 +501,11 @@ public class ReaderOBJ extends AbstractReader {
       }
     }
     
-    private FaceData(){ }
+    private FaceData(){}
     private int idCounter;
     int getID(int vertexIndex, int texIndex, int normalIndex) {
       final String key=vertexIndex+"::"+texIndex+"::"+normalIndex;
-      Integer ret = (Integer) storedData.get(key);
+      Integer ret = storedData.get(key);
       if (ret == null) {
         ret = new Integer(idCounter++);
         storedData.put(key, ret);
@@ -523,13 +520,13 @@ public class ReaderOBJ extends AbstractReader {
       return storedData.size();
     }
     int vertexId(int id) {
-      return ((Triple)list.get(id)).v;
+      return list.get(id).v;
     }
     int texId(int id) {
-      return ((Triple)list.get(id)).t;
+      return list.get(id).t;
     }
     int normalId(int id) {
-      return ((Triple)list.get(id)).n;
+      return list.get(id).n;
     }
   }
 }
