@@ -66,60 +66,91 @@ public class GlslSource implements Serializable {
   private String[] vertexProgs;
   private String[] fragmentProgs;
   
-  private final HashMap uniforms = new HashMap();
-  private final Collection UNIFORMS = Collections.unmodifiableCollection(uniforms.values());
+  private final HashMap<String, UniformParameter> uniforms = new HashMap<String, UniformParameter>();
+  private final HashMap<String, AttributeParameter> attribs = new HashMap<String, AttributeParameter>();
+  private final Collection<UniformParameter> UNIFORMS = Collections.unmodifiableCollection(uniforms.values());
+  private final Collection<AttributeParameter> ATTRIBUTES = Collections.unmodifiableCollection(attribs.values());
   
-  private static final Pattern pattern = Pattern.compile(
+  private static final Pattern uniformPattern = Pattern.compile(
     "^[\\w]*uniform[\\s]+([\\w]+)[\\s]+([\\w,\t ]+)[\\s]*\\[?[\\s]*([0-9]*)[\\s]*\\]?[\\s;]+", Pattern.MULTILINE
   );
+  private static final Pattern attribPattern = Pattern.compile(
+		    "^[\\w]*attribute[\\s]+([\\w]+)[\\s]+([\\w,\t ]+)[\\s]*\\[?[\\s]*([0-9]*)[\\s]*\\]?[\\s;]+", Pattern.MULTILINE
+		  );
   
   public GlslSource(Input vertexProgram, Input fragmentProgram) throws IOException {
       vertexProgs = vertexProgram == null ? null : new String[]{readString(vertexProgram)};
       fragmentProgs = fragmentProgram == null ? null : new String[]{readString(fragmentProgram)};
-      extractUniforms();
+      extractParams();
   }
   
   public GlslSource(String vertexProgram, String fragmentProgram) {
     this.vertexProgs = vertexProgram == null ? null : new String[]{new String(vertexProgram)};
     this.fragmentProgs = fragmentProgram == null ? null : new String[]{new String(fragmentProgram)};
-    extractUniforms();
+    extractParams();
   }
 
   public GlslSource(String[] vertexProgram, String[] fragmentProgram) {
     this.vertexProgs = vertexProgram;
     this.fragmentProgs = fragmentProgram;
-    extractUniforms();
+    extractParams();
   }
   
-  private void extractUniforms() {
-    if (vertexProgs != null) for (int i = 0; i < vertexProgs.length; i++)
+  private void extractParams() {
+    if (vertexProgs != null) for (int i = 0; i < vertexProgs.length; i++) {
       extractUniforms(vertexProgs[i]);
-    if (fragmentProgs != null) for (int i = 0; i < fragmentProgs.length; i++)
+      extractAttribs(vertexProgs[i]);
+    }
+    if (fragmentProgs != null) for (int i = 0; i < fragmentProgs.length; i++) {
       extractUniforms(fragmentProgs[i]);
+      extractAttribs(fragmentProgs[i]);
+    }
   }
   
   private void extractUniforms(String prog) {
-    Matcher m = pattern.matcher(prog);
-    while (m.find()) {
-      String type = m.group(1);
-      int arrayLen = -1;
-      try {
-        arrayLen = Integer.parseInt(m.group(3));
-      } catch (Exception e) {}
-      String nameStr = m.group(2);
-      String[] names = nameStr.split(", ");
-      for (int i = 0; i < names.length; i++) {
-        UniformParameter param = new UniformParameter(names[i], type, arrayLen);
-        uniforms.put(names[i], param);
-        //System.out.println("found "+param);
-      }
-    }
-  }
+	    Matcher m = uniformPattern.matcher(prog);
+	    while (m.find()) {
+	      String type = m.group(1);
+	      int arrayLen = -1;
+	      try {
+	        arrayLen = Integer.parseInt(m.group(3));
+	      } catch (Exception e) {}
+	      String nameStr = m.group(2);
+	      String[] names = nameStr.split(", ");
+	      for (int i = 0; i < names.length; i++) {
+	        UniformParameter param = new UniformParameter(names[i], type, arrayLen);
+	        uniforms.put(names[i], param);
+	        //System.out.println("found "+param);
+	      }
+	    }
+	  }
 
-  public Collection getUniformParameters() {
-    return UNIFORMS;
-  }
-  
+  private void extractAttribs(String prog) {
+	    Matcher m = attribPattern.matcher(prog);
+	    while (m.find()) {
+	      //String type = m.group(1);
+	      //int arrayLen = -1;
+	      //try {
+	      //  arrayLen = Integer.parseInt(m.group(3));
+	      //} catch (Exception e) {}
+	      String nameStr = m.group(2);
+	      String[] names = nameStr.split(", ");
+	      for (int i = 0; i < names.length; i++) {
+	        AttributeParameter param = new AttributeParameter(names[i]);
+	        attribs.put(names[i], param);
+	        System.out.println("found attrib "+param);
+	      }
+	    }
+	  }
+
+  public Collection<UniformParameter> getUniformParameters() {
+	    return UNIFORMS;
+	  }
+	  
+  public Collection<AttributeParameter> getAttributes() {
+	    return ATTRIBUTES;
+	  }
+	  
   public UniformParameter getUniformParameter(String name) {
     return (UniformParameter) uniforms.get(name);
   }
@@ -140,6 +171,23 @@ public class GlslSource implements Serializable {
     while ((read = r.read(buf)) != -1)
       sb.append(buf, 0, read);
     return sb.toString();
+  }
+  
+  public class AttributeParameter {
+    private final String name;
+    
+    private AttributeParameter(String name) {
+    	this.name=name;
+    }
+    
+    public String toString() {
+        return "attribute="+name;
+      }
+
+	public String getName() {
+		return name;
+	}
+
   }
   
   public class UniformParameter {
