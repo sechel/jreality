@@ -2,6 +2,7 @@ package de.jreality.vr;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Insets;
@@ -15,6 +16,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -85,6 +87,8 @@ public class ViewerVR {
 	private JSlider sizeSlider;
 
 	private JSlider groundSlider;
+
+	private ScenePanel sp;
 	
 	public ViewerVR() throws IOException {
 		
@@ -185,7 +189,7 @@ public class ViewerVR {
 		
 		Landscape l = new Landscape();
 		l.setToolScene(this);
-		ScenePanel sp = new ScenePanel();
+		sp = new ScenePanel();
 		sp.setPanelWidth(1);
 		JTabbedPane tabs = new JTabbedPane();
 		
@@ -334,17 +338,32 @@ public class ViewerVR {
 		
 		chooser = FileLoaderDialog.createFileChooser();
 		
+		chooser.addActionListener(new ActionListener() {
+			Container oldCmp = sp.getFrame().getContentPane();
+			public void actionPerformed(ActionEvent ev) {
+				System.out.println(ev);
+				File file = chooser.getSelectedFile();
+				try {
+					if (ev.getActionCommand() == JFileChooser.APPROVE_SELECTION && file != null) setContent(Readers.read(Input.getInput(file)));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				sp.getFrame().setVisible(false);
+				sp.setPanelWidth(1);
+				sp.getFrame().setContentPane(oldCmp);
+				sp.getFrame().setSize(200,190);
+				sp.getFrame().setVisible(true);
+			}
+		});
 	}
 	
 	public void load() {
-		chooser.showOpenDialog(null);
-		File file = chooser.getSelectedFile();
-		try {
-			setContent(Readers.read(Input.getInput(file)));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		sp.getFrame().setVisible(false);
+		sp.setPanelWidth(2);
+		sp.getFrame().setContentPane(chooser);
+		sp.getFrame().pack();
+		sp.getFrame().setVisible(true);
 	}
 	
 	public void setTerrainTexture(ImageData tex, double scale) {
@@ -355,7 +374,7 @@ public class ViewerVR {
 	public void setSkyBox(ImageData[] imgs) {
 		TextureUtility.createSkyBox(rootAppearance, imgs);
 		CubeMap cm = TextureUtility.createReflectionMap(contentAppearance, "polygonShader", imgs);
-		cm.setBlendColor(new java.awt.Color(1.0f, 1.0f, 1.0f, .6f));
+		cm.setBlendColor(new java.awt.Color(1.0f, 1.0f, 1.0f, 0f));
 	}
 	
 	public void setContent(SceneGraphComponent content) {

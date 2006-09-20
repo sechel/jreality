@@ -1,41 +1,40 @@
-//
-// Fragment shader for procedural bumps
-//
-// Authors: Randi Rost, John Kessenich
-//
-// Copyright (c) 2002-2005 3Dlabs Inc. Ltd. 
-//
-// See 3Dlabs-License.txt for license information
-//
+varying vec3 lightVec;
+varying vec3 eyeVec;
+varying vec2 texCoord;
+uniform sampler2D colorMap;
+uniform sampler2D normalMap;
+uniform samplerCube envMap;
+uniform float invRadius;
 
-varying vec3 LightDir;
-varying vec3 EyeDir;
-
-uniform vec3  SurfaceColor;    // = (0.7, 0.6, 0.18)
-uniform float BumpDensity;     // = 16.0
-uniform float BumpSize;        // = 0.15
-uniform float SpecularFactor;  // = 0.5
+const float texScale=30;
 
 void main (void)
 {
-vec3 litColor;
-vec2 c = BumpDensity * gl_TexCoord[0].st;
-vec2 p = fract(c) - vec2(0.5);
+	float distSqr = dot(lightVec, lightVec);
+	float att = clamp(1.0 - invRadius * sqrt(distSqr), 0.0, 1.0);
+	vec3 lVec = lightVec * inversesqrt(distSqr);
 
-float d, f;
-d = p.x * p.x + p.y * p.y;
-f = 1.0 / sqrt(d + 1.0);
+	vec3 vVec = normalize(eyeVec);
+	
+	vec4 base = texture2D(colorMap, texScale*texCoord);
+	float alpha = base.w;
+	
+	vec3 bump = normalize( texture2D(normalMap, texScale*texCoord).xyz * 2.0 - 1.0);
+	if (dot(vVec, bump) < 0) bump *= -1;
 
-if (d >= BumpSize)
-{ p = vec2(0.0); f = 1.0; }
 
-vec3 normDelta = vec3(p.x, p.y, 1.0) * f;
-litColor = SurfaceColor * max(dot(normDelta, LightDir), 0.0);
-vec3 reflectDir = reflect(LightDir, normDelta);
+	vec4 vAmbient = /*gl_LightSource[0].ambient * */gl_FrontMaterial.ambient;
 
-float spec = max(dot(EyeDir, reflectDir), 0.0);
-spec *= SpecularFactor;
-litColor = min(litColor + spec, vec3(1.0));
+	float diffuse = max( dot(lVec, bump), 0.0 );
+	
+	vec4 vDiffuse = /*gl_LightSource[0].diffuse * */gl_FrontMaterial.diffuse * 
+					diffuse;	
 
-gl_FragColor = vec4(litColor, 1.0);
+	float specular = pow(clamp(dot(reflect(-lVec, bump), vVec), 0.0, 1.0), 
+	                 gl_FrontMaterial.shininess );
+	
+	vec4 vSpecular = /*gl_LightSource[0].specular * */gl_FrontMaterial.specular * specular;	
+	
+	gl_FragColor = (vAmbient*base + vDiffuse*base + vSpecular) * att;
+	gl_FragColor.w = alpha;
 }

@@ -61,6 +61,7 @@ import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
@@ -68,8 +69,13 @@ import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.event.GeometryEvent;
 import de.jreality.scene.event.GeometryListener;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.CubeMap;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.GlslProgram;
+import de.jreality.shader.ImageData;
+import de.jreality.shader.ShaderUtility;
+import de.jreality.shader.Texture2D;
 
 /**
  * it is assumed that the shader source code stayes FIXED!
@@ -84,13 +90,51 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	private static final int PER_PART = 2;
 	GlslProgram program;
 
+	Texture2D normalTex, diffuseTex;
+	
+	CubeMap environmentMap;
+	
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
 		super.setFromEffectiveAppearance(eap, name);
 		program = new GlslProgram(eap, name);
+		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "normalMap"), eap)) {
+			normalTex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "normalMap"), eap);
+			System.out.println("normalMap");
+		}
+		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, CommonAttributes.TEXTURE_2D), eap)) {
+			diffuseTex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, CommonAttributes.TEXTURE_2D), eap);
+			System.out.println("diffuseMap");
+		} else {
+			System.out.println("no diffuse map");
+		}
+		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, "reflectionMap"), eap)) {
+			environmentMap = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, "reflectionMap"), eap);
+			System.out.println("env Map");
+		} else {
+			System.out.println("no env map");
+		}
 	}
 
 	public void render(JOGLRenderingState jrs) {
 		JOGLRenderer jr = jrs.getRenderer();
+		GL gl = jr.getGL();
+		if (diffuseTex != null) {
+			gl.glActiveTexture(GL.GL_TEXTURE0);
+			Texture2DLoaderJOGL.render(jr.getGL(), diffuseTex);
+			gl.glEnable(GL.GL_TEXTURE_2D);
+		}
+		if (normalTex != null) {
+			gl.glActiveTexture(GL.GL_TEXTURE1);
+			Texture2DLoaderJOGL.render(jr.getGL(), normalTex);
+			gl.glEnable(GL.GL_TEXTURE_2D);
+		}
+		if (environmentMap != null) {
+			gl.glActiveTexture(GL.GL_TEXTURE2);
+			Texture2DLoaderJOGL.render(jr, environmentMap);
+			gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
+		}
+		gl.glMaterialf(GL.GL_FRONT_AND_BACK, GL.GL_SHININESS, 10.0f);
+		//gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT, new float[]{0.2f,0.2f,0.2f,1f}, 0);
 		GlslLoader.render(program, jr);
 		Geometry g = jrs.getCurrentGeometry();
 		if (g != null)	{
@@ -115,7 +159,23 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 
 	public void postRender(JOGLRenderingState jrs) {
 		JOGLRenderer jr = jrs.getRenderer();
+		GL gl = jr.getGL();
 		GlslLoader.postRender(program, jr);
+		if (diffuseTex != null) {
+			gl.glActiveTexture(GL.GL_TEXTURE0);
+			gl.glDisable(GL.GL_TEXTURE_2D);
+		}
+		if (normalTex != null) {
+			gl.glActiveTexture(GL.GL_TEXTURE1);
+			gl.glDisable(GL.GL_TEXTURE_2D);
+		}
+		if (environmentMap != null) {
+			gl.glActiveTexture(GL.GL_TEXTURE2);
+			gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
+			gl.glDisable(GL.GL_TEXTURE_GEN_S);
+			gl.glDisable(GL.GL_TEXTURE_GEN_T);
+			gl.glDisable(GL.GL_TEXTURE_GEN_R);
+		}
 	}
 
 	public void setFrontBack(int f) {
