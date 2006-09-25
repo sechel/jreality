@@ -71,20 +71,15 @@ public class IndexedLineSet extends PointSet
   {
     super(numPoints);
     edgeAttributes=new DataListSet(numEdges);
+    geometryAttributeCategory.put( Geometry.CATEGORY_EDGE, edgeAttributes );
   }
 
   /**
    * The number of edges defines the length of all data lists associated
    * with edge attributes.
    */
-  public int getNumEdges()
-  {
-    startReader();
-    try {
-      return edgeAttributes.getListLength();
-    } finally {
-      finishReader();
-    }
+  public int getNumEdges() {
+    return getNumEntries(edgeAttributes);
   }
 
   /**
@@ -94,13 +89,7 @@ public class IndexedLineSet extends PointSet
    */
   public void setNumEdges(int numEdges)
   {
-    checkReadOnly();
-    startWriter();
-    try {
-      edgeAttributes.reset(numEdges);
-    } finally {
-    	finishWriter();
-    }
+    setNumEntries( edgeAttributes, numEdges );
   }
 
   /**
@@ -115,53 +104,27 @@ public class IndexedLineSet extends PointSet
    * @see getGeometryAttributes()
    */
   public DataListSet getEdgeAttributes() {
-    startReader();
-    try {
-      return edgeAttributes.readOnly();
-    } finally {
-      finishReader();
-    }
+	  return getAttributes(edgeAttributes);
   }
 
   public DataList getEdgeAttributes(Attribute attr) {
-    startReader();
-    try {
-      return edgeAttributes.getList(attr);
-    } finally {
-      finishReader();
-    }
+	  return getAttributes(edgeAttributes, attr);
   }
 
   public void setEdgeAttributes(DataListSet dls) {
-    checkReadOnly();
-    startWriter();
-    setAttrImpl(edgeAttributes, dls, false);
-    fireGeometryChanged(null, dls.storedAttributes(), null, null);
-    finishWriter();
+	  setAttributes(edgeAttributes,dls);
   }
 
   public void setEdgeAttributes(Attribute attr, DataList dl) {
-    checkReadOnly();
-    startWriter();
-    setAttrImpl(edgeAttributes, attr, dl, false);
-    fireGeometryChanged(null, Collections.singleton(attr), null, null);
-    finishWriter();
+	  setAttributes(edgeAttributes, attr, dl );
   }
 
   public void setEdgeCountAndAttributes(Attribute attr, DataList dl) {
-    checkReadOnly();
-    startWriter();
-    setAttrImpl(edgeAttributes, attr, dl, true);
-    fireGeometryChanged(null, Collections.singleton(attr), null, null);
-    finishWriter();
+	  setCountAndAttributes(edgeAttributes,attr,dl);
   }
 
   public void setEdgeCountAndAttributes(DataListSet dls) {
-    checkReadOnly();
-    startWriter();
-    setAttrImpl(edgeAttributes, dls, true);
-    fireGeometryChanged(null, dls.storedAttributes(), null, null);
-    finishWriter();
+    setCountAndAttributes(edgeAttributes, dls);
   }
 
   public void accept(SceneGraphVisitor v)

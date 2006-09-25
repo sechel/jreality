@@ -69,20 +69,15 @@ public class PointSet extends Geometry //implements GeometryListener
   {
 	super();
 	vertexAttributes= new DataListSet(numPoints);
+	geometryAttributeCategory.put( Geometry.CATEGORY_VERTEX, vertexAttributes );
  }
 
   /**
    * The number of vertices defines the length of all data lists associated
    * with vertex attributes.
    */
-  public int getNumPoints()
-  {
-    startReader();
-    try {
-      return vertexAttributes.getListLength();
-    } finally {
-      finishReader();
-    }
+  public int getNumPoints() {
+	return getNumEntries( vertexAttributes );
   }
 
   /**
@@ -90,15 +85,8 @@ public class PointSet extends Geometry //implements GeometryListener
    * vertex attributes.
    * @param numVertices the number of vertices to set >=0
    */
-  public void setNumPoints(int numVertices)
-  {
-    checkReadOnly();
-    startWriter();
-    try {
-      vertexAttributes.reset(numVertices);
-    } finally {
-      finishWriter();
-    }
+  public void setNumPoints(int numVertices) {
+	  setNumEntries( vertexAttributes, numVertices );
   }
 
   /**
@@ -111,57 +99,31 @@ public class PointSet extends Geometry //implements GeometryListener
    * @see setVertexAttributes(DataListSet)
    * @see getGeometryAttributes()
    */
-  public DataListSet getVertexAttributes()
-  {
-    startReader();
-    try {
-      return vertexAttributes.readOnly();
-    } finally {
-      finishReader();
-    }
+  public DataListSet getVertexAttributes() {
+	  return getAttributes(vertexAttributes);
   }
 
   public DataList getVertexAttributes(Attribute attr) {
-    startReader();
-    try {
-      return vertexAttributes.getList(attr);
-    } finally {
-      finishReader();
-    }
+    return getAttributes(vertexAttributes,attr);
   }
 
   public void setVertexAttributes(DataListSet dls) {
-    checkReadOnly();
-    startWriter();
-    setAttrImpl(vertexAttributes, dls, false);
-    fireGeometryChanged(dls.storedAttributes(), null, null, null);
-    finishWriter();
+	  setAttributes(vertexAttributes,dls);
   }
 
   public void setVertexAttributes(Attribute attr, DataList dl) {
-    checkReadOnly();
-    startWriter();
-    setAttrImpl(vertexAttributes, attr, dl, false);
-    fireGeometryChanged(Collections.singleton(attr), null, null, null);
-    finishWriter();
+	  setAttributes( vertexAttributes, attr, dl );
   }
 
   public void setVertexCountAndAttributes(Attribute attr, DataList dl) {
-    checkReadOnly();
-    startWriter();
-    setAttrImpl(vertexAttributes, attr, dl, true);
-    fireGeometryChanged(Collections.singleton(attr), null, null, null);
-    finishWriter();
+    setCountAndAttributes(vertexAttributes, attr, dl );
   }
 
   public void setVertexCountAndAttributes(DataListSet dls) {
-    checkReadOnly();
-    startWriter();
-    setAttrImpl(vertexAttributes, dls, true);
-    fireGeometryChanged(dls.storedAttributes(), null, null, null);
-    finishWriter();
+    setCountAndAttributes(vertexAttributes,dls);
   }
 
+  
   public void accept(SceneGraphVisitor v)
   {
     startReader();

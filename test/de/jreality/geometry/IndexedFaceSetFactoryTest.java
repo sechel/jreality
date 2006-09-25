@@ -58,13 +58,13 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 	IndexedFaceSetFactory factory;
 
 	static double [] faceNormalse  = new double[] {
-	0, 0, 1,
-	-1, 0, 0,
-	1, 0, 0,
-	0, 1, 0,
-	-1, 0, 0,
-	0, -1, 0
-	};
+	 0,  0,  1,
+	-1,  0,  0,
+	 1,  0,  0,
+	 0,  1,  0,
+	-1,  0,  0,
+	 0, -1,  0
+	 };
 	
 	static double [] vertices  = new double[] {
 
@@ -91,21 +91,8 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 
 	};
 
-	ActionHandler actionHandler;
-	Logger actionLogger = Logger.getLogger("de.jreality.geometry.action");
-	
 	public void setUp() {
-		
-		actionHandler = new ActionHandler();
-		actionHandler.setLevel( Level.INFO );
-		
-		AbstractPointSetFactory.actionLogger = actionLogger;
-		//actionLogger.setUseParentHandlers(false);
-		
-		actionLogger.addHandler( actionHandler );
-		
-		
-		factory=new de.jreality.geometry.IndexedFaceSetFactory();
+		factory = new IndexedFaceSetFactory();
 
 	}
 	
@@ -119,9 +106,8 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		double[][] jitterbugEdgeVerts = new double[][] {{0,0,0,1},{1,0,0,1},{1,1,0,1},{0,1,0,1}};
 		int[][] jitterbugSegmentIndices1 = {{0,1},{2,3}}; //,{{{0,1,2,3,0,1},{4,5,6,7,4,5},{8,9,10,11,8,9}};
 		int[][] jitterbugFaceIndices = {{0,1,2,3}};
-		double[][] borromeanRectColors = {{1.0, 1.0, 200/255.0, 1}};
-
 		factory = new IndexedFaceSetFactory();
+		//factory.debug = true;
 		factory.setVertexCount(jitterbugEdgeVerts.length);
 		factory.setVertexCoordinates(jitterbugEdgeVerts);	
 		factory.setFaceCount(1);
@@ -145,79 +131,80 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		
 		factory.update();
 		
-		assertEquals( ifs.getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null)[0][0], 1, 0);
-		assertEquals( ifs.getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null)[0][1], 0, 0);
-		assertEquals( ifs.getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null)[0][2], 0, 0);
+		assertEquals( 1, ifs.getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null)[0][0], 0);
+		assertEquals( 0, ifs.getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null)[0][1], 0);
+		assertEquals( 0, ifs.getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null)[0][2], 0);
 		
 		//System.err.println("Alpha channel is "+borromeanRectFactory.getIndexedFaceSet().getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null)[0][3]);
 		
 		//ViewerApp.display(factory.getIndexedFaceSet());
 	}
 	
-//	public void test() {
-//
-//		factory.setVertexCount( 8 );
-//		factory.setFaceCount( 6 );	
-//		factory.setVertexCoordinates( vertices );
-//		factory.setFaceIndices( indices );
-//		factory.setGenerateFaceNormals( true );
-//		factory.setGenerateVertexNormals( true );
-//		factory.setGenerateEdgesFromFaces( true );
-//		factory.update();
-//		ViewerApp.display(factory.getIndexedFaceSet());
-//		factory.setFaceColors( new Color[] {Color.RED, Color.YELLOW, Color.RED, Color.YELLOW, Color.RED, Color.YELLOW })  ;
-//		factory.update();
-//		ViewerApp.display(factory.getIndexedFaceSet());
-//		
-//		actionHandler.clear();
-//		
-//		factory.setFaceIndices( indices );
-//		
-//		factory.update();
-//		
-//		actionHandler.clear();
-//		
-//		factory.setVertexCoordinates( vertices );
-//		factory.setGenerateVertexNormals( false);
-//		
-//		factory.update();
-//		
-//	}
-	
-	static class ActionHandler extends Handler {
-
-		HashSet actions = new HashSet();
-		HashMap actionsParam = new HashMap();
+	public void testGenerateEdgesFromFaces() {
+		factory.debug = true;
+		factory.setVertexCount( vertices.length);
+		factory.setVertexCoordinates( vertices );
+		factory.setFaceCount( indices.length );
+		factory.setFaceIndices( indices );
 		
-		boolean isClosed = false;
-		public void close() throws SecurityException {
-			isClosed = true;
+		factory.setGenerateEdgesFromFaces( true );
+		factory.update();
+		
+		IndexedFaceSet ifs = factory.getIndexedFaceSet();
+		
+		int[][] edges = ifs.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
+		
+		assertEquals( 12, ifs.getNumEdges() );
+		
+		try {
+		factory.setLineCount( edges.length );
+		} catch( UnsupportedOperationException e ) {	
 		}
-
-		public void clear() {
-			actions.clear();
-			actionsParam.clear();
-		}
-
-		public void flush() {
-		}
-
-		public void publish(LogRecord record) {
-			if( isClosed )
-				throw new RuntimeException( "action handler is closed");
-			
-			String msg = record.getMessage();
-			
-			if(actions.contains(msg))
-				TestCase.fail( "multiple action invocation" );
-			else
-				actions.add(msg);
-			
-			actionsParam.put( msg, record.getParameters() );
-			
+		try {
+			factory.setEdgeIndices( edges );
+		} catch( ArrayIndexOutOfBoundsException e ) {		
 		}
 		
+		factory.update();
+		
+		assertEquals( 12, ifs.getNumEdges() );
+		
+		factory.setGenerateEdgesFromFaces( false );
+		
+		factory.update();
+		
+		assertEquals( 0, ifs.getNumEdges() );
+		
+		factory.setLineCount( edges.length );
+		factory.setEdgeIndices( edges );
 	}
+	
+	
+	
+	
+	 public void testStrangeError() {
+         IndexedFaceSet ifs = Primitives.cube();
+         IndexedFaceSetFactory ifsf=new IndexedFaceSetFactory();
+         ifsf.setGenerateEdgesFromFaces(false);
+         ifsf.setGenerateFaceNormals(true);
+         ifsf.setGenerateVertexNormals(false);
+         System.out.println(ifs.getEdgeAttributes());
+         //       uebernehmen der Face Atribute:
+         ifsf.setFaceCount(6);
+         ifsf.setVertexCount(8);
+//       ifsf.setLineCount(12);
+//       ifsf.setVertexAttributes(ifs.getVertexAttributes());
+         ifsf.setFaceAttributes(ifs.getFaceAttributes());
+//       ifsf.setEdgeAttributes(ifs.getEdgeAttributes());
+
+         ifsf.setFaceIndices(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null));
+
+         ifsf.setVertexCoordinates(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null));
+
+         ifsf.setGenerateFaceNormals(true);
+         ifsf.update();
+ }
+
 	
 	public static void main( String [] arg ) {
 

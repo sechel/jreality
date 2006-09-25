@@ -61,6 +61,7 @@ public class IndexedFaceSet extends IndexedLineSet {
   public IndexedFaceSet(int numVertices, int numFaces) {
     super(numVertices);
     faceAttributes= new DataListSet(numFaces);
+    geometryAttributeCategory.put( Geometry.CATEGORY_FACE, faceAttributes );
   }
 
   public IndexedFaceSet() {
@@ -68,12 +69,7 @@ public class IndexedFaceSet extends IndexedLineSet {
   }
 
   public int getNumFaces() {
-    startReader();
-    try {
-      return faceAttributes.getListLength();
-    } finally {
-      finishReader();
-    }
+    return getNumEntries(faceAttributes);
   }
 
   /**
@@ -82,13 +78,7 @@ public class IndexedFaceSet extends IndexedLineSet {
    * @param numVertices the number of vertices to set >=0
    */
   public void setNumFaces(int numFaces) {
-    checkReadOnly();
-  	startWriter();
-  	try {
-        faceAttributes.reset(numFaces);
-  	} finally {
-  		finishWriter();
-  	}
+    setNumEntries(faceAttributes,numFaces);
   }
 
   /**
@@ -104,53 +94,27 @@ public class IndexedFaceSet extends IndexedLineSet {
    * @see getGeometryAttributes()
    */
   public DataListSet getFaceAttributes() {
-    startReader();
-    try {
-      return faceAttributes.readOnly();
-    } finally {
-      finishReader();
-    }
+    return getAttributes(faceAttributes);
   }
 
-  public DataList getFaceAttributes(Attribute key) {
-    startReader();
-    try {
-      return faceAttributes.getList(key);
-    } finally {
-      finishReader();
-    }
+  public DataList getFaceAttributes(Attribute attr) {
+    return getAttributes(faceAttributes, attr);
   }
 
   public void setFaceAttributes(DataListSet dls) {
-    checkReadOnly();
-    startWriter();
-    setAttrImpl(faceAttributes, dls, false);
-    fireGeometryChanged(null, null, dls.storedAttributes(), null);
-    finishWriter();
+    setAttributes(faceAttributes, dls );
   }
 
   public void setFaceAttributes(Attribute attr, DataList dl) {
-    checkReadOnly();
-    startWriter();
-    setAttrImpl(faceAttributes, attr, dl, false);
-    fireGeometryChanged(null, null, Collections.singleton(attr), null);
-    finishWriter();
+	  setAttributes(faceAttributes, attr, dl);
   }
 
   public void setFaceCountAndAttributes(Attribute attr, DataList dl) {
-    checkReadOnly();
-    startWriter();
-    setAttrImpl(faceAttributes, attr, dl, true);
-    fireGeometryChanged(null, null, Collections.singleton(attr), null);
-    finishWriter();
+    setCountAndAttributes(faceAttributes,attr,dl);
   }
 
   public void setFaceCountAndAttributes(DataListSet dls) {
-    checkReadOnly();
-    startWriter();
-    setAttrImpl(faceAttributes, dls, true);
-    fireGeometryChanged(null, null, dls.storedAttributes(), null);
-    finishWriter();
+	  setCountAndAttributes(faceAttributes, dls);
   }
 
   public void accept(SceneGraphVisitor v) {

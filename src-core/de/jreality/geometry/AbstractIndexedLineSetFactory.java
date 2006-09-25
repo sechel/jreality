@@ -44,9 +44,11 @@ package de.jreality.geometry;
 
 import java.awt.Color;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import de.jreality.math.Pn;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
@@ -58,24 +60,13 @@ import de.jreality.scene.data.StringArray;
 
 class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 	
-//	final OoNode edgeNormals = new OoNode( "edge.normals" );
-//	final OoNode edgeIndices = new OoNode( "edge.indices" );
-	final OoNode edgeLabels  = new OoNode( "edge.labels" );
+	final OoNode edgeLabels  = node( "edge.labels" );
 
-//	final OoNode vertexCoordinates = new OoNode( "vertex.coordinates" );
-//	final OoNode vertexNormals     = new OoNode( "vertex.normals" );
-
-	
-//	boolean generateVertexNormals     = false;
-//	boolean generateEdgeNormals       = false;
 	boolean generateEdgeLabels	      = false;
-//	boolean generateEdgesFromVertices = false;
 	
-	DataListSet edgeDLS = new DataListSet(0);
-
 	final IndexedLineSet ils;
 	
-	HashMap edgeAttributeNode = new HashMap();
+	GeometryAttributeListSet edge = new GeometryAttributeListSet( this, Geometry.CATEGORY_EDGE );
 	
 	AbstractIndexedLineSetFactory( IndexedLineSet ils, int signature ) {
 		super( ils, signature );	
@@ -96,7 +87,7 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 	}
 	
 	protected int noe(){
-		return edgeDLS.getListLength();
+		return edge.getCount();
 	}
 	
 	public int getLineCount() {
@@ -104,35 +95,15 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 	}
 	
 	void setLineCount( int count ) {
-		if( count == noe() )
-			return;
-	
-		edgeDLS.reset(count);
-	}
-	
-	OoNode edgeAttributeNode( Attribute attr ) {
-		return geometryAttributeNode( edgeAttributeNode, "EDGE", attr );
-	}
-	
-	void updateEdgeAttributes() {
-		for( Iterator iter = edgeDLS.storedAttributes().iterator(); iter.hasNext(); ) {
-			Attribute attr = (Attribute)iter.next();
-			
-			edgeAttributeNode( attr ).update();	
-		}
+		edge.setCount(count);
 	}
 	
 	protected void setEdgeAttribute( Attribute attr, DataList data ) {
-		setAttrImpl( edgeDLS, attr, data );
-		edgeAttributeNode(attr).setObject( data );
+		edge.setAttribute(attr,data);
 	}
 	
 	protected void setEdgeAttributes(DataListSet dls ) {
-		setAttrImpl(edgeDLS, dls);	
-		for( Iterator iter = dls.storedAttributes().iterator(); iter.hasNext(); ) {
-			Attribute attr = (Attribute)iter.next();
-			edgeAttributeNode(attr).setObject( edgeDLS.getList(attr));
-		}
+		edge.setAttributes(dls);
 	}
 	
 	protected void setEdgeIndices( DataList data ) {
@@ -201,10 +172,10 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 		return (String[])edgeLabels.getObject();
 	}
 	
-	String [] generateEdgeLabels() {
-		if( edgeDLS.containsAttribute(Attribute.LABELS)) {
-			return edgeDLS.getList(Attribute.LABELS)
-			.toStringArray((String[])edgeLabels.getObject());
+	String [] generateEdgeLabels( String [] edgeLabels ) {
+		if( edge.DLS.containsAttribute(Attribute.LABELS)) {
+			return edge.DLS.getList(Attribute.LABELS)
+			.toStringArray(edgeLabels);
 		} else {
 			log( "compute", Attribute.LABELS, "edge");
 			return indexString(noe());
@@ -216,165 +187,37 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 		edgeLabels.setUpdateMethod(
 				new OoNode.UpdateMethod() {
 					public Object update( Object object) {					
-						return generateEdgeLabels();		
+						return generateEdgeLabels( (String[]) object );		
 					}					
 				}
 		);
 	}
 	
-//	{
-//		edgeIndices.addIngr( edgeAttributeNode( Attribute.INDICES ) );
-//		edgeIndices.setUpdateMethod(
-//				new OoNode.UpdateMethod() {
-//					public Object update( Object object) {	
-//						return edgeDLS.getList(Attribute.INDICES)
-//							.toIntArrayArray(null);					
-//					}					
-//				}
-//		);
-//	}
-//	
-//	int [][] edgeIndices() {
-//		return (int[][])(edgeIndices.getObject());
-//	}
-	
-//	{
-//		
-//		vertexCoordinates.addIngr( vertexAttributeNode( Attribute.COORDINATES)) ;
-//		vertexCoordinates.setUpdateMethod(
-//				new OoNode.UpdateMethod() {
-//					public Object update( Object object) {					
-//						return vertexDLS.getList(Attribute.COORDINATES)
-//							.toDoubleArrayArray(null);			
-//					}					
-//				}
-//		);
-//	}
-//	
-//	double [][] vertexCoordinates() {
-//		return (double[][])vertexCoordinates.getObject();
-//	}
-//	
-//	double [][] edgeNormals() {
-//		return (double[][])edgeNormals.getObject();
-//	}
-//	
-//	double [][] generateLineNormals() {
-//		if( edgeDLS.containsAttribute(Attribute.NORMALS)) {
-//			return edgeDLS.getList(Attribute.NORMALS)
-//			.toDoubleArrayArray((double[][])edgeNormals.getObject());
-//		} else {
-//			log( "compute", Attribute.NORMALS, "edge");
-//			return GeometryUtility.calculateLineNormals( edgeIndices(), vertexCoordinates(), getSignature() );
-//		}
-//	}
-//	
-//	
-//	{
-//		vertexNormals.addIngr(edgeNormals);
-//		
-//		vertexNormals.setUpdateMethod(
-//				new OoNode.UpdateMethod() {
-//					public Object update( Object object) {					
-//						return generateVertexNormals();		
-//					}					
-//				}
-//		);
-//	}
-//	
-//
-//	double [][] vertexNormals() {
-//		return (double[][])vertexNormals.getObject();
-//	}
-//	
-//	double [][] generateVertexNormals() {
-//		if( vertexDLS.containsAttribute(Attribute.NORMALS)) {
-//			return null;
-//		} else {
-//			log( "compute", Attribute.NORMALS, "vertex" );
-//			return GeometryUtility.calculateVertexNormals( edgeIndices(), vertexCoordinates(), edgeNormals(), getSignature() );
-//		}
-//	}
-//	
-	
 	void recompute() {		
-			
+	
 		super.recompute();
 		
 		if( isGenerateEdgeLabels() )
 			edgeLabels.update();
-		
-//		if( isGenerateEdgesFromVertices() ) 
-//			edgeIndices.update();
-//		
-//		if( isGenerateLineNormals() )
-//			edgeNormals.update();
-//		
-//		if( isGenerateVertexNormals() )
-//			vertexNormals.update();
-//		
+
 	}
+	
 	
 	protected void updateImpl() {
 		super.updateImpl();
 		
-		if( ils.getNumEdges() == noe() ) {
+		updateImplIndexedLineSet();
+	}
+	
+	final protected void updateImplIndexedLineSet() {
+		
+		updateGeometryAttributeCathegory( edge );
 
-			for( Iterator iter = edgeDLS.storedAttributes().iterator(); iter.hasNext(); ) {
-				Attribute attr = (Attribute)iter.next();
-				
-				edgeAttributeNode( attr ).update();
-				
-				if(  nodeWasUpdated(edgeAttributeNode( attr ))  ) {
-					log( "set", attr, "edge" );
-					ils.setEdgeAttributes( attr, edgeDLS.getWritableList(attr));			
-				}				
-			}
-		} else {
-			updateEdgeAttributes();
-			ils.setEdgeCountAndAttributes(edgeDLS);
-		}
+		updateImplGenerateEdgeLabels();
 		
-//		if( generateEdgesFromVertices ) { 
-//			if( nodeWasUpdated(edgeIndices) ) { 
-//				log( "set", Attribute.INDICES, "edge");
-//				ils.setEdgeCountAndAttributes(Attribute.INDICES, new IntArrayArray.Array( edgeIndices() ) );
-//			} else if( noe() == 0 ) {
-//				ils.setNumEdges(0);
-//			}
-//		} else if( ils.getEdgeAttributes().containsAttribute(Attribute.INDICES) ) {
-//			log( "cancle", Attribute.INDICES, "edge");
-//			ils.setEdgeAttributes(Attribute.INDICES, null );
-//		}
-		
-//		if( !edgeDLS.containsAttribute(Attribute.NORMALS) ) {
-//			if( generateEdgeNormals ) {
-//				if( nodeWasUpdated( edgeNormals ) ) { 
-//					log( "set", Attribute.NORMALS, "edge");
-//					ils.setEdgeAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(edgeNormals()[0].length).createReadOnly(edgeNormals()));
-//				}
-//			} else {
-//				if( ils.getEdgeAttributes().containsAttribute(Attribute.NORMALS) ) {
-//					log( "cancle", Attribute.NORMALS, "edge");
-//					ils.setEdgeAttributes(Attribute.NORMALS, null);
-//				}
-//			}
-//		}
-//		
-//		if( !vertexDLS.containsAttribute(Attribute.NORMALS) ) {
-//			if( generateVertexNormals ) {
-//				if( nodeWasUpdated(vertexNormals) ) { 
-//					log( "set", Attribute.NORMALS, "vertex");
-//					ils.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(vertexNormals()[0].length).createReadOnly(vertexNormals()));
-//				}
-//			} else {
-//				if( ils.getVertexAttributes().containsAttribute(Attribute.NORMALS) ) {
-//					log( "cancle", Attribute.NORMALS,  "vertex" );
-//					ils.setVertexAttributes(Attribute.NORMALS, null);
-//				}
-//			}
-//		}
-//		
+	}
+
+	protected void updateImplGenerateEdgeLabels() {
 		if( generateEdgeLabels ) { 
 			if( nodeWasUpdated(edgeLabels) ) { 
 				log( "set", Attribute.LABELS, "labels");
@@ -382,39 +225,14 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 			} 
 		} else if( ils.getEdgeAttributes().containsAttribute(Attribute.LABELS ) ) {
 			log( "cancle", Attribute.LABELS, "labels");
-			ils.setVertexAttributes(Attribute.LABELS, null );
+			ils.setEdgeAttributes(Attribute.LABELS, null );
 		}
-		
 	}
 
 	
 	public IndexedLineSet getIndexedLineSet() {
 		return ils;
 	}
-	
-//	public boolean isGenerateEdgesFromVertices() {
-//		return generateEdgesFromVertices;
-//	}
-//
-//	public void setGenerateEdgesFromVertices(boolean generateEdgesFromLines) {
-//		this.generateEdgesFromVertices=generateEdgesFromLines;
-//	}
-	
-//	public boolean isGenerateVertexNormals() {
-//		return generateVertexNormals;
-//	}
-//
-//	public void setGenerateVertexNormals(boolean generateVertexNormals) {
-//		this.generateVertexNormals=generateVertexNormals;
-//	}
-//	
-//	public boolean isGenerateEdgeNormals() {
-//		return generateEdgeNormals;
-//	}
-//
-//	public void setGenerateEdgeNormals(boolean generateEdgeNormals) {
-//		this.generateEdgeNormals=generateEdgeNormals;
-//	}
 
 	public boolean isGenerateEdgeLabels() {
 		return generateEdgeLabels;

@@ -63,6 +63,16 @@ import de.jreality.scene.event.GeometryListener;
 public abstract class Geometry extends SceneGraphNode {
 	
   private static final Map<String, Object> EMPTY_GEOMETRY_ATTRIBUTE_MAP=Collections.emptyMap();
+
+//  public enum Category {
+//	  CATEGORY_VERTEX,
+//	  CATEGORY_EDGE,
+//	  CATEGORY_FACE;
+//  };
+  
+  public static final String CATEGORY_VERTEX = "VERTEX";
+  public static final String CATEGORY_EDGE = "DGE";
+  public static final String CATEGORY_FACE = "FACE";
 	
   protected Map<String, Object> geometryAttributes=Collections.emptyMap();
   private transient GeometryListener geometryListener;
@@ -71,7 +81,8 @@ public abstract class Geometry extends SceneGraphNode {
   protected transient Set<Attribute> changedVertexAttributes=new HashSet<Attribute>();
   protected transient Set<Attribute> changedEdgeAttributes=new HashSet<Attribute>();
   protected transient Set<Attribute> changedFaceAttributes=new HashSet<Attribute>();
-
+  protected transient Map<String,DataListSet> geometryAttributeCategory=new HashMap<String,DataListSet>();
+  
   /**
    * Returns a read-only view to all currently defined geometry attributes.
    * You can copy all currently defined geometry attributes to another
@@ -187,6 +198,147 @@ public abstract class Geometry extends SceneGraphNode {
     changedGeometryAttributes.clear();
   }
   
+  /**
+   * The number of entries defines the length of all data lists associated
+   * with the target geometry attributes.
+   * @param geometryAttributes target data list set
+   */
+  int getNumEntries( DataListSet geometryAttributes )
+  {
+    startReader();
+    try {
+      return geometryAttributes.getListLength();
+    } finally {
+      finishReader();
+    }
+  }
+
+  /**
+   * Sets the number of entries, implies removal of all previously defined
+   * such geometries attributes
+   * @param geometryAttributes target data list set	
+   * @param numEntries the number of vertices to set >=0
+   */
+  protected void setNumEntries( DataListSet geometryAttributes, int numEntries)
+  {
+    checkReadOnly();
+    startWriter();
+    try {
+      geometryAttributes.reset(numEntries);
+    } finally {
+      finishWriter();
+    }
+  }
+
+  /**
+   * Returns a read-only view to all currently defined target geometry attributes.
+   * @param geometryAttributes target data list set	
+   * @see setVertexAttributes(DataListSet)
+   * @see getGeometryAttributes()
+   */
+  protected DataListSet getAttributes( DataListSet geometryAttributes )
+  {
+    startReader();
+    try {
+      return geometryAttributes.readOnly();
+    } finally {
+      finishReader();
+    }
+  }
+
+  protected DataList getAttributes( DataListSet geometryAttributes, Attribute attr) {
+    startReader();
+    try {
+      return geometryAttributes.getList(attr);
+    } finally {
+      finishReader();
+    }
+  }
+
+  protected void setAttributes( DataListSet geometryAttributes, DataListSet dls) {
+    checkReadOnly();
+    startWriter();
+    setAttrImpl(geometryAttributes, dls, false);
+    fireGeometryChanged(dls.storedAttributes(), null, null, null);
+    finishWriter();
+  }
+
+  protected void setAttributes( DataListSet geometryAttributes, Attribute attr, DataList dl) {
+    checkReadOnly();
+    startWriter();
+    setAttrImpl( geometryAttributes, attr, dl, false);
+    fireGeometryChanged(Collections.singleton(attr), null, null, null);
+    finishWriter();
+  }
+
+  protected void setCountAndAttributes( DataListSet geometryAttributes, Attribute attr, DataList dl) {
+    checkReadOnly();
+    startWriter();
+    setAttrImpl( geometryAttributes, attr, dl, true);
+    fireGeometryChanged(Collections.singleton(attr), null, null, null);
+    finishWriter();
+  }
+
+  protected void setCountAndAttributes( DataListSet geometryAttributes, DataListSet dls) {
+    checkReadOnly();
+    startWriter();
+    setAttrImpl( geometryAttributes, dls, true);
+    fireGeometryChanged(dls.storedAttributes(), null, null, null);
+    finishWriter();
+  }
+
+  public Set<String>getGeometryAttributeCathegories() {
+	  return geometryAttributeCategory.keySet();
+  }
+  /**
+   * The number of entries defines the length of all data lists associated
+   * with the target geometry attributes.
+   * @param attributeCategory key for target data list set
+   */
+  public int getNumEntries( String attributeCategory ) {
+	  return getNumEntries( geometryAttributeCategory.get( attributeCategory));
+  }
+
+  /**
+   * Sets the number of entries, implies removal of all previously defined
+   * such geometries attributes
+   * @param attributeCategory key for target data list set
+   * @param numEntries the number of vertices to set >=0
+   */
+  public  void setNumEntries( String attributeCategory, int numEntries) {
+	  setNumEntries( geometryAttributeCategory.get( attributeCategory), numEntries );
+  }
+
+  /**
+   * Returns a read-only view to all currently defined target geometry attributes.
+   * @param attributeCategory key for target data list set
+   * @see setVertexAttributes(DataListSet)
+   * @see getGeometryAttributes()
+   */
+  public DataListSet getAttributes( String attributeCategory ) {
+	  return getAttributes(geometryAttributeCategory.get( attributeCategory));
+  }
+
+  public DataList getAttributes( String attributeCategory, Attribute attr) {
+	  return getAttributes(geometryAttributeCategory.get( attributeCategory), attr);
+  }
+
+  public void setAttributes( String attributeCategory, DataListSet dls) {
+	  setAttributes(geometryAttributeCategory.get( attributeCategory),dls);
+  }
+
+  public void setAttributes( String attributeCategory, Attribute attr, DataList dl) {
+	  setAttributes(geometryAttributeCategory.get( attributeCategory), attr, dl );
+  }
+
+  public void setCountAndAttributes( String attributeCategory, Attribute attr, DataList dl) {
+	  setCountAndAttributes(geometryAttributeCategory.get( attributeCategory),attr,dl);
+  }
+
+  public void setCountAndAttributes( String attributeCategory, DataListSet dls) {
+	  setCountAndAttributes(geometryAttributeCategory.get( attributeCategory),dls);
+  }
+
   /**
    * Tell the outside world that this geometry has changed.
    */

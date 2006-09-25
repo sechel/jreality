@@ -113,8 +113,8 @@ import de.jreality.util.SceneGraphUtility;
 	}
 
 	double [][] generateFaceNormals() {
-		if( faceDLS.containsAttribute(Attribute.NORMALS)) {
-			return faceDLS.getList(Attribute.NORMALS)
+		if( face.DLS.containsAttribute(Attribute.NORMALS)) {
+			return face.DLS.getList(Attribute.NORMALS)
 			.toDoubleArrayArray((double[][])faceNormals.getObject());
 		} else {
 			log( "compute", Attribute.NORMALS, "face");

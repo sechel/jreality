@@ -46,7 +46,9 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import de.jreality.geometry.OoNode.UpdateMethod;
 import de.jreality.math.Pn;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
@@ -58,14 +60,14 @@ import de.jreality.scene.data.StringArray;
 
 class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	
-	final OoNode faceNormals = new OoNode( "face.normals" );
-	final OoNode faceIndices = new OoNode( "face.indices" );
-	final OoNode faceLabels  = new OoNode( "face.labels" );
+	final OoNode faceNormals = node( "face.normals" );
+	final OoNode faceIndices = node( "face.indices" );
+	final OoNode faceLabels  = node( "face.labels" );
 
-	final OoNode edgeIndices = new OoNode( "edge.indices" );
+	final OoNode edgeIndices = node( "edge.indices" );
 	
-	final OoNode vertexCoordinates = new OoNode( "vertex.coordinates" );
-	final OoNode vertexNormals     = new OoNode( "vertex.normals" );
+	final OoNode vertexCoordinates = node( "vertex.coordinates" );
+	final OoNode vertexNormals     = node( "vertex.normals" );
 
 	
 	boolean generateVertexNormals  = false;
@@ -73,11 +75,9 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	boolean generateFaceLabels	   = false;
 	boolean generateEdgesFromFaces = false;
 	
-	DataListSet faceDLS = new DataListSet(0);
-
 	final IndexedFaceSet ifs;
 	
-	HashMap faceAttributeNode = new HashMap();
+	GeometryAttributeListSet face = new GeometryAttributeListSet( this, Geometry.CATEGORY_FACE );
 	
 	AbstractIndexedFaceSetFactory( IndexedFaceSet ifs, int signature, boolean generateEdgesFromFaces, boolean generateVertexNormals, boolean generateFaceNormals ) {
 		super( ifs, signature );	
@@ -110,43 +110,33 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	}
 	
 	protected int nof(){
-		return faceDLS.getListLength();
+		return face.getCount();
 	}
 	
-	public int getFaceCount() {
+	
+	protected int getFaceCount() {
 		return nof();
 	}
 	
 	void setFaceCount( int count ) {
-		if( count == nof() )
-			return;
-	
-		faceDLS.reset(count);
+		face.setCount( count );
 	}
 	
-	OoNode faceAttributeNode( Attribute attr ) {
-		return this.geometryAttributeNode( faceAttributeNode, "FACE", attr );
+	void setLineCount( int count ) {
+		if( generateEdgesFromFaces )
+			throw new UnsupportedOperationException
+			( "you cannot set edge attributes and generate edges form faces" );
+		
+		super.setLineCount( count );
 	}
 	
-	void updateFaceAttributes() {
-		for( Iterator iter = faceDLS.storedAttributes().iterator(); iter.hasNext(); ) {
-			Attribute attr = (Attribute)iter.next();
-			
-			faceAttributeNode( attr ).update();	
-		}
-	}
 	
 	protected void setFaceAttribute( Attribute attr, DataList data ) {
-		setAttrImpl( faceDLS, attr, data );
-		faceAttributeNode(attr).setObject( data );
+		face.setAttribute(attr, data);
 	}
 	
 	protected void setFaceAttributes(DataListSet dls ) {
-		setAttrImpl(faceDLS, dls);
-		for( Iterator iter = dls.storedAttributes().iterator(); iter.hasNext(); ) {
-			Attribute attr = (Attribute)iter.next();
-			faceAttributeNode(attr).setObject( faceDLS.getList(attr));
-		}
+		face.setAttributes(dls);
 	}
 	
 	protected void setFaceIndices( DataList data ) {
@@ -224,10 +214,10 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		return (String[])faceLabels.getObject();
 	}
 	
-	String [] generateFaceLabels() {
-		if( faceDLS.containsAttribute(Attribute.LABELS)) {
-			return faceDLS.getList(Attribute.LABELS)
-			.toStringArray((String[])faceLabels.getObject());
+	String [] generateFaceLabels( String [] faceLabels ) {
+		if( face.DLS.containsAttribute(Attribute.LABELS)) {
+			return face.DLS.getList(Attribute.LABELS)
+			.toStringArray(faceLabels);
 		} else {
 			log( "compute", Attribute.LABELS, "face");
 			return indexString(nof());
@@ -239,17 +229,17 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		faceLabels.setUpdateMethod(
 				new OoNode.UpdateMethod() {
 					public Object update( Object object) {					
-						return generateFaceLabels();		
+						return generateFaceLabels( (String[])object);		
 					}					
 				}
 		);
 	}
 	{
-		faceIndices.addIngr( faceAttributeNode( Attribute.INDICES ) );
+		faceIndices.addIngr( face.attributeNode( Attribute.INDICES ) );
 		faceIndices.setUpdateMethod(
 				new OoNode.UpdateMethod() {
 					public Object update( Object object) {	
-						return faceDLS.getList(Attribute.INDICES)
+						return face.DLS.getList(Attribute.INDICES)
 							.toIntArrayArray(null);					
 					}					
 				}
@@ -262,11 +252,11 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	
 	{
 		
-		vertexCoordinates.addIngr( vertexAttributeNode( Attribute.COORDINATES)) ;
+		vertexCoordinates.addIngr( vertex.attributeNode( Attribute.COORDINATES)) ;
 		vertexCoordinates.setUpdateMethod(
 				new OoNode.UpdateMethod() {
 					public Object update( Object object) {		
-						return vertexDLS.getList(Attribute.COORDINATES)
+						return vertex.DLS.getList(Attribute.COORDINATES)
 							.toDoubleArrayArray(null);			
 					}					
 				}
@@ -289,6 +279,28 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 				
 	}
 		
+	{
+		OoNode edgeINDICES = edge.attributeNode( Attribute.INDICES );
+		
+		edgeIndices.addDeps( edgeINDICES );
+		
+		edgeINDICES.setUpdateMethod( new UpdateMethod() {
+
+			public Object update(Object object) {
+				if( !edge.DLS.containsAttribute(Attribute.INDICES) ) {
+					if( generateEdgesFromFaces ) {
+						object = edgeIndices();
+					} else {
+						object=null;
+					}
+				}
+					
+				return object;
+			}
+			
+		});
+	}
+	
 	IntArrayArray edgeIndices() {
 		return (IntArrayArray)edgeIndices.getObject();
 	}
@@ -302,11 +314,11 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		faceNormals.addIngr(signature);
 		faceNormals.addIngr(faceIndices);
 		faceNormals.addIngr(vertexCoordinates);
-		faceNormals.addIngr(faceAttributeNode( Attribute.NORMALS ));
+		faceNormals.addIngr(face.attributeNode( Attribute.NORMALS ));
 		faceNormals.setUpdateMethod(
 				new OoNode.UpdateMethod() {
 					public Object update( Object object) {					
-						return generateFaceNormals();		
+						return generateFaceNormals( (double[][])object);		
 					}					
 				}
 		);
@@ -316,10 +328,10 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		return (double[][])faceNormals.getObject();
 	}
 	
-	double [][] generateFaceNormals() {
-		if( faceDLS.containsAttribute(Attribute.NORMALS)) {
-			return faceDLS.getList(Attribute.NORMALS)
-			.toDoubleArrayArray((double[][])faceNormals.getObject());
+	double [][] generateFaceNormals( double [][] faceNormals ) {
+		if( face.DLS.containsAttribute(Attribute.NORMALS)) {
+			return face.DLS.getList(Attribute.NORMALS)
+			.toDoubleArrayArray(faceNormals);
 		} else {
 			log( "compute", Attribute.NORMALS, "face");
 			return GeometryUtility.calculateFaceNormals( faceIndices(), vertexCoordinates(), getSignature() );
@@ -333,7 +345,7 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		vertexNormals.setUpdateMethod(
 				new OoNode.UpdateMethod() {
 					public Object update( Object object) {					
-						return generateVertexNormals();		
+						return generateVertexNormals( (double[][])object);		
 					}					
 				}
 		);
@@ -344,9 +356,10 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		return (double[][])vertexNormals.getObject();
 	}
 	
-	double [][] generateVertexNormals() {
-		if( vertexDLS.containsAttribute(Attribute.NORMALS)) {
-			return null;
+	double [][] generateVertexNormals( double [][] vertexNormals ) {
+		if( vertex.DLS.containsAttribute(Attribute.NORMALS)) {
+			return vertex.DLS.getList(Attribute.NORMALS)
+			.toDoubleArrayArray(vertexNormals);
 		} else {
 			log( "compute", Attribute.NORMALS, "vertex" );
 			return GeometryUtility.calculateVertexNormals( faceIndices(), vertexCoordinates(), faceNormals(), getSignature() );
@@ -372,76 +385,44 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		
 	}
 	
-  //HACK: control edges always as soon as we did that once 
-  boolean didEverGenerateEdgesFromFaces;
-  
-	protected void updateImpl() {
-    // HACK:
-    if( generateEdgesFromFaces ) {
-      didEverGenerateEdgesFromFaces=true;
-      if( nodeWasUpdated(edgeIndices) ) {
-        IntArrayArray ei = edgeIndices();
-        super.setLineCount(ei.size());
-        log( "set", Attribute.INDICES, "edge");
-        super.setEdgeIndices( ei );
-      } else {
-        if( nof() == 0 ) {
-          ifs.setNumEdges(0);
-        }
-      }
-    } else if( didEverGenerateEdgesFromFaces && super.getLineCount() != 0 ) { // !!!!!!!
-      log( "cancle", Attribute.INDICES, "edge");
-      super.setLineCount(0);
-    }
-    
-    super.updateImpl();
+		protected void updateImpl() {
+	 
+		super.updateImpl();
+		
+		updateGeometryAttributeCathegory( face );
+			
+		if( generateEdgesFromFaces ) { 
+			if( nodeWasUpdated(edgeIndices) ) { 
+				log( "set", Attribute.INDICES, "edge");
+				ifs.setEdgeCountAndAttributes(Attribute.INDICES, edgeIndices() );
+			} else if( !edge.DLS.containsAttribute(Attribute.INDICES) ) {
+				ifs.setNumEdges(0);
+			}
+		}
+		
+		updateImplFaceNormals();
 	
-		if( ifs.getNumFaces() == nof() ) {
+		updateImplVertexNormals();
+		
+		updateImplFaceLabels();
+	}
 
-			for( Iterator iter = faceDLS.storedAttributes().iterator(); iter.hasNext(); ) {
-				Attribute attr = (Attribute)iter.next();
-				log( "have", attr, "face" );
-				faceAttributeNode( attr ).update();
-				
-				if(  nodeWasUpdated(faceAttributeNode( attr ))  ) {
-					log( "set", attr, "face" );
-					ifs.setFaceAttributes( attr, faceDLS.getWritableList(attr));			
-				}				
-			}
-		} else {
-			updateFaceAttributes();
-			ifs.setFaceCountAndAttributes(faceDLS);
-		}
-	
-//		if( !edgeDLS.containsAttribute(Attribute.INDICES) ) {
-//			if( generateEdgesFromFaces ) { 
-//				if( nodeWasUpdated(edgeIndices) ) { 
-//					log( "set", Attribute.INDICES, "edge");
-//					ifs.setEdgeCountAndAttributes(Attribute.INDICES, edgeIndices() );
-//				} else if( nof() == 0 ) {
-//					ifs.setNumEdges(0);
-//				}
-//			} else if( ifs.getEdgeAttributes().containsAttribute(Attribute.INDICES) ) {
-//				log( "cancle", Attribute.INDICES, "edge");
-//				ifs.setEdgeAttributes(Attribute.INDICES, null );
-//			}
-//		}
-		
-		if( !faceDLS.containsAttribute(Attribute.NORMALS) ) {
-			if( generateFaceNormals ) {
-				if( nodeWasUpdated( faceNormals ) ) { 
-					log( "set", Attribute.NORMALS, "face");
-					ifs.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(faceNormals()[0].length).createReadOnly(faceNormals()));
-				}
-			} else {
-				if( ifs.getFaceAttributes().containsAttribute(Attribute.NORMALS) ) {
-					log( "cancle", Attribute.NORMALS, "face");
-					ifs.setFaceAttributes(Attribute.NORMALS, null);
-				}
+	private void updateImplFaceLabels() {
+		if( !face.DLS.containsAttribute(Attribute.LABELS) ) {
+			if( generateFaceLabels ) { 
+				if( nodeWasUpdated(faceLabels) ) { 
+					log( "set", Attribute.LABELS, "labels");
+					ifs.setFaceAttributes(Attribute.LABELS, StorageModel.STRING_ARRAY.createReadOnly(faceLabels()));
+				} 
+			} else if( ifs.getFaceAttributes().containsAttribute(Attribute.LABELS ) ) {
+				log( "cancle", Attribute.LABELS, "labels");
+				ifs.setFaceAttributes(Attribute.LABELS, null );
 			}
 		}
-		
-		if( !vertexDLS.containsAttribute(Attribute.NORMALS) ) {
+	}
+
+	private void updateImplVertexNormals() {
+		if( !vertex.DLS.containsAttribute(Attribute.NORMALS) ) {
 			if( generateVertexNormals ) {
 				if( nodeWasUpdated(vertexNormals) ) { 
 					log( "set", Attribute.NORMALS, "vertex");
@@ -454,30 +435,40 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 				}
 			}
 		}
-		
-		if( !faceDLS.containsAttribute(Attribute.LABELS) ) {
-			if( generateFaceLabels ) { 
-				if( nodeWasUpdated(faceLabels) ) { 
-					log( "set", Attribute.LABELS, "labels");
-					ifs.setFaceAttributes(Attribute.LABELS, StorageModel.STRING_ARRAY.createReadOnly(faceLabels()));
-				} 
-			} else if( ifs.getFaceAttributes().containsAttribute(Attribute.LABELS ) ) {
-				log( "cancle", Attribute.LABELS, "labels");
-				ifs.setVertexAttributes(Attribute.LABELS, null );
+	}
+
+	private void updateImplFaceNormals() {
+		if( !face.DLS.containsAttribute(Attribute.NORMALS) ) {
+			if( generateFaceNormals ) {
+				if( nodeWasUpdated( faceNormals ) ) { 
+					log( "set", Attribute.NORMALS, "face");
+					ifs.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(faceNormals()[0].length).createReadOnly(faceNormals()));
+				}
+			} else {
+				if( ifs.getFaceAttributes().containsAttribute(Attribute.NORMALS) ) {
+					log( "cancle", Attribute.NORMALS, "face");
+					ifs.setFaceAttributes(Attribute.NORMALS, null);
+				}
 			}
 		}
 	}
 
-	
 	public IndexedFaceSet getIndexedFaceSet() {
 		return ifs;
 	}
 	
 	public boolean isGenerateEdgesFromFaces() {
+		edgeIndices.outdate();
 		return generateEdgesFromFaces;
 	}
 
 	public void setGenerateEdgesFromFaces(boolean generateEdgesFromFaces) {
+		if( generateEdgesFromFaces && edge.DLS.getNumAttributes() != 0 )
+			throw new UnsupportedOperationException( 
+					"you cannot generate edges form faces " +
+					"while edge attributes are set." +
+					"use clearEdgeAttributes() before");
+			
 		this.generateEdgesFromFaces=generateEdgesFromFaces;
 	}
 	

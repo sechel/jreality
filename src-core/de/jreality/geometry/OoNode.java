@@ -47,6 +47,12 @@ import java.util.logging.Logger;
 
 class OoNode {
 
+	interface IsUpdateCounter {
+		public long getUpdateCount();
+	}
+	
+	private IsUpdateCounter updateCounter;
+	
 	private Set ingr = new HashSet();
 	private Set deps = new HashSet();
 	
@@ -54,7 +60,7 @@ class OoNode {
 	
 	private String name;
 	
-	private long timeStampOfLastUpdate = System.currentTimeMillis();
+	private long counterOfLastUpdate = System.currentTimeMillis();
 	
 	private boolean currentlyUpdating = false;
 	
@@ -62,21 +68,23 @@ class OoNode {
 	
 	UpdateMethod updateMethod = null;
 	
-	static Logger outdateLog = Logger.getAnonymousLogger();//.getLogger("de.jreality.geometry.factory.outdate");
-	static Logger updateLog  = Logger.getAnonymousLogger();//.getLogger("de.jreality.geometry.factory.update");
+	//static Logger outdateLog = Logger.getAnonymousLogger();//.getLogger("de.jreality.geometry.factory.outdate");
+	//static Logger updateLog  = Logger.getAnonymousLogger();//.getLogger("de.jreality.geometry.factory.update");
 	{
-		updateLog.setUseParentHandlers(false);
-		outdateLog.setUseParentHandlers(false);
+		//updateLog.setUseParentHandlers(false);
+		//outdateLog.setUseParentHandlers(false);
 		//outdateLog.setLevel(Level.OFF);
 		//updateLog.setLevel(Level.OFF);
 	}
 	
-	public OoNode( String name ) {
+	public OoNode( String name, IsUpdateCounter updateCounter  ) {
+		this.updateCounter = updateCounter; 
 		setObject(object);
 		setName( name );
 	}
 
-	public OoNode( Object object, String name ) {
+	public OoNode( Object object, String name, IsUpdateCounter updateCounter ) {
+		this.updateCounter = updateCounter; 
 		setObject(object);
 		setName( name );
 	}
@@ -124,7 +132,7 @@ class OoNode {
 	public void outdate() {
 		if( outOfDate )
 			return;
-		outdateLog.info(name);
+		//outdateLog.info(name);
 		outOfDate=true;
 		outdateDeps();
 	}
@@ -146,7 +154,7 @@ class OoNode {
 			}
 		
 			if( updateMethod != null ) {
-				updateLog.info(name);
+				//updateLog.info(name);
 				Object newObject = updateMethod.update( object );
 				/*
 				if( newObject != null && !newObject.equals(object) || newObject == null && object != null )
@@ -155,12 +163,13 @@ class OoNode {
 				object = newObject;
 			}
 			
-			timeStampOfLastUpdate = System.currentTimeMillis();
+			counterOfLastUpdate = System.currentTimeMillis();
 			
 		} finally {
 			currentlyUpdating=false;
 		}
 		outOfDate=false;
+		counterOfLastUpdate = updateCounter.getUpdateCount();
 	}
 
 	public void fire() {
@@ -182,8 +191,8 @@ class OoNode {
 		updateMethod = method;
 		outdate(); //TODO: is this o.k. ?
 	}
-	
-	public long getTimeStampOfLastUpdate() {
-		return timeStampOfLastUpdate;
+
+	public long getCounterOfLastUpdate() {
+		return counterOfLastUpdate;
 	}
 }

@@ -45,12 +45,12 @@ import de.jreality.scene.data.DoubleArrayArray;
 
 public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 
-	final OoNode uMin = new OoNode( new Double(0), "uMin" );
-	final OoNode uMax = new OoNode( new Double(1), "uMax" );
-	final OoNode vMin = new OoNode( new Double(0), "vMin" );
-	final OoNode vMax = new OoNode( new Double(1), "vMax" );
+	final OoNode uMin = node( new Double(0), "uMin" );
+	final OoNode uMax = node( new Double(1), "uMax" );
+	final OoNode vMin = node( new Double(0), "vMin" );
+	final OoNode vMax = node( new Double(1), "vMax" );
 	
-	final OoNode immersion = new OoNode( "immersion" );
+	final OoNode immersion = node( "immersion" );
 	
 	ParametricSurfaceFactory( Immersion immersion, double uMin, double uMax, double vMin, double vMax ) {
 		super();

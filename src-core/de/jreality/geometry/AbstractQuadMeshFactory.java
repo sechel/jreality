@@ -59,14 +59,13 @@ import de.jreality.util.LoggingSystem;
  */
 class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 	
-
-	final OoNode textureCoordinates = new OoNode( "vertex.texture" );
+	final OoNode textureCoordinates = node( "vertex.texture" );
 	
-	final OoNode closedInVDirection = new OoNode( new Boolean(false),"closed in v" );
-	final OoNode closedInUDirection = new OoNode( new Boolean(false),"closed in u" );
+	final OoNode closedInVDirection = node( new Boolean(false),"closed in v" );
+	final OoNode closedInUDirection = node( new Boolean(false),"closed in u" );
 
-	final OoNode vLineCount = new OoNode( new Integer(-1), "v-line count" );  //unfortunately we need the -1
-	final OoNode uLineCount = new OoNode( new Integer(-1), "u-line count" );
+	final OoNode vLineCount = node( new Integer(-1), "v-line count" );  //unfortunately we need the -1
+	final OoNode uLineCount = node( new Integer(-1), "u-line count" );
 	
 	private int uLineCount_;
 	
@@ -154,7 +153,7 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 	}
 	
 	{
-		faceIndices.addIngr( (OoNode)faceAttributeNode.get( Attribute.INDICES )); //allready in superclass
+		faceIndices.addIngr( (OoNode)face.attributeNode.get( Attribute.INDICES )); //allready in superclass
 		faceIndices.addIngr( uLineCount );
 		faceIndices.addIngr( vLineCount );
 		faceIndices.setUpdateMethod(
@@ -226,7 +225,7 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 	}
 
 	{
-		textureCoordinates.addIngr( vertexAttributeNode( Attribute.TEXTURE_COORDINATES ));
+		textureCoordinates.addIngr( vertex.attributeNode( Attribute.TEXTURE_COORDINATES ));
 		textureCoordinates.addIngr( uLineCount );
 		textureCoordinates.addIngr( vLineCount );
 		textureCoordinates.setUpdateMethod(
@@ -244,7 +243,7 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 	
 	double [] generateTextureCoordinates( double [] textureCoordinates ) {
 		
-		if( vertexDLS.containsAttribute(Attribute.TEXTURE_COORDINATES))
+		if( vertex.DLS.containsAttribute(Attribute.TEXTURE_COORDINATES))
 			return null;
 		
 		if( textureCoordinates == null || textureCoordinates.length != 2*nov() )
@@ -290,7 +289,7 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 					new IntArrayArray.Array( faceIndices() ) );
 		}
 		
-		if( !vertexDLS.containsAttribute(Attribute.TEXTURE_COORDINATES) ) {
+		if( !vertex.DLS.containsAttribute(Attribute.TEXTURE_COORDINATES) ) {
 			if( generateTextureCoordinates ) {
 				if( nodeWasUpdated(textureCoordinates) ) { 
 					log( "set", Attribute.TEXTURE_COORDINATES, "vertex");
@@ -338,8 +337,8 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		vertexNormals.addIngr(closedInVDirection);
 	}
 	
-	double [][] generateVertexNormals() {
-		double [][] vertexNormals = super.generateVertexNormals();
+	double [][] generateVertexNormals( double [][] vertexNormals ) {
+		vertexNormals = super.generateVertexNormals( vertexNormals );
 		
 		if( !isClosedInUDirection() && !isClosedInVDirection() )
 			return vertexNormals;

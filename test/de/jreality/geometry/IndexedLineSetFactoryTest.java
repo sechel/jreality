@@ -80,20 +80,9 @@ public class IndexedLineSetFactoryTest extends TestCase {
 
 	};
 
-	ActionHandler actionHandler;
-	Logger actionLogger = Logger.getLogger("de.jreality.geometry.action");
-	
 	public void setUp() {
 		
-		actionHandler = new ActionHandler();
-		actionHandler.setLevel( Level.INFO );
-		
-		AbstractPointSetFactory.actionLogger = actionLogger;
-		//actionLogger.setUseParentHandlers(false);
-		
-		actionLogger.addHandler( actionHandler );
-		
-		
+	
 		factory=new de.jreality.geometry.IndexedLineSetFactory();
 
 	}
@@ -115,15 +104,9 @@ public class IndexedLineSetFactoryTest extends TestCase {
 		
 		factory.update();
 		
-		ViewerApp.display( factory.getIndexedLineSet() );
-		
-		actionHandler.clear();
-		
 		factory.setEdgeIndices( indices );
 		
 		factory.update();
-		
-		actionHandler.clear();
 		
 		factory.setVertexCoordinates( vertices );
 		
@@ -131,40 +114,6 @@ public class IndexedLineSetFactoryTest extends TestCase {
 		
 	}
 	
-	static class ActionHandler extends Handler {
-
-		HashSet actions = new HashSet();
-		HashMap actionsParam = new HashMap();
-		
-		boolean isClosed = false;
-		public void close() throws SecurityException {
-			isClosed = true;
-		}
-
-		public void clear() {
-			actions.clear();
-			actionsParam.clear();
-		}
-
-		public void flush() {
-		}
-
-		public void publish(LogRecord record) {
-			if( isClosed )
-				throw new RuntimeException( "action handler is closed");
-			
-			String msg = record.getMessage();
-			
-			if(actions.contains(msg))
-				TestCase.fail( "multiple action invocation" );
-			else
-				actions.add(msg);
-			
-			actionsParam.put( msg, record.getParameters() );
-			
-		}
-		
-	}
 	
 	public static void main( String [] arg ) {
 
