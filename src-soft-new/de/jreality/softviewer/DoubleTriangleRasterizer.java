@@ -202,7 +202,7 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
             
             
             interpolateA = t.isInterpolateAlpha();
-            if(interpolateA) aaa.value =1;
+            if(!interpolateA) aaa.value =1;
             
         if (outline) {
             transparency = 0;
@@ -542,7 +542,7 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
 
         if (interpolateUV) {
             final int[] color=this.color;
-            final double WW = ((double)ww);
+            final double WW = ww;
             color[0] = (int)r;
             color[1] = (int)g;
             color[2] = (int)b;
@@ -674,7 +674,7 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
     }
     
     public final void clear() {
-        Arrays.fill(zBuffer, Integer.MAX_VALUE);
+        Arrays.fill(zBuffer, Double.MAX_VALUE);
         Arrays.fill(pixels, background);
         
     }

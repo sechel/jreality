@@ -47,6 +47,8 @@ import java.util.Vector;
 
 import com.sun.org.apache.bcel.internal.generic.NEWARRAY;
 
+import de.jreality.math.Rn;
+
 /**
  * This class capsules utility methods for intersecting polygons. It is
  * <em> not</em> speed optimized. It is mainly for file exports at the moment.
@@ -70,7 +72,6 @@ public class PolygonUtility {
         super();
     }
 
-    private static int once = 0;
 
     public static void dehomogenize(AbstractPolygon p) {
         for (int i = 0; i < p.getLength(); i++) {
@@ -88,26 +89,26 @@ public class PolygonUtility {
     
     
     /**
-     * we assume that the triangles are dehomogenized
+     * we assume that the polygons are dehomogenized, planar and convex
      * 
      * @param a
-     *            the triangle to test
+     *            the polygon to test
      * @param b
-     *            the triangle to test against
+     *            the polygon to test against
      * @return 1 if a lies behind or is independent of b, 0 if a and b
      *         intersect, and -1 if b lies behind a
      */
-    public static int liesBehind(Triangle a, Triangle b) {
+    public static int liesBehind(AbstractPolygon a, AbstractPolygon b) {
         // first test: coarse z separation:
-        if (maxZ(b) < minZ(a))
-            return 1;
-        if (maxZ(a) < minZ(b))
-            return -1;
-
+        // has now already been done in intersecting pipeline
+//        if (maxZ(b) < minZ(a))
+//            return 1;
+//        if (maxZ(a) < minZ(b))
+//            return -1;
         
         double[] x = b.getPoint(0);
-        double[] y = b.getPoint((0 + 1) % 3);
-        double[] z = b.getPoint((0 + 2) % 3);
+        double[] y = b.getPoint((0 + 1) );
+        double[] z = b.getPoint((0 + 2) );
 
         // find the plane through the three
         double[] d1 = VecMat.difference(y, Triangle.SX, x,
@@ -120,33 +121,50 @@ public class PolygonUtility {
         VecMat.normalize(normalA);
         double d = VecMat.dot(normalA,0,
                 x,Polygon.SX);
+        int sign = (int) Math.signum(VecMat.dot(normalA, zNormal));
         
         // test if both lie in same plane:
-        if(
-                Math.abs(VecMat.dot(normalA,0,a.getP0(),Polygon.SX)-d)<EPS &&
-                Math.abs(VecMat.dot(normalA,0,a.getP1(),Polygon.SX)-d)<EPS &&
-                Math.abs(VecMat.dot(normalA,0,a.getP2(),Polygon.SX)-d)<EPS
-                ) 
+        int inP = 0;
+        int in  = 0;
+        int out = 0;
+        boolean noIntersect = false;
+        
+        //TODO: probably obsolete:
+        // the call to testPolygonInHalfSpace below should do the same
+        double dist0 = sign*(VecMat.dot(normalA,0,a.getPoint(0),Polygon.SX)-d);
+        for(int i = 1,n = a.getLength(); i<n+1; i++) {
+            double dist1 = dist0;
+            dist0 = sign*(VecMat.dot(normalA,0,a.getPoint(i%n),Polygon.SX)-d);
+            inP += Math.abs(dist1)<EPS ?1:0;
+            in += dist1>EPS?1:0;
+            out += dist1<-EPS?1:0;
+            if(Math.abs(dist1)<EPS && Math.abs(dist0)<EPS) 
+                noIntersect = true;
+        }
+        if(inP == a.getLength())
+            return 1;
+        if(out == 0)
             return 1;
         
         
-        int sign = (int) Math.signum(VecMat.dot(normalA, zNormal));
         int result = testPolygonInHalfSpace(a,Polygon.SX, normalA,-sign,d);
         
         if(result == CLIPPED_IN) {
             //System.out.println("fast track");
             return 1;
-        }
+        } 
+        if(result == CLIPPED_OUT)
+            noIntersect = true;
 
         
-        // clip along teh sides of b
+        // clip along the sides of b
         // if nothing is left a was behind
         AbstractPolygon p = a;
         Polygon clipPoly = null;
-        for (int j = 0; j < 3; j++) {
+        for (int j = 0, n = b.getLength(); j < n; j++) {
             double[] lx = b.getPoint(j);
-            double[] ly = b.getPoint((j + 1) % 3);
-            double[] lz = b.getPoint((j + 2) % 3);
+            double[] ly = b.getPoint((j + 1) % n);
+            double[] lz = b.getPoint((j + 2) % n);
 
             // find the plane through x, y, and z normal
             double[] ld1 = VecMat.difference(lx, Triangle.SX,ly, Triangle.SX);
@@ -165,32 +183,53 @@ public class PolygonUtility {
             if(lresult == CLIPPED_PARTIAL)
                 p = clipPoly;
         }
-        
-        //find what is potentially in front:
+        // now p is the part of a which has a projection that lies inside the projection of b
+        // it is left of find out if this rest still intersects the plane of b
         Polygon poly  = new Polygon(3);
         result = clipToHalfspace(p,Polygon.SX,normalA,-sign,d,poly);
         
-        if(result == CLIPPED_PARTIAL)
-            return 0;
+        if(result == CLIPPED_PARTIAL) {
+            // still intersection
+            if(noIntersect) {
+                System.err.println("intersection detected while two points are in plane");
+                for (int i = 0,n = p.getLength(); i < n; i++) {
+                    double[] v = p.getPoint(i);
+                    double test = -sign
+                            * (VecMat.dot(v, Polygon.SX, normalA, 0) - d * v[Polygon.SX + 3]);
+                    if (test < -EPS)
+                    //if (test > EPS)
+                        return 1;
+                }
+            }else
+                return 0;
+        }
         if(result == CLIPPED_IN)
+            // everything behind
             return 1;
         else 
+            // in front
             return -1;
     }
 
-    
-    public static Triangle[] cutOut(Triangle a, Triangle b) {
+    /**
+     * 
+     * @param a the triangle to be cut
+     * @param b the triangle to cut along
+     * @return
+     */
+    public static AbstractPolygon[] cutOut(AbstractPolygon a, AbstractPolygon b) {
 
-        Vector<Triangle>  v = new Vector<Triangle>();
+        Vector<AbstractPolygon>  v = new Vector<AbstractPolygon>();
         
         // clip along the sides of b
         // if nothing is left a was behind
         AbstractPolygon p = a;
         Polygon clipPoly = null;
-        for (int j = 0; j < 3; j++) {
+        final int length = b.getLength();
+        for (int j = 0; j < length; j++) {
             double[] lx = b.getPoint(j);
-            double[] ly = b.getPoint((j + 1) % 3);
-            double[] lz = b.getPoint((j + 2) % 3);
+            double[] ly = b.getPoint((j + 1) % length);
+            double[] lz = b.getPoint((j + 2) % length);
 
             // find the plane through x, y, and z normal
             double[] ld1 = VecMat.difference(lx, Triangle.SX,ly, Triangle.SX);
@@ -208,12 +247,12 @@ public class PolygonUtility {
             if(lresult == CLIPPED_PARTIAL) {
                 Polygon poly  = new Polygon(3);
                 clipToHalfspace(p,Polygon.SX,lnormalA,lsign,ldist,poly);
-                v.addAll(Arrays.asList(poly.triangulate(null,new ArrayStack(0))));
+                v.add(poly);
                 p = clipPoly;
             }
             if(lresult == CLIPPED_OUT) {
                 //if(p.getLength()>2)
-                v.addAll(Arrays.asList(p.triangulate(null,new ArrayStack(0))));
+                v.add(p);
                 p = clipPoly;
                 clipPoly.setLength(0);
                 break;
@@ -248,7 +287,7 @@ public class PolygonUtility {
 //            }
         }
         
-        return v.toArray(new Triangle[0]);
+        return v.toArray(new AbstractPolygon[0]);
     }
     
     
@@ -256,19 +295,37 @@ public class PolygonUtility {
     private static String s(double[] u) {
         return "("+u[0]+", "+u[1]+", "+u[2]+")";
     }
-
-    private static double minZ(Triangle t) {
-        return Math.min(t.getP0()[AbstractPolygon.SZ], Math.min(
-                t.getP1()[AbstractPolygon.SZ], t.getP2()[AbstractPolygon.SZ]));
+    
+    public static double minZ(AbstractPolygon p) {
+        double min = Double.MAX_VALUE;
+        for (int i = 0, n = p.getLength(); i < n; i++)
+            min = Math.min(min, p.getPoint(i)[AbstractPolygon.SZ]/p.getPoint(i)[AbstractPolygon.SW]);
+        return min;
     }
 
-    private static double maxZ(Triangle t) {
-        return Math.max(t.getP0()[AbstractPolygon.SZ], Math.max(
-                t.getP1()[AbstractPolygon.SZ], t.getP2()[AbstractPolygon.SZ]));
+    public static double maxZ(AbstractPolygon p) {
+        double max = -Double.MAX_VALUE;
+        for (int i = 0, n = p.getLength(); i < n; i++)
+            max = Math.max(max, p.getPoint(i)[AbstractPolygon.SZ]/p.getPoint(i)[AbstractPolygon.SW]);
+        return max;
     }
 
-    private static final double EPS = 0.00000001;
-    //private static final double EPS = 0.01;
+    
+//    public static double minZ(Triangle t) {
+//        return Math.min(t.getP0()[AbstractPolygon.SZ], Math.min(
+//                t.getP1()[AbstractPolygon.SZ], t.getP2()[AbstractPolygon.SZ]));
+//    }
+//
+//    public static double maxZ(Triangle t) {
+//        return Math.max(t.getP0()[AbstractPolygon.SZ], Math.max(
+//                t.getP1()[AbstractPolygon.SZ], t.getP2()[AbstractPolygon.SZ]));
+//    }
+
+    //private static final double EPS = 0.0000000001;
+    private static final double EPS = Math.ulp(2.);
+
+    
+    //ivate static final double EPS = 0.000000001
 
     private static int testTriangleInHalfSpace(Triangle t,
             double[] planeNormal, int sign, double k
@@ -453,7 +510,7 @@ public class PolygonUtility {
         if (testResult != CLIPPED_PARTIAL)
             return testResult;
         // testResult == 1;
-        int length = p.getLength();
+        final int length = p.getLength();
 
         double[] u = p.getPoint(length - 1);
         double[] v = p.getPoint(0);
@@ -482,20 +539,19 @@ public class PolygonUtility {
             }
         }
         dst.setShadingFrom(p);
-        return testResult;
+        return CLIPPED_PARTIAL;
     }
 
     /**
      * @param a
-     *            triangle to split
+     *            polygon to split
      * @param b
-     *            triangle to intersect against
+     *            polygon to intersect against
      * @param s
      *            signum giving the side of the plane of b to get.
-     * @return an array of triangles
      */
-    public static Triangle[] intersect(Triangle a, Triangle b, int s,
-            Polygon res, ArrayStack stack) {
+    public static void intersect(AbstractPolygon a, AbstractPolygon b, int s,
+            Polygon resBefore, Polygon resBehind) {
 
         double[] x = b.getPoint(0);
         double[] y = b.getPoint(1);
@@ -506,20 +562,31 @@ public class PolygonUtility {
         double[] d2 = VecMat.difference(z, Triangle.SX, x, Triangle.SX);
         double[] normal = new double[3];
         VecMat.cross(d1, d2, normal);
+        // might be lin dependent
+//        if(VecMat.norm(normal)<EPS && b.getLength()>3) {
+//            System.err.println("WARNING lindep points in poly");
+//            z = b.getPoint(3);
+//            d2 = VecMat.difference(z, Triangle.SX, x, Triangle.SX);
+//            VecMat.cross(d1, d2, normal);
+//        }
         VecMat.normalize(normal);
         double dist = VecMat.dot(normal, 0, x, Triangle.SX);
         int sign = (int) (s * Math.signum(VecMat.dot(normal, new double[] { 0,
                 0, 1 })));
-        Triangle u = new Triangle();
-        Triangle v = new Triangle();
-        clipToHalfspace(a, Triangle.SX, normal, sign, dist, res);
-        if (res.getLength() >= 3)
-            return res.triangulate(null, stack);
-        else {
+//        Triangle u = new Triangle();
+//        Triangle v = new Triangle();
+        int test = clipToHalfspace(a, Triangle.SX, normal, sign, dist, resBefore);
+        int test2 = clipToHalfspace(a, Triangle.SX, normal, -sign, dist, resBehind);
+        if (test != CLIPPED_PARTIAL) 
+            System.err.println(" warning: intersect gives no intersection!!!");
+        if (resBefore.getLength() < 3)
             System.err.println("WARNING intersect generated polygon of length "
-                    + res.getLength());
-            return new Triangle[0];
-        }
+                    + resBefore.getLength());
+        
+        if (resBehind.getLength() < 3)
+            System.err.println("WARNING intersect generated polygon of length "
+                    + resBehind.getLength());
+    
     }
 
 }

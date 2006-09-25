@@ -40,6 +40,7 @@
 
 package de.jreality.softviewer.shader;
 
+
 import de.jreality.scene.Geometry;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.EffectiveAppearance;
@@ -103,6 +104,8 @@ public class DefaultPolygonShader extends PolygonShader {
     public final void shadePolygon(Polygon p, Environment environment) {
         p.setTransparency(vertexShader.getTransparency());
         p.setTexture(texture);
+        p.setInterpolateAlpha(interpolateAlpha());
+        p.setInterpolateColor(interpolateColor());
         int n = p.getLength();
 		if(smooth) {
             for(int i = 0; i< n;i++) {

@@ -70,9 +70,9 @@ public abstract class AbstractPolygon {
         return center;
     }
 
-    public final Triangle[] triangulate(Triangle[] ta, ArrayStack stack) {
+    public final Triangle[] triangulate(Triangle[] ta, final ArrayStack stack) {
         final int length = getLength()-2;
-        if (length < 0) return ta == null? new Triangle[0]:ta;
+        if (length <= 0) return ta == null? new Triangle[0]:ta;
         if(ta == null|| ta.length < length) ta = new Triangle[length];
         double[] start = getPoint(length+1);
         double[] next = getPoint(0);

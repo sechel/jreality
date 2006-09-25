@@ -41,14 +41,14 @@ package de.jreality.softviewer;
 
 import java.util.Comparator;
 
-public class TriangleComparator implements Comparator {
+public class TriangleComparator implements Comparator<Triangle> {
 
     public TriangleComparator() {
         super();
         // TODO Auto-generated constructor stub
     }
 
-    public int compare(Object o1, Object o2) {
+    public int compare(Triangle o1, Triangle o2) {
         double z = ( (Triangle)o2).getCenterZ();
         z -= ( (Triangle)o1).getCenterZ();
         return z<0?1:(z>0?-1:0);

@@ -37,6 +37,8 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.IntArrayArray;
 import de.jreality.shader.*;
 import de.jreality.soft.PSViewer;
 import de.jreality.ui.viewerapp.ViewerApp;
@@ -54,9 +56,15 @@ public class TestSoft {
      * @param args
      */
     public static void main(String[] args) {
+        // classic mutually obstructing
+        //double[][] points = {{0, 1, 0.1},{1, 0, 0},{0, -1, -0.1}};
+        // mutually intersecting
         double[][] points = {{0, 1, 0.1},{1, 0, 1},{0, -1, -0.1}};
-//        double[][] points = {{0, 1, 0},{1, 0, 0},{0, -1, 0}, 
-//                {.5, 0, -0.1}, {0, 0, -.5}, {0, 0, -1}};
+        // mutually aligned
+        //double[][] points = {{0, 0, 0},{1, 0, 0},{Math.cos(Math.PI*2./3), Math.sin(Math.PI*2./3), 0}};
+        // mutually aligned 2
+        //double[][] points = {{0, 0, 0},{1, 0, 0},{Math.cos(Math.PI*2./3), Math.sin(Math.PI*2./3), 0}};
+
 
         int[][] faces = {{0, 1, 2}};
 
@@ -75,6 +83,7 @@ public class TestSoft {
 
         IndexedFaceSet faceSet = ifsf.getIndexedFaceSet();
         
+        faceSet.setEdgeCountAndAttributes(Attribute.INDICES,new IntArrayArray.Array(new int[][] {{0,2}}));
         //ViewerApp.display(faceSet);
         
         Appearance app = new Appearance();
@@ -86,7 +95,7 @@ public class TestSoft {
         
         DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(app, true);
         dgs.setShowPoints(true);
-        dgs.setShowLines(true );
+        dgs.setShowLines( true );
         DefaultPolygonShader polyShader = (DefaultPolygonShader) dgs.getPolygonShader();
         DefaultPointShader pointShader = (DefaultPointShader) dgs.getPointShader();
         DefaultLineShader lineShader = (DefaultLineShader) dgs.getLineShader();
@@ -109,8 +118,10 @@ public class TestSoft {
         cmp2.setGeometry(faceSet);
         cmp3.setGeometry(faceSet);
         
-        MatrixBuilder.euclidean().rotate(2. * Math.PI/3.,0,0,1).translate(.2,0,0).assignTo(cmp1);
-        MatrixBuilder.euclidean().rotate(4. * Math.PI/3.,0,0,1).translate(.2,0,0).assignTo(cmp2);
+        MatrixBuilder.euclidean().rotate(2. * Math.PI/3.,0,0,1).translate(0*.2,0,0).assignTo(cmp1);
+        MatrixBuilder.euclidean().rotate(4. * Math.PI/3.,0,0,1).translate(0*.2,0,0).assignTo(cmp2);
+        //MatrixBuilder.euclidean().rotate(1. * Math.PI/2.,0,1,0).translate(0.5,-.6,0).assignTo(cmp1);
+        //MatrixBuilder.euclidean().rotate(1. * Math.PI/2.,0,1,0).translate(-0.3,-.3,0.1).assignTo(cmp2);
         
         app = new Appearance();
         app.setAttribute(CommonAttributes.DIFFUSE_COLOR,Color.RED);

@@ -129,8 +129,9 @@ public class PSRasterizer extends TriangleRasterizer {
     }
 
     private void writePolygon(double[][] polygon) {
-        writer
-                .println("<<\n/ColorSpace [/DeviceRGB]\n/ShadingType 4\n/DataSource [");
+//        writer
+//                .println("<<\n/ColorSpace [/DeviceRGB]\n/ShadingType 4\n/DataSource [");
+        writer.print("[");
         for (int i = 0; i < 3; i++) {
             writer.print(" 0");
             writer.print(" " + polygon[i][Polygon.SX]);
@@ -139,7 +140,8 @@ public class PSRasterizer extends TriangleRasterizer {
             writer.print(" " + polygon[i][Polygon.G] / 255.);
             writer.println(" " + polygon[i][Polygon.B] / 255.);
         }
-        writer.print("]\n>> shfill\n");
+//        writer.print("]\n>> shfill\n");
+        writer.println(" f");
 
     }
 
@@ -188,13 +190,16 @@ public class PSRasterizer extends TriangleRasterizer {
         writer.println("%%BoundingBox: " + xmin + " " + ymin + " "
                 + (xmax - xmin) + " " + (ymax - ymin) + "\n%%EndComments");
         writer.println("gsave\n");
+        writer.println("2 dict begin\n/d <<\n/ColorSpace [/DeviceRGB]\n/ShadingType 4\n/DataSource []\n>> def\n");
+        writer.println("/f { ]d exch /DataSource exch put d shfill } bind def");
+
     }
 
     /**
      * This should be called after the last renderPolygon call.
      */
     public void stop() {
-        writer.println(" \ngrestore");
+        writer.println("\nend\ngrestore");
     }
 
     /*

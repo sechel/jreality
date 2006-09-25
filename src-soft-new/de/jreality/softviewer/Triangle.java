@@ -103,7 +103,7 @@ public class Triangle extends AbstractPolygon {
     }
 
     public final double getCenterZ() {
-        return (p0[SZ] + p1[SZ] + p2[SZ]) / 3;
+        return (p0[SZ]/p0[SW] + p1[SZ]/p1[SW] + p2[SZ]/p2[SW]) / 3;
     }
 
     @Override

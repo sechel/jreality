@@ -103,7 +103,7 @@ public class TrianglePipeline {
     // private int vertexCount = 0;
     // double[] vertexData = new double[100 * Polygon.VERTEX_LENGTH];
 
-    TriangleComparator comp = new TriangleComparator();
+    protected TriangleComparator comp = new TriangleComparator();
 
     private CameraProjection perspective = new PerspectiveProjection();
 
@@ -238,7 +238,7 @@ public class TrianglePipeline {
                 faceNormal,faceColor,transform);
         // shade
         shader.shadePolygon(polygon, environment);
-        polygon.setInterpolateColor(shader.interpolateColor());
+        
         // return early if polygon is clipped out
         //TODO: debug clipPlanes
         if (clipPlanes())
@@ -269,6 +269,7 @@ public class TrianglePipeline {
                     // tri.computeCenterZ(vertexData);
                     // pi.computeMaxZ(vertexData);
                     triangles.push(tri);
+                
                 // return;
             } else {
                 rasterizer.renderTriangle(tri, false);

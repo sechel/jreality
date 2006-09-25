@@ -39,6 +39,10 @@
 
 package de.jreality.softviewer;
 
+import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Vector;
 
 public class IntersectingPipeline extends TrianglePipeline {
@@ -48,107 +52,275 @@ public class IntersectingPipeline extends TrianglePipeline {
         // TODO Auto-generated constructor stub
     }
 
+    private int count;
+
     public void finish() {
-       //super.finish();
-        
-        rasterRemaining();
+        int preCount = triangles.getSize();
+        // super.finish();
+        count = 0;
+        rasterRemaining_new();
+        System.out.println(" rastered " + count + " triangles (" + preCount
+                + ")");
+        System.out.println(" polys " + polys.size());
+        System.out.println(" ignore " + ignore.size());
+        System.out.println(" obstruct " + obstruct.size());
     }
 
-    private void rasterRemaining() {
-        System.out.println("rastering rest");
-        // hope this helps
+    LinkedList<AbstractPolygon> polys = new LinkedList<AbstractPolygon>();
+
+    LinkedList<AbstractPolygon> postponed = new LinkedList<AbstractPolygon>();
+
+    HashMap<AbstractPolygon, List<AbstractPolygon>> ignore = new HashMap<AbstractPolygon, List<AbstractPolygon>>();
+
+    HashMap<AbstractPolygon, List<AbstractPolygon>> obstruct = new HashMap<AbstractPolygon, List<AbstractPolygon>>();
+
+    Vector<Pair> looP = new Vector<Pair>();
+
+    private List<AbstractPolygon> getIgnoreList(AbstractPolygon p) {
+        List<AbstractPolygon> l = ignore.get(p);
+        if (l == null) {
+            l = new LinkedList<AbstractPolygon>();
+            ignore.put(p, l);
+        }
+        return l;
+    }
+
+    private List<AbstractPolygon> getObstructList(AbstractPolygon p) {
+        List<AbstractPolygon> l = obstruct.get(p);
+        if (l == null) {
+            l = new LinkedList<AbstractPolygon>();
+            obstruct.put(p, l);
+        }
+        return l;
+    }
+
+    private Comparator<AbstractPolygon> comparator = new Comparator<AbstractPolygon>() {
+
+        public int compare(AbstractPolygon o1, AbstractPolygon o2) {
+            double z = PolygonUtility.maxZ(o1);
+            z -= PolygonUtility.maxZ(o2);
+            return z < 0 ? 1 : (z > 0 ? -1 : 0);
+        }
+
+    };
+
+    /**
+     * new
+     */
+    private void rasterRemaining_new() {
+        ignore.clear();
+        obstruct.clear();
         // we need to dehomogenize for the intersection to work
         int n = triangles.getSize();
         // Triangle[] array = triangles.getArray();
         for (int i = 0; i < n; i++) {
-            PolygonUtility.dehomogenize(triangles.get(i));
+            Triangle t = triangles.pop();
+            PolygonUtility.dehomogenize(t);
+            polys.add(t);
         }
-        sortTriangles();
-        Vector<Triangle> loopKiller = new Vector<Triangle>();
-        retry: while (!triangles.isEmpty()) {
-//            System.out.println(".."+triangles.getSize());
-            Triangle a = triangles.pop();
-            n = triangles.getSize();
-            for (int i = n - 1; i >= 0; i--) {
-                Triangle b = triangles.get(i);
-                int test = PolygonUtility.liesBehind(a, b);
-                // System.out.println("....
-                // (a,b)"+PolygonUtility.liesBehind(a,b));
-                // System.out.println(".... b
-                // (b,a)"+PolygonUtility.liesBehind(b,a));
+        // hope this helps
+        // sortTriangles();
+        Collections.sort(polys, comparator);
+        // System.out.println("first "+tris.get(0).getCenterZ());
+        // System.out.println("last "+tris.peek().getCenterZ());
+        while (!polys.isEmpty()) {
+            AbstractPolygon t = polys.removeFirst();
+            // todo.add(t);
+            rasterQueque_new(polys, t, 0, 0);
+            // while(!postponed.isEmpty()) {
+            // t = postponed.removeFirst();
+            // rasterQueque_new(tris, t, 0,0);
+            // }
+        }
 
-                if (test == 1) {
-                    // System.out.println(".... through "+i);
-                    continue;
-                }
-                if (test == -1) {
-                     System.out.println(".... blocked by "+i+" retry");
-                    // System.out.println("a = "+a);
-                    // System.out.println("b = "+b);
+    }
 
-                    if ( !loopKiller.contains(a)) {
-                    triangles.set(i, a);
-                        loopKiller.add(a);
-                        triangles.push(b);
-                        continue retry;
-                    } else {
-//                        System.err.println("loop found. continue anyway");
+    private Triangle[] tris = new Triangle[1];
 
-                        Triangle[] array = PolygonUtility.cutOut(b,a);
-                        System.err.println(" by adding "+array.length+" triangles (to "+triangles.getSize()+")");
-                        for (int j = 1; j < array.length; j++) {
-                            triangles.push(array[j]);
-                            // System.out.println("-> "+result[j]);
-                        }
-                        loopKiller.remove(a);
-                        if(array.length>0)
-                            triangles.set(i, array[0]);
-                        freeTriangles.push(b);
-                        //triangles.push(a);
-                        //continue retry;
-                        
-                    }
-                } else {
-                    //intersect
-                    // first get the triangles that are result of intersection
-                    // and that are in front of b
-                     System.out.println("....intersect");
-                    // System.out.println("....(a,b)
-                    // "+PolygonUtility.liesBehind(a,b));
-                    // System.out.println("a = "+a);
-                    // System.out.println("b = "+b);
-                    // System.out.println("gives");
-                    tmpPolygon.setLength(0);
-                    Triangle[] result = PolygonUtility.intersect(a, b, -1,
-                            tmpPolygon, freeTriangles);
-                    PolygonUtility.liesBehind(a, b);
-                    for (int j = 0; j < result.length; j++) {
-                        triangles.push(result[j]);
-                        // System.out.println("-> "+result[j]);
-                    }
-                    // then get the triangles that are behind b and use the
-                    // first as new a:
-                    tmpPolygon.setLength(0);
-                    result = PolygonUtility.intersect(a, b, 1, tmpPolygon,
-                            freeTriangles);
-                    // System.out.println(" and ");
-                    for (int j = 0; j < result.length; j++) {
-                        triangles.push(result[j]);
-                        // System.out.println("-> "+result[j]);
-                    }
-                    // if(result.length>0) // intersection might fail :-(
-                    // a = result[0];
-                    // continue;
-                    freeTriangles.push(a);
-                    continue retry;
-                }
+    private void rasterQueque_new(LinkedList<AbstractPolygon> polys,
+            AbstractPolygon a, int n, int depth) {
+        // System.out.println("rqn "+n+" "+tris.size());
+        boolean passed = test_new(polys, a, n, depth);
+        if (passed) {
+
+            // passed everything: raster...
+            tris = a.triangulate(tris, freeTriangles);
+            for (int i = 0, l = a.getLength() - 2; i < l; i++) {
+                rasterizer.renderTriangle(tris[i], false);
+                freeTriangles.push(tris[i]);
+                count++;
             }
-            rasterizer.renderTriangle(a, false);
-//            System.out.println("rastered no "+n);
-            freeTriangles.push(a);
-            loopKiller.removeAllElements();
-            // renderer.renderPolygon(p, vertexData, p.getShader().isOutline());
+            ignore.remove(a);
+            obstruct.remove(a);
+            looP.removeAllElements();
+            System.out.println("rastered " + count);
         }
     }
-    
+
+    private boolean test_new(LinkedList<AbstractPolygon> polys,
+            AbstractPolygon a, int n, int depth) {
+
+        List<AbstractPolygon> ignoreForA = getIgnoreList(a);
+
+        List<AbstractPolygon> obstructsA = getObstructList(a);
+        
+        List<AbstractPolygon> obstructsB = getObstructList(a);
+
+        double minA = PolygonUtility.minZ(a);
+        for (int i = n; i < polys.size(); i++) {
+            AbstractPolygon b = polys.get(i);
+            if (PolygonUtility.maxZ(b) < minA)
+                return true;
+            // System.out.println(" a "+getColor(a)+" on b
+            // ("+i+")"+getColor(b)+"\n (depth "+depth+", remaining
+            // "+polys.size()+": ");
+            // for (int j = 0; j < polys.size(); j++) {
+            // System.out.println("___"+getColor(polys.get(j)));
+            // }
+            // System.out.println( ")");
+            int test;
+            if (ignoreForA.contains(b)|| obstructsB.contains(a))
+                test = 1;
+
+            else if (obstructsA.contains(b))
+                test = -1;
+            else
+                test = PolygonUtility.liesBehind(a, b);
+            if (test == 1) { // a behind b
+            // System.out.println("trough "+i);
+                continue;
+            } else if (test == -1) { // a before b
+                Pair p = new Pair(a, b);
+                if (looP.contains(p)) {
+                    AbstractPolygon[] array = PolygonUtility.cutOut(b, a);
+                    System.out.println("loop obstruction resolved by adding "
+                            + array.length + " polygons (to " + polys.size()
+                            + " depth " + depth + ") loopsize " + looP.size());
+
+                    polys.remove(i);
+                    if (b instanceof Triangle)
+                        freeTriangles.push((Triangle) b);
+                    List<AbstractPolygon> ib = getIgnoreList(b);
+                    obstruct.remove(b);
+                    ignore.remove(b);
+                    for (int j = 0; j < array.length; j++) {
+
+                        insert(polys, array[j]);
+                        ignoreForA.add(array[j]);
+                        List<AbstractPolygon> l = new LinkedList<AbstractPolygon>();
+                        l.add(a);
+                        l.addAll(ib);
+                        for (int k = 0; k < array.length; k++) {
+                            if (k != j)
+                                l.add(array[k]);
+                        }
+                        ignore.put(array[j], l);
+                    }
+
+                    continue;
+                } else { // not yet in loop
+                // System.out.println("obstructed by "+i);
+                    polys.remove(i);
+                    looP.add(p);
+                    // System.out.println("loopsize "+looP.size());
+                    insert(polys, a);
+                    obstructsA.add(b);
+                    List<AbstractPolygon> ignoreForB = getIgnoreList(b);
+                    ignoreForB.add(a);
+                    polys.add(0, b);
+                    // rasterQueque_new(tris, b, 0,depth+1);
+                    return false;
+                }
+            } else { // intersect
+            // System.out.println("intersect_n "+i+" (depth "+depth+" remaining
+            // "+tris.size()+")");
+
+                // intersect a along the plane of b and get both parts
+                //
+                //resultBehindB can be rastered prior to b
+                Polygon resultBehindB = new Polygon(3);
+//              resultBeforeB ns the part of a in front of b
+                Polygon resultBeforeB = new Polygon(3);
+                
+                PolygonUtility.intersect(a, b, 1, resultBeforeB, resultBehindB);
+                for (List<AbstractPolygon> l : ignore.values()) {
+                    if(l.contains(a)) {
+                        l.remove(a);
+                        l.add(resultBeforeB);
+                        l.add(resultBehindB);
+                    }
+                }
+                
+                List<AbstractPolygon> ignoreForB = getIgnoreList(b);
+                ignoreForB.add(resultBeforeB);
+                //List<AbstractPolygon> obstructsB = getObstructList(b);
+                obstructsB.add(resultBehindB);
+
+                // ignore for the resultBehindB polygon
+                List<AbstractPolygon> l = new LinkedList<AbstractPolygon>();
+                l.add(b);
+                l.add(resultBeforeB);
+                l.addAll(ignoreForA);
+                ignore.put(resultBehindB, l);
+                
+//              obstruct for the resultBeforeB polygon
+                l = new LinkedList<AbstractPolygon>();
+                l.add(b);
+                obstruct.put(resultBeforeB, l);
+
+//              ignore for the resultBeforeB polygon
+                l = new LinkedList<AbstractPolygon>();
+                l.addAll(ignoreForA);
+                l.add(resultBehindB);
+                ignore.put(resultBeforeB, l);
+                
+                insert(polys, resultBeforeB);
+                insert(polys, resultBehindB);
+                if (a instanceof Triangle)
+                    freeTriangles.push((Triangle) a);
+                obstruct.remove(a);
+                ignore.remove(a);
+                // restart
+                looP.removeAllElements();
+                return false;
+            }
+        }
+        // trough every thing: we can raster
+        return true;
+    }
+
+    private String getColor(AbstractPolygon b) {
+        double[] v = b.getPoint(0);
+        return "[" + v[Triangle.R] + ", " + v[Triangle.G] + ", "
+                + v[Triangle.B] + "]";
+    }
+
+    private void insert(LinkedList<AbstractPolygon> tris2,
+            AbstractPolygon triangle) {
+        int i = Collections.binarySearch(tris2, triangle, comparator);
+        if (i < 0)
+            i = -i - 1;
+        tris2.add(i, triangle);
+    }
+
+    private class Pair {
+        private AbstractPolygon one;
+
+        private AbstractPolygon two;
+
+        Pair(AbstractPolygon t1, AbstractPolygon t2) {
+            one = t1;
+            two = t2;
+        }
+
+        public boolean equals(Object obj) {
+            if (obj instanceof Pair) {
+                Pair p = (Pair) obj;
+                return one == p.one && two == p.two;
+            } else
+                return false;
+        }
+
+    }
+
 }

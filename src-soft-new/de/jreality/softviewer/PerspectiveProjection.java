@@ -95,7 +95,7 @@ public class PerspectiveProjection extends CameraProjection {
               
         v[Polygon.SX] = v[Polygon.WX] *( focalLength );
         v[Polygon.SY] = v[Polygon.WY] *( focalLength );
-        v[Polygon.SZ] = ( (nearclip + farclip)*vz -(2* nearclip*farclip) )/(farclip - nearclip );
+        v[Polygon.SZ] = ( (nearclip + farclip)*vz - v[Polygon.WW]*(2* nearclip*farclip) )/(farclip - nearclip );
         v[Polygon.SW] = v[Polygon.WW] *vz;
         
 

@@ -72,7 +72,8 @@ public abstract class VertexShader {
                 (geom instanceof PointSet)
           &&((colors=((PointSet)geom).getVertexAttributes(Attribute.COLORS))!=null
                   );
-        interpolateAlpha=vertexColors&&colors.getStorageModel().getDimensions()[1]!=3;
+        //interpolateAlpha=vertexColors&&colors.getStorageModel().getDimensions()[1]!=3;
+        interpolateAlpha=vertexColors&&colors.item(0).size()!=3;
                 
         vertexColors |= (
                           (geom instanceof IndexedFaceSet) && ((IndexedFaceSet)geom).getFaceAttributes(Attribute.COLORS)!=null);
