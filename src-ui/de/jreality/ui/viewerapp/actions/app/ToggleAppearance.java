@@ -38,7 +38,7 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions;
+package de.jreality.ui.viewerapp.actions.app;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
@@ -51,6 +51,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.actions.AbstractAction;
 
 
 public class ToggleAppearance extends AbstractAction {
@@ -68,17 +69,17 @@ public class ToggleAppearance extends AbstractAction {
     if (attribute.equals(CommonAttributes.VERTEX_DRAW)) {
       defaultValue = CommonAttributes.VERTEX_DRAW_DEFAULT;
       putValue(SHORT_DESCRIPTION, "Toggle vertex drawing");
-      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.SHIFT_MASK));
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK));
     }
     else if (attribute.equals(CommonAttributes.EDGE_DRAW)) {
       defaultValue = CommonAttributes.EDGE_DRAW_DEFAULT;
       putValue(SHORT_DESCRIPTION, "Toggle edge drawing");
-      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.SHIFT_MASK));
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
     }
     else if (attribute.equals(CommonAttributes.FACE_DRAW)) {
       defaultValue = CommonAttributes.FACE_DRAW_DEFAULT;
       putValue(SHORT_DESCRIPTION, "Toggle face drawing");
-      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.SHIFT_MASK));
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK));
     }
   }
 
