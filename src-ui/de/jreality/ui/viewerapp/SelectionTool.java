@@ -73,37 +73,32 @@ public class SelectionTool extends AbstractTool {
   
   
   public void perform(ToolContext tc) {
-    //only perform when activationSlot isPressed()
+    //only perform when activationSlot is pressed
     if (tc.getAxisState(activationSlot).isReleased()) return;
 
     PickResult pr = tc.getCurrentPick();
+    
+//    if (pr != null) {
+//      double[] d = pr.getObjectCoordinates();
+//      for (int i = 0; i < d.length; i++) {
+//        System.out.print(d[i] + "  ");
+//      }
+//      System.out.println();
+//    }
+    
     SceneGraphPath newSelection = null;
     
     if (pr == null && sm != null)  //nothing picked
       newSelection = sm.getDefaultSelection();
     if (pr != null)
-      newSelection = pr.getPickPath().popNew();  //only SGComponents
-    
-    if (selection == null) {
-      if (newSelection != null) 
-        selectionChanged(newSelection); 
-    }
-    else {  //selection != null
-      if (!selection.isEqual( newSelection )) 
-        selectionChanged(newSelection);
-    }
-  }
-  
-  
-  private void selectionChanged(SceneGraphPath newSelection) {
+      newSelection = pr.getPickPath().popNew();  //need only SGComponents, but geometry is picked
     
     selection = newSelection;
-    
-    if (sm != null)
-      sm.setSelection(selection);
+    if (sm != null) sm.setSelection(selection);
 
     LoggingSystem.getLogger(SelectionTool.class).log(Level.INFO, 
         "SELECTED COMPONENT: " + (selection!=null ? selection.getLastComponent().getName() : "null") );
+    
   }
 
 }

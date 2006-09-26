@@ -51,8 +51,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import javax.swing.Action;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
@@ -112,6 +115,7 @@ public class ViewerApp {
   private SelectionManager selectionManager;
   
   private boolean showMenu = false;  //default
+  private JMenuBar menuBar;
   
   private JrScene jrScene;
 
@@ -165,6 +169,15 @@ public class ViewerApp {
       if (autoRender) renderTrigger.setAsync(false);
       else LoggingSystem.getLogger(this).config("Inconsistant settings: no autoRender but synchRender!!");
     }
+    
+    //load the scene depending on environment (desktop | portal)
+    //instantiates currViewer, viewers, viewerSwitch, sceneRoot, scene, uiFactory
+    setupViewer(jrScene);
+    
+    frame = new JFrame();
+    selectionManager = new SelectionManager(jrScene.getPath("emptyPickPath"));
+    MenuFactory menuFactory = new MenuFactory(this);  //uses frame, viewerSwitch, selectionManager and viewerapp itself
+    menuBar = menuFactory.getMenuBar();
   }
   
   
@@ -178,10 +191,9 @@ public class ViewerApp {
     
     //set general properties of UI
     try {
-      //XXX: changed back from System to CrossPlatform Look&Feel (SystemL&F looks ugly on windows & linux)
+      //use CrossPlatformLookAndFeel (SystemLookAndFeel looks ugly on windows & linux)
       UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
     } catch (Exception e) {}
-    //System.setProperty("sun.awt.noerasebackground", "true");  //XXX: unnecessary
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
     ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
     
@@ -193,8 +205,8 @@ public class ViewerApp {
       sceneRoot.getAppearance().setAttribute("backgroundColors", bg);
     }
     
-    //init frame
-    frame = new JFrame("jReality Viewer");
+    //frame properties
+    frame.setTitle("jReality Viewer");
     if (!Beans.isDesignTime()) 
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     
@@ -206,12 +218,11 @@ public class ViewerApp {
     //set content of frame
     frame.getContentPane().add(content);
     
-    //setup menu
-    MenuFactory.addMenuBar(this);  //now frame has a menu bar
+    //add menu bar
+    frame.setJMenuBar(menuBar);
     if (!showMenu) {  
     	//hide all menus, then keystrokes for actions are still working,
     	//which is not the case when hiding menuBar
-    	JMenuBar menuBar = frame.getJMenuBar();
     	for (int i = 0; i < menuBar.getComponentCount(); i++)
     	  menuBar.getMenu(i).setVisible(false);
     }
@@ -264,10 +275,6 @@ public class ViewerApp {
    */
   public void update() {
     
-    //load the default scene depending on environment (desktop | portal)
-    //and with chosen options (attachNavigator | attachBeanShell)
-    setupViewer(jrScene);
-    
     //set up beanShell and uiFactory.beanShell
     if (attachBeanShell) setupBeanShell();
     else beanShell = null;
@@ -278,8 +285,10 @@ public class ViewerApp {
     
     uiFactory.setAttachNavigator(attachNavigator);
     uiFactory.setAttachBeanShell(attachBeanShell);
-    
-    selectionManager = new SelectionManager(this);
+
+    //update selectionManager
+    if (attachNavigator) 
+      selectionManager.attachNavigator(navigator);
   }
   
 
@@ -564,6 +573,43 @@ public class ViewerApp {
   public boolean isShowMenu() {
 	  return showMenu;
   }
+  
+//-- MENU METHODS -------------
+  
+  public void addJMenu(JMenu menu) {
+    addJMenu(menu, menuBar.getComponentCount());  //add to end of menuBar
+  }
+  
+  public void addJMenu(JMenu menu, int index) {
+    if (index < 0 || index > menuBar.getComponentCount())
+      throw new IllegalArgumentException("invalid index");
+
+    menuBar.add(menu, index);
+  }
+  
+  public void addJMenuItem(JMenuItem item, String menuName) {
+    addJMenuItem(item, menuName, menuBar.getComponentCount());  //add to end of menu
+  }
+  
+  public void addJMenuItem(JMenuItem item, String menuName, int index) {
+    //get menu
+    JMenu menu = null;
+    for (int i = 0; i < menuBar.getComponentCount(); i++) {
+      if ( ((JMenu)menuBar.getComponent(i)).getText().equals(menuName) )
+        menu = (JMenu)menuBar.getComponent(i);
+    }
+    if (menu != null)
+      menu.insert(item, index);
+  }
+  
+  public void addAction(Action a, String menuName) {
+    addAction(a, menuName, menuBar.getComponentCount());  //add to end of menu
+  }
+  
+  public void addAction(Action a, String menuName, int index) {
+    addJMenuItem(new JMenuItem(a), menuName, index);
+  }
+  
   
 
   /**

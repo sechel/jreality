@@ -60,35 +60,39 @@ public class SelectionManager {
   private Vector<SelectionListener> listeners;
   
 
-  public SelectionManager(ViewerApp viewerApp) {
-
-    setDefaultSelection(viewerApp.getJrScene().getPath("emptyPickPath"));
-   
-    //add communication between the viewerApps navigator and the SelectionManager
-    if (viewerApp.isAttachNavigator()) {
-      final Navigator navigator = viewerApp.getNavigator();
-      final TreeSelectionModel tsm = navigator.getTreeSelectionModel();
-
-      //add listener to SelectionManager
-      final SelectionListener smListener = new SelectionListener() {
-        public void selectionChanged(SelectionEvent e) {
-          //convert selection into TreePath
-          TreePath path = getTreePath((SceneTreeModel) navigator.getSceneTree().getModel());
-          tsm.setSelectionPath(path);
-        }
-      };
-      addSelectionListener(smListener);
-     
-      //add listener to Navigator
-      tsm.addTreeSelectionListener(new Navigator.SelectionListener(){
-        public void selectionChanged(Navigator.SelectionEvent e) {
-          //do not listen to this selection change with smListener to avoid listener cycle          
-          removeSelectionListener(smListener);
-          setSelection(e.getSGPath());
-          addSelectionListener(smListener);
-        }
-      });
-    }
+  public SelectionManager(SceneGraphPath defaultSelection) {
+    setDefaultSelection(defaultSelection);
+    setSelection(defaultSelection);
+  }
+  
+  
+  /**
+   * Add communication between the viewerApps navigator and the SelectionManager.
+   * @param navigator the navigator
+   */
+  public void attachNavigator(final Navigator navigator) {
+    
+    final TreeSelectionModel tsm = navigator.getTreeSelectionModel();
+    
+    //add listener to SelectionManager
+    final SelectionListener smListener = new SelectionListener() {
+      public void selectionChanged(SelectionEvent e) {
+        //convert selection into TreePath
+        TreePath path = getTreePath((SceneTreeModel) navigator.getSceneTree().getModel());
+        tsm.setSelectionPath(path);
+      }
+    };
+    addSelectionListener(smListener);
+    
+    //add listener to Navigator
+    tsm.addTreeSelectionListener(new Navigator.SelectionListener(){
+      public void selectionChanged(Navigator.SelectionEvent e) {
+        //do not listen to this selection change with smListener to avoid listener cycle          
+        removeSelectionListener(smListener);
+        setSelection(e.getSGPath());
+        addSelectionListener(smListener);
+      }
+    });
     
     setSelection(defaultSelection);
   }

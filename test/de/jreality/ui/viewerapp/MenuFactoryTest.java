@@ -41,20 +41,48 @@
 package de.jreality.ui.viewerapp;
 
 import de.jreality.geometry.Primitives;
+import de.jreality.math.FactoredMatrix;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Transformation;
 
 
 public class MenuFactoryTest {
-
+  
   
   public static void main(String[] args) {
-   
-    ViewerApp viewerApp = new ViewerApp(Primitives.icosahedron());
+    
+    SceneGraphComponent cmp = new SceneGraphComponent();
+    cmp.setName("father");
+    cmp.setAppearance(new Appearance());
+    cmp.setTransformation(new Transformation());
+    SceneGraphComponent cmp1 = new SceneGraphComponent();
+    cmp1.setName("Icosahedron");
+    cmp1.setGeometry(Primitives.icosahedron());
+    SceneGraphComponent cmp2 = new SceneGraphComponent();
+    cmp2.setName("Cube");
+    cmp2.setGeometry(Primitives.coloredCube());
+    cmp2.setAppearance(new Appearance());
+    FactoredMatrix m = new FactoredMatrix();
+    m.setTranslation(3,0,0);
+    m.assignTo(cmp2);
+    cmp.addChild(cmp1);
+    cmp.addChild(cmp2);
+    
+//    cmp.addTool(new AnimatedRotateTool());
+    
+    ViewerApp viewerApp = new ViewerApp(cmp);
     viewerApp.setAttachNavigator(true);
     viewerApp.setAttachBeanShell(true);
     viewerApp.setShowMenu(true);
     viewerApp.update();
     viewerApp.display();
     
-  }
+    cmp.addTool(new SelectionTool(viewerApp));
 
+    
+//  ViewerAppOld.display(Primitives.icosahedron());
+
+  }
+  
 }

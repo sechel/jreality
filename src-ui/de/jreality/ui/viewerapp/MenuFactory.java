@@ -56,7 +56,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.Navigator.SelectionEvent;
-import de.jreality.ui.viewerapp.actions.ToggleAppearance;
+import de.jreality.ui.viewerapp.actions.app.ToggleAppearance;
 import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFieldOfView;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFocus;
