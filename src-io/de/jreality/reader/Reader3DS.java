@@ -118,14 +118,6 @@ public class Reader3DS extends AbstractReader {
     setCurrentSceneNode(null);
     setCurrentApperance(null);
     defaultAppearance = new Appearance();
-    defaultAppearance.setAttribute(CommonAttributes.EDGE_DRAW, false);
-    defaultAppearance.setAttribute(CommonAttributes.LIGHTING_ENABLED, true);
-    defaultAppearance.setAttribute(CommonAttributes.POLYGON_SHADER + "."
-        + CommonAttributes.DIFFUSE_COLOR, new java.awt.Color(255, 255, 255));
-    defaultAppearance.setAttribute(CommonAttributes.POLYGON_SHADER + "."
-        + CommonAttributes.AMBIENT_COLOR, new java.awt.Color(255, 255, 255));
-    defaultAppearance.setAttribute(CommonAttributes.POLYGON_SHADER + "."
-        + CommonAttributes.SPECULAR_COLOR, new java.awt.Color(255, 255, 255));
   }
 
   private SceneGraphComponent mRootGroupNode;
@@ -244,19 +236,6 @@ public class Reader3DS extends AbstractReader {
       case ID_MATERIAL: {
         Logger.getLogger("de.jreality").log(Level.FINER, "ID_MATERIAL");
         Appearance matNode = new Appearance();
-        matNode.setAttribute(CommonAttributes.EDGE_DRAW, false);
-        matNode.setAttribute(CommonAttributes.LIGHTING_ENABLED, true);
-        matNode
-            .setAttribute(CommonAttributes.POLYGON_SHADER + "."
-                + CommonAttributes.DIFFUSE_COLOR, new java.awt.Color(255, 255,
-                255));
-        matNode
-            .setAttribute(CommonAttributes.POLYGON_SHADER + "."
-                + CommonAttributes.AMBIENT_COLOR, new java.awt.Color(255, 255,
-                255));
-        matNode.setAttribute(CommonAttributes.POLYGON_SHADER + "."
-            + CommonAttributes.SPECULAR_COLOR,
-            new java.awt.Color(255, 255, 255));
         setCurrentApperance(matNode);
       }
         break;
@@ -371,19 +350,6 @@ public class Reader3DS extends AbstractReader {
         }
         setCurrentSceneNode(shapeNode);
         defaultAppearance = new Appearance();
-        defaultAppearance.setAttribute(CommonAttributes.EDGE_DRAW, false);
-        defaultAppearance.setAttribute(CommonAttributes.LIGHTING_ENABLED, true);
-        defaultAppearance
-            .setAttribute(CommonAttributes.POLYGON_SHADER + "."
-                + CommonAttributes.DIFFUSE_COLOR, new java.awt.Color(255, 255,
-                255));
-        defaultAppearance
-            .setAttribute(CommonAttributes.POLYGON_SHADER + "."
-                + CommonAttributes.AMBIENT_COLOR, new java.awt.Color(255, 255,
-                255));
-        defaultAppearance.setAttribute(CommonAttributes.POLYGON_SHADER + "."
-            + CommonAttributes.SPECULAR_COLOR,
-            new java.awt.Color(255, 255, 255));
         shapeNode.setAppearance(defaultAppearance);
       }
         break;
