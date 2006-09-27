@@ -83,6 +83,7 @@ class MouseEventTool extends AbstractTool {
   private int height;
   
   private boolean dispatchLater = true;
+  long lastActivationTime;
   
   public MouseEventTool(Component c, boolean dispatchLater) {
     super(drag0, drag1, drag2);
@@ -96,6 +97,8 @@ class MouseEventTool extends AbstractTool {
   }
   
   int currentButton=0;
+  boolean doubleClick;
+  int doubleClickDelay=300;
   
   public void activate(ToolContext e) {
     try {
@@ -103,9 +106,18 @@ class MouseEventTool extends AbstractTool {
     } catch (Exception ex) {
       // TODO:
     }
+    int lastButton=currentButton;
     if (e.getSource() == drag0) currentButton=0;
     if (e.getSource() == drag1) currentButton=1;
     if (e.getSource() == drag2) currentButton=2;
+  	long t = System.currentTimeMillis();
+  	if (lastButton == currentButton && t-lastActivationTime<=doubleClickDelay) {
+  		doubleClick=true;
+  		lastActivationTime=0;
+    } else {
+    	lastActivationTime = t;
+    	doubleClick=false;
+    }
     Point newPoint = generatePoint(e.getCurrentPick());
     oldPoint = newPoint;
     dispatchMouseEvent(newPoint, MouseEvent.MOUSE_PRESSED, currentButton);
@@ -123,6 +135,7 @@ class MouseEventTool extends AbstractTool {
   }
 
   public void deactivate(ToolContext e) {
+  	// TODO: maybe adapt click count to "real" AWT behavior - also in perform()
     Point newPoint = generatePoint(e.getCurrentPick());
     dispatchMouseEvent(newPoint, MouseEvent.MOUSE_RELEASED, currentButton);
     if(oldPoint.equals(newPoint)) {
@@ -157,7 +170,7 @@ class MouseEventTool extends AbstractTool {
   void dispatchMouseEvent(Point newPoint, int type, int button) {
     final MouseEvent newEvent = new MouseEvent(comp,
         (int) type, System.currentTimeMillis(), /*InputEvent.BUTTON1_DOWN_MASK*/ 1 << (10+button), newPoint.x,
-        newPoint.y, 1, false, MouseEvent.BUTTON1+button);
+        newPoint.y, doubleClick ? 2 : 1, false, MouseEvent.BUTTON1+button);
     dispatchEvent(newEvent);
   }
 
