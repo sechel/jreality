@@ -374,7 +374,7 @@ public class ViewerVR {
 	public void setSkyBox(ImageData[] imgs) {
 		TextureUtility.createSkyBox(rootAppearance, imgs);
 		CubeMap cm = TextureUtility.createReflectionMap(contentAppearance, "polygonShader", imgs);
-		cm.setBlendColor(new java.awt.Color(1.0f, 1.0f, 1.0f, 0f));
+		cm.setBlendColor(new java.awt.Color(1.0f, 1.0f, 1.0f, 0.6f));
 	}
 	
 	public void setContent(SceneGraphComponent content) {
