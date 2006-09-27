@@ -32,6 +32,7 @@ public class He2Demo {
 		
 		app.setAttribute(CommonAttributes.EDGE_DRAW, false);
 		app.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+		//app.setAttribute(CommonAttributes.AMBIENT_COEFFICIENT, 1.);
 		app.setAttribute("diffuseColor", java.awt.Color.white);
 		cmp.setAppearance(app);
 		ImageData img = ImageData.load(Input.getInput("textures/metal_basic88.png"));
@@ -58,11 +59,26 @@ public class He2Demo {
 		.assignTo(cmp);
 		
 		Appearance heApp = new Appearance();
+		String texture;
+//		texture = "biotechfloor10b";
+		texture = "metal_basic88";
+//		texture = "rubberFloor3";
+//		texture = "sflgratetrans1";
+//		texture = "wall_brick_5Glossb1x";
+//		texture = "zero03";
+//		texture = "zero05";
+//		texture = "outfactory3";
+//		texture = "chainlinkfence";
+//		texture = "supportopacity";
+//		texture = "kf_techfloor10c";
+//		texture = "recycfloor1_fin";
+		
 		//TextureUtility.createTexture(heApp, "polygonShader", "textures/sflgratetrans1_d.png");
-		TextureUtility.createTexture(heApp, "polygonShader", "textures/metal_basic88.png");
+		TextureUtility.createTexture(heApp, "polygonShader", "textures/"+texture+".png");//metal_basic88.png");
 		Texture2D normalTex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "normalMap", heApp, true);
 		//ImageData normalMap = ImageData.load(Input.getInput("textures/sflgratetrans1_local.png"));
-		ImageData normalMap = ImageData.load(Input.getInput("textures/metal_basic88_normal.jpg"));
+		//ImageData normalMap = ImageData.load(Input.getInput("textures/rubberFloor3_ddn00.png"));//metal_basic88_normal.jpg"));
+		ImageData normalMap = ImageData.load(Input.getInput("textures/"+texture+"_bmp.png"));
 		normalTex.setImage(normalMap);
 		GlslProgram prog = new GlslProgram(heApp, "polygonShader", Input.getInput("de/jreality/jogl/shader/resources/bumpmap.vert"), Input.getInput("de/jreality/jogl/shader/resources/bumpmap.frag"));
 		heApp.setAttribute("polygonShader", "glsl");

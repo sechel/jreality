@@ -120,6 +120,7 @@ public class ToggleViewerFullScreen extends AbstractAction {
       fsf.getContentPane().add(viewerApp.getViewerSwitch().getViewingComponent());
       fsf.getGraphicsConfiguration().getDevice().setFullScreenWindow(fsf);
       fsf.validate();
+      frame.setVisible(false);
       isFullscreen = true;
     }
   }
