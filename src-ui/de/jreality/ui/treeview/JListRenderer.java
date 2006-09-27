@@ -57,8 +57,7 @@ import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Transformation;
 
 /**
- * Render a node by showing the simple name and an (optional) icon.
- * @author holger
+ * This class is OUT OF DATE - TODO: merge with JTreeRenderer or delete
  */
 public class JListRenderer extends DefaultListCellRenderer
   //implements TreeCellRenderer, TableCellRenderer, ListCellRenderer

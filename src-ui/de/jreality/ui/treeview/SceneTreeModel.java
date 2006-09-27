@@ -55,6 +55,8 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.data.AttributeEntity;
 import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.scene.event.SceneGraphComponentEvent;
+import de.jreality.scene.event.SceneGraphComponentListener;
 import de.jreality.scene.event.ToolEvent;
 import de.jreality.scene.event.ToolListener;
 import de.jreality.scene.proxy.tree.ProxyTreeFactory;
@@ -208,7 +210,7 @@ public class SceneTreeModel extends AbstractTreeModel {
     }
   }
   
-  private class SceneTreeNodeWithToolListener extends SceneTreeNode implements ToolListener {
+  private class SceneTreeNodeWithToolListener extends SceneTreeNode implements ToolListener, SceneGraphComponentListener {
     
     SceneGraphComponent cmp;
     List<Tool> tools=new LinkedList<Tool>();
@@ -218,6 +220,7 @@ public class SceneTreeModel extends AbstractTreeModel {
       if (isComponent) {
         cmp = (SceneGraphComponent) node;
         cmp.addToolListener(this);
+        cmp.addSceneGraphComponentListener(this);
         tools.addAll(cmp.getTools());
       }
     }
@@ -301,8 +304,39 @@ public class SceneTreeModel extends AbstractTreeModel {
       super.dispose(disposedEntities);
       if (isComponent) {
         cmp.removeToolListener(this);
+        cmp.removeSceneGraphComponentListener(this);
       }
     }
+
+		public void childAdded(SceneGraphComponentEvent ev) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public void childRemoved(SceneGraphComponentEvent ev) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public void childReplaced(SceneGraphComponentEvent ev) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public void visibilityChanged(SceneGraphComponentEvent ev) {
+      Runnable runner = new Runnable(){
+        public void run() {
+          fireNodesChanged(SceneTreeNodeWithToolListener.this.getParent(), new Object[]{SceneTreeNodeWithToolListener.this});
+        }
+      };
+      if (EventQueue.isDispatchThread()) runner.run();
+      else try {
+        EventQueue.invokeAndWait(runner);
+//      EventQueue.invokeLater(runner);
+      } catch (Exception e) {
+        throw new Error(";-(");
+      }
+		}
     
   }
   
