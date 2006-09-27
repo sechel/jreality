@@ -53,8 +53,10 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.swing.ScenePanel;
+import de.jreality.tools.DraggingTool;
 import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.PickShowTool;
+import de.jreality.tools.RotateTool;
 import de.jreality.tools.ShipNavigationTool;
 import de.jreality.ui.beans.ColorEditor;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
@@ -70,6 +72,8 @@ public class ViewerVR {
 	private static final double MAX_SIZE = 0.1;
 
 	private static final int RANGE = 200;
+
+	private static final Dimension PANEL_SIZE = new Dimension(220,250);
 	
 	private SceneGraphComponent sceneRoot=new SceneGraphComponent(),
 	sceneNode=new SceneGraphComponent(),
@@ -77,6 +81,8 @@ public class ViewerVR {
 	camNode=new SceneGraphComponent(),
 	lightNode=new SceneGraphComponent(),
 	terrainNode;
+	
+	Tool rotateTool=new RotateTool(), dragTool=new DraggingTool();
 	
 	private SceneGraphComponent currentContent;
 	
@@ -111,6 +117,10 @@ public class ViewerVR {
 	private double objectScale;
 
 	private JButton loadButton;
+
+	private JCheckBox rotate;
+
+	private JCheckBox drag;
 	
 	public ViewerVR() throws IOException {
 		
@@ -438,6 +448,7 @@ public class ViewerVR {
 		Box faceButtonBox = new Box(BoxLayout.X_AXIS);
 		faceButtonBox.setBorder(new EmptyBorder(5,0,5,5));
 		final JCheckBox faces = new JCheckBox("faces");
+		faces.setSelected(true);
 		faces.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				contentAppearance.setAttribute("showFaces", faces.isSelected());
@@ -469,8 +480,49 @@ public class ViewerVR {
 		appearancePanel.add(appBox);
 		tabs.add("app", appearancePanel);
 		
+		
+		
+		
+		
+		
+		
+//	 tool tab
+		JPanel toolPanel = new JPanel(new BorderLayout());
+		Box toolBox = new Box(BoxLayout.Y_AXIS);
+		toolBox.setBorder(
+				new CompoundBorder(new EmptyBorder(5,5,5,5), LineBorder.createGrayLineBorder())
+		);
+		
+		Box toolButtonBox = new Box(BoxLayout.X_AXIS);
+		toolButtonBox.setBorder(new EmptyBorder(5,0,5,5));
+		rotate = new JCheckBox("rotate");
+		rotate.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setRotate(rotate.isSelected());
+			}
+		});
+		toolButtonBox.add(rotate);
+		drag = new JCheckBox("drag");
+		drag.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setDrag(drag.isSelected());
+			}
+		});
+		toolButtonBox.add(drag);
+		
+		
+		toolBox.add(toolButtonBox);
+		
+		toolPanel.add(toolBox);
+		tabs.add("tools", toolPanel);
+
+		
+		
+		
+		
+		
 		sp.getFrame().getContentPane().add(tabs);
-		sp.getFrame().setSize(200,250);
+		sp.getFrame().setSize(PANEL_SIZE);
 		
 		getTerrainNode().addTool(sp.getPanelTool());
 		
@@ -489,13 +541,32 @@ public class ViewerVR {
 				sp.getFrame().setVisible(false);
 				sp.setPanelWidth(1);
 				sp.getFrame().setContentPane(oldCmp);
-				sp.getFrame().setSize(200,250);
+				sp.getFrame().setSize(PANEL_SIZE);
 				sp.getFrame().setVisible(true);
 			}
 		});
 	}
 	
 	
+	protected void setDrag(boolean b) {
+		toggleTool(dragTool, b);
+		drag.setSelected(b);
+	}
+
+	protected void setRotate(boolean b) {
+		toggleTool(rotateTool, b);
+		rotate.setSelected(b);
+	}
+	
+	private void toggleTool(Tool rotateTool, boolean b) {
+		if (currentContent == null) return;
+		if (!b && currentContent != null && currentContent.getTools().contains(rotateTool)) {
+			currentContent.removeTool(rotateTool);
+		} else {
+			if (b && !currentContent.getTools().contains(rotateTool)) currentContent.addTool(rotateTool);
+		}
+	}
+
 	protected void setReflection(double d) {
 		cm.setBlendColor(new Color(1f, 1f, 1f, (float)d)); 
 	}
@@ -512,7 +583,9 @@ public class ViewerVR {
 
 	public void load() {
 		sp.getFrame().setVisible(false);
-		switchToFileChooser();
+		sp.setPanelWidth(2);
+		sp.getFrame().setContentPane(chooser);
+		sp.getFrame().pack();
 		sp.getFrame().setVisible(true);
 	}
 	
@@ -528,6 +601,8 @@ public class ViewerVR {
 	
 	public void setContent(SceneGraphComponent content) {
 		if (currentContent != null && sceneNode.getChildNodes().contains(currentContent)) {
+			setDrag(false);
+			setRotate(false);
 			sceneNode.removeChild(currentContent);
 		}
 		currentContent=content;
@@ -637,8 +712,8 @@ public class ViewerVR {
 		tds.switchToFileChooser();
 		ViewerApp vApp = tds.display();
 				
-		//vApp.setAttachNavigator(true);
-		//vApp.setAttachBeanShell(true);
+		vApp.setAttachNavigator(true);
+		vApp.setAttachBeanShell(true);
 		//vApp.setShowMenu(true);
 		vApp.update();
 		JFrame f = vApp.display();
