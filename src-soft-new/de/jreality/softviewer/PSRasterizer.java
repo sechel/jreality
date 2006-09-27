@@ -142,6 +142,7 @@ public class PSRasterizer extends TriangleRasterizer {
         }
 //        writer.print("]\n>> shfill\n");
         writer.println(" f");
+        writer.flush();
 
     }
 

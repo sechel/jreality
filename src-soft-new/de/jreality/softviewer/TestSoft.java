@@ -41,6 +41,8 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.shader.*;
 import de.jreality.soft.PSViewer;
+import de.jreality.tools.DraggingTool;
+import de.jreality.tools.RotateTool;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class TestSoft {
@@ -83,7 +85,7 @@ public class TestSoft {
 
         IndexedFaceSet faceSet = ifsf.getIndexedFaceSet();
         
-        faceSet.setEdgeCountAndAttributes(Attribute.INDICES,new IntArrayArray.Array(new int[][] {{0,2}}));
+        //faceSet.setEdgeCountAndAttributes(Attribute.INDICES,new IntArrayArray.Array(new int[][] {{1,0},{0,2}}));
         //ViewerApp.display(faceSet);
         
         Appearance app = new Appearance();
@@ -117,6 +119,9 @@ public class TestSoft {
         cmp1.setGeometry(faceSet);
         cmp2.setGeometry(faceSet);
         cmp3.setGeometry(faceSet);
+        
+        cmp1.addTool(new DraggingTool());
+        cmp1.addTool(new RotateTool());
         
         MatrixBuilder.euclidean().rotate(2. * Math.PI/3.,0,0,1).translate(0*.2,0,0).assignTo(cmp1);
         MatrixBuilder.euclidean().rotate(4. * Math.PI/3.,0,0,1).translate(0*.2,0,0).assignTo(cmp2);

@@ -142,7 +142,7 @@ public class IntersectingPipeline extends TrianglePipeline {
         // System.out.println("rqn "+n+" "+tris.size());
         boolean passed = test_new(polys, a, n, depth);
         if (passed) {
-
+            //PolygonUtility.dehomogenize(a);
             // passed everything: raster...
             tris = a.triangulate(tris, freeTriangles);
             for (int i = 0, l = a.getLength() - 2; i < l; i++) {
@@ -152,8 +152,8 @@ public class IntersectingPipeline extends TrianglePipeline {
             }
             ignore.remove(a);
             obstruct.remove(a);
-            looP.removeAllElements();
             System.out.println("rastered " + count);
+            looP.removeAllElements();
         }
     }
 
@@ -164,11 +164,11 @@ public class IntersectingPipeline extends TrianglePipeline {
 
         List<AbstractPolygon> obstructsA = getObstructList(a);
         
-        List<AbstractPolygon> obstructsB = getObstructList(a);
 
         double minA = PolygonUtility.minZ(a);
         for (int i = n; i < polys.size(); i++) {
             AbstractPolygon b = polys.get(i);
+        List<AbstractPolygon> obstructsB = getObstructList(b);
             if (PolygonUtility.maxZ(b) < minA)
                 return true;
             // System.out.println(" a "+getColor(a)+" on b
@@ -179,30 +179,35 @@ public class IntersectingPipeline extends TrianglePipeline {
             // }
             // System.out.println( ")");
             int test;
-            if (ignoreForA.contains(b)|| obstructsB.contains(a))
-                test = 1;
-
-            else if (obstructsA.contains(b))
+            if (ignoreForA.contains(b))
+                //test = 1;
+                continue;
+            else 
+                if (obstructsA.contains(b))
                 test = -1;
             else
                 test = PolygonUtility.liesBehind(a, b);
+
             if (test == 1) { // a behind b
             // System.out.println("trough "+i);
+                ignoreForA.add(b);
                 continue;
             } else if (test == -1) { // a before b
                 Pair p = new Pair(a, b);
                 if (looP.contains(p)) {
+                   
+                    
                     AbstractPolygon[] array = PolygonUtility.cutOut(b, a);
-                    System.out.println("loop obstruction resolved by adding "
+                    System.out.println("obstruction loop resolved by adding "
                             + array.length + " polygons (to " + polys.size()
                             + " depth " + depth + ") loopsize " + looP.size());
 
                     polys.remove(i);
-                    if (b instanceof Triangle)
-                        freeTriangles.push((Triangle) b);
                     List<AbstractPolygon> ib = getIgnoreList(b);
                     obstruct.remove(b);
                     ignore.remove(b);
+                    if (b instanceof Triangle)
+                        freeTriangles.push((Triangle) b);
                     for (int j = 0; j < array.length; j++) {
 
                         insert(polys, array[j]);
@@ -216,10 +221,12 @@ public class IntersectingPipeline extends TrianglePipeline {
                         }
                         ignore.put(array[j], l);
                     }
-
+                    
                     continue;
+                    
                 } else { // not yet in loop
                 // System.out.println("obstructed by "+i);
+                   
                     polys.remove(i);
                     looP.add(p);
                     // System.out.println("loopsize "+looP.size());
@@ -231,7 +238,9 @@ public class IntersectingPipeline extends TrianglePipeline {
                     // rasterQueque_new(tris, b, 0,depth+1);
                     return false;
                 }
-            } else { // intersect
+            } else { // test == 0  -> intersect
+                if(obstructsB.contains(a))
+                    System.err.println("try to do unncecessary cut");
             // System.out.println("intersect_n "+i+" (depth "+depth+" remaining
             // "+tris.size()+")");
 
@@ -298,8 +307,9 @@ public class IntersectingPipeline extends TrianglePipeline {
     private void insert(LinkedList<AbstractPolygon> tris2,
             AbstractPolygon triangle) {
         int i = Collections.binarySearch(tris2, triangle, comparator);
-        if (i < 0)
+        if (i < 0) {
             i = -i - 1;
+        }
         tris2.add(i, triangle);
     }
 

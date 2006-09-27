@@ -73,13 +73,14 @@ public class PolygonUtility {
     }
 
 
-    public static void dehomogenize(AbstractPolygon p) {
+    public static final void dehomogenize(final AbstractPolygon p) {
         for (int i = 0; i < p.getLength(); i++) {
-            double[] vd = p.getPoint(i);
-            double w = 1 / vd[AbstractPolygon.SW];
+            final double[] vd = p.getPoint(i);
+            final double w = 1 / vd[AbstractPolygon.SW];
             vd[AbstractPolygon.SX] *= w;
             vd[AbstractPolygon.SY] *= w;
             vd[AbstractPolygon.SZ] *= w;
+            //vd[AbstractPolygon.SZ] = -1/( vd[AbstractPolygon.SZ]*w);
             vd[AbstractPolygon.SW] = 1;
         }
 
@@ -175,7 +176,8 @@ public class PolygonUtility {
             VecMat.normalize(lnormalA);
             double ldist = VecMat.dot(lnormalA,0, lx,Triangle.SX);
             int lsign = (int) Math.signum( VecMat.dot(lnormalA,0, lz,Triangle.SX)-ldist);
-                   
+//          TODO hack. find out why we can get double points in polygons...
+            if (lsign == 0) continue; 
             clipPoly = new Polygon(3);
 
             int lresult = clipToHalfspace(p,Polygon.SX,lnormalA,-lsign,ldist,clipPoly);
@@ -249,14 +251,14 @@ public class PolygonUtility {
                 clipToHalfspace(p,Polygon.SX,lnormalA,lsign,ldist,poly);
                 v.add(poly);
                 p = clipPoly;
-            }
-            if(lresult == CLIPPED_OUT) {
-                //if(p.getLength()>2)
-                v.add(p);
-                p = clipPoly;
-                clipPoly.setLength(0);
-                break;
-            }
+            } else
+                if(lresult == CLIPPED_OUT) {
+                    //if(p.getLength()>2)
+                    v.add(p);
+                    p = clipPoly;
+                    clipPoly.setLength(0);
+                    break;
+                }
                 
         }
         if(p.getLength() != 0) {
@@ -534,7 +536,9 @@ public class PolygonUtility {
                     vd[j] = u[j] + t * (v[j] - u[j]);
                 }
             }
-            if (tv <= 0.) { // vertex v is in ...
+            // TODO original was as follows. check if it is safe this way...
+            //if (tv < 0.) { // vertex v is in ...
+            if (tv < 0.) { // vertex v is in ...
                 dst.setPointFrom(pos++, v);
             }
         }
