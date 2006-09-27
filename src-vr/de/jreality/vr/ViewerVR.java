@@ -473,19 +473,6 @@ public class ViewerVR {
 		
 		ViewerVR tds = new ViewerVR();
 		
-		final SceneGraphComponent he2 = Readers.read(Input.getInput("obj/He2SmallTower.obj"));
-		final SceneGraphComponent he2bd = Readers.read(Input.getInput("obj/He2SmallTowerBoundary.obj"));
-		Appearance app = new Appearance();
-		app.setAttribute("showPoints", false);
-		app.setAttribute("lineShader.pickable", false);
-		he2.addChild(he2bd);
-		he2.setAppearance(app);
-		
-		MatrixBuilder.euclidean().rotateX(Math.PI/2).assignTo(he2);
-		
-		tds.setContent(he2);
-		tds.setDiam(40);
-		
 		ViewerApp vApp = tds.display();
 		vApp.setAttachNavigator(true);
 		vApp.setAttachBeanShell(true);
