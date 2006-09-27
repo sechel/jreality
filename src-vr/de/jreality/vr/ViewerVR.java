@@ -257,7 +257,6 @@ public class ViewerVR {
 		JButton yRotateLeft = new JButton(rotateLeft);
 		yRotateLeft.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("yRotateLeft");
 				alignContent(diam, offset, MatrixBuilder.euclidean().rotateY(-PI2).getMatrix());
 			}
 		});
@@ -270,7 +269,6 @@ public class ViewerVR {
 		JButton yRotateRight = new JButton(rotateRight);
 		yRotateRight.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("yRotateRight");
 				alignContent(diam, offset, MatrixBuilder.euclidean().rotateY(PI2).getMatrix());
 			}
 		});
@@ -341,7 +339,6 @@ public class ViewerVR {
 		chooser.addActionListener(new ActionListener() {
 			Container oldCmp = sp.getFrame().getContentPane();
 			public void actionPerformed(ActionEvent ev) {
-				System.out.println(ev);
 				File file = chooser.getSelectedFile();
 				try {
 					if (ev.getActionCommand() == JFileChooser.APPROVE_SELECTION && file != null) setContent(Readers.read(Input.getInput(file)));
