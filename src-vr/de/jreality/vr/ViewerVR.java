@@ -378,7 +378,7 @@ public class ViewerVR {
 	}
 	
 	public void setContent(SceneGraphComponent content) {
-		if (currentContent != null) {
+		if (currentContent != null && sceneNode.getChildNodes().contains(currentContent)) {
 			sceneNode.removeChild(currentContent);
 		}
 		currentContent=content;
