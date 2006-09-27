@@ -16,14 +16,19 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -51,6 +56,7 @@ import de.jreality.swing.ScenePanel;
 import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.PickShowTool;
 import de.jreality.tools.ShipNavigationTool;
+import de.jreality.ui.beans.ColorEditor;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
@@ -60,6 +66,10 @@ import de.jreality.util.Rectangle3D;
 public class ViewerVR {
 	
 	protected static final double PI2 = Math.PI/2;
+
+	private static final double MAX_SIZE = 0.1;
+
+	private static final int RANGE = 200;
 	
 	private SceneGraphComponent sceneRoot=new SceneGraphComponent(),
 	sceneNode=new SceneGraphComponent(),
@@ -89,6 +99,18 @@ public class ViewerVR {
 	private JSlider groundSlider;
 
 	private ScenePanel sp;
+
+	private JSlider tubeRadiusSlider;
+
+	private JSlider pointRadiusSlider;
+
+	private JSlider reflectionSlider;
+
+	private CubeMap cm;
+
+	private double objectScale;
+
+	private JButton loadButton;
 	
 	public ViewerVR() throws IOException {
 		
@@ -159,6 +181,8 @@ public class ViewerVR {
 		
 		contentAppearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.white);
 		contentAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.red);
+		contentAppearance.setAttribute("showLines", false);
+		contentAppearance.setAttribute("showPoints", false);
 		sceneNode.setAppearance(contentAppearance);
 		
 		sceneRoot.addTool(new PickShowTool(null, 0.005));
@@ -191,6 +215,7 @@ public class ViewerVR {
 		l.setToolScene(this);
 		sp = new ScenePanel();
 		sp.setPanelWidth(1);
+		sp.setZOffset(-2.6);
 		JTabbedPane tabs = new JTabbedPane();
 		
 		JPanel placementPanel = new JPanel(new BorderLayout());
@@ -300,7 +325,7 @@ public class ViewerVR {
 		
 		JPanel p = new JPanel(new BorderLayout());
 		JPanel dummy = new JPanel(new BorderLayout());
-		JButton loadButton = new JButton("load ...");
+		loadButton = new JButton("load ...");
 		loadButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				load();
@@ -325,12 +350,127 @@ public class ViewerVR {
 		placementBox.add(groundBox);
 		placementBox.add(p);
 		placementPanel.add(placementBox);
-		tabs.add("placement", placementPanel);
+		tabs.add("object", placementPanel);
 		
-		tabs.add("landscape",l.getSelectionComponent());
+		tabs.add("env",l.getSelectionComponent());
+		
+//		 appearance tab
+		JPanel appearancePanel = new JPanel(new BorderLayout());
+		Box appBox = new Box(BoxLayout.Y_AXIS);
+		
+		//lines
+		Box lineBox = new Box(BoxLayout.Y_AXIS);
+		lineBox.setBorder(
+				new CompoundBorder(new EmptyBorder(5,5,5,5), LineBorder.createGrayLineBorder())
+		);
+		Box lineButtonBox = new Box(BoxLayout.X_AXIS);
+		lineButtonBox.setBorder(new EmptyBorder(5,0,5,5));
+		final JCheckBox lines = new JCheckBox("lines");
+		lines.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				contentAppearance.setAttribute("showLines", lines.isSelected());
+			}
+		});
+		lineButtonBox.add(lines);
+		ColorEditor lineColorEditor = new ColorEditor();
+		JComponent lineColorButton = (JComponent) lineColorEditor.getCustomEditor();
+		lineColorButton.setMaximumSize(new Dimension(200,20));
+		lineColorEditor.setValue(Color.red);
+		lineButtonBox.add(lineColorButton);
+		lineBox.add(lineButtonBox);
+		
+		Box tubeRadiusBox = new Box(BoxLayout.X_AXIS);
+		tubeRadiusBox.setBorder(new EmptyBorder(5,5,5,0));
+		JLabel tubeRadiusLabel = new JLabel("radius");
+		tubeRadiusSlider = new JSlider(SwingConstants.HORIZONTAL,0,100,40);
+		tubeRadiusSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				setTubeRadius(0.01*tubeRadiusSlider.getValue());
+			}
+		});
+		tubeRadiusBox.add(tubeRadiusLabel);
+		tubeRadiusBox.add(tubeRadiusSlider);
+		lineBox.add(tubeRadiusBox);
+		
+		appBox.add(lineBox);
+		
+		//points
+		Box pointBox = new Box(BoxLayout.Y_AXIS);
+		pointBox.setBorder(
+				new CompoundBorder(new EmptyBorder(5,5,5,5), LineBorder.createGrayLineBorder())
+		);
+		Box pointButtonBox = new Box(BoxLayout.X_AXIS);
+		pointButtonBox.setBorder(new EmptyBorder(5,0,5,5));
+		final JCheckBox points = new JCheckBox("points");
+		points.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				contentAppearance.setAttribute("showPoints", points.isSelected());
+			}
+		});
+		pointButtonBox.add(points);
+		ColorEditor pointColorEditor = new ColorEditor();
+		JComponent pointColorButton = (JComponent) pointColorEditor.getCustomEditor();
+		pointColorButton.setMaximumSize(new Dimension(200,20));
+		pointColorEditor.setValue(Color.red);
+		pointButtonBox.add(pointColorButton);
+		pointBox.add(pointButtonBox);
+		
+		Box pointRadiusBox = new Box(BoxLayout.X_AXIS);
+		pointRadiusBox.setBorder(new EmptyBorder(5,5,5,0));
+		JLabel pointRadiusLabel = new JLabel("radius");
+		pointRadiusSlider = new JSlider(SwingConstants.HORIZONTAL,0,100,50);
+		pointRadiusSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				setPointRadius(0.01*pointRadiusSlider.getValue());
+			}
+		});
+		pointRadiusBox.add(pointRadiusLabel);
+		pointRadiusBox.add(pointRadiusSlider);
+		pointBox.add(pointRadiusBox);
+		
+		appBox.add(pointBox);
+		
+		// faces
+		Box faceBox = new Box(BoxLayout.Y_AXIS);
+		faceBox.setBorder(
+				new CompoundBorder(new EmptyBorder(5,5,5,5), LineBorder.createGrayLineBorder())
+		);
+		Box faceButtonBox = new Box(BoxLayout.X_AXIS);
+		faceButtonBox.setBorder(new EmptyBorder(5,0,5,5));
+		final JCheckBox faces = new JCheckBox("faces");
+		faces.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				contentAppearance.setAttribute("showFaces", faces.isSelected());
+			}
+		});
+		faceButtonBox.add(faces);
+		ColorEditor faceColorEditor = new ColorEditor();
+		JComponent faceColorButton = (JComponent) faceColorEditor.getCustomEditor();
+		faceColorButton.setMaximumSize(new Dimension(200,20));
+		faceColorEditor.setValue(Color.red);
+		faceButtonBox.add(faceColorButton);
+		faceBox.add(faceButtonBox);
+		
+		Box reflectionBox = new Box(BoxLayout.X_AXIS);
+		reflectionBox.setBorder(new EmptyBorder(5,5,5,0));
+		JLabel reflectionLabel = new JLabel("reflection");
+		reflectionSlider = new JSlider(SwingConstants.HORIZONTAL,0,100, 60);
+		reflectionSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				setReflection(0.01*reflectionSlider.getValue());
+			}
+		});
+		reflectionBox.add(reflectionLabel);
+		reflectionBox.add(reflectionSlider);
+		faceBox.add(reflectionBox);
+		
+		appBox.add(faceBox);
+		
+		appearancePanel.add(appBox);
+		tabs.add("app", appearancePanel);
 		
 		sp.getFrame().getContentPane().add(tabs);
-		sp.getFrame().setSize(200,190);
+		sp.getFrame().setSize(200,250);
 		
 		getTerrainNode().addTool(sp.getPanelTool());
 		
@@ -349,17 +489,30 @@ public class ViewerVR {
 				sp.getFrame().setVisible(false);
 				sp.setPanelWidth(1);
 				sp.getFrame().setContentPane(oldCmp);
-				sp.getFrame().setSize(200,190);
+				sp.getFrame().setSize(200,250);
 				sp.getFrame().setVisible(true);
 			}
 		});
 	}
 	
+	
+	protected void setReflection(double d) {
+		cm.setBlendColor(new Color(1f, 1f, 1f, (float)d)); 
+	}
+
+	protected void setPointRadius(double d) {
+		pointRadiusSlider.setValue((int) (d*100));
+		contentAppearance.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, Math.exp(Math.log(RANGE)*d)/RANGE*objectScale*MAX_SIZE);
+	}
+
+	protected void setTubeRadius(double d) {
+		tubeRadiusSlider.setValue((int) (d*100));
+		contentAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, Math.exp(Math.log(RANGE)*d)/RANGE*objectScale*MAX_SIZE);
+	}
+
 	public void load() {
 		sp.getFrame().setVisible(false);
-		sp.setPanelWidth(2);
-		sp.getFrame().setContentPane(chooser);
-		sp.getFrame().pack();
+		switchToFileChooser();
 		sp.getFrame().setVisible(true);
 	}
 	
@@ -370,8 +523,7 @@ public class ViewerVR {
 	
 	public void setSkyBox(ImageData[] imgs) {
 		TextureUtility.createSkyBox(rootAppearance, imgs);
-		CubeMap cm = TextureUtility.createReflectionMap(contentAppearance, "polygonShader", imgs);
-		cm.setBlendColor(new java.awt.Color(1.0f, 1.0f, 1.0f, 0.6f));
+		cm = TextureUtility.createReflectionMap(contentAppearance, "polygonShader", imgs);
 	}
 	
 	public void setContent(SceneGraphComponent content) {
@@ -379,6 +531,12 @@ public class ViewerVR {
 			sceneNode.removeChild(currentContent);
 		}
 		currentContent=content;
+		Rectangle3D bounds = GeometryUtility.calculateChildrenBoundingBox(currentContent);
+		// scale
+		double[] extent = bounds.getExtent();
+		objectScale=Math.max(Math.max(extent[0], extent[2]), extent[1]);
+		setTubeRadius(0.4);
+		setPointRadius(0.5);
 		sceneNode.addChild(currentContent);
 		alignContent(diam, offset, null);
 		PickUtility.assignFaceAABBTrees(currentContent);
@@ -461,6 +619,13 @@ public class ViewerVR {
 		MatrixBuilder.euclidean().translate(x, y, z).assignTo(avatarNode);
 	}
 	
+	protected void switchToFileChooser() {
+		sp.setPanelWidth(2);
+		sp.getFrame().setContentPane(chooser);
+		sp.getFrame().pack();
+		sp.show(getSceneRoot(), new Matrix(avatarPath.getMatrix(null)));
+	}
+
 	public static void main(String[] args) throws IOException {
 		
 		//System.setProperty("jreality.data", "/net/MathVis/data/testData3D");
@@ -469,12 +634,16 @@ public class ViewerVR {
 		System.setProperty("de.jreality.ui.viewerapp.synchRender", "true");
 		
 		ViewerVR tds = new ViewerVR();
-		
+		tds.switchToFileChooser();
 		ViewerApp vApp = tds.display();
-		vApp.setAttachNavigator(true);
-		vApp.setAttachBeanShell(true);
+				
+		//vApp.setAttachNavigator(true);
+		//vApp.setAttachBeanShell(true);
 		//vApp.setShowMenu(true);
 		vApp.update();
-		vApp.display();
+		JFrame f = vApp.display();
+		f.setSize(800, 600);
+		f.validate();
 	}
+
 }

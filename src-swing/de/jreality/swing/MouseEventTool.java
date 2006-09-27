@@ -98,7 +98,7 @@ class MouseEventTool extends AbstractTool {
   
   int currentButton=0;
   boolean doubleClick;
-  int doubleClickDelay=300;
+  int doubleClickDelay=400;
   
   public void activate(ToolContext e) {
     try {

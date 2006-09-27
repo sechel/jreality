@@ -179,12 +179,16 @@ public class ScenePanel {
     return rootNode;
   }
 
-  public void show(ToolContext tc, double zOffset) {
+  public void show(ToolContext tc) {
     Matrix avatar = new Matrix(tc.getTransformationMatrix(InputSlot.getDevice("AvatarTransformation")));
-    MatrixBuilder.euclidean(avatar).translate(0, 0, zOffset).assignTo(rootNode);
-    tc.getViewer().getSceneRoot().addChild(getComponent());
-    frame.setVisible(true);
+    show(tc.getViewer().getSceneRoot(), avatar);
   }
+
+  public void show(SceneGraphComponent component, Matrix avatar) {
+	MatrixBuilder.euclidean(avatar).translate(0, 0, getZOffset()).assignTo(rootNode);
+    component.addChild(getComponent());
+    frame.setVisible(true);
+}
   
   public void hide(ToolContext tc) {
     tc.getViewer().getSceneRoot().removeChild(getComponent());
@@ -193,7 +197,7 @@ public class ScenePanel {
 
   public void toggle(ToolContext tc) {
     if (frame.isVisible()) hide(tc);
-    else show(tc, getZOffset());
+    else show(tc);
   }  
   
   public ActionTool getPanelTool() {
