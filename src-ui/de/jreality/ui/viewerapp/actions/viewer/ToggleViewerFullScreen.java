@@ -40,6 +40,7 @@
 
 package de.jreality.ui.viewerapp.actions.viewer;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
@@ -123,6 +124,7 @@ public class ToggleViewerFullScreen extends AbstractAction {
       frame.setVisible(false);
       isFullscreen = true;
     }
+    ((Component) viewerApp.getViewer().getViewingComponent()).requestFocusInWindow();
   }
   
 }
