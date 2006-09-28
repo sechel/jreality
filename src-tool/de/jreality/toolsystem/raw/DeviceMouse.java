@@ -123,8 +123,7 @@ public class DeviceMouse extends AbstractDeviceMouse implements RawDevice, Mouse
       InputSlot slot = (InputSlot) usedSources.get("wheel_down");
       if (slot == null) return;
       for (int i = 0; i > count; i--) {
-        queue
-            .addEvent(new ToolEvent(DeviceMouse.this, slot, AxisState.PRESSED));
+        queue.addEvent(new ToolEvent(DeviceMouse.this, slot, AxisState.PRESSED));
         queue.addEvent(new ToolEvent(DeviceMouse.this, slot, AxisState.ORIGIN));
       }
     }
@@ -174,6 +173,9 @@ public class DeviceMouse extends AbstractDeviceMouse implements RawDevice, Mouse
       public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == MOUSE_GRAB_TOGGLE) {
           setCenter(!isCenter());
+          // XXX: HACK
+          queue.addEvent(new ToolEvent(this, InputSlot.getDevice("LookSwitch"), AxisState.PRESSED, null));
+          queue.addEvent(new ToolEvent(this, InputSlot.getDevice("LookSwitch"), AxisState.ORIGIN, null));
         }
       }
       public void keyReleased(KeyEvent e) {
