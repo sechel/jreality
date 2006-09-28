@@ -44,7 +44,10 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Insets;
+import java.awt.KeyboardFocusManager;
 import java.awt.Point;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -154,11 +157,17 @@ public class DeviceMouse extends AbstractDeviceMouse implements RawDevice, Mouse
     return null;
   }
 
-  public void setComponent(Component component) {
+  public void setComponent(final Component component) {
     this.component = component;
     component.addMouseListener(this);
     component.addMouseMotionListener(this);
     component.addMouseWheelListener(this);
+    component.addComponentListener(new ComponentAdapter() {
+    	public void componentResized(ComponentEvent e) {
+    		if (isCenter()) setCenter(false);
+    		requestFocus();
+    	}
+    });
     component.addKeyListener(new KeyListener() {
       public void keyTyped(KeyEvent e) {
       }
@@ -211,6 +220,7 @@ public class DeviceMouse extends AbstractDeviceMouse implements RawDevice, Mouse
         emptyCursor = component.getToolkit().createCustomCursor(emptyIcon.getImage(), new Point(0, 0), "emptyCursor");
       }
       component.setCursor(emptyCursor);
+      requestFocus();
     } catch (Exception e) {
       LoggingSystem.getLogger(this).log(Level.WARNING, "cannot grab mouse", e);
     }
@@ -219,12 +229,20 @@ public class DeviceMouse extends AbstractDeviceMouse implements RawDevice, Mouse
   public void uninstallGrabs() {
     try {
       component.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+      requestFocus();
     } catch (Exception e) {
       LoggingSystem.getLogger(this).log(Level.WARNING, "cannot grab mouse", e);
     }
   }
 
-  protected int getWidth() {
+  // XXX: howto do that?
+  private void requestFocus() {
+  	KeyboardFocusManager.getCurrentKeyboardFocusManager().clearGlobalFocusOwner();
+  	boolean fow = component.requestFocusInWindow();
+  	//component.requestFocus();
+	}
+
+	protected int getWidth() {
     return component.getWidth();
   }
 

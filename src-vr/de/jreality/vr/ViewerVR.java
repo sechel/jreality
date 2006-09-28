@@ -712,8 +712,8 @@ public class ViewerVR {
 		tds.switchToFileChooser();
 		ViewerApp vApp = tds.display();
 				
-		vApp.setAttachNavigator(true);
-		vApp.setAttachBeanShell(true);
+		//vApp.setAttachNavigator(true);
+		//vApp.setAttachBeanShell(true);
 		//vApp.setShowMenu(true);
 		vApp.update();
 		JFrame f = vApp.display();

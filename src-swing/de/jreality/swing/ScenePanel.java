@@ -50,6 +50,7 @@ public class ScenePanel {
     panel.setVertexCoordinates(panelVerts);
     panel.setVertexTextureCoordinates(tcs);
     panel.setFaceIndices(new int[][] { { 0, 1, 2, 3 } });
+    panel.setGenerateVertexNormals(true);
     panel.update();
     panelNode.setGeometry(panel.getIndexedFaceSet());
 
