@@ -65,7 +65,7 @@ import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.tool.Tool;
 
 /**
- * @author weissman
+ * @author Steffen Weissmann
  */
 class NodeReader extends SceneGraphVisitor {
 
