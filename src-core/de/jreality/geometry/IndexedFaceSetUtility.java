@@ -43,9 +43,11 @@ package de.jreality.geometry;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Vector;
 import java.util.logging.Level;
 
@@ -1432,6 +1434,102 @@ public class IndexedFaceSetUtility {
         ret[a][3] = (Rn.innerProduct(Rn.crossProduct(null, n, t), tan2[a]) < 0) ? -1 : 1;
       }
   		return ret;
+  	}
+  	
+  	private static class Point {
+  		double x,y,z,w;
+  		Point(DoubleArray da) {
+  			x=da.getValueAt(0);
+  			y=da.getValueAt(1);
+  			z=da.getValueAt(2);
+  			if (da.getLength() > 3) w=da.getValueAt(3);
+  		}
+		@Override
+		public int hashCode() {
+			final int PRIME = 31;
+			int result = 1;
+			long temp;
+			temp = Double.doubleToLongBits(w);
+			result = PRIME * result + (int) (temp ^ (temp >>> 32));
+			temp = Double.doubleToLongBits(x);
+			result = PRIME * result + (int) (temp ^ (temp >>> 32));
+			temp = Double.doubleToLongBits(y);
+			result = PRIME * result + (int) (temp ^ (temp >>> 32));
+			temp = Double.doubleToLongBits(z);
+			result = PRIME * result + (int) (temp ^ (temp >>> 32));
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			final Point other = (Point) obj;
+			if (Double.doubleToLongBits(w) != Double.doubleToLongBits(other.w))
+				return false;
+			if (Double.doubleToLongBits(x) != Double.doubleToLongBits(other.x))
+				return false;
+			if (Double.doubleToLongBits(y) != Double.doubleToLongBits(other.y))
+				return false;
+			if (Double.doubleToLongBits(z) != Double.doubleToLongBits(other.z))
+				return false;
+			return true;
+		}
+  	}
+  	
+  	public static void assignSmoothVertexNormals(IndexedFaceSet ifs) {
+  		HashMap<Point, LinkedList<Integer>> table = new HashMap<Point, LinkedList<Integer>>() {
+  			@Override
+  			public LinkedList<Integer> get(Object key) {
+  				LinkedList<Integer> ll = super.get(key);
+  				if (ll == null) {
+  					ll = new LinkedList<Integer>();
+  					super.put((Point) key, ll);
+  				} else {
+  					System.out.println("double point");
+  				}
+  				return ll;
+  			}
+  		};
+  		DoubleArrayArray points = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
+  		for (int i=0, n=points.getLength(); i<n; i++) {
+  			table.get(new Point(points.getValueAt(i))).add(i);
+  		}
+  		
+  		if (ifs.getVertexAttributes(Attribute.NORMALS) == null) GeometryUtility.calculateAndSetVertexNormals(ifs);
+  		
+  		DoubleArrayArray normals = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray();
+  		double[][] na=normals.toDoubleArrayArray(null);
+  		for (LinkedList<Integer> indices : table.values()) {
+  			if (indices.size()==1) continue;
+  			System.out.println("double normal");
+  			double[] n = normals.getValueAt(indices.get(0)).toDoubleArray(null);
+  			Rn.normalize(n, n);
+			double[] target = n.clone();
+			LinkedList<Integer> flips = new LinkedList<Integer>();
+  			for (int j=1,m=indices.size(); j<m; j++) {
+  				double[] n2 = normals.getValueAt(indices.get(j)).toDoubleArray(null);
+  				Rn.normalize(n, n);
+  				if (Rn.innerProduct(n, n2) < 0) {
+  					Rn.times(n2, -1, n2);
+  					flips.add(j);
+  					System.out.println("flip");
+  				}
+  				target = Rn.add(target, target, n2);
+  				Rn.normalize(target, target);
+  			}
+  			for (int i : indices) {
+  				if (flips.contains(i)) {
+  					Rn.times(na[i], -1, target);
+  				} else {
+  					Rn.copy(na[i], target);
+  				}
+  			}
+  		}
+  		ifs.setVertexAttributes(Attribute.NORMALS, new DoubleArrayArray.Array(na, na[0].length));
   	}
 
 }
