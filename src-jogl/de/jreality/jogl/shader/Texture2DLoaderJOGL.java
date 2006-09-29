@@ -61,20 +61,20 @@ import de.jreality.shader.Texture2D;
 import de.jreality.util.LoggingSystem;
 
 /**
- * A utility class to load textures for JOGL
- * Picked up from java.net.games.jogl forum 2.6.4 (gunn)
- * 
- * TODO remove gl calls
- * 
- * @author Kevin Glass
+ * Manages mapping Texture2D and CubeMap to GL textures and loading. Needs the following improvements:
+ *  - mapping from WeakReference<ImageData> to multiple GL objects
+ *  - garbage collection for cube map textures.
+ *  
+ *   @author Charles Gunn, Steffen Weissmann
  */
 public class Texture2DLoaderJOGL {
-	private static WeakHashMap lookupFromGL = new WeakHashMap();
+	private static WeakHashMap<GL, WeakHashMap<ImageData, Integer>> lookupTextures = new WeakHashMap<GL, WeakHashMap<ImageData,Integer>>();
+	private static WeakHashMap<GL, WeakHashMap<ImageData, Integer>> lookupCubemaps = new WeakHashMap<GL, WeakHashMap<ImageData,Integer>>();
 
-  private static ReferenceQueue refQueue = new ReferenceQueue();
-  private static IdentityHashMap refToID = new IdentityHashMap();
-  private static IdentityHashMap refToGL = new IdentityHashMap();
-  private static IdentityHashMap refToDim = new IdentityHashMap();
+  private static ReferenceQueue<ImageData> refQueue = new ReferenceQueue<ImageData>();
+  private static IdentityHashMap<WeakReference<ImageData>, Integer> refToID = new IdentityHashMap<WeakReference<ImageData>, Integer>();
+  private static IdentityHashMap<WeakReference<ImageData>, GL> refToGL = new IdentityHashMap<WeakReference<ImageData>, GL>();
+  private static IdentityHashMap<WeakReference<ImageData>, Dimension> refToDim = new IdentityHashMap<WeakReference<ImageData>, Dimension>();
   
   private static final boolean REPLACE_TEXTURES = true;
   
@@ -88,16 +88,25 @@ public class Texture2DLoaderJOGL {
 	   return tmp[0]; 
 	} 
        
-    private static WeakHashMap getHashTableForGL(GL gl)	{
-      WeakHashMap ht = (WeakHashMap) lookupFromGL.get(gl);
+    private static WeakHashMap<ImageData, Integer> getTextureTableForGL(GL gl)	{
+      WeakHashMap<ImageData, Integer> ht = lookupTextures.get(gl);
   		if (ht == null)	{
-    			ht = new WeakHashMap();
-    			lookupFromGL.put(gl, ht);
+    			ht = new WeakHashMap<ImageData, Integer>();
+    			lookupTextures.put(gl, ht);
       } 
   		return ht;
   }
 
-   /******************* new Textures *******************/
+    private static WeakHashMap<ImageData, Integer> getCubeMapTableForGL(GL gl)	{
+      WeakHashMap<ImageData, Integer> ht = lookupCubemaps.get(gl);
+  		if (ht == null)	{
+    			ht = new WeakHashMap<ImageData, Integer>();
+    			lookupCubemaps.put(gl, ht);
+      } 
+  		return ht;
+  }
+
+    /******************* new Textures *******************/
   
     public static void render(GL gl, Texture2D tex) {
       render(gl, tex, true);
@@ -113,7 +122,7 @@ public class Texture2DLoaderJOGL {
     
     GLU glu = new GLU(); //drawable.getGLU();
     
-    WeakHashMap ht = getHashTableForGL(gl);
+    WeakHashMap<ImageData, Integer> ht = getTextureTableForGL(gl);
 
     Integer texid = (Integer) ht.get(tex.getImage());
     int textureID = -1;
@@ -146,7 +155,7 @@ public class Texture2DLoaderJOGL {
       Integer id = new Integer(textureID);
       ht.put(tex.getImage(), id);
       // register reference for refQueue
-      WeakReference ref = new WeakReference(tex.getImage(), refQueue);
+      WeakReference<ImageData> ref = new WeakReference<ImageData>(tex.getImage(), refQueue);
       refToID.put(ref, id);
       refToGL.put(ref, gl);
       refToDim.put(ref, new Dimension(tex.getImage().getWidth(), tex.getImage().getHeight()));
@@ -156,11 +165,10 @@ public class Texture2DLoaderJOGL {
     int srcPixelFormat = GL.GL_RGBA;
     handleTextureParameters(tex, gl);
 
-    byte[] data = tex.getImage().getByteArray();
-
     // create either a series of mipmaps of a single texture image based on
     // what's loaded
     if (first || replace) {
+    	byte[] data = tex.getImage().getByteArray();
         if (mipmapped) {
           glu.gluBuild2DMipmaps(GL.GL_TEXTURE_2D, 
         		  GL.GL_RGBA, 
@@ -192,21 +200,22 @@ public class Texture2DLoaderJOGL {
     boolean mipmapped = true;
     GL gl = jr.getGL();
     GLU glu = new GLU();
-    WeakHashMap ht = getHashTableForGL(gl);
+    WeakHashMap<ImageData, Integer> ht = getCubeMapTableForGL(gl);
     
-    Integer texid = (Integer) ht.get(ref);
+    Integer texid = (Integer) ht.get(ref.getTop());
     int textureID;
-    if (texid != null)  {
+    if (texid != null) {
       first = false;
       textureID = texid.intValue();
     } else {
       // create the texture ID for this texture 
       textureID = createTextureID(gl); 
-      ht.put(ref, new Integer(textureID));
+      System.out.println("cubemap="+textureID);
+      ht.put(ref.getTop(), new Integer(textureID));
     }
     gl.glBindTexture(GL.GL_TEXTURE_CUBE_MAP, textureID); 
-    //if (!first) return;
     
+
     int srcPixelFormat =  GL.GL_RGBA;
     double[] c2w = jr.getContext().getCameraToWorld();
     c2w[3] = c2w[7] = c2w[11] = 0.0;
@@ -333,7 +342,7 @@ public class Texture2DLoaderJOGL {
 	 * 
 	 */
 	public static void deleteAllTextures(GL gl) {
-        WeakHashMap ht = (WeakHashMap) lookupFromGL.get(gl);
+        WeakHashMap ht = (WeakHashMap) lookupTextures.get(gl);
 		if (ht == null) return;
 		Collection vals = ht.values();
 		Iterator it = vals.iterator();
@@ -346,31 +355,6 @@ public class Texture2DLoaderJOGL {
 		}
 		ht.clear();
 	}
-
-	/**
-	 * @param tex2d
-	 */
-	public static void deleteTexture(Object tex2d) {
-		Iterator gls = lookupFromGL.keySet().iterator();
-		
-		while (gls.hasNext())	{
-			Object foo = gls.next();
-			if ( !(foo instanceof GL)) throw new Error();
-			GL gl = (GL) foo;
-			deleteTexture(tex2d, gl);
-		}
-	}
-
-	 public static void deleteTexture(Object tex, GL gl)  {
-	    WeakHashMap ht = (WeakHashMap) lookupFromGL.get(gl);
-	    if (ht == null) return;
-	    Integer which = (Integer) ht.get(tex);
-	    if (which == null) return;
-	    int[] list = new int[1];
-	    list[0] = which.intValue();
-	    JOGLConfiguration.theLog.info("Deleting texture2d ID "+list[0]);
-	    gl.glDeleteTextures(1, list, 0);
-	  }
 
 }
 
