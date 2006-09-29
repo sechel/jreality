@@ -17,6 +17,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -58,6 +59,8 @@ import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.PickShowTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.tools.ShipNavigationTool;
+import de.jreality.ui.beans.AlphaColorChooser;
+import de.jreality.ui.beans.AlphaColorChooserDialog;
 import de.jreality.ui.beans.ColorEditor;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerApp;
@@ -98,7 +101,10 @@ public class ViewerVR {
 	
 	Landscape landscape = new Landscape();
 
-	private JFileChooser chooser;
+	private JFileChooser fileChooser;
+	
+	private AlphaColorChooser colorChooser;
+	private JPanel colorChooserPanel;
 
 	private JSlider sizeSlider;
 
@@ -121,6 +127,10 @@ public class ViewerVR {
 	private JCheckBox rotate;
 
 	private JCheckBox drag;
+
+	private Container defaultPanel;
+
+	private String currentColor;
 	
 	public ViewerVR() throws IOException {
 		
@@ -382,10 +392,14 @@ public class ViewerVR {
 			}
 		});
 		lineButtonBox.add(lines);
-		ColorEditor lineColorEditor = new ColorEditor();
-		JComponent lineColorButton = (JComponent) lineColorEditor.getCustomEditor();
+		JButton lineColorButton = new JButton("line color");
 		lineColorButton.setMaximumSize(new Dimension(200,20));
-		lineColorEditor.setValue(Color.red);
+		lineColorButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				switchToColorChooser(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR);
+			}
+		});
+
 		lineButtonBox.add(lineColorButton);
 		lineBox.add(lineButtonBox);
 		
@@ -418,10 +432,13 @@ public class ViewerVR {
 			}
 		});
 		pointButtonBox.add(points);
-		ColorEditor pointColorEditor = new ColorEditor();
-		JComponent pointColorButton = (JComponent) pointColorEditor.getCustomEditor();
+		JButton pointColorButton = new JButton("point color");
 		pointColorButton.setMaximumSize(new Dimension(200,20));
-		pointColorEditor.setValue(Color.red);
+		pointColorButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				switchToColorChooser(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR);
+			}
+		});
 		pointButtonBox.add(pointColorButton);
 		pointBox.add(pointButtonBox);
 		
@@ -455,10 +472,14 @@ public class ViewerVR {
 			}
 		});
 		faceButtonBox.add(faces);
-		ColorEditor faceColorEditor = new ColorEditor();
-		JComponent faceColorButton = (JComponent) faceColorEditor.getCustomEditor();
+
+		JButton faceColorButton = new JButton("face color");
 		faceColorButton.setMaximumSize(new Dimension(200,20));
-		faceColorEditor.setValue(Color.red);
+		faceColorButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				switchToColorChooser(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR);
+			}
+		});
 		faceButtonBox.add(faceColorButton);
 		faceBox.add(faceButtonBox);
 		
@@ -526,28 +547,71 @@ public class ViewerVR {
 		
 		getTerrainNode().addTool(sp.getPanelTool());
 		
-		chooser = FileLoaderDialog.createFileChooser();
+		defaultPanel = sp.getFrame().getContentPane();
 		
-		chooser.addActionListener(new ActionListener() {
-			Container oldCmp = sp.getFrame().getContentPane();
+		fileChooser = FileLoaderDialog.createFileChooser();
+		
+		fileChooser.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ev) {
-				File file = chooser.getSelectedFile();
+				File file = fileChooser.getSelectedFile();
 				try {
 					if (ev.getActionCommand() == JFileChooser.APPROVE_SELECTION && file != null) setContent(Readers.read(Input.getInput(file)));
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				sp.getFrame().setVisible(false);
-				sp.setPanelWidth(1);
-				sp.getFrame().setContentPane(oldCmp);
-				sp.getFrame().setSize(PANEL_SIZE);
-				sp.getFrame().setVisible(true);
+				switchToDefaultPanel();
 			}
 		});
+		
+		colorChooser = new AlphaColorChooser(Color.white, false);
+		colorChooserPanel = new JPanel(new BorderLayout());
+		
+		colorChooserPanel.add("Center", colorChooser);
+		
+		Box buttonBox = new Box(BoxLayout.X_AXIS);
+		JButton okButton = new JButton("Ok");
+		okButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				applyColor();
+				switchToDefaultPanel();
+			}
+		});
+		buttonBox.add(okButton);
+		colorChooserPanel.add("South", buttonBox);
+		
+//		colorChooser.addActionListener(new ActionListener() {
+//			Container oldCmp = sp.getFrame().getContentPane();
+//			public void actionPerformed(ActionEvent ev) {
+//				File file = fileChooser.getSelectedFile();
+//				try {
+//					if (ev.getActionCommand() == JFileChooser.APPROVE_SELECTION && file != null) setContent(Readers.read(Input.getInput(file)));
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				sp.getFrame().setVisible(false);
+//				sp.setPanelWidth(1);
+//				sp.getFrame().setContentPane(oldCmp);
+//				sp.getFrame().setSize(PANEL_SIZE);
+//				sp.getFrame().setVisible(true);
+//			}
+//		});
+
 	}
 	
-	
+	protected void applyColor() {
+		contentAppearance.setAttribute(currentColor, colorChooser.getColor());
+	}
+
+	private void switchToDefaultPanel() {
+		sp.getFrame().setVisible(false);
+		sp.setPanelWidth(1);
+		sp.getFrame().setContentPane(defaultPanel);
+		sp.getFrame().setSize(PANEL_SIZE);
+		sp.getFrame().setVisible(true);
+	}
+
 	protected void setDrag(boolean b) {
 		toggleTool(dragTool, b);
 		drag.setSelected(b);
@@ -584,7 +648,18 @@ public class ViewerVR {
 	public void load() {
 		sp.getFrame().setVisible(false);
 		sp.setPanelWidth(2);
-		sp.getFrame().setContentPane(chooser);
+		sp.getFrame().setContentPane(fileChooser);
+		sp.getFrame().pack();
+		sp.getFrame().setVisible(true);
+	}
+
+	void switchToColorChooser(String attribute) {
+		currentColor=attribute;
+		Object current = contentAppearance.getAttribute(currentColor);
+		colorChooser.setColor(current != Appearance.INHERITED ? (Color) current : Color.white);
+		sp.getFrame().setVisible(false);
+		sp.setPanelWidth(2);
+		sp.getFrame().setContentPane(colorChooserPanel);
 		sp.getFrame().pack();
 		sp.getFrame().setVisible(true);
 	}
@@ -696,7 +771,7 @@ public class ViewerVR {
 	
 	protected void switchToFileChooser() {
 		sp.setPanelWidth(2);
-		sp.getFrame().setContentPane(chooser);
+		sp.getFrame().setContentPane(fileChooser);
 		sp.getFrame().pack();
 		sp.show(getSceneRoot(), new Matrix(avatarPath.getMatrix(null)));
 	}
