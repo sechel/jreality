@@ -90,7 +90,7 @@ import de.jreality.tools.ShipNavigationTool;
 
 public class XStreamFactory {
 
-  private static HashSet knownClasses = new HashSet();
+  private static HashSet<Class<?>> knownClasses = new HashSet<Class<?>>();
   
   static {
     // primitives are accepted anyway
@@ -128,11 +128,11 @@ public class XStreamFactory {
   }
   
   public static XStream forVersion(double version) {
-    if (version < 1) return simpleXStream();
+    if (version < 1) return simpleXStream(version);
     else throw new IllegalArgumentException("no such version");
   }
   
-  static XStream simpleXStream() {
+  static XStream simpleXStream(double version) {
 
     XStream ret = new XStream(new PureJavaReflectionProvider());
 
@@ -179,17 +179,17 @@ public class XStreamFactory {
     ret.addImmutableType(Attribute.class);
     ret.addImmutableType(ImageData.class);
     
-    ret.registerConverter(new JrSceneConverter(ret.getClassMapper()));
-    ret.registerConverter(new SceneGraphNodeConverter(ret.getClassMapper()));
-    ret.registerConverter(new SceneGraphPathConverter(ret.getClassMapper()));
-    ret.registerConverter(new DataListSetConverter(ret.getClassMapper()));
-    ret.registerConverter(new DataListConverter(ret.getClassMapper()));
-    ret.registerConverter(new DoubleArrayConverter(ret.getClassMapper()));
-    ret.registerConverter(new IntArrayConverter(ret.getClassMapper()));
-    ret.registerConverter(new StringArrayConverter(ret.getClassMapper()));
+    ret.registerConverter(new JrSceneConverter(ret.getMapper()));
+    ret.registerConverter(new SceneGraphNodeConverter(ret.getMapper()));
+    ret.registerConverter(new SceneGraphPathConverter(ret.getMapper()));
+    ret.registerConverter(new DataListSetConverter(ret.getMapper()));
+    ret.registerConverter(new DataListConverter(ret.getMapper(), version));
+    ret.registerConverter(new DoubleArrayConverter(ret.getMapper()));
+    ret.registerConverter(new IntArrayConverter(ret.getMapper()));
+    ret.registerConverter(new StringArrayConverter(ret.getMapper()));
     ret.registerConverter(new InputSlotConverter());
-    ret.registerConverter(new MatrixConverter(ret.getClassMapper()));
-    ret.registerConverter(new FontConverter(ret.getClassMapper()));
+    ret.registerConverter(new MatrixConverter(ret.getMapper()));
+    ret.registerConverter(new FontConverter(ret.getMapper()));
     
     return ret;
   }
@@ -214,6 +214,7 @@ public class XStreamFactory {
 
   static boolean canWrite(Object val) {
     Class clazz = val.getClass();
+    if (clazz.isArray()) return canWrite(clazz.getComponentType());
     if (clazz.isPrimitive() || knownClasses.contains(clazz))
       return true;
     return false;

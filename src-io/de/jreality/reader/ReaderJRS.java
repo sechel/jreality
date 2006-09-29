@@ -47,7 +47,9 @@ import com.thoughtworks.xstream.XStream;
 import de.jreality.io.JrScene;
 import de.jreality.io.jrs.XStreamFactory;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
 import de.jreality.util.Input;
+import de.jreality.util.SceneGraphUtility;
 
 public class ReaderJRS extends AbstractReader {
 
@@ -55,13 +57,31 @@ public class ReaderJRS extends AbstractReader {
   
   public void setInput(Input input) throws IOException {
     super.setInput(input);
-    XStream xstr = XStreamFactory.forVersion(0.1);
-    Object stuff = xstr.fromXML(input.getReader());
+    Object stuff;
+    XStream xstr = XStreamFactory.forVersion(0.2);
+    try {
+    	stuff = xstr.fromXML(input.getReader());
+    } catch (Exception e) {
+        xstr = XStreamFactory.forVersion(0.1);
+        try {
+            System.out.println("trying to read JRS v0.1");
+        	stuff = xstr.fromXML(input.copy().getReader());
+        	System.out.println("JRS v0.1 success.");
+        } catch (Exception e2) {
+        	throw new IOException("illegal JRS file");
+        }
+    }
     if (stuff instanceof JrScene) {
       read = (JrScene) stuff; 
       root = read.getSceneRoot();
     } else {
-      root = (SceneGraphComponent) stuff;
+    	if (stuff instanceof SceneGraphComponent)
+    		root = (SceneGraphComponent) stuff;
+    	else {
+    		root = new SceneGraphComponent();
+    		root.setName("jrs");
+    		SceneGraphUtility.addChildNode(root, (SceneGraphNode) stuff);
+    	}
     }
   }
   

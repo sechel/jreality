@@ -58,19 +58,16 @@ import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StringArray;
 import de.jreality.scene.data.StringArrayArray;
 
-class DataListConverter implements Converter {
-
-  Mapper mapper;
+class DataListConverter extends AbstractConverter {
   
-  Pattern arrayPattern = Pattern.compile("[^\\[\\]]*\\[\\]");
+  public DataListConverter(Mapper mapper, double version) {
+		super(mapper, version);
+	}
+
+Pattern arrayPattern = Pattern.compile("[^\\[\\]]*\\[\\]");
   Pattern arrayArrayPattern = Pattern.compile("[^\\[\\]]*\\[\\]\\[\\]");
   Pattern arrayArrayInlinedPattern = Pattern.compile("[^\\[\\]]*\\[\\]\\[([0-9])+\\]");
   
-  
-  public DataListConverter(Mapper mapper) {
-    this.mapper = mapper;
-  }
-
   public boolean canConvert(Class type) {
     return DataList.class.isAssignableFrom(type);
   }
@@ -107,16 +104,16 @@ class DataListConverter implements Converter {
     } else {
       throw new UnsupportedOperationException("cannot write: "+sm);
     }
-    writer.startNode(mapper.serializedClass(DataList.class));
+    if (version < 0.2) writer.startNode(mapper.serializedClass(DataList.class));
     context.convertAnother(dst);
-    writer.endNode();
+    if (version < 0.2) writer.endNode();
   }
 
   public Object unmarshal(HierarchicalStreamReader reader,
       UnmarshallingContext context) {
     String sm = reader.getAttribute("data");
     Object ret = null;
-    reader.moveDown();
+    if (version < 0.2) reader.moveDown();
     if (sm.startsWith("double")) {
       if (isArray(sm)) {
         double[] data = (double[]) context.convertAnother(null, double[].class);
@@ -153,7 +150,7 @@ class DataListConverter implements Converter {
     } else {
       throw new UnsupportedOperationException("cannot read: "+sm);
     }
-    reader.moveUp();
+    if (version < 0.2) reader.moveUp();
     return ret;
   }
 

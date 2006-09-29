@@ -289,5 +289,18 @@ public final class Input
     }
     throw new IOException("Resource not found ["+resourceName+"]");
   }
+  
+  /**
+   * Get a fresh version of this Input - i.e. used to re-read files.
+   * Workes only for files and URLs.
+   * 
+   * @return an Input for the same content, but not-yet used InputStream.
+   * @throws IOException
+   */
+  public Input copy() throws IOException {
+	if (sourceFile != null) return new Input(sourceFile);
+	if (sourceURL != null) return new Input(sourceURL);
+	throw new UnsupportedOperationException("only for files and URLs");
+}
 
 }

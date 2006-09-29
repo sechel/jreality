@@ -58,7 +58,7 @@ public class WriterJRS implements SceneWriter {
   }
 
   public void writeScene(JrScene scene, Writer out) throws IOException {
-    XStream xstr = XStreamFactory.forVersion(0.1);
+    XStream xstr = XStreamFactory.forVersion(0.2);
     out.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     xstr.toXML(scene, out);
   }
@@ -68,7 +68,7 @@ public class WriterJRS implements SceneWriter {
   }
   
   public void write(SceneGraphNode node, Writer out) throws IOException {
-    XStream xstr = XStreamFactory.forVersion(0.1);
+    XStream xstr = XStreamFactory.forVersion(0.2);
     out.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     xstr.toXML(node, out);
   }
