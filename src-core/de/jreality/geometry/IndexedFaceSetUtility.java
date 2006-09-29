@@ -1438,11 +1438,12 @@ public class IndexedFaceSetUtility {
   	
   	private static class Point {
   		double x,y,z,w;
-  		Point(DoubleArray da) {
-  			x=da.getValueAt(0);
-  			y=da.getValueAt(1);
-  			z=da.getValueAt(2);
-  			if (da.getLength() > 3) w=da.getValueAt(3);
+  		Point(DoubleArray da, int digits) {
+  			double r=digits > 0 ? Math.pow(10, digits) : 1;
+  			x=Math.round(r*da.getValueAt(0))/r;
+  			y=Math.round(r*da.getValueAt(1))/r;
+  			z=Math.round(r*da.getValueAt(2))/r;
+  			if (da.getLength() > 3) w=Math.round(r*da.getValueAt(3))/r;
   		}
 		@Override
 		public int hashCode() {
@@ -1480,7 +1481,18 @@ public class IndexedFaceSetUtility {
 		}
   	}
   	
-  	public static void assignSmoothVertexNormals(IndexedFaceSet ifs) {
+  	/**
+  	 * Averages the vertex normals for duplicate coordinates. If one normal 
+  	 * is antipodal to another, the average is calculated with the antipodal
+  	 * one flipped, and the result is then flipped back again.
+  	 * 
+  	 * @param ifs the IndexedFaceSet to change
+  	 * @param maxAngle the maximum angle in degrees between two normals for being flipped
+     * @param digits the number of digits to respect for comparing coordinates
+  	 */
+  	public static void assignSmoothVertexNormals(IndexedFaceSet ifs, double maxAngle, int digits) {
+  		double cos = Math.cos(maxAngle*Math.PI/180);
+  		HashSet<Integer> written = new HashSet<Integer>();
   		HashMap<Point, LinkedList<Integer>> table = new HashMap<Point, LinkedList<Integer>>() {
   			@Override
   			public LinkedList<Integer> get(Object key) {
@@ -1488,47 +1500,67 @@ public class IndexedFaceSetUtility {
   				if (ll == null) {
   					ll = new LinkedList<Integer>();
   					super.put((Point) key, ll);
-  				} else {
-  					System.out.println("double point");
   				}
   				return ll;
   			}
   		};
   		DoubleArrayArray points = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
   		for (int i=0, n=points.getLength(); i<n; i++) {
-  			table.get(new Point(points.getValueAt(i))).add(i);
+  			table.get(new Point(points.getValueAt(i), digits)).add(i);
   		}
   		
   		if (ifs.getVertexAttributes(Attribute.NORMALS) == null) GeometryUtility.calculateAndSetVertexNormals(ifs);
   		
   		DoubleArrayArray normals = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray();
   		double[][] na=normals.toDoubleArrayArray(null);
-  		for (LinkedList<Integer> indices : table.values()) {
-  			if (indices.size()==1) continue;
-  			System.out.println("double normal");
-  			double[] n = normals.getValueAt(indices.get(0)).toDoubleArray(null);
-  			Rn.normalize(n, n);
-			double[] target = n.clone();
-			LinkedList<Integer> flips = new LinkedList<Integer>();
-  			for (int j=1,m=indices.size(); j<m; j++) {
-  				double[] n2 = normals.getValueAt(indices.get(j)).toDoubleArray(null);
-  				Rn.normalize(n, n);
-  				if (Rn.innerProduct(n, n2) < 0) {
-  					Rn.times(n2, -1, n2);
-  					flips.add(j);
-  					System.out.println("flip");
-  				}
-  				target = Rn.add(target, target, n2);
-  				Rn.normalize(target, target);
-  			}
-  			for (int i : indices) {
-  				if (flips.contains(i)) {
-  					Rn.times(na[i], -1, target);
-  				} else {
-  					Rn.copy(na[i], target);
-  				}
+  		int total=0;
+  		for (LinkedList<Integer> inds : table.values()) {
+  			if (inds.size()==1) continue;
+  			if (inds.size() > 2) System.out.println(inds.size()+"-fold point");
+  			LinkedList<Integer> indices = inds;
+  			
+  			while (indices.size() > 1) {
+  				int cnt=1;
+  				LinkedList<Integer> remaining = new LinkedList<Integer>();
+	  			double[] n = normals.getValueAt(indices.get(0)).toDoubleArray(null);
+	  			Rn.normalize(n, n);
+				double[] target = n.clone();
+				LinkedList<Integer> flips = new LinkedList<Integer>();
+	  			for (int j=1,m=indices.size(); j<m; j++) {
+	  				double[] n2 = normals.getValueAt(indices.get(j)).toDoubleArray(null);
+	  				Rn.normalize(n2, n2);
+	  				if (Rn.innerProduct(n, n2) < 0) {
+	  					Rn.times(n2, -1, n2);
+	  					flips.add(indices.get(j));
+	  				}
+	  				if (Rn.innerProduct(n2, n)<cos) {
+	  					remaining.add(indices.get(j));
+	  					//flips.remove(new Integer(j));
+	  					continue;
+	  				}
+	  				Rn.add(target, target, n2);
+	  				cnt++; total++;
+	  			}
+	  			Rn.normalize(target, target);
+	  			for (int i : indices) {
+	  				if (remaining.contains(i)) continue;
+	  				if (flips.contains(i)) {
+	  					if (Rn.innerProduct(na[i], target) > 0) throw new RuntimeException();
+	  					Rn.times(na[i], -1, target);
+	  				} else {
+	  					if (Rn.innerProduct(na[i], target) < 0) throw new RuntimeException();
+	  					Rn.copy(na[i], target);
+	  				}
+	  				if (!written.add(i)) throw new RuntimeException();
+	  			}
+	  			if (Rn.innerProduct(n, target) < 0) throw new RuntimeException();
+	  			if (cnt>2) System.out.println("merged "+cnt);
+	  			indices=remaining;
+	  			remaining.clear();
   			}
   		}
+  		//IndexedFaceSetUtility.assignSmoothVertexNormals(self, 5)
+  		System.out.println("merged "+total+" points");
   		ifs.setVertexAttributes(Attribute.NORMALS, new DoubleArrayArray.Array(na, na[0].length));
   	}
 
