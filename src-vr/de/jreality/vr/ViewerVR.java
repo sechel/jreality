@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -11,9 +12,11 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -24,11 +27,16 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -71,12 +79,14 @@ import de.jreality.util.Rectangle3D;
 public class ViewerVR {
 	
 	protected static final double PI2 = Math.PI/2;
-
+	protected static double DEFAULT_POINT_RADIUS = .4;
+	protected static double DEFAULT_TUBE_RADIUS = .3;
 	private static final double MAX_SIZE = 0.1;
 
 	private static final int RANGE = 200;
 
-	private static final Dimension PANEL_SIZE = new Dimension(220,250);
+	private static final Dimension PANEL_SIZE = new Dimension(280,250);
+	private static final double DEFAULT_ABOVE_GROUND = 1.3;
 	
 	private SceneGraphComponent sceneRoot=new SceneGraphComponent(),
 	sceneNode=new SceneGraphComponent(),
@@ -89,6 +99,8 @@ public class ViewerVR {
 	
 	private SceneGraphComponent currentContent;
 	
+	private HashMap<String,Integer> exampleIndices = new HashMap<String,Integer>();
+	
 	private Appearance terrainAppearance=new Appearance(),
 	rootAppearance=new Appearance(),
 	contentAppearance=new Appearance();
@@ -97,7 +109,7 @@ public class ViewerVR {
 	
 	private SceneGraphPath cameraPath, avatarPath, emptyPickPath;
 	
-	private double diam=20, offset=.3;
+	private double diam=22, offset=.3;
 	
 	Landscape landscape = new Landscape();
 
@@ -199,6 +211,7 @@ public class ViewerVR {
 			}
 		}
 		
+		contentAppearance.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.blue);
 		contentAppearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.white);
 		contentAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.red);
 		contentAppearance.setAttribute("showLines", false);
@@ -235,14 +248,56 @@ public class ViewerVR {
 		l.setToolScene(this);
 		sp = new ScenePanel();
 		sp.setPanelWidth(1);
+		sp.setAboveGround(DEFAULT_ABOVE_GROUND);
 		sp.setZOffset(-2.6);
 		JTabbedPane tabs = new JTabbedPane();
 		
+		// load tab
+		final String[][] examples = new String[][] {
+				{"Boy surface", "3ds/boy.3ds"},
+				{"Costa surface", "3ds/costa.3ds"},
+				{"helicoid with 2 handles", "jrs/he2.jrs"},
+				{"tetranoid", "3ds/tetranoid.3ds"},
+				{"Wente torus", "3ds/wente.3ds"}
+		};
+		ActionListener examplesListener = new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String selectedBox = e.getActionCommand();
+				int selectionIndex = ((Integer)exampleIndices.get(selectedBox)).intValue();
+				try {
+					setContent(Readers.read(Input.getInput(examples[selectionIndex][1])));
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		};
+		JPanel buttonGroupComponent = new JPanel(new BorderLayout());
+		buttonGroupComponent.setBorder(new EmptyBorder(10,10,10,10));
+		Box buttonGroupPanel = new Box(BoxLayout.Y_AXIS);
+	    ButtonGroup group = new ButtonGroup();
+	    for (int i = 0; i < examples.length; i++) {
+	      JRadioButton button = new JRadioButton(examples[i][0]);
+	      button.addActionListener(examplesListener);
+	      buttonGroupPanel.add(button);
+	      group.add(button);
+	      exampleIndices.put(examples[i][0], new Integer(i));
+	    }
+	    buttonGroupComponent.add("Center", buttonGroupPanel);
+	    loadButton = new JButton("load ...");
+		loadButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				switchToFileBrowser();
+			}
+		});
+		buttonGroupComponent.add("South", loadButton);
+	    tabs.add("load", buttonGroupComponent);
+	    
+	    // align panel
 		JPanel placementPanel = new JPanel(new BorderLayout());
 		placementPanel.setBorder(new EmptyBorder(5,5,5,5));
 		Box placementBox = new Box(BoxLayout.X_AXIS);
 		Box sizeBox = new Box(BoxLayout.Y_AXIS);
-		sizeBox.setBorder(new EmptyBorder(5,5,5,5));
+		sizeBox.setBorder(new EmptyBorder(10,5,0,5));
 		JLabel sizeLabel = new JLabel("size");
 		sizeSlider = new JSlider(SwingConstants.VERTICAL,100,10000,(int)(diam*100));
 		sizeSlider.addChangeListener(new ChangeListener() {
@@ -251,11 +306,10 @@ public class ViewerVR {
 				alignContent(diam, offset, null);
 			}
 		});
-		sizeSlider.setMaximumSize(new Dimension(20,160));
 		sizeBox.add(sizeLabel);
 		sizeBox.add(sizeSlider);
 		Box groundBox = new Box(BoxLayout.Y_AXIS);
-		groundBox.setBorder(new EmptyBorder(5,5,5,5));
+		groundBox.setBorder(new EmptyBorder(10,5,0,5));
 		JLabel groundLabel = new JLabel("level");
 		groundSlider = new JSlider(SwingConstants.VERTICAL,0,200,(int)(offset*100));
 		groundSlider.addChangeListener(new ChangeListener() {
@@ -264,16 +318,16 @@ public class ViewerVR {
 				alignContent(diam, offset, null);
 			}
 		});
-		groundSlider.setMaximumSize(new Dimension(20,160));
 		groundBox.add(groundLabel);
 		groundBox.add(groundSlider);
+		
 		URL imgURL = ViewerVR.class.getResource("rotleft.gif");
 		ImageIcon rotateLeft = new ImageIcon(imgURL);
 		imgURL = ViewerVR.class.getResource("rotright.gif");
 		ImageIcon rotateRight = new ImageIcon(imgURL);
 		
 		JPanel rotateBox = new JPanel(new GridLayout(3,3));
-		rotateBox.setBorder(new EmptyBorder(5,5,5,5));
+		rotateBox.setBorder(new EmptyBorder(20,0,20,0));
 		
 		JButton xRotateLeft = new JButton(rotateLeft);
 		xRotateLeft.addActionListener(new ActionListener() {
@@ -344,37 +398,32 @@ public class ViewerVR {
 		rotateBox.add(zRotateRight);
 		
 		JPanel p = new JPanel(new BorderLayout());
-		JPanel dummy = new JPanel(new BorderLayout());
+		p.setBorder(new EmptyBorder(5,30,5,20));
+		
 		loadButton = new JButton("load ...");
 		loadButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				load();
+				switchToFileBrowser();
 			}
 		});
-		loadButton.setMargin(insets);
-		dummy.add(loadButton);
-//		Dimension  d = new Dimension(50, 60);
-//		dummy.setPreferredSize(d);
-//		dummy.setMaximumSize(d);
-//		dummy.setMinimumSize(d);
-		dummy.setBorder(new EmptyBorder(5,30,20,30));
-		p.add("North", dummy );
-		dummy = new JPanel();
-//		dummy.setPreferredSize(d);
-//		dummy.setMaximumSize(d);
-//		dummy.setMinimumSize(d);
-		p.add("South", dummy );
+		p.add("North", loadButton);
 		p.add("Center", rotateBox);
-		
+		JButton alignButton = new JButton("align");
+		alignButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				alignContent(diam, offset, null);
+			}
+		});
+		p.add("South",alignButton);
 		placementBox.add(sizeBox);
 		placementBox.add(groundBox);
 		placementBox.add(p);
 		placementPanel.add(placementBox);
-		tabs.add("object", placementPanel);
+		tabs.add("align", placementPanel);
 		
 		tabs.add("env",l.getSelectionComponent());
 		
-//		 appearance tab
+		// appearance tab
 		JPanel appearancePanel = new JPanel(new BorderLayout());
 		Box appBox = new Box(BoxLayout.Y_AXIS);
 		
@@ -406,7 +455,7 @@ public class ViewerVR {
 		Box tubeRadiusBox = new Box(BoxLayout.X_AXIS);
 		tubeRadiusBox.setBorder(new EmptyBorder(5,5,5,0));
 		JLabel tubeRadiusLabel = new JLabel("radius");
-		tubeRadiusSlider = new JSlider(SwingConstants.HORIZONTAL,0,100,40);
+		tubeRadiusSlider = new JSlider(SwingConstants.HORIZONTAL,0,100,(int)(DEFAULT_TUBE_RADIUS * 100));
 		tubeRadiusSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
 				setTubeRadius(0.01*tubeRadiusSlider.getValue());
@@ -445,7 +494,7 @@ public class ViewerVR {
 		Box pointRadiusBox = new Box(BoxLayout.X_AXIS);
 		pointRadiusBox.setBorder(new EmptyBorder(5,5,5,0));
 		JLabel pointRadiusLabel = new JLabel("radius");
-		pointRadiusSlider = new JSlider(SwingConstants.HORIZONTAL,0,100,50);
+		pointRadiusSlider = new JSlider(SwingConstants.HORIZONTAL,0,100,(int)(DEFAULT_POINT_RADIUS*100));
 		pointRadiusSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
 				setPointRadius(0.01*pointRadiusSlider.getValue());
@@ -501,13 +550,7 @@ public class ViewerVR {
 		appearancePanel.add(appBox);
 		tabs.add("app", appearancePanel);
 		
-		
-		
-		
-		
-		
-		
-//	 tool tab
+		// tool tab
 		JPanel toolPanel = new JPanel(new BorderLayout());
 		Box toolBox = new Box(BoxLayout.Y_AXIS);
 		toolBox.setBorder(
@@ -531,19 +574,25 @@ public class ViewerVR {
 		});
 		toolButtonBox.add(drag);
 		
-		
 		toolBox.add(toolButtonBox);
 		
 		toolPanel.add(toolBox);
 		tabs.add("tools", toolPanel);
-
 		
-		
-		
-		
-		
+		// help tab
+		JLabel helpText = new JLabel();
+		helpText.setBackground(rotate.getBackground());
+//		helpText.setText("<html>"+
+//				"<ul>"+
+//				"<item>look around: move mouse (press right mouse button in window mode</item>"+
+//				"</ul>"+
+//				"</html>");
+//		//JScrollPane helpPane = new JScrollPane(helpText);
+		tabs.add("help", helpText);
+	    
 		sp.getFrame().getContentPane().add(tabs);
-		sp.getFrame().setSize(PANEL_SIZE);
+		//sp.getFrame().setSize(PANEL_SIZE);
+		sp.getFrame().pack();
 		
 		getTerrainNode().addTool(sp.getPanelTool());
 		
@@ -566,38 +615,43 @@ public class ViewerVR {
 		
 		colorChooser = new AlphaColorChooser(Color.white, false);
 		colorChooserPanel = new JPanel(new BorderLayout());
+		colorChooserPanel.setBorder(new EmptyBorder(10,10,5,10));
 		
 		colorChooserPanel.add("Center", colorChooser);
 		
-		Box buttonBox = new Box(BoxLayout.X_AXIS);
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		buttonPanel.setBorder(new EmptyBorder(10,0,0,0));
+		//buttonPanel.add(Box.createHorizontalGlue());
 		JButton okButton = new JButton("Ok");
+		//okButton.setMargin(new Insets(20,20,20,20));
+		//okButton.setBorder(new EtchedBorder());
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				applyColor();
 				switchToDefaultPanel();
 			}
 		});
-		buttonBox.add(okButton);
-		colorChooserPanel.add("South", buttonBox);
-		
-//		colorChooser.addActionListener(new ActionListener() {
-//			Container oldCmp = sp.getFrame().getContentPane();
-//			public void actionPerformed(ActionEvent ev) {
-//				File file = fileChooser.getSelectedFile();
-//				try {
-//					if (ev.getActionCommand() == JFileChooser.APPROVE_SELECTION && file != null) setContent(Readers.read(Input.getInput(file)));
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//				sp.getFrame().setVisible(false);
-//				sp.setPanelWidth(1);
-//				sp.getFrame().setContentPane(oldCmp);
-//				sp.getFrame().setSize(PANEL_SIZE);
-//				sp.getFrame().setVisible(true);
-//			}
-//		});
-
+		buttonPanel.add(okButton);
+		//buttonPanel.add(Box.createHorizontalGlue());
+		JButton applyButton = new JButton("Apply");
+		//applyButton.setBorder(new EtchedBorder());
+		applyButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				applyColor();
+			}
+		});
+		buttonPanel.add(applyButton);
+		//buttonPanel.add(Box.createHorizontalGlue());
+		JButton cancelButton = new JButton("Cancel");
+		//cancelButton.setBorder(new EtchedBorder());
+		cancelButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				switchToDefaultPanel();
+			}
+		});
+		buttonPanel.add(cancelButton);
+		//buttonPanel.add(Box.createHorizontalGlue());
+		colorChooserPanel.add("South", buttonPanel);
 	}
 	
 	protected void applyColor() {
@@ -607,8 +661,31 @@ public class ViewerVR {
 	private void switchToDefaultPanel() {
 		sp.getFrame().setVisible(false);
 		sp.setPanelWidth(1);
+		sp.setAboveGround(DEFAULT_ABOVE_GROUND);
 		sp.getFrame().setContentPane(defaultPanel);
-		sp.getFrame().setSize(PANEL_SIZE);
+		//sp.getFrame().setSize(PANEL_SIZE);
+		sp.getFrame().pack();
+		sp.getFrame().setVisible(true);
+	}
+
+	protected void showPanel(boolean showFileChooser) {
+		if (showFileChooser) {
+			sp.setPanelWidth(2);
+			sp.getFrame().setContentPane(fileChooser);
+			sp.getFrame().pack();
+		}
+		sp.show(getSceneRoot(), new Matrix(avatarPath.getMatrix(null)));
+	}
+
+	void switchToColorChooser(String attribute) {
+		currentColor=attribute;
+		Object current = contentAppearance.getAttribute(currentColor);
+		colorChooser.setColor(current != Appearance.INHERITED ? (Color) current : Color.white);
+		sp.getFrame().setVisible(false);
+		sp.setPanelWidth(2);
+		sp.setAboveGround(2);
+		sp.getFrame().setContentPane(colorChooserPanel);
+		sp.getFrame().pack();
 		sp.getFrame().setVisible(true);
 	}
 
@@ -632,6 +709,7 @@ public class ViewerVR {
 	}
 
 	protected void setReflection(double d) {
+		//Color diffuse = (Color) contentAppearance.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR);
 		cm.setBlendColor(new Color(1f, 1f, 1f, (float)d)); 
 	}
 
@@ -645,21 +723,11 @@ public class ViewerVR {
 		contentAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, Math.exp(Math.log(RANGE)*d)/RANGE*objectScale*MAX_SIZE);
 	}
 
-	public void load() {
+	public void switchToFileBrowser() {
 		sp.getFrame().setVisible(false);
 		sp.setPanelWidth(2);
+		sp.setAboveGround(1.7);
 		sp.getFrame().setContentPane(fileChooser);
-		sp.getFrame().pack();
-		sp.getFrame().setVisible(true);
-	}
-
-	void switchToColorChooser(String attribute) {
-		currentColor=attribute;
-		Object current = contentAppearance.getAttribute(currentColor);
-		colorChooser.setColor(current != Appearance.INHERITED ? (Color) current : Color.white);
-		sp.getFrame().setVisible(false);
-		sp.setPanelWidth(2);
-		sp.getFrame().setContentPane(colorChooserPanel);
 		sp.getFrame().pack();
 		sp.getFrame().setVisible(true);
 	}
@@ -685,8 +753,8 @@ public class ViewerVR {
 		// scale
 		double[] extent = bounds.getExtent();
 		objectScale=Math.max(Math.max(extent[0], extent[2]), extent[1]);
-		setTubeRadius(0.4);
-		setPointRadius(0.5);
+		setTubeRadius(DEFAULT_TUBE_RADIUS);
+		setPointRadius(DEFAULT_POINT_RADIUS);
 		sceneNode.addChild(currentContent);
 		alignContent(diam, offset, null);
 		PickUtility.assignFaceAABBTrees(currentContent);
@@ -769,13 +837,6 @@ public class ViewerVR {
 		MatrixBuilder.euclidean().translate(x, y, z).assignTo(avatarNode);
 	}
 	
-	protected void switchToFileChooser() {
-		sp.setPanelWidth(2);
-		sp.getFrame().setContentPane(fileChooser);
-		sp.getFrame().pack();
-		sp.show(getSceneRoot(), new Matrix(avatarPath.getMatrix(null)));
-	}
-
 	public static void main(String[] args) throws IOException {
 		
 		//System.setProperty("jreality.data", "/net/MathVis/data/testData3D");
@@ -784,7 +845,7 @@ public class ViewerVR {
 		System.setProperty("de.jreality.ui.viewerapp.synchRender", "true");
 		
 		ViewerVR tds = new ViewerVR();
-		tds.switchToFileChooser();
+		tds.showPanel(false);
 		ViewerApp vApp = tds.display();
 				
 		//vApp.setAttachNavigator(true);
