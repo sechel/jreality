@@ -89,7 +89,7 @@ public class ColorEditor extends PropertyEditorSupport {
     public Component getCustomEditor() {
         button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Color col = AlphaColorChooser.showDialog(button, title, (Color) getValue());
+                Color col = AlphaColorChooserDialog.showDialog(button, title, (Color) getValue());
                 ColorEditor.this.setValue(col);
             }
         });
