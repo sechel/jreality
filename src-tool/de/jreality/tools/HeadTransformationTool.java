@@ -40,6 +40,7 @@
 
 package de.jreality.tools;
 
+import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.SceneGraphComponent;
@@ -66,6 +67,8 @@ public class HeadTransformationTool extends AbstractTool {
   
   private final transient Matrix m=new Matrix();
   
+  private boolean init;
+  
   public HeadTransformationTool() {
     addCurrentSlot(rotateActivation);
   }
@@ -85,7 +88,12 @@ public class HeadTransformationTool extends AbstractTool {
     if (tc.getSource() == rotateActivation) return;
     if (tc.getRootToToolComponent().getLastComponent().getTransformation() != null) {
       tc.getRootToToolComponent().getLastComponent().getTransformation().getMatrix(m.getArray());
-      headTranslation=m.getColumn(3);     
+      headTranslation=m.getColumn(3);
+      if (init) {
+	      FactoredMatrix fm = new FactoredMatrix(m.getArray());
+	      currentAngle=fm.getRotationAngle();
+	      init=false;
+      }
     } else {
       headTranslation=new double[]{0,1.7,0};
     }
@@ -111,4 +119,5 @@ public class HeadTransformationTool extends AbstractTool {
   public void setMinAngle(double minAngle) {
     this.minAngle = minAngle;
   }
+
 }
