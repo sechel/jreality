@@ -73,7 +73,7 @@ public class ViewerVR {
 	private static final double PANEL_Z_OFFSET = -2.2; //-2.6
 	private static final double DEFAULT_ABOVE_GROUND = 1.8;
 	private static final double COLOR_CHOOSER_ABOVE_GROUND = 1.8; //2
-	private static final double COLOR_CHOOSER_PANEL_WIDTH = 2.3;
+	private static final double COLOR_CHOOSER_PANEL_WIDTH = 2.3; //2
 	private static final int FILE_CHOOSER_ABOVE_GROUND = 2;
 	private static final int FILE_CHOOSER_PANEL_WIDTH = 2;
 
