@@ -70,19 +70,21 @@ import de.jreality.util.Rectangle3D;
 
 public class ViewerVR {
 
-	protected static final double PI2 = Math.PI / 2;
-
+	private static final double PANEL_Z_OFFSET = -2.2; //-2.6
+	private static final double DEFAULT_ABOVE_GROUND = 1.8;
+	private static final double COLOR_CHOOSER_ABOVE_GROUND = 1.8; //2
+	private static final double COLOR_CHOOSER_PANEL_WIDTH = 2.3;
+	private static final int FILE_CHOOSER_ABOVE_GROUND = 2;
+	private static final int FILE_CHOOSER_PANEL_WIDTH = 2;
 	protected static double DEFAULT_POINT_RADIUS = .4;
-
 	protected static double DEFAULT_TUBE_RADIUS = .3;
 
-	private static final double MAX_SIZE = 0.1;
+	protected static final double PI2 = Math.PI / 2;
 
+	private static final double MAX_SIZE = 0.1;
 	private static final int RANGE = 200;
 
 	//private static final Dimension PANEL_SIZE = new Dimension(280, 250);
-
-	private static final double DEFAULT_ABOVE_GROUND = 1.8;
 
 	private static final double DEFAULT_PANEL_WIDTH = 1;
 
@@ -265,7 +267,7 @@ public class ViewerVR {
 		sp = new ScenePanel();
 		sp.setPanelWidth(DEFAULT_PANEL_WIDTH);
 		sp.setAboveGround(DEFAULT_ABOVE_GROUND);
-		sp.setZOffset(-2.6);
+		sp.setZOffset(PANEL_Z_OFFSET);
 		JTabbedPane tabs = new JTabbedPane();
 
 		// load tab
@@ -702,7 +704,7 @@ public class ViewerVR {
 
 	protected void showPanel(boolean showFileChooser) {
 		if (showFileChooser) {
-			sp.setPanelWidth(2);
+			sp.setPanelWidth(1.9);
 			sp.getFrame().setContentPane(fileChooser);
 			sp.getFrame().pack();
 		}
@@ -715,8 +717,8 @@ public class ViewerVR {
 		colorChooser.setColor(current != Appearance.INHERITED ? (Color) current
 				: Color.white);
 		sp.getFrame().setVisible(false);
-		sp.setPanelWidth(2);
-		sp.setAboveGround(2.3);
+		sp.setPanelWidth(COLOR_CHOOSER_ABOVE_GROUND);
+		sp.setAboveGround(COLOR_CHOOSER_PANEL_WIDTH);
 		sp.getFrame().setContentPane(colorChooserPanel);
 		sp.getFrame().pack();
 		sp.getFrame().setVisible(true);
@@ -766,8 +768,8 @@ public class ViewerVR {
 
 	public void switchToFileBrowser() {
 		sp.getFrame().setVisible(false);
-		sp.setPanelWidth(2);
-		sp.setAboveGround(2);
+		sp.setPanelWidth(FILE_CHOOSER_PANEL_WIDTH);
+		sp.setAboveGround(FILE_CHOOSER_ABOVE_GROUND);
 		sp.getFrame().setContentPane(fileChooser);
 		sp.getFrame().pack();
 		sp.getFrame().setVisible(true);
