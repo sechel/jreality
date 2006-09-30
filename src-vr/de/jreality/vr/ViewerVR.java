@@ -76,6 +76,7 @@ public class ViewerVR {
 	private static final double COLOR_CHOOSER_PANEL_WIDTH = 2.3;
 	private static final int FILE_CHOOSER_ABOVE_GROUND = 2;
 	private static final int FILE_CHOOSER_PANEL_WIDTH = 2;
+
 	protected static double DEFAULT_POINT_RADIUS = .4;
 	protected static double DEFAULT_TUBE_RADIUS = .3;
 
