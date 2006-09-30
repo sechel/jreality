@@ -71,6 +71,7 @@ import de.jreality.ui.viewerapp.actions.file.LoadFileMerged;
 import de.jreality.ui.viewerapp.actions.file.LoadScene;
 import de.jreality.ui.viewerapp.actions.file.Quit;
 import de.jreality.ui.viewerapp.actions.file.SaveScene;
+import de.jreality.ui.viewerapp.actions.file.SaveSelected;
 import de.jreality.ui.viewerapp.actions.viewer.Render;
 import de.jreality.ui.viewerapp.actions.viewer.ToggleFullScreen;
 import de.jreality.ui.viewerapp.actions.viewer.ToggleViewerFullScreen;
@@ -91,6 +92,7 @@ public class MenuFactory {
   public static String LOAD_FILE_MERGED = "Load merged files";
   public static String LOAD_SCENE = "Load scene";
   public static String SAVE_SCENE = "Save scene";
+  public static String SAVE_SELECTED = "Save selected";
   public static String QUIT = "Quit";
   public static String REMOVE = "Remove";
   public static String ADD_TOOL = "Add Tool";
@@ -166,9 +168,10 @@ public class MenuFactory {
     
     fileMenu.insert(new JMenuItem(new LoadFile(LOAD_FILE, sm, frame)), 0);
     fileMenu.insert(new JMenuItem(new LoadFileMerged(LOAD_FILE_MERGED, sm, frame)), 1);
+    fileMenu.insert(new JMenuItem(new SaveSelected(SAVE_SELECTED, sm, frame)), 2);
     if (viewerApp != null) {
-      fileMenu.insert(new JMenuItem(new LoadScene(LOAD_SCENE, viewerApp, frame)), 2);
-      fileMenu.insert(new JMenuItem(new SaveScene(SAVE_SCENE, viewerApp.getViewer(), frame)), 3);
+      fileMenu.insert(new JMenuItem(new LoadScene(LOAD_SCENE, viewerApp, frame)), 3);
+      fileMenu.insert(new JMenuItem(new SaveScene(SAVE_SCENE, viewerApp.getViewer(), frame)), 4);
     }
     compMenu.add(new JMenuItem(new Remove(REMOVE, sm)));
     compMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, frame)));
