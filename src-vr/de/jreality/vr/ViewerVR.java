@@ -96,6 +96,8 @@ public class ViewerVR {
 
 	private static final double DEFAULT_PANEL_WIDTH = 1;
 
+	private static final double MAX_CONTENT_SIZE = 100;
+
 	private SceneGraphComponent sceneRoot = new SceneGraphComponent(),
 			sceneNode = new SceneGraphComponent(),
 			avatarNode = new SceneGraphComponent(),
@@ -140,7 +142,7 @@ public class ViewerVR {
 
 	private CubeMap cm;
 
-	private double objectScale;
+	private double objectScale=1;
 
 	private JButton loadButton;
 
@@ -325,11 +327,12 @@ public class ViewerVR {
 		Box sizeBox = new Box(BoxLayout.Y_AXIS);
 		sizeBox.setBorder(new EmptyBorder(10, 5, 0, 5));
 		JLabel sizeLabel = new JLabel("size");
-		sizeSlider = new JSlider(SwingConstants.VERTICAL, 100, 10000,
-				(int) (diam * 100));
+		int sliderDiam = (int)(Math.log(diam*RANGE/MAX_CONTENT_SIZE)/Math.log(RANGE)*100);
+		sizeSlider = new JSlider(SwingConstants.VERTICAL, 0, 100, sliderDiam);
 		sizeSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
-				setDiam(0.01 * sizeSlider.getValue());
+				double sliderDiam = 0.01 * sizeSlider.getValue();
+				setDiam(Math.exp(Math.log(RANGE)*sliderDiam)/RANGE * MAX_CONTENT_SIZE);
 				alignContent(diam, offset, null);
 			}
 		});
@@ -620,26 +623,11 @@ public class ViewerVR {
 
 		// help tab
 		JTextPane helpText = new JTextPane();
-		 helpText.setEditable(false);
-		 helpText.setContentType("text/html");
-		 helpText.setPreferredSize(new Dimension(100,100));
-		 helpText.setBackground(rotate.getBackground());
-		// helpText.setText("<html>"+
-		// "<ul>"+
-		// "<item>look around: move mouse (press right mouse button in window
-		// mode</item>"+
-		// "</ul>"+
-		// "</html>");
-		// JScrollPane helpPane = new JScrollPane(helpText);
-//		LineNumberReader r = new LineNumberReader(Input.getInput("de/jreality/vr/ViewerVR_help.html").getReader());
-//		String html = null;
-//		String line;
-//		while ((line=r.readLine())!=null) html+=line+"\n";
-//		helpText.setText(html);
-//		System.out.println(html);
-		 String html = Input.getInput("de/jreality/vr/help.html").getContentAsString()
-
-
+		helpText.setEditable(false);
+		helpText.setContentType("text/html");
+		helpText.setPreferredSize(new Dimension(100,100));
+		helpText.setBackground(rotate.getBackground());
+		helpText.setText(Input.getInput("de/jreality/vr/help.html").getContentAsString());
 		tabs.add("help", helpText);
 
 		sp.getFrame().getContentPane().add(tabs);
@@ -738,7 +726,7 @@ public class ViewerVR {
 				: Color.white);
 		sp.getFrame().setVisible(false);
 		sp.setPanelWidth(2);
-		sp.setAboveGround(2);
+		sp.setAboveGround(2.3);
 		sp.getFrame().setContentPane(colorChooserPanel);
 		sp.getFrame().pack();
 		sp.getFrame().setVisible(true);
@@ -789,7 +777,7 @@ public class ViewerVR {
 	public void switchToFileBrowser() {
 		sp.getFrame().setVisible(false);
 		sp.setPanelWidth(2);
-		sp.setAboveGround(1.7);
+		sp.setAboveGround(2);
 		sp.getFrame().setContentPane(fileChooser);
 		sp.getFrame().pack();
 		sp.getFrame().setVisible(true);
@@ -846,9 +834,10 @@ public class ViewerVR {
 		return diam;
 	}
 
-	public void setDiam(double diam) {
-		this.diam = diam;
-		sizeSlider.setValue((int) (diam * 100));
+	public void setDiam(double d) {
+		diam = d;
+		double sliderDiam = Math.log(diam*RANGE/MAX_CONTENT_SIZE)/Math.log(RANGE);
+		sizeSlider.setValue((int) (sliderDiam * 100));
 	}
 
 	public double getOffset() {
@@ -873,18 +862,19 @@ public class ViewerVR {
 				// scale
 				double[] extent = bounds.getExtent();
 				double maxExtent = Math.max(extent[0], extent[2]);
-				double scale = diam / maxExtent;
+				if (maxExtent != 0) {
+					double scale = diam / maxExtent;
+					double[] translation = bounds.getCenter();
+					translation[1] = -scale * bounds.getMinY() + offset;
+					translation[0] *= -scale;
+					translation[2] *= -scale;
 
-				double[] translation = bounds.getCenter();
-				translation[1] = -scale * bounds.getMinY() + offset;
-				translation[0] *= -scale;
-				translation[2] *= -scale;
-
-				MatrixBuilder mb = MatrixBuilder.euclidean().translate(
-						translation).scale(scale);
-				if (sceneNode.getTransformation() != null)
-					mb.times(sceneNode.getTransformation().getMatrix());
-				mb.assignTo(sceneNode);
+					MatrixBuilder mb = MatrixBuilder.euclidean().translate(
+							translation).scale(scale);
+					if (sceneNode.getTransformation() != null)
+						mb.times(sceneNode.getTransformation().getMatrix());
+					mb.assignTo(sceneNode);
+				}
 			}
 		});
 	}
