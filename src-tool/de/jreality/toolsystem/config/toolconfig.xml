@@ -6,7 +6,6 @@
     <rawdevice id="Mouse" type="de.jreality.toolsystem.raw.DeviceMouse"/>
     <!--rawdevice id="Mouse" type="de.jreality.toolsystem.raw.DeviceMouseSWT"/-->
     <rawdevice id="SystemTimer" type="de.jreality.toolsystem.raw.DeviceSystemTimer"/>
-    <!--rawdevice id="Joystick" type="de.jreality.toolsystem.raw.DeviceJoystick"/-->
     <!--rawdevice id="Joystick" type="de.jreality.toolsystem.raw.DeviceJinputJoystick"/-->
   </rawdevices>
 
@@ -56,10 +55,10 @@
     
     <mapping device="SystemTimer" src="tick" target="SystemTime"/>
 
-    <!--mapping device="Joystick" src="axis_1" target="ForwardBackwardAxis"/>
-    <mapping device="Joystick" src="axis_0" target="RightLeftAxis"/>
-    <mapping device="Joystick" src="button_0" target="IncreaseSpeed"/>
-    <mapping device="Joystick" src="button_1" target="DecreaseSpeed"/-->
+    <!--mapping device="Joystick" src="axis_0_5" target="ForwardBackwardAxis"/>
+    <mapping device="Joystick" src="axis_0_4" target="RightLeftAxis"/>
+    <mapping device="Joystick" src="button_0_0" target="JumpActivation"/>
+    <mapping device="Joystick" src="button_0_1" target="RunActivation"/-->
     
     <!--mapping device="Joystick" src="axis_3_0" target="GtXaxis"/>
     <mapping device="Joystick" src="axis_3_1" target="GtYaxis"/>
@@ -71,7 +70,7 @@
   
   
   <virtualdevices>
-  
+   
     <mapping src="Secondary" target="RunActivation"/>
     
     <mapping src="PrimaryAction" target="PanelAction"/>
@@ -94,7 +93,7 @@
     <mapping src="PointerNdcXevolution" target="ScaleAxis"/>
     <mapping src="PointerNdcYevolution" target="VerticalShipRotationAngleEvolution"/>
     <mapping src="PointerNdcYevolution" target="VerticalHeadRotationAngleEvolution"/>
-    
+
     <virtualdevice type="de.jreality.toolsystem.virtual.VirtualDoubleClick">
       <inputslot>PrimaryAction</inputslot>
       <outputslot>PanelActivation</outputslot>
@@ -110,9 +109,14 @@
       <outputslot>PickShowActivation</outputslot>
     </virtualdevice>
 
-    <virtualdevice type="de.jreality.toolsystem.virtual.VirtualSwitchAndInvertAxis">
-      <inputslot>LookSwitch</inputslot>
+    <virtualdevice type="de.jreality.toolsystem.virtual.VirtualMap">
       <inputslot>PrimarySelection</inputslot>
+      <outputslot>ShipRotateActivation</outputslot>
+    </virtualdevice>
+
+    <virtualdevice type="de.jreality.toolsystem.virtual.VirtualToggleAxis">
+      <inputslot>LookSwitch</inputslot>
+      <inputslot>ShipRotateActivation</inputslot>
       <outputslot>ShipRotateActivation</outputslot>
     </virtualdevice>
 
@@ -195,6 +199,11 @@
       <outputslot>LeftRightAxis</outputslot>
     </virtualdevice>
     
+    <!--virtualdevice type="de.jreality.toolsystem.virtual.VirtualReverseAxis">
+      <inputslot>RightLeftAxis</inputslot>
+      <outputslot>LeftRightAxis</outputslot>
+    </virtualdevice-->
+
     <virtualdevice type="de.jreality.toolsystem.virtual.VirtualRotation">
       <inputslot>PointerNDC</inputslot>
       <inputslot>CameraToWorld</inputslot>

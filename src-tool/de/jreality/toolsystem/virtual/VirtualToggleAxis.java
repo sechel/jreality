@@ -63,12 +63,17 @@ public class VirtualToggleAxis implements VirtualDevice {
     boolean pressed=false;
     
     public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
+    	if (context.getEvent().getInputSlot() == in) {
         if (context.getAxisState(in).isPressed()) {
         	pressed=!pressed;
         	return null;
         } else {
         	return new ToolEvent(context.getEvent().getSource(), out, pressed ? AxisState.PRESSED : AxisState.ORIGIN);
         }
+    	} else { // source == out
+    		if (context.getAxisState(out).isReleased() && pressed) pressed=false;
+  			return null;
+    	}
     }
 
     public void initialize(List inputSlots, InputSlot result, Map configuration) {

@@ -163,7 +163,11 @@ public class DeviceMouse extends AbstractDeviceMouse implements RawDevice, Mouse
     component.addMouseWheelListener(this);
     component.addComponentListener(new ComponentAdapter() {
     	public void componentResized(ComponentEvent e) {
-    		if (isCenter()) setCenter(false);
+    		if (isCenter()) {
+    			setCenter(false);
+          queue.addEvent(new ToolEvent(this, InputSlot.getDevice("LookSwitch"), AxisState.PRESSED, null));
+          queue.addEvent(new ToolEvent(this, InputSlot.getDevice("LookSwitch"), AxisState.ORIGIN, null));
+    		}
     		requestFocus();
     	}
     });

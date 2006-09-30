@@ -53,7 +53,6 @@ import java.util.WeakHashMap;
 import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
 
-import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.ImageData;
@@ -210,7 +209,6 @@ public class Texture2DLoaderJOGL {
     } else {
       // create the texture ID for this texture 
       textureID = createTextureID(gl); 
-      System.out.println("cubemap="+textureID);
       ht.put(ref.getTop(), new Integer(textureID));
     }
     gl.glBindTexture(GL.GL_TEXTURE_CUBE_MAP, textureID); 
