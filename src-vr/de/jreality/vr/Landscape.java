@@ -60,8 +60,9 @@ public class Landscape implements ActionListener {
     this.skyboxes=(String[][])skyboxes.clone();
     Box buttonGroupComponent = new javax.swing.Box(BoxLayout.Y_AXIS);
     selectionComponent = new javax.swing.Box(BoxLayout.Y_AXIS);
-    JScrollPane pane = new JScrollPane(buttonGroupComponent);
-    selectionComponent.add("Center", pane);
+    //JScrollPane pane = new JScrollPane(buttonGroupComponent);
+    //selectionComponent.add("Center", pane);
+    selectionComponent.add("Center", buttonGroupComponent);
     ButtonGroup group = new ButtonGroup();
     for (int i = 0; i < skyboxes.length; i++) {
       JRadioButton button = new JRadioButton(skyboxes[i][0]);
