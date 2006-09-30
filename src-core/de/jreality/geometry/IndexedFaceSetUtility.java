@@ -1439,11 +1439,17 @@ public class IndexedFaceSetUtility {
   	private static class Point {
   		double x,y,z,w;
   		Point(DoubleArray da, int digits) {
-  			double r=digits > 0 ? Math.pow(10, digits) : 1;
-  			x=Math.round(r*da.getValueAt(0))/r;
-  			y=Math.round(r*da.getValueAt(1))/r;
-  			z=Math.round(r*da.getValueAt(2))/r;
-  			if (da.getLength() > 3) w=Math.round(r*da.getValueAt(3))/r;
+	  			double r=Math.pow(10, digits);
+	  			x=Math.round(r*da.getValueAt(0))/r;
+	  			y=Math.round(r*da.getValueAt(1))/r;
+	  			z=Math.round(r*da.getValueAt(2))/r;
+	  			if (da.getLength() > 3) w=Math.round(r*da.getValueAt(3))/r;
+  			}
+  		Point(DoubleArray da) {
+  			x=da.getValueAt(0);
+  			y=da.getValueAt(1);
+  			z=da.getValueAt(2);
+  			if (da.getLength() > 3) w=da.getValueAt(3);  				
   		}
 		@Override
 		public int hashCode() {
@@ -1506,7 +1512,7 @@ public class IndexedFaceSetUtility {
   		};
   		DoubleArrayArray points = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
   		for (int i=0, n=points.getLength(); i<n; i++) {
-  			table.get(new Point(points.getValueAt(i), digits)).add(i);
+  			table.get(digits > 0 ? new Point(points.getValueAt(i), digits) : new Point(points.getValueAt(i))).add(i);
   		}
   		
   		if (ifs.getVertexAttributes(Attribute.NORMALS) == null) GeometryUtility.calculateAndSetVertexNormals(ifs);
@@ -1556,7 +1562,6 @@ public class IndexedFaceSetUtility {
 	  			if (Rn.innerProduct(n, target) < 0) throw new RuntimeException();
 	  			if (cnt>2) System.out.println("merged "+cnt);
 	  			indices=remaining;
-	  			remaining.clear();
   			}
   		}
   		//IndexedFaceSetUtility.assignSmoothVertexNormals(self, 5)
