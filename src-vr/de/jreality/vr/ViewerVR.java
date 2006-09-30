@@ -203,7 +203,8 @@ public class ViewerVR {
 		avatarPath = cameraPath.popNew();
 		cameraPath.push(cam);
 
-		MatrixBuilder.euclidean().translate(0, 1.7, 0).rotateX(8*Math.PI/180).assignTo(camNode);
+		MatrixBuilder.euclidean().translate(0, 1.7, 0).rotateX(5*Math.PI/180).assignTo(camNode);
+		//MatrixBuilder.euclidean().translate(0, 1.7, 0).assignTo(camNode);
 
 		// add tools
 		ShipNavigationTool shipNavigationTool = new ShipNavigationTool();
