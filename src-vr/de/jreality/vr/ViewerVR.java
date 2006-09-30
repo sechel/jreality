@@ -82,7 +82,7 @@ public class ViewerVR {
 
 	//private static final Dimension PANEL_SIZE = new Dimension(280, 250);
 
-	private static final double DEFAULT_ABOVE_GROUND = 1.7;
+	private static final double DEFAULT_ABOVE_GROUND = 1.8;
 
 	private static final double DEFAULT_PANEL_WIDTH = 1;
 
@@ -615,7 +615,7 @@ public class ViewerVR {
 		JTextPane helpText = new JTextPane();
 		helpText.setEditable(false);
 		helpText.setContentType("text/html");
-		helpText.setPreferredSize(new Dimension(100,100));
+		helpText.setPreferredSize(new Dimension(100,260));
 		helpText.setBackground(rotate.getBackground());
 		helpText.setText(Input.getInput("de/jreality/vr/help.html").getContentAsString());
 		tabs.add("help", helpText);
