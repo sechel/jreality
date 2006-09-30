@@ -11,6 +11,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.LineNumberReader;
+import java.io.Reader;
 import java.net.URL;
 import java.util.HashMap;
 
@@ -88,9 +90,9 @@ public class ViewerVR {
 
 	private static final int RANGE = 200;
 
-	private static final Dimension PANEL_SIZE = new Dimension(280, 250);
+	//private static final Dimension PANEL_SIZE = new Dimension(280, 250);
 
-	private static final double DEFAULT_ABOVE_GROUND = 1.2;
+	private static final double DEFAULT_ABOVE_GROUND = 1.7;
 
 	private static final double DEFAULT_PANEL_WIDTH = 1;
 
@@ -206,7 +208,7 @@ public class ViewerVR {
 		avatarPath = cameraPath.popNew();
 		cameraPath.push(cam);
 
-		MatrixBuilder.euclidean().translate(0, 1.7, 0).assignTo(camNode);
+		MatrixBuilder.euclidean().translate(0, 1.7, 0).rotateX(8*Math.PI/180).assignTo(camNode);
 
 		// add tools
 		ShipNavigationTool shipNavigationTool = new ShipNavigationTool();
@@ -215,6 +217,7 @@ public class ViewerVR {
 			shipNavigationTool.setPollingDevice(false);
 
 		if (!portal)
+			//HeadTransformationTool ht = new HeadTransformationTool();
 			camNode.addTool(new HeadTransformationTool());
 		else {
 			try {
@@ -317,7 +320,7 @@ public class ViewerVR {
 
 		// align panel
 		JPanel placementPanel = new JPanel(new BorderLayout());
-		placementPanel.setBorder(new EmptyBorder(5, 35, 5, 35));
+		placementPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		Box placementBox = new Box(BoxLayout.X_AXIS);
 		Box sizeBox = new Box(BoxLayout.Y_AXIS);
 		sizeBox.setBorder(new EmptyBorder(10, 5, 0, 5));
@@ -429,7 +432,6 @@ public class ViewerVR {
 		rotateBox.add(zRotateRight);
 
 		JPanel p = new JPanel(new BorderLayout());
-		// p.setBorder(new EmptyBorder(5,30,5,20));
 		p.setBorder(new EmptyBorder(5, 30, 5, 20));
 		loadButton = new JButton("load ...");
 		loadButton.addActionListener(new ActionListener() {
@@ -617,11 +619,11 @@ public class ViewerVR {
 		tabs.add("tools", toolPanel);
 
 		// help tab
-		JLabel helpText = new JLabel();
-		// helpText.setEditable(false);
-		// helpText.setContentType("text/html");
-		// helpText.setPreferredSize(new Dimension(100,500));
-		// helpText.setBackground(rotate.getBackground());
+		JTextPane helpText = new JTextPane();
+		 helpText.setEditable(false);
+		 helpText.setContentType("text/html");
+		 helpText.setPreferredSize(new Dimension(100,100));
+		 helpText.setBackground(rotate.getBackground());
 		// helpText.setText("<html>"+
 		// "<ul>"+
 		// "<item>look around: move mouse (press right mouse button in window
@@ -629,6 +631,15 @@ public class ViewerVR {
 		// "</ul>"+
 		// "</html>");
 		// JScrollPane helpPane = new JScrollPane(helpText);
+//		LineNumberReader r = new LineNumberReader(Input.getInput("de/jreality/vr/ViewerVR_help.html").getReader());
+//		String html = null;
+//		String line;
+//		while ((line=r.readLine())!=null) html+=line+"\n";
+//		helpText.setText(html);
+//		System.out.println(html);
+		 String html = Input.getInput("de/jreality/vr/help.html").getContentAsString()
+
+
 		tabs.add("help", helpText);
 
 		sp.getFrame().getContentPane().add(tabs);
