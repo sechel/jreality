@@ -51,8 +51,6 @@ import java.io.IOException;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
-import de.jreality.io.JrScene;
-import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
