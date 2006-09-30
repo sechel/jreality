@@ -298,9 +298,18 @@ public final class Input
    * @throws IOException
    */
   public Input copy() throws IOException {
-	if (sourceFile != null) return new Input(sourceFile);
-	if (sourceURL != null) return new Input(sourceURL);
-	throw new UnsupportedOperationException("only for files and URLs");
-}
+		if (sourceFile != null) return new Input(sourceFile);
+		if (sourceURL != null) return new Input(sourceURL);
+		throw new UnsupportedOperationException("only for files and URLs");
+	}
 
+  public String getContentAsString() throws IOException {
+  	StringBuilder sb = new StringBuilder();
+  	Reader r = getReader();
+  	char[] buf = new char[1024];
+  	int read;
+  	while ((read=r.read(buf))!=-1) sb.append(buf, 0, read);
+  	return sb.toString();
+  }
+  
 }
