@@ -34,6 +34,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileSystemView;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Matrix;
@@ -90,6 +91,11 @@ public class ViewerVR {
 	private static final double DEFAULT_PANEL_WIDTH = 1;
 
 	private static final double MAX_CONTENT_SIZE = 100;
+	private static final double DEFAULT_TEX_SCALE = 20;
+	private static final double MAX_TEX_SCALE = 400;
+	private static final double TEX_SCALE_RANGE = 400;
+	
+	private Texture2D tex;
 
 	private SceneGraphComponent sceneRoot = new SceneGraphComponent(),
 			sceneNode = new SceneGraphComponent(),
@@ -102,6 +108,7 @@ public class ViewerVR {
 	private SceneGraphComponent currentContent;
 
 	private HashMap<String, Integer> exampleIndices = new HashMap<String, Integer>();
+	private HashMap<String, Integer> textureIndices = new HashMap<String, Integer>();
 
 	private Appearance terrainAppearance = new Appearance(),
 			rootAppearance = new Appearance(),
@@ -116,7 +123,7 @@ public class ViewerVR {
 	Landscape landscape = new Landscape();
 
 	private JFileChooser fileChooser;
-
+	private JFileChooser texFileChooser;
 	private AlphaColorChooser colorChooser;
 
 	private JPanel colorChooserPanel;
@@ -146,6 +153,8 @@ public class ViewerVR {
 	private Container defaultPanel;
 
 	private String currentColor;
+	private JSlider texScaleSlider;
+	
 
 	public ViewerVR() throws IOException {
 
@@ -204,7 +213,6 @@ public class ViewerVR {
 		cameraPath.push(cam);
 
 		MatrixBuilder.euclidean().translate(0, 1.7, 0).rotateX(5*Math.PI/180).assignTo(camNode);
-		//MatrixBuilder.euclidean().translate(0, 1.7, 0).assignTo(camNode);
 
 		// add tools
 		ShipNavigationTool shipNavigationTool = new ShipNavigationTool();
@@ -213,7 +221,6 @@ public class ViewerVR {
 			shipNavigationTool.setPollingDevice(false);
 
 		if (!portal)
-			//HeadTransformationTool ht = new HeadTransformationTool();
 			camNode.addTool(new HeadTransformationTool());
 		else {
 			try {
@@ -615,6 +622,68 @@ public class ViewerVR {
 		toolPanel.add(toolBox);
 		tabs.add("tools", toolPanel);
 
+		// texture tab
+		final String[][] textures = new String[][] {
+				{ "none", null },
+				{ "metal grid", "textures/boysurface.png" },
+				{ "metal floor", "textures/metal_basic88.png" }
+		};
+		ActionListener texturesListener = new ActionListener() {
+			
+			public void actionPerformed(ActionEvent e) {
+				String selectedBox = e.getActionCommand();
+				int selectionIndex = ((Integer) textureIndices.get(selectedBox))
+						.intValue();
+				try {
+					if (textures[selectionIndex][0] == "none") {
+						contentAppearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D, Appearance.INHERITED, Texture2D.class);
+					} else {
+						ImageData img = ImageData.load(Input.getInput(textures[selectionIndex][1]));
+						tex = TextureUtility.createTexture(contentAppearance, "polygonShader", img, false);
+						setTexScale(texScaleSlider.getValue()*.01);
+					}
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		};
+		JPanel textureButtonPanel = new JPanel(new BorderLayout());
+		textureButtonPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+		Box textureButtonBox = new Box(BoxLayout.Y_AXIS);
+		ButtonGroup textureGroup = new ButtonGroup();
+		for (int i = 0; i < textures.length; i++) {
+			JRadioButton button = new JRadioButton(textures[i][0]);
+			button.addActionListener(texturesListener);
+			textureButtonBox.add(button);
+			textureGroup.add(button);
+			textureIndices.put(textures[i][0], new Integer(i));
+		}
+		textureButtonPanel.add("Center", textureButtonBox);
+		
+		Box texScaleBox = new Box(BoxLayout.X_AXIS);
+		texScaleBox.setBorder(new EmptyBorder(70, 5, 5, 0));
+		JLabel texScaleLabel = new JLabel("scale");
+		int sliderTexScale = (int)(Math.log(DEFAULT_TEX_SCALE /MAX_TEX_SCALE*TEX_SCALE_RANGE)/Math.log(TEX_SCALE_RANGE)*100);
+		System.out.println("creating slider with value "+sliderTexScale);
+		texScaleSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, sliderTexScale);
+		texScaleSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				setTexScale(0.01 * texScaleSlider.getValue());
+			}
+		});
+		texScaleBox.add(texScaleLabel);
+		texScaleBox.add(texScaleSlider);
+		textureButtonBox .add(texScaleBox);
+		
+		JButton textureLoadButton = new JButton("load ...");
+		textureLoadButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				switchToTextureBrowser();
+			}
+		});
+		textureButtonPanel.add("South", textureLoadButton);
+		tabs.add("tex", textureButtonPanel);
+		
 		// help tab
 		JTextPane helpText = new JTextPane();
 		helpText.setEditable(false);
@@ -625,7 +694,6 @@ public class ViewerVR {
 		tabs.add("help", helpText);
 
 		sp.getFrame().getContentPane().add(tabs);
-		// sp.getFrame().setSize(PANEL_SIZE);
 		sp.getFrame().pack();
 
 		getTerrainNode().addTool(sp.getPanelTool());
@@ -633,7 +701,6 @@ public class ViewerVR {
 		defaultPanel = sp.getFrame().getContentPane();
 
 		fileChooser = FileLoaderDialog.createFileChooser();
-
 		fileChooser.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ev) {
 				File file = fileChooser.getSelectedFile();
@@ -649,6 +716,29 @@ public class ViewerVR {
 			}
 		});
 
+		FileSystemView view = FileSystemView.getFileSystemView();
+		String texDir = null;
+		String dataDir = System.getProperty("jreality.data");
+		if (dataDir!= null) texDir = dataDir+"/textures";
+		File defaultDir = new File(texDir);
+		texFileChooser = new JFileChooser(!defaultDir.exists() ? view.getHomeDirectory() : defaultDir, view);
+		texFileChooser.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ev) {
+				File file = texFileChooser.getSelectedFile();
+				try {
+					if (ev.getActionCommand() == JFileChooser.APPROVE_SELECTION
+							&& file != null) {
+						ImageData img = ImageData.load(Input.getInput(file));
+						tex = TextureUtility.createTexture(contentAppearance, "polygonShader", img, false);
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				switchToDefaultPanel();
+			}
+		});
+		
 		colorChooser = new AlphaColorChooser(Color.white, false);
 		colorChooserPanel = new JPanel(new BorderLayout());
 		colorChooserPanel.setBorder(new EmptyBorder(10, 10, 5, 10));
@@ -657,10 +747,7 @@ public class ViewerVR {
 
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		buttonPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
-		// buttonPanel.add(Box.createHorizontalGlue());
 		JButton okButton = new JButton("Ok");
-		// okButton.setMargin(new Insets(20,20,20,20));
-		// okButton.setBorder(new EtchedBorder());
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				applyColor();
@@ -668,26 +755,31 @@ public class ViewerVR {
 			}
 		});
 		buttonPanel.add(okButton);
-		// buttonPanel.add(Box.createHorizontalGlue());
 		JButton applyButton = new JButton("Apply");
-		// applyButton.setBorder(new EtchedBorder());
 		applyButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				applyColor();
 			}
 		});
 		buttonPanel.add(applyButton);
-		// buttonPanel.add(Box.createHorizontalGlue());
 		JButton cancelButton = new JButton("Cancel");
-		// cancelButton.setBorder(new EtchedBorder());
 		cancelButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				switchToDefaultPanel();
 			}
 		});
 		buttonPanel.add(cancelButton);
-		// buttonPanel.add(Box.createHorizontalGlue());
 		colorChooserPanel.add("South", buttonPanel);
+	}
+
+	protected void setTexScale(double d) {
+		System.out.println("setting slider to "+(int) (d * 100));
+		texScaleSlider.setValue((int) (d * 100));
+		if (tex != null) {
+			double texScale = Math.exp(Math.log(TEX_SCALE_RANGE) * d)/TEX_SCALE_RANGE * MAX_TEX_SCALE;
+			System.out.println("setting texture scale to "+texScale);
+			tex.setTextureMatrix(MatrixBuilder.euclidean().scale(texScale).getMatrix());
+		}
 	}
 
 	protected void applyColor() {
@@ -699,7 +791,6 @@ public class ViewerVR {
 		sp.setPanelWidth(DEFAULT_PANEL_WIDTH);
 		sp.setAboveGround(DEFAULT_ABOVE_GROUND);
 		sp.getFrame().setContentPane(defaultPanel);
-		// sp.getFrame().setSize(PANEL_SIZE);
 		sp.getFrame().pack();
 		sp.getFrame().setVisible(true);
 	}
@@ -749,8 +840,6 @@ public class ViewerVR {
 	}
 
 	protected void setReflection(double d) {
-		// Color diffuse = (Color)
-		// contentAppearance.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR);
 		cm.setBlendColor(new Color(1f, 1f, 1f, (float) d));
 	}
 
@@ -773,6 +862,15 @@ public class ViewerVR {
 		sp.setPanelWidth(FILE_CHOOSER_PANEL_WIDTH);
 		sp.setAboveGround(FILE_CHOOSER_ABOVE_GROUND);
 		sp.getFrame().setContentPane(fileChooser);
+		sp.getFrame().pack();
+		sp.getFrame().setVisible(true);
+	}
+	
+	public void switchToTextureBrowser() {
+		sp.getFrame().setVisible(false);
+		sp.setPanelWidth(FILE_CHOOSER_PANEL_WIDTH);
+		sp.setAboveGround(FILE_CHOOSER_ABOVE_GROUND);
+		sp.getFrame().setContentPane(texFileChooser);
 		sp.getFrame().pack();
 		sp.getFrame().setVisible(true);
 	}
