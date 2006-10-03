@@ -664,7 +664,6 @@ public class ViewerVR {
 		texScaleBox.setBorder(new EmptyBorder(70, 5, 5, 0));
 		JLabel texScaleLabel = new JLabel("scale");
 		int sliderTexScale = (int)(Math.log(DEFAULT_TEX_SCALE /MAX_TEX_SCALE*TEX_SCALE_RANGE)/Math.log(TEX_SCALE_RANGE)*100);
-		System.out.println("creating slider with value "+sliderTexScale);
 		texScaleSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, sliderTexScale);
 		texScaleSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
@@ -773,11 +772,9 @@ public class ViewerVR {
 	}
 
 	protected void setTexScale(double d) {
-		System.out.println("setting slider to "+(int) (d * 100));
 		texScaleSlider.setValue((int) (d * 100));
 		if (tex != null) {
 			double texScale = Math.exp(Math.log(TEX_SCALE_RANGE) * d)/TEX_SCALE_RANGE * MAX_TEX_SCALE;
-			System.out.println("setting texture scale to "+texScale);
 			tex.setTextureMatrix(MatrixBuilder.euclidean().scale(texScale).getMatrix());
 		}
 	}
