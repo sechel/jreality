@@ -734,7 +734,7 @@ public class ViewerVR {
 		});
 
 		FileSystemView view = FileSystemView.getFileSystemView();
-		String texDir = null;
+		String texDir = ".";
 		String dataDir = System.getProperty("jreality.data");
 		if (dataDir!= null) texDir = dataDir+"/textures";
 		File defaultDir = new File(texDir);
