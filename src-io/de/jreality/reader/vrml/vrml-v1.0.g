@@ -43,6 +43,11 @@ import de.jreality.math.*;
 import de.jreality.geometry.*;
 import de.jreality.shader.*;
 import de.jreality.scene.data.*;
+import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.Light;
+import de.jreality.scene.PointLight;
+import de.jreality.scene.SpotLight;
+
 }
 
 /*****************************************************************************
@@ -53,708 +58,1365 @@ class VRMLV1Parser extends Parser;
 options {
 	k = 2;							// two token lookahead
 }
-{
-	// this is what is returned from the parsing process
+{	
+	// Entwurfsentscheidung:
+	// - hier werden keine Indexed*(-Set) zusammengefast!
+	// - es wird auf globale Variablen weitgehend verzichtet
+	//		statdessen gibt es die Klasse State die alle wichtigen Daten enthaelt
+	// - das einhaengen der Geometrieen geschieht in shapeNode
+	//		colorieren und die Normalen werden direkt bei der Geometrie behandelt
+	// - die durchgereichten States werden stets direkt geaendert.
+	// 		nur beim erschaffen eines neuen Knotens und beim erstellen einer Geometrie 
+	// 		(oder DEF & USE) werden die States Kopiert ((als Kopie abgezweigt))
+	// - Regeln die den State veraendern haben deshalb KEINEN Rueckgabewert 
+	// 		da sie auf dem Original arbeiten.
+	// - leider koennen einige Geometrieen nicht direkt erstellt werden:
+	//		fuer ihre Richtigen Abmessungen muss man (noch) eine Transformationsmatrix
+	//		in ihren Eltern-Knoten legen (Bsp: Sphere mit RADIUS = 3).
+	// 		Desshalb gibt es im State eine Matrix extraGeoTrans die dufuer ungleich 
+	//		der Identitaet gesetzt wird. Sie wird im ShapeNode behandelt.
+	// - sfbitmaskValue werden eine Liste mit zulaessigen Namen uebergeben
+	//		zurueckgegebewn wird ein neuer BooleanArray der fuer die  
+	//		geparsten Namen den entsprechenden Flag auf true gesetzt hat
+	// - werde zunaechst die Bindings als Attribute zwar parsen, aber ignorieren.
+	// - ebenso Texturen
+
+
+	// TODO: mehrerfache Kameras(-Pfade)
+	// hier : die erste Kamera gilt
+	SceneGraphPath camPath = null;
 	SceneGraphComponent root = null;
-	// current state of the parsing process
-	SceneGraphComponent currentSGC = null;
-	SceneGraphPath currentPath = new SceneGraphPath();
-	Transformation currentTransform = new Transformation();
-	Appearance currentAp = null;
-	DataList currentCoordinate3 = null;
-	DataList currentNormal = null;
-	int[][] currentCoordinateIndex = null;
-	int[][] currentNormalIndex = null;
-	int[][] currentMaterialIndex = null;
-	int currentNormalBinding = VRMLHelper.DEFAULT;
-	int currentMaterialBinding = VRMLHelper.DEFAULT;
+
+//	int currentNormalBinding = VRMLHelper.DEFAULT;
+//	int currentMaterialBinding = VRMLHelper.DEFAULT;
+
+
 	
 	// we use a dynamic allocation scheme, beginning with arrays of length 10000
 	final int INITIAL_SIZE = 10000;
-	double[] ds = new double[INITIAL_SIZE];		// for storing double arrays
-	int[] is = new int[INITIAL_SIZE];				// for storing int arrays
-	double[] tempVector3 = new double[3];
-	boolean collectingMFVec3 = false;
-	// for collecting statistics
-	int primitiveCount, polygonCount, coordinate3Count;
-	int[] ngons = new int[10];
-	SceneGraphComponent cameraNode = null;
+	double[] ds = new double[INITIAL_SIZE];			// for storing double arrays
+	Color[] cs = new Color[INITIAL_SIZE];			// for storing Color arrays
+	int[] ls = new int[INITIAL_SIZE];				// for storing int arrays
+	String [] strs = new String [INITIAL_SIZE]; 	// for storing vec2 & vec3 arrays
+	double [][] vecs = new double [INITIAL_SIZE][]; // for storing vec2 & vec3 arrays
+	
+//	double[] tempVector3 = new double[3];
+//	boolean collectingMFVec3 = false;		
 }
 
-// the "main" rule for the parser
-vrmlFile returns [SceneGraphComponent r]
-{ r = null;}
+/// __________________________________________________________________________
+/// _____________________________START________________________________________
+/// __________________________________________________________________________
+vrmlFile returns [SceneGraphComponent r=null]
 		:
 		HEADER
-		r = vrmlScene
-	;
-
-vrmlScene returns [SceneGraphComponent r]
-{r = null; }
-		:
 		{
+			// Start-State initialisieren:
 			root = new SceneGraphComponent();
-			currentSGC = root;
-			currentPath.push(root);
-			primitiveCount = polygonCount = 0;
+			SceneGraphPath p = new SceneGraphPath();
+			p.push(root);
+			Transformation t = null;
+			State state = new State();
+			state.diffuse=new Color[]{new Color(0,0,1)};
+			state.trafo=t;
+			state.currNode=root;
+			state.camPath=p;
+			state.transparency= new double[]{1};
+			Appearance rootApp = new Appearance();
+			rootApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
+			rootApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
+			root.setAppearance(rootApp);
+			}
+		(statement[state] {state.history = state.history+"*";})?
+		(statement[state] {state.history = state.history+"*";
+						   System.err.println("Warning: multiple basic Nodes"
+							 +"found (and processed). This is not VRML-Standard !");})*
+		{ r = root; }
+	;
+	
+private
+statement[State state]:
+		"DEF"	ID	node[state]
+		/// erst merken dann auswerten!
+		/// als SgC anhaengen
+		/// only Nodes!
+
+	|	"USE"	ID
+		/// Notfalls erst eine App wirklich setzen und den Rest anhaengen
+	|	node[state]
+	;
+
+// --------------------- Node Types -------------------------
+private
+node[State state]
+{if (VRMLHelper.verbose) System.err.print(state.history+"Got Node: ");}
+	:(groupNode						[state]
+  	  | shapeNode					[state]
+	  | propertyGeoNAppNode			[state]
+	  | propertyMatrixTransformNode	[state]
+	  | specialNode				 	[state]
+	  | strangeNode 		         // fremd definierter Node (ignorieren)
+	 )
+	;
+
+private
+groupNode [State state] 
+ {if (VRMLHelper.verbose) System.err.print("group Node: ");}
+	:(  separatorNode   [state]
+	  |	"Switch"		egal // TODO3
+	  |	"WWWAnchor"		egal // TODO3
+	  |	"LOD"			egal // TODO3
+	 )
+ 	;
+
+private
+shapeNode [State state]
+{
+if (VRMLHelper.verbose) System.err.print("Shape Node: ");
+State state2= new State(state);
+PointSet geo=null; // ist allgemeinste Geometrie
+}	:
+	(
+		geo = asciiTextNode			[state2]
+	|	geo = coneNode				[state2]
+	|	geo = cubeNode				[state2]
+	|	geo = cylinderNode			[state2]
+	|	geo = indexedFaceSetNode 	[state2]
+	|	geo = indexedLineSetNode 	[state2]
+	|	geo = pointSetNode			[state2]
+	|	geo = sphereNode 			[state2]
+	)
+		{ 	
+			SceneGraphComponent sgc= new SceneGraphComponent();
+			if (geo==null){System.out.println("failure in geometry. Abort Node!");}
+			else{
+				sgc.setName(geo.getName());
+				state2.currNode.addChild(sgc);
+				sgc.setGeometry(geo);
+				if (geo instanceof IndexedFaceSet)
+					 sgc.setAppearance(state2.makeGeoApp(false));
+				else sgc.setAppearance(state2.makeGeoApp(true));
+				// Trafos:
+				Transformation t= null;
+				if ((state2.trafo!=null)|(state2.extraGeoTrans!=null)){
+					if (state2.trafo==null){
+						t=state2.extraGeoTrans;
+					}
+					else if(state2.extraGeoTrans==null)
+						t=state2.trafo;
+					else {
+						t = state2.trafo; 
+						t.multiplyOnRight(state2.extraGeoTrans.getMatrix());
+				  	}
+				}
+				if (t!=null) sgc.setTransformation(new Transformation(t));
+			}
 		}
-		(statement)*
-		{
-			r = root;
-			System.err.println("Read in "+primitiveCount+" indexed face sets with a total of "+polygonCount+" faces.");
-			System.err.println("There were "+coordinate3Count+" vertex lists");
+	;
+
+private
+propertyGeoNAppNode [State state] 
+ {if (VRMLHelper.verbose) System.err.print("prop Geo Node: ");}
+	:(	coordinate3Node 		[state]
+	  |	"FontStyle"				egal 		// TODO2
+	  |	infoNode				[state]
+	  |	materialNode			[state]
+	  |	materialBindingNode		[state]		// irgendwie implementiert TODO3
+	  |	normalNode				[state]
+	  |	normalBindingNode		[state]		// irgendwie implementiert TODO3
+	  |	"Texture2"				egal 		// [state] TODO2
+	  |	"Texture2Transform"		egal 		// [state] TODO2
+	  |	"TextureCoordinate2"	egal 		// [state] TODO2
+	  |	shapeHintsNode			[state]		//eigentlich egal
+	 )
+	;
+
+private
+propertyMatrixTransformNode [State state]
+{
+if (VRMLHelper.verbose) System.err.print("Prop Matrix Node: ");
+Transformation m= new Transformation();
+}	:
+	(	m = matrixTransformNode
+	|	m = rotationNode
+	|	m = scaleNode
+	| 	m = transformNode
+	| 	m = translationNode	)
+		{ 	
+		 if (state.trafo==null)
+		 	state.trafo= new Transformation();
+		 state.trafo.multiplyOnRight(m.getMatrix());
 		}
 	;
 
-statement:
-		"DEF"	id	statement		//TODO statements must return values, and then get put into a map
-	|	"USE"	id					// TODO pull out the value from the map
-	|	atomicNode
+private
+specialNode[State state]
+ {if (VRMLHelper.verbose) System.err.print("special Node: ");}
+	:( camNode	[state]
+	  | lightNode [state]
+	  | "WWWInline" 		egal	 //[state] TODO3
+	 )
+	;
+	
+private
+camNode[State state]
+{ if (VRMLHelper.verbose) System.err.print("Cam Node: ");
+  Camera c=null;
+}
+	:( c = orthographicCameraNode	[state]
+	  |c = perspectiveCameraNode	[state]	
+	 )
+		{ 
+			SceneGraphComponent sgc= new SceneGraphComponent();
+			state.currNode.addChild(sgc);
+			sgc.setName(c.getName());
+			if (c!=null){
+				//TODO3 mehrere KameraPfade
+				if (camPath==null) 	camPath=state.camPath;
+				sgc.setCamera(c);
+				Transformation t= new Transformation();
+				if ((state.trafo!=null)|(state.extraGeoTrans!=null)){
+					if (state.trafo==null){
+						t=state.extraGeoTrans;
+					}
+					else if(state.extraGeoTrans==null)
+						t=state.trafo;
+					else {
+						t = state.trafo; 
+						t.multiplyOnRight(state.extraGeoTrans.getMatrix());
+			  		}
+				}
+				if (t!=null) sgc.setTransformation(new Transformation(t));
+			}
+		}
 	;
 
-// TODO put the global assignments into this rule, and pull out of the node rules themselves
-atomicNode:
-		separatorNode
-	|	infoNode
-	| 	transformNode
-	| 	translationNode
-	|	rotationNode
-	|	scaleNode
-	|	matrixTransformNode
-	| 	shapeHintsNode
-	|	directionalLightNode
- 	|	currentAp=materialNode
-	|	currentCoordinate3=coordinate3Node		{coordinate3Count++;}
-	|	currentNormal=normalNode
-	|	currentNormalBinding=normalBindingNode
-	|	currentMaterialBinding=materialBindingNode
-	|	cubeNode
-	|	indexedFaceSetNode
-	|	indexedLineSetNode
-	|	cameraNode=perspectiveCameraNode
-	|	unknownNode
+private
+lightNode [State state]
+{ if (VRMLHelper.verbose) System.err.print("Light Node: ");
+  Light l= null;
+}	:(	l= directionalLightNode [state]
+	 |	l= pointLightNode		[state]
+	 |	l= spotLightNode		[state]
+	 )
+	{
+		SceneGraphComponent sgc= new SceneGraphComponent();
+		state.currNode.addChild(sgc);
+		sgc.setName(l.getName());
+		sgc.setLight(l);
+		Transformation t= new Transformation();
+		if ((state.trafo!=null)|(state.extraGeoTrans!=null)){
+			if (state.trafo==null){
+				t=state.extraGeoTrans;
+			}
+			else if(state.extraGeoTrans==null)
+				t=state.trafo;
+			else {
+				t = state.trafo; 
+				t.multiplyOnRight(state.extraGeoTrans.getMatrix());
+		  	}
+		}
+		if (t!=null) sgc.setTransformation(new Transformation(t));
+	}
 	;
 
-separatorNode:
-		g:"Separator"			
+// ------------------------------ group Nodes -----------------------------
+private
+separatorNode[State state]
+{
+ if (VRMLHelper.verbose) System.err.println("Separator"); 
+ State state2= new State(state);
+ Transformation t= state2.trafo;
+ state2.trafo=null;
+ state2.history=state.history+"|";
+ { if (VRMLHelper.verbose) System.err.println(state.history+"\\"); }
+		
+}:
+		g:"Separator"
 			{
 				SceneGraphComponent sgc = new SceneGraphComponent();
-				sgc.setName("LineNo "+g.getLine());		// for looking up later
-				currentSGC.addChild(sgc);
-				currentSGC = sgc;
-				currentPath.push(sgc);
+				if (t!=null)
+					sgc.setTransformation(t);
+				sgc.setName("Knot LineNo "+g.getLine()); // for looking up later
+				state2.currNode.addChild(sgc);
+				state2.currNode=sgc;
+				state2.camPath.push(sgc);
 			}
 		OPEN_BRACE	
-			(statement)* 	
-		CLOSE_BRACE			
-			{
-				currentPath.pop();
-				currentSGC = currentPath.getLastComponent();
-				if (VRMLHelper.verbose) System.err.println("Got Separator"); 
-			}
+			(statement[state2])*
+		CLOSE_BRACE	
+		{ if (VRMLHelper.verbose) System.err.println(state.history+"/"); }
+		
 	;
 
-infoNode returns [String[] info]
-{ info = null; 
-  String s = null;
-  Vector v = new Vector();}
-	:
-	"Info"	OPEN_BRACE	(s=infoAttribute		{v.add(s);} )* 	CLOSE_BRACE
-	{
-		info = new String[v.size()];
-		v.toArray(info);
-		//LoggingSystem.getLogger(this).info("Got "+info.length+" info strings.");
-		if (VRMLHelper.verbose) System.err.println("Got "+info.length+" info strings.");
-	}
-	;
-	
-infoAttribute returns [String s]
-{s = null; }
-	:
-	"string"	s=sfstringValue
-	;
-
-//
-//  *************** Transformation-related noded *******************
-//	
-transformNode
-{FactoredMatrix fm = new FactoredMatrix();}
-	:
-	"Transform"	OPEN_BRACE	(transformAttribute[fm])*	CLOSE_BRACE
-	{
-		// TODO check to be sure the transform not already set; if it is,
-		// make child
-		currentSGC.setTransformation(new Transformation( fm.getArray())); 
-	}
-	;
-
-transformAttribute[FactoredMatrix fm]
-{ double[] rr = null; }
-	:
-		// TODO add more attributes
-		"rotation"	rr=sfrotationValue	{fm.setRotation(rr[3], rr[0], rr[1], rr[2]);}
-	|	"scale"		rr=sfvec3fValue		{fm.setStretch(rr[0], rr[1], rr[2]);}
-	|	"translation"	rr=sfvec3fValue	{fm.setTranslation(rr[0], rr[1], rr[2]);}
-	|	"center"		rr=sfvec3fValue		{fm.setCenter(rr);}
-	;
-
-matrixTransformNode returns [double[] mat]
-{ mat = null;}
-	:
-	"MatrixTransform"		OPEN_BRACE	mat = sffloatValues CLOSE_BRACE	
-	{
-		// TODO move this up to the "invoking" rule
-		currentSGC.setTransformation(new Transformation( mat)); 
-	}
-	;
-	
-translationNode returns [double[] mat]
-{mat = null;  double[] t = null; }
-		:
-		"Translation"	OPEN_BRACE "translation" t=sfvec3fValue CLOSE_BRACE		
+// ------------------------------ shape Nodes ------------------------------
+private 
+asciiTextNode [State state] returns[PointSet label=null]
+{
+  if (VRMLHelper.verbose) System.err.print("Label( ");
+  String just="LEFT";
+  String [] text = new String[]{""};
+  double spacing=1;
+  String[] code= new String[]{ 	"LEFT","CENTER","RIGHT"	};
+  double[] width =new double[]{0};
+}	
+	:	"AsciiText" OPEN_BRACE
+		(	"String" 		{if (VRMLHelper.verbose) System.err.print("String ");}
+				text = mfstringValue
+		  | "spacing" 		{if (VRMLHelper.verbose) System.err.print("spacing ");}
+		  		spacing = sffloatValue
+		  | "justification" {if (VRMLHelper.verbose) System.err.print("justif. ");}
+		  		just = sfenumValue
+		  | "width" 		{if (VRMLHelper.verbose) System.err.print("width ");}
+		  		width = mffloatValue
+		  | wrongAttribute
+		   )* CLOSE_BRACE
 		{
-			if (VRMLHelper.verbose) System.err.println("Got Translation");
-			mat = P3.makeTranslationMatrix(null, t, Pn.EUCLIDEAN);
-			if (currentSGC.getTransformation() == null)	
-				currentSGC.setTransformation( new Transformation());
-			currentSGC.getTransformation().multiplyOnRight(mat); 
+			int justif = State.getEnum(code, just);
+			String[] text2= new String[]{State.mergeStrings(text)};
+			label = new PointSet();
+			label.setNumPoints(1);
+			double[][] d=new double[][]{{0,0,0}};
+			label.setVertexAttributes(Attribute.COORDINATES,new DoubleArrayArray.Array(d));
+			label.setVertexAttributes(Attribute.LABELS, new StringArray(text2));
+			label.setName("Label");
+//			TODO2: dont ignore justification
+//			TODO2: dont ignore width
+//			TODO2: dont ignore spacing
+			
+			if (VRMLHelper.verbose) System.err.println(")");
+			state.extraGeoTrans = new Transformation();		
+			state.edgeDraw=2;
+			state.vertexDraw=0;
+			state.faceDraw=2;
 		}
-		;
-
-rotationNode returns [double[] mat]
-{mat = null; double[] t = null; }
-		:
-		"Rotation"	OPEN_BRACE	"rotation" t=sfrotationValue CLOSE_BRACE		
-		{
-			if (VRMLHelper.verbose) System.err.println("Got Rotation");
-			double[] axis = new double[]{t[0], t[1], t[2]};
-			mat = P3.makeRotationMatrix(null, axis, t[3]);
-			if (currentSGC.getTransformation() == null)	
-				currentSGC.setTransformation( new Transformation());
-			currentSGC.getTransformation().multiplyOnRight(mat); 
+	;
+		  
+		  
+private
+coneNode [State state] returns [IndexedFaceSet cone=null]
+{
+  if (VRMLHelper.verbose) System.err.print("Cone( ");
+  String[]  parts = new String[]{"SIDES","BOTTOM","ALL"};
+  boolean[] partsMask=null;
+  double r=1;
+  double h=2; // default value 
+  boolean sideDraw=false;
+  boolean bottomDraw=false;
+}
+  	:
+	    "Cone"	OPEN_BRACE	(
+				("parts"  {if (VRMLHelper.verbose) System.err.print("parts ");}
+					partsMask = sfbitmaskValue[parts] )
+			| 	("bottomRadius" {if (VRMLHelper.verbose) System.err.print("bottomRadius ");}
+					r = sffloatValue)	
+			| 	("height"		{if (VRMLHelper.verbose) System.err.print("height ");}
+					h = sffloatValue)
+			|	wrongAttribute
+		)* CLOSE_BRACE
+	{	if (partsMask==null)		{bottomDraw=true; sideDraw=true;}
+		else{
+			if ((partsMask[2])|	!(partsMask[0]|partsMask[1]))
+			    	{bottomDraw=true; sideDraw=true;}
+			if (partsMask[0])	{sideDraw=true;	 }
+			if (partsMask[1])	{bottomDraw=true;}
 		}
-		;
-
-scaleNode returns [double[] mat]
-{mat = null; double[] t = null; }
-		:
-		"Scale"	OPEN_BRACE	"scaleFactor" t=sfvec3fValue CLOSE_BRACE		
-		{
-			if (VRMLHelper.verbose) System.err.println("Got Scale");
-			mat = P3.makeStretchMatrix(null, t);
-			if (currentSGC.getTransformation() == null)	
-				currentSGC.setTransformation( new Transformation());
-			currentSGC.getTransformation().multiplyOnRight(mat); 
+		cone = State.cone(sideDraw,bottomDraw,20);
+		cone.setName("cone"); 
+		state.extraGeoTrans = new Transformation();
+		state.edgeDraw=2;
+		state.vertexDraw=2;
+		state.faceDraw=0;
+		MatrixBuilder.euclidean().scale(r,h,r).translate(0,-0.5,0).assignTo(state.extraGeoTrans);
+		if (VRMLHelper.verbose) System.err.println(")");
 		}
-		;
-	
-shapeHintsNode:
-		"ShapeHints"	OPEN_BRACE	(shapeHintAttribute)* CLOSE_BRACE		
-		{if (VRMLHelper.verbose) System.err.println("Got ShapeHints"); }
 	;
 
-shapeHintAttribute:
-                "vertexOrdering"        ("COUNTERCLOCKWISE" | "CLOCKWISE")
-     |        "shapeType"                ("SOLID" | "UNKNOWN_SHAPE_TYPE" )
-     |        "faceType"                ("CONVEX" | "UNKNOWN_FACE_TYPE")
-	|	"creaseAngle"	number
-	|	unknownAttribute
-	;
-	
-directionalLightNode returns [DirectionalLight dl]
-{     dl = new DirectionalLight();
-     SceneGraphComponent sgc = new SceneGraphComponent();
-    sgc.setLight(dl);
-        }
-        :
-        "DirectionalLight"        OPEN_BRACE        (directionalLightAttribute[sgc])* CLOSE_BRACE
-       ;
-        
-directionalLightAttribute[SceneGraphComponent sgc]
-{       boolean b = false;
-     double d = 1.0;
-     Color c = null;
-     double[] dir = null;
-     }
-        :
-                "on"                b=sfboolValue               { if (VRMLHelper.verbose)      System.err.println("Got on"); }
-      |        "intensity"        d=sffloatValue                { if (VRMLHelper.verbose)      System.err.println("Got intensity"); sgc.getLight().setIntensity(d); }
-     |        "color"        c=sfcolorValue                     { if (VRMLHelper.verbose)      System.err.println("Got color"); sgc.getLight().setColor(c);      }
-        |        "direction" dir=sfvec3fValue               
-                { 
-                    Transformation tt = new Transformation();
-                    tt.setMatrix(P3.makeLookatMatrix(null, Pn.originP3, dir, 0.0, Pn.EUCLIDEAN));
-                    sgc.setTransformation(tt);
-                    if (VRMLHelper.verbose)      System.err.println("Got direction"); 
-                }
-        ;
-// TODO fix this
-// The Material node has values that are potentially arrays (mfcolorValue and mffloatValue)
-materialNode returns [Appearance ap]
-{ap = new Appearance();}
-	:
-	"Material" OPEN_BRACE  (materialAttribute[ap])*	CLOSE_BRACE			
-	{
-		if (VRMLHelper.verbose) System.err.println("Got Material"); 
-		currentSGC.setAppearance(ap);
-	}
-	;
-//TODO fix this
-// remove mfcolorValue, replace with mfvec3fValue.
-// look at current state of MaterialBinding to decide what to do with the return values
-// If PER_PART, then values need to be converted to Color type
-materialAttribute[Appearance ap]
-{	Color[] c=null; double[] d = null; }
-	:
-	// TODO check whether there are multiple values returned; may need to set the color per face or vertex
-	// make true emissive color
-	 	"ambientColor"	c=mfcolorValue 	{ap.setAttribute(CommonAttributes.AMBIENT_COLOR, c[0]);}
-	 |	"diffuseColor"	c=mfcolorValue {ap.setAttribute(CommonAttributes.DIFFUSE_COLOR, c[0]);}
-	 |	"specularColor"	c=mfcolorValue {ap.setAttribute(CommonAttributes.SPECULAR_COLOR, c[0]);}
-	 | 	"emissiveColor" c=mfcolorValue {ap.setAttribute(CommonAttributes.SPECULAR_COLOR, c[0]);}
-	 | 	"transparency"	d=mffloatValue {ap.setAttribute(CommonAttributes.TRANSPARENCY, d[0]);}
-	 | 	"shininess"	d=mffloatValue {ap.setAttribute(CommonAttributes.SPECULAR_EXPONENT, d[0]);}
-	 ;
-	 
-coordinate3Node returns [DataList dl]
-{ dl = null;  double[] points = null;}
-	:				
-	"Coordinate3"	OPEN_BRACE	"point" 
-			points = mfvec3fValue
-			CLOSE_BRACE							
-			{
-			if (VRMLHelper.verbose)	{
-				System.err.println("Got Coordinate3");
-				System.err.println("Points: "+Rn.toString(points));
-			}
-			dl = StorageModel.DOUBLE_ARRAY.inlined(3).createReadOnly(points);
-		 	}
-	;
-	
-normalNode returns [DataList dl]
-{ dl = null;  double[] normals = null;}
-	:
-	"Normal"	OPEN_BRACE	"vector" 
-			normals=mfvec3fValue
-			CLOSE_BRACE
-	{ 
-		if (VRMLHelper.verbose)	System.err.println("Got Normal"); 
-		dl =  StorageModel.DOUBLE_ARRAY.inlined(3).createReadOnly(normals);
-	}	
-	;
-
-normalBindingNode returns [int nb]
-{ nb = 0;}
-	:
-	"NormalBinding"	OPEN_BRACE	"value" nb=bindingAttribute CLOSE_BRACE
-	;
-	
-materialBindingNode returns [int mb]
-{ mb = 0;}
-	:
-	"MaterialBinding"	OPEN_BRACE	"value" mb=bindingAttribute CLOSE_BRACE
-	;
-	
-bindingAttribute returns [int which]
-{ which = VRMLHelper.DEFAULT; }
-	:
-		"DEFAULT"			{which = VRMLHelper.DEFAULT;	}
-	|	"OVERALL"			{which = VRMLHelper.OVERALL;	}
-	|	"PER_PART"			{which = VRMLHelper.PER_PART;	}
-	|	"PER_PART_INDEXED"	{which = VRMLHelper.PER_PART_INDEXED;	}
-	|	"PER_FACE"			{which = VRMLHelper.PER_FACE;	}
-	|	"PER_FACE_INDEXED"	{which = VRMLHelper.PER_FACE_INDEXED;	}
-	|	"PER_VERTEX"			{which = VRMLHelper.PER_VERTEX;	}
-	|	"PER_VERTEX_INDEXED"	{which = VRMLHelper.PER_VERTEX_INDEXED;	}
-	;
-
-cubeNode returns [SceneGraphComponent sgc]
-{ sgc = null; double w=2, h=2, d=2;}	
+private
+cubeNode [State state]returns [IndexedFaceSet cube=null]
+{
+  if (VRMLHelper.verbose) System.err.print("Cube( ");
+  double w=2;
+  double h=2;
+  double d=2; // default value 
+}	
 	:
 	"Cube"	OPEN_BRACE	(
-			("width"		w = 	sffloatValue)
-		| 	("height"	h = 	sffloatValue)
-		| 	("depth"		d = 	sffloatValue)
-		)+ CLOSE_BRACE
+			"width"	{if (VRMLHelper.verbose) System.err.print("width ");}
+				w = 	sffloatValue
+		| 	"height" {if (VRMLHelper.verbose) System.err.print("height ");}
+				h = 	sffloatValue
+		| 	"depth"	 {if (VRMLHelper.verbose) System.err.print("depth ");}
+				d = 	sffloatValue
+		|	wrongAttribute
+		)* CLOSE_BRACE
 	{
-		IndexedFaceSet cube = Primitives.cube(false);
-		sgc = new SceneGraphComponent();
-		sgc.setName("cube");
-		sgc.setGeometry(cube);
-		double[] scaleMatrix = P3.makeStretchMatrix(null, new double[]{w,d,h});
-		sgc.setTransformation(new Transformation(scaleMatrix));
-		currentSGC.addChild(sgc);
+		cube = Primitives.cube(false);
+		cube.setName("cube");
+		state.extraGeoTrans = new Transformation();
+		state.edgeDraw=2;
+		state.vertexDraw=2;
+		state.faceDraw=0;
+		MatrixBuilder.euclidean().scale(w/2,h/2,d/2).assignTo(state.extraGeoTrans);
+		if (VRMLHelper.verbose) System.err.println(")");
 	}
 	;
 
-sphereNode returns [SceneGraphComponent sgc]
-{ sgc = null; double r=1, h=2, d=2;}	
+private
+cylinderNode [State state]returns [IndexedFaceSet cylinder=null]
+{
+  if (VRMLHelper.verbose) System.err.print("Cylinder( ");
+  String[]  parts = new String[]{"SIDES","TOP","BOTTOM","ALL"};
+  boolean[] partsMask=null;
+  double r=1;
+  double h=2; // default value 
+}	
 	:
-	"Sphere"	OPEN_BRACE	(
-			("radius"		r = 	sffloatValue)
-		)+ CLOSE_BRACE
+	"Cylinder"	OPEN_BRACE	(
+				"parts"	{if (VRMLHelper.verbose) System.err.print("parts ");}
+					partsMask = sfbitmaskValue[parts] 
+			| 	"radius" {if (VRMLHelper.verbose) System.err.print("radius ");}
+					r = sffloatValue
+			| 	"height" {if (VRMLHelper.verbose) System.err.print("height ");}
+					h = sffloatValue
+			|	wrongAttribute
+		)* CLOSE_BRACE
 	{
-		sgc = new SceneGraphComponent();
-		sgc.setName("vrml sphere");
-		sgc.setGeometry(new Sphere());
-		double[] scaleMatrix = P3.makeStretchMatrix(null, r);
-		sgc.setTransformation(new Transformation(scaleMatrix));
-		currentSGC.addChild(sgc);
+		// TODO3: Parts bewerten
+		if (partsMask==null) 		
+			cylinder = State.cylinder(true,true,true,20);
+		else{
+			if (partsMask[3])
+				cylinder = State.cylinder(true,true,true,20);
+			else 
+				if (!(partsMask[0]|partsMask[1]|partsMask[2]))
+					cylinder = State.cylinder(true,true,true,20);
+				else
+					cylinder = State.cylinder(partsMask[0],partsMask[1],partsMask[2],20);
+		}
+		cylinder.setName("cylinder");
+		state.extraGeoTrans = new Transformation();
+		state.edgeDraw=2;
+		state.vertexDraw=2;
+		state.faceDraw=0;
+		MatrixBuilder.euclidean().scale(r,r,h).assignTo(state.extraGeoTrans);
+		if (VRMLHelper.verbose) System.err.println(")");
 	}
 	;
-		
 
-// TODO
-// Decide whether to "inline" the indexedFaceSetAttribute's so that no global variables
-// have to be used. (See perspectiveCameraNode below).	
-indexedFaceSetNode returns [IndexedFaceSet ifs]
-{ifs = null;}
+private
+indexedFaceSetNode [State state] returns [IndexedFaceSet ifs=null]
+{
+  if (VRMLHelper.verbose) System.err.print("IndexedFaceSet( "); 
+  int[] coordIndex	= new int[]{0};
+  int[] materialIndex	= new int[]{-1};
+  int[] normalIndex	= new int[]{-1};
+  int[] textureCoordIndex	= new int[]{-1};
+ }
 	:
-	g:"IndexedFaceSet"		OPEN_BRACE	(indexedFaceSetAttribute)+ CLOSE_BRACE	
+	"IndexedFaceSet"		OPEN_BRACE	
+	(   "coordIndex"		{  if (VRMLHelper.verbose) System.err.print("coordIndex "); }
+			coordIndex 			= mflongValue 
+	  | "materialIndex" 	{  if (VRMLHelper.verbose) System.err.print("materialIndex "); }
+	  		materialIndex		= mflongValue
+	  | "normalIndex" 		{  if (VRMLHelper.verbose) System.err.print("normalIndex "); }
+			normalIndex			= mflongValue
+	  | "textureCoordIndex"	{  if (VRMLHelper.verbose) System.err.print("textureCoordIndex "); }
+			textureCoordIndex	= mflongValue
+	  |	wrongAttribute	)*
+	CLOSE_BRACE
 	{
-	// TODO move this into VRMLHelper somehow
-	if (VRMLHelper.verbose) System.err.println("Got IndexedFaceSet"); 
+	int[][] coordIndex2 = State.convertIndexList(coordIndex);
+    int[][] materialIndex2 = State.convertIndexList(materialIndex);
+	int[][] normalIndex2 = State.convertIndexList(normalIndex);
+	int[][] textureCoordIndex2 = State.convertIndexList(textureCoordIndex);
+	
+	State state2= new State(state);
 	IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
-	ifsf.setVertexCount(currentCoordinate3.size());
-	ifsf.setFaceCount(currentCoordinateIndex.length);
-	ifsf.setVertexCoordinates(currentCoordinate3);
-	ifsf.setFaceIndices(currentCoordinateIndex);
-	// TODO handle other attributes, decide whether they are face/vertex attributes, etc.
+	ifsf.setVertexCount(state2.coords.length);
+	ifsf.setFaceCount(coordIndex2.length);
+	ifsf.setVertexAttribute(Attribute.COORDINATES,new DoubleArrayArray.Array(state2.coords) );
+	ifsf.setFaceIndices(coordIndex2);
+	State.setNormals(ifsf,coordIndex2,normalIndex2,state2);
+	State.setColors(ifsf,coordIndex2,materialIndex2,state2);
+	// TODO2: handle texture
+	// Texture:	if (textureCoordIndex2.length>0){}else {}
+	
 	ifsf.setGenerateEdgesFromFaces(false);
-	ifsf.setGenerateFaceNormals(true); // depends on whether face normals were set above!
-	ifsf.setGenerateVertexNormals(true); // depends on whether face normals were set above!
 	ifsf.update();
 	ifs = ifsf.getIndexedFaceSet();
-	ifs.setName("IFS:LineNo "+g.getLine());
-	// collect some statistics
-	primitiveCount++;
-	polygonCount += ifs.getNumFaces();
-	if (currentSGC.getGeometry() != null) currentSGC.setGeometry(ifs);
-	else		{
-		SceneGraphComponent sgc = new SceneGraphComponent();
-		sgc.setName("LineNo "+g.getLine());		// for looking up later
-		sgc.setGeometry(ifs);
-		sgc.setAppearance(currentAp);
-		currentSGC.addChild(sgc);
-	}
+	ifs.setName("Face Set");
+	state.extraGeoTrans = new Transformation();
+	state.edgeDraw=2;
+	state.vertexDraw=2;
+	state.faceDraw=0;
+	if (VRMLHelper.verbose) System.err.println(")");
 	}
 	;
 	
-indexedFaceSetAttribute
-{ int[] indices = null; }
-	:
-		"coordIndex"	indices = mfint32Value		
-				{
-					if (VRMLHelper.verbose) System.err.println("Got coord "+indices.length+"indices");
-					currentCoordinateIndex = VRMLHelper.convertIndices(indices); 
-				}
-	|	"normalIndex" indices=mfint32Value
-				{
-					if (VRMLHelper.verbose) System.err.println("Got normal "+indices.length+"indices");
-					currentNormalIndex = VRMLHelper.convertIndices(indices); 
-				}
-	|	"materialIndex" indices=mfint32Value  // hier egal
-				{
-					if (VRMLHelper.verbose) System.err.println("Got material "+indices.length+"indices");
-					currentMaterialIndex = VRMLHelper.convertIndices(indices); 
-				}
-	;
-
-indexedLineSetNode  returns [IndexedLineSet ils]
-{ ils = null; 
+private
+indexedLineSetNode[State state] returns [IndexedLineSet ils=null]
+{
+  if (VRMLHelper.verbose) System.err.print("IndexedLineSet( "); 
+  int[] coordIndex	= new int[]{0};
+  int[] materialIndex	= new int[]{-1};
+  int[] normalIndex	= new int[]{-1};
+  int[] textureCoordIndex	= new int[]{-1};
 }
 	:
-		"IndexedLineSet"	OPEN_BRACE	(indexedLineSetAttribute)+ CLOSE_BRACE	
-		{
-		// TODO move this into VRMLHelper somehow
-		if (VRMLHelper.verbose) System.err.println("Got IndexedLineSet"); 
-		IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
-		ilsf.setVertexCount(currentCoordinate3.size());
-		ilsf.setLineCount(currentCoordinateIndex.length);
-		ilsf.setVertexCoordinates(currentCoordinate3);
-		ilsf.setEdgeIndices(currentCoordinateIndex);
-		// TODO handle other attributes, decide whether they are face/vertex attributes, etc.
-		ilsf.update();
-		ils = ilsf.getIndexedLineSet();
-		//ils.setName("IFS:LineNo "+g.getLine());
-		// collect some statistics
-		primitiveCount++;
-		//polygonCount += ifs.getNumFaces();
-		if (currentSGC.getGeometry() != null) currentSGC.setGeometry(ils);
-		else		{
-			SceneGraphComponent sgc = new SceneGraphComponent();
-			//sgc.setName("LineNo "+g.getLine());		// for looking up later
-			sgc.setGeometry(ils);
-			sgc.setAppearance(currentAp);
-			currentSGC.addChild(sgc);
-		}
-		}
-	;
+	"IndexedLineSet"		OPEN_BRACE	
+	(   "coordIndex" {if (VRMLHelper.verbose) System.err.print("coordIndex ");}
+	 		coordIndex 			= mflongValue
+	  | "materialIndex" {if (VRMLHelper.verbose) System.err.print("materialIndex ");}
+	  	 	materialIndex		= mflongValue
+	  | "normalIndex" {if (VRMLHelper.verbose) System.err.print("normalIndex ");}
+	  		normalIndex			= mflongValue
+	  | "textureCoordIndex"	{if (VRMLHelper.verbose) System.err.print("textureCoordIndex ");}
+	  		textureCoordIndex	= mflongValue
+	  |	wrongAttribute	)*
+	CLOSE_BRACE
+	{
+	int[][] coordIndex2 = State.convertIndexList(coordIndex);
+    int[][] materialIndex2 = State.convertIndexList(materialIndex);
+	int[][] normalIndex2 = State.convertIndexList(normalIndex);
+	int[][] textureCoordIndex2 = State.convertIndexList(textureCoordIndex);
 	
-indexedLineSetAttribute  // hier ok
-{ int[] indices = null; }
-	:
-		"coordIndex"	indices = mfint32Value		
-				{
-					if (VRMLHelper.verbose) System.err.println("Got coord "+indices.length+"indices");
-					currentCoordinateIndex = VRMLHelper.convertIndices(indices); 
-				}
-	|	"normalIndex" indices=mfint32Value // hier egal
-				{
-					// ignore
-				}
-	|	"materialIndex" indices=mfint32Value // hier egal
-				{
-					// ignore
-				}
-	;
-	
-	
-// TODO hook this up
-perspectiveCameraNode returns [SceneGraphComponent cn]
-{	cn = new SceneGraphComponent();
-	FactoredMatrix fm = new FactoredMatrix();
-	// TODO set default position/orientation for fm?
-	Camera c = new Camera();
-	double[] d = null;
-	double a = 0.0;
+	IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
+	ilsf.setVertexCount(state.coords.length);
+	ilsf.setLineCount(coordIndex2.length);
+	ilsf.setVertexAttribute(Attribute.COORDINATES,new DoubleArrayArray.Array(state.coords) );
+	ilsf.setEdgeIndices(coordIndex2);
+	// TODO2: handle Bindings, Normals, Colors
+	// Normals:	if (normalIndex2.length>0){}else {}
+	// Colors:	if (materialIndex2.length>0){}else {}
+	// Texture:	if (textureCoordIndex2.length>0){}else {}
+
+	ilsf.update();
+	ils = ilsf.getIndexedLineSet();
+	ils.setName("Line Set");
+	state.extraGeoTrans = new Transformation();
+	state.vertexDraw=2;
+	state.edgeDraw=0;
+	state.faceDraw=0;
+	if (VRMLHelper.verbose) System.err.println(")");
 	}
+	;
+
+private 
+pointSetNode [State state] returns[PointSet ps=null]
+{
+  if (VRMLHelper.verbose) System.err.print("PointSet( "); 
+  int start=0;
+  int num=-1;
+}
+	: "PointSet"		OPEN_BRACE
+		( "startIndex" {if (VRMLHelper.verbose) System.err.print("startIndex ");}
+				 start = sflongValue
+		 |"numPoints"  {if (VRMLHelper.verbose) System.err.print("numPoints ");}
+		 		 num   = sflongValue		
+		 | wrongAttribute )*
+	CLOSE_BRACE
+	{
+	double[][] coords2 = new double[num][];
+	System.arraycopy(state.coords,start,coords2,0,num);
+	ps = new PointSet();
+	ps.setNumPoints(num);
+	ps.setVertexAttributes(Attribute.COORDINATES,new DoubleArrayArray.Array(coords2));
+	// TODO2: handle Bindings, Normals, Colors
+	ps.setName("Point Set");
+	// Normals:	if (normalIndex2.length>0){}else {}
+	// Colors:	if (materialIndex2.length>0){}else {}
+	// Texture:	if (textureCoordIndex2.length>0){}else {}
+
+	state.extraGeoTrans = new Transformation();
+	state.vertexDraw=0;
+	state.edgeDraw=0;
+	state.faceDraw=0;
+	{if (VRMLHelper.verbose) System.err.println(")");}
+	}
+	;
+
+private
+sphereNode [State state] returns [IndexedFaceSet sphere=null]
+{
+ if (VRMLHelper.verbose) System.err.print("Sphere( ");
+ double r=1; // default 
+}	
 	:
-	("PerspectiveCamera"	OPEN_BRACE	(
-			"position"		d=sfvec3fValue		{fm.setTranslation(d); }		
-		|	"orientation"	d=sfrotationValue	{fm.setRotation(d[3], d[0], d[1], d[2]);}
-		|	"focalDistance"	a=sffloatValue		{c.setFocus(a);}
-		|	"heightAngle"	a=sffloatValue		{c.setFieldOfView(180.0*a/Math.PI);} )+	CLOSE_BRACE )
-	{	
-		fm.update();
-		cn.setTransformation(new Transformation(fm.getArray()));
-		cn.setCamera(c);
+	"Sphere"	OPEN_BRACE	(
+		"radius" {if (VRMLHelper.verbose) System.err.print("radius ");}
+				r = 	sffloatValue
+		| wrongAttribute 
+		)* CLOSE_BRACE
+	{
+		sphere = Primitives.sphere(20);
+		sphere.setName("Sphere");
+		state.extraGeoTrans=new Transformation();
+		MatrixBuilder.euclidean().scale(r).assignTo(state.extraGeoTrans);
+		state.edgeDraw=2;
+		state.vertexDraw=2;
+		state.faceDraw=0;
+		{if (VRMLHelper.verbose) System.err.println(")");}
 	}
 	;
 		
-unknownNode
-{String n = null; }
-	:
-	n=id		OPEN_BRACE  	(unknownAttribute)* CLOSE_BRACE	
-	{System.err.println("Unrecognized keyword "+	n); }
+/// ******************* shape Nodes done *****************
+// ------------------------------ property Geometry App Nodes ------------------------------
+
+private
+coordinate3Node [State state] 
+{
+ if (VRMLHelper.verbose) System.err.println("Coordinate3");
+ double[][] d={};
+ }
+	: "Coordinate3"	OPEN_BRACE	
+		("point" 	d = mfvec3fValue
+		| wrongAttribute)?
+	  CLOSE_BRACE							
+	{ state.coords=d;}
 	;
 
+//private
+// TODO3:
+//fontStyleNode[State state]:;
+
+private
+infoNode [State state]
+{if (VRMLHelper.verbose) System.err.println("Info:{ "); 
+ String s = null;}
+	: "Info"	OPEN_BRACE
+	 ( "string" s=sfstringValue
+	  	{if (VRMLHelper.verbose) System.err.println(state.history+"    "+s); }
+	   | wrongAttribute )*
+	  CLOSE_BRACE
+	{if (VRMLHelper.verbose) System.err.println(state.history+"}"); }
+  
+	;
+	
+private
+materialNode [State state]
+{ 
+ if (VRMLHelper.verbose) System.err.println("Material");
+ Color[] c=null;
+ double[] d=null;
+}	:
+	"Material" OPEN_BRACE
+	  (	 "ambientColor"		c = mfcolorValue {state.ambient=c;}
+	  	|"diffuseColor"		c = mfcolorValue {state.diffuse=c;}
+	  	|"specularColor"	c = mfcolorValue {state.specular=c;}
+	  	|"emissiveColor"	c = mfcolorValue {state.emissive=c;}// TODO3 emissive realisieren
+	  	|"shininess"		d = mffloatValue {state.shininess=d;}
+	  	|"transparency"		d = mffloatValue {state.transparency=d;}
+	  	| wrongAttribute
+	  )*
+	  CLOSE_BRACE			
+	;
+
+private
+materialBindingNode [State state]
+{if (VRMLHelper.verbose) System.err.println("Material Binding");
+ String mb="OVERALL"; }
+	:
+	"MaterialBinding"	OPEN_BRACE
+		("value"  mb = sfenumValue 
+		 |wrongAttribute )?
+	CLOSE_BRACE
+		{ state.materialBinding = State.getBinding(mb);	}
+	;
+
+private
+normalNode [State state]
+{ if (VRMLHelper.verbose)	System.err.println("Normals"); 
+  double[][] normals={};
+}
+	:
+	"Normal"	OPEN_BRACE	
+	("vector" 	normals=mfvec3fValue
+	| wrongAttribute)?
+	CLOSE_BRACE
+	{ state.normals=normals; }	
+	;
+
+private
+normalBindingNode [State state]
+{ if (VRMLHelper.verbose) System.err.println("normalBinding");
+ String nb ="DEFAULT";}
+	:
+	"NormalBinding"	OPEN_BRACE
+		("value" nb = sfenumValue 
+		| wrongAttribute)?
+	 CLOSE_BRACE
+	 	{ state.normalBinding = State.getBinding(nb);
+	 	}
+	;
+
+//private
+// TODO3
+//texture2Node[State state]:;
+
+//private
+// TODO3
+//texture2TransformNode[State state]:;
+
+//private
+// TODO3
+//textureCoordinate2Node[State state]:;
+
+private
+shapeHintsNode [State state]
+{ if (VRMLHelper.verbose) System.err.println("ShapeHints");
+ int vertOrd=0;
+ int shape=0;
+ int face=0;
+ double crease=0.5;
+ String s;
+}:
+		"ShapeHints"	OPEN_BRACE
+		( "vertexOrdering"  s = sfenumValue 
+			{state.vertOrder=State.getEnum(State.VERTORDER,s);}
+		 |"shapeType"		s = sfenumValue
+ 			{state.shapeType=State.getEnum(State.SHAPETYPE,s);}
+		 |"faceType"		s = sfenumValue
+			{state.faceType=State.getEnum(State.FACETYPE,s);}
+		 |"creaseAngle"		crease = sffloatValue
+		 	{state.creaseAngle=crease;}
+		 | wrongAttribute
+		)*
+		CLOSE_BRACE		
+		{// TODO3: handle Hints;
+		}
+	;
+
+// ************* prop Geo Nodes done *********************
+// ------------------------------ property Matrix transform Nodes ------------------------------
+
+private
+matrixTransformNode returns[Transformation t= new Transformation()]
+{if (VRMLHelper.verbose) System.err.println("Matrix Transform");
+double[] mat = null;}
+	: "MatrixTransform"		OPEN_BRACE
+	   ( "matrix"	mat = sfmatrixValue
+	   | wrongAttribute )?
+	  CLOSE_BRACE
+	{t= new Transformation(mat);}
+	;
+
+private
+rotationNode returns [Transformation m =new Transformation() ]
+{if (VRMLHelper.verbose) System.err.println("Rotation");
+double[] d=new double[]{0,0,1,0};
+}	:
+	"Rotation"	OPEN_BRACE	
+	("rotation" d=sfrotationValue
+	| wrongAttribute	)?
+	CLOSE_BRACE
+	{
+		double[] axis=new double[3];
+		System.arraycopy(d,0,axis,0,3);
+		MatrixBuilder.euclidean().rotate(d[3],axis).assignTo(m);
+	}
+	;
+
+private
+scaleNode returns [Transformation m =new Transformation() ]
+{ if (VRMLHelper.verbose) System.err.println("Scale");
+double[] d = new double[]{1,1,1};
+}	: "Scale"	OPEN_BRACE
+	   ( "scaleFactor" d=sfvec3fValue 
+	   | wrongAttribute	)?
+	 CLOSE_BRACE
+	{ MatrixBuilder.euclidean().scale(d).assignTo(m); 
+	}
+	;
+
+private
+transformNode returns [Transformation m =new Transformation() ]
+{	
+ if (VRMLHelper.verbose) System.err.println("transform Node");
+ double[] trans=new 	double[]{0,0,0};
+ double[] rot=new 		double[]{0,0,1,0};
+ double[] scaleF=new 	double[]{1,1,1};
+ double[] scaleO=new 	double[]{0,0,1,0};
+ double[] center=new 	double[]{0,0,0};
+}	: "Transform"	OPEN_BRACE
+	  ( "translation"		trans = sfvec3fValue	
+	   |"rotation"			rot = sfrotationValue	
+	   |"scaleFactor"		scaleF = sfvec3fValue	
+	   |"scaleOrientation"	scaleO = sfrotationValue	
+	   |"center"			center = sfvec3fValue
+	   | wrongAttribute 
+	  )*
+	  CLOSE_BRACE
+	{
+	 MatrixBuilder.euclidean()
+	  .translate(trans)
+	  .translate(center)
+	  .rotate(rot[3],rot[0],rot[1],rot[2])
+	  .rotate(scaleO[3],scaleO[0],scaleO[1],scaleO[2])
+	  .scale(scaleF)
+	  .rotate(-scaleO[3],scaleO[0],scaleO[1],scaleO[2])
+	  .translate(-center[0],-center[1],-center[2])
+	  .assignTo(m);
+	}
+	;
+
+private
+translationNode returns [Transformation m =new Transformation() ]
+{if (VRMLHelper.verbose) System.err.println("Translation");
+ double[] d = new double[]{0,0,0};
+}	:
+	"Translation"	OPEN_BRACE 
+	 ("translation" d = sfvec3fValue 
+	 | wrongAttribute )?
+	CLOSE_BRACE
+	{ MatrixBuilder.euclidean().translate(d).assignTo(m);}
+	;
+
+// ******************** prop Matr TransFNode Done *****************
+// ------------------------------ special Nodes ------------------------------
+
+private
+perspectiveCameraNode [State state] returns [Camera cam=null]
+{	
+    if (VRMLHelper.verbose) System.err.print("perspective Cam( ");
+	double[] pos = new double[]{0,0,1};
+	double[] orient = new double[]{0,0,1,0};
+	double fDist = 5;
+	double heightA = 0.785398; // defaults
+}	:
+	"PerspectiveCamera"	OPEN_BRACE	
+	(		"position"		{if (VRMLHelper.verbose) System.err.print("position ");}
+				pos =sfvec3fValue
+		|	"orientation"	{if (VRMLHelper.verbose) System.err.print("Orientation ");}
+				orient =sfrotationValue
+		|	"focalDistance"	{if (VRMLHelper.verbose) System.err.print("focalDistance ");}
+				fDist =sffloatValue
+		|	"heightAngle"	{if (VRMLHelper.verbose) System.err.print("heightAngle ");}
+				heightA =sffloatValue
+		|   wrongAttribute
+	)*	CLOSE_BRACE 
+	{
+		double[] rotAx=new double[3];
+	  	System.arraycopy(orient, 0, rotAx, 0, 3);	
+		cam= new Camera();
+		cam.setPerspective(true);
+		double hAngle=heightA*180/Math.PI;
+		cam.setFieldOfView(hAngle);// default=45
+		cam.setFocus(3);
+		cam.setName("perspective Cam");
+		cam.setFocalLength(fDist);
+		state.extraGeoTrans = new Transformation();
+		MatrixBuilder.euclidean()
+			.rotate(orient[3],rotAx)
+			.translate(pos)
+			.assignTo(state.extraGeoTrans);
+		if (VRMLHelper.verbose) System.err.println(")");
+	}
+	;
+
+private
+orthographicCameraNode 	[State state] returns[Camera cam=null]
+{
+    if (VRMLHelper.verbose) System.err.print("orthographic Cam( ");
+	double[] pos = new double[]{0,0,1};
+	double[] orient = new double[]{0,0,1,0};
+	double fDist = 5;
+	double height = 2; // defaults
+}:	"OrthographicCamera"	OPEN_BRACE	
+	(		"position"		{if (VRMLHelper.verbose) System.err.print("position ");}
+					pos =sfvec3fValue
+		|	"orientation"	{if (VRMLHelper.verbose) System.err.print("Orientation ");}
+					orient =sfrotationValue
+		|	"focalDistance"	{if (VRMLHelper.verbose) System.err.print("focalDistance ");}
+					fDist =sffloatValue
+		|	"height"	    {if (VRMLHelper.verbose) System.err.print("height ");}
+					height =sffloatValue
+		|   wrongAttribute
+	)*	CLOSE_BRACE 
+	{ 
+		cam= new Camera();
+		cam.setPerspective(false);
+		cam.setFieldOfView(45);
+		cam.setFocus((height*6)/5);
+		cam.setName("orthographic Cam");
+		cam.setFocalLength(fDist);
+		state.extraGeoTrans = new Transformation();
+		MatrixBuilder.euclidean()
+			.rotate(orient[3],orient[0],orient[1],orient[2])
+			.translate(pos)
+			.assignTo(state.extraGeoTrans);
+		if (VRMLHelper.verbose) System.err.println(")");	
+	}
+
+;
+
+private	pointLightNode	[State state] returns[PointLight l=null]
+{if (VRMLHelper.verbose) System.err.print("Point Light( ");
+  boolean on = true;
+  double intens = 1;
+  Color c = new Color(1f,1f,1f);
+  double[] loc = new double[]{0,0,1};
+}
+: "PointLight"	OPEN_BRACE
+		( "on" 	{if (VRMLHelper.verbose) System.err.print("on ");}
+				on = sfboolValue
+		 |"intensity"	{if (VRMLHelper.verbose) System.err.print("intensity ");}
+		 		intens = sffloatValue
+		 |"color"	{if (VRMLHelper.verbose) System.err.print("color ");}
+		 		c = sfcolorValue
+		 |"location" {if (VRMLHelper.verbose) System.err.print("location ");}
+		 		loc = sfvec3fValue
+		 | wrongAttribute
+		)*
+	  CLOSE_BRACE
+	  {l = new PointLight();
+		if (on)	l.setIntensity(intens);
+		else 	l.setIntensity(0);
+		l.setColor(c);
+		l.setGlobal(false);
+		l.setName("Point Light");
+		state.extraGeoTrans = new Transformation();
+		MatrixBuilder.euclidean().translate(loc)
+			.assignTo(state.extraGeoTrans);
+		if (VRMLHelper.verbose) System.err.println(")");
+		}
+	;
+private spotLightNode	[State state] returns[SpotLight l=null]
+{if (VRMLHelper.verbose) System.err.print("Spot Light( ");
+  boolean on = true;
+  double intens = 1;
+  Color c = new Color(1f,1f,1f);
+  double[] loc = new double[]{0,0,1};
+  double[] dir = new double[]{0,0,-1};
+  double dropR=0;
+  double cutA=0.785398;
+}
+: "SpotLight"	OPEN_BRACE
+		( "on" 	{if (VRMLHelper.verbose) System.err.print("on ");}
+				on = sfboolValue
+		 |"intensity"	{if (VRMLHelper.verbose) System.err.print("intensity ");}
+		 		intens = sffloatValue
+		 |"color"	{if (VRMLHelper.verbose) System.err.print("color ");}
+		 		c = sfcolorValue
+		 |"location" {if (VRMLHelper.verbose) System.err.print("location ");}
+		 		loc = sfvec3fValue
+		 |"direction" {if (VRMLHelper.verbose) System.err.print("direction ");}
+		 		dir = sfvec3fValue
+		 |"dropOffRate" {if (VRMLHelper.verbose) System.err.print("dropOffRate ");}
+		 		dropR = sffloatValue
+		 |"cutOffAngle" {if (VRMLHelper.verbose) System.err.print("cutOffAngle ");}
+		 		cutA  = sffloatValue
+		 | wrongAttribute
+		)*
+	  CLOSE_BRACE
+	  {
+	    l = new SpotLight();
+		if (on)	l.setIntensity(intens);
+		else 	l.setIntensity(0);
+		l.setColor(c);
+		l.setGlobal(false);
+		l.setName("Spot Light");
+		state.extraGeoTrans = new Transformation();
+		MatrixBuilder.euclidean().rotateFromTo(new double[]{0,0,-1},dir)
+			.translate(loc)
+			.assignTo(state.extraGeoTrans);
+		l.setConeAngle(cutA);
+		l.setFalloffA0(0);
+		l.setFalloffA1(0);
+		l.setFalloffA2(dropR);
+		if (VRMLHelper.verbose) System.err.println(")");
+		}
+	;
+
+
+private
+directionalLightNode [State state] returns[DirectionalLight l=null]
+{if (VRMLHelper.verbose) System.err.print("Dir Light( ");
+  boolean on = true;
+  double intens = 1;
+  Color c = new Color(1f,1f,1f);
+  double[] dir = new double[]{0,0,-1};
+}
+	: "DirectionalLight"	OPEN_BRACE
+		( "on" 	{if (VRMLHelper.verbose) System.err.print("on ");}
+				on = sfboolValue
+		 |"intensity"	{if (VRMLHelper.verbose) System.err.print("intensity ");}
+		 		intens = sffloatValue
+		 |"color"	{if (VRMLHelper.verbose) System.err.print("color ");}
+		 		c = sfcolorValue
+		 |"direction" {if (VRMLHelper.verbose) System.err.print("direction ");}
+		 		dir = sfvec3fValue
+		 | wrongAttribute
+		)*
+	  CLOSE_BRACE
+	  {
+	    l = new DirectionalLight();
+		if (on)	l.setIntensity(intens);
+		else 	l.setIntensity(0);
+		l.setColor(c);
+		l.setGlobal(false);
+		l.setName("Directional Light");
+		state.extraGeoTrans = new Transformation();
+		MatrixBuilder.euclidean().rotateFromTo(new double[]{0,0,-1},dir)
+			.assignTo(state.extraGeoTrans);
+		if (VRMLHelper.verbose) System.err.println(")");
+		}
+	;
+        
+// ---------------------------- Nodes ende -----------------------------------
+// ---------------------------------------------------------------------------
+/// ---------- Daten **** Done **** ------------------------------
+
+// entwurfswentscheidung fuer Werte:
+// - Achtung: ein Long ist hier ein 32Integer
+// - keine allgemeinen Values (man weiss ja was man parst)
+// --> Long lexen
+//	-> Bool nur TRUE & False Lexen
+//		-> Bool aus 0,1 und gelextem TRUE,FALSE Parsen
+//		-> Float aus Long parsen
+
+//		-> Field als LinkedList[Object] parsen? 
+//			-> geht nicht da nicht klar ist was geparst wird!!
+//				=> mus Fields fuer jeden MF neu schreiben
+//		-> koennte eine FloatList[Anzahl={1,2,3,4,16}] machen ({Float,Vec2,Vec3&Color,Rotatieon,Matrix})
+//		-> koennte Fields dann wenigstens fuer Color,Float,Vec2,vec3 machen
+//				dann bliebe nur Long und String
+
+private
 id returns [String s]
-{ s = null; }
+{ s = ""; }
 	:	
-	n:ID  	{if (VRMLHelper.verbose)	System.err.println("Id matched: "+n.getText()); s=n.getText();}
+	n:ID  {s=n.getText();}	
 	;
 
-unknownAttribute:
-	id	value
-	;
-	
-value:				// TODO extend this list while keeping the grammar unambiguous
-		id
-	|	sfboolValue
-	| 	sffloatValues
-	| 	sfstringValue
-	|	mffloatValue
-	|	OPEN_BRACE	(unknownAttribute)* CLOSE_BRACE
-	;
-
-// ********************** Field parsing rules *******************
-// 		From here on, parsing of basic field value types	
-//
-number returns [double d]	
-{d = 0; }
-	:
-		(f:INT {d=Double.parseDouble(f.getText()); } )
-	|	(g:FLOAT {d=Double.parseDouble(g.getText()); } )
-	{ if (VRMLHelper.verbose) System.err.println("Got number "+d); }		
+private 
+sfbitmaskValue [String [] code] returns [boolean[] mask]
+{ mask= new boolean[code.length];
+  for(int i=0;i<code.length;i++)	mask[i]=false;
+  String b="";
+}
+	:  	b=id  {State.checkFlag(code,mask,b);}
+	|	LPAREN  b=id  {State.checkFlag(code,mask,b);}
+		( T1	b=id  {State.checkFlag(code,mask,b);})*
+		( T1 )? 
+		RPAREN
 	;
 		
+private
 sfboolValue returns [boolean b]
-{ b = false;}
-	:
-    ("true" | "TRUE"	{b = true;} ) | ( "false" | "FALSE"  {b = false;} )
+{ b = false;
+  int n=0; }
+	:(n=intThing {
+			if (n==0) b=false;
+			else b=true; // TODO3: hier Fehler ausgeben bei n!=1
+	 })
+    |("TRUE" {b = true;})
+    |("FALSE"{b = false;})
 	;
-
-sfstringValue returns [String s]
-{ s = null; }
-	:
-	g:STRING		{ s = g.getText();}
-	;
-
-// TODO fix this 
-// should return double[] since that's how IndexedFaceSets define colors
-// in that case, can be omitted and use instead sfvec3fValue, sfvec3fValues, and mfvec3fValue
+	
+private
 sfcolorValue returns [Color c]
-{ c = null; double r, g, b;}
-	:
-		r=number g=number b=number	{c = new Color( (float)r, (float) g, (float) b); }
-	;
-
-sfcolorValues returns [Color[] cl]
-{cl = null; 	Color c = null; Vector collect = new Vector(); }
-	:
-		(c=sfcolorValue	{collect.add(c);}	)+
-		{cl = VRMLHelper.listToColorArray(collect);}
-	;
-
-mfcolorValue returns [Color[] cl]
-{ cl = null;Color c = null;}
-	:
-		c = sfcolorValue				{ cl = new Color[1];	cl[0] = c; }
-	|	OPEN_BRACKET CLOSE_BRACKET
-	|	OPEN_BRACKET cl=sfcolorValues CLOSE_BRACKET
-	;
-
-sffloatValue returns [double d]
-{ d = 0; }
-	:
-	d = number
-	;
-
-// TODO decide whether to optimize this as mfvec3fValue (probably should)
-sffloatValues returns [double[] dl]
-{
-	dl = null;
-	Vector vl = new Vector();
-	double d = 0;
+{ c = null;
+  double r, g, b;
+  float ro, ge, bl;
 }
 	:
-		(d=sffloatValue	{vl.add(new Double(d)); } )+
-		{dl = VRMLHelper.listToDoubleArray(vl);}
+		r=doubleThing g=doubleThing b=doubleThing	
+		{ro=(float) r; ge=(float) g; bl=(float) b;
+		 c = new Color(ro,ge,bl); }
+	;
+	
+private
+mfcolorValue returns [Color[] cl=null]
+{Color c = null; 
+ cs= new Color[INITIAL_SIZE];
+ int i=0;
+ }
+	:(OPEN_BRACKET
+		(   ( CLOSE_BRACKET{cl=new Color[]{};})
+		  | ( c=sfcolorValue { cs[0]=c;i++;}
+			  ( COLON c=sfcolorValue {	if (i==cs.length)	cs=VRMLHelper.reallocate(cs);
+		  								cs[i]=c;i++;})*
+			  ( COLON )?
+			  CLOSE_BRACKET {
+			  	cl=new Color[i];
+			  	System.arraycopy(cs, 0, cl, 0, i);}
+			)
+		)
+	  )
+	 |(c = sfcolorValue	{cl = new Color[]{c};} )	
 	;
 
-mffloatValue returns [double[] dl]
-{ double d = 0; dl = null; }
-	:
-		d=sffloatValue		{dl = new double[]{d}; }
-	|	OPEN_BRACKET CLOSE_BRACKET
-	|	OPEN_BRACKET dl=sffloatValues CLOSE_BRACKET	{}
+private
+sfenumValue returns[String s=""]
+	:	s=id
 	;
 
+private
+sffloatValue returns [double d=0]
+	: d = doubleThing 
+	;
 
-sfint32Value returns [int i]
+private
+mffloatValue returns [double[] dl=null]
+{double d; 
+ ds= new double[INITIAL_SIZE];
+ int i=0;
+ }
+	:(OPEN_BRACKET
+		(   ( CLOSE_BRACKET{dl=new double[]{};})
+		  | ( d=sffloatValue { ds[0]=d;i++;}
+			  ( COLON d=sffloatValue {	if (i==ds.length)	ds=VRMLHelper.reallocate(ds);
+		  								ds[i]=d;i++;})*
+			  ( COLON )?
+			  CLOSE_BRACKET {
+			  	dl=new double[i];
+			  	System.arraycopy(ds, 0, dl, 0, i);}
+			)
+		)
+	  )
+	 |(d = sffloatValue	{dl = new double[]{d};} )	
+	;
+
+// TODO2: RueckgabeWert
+private 
+sfimageValue
+{int width=0;
+ int hight=0;
+ int colorDim=0;
+ int[] colL=null;
+ int size=0;}
+ 	:	width=intThing hight=intThing colorDim=intThing 
+		{size=width*hight;}
+		colL=hexList[size]
+	;
+
+private 
+hexList [int size] returns [int[] clL]
+{
+clL = new int[size];
+int c; 
+}	:
+	(g : HEXDEC {	})*
+	;
+
+private
+sflongValue returns [int i]
 { i = 0;}
-	:
-	    f:INT	{i = Integer.parseInt(f.getText()); }
+	: i=intThing
 	;
 
-sfint32Values returns [int[] il]
-{
-	il = null;
-	Vector vl = new Vector();
-	int t = 0;
-	int count = 0;
+private
+mflongValue returns [int[] ll=null]
+{int l; 
+ ls= new int[INITIAL_SIZE];
+ int i=0;
+ }
+	:(OPEN_BRACKET
+		(   ( CLOSE_BRACKET{ll=new int[]{};})
+		  | ( l=sflongValue { ls[0]=l;i++;}
+			  ( COLON l=sflongValue {	if (i==ls.length)	ls=VRMLHelper.reallocate(ls);
+		  								ls[i]=l;i++;})*
+			  ( COLON )?
+			  CLOSE_BRACKET {
+			  	ll= new int[i];
+			  	System.arraycopy(ls, 0, ll, 0, i);}
+			)
+		)
+	  )
+	 |(l = sflongValue	{ll = new int[]{l};} )	
+	;
+
+private 
+sfmatrixValue returns [double[] m]
+{ m=new double[16];
+  double d;
+  int i=0;
 }
+	:    d=doubleThing{m[i]=d;i++;}  d=doubleThing{m[i]=d;i++;}
+	     d=doubleThing{m[i]=d;i++;}  d=doubleThing{m[i]=d;i++;}
+	     d=doubleThing{m[i]=d;i++;}  d=doubleThing{m[i]=d;i++;}
+	     d=doubleThing{m[i]=d;i++;}  d=doubleThing{m[i]=d;i++;}
+	     d=doubleThing{m[i]=d;i++;}  d=doubleThing{m[i]=d;i++;}
+	     d=doubleThing{m[i]=d;i++;}  d=doubleThing{m[i]=d;i++;}
+	     d=doubleThing{m[i]=d;i++;}  d=doubleThing{m[i]=d;i++;}
+	     d=doubleThing{m[i]=d;i++;}  d=doubleThing{m[i]=d;i++;}
+	;
+
+private
+sfrotationValue returns [double[] rv=null]
+{ double x,y,z,ang; }
 	:
-		(t=sfint32Value	
-			{
-				if (count +1 > is.length)	{
-					is=VRMLHelper.reallocate(is);
-				}
-				is[count++] = t; 
-			} 
-		)+
-		{il = new int[count];
-		System.arraycopy(is,0,il,0,count);
-		}
+	 x=doubleThing y=doubleThing z=doubleThing ang=doubleThing
+		{rv = new double[]{x,y,z,ang}; }
 	;
 
-mfint32Value returns [int[] i]
-{i = null; int t = 0; }
-	:
-		t = sfint32Value			{ i = new int[1];  i[0] = t; }
-	|	OPEN_BRACKET CLOSE_BRACKET
-	|	OPEN_BRACKET i=sfint32Values CLOSE_BRACKET
+private
+sfstringValue returns [String s=""]
+	:     g:ID 	  	{ s = g.getText();}
+		| h:STRING	{ s = h.getText();}
 	;
 
-
-sfrotationValue returns [double[] rv]
-{	double a,b,c,d; rv = null;}
-	:
-	a=number  b=number c=number d=number	{rv = new double[]{a,b,c,d}; }
+private
+mfstringValue returns [String [] strl={}]
+{String str; 
+ strs= new String[INITIAL_SIZE];
+ int i=0;
+ }
+	:(OPEN_BRACKET
+		(   ( CLOSE_BRACKET{strl=new String[]{};})
+		  | ( str=sfstringValue { strs[0]=str;i++;}
+			  ( COLON str=sfstringValue {
+			  		if (i==strs.length)	strs=VRMLHelper.reallocate(strs);
+			  			strs[i]=str;i++;
+		  		}
+		  	  )*
+			  ( COLON )?
+			  CLOSE_BRACKET {
+			  	strl= new String[i];
+			 	System.arraycopy(strs, 0, strl, 0, i);}
+			)
+		)
+	  )
+	 |(str = sfstringValue	{strl = new String[]{str};} )	
 	;
 
-sfrotationValues:
-		(sfrotationValue)+
+private
+sfvec2fValue returns [double[] vec=null]
+{ double fx,fy;}
+	: fx=doubleThing fy=doubleThing 
+	  {vec= new double[]{fx,fy};}
 	;
 
-mfrotationValue:
-		sfrotationValue
-	|	OPEN_BRACKET CLOSE_BRACKET
-	|	OPEN_BRACKET sfrotationValues CLOSE_BRACKET
+private
+sfvec3fValue returns [double[] vec=null]
+{ double fx,fy,fz;}
+	: fx=doubleThing fy=doubleThing fz=doubleThing 
+	  {vec= new double[]{fx,fy,fz};}
+	;
+	
+private
+mfvec2fValue returns [double[][] vecl=null]
+{double[] vec; 
+ vecs= new double[INITIAL_SIZE][];
+ int i=0;
+ }
+	:(OPEN_BRACKET
+		(   ( CLOSE_BRACKET{vecl=new double[][]{};})
+		  | ( vec=sfvec2fValue { vecs[0]=vec;i++;}
+			  ( COLON vec=sfvec2fValue { if (i==vecs.length)	vecs=VRMLHelper.reallocate(vecs);
+		  								 vecs[i]=vec;i++;})*
+			  ( COLON )?
+			  CLOSE_BRACKET {
+			  		vecl= new double[i][];
+			  		System.arraycopy(vecs, 0, vecl, 0, i);}
+			)
+		)
+	  )
+	 |(vec = sfvec2fValue	{vecl = new double[][]{vec};} )	
 	;
 
-mfstringValue:
-		sfstringValue
-	|	OPEN_BRACKET CLOSE_BRACKET
-	|	OPEN_BRACKET sfstringValues CLOSE_BRACKET
+private
+mfvec3fValue returns [double[][] vecl=null]
+{double[] vec; 
+ vecs= new double[INITIAL_SIZE][];
+ int i=0;
+ }
+	:(OPEN_BRACKET
+		(   ( CLOSE_BRACKET{vecl=new double[][]{};})
+		  | ( vec=sfvec3fValue { vecs[0]=vec;i++;}
+			  ( COLON vec=sfvec3fValue { if (i==vecs.length)	vecs=VRMLHelper.reallocate(vecs);
+		  								 vecs[i]=vec;i++;})*
+			  ( COLON )?
+			  CLOSE_BRACKET {
+			  		vecl= new double[i][];
+			   		System.arraycopy(vecs, 0, vecl, 0, i);
+			  		}
+			)
+		)
+	  )
+	 |(vec = sfvec3fValue	{vecl = new double[][]{vec};} )	
 	;
 
-sfstringValues:
-		(sfstringValue)+
+// _________________________________________________
+// ---------------- einfache Zahlen ----------------
+
+private 
+hexValue returns[int hexVal]
+{hexVal=0;}
+	: g:HEXDEC
+	{ hexVal= Integer.parseInt(g.getText());}
 	;
 
-sfvec2fValue:
-		number number
+private
+intThing returns[int i]
+// liest ein Integer aus
+{i=0; String sig="";}
+	: (PLUS | MINUS {sig="-";} )?
+	  s:NUMBER 
+	   {i=Integer.parseInt(sig + s.getText());}
 	;
 
-sfvec2fValues:
-		(sfvec2fValue)+
+private
+doubleThing returns[double d=0]
+// liest ein double aus
+	{int e=0; String sig="";}
+    : (PLUS | MINUS {sig="-";} )?
+    ( s:NUMBER	{d=Double.parseDouble(sig + s.getText());}
+      (DOT
+      	(s2:NUMBER	
+      		{ d=Double.parseDouble(sig + s.getText()+ "." + s2.getText());}
+         )?
+      )?
+	| DOT s3:NUMBER	{d=Double.parseDouble(sig + "0." + s3.getText());}
+    )
+    (e=expThing {d=d*Math.pow(10,e);})?
+    ;
+    
+private 
+expThing returns[int e]
+// liest den exponenten fuer floatThing
+{e=0; String sig="";}
+    : ("E"|"e") (PLUS | MINUS {sig="-";} )?
+		s:NUMBER
+     	{e=Integer.parseInt(sig + s.getText() );}
 	;
 
-mfvec2fValue:
-		sfvec2fValue
-	|	OPEN_BRACKET CLOSE_BRACKET
-	|	OPEN_BRACKET sfvec2fValues CLOSE_BRACKET
+// ___________________________________________________
+// -------------- Ueberlesen: { ... } ----------------
+
+private
+wrongAttribute
+	:	g:ID 	(dumb)*
+		{System.out.println("unknown Attribute:"+g.getText()+" -following Attributes ignored!");}
 	;
 
-sfvec3fValue returns [double[] vec3]
-{vec3 = null;
-double a, b, c;}
-	:
-		a=number b=number c=number	
-		{	
-			if (collectingMFVec3)	{
-				tempVector3[0] = a;  tempVector3[1] = b; tempVector3[2] = c;
-				vec3 = tempVector3;
-			} else 
-				vec3 = new double[]{a,b,c}; 
-		}
+private
+strangeNode
+{String s;}
+	:	s=id 	egal
+		{System.out.println("unknown Node:"+s+" -Node ignored!");}
 	;
 
-sfvec3fValues returns [double[] vec3array]
-{vec3array = null;
-//List collect = new Vector();
-double[] onevec  = null;
-collectingMFVec3 = true;			// optimized reading into a big double[] array
-int count = 0;
-	}
-	:
-		(onevec = sfvec3fValue	
-		{	
-			if (count + 3 >= ds.length)	{
-				// Reallocate!
-				ds = VRMLHelper.reallocate(ds);
-			}
-			for (int i=0; i<3; ++i)	ds[count+i] = onevec[i];
-			count += 3;
-		} )+
-		{
-			vec3array = new double[count];
-			System.arraycopy(ds, 0, vec3array, 0, count);
-			collectingMFVec3 = false; 
-		}
+private 
+egal :
+	  (LPAREN			(dumb)*		RPAREN			)
+	| (OPEN_BRACE	 	(dumb)*		CLOSE_BRACE		)
+	| (OPEN_BRACKET	 	(dumb)*		CLOSE_BRACKET	)
 	;
 
-mfvec3fValue returns [double[] vec3array]
-{vec3array = null;
-double[] onevec = null;
-}
-	:
-		vec3array=sfvec3fValue				
-	|	OPEN_BRACKET CLOSE_BRACKET
-	|	OPEN_BRACKET vec3array = sfvec3fValues CLOSE_BRACKET
-	;
+private
+dumb
+// ueberliset alles bis zum Klammerende auch mit Unterklammern
+	:(  (~(	 OPEN_BRACE | OPEN_BRACKET | LPAREN | RPAREN |CLOSE_BRACKET | CLOSE_BRACE ))+
+		(     OPEN_BRACE	 	(dumb)*	CLOSE_BRACE
+			| LPAREN			(dumb)* RPAREN
+			| OPEN_BRACKET	 	(dumb)*	CLOSE_BRACKET	)?  )
+	 |  (     OPEN_BRACE	 	(dumb)*	CLOSE_BRACE 
+	 		| OPEN_BRACKET	 	(dumb)*	CLOSE_BRACKET	
+	 		| LPAREN 			(dumb)*	RPAREN		)
+  ;
+
 
 /************************************************************************************
  * The VRML Lexer
@@ -765,13 +1427,20 @@ options {
 	charVocabulary = '\3'..'\377';
 	k=2;
 	testLiterals=false;
-	filter=IGNORE;
+//	filter=IGNORE;
 }
 	/* Terminal Symbols */
 OPEN_BRACE:		'{';
-CLOSE_BRACE:		'}';
+CLOSE_BRACE:	'}';
 OPEN_BRACKET:	'[';
 CLOSE_BRACKET:	']';
+LPAREN:			'(';
+RPAREN:			')';
+MINUS:			'-';
+PLUS:			'+';	
+DOT:			'.';
+COLON:			',';
+T1:				'|';
 
 ID
 options {
@@ -786,47 +1455,29 @@ ID_LETTER:
 	('a'..'z'|'A'..'Z'|'_'|'0'..'9')
 	;
 
-//INT_OR_FLOAT : 
-//   		((('+'|'-')? DECIMAL_FRACTION (EXPONENT)?) {$setType(FLOAT);})
-//	|	(DECIMAL_INT) {$setType(INT32);}  (DECIMAL_FRACTION (EXPONENT)? {$setType(FLOAT);} )?
-//INT_OR_FLOAT : (DECIMAL_INT) {$setType(INT32);}  
-//       ( (('.' (DIGIT)+ (EXPONENT)? ) | EXPONENT) {$setType(FLOAT);} )?
-//       ;
-
-//INT:
-//	(('+'|'-')? (DIGIT)+) | ('0' ('x'|'X') ('0'..'9' | 'a'..'f' | 'A'..'F')+)
-//	;
-
-INT_OR_FLOAT:
-//   optional sign   either integer w/exponent or   real number with optional exponent
-//  this rule doesn't accept simple integers, only integers with exponents
-//	('+'|'-')? ( ( (DIGIT)+ EXPONENT) | ( (DIGIT)* '.' (DIGIT)+   (EXPONENT)?) )
-	('+'|'-')? ((DIGIT)* (EXPONENT)? {$setType(INT);}) ('.' {$setType(FLOAT); }  (DIGIT)+   (EXPONENT)?)?
+HEXDEC
+	:'0'
+	 ('x'|'X')
+	 (HEXDIGIT)*
 	;
-	
+protected
+HEXDIGIT
+	: ('0'..'9')
+	| ('A'..'F')
+	;
+
 protected
 DIGIT:	
 	('0'..'9')
 	;
-	
-protected 
-DECIMAL_INT:
-	('+'|'-')? (DIGIT)+
+
+NUMBER:
+ 	(DIGIT)+	
 	;
 
-protected
-DECIMAL_FRACTION:
-	'.' (DIGIT)+
-	;
-	
-protected
-EXPONENT:
-	(('e'|'E') ('+'|'-')? (DIGIT)+) 
-	;
-	
-	/* ".*" ... double-quotes must be \", backslashes must be \\... */
-STRING:
-		'"' (ESC | ~('"'|'\\'))* '"'
+STRING:	
+//  ".*" ... double-quotes must be \", backslashes must be \\... 
+		'"'! (ESC | ~('"'|'\\'))* '"'!
 	;
 
 protected
@@ -846,16 +1497,16 @@ HEADER:	{getLine()==1}?	HEADER1 RESTLINE
 	{System.err.println("Got header");}
 	;
 	
+protected
 COMMENT:	
  	'#'  (~('\n'))* ('\n')
-	{ System.err.println("Skipping comment "); $setType(Token.SKIP); }
 	;
 
 WS_:
 		( ' '
 		| '\t'
 		| '\f'
-		| ','
+		| COMMENT
 		// handle newlines
 		|	(options {
 					generateAmbigWarnings=false;
@@ -866,8 +1517,5 @@ WS_:
 			{newline(); } )	
 		)+ { $setType(Token.SKIP); }
 	;
-
-protected
-IGNORE:
-	'{' (~('}'))* '}'
-	;
+	
+	
