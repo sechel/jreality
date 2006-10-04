@@ -105,10 +105,9 @@ public class GeometryAttributeListSet {
 			w = target.getWritableList(a);
 			if (w == null) {
 				w = target.addWritable(a, d.getStorageModel());
-				d.copyTo(w);
-			} else {
-				d.copyTo(w);
-			}
+			} 	
+			d.copyTo(w);
+			
 		}
 	}
 
