@@ -86,6 +86,10 @@ public class GeometryAttributeListSet {
 	}
 
 	final void setAttrImpl(DataListSet target, DataListSet data) {
+		if(target.getListLength() != data.getListLength() ) {  //TODO: what is the intention of this method?
+			target.reset( data.getListLength() );
+		}
+		
 		for (Iterator i = data.storedAttributes().iterator(); i.hasNext();) {
 			Attribute a = (Attribute) i.next();
 			setAttrImpl(target, a, data.getList(a));
@@ -99,9 +103,12 @@ public class GeometryAttributeListSet {
 		} else {
 			WritableDataList w;
 			w = target.getWritableList(a);
-			if (w == null)
+			if (w == null) {
 				w = target.addWritable(a, d.getStorageModel());
-			d.copyTo(w);
+				d.copyTo(w);
+			} else {
+				d.copyTo(w);
+			}
 		}
 	}
 
