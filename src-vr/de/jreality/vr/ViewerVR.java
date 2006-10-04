@@ -278,11 +278,15 @@ public class ViewerVR {
 		sp.setAboveGround(DEFAULT_ABOVE_GROUND);
 		sp.setZOffset(PANEL_Z_OFFSET);
 		JTabbedPane tabs = new JTabbedPane();
-
+		JTabbedPane geomTabs = new JTabbedPane();
+		JTabbedPane appearanceTabs = new JTabbedPane();
+		tabs.add("geometry", geomTabs);
+		tabs.add("appearance", appearanceTabs);
+		
 		// load tab
 		final String[][] examples = new String[][] {
 				{ "Boy surface", "jrs/boy.jrs" },
-				{ "Costa surface", "jrs/costa.jrs" },
+				{ "Chen-Gackstatter surface", "obj/Chen-Gackstatter-4.obj" },
 				{ "helicoid with 2 handles", "jrs/He2WithBoundary.jrs" },
 				{ "tetranoid", "3ds/tetranoid.3ds" },
 				{ "Wente torus", "jrs/wente.jrs" },
@@ -319,7 +323,7 @@ public class ViewerVR {
 			}
 		});
 		buttonGroupComponent.add("South", loadButton);
-		tabs.add("load", buttonGroupComponent);
+		geomTabs.add("load", buttonGroupComponent);
 
 		// align panel
 		JPanel placementPanel = new JPanel(new BorderLayout());
@@ -456,13 +460,13 @@ public class ViewerVR {
 		placementBox.add(groundBox);
 		placementBox.add(p);
 		placementPanel.add(placementBox);
-		tabs.add("align", placementPanel);
+		geomTabs.add("align", placementPanel);
 		
 		// env panel
 		JPanel envSelection = new JPanel(new BorderLayout());
 		envSelection.setBorder(new EmptyBorder(20,20,0,0));
 		envSelection.add(l.getSelectionComponent());
-		tabs.add("env", envSelection);
+		appearanceTabs.add("env", envSelection);
 
 		// appearance tab
 		JPanel appearancePanel = new JPanel(new BorderLayout());
@@ -592,7 +596,7 @@ public class ViewerVR {
 		appBox.add(faceBox);
 
 		appearancePanel.add(appBox);
-		tabs.add("app", appearancePanel);
+		appearanceTabs.add("app", appearancePanel);
 
 		// tool tab
 		JPanel toolPanel = new JPanel(new BorderLayout());
@@ -620,7 +624,7 @@ public class ViewerVR {
 		toolBox.add(toolButtonBox);
 
 		toolPanel.add(toolBox);
-		tabs.add("tools", toolPanel);
+		geomTabs.add("tools", toolPanel);
 
 		// texture tab
 		final String[][] textures = new String[][] {
@@ -681,7 +685,7 @@ public class ViewerVR {
 			}
 		});
 		textureButtonPanel.add("South", textureLoadButton);
-		tabs.add("tex", textureButtonPanel);
+		appearanceTabs.add("tex", textureButtonPanel);
 		
 		// help tab
 		JTextPane helpText = new JTextPane();
@@ -690,7 +694,7 @@ public class ViewerVR {
 		helpText.setPreferredSize(new Dimension(100,260));
 		helpText.setBackground(rotate.getBackground());
 		helpText.setText(Input.getInput("de/jreality/vr/help.html").getContentAsString());
-		tabs.add("help", helpText);
+		geomTabs.add("help", helpText);
 
 		sp.getFrame().getContentPane().add(tabs);
 		sp.getFrame().pack();
@@ -743,6 +747,7 @@ public class ViewerVR {
 		colorChooserPanel.setBorder(new EmptyBorder(10, 10, 5, 10));
 
 		colorChooserPanel.add("Center", colorChooser);
+		tabs.add("color",colorChooserPanel);
 
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		buttonPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
