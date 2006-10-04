@@ -72,7 +72,7 @@ public class ToggleViewerFullScreen extends AbstractAction {
     fsf.setUndecorated(true);
    
     putValue(SHORT_DESCRIPTION, "Toggle viewer full screen");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0));
+    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F, 0));
   }
 
   
