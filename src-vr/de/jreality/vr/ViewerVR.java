@@ -277,12 +277,25 @@ public class ViewerVR {
 		sp.setPanelWidth(DEFAULT_PANEL_WIDTH);
 		sp.setAboveGround(DEFAULT_ABOVE_GROUND);
 		sp.setZOffset(PANEL_Z_OFFSET);
-		JTabbedPane tabs = new JTabbedPane();
-		JTabbedPane geomTabs = new JTabbedPane();
-		JTabbedPane appearanceTabs = new JTabbedPane();
-		tabs.add("geometry", geomTabs);
-		tabs.add("appearance", appearanceTabs);
 		
+		JTabbedPane tabs = new JTabbedPane();
+		
+		// tabs do not work under Mac OS X in a FakeFrame if two rows
+		// of tabs are necessary
+		JTabbedPane geomTabs;
+		JTabbedPane appearanceTabs;
+		String os = System.getProperty("os.name");
+		boolean macOS = os.equalsIgnoreCase("Mac OS X");
+		if (macOS) {
+			geomTabs = new JTabbedPane();
+			appearanceTabs = new JTabbedPane();
+			tabs.add("geometry", geomTabs);
+			tabs.add("appearance", appearanceTabs);
+		} else {
+			geomTabs = tabs;
+			appearanceTabs = tabs;
+		}
+
 		// load tab
 		final String[][] examples = new String[][] {
 				{ "Boy surface", "jrs/boy.jrs" },
@@ -441,13 +454,13 @@ public class ViewerVR {
 
 		JPanel p = new JPanel(new BorderLayout());
 		p.setBorder(new EmptyBorder(5, 30, 5, 20));
-		loadButton = new JButton("load ...");
-		loadButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				switchToFileBrowser();
-			}
-		});
-		p.add("North", loadButton);
+//		loadButton = new JButton("load ...");
+//		loadButton.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent arg0) {
+//				switchToFileBrowser();
+//			}
+//		});
+//		p.add("North", loadButton);
 		p.add("Center", rotateBox);
 		JButton alignButton = new JButton("align");
 		alignButton.addActionListener(new ActionListener() {
@@ -462,11 +475,6 @@ public class ViewerVR {
 		placementPanel.add(placementBox);
 		geomTabs.add("align", placementPanel);
 		
-		// env panel
-		JPanel envSelection = new JPanel(new BorderLayout());
-		envSelection.setBorder(new EmptyBorder(20,20,0,0));
-		envSelection.add(l.getSelectionComponent());
-		appearanceTabs.add("env", envSelection);
 
 		// appearance tab
 		JPanel appearancePanel = new JPanel(new BorderLayout());
@@ -598,6 +606,12 @@ public class ViewerVR {
 		appearancePanel.add(appBox);
 		appearanceTabs.add("app", appearancePanel);
 
+		// env panel
+		JPanel envSelection = new JPanel(new BorderLayout());
+		envSelection.setBorder(new EmptyBorder(20,20,0,0));
+		envSelection.add(l.getSelectionComponent());
+		appearanceTabs.add("env", envSelection);
+		
 		// tool tab
 		JPanel toolPanel = new JPanel(new BorderLayout());
 		Box toolBox = new Box(BoxLayout.Y_AXIS);
@@ -742,12 +756,13 @@ public class ViewerVR {
 			}
 		});
 		
-		colorChooser = new AlphaColorChooser(Color.white, false);
+		colorChooser = new AlphaColorChooser(Color.white, true, !macOS, false);
+		
 		colorChooserPanel = new JPanel(new BorderLayout());
 		colorChooserPanel.setBorder(new EmptyBorder(10, 10, 5, 10));
 
 		colorChooserPanel.add("Center", colorChooser);
-		tabs.add("color",colorChooserPanel);
+		//tabs.add("color",colorChooserPanel);
 
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		buttonPanel.setBorder(new EmptyBorder(10, 0, 0, 0));

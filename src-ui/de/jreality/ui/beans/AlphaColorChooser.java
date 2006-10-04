@@ -25,11 +25,14 @@ public class AlphaColorChooser extends JPanel implements ChangeListener {
     private JColorChooser colorChooser;
     private ChangeListener changeListener;
 
-    public AlphaColorChooser(Color color, boolean withHSV) {
+    public AlphaColorChooser(Color color, boolean withSamples, boolean withRGB, boolean withHSV) {
     	super(new BorderLayout());
         changeListener = null;
         colorChooser = color != null ? new JColorChooser(color) : new JColorChooser();
-        if (!withHSV) colorChooser.removeChooserPanel(colorChooser.getChooserPanels()[1]);
+        if (!withSamples) colorChooser.removeChooserPanel(colorChooser.getChooserPanels()[0]);
+        if (!withRGB) colorChooser.removeChooserPanel(colorChooser.getChooserPanels()[1]);
+        if (!withHSV) colorChooser.removeChooserPanel(colorChooser.getChooserPanels()[2]);
+        colorChooser.removeChooserPanel(colorChooser.getChooserPanels()[1]);
         AlphaPreviewPanel previewPanel = new AlphaPreviewPanel(color);
         setChangeListener(previewPanel);
         colorChooser.getSelectionModel().addChangeListener(this);

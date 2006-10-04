@@ -55,7 +55,7 @@ public class AlphaColorChooserDialog extends DefaultDialog
     {
         super();
         setTitle(title);
-        content = new AlphaColorChooser(color, true);
+        content = new AlphaColorChooser(color, true, true, true);
         setMainComponent(content);
         pack();
     }
