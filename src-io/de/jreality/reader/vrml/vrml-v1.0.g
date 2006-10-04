@@ -80,7 +80,31 @@ options {
 	//		geparsten Namen den entsprechenden Flag auf true gesetzt hat
 	// - werde zunaechst die Bindings als Attribute zwar parsen, aber ignorieren.
 	// - ebenso Texturen
-
+	// - Erkennungs-Problem zwischen double(float) und int(long):
+	//		betrachte filefragment: " 2   .5    1.5 "
+	//		der Lexer erkennt entweder [2] [.5] [1.5] als  Double-Double-Double
+	//      oder [2] [.] [5] [1] [.] [5] als  int-DOT-int-int-DOT-int
+	//		Da die Zeichen nur durch WhiteSpaces getrennt sind,
+	//		muessen wir entweder:
+	//			- alles als Dezimalzahlen lexen und im Kontext wissen
+	//				ob wir ein double oder int erwarten.
+	//			- oder beim Lexen aufwendig erkennen ob es ein Double oder int ist.
+	//				wobei ein int ja stets auch ein double ist!
+	//				Dann im Gebrauch erfragen ob int oder Double vorhanden ist.
+	//			- Zusammenparsen von (int-Dot-int) fuehrt zu Fehlern!
+	//				Bsp oben: [2.5] [1.5] als double double
+	// 		Entscheidung: wir lexen nur	positive Dezimalzahlen da hier im Kontext stets
+	//				klar ist, ob int, double oder boolean gefordert ist
+	//				'+' und '-' und 'e' werden hinzugeparst,
+	//				der Exponent wird als double gelext und hinzugeparst 
+	//				bsp1: -0.34e+12 
+	//				gelext: [-] [0.34] [e] [+] [12] 
+	//						als '-' DOUBLE 'e' '+' DOUBLE
+	//				bsp2: 12  .3 4 e12.2
+	//				gelext:  [12] [.3] [4] [e] [12.2]
+	//				geparst: [12] [0.3] [4*10^(12.2)] 
+	//		    Ein dezimaler Exponent wird also wirklich einer. Aber mit Warnung.
+	// 	- Weil '.' als Teil einer Zahl gelext wird kann es nicht als Token zur verfuegung stehen!
 
 	// TODO: mehrerfache Kameras(-Pfade)
 	// hier : die erste Kamera gilt
@@ -127,10 +151,11 @@ vrmlFile returns [SceneGraphComponent r=null]
 			rootApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
 			root.setAppearance(rootApp);
 			}
-		(statement[state] {state.history = state.history+"*";})?
+		(statement[state] {state.history = state.history+"*";}
 		(statement[state] {state.history = state.history+"*";
 						   System.err.println("Warning: multiple basic Nodes"
 							 +"found (and processed). This is not VRML-Standard !");})*
+		)?
 		{ r = root; }
 	;
 	
@@ -537,6 +562,8 @@ indexedFaceSetNode [State state] returns [IndexedFaceSet ifs=null]
 	ifsf.setFaceCount(coordIndex2.length);
 	ifsf.setVertexAttribute(Attribute.COORDINATES,new DoubleArrayArray.Array(state2.coords) );
 	ifsf.setFaceIndices(coordIndex2);
+	//ifsf.setGenerateVertexNormals(true);
+	//ifsf.setGenerateFaceNormals(true);
 	State.setNormals(ifsf,coordIndex2,normalIndex2,state2);
 	State.setColors(ifsf,coordIndex2,materialIndex2,state2);
 	// TODO2: handle texture
@@ -696,20 +723,26 @@ infoNode [State state]
 private
 materialNode [State state]
 { 
- if (VRMLHelper.verbose) System.err.println("Material");
+ if (VRMLHelper.verbose) System.err.print("Material( ");
  Color[] c=null;
  double[] d=null;
 }	:
 	"Material" OPEN_BRACE
-	  (	 "ambientColor"		c = mfcolorValue {state.ambient=c;}
-	  	|"diffuseColor"		c = mfcolorValue {state.diffuse=c;}
-	  	|"specularColor"	c = mfcolorValue {state.specular=c;}
-	  	|"emissiveColor"	c = mfcolorValue {state.emissive=c;}// TODO3 emissive realisieren
-	  	|"shininess"		d = mffloatValue {state.shininess=d;}
-	  	|"transparency"		d = mffloatValue {state.transparency=d;}
+	  (	 "ambientColor"	{ if (VRMLHelper.verbose) System.err.print("ambientColor ");}
+	  			c = mfcolorValue {state.ambient=c;}
+	  	|"diffuseColor"		{ if (VRMLHelper.verbose) System.err.print("diffuseColor ");}
+	  			c = mfcolorValue {state.diffuse=c;}
+	  	|"specularColor"	{ if (VRMLHelper.verbose) System.err.print("specularColor ");}
+	  			c = mfcolorValue {state.specular=c;}
+	  	|"emissiveColor"	{ if (VRMLHelper.verbose) System.err.print("emissiveColor ");}
+	  			c = mfcolorValue {state.emissive=c;}// TODO3 emissive realisieren
+	  	|"shininess"		{ if (VRMLHelper.verbose) System.err.print("shininess ");}
+	  			d = mffloatValue {state.shininess=d;}
+	  	|"transparency"	{ if (VRMLHelper.verbose) System.err.print("transparency ");}
+	  			d = mffloatValue {state.transparency=d;}
 	  	| wrongAttribute
 	  )*
-	  CLOSE_BRACE			
+	  CLOSE_BRACE 	{ if (VRMLHelper.verbose) System.err.println(")");}
 	;
 
 private
@@ -1118,11 +1151,10 @@ private
 sfcolorValue returns [Color c]
 { c = null;
   double r, g, b;
-  float ro, ge, bl;
+  int ro, ge, bl;
 }
-	:
-		r=doubleThing g=doubleThing b=doubleThing	
-		{ro=(float) r; ge=(float) g; bl=(float) b;
+	:	r=doubleThing g=doubleThing b=doubleThing	
+		{ro= (int)Math.round(r*255); ge=(int)Math.round(g*255); bl=(int)Math.round(b*255);
 		 c = new Color(ro,ge,bl); }
 	;
 	
@@ -1354,32 +1386,27 @@ intThing returns[int i]
 {i=0; String sig="";}
 	: (PLUS | MINUS {sig="-";} )?
 	  s:NUMBER 
-	   {i=Integer.parseInt(sig + s.getText());}
+	   {double d=Double.parseDouble(sig + s.getText());
+	    i=(int)Math.round(d);}
 	;
-
+	
 private
 doubleThing returns[double d=0]
 // liest ein double aus
-	{int e=0; String sig="";}
-    : (PLUS | MINUS {sig="-";} )?
-    ( s:NUMBER	{d=Double.parseDouble(sig + s.getText());}
-      (DOT
-      	(s2:NUMBER	
-      		{ d=Double.parseDouble(sig + s.getText()+ "." + s2.getText());}
-         )?
-      )?
-	| DOT s3:NUMBER	{d=Double.parseDouble(sig + "0." + s3.getText());}
-    )
+	{double e=0; String sig="";}
+    : 
+    (PLUS | MINUS {sig="-";} )?
+     s:NUMBER	{d=Double.parseDouble(sig + s.getText());}
     (e=expThing {d=d*Math.pow(10,e);})?
     ;
     
 private 
-expThing returns[int e]
+expThing returns[double e]
 // liest den exponenten fuer floatThing
 {e=0; String sig="";}
     : ("E"|"e") (PLUS | MINUS {sig="-";} )?
 		s:NUMBER
-     	{e=Integer.parseInt(sig + s.getText() );}
+     	{e=Double.parseDouble(sig + s.getText() );}
 	;
 
 // ___________________________________________________
@@ -1418,6 +1445,7 @@ dumb
   ;
 
 
+
 /************************************************************************************
  * The VRML Lexer
  ************************************************************************************
@@ -1438,7 +1466,6 @@ LPAREN:			'(';
 RPAREN:			')';
 MINUS:			'-';
 PLUS:			'+';	
-DOT:			'.';
 COLON:			',';
 T1:				'|';
 
@@ -1472,7 +1499,8 @@ DIGIT:
 	;
 
 NUMBER:
- 	(DIGIT)+	
+ 	(DIGIT)+ ('.' (DIGIT)* )?
+ 	|'.' (DIGIT)+	
 	;
 
 STRING:	
