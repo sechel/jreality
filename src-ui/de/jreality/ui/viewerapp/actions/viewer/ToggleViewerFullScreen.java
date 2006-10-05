@@ -42,6 +42,7 @@ package de.jreality.ui.viewerapp.actions.viewer;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
 
@@ -72,7 +73,7 @@ public class ToggleViewerFullScreen extends AbstractAction {
     fsf.setUndecorated(true);
    
     putValue(SHORT_DESCRIPTION, "Toggle viewer full screen");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F, 0));
+    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
 
   
