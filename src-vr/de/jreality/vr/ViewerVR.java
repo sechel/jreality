@@ -63,6 +63,7 @@ import de.jreality.tools.PickShowTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.tools.ShipNavigationTool;
 import de.jreality.ui.beans.AlphaColorChooser;
+import de.jreality.ui.beans.SimpleColorChooser;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
@@ -73,8 +74,8 @@ public class ViewerVR {
 
 	private static final double PANEL_Z_OFFSET = -2.2; //-2.6
 	private static final double DEFAULT_ABOVE_GROUND = 1.8;
-	private static final double COLOR_CHOOSER_ABOVE_GROUND = 1.8; //2
-	private static final double COLOR_CHOOSER_PANEL_WIDTH = 2.3; //2
+	private static final double COLOR_CHOOSER_ABOVE_GROUND = 1.8; //2.3
+	private static final double COLOR_CHOOSER_PANEL_WIDTH = 1; //1.8
 	private static final int FILE_CHOOSER_ABOVE_GROUND = 2;
 	private static final int FILE_CHOOSER_PANEL_WIDTH = 2;
 
@@ -124,7 +125,8 @@ public class ViewerVR {
 
 	private JFileChooser fileChooser;
 	private JFileChooser texFileChooser;
-	private AlphaColorChooser colorChooser;
+//	private AlphaColorChooser colorChooser;
+	private SimpleColorChooser colorChooser;
 
 	private JPanel colorChooserPanel;
 
@@ -756,7 +758,8 @@ public class ViewerVR {
 			}
 		});
 		
-		colorChooser = new AlphaColorChooser(Color.white, true, !macOS, false);
+		//colorChooser = new AlphaColorChooser(Color.white, true, !macOS, false);
+		colorChooser = new SimpleColorChooser();
 		
 		colorChooserPanel = new JPanel(new BorderLayout());
 		colorChooserPanel.setBorder(new EmptyBorder(10, 10, 5, 10));
@@ -827,8 +830,8 @@ public class ViewerVR {
 		colorChooser.setColor(current != Appearance.INHERITED ? (Color) current
 				: Color.white);
 		sp.getFrame().setVisible(false);
-		sp.setPanelWidth(COLOR_CHOOSER_ABOVE_GROUND);
-		sp.setAboveGround(COLOR_CHOOSER_PANEL_WIDTH);
+		sp.setPanelWidth(COLOR_CHOOSER_PANEL_WIDTH);
+		sp.setAboveGround(COLOR_CHOOSER_ABOVE_GROUND);
 		sp.getFrame().setContentPane(colorChooserPanel);
 		sp.getFrame().pack();
 		sp.getFrame().setVisible(true);
