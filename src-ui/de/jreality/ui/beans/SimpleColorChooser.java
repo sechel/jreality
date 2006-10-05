@@ -2,7 +2,6 @@ package de.jreality.ui.beans;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -13,13 +12,9 @@ import java.awt.font.TextLayout;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -33,7 +28,7 @@ public class SimpleColorChooser extends JPanel implements ChangeListener {
 	private JSlider greenSlider;
 	private JSlider blueSlider;
 	private JSlider alphaSlider;
-	private JButton previewPanel;
+	private JPanel previewPanel;
 	private Color color;
 	private ChangeListener changeListener;
 	private boolean updating = false;
@@ -56,14 +51,12 @@ public class SimpleColorChooser extends JPanel implements ChangeListener {
 		alphaSlider = makeSlider(color.getRed(), "alpha");
 		sliderBox.add(alphaSlider);
 		add(sliderBox, BorderLayout.CENTER);
-		
-		// preview panel
-		Icon colorIcon = new Icon() {
 
-			public void paintIcon(Component cmp, Graphics g, int x, int y) {
+		previewPanel = new JPanel() {
+			public void paint(Graphics g) {
 				Graphics2D g2d = (Graphics2D) g;
-				g.setColor(Color.white);
-				g.fillRect(x, y, previewPanel.getWidth(), previewPanel.getHeight());
+				int w0 = previewPanel.getWidth();
+				int h0 = previewPanel.getHeight();
 				Color col = getColor();
 				if (col != null) {
 					g.setColor(Color.black);
@@ -73,31 +66,19 @@ public class SimpleColorChooser extends JPanel implements ChangeListener {
 
 					int height = r.height;
 					int width = r.width;
-
-					final float border = height - tl.getDescent();
+					
 					g2d.setFont(font);
 
-					int w=(getIconWidth()-width)/2;
-					int h=(getIconHeight()-height)/2;
-					g2d.drawString(text,x+w,y+height+h);
+					int w=(w0-width)/2;
+					int h=(h0-height)/2;
+					g2d.drawString(text,w,height+h);
 
 					g.setColor(col);
-					g.fillRect(x, y, getIconWidth(), getIconHeight());
+					g.fillRect(0,0,w0, h0);
 				}
-				g.setColor(Color.black);
-				g.drawRect(x, y, getIconWidth(), getIconHeight());
 			}
 
-			public int getIconWidth() {
-				return previewPanel.getWidth();
-			}
-
-			public int getIconHeight() {
-				return previewPanel.getHeight();
-			}
 		};
-		previewPanel = new JButton(colorIcon);
-		previewPanel.setEnabled(false);
 		previewPanel.setPreferredSize(new Dimension(350,50));
 		add(previewPanel, BorderLayout.SOUTH);
 	}
