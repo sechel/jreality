@@ -16,6 +16,7 @@ import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.border.EmptyBorder;
@@ -37,6 +38,10 @@ public class SimpleColorChooser extends JPanel implements ChangeListener {
 	private ChangeListener changeListener;
 	private boolean updating = false;
 
+	public SimpleColorChooser() {
+		this(Color.white);
+	}
+	
 	public SimpleColorChooser(Color color) {
 		super(new BorderLayout());
 		
@@ -118,7 +123,7 @@ public class SimpleColorChooser extends JPanel implements ChangeListener {
 					alphaSlider.getValue()
 			);
 			previewPanel.repaint();
-			changeListener.stateChanged(new ChangeEvent(this));
+			if (changeListener != null) changeListener.stateChanged(new ChangeEvent(this));
 		}
 	}
 
@@ -131,7 +136,8 @@ public class SimpleColorChooser extends JPanel implements ChangeListener {
 	}
 
 	public void setColor(Color c) {
-		if (!color.equals(c)) {
+		
+		if (color == null || !color.equals(c)) {
 			updating = true;
 			redSlider.setValue( c.getRed() );
 			greenSlider.setValue( c.getGreen() );
@@ -145,5 +151,13 @@ public class SimpleColorChooser extends JPanel implements ChangeListener {
 
 	public Color getColor() {
 		return color;
+	}
+	
+	public static void main(String[] args) {
+		JFrame f = new JFrame("SimpleColorChooser");
+		SimpleColorChooser scc = new SimpleColorChooser();
+		f.getContentPane().add(scc);
+		f.pack();
+		f.show();
 	}
 }
