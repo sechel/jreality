@@ -62,7 +62,6 @@ import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.PickShowTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.tools.ShipNavigationTool;
-import de.jreality.ui.beans.AlphaColorChooser;
 import de.jreality.ui.beans.SimpleColorChooser;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerApp;
@@ -71,40 +70,58 @@ import de.jreality.util.PickUtility;
 import de.jreality.util.Rectangle3D;
 
 public class ViewerVR {
-
-	private static final double PANEL_Z_OFFSET = -2.2; //-2.6
-	private static final double DEFAULT_ABOVE_GROUND = 1.8;
-	private static final double COLOR_CHOOSER_ABOVE_GROUND = 1.8; //2.3
-	private static final double COLOR_CHOOSER_PANEL_WIDTH = 1; //1.8
+	
+	protected static final double PI2 = Math.PI / 2;
+	
+	// width of control panel in meters
+	private static final double PANEL_WIDTH = 1;
+	
+	// distance of all panels from avatar in meters
+	private static final double PANEL_Z_OFFSET = -2.2;
+	
+	// height of upper edge of control panel in meters
+	private static final double PANEL_ABOVE_GROUND = 1.8;
+	
+	// height of upper edge of file browser panel in meters
 	private static final int FILE_CHOOSER_ABOVE_GROUND = 2;
+	
+	// width of file browser panel in meters
 	private static final int FILE_CHOOSER_PANEL_WIDTH = 2;
 
-	protected static double DEFAULT_POINT_RADIUS = .4;
-	protected static double DEFAULT_TUBE_RADIUS = .3;
-
-	protected static final double PI2 = Math.PI / 2;
-
-	private static final double MAX_SIZE = 0.1;
-	private static final int RANGE = 200;
-
-	//private static final Dimension PANEL_SIZE = new Dimension(280, 250);
-
-	private static final double DEFAULT_PANEL_WIDTH = 1;
-
+	private static final double DEFAULT_POINT_RADIUS = .4;
+	
+	private static final double DEFAULT_TUBE_RADIUS = .3;
+	
+	// maximal radius of tubes or points compared to content size
+	private static final double MAX_RADIUS = 0.1;
+	
+	// ratio of maximal versus minimal value for logarithmic sliders
+	private static final int LOGARITHMIC_RANGE = 200;
+	
+	// maximal horizontal diameter of content in meters
 	private static final double MAX_CONTENT_SIZE = 100;
+	
+	// default value of texture scale
 	private static final double DEFAULT_TEX_SCALE = 20;
+	
+	// maximal value of texture scale
 	private static final double MAX_TEX_SCALE = 400;
+	
+	// ratio of maximal value and minimal value of texture scale
 	private static final double TEX_SCALE_RANGE = 400;
 	
+	// texture of content
 	private Texture2D tex;
 
+	// root of scene graph
 	private SceneGraphComponent sceneRoot = new SceneGraphComponent(),
 			sceneNode = new SceneGraphComponent(),
+			reflectedSceneNode = new SceneGraphComponent(),
 			avatarNode = new SceneGraphComponent(),
 			camNode = new SceneGraphComponent(),
 			lightNode = new SceneGraphComponent(), terrainNode;
 
-	Tool rotateTool = new RotateTool(), dragTool = new DraggingTool();
+	private Tool rotateTool = new RotateTool(), dragTool = new DraggingTool();
 
 	private SceneGraphComponent currentContent;
 
@@ -121,8 +138,6 @@ public class ViewerVR {
 
 	private double diam = 22, offset = .3;
 
-	Landscape landscape = new Landscape();
-
 	private JFileChooser fileChooser;
 	private JFileChooser texFileChooser;
 //	private AlphaColorChooser colorChooser;
@@ -135,29 +150,21 @@ public class ViewerVR {
 	private JSlider groundSlider;
 
 	private ScenePanel sp;
-
 	private JSlider tubeRadiusSlider;
-
 	private JSlider pointRadiusSlider;
-
 	private JSlider reflectionSlider;
-
 	private CubeMap cm;
-
 	private double objectScale=1;
-
-	private JButton loadButton;
-
 	private JCheckBox rotate;
-
 	private JCheckBox drag;
-
 	private Container defaultPanel;
-
 	private String currentColor;
 	private JSlider texScaleSlider;
+	private JCheckBox flatTerrain;
+	private Appearance currentAppearance;
+	private Landscape landscape;
 	
-
+	
 	public ViewerVR() throws IOException {
 
 		boolean portal = "portal".equals(System
@@ -181,10 +188,6 @@ public class ViewerVR {
 		rootAppearance.setAttribute(CommonAttributes.POINT_SHADER + "."
 				+ CommonAttributes.PICKABLE, false);
 		sceneRoot.setAppearance(rootAppearance);
-
-		terrainAppearance.setAttribute("showLines", false);
-		terrainAppearance.setAttribute("showPoints", false);
-		terrainAppearance.setAttribute("diffuseColor", Color.white);
 
 		Camera cam = new Camera();
 		cam.setNear(0.01);
@@ -230,7 +233,7 @@ public class ViewerVR {
 						"de.jreality.tools.PortalHeadMoveTool").newInstance();
 				camNode.addTool(t);
 			} catch (Throwable t) {
-				// XXX
+				t.printStackTrace();
 			}
 		}
 
@@ -246,19 +249,8 @@ public class ViewerVR {
 
 		sceneRoot.addTool(new PickShowTool(null, 0.005));
 		setAvatarPosition(0, 0.7, 30);
-
-		// avatarNode.addTool(new PointerDisplayTool());
-
-		// sceneNode.addTool(new RotateTool());
-		// DraggingTool draggingTool = new DraggingTool();
-		// draggingTool.setMoveChildren(true);
-		// sceneNode.addTool(draggingTool);
-
-		init();
-	}
-
-	private void init() throws IOException {
-		// prepare terrain
+ 
+		// prepare  terrain
 		terrainNode = Readers
 				.read(Input.getInput("de/jreality/vr/terrain.3ds"))
 				.getChildComponent(0);
@@ -269,15 +261,34 @@ public class ViewerVR {
 		GeometryUtility.calculateAndSetNormals(terrainGeom);
 		terrainGeom.setName("terrain Geometry");
 		PickUtility.assignFaceAABBTree(terrainGeom);
-
+		terrainAppearance.setAttribute("showLines", false);
+		terrainAppearance.setAttribute("showPoints", false);
+		terrainAppearance.setAttribute("diffuseColor", Color.white);
 		terrainNode.setAppearance(terrainAppearance);
+		
+//		reflectedSceneNode.setName("reflectedScene");
+//		MatrixBuilder.euclidean().reflect(new double[]{0,1,0,0}).assignTo(reflectedSceneNode);
+//		reflectedSceneNode.addChild(sceneNode);
+//		sceneRoot.addChild(reflectedSceneNode);
 		sceneRoot.addChild(terrainNode);
+//		reflectedSceneNode.setVisible(false);
+		
+		
+		// landscape
+		landscape = new Landscape();
+		updateLandscape();
+		
+		// swing widgets
+		makeControlPanel();
+		makeContentFileChooser();
+		makeTextureFileChooser();
+		makeColorChooser();
+	}
 
-		Landscape l = new Landscape();
-		l.setToolScene(this);
+	private void makeControlPanel() {
 		sp = new ScenePanel();
-		sp.setPanelWidth(DEFAULT_PANEL_WIDTH);
-		sp.setAboveGround(DEFAULT_ABOVE_GROUND);
+		sp.setPanelWidth(PANEL_WIDTH);
+		sp.setAboveGround(PANEL_ABOVE_GROUND);
 		sp.setZOffset(PANEL_Z_OFFSET);
 		
 		JTabbedPane tabs = new JTabbedPane();
@@ -298,190 +309,156 @@ public class ViewerVR {
 			appearanceTabs = tabs;
 		}
 
-		// load tab
-		final String[][] examples = new String[][] {
-				{ "Boy surface", "jrs/boy.jrs" },
-				{ "Chen-Gackstatter surface", "obj/Chen-Gackstatter-4.obj" },
-				{ "helicoid with 2 handles", "jrs/He2WithBoundary.jrs" },
-				{ "tetranoid", "3ds/tetranoid.3ds" },
-				{ "Wente torus", "jrs/wente.jrs" },
-				{ "Matheon baer", "jrs/baer.jrs" } };
-		ActionListener examplesListener = new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String selectedBox = e.getActionCommand();
-				int selectionIndex = ((Integer) exampleIndices.get(selectedBox))
-						.intValue();
-				try {
-					setContent(Readers.read(Input
-							.getInput(examples[selectionIndex][1])));
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			}
-		};
-		JPanel buttonGroupComponent = new JPanel(new BorderLayout());
-		buttonGroupComponent.setBorder(new EmptyBorder(10, 10, 10, 10));
-		Box buttonGroupPanel = new Box(BoxLayout.Y_AXIS);
-		ButtonGroup group = new ButtonGroup();
-		for (int i = 0; i < examples.length; i++) {
-			JRadioButton button = new JRadioButton(examples[i][0]);
-			button.addActionListener(examplesListener);
-			buttonGroupPanel.add(button);
-			group.add(button);
-			exampleIndices.put(examples[i][0], new Integer(i));
-		}
-		buttonGroupComponent.add("Center", buttonGroupPanel);
-		loadButton = new JButton("load ...");
-		loadButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				switchToFileBrowser();
-			}
-		});
-		buttonGroupComponent.add("South", loadButton);
+		JPanel buttonGroupComponent = makeLoadTab();
 		geomTabs.add("load", buttonGroupComponent);
 
-		// align panel
-		JPanel placementPanel = new JPanel(new BorderLayout());
-		placementPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		Box placementBox = new Box(BoxLayout.X_AXIS);
-		Box sizeBox = new Box(BoxLayout.Y_AXIS);
-		sizeBox.setBorder(new EmptyBorder(10, 5, 0, 5));
-		JLabel sizeLabel = new JLabel("size");
-		int sliderDiam = (int)(Math.log(diam*RANGE/MAX_CONTENT_SIZE)/Math.log(RANGE)*100);
-		sizeSlider = new JSlider(SwingConstants.VERTICAL, 0, 100, sliderDiam);
-		sizeSlider.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent arg0) {
-				double sliderDiam = 0.01 * sizeSlider.getValue();
-				setDiam(Math.exp(Math.log(RANGE)*sliderDiam)/RANGE * MAX_CONTENT_SIZE);
-				alignContent(diam, offset, null);
-			}
-		});
-		sizeBox.add(sizeLabel);
-		sizeBox.add(sizeSlider);
-		Box groundBox = new Box(BoxLayout.Y_AXIS);
-		groundBox.setBorder(new EmptyBorder(10, 5, 0, 5));
-		JLabel groundLabel = new JLabel("level");
-		groundSlider = new JSlider(SwingConstants.VERTICAL, 0, 200,
-				(int) (offset * 100));
-		groundSlider.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent arg0) {
-				setOffset(0.01 * groundSlider.getValue());
-				alignContent(diam, offset, null);
-			}
-		});
-		groundBox.add(groundLabel);
-		groundBox.add(groundSlider);
-
-		URL imgURL = ViewerVR.class.getResource("rotleft.gif");
-		ImageIcon rotateLeft = new ImageIcon(imgURL);
-		imgURL = ViewerVR.class.getResource("rotright.gif");
-		ImageIcon rotateRight = new ImageIcon(imgURL);
-
-		JPanel rotateBox = new JPanel(new GridLayout(3, 3));
-		rotateBox.setBorder(new EmptyBorder(20, 0, 20, 0));
-
-		JButton xRotateLeft = new JButton(rotateLeft);
-		xRotateLeft.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				alignContent(diam, offset, MatrixBuilder.euclidean().rotateX(
-						-PI2).getMatrix());
-			}
-		});
-		Insets insets = new Insets(0, 0, 0, 0);
-		Dimension dim = new Dimension(25, 22);
-		xRotateLeft.setMargin(insets);
-		xRotateLeft.setMaximumSize(dim);
-		rotateBox.add(xRotateLeft);
-		JLabel label = new JLabel("x");
-		label.setHorizontalAlignment(SwingConstants.CENTER);
-		rotateBox.add(label);
-		JButton xRotateRight = new JButton(rotateRight);
-		xRotateRight.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				alignContent(diam, offset, MatrixBuilder.euclidean().rotateX(
-						PI2).getMatrix());
-			}
-		});
-		xRotateRight.setMargin(insets);
-		xRotateRight.setMaximumSize(dim);
-		rotateBox.add(xRotateRight);
-
-		JButton yRotateLeft = new JButton(rotateLeft);
-		yRotateLeft.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				alignContent(diam, offset, MatrixBuilder.euclidean().rotateY(
-						-PI2).getMatrix());
-			}
-		});
-		yRotateLeft.setMargin(insets);
-		yRotateLeft.setMaximumSize(dim);
-		rotateBox.add(yRotateLeft);
-		label = new JLabel("y");
-		label.setHorizontalAlignment(SwingConstants.CENTER);
-		rotateBox.add(label);
-		JButton yRotateRight = new JButton(rotateRight);
-		yRotateRight.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				alignContent(diam, offset, MatrixBuilder.euclidean().rotateY(
-						PI2).getMatrix());
-			}
-		});
-		yRotateRight.setMargin(insets);
-		yRotateRight.setMaximumSize(dim);
-		rotateBox.add(yRotateRight);
-
-		JButton zRotateLeft = new JButton(rotateLeft);
-		zRotateLeft.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				alignContent(diam, offset, MatrixBuilder.euclidean().rotateZ(
-						-PI2).getMatrix());
-			}
-		});
-		zRotateLeft.setMargin(insets);
-		zRotateLeft.setMaximumSize(dim);
-		rotateBox.add(zRotateLeft);
-		label = new JLabel("z");
-		label.setHorizontalAlignment(SwingConstants.CENTER);
-		rotateBox.add(label);
-		JButton zRotateRight = new JButton(rotateRight);
-		zRotateRight.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				alignContent(diam, offset, MatrixBuilder.euclidean().rotateZ(
-						PI2).getMatrix());
-			}
-		});
-		zRotateRight.setMargin(insets);
-		zRotateRight.setMaximumSize(dim);
-		rotateBox.add(zRotateRight);
-
-		JPanel p = new JPanel(new BorderLayout());
-		p.setBorder(new EmptyBorder(5, 30, 5, 20));
-//		loadButton = new JButton("load ...");
-//		loadButton.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent arg0) {
-//				switchToFileBrowser();
-//			}
-//		});
-//		p.add("North", loadButton);
-		p.add("Center", rotateBox);
-		JButton alignButton = new JButton("align");
-		alignButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				alignContent(diam, offset, null);
-			}
-		});
-		p.add("South", alignButton);
-		placementBox.add(sizeBox);
-		placementBox.add(groundBox);
-		placementBox.add(p);
-		placementPanel.add(placementBox);
+		JPanel placementPanel = makeAlignTab();
 		geomTabs.add("align", placementPanel);
 		
+		JPanel appearancePanel = makeAppTab();
+		appearanceTabs.add("app", appearancePanel);
 
-		// appearance tab
+		JPanel envSelection = makeEnvTab();
+		appearanceTabs.add("env", envSelection);
+		
+		JPanel toolPanel = makeToolTab();
+		geomTabs.add("tools", toolPanel);
+
+		JPanel textureButtonPanel = makeTexTab();
+		appearanceTabs.add("tex", textureButtonPanel);
+		
+		JTextPane helpText = makeHelpTab();
+		geomTabs.add("help", helpText);
+
+		sp.getFrame().getContentPane().add(tabs);
+		sp.getFrame().pack();
+
+		getTerrainNode().addTool(sp.getPanelTool());
+
+		defaultPanel = sp.getFrame().getContentPane();
+	}
+
+	private void makeContentFileChooser() {
+		fileChooser = FileLoaderDialog.createFileChooser();
+		fileChooser.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ev) {
+				File file = fileChooser.getSelectedFile();
+				try {
+					if (ev.getActionCommand() == JFileChooser.APPROVE_SELECTION
+							&& file != null)
+						setContent(Readers.read(Input.getInput(file)));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				switchToDefaultPanel();
+			}
+		});
+	}
+
+	private void makeTextureFileChooser() {
+		FileSystemView view = FileSystemView.getFileSystemView();
+		String texDir = ".";
+		String dataDir = System.getProperty("jreality.data");
+		if (dataDir!= null) texDir = dataDir+"/textures";
+		File defaultDir = new File(texDir);
+		texFileChooser = new JFileChooser(!defaultDir.exists() ? view.getHomeDirectory() : defaultDir, view);
+		texFileChooser.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ev) {
+				File file = texFileChooser.getSelectedFile();
+				try {
+					if (ev.getActionCommand() == JFileChooser.APPROVE_SELECTION
+							&& file != null) {
+						ImageData img = ImageData.load(Input.getInput(file));
+						tex = TextureUtility.createTexture(contentAppearance, "polygonShader", img, false);
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				switchToDefaultPanel();
+			}
+		});
+	}
+
+	private void makeColorChooser() {
+		//colorChooser = new AlphaColorChooser(Color.white, true, !macOS, false);
+		colorChooser = new SimpleColorChooser();
+		colorChooser.addChangeListener(new ChangeListener() {
+
+			public void stateChanged(ChangeEvent arg0) {
+				contentAppearance.setAttribute(currentColor, colorChooser.getColor());
+			}
+		});
+		colorChooserPanel = new JPanel(new BorderLayout());
+		colorChooserPanel.setBorder(new EmptyBorder(10, 10, 5, 10));
+
+		colorChooserPanel.add("Center", colorChooser);
+
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		buttonPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
+		
+		JButton closeButton = new JButton("Close");
+		closeButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				switchToDefaultPanel();
+			}
+		});
+		buttonPanel.add(closeButton);
+		colorChooserPanel.add("South", buttonPanel);
+	}
+
+	private void updateLandscape() {
+		ImageData[] cubeMap = landscape.getCubeMap();
+		if (cubeMap != null) {
+			setSkyBox(cubeMap);
+		}
+		ImageData terrainTex = landscape.getTerrainTexture();
+		if (terrainTex != null) {
+			setTerrainTexture(
+					terrainTex,
+					landscape.getTerrainTextureScale()
+			);
+		}
+	}
+	
+	private JPanel makeEnvTab() {
+		landscape.addChangeListener(new ChangeListener() {
+
+			public void stateChanged(ChangeEvent arg0) {
+				updateLandscape();
+			}
+		});	
+		
+		JPanel envSelection = new JPanel(new BorderLayout());
+		envSelection.setBorder(new EmptyBorder(20,20,0,0));
+		envSelection.add(landscape.getSelectionComponent(), BorderLayout.CENTER);
+//		flatTerrain = new JCheckBox("flat terrain");
+//		flatTerrain.setSelected(false);
+//		flatTerrain.addActionListener(new ActionListener() {
+//
+//			public void actionPerformed(ActionEvent arg0) {
+//				boolean flat = flatTerrain.isSelected();
+//				double scaleX = flat ? .5 : .33333;
+//				double scaleY = flat ? 0 : .33333;
+//				double scaleZ = flat ? .5 : .33333;
+//				MatrixBuilder.euclidean().scale(scaleX, scaleY, scaleZ).translate(0, 9, 0).assignTo(
+//						terrainNode);
+//				IndexedFaceSet terrainGeom = (IndexedFaceSet) terrainNode.getGeometry();
+//				GeometryUtility.calculateAndSetNormals(terrainGeom);
+//				if (flat) {
+//					terrainGeom.setGeometryAttributes("AABBTree",null);
+//				} else {
+//					PickUtility.assignFaceAABBTree(terrainGeom);
+//				}
+//			}
+//		});
+//		envSelection.add(flatTerrain, BorderLayout.SOUTH);
+		return envSelection;
+	}
+
+	private JPanel makeAppTab() {
 		JPanel appearancePanel = new JPanel(new BorderLayout());
 		Box appBox = new Box(BoxLayout.Y_AXIS);
-
+		
 		// lines
 		Box lineBox = new Box(BoxLayout.Y_AXIS);
 		lineBox.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
@@ -606,15 +583,184 @@ public class ViewerVR {
 		appBox.add(faceBox);
 
 		appearancePanel.add(appBox);
-		appearanceTabs.add("app", appearancePanel);
+		return appearancePanel;
+	}
 
-		// env panel
-		JPanel envSelection = new JPanel(new BorderLayout());
-		envSelection.setBorder(new EmptyBorder(20,20,0,0));
-		envSelection.add(l.getSelectionComponent());
-		appearanceTabs.add("env", envSelection);
-		
-		// tool tab
+	private JPanel makeAlignTab() {
+		JPanel placementPanel = new JPanel(new BorderLayout());
+		placementPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		Box placementBox = new Box(BoxLayout.X_AXIS);
+		Box sizeBox = new Box(BoxLayout.Y_AXIS);
+		sizeBox.setBorder(new EmptyBorder(10, 5, 0, 5));
+		JLabel sizeLabel = new JLabel("size");
+		int sliderDiam = (int)(Math.log(diam*LOGARITHMIC_RANGE/MAX_CONTENT_SIZE)/Math.log(LOGARITHMIC_RANGE)*100);
+		sizeSlider = new JSlider(SwingConstants.VERTICAL, 0, 100, sliderDiam);
+		sizeSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				double sliderDiam = 0.01 * sizeSlider.getValue();
+				setDiam(Math.exp(Math.log(LOGARITHMIC_RANGE)*sliderDiam)/LOGARITHMIC_RANGE * MAX_CONTENT_SIZE);
+				alignContent(diam, offset, null);
+			}
+		});
+		sizeBox.add(sizeLabel);
+		sizeBox.add(sizeSlider);
+		Box groundBox = new Box(BoxLayout.Y_AXIS);
+		groundBox.setBorder(new EmptyBorder(10, 5, 0, 5));
+		JLabel groundLabel = new JLabel("level");
+		groundSlider = new JSlider(SwingConstants.VERTICAL, 0, 200,
+				(int) (offset * 100));
+		groundSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				setOffset(0.01 * groundSlider.getValue());
+				alignContent(diam, offset, null);
+			}
+		});
+		groundBox.add(groundLabel);
+		groundBox.add(groundSlider);
+
+		URL imgURL = ViewerVR.class.getResource("rotleft.gif");
+		ImageIcon rotateLeft = new ImageIcon(imgURL);
+		imgURL = ViewerVR.class.getResource("rotright.gif");
+		ImageIcon rotateRight = new ImageIcon(imgURL);
+
+		JPanel rotateBox = new JPanel(new GridLayout(3, 3));
+		rotateBox.setBorder(new EmptyBorder(20, 0, 20, 0));
+
+		JButton xRotateLeft = new JButton(rotateLeft);
+		xRotateLeft.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				alignContent(diam, offset, MatrixBuilder.euclidean().rotateX(
+						-PI2).getMatrix());
+			}
+		});
+		Insets insets = new Insets(0, 0, 0, 0);
+		Dimension dim = new Dimension(25, 22);
+		xRotateLeft.setMargin(insets);
+		xRotateLeft.setMaximumSize(dim);
+		rotateBox.add(xRotateLeft);
+		JLabel label = new JLabel("x");
+		label.setHorizontalAlignment(SwingConstants.CENTER);
+		rotateBox.add(label);
+		JButton xRotateRight = new JButton(rotateRight);
+		xRotateRight.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				alignContent(diam, offset, MatrixBuilder.euclidean().rotateX(
+						PI2).getMatrix());
+			}
+		});
+		xRotateRight.setMargin(insets);
+		xRotateRight.setMaximumSize(dim);
+		rotateBox.add(xRotateRight);
+
+		JButton yRotateLeft = new JButton(rotateLeft);
+		yRotateLeft.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				alignContent(diam, offset, MatrixBuilder.euclidean().rotateY(
+						-PI2).getMatrix());
+			}
+		});
+		yRotateLeft.setMargin(insets);
+		yRotateLeft.setMaximumSize(dim);
+		rotateBox.add(yRotateLeft);
+		label = new JLabel("y");
+		label.setHorizontalAlignment(SwingConstants.CENTER);
+		rotateBox.add(label);
+		JButton yRotateRight = new JButton(rotateRight);
+		yRotateRight.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				alignContent(diam, offset, MatrixBuilder.euclidean().rotateY(
+						PI2).getMatrix());
+			}
+		});
+		yRotateRight.setMargin(insets);
+		yRotateRight.setMaximumSize(dim);
+		rotateBox.add(yRotateRight);
+
+		JButton zRotateLeft = new JButton(rotateLeft);
+		zRotateLeft.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				alignContent(diam, offset, MatrixBuilder.euclidean().rotateZ(
+						-PI2).getMatrix());
+			}
+		});
+		zRotateLeft.setMargin(insets);
+		zRotateLeft.setMaximumSize(dim);
+		rotateBox.add(zRotateLeft);
+		label = new JLabel("z");
+		label.setHorizontalAlignment(SwingConstants.CENTER);
+		rotateBox.add(label);
+		JButton zRotateRight = new JButton(rotateRight);
+		zRotateRight.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				alignContent(diam, offset, MatrixBuilder.euclidean().rotateZ(
+						PI2).getMatrix());
+			}
+		});
+		zRotateRight.setMargin(insets);
+		zRotateRight.setMaximumSize(dim);
+		rotateBox.add(zRotateRight);
+
+		JPanel p = new JPanel(new BorderLayout());
+		p.setBorder(new EmptyBorder(5, 30, 5, 20));
+		p.add("Center", rotateBox);
+		JButton alignButton = new JButton("align");
+		alignButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				alignContent(diam, offset, null);
+			}
+		});
+		p.add("South", alignButton);
+		placementBox.add(sizeBox);
+		placementBox.add(groundBox);
+		placementBox.add(p);
+		placementPanel.add(placementBox);
+		return placementPanel;
+	}
+
+	private JPanel makeLoadTab() {
+		final String[][] examples = new String[][] {
+				{ "Boy surface", "jrs/boy.jrs" },
+				{ "Chen-Gackstatter surface", "obj/Chen-Gackstatter-4.obj" },
+				{ "helicoid with 2 handles", "jrs/He2WithBoundary.jrs" },
+				{ "tetranoid", "3ds/tetranoid.3ds" },
+				{ "Wente torus", "jrs/wente.jrs" },
+				{ "Matheon baer", "jrs/baer.jrs" } };
+		ActionListener examplesListener = new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String selectedBox = e.getActionCommand();
+				int selectionIndex = ((Integer) exampleIndices.get(selectedBox))
+						.intValue();
+				try {
+					setContent(Readers.read(Input
+							.getInput(examples[selectionIndex][1])));
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		};
+		JPanel buttonGroupComponent = new JPanel(new BorderLayout());
+		buttonGroupComponent.setBorder(new EmptyBorder(10, 10, 10, 10));
+		Box buttonGroupPanel = new Box(BoxLayout.Y_AXIS);
+		ButtonGroup group = new ButtonGroup();
+		for (int i = 0; i < examples.length; i++) {
+			JRadioButton button = new JRadioButton(examples[i][0]);
+			button.addActionListener(examplesListener);
+			buttonGroupPanel.add(button);
+			group.add(button);
+			exampleIndices.put(examples[i][0], new Integer(i));
+		}
+		buttonGroupComponent.add("Center", buttonGroupPanel);
+		JButton loadButton = new JButton("load ...");
+		loadButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				switchToFileBrowser();
+			}
+		});
+		buttonGroupComponent.add("South", loadButton);
+		return buttonGroupComponent;
+	}
+
+	private JPanel makeToolTab() {
 		JPanel toolPanel = new JPanel(new BorderLayout());
 		Box toolBox = new Box(BoxLayout.Y_AXIS);
 		toolBox.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
@@ -640,9 +786,10 @@ public class ViewerVR {
 		toolBox.add(toolButtonBox);
 
 		toolPanel.add(toolBox);
-		geomTabs.add("tools", toolPanel);
+		return toolPanel;
+	}
 
-		// texture tab
+	private JPanel makeTexTab() {
 		final String[][] textures = new String[][] {
 				{ "none", null },
 				{ "metal grid", "textures/boysurface.png" },
@@ -697,101 +844,25 @@ public class ViewerVR {
 		JButton textureLoadButton = new JButton("load ...");
 		textureLoadButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				switchToTextureBrowser();
+				switchToTextureBrowser(contentAppearance);
 			}
 		});
 		textureButtonPanel.add("South", textureLoadButton);
-		appearanceTabs.add("tex", textureButtonPanel);
-		
-		// help tab
+		return textureButtonPanel;
+	}
+
+	private JTextPane makeHelpTab() {
 		JTextPane helpText = new JTextPane();
 		helpText.setEditable(false);
 		helpText.setContentType("text/html");
 		helpText.setPreferredSize(new Dimension(100,260));
 		helpText.setBackground(rotate.getBackground());
-		helpText.setText(Input.getInput("de/jreality/vr/help.html").getContentAsString());
-		geomTabs.add("help", helpText);
-
-		sp.getFrame().getContentPane().add(tabs);
-		sp.getFrame().pack();
-
-		getTerrainNode().addTool(sp.getPanelTool());
-
-		defaultPanel = sp.getFrame().getContentPane();
-
-		fileChooser = FileLoaderDialog.createFileChooser();
-		fileChooser.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ev) {
-				File file = fileChooser.getSelectedFile();
-				try {
-					if (ev.getActionCommand() == JFileChooser.APPROVE_SELECTION
-							&& file != null)
-						setContent(Readers.read(Input.getInput(file)));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				switchToDefaultPanel();
-			}
-		});
-
-		FileSystemView view = FileSystemView.getFileSystemView();
-		String texDir = ".";
-		String dataDir = System.getProperty("jreality.data");
-		if (dataDir!= null) texDir = dataDir+"/textures";
-		File defaultDir = new File(texDir);
-		texFileChooser = new JFileChooser(!defaultDir.exists() ? view.getHomeDirectory() : defaultDir, view);
-		texFileChooser.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ev) {
-				File file = texFileChooser.getSelectedFile();
-				try {
-					if (ev.getActionCommand() == JFileChooser.APPROVE_SELECTION
-							&& file != null) {
-						ImageData img = ImageData.load(Input.getInput(file));
-						tex = TextureUtility.createTexture(contentAppearance, "polygonShader", img, false);
-					}
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				switchToDefaultPanel();
-			}
-		});
-		
-		//colorChooser = new AlphaColorChooser(Color.white, true, !macOS, false);
-		colorChooser = new SimpleColorChooser();
-		
-		colorChooserPanel = new JPanel(new BorderLayout());
-		colorChooserPanel.setBorder(new EmptyBorder(10, 10, 5, 10));
-
-		colorChooserPanel.add("Center", colorChooser);
-		//tabs.add("color",colorChooserPanel);
-
-		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		buttonPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
-		JButton okButton = new JButton("Ok");
-		okButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				applyColor();
-				switchToDefaultPanel();
-			}
-		});
-		buttonPanel.add(okButton);
-		JButton applyButton = new JButton("Apply");
-		applyButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				applyColor();
-			}
-		});
-		buttonPanel.add(applyButton);
-		JButton cancelButton = new JButton("Cancel");
-		cancelButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				switchToDefaultPanel();
-			}
-		});
-		buttonPanel.add(cancelButton);
-		colorChooserPanel.add("South", buttonPanel);
+		try {
+			helpText.setText(Input.getInput("de/jreality/vr/help.html").getContentAsString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return helpText;
 	}
 
 	protected void setTexScale(double d) {
@@ -802,14 +873,10 @@ public class ViewerVR {
 		}
 	}
 
-	protected void applyColor() {
-		contentAppearance.setAttribute(currentColor, colorChooser.getColor());
-	}
-
 	private void switchToDefaultPanel() {
 		sp.getFrame().setVisible(false);
-		sp.setPanelWidth(DEFAULT_PANEL_WIDTH);
-		sp.setAboveGround(DEFAULT_ABOVE_GROUND);
+		sp.setPanelWidth(PANEL_WIDTH);
+		sp.setAboveGround(PANEL_ABOVE_GROUND);
 		sp.getFrame().setContentPane(defaultPanel);
 		sp.getFrame().pack();
 		sp.getFrame().setVisible(true);
@@ -824,16 +891,17 @@ public class ViewerVR {
 		sp.show(getSceneRoot(), new Matrix(avatarPath.getMatrix(null)));
 	}
 
-	void switchToColorChooser(String attribute) {
+	private void switchToColorChooser(String attribute) {
 		currentColor = attribute;
 		Object current = contentAppearance.getAttribute(currentColor);
+		System.out.println(current);
 		colorChooser.setColor(current != Appearance.INHERITED ? (Color) current
 				: Color.white);
 		sp.getFrame().setVisible(false);
-		sp.setPanelWidth(COLOR_CHOOSER_PANEL_WIDTH);
-		sp.setAboveGround(COLOR_CHOOSER_ABOVE_GROUND);
+		//sp.setPanelWidth(COLOR_CHOOSER_PANEL_WIDTH);
+		//sp.setAboveGround(COLOR_CHOOSER_ABOVE_GROUND);
 		sp.getFrame().setContentPane(colorChooserPanel);
-		sp.getFrame().pack();
+		//sp.getFrame().pack();
 		sp.getFrame().setVisible(true);
 	}
 
@@ -866,15 +934,15 @@ public class ViewerVR {
 	protected void setPointRadius(double d) {
 		pointRadiusSlider.setValue((int) (d * 100));
 		contentAppearance.setAttribute(CommonAttributes.POINT_SHADER + "."
-				+ CommonAttributes.POINT_RADIUS, Math.exp(Math.log(RANGE) * d)
-				/ RANGE * objectScale * MAX_SIZE);
+				+ CommonAttributes.POINT_RADIUS, Math.exp(Math.log(LOGARITHMIC_RANGE) * d)
+				/ LOGARITHMIC_RANGE * objectScale * MAX_RADIUS);
 	}
 
 	protected void setTubeRadius(double d) {
 		tubeRadiusSlider.setValue((int) (d * 100));
 		contentAppearance.setAttribute(CommonAttributes.LINE_SHADER + "."
-				+ CommonAttributes.TUBE_RADIUS, Math.exp(Math.log(RANGE) * d)
-				/ RANGE * objectScale * MAX_SIZE);
+				+ CommonAttributes.TUBE_RADIUS, Math.exp(Math.log(LOGARITHMIC_RANGE) * d)
+				/ LOGARITHMIC_RANGE * objectScale * MAX_RADIUS);
 	}
 
 	public void switchToFileBrowser() {
@@ -886,7 +954,8 @@ public class ViewerVR {
 		sp.getFrame().setVisible(true);
 	}
 	
-	public void switchToTextureBrowser() {
+	public void switchToTextureBrowser(Appearance app) {
+		currentAppearance = app;
 		sp.getFrame().setVisible(false);
 		sp.setPanelWidth(FILE_CHOOSER_PANEL_WIDTH);
 		sp.setAboveGround(FILE_CHOOSER_ABOVE_GROUND);
@@ -948,7 +1017,7 @@ public class ViewerVR {
 
 	public void setDiam(double d) {
 		diam = d;
-		double sliderDiam = Math.log(diam*RANGE/MAX_CONTENT_SIZE)/Math.log(RANGE);
+		double sliderDiam = Math.log(diam*LOGARITHMIC_RANGE/MAX_CONTENT_SIZE)/Math.log(LOGARITHMIC_RANGE);
 		sizeSlider.setValue((int) (sliderDiam * 100));
 	}
 

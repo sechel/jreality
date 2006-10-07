@@ -28,18 +28,20 @@ public class SimpleColorChooser extends JPanel implements ChangeListener {
 	private JSlider greenSlider;
 	private JSlider blueSlider;
 	private JSlider alphaSlider;
-	private JPanel previewPanel;
+	//private JPanel previewPanel;
 	private Color color;
 	private ChangeListener changeListener;
 	private boolean updating = false;
+	private boolean withAlpha;
 
 	public SimpleColorChooser() {
-		this(Color.white);
+		this(Color.white, false);
 	}
 	
-	public SimpleColorChooser(Color color) {
+	public SimpleColorChooser(Color color, boolean withAlpha) {
 		super(new BorderLayout());
-		
+		this.color = color;
+		this.withAlpha = withAlpha;
 		// sliders
 		Box sliderBox = new Box(BoxLayout.Y_AXIS);
 		redSlider = makeSlider(color.getRed(), "red");
@@ -48,39 +50,41 @@ public class SimpleColorChooser extends JPanel implements ChangeListener {
 		sliderBox.add(greenSlider);
 		blueSlider = makeSlider(color.getRed(), "blue");
 		sliderBox.add(blueSlider);
-		alphaSlider = makeSlider(color.getRed(), "alpha");
-		sliderBox.add(alphaSlider);
+		if (withAlpha) {
+			alphaSlider = makeSlider(color.getRed(), "alpha");
+			sliderBox.add(alphaSlider);
+		}
 		add(sliderBox, BorderLayout.CENTER);
 
-		previewPanel = new JPanel() {
-			public void paint(Graphics g) {
-				Graphics2D g2d = (Graphics2D) g;
-				int w0 = previewPanel.getWidth();
-				int h0 = previewPanel.getHeight();
-				Color col = getColor();
-				if (col != null) {
-					g.setColor(Color.black);
-
-					TextLayout tl = new TextLayout(text,font,g2d.getFontRenderContext());
-					Rectangle r = tl.getBounds().getBounds();
-
-					int height = r.height;
-					int width = r.width;
-					
-					g2d.setFont(font);
-
-					int w=(w0-width)/2;
-					int h=(h0-height)/2;
-					g2d.drawString(text,w,height+h);
-
-					g.setColor(col);
-					g.fillRect(0,0,w0, h0);
-				}
-			}
-
-		};
-		previewPanel.setPreferredSize(new Dimension(350,50));
-		add(previewPanel, BorderLayout.SOUTH);
+//		previewPanel = new JPanel() {
+//			public void paint(Graphics g) {
+//				Graphics2D g2d = (Graphics2D) g;
+//				int w0 = previewPanel.getWidth();
+//				int h0 = previewPanel.getHeight();
+//				Color col = getColor();
+//				if (col != null) {
+//					g.setColor(Color.black);
+//
+//					TextLayout tl = new TextLayout(text,font,g2d.getFontRenderContext());
+//					Rectangle r = tl.getBounds().getBounds();
+//
+//					int height = r.height;
+//					int width = r.width;
+//					
+//					g2d.setFont(font);
+//
+//					int w=(w0-width)/2;
+//					int h=(h0-height)/2;
+//					g2d.drawString(text,w,height+h);
+//
+//					g.setColor(col);
+//					g.fillRect(0,0,w0, h0);
+//				}
+//			}
+//
+//		};
+//		previewPanel.setPreferredSize(new Dimension(350,50));
+//		add(previewPanel, BorderLayout.SOUTH);
 	}
 
 	private JSlider makeSlider(int value, String text) {
@@ -101,9 +105,9 @@ public class SimpleColorChooser extends JPanel implements ChangeListener {
 					redSlider.getValue(),
 					greenSlider.getValue(),
 					blueSlider.getValue(),
-					alphaSlider.getValue()
+					withAlpha ? alphaSlider.getValue() : 255
 			);
-			previewPanel.repaint();
+			//previewPanel.repaint();
 			if (changeListener != null) changeListener.stateChanged(new ChangeEvent(this));
 		}
 	}
@@ -117,16 +121,15 @@ public class SimpleColorChooser extends JPanel implements ChangeListener {
 	}
 
 	public void setColor(Color c) {
-		
-		if (color == null || !color.equals(c)) {
+		if (!color.equals(c)) {
 			updating = true;
 			redSlider.setValue( c.getRed() );
 			greenSlider.setValue( c.getGreen() );
 			blueSlider.setValue( c.getBlue() );
-			alphaSlider.setValue( c.getAlpha() );
+			if (withAlpha) alphaSlider.setValue( c.getAlpha() );
 			updating = false;
 			color = c;
-			previewPanel.repaint();
+			//previewPanel.repaint();
 		}
 	}
 
@@ -139,6 +142,6 @@ public class SimpleColorChooser extends JPanel implements ChangeListener {
 		SimpleColorChooser scc = new SimpleColorChooser();
 		f.getContentPane().add(scc);
 		f.pack();
-		f.show();
+		f.setVisible(true);
 	}
 }
