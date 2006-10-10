@@ -1,5 +1,6 @@
 package de.jreality.vr;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -26,13 +27,19 @@ public class Landscape implements ActionListener {
 	private static String sideNames= "rt,lf,up,dn,bk,ft";
 
 	private static String[][] defaultLandscapes = {
-		{"snow","textures/jms/jms_", sideNames, ".JPG","textures/jms/jms_dn_seamless.JPG","10"},
-		{"tropic","textures/tropseadusk/tropseadusk512_", sideNames, ".jpg","textures/tropseadusk/tropseadusk512_dnSeamless.jpg","10"},
-		{"mountain","textures/malrav11/malrav11sky_", sideNames, ".jpg", "textures/mxsnow0.jpg","10"},
-		{"desert","textures/dragonvale/dragonvale_", sideNames, ".jpg","textures/dragonvale/dragonvale_dnSeamless.jpg","10"},
-		{"night","textures/dragonmoon/dragonmoon_", sideNames, ".jpg","textures/dragonmoon/dragonmoon_dnSeamless.jpg","10"}
+		//{"snow","textures/jms/jms_", sideNames, ".JPG","textures/jms/jms_dn_seamless.JPG","10"},
+		{"snow","textures/jms_hc/jms_hc_", sideNames, ".png","textures/jms_hc/jms_hc_dn_seamless.png","10"},
+		//{"tropic","textures/tropseadusk/tropseadusk512_", sideNames, ".jpg","textures/tropseadusk/tropseadusk512_dnSeamless.jpg","10"},
+		{"tropic","textures/tropseadusk_hc/tropseadusk512_hc_", sideNames, ".jpg","textures/tropseadusk_hc/tropseadusk512_hc_dn_seamless.jpg","10"},
+		//{"mountain","textures/malrav11/malrav11sky_", sideNames, ".jpg", "textures/mxsnow0.jpg","10"},
+		//{"desert","textures/dragonvale/dragonvale_", sideNames, ".jpg","textures/dragonvale/dragonvale_dnSeamless.jpg","10"},
+		{"desert","textures/dragonvale_hc/dragonvale_hc_", sideNames, ".jpg","textures/dragonvale_hc/dragonvale_hc_dn_seamless.jpg","10"},
+		{"night","textures/dragonmoon/dragonmoon_", sideNames, ".jpg","textures/dragonmoon/dragonmoon_dnSeamless.jpg","10"},
+		{"tiles dark", null, null, null, "textures/recycfloor1_fin.png", "50", "80 80 120", "0 0 0"},
+		{"tiles bright", null, null, null, "textures/recycfloor1_fin.png", "50", "225 225 245", "0 0 0"}
 	};
 
+	Color upColor, downColor;
 	Box selectionComponent;
 	String selectedBox;
 
@@ -116,8 +123,25 @@ public class Landscape implements ActionListener {
 	}
 
 	private void load() throws IOException {
-		cubeMap=TextureUtility.createCubeMapData(skyboxes[selectionIndex][1], skyboxes[selectionIndex][2].split(","), skyboxes[selectionIndex][3]);
-		terrainTexture=ImageData.load(Input.getInput(skyboxes[selectionIndex][4]));
+		String[] selectedLandscape = skyboxes[selectionIndex];
+		if (selectedLandscape[1] != null) {
+			cubeMap=TextureUtility.createCubeMapData(selectedLandscape[1], selectedLandscape[2].split(","), selectedLandscape[3]);
+		} else {
+			cubeMap = null;
+		}
+		if (selectedLandscape[4] != null) {
+			terrainTexture=ImageData.load(Input.getInput(selectedLandscape[4]));
+		} else {
+			terrainTexture = null;
+		}
+		if (selectedLandscape.length == 8) {
+			String[] up = selectedLandscape[6].split(" ");
+			String[] down = selectedLandscape[7].split(" ");
+			upColor=new Color(Integer.parseInt(up[0]), Integer.parseInt(up[1]), Integer.parseInt(up[2]));
+			downColor=new Color(Integer.parseInt(down[0]), Integer.parseInt(down[1]), Integer.parseInt(down[2]));			
+		} else {
+			upColor=downColor=null;
+		}
 	}
 
 	public JComponent getSelectionComponent() {
@@ -145,5 +169,13 @@ public class Landscape implements ActionListener {
 				l.stateChanged(e);
 			}
 		}
+	}
+
+	public Color getDownColor() {
+		return downColor;
+	}
+
+	public Color getUpColor() {
+		return upColor;
 	}
 }

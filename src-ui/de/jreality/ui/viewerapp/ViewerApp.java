@@ -61,6 +61,7 @@ import javax.swing.UIManager;
 
 import de.jreality.io.JrScene;
 import de.jreality.io.JrSceneFactory;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
@@ -68,6 +69,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.ui.viewerapp.actions.app.SwitchBackgroundColor;
@@ -198,9 +200,9 @@ public class ViewerApp {
     ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
     
     //set viewer background colors
-    if (sceneRoot.getAppearance() != null) {
-      sceneRoot.getAppearance().setAttribute("backgroundColors", SwitchBackgroundColor.defaultColor);
-    }
+    if (sceneRoot.getAppearance() != null && (sceneRoot.getAppearance().getAttribute(CommonAttributes.BACKGROUND_COLORS) == Appearance.INHERITED && sceneRoot.getAppearance().getAttribute(CommonAttributes.BACKGROUND_COLOR) == Appearance.INHERITED)) {
+        sceneRoot.getAppearance().setAttribute("backgroundColors", SwitchBackgroundColor.defaultColor);
+      }
     
     //frame properties
     frame.setTitle("jReality Viewer");

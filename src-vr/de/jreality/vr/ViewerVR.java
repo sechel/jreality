@@ -38,24 +38,23 @@ import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileSystemView;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArrayArray;
-import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.pick.PickResult;
-import de.jreality.scene.pick.PickSystem;
 import de.jreality.scene.tool.Tool;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
@@ -116,6 +115,8 @@ public class ViewerVR {
 	
 	// ratio of maximal value and minimal value of texture scale
 	private static final double TEX_SCALE_RANGE = 400;
+
+	private static final Object DARK_DIFFUSE_COLOR = new Color(0,80,80);
 	
 	// texture of content
 	private Texture2D tex;
@@ -123,7 +124,7 @@ public class ViewerVR {
 	// root of scene graph
 	private SceneGraphComponent sceneRoot = new SceneGraphComponent(),
 			sceneNode = new SceneGraphComponent(),
-			reflectedSceneNode = new SceneGraphComponent(),
+//			reflectedSceneNode = new SceneGraphComponent(),
 			avatarNode = new SceneGraphComponent(),
 			camNode = new SceneGraphComponent(),
 			lightNode = new SceneGraphComponent(), terrainNode;
@@ -167,15 +168,19 @@ public class ViewerVR {
 	private Container defaultPanel;
 	private String currentColor;
 	private JSlider texScaleSlider;
-//	private JCheckBox flatTerrain;
+	private JCheckBox flatTerrainCheckbox;
 //	private Appearance currentAppearance;
 	private Landscape landscape;
 
-	private PickSystem pickSystem;
+	private AABBPickSystem pickSystem;
 	private double[][] terrainPoints;
 
-	private boolean showShadow = false;
-	
+	private IndexedFaceSet terrain;
+	private IndexedFaceSet flatTerrain = Primitives.plainQuadMesh(3, 3, 100, 100);
+
+	private double[][] flatTerrainPoints;
+
+	private boolean flat;
 	
 	public ViewerVR() throws IOException {
 
@@ -199,6 +204,11 @@ public class ViewerVR {
 				+ CommonAttributes.PICKABLE, false);
 		rootAppearance.setAttribute(CommonAttributes.POINT_SHADER + "."
 				+ CommonAttributes.PICKABLE, false);
+		Color downColor = new Color(0,0,0);
+		Color upColor = new Color(80,80,120);
+		rootAppearance.setAttribute(CommonAttributes.BACKGROUND_COLORS, new Color[]{
+				upColor, upColor, downColor, downColor
+		});
 		sceneRoot.setAppearance(rootAppearance);
 
 		Camera cam = new Camera();
@@ -264,14 +274,14 @@ public class ViewerVR {
 		sceneNode.setAppearance(contentAppearance);
 
 		sceneRoot.addTool(new PickShowTool(null, 0.005));
-		setAvatarPosition(0, 0.7, 30);
+		setAvatarPosition(0, 0, 28);
  
 		// prepare  terrain
 		terrainNode = Readers
 				.read(Input.getInput("de/jreality/vr/terrain.3ds"))
 				.getChildComponent(0);
-		MatrixBuilder.euclidean().scale(1 / 3.).translate(0, 9, 0).assignTo(
-				terrainNode);
+		terrain = (IndexedFaceSet) terrainNode.getGeometry();
+		MatrixBuilder.euclidean().scale(1 / 3.).translate(0, 7, 0).assignTo(terrainNode);
 		terrainNode.setName("terrain");
 		IndexedFaceSet terrainGeom = (IndexedFaceSet) terrainNode.getGeometry();
 		terrainPoints = terrainGeom.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
@@ -279,12 +289,33 @@ public class ViewerVR {
 		for (int j=0; j<n; j++) {
 			terrainPoints[j][0] /= 3;
 			terrainPoints[j][1] /= 3;
-			terrainPoints[j][1] += 9;
+			terrainPoints[j][1] += 7;
 			terrainPoints[j][2] /= 3;
 		}
+		
 		GeometryUtility.calculateAndSetNormals(terrainGeom);
 		terrainGeom.setName("terrain Geometry");
 		PickUtility.assignFaceAABBTree(terrainGeom);
+		
+		flatTerrainPoints = flatTerrain.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+		n = flatTerrainPoints.length;
+		for (int j=0; j<n; j++) {
+			double y = flatTerrainPoints[j][1];
+			//double z = flatTerrainPoints[j][2];
+			flatTerrainPoints[j][1] = -7;
+			flatTerrainPoints[j][2] = y;
+		}
+		flatTerrain.setVertexAttributes(Attribute.COORDINATES, new DoubleArrayArray.Array(flatTerrainPoints, 3));
+		for (int j=0; j<n; j++) {			
+			flatTerrainPoints[j][0] /= 3;
+			flatTerrainPoints[j][1] = 0;
+			flatTerrainPoints[j][2] /= 3;
+		}
+		
+		GeometryUtility.calculateAndSetNormals(flatTerrain);
+		flatTerrain.setName("flat terrain Geometry");
+		PickUtility.assignFaceAABBTree(flatTerrain);
+		
 		terrainAppearance.setAttribute("showLines", false);
 		terrainAppearance.setAttribute("showPoints", false);
 		terrainAppearance.setAttribute("diffuseColor", Color.white);
@@ -300,14 +331,15 @@ public class ViewerVR {
 		
 		// landscape
 		landscape = new Landscape();
-		updateLandscape();
-		
+
 		// swing widgets
 		makeControlPanel();
 		makeContentFileChooser();
 		makeTextureFileChooser();
 		makeColorChooser();
-	}
+		
+		updateLandscape();
+}
 
 	private void makeControlPanel() {
 		sp = new ScenePanel();
@@ -432,16 +464,33 @@ public class ViewerVR {
 
 	private void updateLandscape() {
 		ImageData[] cubeMap = landscape.getCubeMap();
-		if (cubeMap != null) {
-			setSkyBox(cubeMap);
+		String diffCol = CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR;
+		Color currentDiffuseColor = (Color) contentAppearance.getAttribute(diffCol);
+		flat = (cubeMap == null);
+		if (cubeMap == null) {
+			if (currentDiffuseColor.equals(Color.white)) {
+				contentAppearance.setAttribute(diffCol, DARK_DIFFUSE_COLOR);
+			}
+		} else {
+			if (currentDiffuseColor.equals(DARK_DIFFUSE_COLOR)) {
+				contentAppearance.setAttribute(diffCol, Color.white);
+			}
 		}
+		Geometry last = terrainNode.getGeometry();
+		terrainNode.setGeometry(cubeMap == null ? flatTerrain : terrain);
+		if (last != terrainNode.getGeometry()) computeShadow();
+		setSkyBox(cubeMap);	
 		ImageData terrainTex = landscape.getTerrainTexture();
-		if (terrainTex != null) {
-			setTerrainTexture(
-					terrainTex,
-					landscape.getTerrainTextureScale()
-			);
-		}
+		setTerrainTexture(
+				terrainTex,
+				landscape.getTerrainTextureScale()
+		);
+
+		rootAppearance.setAttribute(CommonAttributes.BACKGROUND_COLORS, landscape.getUpColor() != null ? 
+				new Color[]{
+			landscape.getUpColor(), landscape.getUpColor(), landscape.getDownColor(), landscape.getDownColor()
+		} : Appearance.INHERITED);
+
 	}
 	
 	private JPanel makeEnvTab() {
@@ -456,43 +505,32 @@ public class ViewerVR {
 		envSelection.setBorder(new EmptyBorder(20,20,0,0));
 		envSelection.add(landscape.getSelectionComponent(), BorderLayout.CENTER);
 		
-		final JCheckBox showShadowCheckBox = new JCheckBox("show shadow");
-		showShadowCheckBox.setSelected(showShadow);
-		showShadowCheckBox.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				showShadow = showShadowCheckBox.isSelected();	
-				if (showShadow) {
-					computeShadow();
-				} else {
-					IndexedFaceSet terrainGeometry = (IndexedFaceSet) terrainNode.getGeometry();
-					terrainGeometry.setVertexAttributes(Attribute.COLORS, null);
-				}
-			}
-		});
-		envSelection.add(showShadowCheckBox, BorderLayout.SOUTH);
-		
-//		flatTerrain = new JCheckBox("flat terrain");
-//		flatTerrain.setSelected(false);
-//		flatTerrain.addActionListener(new ActionListener() {
+//		final JCheckBox showShadowCheckBox = new JCheckBox("show shadow");
+//		showShadowCheckBox.setSelected(showShadow);
+//		showShadowCheckBox.addActionListener(new ActionListener() {
 //
-//			public void actionPerformed(ActionEvent arg0) {
-//				boolean flat = flatTerrain.isSelected();
-//				double scaleX = flat ? .5 : .33333;
-//				double scaleY = flat ? 0 : .33333;
-//				double scaleZ = flat ? .5 : .33333;
-//				MatrixBuilder.euclidean().scale(scaleX, scaleY, scaleZ).translate(0, 9, 0).assignTo(
-//						terrainNode);
-//				IndexedFaceSet terrainGeom = (IndexedFaceSet) terrainNode.getGeometry();
-//				GeometryUtility.calculateAndSetNormals(terrainGeom);
-//				if (flat) {
-//					terrainGeom.setGeometryAttributes("AABBTree",null);
+//			public void actionPerformed(ActionEvent e) {
+//				showShadow = showShadowCheckBox.isSelected();	
+//				if (showShadow) {
+//					computeShadow();
 //				} else {
-//					PickUtility.assignFaceAABBTree(terrainGeom);
+//					IndexedFaceSet terrainGeometry = (IndexedFaceSet) terrainNode.getGeometry();
+//					terrainGeometry.setVertexAttributes(Attribute.COLORS, null);
 //				}
 //			}
 //		});
-//		envSelection.add(flatTerrain, BorderLayout.SOUTH);
+//		envSelection.add(showShadowCheckBox, BorderLayout.SOUTH);
+		
+//		flatTerrainCheckbox = new JCheckBox("flat terrain");
+//		flatTerrainCheckbox.setSelected(false);
+//		flatTerrainCheckbox.addActionListener(new ActionListener() {
+//
+//			public void actionPerformed(ActionEvent arg0) {
+//				boolean flat = flatTerrainCheckbox.isSelected();
+//				terrainNode.setGeometry(flat ? flatTerrain : terrain);
+//			}
+//		});
+//		envSelection.add(flatTerrainCheckbox, BorderLayout.SOUTH);
 		return envSelection;
 	}
 
@@ -641,6 +679,9 @@ public class ViewerVR {
 				double sliderDiam = 0.01 * sizeSlider.getValue();
 				setDiam(Math.exp(Math.log(LOGARITHMIC_RANGE)*sliderDiam)/LOGARITHMIC_RANGE * MAX_CONTENT_SIZE);
 				alignContent(diam, offset, null);
+				if (!sizeSlider.getValueIsAdjusting()) {
+					computeShadow();
+				}
 			}
 		});
 		sizeBox.add(sizeLabel);
@@ -654,6 +695,9 @@ public class ViewerVR {
 			public void stateChanged(ChangeEvent arg0) {
 				setOffset(0.01 * groundSlider.getValue());
 				alignContent(diam, offset, null);
+				if (!groundSlider.getValueIsAdjusting()) {
+					computeShadow();
+				}
 			}
 		});
 		groundBox.add(groundLabel);
@@ -672,6 +716,7 @@ public class ViewerVR {
 			public void actionPerformed(ActionEvent arg0) {
 				alignContent(diam, offset, MatrixBuilder.euclidean().rotateX(
 						-PI2).getMatrix());
+				computeShadow();
 			}
 		});
 		Insets insets = new Insets(0, 0, 0, 0);
@@ -687,6 +732,7 @@ public class ViewerVR {
 			public void actionPerformed(ActionEvent arg0) {
 				alignContent(diam, offset, MatrixBuilder.euclidean().rotateX(
 						PI2).getMatrix());
+				computeShadow();
 			}
 		});
 		xRotateRight.setMargin(insets);
@@ -698,6 +744,7 @@ public class ViewerVR {
 			public void actionPerformed(ActionEvent arg0) {
 				alignContent(diam, offset, MatrixBuilder.euclidean().rotateY(
 						-PI2).getMatrix());
+				computeShadow();
 			}
 		});
 		yRotateLeft.setMargin(insets);
@@ -711,6 +758,7 @@ public class ViewerVR {
 			public void actionPerformed(ActionEvent arg0) {
 				alignContent(diam, offset, MatrixBuilder.euclidean().rotateY(
 						PI2).getMatrix());
+				computeShadow();
 			}
 		});
 		yRotateRight.setMargin(insets);
@@ -722,6 +770,7 @@ public class ViewerVR {
 			public void actionPerformed(ActionEvent arg0) {
 				alignContent(diam, offset, MatrixBuilder.euclidean().rotateZ(
 						-PI2).getMatrix());
+				computeShadow();
 			}
 		});
 		zRotateLeft.setMargin(insets);
@@ -735,6 +784,7 @@ public class ViewerVR {
 			public void actionPerformed(ActionEvent arg0) {
 				alignContent(diam, offset, MatrixBuilder.euclidean().rotateZ(
 						PI2).getMatrix());
+				computeShadow();
 			}
 		});
 		zRotateRight.setMargin(insets);
@@ -803,10 +853,11 @@ public class ViewerVR {
 
 	private JPanel makeToolTab() {
 		JPanel toolPanel = new JPanel(new BorderLayout());
+		
+//		toolPanel.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
+//				LineBorder.createGrayLineBorder()));
+		toolPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		Box toolBox = new Box(BoxLayout.Y_AXIS);
-		toolBox.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
-				LineBorder.createGrayLineBorder()));
-
 		Box toolButtonBox = new Box(BoxLayout.X_AXIS);
 		toolButtonBox.setBorder(new EmptyBorder(5, 0, 5, 5));
 		rotate = new JCheckBox("rotate");
@@ -826,7 +877,28 @@ public class ViewerVR {
 
 		toolBox.add(toolButtonBox);
 
-		toolPanel.add(toolBox);
+		toolPanel.add(BorderLayout.CENTER, toolBox);
+		
+		JPanel buttonPanel = new JPanel(new FlowLayout());
+		JButton resetButton = new JButton("reset");
+		resetButton.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				if (currentContent != null) {
+					MatrixBuilder.euclidean().assignTo(currentContent);
+				}
+			}
+		});
+		buttonPanel.add(resetButton);
+		JButton shadowButton = new JButton("recompute shadow");
+		shadowButton.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				computeShadow();
+			}
+		});
+		buttonPanel.add(shadowButton);
+		toolPanel.add(BorderLayout.SOUTH, buttonPanel);
 		return toolPanel;
 	}
 
@@ -1025,6 +1097,8 @@ public class ViewerVR {
 			sceneNode.removeChild(currentContent);
 		}
 		currentContent = content;
+		rotate.setSelected(false);
+		drag.setSelected(false);
 		Rectangle3D bounds = GeometryUtility
 				.calculateChildrenBoundingBox(currentContent);
 		// scale
@@ -1039,7 +1113,7 @@ public class ViewerVR {
 			@Override
 			public void visit(SceneGraphComponent c) {
 				c.childrenWriteAccept(this, false, false, false, false, true,
-						false);
+						true);
 			}
 
 			@Override
@@ -1050,6 +1124,7 @@ public class ViewerVR {
 				}
 			}
 		});
+		computeShadow();
 	}
 
 	public double getDiam() {
@@ -1075,10 +1150,11 @@ public class ViewerVR {
 			final Matrix rotation) {
 		Scene.executeWriter(sceneNode, new Runnable() {
 			public void run() {
-				if (rotation != null)
+				if (rotation != null) {
 					MatrixBuilder.euclidean(rotation).times(
 							new Matrix(sceneNode.getTransformation()))
 							.assignTo(sceneNode);
+				}
 				Rectangle3D bounds = GeometryUtility
 						.calculateBoundingBox(sceneNode);
 				// scale
@@ -1097,7 +1173,6 @@ public class ViewerVR {
 						mb.times(sceneNode.getTransformation().getMatrix());
 					mb.assignTo(sceneNode);
 				}
-				if (showShadow) computeShadow();
 			}
 		});
 	}
@@ -1125,28 +1200,28 @@ public class ViewerVR {
 	public void setAvatarPosition(double x, double y, double z) {
 		MatrixBuilder.euclidean().translate(x, y, z).assignTo(avatarNode);
 	}
-	
+
 	private void computeShadow() {
-		if (showShadow) {
 		if (pickSystem == null) {
 			pickSystem = new AABBPickSystem();
 			pickSystem.setSceneRoot(sceneNode);
 		}
-		IndexedFaceSet terrain = (IndexedFaceSet) terrainNode.getGeometry();
-		int n = terrainPoints.length;
+
+		//boolean flat = flatTerrainCheckbox.isSelected();
+		
+		int n = flat ? flatTerrainPoints.length : terrainPoints.length;
 		double[] white = new double[]{1,1,1,1};
 		double[] black = new double[]{.2,.2,.2,1};
 		double[] sun = new double[]{0,1,1,0};
 		double[][] color = new double[n][];
 		for (int j=0; j<n; j++) {
-			List<PickResult> hits = pickSystem.computePick(terrainPoints[j], sun);
+			List<PickResult> hits = pickSystem.computePick((flat ? flatTerrainPoints : terrainPoints)[j], sun);
 			color[j] = hits.size() > 0 ? black : white;
 		}
-		terrain.setVertexAttributes(
+		(flat ? flatTerrain : terrain).setVertexAttributes(
 				Attribute.COLORS,
 				new DoubleArrayArray.Array(color)
 		);
-		}
 	}
 	
 	public static void main(String[] args) throws IOException {
@@ -1154,9 +1229,9 @@ public class ViewerVR {
 		ViewerVR tds = new ViewerVR();
 		tds.showPanel(false);
 		ViewerApp vApp = tds.display();
-		// vApp.setAttachNavigator(true);
-		// vApp.setAttachBeanShell(true);
-		// vApp.setShowMenu(true);
+//		 vApp.setAttachNavigator(true);
+//		 vApp.setAttachBeanShell(true);
+//		 vApp.setShowMenu(true);
 		vApp.update();
 		JFrame f = vApp.display();
 		f.setSize(800, 600);
