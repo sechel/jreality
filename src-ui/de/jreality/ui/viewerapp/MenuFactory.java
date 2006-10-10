@@ -40,8 +40,11 @@
 
 package de.jreality.ui.viewerapp;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
@@ -56,6 +59,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.Navigator.SelectionEvent;
+import de.jreality.ui.viewerapp.actions.app.SwitchBackgroundColor;
 import de.jreality.ui.viewerapp.actions.app.ToggleAppearance;
 import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFieldOfView;
@@ -101,6 +105,7 @@ public class MenuFactory {
   public static String TOGGLE_VERTEX_DRAWING = "Toggle vertex drawing";
   public static String TOGGLE_EDGE_DRAWING = "Toggle egde drawing";
   public static String TOGGLE_FACE_DRAWING = "Toggle face drawing";
+  public static String BACKGROUND_COLOR = "Set background color";
   public static String TOGGLE_FULL_SCREEN = "Toggle full screen";
   public static String TOGGLE_FULL_VIEWER = "Toggle viewer full screen";
   public static String RENDER = "Force Rendering";
@@ -185,6 +190,22 @@ public class MenuFactory {
     appMenu.add(new JMenuItem(new ToggleAppearance(TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm)));
     appMenu.add(new JMenuItem(new ToggleAppearance(TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm)));
     appMenu.add(new JMenuItem(new ToggleAppearance(TOGGLE_FACE_DRAWING, CommonAttributes.FACE_DRAW, sm)));
+    if (viewerApp != null) {  //background color of viewerApp
+      JMenu bgColors = new JMenu(BACKGROUND_COLOR);
+      ButtonGroup bg = new ButtonGroup();
+      List<JRadioButtonMenuItem> items = new LinkedList<JRadioButtonMenuItem>();
+      JRadioButtonMenuItem def = new JRadioButtonMenuItem(new SwitchBackgroundColor("default", SwitchBackgroundColor.defaultColor, viewerApp)); 
+      def.setSelected(true);
+      items.add( def );
+      items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("white", new Color[]{Color.WHITE}, viewerApp)) );
+      items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("gray", new Color[]{new Color(225, 225, 225)}, viewerApp)) );
+      for (JRadioButtonMenuItem item : items) {
+        bg.add(item);
+        bgColors.add(item);
+      }
+      appMenu.addSeparator();
+      appMenu.add(bgColors);
+    }
     
     final JMenu viewerMenu = new JMenu("Viewer");
     viewerMenu.setMnemonic(KeyEvent.VK_V);

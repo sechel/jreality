@@ -40,7 +40,6 @@
 
 package de.jreality.ui.viewerapp;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.beans.Beans;
@@ -71,6 +70,7 @@ import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
+import de.jreality.ui.viewerapp.actions.app.SwitchBackgroundColor;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
@@ -199,10 +199,7 @@ public class ViewerApp {
     
     //set viewer background colors
     if (sceneRoot.getAppearance() != null) {
-      Color[] bg = new Color[]{
-          new Color(225, 225, 225), new Color(225, 225, 225),
-          new Color(255, 225, 180), new Color(255, 225, 180), };
-      sceneRoot.getAppearance().setAttribute("backgroundColors", bg);
+      sceneRoot.getAppearance().setAttribute("backgroundColors", SwitchBackgroundColor.defaultColor);
     }
     
     //frame properties
