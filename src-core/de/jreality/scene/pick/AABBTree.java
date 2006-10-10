@@ -48,6 +48,7 @@ import java.util.List;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
@@ -315,55 +316,39 @@ public class AABBTree {
         }
     };
     
-    /**
-     * this is only for debugging and might be removed in future.
-     * @return A component that contains the AABBs of the tree as
-     * IndexedLineSets.
-     */
-    public SceneGraphComponent display() {
-      SceneGraphComponent cmp = new SceneGraphComponent();
-      Appearance app = new Appearance();
-      app.setAttribute("showPoints", false);
-      app.setAttribute("showLines", true);
-      app.setAttribute("showFaces", false);
-      cmp.setAppearance(app);
-      display(cmp, Color.BLUE, Color.RED, true, 0.0001, 0.99);
-      return cmp;
-    }
-    
-    void display(SceneGraphComponent parent, Color leftColor, Color rightColor, boolean isLeft, double radius, double factor) {
-      if (left != null) left.display(parent, leftColor.brighter(), rightColor.brighter(), true, radius*factor, factor);
-      if (right != null) right.display(parent, leftColor.darker(), rightColor.darker(), false, radius*factor, factor);
-      else if (left == null) { // leaf
-        SceneGraphComponent myComp = new SceneGraphComponent();
-        double[] t = bounds.center;
-        double[] s = bounds.extent;
-        Matrix m = MatrixBuilder.euclidean().translate(t)./*rotateFromTo(z, bounds.zAxis).*/scale(s[0], s[1], s[2]).getMatrix();
-        boolean printed = false;
-        IndexedFaceSet box = new IndexedFaceSet();
-        double[][] verts = new double[8][3];
-        box.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(verts);
-        for (int i = 0; i < 8; i++) {
-          verts[i] = m.multiplyVector(verts[i]);
-          if (Rn.euclideanNorm(verts[i]) < 0.0001) {
-            if (!printed) {
-              System.out.println("trans: "+Rn.toString(t));
-              System.out.println("scale: "+Rn.toString(s));
-              System.out.println("Matrix: \n"+m);
-              printed = true;
-            }
-            System.out.println(i+">>"+Rn.toString(verts[i]));
-          }
-        }
-        box.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY_ARRAY.createReadOnly(verts));
-        myComp.setGeometry(box);
-        IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(box);
-        GeometryUtility.calculateAndSetNormals(box);
-        Appearance a = new Appearance();
-        a.setAttribute("lineShader.diffuseColor", isLeft ? leftColor : rightColor);
-        a.setAttribute("lineShader."+CommonAttributes.TUBE_RADIUS, radius);
-        myComp.setAppearance(a);
-        parent.addChild(myComp);
-      }
-    }
+	/**
+	 * this is only for debugging and might be removed in future.
+	 * @return A component that contains the AABBs of the tree as
+	 * IndexedLineSets.
+	 */
+	public SceneGraphComponent display() {
+		SceneGraphComponent cmp = new SceneGraphComponent();
+		Appearance app = new Appearance();
+		app.setAttribute("showPoints", false);
+		app.setAttribute("showLines", true);
+		app.setAttribute("showFaces", false);
+		cmp.setAppearance(app);
+		display(cmp, Color.BLUE, Color.RED, true, (bounds.extent[0]+bounds.extent[1]+bounds.extent[2])*0.003, 0.99);
+		return cmp;
+	}
+
+	void display(SceneGraphComponent parent, Color leftColor, Color rightColor, boolean isLeft, double radius, double factor) {
+		if (left != null) left.display(parent, leftColor.brighter(), rightColor.brighter(), true, radius*factor, factor);
+		if (right != null) right.display(parent, leftColor.darker(), rightColor.darker(), false, radius*factor, factor);
+		else if (left == null && right == null) { // leaf
+			SceneGraphComponent myComp = new SceneGraphComponent();
+			double[] t = bounds.center;
+			double[] s = bounds.extent;
+			MatrixBuilder.euclidean().translate(t).getMatrix().assignTo(myComp);
+			IndexedFaceSet box = Primitives.cube(2*s[0], 2*s[1], 2*s[2]);
+			myComp.setGeometry(box);
+			IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(box);
+			GeometryUtility.calculateAndSetNormals(box);
+			Appearance a = new Appearance();
+			a.setAttribute("lineShader.diffuseColor", isLeft ? leftColor : rightColor);
+			a.setAttribute("lineShader."+CommonAttributes.TUBE_RADIUS, radius);
+			myComp.setAppearance(a);
+			parent.addChild(myComp);
+		}
+	}
 }
