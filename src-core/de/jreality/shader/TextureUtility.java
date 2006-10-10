@@ -46,6 +46,7 @@ import java.io.IOException;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Scene;
+import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.util.Input;
 
@@ -133,9 +134,14 @@ public class TextureUtility {
    * @return a proxy implementation of ReflectionMap
    */
   public static CubeMap createReflectionMap(Appearance app, String shader, ImageData[] imgs) {
-    if (imgs.length != 6) throw new IllegalArgumentException("need 6 images for reflection map");
-    String key = (shader == null || shader.equals("")) ? "reflectionMap" : shader+".reflectionMap";
-    return createCubeMap(app, key, imgs);
+	  String key = (shader == null || shader.equals("")) ? "reflectionMap" : shader+".reflectionMap";
+	  if (imgs != null) {  
+		  if (imgs.length != 6) throw new IllegalArgumentException("need 6 images for reflection map");
+		  return createCubeMap(app, key, imgs);
+	  } else {
+		  app.setAttribute(key, Appearance.INHERITED);
+		  return null;
+  }
   }
   
   /**
@@ -244,8 +250,13 @@ public class TextureUtility {
    * @return a proxy implementation of ReflectionMap
    */
   public static CubeMap createSkyBox(Appearance app, ImageData[] imgs) {
-    if (imgs.length != 6) throw new IllegalArgumentException("need 6 images for reflection map");
-    return createCubeMap(app, CommonAttributes.SKY_BOX, imgs);
+	  if (imgs != null) {
+		  if (imgs.length != 6) throw new IllegalArgumentException("need 6 images for reflection map");
+		  return createCubeMap(app, CommonAttributes.SKY_BOX, imgs);
+	  } else {
+		  app.setAttribute(CommonAttributes.SKY_BOX, Appearance.INHERITED);
+		  return null;
+	  }
   }
   
   /**

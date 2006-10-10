@@ -56,7 +56,7 @@ public interface RootAppearance extends AttributeEntity {
   Color getBackgroundColor();
   void setBackgroundColor(Color color);
   
-  Color getBackgroundColors();
+  Color[] getBackgroundColors();
   void setBackgroundColors(Color[] color);
   
   Boolean getFogEnabled();
