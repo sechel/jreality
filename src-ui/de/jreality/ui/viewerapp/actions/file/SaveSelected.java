@@ -61,7 +61,7 @@ public class SaveSelected extends AbstractAction {
 
   public SaveSelected(String name, SelectionManager sm, Frame frame) {
     super(name, sm, frame);
-    putValue(SHORT_DESCRIPTION, "Save selects component as a file");
+    putValue(SHORT_DESCRIPTION, "Save selected component as a file");
     putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
     
   }
