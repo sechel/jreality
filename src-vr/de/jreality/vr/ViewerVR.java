@@ -47,6 +47,7 @@ import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.PointLight;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -116,7 +117,7 @@ public class ViewerVR {
 	// ratio of maximal value and minimal value of texture scale
 	private static final double TEX_SCALE_RANGE = 400;
 
-	private static final Object DARK_DIFFUSE_COLOR = new Color(0,80,80);
+	private static final Object DARK_DIFFUSE_COLOR = new Color(128,128,0);
 	
 	// texture of content
 	private Texture2D tex;
@@ -141,10 +142,11 @@ public class ViewerVR {
 			contentAppearance = new Appearance();
 
 	private DirectionalLight light = new DirectionalLight();
+	//private PointLight light = new PointLight();
 
 	private SceneGraphPath cameraPath, avatarPath, emptyPickPath;
 
-	private double diam = 22, offset = .3;
+	private double diam = 22, offset = -.5;
 
 	private JFileChooser fileChooser;
 	private JFileChooser texFileChooser;
@@ -168,7 +170,7 @@ public class ViewerVR {
 	private Container defaultPanel;
 	private String currentColor;
 	private JSlider texScaleSlider;
-	private JCheckBox flatTerrainCheckbox;
+//	private JCheckBox flatTerrainCheckbox;
 //	private Appearance currentAppearance;
 	private Landscape landscape;
 
@@ -197,7 +199,7 @@ public class ViewerVR {
 		rootAppearance.setName("root app");
 		ShaderUtility.createRootAppearance(rootAppearance);
 		rootAppearance.setAttribute(CommonAttributes.POLYGON_SHADER + "."
-				+ CommonAttributes.AMBIENT_COEFFICIENT, 0.1);
+				+ CommonAttributes.AMBIENT_COEFFICIENT, 0.07);
 		rootAppearance.setAttribute(CommonAttributes.LINE_SHADER + "."
 				+ CommonAttributes.AMBIENT_COEFFICIENT, 0.03);
 		rootAppearance.setAttribute(CommonAttributes.LINE_SHADER + "."
@@ -302,13 +304,13 @@ public class ViewerVR {
 		for (int j=0; j<n; j++) {
 			double y = flatTerrainPoints[j][1];
 			//double z = flatTerrainPoints[j][2];
-			flatTerrainPoints[j][1] = -7;
+			flatTerrainPoints[j][1] = -8.5;
 			flatTerrainPoints[j][2] = y;
 		}
 		flatTerrain.setVertexAttributes(Attribute.COORDINATES, new DoubleArrayArray.Array(flatTerrainPoints, 3));
 		for (int j=0; j<n; j++) {			
 			flatTerrainPoints[j][0] /= 3;
-			flatTerrainPoints[j][1] = 0;
+			flatTerrainPoints[j][1] = -1.5;
 			flatTerrainPoints[j][2] /= 3;
 		}
 		
@@ -464,33 +466,42 @@ public class ViewerVR {
 
 	private void updateLandscape() {
 		ImageData[] cubeMap = landscape.getCubeMap();
+		Color upColor = landscape.getUpColor();
+		Color downColor = landscape.getDownColor();
+		
 		String diffCol = CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR;
 		Color currentDiffuseColor = (Color) contentAppearance.getAttribute(diffCol);
-		flat = (cubeMap == null);
 		if (cubeMap == null) {
 			if (currentDiffuseColor.equals(Color.white)) {
 				contentAppearance.setAttribute(diffCol, DARK_DIFFUSE_COLOR);
 			}
+//			if (upColor != null && downColor != null) {
+//				cubeMap = CubeMapGenerator.createCubeMap(upColor, downColor);
+//			}
 		} else {
 			if (currentDiffuseColor.equals(DARK_DIFFUSE_COLOR)) {
 				contentAppearance.setAttribute(diffCol, Color.white);
 			}
 		}
 		Geometry last = terrainNode.getGeometry();
-		terrainNode.setGeometry(cubeMap == null ? flatTerrain : terrain);
+		flat = landscape.isTerrainFlat();
+		terrainNode.setGeometry(flat ? flatTerrain : terrain);
 		if (last != terrainNode.getGeometry()) computeShadow();
-		setSkyBox(cubeMap);	
+		
+		setSkyBox(cubeMap);
+		
 		ImageData terrainTex = landscape.getTerrainTexture();
 		setTerrainTexture(
 				terrainTex,
 				landscape.getTerrainTextureScale()
 		);
 
-		rootAppearance.setAttribute(CommonAttributes.BACKGROUND_COLORS, landscape.getUpColor() != null ? 
-				new Color[]{
-			landscape.getUpColor(), landscape.getUpColor(), landscape.getDownColor(), landscape.getDownColor()
-		} : Appearance.INHERITED);
-
+		rootAppearance.setAttribute(
+				CommonAttributes.BACKGROUND_COLORS,
+				upColor != null && downColor != null ?
+						new Color[]{upColor, upColor, downColor, downColor} :
+							Appearance.INHERITED
+		);
 	}
 	
 	private JPanel makeEnvTab() {
@@ -689,7 +700,7 @@ public class ViewerVR {
 		Box groundBox = new Box(BoxLayout.Y_AXIS);
 		groundBox.setBorder(new EmptyBorder(10, 5, 0, 5));
 		JLabel groundLabel = new JLabel("level");
-		groundSlider = new JSlider(SwingConstants.VERTICAL, 0, 200,
+		groundSlider = new JSlider(SwingConstants.VERTICAL, -100, 100,
 				(int) (offset * 100));
 		groundSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
