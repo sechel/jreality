@@ -278,7 +278,6 @@ public class ViewerVR {
 		sceneNode.setAppearance(contentAppearance);
 
 		sceneRoot.addTool(new PickShowTool(null, 0.005));
-		setAvatarPosition(0, 0, 28);
  
 		// prepare  terrain
 		terrainNode = Readers
@@ -337,7 +336,7 @@ public class ViewerVR {
 		
 		
 		// landscape
-		landscape = new Landscape();
+		landscape = new Landscape(System.getProperty("javaws.ViewerVR.landscape"));
 
 		// swing widgets
 		makeControlPanel();
@@ -346,6 +345,8 @@ public class ViewerVR {
 		makeColorChooser();
 		
 		updateLandscape();
+
+		setAvatarPosition(0, landscape.isTerrainFlat() ? -.5:0, 28);
 }
 
 	private void makeControlPanel() {
@@ -507,6 +508,20 @@ public class ViewerVR {
 						new Color[]{upColor, upColor, downColor, downColor} :
 							Appearance.INHERITED
 		);
+		
+			Matrix m = new Matrix(avatarNode.getTransformation());
+			AABBPickSystem ps = new AABBPickSystem();
+			ps.setSceneRoot(terrainNode);
+			double[] pos = m.getColumn(3);
+			double[] dest = pos.clone();
+			dest[1]-=1.5;
+			List<PickResult> picks = ps.computePick(pos, dest);
+			if (picks.isEmpty()) {
+				picks = ps.computePick(pos, new double[]{0,1,0,0});
+			}
+			if (!picks.isEmpty()) {
+				setAvatarHeight(picks.get(0).getWorldCoordinates()[1]);
+			}
 	}
 	
 	private JPanel makeEnvTab() {
@@ -1215,6 +1230,13 @@ public class ViewerVR {
 
 	public void setAvatarPosition(double x, double y, double z) {
 		MatrixBuilder.euclidean().translate(x, y, z).assignTo(avatarNode);
+	}
+	public void setAvatarHeight(double y) {
+		Matrix m = new Matrix(avatarNode.getTransformation());
+		double delta = y-m.getEntry(1, 3);
+		m.setEntry(1, 3, y);
+		m.assignTo(avatarNode);
+		sp.adjustHeight(delta);
 	}
 
 	private void computeShadow() {

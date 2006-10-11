@@ -186,9 +186,13 @@ public class ScenePanel {
   }
 
   public void show(SceneGraphComponent component, Matrix avatar) {
-	MatrixBuilder.euclidean(avatar).translate(0, 0, getZOffset()).assignTo(rootNode);
+	setPosition(avatar);
     component.addChild(getComponent());
     frame.setVisible(true);
+}
+
+public void setPosition(Matrix avatar) {
+	MatrixBuilder.euclidean(avatar).translate(0, 0, getZOffset()).assignTo(rootNode);
 }
   
   public void hide(ToolContext tc) {
@@ -256,6 +260,10 @@ public class ScenePanel {
 
 	public void setShowFeet(boolean showFeet) {
 		this.showFeet = showFeet;
+	}
+
+	public void adjustHeight(double delta) {
+		MatrixBuilder.euclidean(rootNode).translate(0, delta, 0).assignTo(rootNode);
 	}
   
 }
