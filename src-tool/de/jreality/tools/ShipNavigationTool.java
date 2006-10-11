@@ -67,13 +67,16 @@ public class ShipNavigationTool extends AbstractTool {
   private final InputSlot horizontalRotation = InputSlot.getDevice("HorizontalShipRotationAngleEvolution");
   private final InputSlot timer = InputSlot.getDevice("SystemTime");
   private final InputSlot run = InputSlot.getDevice("RunActivation");
-  
+
+  private final InputSlot gravityToggle = InputSlot.getDevice("GravityToggle");
+
   private double[] velocity = {0,0,0};
   private boolean touchGround;
   
   double gain = 4;
   private double runFactor=2;
   private double gravity = 9.81;
+  private double lastGravity = 0;
   private double jumpSpeed = 8;
   private double lastJumpSpeed;
   private boolean rotate=false;
@@ -85,9 +88,20 @@ public class ShipNavigationTool extends AbstractTool {
     addCurrentSlot(leftRight);
     addCurrentSlot(rotateActivation);
     addCurrentSlot(jump);
+    addCurrentSlot(gravityToggle);
   }
 
   public void perform(ToolContext tc) {
+	  
+	  if (tc.getSource() == gravityToggle) {
+		  if (tc.getAxisState(tc.getSource()).isReleased()) return;
+		  double lg = gravity;
+		  gravity=lastGravity;
+		  lastGravity=lg;
+		  velocity[1]=0;
+		  touchGround=gravity==0;
+	  }
+	  
     if (rotate) {
       if (!tc.getAxisState(rotateActivation).isPressed()) {
         removeCurrentSlot(horizontalRotation);

@@ -31,6 +31,8 @@
     <mapping device="KeyboardSWT" src="115" target="backward"/>
     <mapping device="KeyboardSWT" src="100" target="right"/>
 
+    <mapping device="Keyboard" src="VK_G" target="GravityToggle"/>
+
     <mapping device="Keyboard" src="VK_E" target="EncompassActivation"/>
     <mapping device="KeyboardSWT" src="101" target="EncompassActivation"/>
 

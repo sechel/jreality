@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -26,6 +27,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
@@ -308,10 +310,13 @@ public class ViewerVR {
 			flatTerrainPoints[j][2] = y;
 		}
 		flatTerrain.setVertexAttributes(Attribute.COORDINATES, new DoubleArrayArray.Array(flatTerrainPoints, 3));
+		Random r = new Random();
 		for (int j=0; j<n; j++) {			
 			flatTerrainPoints[j][0] /= 3;
+			flatTerrainPoints[j][0] += (-.5+r.nextDouble())*1E-1;
 			flatTerrainPoints[j][1] = -1.5;
 			flatTerrainPoints[j][2] /= 3;
+			flatTerrainPoints[j][2] += (-.5+r.nextDouble())*1E-1;
 		}
 		
 		GeometryUtility.calculateAndSetNormals(flatTerrain);
@@ -385,7 +390,7 @@ public class ViewerVR {
 		JPanel textureButtonPanel = makeTexTab();
 		appearanceTabs.add("tex", textureButtonPanel);
 		
-		JTextPane helpText = makeHelpTab();
+		JScrollPane helpText = makeHelpTab();
 		geomTabs.add("help", helpText);
 
 		sp.getFrame().getContentPane().add(tabs);
@@ -975,18 +980,18 @@ public class ViewerVR {
 		return textureButtonPanel;
 	}
 
-	private JTextPane makeHelpTab() {
+	private JScrollPane makeHelpTab() {
 		JTextPane helpText = new JTextPane();
 		helpText.setEditable(false);
 		helpText.setContentType("text/html");
-		helpText.setPreferredSize(new Dimension(100,260));
+		helpText.setPreferredSize(new Dimension(100,100));
 		helpText.setBackground(rotate.getBackground());
 		try {
 			helpText.setText(Input.getInput("de/jreality/vr/help.html").getContentAsString());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return helpText;
+		return new JScrollPane(helpText);
 	}
 
 	protected void setTexScale(double d) {
