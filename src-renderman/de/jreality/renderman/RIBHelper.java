@@ -127,59 +127,75 @@ public class RIBHelper {
 	    //if(object instanceof Float)
 	    w2.print(" "+object+" ");
 	}
+  
+  
+  public static void writeTexture(ImageData data, String noSuffix){
+    writeTexture(data, noSuffix, 1, 1);
+  }
 
-	public static void writeTexture(ImageData data, String noSuffix){
-	        BufferedImage img;
-	        for (Iterator iter = ImageIO.getImageWritersByMIMEType("image/tiff"); iter.hasNext(); ) {
-	         	System.err.println("Writer: "+((ImageWriter) iter.next()).getClass().getName());
-	        }
+	public static void writeTexture(ImageData data, String noSuffix, int texTimesY,int texTimesX){
+	  
+    if(texTimesY<1||texTimesX<1) {
+      System.err.println("texTimes is not or wrong initialized: texTimesY="+texTimesY+", texTimesX="+texTimesX);
+      return;
+    }
+    
+    BufferedImage img;
+	  for (Iterator iter = ImageIO.getImageWritersByMIMEType("image/tiff"); iter.hasNext(); ) {
+	   System.err.println("Writer: "+((ImageWriter) iter.next()).getClass().getName());
+	  }
 	        
-	        if (true) {
-	                // TODO temporary as long as ImageData does not return a propper BufferedImage
-	                byte[] byteArray = data.getByteArray();
-	                int dataHeight = data.getHeight();
-	                int dataWidth = data.getWidth();
-	                img = new BufferedImage(dataWidth, dataHeight,
-	                        BufferedImage.TYPE_INT_ARGB);
-	                WritableRaster raster = img.getRaster();
-	                int[] pix = new int[4];
-	                for (int y = 0, ptr = 0; y < dataHeight; y++) {
-	                    for (int x = 0; x < dataWidth; x++, ptr += 4) {
-	                        pix[3] = byteArray[ptr + 3];
-	                        pix[0] = byteArray[ptr];
-	                        pix[1] = byteArray[ptr + 1];
-	                        pix[2] = byteArray[ptr + 2];
-	                        raster.setPixel(x, y, pix);
-	                    }
-	                }
-	            } else {
-	            	img = (BufferedImage) data.getImage();
-	            }
+	  if (true) {
+	   // TODO temporary as long as ImageData does not return a propper BufferedImage
+	   byte[] byteArray = data.getByteArray();
+	   int dataHeight = data.getHeight();
+	   int dataWidth = data.getWidth();
+	   img = new BufferedImage(dataWidth*texTimesX, dataHeight*texTimesY,
+	   BufferedImage.TYPE_INT_ARGB);
+	   WritableRaster raster = img.getRaster();
+	   int[] pix = new int[4];
+     for(int i=0;i<texTimesY;i++){
+       for(int j=0;j<texTimesX;j++){  
+         for (int y = 0, ptr = 0; y < dataHeight; y++) {
+           for (int x = 0; x < dataWidth; x++, ptr += 4) {
+             pix[3] = byteArray[ptr + 3];
+             pix[0] = byteArray[ptr];
+             pix[1] = byteArray[ptr + 1];
+             pix[2] = byteArray[ptr + 2];
+             raster.setPixel(x+dataWidth*j, y+dataHeight*i, pix);
+           }
+         }                      
+       }
+     }
+	  } else {
+	   img = (BufferedImage) data.getImage();
+	  }
 	            // force alpha channel to be "pre-multiplied"
-			    img.coerceData(true);
+		img.coerceData(true);
 	
-	            boolean worked=true;
-				try {
+	  boolean worked=true;
+		try {
 					// TODO: !!!
 					//worked = ImageIO.write(img, "TIFF", new File(noSuffix+".tiff"));
-					Method cm = Class.forName("javax.media.jai.JAI").getMethod("create", new Class[]{String.class, RenderedImage.class, Object.class, Object.class});
-					cm.invoke(null, new Object[]{"filestore", img, noSuffix+".tiff", "tiff"});
+		  Method cm = Class.forName("javax.media.jai.JAI").getMethod("create", new Class[]{String.class, RenderedImage.class, Object.class, Object.class});
+		  cm.invoke(null, new Object[]{"filestore", img, noSuffix+".tiff", "tiff"});
 	//				Statement stm = new Statement(, "create", new Object[]{"filestore", img, noSuffix+".tiff", "tiff"});
 	//				stm.execute();
-				} catch(Throwable e) {
-					worked=false;
-		            LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write TIFF: "+noSuffix+".tiff", e);
-				}
-	            if (!worked) {
-	              try {
-					worked =ImageIO.write(img, "PNG", new File(noSuffix+".png"));
-				} catch (IOException e) {
+		} catch(Throwable e) {
+		worked=false;
+		LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write TIFF: "+noSuffix+".tiff", e);
+		}
+	  if (!worked) {
+	    try {
+			 worked =ImageIO.write(img, "PNG", new File(noSuffix+".png"));
+	    } catch (IOException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-	              if (!worked) 
-	                  LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write PNG: {0}.png", noSuffix);
-	            }
-	    }
+	      e.printStackTrace();
+			}
+	    if (!worked) 
+	     LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write PNG: {0}.png", noSuffix);
+	  }
+	}
+  
 
 }

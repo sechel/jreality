@@ -125,56 +125,57 @@ import de.jreality.util.CameraUtility;
  * @see de.jreality.shader.CommonAttributes
  */
 public class RIBVisitor extends SceneGraphVisitor {
+  
 	private SceneGraphComponent root;
 	private SceneGraphPath cameraPath;
 	private double[] world2Camera;
 	private Camera camera;
-    private int width =640;
-    private int height = 480;
-    private String ribFileName;
-    private int[] maximumEyeSplits={10};
-    boolean insidePointset = false;		// life gets complicated with appearance-generated tubes and spheres
-    protected boolean shadowEnabled = false;
-    protected  boolean fullSpotLight = false;
-    protected  boolean retainGeometry = false;	// should geometry be saved using "Begin/EndArchive"?
-    protected  boolean useProxyCommands = true;
+  private int width =640;
+  private int height = 480;
+  private String ribFileName;
+  private int[] maximumEyeSplits={10};
+  boolean insidePointset = false;		// life gets complicated with appearance-generated tubes and spheres
+  protected boolean shadowEnabled = false;
+  protected  boolean fullSpotLight = false;
+  protected  boolean retainGeometry = false;	// should geometry be saved using "Begin/EndArchive"?
+  protected  boolean useProxyCommands = true;
     // user can specify that tubes and spheres drawn by the appearances are to be opaque
     // reqardless of the current transparency value
-    protected boolean opaqueTubes = false;
-    protected  String shaderPath = null;
-    protected boolean handlingProxyGeometry = false;
-    private boolean writeShadersToFile = true;
-    private  String globalIncludeFile = "";
-    private int rendererType = RIBViewer.TYPE_PIXAR;
-    private int currentSignature = Pn.EUCLIDEAN;
-    private String outputDisplayFormat = "rgb";
-    protected String textureFileSuffix = "tex";  // When it's not prman, set to "tiff" probably.
-    private boolean hasPw = false;
+  protected boolean opaqueTubes = false;
+  protected  String shaderPath = null;
+  protected boolean handlingProxyGeometry = false;
+  private boolean writeShadersToFile = true;
+  private  String globalIncludeFile = "";
+  private int rendererType = RIBViewer.TYPE_PIXAR;
+  private int currentSignature = Pn.EUCLIDEAN;
+  private String outputDisplayFormat = "rgb";
+  protected String textureFileSuffix;// = "tex"; 
+  private boolean hasPw = false;
  
-    transient protected EffectiveAppearance eAppearance = EffectiveAppearance.create();
-    transient private int textureCount = 0;
-    transient private Map<ImageData, String> textures =new HashMap<ImageData, String>();
-    transient private Hashtable<PointSet, String> pointsets = new Hashtable<PointSet, String>();
-    transient int pointsetCount = 0;
-    transient protected Ri ri = new Ri();
-    transient int whichEye = CameraUtility.MIDDLE_EYE;
+  transient protected EffectiveAppearance eAppearance = EffectiveAppearance.create();
+  transient private int textureCount = 0;    
+  transient private Map<ImageData, String> textures =new HashMap<ImageData, String>();
+  transient private Hashtable<PointSet, String> pointsets = new Hashtable<PointSet, String>();
+  transient int pointsetCount = 0;
+  transient protected Ri ri = new Ri();
+  transient int whichEye = CameraUtility.MIDDLE_EYE;
 
  	public void visit(Viewer viewer, String name)	{
  		// handle the file name
 		ribFileName = name;
-	    if(!ribFileName.endsWith(".rib"))	ribFileName = ribFileName+".rib";
-        int index = ribFileName.lastIndexOf('/');
-        outputFileName = ribFileName.substring(index+1,ribFileName.length()-3)+"tif";
+	  if(!ribFileName.endsWith(".rib"))	ribFileName = ribFileName+".rib";
+    int index = ribFileName.lastIndexOf('/');
+    outputFileName = ribFileName.substring(index+1,ribFileName.length()-3)+"tif";
      
-	    root = viewer.getSceneRoot();
+	  root = viewer.getSceneRoot();
 		cameraPath = viewer.getCameraPath();
 		camera = CameraUtility.getCamera(viewer);
-        rootAppearance = root.getAppearance();
-        if (rootAppearance == null) rootAppearance = new Appearance();
+    rootAppearance = root.getAppearance();
+    if (rootAppearance == null) rootAppearance = new Appearance();
 		eAppearance = EffectiveAppearance.create();
 		eAppearance = eAppearance.create(rootAppearance);
 
-        world2Camera = cameraPath.getInverseMatrix(null);
+    world2Camera = cameraPath.getInverseMatrix(null);
 
  		if (writeShadersToFile)		writeStandardShaders(ribFileName);        	
 		if (rootAppearance != null) 	handleRootAppearance();
@@ -183,13 +184,13 @@ public class RIBVisitor extends SceneGraphVisitor {
 		if (camera.isStereo())	{
 			// Careful: the rest of the code expects left eye to be rendered first!
 			whichEye = CameraUtility.LEFT_EYE;
-		    index = ribFileName.lastIndexOf('/');
-		    outputFileName = ribFileName.substring(index+1,ribFileName.length()-4)+"L.tif";	
+		  index = ribFileName.lastIndexOf('/');
+		  outputFileName = ribFileName.substring(index+1,ribFileName.length()-4)+"L.tif";	
 			ri.frameBegin(0);
 			render();
 			ri.frameEnd();
 			whichEye = CameraUtility.RIGHT_EYE;
-		    outputFileName = ribFileName.substring(index+1,ribFileName.length()-4)+"R.tif";	
+		  outputFileName = ribFileName.substring(index+1,ribFileName.length()-4)+"R.tif";	
 			ri.frameBegin(1);
 			render();
 			ri.frameEnd();
@@ -204,90 +205,98 @@ public class RIBVisitor extends SceneGraphVisitor {
 	 */
  	private void render() {
 
-        handleGlobalSettings();
+    handleGlobalSettings();
      
         // handle the camera model next
        // 
         // TODO handle negative far clipping plane as used in elliptic geometry
         //	(OpenGL supports this) (can we do this here by generating our own matrices?)
         // TODO figure out how to specify RI_INFINITY in a RIB file
-        ri.clipping(camera.getNear(), (camera.getFar() > 0) ? camera.getFar() : 1000.0 );
-        ri.depthOfField(camera.getFStop(), camera.getFocalLength(), camera.getFocus());
-       boolean testCameraExplicit = false;
-       double aspectRatio = ((double)width)/height;
-       if (testCameraExplicit)	{
+    ri.clipping(camera.getNear(), (camera.getFar() > 0) ? camera.getFar() : 1000.0 );
+    ri.depthOfField(camera.getFStop(), camera.getFocalLength(), camera.getFocus());
+    boolean testCameraExplicit = false;
+    double aspectRatio = ((double)width)/height;
+    if (testCameraExplicit)	{
     	   // following experiment to set the camera to NDC transformation explicitly without
     	   // using RenderMan commands for doing that.  Doesn't work. -gunn 01.09.06
  //   	   camera.setNear( camera.getNear() * -1);
  //   	   camera.setFar(camera.getFar() * -1);
            // flip the z-direction
-           ri.transform(RIBHelper.fTranspose(MatrixBuilder.euclidean().scale(1,1,-1).getArray()));
-           ri.comment("Home-grown camera transformation");
-    	   double[] c2ndc = CameraUtility.getCameraToNDC(camera, 1.0, currentSignature);
-    	   ri.concatTransform(RIBHelper.fTranspose(c2ndc));
+      ri.transform(RIBHelper.fTranspose(MatrixBuilder.euclidean().scale(1,1,-1).getArray()));
+      ri.comment("Home-grown camera transformation");
+    	double[] c2ndc = CameraUtility.getCameraToNDC(camera, 1.0, currentSignature);
+    	ri.concatTransform(RIBHelper.fTranspose(c2ndc));
  //   	   camera.setNear( camera.getNear() * -1);
  //   	   camera.setFar( camera.getFar() * -1);
-       } else {
-           if (camera.isStereo())	{
-               	double[] eyeP = CameraUtility.getEyePosition(camera, whichEye);
-       			Rectangle2D vp = CameraUtility.getOffAxisViewPort(camera, CameraUtility.getViewport(camera, aspectRatio), eyeP);
-       			ri.comment("Testing left eye stereo");
-       			// can a stereo camera be non-perspective?
-       			ri.projection(camera.isPerspective() ? "perspective" : "orthographic", null);
-       			ri.screenWindow(vp);
-                ri.concatTransform(RIBHelper.fTranspose(MatrixBuilder.euclidean().scale(1,1,-1).getArray()));
-       			double[] moveToEye = Rn.inverse(null, 
-       					P3.makeTranslationMatrix(null, eyeP, currentSignature ));
-       			ri.concatTransform(RIBHelper.fTranspose(moveToEye));
-           } else {
-           		HashMap<String, Object> map = new HashMap<String, Object>();
-           		float fov = (float) camera.getFieldOfView();
-           		float a = 1.0f;
-           		if(camera.isPerspective()) {
-           			map.put("fov", new Float(fov));
-           			ri.projection("perspective",map);
-           		} else {
-           			ri.projection("orthographic",map);    
-           			a =(float) (1/((Math.tan((Math.PI/180.0)*camera.getFieldOfView()/2.0)*camera.getFocus())));
-           			ri.concatTransform(new float[] {a,0,0,0,0,a,0,0,0,0,1,0,0,0,0,1});
-           		}        	
-                ri.concatTransform(RIBHelper.fTranspose(MatrixBuilder.euclidean().scale(1,1,-1).getArray()));
-           }    	   
-      }
+    } else {
+      if (camera.isStereo())	{
+        double[] eyeP = CameraUtility.getEyePosition(camera, whichEye);
+       	Rectangle2D vp = CameraUtility.getOffAxisViewPort(camera, CameraUtility.getViewport(camera, aspectRatio), eyeP);
+       	ri.comment("Testing left eye stereo");
+       	// can a stereo camera be non-perspective?
+       	ri.projection(camera.isPerspective() ? "perspective" : "orthographic", null);
+       	ri.screenWindow(vp);
+        ri.concatTransform(RIBHelper.fTranspose(MatrixBuilder.euclidean().scale(1,1,-1).getArray()));
+       	double[] moveToEye = Rn.inverse(null, 
+       	P3.makeTranslationMatrix(null, eyeP, currentSignature ));
+       	ri.concatTransform(RIBHelper.fTranspose(moveToEye));
+      } else {
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        float fov = (float) camera.getFieldOfView();
+        float a = 1.0f;
+        if(camera.isPerspective()) {
+          map.put("fov", new Float(fov));
+          ri.projection("perspective",map);
+        } else {
+          ri.projection("orthographic",map);    
+          a =(float) (1/((Math.tan((Math.PI/180.0)*camera.getFieldOfView()/2.0)*camera.getFocus())));
+          ri.concatTransform(new float[] {a,0,0,0,0,a,0,0,0,0,1,0,0,0,0,1});
+        }        	
+        ri.concatTransform(RIBHelper.fTranspose(MatrixBuilder.euclidean().scale(1,1,-1).getArray()));
+      }    	   
+    }
   
-       if (whichEye == CameraUtility.LEFT_EYE)	{
-    	   ri.archiveBegin("world");
-       } else if (whichEye == CameraUtility.RIGHT_EYE)	{
-    	   ri.readArchive("world");
-    	   return;
-       }
-       // handle the world
-        ri.comment("world to camera");
+    if (whichEye == CameraUtility.LEFT_EYE)	{
+      ri.archiveBegin("world");
+    } else if (whichEye == CameraUtility.RIGHT_EYE)	{
+    	ri.readArchive("world");
+    	return;
+    }
+    // handle the world
+    ri.comment("world to camera");
         //       world2Camera = MatrixBuilder.euclidean().scale(1,1,-1).times(world2Camera).getArray();
-        ri.concatTransform(RIBHelper.fTranspose(world2Camera));
-        ri.worldBegin();
+    ri.concatTransform(RIBHelper.fTranspose(world2Camera));
+    ri.worldBegin();
        // alpha in the output format means skip over any background settings
-        if (outputDisplayFormat != "rgba")		handleBackground();
+    if (outputDisplayFormat != "rgba")		handleBackground();
         // handle the lights
-        new LightCollector(root, this);
+    new LightCollector(root, this);
         // finally render the scene graph
-        root.accept(this);
-        ri.worldEnd();
-        if (whichEye == CameraUtility.LEFT_EYE)	{
-        	ri.archiveEnd();
-        	ri.readArchive("world");
-        }
+    root.accept(this);
+    ri.worldEnd();
+    if (whichEye == CameraUtility.LEFT_EYE)	{
+      ri.archiveEnd();
+      ri.readArchive("world");
+    }
 	}
 
 	private void handleRootAppearance() {
 		maximumEyeSplits[0] = ((Integer) eAppearance.getAttribute(CommonAttributes.RMAN_MAX_EYE_SPLITS, new Integer(maximumEyeSplits[0]))).intValue();
 		shaderPath = (String) eAppearance.getAttribute(CommonAttributes.RMAN_SEARCHPATH_SHADER, "");
-		textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");
-		shadowEnabled = eAppearance.getAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, false);
+		if(rendererType==RIBViewer.TYPE_PIXAR)
+		  textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");
+    else if(rendererType==RIBViewer.TYPE_3DELIGHT){
+      textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tdl");
+    }else if(rendererType==RIBViewer.TYPE_AQSIS)
+      textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tx");
+    else{
+      System.err.println("no valid rendererType");
+    }
+    shadowEnabled = eAppearance.getAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, false);
 		currentSignature = eAppearance.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-      	outputDisplayFormat = (String) eAppearance.getAttribute(CommonAttributes.RMAN_OUTPUT_DISPLAY_FORMAT, "rgb");
-      	globalIncludeFile = (String) eAppearance.getAttribute(CommonAttributes.RMAN_GLOBAL_INCLUDE_FILE, "");
-      	System.err.println("Preamble is "+globalIncludeFile);
+    outputDisplayFormat = (String) eAppearance.getAttribute(CommonAttributes.RMAN_OUTPUT_DISPLAY_FORMAT, "rgb");
+    globalIncludeFile = (String) eAppearance.getAttribute(CommonAttributes.RMAN_GLOBAL_INCLUDE_FILE, "");
+    System.err.println("Preamble is "+globalIncludeFile);
 	}
 
 	/**
@@ -296,18 +305,18 @@ public class RIBVisitor extends SceneGraphVisitor {
 	 */
  	private void handleGlobalSettings() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
-        map.put("shader", (shaderPath!=null?(shaderPath+":"):"")+".:&");
-        ri.option( "searchpath", map);
+    map.put("shader", (shaderPath!=null?(shaderPath+":"):"")+".:&");
+    ri.option( "searchpath", map);
         
-        map.clear();
-        map.put("eyesplits",maximumEyeSplits);
-        ri.option("limits",map);
+    map.clear();
+    map.put("eyesplits",maximumEyeSplits);
+    ri.option("limits",map);
 		ri.display(outputFileName, "tiff", outputDisplayFormat,null);
         
-        ri.format(width,height,1);
+    ri.format(width,height,1);
         // TODO make this a variable
-        ri.shadingRate(1f);        	
-        if (globalIncludeFile != "") ri.readArchive((String) globalIncludeFile);
+    ri.shadingRate(1f);        	
+    if (globalIncludeFile != "") ri.readArchive((String) globalIncludeFile);
 	}
 
 	/**
@@ -319,33 +328,31 @@ public class RIBVisitor extends SceneGraphVisitor {
 	private void handleBackground() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		Appearance ap = root.getAppearance();
-         if(ap!=null) { 
-			if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
-				CommonAttributes.SKY_BOX, ap)) {
-			CubeMap cm = (CubeMap) AttributeEntityUtility
-					.createAttributeEntity(CubeMap.class,
-							CommonAttributes.SKY_BOX, ap, true);
-			RendermanSkyBox.render(this, world2Camera, cm);
-		} else {
-			Color[] clrs = new Color[1];
-		     Object o =  eAppearance.getAttribute(CommonAttributes.BACKGROUND_COLORS, Appearance.DEFAULT, clrs.getClass());
-		      if (o != Appearance.DEFAULT && o instanceof Color[])	 {
-		    	  clrs = (Color[]) o;
-		    	  double sx = eAppearance.getAttribute(CommonAttributes.BACKGROUND_COLORS_STRETCH_X, 1.0);
-		    	  double sy = eAppearance.getAttribute(CommonAttributes.BACKGROUND_COLORS_STRETCH_Y, 1.0);
+    if(ap!=null) { 
+       if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,CommonAttributes.SKY_BOX, ap)) {
+			    CubeMap cm = (CubeMap) AttributeEntityUtility
+					  .createAttributeEntity(CubeMap.class,
+						CommonAttributes.SKY_BOX, ap, true);
+			    RendermanSkyBox.render(this, world2Camera, cm);
+       } else {
+         Color[] clrs = new Color[1];
+         Object o =  eAppearance.getAttribute(CommonAttributes.BACKGROUND_COLORS, Appearance.DEFAULT, clrs.getClass());
+         if (o != Appearance.DEFAULT && o instanceof Color[])	 {
+           clrs = (Color[]) o;
+           double sx = eAppearance.getAttribute(CommonAttributes.BACKGROUND_COLORS_STRETCH_X, 1.0);
+           double sy = eAppearance.getAttribute(CommonAttributes.BACKGROUND_COLORS_STRETCH_Y, 1.0);
 		    	  // insert a polygon at the back of the viewing frustrum
-		    	  handleBackgroundColors(clrs, sx, sy, camera, cameraPath.getMatrix(null));
-		      }
-		      else {
-		         Color clr  = (Color) eAppearance.getAttribute(CommonAttributes.BACKGROUND_COLOR,
-		         		CommonAttributes.BACKGROUND_COLOR_DEFAULT);
-		         float[] f = clr.getRGBColorComponents(null);     
-		         map.put("color background", f);
-		         ri.imager("background",map);        
-		    }       			
-		}
+           handleBackgroundColors(clrs, sx, sy, camera, cameraPath.getMatrix(null));
+         }else {
+           Color clr  = (Color) eAppearance.getAttribute(CommonAttributes.BACKGROUND_COLOR,
+               CommonAttributes.BACKGROUND_COLOR_DEFAULT);
+           float[] f = clr.getRGBColorComponents(null);     
+           map.put("color background", f);
+           ri.imager("background",map);        
+         }       			
+		  }
+    }
 	}
-}
 
     /**
      * Handle request for gradient like background image
@@ -377,8 +384,16 @@ public class RIBVisitor extends SceneGraphVisitor {
 		bkgd.setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(cd));
 		ri.attributeBegin();
 		ri.concatTransform(RIBHelper.fTranspose(w2c));
- 	    ri.comment("Disable shadows for background");
-	    ri.verbatim("Attribute \"visibility\"  \"int transmission\" [0]");
+ 	  ri.comment("Disable shadows for background");
+    if(rendererType==RIBViewer.TYPE_PIXAR)
+      ri.verbatim("Attribute \"visibility\"  \"int transmission\" [0]");
+    else if(rendererType==RIBViewer.TYPE_3DELIGHT){
+      ri.verbatim("Attribute \"visibility\"  \"string transmission\" \"Os\"");
+    }else if(rendererType==RIBViewer.TYPE_AQSIS)
+      ri.verbatim("Attribute \"visibility\"  \"int transmission\" [0]");
+    else{
+      System.err.println("no valid rendererType");
+    }
 		ri.surface("constant",null);
 		pointPolygon(bkgd, null);
 		ri.attributeEnd();
@@ -393,35 +408,35 @@ public class RIBVisitor extends SceneGraphVisitor {
      * Visit methods start here
      */
 	public void  visit(SceneGraphComponent c) {
-    	if (!c.isVisible()) return;
-        EffectiveAppearance tmp =eAppearance;
-        Appearance a = c.getAppearance();
-        ri.attributeBegin(c.getName());
-        if(a!= null ) {
-            eAppearance = eAppearance.create(a);
-         }
-        c.childrenAccept(this);
-        ri.attributeEnd(c.getName());
+    if (!c.isVisible()) return;
+    EffectiveAppearance tmp =eAppearance;
+    Appearance a = c.getAppearance();
+    ri.attributeBegin(c.getName());
+    if(a!= null ) {
+      eAppearance = eAppearance.create(a);
+    }
+    c.childrenAccept(this);
+    ri.attributeEnd(c.getName());
         // restore effective appearance
-        eAppearance= tmp;
-    }
+    eAppearance= tmp;
+  }
 	
-    public void visit(Transformation t) {
-         double[] mat = t.getMatrix();
-          ri.concatTransform(RIBHelper.fTranspose(mat));
-     }
+  public void visit(Transformation t) {
+    double[] mat = t.getMatrix();
+    ri.concatTransform(RIBHelper.fTranspose(mat));
+  }
  
-    public void visit(Appearance a) {
-    }
+  public void visit(Appearance a) {
+  }
 
-    private void setupShader(EffectiveAppearance eap, String type) {
-        Map m = (Map) eap.getAttribute("rendermanAttribute",null, Map.class);
-        if(m!=null) {
-            for (Iterator i = m.keySet().iterator(); i.hasNext();) {
-                String key = (String) i.next();
-                ri.attribute(key,(Map)m.get(key));
-            }
-        }
+  private void setupShader(EffectiveAppearance eap, String type) {
+    Map m = (Map) eap.getAttribute("rendermanAttribute",null, Map.class);
+    if(m!=null) {
+      for (Iterator i = m.keySet().iterator(); i.hasNext();) {
+        String key = (String) i.next();
+        ri.attribute(key,(Map)m.get(key));
+      }
+    }
         // read current values from the effective appearance
         currentSignature = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
         opaqueTubes = eap.getAttribute(CommonAttributes.OPAQUE_TUBES_AND_SPHERES, 
@@ -444,7 +459,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         if ((handlingProxyGeometry && opaqueTubes)) currentOpacity = 1f;
         ri.opacity(currentOpacity);
          //System.out.println("transparency is "+type+" is "+transparency);
-        SLShader slShader = (SLShader) eap.getAttribute(type+CommonAttributes.RMAN_DISPLACEMENT_SHADER,null,SLShader.class);
+        SLShader slShader = (SLShader) eap.getAttribute(type+"."+CommonAttributes.RMAN_DISPLACEMENT_SHADER,null,SLShader.class);
         if(slShader != null) {
             ri.displacement(slShader.getName(),slShader.getParameters());
         }
@@ -458,18 +473,18 @@ public class RIBVisitor extends SceneGraphVisitor {
      * @param tex
      * @return
      */
-    public String writeTexture(Texture2D tex) {
-            ImageData data = tex.getImage(); 
-            return writeTexture(data);
-    }
+  public String writeTexture(Texture2D tex) {
+    ImageData data = tex.getImage(); 
+    return writeTexture(data);
+  }
 
 	public String writeTexture(ImageData data) {
 		String noSuffix = (String) textures.get(data);
 		if(noSuffix == null) {
 			noSuffix = ribFileName+"_texture"+(textureCount++);
-		    RIBHelper.writeTexture(data, noSuffix);
+		  RIBHelper.writeTexture(data, noSuffix);        
 			textures.put(data, noSuffix);
-         }
+    }
 		return noSuffix+"."+textureFileSuffix;		// should be dependent on the final renderman renderer
 	}
     
@@ -849,6 +864,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		}
 		// texture coords:
 		DataList texCoords = i.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+    
 		if(texCoords!= null) {
 			float[] ftex =new float[2*texCoords.size()];
 			for (int j = 0; j < texCoords.size(); j++) {
@@ -859,7 +875,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 				ftex[2*j+1] =(float)l.getValueAt(1);
 				//ftex[2*j] =(float)d.getValueAt(j,0);
 				//ftex[2*j+1] =(float)d.getValueAt(j,1);
-			}
+			}      
 			map.put("st",ftex);
 		}
  

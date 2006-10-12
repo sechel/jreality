@@ -64,6 +64,7 @@ public class RIBViewer implements Viewer {
     // features depend on the type of renderman renderer being used
     public final static int TYPE_PIXAR = 1;
     public final static int TYPE_3DELIGHT = 2;
+    public final static int TYPE_AQSIS = 3;
     
     /**
      * 
@@ -198,14 +199,6 @@ public class RIBViewer implements Viewer {
      */
     public void setWidth(int width) {
         this.width = width;
-    }
-    
-    /**
-     * @param maximumEyeSplits.
-     * @deprecated	Use top level appearance and CommonAttributes.RMAN_MAX_EYE_SPLITS
-     */
-    public void setMaximumEyeSplits(int maximumEyeSplits){
-    	this.maximumEyeSplits=maximumEyeSplits;
     }
 
     public Dimension getViewingComponentSize() {
