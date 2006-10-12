@@ -167,18 +167,22 @@ public class MenuFactory {
     if (sm == null) return menuBar;
     
     //create actions which require a SelectionManager
+    
     final JMenu compMenu = new JMenu("Component");
     compMenu.setMnemonic(KeyEvent.VK_C);
     menuBar.add(compMenu);
     
     fileMenu.insert(new JMenuItem(new LoadFile(LOAD_FILE, sm, frame)), 0);
     fileMenu.insert(new JMenuItem(new LoadFileMerged(LOAD_FILE_MERGED, sm, frame)), 1);
-    fileMenu.insert(new JMenuItem(new SaveSelected(SAVE_SELECTED, sm, frame)), 2);
+    fileMenu.insertSeparator(2);
+    fileMenu.insert(new JMenuItem(new SaveSelected(SAVE_SELECTED, sm, frame)), 3);
+    fileMenu.insertSeparator(4);
     if (viewerApp != null) {
-      fileMenu.insert(new JMenuItem(new LoadScene(LOAD_SCENE, viewerApp, frame)), 3);
+      fileMenu.insert(new JMenuItem(new LoadScene(LOAD_SCENE, viewerApp, frame)), 2);
       fileMenu.insert(new JMenuItem(new SaveScene(SAVE_SCENE, viewerApp.getViewer(), frame)), 4);
     }
     compMenu.add(new JMenuItem(new Remove(REMOVE, sm)));
+    compMenu.addSeparator();
     compMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, frame)));
     compMenu.addSeparator();
     compMenu.add(new JMenuItem(new TogglePickable(TOGGLE_PICKABLE, sm)));
@@ -246,10 +250,13 @@ public class MenuFactory {
       menuBar.add(cameraMenu, 3);
       cameraMenu.add(new JMenuItem(new ShiftFieldOfView(DECREASE_FIELD_OF_VIEW, viewerSwitch, true)));
       cameraMenu.add(new JMenuItem(new ShiftFieldOfView(INCREASE_FIELD_OF_VIEW, viewerSwitch, false)));
+      cameraMenu.addSeparator();
       cameraMenu.add(new JMenuItem(new ShiftFocus(DECREASE_FOCUS, viewerSwitch, true)));
       cameraMenu.add(new JMenuItem(new ShiftFocus(INCREASE_FOCUS, viewerSwitch, false)));
+      cameraMenu.addSeparator();
       cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(DECREASE_EYE_SEPARATION, viewerSwitch, true)));
       cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(INCREASE_EYE_SEPARATION, viewerSwitch, false)));
+      cameraMenu.addSeparator();
       cameraMenu.add(new JMenuItem(new TogglePerspective(TOGGLE_PERSPECTIVE, viewerSwitch)));
       cameraMenu.add(new JMenuItem(new ToggleStereo(TOGGLE_STEREO, viewerSwitch)));
     }    
