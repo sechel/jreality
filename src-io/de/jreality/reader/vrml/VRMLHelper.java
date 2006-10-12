@@ -49,7 +49,7 @@ import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.math.FactoredMatrix;
 
 public class VRMLHelper {
-	public static boolean verbose = false;
+	public static boolean verbose = true;
 	
 	public static final int DEFAULT = 1;
 	public static final int OVERALL = 2;
@@ -140,16 +140,44 @@ public class VRMLHelper {
 		IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
 	}
 	
-	public static double[] reallocate(double[] array)	{
+//	public static double[] reallocate(double[] array)	{
+//		int n = array.length;
+//		double[] newarray = new double[n*2];
+//		System.arraycopy(array, 0, newarray, 0, n);
+//		return newarray;
+//	}
+
+	public static int[] reallocate(int[] array)	{
+		int n = array.length;
+		int[] newarray = new int[n*2];
+		System.arraycopy(array, 0, newarray, 0, n);
+		return newarray;
+	}
+
+	public static double[] reallocate(double[] array)	{ /// Bernd
 		int n = array.length;
 		double[] newarray = new double[n*2];
 		System.arraycopy(array, 0, newarray, 0, n);
 		return newarray;
 	}
 
-	public static int[] reallocate(int[] array)	{
+	public static Color[] reallocate(Color[] array)	{ ///Bernd
 		int n = array.length;
-		int[] newarray = new int[n*2];
+		Color[] newarray = new Color[n*2];
+		System.arraycopy(array, 0, newarray, 0, n);
+		return newarray;
+	}
+
+	public static String[] reallocate(String[] array)	{ ///Bernd
+		int n = array.length;
+		String[] newarray = new String[n*2];
+		System.arraycopy(array, 0, newarray, 0, n);
+		return newarray;
+	}
+
+	public static double[][] reallocate(double[][] array)	{ ///Bernd
+		int n = array.length;
+		double[][] newarray = new double[n*2][];
 		System.arraycopy(array, 0, newarray, 0, n);
 		return newarray;
 	}
