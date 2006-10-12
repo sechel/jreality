@@ -42,9 +42,13 @@ package de.jreality.ui.viewerapp.actions.comp;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.JDialog;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -70,28 +74,37 @@ import de.jreality.ui.viewerapp.actions.AbstractAction;
 
 public class AddTool extends AbstractAction {
 
+  private boolean initialized = false;
   private JList toolList = null;
-  private JScrollPane scrollPane = null;
+  private JOptionPane pane = null;
+  private JDialog dialog = null;
   
   
   public AddTool(String name, SelectionManager sm, Component frame) {
+    
     super(name, sm, frame);
     putValue(SHORT_DESCRIPTION, "Add Tools");
-    
-    setupToolList();
   }
   
 
   public void actionPerformed(ActionEvent e) {
-   
-    int ret = JOptionPane.showConfirmDialog(frame, scrollPane, "Add Tool", JOptionPane.OK_CANCEL_OPTION);
-    if (ret == JOptionPane.OK_OPTION) {
+    
+    if (!initialized) initializeToolList();
+    
+    //show dialog
+    dialog.setLocationRelativeTo(frame);
+    dialog.setVisible(true);
+    
+    //add selected tools
+    if (pane.getValue() instanceof Integer && 
+        (Integer) pane.getValue() == JOptionPane.OK_OPTION) {
       Object[] selectedTools = toolList.getSelectedValues();
       for (int i=0; i<selectedTools.length; i++) {
         try {
-          final Tool t = (Tool) ((Class)selectedTools[i]).newInstance();
+          final Tool t = (Tool) Class.forName((String)selectedTools[i]).newInstance();
           selection.getLastComponent().addTool(t);
         } catch (Exception exc) {
+          exc.printStackTrace();
           //System.out.println("Could not add tool!");
         }
       }
@@ -100,32 +113,49 @@ public class AddTool extends AbstractAction {
   }
   
  
-  private void setupToolList() {
+  private void initializeToolList() {
     
-    List<Class> tools = new LinkedList<Class>();
+    List<String> tools = new LinkedList<String>();
     
-    tools.add(DraggingTool.class);
-    tools.add(EncompassTool.class);
-    tools.add(FlyTool.class);
-    tools.add(HeadTransformationTool.class);
-    tools.add(LookAtTool.class);
-    tools.add(PointerDisplayTool.class);
-    tools.add(RotateTool.class);
-    tools.add(ScaleTool.class);
-    tools.add(ShipNavigationTool.class);
-    tools.add(ShipRotateTool.class);
-    tools.add(ShipScaleTool.class);
-    tools.add(ShowPropertiesTool.class);
-    tools.add(TranslateTool.class);
-    
-//    try {
-//      tools.add(Class.forName("de.jreality.portal.tools.PortalHeadMoveTool"));
-//    } catch (ClassNotFoundException exc) {}
+    tools.add(DraggingTool.class.getName());
+    tools.add(EncompassTool.class.getName());
+    tools.add(FlyTool.class.getName());
+    tools.add(HeadTransformationTool.class.getName());
+    tools.add(LookAtTool.class.getName());
+    tools.add(PointerDisplayTool.class.getName());
+    tools.add(RotateTool.class.getName());
+    tools.add(ScaleTool.class.getName());
+    tools.add(ShipNavigationTool.class.getName());
+    tools.add(ShipRotateTool.class.getName());
+    tools.add(ShipScaleTool.class.getName());
+    tools.add(ShowPropertiesTool.class.getName());
+    tools.add(TranslateTool.class.getName());
 
-    toolList = new JList(tools.toArray());
+    try {  //different source folder
+      tools.add(Class.forName("de.jreality.tools.PortalHeadMoveTool").getName());
+    } catch (ClassNotFoundException exc) {}
+    
+    //sort tool list entries
+    Object[] obj = tools.toArray();
+    Arrays.sort(obj);
+
+    toolList = new JList(obj);
     toolList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+    
+    pane = new JOptionPane(new JScrollPane(toolList), JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+    dialog = pane.createDialog(frame, "Add Tools");
+    
+    //enable choice by double-click without pressing OK
+    toolList.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent evt) {
+        if (evt.getClickCount() == 2) {
+          dialog.setVisible(false);
+          pane.setValue(JOptionPane.OK_OPTION);
+        }
+      }
+    });
 
-    scrollPane = new JScrollPane(toolList);
+    initialized = true;
   }
   
 }
