@@ -60,6 +60,7 @@ public class EncompassTool extends AbstractTool {
 
   final static InputSlot encompassSlot = InputSlot.getDevice("EncompassActivation");
   final static InputSlot SHIFT = InputSlot.getDevice("Secondary");
+  final static InputSlot CTRL = InputSlot.getDevice("Meta");
 
   public EncompassTool() {
     addCurrentSlot(encompassSlot);
@@ -71,7 +72,8 @@ public class EncompassTool extends AbstractTool {
 
   public void perform(ToolContext tc) {
     // HACK: otherwise collision with viewerapp key bindings
-    if (tc.getAxisState(SHIFT).isPressed()) return;
+    if (tc.getAxisState(SHIFT).isPressed() || 
+        tc.getAxisState(CTRL).isPressed()) return;
     if (tc.getAxisState(encompassSlot).isPressed()) {
       if (false) {
         CameraUtility.encompass(tc.getViewer());
