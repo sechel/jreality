@@ -172,6 +172,7 @@ public class MenuFactory {
     compMenu.setMnemonic(KeyEvent.VK_C);
     menuBar.add(compMenu);
     
+    //-- FILE MENU ---------------------------------
     fileMenu.insert(new JMenuItem(new LoadFile(LOAD_FILE, sm, frame)), 0);
     fileMenu.insert(new JMenuItem(new LoadFileMerged(LOAD_FILE_MERGED, sm, frame)), 1);
     fileMenu.insertSeparator(2);
@@ -181,6 +182,43 @@ public class MenuFactory {
       fileMenu.insert(new JMenuItem(new LoadScene(LOAD_SCENE, viewerApp, frame)), 2);
       fileMenu.insert(new JMenuItem(new SaveScene(SAVE_SCENE, viewerApp.getViewer(), frame)), 4);
     }
+    
+//    JMenu export = new JMenu("Export");
+//    fileMenu.insertSeparator(7);
+//    fileMenu.insert(export, 7);
+//    export.add(new JMenuItem("RIB"));
+////    mi.addActionListener(new ActionListener(){
+////      public void actionPerformed(ActionEvent arg0) {
+////        File file = FileLoaderDialog.selectTargetFile(frame,"rib", " renderman RIB");
+////        if (file == null) return;
+//////      try {
+////        String fileName = file.getPath();
+////        RIBViewer rv = new RIBViewer();
+////        rv.initializeFrom(viewerSwitch);
+////        rv.setFileName(fileName);
+////        rv.render();
+//////      System.out.println("file name is "+fileName);
+////      }
+////    });
+//    
+//    export.add(new JMenuItem("SVG"));
+////    mi.addActionListener(new ActionListener(){
+////      public void actionPerformed(ActionEvent arg0) {
+////        File file = FileLoaderDialog.selectTargetFile(frame,"svg", " svg export");
+////        if (file == null) return;
+//////      try {
+////        String fileName = file.getPath();
+////        de.jreality.soft.SVGViewer rv = new de.jreality.soft.SVGViewer(fileName);
+////        rv.initializeFrom(viewerSwitch);
+////        rv.setWidth(viewerSwitch.getViewingComponent().getWidth());
+////        rv.setHeight(viewerSwitch.getViewingComponent().getHeight());
+////        rv.render();
+//////      System.out.println("file name is "+fileName);
+////      }
+////    });
+
+    
+    //-- COMPONENT MENU ---------------------------
     compMenu.add(new JMenuItem(new Remove(REMOVE, sm)));
     compMenu.addSeparator();
     compMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, frame)));
@@ -188,6 +226,7 @@ public class MenuFactory {
     compMenu.add(new JMenuItem(new TogglePickable(TOGGLE_PICKABLE, sm)));
     compMenu.add(new JMenuItem(new AssignFaceAABBTree(ASSIGN_FACE_AABBTREE, sm)));
     
+    //-- APPEARANCE MENU ---------------------------
     final JMenu appMenu = new JMenu("Appearance");
     appMenu.setMnemonic(KeyEvent.VK_A);
     menuBar.add(appMenu);
@@ -211,6 +250,7 @@ public class MenuFactory {
       appMenu.add(bgColors);
     }
     
+    //-- VIEWER MENU -------------------------------
     final JMenu viewerMenu = new JMenu("Viewer");
     viewerMenu.setMnemonic(KeyEvent.VK_V);
     menuBar.add(viewerMenu);
@@ -244,7 +284,7 @@ public class MenuFactory {
       viewerMenu.addSeparator();
       viewerMenu.add(new JMenuItem(new Render(RENDER, viewerSwitch)));
       
-      //camera actions
+      //-- CAMERA MENU -------------------------------
       final JMenu cameraMenu = new JMenu("Camera");
       cameraMenu.setMnemonic(KeyEvent.VK_M);
       menuBar.add(cameraMenu, 3);
@@ -260,6 +300,7 @@ public class MenuFactory {
       cameraMenu.add(new JMenuItem(new TogglePerspective(TOGGLE_PERSPECTIVE, viewerSwitch)));
       cameraMenu.add(new JMenuItem(new ToggleStereo(TOGGLE_STEREO, viewerSwitch)));
     }    
+    
     
     //enable or disable menus depending on navigator selection
     if (viewerApp != null && viewerApp.isAttachNavigator()) {
