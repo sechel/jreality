@@ -99,7 +99,7 @@ public class MenuFactory {
   public static String SAVE_SELECTED = "Save selected";
   public static String QUIT = "Quit";
   public static String REMOVE = "Remove";
-  public static String ADD_TOOL = "Add Tool";
+  public static String ADD_TOOL = "Add Tools";
   public static String TOGGLE_PICKABLE = "Toggle pickable";
   public static String ASSIGN_FACE_AABBTREE = "Assign AABBTree";
   public static String TOGGLE_VERTEX_DRAWING = "Toggle vertex drawing";

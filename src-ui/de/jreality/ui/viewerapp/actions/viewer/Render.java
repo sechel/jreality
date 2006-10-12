@@ -41,6 +41,8 @@
 package de.jreality.ui.viewerapp.actions.viewer;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
@@ -56,7 +58,7 @@ public class Render extends AbstractAction {
   public Render(String name, Viewer viewer) {
     super(name);
     putValue(SHORT_DESCRIPTION, "Render");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("R"));
+    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
     
     if (viewer == null) 
       throw new IllegalArgumentException("Viewer is null!");
