@@ -1497,6 +1497,17 @@ public class IndexedFaceSetUtility {
      * @param digits the number of digits to respect for comparing coordinates
   	 */
   	public static void assignSmoothVertexNormals(IndexedFaceSet ifs, double maxAngle, int digits) {
+  		assignSmoothVertexNormals(ifs, true, maxAngle, digits);
+  	}
+  	/**
+  	 * Averages the vertex normals for duplicate coordinates.
+  	 * @param ifs
+  	 * @param digits
+  	 */
+  	public static void assignSmoothVertexNormals(IndexedFaceSet ifs, int digits) {
+  		assignSmoothVertexNormals(ifs, false, -1, digits);
+  	}
+  	private static void assignSmoothVertexNormals(IndexedFaceSet ifs, boolean flipNormals, double maxAngle, int digits) {
   		double cos = Math.cos(maxAngle*Math.PI/180);
   		HashSet<Integer> written = new HashSet<Integer>();
   		HashMap<Point, LinkedList<Integer>> table = new HashMap<Point, LinkedList<Integer>>() {
@@ -1535,11 +1546,11 @@ public class IndexedFaceSetUtility {
 	  			for (int j=1,m=indices.size(); j<m; j++) {
 	  				double[] n2 = normals.getValueAt(indices.get(j)).toDoubleArray(null);
 	  				Rn.normalize(n2, n2);
-	  				if (Rn.innerProduct(n, n2) < 0) {
+	  				if (flipNormals && Rn.innerProduct(n, n2) < 0) {
 	  					Rn.times(n2, -1, n2);
 	  					flips.add(indices.get(j));
 	  				}
-	  				if (Rn.innerProduct(n2, n)<cos) {
+	  				if (flipNormals && Rn.innerProduct(n2, n)<cos) {
 	  					remaining.add(indices.get(j));
 	  					//flips.remove(new Integer(j));
 	  					continue;
@@ -1551,10 +1562,10 @@ public class IndexedFaceSetUtility {
 	  			for (int i : indices) {
 	  				if (remaining.contains(i)) continue;
 	  				if (flips.contains(i)) {
-	  					if (Rn.innerProduct(na[i], target) > 0) throw new RuntimeException();
+	  					//if (Rn.innerProduct(na[i], target) > 0) throw new RuntimeException();
 	  					Rn.times(na[i], -1, target);
 	  				} else {
-	  					if (Rn.innerProduct(na[i], target) < 0) throw new RuntimeException();
+	  					//if (Rn.innerProduct(na[i], target) < 0) throw new RuntimeException();
 	  					Rn.copy(na[i], target);
 	  				}
 	  				if (!written.add(i)) throw new RuntimeException();

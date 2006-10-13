@@ -40,6 +40,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileSystemView;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
@@ -150,7 +151,7 @@ public class ViewerVR {
 
 	private double diam = 22, offset = -.5;
 
-	private JFileChooser fileChooser;
+	private JPanel fileChooserPanel;
 	private JFileChooser texFileChooser;
 //	private AlphaColorChooser colorChooser;
 	private SimpleColorChooser colorChooser;
@@ -403,17 +404,46 @@ public class ViewerVR {
 	}
 
 	private void makeContentFileChooser() {
-		fileChooser = FileLoaderDialog.createFileChooser();
+		this.fileChooserPanel = new JPanel(new BorderLayout());
+		final JFileChooser fileChooser = FileLoaderDialog.createFileChooser();
+		final JCheckBox smoothNormalsCheckBox = new JCheckBox("smooth normals");
+		final JCheckBox removeAppsCheckBox = new JCheckBox("ignore appearances");
+		JPanel checkBoxPanel = new JPanel(new FlowLayout());
+		fileChooserPanel.add(BorderLayout.CENTER, fileChooser);
+		checkBoxPanel.add(smoothNormalsCheckBox);
+		checkBoxPanel.add(removeAppsCheckBox);
+		fileChooserPanel.add(BorderLayout.SOUTH, checkBoxPanel);
 		fileChooser.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ev) {
 				File file = fileChooser.getSelectedFile();
 				try {
 					if (ev.getActionCommand() == JFileChooser.APPROVE_SELECTION
-							&& file != null)
-						setContent(Readers.read(Input.getInput(file)));
+							&& file != null) {
+						SceneGraphComponent read = Readers.read(Input.getInput(file));
+						SceneGraphComponent hack = new SceneGraphComponent();
+						hack.addChild(read);
+						hack.accept(new SceneGraphVisitor() {
+							@Override
+							public void visit(SceneGraphComponent c) {
+								if (removeAppsCheckBox.isSelected() && c.getAppearance() != null) c.setAppearance(null); 
+								c.childrenWriteAccept(this, false, false, false, false, true,
+										true);
+							}
+
+							@Override
+							public void visit(IndexedFaceSet i) {
+								GeometryUtility.calculateAndSetNormals(i);
+								if (smoothNormalsCheckBox.isSelected()) IndexedFaceSetUtility.assignSmoothVertexNormals(i, -1);
+							}
+						});
+						hack.removeChild(read);
+						setContent(read);
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+				smoothNormalsCheckBox.setSelected(false);
+				removeAppsCheckBox.setSelected(false);
 				switchToDefaultPanel();
 			}
 		});
@@ -850,11 +880,11 @@ public class ViewerVR {
 		ActionListener examplesListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String selectedBox = e.getActionCommand();
-				int selectionIndex = ((Integer) exampleIndices.get(selectedBox))
-						.intValue();
+				int selectionIndex = ((Integer) exampleIndices.get(selectedBox)).intValue();
 				try {
-					setContent(Readers.read(Input
-							.getInput(examples[selectionIndex][1])));
+					SceneGraphComponent read = Readers.read(Input
+												.getInput(examples[selectionIndex][1]));
+					setContent(read);
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
@@ -1029,7 +1059,7 @@ public class ViewerVR {
 	protected void showPanel(boolean showFileChooser) {
 		if (showFileChooser) {
 			sp.setPanelWidth(1.9);
-			sp.getFrame().setContentPane(fileChooser);
+			sp.getFrame().setContentPane(fileChooserPanel);
 			sp.getFrame().pack();
 		}
 		sp.show(getSceneRoot(), new Matrix(avatarPath.getMatrix(null)));
@@ -1093,7 +1123,7 @@ public class ViewerVR {
 		sp.getFrame().setVisible(false);
 		sp.setPanelWidth(FILE_CHOOSER_PANEL_WIDTH);
 		sp.setAboveGround(FILE_CHOOSER_ABOVE_GROUND);
-		sp.getFrame().setContentPane(fileChooser);
+		sp.getFrame().setContentPane(fileChooserPanel);
 		sp.getFrame().pack();
 		sp.getFrame().setVisible(true);
 	}
@@ -1128,6 +1158,7 @@ public class ViewerVR {
 			sceneNode.removeChild(currentContent);
 		}
 		currentContent = content;
+		PickUtility.assignFaceAABBTrees(content);
 		rotate.setSelected(false);
 		drag.setSelected(false);
 		Rectangle3D bounds = GeometryUtility
@@ -1139,22 +1170,6 @@ public class ViewerVR {
 		setPointRadius(DEFAULT_POINT_RADIUS);
 		sceneNode.addChild(currentContent);
 		alignContent(diam, offset, null);
-		PickUtility.assignFaceAABBTrees(currentContent);
-		currentContent.accept(new SceneGraphVisitor() {
-			@Override
-			public void visit(SceneGraphComponent c) {
-				c.childrenWriteAccept(this, false, false, false, false, true,
-						true);
-			}
-
-			@Override
-			public void visit(IndexedFaceSet i) {
-				// JoinGeometry.meltFaceHack(i);
-				if (i.getVertexAttributes(Attribute.NORMALS) == null) {
-					GeometryUtility.calculateAndSetVertexNormals(i);
-				}
-			}
-		});
 		computeShadow();
 	}
 
@@ -1267,9 +1282,9 @@ public class ViewerVR {
 		ViewerVR tds = new ViewerVR();
 		tds.showPanel(false);
 		ViewerApp vApp = tds.display();
-//		 vApp.setAttachNavigator(true);
-//		 vApp.setAttachBeanShell(true);
-//		 vApp.setShowMenu(true);
+		 vApp.setAttachNavigator(true);
+		 vApp.setAttachBeanShell(true);
+		 vApp.setShowMenu(true);
 		vApp.update();
 		JFrame f = vApp.display();
 		f.setSize(800, 600);

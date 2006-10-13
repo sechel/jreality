@@ -56,7 +56,7 @@ import de.jreality.util.CameraUtility;
  */
 public class EncompassTool extends AbstractTool {
 	
-	double margin = 1.25;		// value greater than one creates a margin around the encompassed object  
+	double margin = 1.75;		// value greater than one creates a margin around the encompassed object  
 
   final static InputSlot encompassSlot = InputSlot.getDevice("EncompassActivation");
   final static InputSlot SHIFT = InputSlot.getDevice("Secondary");

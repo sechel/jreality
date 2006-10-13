@@ -357,8 +357,9 @@ public class CameraUtility {
 	    double [] e = avatarBounds.getExtent();
 	    double radius = Math.sqrt(e[0]*e[0] + e[2]*e[2] + e[1]*e[1]);
 	    double [] c = avatarBounds.getCenter();
-	    c[2] += radius;
-	    Rn.times(c, margin, c);
+	    // TODO: read viewing angle from camera
+	    c[2] += margin*radius;
+	    //Rn.times(c, margin, c);
 	    // add head height to c[1]
 	    Matrix camMatrix = new Matrix();
 	    cameraPath.getInverseMatrix(camMatrix.getArray(), avatarPath.getLength());
