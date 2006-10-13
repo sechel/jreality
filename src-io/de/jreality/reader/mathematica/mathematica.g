@@ -93,9 +93,12 @@ options {
 	private Appearance startApp =new Appearance();
 	private Color plCDefault= new Color(255,0,0);	// default- Punkt und Linienfarbe
 	private Color fCDefault = new Color(0,255,0);	// default- Flaechenfarbe
-
+	
+	private boolean optGeo=false;
+	public void setOptimizeGeometry(boolean flag){optGeo=flag;}
+	
 //	private Object defaultEdgeForm = Color.black;
-		private Object defaultEdgeForm = new Double(1); 
+	private Object defaultEdgeForm = new Double(1); 
 
 // ---------------------------- total Sizes of Scene --------------------------
 	private double[][] borderValue= new double [3][]; // maximale Werte der Scenenkoordinaten in x-,y- und z-Richtung
@@ -249,9 +252,8 @@ options {
 * @param none sourcefile set by creating the object
 * @returns SceneGraphComponent root of generated scene
 */
-start returns [SceneGraphComponent r]
-{ r = null;	
-	globalApp.setName("global");	
+start returns [SceneGraphComponent r=null]
+{	globalApp.setName("global");	
 	setPLColor(globalApp, plCDefault);			 	
 	globalApp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+
 			 	CommonAttributes.DIFFUSE_COLOR, fCDefault);
@@ -564,10 +566,12 @@ lineBlock [Appearance app] returns[Appearance app2]
 				colorData[i]=getRGBColor((Color)colors.get(i));		
 			}
 			// -- verschmelzen der Punkte
-			Vector temp= FaceMelt.meltCoords(data,indices);
-			data= (double[][]) temp.elementAt(0);
-			indices= (int[][]) temp.elementAt(1);
-			count=data.length;
+			if (optGeo){
+				Vector temp= FaceMelt.meltCoords(data,indices);
+				data= (double[][]) temp.elementAt(0);
+				indices= (int[][]) temp.elementAt(1);
+				count=data.length;
+			}
 			// -- verschmelzen der Punkte Ende
 			IndexedLineSetFactory lineset=new IndexedLineSetFactory();
 			lineset.setLineCount(linesIndices.size());
@@ -661,10 +665,12 @@ polygonBlock [Appearance app, Object edgeF] returns[Appearance app2]
 			colorData[i]=getRGBColor((Color)colors.get(i));
 		}
 		//	melt:	  if it dos not work simply take it out
-			//	Vector temp= FaceMelt.meltCoords(data,indices);
-			//	data= (double[][]) temp.elementAt(0);
-			//	indices= (int[][]) temp.elementAt(1);
-			//	count=data.length;
+		if(optGeo){
+			Vector temp= FaceMelt.meltCoords(data,indices);
+			data= (double[][]) temp.elementAt(0);
+			indices= (int[][]) temp.elementAt(1);
+			count=data.length;
+		}
 		//  end melt
 		IndexedFaceSetFactory faceSet = new IndexedFaceSetFactory();
 		faceSet.setVertexCount(count);
