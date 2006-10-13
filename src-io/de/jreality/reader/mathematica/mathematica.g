@@ -92,6 +92,7 @@ options {
 	private Logger log = LoggingSystem.getLogger(MathematicaParser.class);
 	private CoordinateSystemFactory box;
 	private Appearance globalApp =new Appearance();	// App. der root
+	private Appearance startApp =new Appearance();
 	private Color plCDefault= new Color(255,0,0);	// default- Punkt und Linienfarbe
 	private Color fCDefault = new Color(0,255,0);	// default- Flaechenfarbe
 	private Color defaultEdgeForm= Color.black;
@@ -177,11 +178,50 @@ options {
 		}
 	 	return appNew;
 	}
+	private static Appearance setPLColor(Appearance app,Object c){
+		Appearance app2= copyApp(app);
+		app2.setAttribute(CommonAttributes.POINT_SHADER+"."+
+			 	CommonAttributes.POLYGON_SHADER+"."+
+			 	CommonAttributes.DIFFUSE_COLOR, c);
+	 	app2.setAttribute(CommonAttributes.POINT_SHADER+"."+
+			 	CommonAttributes.DIFFUSE_COLOR, c);			 	
+		app2.setAttribute(CommonAttributes.LINE_SHADER+"."+
+			 	CommonAttributes.POLYGON_SHADER+"."+
+			 	CommonAttributes.DIFFUSE_COLOR, c);
+	 	app2.setAttribute(CommonAttributes.LINE_SHADER+"."+
+			 	CommonAttributes.DIFFUSE_COLOR, c);
+		return app2;
+	}
+	private Color getPLColor(Appearance app){
+		Color c= null;
+		try{
+			c=(Color)app.getAttribute(CommonAttributes.POINT_SHADER+"."+
+			 	CommonAttributes.DIFFUSE_COLOR);
+			}
+		catch(Exception e){
+			c=plCDefault;
+		}
+		return c;
+	}
+	private Color getFColor(Appearance app){
+		Color c= null;
+		try{
+			c=(Color)app.getAttribute(CommonAttributes.POLYGON_SHADER+"."+
+			 	CommonAttributes.DIFFUSE_COLOR);
+			}
+		catch(Exception e){
+			c=fCDefault;
+		}
+		return c;
+	}
 	private static Color copyColor(Color c){
 		// kopiert eine Farbe um doppelt-Verzeigerung zu vermeiden
 		return new Color(c.getRed(),c.getGreen(),c.getBlue()) ;
 	}
-	
+	private static void simplifyColor(Appearance app){
+		//takes out the point-, polygon and line- colors if they are at defaultColors
+		// kommt spaeter ist nicht so wichtig
+	}	
 	private double[] getRGBColor(Color c){
 	// retuns a array that represents a color (needed for color-Arrays as double[][])
 		double[] fl= new double[3];
@@ -213,17 +253,21 @@ options {
 start returns [SceneGraphComponent r]
 { r = null;	
 	globalApp.setName("global");	
+
+	setPLColor(globalApp, plCDefault);			 	
+	globalApp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+
+			 	CommonAttributes.DIFFUSE_COLOR, fCDefault);
+	
 	root.setAppearance(globalApp);
 	root.setName("Mathematica");
-	log.setLevel(Level.FINE);
-	
+	log.setLevel(Level.FINE);	
 }
 	:"Graphics3D"
 	  OPEN_BRACKET  
-	  	( 	  firstList[plCDefault,fCDefault,globalApp,defaultEdgeForm]	// bei nur einem Objekt sind Klammern optional
-	  		| fCDefault=faceThing[fCDefault,globalApp,defaultEdgeForm]	// ein Flaechen-beeinflussendes Object
-	  		| plCDefault=plThing[plCDefault,globalApp]  // ein Punkt/Linien-beeinflussendes Object
-	  		| globalApp=appThing[globalApp]				// ein App.-beeinflussendes Object
+	  	( 	  firstList[startApp,defaultEdgeForm]			// bei nur einem Objekt sind Klammern optional
+	  		| startApp=faceThing[startApp,defaultEdgeForm]	// ein Flaechen-beeinflussendes Object
+	  		| startApp=plThing[startApp]  					// ein Punkt/Linien-beeinflussendes Object
+	  		| startApp=appThing[startApp]					// ein App.-beeinflussendes Object
 	  	)
 	  	{
 	  	// Box und Axen ermoeglichen:
@@ -241,16 +285,16 @@ start returns [SceneGraphComponent r]
 
 // ---------------------------------- 3D Objects ---------------------------------------------
 private
-firstList[Color plC, Color fC, Appearance app, Color edgeF]
+firstList[Appearance app, Color edgeF]
 // firstList ist wie list, nur das hier kein neuer Sc.Gr.Co. erstellt wird da wir ja schon die Root haben
 // (wird nur am Anfang benutzt!)
 	:	OPEN_BRACE
-			(objectList[plC,fC,app,edgeF])?	// eine Abfolge graphischer Objecte
+			(objectList[app,edgeF])?	// eine Abfolge graphischer Objecte
 	    CLOSE_BRACE
 	;
 
 private
-list[Color plC, Color fC, Appearance app, Color edgeF]
+list[Appearance app, Color edgeF]
 {Appearance app2=copyApp(app);}
 	// eine Klammer mit mglw. einer Abfolge von 3d-Objekten
 	:	OPEN_BRACE						
@@ -263,51 +307,52 @@ list[Color plC, Color fC, Appearance app, Color edgeF]
 			current.addChild(newPart);
 			current=newPart;
 			}
-	        (objectList[plC,fC,app2, edgeF])?	// das innere der Klammer einhaengen
+	        (objectList[app2, edgeF])?	// das innere der Klammer einhaengen
 	    CLOSE_BRACE
 			{current=oldPart;}
 	;
 	
 private
-objectList [Color plC, Color fC, Appearance app, Color edgeF]
+objectList [Appearance app, Color edgeF]
 // abarbeiten einer Abfolge von 3d-Objecten(und Directiven)
 {Appearance app2=copyApp(app);}
 	:(
-		  list[ plC, fC, app2 ,edgeF]		// Listen koennen Listen enthalten
+		  list[app2 ,edgeF]		// Listen koennen Listen enthalten
 		| edgeF=edgeFormThing
-		| fC=faceThing[fC, app2,edgeF]	// FlaechenElemente
-		| plC=plThing[plC, app2]	// Punkt/Linien Elemente
+		| app2=faceThing[app2,edgeF]	// FlaechenElemente
+		| app2=plThing[app2]	// Punkt/Linien Elemente
 		| app2=appThing [app2]		// Directiven die Appearance beeinflussen sollen
 	 )
 	 ( COLON 
 		(	
-			  list[ plC, fC, app2,edgeF]
+			  list[app2,edgeF]
 		 	| edgeF=edgeFormThing
-			| fC =faceThing[fC,app2,edgeF]
-			| plC=plThing[plC,app2]
+			| app2 =faceThing[app2,edgeF]
+			| app2=plThing[app2]
 			| app2=appThing[app2]
 	 	)
 	 )*
 	;	
 	
 private
-faceThing [Color fCgiven, Appearance app, Color edgeF] returns[Color fC ]
-{fC=copyColor(fCgiven);
- Appearance app2=copyApp(app);}
-	:	cuboid[fC, app2,edgeF]					// Wuerfel 
-	|	fC=polygonBlock[fC, app2,edgeF]			// Abfolge von Polygonen (IndexedFaceSet)
-	|	fC=faceColor						// Farbe die Flaechen beeinflusst
+faceThing [Appearance app, Color edgeF] returns[Appearance app2]
+{app2=copyApp(app);}
+	:	cuboid[app2,edgeF]					// Wuerfel 
+	|	app2=polygonBlock[app2,edgeF]		// Abfolge von Polygonen (IndexedFaceSet)
+	|	app2=faceColor[app2]				// Farbe die Flaechen beeinflusst
 	;
 
 
 private
-plThing [Color plCgiven, Appearance app] returns[Color plC]
-{plC=copyColor(plCgiven);
- Appearance app2=copyApp(app);}
-	:	plC= color							// Farbe fuer folgende Punkte, Linien und Texte
-	|	plC= lineBlock [plC, app2]			// Abfolge von Linien (IndexedLineSet)
-	|	plC= pointBlock [plC, app2]			// Abfolge von Punkten (PointSet)
-	|	text [plC, app2]					// Text an einem Punkt im Raum (einelementiges labeld PointSet)
+plThing [Appearance app] returns[Appearance app2]
+{
+ app2=copyApp(app);
+ Color c= null;
+}
+	:	c= color	{app2=setPLColor(app2,c);}	// Farbe fuer folgende Punkte, Linien und Texte
+	|	app2= lineBlock [app2]			// Abfolge von Linien (IndexedLineSet)
+	|	app2= pointBlock [app2]			// Abfolge von Punkten (PointSet)
+	|	text [app2]					// Text an einem Punkt im Raum (einelementiges labeld PointSet)
 	;
 	
 private
@@ -318,7 +363,7 @@ appThing [Appearance appOld] returns [ Appearance app]
 	
 // ----------------------------- Graphic Primitives ------------------------------------------------------------
 private 
-cuboid [ Color fC,Appearance app,Color edgeF]
+cuboid [Appearance app,Color edgeF]
 	// ein achsenparalleler Wuerfel, gegeben durch Zentrum(Kantenlaenge 1) oder zusaetslich durch leangen
 	:"Cuboid"
 	 OPEN_BRACKET 
@@ -335,8 +380,6 @@ cuboid [ Color fC,Appearance app,Color edgeF]
 			 geo.setGeometry(Primitives.cube());
 	 		 geo.setName("Cuboid");
 	 		 Appearance cubicApp =copyApp(app);
-			 cubicApp.setAttribute(CommonAttributes.POLYGON_SHADER+
-			 	CommonAttributes.DIFFUSE_COLOR, fC);
 	 		 if (edgeF!=null){
 	 		 	cubicApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
 			 	cubicApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
@@ -359,7 +402,7 @@ cuboid [ Color fC,Appearance app,Color edgeF]
  	;
  	
 private
-text [ Color plC,Appearance app]
+text [Appearance app]
 {double[] v=new double[3]; String t;}
 // ein Stueck Text im Raum 
 	:"Text"		OPEN_BRACKET 
@@ -393,17 +436,19 @@ text [ Color plC,Appearance app]
 	;
 
 private
-pointBlock [Color plCgiven,Appearance app] returns [Color plC]
+pointBlock [Appearance app] returns [Appearance app2]
 // eine Abfolge von Punkten wird zu einer PointSet
 // je nach dem ob Farben ZWISCHEN den Punkten stehen wird eine 
 // Farbliste eingelesen, oder die App. eingefaerbt
-{Vector points= new Vector(); 
+{
+ app2=copyApp(app);
+ Vector points= new Vector(); 
  double[] v;
  Vector colors= new Vector();
- plC=copyColor(plCgiven);
+ Color plC=getPLColor(app2);
  boolean colorFlag=false;
  boolean colorNeeded =false;
-}
+ }
 	:
 	( "Point"
 	   OPEN_BRACKET
@@ -417,7 +462,7 @@ pointBlock [Color plCgiven,Appearance app] returns [Color plC]
 	COLON
 	(
 	
-	   plC=color {colorFlag=true;}
+	   plC=color {colorFlag=true; app2=setPLColor(app2,plC);}
 	 |( "Point"  {if (colorFlag) colorNeeded= true;}
 	   OPEN_BRACKET
 				{v=new double [3];}
@@ -438,11 +483,11 @@ pointBlock [Color plCgiven,Appearance app] returns [Color plC]
 		}
 		psf.setVertexCount(points.size());
 		psf.setVertexCoordinates(data);
-		Appearance pointApp =copyApp(app);
+		Appearance pointApp =copyApp(app2);
 	    if (colorNeeded) 			// brauchen wir eine Farbliste?
 			psf.setVertexColors(colorData);
 		else
-			pointApp.setAttribute(CommonAttributes.DIFFUSE_COLOR, colors.get(0));
+			pointApp= setPLColor(pointApp,plC);
 		psf.update();
 		SceneGraphComponent geo=new SceneGraphComponent();
 		pointApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
@@ -451,16 +496,18 @@ pointBlock [Color plCgiven,Appearance app] returns [Color plC]
 		geo.setGeometry(psf.getPointSet());
 		geo.setName("Points");
 		current.addChild(geo);
+		simplifyColor(app2);
 	}
 	;  
 
 private
-lineBlock [Color plCgiven, Appearance app] returns[Color plC]
+lineBlock [Appearance app] returns[Appearance app2]
 // liest eine Abfolge von Linien in eine IndexedLineSet.
 // schmeist doppelte Punkte durch umindizierung raus.
 // Farben wie bei pointBlock.
 {
- plC=copyColor(plCgiven);					// Punkt/Linienfarbe
+ app2=copyApp(app);
+ Color plC=getPLColor(app2);						// Punkt/Linienfarbe
  Vector coordinates= new Vector();			// alle Punkte in einer Liste
  Vector line=new Vector();					// alle Punkte einer Linie
  Vector colors= new Vector();				// FarbListe
@@ -470,8 +517,7 @@ lineBlock [Color plCgiven, Appearance app] returns[Color plC]
  boolean colorFlag=false;
  boolean colorNeeded =false;
  }
- :
-	"Line"
+ :	"Line"
 	 OPEN_BRACKET
 				line=lineset 			// das ist ein Vector von double[3]
 				{
@@ -488,7 +534,7 @@ lineBlock [Color plCgiven, Appearance app] returns[Color plC]
 	(
 	  COLON
 	  (
-	    (plC=color  {colorFlag=true;} )
+	    (plC=color {colorFlag=true; app2=setPLColor(app2,plC);})
 	   |( "Line"
 	     OPEN_BRACKET
 				line=lineset 			// das ist ein Vector von double[3]
@@ -530,15 +576,12 @@ lineBlock [Color plCgiven, Appearance app] returns[Color plC]
 			lineset.setEdgeIndices(indices);
 			lineset.setVertexCoordinates(data);
 			lineset.update();
-			Appearance lineApp =copyApp(app);
+			Appearance lineApp =copyApp(app2);
 		    if (colorNeeded){
-					// Achtung ist gehackt, weil noch keine Methoden in der LineSetFactory dafuer da : 
 					lineset.getIndexedLineSet().setEdgeAttributes(Attribute.COLORS,new DoubleArrayArray.Array( colorData ));
-
-					//lineset.setEdgeColors(colorData); //das funktioniert noch nicht richtig
 			}
 			else
-				lineApp.setAttribute(CommonAttributes.DIFFUSE_COLOR, colors.get(0));
+				lineApp= setPLColor(lineApp,plC);
 			lineset.update();
 			// for (int i=0;i<linesIndices.size();i++)
 			// System.out.println(colorData[i][0]+"|"+colorData[i][1]+"|"+colorData[i][2]);
@@ -549,16 +592,19 @@ lineBlock [Color plCgiven, Appearance app] returns[Color plC]
 			geo.setGeometry(lineset.getIndexedLineSet());
 			geo.setName("Lines");
 			current.addChild(geo);
+			simplifyColor(app2);
 		}
 	;  
 
 
 private 
-polygonBlock [Color fCgiven, Appearance app, Color edgeF] returns[Color fC]
+polygonBlock [Appearance app, Color edgeF] returns[Appearance app2]
 // liest eine Abfolge von Polygonen 
 // schmeist doppelte Punkte durch umindizierung raus
 // Farben wie pointBlock und lineBlock
-{fC=copyColor(fCgiven);
+{
+ app2=copyApp(app);
+ Color fC=getFColor(app2);
  Vector coordinates= new Vector(); 	// alle PunktListen vereint in einer
  Vector poly=new Vector();			// alle Punkte in einem Polygon
  int[] polyIndices;					// alle indices eines Polygons
@@ -585,7 +631,7 @@ polygonBlock [Color fCgiven, Appearance app, Color edgeF] returns[Color fC]
 	 CLOSE_BRACKET 
 	( COLON
 	 (
-	   (fC=faceColor {colorFlag=true;})
+	   (   app2=faceColor[app2] {colorFlag=true; fC=getFColor(app2);} )
 	  |("Polygon"
 	    OPEN_BRACKET
 				poly=lineset 			// das ist ein Vector von double[3]
@@ -626,12 +672,14 @@ polygonBlock [Color fCgiven, Appearance app, Color edgeF] returns[Color fC]
 		faceSet.setFaceCount(polysIndices.size());
 		faceSet.setFaceIndices(indices);
 		faceSet.setVertexCoordinates(data);
-		Appearance faceApp =copyApp(app);
+		Appearance faceApp =copyApp(app2);
 		//faceApp.setAttribute(CommonAttributes.SMOOTH_SHADING, true);// smoth ist eh default
 	    if (colorNeeded)
 			faceSet.setFaceColors(colorData);
-		else
-			faceApp.setAttribute(CommonAttributes.DIFFUSE_COLOR, colors.get(0));
+		else{
+			faceApp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+
+			 	CommonAttributes.DIFFUSE_COLOR, fC);
+		}
 		if (edgeF!=null){
 	 	 	faceApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
 		 	faceApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
@@ -644,7 +692,8 @@ polygonBlock [Color fCgiven, Appearance app, Color edgeF] returns[Color fC]
 			 	CommonAttributes.DIFFUSE_COLOR, edgeF);				 	
 			faceSet.setGenerateEdgesFromFaces(true);
 		}
-		else {faceSet.setGenerateEdgesFromFaces(false);}
+		else 
+			faceSet.setGenerateEdgesFromFaces(false);
 		faceSet.setGenerateFaceNormals(true);
 		faceSet.setGenerateVertexNormals(true);
 		faceSet.update();
@@ -668,12 +717,22 @@ edgeFormThing returns[Color c]
 	;
 
 private
-faceColor returns[Color fC]
+faceColor [Appearance app] returns[Appearance app2]
 // Farben fuer Flaechen sind in 'SurfaceColor[]' gekapselt
-{Color specular; double d; fC= new Color(255,0,0);}
+{
+ app2=copyApp(app);
+ Color specular; double d; Color fC= new Color(255,0,0);
+}
 	: "SurfaceColor" OPEN_BRACKET
 			fC=color
-			( COLON specular=color	(	COLON 	d=doublething )?)?	// ignore !
+				{app2.setAttribute(CommonAttributes.POLYGON_SHADER+"."+
+				 	CommonAttributes.DIFFUSE_COLOR, fC);}
+			( COLON specular=color	
+				{app2.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COLOR,specular);}
+			 (	COLON 	d=doublething 
+			 	{app2.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_EXPONENT,d);}
+			 )?
+			)?
 		CLOSE_BRACKET 
 	;
 
