@@ -65,7 +65,7 @@ options {
 *	 	werden zu einem PointSet
 * 	 TexteMarken werden zu gelabelten EINELEMENTIGEN Pointsets.(sie werden nicht verbunden)
 *
-*   desweiteren werden doppelte Punkte aus Line- und Face- Sets aussortiert
+*   desweiteren werden auf Wunsch doppelte Punkte aus Line- und Face- Sets aussortiert
 * 		das ermoeglicht u.a. smoothshading bei Flaechen aus getrennt angegebenen Polygonen(das ist ueblich)
 *
 *   Farben werden je nach Bedarf als Farbliste in Line-, Point-, und Face- Sets eingebunden.
@@ -76,11 +76,9 @@ options {
 *
 * TO DO:
 * viele Optionen sind noch unbehandelt (siehe dort: "optionPrimitives")
-* Standard Licheter und Camera werden nicht uebernommen 
+* Standard Lichter und Camera werden nicht uebernommen 
 * 		(der Scenegraph hat keine Lichter oder Camera)
 * ein paar Directiven werden auch ignoriert (siehe dort: "directive")
-* die Root hat Linien und Punkte ausgeschaltet. 
-*		Sie werden bei den entsprechenden Knoten der Geometrieen wieder eingeschaltet.
 * Auch wenn Appearances wie Directiven fuer ganze gruppen gelten koennen,
 *		werden sie erst im Knoten der Geometrie eingesetzt.
 */
@@ -95,8 +93,9 @@ options {
 	private Appearance startApp =new Appearance();
 	private Color plCDefault= new Color(255,0,0);	// default- Punkt und Linienfarbe
 	private Color fCDefault = new Color(0,255,0);	// default- Flaechenfarbe
-	private Color defaultEdgeForm= Color.black;
-	
+
+//	private Object defaultEdgeForm = Color.black;
+		private Object defaultEdgeForm = new Double(1); 
 
 // ---------------------------- total Sizes of Scene --------------------------
 	private double[][] borderValue= new double [3][]; // maximale Werte der Scenenkoordinaten in x-,y- und z-Richtung
@@ -253,11 +252,9 @@ options {
 start returns [SceneGraphComponent r]
 { r = null;	
 	globalApp.setName("global");	
-
 	setPLColor(globalApp, plCDefault);			 	
 	globalApp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+
 			 	CommonAttributes.DIFFUSE_COLOR, fCDefault);
-	
 	root.setAppearance(globalApp);
 	root.setName("Mathematica");
 	log.setLevel(Level.FINE);	
@@ -276,16 +273,16 @@ start returns [SceneGraphComponent r]
 	  	(optionen)? 									// Die in der 2."{}"-Klammer folgenden Optionen sind optional
 	  CLOSE_BRACKET 
 		{
-		globalApp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+		//globalApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
 		globalApp.setAttribute(CommonAttributes.SPHERES_DRAW, false);
-		globalApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
-		globalApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
+		//globalApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
+		//globalApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
 		r = root;}
 	;
 
 // ---------------------------------- 3D Objects ---------------------------------------------
 private
-firstList[Appearance app, Color edgeF]
+firstList[Appearance app, Object edgeF]
 // firstList ist wie list, nur das hier kein neuer Sc.Gr.Co. erstellt wird da wir ja schon die Root haben
 // (wird nur am Anfang benutzt!)
 	:	OPEN_BRACE
@@ -294,7 +291,7 @@ firstList[Appearance app, Color edgeF]
 	;
 
 private
-list[Appearance app, Color edgeF]
+list[Appearance app, Object edgeF]
 {Appearance app2=copyApp(app);}
 	// eine Klammer mit mglw. einer Abfolge von 3d-Objekten
 	:	OPEN_BRACE						
@@ -313,7 +310,7 @@ list[Appearance app, Color edgeF]
 	;
 	
 private
-objectList [Appearance app, Color edgeF]
+objectList [Appearance app, Object edgeF]
 // abarbeiten einer Abfolge von 3d-Objecten(und Directiven)
 {Appearance app2=copyApp(app);}
 	:(
@@ -335,7 +332,7 @@ objectList [Appearance app, Color edgeF]
 	;	
 	
 private
-faceThing [Appearance app, Color edgeF] returns[Appearance app2]
+faceThing [Appearance app, Object edgeF] returns[Appearance app2]
 {app2=copyApp(app);}
 	:	cuboid[app2,edgeF]					// Wuerfel 
 	|	app2=polygonBlock[app2,edgeF]		// Abfolge von Polygonen (IndexedFaceSet)
@@ -363,7 +360,7 @@ appThing [Appearance appOld] returns [ Appearance app]
 	
 // ----------------------------- Graphic Primitives ------------------------------------------------------------
 private 
-cuboid [Appearance app,Color edgeF]
+cuboid [Appearance app,Object edgeF]
 	// ein achsenparalleler Wuerfel, gegeben durch Zentrum(Kantenlaenge 1) oder zusaetslich durch leangen
 	:"Cuboid"
 	 OPEN_BRACKET 
@@ -381,19 +378,21 @@ cuboid [Appearance app,Color edgeF]
 	 		 geo.setName("Cuboid");
 	 		 Appearance cubicApp =copyApp(app);
 	 		 if (edgeF!=null){
-	 		 	cubicApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
-			 	cubicApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
+	 		 	//cubicApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
+			 	//cubicApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
 				cubicApp.setAttribute(CommonAttributes.TUBE_RADIUS,1/150);
 				cubicApp.setAttribute(CommonAttributes.LINE_WIDTH,1);	 	
-			 	cubicApp.setAttribute(CommonAttributes.LINE_SHADER+"."+
+				if (edgeF instanceof Color){
+			 	  cubicApp.setAttribute(CommonAttributes.LINE_SHADER+"."+
 				 	CommonAttributes.POLYGON_SHADER+"."+
-				 	CommonAttributes.DIFFUSE_COLOR, edgeF);
-			 	cubicApp.setAttribute(CommonAttributes.LINE_SHADER+"."+
-				 	CommonAttributes.DIFFUSE_COLOR, edgeF);				 	
+				 	CommonAttributes.DIFFUSE_COLOR, (Color)edgeF);
+			 	  cubicApp.setAttribute(CommonAttributes.LINE_SHADER+"."+
+				 	CommonAttributes.DIFFUSE_COLOR, (Color)edgeF);				 	
+				 }
 			 }
 	 		 else{
 		 		 cubicApp.setAttribute(CommonAttributes.EDGE_DRAW, false);
-				 cubicApp.setAttribute(CommonAttributes.TUBES_DRAW, false);
+				 //cubicApp.setAttribute(CommonAttributes.TUBES_DRAW, false);
 			 }
 			 geo.setAppearance(cubicApp);
 			 MatrixBuilder.euclidean().scale(v2[0],v2[1],v2[2])
@@ -425,7 +424,7 @@ text [Appearance app]
 					 SceneGraphComponent geo=new SceneGraphComponent();
 					 Appearance pointApp =copyApp(app);
 					 pointApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
-					 pointApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
+					 //pointApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
 					 pointApp.setAttribute(CommonAttributes.POINT_RADIUS, 0.0001);
 				
 					 geo.setAppearance(pointApp);
@@ -490,7 +489,7 @@ pointBlock [Appearance app] returns [Appearance app2]
 			pointApp= setPLColor(pointApp,plC);
 		psf.update();
 		SceneGraphComponent geo=new SceneGraphComponent();
-		pointApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
+		//pointApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
 		pointApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
 		geo.setAppearance(pointApp);
 		geo.setGeometry(psf.getPointSet());
@@ -586,8 +585,8 @@ lineBlock [Appearance app] returns[Appearance app2]
 			// for (int i=0;i<linesIndices.size();i++)
 			// System.out.println(colorData[i][0]+"|"+colorData[i][1]+"|"+colorData[i][2]);
 			SceneGraphComponent geo=new SceneGraphComponent();
-			lineApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
-			lineApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
+			//lineApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
+			//lineApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
 			geo.setAppearance(lineApp);
 			geo.setGeometry(lineset.getIndexedLineSet());
 			geo.setName("Lines");
@@ -598,7 +597,7 @@ lineBlock [Appearance app] returns[Appearance app2]
 
 
 private 
-polygonBlock [Appearance app, Color edgeF] returns[Appearance app2]
+polygonBlock [Appearance app, Object edgeF] returns[Appearance app2]
 // liest eine Abfolge von Polygonen 
 // schmeist doppelte Punkte durch umindizierung raus
 // Farben wie pointBlock und lineBlock
@@ -680,20 +679,25 @@ polygonBlock [Appearance app, Color edgeF] returns[Appearance app2]
 			faceApp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+
 			 	CommonAttributes.DIFFUSE_COLOR, fC);
 		}
+		
 		if (edgeF!=null){
-	 	 	faceApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
-		 	faceApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
+	 	 	//faceApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
+		 	//faceApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
 			faceApp.setAttribute(CommonAttributes.TUBE_RADIUS,1/150);
 			faceApp.setAttribute(CommonAttributes.LINE_WIDTH,1);	 	
-		 	faceApp.setAttribute(CommonAttributes.LINE_SHADER+"."+
-			 	CommonAttributes.POLYGON_SHADER+"."+
-			 	CommonAttributes.DIFFUSE_COLOR, edgeF);
-		 	faceApp.setAttribute(CommonAttributes.LINE_SHADER+"."+
-			 	CommonAttributes.DIFFUSE_COLOR, edgeF);				 	
+			if (edgeF instanceof Color){
+		 		faceApp.setAttribute(CommonAttributes.LINE_SHADER+"."+
+			 		CommonAttributes.POLYGON_SHADER+"."+
+			 		CommonAttributes.DIFFUSE_COLOR, edgeF);
+		 		faceApp.setAttribute(CommonAttributes.LINE_SHADER+"."+
+				 	CommonAttributes.DIFFUSE_COLOR, edgeF);				 	
+			}
 			faceSet.setGenerateEdgesFromFaces(true);
 		}
-		else 
+		else {
+		 	faceApp.setAttribute(CommonAttributes.EDGE_DRAW, false);
 			faceSet.setGenerateEdgesFromFaces(false);
+			}
 		faceSet.setGenerateFaceNormals(true);
 		faceSet.setGenerateVertexNormals(true);
 		faceSet.update();
@@ -707,7 +711,7 @@ polygonBlock [Appearance app, Color edgeF] returns[Appearance app2]
 	
 // -------------------------------------------------- Farben --------------------------------------------
 private
-edgeFormThing returns[Color c]
+edgeFormThing returns[Object c]
 // gibt die Farbe der PolygonRaender an
 // keine Farbe bedeutet keine Raender
 {c=null;}
