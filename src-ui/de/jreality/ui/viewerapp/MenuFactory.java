@@ -173,8 +173,8 @@ public class MenuFactory {
     menuBar.add(compMenu);
     
     //-- FILE MENU ---------------------------------
-    fileMenu.insert(new JMenuItem(new LoadFile(LOAD_FILE, sm, frame)), 0);
-    fileMenu.insert(new JMenuItem(new LoadFileMerged(LOAD_FILE_MERGED, sm, frame)), 1);
+    fileMenu.insert(new JMenuItem(new LoadFile(LOAD_FILE, sm, viewerApp, frame)), 0);
+    fileMenu.insert(new JMenuItem(new LoadFileMerged(LOAD_FILE_MERGED, sm, viewerApp, frame)), 1);
     fileMenu.insertSeparator(2);
     fileMenu.insert(new JMenuItem(new SaveSelected(SAVE_SELECTED, sm, frame)), 3);
     fileMenu.insertSeparator(4);

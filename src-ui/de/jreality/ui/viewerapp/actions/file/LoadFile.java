@@ -51,14 +51,21 @@ import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.util.CameraUtility;
+import de.jreality.util.PickUtility;
 
 
 public class LoadFile extends AbstractAction {
 
 
-  public LoadFile(String name, SelectionManager sm, Component frame) {
+  private ViewerApp viewerApp;
+
+
+public LoadFile(String name, SelectionManager sm, ViewerApp viewerApp, Component frame) {
     super(name, sm, frame);
+    this.viewerApp=viewerApp;
     putValue(SHORT_DESCRIPTION, "Load one or more files");
     //putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
   }
@@ -73,6 +80,14 @@ public class LoadFile extends AbstractAction {
         sgc.setName(files[i].getName());
         System.out.println("READ finished.");
         selection.getLastComponent().addChild(sgc);
+        
+        PickUtility.assignFaceAABBTrees(sgc);
+
+        CameraUtility.encompass(viewerApp.getViewer().getAvatarPath(),
+        						viewerApp.getViewer().getEmptyPickPath(),
+        						viewerApp.getViewer().getCameraPath(),
+        						1.75, viewerApp.getViewer().getSignature());
+        
       } 
       catch (IOException ioe) {
         JOptionPane.showMessageDialog(frame, "Failed to load file: "+ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
