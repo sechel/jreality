@@ -227,6 +227,11 @@ public class ViewerApp {
     }
     
     frame.validate();
+    
+    //encompass scene before displaying
+//    CameraUtility.encompass(currViewer);
+//    currViewer.render();
+	
     frame.setVisible(true);
     
     return frame;
@@ -575,30 +580,37 @@ public class ViewerApp {
   
 //-- MENU METHODS -------------
   
-  public void addJMenu(JMenu menu) {
-    addJMenu(menu, menuBar.getComponentCount());  //add to end of menuBar
+  public JMenuBar getMenuBar() {
+	  return menuBar;
   }
   
-  public void addJMenu(JMenu menu, int index) {
+  public void addMenu(JMenu menu) {
+    addMenu(menu, menuBar.getComponentCount());  //add to end of menuBar
+  }
+  
+  public void addMenu(JMenu menu, int index) {
     if (index < 0 || index > menuBar.getComponentCount())
       throw new IllegalArgumentException("invalid index");
 
     menuBar.add(menu, index);
   }
   
-  public void addJMenuItem(JMenuItem item, String menuName) {
-    addJMenuItem(item, menuName, menuBar.getComponentCount());  //add to end of menu
+  public JMenu getMenu(String menuName) {
+	JMenu menu = null;
+	for (int i = 0; i < menuBar.getComponentCount(); i++) {
+		if ( ((JMenu)menuBar.getComponent(i)).getText().equals(menuName) )
+			menu = (JMenu)menuBar.getComponent(i);
+	}
+	return menu;
   }
   
-  public void addJMenuItem(JMenuItem item, String menuName, int index) {
-    //get menu
-    JMenu menu = null;
-    for (int i = 0; i < menuBar.getComponentCount(); i++) {
-      if ( ((JMenu)menuBar.getComponent(i)).getText().equals(menuName) )
-        menu = (JMenu)menuBar.getComponent(i);
-    }
-    if (menu != null)
-      menu.insert(item, index);
+  public void addMenuItem(JMenuItem item, String menuName) {
+    addMenuItem(item, menuName, menuBar.getComponentCount());  //add to end of menu
+  }
+  
+  public void addMenuItem(JMenuItem item, String menuName, int index) {
+	JMenu menu = getMenu(menuName);
+	if (menu != null) menu.insert(item, index);
   }
   
   public void addAction(Action a, String menuName) {
@@ -606,7 +618,7 @@ public class ViewerApp {
   }
   
   public void addAction(Action a, String menuName, int index) {
-    addJMenuItem(new JMenuItem(a), menuName, index);
+    addMenuItem(new JMenuItem(a), menuName, index);
   }
   
   
