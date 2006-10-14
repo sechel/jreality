@@ -219,7 +219,7 @@ public class ViewerApp {
     
     //add menu bar
     frame.setJMenuBar(menuBar);
-    if (!showMenu) {  
+    if (!showMenu) { 
     	//hide all menus, then keystrokes for actions are still working,
     	//which is not the case when hiding menuBar
     	for (int i = 0; i < menuBar.getComponentCount(); i++)
