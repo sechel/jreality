@@ -96,6 +96,7 @@ public class ToggleViewerFullScreen extends AbstractAction {
       sharedInstances.put(viewerApp, sharedInstance);
       //add same action instance to full screen frame
       JMenuBar menu = new JMenuBar();
+      menu.setBorder(null);
       JMenuItem item = new JMenuItem(sharedInstance(name, viewerApp));
       item.setVisible(false);
       menu.add(item);
