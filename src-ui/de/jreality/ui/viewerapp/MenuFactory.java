@@ -158,6 +158,9 @@ public class MenuFactory {
   public JMenuBar getMenuBar() {
     
     final JMenuBar menuBar = new JMenuBar();
+    
+    menuBar.setBorder(null);
+    
     //create general actions
     final JMenu fileMenu = new JMenu("File");
     fileMenu.setMnemonic(KeyEvent.VK_F);
