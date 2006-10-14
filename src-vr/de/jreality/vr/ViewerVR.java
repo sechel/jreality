@@ -1282,9 +1282,9 @@ public class ViewerVR {
 		ViewerVR tds = new ViewerVR();
 		tds.showPanel(false);
 		ViewerApp vApp = tds.display();
-		 vApp.setAttachNavigator(true);
-		 vApp.setAttachBeanShell(true);
-		 vApp.setShowMenu(true);
+//		 vApp.setAttachNavigator(true);
+//		 vApp.setAttachBeanShell(true);
+//		 vApp.setShowMenu(true);
 		vApp.update();
 		JFrame f = vApp.display();
 		f.setSize(800, 600);
