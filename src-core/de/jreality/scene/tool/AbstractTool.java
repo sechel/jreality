@@ -50,7 +50,9 @@ import java.util.List;
 
 public abstract class AbstractTool implements Tool {
 
-  private List<InputSlot> activationSlots;
+  // Only protected for use by BeanshellTool. Should be private.
+  protected List<InputSlot> activationSlots;
+  
   private transient List<InputSlot> currentSlots=Collections.emptyList();
   private final transient HashMap<InputSlot, String> descriptions=new HashMap<InputSlot, String>();
   private String description = "No description!";
