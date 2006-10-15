@@ -121,7 +121,7 @@ public interface Tool {
    * 
    * @return List of InputSlots for activating the tool
    */
-	List<InputSlot> getActivationSlot();
+	List<InputSlot> getActivationSlots();
 
   /**
    * This method will only be called for active tools. The

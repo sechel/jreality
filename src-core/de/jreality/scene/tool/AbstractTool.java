@@ -64,7 +64,7 @@ public abstract class AbstractTool implements Tool {
 		this.activationSlots=Arrays.asList(activationSlots);
   }
   
-  public List<InputSlot> getActivationSlot() {
+  public List<InputSlot> getActivationSlots() {
 	return activationSlots;
   }
   public List<InputSlot> getCurrentSlots() {

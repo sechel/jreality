@@ -70,7 +70,7 @@ public class ToolManager {
         	pathsForTool(tool).add(path);	// clone path, perhaps?
         else
             throw new IllegalStateException("Tool "+tool+" already registered with path="+path);
-        if (!tool.getActivationSlot().isEmpty() && !toolsWithPick.contains(tool)) {
+        if (!tool.getActivationSlots().isEmpty() && !toolsWithPick.contains(tool)) {
         	toolsWithPick.add(tool);
         }
         return first;
@@ -82,7 +82,7 @@ public class ToolManager {
       else
         throw new IllegalStateException();
       if (pathsForTool(tool).isEmpty()) {
-      	if (!tool.getActivationSlot().isEmpty())
+      	if (!tool.getActivationSlots().isEmpty())
           toolsWithPick.remove(tool);
         return true;
       }

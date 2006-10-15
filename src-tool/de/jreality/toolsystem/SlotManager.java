@@ -227,7 +227,7 @@ public class SlotManager {
             getVirtualSlotsForTool(tool).addAll(tool.getCurrentSlots());
 
             // update slot2activation
-            for (InputSlot slot : tool.getActivationSlot()) {
+            for (InputSlot slot : tool.getActivationSlots()) {
 	            for (InputSlot resolvedSlot : resolveSlot(slot)) {
 	              getSlot2activation(resolvedSlot).remove(tool);
 	              getSlot2deactivation(resolvedSlot).add(tool);
@@ -245,14 +245,14 @@ public class SlotManager {
               }
             }
             // update slot2activation
-            for (InputSlot slot : tool.getActivationSlot()) {
+            for (InputSlot slot : tool.getActivationSlots()) {
 	            for (InputSlot resolvedSlot : resolveSlot(slot)) {
 	              getSlot2activation(resolvedSlot).add(tool);
 	              getSlot2deactivation(resolvedSlot).remove(tool);
 	            }
             }            
             getVirtualSlotsForTool(tool).clear();
-            getVirtualSlotsForTool(tool).addAll(tool.getActivationSlot());
+            getVirtualSlotsForTool(tool).addAll(tool.getActivationSlots());
         }
         
         //update used slots for still active tools
@@ -277,7 +277,7 @@ public class SlotManager {
             Set<InputSlot> oldUsedVirtual = new HashSet<InputSlot>(getVirtualSlotsForTool(tool));
 
             Set<InputSlot> newUsedVirtual = new HashSet<InputSlot>();
-            newUsedVirtual.addAll(tool.getActivationSlot());
+            newUsedVirtual.addAll(tool.getActivationSlots());
             newUsedVirtual.addAll(tool.getCurrentSlots());
             
             oldUsedVirtual.removeAll(newUsedVirtual); // these are no longer used
@@ -312,7 +312,7 @@ public class SlotManager {
      * @param tool
      */
   void registerTool(Tool tool) {
-    if (tool.getActivationSlot().isEmpty()) {
+    if (tool.getActivationSlots().isEmpty()) {
       // permanently active tool
       getVirtualSlotsForTool(tool).addAll(tool.getCurrentSlots());
       for (Iterator i = tool.getCurrentSlots().iterator(); i.hasNext();) {
@@ -325,10 +325,10 @@ public class SlotManager {
         }
       }
     } else {
-      getVirtualSlotsForTool(tool).addAll(tool.getActivationSlot());
+      getVirtualSlotsForTool(tool).addAll(tool.getActivationSlots());
       
       //InputSlot mappedSlot = tool.getActivationSlot();
-      for (InputSlot mappedSlot : tool.getActivationSlot()) {
+      for (InputSlot mappedSlot : tool.getActivationSlots()) {
 	      Set resolvedSlots = resolveSlot(mappedSlot);
 	      for (Iterator i2 = resolvedSlots.iterator(); i2.hasNext();) {
 	        InputSlot resolvedSlot = (InputSlot) i2.next();
@@ -342,7 +342,7 @@ public class SlotManager {
   }
 
   void unregisterTool(Tool tool) {
-    if (tool.getActivationSlot().isEmpty()) {
+    if (tool.getActivationSlots().isEmpty()) {
       // permanently active tool
       for (Iterator i = tool.getCurrentSlots().iterator(); i.hasNext();) {
         InputSlot mappedSlot = (InputSlot) i.next();
@@ -354,7 +354,7 @@ public class SlotManager {
       }
     } else {
       // InputSlot mappedSlot = tool.getActivationSlot();
-      for (InputSlot mappedSlot : tool.getActivationSlot()) {
+      for (InputSlot mappedSlot : tool.getActivationSlots()) {
 	      Set resolvedSlots = resolveSlot(mappedSlot);
 	      for (Iterator i2 = resolvedSlots.iterator(); i2.hasNext();) {
 	        InputSlot resolvedSlot = (InputSlot) i2.next();
