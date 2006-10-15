@@ -7,25 +7,25 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.pick.PickResult;
-import de.jreality.scene.tool.AbstractTool;
-import de.jreality.scene.tool.InputSlot;
-import de.jreality.scene.tool.ToolContext;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.tools.DuplicateTriplyPeriodicTool;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
+import de.jreality.util.Rectangle3D;
 import de.jreality.vr.ViewerVR;
 
 public class SchwarzDemo {
+
+	private SceneGraphComponent domain;
+
+	private SceneGraphComponent cmp = new SceneGraphComponent();
 	
-	Appearance app = new Appearance();
-	
-	private static SceneGraphComponent domain() {
-		SceneGraphComponent domain;
+	public SchwarzDemo() throws IOException {
+		
 		try {
+			//domain = Readers.read(Input.getInput("obj/SawTooth.obj"));
 			domain = Readers.read(Input.getInput("3ds/schwarz.3ds"));
 		} catch (IOException e) {
 			RuntimeException re = new RuntimeException("could not load schwarz: "+e.getMessage());
@@ -34,54 +34,27 @@ public class SchwarzDemo {
 		}
 		MatrixBuilder mb = MatrixBuilder.euclidean();
 		mb.rotateY(-0.39283794);
-//		mb.translate(0,-0.5,0);
-//		mb.scale(1/16.203125);
 		mb.assignTo(domain);
-		domain=GeometryUtility.flatten(domain);
-		domain=domain.getChildComponent(0);
+		SceneGraphComponent parent = new SceneGraphComponent();
+		parent.setName("parent");
+		cmp.addChild(parent);
+		parent.addChild(domain);
+		Rectangle3D bb = GeometryUtility.calculateChildrenBoundingBox(parent);
+		double[] center = bb.getCenter();
+		double[] latticeSpacing = bb.getExtent();
 		domain.setName("domain");
 		PickUtility.assignFaceAABBTrees(domain);
-		domain.getGeometry().setName("schwarz");
-		// now domain is aligned along x,y,z axes and scaled to size 1,1,1
-		return domain;
-	}
-	
-	final SceneGraphComponent domain=domain();
-	final double[] latticeSpacing = GeometryUtility.calculateChildrenBoundingBox(domain).getExtent();
-	SceneGraphComponent cmp = new SceneGraphComponent();
-	
-	public SchwarzDemo() throws IOException {
-		
-		domain.addTool(new DuplicateTriplyPeriodicTool(latticeSpacing[0],latticeSpacing[1],latticeSpacing[2]));
-		
-//		domain.addTool(new AbstractTool(InputSlot.getDevice("PanelActivation")) {
-//			public void activate(ToolContext tc) {
-//				PickResult pick = tc.getCurrentPick();
-//				double[] coords = pick.getObjectCoordinates();
-//				// get max dir:
-//				int dir=0;
-//				if (Math.abs(coords[1])>Math.abs(coords[0])) dir=1;
-//				if (Math.abs(coords[2])>Math.abs(coords[dir])) dir=2;
-//				double[] trans=new double[3];
-//				trans[dir]=Math.signum(coords[dir]);
-//				SceneGraphComponent newCmp = new SceneGraphComponent();
-//				newCmp.setGeometry(domain.getGeometry());
-//				MatrixBuilder.euclidean().translate(trans).assignTo(newCmp);
-//				//pick.getPickPath().getLastComponent().addChild(newCmp);
-//				tc.getRootToLocal().getLastComponent().addChild(newCmp);
-//			}
-//		});
+		domain.addTool(new DuplicateTriplyPeriodicTool(
+				latticeSpacing[0],latticeSpacing[1],latticeSpacing[2],
+				center[0], center[1], center[2]));
+		Appearance app = new Appearance();
 		app.setAttribute("showPoints", false);
+		TextureUtility.createTexture(app, "polygonShader", Input.getInput("textures/schwarz.png"));
 		cmp.setAppearance(app);
-		cmp.addChild(domain);
-		//Texture2D tex = TextureUtility.createTexture(app, "polygonShader", Input.getInput("textures/schwarz.png"));
+		cmp.setName("cmp");
 	}
 	
 	public static void main(String[] args) throws IOException {
-		//System.setProperty("jreality.data", "/net/MathVis/data/testData3D");
-		//System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer");
-		//System.setProperty("de.jreality.ui.viewerapp.autoRender", "false");
-		System.setProperty("de.jreality.ui.viewerapp.synchRender", "true");
 		ViewerVR tds = new ViewerVR();
 		tds.setContent(new SchwarzDemo().cmp);
 		tds.setDiam(5);
@@ -92,6 +65,5 @@ public class SchwarzDemo {
 		
 		va.update();
 		va.display();
-		
 	}
 }
