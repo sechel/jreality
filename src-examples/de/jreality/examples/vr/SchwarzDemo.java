@@ -13,6 +13,7 @@ import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
+import de.jreality.tools.DuplicateTriplyPeriodicTool;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
@@ -33,8 +34,8 @@ public class SchwarzDemo {
 		}
 		MatrixBuilder mb = MatrixBuilder.euclidean();
 		mb.rotateY(-0.39283794);
-		mb.translate(0,-0.5,0);
-		mb.scale(1/16.203125);
+//		mb.translate(0,-0.5,0);
+//		mb.scale(1/16.203125);
 		mb.assignTo(domain);
 		domain=GeometryUtility.flatten(domain);
 		domain=domain.getChildComponent(0);
@@ -46,30 +47,34 @@ public class SchwarzDemo {
 	}
 	
 	final SceneGraphComponent domain=domain();
+	final double[] latticeSpacing = GeometryUtility.calculateChildrenBoundingBox(domain).getExtent();
 	SceneGraphComponent cmp = new SceneGraphComponent();
 	
 	public SchwarzDemo() throws IOException {
-		domain.addTool(new AbstractTool(InputSlot.getDevice("PanelActivation")) {
-			public void activate(ToolContext tc) {
-				PickResult pick = tc.getCurrentPick();
-				double[] coords = pick.getObjectCoordinates();
-				// get max dir:
-				int dir=0;
-				if (Math.abs(coords[1])>Math.abs(coords[0])) dir=1;
-				if (Math.abs(coords[2])>Math.abs(coords[dir])) dir=2;
-				double[] trans=new double[3];
-				trans[dir]=Math.signum(coords[dir]);
-				SceneGraphComponent newCmp = new SceneGraphComponent();
-				newCmp.setGeometry(domain.getGeometry());
-				MatrixBuilder.euclidean().translate(trans).assignTo(newCmp);
-				//pick.getPickPath().getLastComponent().addChild(newCmp);
-				tc.getRootToLocal().getLastComponent().addChild(newCmp);
-			}
-		});
+		
+		domain.addTool(new DuplicateTriplyPeriodicTool(latticeSpacing[0],latticeSpacing[1],latticeSpacing[2]));
+		
+//		domain.addTool(new AbstractTool(InputSlot.getDevice("PanelActivation")) {
+//			public void activate(ToolContext tc) {
+//				PickResult pick = tc.getCurrentPick();
+//				double[] coords = pick.getObjectCoordinates();
+//				// get max dir:
+//				int dir=0;
+//				if (Math.abs(coords[1])>Math.abs(coords[0])) dir=1;
+//				if (Math.abs(coords[2])>Math.abs(coords[dir])) dir=2;
+//				double[] trans=new double[3];
+//				trans[dir]=Math.signum(coords[dir]);
+//				SceneGraphComponent newCmp = new SceneGraphComponent();
+//				newCmp.setGeometry(domain.getGeometry());
+//				MatrixBuilder.euclidean().translate(trans).assignTo(newCmp);
+//				//pick.getPickPath().getLastComponent().addChild(newCmp);
+//				tc.getRootToLocal().getLastComponent().addChild(newCmp);
+//			}
+//		});
 		app.setAttribute("showPoints", false);
 		cmp.setAppearance(app);
 		cmp.addChild(domain);
-		Texture2D tex = TextureUtility.createTexture(app, "polygonShader", Input.getInput("textures/schwarz.png"));
+		//Texture2D tex = TextureUtility.createTexture(app, "polygonShader", Input.getInput("textures/schwarz.png"));
 	}
 	
 	public static void main(String[] args) throws IOException {

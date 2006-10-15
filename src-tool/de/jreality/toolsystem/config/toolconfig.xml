@@ -101,6 +101,11 @@
       <outputslot>PanelActivation</outputslot>
     </virtualdevice>
     
+    <virtualdevice type="de.jreality.toolsystem.virtual.VirtualDoubleClick">
+      <inputslot>PrimarySelection</inputslot>
+      <outputslot>Duplication</outputslot>
+    </virtualdevice>
+    
     <virtualdevice type="de.jreality.toolsystem.virtual.VirtualToggleAxis">
       <inputslot>JumpActivation</inputslot>    <!-- SPACE -->
       <outputslot>RotationToggle</outputslot>
