@@ -164,7 +164,7 @@ public static String findFormat(String resourceName) {
       format = "JVX";
     } else if (lcName.endsWith(".jrs")) {
       format = "JRS";
-    } else if (lcName.endsWith(".wrl")) {
+    } else if (lcName.endsWith(".wrl") || lcName.endsWith(".vrml")) {
       format = "VRML";
     } else if (lcName.endsWith(".m")) {
       format = "MATHEMATICA";
