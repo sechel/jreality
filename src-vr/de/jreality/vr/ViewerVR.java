@@ -196,6 +196,8 @@ public class ViewerVR {
 		avatarNode.setName("avatar");
 		camNode.setName("camNode");
 		lightNode.setName("sun");
+		//sign????
+		MatrixBuilder.euclidean().rotateX(Math.PI/2).assignTo(sceneNode);
 		sceneRoot.addChild(sceneNode);
 
 		rootAppearance.setName("root app");
