@@ -54,6 +54,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 
+import de.jreality.renderman.RIBViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphVisitor;
@@ -70,6 +71,8 @@ import de.jreality.ui.viewerapp.actions.comp.AddTool;
 import de.jreality.ui.viewerapp.actions.comp.AssignFaceAABBTree;
 import de.jreality.ui.viewerapp.actions.comp.Remove;
 import de.jreality.ui.viewerapp.actions.comp.TogglePickable;
+import de.jreality.ui.viewerapp.actions.file.ExportRIB;
+import de.jreality.ui.viewerapp.actions.file.ExportSVG;
 import de.jreality.ui.viewerapp.actions.file.LoadFile;
 import de.jreality.ui.viewerapp.actions.file.LoadFileMerged;
 import de.jreality.ui.viewerapp.actions.file.LoadScene;
@@ -124,7 +127,7 @@ public class MenuFactory {
   private ViewerSwitch viewerSwitch = null;
   
 
-  public MenuFactory() {
+  private MenuFactory() {
     super();
   }
   
@@ -176,50 +179,25 @@ public class MenuFactory {
     menuBar.add(compMenu);
     
     //-- FILE MENU ---------------------------------
-    fileMenu.insert(new JMenuItem(new LoadFile(LOAD_FILE, sm, viewerApp, frame)), 0);
-    fileMenu.insert(new JMenuItem(new LoadFileMerged(LOAD_FILE_MERGED, sm, viewerApp, frame)), 1);
-    fileMenu.insertSeparator(2);
-    fileMenu.insert(new JMenuItem(new SaveSelected(SAVE_SELECTED, sm, frame)), 3);
-    fileMenu.insertSeparator(4);
+    fileMenu.insert(new JMenuItem(new SaveSelected(SAVE_SELECTED, sm, frame)), 0);
+    fileMenu.insertSeparator(1);
     if (viewerApp != null) {
+      fileMenu.insert(new JMenuItem(new LoadFile(LOAD_FILE, sm, viewerApp, frame)), 0);
+      fileMenu.insert(new JMenuItem(new LoadFileMerged(LOAD_FILE_MERGED, sm, viewerApp, frame)), 1);
       fileMenu.insert(new JMenuItem(new LoadScene(LOAD_SCENE, viewerApp, frame)), 2);
+      fileMenu.insertSeparator(3);
       fileMenu.insert(new JMenuItem(new SaveScene(SAVE_SCENE, viewerApp.getViewer(), frame)), 4);
     }
     
-//    JMenu export = new JMenu("Export");
-//    fileMenu.insertSeparator(7);
-//    fileMenu.insert(export, 7);
-//    export.add(new JMenuItem("RIB"));
-////    mi.addActionListener(new ActionListener(){
-////      public void actionPerformed(ActionEvent arg0) {
-////        File file = FileLoaderDialog.selectTargetFile(frame,"rib", " renderman RIB");
-////        if (file == null) return;
-//////      try {
-////        String fileName = file.getPath();
-////        RIBViewer rv = new RIBViewer();
-////        rv.initializeFrom(viewerSwitch);
-////        rv.setFileName(fileName);
-////        rv.render();
-//////      System.out.println("file name is "+fileName);
-////      }
-////    });
-//    
-//    export.add(new JMenuItem("SVG"));
-////    mi.addActionListener(new ActionListener(){
-////      public void actionPerformed(ActionEvent arg0) {
-////        File file = FileLoaderDialog.selectTargetFile(frame,"svg", " svg export");
-////        if (file == null) return;
-//////      try {
-////        String fileName = file.getPath();
-////        de.jreality.soft.SVGViewer rv = new de.jreality.soft.SVGViewer(fileName);
-////        rv.initializeFrom(viewerSwitch);
-////        rv.setWidth(viewerSwitch.getViewingComponent().getWidth());
-////        rv.setHeight(viewerSwitch.getViewingComponent().getHeight());
-////        rv.render();
-//////      System.out.println("file name is "+fileName);
-////      }
-////    });
-
+    JMenu export = new JMenu("Export");
+    fileMenu.insertSeparator(7);
+    fileMenu.insert(export, 7);
+    JMenu rib = new JMenu("RIB");
+    export.add(rib);
+    rib.add(new JMenuItem(new ExportRIB("Pixar", RIBViewer.TYPE_PIXAR, viewerSwitch, frame)));
+    rib.add(new JMenuItem(new ExportRIB("3DLight", RIBViewer.TYPE_3DELIGHT, viewerSwitch, frame)));
+    rib.add(new JMenuItem(new ExportRIB("Aqsis", RIBViewer.TYPE_AQSIS, viewerSwitch, frame)));
+    export.add(new JMenuItem(new ExportSVG("SVG", viewerSwitch, frame)));
     
     //-- COMPONENT MENU ---------------------------
     compMenu.add(new JMenuItem(new Remove(REMOVE, sm)));
@@ -370,47 +348,4 @@ public class MenuFactory {
     return menuFac;
   }
   
-   
-//  public void setupNavigatorContextMenu() {
-//    
-//    if (navigator == null)
-//      throw new UnsupportedOperationException("No navigator instantiated, call setNavigator(navigator)!");
-//    
-//    final JPopupMenu cm = createContextMenu();  //creates TreeSelectionListener
-//    final JTree sceneTree = navigator.getSceneTree();
-//    
-//    sceneTree.addMouseListener(new MouseAdapter() {
-//      
-//      public void mousePressed( MouseEvent e ) {
-//        handlePopup( e );
-//      }
-//      
-//      public void mouseReleased( MouseEvent e ) {
-//        handlePopup( e );
-//      }
-//      
-//      private void handlePopup( MouseEvent e ) {
-//        if ( e.isPopupTrigger() ) {
-//          TreePath path = sceneTree.getPathForLocation( e.getX(), e.getY() );
-//          if ( path != null ) {
-//            TreeSelectionModel selectionModel = sceneTree.getSelectionModel();
-//            selectionModel.clearSelection();  //ensures that SelectionListeners are notified even if path did not change
-//            selectionModel.setSelectionPath( path );
-//            cm.show( e.getComponent(), e.getX(), e.getY()+10 );
-//          }
-//        }
-//      }
-//    });//end mouse listener
-//    
-//  }
-//  
-//  
-//  private JPopupMenu createContextMenu() {
-//    JPopupMenu cm = new JPopupMenu();
-//    cm.add(new JMenuItem(new LoadFile(LOAD_FILE, navigator, frame)));  //frame is allowed to be null
-//    cm.add(new JMenuItem(new Remove(REMOVE, navigator)));
-//    cm.add(new JMenuItem(new AddTool(ADD_TOOL, navigator, frame)));
-//    return cm;
-//  }
-
 }
