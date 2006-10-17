@@ -55,11 +55,7 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 
 import de.jreality.renderman.RIBViewer;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.ui.viewerapp.Navigator.SelectionEvent;
 import de.jreality.ui.viewerapp.actions.app.SwitchBackgroundColor;
 import de.jreality.ui.viewerapp.actions.app.ToggleAppearance;
 import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
@@ -80,7 +76,9 @@ import de.jreality.ui.viewerapp.actions.file.Quit;
 import de.jreality.ui.viewerapp.actions.file.SaveScene;
 import de.jreality.ui.viewerapp.actions.file.SaveSelected;
 import de.jreality.ui.viewerapp.actions.viewer.Render;
+import de.jreality.ui.viewerapp.actions.viewer.ToggleBeanShell;
 import de.jreality.ui.viewerapp.actions.viewer.ToggleFullScreen;
+import de.jreality.ui.viewerapp.actions.viewer.ToggleNavigator;
 import de.jreality.ui.viewerapp.actions.viewer.ToggleViewerFullScreen;
 
 
@@ -94,24 +92,28 @@ import de.jreality.ui.viewerapp.actions.viewer.ToggleViewerFullScreen;
  * </pre></b></code>
  */
 public class MenuFactory {
-
+  //FILE MENU
   public static String LOAD_FILE = "Load files";
   public static String LOAD_FILE_MERGED = "Load merged files";
   public static String LOAD_SCENE = "Load scene";
   public static String SAVE_SCENE = "Save scene";
   public static String SAVE_SELECTED = "Save selected";
   public static String QUIT = "Quit";
+  //COMPONENT MENU
   public static String REMOVE = "Remove";
   public static String ADD_TOOL = "Add Tools";
   public static String TOGGLE_PICKABLE = "Toggle pickable";
   public static String ASSIGN_FACE_AABBTREE = "Assign AABBTree";
+  //APPEARANCE MENU
   public static String TOGGLE_VERTEX_DRAWING = "Toggle vertex drawing";
   public static String TOGGLE_EDGE_DRAWING = "Toggle egde drawing";
   public static String TOGGLE_FACE_DRAWING = "Toggle face drawing";
   public static String BACKGROUND_COLOR = "Set background color";
+  //VIEWER MENU
   public static String TOGGLE_FULL_SCREEN = "Toggle full screen";
   public static String TOGGLE_FULL_VIEWER = "Toggle viewer full screen";
   public static String RENDER = "Force Rendering";
+  //CAMERA MENU
   public static String DECREASE_FIELD_OF_VIEW = "Decrease fieldOfView";
   public static String INCREASE_FIELD_OF_VIEW = "Increase fieldOfView";
   public static String DECREASE_FOCUS = "Decrease focus";
@@ -161,7 +163,6 @@ public class MenuFactory {
   public JMenuBar getMenuBar() {
     
     final JMenuBar menuBar = new JMenuBar();
-    
     menuBar.setBorder(null);
     
     //create general actions
@@ -189,15 +190,17 @@ public class MenuFactory {
       fileMenu.insert(new JMenuItem(new SaveScene(SAVE_SCENE, viewerApp.getViewer(), frame)), 4);
     }
     
-    JMenu export = new JMenu("Export");
-    fileMenu.insertSeparator(7);
-    fileMenu.insert(export, 7);
-    JMenu rib = new JMenu("RIB");
-    export.add(rib);
-    rib.add(new JMenuItem(new ExportRIB("Pixar", RIBViewer.TYPE_PIXAR, viewerSwitch, frame)));
-    rib.add(new JMenuItem(new ExportRIB("3DLight", RIBViewer.TYPE_3DELIGHT, viewerSwitch, frame)));
-    rib.add(new JMenuItem(new ExportRIB("Aqsis", RIBViewer.TYPE_AQSIS, viewerSwitch, frame)));
-    export.add(new JMenuItem(new ExportSVG("SVG", viewerSwitch, frame)));
+    if (viewerSwitch != null) {
+      JMenu export = new JMenu("Export");
+      fileMenu.insertSeparator(7);
+      fileMenu.insert(export, 7);
+      JMenu rib = new JMenu("RIB");
+      export.add(rib);
+      rib.add(new JMenuItem(new ExportRIB("Pixar", RIBViewer.TYPE_PIXAR, viewerSwitch, frame)));
+      rib.add(new JMenuItem(new ExportRIB("3DLight", RIBViewer.TYPE_3DELIGHT, viewerSwitch, frame)));
+      rib.add(new JMenuItem(new ExportRIB("Aqsis", RIBViewer.TYPE_AQSIS, viewerSwitch, frame)));
+      export.add(new JMenuItem(new ExportSVG("SVG", viewerSwitch, frame)));
+    }
     
     //-- COMPONENT MENU ---------------------------
     compMenu.add(new JMenuItem(new Remove(REMOVE, sm)));
@@ -235,11 +238,16 @@ public class MenuFactory {
     final JMenu viewerMenu = new JMenu("Viewer");
     viewerMenu.setMnemonic(KeyEvent.VK_V);
     menuBar.add(viewerMenu);
-    if (viewerApp != null)
-      viewerMenu.add(new JMenuItem(ToggleViewerFullScreen.sharedInstance(TOGGLE_FULL_VIEWER, viewerApp)));
     viewerMenu.add(new JMenuItem(ToggleFullScreen.sharedInstance(TOGGLE_FULL_SCREEN, frame)));
+    if (viewerApp != null) {
+      viewerMenu.insert(new JMenuItem(ToggleViewerFullScreen.sharedInstance(TOGGLE_FULL_VIEWER, viewerApp)),0);
+      viewerMenu.insertSeparator(2);
+//      JCheckBoxMenuItem item = new JCheckBoxMenuItem(ToggleNavigator.sharedInstance("Show Navigator", viewerApp));
+//      item.setSelected(viewerApp.isAttachNavigator());  //XXX: property not set yet
+      viewerMenu.insert(new JMenuItem(ToggleNavigator.sharedInstance("Toggle attachNavigator", viewerApp)), 3);
+      viewerMenu.insert(new JMenuItem(ToggleBeanShell.sharedInstance("Toggle attachBeanShell", viewerApp)), 4);
+    }
     
-    //create actions which require a Viewer
     if (viewerSwitch != null) {
       viewerMenu.addSeparator();
       
@@ -266,50 +274,53 @@ public class MenuFactory {
       viewerMenu.add(new JMenuItem(new Render(RENDER, viewerSwitch)));
       
       //-- CAMERA MENU -------------------------------
-      final JMenu cameraMenu = new JMenu("Camera");
-      cameraMenu.setMnemonic(KeyEvent.VK_M);
-      menuBar.add(cameraMenu, 3);
-      cameraMenu.add(new JMenuItem(new ShiftFieldOfView(DECREASE_FIELD_OF_VIEW, viewerSwitch, true)));
-      cameraMenu.add(new JMenuItem(new ShiftFieldOfView(INCREASE_FIELD_OF_VIEW, viewerSwitch, false)));
-      cameraMenu.addSeparator();
-      cameraMenu.add(new JMenuItem(new ShiftFocus(DECREASE_FOCUS, viewerSwitch, true)));
-      cameraMenu.add(new JMenuItem(new ShiftFocus(INCREASE_FOCUS, viewerSwitch, false)));
-      cameraMenu.addSeparator();
-      cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(DECREASE_EYE_SEPARATION, viewerSwitch, true)));
-      cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(INCREASE_EYE_SEPARATION, viewerSwitch, false)));
-      cameraMenu.addSeparator();
-      cameraMenu.add(new JMenuItem(new TogglePerspective(TOGGLE_PERSPECTIVE, viewerSwitch)));
-      cameraMenu.add(new JMenuItem(new ToggleStereo(TOGGLE_STEREO, viewerSwitch)));
+      if (viewerSwitch != null) {
+        final JMenu cameraMenu = new JMenu("Camera");
+        cameraMenu.setMnemonic(KeyEvent.VK_M);
+        menuBar.add(cameraMenu, 3);
+        cameraMenu.add(new JMenuItem(new ShiftFieldOfView(DECREASE_FIELD_OF_VIEW, viewerSwitch, true)));
+        cameraMenu.add(new JMenuItem(new ShiftFieldOfView(INCREASE_FIELD_OF_VIEW, viewerSwitch, false)));
+        cameraMenu.addSeparator();
+        cameraMenu.add(new JMenuItem(new ShiftFocus(DECREASE_FOCUS, viewerSwitch, true)));
+        cameraMenu.add(new JMenuItem(new ShiftFocus(INCREASE_FOCUS, viewerSwitch, false)));
+        cameraMenu.addSeparator();
+        cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(DECREASE_EYE_SEPARATION, viewerSwitch, true)));
+        cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(INCREASE_EYE_SEPARATION, viewerSwitch, false)));
+        cameraMenu.addSeparator();
+        cameraMenu.add(new JMenuItem(new TogglePerspective(TOGGLE_PERSPECTIVE, viewerSwitch)));
+        cameraMenu.add(new JMenuItem(new ToggleStereo(TOGGLE_STEREO, viewerSwitch)));
+      }
     }    
     
-    
-    //enable or disable menus depending on navigator selection
-    if (viewerApp != null && viewerApp.isAttachNavigator()) {
-      Navigator navigator = (Navigator) viewerApp.getNavigator();
-      if (navigator != null) {
-        navigator.getTreeSelectionModel().addTreeSelectionListener(
-            new Navigator.SelectionListener() {
-              @Override
-              public void selectionChanged(SelectionEvent e) {
-                compMenu.setEnabled(false);
-                appMenu.setEnabled(false);
-                if (e.selectionIsSGNode()) {
-                  e.selectionAsSGNode().accept(new SceneGraphVisitor(){
-                    @Override
-                    public void visit(SceneGraphComponent c) {
-                      compMenu.setEnabled(true);
-                      appMenu.setEnabled(true);
-                    }
-                    @Override
-                    public void visit(Appearance a) {
-                      appMenu.setEnabled(true);
-                    }
-                  });
-                }
-              }
-            });
-      }
-    }
+
+//    //enable or disable menus depending on navigator selection
+//    if (viewerApp != null && viewerApp.isAttachNavigator()) {
+//XXX: viewerApp.attachNavigator is set after calling this method
+//      Navigator navigator = (Navigator) viewerApp.getNavigator();
+//      if (navigator != null) {
+//        navigator.getTreeSelectionModel().addTreeSelectionListener(
+//            new Navigator.SelectionListener() {
+//              @Override
+//              public void selectionChanged(SelectionEvent e) {
+//                compMenu.setEnabled(false);
+//                appMenu.setEnabled(false);
+//                if (e.selectionIsSGNode()) {
+//                  e.selectionAsSGNode().accept(new SceneGraphVisitor(){
+//                    @Override
+//                    public void visit(SceneGraphComponent c) {
+//                      compMenu.setEnabled(true);
+//                      appMenu.setEnabled(true);
+//                    }
+//                    @Override
+//                    public void visit(Appearance a) {
+//                      appMenu.setEnabled(true);
+//                    }
+//                  });
+//                }
+//              }
+//            });
+//      }
+//    }
     
     return menuBar;
   }

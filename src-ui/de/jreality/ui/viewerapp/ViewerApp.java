@@ -202,7 +202,7 @@ public class ViewerApp {
     //set viewer background colors
     if (sceneRoot.getAppearance() != null && (sceneRoot.getAppearance().getAttribute(CommonAttributes.BACKGROUND_COLORS) == Appearance.INHERITED && sceneRoot.getAppearance().getAttribute(CommonAttributes.BACKGROUND_COLOR) == Appearance.INHERITED)) {
         sceneRoot.getAppearance().setAttribute("backgroundColors", SwitchBackgroundColor.defaultColor);
-      }
+    }
     
     //frame properties
     frame.setTitle("jReality Viewer");
@@ -293,6 +293,7 @@ public class ViewerApp {
     //update selectionManager
     if (attachNavigator) 
       selectionManager.attachNavigator(navigator);
+    else selectionManager.detachNavigator();
   }
   
 
@@ -524,7 +525,7 @@ public class ViewerApp {
   
    
   /**
-   * Returns true iff a navigator is attached to the viewer.
+   * Returns true iff a bean shell is attached to the viewer.
    */
   public boolean isAttachBeanShell() {
     return attachBeanShell;
@@ -532,7 +533,7 @@ public class ViewerApp {
 
   
   /**
-   * Returns true iff a bean shell is attached to the viewer. 
+   * Returns true iff a navigator is attached to the viewer. 
    */
   public boolean isAttachNavigator() {
     return attachNavigator;

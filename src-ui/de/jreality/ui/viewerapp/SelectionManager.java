@@ -58,6 +58,7 @@ public class SelectionManager {
   private SceneGraphPath selection;
 
   private Vector<SelectionListener> listeners;
+  private SelectionListener smListener = null;
   
 
   public SelectionManager(SceneGraphPath defaultSelection) {
@@ -75,7 +76,7 @@ public class SelectionManager {
     final TreeSelectionModel tsm = navigator.getTreeSelectionModel();
     
     //add listener to SelectionManager
-    final SelectionListener smListener = new SelectionListener() {
+    smListener = new SelectionListener() {
       public void selectionChanged(SelectionEvent e) {
         //convert selection into TreePath
         TreePath path = getTreePath((SceneTreeModel) navigator.getSceneTree().getModel());
@@ -95,6 +96,14 @@ public class SelectionManager {
     });
     
     setSelection(defaultSelection);
+  }
+  
+  
+  /**
+   * Remove communication between the viewerApps navigator and the SelectionManager.
+   */
+  public void detachNavigator() {
+    removeSelectionListener(smListener);
   }
   
   
