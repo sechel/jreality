@@ -27,7 +27,7 @@ public class DuplicateTriplyPeriodicTool extends AbstractTool {
 
 	private double[] latticeSpacing;
 	private double[] center;
-	private static int count = 0;
+	private int count = 0;
 
 	public DuplicateTriplyPeriodicTool(
 			double latticeX, double latticeY, double latticeZ,
@@ -71,6 +71,7 @@ public class DuplicateTriplyPeriodicTool extends AbstractTool {
 		// make a component with the translation we decided on
 		SceneGraphComponent newCopy = new SceneGraphComponent();
 		newCopy.setName("copy"+count);
+		count++;
 		MatrixBuilder.euclidean().translate(trans).assignTo(newCopy);
 		
 		// add the fundamental domain as a child to this component

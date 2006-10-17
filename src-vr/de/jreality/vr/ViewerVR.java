@@ -27,6 +27,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
@@ -185,6 +186,20 @@ public class ViewerVR {
 	private JTabbedPane geomTabs;
 
 	private JTabbedPane appearanceTabs;
+
+	private JPanel textureButtonPanel;
+
+	private JPanel placementPanel;
+
+	private JPanel appearancePanel;
+
+	private JPanel envSelection;
+
+	private JTextPane helpText;
+
+	private JPanel buttonGroupComponent;
+
+	private JPanel toolPanel;
 	
 	public ViewerVR() throws IOException {
 
@@ -197,6 +212,7 @@ public class ViewerVR {
 		camNode.setName("camNode");
 		lightNode.setName("sun");
 		MatrixBuilder.euclidean().rotateX(-Math.PI/2).assignTo(sceneNode);
+		sceneNode.getTransformation().setName("alignment");
 		sceneRoot.addChild(sceneNode);
 
 		rootAppearance.setName("root app");
@@ -263,7 +279,7 @@ public class ViewerVR {
 				t.printStackTrace();
 			}
 		}
-
+		contentAppearance.setName("contentApp");
 		contentAppearance.setAttribute(CommonAttributes.POINT_SHADER + "."
 				+ CommonAttributes.DIFFUSE_COLOR, Color.blue);
 		contentAppearance.setAttribute(CommonAttributes.POLYGON_SHADER + "."
@@ -341,6 +357,14 @@ public class ViewerVR {
 
 		// swing widgets
 		makeControlPanel();
+		
+		makeAlignTab();
+		makeAppTab();
+		makeEnvTab();
+		makeToolTab();
+		makeTexTab();
+		makeHelpTab();
+		
 		makeContentFileChooser();
 		makeTextureFileChooser();
 		makeColorChooser();
@@ -391,20 +415,22 @@ public class ViewerVR {
 					if (ev.getActionCommand() == JFileChooser.APPROVE_SELECTION
 							&& file != null) {
 						SceneGraphComponent read = Readers.read(Input.getInput(file));
-						SceneGraphComponent hack = new SceneGraphComponent();
-						hack.addChild(read);
-						hack.accept(new SceneGraphVisitor() {
+						SceneGraphComponent tempRoot = new SceneGraphComponent();
+						tempRoot.addChild(read);
+						tempRoot.accept(new SceneGraphVisitor() {
 							public void visit(SceneGraphComponent c) {
 								if (removeAppsCheckBox.isSelected() && c.getAppearance() != null) c.setAppearance(null); 
 								c.childrenWriteAccept(this, false, false, false, false, true,
 										true);
 							}
 							public void visit(IndexedFaceSet i) {
-								GeometryUtility.calculateAndSetNormals(i);
+								if (i.getFaceAttributes(Attribute.NORMALS) == null) GeometryUtility.calculateAndSetFaceNormals(i);
+								if (i.getVertexAttributes(Attribute.NORMALS) == null) GeometryUtility.calculateAndSetVertexNormals(i);
+								System.out.println(".visit()");
 								if (smoothNormalsCheckBox.isSelected()) IndexedFaceSetUtility.assignSmoothVertexNormals(i, -1);
 							}
 						});
-						hack.removeChild(read);
+						tempRoot.removeChild(read);
 						setContent(read);
 					}
 				} catch (IOException e) {
@@ -519,6 +545,11 @@ public class ViewerVR {
 	}
 	
 	public void addEnvTab() {
+		appearanceTabs.add("env", envSelection);
+		sp.getFrame().pack();
+	}
+
+	private void makeEnvTab() {
 		landscape.addChangeListener(new ChangeListener() {
 
 			public void stateChanged(ChangeEvent arg0) {
@@ -526,16 +557,18 @@ public class ViewerVR {
 			}
 		});	
 		
-		JPanel envSelection = new JPanel(new BorderLayout());
+		envSelection = new JPanel(new BorderLayout());
 		envSelection.setBorder(new EmptyBorder(20,20,0,0));
 		envSelection.add(landscape.getSelectionComponent(), BorderLayout.CENTER);
-
-		appearanceTabs.add("env", envSelection);
-		sp.getFrame().pack();
 	}
 
 	public void addAppTab() {
-		JPanel appearancePanel = new JPanel(new BorderLayout());
+		appearanceTabs.add("app", appearancePanel);
+		sp.getFrame().pack();
+	}
+
+	private void makeAppTab() {
+		appearancePanel = new JPanel(new BorderLayout());
 		Box appBox = new Box(BoxLayout.Y_AXIS);
 		
 		// lines
@@ -662,12 +695,15 @@ public class ViewerVR {
 		appBox.add(faceBox);
 
 		appearancePanel.add(appBox);
-		appearanceTabs.add("app", appearancePanel);
-		sp.getFrame().pack();
 	}
 
 	public void addAlignTab() {
-		JPanel placementPanel = new JPanel(new BorderLayout());
+		geomTabs.add("align", placementPanel);
+		sp.getFrame().pack();
+	}
+
+	private void makeAlignTab() {
+		placementPanel = new JPanel(new BorderLayout());
 		placementPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		Box placementBox = new Box(BoxLayout.X_AXIS);
 		Box sizeBox = new Box(BoxLayout.Y_AXIS);
@@ -806,43 +842,38 @@ public class ViewerVR {
 		placementBox.add(groundBox);
 		placementBox.add(p);
 		placementPanel.add(placementBox);
-		geomTabs.add("align", placementPanel);
-		sp.getFrame().pack();
 	}
 
-	public void addLoadTab() {
-		final String[][] examples = new String[][] {
-				{ "Boy surface", "jrs/boy.jrs" },
-				{ "Chen-Gackstatter surface", "obj/Chen-Gackstatter-4.obj" },
-				{ "helicoid with 2 handles", "jrs/He2WithBoundary.jrs" },
-				{ "tetranoid", "3ds/tetranoid.3ds" },
-				{ "Wente torus", "jrs/wente.jrs" },
-				{ "Matheon baer", "jrs/baer.jrs" } };
-		ActionListener examplesListener = new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String selectedBox = e.getActionCommand();
-				int selectionIndex = ((Integer) exampleIndices.get(selectedBox)).intValue();
-				try {
-					SceneGraphComponent read = Readers.read(Input
-												.getInput(examples[selectionIndex][1]));
-					setContent(read);
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			}
-		};
-		JPanel buttonGroupComponent = new JPanel(new BorderLayout());
+	public void addLoadTab(final String[][] examples) {
+		buttonGroupComponent = new JPanel(new BorderLayout());
 		buttonGroupComponent.setBorder(new EmptyBorder(10, 10, 10, 10));
-		Box buttonGroupPanel = new Box(BoxLayout.Y_AXIS);
-		ButtonGroup group = new ButtonGroup();
-		for (int i = 0; i < examples.length; i++) {
-			JRadioButton button = new JRadioButton(examples[i][0]);
-			button.addActionListener(examplesListener);
-			buttonGroupPanel.add(button);
-			group.add(button);
-			exampleIndices.put(examples[i][0], new Integer(i));
+		
+		if (examples != null) {
+			ActionListener examplesListener = new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					String selectedBox = e.getActionCommand();
+					int selectionIndex = ((Integer) exampleIndices.get(selectedBox)).intValue();
+					try {
+						SceneGraphComponent read = Readers.read(Input
+								.getInput(examples[selectionIndex][1]));
+						setContent(read);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+			};
+			
+			Box buttonGroupPanel = new Box(BoxLayout.Y_AXIS);
+			ButtonGroup group = new ButtonGroup();
+			for (int i = 0; i < examples.length; i++) {
+				JRadioButton button = new JRadioButton(examples[i][0]);
+				button.addActionListener(examplesListener);
+				buttonGroupPanel.add(button);
+				group.add(button);
+				exampleIndices.put(examples[i][0], new Integer(i));
+			}
+			buttonGroupComponent.add("Center", buttonGroupPanel);
 		}
-		buttonGroupComponent.add("Center", buttonGroupPanel);
 		JButton loadButton = new JButton("load ...");
 		loadButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -855,7 +886,12 @@ public class ViewerVR {
 	}
 
 	public void addToolTab() {
-		JPanel toolPanel = new JPanel(new BorderLayout());
+		geomTabs.add("tools", toolPanel);
+		sp.getFrame().pack();
+	}
+
+	private void makeToolTab() {
+		toolPanel = new JPanel(new BorderLayout());
 		toolPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		Box toolBox = new Box(BoxLayout.Y_AXIS);
 		Box toolButtonBox = new Box(BoxLayout.X_AXIS);
@@ -899,11 +935,14 @@ public class ViewerVR {
 		});
 		buttonPanel.add(shadowButton);
 		toolPanel.add(BorderLayout.SOUTH, buttonPanel);
-		geomTabs.add("tools", toolPanel);
-		sp.getFrame().pack();
 	}
 
 	public void addTexTab() {
+		appearanceTabs.add("tex", textureButtonPanel);
+		sp.getFrame().pack();
+	}
+
+	private void makeTexTab() {
 		final String[][] textures = new String[][] {
 				{ "none", null },
 				{ "metal grid", "textures/boysurface.png" },
@@ -928,7 +967,7 @@ public class ViewerVR {
 				}
 			}
 		};
-		JPanel textureButtonPanel = new JPanel(new BorderLayout());
+		textureButtonPanel = new JPanel(new BorderLayout());
 		textureButtonPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		Box textureButtonBox = new Box(BoxLayout.Y_AXIS);
 		ButtonGroup textureGroup = new ButtonGroup();
@@ -962,12 +1001,15 @@ public class ViewerVR {
 			}
 		});
 		textureButtonPanel.add("South", textureLoadButton);
-		appearanceTabs.add("tex", textureButtonPanel);
-		sp.getFrame().pack();
 	}
 
 	public void addHelpTab() {
-		JTextPane helpText = new JTextPane();
+		geomTabs.add("help", new JScrollPane(helpText));
+		sp.getFrame().pack();
+	}
+
+	private void makeHelpTab() {
+		helpText = new JTextPane();
 		helpText.setEditable(false);
 		helpText.setContentType("text/html");
 		helpText.setPreferredSize(new Dimension(100,100));
@@ -977,8 +1019,6 @@ public class ViewerVR {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		geomTabs.add("help", helpText);
-		sp.getFrame().pack();
 	}
 
 	protected void setTexScale(double d) {
@@ -1097,11 +1137,12 @@ public class ViewerVR {
 			sceneNode.removeChild(currentContent);
 		}
 		SceneGraphComponent parent = new SceneGraphComponent();
+		parent.setName("content");
 		parent.addChild(content);
 		currentContent = parent;
 		PickUtility.assignFaceAABBTrees(content);
-		rotate.setSelected(false);
-		drag.setSelected(false);
+		if (rotate != null) rotate.setSelected(false);
+		if (drag != null)drag.setSelected(false);
 		Rectangle3D bounds = GeometryUtility
 				.calculateChildrenBoundingBox(currentContent);
 		// scale
@@ -1222,7 +1263,17 @@ public class ViewerVR {
 	public static void main(String[] args) throws IOException {
 //		System.setProperty("de.jreality.ui.viewerapp.synchRender", "true");
 		ViewerVR vr = new ViewerVR();
-		vr.addLoadTab();
+		final String[][] examples = new String[][] {
+				{ "Boy surface", "jrs/boy.jrs" },
+				{ "Chen-Gackstatter surface", "obj/Chen-Gackstatter-4.obj" },
+				{ "helicoid with 2 handles", "jrs/He2WithBoundary.jrs" },
+				{ "tetranoid", "jrs/tetranoid.jrs" },
+				{ "Wente torus", "jrs/wente.jrs" },
+				{ "Schwarz P", "jrs/schwarz.jrs" },
+				{ "Matheon baer", "jrs/baer.jrs" }
+		};
+		vr.addLoadTab(examples);
+//		vr.addLoadTab(null);
 		vr.addAlignTab();
 		vr.addAppTab();
 		vr.addEnvTab();
@@ -1231,9 +1282,9 @@ public class ViewerVR {
 		vr.addHelpTab();
 		vr.showPanel(false);
 		ViewerApp vApp = vr.display();
-//		vApp.setAttachNavigator(true);
-//		vApp.setAttachBeanShell(true);
-//		vApp.setShowMenu(true);
+		vApp.setAttachNavigator(true);
+		vApp.setAttachBeanShell(true);
+		vApp.setShowMenu(true);
 		vApp.update();
 		JFrame f = vApp.display();
 		f.setSize(800, 600);
