@@ -111,12 +111,12 @@ public class ToggleViewerFullScreen extends AbstractAction {
   public void actionPerformed(ActionEvent e) {
 
     if (isFullscreen) {
-      fsf.dispose();
-      fsf.getGraphicsConfiguration().getDevice().setFullScreenWindow(null);
       frame.getContentPane().removeAll();
       frame.getContentPane().add(viewerApp.getComponent());
       frame.validate();
       frame.setVisible(true);
+      fsf.dispose();
+      fsf.getGraphicsConfiguration().getDevice().setFullScreenWindow(null);
       isFullscreen = false;
     } else {
       fsf.getContentPane().removeAll();
