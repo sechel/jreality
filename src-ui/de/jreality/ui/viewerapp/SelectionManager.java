@@ -47,7 +47,9 @@ import javax.swing.tree.TreeSelectionModel;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.data.AttributeEntity;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
+import de.jreality.scene.tool.Tool;
 import de.jreality.ui.treeview.SceneTreeModel;
 import de.jreality.util.SceneGraphUtility;
 
@@ -59,6 +61,8 @@ public class SelectionManager {
 
   private Vector<SelectionListener> listeners;
   private SelectionListener smListener = null;
+  private Tool tool = null;               //currently selected tool
+  private AttributeEntity entity = null;  //currently selected attribute entity
   
 
   public SelectionManager(SceneGraphPath defaultSelection) {
@@ -79,6 +83,8 @@ public class SelectionManager {
     final Navigator.SelectionListener navigatorListener = new Navigator.SelectionListener(){
       public void selectionChanged(Navigator.SelectionEvent e) {
         removeSelectionListener(smListener);  //avoid listener cycle
+        tool = e.selectionAsTool();  //null if no tool
+        entity = e.selectionAsAttributeEntity();  //null if no attribute entity
         setSelection(e.getSGPath());
         addSelectionListener(smListener);
       }
@@ -106,6 +112,7 @@ public class SelectionManager {
    */
   public void detachNavigator() {
     removeSelectionListener(smListener);
+    setSelection(defaultSelection);
   }
   
   
@@ -157,38 +164,14 @@ public class SelectionManager {
   }
   
   
-  
-  public static class SelectionEvent extends java.util.EventObject {
-    
-    private static final long serialVersionUID = 1L;
-    
-    private SceneGraphPath selection;
-    
-    public SelectionEvent(Object source, SceneGraphPath selection) {
-      super(source);
-      this.selection = selection;
-    }
-    
-    public SceneGraphPath getSelection() {
-      return selection;
-    }
-  }
- 
-  
-  public interface SelectionListener extends java.util.EventListener {
-    
-    public void selectionChanged(SelectionManager.SelectionEvent e);
-  }
-  
-  
-  public void addSelectionListener(SelectionManager.SelectionListener listener)  {
+  public void addSelectionListener(SelectionListener listener)  {
     if (listeners == null)  listeners = new Vector<SelectionListener>();
     if (listeners.contains(listener)) return;
     listeners.add(listener);
   }
 
   
-  public void removeSelectionListener(SelectionManager.SelectionListener listener) {
+  public void removeSelectionListener(SelectionListener listener) {
     if (listeners == null) return;
     listeners.remove(listener);
   }
@@ -199,7 +182,7 @@ public class SelectionManager {
     if (!listeners.isEmpty()) {
       for (int i = 0; i<listeners.size(); i++)  {
         SelectionListener l = listeners.get(i);
-        l.selectionChanged(new SelectionEvent(this, this.selection));
+        l.selectionChanged(new SelectionEvent(this, this.selection, tool, entity));
       }
     }
   }

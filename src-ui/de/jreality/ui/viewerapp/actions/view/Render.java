@@ -38,64 +38,37 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.file;
+package de.jreality.ui.viewerapp.actions.view;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.io.File;
-import java.io.IOException;
 
-import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
-import de.jreality.reader.Readers;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.viewerapp.FileLoaderDialog;
-import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
-import de.jreality.util.CameraUtility;
-import de.jreality.util.PickUtility;
 
 
-public class LoadFile extends AbstractAction {
+public class Render extends AbstractAction {
 
-
-  private ViewerApp viewerApp;
-
-
-public LoadFile(String name, SelectionManager sm, ViewerApp viewerApp, Component frame) {
-    super(name, sm, frame);
-    this.viewerApp=viewerApp;
-    putValue(SHORT_DESCRIPTION, "Load one or more files");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+  private Viewer viewer;
+  
+  
+  public Render(String name, Viewer viewer) {
+    super(name);
+    putValue(SHORT_DESCRIPTION, "Render");
+    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+    
+    if (viewer == null) 
+      throw new IllegalArgumentException("Viewer is null!");
+    
+    this.viewer = viewer;
   }
-
   
+    
   public void actionPerformed(ActionEvent e) {
-  
-    File[] files = FileLoaderDialog.loadFiles(frame);
-    for (int i = 0; i < files.length; i++) {
-      try {
-        final SceneGraphComponent sgc = Readers.read(files[i]);
-        sgc.setName(files[i].getName());
-        System.out.println("READ finished.");
-        selection.getLastComponent().addChild(sgc);
-        
-        PickUtility.assignFaceAABBTrees(sgc);
-
-        CameraUtility.encompass(viewerApp.getViewer().getAvatarPath(),
-        						viewerApp.getViewer().getEmptyPickPath(),
-        						viewerApp.getViewer().getCameraPath(),
-        						1.75, viewerApp.getViewer().getSignature());
-        
-      } 
-      catch (IOException ioe) {
-        JOptionPane.showMessageDialog(frame, "Failed to load file: "+ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-      }
-    }
+    viewer.render();
   }
 
 }

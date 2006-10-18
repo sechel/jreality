@@ -38,25 +38,10 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.comp;
-
-import java.awt.event.ActionEvent;
-
-import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
-import de.jreality.util.PickUtility;
+package de.jreality.ui.viewerapp;
 
 
-public class AssignFaceAABBTree extends AbstractAction {
-
-  public AssignFaceAABBTree(String name, SelectionManager sm) {
-    super(name, sm);
-    putValue(SHORT_DESCRIPTION, "Assign AABBTree to faces");
-  }
-
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    PickUtility.assignFaceAABBTrees(selection.getLastComponent());
-  }
-
+public interface SelectionListener extends java.util.EventListener {
+  
+  public void selectionChanged(SelectionEvent e);
 }

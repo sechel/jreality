@@ -85,8 +85,8 @@ public class ToggleAppearance extends AbstractAction {
 
   
   /**
-   * Toggles the specified appearance attribute of the first appearance 
-   * existing along the path from the selected component to the scene root. 
+   * Toggles the specified appearance attribute of the responsible appearance 
+   * - the first one existing along the path from the selected component to the scene root. 
    * If there is no appearance along the path, nothing is toggled.
    */
   public void actionPerformed(ActionEvent e) {

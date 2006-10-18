@@ -46,10 +46,10 @@ import java.awt.event.ActionEvent;
 import javax.swing.KeyStroke;
 
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.ui.viewerapp.SelectionEvent;
+import de.jreality.ui.viewerapp.SelectionListener;
 import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.ui.viewerapp.SelectionManager.SelectionEvent;
-import de.jreality.ui.viewerapp.SelectionManager.SelectionListener;
 
 
 public abstract class AbstractAction extends javax.swing.AbstractAction {
@@ -58,7 +58,7 @@ public abstract class AbstractAction extends javax.swing.AbstractAction {
   protected SceneGraphPath selection;
   
   
-  public AbstractAction(String name, final SelectionManager sm, Component frame) {
+  protected AbstractAction(String name, final SelectionManager sm, Component frame) {
     super(name);
     
     if (sm == null) 
@@ -76,30 +76,30 @@ public abstract class AbstractAction extends javax.swing.AbstractAction {
   }
   
   
-  public AbstractAction(String name, SelectionManager sm) {
+  protected AbstractAction(String name, SelectionManager sm) {
     this(name, sm, null);
   }
   
   
-  public AbstractAction(String name, ViewerApp viewerApp) {
+  protected AbstractAction(String name, ViewerApp viewerApp) {
     this(name, viewerApp.getSelectionManager(), viewerApp.getFrame());
   }
   
   
-  public AbstractAction(String name) {
+  protected AbstractAction(String name) {
     super(name);
   }
   
   
-  public void selectionChanged(SelectionEvent e) {
+  protected void selectionChanged(SelectionEvent e) {
     selection = e.getSelection();
     
-    if (isEnabled()) setEnabled(true);
+    if (isEnabled(e)) setEnabled(true);
     else setEnabled(false);
   }
   
   
-  public boolean isEnabled() {
+  protected boolean isEnabled(SelectionEvent e) {
     return true;
   }
   
@@ -107,12 +107,12 @@ public abstract class AbstractAction extends javax.swing.AbstractAction {
   public abstract void actionPerformed(ActionEvent e);
   
   
-  public void setAcceleratorKey(KeyStroke key) {
+  protected void setAcceleratorKey(KeyStroke key) {
     putValue(ACCELERATOR_KEY, key);
   }
   
   
-  public void setName(String name) {
+  protected void setName(String name) {
     putValue(NAME, name);
   }
   

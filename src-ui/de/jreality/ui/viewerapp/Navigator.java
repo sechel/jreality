@@ -50,6 +50,7 @@ import javax.swing.tree.TreeSelectionModel;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.data.AttributeEntity;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.scene.tool.Tool;
 import de.jreality.ui.beans.InspectorPanel;
@@ -202,6 +203,18 @@ public class Navigator {
     public Tool selectionAsTool() {
       if (selectionIsTool())
         return ((TreeTool) selection).getTool();
+      else return null;
+    }
+    
+    
+    public boolean selectionIsAttributeEntity() {
+      return (!selectionIsSGNode() && !selectionIsTool());
+    }
+    
+    
+    public AttributeEntity selectionAsAttributeEntity() {
+      if (selectionIsAttributeEntity())
+        return (AttributeEntity) selection;
       else return null;
     }
 

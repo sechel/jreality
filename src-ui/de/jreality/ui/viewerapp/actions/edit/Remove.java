@@ -38,29 +38,27 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.comp;
+package de.jreality.ui.viewerapp.actions.edit;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
-import de.jreality.scene.Appearance;
-import de.jreality.scene.Camera;
-import de.jreality.scene.Geometry;
-import de.jreality.scene.Light;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.SceneGraphVisitor;
-import de.jreality.scene.Transformation;
+import de.jreality.scene.tool.Tool;
+import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.util.SceneGraphUtility;
 
 
 public class Remove extends AbstractAction {
 
   private SelectionManager sm;
+  private Tool tool = null;
   
   
   public Remove(String name, SelectionManager sm) {
@@ -77,34 +75,28 @@ public class Remove extends AbstractAction {
     SceneGraphPath parentPath = selection.popNew();  //selection.getLength() > 1
     final SceneGraphComponent parent = parentPath.getLastComponent();
     
-    node.accept(new SceneGraphVisitor() {
-      
-      public void visit(SceneGraphComponent sc) {
-        parent.removeChild(sc);
-      }
-      public void visit(Geometry g) {
-        parent.setGeometry(null);
-      }
-      public void visit(Transformation t) {
-        parent.setTransformation(null);
-      }
-      public void visit(Appearance a) {
-        parent.setAppearance(null);
-      }
-      public void visit(Camera c) {
-        parent.setCamera(null);
-      }
-      public void visit(Light l) {
-       parent.setLight(null); 
-      }
-    });
+    if (tool == null) {  //DEFAULT_SELECTION
+      SceneGraphUtility.removeChildNode(parent, node);
+      sm.setSelection(parentPath);
+    }
+    else {  //TOOL_SELECTION
+      selection.getLastComponent().removeTool(tool);
+      sm.setSelection(selection);
+    }
+  }
+
+  
+  @Override
+  public void selectionChanged(SelectionEvent e) {
+    super.selectionChanged(e);
     
-    sm.setSelection(parentPath);
+    tool = (e.getType()==SelectionEvent.TOOL_SELECTION) ? e.getTool() : null;
   }
   
-    
+  
   @Override
-  public boolean isEnabled() {
-    return (selection.getLength() != 1);  //don't allow to remove the sceneRoot
+  protected boolean isEnabled(SelectionEvent e) {
+    return (e.getType() != SelectionEvent.ENTITY_SELECTION &&
+        selection.getLength() != 1);  //don't allow to remove the sceneRoot
   }
 }

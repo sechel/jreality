@@ -38,7 +38,7 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.comp;
+package de.jreality.ui.viewerapp.actions.edit;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -69,6 +69,7 @@ import de.jreality.tools.ShipRotateTool;
 import de.jreality.tools.ShipScaleTool;
 import de.jreality.tools.ShowPropertiesTool;
 import de.jreality.tools.TranslateTool;
+import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
 
@@ -161,7 +162,8 @@ public class AddTool extends AbstractAction {
   
   
   @Override
-  public boolean isEnabled() {
-    return (selection.getLastElement() instanceof SceneGraphComponent);
+  protected boolean isEnabled(SelectionEvent e) {
+    return (e.getType() == SelectionEvent.DEFAULT_SELECTION &&
+        selection.getLastElement() instanceof SceneGraphComponent);
   }
 }

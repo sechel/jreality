@@ -38,42 +38,39 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.viewer;
+package de.jreality.ui.viewerapp.actions.view;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.KeyStroke;
 
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
 
 
-public class ToggleNavigator extends AbstractAction {
+public class ToggleMenu extends AbstractAction {
 
-  private boolean attachNavigator = false;
-  private ViewerApp viewerApp;
+  private JMenuBar menuBar;
   
   
-  public ToggleNavigator(String name, ViewerApp viewerApp) {
+  public ToggleMenu(String name, JMenuBar menuBar) {
     super(name);
-    this.viewerApp = viewerApp;
-
-    putValue(SHORT_DESCRIPTION, "Toggle navigator visibility");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+    putValue(SHORT_DESCRIPTION, "Show or hide the menu bar");
+    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+    
+    this.menuBar = menuBar;
   }
-
   
+    
   public void actionPerformed(ActionEvent e) {
-    attachNavigator = !viewerApp.isAttachNavigator();
-    viewerApp.setAttachNavigator(attachNavigator);
-    viewerApp.update();
-    JFrame frame = viewerApp.getFrame();
-    frame.getContentPane().removeAll();
-    frame.getContentPane().add(viewerApp.getComponent());
-    frame.validate();
+    JMenu menu;
+    for (int i = 0; i < menuBar.getComponentCount(); i++) {
+      menu = menuBar.getMenu(i);
+      menu.setVisible(!menu.isVisible());
+    }
   }
-  
+
 }

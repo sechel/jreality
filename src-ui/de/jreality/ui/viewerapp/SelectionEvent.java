@@ -38,32 +38,49 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.comp;
+package de.jreality.ui.viewerapp;
 
-import java.awt.event.ActionEvent;
-
-import de.jreality.scene.Geometry;
-import de.jreality.shader.CommonAttributes;
-import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
-import de.jreality.util.PickUtility;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.data.AttributeEntity;
+import de.jreality.scene.tool.Tool;
 
 
-public class TogglePickable extends AbstractAction {
+public class SelectionEvent extends java.util.EventObject {
   
-  public TogglePickable(String name, SelectionManager sm) {
-    super(name, sm);
-    putValue(SHORT_DESCRIPTION, "Toggle pickability of selection");
+  public static final int DEFAULT_SELECTION = 0;
+  public static final int TOOL_SELECTION = 1;
+  public static final int ENTITY_SELECTION = 2;
+  
+  final SceneGraphPath selection;
+  private final int type;
+  
+  private final Tool tool;
+  private final AttributeEntity entity;
+  
+  
+  public SelectionEvent(Object source, SceneGraphPath selection, Tool tool, AttributeEntity entity) {
+    super(source);
+    this.selection = selection;
+    if (tool!=null && entity != null) throw new IllegalStateException("illegal selection!");
+    type = (tool == null && entity == null) ? DEFAULT_SELECTION : (tool != null) ? TOOL_SELECTION : ENTITY_SELECTION;
+    this.tool = tool;
+    this.entity = entity;
   }
   
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    Geometry g = selection.getLastComponent().getGeometry();
-    if (g!=null) {
-      Boolean b = (Boolean)g.getGeometryAttributes(CommonAttributes.PICKABLE);
-      if (b==null) b = true;  //default
-      PickUtility.setPickable(g, !b);
-    }
+  
+  public SceneGraphPath getSelection() {
+    return selection;
   }
 
+  public AttributeEntity getEntity() {
+    return entity;
+  }
+
+  public Tool getTool() {
+    return tool;
+  }
+
+  public int getType() {
+    return type;
+  }
 }

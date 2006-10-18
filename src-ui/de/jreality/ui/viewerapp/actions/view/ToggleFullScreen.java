@@ -38,42 +38,76 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.viewer;
+package de.jreality.ui.viewerapp.actions.view;
 
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.util.HashMap;
 
-import javax.swing.JFrame;
 import javax.swing.KeyStroke;
 
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
 
 
-public class ToggleBeanShell extends AbstractAction {
+public class ToggleFullScreen extends AbstractAction {
 
-  private boolean attachBeanShell = false;
-  private ViewerApp viewerApp;
+  private boolean isFullscreen = false;
+  private Frame frame;
+
+  private static HashMap <Frame, ToggleFullScreen> sharedInstances = new HashMap <Frame, ToggleFullScreen>();
   
-    
-  public ToggleBeanShell(String name, ViewerApp viewerApp) {
+  
+  private ToggleFullScreen(String name, Frame frame) {
     super(name);
-    this.viewerApp = viewerApp;
-
-    putValue(SHORT_DESCRIPTION, "Toggle bean shell visibility");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+    this.frame = frame;
+    
+    putValue(SHORT_DESCRIPTION, "Toggle full screen");
+    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0));
   }
 
   
+  /**
+   * Returns a shared instance of this action depending on the specified frame
+   * (i.e. there is a shared instance for each frame). 
+   * The action's name is overwritten by the specified name.
+   * @param name name of the action
+   * @param frame the frame to toggle
+   * @throws UnsupportedOperationException if frame equals null
+   * @return shared instance of ToggleFullScreen with specified name
+   */
+  public static ToggleFullScreen sharedInstance(String name, Frame frame) {
+    if (frame == null) 
+      throw new UnsupportedOperationException("Frame not allowed to be null!");
+    
+    ToggleFullScreen sharedInstance = sharedInstances.get(frame);
+    if (sharedInstance == null) {
+      sharedInstance = new ToggleFullScreen(name, frame);
+      sharedInstances.put(frame, sharedInstance);
+    }
+     
+    sharedInstance.setName(name);
+    return sharedInstance;
+  }
+  
+  
   public void actionPerformed(ActionEvent e) {
-    attachBeanShell = !viewerApp.isAttachBeanShell();
-    viewerApp.setAttachBeanShell(attachBeanShell);
-    viewerApp.update();
-    JFrame frame = viewerApp.getFrame();
-    frame.getContentPane().removeAll();
-    frame.getContentPane().add(viewerApp.getComponent());
-    frame.validate();
+   
+    if (isFullscreen) {
+      frame.dispose();
+      frame.setUndecorated(false);
+      frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(null);
+      frame.validate();
+      frame.setVisible(true);
+      isFullscreen=false;
+    } 
+    else {
+      frame.dispose();
+      frame.setUndecorated(true);
+      frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(frame);
+      frame.validate();
+      isFullscreen=true;
+    }
   }
   
 }

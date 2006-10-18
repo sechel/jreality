@@ -51,7 +51,9 @@ import java.io.IOException;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
+import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
 import de.jreality.writer.WriterJRS;
@@ -63,7 +65,6 @@ public class SaveSelected extends AbstractAction {
     super(name, sm, frame);
     putValue(SHORT_DESCRIPTION, "Save selected component as a file");
     putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
-    
   }
 
   @Override
@@ -84,4 +85,9 @@ public class SaveSelected extends AbstractAction {
     }
   }
 
+  @Override
+  protected boolean isEnabled(SelectionEvent e) {
+    return (e.getType() == SelectionEvent.DEFAULT_SELECTION &&
+        selection.getLastElement() instanceof SceneGraphComponent);
+  }
 }

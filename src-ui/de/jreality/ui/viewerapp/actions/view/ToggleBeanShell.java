@@ -38,37 +38,42 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.viewer;
+package de.jreality.ui.viewerapp.actions.view;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
+import javax.swing.JFrame;
 import javax.swing.KeyStroke;
 
-import de.jreality.scene.Viewer;
+import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
 
 
-public class Render extends AbstractAction {
+public class ToggleBeanShell extends AbstractAction {
 
-  private Viewer viewer;
+  private boolean attachBeanShell = false;
+  private ViewerApp viewerApp;
   
-  
-  public Render(String name, Viewer viewer) {
+    
+  public ToggleBeanShell(String name, ViewerApp viewerApp) {
     super(name);
-    putValue(SHORT_DESCRIPTION, "Render");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
-    
-    if (viewer == null) 
-      throw new IllegalArgumentException("Viewer is null!");
-    
-    this.viewer = viewer;
-  }
-  
-    
-  public void actionPerformed(ActionEvent e) {
-    viewer.render();
+    this.viewerApp = viewerApp;
+
+    putValue(SHORT_DESCRIPTION, "Toggle bean shell visibility");
+    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
 
+  
+  public void actionPerformed(ActionEvent e) {
+    attachBeanShell = !viewerApp.isAttachBeanShell();
+    viewerApp.setAttachBeanShell(attachBeanShell);
+    viewerApp.update();
+    JFrame frame = viewerApp.getFrame();
+    frame.getContentPane().removeAll();
+    frame.getContentPane().add(viewerApp.getComponent());
+    frame.validate();
+  }
+  
 }

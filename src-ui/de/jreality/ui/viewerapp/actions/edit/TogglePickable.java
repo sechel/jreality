@@ -38,76 +38,39 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.viewer;
+package de.jreality.ui.viewerapp.actions.edit;
 
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.util.HashMap;
 
-import javax.swing.KeyStroke;
-
+import de.jreality.scene.Geometry;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.ui.viewerapp.SelectionEvent;
+import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.util.PickUtility;
 
 
-public class ToggleFullScreen extends AbstractAction {
-
-  private boolean isFullscreen = false;
-  private Frame frame;
-
-  private static HashMap <Frame, ToggleFullScreen> sharedInstances = new HashMap <Frame, ToggleFullScreen>();
+public class TogglePickable extends AbstractAction {
   
-  
-  private ToggleFullScreen(String name, Frame frame) {
-    super(name);
-    this.frame = frame;
-    
-    putValue(SHORT_DESCRIPTION, "Toggle full screen");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0));
-  }
-
-  
-  /**
-   * Returns a shared instance of this action depending on the specified frame
-   * (i.e. there is a shared instance for each frame). 
-   * The action's name is overwritten by the specified name.
-   * @param name name of the action
-   * @param frame the frame to toggle
-   * @throws UnsupportedOperationException if frame equals null
-   * @return shared instance of ToggleFullScreen with specified name
-   */
-  public static ToggleFullScreen sharedInstance(String name, Frame frame) {
-    if (frame == null) 
-      throw new UnsupportedOperationException("Frame not allowed to be null!");
-    
-    ToggleFullScreen sharedInstance = sharedInstances.get(frame);
-    if (sharedInstance == null) {
-      sharedInstance = new ToggleFullScreen(name, frame);
-      sharedInstances.put(frame, sharedInstance);
-    }
-     
-    sharedInstance.setName(name);
-    return sharedInstance;
+  public TogglePickable(String name, SelectionManager sm) {
+    super(name, sm);
+    putValue(SHORT_DESCRIPTION, "Toggle pickability of selection");
   }
   
-  
+  @Override
   public void actionPerformed(ActionEvent e) {
-   
-    if (isFullscreen) {
-      frame.dispose();
-      frame.setUndecorated(false);
-      frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(null);
-      frame.validate();
-      frame.setVisible(true);
-      isFullscreen=false;
-    } 
-    else {
-      frame.dispose();
-      frame.setUndecorated(true);
-      frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(frame);
-      frame.validate();
-      isFullscreen=true;
+    Geometry g = selection.getLastComponent().getGeometry();
+    if (g!=null) {
+      Boolean b = (Boolean)g.getGeometryAttributes(CommonAttributes.PICKABLE);
+      if (b==null) b = true;  //default
+      PickUtility.setPickable(g, !b);
     }
   }
-  
+
+  @Override
+  protected boolean isEnabled(SelectionEvent e) {
+    return (e.getType() == SelectionEvent.DEFAULT_SELECTION &&
+        selection.getLastElement() instanceof SceneGraphComponent);
+  }
 }
