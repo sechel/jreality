@@ -5,7 +5,6 @@ import java.text.Format;
 import java.util.Scanner;
 import java.util.Vector;
 
-import sun.security.krb5.internal.crypto.f;
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.IndexedLineSetFactory;
