@@ -123,9 +123,15 @@ public class MenuFactory {
   //VIEWER MENU
   public static String TOGGLE_FULL_SCREEN = "Toggle full screen";
   public static String TOGGLE_FULL_VIEWER = "Toggle viewer full screen";
-  public static String TOGGLE_NAVIGATOR = "Toggle attachNavigator";
-  public static String TOGGLE_BEANSHELL = "Toggle attachBeanShell"; 
+  public static String TOGGLE_NAVIGATOR = "Show navigator";
+  public static String TOGGLE_BEANSHELL = "Show bean shell"; 
   public static String RENDER = "Force Rendering";
+  
+  private static String FILE_MENU = "File";
+  private static String COMP_MENU = "Component";
+  private static String APP_MENU = "Appearance";
+  private static String CAMERA_MENU = "Camera";
+  private static String VIEWER_MENU = "Viewer";
   
   
   private JFrame frame = null;
@@ -171,11 +177,11 @@ public class MenuFactory {
 
   public JMenuBar getMenuBar() {
     
-    final JMenuBar menuBar = new JMenuBar();
+    JMenuBar menuBar = new JMenuBar();
     menuBar.setBorder(null);
     
     //create general actions
-    final JMenu fileMenu = new JMenu("File");
+    JMenu fileMenu = new JMenu(FILE_MENU);
     fileMenu.setMnemonic(KeyEvent.VK_F);
     fileMenu.add(new JMenuItem(new Quit(QUIT)));
     menuBar.add(fileMenu);
@@ -184,7 +190,7 @@ public class MenuFactory {
     
     //create actions which require a SelectionManager
     
-    final JMenu compMenu = new JMenu("Component");
+    JMenu compMenu = new JMenu(COMP_MENU);
     compMenu.setMnemonic(KeyEvent.VK_C);
     menuBar.add(compMenu);
     
@@ -220,7 +226,7 @@ public class MenuFactory {
     compMenu.add(new JMenuItem(new AssignFaceAABBTree(ASSIGN_FACE_AABBTREE, sm)));
     
     //-- APPEARANCE MENU ---------------------------
-    final JMenu appMenu = new JMenu("Appearance");
+    JMenu appMenu = new JMenu(APP_MENU);
     appMenu.setMnemonic(KeyEvent.VK_A);
     menuBar.add(appMenu);
     appMenu.add(new JMenuItem(new ToggleAppearance(TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm)));
@@ -244,7 +250,7 @@ public class MenuFactory {
     }
     
     //-- VIEWER MENU -------------------------------
-    final JMenu viewerMenu = new JMenu("Viewer");
+    JMenu viewerMenu = new JMenu(VIEWER_MENU);
     viewerMenu.setMnemonic(KeyEvent.VK_V);
     menuBar.add(viewerMenu);
     viewerMenu.add(new JMenuItem(ToggleFullScreen.sharedInstance(TOGGLE_FULL_SCREEN, frame)));
@@ -284,7 +290,7 @@ public class MenuFactory {
       
       //-- CAMERA MENU -------------------------------
       if (viewerSwitch != null) {
-        final JMenu cameraMenu = new JMenu("Camera");
+        JMenu cameraMenu = new JMenu(CAMERA_MENU);
         cameraMenu.setMnemonic(KeyEvent.VK_M);
         menuBar.add(cameraMenu, 3);
         cameraMenu.add(new JMenuItem(new ShiftFieldOfView(DECREASE_FIELD_OF_VIEW, viewerSwitch, true)));
@@ -306,6 +312,7 @@ public class MenuFactory {
   
   
   //update menu items which depend on viewerApp.isAttachNavigator/BeanShell
+  //getMenuBar() has to be called before
   public void update() {
     if (viewerApp == null) return;
     
@@ -319,48 +326,19 @@ public class MenuFactory {
       navigatorListener = new Navigator.SelectionListener() {
         @Override
         public void selectionChanged(SelectionEvent e) {
-//          if (!e.selectionIsSGNode())
-//            System.out.println("tool or shader selected");
+          if (!e.selectionIsSGNode()) {
+            viewerApp.getMenu(COMP_MENU).setEnabled(false);
+            viewerApp.getMenu(APP_MENU).setEnabled(false);
+          }
+          else {
+            viewerApp.getMenu(COMP_MENU).setEnabled(true);
+            viewerApp.getMenu(APP_MENU).setEnabled(true);
+          }
         }
       };
       navigator.getTreeSelectionModel().addTreeSelectionListener(navigatorListener);
     }
     
-  }
-  
-  
-  
-  /**
-   * Adds a JMenuBar to a specified JFrame containing actions 
-   * which can be performed on a SceneGraph.
-   * @param frame the JFrame to which the MenuBar is added 
-   * @param sm the SelectionManager required for most of the actions in the menu 
-   * (if sm equals null the menu bar does only contain a few general actions)
-   * @return the menu factory used to create the menu bar
-   */
-  public static MenuFactory addMenuBar(JFrame frame, SelectionManager sm) {
-    MenuFactory menuFac = new MenuFactory();
-    menuFac.setFrame(frame);
-    menuFac.setSelectionManager(sm);
-    frame.setJMenuBar( menuFac.getMenuBar() );
-    frame.validate();
-    
-    return menuFac;
-  }
-
-  
-  /**
-   * Adds a JMenuBar to the specified ViewerApp containing actions 
-   * which can be performed on a SceneGraph.
-   * @param viewerApp the viewer application 
-   * @return the menu factory used to create the menu bar
-   */
-  public static MenuFactory addMenuBar(ViewerApp viewerApp) {
-    MenuFactory menuFac = new MenuFactory(viewerApp);
-    menuFac.frame.setJMenuBar( menuFac.getMenuBar() );
-    menuFac.frame.validate();
-    
-    return menuFac;
   }
   
 }
