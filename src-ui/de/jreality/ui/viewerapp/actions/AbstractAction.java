@@ -93,6 +93,14 @@ public abstract class AbstractAction extends javax.swing.AbstractAction {
   
   public void selectionChanged(SelectionEvent e) {
     selection = e.getSelection();
+    
+    if (isEnabled()) setEnabled(true);
+    else setEnabled(false);
+  }
+  
+  
+  public boolean isEnabled() {
+    return true;
   }
   
   

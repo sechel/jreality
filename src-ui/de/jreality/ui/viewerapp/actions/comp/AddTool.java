@@ -54,6 +54,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.tool.Tool;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.EncompassTool;
@@ -158,4 +159,9 @@ public class AddTool extends AbstractAction {
     initialized = true;
   }
   
+  
+  @Override
+  public boolean isEnabled() {
+    return (selection.getLastElement() instanceof SceneGraphComponent);
+  }
 }
