@@ -40,6 +40,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileSystemView;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
@@ -200,6 +201,12 @@ public class ViewerVR {
 	private JPanel buttonGroupComponent;
 
 	private JPanel toolPanel;
+
+	private JCheckBox showLines;
+
+	private JCheckBox showPoints;
+
+	private JCheckBox showFaces;
 	
 	public ViewerVR() throws IOException {
 
@@ -577,13 +584,13 @@ public class ViewerVR {
 				LineBorder.createGrayLineBorder()));
 		Box lineButtonBox = new Box(BoxLayout.X_AXIS);
 		lineButtonBox.setBorder(new EmptyBorder(5, 0, 5, 5));
-		final JCheckBox lines = new JCheckBox("lines");
-		lines.addChangeListener(new ChangeListener() {
+		showLines = new JCheckBox("lines");
+		showLines.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				contentAppearance.setAttribute("showLines", lines.isSelected());
+				setShowLines(showLines.isSelected());
 			}
 		});
-		lineButtonBox.add(lines);
+		lineButtonBox.add(showLines);
 		JButton lineColorButton = new JButton("line color");
 		lineColorButton.setMaximumSize(new Dimension(200, 20));
 		lineColorButton.addActionListener(new ActionListener() {
@@ -618,14 +625,13 @@ public class ViewerVR {
 				LineBorder.createGrayLineBorder()));
 		Box pointButtonBox = new Box(BoxLayout.X_AXIS);
 		pointButtonBox.setBorder(new EmptyBorder(5, 0, 5, 5));
-		final JCheckBox points = new JCheckBox("points");
-		points.addChangeListener(new ChangeListener() {
+		showPoints = new JCheckBox("points");
+		showPoints.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				contentAppearance.setAttribute("showPoints", points
-						.isSelected());
+				setShowPoints(showPoints.isSelected());
 			}
 		});
-		pointButtonBox.add(points);
+		pointButtonBox.add(showPoints);
 		JButton pointColorButton = new JButton("point color");
 		pointColorButton.setMaximumSize(new Dimension(200, 20));
 		pointColorButton.addActionListener(new ActionListener() {
@@ -659,14 +665,14 @@ public class ViewerVR {
 				LineBorder.createGrayLineBorder()));
 		Box faceButtonBox = new Box(BoxLayout.X_AXIS);
 		faceButtonBox.setBorder(new EmptyBorder(5, 0, 5, 5));
-		final JCheckBox faces = new JCheckBox("faces");
-		faces.setSelected(true);
-		faces.addChangeListener(new ChangeListener() {
+		showFaces = new JCheckBox("faces");
+		showFaces.setSelected(true);
+		showFaces.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				contentAppearance.setAttribute("showFaces", faces.isSelected());
+				setShowFaces(showFaces.isSelected());
 			}
 		});
-		faceButtonBox.add(faces);
+		faceButtonBox.add(showFaces);
 
 		JButton faceColorButton = new JButton("face color");
 		faceColorButton.setMaximumSize(new Dimension(200, 20));
@@ -1021,7 +1027,7 @@ public class ViewerVR {
 		}
 	}
 
-	protected void setTexScale(double d) {
+	public void setTexScale(double d) {
 		texScaleSlider.setValue((int) (d * 100));
 		if (tex != null) {
 			double texScale = Math.exp(Math.log(TEX_SCALE_RANGE) * d)/TEX_SCALE_RANGE * MAX_TEX_SCALE;
@@ -1058,12 +1064,12 @@ public class ViewerVR {
 		sp.getFrame().setVisible(true);
 	}
 
-	protected void setDrag(boolean b) {
+	public void setDrag(boolean b) {
 		toggleTool(dragTool, b);
 		drag.setSelected(b);
 	}
 
-	protected void setRotate(boolean b) {
+	public void setRotate(boolean b) {
 		toggleTool(rotateTool, b);
 		rotate.setSelected(b);
 	}
@@ -1080,18 +1086,18 @@ public class ViewerVR {
 		}
 	}
 
-	protected void setReflection(double d) {
+	public void setReflection(double d) {
 		cm.setBlendColor(new Color(1f, 1f, 1f, (float) d));
 	}
 
-	protected void setPointRadius(double d) {
+	public void setPointRadius(double d) {
 		pointRadiusSlider.setValue((int) (d * 100));
 		contentAppearance.setAttribute(CommonAttributes.POINT_SHADER + "."
 				+ CommonAttributes.POINT_RADIUS, Math.exp(Math.log(LOGARITHMIC_RANGE) * d)
 				/ LOGARITHMIC_RANGE * objectScale * MAX_RADIUS);
 	}
 
-	protected void setTubeRadius(double d) {
+	public void setTubeRadius(double d) {
 		tubeRadiusSlider.setValue((int) (d * 100));
 		contentAppearance.setAttribute(CommonAttributes.LINE_SHADER + "."
 				+ CommonAttributes.TUBE_RADIUS, Math.exp(Math.log(LOGARITHMIC_RANGE) * d)
@@ -1260,6 +1266,21 @@ public class ViewerVR {
 		);
 	}
 	
+	public void setShowLines(boolean selected) {
+		showLines.setSelected(selected);
+		contentAppearance.setAttribute("showLines", selected);
+	}
+
+	public void setShowPoints(boolean selected) {
+		showPoints.setSelected(selected);
+		contentAppearance.setAttribute("showPoints", selected);
+	}
+
+	public void setShowFaces(boolean selected) {
+		showFaces.setSelected(selected);
+		contentAppearance.setAttribute("showFaces", selected);
+	}
+
 	public static void main(String[] args) throws IOException {
 //		System.setProperty("de.jreality.ui.viewerapp.synchRender", "true");
 		ViewerVR vr = new ViewerVR();
@@ -1290,4 +1311,5 @@ public class ViewerVR {
 		f.setSize(800, 600);
 		f.validate();
 	}
+	
 }
