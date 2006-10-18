@@ -46,7 +46,11 @@ import java.util.List;
 import java.util.Vector;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
+import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.geometry.IndexedLineSetFactory;
+import de.jreality.geometry.QuadMeshFactory;
 import de.jreality.math.FactoredMatrix;
+import de.jreality.scene.IndexedFaceSet;
 
 public class VRMLHelper {
 	public static boolean verbose = true;
@@ -85,7 +89,6 @@ public class VRMLHelper {
 		return foo;
 	}
 	
-//	IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
 	public static double[][] listToDoubleArrayArray(List l)		{
 		double[][] foo = new double[l.size()][];
 		int count = 0;
@@ -139,13 +142,6 @@ public class VRMLHelper {
 
 		IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
 	}
-	
-//	public static double[] reallocate(double[] array)	{
-//		int n = array.length;
-//		double[] newarray = new double[n*2];
-//		System.arraycopy(array, 0, newarray, 0, n);
-//		return newarray;
-//	}
 
 	public static int[] reallocate(int[] array)	{
 		int n = array.length;
@@ -201,4 +197,474 @@ public class VRMLHelper {
 //		
 //	}
 
+	/**
+	 * braucht man fuer sfbitmaskValue.
+	 * setzt in mask den i-ten Eintrag auf true falls 
+	 * key dem i-ten Eintrag in code entspricht
+	 * @param code  Liste gueltiger Namen(geordnet!)
+	 * @param mask  enthaelt die gesammelten Aussagen
+	 *  ueber gefundene Namen
+	 * @param key   zu vergleichender Name
+	 */
+	public static void checkFlag(String [] code,boolean[] mask,String key){
+		boolean hit=false;
+		for (int i= 0;i<code.length;i++){
+			if (key.equals(code[i])){
+				mask[i]=true;
+				hit=true;
+				break;
+			}
+		}
+		if (!hit)System.out.println("unknown AttributValue:"+key);
+	}
+	/**
+	 * braucht man fuer sfenumValue
+	 * liefert die Nummer der Stelle von key in code 
+	 * @param code Liste gueltiger Namen (geordnet!)
+	 * @param key  zu findender Name
+	 * @return Nummer der Position (erste Position ist default)
+	 */
+	public static int getEnum(String[] code, String key){
+		int n=0;
+		for (int i=0;i<code.length;i++){
+			if (key.equals(code[i]))
+				n=i;
+		}
+		return n;
+	}
+	/**
+	 * IndizeAbschnitte werden in VRML1.0 durch '-1' getrennt.
+	 * Hier werden sie zu einer Doppelliste.
+	 * 
+	 * @param list eindimensionale Liste (trennung durch '-1') 
+	 * @return nicht quadratische zweidimensionale Liste
+	 * 
+	 */
+	public static int[][] convertIndexList (int[] list){
+		// -1 trennt die Teile
+		int n=0;// # parts
+		for (int i=0;i<list.length;i++)// zaehlt die '-1'-en
+			if (list[i]==-1) n++;
+		if (list.length==0)
+			return new int[][]{};
+		if (list[list.length-1]!=-1) n++;// -1 am ende ist optional
+		int[][] indices = new int[n][];
+		Vector v;
+		int k=0;// current index 
+		for(int i=0;i<n;i++){// fuer alle Listen
+			v= new Vector();
+			while ((k<list.length)&&(list[k]!=-1)){
+				v.add(new Integer(list[k]));
+				k++;
+			}
+			indices[i]= new int[v.size()];
+			for (int j=0;j<v.size();j++)
+				indices[i][j]=((Integer)v.get(j)).intValue();
+			k++;// -1 ueberspringen
+		}
+		return indices;
+	}
+	
+	/**
+	 * Erweiterung des Zylinders:
+	 * Optionaler Boden,  Deckel, Mantel. 
+	 * @param side
+	 * @param top
+	 * @param bottom
+	 * @param n	 #Unterteilung (feinheit)
+	 * @return Zylinder
+	 */
+	public static IndexedFaceSet cylinder(boolean side,boolean top,boolean bottom,int n) {
+		int rn = n+1;
+		double[] verts = new double[2*3*rn];
+		double angle = 0, delta = Math.PI*2/(n);
+		for (int i = 0 ;i<rn; ++i)	{
+			angle = i*delta;
+			verts[3*(i+rn)]   = verts[3*i]   = Math.cos(angle);
+			verts[3*(i+rn)+1] = verts[3*i+1] = Math.sin(angle);
+			verts[3*i+2] = 0.5;
+			verts[3*(i+rn)+2] = -0.5;
+		}
+		QuadMeshFactory qmf = new QuadMeshFactory();//Pn.EUCLIDEAN, n+1, 2, true, false);
+		qmf.setULineCount(n+1);
+		qmf.setVLineCount(2);
+		qmf.setClosedInUDirection(true);
+		qmf.setVertexCoordinates(verts);
+		qmf.setGenerateEdgesFromFaces(true);
+		qmf.setGenerateFaceNormals(true);
+		qmf.setGenerateVertexNormals(true);
+		qmf.update();
+		IndexedFaceSet geo1= qmf.getIndexedFaceSet();
+		double[][] verts2 = new double[n][3];
+		double[][] verts3 = new double[n][3];
+		for (int  i =0; i<n; ++i)	{
+			angle = 2 * (i+.5) * Math.PI/n;
+			verts2[i][0] = verts3[i][0] = Math.cos(angle);
+			verts2[i][1] = verts3[i][1] = Math.sin(angle);
+			verts2[i][2] = 0.5;
+			verts3[i][2] = -0.5;
+		}
+		IndexedFaceSet geo2= IndexedFaceSetUtility.constructPolygon(verts2);
+		IndexedFaceSetUtility.assignSmoothVertexNormals(geo2,0,0);
+		IndexedFaceSet geo3= IndexedFaceSetUtility.constructPolygon(verts3);
+		IndexedFaceSetUtility.assignSmoothVertexNormals(geo3,0,0);
+		// GeometrieTeile auswaehlen
+		Vector v=new Vector();
+		if (side)  v.add(geo1);
+		if (top)   v.add(geo2);
+		if (bottom)v.add(geo3);
+		IndexedFaceSet[] geos= new IndexedFaceSet[v.size()];
+		for (int i=0;i<v.size();i++){
+			geos[i]=(IndexedFaceSet)v.get(i);
+			}
+		if(geos.length==0)
+			return null; 
+		IndexedFaceSet result=IndexedFaceSetUtility.mergeIndexedFaceSets(geos);
+		return result;
+		}
+	/**
+	 * Cone mit optionalem Mantel bzw Boden
+	 * @param sidesdraw
+	 * @param bottomdraw
+	 * @param n		feinheit der Unterteilung
+	 * @return Kegel
+	 */
+	public static IndexedFaceSet cone(boolean sidesdraw, boolean bottomdraw,int n) {
+		// Points
+		double[] tip= new double[]{0,1,0}; 
+		double[][] vertsBottom = new double[n][];
+		double angle = 0;
+		for (int i=0;i<n;i++){
+			angle = 2 * (i+.5) * Math.PI/n;
+			vertsBottom[i] = new double[]{
+					Math.cos(angle),0,Math.sin(angle) };
+		}
+		IndexedFaceSet sides=null;
+		IndexedFaceSet bottom=null;
+		IndexedFaceSetFactory ifsf=null;
+		if (bottomdraw){
+			int[][] indicesB = new int[1][];
+			indicesB[0] = new int[n];
+			for (int i = 0; i<n; ++i)	indicesB[0][i] = i;
+			ifsf = new IndexedFaceSetFactory();
+			ifsf.setVertexCount(n);
+			ifsf.setFaceCount(1);
+			ifsf.setVertexCoordinates(vertsBottom);
+			ifsf.setFaceIndices(indicesB);
+			ifsf.setGenerateEdgesFromFaces(true);
+			ifsf.setGenerateFaceNormals(true);
+			ifsf.setGenerateVertexNormals(true);
+			ifsf.update();
+			bottom= ifsf.getIndexedFaceSet();
+		}
+		if (sidesdraw){
+			double[][] vertsSides = new double[n+1][];
+			System.arraycopy(vertsBottom,0,vertsSides,0,n);
+			vertsSides[n]=tip;
+			int[][] indicesS = new int[n][];
+			for (int i = 0; i<n; ++i)	{
+				indicesS[i] = new int[3];
+				indicesS[i][0] = i;
+				indicesS[i][1] = (i+1)%n;
+				indicesS[i][2] = n;
+			}
+			ifsf = new IndexedFaceSetFactory();
+			ifsf.setVertexCount(n+1);
+			ifsf.setFaceCount(n);
+			ifsf.setVertexCoordinates(vertsSides);
+			ifsf.setFaceIndices(indicesS);
+			ifsf.setGenerateEdgesFromFaces(true);
+			ifsf.setGenerateVertexNormals(true);
+			ifsf.setGenerateFaceNormals(true);
+			ifsf.update();
+			sides= ifsf.getIndexedFaceSet();
+		}
+		if (sidesdraw && bottomdraw)
+			return IndexedFaceSetUtility.mergeIndexedFaceSets(
+					new	IndexedFaceSet[]{bottom,sides});
+		if (bottomdraw)
+			return bottom;
+		if (sidesdraw)
+			return sides;
+		return null;
+	}
+	/**
+	 * VRML kann mehrzeilige Labels.
+	 * jReality noch nicht.
+	 * Also werden Zeilen hintereinandergehaengt.
+	 * @param ss
+	 * @return
+	 */
+	public static String mergeStrings(String [] ss){
+		String s=ss[0];
+		for (int i=1;i<ss.length;i++){
+			s=s+"   "+ss[i];
+		}
+		if(s.equals("")) return " ";
+		return s;
+	}  
+	/**
+	 * setzt die aktuell gueltigen Normalen fuer 
+	 * IndexedFaceSetFactory
+	 * zu gegebenen indizes ein.
+	 * State enthealt: 
+	 * 		die Normalen
+	 * 		die binding Informationen
+	 * 
+	 * @param ifsf Factory die die normalen bekommen soll
+	 * @param cIndex indizes der Farben
+	 * @param nIndex indizes der Normalen
+	 * @param state enthaelt die Daten
+	 */
+	public static void setNormals(IndexedFaceSetFactory ifsf,
+			int [][] cIndex,int[][] nIndex,State state){
+	int faceCount=state.coords.length;
+	int VertexCount= state.coords.length;
+	double[][] fNormals=new double[faceCount][3];
+	double[][] vNormals=new double[VertexCount][3];
+	switch (state.normalBinding) {
+	case 1:// overall
+	{	for (int i=0;i<faceCount;i++){
+			fNormals[i][0]=state.normals[0][0];
+			fNormals[i][1]=state.normals[0][1];
+			fNormals[i][2]=state.normals[0][2];
+		}
+		ifsf.setFaceNormals(fNormals);
+	}
+	break;
+	case 2:// per part
+	case 4:// per face
+	{	System.arraycopy(state.normals,0,fNormals,0,faceCount);
+		ifsf.setFaceNormals(fNormals);
+	}
+	break;
+	case 3:// per part indexed
+	case 5:// per face indexed
+	{	for (int i=0;i<faceCount;i++){
+			fNormals[i][0]=state.normals[(nIndex[0][i])][0];
+			fNormals[i][1]=state.normals[(nIndex[0][i])][1];
+			fNormals[i][2]=state.normals[(nIndex[0][i])][2];
+		}
+		ifsf.setFaceNormals(fNormals);
+	}
+	break;
+	case 6:// per Vertex
+	{
+		int m=0;
+		for (int i=0;i<faceCount;i++){
+			int k=faceCount-i-1;
+			int faceLength=cIndex[k].length;
+			for (int j=0;j<faceLength;j++){
+				int l=faceLength-1-j;
+				double [] n=state.normals[m];
+				vNormals[cIndex[k][l]][0]=n[0];
+				vNormals[cIndex[k][l]][0]=n[0];
+				vNormals[cIndex[k][l]][0]=n[0];
+				m++;
+			}
+		}
+		ifsf.setVertexNormals(vNormals);
+	}
+		break;
+	case 0:// default
+	case 7:// per Vertex indexed 
+	{
+		if (nIndex == null || nIndex.length != faceCount){
+			ifsf.setGenerateVertexNormals(true);
+			break;
+		}
+		for (int i=0;i<faceCount;i++){
+			int k=faceCount-i-1;
+			int faceLength=cIndex[k].length;
+			for (int j=0;j<faceLength;j++){
+				int l=faceLength-1-j;
+				double [] n=state.normals[nIndex[k][l]];
+				vNormals[cIndex[k][l]][0]=n[0];
+				vNormals[cIndex[k][l]][0]=n[0];
+				vNormals[cIndex[k][l]][0]=n[0];
+			}
+		}
+		ifsf.setVertexNormals(vNormals);
+	}
+		break;
+		default:
+		break;
+	}
+}
+	/**
+	 * Setzt FarbListe in die gegebene Factory
+	 * @param ifsf
+	 * @param coordIndex Koordinaten-Indizierung
+	 * 	zur KoordinatenListe in state
+	 * @param colorIndex Farb-Indizierung
+	 * 	zur FarbListe in state 
+	 * @param state
+	 */
+	public static void setColors(IndexedFaceSetFactory ifsf,
+			int [][] coordIndex,int[][] colorIndex,State state){
+	int faceCount=state.coords.length;
+	int VertexCount= state.coords.length;
+	Color[] fColors=new Color[faceCount];
+	Color[] vColors=new Color[VertexCount];
+	switch (state.materialBinding) {
+	case 0:// default
+	case 1:// overall
+	break;
+	case 2:// per part
+	case 4:// per face
+	{	System.arraycopy(state.diffuse,0,fColors,0,faceCount);
+		ifsf.setFaceColors(fColors);
+	}
+	break;
+	case 3:// per part indexed
+	case 5:// per face indexed
+	{	for (int i=0;i<faceCount;i++){
+			fColors[i]=state.diffuse[(colorIndex[0][i])];
+			}
+		ifsf.setFaceColors(fColors);
+	}
+	break;
+	case 6:// per Vertex
+	{
+		int m=0;
+		for (int i=0;i<faceCount;i++){
+			int k=faceCount-i-1;
+			int faceLength=coordIndex[k].length;
+			for (int j=0;j<faceLength;j++){
+				int l=faceLength-1-j;
+				vColors[coordIndex[k][l]]=state.diffuse[m];
+				m++;
+			}
+		}
+		ifsf.setVertexColors(vColors);
+	}
+		break;
+	case 7:// per Vertex indexed 
+	{
+		for (int i=0;i<faceCount;i++){
+			int k=faceCount-i-1;
+			int faceLength=coordIndex[k].length;
+			for (int j=0;j<faceLength;j++){
+				int l=faceLength-1-j;
+				vColors[coordIndex[k][l]]=state.diffuse[colorIndex[k][l]];
+			}
+		}
+		ifsf.setVertexColors(vColors);
+	}
+		break;
+		default:
+		break;
+	}
+}
+	/**
+	 * Setzt FarbListe in die gegebene Factory
+	 * @param ilsf
+	 * @param coordIndex Koordinaten-Indizierung
+	 * 	zur KoordinatenListe in state
+	 * @param colorIndex Farb-Indizierung
+	 * 	zur FarbListe in state 
+	 * @param state
+	 */
+	public static void setColors(IndexedLineSetFactory ilsf,
+			int [][] coordIndex,int[][] colorIndex,State state){
+	int edgeCount=state.coords.length;
+	int VertexCount= state.coords.length; 
+	Color[] eColors=new Color[edgeCount];
+	Color[] vColors=new Color[VertexCount];
+	switch (state.materialBinding) {
+	case 0:// default
+	case 1:// overall
+	break;
+	case 2:// per part
+	{	System.arraycopy(state.emissive,0,eColors,0,edgeCount);
+		ilsf.setEdgeColors(eColors);
+	}
+	break;
+	case 4:// per face 
+		//TODO: get nicht mache angepasstes "per part"
+	{	int current=0;
+		for (int i=0;i<edgeCount;i++){
+			eColors[i]=state.emissive[current];
+			current+=coordIndex[i].length;
+		}
+		ilsf.setEdgeColors(eColors);
+	}
+	break;
+	case 3:// per part indexed
+	{
+		for (int i=0;i<edgeCount;i++){
+		eColors[i]=state.emissive[(colorIndex[0][i])];
+		}
+	ilsf.setEdgeColors(eColors);
+	}
+	break;
+	case 5:// per face indexed
+	{//TODO: get nicht mache angepasstes "per part indexed"
+		int current=0;
+		for (int i=0;i<edgeCount;i++){
+		eColors[i]=state.emissive[(colorIndex[0][current])];
+		current+=coordIndex[i].length;
+		}
+	ilsf.setEdgeColors(eColors);
+	}
+	break;
+	case 6:// per Vertex 
+		//TODO: eine Farbe pro Punkt! weitere Farben gehen verloren
+		// Arbeite deshalb rueckwaerts.
+	{
+		int m=0;
+		for (int i=0;i<edgeCount;i++){
+			int k=edgeCount-i-1;
+			int edgeLength=coordIndex[k].length;
+			for (int j=0;j<edgeLength;j++){
+				int l=edgeLength-1-j;
+				vColors[coordIndex[k][l]]=state.emissive[m];
+				m++;
+			}
+		}
+		ilsf.setVertexColors(vColors);
+	}
+		break;
+	case 7:// per Vertex indexed 
+	{
+		for (int i=0;i<edgeCount;i++){
+			int k=edgeCount-i-1;
+			int edgeLength=coordIndex[k].length;
+			for (int j=0;j<edgeLength;j++){
+				int l=edgeLength-1-j;
+				vColors[coordIndex[k][l]]=state.emissive[colorIndex[k][l]];
+			}
+		}
+		ilsf.setVertexColors(vColors);
+	}
+		break;
+		default:
+		break;
+	}
+}
+	/**
+	 * wandelt eine Int- oder HexZahl 
+	 * (gegeben als String) die eine mehrdimensionale Farbe
+	 * 	repraesentiert in einen Int-Array i um. 
+	 *  Dieser hat je Werte von 0 bis 255. 
+	 * @param dim Dimension der Farbe
+	 * @param s   String der die Zahl beschreibt
+	 * @return    i
+	 * Bsp: (4,"0xF001FF") -> ([0,240,1,255])
+	 * Bsp: (5,"257")	   -> ([0,0,0,1,1])
+	 */
+	public static int[]decodeColorFromString(int dim,String s){
+		int[] c= new int[dim];
+		int dec = Integer.decode(s);// to int
+		for (int i=0;i<dim;i++){
+			int t= dec%256;
+			c[dim-i-1]=t;
+			dec -= t;
+			dec /= 256;
+		}
+		return c;
+	}
+
+	
+	
 }

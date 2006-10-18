@@ -4,8 +4,8 @@
 
 header {
 /*
- *	@author gunn
- *  Nov. 30, 2005
+ *	@author gonska
+ *  Nov. october 12 2006
  */
 /* TODO: 
  * 	Read over vrml1.0 spec and figure out exactly what it says
@@ -88,7 +88,7 @@ options {
 	//		muessen wir entweder:
 	//			- alles als Dezimalzahlen lexen und im Kontext wissen
 	//				ob wir ein double oder int erwarten.
-	//			- oder beim Lexen aufwendig erkennen ob es ein Double oder int ist.
+	//			- oder beim Lexen aufwendig erkennen ob es ein double oder int ist.
 	//				wobei ein int ja stets auch ein double ist!
 	//				Dann im Gebrauch erfragen ob int oder Double vorhanden ist.
 	//			- Zusammenparsen von (int-Dot-int) fuehrt zu Fehlern!
@@ -104,7 +104,17 @@ options {
 	//				gelext:  [12] [.3] [4] [e] [12.2]
 	//				geparst: [12] [0.3] [4*10^(12.2)] 
 	//		    Ein dezimaler Exponent wird also wirklich einer. Aber mit Warnung.
+	//				bsp3: "12.3e4 .3" 
+	//				gelext: [12.3] [e] [4] [.3]
+	//				geparst: [12.3*10^4] [0.3]
 	// 	- Weil '.' als Teil einer Zahl gelext wird kann es nicht als Token zur verfuegung stehen!
+
+	// TODO: 
+	// correct cutOfAngle 
+	// normals & co
+	// Texture
+	// Def & Use
+
 
 	// TODO: mehrerfache Kameras(-Pfade)
 	// hier : die erste Kamera gilt
@@ -199,7 +209,7 @@ shapeNode [State state]
 {
 if (VRMLHelper.verbose) System.err.print("Shape Node: ");
 State state2= new State(state);
-PointSet geo=null; // ist allgemeinste Geometrie
+PointSet geo=null;
 }	:
 	(
 		geo = asciiTextNode			[state2]
@@ -246,13 +256,13 @@ propertyGeoNAppNode [State state]
 	  |	"FontStyle"				egal 		// TODO2
 	  |	infoNode				[state]
 	  |	materialNode			[state]
-	  |	materialBindingNode		[state]		// irgendwie implementiert TODO3
+	  |	materialBindingNode		[state]		// nur fuer IFS & ILS implementiert TODO3: rest
 	  |	normalNode				[state]
-	  |	normalBindingNode		[state]		// irgendwie implementiert TODO3
-	  |	"Texture2"				egal 		// [state] TODO2
-	  |	"Texture2Transform"		egal 		// [state] TODO2
-	  |	"TextureCoordinate2"	egal 		// [state] TODO2
-	  |	shapeHintsNode			[state]		//eigentlich egal
+	  |	normalBindingNode		[state]		// nur fuer IFS implementiert TODO3: rest
+	  |	texture2Node			[state]
+	  |	texture2TransformNode	[state]
+	  |	textureCoordinate2Node	[state]
+	  |	shapeHintsNode			[state]		// eigentlich egal
 	 )
 	;
 
@@ -376,6 +386,7 @@ separatorNode[State state]
 
 // ------------------------------ shape Nodes ------------------------------
 private 
+//TODO3: material,texture,justification,width,spacing
 asciiTextNode [State state] returns[PointSet label=null]
 {
   if (VRMLHelper.verbose) System.err.print("Label( ");
@@ -397,18 +408,15 @@ asciiTextNode [State state] returns[PointSet label=null]
 		  | wrongAttribute
 		   )* CLOSE_BRACE
 		{
-			int justif = State.getEnum(code, just);
-			String[] text2= new String[]{State.mergeStrings(text)};
+			int justif = VRMLHelper.getEnum(code, just);
+			String[] text2= new String[]{VRMLHelper.mergeStrings(text)};
 			label = new PointSet();
 			label.setNumPoints(1);
 			double[][] d=new double[][]{{0,0,0}};
 			label.setVertexAttributes(Attribute.COORDINATES,new DoubleArrayArray.Array(d));
 			label.setVertexAttributes(Attribute.LABELS, new StringArray(text2));
 			label.setName("Label");
-//			TODO2: dont ignore justification
-//			TODO2: dont ignore width
-//			TODO2: dont ignore spacing
-			
+
 			if (VRMLHelper.verbose) System.err.println(")");
 			state.extraGeoTrans = new Transformation();		
 			state.edgeDraw=2;
@@ -420,12 +428,12 @@ asciiTextNode [State state] returns[PointSet label=null]
 		  
 private
 coneNode [State state] returns [IndexedFaceSet cone=null]
-{
+{//TODO3: material,texture
   if (VRMLHelper.verbose) System.err.print("Cone( ");
   String[]  parts = new String[]{"SIDES","BOTTOM","ALL"};
   boolean[] partsMask=null;
   double r=1;
-  double h=2; // default value 
+  double h=2;
   boolean sideDraw=false;
   boolean bottomDraw=false;
 }
@@ -446,7 +454,7 @@ coneNode [State state] returns [IndexedFaceSet cone=null]
 			if (partsMask[0])	{sideDraw=true;	 }
 			if (partsMask[1])	{bottomDraw=true;}
 		}
-		cone = State.cone(sideDraw,bottomDraw,20);
+		cone = VRMLHelper.cone(sideDraw,bottomDraw,20);
 		cone.setName("cone"); 
 		state.extraGeoTrans = new Transformation();
 		state.edgeDraw=2;
@@ -459,11 +467,11 @@ coneNode [State state] returns [IndexedFaceSet cone=null]
 
 private
 cubeNode [State state]returns [IndexedFaceSet cube=null]
-{
+{//TODO3: material,texture
   if (VRMLHelper.verbose) System.err.print("Cube( ");
   double w=2;
   double h=2;
-  double d=2; // default value 
+  double d=2;
 }	
 	:
 	"Cube"	OPEN_BRACE	(
@@ -489,12 +497,12 @@ cubeNode [State state]returns [IndexedFaceSet cube=null]
 
 private
 cylinderNode [State state]returns [IndexedFaceSet cylinder=null]
-{
+{//TODO3: material,texture
   if (VRMLHelper.verbose) System.err.print("Cylinder( ");
   String[]  parts = new String[]{"SIDES","TOP","BOTTOM","ALL"};
   boolean[] partsMask=null;
   double r=1;
-  double h=2; // default value 
+  double h=2;
 }	
 	:
 	"Cylinder"	OPEN_BRACE	(
@@ -507,17 +515,16 @@ cylinderNode [State state]returns [IndexedFaceSet cylinder=null]
 			|	wrongAttribute
 		)* CLOSE_BRACE
 	{
-		// TODO3: Parts bewerten
 		if (partsMask==null) 		
-			cylinder = State.cylinder(true,true,true,20);
+			cylinder = VRMLHelper.cylinder(true,true,true,20);
 		else{
 			if (partsMask[3])
-				cylinder = State.cylinder(true,true,true,20);
+				cylinder = VRMLHelper.cylinder(true,true,true,20);
 			else 
 				if (!(partsMask[0]|partsMask[1]|partsMask[2]))
-					cylinder = State.cylinder(true,true,true,20);
+					cylinder = VRMLHelper.cylinder(true,true,true,20);
 				else
-					cylinder = State.cylinder(partsMask[0],partsMask[1],partsMask[2],20);
+					cylinder = VRMLHelper.cylinder(partsMask[0],partsMask[1],partsMask[2],20);
 		}
 		cylinder.setName("cylinder");
 		state.extraGeoTrans = new Transformation();
@@ -531,7 +538,7 @@ cylinderNode [State state]returns [IndexedFaceSet cylinder=null]
 
 private
 indexedFaceSetNode [State state] returns [IndexedFaceSet ifs=null]
-{
+{//TODO3: texture
   if (VRMLHelper.verbose) System.err.print("IndexedFaceSet( "); 
   int[] coordIndex	= new int[]{0};
   int[] materialIndex	= new int[]{-1};
@@ -551,10 +558,10 @@ indexedFaceSetNode [State state] returns [IndexedFaceSet ifs=null]
 	  |	wrongAttribute	)*
 	CLOSE_BRACE
 	{
-	int[][] coordIndex2 = State.convertIndexList(coordIndex);
-    int[][] materialIndex2 = State.convertIndexList(materialIndex);
-	int[][] normalIndex2 = State.convertIndexList(normalIndex);
-	int[][] textureCoordIndex2 = State.convertIndexList(textureCoordIndex);
+	int[][] coordIndex2 = VRMLHelper.convertIndexList(coordIndex);
+    int[][] materialIndex2 = VRMLHelper.convertIndexList(materialIndex);
+	int[][] normalIndex2 = VRMLHelper.convertIndexList(normalIndex);
+	int[][] textureCoordIndex2 = VRMLHelper.convertIndexList(textureCoordIndex);
 	
 	State state2= new State(state);
 	IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
@@ -562,10 +569,10 @@ indexedFaceSetNode [State state] returns [IndexedFaceSet ifs=null]
 	ifsf.setFaceCount(coordIndex2.length);
 	ifsf.setVertexAttribute(Attribute.COORDINATES,new DoubleArrayArray.Array(state2.coords) );
 	ifsf.setFaceIndices(coordIndex2);
-	//ifsf.setGenerateVertexNormals(true);
-	//ifsf.setGenerateFaceNormals(true);
-	State.setNormals(ifsf,coordIndex2,normalIndex2,state2);
-	State.setColors(ifsf,coordIndex2,materialIndex2,state2);
+	ifsf.setGenerateVertexNormals(true);
+	ifsf.setGenerateFaceNormals(true);
+	VRMLHelper.setNormals(ifsf,coordIndex2,normalIndex2,state2);
+	VRMLHelper.setColors(ifsf,coordIndex2,materialIndex2,state2);
 	// TODO2: handle texture
 	// Texture:	if (textureCoordIndex2.length>0){}else {}
 	
@@ -583,7 +590,7 @@ indexedFaceSetNode [State state] returns [IndexedFaceSet ifs=null]
 	
 private
 indexedLineSetNode[State state] returns [IndexedLineSet ils=null]
-{
+{ //TODO3: normal,texture
   if (VRMLHelper.verbose) System.err.print("IndexedLineSet( "); 
   int[] coordIndex	= new int[]{0};
   int[] materialIndex	= new int[]{-1};
@@ -603,10 +610,10 @@ indexedLineSetNode[State state] returns [IndexedLineSet ils=null]
 	  |	wrongAttribute	)*
 	CLOSE_BRACE
 	{
-	int[][] coordIndex2 = State.convertIndexList(coordIndex);
-    int[][] materialIndex2 = State.convertIndexList(materialIndex);
-	int[][] normalIndex2 = State.convertIndexList(normalIndex);
-	int[][] textureCoordIndex2 = State.convertIndexList(textureCoordIndex);
+	int[][] coordIndex2 = VRMLHelper.convertIndexList(coordIndex);
+    int[][] materialIndex2 = VRMLHelper.convertIndexList(materialIndex);
+	int[][] normalIndex2 = VRMLHelper.convertIndexList(normalIndex);
+	int[][] textureCoordIndex2 = VRMLHelper.convertIndexList(textureCoordIndex);
 	
 	IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
 	ilsf.setVertexCount(state.coords.length);
@@ -631,7 +638,7 @@ indexedLineSetNode[State state] returns [IndexedLineSet ils=null]
 
 private 
 pointSetNode [State state] returns[PointSet ps=null]
-{
+{//TODO3: material,normal
   if (VRMLHelper.verbose) System.err.print("PointSet( "); 
   int start=0;
   int num=-1;
@@ -665,9 +672,9 @@ pointSetNode [State state] returns[PointSet ps=null]
 
 private
 sphereNode [State state] returns [IndexedFaceSet sphere=null]
-{
+{//TODO3:texture
  if (VRMLHelper.verbose) System.err.print("Sphere( ");
- double r=1; // default 
+ double r=1;
 }	
 	:
 	"Sphere"	OPEN_BRACE	(
@@ -772,28 +779,95 @@ normalNode [State state]
 
 private
 normalBindingNode [State state]
-{ if (VRMLHelper.verbose) System.err.println("normalBinding");
+{ if (VRMLHelper.verbose) System.err.print("normalBinding( ");
  String nb ="DEFAULT";}
 	:
 	"NormalBinding"	OPEN_BRACE
-		("value" nb = sfenumValue 
+		("value"  {if (VRMLHelper.verbose) System.err.print("value ");}
+				nb = sfenumValue 
 		| wrongAttribute)?
 	 CLOSE_BRACE
 	 	{ state.normalBinding = State.getBinding(nb);
+	 	 if (VRMLHelper.verbose) System.err.println(")");
 	 	}
 	;
 
-//private
-// TODO3
-//texture2Node[State state]:;
+private
+texture2Node[State state]
+{   if (VRMLHelper.verbose) System.err.print("texture2( ");
+	String file="";
+	int[][][] image = new int[][][]{{{}}};
+	String[] code = new String[]{"REPEAT","CLAMP"};
+	String wrapS="REPEAT";
+	String wrapT="REPEAT";
+}	: "Texture2" OPEN_BRACE
+		(
+		| "filename" { if (VRMLHelper.verbose) System.err.print("filename ");}
+				file=sfstringValue
+		| "image" 	{ if (VRMLHelper.verbose) System.err.print("image ");}
+				image=sfimageValue
+		| "wrapS"	{ if (VRMLHelper.verbose) System.err.print("wrapS ");}
+				wrapS=sfenumValue
+		| "wrapT"	{ if (VRMLHelper.verbose) System.err.print("wrapT ");}
+				wrapT=sfenumValue
+		| wrongAttribute )*
+	CLOSE_BRACE
+	{
+	 state.textureFile=file;
+	 state.textureData=image;
+	 state.wrapS=(VRMLHelper.getEnum(code,wrapS)!=0);
+	 state.wrapT=(VRMLHelper.getEnum(code,wrapT)!=0);
+	 if (VRMLHelper.verbose) System.err.println(")");
+	 }
+;
 
-//private
-// TODO3
-//texture2TransformNode[State state]:;
+private
+texture2TransformNode[State state]
+{   if (VRMLHelper.verbose) System.err.print("texture2Transform( ");
+	double[] trans= new double[]{0,0};
+	double 	 rot =	0;
+	double[] scale= new double[]{1,1};
+	double[] center=new double[]{0,0};
+}
+	: "Texture2Transform" OPEN_BRACE
+		(
+		| "translation" { if (VRMLHelper.verbose) System.err.print("translation ");}
+				trans=sfvec2fValue
+		| "rotation" 	{ if (VRMLHelper.verbose) System.err.print("rotation ");}
+				rot=sffloatValue
+		| "ScaleFactor"	{ if (VRMLHelper.verbose) System.err.print("ScaleFactor ");}
+				scale=sfvec2fValue
+		| "Center"	{ if (VRMLHelper.verbose) System.err.print("Center ");}
+				center=sfvec2fValue
+		| wrongAttribute )*
+	CLOSE_BRACE
+	{
+	 MatrixBuilder.euclidean()
+		.translate(trans[0],trans[1],0)
+		.translate(center[0],center[1],0)
+		.rotate(rot,0,0,1)
+		.scale(scale[0],scale[1],1)
+		.translate(-center[0],-center[1],0)
+		.assignTo(state.textureTrafo);
+	 if (VRMLHelper.verbose) System.err.println(")");
+	 }
+;
 
-//private
-// TODO3
-//textureCoordinate2Node[State state]:;
+private
+textureCoordinate2Node[State state]
+{
+ if (VRMLHelper.verbose) System.err.print("TextureCoordinate2( ");
+ double [][] point= new double[][]{{0,0}};
+}
+	: "TextureCoordinate2" OPEN_BRACE 
+	  ( "point"		{ if (VRMLHelper.verbose) System.err.print("point ");}
+	  			point= mfvec2fValue
+		 | wrongAttribute )?
+		CLOSE_BRACE
+		{ state.textureCoords=point;
+		  if (VRMLHelper.verbose) System.err.print(")"); 
+		}
+	;
 
 private
 shapeHintsNode [State state]
@@ -806,11 +880,11 @@ shapeHintsNode [State state]
 }:
 		"ShapeHints"	OPEN_BRACE
 		( "vertexOrdering"  s = sfenumValue 
-			{state.vertOrder=State.getEnum(State.VERTORDER,s);}
+			{state.vertOrder=VRMLHelper.getEnum(State.VERTORDER,s);}
 		 |"shapeType"		s = sfenumValue
- 			{state.shapeType=State.getEnum(State.SHAPETYPE,s);}
+ 			{state.shapeType=VRMLHelper.getEnum(State.SHAPETYPE,s);}
 		 |"faceType"		s = sfenumValue
-			{state.faceType=State.getEnum(State.FACETYPE,s);}
+			{state.faceType=VRMLHelper.getEnum(State.FACETYPE,s);}
 		 |"creaseAngle"		crease = sffloatValue
 		 	{state.creaseAngle=crease;}
 		 | wrongAttribute
@@ -1128,9 +1202,9 @@ sfbitmaskValue [String [] code] returns [boolean[] mask]
   for(int i=0;i<code.length;i++)	mask[i]=false;
   String b="";
 }
-	:  	b=id  {State.checkFlag(code,mask,b);}
-	|	LPAREN  b=id  {State.checkFlag(code,mask,b);}
-		( T1	b=id  {State.checkFlag(code,mask,b);})*
+	:  	b=id  {VRMLHelper.checkFlag(code,mask,b);}
+	|	LPAREN  b=id  {VRMLHelper.checkFlag(code,mask,b);}
+		( T1	b=id  {VRMLHelper.checkFlag(code,mask,b);})*
 		( T1 )? 
 		RPAREN
 	;
@@ -1212,24 +1286,35 @@ mffloatValue returns [double[] dl=null]
 
 // TODO2: RueckgabeWert
 private 
-sfimageValue
+sfimageValue returns[int[][][] colors = new int[][][]{{{}}} ]
 {int width=0;
- int hight=0;
+ int height=0;
  int colorDim=0;
- int[] colL=null;
+ int[][] colL=null;
  int size=0;}
- 	:	width=intThing hight=intThing colorDim=intThing 
-		{size=width*hight;}
-		colL=hexList[size]
+ 	:	width=intThing height=intThing colorDim=intThing 
+		{size=width*height;}
+		colL=hexList[size,colorDim]
+		{
+		 colors=new int[width][height][colorDim];
+		 for (int i=0;i<width;i++)
+		 	for (int j=0;j<height;j++)
+		 		for (int k=0;k<colorDim;k++)
+		 			colors[i][j][k]=colL[i*width+j][k];
+		}
 	;
 
 private 
-hexList [int size] returns [int[] clL]
-{
-clL = new int[size];
-int c; 
-}	:
-	(g : HEXDEC {	})*
+hexList [int size, int dim] returns [int[][] cL= new int[size][dim]]
+{int i=0;
+ String s="";}
+	:
+	((g : HEXDEC {s=g.getText();}
+	 |k : NUMBER {s=k.getText();} )
+	 {	if(i<size)
+		 	cL[i]=VRMLHelper.decodeColorFromString(dim,g.getText());
+	 	i++; }
+	)*
 	;
 
 private
@@ -1539,11 +1624,10 @@ WS_:
 		|	(options {
 					generateAmbigWarnings=false;
 				}
-		: "\r\n"	// Evil DOS
-			| '\r'		// MacINTosh
-			| '\n'		// Unix (the right way)
+		: "\r\n"		// DOS
+			| '\r'		// Mac
+			| '\n'		// Unix
 			{newline(); } )	
 		)+ { $setType(Token.SKIP); }
 	;
-	
 	
