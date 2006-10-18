@@ -81,6 +81,15 @@ options {
 * ein paar Directiven werden auch ignoriert (siehe dort: "directive")
 * Auch wenn Appearances wie Directiven fuer ganze gruppen gelten koennen,
 *		werden sie erst im Knoten der Geometrie eingesetzt.
+
+
+* Problem: manchmal werden Coordinaten so ausgerechnet das sie noch einen 
+*	 Imaginaerteil haben ( meist = 0) der noch dahinter steht
+*	Loesung :ein + ...*I ignorieren!
+*			   Doubles werden ja immer durch "," getrennt! Also geht das!
+*			   sollte jemand komplexe Zahlen lesen wollen
+*				oder doubles ohne Komma parsenwollen 
+*				so erstellt man dann noch eine eine extra RegelMethode
 */
 
 	// this is what is returned from the parsing process
@@ -1092,10 +1101,22 @@ integerthing returns[int i]
 	  s:INTEGER_THING {i=Integer.parseInt(sig + s.getText());}
 	;
 
+
+
+
 private
-doublething returns[double d]
+doublething returns[double d=0]
+	: d=doubleHelp
+	  (doubleHelp STAR "I") ?
+	;
+
+
+
+	
+private
+doubleHelp  returns[double d=0]
 // liest ein double aus
-	{d=0; double e=0; String sig="";}
+	{double e=0; String sig="";}
     : (PLUS | MINUS {sig="-";} )?
     ( s:INTEGER_THING 
     		{d=Double.parseDouble(sig + s.getText());}
@@ -1109,7 +1130,7 @@ doublething returns[double d]
     )
     (e=exponent_thing {d=d*Math.pow(10,e);})?
     ;
-    
+
 private 
 exponent_thing returns[int e]
 // liest den exponenten fuer double_thing
