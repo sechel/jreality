@@ -78,8 +78,7 @@ public class SelectionManager {
     //add listener to Navigator
     final Navigator.SelectionListener navigatorListener = new Navigator.SelectionListener(){
       public void selectionChanged(Navigator.SelectionEvent e) {
-        //do not listen to this selection change with smListener to avoid listener cycle          
-        removeSelectionListener(smListener);
+        removeSelectionListener(smListener);  //avoid listener cycle
         setSelection(e.getSGPath());
         addSelectionListener(smListener);
       }
@@ -91,7 +90,7 @@ public class SelectionManager {
       public void selectionChanged(SelectionEvent e) {
         //convert selection into TreePath
         TreePath path = getTreePath((SceneTreeModel) navigator.getSceneTree().getModel());
-        tsm.removeTreeSelectionListener(navigatorListener);
+        tsm.removeTreeSelectionListener(navigatorListener);  //avoid listener cycle
         tsm.setSelectionPath(path);
         tsm.addTreeSelectionListener(navigatorListener);
       }

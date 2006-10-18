@@ -47,6 +47,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -56,6 +57,7 @@ import javax.swing.KeyStroke;
 
 import de.jreality.renderman.RIBViewer;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.ui.viewerapp.Navigator.SelectionEvent;
 import de.jreality.ui.viewerapp.actions.app.SwitchBackgroundColor;
 import de.jreality.ui.viewerapp.actions.app.ToggleAppearance;
 import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
@@ -109,10 +111,6 @@ public class MenuFactory {
   public static String TOGGLE_EDGE_DRAWING = "Toggle egde drawing";
   public static String TOGGLE_FACE_DRAWING = "Toggle face drawing";
   public static String BACKGROUND_COLOR = "Set background color";
-  //VIEWER MENU
-  public static String TOGGLE_FULL_SCREEN = "Toggle full screen";
-  public static String TOGGLE_FULL_VIEWER = "Toggle viewer full screen";
-  public static String RENDER = "Force Rendering";
   //CAMERA MENU
   public static String DECREASE_FIELD_OF_VIEW = "Decrease fieldOfView";
   public static String INCREASE_FIELD_OF_VIEW = "Increase fieldOfView";
@@ -122,11 +120,22 @@ public class MenuFactory {
   public static String INCREASE_EYE_SEPARATION = "Increase eyeSeparation";
   public static String TOGGLE_PERSPECTIVE = "Toggle perspective";
   public static String TOGGLE_STEREO = "Toggle stereo";
+  //VIEWER MENU
+  public static String TOGGLE_FULL_SCREEN = "Toggle full screen";
+  public static String TOGGLE_FULL_VIEWER = "Toggle viewer full screen";
+  public static String TOGGLE_NAVIGATOR = "Toggle attachNavigator";
+  public static String TOGGLE_BEANSHELL = "Toggle attachBeanShell"; 
+  public static String RENDER = "Force Rendering";
+  
   
   private JFrame frame = null;
   private ViewerApp viewerApp = null;
   private SelectionManager sm = null;
   private ViewerSwitch viewerSwitch = null;
+  
+  private JCheckBoxMenuItem navigatorCheckBox;
+  private JCheckBoxMenuItem beanShellCheckBox;
+  private Navigator.SelectionListener navigatorListener = null;
   
 
   private MenuFactory() {
@@ -241,11 +250,11 @@ public class MenuFactory {
     viewerMenu.add(new JMenuItem(ToggleFullScreen.sharedInstance(TOGGLE_FULL_SCREEN, frame)));
     if (viewerApp != null) {
       viewerMenu.insert(new JMenuItem(ToggleViewerFullScreen.sharedInstance(TOGGLE_FULL_VIEWER, viewerApp)),0);
+      navigatorCheckBox = new JCheckBoxMenuItem(new ToggleNavigator(TOGGLE_NAVIGATOR, viewerApp));
+      beanShellCheckBox = new JCheckBoxMenuItem(new ToggleBeanShell(TOGGLE_BEANSHELL, viewerApp));
+      viewerMenu.insert(navigatorCheckBox, 0);
+      viewerMenu.insert(beanShellCheckBox, 1);
       viewerMenu.insertSeparator(2);
-//      JCheckBoxMenuItem item = new JCheckBoxMenuItem(ToggleNavigator.sharedInstance("Show Navigator", viewerApp));
-//      item.setSelected(viewerApp.isAttachNavigator());  //XXX: property not set yet
-      viewerMenu.insert(new JMenuItem(new ToggleNavigator("Toggle attachNavigator", viewerApp)), 3);
-      viewerMenu.insert(new JMenuItem(new ToggleBeanShell("Toggle attachBeanShell", viewerApp)), 4);
     }
     
     if (viewerSwitch != null) {
@@ -292,38 +301,33 @@ public class MenuFactory {
       }
     }    
     
-
-//    //enable or disable menus depending on navigator selection
-//    if (viewerApp != null && viewerApp.isAttachNavigator()) {
-//XXX: viewerApp.attachNavigator is set after calling this method
-//      Navigator navigator = (Navigator) viewerApp.getNavigator();
-//      if (navigator != null) {
-//        navigator.getTreeSelectionModel().addTreeSelectionListener(
-//            new Navigator.SelectionListener() {
-//              @Override
-//              public void selectionChanged(SelectionEvent e) {
-//                compMenu.setEnabled(false);
-//                appMenu.setEnabled(false);
-//                if (e.selectionIsSGNode()) {
-//                  e.selectionAsSGNode().accept(new SceneGraphVisitor(){
-//                    @Override
-//                    public void visit(SceneGraphComponent c) {
-//                      compMenu.setEnabled(true);
-//                      appMenu.setEnabled(true);
-//                    }
-//                    @Override
-//                    public void visit(Appearance a) {
-//                      appMenu.setEnabled(true);
-//                    }
-//                  });
-//                }
-//              }
-//            });
-//      }
-//    }
-    
     return menuBar;
   }
+  
+  
+  //update menu items which depend on viewerApp.isAttachNavigator/BeanShell
+  public void update() {
+    if (viewerApp == null) return;
+    
+    navigatorCheckBox.setSelected(viewerApp.isAttachNavigator());
+    beanShellCheckBox.setSelected(viewerApp.isAttachBeanShell());
+    
+    //enable or disable menus/actions depending on navigator selection
+    if (viewerApp.isAttachNavigator()) {
+      Navigator navigator = (Navigator) viewerApp.getNavigator();
+      navigator.getTreeSelectionModel().removeTreeSelectionListener(navigatorListener);
+      navigatorListener = new Navigator.SelectionListener() {
+        @Override
+        public void selectionChanged(SelectionEvent e) {
+//          if (!e.selectionIsSGNode())
+//            System.out.println("tool or shader selected");
+        }
+      };
+      navigator.getTreeSelectionModel().addTreeSelectionListener(navigatorListener);
+    }
+    
+  }
+  
   
   
   /**
