@@ -229,17 +229,17 @@ public class Navigator {
 
 
     /**
-     * Converts the TreePath of the current selection into a SceneGraphPath
-     * containing only nodes that are SceneGraphComponents.  
-     * @return a (sub)path of the currently selected TreePath
+     * Converts the TreePath of the current selection into a SceneGraphPath.  
+     * @return the path of the current selection
      */
     public SceneGraphPath getSGPath() {
       SceneGraphPath sgPath = new SceneGraphPath();
       Object[] treePath = getPath().getPath();
       for (int i = 0; i < treePath.length; i++) {
         selection = treePath[i];
-        if (selectionIsSGComp())
-          sgPath.push(selectionAsSGComp());
+        if (selectionIsSGNode())
+          sgPath.push(selectionAsSGNode());
+        else break;
       }
       return sgPath;
     }
