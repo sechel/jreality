@@ -45,10 +45,16 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import de.jreality.scene.Appearance;
+import de.jreality.scene.Camera;
+import de.jreality.scene.Geometry;
+import de.jreality.scene.Light;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.SceneGraphVisitor;
+import de.jreality.scene.Transformation;
 import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.SelectionManager.SelectionEvent;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
 
 
@@ -66,20 +72,39 @@ public class Remove extends AbstractAction {
   
   
   public void actionPerformed(ActionEvent e) {
-    //selection.getLength() > 1
-    SceneGraphComponent child = selection.getLastComponent();
-    SceneGraphPath parentPath = selection.popNew();
-    parentPath.getLastComponent().removeChild(child);
+    
+    SceneGraphNode node = selection.getLastElement();  //the node to be removed
+    SceneGraphPath parentPath = selection.popNew();  //selection.getLength() > 1
+    final SceneGraphComponent parent = parentPath.getLastComponent();
+    
+    node.accept(new SceneGraphVisitor() {
+      
+      public void visit(SceneGraphComponent sc) {
+        parent.removeChild(sc);
+      }
+      public void visit(Geometry g) {
+        parent.setGeometry(null);
+      }
+      public void visit(Transformation t) {
+        parent.setTransformation(null);
+      }
+      public void visit(Appearance a) {
+        parent.setAppearance(null);
+      }
+      public void visit(Camera c) {
+        parent.setCamera(null);
+      }
+      public void visit(Light l) {
+       parent.setLight(null); 
+      }
+    });
+    
     sm.setSelection(parentPath);
   }
   
-  
+    
   @Override
-  public void selectionChanged(SelectionEvent e) {
-      super.selectionChanged(e);
-      if (selection.getLength() == 1)
-        setEnabled(false);
-      else setEnabled(true);
+  public boolean isEnabled() {
+    return (selection.getLength() != 1);  //don't allow to remove the sceneRoot
   }
-
 }
