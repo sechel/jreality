@@ -49,19 +49,18 @@ import javax.swing.KeyStroke;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.util.CameraUtility;
 
 
 public class ShiftEyeSeparation extends AbstractAction {
 	
 	private Viewer viewer;
-	private Camera camera;
 	private double step = 0.005;
 	
 
 	public ShiftEyeSeparation(String name, Viewer v, boolean decrease) {
 		super(name);
 		viewer = v;
-		camera = (Camera) v.getCameraPath().getLastElement();
 		
 		if (decrease) {
 			step = -step;
@@ -77,7 +76,8 @@ public class ShiftEyeSeparation extends AbstractAction {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		camera.setEyeSeparation(camera.getEyeSeparation() + step);
+	  Camera camera = CameraUtility.getCamera(viewer);
+    camera.setEyeSeparation(camera.getEyeSeparation() + step);
 		viewer.render();
 	}
 	

@@ -49,19 +49,18 @@ import javax.swing.KeyStroke;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.util.CameraUtility;
 
 
 public class ShiftFocus extends AbstractAction {
 	
 	private Viewer viewer;
-	private Camera camera;
 	private double step = 0.05;
 	
 
 	public ShiftFocus(String name, Viewer v, boolean decrease) {
 		super(name);
 		viewer = v;
-		camera = (Camera) v.getCameraPath().getLastElement();
 		
 		if (decrease) {
 			step = -step;
@@ -77,7 +76,8 @@ public class ShiftFocus extends AbstractAction {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		camera.setFocus(camera.getFocus() + step);
+    Camera camera = CameraUtility.getCamera(viewer);
+    camera.setFocus(camera.getFocus() + step);
 		viewer.render();
 	}
 	

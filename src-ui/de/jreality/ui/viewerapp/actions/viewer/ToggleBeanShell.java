@@ -43,7 +43,6 @@ package de.jreality.ui.viewerapp.actions.viewer;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.util.HashMap;
 
 import javax.swing.JFrame;
 import javax.swing.KeyStroke;
@@ -57,10 +56,8 @@ public class ToggleBeanShell extends AbstractAction {
   private boolean attachBeanShell = false;
   private ViewerApp viewerApp;
   
-  private static HashMap <ViewerApp, ToggleBeanShell> sharedInstances = new HashMap <ViewerApp, ToggleBeanShell>();
-  
-  
-  private ToggleBeanShell(String name, ViewerApp viewerApp) {
+    
+  public ToggleBeanShell(String name, ViewerApp viewerApp) {
     super(name);
     this.viewerApp = viewerApp;
 
@@ -68,30 +65,6 @@ public class ToggleBeanShell extends AbstractAction {
     putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
 
-  
-  /**
-   * Returns a shared instance of this action depending on the specified viewerApp
-   * (i.e. there is a shared instance for each viewerApp). 
-   * The action's name is overwritten by the specified name.
-   * @param name name of the action
-   * @param viewerApp the viewerApp displaying the viewer
-   * @throws UnsupportedOperationException if viewerApp equals null
-   * @return shared instance of ToggleViewerFullScreen with specified name
-   */
-  public static ToggleBeanShell sharedInstance(String name, ViewerApp viewerApp) {
-    if (viewerApp == null) 
-      throw new UnsupportedOperationException("ViewerApp not allowed to be null!");
-    
-    ToggleBeanShell sharedInstance = sharedInstances.get(viewerApp);
-    if (sharedInstance == null) {
-      sharedInstance = new ToggleBeanShell(name, viewerApp);
-      sharedInstances.put(viewerApp, sharedInstance);
-    }
-     
-    sharedInstance.setName(name);
-    return sharedInstance;
-  }
-  
   
   public void actionPerformed(ActionEvent e) {
     attachBeanShell = !viewerApp.isAttachBeanShell();

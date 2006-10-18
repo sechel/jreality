@@ -244,8 +244,8 @@ public class MenuFactory {
       viewerMenu.insertSeparator(2);
 //      JCheckBoxMenuItem item = new JCheckBoxMenuItem(ToggleNavigator.sharedInstance("Show Navigator", viewerApp));
 //      item.setSelected(viewerApp.isAttachNavigator());  //XXX: property not set yet
-      viewerMenu.insert(new JMenuItem(ToggleNavigator.sharedInstance("Toggle attachNavigator", viewerApp)), 3);
-      viewerMenu.insert(new JMenuItem(ToggleBeanShell.sharedInstance("Toggle attachBeanShell", viewerApp)), 4);
+      viewerMenu.insert(new JMenuItem(new ToggleNavigator("Toggle attachNavigator", viewerApp)), 3);
+      viewerMenu.insert(new JMenuItem(new ToggleBeanShell("Toggle attachBeanShell", viewerApp)), 4);
     }
     
     if (viewerSwitch != null) {
