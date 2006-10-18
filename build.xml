@@ -75,6 +75,7 @@
     <path refid="backend.classpath"/>
     <fileset dir="dist">
         <include name="jReality-soft.jar"/>
+        <include name="jReality-renderman.jar"/>
         <include name="jReality-io.jar"/>
         <include name="jReality-jogl.jar"/>
         <include name="jReality-tools.jar"/>
