@@ -197,7 +197,6 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 		super.updateImpl();
 	
 		if( nodeWasUpdated(vertexCoordinates) ) { 
-			System.out.println( "node was updated" );
 			log( "set", Attribute.COORDINATES, "vertex" );
 			ifs.setVertexAttributes(Attribute.COORDINATES, new DoubleArrayArray.Array(vertexCoordinates()));
 		}

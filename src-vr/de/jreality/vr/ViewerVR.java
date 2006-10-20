@@ -150,6 +150,8 @@ public class ViewerVR {
 	private SceneGraphPath cameraPath, avatarPath, emptyPickPath;
 
 	private double diam = 22, offset = -.5;
+	
+	private boolean generatePickTrees;
 
 	private JPanel fileChooserPanel;
 	private JFileChooser texFileChooser;
@@ -207,6 +209,8 @@ public class ViewerVR {
 	private JCheckBox showPoints;
 
 	private JCheckBox showFaces;
+
+	private boolean showShadow;
 	
 	public ViewerVR() throws IOException {
 
@@ -1146,7 +1150,7 @@ public class ViewerVR {
 		parent.setName("content");
 		parent.addChild(content);
 		currentContent = parent;
-		PickUtility.assignFaceAABBTrees(content);
+		if (isGeneratePickTrees()) PickUtility.assignFaceAABBTrees(content);
 		if (rotate != null) rotate.setSelected(false);
 		if (drag != null)drag.setSelected(false);
 		Rectangle3D bounds = GeometryUtility
@@ -1246,7 +1250,8 @@ public class ViewerVR {
 	}
 
 	private void computeShadow() {
-		if (pickSystem == null) {
+		if (!isShowShadow()) return;
+ 		if (pickSystem == null) {
 			pickSystem = new AABBPickSystem();
 			pickSystem.setSceneRoot(sceneNode);
 		}
@@ -1280,6 +1285,22 @@ public class ViewerVR {
 		showFaces.setSelected(selected);
 		contentAppearance.setAttribute("showFaces", selected);
 	}
+	
+	public boolean isGeneratePickTrees() {
+		return generatePickTrees;
+	}
+
+	public void setGeneratePickTrees(boolean generatePickTrees) {
+		this.generatePickTrees = generatePickTrees;
+	}
+
+	public void setShowShadow(boolean b) {
+		showShadow=b;
+	}
+
+	public boolean isShowShadow() {
+		return showShadow;
+	}
 
 	public static void main(String[] args) throws IOException {
 //		System.setProperty("de.jreality.ui.viewerapp.synchRender", "true");
@@ -1302,6 +1323,7 @@ public class ViewerVR {
 		vr.addTexTab();
 		vr.addHelpTab();
 		vr.showPanel(false);
+		vr.setGeneratePickTrees(true);
 		ViewerApp vApp = vr.display();
 //		vApp.setAttachNavigator(true);
 //		vApp.setAttachBeanShell(true);
@@ -1311,5 +1333,5 @@ public class ViewerVR {
 		f.setSize(800, 600);
 		f.validate();
 	}
-	
+
 }

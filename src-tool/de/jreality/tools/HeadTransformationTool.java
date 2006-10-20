@@ -60,6 +60,8 @@ public class HeadTransformationTool extends AbstractTool {
   private double maxAngle = Math.PI*0.35;
   private double minAngle = -Math.PI*0.35;
   
+  private boolean invert;
+  
   private double[] headTranslation;
   
   private double currentAngle;
@@ -97,7 +99,7 @@ public class HeadTransformationTool extends AbstractTool {
     } else {
       headTranslation=new double[]{0,1.7,0};
     }
-    double dAngle = tc.getAxisState(verticalRotation).doubleValue();
+    double dAngle = (invert ? -1 : 1) * tc.getAxisState(verticalRotation).doubleValue();
     if (currentAngle + dAngle > maxAngle || currentAngle + dAngle < minAngle) return;
     SceneGraphComponent myComponent = tc.getRootToToolComponent().getLastComponent();
     MatrixBuilder.euclidean().translate(headTranslation).rotateX(currentAngle).assignTo(myComponent);
@@ -119,5 +121,13 @@ public class HeadTransformationTool extends AbstractTool {
   public void setMinAngle(double minAngle) {
     this.minAngle = minAngle;
   }
+
+public boolean isInvert() {
+	return invert;
+}
+
+public void setInvert(boolean invert) {
+	this.invert = invert;
+}
 
 }
