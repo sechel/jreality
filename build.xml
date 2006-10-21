@@ -81,6 +81,7 @@
         <include name="jReality-tools.jar"/>
     </fileset>
     <fileset dir="lib">
+        <include name="jtem-beans.jar"/>
         <include name="jterm.jar"/>
         <include name="bsh-1.3b2.jar"/>
     </fileset>
@@ -258,6 +259,7 @@
   </target>
 
   <target name="ui-deps" unless="env.NO_FETCH_DEPS">
+    <get dest="lib/jtem-beans.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/jtem-beans.jar" usetimestamp="true" verbose="true"/>
     <get dest="lib/bsh-1.3b2.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/bsh-1.3b2.jar" usetimestamp="true" verbose="true"/>
     <get dest="lib/jterm.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/jterm.jar" usetimestamp="true" verbose="true"/>
   </target>
