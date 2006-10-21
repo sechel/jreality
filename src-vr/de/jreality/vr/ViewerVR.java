@@ -206,6 +206,8 @@ public class ViewerVR {
 	private ImageData[] cubeMap;
 
 	private boolean generatePickTrees;
+
+	private JButton shadowButton;
 	
 	
 	public ViewerVR() throws IOException {
@@ -1003,7 +1005,7 @@ public class ViewerVR {
 			}
 		});
 		buttonPanel.add(resetButton);
-		JButton shadowButton = new JButton("recompute shadow");
+		shadowButton = new JButton("recompute shadow");
 		shadowButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
@@ -1395,6 +1397,7 @@ public class ViewerVR {
 
 	public void setShowShadow(boolean b) {
 		showShadow=b;
+		shadowButton.setEnabled(b);
 	}
 
 	public boolean isShowShadow() {
