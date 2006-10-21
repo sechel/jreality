@@ -53,7 +53,11 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.data.AttributeEntity;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.scene.tool.Tool;
-import de.jreality.ui.beans.InspectorPanel;
+import de.jtem.beans.BooleanEditor;
+import de.jtem.beans.ColorEditor;
+import de.jtem.beans.EditorSpawner;
+import de.jtem.beans.FontEditor;
+import de.jtem.beans.InspectorPanel;
 import de.jreality.ui.treeview.JTreeRenderer;
 import de.jreality.ui.treeview.SceneTreeModel;
 import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
@@ -71,7 +75,11 @@ public class Navigator {
   
   public Navigator(SceneGraphComponent sceneRoot) {
   
-    inspector = new InspectorPanel();
+    inspector = new InspectorPanel(false);
+    BooleanEditor.setNameOfNull("inherit");
+    EditorSpawner.setNameOfNull("inherit");
+    ColorEditor.setAllowNullByDefault(true);
+    FontEditor.setAllowNullByDefault(true);
 
     sceneTree = new JTree();
     SceneTreeModel model = new SceneTreeModel(sceneRoot);
