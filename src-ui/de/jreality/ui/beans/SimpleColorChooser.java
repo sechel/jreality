@@ -2,19 +2,18 @@ package de.jreality.ui.beans;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.font.TextLayout;
+import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -33,6 +32,7 @@ public class SimpleColorChooser extends JPanel implements ChangeListener {
 	private ChangeListener changeListener;
 	private boolean updating = false;
 	private boolean withAlpha;
+	private JButton closeButton;
 
 	public SimpleColorChooser() {
 		this(Color.white, false);
@@ -55,6 +55,12 @@ public class SimpleColorChooser extends JPanel implements ChangeListener {
 			sliderBox.add(alphaSlider);
 		}
 		add(sliderBox, BorderLayout.CENTER);
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		buttonPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
+		
+		closeButton = new JButton("Close");
+		buttonPanel.add(closeButton);
+		add("South", buttonPanel);
 
 //		previewPanel = new JPanel() {
 //			public void paint(Graphics g) {
@@ -85,6 +91,14 @@ public class SimpleColorChooser extends JPanel implements ChangeListener {
 //		};
 //		previewPanel.setPreferredSize(new Dimension(350,50));
 //		add(previewPanel, BorderLayout.SOUTH);
+	}
+	
+	public void addActionListener(ActionListener l) {
+		closeButton.addActionListener(l);
+	}
+	
+	public void removeActionListener(ActionListener l) {
+		closeButton.removeActionListener(l);
 	}
 
 	private JSlider makeSlider(int value, String text) {
