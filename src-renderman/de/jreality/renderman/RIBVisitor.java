@@ -305,7 +305,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	 */
  	private void handleGlobalSettings() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
-        map.put("shader", ("".equals(shaderPath)?(shaderPath+":"):"")+".:&");
+        map.put("shader", ("".equals(shaderPath)?"":(shaderPath+":"))+".:&");
         ri.option( "searchpath", map);
         
         map.clear();
