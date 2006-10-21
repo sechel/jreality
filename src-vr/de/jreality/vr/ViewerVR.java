@@ -22,7 +22,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -41,7 +40,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileSystemView;
 
 import de.jreality.geometry.GeometryUtility;
-import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
@@ -52,7 +50,6 @@ import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.PointLight;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -75,7 +72,7 @@ import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.PickShowTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.tools.ShipNavigationTool;
-import de.jreality.ui.beans.SimpleColorChooser;
+import de.jtem.beans.SimpleColorChooser;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
@@ -148,8 +145,6 @@ public class ViewerVR {
 	private double diam = 22, offset = -.5;
 	private JPanel fileChooserPanel;
 	private JFileChooser texFileChooser;
-	private JComponent colorChooserPanel;
-	private JComponent backgroundColorChooserPanel;
 	private SimpleColorChooser contentColorChooser;
 	private SimpleColorChooser backgroundColorChooser;
 	private JSlider sizeSlider;
@@ -1140,7 +1135,7 @@ public class ViewerVR {
 		contentColorChooser.setColor(current != Appearance.INHERITED ? (Color) current
 				: Color.white);
 		sp.getFrame().setVisible(false);
-		sp.getFrame().setContentPane(colorChooserPanel);
+		sp.getFrame().setContentPane(contentColorChooser);
 		sp.getFrame().setVisible(true);
 	}
 
