@@ -71,16 +71,7 @@ public class SelectionManager {
   }
   
   
-  /**
-   * Add communication between the viewerApps navigator and the SelectionManager.
-   * @param navigator the navigator
-   */
-  public void attachNavigator(final Navigator navigator) {
-    
-    final TreeSelectionModel tsm = navigator.getTreeSelectionModel();
-    
-    //add listener to Navigator
-    final Navigator.SelectionListener navigatorListener = new Navigator.SelectionListener(){
+  final Navigator.SelectionListener navigatorListener = new Navigator.SelectionListener(){
       public void selectionChanged(Navigator.SelectionEvent e) {
         removeSelectionListener(smListener);  //avoid listener cycle
         tool = e.selectionAsTool();  //null if no tool
@@ -89,32 +80,36 @@ public class SelectionManager {
         addSelectionListener(smListener);
       }
     };
-    tsm.addTreeSelectionListener(navigatorListener);
     
-    //add listener to SelectionManager
-    smListener = new SelectionListener() {
-      public void selectionChanged(SelectionEvent e) {
-        //convert selection into TreePath
-        TreePath path = getTreePath((SceneTreeModel) navigator.getSceneTree().getModel());
-        tsm.removeTreeSelectionListener(navigatorListener);  //avoid listener cycle
-        tsm.setSelectionPath(path);
-        tsm.addTreeSelectionListener(navigatorListener);
-      }
-    };
-    addSelectionListener(smListener);
-    
-    setSelection(defaultSelection);
-  }
-  
-  
+    private TreeSelectionModel tsm;
+
   /**
-   * Remove communication between the viewerApps navigator and the SelectionManager.
+   * Add communication between the viewerApps navigator and the SelectionManager.
+   * @param navigator the navigator
    */
-  public void detachNavigator() {
-    removeSelectionListener(smListener);
-    setSelection(defaultSelection);
+  public void attachNavigator(final Navigator navigator) {
+	// clean up prevoius
+	if (tsm != null) tsm.removeTreeSelectionListener(navigatorListener);
+	if (smListener != null) removeSelectionListener(smListener);
+	if (navigator != null) {	  
+	    tsm = navigator.getTreeSelectionModel();
+	    //add listener to Navigator
+	    tsm.addTreeSelectionListener(navigatorListener);
+	    //add listener to SelectionManager
+	    smListener = new SelectionListener() {
+	      public void selectionChanged(SelectionEvent e) {
+	        //convert selection into TreePath
+	        TreePath path = getTreePath((SceneTreeModel) navigator.getSceneTree().getModel());
+	        tsm.removeTreeSelectionListener(navigatorListener);  //avoid listener cycle
+	        tsm.setSelectionPath(path);
+	        tsm.addTreeSelectionListener(navigatorListener);
+	      }
+	    };
+	    addSelectionListener(smListener);
+	}
+	// TODO: really?
+    //setSelection(defaultSelection);
   }
-  
   
   public SceneGraphPath getDefaultSelection() {
     return defaultSelection;

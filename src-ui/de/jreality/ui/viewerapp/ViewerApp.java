@@ -281,22 +281,38 @@ public class ViewerApp {
    */
   public void update() {
     
+    uiFactory = new UIFactory();
+    uiFactory.setViewer((Component) currViewer.getViewingComponent());
+	  
     //set up beanShell and uiFactory.beanShell
-    if (attachBeanShell) setupBeanShell();
-    else beanShell = null;
+    if (attachBeanShell && beanShell == null) setupBeanShell();
 
     //setup navigator, uiFactory.inspector and uiFactory.sceneTree
-    if (attachNavigator) setupNavigator();
-    else navigator = null;
+    if (attachNavigator && navigator == null) setupNavigator();
+
     
+    if (attachBeanShell) {
+    	uiFactory.setBeanShell(beanShell.getJTerm());
+    	Object self = getViewer().getSceneRoot();
+    	if (attachNavigator) {
+    		navigator.setBeanShell(beanShell);
+    		self = navigator.getCurrentSelection();
+    	}
+    	beanShell.setSelf(self);
+    }
+        
+    if (attachNavigator) {
+    	uiFactory.setInspector(navigator.getInspector());
+    	uiFactory.setSceneTree(navigator.getSceneTree());
+    	selectionManager.attachNavigator(navigator);
+    	if (!attachBeanShell) navigator.setBeanShell(null);
+    } else {
+    	selectionManager.attachNavigator(null);
+    }
+
     uiFactory.setAttachNavigator(attachNavigator);
     uiFactory.setAttachBeanShell(attachBeanShell);
 
-    //update selectionManager (depends on attachNavigator)
-    if (attachNavigator) 
-      selectionManager.attachNavigator(navigator);
-    else selectionManager.detachNavigator();
-    
     //update menu (depends on attachNavigator/BeanShell)
     menuFactory.update();
   }
@@ -344,7 +360,7 @@ public class ViewerApp {
       currViewer.dispose();
     }
     
-    uiFactory = new UIFactory();
+//    uiFactory = new UIFactory();
     
     try { currViewer = createViewer(); } 
     catch (Exception exc) { exc.printStackTrace(); }
@@ -371,7 +387,7 @@ public class ViewerApp {
     currViewer.initializeTools();
     
     //set viewer and sceneRoot of uiFactory
-    uiFactory.setViewer((Component) currViewer.getViewingComponent());
+//    uiFactory.setViewer((Component) currViewer.getViewingComponent());
     
     //add node to this scene depending on its type
     if (displayedNode != null) {  //show scene even if displayedNode=null
@@ -461,8 +477,6 @@ public class ViewerApp {
     beanShell.setCurrViewer(currViewer);
     beanShell.setViewerSwitch(viewerSwitch);
     beanShell.setSelf(sceneRoot);
-    
-    uiFactory.setBeanShell(beanShell.getJTerm());
   }
   
   
@@ -471,10 +485,6 @@ public class ViewerApp {
    */
   private void setupNavigator() {
     navigator = new Navigator(sceneRoot);
-    if (attachBeanShell) navigator.setBeanShell(beanShell);
-    
-    uiFactory.setInspector(navigator.getInspector());
-    uiFactory.setSceneTree(navigator.getSceneTree());
   }
   
   

@@ -71,7 +71,8 @@ public class Navigator {
   private BeanShell beanShell;
   
   private SceneGraphComponent sceneRoot;  //the scene root
-  
+
+  private Object currentSelection;
   
   public Navigator(SceneGraphComponent sceneRoot) {
   
@@ -93,16 +94,14 @@ public class Navigator {
     
     tsm.addTreeSelectionListener(new SelectionListener(){
 
-      public void selectionChanged(SelectionEvent e) {
+	public void selectionChanged(SelectionEvent e) {
 
-        Object selection = null;
+        if (e.selectionIsSGNode()) currentSelection = e.selectionAsSGNode();
+        else if (e.selectionIsTool()) currentSelection = e.selectionAsTool();
+        else currentSelection = e.getSelection();  //e.g. shader
         
-        if (e.selectionIsSGNode()) selection = e.selectionAsSGNode();
-        else if (e.selectionIsTool()) selection = e.selectionAsTool();
-        else selection = e.getSelection();  //e.g. shader
-        
-        inspector.setObject(selection);
-        if (beanShell != null) beanShell.setSelf(selection);
+        inspector.setObject(currentSelection);
+        if (beanShell != null) beanShell.setSelf(currentSelection);
       }
     });
     
@@ -265,4 +264,9 @@ public class Navigator {
       return sgPath;
     }
   }
+
+
+public Object getCurrentSelection() {
+	return currentSelection;
+}
 }

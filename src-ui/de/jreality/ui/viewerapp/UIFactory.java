@@ -79,7 +79,7 @@ class UIFactory {
       jsp.setOneTouchExpandable(true);
       jsp.setResizeWeight(.01);
       jsp.setDividerLocation(420);
-      jsp.setDividerLocation(Integer.MAX_VALUE);
+      //jsp.setDividerLocation(Integer.MAX_VALUE);
       right = jsp;
     }
     
