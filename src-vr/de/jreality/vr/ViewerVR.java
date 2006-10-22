@@ -188,7 +188,7 @@ public class ViewerVR {
 
 	private JCheckBox showFaces;
 
-	private boolean showShadow;
+	private boolean showShadow = true;
 	
 	private JLabel backgroundLabel;
 
@@ -203,6 +203,8 @@ public class ViewerVR {
 	private boolean generatePickTrees;
 
 	private JButton shadowButton;
+
+	private JCheckBox skyBoxHidden;
 	
 	
 	public ViewerVR() throws IOException {
@@ -526,7 +528,7 @@ public class ViewerVR {
 		terrainNode.setGeometry(flat ? flatTerrain : terrain);
 		if (last != terrainNode.getGeometry()) computeShadow();
 		
-		setSkyBox(cubeMap);
+		updateSkyBox();
 		
 		ImageData terrainTex = landscape.getTerrainTexture();
 		setTerrainTexture(
@@ -568,16 +570,26 @@ public class ViewerVR {
 		selectionPanel.setBorder(new EmptyBorder(5,5,5,5));
 		selectionPanel.add(landscape.getSelectionComponent(), BorderLayout.CENTER);
 		envSelection.add(selectionPanel, BorderLayout.CENTER);
-		terrainTransparent = new JCheckBox("transparent terrain");
-		terrainTransparent.addChangeListener(new ChangeListener() {
-
-			public void stateChanged(ChangeEvent e) {
-				setTerrainTerrainTransparent(terrainTransparent.isSelected());
-			}
-		});
+		
 		Box envControlBox = new Box(BoxLayout.Y_AXIS);
 		JPanel terrainTransparentPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		terrainTransparent = new JCheckBox("transparent terrain");
+		terrainTransparent.addChangeListener(new ChangeListener() {
+			
+			public void stateChanged(ChangeEvent e) {
+				setTerrainTransparent(terrainTransparent.isSelected());
+			}
+		});
 		terrainTransparentPanel.add(terrainTransparent);
+		skyBoxHidden = new JCheckBox("no sky");
+		skyBoxHidden.addChangeListener(new ChangeListener() {
+			
+			public void stateChanged(ChangeEvent e) {
+				updateSkyBox();
+			}
+		});
+		terrainTransparentPanel.add(skyBoxHidden);
+		
 		envControlBox.add(terrainTransparentPanel);
 		
 		JPanel backgroundColorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -622,17 +634,17 @@ public class ViewerVR {
 	}
 
 	private void updateEnablingOfBackgroundEdit() {
-		backgroundLabel.setEnabled(cubeMap == null);
-		topColorButton.setEnabled(cubeMap == null);
-		backGroundFlat.setEnabled(cubeMap == null);
-		bottomColorButton.setEnabled(cubeMap == null && !backGroundFlat.isSelected());
+//		backgroundLabel.setEnabled(cubeMap == null);
+//		topColorButton.setEnabled(cubeMap == null);
+//		backGroundFlat.setEnabled(cubeMap == null);
+//		bottomColorButton.setEnabled(cubeMap == null && !backGroundFlat.isSelected());
 	}
 	
 	public boolean isTerrainTransparent() {
 		return terrainTransparent.isSelected();
 	}
 	
-	public void setTerrainTerrainTransparent(boolean b) {
+	public void setTerrainTransparent(boolean b) {
 		terrainTransparent.setSelected(b);
 		terrainAppearance.setAttribute(CommonAttributes.TRANSPARENCY, b ? 1.0 : 0.0);
 	}
@@ -1020,7 +1032,9 @@ public class ViewerVR {
 		final String[][] textures = new String[][] {
 				{ "none", null },
 				{ "metal grid", "textures/boysurface.png" },
-				{ "metal floor", "textures/metal_basic88.png" }
+				{ "metal floor", "textures/metal_basic88.png" },
+				{ "chain-link fence", "textures/chainlinkfence.png" },
+				{ "random dots", "textures/random.png" }
 		};
 		ActionListener texturesListener = new ActionListener() {
 			
@@ -1229,10 +1243,11 @@ public class ViewerVR {
 		t.setTextureMatrix(MatrixBuilder.euclidean().scale(scale).getMatrix());
 	}
 
-	public void setSkyBox(ImageData[] imgs) {
+	public void updateSkyBox() {
+		ImageData[] imgs = skyBoxHidden.isSelected() ? null : cubeMap;
 		TextureUtility.createSkyBox(rootAppearance, imgs);
 		cm = TextureUtility.createReflectionMap(contentAppearance,
-				"polygonShader", imgs);
+				"polygonShader", cubeMap);
 	}
 
 	public void setContent(SceneGraphComponent content) {
