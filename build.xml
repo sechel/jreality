@@ -488,6 +488,7 @@
 
   	<mkdir dir="release/tmp/lib" />
   	<copy file="${lib}/antlr-2.7.5.jar" todir="release/tmp/lib" />
+  	<copy file="${lib}/jtem-beans.jar" todir="release/tmp/lib" />
   	<copy file="${lib}/bsh-1.3b2.jar" todir="release/tmp/lib" />
   	<copy file="${lib}/jterm.jar" todir="release/tmp/lib" />
   	<copy file="${lib}/smrj.jar" todir="release/tmp/lib" />
