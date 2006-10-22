@@ -102,6 +102,8 @@ public class ViewerVR {
 	
 	private static final double DEFAULT_TUBE_RADIUS = .3;
 	
+	private static final double DEFAULT_TRANSPARENCY = .7;
+	
 	// maximal radius of tubes or points compared to content size
 	private static final double MAX_RADIUS = 0.1;
 	
@@ -205,6 +207,10 @@ public class ViewerVR {
 	private JButton shadowButton;
 
 	private JCheckBox skyBoxHidden;
+
+	private JCheckBox transparency;
+
+	private JSlider transparencySlider;
 	
 	
 	public ViewerVR() throws IOException {
@@ -219,7 +225,6 @@ public class ViewerVR {
 		lightNode.setName("sun");
 		MatrixBuilder.euclidean().rotateX(-Math.PI/2).assignTo(sceneNode);
 		sceneNode.getTransformation().setName("alignment");
-		sceneRoot.addChild(sceneNode);
 
 		rootAppearance.setName("root app");
 		ShaderUtility.createRootAppearance(rootAppearance);
@@ -231,6 +236,7 @@ public class ViewerVR {
 				+ CommonAttributes.PICKABLE, false);
 		rootAppearance.setAttribute(CommonAttributes.POINT_SHADER + "."
 				+ CommonAttributes.PICKABLE, false);
+		rootAppearance.setAttribute(CommonAttributes.OPAQUE_TUBES_AND_SPHERES, true);
 		
 		sceneRoot.setAppearance(rootAppearance);
 
@@ -358,6 +364,7 @@ public class ViewerVR {
 //		reflectedSceneNode.addChild(sceneNode);
 //		sceneRoot.addChild(reflectedSceneNode);
 		sceneRoot.addChild(terrainNode);
+		sceneRoot.addChild(sceneNode);
 //		reflectedSceneNode.setVisible(false);
 		
 		
@@ -379,6 +386,7 @@ public class ViewerVR {
 		makeColorChoosers();
 		
 		updateLandscape();
+		setTransparency(DEFAULT_TRANSPARENCY);
 
 		setAvatarPosition(0, landscape.isTerrainFlat() ? -.5:0, 28);
 }
@@ -648,6 +656,11 @@ public class ViewerVR {
 		terrainTransparent.setSelected(b);
 		terrainAppearance.setAttribute(CommonAttributes.TRANSPARENCY, b ? 1.0 : 0.0);
 	}
+	
+	public void setTransparencyEnabled(boolean b) {
+		transparency.setSelected(b);
+		contentAppearance.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, b);
+	}
 
 	public void addAppTab() {
 		appearanceTabs.add("app", appearancePanel);
@@ -777,8 +790,29 @@ public class ViewerVR {
 		reflectionBox.add(reflectionLabel);
 		reflectionBox.add(reflectionSlider);
 		faceBox.add(reflectionBox);
-
 		appBox.add(faceBox);
+		
+		Box transparencyYBox = new Box(BoxLayout.Y_AXIS);
+		transparencyYBox.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
+				LineBorder.createGrayLineBorder()));
+		Box transparencyXBox = new Box(BoxLayout.X_AXIS);
+		transparencyXBox.setBorder(new EmptyBorder(5, 5, 5, 0));
+		transparency = new JCheckBox("transp");
+		transparency.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setTransparencyEnabled(transparency.isSelected());
+			}
+		});
+		transparencyXBox.add(transparency);
+		transparencySlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 70);
+		transparencySlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				setTransparency(0.01 * transparencySlider.getValue());
+			}
+		});
+		transparencyXBox.add(transparencySlider);
+		transparencyYBox.add(transparencyXBox);
+		appBox.add(transparencyYBox);
 
 		appearancePanel.add(appBox);
 	}
@@ -1177,6 +1211,10 @@ public class ViewerVR {
 
 	public void setReflection(double d) {
 		cm.setBlendColor(new Color(1f, 1f, 1f, (float) d));
+	}
+	
+	public void setTransparency(double d) {
+		contentAppearance.setAttribute(CommonAttributes.TRANSPARENCY, d);
 	}
 
 	public void setPointRadius(double d) {
