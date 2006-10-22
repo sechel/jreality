@@ -43,6 +43,7 @@ package de.jreality.renderman;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -159,10 +160,23 @@ public class RIBVisitor extends SceneGraphVisitor {
     transient protected Ri ri = new Ri();
     transient int whichEye = CameraUtility.MIDDLE_EYE;
 
+    RenderScript renderScript;
+    
  	public void visit(Viewer viewer, String name)	{
  		// handle the file name
 		ribFileName = name;
 	    if(!ribFileName.endsWith(".rib"))	ribFileName = ribFileName+".rib";
+	    
+	    // determine files for render-script
+	    File ribF = new File(ribFileName);
+	    File dir = ribF.getParentFile();
+	    renderScript=new RenderScript(dir, ribF.getName(), rendererType);
+	    
+	    // register standard shaders for render script
+	    renderScript.addShader("transformedpaintedplastic.sl");
+	    renderScript.addShader("constantTexture.sl");
+	    
+	    
         int index = ribFileName.lastIndexOf('/');
         outputFileName = ribFileName.substring(index+1,ribFileName.length()-3)+"tif";
      
@@ -176,8 +190,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 
         world2Camera = cameraPath.getInverseMatrix(null);
 
- 		if (writeShadersToFile)		writeStandardShaders(ribFileName);        	
-		if (rootAppearance != null) 	handleRootAppearance();
+ 		if (writeShadersToFile)	{
+ 			writeStandardShaders(ribFileName);
+ 		}
+		if (rootAppearance != null) handleRootAppearance();
    
 		ri.begin(ribFileName);
 		if (camera.isStereo())	{
@@ -196,6 +212,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 		} else
 			render();
 		ri.end();
+		
+		renderScript.dumpScript();
     }
 
 	/**
@@ -484,9 +502,11 @@ public class RIBVisitor extends SceneGraphVisitor {
 	public String writeTexture(ImageData data) {
 		String noSuffix = (String) textures.get(data);
 		if(noSuffix == null) {
-			noSuffix = ribFileName+"_texture"+(textureCount++);
+			String texFileName = "_texture"+(textureCount++);
+			noSuffix = ribFileName+texFileName;
 		    RIBHelper.writeTexture(data, noSuffix);
 			textures.put(data, noSuffix);
+			renderScript.addTexture(texFileName);
          }
 		return noSuffix+"."+textureFileSuffix;		// should be dependent on the final renderman renderer
 	}
