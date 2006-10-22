@@ -146,9 +146,8 @@ public class SelectionManager {
    * (model of the viewerApp's navigator)
    */
   private TreePath getTreePath(SceneTreeModel model) {
-    Object[] path = selection.toList().toArray();
-    Object[] newPath = new Object[path.length];
-    newPath[0] = model.getRoot();
+    Object[] newPath = model.convertSceneGraphPath(selection);
+    /*
     for (int i = 1; i < newPath.length; i++) {
       final int index = SceneGraphUtility.getIndexOfChild(
           (SceneGraphComponent) path[i-1], (SceneGraphComponent) path[i]);
@@ -160,6 +159,7 @@ public class SelectionManager {
       
       newPath[i] = model.getChild(newPath[i-1], index+offset);
     }
+    */
     return new TreePath(newPath);
   }
   

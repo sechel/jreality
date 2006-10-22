@@ -46,6 +46,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.WeakHashMap;
@@ -53,6 +54,7 @@ import java.util.WeakHashMap;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.data.AttributeEntity;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.event.SceneGraphComponentEvent;
@@ -81,6 +83,10 @@ public class SceneTreeModel extends AbstractTreeModel {
   public void dispose() {
     builder.dispose();
     builder = null;
+  }
+  
+  public UpToDateSceneProxyBuilder getBuilder() {
+	  return builder;
   }
   
   void setSceneRoot(SceneGraphComponent comp) {
@@ -339,5 +345,17 @@ public class SceneTreeModel extends AbstractTreeModel {
 		}
     
   }
+
+	public SceneTreeNode[] convertSceneGraphPath(SceneGraphPath selection) {
+		ArrayList<SceneTreeNode> al = new ArrayList<SceneTreeNode>(selection.getLength());
+		SceneTreeNode parent=builder.getTreeRoot();
+		al.add(parent);
+		for (Iterator<SceneGraphNode> it = selection.iterator(1); it.hasNext(); ) {
+			SceneTreeNode child = parent.getTreeNodeForChild(it.next());
+			al.add(child);
+			parent=child;
+		}
+		return al.toArray(new SceneTreeNode[]{});
+	}
   
 }
