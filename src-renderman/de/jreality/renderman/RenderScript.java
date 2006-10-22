@@ -22,7 +22,7 @@ class RenderScript {
 			texCmd="teqser -mode 'periodic' ";
 			shaderCmd="aqsl ";
 			refMapCmd="??? ";
-			renderer="aqsis -d ";
+			renderer="aqsis ";
 			texSuffix=".tx";
 			refMapSuffix=".???";
 			break;
@@ -61,6 +61,9 @@ class RenderScript {
 	}
 	
 	void dumpScript() {
+		
+		System.out.println("========= render script ==========\n\n");
+		
         System.out.println("cd "+dir.getAbsolutePath());
         
         for (String texName : textures) {
@@ -76,6 +79,9 @@ class RenderScript {
         }
         
         System.out.println(renderer + ribFileName);
+
+		System.out.println("\n\n========= render script ==========\n\n");
+
 	}
 	
 	

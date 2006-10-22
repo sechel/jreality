@@ -43,6 +43,7 @@ package de.jreality.renderman.shader;
 import java.awt.Color;
 import java.util.Map;
 
+import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.renderman.RIBHelper;
@@ -112,9 +113,16 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
             	fname = fname.substring(fname.lastIndexOf('/')+1);
             }
              map.put("string texturename",fname);
-            double[] mat = tex.getTextureMatrix().getArray();
+            Matrix textureMatrix = tex.getTextureMatrix();
+			double[] mat = textureMatrix.getArray();
             if(mat != null && !Rn.isIdentityMatrix(mat, 10E-8)) {
-            	map.put("matrix textureMatrix",RIBHelper.fTranspose(mat));
+            	//map.put("matrix textureMatrix",RIBHelper.fTranspose(mat));
+            	map.put("float m00", new Float(textureMatrix.getEntry(0, 0)));
+            	map.put("float m01", new Float(textureMatrix.getEntry(0, 1)));
+            	map.put("float m02", new Float(textureMatrix.getEntry(0, 2)));
+            	map.put("float m10", new Float(textureMatrix.getEntry(1, 0)));
+            	map.put("float m11", new Float(textureMatrix.getEntry(1, 1)));
+            	map.put("float m12", new Float(textureMatrix.getEntry(1, 2)));
 //                shaderName = "transformedpaintedplastic";
                 shaderName = (signature == Pn.EUCLIDEAN) ? "transformedpaintedplastic" : "hpaintedplastic";
            }

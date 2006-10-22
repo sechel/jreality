@@ -107,8 +107,7 @@ public class RIBViewer implements Viewer {
         rv.setHeight(height);
         rv.setMaximumEyeSplits(maximumEyeSplits);
         System.out.print(" Rendering renderman RIB into "+fileName+"..");
-        rv.visit(this,fileName);
-        System.out.println(".done."); 
+        rv.visit(this,fileName); 
     }
 
     /* (non-Javadoc)

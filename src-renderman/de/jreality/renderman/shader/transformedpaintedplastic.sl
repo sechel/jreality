@@ -9,8 +9,8 @@
 
 
 surface
-transformedpaintedplastic ( float Ka = 1, Kd = .5, Ks = .5, Kr = .5, roughness = .1, reflectionBlend = .6;
-     	 matrix textureMatrix = 1;
+transformedpaintedplastic ( float Ka = 1, Kd = .5, Ks = .5, Kr = .5, roughness = .1, reflectionBlend = .6,
+     	 m00 = 1, m01 = 0, m02 = 0, m10 = 0, m11 = 1,m12 = 0;
 		 color specularcolor = 1;
 		 string texturename = ""; 
 		 string reflectionmap = ""; 
@@ -29,13 +29,15 @@ transformedpaintedplastic ( float Ka = 1, Kd = .5, Ks = .5, Kr = .5, roughness =
 
   // evaluate the texture map, if any
   if (texturename != ""){
-	point a = point (s,t,0);
+	//point a = point (s,t,0);
     // RenderMan automatically converts the textureMatrix into "current" space
     // so the point has also to be transformed into that space!
-	point b = transform("shader", "current",a); 	 
-	point p = transform( textureMatrix , b);
-	float ss = xcomp(p);
-	float tt = ycomp(p);
+	//point b = transform("shader", "current",a); 	 
+	//point p = transform( textureMatrix , b);
+	//float ss = xcomp(p);
+	//float tt = ycomp(p);
+	float ss = s*m00+t*m01+m02;
+	float tt = s*m10+t*m11+m12;
 	
 	tr = float texture(texturename[3],ss,tt, "fill",1);
     Ct = color texture (texturename,ss, tt);
