@@ -47,8 +47,8 @@ import java.awt.event.KeyEvent;
 import java.util.HashMap;
 
 import javax.swing.JFrame;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
 import de.jreality.ui.viewerapp.ViewerApp;
@@ -57,10 +57,13 @@ import de.jreality.ui.viewerapp.actions.AbstractAction;
 
 public class ToggleViewerFullScreen extends AbstractAction {
 
-  boolean isFullscreen = false;
+  private boolean isFullscreen = false;
+  private boolean showMenu = false;
+  
   private ViewerApp viewerApp;
   private JFrame fsf;  //full screen frame
   private JFrame frame;  //the viewerApp's frame
+  private JMenuBar menuBar;
   
   private static HashMap <ViewerApp, ToggleViewerFullScreen> sharedInstances = new HashMap <ViewerApp, ToggleViewerFullScreen>();
   
@@ -94,13 +97,6 @@ public class ToggleViewerFullScreen extends AbstractAction {
     if (sharedInstance == null) {
       sharedInstance = new ToggleViewerFullScreen(name, viewerApp);
       sharedInstances.put(viewerApp, sharedInstance);
-      //add same action instance to full screen frame
-      JMenuBar menu = new JMenuBar();
-      menu.setBorder(null);
-      JMenuItem item = new JMenuItem(sharedInstance(name, viewerApp));
-      item.setVisible(false);
-      menu.add(item);
-      sharedInstance.fsf.setJMenuBar(menu);
     }
      
     sharedInstance.setName(name);
@@ -110,23 +106,38 @@ public class ToggleViewerFullScreen extends AbstractAction {
   
   public void actionPerformed(ActionEvent e) {
 
-    if (isFullscreen) {
+    menuBar = frame.getJMenuBar();
+    
+    if (isFullscreen) {  //exit full screen
       frame.getContentPane().removeAll();
       frame.getContentPane().add(viewerApp.getComponent());
+      if (showMenu) showMenuBar(true);  //restore menu state
+      frame.setJMenuBar(menuBar);
       frame.validate();
       frame.setVisible(true);
       fsf.dispose();
       fsf.getGraphicsConfiguration().getDevice().setFullScreenWindow(null);
       isFullscreen = false;
-    } else {
+    } else {  //switch to full screen
       fsf.getContentPane().removeAll();
       fsf.getContentPane().add(viewerApp.getViewerSwitch().getViewingComponent());
-      fsf.getGraphicsConfiguration().getDevice().setFullScreenWindow(fsf);
+      showMenu = menuBar.getMenu(0).isVisible();  //remember menu state
+      if (showMenu) showMenuBar(false);  //hide menu bar
+      fsf.setJMenuBar(menuBar);
       fsf.validate();
+      fsf.getGraphicsConfiguration().getDevice().setFullScreenWindow(fsf);
       frame.setVisible(false);
       isFullscreen = true;
     }
     ((Component) viewerApp.getViewer().getViewingComponent()).requestFocusInWindow();
   }
   
+  
+  private void showMenuBar(boolean b) {
+    JMenu menu;
+    for (int i = 0; i < menuBar.getComponentCount(); i++) {
+      menu = menuBar.getMenu(i);
+      menu.setVisible(b);
+    }
+  }
 }
