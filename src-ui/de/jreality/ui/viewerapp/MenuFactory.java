@@ -83,6 +83,7 @@ import de.jreality.ui.viewerapp.actions.view.ToggleBeanShell;
 import de.jreality.ui.viewerapp.actions.view.ToggleFullScreen;
 import de.jreality.ui.viewerapp.actions.view.ToggleMenu;
 import de.jreality.ui.viewerapp.actions.view.ToggleNavigator;
+import de.jreality.ui.viewerapp.actions.view.ToggleRenderSelection;
 import de.jreality.ui.viewerapp.actions.view.ToggleViewerFullScreen;
 
 
@@ -126,6 +127,7 @@ public class MenuFactory {
   public static String TOGGLE_NAVIGATOR = "Show navigator";
   public static String TOGGLE_BEANSHELL = "Show bean shell"; 
   public static String TOGGLE_MENU = "Hide menu bar";
+  public static String TOGGLE_RENDER_SELECTION = "Show selection";
   public static String TOGGLE_FULL_VIEWER = "Toggle viewer full screen";
   public static String TOGGLE_FULL_SCREEN = "Toggle full screen";
   public static String RENDER = "Force Rendering";
@@ -144,9 +146,11 @@ public class MenuFactory {
   
   private JCheckBoxMenuItem navigatorCheckBox;
   private JCheckBoxMenuItem beanShellCheckBox;
+  private JCheckBoxMenuItem renderSelectionCheckbox;
   private Navigator.SelectionListener navigatorListener = null;
 
-  MenuFactory(ViewerApp v) {
+
+  protected MenuFactory(ViewerApp v) {
     viewerApp = v;
     frame = v.getFrame();
     sm = v.getSelectionManager();
@@ -242,6 +246,9 @@ public class MenuFactory {
     viewerMenu.add(navigatorCheckBox);
     viewerMenu.add(beanShellCheckBox);
     viewerMenu.addSeparator();
+    renderSelectionCheckbox = new JCheckBoxMenuItem(new ToggleRenderSelection(TOGGLE_RENDER_SELECTION, sm));
+    viewerMenu.add(renderSelectionCheckbox);
+    viewerMenu.addSeparator();
     viewerMenu.add(new JMenuItem(new ToggleMenu(TOGGLE_MENU, menuBar)));
     viewerMenu.addSeparator();
     viewerMenu.add(new JMenuItem(ToggleViewerFullScreen.sharedInstance(TOGGLE_FULL_VIEWER, viewerApp)));
@@ -283,6 +290,7 @@ public class MenuFactory {
     
     navigatorCheckBox.setSelected(viewerApp.isAttachNavigator());
     beanShellCheckBox.setSelected(viewerApp.isAttachBeanShell());
+    renderSelectionCheckbox.setSelected(sm.isRenderSelection());
     
     //enable or disable menus/actions depending on navigator selection
     if (viewerApp.isAttachNavigator()) {
