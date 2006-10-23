@@ -179,6 +179,8 @@ public class ViewerApp {
     
     frame = new JFrame();
     selectionManager = new SelectionManager(jrScene.getPath("emptyPickPath"));
+    selectionManager.setAuxiliaryRoot(viewerSwitch.getAuxiliaryRoot());
+    selectionManager.setViewer(viewerSwitch);
     menuFactory = new MenuFactory(this);  //uses frame, viewerSwitch, selectionManager and viewerapp itself
     menuBar = menuFactory.getMenuBar();
   }
@@ -304,10 +306,10 @@ public class ViewerApp {
     if (attachNavigator) {
     	uiFactory.setInspector(navigator.getInspector());
     	uiFactory.setSceneTree(navigator.getSceneTree());
-    	selectionManager.attachNavigator(navigator);
+    	selectionManager.setNavigator(navigator);
     	if (!attachBeanShell) navigator.setBeanShell(null);
     } else {
-    	selectionManager.attachNavigator(null);
+    	selectionManager.setNavigator(null);
     }
 
     uiFactory.setAttachNavigator(attachNavigator);

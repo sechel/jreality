@@ -53,17 +53,14 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.data.AttributeEntity;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.scene.tool.Tool;
-import de.jreality.shader.Texture2D;
-import de.jtem.beans.BooleanEditor;
-import de.jtem.beans.ColorEditor;
-import de.jtem.beans.EditorManager;
-import de.jtem.beans.EditorSpawner;
-import de.jtem.beans.FontEditor;
-import de.jtem.beans.InspectorPanel;
-import de.jtem.beans.ObjectEditor;
 import de.jreality.ui.treeview.JTreeRenderer;
 import de.jreality.ui.treeview.SceneTreeModel;
 import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
+import de.jtem.beans.BooleanEditor;
+import de.jtem.beans.ColorEditor;
+import de.jtem.beans.EditorSpawner;
+import de.jtem.beans.FontEditor;
+import de.jtem.beans.InspectorPanel;
 
 
 public class Navigator {
@@ -98,7 +95,7 @@ public class Navigator {
     
     tsm.addTreeSelectionListener(new SelectionListener(){
 
-	public void selectionChanged(SelectionEvent e) {
+      public void selectionChanged(SelectionEvent e) {
 
         if (e.selectionIsSGNode()) currentSelection = e.selectionAsSGNode();
         else if (e.selectionIsTool()) currentSelection = e.selectionAsTool();

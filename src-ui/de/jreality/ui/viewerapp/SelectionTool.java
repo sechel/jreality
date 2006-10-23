@@ -88,8 +88,9 @@ public class SelectionTool extends AbstractTool {
     
     SceneGraphPath newSelection = null;
     
-    if (pr == null && sm != null)  //nothing picked
-      newSelection = sm.getDefaultSelection();
+    if (pr == null)  // && sm != null)  //nothing picked
+      //newSelection = sm.getDefaultSelection();
+      return;  //do nothing
     if (pr != null)
       newSelection = pr.getPickPath().popNew();  //need only SGComponents, but geometry is picked
     
