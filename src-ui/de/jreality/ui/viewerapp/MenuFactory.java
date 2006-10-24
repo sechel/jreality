@@ -84,6 +84,7 @@ import de.jreality.ui.viewerapp.actions.view.ToggleBeanShell;
 import de.jreality.ui.viewerapp.actions.view.ToggleFullScreen;
 import de.jreality.ui.viewerapp.actions.view.ToggleMenu;
 import de.jreality.ui.viewerapp.actions.view.ToggleNavigator;
+import de.jreality.ui.viewerapp.actions.view.ToggleRenderSelection;
 import de.jreality.ui.viewerapp.actions.view.ToggleViewerFullScreen;
 
 
