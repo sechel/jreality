@@ -78,10 +78,10 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
 	public void setFromEffectiveAppearance(RIBVisitor ribv, EffectiveAppearance eap, String name) {
 		map.clear();
 		boolean lighting = (boolean) eap.getAttribute(name+"."+CommonAttributes.LIGHTING_ENABLED, true);
-		if (!lighting)	{
-			shaderName = "constant";
-			return;
-		}
+//		if (!lighting)	{
+//			shaderName = "constant";
+//			return;
+//		}
 		float specularExponent =(float) eap.getAttribute(name+"."+CommonAttributes.SPECULAR_EXPONENT,CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
         float Ks =(float) eap.getAttribute(name+"."+CommonAttributes.SPECULAR_COEFFICIENT,CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);
         float Kd =(float) eap.getAttribute(name+"."+CommonAttributes.DIFFUSE_COEFFICIENT,CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
@@ -122,12 +122,13 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
 			double[] mat = textureMatrix.getArray();
             if(mat != null && !Rn.isIdentityMatrix(mat, 10E-8)) {
             	//map.put("matrix textureMatrix",RIBHelper.fTranspose(mat));
-            	map.put("float m00", new Float(textureMatrix.getEntry(0, 0)));
-            	map.put("float m01", new Float(textureMatrix.getEntry(0, 1)));
-            	map.put("float m02", new Float(textureMatrix.getEntry(0, 2)));
-            	map.put("float m10", new Float(textureMatrix.getEntry(1, 0)));
-            	map.put("float m11", new Float(textureMatrix.getEntry(1, 1)));
-            	map.put("float m12", new Float(textureMatrix.getEntry(1, 2)));
+            	map.put("float[16] tm", RIBHelper.fTranspose(mat));
+//            	map.put("float m00", new Float(textureMatrix.getEntry(0, 0)));
+//            	map.put("float m01", new Float(textureMatrix.getEntry(0, 1)));
+//            	map.put("float m02", new Float(textureMatrix.getEntry(0, 2)));
+//            	map.put("float m10", new Float(textureMatrix.getEntry(1, 0)));
+//            	map.put("float m11", new Float(textureMatrix.getEntry(1, 1)));
+//            	map.put("float m12", new Float(textureMatrix.getEntry(1, 2)));
 //                shaderName = "transformedpaintedplastic";
                 shaderName = (signature == Pn.EUCLIDEAN) ? "transformedpaintedplastic" : "hpaintedplastic";
            }
