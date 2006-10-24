@@ -118,7 +118,7 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
              map.put("string texturename",fname);
             Matrix textureMatrix = tex.getTextureMatrix();
 			double[] mat = textureMatrix.getArray();
-            if(mat != null && !Rn.isIdentityMatrix(mat, 10E-8)) {
+            if(mat != null){// && !Rn.isIdentityMatrix(mat, 10E-8)) {
             	map.put("float[16] tm", RIBHelper.fTranspose(mat));
                 shaderName = (signature == Pn.EUCLIDEAN) ? "transformedpaintedplastic" : "hpaintedplastic";
            }
