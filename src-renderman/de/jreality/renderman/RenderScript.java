@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashSet;
 
+import de.jreality.shader.Texture2D;
+
 class RenderScript {
 	
 	final File dir;
@@ -13,9 +15,10 @@ class RenderScript {
 	final String ribFileName, texCmd, shaderCmd, refMapCmd, renderer, texSuffix, refMapSuffix;
 	
 	HashSet<String> ribFiles=new HashSet<String>(),
-					textures=new HashSet<String>(),
-			  reflectionMaps=new HashSet<String>(),
+	             reflectionMaps=new HashSet<String>(),
 			         shaders=new HashSet<String>();
+  HashSet<String[]> textures=new HashSet<String[]>();
+
 
 	private boolean execute=false;
 	
@@ -24,7 +27,7 @@ class RenderScript {
 		this.ribFileName=ribFileName;
 		switch (type) {
 		case RIBViewer.TYPE_AQSIS:
-			texCmd="teqser -mode 'periodic' ";
+			texCmd="teqser ";
 			shaderCmd="aqsl ";
 			refMapCmd="??? ";
 			renderer="aqsis ";
@@ -32,7 +35,7 @@ class RenderScript {
 			refMapSuffix=".???";
 			break;
 		case RIBViewer.TYPE_3DELIGHT:
-			texCmd="tdlmake -mode 'periodic' ";
+			texCmd="tdlmake ";
 			shaderCmd="shaderdl ";
 			refMapCmd="??? ";
 			renderer="renderdl ";
@@ -40,7 +43,7 @@ class RenderScript {
 			refMapSuffix=".???";
 			break;
 		default:
-			texCmd="txmake -mode 'periodic' -resize 'up-' ";
+			texCmd="txmake -resize 'up-' ";
 			shaderCmd="shader ";
 			refMapCmd="??? ";
 			renderer="prman ";
@@ -49,8 +52,12 @@ class RenderScript {
 		}
 	}
 	
-	void addTexture(String tex) {
-		textures.add(tex);
+	void addTexture(String tex, int smode, int tmode) {    
+    String repeatS = smode==Texture2D.GL_REPEAT ? "-smode 'periodic' " : "-smode 'black' ";
+    String repeatT = tmode==Texture2D.GL_REPEAT ? "-tmode 'periodic' " : "-tmode 'black' ";
+    //String repeatS=smode==Texture2D.GL_REPEAT ? "-smode 'periodic' " : "-smode 'clamp' ";
+    //String repeatT=tmode==Texture2D.GL_REPEAT ? "-tmode 'periodic' " : "-tmode 'clamp' ";    
+   	textures.add(new String[]{tex, repeatS, repeatT});
 	}
 	
 	void addReflectionMap(String reflectionMap) {
@@ -71,8 +78,8 @@ class RenderScript {
 		
         System.out.println("cd "+dir.getAbsolutePath());
         
-        for (String texName : textures) {
-        	String cmd = texCmd+ribFileName+texName+".tiff "+ribFileName+texName+texSuffix;
+        for (String[] texName : textures) {
+        	String cmd = texCmd+texName[1]+texName[2]+ribFileName+texName[0]+".tiff "+ribFileName+texName[0]+texSuffix;
 			System.out.println(cmd);
         	//if (execute)
 			exec(cmd, true);
