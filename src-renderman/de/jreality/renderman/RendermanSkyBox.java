@@ -41,6 +41,7 @@
 package de.jreality.renderman;
 
 import java.awt.Color;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -104,7 +105,7 @@ class RendermanSkyBox {
 			tc[n++] = (float) texCoords[j][k];
 	for (int i = 0; i<6; ++i)	{
 		String name = ribv.writeTexture(imgs[i]);
-		ct.getAttributes().put("texturename",name);
+		ct.getAttributes().put("texturename", new File(name).getName());
 		ribv.ri.shader(ct);
 		int m = 0;
 		for (int j = 0; j<4; ++j)	{

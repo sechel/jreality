@@ -41,6 +41,7 @@
 package de.jreality.renderman.shader;
 
 import java.awt.Color;
+import java.io.File;
 import java.util.Map;
 
 import de.jreality.math.Matrix;
@@ -107,7 +108,7 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
             		} 
 //           } 
             if (fname == null) {
-            	fname = ribv.writeTexture(tex);
+            	fname = new File(ribv.writeTexture(tex)).getName();
             }
             // strip off leading path of absolute paths 
             // (use texture path in rib file to look up such textures
@@ -118,15 +119,7 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
             Matrix textureMatrix = tex.getTextureMatrix();
 			double[] mat = textureMatrix.getArray();
             if(mat != null && !Rn.isIdentityMatrix(mat, 10E-8)) {
-            	//map.put("matrix textureMatrix",RIBHelper.fTranspose(mat));
             	map.put("float[16] tm", RIBHelper.fTranspose(mat));
-//            	map.put("float m00", new Float(textureMatrix.getEntry(0, 0)));
-//            	map.put("float m01", new Float(textureMatrix.getEntry(0, 1)));
-//            	map.put("float m02", new Float(textureMatrix.getEntry(0, 2)));
-//            	map.put("float m10", new Float(textureMatrix.getEntry(1, 0)));
-//            	map.put("float m11", new Float(textureMatrix.getEntry(1, 1)));
-//            	map.put("float m12", new Float(textureMatrix.getEntry(1, 2)));
-//                shaderName = "transformedpaintedplastic";
                 shaderName = (signature == Pn.EUCLIDEAN) ? "transformedpaintedplastic" : "hpaintedplastic";
            }
         }

@@ -1,6 +1,9 @@
 package de.jreality.renderman;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashSet;
 
 class RenderScript {
@@ -13,6 +16,8 @@ class RenderScript {
 					textures=new HashSet<String>(),
 			  reflectionMaps=new HashSet<String>(),
 			         shaders=new HashSet<String>();
+
+	private boolean execute=false;
 	
 	protected RenderScript(File dir, String ribFileName, int type) {
 		this.dir=dir;
@@ -67,21 +72,58 @@ class RenderScript {
         System.out.println("cd "+dir.getAbsolutePath());
         
         for (String texName : textures) {
-        	System.out.println(texCmd+ribFileName+texName+".tiff "+ribFileName+texName+texSuffix);
+        	String cmd = texCmd+ribFileName+texName+".tiff "+ribFileName+texName+texSuffix;
+			System.out.println(cmd);
+        	//if (execute)
+			exec(cmd, true);
         }
         
         for (String shaderName : shaders) {
-        	System.out.println(shaderCmd+shaderName);
+        	String cmd = shaderCmd+shaderName;
+			System.out.println(cmd);
+			exec(cmd, true);
         }
 
         for (String refMapName : reflectionMaps) {
         	System.out.println(refMapCmd+refMapName);
         }
         
-        System.out.println(renderer + ribFileName);
+        String renderCmd = renderer + ribFileName;
+		System.out.println(renderCmd);
+		exec(renderCmd, false);
 
 		System.out.println("\n\n========= render script ==========\n\n");
 
+	}
+
+	private void exec(String cmd, boolean wait) {
+		if (!execute) return;
+		ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
+		pb.directory(dir);
+		pb.redirectErrorStream(true);
+		try {
+			final Process proc = pb.start();
+			Thread t = new Thread(new Runnable() {
+				public void run() {
+					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+					String line = null;
+					try {
+						while ((line = br.readLine()) != null) System.out.println(line);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			});
+			t.start();
+			if (wait) proc.waitFor();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	

@@ -177,7 +177,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	    renderScript.addShader("constantTexture.sl");
 	    
 	    
-        int index = ribFileName.lastIndexOf('/');
+        int index = ribFileName.lastIndexOf(File.separatorChar);
         outputFileName = ribFileName.substring(index+1,ribFileName.length()-3)+"tif";
      
 	    root = viewer.getSceneRoot();
@@ -329,7 +329,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         map.clear();
         map.put("eyesplits",maximumEyeSplits);
         ri.option("limits",map);
-		ri.display(outputFileName, "tiff", outputDisplayFormat,null);
+		ri.display(new File(outputFileName).getName(), "tiff", outputDisplayFormat,null);
         
         ri.format(width,height,1);
         // TODO make this a variable
