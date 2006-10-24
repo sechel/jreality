@@ -104,7 +104,7 @@ class RendermanSkyBox {
 		for (int k = 0; k<2; ++k) 
 			tc[n++] = (float) texCoords[j][k];
 	for (int i = 0; i<6; ++i)	{
-		String name = ribv.writeTexture(imgs[i]);
+		String name = ribv.writeTexture(imgs[i], Texture2D.CLAMP, Texture2D.CLAMP);
 		ct.getAttributes().put("texturename", new File(name).getName());
 		ribv.ri.shader(ct);
 		int m = 0;
