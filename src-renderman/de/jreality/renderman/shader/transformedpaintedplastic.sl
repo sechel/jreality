@@ -9,11 +9,12 @@
 
 
 surface
-transformedpaintedplastic ( float Ka = 1, Kd = .5, Ks = .5, Kr = .5, roughness = .1, reflectionBlend = .6,
-     	 m00 = 1, m01 = 0, m02 = 0, m10 = 0, m11 = 1,m12 = 0;
+transformedpaintedplastic ( float Ka = 1, Kd = .5, Ks = .5, Kr = .5, roughness = .1, reflectionBlend = .6;
+    float tm[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 		 color specularcolor = 1;
 		 string texturename = ""; 
 		 string reflectionmap = ""; 
+         float lighting = 1;
 		 )
 {
   normal Nf;
@@ -21,23 +22,18 @@ transformedpaintedplastic ( float Ka = 1, Kd = .5, Ks = .5, Kr = .5, roughness =
   color Ct, Cr;
   float tr = 1;
   float debug = 0;
-
-    Nf = faceforward (normalize(N),I);
-    D = reflect(I, Nf) ;
-    D = vtransform ("world", D);
-    V = -normalize(I);
+  matrix textureMatrix = matrix "current" (tm[0],tm[1],tm[2],tm[3],tm[4],tm[5],tm[6],tm[7],tm[8],tm[9],tm[10],tm[11],tm[12],tm[13],tm[14],tm[15]);
 
   // evaluate the texture map, if any
   if (texturename != ""){
-	//point a = point (s,t,0);
+	point a = point (s,t,0);
     // RenderMan automatically converts the textureMatrix into "current" space
     // so the point has also to be transformed into that space!
 	//point b = transform("shader", "current",a); 	 
-	//point p = transform( textureMatrix , b);
-	//float ss = xcomp(p);
-	//float tt = ycomp(p);
-	float ss = s*m00+t*m01+m02;
-	float tt = s*m10+t*m11+m12;
+	point p = transform( textureMatrix , a);
+	float ss = xcomp(p);
+	float tt = ycomp(p);
+    if (debug != 0) printf("texture coords are %f %f",ss,tt);
 	
 	tr = float texture(texturename[3],ss,tt, "fill",1);
     Ct = color texture (texturename,ss, tt);
@@ -51,15 +47,25 @@ transformedpaintedplastic ( float Ka = 1, Kd = .5, Ks = .5, Kr = .5, roughness =
     // modulate the opacity by the alpha channel of the texture
     Oi = Os*tr;
 
-    // calculate the diffuse component
-    Ct = Ct * (Ka*ambient() + Kd*diffuse(Nf)) ;
+    if (lighting != 0)  {
+        Nf = faceforward (normalize(N),I);
+        V = -normalize(I);
+        // calculate the diffuse component
+        Ct = Ct * (Ka*ambient() + Kd*diffuse(Nf)) ;
+    }
+
 
     // and add in the reflection map (without modulating by shading)
     if (reflectionmap != "") {
+        D = reflect(I, Nf) ;
+        D = vtransform ("world", D);
 	    Ct = (1-reflectionBlend) * Ct + reflectionBlend * color environment(reflectionmap, D);
     } 
 
     // the surface color is a sum of ambient, diffuse, specular
-    Ci = Oi * ( Ct + specularcolor * Ks*specular(Nf,V,roughness) );
+    if (lighting != 0)
+        Ci = Oi * ( Ct + specularcolor * Ks*specular(Nf,V,roughness) );
+    else 
+        Ci = Ct;
 }
 
