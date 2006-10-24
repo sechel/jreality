@@ -473,7 +473,9 @@ public class RIBVisitor extends SceneGraphVisitor {
             ri.color(rgb);
         }
  
-        double transparency = eap.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
+		boolean transparencyEnabled = (boolean) eap.getAttribute(type+"."+CommonAttributes.TRANSPARENCY_ENABLED, true);
+        double transparency = 0.0;
+        if (transparencyEnabled) transparency = eap.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
         currentOpacity = 1f - (float)transparency;
         currentOpacity *= colorAlpha;
 		//currentOpacity *= colorAlpha;

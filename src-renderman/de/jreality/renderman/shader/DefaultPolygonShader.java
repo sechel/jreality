@@ -77,7 +77,12 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
 	
 	public void setFromEffectiveAppearance(RIBVisitor ribv, EffectiveAppearance eap, String name) {
 		map.clear();
-        float specularExponent =(float) eap.getAttribute(name+"."+CommonAttributes.SPECULAR_EXPONENT,CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
+		boolean lighting = (boolean) eap.getAttribute(name+"."+CommonAttributes.LIGHTING_ENABLED, true);
+		if (!lighting)	{
+			shaderName = "constant";
+			return;
+		}
+		float specularExponent =(float) eap.getAttribute(name+"."+CommonAttributes.SPECULAR_EXPONENT,CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
         float Ks =(float) eap.getAttribute(name+"."+CommonAttributes.SPECULAR_COEFFICIENT,CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);
         float Kd =(float) eap.getAttribute(name+"."+CommonAttributes.DIFFUSE_COEFFICIENT,CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
         float Ka =(float) eap.getAttribute(name+"."+CommonAttributes.AMBIENT_COEFFICIENT,CommonAttributes.AMBIENT_COEFFICIENT_DEFAULT);
@@ -142,7 +147,7 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
     	    	map.put("reflectionBlend", new Float(reflectionMap.getBlendColor().getAlpha()/255.0));
                 shaderName = (signature == Pn.EUCLIDEAN) ? "transformedpaintedplastic" : "hpaintedplastic";
    		}
-	    	}
+	    }
     }
 
 	public String getType() {
