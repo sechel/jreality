@@ -52,11 +52,27 @@ class RenderScript {
 		}
 	}
 	
-	void addTexture(String tex, int smode, int tmode) {    
-    String repeatS = smode==Texture2D.GL_REPEAT ? "-smode 'periodic' " : "-smode 'black' ";
-    String repeatT = tmode==Texture2D.GL_REPEAT ? "-tmode 'periodic' " : "-tmode 'black' ";
-    //String repeatS=smode==Texture2D.GL_REPEAT ? "-smode 'periodic' " : "-smode 'clamp' ";
-    //String repeatT=tmode==Texture2D.GL_REPEAT ? "-tmode 'periodic' " : "-tmode 'clamp' ";    
+	void addTexture(String tex, int smode, int tmode) {   
+    String repeatS="";
+    switch(smode){
+    //case Texture2D.GL_MIRRORED_REPEAT: repeatS="";  // <- no support in renderman
+    case(Texture2D.GL_REPEAT): repeatS="-smode 'periodic' "; break;           
+    case(Texture2D.GL_CLAMP): repeatS="-smode 'clamp' "; break;                  
+    case(Texture2D.GL_CLAMP_TO_EDGE): repeatS="-smode 'clamp' "; break;
+    default: repeatS="-smode 'periodic' ";
+    }    
+    String repeatT="";   
+    switch(tmode){
+    //case Texture2D.GL_MIRRORED_REPEAT: repeatT="";  // <- no support in renderman
+    case(Texture2D.GL_REPEAT): repeatT="-tmode 'periodic' "; break;
+    case(Texture2D.GL_CLAMP): repeatT="-tmode 'clamp' "; break;               
+    case(Texture2D.GL_CLAMP_TO_EDGE): repeatT="-tmode 'clamp' "; break;
+    default: repeatT="-tmode 'periodic' ";
+    }
+    
+//    String repeatS = smode==Texture2D.GL_REPEAT ? "-smode 'periodic' " : "-smode 'clamp' ";
+//    String repeatT = tmode==Texture2D.GL_REPEAT ? "-tmode 'periodic' " : "-tmode 'clamp' ";
+    
    	textures.add(new String[]{tex, repeatS, repeatT});
 	}
 	
