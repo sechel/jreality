@@ -199,7 +199,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		if (camera.isStereo())	{
 			// Careful: the rest of the code expects left eye to be rendered first!
 			whichEye = CameraUtility.LEFT_EYE;
-		    index = ribFileName.lastIndexOf('/');
+		    index = ribFileName.lastIndexOf(File.separator);
 		    outputFileName = ribFileName.substring(index+1,ribFileName.length()-4)+"L.tif";	
 			ri.frameBegin(0);
 			render();
