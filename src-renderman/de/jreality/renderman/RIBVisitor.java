@@ -496,19 +496,19 @@ public class RIBVisitor extends SceneGraphVisitor {
      * @param tex
      * @return
      */
-    public String writeTexture(Texture2D tex) {
-            ImageData data = tex.getImage(); 
-            return writeTexture(data);
+    public String writeTexture(Texture2D tex) {      
+      ImageData data = tex.getImage();
+      return writeTexture(data, tex.getRepeatS(), tex.getRepeatT());
     }
 
-	public String writeTexture(ImageData data) {
+	public String writeTexture(ImageData data, int repeatS, int repeatT) {
 		String noSuffix = (String) textures.get(data);
 		if(noSuffix == null) {
 			String texFileName = "_texture"+(textureCount++);
 			noSuffix = ribFileName+texFileName;
 		    RIBHelper.writeTexture(data, noSuffix);
 			textures.put(data, noSuffix);
-			renderScript.addTexture(texFileName);
+			renderScript.addTexture(texFileName, repeatS, repeatT);
          }
 		return noSuffix+"."+textureFileSuffix;		// should be dependent on the final renderman renderer
 	}
