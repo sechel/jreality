@@ -281,9 +281,9 @@ public class VRMLHelper {
 		for (int i = 0 ;i<rn; ++i)	{
 			angle = i*delta;
 			verts[3*(i+rn)]   = verts[3*i]   = Math.cos(angle);
-			verts[3*(i+rn)+1] = verts[3*i+1] = Math.sin(angle);
-			verts[3*i+2] = 0.5;
-			verts[3*(i+rn)+2] = -0.5;
+			verts[3*(i+rn)+2] = verts[3*i+2] = Math.sin(angle);
+			verts[3*i+1] = 0.5;
+			verts[3*(i+rn)+1] = -0.5;
 		}
 		QuadMeshFactory qmf = new QuadMeshFactory();//Pn.EUCLIDEAN, n+1, 2, true, false);
 		qmf.setULineCount(n+1);
@@ -300,9 +300,9 @@ public class VRMLHelper {
 		for (int  i =0; i<n; ++i)	{
 			angle = 2 * (i+.5) * Math.PI/n;
 			verts2[i][0] = verts3[i][0] = Math.cos(angle);
-			verts2[i][1] = verts3[i][1] = Math.sin(angle);
-			verts2[i][2] = 0.5;
-			verts3[i][2] = -0.5;
+			verts2[i][2] = verts3[i][2] = Math.sin(angle);
+			verts2[i][1] = 0.5;
+			verts3[i][1] = -0.5;
 		}
 		IndexedFaceSet geo2= IndexedFaceSetUtility.constructPolygon(verts2);
 		IndexedFaceSetUtility.assignSmoothVertexNormals(geo2,0,0);

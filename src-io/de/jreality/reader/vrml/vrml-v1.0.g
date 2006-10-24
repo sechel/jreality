@@ -531,7 +531,7 @@ cylinderNode [State state]returns [IndexedFaceSet cylinder=null]
 		state.edgeDraw=2;
 		state.vertexDraw=2;
 		state.faceDraw=0;
-		MatrixBuilder.euclidean().scale(r,r,h).assignTo(state.extraGeoTrans);
+		MatrixBuilder.euclidean().scale(r,h,r).assignTo(state.extraGeoTrans);
 		if (VRMLHelper.verbose) System.err.println(")");
 	}
 	;
@@ -591,6 +591,7 @@ indexedFaceSetNode [State state] returns [IndexedFaceSet ifs=null]
 private
 indexedLineSetNode[State state] returns [IndexedLineSet ils=null]
 { //TODO3: normal,texture
+  State state2= new State(state);
   if (VRMLHelper.verbose) System.err.print("IndexedLineSet( "); 
   int[] coordIndex	= new int[]{0};
   int[] materialIndex	= new int[]{-1};
@@ -618,11 +619,11 @@ indexedLineSetNode[State state] returns [IndexedLineSet ils=null]
 	IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
 	ilsf.setVertexCount(state.coords.length);
 	ilsf.setLineCount(coordIndex2.length);
-	ilsf.setVertexAttribute(Attribute.COORDINATES,new DoubleArrayArray.Array(state.coords) );
+	ilsf.setVertexAttribute(Attribute.COORDINATES,new DoubleArrayArray.Array(state2.coords) );
 	ilsf.setEdgeIndices(coordIndex2);
-	// TODO2: handle Bindings, Normals, Colors
+	VRMLHelper.setColors(ilsf,coordIndex2,materialIndex2,state2);
+	// TODO2: handle Normals
 	// Normals:	if (normalIndex2.length>0){}else {}
-	// Colors:	if (materialIndex2.length>0){}else {}
 	// Texture:	if (textureCoordIndex2.length>0){}else {}
 
 	ilsf.update();
@@ -1284,7 +1285,6 @@ mffloatValue returns [double[] dl=null]
 	 |(d = sffloatValue	{dl = new double[]{d};} )	
 	;
 
-// TODO2: RueckgabeWert
 private 
 sfimageValue returns[int[][][] colors = new int[][][]{{{}}} ]
 {int width=0;
