@@ -28,27 +28,27 @@ import de.jreality.util.LoggingSystem;
 public class RIBHelper {
 
 	public static void writeShader(String name, String shaderName ) {
-		try {
-		    File file = new File(name);
-		    System.out.println("writing in  "+name);
-		    file = new File(file.getParent(),shaderName);
-		    System.out.println("checking on "+file+" exists "+file.exists());
-		    if(!file.exists()) {
-		    OutputStream os = new FileOutputStream(file);
-		    InputStream is = DefaultPolygonShader.class.getResourceAsStream(shaderName);
-		    
-		    int c = 0;
-		    while((c =is.read())!=-1) {
-		        os.write(c);
-		    }
-		    os.close();
-		    is.close();
-		    }
-		} catch (FileNotFoundException e) {
-		    e.printStackTrace();
-		} catch (IOException e) {
-		    e.printStackTrace();
-		}
+//		try {
+//		    File file = new File(name);
+//		    System.out.println("writing in  "+name);
+//		    file = new File(file.getParent(),shaderName);
+//		    System.out.println("checking on "+file+" exists "+file.exists());
+//		    if(!file.exists()) {
+//		    	OutputStream os = new FileOutputStream(file);
+//		    	InputStream is = DefaultPolygonShader.class.getResourceAsStream(shaderName);
+//		    
+//		    	int c = 0;
+//		    	while((c =is.read())!=-1) {
+//		    		os.write(c);
+//		    	}
+//		    	os.close();
+//		    	is.close();
+//		    }
+//		} catch (FileNotFoundException e) {
+//		    e.printStackTrace();
+//		} catch (IOException e) {
+//		    e.printStackTrace();
+//		}
 	}
 
 	/**
