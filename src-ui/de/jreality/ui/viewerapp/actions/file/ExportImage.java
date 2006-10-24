@@ -38,77 +38,51 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions;
+package de.jreality.ui.viewerapp.actions.file;
 
-import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.io.File;
 
-import javax.swing.KeyStroke;
-
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.ui.viewerapp.SelectionEvent;
-import de.jreality.ui.viewerapp.SelectionListener;
-import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.scene.Viewer;
+import de.jreality.ui.viewerapp.FileLoaderDialog;
+import de.jreality.ui.viewerapp.ViewerSwitch;
+import de.jreality.ui.viewerapp.actions.AbstractAction;
 
 
-public abstract class AbstractAction extends javax.swing.AbstractAction implements SelectionListener {
+public class ExportImage extends AbstractAction {
 
-  protected Component frame;
-  protected SceneGraphPath selection;
-  
-  
-  protected AbstractAction(String name, final SelectionManager sm, Component frame) {
-    super(name);
-    
-    if (sm == null) 
-      throw new IllegalArgumentException("SelectionManager is null!");
-    
-    this.frame = frame;
-    selection = sm.getSelection();
-    
-    sm.addSelectionListener(this);
-  }
-  
-  
-  protected AbstractAction(String name, SelectionManager sm) {
-    this(name, sm, null);
-  }
-  
-  
-  protected AbstractAction(String name, ViewerApp viewerApp) {
-    this(name, viewerApp.getSelectionManager(), viewerApp.getFrame());
-  }
-  
-  
-  protected AbstractAction(String name) {
-    super(name);
-  }
-  
-  
-  public void selectionChanged(SelectionEvent e) {
-    selection = e.getSelection();
-    
-    if (isEnabled(e)) setEnabled(true);
-    else setEnabled(false);
-  }
-  
-  
-  protected boolean isEnabled(SelectionEvent e) {
-    return true;
-  }
-  
-  
-  public abstract void actionPerformed(ActionEvent e);
-  
-  
-  protected void setAcceleratorKey(KeyStroke key) {
-    putValue(ACCELERATOR_KEY, key);
-  }
-  
-  
-  protected void setName(String name) {
-    putValue(NAME, name);
-  }
-  
+	private Viewer viewer;
+
+
+	public ExportImage(String name, Viewer viewer, Frame frame) {
+		super(name);
+		this.frame = frame;
+		putValue(SHORT_DESCRIPTION, "Export image file");
+
+		if (viewer == null) 
+			throw new IllegalArgumentException("Viewer is null!");
+		this.viewer = viewer;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		File file = FileLoaderDialog.selectTargetFile(frame, null, "image files");
+		if (file == null) return;
+		// Hack
+		Viewer realViewer = ((ViewerSwitch)viewer).getCurrentViewer();
+		de.jreality.jogl.Viewer joglViewer = (de.jreality.jogl.Viewer) realViewer;
+		
+		Dimension d = joglViewer.getViewingComponentSize();
+		int w = 2 * d.width;
+		int h = 2 * d.height;
+		joglViewer.renderOffscreen(w, h, file);
+	}
+	
+	@Override
+	public boolean isEnabled() {
+		Viewer realViewer = ((ViewerSwitch)viewer).getCurrentViewer();
+		return realViewer instanceof de.jreality.jogl.Viewer;
+	}
 }

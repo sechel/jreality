@@ -70,6 +70,7 @@ import de.jreality.ui.viewerapp.actions.edit.AddTool;
 import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
 import de.jreality.ui.viewerapp.actions.edit.Remove;
 import de.jreality.ui.viewerapp.actions.edit.TogglePickable;
+import de.jreality.ui.viewerapp.actions.file.ExportImage;
 import de.jreality.ui.viewerapp.actions.file.ExportRIB;
 import de.jreality.ui.viewerapp.actions.file.ExportSVG;
 import de.jreality.ui.viewerapp.actions.file.LoadFile;
@@ -83,7 +84,6 @@ import de.jreality.ui.viewerapp.actions.view.ToggleBeanShell;
 import de.jreality.ui.viewerapp.actions.view.ToggleFullScreen;
 import de.jreality.ui.viewerapp.actions.view.ToggleMenu;
 import de.jreality.ui.viewerapp.actions.view.ToggleNavigator;
-import de.jreality.ui.viewerapp.actions.view.ToggleRenderSelection;
 import de.jreality.ui.viewerapp.actions.view.ToggleViewerFullScreen;
 
 
@@ -148,6 +148,7 @@ public class MenuFactory {
   private JCheckBoxMenuItem beanShellCheckBox;
   private JCheckBoxMenuItem renderSelectionCheckbox;
   private Navigator.SelectionListener navigatorListener = null;
+private ExportImage exportImageAction;
 
 
   protected MenuFactory(ViewerApp v) {
@@ -181,7 +182,10 @@ public class MenuFactory {
     rib.add(new JMenuItem(new ExportRIB("Pixar", RIBViewer.TYPE_PIXAR, viewerSwitch, frame)));
     rib.add(new JMenuItem(new ExportRIB("3DLight", RIBViewer.TYPE_3DELIGHT, viewerSwitch, frame)));
     rib.add(new JMenuItem(new ExportRIB("Aqsis", RIBViewer.TYPE_AQSIS, viewerSwitch, frame)));
+
     export.add(new JMenuItem(new ExportSVG("SVG", viewerSwitch, frame)));
+    exportImageAction = new ExportImage("Image", viewerSwitch, frame);
+	export.add(new JMenuItem(exportImageAction));
     fileMenu.addSeparator();
     fileMenu.add(new JMenuItem(new Quit(QUIT)));    
     
@@ -266,6 +270,7 @@ public class MenuFactory {
             public void actionPerformed(ActionEvent e) {
               viewerSwitch.selectViewer(index);
               viewerSwitch.getCurrentViewer().renderAsync();
+              exportImageAction.setEnabled(exportImageAction.isEnabled());
             }
           });
       item.setSelected(index==0);
