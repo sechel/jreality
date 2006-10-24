@@ -36,9 +36,9 @@ class RenderScript {
 			break;
 		default:
 			texCmd="txmake -mode 'periodic' -resize 'up-' ";
-			shaderCmd="??? ";
+			shaderCmd="shader ";
 			refMapCmd="??? ";
-			renderer="??? ";
+			renderer="prman ";
 			texSuffix=".tex";
 			refMapSuffix=".???";
 		}
