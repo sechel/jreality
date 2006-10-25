@@ -227,7 +227,7 @@ public class SelectionManager implements TransformationListener {
   public void setAuxiliaryRoot(SceneGraphComponent aux) {
     //if (auxiliaryRoot != null) auxiliaryRoot.removeChild(selectionKit);
     auxiliaryRoot = aux;
-    auxiliaryRoot.addChild(selectionKit);
+    if (auxiliaryRoot != null) auxiliaryRoot.addChild(selectionKit);
   }
 
 
