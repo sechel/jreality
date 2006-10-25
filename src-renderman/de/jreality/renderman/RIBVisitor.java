@@ -173,7 +173,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	    renderScript=new RenderScript(dir, ribF.getName(), rendererType);
 	    
 	    // register standard shaders for render script
-	    renderScript.addShader("transformedpaintedplastic.sl");
+	    renderScript.addShader("defaultpolygonshader.sl");
 	    renderScript.addShader("constantTexture.sl");
 	    
 	    
@@ -1074,7 +1074,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			String right = new File(writeTexture(reflectionMap.getRight(), Texture2D.GL_CLAMP_TO_EDGE, Texture2D.GL_CLAMP_TO_EDGE)).getName();
 			String front = new File(writeTexture(reflectionMap.getFront(), Texture2D.GL_CLAMP_TO_EDGE, Texture2D.GL_CLAMP_TO_EDGE)).getName();
 			String back = new File(writeTexture(reflectionMap.getBack(), Texture2D.GL_CLAMP_TO_EDGE, Texture2D.GL_CLAMP_TO_EDGE)).getName();
-			renderScript.addReflectionMap(cubeMapFileName, top, bottom, left, right, front, back);
+			renderScript.addReflectionMap(cubeMapFileName, back, front, bottom, top, left, right);
         }
 		return noSuffix+"."+cubeMapFileSuffix;
 	}

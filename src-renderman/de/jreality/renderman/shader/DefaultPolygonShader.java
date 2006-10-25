@@ -88,7 +88,7 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
         map.put("lighting", new Float( lighting ? 1 : 0));
        
         int signature = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-        shaderName = (signature == Pn.EUCLIDEAN) ? "transformedpaintedplastic" : "htransformedpaintedplastic";
+        shaderName = (signature == Pn.EUCLIDEAN) ? "defaultpolygonshader" : "htransformedpaintedplastic";
 		boolean ignoreTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name,"ignoreTexture2d"), false);	
         if (!ignoreTexture2d && AttributeEntityUtility.hasAttributeEntity(Texture2D.class, "polygonShader.texture2d", eap)) {
         	Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), eap);
