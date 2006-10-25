@@ -77,48 +77,48 @@ import java.awt.Color;
  */
 public interface DefaultPolygonShader extends PolygonShader {
 
-  final static double AMBIENT_COEFFICIENT_DEFAULT = .0;
+	final static double AMBIENT_COEFFICIENT_DEFAULT = .0;
 
-  final static Color AMBIENT_COLOR_DEFAULT = Color.WHITE;
-  final static double DIFFUSE_COEFFICIENT_DEFAULT = 1.0;
-  final static Color DIFFUSE_COLOR_DEFAULT = Color.BLUE;
-  final static boolean SMOOTH_SHADING_DEFAULT = true;
-  final static double SPECULAR_COEFFICIENT_DEFAULT = .7;
-  final static Color SPECULAR_COLOR_DEFAULT = Color.WHITE;
-  final static double SPECULAR_EXPONENT_DEFAULT = 60.;
-  final static double TRANSPARENCY_DEFAULT = 0.5;
-  Object CREATE_DEFAULT=new Object();
+	final static Color AMBIENT_COLOR_DEFAULT = Color.WHITE;
+	final static double DIFFUSE_COEFFICIENT_DEFAULT = 1.0;
+	final static Color DIFFUSE_COLOR_DEFAULT = Color.BLUE;
+	final static boolean SMOOTH_SHADING_DEFAULT = true;
+	final static double SPECULAR_COEFFICIENT_DEFAULT = .7;
+	final static Color SPECULAR_COLOR_DEFAULT = Color.WHITE;
+	final static double SPECULAR_EXPONENT_DEFAULT = 60.;
+	final static double TRANSPARENCY_DEFAULT = 0.5;
+	Object CREATE_DEFAULT=new Object();
 
-  TextShader createTextShader(String name);
-  Texture2D createTexture2d();
+	TextShader createTextShader(String name);
+	Texture2D createTexture2d();
 
-  Double getAmbientCoefficient();
-  Color getAmbientColor();
+	Double getAmbientCoefficient();
+	Color getAmbientColor();
 
-  Double getDiffuseCoefficient();
-  Color getDiffuseColor();
+	Double getDiffuseCoefficient();
+	Color getDiffuseColor();
 
-  Boolean getSmoothShading();
-  Double getSpecularCoefficient();
+	Boolean getSmoothShading();
+	Double getSpecularCoefficient();
 
-  Color getSpecularColor();
-  Double getSpecularExponent();
+	Color getSpecularColor();
+	Double getSpecularExponent();
 
-  TextShader getTextShader();
-  Texture2D getTexture2d();
+	TextShader getTextShader();
+	Texture2D getTexture2d();
 
-  Double getTransparency();
-  void setAmbientCoefficient(Double d);
+	Double getTransparency();
+	void setAmbientCoefficient(Double d);
 
-  void setAmbientColor(Color c);
-  void setDiffuseCoefficient(Double d);
+	void setAmbientColor(Color c);
+	void setDiffuseCoefficient(Double d);
 
-  void setDiffuseColor(Color c);
-  void setSmoothShading(Boolean b);
+	void setDiffuseColor(Color c);
+	void setSmoothShading(Boolean b);
 
-  void setSpecularCoefficient(Double d);
-  void setSpecularColor(Color c);
+	void setSpecularCoefficient(Double d);
+	void setSpecularColor(Color c);
 
-  void setSpecularExponent(Double d);
-  void setTransparency(Double d);
+	void setSpecularExponent(Double d);
+	void setTransparency(Double d);
 }

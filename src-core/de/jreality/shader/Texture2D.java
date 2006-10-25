@@ -125,9 +125,12 @@ public interface Texture2D extends AttributeEntity {
   public static final int REPEAT_T_DEFAULT=GL_REPEAT;
 
   public static final int APPLY_MODE_DEFAULT = GL_MODULATE;
+  //public static final int APPLY_MODE_DEFAULT = GL_COMBINE;
+  
   public static final int MAG_FILTER_DEFAULT = GL_LINEAR;
   public static final int MIN_FILTER_DEFAULT = GL_LINEAR;
   public static final int COMBINE_MODE_DEFAULT = GL_INTERPOLATE;
+  //public static final int COMBINE_MODE_DEFAULT = GL_MODULATE;
 
   public static final Matrix TEXTURE_MATRIX_DEFAULT=new Matrix();
   public static final Color BLEND_COLOR_DEFAULT=Color.WHITE;
