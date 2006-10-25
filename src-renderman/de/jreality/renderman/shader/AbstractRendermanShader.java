@@ -50,7 +50,6 @@ public abstract class AbstractRendermanShader implements RendermanShader {
 	protected Map<String, Object> map = new HashMap<String, Object>();
 	protected String shaderName;
 	protected String type;
-	protected RIBVisitor ribV = null;
 	
 	abstract public void setFromEffectiveAppearance(RIBVisitor ribv, EffectiveAppearance ap, String name);
 	 public Map getAttributes() { return map; }

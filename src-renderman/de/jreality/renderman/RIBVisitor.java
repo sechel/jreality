@@ -620,6 +620,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 	private Appearance rootAppearance;
 	private String outputFileName;
 	private boolean transparencyEnabled;
+	private HashMap<ImageData, String> cubeMaps=new HashMap<ImageData, String>();
+	private int cubeMapCount;
+	private String cubeMapFileSuffix="env";
+	
    /* (non-Javadoc)
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.IndexedLineSet)
      */
@@ -1056,5 +1060,22 @@ public class RIBVisitor extends SceneGraphVisitor {
 
     public int getRendererType() {
 		return rendererType;
+	}
+
+	public String writeCubeMap(CubeMap reflectionMap) {
+		String noSuffix = cubeMaps.get(reflectionMap.getTop());
+		if(noSuffix == null) {
+			String cubeMapFileName = "_cubeMap"+(cubeMapCount++);
+			noSuffix = ribFileName+cubeMapFileName;
+			cubeMaps.put(reflectionMap.getTop(), noSuffix);
+			String top = new File(writeTexture(reflectionMap.getTop(), Texture2D.GL_CLAMP_TO_EDGE, Texture2D.GL_CLAMP_TO_EDGE)).getName();
+			String bottom = new File(writeTexture(reflectionMap.getBottom(), Texture2D.GL_CLAMP_TO_EDGE, Texture2D.GL_CLAMP_TO_EDGE)).getName();
+			String left = new File(writeTexture(reflectionMap.getLeft(), Texture2D.GL_CLAMP_TO_EDGE, Texture2D.GL_CLAMP_TO_EDGE)).getName();
+			String right = new File(writeTexture(reflectionMap.getRight(), Texture2D.GL_CLAMP_TO_EDGE, Texture2D.GL_CLAMP_TO_EDGE)).getName();
+			String front = new File(writeTexture(reflectionMap.getFront(), Texture2D.GL_CLAMP_TO_EDGE, Texture2D.GL_CLAMP_TO_EDGE)).getName();
+			String back = new File(writeTexture(reflectionMap.getBack(), Texture2D.GL_CLAMP_TO_EDGE, Texture2D.GL_CLAMP_TO_EDGE)).getName();
+			renderScript.addReflectionMap(cubeMapFileName, top, bottom, left, right, front, back);
+        }
+		return noSuffix+"."+cubeMapFileSuffix;
 	}
 }

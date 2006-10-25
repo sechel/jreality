@@ -22,6 +22,7 @@ import javax.imageio.ImageWriter;
 
 import de.jreality.math.Rn;
 import de.jreality.renderman.shader.DefaultPolygonShader;
+import de.jreality.shader.CubeMap;
 import de.jreality.shader.ImageData;
 import de.jreality.util.LoggingSystem;
 
@@ -184,6 +185,5 @@ public class RIBHelper {
 	     LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write PNG: {0}.png", noSuffix);
 	  }
 	}
-  
 
 }

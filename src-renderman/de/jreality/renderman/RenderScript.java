@@ -15,9 +15,9 @@ class RenderScript {
 	final String ribFileName, texCmd, shaderCmd, refMapCmd, renderer, texSuffix, refMapSuffix;
 	
 	HashSet<String> ribFiles=new HashSet<String>(),
-	             reflectionMaps=new HashSet<String>(),
 			         shaders=new HashSet<String>();
-  HashSet<String[]> textures=new HashSet<String[]>();
+  HashSet<String[]> textures=new HashSet<String[]>(),
+  					reflectionMaps=new HashSet<String[]>();
 
 
 	private boolean execute=false;
@@ -45,10 +45,10 @@ class RenderScript {
 		default:
 			texCmd="txmake -resize 'up-' ";
 			shaderCmd="shader ";
-			refMapCmd="??? ";
+			refMapCmd="txmake -envcube ";
 			renderer="prman ";
 			texSuffix=".tex";
-			refMapSuffix=".???";
+			refMapSuffix=".env";
 		}
 	}
 	
@@ -76,7 +76,7 @@ class RenderScript {
    	textures.add(new String[]{tex, repeatS, repeatT});
 	}
 	
-	void addReflectionMap(String reflectionMap) {
+	void addReflectionMap(String... reflectionMap) {
 		reflectionMaps.add(reflectionMap);
 	}
 
@@ -97,7 +97,6 @@ class RenderScript {
         for (String[] texName : textures) {
         	String cmd = texCmd+texName[1]+texName[2]+ribFileName+texName[0]+".tiff "+ribFileName+texName[0]+texSuffix;
 			System.out.println(cmd);
-        	//if (execute)
 			exec(cmd, true);
         }
         
@@ -107,8 +106,8 @@ class RenderScript {
 			exec(cmd, true);
         }
 
-        for (String refMapName : reflectionMaps) {
-        	System.out.println(refMapCmd+refMapName);
+        for (String[] refMap : reflectionMaps) {
+        	System.out.println(refMapCmd+refMap[1]+" "+refMap[2]+" "+refMap[3]+" "+refMap[4]+" "+refMap[5]+" "+refMap[6]+" "+ribFileName+refMap[0]+refMapSuffix);
         }
         
         String renderCmd = renderer + ribFileName;

@@ -41,6 +41,7 @@
 package de.jreality.renderman.shader;
 
 import java.awt.Color;
+import java.io.File;
 import java.util.Map;
 
 import de.jreality.math.Matrix;
@@ -63,11 +64,7 @@ import de.jreality.shader.TextureUtility;
  */
 public class DefaultPolygonShader extends AbstractRendermanShader {
 
-	// maybe use these somedays for a two-sided shader
-	//public static final int FRONT_AND_BACK = GL.GL_FRONT_AND_BACK;
-	//public static final int FRONT = GL.GL_FRONT;
-	//public static final int BACK = GL.GL_BACK;
-	  CubeMap reflectionMap;
+    CubeMap reflectionMap;
 	
 		
 	static int count = 0;
@@ -91,47 +88,39 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
         map.put("lighting", new Float( lighting ? 1 : 0));
        
         int signature = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-        shaderName = (signature == Pn.EUCLIDEAN) ? "defaultpolygonshader" : "hpaintedplastic";
+        shaderName = (signature == Pn.EUCLIDEAN) ? "transformedpaintedplastic" : "htransformedpaintedplastic";
 		boolean ignoreTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name,"ignoreTexture2d"), false);	
         if (!ignoreTexture2d && AttributeEntityUtility.hasAttributeEntity(Texture2D.class, "polygonShader.texture2d", eap)) {
         	Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), eap);
-        	// TODO: write out other fields of the texture: apply mode, combine mode, ...
-        	// and/or use these fields to control generation of renderman texture file
-        	// (That is, some things need to be done in shader and some in e.g., txmake)
+         
             String fname = null;
-//            if (ribv.getRendererType() == RIBViewer.TYPE_PIXAR)	{
-            fname = (String) eap.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE,"");
-            if (fname == "") fname = null;
-           
+    		fname = (String) eap.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE,"");
+    		if (fname == "")	{
+    			fname = null;
+    		} 
             if (fname == null) {
-            	fname = ribv.writeTexture(tex);
+            	fname = new File(ribv.writeTexture(tex)).getName();
             }
-            // strip off leading path of absolute paths 
-            // (use texture path in rib file to look up such textures
-            if (fname.indexOf('/') == 0)	{
-            	fname = fname.substring(fname.lastIndexOf('/')+1);
-            }
-             map.put("string texturename",fname);
+            // removed texfile path stripping -> is just the filename without path now. 
+            map.put("string texturename",fname);
             Matrix textureMatrix = tex.getTextureMatrix();
 			double[] mat = textureMatrix.getArray();
             if(mat != null && !Rn.isIdentityMatrix(mat, 10E-8)) {
-             	map.put("float[16] tm", RIBHelper.fTranspose(mat));
+            	map.put("float[16] tm", RIBHelper.fTranspose(mat));
            }
         }
 	    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))
 	    	{
 	    	reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));
-	    	// TODO figure out how to write out a reflection map so that a renderman renderer can digest it
-	    	// failing that, require user to hand-set the file name to be read
 	    	String fname = (String) eap.getAttribute(CommonAttributes.RMAN_REFLECTIONMAP_FILE,"");
-    		if (fname == "")	{
+    		if (fname == "") {
     			fname = null;
-    		} 
-    		if (fname != null) {
-    	    	map.put("string reflectionmap", fname);
-//    	    	shaderName = "transformedpaintedplastic";   
-    	    	map.put("reflectionBlend", new Float(reflectionMap.getBlendColor().getAlpha()/255.0));
-   		}
+    		}
+    		if (fname == null) {
+    			fname = ribv.writeCubeMap(reflectionMap);
+    		}
+	    	map.put("string reflectionmap", fname);
+	    	map.put("reflectionBlend", new Float(reflectionMap.getBlendColor().getAlpha()/255.0));
 	    }
     }
 
