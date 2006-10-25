@@ -192,7 +192,7 @@ private ExportImage exportImageAction;
     
     //EDIT MENU
     JMenu editMenu = new JMenu(EDIT_MENU);
-    editMenu.setMnemonic(KeyEvent.VK_C);
+    editMenu.setMnemonic(KeyEvent.VK_E);
     menuBar.add(editMenu);
     
     editMenu.add(new JMenuItem(new Remove(REMOVE, sm)));
@@ -227,7 +227,7 @@ private ExportImage exportImageAction;
     
     //CAMERA MENU
     JMenu cameraMenu = new JMenu(CAMERA_MENU);
-    cameraMenu.setMnemonic(KeyEvent.VK_M);
+    cameraMenu.setMnemonic(KeyEvent.VK_C);
     menuBar.add(cameraMenu);
     cameraMenu.add(new JMenuItem(new ShiftFieldOfView(DECREASE_FIELD_OF_VIEW, viewerSwitch, true)));
     cameraMenu.add(new JMenuItem(new ShiftFieldOfView(INCREASE_FIELD_OF_VIEW, viewerSwitch, false)));

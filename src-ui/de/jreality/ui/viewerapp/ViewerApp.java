@@ -233,8 +233,11 @@ public class ViewerApp {
     frame.validate();
     
     //encompass scene before displaying
-//    CameraUtility.encompass(currViewer);
-//    currViewer.render();
+/* 	CameraUtility.encompass(currViewer.getAvatarPath(),
+    		currViewer.getEmptyPickPath(),
+    		currViewer.getCameraPath(),
+			1.75, currViewer.getSignature());
+*/
 	
     frame.setVisible(true);
     
