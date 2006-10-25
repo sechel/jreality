@@ -46,8 +46,10 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -89,6 +91,7 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
+import de.jreality.renderman.RIBVisitor;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Cylinder;
@@ -1493,13 +1496,30 @@ public class JOGLRenderer  implements AppearanceListener {
 	    //display(offscreenPBuffer);
 
 	    ImageUtil.flipImageVertically(img);
-	    try {
-			if (!ImageIO.write(img, FileUtil.getFileSuffix(file), file)) {
-				JOGLConfiguration.getLogger().log(Level.WARNING,"Error writing file using ImageIO (unsupported file format?)");
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+
+	  // force alpha channel to be "pre-multiplied"
+	  img.coerceData(true);
+	
+	  boolean worked=true;
+	  System.err.println("Writing to file "+file.getPath());
+	  if (file.getName().endsWith(".tiff") || file.getName().endsWith(".tif"))
+		try {
+		  // TODO: !!!
+		  //worked = ImageIO.write(img, "TIFF", new File(noSuffix+".tiff"));
+		  Method cm = Class.forName("javax.media.jai.JAI").getMethod("create", new Class[]{String.class, RenderedImage.class, Object.class, Object.class});
+		  cm.invoke(null, new Object[]{"filestore", img, file.getPath(), "tiff"});
+		} catch(Throwable e) {
+			worked=false;
+			LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write TIFF: "+file.getPath(), e);
 		}
+		if (!worked)
+			try {
+				if (!ImageIO.write(img, FileUtil.getFileSuffix(file), file)) {
+					JOGLConfiguration.getLogger().log(Level.WARNING,"Error writing file using ImageIO (unsupported file format?)");
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 	}
 
   public GL getGL() {
