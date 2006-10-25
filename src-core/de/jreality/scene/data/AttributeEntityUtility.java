@@ -469,7 +469,7 @@ public class AttributeEntityUtility {
       	subEntityReader = new HashMap<Method, PropertyDescriptor>(),
       	subEntityWriter = new HashMap<Method, PropertyDescriptor>();
       HashSet<PropertyDescriptor> pds = new HashSet<PropertyDescriptor>();
-      BeanInfo bi = Introspector.getBeanInfo(clazz);
+      BeanInfo bi = Introspector.getBeanInfo(clazz, Introspector.IGNORE_ALL_BEANINFO);
       PropertyDescriptor[] pd = bi.getPropertyDescriptors();
       pds.addAll(Arrays.asList(pd));
       for (int ix = 0; ix < pd.length; ix++) {
