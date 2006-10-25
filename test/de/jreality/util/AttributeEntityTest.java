@@ -77,7 +77,7 @@ public class AttributeEntityTest extends TestCase {
 
     Texture2D t1 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "texture2d", app1, true);
     System.out.println(t1);
-    assertEquals(Texture2D.GL_LINEAR_MIPMAP_LINEAR, t1.getApplyMode());
+    assertEquals(new Integer(Texture2D.GL_LINEAR_MIPMAP_LINEAR), t1.getApplyMode());
 
     
     EffectiveAppearance ea = EffectiveAppearance.create();
@@ -88,7 +88,7 @@ public class AttributeEntityTest extends TestCase {
     assertTrue(AttributeEntityUtility.hasAttributeEntity(Texture2D.class, "texture2d", ea));
     Texture2D t2 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "texture2d", ea);
     System.out.println(t2);
-    assertEquals(t2.getApplyMode(), Texture2D.GL_LINEAR_MIPMAP_LINEAR);
+    assertEquals(t2.getApplyMode(), new Integer(Texture2D.GL_LINEAR_MIPMAP_LINEAR));
 
   }
   
