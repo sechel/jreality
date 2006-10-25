@@ -15,7 +15,30 @@ public class Texture2DBeanInfo extends SimpleBeanInfo {
 			valuesToStrings.put(new Integer(Texture2D.GL_REPLACE), "replace");
 			valuesToStrings.put(new Integer(Texture2D.GL_DECAL), "decal");
 		}
+		@Override
+		protected String getNameOfNull() {
+			return "inherit";
+		}
 	}
+	
+	public static class RepeatModeEditor extends ChoiceEditor {
+		protected void defineValuesToStrings() {
+			valuesToStrings.put(new Integer(Texture2D.GL_REPEAT), "repeat");
+			valuesToStrings.put(new Integer(Texture2D.GL_CLAMP), "clamp");
+			valuesToStrings.put(new Integer(Texture2D.GL_CLAMP_TO_EDGE), "clamp to edge");
+		}
+		@Override
+		protected String getNameOfNull() {
+			return "inherit";
+		}
+	}
+	
+//	 GL_MIRRORED_REPEAT =  0x8370;
+//	  public static final int GL_REPEAT = 0x2901;
+//	  public static final int GL_CLAMP = 0x2900;
+//	  public static final int GL_CLAMP_TO_EDGE = 0x812F;
+//	  public static final int CLAMP = 0;
+//	  public static final int REPEAT = 1;
 	
 	public PropertyDescriptor[] getPropertyDescriptors() {
 		Class beanClass = Texture2D.class;
@@ -39,8 +62,14 @@ public class Texture2DBeanInfo extends SimpleBeanInfo {
 				new PropertyDescriptor("textureMatrix", beanClass);
 			PropertyDescriptor repeatS =
 				new PropertyDescriptor("repeatS", beanClass);
+			repeatS.setPropertyEditorClass(
+					RepeatModeEditor.class
+			);
 			PropertyDescriptor repeatT =
 				new PropertyDescriptor("repeatT", beanClass);
+			repeatT.setPropertyEditorClass(
+					RepeatModeEditor.class
+			);
 			
 			PropertyDescriptor rv[] = {
 					minFilter,

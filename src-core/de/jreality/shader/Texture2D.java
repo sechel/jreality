@@ -135,44 +135,44 @@ public interface Texture2D extends AttributeEntity {
   /**
    * @return Returns the repeatS.
    */
-  public abstract int getRepeatS();
+  public abstract Integer getRepeatS();
 
   /**
    * @param repeatS
    *          The repeatS to set.
    */
-  public abstract void setRepeatS(int repeatS);
+  public abstract void setRepeatS(Integer repeatS);
 
   /**
    * @return Returns the repeatT.
    */
-  public abstract int getRepeatT();
+  public abstract Integer getRepeatT();
 
   /**
    * @param repeatT
    *          The repeatT to set.
    */
-  public abstract void setRepeatT(int repeatT);
+  public abstract void setRepeatT(Integer repeatT);
 
   /**
    * @return
    */
-  public abstract int getMagFilter();
+  public abstract Integer getMagFilter();
 
   /**
    * @return
    */
-  public abstract int getMinFilter();
+  public abstract Integer getMinFilter();
 
   /**
    * @param i
    */
-  public abstract void setMagFilter(int i);
+  public abstract void setMagFilter(Integer i);
 
   /**
    * @param i
    */
-  public abstract void setMinFilter(int i);
+  public abstract void setMinFilter(Integer i);
 
   /**
    * @return
@@ -187,21 +187,21 @@ public interface Texture2D extends AttributeEntity {
   /**
    * @return Returns the applyMode.
    */
-  public abstract int getApplyMode();
+  public abstract Integer getApplyMode();
 
   /**
    * @param applyMode
    *          The applyMode to set.
    */
-  public abstract void setApplyMode(int applyMode);
+  public abstract void setApplyMode(Integer applyMode);
 
   public abstract Color getBlendColor();
 
   public abstract void setBlendColor(Color blendColor);
 
-  public abstract int getCombineMode();
+  public abstract Integer getCombineMode();
 
-  public abstract void setCombineMode(int combineMode);
+  public abstract void setCombineMode(Integer combineMode);
   
   public abstract void setImage(ImageData image);
   
