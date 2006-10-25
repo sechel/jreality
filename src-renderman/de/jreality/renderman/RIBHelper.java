@@ -129,16 +129,7 @@ public class RIBHelper {
 	}
   
   
-  public static void writeTexture(ImageData data, String noSuffix){
-    writeTexture(data, noSuffix, 1, 1);
-  }
-
-	public static void writeTexture(ImageData data, String noSuffix, int texTimesY,int texTimesX){
-	  
-    if(texTimesY<1||texTimesX<1) {
-      System.err.println("texTimes is not or wrong initialized: texTimesY="+texTimesY+", texTimesX="+texTimesX);
-      return;
-    }
+  public static void writeTexture(ImageData data, String noSuffix, boolean transparencyEnabled){
     
     BufferedImage img;
 	  for (Iterator iter = ImageIO.getImageWritersByMIMEType("image/tiff"); iter.hasNext(); ) {
@@ -150,28 +141,25 @@ public class RIBHelper {
 	   byte[] byteArray = data.getByteArray();
 	   int dataHeight = data.getHeight();
 	   int dataWidth = data.getWidth();
-	   img = new BufferedImage(dataWidth*texTimesX, dataHeight*texTimesY,
+	   img = new BufferedImage(dataWidth, dataHeight,
 	   BufferedImage.TYPE_INT_ARGB);
 	   WritableRaster raster = img.getRaster();
 	   int[] pix = new int[4];
-     for(int i=0;i<texTimesY;i++){
-       for(int j=0;j<texTimesX;j++){  
          for (int y = 0, ptr = 0; y < dataHeight; y++) {
            for (int x = 0; x < dataWidth; x++, ptr += 4) {
-             pix[3] = byteArray[ptr + 3];
+             if (transparencyEnabled) pix[3] = byteArray[ptr + 3];
+             else pix[3] = (byte) 255;
              pix[0] = byteArray[ptr];
              pix[1] = byteArray[ptr + 1];
              pix[2] = byteArray[ptr + 2];
-             raster.setPixel(x+dataWidth*j, y+dataHeight*i, pix);
+             raster.setPixel(x, y, pix);
            }
          }                      
-       }
-     }
 	  } else {
 	   img = (BufferedImage) data.getImage();
 	  }
-	            // force alpha channel to be "pre-multiplied"
-		img.coerceData(true);
+	  // force alpha channel to be "pre-multiplied"
+	  img.coerceData(true);
 	
 	  boolean worked=true;
 		try {

@@ -41,7 +41,6 @@
 package de.jreality.renderman.shader;
 
 import java.awt.Color;
-import java.io.File;
 import java.util.Map;
 
 import de.jreality.math.Matrix;
@@ -92,23 +91,20 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
         map.put("lighting", new Float( lighting ? 1 : 0));
        
         int signature = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-        shaderName = (signature == Pn.EUCLIDEAN) ? "plastic" : "hplastic";
-        //System.out.println("has texture "+AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), a));
+        shaderName = (signature == Pn.EUCLIDEAN) ? "defaultpolygonshader" : "hpaintedplastic";
 		boolean ignoreTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name,"ignoreTexture2d"), false);	
         if (!ignoreTexture2d && AttributeEntityUtility.hasAttributeEntity(Texture2D.class, "polygonShader.texture2d", eap)) {
-//        	shaderName = "paintedplastic";
-            shaderName = (signature == Pn.EUCLIDEAN) ? "paintedplastic" : "hpaintedplastic";
         	Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), eap);
-         
+        	// TODO: write out other fields of the texture: apply mode, combine mode, ...
+        	// and/or use these fields to control generation of renderman texture file
+        	// (That is, some things need to be done in shader and some in e.g., txmake)
             String fname = null;
 //            if (ribv.getRendererType() == RIBViewer.TYPE_PIXAR)	{
-            		fname = (String) eap.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE,"");
-            		if (fname == "")	{
-            			fname = null;
-            		} 
-//           } 
+            fname = (String) eap.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE,"");
+            if (fname == "") fname = null;
+           
             if (fname == null) {
-            	fname = new File(ribv.writeTexture(tex)).getName();
+            	fname = ribv.writeTexture(tex);
             }
             // strip off leading path of absolute paths 
             // (use texture path in rib file to look up such textures
@@ -118,9 +114,8 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
              map.put("string texturename",fname);
             Matrix textureMatrix = tex.getTextureMatrix();
 			double[] mat = textureMatrix.getArray();
-            if(mat != null){// && !Rn.isIdentityMatrix(mat, 10E-8)) {
-            	map.put("float[16] tm", RIBHelper.fTranspose(mat));
-                shaderName = (signature == Pn.EUCLIDEAN) ? "transformedpaintedplastic" : "hpaintedplastic";
+            if(mat != null && !Rn.isIdentityMatrix(mat, 10E-8)) {
+             	map.put("float[16] tm", RIBHelper.fTranspose(mat));
            }
         }
 	    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))
@@ -136,7 +131,6 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
     	    	map.put("string reflectionmap", fname);
 //    	    	shaderName = "transformedpaintedplastic";   
     	    	map.put("reflectionBlend", new Float(reflectionMap.getBlendColor().getAlpha()/255.0));
-                shaderName = (signature == Pn.EUCLIDEAN) ? "transformedpaintedplastic" : "hpaintedplastic";
    		}
 	    }
     }

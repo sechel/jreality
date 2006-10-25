@@ -421,7 +421,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	}
 
 	private static void writeStandardShaders(String name) {
-		RIBHelper.writeShader(name, "transformedpaintedplastic.sl");
+		RIBHelper.writeShader(name, "defaultpolygonshader.sl");
 		RIBHelper.writeShader(name, "constantTexture.sl");
 	}
 
@@ -464,6 +464,10 @@ public class RIBVisitor extends SceneGraphVisitor {
         		CommonAttributes.OPAQUE_TUBES_AND_SPHERES_DEFAULT);
         retainGeometry =  eap.getAttribute(CommonAttributes.RMAN_RETAIN_GEOMETRY,false); //false; //anyDisplayLists; // && !manyDisplayLists;
         
+		transparencyEnabled = (boolean) eap.getAttribute(type+"."+CommonAttributes.TRANSPARENCY_ENABLED, true);
+		double transparency = 0.0;
+        if (transparencyEnabled) transparency = eap.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
+
         Object color = eap.getAttribute(type+"."+CommonAttributes.DIFFUSE_COLOR,CommonAttributes.DIFFUSE_COLOR_DEFAULT);
         float colorAlpha = 1.0f;
         if(color!=Appearance.INHERITED) {
@@ -473,12 +477,8 @@ public class RIBVisitor extends SceneGraphVisitor {
             ri.color(rgb);
         }
  
-		boolean transparencyEnabled = (boolean) eap.getAttribute(type+"."+CommonAttributes.TRANSPARENCY_ENABLED, true);
-        double transparency = 0.0;
-        if (transparencyEnabled) transparency = eap.getAttribute(type+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
         currentOpacity = 1f - (float)transparency;
         currentOpacity *= colorAlpha;
-		//currentOpacity *= colorAlpha;
         if ((handlingProxyGeometry && opaqueTubes)) currentOpacity = 1f;
         ri.opacity(currentOpacity);
         //System.err.println("currentOpacity is "+currentOpacity);
@@ -506,7 +506,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		if(noSuffix == null) {
 			String texFileName = "_texture"+(textureCount++);
 			noSuffix = ribFileName+texFileName;
-		    RIBHelper.writeTexture(data, noSuffix);
+		    RIBHelper.writeTexture(data, noSuffix, transparencyEnabled);
 			textures.put(data, noSuffix);
 			renderScript.addTexture(texFileName, repeatS, repeatT);
          }
@@ -541,10 +541,7 @@ public class RIBVisitor extends SceneGraphVisitor {
     	//System.err.println("Visiting geometry RIBVisitor");
     }
       
-    /* (non-Javadoc)
-     * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.PointSet)
-     */
-    public void visit(PointSet g) {
+     public void visit(PointSet g) {
 		ri.comment("PointSet "+g.getName());
      	if (!insidePointset)	{
     		// p is not a subclass of PointSet
@@ -622,6 +619,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	private float currentOpacity;
 	private Appearance rootAppearance;
 	private String outputFileName;
+	private boolean transparencyEnabled;
    /* (non-Javadoc)
      * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.IndexedLineSet)
      */
