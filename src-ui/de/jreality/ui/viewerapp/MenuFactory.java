@@ -56,9 +56,7 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 
 import de.jreality.renderman.RIBViewer;
-import de.jreality.scene.Transformation;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.ui.viewerapp.Navigator.SelectionEvent;
 import de.jreality.ui.viewerapp.actions.app.SwitchBackgroundColor;
 import de.jreality.ui.viewerapp.actions.app.ToggleAppearance;
 import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
@@ -148,8 +146,7 @@ public class MenuFactory {
   private JCheckBoxMenuItem navigatorCheckBox;
   private JCheckBoxMenuItem beanShellCheckBox;
   private JCheckBoxMenuItem renderSelectionCheckbox;
-  private Navigator.SelectionListener navigatorListener = null;
-private ExportImage exportImageAction;
+  private ExportImage exportImageAction;
 
 
   protected MenuFactory(ViewerApp v) {
@@ -183,10 +180,9 @@ private ExportImage exportImageAction;
     rib.add(new JMenuItem(new ExportRIB("Pixar", RIBViewer.TYPE_PIXAR, viewerSwitch, frame)));
     rib.add(new JMenuItem(new ExportRIB("3DLight", RIBViewer.TYPE_3DELIGHT, viewerSwitch, frame)));
     rib.add(new JMenuItem(new ExportRIB("Aqsis", RIBViewer.TYPE_AQSIS, viewerSwitch, frame)));
-
     export.add(new JMenuItem(new ExportSVG("SVG", viewerSwitch, frame)));
     exportImageAction = new ExportImage("Image", viewerSwitch, frame);
-	export.add(new JMenuItem(exportImageAction));
+    export.add(new JMenuItem(exportImageAction));
     fileMenu.addSeparator();
     fileMenu.add(new JMenuItem(new Quit(QUIT)));    
     
@@ -283,7 +279,6 @@ private ExportImage exportImageAction;
     viewerMenu.addSeparator();
     viewerMenu.add(new JMenuItem(new Render(RENDER, viewerSwitch)));
     
-  
     return menuBar;
   }
   
@@ -297,26 +292,6 @@ private ExportImage exportImageAction;
     navigatorCheckBox.setSelected(viewerApp.isAttachNavigator());
     beanShellCheckBox.setSelected(viewerApp.isAttachBeanShell());
     renderSelectionCheckbox.setSelected(sm.isRenderSelection());
-    
-    //enable or disable menus/actions depending on navigator selection
-    if (viewerApp.isAttachNavigator()) {
-      Navigator navigator = (Navigator) viewerApp.getNavigator();
-      navigator.getTreeSelectionModel().removeTreeSelectionListener(navigatorListener);
-      navigatorListener = new Navigator.SelectionListener() {
-        @Override
-        public void selectionChanged(SelectionEvent e) {
-          JMenu appMenu = viewerApp.getMenu(APP_MENU);
-          if (e.selectionAsSGNode() instanceof Transformation ||
-              e.selectionIsTool()) {
-            appMenu.setEnabled(false);
-          }
-          else if (!appMenu.isEnabled())
-            appMenu.setEnabled(true);
-        }
-      };
-      navigator.getTreeSelectionModel().addTreeSelectionListener(navigatorListener);
-    }
-    
   }
   
 }
