@@ -69,8 +69,8 @@ public interface DefaultTextShader extends TextShader {
 	double[] getOffset();
 	void setOffset(double[] o);
 
-	int getAlignment();
-	void setAlignment(int a);
+	Integer getAlignment();
+	void setAlignment(Integer a);
 	
 	// until there is an alternative for making labels invisible
 	// without completely deleting them, this stays undeprecated. -gunn
