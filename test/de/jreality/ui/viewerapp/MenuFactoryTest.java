@@ -73,8 +73,8 @@ public class MenuFactoryTest {
     
     ViewerApp viewerApp = new ViewerApp(cmp);
     viewerApp.setAttachNavigator(true);
-    viewerApp.setAttachBeanShell(true);
-    viewerApp.setShowMenu(true);
+//    viewerApp.setAttachBeanShell(true);
+//    viewerApp.setShowMenu(false);
     viewerApp.update();
     viewerApp.display();
     
