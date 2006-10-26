@@ -116,7 +116,7 @@ public class ViewerApp {
   private Navigator navigator;
   private SelectionManager selectionManager;
   
-  private boolean showMenu = false;  //default
+  private boolean showMenu = true;  //default
   private MenuFactory menuFactory;
   private JMenuBar menuBar;
   
@@ -178,7 +178,7 @@ public class ViewerApp {
     setupViewer(jrScene);
     
     frame = new JFrame();
-    selectionManager = new SelectionManager(jrScene.getPath("emptyPickPath"));
+    selectionManager = new SelectionManager(jrScene.getPath("emptyPickPath")); //default selection = scene node
     selectionManager.setAuxiliaryRoot(viewerSwitch.getAuxiliaryRoot());
     selectionManager.setViewer(viewerSwitch);
     menuFactory = new MenuFactory(this);  //uses frame, viewerSwitch, selectionManager and viewerapp itself
@@ -233,11 +233,10 @@ public class ViewerApp {
     frame.validate();
     
     //encompass scene before displaying
-/* 	CameraUtility.encompass(currViewer.getAvatarPath(),
-    		currViewer.getEmptyPickPath(),
-    		currViewer.getCameraPath(),
-			1.75, currViewer.getSignature());
-*/
+//    CameraUtility.encompass(currViewer.getAvatarPath(),
+//    		currViewer.getEmptyPickPath(),
+//    		currViewer.getCameraPath(),
+//			1.75, currViewer.getSignature());
 	
     frame.setVisible(true);
     
@@ -666,7 +665,6 @@ public class ViewerApp {
 
   public static void main(String[] args) {
 	ViewerApp va = new ViewerApp(null, null, null, null, null);
-	va.setShowMenu(true);
 	va.setAttachNavigator(true);
 	va.setAttachBeanShell(true);
 //  va.getMenuFactory();
