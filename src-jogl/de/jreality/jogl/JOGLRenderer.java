@@ -91,7 +91,6 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
-import de.jreality.renderman.RIBVisitor;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Cylinder;
@@ -1510,7 +1509,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		  cm.invoke(null, new Object[]{"filestore", img, file.getPath(), "tiff"});
 		} catch(Throwable e) {
 			worked=false;
-			LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write TIFF: "+file.getPath(), e);
+			LoggingSystem.getLogger(this).log(Level.CONFIG, "could not write TIFF: "+file.getPath(), e);
 		}
 		if (!worked)
 			try {
