@@ -48,7 +48,6 @@ import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.renderman.RIBHelper;
-import de.jreality.renderman.RIBViewer;
 import de.jreality.renderman.RIBVisitor;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
@@ -117,7 +116,7 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
     			fname = null;
     		}
     		if (fname == null) {
-    			fname = ribv.writeCubeMap(reflectionMap);
+    			fname = new File(ribv.writeCubeMap(reflectionMap)).getName();
     		}
 	    	map.put("string reflectionmap", fname);
 	    	map.put("reflectionBlend", new Float(reflectionMap.getBlendColor().getAlpha()/255.0));

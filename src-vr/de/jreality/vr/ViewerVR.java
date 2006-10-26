@@ -122,7 +122,7 @@ public class ViewerVR {
 	// ratio of maximal value and minimal value of texture scale
 	private static final double TEX_SCALE_RANGE = 400;
 
-	private static final Object DARK_DIFFUSE_COLOR = new Color(128,128,0);
+	//private static final Object DARK_DIFFUSE_COLOR = new Color(128,128,0);
 	
 	// texture of content
 	private Texture2D tex;
@@ -250,7 +250,7 @@ public class ViewerVR {
 		}
 
 		// lights
-		light.setIntensity(1.8);
+		light.setIntensity(1);
 		lightNode.setLight(light);
 		MatrixBuilder.euclidean().rotateFromTo(new double[] { 0, 0, 1 },
 				new double[] { 0, 1, 1 }).assignTo(lightNode);
@@ -357,6 +357,7 @@ public class ViewerVR {
 		terrainAppearance.setAttribute("showLines", false);
 		terrainAppearance.setAttribute("showPoints", false);
 		terrainAppearance.setAttribute("diffuseColor", Color.white);
+		terrainAppearance.setAttribute(CommonAttributes.AMBIENT_COEFFICIENT, .3);
 		terrainNode.setAppearance(terrainAppearance);
 		
 //		reflectedSceneNode.setName("reflectedScene");
@@ -518,19 +519,19 @@ public class ViewerVR {
 		upColor = landscape.getUpColor();
 		downColor = landscape.getDownColor();
 		
-		String diffCol = CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR;
-		Color currentDiffuseColor = (Color) contentAppearance.getAttribute(diffCol);
+//		String diffCol = CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR;
+//		Color currentDiffuseColor = (Color) contentAppearance.getAttribute(diffCol);
 		updateEnablingOfBackgroundEdit();
 		updateBackground();
-		if (cubeMap == null) {
-			if (currentDiffuseColor.equals(Color.white)) {
-				contentAppearance.setAttribute(diffCol, DARK_DIFFUSE_COLOR);
-			}
-		} else {
-			if (currentDiffuseColor.equals(DARK_DIFFUSE_COLOR)) {
-				contentAppearance.setAttribute(diffCol, Color.white);
-			}
-		}
+//		if (cubeMap == null) {
+//			if (currentDiffuseColor.equals(Color.white)) {
+//				contentAppearance.setAttribute(diffCol, DARK_DIFFUSE_COLOR);
+//			}
+//		} else {
+//			if (currentDiffuseColor.equals(DARK_DIFFUSE_COLOR)) {
+//				contentAppearance.setAttribute(diffCol, Color.white);
+//			}
+//		}
 		Geometry last = terrainNode.getGeometry();
 		flat = landscape.isTerrainFlat();
 		terrainNode.setGeometry(flat ? flatTerrain : terrain);
@@ -1407,7 +1408,7 @@ public class ViewerVR {
 		
 		int n = flat ? flatTerrainPoints.length : terrainPoints.length;
 		double[] white = new double[]{1,1,1,1};
-		double[] black = new double[]{.2,.2,.2,1};
+		double[] black = new double[]{0,0,0,1};
 		double[] sun = new double[]{0,1,1,0};
 		double[][] color = new double[n][];
 		for (int j=0; j<n; j++) {
