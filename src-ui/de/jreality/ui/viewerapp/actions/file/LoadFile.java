@@ -64,11 +64,14 @@ public class LoadFile extends AbstractAction {
 
 
   private ViewerApp viewerApp;
+  private SceneGraphComponent sceneNode;
 
 
-public LoadFile(String name, SelectionManager sm, ViewerApp viewerApp, Component frame) {
+  public LoadFile(String name, SelectionManager sm, ViewerApp viewerApp, Component frame) {
     super(name, sm, frame);
     this.viewerApp=viewerApp;
+    sceneNode = sm.getDefaultSelection().getLastComponent();
+    
     putValue(SHORT_DESCRIPTION, "Load one or more files");
     putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
@@ -82,7 +85,7 @@ public LoadFile(String name, SelectionManager sm, ViewerApp viewerApp, Component
         final SceneGraphComponent sgc = Readers.read(files[i]);
         sgc.setName(files[i].getName());
         System.out.println("READ finished.");
-        selection.getLastComponent().addChild(sgc);
+        sceneNode.addChild(sgc);
         
         PickUtility.assignFaceAABBTrees(sgc);
 
