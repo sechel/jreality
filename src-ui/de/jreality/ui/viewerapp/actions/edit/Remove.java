@@ -57,13 +57,12 @@ import de.jreality.util.SceneGraphUtility;
 
 public class Remove extends AbstractAction {
 
-  private SelectionManager sm;
   private Tool tool = null;
   
   
   public Remove(String name, SelectionManager sm) {
     super(name, sm);
-    this.sm = sm;
+
     putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
     putValue(SHORT_DESCRIPTION, "Delete");
   }
@@ -77,11 +76,11 @@ public class Remove extends AbstractAction {
     
     if (tool == null) {  //DEFAULT_SELECTION
       SceneGraphUtility.removeChildNode(parent, node);
-      sm.setSelection(parentPath);
+      selectionManager.setSelection(parentPath);
     }
     else {  //TOOL_SELECTION
       selection.getLastComponent().removeTool(tool);
-      sm.setSelection(selection);
+      selectionManager.setSelection(selection);
     }
   }
 
@@ -97,6 +96,7 @@ public class Remove extends AbstractAction {
   @Override
   protected boolean isEnabled(SelectionEvent e) {
     return (e.getType() != SelectionEvent.ENTITY_SELECTION &&
-        selection.getLength() != 1);  //don't allow to remove the sceneRoot
+        selection.getLength() != 1 &&  //don't allow to remove the sceneRoot
+        !selectionManager.isNothingSelected());
   }
 }

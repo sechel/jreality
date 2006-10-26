@@ -52,8 +52,6 @@ import de.jreality.ui.viewerapp.actions.AbstractAction;
 
 public class ToggleRenderSelection extends AbstractAction {
 
-  private SelectionManager sm;
-  
   
   public ToggleRenderSelection(String name, SelectionManager sm) {
     super(name);
@@ -61,12 +59,12 @@ public class ToggleRenderSelection extends AbstractAction {
     putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
     
     if (sm == null) throw new UnsupportedOperationException("SelectionManager not allowed to be null!");
-    this.sm = sm;
+    selectionManager = sm;
   }
   
     
   public void actionPerformed(ActionEvent e) {
-    sm.setRenderSelection(!sm.isRenderSelection());
+    selectionManager.setRenderSelection(!selectionManager.isRenderSelection());
   }
 
 }

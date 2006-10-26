@@ -50,6 +50,7 @@ import javax.swing.KeyStroke;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
 
@@ -110,4 +111,12 @@ public class ToggleAppearance extends AbstractAction {
     app.setAttribute(attribute, !((Boolean)value));
   }
 
+  
+  @Override
+  protected boolean isEnabled(SelectionEvent e) {
+    if (e.getType() == SelectionEvent.DEFAULT_SELECTION)
+      return (selection.getLastElement() instanceof SceneGraphComponent ||
+          selection.getLastElement() instanceof Appearance);
+    else return false;
+  }
 }

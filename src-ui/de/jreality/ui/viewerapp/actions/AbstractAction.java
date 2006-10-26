@@ -56,6 +56,7 @@ public abstract class AbstractAction extends javax.swing.AbstractAction implemen
 
   protected Component frame;
   protected SceneGraphPath selection;
+  protected SelectionManager selectionManager;
   
   
   protected AbstractAction(String name, final SelectionManager sm, Component frame) {
@@ -65,9 +66,12 @@ public abstract class AbstractAction extends javax.swing.AbstractAction implemen
       throw new IllegalArgumentException("SelectionManager is null!");
     
     this.frame = frame;
-    selection = sm.getSelection();
+    selectionManager = sm;
     
-    sm.addSelectionListener(this);
+    //set initial selection, enable/disable action
+    selectionChanged(new SelectionEvent(this, sm.getSelection(), sm.getTool(), sm.getEntity()));
+    
+    selectionManager.addSelectionListener(this);
   }
   
   
@@ -89,8 +93,7 @@ public abstract class AbstractAction extends javax.swing.AbstractAction implemen
   public void selectionChanged(SelectionEvent e) {
     selection = e.getSelection();
     
-    if (isEnabled(e)) setEnabled(true);
-    else setEnabled(false);
+    setEnabled( isEnabled(e) );
   }
   
   

@@ -88,6 +88,7 @@ public class SaveSelected extends AbstractAction {
   @Override
   protected boolean isEnabled(SelectionEvent e) {
     return (e.getType() == SelectionEvent.DEFAULT_SELECTION &&
-        selection.getLastElement() instanceof SceneGraphComponent);
+        selection.getLastElement() instanceof SceneGraphComponent &&
+        !selectionManager.isNothingSelected());
   }
 }
