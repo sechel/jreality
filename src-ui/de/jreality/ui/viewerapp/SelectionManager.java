@@ -73,18 +73,17 @@ public class SelectionManager implements TransformationListener {
   private SelectionListener smListener = null;
   private Tool tool = null;               //currently selected tool
   private AttributeEntity entity = null;  //currently selected attribute entity
+  private boolean nothingSelected = true;  //true if default selection is selected by manager, e.g. setSelection(null)
   
-  private boolean renderSelection = false;
+  private boolean renderSelection = false;  //default
   private Viewer viewer = null;
   private SceneGraphComponent auxiliaryRoot;
   private SceneGraphComponent selectionKit;
   
   
   public SelectionManager(SceneGraphPath defaultSelection) {
-    
-    //set default selection
-    this.defaultSelection = defaultSelection;
-    selection = defaultSelection;
+    if (defaultSelection == null)
+      throw new IllegalArgumentException("Default selection is null!");
     
     //listen to changes of the selection's transformation matrix
     selectionObserver = new SceneGraphPathObserver();
@@ -93,28 +92,9 @@ public class SelectionManager implements TransformationListener {
     
     listeners = new Vector<SelectionListener>();
     
-    //set up representation of selection in scene graph
-    auxiliaryRoot = new SceneGraphComponent();
-    auxiliaryRoot.setName("auxiliary root");
-    selectionKit = new SceneGraphComponent();
-    selectionKit.setName("selection");
-    selectionKit.setVisible(renderSelection);
-    auxiliaryRoot.addChild(selectionKit);
-    Appearance app = new Appearance();
-    app.setAttribute(CommonAttributes.EDGE_DRAW,true);
-    app.setAttribute(CommonAttributes.FACE_DRAW,false);
-    app.setAttribute(CommonAttributes.VERTEX_DRAW,false);
-    app.setAttribute(CommonAttributes.LIGHTING_ENABLED,false);
-    app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_STIPPLE,true);
-    app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_FACTOR, 1.0);
-    app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_STIPPLE_PATTERN, 0x6666);
-    app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_WIDTH,2.0);
-    app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
-    app.setAttribute(CommonAttributes.LEVEL_OF_DETAIL,0.0);
-    app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
-    selectionKit.setAppearance(app);
-    selectionKit.setTransformation(new Transformation());
-
+    //set default selection
+    setDefaultSelection(defaultSelection);
+    setSelection(null);
   }
   
   
@@ -154,7 +134,7 @@ public class SelectionManager implements TransformationListener {
       };
       addSelectionListener(smListener);
     }
-    //else setSelection(defaultSelection);
+    else setSelection(null);  //navigator == null
   }
   
   public SceneGraphPath getDefaultSelection() {
@@ -173,10 +153,12 @@ public class SelectionManager implements TransformationListener {
   
   
   public void setSelection(SceneGraphPath selection) {
-    if (selection == null)
+    if (selection == null)  //nothing selected
       this.selection = defaultSelection;
     else this.selection = selection;
-
+    
+    nothingSelected = (selection == null);
+    
     selectionChanged();
   }
 
@@ -214,20 +196,23 @@ public class SelectionManager implements TransformationListener {
       }
     }
     
-    Rectangle3D bbox = GeometryUtility.calculateChildrenBoundingBox( selection.getLastComponent() ); 
-    
-    IndexedFaceSet box = null;
-    box = IndexedFaceSetUtility.representAsSceneGraph(box, bbox);
-    
-    selectionKit.setGeometry(box);
-    transformationMatrixChanged(null);
+    if (renderSelection) {
+      if (nothingSelected) { 
+        if (selectionKit != null) selectionKit.setVisible(false);
+      }
+      else {  //something selected
+        updateBoundingBox();
+        selectionKit.setVisible(true);
+        if (viewer != null) viewer.render();  //render auxiliary root
+      }
+    }
   }
 
-  
+
   public void setAuxiliaryRoot(SceneGraphComponent aux) {
-    //if (auxiliaryRoot != null) auxiliaryRoot.removeChild(selectionKit);
     auxiliaryRoot = aux;
-    if (auxiliaryRoot != null) auxiliaryRoot.addChild(selectionKit);
+    if (auxiliaryRoot != null && selectionKit != null) 
+      auxiliaryRoot.addChild(selectionKit);
   }
 
 
@@ -237,12 +222,49 @@ public class SelectionManager implements TransformationListener {
   
   
   public void transformationMatrixChanged(TransformationEvent ev) {
-    if (!renderSelection) return;
+    if (!renderSelection || selectionKit == null) 
+      return; 
+    
     if (selectionKit.getTransformation() != null)
       selectionKit.getTransformation().setMatrix(selection.getMatrix(null));
-    if (viewer != null) viewer.render();  //render auxiliary root
   }
 
+  
+  private void updateBoundingBox() {
+    
+    if (selectionKit == null) {
+      //set up representation of selection in scene graph
+      selectionKit = new SceneGraphComponent();
+      selectionKit.setName("selection");
+      Appearance app = new Appearance();
+      app.setAttribute(CommonAttributes.EDGE_DRAW,true);
+      app.setAttribute(CommonAttributes.FACE_DRAW,false);
+      app.setAttribute(CommonAttributes.VERTEX_DRAW,false);
+      app.setAttribute(CommonAttributes.LIGHTING_ENABLED,false);
+      app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_STIPPLE,true);
+      app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_FACTOR, 1.0);
+      app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_STIPPLE_PATTERN, 0x6666);
+      app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_WIDTH, 2.0);
+      app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
+      app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
+      app.setAttribute(CommonAttributes.LEVEL_OF_DETAIL,0.0);
+      app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
+      selectionKit.setAppearance(app);
+      selectionKit.setTransformation(new Transformation());
+      
+      if (auxiliaryRoot != null) auxiliaryRoot.addChild(selectionKit);
+    }
+    
+    Rectangle3D bbox = GeometryUtility.calculateChildrenBoundingBox( selection.getLastComponent() ); 
+    
+    IndexedFaceSet box = null;
+    box = IndexedFaceSetUtility.representAsSceneGraph(box, bbox);
+    
+    selectionKit.setGeometry(box);
+    transformationMatrixChanged(null);  //selectionKit.setTransformation()
+    if (viewer != null) viewer.render();  //render auxiliary root
+  }
+  
   
   public boolean isRenderSelection() {
     return renderSelection;
@@ -251,9 +273,26 @@ public class SelectionManager implements TransformationListener {
   
   public void setRenderSelection(boolean renderSelection) {
     this.renderSelection = renderSelection;
-    if (renderSelection)
+    if (renderSelection) {
+      updateBoundingBox();
       transformationMatrixChanged(null);  //update transformation matrix
-    selectionKit.setVisible(renderSelection);
+      if (viewer != null) viewer.render();  //render auxiliary root
+    }
+    if (selectionKit != null) selectionKit.setVisible(renderSelection);
+  }
+
+  
+  public AttributeEntity getEntity() {
+    return entity;
+  }
+
+  
+  public Tool getTool() {
+    return tool;
+  }
+
+  public boolean isNothingSelected() {
+    return nothingSelected;
   }
 
 }
