@@ -10,10 +10,14 @@ import de.jreality.shader.Texture2D;
 
 class RenderScript {
 	
+  private boolean display=true;
+  
 	final File dir;
 	
 	final String ribFileName, texCmd, shaderCmd, refMapCmd, renderer, texSuffix, refMapSuffix;
 	
+  final int type;
+  
 	HashSet<String> ribFiles=new HashSet<String>(),
 			         shaders=new HashSet<String>();
   HashSet<String[]> textures=new HashSet<String[]>(),
@@ -25,22 +29,23 @@ class RenderScript {
 	protected RenderScript(File dir, String ribFileName, int type) {
 		this.dir=dir;
 		this.ribFileName=ribFileName;
+    this.type=type;
 		switch (type) {
 		case RIBViewer.TYPE_AQSIS:
 			texCmd="teqser ";
 			shaderCmd="aqsl ";
-			refMapCmd="??? ";
+			refMapCmd="teqser -envcube ";
 			renderer="aqsis ";
-			texSuffix=".tx";
-			refMapSuffix=".???";
+			texSuffix=".tex";
+			refMapSuffix=".env";
 			break;
 		case RIBViewer.TYPE_3DELIGHT:
 			texCmd="tdlmake ";
 			shaderCmd="shaderdl ";
-			refMapCmd="??? ";
+			refMapCmd="tdlmake -envcube ";
 			renderer="renderdl ";
-			texSuffix=".tdl";
-			refMapSuffix=".???";
+			texSuffix=".tex";
+			refMapSuffix=".env";
 			break;
 		default:
 			texCmd="txmake -resize 'up-' ";
@@ -109,10 +114,18 @@ class RenderScript {
         for (String[] refMap : reflectionMaps) {
         	System.out.println(refMapCmd+refMap[1]+" "+refMap[2]+" "+refMap[3]+" "+refMap[4]+" "+refMap[5]+" "+refMap[6]+" "+ribFileName+refMap[0]+refMapSuffix);
         }
-        
         String renderCmd = renderer + ribFileName;
+        if(display&&(type!=RIBViewer.TYPE_PIXAR)) renderCmd = renderer +"-d "+ ribFileName +" &";
+        
 		System.out.println(renderCmd);
 		exec(renderCmd, false);
+    
+//    if(display&&(type==RIBViewer.TYPE_PIXAR)){
+//      String fileName=ribFileName.substring(0,ribFileName.length()-4); 
+//      System.out.println("display "+ fileName+".tif &");
+//      
+//    }
+      
 
 		System.out.println("\n\n========= render script ==========\n\n");
 

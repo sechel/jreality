@@ -300,16 +300,16 @@ public class RIBVisitor extends SceneGraphVisitor {
 	private void handleRootAppearance() {
 		maximumEyeSplits[0] = ((Integer) eAppearance.getAttribute(CommonAttributes.RMAN_MAX_EYE_SPLITS, new Integer(maximumEyeSplits[0]))).intValue();
 		shaderPath = (String) eAppearance.getAttribute(CommonAttributes.RMAN_SEARCHPATH_SHADER, "");
-		//textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");
-		if(rendererType==RIBViewer.TYPE_PIXAR)
-			  textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");
-	    else if(rendererType==RIBViewer.TYPE_3DELIGHT){
-	      textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tdl");
-	    }else if(rendererType==RIBViewer.TYPE_AQSIS)
-	      textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tx");
-	    else{
-	      System.err.println("no valid rendererType");
-	    }
+		textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");
+//		if(rendererType==RIBViewer.TYPE_PIXAR)
+//			  textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");
+//	    else if(rendererType==RIBViewer.TYPE_3DELIGHT){
+//	      textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");//"tdl");
+//	    }else if(rendererType==RIBViewer.TYPE_AQSIS)
+//	      textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tx");
+//	    else{
+//	      System.err.println("no valid rendererType");
+//	    }
 		shadowEnabled = eAppearance.getAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, false);
 		currentSignature = eAppearance.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
       	outputDisplayFormat = (String) eAppearance.getAttribute(CommonAttributes.RMAN_OUTPUT_DISPLAY_FORMAT, "rgb");
