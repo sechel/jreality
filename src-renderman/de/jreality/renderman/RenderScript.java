@@ -124,10 +124,9 @@ class RenderScript {
 		System.out.println(renderCmd);
 		exec(renderCmd, false);
     
-//    if(display&&((type==RIBViewer.TYPE_PIXAR)||(type!=RIBViewer.TYPE_PIXIE))){
+//    if(display&&((type==RIBViewer.TYPE_PIXAR)||(type==RIBViewer.TYPE_PIXIE))){
 //      String fileName=ribFileName.substring(0,ribFileName.length()-4); 
-//      System.out.println("display "+ fileName+".tif &");
-//      
+//      System.out.println("display "+ fileName+".tif &");      
 //    }
       
 
