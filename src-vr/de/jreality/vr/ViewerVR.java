@@ -1172,7 +1172,7 @@ public class ViewerVR {
 	
 	public void setTextureScale(double d) {
 		texScaleSlider.setValue(
-				(int)(Math.log(DEFAULT_TEXTURE_SCALE /MAX_TEX_SCALE*TEX_SCALE_RANGE)/Math.log(TEX_SCALE_RANGE)*100)
+				(int)(Math.log(d / MAX_TEX_SCALE * TEX_SCALE_RANGE)/Math.log(TEX_SCALE_RANGE)*100)
 			);
 		if (tex != null) {
 			tex.setTextureMatrix(MatrixBuilder.euclidean().scale(d).getMatrix());
