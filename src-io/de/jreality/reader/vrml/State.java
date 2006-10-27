@@ -170,7 +170,13 @@ public class State {
 		// camPath
 		camPath=orig.camPath;
 		// extraGeoTrans
-		extraGeoTrans=orig.extraGeoTrans;
+		if (orig.extraGeoTrans==null)
+			extraGeoTrans=null;
+		else {
+			double[] mOld =orig.extraGeoTrans.getMatrix();
+			double[] m= new double[16];
+			for (int i=0;i<16;i++)	m[i]=mOld[i];
+			extraGeoTrans= new Transformation(m);}
 		// texture
 		textureData= new int [][][]{{{}}};
 		if (orig.textureData.length>0 && orig.textureData[0].length>0
@@ -212,15 +218,24 @@ public class State {
 		if (specular.length>0)
 			a.setAttribute(CommonAttributes.SPECULAR_COLOR,specular[0]);
 
-		// TODO emissive Color; 
-		if( useEmissive){
+		// TODO emissive Color vs diffuse Color
+//		if( useEmissive){
+//		if (emissive.length>0)
+//			a.setAttribute(CommonAttributes.DIFFUSE_COLOR,emissive[0]);
+//	}
+//	else{
+//		if (diffuse.length>0)
+//			a.setAttribute(CommonAttributes.DIFFUSE_COLOR,diffuse[0]);
+//	}
+		
+		// VRML diffuse & emissive definition, if emissive is not supported:
+		// take diffuse as base Color, take emissive if all others colors are empty
+		if (diffuse.length>0)
+				a.setAttribute(CommonAttributes.DIFFUSE_COLOR,diffuse[0]);
+		else
 			if (emissive.length>0)
 				a.setAttribute(CommonAttributes.DIFFUSE_COLOR,emissive[0]);
-		}
-		else{
-			if (diffuse.length>0)
-				a.setAttribute(CommonAttributes.DIFFUSE_COLOR,diffuse[0]);
-		}
+		// 
 		if (transparency.length>0)
 			if (transparency[0]!=1)
 				a.setAttribute(CommonAttributes.TRANSPARENCY,transparency[0]);
@@ -238,25 +253,35 @@ public class State {
 			a.setAttribute(CommonAttributes.FACE_DRAW,false);
 		return a;
 	}
+	
+	/** sets the transformation resulting of trafo and 
+	 * extraGeoTrans to the given SceneGraphComponent 
+	 * @param sgc
+	 */
+	public void setTrafo(SceneGraphComponent sgc){
+		if ((trafo!=null)|(extraGeoTrans!=null)){
+			Transformation t= new Transformation();
+			if (trafo!=null){
+				t=trafo;
+			}
+			else{MatrixBuilder.euclidean().assignTo(t);}
+			if(extraGeoTrans!=null)
+				t.multiplyOnRight(extraGeoTrans.getMatrix());
+			sgc.setTransformation(t);
+		}
+	}
+	
+	
+	
 	public static void main(String[] args){
 		
 		int[] c=VRMLHelper.decodeColorFromString(4,"257");
 		System.out.println(""+c[0]+" "+c[1]+" "+c[2]+" "+c[3]);
 	}
+	
 	public static void codeTest(){
 	State state= new State();
 	
-	IndexedFaceSetFactory ff=new IndexedFaceSetFactory();
-	ff.setVertexTextureCoordinates(state.textureCoords);
-
-	IndexedFaceSet self = new IndexedFaceSet();
 	
-	int l=self.getVertexAttributes(Attribute.COORDINATES).size();
-	double [][] a= new double[l][3];
-	double [][] b= new double[l][2];
-	self.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(a);
-	for(int i=0;i<l;i++){ b[i]=new double[]{a[i][0],a[i][1]};};
-	
-	self.setVertexAttributes(Attribute.TEXTURE_COORDINATES,StorageModel.DOUBLE_ARRAY.array(b[0].length).createReadOnly(b));	
 	}
 }

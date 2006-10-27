@@ -156,10 +156,7 @@ vrmlFile returns [SceneGraphComponent r=null]
 			state.currNode=root;
 			state.camPath=p;
 			state.transparency= new double[]{1};
-			Appearance rootApp = new Appearance();
-			rootApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
-			rootApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
-			root.setAppearance(rootApp);
+			root.setAppearance(VRMLHelper.defaultApp());
 			}
 		(statement[state] {state.history = state.history+"*";}
 		(statement[state] {state.history = state.history+"*";
@@ -228,23 +225,11 @@ PointSet geo=null;
 				sgc.setName(geo.getName());
 				state2.currNode.addChild(sgc);
 				sgc.setGeometry(geo);
-				if (geo instanceof IndexedFaceSet)
+//TODO0:
+//				if (geo instanceof IndexedFaceSet)
 					 sgc.setAppearance(state2.makeGeoApp(false));
-				else sgc.setAppearance(state2.makeGeoApp(true));
-				// Trafos:
-				Transformation t= null;
-				if ((state2.trafo!=null)|(state2.extraGeoTrans!=null)){
-					if (state2.trafo==null){
-						t=state2.extraGeoTrans;
-					}
-					else if(state2.extraGeoTrans==null)
-						t=state2.trafo;
-					else {
-						t = state2.trafo; 
-						t.multiplyOnRight(state2.extraGeoTrans.getMatrix());
-				  	}
-				}
-				if (t!=null) sgc.setTransformation(new Transformation(t));
+//				else sgc.setAppearance(state2.makeGeoApp(true));
+				state2.setTrafo(sgc);
 			}
 		}
 	;
@@ -297,9 +282,10 @@ private
 camNode[State state]
 { if (VRMLHelper.verbose) System.err.print("Cam Node: ");
   Camera c=null;
+  State state2= new State(state);
 }
-	:( c = orthographicCameraNode	[state]
-	  |c = perspectiveCameraNode	[state]	
+	:( c = orthographicCameraNode	[state2]
+	  |c = perspectiveCameraNode	[state2]	
 	 )
 		{ 
 			SceneGraphComponent sgc= new SceneGraphComponent();
@@ -309,19 +295,7 @@ camNode[State state]
 				//TODO3 mehrere KameraPfade
 				if (camPath==null) 	camPath=state.camPath;
 				sgc.setCamera(c);
-				Transformation t= new Transformation();
-				if ((state.trafo!=null)|(state.extraGeoTrans!=null)){
-					if (state.trafo==null){
-						t=state.extraGeoTrans;
-					}
-					else if(state.extraGeoTrans==null)
-						t=state.trafo;
-					else {
-						t = state.trafo; 
-						t.multiplyOnRight(state.extraGeoTrans.getMatrix());
-			  		}
-				}
-				if (t!=null) sgc.setTransformation(new Transformation(t));
+				state2.setTrafo(sgc);
 			}
 		}
 	;
@@ -330,28 +304,18 @@ private
 lightNode [State state]
 { if (VRMLHelper.verbose) System.err.print("Light Node: ");
   Light l= null;
-}	:(	l= directionalLightNode [state]
-	 |	l= pointLightNode		[state]
-	 |	l= spotLightNode		[state]
+  State state2= new State(state);
+}	:(	l= directionalLightNode [state2]
+	 |	l= pointLightNode		[state2]
+	 |	l= spotLightNode		[state2]
 	 )
 	{
 		SceneGraphComponent sgc= new SceneGraphComponent();
-		state.currNode.addChild(sgc);
+		state2.currNode.addChild(sgc);
 		sgc.setName(l.getName());
 		sgc.setLight(l);
-		Transformation t= new Transformation();
-		if ((state.trafo!=null)|(state.extraGeoTrans!=null)){
-			if (state.trafo==null){
-				t=state.extraGeoTrans;
-			}
-			else if(state.extraGeoTrans==null)
-				t=state.trafo;
-			else {
-				t = state.trafo; 
-				t.multiplyOnRight(state.extraGeoTrans.getMatrix());
-		  	}
-		}
-		if (t!=null) sgc.setTransformation(new Transformation(t));
+		state2.setTrafo(sgc);
+		
 	}
 	;
 
@@ -569,8 +533,6 @@ indexedFaceSetNode [State state] returns [IndexedFaceSet ifs=null]
 	ifsf.setFaceCount(coordIndex2.length);
 	ifsf.setVertexAttribute(Attribute.COORDINATES,new DoubleArrayArray.Array(state2.coords) );
 	ifsf.setFaceIndices(coordIndex2);
-	ifsf.setGenerateVertexNormals(true);
-	ifsf.setGenerateFaceNormals(true);
 	VRMLHelper.setNormals(ifsf,coordIndex2,normalIndex2,state2);
 	VRMLHelper.setColors(ifsf,coordIndex2,materialIndex2,state2);
 	// TODO2: handle texture
@@ -734,23 +696,37 @@ materialNode [State state]
  if (VRMLHelper.verbose) System.err.print("Material( ");
  Color[] c=null;
  double[] d=null;
+ Color[] amb=new Color[]{};
+ Color[] dif=new Color[]{};
+ Color[] spe=new Color[]{};
+ Color[] emi=new Color[]{};
+ double [] shi= new double[]{};
+ double [] tra= new double[]{};
 }	:
 	"Material" OPEN_BRACE
 	  (	 "ambientColor"	{ if (VRMLHelper.verbose) System.err.print("ambientColor ");}
-	  			c = mfcolorValue {state.ambient=c;}
+	  			c = mfcolorValue {amb=c;}
 	  	|"diffuseColor"		{ if (VRMLHelper.verbose) System.err.print("diffuseColor ");}
-	  			c = mfcolorValue {state.diffuse=c;}
+	  			c = mfcolorValue {dif=c;}
 	  	|"specularColor"	{ if (VRMLHelper.verbose) System.err.print("specularColor ");}
-	  			c = mfcolorValue {state.specular=c;}
+	  			c = mfcolorValue {spe=c;}
 	  	|"emissiveColor"	{ if (VRMLHelper.verbose) System.err.print("emissiveColor ");}
-	  			c = mfcolorValue {state.emissive=c;}// TODO3 emissive realisieren
+	  			c = mfcolorValue {emi=c;}// TODO3 emissive realisieren
 	  	|"shininess"		{ if (VRMLHelper.verbose) System.err.print("shininess ");}
-	  			d = mffloatValue {state.shininess=d;}
+	  			d = mffloatValue {shi=d;}
 	  	|"transparency"	{ if (VRMLHelper.verbose) System.err.print("transparency ");}
-	  			d = mffloatValue {state.transparency=d;}
+	  			d = mffloatValue {tra=d;}
 	  	| wrongAttribute
 	  )*
-	  CLOSE_BRACE 	{ if (VRMLHelper.verbose) System.err.println(")");}
+	  CLOSE_BRACE 	{
+		  state.ambient=amb;
+		  state.diffuse=dif;
+		  state.specular=spe;
+		  state.emissive=emi; 
+		  state.shininess=shi;
+		  state.transparency=tra;
+	      if (VRMLHelper.verbose) System.err.println(")");
+	   }
 	;
 
 private
@@ -1125,13 +1101,15 @@ private spotLightNode	[State state] returns[SpotLight l=null]
 		l.setGlobal(false);
 		l.setName("Spot Light");
 		state.extraGeoTrans = new Transformation();
-		MatrixBuilder.euclidean().rotateFromTo(new double[]{0,0,-1},dir)
+		MatrixBuilder.euclidean()
 			.translate(loc)
+			.rotateFromTo(new double[]{0,0,1},dir)
 			.assignTo(state.extraGeoTrans);
 		l.setConeAngle(cutA);
+		l.setDistribution(dropR);
 		l.setFalloffA0(0);
 		l.setFalloffA1(0);
-		l.setFalloffA2(dropR);
+		l.setFalloffA2(0);
 		if (VRMLHelper.verbose) System.err.println(")");
 		}
 	;
@@ -1604,15 +1582,16 @@ RESTLINE:
 	 ;
 	
 protected
-HEADER1:	"#VRML V1.0";
+HEADER1:	"#VRML V1.0 ascii";
+
 
 HEADER:	{getLine()==1}?	HEADER1 RESTLINE
 	{System.err.println("Got header");}
 	;
 	
 protected
-COMMENT:	
- 	'#'  (~('\n'))* ('\n')
+COMMENT:
+	'#' (~('\n'))* ('\n')
 	;
 
 WS_:

@@ -50,7 +50,9 @@ import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.geometry.QuadMeshFactory;
 import de.jreality.math.FactoredMatrix;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.shader.CommonAttributes;
 
 public class VRMLHelper {
 	public static boolean verbose = true;
@@ -430,12 +432,14 @@ public class VRMLHelper {
 			fNormals[i][2]=state.normals[0][2];
 		}
 		ifsf.setFaceNormals(fNormals);
+		ifsf.setGenerateVertexNormals(true);
 	}
 	break;
 	case 2:// per part
 	case 4:// per face
 	{	System.arraycopy(state.normals,0,fNormals,0,faceCount);
 		ifsf.setFaceNormals(fNormals);
+		ifsf.setGenerateVertexNormals(true);
 	}
 	break;
 	case 3:// per part indexed
@@ -446,6 +450,7 @@ public class VRMLHelper {
 			fNormals[i][2]=state.normals[(nIndex[0][i])][2];
 		}
 		ifsf.setFaceNormals(fNormals);
+		ifsf.setGenerateVertexNormals(true);
 	}
 	break;
 	case 6:// per Vertex
@@ -464,6 +469,7 @@ public class VRMLHelper {
 			}
 		}
 		ifsf.setVertexNormals(vNormals);
+		ifsf.setGenerateFaceNormals(true);
 	}
 		break;
 	case 0:// default
@@ -471,6 +477,7 @@ public class VRMLHelper {
 	{
 		if (nIndex == null || nIndex.length != faceCount){
 			ifsf.setGenerateVertexNormals(true);
+			ifsf.setGenerateFaceNormals(true);
 			break;
 		}
 		for (int i=0;i<faceCount;i++){
@@ -485,6 +492,7 @@ public class VRMLHelper {
 			}
 		}
 		ifsf.setVertexNormals(vNormals);
+		ifsf.setGenerateFaceNormals(true);
 	}
 		break;
 		default:
@@ -664,7 +672,27 @@ public class VRMLHelper {
 		}
 		return c;
 	}
-
+	/**
+	 * merges colors by maximum of components
+	 * @param c1
+	 * @param c2
+	 */
+	public static Color mergeColor(Color c1, Color c2){
+		float r,g,b;
+		r= Math.max(c1.getRed(),c2.getRed());
+		g= Math.max(c1.getGreen(),c2.getGreen());
+		b= Math.max(c1.getBlue(),c2.getBlue());
+		return new Color(r,g,b);
+	}
+	/** appearance set to the root
+	 * @return appearance
+	 */
+	public static Appearance defaultApp(){
+		Appearance a= new Appearance();
+		a.setAttribute(CommonAttributes.TUBES_DRAW, true);
+		a.setAttribute(CommonAttributes.SPHERES_DRAW, true);
+		return a;
+	}
 	
 	
 }
