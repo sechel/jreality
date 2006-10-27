@@ -119,12 +119,12 @@ class RenderScript {
         	System.out.println(refMapCmd+refMap[1]+" "+refMap[2]+" "+refMap[3]+" "+refMap[4]+" "+refMap[5]+" "+refMap[6]+" "+ribFileName+refMap[0]+refMapSuffix);
         }
         String renderCmd = renderer + ribFileName;
-        if(display&&(type!=RIBViewer.TYPE_PIXAR)) renderCmd = renderer +"-d "+ ribFileName +" &";
+        if(display&&(type!=RIBViewer.TYPE_PIXAR)&&(type!=RIBViewer.TYPE_PIXIE)) renderCmd = renderer +"-d "+ ribFileName +" &";
         
 		System.out.println(renderCmd);
 		exec(renderCmd, false);
     
-//    if(display&&(type==RIBViewer.TYPE_PIXAR)){
+//    if(display&&((type==RIBViewer.TYPE_PIXAR)||(type!=RIBViewer.TYPE_PIXIE))){
 //      String fileName=ribFileName.substring(0,ribFileName.length()-4); 
 //      System.out.println("display "+ fileName+".tif &");
 //      
