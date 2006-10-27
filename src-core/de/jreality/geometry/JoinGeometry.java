@@ -482,7 +482,6 @@ public class JoinGeometry {
 	 */
 	public static IndexedFaceSet meltFace (IndexedFaceSet ifs){
 		// die alten Daten auslesen
-		System.out.println("JoinGeometry.meltFace()");
 		int [][] indicesOld = ifs.getFaceAttributes( Attribute.INDICES ).toIntArrayArray(null);
 		double [][] coordsOld = ifs.getVertexAttributes( Attribute.COORDINATES ).toDoubleArrayArray(null);
 		int iOldSize=indicesOld.length;
@@ -493,12 +492,11 @@ public class JoinGeometry {
 		// hilfsVariablen
 		int curr=0; // : aktuell einzufuegender Index(= length(pNew) )
 		int n=0;
-		int index;
+		int index=0;
 		double[] currPoint;
-	
 		for (int i=0;i<iOldSize;i++){	
 			n=indicesOld[i].length;
-			indicesNew[i]= new int[n];
+		 	indicesNew[i]= new int[n];
 			for (int j=0;j<n;j++){
 				currPoint=coordsOld[indicesOld[i][j]];
 				index= searchIndex(coordsNew, currPoint,curr);
@@ -509,7 +507,6 @@ public class JoinGeometry {
 				} 
 			}
 		}
-		
 		//konvertieren
 		double [][] Points= new double[curr][];
 		for (int i=0;i<curr;i++)
@@ -521,8 +518,8 @@ public class JoinGeometry {
 		ifsf.setFaceAttributes(ifs.getFaceAttributes());	
 		ifsf.setFaceCount(iOldSize);
 		ifsf.setVertexCount(curr);
-		ifsf.setFaceAttribute(Attribute.INDICES ,new IntArrayArray.Array(indicesNew));
-		//ifsf.setFaceIndices(indicesNew);
+		//ifsf.setFaceAttribute(Attribute.INDICES ,new IntArrayArray.Array(indicesNew));
+		ifsf.setFaceIndices(indicesNew);
 		ifsf.setVertexCoordinates(Points);
 		
 		ifsf.setGenerateFaceNormals(true);
