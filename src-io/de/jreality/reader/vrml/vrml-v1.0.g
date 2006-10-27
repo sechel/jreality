@@ -110,7 +110,6 @@ options {
 	// 	- Weil '.' als Teil einer Zahl gelext wird kann es nicht als Token zur verfuegung stehen!
 
 	// TODO: 
-	// correct cutOfAngle 
 	// normals & co
 	// Texture
 	// Def & Use
@@ -151,7 +150,7 @@ vrmlFile returns [SceneGraphComponent r=null]
 			p.push(root);
 			Transformation t = null;
 			State state = new State();
-			state.diffuse=new Color[]{new Color(0,0,1)};
+			state.diffuse=new Color[]{new Color(0,0,1f)};
 			state.trafo=t;
 			state.currNode=root;
 			state.camPath=p;
@@ -1065,7 +1064,9 @@ private	pointLightNode	[State state] returns[PointLight l=null]
 		if (VRMLHelper.verbose) System.err.println(")");
 		}
 	;
-private spotLightNode	[State state] returns[SpotLight l=null]
+	
+private
+spotLightNode	[State state] returns[SpotLight l=null]
 {if (VRMLHelper.verbose) System.err.print("Spot Light( ");
   boolean on = true;
   double intens = 1;
