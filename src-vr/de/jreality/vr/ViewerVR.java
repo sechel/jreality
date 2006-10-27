@@ -15,16 +15,22 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.prefs.Preferences;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -81,6 +87,59 @@ import de.jreality.util.Rectangle3D;
 
 public class ViewerVR {
 	
+	// defaults for preferences:
+	
+	// defaults for env panel
+	private static final String DEFAULT_ENVIRONMENT = "snow";
+	private static final boolean DEFAULT_TERRAIN_TRANSPARENT = false;
+	private static final boolean DEFAULT_SKYBOX_HIDDEN = false;
+	private static final Color DEFAULT_TOP_COLOR = new Color(80,80,120);
+	private static final Color DEFAULT_BOTTOM_COLOR = Color.black;
+	private static final boolean DEFAULT_BACKGROUND_FLAT = false;
+	
+	// defaults for app panel
+	private static final boolean DEFAULT_SHOW_POINTS = false;
+	private static final double DEFAULT_POINT_RADIUS = .4;
+	private static final Color DEFAULT_POINT_COLOR = Color.blue;
+	private static final boolean DEFAULT_SHOW_LINES = false;
+	private static final double DEFAULT_TUBE_RADIUS = .3;
+	private static final Color DEFAULT_LINE_COLOR = Color.red;
+	private static final boolean DEFAULT_SHOW_FACES = true;
+	private static final double DEFAULT_REFLECTION = .7;
+	private static final Color DEFAULT_FACE_COLOR = Color.white;
+	private static final boolean DEFAULT_TRANSPARENCY_ENABLED = false;
+	private static final double DEFAULT_TRANSPARENCY = .7;
+	
+	// defaults for tool panel
+	private static final boolean DEFAULT_ROTATION_ENABLED = false;
+	private static final boolean DEFAULT_DRAG_ENABLED = false;
+	
+	// default value of tex panel
+	private static final double DEFAULT_TEXTURE_SCALE = 20;
+	private static final String DEFAULT_TEXTURE = "none";
+	
+	// defaults for align panel
+	private static final double DEFAULT_SIZE = 22;
+	private static final double DEFAULT_OFFSET = -.5;
+	
+	
+	// other static constants:
+	
+	// maximal radius of tubes or points compared to content size
+	private static final double MAX_RADIUS = 0.1;
+	
+	// ratio of maximal versus minimal value for logarithmic sliders
+	private static final int LOGARITHMIC_RANGE = 200;
+	
+	// maximal horizontal diameter of content in meters
+	private static final double MAX_CONTENT_SIZE = 100;
+	
+	// maximal value of texture scale
+	private static final double MAX_TEX_SCALE = 400;
+	
+	// ratio of maximal value and minimal value of texture scale
+	private static final double TEX_SCALE_RANGE = 400;
+
 	protected static final double PI2 = Math.PI / 2;
 	
 	// width of control panel in meters
@@ -97,32 +156,7 @@ public class ViewerVR {
 	
 	// width of file browser panel in meters
 	private static final int FILE_CHOOSER_PANEL_WIDTH = 2;
-
-	private static final double DEFAULT_POINT_RADIUS = .4;
 	
-	private static final double DEFAULT_TUBE_RADIUS = .3;
-	
-	private static final double DEFAULT_TRANSPARENCY = .7;
-	
-	// maximal radius of tubes or points compared to content size
-	private static final double MAX_RADIUS = 0.1;
-	
-	// ratio of maximal versus minimal value for logarithmic sliders
-	private static final int LOGARITHMIC_RANGE = 200;
-	
-	// maximal horizontal diameter of content in meters
-	private static final double MAX_CONTENT_SIZE = 100;
-	
-	// default value of texture scale
-	private static final double DEFAULT_TEX_SCALE = 20;
-	
-	// maximal value of texture scale
-	private static final double MAX_TEX_SCALE = 400;
-	
-	// ratio of maximal value and minimal value of texture scale
-	private static final double TEX_SCALE_RANGE = 400;
-
-	//private static final Object DARK_DIFFUSE_COLOR = new Color(128,128,0);
 	
 	// texture of content
 	private Texture2D tex;
@@ -130,7 +164,6 @@ public class ViewerVR {
 	// root of scene graph
 	private SceneGraphComponent sceneRoot = new SceneGraphComponent(),
 			sceneNode = new SceneGraphComponent(),
-//			reflectedSceneNode = new SceneGraphComponent(),
 			avatarNode = new SceneGraphComponent(),
 			camNode = new SceneGraphComponent(),
 			lightNode = new SceneGraphComponent(), terrainNode;
@@ -138,31 +171,57 @@ public class ViewerVR {
 	private Tool rotateTool = new RotateTool(), dragTool = new DraggingTool();
 	private SceneGraphComponent currentContent;
 	private HashMap<String, Integer> exampleIndices = new HashMap<String, Integer>();
-	private HashMap<String, Integer> textureIndices = new HashMap<String, Integer>();
+	private HashMap<String, String> textureNameToTexture = new HashMap<String, String>();
+	private HashMap<String, ButtonModel> textureNameToButton = new HashMap<String, ButtonModel>();
+	
 	private Appearance terrainAppearance = new Appearance(),
 			rootAppearance = new Appearance(),
 			contentAppearance = new Appearance();
 	private DirectionalLight light = new DirectionalLight();
 	private SceneGraphPath cameraPath, avatarPath, emptyPickPath;
-	private double diam = 22, offset = -.5;
+	private double size = DEFAULT_SIZE, offset = DEFAULT_OFFSET;
 	private JPanel fileChooserPanel;
 	private JFileChooser texFileChooser;
 	private SimpleColorChooser contentColorChooser;
 	private SimpleColorChooser backgroundColorChooser;
+	private ScenePanel sp;
+	
+	// align panel
 	private JSlider sizeSlider;
 	private JSlider groundSlider;
-	private ScenePanel sp;
+
+	// app panel
 	private JSlider tubeRadiusSlider;
 	private JSlider pointRadiusSlider;
 	private JSlider reflectionSlider;
-	private CubeMap cm;
-	private double objectScale=1;
+	
+	// tool tab
 	private JCheckBox rotate;
 	private JCheckBox drag;
+	
+	// env tab
 	private JCheckBox terrainTransparent;
+	private JCheckBox skyBoxHidden;
+	private Color bottomColor;
+	private Color topColor;
+	
+	// app tab
+	private JCheckBox showLines;
+	private JCheckBox showPoints;
+	private JCheckBox showFaces;
+	private JCheckBox transparency;
+	private JSlider transparencySlider;
+	
+	// tex tab
+	private JSlider texScaleSlider;
+
+
+	
+	private CubeMap cm;
+	private double objectScale=1;
 	private Container defaultPanel;
 	private String currentColor;
-	private JSlider texScaleSlider;
+	
 	private Landscape landscape;
 	private AABBPickSystem pickSystem;
 	private double[][] terrainPoints;
@@ -179,16 +238,10 @@ public class ViewerVR {
 	private JTextPane helpText;
 	private JPanel buttonGroupComponent;
 	private JPanel toolPanel;
-	private Color downColor = new Color(0,0,0);
-	private Color upColor = new Color(80,80,120);
 
 	protected boolean currentBackgroundColorTop;
 
-	private JCheckBox showLines;
-
-	private JCheckBox showPoints;
-
-	private JCheckBox showFaces;
+	
 
 	private boolean showShadow = true;
 	
@@ -198,20 +251,14 @@ public class ViewerVR {
 
 	private JButton bottomColorButton;
 
-	private JCheckBox backGroundFlat;
+	private JCheckBox backgroundFlat;
 
 	private ImageData[] cubeMap;
 
 	private boolean generatePickTrees;
 
 	private JButton shadowButton;
-
-	private JCheckBox skyBoxHidden;
-
-	private JCheckBox transparency;
-
-	private JSlider transparencySlider;
-	
+	private ButtonGroup textureGroup;
 	
 	public ViewerVR() throws IOException {
 
@@ -295,14 +342,14 @@ public class ViewerVR {
 			}
 		}
 		contentAppearance.setName("contentApp");
-		contentAppearance.setAttribute(CommonAttributes.POINT_SHADER + "."
-				+ CommonAttributes.DIFFUSE_COLOR, Color.blue);
-		contentAppearance.setAttribute(CommonAttributes.POLYGON_SHADER + "."
-				+ CommonAttributes.DIFFUSE_COLOR, Color.white);
-		contentAppearance.setAttribute(CommonAttributes.LINE_SHADER + "."
-				+ CommonAttributes.DIFFUSE_COLOR, Color.red);
-		contentAppearance.setAttribute("showLines", false);
-		contentAppearance.setAttribute("showPoints", false);
+//		contentAppearance.setAttribute(CommonAttributes.POINT_SHADER + "."
+//				+ CommonAttributes.DIFFUSE_COLOR, Color.blue);
+//		contentAppearance.setAttribute(CommonAttributes.POLYGON_SHADER + "."
+//				+ CommonAttributes.DIFFUSE_COLOR, Color.white);
+//		contentAppearance.setAttribute(CommonAttributes.LINE_SHADER + "."
+//				+ CommonAttributes.DIFFUSE_COLOR, Color.red);
+//		contentAppearance.setAttribute("showLines", false);
+//		contentAppearance.setAttribute("showPoints", false);
 		contentAppearance.setAttribute(CommonAttributes.LINE_SHADER + "."
 				+ CommonAttributes.PICKABLE, false);
 		contentAppearance.setAttribute(CommonAttributes.POINT_SHADER + "."
@@ -370,7 +417,7 @@ public class ViewerVR {
 		
 		
 		// landscape
-		landscape = new Landscape(System.getProperty("javaws.ViewerVR.landscape"));
+		landscape = new Landscape();
 
 		// swing widgets
 		makeControlPanel();
@@ -386,10 +433,12 @@ public class ViewerVR {
 		makeTextureFileChooser();
 		makeColorChoosers();
 		
-		updateLandscape();
-		setTransparency(DEFAULT_TRANSPARENCY);
+//		updateLandscape();
+//		setTransparency(DEFAULT_TRANSPARENCY);
 
 		setAvatarPosition(0, landscape.isTerrainFlat() ? -.5:0, 28);
+		
+		restoreDefaults();
 }
 
 	private void makeControlPanel() {
@@ -444,7 +493,6 @@ public class ViewerVR {
 							public void visit(IndexedFaceSet i) {
 								if (i.getFaceAttributes(Attribute.NORMALS) == null) GeometryUtility.calculateAndSetFaceNormals(i);
 								if (i.getVertexAttributes(Attribute.NORMALS) == null) GeometryUtility.calculateAndSetVertexNormals(i);
-								System.out.println(".visit()");
 								if (smoothNormalsCheckBox.isSelected()) IndexedFaceSetUtility.assignSmoothVertexNormals(i, -1);
 							}
 						});
@@ -505,7 +553,7 @@ public class ViewerVR {
 			public void stateChanged(ChangeEvent arg0) {
 				Color color = backgroundColorChooser.getColor();
 				if (currentBackgroundColorTop) {
-					setUpColor(color);
+					setTopColor(color);
 				} else {
 					setDownColor(color);
 				}
@@ -516,22 +564,11 @@ public class ViewerVR {
 
 	private void updateLandscape() {
 		cubeMap = landscape.getCubeMap();
-		upColor = landscape.getUpColor();
-		downColor = landscape.getDownColor();
+		topColor = landscape.getUpColor();
+		bottomColor = landscape.getDownColor();
 		
-//		String diffCol = CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR;
-//		Color currentDiffuseColor = (Color) contentAppearance.getAttribute(diffCol);
 		updateEnablingOfBackgroundEdit();
 		updateBackground();
-//		if (cubeMap == null) {
-//			if (currentDiffuseColor.equals(Color.white)) {
-//				contentAppearance.setAttribute(diffCol, DARK_DIFFUSE_COLOR);
-//			}
-//		} else {
-//			if (currentDiffuseColor.equals(DARK_DIFFUSE_COLOR)) {
-//				contentAppearance.setAttribute(diffCol, Color.white);
-//			}
-//		}
 		Geometry last = terrainNode.getGeometry();
 		flat = landscape.isTerrainFlat();
 		terrainNode.setGeometry(flat ? flatTerrain : terrain);
@@ -624,22 +661,17 @@ public class ViewerVR {
 			}
 		});
 		backgroundColorPanel.add(bottomColorButton);
-		backGroundFlat = new JCheckBox("flat");
-		backGroundFlat.addChangeListener(new ChangeListener() {
+		backgroundFlat = new JCheckBox("flat");
+		backgroundFlat.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				updateEnablingOfBackgroundEdit();
 				updateBackground();
 			}
 		});
-		backgroundColorPanel.add(backGroundFlat);
+		backgroundColorPanel.add(backgroundFlat);
 		
 		envControlBox.add(backgroundColorPanel);
 		envSelection.add(envControlBox, BorderLayout.SOUTH);
-	}
-
-	protected void setBackGroundFlat(boolean b) {
-		backGroundFlat.setSelected(b);
-		updateEnablingOfBackgroundEdit();
 	}
 
 	private void updateEnablingOfBackgroundEdit() {
@@ -656,6 +688,10 @@ public class ViewerVR {
 	public void setTerrainTransparent(boolean b) {
 		terrainTransparent.setSelected(b);
 		terrainAppearance.setAttribute(CommonAttributes.TRANSPARENCY, b ? 1.0 : 0.0);
+	}
+	
+	public boolean isTransparencyEnabled() {
+		return transparency.isSelected();
 	}
 	
 	public void setTransparencyEnabled(boolean b) {
@@ -700,8 +736,7 @@ public class ViewerVR {
 		Box tubeRadiusBox = new Box(BoxLayout.X_AXIS);
 		tubeRadiusBox.setBorder(new EmptyBorder(5, 5, 5, 0));
 		JLabel tubeRadiusLabel = new JLabel("radius");
-		tubeRadiusSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100,
-				(int) (DEFAULT_TUBE_RADIUS * 100));
+		tubeRadiusSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
 		tubeRadiusSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
 				setTubeRadius(0.01 * tubeRadiusSlider.getValue());
@@ -740,8 +775,7 @@ public class ViewerVR {
 		Box pointRadiusBox = new Box(BoxLayout.X_AXIS);
 		pointRadiusBox.setBorder(new EmptyBorder(5, 5, 5, 0));
 		JLabel pointRadiusLabel = new JLabel("radius");
-		pointRadiusSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100,
-				(int) (DEFAULT_POINT_RADIUS * 100));
+		pointRadiusSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
 		pointRadiusSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
 				setPointRadius(0.01 * pointRadiusSlider.getValue());
@@ -782,7 +816,7 @@ public class ViewerVR {
 		Box reflectionBox = new Box(BoxLayout.X_AXIS);
 		reflectionBox.setBorder(new EmptyBorder(5, 5, 5, 0));
 		JLabel reflectionLabel = new JLabel("reflection");
-		reflectionSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 60);
+		reflectionSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 1);
 		reflectionSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
 				setReflection(0.01 * reflectionSlider.getValue());
@@ -830,13 +864,13 @@ public class ViewerVR {
 		Box sizeBox = new Box(BoxLayout.Y_AXIS);
 		sizeBox.setBorder(new EmptyBorder(10, 5, 0, 5));
 		JLabel sizeLabel = new JLabel("size");
-		int sliderDiam = (int)(Math.log(diam*LOGARITHMIC_RANGE/MAX_CONTENT_SIZE)/Math.log(LOGARITHMIC_RANGE)*100);
+		int sliderDiam = (int)(Math.log(size*LOGARITHMIC_RANGE/MAX_CONTENT_SIZE)/Math.log(LOGARITHMIC_RANGE)*100);
 		sizeSlider = new JSlider(SwingConstants.VERTICAL, 0, 100, sliderDiam);
 		sizeSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
 				double sliderDiam = 0.01 * sizeSlider.getValue();
-				setDiam(Math.exp(Math.log(LOGARITHMIC_RANGE)*sliderDiam)/LOGARITHMIC_RANGE * MAX_CONTENT_SIZE);
-				alignContent(diam, offset, null);
+				setSize(Math.exp(Math.log(LOGARITHMIC_RANGE)*sliderDiam)/LOGARITHMIC_RANGE * MAX_CONTENT_SIZE);
+				alignContent(size, offset, null);
 				if (!sizeSlider.getValueIsAdjusting()) {
 					computeShadow();
 				}
@@ -852,7 +886,7 @@ public class ViewerVR {
 		groundSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
 				setOffset(0.01 * groundSlider.getValue());
-				alignContent(diam, offset, null);
+				alignContent(size, offset, null);
 				if (!groundSlider.getValueIsAdjusting()) {
 					computeShadow();
 				}
@@ -872,7 +906,7 @@ public class ViewerVR {
 		JButton xRotateLeft = new JButton(rotateLeft);
 		xRotateLeft.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				alignContent(diam, offset, MatrixBuilder.euclidean().rotateX(
+				alignContent(size, offset, MatrixBuilder.euclidean().rotateX(
 						-PI2).getMatrix());
 				computeShadow();
 			}
@@ -888,7 +922,7 @@ public class ViewerVR {
 		JButton xRotateRight = new JButton(rotateRight);
 		xRotateRight.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				alignContent(diam, offset, MatrixBuilder.euclidean().rotateX(
+				alignContent(size, offset, MatrixBuilder.euclidean().rotateX(
 						PI2).getMatrix());
 				computeShadow();
 			}
@@ -900,7 +934,7 @@ public class ViewerVR {
 		JButton yRotateLeft = new JButton(rotateLeft);
 		yRotateLeft.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				alignContent(diam, offset, MatrixBuilder.euclidean().rotateY(
+				alignContent(size, offset, MatrixBuilder.euclidean().rotateY(
 						-PI2).getMatrix());
 				computeShadow();
 			}
@@ -914,7 +948,7 @@ public class ViewerVR {
 		JButton yRotateRight = new JButton(rotateRight);
 		yRotateRight.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				alignContent(diam, offset, MatrixBuilder.euclidean().rotateY(
+				alignContent(size, offset, MatrixBuilder.euclidean().rotateY(
 						PI2).getMatrix());
 				computeShadow();
 			}
@@ -926,7 +960,7 @@ public class ViewerVR {
 		JButton zRotateLeft = new JButton(rotateLeft);
 		zRotateLeft.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				alignContent(diam, offset, MatrixBuilder.euclidean().rotateZ(
+				alignContent(size, offset, MatrixBuilder.euclidean().rotateZ(
 						-PI2).getMatrix());
 				computeShadow();
 			}
@@ -940,7 +974,7 @@ public class ViewerVR {
 		JButton zRotateRight = new JButton(rotateRight);
 		zRotateRight.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				alignContent(diam, offset, MatrixBuilder.euclidean().rotateZ(
+				alignContent(size, offset, MatrixBuilder.euclidean().rotateZ(
 						PI2).getMatrix());
 				computeShadow();
 			}
@@ -955,7 +989,7 @@ public class ViewerVR {
 		JButton alignButton = new JButton("align");
 		alignButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				alignContent(diam, offset, null);
+				alignContent(size, offset, null);
 			}
 		});
 		p.add("South", alignButton);
@@ -1020,14 +1054,14 @@ public class ViewerVR {
 		rotate = new JCheckBox("rotate");
 		rotate.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				setRotate(rotate.isSelected());
+				setRotationEnabled(rotate.isSelected());
 			}
 		});
 		toolButtonBox.add(rotate);
 		drag = new JCheckBox("drag");
 		drag.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				setDrag(drag.isSelected());
+				setDragEnabled(drag.isSelected());
 			}
 		});
 		toolButtonBox.add(drag);
@@ -1064,53 +1098,40 @@ public class ViewerVR {
 	}
 
 	private void makeTexTab() {
-		final String[][] textures = new String[][] {
-				{ "none", null },
-				{ "metal grid", "textures/boysurface.png" },
-				{ "metal floor", "textures/metal_basic88.png" },
-				{ "chain-link fence", "textures/chainlinkfence.png" },
-				{ "random dots", "textures/random.png" }
-		};
+		textureNameToTexture.put("none", null);
+		textureNameToTexture.put("metal grid", "textures/boysurface.png");
+		textureNameToTexture.put("metal floor", "textures/metal_basic88.png");
+		textureNameToTexture.put("chain-link fence", "textures/chainlinkfence.png");
+		textureNameToTexture.put("random dots", "textures/random.png");
+
 		ActionListener texturesListener = new ActionListener() {
 			
 			public void actionPerformed(ActionEvent e) {
-				String selectedBox = e.getActionCommand();
-				int selectionIndex = ((Integer) textureIndices.get(selectedBox))
-						.intValue();
-				try {
-					if (textures[selectionIndex][0] == "none") {
-						contentAppearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D, Appearance.INHERITED, Texture2D.class);
-					} else {
-						ImageData img = ImageData.load(Input.getInput(textures[selectionIndex][1]));
-						tex = TextureUtility.createTexture(contentAppearance, "polygonShader", img, false);
-						setTexScale(texScaleSlider.getValue()*.01);
-					}
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
+				setTexture(e.getActionCommand());
 			}
 		};
 		textureButtonPanel = new JPanel(new BorderLayout());
 		textureButtonPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		Box textureButtonBox = new Box(BoxLayout.Y_AXIS);
-		ButtonGroup textureGroup = new ButtonGroup();
-		for (int i = 0; i < textures.length; i++) {
-			JRadioButton button = new JRadioButton(textures[i][0]);
+		textureGroup = new ButtonGroup();
+		for (String name : textureNameToTexture.keySet()) {
+			JRadioButton button = new JRadioButton(name);
+			button.setActionCommand(name);
+			textureNameToButton.put(name, button.getModel());
 			button.addActionListener(texturesListener);
 			textureButtonBox.add(button);
 			textureGroup.add(button);
-			textureIndices.put(textures[i][0], new Integer(i));
 		}
 		textureButtonPanel.add("Center", textureButtonBox);
 		
 		Box texScaleBox = new Box(BoxLayout.X_AXIS);
 		texScaleBox.setBorder(new EmptyBorder(70, 5, 5, 0));
 		JLabel texScaleLabel = new JLabel("scale");
-		int sliderTexScale = (int)(Math.log(DEFAULT_TEX_SCALE /MAX_TEX_SCALE*TEX_SCALE_RANGE)/Math.log(TEX_SCALE_RANGE)*100);
-		texScaleSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, sliderTexScale);
+		texScaleSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100,0);
 		texScaleSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
-				setTexScale(0.01 * texScaleSlider.getValue());
+				double d = .01 * texScaleSlider.getValue();
+				setTextureScale(Math.exp(Math.log(TEX_SCALE_RANGE) * d)/TEX_SCALE_RANGE * MAX_TEX_SCALE);
 			}
 		});
 		texScaleBox.add(texScaleLabel);
@@ -1144,11 +1165,17 @@ public class ViewerVR {
 		}
 	}
 
-	public void setTexScale(double d) {
-		texScaleSlider.setValue((int) (d * 100));
+	public double getTextureScale() {
+		double d = .01 * texScaleSlider.getValue();
+		return Math.exp(Math.log(TEX_SCALE_RANGE) * d)/TEX_SCALE_RANGE * MAX_TEX_SCALE;
+	}
+	
+	public void setTextureScale(double d) {
+		texScaleSlider.setValue(
+				(int)(Math.log(DEFAULT_TEXTURE_SCALE /MAX_TEX_SCALE*TEX_SCALE_RANGE)/Math.log(TEX_SCALE_RANGE)*100)
+			);
 		if (tex != null) {
-			double texScale = Math.exp(Math.log(TEX_SCALE_RANGE) * d)/TEX_SCALE_RANGE * MAX_TEX_SCALE;
-			tex.setTextureMatrix(MatrixBuilder.euclidean().scale(texScale).getMatrix());
+			tex.setTextureMatrix(MatrixBuilder.euclidean().scale(d).getMatrix());
 		}
 	}
 
@@ -1172,7 +1199,7 @@ public class ViewerVR {
 
 	private void switchToBackgroundColorChooser(boolean top) {
 		currentBackgroundColorTop = top;
-		backgroundColorChooser.setColor(top ? upColor : downColor);
+		backgroundColorChooser.setColor(top ? topColor : bottomColor);
 		sp.getFrame().setVisible(false);
 		sp.getFrame().setContentPane(backgroundColorChooser);
 		sp.getFrame().setVisible(true);
@@ -1188,12 +1215,20 @@ public class ViewerVR {
 		sp.getFrame().setVisible(true);
 	}
 
-	public void setDrag(boolean b) {
+	public boolean isDragEnabled() {
+		return drag.isSelected();
+	}
+	
+	public void setDragEnabled(boolean b) {
 		toggleTool(dragTool, b);
 		drag.setSelected(b);
 	}
 
-	public void setRotate(boolean b) {
+	public boolean isRotationEnabled() {
+		return rotate.isSelected();
+	}
+	
+	public void setRotationEnabled(boolean b) {
 		toggleTool(rotateTool, b);
 		rotate.setSelected(b);
 	}
@@ -1210,21 +1245,39 @@ public class ViewerVR {
 		}
 	}
 
+	public double getReflection() {
+			return .01 * reflectionSlider.getValue();
+	}
+	
 	public void setReflection(double d) {
-		cm.setBlendColor(new Color(1f, 1f, 1f, (float) d));
+		reflectionSlider.setValue((int)(100*d));
+		if (cm != null) cm.setBlendColor(new Color(1f, 1f, 1f, (float) d));
+	}
+	
+	public double getTransparency() {
+		return .01 * transparencySlider.getValue();
 	}
 	
 	public void setTransparency(double d) {
+		transparencySlider.setValue((int)(100 * d));
 		contentAppearance.setAttribute(CommonAttributes.TRANSPARENCY, d);
 	}
 
+	public double getPointRadius() {
+		return .01 * pointRadiusSlider.getValue();
+	}
+	
 	public void setPointRadius(double d) {
 		pointRadiusSlider.setValue((int) (d * 100));
 		contentAppearance.setAttribute(CommonAttributes.POINT_SHADER + "."
 				+ CommonAttributes.POINT_RADIUS, Math.exp(Math.log(LOGARITHMIC_RANGE) * d)
 				/ LOGARITHMIC_RANGE * objectScale * MAX_RADIUS);
 	}
-
+	
+	public double getTubeRadius() {
+		return .01 * tubeRadiusSlider.getValue();
+	}
+	
 	public void setTubeRadius(double d) {
 		tubeRadiusSlider.setValue((int) (d * 100));
 		contentAppearance.setAttribute(CommonAttributes.LINE_SHADER + "."
@@ -1233,27 +1286,29 @@ public class ViewerVR {
 	}
 
 	public Color getDownColor() {
-		return downColor;
+		return bottomColor;
 	}
 
 	public void setDownColor(Color downColor) {
-		this.downColor = downColor;
+		this.bottomColor = downColor;
 		updateBackground();
 	}
 	
 	private void updateBackground() {
-		Color down = backGroundFlat.isSelected() ? upColor : downColor;
-		rootAppearance.setAttribute(CommonAttributes.BACKGROUND_COLORS, new Color[]{
-				upColor, upColor, down, down
-		});
+		if (topColor != null && bottomColor != null) {
+			Color down = backgroundFlat.isSelected() ? topColor : bottomColor;
+			rootAppearance.setAttribute(CommonAttributes.BACKGROUND_COLORS, new Color[]{
+					topColor, topColor, down, down
+			});
+		}
 	}
 
-	public Color getUpColor() {
-		return upColor;
+	public Color getTopColor() {
+		return topColor;
 	}
 
-	public void setUpColor(Color upColor) {
-		this.upColor = upColor;
+	public void setTopColor(Color color) {
+		this.topColor = color;
 		updateBackground();
 	}
 
@@ -1276,24 +1331,25 @@ public class ViewerVR {
 		sp.getFrame().setVisible(true);
 	}
 
-	public void setTerrainTexture(ImageData tex, double scale) {
+	private void setTerrainTexture(ImageData tex, double scale) {
 		Texture2D t = TextureUtility.createTexture(terrainAppearance,
 				"polygonShader", tex);
 		t.setTextureMatrix(MatrixBuilder.euclidean().scale(scale).getMatrix());
 	}
 
-	public void updateSkyBox() {
+	private void updateSkyBox() {
 		ImageData[] imgs = skyBoxHidden.isSelected() ? null : cubeMap;
 		TextureUtility.createSkyBox(rootAppearance, imgs);
 		cm = TextureUtility.createReflectionMap(contentAppearance,
 				"polygonShader", cubeMap);
+		setReflection(getReflection());
 	}
 
 	public void setContent(SceneGraphComponent content) {
 		if (currentContent != null
 				&& sceneNode.getChildNodes().contains(currentContent)) {
-			setDrag(false);
-			setRotate(false);
+			setDragEnabled(false);
+			setRotationEnabled(false);
 			sceneNode.removeChild(currentContent);
 		}
 		SceneGraphComponent parent = new SceneGraphComponent();
@@ -1311,20 +1367,20 @@ public class ViewerVR {
 		content.addTool(new DuplicateTriplyPeriodicTool(
 				extent[0],extent[1],extent[2],center[0],center[1],center[2]));
 		objectScale = Math.max(Math.max(extent[0], extent[2]), extent[1]);
-		setTubeRadius(DEFAULT_TUBE_RADIUS);
-		setPointRadius(DEFAULT_POINT_RADIUS);
+		setTubeRadius(getTubeRadius());
+		setPointRadius(getPointRadius());
 		sceneNode.addChild(currentContent);
-		alignContent(diam, offset, null);
+		alignContent(size, offset, null);
 		computeShadow();
 	}
 
-	public double getDiam() {
-		return diam;
+	public double getSize() {
+		return size;
 	}
 
-	public void setDiam(double d) {
-		diam = d;
-		double sliderDiam = Math.log(diam*LOGARITHMIC_RANGE/MAX_CONTENT_SIZE)/Math.log(LOGARITHMIC_RANGE);
+	public void setSize(double d) {
+		size = d;
+		double sliderDiam = Math.log(size*LOGARITHMIC_RANGE/MAX_CONTENT_SIZE)/Math.log(LOGARITHMIC_RANGE);
 		sizeSlider.setValue((int) (sliderDiam * 100));
 	}
 
@@ -1369,7 +1425,32 @@ public class ViewerVR {
 	}
 
 	public ViewerApp display() {
-		return new ViewerApp(sceneRoot, cameraPath, emptyPickPath, avatarPath);
+		ViewerApp viewerApp = new ViewerApp(sceneRoot, cameraPath, emptyPickPath, avatarPath);
+		JMenuBar menuBar = viewerApp.getMenuBar();
+		JMenu settings = new JMenu("Settings");
+		Action defaults = new AbstractAction("Restore defaults") {
+
+			public void actionPerformed(ActionEvent e) {
+				restoreDefaults();
+			}
+		};
+		settings.add(defaults);
+		Action restorePrefs = new AbstractAction("Restore preferences") {
+
+			public void actionPerformed(ActionEvent e) {
+				restorePreferences();
+			}
+		};
+		settings.add(restorePrefs);
+		Action savePrefs = new AbstractAction("Save preferences") {
+
+			public void actionPerformed(ActionEvent e) {
+				savePreferences();
+			}
+		};
+		settings.add(savePrefs);
+		menuBar.add(settings);
+		return viewerApp;
 	}
 
 	public SceneGraphComponent getSceneRoot() {
@@ -1421,16 +1502,173 @@ public class ViewerVR {
 		);
 	}
 	
+	public void restoreDefaults() {
+		// env panel
+		setEnvironment(DEFAULT_ENVIRONMENT);
+		setTerrainTransparent(DEFAULT_TERRAIN_TRANSPARENT);
+		setSkyBoxHidden(DEFAULT_SKYBOX_HIDDEN);
+		setTopColor(DEFAULT_TOP_COLOR);
+		setBottomColor(DEFAULT_BOTTOM_COLOR);
+		setBackgroundFlat(DEFAULT_BACKGROUND_FLAT);
+		
+		// app panel
+		setShowPoints(DEFAULT_SHOW_POINTS);
+		setPointRadius(DEFAULT_POINT_RADIUS);
+		setPointColor(DEFAULT_POINT_COLOR);
+		setShowLines(DEFAULT_SHOW_LINES);
+		setTubeRadius(DEFAULT_TUBE_RADIUS);
+		setLineColor(DEFAULT_LINE_COLOR);
+		setShowFaces(DEFAULT_SHOW_FACES);
+		setReflection(DEFAULT_REFLECTION);
+		setFaceColor(DEFAULT_FACE_COLOR);
+		setTransparencyEnabled(DEFAULT_TRANSPARENCY_ENABLED);
+		setTransparency(DEFAULT_TRANSPARENCY);
+		
+		// tool panel
+		setRotationEnabled(DEFAULT_ROTATION_ENABLED);
+		setDragEnabled(DEFAULT_DRAG_ENABLED);
+		
+		// tex panel
+		setTextureScale(DEFAULT_TEXTURE_SCALE);
+		setTexture(DEFAULT_TEXTURE);
+		
+		// defaults for align panel
+		setSize(DEFAULT_SIZE);
+		setOffset(DEFAULT_OFFSET);
+	}
+	
+	public void savePreferences() {
+		Preferences prefs =  Preferences.userNodeForPackage(this.getClass());
+		// env panel
+		prefs.put("environment", getEnvironment());
+		prefs.putBoolean("terrainTransparent", isTerrainTransparent());
+		prefs.putBoolean("skyBoxHidden", isSkyBoxHidden());
+		Color c = getTopColor();
+		prefs.putInt("topColorRed", c.getRed());
+		prefs.putInt("topColorGreen", c.getGreen());
+		prefs.putInt("topColorBlue", c.getBlue());
+		c = getBottomColor();
+		prefs.putInt("bottomColorRed", c.getRed());
+		prefs.putInt("bottomColorGreen", c.getGreen());
+		prefs.putInt("bottomColorBlue", c.getBlue());
+		prefs.putBoolean("backgroundFlat", isBackgroundFlat());
+		
+		// app panel
+		prefs.putBoolean("showPoints", isShowPoints());
+		prefs.putDouble("pointRadius", getPointRadius());
+		c = getPointColor();
+		prefs.putInt("pointColorRed", c.getRed());
+		prefs.putInt("pointColorGreen", c.getGreen());
+		prefs.putInt("pointColorBlue", c.getBlue());
+		prefs.putBoolean("showLines", isShowLines());
+		prefs.putDouble("tubeRadius", getTubeRadius());
+		c = getLineColor();
+		prefs.putInt("lineColorRed", c.getRed());
+		prefs.putInt("lineColorGreen", c.getGreen());
+		prefs.putInt("lineColorBlue", c.getBlue());
+		prefs.putBoolean("showFaces", isShowFaces());
+		prefs.putDouble("reflection", getReflection());
+		c = getFaceColor();
+		prefs.putInt("faceColorRed", c.getRed());
+		prefs.putInt("faceColorGreen", c.getGreen());
+		prefs.putInt("faceColorBlue", c.getBlue());
+		prefs.putBoolean("transparencyEnabled", isTransparencyEnabled());
+		prefs.putDouble("transparency", getTransparency());
+		
+		// tool panel
+		prefs.putBoolean("rotationEnabled", isRotationEnabled());
+		prefs.putBoolean("dragEnabled", isDragEnabled());
+		
+		// tex panel
+		prefs.putDouble("textureScale", getTextureScale());
+		prefs.put("texture", getTexture());
+		
+		// defaults for align panel
+		prefs.putDouble("size", getSize());
+		prefs.putDouble("offset", getOffset());
+	}
+	
+	public void restorePreferences() {
+		Preferences prefs =  Preferences.userNodeForPackage(this.getClass());
+		// env panel
+		setEnvironment(prefs.get("environment", DEFAULT_ENVIRONMENT));
+		setTerrainTransparent(prefs.getBoolean("terrainTransparent", DEFAULT_TERRAIN_TRANSPARENT));
+		setSkyBoxHidden(prefs.getBoolean("skyBoxHidden", DEFAULT_SKYBOX_HIDDEN));
+		int r = prefs.getInt("topColorRed", DEFAULT_TOP_COLOR.getRed());
+		int g = prefs.getInt("topColorGreen", DEFAULT_TOP_COLOR.getGreen());
+		int b = prefs.getInt("topColorBlue", DEFAULT_TOP_COLOR.getBlue());
+		setTopColor(new Color(r,g,b));
+		r = prefs.getInt("bottomColorRed", DEFAULT_BOTTOM_COLOR.getRed());
+		g = prefs.getInt("bottomColorGreen", DEFAULT_BOTTOM_COLOR.getGreen());
+		b = prefs.getInt("bottomColorBlue", DEFAULT_BOTTOM_COLOR.getBlue());
+		setBottomColor(new Color(r,g,b));
+		setBackgroundFlat(prefs.getBoolean("backgroundFlat", DEFAULT_BACKGROUND_FLAT));
+		
+		// app panel
+		setShowPoints(prefs.getBoolean("showPoints", DEFAULT_SHOW_POINTS));
+		setPointRadius(prefs.getDouble("pointRadius", DEFAULT_POINT_RADIUS));
+		r = prefs.getInt("pointColorRed", DEFAULT_POINT_COLOR.getRed());
+		g = prefs.getInt("pointColorGreen", DEFAULT_POINT_COLOR.getGreen());
+		b = prefs.getInt("pointColorBlue", DEFAULT_POINT_COLOR.getBlue());
+		setPointColor(new Color(r,g,b));
+		setShowLines(prefs.getBoolean("showLines", DEFAULT_SHOW_LINES));
+		setTubeRadius(prefs.getDouble("tubeRadius", DEFAULT_TUBE_RADIUS));
+		r = prefs.getInt("lineColorRed", DEFAULT_LINE_COLOR.getRed());
+		g = prefs.getInt("lineColorGreen", DEFAULT_LINE_COLOR.getGreen());
+		b = prefs.getInt("lineColorBlue", DEFAULT_LINE_COLOR.getBlue());
+		setLineColor(new Color(r,g,b));
+		setShowFaces(prefs.getBoolean("showFaces", DEFAULT_SHOW_FACES));
+		setReflection(prefs.getDouble("reflection", DEFAULT_REFLECTION));
+		r = prefs.getInt("faceColorRed", DEFAULT_FACE_COLOR.getRed());
+		g = prefs.getInt("faceColorGreen", DEFAULT_FACE_COLOR.getGreen());
+		b = prefs.getInt("faceColorBlue", DEFAULT_FACE_COLOR.getBlue());
+		setFaceColor(new Color(r,g,b));
+		setTransparencyEnabled(prefs.getBoolean("transparencyEnabled", DEFAULT_TRANSPARENCY_ENABLED));
+		setTransparency(prefs.getDouble("transparency", DEFAULT_TRANSPARENCY));
+		
+		// tool panel
+		setRotationEnabled(prefs.getBoolean("rotationEnabled", DEFAULT_ROTATION_ENABLED));
+		setDragEnabled(prefs.getBoolean("dragEnabled", DEFAULT_DRAG_ENABLED));
+		
+		// tex panel
+		setTextureScale(prefs.getDouble("textureScale", DEFAULT_TEXTURE_SCALE));
+		setTexture(prefs.get("texture", DEFAULT_TEXTURE));
+		
+		// defaults for align panel
+		setSize(prefs.getDouble("size", DEFAULT_SIZE));
+		setOffset(prefs.getDouble("offset", DEFAULT_OFFSET));
+	}
+	
+	public boolean isSkyBoxHidden() {
+		return skyBoxHidden.isSelected();
+	}
+	
+	public void setSkyBoxHidden(boolean b) {
+		skyBoxHidden.setSelected(b);
+	}
+	
+	public boolean isShowLines() {
+		return showLines.isSelected();
+	}
+	
 	public void setShowLines(boolean selected) {
 		showLines.setSelected(selected);
 		contentAppearance.setAttribute("showLines", selected);
 	}
 
+	public boolean isShowPoints() {
+		return showPoints.isSelected();
+	}
+	
 	public void setShowPoints(boolean selected) {
 		showPoints.setSelected(selected);
 		contentAppearance.setAttribute("showPoints", selected);
 	}
 
+	public boolean isShowFaces() {
+		return showFaces.isSelected();
+	}
+	
 	public void setShowFaces(boolean selected) {
 		showFaces.setSelected(selected);
 		contentAppearance.setAttribute("showFaces", selected);
@@ -1454,7 +1692,6 @@ public class ViewerVR {
 	}
 
 	public static void main(String[] args) throws IOException {
-//		System.setProperty("de.jreality.ui.viewerapp.synchRender", "true");
 		ViewerVR vr = new ViewerVR();
 		final String[][] examples = new String[][] {
 				{ "Boy surface", "jrs/boy.jrs" },
@@ -1476,13 +1713,96 @@ public class ViewerVR {
 		vr.showPanel(false);
 		vr.setGeneratePickTrees(true);
 		ViewerApp vApp = vr.display();
-//		vApp.setAttachNavigator(true);
-//		vApp.setAttachBeanShell(true);
-//		vApp.setShowMenu(true);
 		vApp.update();
 		JFrame f = vApp.display();
 		f.setSize(800, 600);
 		f.validate();
 	}
 
+	public String getEnvironment() {
+		return landscape.getEnvironment();
+	}
+
+	public void setEnvironment(String environment) {
+		landscape.setEvironment(environment);
+	}
+
+	public boolean getBackgroundFlat() {
+		return backgroundFlat.isSelected();
+	}
+	
+	public Color getBottomColor() {
+		return bottomColor;
+	}
+
+	public void setBottomColor(Color color) {
+		this.bottomColor = color;
+	}
+	
+	public boolean isBackgroundFlat() {
+		return backgroundFlat.isSelected();
+	}
+	
+	public void setBackgroundFlat(boolean b) {
+		backgroundFlat.setSelected(b);
+		updateEnablingOfBackgroundEdit();
+	}
+	
+	public Color getPointColor() {
+		return (Color) contentAppearance.getAttribute(
+				CommonAttributes.POINT_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR
+		);
+	}
+	
+	public void setPointColor(Color c) {
+		contentAppearance.setAttribute(
+				CommonAttributes.POINT_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR,
+				c
+		);
+	}
+	
+	public Color getLineColor() {
+		return (Color) contentAppearance.getAttribute(
+				CommonAttributes.LINE_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR
+		);
+	}
+	
+	public void setLineColor(Color c) {
+		contentAppearance.setAttribute(
+				CommonAttributes.LINE_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR,
+				c
+		);
+	}
+	
+	public Color getFaceColor() {
+		return (Color) contentAppearance.getAttribute(
+				CommonAttributes.POLYGON_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR
+		);
+	}
+	
+	public void setFaceColor(Color c) {
+		contentAppearance.setAttribute(
+				CommonAttributes.POLYGON_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR,
+				c
+		);
+	}
+	
+	public String getTexture() {
+		return textureGroup.getSelection().getActionCommand();
+	}
+	
+	public void setTexture(String name) {
+		textureGroup.setSelected(textureNameToButton.get(name),true);
+		try {
+			if ("none".equals(name)) {
+				contentAppearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D, Appearance.INHERITED, Texture2D.class);
+			} else {
+				ImageData img = ImageData.load(Input.getInput(textureNameToTexture.get(name)));
+				tex = TextureUtility.createTexture(contentAppearance, "polygonShader", img, false);
+				setTextureScale(getTextureScale());
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+	}
 }

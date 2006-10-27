@@ -1,8 +1,6 @@
 package de.jreality.vr;
 
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +8,7 @@ import java.util.HashMap;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JRadioButton;
@@ -20,7 +19,7 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.TextureUtility;
 import de.jreality.util.Input;
 
-public class Landscape implements ActionListener {
+public class Landscape {
 
 	private HashMap<String,Integer> boxes=new HashMap<String,Integer>();
 
@@ -36,6 +35,12 @@ public class Landscape implements ActionListener {
 		{"tiles bright", null, null, null, "textures/recycfloor1_clean2.png", "50", "true", "225 225 245", "0 0 0"}
 	};
 
+	private final transient ArrayList<ChangeListener> listeners=new ArrayList<ChangeListener>();
+
+	private ButtonGroup group;
+
+
+	private HashMap<String,ButtonModel> envToButton = new HashMap<String,ButtonModel>();
 	Color upColor, downColor;
 	Box selectionComponent;
 	String selectedBox;
@@ -61,15 +66,25 @@ public class Landscape implements ActionListener {
 		Box buttonGroupComponent = new javax.swing.Box(BoxLayout.Y_AXIS);
 		selectionComponent = new javax.swing.Box(BoxLayout.Y_AXIS);
 		selectionComponent.add("Center", buttonGroupComponent);
-		ButtonGroup group = new ButtonGroup();
+		group = new ButtonGroup();
 		for (int i = 0; i < skyboxes.length; i++) {
+			final String name = skyboxes[i][0];
 			JRadioButton button = new JRadioButton(skyboxes[i][0]);
-			button.addActionListener(this);
-			if ( (selected == null && i==0) || skyboxes[i][0].equals(selected)) {
-				selectedBox=skyboxes[i][0];
-				button.setSelected(true);
-				selectionIndex=i;
-			}
+			envToButton.put(skyboxes[i][0], button.getModel());
+			button.addChangeListener(new ChangeListener() {
+
+				public void stateChanged(ChangeEvent e) {
+					selectionIndex = ((Integer)boxes.get(name)).intValue();
+					try {
+						load();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+					fireChange();
+					
+				}
+				
+			});
 			buttonGroupComponent.add(button);
 			group.add(button);
 			boxes.put(skyboxes[i][0], new Integer(i));
@@ -97,17 +112,6 @@ public class Landscape implements ActionListener {
 		f.setVisible(true);
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-	}
-
-	public void actionPerformed(ActionEvent e) {
-		selectedBox = e.getActionCommand();
-		selectionIndex = ((Integer)boxes.get(selectedBox)).intValue();
-		try {
-			load();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		fireChange();
 	}
 
 	private void load() throws IOException {
@@ -168,9 +172,6 @@ public class Landscape implements ActionListener {
 		return terrainFlat;
 	}
 
-	private final transient ArrayList<ChangeListener> listeners=new ArrayList<ChangeListener>();
-
-
 	public void addChangeListener(ChangeListener listener) {
 		synchronized (listeners) {
 			listeners.add(listener);
@@ -190,5 +191,13 @@ public class Landscape implements ActionListener {
 				l.stateChanged(e);
 			}
 		}
+	}
+
+	public String getEnvironment() {
+		return skyboxes[selectionIndex][0];
+	}
+	
+	public void setEvironment(String environment) {
+		group.setSelected(envToButton.get(environment), true);
 	}
 }
