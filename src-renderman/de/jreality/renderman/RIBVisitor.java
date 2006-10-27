@@ -305,9 +305,12 @@ public class RIBVisitor extends SceneGraphVisitor {
 //			  textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");
 //	    else if(rendererType==RIBViewer.TYPE_3DELIGHT){
 //	      textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");//"tdl");
-//	    }else if(rendererType==RIBViewer.TYPE_AQSIS)
+//	    }else if(rendererType==RIBViewer.TYPE_AQSIS){
 //	      textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tx");
-//	    else{
+//      }else if(rendererType==RIBViewer.TYPE_PIXIE){
+//        textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tx");
+//      }
+//      else{
 //	      System.err.println("no valid rendererType");
 //	    }
 		shadowEnabled = eAppearance.getAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, false);

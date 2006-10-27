@@ -65,6 +65,7 @@ public class RIBViewer implements Viewer {
     public final static int TYPE_PIXAR = 1;
     public final static int TYPE_3DELIGHT = 2;
     public final static int TYPE_AQSIS = 3;
+    public final static int TYPE_PIXIE = 4;
     
     /**
      * 

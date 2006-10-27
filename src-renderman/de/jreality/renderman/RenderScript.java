@@ -47,6 +47,14 @@ class RenderScript {
 			texSuffix=".tex";
 			refMapSuffix=".env";
 			break;
+    case RIBViewer.TYPE_PIXIE:
+      texCmd="texmake ";
+      shaderCmd="sdrc ";
+      refMapCmd="texmake -envcube ";
+      renderer="rndr ";
+      texSuffix=".tex";
+      refMapSuffix=".env";
+      break;
 		default:
 			texCmd="txmake -resize 'up-' ";
 			shaderCmd="shader ";
