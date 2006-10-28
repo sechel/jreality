@@ -1,6 +1,8 @@
 package de.jreality.vr;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -71,28 +73,22 @@ public class Landscape {
 			final String name = skyboxes[i][0];
 			JRadioButton button = new JRadioButton(skyboxes[i][0]);
 			envToButton.put(skyboxes[i][0], button.getModel());
-			button.addChangeListener(new ChangeListener() {
+			button.getModel().addActionListener(new ActionListener() {
 
-				public void stateChanged(ChangeEvent e) {
-					selectionIndex = ((Integer)boxes.get(name)).intValue();
-					try {
-						load();
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-					fireChange();
+				public void actionPerformed(ActionEvent e) {
+					System.out.println("actionPerformed from button "+name);
 					
+					
+					setEvironment(name);
 				}
-				
 			});
 			buttonGroupComponent.add(button);
 			group.add(button);
 			boxes.put(skyboxes[i][0], new Integer(i));
 		}
-		try {
-			load();
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (selected != null) {
+			System.out.println("loading: Landscape.Landscape()");
+			load(selected);
 		}
 	}
 
@@ -114,41 +110,46 @@ public class Landscape {
 
 	}
 
-	private void load() throws IOException {
-		String[] selectedLandscape = skyboxes[selectionIndex];
-		if (selectedLandscape[1] != null) {
-			cubeMap=TextureUtility.createCubeMapData(selectedLandscape[1], selectedLandscape[2].split(","), selectedLandscape[3]);
-		} else {
-			cubeMap = null;
+	private void load(String env) {
+		selectionIndex = ((Integer)boxes.get(env)).intValue();
+		try {
+			String[] selectedLandscape = skyboxes[selectionIndex];
+			if (selectedLandscape[1] != null) {
+				cubeMap=TextureUtility.createCubeMapData(selectedLandscape[1], selectedLandscape[2].split(","), selectedLandscape[3]);
+			} else {
+				cubeMap = null;
+			}
+			if (selectedLandscape[4] != null) {
+				terrainTexture=ImageData.load(Input.getInput(selectedLandscape[4]));
+			} else {
+				terrainTexture = null;
+			}
+
+			String upColorString = selectedLandscape[7];
+			if (upColorString.equals("null")) {
+				upColor = null;
+			} else {
+				String[] up = selectedLandscape[7].split(" ");
+				upColor=new Color(Integer.parseInt(up[0]), Integer.parseInt(up[1]), Integer.parseInt(up[2]));
+			}
+			String downColorString = selectedLandscape[8];
+			if (downColorString.equals("null")) {
+				downColor = null;
+			} else {
+				String[] down = selectedLandscape[8].split(" ");
+				downColor=new Color(Integer.parseInt(down[0]), Integer.parseInt(down[1]), Integer.parseInt(down[2]));
+			}
+			terrainFlat = Boolean.parseBoolean(selectedLandscape[6]);
+			terrainTextureScale = Double.parseDouble(skyboxes[selectionIndex][5]);
+		} catch(IOException e) {
+			e.printStackTrace();
 		}
-		if (selectedLandscape[4] != null) {
-			terrainTexture=ImageData.load(Input.getInput(selectedLandscape[4]));
-		} else {
-			terrainTexture = null;
-		}
-		
-		String upColorString = selectedLandscape[7];
-		if (upColorString.equals("null")) {
-			upColor = null;
-		} else {
-			String[] up = selectedLandscape[7].split(" ");
-			upColor=new Color(Integer.parseInt(up[0]), Integer.parseInt(up[1]), Integer.parseInt(up[2]));
-		}
-		String downColorString = selectedLandscape[8];
-		if (downColorString.equals("null")) {
-			downColor = null;
-		} else {
-			String[] down = selectedLandscape[8].split(" ");
-			downColor=new Color(Integer.parseInt(down[0]), Integer.parseInt(down[1]), Integer.parseInt(down[2]));
-		}
-		terrainFlat = Boolean.parseBoolean(selectedLandscape[6]);
-		terrainTextureScale = Double.parseDouble(skyboxes[selectionIndex][5]);
 	}
 
 	public JComponent getSelectionComponent() {
 		return selectionComponent;
 	}
-	
+
 	public ImageData[] getCubeMap() {
 		return cubeMap;
 	}
@@ -185,6 +186,7 @@ public class Landscape {
 	}
 
 	private void fireChange() {
+		System.out.println("Landscape.fireChange()");
 		synchronized (listeners) {
 			ChangeEvent e = new ChangeEvent(this);
 			for (ChangeListener l : listeners) {
@@ -198,6 +200,10 @@ public class Landscape {
 	}
 	
 	public void setEvironment(String environment) {
-		group.setSelected(envToButton.get(environment), true);
+		System.out.println("Landscape.setEvironment("+environment+")");
+		ButtonModel model = envToButton.get(environment);
+			group.setSelected(model, true);
+			load(environment);
+			fireChange();
 	}
 }
