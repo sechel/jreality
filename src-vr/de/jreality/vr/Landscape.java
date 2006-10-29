@@ -76,9 +76,6 @@ public class Landscape {
 			button.getModel().addActionListener(new ActionListener() {
 
 				public void actionPerformed(ActionEvent e) {
-					System.out.println("actionPerformed from button "+name);
-					
-					
 					setEvironment(name);
 				}
 			});
@@ -87,8 +84,7 @@ public class Landscape {
 			boxes.put(skyboxes[i][0], new Integer(i));
 		}
 		if (selected != null) {
-			System.out.println("loading: Landscape.Landscape()");
-			load(selected);
+			setEvironment(selected);
 		}
 	}
 
@@ -186,7 +182,6 @@ public class Landscape {
 	}
 
 	private void fireChange() {
-		System.out.println("Landscape.fireChange()");
 		synchronized (listeners) {
 			ChangeEvent e = new ChangeEvent(this);
 			for (ChangeListener l : listeners) {
@@ -200,7 +195,6 @@ public class Landscape {
 	}
 	
 	public void setEvironment(String environment) {
-		System.out.println("Landscape.setEvironment("+environment+")");
 		ButtonModel model = envToButton.get(environment);
 			group.setSelected(model, true);
 			load(environment);
