@@ -43,11 +43,12 @@ package de.jreality.scene;
 import java.beans.BeanDescriptor;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
+import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.beans.SimpleBeanInfo;
 
 
-public class SceneGraphComponentBeanInfo extends SimpleBeanInfo implements BeanInfo {
+public class SceneGraphComponentBeanInfo extends SimpleBeanInfo {
 
   private PropertyDescriptor[] pd;
   private BeanDescriptor bd;
@@ -64,13 +65,21 @@ public class SceneGraphComponentBeanInfo extends SimpleBeanInfo implements BeanI
     pdCCC.setShortDescription("Number of child components");
     
     pd = new PropertyDescriptor[]{
-        pd("name", "Name", "Name of node"),
-        pd("readOnly", "Read only", "Flag to tell whether node may be modified"),
         pdCCC,
-        pd("visible", "Visible", "Flag to tell whether node is visible"),
+        pd("visible", "Visible", "Flag to tell whether the node is visible"),
     };
   }
   
+  
+  @Override
+  public BeanInfo[] getAdditionalBeanInfo() {
+    try {
+      return new BeanInfo[]{Introspector.getBeanInfo(SceneGraphNode.class)};
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
   
   private PropertyDescriptor pd(String name, String... d) throws IntrospectionException {
     PropertyDescriptor p = new PropertyDescriptor(name, bd.getBeanClass());
