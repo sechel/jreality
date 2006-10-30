@@ -161,22 +161,24 @@ public class ViewerVR {
 	// texture of content
 	private Texture2D tex;
 
-	// root of scene graph
+	// parts of the scene that do not change
 	private SceneGraphComponent sceneRoot = new SceneGraphComponent(),
 			sceneNode = new SceneGraphComponent(),
 			avatarNode = new SceneGraphComponent(),
 			camNode = new SceneGraphComponent(),
 			lightNode = new SceneGraphComponent(), terrainNode;
-
+	private Appearance terrainAppearance = new Appearance(),
+			rootAppearance = new Appearance(),
+			contentAppearance = new Appearance();
 	private Tool rotateTool = new RotateTool(), dragTool = new DraggingTool();
+	
+	
 	private SceneGraphComponent currentContent;
 	private HashMap<String, Integer> exampleIndices = new HashMap<String, Integer>();
 	private HashMap<String, String> textureNameToTexture = new HashMap<String, String>();
 	private HashMap<String, ButtonModel> textureNameToButton = new HashMap<String, ButtonModel>();
 	
-	private Appearance terrainAppearance = new Appearance(),
-			rootAppearance = new Appearance(),
-			contentAppearance = new Appearance();
+	
 	private DirectionalLight light = new DirectionalLight();
 	private SceneGraphPath cameraPath, avatarPath, emptyPickPath;
 	private double size = DEFAULT_SIZE, offset = DEFAULT_OFFSET;
@@ -262,9 +264,11 @@ public class ViewerVR {
 	
 	public ViewerVR() throws IOException {
 
+		// find out where we are running
 		boolean portal = "portal".equals(System
 				.getProperty("de.jreality.scene.tool.Config"));
 
+		// build basic scene graph
 		sceneRoot.setName("root");
 		sceneNode.setName("scene");
 		avatarNode.setName("avatar");
@@ -273,10 +277,9 @@ public class ViewerVR {
 		MatrixBuilder.euclidean().rotateX(-Math.PI/2).assignTo(sceneNode);
 		sceneNode.getTransformation().setName("alignment");
 
+		// root appearance
 		rootAppearance.setName("root app");
 		ShaderUtility.createRootAppearance(rootAppearance);
-//		rootAppearance.setAttribute(CommonAttributes.POLYGON_SHADER + "."
-//				+ CommonAttributes.AMBIENT_COEFFICIENT, 0.07);
 		rootAppearance.setAttribute(CommonAttributes.LINE_SHADER + "."
 				+ CommonAttributes.AMBIENT_COEFFICIENT, 0.03);
 		rootAppearance.setAttribute(CommonAttributes.LINE_SHADER + "."
@@ -284,13 +287,10 @@ public class ViewerVR {
 		rootAppearance.setAttribute(CommonAttributes.POINT_SHADER + "."
 				+ CommonAttributes.PICKABLE, false);
 		rootAppearance.setAttribute(CommonAttributes.OPAQUE_TUBES_AND_SPHERES, true);
-		
 		sceneRoot.setAppearance(rootAppearance);
-
 		Camera cam = new Camera();
 		cam.setNear(0.01);
 		cam.setFar(1500);
-
 		if (portal) {
 			cam.setOnAxis(false);
 			cam.setStereo(true);
@@ -310,7 +310,7 @@ public class ViewerVR {
 		HeadLight.setIntensity(0.3);
 	    camNode.setLight(HeadLight);
 
-		// prepare paths
+		// paths
 		sceneRoot.addChild(avatarNode);
 		avatarNode.addChild(camNode);
 		camNode.setCamera(cam);
@@ -324,12 +324,11 @@ public class ViewerVR {
 
 		MatrixBuilder.euclidean().translate(0, 1.7, 0).rotateX(5*Math.PI/180).assignTo(camNode);
 
-		// add tools
+		// tools
 		ShipNavigationTool shipNavigationTool = new ShipNavigationTool();
 		avatarNode.addTool(shipNavigationTool);
 		if (portal)
 			shipNavigationTool.setPollingDevice(false);
-
 		if (!portal)
 			camNode.addTool(new HeadTransformationTool());
 		else {
@@ -341,24 +340,17 @@ public class ViewerVR {
 				t.printStackTrace();
 			}
 		}
+		sceneRoot.addTool(new PickShowTool(null, 0.005));
+		
+		// content appearearance
 		contentAppearance.setName("contentApp");
-//		contentAppearance.setAttribute(CommonAttributes.POINT_SHADER + "."
-//				+ CommonAttributes.DIFFUSE_COLOR, Color.blue);
-//		contentAppearance.setAttribute(CommonAttributes.POLYGON_SHADER + "."
-//				+ CommonAttributes.DIFFUSE_COLOR, Color.white);
-//		contentAppearance.setAttribute(CommonAttributes.LINE_SHADER + "."
-//				+ CommonAttributes.DIFFUSE_COLOR, Color.red);
-//		contentAppearance.setAttribute("showLines", false);
-//		contentAppearance.setAttribute("showPoints", false);
 		contentAppearance.setAttribute(CommonAttributes.LINE_SHADER + "."
 				+ CommonAttributes.PICKABLE, false);
 		contentAppearance.setAttribute(CommonAttributes.POINT_SHADER + "."
 				+ CommonAttributes.PICKABLE, false);
 		sceneNode.setAppearance(contentAppearance);
-
-		sceneRoot.addTool(new PickShowTool(null, 0.005));
  
-		// prepare  terrain
+		// terrain
 		terrainNode = Readers
 				.read(Input.getInput("de/jreality/vr/terrain.3ds"))
 				.getChildComponent(0);
@@ -374,11 +366,9 @@ public class ViewerVR {
 			terrainPoints[j][1] += 7;
 			terrainPoints[j][2] /= 3;
 		}
-		
 		GeometryUtility.calculateAndSetNormals(terrainGeom);
 		terrainGeom.setName("terrain Geometry");
 		PickUtility.assignFaceAABBTree(terrainGeom);
-		
 		flatTerrainPoints = flatTerrain.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 		n = flatTerrainPoints.length;
 		for (int j=0; j<n; j++) {
@@ -396,24 +386,16 @@ public class ViewerVR {
 			flatTerrainPoints[j][2] /= 3;
 			flatTerrainPoints[j][2] += (-.5+r.nextDouble())*1E-1;
 		}
-		
 		GeometryUtility.calculateAndSetNormals(flatTerrain);
 		flatTerrain.setName("flat terrain Geometry");
 		PickUtility.assignFaceAABBTree(flatTerrain);
-		
 		terrainAppearance.setAttribute("showLines", false);
 		terrainAppearance.setAttribute("showPoints", false);
 		terrainAppearance.setAttribute("diffuseColor", Color.white);
 		terrainAppearance.setAttribute(CommonAttributes.AMBIENT_COEFFICIENT, .3);
 		terrainNode.setAppearance(terrainAppearance);
-		
-//		reflectedSceneNode.setName("reflectedScene");
-//		MatrixBuilder.euclidean().reflect(new double[]{0,1,0,0}).assignTo(reflectedSceneNode);
-//		reflectedSceneNode.addChild(sceneNode);
-//		sceneRoot.addChild(reflectedSceneNode);
 		sceneRoot.addChild(terrainNode);
 		sceneRoot.addChild(sceneNode);
-//		reflectedSceneNode.setVisible(false);
 		
 		
 		// landscape
@@ -421,25 +403,19 @@ public class ViewerVR {
 
 		// swing widgets
 		makeControlPanel();
-		
 		makeAlignTab();
 		makeAppTab();
 		makeEnvTab();
 		makeToolTab();
 		makeTexTab();
 		makeHelpTab();
-		
 		makeContentFileChooser();
 		makeTextureFileChooser();
 		makeColorChoosers();
-		
-//		updateLandscape();
-//		setTransparency(DEFAULT_TRANSPARENCY);
 
-		setAvatarPosition(0, landscape.isTerrainFlat() ? -.5:0, 28);
-		
-		restoreDefaults();
-}
+		restorePreferences();
+		setAvatarPosition(0, landscape.isTerrainFlat() ? -.5 : -.13, 28);
+	}
 
 	private void makeControlPanel() {
 		sp = new ScenePanel();
