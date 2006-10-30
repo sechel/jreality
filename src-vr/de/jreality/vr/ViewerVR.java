@@ -1324,8 +1324,8 @@ public class ViewerVR {
 	public void setContent(SceneGraphComponent content) {
 		if (currentContent != null
 				&& sceneNode.getChildNodes().contains(currentContent)) {
-			setDragEnabled(false);
-			setRotationEnabled(false);
+			toggleTool(rotateTool,false);
+			toggleTool(dragTool,false);
 			sceneNode.removeChild(currentContent);
 		}
 		SceneGraphComponent parent = new SceneGraphComponent();
@@ -1333,8 +1333,8 @@ public class ViewerVR {
 		parent.addChild(content);
 		currentContent = parent;
 		if (isGeneratePickTrees()) PickUtility.assignFaceAABBTrees(content);
-		if (rotate != null) rotate.setSelected(false);
-		if (drag != null)drag.setSelected(false);
+		toggleTool(rotateTool, rotate.isSelected());
+		toggleTool(dragTool, drag.isSelected());
 		Rectangle3D bounds = GeometryUtility
 				.calculateChildrenBoundingBox(currentContent);
 		// scale
