@@ -89,6 +89,9 @@ public class ViewerVR {
 	
 	// defaults for preferences:
 	
+	private static final boolean DEFAULT_PICK_FACES = true;
+	private static final boolean DEFAULT_PICK_EDGES = false;
+	private static final boolean DEFAULT_PICK_VERTICES = false;
 	// defaults for env panel
 	private static final String DEFAULT_ENVIRONMENT = "snow";
 	private static final boolean DEFAULT_TERRAIN_TRANSPARENT = false;
@@ -261,6 +264,9 @@ public class ViewerVR {
 
 	private JButton shadowButton;
 	private ButtonGroup textureGroup;
+	private JCheckBox pickFaces;
+	private JCheckBox pickEdges;
+	private JCheckBox pickVertices;
 	
 	public ViewerVR() throws IOException {
 
@@ -282,11 +288,11 @@ public class ViewerVR {
 		ShaderUtility.createRootAppearance(rootAppearance);
 		rootAppearance.setAttribute(CommonAttributes.LINE_SHADER + "."
 				+ CommonAttributes.AMBIENT_COEFFICIENT, 0.03);
+		rootAppearance.setAttribute(CommonAttributes.OPAQUE_TUBES_AND_SPHERES, true);
 		rootAppearance.setAttribute(CommonAttributes.LINE_SHADER + "."
 				+ CommonAttributes.PICKABLE, false);
 		rootAppearance.setAttribute(CommonAttributes.POINT_SHADER + "."
 				+ CommonAttributes.PICKABLE, false);
-		rootAppearance.setAttribute(CommonAttributes.OPAQUE_TUBES_AND_SPHERES, true);
 		sceneRoot.setAppearance(rootAppearance);
 		Camera cam = new Camera();
 		cam.setNear(0.01);
@@ -295,7 +301,6 @@ public class ViewerVR {
 			cam.setOnAxis(false);
 			cam.setStereo(true);
 		}
-
 		// lights
 		light.setIntensity(1);
 		lightNode.setLight(light);
@@ -344,10 +349,6 @@ public class ViewerVR {
 		
 		// content appearearance
 		contentAppearance.setName("contentApp");
-		contentAppearance.setAttribute(CommonAttributes.LINE_SHADER + "."
-				+ CommonAttributes.PICKABLE, false);
-		contentAppearance.setAttribute(CommonAttributes.POINT_SHADER + "."
-				+ CommonAttributes.PICKABLE, false);
 		sceneNode.setAppearance(contentAppearance);
  
 		// terrain
@@ -1044,6 +1045,33 @@ public class ViewerVR {
 
 		toolBox.add(toolButtonBox);
 
+		Box pickButtonBox = new Box(BoxLayout.X_AXIS);
+		toolButtonBox.setBorder(new EmptyBorder(5, 0, 5, 5));
+		pickFaces = new JCheckBox("pick faces");
+		pickFaces.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setPickFaces(pickFaces.isSelected());
+			}
+		});
+		pickButtonBox.add(pickFaces);
+		
+		pickEdges = new JCheckBox("pick edges");
+		pickEdges.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setPickEdges(pickEdges.isSelected());
+			}
+		});
+		pickButtonBox.add(pickEdges);
+		
+		pickVertices = new JCheckBox("pick vertices");
+		pickVertices.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setPickVertices(pickVertices.isSelected());
+			}
+		});
+		pickButtonBox.add(pickVertices);
+		
+		toolBox.add(pickButtonBox);
 		toolPanel.add(BorderLayout.CENTER, toolBox);
 		
 		JPanel buttonPanel = new JPanel(new FlowLayout());
@@ -1066,6 +1094,21 @@ public class ViewerVR {
 		});
 		buttonPanel.add(shadowButton);
 		toolPanel.add(BorderLayout.SOUTH, buttonPanel);
+	}
+
+	protected void setPickVertices(boolean b) {
+		contentAppearance.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE, b);
+		pickVertices.setSelected(b);
+	}
+
+	public void setPickEdges(boolean b) {
+		contentAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.PICKABLE, b);
+		pickEdges.setSelected(b);
+	}
+
+	public void setPickFaces(boolean b) {
+		contentAppearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.PICKABLE, b);
+		pickFaces.setSelected(b);
 	}
 
 	public void addTexTab() {
@@ -1317,7 +1360,7 @@ public class ViewerVR {
 		ImageData[] imgs = skyBoxHidden.isSelected() ? null : cubeMap;
 		TextureUtility.createSkyBox(rootAppearance, imgs);
 		cm = TextureUtility.createReflectionMap(contentAppearance,
-				"polygonShader", cubeMap);
+				"", cubeMap);
 		setReflection(getReflection());
 	}
 
@@ -1503,6 +1546,9 @@ public class ViewerVR {
 		// tool panel
 		setRotationEnabled(DEFAULT_ROTATION_ENABLED);
 		setDragEnabled(DEFAULT_DRAG_ENABLED);
+		setPickVertices(DEFAULT_PICK_VERTICES);
+		setPickEdges(DEFAULT_PICK_EDGES);
+		setPickFaces(DEFAULT_PICK_FACES);
 		
 		// tex panel
 		setTextureScale(DEFAULT_TEXTURE_SCALE);
@@ -1554,6 +1600,9 @@ public class ViewerVR {
 		// tool panel
 		prefs.putBoolean("rotationEnabled", isRotationEnabled());
 		prefs.putBoolean("dragEnabled", isDragEnabled());
+		prefs.putBoolean("pickVertices", isPickVertices());
+		prefs.putBoolean("pickEdges", isPickEdges());
+		prefs.putBoolean("pickFaces", isPickFaces());
 		
 		// tex panel
 		prefs.putDouble("textureScale", getTextureScale());
@@ -1564,6 +1613,21 @@ public class ViewerVR {
 		prefs.putDouble("offset", getOffset());
 	}
 	
+	private boolean isPickFaces() {
+		Object v = contentAppearance.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.PICKABLE);
+		return (v instanceof Boolean) ? (Boolean) v : DEFAULT_PICK_FACES;
+	}
+
+	private boolean isPickEdges() {
+		Object v = contentAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.PICKABLE);
+		return (v instanceof Boolean) ? (Boolean) v : DEFAULT_PICK_EDGES;
+	}
+
+	private boolean isPickVertices() {
+		Object v = contentAppearance.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE);
+		return (v instanceof Boolean) ? (Boolean) v : DEFAULT_PICK_VERTICES;
+	}
+
 	public void restorePreferences() {
 		Preferences prefs =  Preferences.userNodeForPackage(this.getClass());
 		// env panel
@@ -1605,6 +1669,9 @@ public class ViewerVR {
 		// tool panel
 		setRotationEnabled(prefs.getBoolean("rotationEnabled", DEFAULT_ROTATION_ENABLED));
 		setDragEnabled(prefs.getBoolean("dragEnabled", DEFAULT_DRAG_ENABLED));
+		setPickVertices(prefs.getBoolean("pickVertices", DEFAULT_PICK_VERTICES));
+		setPickEdges(prefs.getBoolean("pickEdges", DEFAULT_PICK_EDGES));
+		setPickFaces(prefs.getBoolean("pickFaces", DEFAULT_PICK_FACES));
 		
 		// tex panel
 		setTextureScale(prefs.getDouble("textureScale", DEFAULT_TEXTURE_SCALE));
