@@ -1236,7 +1236,7 @@ public class ViewerVR {
 	
 	public void setTransparency(double d) {
 		transparencySlider.setValue((int)(100 * d));
-		contentAppearance.setAttribute(CommonAttributes.TRANSPARENCY, d);
+		contentAppearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY, d);
 	}
 
 	public double getPointRadius() {
