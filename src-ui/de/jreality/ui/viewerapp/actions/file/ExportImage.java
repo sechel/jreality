@@ -43,16 +43,30 @@ package de.jreality.ui.viewerapp.actions.file;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
 
+import javax.imageio.ImageIO;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import com.sun.opengl.util.FileUtil;
+
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
+import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.ViewerSwitch;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jtem.beans.DimensionDialog;
 
 
 public class ExportImage extends AbstractAction {
 
+	private static final long serialVersionUID = 5793099900216754633L;
 	private Viewer viewer;
 
 
@@ -75,9 +89,10 @@ public class ExportImage extends AbstractAction {
 		de.jreality.jogl.Viewer joglViewer = (de.jreality.jogl.Viewer) realViewer;
 		
 		Dimension d = joglViewer.getViewingComponentSize();
-		int w = 2 * d.width;
-		int h = 2 * d.height;
-		joglViewer.renderOffscreen(w, h, file);
+
+		Dimension dim = DimensionDialog.selectDimension(d,frame);
+		if (dim == null) return;
+		joglViewer.renderOffscreen(dim.width, dim.height,file);
 	}
 	
 	@Override
