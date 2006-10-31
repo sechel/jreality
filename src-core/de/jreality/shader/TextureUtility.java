@@ -373,6 +373,21 @@ public class TextureUtility {
     }
     return new ImageData(sphereTex, textureSize, textureSize);
   }
+
+	public static void removeReflectionMap(Appearance app, String shader) {
+		String key = (shader == null || shader.equals("")) ? "reflectionMap" : shader+".reflectionMap";
+		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, key, app)) {
+			CubeMap cm = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, key, app, false);
+			app.setAttribute(key, Appearance.INHERITED);
+			cm.setBack(null);
+			cm.setFront(null);
+			cm.setBottom(null);
+			cm.setTop(null);
+			cm.setLeft(null);
+			cm.setRight(null);
+			cm.setBlendColor(null);
+		}
+	}
   
   
 }
