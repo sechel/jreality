@@ -51,6 +51,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.EventObject;
@@ -341,12 +342,21 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	  	if (renderer != null) renderer.saveScreenShot(file, canvas);
 	  	else JOGLConfiguration.getLogger().log(Level.WARNING,"Renderer not initialized");
 	  }
+
+	  public BufferedImage renderOffscreen(int w, int h) {
+		  if (renderer != null) {
+			  return renderer.renderOffscreen(w, h, canvas);
+		  } else {
+			  JOGLConfiguration.getLogger().log(Level.WARNING,"Renderer not initialized");
+			  return null;
+		  }
+	  }
 	  
 	  public void renderOffscreen(int w, int h, File file)	{
 		  if (renderer != null) renderer.renderOffscreen(w,h,file, canvas);
 		  else JOGLConfiguration.getLogger().log(Level.WARNING,"Renderer not initialized");
-		  }
-	  
+	  }
+
 	private boolean pendingUpdate;
 	
 	public void display(GLAutoDrawable arg0) {
