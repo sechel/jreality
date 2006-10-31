@@ -41,6 +41,8 @@
 package de.jreality.reader;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Stack;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -129,6 +131,7 @@ public class ReaderJVX extends AbstractReader {
      */
     public void endElement(String uri, String localName, String qName)
             throws SAXException {
+    	charactersImpl();
         LoggingSystem.getLogger(this).fine("end elem: qName "+qName);
         if(qName.equals("geometry")) {
             if(currentPoints != null) {
@@ -151,7 +154,8 @@ public class ReaderJVX extends AbstractReader {
             //vertexAttributes.add(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY_ARRAY.createReadOnly(currentPoints));
             vertexAttributes.addWritable(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY_ARRAY,currentPoints);
             if(currentColors!= null) {
-                vertexAttributes.addWritable(Attribute.COLORS,StorageModel.DOUBLE3_INLINED, currentColors);
+            	System.out.println(currentColors);
+                vertexAttributes.addWritable(Attribute.COLORS,StorageModel.DOUBLE3_ARRAY, currentColors);
                 currentColors = null;
             }
             return;
@@ -333,9 +337,37 @@ public class ReaderJVX extends AbstractReader {
         }
         super.startElement(uri, localName, qName, attributes);
     }
+
     
-    public void characters(char[] ch, int start, int length)
-            throws SAXException {
+    
+    LinkedList<char[]> chars = new LinkedList<char[]>();
+    public void characters(char[] ch, int start, int length) throws SAXException {
+    	if (currentColors != null || currentFaces != null || currentPoints != null) {
+	    	char[] read = new char[length];
+	    	System.arraycopy(ch, start, read, 0, length);
+	    	chars.add(read);
+    	} else super.characters(ch, start, length);
+    }
+
+    public void charactersImpl() {
+    	if (chars.isEmpty()) return;
+    	char[] ch;
+    	if (chars.size() > 1) {
+    		int len=0;
+    		for (int i=0; i < chars.size(); i++) {
+    			len+=chars.get(i).length;
+    		}
+    		ch=new char[len];
+    		for (int i=0, s=0; i < chars.size(); i++) {
+    			char[] cs = chars.get(i);
+				System.arraycopy(cs, 0, ch, s, cs.length);
+    			s+=cs.length;
+    		}
+    	} else {
+    		ch=chars.get(0);
+    	}
+    	chars.clear();
+    	int start=0, length=ch.length;
         if(currentPoint != null) {
             // read point coords...
             String s = String.valueOf(ch,start,length);
@@ -366,7 +398,6 @@ public class ReaderJVX extends AbstractReader {
             currentColors[currentColorNum][2] = b/255.;
             return;
         }
-        super.characters(ch, start, length);
     }
 }
 
