@@ -1471,7 +1471,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		writeBufferedImage(file, img);
 	}
 
-	public void writeBufferedImage(File file, BufferedImage img) {
+	public static void writeBufferedImage(File file, BufferedImage img) {
 		//boolean worked=true;
 		System.err.println("Writing to file "+file.getPath());
 		if (file.getName().endsWith(".tiff") || file.getName().endsWith(".tif")) {
@@ -1481,8 +1481,9 @@ public class JOGLRenderer  implements AppearanceListener {
 				Method cm = Class.forName("javax.media.jai.JAI").getMethod("create", new Class[]{String.class, RenderedImage.class, Object.class, Object.class});
 				cm.invoke(null, new Object[]{"filestore", img, file.getPath(), "tiff"});
 			} catch(Throwable e) {
-				//worked=false;
-				LoggingSystem.getLogger(this).log(Level.CONFIG, "could not write TIFF: "+file.getPath(), e);
+//				//worked=false;
+//				LoggingSystem.getLogger(this).log(Level.CONFIG, "could not write TIFF: "+file.getPath(), e);
+				e.printStackTrace();
 			}
 		} else {
 			//if (!worked)

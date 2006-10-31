@@ -102,12 +102,15 @@ public class ViewerVR {
 	
 	// defaults for app panel
 	private static final boolean DEFAULT_SHOW_POINTS = false;
+	private static final boolean DEFAULT_POINTS_REFLECTING = false;
 	private static final double DEFAULT_POINT_RADIUS = .4;
 	private static final Color DEFAULT_POINT_COLOR = Color.blue;
 	private static final boolean DEFAULT_SHOW_LINES = false;
+	private static final boolean DEFAULT_LINES_REFLECTING = false;
 	private static final double DEFAULT_TUBE_RADIUS = .3;
 	private static final Color DEFAULT_LINE_COLOR = Color.red;
 	private static final boolean DEFAULT_SHOW_FACES = true;
+	private static final boolean DEFAULT_FACES_REFLECTING = true;
 	private static final double DEFAULT_REFLECTION = .7;
 	private static final Color DEFAULT_FACE_COLOR = Color.white;
 	private static final boolean DEFAULT_TRANSPARENCY_ENABLED = false;
@@ -1135,7 +1138,7 @@ public class ViewerVR {
 		textureNameToTexture.put("metal grid", "textures/boysurface.png");
 		textureNameToTexture.put("metal floor", "textures/metal_basic88.png");
 		textureNameToTexture.put("chain-link fence", "textures/chainlinkfence.png");
-		textureNameToTexture.put("random dots", "textures/random.png");
+		//textureNameToTexture.put("random dots", "textures/random.png");
 
 		ActionListener texturesListener = new ActionListener() {
 			
@@ -1550,12 +1553,15 @@ public class ViewerVR {
 		
 		// app panel
 		setShowPoints(DEFAULT_SHOW_POINTS);
+		setPointsReflecting(DEFAULT_POINTS_REFLECTING);
 		setPointRadius(DEFAULT_POINT_RADIUS);
 		setPointColor(DEFAULT_POINT_COLOR);
 		setShowLines(DEFAULT_SHOW_LINES);
+		setLinesReflecting(DEFAULT_LINES_REFLECTING);
 		setTubeRadius(DEFAULT_TUBE_RADIUS);
 		setLineColor(DEFAULT_LINE_COLOR);
 		setShowFaces(DEFAULT_SHOW_FACES);
+		setFacesReflecting(DEFAULT_FACES_REFLECTING);
 		setReflection(DEFAULT_REFLECTION);
 		setFaceColor(DEFAULT_FACE_COLOR);
 		setTransparencyEnabled(DEFAULT_TRANSPARENCY_ENABLED);
@@ -1664,18 +1670,21 @@ public class ViewerVR {
 		
 		// app panel
 		setShowPoints(prefs.getBoolean("showPoints", DEFAULT_SHOW_POINTS));
+		setPointsReflecting(prefs.getBoolean("pointsReflecting", DEFAULT_POINTS_REFLECTING));
 		setPointRadius(prefs.getDouble("pointRadius", DEFAULT_POINT_RADIUS));
 		r = prefs.getInt("pointColorRed", DEFAULT_POINT_COLOR.getRed());
 		g = prefs.getInt("pointColorGreen", DEFAULT_POINT_COLOR.getGreen());
 		b = prefs.getInt("pointColorBlue", DEFAULT_POINT_COLOR.getBlue());
 		setPointColor(new Color(r,g,b));
 		setShowLines(prefs.getBoolean("showLines", DEFAULT_SHOW_LINES));
+		setLinesReflecting(prefs.getBoolean("linesReflecting", DEFAULT_LINES_REFLECTING));
 		setTubeRadius(prefs.getDouble("tubeRadius", DEFAULT_TUBE_RADIUS));
 		r = prefs.getInt("lineColorRed", DEFAULT_LINE_COLOR.getRed());
 		g = prefs.getInt("lineColorGreen", DEFAULT_LINE_COLOR.getGreen());
 		b = prefs.getInt("lineColorBlue", DEFAULT_LINE_COLOR.getBlue());
 		setLineColor(new Color(r,g,b));
 		setShowFaces(prefs.getBoolean("showFaces", DEFAULT_SHOW_FACES));
+		setFacesReflecting(prefs.getBoolean("facesReflecting", DEFAULT_FACES_REFLECTING));
 		setReflection(prefs.getDouble("reflection", DEFAULT_REFLECTION));
 		r = prefs.getInt("faceColorRed", DEFAULT_FACE_COLOR.getRed());
 		g = prefs.getInt("faceColorGreen", DEFAULT_FACE_COLOR.getGreen());
