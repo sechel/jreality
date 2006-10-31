@@ -342,6 +342,7 @@ public class ReaderJVX extends AbstractReader {
     
     LinkedList<char[]> chars = new LinkedList<char[]>();
     public void characters(char[] ch, int start, int length) throws SAXException {
+		// QUICK FIX: sax parser sometimes splits char content into two calls of characters(..)
     	if (currentColors != null || currentFaces != null || currentPoints != null) {
 	    	char[] read = new char[length];
 	    	System.arraycopy(ch, start, read, 0, length);
