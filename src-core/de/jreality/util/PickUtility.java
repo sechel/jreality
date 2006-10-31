@@ -61,6 +61,7 @@ public class PickUtility {
   }
   
   public static void assignFaceAABBTree(IndexedFaceSet ifs, int maxTrianglesPerBox) {
+	if (ifs.getNumFaces() == 0) return;
     ifs.setGeometryAttributes("AABBTree", AABBTree.construct(ifs, maxTrianglesPerBox));
   }
   public static void assignFaceAABBTrees(final SceneGraphComponent comp) {

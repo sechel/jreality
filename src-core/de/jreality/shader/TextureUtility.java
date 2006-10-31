@@ -56,7 +56,7 @@ import de.jreality.util.Input;
  * A bunch of factory methods that create Textures and ReflectionMaps. Other shader related
  * stuff should follow.
  *
- * @author weissman
+ * @author Steffen Weissman
  *
  */
 public class TextureUtility {

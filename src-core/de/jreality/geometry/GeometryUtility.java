@@ -118,6 +118,7 @@ public class GeometryUtility {
 	private GeometryUtility() {}
 	
 	public static void calculateAndSetFaceNormals(IndexedFaceSet ifs)   {
+		if (ifs.getNumFaces() == 0) return;
         double[][] fn = calculateFaceNormals(ifs);
         ifs.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(fn[0].length).createReadOnly(fn));
     }
@@ -128,6 +129,7 @@ public class GeometryUtility {
 	}
 
 	public static void calculateAndSetVertexNormals(IndexedFaceSet ifs) {
+		if (ifs.getNumFaces() == 0) return;
         double[][] vn = calculateVertexNormals(ifs);
         ifs.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(vn[0].length).createReadOnly(vn));
     }
