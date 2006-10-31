@@ -42,7 +42,10 @@ package de.jreality.ui.viewerapp.actions.file;
 
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 
 import de.jreality.scene.Viewer;
@@ -70,17 +73,31 @@ public class ExportImage extends AbstractAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		File file = FileLoaderDialog.selectTargetFile(frame, null, "image files");
-		if (file == null) return;
+		
 		// Hack
 		Viewer realViewer = ((ViewerSwitch)viewer).getCurrentViewer();
 		de.jreality.jogl.Viewer joglViewer = (de.jreality.jogl.Viewer) realViewer;
-		
 		Dimension d = joglViewer.getViewingComponentSize();
-
 		Dimension dim = DimensionDialog.selectDimension(d,frame);
 		if (dim == null) return;
-		joglViewer.renderOffscreen(dim.width, dim.height,file);
+		
+		File file = FileLoaderDialog.selectTargetFile(frame, null, "image files");
+		if (file == null) return;
+		BufferedImage img = joglViewer.renderOffscreen(4*dim.width, 4*dim.height);
+		BufferedImage img2 = new BufferedImage(dim.width, dim.height,BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = (Graphics2D) img2.getGraphics();
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		img2.getGraphics().drawImage(
+				img.getScaledInstance(
+						dim.width,
+						dim.height,
+						BufferedImage.SCALE_SMOOTH
+				),
+                0,
+                0,
+                null
+		);
+		de.jreality.jogl.JOGLRenderer.writeBufferedImage(file,img2);
 	}
 	
 	@Override
