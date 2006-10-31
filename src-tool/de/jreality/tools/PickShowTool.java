@@ -53,6 +53,7 @@ import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.util.PickUtility;
 
 public class PickShowTool extends AbstractTool {
 
@@ -69,7 +70,7 @@ public class PickShowTool extends AbstractTool {
     c.addChild(Primitives.sphere(1, 0, 0, 0));
     c.setName("pick display");
     c.setAppearance(a);
-    a.setAttribute("pickable", false);
+    PickUtility.setPickable(c, false);
     a.setAttribute(CommonAttributes.FACE_DRAW, true);
   }
   public PickShowTool(String activationAxis) {
