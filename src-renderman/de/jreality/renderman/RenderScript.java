@@ -141,12 +141,12 @@ class RenderScript {
     script=script+separator+cmd;
     exec(cmd, false);
 
-    if(display&&((type==RIBViewer.TYPE_PIXAR)||(type==RIBViewer.TYPE_PIXIE))){
-      String fileName=ribFileName.substring(0,ribFileName.length()-4); 
-      cmd="display "+ fileName+".tif &";  
-      script=script+separator+cmd;
-      exec(cmd, false);
-    } 
+//    if(display&&((type==RIBViewer.TYPE_PIXAR)||(type==RIBViewer.TYPE_PIXIE))){
+//      String fileName=ribFileName.substring(0,ribFileName.length()-4); 
+//      cmd="display "+ fileName+".tif &";  
+//      script=script+separator+cmd;
+//      exec(cmd, false);
+//    } 
     
     if(writeToFile) writeToFile(script);    
     else dumpScript(script);      
