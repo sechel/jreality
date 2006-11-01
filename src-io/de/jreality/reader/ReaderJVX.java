@@ -113,6 +113,7 @@ public class ReaderJVX extends AbstractReader {
     private int lineLength = 2;
     private int currentLineNum;
     private double[][] currentColors;
+    private String[] currentPointLabels;
     private int currentColorNum;
     
     public Handler() {
@@ -153,8 +154,8 @@ public class ReaderJVX extends AbstractReader {
             vertexAttributes = new DataListSet(currentPoints.length);
             //vertexAttributes.add(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY_ARRAY.createReadOnly(currentPoints));
             vertexAttributes.addWritable(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY_ARRAY,currentPoints);
+            vertexAttributes.addWritable(Attribute.LABELS, StorageModel.STRING_ARRAY, currentPointLabels);
             if(currentColors!= null) {
-            	System.out.println(currentColors);
                 vertexAttributes.addWritable(Attribute.COLORS,StorageModel.DOUBLE3_ARRAY, currentColors);
                 currentColors = null;
             }
@@ -280,6 +281,7 @@ public class ReaderJVX extends AbstractReader {
         if(qName.equals("points")) {
             int pointNum= Integer.parseInt(attributes.getValue("num"));
             currentPoints = new double[pointNum][];
+            currentPointLabels = new String[pointNum];
             currentPointNum = 0;
             return;
         }
@@ -287,7 +289,7 @@ public class ReaderJVX extends AbstractReader {
         // p
         //
         if(qName.equals("p")) {
-            String name = attributes.getValue("name");
+            currentPointLabels[currentPointNum]=attributes.getValue("name");
             currentPoints[currentPointNum] = currentPoint = new double[pointLength];
             return;
         }

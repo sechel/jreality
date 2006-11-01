@@ -258,7 +258,7 @@ public class ViewerVR {
 	private JPanel toolPanel;
 
 	protected boolean currentBackgroundColorTop;
-	private boolean showShadow = true;
+	private boolean showShadow = false;
 	private JCheckBox backgroundFlat;
 	private ImageData[] cubeMap;
 	private boolean generatePickTrees;
@@ -1044,6 +1044,8 @@ public class ViewerVR {
 		toolPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		Box toolBox = new Box(BoxLayout.Y_AXIS);
 		Box toolButtonBox = new Box(BoxLayout.X_AXIS);
+		toolButtonBox.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
+				LineBorder.createGrayLineBorder()));
 		toolButtonBox.setBorder(new EmptyBorder(5, 0, 5, 5));
 		rotate = new JCheckBox("rotate");
 		rotate.addChangeListener(new ChangeListener() {
@@ -1062,9 +1064,11 @@ public class ViewerVR {
 
 		toolBox.add(toolButtonBox);
 
+		
 		Box pickButtonBox = new Box(BoxLayout.X_AXIS);
-		toolButtonBox.setBorder(new EmptyBorder(5, 0, 5, 5));
-		pickFaces = new JCheckBox("pick faces");
+		pickButtonBox.setBorder(new EmptyBorder(5, 5, 5, 5));
+		pickButtonBox.add(new JLabel("pick: "));
+		pickFaces = new JCheckBox("faces");
 		pickFaces.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setPickFaces(pickFaces.isSelected());
@@ -1072,7 +1076,7 @@ public class ViewerVR {
 		});
 		pickButtonBox.add(pickFaces);
 		
-		pickEdges = new JCheckBox("pick edges");
+		pickEdges = new JCheckBox("edges");
 		pickEdges.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setPickEdges(pickEdges.isSelected());
@@ -1080,7 +1084,7 @@ public class ViewerVR {
 		});
 		pickButtonBox.add(pickEdges);
 		
-		pickVertices = new JCheckBox("pick vertices");
+		pickVertices = new JCheckBox("vertices");
 		pickVertices.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setPickVertices(pickVertices.isSelected());
@@ -1089,6 +1093,7 @@ public class ViewerVR {
 		pickButtonBox.add(pickVertices);
 		
 		toolBox.add(pickButtonBox);
+		
 		toolPanel.add(BorderLayout.CENTER, toolBox);
 		
 		JPanel buttonPanel = new JPanel(new FlowLayout());
