@@ -52,7 +52,7 @@ public interface DefaultTextShader extends TextShader {
 	final static Color DIFFUSE_COLOR_DEFAULT = Color.BLACK;
 	final static double SCALE_DEFAULT = 0.0125;
 	final static Font FONT_DEFAULT = new Font("Sans Serif",Font.PLAIN,48);
-	final static double[] OFFSET_DEFAULT = new double[]{0,0,0,1};
+	final static double[] OFFSET_DEFAULT = new double[]{0,0,1,1};
 	final static Boolean SHOW_LABELS_DEFAULT = Boolean.TRUE;
 	final static int ALIGNMENT_DEFAULT = SwingConstants.NORTH_EAST;
 	
