@@ -82,18 +82,19 @@ class RenderScript {
 	
 	void addTexture(String tex, int smode, int tmode) {   
 	    String repeatS=type == RIBViewer.TYPE_AQSIS ? "-swrap " : "-smode ";
+      
 	    switch(smode){
 	    //case Texture2D.GL_MIRRORED_REPEAT: repeatS="";  // <- no support in renderman
 	    case(Texture2D.GL_REPEAT): repeatS+="'periodic' "; break;           
-	    case(Texture2D.GL_CLAMP):                  
+	    case(Texture2D.GL_CLAMP): repeatS+="'clamp' "; break;                 
 	    case(Texture2D.GL_CLAMP_TO_EDGE): repeatS+="'clamp' "; break;
 	    default: repeatS+="'periodic' ";
 	    }    
 	    String repeatT=type == RIBViewer.TYPE_AQSIS ? "-twrap " : "-tmode ";
-	    switch(smode){
+	    switch(tmode){
 	    //case Texture2D.GL_MIRRORED_REPEAT: repeatS="";  // <- no support in renderman
 	    case(Texture2D.GL_REPEAT): repeatT+="'periodic' "; break;           
-	    case(Texture2D.GL_CLAMP):                  
+	    case(Texture2D.GL_CLAMP): repeatT+="'clamp' "; break;               
 	    case(Texture2D.GL_CLAMP_TO_EDGE): repeatT+="'clamp' "; break;
 	    default: repeatT+="'periodic' ";
 	    }    
@@ -141,12 +142,12 @@ class RenderScript {
     script=script+separator+cmd;
     exec(cmd, false);
 
-//    if(display&&((type==RIBViewer.TYPE_PIXAR)||(type==RIBViewer.TYPE_PIXIE))){
-//      String fileName=ribFileName.substring(0,ribFileName.length()-4); 
-//      cmd="display "+ fileName+".tif &";  
-//      script=script+separator+cmd;
-//      exec(cmd, false);
-//    } 
+    if(display&&((type==RIBViewer.TYPE_PIXAR)||(type==RIBViewer.TYPE_PIXIE))){
+      String fileName=ribFileName.substring(0,ribFileName.length()-4); 
+      cmd="display "+ fileName+".tif &";  
+      script=script+separator+cmd;
+      exec(cmd, false);
+    } 
     
     if(writeToFile) writeToFile(script);    
     else dumpScript(script);      
