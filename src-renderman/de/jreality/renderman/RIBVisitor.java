@@ -213,7 +213,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			render();
 		ri.end();
 		
-		renderScript.dumpScript();
+		renderScript.finishScript();
     }
 
 	/**
@@ -302,17 +302,17 @@ public class RIBVisitor extends SceneGraphVisitor {
 		shaderPath = (String) eAppearance.getAttribute(CommonAttributes.RMAN_SEARCHPATH_SHADER, "");
 		textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");
 //		if(rendererType==RIBViewer.TYPE_PIXAR)
-//			  textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");
-//	    else if(rendererType==RIBViewer.TYPE_3DELIGHT){
-//	      textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");//"tdl");
-//	    }else if(rendererType==RIBViewer.TYPE_AQSIS){
-//	      textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tx");
-//      }else if(rendererType==RIBViewer.TYPE_PIXIE){
-//        textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tx");
-//      }
-//      else{
-//	      System.err.println("no valid rendererType");
-//	    }
+//			textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");
+//	  else if(rendererType==RIBViewer.TYPE_3DELIGHT){
+//	    textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");//"tdl");
+//	  }else if(rendererType==RIBViewer.TYPE_AQSIS){
+//	    textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tx");
+//    }else if(rendererType==RIBViewer.TYPE_PIXIE){
+//      textureFileSuffix = (String) eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tiff");
+//    }
+//    else{
+//	    System.err.println("no valid rendererType");
+//	  }
 		shadowEnabled = eAppearance.getAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, false);
 		currentSignature = eAppearance.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
       	outputDisplayFormat = (String) eAppearance.getAttribute(CommonAttributes.RMAN_OUTPUT_DISPLAY_FORMAT, "rgb");
