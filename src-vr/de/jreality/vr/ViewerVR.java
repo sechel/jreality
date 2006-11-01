@@ -78,12 +78,12 @@ import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.PickShowTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.tools.ShipNavigationTool;
-import de.jtem.beans.SimpleColorChooser;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
 import de.jreality.util.Rectangle3D;
+import de.jtem.beans.SimpleColorChooser;
 
 public class ViewerVR {
 	
@@ -111,7 +111,9 @@ public class ViewerVR {
 	private static final Color DEFAULT_LINE_COLOR = Color.red;
 	private static final boolean DEFAULT_SHOW_FACES = true;
 	private static final boolean DEFAULT_FACES_REFLECTING = true;
-	private static final double DEFAULT_REFLECTION = .7;
+	private static final double DEFAULT_FACE_REFLECTION = .7;
+	private static final double DEFAULT_LINE_REFLECTION = .7;
+	private static final double DEFAULT_POINT_REFLECTION = .7;
 	private static final Color DEFAULT_FACE_COLOR = Color.white;
 	private static final boolean DEFAULT_TRANSPARENCY_ENABLED = false;
 	private static final double DEFAULT_TRANSPARENCY = .7;
@@ -201,7 +203,9 @@ public class ViewerVR {
 	// app panel
 	private JSlider tubeRadiusSlider;
 	private JSlider pointRadiusSlider;
-	private JSlider reflectionSlider;
+	private JSlider lineReflectionSlider;
+	private JSlider pointReflectionSlider;
+	private JSlider faceReflectionSlider;
 	
 	// tool tab
 	private JCheckBox rotate;
@@ -687,7 +691,7 @@ public class ViewerVR {
 		lineBox.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
 				LineBorder.createGrayLineBorder()));
 		Box lineButtonBox = new Box(BoxLayout.X_AXIS);
-		lineButtonBox.setBorder(new EmptyBorder(5, 0, 5, 5));
+		lineButtonBox.setBorder(new EmptyBorder(5, 5, 5, 5));
 		showLines = new JCheckBox("lines");
 		showLines.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -695,36 +699,45 @@ public class ViewerVR {
 			}
 		});
 		lineButtonBox.add(showLines);
-		linesReflecting = new JCheckBox("reflecting");
+		linesReflecting = new JCheckBox("reflection");
 		linesReflecting.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				setLinesReflecting(isLinesReflecting());
 			}
 		});
 		lineButtonBox.add(linesReflecting);
-		JButton lineColorButton = new JButton("line color");
-		lineColorButton.setMaximumSize(new Dimension(200, 20));
+		lineReflectionSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
+		lineReflectionSlider.setPreferredSize(new Dimension(70,20));
+		lineReflectionSlider.setBorder(new EmptyBorder(0,5,0,0));
+		lineReflectionSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setLineReflection(getLineReflection());
+			}
+		});
+		lineButtonBox.add(lineReflectionSlider);
+		JButton lineColorButton = new JButton("color");
+		lineColorButton.setMargin(new Insets(0,5,0,5));
 		lineColorButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				switchToContentColorChooser(
 						CommonAttributes.LINE_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR);
 			}
 		});
-
-		lineButtonBox.add(lineColorButton);
 		lineBox.add(lineButtonBox);
 
 		Box tubeRadiusBox = new Box(BoxLayout.X_AXIS);
-		tubeRadiusBox.setBorder(new EmptyBorder(5, 5, 5, 0));
+		tubeRadiusBox.setBorder(new EmptyBorder(5, 10, 5, 10));
 		JLabel tubeRadiusLabel = new JLabel("radius");
 		tubeRadiusSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
+		tubeRadiusSlider.setPreferredSize(new Dimension(70,20));
 		tubeRadiusSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
-				setTubeRadius(0.01 * tubeRadiusSlider.getValue());
+				setTubeRadius(getTubeRadius());
 			}
 		});
 		tubeRadiusBox.add(tubeRadiusLabel);
 		tubeRadiusBox.add(tubeRadiusSlider);
+		tubeRadiusBox.add(lineColorButton);
 		lineBox.add(tubeRadiusBox);
 
 		appBox.add(lineBox);
@@ -734,7 +747,7 @@ public class ViewerVR {
 		pointBox.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
 				LineBorder.createGrayLineBorder()));
 		Box pointButtonBox = new Box(BoxLayout.X_AXIS);
-		pointButtonBox.setBorder(new EmptyBorder(5, 0, 5, 5));
+		pointButtonBox.setBorder(new EmptyBorder(5, 5, 5, 5));
 		showPoints = new JCheckBox("points");
 		showPoints.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -742,28 +755,37 @@ public class ViewerVR {
 			}
 		});
 		pointButtonBox.add(showPoints);
-		pointsReflecting = new JCheckBox("reflecting");
+		pointsReflecting = new JCheckBox("reflection");
 		pointsReflecting.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				setPointsReflecting(isPointsReflecting());
 			}
 		});
 		pointButtonBox.add(pointsReflecting);
-		JButton pointColorButton = new JButton("point color");
-		pointColorButton.setMaximumSize(new Dimension(200, 20));
+		pointReflectionSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
+		pointReflectionSlider.setPreferredSize(new Dimension(70,20));
+		pointReflectionSlider.setBorder(new EmptyBorder(0,5,0,0));
+		pointReflectionSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setPointReflection(getPointReflection());
+			}
+		});
+		pointButtonBox.add(pointReflectionSlider);
+		JButton pointColorButton = new JButton("color");
+		pointColorButton.setMargin(new Insets(0,5,0,5));
 		pointColorButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				switchToContentColorChooser(
 						CommonAttributes.POINT_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR);
 			}
 		});
-		pointButtonBox.add(pointColorButton);
 		pointBox.add(pointButtonBox);
 
 		Box pointRadiusBox = new Box(BoxLayout.X_AXIS);
-		pointRadiusBox.setBorder(new EmptyBorder(5, 5, 5, 0));
+		pointRadiusBox.setBorder(new EmptyBorder(5,10,5,10));
 		JLabel pointRadiusLabel = new JLabel("radius");
 		pointRadiusSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
+		pointRadiusSlider.setPreferredSize(new Dimension(70,20));
 		pointRadiusSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
 				setPointRadius(0.01 * pointRadiusSlider.getValue());
@@ -771,6 +793,7 @@ public class ViewerVR {
 		});
 		pointRadiusBox.add(pointRadiusLabel);
 		pointRadiusBox.add(pointRadiusSlider);
+		pointRadiusBox.add(pointColorButton);
 		pointBox.add(pointRadiusBox);
 
 		appBox.add(pointBox);
@@ -780,7 +803,7 @@ public class ViewerVR {
 		faceBox.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
 				LineBorder.createGrayLineBorder()));
 		Box faceButtonBox = new Box(BoxLayout.X_AXIS);
-		faceButtonBox.setBorder(new EmptyBorder(5, 0, 5, 5));
+		faceButtonBox.setBorder(new EmptyBorder(5, 5, 5, 5));
 		showFaces = new JCheckBox("faces");
 		showFaces.setSelected(true);
 		showFaces.addChangeListener(new ChangeListener() {
@@ -796,52 +819,45 @@ public class ViewerVR {
 			}
 		});
 		faceButtonBox.add(facesReflecting);
-		JButton faceColorButton = new JButton("face color");
-		faceColorButton.setMaximumSize(new Dimension(200, 20));
+		faceReflectionSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
+		faceReflectionSlider.setPreferredSize(new Dimension(70,20));
+		faceReflectionSlider.setBorder(new EmptyBorder(0,5,0,0));
+		faceReflectionSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setFaceReflection(getFaceReflection());
+			}
+		});
+		faceButtonBox.add(faceReflectionSlider);
+		JButton faceColorButton = new JButton("color");
+		faceColorButton.setMargin(new Insets(0,5,0,5));
 		faceColorButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				switchToContentColorChooser(
 						CommonAttributes.POLYGON_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR);
 			}
 		});
-		faceButtonBox.add(faceColorButton);
 		faceBox.add(faceButtonBox);
 
-		Box reflectionBox = new Box(BoxLayout.X_AXIS);
-		reflectionBox.setBorder(new EmptyBorder(5, 5, 5, 0));
-		JLabel reflectionLabel = new JLabel("reflection");
-		reflectionSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 1);
-		reflectionSlider.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent arg0) {
-				setReflection(0.01 * reflectionSlider.getValue());
-			}
-		});
-		reflectionBox.add(reflectionLabel);
-		reflectionBox.add(reflectionSlider);
-		faceBox.add(reflectionBox);
-		appBox.add(faceBox);
-		
-		Box transparencyYBox = new Box(BoxLayout.Y_AXIS);
-		transparencyYBox.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
-				LineBorder.createGrayLineBorder()));
-		Box transparencyXBox = new Box(BoxLayout.X_AXIS);
-		transparencyXBox.setBorder(new EmptyBorder(5, 5, 5, 0));
+		Box transparencyBox = new Box(BoxLayout.X_AXIS);
+		transparencyBox.setBorder(new EmptyBorder(5,5,5,10));
 		transparency = new JCheckBox("transp");
 		transparency.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setTransparencyEnabled(transparency.isSelected());
 			}
 		});
-		transparencyXBox.add(transparency);
-		transparencySlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 70);
+		transparencySlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 1);
+		transparencySlider.setPreferredSize(new Dimension(70,20));
 		transparencySlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
-				setTransparency(0.01 * transparencySlider.getValue());
+				setTransparency(getTransparency());
 			}
 		});
-		transparencyXBox.add(transparencySlider);
-		transparencyYBox.add(transparencyXBox);
-		appBox.add(transparencyYBox);
+		transparencyBox.add(transparency);
+		transparencyBox.add(transparencySlider);
+		transparencyBox.add(faceColorButton);
+		faceBox.add(transparencyBox);
+		appBox.add(faceBox);
 
 		appearancePanel.add(appBox);
 	}
@@ -1286,14 +1302,30 @@ public class ViewerVR {
 		}
 	}
 
-	public double getReflection() {
-			return .01 * reflectionSlider.getValue();
+	public double getFaceReflection() {
+			return .01 * faceReflectionSlider.getValue();
 	}
 	
-	public void setReflection(double d) {
-		reflectionSlider.setValue((int)(100*d));
+	public double getLineReflection() {
+		return .01 * lineReflectionSlider.getValue();
+	}
+
+	public double getPointReflection() {
+		return .01 * pointReflectionSlider.getValue();
+	}
+
+	public void setFaceReflection(double d) {
+		faceReflectionSlider.setValue((int)(100*d));
 		if (cmFaces != null) cmFaces.setBlendColor(new Color(1f, 1f, 1f, (float) d));
+	}
+	
+	public void setLineReflection(double d) {
+		lineReflectionSlider.setValue((int)(100*d));
 		if (cmEdges != null) cmEdges.setBlendColor(new Color(1f, 1f, 1f, (float) d));
+	}
+	
+	public void setPointReflection(double d) {
+		pointReflectionSlider.setValue((int)(100*d));
 		if (cmVertices != null) cmVertices.setBlendColor(new Color(1f, 1f, 1f, (float) d));
 	}
 	
@@ -1387,7 +1419,7 @@ public class ViewerVR {
 		setPointsReflecting(isPointsReflecting());
 		setLinesReflecting(isLinesReflecting());
 		setFacesReflecting(isFacesReflecting());
-		setReflection(getReflection());
+		setFaceReflection(getFaceReflection());
 	}
 
 	public void setContent(SceneGraphComponent content) {
@@ -1474,6 +1506,7 @@ public class ViewerVR {
 		JMenuBar menuBar = viewerApp.getMenuBar();
 		JMenu settings = new JMenu("Settings");
 		Action defaults = new AbstractAction("Restore defaults") {
+			private static final long serialVersionUID = 1834896899901782677L;
 
 			public void actionPerformed(ActionEvent e) {
 				restoreDefaults();
@@ -1481,6 +1514,7 @@ public class ViewerVR {
 		};
 		settings.add(defaults);
 		Action restorePrefs = new AbstractAction("Restore preferences") {
+			private static final long serialVersionUID = 629286193877652699L;
 
 			public void actionPerformed(ActionEvent e) {
 				restorePreferences();
@@ -1488,6 +1522,7 @@ public class ViewerVR {
 		};
 		settings.add(restorePrefs);
 		Action savePrefs = new AbstractAction("Save preferences") {
+			private static final long serialVersionUID = -3242879996093277296L;
 
 			public void actionPerformed(ActionEvent e) {
 				savePreferences();
@@ -1567,7 +1602,9 @@ public class ViewerVR {
 		setLineColor(DEFAULT_LINE_COLOR);
 		setShowFaces(DEFAULT_SHOW_FACES);
 		setFacesReflecting(DEFAULT_FACES_REFLECTING);
-		setReflection(DEFAULT_REFLECTION);
+		setFaceReflection(DEFAULT_FACE_REFLECTION);
+		setFaceReflection(DEFAULT_LINE_REFLECTION);
+		setFaceReflection(DEFAULT_POINT_REFLECTION);
 		setFaceColor(DEFAULT_FACE_COLOR);
 		setTransparencyEnabled(DEFAULT_TRANSPARENCY_ENABLED);
 		setTransparency(DEFAULT_TRANSPARENCY);
@@ -1618,7 +1655,9 @@ public class ViewerVR {
 		prefs.putInt("lineColorGreen", c.getGreen());
 		prefs.putInt("lineColorBlue", c.getBlue());
 		prefs.putBoolean("showFaces", isShowFaces());
-		prefs.putDouble("reflection", getReflection());
+		prefs.putDouble("faceReflection", getFaceReflection());
+		prefs.putDouble("lineReflection", getLineReflection());
+		prefs.putDouble("pointReflection", getPointReflection());
 		c = getFaceColor();
 		prefs.putInt("faceColorRed", c.getRed());
 		prefs.putInt("faceColorGreen", c.getGreen());
@@ -1690,7 +1729,9 @@ public class ViewerVR {
 		setLineColor(new Color(r,g,b));
 		setShowFaces(prefs.getBoolean("showFaces", DEFAULT_SHOW_FACES));
 		setFacesReflecting(prefs.getBoolean("facesReflecting", DEFAULT_FACES_REFLECTING));
-		setReflection(prefs.getDouble("reflection", DEFAULT_REFLECTION));
+		setFaceReflection(prefs.getDouble("faceReflection", DEFAULT_FACE_REFLECTION));
+		setLineReflection(prefs.getDouble("lineReflection", DEFAULT_LINE_REFLECTION));
+		setPointReflection(prefs.getDouble("pointReflection", DEFAULT_POINT_REFLECTION));
 		r = prefs.getInt("faceColorRed", DEFAULT_FACE_COLOR.getRed());
 		g = prefs.getInt("faceColorGreen", DEFAULT_FACE_COLOR.getGreen());
 		b = prefs.getInt("faceColorBlue", DEFAULT_FACE_COLOR.getBlue());
