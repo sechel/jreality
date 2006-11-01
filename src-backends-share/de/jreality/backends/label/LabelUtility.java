@@ -220,9 +220,10 @@ public class LabelUtility {
   /************** CACHING END *****************/
   
   private static final FontRenderContext frc;
+  private static BufferedImage bi;
 	//TODO is there a better way to get a FontRenderContext???
 	static {
-		BufferedImage bi = new BufferedImage(1,1,BufferedImage.TYPE_INT_ARGB);
+		bi = new BufferedImage(1,1,BufferedImage.TYPE_INT_ARGB);
 		frc = bi.createGraphics().getFontRenderContext();
 	}
 
@@ -251,6 +252,7 @@ public class LabelUtility {
 
   public static BufferedImage createImageFromString(String s, Font f, Color color) {
 	  //Rectangle r = f.getStringBounds(s,frc).getBounds();
+	  if (s==null || s.length()==0) return bi;
 	  TextLayout tl = new TextLayout(s,f,frc);
 	  Rectangle r = tl.getBounds().getBounds();
 	  
