@@ -1,24 +1,13 @@
 package de.jreality.renderman;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.Writer;
 import java.util.HashSet;
-import java.util.StringTokenizer;
-
-import de.jreality.renderman.shader.DefaultPolygonShader;
 import de.jreality.shader.Texture2D;
 
 class RenderScript {
