@@ -133,6 +133,8 @@ public class ViewerVR {
 	
 	// other static constants:
 	
+	private static final double MAX_OFFSET = 5;
+	
 	// maximal radius of tubes or points compared to content size
 	private static final double MAX_RADIUS = 0.1;
 	
@@ -189,7 +191,6 @@ public class ViewerVR {
 	
 	private DirectionalLight light = new DirectionalLight();
 	private SceneGraphPath cameraPath, avatarPath, emptyPickPath;
-	private double size = DEFAULT_SIZE, offset = DEFAULT_OFFSET;
 	private JPanel fileChooserPanel;
 	private JFileChooser texFileChooser;
 	private SimpleColorChooser contentColorChooser;
@@ -874,13 +875,11 @@ public class ViewerVR {
 		Box sizeBox = new Box(BoxLayout.Y_AXIS);
 		sizeBox.setBorder(new EmptyBorder(10, 5, 0, 5));
 		JLabel sizeLabel = new JLabel("size");
-		int sliderDiam = (int)(Math.log(size*LOGARITHMIC_RANGE/MAX_CONTENT_SIZE)/Math.log(LOGARITHMIC_RANGE)*100);
-		sizeSlider = new JSlider(SwingConstants.VERTICAL, 0, 100, sliderDiam);
+		sizeSlider = new JSlider(SwingConstants.VERTICAL, 0, 100, 0);
 		sizeSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
-				double sliderDiam = 0.01 * sizeSlider.getValue();
-				setSize(Math.exp(Math.log(LOGARITHMIC_RANGE)*sliderDiam)/LOGARITHMIC_RANGE * MAX_CONTENT_SIZE);
-				alignContent(size, offset, null);
+				setSize(getSize());
+				alignContent(getSize(), getOffset(), null);
 				if (!sizeSlider.getValueIsAdjusting()) {
 					computeShadow();
 				}
@@ -891,12 +890,11 @@ public class ViewerVR {
 		Box groundBox = new Box(BoxLayout.Y_AXIS);
 		groundBox.setBorder(new EmptyBorder(10, 5, 0, 5));
 		JLabel groundLabel = new JLabel("level");
-		groundSlider = new JSlider(SwingConstants.VERTICAL, -100, 100,
-				(int) (offset * 100));
+		groundSlider = new JSlider(SwingConstants.VERTICAL, -25, 75, 0);
 		groundSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
-				setOffset(0.01 * groundSlider.getValue());
-				alignContent(size, offset, null);
+				setOffset(getOffset());
+				alignContent(getSize(), getOffset(), null);
 				if (!groundSlider.getValueIsAdjusting()) {
 					computeShadow();
 				}
@@ -916,7 +914,7 @@ public class ViewerVR {
 		JButton xRotateLeft = new JButton(rotateLeft);
 		xRotateLeft.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				alignContent(size, offset, MatrixBuilder.euclidean().rotateX(
+				alignContent(getSize(), getOffset(), MatrixBuilder.euclidean().rotateX(
 						-PI2).getMatrix());
 				computeShadow();
 			}
@@ -932,7 +930,7 @@ public class ViewerVR {
 		JButton xRotateRight = new JButton(rotateRight);
 		xRotateRight.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				alignContent(size, offset, MatrixBuilder.euclidean().rotateX(
+				alignContent(getSize(), getOffset(), MatrixBuilder.euclidean().rotateX(
 						PI2).getMatrix());
 				computeShadow();
 			}
@@ -944,7 +942,7 @@ public class ViewerVR {
 		JButton yRotateLeft = new JButton(rotateLeft);
 		yRotateLeft.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				alignContent(size, offset, MatrixBuilder.euclidean().rotateY(
+				alignContent(getSize(), getOffset(), MatrixBuilder.euclidean().rotateY(
 						-PI2).getMatrix());
 				computeShadow();
 			}
@@ -958,7 +956,7 @@ public class ViewerVR {
 		JButton yRotateRight = new JButton(rotateRight);
 		yRotateRight.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				alignContent(size, offset, MatrixBuilder.euclidean().rotateY(
+				alignContent(getSize(), getOffset(), MatrixBuilder.euclidean().rotateY(
 						PI2).getMatrix());
 				computeShadow();
 			}
@@ -970,7 +968,7 @@ public class ViewerVR {
 		JButton zRotateLeft = new JButton(rotateLeft);
 		zRotateLeft.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				alignContent(size, offset, MatrixBuilder.euclidean().rotateZ(
+				alignContent(getSize(), getOffset(), MatrixBuilder.euclidean().rotateZ(
 						-PI2).getMatrix());
 				computeShadow();
 			}
@@ -984,7 +982,7 @@ public class ViewerVR {
 		JButton zRotateRight = new JButton(rotateRight);
 		zRotateRight.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				alignContent(size, offset, MatrixBuilder.euclidean().rotateZ(
+				alignContent(getSize(), getOffset(), MatrixBuilder.euclidean().rotateZ(
 						PI2).getMatrix());
 				computeShadow();
 			}
@@ -999,7 +997,7 @@ public class ViewerVR {
 		JButton alignButton = new JButton("align");
 		alignButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				alignContent(size, offset, null);
+				alignContent(getSize(), getOffset(), null);
 			}
 		});
 		p.add("South", alignButton);
@@ -1447,27 +1445,26 @@ public class ViewerVR {
 		setTubeRadius(getTubeRadius());
 		setPointRadius(getPointRadius());
 		sceneNode.addChild(currentContent);
-		alignContent(size, offset, null);
+		alignContent(getSize(), getOffset(), null);
 		computeShadow();
 	}
 
 	public double getSize() {
-		return size;
+		double sliderDiam = 0.01 * sizeSlider.getValue();
+		return Math.exp(Math.log(LOGARITHMIC_RANGE)*sliderDiam)/LOGARITHMIC_RANGE * MAX_CONTENT_SIZE;
 	}
 
 	public void setSize(double d) {
-		size = d;
-		double sliderDiam = Math.log(size*LOGARITHMIC_RANGE/MAX_CONTENT_SIZE)/Math.log(LOGARITHMIC_RANGE);
+		double sliderDiam = Math.log(d*LOGARITHMIC_RANGE/MAX_CONTENT_SIZE)/Math.log(LOGARITHMIC_RANGE);
 		sizeSlider.setValue((int) (sliderDiam * 100));
 	}
 
 	public double getOffset() {
-		return offset;
+		return .01 * groundSlider.getValue() * MAX_OFFSET;
 	}
 
 	public void setOffset(double offset) {
-		this.offset = offset;
-		groundSlider.setValue((int) (offset * 100));
+		groundSlider.setValue((int) (offset/MAX_OFFSET * 100));
 	}
 
 	private void alignContent(final double diam, final double offset,
