@@ -416,6 +416,9 @@
       <fileset dir="${ui}" defaultexcludes="yes">
         <include name="de/jreality/**/*.java" />
       </fileset>
+      <fileset dir="${vr}" defaultexcludes="yes">
+        <include name="de/jreality/**/*.java" />
+      </fileset>
       <link href="http://java.sun.com/j2se/1.5/docs/api/"/>
     </javadoc>
   </target>
@@ -445,7 +448,9 @@
       <fileset dir="${build}/swing" />
       <fileset dir="${build}/vr" />
 
-      <fileset dir="${build}/examples" />
+      <fileset dir="${build}/examples">
+      	<exclude name="**/SwtExample*"/>
+      </fileset>
     </jar>
   	
   	<mkdir dir="release/tmp/src" />
@@ -469,7 +474,9 @@
   		<fileset dir="${swing}" />
   		<fileset dir="${vr}" />
   		
-  		<fileset dir="${examples}" />
+  		<fileset dir="${examples}">
+  	      <exclude name="**/SwtExample*"/>
+  	    </fileset>
   	</copy>
 
   	<zip destfile="release/jReality-src.zip" basedir="release/tmp"/>
