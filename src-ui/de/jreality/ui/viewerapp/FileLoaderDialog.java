@@ -49,49 +49,54 @@ import javax.swing.filechooser.FileSystemView;
 
 import de.jreality.reader.Readers;
 
+
 public class FileLoaderDialog {
 	
   static File lastDir = new File(System.getProperty("jreality.data", "/net/MathVis/data/testData3D"));
   
+  
   public static JFileChooser createFileChooser() {
-      FileFilter ff = new FileFilter(){
-            public boolean accept(File arg0) {
-                if (arg0.isDirectory()) return true;
-                String filename = arg0.getName().toLowerCase();
-                if (Readers.findFormat(filename) != null)
-                    return true;
-                return false;
-            }
-
-            public String getDescription() {
-                return "jReality 3D data files";
-            }
-        };
-      return createFileChooser(ff);
+    FileFilter ff = new FileFilter(){
+      public boolean accept(File f) {
+        if (f.isDirectory()) return true;
+        String filename = f.getName().toLowerCase();
+        return (Readers.findFormat(filename) != null);
+      }
+      public String getDescription() {
+        return "jReality 3D data files";
+      }
+    };
+    return createFileChooser(ff);
   }
+  
   
   static JFileChooser createFileChooser(final String ext, final String description) {
       FileFilter ff = new FileFilter(){
-          public boolean accept(File arg0) {
-              if (arg0.isDirectory()) return true;
-              if(arg0.getName().endsWith("."+ext))
-                  return true;
-              return false;
-          }
-
-          public String getDescription() {
-              return description;
-          }
+        public boolean accept(File f) {
+          return (f.isDirectory() || 
+              f.getName().endsWith("."+ext) || 
+              f.getName().endsWith("."+ext.toLowerCase()) ||
+              f.getName().endsWith("."+ext.toUpperCase()));
+        }
+        public String getDescription() {
+          return description;
+        }
       };
       return createFileChooser(ff);
   }
-	static JFileChooser createFileChooser(FileFilter ff) {
-		FileSystemView view = FileSystemView.getFileSystemView();
-		JFileChooser chooser = new JFileChooser(!lastDir.exists() ? view.getHomeDirectory() : lastDir, view);
-		chooser.addChoosableFileFilter(ff);
-		return chooser;
-	}
-	
+
+  
+  public static JFileChooser createFileChooser(FileFilter... ff) {
+    FileSystemView view = FileSystemView.getFileSystemView();
+    JFileChooser chooser = new JFileChooser(!lastDir.exists() ? view.getHomeDirectory() : lastDir, view);
+    for (int i = 0; i < ff.length; i++)
+      chooser.addChoosableFileFilter(ff[i]);
+    chooser.setFileFilter(chooser.getAcceptAllFileFilter());
+    
+    return chooser;
+  }
+  
+  
   public static File[] loadFiles(Component parent) {
     JFileChooser chooser = createFileChooser();
     chooser.setMultiSelectionEnabled(true);
@@ -101,21 +106,30 @@ public class FileLoaderDialog {
     return files;
   }
   
+  
   private static File selectTargetFile(Component parent,JFileChooser chooser) {
     chooser.setMultiSelectionEnabled(false);
     chooser.showSaveDialog(parent);
     lastDir = chooser.getCurrentDirectory();
     return chooser.getSelectedFile();
   }
+  
+  
   public static File selectTargetFile(Component parent) {
       JFileChooser chooser = createFileChooser();
-      return selectTargetFile(parent,chooser);
+      return selectTargetFile(parent, chooser);
   }
+  
   
   public static File selectTargetFile(Component parent, String extension, String description) {
       JFileChooser chooser = createFileChooser(extension, description);
-      return selectTargetFile(parent,chooser);
-    }
+      return selectTargetFile(parent, chooser);
+  }
   
+  
+  public static File selectTargetFile(Component parent, FileFilter... ff) {
+    JFileChooser chooser = createFileChooser(ff);
+    return selectTargetFile(parent, chooser);
+  }
   
 }
