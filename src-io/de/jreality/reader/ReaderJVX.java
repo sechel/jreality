@@ -289,6 +289,7 @@ public class ReaderJVX extends AbstractReader {
         // p
         //
         if(qName.equals("p")) {
+        	if (currentPointNum == -1 || pointLength == -1) return;
             currentPointLabels[currentPointNum]=attributes.getValue("name");
             currentPoints[currentPointNum] = currentPoint = new double[pointLength];
             return;
