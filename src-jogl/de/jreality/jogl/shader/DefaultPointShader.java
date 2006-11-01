@@ -257,13 +257,14 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 
 	public void postRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.getRenderer(); 
-		polygonShader.postRender(jrs);
 		if (!sphereDraw)	{
 			GL gl = jr.getGL();
 			gl.glDisable(GL.GL_POINT_SPRITE_ARB);
 			gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_FALSE);
 			gl.glDisable(GL.GL_TEXTURE_2D);
+		} else {
+			polygonShader.postRender(jrs);
 		}
 	}
 

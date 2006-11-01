@@ -224,7 +224,10 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 //			jr.getGL().glPopAttrib();
 //			jr.getGL().glPopAttrib();
 		}
-		if (!tubeDraw) jr.getGL().glDepthRange(0.0d, 1d);
+		if (!tubeDraw) {
+			jr.getGL().glDepthRange(0.0d, 1d);
+		} else 
+			polygonShader.postRender(jrs);
 	}
 
 	public boolean providesProxyGeometry() {		
