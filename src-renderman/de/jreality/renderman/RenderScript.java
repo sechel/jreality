@@ -81,8 +81,7 @@ class RenderScript {
 	}
 	
 	void addTexture(String tex, int smode, int tmode) {   
-	    String repeatS=type == RIBViewer.TYPE_AQSIS ? "-swrap " : "-smode ";
-      
+	    String repeatS=type == RIBViewer.TYPE_AQSIS ? "-swrap " : "-smode ";      
 	    switch(smode){
 	    //case Texture2D.GL_MIRRORED_REPEAT: repeatS="";  // <- no support in renderman
 	    case(Texture2D.GL_REPEAT): repeatS+="'periodic' "; break;           
