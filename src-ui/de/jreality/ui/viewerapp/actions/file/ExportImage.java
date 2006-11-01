@@ -47,6 +47,13 @@ import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.imageio.ImageIO;
+import javax.swing.filechooser.FileFilter;
+
+import com.sun.opengl.util.FileUtil;
 
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
@@ -56,53 +63,94 @@ import de.jtem.beans.DimensionDialog;
 
 
 public class ExportImage extends AbstractAction {
-
-	private static final long serialVersionUID = 5793099900216754633L;
-	private Viewer viewer;
-
-
-	public ExportImage(String name, Viewer viewer, Frame frame) {
-		super(name);
-		this.frame = frame;
-		putValue(SHORT_DESCRIPTION, "Export image file");
-
-		if (viewer == null) 
-			throw new IllegalArgumentException("Viewer is null!");
-		this.viewer = viewer;
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		
-		// Hack
-		Viewer realViewer = ((ViewerSwitch)viewer).getCurrentViewer();
-		de.jreality.jogl.Viewer joglViewer = (de.jreality.jogl.Viewer) realViewer;
-		Dimension d = joglViewer.getViewingComponentSize();
-		Dimension dim = DimensionDialog.selectDimension(d,frame);
-		if (dim == null) return;
-		
-		File file = FileLoaderDialog.selectTargetFile(frame, null, "image files");
-		if (file == null) return;
-		BufferedImage img = joglViewer.renderOffscreen(4*dim.width, 4*dim.height);
-		BufferedImage img2 = new BufferedImage(dim.width, dim.height,BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g = (Graphics2D) img2.getGraphics();
-		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-		img2.getGraphics().drawImage(
-				img.getScaledInstance(
-						dim.width,
-						dim.height,
-						BufferedImage.SCALE_SMOOTH
-				),
-                0,
-                0,
-                null
-		);
-		de.jreality.jogl.JOGLRenderer.writeBufferedImage(file,img2);
-	}
-	
-	@Override
-	public boolean isEnabled() {
-		Viewer realViewer = ((ViewerSwitch)viewer).getCurrentViewer();
-		return realViewer instanceof de.jreality.jogl.Viewer;
-	}
+  
+  private static final long serialVersionUID = 5793099900216754633L;
+  private Viewer viewer;
+  
+  
+  public ExportImage(String name, Viewer viewer, Frame frame) {
+    super(name);
+    this.frame = frame;
+    putValue(SHORT_DESCRIPTION, "Export image file");
+    
+    if (viewer == null) 
+      throw new IllegalArgumentException("Viewer is null!");
+    this.viewer = viewer;
+  }
+  
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    
+    // Hack
+    Viewer realViewer = ((ViewerSwitch)viewer).getCurrentViewer();
+    de.jreality.jogl.Viewer joglViewer = (de.jreality.jogl.Viewer) realViewer;
+    Dimension d = joglViewer.getViewingComponentSize();
+    Dimension dim = DimensionDialog.selectDimension(d,frame);
+    if (dim == null) return;
+    
+    File file = FileLoaderDialog.selectTargetFile(frame, createFileFilters());
+    if (file == null) return;  //dialog cancelled 
+    if (FileUtil.getFileSuffix(file) == null) {  //no extension specified
+      System.err.println("Please specify a valid file extension.\n" +
+      "Export aborted.");
+      return;
+    }
+    
+    BufferedImage img = joglViewer.renderOffscreen(4*dim.width, 4*dim.height);
+    BufferedImage img2 = new BufferedImage(dim.width, dim.height,BufferedImage.TYPE_INT_ARGB);
+    Graphics2D g = (Graphics2D) img2.getGraphics();
+    g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+    img2.getGraphics().drawImage(
+        img.getScaledInstance(
+            dim.width,
+            dim.height,
+            BufferedImage.SCALE_SMOOTH
+        ),
+        0,
+        0,
+        null
+    );
+    de.jreality.jogl.JOGLRenderer.writeBufferedImage(file,img2);
+  }
+  
+  
+  @Override
+  public boolean isEnabled() {
+    Viewer realViewer = ((ViewerSwitch)viewer).getCurrentViewer();
+    return realViewer instanceof de.jreality.jogl.Viewer;
+  }
+  
+  
+  private FileFilter[] createFileFilters() {
+    
+    String writerFormats[] = ImageIO.getWriterFormatNames();
+    //remove duplicate entries (ignore case)
+    Set<String> s = new TreeSet<String>();  //ordered set
+    for (int i = 0; i < writerFormats.length; i++)
+      s.add(writerFormats[i].toLowerCase());
+    s.add("tif");
+    s.add("tiff");
+    final String[] formats = new String[s.size()];
+    s.toArray(formats);
+    
+    //TODO: tif=tiff, jpg=jpeg
+    
+    FileFilter[] ff = new FileFilter[formats.length];
+    for (int i = 0; i < ff.length; i++) {
+      final int ind = i;
+      ff[i] = new FileFilter(){
+        public boolean accept(File f) {
+          return (f.isDirectory() || 
+              f.getName().endsWith("."+formats[ind]) || 
+              f.getName().endsWith("."+formats[ind].toUpperCase()));
+        }
+        public String getDescription() {
+          return formats[ind].toUpperCase()+" Image";
+        }
+      };
+    }
+    
+    return ff;
+  }
+  
 }
