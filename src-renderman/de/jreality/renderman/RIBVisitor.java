@@ -425,6 +425,17 @@ public class RIBVisitor extends SceneGraphVisitor {
 		ri.shadingRate(1f);
 		if (globalIncludeFile != "")
 			ri.readArchive((String) globalIncludeFile);
+
+		if(shadowEnabled){
+      if(rendererType==RIBViewer.TYPE_PIXAR)
+        ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
+      else if(rendererType==RIBViewer.TYPE_3DELIGHT)
+        ri.verbatim("Attribute \"visibility\"  \"string transmission\" \"shader\"");
+      else if(rendererType==RIBViewer.TYPE_AQSIS)
+        ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
+      else if(rendererType==RIBViewer.TYPE_PIXIE)
+        ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
+    }
 	}
 
 	/**

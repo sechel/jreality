@@ -147,16 +147,6 @@ public class LightCollector extends SceneGraphVisitor {
         }
         else if (shadowEnabled){
         	map.put("string shadowname", "raytrace");
-          if(rendererType==RIBViewer.TYPE_PIXAR)
-            ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
-          else if(rendererType==RIBViewer.TYPE_3DELIGHT)
-            ri.verbatim("Attribute \"visibility\"  \"string transmission\" \"shader\"");
-          else if(rendererType==RIBViewer.TYPE_AQSIS)
-            ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
-          else if(rendererType==RIBViewer.TYPE_PIXIE)
-            ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
-          else
-            System.err.println("no valid rendererType in LightCollector");
         }
 	}
 	String lightname;
