@@ -121,7 +121,12 @@ public class Primitives {
 			return cube;
 	}
 		/**
-		 * A dimensioned cube.  If <i>colored</i> is true, then it has face colors.
+		 * @deprecated	Use {@link #box(double, double, double, boolean)}.
+		 */public static IndexedFaceSet cube(double width,double hight,double depth,boolean colored){
+			return box(width, hight, depth, colored);
+		}
+		/**
+		 * A dimensioned box.  If <i>colored</i> is true, then it has face colors.
 		 * @author Gonska
 		 * @param width: size in X-dimension 
 		 * @param higth: size in Y-dimension
@@ -129,26 +134,32 @@ public class Primitives {
 		 * @param colored
 		 * @return
 		 */		
-		public static IndexedFaceSet cube(double width,double hight,double depth,boolean colored){
+		public static IndexedFaceSet box(double width,double hight,double depth,boolean colored){
+			return box (width, hight, depth, colored, Pn.EUCLIDEAN);
+		}
+		public static IndexedFaceSet box(double width,double hight,double depth,boolean colored, int signature){
 			double w=width/2;	double h=hight/2;	double d=depth/2;
 			IndexedFaceSet cube = new IndexedFaceSet(8, 6);
 			double[][] points =  
 			 {{w,h,d},{w,h,-d},{w,-h,d},{w,-h,-d},
 			 {-w,h,d},{-w,h,-d},{-w,-h,d},{-w,-h,-d}};
-			cube.setFaceAttributes(Attribute.INDICES, new IntArrayArray.Array(cubeIndices));
-			cube.setVertexAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(points));
-			if (colored)	{
-				cube.setFaceAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(cubeColors));
-			}
-			IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(cube);
-			GeometryUtility.calculateAndSetFaceNormals(cube);		
-			return cube;
+			IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
+			ifsf.setVertexCount(8);
+			ifsf.setVertexCoordinates(points);
+			ifsf.setFaceCount(cubeIndices.length);
+			ifsf.setFaceIndices(cubeIndices);
+			if (colored) ifsf.setFaceColors(cubeColors);
+			ifsf.setSignature(signature);
+			ifsf.setGenerateFaceNormals(true);
+			ifsf.setGenerateEdgesFromFaces(true);
+			ifsf.update();
+			return ifsf.getIndexedFaceSet();
 		}
 		public static IndexedFaceSet coloredCube(double width,double hight,double depth){
-			return cube(width,hight,depth,true);
+			return box(width,hight,depth,true);
 		}
 		public static IndexedFaceSet cube(double width,double hight,double depth){
-			return cube(width,hight,depth,false);
+			return box(width,hight,depth,false);
 		}
 		static private double[][] tetrahedronVerts3 =  
 		{{1,1,1},{1,-1,-1},{-1,1,-1},{-1,-1,1}};
@@ -321,6 +332,7 @@ public class Primitives {
 			ap.setAttribute(CommonAttributes.FACE_DRAW, false);
 			ap.setAttribute(CommonAttributes.EDGE_DRAW, true);
 			ap.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+			ap.setAttribute(CommonAttributes.TUBES_DRAW, false);
 			ap.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new Color(200, 200, 200));
 			ap.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_WIDTH, 0.5);
 			return hypersphere;

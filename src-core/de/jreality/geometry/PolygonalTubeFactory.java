@@ -177,6 +177,7 @@ import de.jreality.scene.data.StorageModel;
 		theTubeVertices = makeTube(theCurve, radius, crossSection, frameFieldType, closedCurve, signature, twists);
 		qmf = new QuadMeshFactory();
 		qmf.setSignature(signature);
+//		System.err.println("PTF: sig = "+signature);
 		qmf.setULineCount(crossSection.length);
 		qmf.setVLineCount(theTubeVertices.length/crossSection.length);
 		qmf.setClosedInUDirection(true);

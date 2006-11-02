@@ -181,7 +181,7 @@ public class TubeUtility {
 				qmf.setGenerateTextureCoordinates(false);
 				qmf.update();
 				urTube[k] = qmf.getIndexedFaceSet();
-				urTube[k].setGeometryAttributes(CommonAttributes.RMAN_PROXY_COMMAND,"Cylinder 1.0 -.5 .5 360");
+				if (k == 1) urTube[k].setGeometryAttributes(CommonAttributes.RMAN_PROXY_COMMAND,"Cylinder 1.0 -.5 .5 360");
 			}
 		}
 		

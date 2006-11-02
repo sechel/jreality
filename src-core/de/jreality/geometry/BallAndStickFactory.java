@@ -195,6 +195,7 @@ import de.jreality.shader.CommonAttributes;
 			topAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING, true);
 			theResult = new SceneGraphComponent();
 			theResult.setAppearance(topAp);
+			topAp.setAttribute("signature", signature);
 			if (showSticks) theResult.addChild(sticks);
 			if (showBalls) theResult.addChild(balls);
 	 }

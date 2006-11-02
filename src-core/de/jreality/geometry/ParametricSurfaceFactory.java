@@ -40,6 +40,8 @@
 
 package de.jreality.geometry;
 
+import java.awt.Dimension;
+
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DoubleArrayArray;
 
@@ -200,6 +202,8 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 			log( "set", Attribute.COORDINATES, "vertex" );
 			ifs.setVertexAttributes(Attribute.COORDINATES, new DoubleArrayArray.Array(vertexCoordinates()));
 		}
+		// TODO figure out why I had to put this here (not getting done in super -- gunn
+		ifs.setGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE, new Dimension( getULineCount(), getVLineCount() ));
 		
 	}
 

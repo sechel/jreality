@@ -225,6 +225,7 @@ public class GeometryUtility {
 	public static double[][] calculateFaceNormals(int[][] indices, double[][] verts, int signature)	{
 		if (indices == null) return null;
 		int normalLength = 4;
+		//System.err.println("Sig is "+signature);
 		if (signature == Pn.EUCLIDEAN)	normalLength = 3;
 		double[][] fn = new double[indices.length][normalLength];
 		if (signature == Pn.EUCLIDEAN && verts[0].length == 4) Pn.dehomogenize(verts,verts);
@@ -252,12 +253,12 @@ public class GeometryUtility {
 				double[] normal = Pn.polarizePlane(null, osculatingPlane,signature);	
 				Pn.setToLength(normal, normal, 1.0, signature);
 				if (normal[3] < 0) Rn.times(normal, -1, normal);
-				//normal[0] *= -1; normal[1] *= -1; normal[2] *= -1;
 	//				double[] np = new double[3];
 	//				for (int k = 0; k<3; ++k)	{
 	//					np[k] = Pn.innerProduct(normal, verts[indices[i][k]], signature);
 	//				}
-	//				System.err.println("N.P "+Rn.toString(np));
+//				double[] v4 = Pn.homogenize(null, verts[indices[i][0]]);
+//				System.err.println("N.P "+Pn.innerProduct(normal,v4, signature));
 				System.arraycopy(normal, 0, fn[i], 0, normalLength);				
 			}
 		}
@@ -338,7 +339,8 @@ public class GeometryUtility {
 	   */
      public static double[][] calculateVertexNormals(int[][] indices,
 				double[][] vertsAs2D, double[][] fn, int signature) {
-			double[][] nvn = new double[vertsAs2D.length][3];
+    	 	int n = fn[0].length;
+			double[][] nvn = new double[vertsAs2D.length][n];
 			// TODO average only after normalizing wrt the signature
 			for (int j = 0; j < indices.length; ++j) {
 				for (int k = 0; k < indices[j].length; ++k) {

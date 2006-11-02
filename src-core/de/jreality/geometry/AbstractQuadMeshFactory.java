@@ -304,10 +304,10 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 			}
 		}
 		
-		if( nodeWasUpdated(uLineCount)|| nodeWasUpdated(vLineCount) ) {
+//		if( nodeWasUpdated(uLineCount)|| nodeWasUpdated(vLineCount) ) {
 			log( "set", GeometryUtility.QUAD_MESH_SHAPE, "vertex");
 			ifs.setGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE, new Dimension( getULineCount(), getVLineCount() ));
-		}
+//		}
 	}
 
 	public boolean isGenerateTextureCoordinates() {
