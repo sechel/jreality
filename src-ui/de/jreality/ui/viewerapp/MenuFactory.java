@@ -43,6 +43,7 @@ package de.jreality.ui.viewerapp;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.beans.Beans;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -183,8 +184,10 @@ public class MenuFactory {
     //export.add(new JMenuItem(new ExportSVG("SVG", viewerSwitch, frame)));
     exportImageAction = new ExportImage("Image", viewerSwitch, frame);
     export.add(new JMenuItem(exportImageAction));
-    fileMenu.addSeparator();
-    fileMenu.add(new JMenuItem(new Quit(QUIT)));    
+    if (!Beans.isDesignTime()) {
+    	fileMenu.addSeparator();
+    	fileMenu.add(new JMenuItem(new Quit(QUIT)));    
+    }
     
     //EDIT MENU
     JMenu editMenu = new JMenu(EDIT_MENU);
