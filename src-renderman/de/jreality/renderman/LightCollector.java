@@ -59,12 +59,12 @@ import de.jreality.shader.EffectiveAppearance;
  * and writes them using the {@link de.jreality.renderman.Ri} instance <i>ri</i>. Currently supports {@link de.jreality.scene.DirectionalLight},
  * {@link de.jreality.scene.PointLight}, and {@link de.jreality.scene.SpotLight}.  If the
  * current effective appearance {@link de.jreality.shader.EffectiveAppearance} evaluates 
- * {@link de.jreality.shader.CommonAttributes#RMAN_SHADOWS_ENABLED} is <code>true</code> then
+ * {@link de.jreality.shader.CommonAttributes#RMAN_SHADOWS_ENABLED} as <code>true</code> then
  * corresponding shadow-casting shaders are written out into the RIB file instead of the 
  * standard RenderMan lights.
  * <p>
  * Todo: look at the {@link de.jreality.scene.Appearance} attached to the SceneGraphComponent 
- * containing the light for {@link de.jreality.shader.CommonAttributes#RMAN_LIGHT_SHADER}. If 
+ * containing the light for the key {@link de.jreality.shader.CommonAttributes#RMAN_LIGHT_SHADER}. If 
  * found, its value should be an instance of {@link de.jreality.renderman.SLShader}, and this 
  * should be substituted for the standard light as generated now by this visitor.
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>, Charles Gunn
@@ -78,6 +78,7 @@ public class LightCollector extends SceneGraphVisitor {
     protected LightCollector reclaimableSubcontext;
     EffectiveAppearance eAppearance = null;
     boolean shadowEnabled = false;
+    int signature = Pn.EUCLIDEAN;
     SceneGraphPath currentPath = null;
     Ri ri = null;
     /**
@@ -95,6 +96,7 @@ public class LightCollector extends SceneGraphVisitor {
     protected LightCollector(LightCollector parentContext) {
         initializeFromParentContext(parentContext);
     }
+    
     LightCollector subContext() {
         if (reclaimableSubcontext != null) {
             reclaimableSubcontext.initializeFromParentContext(this);
@@ -114,6 +116,7 @@ public class LightCollector extends SceneGraphVisitor {
         if(a!= null ) eAppearance = eAppearance.create(a);
         currentPath.push(c);
         shadowEnabled = eAppearance.getAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, false);
+        signature = eAppearance.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
         c.childrenAccept(this); //subContext());
         eAppearance= tmp;
         currentPath.pop();
@@ -125,8 +128,10 @@ public class LightCollector extends SceneGraphVisitor {
         handleCommon(l, map);
         ri.concatTransform(fCurrentTrafo);
         map.put("to",zdirection);
-        ri.lightSource(shadowEnabled ? "shadowdistant":"distantlight",map);
-        ri.transformEnd();
+        if (signature == Pn.EUCLIDEAN)
+        	lightname = shadowEnabled ? "shadowdistant": "distantlight";
+         ri.lightSource(lightname,map);
+         ri.transformEnd();
      }
 	private void handleCommon(Light l, HashMap<String, Object> map) {
 		currentPath.getMatrix(currentTrafo);
@@ -134,32 +139,28 @@ public class LightCollector extends SceneGraphVisitor {
 		map.put("intensity",new Float(l.getIntensity()));
         map.put("lightcolor",l.getColor().getRGBColorComponents(null));
         map.put("from",new float[] {0f,0f,0f});
-//       map.put("signature", new Float(signature));
-        if (shadowEnabled)
+        if (signature != Pn.EUCLIDEAN)	{
+        	map.put("signature", new Float(signature));
+     	   lightname = "noneuclideanlight";
+        }
+        else if (shadowEnabled)
         	map.put("string shadowname", "raytrace");
 	}
-
+	String lightname;
     public void visit(PointLight l) {
-        ri.transformBegin();
-        // write the transform for this light:
-        //double[] mat = t.getMatrix();
-        // now write the light:
-        HashMap<String, Object> map =new HashMap<String, Object>();
-        handleCommon(l, map);
-        map.put("from",new float[] {0f,0f,0f});
+       ri.transformBegin();
+       HashMap<String, Object> map =new HashMap<String, Object>();
+       handleCommon(l, map);
+       map.put("from",new float[] {0f,0f,0f});
        ri.concatTransform(fCurrentTrafo);
-        ri.lightSource(shadowEnabled ? "shadowpoint": "pointlight",map);
+       if (signature == Pn.EUCLIDEAN)	
+    	   lightname = shadowEnabled ? "shadowpoint": "pointlight";
+       ri.lightSource(lightname,map);
         
-        ri.transformEnd();
+       ri.transformEnd();
     }
-    /* (non-Javadoc)
-     * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.SpotLightSoft)
-     */
     public void visit(SpotLight l) {
         ri.transformBegin();
-        // write the transform for this light:
-        //double[] mat = t.getMatrix();
-        // now write the light:
         HashMap<String, Object> map =new HashMap<String, Object>();
         handleCommon(l, map);
         ri.concatTransform(fCurrentTrafo);
@@ -173,8 +174,10 @@ public class LightCollector extends SceneGraphVisitor {
             map.put("float a2", new Float(l.getFalloffA2()));
             ri.lightSource("spotlightFalloff",map);
         } else
-            ri.lightSource(shadowEnabled ? "shadowspot": "spotlight",map);
-        
+        if (signature == Pn.EUCLIDEAN)	
+        	lightname = shadowEnabled ? "shadowspot" : "spotlight";
+        ri.lightSource(lightname,map);
+         
         ri.transformEnd();
         //super.visit(l);
     }

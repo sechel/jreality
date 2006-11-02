@@ -73,6 +73,7 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
 	
 	public void setFromEffectiveAppearance(RIBVisitor ribv, EffectiveAppearance eap, String name) {
 		map.clear();
+        int signature = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
 		boolean lighting = (boolean) eap.getAttribute(name+"."+CommonAttributes.LIGHTING_ENABLED, true);
 		float specularExponent =(float) eap.getAttribute(name+"."+CommonAttributes.SPECULAR_EXPONENT,CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
         float Ks =(float) eap.getAttribute(name+"."+CommonAttributes.SPECULAR_COEFFICIENT,CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);
@@ -85,9 +86,13 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
         map.put("Ka",new Float(Ka));
         map.put("specularcolor",specularcolor);
         map.put("lighting", new Float( lighting ? 1 : 0));
-       
-        int signature = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-        shaderName = (signature == Pn.EUCLIDEAN) ? "defaultpolygonshader" : "htransformedpaintedplastic";
+        if (signature != Pn.EUCLIDEAN) {
+        	map.put("signature", signature);
+        	map.put("objectToCamera", RIBHelper.fTranspose(ribv.getCurrentObjectToCamera()));
+        	shaderName = "noneuclideanpolygonshader";
+        }
+        else shaderName ="defaultpolygonshader" ;
+        //shaderName = "defaultpolygonshader";
 		boolean ignoreTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name,"ignoreTexture2d"), false);	
         if (!ignoreTexture2d && AttributeEntityUtility.hasAttributeEntity(Texture2D.class, "polygonShader.texture2d", eap)) {
         	Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("polygonShader","texture2d"), eap);
