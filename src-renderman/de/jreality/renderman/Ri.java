@@ -294,10 +294,10 @@ public class Ri {
     	w.print(RIBHelper.str(type)+" ");
     	RIBHelper.writeMap(w,map);
     }
-    public  void curves(String type, int ncurves,int[] nvertices, String wrap, Map map) {
-        w.print("Curves "+RIBHelper.str(type)+" "+ncurves+" ");
+    public  void curves(String type, int[] nvertices, String wrap, Map map) {
+        w.print("Curves "+RIBHelper.str(type)+" ");
         RIBHelper.writeObject(w,nvertices);
-        w.print(" "+wrap+" ");
+        w.print(" "+RIBHelper.str(type)+" ");
         RIBHelper.writeMap(w,map);
     }
     
