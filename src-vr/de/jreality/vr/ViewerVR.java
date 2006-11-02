@@ -1982,8 +1982,9 @@ public class ViewerVR {
 		}
 		fileMenu.remove(0);
 		JMenu viewMenu = vApp.getMenu("View");
-		viewMenu.remove(viewMenu.getItemCount()-1);
-		viewMenu.remove(viewMenu.getItemCount()-1);
+		for (int i=0; i<5; i++) {
+			viewMenu.remove(viewMenu.getItemCount()-1);
+		}
 		JFrame f = vApp.display();
 		f.setSize(800, 600);
 		f.validate();
