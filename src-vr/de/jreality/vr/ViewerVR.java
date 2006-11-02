@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
@@ -119,6 +120,7 @@ public class ViewerVR {
 	private static final Color DEFAULT_FACE_COLOR = Color.white;
 	private static final boolean DEFAULT_TRANSPARENCY_ENABLED = false;
 	private static final double DEFAULT_TRANSPARENCY = .7;
+	private static final boolean DEFAULT_FACES_FLAT = false;
 	
 	// defaults for tool panel
 	private static final boolean DEFAULT_ROTATION_ENABLED = false;
@@ -234,6 +236,7 @@ public class ViewerVR {
 	private JCheckBox pointsReflecting;
 	private JCheckBox linesReflecting;
 	private JCheckBox facesReflecting;
+	private JCheckBox facesFlat;
 	
 	// tex tab
 	private JSlider texScaleSlider;
@@ -860,6 +863,17 @@ public class ViewerVR {
 		transparencyBox.add(transparencySlider);
 		transparencyBox.add(faceColorButton);
 		faceBox.add(transparencyBox);
+		JPanel flatPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		//flatPanel.setBorder(new EmptyBorder(5,5,5,5));
+		facesFlat = new JCheckBox("flat shading");
+		facesFlat.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				setFacesFlat(isFacesFlat());
+			}
+		});
+		flatPanel.add(facesFlat);
+		faceBox.add(flatPanel);
 		appBox.add(faceBox);
 
 		appearancePanel.add(appBox);
@@ -1607,6 +1621,7 @@ public class ViewerVR {
 		setFaceColor(DEFAULT_FACE_COLOR);
 		setTransparencyEnabled(DEFAULT_TRANSPARENCY_ENABLED);
 		setTransparency(DEFAULT_TRANSPARENCY);
+		setFacesFlat(DEFAULT_FACES_FLAT);
 		
 		// tool panel
 		setRotationEnabled(DEFAULT_ROTATION_ENABLED);
@@ -1663,6 +1678,8 @@ public class ViewerVR {
 		prefs.putInt("faceColorBlue", c.getBlue());
 		prefs.putBoolean("transparencyEnabled", isTransparencyEnabled());
 		prefs.putDouble("transparency", getTransparency());
+		prefs.putBoolean("facesFlat", isFacesFlat());
+		
 		
 		// tool panel
 		prefs.putBoolean("rotationEnabled", isRotationEnabled());
@@ -1678,6 +1695,11 @@ public class ViewerVR {
 		// defaults for align panel
 		prefs.putDouble("size", getSize());
 		prefs.putDouble("offset", getOffset());
+		try {
+			prefs.flush();
+		} catch(BackingStoreException e){
+			e.printStackTrace();
+		}
 	}
 	
 	private boolean isPickFaces() {
@@ -1697,6 +1719,7 @@ public class ViewerVR {
 
 	public void restorePreferences() {
 		Preferences prefs =  Preferences.userNodeForPackage(this.getClass());
+		
 		// env panel
 		setEnvironment(prefs.get("environment", DEFAULT_ENVIRONMENT));
 		setTerrainTransparent(prefs.getBoolean("terrainTransparent", DEFAULT_TERRAIN_TRANSPARENT));
@@ -1737,6 +1760,7 @@ public class ViewerVR {
 		setFaceColor(new Color(r,g,b));
 		setTransparencyEnabled(prefs.getBoolean("transparencyEnabled", DEFAULT_TRANSPARENCY_ENABLED));
 		setTransparency(prefs.getDouble("transparency", DEFAULT_TRANSPARENCY));
+		setFacesFlat(prefs.getBoolean("facesFlat", DEFAULT_FACES_FLAT));
 		
 		// tool panel
 		setRotationEnabled(prefs.getBoolean("rotationEnabled", DEFAULT_ROTATION_ENABLED));
@@ -1920,6 +1944,15 @@ public class ViewerVR {
 				CommonAttributes.POLYGON_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR,
 				c
 		);
+	}
+	
+	public boolean isFacesFlat() {
+		return facesFlat.isSelected();
+	}
+	
+	public void setFacesFlat(boolean b) {
+		facesFlat.setSelected(b);
+		contentAppearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING, !b);
 	}
 	
 	public String getTexture() {
