@@ -9,6 +9,7 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.Statement;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -34,6 +35,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -1993,11 +1995,17 @@ public class ViewerVR {
 		vr.addToolTab();
 		vr.addTexTab();
 		vr.addHelpTab();
-		vr.showPanel(false);
 		vr.setGeneratePickTrees(true);
 		ViewerApp vApp = vr.display();
 		vApp.update();
 		
+		tweakMenu(vApp);
+		JFrame f = vApp.display();
+		f.setSize(800, 600);
+		f.validate();
+	}
+
+	public static void tweakMenu(ViewerApp vApp) {
 		JMenuBar menuBar = vApp.getMenuBar();
 		menuBar.remove(vApp.getMenu("Edit"));
 		menuBar.remove(vApp.getMenu("Appearance"));
@@ -2018,8 +2026,22 @@ public class ViewerVR {
 		for (int i=0; i<5; i++) {
 			viewMenu.remove(viewMenu.getItemCount()-1);
 		}
-		JFrame f = vApp.display();
-		f.setSize(800, 600);
-		f.validate();
+		JMenu helpMenu = new JMenu("Help");
+		helpMenu.add(new AbstractAction("help"){
+			private static final long serialVersionUID = 3770710651980089282L;
+
+			public void actionPerformed(ActionEvent e) {
+				try {
+					new Statement(Class.forName("org.jdesktop.jdic.desktop.Desktop"), "browse",
+							new Object[]{
+								new URL("http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/ViewerVR_User_Manual")
+					}).execute();
+				} catch(Exception ex) {
+					JOptionPane.showMessageDialog(null, "please visit <i>http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/ViewerVR_User_Manual</i>");
+				}
+			}
+			
+		});
+		menuBar.add(helpMenu);
 	}
 }
