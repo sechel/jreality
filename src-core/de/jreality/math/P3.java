@@ -793,12 +793,12 @@ public class P3 {
 //		if (Rn.maxNorm(diagnosis) < tolerance)		{
 //			return null;
 //		}
-		boolean mydebug = false;
+		boolean mydebug = true;
 		if (mydebug)	{
 			LoggingSystem.getLogger(P3.class).log(Level.FINER,"m =");
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(m,"%16.10"));
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(m));
 			LoggingSystem.getLogger(P3.class).log(Level.FINER,"Original is");
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(diagnosis, "%16.10"));			
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(diagnosis));			
 		}
 		double[][] basis = new double[4][4];
 		double[] Q = Q_LIST[signature+1];
@@ -826,9 +826,9 @@ public class P3 {
 				Rn.times(null, Rn.transpose(null, dst), Rn.times(null, Q_LIST[signature+1],dst )));
 		if (mydebug)	{
 			LoggingSystem.getLogger(P3.class).log(Level.FINER,"dst =");
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(dst, "%16.10"));
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(dst));
 			LoggingSystem.getLogger(P3.class).log(Level.FINER,"Revised is");
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(diagnosis, "%16.10"));			
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(diagnosis));			
 		}
 		return dst;
 	}
