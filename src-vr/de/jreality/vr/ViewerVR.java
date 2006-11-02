@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -31,6 +32,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -1804,34 +1806,6 @@ public class ViewerVR {
 		return showShadow;
 	}
 
-	public static void main(String[] args) throws IOException {
-		ViewerVR vr = new ViewerVR();
-		final String[][] examples = new String[][] {
-				{ "Boy surface", "jrs/boy.jrs" },
-				{ "Chen-Gackstatter surface", "obj/Chen-Gackstatter-4.obj" },
-				{ "helicoid with 2 handles", "jrs/He2WithBoundary.jrs" },
-				{ "tetranoid", "jrs/tetranoid.jrs" },
-				{ "Wente torus", "jrs/wente.jrs" },
-				{ "Schwarz P", "jrs/schwarz.jrs" },
-				{ "Matheon baer", "jrs/baer.jrs" }
-		};
-		vr.addLoadTab(examples);
-//		vr.addLoadTab(null);
-		vr.addAlignTab();
-		vr.addAppTab();
-		vr.addEnvTab();
-		vr.addToolTab();
-		vr.addTexTab();
-		vr.addHelpTab();
-		vr.showPanel(false);
-		vr.setGeneratePickTrees(true);
-		ViewerApp vApp = vr.display();
-		vApp.update();
-		JFrame f = vApp.display();
-		f.setSize(800, 600);
-		f.validate();
-	}
-
 	public String getEnvironment() {
 		return landscape.getEnvironment();
 	}
@@ -1966,5 +1940,52 @@ public class ViewerVR {
 			e1.printStackTrace();
 		}
 	}
-
+	
+	public static void main(String[] args) throws IOException {
+		ViewerVR vr = new ViewerVR();
+		final String[][] examples = new String[][] {
+				{ "Boy surface", "jrs/boy.jrs" },
+				{ "Chen-Gackstatter surface", "obj/Chen-Gackstatter-4.obj" },
+				{ "helicoid with 2 handles", "jrs/He2WithBoundary.jrs" },
+				{ "tetranoid", "jrs/tetranoid.jrs" },
+				{ "Wente torus", "jrs/wente.jrs" },
+				{ "Schwarz P", "jrs/schwarz.jrs" },
+				{ "Matheon baer", "jrs/baer.jrs" }
+		};
+		vr.addLoadTab(examples);
+//		vr.addLoadTab(null);
+		vr.addAlignTab();
+		vr.addAppTab();
+		vr.addEnvTab();
+		vr.addToolTab();
+		vr.addTexTab();
+		vr.addHelpTab();
+		vr.showPanel(false);
+		vr.setGeneratePickTrees(true);
+		ViewerApp vApp = vr.display();
+		vApp.update();
+		
+		JMenuBar menuBar = vApp.getMenuBar();
+		menuBar.remove(vApp.getMenu("Edit"));
+		menuBar.remove(vApp.getMenu("Appearance"));
+		JMenu fileMenu = vApp.getMenu("File");
+		ArrayList<JMenuItem> items = new ArrayList<JMenuItem>();
+		for (int i=0; i<fileMenu.getItemCount(); i++) {
+			items.add(fileMenu.getItem(i));
+		}
+		for (JMenuItem item : items) {
+			if (item != null) {
+			String name = item.getActionCommand();
+				if (name != null && (name.contains("Load") || name.contains("selected")))
+					fileMenu.remove(item);
+			}
+		}
+		fileMenu.remove(0);
+		JMenu viewMenu = vApp.getMenu("View");
+		viewMenu.remove(viewMenu.getItemCount()-1);
+		viewMenu.remove(viewMenu.getItemCount()-1);
+		JFrame f = vApp.display();
+		f.setSize(800, 600);
+		f.validate();
+	}
 }
