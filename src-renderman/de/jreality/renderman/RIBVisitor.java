@@ -502,17 +502,16 @@ public class RIBVisitor extends SceneGraphVisitor {
 		ri.attributeBegin();
 		ri.concatTransform(RIBHelper.fTranspose(w2c));
 		ri.comment("Disable shadows for background");
-		// ri.verbatim("Attribute \"visibility\" \"int transmission\" [0]");
 		if (rendererType == RIBViewer.TYPE_PIXAR)
 			ri.verbatim("Attribute \"visibility\"  \"int transmission\" [0]");
-		else if (rendererType == RIBViewer.TYPE_3DELIGHT) {
-			ri
-					.verbatim("Attribute \"visibility\"  \"string transmission\" \"Os\"");
-		} else if (rendererType == RIBViewer.TYPE_AQSIS)
+		else if (rendererType == RIBViewer.TYPE_3DELIGHT) 
+			ri.verbatim("Attribute \"visibility\"  \"string transmission\" \"Os\"");
+		else if (rendererType == RIBViewer.TYPE_AQSIS)
 			ri.verbatim("Attribute \"visibility\"  \"int transmission\" [0]");
-		else {
+    else if (rendererType == RIBViewer.TYPE_PIXIE)
+      ri.verbatim("Attribute \"visibility\"  \"int transmission\" [0]");
+		else
 			System.err.println("no valid rendererType");
-		}
 		ri.surface("constant", null);
 		pointPolygon(bkgd, null);
 		ri.attributeEnd();
