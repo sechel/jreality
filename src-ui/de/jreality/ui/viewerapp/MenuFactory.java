@@ -180,7 +180,7 @@ public class MenuFactory {
     rib.add(new JMenuItem(new ExportRIB("Pixar", RIBViewer.TYPE_PIXAR, viewerSwitch, frame)));
     rib.add(new JMenuItem(new ExportRIB("3DLight", RIBViewer.TYPE_3DELIGHT, viewerSwitch, frame)));
     rib.add(new JMenuItem(new ExportRIB("Aqsis", RIBViewer.TYPE_AQSIS, viewerSwitch, frame)));
-    export.add(new JMenuItem(new ExportSVG("SVG", viewerSwitch, frame)));
+    //export.add(new JMenuItem(new ExportSVG("SVG", viewerSwitch, frame)));
     exportImageAction = new ExportImage("Image", viewerSwitch, frame);
     export.add(new JMenuItem(exportImageAction));
     fileMenu.addSeparator();
