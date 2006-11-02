@@ -704,7 +704,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			DefaultGeometryShader geometryShader = jpc.geometryShader;
 			openGLState.setUseDisplayLists(renderingHints.isUseDisplayLists()); //(); //useDisplayLists(activeDL, jpc);
 			openGLState.setCurrentGeometry(originalGeometry);
-			openGLState.setCurrentSignature(signature);
+//			openGLState.setCurrentSignature(signature);
 			if (preRender && geometryShader.polygonShader instanceof DefaultPolygonShader)	{
 				((DefaultPolygonShader) geometryShader.polygonShader).preRender(openGLState);		
 				return;
@@ -856,6 +856,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			// TODO shaders should register keywords somehow and which geometries might be changed
 			if (key.indexOf("implodeFactor") != -1 ) changed |= (FACES_CHANGED);
 			else if (key.indexOf("transparency") != -1) changed |= (POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
+			else if (key.indexOf(CommonAttributes.SMOOTH_SHADING) != -1) changed |= (POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
 			else if (key.indexOf("tubeRadius") != -1) changed |= (LINES_CHANGED);
 			else if (key.indexOf("pointRadius") != -1) changed |= (POINTS_CHANGED);
 			else if (key.indexOf("anyDisplayLists") != -1) changed |= (POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
@@ -1076,6 +1077,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		public void render()		{
 			if (!goBetween.getOriginalComponent().isVisible()) return;
 			Transformation thisT = preRender();
+			//System.err.println(goBetween.getOriginalComponent().getName()+"Signature is "+currentSignature);
 			renderChildren();
 			postRender(thisT);
 		}
@@ -1091,10 +1093,12 @@ public class JOGLRenderer  implements AppearanceListener {
 
 			if (thisT != null) {
 				pushTransformation(thisT.getMatrix());
-				if (eAp != null)
-					currentSignature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
 			}
 
+			if (eAp != null) {
+				currentSignature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
+				openGLState.setCurrentSignature(currentSignature);
+			}
 			if (parent != null) cumulativeIsReflection = (isReflection != parent.cumulativeIsReflection);
 			else cumulativeIsReflection = (isReflection != globalIsReflection);
 			if (cumulativeIsReflection != openGLState.flipped)	{
@@ -1178,7 +1182,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 
 		public void setIndexOfChildren()	{
-			childlock.readLock();
+			//childlock.readLock();
 			int n = goBetween.getOriginalComponent().getChildComponentCount();
 			for (int i = 0; i<n; ++i)	{
 				SceneGraphComponent sgc = goBetween.getOriginalComponent().getChildComponent(i);
@@ -1188,12 +1192,12 @@ public class JOGLRenderer  implements AppearanceListener {
 					jpc.childIndex = -1;
 				} else jpc.childIndex = i;
 			}									
-			childlock.readUnlock();
+			//childlock.readUnlock();
 
 		}
 
 		private JOGLPeerComponent getPeerForChildComponent(SceneGraphComponent sgc) {
-			childlock.readLock();
+			//childlock.readLock();
 			int n = children.size();
 			for (int i = 0; i<n; ++i)	{
 				JOGLPeerComponent jpc = (JOGLPeerComponent) children.get(i);
@@ -1201,7 +1205,7 @@ public class JOGLRenderer  implements AppearanceListener {
 					return jpc;
 				}
 			}
-			childlock.readUnlock();
+			//childlock.readUnlock();
 			return null;
 		}
 
@@ -1239,13 +1243,13 @@ public class JOGLRenderer  implements AppearanceListener {
 				}
 			}
 			updateShaders();
-			childlock.readLock();
+			//childlock.readLock();
 			int n = children.size();
 			for (int i = 0; i<n; ++i)	{		
 				JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
 				child.propagateAppearanceChanged();
 			}	
-			childlock.readUnlock();
+			//childlock.readUnlock();
 			appearanceChanged=false;
 		}
 
@@ -1397,13 +1401,13 @@ public class JOGLRenderer  implements AppearanceListener {
 //			goBetween.getPeerGeometry().geometryChanged(changed);
 //			dlInfo.geometryChanged(changed);
 			geometryChanged(changed);
-			childlock.readLock();
+			//childlock.readLock();
 			int n = children.size();
 			for (int i = 0; i<n; ++i)	{		
 				JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
 				child.propagateGeometryChanged(changed);
 			}	
-			childlock.readUnlock();
+			//childlock.readUnlock();
 
 		}
 
