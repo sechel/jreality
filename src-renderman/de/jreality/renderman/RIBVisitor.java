@@ -102,6 +102,7 @@ import de.jreality.util.CameraUtility;
  * <b>TODO list and Known issues</b>:
  * <ul>
  * <li> "twoSided", "implode", "flat" polygon shaders not supported</li>
+ * <li> volume shaders not supported, image shaders not supported
  * <li> Toplevel {@link de.jreality.scene.Appearance} fog attributes not
  * implemented</li>
  * <li> Clipping planes written but not tested</li>
@@ -601,9 +602,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		if (slShader != null) {
 			ri.displacement(slShader.getName(), slShader.getParameters());
 		}
-		// check to see if RMAN_SURFACE attribute is non-null and is of class
-		// SLShader; if so,
-		// use it instead of the following call.
+		// TODO check for volume shaders here too
 		RendermanShader polygonShader = (RendermanShader) ShaderLookup
 				.getShaderAttr(this, eap, "", CommonAttributes.POLYGON_SHADER);
 		ri.shader(polygonShader);
@@ -734,11 +733,17 @@ public class RIBVisitor extends SceneGraphVisitor {
 				}
 			} else {
 				HashMap<String, Object> map = new HashMap();
-				double[] pc = new double[3 * n];
-				coord.toDoubleArray(pc);
+				int fiber = GeometryUtility.getVectorLength(coord);
+				double[][] pc = new double[n][3];
+				coord.toDoubleArrayArray(pc);
 				float[] pcf = new float[3 * n];
-				for (int i = 0; i < pcf.length; i++) {
-					pcf[i] = (float) pc[i];
+				double[] vector = new double[3];
+				for (int i = 0; i < pc.length; i++) {
+					if (fiber == 4)	{
+						Pn.dehomogenize(vector, pc[i]);	
+					} else
+						vector = pc[i];
+					for (int k = 0; k<3; ++k)	pcf[i*3+k] = (float) vector[k];
 				}
 				map.put("P", pcf);
 				map.put("constant float constantwidth", new Float(r));

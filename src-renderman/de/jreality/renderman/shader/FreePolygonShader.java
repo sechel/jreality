@@ -13,7 +13,7 @@ public class FreePolygonShader extends AbstractRendermanShader {
 	@Override
 	public void setFromEffectiveAppearance(RIBVisitor ribv,
 			EffectiveAppearance eap, String name) {
-       Object foo = eap.getAttribute(name+"."+CommonAttributes.RMAN_SL_SHADER,orig);
+       Object foo = eap.getAttribute(name+"."+CommonAttributes.RMAN_SURFACE_SHADER,orig);
        if (foo == Appearance.DEFAULT || !(foo instanceof SLShader) || foo == orig)
     	   throw new IllegalStateException("FreePolygonShader called without SLShader");
        SLShader sls = (SLShader) foo;
