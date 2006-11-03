@@ -42,49 +42,61 @@ package de.jreality.ui.viewerapp.actions.file;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
+import javax.swing.KeyStroke;
+
 import de.jreality.scene.Viewer;
-import de.jreality.softviewer.SVGRenderer;
+import de.jreality.softviewer.PSRenderer;
+import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
 
-public class ExportSVG extends AbstractAction {
-
+public class ExportPS extends AbstractAction {
     private static final long serialVersionUID = 1L;
 
     private Viewer viewer;
 
-    public ExportSVG(String name, Viewer viewer, Frame frame) {
+    public ExportPS(String name, Viewer viewer, Frame frame) {
         super(name);
         this.frame = frame;
-        putValue(SHORT_DESCRIPTION, "Export SVG file");
+        putValue(SHORT_DESCRIPTION,
+                "export the current scene as PostScript file");
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P,
+                InputEvent.CTRL_MASK));
 
         if (viewer == null)
             throw new IllegalArgumentException("Viewer is null!");
+
         this.viewer = viewer;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        File file = FileLoaderDialog
-                .selectTargetFile(frame, "svg", "SVG files");
+        File file = FileLoaderDialog.selectTargetFile(frame);
         if (file == null)
             return;
+        // try {
         Dimension d = viewer.getViewingComponentSize();
-        SVGRenderer rv;
+        PSRenderer rv;
         try {
-            rv = new SVGRenderer(new PrintWriter(file), d.width, d.height);
+            rv = new PSRenderer(new PrintWriter(file), d.width, d.height);
             rv.setCameraPath(viewer.getCameraPath());
             rv.setSceneRoot(viewer.getSceneRoot());
             rv.setAuxiliaryRoot(viewer.getAuxiliaryRoot());
+            // rv.initializeFrom(viewer);
             rv.render();
         } catch (FileNotFoundException e1) {
-            // TODO Auto-generated catch block
             e1.printStackTrace();
         }
+        // } catch (IOException ioe) {
+        // JOptionPane.showMessageDialog(frame, "Save failed:
+        // "+ioe.getMessage());
+        // }
     }
 
 }

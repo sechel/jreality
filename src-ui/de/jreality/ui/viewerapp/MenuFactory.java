@@ -69,15 +69,7 @@ import de.jreality.ui.viewerapp.actions.edit.AddTool;
 import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
 import de.jreality.ui.viewerapp.actions.edit.Remove;
 import de.jreality.ui.viewerapp.actions.edit.TogglePickable;
-import de.jreality.ui.viewerapp.actions.file.ExportImage;
-import de.jreality.ui.viewerapp.actions.file.ExportRIB;
-import de.jreality.ui.viewerapp.actions.file.ExportSVG;
-import de.jreality.ui.viewerapp.actions.file.LoadFile;
-import de.jreality.ui.viewerapp.actions.file.LoadFileMerged;
-import de.jreality.ui.viewerapp.actions.file.LoadScene;
-import de.jreality.ui.viewerapp.actions.file.Quit;
-import de.jreality.ui.viewerapp.actions.file.SaveScene;
-import de.jreality.ui.viewerapp.actions.file.SaveSelected;
+import de.jreality.ui.viewerapp.actions.file.*;
 import de.jreality.ui.viewerapp.actions.view.Render;
 import de.jreality.ui.viewerapp.actions.view.ToggleBeanShell;
 import de.jreality.ui.viewerapp.actions.view.ToggleFullScreen;
@@ -181,7 +173,9 @@ public class MenuFactory {
     rib.add(new JMenuItem(new ExportRIB("Pixar", RIBViewer.TYPE_PIXAR, viewerSwitch, frame)));
     rib.add(new JMenuItem(new ExportRIB("3DLight", RIBViewer.TYPE_3DELIGHT, viewerSwitch, frame)));
     rib.add(new JMenuItem(new ExportRIB("Aqsis", RIBViewer.TYPE_AQSIS, viewerSwitch, frame)));
-    //export.add(new JMenuItem(new ExportSVG("SVG", viewerSwitch, frame)));
+
+    export.add(new JMenuItem(new ExportSVG("SVG", viewerSwitch, frame)));
+    export.add(new JMenuItem(new ExportPS("PS", viewerSwitch, frame)));
     exportImageAction = new ExportImage("Image", viewerSwitch, frame);
     export.add(new JMenuItem(exportImageAction));
     if (!Beans.isDesignTime()) {

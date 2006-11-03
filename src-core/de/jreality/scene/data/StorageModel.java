@@ -434,9 +434,11 @@ public abstract class StorageModel implements Serializable {
       numPerEntry=num;
       if(compModel.inlined!=null)
       {
-        if(compModel.inlined.length<num)
+        if(compModel.inlined.length<num){
+            int l = compModel.inlined.length;
           System.arraycopy(compModel.inlined, 0, compModel.inlined
-            =new StorageModel[num+32], 0, compModel.inlined.length);
+            =new StorageModel[num+32], 0, l);
+        }
         else if(compModel.inlined[num]!=null)
           throw new IllegalStateException("redefinition of"+this);
       } else compModel.inlined=new StorageModel[num+32];

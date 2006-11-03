@@ -128,6 +128,10 @@ public class IndexedLineSetFactory extends AbstractIndexedLineSetFactory {
 		super.setLineCount(count);
 	}
 	
+    public void setEdgeIndices( DataList data ) {
+        super.setEdgeIndices(data);
+    }
+    
 	public void setEdgeIndices( int[][] data ) {
 		super.setEdgeIndices(data);
 	}

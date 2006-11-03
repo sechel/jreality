@@ -553,8 +553,8 @@ public class PolygonPipeline
         //i--, v += Polygon.VERTEX_LENGTH) {
         for (int v = p1.vertices[0], i = 0;
         i <n;
-        i++, v = p1.vertices[i]) {
-            
+        i++ ) {
+            v = p1.vertices[i];
             double vsw =vertexData[v+Polygon.SW];
             if (vertexData[v + Polygon.SX] < box.x0 * vsw
                 )
