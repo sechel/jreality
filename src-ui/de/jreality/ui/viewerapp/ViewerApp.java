@@ -414,6 +414,7 @@ public class ViewerApp {
       
       String viewer = getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
       String[] vrs = viewer.split(" ");
+      System.out.println(viewer+" numViewers="+vrs.length);
       List<Viewer> viewerList = new LinkedList<Viewer>();
       String viewerClassName;
       for (int i = 0; i < vrs.length; i++) {
