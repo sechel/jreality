@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.beans.Statement;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,6 +44,7 @@ import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
+import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -59,7 +61,6 @@ import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
-import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
@@ -270,7 +271,7 @@ public class ViewerVR {
 	private JPanel toolPanel;
 
 	protected boolean currentBackgroundColorTop;
-	private boolean showShadow = false;
+//	private boolean showShadow = false;
 	private JCheckBox backgroundFlat;
 	private ImageData[] cubeMap;
 	private boolean generatePickTrees;
@@ -302,6 +303,10 @@ public class ViewerVR {
 				+ CommonAttributes.PICKABLE, false);
 		rootAppearance.setAttribute(CommonAttributes.POINT_SHADER + "."
 				+ CommonAttributes.PICKABLE, false);
+		
+		rootAppearance.setAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, true);
+		rootAppearance.setAttribute(CommonAttributes.RMAN_LIGHT_SHADER, "shadowdistant");
+		
 		sceneRoot.setAppearance(rootAppearance);
 		Camera cam = new Camera();
 		cam.setNear(0.01);
@@ -555,10 +560,10 @@ public class ViewerVR {
 		
 		updateEnablingOfBackgroundEdit();
 		updateBackground();
-		Geometry last = terrainNode.getGeometry();
+//		Geometry last = terrainNode.getGeometry();
 		flat = landscape.isTerrainFlat();
 		terrainNode.setGeometry(flat ? flatTerrain : terrain);
-		if (last != terrainNode.getGeometry()) computeShadow();
+		//if (last != terrainNode.getGeometry()) computeShadow();
 		
 		updateSkyBox();
 		
@@ -596,14 +601,35 @@ public class ViewerVR {
 			}
 		});	
 		
+		Insets insets = new Insets(0,2,0,2);
+		
 		envSelection = new JPanel(new BorderLayout());
-		envSelection.setBorder(new EmptyBorder(15,15,0,0));
+		envSelection.setBorder(new EmptyBorder(0,15,0,0));
 		JPanel selectionPanel = new JPanel(new BorderLayout());
-		selectionPanel.setBorder(new EmptyBorder(5,5,5,5));
+		selectionPanel.setBorder(new EmptyBorder(0,5,0,5));
 		selectionPanel.add(landscape.getSelectionComponent(), BorderLayout.CENTER);
 		envSelection.add(selectionPanel, BorderLayout.CENTER);
 		
 		Box envControlBox = new Box(BoxLayout.Y_AXIS);
+		JPanel shadowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		shadowPanel.setBorder(new EmptyBorder(0,5,0,0));
+		JButton computeShadow = new JButton("add shadow");
+		computeShadow.setMargin(insets);
+		computeShadow.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				computeShadow();
+			}
+		});
+		shadowPanel.add(computeShadow);
+		JButton clearShadow = new JButton("clear shadow");
+		clearShadow.setMargin(insets);
+		computeShadow.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				clearShadow();
+			}
+		});
+		shadowPanel.add(clearShadow);
+		envControlBox.add(shadowPanel);
 		JPanel terrainTransparentPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		terrainTransparent = new JCheckBox("transparent terrain");
 		terrainTransparent.addChangeListener(new ChangeListener() {
@@ -630,7 +656,6 @@ public class ViewerVR {
 		backgroundLabel.setBorder(new EmptyBorder(0,5,0,10));
 		backgroundColorPanel.add(backgroundLabel);
 		
-		Insets insets = new Insets(0,2,0,2);
 		JButton topColorButton = new JButton("top");
 		topColorButton.setMargin(insets);
 		topColorButton.addActionListener(new ActionListener() {
@@ -694,12 +719,18 @@ public class ViewerVR {
 		appearancePanel = new JPanel(new BorderLayout());
 		Box appBox = new Box(BoxLayout.Y_AXIS);
 		
+		int topSpacing = 0;
+		int bottomSpacing = 5;
+		
+		Border boxBorder = new EmptyBorder(topSpacing, 5, bottomSpacing, 5);
+		Border sliderBoxBorder = new EmptyBorder(topSpacing, 10, bottomSpacing, 10);
+		
 		// lines
 		Box lineBox = new Box(BoxLayout.Y_AXIS);
 		lineBox.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
 				LineBorder.createGrayLineBorder()));
 		Box lineButtonBox = new Box(BoxLayout.X_AXIS);
-		lineButtonBox.setBorder(new EmptyBorder(5, 5, 5, 5));
+		lineButtonBox.setBorder(boxBorder);
 		showLines = new JCheckBox("lines");
 		showLines.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -734,7 +765,7 @@ public class ViewerVR {
 		lineBox.add(lineButtonBox);
 
 		Box tubeRadiusBox = new Box(BoxLayout.X_AXIS);
-		tubeRadiusBox.setBorder(new EmptyBorder(5, 10, 5, 10));
+		tubeRadiusBox.setBorder(sliderBoxBorder);
 		JLabel tubeRadiusLabel = new JLabel("radius");
 		tubeRadiusSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
 		tubeRadiusSlider.setPreferredSize(new Dimension(70,20));
@@ -755,7 +786,7 @@ public class ViewerVR {
 		pointBox.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
 				LineBorder.createGrayLineBorder()));
 		Box pointButtonBox = new Box(BoxLayout.X_AXIS);
-		pointButtonBox.setBorder(new EmptyBorder(5, 5, 5, 5));
+		pointButtonBox.setBorder(boxBorder);
 		showPoints = new JCheckBox("points");
 		showPoints.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -790,7 +821,7 @@ public class ViewerVR {
 		pointBox.add(pointButtonBox);
 
 		Box pointRadiusBox = new Box(BoxLayout.X_AXIS);
-		pointRadiusBox.setBorder(new EmptyBorder(5,10,5,10));
+		pointRadiusBox.setBorder(sliderBoxBorder);
 		JLabel pointRadiusLabel = new JLabel("radius");
 		pointRadiusSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
 		pointRadiusSlider.setPreferredSize(new Dimension(70,20));
@@ -811,7 +842,7 @@ public class ViewerVR {
 		faceBox.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
 				LineBorder.createGrayLineBorder()));
 		Box faceButtonBox = new Box(BoxLayout.X_AXIS);
-		faceButtonBox.setBorder(new EmptyBorder(5, 5, 5, 5));
+		faceButtonBox.setBorder(boxBorder);
 		showFaces = new JCheckBox("faces");
 		showFaces.setSelected(true);
 		showFaces.addChangeListener(new ChangeListener() {
@@ -847,7 +878,7 @@ public class ViewerVR {
 		faceBox.add(faceButtonBox);
 
 		Box transparencyBox = new Box(BoxLayout.X_AXIS);
-		transparencyBox.setBorder(new EmptyBorder(5,5,5,10));
+		transparencyBox.setBorder(new EmptyBorder(topSpacing,5,0,10));
 		transparency = new JCheckBox("transp");
 		transparency.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -898,9 +929,9 @@ public class ViewerVR {
 			public void stateChanged(ChangeEvent arg0) {
 				setSize(getSize());
 				alignContent(getSize(), getOffset(), null);
-				if (!sizeSlider.getValueIsAdjusting()) {
-					computeShadow();
-				}
+//				if (!sizeSlider.getValueIsAdjusting()) {
+//					computeShadow();
+//				}
 			}
 		});
 		sizeBox.add(sizeLabel);
@@ -913,9 +944,9 @@ public class ViewerVR {
 			public void stateChanged(ChangeEvent arg0) {
 				setOffset(getOffset());
 				alignContent(getSize(), getOffset(), null);
-				if (!groundSlider.getValueIsAdjusting()) {
-					computeShadow();
-				}
+//				if (!groundSlider.getValueIsAdjusting()) {
+//					computeShadow();
+//				}
 			}
 		});
 		groundBox.add(groundLabel);
@@ -934,7 +965,7 @@ public class ViewerVR {
 			public void actionPerformed(ActionEvent arg0) {
 				alignContent(getSize(), getOffset(), MatrixBuilder.euclidean().rotateX(
 						-PI2).getMatrix());
-				computeShadow();
+//				computeShadow();
 			}
 		});
 		Insets insets = new Insets(0, 0, 0, 0);
@@ -950,7 +981,7 @@ public class ViewerVR {
 			public void actionPerformed(ActionEvent arg0) {
 				alignContent(getSize(), getOffset(), MatrixBuilder.euclidean().rotateX(
 						PI2).getMatrix());
-				computeShadow();
+//				computeShadow();
 			}
 		});
 		xRotateRight.setMargin(insets);
@@ -962,7 +993,7 @@ public class ViewerVR {
 			public void actionPerformed(ActionEvent arg0) {
 				alignContent(getSize(), getOffset(), MatrixBuilder.euclidean().rotateY(
 						-PI2).getMatrix());
-				computeShadow();
+//				computeShadow();
 			}
 		});
 		yRotateLeft.setMargin(insets);
@@ -976,7 +1007,7 @@ public class ViewerVR {
 			public void actionPerformed(ActionEvent arg0) {
 				alignContent(getSize(), getOffset(), MatrixBuilder.euclidean().rotateY(
 						PI2).getMatrix());
-				computeShadow();
+//				computeShadow();
 			}
 		});
 		yRotateRight.setMargin(insets);
@@ -988,7 +1019,7 @@ public class ViewerVR {
 			public void actionPerformed(ActionEvent arg0) {
 				alignContent(getSize(), getOffset(), MatrixBuilder.euclidean().rotateZ(
 						-PI2).getMatrix());
-				computeShadow();
+//				computeShadow();
 			}
 		});
 		zRotateLeft.setMargin(insets);
@@ -1002,7 +1033,7 @@ public class ViewerVR {
 			public void actionPerformed(ActionEvent arg0) {
 				alignContent(getSize(), getOffset(), MatrixBuilder.euclidean().rotateZ(
 						PI2).getMatrix());
-				computeShadow();
+//				computeShadow();
 			}
 		});
 		zRotateRight.setMargin(insets);
@@ -1464,7 +1495,7 @@ public class ViewerVR {
 		setPointRadius(getPointRadius());
 		sceneNode.addChild(currentContent);
 		alignContent(getSize(), getOffset(), null);
-		computeShadow();
+//		computeShadow();
 	}
 
 	public double getSize() {
@@ -1576,7 +1607,7 @@ public class ViewerVR {
 	}
 
 	private void computeShadow() {
-		if (!isShowShadow()) return;
+		//if (!isShowShadow()) return;
  		if (pickSystem == null) {
 			pickSystem = new AABBPickSystem();
 			pickSystem.setSceneRoot(sceneNode);
@@ -1594,6 +1625,13 @@ public class ViewerVR {
 		(flat ? flatTerrain : terrain).setVertexAttributes(
 				Attribute.COLORS,
 				new DoubleArrayArray.Array(color)
+		);
+	}
+	
+	private void clearShadow() {
+		(flat ? flatTerrain : terrain).setVertexAttributes(
+				Attribute.COLORS,
+				null
 		);
 	}
 	
@@ -1823,14 +1861,14 @@ public class ViewerVR {
 		this.generatePickTrees = generatePickTrees;
 	}
 
-	public void setShowShadow(boolean b) {
-		showShadow=b;
-		shadowButton.setEnabled(b);
-	}
-
-	public boolean isShowShadow() {
-		return showShadow;
-	}
+//	public void setShowShadow(boolean b) {
+//		showShadow=b;
+//		shadowButton.setEnabled(b);
+//	}
+//
+//	public boolean isShowShadow() {
+//		return showShadow;
+//	}
 
 	public String getEnvironment() {
 		return landscape.getEnvironment();
@@ -1976,35 +2014,6 @@ public class ViewerVR {
 		}
 	}
 	
-	public static void main(String[] args) throws IOException {
-		ViewerVR vr = new ViewerVR();
-		final String[][] examples = new String[][] {
-				{ "Boy surface", "jrs/boy.jrs" },
-				{ "Chen-Gackstatter surface", "obj/Chen-Gackstatter-4.obj" },
-				{ "helicoid with 2 handles", "jrs/He2WithBoundary.jrs" },
-				{ "tetranoid", "jrs/tetranoid.jrs" },
-				{ "Wente torus", "jrs/wente.jrs" },
-				{ "Schwarz P", "jrs/schwarz.jrs" },
-				{ "Matheon baer", "jrs/baer.jrs" }
-		};
-		vr.addLoadTab(examples);
-//		vr.addLoadTab(null);
-		vr.addAlignTab();
-		vr.addAppTab();
-		vr.addEnvTab();
-		vr.addToolTab();
-		vr.addTexTab();
-		vr.addHelpTab();
-		vr.setGeneratePickTrees(true);
-		ViewerApp vApp = vr.display();
-		vApp.update();
-		
-		tweakMenu(vApp);
-		JFrame f = vApp.display();
-		f.setSize(800, 600);
-		f.validate();
-	}
-
 	public static void tweakMenu(ViewerApp vApp) {
 		JMenuBar menuBar = vApp.getMenuBar();
 		menuBar.remove(vApp.getMenu("Edit"));
@@ -2029,19 +2038,55 @@ public class ViewerVR {
 		JMenu helpMenu = new JMenu("Help");
 		helpMenu.add(new AbstractAction("help"){
 			private static final long serialVersionUID = 3770710651980089282L;
-
 			public void actionPerformed(ActionEvent e) {
+				URL helpURL=null;
+				try {
+					helpURL = new URL("http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/ViewerVR_User_Manual");
+				} catch (MalformedURLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				try {
 					new Statement(Class.forName("org.jdesktop.jdic.desktop.Desktop"), "browse",
 							new Object[]{
-								new URL("http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/ViewerVR_User_Manual")
+								helpURL
 					}).execute();
 				} catch(Exception ex) {
-					JOptionPane.showMessageDialog(null, "please visit <i>http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/ViewerVR_User_Manual</i>");
+					JOptionPane.showMessageDialog(null, "please visit "+helpURL);
 				}
 			}
 			
 		});
 		menuBar.add(helpMenu);
+	}
+
+	public static void main(String[] args) throws IOException {
+		ViewerVR vr = new ViewerVR();
+		final String[][] examples = new String[][] {
+				{ "Boy surface", "jrs/boy.jrs" },
+				{ "Chen-Gackstatter surface", "obj/Chen-Gackstatter-4.obj" },
+				{ "helicoid with 2 handles", "jrs/He2WithBoundary.jrs" },
+				{ "tetranoid", "jrs/tetranoid.jrs" },
+				{ "Wente torus", "jrs/wente.jrs" },
+				{ "Schwarz P", "jrs/schwarz.jrs" },
+				{ "Matheon baer", "jrs/baer.jrs" }
+		};
+		vr.addLoadTab(examples);
+//		vr.addLoadTab(null);
+		vr.addAlignTab();
+		vr.addAppTab();
+		vr.addEnvTab();
+		vr.addToolTab();
+		vr.addTexTab();
+		vr.addHelpTab();
+		vr.setGeneratePickTrees(true);
+		vr.showPanel(false);
+		ViewerApp vApp = vr.display();
+		vApp.update();
+		
+		tweakMenu(vApp);
+		JFrame f = vApp.display();
+		f.setSize(800, 600);
+		f.validate();
 	}
 }
