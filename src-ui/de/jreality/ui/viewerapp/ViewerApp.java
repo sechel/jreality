@@ -413,11 +413,11 @@ public class ViewerApp {
     if (viewers == null) {
       
       String viewer = getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
-      StringTokenizer st = new StringTokenizer(viewer);
+      String[] vrs = viewer.split(" ");
       List<Viewer> viewerList = new LinkedList<Viewer>();
       String viewerClassName;
-      while (st.hasMoreTokens()) {
-        viewerClassName = st.nextToken();
+      for (int i = 0; i < vrs.length; i++) {
+        viewerClassName = vrs[i];
         try {
           Viewer v = createViewer(viewerClassName);
           viewerList.add(v);
