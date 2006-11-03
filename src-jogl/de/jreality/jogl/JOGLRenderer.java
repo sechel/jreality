@@ -40,6 +40,7 @@
 
 package de.jreality.jogl;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -486,6 +487,19 @@ public class JOGLRenderer  implements AppearanceListener {
 				forceNewDisplayLists();
 				openGLState.initializeGLState();
 
+				Color[] bg=null;
+				float[][] bgColors=null;
+				if (numTiles > 1) {
+					if (theRoot.getAppearance() != null && theRoot.getAppearance().getAttribute(CommonAttributes.BACKGROUND_COLORS, Color[].class) != Appearance.INHERITED) {
+						bg = (Color[]) theRoot.getAppearance().getAttribute(CommonAttributes.BACKGROUND_COLORS, Color[].class);
+						bgColors=new float[4][];
+						bgColors[0]=bg[0].getColorComponents(null);
+						bgColors[1]=bg[1].getColorComponents(null);
+						bgColors[2]=bg[2].getColorComponents(null);
+						bgColors[3]=bg[3].getColorComponents(null);
+					}
+				}
+
 				for (int i = 0; i<numTiles; ++i)	{
 
 					for (int j = 0; j<numTiles; ++j)	{
@@ -493,6 +507,16 @@ public class JOGLRenderer  implements AppearanceListener {
 						Rectangle2D lr = new Rectangle2D.Double(vp.getX()+j*dx, vp.getY()+i*dy, dx, dy);
 						System.err.println("Setting vp to "+lr.toString());
 						theCamera.setViewPort(lr);
+						
+						if (bgColors != null) {
+							Color[] currentBg = new Color[4];
+							currentBg[1]=interpolateBG(bgColors, i+1, j);
+							currentBg[2]=interpolateBG(bgColors, i, j);
+							currentBg[3]=interpolateBG(bgColors, i, j+1);
+							currentBg[0]=interpolateBG(bgColors, i+1, j+1);
+							theRoot.getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLORS, currentBg);
+						}
+						
 						render();
 						globalGL.glPixelStorei(GL.GL_PACK_ROW_LENGTH,numTiles*tileSizeX);
 						globalGL.glPixelStorei(GL.GL_PACK_SKIP_ROWS, i*tileSizeY);
@@ -504,6 +528,8 @@ public class JOGLRenderer  implements AppearanceListener {
 					}
 				}
 
+				if (bgColors != null) theRoot.getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLORS, bg);
+				
 				context.release();
 
 				theCamera.setOnAxis(isOnAxis);
@@ -541,6 +567,18 @@ public class JOGLRenderer  implements AppearanceListener {
 //	visit();
 //	}
 //	else 
+
+	private Color interpolateBG(float[][] bgColors, int i, int j) {
+		float[] col = new float[bgColors[0].length];
+		float alpha = ((float)j)/numTiles;
+		float beta = 1-((float)i)/numTiles;
+		//col = alpha*(1-beta)*bgColors[0]+(1-alpha)*(1-beta)*bgColors[1]+beta*(1-alpha)*bgColors[2]+alpha*beta*bgColors[3]
+		for (int k = 0; k < col.length; k++) {
+			col[k] = alpha*(1-beta)*bgColors[0][k]+(1-alpha)*(1-beta)*bgColors[1][k]+beta*(1-alpha)*bgColors[2][k]+alpha*beta*bgColors[3][k];
+		}
+		if (col.length == 3) return new Color(col[0], col[1], col[2]);
+		else return new Color(col[0], col[1], col[2], col[3]);
+	}
 
 	private void setupRightEye() {
 		int which = getStereoType();
