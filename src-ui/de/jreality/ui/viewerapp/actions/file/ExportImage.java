@@ -53,8 +53,6 @@ import java.util.TreeSet;
 import javax.imageio.ImageIO;
 import javax.swing.filechooser.FileFilter;
 
-import com.sun.opengl.util.FileUtil;
-
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerSwitch;
@@ -90,7 +88,7 @@ public class ExportImage extends AbstractAction {
     
     File file = FileLoaderDialog.selectTargetFile(frame, createFileFilters());
     if (file == null) return;  //dialog cancelled 
-    if (FileUtil.getFileSuffix(file) == null) {  //no extension specified
+    if (getFileSuffix(file) == null) {  //no extension specified
       System.err.println("Please specify a valid file extension.\n" +
       "Export aborted.");
       return;
@@ -115,7 +113,14 @@ public class ExportImage extends AbstractAction {
   }
   
   
-  @Override
+  private static String getFileSuffix(File file) {
+	String fileName = file.getName();
+	int dotIndex = fileName.lastIndexOf('.');
+	if (dotIndex == -1 || dotIndex == (fileName.length()-1)) return null;
+	return fileName.substring(dotIndex+1);
+}
+
+@Override
   public boolean isEnabled() {
     Viewer realViewer = ((ViewerSwitch)viewer).getCurrentViewer();
     return realViewer instanceof de.jreality.jogl.Viewer;
