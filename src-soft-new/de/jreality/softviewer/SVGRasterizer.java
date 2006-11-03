@@ -166,6 +166,7 @@ public class SVGRasterizer extends TriangleRasterizer {
             //TODO decide how to handle the stroke:NONE or col
             //it seems that NONE is good for transparent but col is better for opaque
             writePolygon(triangle, 3, col, /*p.getShader().isOutline()?"black":NONE*/ NONE);
+            //writePolygon(triangle, 3, col, /*p.getShader().isOutline()?"black":NONE*/ col);
         }
         
         
@@ -317,7 +318,7 @@ public class SVGRasterizer extends TriangleRasterizer {
                 " viewBox=\""+xmin+" "+ymin+" "+(xmax-xmin)+" "+(ymax-ymin)+" \" "+
                 " image-rendering=\"auto\" "+
                 "    shape-rendering=\"auto\" stroke=\"black\" stroke-dasharray=\"none\" "+
-                "    stroke-dashoffset=\"0\" stroke-linecap=\"square\" stroke-linejoin=\"miter\""+
+                "    stroke-dashoffset=\"0\" stroke-linecap=\"square\" stroke-linejoin=\"bevel\""+
                 "    stroke-miterlimit=\"10\" stroke-opacity=\"1\" stroke-width=\"1\" "+
                 "    text-rendering=\"auto\" >"        
         );

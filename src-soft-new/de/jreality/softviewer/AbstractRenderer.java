@@ -97,7 +97,8 @@ public abstract class AbstractRenderer {
               Object o = a.getAttribute(CommonAttributes.BACKGROUND_COLOR);
     
               if( o instanceof Color) background = (Color) o;
-              else background = Color.WHITE;
+              //else background = Color.WHITE;
+              else background = CommonAttributes.BACKGROUND_COLOR_DEFAULT;
           } else
               background = Color.WHITE;
         rasterizer.setBackground(background.getRGB());

@@ -152,7 +152,7 @@ public class IntersectingPipeline extends TrianglePipeline {
             }
             ignore.remove(a);
             obstruct.remove(a);
-            System.out.println("rastered " + count);
+            //System.out.println("rastered " + count);
             looP.removeAllElements();
         }
     }

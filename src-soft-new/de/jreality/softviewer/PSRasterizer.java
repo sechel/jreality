@@ -142,7 +142,7 @@ public class PSRasterizer extends TriangleRasterizer {
         }
 //        writer.print("]\n>> shfill\n");
         writer.println(" f");
-        writer.flush();
+        //writer.flush();
 
     }
 
@@ -185,6 +185,7 @@ public class PSRasterizer extends TriangleRasterizer {
      * This should be called before any renderPolygon. It writes the header.
      */
     public void start() {
+        System.out.println("Writing ps file. This may take a while if there are a lot of intersecting triangles.");
         count = 0;
         writer.println("%!PS-Adobe-3.0 EPSF-3.0\n%%Creator: jReality");
         writer.println("%%LanguageLevel: 3");
