@@ -1,6 +1,8 @@
 package de.jreality.vr;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -13,7 +15,11 @@ import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -44,7 +50,7 @@ public class Landscape {
 
 	private HashMap<String,ButtonModel> envToButton = new HashMap<String,ButtonModel>();
 	Color upColor, downColor;
-	Box selectionComponent;
+	JPanel selectionComponent;
 	String selectedBox;
 
 	private int selectionIndex;
@@ -65,9 +71,12 @@ public class Landscape {
 	 */
 	public Landscape(String[][] skyboxes, String selected) {
 		this.skyboxes=(String[][])skyboxes.clone();
-		Box buttonGroupComponent = new javax.swing.Box(BoxLayout.Y_AXIS);
-		selectionComponent = new javax.swing.Box(BoxLayout.Y_AXIS);
+		JPanel buttonGroupComponent = new JPanel(new GridLayout(skyboxes.length/2,2));
+		buttonGroupComponent.setBorder(new EmptyBorder(5,5,5,5));
+		selectionComponent = new JPanel(new BorderLayout());
 		selectionComponent.add("Center", buttonGroupComponent);
+		selectionComponent.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
+				LineBorder.createGrayLineBorder()));
 		group = new ButtonGroup();
 		for (int i = 0; i < skyboxes.length; i++) {
 			final String name = skyboxes[i][0];

@@ -604,7 +604,7 @@ public class ViewerVR {
 		Insets insets = new Insets(0,2,0,2);
 		
 		envSelection = new JPanel(new BorderLayout());
-		envSelection.setBorder(new EmptyBorder(0,15,0,0));
+		envSelection.setBorder(new EmptyBorder(0,0,0,0));
 		JPanel selectionPanel = new JPanel(new BorderLayout());
 		selectionPanel.setBorder(new EmptyBorder(0,5,0,5));
 		selectionPanel.add(landscape.getSelectionComponent(), BorderLayout.CENTER);
@@ -623,7 +623,7 @@ public class ViewerVR {
 		shadowPanel.add(computeShadow);
 		JButton clearShadow = new JButton("clear shadow");
 		clearShadow.setMargin(insets);
-		computeShadow.addActionListener(new ActionListener(){
+		clearShadow.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
 				clearShadow();
 			}
