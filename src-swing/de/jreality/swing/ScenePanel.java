@@ -91,6 +91,8 @@ public class ScenePanel {
 
     app.setAttribute("showLines", true);
     app.setAttribute("lineShader.tubeRadius", 0.008);
+    app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.AMBIENT_COEFFICIENT,.1);
+    app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.AMBIENT_COEFFICIENT,.1);
     app.setAttribute("lineShader.diffuseColor", java.awt.Color.gray);
     app.setAttribute("pointShader.pointRadius", 0.016);
     app.setAttribute("pointShader.diffuseColor", java.awt.Color.gray);
