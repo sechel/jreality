@@ -97,7 +97,7 @@ public class ExportImage extends AbstractAction {
     }
     
     BufferedImage img = joglViewer.renderOffscreen(4*dim.width, 4*dim.height);
-    BufferedImage img2 = new BufferedImage(dim.width, dim.height,BufferedImage.TYPE_INT_ARGB);
+    BufferedImage img2 = new BufferedImage(dim.width, dim.height,BufferedImage.TYPE_INT_RGB);
     Graphics2D g = (Graphics2D) img2.getGraphics();
     g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
     img2.getGraphics().drawImage(
@@ -110,6 +110,7 @@ public class ExportImage extends AbstractAction {
         0,
         null
     );
+    System.out.println("writing "+file.getName());
     de.jreality.jogl.JOGLRenderer.writeBufferedImage(file,img2);
   }
   
