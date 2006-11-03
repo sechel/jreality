@@ -396,8 +396,8 @@
     <javac excludesfile="excludes.txt" srcdir="${portal}" destdir="${build}/portal" debug="true">
       <classpath refid="portal.classpath"/>
     </javac>
-    <rmic base="${build}/portal" includes="**/*Impl.class" classpath="${dist}/jReality-core.jar:${dist}/jReality-jogl.jar:${dist}/jReality-stubs.jar:${dist}/jReality-proxies.jar" />
     <jar jarfile="${dist}/jReality-portal.jar" basedir="${build}/portal" />
+  	<jar jarfile="${dist}/jReality-portal-native-linux.jar" basedir="native" />
   </target>
 
   <target name="javadoc" description="generate javadoc in docs/api">
