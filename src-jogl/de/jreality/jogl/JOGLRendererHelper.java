@@ -644,7 +644,7 @@ public class JOGLRendererHelper {
 		}
 		if (vertexNormals != null && smooth) {
 			normalBind = PER_VERTEX;
-		} else if (faceNormals != null && (vertexNormals == null || !smooth)) {
+		} else if (faceNormals != null) {
 			normalBind = PER_FACE;
 		} else
 			normalBind = PER_PART;

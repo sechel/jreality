@@ -505,7 +505,7 @@ public class JOGLRenderer  implements AppearanceListener {
 					for (int j = 0; j<numTiles; ++j)	{
 						openGLState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 						Rectangle2D lr = new Rectangle2D.Double(vp.getX()+j*dx, vp.getY()+i*dy, dx, dy);
-						System.err.println("Setting vp to "+lr.toString());
+						//System.err.println("Setting vp to "+lr.toString());
 						theCamera.setViewPort(lr);
 						
 						if (bgColors != null) {
@@ -1136,6 +1136,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			if (eAp != null) {
 				currentSignature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
 				openGLState.setCurrentSignature(currentSignature);
+				//System.err.println(goBetween.getOriginalComponent().getName()+" Setting sig to "+currentSignature);
 			}
 			if (parent != null) cumulativeIsReflection = (isReflection != parent.cumulativeIsReflection);
 			else cumulativeIsReflection = (isReflection != globalIsReflection);
@@ -1230,7 +1231,7 @@ public class JOGLRenderer  implements AppearanceListener {
 					jpc.childIndex = -1;
 				} else jpc.childIndex = i;
 			}									
-			//childlock.readUnlock();
+			//childlock.readUnlock();Appearance
 
 		}
 
@@ -1254,11 +1255,11 @@ public class JOGLRenderer  implements AppearanceListener {
 		protected void propagateAppearanceChanged()	{
 			Appearance thisAp = goBetween.getOriginalComponent().getAppearance(); 
 			if (parent == null)	{
-				if (eAp == null) {
+				if (eAp == null || eAp.getAppearanceHierarchy().indexOf(thisAp) == -1) {
 					eAp = EffectiveAppearance.create();
 					if (goBetween.getOriginalComponent().getAppearance() != null )	
 						eAp = eAp.create(goBetween.getOriginalComponent().getAppearance());
-				}
+				} 
 			} else {
 				if ( parent.eAp == null)	{
 					throw new IllegalStateException("Parent must have effective appearance");

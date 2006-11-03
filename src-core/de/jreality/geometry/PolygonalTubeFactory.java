@@ -115,10 +115,11 @@ import de.jreality.scene.data.StorageModel;
 	 */
 	private double[][] polygon2, vals;
 	protected  double[][] makeTube(double[][] curve, double radius, double[][] xsec, FrameFieldType type, boolean closed, int signature, int twists)	{
+
 		int n = curve.length;
 		int vl = xsec[0].length;
 		// have to handle the situation here that the first and last points are the same but the closed flag isn't set.
-		// We assume for now that the user wants to treat this as a closed curve but we have to ignore the last point
+		// We assume for now that the user wants to treat this as a closed curve so we have to ignore the last point
 		// Here's how we do that
 		boolean autoClosed = false;
 		double d = Rn.euclideanDistance(curve[0], curve[n-1]);
@@ -149,6 +150,7 @@ import de.jreality.scene.data.StorageModel;
 			
 		}
 		FrameInfo[] frames = makeFrameField(polygon2, type, signature);
+//		System.err.println("makeTube: sig = "+signature);
 		double[] rad = Rn.identityMatrix(4);
 		rad[0] = rad[5] = radius;
 		int nn = frames.length;
@@ -174,7 +176,10 @@ import de.jreality.scene.data.StorageModel;
 	  * Update the state of the output tube to reflect the current state of all settable variables.
 	  */
 	public void update() {
+		super.update();
 		theTubeVertices = makeTube(theCurve, radius, crossSection, frameFieldType, closedCurve, signature, twists);
+//		System.err.println("PTF: frame type is "+frameFieldType);
+//		System.err.println("PTF: signature is "+signature);
 		qmf = new QuadMeshFactory();
 		qmf.setSignature(signature);
 //		System.err.println("PTF: sig = "+signature);
@@ -182,8 +187,6 @@ import de.jreality.scene.data.StorageModel;
 		qmf.setVLineCount(theTubeVertices.length/crossSection.length);
 		qmf.setClosedInUDirection(true);
 		qmf.setClosedInVDirection(closedCurve);
-		
-		//signature, crossSection.length, theTubeVertices.length/crossSection.length, true,closedCurve);
 		qmf.setVertexCoordinates(theTubeVertices);
 		qmf.setGenerateFaceNormals(true);
 		qmf.setGenerateVertexNormals(true);
@@ -197,13 +200,8 @@ import de.jreality.scene.data.StorageModel;
 		qmf.update();
 		theTube = qmf.getIndexedFaceSet();
 		if (vertexColors != null || edgeColors != null)	{
-//		 	DataList theCurveAsILSEdgeColors = theCurveAsILS.getEdgeAttributes(Attribute.COLORS);
-//		 	DataList theCurveAsILSVertexColors = theCurveAsILS.getVertexAttributes(Attribute.COLORS);
-//		 	int theCurveAsILSNumVerts = theCurveAsILS.getNumPoints();
-//		 	int theCurveAsILSNumEdges = theCurveAsILS.getNumEdges();
 		 	int numVerts = theTube.getNumPoints();
 		 	int numFaces = theTube.getNumFaces();
-		 	// transfer the colors
 		 	int xsLength = crossSection.length;
 		 	if (edgeColors != null)	{
 		 		int colorLength = edgeColors[0].length;

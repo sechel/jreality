@@ -326,13 +326,13 @@ public class Primitives {
 		 * @return
 		 */
 		 public static SceneGraphComponent wireframeSphere() {
-			SceneGraphComponent hypersphere = SceneGraphUtility.createFullSceneGraphComponent("hyperbolic sphere");
+			SceneGraphComponent hypersphere = SceneGraphUtility.createFullSceneGraphComponent("wireframe sphere");
 			hypersphere.setGeometry(SphereUtility.sphericalPatch(0.0, 0.0, 360.0, 180.0, 40, 20, 1.0));
 			Appearance ap = hypersphere.getAppearance();
 			ap.setAttribute(CommonAttributes.FACE_DRAW, false);
 			ap.setAttribute(CommonAttributes.EDGE_DRAW, true);
 			ap.setAttribute(CommonAttributes.VERTEX_DRAW, false);
-			ap.setAttribute(CommonAttributes.TUBES_DRAW, false);
+			ap.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
 			ap.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new Color(200, 200, 200));
 			ap.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_WIDTH, 0.5);
 			return hypersphere;

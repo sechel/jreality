@@ -40,6 +40,7 @@
 
 package de.jreality.geometry;
 
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -112,6 +113,8 @@ public  class TubeFactory {
 		public int twists = 0;
 		public boolean generateTextureCoordinates = false;
 		boolean arcLengthTextureCoordinates = false;
+		boolean removeDuplicates = false;
+		private boolean duplicatesRemoved = false;
 		
 		public boolean closedCurve = false,
 			vertexColorsEnabled = false;
@@ -233,11 +236,42 @@ public  class TubeFactory {
 			this.arcLengthTextureCoordinates = arcLengthTextureCoordinates;
 		}
 			
+		public boolean isRemoveDuplicates() {
+			return removeDuplicates;
+		}
+
+		public void setRemoveDuplicates(boolean removeDuplicates) {
+			this.removeDuplicates = removeDuplicates;
+		}
+
 		public  void update()		{
-			
+			if (removeDuplicates && !duplicatesRemoved)	{
+				theCurve = removeDuplicates(theCurve);
+				duplicatesRemoved = true;
+			}
 		}
 		
-
+		protected static double[][] removeDuplicates(double[][] cc)	{
+			int n = cc.length;
+			Vector<double[]> v = new Vector<double[]>();
+			double[] currentPoint = cc[0], nextPoint;
+			v.add(currentPoint);
+			int i = 1;
+			double d;
+			do {
+				do {
+					nextPoint = cc[i];
+					d = Rn.euclideanDistance(currentPoint, nextPoint);
+					i++;
+				} while (d < 10E-16 && i < n);
+				if (i==n) break;
+				currentPoint = nextPoint;
+				v.add(currentPoint);
+			} while(i<n);
+			double[][] newcurve = new double[v.size()][];
+			v.toArray(newcurve);
+			return newcurve;
+		}
 		static double[] px1 = {0,0,-.5,1};
 		static double[] px2 = {0,0,.5,1};
 		private double[][] tangentField;

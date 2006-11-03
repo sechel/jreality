@@ -177,7 +177,7 @@ public class EffectiveAppearance {
   }
   
   public List getAppearanceHierarchy()	{
-	  Vector v = new Vector();
+	  Vector<Appearance> v = new Vector<Appearance>();
 	  EffectiveAppearance pa = this;
 	  if (pa.app != null) v.add(pa.app);
 	  while ( (pa = pa.parentApp) != null)	{
