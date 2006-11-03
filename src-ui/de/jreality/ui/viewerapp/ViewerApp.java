@@ -423,6 +423,7 @@ public class ViewerApp {
           Viewer v = createViewer(viewerClassName);
           viewerList.add(v);
         } catch (Exception e) { // catches creation problems - i. e. no jogl in classpath
+          e.printStackTrace();
           LoggingSystem.getLogger(this).info("could not create viewer instance of ["+viewerClassName+"]");
         } catch (NoClassDefFoundError ndfe) {
           System.out.println("Possibly no jogl in classpath!");
