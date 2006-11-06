@@ -52,19 +52,20 @@ import de.jreality.geometry.QuadMeshFactory;
 import de.jreality.math.FactoredMatrix;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.data.Attribute;
 import de.jreality.shader.CommonAttributes;
 
 public class VRMLHelper {
 	public static boolean verbose = true;
 	
-	public static final int DEFAULT = 1;
-	public static final int OVERALL = 2;
-	public static final int PER_PART = 3;
-	public static final int PER_PART_INDEXED = 4;
-	public static final int PER_FACE = 5;
-	public static final int PER_FACE_INDEXED = 6;
-	public static final int PER_VERTEX = 7;
-	public static final int PER_VERTEX_INDEXED = 8;
+	public static final int DEFAULT = 0;
+	public static final int OVERALL = 1;
+	public static final int PER_PART = 2;
+	public static final int PER_PART_INDEXED = 3;
+	public static final int PER_FACE = 4;
+	public static final int PER_FACE_INDEXED = 5;
+	public static final int PER_VERTEX = 6;
+	public static final int PER_VERTEX_INDEXED = 7;
 
 	public VRMLHelper() {
 		super();
@@ -420,7 +421,7 @@ public class VRMLHelper {
 	 */
 	public static void setNormals(IndexedFaceSetFactory ifsf,
 			int [][] cIndex,int[][] nIndex,State state){
-	int faceCount=state.coords.length;
+	int faceCount=cIndex.length;
 	int VertexCount= state.coords.length;
 	double[][] fNormals=new double[faceCount][3];
 	double[][] vNormals=new double[VertexCount][3];
@@ -463,8 +464,8 @@ public class VRMLHelper {
 				int l=faceLength-1-j;
 				double [] n=state.normals[m];
 				vNormals[cIndex[k][l]][0]=n[0];
-				vNormals[cIndex[k][l]][0]=n[0];
-				vNormals[cIndex[k][l]][0]=n[0];
+				vNormals[cIndex[k][l]][1]=n[1];
+				vNormals[cIndex[k][l]][2]=n[2];
 				m++;
 			}
 		}
@@ -477,7 +478,7 @@ public class VRMLHelper {
 	{
 		if (nIndex == null || nIndex.length != faceCount){
 			ifsf.setGenerateVertexNormals(true);
-			ifsf.setGenerateFaceNormals(true);
+			ifsf.setGenerateFaceNormals(true); 
 			break;
 		}
 		for (int i=0;i<faceCount;i++){
@@ -487,8 +488,8 @@ public class VRMLHelper {
 				int l=faceLength-1-j;
 				double [] n=state.normals[nIndex[k][l]];
 				vNormals[cIndex[k][l]][0]=n[0];
-				vNormals[cIndex[k][l]][0]=n[0];
-				vNormals[cIndex[k][l]][0]=n[0];
+				vNormals[cIndex[k][l]][1]=n[1];
+				vNormals[cIndex[k][l]][2]=n[2];
 			}
 		}
 		ifsf.setVertexNormals(vNormals);
@@ -510,7 +511,7 @@ public class VRMLHelper {
 	 */
 	public static void setColors(IndexedFaceSetFactory ifsf,
 			int [][] coordIndex,int[][] colorIndex,State state){
-	int faceCount=state.coords.length;
+	int faceCount=coordIndex.length;
 	int VertexCount= state.coords.length;
 	Color[] fColors=new Color[faceCount];
 	Color[] vColors=new Color[VertexCount];
@@ -518,7 +519,7 @@ public class VRMLHelper {
 	case 0:// default
 	case 1:// overall
 	break;
-	case 2:// per part
+	case 2: System.out.println("Per-Part"); // per part
 	case 4:// per face
 	{	System.arraycopy(state.diffuse,0,fColors,0,faceCount);
 		ifsf.setFaceColors(fColors);
@@ -575,7 +576,7 @@ public class VRMLHelper {
 	 */
 	public static void setColors(IndexedLineSetFactory ilsf,
 			int [][] coordIndex,int[][] colorIndex,State state){
-	int edgeCount=state.coords.length;
+	int edgeCount=coordIndex.length;
 	int VertexCount= state.coords.length; 
 	Color[] eColors=new Color[edgeCount];
 	Color[] vColors=new Color[VertexCount];
@@ -693,6 +694,37 @@ public class VRMLHelper {
 		a.setAttribute(CommonAttributes.SPHERES_DRAW, true);
 		return a;
 	}
-	
-	
+		
+	/**
+	 * Changes the coords-List and FaceIndices. After that, every Point is unicly
+	 * refferenced by the Faces.
+	 * A possible, but not canonical, RefferenceTable will be returnd for changing
+	 * Vertex-Attributes-Lists. 
+	 * "refferenceTable: [0,..,new size] -> [o,..,old size]
+	 * 					 new indice     |->  old Indice " 
+	 * @param faces
+	 * @param coords
+	 * @return a possible refferenceTable
+	 */
+	public static int[] separateVertices(int[][] faces, State state){
+		int faceC=faces.length;
+		int totalVC=0;
+		for (int i=0;i<faceC;i++)	totalVC+=faces[i].length;
+		double [][] newCoords=new double[totalVC][3];
+		int count=0;
+		int[] refferenceTable= new int[totalVC];
+		for(int f=0;f<faceC;f++){
+			for(int v=0;v<faces[f].length;v++){
+				newCoords[count]=new double []{
+					state.coords[faces[f][v]][0],
+					state.coords[faces[f][v]][1],
+					state.coords[faces[f][v]][2]};
+				refferenceTable[count]=faces[f][v];
+				faces[f][v]=count;
+				count++;
+			}
+		}
+		state.coords=newCoords;
+		return refferenceTable;
+	}
 }

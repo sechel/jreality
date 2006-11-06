@@ -164,6 +164,8 @@ vrmlFile returns [SceneGraphComponent r=null]
 		)?
 		{ r = root; }
 	;
+
+// --------------------- Basic Node Types -------------------------
 	
 private
 statement[State state]:
@@ -177,7 +179,6 @@ statement[State state]:
 	|	node[state]
 	;
 
-// --------------------- Node Types -------------------------
 private
 node[State state]
 {if (VRMLHelper.verbose) System.err.print(state.history+"Got Node: ");}
@@ -190,83 +191,6 @@ node[State state]
 	 )
 	;
 
-private
-groupNode [State state] 
- {if (VRMLHelper.verbose) System.err.print("group Node: ");}
-	:(  separatorNode   [state]
-	  |	"Switch"		egal // TODO3
-	  |	"WWWAnchor"		egal // TODO3
-	  |	"LOD"			egal // TODO3
-	 )
- 	;
-
-private
-shapeNode [State state]
-{
-if (VRMLHelper.verbose) System.err.print("Shape Node: ");
-State state2= new State(state);
-PointSet geo=null;
-}	:
-	(
-		geo = asciiTextNode			[state2]
-	|	geo = coneNode				[state2]
-	|	geo = cubeNode				[state2]
-	|	geo = cylinderNode			[state2]
-	|	geo = indexedFaceSetNode 	[state2]
-	|	geo = indexedLineSetNode 	[state2]
-	|	geo = pointSetNode			[state2]
-	|	geo = sphereNode 			[state2]
-	)
-		{ 	
-			SceneGraphComponent sgc= new SceneGraphComponent();
-			if (geo==null){System.out.println("failure in geometry. Abort Node!");}
-			else{
-				sgc.setName(geo.getName());
-				state2.currNode.addChild(sgc);
-				sgc.setGeometry(geo);
-//TODO0:
-//				if (geo instanceof IndexedFaceSet)
-					 sgc.setAppearance(state2.makeGeoApp(false));
-//				else sgc.setAppearance(state2.makeGeoApp(true));
-				state2.setTrafo(sgc);
-			}
-		}
-	;
-
-private
-propertyGeoNAppNode [State state] 
- {if (VRMLHelper.verbose) System.err.print("prop Geo Node: ");}
-	:(	coordinate3Node 		[state]
-	  |	"FontStyle"				egal 		// TODO2
-	  |	infoNode				[state]
-	  |	materialNode			[state]
-	  |	materialBindingNode		[state]		// nur fuer IFS & ILS implementiert TODO3: rest
-	  |	normalNode				[state]
-	  |	normalBindingNode		[state]		// nur fuer IFS implementiert TODO3: rest
-	  |	texture2Node			[state]
-	  |	texture2TransformNode	[state]
-	  |	textureCoordinate2Node	[state]
-	  |	shapeHintsNode			[state]		// eigentlich egal
-	 )
-	;
-
-private
-propertyMatrixTransformNode [State state]
-{
-if (VRMLHelper.verbose) System.err.print("Prop Matrix Node: ");
-Transformation m= new Transformation();
-}	:
-	(	m = matrixTransformNode
-	|	m = rotationNode
-	|	m = scaleNode
-	| 	m = transformNode
-	| 	m = translationNode	)
-		{ 	
-		 if (state.trafo==null)
-		 	state.trafo= new Transformation();
-		 state.trafo.multiplyOnRight(m.getMatrix());
-		}
-	;
 
 private
 specialNode[State state]
@@ -278,47 +202,25 @@ specialNode[State state]
 	;
 	
 private
-camNode[State state]
-{ if (VRMLHelper.verbose) System.err.print("Cam Node: ");
-  Camera c=null;
-  State state2= new State(state);
-}
-	:( c = orthographicCameraNode	[state2]
-	  |c = perspectiveCameraNode	[state2]	
-	 )
-		{ 
-			SceneGraphComponent sgc= new SceneGraphComponent();
-			state.currNode.addChild(sgc);
-			sgc.setName(c.getName());
-			if (c!=null){
-				//TODO3 mehrere KameraPfade
-				if (camPath==null) 	camPath=state.camPath;
-				sgc.setCamera(c);
-				state2.setTrafo(sgc);
-			}
-		}
+strangeNode
+{String s;}
+	:	s=id 	egal
+		{System.out.println("unknown Node:"+s+" -Node ignored!");}
 	;
-
-private
-lightNode [State state]
-{ if (VRMLHelper.verbose) System.err.print("Light Node: ");
-  Light l= null;
-  State state2= new State(state);
-}	:(	l= directionalLightNode [state2]
-	 |	l= pointLightNode		[state2]
-	 |	l= spotLightNode		[state2]
-	 )
-	{
-		SceneGraphComponent sgc= new SceneGraphComponent();
-		state2.currNode.addChild(sgc);
-		sgc.setName(l.getName());
-		sgc.setLight(l);
-		state2.setTrafo(sgc);
-		
-	}
-	;
+	
 
 // ------------------------------ group Nodes -----------------------------
+
+private
+groupNode [State state] 
+ {if (VRMLHelper.verbose) System.err.print("group Node: ");}
+	:(  separatorNode   [state]
+	  |	"Switch"		egal // TODO3
+	  |	"WWWAnchor"		egal // TODO3
+	  |	"LOD"			egal // TODO3
+	 )
+ 	;
+
 private
 separatorNode[State state]
 {
@@ -348,9 +250,43 @@ separatorNode[State state]
 	;
 
 // ------------------------------ shape Nodes ------------------------------
+
+private
+shapeNode [State state]
+{
+if (VRMLHelper.verbose) System.err.print("Shape Node: ");
+State state2= new State(state);
+PointSet geo=null;
+Appearance app= new Appearance();
+SceneGraphComponent sgc= new SceneGraphComponent();
+}	:
+	(
+		geo = asciiTextNode			[state2,app]
+	|	geo = coneNode				[state2,app]
+	|	geo = cubeNode				[state2,app]
+	|	geo = cylinderNode			[state2,app]
+	|	geo = indexedFaceSetNode 	[state2,app]
+	|	geo = indexedLineSetNode 	[state2,app]
+	|	geo = pointSetNode			[state2,app]
+	|	geo = sphereNode 			[state2,app]
+	)
+		{ 	
+			if (geo==null){System.out.println("failure in geometry. Abort Node!");}
+			else{
+				sgc.setName(geo.getName());
+				state2.currNode.addChild(sgc);
+				sgc.setGeometry(geo);
+				state2.setColorApp(app,false);
+				sgc.setAppearance(app);
+				state2.setTrafo(sgc);
+			}
+		}
+	;
+
+
 private 
 //TODO3: material,texture,justification,width,spacing
-asciiTextNode [State state] returns[PointSet label=null]
+asciiTextNode [State state, Appearance app] returns[PointSet label=null]
 {
   if (VRMLHelper.verbose) System.err.print("Label( ");
   String just="LEFT";
@@ -390,7 +326,7 @@ asciiTextNode [State state] returns[PointSet label=null]
 		  
 		  
 private
-coneNode [State state] returns [IndexedFaceSet cone=null]
+coneNode [State state, Appearance app] returns [IndexedFaceSet cone=null]
 {//TODO3: material,texture
   if (VRMLHelper.verbose) System.err.print("Cone( ");
   String[]  parts = new String[]{"SIDES","BOTTOM","ALL"};
@@ -429,7 +365,7 @@ coneNode [State state] returns [IndexedFaceSet cone=null]
 	;
 
 private
-cubeNode [State state]returns [IndexedFaceSet cube=null]
+cubeNode [State state, Appearance app]returns [IndexedFaceSet cube=null]
 {//TODO3: material,texture
   if (VRMLHelper.verbose) System.err.print("Cube( ");
   double w=2;
@@ -459,7 +395,7 @@ cubeNode [State state]returns [IndexedFaceSet cube=null]
 	;
 
 private
-cylinderNode [State state]returns [IndexedFaceSet cylinder=null]
+cylinderNode [State state, Appearance app]returns [IndexedFaceSet cylinder=null]
 {//TODO3: material,texture
   if (VRMLHelper.verbose) System.err.print("Cylinder( ");
   String[]  parts = new String[]{"SIDES","TOP","BOTTOM","ALL"};
@@ -500,7 +436,7 @@ cylinderNode [State state]returns [IndexedFaceSet cylinder=null]
 	;
 
 private
-indexedFaceSetNode [State state] returns [IndexedFaceSet ifs=null]
+indexedFaceSetNode [State state, Appearance app] returns [IndexedFaceSet ifs=null]
 {//TODO3: texture
   if (VRMLHelper.verbose) System.err.print("IndexedFaceSet( "); 
   int[] coordIndex	= new int[]{0};
@@ -526,20 +462,52 @@ indexedFaceSetNode [State state] returns [IndexedFaceSet ifs=null]
 	int[][] normalIndex2 = VRMLHelper.convertIndexList(normalIndex);
 	int[][] textureCoordIndex2 = VRMLHelper.convertIndexList(textureCoordIndex);
 	
-	State state2= new State(state);
+	// TODO0:
 	IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
-	ifsf.setVertexCount(state2.coords.length);
+	ifsf.setVertexCount(state.coords.length);
 	ifsf.setFaceCount(coordIndex2.length);
-	ifsf.setVertexAttribute(Attribute.COORDINATES,new DoubleArrayArray.Array(state2.coords) );
+	ifsf.setVertexAttribute(Attribute.COORDINATES,new DoubleArrayArray.Array(state.coords) );
 	ifsf.setFaceIndices(coordIndex2);
-	VRMLHelper.setNormals(ifsf,coordIndex2,normalIndex2,state2);
-	VRMLHelper.setColors(ifsf,coordIndex2,materialIndex2,state2);
-	// TODO2: handle texture
-	// Texture:	if (textureCoordIndex2.length>0){}else {}
-	
+
+
+
+	if (state.normalBinding >=6 | state.materialBinding>=6 
+		| state.textureFile.equals("")	|state.textureData.length!=0 ){
+		// have to separate the vertices!
+			// make Normals now!
+		double[][] vnormals=null;
+		ifsf.setGenerateVertexNormals(true);
+		ifsf.update();
+		vnormals=ifsf.getIndexedFaceSet()
+			.getVertexAttributes(Attribute.NORMALS)
+			.toDoubleArrayArray(null);
+			//	separate vertices
+		int[] reffTab=VRMLHelper.separateVertices(coordIndex2,state);
+			// make new Factory
+		ifsf = new IndexedFaceSetFactory();
+		ifsf.setVertexCount(reffTab.length);//(new)
+		ifsf.setFaceCount(coordIndex2.length);//(new)
+		ifsf.setVertexAttribute(Attribute.COORDINATES,new DoubleArrayArray.Array(state.coords) );//new
+		ifsf.setFaceIndices(coordIndex2);//new
+			// set modified old normals
+		double[][] vnormalsNew= new double[reffTab.length][];
+		for(int i=0;i<reffTab.length;i++){
+			vnormalsNew[i]=new double[]{
+				vnormals[reffTab[i]][0],
+				vnormals[reffTab[i]][1],
+				vnormals[reffTab[i]][2]};
+		}
+		
+		ifsf.setVertexAttribute(Attribute.NORMALS,new DoubleArrayArray.Array(vnormalsNew) );//new
+		// now all indices of texture, color, normals, ect are unique because 
+		// they are based on face indices and coords
+	}
+	VRMLHelper.setNormals(ifsf,coordIndex2,normalIndex2,state);//werden nicht generiert wenn vorhanden
+	VRMLHelper.setColors(ifsf,coordIndex2,materialIndex2,state);
 	ifsf.setGenerateEdgesFromFaces(false);
 	ifsf.update();
 	ifs = ifsf.getIndexedFaceSet();
+	state.assignTexture(app, ifs);
 	ifs.setName("Face Set");
 	state.extraGeoTrans = new Transformation();
 	state.edgeDraw=2;
@@ -550,7 +518,7 @@ indexedFaceSetNode [State state] returns [IndexedFaceSet ifs=null]
 	;
 	
 private
-indexedLineSetNode[State state] returns [IndexedLineSet ils=null]
+indexedLineSetNode[State state, Appearance app] returns [IndexedLineSet ils=null]
 { //TODO3: normal,texture
   State state2= new State(state);
   if (VRMLHelper.verbose) System.err.print("IndexedLineSet( "); 
@@ -599,7 +567,7 @@ indexedLineSetNode[State state] returns [IndexedLineSet ils=null]
 	;
 
 private 
-pointSetNode [State state] returns[PointSet ps=null]
+pointSetNode [State state, Appearance app] returns[PointSet ps=null]
 {//TODO3: material,normal
   if (VRMLHelper.verbose) System.err.print("PointSet( "); 
   int start=0;
@@ -633,7 +601,7 @@ pointSetNode [State state] returns[PointSet ps=null]
 	;
 
 private
-sphereNode [State state] returns [IndexedFaceSet sphere=null]
+sphereNode [State state, Appearance app] returns [IndexedFaceSet sphere=null]
 {//TODO3:texture
  if (VRMLHelper.verbose) System.err.print("Sphere( ");
  double r=1;
@@ -658,6 +626,24 @@ sphereNode [State state] returns [IndexedFaceSet sphere=null]
 		
 /// ******************* shape Nodes done *****************
 // ------------------------------ property Geometry App Nodes ------------------------------
+
+private
+propertyGeoNAppNode [State state] 
+ {if (VRMLHelper.verbose) System.err.print("prop Geo Node: ");}
+	:(	coordinate3Node 		[state]
+	  |	"FontStyle"				egal 		// TODO2
+	  |	infoNode				[state]
+	  |	materialNode			[state]
+	  |	materialBindingNode		[state]		// nur fuer IFS & ILS implementiert TODO3: rest
+	  |	normalNode				[state]
+	  |	normalBindingNode		[state]		// nur fuer IFS implementiert TODO3: rest
+	  |	texture2Node			[state]
+	  |	texture2TransformNode	[state]
+	  |	textureCoordinate2Node	[state]
+	  |	shapeHintsNode			[state]		// eigentlich egal
+	 )
+	;
+
 
 private
 coordinate3Node [State state] 
@@ -777,8 +763,7 @@ texture2Node[State state]
 	String wrapS="REPEAT";
 	String wrapT="REPEAT";
 }	: "Texture2" OPEN_BRACE
-		(
-		| "filename" { if (VRMLHelper.verbose) System.err.print("filename ");}
+		("filename" { if (VRMLHelper.verbose) System.err.print("filename ");}
 				file=sfstringValue
 		| "image" 	{ if (VRMLHelper.verbose) System.err.print("image ");}
 				image=sfimageValue
@@ -806,8 +791,7 @@ texture2TransformNode[State state]
 	double[] center=new double[]{0,0};
 }
 	: "Texture2Transform" OPEN_BRACE
-		(
-		| "translation" { if (VRMLHelper.verbose) System.err.print("translation ");}
+		( "translation" { if (VRMLHelper.verbose) System.err.print("translation ");}
 				trans=sfvec2fValue
 		| "rotation" 	{ if (VRMLHelper.verbose) System.err.print("rotation ");}
 				rot=sffloatValue
@@ -841,7 +825,7 @@ textureCoordinate2Node[State state]
 		 | wrongAttribute )?
 		CLOSE_BRACE
 		{ state.textureCoords=point;
-		  if (VRMLHelper.verbose) System.err.print(")"); 
+		  if (VRMLHelper.verbose) System.err.println(")"); 
 		}
 	;
 
@@ -872,6 +856,24 @@ shapeHintsNode [State state]
 
 // ************* prop Geo Nodes done *********************
 // ------------------------------ property Matrix transform Nodes ------------------------------
+
+private
+propertyMatrixTransformNode [State state]
+{
+if (VRMLHelper.verbose) System.err.print("Prop Matrix Node: ");
+Transformation m= new Transformation();
+}	:
+	(	m = matrixTransformNode
+	|	m = rotationNode
+	|	m = scaleNode
+	| 	m = transformNode
+	| 	m = translationNode	)
+		{ 	
+		 if (state.trafo==null)
+		 	state.trafo= new Transformation();
+		 state.trafo.multiplyOnRight(m.getMatrix());
+		}
+	;
 
 private
 matrixTransformNode returns[Transformation t= new Transformation()]
@@ -956,7 +958,48 @@ translationNode returns [Transformation m =new Transformation() ]
 	;
 
 // ******************** prop Matr TransFNode Done *****************
-// ------------------------------ special Nodes ------------------------------
+// ------------------------------ cam & light Nodes ------------------------------
+private
+camNode[State state]
+{ if (VRMLHelper.verbose) System.err.print("Cam Node: ");
+  Camera c=null;
+  State state2= new State(state);
+}
+	:( c = orthographicCameraNode	[state2]
+	  |c = perspectiveCameraNode	[state2]	
+	 )
+		{ 
+			SceneGraphComponent sgc= new SceneGraphComponent();
+			state.currNode.addChild(sgc);
+			sgc.setName(c.getName());
+			if (c!=null){
+				//TODO3 mehrere KameraPfade
+				if (camPath==null) 	camPath=state.camPath;
+				sgc.setCamera(c);
+				state2.setTrafo(sgc);
+			}
+		}
+	;
+
+private
+lightNode [State state]
+{ if (VRMLHelper.verbose) System.err.print("Light Node: ");
+  Light l= null;
+  State state2= new State(state);
+}	:(	l= directionalLightNode [state2]
+	 |	l= pointLightNode		[state2]
+	 |	l= spotLightNode		[state2]
+	 )
+	{
+		SceneGraphComponent sgc= new SceneGraphComponent();
+		state2.currNode.addChild(sgc);
+		sgc.setName(l.getName());
+		sgc.setLight(l);
+		state2.setTrafo(sgc);
+		
+	}
+	;
+
 
 private
 perspectiveCameraNode [State state] returns [Camera cam=null]
@@ -1480,13 +1523,6 @@ private
 wrongAttribute
 	:	g:ID 	(dumb)*
 		{System.out.println("unknown Attribute:"+g.getText()+" -following Attributes ignored!");}
-	;
-
-private
-strangeNode
-{String s;}
-	:	s=id 	egal
-		{System.out.println("unknown Node:"+s+" -Node ignored!");}
 	;
 
 private 
