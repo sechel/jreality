@@ -155,7 +155,7 @@ class RenderScript {
       System.err.println("can't write "+scriptName);
     }   
     
-    dumpScript("sh "+scriptName);
+    //dumpScript("sh "+scriptName);
   }
     
     

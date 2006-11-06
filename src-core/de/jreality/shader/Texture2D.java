@@ -134,6 +134,7 @@ public interface Texture2D extends AttributeEntity {
 
   public static final Matrix TEXTURE_MATRIX_DEFAULT=new Matrix();
   public static final Color BLEND_COLOR_DEFAULT=Color.WHITE;
+  public static final String EXTERNAL_SOURCE_DEFAULT=null;
   
   /**
    * @return Returns the repeatS.
@@ -207,6 +208,10 @@ public interface Texture2D extends AttributeEntity {
   public abstract void setCombineMode(Integer combineMode);
   
   public abstract void setImage(ImageData image);
+  
+  public abstract void setExternalSource(String b);
+  
+  public abstract String getExternalSource();
   
   public abstract ImageData getImage();
 }

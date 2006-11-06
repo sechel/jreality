@@ -423,19 +423,20 @@ public class RIBVisitor extends SceneGraphVisitor {
 		ri.format(width, height, 1);
 		// TODO make this a variable
 		ri.shadingRate(1f);
+		if(shadowEnabled){
+		      if(rendererType==RIBViewer.TYPE_PIXAR)
+		        ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
+		      else if(rendererType==RIBViewer.TYPE_3DELIGHT)
+		        ri.verbatim("Attribute \"visibility\"  \"string transmission\" \"shader\"");
+		      else if(rendererType==RIBViewer.TYPE_AQSIS)
+		        ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
+		      else if(rendererType==RIBViewer.TYPE_PIXIE)
+		        ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
+		    }
+		// make sure this is the last thing done, to maximize what the user can override.
 		if (globalIncludeFile != "")
 			ri.readArchive((String) globalIncludeFile);
 
-		if(shadowEnabled){
-      if(rendererType==RIBViewer.TYPE_PIXAR)
-        ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
-      else if(rendererType==RIBViewer.TYPE_3DELIGHT)
-        ri.verbatim("Attribute \"visibility\"  \"string transmission\" \"shader\"");
-      else if(rendererType==RIBViewer.TYPE_AQSIS)
-        ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
-      else if(rendererType==RIBViewer.TYPE_PIXIE)
-        ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
-    }
 	}
 
 	/**
@@ -624,6 +625,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 	 * @return
 	 */
 	public String writeTexture(Texture2D tex) {
+		String extSource = tex.getExternalSource();
+		if (extSource != null) return extSource + "." + textureFileSuffix;
 		ImageData data = tex.getImage();
 		return writeTexture(data, tex.getRepeatS(), tex.getRepeatT());
 	}
@@ -835,7 +838,7 @@ public class RIBVisitor extends SceneGraphVisitor {
                 // System.err.println("alpha channel is "+cc.getAlpha());
 
                 Object ga = g.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
-                System.err.println(object2world.getLastComponent().getName()+" Current sig = "+currentSignature);
+ //               System.err.println(object2world.getLastComponent().getName()+" Current sig = "+currentSignature);
                 if (ga != null) System.err.println("GA = "+ga.toString());
                 if (ga == null || !( ga instanceof Dimension))	{
                     BallAndStickFactory bsf = new BallAndStickFactory(g);
@@ -975,10 +978,11 @@ public class RIBVisitor extends SceneGraphVisitor {
 			boolean opaqueColors = true;
 			if (colors != null && GeometryUtility.getVectorLength(colors) == 4) {
 				double[][] colorArray = colors.toDoubleArrayArray(null);
-				for (double[] cc : colorArray) {
-					if (cc[3] != 1.0)
-						opaqueColors = false;
-				}
+//				for (double[] cc : colorArray) {
+//					if (cc[3] != 1.0)
+//						opaqueColors = false;
+//				}
+				opaqueColors = false;
 				if (!opaqueColors) {
 					int numFaces = i.getNumFaces();
 					float[][] colorArrayf = new float[numFaces][4];

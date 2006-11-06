@@ -80,12 +80,12 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
         float Kd =(float) eap.getAttribute(name+"."+CommonAttributes.DIFFUSE_COEFFICIENT,CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
         float Ka =(float) eap.getAttribute(name+"."+CommonAttributes.AMBIENT_COEFFICIENT,CommonAttributes.AMBIENT_COEFFICIENT_DEFAULT);
         Color specularcolor =(Color) eap.getAttribute(name+"."+CommonAttributes.SPECULAR_COLOR, CommonAttributes.SPECULAR_COLOR_DEFAULT);
-        map.put("roughness",new Float(1/specularExponent));
-        map.put("Ks",new Float(Ks));
-        map.put("Kd",new Float(Kd));
-        map.put("Ka",new Float(Ka));
-        map.put("specularcolor",specularcolor);
-        map.put("lighting", new Float( lighting ? 1 : 0));
+        map.put("float roughness",new Float(1/specularExponent));
+        map.put("float Ks",new Float(Ks));
+        map.put("float Kd",new Float(Kd));
+        map.put("float Ka",new Float(Ka));
+        map.put("color specularcolor",specularcolor);
+        map.put("float lighting", new Float( lighting ? 1 : 0));
         if (signature != Pn.EUCLIDEAN) {
         	map.put("signature", signature);
         	map.put("objectToCamera", RIBHelper.fTranspose(ribv.getCurrentObjectToCamera()));

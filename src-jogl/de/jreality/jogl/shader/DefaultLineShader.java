@@ -322,6 +322,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				oneCurve = IndexedLineSetUtility.extractCurve(oneCurve, ils, i);
 				PolygonalTubeFactory ptf = new PolygonalTubeFactory(oneCurve);
 				ptf.setClosed(false);
+				ptf.setVertexColorsEnabled(true);
 				ptf.setCrossSection(crossSection);
 				ptf.setFrameFieldType(tubeStyle);
 				ptf.setSignature(sig);

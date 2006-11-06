@@ -20,6 +20,8 @@ import java.util.logging.Level;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
 
+import bsh.This;
+
 import de.jreality.math.Rn;
 import de.jreality.renderman.shader.DefaultPolygonShader;
 import de.jreality.shader.CubeMap;
@@ -31,9 +33,9 @@ public class RIBHelper {
 	public static void writeShader(String name, String shaderName ) {
 		try {
 		    File file = new File(name);
-		    System.out.println("writing in  "+name);
+		    LoggingSystem.getLogger(RIBHelper.class).fine("writing in  "+name);
 		    file = new File(file.getParent(),shaderName);
-		    System.out.println("checking on "+file+" exists "+file.exists());
+		    LoggingSystem.getLogger(RIBHelper.class).fine("checking on "+file+" exists "+file.exists());
 		    if(!file.exists()) {
 		    	OutputStream os = new FileOutputStream(file);
 		    	InputStream is = DefaultPolygonShader.class.getResourceAsStream(shaderName);
@@ -125,7 +127,6 @@ public class RIBHelper {
 	        w2.print("\""+object+"\"");
 	        return;
 	    }
-	    //if(object instanceof Float)
 	    w2.print(" "+object+" ");
 	}
   
