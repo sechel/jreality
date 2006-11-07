@@ -20,11 +20,8 @@ import java.util.logging.Level;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
 
-import bsh.This;
-
 import de.jreality.math.Rn;
 import de.jreality.renderman.shader.DefaultPolygonShader;
-import de.jreality.shader.CubeMap;
 import de.jreality.shader.ImageData;
 import de.jreality.util.LoggingSystem;
 
