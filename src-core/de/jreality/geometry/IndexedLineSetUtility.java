@@ -73,7 +73,6 @@ public class IndexedLineSetUtility {
 		int veclength = verts[0].length;
 		double[][] newVerts = new double[n*numEdges][veclength];
 		int[][] newIndices = new int[numEdges][n];
-		IndexedLineSet newils = new IndexedLineSet(n*numEdges, numEdges);
 		for (int i = 0; i<numEdges; ++i)	{
 			int i0 = indices[i][0];
 			int i1 = indices[i][1];
@@ -86,7 +85,6 @@ public class IndexedLineSetUtility {
 				newIndices[i][j] = i*n+j;
 			}
 		}
-//		IndexedFaceSetUtility.setIndexedLineSetFrom(newils, newIndices, newVerts, null, null);
 		IndexedLineSetFactory ifsf = new IndexedLineSetFactory();
 		ifsf.setVertexCount(newVerts.length);
 		ifsf.setVertexCoordinates(newVerts);

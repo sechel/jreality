@@ -340,6 +340,7 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	
 	
 	{
+		vertexNormals.addIngr(signature);
 		vertexNormals.addIngr(faceNormals);
 		
 		vertexNormals.setUpdateMethod(
