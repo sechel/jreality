@@ -20,16 +20,20 @@
  * Boston, MA 02111-1307
  * USA 
  */
+
+
 package de.jreality.ui.viewerapp;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.io.JrSceneFactory;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.proxy.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphComponent;
+
 
 public class ViewerAppFromScene {
-    public static void main(String[] args) {
+
+	public static void main(String[] args) {
         IndexedFaceSet cube = Primitives.coloredCube();
         SceneGraphComponent sgc = new SceneGraphComponent();
         sgc.setGeometry(cube);
@@ -39,7 +43,7 @@ public class ViewerAppFromScene {
         
         
         JrScene scene = JrSceneFactory.getDefaultDesktopScene();
-        scene.getSceneRoot().addChild(sgc);
+        scene.getSceneRoot().getChildComponent(0).addChild(sgc);  //tools are attached to scene node
         ViewerApp app2 = new ViewerApp(scene);
         app2.update();
         app2.display();
