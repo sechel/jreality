@@ -607,10 +607,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 			currentOpacity = 1f;
 		ri.opacity(currentOpacity);
 		// System.err.println("currentOpacity is "+currentOpacity);
-		SLShader slShader = (SLShader) eap.getAttribute(type
-				+ CommonAttributes.RMAN_DISPLACEMENT_SHADER, null,
+		Object obj = eap.getAttribute(CommonAttributes.RMAN_DISPLACEMENT_SHADER, Appearance.INHERITED,
 				SLShader.class);
-		if (slShader != null) {
+		if (obj != Appearance.INHERITED) {
+			SLShader slShader = (SLShader) obj;
 			ri.displacement(slShader.getName(), slShader.getParameters());
 		}
 		// TODO check for volume shaders here too
