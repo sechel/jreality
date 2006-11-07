@@ -200,6 +200,12 @@ public class Ri {
       RIBHelper.writeMap(w,map);
   }
     
+    public void atmosphere(String name, Map map){
+      w.print("Atmosphere "+RIBHelper.str(name)+" ");
+      RIBHelper.writeMap(w,map);
+    }
+    
+    
     public  void imager(String name, Map map) {
         w.print("Imager "+RIBHelper.str(name)+" ");
         RIBHelper.writeMap(w,map);

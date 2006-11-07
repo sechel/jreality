@@ -91,6 +91,7 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
+import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.CameraUtility;
@@ -157,6 +158,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 									// appearance-generated tubes and spheres
 
 	protected boolean shadowEnabled = false;
+  
+  private boolean fogEnabled=false;
 
 	protected boolean fullSpotLight = false;
 
@@ -204,6 +207,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	transient int whichEye = CameraUtility.MIDDLE_EYE;
 
 	RenderScript renderScript;
+
 
 	public void visit(Viewer viewer, String name) {
 		// handle the file name
@@ -353,7 +357,11 @@ public class RIBVisitor extends SceneGraphVisitor {
 		ri.worldBegin();
 		// alpha in the output format means skip over any background settings
 		if (outputDisplayFormat != "rgba")
-			handleBackground();
+			handleBackground();   
+    
+    if(fogEnabled)
+      handleFog();    
+    
 		// handle the lights
 		new LightCollector(root, this);
 		// finally render the scene graph
@@ -365,7 +373,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		}
 	}
 
-	private void handleRootAppearance() {
+  private void handleRootAppearance() {
 		maximumEyeSplits[0] = ((Integer) eAppearance.getAttribute(
 				CommonAttributes.RMAN_MAX_EYE_SPLITS, new Integer(
 						maximumEyeSplits[0]))).intValue();
@@ -373,26 +381,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 				CommonAttributes.RMAN_SEARCHPATH_SHADER, "");
 		textureFileSuffix = (String) eAppearance.getAttribute(
 				CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");
-		// if(rendererType==RIBViewer.TYPE_PIXAR)
-		// textureFileSuffix = (String)
-		// eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX,
-		// "tex");
-		// else if(rendererType==RIBViewer.TYPE_3DELIGHT){
-		// textureFileSuffix = (String)
-		// eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX,
-		// "tex");//"tdl");
-		// }else if(rendererType==RIBViewer.TYPE_AQSIS){
-		// textureFileSuffix = (String)
-		// eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX,
-		// "tx");
-		// }else if(rendererType==RIBViewer.TYPE_PIXIE){
-		// textureFileSuffix = (String)
-		// eAppearance.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX,
-		// "tx");
-		// }
-		// else{
-		// System.err.println("no valid rendererType");
-		// }
 		shadowEnabled = eAppearance.getAttribute(
 				CommonAttributes.RMAN_SHADOWS_ENABLED, false);
 		currentSignature = eAppearance.getAttribute(CommonAttributes.SIGNATURE,
@@ -401,7 +389,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 				CommonAttributes.RMAN_OUTPUT_DISPLAY_FORMAT, "rgb");
 		globalIncludeFile = (String) eAppearance.getAttribute(
 				CommonAttributes.RMAN_GLOBAL_INCLUDE_FILE, "");
-		System.err.println("Preamble is " + globalIncludeFile);
+		if(!globalIncludeFile.equals("")) System.err.println("Preamble is " + globalIncludeFile);    
+    fogEnabled=(boolean)eAppearance.getAttribute(CommonAttributes.FOG_ENABLED, CommonAttributes.FOG_ENABLED_DEFAULT);   
 	}
 
 	/**
@@ -424,21 +413,18 @@ public class RIBVisitor extends SceneGraphVisitor {
 		// TODO make this a variable
 		ri.shadingRate(1f);
 		if(shadowEnabled){
-		      if(rendererType==RIBViewer.TYPE_PIXAR)
-		        ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
-		      else if(rendererType==RIBViewer.TYPE_3DELIGHT)
+		      if(rendererType==RIBViewer.TYPE_3DELIGHT)
 		        ri.verbatim("Attribute \"visibility\"  \"string transmission\" \"shader\"");
-		      else if(rendererType==RIBViewer.TYPE_AQSIS)
-		        ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
-		      else if(rendererType==RIBViewer.TYPE_PIXIE)
+		      else 
 		        ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
 		    }
 		// make sure this is the last thing done, to maximize what the user can override.
 		if (globalIncludeFile != "")
 			ri.readArchive((String) globalIncludeFile);
 
-	}
-
+//    if(fogEnabled)
+//      handleFog();
+  }
 	/**
 	 * Handle background specifications contained in the top-level appearance:
 	 * skybox, flat background color, or gradient background colors TODO: fog
@@ -514,16 +500,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 		ri.attributeBegin();
 		ri.concatTransform(RIBHelper.fTranspose(w2c));
 		ri.comment("Disable shadows for background");
-		if (rendererType == RIBViewer.TYPE_PIXAR)
-			ri.verbatim("Attribute \"visibility\"  \"int transmission\" [0]");
-		else if (rendererType == RIBViewer.TYPE_3DELIGHT) 
+		if (rendererType == RIBViewer.TYPE_3DELIGHT) 
 			ri.verbatim("Attribute \"visibility\"  \"string transmission\" \"Os\"");
-		else if (rendererType == RIBViewer.TYPE_AQSIS)
+		else 
 			ri.verbatim("Attribute \"visibility\"  \"int transmission\" [0]");
-    else if (rendererType == RIBViewer.TYPE_PIXIE)
-      ri.verbatim("Attribute \"visibility\"  \"int transmission\" [0]");
-		else
-			System.err.println("no valid rendererType");
 		ri.surface("constant", null);
 		pointPolygon(bkgd, null);
 		ri.attributeEnd();
@@ -535,6 +515,13 @@ public class RIBVisitor extends SceneGraphVisitor {
 		RIBHelper.writeShader(name, "noneuclideanlight.sl");
 		RIBHelper.writeShader(name, "constantTexture.sl");
 	}
+  
+  private void handleFog() {
+    HashMap<String, Object> fogMap=new HashMap<String, Object>();      
+    fogMap.put("background",(Color)eAppearance.getAttribute(CommonAttributes.FOG_COLOR, RootAppearance.FOG_COLOR_DEFAULT));
+    fogMap.put("distance",new Float(1/(double)eAppearance.getAttribute(CommonAttributes.FOG_DENSITY, CommonAttributes.FOG_DENSITY_DEFAULT)));
+    ri.atmosphere("fog", fogMap);    
+  }
 
 	/*
 	 * Visit methods start here
