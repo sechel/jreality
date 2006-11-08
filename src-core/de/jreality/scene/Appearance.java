@@ -40,6 +40,8 @@
 
 package de.jreality.scene;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
@@ -65,11 +67,19 @@ import de.jreality.scene.event.AppearanceListener;
  */
 public class Appearance extends SceneGraphNode
 {
-  public static final Object DEFAULT = new Object() {
+  public static final Object DEFAULT = new Serializable() {
     public String toString() { return "default"; }
+    Object readResolve() throws ObjectStreamException
+    {
+      return Appearance.DEFAULT;
+    }
   };
-  public static final Object INHERITED = new Object() {
+  public static final Object INHERITED = new Serializable() {
     public String toString() { return "inherited"; }
+    Object readResolve() throws ObjectStreamException
+    {
+      return Appearance.INHERITED;
+    }
   };
   private transient AppearanceListener appearanceListener;
   private HashMap<String, Object> attributes=new HashMap<String, Object>();
