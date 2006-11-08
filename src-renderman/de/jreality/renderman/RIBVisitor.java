@@ -1087,7 +1087,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 						fnormals[n * j + 1] = (float) da.getValueAt(j, 1);
 						fnormals[n * j + 2] = (float) da.getValueAt(j, 2);
 					}
-					map.put("N", fnormals);
+					map.put(type + "vector N", fnormals);
 				} else {
 					// in noneuclidean case we have to use 4D vectors and
 					// transform the values
