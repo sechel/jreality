@@ -177,6 +177,9 @@ import de.jreality.scene.Appearance;
 	public final static String RMAN_SURFACE_SHADER = "rendermanSurfaceShader";
 	public final static String RMAN_LIGHT_SHADER = "rendermanLightShader";
 	public final static String RMAN_DISPLACEMENT_SHADER = "rendermanDisplacementShader";
+  public static final String RMAN_VOLUME_EXTERIOR_SHADER = "rendermanVolumeExteriorShader"; 
+  public static final String RMAN_VOLUME_INTERIOR_SHADER = "rendermanVolumeInteriorShader"; 
+  public static final String RMAN_VOLUME_ATMOSPHERE_SHADER = "rendermanVolumeAtmosphereShader"; 
 	public final static String RMAN_TEXTURE_FILE = "rendermanTexFile";
 	public static final String RMAN_REFLECTIONMAP_FILE = "rendermanReflectionmapFile";
 	public final static String RMAN_GLOBAL_INCLUDE_FILE = "rendermanGlobalIncludeFile";
@@ -185,7 +188,8 @@ import de.jreality.scene.Appearance;
 	public static final String RMAN_PROXY_COMMAND = "rendermanProxyCommand";
 	public static final String RMAN_RETAIN_GEOMETRY = "rendermanRetainGeometry";
 	public static final String RMAN_MAX_EYE_SPLITS  = "rendermanMaxEyeSplits";
-	public static final String RMAN_TEXTURE_FILE_SUFFIX = "rendermanTextureFileSuffix";  
+	public static final String RMAN_TEXTURE_FILE_SUFFIX = "rendermanTextureFileSuffix";
+   
 	/* 
      * @deprecated
      */
