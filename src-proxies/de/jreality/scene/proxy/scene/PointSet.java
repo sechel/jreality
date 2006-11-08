@@ -75,8 +75,12 @@ public class PointSet extends de.jreality.scene.PointSet implements RemotePointS
   public void setVertexAttributes(Attribute attr, DataList dl) {
     startWriter();
     try {
-      int length = (dl instanceof ByteBufferList) ? ((ByteBufferList)dl).getCoveredLength() : dl.size();
-      PointSet.setAttrImp(vertexAttributes, attr, dl, length != vertexAttributes.getListLength());
+    	if (dl == null) {
+    		vertexAttributes.remove(attr);
+    	} else {
+	      int length = (dl instanceof ByteBufferList) ? ((ByteBufferList)dl).getCoveredLength() : dl.size();
+	      PointSet.setAttrImp(vertexAttributes, attr, dl, length != vertexAttributes.getListLength());
+    	}
       fireGeometryChanged(Collections.singleton(attr), null, null, null);
     } finally {
       finishWriter();

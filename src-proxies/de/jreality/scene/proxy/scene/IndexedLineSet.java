@@ -73,8 +73,12 @@ public class IndexedLineSet extends de.jreality.scene.IndexedLineSet implements
     public void setEdgeAttributes(Attribute attr, DataList dl) {
       startWriter();
       try {
-        int length = (dl instanceof ByteBufferList) ? ((ByteBufferList)dl).getCoveredLength() : dl.size();
-        PointSet.setAttrImp(edgeAttributes, attr, dl, length != edgeAttributes.getListLength());
+      	if (dl == null) {
+    		edgeAttributes.remove(attr);
+    	} else {
+	        int length = (dl instanceof ByteBufferList) ? ((ByteBufferList)dl).getCoveredLength() : dl.size();
+	        PointSet.setAttrImp(edgeAttributes, attr, dl, length != edgeAttributes.getListLength());
+    	}
         fireGeometryChanged(null, Collections.singleton(attr), null, null);
       } finally {
         finishWriter();
@@ -114,9 +118,13 @@ public class IndexedLineSet extends de.jreality.scene.IndexedLineSet implements
     public void setVertexAttributes(Attribute attr, DataList dl) {
       startWriter();
       try {
-        int length = (dl instanceof ByteBufferList) ? ((ByteBufferList)dl).getCoveredLength() : dl.size();
-        PointSet.setAttrImp(vertexAttributes, attr, dl, length != vertexAttributes.getListLength());
-        fireGeometryChanged(Collections.singleton(attr), null, null, null);
+    	if (dl == null) {
+    		vertexAttributes.remove(attr);
+    	} else {
+	        int length = (dl instanceof ByteBufferList) ? ((ByteBufferList)dl).getCoveredLength() : dl.size();
+	        PointSet.setAttrImp(vertexAttributes, attr, dl, length != vertexAttributes.getListLength());
+    	}
+	    fireGeometryChanged(Collections.singleton(attr), null, null, null);
       } finally {
         finishWriter();
       }

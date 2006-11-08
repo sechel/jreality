@@ -73,8 +73,12 @@ public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
     public void setFaceAttributes(Attribute attr, DataList dl) {
       startWriter();
       try {
-        int length = (dl instanceof ByteBufferList) ? ((ByteBufferList)dl).getCoveredLength() : dl.size();
-        PointSet.setAttrImp(faceAttributes, attr, dl, length != faceAttributes.getListLength());
+      	if (dl == null) {
+    		faceAttributes.remove(attr);
+    	} else {
+	        int length = (dl instanceof ByteBufferList) ? ((ByteBufferList)dl).getCoveredLength() : dl.size();
+	        PointSet.setAttrImp(faceAttributes, attr, dl, length != faceAttributes.getListLength());
+    	}
         fireGeometryChanged(null, null, Collections.singleton(attr), null);
       } finally {
         finishWriter();
@@ -114,8 +118,12 @@ public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
     public void setEdgeAttributes(Attribute attr, DataList dl) {
       startWriter();
       try {
-        int length = (dl instanceof ByteBufferList) ? ((ByteBufferList)dl).getCoveredLength() : dl.size();
-        PointSet.setAttrImp(edgeAttributes, attr, dl, length != edgeAttributes.getListLength());
+      	if (dl == null) {
+    		edgeAttributes.remove(attr);
+    	} else {
+    		int length = (dl instanceof ByteBufferList) ? ((ByteBufferList)dl).getCoveredLength() : dl.size();
+    		PointSet.setAttrImp(edgeAttributes, attr, dl, length != edgeAttributes.getListLength());
+    	}
         fireGeometryChanged(null, Collections.singleton(attr), null, null);
       } finally {
         finishWriter();
@@ -155,8 +163,12 @@ public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
     public void setVertexAttributes(Attribute attr, DataList dl) {
       startWriter();
       try {
-        int length = (dl instanceof ByteBufferList) ? ((ByteBufferList)dl).getCoveredLength() : dl.size();
-        PointSet.setAttrImp(vertexAttributes, attr, dl, length != vertexAttributes.getListLength());
+      	if (dl == null) {
+    		vertexAttributes.remove(attr);
+    	} else {
+    		int length = (dl instanceof ByteBufferList) ? ((ByteBufferList)dl).getCoveredLength() : dl.size();
+    		PointSet.setAttrImp(vertexAttributes, attr, dl, length != vertexAttributes.getListLength());
+    	}
         fireGeometryChanged(Collections.singleton(attr), null, null, null);
       } finally {
         finishWriter();
