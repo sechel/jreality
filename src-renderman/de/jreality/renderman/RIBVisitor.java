@@ -391,7 +391,9 @@ public class RIBVisitor extends SceneGraphVisitor {
 				CommonAttributes.RMAN_GLOBAL_INCLUDE_FILE, "");
 		if(!globalIncludeFile.equals("")) System.err.println("Preamble is " + globalIncludeFile);    
     fogEnabled=(boolean)eAppearance.getAttribute(CommonAttributes.FOG_ENABLED, CommonAttributes.FOG_ENABLED_DEFAULT);   
-	}
+	
+
+  }
 
 	/**
 	 * Write the top of the rib file
@@ -424,6 +426,13 @@ public class RIBVisitor extends SceneGraphVisitor {
 
 //    if(fogEnabled)
 //      handleFog();
+    
+    Object obj = eAppearance.getAttribute(CommonAttributes.RMAN_VOLUME_ATMOSPHERE_SHADER, Appearance.INHERITED,
+        SLShader.class);
+    if (obj != Appearance.INHERITED) {
+      SLShader slShader = (SLShader) obj;      
+      ri.atmosphere(slShader.getName(), slShader.getParameters());
+    }
   }
 	/**
 	 * Handle background specifications contained in the top-level appearance:
@@ -600,7 +609,21 @@ public class RIBVisitor extends SceneGraphVisitor {
 			SLShader slShader = (SLShader) obj;
 			ri.displacement(slShader.getName(), slShader.getParameters());
 		}
-		// TODO check for volume shaders here too
+		
+    obj = eap.getAttribute(CommonAttributes.RMAN_VOLUME_EXTERIOR_SHADER, Appearance.INHERITED,
+        SLShader.class);
+    if (obj != Appearance.INHERITED) {
+      SLShader slShader = (SLShader) obj;
+      ri.exterior(slShader.getName(), slShader.getParameters());
+    }
+    obj = eap.getAttribute(CommonAttributes.RMAN_VOLUME_INTERIOR_SHADER, Appearance.INHERITED,
+        SLShader.class);
+    if (obj != Appearance.INHERITED) {
+      SLShader slShader = (SLShader) obj;
+      ri.interior(slShader.getName(), slShader.getParameters());
+    }
+
+    
 		RendermanShader polygonShader = (RendermanShader) ShaderLookup
 				.getShaderAttr(this, eap, "", CommonAttributes.POLYGON_SHADER);
 		ri.shader(polygonShader);

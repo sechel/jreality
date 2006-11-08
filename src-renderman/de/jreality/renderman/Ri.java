@@ -198,8 +198,16 @@ public class Ri {
     public  void displacement(String name, Map map) {
       w.print("Displacement "+RIBHelper.str(name)+" ");
       RIBHelper.writeMap(w,map);
-  }
+    }
     
+    public void interior(String name, Map map){
+      w.print("Interior "+RIBHelper.str(name)+" ");
+      RIBHelper.writeMap(w,map);
+    }
+    public void exterior(String name, Map map){
+      w.print("Exterior "+RIBHelper.str(name)+" ");
+      RIBHelper.writeMap(w,map);
+    }    
     public void atmosphere(String name, Map map){
       w.print("Atmosphere "+RIBHelper.str(name)+" ");
       RIBHelper.writeMap(w,map);
