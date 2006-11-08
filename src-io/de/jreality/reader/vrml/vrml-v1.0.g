@@ -135,6 +135,8 @@ options {
 	
 //	double[] tempVector3 = new double[3];
 //	boolean collectingMFVec3 = false;		
+	
+	DefUseData defs= new DefUseData(); // class that manages the Def & Use
 }
 
 /// __________________________________________________________________________
@@ -169,23 +171,50 @@ vrmlFile returns [SceneGraphComponent r=null]
 	
 private
 statement[State state]:
-		"DEF"	ID	node[state]
-		/// erst merken dann auswerten!
-		/// als SgC anhaengen
-		/// only Nodes!
-
-	|	"USE"	ID
-		/// Notfalls erst eine App wirklich setzen und den Rest anhaengen
+		defNode [state]
+	|	useNode [state]
 	|	node[state]
 	;
 
 private
+defNode [State state]
+{if (VRMLHelper.verbose) System.err.print(state.history+"Def Node(");
+ String name="";
+ State fake = DefUseData.defState(state);
+}:		"DEF"	
+		name = sfstringValue
+		{if (VRMLHelper.verbose) System.err.println(name+"):");}
+		statement[fake]
+	{
+		defs.addDef(fake,name);
+		if (VRMLHelper.verbose) System.err.print("DEF End(");
+		defs.use(state,name); 
+		if (VRMLHelper.verbose) System.err.println("DEF used)");
+	}
+	;
+
+private
+useNode [State state]
+{if (VRMLHelper.verbose) System.err.print(state.history+"Use Node(");
+ String name="";
+}:		"USE"	
+		name = sfstringValue
+		{if (VRMLHelper.verbose) System.err.print(name);}
+	{
+		defs.use(state,name);
+		if (VRMLHelper.verbose) System.err.println(")");
+	}
+	;
+
+
+private
 node[State state]
-{if (VRMLHelper.verbose) System.err.print(state.history+"Got Node: ");}
-	:(groupNode						[state]
-  	  | shapeNode					[state]
+{if (VRMLHelper.verbose) System.err.print(state.history+"Got Node: ");
+}
+	:(  groupNode					[state]{state.defTyp=DefUseData.KNOT;}
+  	  | shapeNode					[state]{state.defTyp=DefUseData.KNOT;}
 	  | propertyGeoNAppNode			[state]
-	  | propertyMatrixTransformNode	[state]
+	  | propertyMatrixTransformNode	[state]{state.defTyp=DefUseData.TRAFO;}
 	  | specialNode				 	[state]
 	  | strangeNode 		         // fremd definierter Node (ignorieren)
 	 )
@@ -195,8 +224,8 @@ node[State state]
 private
 specialNode[State state]
  {if (VRMLHelper.verbose) System.err.print("special Node: ");}
-	:( camNode	[state]
-	  | lightNode [state]
+	:( camNode	[state]  {state.defTyp=DefUseData.KNOT; System.out.println("def-Cam Problem?");}
+	  | lightNode [state]{state.defTyp=DefUseData.KNOT;}
 	  | "WWWInline" 		egal	 //[state] TODO3
 	 )
 	;
@@ -462,15 +491,11 @@ indexedFaceSetNode [State state, Appearance app] returns [IndexedFaceSet ifs=nul
 	int[][] normalIndex2 = VRMLHelper.convertIndexList(normalIndex);
 	int[][] textureCoordIndex2 = VRMLHelper.convertIndexList(textureCoordIndex);
 	
-	// TODO0:
 	IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
 	ifsf.setVertexCount(state.coords.length);
 	ifsf.setFaceCount(coordIndex2.length);
 	ifsf.setVertexAttribute(Attribute.COORDINATES,new DoubleArrayArray.Array(state.coords) );
 	ifsf.setFaceIndices(coordIndex2);
-
-
-
 	if (state.normalBinding >=6 | state.materialBinding>=6 
 		| state.textureFile.equals("")	|state.textureData.length!=0 ){
 		// have to separate the vertices!
@@ -630,17 +655,20 @@ sphereNode [State state, Appearance app] returns [IndexedFaceSet sphere=null]
 private
 propertyGeoNAppNode [State state] 
  {if (VRMLHelper.verbose) System.err.print("prop Geo Node: ");}
-	:(	coordinate3Node 		[state]
+	:(	coordinate3Node 		[state]{state.defTyp=DefUseData.COORDS;}
 	  |	"FontStyle"				egal 		// TODO2
 	  |	infoNode				[state]
-	  |	materialNode			[state]
-	  |	materialBindingNode		[state]		// nur fuer IFS & ILS implementiert TODO3: rest
-	  |	normalNode				[state]
-	  |	normalBindingNode		[state]		// nur fuer IFS implementiert TODO3: rest
-	  |	texture2Node			[state]
-	  |	texture2TransformNode	[state]
-	  |	textureCoordinate2Node	[state]
-	  |	shapeHintsNode			[state]		// eigentlich egal
+	  |	materialNode			[state]{state.defTyp=DefUseData.MATERIAL;}
+	  |	materialBindingNode		[state]{state.defTyp=DefUseData.BIND_M;}
+	  								// nur fuer IFS & ILS implementiert TODO3: rest
+	  |	normalNode				[state]{state.defTyp=DefUseData.NORMALS;}
+	  |	normalBindingNode		[state]{state.defTyp=DefUseData.BIND_N;}
+	  								// nur fuer IFS implementiert TODO3: rest
+	  |	texture2Node			[state]{state.defTyp=DefUseData.TEXTURE;}
+	  |	texture2TransformNode	[state]{state.defTyp=DefUseData.TEXTURE_TRAFO;}
+	  |	textureCoordinate2Node	[state]{state.defTyp=DefUseData.TEXTURE_COORDS;}
+	  |	shapeHintsNode			[state]{state.defTyp=DefUseData.SHAPE_HINTS;}
+	  								// eigentlich egal
 	 )
 	;
 

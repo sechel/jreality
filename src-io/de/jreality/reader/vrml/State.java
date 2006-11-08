@@ -50,19 +50,20 @@ public class State {
 	public double [][] normals= new double[0][3];
 	public Transformation trafo=null;
 	public Transformation extraGeoTrans=null;// fuer die Abmessungen der Geometrie
-	String textureFile="";				// TexturDaten
-	int[][][] textureData= new int[][][]{{{}}};
-	boolean wrapS=true; 
-	boolean wrapT=true; 
-	Matrix textureTrafo = MatrixBuilder.euclidean().getMatrix(); 
-	double [][] textureCoords=new double[][]{{0,0}};
+	public String textureFile="";				// TexturDaten
+	public int[][][] textureData= new int[][][]{{{}}};
+	public boolean wrapS=true; 
+	public boolean wrapT=true; 
+	public Matrix textureTrafo = MatrixBuilder.euclidean().getMatrix(); 
+	public double [][] textureCoords=new double[][]{{0,0}};
 	public int vertexDraw=0;// visibility // 0= inherit, 1= true, 2= false; 
 	public int edgeDraw=0;
 	public int faceDraw=0; 
 	public int vertOrder=0;	// ShapeHints
 	public int shapeType=0;
 	public int faceType=0;
-	double creaseAngle = 0.5f;
+	public double creaseAngle = 0.5f;
+	public int defTyp=DefUseData.NO_TYP;
 	
 //	-------------- construct --------------
 	public State(){	}
