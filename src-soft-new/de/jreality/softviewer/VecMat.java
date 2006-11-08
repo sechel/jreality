@@ -371,5 +371,27 @@ class VecMat {
     // TODO see if the following is o.k. : I added the following for the Inverse:
     dst[4 * 3 + 3]= 1;
   }
-
+  public static void normalToEuler(double r[], int i) {
+      double x = r[i+0];
+      double y = r[i+1];
+      double z = r[i+2];
+      double xrot = 0;
+      double zrot = 0;
+      double yrot = 0;
+      
+//  if(x*x+y*y -0.0001> 0.) {
+//      xrot =  -Math.acos(z);
+//      zrot =  Math.atan2(y,x);
+//  }
+      if(z*z +x*x -0.000001> 0.) {
+          xrot =  Math.acos(y);
+          yrot =  Math.atan2(x,z);
+      }
+      //e.set(xrot,yrot,zrot);
+      r[i+0] = xrot;
+      r[i+1] = yrot;
+      r[i+2] = zrot;
+      //e.set(Math.PI/2,0,Math.PI/2.);
+      //System.err.println("rot "+e+ "   "+ x+ " "+y+" "+z);
+  }
 }

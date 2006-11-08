@@ -56,12 +56,12 @@ public class PrimitiveCache {
 
     public static IndexedFaceSet getSphere() {
         if( sphere == null )
-            sphere = SphereUtility.tessellatedIcosahedronSphere(4,true);
+            sphere = SphereUtility.tessellatedIcosahedronSphere(2,true);
         return sphere;
     }
     public static IndexedFaceSet getCylinder() {
         if( cylinder == null )
-            cylinder = Primitives.cylinder(16);
+            cylinder = Primitives.cylinder(12);
         return cylinder;
     }
     

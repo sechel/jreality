@@ -80,7 +80,8 @@ public class ConstantVertexShader extends VertexShader {
 
 	public void shadeVertex(
 		double[] vertex,
-		Environment environment) {
+		Environment environment, boolean vertexColors) {
+        vertexColors |= this.vertexColors;
         if(!vertexColors) {
 			vertex[Polygon.R] = red;
 			vertex[Polygon.G] = green;

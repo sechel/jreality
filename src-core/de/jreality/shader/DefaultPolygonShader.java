@@ -86,7 +86,7 @@ public interface DefaultPolygonShader extends PolygonShader {
 	final static double SPECULAR_COEFFICIENT_DEFAULT = .7;
 	final static Color SPECULAR_COLOR_DEFAULT = Color.WHITE;
 	final static double SPECULAR_EXPONENT_DEFAULT = 60.;
-	final static double TRANSPARENCY_DEFAULT = 0.5;
+	final static double TRANSPARENCY_DEFAULT = 0.0;
 	Object CREATE_DEFAULT=new Object();
 
 	TextShader createTextShader(String name);

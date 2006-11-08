@@ -88,7 +88,8 @@ public class DefaultVertexShader extends VertexShader {
 	/* (non-Javadoc)
 	 * @see de.jreality.soft.VertexShader#shadeVertex(double[], de.jreality.soft.Environment)
 	 */
-	public final void shadeVertex(final double[] vd, final Environment environment) {
+	public final void shadeVertex(final double[] vd, final Environment environment, boolean vertexColors) {
+        vertexColors |= this.vertexColors;
 		double nx = vd[Polygon.NX];
 		double ny = vd[Polygon.NY];
 		double nz = vd[Polygon.NZ];

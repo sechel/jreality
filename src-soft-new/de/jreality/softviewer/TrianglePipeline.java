@@ -142,6 +142,9 @@ public class TrianglePipeline {
 
     private static double[][] pointColors = new double[16][4];
     private DoubleArrayArray pointColorsDataList = new DoubleArrayArray.Array(pointColors);
+    
+    private static double[][] lineFaceColors = new double[1][4];
+    private DoubleArrayArray lineFaceColorsDataList = new DoubleArrayArray.Array(lineFaceColors);
 
     
 //    private DataList pointColorDataList = StorageModel.DOUBLE_ARRAY_ARRAY
@@ -237,7 +240,7 @@ public class TrianglePipeline {
         fillVertexData(vd, vertices, nd, normals, texCoords, vertexColors,
                 faceNormal,faceColor,transform);
         // shade
-        shader.shadePolygon(polygon, environment);
+        shader.shadePolygon(polygon, environment,vertexColors!=null | faceColor!=null);
         
         // return early if polygon is clipped out
         //TODO: debug clipPlanes
@@ -669,18 +672,20 @@ private final void rasterRemaining() {
     public final void processPoint(final double[] data, int index, int length) {
         if (pointShader == null)
             return;
+        double r = pointShader.getPointRadius();
         if (length == 4)
             processPoint(data[index], data[index + 1], data[index + 2],
-                    data[index + 3]);
+                    data[index + 3],r,null);
         else
-            processPoint(data[index], data[index + 1], data[index + 2], 1);
+            processPoint(data[index], data[index + 1], data[index + 2], 1,r,null);
     }
 
-    public final void processPoint(final DoubleArrayArray data, int index,DataList vertexColors) {
+    public final void processPoint(final DoubleArrayArray data, int index,DataList vertexColors,DataList vertexRadii) {
         DoubleArray da = data.item(index).toDoubleArray();
         double w = 1;
         if (da.size() == 4)
             w = da.getValueAt(3);
+        DataList vertexColorsOld;
         if (vertexColors!=null) {
             DoubleArray color = vertexColors.item(index).toDoubleArray();
             for (int i = 0; i < 16; i++) {
@@ -689,16 +694,22 @@ private final void rasterRemaining() {
                 pointColors[i][2] = color.getValueAt(2);
                 pointColors[i][3] = (color.size() > 3) ? color.getValueAt(3) : 1.;
             }
-            vertexColors = pointColorsDataList;
         }
-        processPoint(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), w);
+        double r;
+        if(vertexRadii != null)
+            r = vertexRadii.toDoubleArray().getValueAt(index);
+            else r = pointShader.getPointRadius();
+        //vertexColorsOld = vertexColors;
+        //vertexColors = pointColorsDataList;
+        processPoint(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), w,r,vertexColors!=null?pointColorsDataList:null);
+        //vertexColors = vertexColorsOld;
     }
 
     public final void processPoint(final double x, final double y,
-            final double z, final double w) {
+            final double z, final double w,double pointRadius,DataList pointColors) {
         if (pointShader == null)
             return;
-        double pointRadius = pointShader.getPointRadius();
+        
         VecMat.transform(matrix, x, y, z, w, point0, 0);
         VecMat.transformUnNormalized(matrix, 0, 0, pointRadius, normal0, 0);
         double[] mat = matrix;
@@ -716,8 +727,8 @@ private final void rasterRemaining() {
         Rn.inverse(inverseTransposeMatrix, inverseTransposeMatrix);
         shader = pointShader.getCoreShader();
         //computeArray(pointVertices, pointIndices, zNormal, pointNormals);
-
-        process(pointVerticesDataList,pointIndicesDataList,zNormalDataList,pointNormalsDataList,null,pointColorsDataList,null,null,true);
+        
+        process(pointVerticesDataList,pointIndicesDataList,zNormalDataList,pointNormalsDataList,null,pointColors,null,null,true);
         // outline :
         if (outlineFraction > 0 /* && pointShader!= null */) {
             shader = pointShader.getOutlineShader();
@@ -833,7 +844,7 @@ private final void rasterRemaining() {
     private static final double cs = Math.cos(0.2);
 
     private static final double ss = Math.sin(0.2);
-
+/*
     private double test1[] = new double[3];
 
     private double test2[] = new double[3];
@@ -849,15 +860,16 @@ private final void rasterRemaining() {
     private DoubleArray tda3 = new DoubleArray(test3);
 
     private DoubleArray tda4 = new DoubleArray(test4);
-
+*/
     private double[] zzNormal = new double[3];
 
     
-    public final void processPseudoTube(DoubleArray from, DoubleArray to) {
+    public final void processPseudoTube(DoubleArray from, DoubleArray to, double lineWidth,DoubleArray colors) {
+
         if (lineShader == null)
             return;
         shader = lineShader.getPolygonShader();
-        double lineWidth = lineShader.getTubeRadius();
+        //double lineWidth = lineShader.getTubeRadius();
         double w = 1;
         if (from.size() == 4)
             w = from.getValueAt(3);
@@ -938,7 +950,7 @@ private final void rasterRemaining() {
         normal2[5] = normal1[2];
 
         //computeArrayNoTransform(line, lineIndices, normal2, nIndices);
-        process(lineDataList,lineIndicesDataList,normal2DataList,nIndicesDataList,null,null,null,null,false);
+        process(lineDataList,lineIndicesDataList,normal2DataList,nIndicesDataList,null,null,null,colors,false);
 
         // ///
 
@@ -967,7 +979,7 @@ private final void rasterRemaining() {
         normal2[5] = ss * normal1[2];
 
         //computeArrayNoTransform(line, lineIndices, normal2, nIndices);
-        process(lineDataList,lineIndicesDataList,normal2DataList,nIndicesDataList,null,null,null,null,false);
+        process(lineDataList,lineIndicesDataList,normal2DataList,nIndicesDataList,null,null,null,colors,false);
         /*
          * test1[0] = point1[0]; test1[1] = point1[1]; test1[2] = point1[2];
          * test2[0] = point1[0]+normal1[0]; test2[1] = point1[1]+normal1[1];

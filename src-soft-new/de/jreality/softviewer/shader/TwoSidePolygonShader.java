@@ -70,7 +70,7 @@ public class TwoSidePolygonShader extends PolygonShader {
          back = b;
 	 }
 
-    public final void shadePolygon(Polygon p, Environment environment) {
+    public final void shadePolygon(Polygon p, Environment environment,boolean vertexColors) {
         double[] vd = p.getPoint(0);
         double px = vd[Polygon.SX];
         double py = vd[Polygon.SY];
@@ -90,9 +90,9 @@ public class TwoSidePolygonShader extends PolygonShader {
         
 		boolean faceforward = (px * d1[0] + py * d1[1] + pz * d1[2]) <= 0 ;
         if(faceforward){
-            front.shadePolygon(p,environment);
+            front.shadePolygon(p,environment,vertexColors);
         } else {
-            back.shadePolygon(p,environment);
+            back.shadePolygon(p,environment,vertexColors);
         }
     }
 

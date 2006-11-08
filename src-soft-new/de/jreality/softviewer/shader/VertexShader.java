@@ -59,7 +59,7 @@ public abstract class VertexShader {
 	protected boolean vertexColors;
     protected boolean interpolateAlpha;
 
-    public abstract void shadeVertex(final double[] vertex, final Environment environment);
+    public abstract void shadeVertex(final double[] vertex, final Environment environment, boolean vertexColors);
 	public abstract double getTransparency();
     public boolean interpolateAlpha() {
         return interpolateAlpha;

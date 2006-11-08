@@ -57,6 +57,7 @@ public class Attribute implements Serializable {
   public static final Attribute INDICES=attributeForName("indices");
   public static final Attribute TEXTURE_COORDINATES=attributeForName("texture coordinates");
   public static final Attribute POINT_SIZE=attributeForName("pointSize");
+  public static final Attribute RADII=attributeForName("radii");
   public static final Attribute LABELS=attributeForName("labels");
   
   /**

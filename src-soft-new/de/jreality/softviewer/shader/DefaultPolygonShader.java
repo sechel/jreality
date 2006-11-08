@@ -101,7 +101,7 @@ public class DefaultPolygonShader extends PolygonShader {
         
     }
     
-    public final void shadePolygon(Polygon p, Environment environment) {
+    public final void shadePolygon(Polygon p, Environment environment, boolean vertexColors) {
         p.setTransparency(vertexShader.getTransparency());
         p.setTexture(texture);
         p.setInterpolateAlpha(interpolateAlpha());
@@ -109,7 +109,7 @@ public class DefaultPolygonShader extends PolygonShader {
         int n = p.getLength();
 		if(smooth) {
             for(int i = 0; i< n;i++) {
-                vertexShader.shadeVertex(p.getPoint(i),environment);
+                vertexShader.shadeVertex(p.getPoint(i),environment,vertexColors);
             }
         } else {
             double[] v = p.getCenter();
@@ -148,7 +148,7 @@ public class DefaultPolygonShader extends PolygonShader {
             v[Polygon.NZ] = vertexData[Polygon.NZ];
             */
             
-            vertexShader.shadeVertex(v,environment);
+            vertexShader.shadeVertex(v,environment,vertexColors);
             
             for(int i = 0; i< n;i++) {
                 vertexData = p.getPoint(i);

@@ -90,6 +90,10 @@ import de.jreality.softviewer.shader.PolygonShader;
 public class RenderingVisitor extends SceneGraphVisitor {
     // private static final String FACE_SHADER =
     // /*"faceShader."+*/CommonAttributes.POLYGON_SHADER;
+    private static final boolean POINT_SPHERES = true;
+    private static final boolean LINE_CYLINDERS = true;
+    private static final Cylinder CYLINDER = new Cylinder();;
+    
     private boolean shaderUptodate;
 
     protected Environment environment = new Environment();
@@ -259,16 +263,47 @@ public class RenderingVisitor extends SceneGraphVisitor {
             IntArrayArray edgeIndices = dl.toIntArrayArray();
             DoubleArrayArray vertices = g.getVertexAttributes(
                     Attribute.COORDINATES).toDoubleArrayArray();
+            DataList radii = g.getEdgeAttributes(Attribute.RADII);
+            DataList colors = g.getEdgeAttributes(Attribute.COLORS);
+            DoubleArray radiiArray = null;
+            if(radii != null) radiiArray = radii.toDoubleArray();
             pipeline.startGeometry(g);
             for (int i = 0, n = edgeIndices.size(); i < n; i++) {
                 IntArray edge = edgeIndices.item(i).toIntArray();
+                double radius = 0;
+                if(radiiArray != null)
+                    radius = radiiArray.getValueAt(i);
+                else radius = lineShader.getTubeRadius();
+                
                 for (int j = 0; j < edge.getLength() - 1; j++) {
                     DoubleArray p1 = vertices.item(edge.getValueAt(j))
                             .toDoubleArray();
                     DoubleArray p2 = vertices.item(edge.getValueAt(j + 1))
                             .toDoubleArray();
                     // pipeline.processLine(p1, p2);
-                    pipeline.processPseudoTube(p1, p2);
+                    if(LINE_CYLINDERS) {
+                        DefaultGeometryShader gs = ShaderUtility
+                        .createDefaultGeometryShader(eAppearance);
+                        de.jreality.shader.LineShader ls = gs.getLineShader();
+                        if(ls instanceof DefaultLineShader)
+                            pApp.setAttribute("polygonShader.diffuseColor", ((DefaultLineShader)ls).getDiffuseColor());
+                        if(colors!= null) {
+                            DoubleArray cc = colors.item(i).toDoubleArray();
+                            if(cc.size()==4)
+                                pApp.setAttribute("polygonShader.transparency", cc.getValueAt(3));
+                            else 
+                                pApp.setAttribute("polygonShader.transparency", 0);
+                            Color c = new Color((float)cc.getValueAt(0),(float) cc.getValueAt(1),(float) cc.getValueAt(1) );                        
+                            pApp.setAttribute("polygonShader.diffuseColor", c);
+                        }
+                        EffectiveAppearance apOld = eAppearance;
+                        eAppearance = eAppearance.create(pApp);
+                        setupShader();
+                        cylinder(p1, p2,radius);
+                        eAppearance = apOld;
+                        shaderUptodate = false;
+                    } else
+                        pipeline.processPseudoTube(p1, p2,radius,colors!=null?colors.item(i).toDoubleArray():null);
                 }
                 // int ix1=edge.getValueAt(0), ix2=edge.getValueAt(1);
                 // DoubleArray p1=vertices.item(ix1).toDoubleArray();
@@ -298,6 +333,44 @@ public class RenderingVisitor extends SceneGraphVisitor {
             }
         }
         visit((PointSet) g);
+    }
+    double[] cmat = new double[16];
+    double[] cnormal = new double[3];
+    double[] ctrans = new double[3];
+    private void cylinder(DoubleArray p1, DoubleArray p2, double radius) {
+        double w1 = (p1.size()==4)?1/p1.getValueAt(3):1;
+        double w2 = (p2.size()==4)?1/p2.getValueAt(3):1;
+        cnormal[0] = .5*(p2.getValueAt(0)*w2-p1.getValueAt(0)*w2);
+        cnormal[1] = .5*(p2.getValueAt(1)*w2-p1.getValueAt(1)*w2);
+        cnormal[2] = .5*(p2.getValueAt(2)*w2-p1.getValueAt(2)*w2);
+        ctrans[0] = p1.getValueAt(0)*w2 + cnormal[0];
+        ctrans[1] = p1.getValueAt(1)*w2 + cnormal[1];
+        ctrans[2] = p1.getValueAt(2)*w2 + cnormal[2];
+        double d = VecMat.norm(cnormal);
+        if(d !=0) VecMat.normalize(cnormal);
+        
+        VecMat.normalToEuler(cnormal,0);
+
+        VecMat.copyMatrix( currentTrafo,tmpTrafo);
+        
+        VecMat.assignTranslation(cmat, ctrans);
+        VecMat.multiplyFromRight(tmpTrafo, cmat);
+
+        VecMat.assignRotationZ(cmat, cnormal[2]);
+        VecMat.multiplyFromRight(tmpTrafo, cmat);
+        
+        VecMat.assignRotationY(cmat, cnormal[1]);
+        VecMat.multiplyFromRight(tmpTrafo, cmat);
+        
+        VecMat.assignRotationX(cmat, cnormal[0]+Math.PI/2);
+        VecMat.multiplyFromRight(tmpTrafo, cmat);
+        
+        VecMat.assignScale(cmat, radius,radius,d);
+        VecMat.multiplyFromRight(tmpTrafo, cmat);
+
+        pipeline.setMatrix(tmpTrafo);
+        visit(CYLINDER);
+        pipeline.setMatrix(currentTrafo);
     }
 
     private int[] fni = new int[Polygon.VERTEX_LENGTH];
@@ -376,7 +449,11 @@ public class RenderingVisitor extends SceneGraphVisitor {
         }
         visit((IndexedLineSet) ifs);
     }
+    double[] pmat = new double[16];
+    double[] tmpTrafo = new double[16];
 
+    private Sphere SPHERE = new Sphere();
+    Appearance pApp = new Appearance();
     public void visit(PointSet p) {
         if (!shaderUptodate)
             setupShader();
@@ -389,9 +466,46 @@ public class RenderingVisitor extends SceneGraphVisitor {
                 return;
             pipeline.startGeometry(p);
             DataList vertexColors = p.getVertexAttributes(Attribute.COLORS);
-            for (int i = 0; i < n; i++)
-                pipeline.processPoint(a, i,vertexColors);
-
+            DataList vertexRadii = p.getVertexAttributes(Attribute.RADII);
+            if(!POINT_SPHERES)
+                    for (int i = 0; i < n; i++)
+                        pipeline.processPoint(a, i,vertexColors,vertexRadii);
+            else
+                for (int i = 0; i < n; i++) {
+                    pmat[0]  = pmat[5]  = pmat[10] = vertexRadii!=null?vertexRadii.toDoubleArray().getValueAt(i):pointShader.getPointRadius();
+                    DoubleArray da = a.item(i).toDoubleArray();
+                    pmat[3] = da.getValueAt(0);
+                    pmat[7] = da.getValueAt(1);
+                    pmat[11] = da.getValueAt(2);
+                    pmat[15] = da.size()==4?da.getValueAt(3):1;
+                    
+                    VecMat.copyMatrix( currentTrafo,tmpTrafo);
+                    VecMat.multiplyFromRight(tmpTrafo, pmat);
+                    pipeline.setMatrix(tmpTrafo);
+                    //TODO set shader and vertexcolors correctly
+                    DefaultGeometryShader gs = ShaderUtility
+                    .createDefaultGeometryShader(eAppearance);
+                    de.jreality.shader.PointShader pts = gs.getPointShader();
+                    if(pts instanceof DefaultPointShader)
+                        pApp.setAttribute("polygonShader.diffuseColor", ((DefaultPointShader)pts).getDiffuseColor());
+                    if(vertexColors!= null) {
+                        DoubleArray cc = vertexColors.item(i).toDoubleArray();
+                        if(cc.size()==4)
+                            pApp.setAttribute("polygonShader.transparency", cc.getValueAt(3));
+                        else 
+                            pApp.setAttribute("polygonShader.transparency", 0);
+                        Color c = new Color((float)cc.getValueAt(0),(float) cc.getValueAt(1),(float) cc.getValueAt(1) );                        
+                        pApp.setAttribute("polygonShader.diffuseColor", c);
+                    }
+                    EffectiveAppearance apOld = eAppearance;
+                    eAppearance = eAppearance.create(pApp);
+                    setupShader();
+                    visit(SPHERE );
+                    pipeline.setMatrix(currentTrafo);
+                    eAppearance = apOld;
+                    shaderUptodate = false;
+                    //pipeline.processPoint(a, i,vertexColors,vertexRadii);
+                }
             // Labels
             if (p.getVertexAttributes(Attribute.LABELS) != null) {
                 Class shaderType = (Class) eAppearance.getAttribute(
@@ -488,17 +602,27 @@ public class RenderingVisitor extends SceneGraphVisitor {
     public void visit(Sphere s) {
         if (!shaderUptodate)
             setupShader();
+        LineShader lso = lineShader;
+        lineShader = null;
+        PointShader pso = pointShader;
+        pointShader = null;
         pipeline.startGeometry(s);
         PrimitiveCache.getSphere().accept(this);
-        // Geometries.unitSphere().apply(pipeline);
+        pointShader = pso;
+        lineShader = lso;
     }
 
     public void visit(Cylinder c) {
         if (!shaderUptodate)
             setupShader();
+        LineShader lso = lineShader;
+        lineShader = null;
+        PointShader pso = pointShader;
+        pointShader = null;
         pipeline.startGeometry(c);
         PrimitiveCache.getCylinder().accept(this);
-        // Geometries.cylinder().apply(pipeline);
+        pointShader = pso;
+        lineShader = lso;
     }
 
     //

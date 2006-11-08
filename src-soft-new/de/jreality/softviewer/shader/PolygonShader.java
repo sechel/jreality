@@ -54,7 +54,7 @@ import de.jreality.softviewer.Texture;
 public abstract class PolygonShader {
 	protected Texture texture;
 
-    public abstract  void shadePolygon(final Polygon p, final Environment environment);
+    public abstract  void shadePolygon(final Polygon p, final Environment environment,boolean vertexColors);
 	public abstract boolean interpolateColor();
 	public abstract boolean isOutline();
     public abstract boolean hasTexture();
