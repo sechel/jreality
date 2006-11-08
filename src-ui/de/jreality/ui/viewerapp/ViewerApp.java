@@ -48,7 +48,6 @@ import java.net.URL;
 import java.security.AccessControlException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import javax.swing.Action;
 import javax.swing.JFrame;
@@ -180,8 +179,8 @@ public class ViewerApp {
     frame = new JFrame();
     selectionManager = new SelectionManager(jrScene.getPath("emptyPickPath")); //default selection = scene node
     selectionManager.setAuxiliaryRoot(viewerSwitch.getAuxiliaryRoot());
-    selectionManager.setViewer(viewerSwitch);
-    menuFactory = new MenuFactory(this);  //uses frame, viewerSwitch, selectionManager and viewerapp itself
+    selectionManager.setViewer(viewerSwitch);  //used to force rendering
+    menuFactory = new MenuFactory(this);  //uses frame, viewerSwitch, selectionManager and viewerApp itself
     menuBar = menuFactory.getMenuBar();
   }
   
@@ -317,7 +316,7 @@ public class ViewerApp {
     uiFactory.setAttachNavigator(attachNavigator);
     uiFactory.setAttachBeanShell(attachBeanShell);
 
-    //update menu (depends on attachNavigator/BeanShell)
+    //update menu (depends on attachNavigator/BeanShell, SelectionManager)
     menuFactory.update();
   }
   
