@@ -3,7 +3,7 @@
   <rawdevices>
     <!--rawdevice id="Motionstar" type="de.jreality.toolsystem.raw.DeviceMotionstar"/-->
     <rawdevice id="Trackd" type="de.jreality.toolsystem.raw.DevicePortalTrackd"/>
-    <!--rawdevice id="Keyboard" type="de.jreality.toolsystem.raw.DeviceKeyboard"/-->
+    <rawdevice id="Keyboard" type="de.jreality.toolsystem.raw.DeviceKeyboard"/>
     <!--rawdevice id="Mouse" type="de.jreality.toolsystem.raw.DeviceMouse"/-->
     <rawdevice id="SystemTimer" type="de.jreality.toolsystem.raw.DeviceSystemTimer"/>
     <!--rawdevice id="Joystick" type="de.jreality.toolsystem.raw.DeviceJoystick"/-->
@@ -68,6 +68,11 @@
     <virtualdevice type="de.jreality.toolsystem.virtual.VirtualDoubleClick">
       <inputslot>PrimaryAction</inputslot>
       <outputslot>PanelActivation</outputslot>
+    </virtualdevice>
+
+    <virtualdevice type="de.jreality.toolsystem.virtual.VirtualDoubleClick">
+      <inputslot>PrimarySelection</inputslot>
+      <outputslot>GravityToggle</outputslot>
     </virtualdevice>
 
     <constant name="FollowPointerSwitch">
