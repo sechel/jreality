@@ -411,9 +411,8 @@ public class ViewerApp {
   private ToolSystemViewer createViewer() throws IOException {
     if (viewers == null) {
       
-      String viewer = getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer"); // de.jreality.portal.DesktopPortalViewer");
+      String viewer = getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.softviewer.SoftViewer"); // de.jreality.portal.DesktopPortalViewer");
       String[] vrs = viewer.split(" ");
-      System.out.println(viewer+" numViewers="+vrs.length);
       List<Viewer> viewerList = new LinkedList<Viewer>();
       String viewerClassName;
       for (int i = 0; i < vrs.length; i++) {
@@ -422,7 +421,6 @@ public class ViewerApp {
           Viewer v = createViewer(viewerClassName);
           viewerList.add(v);
         } catch (Exception e) { // catches creation problems - i. e. no jogl in classpath
-          e.printStackTrace();
           LoggingSystem.getLogger(this).info("could not create viewer instance of ["+viewerClassName+"]");
         } catch (NoClassDefFoundError ndfe) {
           System.out.println("Possibly no jogl in classpath!");
