@@ -276,7 +276,8 @@ public class ViewerVR {
 	private ImageData[] cubeMap;
 	private boolean generatePickTrees;
 	private ButtonGroup textureGroup;
-	
+	private boolean panelInScene = true;
+	private boolean managingPanelPopup = true;
 	
 	public ViewerVR() throws IOException {
 
@@ -546,7 +547,7 @@ public class ViewerVR {
 				if (currentBackgroundColorTop) {
 					setTopColor(color);
 				} else {
-					setDownColor(color);
+					setBottomColor(color);
 				}
 			}
 		});
@@ -1300,13 +1301,24 @@ public class ViewerVR {
 		}
 		sp.show(getSceneRoot(), new Matrix(avatarPath.getMatrix(null)));
 	}
-
+	private void updateBackgroundColorChooser(boolean top, Color c) {
+		if (currentBackgroundColorTop == top) {
+			backgroundColorChooser.setColor(c);
+		}
+	}
+	
 	private void switchToBackgroundColorChooser(boolean top) {
 		currentBackgroundColorTop = top;
 		backgroundColorChooser.setColor(top ? topColor : bottomColor);
 		sp.getFrame().setVisible(false);
 		sp.getFrame().setContentPane(backgroundColorChooser);
 		sp.getFrame().setVisible(true);
+	}
+	
+	private void updateContentColorChooser(String attribute, Color c) {
+		if (attribute.equals(currentColor)) {
+			contentColorChooser.setColor(c);
+		}
 	}
 	
 	private void switchToContentColorChooser(String attribute) {
@@ -1410,11 +1422,6 @@ public class ViewerVR {
 	public Color getDownColor() {
 		return bottomColor;
 	}
-
-	public void setDownColor(Color downColor) {
-		this.bottomColor = downColor;
-		updateBackground();
-	}
 	
 	private void updateBackground() {
 		if (topColor != null && bottomColor != null) {
@@ -1432,6 +1439,7 @@ public class ViewerVR {
 	public void setTopColor(Color color) {
 		this.topColor = color;
 		updateBackground();
+		updateBackgroundColorChooser(true, color);
 	}
 
 	public void switchToFileBrowser() {
@@ -1888,6 +1896,7 @@ public class ViewerVR {
 
 	public void setBottomColor(Color color) {
 		this.bottomColor = color;
+		updateBackgroundColorChooser(false, color);
 	}
 	
 	public boolean isBackgroundFlat() {
@@ -1906,10 +1915,9 @@ public class ViewerVR {
 	}
 	
 	public void setPointColor(Color c) {
-		contentAppearance.setAttribute(
-				CommonAttributes.POINT_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR,
-				c
-		);
+		String attribute = CommonAttributes.POINT_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR;
+		contentAppearance.setAttribute(attribute,c);
+		updateContentColorChooser(attribute, c);
 	}
 	
 	public Color getLineColor() {
@@ -1919,10 +1927,9 @@ public class ViewerVR {
 	}
 	
 	public void setLineColor(Color c) {
-		contentAppearance.setAttribute(
-				CommonAttributes.LINE_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR,
-				c
-		);
+		String attribute = CommonAttributes.LINE_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR;
+		contentAppearance.setAttribute(attribute,c);
+		updateContentColorChooser(attribute, c);
 	}
 	
 	public boolean isPointsReflecting() {
@@ -1980,10 +1987,9 @@ public class ViewerVR {
 	}
 	
 	public void setFaceColor(Color c) {
-		contentAppearance.setAttribute(
-				CommonAttributes.POLYGON_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR,
-				c
-		);
+		String attribute = CommonAttributes.POLYGON_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR;
+		contentAppearance.setAttribute(attribute,c);
+		updateContentColorChooser(attribute, c);
 	}
 	
 	public boolean isFacesFlat() {
@@ -2033,7 +2039,7 @@ public class ViewerVR {
 		fileMenu.remove(0);
 		JMenu viewMenu = vApp.getMenu("View");
 		for (int i=0; i<5; i++) {
-			viewMenu.remove(viewMenu.getItemCount()-1);
+		viewMenu.remove(viewMenu.getItemCount()-1);
 		}
 		JMenu helpMenu = new JMenu("Help");
 		helpMenu.add(new AbstractAction("help"){
@@ -2043,7 +2049,6 @@ public class ViewerVR {
 				try {
 					helpURL = new URL("http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/ViewerVR_User_Manual");
 				} catch (MalformedURLException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				try {
@@ -2088,5 +2093,32 @@ public class ViewerVR {
 		JFrame f = vApp.display();
 		f.setSize(800, 600);
 		f.validate();
+	}
+
+	public boolean isManagingPanelPopup() {
+		return managingPanelPopup;
+	}
+
+	public void setManagingPanelPopup(boolean b) {
+		if (managingPanelPopup != managingPanelPopup) {
+			this.managingPanelPopup = b;
+			if (managingPanelPopup) {
+				terrainNode.addTool(sp.getPanelTool());
+			} else {
+				terrainNode.removeTool(sp.getPanelTool());
+			}
+		}
+	}
+
+	public boolean isPanelInScene() {
+		return panelInScene;
+	}
+
+	public void setPanelInScene(boolean panelInScene) {
+		this.panelInScene = panelInScene;
+	}
+
+	public Container getPanel() {
+		return defaultPanel;
 	}
 }
