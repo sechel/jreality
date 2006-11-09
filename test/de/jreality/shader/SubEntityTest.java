@@ -149,4 +149,21 @@ public class SubEntityTest extends TestCase {
     
     System.out.println(gs);
   }
+  
+  public void testNonDefaultShaders() {
+	    System.out.println("\n***********");
+	    System.out.println("\n***********");
+	  
+	  Appearance app = new Appearance();
+	  EffectiveAppearance eapp = EffectiveAppearance.create().create(app);
+	  
+	  DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(app, false);
+	  TwoSidePolygonShader tps = (TwoSidePolygonShader) dgs.createPolygonShader("twoSide");
+	  
+	  DefaultGeometryShader dgsEap = ShaderUtility.createDefaultGeometryShader(eapp);
+	  PolygonShader ps = dgsEap.getPolygonShader();
+	  assertTrue(tps instanceof TwoSidePolygonShader);
+	  System.out.println(ps);
+	  assertTrue(ps instanceof TwoSidePolygonShader);
+  }
 }
