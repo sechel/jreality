@@ -40,50 +40,49 @@
 
 package de.jreality.softviewer.shader;
 
-import de.jreality.scene.Geometry;
-import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.PointSet;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DataList;
-import de.jreality.softviewer.Environment;
-
+import de.jreality.softviewer.Texture;
 
 /**
- * This is what the PolygonPipeline uses to shade a vertex.
+ * 
  * @version 1.0
- * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
+ * @author timh
  *
  */
-public abstract class VertexShader {
-	
-	protected boolean vertexColors;
-    protected boolean interpolateAlpha;
+public class HatchTexture implements Texture {
+    double scaleU = .02;
+    double scaleV = .02;
+    public final int transparency = 255;
+    /**
+     * 
+     */
+    public HatchTexture() {
+        super();
+    }
 
-    public abstract void shadeVertex(final double[] vertex, final Environment environment, boolean vertexColors);
-	public abstract double getTransparency();
-    public boolean interpolateAlpha() {
-        return interpolateAlpha;
+    /* (non-Javadoc)
+     * @see de.jreality.soft.Texture#getColor(double, double, int[])
+     */
+    public void getColor(double u, double v,int x, int y, int[] color) {
+        int value  = (color[0] + color[1] + color[2])/3;
+
+        if(value>90) {
+            color[0] = color[1] = color[2] = 255;
+            color[3] = 255;
+            return;
+        }
+        
+        int m = value >20? 4:(value>5? 2:1);
+        //int iu = ((int) ((x+y)/4))%m;
+        int iu = x%m;
+        //int iu = ((int) ((v/scaleV)+(u/scaleU)))%m;
+        if(iu ==0 ) {
+            color[0] = color[1] = color[2] = 0;
+            color[3] = 255;
+        } else {
+            color[0] = color[1] = color[2] = 255;
+            color[3] = 255;
+        }
+
     }
-    
-    public abstract void setColor(double r, double g, double b);
-    public abstract double getRed();
-    public abstract double getGreen();
-    public abstract double getBlue();
-    public void startGeometry(Geometry geom)
-    {
-        DataList colors=null;
-        vertexColors=
-                (geom instanceof PointSet)
-          &&((colors=((PointSet)geom).getVertexAttributes(Attribute.COLORS))!=null
-                  );
-        //interpolateAlpha=vertexColors&&colors.getStorageModel().getDimensions()[1]!=3;
-        interpolateAlpha=vertexColors&&colors.item(0).size()!=3;
-                
-        vertexColors |= (
-                          (geom instanceof IndexedFaceSet) && ((IndexedFaceSet)geom).getFaceAttributes(Attribute.COLORS)!=null);
-        //System.out.println(vertexColors+": colors: "+colors+" interpolate alpha: "+interpolateAlpha);
-    }
-    public boolean isVertexColors() {
-        return vertexColors;
-    }
+
 }

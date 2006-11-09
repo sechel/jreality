@@ -137,4 +137,12 @@ public class ConstantVertexShader extends VertexShader {
           blue=rgb[2];
      
     }
+
+    @Override
+    public void setColor(double r, double g, double b) {
+        red = r;
+        green = g;
+        blue = b;
+        
+    }
 }

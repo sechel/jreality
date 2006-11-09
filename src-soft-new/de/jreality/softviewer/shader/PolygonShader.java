@@ -61,11 +61,17 @@ public abstract class PolygonShader {
     public abstract boolean interpolateAlpha();
     public abstract boolean needsSorting();
 
+    public abstract void setColor(double r, double g, double b);
+    public abstract double getRed();
+    public abstract double getGreen();
+    public abstract double getBlue();
     public void startGeometry(Geometry geom) {
         
     }
     
     public static PolygonShader createFrom(de.jreality.shader.PolygonShader ps) {
+        if(ps instanceof de.jreality.shader.HatchPolygonShader)
+            return new HatchPolygonShader((de.jreality.shader.DefaultPolygonShader) ps);
         if(ps instanceof de.jreality.shader.DefaultPolygonShader)
             return new DefaultPolygonShader((de.jreality.shader.DefaultPolygonShader) ps);
         if(ps instanceof de.jreality.shader.TwoSidePolygonShader)

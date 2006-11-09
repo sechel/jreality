@@ -282,6 +282,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
                             .toDoubleArray();
                     // pipeline.processLine(p1, p2);
                     if(LINE_CYLINDERS) {
+                        /*
                         DefaultGeometryShader gs = ShaderUtility
                         .createDefaultGeometryShader(eAppearance);
                         de.jreality.shader.LineShader ls = gs.getLineShader();
@@ -299,9 +300,22 @@ public class RenderingVisitor extends SceneGraphVisitor {
                         EffectiveAppearance apOld = eAppearance;
                         eAppearance = eAppearance.create(pApp);
                         setupShader();
+                        */
+                        PolygonShader dps = lineShader.getPolygonShader();
+                        
+                        double red = dps.getRed();
+                        double green = dps.getGreen();
+                        double blue = dps.getBlue();
+                        if(colors!= null) {
+                            DoubleArray  cc = colors.item(i).toDoubleArray();
+                            dps.setColor(cc.getValueAt(0), cc.getValueAt(1), cc.getValueAt(2));
+                        }
+                        pipeline.setFaceShader(dps);
                         cylinder(p1, p2,radius);
-                        eAppearance = apOld;
-                        shaderUptodate = false;
+                        dps.setColor(red,green,blue);
+                        pipeline.setFaceShader(polygonShader);
+                        //eAppearance = apOld;
+                        //shaderUptodate = false;
                     } else
                         pipeline.processPseudoTube(p1, p2,radius,colors!=null?colors.item(i).toDoubleArray():null);
                 }
@@ -472,7 +486,8 @@ public class RenderingVisitor extends SceneGraphVisitor {
                         pipeline.processPoint(a, i,vertexColors,vertexRadii);
             else
                 for (int i = 0; i < n; i++) {
-                    pmat[0]  = pmat[5]  = pmat[10] = vertexRadii!=null?vertexRadii.toDoubleArray().getValueAt(i):pointShader.getPointRadius();
+                    double r = vertexRadii!=null?vertexRadii.toDoubleArray().getValueAt(i):pointShader.getPointRadius();
+                    pmat[0]  = pmat[5]  = pmat[10] = r;
                     DoubleArray da = a.item(i).toDoubleArray();
                     pmat[3] = da.getValueAt(0);
                     pmat[7] = da.getValueAt(1);
@@ -483,6 +498,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
                     VecMat.multiplyFromRight(tmpTrafo, pmat);
                     pipeline.setMatrix(tmpTrafo);
                     //TODO set shader and vertexcolors correctly
+                    /*
                     DefaultGeometryShader gs = ShaderUtility
                     .createDefaultGeometryShader(eAppearance);
                     de.jreality.shader.PointShader pts = gs.getPointShader();
@@ -500,10 +516,23 @@ public class RenderingVisitor extends SceneGraphVisitor {
                     EffectiveAppearance apOld = eAppearance;
                     eAppearance = eAppearance.create(pApp);
                     setupShader();
+                    */
+                    PolygonShader dps= pointShader.getCoreShader();
+                    double red = dps.getRed();
+                    double g = dps.getGreen();
+                    double b = dps.getBlue();
+                    if(vertexColors!= null) {
+                        DoubleArray  cc = vertexColors.item(i).toDoubleArray();
+                        dps.setColor(cc.getValueAt(0), cc.getValueAt(1), cc.getValueAt(2));
+                    }
+                    pipeline.setFaceShader(dps);
                     visit(SPHERE );
+                    dps.setColor(red, g, b);
+                    pipeline.setFaceShader(polygonShader);
                     pipeline.setMatrix(currentTrafo);
-                    eAppearance = apOld;
-                    shaderUptodate = false;
+                    //eAppearance = apOld;
+                   
+                    //shaderUptodate = false;
                     //pipeline.processPoint(a, i,vertexColors,vertexRadii);
                 }
             // Labels
@@ -554,7 +583,24 @@ public class RenderingVisitor extends SceneGraphVisitor {
         // pipeline.setLineShader(l);
         // }
     }
-
+    double[] p1 = new double[8];
+    double[] p2 = new double[8];
+    private double lod(double r) {
+        p1[0] = p1[1] = p1[2] = p2[1] = p2[2] = 0;
+        p2[0] = r;
+        p1[3] = p2[3] = 1;
+        pipeline.transformNDC(p1,p2);
+        p1[0] = p1[4];
+        p1[1] = p1[5];
+        p1[2] = p1[6];
+        VecMat.multiply(p1, 1/p1[7]);
+        p2[0] = p2[4];
+        p2[1] = p2[5];
+        p2[2] = p2[6];
+        VecMat.multiply(p2, 1/p2[7]);
+        VecMat.vecAssignMinus(p2, p1);
+        return VecMat.norm(p2);
+    }
     private final SceneGraphComponent labelComp = new SceneGraphComponent();
 
     private void renderLabels(double scale, double[] offset, int alignment,
@@ -607,7 +653,9 @@ public class RenderingVisitor extends SceneGraphVisitor {
         PointShader pso = pointShader;
         pointShader = null;
         pipeline.startGeometry(s);
-        PrimitiveCache.getSphere().accept(this);
+        double l = lod(1.);
+        //PrimitiveCache.getSphere(l).accept(this);
+        PrimitiveCache.renderSphere(pipeline, l);
         pointShader = pso;
         lineShader = lso;
     }
@@ -620,7 +668,9 @@ public class RenderingVisitor extends SceneGraphVisitor {
         PointShader pso = pointShader;
         pointShader = null;
         pipeline.startGeometry(c);
-        PrimitiveCache.getCylinder().accept(this);
+        double l = lod(1.);
+        PrimitiveCache.renderCylinder(pipeline, l);
+        //PrimitiveCache.getCylinder().accept(this);
         pointShader = pso;
         lineShader = lso;
     }

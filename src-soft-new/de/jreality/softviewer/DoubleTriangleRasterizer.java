@@ -589,10 +589,10 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
             // r *= color[0]*COLOR_CH_SCALE;
             // g *= color[1]*COLOR_CH_SCALE;
             // b *= color[2]*COLOR_CH_SCALE;
-            omt = color[3] * COLOR_CH_SCALE;
-            r = color[0] * COLOR_CH_SCALE;
-            g = color[1] * COLOR_CH_SCALE;
-            b = color[2] * COLOR_CH_SCALE;
+            omt = color[3];// * COLOR_CH_SCALE;
+            r = color[0];// * COLOR_CH_SCALE;
+            g = color[1];// * COLOR_CH_SCALE;
+            b = color[2];// * COLOR_CH_SCALE;
         }
 
         if (omt < 1.D) {

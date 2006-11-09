@@ -128,4 +128,28 @@ public class TwoSidePolygonShader extends PolygonShader {
     public boolean needsSorting() {
         return false; 
     }
+
+
+    @Override
+    public double getBlue() {
+        return front.getBlue();
+    }
+
+
+    @Override
+    public double getGreen() {
+        return front.getGreen();
+    }
+
+
+    @Override
+    public double getRed() {
+        return front.getRed();
+    }
+
+
+    @Override
+    public void setColor(double r, double g, double b) {
+        front.setColor(r, g, b);
+    }
 }

@@ -38,52 +38,59 @@
  */
 
 
-package de.jreality.softviewer.shader;
+package de.jreality.shader;
 
-import de.jreality.scene.Geometry;
-import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.PointSet;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DataList;
-import de.jreality.softviewer.Environment;
-
+import java.awt.Color;
 
 /**
- * This is what the PolygonPipeline uses to shade a vertex.
- * @version 1.0
- * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
+ * The default point shader for jReality. 
+ * @author Charles Gunn
+ * @see DefaultPolygonShader  for general remarks on these shader interfaces.
  *
- */
-public abstract class VertexShader {
-	
-	protected boolean vertexColors;
-    protected boolean interpolateAlpha;
+ */public interface HatchPolygonShader extends DefaultPolygonShader {
 
-    public abstract void shadeVertex(final double[] vertex, final Environment environment, boolean vertexColors);
-	public abstract double getTransparency();
-    public boolean interpolateAlpha() {
-        return interpolateAlpha;
-    }
-    
-    public abstract void setColor(double r, double g, double b);
-    public abstract double getRed();
-    public abstract double getGreen();
-    public abstract double getBlue();
-    public void startGeometry(Geometry geom)
-    {
-        DataList colors=null;
-        vertexColors=
-                (geom instanceof PointSet)
-          &&((colors=((PointSet)geom).getVertexAttributes(Attribute.COLORS))!=null
-                  );
-        //interpolateAlpha=vertexColors&&colors.getStorageModel().getDimensions()[1]!=3;
-        interpolateAlpha=vertexColors&&colors.item(0).size()!=3;
-                
-        vertexColors |= (
-                          (geom instanceof IndexedFaceSet) && ((IndexedFaceSet)geom).getFaceAttributes(Attribute.COLORS)!=null);
-        //System.out.println(vertexColors+": colors: "+colors+" interpolate alpha: "+interpolateAlpha);
-    }
-    public boolean isVertexColors() {
-        return vertexColors;
-    }
+    final static double AMBIENT_COEFFICIENT_DEFAULT = .0;
+
+    final static Color AMBIENT_COLOR_DEFAULT = Color.WHITE;
+    final static double DIFFUSE_COEFFICIENT_DEFAULT = 1.0;
+    final static Color DIFFUSE_COLOR_DEFAULT = Color.BLUE;
+    final static boolean SMOOTH_SHADING_DEFAULT = true;
+    final static double SPECULAR_COEFFICIENT_DEFAULT = .7;
+    final static Color SPECULAR_COLOR_DEFAULT = Color.WHITE;
+    final static double SPECULAR_EXPONENT_DEFAULT = 60.;
+    final static double TRANSPARENCY_DEFAULT = 0.0;
+    Object CREATE_DEFAULT=new Object();
+
+    TextShader createTextShader(String name);
+    Texture2D createTexture2d();
+
+    Double getAmbientCoefficient();
+    Color getAmbientColor();
+
+    Double getDiffuseCoefficient();
+    Color getDiffuseColor();
+
+    Boolean getSmoothShading();
+    Double getSpecularCoefficient();
+
+    Color getSpecularColor();
+    Double getSpecularExponent();
+
+    TextShader getTextShader();
+    Texture2D getTexture2d();
+
+    Double getTransparency();
+    void setAmbientCoefficient(Double d);
+
+    void setAmbientColor(Color c);
+    void setDiffuseCoefficient(Double d);
+
+    void setDiffuseColor(Color c);
+    void setSmoothShading(Boolean b);
+
+    void setSpecularCoefficient(Double d);
+    void setSpecularColor(Color c);
+
+    void setSpecularExponent(Double d);
+    void setTransparency(Double d);
 }

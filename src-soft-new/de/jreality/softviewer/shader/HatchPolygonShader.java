@@ -40,50 +40,26 @@
 
 package de.jreality.softviewer.shader;
 
-import de.jreality.scene.Geometry;
-import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.PointSet;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DataList;
-import de.jreality.softviewer.Environment;
 
 
 /**
- * This is what the PolygonPipeline uses to shade a vertex.
+ * 
  * @version 1.0
- * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
+ * @author timh
  *
  */
-public abstract class VertexShader {
-	
-	protected boolean vertexColors;
-    protected boolean interpolateAlpha;
+public class HatchPolygonShader extends DefaultPolygonShader {
 
-    public abstract void shadeVertex(final double[] vertex, final Environment environment, boolean vertexColors);
-	public abstract double getTransparency();
-    public boolean interpolateAlpha() {
-        return interpolateAlpha;
+    /**
+     * 
+     */
+    public HatchPolygonShader() {
+        super();
+        texture = new HatchTexture();
     }
-    
-    public abstract void setColor(double r, double g, double b);
-    public abstract double getRed();
-    public abstract double getGreen();
-    public abstract double getBlue();
-    public void startGeometry(Geometry geom)
-    {
-        DataList colors=null;
-        vertexColors=
-                (geom instanceof PointSet)
-          &&((colors=((PointSet)geom).getVertexAttributes(Attribute.COLORS))!=null
-                  );
-        //interpolateAlpha=vertexColors&&colors.getStorageModel().getDimensions()[1]!=3;
-        interpolateAlpha=vertexColors&&colors.item(0).size()!=3;
-                
-        vertexColors |= (
-                          (geom instanceof IndexedFaceSet) && ((IndexedFaceSet)geom).getFaceAttributes(Attribute.COLORS)!=null);
-        //System.out.println(vertexColors+": colors: "+colors+" interpolate alpha: "+interpolateAlpha);
+    public HatchPolygonShader(de.jreality.shader.DefaultPolygonShader ps) {
+        super(ps);
+        texture = new HatchTexture();
     }
-    public boolean isVertexColors() {
-        return vertexColors;
-    }
+
 }

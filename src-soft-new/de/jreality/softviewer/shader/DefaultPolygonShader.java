@@ -101,6 +101,7 @@ public class DefaultPolygonShader extends PolygonShader {
         
     }
     
+    
     public final void shadePolygon(Polygon p, Environment environment, boolean vertexColors) {
         p.setTransparency(vertexShader.getTransparency());
         p.setTexture(texture);
@@ -195,6 +196,27 @@ public class DefaultPolygonShader extends PolygonShader {
 
     public boolean needsSorting() {
         return (vertexShader.getTransparency() != 0.)||hasTexture()||interpolateAlpha(); 
+    }
+
+    @Override
+    public void setColor(double r, double g, double b) {
+        vertexShader.setColor(r,g,b);
+        
+    }
+
+    @Override
+    public double getBlue() {
+        return vertexShader.getBlue();
+    }
+
+    @Override
+    public double getGreen() {
+        return vertexShader.getGreen();
+    }
+
+    @Override
+    public double getRed() {
+        return vertexShader.getRed();
     }
 
 }

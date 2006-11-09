@@ -40,29 +40,92 @@
 
 package de.jreality.softviewer;
 
+import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereUtility;
 import de.jreality.scene.IndexedFaceSet;
-
+import de.jreality.scene.data.*;
 public class PrimitiveCache {
 
-    private static IndexedFaceSet sphere;
-    private static IndexedFaceSet cylinder;
+    private static IndexedFaceSet[] sphere = new IndexedFaceSet[5];
+    private static IntArrayArray[] sphereIndices =new  IntArrayArray[5];
+    private static DoubleArrayArray[] sphereVertices =new  DoubleArrayArray[5];
+    private static DoubleArrayArray[] sphereNormals =new  DoubleArrayArray[5];
     
+    private static IndexedFaceSet[] cylinder = new IndexedFaceSet[13];
+    private static IntArrayArray[] cylinderIndices =new  IntArrayArray[13];
+    private static DoubleArrayArray[] cylinderVertices =new  DoubleArrayArray[13];
+    private static DoubleArrayArray[] cylinderNormals =new  DoubleArrayArray[13];
+    
+    
+    static {
+        double d = 1/Math.sqrt(3.);
+        double[][] tetrahedronVerts3 =  
+        {{d,d,d},{d,-d,-d},{-d,d,-d},{-d,-d,d}};
+
+        int[][] tetrahedronIndices = {
+                {0,1,2},
+                {2,1,3},
+                {1,0,3},
+                {0,2,3}};
+        IndexedFaceSet tetra = new IndexedFaceSet(4,4);
+        
+        tetra.setFaceAttributes(Attribute.INDICES, new IntArrayArray.Array(tetrahedronIndices));
+        tetra.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(tetrahedronVerts3));
+       
+        GeometryUtility.calculateAndSetVertexNormals(tetra);        
+        
+        sphere[0] = tetra;
+        GeometryUtility.calculateAndSetVertexNormals(sphere[0]);
+        for (int i = 0; i < sphere.length; i++) {
+            if(i>0)
+                sphere[i] = SphereUtility.tessellatedIcosahedronSphere(i-1,true);
+            sphereIndices[i] = sphere[i].getFaceAttributes(Attribute.INDICES).toIntArrayArray();
+            sphereVertices[i] = sphere[i].getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
+            sphereNormals[i] = sphere[i].getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray();
+        }
+        for (int i = 0; i < cylinder.length; i++) {
+            cylinder[i] = Primitives.cylinder(i+3);
+            cylinderIndices[i] = cylinder[i].getFaceAttributes(Attribute.INDICES).toIntArrayArray();
+            cylinderVertices[i] = cylinder[i].getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
+            cylinderNormals[i] = cylinder[i].getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray();
+        }
+    }
     private PrimitiveCache() {
         super();
         // TODO Auto-generated constructor stub
     }
 
-    public static IndexedFaceSet getSphere() {
-        if( sphere == null )
-            sphere = SphereUtility.tessellatedIcosahedronSphere(2,true);
-        return sphere;
+    public static void renderSphere(TrianglePipeline pipeline, double lod) {
+        int i = (int) Math.min(4*Math.pow(lod,1/3.5),4);
+        //i= 0;
+        for(int j = 0, n = sphereIndices[i].size();j<n;j++) {
+            pipeline.processPolygon(sphereVertices[i], sphereIndices[i].getValueAt(j), sphereNormals[i], sphereIndices[i].getValueAt(j), null, null, null, null);
+        }
     }
-    public static IndexedFaceSet getCylinder() {
-        if( cylinder == null )
-            cylinder = Primitives.cylinder(12);
-        return cylinder;
+    
+    
+    public static void renderCylinder(TrianglePipeline pipeline, double lod) {
+        int i = ((int) Math.min(12*Math.pow(lod,1/2.5),12));
+        //i= 0;
+        for(int j = 0, n = cylinderIndices[i].size();j<n;j++) {
+            pipeline.processPolygon(cylinderVertices[i], cylinderIndices[i].getValueAt(j), cylinderNormals[i], cylinderIndices[i].getValueAt(j), null, null, null, null);
+        }
+    }
+    
+    
+    public static IndexedFaceSet getSphere(double lod) {
+        int i = (int) Math.min(4*Math.pow(lod,1/3.5),4);
+        //i= 0;
+        return sphere[i]==null? sphere[i] = SphereUtility.tessellatedIcosahedronSphere(i-1,true) : sphere[i];
+ //        if( sphere == null )
+//            sphere = SphereUtility.tessellatedIcosahedronSphere(2,true);
+//        return sphere;
+    }
+    public static IndexedFaceSet getCylinder(double lod) {
+        int i = (int) Math.min(16*Math.pow(lod,1/3.5),16);
+        return cylinder[i];
     }
     
 }

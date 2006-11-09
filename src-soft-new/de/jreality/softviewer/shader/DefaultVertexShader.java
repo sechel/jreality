@@ -264,6 +264,28 @@ public class DefaultVertexShader extends VertexShader {
 		this.transparency = transparency;
 	}
 
+    public void setColor(double r, double g, double b) {
+        red = r;
+        green = g;
+        blue = b;
+        
+    }
+
+    @Override
+    public double getBlue() {
+        return blue;
+    }
+
+    @Override
+    public double getGreen() {
+        return green;
+    }
+
+    @Override
+    public double getRed() {
+        return red;
+    }
+
 //    public void setup(EffectiveAppearance eAppearance, String name) {
 //      transparency = eAppearance.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.TRANSPARENCY), transparency);
 //      Color c = (Color)eAppearance.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.DIFFUSE_COLOR), CommonAttributes.DIFFUSE_COLOR_DEFAULT);

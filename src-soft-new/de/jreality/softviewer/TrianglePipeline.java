@@ -1052,6 +1052,17 @@ private final void rasterRemaining() {
         
     }
 
+    public void transformNDC(double[] p1,double[] p2) {
+        VecMat.transformUnNormalized(matrix, p2[0], p2[1], p2[2], p2);
+        VecMat.transform(matrix, p1[0], p1[1], p1[2], p1);
+        double r = VecMat.norm(p2);
+        p2[0] = r + p1[0];
+        p2[1] =  p1[1];
+        p2[2] =  p1[2];
+        perspective.perspective(p1);
+        perspective.perspective(p2);
+    }
+
     /**
      * @return PolygonShader
      */
