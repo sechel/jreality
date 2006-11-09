@@ -67,19 +67,12 @@ import de.jreality.scene.event.AppearanceListener;
  */
 public class Appearance extends SceneGraphNode
 {
-  public static final Object DEFAULT = new Serializable() {
+  // it would be convenient if these were no inner classes but just objects....
+  public static final Object DEFAULT = new Object() {
     public String toString() { return "default"; }
-    Object readResolve() throws ObjectStreamException
-    {
-      return Appearance.DEFAULT;
-    }
   };
-  public static final Object INHERITED = new Serializable() {
+  public static final Object INHERITED = new Object() {
     public String toString() { return "inherited"; }
-    Object readResolve() throws ObjectStreamException
-    {
-      return Appearance.INHERITED;
-    }
   };
   private transient AppearanceListener appearanceListener;
   private HashMap<String, Object> attributes=new HashMap<String, Object>();

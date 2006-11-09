@@ -201,39 +201,40 @@ public class AttributeEntityUtility {
       return result;
     }
 
+    // TODO: no idea what exactly this should do - we need to specify what the
+    // entities should do and how to specify defaults...
     private Object getSubEntityAttribute(PropertyDescriptor pd, Object proxy)
         throws IllegalAccessException {
-      Object result = Appearance.INHERITED, defValue;
+      Object result = Appearance.INHERITED;
       String attrName = pd.getName();
       Class attrType = Class.class;
+      
       if (app != null)
-        result = app.getAttribute(prefix + attrName, attrType);
+          result = app.getAttribute(prefix + attrName, attrType);
+      if (result == Appearance.INHERITED && effApp != null)
+          result = effApp.getAttribute(prefix + attrName, result, attrType);
       if (result != Appearance.INHERITED && result != Appearance.DEFAULT)
         return result;
+      // check for a default value of the sub-entity (how is this specified?)
       Object defaultVal = pd.getValue("default");
       if (defaultVal instanceof Class) {
         try {
+          // check for a default implementation of the sub-entities type.
           Field f = ((Class)defaultVal).getDeclaredField("CREATE_DEFAULT");
           return defaultVal;
         } catch (NoSuchFieldException nfe) {
-          return null;
         }
       }
-      Field f = (Field) defaultVal;
-      if (f != null)
-        defValue = f.get(proxy);
-      else if (attrType.isPrimitive())
-        throw new IllegalStateException(MessageFormat.format(
-            "no default value for primitive attribute {0}."
-                + "\npublic static final {1} {2} = <defaultValue>;",
-            new Object[] { attrName, attrType, defaultFieldName(attrName) }));
-      else
-        defValue = null;
-      if (effApp != null)
-        result = effApp.getAttribute(prefix + attrName, defValue, attrType);
-      else
-        result = defValue;
-      return result;
+      return null;
+      
+//      // if no default value for the sub-entity is given, it is a field (makes more sense: DEFAULT_POLYGON_SHADER)
+//      Field f = (Field) defaultVal;
+//      if (f != null)
+//        defValue = f.get(proxy);
+//      if (defValue instanceof Class) return defValue;
+//      if (effApp != null)
+//        result = effApp.getAttribute(prefix + attrName, defValue, attrType);
+//      return result;
     }
     
     public Object invoke(Object proxy, Method method, Object[] args)
@@ -414,7 +415,7 @@ public class AttributeEntityUtility {
 
   private static Class resolveType(Class clazz) {
     try {
-      Field f = clazz.getField("DEFAULT_ENTITY");
+      Field f = clazz.getDeclaredField("DEFAULT_ENTITY");
       return (Class) f.get(null);
     } catch (NoSuchFieldException nfe) {
     } catch (IllegalAccessException e) {
