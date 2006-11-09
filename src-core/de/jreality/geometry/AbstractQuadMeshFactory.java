@@ -71,6 +71,12 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 	
 	boolean generateTextureCoordinates = false;
 	
+	double uTextureScale = 1;
+	double vTextureScale = 1;
+	
+	double uTextureShift = 0;
+	double vTextureShift = 0;
+	
 	AbstractQuadMeshFactory() {
 		this( Pn.EUCLIDEAN, 10, 10, false, false );
 	}
@@ -252,8 +258,8 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		final int vLineCount = getVLineCount();
 		final int uLineCount = getULineCount();
 		
-		final double dv= 1.0 / (vLineCount - 1);
-		final double du= 1.0 / (uLineCount - 1);
+		final double dv= 1.0 / (vLineCount - 1) * vTextureScale;
+		final double du= 1.0 / (uLineCount - 1) * uTextureScale;
 		
 		double v=0;
 		for(int iv=0, firstIndexInULine=0;
@@ -262,8 +268,8 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 			double u=0;
 			for(int iu=0; iu < uLineCount; iu++, u+=du) {
 				final int indexOfUV=firstIndexInULine + iu;
-				textureCoordinates[2*indexOfUV+0] = u;
-				textureCoordinates[2*indexOfUV+1] = v;
+				textureCoordinates[2*indexOfUV+0] = u + uTextureShift;
+				textureCoordinates[2*indexOfUV+1] = v + vTextureShift;
 			}
 		}
 				
@@ -372,6 +378,58 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		}
 		
 		return vertexNormals;
+	}
+
+	public double getUTextureScale() {
+		return uTextureScale;
+	}
+
+	public void setUTextureScale(double textureScale) {
+		if( this.uTextureScale == textureScale )
+			return;
+		
+		uTextureScale = textureScale;
+		
+		vertexCoordinates.outdate();
+	}
+
+	public double getVTextureScale() {
+		return vTextureScale;
+	}
+
+	public void setVTextureScale(double textureScale) {
+		if( this.vTextureScale == textureScale )
+			return;
+		
+		vTextureScale = textureScale;
+		
+		vertexCoordinates.outdate();
+	}
+
+	public double getUTextureShift() {
+		return uTextureShift;
+	}
+
+	public void setUTextureShift(double textureShift) {
+		if( this.uTextureShift == textureShift )
+			return;
+		
+		uTextureShift = textureShift;
+		
+		vertexCoordinates.outdate();
+	}
+
+	public double getVTextureShift() {
+		return vTextureShift;
+	}
+
+	public void setVTextureShift(double textureShift) {
+		if( this.vTextureShift == textureShift )
+			return;
+		
+		vTextureShift = textureShift;
+		
+		vertexCoordinates.outdate();
 	}
 
 }
