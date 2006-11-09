@@ -582,17 +582,17 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
             color[0] = (int) r;
             color[1] = (int) g;
             color[2] = (int) b;
-            color[3] = (int) omt;
+            color[3] = (int) omt*255;
             texture.getColor(uuu.value / WW, vvv.value / WW, pos % w, pos / w,
                     color);
             // omt *= color[3]*COLOR_CH_SCALE;
             // r *= color[0]*COLOR_CH_SCALE;
             // g *= color[1]*COLOR_CH_SCALE;
             // b *= color[2]*COLOR_CH_SCALE;
-            omt = color[3];// * COLOR_CH_SCALE;
-            r = color[0];// * COLOR_CH_SCALE;
-            g = color[1];// * COLOR_CH_SCALE;
-            b = color[2];// * COLOR_CH_SCALE;
+            omt = color[3] * COLOR_CH_SCALE;
+            r = color[0] * COLOR_CH_SCALE;
+            g = color[1] * COLOR_CH_SCALE;
+            b = color[2] * COLOR_CH_SCALE;
         }
 
         if (omt < 1.D) {
