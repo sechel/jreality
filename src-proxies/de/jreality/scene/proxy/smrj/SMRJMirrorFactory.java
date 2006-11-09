@@ -194,7 +194,10 @@ public class SMRJMirrorFactory extends ProxyFactory {
         Set lst = src.getStoredAttributes();
         for (Iterator i = lst.iterator(); i.hasNext(); ) {
           String aName = (String) i.next();
-            dst.setAttribute(aName, src.getAttribute(aName));
+            Object aa = src.getAttribute(aName);
+            if (aa == Appearance.INHERITED) aa = de.jreality.scene.proxy.scene.Appearance.INHERITED;
+            if (aa == Appearance.DEFAULT) aa = de.jreality.scene.proxy.scene.Appearance.DEFAULT;            
+			dst.setAttribute(aName, aa);
         }
     }
 

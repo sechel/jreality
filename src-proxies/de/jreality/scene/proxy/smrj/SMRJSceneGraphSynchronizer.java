@@ -153,6 +153,8 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
     	System.out.println("Matrix measure: waiting for lock="+dt);
         t = System.currentTimeMillis(); 
     }
+    if (aa == Appearance.INHERITED) aa = de.jreality.scene.proxy.scene.Appearance.INHERITED;
+    if (aa == Appearance.DEFAULT) aa = de.jreality.scene.proxy.scene.Appearance.DEFAULT;
     dst.setAttribute(ev.getKey(), aa);
     if (measure) {
     	dt = System.currentTimeMillis()-t;

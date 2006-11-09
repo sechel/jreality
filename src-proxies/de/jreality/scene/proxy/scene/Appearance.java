@@ -40,6 +40,31 @@
 
 package de.jreality.scene.proxy.scene;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+
+@SuppressWarnings("serial")
 public class Appearance extends de.jreality.scene.Appearance implements
         RemoteAppearance {
+	
+	public static final Object INHERITED = new Serializable() {
+	    Object readResolve() throws ObjectStreamException
+	    {
+	      return de.jreality.scene.Appearance.INHERITED;
+	    }
+	    @Override
+	    public String toString() {
+	    	return "serializable inherited";
+	    }
+	};
+	public static final Object DEFAULT = new Serializable() {
+	    Object readResolve() throws ObjectStreamException
+	    {
+	      return de.jreality.scene.Appearance.DEFAULT;
+	    }
+	    @Override
+	    public String toString() {
+	    	return "serializable default";
+	    }
+	};
 }
