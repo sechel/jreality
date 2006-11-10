@@ -9,6 +9,8 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.beans.Statement;
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +46,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -93,7 +96,7 @@ import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
 import de.jtem.beans.SimpleColorChooser;
 
-// -Dsun.java2d.d3d=false
+
 
 public class ViewerVR {
 	
@@ -435,8 +438,6 @@ public class ViewerVR {
 		makeTextureFileChooser();
 		makeColorChoosers();
 
-		restorePreferences();
-		setAvatarPosition(0, landscape.isTerrainFlat() ? -.5 : -.13, 28);
 		panelInSceneCheckBox = new JCheckBoxMenuItem("panel in scene",true);
 		panelInSceneCheckBox.addActionListener(new ActionListener() {
 			
@@ -444,6 +445,10 @@ public class ViewerVR {
 				setPanelInScene(panelInSceneCheckBox.getState());
 			}
 		});
+		
+		restorePreferences();
+		setAvatarPosition(0, landscape.isTerrainFlat() ? -.5 : -.13, 28);
+
 	}
 
 	private void makeControlPanel() {
@@ -1298,12 +1303,12 @@ public class ViewerVR {
 	}
 
 	private void switchToDefaultPanel() {
-		//sp.getFrame().setVisible(false);
+		sp.getFrame().setVisible(false);
 		sp.setPanelWidth(PANEL_WIDTH);
 		sp.setAboveGround(PANEL_ABOVE_GROUND);
 		sp.getFrame().setContentPane(defaultPanel);
 		sp.getFrame().pack();
-		//sp.getFrame().setVisible(true);
+		sp.getFrame().setVisible(true);
 	}
 
 	protected void showPanel(boolean showFileChooser) {
@@ -1463,12 +1468,12 @@ public class ViewerVR {
 	}
 
 	public void switchToFileBrowser() {
-		//sp.getFrame().setVisible(false);
+		sp.getFrame().setVisible(false);
 		sp.setPanelWidth(FILE_CHOOSER_PANEL_WIDTH);
 		sp.setAboveGround(FILE_CHOOSER_ABOVE_GROUND);
 		sp.getFrame().setContentPane(fileChooserPanel);
 		sp.getFrame().pack();
-		//sp.getFrame().setVisible(true);
+		sp.getFrame().setVisible(true);
 	}
 	
 	public void switchToTextureBrowser(Appearance app) {
@@ -1578,7 +1583,24 @@ public class ViewerVR {
 	public ViewerApp display() {
 		ViewerApp viewerApp = new ViewerApp(sceneRoot, cameraPath, emptyPickPath, avatarPath);
 		JMenuBar menuBar = viewerApp.getMenuBar();
-		JMenu settings = new JMenu("Settings");
+		JMenu settings = new JMenu("ViewerVR");
+		
+		if (managingPanelPopup) settings.add(panelInSceneCheckBox);
+		
+		Action panelPopup = new AbstractAction("Toggle panel") {
+			private static final long serialVersionUID = -4212517852052390335L;
+			{
+			    putValue(SHORT_DESCRIPTION, "Toggle the ViewerVR panel");
+			    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+			}
+			public void actionPerformed(ActionEvent e) {
+				sp.toggle(sceneRoot, new Matrix(avatarPath.getMatrix(null)));
+			}
+		};
+		settings.add(panelPopup);
+
+		settings.addSeparator();
+		
 		Action defaults = new AbstractAction("Restore defaults") {
 			private static final long serialVersionUID = 1834896899901782677L;
 
@@ -1603,7 +1625,7 @@ public class ViewerVR {
 			}
 		};
 		settings.add(savePrefs);
-		if (managingPanelPopup) settings.add(panelInSceneCheckBox);
+		
 		menuBar.add(settings);
 		return viewerApp;
 	}
@@ -1665,6 +1687,8 @@ public class ViewerVR {
 	}
 	
 	public void restoreDefaults() {
+		setPanelInScene(DEFAULT_PANEL_IN_SCENE);
+		
 		// env panel
 		setEnvironment(DEFAULT_ENVIRONMENT);
 		setTerrainTransparent(DEFAULT_TERRAIN_TRANSPARENT);
@@ -1710,6 +1734,9 @@ public class ViewerVR {
 	
 	public void savePreferences() {
 		Preferences prefs =  Preferences.userNodeForPackage(this.getClass());
+		
+		prefs.putBoolean("panelInScene", isPanelInScene());
+		
 		// env panel
 		prefs.put("environment", getEnvironment());
 		prefs.putBoolean("terrainTransparent", isTerrainTransparent());
@@ -1788,6 +1815,8 @@ public class ViewerVR {
 
 	public void restorePreferences() {
 		Preferences prefs =  Preferences.userNodeForPackage(this.getClass());
+		
+		setPanelInScene(prefs.getBoolean("panelInScene", DEFAULT_PANEL_IN_SCENE));
 		
 		// env panel
 		setEnvironment(prefs.get("environment", DEFAULT_ENVIRONMENT));

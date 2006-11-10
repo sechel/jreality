@@ -53,7 +53,8 @@ public class Quit extends AbstractAction {
 
   public Quit(String name) {
     super(name);
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
+    // better use Alt+F4... ;-)
+    //putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
     putValue(SHORT_DESCRIPTION, "Quit");
   }
   
