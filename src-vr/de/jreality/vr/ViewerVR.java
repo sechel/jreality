@@ -30,6 +30,7 @@ import javax.swing.ButtonModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -89,11 +90,15 @@ import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
 import de.jreality.util.Rectangle3D;
+import de.jreality.util.SceneGraphUtility;
 import de.jtem.beans.SimpleColorChooser;
+
+// -Dsun.java2d.d3d=false
 
 public class ViewerVR {
 	
 	// defaults for preferences:
+	private static final boolean DEFAULT_PANEL_IN_SCENE = true;
 	
 	private static final boolean DEFAULT_PICK_FACES = true;
 	private static final boolean DEFAULT_PICK_EDGES = false;
@@ -278,6 +283,7 @@ public class ViewerVR {
 	private ButtonGroup textureGroup;
 	private boolean panelInScene = true;
 	private boolean managingPanelPopup = true;
+	private JCheckBoxMenuItem panelInSceneCheckBox;
 	
 	public ViewerVR() throws IOException {
 
@@ -431,6 +437,13 @@ public class ViewerVR {
 
 		restorePreferences();
 		setAvatarPosition(0, landscape.isTerrainFlat() ? -.5 : -.13, 28);
+		panelInSceneCheckBox = new JCheckBoxMenuItem("panel in scene",true);
+		panelInSceneCheckBox.addActionListener(new ActionListener() {
+			
+			public void actionPerformed(ActionEvent e) {
+				setPanelInScene(panelInSceneCheckBox.getState());
+			}
+		});
 	}
 
 	private void makeControlPanel() {
@@ -1285,12 +1298,12 @@ public class ViewerVR {
 	}
 
 	private void switchToDefaultPanel() {
-		sp.getFrame().setVisible(false);
+		//sp.getFrame().setVisible(false);
 		sp.setPanelWidth(PANEL_WIDTH);
 		sp.setAboveGround(PANEL_ABOVE_GROUND);
 		sp.getFrame().setContentPane(defaultPanel);
 		sp.getFrame().pack();
-		sp.getFrame().setVisible(true);
+		//sp.getFrame().setVisible(true);
 	}
 
 	protected void showPanel(boolean showFileChooser) {
@@ -1301,6 +1314,13 @@ public class ViewerVR {
 		}
 		sp.show(getSceneRoot(), new Matrix(avatarPath.getMatrix(null)));
 	}
+	
+	private void hidePanel() {
+		if (SceneGraphUtility.getIndexOfChild(getSceneRoot(), sp.getComponent()) != -1) {
+			getSceneRoot().removeChild(sp.getComponent());
+		}
+	}
+	
 	private void updateBackgroundColorChooser(boolean top, Color c) {
 		if (currentBackgroundColorTop == top) {
 			backgroundColorChooser.setColor(c);
@@ -1443,12 +1463,12 @@ public class ViewerVR {
 	}
 
 	public void switchToFileBrowser() {
-		sp.getFrame().setVisible(false);
+		//sp.getFrame().setVisible(false);
 		sp.setPanelWidth(FILE_CHOOSER_PANEL_WIDTH);
 		sp.setAboveGround(FILE_CHOOSER_ABOVE_GROUND);
 		sp.getFrame().setContentPane(fileChooserPanel);
 		sp.getFrame().pack();
-		sp.getFrame().setVisible(true);
+		//sp.getFrame().setVisible(true);
 	}
 	
 	public void switchToTextureBrowser(Appearance app) {
@@ -1583,6 +1603,7 @@ public class ViewerVR {
 			}
 		};
 		settings.add(savePrefs);
+		if (managingPanelPopup) settings.add(panelInSceneCheckBox);
 		menuBar.add(settings);
 		return viewerApp;
 	}
@@ -2114,8 +2135,12 @@ public class ViewerVR {
 		return panelInScene;
 	}
 
-	public void setPanelInScene(boolean panelInScene) {
-		this.panelInScene = panelInScene;
+	public void setPanelInScene(boolean b) {
+		if (panelInScene != b) {
+			panelInScene = b;
+			panelInSceneCheckBox.setState(b);
+			sp.setInScene(b, sceneRoot,  new Matrix(avatarPath.getMatrix(null)));
+		}
 	}
 
 	public Container getPanel() {

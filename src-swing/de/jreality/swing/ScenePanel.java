@@ -17,244 +17,270 @@ import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.tools.ActionTool;
+import de.jreality.util.SceneGraphUtility;
 
 public class ScenePanel {
+	private boolean inScene = true;
+	private JFrame externalFrame = new JFrame();
+	SceneGraphComponent rootNode = new SceneGraphComponent(); // translated in front of the avatar
+	SceneGraphComponent rackNode = new SceneGraphComponent();
+	SceneGraphComponent panelNode = new SceneGraphComponent();
 
-  SceneGraphComponent rootNode = new SceneGraphComponent(); // translated in front of the avatar
-  SceneGraphComponent rackNode = new SceneGraphComponent();
-  SceneGraphComponent panelNode = new SceneGraphComponent();
+	Appearance app = new Appearance();
 
-  Appearance app = new Appearance();
+	JFakeFrame frame = new JFakeFrame();
 
-  JFakeFrame frame = new JFakeFrame();
+	IndexedFaceSetFactory panel = new IndexedFaceSetFactory();
+	IndexedLineSetFactory rack = new IndexedLineSetFactory();
 
-  IndexedFaceSetFactory panel = new IndexedFaceSetFactory();
-  IndexedLineSetFactory rack = new IndexedLineSetFactory();
+	double[][] panelVerts = { { -.5, 0, 0 }, { -.5, 1, 0 }, { .5, 1, 0 }, { .5, 0, 0 } };
+	double[][] tcs = { { 1, 1 }, { 1, 0 }, { 0, 0 }, { 0, 1 } };
+	int[][] rackEdgeIndices = { { 4, 0 }, { 0, 1 }, { 1, 5 }, { 5, 4 }, { 0, 3 }, { 1, 2 }, { 4, 7 }, { 5, 6 } };
 
-  double[][] panelVerts = { { -.5, 0, 0 }, { -.5, 1, 0 }, { .5, 1, 0 }, { .5, 0, 0 } };
-  double[][] tcs = { { 1, 1 }, { 1, 0 }, { 0, 0 }, { 0, 1 } };
-  int[][] rackEdgeIndices = { { 4, 0 }, { 0, 1 }, { 1, 5 }, { 5, 4 }, { 0, 3 }, { 1, 2 }, { 4, 7 }, { 5, 6 } };
+	double aboveGround = 1.6;
+	double belowGround = -.2;
+	double panelWidth = 1;
+	double angle = .8 * Math.PI / 2;
+	double zOffset = -3.5;
 
-  double aboveGround = 1.6;
-  double belowGround = -.2;
-  double panelWidth = 1;
-  double angle = .8 * Math.PI / 2;
-  double zOffset = -3.5;
-  
-  ActionTool myActionTool=new ActionTool("PanelActivation");
+	ActionTool myActionTool=new ActionTool("PanelActivation");
 
-  public ScenePanel() {
-  	rootNode.setName("panel");
-    panel.setVertexCount(4);
-    panel.setFaceCount(1);
-    panel.setVertexCoordinates(panelVerts);
-    panel.setVertexTextureCoordinates(tcs);
-    panel.setFaceIndices(new int[][] { { 0, 1, 2, 3 } });
-    panel.setGenerateVertexNormals(true);
-    panel.update();
-    panelNode.setGeometry(panel.getIndexedFaceSet());
+	public ScenePanel() {
+		rootNode.setName("panel");
+		panel.setVertexCount(4);
+		panel.setFaceCount(1);
+		panel.setVertexCoordinates(panelVerts);
+		panel.setVertexTextureCoordinates(tcs);
+		panel.setFaceIndices(new int[][] { { 0, 1, 2, 3 } });
+		panel.setGenerateVertexNormals(true);
+		panel.update();
+		panelNode.setGeometry(panel.getIndexedFaceSet());
 
-    Appearance panelApp = frame.getAppearance();
-    panelNode.setAppearance(frame.getAppearance());
-    panelNode.addTool(frame.getTool());
+		Appearance panelApp = frame.getAppearance();
+		panelNode.setAppearance(frame.getAppearance());
+		panelNode.addTool(frame.getTool());
 
-    panelApp.setAttribute("lineShader.tubeDraw", false);
-    panelApp.setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
-    panelApp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+		panelApp.setAttribute("lineShader.tubeDraw", false);
+		panelApp.setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
+		panelApp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
 
-    frame.addComponentListener(new ComponentAdapter() {
-      public void componentResized(ComponentEvent e) {
-        update();
-      }
+		frame.addComponentListener(new ComponentAdapter() {
+			public void componentResized(ComponentEvent e) {
+				update();
+			}
 
-      public void componentShown(ComponentEvent e) {
-        rootNode.setVisible(true);
-        frame.setMute(false);
-      }
+			public void componentShown(ComponentEvent e) {
+				rootNode.setVisible(true);
+				frame.setMute(false);
+			}
 
-      public void componentHidden(ComponentEvent e) {
-        rootNode.setVisible(false);
-        frame.setMute(true);
-      }
-    });
+			public void componentHidden(ComponentEvent e) {
+				rootNode.setVisible(false);
+				frame.setMute(true);
+			}
+		});
 
-    myActionTool.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        toggle((ToolContext) e.getSource());
-      }
-    });
-    
-    rack.setVertexCount(8);
-    rack.setLineCount(8);
-    rack.setEdgeIndices(rackEdgeIndices);
-    rackNode.setGeometry(rack.getIndexedLineSet());
+		myActionTool.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				toggle((ToolContext) e.getSource());
+			}
+		});
 
-    app.setAttribute("showLines", true);
-    app.setAttribute("lineShader.tubeRadius", 0.008);
-    app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.AMBIENT_COEFFICIENT,.1);
-    app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.AMBIENT_COEFFICIENT,.1);
-    app.setAttribute("lineShader.diffuseColor", java.awt.Color.gray);
-    app.setAttribute("pointShader.pointRadius", 0.016);
-    app.setAttribute("pointShader.diffuseColor", java.awt.Color.gray);
-    app.setAttribute("showPoints", true);
+		rack.setVertexCount(8);
+		rack.setLineCount(8);
+		rack.setEdgeIndices(rackEdgeIndices);
+		rackNode.setGeometry(rack.getIndexedLineSet());
 
-    rackNode.setAppearance(app);
+		app.setAttribute("showLines", true);
+		app.setAttribute("lineShader.tubeRadius", 0.008);
+		app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.AMBIENT_COEFFICIENT,.1);
+		app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.AMBIENT_COEFFICIENT,.1);
+		app.setAttribute("lineShader.diffuseColor", java.awt.Color.gray);
+		app.setAttribute("pointShader.pointRadius", 0.016);
+		app.setAttribute("pointShader.diffuseColor", java.awt.Color.gray);
+		app.setAttribute("showPoints", true);
 
-    rootNode.addChild(rackNode);
-    rackNode.addChild(panelNode);
+		rackNode.setAppearance(app);
 
-    MatrixBuilder.euclidean().rotateY(Math.PI).assignTo(rackNode);
-    
-    rootNode.setVisible(false);
-  }
-  
-  public void setPanelWidth(double panelWidth) {
-    this.panelWidth=panelWidth;
-    update();
-  }
+		rootNode.addChild(rackNode);
+		rackNode.addChild(panelNode);
 
-  void update() {
-    int width=frame.getWidth(); int height=frame.getHeight();
-    double panelHeight = panelWidth * height / width;
-    rack.setVertexCoordinates(rackVerts(panelHeight));
-    rack.update();
-    MatrixBuilder.euclidean().translate(0,
-        aboveGround - Math.sin(angle) * panelHeight, 0).rotateX(
-        Math.PI / 2 - angle).scale(panelWidth, panelHeight, 1).assignTo(
-        panelNode);
-  }
+		MatrixBuilder.euclidean().rotateY(Math.PI).assignTo(rackNode);
 
-  boolean showFeet=true;
-  
-  double[][] rackVerts(double panelHeight) {
-    double cos = Math.cos(angle);
-    double sin = Math.sin(angle);
-    double[][] verts = new double[8][3];
+		rootNode.setVisible(false);
+	}
 
-    // upper right back
-    verts[0][0] = panelWidth/2;
-    verts[0][1] = aboveGround;
-    verts[0][2] = cos * panelHeight;
+	public void setPanelWidth(double panelWidth) {
+		this.panelWidth=panelWidth;
+		update();
+	}
 
-    // upper right front
-    verts[1][0] = panelWidth/2;
-    verts[1][1] = aboveGround - sin * panelHeight;
-    verts[1][2] = 0;
+	void update() {
+		int width=frame.getWidth(); int height=frame.getHeight();
+		double panelHeight = panelWidth * height / width;
+		rack.setVertexCoordinates(rackVerts(panelHeight));
+		rack.update();
+		MatrixBuilder.euclidean().translate(0,
+				aboveGround - Math.sin(angle) * panelHeight, 0).rotateX(
+						Math.PI / 2 - angle).scale(panelWidth, panelHeight, 1).assignTo(
+								panelNode);
+	}
 
-    // lower right front
-    verts[2][0] = panelWidth/2;
-    verts[2][1] = showFeet ? belowGround : aboveGround - sin * panelHeight;;
-    verts[2][2] = 0;
+	boolean showFeet=true;
 
-    // lower right back
-    verts[3][0] = panelWidth/2;
-    verts[3][1] = showFeet ? belowGround : aboveGround;
-    verts[3][2] = cos * panelHeight;
+	double[][] rackVerts(double panelHeight) {
+		double cos = Math.cos(angle);
+		double sin = Math.sin(angle);
+		double[][] verts = new double[8][3];
 
-    // upper left back
-    verts[4][0] = -panelWidth/2;
-    verts[4][1] = aboveGround;
-    verts[4][2] = cos * panelHeight;
+		// upper right back
+		verts[0][0] = panelWidth/2;
+		verts[0][1] = aboveGround;
+		verts[0][2] = cos * panelHeight;
 
-    // upper left front
-    verts[5][0] = -panelWidth/2;
-    verts[5][1] = aboveGround - sin * panelHeight;
-    verts[5][2] = 0;
+		// upper right front
+		verts[1][0] = panelWidth/2;
+		verts[1][1] = aboveGround - sin * panelHeight;
+		verts[1][2] = 0;
 
-    // lower left front
-    verts[6][0] = -panelWidth/2;
-    verts[6][1] = showFeet ? belowGround : aboveGround - sin * panelHeight;
-    verts[6][2] = 0;
+		// lower right front
+		verts[2][0] = panelWidth/2;
+		verts[2][1] = showFeet ? belowGround : aboveGround - sin * panelHeight;;
+		verts[2][2] = 0;
 
-    // lower left back
-    verts[7][0] = -panelWidth/2;
-    verts[7][1] = showFeet ? belowGround : aboveGround;
-    verts[7][2] = cos * panelHeight;
+		// lower right back
+		verts[3][0] = panelWidth/2;
+		verts[3][1] = showFeet ? belowGround : aboveGround;
+		verts[3][2] = cos * panelHeight;
 
-    return verts;
-  }
+		// upper left back
+		verts[4][0] = -panelWidth/2;
+		verts[4][1] = aboveGround;
+		verts[4][2] = cos * panelHeight;
 
-  public JFrame getFrame() {
-    return frame;
-  }
+		// upper left front
+		verts[5][0] = -panelWidth/2;
+		verts[5][1] = aboveGround - sin * panelHeight;
+		verts[5][2] = 0;
 
-  public SceneGraphComponent getComponent() {
-    return rootNode;
-  }
+		// lower left front
+		verts[6][0] = -panelWidth/2;
+		verts[6][1] = showFeet ? belowGround : aboveGround - sin * panelHeight;
+		verts[6][2] = 0;
 
-  public void show(ToolContext tc) {
-    Matrix avatar = new Matrix(tc.getTransformationMatrix(InputSlot.getDevice("AvatarTransformation")));
-    show(tc.getViewer().getSceneRoot(), avatar);
-  }
+		// lower left back
+		verts[7][0] = -panelWidth/2;
+		verts[7][1] = showFeet ? belowGround : aboveGround;
+		verts[7][2] = cos * panelHeight;
 
-  public void show(SceneGraphComponent component, Matrix avatar) {
-	setPosition(avatar);
-    component.addChild(getComponent());
-    frame.setVisible(true);
-}
+		return verts;
+	}
 
-public void setPosition(Matrix avatar) {
-	MatrixBuilder.euclidean(avatar).translate(0, 0, getZOffset()).assignTo(rootNode);
-}
-  
-  public void hide(ToolContext tc) {
-    tc.getViewer().getSceneRoot().removeChild(getComponent());
-    frame.setVisible(false);
-  }
+	public JFrame getFrame() {
+		return inScene ? frame : externalFrame;
+	}
 
-  public void toggle(ToolContext tc) {
-    if (frame.isVisible()) hide(tc);
-    else show(tc);
-  }  
-  
-  public ActionTool getPanelTool() {
-    return myActionTool;
-  }
+	public SceneGraphComponent getComponent() {
+		return rootNode;
+	}
 
-  public double getAboveGround() {
-    return aboveGround;
-  }
+	public void show(ToolContext tc) {
+		if (inScene) {
+			Matrix avatar = new Matrix(tc.getTransformationMatrix(InputSlot.getDevice("AvatarTransformation")));
+			show(tc.getViewer().getSceneRoot(), avatar);
+		} else {
+			externalFrame.setVisible(true);
+		}
+	}
 
-  public void setAboveGround(double aboveGround) {
-    this.aboveGround = aboveGround;
-    update();
-  }
+	public void show(SceneGraphComponent component, Matrix avatar) {
+		if (inScene) {
+		setPosition(avatar);
+		if (SceneGraphUtility.getIndexOfChild(component, getComponent()) == -1) {
+			component.addChild(getComponent());
+		}
+		frame.setVisible(true);
+		} else {
+			externalFrame.setVisible(true);
+		}
+	}
 
-  public double getAngle() {
-    return angle;
-  }
+	public void setPosition(Matrix avatar) {
+		MatrixBuilder.euclidean(avatar).translate(0, 0, getZOffset()).assignTo(rootNode);
+	}
 
-  public void setAngle(double angle) {
-    this.angle = angle;
-    update();
-  }
+	public void hide(SceneGraphComponent cmp) {
+		if (inScene) {
+			if (SceneGraphUtility.getIndexOfChild(cmp, getComponent()) != -1) {
+				cmp.removeChild(getComponent());
+			}
+			frame.setVisible(false);
+		} else {
+			externalFrame.setVisible(false);
+		}
+	}
+	
+	public void hide(ToolContext tc) {
+		hide(tc.getViewer().getSceneRoot());
+	}
 
-  public double getBelowGround() {
-    return belowGround;
-  }
+	public void toggle(ToolContext tc) {
+		if (inScene) {
+			if (frame.isVisible()) hide(tc);
+			else show(tc);
+		} else {
+			externalFrame.setVisible(!externalFrame.isVisible());
+		}
+	}  
 
-  public void setBelowGround(double belowGround) {
-    this.belowGround = belowGround;
-    update();
-  }
+	public ActionTool getPanelTool() {
+		return myActionTool;
+	}
 
-  public double getZOffset() {
-    return zOffset;
-  }
+	public double getAboveGround() {
+		return aboveGround;
+	}
 
-  /**
-   * Note: this affects the next show call but does not change the
-   * current position of the panel.
-   * 
-   * @param offset the new zOffset
-   */
-  public void setZOffset(double offset) {
-    zOffset = offset;
-  }
+	public void setAboveGround(double aboveGround) {
+		this.aboveGround = aboveGround;
+		update();
+	}
 
-  public double getPanelWidth() {
-    return panelWidth;
-  }
+	public double getAngle() {
+		return angle;
+	}
+
+	public void setAngle(double angle) {
+		this.angle = angle;
+		update();
+	}
+
+	public double getBelowGround() {
+		return belowGround;
+	}
+
+	public void setBelowGround(double belowGround) {
+		this.belowGround = belowGround;
+		update();
+	}
+
+	public double getZOffset() {
+		return zOffset;
+	}
+
+	/**
+	 * Note: this affects the next show call but does not change the
+	 * current position of the panel.
+	 * 
+	 * @param offset the new zOffset
+	 */
+	public void setZOffset(double offset) {
+		zOffset = offset;
+	}
+
+	public double getPanelWidth() {
+		return panelWidth;
+	}
 
 	public boolean isShowFeet() {
 		return showFeet;
@@ -267,5 +293,34 @@ public void setPosition(Matrix avatar) {
 	public void adjustHeight(double delta) {
 		MatrixBuilder.euclidean(rootNode).translate(0, delta, 0).assignTo(rootNode);
 	}
-  
+
+	public boolean isInScene() {
+		return inScene;
+	}
+
+	public void setInScene(boolean b, SceneGraphComponent cmp, Matrix m) {
+		System.out.println("ScenePanel.setInScene("+b+")");
+		System.out.println("inScene is "+inScene);
+		if (inScene == b) return;
+		
+		if (b) {
+			boolean visible = externalFrame.isVisible();
+			externalFrame.setVisible(false);
+			frame.setContentPane(externalFrame.getContentPane());
+			externalFrame.remove(externalFrame.getContentPane());
+			frame.pack();
+			if (visible) show(cmp,m);
+		} else {
+			boolean visible = frame.isVisible();
+			hide(cmp);
+			System.out.println(frame.getContentPane());
+			externalFrame.setContentPane(frame.getContentPane());
+			frame.remove(frame.getContentPane());
+			externalFrame.pack();
+			if (visible) {
+				externalFrame.setVisible(true);
+			}
+		}
+		inScene = b;
+	}
 }
