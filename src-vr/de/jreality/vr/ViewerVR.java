@@ -327,8 +327,8 @@ public class ViewerVR {
 		rootAppearance.setAttribute(CommonAttributes.POINT_SHADER + "."
 				+ CommonAttributes.PICKABLE, false);
 		
-		rootAppearance.setAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, true);
-		rootAppearance.setAttribute(CommonAttributes.RMAN_LIGHT_SHADER, "shadowdistant");
+		//rootAppearance.setAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, true);
+		//rootAppearance.setAttribute(CommonAttributes.RMAN_LIGHT_SHADER, "shadowdistant");
 		
 		sceneRoot.setAppearance(rootAppearance);
 		Camera cam = new Camera();
