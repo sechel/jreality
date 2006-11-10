@@ -299,12 +299,12 @@ public class ScenePanel {
 	}
 
 	public void setInScene(boolean b, SceneGraphComponent cmp, Matrix m) {
-		System.out.println("ScenePanel.setInScene("+b+")");
-		System.out.println("inScene is "+inScene);
 		if (inScene == b) return;
 		
 		if (b) {
+			inScene = b;
 			boolean visible = externalFrame.isVisible();
+			System.out.println("setting external invisible");
 			externalFrame.setVisible(false);
 			frame.setContentPane(externalFrame.getContentPane());
 			externalFrame.remove(externalFrame.getContentPane());
@@ -313,7 +313,7 @@ public class ScenePanel {
 		} else {
 			boolean visible = frame.isVisible();
 			hide(cmp);
-			System.out.println(frame.getContentPane());
+			inScene = b;
 			externalFrame.setContentPane(frame.getContentPane());
 			frame.remove(frame.getContentPane());
 			externalFrame.pack();
@@ -321,6 +321,6 @@ public class ScenePanel {
 				externalFrame.setVisible(true);
 			}
 		}
-		inScene = b;
+		
 	}
 }
