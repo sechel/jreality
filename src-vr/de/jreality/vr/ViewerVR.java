@@ -1204,7 +1204,12 @@ public class ViewerVR {
 		gainBox.setBorder(new EmptyBorder(10,5,10,5));
 		JLabel gainLabel = new JLabel("navigation speed");
 		gainBox.add(gainLabel);
-		gain = new JSlider();
+		gain = new JSlider(0, 1000, (int) (100*DEFAULT_SPEED));
+		gain.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				setNavigationSpeed(getNavigationSpeed());
+			}
+		});
 		gain.setPreferredSize(new Dimension(70,20));
 		gain.setBorder(new EmptyBorder(0,5,0,0));
 		gainBox.add(gain);
@@ -1214,7 +1219,12 @@ public class ViewerVR {
 		gravityBox.setBorder(new EmptyBorder(10,5,10,5));
 		JLabel gravityLabel = new JLabel("gravity");
 		gravityBox.add(gravityLabel);
-		gravity = new JSlider();
+		gravity = new JSlider(0, 2000, (int) (100*DEFAULT_GRAVITY));
+		gravity.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				setGravity(getGravity());
+			}
+		});
 		gravity.setPreferredSize(new Dimension(70,20));
 		gravity.setBorder(new EmptyBorder(0,5,0,0));
 		gravityBox.add(gravity);
@@ -1242,6 +1252,28 @@ public class ViewerVR {
 		});
 		buttonPanel.add(shadowButton);
 		toolPanel.add(BorderLayout.SOUTH, buttonPanel);
+	}
+
+	protected void setNavigationSpeed(double navigationSpeed) {
+		int speed = (int)(100*navigationSpeed);
+		gain.setValue(speed);
+		shipNavigationTool.setGain(navigationSpeed);
+	}
+
+	protected double getNavigationSpeed() {
+		double speed = 0.01*gain.getValue();
+		return speed;
+	}
+
+	protected void setGravity(double g) {
+		int grav = (int)(100*g);
+		gravity.setValue(grav);
+		shipNavigationTool.setGravity(g);
+	}
+
+	protected double getGravity() {
+		double g = 0.01*gravity.getValue();
+		return g;
 	}
 
 	public void setInvertMouse(boolean b) {
@@ -1775,6 +1807,8 @@ public class ViewerVR {
 		setPickVertices(DEFAULT_PICK_VERTICES);
 		setPickEdges(DEFAULT_PICK_EDGES);
 		setPickFaces(DEFAULT_PICK_FACES);
+		setGravity(DEFAULT_GRAVITY);
+		setNavigationSpeed(DEFAULT_SPEED);
 		
 		// tex panel
 		setTextureScale(DEFAULT_TEXTURE_SCALE);
@@ -1836,6 +1870,8 @@ public class ViewerVR {
 		prefs.putBoolean("pickVertices", isPickVertices());
 		prefs.putBoolean("pickEdges", isPickEdges());
 		prefs.putBoolean("pickFaces", isPickFaces());
+		prefs.putDouble("gravity", getGravity());
+		prefs.putDouble("navSpeed", getNavigationSpeed());
 		
 		// tex panel
 		prefs.putDouble("textureScale", getTextureScale());
@@ -1919,6 +1955,8 @@ public class ViewerVR {
 		setPickVertices(prefs.getBoolean("pickVertices", DEFAULT_PICK_VERTICES));
 		setPickEdges(prefs.getBoolean("pickEdges", DEFAULT_PICK_EDGES));
 		setPickFaces(prefs.getBoolean("pickFaces", DEFAULT_PICK_FACES));
+		setGravity(prefs.getDouble("gravity", DEFAULT_GRAVITY));
+		setNavigationSpeed(prefs.getDouble("navSpeed", DEFAULT_SPEED));
 		
 		// tex panel
 		setTextureScale(prefs.getDouble("textureScale", DEFAULT_TEXTURE_SCALE));
