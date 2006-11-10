@@ -1807,6 +1807,7 @@ public class ViewerVR {
 		setPickVertices(DEFAULT_PICK_VERTICES);
 		setPickEdges(DEFAULT_PICK_EDGES);
 		setPickFaces(DEFAULT_PICK_FACES);
+		setInvertMouse(DEFAULT_INVERT_MOUSE);
 		setGravity(DEFAULT_GRAVITY);
 		setNavigationSpeed(DEFAULT_SPEED);
 		
@@ -1870,6 +1871,7 @@ public class ViewerVR {
 		prefs.putBoolean("pickVertices", isPickVertices());
 		prefs.putBoolean("pickEdges", isPickEdges());
 		prefs.putBoolean("pickFaces", isPickFaces());
+		prefs.putBoolean("invertMouse", isInvertMouse());
 		prefs.putDouble("gravity", getGravity());
 		prefs.putDouble("navSpeed", getNavigationSpeed());
 		
@@ -1955,8 +1957,10 @@ public class ViewerVR {
 		setPickVertices(prefs.getBoolean("pickVertices", DEFAULT_PICK_VERTICES));
 		setPickEdges(prefs.getBoolean("pickEdges", DEFAULT_PICK_EDGES));
 		setPickFaces(prefs.getBoolean("pickFaces", DEFAULT_PICK_FACES));
+		setInvertMouse(prefs.getBoolean("invertMouse", DEFAULT_INVERT_MOUSE));
 		setGravity(prefs.getDouble("gravity", DEFAULT_GRAVITY));
 		setNavigationSpeed(prefs.getDouble("navSpeed", DEFAULT_SPEED));
+		
 		
 		// tex panel
 		setTextureScale(prefs.getDouble("textureScale", DEFAULT_TEXTURE_SCALE));
