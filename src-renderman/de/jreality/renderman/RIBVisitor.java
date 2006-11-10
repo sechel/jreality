@@ -94,6 +94,7 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
 import de.jreality.util.CameraUtility;
 
 /**
@@ -207,6 +208,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 	transient int whichEye = CameraUtility.MIDDLE_EYE;
 
 	RenderScript renderScript;
+
+  private boolean raytracedReflectionsEnabled;
 
 
 	public void visit(Viewer viewer, String name) {
@@ -383,6 +386,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 				CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");
 		shadowEnabled = eAppearance.getAttribute(
 				CommonAttributes.RMAN_SHADOWS_ENABLED, false);
+    raytracedReflectionsEnabled = eAppearance.getAttribute(
+        CommonAttributes.RMAN_RAY_TRACING_REFLECTIONS, false);
 		currentSignature = eAppearance.getAttribute(CommonAttributes.SIGNATURE,
 				Pn.EUCLIDEAN);
 		outputDisplayFormat = (String) eAppearance.getAttribute(
@@ -415,11 +420,24 @@ public class RIBVisitor extends SceneGraphVisitor {
 		// TODO make this a variable
 		ri.shadingRate(1f);
 		if(shadowEnabled){
-		      if(rendererType==RIBViewer.TYPE_3DELIGHT)
-		        ri.verbatim("Attribute \"visibility\"  \"string transmission\" \"shader\"");
-		      else 
-		        ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
-		    }
+		  if(rendererType==RIBViewer.TYPE_3DELIGHT)
+		    ri.verbatim("Attribute \"visibility\"  \"string transmission\" \"shader\"");            
+      else 
+		    ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
+		}
+    
+    if(raytracedReflectionsEnabled){
+      if(rendererType==RIBViewer.TYPE_3DELIGHT){
+        ri.verbatim("Attribute \"visibility\"  \"string diffuse\" \"shader\"");
+        ri.verbatim("Attribute \"visibility\"  \"string specular\" \"shader\"");
+      }else {      
+        ri.verbatim("Attribute \"visibility\"  \"int diffuse\" [1]");
+        ri.verbatim("Attribute \"visibility\"  \"int specular\" [1]");
+      }
+    }
+    
+    
+    
 		// make sure this is the last thing done, to maximize what the user can override.
 		if (globalIncludeFile != "")
 			ri.readArchive((String) globalIncludeFile);
@@ -561,6 +579,13 @@ public class RIBVisitor extends SceneGraphVisitor {
 	}
 
 	private void setupShader(EffectiveAppearance eap, String type) {
+    
+//    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(type,"reflectionMap"), eap))
+//    {
+//    ri.verbatim("Attribute \"visibility\"  \"int diffuse\" [1]");
+//    ri.verbatim("Attribute \"visibility\"  \"int specular\" [1]");
+//    }
+    
 		Map m = (Map) eap.getAttribute("rendermanAttribute", null, Map.class);
 		if (m != null) {
 			for (Iterator i = m.keySet().iterator(); i.hasNext();) {
@@ -1091,10 +1116,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 			String type;
 			int n;
 			if (smooth && normals != null) {
-				type = "vertex";
+				type = "N";//"vertex";
 			} else { // face normals
 				normals = i.getFaceAttributes(Attribute.NORMALS);
-				type = "uniform";
+				type = "Np";//"uniform";
 			}
 			if (normals != null) {
 				da = normals.toDoubleArrayArray();
@@ -1110,7 +1135,13 @@ public class RIBVisitor extends SceneGraphVisitor {
 						fnormals[n * j + 1] = (float) da.getValueAt(j, 1);
 						fnormals[n * j + 2] = (float) da.getValueAt(j, 2);
 					}
-					map.put(type + "vector N", fnormals);
+          
+          /////////////////////////////////////////////////////////////////////////////////
+          map.put(type, fnormals);
+					//map.put(type + "vector N", fnormals);
+          
+          
+          
 				} else {
 					// in noneuclidean case we have to use 4D vectors and
 					// transform the values
@@ -1121,7 +1152,14 @@ public class RIBVisitor extends SceneGraphVisitor {
 						for (int k = 0; k < 4; ++k)
 							fnormals[ii++] = (float) dnormals[j][k];
 					}
-					map.put(type + " float[4] Nw", fnormals);
+          
+          
+					/////////////////////////////////////////////////////////////////////////////////
+					//map.put(type + " float[4] Nw", fnormals);
+          map.put(type + " float[4] Nw", fnormals);
+          
+          
+          
 				}
 			}
 			// texture coords:
