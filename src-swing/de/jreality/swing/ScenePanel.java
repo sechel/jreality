@@ -46,6 +46,7 @@ public class ScenePanel {
 	ActionTool myActionTool=new ActionTool("PanelActivation");
 
 	public ScenePanel() {
+		externalFrame.setLocationRelativeTo(null);
 		rootNode.setName("panel");
 		panel.setVertexCount(4);
 		panel.setFaceCount(1);
@@ -225,9 +226,13 @@ public class ScenePanel {
 	}
 
 	public void toggle(ToolContext tc) {
+		toggle(tc.getViewer().getSceneRoot(), new Matrix(tc.getAvatarPath().getMatrix(null)));
+	}
+	
+	public void toggle(SceneGraphComponent component, Matrix avatar) {
 		if (inScene) {
-			if (frame.isVisible()) hide(tc);
-			else show(tc);
+			if (frame.isVisible()) hide(component);
+			else show(component, avatar);
 		} else {
 			externalFrame.setVisible(!externalFrame.isVisible());
 		}
