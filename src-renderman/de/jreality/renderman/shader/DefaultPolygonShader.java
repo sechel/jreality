@@ -113,19 +113,34 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
             	map.put("float[16] tm", RIBHelper.fTranspose(mat));
            }
         }
+        
+//      if((boolean) eap.getAttribute(CommonAttributes.RMAN_RAY_TRACING_REFLECTIONS,true))
+//        map.put("float raytracedreflections", new Float(1));  
+//      else
+//        map.put("float raytracedreflections", new Float(0));
+            
 	    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))
-	    	{
-	    	reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));
-	    	String fname = (String) eap.getAttribute(CommonAttributes.RMAN_REFLECTIONMAP_FILE,"");
-    		if (fname == "") {
-    			fname = null;
-    		}
-    		if (fname == null) {
-    			fname = new File(ribv.writeCubeMap(reflectionMap)).getName();
-    		}
-	    	map.put("string reflectionmap", fname);
+	    {
+        reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));
+        if((boolean) eap.getAttribute(CommonAttributes.RMAN_RAY_TRACING_REFLECTIONS,false))
+          map.put("float raytracedreflections", new Float(1));
+        else{
+          map.put("float raytracedreflections", new Float(0));
+          String fname = (String) eap.getAttribute(CommonAttributes.RMAN_REFLECTIONMAP_FILE,"");
+          if (fname == "") {
+            fname = null;
+          }
+          if (fname == null) {
+            fname = new File(ribv.writeCubeMap(reflectionMap)).getName();
+          }
+          map.put("string reflectionmap", fname);
+        }
 	    	map.put("reflectionBlend", new Float(reflectionMap.getBlendColor().getAlpha()/255.0));
-	    }
+	    }//else
+       // map.put("reflectionBlend", new Float(eap.getAttribute(CommonAttributes.RMAN_RAY_TRACING_REFLECTION_BLEND,0.0)));
+        
+      
+      
     }
 
 	public String getType() {
