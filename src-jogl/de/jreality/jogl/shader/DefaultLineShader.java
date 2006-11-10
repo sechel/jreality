@@ -265,6 +265,9 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		if (jr.getRenderingState().levelOfDetail == 0.0) crossSection = TubeUtility.diamondCrossSection;
 		int n = ils.getNumEdges();
 		DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
+		DataList radiidl = ils.getEdgeAttributes(Attribute.RADII);
+		DoubleArray radii = null;
+		if (radiidl != null) radii = radiidl.toDoubleArray();
 		if (ils.getNumPoints() <= 1) return -1;
 //		JOGLConfiguration.theLog.log(Level.FINE,"Creating tubes for "+ils.getName());
 		if (tubeDL == null)	{
@@ -288,6 +291,9 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			IntArray ia = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray();
 			DataList edgec =  ils.getEdgeAttributes(Attribute.COLORS);
 			int m = ia.size();
+			if (radii != null)	{
+				rad = radii.getValueAt(i);
+			}
 			if (pickMode)	gl.glPushName(i);
 			DoubleArray edgecolor = null;
 			int clength = 3;

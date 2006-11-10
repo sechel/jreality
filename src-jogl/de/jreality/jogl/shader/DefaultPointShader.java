@@ -226,11 +226,11 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		if (!sphereDraw)	{
 			lighting = false;
 			gl.glPointSize((float) getPointSize());
-      try {
-        gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, pointAttenuation,0);
-      } catch (Exception e){
-      //TODO: i dont know - got error on ati radeon 9800
-      }
+			try {
+				gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, pointAttenuation,0);
+			} catch (Exception e){
+				//TODO: i dont know - got error on ati radeon 9800
+			}
 			gl.glEnable(GL.GL_POINT_SMOOTH);
 			gl.glEnable(GL.GL_POINT_SPRITE_ARB);
 			gl.glActiveTexture(GL.GL_TEXTURE0);
@@ -282,10 +282,12 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			PointSet ps = (PointSet) original;
 			DataList vertices = ps.getVertexAttributes(Attribute.COORDINATES);
 			DataList vertexColors = ps.getVertexAttributes(Attribute.COLORS);
+			DataList radii = ps.getVertexAttributes(Attribute.RADII);
+			DoubleArray da = null;
+			if (radii != null) da = radii.toDoubleArray();
 			//JOGLConfiguration.theLog.log(Level.INFO,"VC is "+vertexColors);
 			int colorLength = 0;
 			if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
-			DoubleArray da;
 			int n = ps.getNumPoints();
 			int resolution = 1;
 			if (jr.getRenderingState().levelOfDetail == 0.0) resolution = 0;
@@ -306,6 +308,10 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			for (int i = 0; i< length; ++i)	{
 				double[] transVec = null;
 				gl.glPushMatrix();
+				if (radii != null)	{
+					double radius = da.getValueAt(i);
+					scale[0] = scale[5] = scale[10] = radius;
+				}
 				transVec =  vertices.item(i).toDoubleArray().toDoubleArray(null);	
 				P3.makeTranslationMatrix(mat, transVec,sig);
 				Rn.times(mat, mat, scale);
