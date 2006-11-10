@@ -119,16 +119,22 @@ public class ToolEventQueue {
     private boolean placeEvent(ToolEvent event) {
       synchronized(mutex) {
         // we replace the last possible event
+    	// only the last event with same source (device) and input slot
+    	ToolEvent candidate = null;
         for (ListIterator i = queue.listIterator(queue.size()); i.hasPrevious(); ) {
             ToolEvent e = (ToolEvent) i.previous();
-            if (event.canReplace(e)) {
-                LoggingSystem.getLogger(this).log(e.getInputSlot() == InputSlot.getDevice("SystemTime") ? Level.FINEST:Level.FINER, "replacing ToolEvent {0} with {1}", new Object[]{e, event});
-                e.replaceWith(event);
+            if (e.getInputSlot() == event.getInputSlot() &&
+                e.getSource() == event.getSource()) {
+            	candidate = e;
+            	break;
+            }
+            if (candidate != null && event.canReplace(candidate)) {
+                LoggingSystem.getLogger(this).log(candidate.getInputSlot() == InputSlot.getDevice("SystemTime") ? Level.FINEST:Level.FINER, "replacing ToolEvent {0} with {1}", new Object[]{e, event});
+                candidate.replaceWith(event);
                 return false;
             }
         }
         queue.addLast(event);
-//        System.out.println(queue);
         mutex.notify();
       }
       return true;
