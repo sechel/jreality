@@ -52,6 +52,7 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileSystemView;
@@ -106,6 +107,7 @@ public class ViewerVR {
 	private static final boolean DEFAULT_PICK_FACES = true;
 	private static final boolean DEFAULT_PICK_EDGES = false;
 	private static final boolean DEFAULT_PICK_VERTICES = false;
+	
 	// defaults for env panel
 	private static final String DEFAULT_ENVIRONMENT = "snow";
 	private static final boolean DEFAULT_TERRAIN_TRANSPARENT = false;
@@ -136,6 +138,9 @@ public class ViewerVR {
 	// defaults for tool panel
 	private static final boolean DEFAULT_ROTATION_ENABLED = false;
 	private static final boolean DEFAULT_DRAG_ENABLED = false;
+	private static final boolean DEFAULT_INVERT_MOUSE = false;
+	private static final double DEFAULT_SPEED = 4;
+	private static final double DEFAULT_GRAVITY = 9.81;
 	
 	// default value of tex panel
 	private static final double DEFAULT_TEXTURE_SCALE = 20;
@@ -229,6 +234,8 @@ public class ViewerVR {
 	private JCheckBox pickFaces;
 	private JCheckBox pickEdges;
 	private JCheckBox pickVertices;
+	private JSlider gravity;
+	private JSlider gain;
 
 	
 	// env tab
@@ -287,6 +294,12 @@ public class ViewerVR {
 	private boolean panelInScene = true;
 	private boolean managingPanelPopup = true;
 	private JCheckBoxMenuItem panelInSceneCheckBox;
+
+	private JCheckBox invertMouse;
+
+	private ShipNavigationTool shipNavigationTool;
+
+	private HeadTransformationTool headTransformationTool;
 	
 	public ViewerVR() throws IOException {
 
@@ -353,14 +366,14 @@ public class ViewerVR {
 
 		MatrixBuilder.euclidean().translate(0, 1.7, 0).rotateX(5*Math.PI/180).assignTo(camNode);
 
-		// tools
-		ShipNavigationTool shipNavigationTool = new ShipNavigationTool();
+		shipNavigationTool = new ShipNavigationTool();
 		avatarNode.addTool(shipNavigationTool);
 		if (portal)
 			shipNavigationTool.setPollingDevice(false);
-		if (!portal)
-			camNode.addTool(new HeadTransformationTool());
-		else {
+		if (!portal) {
+			headTransformationTool = new HeadTransformationTool();
+			camNode.addTool(headTransformationTool);
+		} else {
 			try {
 				Tool t = (Tool) Class.forName(
 						"de.jreality.tools.PortalHeadMoveTool").newInstance();
@@ -1126,8 +1139,6 @@ public class ViewerVR {
 		toolPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		Box toolBox = new Box(BoxLayout.Y_AXIS);
 		Box toolButtonBox = new Box(BoxLayout.X_AXIS);
-		toolButtonBox.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
-				LineBorder.createGrayLineBorder()));
 		toolButtonBox.setBorder(new EmptyBorder(5, 0, 5, 5));
 		rotate = new JCheckBox("rotate");
 		rotate.addChangeListener(new ChangeListener() {
@@ -1143,7 +1154,7 @@ public class ViewerVR {
 			}
 		});
 		toolButtonBox.add(drag);
-
+		toolButtonBox.add(Box.createHorizontalGlue());
 		toolBox.add(toolButtonBox);
 
 		
@@ -1173,8 +1184,41 @@ public class ViewerVR {
 			}
 		});
 		pickButtonBox.add(pickVertices);
+		pickButtonBox.add(Box.createHorizontalGlue());
 		
 		toolBox.add(pickButtonBox);
+		
+		Box invertBox = new Box(BoxLayout.X_AXIS);
+		invertBox.setBorder(new EmptyBorder(5, 0, 5, 5));
+		invertMouse = new JCheckBox("invert mouse");
+		invertMouse.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setInvertMouse(invertMouse.isSelected());
+			}
+		});
+		invertBox.add(invertMouse);
+		invertBox.add(Box.createHorizontalGlue());
+		toolBox.add(invertBox);
+		
+		Box gainBox = new Box(BoxLayout.X_AXIS);
+		gainBox.setBorder(new EmptyBorder(10,5,10,5));
+		JLabel gainLabel = new JLabel("navigation speed");
+		gainBox.add(gainLabel);
+		gain = new JSlider();
+		gain.setPreferredSize(new Dimension(70,20));
+		gain.setBorder(new EmptyBorder(0,5,0,0));
+		gainBox.add(gain);
+		toolBox.add(gainBox);
+		
+		Box gravityBox = new Box(BoxLayout.X_AXIS);
+		gravityBox.setBorder(new EmptyBorder(10,5,10,5));
+		JLabel gravityLabel = new JLabel("gravity");
+		gravityBox.add(gravityLabel);
+		gravity = new JSlider();
+		gravity.setPreferredSize(new Dimension(70,20));
+		gravity.setBorder(new EmptyBorder(0,5,0,0));
+		gravityBox.add(gravity);
+		toolBox.add(gravityBox);
 		
 		toolPanel.add(BorderLayout.CENTER, toolBox);
 		
@@ -1200,7 +1244,16 @@ public class ViewerVR {
 		toolPanel.add(BorderLayout.SOUTH, buttonPanel);
 	}
 
-	protected void setPickVertices(boolean b) {
+	public void setInvertMouse(boolean b) {
+		invertMouse.setSelected(b);
+		headTransformationTool.setInvert(b);
+	}
+	
+	public boolean isInvertMouse() {
+		return invertMouse.isSelected();
+	}
+
+	public void setPickVertices(boolean b) {
 		contentAppearance.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE, b);
 		pickVertices.setSelected(b);
 	}
@@ -2170,9 +2223,5 @@ public class ViewerVR {
 			panelInSceneCheckBox.setState(b);
 			sp.setInScene(b, sceneRoot,  new Matrix(avatarPath.getMatrix(null)));
 		}
-	}
-
-	public Container getPanel() {
-		return defaultPanel;
 	}
 }

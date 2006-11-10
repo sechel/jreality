@@ -309,7 +309,6 @@ public class ScenePanel {
 		if (b) {
 			inScene = b;
 			boolean visible = externalFrame.isVisible();
-			System.out.println("setting external invisible");
 			externalFrame.setVisible(false);
 			frame.setContentPane(externalFrame.getContentPane());
 			externalFrame.remove(externalFrame.getContentPane());
