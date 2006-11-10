@@ -1191,9 +1191,11 @@ public class RIBVisitor extends SceneGraphVisitor {
 				map.put("uniform color Cs", vCol);
 				// Following is a bug in 12.5 prman so we have to simply avoid
 				// it.
-				if (false)
+				//if (false)
 					if (faceColorLength == 4)
-						map.put("uniform color Os", vOp);
+						//map.put("uniform color Os", vOp);
+						// seems that a work-around is to leave out "uniform color"
+						map.put("Os", vOp);
 			}
 
 			int[] nvertices = new int[npolys];
