@@ -40,6 +40,7 @@
 
 package de.jreality.toolsystem.virtual;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -59,8 +60,7 @@ import de.jreality.toolsystem.VirtualDeviceContext;
  **/
 public class VirtualCoupledAxis implements VirtualDevice {
     
-    InputSlot in1;
-    InputSlot in2;
+    List<InputSlot> inSlots;
 
     InputSlot out;
     
@@ -73,21 +73,26 @@ public class VirtualCoupledAxis implements VirtualDevice {
         initialized = true;
         return new ToolEvent(context.getEvent().getSource(), out, AxisState.ORIGIN);
       }
-        boolean state = context.getAxisState(in1).isPressed() && context.getAxisState(in2).isPressed();
+        boolean state = true;
+        for (InputSlot inSlot : inSlots) {
+        	state = state && context.getAxisState(inSlot).isPressed();
+        	if (!state) break;
+        }
         if (state != currentState) {
           currentState = state;
           ToolEvent te = new ToolEvent(context.getEvent().getSource(), out, currentState ? AxisState.PRESSED : AxisState.ORIGIN);
-          if (context.getEvent().getInputSlot() == in1 || context.getAxisState(in1).isPressed())
+          // ???:
+          if (context.getEvent().getInputSlot() == inSlots.get(0) || context.getAxisState(inSlots.get(0)).isPressed())
             context.getEvent().consume();
           return te;
         }
         return null;
     }
 
-    public void initialize(List inputSlots, InputSlot result,
+    @SuppressWarnings("unchecked")
+	public void initialize(List inputSlots, InputSlot result,
             Map configuration) {
-      in1 = (InputSlot) inputSlots.get(0);
-      in2 = (InputSlot) inputSlots.get(1);
+      inSlots = new LinkedList<InputSlot>(inputSlots);
       out = result;
     }
 
