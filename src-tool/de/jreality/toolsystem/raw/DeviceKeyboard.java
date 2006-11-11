@@ -59,7 +59,6 @@ import de.jreality.util.LoggingSystem;
 public class DeviceKeyboard implements RawDevice, KeyListener {
   
     private HashMap<Integer, InputSlot> keysToVirtual = new HashMap<Integer, InputSlot>();
-    private HashMap<Integer, ToolEvent> keysToRelease = new HashMap<Integer, ToolEvent>();
     
     private ToolEventQueue queue;
     private Component component;
@@ -71,16 +70,10 @@ public class DeviceKeyboard implements RawDevice, KeyListener {
     }
 
     public synchronized void keyPressed(KeyEvent e) {
-    	//System.out.println("DeviceKeyboard.keyPressed()");
     	if (e.isConsumed()) return;
-        InputSlot id = (InputSlot) keysToVirtual.get(e.getKeyCode());
+        InputSlot id = (InputSlot) keysToVirtual.get(new Integer(e.getKeyCode()));
         if (id != null) {
-          ToolEvent ev = new ToolEvent(this, id, AxisState.PRESSED) {
-        	  @Override
-        	protected boolean canReplace(ToolEvent e) {
-        		return e.getSource() == getSource() && e.getInputSlot() == getInputSlot();
-        	}
-          };
+          ToolEvent ev = new ToolEvent(this, id, AxisState.PRESSED);
           queue.addEvent(ev);
           LoggingSystem.getLogger(this).fine(this.hashCode()+" added key pressed ["+id+"] "+e.getWhen());
         }
@@ -95,14 +88,7 @@ public class DeviceKeyboard implements RawDevice, KeyListener {
         		nextEvent.consume();
         		return;
         	}
-        	ToolEvent toolEvent = new ToolEvent(this, id, AxisState.ORIGIN) {
-	          	  @Override
-	          	protected boolean canReplace(ToolEvent e) {
-	          		return e.getSource() == getSource() && e.getInputSlot() == getInputSlot();
-	          	}
-            };
-            queue.addEvent(toolEvent);
-			
+        	queue.addEvent(new ToolEvent(this, id, AxisState.ORIGIN));
             LoggingSystem.getLogger(this).finer("added key released ["+id+"] "+e.getWhen());
         }
     }
@@ -127,8 +113,7 @@ public class DeviceKeyboard implements RawDevice, KeyListener {
     }
 
     public void setEventQueue(ToolEventQueue queue) {
-        this.queue = queue;
-        queue.setKeyboard(this);
+        this.queue = queue; 
     }
 
     public void dispose() {
