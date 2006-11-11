@@ -40,11 +40,13 @@
 
 package de.jreality.toolsystem;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.logging.Level;
 
 import de.jreality.scene.tool.InputSlot;
+import de.jreality.toolsystem.raw.DeviceKeyboard;
 import de.jreality.util.LoggingSystem;
 
 /**
@@ -60,6 +62,7 @@ public class ToolEventQueue {
     private LinkedList<ToolEvent> queue = new LinkedList<ToolEvent>();
     private final Object mutex = new Object();
     protected volatile boolean running = true;
+	protected Object keyboard;
     
     private Runnable eventThread = new Runnable() {
     	public void run() {
@@ -76,7 +79,11 @@ public class ToolEventQueue {
                     }
                     event = (ToolEvent) queue.removeFirst();
                 }
-                receiver.processToolEvent(event);
+//                // hack for key repeat
+//                if (event.getSource() == keyboard ) {//&& event.getAxisState().isReleased()) {
+//                	if (peekKeyEvent(event)) event.consume();
+//                }
+                if (!event.isConsumed()) receiver.processToolEvent(event);
             }
         }    
     };
@@ -85,7 +92,29 @@ public class ToolEventQueue {
         this.receiver = receiver;
     }
 
-    private volatile boolean started = false;
+//    // HACK for key repeat
+//    protected boolean peekKeyEvent(ToolEvent event) {
+//    	synchronized(mutex) {
+//	    	for (Iterator<ToolEvent> it = queue.iterator(); it.hasNext(); ) {
+//	    		ToolEvent te = it.next();
+//	    		if (te.getSource() == keyboard && te.getInputSlot() == event.getInputSlot()) {
+//	    			if (te.getAxisState() != event.getAxisState()) {
+//	    				if ((te.getTimeStamp() - event.getTimeStamp()) < 8) {
+//	    					it.remove();
+//	    					System.out.println("merged repeat");
+//	    					return true;
+//	    				} else {
+//	    					System.out.println((te.getTimeStamp() - event.getTimeStamp()));
+//	    				}
+//	    			}
+//	    		}
+//	    		return false;
+//	    	}
+//    	}
+//    	return false;
+//	}
+
+	private volatile boolean started = false;
     private Thread thread = new Thread(eventThread);
     {
       thread.setName("jReality ToolSystem EventQueue");
@@ -153,4 +182,14 @@ public class ToolEventQueue {
     public Thread getThread() {
       return thread;
     }
+
+	public void setKeyboard(DeviceKeyboard keyboard) {
+		this.keyboard = keyboard;
+	}
+
+	public boolean unqueue(ToolEvent lastRelease) {
+		synchronized (mutex) {
+			return queue.remove(lastRelease);
+		}
+	}
 }

@@ -150,13 +150,8 @@ class DeviceManager {
 
   DeviceManager(ToolSystemConfiguration config, ToolEventQueue queue, Viewer viewer) {
 
-    debugSlots.add(InputSlot.getDevice("Secondary"));
-    debugSlots.add(InputSlot.getDevice("PrimaryAction"));
-    debugSlots.add(InputSlot.getDevice("SecondaryAction"));
-//    debugSlots.add(InputSlot.getDevice("DragAlongPointer"));
-//      debugSlots.add(InputSlot.getDevice("ForwardBackwardAxis"));
-//      debugSlots.add(InputSlot.getDevice("LeftRightAxis"));
-//      debugSlots.add(InputSlot.getDevice("HorizontalShipRotationEvolution"));
+      //debugSlots.add(InputSlot.getDevice("ForwardBackwardAxis"));
+      //debugSlots.add(InputSlot.getDevice("JumpActivation"));
       
     this.viewer=viewer;
     
@@ -287,7 +282,8 @@ class DeviceManager {
    */
   void setAxisState(InputSlot slot, AxisState axisState) {
     slot2axis.put(slot, axisState);
-    if (axisState != null && debugSlots.contains(slot)) LoggingSystem.getLogger(this).fine(slot+": "+axisState);
+    if (axisState != null && debugSlots.contains(slot))
+    	LoggingSystem.getLogger(this).fine(slot+": "+axisState);
   }
 
   /**
