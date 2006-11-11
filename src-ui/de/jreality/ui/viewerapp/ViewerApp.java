@@ -200,6 +200,7 @@ public class ViewerApp {
     } catch (Exception e) {}
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
     ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
+    frame.setLocationByPlatform(true);
     
     //set viewer background colors
     if (sceneRoot.getAppearance() != null && (sceneRoot.getAppearance().getAttribute(CommonAttributes.BACKGROUND_COLORS) == Appearance.INHERITED && sceneRoot.getAppearance().getAttribute(CommonAttributes.BACKGROUND_COLOR) == Appearance.INHERITED)) {
