@@ -2,6 +2,7 @@ package de.jreality.vr;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -292,7 +293,6 @@ public class ViewerVR {
 	private boolean generatePickTrees;
 	private ButtonGroup textureGroup;
 	private boolean panelInScene = true;
-	private boolean managingPanelPopup = true;
 	private JCheckBoxMenuItem panelInSceneCheckBox;
 
 	private JCheckBox invertMouse;
@@ -1667,10 +1667,9 @@ public class ViewerVR {
 
 	public ViewerApp display() {
 		ViewerApp viewerApp = new ViewerApp(sceneRoot, cameraPath, emptyPickPath, avatarPath);
+		
 		JMenuBar menuBar = viewerApp.getMenuBar();
 		JMenu settings = new JMenu("ViewerVR");
-		
-		if (managingPanelPopup) settings.add(panelInSceneCheckBox);
 		
 		Action panelPopup = new AbstractAction("Toggle panel") {
 			private static final long serialVersionUID = -4212517852052390335L;
@@ -1683,7 +1682,8 @@ public class ViewerVR {
 			}
 		};
 		settings.add(panelPopup);
-
+		settings.add(panelInSceneCheckBox);
+		
 		settings.addSeparator();
 		
 		Action defaults = new AbstractAction("Restore defaults") {
@@ -2210,6 +2210,10 @@ public class ViewerVR {
 		menuBar.add(helpMenu);
 	}
 
+	public JFrame getExternalFrame() {
+		return sp.getExternalFrame();
+	}
+	
 	public static void main(String[] args) throws IOException {
 		ViewerVR vr = new ViewerVR();
 		final String[][] examples = new String[][] {
@@ -2238,21 +2242,8 @@ public class ViewerVR {
 		JFrame f = vApp.display();
 		f.setSize(800, 600);
 		f.validate();
-	}
-
-	public boolean isManagingPanelPopup() {
-		return managingPanelPopup;
-	}
-
-	public void setManagingPanelPopup(boolean b) {
-		if (managingPanelPopup != managingPanelPopup) {
-			this.managingPanelPopup = b;
-			if (managingPanelPopup) {
-				terrainNode.addTool(sp.getPanelTool());
-			} else {
-				terrainNode.removeTool(sp.getPanelTool());
-			}
-		}
+		JFrame external = vr.getExternalFrame();
+		external.setLocationRelativeTo(f);
 	}
 
 	public boolean isPanelInScene() {

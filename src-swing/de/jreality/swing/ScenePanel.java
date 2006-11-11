@@ -46,7 +46,7 @@ public class ScenePanel {
 	ActionTool myActionTool=new ActionTool("PanelActivation");
 
 	public ScenePanel() {
-		externalFrame.setLocationRelativeTo(null);
+		externalFrame.setAlwaysOnTop(true);
 		rootNode.setName("panel");
 		panel.setVertexCount(4);
 		panel.setFaceCount(1);
@@ -179,6 +179,10 @@ public class ScenePanel {
 
 	public JFrame getFrame() {
 		return inScene ? frame : externalFrame;
+	}
+	
+	public JFrame getExternalFrame() {
+		return externalFrame;
 	}
 
 	public SceneGraphComponent getComponent() {
