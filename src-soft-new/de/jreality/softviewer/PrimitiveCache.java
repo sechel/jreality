@@ -46,86 +46,183 @@ import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereUtility;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.data.*;
+import de.jreality.shader.CubeMap;
+import de.jreality.softviewer.shader.PolygonShader;
+import de.jreality.softviewer.shader.SkyboxPolygonShader;
+
 public class PrimitiveCache {
 
     private static IndexedFaceSet[] sphere = new IndexedFaceSet[5];
-    private static IntArrayArray[] sphereIndices =new  IntArrayArray[5];
-    private static DoubleArrayArray[] sphereVertices =new  DoubleArrayArray[5];
-    private static DoubleArrayArray[] sphereNormals =new  DoubleArrayArray[5];
-    
-    private static IndexedFaceSet[] cylinder = new IndexedFaceSet[13];
-    private static IntArrayArray[] cylinderIndices =new  IntArrayArray[13];
-    private static DoubleArrayArray[] cylinderVertices =new  DoubleArrayArray[13];
-    private static DoubleArrayArray[] cylinderNormals =new  DoubleArrayArray[13];
-    
-    
-    static {
-        double d = 1/Math.sqrt(3.);
-        double[][] tetrahedronVerts3 =  
-        {{d,d,d},{d,-d,-d},{-d,d,-d},{-d,-d,d}};
 
-        int[][] tetrahedronIndices = {
-                {0,1,2},
-                {2,1,3},
-                {1,0,3},
-                {0,2,3}};
-        IndexedFaceSet tetra = new IndexedFaceSet(4,4);
-        
-        tetra.setFaceAttributes(Attribute.INDICES, new IntArrayArray.Array(tetrahedronIndices));
-        tetra.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(tetrahedronVerts3));
-       
-        GeometryUtility.calculateAndSetVertexNormals(tetra);        
-        
+    private static IntArrayArray[] sphereIndices = new IntArrayArray[5];
+
+    private static DoubleArrayArray[] sphereVertices = new DoubleArrayArray[5];
+
+    private static DoubleArrayArray[] sphereNormals = new DoubleArrayArray[5];
+
+    private static IndexedFaceSet[] cylinder = new IndexedFaceSet[13];
+
+    private static IntArrayArray[] cylinderIndices = new IntArrayArray[13];
+
+    private static DoubleArrayArray[] cylinderVertices = new DoubleArrayArray[13];
+
+    private static DoubleArrayArray[] cylinderNormals = new DoubleArrayArray[13];
+
+    private static SkyboxPolygonShader skybox = new SkyboxPolygonShader();
+
+    private static final DoubleArrayArray[] cubeVertices = new DoubleArrayArray[] {
+            new DoubleArrayArray.Array(new double[][] { { 1, 1, 1 },
+                    { 1, 1, -1 }, { 1, -1, -1 }, { 1, -1, 1 } }),// right
+            new DoubleArrayArray.Array(new double[][] { { -1, 1, -1 },
+                    { -1, 1, 1 }, { -1, -1, 1 }, { -1, -1, -1 } }),// left
+                    
+            new DoubleArrayArray.Array(new double[][] { { -1, -1, 1 },
+                    { 1, -1, 1 }, { 1, -1, -1 }, { -1, -1, -1 } }),// down
+            new DoubleArrayArray.Array(new double[][] { { -1, 1, -1 },
+                    { 1, 1, -1 }, { 1, 1, 1 }, { -1, 1, 1 } }),// up
+                    
+            new DoubleArrayArray.Array(new double[][] { { -1, 1, 1 },
+                    { 1, 1, 1 }, { 1, -1, 1 }, { -1, -1, 1 } }),// back
+            new DoubleArrayArray.Array(new double[][] { { 1, 1, -1 },
+                    { -1, 1, -1 }, { -1, -1, -1 }, { 1, -1, -1 } }), // front
+    };
+
+    
+    private static final DoubleArrayArray cubeTex = new DoubleArrayArray.Array( new double[][] 
+                                                                                                  {{0,0},{1,0},{1,1},{0,1}}
+    ); 
+    private static final IntArray cubeIndices = new IntArray(new int[] { 0, 1,
+            2, 3 });
+
+    private static final DoubleArray[] cubeNormals = new DoubleArray[] {
+            new DoubleArray(new double[] { 1, 0, 0 }),
+            new DoubleArray(new double[] { -1, 0, 0 }),
+            new DoubleArray(new double[] { 0, 1, 0 }),
+            new DoubleArray(new double[] { 0, -1, 0 }),
+            new DoubleArray(new double[] { 0, 0, 1 }),
+            new DoubleArray(new double[] { 0, 0, -1 }) };
+    /*
+     * static private double[][][] cubeVerts3 = { {{1,1,1}, {1,1,-1}, {1, -1,
+     * -1}, {1, -1, 1}}, // right { {-1, 1, -1}, {-1, 1, 1},{-1,-1,1},
+     * {-1,-1,-1}}, // left { {-1, 1,-1}, {1, 1,-1},{1, 1,1}, {-1, 1,1}}, // up {
+     * {-1,-1,1},{1,-1,1},{1,-1,-1}, {-1,-1,-1}}, // down {{-1,1,1}, {1,1,1},
+     * {1,-1,1},{-1,-1,1}}, // back { {1,1,-1},{-1,1,-1}, {-1,-1,-1},{1,-1,-1}} //
+     * front };
+     */
+    static {
+        double d = 1 / Math.sqrt(3.);
+        double[][] tetrahedronVerts3 = { { d, d, d }, { d, -d, -d },
+                { -d, d, -d }, { -d, -d, d } };
+
+        int[][] tetrahedronIndices = { { 0, 1, 2 }, { 2, 1, 3 }, { 1, 0, 3 },
+                { 0, 2, 3 } };
+        IndexedFaceSet tetra = new IndexedFaceSet(4, 4);
+
+        tetra.setFaceAttributes(Attribute.INDICES, new IntArrayArray.Array(
+                tetrahedronIndices));
+        tetra.setVertexAttributes(Attribute.COORDINATES,
+                StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(
+                        tetrahedronVerts3));
+
+        GeometryUtility.calculateAndSetVertexNormals(tetra);
+
         sphere[0] = tetra;
         GeometryUtility.calculateAndSetVertexNormals(sphere[0]);
         for (int i = 0; i < sphere.length; i++) {
-            if(i>0)
-                sphere[i] = SphereUtility.tessellatedIcosahedronSphere(i-1,true);
-            sphereIndices[i] = sphere[i].getFaceAttributes(Attribute.INDICES).toIntArrayArray();
-            sphereVertices[i] = sphere[i].getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
-            sphereNormals[i] = sphere[i].getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray();
+            if (i > 0)
+                sphere[i] = SphereUtility.tessellatedIcosahedronSphere(i - 1,
+                        true);
+            sphereIndices[i] = sphere[i].getFaceAttributes(Attribute.INDICES)
+                    .toIntArrayArray();
+            sphereVertices[i] = sphere[i].getVertexAttributes(
+                    Attribute.COORDINATES).toDoubleArrayArray();
+            sphereNormals[i] = sphere[i].getVertexAttributes(Attribute.NORMALS)
+                    .toDoubleArrayArray();
         }
         for (int i = 0; i < cylinder.length; i++) {
-            cylinder[i] = Primitives.cylinder(i+3);
-            cylinderIndices[i] = cylinder[i].getFaceAttributes(Attribute.INDICES).toIntArrayArray();
-            cylinderVertices[i] = cylinder[i].getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
-            cylinderNormals[i] = cylinder[i].getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray();
+            cylinder[i] = Primitives.cylinder(i + 3);
+            cylinderIndices[i] = cylinder[i].getFaceAttributes(
+                    Attribute.INDICES).toIntArrayArray();
+            cylinderVertices[i] = cylinder[i].getVertexAttributes(
+                    Attribute.COORDINATES).toDoubleArrayArray();
+            cylinderNormals[i] = cylinder[i].getVertexAttributes(
+                    Attribute.NORMALS).toDoubleArrayArray();
         }
     }
+
     private PrimitiveCache() {
         super();
         // TODO Auto-generated constructor stub
     }
 
     public static void renderSphere(TrianglePipeline pipeline, double lod) {
-        int i = (int) Math.min(4*Math.pow(lod,1/3.5),4);
-        //i= 0;
-        for(int j = 0, n = sphereIndices[i].size();j<n;j++) {
-            pipeline.processPolygon(sphereVertices[i], sphereIndices[i].getValueAt(j), sphereNormals[i], sphereIndices[i].getValueAt(j), null, null, null, null);
+        int i = (int) Math.min(4 * Math.pow(lod, 1 / 3.5), 4);
+        // i= 0;
+        for (int j = 0, n = sphereIndices[i].size(); j < n; j++) {
+            pipeline.processPolygon(sphereVertices[i], sphereIndices[i]
+                    .getValueAt(j), sphereNormals[i], sphereIndices[i]
+                    .getValueAt(j), null, null, null, null);
         }
     }
-    
-    
+
     public static void renderCylinder(TrianglePipeline pipeline, double lod) {
-        int i = ((int) Math.min(12*Math.pow(lod,1/2.5),12));
-        //i= 0;
-        for(int j = 0, n = cylinderIndices[i].size();j<n;j++) {
-            pipeline.processPolygon(cylinderVertices[i], cylinderIndices[i].getValueAt(j), cylinderNormals[i], cylinderIndices[i].getValueAt(j), null, null, null, null);
+        int i = ((int) Math.min(12 * Math.pow(lod, 1 / 2.5), 12));
+        // i= 0;
+        for (int j = 0, n = cylinderIndices[i].size(); j < n; j++) {
+            pipeline.processPolygon(cylinderVertices[i], cylinderIndices[i]
+                    .getValueAt(j), cylinderNormals[i], cylinderIndices[i]
+                    .getValueAt(j), null, null, null, null);
         }
     }
-    
-    
+
     public static IndexedFaceSet getSphere(double lod) {
-        int i = (int) Math.min(4*Math.pow(lod,1/3.5),4);
-        //i= 0;
-        return sphere[i]==null? sphere[i] = SphereUtility.tessellatedIcosahedronSphere(i-1,true) : sphere[i];
- //        if( sphere == null )
-//            sphere = SphereUtility.tessellatedIcosahedronSphere(2,true);
-//        return sphere;
+        int i = (int) Math.min(4 * Math.pow(lod, 1 / 3.5), 4);
+        // i= 0;
+        return sphere[i] == null ? sphere[i] = SphereUtility
+                .tessellatedIcosahedronSphere(i - 1, true) : sphere[i];
+        // if( sphere == null )
+        // sphere = SphereUtility.tessellatedIcosahedronSphere(2,true);
+        // return sphere;
     }
+
     public static IndexedFaceSet getCylinder(double lod) {
-        int i = (int) Math.min(16*Math.pow(lod,1/3.5),16);
+        int i = (int) Math.min(16 * Math.pow(lod, 1 / 3.5), 16);
         return cylinder[i];
     }
-    
+
+    public static void renderSky(TrianglePipeline pipeline, CubeMap sky) {
+        pipeline.setFaceShader(skybox);
+        
+        SimpleTexture tex = new SimpleTexture(sky.getBack());
+        skybox.setTexture(tex);
+        pipeline.processPolygon(cubeVertices[0], cubeIndices, null, null, cubeTex,
+                null, cubeNormals[0], null);
+
+        tex = new SimpleTexture(sky.getFront());
+        skybox.setTexture(tex);
+        pipeline.processPolygon(cubeVertices[1], cubeIndices, null, null, cubeTex,
+                null, cubeNormals[1], null);
+
+        tex = new SimpleTexture(sky.getTop());
+        skybox.setTexture(tex);
+        pipeline.processPolygon(cubeVertices[2], cubeIndices, null, null, cubeTex,
+                null, cubeNormals[2], null);
+
+        tex = new SimpleTexture(sky.getBottom());
+        skybox.setTexture(tex);
+        pipeline.processPolygon(cubeVertices[3], cubeIndices, null, null, cubeTex,
+                null, cubeNormals[3], null);
+
+        tex = new SimpleTexture(sky.getLeft());
+        skybox.setTexture(tex);
+        pipeline.processPolygon(cubeVertices[4], cubeIndices, null, null, cubeTex,
+                null, cubeNormals[4], null);
+
+        tex = new SimpleTexture(sky.getRight());
+        skybox.setTexture(tex);
+        pipeline.processPolygon(cubeVertices[5], cubeIndices, null, null, cubeTex,
+                null, cubeNormals[5], null);
+
+    }
+
 }

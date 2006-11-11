@@ -583,6 +583,7 @@ public class TrianglePipeline {
         this.matrix = matrix;
         Rn.transpose(inverseTransposeMatrix, matrix);
         Rn.inverse(inverseTransposeMatrix, inverseTransposeMatrix);
+        environment.setMatrix(matrix);
     }
 
     public final void sortTriangles() {

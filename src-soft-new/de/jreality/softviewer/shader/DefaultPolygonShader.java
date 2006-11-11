@@ -59,7 +59,7 @@ import de.jreality.softviewer.Texture;
  */
 public class DefaultPolygonShader extends PolygonShader {
     private boolean interpolateColor=true;
-    private DefaultVertexShader vertexShader;
+    private VertexShader vertexShader;
     protected boolean outline = false;
     private final boolean smooth;
     
@@ -69,9 +69,12 @@ public class DefaultPolygonShader extends PolygonShader {
     //final private double[] v;
     
     final de.jreality.shader.DefaultPolygonShader ps;
-    public DefaultPolygonShader() {
+    protected DefaultPolygonShader() {
+        this(new DefaultVertexShader());
+    }
+    public DefaultPolygonShader(VertexShader v) {
         super();
-        vertexShader= new DefaultVertexShader();
+        vertexShader= v;
         smooth = true;
         d1 = null;
         d2 = null;
@@ -102,11 +105,12 @@ public class DefaultPolygonShader extends PolygonShader {
     }
     
     
-    public final void shadePolygon(Polygon p, Environment environment, boolean vertexColors) {
+    public void shadePolygon(Polygon p, Environment environment, boolean vertexColors) {
         p.setTransparency(vertexShader.getTransparency());
         p.setTexture(texture);
         p.setInterpolateAlpha(interpolateAlpha());
         p.setInterpolateColor(interpolateColor());
+        p.setSkybox(false);
         int n = p.getLength();
 		if(smooth) {
             for(int i = 0; i< n;i++) {

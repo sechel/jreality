@@ -46,7 +46,9 @@ import java.util.List;
 
 import de.jreality.math.Rn;
 import de.jreality.scene.*;
+import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.CubeMap;
 import de.jreality.util.DefaultMatrixSupport;
 import de.jreality.util.SceneGraphUtility;
 
@@ -93,16 +95,27 @@ public abstract class AbstractRenderer {
     //    }
         Appearance a = root == null ? null : root.getAppearance();
           Color background;
+          CubeMap sky= null;
           if(a != null) {
               Object o = a.getAttribute(CommonAttributes.BACKGROUND_COLOR);
     
               if( o instanceof Color) background = (Color) o;
               //else background = Color.WHITE;
               else background = CommonAttributes.BACKGROUND_COLOR_DEFAULT;
-          } else
+              
+              // if there is a sky box read it
+              if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
+                    CommonAttributes.SKY_BOX, a)) {
+                sky = (CubeMap) AttributeEntityUtility
+                        .createAttributeEntity(CubeMap.class,
+                                CommonAttributes.SKY_BOX, a, true);
+              }
+          } else {
               background = Color.WHITE;
+          }
         rasterizer.setBackground(background.getRGB());
-        rasterizer.clear();
+        // only clear screen if sky != null
+        rasterizer.clear(sky==null);
         rasterizer.start();
         //
         // set camera settings:
@@ -130,7 +143,13 @@ public abstract class AbstractRenderer {
           renderTraversal.traverse(root);
           if(auxiliaryRoot!= null)
               renderTraversal.traverse(auxiliaryRoot);
-        }    
+        }
+        
+        //finally if there is a sky box raster it
+        if(sky != null) {
+            PrimitiveCache.renderSky(pipeline,sky);
+        }
+        
         pipeline.finish();
         rasterizer.stop();
       }

@@ -703,9 +703,10 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
         return background;
     }
 
-    public final void clear() {
+    public final void clear(boolean clearBackground) {
         Arrays.fill(zBuffer, Double.MAX_VALUE);
-        Arrays.fill(pixels, background);
+        if(clearBackground)
+            Arrays.fill(pixels, background);
 
     }
 

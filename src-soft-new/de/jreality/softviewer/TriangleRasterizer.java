@@ -50,7 +50,7 @@ public abstract class TriangleRasterizer {
     public abstract void renderTriangle(final Triangle t, final boolean outline);
     public abstract void setBackground(int argb);
     public abstract int getBackground();
-  public abstract void clear();
+  public abstract void clear(boolean clearBackground);
     public abstract void setWindow(final int xmin, final int xmax, final int ymin, final int ymax);
     public abstract void setSize(final double width, final double height);
 }
