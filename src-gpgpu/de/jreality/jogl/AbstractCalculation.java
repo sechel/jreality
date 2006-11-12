@@ -398,7 +398,7 @@ public abstract class AbstractCalculation implements GLEventListener {
    * @return a FloatBuffer that contains the latest calculated values
    */
   public FloatBuffer getCurrentValues() {
-    if (!readData) return null;
+    if (!readData || valueBuffer == null) return null;
     valueBuffer.position(0).limit(numValues);
     return valueBuffer.asReadOnlyBuffer();
   }
