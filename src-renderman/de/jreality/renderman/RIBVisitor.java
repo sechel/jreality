@@ -466,8 +466,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 					CommonAttributes.SKY_BOX, ap)) {
 				CubeMap cm = (CubeMap) AttributeEntityUtility
 						.createAttributeEntity(CubeMap.class,
-								CommonAttributes.SKY_BOX, ap, true);
-				RendermanSkyBox.render(this, world2Camera, cm);
+								CommonAttributes.SKY_BOX, ap, true);        
+				RendermanSkyBox.render(this, world2Camera, cm);  
 			} else {
 				Color[] clrs = new Color[1];
 				Object o = eAppearance.getAttribute(
