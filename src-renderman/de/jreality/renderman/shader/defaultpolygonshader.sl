@@ -66,19 +66,9 @@ defaultpolygonshader ( float Ka = 0,
   }
 
   // and add in the reflection map (like a specular highlight, without modulating by shading)
-  if(raytracedreflections!=0){
-    normal Nn = normalize(N);
-    vector In = normalize(I);
-    color Crefl;
-    if (Nn.In < 0) {
-      vector reflDir = reflect(I,Nf);
-      Crefl = trace(P, reflDir);
-    } else {
-      Crefl = 0;
-      //reflDir = reflect(I, Nf) ;
-      //reflDir = vtransform ("world", reflDir);
-      //Crefl = color environment(reflectionmap, reflDir)
-    }
+  if(raytracedreflections!=0){    
+    vector reflDir = reflect(normalize(I),normalize(Nf));
+    color Crefl = trace(P, reflDir);    
     Ct = (1-reflectionBlend) * Ct + reflectionBlend * Crefl;
   } else{
     if (reflectionmap != "") {
