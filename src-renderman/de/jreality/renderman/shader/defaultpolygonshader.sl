@@ -17,7 +17,7 @@ defaultpolygonshader ( float Ka = 0,
 	Ks = .5, 
 	Kr = .5, 
 	roughness = .1, 
-	reflectionBlend = .0;
+	reflectionBlend = .6;
     float tm[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 	color specularcolor = 1;
 	string texturename = ""; 
@@ -66,10 +66,26 @@ defaultpolygonshader ( float Ka = 0,
   }
 
   // and add in the reflection map (like a specular highlight, without modulating by shading)
-  if (reflectionmap != "" && raytracedreflections != 1) {
-        D = reflect(I, Nf) ;
-        D = vtransform ("world", D);
-	    Ct = (1-reflectionBlend) * Ct + reflectionBlend * color environment(reflectionmap, D);
+  if(raytracedreflections!=0){
+    normal Nn = normalize(N);
+    vector In = normalize(I);
+    color Crefl;
+    if (Nn.In < 0) {
+      vector reflDir = reflect(I,Nf);
+      Crefl = trace(P, reflDir);
+    } else {
+      Crefl = 0;
+      //reflDir = reflect(I, Nf) ;
+      //reflDir = vtransform ("world", reflDir);
+      //Crefl = color environment(reflectionmap, reflDir)
+    }
+    Ct = (1-reflectionBlend) * Ct + reflectionBlend * Crefl;
+  } else{
+    if (reflectionmap != "") {
+      D = reflect(I, Nf) ;
+      D = vtransform ("world", D);
+	  Ct = (1-reflectionBlend) * Ct + reflectionBlend * color environment(reflectionmap, D);
+	}
   } 
 
 
@@ -77,26 +93,5 @@ defaultpolygonshader ( float Ka = 0,
   if (lighting != 0)
         Ci = Oi * ( Ct + specularcolor * Ks*specular(Nf,V,roughness) );
   else 
-        Ci = Ct;
-        
-   ////////////////////////////////////// 
-  
-
-   if(raytracedreflections!=0){
-   normal Nn = normalize(N);
-   vector In = normalize(I);
-   color Crefl;
-   if (Nn.In < 0) {
-     vector reflDir = reflect(I,Nf);
-     Crefl = trace(P, reflDir);
-   } else {
-    Crefl = 0;
-     //reflDir = reflect(I, Nf) ;
-     //reflDir = vtransform ("world", reflDir);
-     //Crefl = color environment(reflectionmap, reflDir)
-   }
-   Ci = ((1-reflectionBlend) * Ci) + (reflectionBlend * Crefl);
-   }
-  
+        Ci = Oi * Ct;
 }
-
