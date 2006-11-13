@@ -122,10 +122,30 @@ public abstract class AbstractRenderer {
         //
         
         if (root != null && camera != null) {
-          PerspectiveProjection p =( (PerspectiveProjection)pipeline.getPerspective());
-          p.setFieldOfViewDeg(camera.getFieldOfView());
-          p.setNear(camera.getNear());
-          p.setFar(camera.getFar());
+            boolean isPerspective = camera.isPerspective();
+            CameraProjection p =pipeline.getPerspective();
+            if(isPerspective) {
+                PerspectiveProjection pp = null;
+                if(! (p instanceof PerspectiveProjection)) {
+                    pp = new PerspectiveProjection();
+                    pipeline.setPerspective(pp);
+                } else
+                    pp = (PerspectiveProjection) p;
+                pp.setFieldOfViewDeg(camera.getFieldOfView());
+                pp.setNear(camera.getNear());
+                pp.setFar(camera.getFar());
+            } else {
+                OrthographicProjection pp = null;
+                if(! (p instanceof OrthographicProjection)) {
+                    pp = new OrthographicProjection();
+                    pipeline.setPerspective(pp);
+                } else
+                    pp = (OrthographicProjection) p;
+                //pp.setFieldOfViewDeg(camera.getFieldOfView());
+                pp.setFieldOfViewDeg(1);
+                pp.setNear(camera.getNear());
+                pp.setFar(camera.getFar());
+            }
           DefaultMatrixSupport.getSharedInstance().restoreDefault(cameraWorld, true);
           //cameraPath.applyEffectiveTransformation(cameraWorld);
           cameraWorld.setMatrix(cameraPath.getMatrix(null));

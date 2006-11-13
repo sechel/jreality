@@ -245,6 +245,16 @@ public class DefaultVertexShader extends VertexShader {
 		cdb += phong * csb;
 
 		//double omt = 1-transparency;
+        
+        double ff = environment.getFogfactor();
+        if(ff != 0) {
+            double d = Math.exp(-Math.sqrt(px*px + py*py + pz*pz)*ff);
+            double dm = 1-d;
+            double[] fc = environment.getFogColor();
+            cdr = cdr * d + dm*fc[0];
+            cdg = cdg * d + dm*fc[1];
+            cdb = cdb * d + dm*fc[2];
+        }
 		
 		vd[Polygon.R] = cdr;
 		vd[Polygon.G] = cdg;

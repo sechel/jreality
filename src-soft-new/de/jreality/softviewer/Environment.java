@@ -40,13 +40,12 @@
 
 package de.jreality.softviewer;
 
-import de.jreality.scene.ClippingPlane;
-import de.jreality.scene.DirectionalLight;
-import de.jreality.scene.PointLight;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphVisitor;
-import de.jreality.scene.SpotLight;
-import de.jreality.scene.Transformation;
+import java.awt.Color;
+
+import de.jreality.scene.*;
+import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.CubeMap;
 
 /**
  * This class holds information about the environment---mainly lights and the camera at the moment.
@@ -193,7 +192,29 @@ public final class Environment extends SceneGraphVisitor {
         else
             VecMat.assignIdentity(initialTrafo);
         currentTrafo= initialTrafo;
-        
+        Appearance a = root.getAppearance();
+        boolean doFog = CommonAttributes.FOG_ENABLED_DEFAULT;
+        double fogFactor = CommonAttributes.FOG_DENSITY_DEFAULT;
+        Color fogColor = CommonAttributes.BACKGROUND_COLOR_DEFAULT;
+        if (a != null) {
+            Object o  = a.getAttribute(CommonAttributes.FOG_ENABLED);
+            if(o instanceof Boolean) doFog = ((Boolean)o).booleanValue();
+            o = a.getAttribute(CommonAttributes.FOG_DENSITY);
+            if(o instanceof Double) fogFactor = ((Double)o).doubleValue();
+            o = a.getAttribute(CommonAttributes.FOG_COLOR);
+            if(o instanceof Color) fogColor = (Color) o;
+            else {
+                o = a.getAttribute(CommonAttributes.BACKGROUND_COLOR);
+                if(o instanceof Color) fogColor = (Color) o;
+            }
+        }
+        if(doFog) {
+            globals.setFogFactor(fogFactor);
+            globals.setFogColor(fogColor.getRed()/255.,fogColor.getGreen()/255.,fogColor.getBlue()/255.);
+        } else {
+            globals.setFogFactor(0);
+            globals.setFogColor(0,0,0);
+        }
         visit(root);
     }
 
@@ -284,6 +305,14 @@ public final class Environment extends SceneGraphVisitor {
         this.matrix = matrix;
     }
     
+    public double getFogfactor() {
+        return globals.getFogFactor();
+    }
+    
+    public double[] getFogColor() {
+        return globals.getFogColor();
+    }
+    
     private class Globals{
         
         private SpotLightSoft[] spotLights= new SpotLightSoft[0];
@@ -298,12 +327,42 @@ public final class Environment extends SceneGraphVisitor {
 
         private DirectionalLightSoft[] directionalLights= new DirectionalLightSoft[0];
         
+        private double[] fogColor = new double[3];
+        private double fogFactor = 0;
+        
         
         public Globals() {
             super();
         }
         
         
+        
+        public double[] getFogColor() {
+            return fogColor;
+        }
+
+
+
+        public void setFogColor(double r, double g, double b) {
+            fogColor[0] = r;
+            fogColor[1] = g;
+            fogColor[2] = b;
+        }
+
+
+
+        public double getFogFactor() {
+            return fogFactor;
+        }
+
+
+
+        public void setFogFactor(double fogFactor) {
+            this.fogFactor = fogFactor;
+        }
+
+
+
         public final DirectionalLightSoft[] getDirectionalLights() {
             return directionalLights;
         }
