@@ -86,6 +86,14 @@ class RendermanSkyBox {
   static int[] vertices = {0,1,2,3};
   static void render(RIBVisitor ribv, double[] w2c, CubeMap cm)	{
     ImageData[] imgs=TextureUtility.getCubeMapImages(cm);
+    
+    ribv.ri.attributeBegin("SkyBox");    
+    if(ribv.getRendererType()==RIBViewer.TYPE_3DELIGHT)
+      ribv.ri.verbatim("Attribute \"visibility\"  \"string transmission\" \"Os\"");            
+    else 
+      ribv.ri.verbatim("Attribute \"visibility\"  \"int transmission\" [0]");
+    
+    
     ribv.ri.color(Color.WHITE);
     ribv.ri.comment("Skybox ");
     ribv.ri.transformBegin();
@@ -115,6 +123,7 @@ class RendermanSkyBox {
 		ribv.ri.pointsPolygons(1,nvertices, vertices, map);
 	}
 	ribv.ri.transformEnd();
+  ribv.ri.attributeEnd("SkyBox");
 	}
 	
 }
