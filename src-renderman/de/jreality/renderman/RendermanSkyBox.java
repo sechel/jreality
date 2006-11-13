@@ -89,7 +89,7 @@ class RendermanSkyBox {
     
     ribv.ri.attributeBegin("SkyBox");    
     if(ribv.getRendererType()==RIBViewer.TYPE_3DELIGHT)
-      ribv.ri.verbatim("Attribute \"visibility\"  \"string transmission\" \"Os\"");            
+      ribv.ri.verbatim("Attribute \"visibility\"  \"string transmission\" \"transparent\"");            
     else 
       ribv.ri.verbatim("Attribute \"visibility\"  \"int transmission\" [0]");
     

@@ -133,7 +133,7 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
           }
           map.put("string reflectionmap", fname);
         }
-	    	map.put("reflectionBlend", new Float(reflectionMap.getBlendColor().getAlpha()/255.0));
+	    	map.put("float reflectionBlend", new Float(reflectionMap.getBlendColor().getAlpha()/255.0));
 	    }
 
       

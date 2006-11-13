@@ -532,7 +532,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		ri.concatTransform(RIBHelper.fTranspose(w2c));
 		ri.comment("Disable shadows for background");
 		if (rendererType == RIBViewer.TYPE_3DELIGHT) 
-			ri.verbatim("Attribute \"visibility\"  \"string transmission\" \"Os\"");
+			ri.verbatim("Attribute \"visibility\"  \"string transmission\" \"transparent\"");
 		else 
 			ri.verbatim("Attribute \"visibility\"  \"int transmission\" [0]");
 		ri.surface("constant", null);
