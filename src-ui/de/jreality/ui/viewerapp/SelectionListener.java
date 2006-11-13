@@ -41,6 +41,9 @@
 package de.jreality.ui.viewerapp;
 
 
+/**
+ * @author msommer
+ */
 public interface SelectionListener extends java.util.EventListener {
   
   public void selectionChanged(SelectionEvent e);

@@ -49,13 +49,10 @@ import javax.swing.JTree;
 import javax.swing.border.Border;
 
 
-
-
 /**
- * TODO: comment UIFactory
+ * @author msommer
  */
 class UIFactory {
-  
   
   private Component viewer;
   private Component beanShell;
@@ -102,9 +99,7 @@ class UIFactory {
   }
   
   
-  //used in ViewerAppOld
-  protected JScrollPane scroll(Component comp)
-  {
+  protected JScrollPane scroll(Component comp) {
     JScrollPane scroll = new JScrollPane(comp);
     scroll.setBorder(emptyBorder);
     return scroll;
@@ -117,7 +112,7 @@ class UIFactory {
 
   
   protected void setBeanShell(Component component) {
-    beanShell =component;
+    beanShell = component;
   }
 
 
@@ -126,14 +121,9 @@ class UIFactory {
     inspector = component;
   }
 
+  
   protected void setSceneTree(JTree sceneTree) {
     this.sceneTree = sceneTree;
-  }
-  
-  
-  //for ViewerAppOld
-  protected JTree getSceneTree() {
-    return sceneTree;
   }
   
   
@@ -141,6 +131,7 @@ class UIFactory {
     attachNavigator = b;
   }
 
+  
   protected void setAttachBeanShell(boolean b) {
     attachBeanShell = b;
   }

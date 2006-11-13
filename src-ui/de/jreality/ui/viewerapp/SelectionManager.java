@@ -63,6 +63,11 @@ import de.jreality.ui.treeview.SceneTreeModel;
 import de.jreality.util.Rectangle3D;
 
 
+/**
+ * Manages selections of scene graph nodes within a scene graph displayed by a viewer.
+ * 
+ * @author msommer
+ */
 public class SelectionManager implements TransformationListener {
   
   private SceneGraphPath defaultSelection;

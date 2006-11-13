@@ -62,6 +62,11 @@ import de.jtem.beans.InspectorPanel;
 import de.jtem.beans.NumberSpinnerEditor;
 
 
+/**
+ * Scene tree and inspector panel for a given scene graph.
+ * 
+ * @author msommer
+ */
 public class Navigator {
 
 	private InspectorPanel inspector;
@@ -136,6 +141,10 @@ public class Navigator {
 		return sceneRoot;
 	}
 
+  
+  public Object getCurrentSelection() {
+    return currentSelection;
+  }
 
 
 	public static abstract class SelectionListener implements TreeSelectionListener {
@@ -154,13 +163,10 @@ public class Navigator {
 			selectionChanged(se);
 		}
 
+	}  //end of class SelectionListener
 
-	}
 
-
-	public static class SelectionEvent extends TreeSelectionEvent{
-
-		private static final long serialVersionUID = 1L;
+	public static class SelectionEvent extends TreeSelectionEvent {
 
 		private Object selection;
 
@@ -228,28 +234,6 @@ public class Navigator {
 
 
 		/**
-		 * Returns null if the selection has no parent (i.e. selection is the root node) 
-		 * or if the selection is not a SGNode or a tool (e.g. shader).
-		 * @return the parent component
-		 */
-		public SceneGraphComponent getParentOfSelection() {
-
-			SceneGraphComponent parent = null;
-
-			if (selectionIsSGNode()) {
-				SceneTreeNode p = ((SceneTreeNode) selection).getParent();
-				if (p != null)
-					parent = (SceneGraphComponent) p.getNode();
-				//could parent be something different than SGComponent?
-			}
-			else if (selectionIsTool())
-				parent = (SceneGraphComponent) ((TreeTool) selection).getTreeNode().getNode();
-
-			return parent;  //returns null if no parent or selection other than SGNode or tool (e.g. shader)
-		}
-
-
-		/**
 		 * Converts the TreePath of the current selection into a SceneGraphPath.  
 		 * @return the path of the current selection
 		 */
@@ -264,10 +248,7 @@ public class Navigator {
 			}
 			return sgPath;
 		}
-	}
+    
+	}  //end of class SelectionEvent
 
-
-	public Object getCurrentSelection() {
-		return currentSelection;
-	}
 }

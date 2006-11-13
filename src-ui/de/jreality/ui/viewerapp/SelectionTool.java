@@ -50,6 +50,11 @@ import de.jreality.scene.tool.ToolContext;
 import de.jreality.util.LoggingSystem;
 
 
+/**
+ * Manages selections of scene graph components within the scene.
+ * 
+ * @author msommer
+ */
 public class SelectionTool extends AbstractTool {
 
   final static InputSlot activationSlot = InputSlot.getDevice("PrimaryAction");

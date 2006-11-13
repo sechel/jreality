@@ -45,14 +45,19 @@ import de.jreality.scene.data.AttributeEntity;
 import de.jreality.scene.tool.Tool;
 
 
+/**
+ * Event for selections in the scene graph.
+ * 
+ * @author msommer
+ */
 public class SelectionEvent extends java.util.EventObject {
   
-  public static final int DEFAULT_SELECTION = 0;
-  public static final int TOOL_SELECTION = 1;
-  public static final int ENTITY_SELECTION = 2;
+  public static final int DEFAULT_SELECTION = 0;  //scene graph node selected
+  public static final int TOOL_SELECTION = 1;  //tool selected
+  public static final int ENTITY_SELECTION = 2;  //attribute entity selected (shader)
   
   final SceneGraphPath selection;
-  private final int type;
+  private final int type;  //one of the static fields above
   
   private final Tool tool;
   private final AttributeEntity entity;
