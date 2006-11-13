@@ -24,6 +24,7 @@ defaultpolygonshader ( float Ka = 0,
 	string reflectionmap = ""; 
     float lighting = 1;
     float raytracedreflections = 0;
+    float raytracedvolumes = 0;
 	)
 {
   normal Nf;
@@ -66,10 +67,10 @@ defaultpolygonshader ( float Ka = 0,
   }
 
   // and add in the reflection map (like a specular highlight, without modulating by shading)
-  if(raytracedreflections!=0){    
+  if(raytracedreflections!=0){   
     vector reflDir = reflect(normalize(I),normalize(Nf));
     color Crefl = trace(P, reflDir);    
-    Ct = (1-reflectionBlend) * Ct + reflectionBlend * Crefl;
+    Ct = (1-reflectionBlend) * Ct + reflectionBlend * Crefl;    
   } else{
     if (reflectionmap != "") {
       D = reflect(I, Nf) ;
@@ -84,4 +85,11 @@ defaultpolygonshader ( float Ka = 0,
         Ci = Oi * ( Ct + specularcolor * Ks*specular(Nf,V,roughness) );
   else 
         Ci = Oi * Ct;
+
+
+  if(raytracedvolumes!=0){
+    color Crefr = trace(P, I); 
+    Ci+=Crefr;
+    Oi=1;
+  }
 }

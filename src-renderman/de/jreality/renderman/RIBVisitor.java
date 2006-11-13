@@ -211,6 +211,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 
   private boolean raytracedReflectionsEnabled;
 
+  private boolean raytracedVolumesEnabled;
+
 
 	public void visit(Viewer viewer, String name) {
 		// handle the file name
@@ -388,6 +390,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 				CommonAttributes.RMAN_SHADOWS_ENABLED, false);
     raytracedReflectionsEnabled = eAppearance.getAttribute(
         CommonAttributes.RMAN_RAY_TRACING_REFLECTIONS, false);
+    raytracedVolumesEnabled = eAppearance.getAttribute(
+        CommonAttributes.RMAN_RAY_TRACING_VOLUMES, false);
 		currentSignature = eAppearance.getAttribute(CommonAttributes.SIGNATURE,
 				Pn.EUCLIDEAN);
 		outputDisplayFormat = (String) eAppearance.getAttribute(
@@ -426,7 +430,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		    ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
 		}
     
-    if(raytracedReflectionsEnabled){
+    if(raytracedReflectionsEnabled||raytracedVolumesEnabled){
       if(rendererType==RIBViewer.TYPE_3DELIGHT){
         ri.verbatim("Attribute \"visibility\"  \"string diffuse\" \"shader\"");
         ri.verbatim("Attribute \"visibility\"  \"string specular\" \"shader\"");
@@ -633,18 +637,21 @@ public class RIBVisitor extends SceneGraphVisitor {
 		if (obj != Appearance.INHERITED) {
 			SLShader slShader = (SLShader) obj;
 			ri.displacement(slShader.getName(), slShader.getParameters());
+      
 		}
 		
     obj = eap.getAttribute(CommonAttributes.RMAN_VOLUME_EXTERIOR_SHADER, Appearance.INHERITED,
         SLShader.class);
     if (obj != Appearance.INHERITED) {
       SLShader slShader = (SLShader) obj;
+      if(!raytracedVolumesEnabled) ri.verbatim("Attribute \"visibility\"  \"shade\" \"strategy\" \"[\"vpvolumes\"]\""); 
       ri.exterior(slShader.getName(), slShader.getParameters());
     }
     obj = eap.getAttribute(CommonAttributes.RMAN_VOLUME_INTERIOR_SHADER, Appearance.INHERITED,
         SLShader.class);
     if (obj != Appearance.INHERITED) {
       SLShader slShader = (SLShader) obj;
+      if(!raytracedVolumesEnabled) ri.verbatim("Attribute \"shade\" \"strategy\" [\"vpvolumes\"]"); 
       ri.interior(slShader.getName(), slShader.getParameters());
     }
 

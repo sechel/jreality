@@ -56,7 +56,10 @@ import de.jreality.scene.Appearance;
  *
  */public class CommonAttributes {
     
-	private CommonAttributes() {}
+	
+
+
+  private CommonAttributes() {}
 
 	// goes in root appearance: first set controls how the background of generated image appears
 	public final static String BACKGROUND_COLOR = 	"backgroundColor";
@@ -174,7 +177,7 @@ import de.jreality.scene.Appearance;
 	// RenderMan backend attributes
 	public final static String RMAN_SHADOWS_ENABLED = "rendermanShadowsEnabled";
   public static final String RMAN_RAY_TRACING_REFLECTIONS = "rendermanRayTracingReflectionsEnabled";
-  //public static final String RMAN_RAY_TRACING_REFLECTION_BLEND = "rendermanRayTracingReflectionBlend";
+  public static final String RMAN_RAY_TRACING_VOLUMES="rendermanRayTracingVolumesEnabled";
 	public static final String RMAN_SL_SHADER = "rendermanSLShader";
 	public final static String RMAN_SURFACE_SHADER = "rendermanSurfaceShader";
 	public final static String RMAN_LIGHT_SHADER = "rendermanLightShader";

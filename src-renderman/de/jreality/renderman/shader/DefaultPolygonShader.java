@@ -49,6 +49,8 @@ import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.renderman.RIBHelper;
 import de.jreality.renderman.RIBVisitor;
+import de.jreality.renderman.SLShader;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
@@ -114,11 +116,7 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
            }
         }
         
-//      if((boolean) eap.getAttribute(CommonAttributes.RMAN_RAY_TRACING_REFLECTIONS,true))
-//        map.put("float raytracedreflections", new Float(1));  
-//      else
-//        map.put("float raytracedreflections", new Float(0));
-            
+        
 	    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))
 	    {
         reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));
@@ -136,11 +134,15 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
           map.put("string reflectionmap", fname);
         }
 	    	map.put("reflectionBlend", new Float(reflectionMap.getBlendColor().getAlpha()/255.0));
-	    }//else
-       // map.put("reflectionBlend", new Float(eap.getAttribute(CommonAttributes.RMAN_RAY_TRACING_REFLECTION_BLEND,0.0)));
-        
+	    }
+
       
-      
+      //volume shaders
+      Object obj1 = eap.getAttribute(CommonAttributes.RMAN_VOLUME_INTERIOR_SHADER, Appearance.INHERITED,SLShader.class);
+      Object obj2 = eap.getAttribute(CommonAttributes.RMAN_VOLUME_INTERIOR_SHADER, Appearance.INHERITED,SLShader.class);
+      boolean volume=(obj1 != Appearance.INHERITED)||(obj2 != Appearance.INHERITED);        
+      if(volume && (boolean) eap.getAttribute(CommonAttributes.RMAN_RAY_TRACING_VOLUMES,false))
+          map.put("float raytracedvolumes", new Float(1));      
     }
 
 	public String getType() {
