@@ -1,8 +1,47 @@
+/**
+ *
+ * This file is part of jReality. jReality is open source software, made
+ * available under a BSD license:
+ *
+ * Copyright (c) 2003-2006, jReality Group: Charles Gunn, Tim Hoffmann, Markus
+ * Schmies, Steffen Weissmann.
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * - Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * - Neither the name of jReality nor the names of its contributors nor the
+ *   names of their associated organizations may be used to endorse or promote
+ *   products derived from this software without specific prior written
+ *   permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
+
 package de.jreality.vr;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -17,7 +56,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -38,7 +76,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -53,7 +90,6 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileSystemView;
@@ -92,12 +128,12 @@ import de.jreality.tools.RotateTool;
 import de.jreality.tools.ShipNavigationTool;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.ui.viewerapp.ViewerAppMenu;
 import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
 import de.jtem.beans.SimpleColorChooser;
-
 
 
 public class ViewerVR {
@@ -450,14 +486,13 @@ public class ViewerVR {
 		makeContentFileChooser();
 		makeTextureFileChooser();
 		makeColorChoosers();
-
-		panelInSceneCheckBox = new JCheckBoxMenuItem("panel in scene",true);
-		panelInSceneCheckBox.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent e) {
-				setPanelInScene(panelInSceneCheckBox.getState());
-			}
+		
+		panelInSceneCheckBox = new JCheckBoxMenuItem( new AbstractAction("Show panel in scene") {
+		  public void actionPerformed(ActionEvent e) {
+		    setPanelInScene(panelInSceneCheckBox.getState());
+		  }
 		});
+    panelInSceneCheckBox.setSelected(true);
 		
 		restorePreferences();
 		setAvatarPosition(0, landscape.isTerrainFlat() ? -.5 : -.13, 28);
@@ -1667,51 +1702,7 @@ public class ViewerVR {
 
 	public ViewerApp display() {
 		ViewerApp viewerApp = new ViewerApp(sceneRoot, cameraPath, emptyPickPath, avatarPath);
-		
-		JMenuBar menuBar = viewerApp.getMenuBar();
-		JMenu settings = new JMenu("ViewerVR");
-		
-		Action panelPopup = new AbstractAction("Toggle panel") {
-			private static final long serialVersionUID = -4212517852052390335L;
-			{
-			    putValue(SHORT_DESCRIPTION, "Toggle the ViewerVR panel");
-			    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
-			}
-			public void actionPerformed(ActionEvent e) {
-				sp.toggle(sceneRoot, new Matrix(avatarPath.getMatrix(null)));
-			}
-		};
-		settings.add(panelPopup);
-		settings.add(panelInSceneCheckBox);
-		
-		settings.addSeparator();
-		
-		Action defaults = new AbstractAction("Restore defaults") {
-			private static final long serialVersionUID = 1834896899901782677L;
-
-			public void actionPerformed(ActionEvent e) {
-				restoreDefaults();
-			}
-		};
-		settings.add(defaults);
-		Action restorePrefs = new AbstractAction("Restore preferences") {
-			private static final long serialVersionUID = 629286193877652699L;
-
-			public void actionPerformed(ActionEvent e) {
-				restorePreferences();
-			}
-		};
-		settings.add(restorePrefs);
-		Action savePrefs = new AbstractAction("Save preferences") {
-			private static final long serialVersionUID = -3242879996093277296L;
-
-			public void actionPerformed(ActionEvent e) {
-				savePreferences();
-			}
-		};
-		settings.add(savePrefs);
-		
-		menuBar.add(settings);
+		tweakMenu(viewerApp.getMenu());
 		return viewerApp;
 	}
 
@@ -2165,49 +2156,108 @@ public class ViewerVR {
 		}
 	}
 	
-	public static void tweakMenu(ViewerApp vApp) {
-		JMenuBar menuBar = vApp.getMenuBar();
-		menuBar.remove(vApp.getMenu("Edit"));
-		menuBar.remove(vApp.getMenu("Appearance"));
-		JMenu fileMenu = vApp.getMenu("File");
-		ArrayList<JMenuItem> items = new ArrayList<JMenuItem>();
-		for (int i=0; i<fileMenu.getItemCount(); i++) {
-			items.add(fileMenu.getItem(i));
-		}
-		for (JMenuItem item : items) {
-			if (item != null) {
-			String name = item.getActionCommand();
-				if (name != null && (name.contains("Load") || name.contains("selected")))
-					fileMenu.remove(item);
-			}
-		}
-		fileMenu.remove(0);
-		JMenu viewMenu = vApp.getMenu("View");
-		for (int i=0; i<5; i++) {
-		viewMenu.remove(viewMenu.getItemCount()-1);
-		}
+	private void tweakMenu(ViewerAppMenu menu) {
+    
+    //remove Edit and Appearance menu
+    menu.removeMenu(ViewerAppMenu.EDIT_MENU);
+    menu.removeMenu(ViewerAppMenu.APP_MENU);
+
+    //edit File menu
+		JMenu fileMenu = menu.getMenu(ViewerAppMenu.FILE_MENU);
+		if (fileMenu != null) {
+		  for (int i=0; i<fileMenu.getItemCount(); i++) {
+		    JMenuItem item = fileMenu.getItem(i);
+		    String name = (item == null)? null : item.getActionCommand();
+		    if (!(ViewerAppMenu.SAVE_SCENE.equals(name) ||
+		        ViewerAppMenu.EXPORT.equals(name) ||
+		        ViewerAppMenu.QUIT.equals(name))) {
+		      fileMenu.remove(i--);
+		    }
+		  }
+		  fileMenu.insertSeparator(2);
+		  fileMenu.insertSeparator(1);
+    }
+
+    //edit View menu
+		JMenu viewMenu = menu.getMenu(ViewerAppMenu.VIEW_MENU);
+    if (viewMenu != null) {
+      for (int i=0; i<5; i++)
+        viewMenu.remove(viewMenu.getMenuComponentCount()-1);
+    }
+    
+    //setup ViewerVR menu
+    JMenu settings = new JMenu("ViewerVR");
+    
+    Action panelPopup = new AbstractAction("Toggle panel") {
+      private static final long serialVersionUID = -4212517852052390335L;
+      {
+          putValue(SHORT_DESCRIPTION, "Toggle the ViewerVR panel");
+          putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+      }
+      public void actionPerformed(ActionEvent e) {
+        sp.toggle(sceneRoot, new Matrix(avatarPath.getMatrix(null)));
+      }
+    };
+    settings.add(panelPopup);
+    settings.add(panelInSceneCheckBox);
+    
+    settings.addSeparator();
+    
+    Action defaults = new AbstractAction("Restore defaults") {
+      private static final long serialVersionUID = 1834896899901782677L;
+
+      public void actionPerformed(ActionEvent e) {
+        restoreDefaults();
+      }
+    };
+    settings.add(defaults);
+    Action restorePrefs = new AbstractAction("Restore preferences") {
+      private static final long serialVersionUID = 629286193877652699L;
+
+      public void actionPerformed(ActionEvent e) {
+        restorePreferences();
+      }
+    };
+    settings.add(restorePrefs);
+    Action savePrefs = new AbstractAction("Save preferences") {
+      private static final long serialVersionUID = -3242879996093277296L;
+
+      public void actionPerformed(ActionEvent e) {
+        savePreferences();
+      }
+    };
+    settings.add(savePrefs);
+    menu.addMenu(settings);
+    
+    //setup Help menu
 		JMenu helpMenu = new JMenu("Help");
-		helpMenu.add(new AbstractAction("help"){
+		helpMenu.add(new AbstractAction("Help"){
 			private static final long serialVersionUID = 3770710651980089282L;
 			public void actionPerformed(ActionEvent e) {
-				URL helpURL=null;
+				URL helpURL = null;
 				try {
 					helpURL = new URL("http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/ViewerVR_User_Manual");
-				} catch (MalformedURLException e1) {
-					e1.printStackTrace();
-				}
-				try {
-					new Statement(Class.forName("org.jdesktop.jdic.desktop.Desktop"), "browse",
-							new Object[]{
-								helpURL
-					}).execute();
-				} catch(Exception ex) {
-					JOptionPane.showMessageDialog(null, "please visit "+helpURL);
+				} catch (MalformedURLException e1) { e1.printStackTrace(); }
+				
+        try {
+          new Statement(Class.forName("java.awt.Desktop"), "browse",
+              new Object[]{
+                helpURL.toURI()
+          }).execute();
+				} catch(Exception e2) {
+          try {
+            new Statement(Class.forName("org.jdesktop.jdic.desktop.Desktop"), "browse",
+                new Object[]{
+                  helpURL
+            }).execute();
+          } catch (Exception e3) {
+            JOptionPane.showMessageDialog(null, "Please visit "+helpURL);
+          }
 				}
 			}
 			
 		});
-		menuBar.add(helpMenu);
+		menu.addMenu(helpMenu);
 	}
 
 	public JFrame getExternalFrame() {
@@ -2238,7 +2288,6 @@ public class ViewerVR {
 		ViewerApp vApp = vr.display();
 		vApp.update();
 		
-		tweakMenu(vApp);
 		JFrame f = vApp.display();
 		f.setSize(800, 600);
 		f.validate();
