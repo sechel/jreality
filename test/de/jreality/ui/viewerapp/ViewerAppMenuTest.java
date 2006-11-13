@@ -47,7 +47,12 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 
 
-public class MenuFactoryTest {
+/**
+ * Test viewerApp's menu and selection management.
+ * 
+ * @author msommer
+ */
+public class ViewerAppMenuTest {
   
   
   public static void main(String[] args) {
@@ -69,19 +74,17 @@ public class MenuFactoryTest {
     cmp.addChild(cmp1);
     cmp.addChild(cmp2);
     
-//    cmp.addTool(new AnimatedRotateTool());
-    
     ViewerApp viewerApp = new ViewerApp(cmp);
     viewerApp.setAttachNavigator(true);
 //    viewerApp.setAttachBeanShell(true);
 //    viewerApp.setShowMenu(false);
+    
+//    viewerApp.getMenu().removeMenu(ViewerAppMenu.APP_MENU);
+    
     viewerApp.update();
     viewerApp.display();
     
     cmp.addTool(new SelectionTool(viewerApp));
-
-    
-//  ViewerAppOld.display(Primitives.icosahedron());
 
   }
   

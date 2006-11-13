@@ -49,14 +49,16 @@ import java.security.AccessControlException;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
+
+import bsh.EvalError;
+
+import jterm.BshEvaluator;
 
 import de.jreality.io.JrScene;
 import de.jreality.io.JrSceneFactory;
@@ -78,20 +80,26 @@ import de.jreality.util.RenderTrigger;
 
 
 /**
- * Factory for the jReality Viewer application, which displays a {@link Geometry} or a {@link SceneGraphComponent}.<br>
+ * Factory for the jReality Viewer application, which displays a 
+ * {@link de.jreality.io.JrScene} in a frame.<br>
  * Use the factory as following:<br>
  * <code><b><pre>
- * SceneGraphComponent node;
- * //or
- * Geometry node;
- * [...]<br>
- * ViewerApp viewer = new ViewerApp(node);
+ * ViewerApp viewer = new ViewerApp(...);
  * viewer.setAttachNavigator(true);
  * viewer.setAttachBeanShell(false);
  * [setting more properties]<br>
  * viewer.update();
  * viewer.display();
  * </pre></b></code>
+ * Editing the viewerApp's menu:<br>
+ * <code><b><pre>
+ * ViewerAppMenu menu = viewerApp.getMenu();
+ * menu.removeMenu(ViewerAppMenu.APP_MENU);
+ * menu.addAction(ViewerAppMenu.FILE_MENU, action);
+ * [etc.]
+* </pre></b></code>
+ * 
+ * @author weissman, msommer
  */
 public class ViewerApp {
   
@@ -116,28 +124,40 @@ public class ViewerApp {
   private SelectionManager selectionManager;
   
   private boolean showMenu = true;  //default
-  private MenuFactory menuFactory;
-  private JMenuBar menuBar;
+  private ViewerAppMenu menu;
   
   private JrScene jrScene;
 
   private boolean autoRender = true;
   private boolean synchRender = false;
 
+  
   /**
-   * @param node the SceneGraphNode (SceneGraphComponent or Geometry) to be displayed in the viewer
+   * @param node the SceneGraphNode (SceneGraphComponent or Geometry) to be displayed with the viewer
    */
   public ViewerApp(SceneGraphNode node) {
     this(node, null, null, null, null);
   }
   
+  
+  /**
+   * @param root the scene's root
+   * @param cameraPath the scene's camera path
+   * @param emptyPick the scene's empty pick path
+   * @param avatar the scene's avatar path
+   */
   public ViewerApp(SceneGraphComponent root, SceneGraphPath cameraPath, SceneGraphPath emptyPick, SceneGraphPath avatar) {
     this(null, root, cameraPath, emptyPick, avatar);
   }
   
+  
+  /**
+   * @param scene the scene to be displayed with the viewer
+   */
   public ViewerApp(JrScene scene) {
 	  this(scene.getSceneRoot(), scene.getPath("cameraPath"), scene.getPath("emptyPickPath"), scene.getPath("avatarPath"));
   }
+  
   
   private ViewerApp(SceneGraphNode contentNode, SceneGraphComponent root, SceneGraphPath cameraPath, SceneGraphPath emptyPick, SceneGraphPath avatar) {
 
@@ -180,13 +200,12 @@ public class ViewerApp {
     selectionManager = new SelectionManager(jrScene.getPath("emptyPickPath")); //default selection = scene node
     selectionManager.setAuxiliaryRoot(viewerSwitch.getAuxiliaryRoot());
     selectionManager.setViewer(viewerSwitch);  //used to force rendering
-    menuFactory = new MenuFactory(this);  //uses frame, viewerSwitch, selectionManager and viewerApp itself
-    menuBar = menuFactory.getMenuBar();
+    menu = new ViewerAppMenu(this);  //uses frame, viewerSwitch, selectionManager and viewerApp itself
   }
   
   
   /**
-   * Displays the scene in a JFrame.
+   * Display the scene in a JFrame.
    * @return the frame
    */
   public JFrame display() {
@@ -221,8 +240,9 @@ public class ViewerApp {
     frame.getContentPane().add(content);
     
     //add menu bar
+    JMenuBar menuBar = menu.getMenuBar();
     frame.setJMenuBar(menuBar);
-    menuBar.setBorder(null);
+    menuBar.setBorder(BorderFactory.createEmptyBorder());
     if (!showMenu) {
     	//hide all menus, then keystrokes for actions are still working,
     	//which is not the case when hiding menuBar
@@ -262,10 +282,10 @@ public class ViewerApp {
 
   /**
    * Displays a scene specified by the following parameters.
-   * @param root the scene root
-   * @param cameraPath the camera path
-   * @param emptyPick the empty pick path
-   * @param avatar the avatar path
+   * @param root the scene's root
+   * @param cameraPath the scene's camera path
+   * @param emptyPick the scene's empty pick path
+   * @param avatar the scene's avatar path
    * @return the ViewerApp factory instantiated to display the scene
    */
   public static ViewerApp display(SceneGraphComponent root, SceneGraphPath cameraPath, SceneGraphPath emptyPick, SceneGraphPath avatar) {
@@ -280,8 +300,10 @@ public class ViewerApp {
 
   }
   
+  
   /**
-   * Update the factory (needs to be invoked before calling display or getter methods). 
+   * Update the viewer factory.<br>
+   * Needs to be invoked before calling display or getter methods. 
    */
   public void update() {
     
@@ -293,7 +315,6 @@ public class ViewerApp {
 
     //setup navigator, uiFactory.inspector and uiFactory.sceneTree
     if (attachNavigator && navigator == null) setupNavigator();
-
     
     if (attachBeanShell) {
     	uiFactory.setBeanShell(beanShell.getJTerm());
@@ -318,7 +339,7 @@ public class ViewerApp {
     uiFactory.setAttachBeanShell(attachBeanShell);
 
     //update menu (depends on attachNavigator/BeanShell, SelectionManager)
-    menuFactory.update();
+    menu.update();
   }
   
 
@@ -478,8 +499,13 @@ public class ViewerApp {
     beanShell.eval("import de.jreality.tools.*;");
     beanShell.eval("import de.jreality.util.*;");
     
-    beanShell.setCurrViewer(currViewer);
-    beanShell.setViewerSwitch(viewerSwitch);
+    BshEvaluator bshEval = beanShell.getBshEval();
+    try { 
+      bshEval.getInterpreter().set("_viewer", viewerSwitch);
+      bshEval.getInterpreter().set("_toolSystemViewer", currViewer);      
+    } 
+    catch (EvalError error) { error.printStackTrace(); }
+    
     beanShell.setSelf(sceneRoot);
   }
   
@@ -585,64 +611,29 @@ public class ViewerApp {
   }
 
   
-  
   /**
-   * Use to include a MenuBar and context menus in ViewerApp.
+   * Use to include a menu bar and context menus in ViewerApp.
    * @param b true iff menu is to be shown
    */
   public void setShowMenu(boolean b) {
     showMenu = b;
   }
   
+  
   public boolean isShowMenu() {
 	  return showMenu;
   }
   
-//-- MENU METHODS -------------
   
-  public JMenuBar getMenuBar() {
-	  return menuBar;
-  }
-  
-  public void addMenu(JMenu menu) {
-    addMenu(menu, menuBar.getComponentCount());  //add to end of menuBar
-  }
-  
-  public void addMenu(JMenu menu, int index) {
-    if (index < 0 || index > menuBar.getComponentCount())
-      throw new IllegalArgumentException("invalid index");
-
-    menuBar.add(menu, index);
-  }
-  
-  public JMenu getMenu(String menuName) {
-	JMenu menu = null;
-	for (int i = 0; i < menuBar.getComponentCount(); i++) {
-		if ( ((JMenu)menuBar.getComponent(i)).getText().equals(menuName) )
-			menu = (JMenu)menuBar.getComponent(i);
-	}
-	return menu;
-  }
-  
-  public void addMenuItem(JMenuItem item, String menuName) {
-    addMenuItem(item, menuName, menuBar.getComponentCount());  //add to end of menu
-  }
-  
-  public void addMenuItem(JMenuItem item, String menuName, int index) {
-	JMenu menu = getMenu(menuName);
-	if (menu != null) menu.insert(item, index);
-  }
-  
-  public void addAction(Action a, String menuName) {
-    addAction(a, menuName, menuBar.getComponentCount());  //add to end of menu
-  }
-  
-  public void addAction(Action a, String menuName, int index) {
-    addMenuItem(new JMenuItem(a), menuName, index);
+  /**
+   * Use to edit the menu bar (add/remove menus, add/remove items or actions to special menus).
+   * @return the viewerApp's menu
+   */
+  public ViewerAppMenu getMenu() {
+    return menu;
   }
   
   
-
   /**
    * Get the SelectionManager managing selections in the ViewerApp
    * @return the SelectionManager
@@ -667,9 +658,8 @@ public class ViewerApp {
 	ViewerApp va = new ViewerApp(null, null, null, null, null);
 	va.setAttachNavigator(true);
 	va.setAttachBeanShell(true);
-//  va.getMenuFactory();
 	va.update();
 	va.display();
   }
-  
+
 }

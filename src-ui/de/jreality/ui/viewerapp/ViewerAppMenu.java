@@ -47,6 +47,7 @@ import java.beans.Beans;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
@@ -69,7 +70,16 @@ import de.jreality.ui.viewerapp.actions.edit.AddTool;
 import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
 import de.jreality.ui.viewerapp.actions.edit.Remove;
 import de.jreality.ui.viewerapp.actions.edit.TogglePickable;
-import de.jreality.ui.viewerapp.actions.file.*;
+import de.jreality.ui.viewerapp.actions.file.ExportImage;
+import de.jreality.ui.viewerapp.actions.file.ExportPS;
+import de.jreality.ui.viewerapp.actions.file.ExportRIB;
+import de.jreality.ui.viewerapp.actions.file.ExportSVG;
+import de.jreality.ui.viewerapp.actions.file.LoadFile;
+import de.jreality.ui.viewerapp.actions.file.LoadFileMerged;
+import de.jreality.ui.viewerapp.actions.file.LoadScene;
+import de.jreality.ui.viewerapp.actions.file.Quit;
+import de.jreality.ui.viewerapp.actions.file.SaveScene;
+import de.jreality.ui.viewerapp.actions.file.SaveSelected;
 import de.jreality.ui.viewerapp.actions.view.Render;
 import de.jreality.ui.viewerapp.actions.view.ToggleBeanShell;
 import de.jreality.ui.viewerapp.actions.view.ToggleFullScreen;
@@ -80,21 +90,27 @@ import de.jreality.ui.viewerapp.actions.view.ToggleViewerFullScreen;
 
 
 /**
- * at present to use the following way:<br>
- * <code><b><pre>
- * ViewerApp viewerApp = new ViewerApp(SceneGraphNode);
- * viewerApp.display();
- * <p>
- * MenuFactory.addMenuBar(viewerApp);
- * </pre></b></code>
+ * Creates the viewerApp's menu bar and contains static fields
+ * for names of menus and actions.
+ * 
+ * @author msommer
  */
-public class MenuFactory {
+public class ViewerAppMenu {
+
+  //menu names
+  public static String FILE_MENU = "File";
+  public static String EDIT_MENU = "Edit";
+  public static String APP_MENU = "Appearance";
+  public static String CAMERA_MENU = "Camera";
+  public static String VIEW_MENU = "View";
+  
   //FILE MENU
   public static String LOAD_FILE = "Load files";
   public static String LOAD_FILE_MERGED = "Load merged files";
   public static String LOAD_SCENE = "Load scene";
   public static String SAVE_SCENE = "Save scene";
   public static String SAVE_SELECTED = "Save selected";
+  public static String EXPORT = "Export";
   public static String QUIT = "Quit";
   //EDIT MENU
   public static String REMOVE = "Remove";
@@ -124,17 +140,11 @@ public class MenuFactory {
   public static String TOGGLE_FULL_SCREEN = "Toggle full screen";
   public static String RENDER = "Force Rendering";
   
-  private static String FILE_MENU = "File";
-  private static String EDIT_MENU = "Edit";
-  private static String APP_MENU = "Appearance";
-  private static String CAMERA_MENU = "Camera";
-  private static String VIEW_MENU = "View";
-  
-  
   private JFrame frame = null;
   private ViewerApp viewerApp = null;
   private SelectionManager sm = null;
   private ViewerSwitch viewerSwitch = null;
+  private JMenuBar menuBar;
   
   private JCheckBoxMenuItem navigatorCheckBox;
   private JCheckBoxMenuItem beanShellCheckBox;
@@ -142,17 +152,19 @@ public class MenuFactory {
   private ExportImage exportImageAction;
 
 
-  protected MenuFactory(ViewerApp v) {
+  protected ViewerAppMenu(ViewerApp v) {
     viewerApp = v;
     frame = v.getFrame();
     sm = v.getSelectionManager();
     viewerSwitch = v.getViewerSwitch();
+    
+    setupMenuBar();
   }
   
 
-  public JMenuBar getMenuBar() {
+  private void setupMenuBar() {
     
-    JMenuBar menuBar = new JMenuBar();
+    menuBar = new JMenuBar();
     
     //FILE MENU
     JMenu fileMenu = new JMenu(FILE_MENU);
@@ -166,7 +178,7 @@ public class MenuFactory {
     fileMenu.add(new JMenuItem(new SaveScene(SAVE_SCENE, viewerApp.getViewer(), frame)));
     fileMenu.add(new JMenuItem(new SaveSelected(SAVE_SELECTED, sm, frame)));
     fileMenu.addSeparator();
-    JMenu export = new JMenu("Export");
+    JMenu export = new JMenu(EXPORT);
     fileMenu.add(export);
     JMenu rib = new JMenu("RIB");
     export.add(rib);
@@ -276,19 +288,176 @@ public class MenuFactory {
     viewerMenu.addSeparator();
     viewerMenu.add(new JMenuItem(new Render(RENDER, viewerSwitch)));
     
-    return menuBar;
   }
   
   
   //update menu items which depend on viewerApp properties
   //(isAttachNavigator/BeanShell, isShowMenu)
-  //getMenuBar() has to be called before
+  //setupMenuBar() has to be called before
   public void update() {
     if (viewerApp == null) return;
     
     navigatorCheckBox.setSelected(viewerApp.isAttachNavigator());
     beanShellCheckBox.setSelected(viewerApp.isAttachBeanShell());
-    renderSelectionCheckbox.setSelected(sm.isRenderSelection());
+    renderSelectionCheckbox.setSelected(sm.isRenderSelection());  //sm!=null if viewerApp!=null
+  }
+  
+  
+  /**
+   * Get the menu bar.
+   * @return the menu bar
+   */
+  public JMenuBar getMenuBar() {
+    return menuBar;
+  }
+  
+  
+  /**
+   * Add a menu to the end of the menu bar.
+   * @param menu the menu to add
+   * @see ViewerApp#addMenu(JMenu, int)
+   */
+  public void addMenu(JMenu menu) {
+    addMenu(menu, menuBar.getComponentCount());  //add to end of menuBar
+  }
+
+  
+  /**
+   * Add a menu to the menu bar at the specified index.
+   * @param menu the menu to add
+   * @param index the menu's position in the menu bar
+   * @throws IllegalArgumentException if an invalid index is specified
+   */
+  public void addMenu(JMenu menu, int index) {
+    menuBar.add(menu, index);
+  }
+  
+  
+  /**
+   * Remove the menu with the specified name.
+   * @param menuName the menu's name (use static fields of {@link de.jreality.ui.viewerapp.ViewerAppMenu})
+   * @return false iff the specified menu is not contained in the menu bar
+   */
+  public boolean removeMenu(String menuName) {
+    JMenu menu = getMenu(menuName);
+    if (menu != null) menuBar.remove(menu);
+    return (menu != null);
+  }
+  
+  
+  /**
+   * Get a menu specified by its name.
+   * @param menuName the menu's name (use static fields of {@link de.jreality.ui.viewerapp.ViewerAppMenu})
+   * @return the menu or null if the specified menu doesn't exist
+   */
+  public JMenu getMenu(String menuName) {
+    JMenu menu = null;
+    for (int i = 0; i < menuBar.getComponentCount(); i++) {
+      if ( ((JMenu)menuBar.getComponent(i)).getText().equals(menuName) )
+        menu = (JMenu)menuBar.getComponent(i);
+    }
+    return menu;
+  }
+  
+  
+  /**
+   * Add a menu item to the end of the menu with the specified name.
+   * @param item the menu item to add
+   * @param menuName the menu's name (use static fields of {@link de.jreality.ui.viewerapp.ViewerAppMenu})
+   * @return false iff the specified menu is not contained in the menu bar
+   * @see ViewerApp#addMenuItem(JMenuItem, String, int)
+   */
+  public boolean addMenuItem(JMenuItem item, String menuName) {
+    return addMenuItem(item, menuName, menuBar.getComponentCount());  //add to end of menu
+  }
+  
+  
+  /**
+   * Add a menu item to the menu with the specified name at the specified index.
+   * @param item the menu item to add
+   * @param menuName the menu's name (use static fields of {@link de.jreality.ui.viewerapp.ViewerAppMenu})
+   * @param index the menu item's position in the menu (note that separators are also components of the menu)
+   * @return false iff the specified menu is not contained in the menu bar
+   * @throws IllegalArgumentException if an invalid index is specified
+   */
+  public boolean addMenuItem(JMenuItem item, String menuName, int index) {
+    JMenu menu = getMenu(menuName);
+    if (menu != null) menu.insert(item, index);
+    return (menu != null);
+  }
+  
+  
+  /**
+   * Remove the menu item at given position of the menu with the specified name.
+   * @param menuName the menu's name (use static fields of {@link de.jreality.ui.viewerapp.ViewerAppMenu})
+   * @param index the menu item's position
+   * @return false iff the specified menu is not contained in the menu bar
+   * @throws IllegalArgumentException if an invalid index is specified
+   */
+  public boolean removeMenuItem(String menuName, int index) {
+    JMenu menu = getMenu(menuName);
+    if (menu != null) menu.remove(index);
+    return (menu != null);
+  }
+
+  
+  /**
+   * Add an action to the end of the menu with the specified name.
+   * @param a the action to add
+   * @param menuName the menu's name (use static fields of {@link de.jreality.ui.viewerapp.ViewerAppMenu})
+   * @return false iff the specified menu is not contained in the menu bar
+   * @see ViewerApp#addAction(Action, String, int)
+   */
+  public boolean addAction(Action a, String menuName) {
+    int index = 0;
+    JMenu menu = getMenu(menuName);
+    if (menu != null) index = menu.getMenuComponentCount();
+    else return false;
+    
+    return addAction(a, menuName, index);  //add to end of menu
+  }
+  
+  
+  /**
+   * Add an action to the menu with the specified name at the specified index.
+   * @param a the action to add
+   * @param menuName the menu's name (use static fields of {@link de.jreality.ui.viewerapp.ViewerAppMenu})
+   * @param index the action's position in the menu
+   * @return false iff the specified menu is not contained in the menu bar
+   * @throws IllegalArgumentException if an invalid index is specified
+   */
+  public boolean addAction(Action a, String menuName, int index) {
+    return addMenuItem(new JMenuItem(a), menuName, index);
+  }
+  
+  
+  /**
+   * Add a separator to the end of the menu with the specified name.
+   * @param menuName the menu's name (use static fields of {@link de.jreality.ui.viewerapp.ViewerAppMenu})
+   * @return false iff the specified menu is not contained in the menu bar
+   * @see ViewerApp#addSeparator(String, int)
+   */
+  public boolean addSeparator(String menuName) {
+    int index = 0;
+    JMenu menu = getMenu(menuName);
+    if (menu != null) index = menu.getMenuComponentCount();
+    else return false;
+    
+    return addSeparator(menuName, index);
+  }
+  
+  
+  /**
+   * Add a separator to the menu with the specified name at the specified index.
+   * @param menuName the menu's name (use static fields of {@link de.jreality.ui.viewerapp.ViewerAppMenu})
+   * @param index the separators's position in the menu
+   * @return false iff the specified menu is not contained in the menu bar
+   * @throws IllegalArgumentException if an invalid index is specified
+   */
+  public boolean addSeparator(String menuName, int index) {
+    JMenu menu = getMenu(menuName);
+    if (menu != null) menu.insertSeparator(index);
+    return (menu != null);
   }
   
 }
