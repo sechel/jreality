@@ -48,15 +48,16 @@ import javax.swing.JComponent;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
-import de.jreality.scene.SceneGraphNode;
-import de.jreality.toolsystem.ToolSystemViewer;
-
-import bsh.EvalError;
 import jterm.BshEvaluator;
 import jterm.JTerm;
 import jterm.Session;
+import bsh.EvalError;
+import de.jreality.scene.SceneGraphNode;
 
 
+/**
+ * @author msommer
+ */
 public class BeanShell {
 
   private BshEvaluator bshEval;
@@ -92,20 +93,6 @@ public class BeanShell {
   }
   
 
-  public void setViewerSwitch(ViewerSwitch viewerSwitch) {
-    
-    try { bshEval.getInterpreter().set("_viewer", viewerSwitch); } 
-    catch (EvalError error) { error.printStackTrace(); }
-  }
-  
-  
-  public void setCurrViewer(ToolSystemViewer currViewer) {
-    
-    try { bshEval.getInterpreter().set("_toolSystemViewer", currViewer); } 
-    catch (EvalError error) { error.printStackTrace(); }
-  }
-  
-  
   public void setSelf(Object obj) {
     
     if (obj == null) return;
@@ -126,6 +113,11 @@ public class BeanShell {
     catch (EvalError error) { 
       error.printStackTrace();
     }
+  }
+
+
+  public BshEvaluator getBshEval() {
+    return bshEval;
   }
  
 }
