@@ -321,7 +321,7 @@ public void render(JOGLRenderingState jrs)	{
     } else {
       gl.glColor3fv(difCol,0);
       gl.glPointSize((float) pointSize);
-      if (sprites) {
+      if (sprites && tex != null) {
         gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, pointAttenuation,0);
         gl.glEnable(GL.GL_POINT_SPRITE_ARB);
         gl.glActiveTexture(GL.GL_TEXTURE0);
