@@ -178,7 +178,7 @@ public class PSRasterizer extends TriangleRasterizer {
      * 
      * @see de.jreality.soft.PolygonRasterizer#clear()
      */
-    public void clear() {
+    public void clear(boolean clearBackground) {
     }
 
     /**

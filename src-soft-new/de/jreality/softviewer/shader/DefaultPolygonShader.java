@@ -69,7 +69,7 @@ public class DefaultPolygonShader extends PolygonShader {
     //final private double[] v;
     
     final de.jreality.shader.DefaultPolygonShader ps;
-    protected DefaultPolygonShader() {
+    public  DefaultPolygonShader() {
         this(new DefaultVertexShader());
     }
     public DefaultPolygonShader(VertexShader v) {

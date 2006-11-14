@@ -303,7 +303,7 @@ public class SVGRasterizer extends TriangleRasterizer {
     /* (non-Javadoc)
      * @see de.jreality.soft.PolygonRasterizer#clear()
      */
-    public void clear() {
+    public void clear(boolean clearBackground) {
     }
     /**
      * This should be called before any renderPolygon.
