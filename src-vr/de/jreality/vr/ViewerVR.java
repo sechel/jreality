@@ -494,8 +494,8 @@ public class ViewerVR {
 		makeToolTab();
 		makeTexTab();
 		makeHelpTab();
-		makeContentFileChooser();
-		makeTextureFileChooser();
+		//makeContentFileChooser();
+		//makeTextureFileChooser();
 		makeColorChoosers();
 		
 		panelInSceneCheckBox = new JCheckBoxMenuItem( new AbstractAction("Show panel in scene") {
@@ -1148,6 +1148,7 @@ public class ViewerVR {
 	}
 
 	public void addLoadTab(final String[][] examples) {
+		makeContentFileChooser();
 		buttonGroupComponent = new JPanel(new BorderLayout());
 		buttonGroupComponent.setBorder(new EmptyBorder(10, 10, 10, 10));
 		
@@ -1360,6 +1361,7 @@ public class ViewerVR {
 	}
 
 	public void addTexTab() {
+		makeTextureFileChooser();
 		appearanceTabs.add("tex", textureButtonPanel);
 		sp.getFrame().pack();
 	}
