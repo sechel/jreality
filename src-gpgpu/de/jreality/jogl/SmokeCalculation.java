@@ -61,65 +61,64 @@ public class SmokeCalculation extends AbstractCalculation {
   private boolean hasData;
   private boolean dataTextureSizeChanged;
   private boolean dataChanged;
+private int vortexLength;
   
   static String src;
   
-  static boolean geforce6=false;
+  static boolean geforce6=true;
   
   static {
     IntegratorFactory rk = IntegratorFactory.rk2();
     rk.addConstant("const float PI = 3.141592653589793;");
     rk.addUniform("vorts0", "samplerRect");
     rk.addUniform("vorts1", "samplerRect");
+    rk.addUniform("VORTEX_LENGTH", "int");
     rk.addUniform("a2", "float");
     if (geforce6) rk.addUniform("CNT", "int");
     
     rk.srcT0(
-      "  return vec4(biotSavart(point.xyz, vorts0), 0);\n"
+      "  return vec4(biotSavart(point.xyz, vorts0), 1);\n"
     );
   
     rk.srcT0_H2(
-      "  return vec4(biotSavart(point.xyz, vorts1), 0);\n"
+      "  return vec4(biotSavart(point.xyz, vorts1), 1);\n"
     );
   
     rk.addMethod("biotSavart", "vec3", "const vec3 pt, const samplerRect vorts", 
-        "  vec3 ret;\n" + 
-        "  \n" + 
-        "  vec2 texCoord=vec2(0.5,0.5);\n" +
-        "  vec4 data=textureRect(vorts, texCoord);\n" + 
-        "  \n" + 
-        "  vec3 v1=data.xyz-pt;\n" + 
-        "  vec3 v2;\n" + 
-        "  \n" + 
-        "  float norm1=dot(v1, v1);\n" + 
-        "  float norm2;\n" + 
-        "    \n" + 
-        "  for (int i=0; i < CNT; i++) {\n" + 
-        "    for (int j=i>0?0:1; j < CNT; j++) {\n" + 
-        "      // add biot savart on for one edge \n" +
-        "      texCoord.x=float(j)+0.5; \n" +
-        "      texCoord.y=float(i)+0.5; \n" +
-        "      data=textureRect(vorts, texCoord);\n" + 
-        "      \n" + 
-        "      float strength=data.w;\n" + 
-        "      \n" + 
-        "      v2 =data.xyz-pt;\n" + 
-        "      norm2=dot(v2, v2);\n" + 
-        "      \n" + 
-        "      vec3 e = v2-v1;\n" + 
-        "      \n" + 
-        "      if (strength != 0.0) {\n" + 
-        "        ret += strength/(4.*PI)*biotSavartEdge(e, v1, norm1, v2, norm2);\n" + 
-        "      }\n" + 
-        "      vec3 swap = v1;\n" + 
-        "      v1 = v2;\n" + 
-        "      v2 = swap;\n" + 
-        "      norm1 = norm2;\n" + 
-        "    }\n" + 
-        "  }\n" + 
-        "  return ret;\n"
-      );
-
+            "  vec3 ret;\n" + 
+            "  \n" + 
+            "  for (int i=0; i < VORTEX_LENGTH-1; i++) { \n" +
+            "     int s1 = i%CNT;\n" +
+            "     int t1 = (i-s1)/CNT;\n" +
+            "     int s2 = (i+1)%CNT;\n" +
+            "     int t2 = ((i+1)-s2)/CNT;\n" +
+            
+            "  vec2 texCoord1=vec2(float(s1),float(t1));\n" +
+            "  vec4 data1=textureRect(vorts, texCoord1);\n" + 
+            "  \n" + 
+            "  vec3 v1=data1.xyz-pt;\n" + 
+            "  \n" + 
+            "  vec2 texCoord2=vec2(float(s2),float(t2));\n" +
+            "  vec4 data2=textureRect(vorts, texCoord2);\n" + 
+            "  \n" + 
+            "  vec3 v2=data2.xyz-pt;\n" + 
+            "  \n" + 
+            "  float norm1=dot(v1, v1);\n" + 
+            "  float norm2=dot(v2, v2);\n" + 
+            "    \n" + 
+            "      // add biot savart on for one edge \n" +
+            "      \n" + 
+            "      float strength=data2.w;\n" + 
+            "      \n" + 
+            "      vec3 e = v2-v1;\n" + 
+            "      \n" + 
+            "      if (strength != 0.0) {\n" + 
+            "        ret += strength/(4.*PI)*biotSavartEdge(e, v1, norm1, v2, norm2);\n" + 
+            "      }\n" + 
+            " } \n" +
+            "  return ret;\n"
+          );
+    
     rk.addMethod("biotSavartEdge", "vec3", "const vec3 edge, const vec3 v1, const float norm1, const vec3 v2, const float norm2", 
       "  \n" + 
       "  float scpG = dot(v1, v2);\n" + 
@@ -176,6 +175,7 @@ public class SmokeCalculation extends AbstractCalculation {
     prog.setUniform("a2", a*a);
     prog.setUniform("h", h);
     prog.setUniform("r3", true);
+    prog.setUniform("VORTEX_LENGTH", vortexLength);
     if (geforce6) prog.setUniform("CNT", dataTextureSize);
 
   }
@@ -187,7 +187,8 @@ public class SmokeCalculation extends AbstractCalculation {
     }
     int dataLen = (data.length-1)/2;
     if (dataT0 == null || dataT0.capacity() != dataLen) {
-      int texSize = GpgpuUtility.texSize(dataLen/4);
+    vortexLength = dataLen/4;
+	int texSize = GpgpuUtility.texSize(vortexLength);
       if (texSize != dataTextureSize) {
         System.out.println("[setVortexData] new vortex tex size="+texSize+" data.length="+data.length);
         dataTextureSize=texSize;

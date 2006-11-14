@@ -167,7 +167,7 @@ public final class Input
         //     throw new IOException("cannot resolve \""
         //        +name+"\" relative to \""+description+'"');
         base = new URI("file:"
-            + System.getProperty("user.dir", "/").replace(File.separatorChar,
+            + Secure.getProperty("user.dir", "/").replace(File.separatorChar,
                 '/')).normalize();
       URI resolved = base.resolve(uri);
       if (sourceFile != null && resolved.getScheme().equals("file"))
@@ -268,24 +268,32 @@ public final class Input
     if (ret != null) return ret;
     String currentDir = null;
     try {
-      currentDir = System.getProperty("jreality.data");
+      currentDir = Secure.getProperty("jreality.data");
     } catch (SecurityException se) {
       // webstart
     }
     if (currentDir != null) {
-      File dir = new File(currentDir);
-      File f1 = new File(dir, resourceName);
-      if (f1.exists()) return new Input(f1);
+        try {
+	      File dir = new File(currentDir);
+	      File f1 = new File(dir, resourceName);
+	      if (f1.exists()) return new Input(f1);
+        } catch (SecurityException se) {
+            // webstart
+        }
     }
     try {
-      currentDir = System.getProperty("user.dir");
+      currentDir = Secure.getProperty("user.dir");
     } catch (SecurityException se) {
       // webstart
     }
     if (currentDir != null) {
-      File dir = new File(currentDir);
-      File f1 = new File(dir, resourceName);
+        try {
+	      File dir = new File(currentDir);
+	      File f1 = new File(dir, resourceName);
       if (f1.exists()) return new Input(f1);
+        } catch (SecurityException se) {
+            // webstart
+        }
     }
     throw new IOException("Resource not found ["+resourceName+"]");
   }

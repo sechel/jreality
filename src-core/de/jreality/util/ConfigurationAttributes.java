@@ -66,7 +66,7 @@ public class ConfigurationAttributes extends Properties {
     public static ConfigurationAttributes getDefaultConfiguration() {
         try {
             return new ConfigurationAttributes(
-                Input.getInput(new File(System.getProperty("jreality.config", "jreality.props"))),
+                Input.getInput(new File(Secure.getProperty("jreality.config", "jreality.props"))),
                 null);
         } catch (IOException e) {
             LoggingSystem.getLogger(ConfigurationAttributes.class).log(Level.WARNING, "loading default Configuration", e);
