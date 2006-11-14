@@ -427,102 +427,119 @@
   <target name="dist" depends="core,io,jogl,soft,renderman,portal,gpgpu,examples" description="generate the distribution">
   </target>
 
-  <target name="release" depends="dist, javadoc" description="generate a big jar that contains all classes needed for the tutorial">
-  	<mkdir dir="release" />
-  	
-    <jar jarfile="release/jReality.jar">
-      <fileset dir="${build}/core" />
-      <fileset dir="${build}/tools" />
-      <fileset dir="${build}/backends-share" />
-      <fileset dir="${build}/io" />
-      <fileset dir="${build}/ui" />
-      
-      <fileset dir="${build}/soft" />
-      <fileset dir="${build}/renderman" />
-      <fileset dir="${build}/jogl" />
-    	
-      <fileset dir="${build}/proxies" />
-  	  <fileset dir="${build}/portal" />
-    	
-  	  <!--fileset dir="${swt}" /-->
-      <fileset dir="${build}/gpgpu" />
-      <fileset dir="${build}/swing" />
-      <fileset dir="${build}/vr" />
-
-      <fileset dir="${build}/examples">
-      	<exclude name="**/SwtExample*"/>
-      </fileset>
-    </jar>
-  	
-  	<mkdir dir="release/tmp/src" />
-
-  	<copy todir="release/tmp/src">
-        <fileset dir="${core}" />
-        <fileset dir="${tools}" />
-        <fileset dir="${backends-share}" />
-        <fileset dir="${io}" />
-        <fileset dir="${ui}" />
-
-  		<fileset dir="${soft}" />
-  		<fileset dir="${soft-new}" />
-        <fileset dir="${renderman}" />
-        <fileset dir="${jogl}" />
-
-  		<fileset dir="${proxies}" />
-  	    <fileset dir="${portal}" />
-  		
-  	    <!--fileset dir="${swt}" /-->
-        <fileset dir="${gpgpu}" />
-  		<fileset dir="${swing}" />
-  		<fileset dir="${vr}" />
-  		
-  		<fileset dir="${examples}">
-  	      <exclude name="**/SwtExample*"/>
-  	    </fileset>
-  	</copy>
-
-  	<zip destfile="release/jReality-src.zip" basedir="release/tmp"/>
-
-  	<delete dir="release/tmp" />
-
-  	<mkdir dir="release/tmp/javadoc" />
-  	<copy todir="release/tmp/javadoc">
-  		<fileset dir="${javadoc}" />
-  	</copy>
-  	<zip destfile="release/jReality-javadoc.zip" >
-  		<fileset dir="release/tmp" />
-  	</zip>
-  	
-  	<delete dir="release/tmp"/>
-
-  	<mkdir dir="release/tmp/lib" />
-  	<copy file="${lib}/antlr-2.7.5.jar" todir="release/tmp/lib" />
-  	<copy file="${lib}/jtem-beans.jar" todir="release/tmp/lib" />
-  	<copy file="${lib}/bsh-1.3b2.jar" todir="release/tmp/lib" />
-  	<copy file="${lib}/jterm.jar" todir="release/tmp/lib" />
-  	<copy file="${lib}/jtem-beans.jar" todir="release/tmp/lib" />
-  	<copy file="${lib}/smrj.jar" todir="release/tmp/lib" />
-  	<copy file="${lib}/xstream-1.2.jar" todir="release/tmp/lib" />
-  	<copy file="${lib}/xpp3-1.1.3.4.O.jar" todir="release/tmp/lib" />
-  	<copy todir="release/tmp/lib">
-  		<fileset dir="3rd-party" />
-  	</copy>
-  	<zip destfile="release/jReality-3rd-party.zip" >
-  		<fileset dir="release/tmp" />
-  	</zip>
-
-  	<delete dir="release/tmp"/>
-  
-  	<mkdir dir="release/tmp/tutorial" />
-	<copy todir="release/tmp/tutorial">
-  		<fileset dir="src-tutorial" />
-  	</copy>
-  	<zip destfile="release/jReality-tutorial.zip" basedir="release/tmp"/>
-  	<delete dir="release/tmp"/>
-
+  <target name="release" depends="release-jar, release-src, release-javadoc, release-3rdparty, release-tutorial" description="generate a big jar that contains all classes needed for the tutorial">
   </target>
 
-  <target name="check_cvs" description="check the current cvs state">
+	  <target name="release-jar" depends="dist" description="generate a big jar that contains all classes needed for the tutorial">
+	  	<mkdir dir="release" />
+	    <jar jarfile="release/jReality.jar">
+	      <fileset dir="${build}/core" />
+	      <fileset dir="${build}/tools" />
+	      <fileset dir="${build}/backends-share" />
+	      <fileset dir="${build}/io" />
+	      <fileset dir="${build}/ui" />
+	      
+	      <fileset dir="${build}/soft" />
+	      <fileset dir="${build}/renderman" />
+	      <fileset dir="${build}/jogl" />
+	    	
+	      <fileset dir="${build}/proxies" />
+	  	  <fileset dir="${build}/portal" />
+	    	
+	  	  <!--fileset dir="${swt}" /-->
+	      <fileset dir="${build}/gpgpu" />
+	      <fileset dir="${build}/swing" />
+	      <fileset dir="${build}/vr" />
+
+	      <fileset dir="${build}/examples">
+	      	<exclude name="**/SwtExample*"/>
+	      </fileset>
+	    </jar>
+	  	
+	  </target>
+
+	  <target name="release-src" depends="dist" description="generate a big jar that contains all classes needed for the tutorial">
+	  	<mkdir dir="release" />
+	  	<mkdir dir="release/tmp/src" />
+	  	<copy todir="release/tmp/src">
+	        <fileset dir="${core}" />
+	        <fileset dir="${tools}" />
+	        <fileset dir="${backends-share}" />
+	        <fileset dir="${io}" />
+	        <fileset dir="${ui}" />
+
+	  		<fileset dir="${soft}" />
+	  		<fileset dir="${soft-new}" />
+	        <fileset dir="${renderman}" />
+	        <fileset dir="${jogl}" />
+
+	  		<fileset dir="${proxies}" />
+	  	    <fileset dir="${portal}" />
+	  		
+	  	    <!--fileset dir="${swt}" /-->
+	        <fileset dir="${gpgpu}" />
+	  		<fileset dir="${swing}" />
+	  		<fileset dir="${vr}" />
+	  		
+	  		<fileset dir="${examples}">
+	  	      <exclude name="**/SwtExample*"/>
+	  	    </fileset>
+	  	</copy>
+	  	<zip destfile="release/jReality-src.zip" basedir="release/tmp"/>
+	  	<delete dir="release/tmp"/>
+	  </target>
+
+	  <target name="release-javadoc" depends="dist, javadoc" description="generate a big jar that contains all classes needed for the tutorial">
+	  	<mkdir dir="release" />
+	  	<mkdir dir="release/tmp/javadoc" />
+	  	<copy todir="release/tmp/javadoc">
+	  		<fileset dir="${javadoc}" />
+	  	</copy>
+	  	<zip destfile="release/jReality-javadoc.zip" >
+	  		<fileset dir="release/tmp" />
+	  	</zip>
+	  	<delete dir="release/tmp"/>
+	  	<mkdir dir="release/tmp/tutorial" />
+		<copy todir="release/tmp/tutorial">
+	  		<fileset dir="src-tutorial" />
+	  	</copy>
+	  	<zip destfile="release/jReality-tutorial.zip" basedir="release/tmp"/>
+	  	<delete dir="release/tmp"/>
+
+	  </target>
+
+	  <target name="release-3rdparty" depends="dist" description="generate a big jar that contains all classes needed for the tutorial">
+	  	<mkdir dir="release" />
+	  	<mkdir dir="release/tmp/lib" />
+	  	<copy file="${lib}/antlr-2.7.5.jar" todir="release/tmp/lib" />
+	  	<copy file="${lib}/jtem-beans.jar" todir="release/tmp/lib" />
+	  	<copy file="${lib}/bsh-1.3b2.jar" todir="release/tmp/lib" />
+	  	<copy file="${lib}/jterm.jar" todir="release/tmp/lib" />
+	  	<copy file="${lib}/jtem-beans.jar" todir="release/tmp/lib" />
+	  	<copy file="${lib}/smrj.jar" todir="release/tmp/lib" />
+	  	<copy file="${lib}/xstream-1.2.jar" todir="release/tmp/lib" />
+	  	<copy file="${lib}/xpp3-1.1.3.4.O.jar" todir="release/tmp/lib" />
+	  	<copy todir="release/tmp/lib">
+	  		<fileset dir="3rd-party" />
+	  	</copy>
+	  	<zip destfile="release/jReality-3rd-party.zip" >
+	  		<fileset dir="release/tmp" />
+	  	</zip>
+
+	  	<delete dir="release/tmp"/>
+	  </target>
+
+	  <target name="release-tutorial" depends="dist, javadoc" description="generate a big jar that contains all classes needed for the tutorial">
+	  	<mkdir dir="release" />
+	  	<mkdir dir="release/tmp/tutorial" />
+		<copy todir="release/tmp/tutorial">
+	  		<fileset dir="src-tutorial" />
+	  	</copy>
+	  	<zip destfile="release/jReality-tutorial.zip" basedir="release/tmp"/>
+	  	<delete dir="release/tmp"/>
+	  </target>
+
+	<target name="check_cvs" description="check the current cvs state">
 	<mkdir dir="check_cvs_tmp"/>
   	<cvs cvsroot="${env.CVSROOT}" package="jReality" dest="check_cvs_tmp"/>
     <ant dir="check_cvs_tmp/jReality" inheritall="false">
