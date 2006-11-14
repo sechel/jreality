@@ -1838,7 +1838,7 @@ public class ViewerVR {
 	}
 	
 	public void savePreferences() {
-		Preferences prefs =  Preferences.userNodeForPackage(this.getClass());
+		Preferences prefs = getPreferences();
 		
 		prefs.putBoolean("panelInScene", isPanelInScene());
 		
@@ -1906,6 +1906,14 @@ public class ViewerVR {
 		}
 	}
 	
+	private Preferences getPreferences() {
+		return AccessController.doPrivileged(new PrivilegedAction<Preferences>() {
+			public Preferences run() {
+				return Preferences.userNodeForPackage(ViewerVR.class);
+			}
+		});
+	}
+
 	private boolean isPickFaces() {
 		Object v = contentAppearance.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.PICKABLE);
 		return (v instanceof Boolean) ? (Boolean) v : DEFAULT_PICK_FACES;
@@ -1922,7 +1930,7 @@ public class ViewerVR {
 	}
 
 	public void restorePreferences() {
-		Preferences prefs =  Preferences.userNodeForPackage(this.getClass());
+		Preferences prefs = getPreferences();
 		
 		setPanelInScene(prefs.getBoolean("panelInScene", DEFAULT_PANEL_IN_SCENE));
 		
