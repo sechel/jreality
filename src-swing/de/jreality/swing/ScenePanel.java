@@ -46,7 +46,11 @@ public class ScenePanel {
 	ActionTool myActionTool=new ActionTool("PanelActivation");
 
 	public ScenePanel() {
-		externalFrame.setAlwaysOnTop(true);
+		try {
+			externalFrame.setAlwaysOnTop(true);
+		} catch (SecurityException se) {
+			// webstart
+		}
 		rootNode.setName("panel");
 		panel.setVertexCount(4);
 		panel.setFaceCount(1);

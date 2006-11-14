@@ -511,7 +511,11 @@ public class ViewerVR {
 	}
 
 	private void makeControlPanel() {
-		sp = new ScenePanel();
+		sp = AccessController.doPrivileged(new PrivilegedAction<ScenePanel>() {
+			public ScenePanel run() {
+				return new ScenePanel();
+			}
+		});
 		sp.setPanelWidth(PANEL_WIDTH);
 		sp.setAboveGround(PANEL_ABOVE_GROUND);
 		sp.setZOffset(PANEL_Z_OFFSET);
