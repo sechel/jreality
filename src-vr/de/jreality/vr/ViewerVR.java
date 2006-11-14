@@ -427,7 +427,7 @@ public class ViewerVR {
  
 		// terrain
 		terrainNode = Readers
-				.read(Input.getInput("de/jreality/vr/terrain.3ds"))
+				.read(Input.getInput(this.getClass().getResource("terrain.3ds")))
 				.getChildComponent(0);
 		terrain = (IndexedFaceSet) terrainNode.getGeometry();
 		MatrixBuilder.euclidean().scale(1 / 3.).translate(0, 7, 0).assignTo(terrainNode);
