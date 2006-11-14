@@ -56,6 +56,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -426,9 +428,17 @@ public class ViewerVR {
 		sceneNode.setAppearance(contentAppearance);
  
 		// terrain
-		terrainNode = Readers
-				.read(Input.getInput(ViewerVR.class.getResource("terrain.3ds")))
-				.getChildComponent(0);
+		terrainNode = AccessController.doPrivileged(new PrivilegedAction<SceneGraphComponent>() {
+			public SceneGraphComponent run() {
+				try {
+					return Readers.read(Input.getInput(ViewerVR.class.getResource("terrain.3ds"))).getChildComponent(0);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return null;
+			}
+		});
+		
 		terrain = (IndexedFaceSet) terrainNode.getGeometry();
 		MatrixBuilder.euclidean().scale(1 / 3.).translate(0, 7, 0).assignTo(terrainNode);
 		terrainNode.setName("terrain");
