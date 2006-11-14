@@ -46,6 +46,8 @@ import java.beans.Beans;
 import java.io.IOException;
 import java.net.URL;
 import java.security.AccessControlException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -388,8 +390,14 @@ public class ViewerApp {
     
 //    uiFactory = new UIFactory();
     
-    try { currViewer = createViewer(); } 
-    catch (Exception exc) { exc.printStackTrace(); }
+    	currViewer = AccessController.doPrivileged(new PrivilegedAction<ToolSystemViewer>() {
+    		public ToolSystemViewer run() {
+    		    try {
+    		    	return createViewer();
+    		    } catch (Exception exc) { exc.printStackTrace(); }
+    		    return null;
+    		}
+    	});
 
     //set sceneRoot and paths of viewer
     sceneRoot = sc.getSceneRoot();
