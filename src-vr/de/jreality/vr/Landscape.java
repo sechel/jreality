@@ -6,6 +6,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -115,40 +117,45 @@ public class Landscape {
 
 	}
 
-	private void load(String env) {
-		selectionIndex = ((Integer)boxes.get(env)).intValue();
-		try {
-			String[] selectedLandscape = skyboxes[selectionIndex];
-			if (selectedLandscape[1] != null) {
-				cubeMap=TextureUtility.createCubeMapData(selectedLandscape[1], selectedLandscape[2].split(","), selectedLandscape[3]);
-			} else {
-				cubeMap = null;
+	private void load(final String env) {
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+			public Object run() {
+				selectionIndex = ((Integer)boxes.get(env)).intValue();
+				try {
+					String[] selectedLandscape = skyboxes[selectionIndex];
+					if (selectedLandscape[1] != null) {
+						cubeMap=TextureUtility.createCubeMapData(selectedLandscape[1], selectedLandscape[2].split(","), selectedLandscape[3]);
+					} else {
+						cubeMap = null;
+					}
+					if (selectedLandscape[4] != null) {
+						terrainTexture=ImageData.load(Input.getInput(selectedLandscape[4]));
+					} else {
+						terrainTexture = null;
+					}
+		
+					String upColorString = selectedLandscape[7];
+					if (upColorString.equals("null")) {
+						upColor = null;
+					} else {
+						String[] up = selectedLandscape[7].split(" ");
+						upColor=new Color(Integer.parseInt(up[0]), Integer.parseInt(up[1]), Integer.parseInt(up[2]));
+					}
+					String downColorString = selectedLandscape[8];
+					if (downColorString.equals("null")) {
+						downColor = null;
+					} else {
+						String[] down = selectedLandscape[8].split(" ");
+						downColor=new Color(Integer.parseInt(down[0]), Integer.parseInt(down[1]), Integer.parseInt(down[2]));
+					}
+					terrainFlat = Boolean.parseBoolean(selectedLandscape[6]);
+					terrainTextureScale = Double.parseDouble(skyboxes[selectionIndex][5]);
+				} catch(IOException e) {
+					e.printStackTrace();
+				}
+				return null;
 			}
-			if (selectedLandscape[4] != null) {
-				terrainTexture=ImageData.load(Input.getInput(selectedLandscape[4]));
-			} else {
-				terrainTexture = null;
-			}
-
-			String upColorString = selectedLandscape[7];
-			if (upColorString.equals("null")) {
-				upColor = null;
-			} else {
-				String[] up = selectedLandscape[7].split(" ");
-				upColor=new Color(Integer.parseInt(up[0]), Integer.parseInt(up[1]), Integer.parseInt(up[2]));
-			}
-			String downColorString = selectedLandscape[8];
-			if (downColorString.equals("null")) {
-				downColor = null;
-			} else {
-				String[] down = selectedLandscape[8].split(" ");
-				downColor=new Color(Integer.parseInt(down[0]), Integer.parseInt(down[1]), Integer.parseInt(down[2]));
-			}
-			terrainFlat = Boolean.parseBoolean(selectedLandscape[6]);
-			terrainTextureScale = Double.parseDouble(skyboxes[selectionIndex][5]);
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
+		});
 	}
 
 	public JComponent getSelectionComponent() {

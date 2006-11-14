@@ -1034,10 +1034,19 @@ public class ViewerVR {
 		groundBox.add(groundLabel);
 		groundBox.add(groundSlider);
 
-		URL imgURL = ViewerVR.class.getResource("rotleft.gif");
-		ImageIcon rotateLeft = new ImageIcon(imgURL);
-		imgURL = ViewerVR.class.getResource("rotright.gif");
-		ImageIcon rotateRight = new ImageIcon(imgURL);
+		ImageIcon rotateLeft = AccessController.doPrivileged(new PrivilegedAction<ImageIcon>() {
+			public ImageIcon run() {
+				URL imgURL = ViewerVR.class.getResource("rotleft.gif");
+				return new ImageIcon(imgURL);
+			}
+		});
+
+		ImageIcon rotateRight = AccessController.doPrivileged(new PrivilegedAction<ImageIcon>() {
+			public ImageIcon run() {
+				URL imgURL = ViewerVR.class.getResource("rotright.gif");
+				return new ImageIcon(imgURL);
+			}
+		});
 
 		JPanel rotateBox = new JPanel(new GridLayout(3, 3));
 		rotateBox.setBorder(new EmptyBorder(20, 0, 20, 0));
