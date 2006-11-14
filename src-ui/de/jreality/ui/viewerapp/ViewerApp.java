@@ -181,11 +181,11 @@ public class ViewerApp {
     displayedNode = contentNode;
 
     //update autoRender & synchRender
-    String autoRenderProp = getProperty("de.jreality.ui.viewerapp.autoRender", "true");
+    String autoRenderProp = Secure.getProperty( "de.jreality.ui.viewerapp.autoRender", "true" );
     if (autoRenderProp.equalsIgnoreCase("false")) {
       autoRender = false;
     }
-    String synchRenderProp = getProperty("de.jreality.ui.viewerapp.synchRender", "true");
+    String synchRenderProp = Secure.getProperty( "de.jreality.ui.viewerapp.synchRender", "true" );
     if (synchRenderProp.equalsIgnoreCase("true")) {
       synchRender = true;
     }
@@ -346,22 +346,12 @@ public class ViewerApp {
   }
   
 
-  private static String getProperty( String key, String def ) {
-    try {
-      return Secure.getProperty( key, def );
-    } 
-    catch( AccessControlException e ) {
-      return def;
-    }
-  }
-  
-  
   /**
    * Get the default Scene depending on the environment (desktop or portal).
    * @return the default scene
    */
   private JrScene getDefaultScene() {
-    String environment = getProperty("de.jreality.viewerapp.env", "desktop");
+    String environment = Secure.getProperty( "de.jreality.viewerapp.env", "desktop" );
     
     if (!environment.equals("desktop") && !environment.equals("portal"))
       throw new IllegalArgumentException("unknown environment!");
@@ -442,7 +432,7 @@ public class ViewerApp {
   private ToolSystemViewer createViewer() throws IOException {
     if (viewers == null) {
       
-      String viewer = getProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.softviewer.SoftViewer"); // de.jreality.portal.DesktopPortalViewer");
+      String viewer = Secure.getProperty( "de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.softviewer.SoftViewer" ); // de.jreality.portal.DesktopPortalViewer");
       String[] vrs = viewer.split(" ");
       List<Viewer> viewerList = new LinkedList<Viewer>();
       String viewerClassName;
@@ -464,19 +454,8 @@ public class ViewerApp {
     }
     
     //create ToolSystemViewer with configuration corresp. to environment
-    ToolSystemConfiguration cfg = null;
+    ToolSystemConfiguration cfg = loadToolSystemConfiguration();
     
-    String config = getProperty("de.jreality.scene.tool.Config", "default");
-    
-    // HACK: only works for "regular" URLs
-    if (config.contains("://")) {
-      cfg = ToolSystemConfiguration.loadConfiguration(new Input(new URL(config)));
-    } else {
-      if (config.equals("default")) cfg = ToolSystemConfiguration.loadDefaultDesktopConfiguration();
-      if (config.equals("portal")) cfg = ToolSystemConfiguration.loadDefaultPortalConfiguration();
-      if (config.equals("default+portal")) cfg = ToolSystemConfiguration.loadDefaultDesktopAndPortalConfiguration();
-    }    
-    if (cfg == null) throw new IllegalStateException("couldn't load config ["+config+"]");
     
     ToolSystemViewer viewer = new ToolSystemViewer(viewerSwitch, cfg, synchRender ? renderTrigger : null);
     viewer.setPickSystem(new AABBPickSystem());
@@ -485,7 +464,32 @@ public class ViewerApp {
   }
   
   
-  private Viewer createViewer(String viewer) 
+  private ToolSystemConfiguration loadToolSystemConfiguration() {
+	  return AccessController.doPrivileged(new PrivilegedAction<ToolSystemConfiguration>() {
+		  public ToolSystemConfiguration run() {
+			  String config = Secure.getProperty( "de.jreality.scene.tool.Config", "default" );
+			  ToolSystemConfiguration cfg=null;
+		    // HACK: only works for "regular" URLs
+		    	try {
+		    		if (config.contains("://")) {
+				      cfg = ToolSystemConfiguration.loadConfiguration(new Input(new URL(config)));
+				    } else {
+				      if (config.equals("default")) cfg = ToolSystemConfiguration.loadDefaultDesktopConfiguration();
+				      if (config.equals("portal")) cfg = ToolSystemConfiguration.loadDefaultPortalConfiguration();
+				      if (config.equals("default+portal")) cfg = ToolSystemConfiguration.loadDefaultDesktopAndPortalConfiguration();
+				    }
+		    } catch (IOException e) {
+		    	// should not happen
+		    	e.printStackTrace();
+		    }
+		    if (cfg == null) throw new IllegalStateException("couldn't load config ["+config+"]");
+		    return cfg;
+		  }
+	  });
+}
+
+
+private Viewer createViewer(String viewer) 
     throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
   {
     return (Viewer)Class.forName(viewer).newInstance();
