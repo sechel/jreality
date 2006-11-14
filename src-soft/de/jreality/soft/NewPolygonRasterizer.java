@@ -50,6 +50,8 @@ import java.util.Arrays;
  *
  */
 
+import de.jreality.util.Secure;
+
 /**
  * @version 1.0
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
@@ -79,7 +81,7 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
     
     {
     	try {
-    		String img = System.getProperty("jreality.soft.imager");
+    		String img = Secure.getProperty("jreality.soft.imager");
             if (img != null && img.equals("hatch")) imager = new HatchImager();
             if (img != null && img.equals("toon")) imager = new ToonImager();
     	} catch (SecurityException se) {

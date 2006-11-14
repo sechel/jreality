@@ -48,11 +48,12 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileSystemView;
 
 import de.jreality.reader.Readers;
+import de.jreality.util.Secure;
 
 
 public class FileLoaderDialog {
 	
-  static File lastDir = new File(System.getProperty("jreality.data", "/net/MathVis/data/testData3D"));
+  static File lastDir = new File(Secure.getProperty("jreality.data", "/net/MathVis/data/testData3D"));
   
   
   public static JFileChooser createFileChooser() {

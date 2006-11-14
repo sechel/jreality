@@ -42,6 +42,7 @@ package de.jreality.soft;
 
 import de.jreality.math.Rn;
 import de.jreality.util.LoggingSystem;
+import de.jreality.util.Secure;
 
 /**
  * 
@@ -54,7 +55,7 @@ public final class Polygon {
   static {
     int pvInt = 14;
     try {
-      String pv = System.getProperty("jreality.soft.maxpolyvertex");
+      String pv = Secure.getProperty("jreality.soft.maxpolyvertex");
       if (pv != null) pvInt = Integer.parseInt(pv);
     } catch (Exception e) {
       // hm... now we are back with 14 verts each polygon

@@ -77,6 +77,7 @@ import de.jreality.ui.viewerapp.actions.app.SwitchBackgroundColor;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
+import de.jreality.util.Secure;
 
 
 /**
@@ -345,7 +346,7 @@ public class ViewerApp {
 
   private static String getProperty( String key, String def ) {
     try {
-      return System.getProperty( key, def );
+      return Secure.getProperty( key, def );
     } 
     catch( AccessControlException e ) {
       return def;

@@ -133,6 +133,7 @@ import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
+import de.jreality.util.Secure;
 import de.jtem.beans.SimpleColorChooser;
 
 
@@ -340,8 +341,7 @@ public class ViewerVR {
 	public ViewerVR() throws IOException {
 
 		// find out where we are running
-		boolean portal = "portal".equals(System
-				.getProperty("de.jreality.scene.tool.Config"));
+		boolean portal = "portal".equals(Secure.getProperty("de.jreality.scene.tool.Config"));
 
 		// build basic scene graph
 		sceneRoot.setName("root");
@@ -508,7 +508,7 @@ public class ViewerVR {
 		
 		JTabbedPane tabs = new JTabbedPane();
 		
-		String os = System.getProperty("os.name");
+		String os = Secure.getProperty("os.name");
 		boolean macOS = os.equalsIgnoreCase("Mac OS X");
 		if (macOS) {
 			geomTabs = new JTabbedPane();
@@ -571,7 +571,7 @@ public class ViewerVR {
 	private void makeTextureFileChooser() {
 		FileSystemView view = FileSystemView.getFileSystemView();
 		String texDir = ".";
-		String dataDir = System.getProperty("jreality.data");
+		String dataDir = Secure.getProperty("jreality.data");
 		if (dataDir!= null) texDir = dataDir+"/textures";
 		File defaultDir = new File(texDir);
 		texFileChooser = new JFileChooser(!defaultDir.exists() ? view.getHomeDirectory() : defaultDir, view);

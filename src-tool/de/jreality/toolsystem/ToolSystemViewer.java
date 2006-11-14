@@ -54,6 +54,7 @@ import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
+import de.jreality.util.Secure;
 
 
 /**
@@ -89,7 +90,7 @@ public class ToolSystemViewer implements Viewer {
   private static ToolSystemConfiguration loadConfiguration() {
     ToolSystemConfiguration config;
     try {
-      String toolFile=System.getProperty("jreality.toolconfig");
+      String toolFile=Secure.getProperty("jreality.toolconfig");
       config = ToolSystemConfiguration.loadConfiguration(
           Input.getInput(toolFile)
       );

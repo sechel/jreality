@@ -65,6 +65,7 @@ import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.LoggingSystem;
+import de.jreality.util.Secure;
 import de.smrj.ClientFactory;
 
 /**
@@ -128,7 +129,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
   }
   
   public HeadTrackedViewer() {
-    String delegated = System.getProperty("de.jreality.portal.HeadTrackedViewer", "de.jreality.jogl.Viewer");
+    String delegated = Secure.getProperty("de.jreality.portal.HeadTrackedViewer", "de.jreality.jogl.Viewer");
     try {
       viewer = (Viewer) Class.forName(delegated).newInstance();
     } catch (Exception e) {

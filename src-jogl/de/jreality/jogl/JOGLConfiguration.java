@@ -47,6 +47,7 @@ import javax.swing.JPopupMenu;
 
 import de.jreality.scene.data.Attribute;
 import de.jreality.util.LoggingSystem;
+import de.jreality.util.Secure;
 
 /*
  * Author	gunn
@@ -84,7 +85,7 @@ public class JOGLConfiguration {
 		theLog	= LoggingSystem.getLogger(this);
 //	    AccessController.doPrivileged(new PrivilegedAction() {
 //	        public Object run() {
-//	          if (System.getProperty("os.name").indexOf("Linux") != -1) isLinux = true; else isLinux = false;
+//	          if (Secure.getProperty("os.name").indexOf("Linux") != -1) isLinux = true; else isLinux = false;
 //	          return null;
 //	        }
 //	      });
@@ -92,16 +93,16 @@ public class JOGLConfiguration {
 		try {
 		    System.setProperty("sun.awt.noerasebackground", "true");
 			//theLog.setLevel(Level.INFO);
-			String foo = System.getProperty("jreality.jogl.debugGL");
+			String foo = Secure.getProperty("jreality.jogl.debugGL");
 			if (foo != null) { if (foo.equals("false")) debugGL = false; else debugGL =true;}
-			foo = System.getProperty("jreality.jogl.testMatrices");
+			foo = Secure.getProperty("jreality.jogl.testMatrices");
 			if (foo != null) 
 				if (foo.indexOf("false") != -1) testMatrices = false;
 				else testMatrices = true;
-			foo = System.getProperty("jreality.jogl.portalUsage");
+			foo = Secure.getProperty("jreality.jogl.portalUsage");
 			if (foo != null) 
 				if (foo.indexOf("true") != -1) portalUsage = true;
-			foo = System.getProperty("jreality.jogl.loggingLevel");
+			foo = Secure.getProperty("jreality.jogl.loggingLevel");
 			if (foo != null)  {
 				Level level = Level.INFO;
 				if (foo.indexOf("finest") != -1) level = Level.FINEST;
@@ -110,10 +111,10 @@ public class JOGLConfiguration {
 				else if (foo.indexOf("info") != -1) level = Level.INFO;
 				theLog.setLevel(level);
 			}
-			foo = System.getProperty("os.name");
+			foo = Secure.getProperty("os.name");
 			if (foo != null && foo.indexOf("Linux") != -1) isLinux = true;
 			// allocate a GLCanvas to be the "sharer": it will never be destroyed
-//			foo = System.getProperty("jreality.jogl.sharedContexts");
+//			foo = Secure.getProperty("jreality.jogl.sharedContexts");
 //			if (foo != null && foo.indexOf("true") != -1) sharedContexts = true;
 //			if (sharedContexts)	{
 //				GLCapabilities capabilities = new GLCapabilities();
@@ -122,13 +123,13 @@ public class JOGLConfiguration {
 //				sharedContexts=false;
 //				theLog.log(Level.INFO,"Using shared contexts: "+sharedContexts);
 //			}
-			foo = System.getProperty("jreality.jogl.resourceDir");
+			foo = Secure.getProperty("jreality.jogl.resourceDir");
 			if (foo != null) saveResourceDir = resourceDir = foo;
-			quadBufferedStereo = "true".equals(System.getProperty("jreality.jogl.quadBufferedStereo"));
+			quadBufferedStereo = "true".equals(Secure.getProperty("jreality.jogl.quadBufferedStereo"));
 			if (quadBufferedStereo) {
 				// hack, otherwise one side of swing gui will not be drawn
 				// only for windows
-				System.setProperty("sun.java2d.noddraw", "true");
+				Secure.setProperty("sun.java2d.noddraw", "true");
 			}
 		} catch(SecurityException se)	{
 			theLog.log(Level.WARNING,"Security exception in setting configuration options",se);
