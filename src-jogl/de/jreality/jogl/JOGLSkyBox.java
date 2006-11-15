@@ -46,6 +46,7 @@ import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.Camera;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.ImageData;
@@ -80,41 +81,39 @@ class JOGLSkyBox {
     tex.setRepeatT(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
   }
 
-  static void render(GL gl, double[] w2c, CubeMap cm)	{
+  static void render(GL gl, double[] w2c, CubeMap cm, Camera cam)	{
     ImageData[] imgs=TextureUtility.getCubeMapImages(cm);
     tex.setBlendColor(cm.getBlendColor());
-		gl.glDepthMask(false);
-		gl.glDepthFunc(GL.GL_NEVER);
-		gl.glPushAttrib(GL.GL_ENABLE_BIT);
-		gl.glDisable(GL.GL_BLEND);
-		gl.glDisable(GL.GL_DEPTH_TEST);
-		gl.glDisable(GL.GL_LIGHTING);
-    gl.glActiveTexture(GL.GL_TEXTURE0);
-    gl.glEnable(GL.GL_TEXTURE_2D);
+	gl.glDepthMask(false);
+	gl.glDepthFunc(GL.GL_NEVER);
+	gl.glPushAttrib(GL.GL_ENABLE_BIT);
+	gl.glDisable(GL.GL_BLEND);
+	gl.glDisable(GL.GL_DEPTH_TEST);
+	gl.glDisable(GL.GL_LIGHTING);
+	gl.glActiveTexture(GL.GL_TEXTURE0);
+	gl.glEnable(GL.GL_TEXTURE_2D);
     float[] white = {1f,1f,1f,1f};
 //	    gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, white);
     gl.glColor4fv( white, 0);
     gl.glPushMatrix();
 	    
-	    //double[] w2c = o.getWorldToCamera();
-	    //System.err.println("w2c: \n"+Rn.matrixToString(w2c));
-      
-	    gl.glLoadTransposeMatrixd(P3.extractOrientationMatrix(null, w2c, Pn.originP3, Pn.EUCLIDEAN), 0);
-	    gl.glMultTransposeMatrixd(P3.makeStretchMatrix(null, 500.0),0);
-		for (int i = 0; i<6; ++i)	{
-			tex.setImage(imgs[i]);
-		    Texture2DLoaderJOGL.render(gl, tex);
-			gl.glBegin(GL.GL_POLYGON);
-				for (int j = 0; j<4; ++j)	{
-					gl.glTexCoord2dv(texCoords[j],0);
-					gl.glVertex3dv(cubeVerts3[i][j],0);
-				}
-			gl.glEnd();
+    gl.glLoadTransposeMatrixd(P3.extractOrientationMatrix(null, w2c, Pn.originP3, Pn.EUCLIDEAN), 0);
+    double scale = (cam.getNear() + cam.getFar())/2;
+    gl.glMultTransposeMatrixd(P3.makeStretchMatrix(null, scale),0);
+	for (int i = 0; i<6; ++i)	{
+		tex.setImage(imgs[i]);
+	    Texture2DLoaderJOGL.render(gl, tex);
+		gl.glBegin(GL.GL_POLYGON);
+		for (int j = 0; j<4; ++j)	{
+			gl.glTexCoord2dv(texCoords[j],0);
+			gl.glVertex3dv(cubeVerts3[i][j],0);
 		}
-	    gl.glPopMatrix();
-		gl.glDepthFunc(GL.GL_LESS);
-		gl.glPopAttrib();
-		gl.glDepthMask(true);
+		gl.glEnd();
 	}
+    gl.glPopMatrix();
+	gl.glDepthFunc(GL.GL_LESS);
+	gl.glPopAttrib();
+	gl.glDepthMask(true);
+}
 	
 }

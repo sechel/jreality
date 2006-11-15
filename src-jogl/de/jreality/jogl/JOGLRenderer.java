@@ -254,11 +254,6 @@ public class JOGLRenderer  implements AppearanceListener {
 				aspectRatio,
 				whichEye);
 		globalGL.glMultTransposeMatrixd(c2ndc, 0);
-//		if (offscreenMode)	{
-//		System.err.println("Viewport is "+CameraUtility.getCamera(theViewer).getViewPort().toString());
-//		System.err.println("Matrix is "+Rn.matrixToString(c2ndc));
-//		}
-
 
 		// prepare for rendering the geometry
 		globalGL.glMatrixMode(GL.GL_MODELVIEW);
@@ -270,7 +265,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		globalIsReflection = ( isFlipped() != (Rn.determinant(w2c) < 0.0));
 
 		if (theRoot.getAppearance() != null) 
-			JOGLRendererHelper.handleSkyBox(this, theRoot.getAppearance());
+			JOGLRendererHelper.handleSkyBox(this, theRoot.getAppearance(),CameraUtility.getCamera(theViewer) );
 
 		if (!pickMode) processLights();
 

@@ -70,6 +70,7 @@ import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.Camera;
 import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.IndexedFaceSet;
@@ -218,7 +219,7 @@ public class JOGLRendererHelper {
 			gl.glDisable(GL.GL_FOG);
 	}
 
-	public static void handleSkyBox(JOGLRenderer jr, Appearance topAp) {
+	public static void handleSkyBox(JOGLRenderer jr, Appearance topAp, Camera cam) {
     GL gl = jr.getGL();
     double[] w2c = jr.getContext().getWorldToCamera();
 		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
@@ -226,7 +227,7 @@ public class JOGLRendererHelper {
 			CubeMap cm = (CubeMap) AttributeEntityUtility
 					.createAttributeEntity(CubeMap.class,
 							CommonAttributes.SKY_BOX, topAp, true);
-			JOGLSkyBox.render(gl, w2c, cm);
+			JOGLSkyBox.render(gl, w2c, cm, cam);
 		}
 
 	}
