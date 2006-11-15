@@ -955,15 +955,11 @@ public class JOGLRenderer  implements AppearanceListener {
 				}
 //				return;
 			}
-//			boolean apAdded = (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE);
-//			int changed = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
 			peersLock.readLock();
 			Iterator iter = peers.iterator();
 			while (iter.hasNext())	{
 				JOGLPeerComponent peer = (JOGLPeerComponent) iter.next();
 				peer.childRemoved(ev);
-				// why isn't the following done in peer.childRemoved?
-//				if (apAdded) peer.propagateGeometryChanged(changed);
 			}
 			peersLock.readUnlock();
 		}
@@ -982,16 +978,12 @@ public class JOGLRenderer  implements AppearanceListener {
 					peerGeometry = getJOGLPeerGeometryFor(originalComponent.getGeometry());
 					peerGeometry.refCount++;
 				} 
-//				return;
 			}
-//			boolean apAdded = (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE);
-//			int changed = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
 			peersLock.readLock();
 			Iterator iter = peers.iterator();
 			while (iter.hasNext())	{
 				JOGLPeerComponent peer = (JOGLPeerComponent) iter.next();
 				peer.childReplaced(ev);
-//				if (apAdded) peer.propagateGeometryChanged(changed);
 			}				
 			peersLock.readUnlock();
 		}
@@ -1073,6 +1065,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		geometryIsDirty = true,
 		boundIsDirty = true,
 		clipToCamera = true;
+		int geometryChanged = 0;
 		protected boolean flushCachedInfo  = false;
 		protected boolean renderRunnableDirty = true;
 		boolean[] matrixIsReflection = null;
@@ -1154,6 +1147,7 @@ public class JOGLRenderer  implements AppearanceListener {
 				openGLState.flipped  = cumulativeIsReflection;
 			}
 			if (appearanceChanged)  	propagateAppearanceChanged();
+			if (geometryChanged != 0)	geometryChanged(geometryChanged);
 			if (flushCachedInfo)		flushCachedInfo();
 			if (goBetween != null && goBetween.peerGeometry != null && goBetween.peerGeometry.originalGeometry != null )	{
 				Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
@@ -1229,7 +1223,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			}
 		}
 
-		public void setIndexOfChildren()	{
+		protected void setIndexOfChildren()	{
 			//childlock.readLock();
 			int n = goBetween.getOriginalComponent().getChildComponentCount();
 			for (int i = 0; i<n; ++i)	{
@@ -1278,12 +1272,6 @@ public class JOGLRenderer  implements AppearanceListener {
 				if (effectiveAppearanceDirty || eAp == null)	{
 					if (thisAp != null )	{
 						eAp = parent.eAp.create(thisAp);
-//						theLog.log(Level.INFO,"creating new eap for "+goBetween.originalComponent.getName());
-//						List l = eAp.getAppearanceHierarchy();
-//						Iterator iter = l.iterator();
-//						while (iter.hasNext())	{
-//						System.err.println("\t"+((Appearance)iter.next()).toString());
-//						}
 					} else {
 						eAp = parent.eAp;	
 					}
@@ -1291,7 +1279,7 @@ public class JOGLRenderer  implements AppearanceListener {
 				}
 			}
 			updateShaders();
-			//childlock.readLock();
+
 			int n = children.size();
 			for (int i = 0; i<n; ++i)	{		
 				JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
@@ -1448,7 +1436,7 @@ public class JOGLRenderer  implements AppearanceListener {
 //			if (goBetween != null && goBetween.getPeerGeometry() != null) 
 //			goBetween.getPeerGeometry().geometryChanged(changed);
 //			dlInfo.geometryChanged(changed);
-			geometryChanged(changed);
+			geometryChanged = changed;
 			//childlock.readLock();
 			int n = children.size();
 			for (int i = 0; i<n; ++i)	{		
