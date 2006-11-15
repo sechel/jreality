@@ -37,6 +37,7 @@
  *
  */
 
+
 package de.jreality.ui.viewerapp.actions.file;
 
 import java.awt.Dimension;
@@ -52,51 +53,51 @@ import javax.swing.KeyStroke;
 
 import de.jreality.scene.Viewer;
 import de.jreality.softviewer.PSRenderer;
-import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.actions.AbstractAction;
 
+
 public class ExportPS extends AbstractAction {
-    private static final long serialVersionUID = 1L;
-
-    private Viewer viewer;
-
-    public ExportPS(String name, Viewer viewer, Frame frame) {
-        super(name);
-        this.frame = frame;
-        putValue(SHORT_DESCRIPTION,
-                "export the current scene as PostScript file");
-        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P,
-                InputEvent.CTRL_MASK));
-
-        if (viewer == null)
-            throw new IllegalArgumentException("Viewer is null!");
-
-        this.viewer = viewer;
+  
+  private Viewer viewer;
+  
+  
+  public ExportPS(String name, Viewer viewer, Frame frame) {
+    super(name);
+    this.frame = frame;
+    putValue(SHORT_DESCRIPTION,
+    "Export the current scene as PostScript file");
+    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P,
+        InputEvent.CTRL_MASK));
+    
+    if (viewer == null)
+      throw new IllegalArgumentException("Viewer is null!");
+    
+    this.viewer = viewer;
+  }
+  
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    File file = FileLoaderDialog.selectTargetFile(frame, "ps", "PostScript Files");
+    if (file == null)
+      return;
+    // try {
+    Dimension d = viewer.getViewingComponentSize();
+    PSRenderer rv;
+    try {
+      rv = new PSRenderer(new PrintWriter(file), d.width, d.height);
+      rv.setCameraPath(viewer.getCameraPath());
+      rv.setSceneRoot(viewer.getSceneRoot());
+      rv.setAuxiliaryRoot(viewer.getAuxiliaryRoot());
+      // rv.initializeFrom(viewer);
+      rv.render();
+    } catch (FileNotFoundException e1) {
+      e1.printStackTrace();
     }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        File file = FileLoaderDialog.selectTargetFile(frame);
-        if (file == null)
-            return;
-        // try {
-        Dimension d = viewer.getViewingComponentSize();
-        PSRenderer rv;
-        try {
-            rv = new PSRenderer(new PrintWriter(file), d.width, d.height);
-            rv.setCameraPath(viewer.getCameraPath());
-            rv.setSceneRoot(viewer.getSceneRoot());
-            rv.setAuxiliaryRoot(viewer.getAuxiliaryRoot());
-            // rv.initializeFrom(viewer);
-            rv.render();
-        } catch (FileNotFoundException e1) {
-            e1.printStackTrace();
-        }
-        // } catch (IOException ioe) {
-        // JOptionPane.showMessageDialog(frame, "Save failed:
-        // "+ioe.getMessage());
-        // }
-    }
-
+    // } catch (IOException ioe) {
+    // JOptionPane.showMessageDialog(frame, "Save failed:
+    // "+ioe.getMessage());
+    // }
+  }
+  
 }

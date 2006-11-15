@@ -44,7 +44,6 @@ import java.awt.Component;
 import java.io.File;
 
 import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileSystemView;
 
 import de.jreality.reader.Readers;
@@ -57,42 +56,34 @@ public class FileLoaderDialog {
   
   
   public static JFileChooser createFileChooser() {
-    FileFilter ff = new FileFilter(){
+    FileFilter ff = new FileFilter("jReality 3D data files") {
+      @Override
       public boolean accept(File f) {
         if (f.isDirectory()) return true;
         String filename = f.getName().toLowerCase();
         return (Readers.findFormat(filename) != null);
       }
-      public String getDescription() {
-        return "jReality 3D data files";
-      }
     };
-    return createFileChooser(ff);
+    ff.setShowExtensionList(false);
+    return createFileChooser(true, ff);
   }
   
   
-  static JFileChooser createFileChooser(final String ext, final String description) {
-      FileFilter ff = new FileFilter(){
-        public boolean accept(File f) {
-          return (f.isDirectory() || 
-              f.getName().endsWith("."+ext) || 
-              f.getName().endsWith("."+ext.toLowerCase()) ||
-              f.getName().endsWith("."+ext.toUpperCase()));
-        }
-        public String getDescription() {
-          return description;
-        }
-      };
-      return createFileChooser(ff);
+  public static JFileChooser createFileChooser(final String ext, final String description) {
+      return createFileChooser(true, new FileFilter(description, ext));
   }
 
   
-  public static JFileChooser createFileChooser(FileFilter... ff) {
+  public static JFileChooser createFileChooser(boolean useAcceptAllFileFilter, FileFilter... ff) {
     FileSystemView view = FileSystemView.getFileSystemView();
     JFileChooser chooser = new JFileChooser(!lastDir.exists() ? view.getHomeDirectory() : lastDir, view);
+    
+    chooser.setAcceptAllFileFilterUsed(useAcceptAllFileFilter);
     for (int i = 0; i < ff.length; i++)
       chooser.addChoosableFileFilter(ff[i]);
-    chooser.setFileFilter(chooser.getAcceptAllFileFilter());
+    if (ff.length != 0) chooser.setFileFilter(ff[0]);
+    else if (useAcceptAllFileFilter)
+      chooser.setFileFilter(chooser.getAcceptAllFileFilter());
     
     return chooser;
   }
@@ -108,11 +99,22 @@ public class FileLoaderDialog {
   }
   
   
-  private static File selectTargetFile(Component parent,JFileChooser chooser) {
+  private static File selectTargetFile(Component parent, JFileChooser chooser) {
     chooser.setMultiSelectionEnabled(false);
     chooser.showSaveDialog(parent);
     lastDir = chooser.getCurrentDirectory();
-    return chooser.getSelectedFile();
+    File file = chooser.getSelectedFile();
+    
+    //append preferred extension if existing and user did not specify one
+    try {
+      FileFilter filter = (FileFilter) chooser.getFileFilter();
+      if (!filter.accept(file)) {  //invalid extension
+        String extension = filter.getPreferredExtension();
+        if (extension != null) file = new File(file.getPath()+"."+extension);
+      }
+    } catch (Exception e) {}
+   
+    return file;
   }
   
   
@@ -128,8 +130,8 @@ public class FileLoaderDialog {
   }
   
   
-  public static File selectTargetFile(Component parent, FileFilter... ff) {
-    JFileChooser chooser = createFileChooser(ff);
+  public static File selectTargetFile(Component parent, boolean useAcceptAllFileFilter, FileFilter... ff) {
+    JFileChooser chooser = createFileChooser(useAcceptAllFileFilter, ff);
     return selectTargetFile(parent, chooser);
   }
   
