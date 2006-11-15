@@ -64,7 +64,6 @@ import de.jreality.ui.viewerapp.actions.app.ToggleAppearance;
 import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFieldOfView;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFocus;
-import de.jreality.ui.viewerapp.actions.camera.TogglePerspective;
 import de.jreality.ui.viewerapp.actions.camera.ToggleStereo;
 import de.jreality.ui.viewerapp.actions.edit.AddTool;
 import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
@@ -80,7 +79,6 @@ import de.jreality.ui.viewerapp.actions.file.LoadScene;
 import de.jreality.ui.viewerapp.actions.file.Quit;
 import de.jreality.ui.viewerapp.actions.file.SaveScene;
 import de.jreality.ui.viewerapp.actions.file.SaveSelected;
-import de.jreality.ui.viewerapp.actions.view.Render;
 import de.jreality.ui.viewerapp.actions.view.ToggleBeanShell;
 import de.jreality.ui.viewerapp.actions.view.ToggleFullScreen;
 import de.jreality.ui.viewerapp.actions.view.ToggleMenu;
@@ -100,7 +98,6 @@ public class ViewerAppMenu {
   //menu names
   public static String FILE_MENU = "File";
   public static String EDIT_MENU = "Edit";
-  public static String APP_MENU = "Appearance";
   public static String CAMERA_MENU = "Camera";
   public static String VIEW_MENU = "View";
   
@@ -115,13 +112,14 @@ public class ViewerAppMenu {
   //EDIT MENU
   public static String REMOVE = "Remove";
   public static String ADD_TOOL = "Add Tools";
-  public static String TOGGLE_PICKABLE = "Toggle pickable";
-  public static String ASSIGN_FACE_AABBTREE = "Assign AABBTree";
-  //APPEARANCE MENU
+  public static String APPEARANCE = "Appearance";
   public static String TOGGLE_VERTEX_DRAWING = "Toggle vertex drawing";
   public static String TOGGLE_EDGE_DRAWING = "Toggle egde drawing";
   public static String TOGGLE_FACE_DRAWING = "Toggle face drawing";
   public static String BACKGROUND_COLOR = "Set background color";
+  public static String TOGGLE_PICKABLE = "Toggle pickable";
+  public static String ASSIGN_FACE_AABBTREE = "Assign AABBTree";
+  
   //CAMERA MENU
   public static String DECREASE_FIELD_OF_VIEW = "Decrease fieldOfView";
   public static String INCREASE_FIELD_OF_VIEW = "Increase fieldOfView";
@@ -166,10 +164,16 @@ public class ViewerAppMenu {
     
     menuBar = new JMenuBar();
     
-    //FILE MENU
+    menuBar.add(getFileMenu());
+    menuBar.add(getEditMenu());
+    menuBar.add(getCameraMenu());
+    menuBar.add(getViewMenu());
+  }
+
+
+  private JMenu getFileMenu() {
     JMenu fileMenu = new JMenu(FILE_MENU);
     fileMenu.setMnemonic(KeyEvent.VK_F);
-    menuBar.add(fileMenu);
     
     fileMenu.add(new JMenuItem(new LoadFile(LOAD_FILE, sm, viewerApp, frame)));
     fileMenu.add(new JMenuItem(new LoadFileMerged(LOAD_FILE_MERGED, sm, viewerApp, frame)));
@@ -195,27 +199,27 @@ public class ViewerAppMenu {
     	fileMenu.add(new JMenuItem(new Quit(QUIT)));    
     }
     
-    //EDIT MENU
+    return fileMenu;
+  }
+  
+  
+  private JMenu getEditMenu() {
     JMenu editMenu = new JMenu(EDIT_MENU);
     editMenu.setMnemonic(KeyEvent.VK_E);
-    menuBar.add(editMenu);
+    
+    renderSelectionCheckbox = new JCheckBoxMenuItem(new ToggleRenderSelection(TOGGLE_RENDER_SELECTION, sm));
+    editMenu.add(renderSelectionCheckbox);
+    editMenu.addSeparator();
     
     editMenu.add(new JMenuItem(new Remove(REMOVE, sm)));
     editMenu.addSeparator();
-    editMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, frame)));
-    editMenu.addSeparator();
-    editMenu.add(new JMenuItem(new TogglePickable(TOGGLE_PICKABLE, sm)));
-    editMenu.add(new JMenuItem(new AssignFaceAABBTree(ASSIGN_FACE_AABBTREE, sm)));
     
-    //APPEARANCE MENU
-    JMenu appMenu = new JMenu(APP_MENU);
-    appMenu.setMnemonic(KeyEvent.VK_A);
-    menuBar.add(appMenu);
-    
-    appMenu.add(new JMenuItem(new ToggleAppearance(TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm)));
-    appMenu.add(new JMenuItem(new ToggleAppearance(TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm)));
-    appMenu.add(new JMenuItem(new ToggleAppearance(TOGGLE_FACE_DRAWING, CommonAttributes.FACE_DRAW, sm)));
-    appMenu.addSeparator();
+    JMenu appearance = new JMenu(APPEARANCE);
+    editMenu.add(appearance);
+    appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm)));
+    appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm)));
+    appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_FACE_DRAWING, CommonAttributes.FACE_DRAW, sm)));
+    appearance.addSeparator();
     JMenu bgColors = new JMenu(BACKGROUND_COLOR);  //background color of viewerApp
     ButtonGroup bg = new ButtonGroup();
     List<JRadioButtonMenuItem> items = new LinkedList<JRadioButtonMenuItem>();
@@ -228,12 +232,22 @@ public class ViewerAppMenu {
       bg.add(item);
       bgColors.add(item);
     }
-    appMenu.add(bgColors);
+    appearance.add(bgColors);
     
-    //CAMERA MENU
+    editMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, frame)));
+    editMenu.addSeparator();
+
+    editMenu.add(new JMenuItem(new TogglePickable(TOGGLE_PICKABLE, sm)));
+    editMenu.add(new JMenuItem(new AssignFaceAABBTree(ASSIGN_FACE_AABBTREE, sm)));
+    
+    return editMenu;
+  }
+
+  
+  private JMenu getCameraMenu() {
     JMenu cameraMenu = new JMenu(CAMERA_MENU);
     cameraMenu.setMnemonic(KeyEvent.VK_C);
-    menuBar.add(cameraMenu);
+
     cameraMenu.add(new JMenuItem(new ShiftFieldOfView(DECREASE_FIELD_OF_VIEW, viewerSwitch, true)));
     cameraMenu.add(new JMenuItem(new ShiftFieldOfView(INCREASE_FIELD_OF_VIEW, viewerSwitch, false)));
     cameraMenu.addSeparator();
@@ -243,30 +257,30 @@ public class ViewerAppMenu {
     cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(DECREASE_EYE_SEPARATION, viewerSwitch, true)));
     cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(INCREASE_EYE_SEPARATION, viewerSwitch, false)));
     cameraMenu.addSeparator();
-    cameraMenu.add(new JMenuItem(new TogglePerspective(TOGGLE_PERSPECTIVE, viewerSwitch)));
+//    cameraMenu.add(new JMenuItem(new TogglePerspective(TOGGLE_PERSPECTIVE, viewerSwitch)));
     cameraMenu.add(new JMenuItem(new ToggleStereo(TOGGLE_STEREO, viewerSwitch)));
-
-    //VIEW MENU
-    JMenu viewerMenu = new JMenu(VIEW_MENU);
-    viewerMenu.setMnemonic(KeyEvent.VK_V);
-    menuBar.add(viewerMenu);
+    
+    return cameraMenu;
+  }
+  
+  
+  private JMenu getViewMenu() {
+    JMenu viewMenu = new JMenu(VIEW_MENU);
+    viewMenu.setMnemonic(KeyEvent.VK_V);
     
     navigatorCheckBox = new JCheckBoxMenuItem(new ToggleNavigator(TOGGLE_NAVIGATOR, viewerApp));
     beanShellCheckBox = new JCheckBoxMenuItem(new ToggleBeanShell(TOGGLE_BEANSHELL, viewerApp));
-    viewerMenu.add(navigatorCheckBox);
-    viewerMenu.add(beanShellCheckBox);
-    viewerMenu.addSeparator();
-    renderSelectionCheckbox = new JCheckBoxMenuItem(new ToggleRenderSelection(TOGGLE_RENDER_SELECTION, sm));
-    viewerMenu.add(renderSelectionCheckbox);
-    viewerMenu.addSeparator();
-    viewerMenu.add(new JMenuItem(new ToggleMenu(TOGGLE_MENU, menuBar)));
-    viewerMenu.addSeparator();
-    viewerMenu.add(new JMenuItem(ToggleViewerFullScreen.sharedInstance(TOGGLE_FULL_VIEWER, viewerApp)));
-    viewerMenu.add(new JMenuItem(ToggleFullScreen.sharedInstance(TOGGLE_FULL_SCREEN, frame)));      
-    viewerMenu.addSeparator();
+    viewMenu.add(navigatorCheckBox);
+    viewMenu.add(beanShellCheckBox);
+    viewMenu.addSeparator();
+    viewMenu.add(new JMenuItem(new ToggleMenu(TOGGLE_MENU, menuBar)));
+    viewMenu.addSeparator();
+    viewMenu.add(new JMenuItem(ToggleViewerFullScreen.sharedInstance(TOGGLE_FULL_VIEWER, viewerApp)));
+    viewMenu.add(new JMenuItem(ToggleFullScreen.sharedInstance(TOGGLE_FULL_SCREEN, frame)));      
+    viewMenu.addSeparator();
     
     String[] viewerNames = viewerSwitch.getViewerNames();
-    bg = new ButtonGroup();
+    ButtonGroup bg = new ButtonGroup();
     for (int i=0; i<viewerSwitch.getNumViewers(); i++) {
       final int index = i;
       final JRadioButtonMenuItem item = new JRadioButtonMenuItem(
@@ -282,12 +296,13 @@ public class ViewerAppMenu {
       item.setSelected(index==0);
       item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1 + index, 0));
       bg.add(item);
-      viewerMenu.add(item);
+      viewMenu.add(item);
     }
     
-    viewerMenu.addSeparator();
-    viewerMenu.add(new JMenuItem(new Render(RENDER, viewerSwitch)));
+//    viewMenu.addSeparator();
+//    viewMenu.add(new JMenuItem(new Render(RENDER, viewerSwitch)));
     
+    return viewMenu;
   }
   
   

@@ -2194,7 +2194,6 @@ public class ViewerVR {
     
     //remove Edit and Appearance menu
     menu.removeMenu(ViewerAppMenu.EDIT_MENU);
-    menu.removeMenu(ViewerAppMenu.APP_MENU);
 
     //edit File menu
 		JMenu fileMenu = menu.getMenu(ViewerAppMenu.FILE_MENU);
@@ -2215,7 +2214,7 @@ public class ViewerVR {
     //edit View menu
 		JMenu viewMenu = menu.getMenu(ViewerAppMenu.VIEW_MENU);
     if (viewMenu != null) {
-      for (int i=0; i<5; i++)
+      for (int i=0; i<3; i++)
         viewMenu.remove(viewMenu.getMenuComponentCount()-1);
     }
     
