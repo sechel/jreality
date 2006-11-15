@@ -126,10 +126,8 @@ public class JOGLRendererHelper {
 		if (bgo != null && bgo instanceof java.awt.Color)
 			backgroundColor = ((java.awt.Color) bgo).getComponents(null);
 		else
-			backgroundColor = CommonAttributes.BACKGROUND_COLOR_DEFAULT
-					.getRGBComponents(null);
-		gl.glClearColor(backgroundColor[0], backgroundColor[1],
-				backgroundColor[2], 0.0f); // bg[3] ); //white
+			backgroundColor = CommonAttributes.BACKGROUND_COLOR_DEFAULT.getRGBComponents(null);
+		gl.glClearColor(backgroundColor[0], backgroundColor[1],backgroundColor[2], 0.0f); // bg[3] ); //white
 		// Here is where we clear the screen and set the color mask
 		// It's a bit complicated by the various color masking required by
 		// color-channel stereo (see JOGLRenderer#display() ).
@@ -142,59 +140,63 @@ public class JOGLRendererHelper {
 		int cm = openGLState.colorMask;
 		gl.glColorMask((cm&1) !=0, (cm&2) != 0, (cm&4) != 0, (cm&8) != 0);
 
-		boolean hasTexture = false, hasColors = false;
-		double textureAR = 1.0;
-		bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_TEXTURE2D);
-		if (bgo != null && bgo instanceof Texture2D) {
-			Texture2D tex = ((Texture2D) bgo);
-			// Texture2DLoaderJOGL tl = Texture2DLoaderJOGL.FactoryLoader;
-			// JOGLConfiguration.theLog.log(Level.INFO,"Texture:
-			// "+tex.getWidth()+" "+tex.getHeight());
-			textureAR = tex.getImage().getWidth()
-					/ ((double) tex.getImage().getHeight());
-			Texture2DLoaderJOGL.render(gl, tex);
-			gl.glEnable(GL.GL_TEXTURE_2D);
-			hasTexture = true;
-		}
-		double ar = width / ((double) height) / textureAR;
-		double xl = 0, xr = 1, yb = 0, yt = 1;
-		if (ar > 1.0) {
-			xl = 0.0;
-			xr = 1.0;
-			yb = .5 * (1 - 1 / ar);
-			yt = 1.0 - yb;
-		} else {
-			yb = 0.0;
-			yt = 1.0;
-			xl = .5 * (1 - ar);
-			xr = 1.0 - xl;
-		}
-		double[][] texcoords = { { xl, yb }, { xr, yb }, { xr, yt }, { xl, yt } };
-		bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_COLORS);
-		if (bgo != null && bgo instanceof Color[]) {
-			hasColors = true;
-		}
-		if (hasTexture || hasColors) {
-			// bgo = (Object) corners;
-			float[][] cornersf = new float[4][];
-			gl.glDisable(GL.GL_DEPTH_TEST);
-			gl.glDisable(GL.GL_LIGHTING);
-			gl.glShadeModel(GL.GL_SMOOTH);
-			gl.glBegin(GL.GL_POLYGON);
-			// gl.glScalef(.5f, .5f, 1.0f);
-			for (int q = 0; q < 4; ++q) {
-				if (hasTexture) {
-					gl.glColor3f(1f, 1f, 1f);
-					gl.glTexCoord2dv(texcoords[q], 0);
-				} else {
-					cornersf[q] = ((Color[]) bgo)[q].getComponents(null);
-					gl.glColor3fv(cornersf[q],0);
-				}
-				gl.glVertex2fv(unitsquare[q],0);
+		Object obj = topAp.getAttribute(CommonAttributes.SKY_BOX);
+		// only draw background colors or texture if the skybox isn't there
+		if (obj == Appearance.INHERITED)	{
+			boolean hasTexture = false, hasColors = false;
+			double textureAR = 1.0;
+			bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_TEXTURE2D);
+			if (bgo != null && bgo instanceof Texture2D) {
+				Texture2D tex = ((Texture2D) bgo);
+				// Texture2DLoaderJOGL tl = Texture2DLoaderJOGL.FactoryLoader;
+				// JOGLConfiguration.theLog.log(Level.INFO,"Texture:
+				// "+tex.getWidth()+" "+tex.getHeight());
+				textureAR = tex.getImage().getWidth()
+						/ ((double) tex.getImage().getHeight());
+				Texture2DLoaderJOGL.render(gl, tex);
+				gl.glEnable(GL.GL_TEXTURE_2D);
+				hasTexture = true;
 			}
-			gl.glEnd();
-			gl.glEnable(GL.GL_DEPTH_TEST);
-			gl.glDisable(GL.GL_TEXTURE_2D);
+			double ar = width / ((double) height) / textureAR;
+			double xl = 0, xr = 1, yb = 0, yt = 1;
+			if (ar > 1.0) {
+				xl = 0.0;
+				xr = 1.0;
+				yb = .5 * (1 - 1 / ar);
+				yt = 1.0 - yb;
+			} else {
+				yb = 0.0;
+				yt = 1.0;
+				xl = .5 * (1 - ar);
+				xr = 1.0 - xl;
+			}
+			double[][] texcoords = { { xl, yb }, { xr, yb }, { xr, yt }, { xl, yt } };
+			bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_COLORS);
+			if (bgo != null && bgo instanceof Color[]) {
+				hasColors = true;
+			}
+			if (hasTexture || hasColors) {
+				// bgo = (Object) corners;
+				float[][] cornersf = new float[4][];
+				gl.glDisable(GL.GL_DEPTH_TEST);
+				gl.glDisable(GL.GL_LIGHTING);
+				gl.glShadeModel(GL.GL_SMOOTH);
+				gl.glBegin(GL.GL_POLYGON);
+				// gl.glScalef(.5f, .5f, 1.0f);
+				for (int q = 0; q < 4; ++q) {
+					if (hasTexture) {
+						gl.glColor3f(1f, 1f, 1f);
+						gl.glTexCoord2dv(texcoords[q], 0);
+					} else {
+						cornersf[q] = ((Color[]) bgo)[q].getComponents(null);
+						gl.glColor3fv(cornersf[q],0);
+					}
+					gl.glVertex2fv(unitsquare[q],0);
+				}
+				gl.glEnd();
+				gl.glEnable(GL.GL_DEPTH_TEST);
+				gl.glDisable(GL.GL_TEXTURE_2D);
+			}			
 		}
 		bgo = topAp.getAttribute(CommonAttributes.FOG_ENABLED);
 		boolean doFog = CommonAttributes.FOG_ENABLED_DEFAULT;
