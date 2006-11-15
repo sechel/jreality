@@ -146,8 +146,14 @@ public class RIBHelper {
 	   int[] pix = new int[4];
          for (int y = 0, ptr = 0; y < dataHeight; y++) {
            for (int x = 0; x < dataWidth; x++, ptr += 4) {
-             if (transparencyEnabled) pix[3] = byteArray[ptr + 3];
-             else pix[3] = (byte) 255;
+             
+             if (transparencyEnabled)
+               pix[3]=byteArray[ptr + 3]; 
+             else{
+               if (byteArray[ptr + 3]==0) pix[3]=(byte) 0;                 
+               else pix[3]=(byte) 255;                              
+             }    
+             
              pix[0] = byteArray[ptr];
              pix[1] = byteArray[ptr + 1];
              pix[2] = byteArray[ptr + 2];
