@@ -139,7 +139,7 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
       
       //volume shaders
       Object obj1 = eap.getAttribute(CommonAttributes.RMAN_VOLUME_INTERIOR_SHADER, Appearance.INHERITED,SLShader.class);
-      Object obj2 = eap.getAttribute(CommonAttributes.RMAN_VOLUME_INTERIOR_SHADER, Appearance.INHERITED,SLShader.class);
+      Object obj2 = eap.getAttribute(CommonAttributes.RMAN_VOLUME_EXTERIOR_SHADER, Appearance.INHERITED,SLShader.class);
       boolean volume=(obj1 != Appearance.INHERITED)||(obj2 != Appearance.INHERITED);        
       if(volume && (boolean) eap.getAttribute(CommonAttributes.RMAN_RAY_TRACING_VOLUMES,false))
           map.put("float raytracedvolumes", new Float(1));      
