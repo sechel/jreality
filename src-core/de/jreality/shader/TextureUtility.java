@@ -120,7 +120,10 @@ public class TextureUtility {
   
   /************* Reflection Map *****************/
   
-  private static String[] refOrder = {"bk","ft","dn","up","lf","rt"};
+  /**
+   * {"bk","ft","dn","up","lf","rt"}
+   */
+  public static final String[] STANDARD_CUBEMAP_PARTS = {"bk","ft","dn","up","lf","rt"};
 
   /**
    * method to create a reflectionMap for the 6 given images (as ImageData). The images are assumed to be in the
