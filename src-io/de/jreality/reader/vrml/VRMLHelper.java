@@ -48,11 +48,14 @@ import java.util.Vector;
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.IndexedLineSetFactory;
+import de.jreality.geometry.PointSetFactory;
 import de.jreality.geometry.QuadMeshFactory;
 import de.jreality.math.FactoredMatrix;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.shader.CommonAttributes;
 
 public class VRMLHelper {
@@ -433,14 +436,14 @@ public class VRMLHelper {
 			fNormals[i][2]=state.normals[0][2];
 		}
 		ifsf.setFaceNormals(fNormals);
-		ifsf.setGenerateVertexNormals(true);
+		//ifsf.setGenerateVertexNormals(true);
 	}
 	break;
 	case 2:// per part
 	case 4:// per face
 	{	System.arraycopy(state.normals,0,fNormals,0,faceCount);
 		ifsf.setFaceNormals(fNormals);
-		ifsf.setGenerateVertexNormals(true);
+		//ifsf.setGenerateVertexNormals(true);
 	}
 	break;
 	case 3:// per part indexed
@@ -451,7 +454,7 @@ public class VRMLHelper {
 			fNormals[i][2]=state.normals[(nIndex[0][i])][2];
 		}
 		ifsf.setFaceNormals(fNormals);
-		ifsf.setGenerateVertexNormals(true);
+		//ifsf.setGenerateVertexNormals(true);
 	}
 	break;
 	case 6:// per Vertex
@@ -477,7 +480,7 @@ public class VRMLHelper {
 	case 7:// per Vertex indexed 
 	{
 		if (nIndex == null || nIndex.length != faceCount){
-			ifsf.setGenerateVertexNormals(true);
+			//ifsf.setGenerateVertexNormals(true);
 			ifsf.setGenerateFaceNormals(true); 
 			break;
 		}
@@ -519,7 +522,7 @@ public class VRMLHelper {
 	case 0:// default
 	case 1:// overall
 	break;
-	case 2: System.out.println("Per-Part"); // per part
+	case 2:// per part
 	case 4:// per face
 	{	System.arraycopy(state.diffuse,0,fColors,0,faceCount);
 		ifsf.setFaceColors(fColors);
@@ -566,6 +569,49 @@ public class VRMLHelper {
 	}
 }
 	/**
+	 * Setzt FarbListe in das gegebene PointSet
+	 * @param psf
+	 * @param colorIndex Farb-Indizierung
+	 * 	zur FarbListe in state 
+	 * @param state
+	 */
+	public static void setColors(PointSet ps,State state,int start,int numP){
+	double[][] vColors=new double[numP][3];
+	switch (state.materialBinding) {
+	case 0:// default
+	case 1:// overall
+	break;
+	case 2:// per part
+	case 4:// per face 
+	case 6:// per Vertex 
+	{
+		for (int i=0;i<numP;i--){
+			Color c=state.diffuse[i];
+			vColors[i][0]=(double)c.getRed();
+			vColors[i][1]=(double)c.getGreen();
+			vColors[i][2]=(double)c.getBlue();
+		}	
+	ps.setVertexAttributes(Attribute.COLORS,new DoubleArrayArray.Array(vColors));
+	}
+	break;
+	case 3:// per part indexed
+	case 5:// per face indexed
+	case 7:// per Vertex indexed 
+	{	
+		for (int i=start;i<start+numP;i--){
+			Color c=state.diffuse[i];
+			vColors[i][0]=(double)c.getRed();
+			vColors[i][1]=(double)c.getGreen();
+			vColors[i][2]=(double)c.getBlue();
+		}	
+	ps.setVertexAttributes(Attribute.COLORS,new DoubleArrayArray.Array(vColors));
+	}
+	break;
+		default:
+		break;
+	}
+}
+	/**
 	 * Setzt FarbListe in die gegebene Factory
 	 * @param ilsf
 	 * @param coordIndex Koordinaten-Indizierung
@@ -580,41 +626,56 @@ public class VRMLHelper {
 	int VertexCount= state.coords.length; 
 	Color[] eColors=new Color[edgeCount];
 	Color[] vColors=new Color[VertexCount];
+	for(int i=0;i<VertexCount;i++)
+		vColors[i]=Color.BLACK;
+	for(int i=0;i<edgeCount;i++)
+		eColors[i]=Color.BLACK;
 	switch (state.materialBinding) {
 	case 0:// default
 	case 1:// overall
 	break;
 	case 2:// per part
-	{	System.arraycopy(state.emissive,0,eColors,0,edgeCount);
+	{	System.arraycopy(state.diffuse,0,eColors,0,edgeCount);
 		ilsf.setEdgeColors(eColors);
 	}
 	break;
 	case 4:// per face 
-		//TODO: get nicht mache angepasstes "per part"
-	{	int current=0;
+		//TODO: get nicht, mache angepasstes "per Vertex"
+	{	int m=0;
 		for (int i=0;i<edgeCount;i++){
-			eColors[i]=state.emissive[current];
-			current+=coordIndex[i].length;
+			int edgeLength=coordIndex[i].length;
+			for (int j=0;j<edgeLength;j++){
+				if (j==edgeLength-1)
+					vColors[coordIndex[i][j]]=state.diffuse[m-1];
+				else
+					vColors[coordIndex[i][j]]=state.diffuse[m];
+				m++;
+			}
 		}
-		ilsf.setEdgeColors(eColors);
+		ilsf.setVertexColors(vColors);
 	}
 	break;
 	case 3:// per part indexed
 	{
 		for (int i=0;i<edgeCount;i++){
-		eColors[i]=state.emissive[(colorIndex[0][i])];
+		eColors[i]=state.diffuse[(colorIndex[0][i])];
 		}
 	ilsf.setEdgeColors(eColors);
 	}
 	break;
 	case 5:// per face indexed
-	{//TODO: get nicht mache angepasstes "per part indexed"
-		int current=0;
+	//TODO: get nicht mache angepasstes "per vertex indexed"
+		{
 		for (int i=0;i<edgeCount;i++){
-		eColors[i]=state.emissive[(colorIndex[0][current])];
-		current+=coordIndex[i].length;
+			int edgeLength=coordIndex[i].length;
+			for (int j=0;j<edgeLength;j++){
+				if (j==edgeLength-1)
+					vColors[coordIndex[i][j]]=state.diffuse[colorIndex[i][j-1]];
+				else
+					vColors[coordIndex[i][j]]=state.diffuse[colorIndex[i][j]];
+			}
 		}
-	ilsf.setEdgeColors(eColors);
+		ilsf.setVertexColors(vColors);
 	}
 	break;
 	case 6:// per Vertex 
@@ -623,11 +684,9 @@ public class VRMLHelper {
 	{
 		int m=0;
 		for (int i=0;i<edgeCount;i++){
-			int k=edgeCount-i-1;
-			int edgeLength=coordIndex[k].length;
+			int edgeLength=coordIndex[i].length;
 			for (int j=0;j<edgeLength;j++){
-				int l=edgeLength-1-j;
-				vColors[coordIndex[k][l]]=state.emissive[m];
+				vColors[coordIndex[i][j]]=state.diffuse[m];
 				m++;
 			}
 		}
@@ -637,11 +696,9 @@ public class VRMLHelper {
 	case 7:// per Vertex indexed 
 	{
 		for (int i=0;i<edgeCount;i++){
-			int k=edgeCount-i-1;
-			int edgeLength=coordIndex[k].length;
+			int edgeLength=coordIndex[i].length;
 			for (int j=0;j<edgeLength;j++){
-				int l=edgeLength-1-j;
-				vColors[coordIndex[k][l]]=state.emissive[colorIndex[k][l]];
+				vColors[coordIndex[i][j]]=state.diffuse[colorIndex[k][j]];
 			}
 		}
 		ilsf.setVertexColors(vColors);

@@ -1,11 +1,9 @@
 package de.jreality.reader.vrml;
+/**
+ * @author gonska
+ */
 
 import java.util.LinkedList;
-import java.util.List;
-
-import sun.rmi.runtime.NewThreadAction;
-
-import com.sun.org.apache.xerces.internal.impl.dtd.models.DFAContentModel;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 
@@ -30,6 +28,9 @@ public class DefUseData {
 	
 	
 // Setter	
+	/**
+	 * stores a definition for the USE-command
+	 */
 	public void addDef(State s, String n){
 		for (int i=0;i<names.size();i++){
 			if (n.equalsIgnoreCase((String)names.get(i))){
@@ -42,7 +43,7 @@ public class DefUseData {
 	}
 // Getter
 /**
- *returns a State that is to use in a Def Knot
+ *returns a State that is to use in a Def Node
  * 
  */
 	public static State defState(State givenState){
@@ -54,8 +55,8 @@ public class DefUseData {
 		return s;
 	} 
 	/**
-	 * inserts a by name defined Vrml-Knot
-	 * at the currentKnot in the given state    
+	 * inserts a, by name defined, Vrml-Node
+	 * at the currentKnot of the given state    
 	 * @param current state
 	 * @param name  	the key
 	 */

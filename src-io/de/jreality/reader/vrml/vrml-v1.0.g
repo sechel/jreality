@@ -325,7 +325,7 @@ asciiTextNode [State state, Appearance app] returns[PointSet label=null]
   double[] width =new double[]{0};
 }	
 	:	"AsciiText" OPEN_BRACE
-		(	"String" 		{if (VRMLHelper.verbose) System.err.print("String ");}
+		(	"string" 		{if (VRMLHelper.verbose) System.err.print("String ");}
 				text = mfstringValue
 		  | "spacing" 		{if (VRMLHelper.verbose) System.err.print("spacing ");}
 		  		spacing = sffloatValue
@@ -499,13 +499,17 @@ indexedFaceSetNode [State state, Appearance app] returns [IndexedFaceSet ifs=nul
 	if (state.normalBinding >=6 | state.materialBinding>=6 
 		| state.textureFile.equals("")	|state.textureData.length!=0 ){
 		// have to separate the vertices!
-			// make Normals now!
 		double[][] vnormals=null;
-		ifsf.setGenerateVertexNormals(true);
-		ifsf.update();
-		vnormals=ifsf.getIndexedFaceSet()
-			.getVertexAttributes(Attribute.NORMALS)
-			.toDoubleArrayArray(null);
+		
+			// make Normals now!		
+		//TODO:
+		//	 do we support this?: ifsf.setGenerateVertexNormals(true);
+		// see also: VRMLHelper.setNormals
+		//ifsf.update();
+		//vnormals=ifsf.getIndexedFaceSet()
+		//	.getVertexAttributes(Attribute.NORMALS)
+		//	.toDoubleArrayArray(null);
+		
 			//	separate vertices
 		int[] reffTab=VRMLHelper.separateVertices(coordIndex2,state);
 			// make new Factory
@@ -515,15 +519,15 @@ indexedFaceSetNode [State state, Appearance app] returns [IndexedFaceSet ifs=nul
 		ifsf.setVertexAttribute(Attribute.COORDINATES,new DoubleArrayArray.Array(state.coords) );//new
 		ifsf.setFaceIndices(coordIndex2);//new
 			// set modified old normals
-		double[][] vnormalsNew= new double[reffTab.length][];
-		for(int i=0;i<reffTab.length;i++){
-			vnormalsNew[i]=new double[]{
-				vnormals[reffTab[i]][0],
-				vnormals[reffTab[i]][1],
-				vnormals[reffTab[i]][2]};
-		}
+		//double[][] vnormalsNew= new double[reffTab.length][];
+		//for(int i=0;i<reffTab.length;i++){
+		//	vnormalsNew[i]=new double[]{
+		//		vnormals[reffTab[i]][0],
+		//		vnormals[reffTab[i]][1],
+		//		vnormals[reffTab[i]][2]};
+		//}
+		// ifsf.setVertexAttribute(Attribute.NORMALS,new DoubleArrayArray.Array(vnormalsNew) );//new
 		
-		ifsf.setVertexAttribute(Attribute.NORMALS,new DoubleArrayArray.Array(vnormalsNew) );//new
 		// now all indices of texture, color, normals, ect are unique because 
 		// they are based on face indices and coords
 	}
@@ -611,12 +615,9 @@ pointSetNode [State state, Appearance app] returns[PointSet ps=null]
 	ps = new PointSet();
 	ps.setNumPoints(num);
 	ps.setVertexAttributes(Attribute.COORDINATES,new DoubleArrayArray.Array(coords2));
-	// TODO2: handle Bindings, Normals, Colors
+	// TODO2: handle Normals
+	VRMLHelper.setColors(ps,state,start,num);
 	ps.setName("Point Set");
-	// Normals:	if (normalIndex2.length>0){}else {}
-	// Colors:	if (materialIndex2.length>0){}else {}
-	// Texture:	if (textureCoordIndex2.length>0){}else {}
-
 	state.extraGeoTrans = new Transformation();
 	state.vertexDraw=0;
 	state.edgeDraw=0;

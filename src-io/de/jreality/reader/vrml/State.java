@@ -1,4 +1,7 @@
 package de.jreality.reader.vrml;
+/**
+ * @author gonska
+ */
 
 import java.awt.Color;
 
