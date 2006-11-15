@@ -644,7 +644,7 @@ public class RIBVisitor extends SceneGraphVisitor {
         SLShader.class);
     if (obj != Appearance.INHERITED) {
       SLShader slShader = (SLShader) obj;
-      if(!raytracedVolumesEnabled) ri.verbatim("Attribute \"visibility\"  \"shade\" \"strategy\" \"[\"vpvolumes\"]\""); 
+      if(!raytracedVolumesEnabled) System.err.println("CommonAttributes.RMAN_RAY_TRACING_VOLUMES must be set true for Exterior volume shaders"); //ri.verbatim("Attribute \"shade\" \"strategy\" [\"vpvolumes\"]");  
       ri.exterior(slShader.getName(), slShader.getParameters());
     }
     obj = eap.getAttribute(CommonAttributes.RMAN_VOLUME_INTERIOR_SHADER, Appearance.INHERITED,
