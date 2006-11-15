@@ -88,6 +88,13 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
         map.put("float Ka",new Float(Ka));
         map.put("color specularcolor",specularcolor);
         map.put("float lighting", new Float( lighting ? 1 : 0));
+        
+        if((boolean) eap.getAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false))
+          map.put("float transparencyenabled",new Float(1));
+        else
+          map.put("float transparencyenabled",new Float(0));
+        
+        
         if (signature != Pn.EUCLIDEAN) {
         	map.put("signature", signature);
         	map.put("objectToCamera", RIBHelper.fTranspose(ribv.getCurrentObjectToCamera()));
@@ -141,7 +148,7 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
       Object obj1 = eap.getAttribute(CommonAttributes.RMAN_VOLUME_INTERIOR_SHADER, Appearance.INHERITED,SLShader.class);
       Object obj2 = eap.getAttribute(CommonAttributes.RMAN_VOLUME_EXTERIOR_SHADER, Appearance.INHERITED,SLShader.class);     
       if((obj1 != Appearance.INHERITED && (boolean) eap.getAttribute(CommonAttributes.RMAN_RAY_TRACING_VOLUMES,false))||obj2 != Appearance.INHERITED)
-          map.put("float raytracedvolumes", new Float(1));      
+          map.put("float raytracedvolumes", new Float(1));    
     }
 
 	public String getType() {

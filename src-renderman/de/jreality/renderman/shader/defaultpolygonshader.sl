@@ -25,6 +25,7 @@ defaultpolygonshader ( float Ka = 0,
     float lighting = 1;
     float raytracedreflections = 0;
     float raytracedvolumes = 0;
+    float transparencyenabled = 1;
 	)
 {
   normal Nf;
@@ -57,7 +58,14 @@ defaultpolygonshader ( float Ka = 0,
   else Ct = Cs;
 
   // modulate the opacity by the alpha channel of the texture
-  Oi = Os*tr;
+  if(transparencyenabled==1)
+  	Oi = Os*tr;
+  else{
+    if(tr==0)
+       Oi=0;
+    else
+       Oi=Os;  
+  }
 
   if (lighting != 0)  {
         Nf = faceforward (normalize(N),I);
