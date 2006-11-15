@@ -432,22 +432,15 @@ public class RIBVisitor extends SceneGraphVisitor {
     
     if(raytracedReflectionsEnabled||raytracedVolumesEnabled){
       if(rendererType==RIBViewer.TYPE_3DELIGHT){
+        ri.verbatim("Attribute \"visibility\"  \"integer trace\" [1]");
         ri.verbatim("Attribute \"visibility\"  \"string diffuse\" \"shader\"");
         ri.verbatim("Attribute \"visibility\"  \"string specular\" \"shader\"");
+        ri.verbatim("Option \"trace\"  \"integer maxdepth\" [2]");
       }else {      
         ri.verbatim("Attribute \"visibility\"  \"int diffuse\" [1]");
         ri.verbatim("Attribute \"visibility\"  \"int specular\" [1]");
       }
     }
-    
-    
-    
-		// make sure this is the last thing done, to maximize what the user can override.
-		if (globalIncludeFile != "")
-			ri.readArchive((String) globalIncludeFile);
-
-//    if(fogEnabled)
-//      handleFog();
     
     Object obj = eAppearance.getAttribute(CommonAttributes.RMAN_VOLUME_ATMOSPHERE_SHADER, Appearance.INHERITED,
         SLShader.class);
@@ -455,7 +448,14 @@ public class RIBVisitor extends SceneGraphVisitor {
       SLShader slShader = (SLShader) obj;      
       ri.atmosphere(slShader.getName(), slShader.getParameters());
     }
+//  if(fogEnabled)
+//  handleFog();    
+    
+    // make sure this is the last thing done, to maximize what the user can override.
+    if (globalIncludeFile != "")
+      ri.readArchive((String) globalIncludeFile);
   }
+  
 	/**
 	 * Handle background specifications contained in the top-level appearance:
 	 * skybox, flat background color, or gradient background colors TODO: fog
