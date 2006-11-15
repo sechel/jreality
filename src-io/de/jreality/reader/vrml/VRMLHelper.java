@@ -585,11 +585,11 @@ public class VRMLHelper {
 	case 4:// per face 
 	case 6:// per Vertex 
 	{
-		for (int i=0;i<numP;i--){
+		for (int i=0;i<numP;i++){
 			Color c=state.diffuse[i];
-			vColors[i][0]=(double)c.getRed();
-			vColors[i][1]=(double)c.getGreen();
-			vColors[i][2]=(double)c.getBlue();
+			vColors[i][0]=((double)c.getRed())/256;
+			vColors[i][1]=((double)c.getGreen())/256;
+			vColors[i][2]=((double)c.getBlue())/256;
 		}	
 	ps.setVertexAttributes(Attribute.COLORS,new DoubleArrayArray.Array(vColors));
 	}
@@ -598,11 +598,11 @@ public class VRMLHelper {
 	case 5:// per face indexed
 	case 7:// per Vertex indexed 
 	{	
-		for (int i=start;i<start+numP;i--){
+		for (int i=start;i<start+numP;i++){
 			Color c=state.diffuse[i];
-			vColors[i][0]=(double)c.getRed();
-			vColors[i][1]=(double)c.getGreen();
-			vColors[i][2]=(double)c.getBlue();
+			vColors[i-start][0]=((double)c.getRed())/256;
+			vColors[i-start][1]=((double)c.getGreen())/256;
+			vColors[i-start][2]=((double)c.getBlue())/256;
 		}	
 	ps.setVertexAttributes(Attribute.COLORS,new DoubleArrayArray.Array(vColors));
 	}
