@@ -698,7 +698,7 @@ public class VRMLHelper {
 		for (int i=0;i<edgeCount;i++){
 			int edgeLength=coordIndex[i].length;
 			for (int j=0;j<edgeLength;j++){
-				vColors[coordIndex[i][j]]=state.diffuse[colorIndex[k][j]];
+				vColors[coordIndex[i][j]]=state.diffuse[colorIndex[i][j]];
 			}
 		}
 		ilsf.setVertexColors(vColors);
