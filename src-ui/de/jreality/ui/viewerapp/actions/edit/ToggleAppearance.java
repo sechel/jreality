@@ -38,7 +38,7 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.app;
+package de.jreality.ui.viewerapp.actions.edit;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
@@ -52,12 +52,17 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 
 
-public class ToggleAppearance extends AbstractAction {
-
-  private static final long serialVersionUID = 1L;
+/**
+ * Toggles appearance atributes of a selected SceneGraphComponent or Appearance 
+ * (if something different is selected, this action is disabled).
+ * 
+ * @author msommer
+ */
+public class ToggleAppearance extends AbstractSelectionListenerAction {
 
   private String attribute;
   private boolean defaultValue;
@@ -69,27 +74,32 @@ public class ToggleAppearance extends AbstractAction {
     
     if (attribute.equals(CommonAttributes.VERTEX_DRAW)) {
       defaultValue = CommonAttributes.VERTEX_DRAW_DEFAULT;
-      putValue(SHORT_DESCRIPTION, "Toggle vertex drawing");
-      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK));
+      setShortDescription("Toggle vertex drawing");
+      setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK));
     }
     else if (attribute.equals(CommonAttributes.EDGE_DRAW)) {
       defaultValue = CommonAttributes.EDGE_DRAW_DEFAULT;
-      putValue(SHORT_DESCRIPTION, "Toggle edge drawing");
-      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
+      setShortDescription("Toggle edge drawing");
+      setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
     }
     else if (attribute.equals(CommonAttributes.FACE_DRAW)) {
       defaultValue = CommonAttributes.FACE_DRAW_DEFAULT;
-      putValue(SHORT_DESCRIPTION, "Toggle face drawing");
-      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK));
+      setShortDescription("Toggle face drawing");
+      setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK));
     }
   }
 
+  public ToggleAppearance(String name, String attribute, ViewerApp v) {
+    this(name, attribute, v.getSelectionManager());
+  }
+  
   
   /**
    * Toggles the specified appearance attribute of the responsible appearance 
    * - the first one existing along the path from the selected component to the scene root. 
    * If there is no appearance along the path, nothing is toggled.
    */
+  @Override
   public void actionPerformed(ActionEvent e) {
     
     Object value = null;
@@ -113,10 +123,8 @@ public class ToggleAppearance extends AbstractAction {
 
   
   @Override
-  protected boolean isEnabled(SelectionEvent e) {
-    if (e.getType() == SelectionEvent.DEFAULT_SELECTION)
-      return (selection.getLastElement() instanceof SceneGraphComponent ||
-          selection.getLastElement() instanceof Appearance);
-    else return false;
+  public boolean isEnabled(SelectionEvent e) {
+    return (e.componentSelected() || e.appearanceSelected());
   }
+  
 }

@@ -41,9 +41,6 @@
 package de.jreality.ui.viewerapp.actions;
 
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-
-import javax.swing.KeyStroke;
 
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.ui.viewerapp.SelectionEvent;
@@ -52,44 +49,69 @@ import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 
-public abstract class AbstractAction extends javax.swing.AbstractAction implements SelectionListener {
+/**
+ * Abstract class for actions used in jReality applications 
+ * (usually used in the {@link de.jreality.ui.viewerapp.ViewerAppMenu}) 
+ * which do something if the selection given by the underlying selection manager changes 
+ * (e.g. which only act on specific scene tree or scene graph nodes
+ * and have to disable or enable themselves based on the current selection).
+ * 
+ * @author msommer
+ */
+public abstract class AbstractSelectionListenerAction extends AbstractJrAction implements SelectionListener {
 
-  protected Component frame;
   protected SceneGraphPath selection;
-  protected SelectionManager selectionManager;
   
   
-  protected AbstractAction(String name, final SelectionManager sm, Component frame) {
-    super(name);
+  /**
+   * Constructor for actions which act on a selection,
+   * i.e. which have an underlying selection manager, 
+   * and may need a parent component e.g. for displaying dialogs.
+   * @param name the name of the action
+   * @param sm the underlying selection manager
+   * @param frame the parent component (e.g. for dialogs)
+   * @throws IllegalArgumentException if sm is <code>null</code>
+   */
+  public AbstractSelectionListenerAction(String name, final SelectionManager sm, Component frame) {
+    super(name, sm, frame);
     
-    if (sm == null) 
-      throw new IllegalArgumentException("SelectionManager is null!");
-    
-    this.frame = frame;
-    selectionManager = sm;
-    
-    //set initial selection, enable/disable action
-    selectionChanged(new SelectionEvent(this, sm.getSelection(), sm.getTool(), sm.getEntity()));
+    //set initial selection
+    selectionChanged(new SelectionEvent(this, 
+        sm.getSelection(), 
+        sm.getTool(), 
+        sm.getEntity(), 
+        sm.getCurrentType()));
     
     selectionManager.addSelectionListener(this);
   }
   
   
-  protected AbstractAction(String name, SelectionManager sm) {
+  /**
+   * Constructor for actions which act on a selection,
+   * i.e. which have an underlying selection manager.
+   * @param name the name of the action
+   * @param sm the underlying selection manager
+   * @throws IllegalArgumentException if sm is <code>null</code>
+   */
+  public AbstractSelectionListenerAction(String name, SelectionManager sm) {
     this(name, sm, null);
   }
   
   
-  protected AbstractAction(String name, ViewerApp viewerApp) {
+  /**
+   * Uses the ViewerApp's selection manager and frame.
+   * @see AbstractSelectionListenerAction#AbstractSelectionListenerAction(String, SelectionManager, Component)
+   */
+  public AbstractSelectionListenerAction(String name, ViewerApp viewerApp) {
     this(name, viewerApp.getSelectionManager(), viewerApp.getFrame());
   }
   
   
-  protected AbstractAction(String name) {
-    super(name);
-  }
-  
-  
+  /**
+   * Override this method to specify what to do when the selection changes.
+   * @param e the selection event
+   * @see AbstractSelectionListenerAction#isEnabled(SelectionEvent)
+   */
   public void selectionChanged(SelectionEvent e) {
     selection = e.getSelection();
     
@@ -97,21 +119,16 @@ public abstract class AbstractAction extends javax.swing.AbstractAction implemen
   }
   
   
-  protected boolean isEnabled(SelectionEvent e) {
+  /**
+   * Override this method to specify when to disable or enable the action 
+   * based on the current selection. <br>
+   * This method is called in {@link AbstractSelectionListenerAction#selectionChanged(SelectionEvent)}.
+   * @param e the selection event
+   * @return true iff the action is enabled based on the current selection
+   * @see AbstractSelectionListenerAction#selectionChanged(SelectionEvent)
+   */
+  public boolean isEnabled(SelectionEvent e) {
     return true;
-  }
-  
-  
-  public abstract void actionPerformed(ActionEvent e);
-  
-  
-  protected void setAcceleratorKey(KeyStroke key) {
-    putValue(ACCELERATOR_KEY, key);
-  }
-  
-  
-  protected void setName(String name) {
-    putValue(NAME, name);
   }
   
 }

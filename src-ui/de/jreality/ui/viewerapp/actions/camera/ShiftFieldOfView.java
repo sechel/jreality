@@ -48,28 +48,29 @@ import javax.swing.KeyStroke;
 
 import de.jreality.scene.Camera;
 import de.jreality.scene.Viewer;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
 import de.jreality.util.CameraUtility;
 
 
-public class ShiftFieldOfView extends AbstractAction {
-	
-	private Viewer viewer;
-	private double step = 0.05;
+/**
+ * Shifts the camera's field of view.
+ * 
+ * @author msommer
+ */
+public class ShiftFieldOfView extends AbstractCameraAction {
 	
 
 	public ShiftFieldOfView(String name, Viewer v, boolean decrease) {
-		super(name);
-		viewer = v;
-		
+		super(name, v);
+		setStep(1.0);
+    
 		if (decrease) {
-			step = -step;
-			putValue(SHORT_DESCRIPTION, "Decrease the field of view of the camera");
-			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F1, InputEvent.SHIFT_MASK));
+      setStep(-getStep());
+      setShortDescription("Decrease the field of view of the camera");
+      setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F1, InputEvent.SHIFT_MASK));
 		}
 		else {
-			putValue(SHORT_DESCRIPTION, "Increase the field of view of the camera");
-			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F2, InputEvent.SHIFT_MASK));
+      setShortDescription("Increase the field of view of the camera");
+      setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F2, InputEvent.SHIFT_MASK));
 		}
 	}
 	
@@ -77,13 +78,8 @@ public class ShiftFieldOfView extends AbstractAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
     Camera camera = CameraUtility.getCamera(viewer);
-    camera.setFieldOfView(camera.getFieldOfView() + step);
+    camera.setFieldOfView(camera.getFieldOfView() + getStep());
 		viewer.render();
-	}
-	
-	
-	public void setStep(double step) {
-		this.step = step;
 	}
 	
 }

@@ -48,21 +48,22 @@ import javax.swing.KeyStroke;
 
 import de.jreality.scene.Camera;
 import de.jreality.scene.Viewer;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
 import de.jreality.util.CameraUtility;
 
 
-public class ToggleStereo extends AbstractAction {
-	
-	private Viewer viewer;
+/**
+ * Toggles the camera's stereo property.
+ * 
+ * @author msommer
+ */
+public class ToggleStereo extends AbstractCameraAction {
 	
 
 	public ToggleStereo(String name, Viewer v) {
-		super(name);
-		viewer = v;
+		super(name, v);
 		
-		putValue(SHORT_DESCRIPTION, "Toggle stereo of the camera");
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F8, InputEvent.SHIFT_MASK));
+    setShortDescription("Toggle stereo of the camera");
+    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F8, InputEvent.SHIFT_MASK));
 	}
 	
 	

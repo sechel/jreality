@@ -51,11 +51,18 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.tool.Tool;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 import de.jreality.util.SceneGraphUtility;
 
 
-public class Remove extends AbstractAction {
+/**
+ * Removes selected scene tree or scene graph nodes if they are not attribute entities or the root 
+ * (otherwise this action is disabled).
+ * 
+ * @author msommer
+ */
+public class Remove extends AbstractSelectionListenerAction {
 
   private Tool tool = null;
   
@@ -63,8 +70,12 @@ public class Remove extends AbstractAction {
   public Remove(String name, SelectionManager sm) {
     super(name, sm);
 
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
-    putValue(SHORT_DESCRIPTION, "Delete");
+    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
+    setShortDescription("Delete");
+  }
+  
+  public Remove(String name, ViewerApp v) {
+    this(name, v.getSelectionManager());
   }
   
   
@@ -94,9 +105,10 @@ public class Remove extends AbstractAction {
   
   
   @Override
-  protected boolean isEnabled(SelectionEvent e) {
-    return (e.getType() != SelectionEvent.ENTITY_SELECTION &&
-        selection.getLength() != 1 &&  //don't allow to remove the sceneRoot
-        !selectionManager.isNothingSelected());
+  public boolean isEnabled(SelectionEvent e) {
+    return (!e.entitySelected() &&
+        !e.rootSelected() &&  //don't allow to remove the sceneRoot
+        !e.nothingSelected());
   }
+  
 }

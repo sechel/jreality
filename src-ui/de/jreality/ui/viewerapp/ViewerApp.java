@@ -45,7 +45,6 @@ import java.awt.Dimension;
 import java.beans.Beans;
 import java.io.IOException;
 import java.net.URL;
-import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.LinkedList;
@@ -58,10 +57,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 
-import bsh.EvalError;
-
 import jterm.BshEvaluator;
-
+import bsh.EvalError;
 import de.jreality.io.JrScene;
 import de.jreality.io.JrSceneFactory;
 import de.jreality.scene.Appearance;
@@ -75,7 +72,7 @@ import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
-import de.jreality.ui.viewerapp.actions.app.SwitchBackgroundColor;
+import de.jreality.ui.viewerapp.actions.edit.SwitchBackgroundColor;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;

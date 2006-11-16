@@ -48,28 +48,29 @@ import javax.swing.KeyStroke;
 
 import de.jreality.scene.Camera;
 import de.jreality.scene.Viewer;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
 import de.jreality.util.CameraUtility;
 
 
-public class ShiftFocus extends AbstractAction {
-	
-	private Viewer viewer;
-	private double step = 0.05;
+/**
+ * Shifts the camera's focus.
+ * 
+ * @author msommer
+ */
+public class ShiftFocus extends AbstractCameraAction {
 	
 
 	public ShiftFocus(String name, Viewer v, boolean decrease) {
-		super(name);
-		viewer = v;
-		
-		if (decrease) {
-			step = -step;
-			putValue(SHORT_DESCRIPTION, "Decrease the focus of the camera");
-			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F3, InputEvent.SHIFT_MASK));
+		super(name, v);
+		setStep(1.0);
+    
+    if (decrease) {
+      setStep(-getStep());
+      setShortDescription("Decrease the focus of the camera");
+      setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F3, InputEvent.SHIFT_MASK));
 		}
 		else {
-			putValue(SHORT_DESCRIPTION, "Increase the focus of the camera");
-			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.SHIFT_MASK));
+      setShortDescription("Increase the focus of the camera");
+      setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.SHIFT_MASK));
 		}
 	}
 	
@@ -77,13 +78,8 @@ public class ShiftFocus extends AbstractAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
     Camera camera = CameraUtility.getCamera(viewer);
-    camera.setFocus(camera.getFocus() + step);
+    camera.setFocus(camera.getFocus() + getStep());
 		viewer.render();
 	}
-	
-	
-	public void setStep(double step) {
-		this.step = step;
-	}
-	
+  
 }

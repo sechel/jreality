@@ -54,11 +54,17 @@ import javax.swing.KeyStroke;
 import de.jreality.io.JrScene;
 import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jreality.writer.WriterJRS;
 
 
-public class SaveScene extends AbstractAction {
+/**
+ * Saves the current scene.
+ * 
+ * @author msommer
+ */
+public class SaveScene extends AbstractJrAction {
 
   private ToolSystemViewer viewer;
   
@@ -66,15 +72,21 @@ public class SaveScene extends AbstractAction {
   public SaveScene(String name, ToolSystemViewer viewer, Frame frame) {
     super(name);
     this.frame = frame;
-    putValue(SHORT_DESCRIPTION, "Save scene as a file");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
     
     if (viewer == null) 
       throw new IllegalArgumentException("Viewer is null!");
     
     this.viewer = viewer;
+    
+    setShortDescription("Save scene as a file");
+    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
   }
 
+  public SaveScene(String name, ViewerApp v) {
+    this(name, v.getViewer(), v.getFrame());
+  }
+  
+  
   @Override
   public void actionPerformed(ActionEvent e) {
     File file = FileLoaderDialog.selectTargetFile(frame);

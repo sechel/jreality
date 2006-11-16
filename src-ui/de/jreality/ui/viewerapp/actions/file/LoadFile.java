@@ -40,7 +40,6 @@
 
 package de.jreality.ui.viewerapp.actions.file;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -53,30 +52,37 @@ import javax.swing.KeyStroke;
 import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
-import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.PickUtility;
 
 
-public class LoadFile extends AbstractAction {
+/**
+ * Loads one or several files into the scene 
+ * (adds the files as children to the selection managers default selection, 
+ * which is usually the scene node).
+ * 
+ * @author msommer
+ */
+public class LoadFile extends AbstractJrAction {
 
 
   private ViewerApp viewerApp;
   private SceneGraphComponent sceneNode;
 
 
-  public LoadFile(String name, SelectionManager sm, ViewerApp viewerApp, Component frame) {
-    super(name, sm, frame);
-    this.viewerApp=viewerApp;
-    sceneNode = sm.getDefaultSelection().getLastComponent();
+  public LoadFile(String name, ViewerApp v) {
+    super(name, v.getSelectionManager(), v.getFrame());
+    this.viewerApp = v;
+    sceneNode = v.getSelectionManager().getDefaultSelection().getLastComponent();
     
-    putValue(SHORT_DESCRIPTION, "Load one or more files");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+    setShortDescription("Load one or more files");
+    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
 
   
+  @Override
   public void actionPerformed(ActionEvent e) {
   
     File[] files = FileLoaderDialog.loadFiles(frame);

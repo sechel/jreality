@@ -48,23 +48,29 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.KeyStroke;
 
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
-public class ToggleMenu extends AbstractAction {
+/**
+ * Toggles the visiblity of a given menu bar. 
+ * 
+ * @author msommer
+ */
+public class ToggleMenu extends AbstractJrAction {
 
   private JMenuBar menuBar;
   
   
   public ToggleMenu(String name, JMenuBar menuBar) {
     super(name);
-    putValue(SHORT_DESCRIPTION, "Show or hide the menu bar");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+    setShortDescription("Show or hide the menu bar");
+    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
     
     this.menuBar = menuBar;
   }
   
     
+  @Override
   public void actionPerformed(ActionEvent e) {
     JMenu menu;
     for (int i = 0; i < menuBar.getComponentCount(); i++) {

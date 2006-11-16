@@ -43,19 +43,29 @@ package de.jreality.ui.viewerapp.actions.edit;
 import java.awt.event.ActionEvent;
 
 import de.jreality.scene.Geometry;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 import de.jreality.util.PickUtility;
 
 
-public class TogglePickable extends AbstractAction {
+/**
+ * Toggles the pickable property of a selected SceneGraphComponent 
+ * (if no SceneGraphComponent is selected, this action is disabled).
+ * 
+ * @author msommer
+ */
+public class TogglePickable extends AbstractSelectionListenerAction {
   
   public TogglePickable(String name, SelectionManager sm) {
     super(name, sm);
-    putValue(SHORT_DESCRIPTION, "Toggle pickability of selection");
+    setShortDescription("Toggle pickability of selection");
+  }
+  
+  public TogglePickable(String name, ViewerApp v) {
+    this(name, v.getSelectionManager());
   }
   
   @Override
@@ -69,9 +79,8 @@ public class TogglePickable extends AbstractAction {
   }
 
   @Override
-  protected boolean isEnabled(SelectionEvent e) {
-    return (e.getType() == SelectionEvent.DEFAULT_SELECTION &&
-        selection.getLastElement() instanceof SceneGraphComponent &&
-        !selectionManager.isNothingSelected());
+  public boolean isEnabled(SelectionEvent e) {
+    return e.componentSelected();
   }
+  
 }

@@ -52,10 +52,16 @@ import javax.swing.JMenuBar;
 import javax.swing.KeyStroke;
 
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
-public class ToggleViewerFullScreen extends AbstractAction {
+/**
+ * Toggles full screen of the ViewerApp's viewer component (where the scene is displayed).<br>
+ * There is only one instance of this action.
+ * 
+ * @author msommer
+ */
+public class ToggleViewerFullScreen extends AbstractJrAction {
 
   private boolean isFullscreen = false;
   private boolean showMenu = false;
@@ -75,8 +81,8 @@ public class ToggleViewerFullScreen extends AbstractAction {
     this.fsf = new JFrame("jReality Viewer");
     fsf.setUndecorated(true);
    
-    putValue(SHORT_DESCRIPTION, "Toggle viewer full screen");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+    setShortDescription("Toggle viewer full screen");
+    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
 
   
@@ -104,6 +110,7 @@ public class ToggleViewerFullScreen extends AbstractAction {
   }
   
   
+  @Override
   public void actionPerformed(ActionEvent e) {
 
     menuBar = frame.getJMenuBar();

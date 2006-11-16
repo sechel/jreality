@@ -47,10 +47,16 @@ import java.util.HashMap;
 
 import javax.swing.KeyStroke;
 
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
-public class ToggleFullScreen extends AbstractAction {
+/**
+ * Toggles full screen of the ViewerApp.<br>
+ * There is only one instance of this action.
+ * 
+ * @author msommer
+ */
+public class ToggleFullScreen extends AbstractJrAction {
 
   private boolean isFullscreen = false;
   private Frame frame;
@@ -62,8 +68,8 @@ public class ToggleFullScreen extends AbstractAction {
     super(name);
     this.frame = frame;
     
-    putValue(SHORT_DESCRIPTION, "Toggle full screen");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0));
+    setShortDescription("Toggle full screen");
+    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0));
   }
 
   
@@ -91,6 +97,7 @@ public class ToggleFullScreen extends AbstractAction {
   }
   
   
+  @Override
   public void actionPerformed(ActionEvent e) {
    
     if (isFullscreen) {

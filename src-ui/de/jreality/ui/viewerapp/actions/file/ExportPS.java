@@ -54,10 +54,16 @@ import javax.swing.KeyStroke;
 import de.jreality.scene.Viewer;
 import de.jreality.softviewer.PSRenderer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
-public class ExportPS extends AbstractAction {
+/**
+ * Exports the scene displayed in a viewer as a post script file.
+ * 
+ * @author hoffmann
+ */
+public class ExportPS extends AbstractJrAction {
   
   private Viewer viewer;
   
@@ -65,16 +71,19 @@ public class ExportPS extends AbstractAction {
   public ExportPS(String name, Viewer viewer, Frame frame) {
     super(name);
     this.frame = frame;
-    putValue(SHORT_DESCRIPTION,
-    "Export the current scene as PostScript file");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P,
-        InputEvent.CTRL_MASK));
+    setShortDescription("Export the current scene as PostScript file");
+    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK));
     
     if (viewer == null)
       throw new IllegalArgumentException("Viewer is null!");
     
     this.viewer = viewer;
   }
+  
+  public ExportPS(String name, ViewerApp v) {
+    this(name, v.getViewerSwitch(), v.getFrame());
+  }
+  
   
   @Override
   public void actionPerformed(ActionEvent e) {

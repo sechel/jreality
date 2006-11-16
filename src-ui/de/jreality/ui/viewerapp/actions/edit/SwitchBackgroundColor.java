@@ -38,7 +38,7 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.app;
+package de.jreality.ui.viewerapp.actions.edit;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -46,10 +46,16 @@ import java.awt.event.ActionEvent;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
-public class SwitchBackgroundColor extends AbstractAction {
+/**
+ * Switches the background color of a scene graph's root, 
+ * which is used as the background color of the displaying viewer.  
+ * 
+ * @author msommer
+ */
+public class SwitchBackgroundColor extends AbstractJrAction {
 
   public static Color[] defaultColor = new Color[]{
     new Color(225, 225, 225), new Color(225, 225, 225),
@@ -60,7 +66,7 @@ public class SwitchBackgroundColor extends AbstractAction {
   
   
   /**
-   * Sets the ViewerApp's background color.
+   * Sets the scene root's background color.
    * @param name name of the action
    * @param colors array of colors with length = 1|4
    * @param sceneRoot the root of the scene graph
@@ -69,7 +75,7 @@ public class SwitchBackgroundColor extends AbstractAction {
     super(name);
     this.colors = colors;
     this.sceneRoot = sceneRoot;
-    putValue(SHORT_DESCRIPTION, "Set the viewer's background color");
+    setShortDescription("Set the viewer's background color");
   }
   
   public SwitchBackgroundColor(String name, Color[] colors, ViewerApp viewerApp) {
@@ -81,6 +87,7 @@ public class SwitchBackgroundColor extends AbstractAction {
   }
   
   
+  @Override
   public void actionPerformed(ActionEvent e) {
     if (sceneRoot.getAppearance() != null) {
       if (colors.length == 1)

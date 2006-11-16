@@ -48,28 +48,29 @@ import javax.swing.KeyStroke;
 
 import de.jreality.scene.Camera;
 import de.jreality.scene.Viewer;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
 import de.jreality.util.CameraUtility;
 
 
-public class ShiftEyeSeparation extends AbstractAction {
-	
-	private Viewer viewer;
-	private double step = 0.005;
-	
+/**
+ * Shifts the camera's eye separation.
+ * 
+ * @author msommer
+ */
+public class ShiftEyeSeparation extends AbstractCameraAction {
 
+  
 	public ShiftEyeSeparation(String name, Viewer v, boolean decrease) {
-		super(name);
-		viewer = v;
-		
+		super(name, v);
+		setStep(0.1);
+    
 		if (decrease) {
-			step = -step;
-			putValue(SHORT_DESCRIPTION, "Decrease the eye separation of the camera");
-			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F5, InputEvent.SHIFT_MASK));
+			setStep(-getStep());
+			setShortDescription("Decrease the eye separation of the camera");
+			setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F5, InputEvent.SHIFT_MASK));
 		}
 		else {
-			putValue(SHORT_DESCRIPTION, "Increase the eye separation of the camera");
-			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F6, InputEvent.SHIFT_MASK));
+			setShortDescription("Increase the eye separation of the camera");
+			setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F6, InputEvent.SHIFT_MASK));
 		}
 	}
 	
@@ -77,13 +78,8 @@ public class ShiftEyeSeparation extends AbstractAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 	  Camera camera = CameraUtility.getCamera(viewer);
-    camera.setEyeSeparation(camera.getEyeSeparation() + step);
+    camera.setEyeSeparation(camera.getEyeSeparation() + getStep());
 		viewer.render();
-	}
-	
-	
-	public void setStep(double step) {
-		this.step = step;
 	}
 	
 }

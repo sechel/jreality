@@ -57,26 +57,36 @@ import javax.imageio.ImageIO;
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.FileFilter;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
+import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.ViewerSwitch;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jtem.beans.DimensionDialog;
 
 
-public class ExportImage extends AbstractAction {
+/**
+ * Exports the scene displayed in a viewer as an image.
+ * 
+ * @author pinkall
+ */
+public class ExportImage extends AbstractJrAction {
   
-  private static final long serialVersionUID = 5793099900216754633L;
   private Viewer viewer;
   
   
   public ExportImage(String name, Viewer viewer, Frame frame) {
     super(name);
     this.frame = frame;
-    putValue(SHORT_DESCRIPTION, "Export image file");
+    setShortDescription("Export image file");
     
     if (viewer == null) 
       throw new IllegalArgumentException("Viewer is null!");
     this.viewer = viewer;
   }
+  
+  public ExportImage(String name, ViewerApp v) {
+    this(name, v.getViewerSwitch(), v.getFrame());
+  }
+  
   
   @Override
   public void actionPerformed(ActionEvent e) {

@@ -59,8 +59,6 @@ import javax.swing.KeyStroke;
 
 import de.jreality.renderman.RIBViewer;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.ui.viewerapp.actions.app.SwitchBackgroundColor;
-import de.jreality.ui.viewerapp.actions.app.ToggleAppearance;
 import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFieldOfView;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFocus;
@@ -68,6 +66,8 @@ import de.jreality.ui.viewerapp.actions.camera.ToggleStereo;
 import de.jreality.ui.viewerapp.actions.edit.AddTool;
 import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
 import de.jreality.ui.viewerapp.actions.edit.Remove;
+import de.jreality.ui.viewerapp.actions.edit.SwitchBackgroundColor;
+import de.jreality.ui.viewerapp.actions.edit.ToggleAppearance;
 import de.jreality.ui.viewerapp.actions.edit.TogglePickable;
 import de.jreality.ui.viewerapp.actions.file.ExportImage;
 import de.jreality.ui.viewerapp.actions.file.ExportPS;
@@ -175,9 +175,9 @@ public class ViewerAppMenu {
     JMenu fileMenu = new JMenu(FILE_MENU);
     fileMenu.setMnemonic(KeyEvent.VK_F);
     
-    fileMenu.add(new JMenuItem(new LoadFile(LOAD_FILE, sm, viewerApp, frame)));
-    fileMenu.add(new JMenuItem(new LoadFileMerged(LOAD_FILE_MERGED, sm, viewerApp, frame)));
-    fileMenu.add(new JMenuItem(new LoadScene(LOAD_SCENE, viewerApp, frame)));
+    fileMenu.add(new JMenuItem(new LoadFile(LOAD_FILE, viewerApp)));
+    fileMenu.add(new JMenuItem(new LoadFileMerged(LOAD_FILE_MERGED, viewerApp)));
+    fileMenu.add(new JMenuItem(new LoadScene(LOAD_SCENE, viewerApp)));
     fileMenu.addSeparator();
     fileMenu.add(new JMenuItem(new SaveScene(SAVE_SCENE, viewerApp.getViewer(), frame)));
     fileMenu.add(new JMenuItem(new SaveSelected(SAVE_SELECTED, sm, frame)));

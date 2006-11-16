@@ -47,26 +47,37 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import de.jreality.scene.Viewer;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
-public class Render extends AbstractAction {
+/**
+ * Forces rendering.
+ * 
+ * @author msommer
+ */
+public class Render extends AbstractJrAction {
 
   private Viewer viewer;
   
   
   public Render(String name, Viewer viewer) {
     super(name);
-    putValue(SHORT_DESCRIPTION, "Render");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
     
     if (viewer == null) 
       throw new IllegalArgumentException("Viewer is null!");
-    
     this.viewer = viewer;
+    
+    setShortDescription("Render");
+    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+  }
+  
+  public Render(String name, ViewerApp v) {
+    this(name, v.getViewerSwitch());
   }
   
     
+  @Override
   public void actionPerformed(ActionEvent e) {
     viewer.render();
   }

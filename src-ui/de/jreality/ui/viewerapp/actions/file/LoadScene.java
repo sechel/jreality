@@ -40,7 +40,6 @@
 
 package de.jreality.ui.viewerapp.actions.file;
 
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -54,27 +53,30 @@ import de.jreality.io.JrScene;
 import de.jreality.reader.ReaderJRS;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jreality.util.Input;
 
 
-public class LoadScene extends AbstractAction {
+/**
+ * Opens a saved scene in a new ViewerApp.
+ * 
+ * @author msommer
+ */
+public class LoadScene extends AbstractJrAction {
 
   private ViewerApp viewerApp;
   
 
-  public LoadScene(String name, ViewerApp viewerApp, Frame frame) {
+  public LoadScene(String name, ViewerApp v) {
     super(name);
-    this.frame = frame;
-    putValue(SHORT_DESCRIPTION, "Open saved scene");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
+    this.frame = v.getFrame();
+    this.viewerApp = v;
     
-    if (viewerApp == null) 
-      throw new IllegalArgumentException("ViewerApp is null!");
-    
-    this.viewerApp = viewerApp;
+    setShortDescription("Open saved scene");
+    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
   }
 
+  
   @Override
   public void actionPerformed(ActionEvent e) {
     File[] fs = FileLoaderDialog.loadFiles(frame);

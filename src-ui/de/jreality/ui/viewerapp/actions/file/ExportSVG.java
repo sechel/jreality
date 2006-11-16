@@ -49,24 +49,34 @@ import java.io.PrintWriter;
 import de.jreality.scene.Viewer;
 import de.jreality.softviewer.SVGRenderer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
-public class ExportSVG extends AbstractAction {
 
-    private static final long serialVersionUID = 1L;
+/**
+ * Exports the scene displayed in a viewer as a SVG file.
+ * 
+ * @author sommer
+ */
+public class ExportSVG extends AbstractJrAction {
 
     private Viewer viewer;
 
     public ExportSVG(String name, Viewer viewer, Frame frame) {
         super(name);
         this.frame = frame;
-        putValue(SHORT_DESCRIPTION, "Export SVG file");
+        setShortDescription("Export SVG file");
 
         if (viewer == null)
             throw new IllegalArgumentException("Viewer is null!");
         this.viewer = viewer;
     }
 
+    public ExportSVG(String name, ViewerApp v) {
+      this(name, v.getViewerSwitch(), v.getFrame());
+    }
+    
+    
     @Override
     public void actionPerformed(ActionEvent e) {
         File file = FileLoaderDialog
@@ -82,7 +92,6 @@ public class ExportSVG extends AbstractAction {
             rv.setAuxiliaryRoot(viewer.getAuxiliaryRoot());
             rv.render();
         } catch (FileNotFoundException e1) {
-            // TODO Auto-generated catch block
             e1.printStackTrace();
         }
     }

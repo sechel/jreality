@@ -51,22 +51,33 @@ import java.io.IOException;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 import de.jreality.writer.WriterJRS;
 
 
-public class SaveSelected extends AbstractAction {
+/**
+ * Saves the selected SceneGraphComponent into a file 
+ * (if no SceneGraphComponent is selected, this action is disabled).
+ * 
+ * @author msommer
+ */
+public class SaveSelected extends AbstractSelectionListenerAction {
 
   public SaveSelected(String name, SelectionManager sm, Frame frame) {
     super(name, sm, frame);
-    putValue(SHORT_DESCRIPTION, "Save selected component as a file");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+    setShortDescription("Save selected component as a file");
+    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
 
+  public SaveSelected(String name, ViewerApp v) {
+    this(name, v.getSelectionManager(), v.getFrame());
+  }
+  
+  
   @Override
   public void actionPerformed(ActionEvent e) {
     File file = FileLoaderDialog.selectTargetFile(frame);
@@ -85,10 +96,10 @@ public class SaveSelected extends AbstractAction {
     }
   }
 
+  
   @Override
-  protected boolean isEnabled(SelectionEvent e) {
-    return (e.getType() == SelectionEvent.DEFAULT_SELECTION &&
-        selection.getLastElement() instanceof SceneGraphComponent &&
-        !selectionManager.isNothingSelected());
+  public boolean isEnabled(SelectionEvent e) {
+    return e.componentSelected();
   }
+  
 }

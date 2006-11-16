@@ -47,22 +47,26 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
-public class ToggleRenderSelection extends AbstractAction {
+/**
+ * Toggles the rendering of the current selection's bounding box. 
+ * 
+ * @author msommer
+ */
+public class ToggleRenderSelection extends AbstractJrAction {
 
   
   public ToggleRenderSelection(String name, SelectionManager sm) {
-    super(name);
-    putValue(SHORT_DESCRIPTION, "Show or hide the selection's bounding box");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
-    
-    if (sm == null) throw new UnsupportedOperationException("SelectionManager not allowed to be null!");
-    selectionManager = sm;
+    super(name, sm);
+
+    setShortDescription("Show or hide the selection's bounding box");
+    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
   
-    
+ 
+  @Override
   public void actionPerformed(ActionEvent e) {
     selectionManager.setRenderSelection(!selectionManager.isRenderSelection());
   }

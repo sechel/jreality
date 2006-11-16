@@ -48,10 +48,15 @@ import javax.swing.JFrame;
 import javax.swing.KeyStroke;
 
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
-public class ToggleBeanShell extends AbstractAction {
+/**
+ * Toggles the bean shell within the ViewerApp. 
+ * 
+ * @author msommer
+ */
+public class ToggleBeanShell extends AbstractJrAction {
 
   private boolean attachBeanShell = false;
   private ViewerApp viewerApp;
@@ -61,11 +66,12 @@ public class ToggleBeanShell extends AbstractAction {
     super(name);
     this.viewerApp = viewerApp;
 
-    putValue(SHORT_DESCRIPTION, "Toggle bean shell visibility");
-    putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+    setShortDescription("Toggle bean shell visibility");
+    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
 
   
+  @Override
   public void actionPerformed(ActionEvent e) {
     attachBeanShell = !viewerApp.isAttachBeanShell();
     viewerApp.setAttachBeanShell(attachBeanShell);

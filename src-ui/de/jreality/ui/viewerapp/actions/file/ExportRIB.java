@@ -47,10 +47,16 @@ import java.io.File;
 import de.jreality.renderman.RIBViewer;
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
-public class ExportRIB extends AbstractAction {
+/**
+ * Exports the scene displayed in a viewer as a RIB file.
+ * 
+ * @author sommer
+ */
+public class ExportRIB extends AbstractJrAction {
 
   private Viewer viewer;
   private int type;
@@ -60,13 +66,18 @@ public class ExportRIB extends AbstractAction {
     super(name);
     this.frame = frame;
     this.type = type;
-    putValue(SHORT_DESCRIPTION, "Export Renderman file");
+    setShortDescription("Export Renderman file");
     
     if (viewer == null) 
       throw new IllegalArgumentException("Viewer is null!");
     this.viewer = viewer;
   }
 
+  public ExportRIB(String name, int type, ViewerApp v) {
+    this(name, type, v.getViewerSwitch(), v.getFrame());
+  }
+  
+  
   @Override
   public void actionPerformed(ActionEvent e) {
     File file = FileLoaderDialog.selectTargetFile(frame, "rib", "RIB files");

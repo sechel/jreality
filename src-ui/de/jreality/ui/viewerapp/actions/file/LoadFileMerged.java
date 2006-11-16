@@ -40,7 +40,6 @@
 
 package de.jreality.ui.viewerapp.actions.file;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
@@ -51,29 +50,36 @@ import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
-import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.PickUtility;
 
 
-public class LoadFileMerged extends AbstractAction {
+/**
+ * Loads one or several files into the scene and merges indexed face&line sets
+ * (adds the file as a child to the selection managers default selection, 
+ * which is usually the scene node).
+ * 
+ * @author msommer
+ */
+public class LoadFileMerged extends AbstractJrAction {
 
 
   private ViewerApp viewerApp;
   private SceneGraphComponent sceneNode;
 
 
-  public LoadFileMerged(String name, SelectionManager sm, ViewerApp viewerApp, Component frame) {
-    super(name, sm, frame);
-    this.viewerApp = viewerApp;
-    sceneNode = sm.getDefaultSelection().getLastComponent();
+  public LoadFileMerged(String name, ViewerApp v) {
+    super(name, v.getSelectionManager(), v.getFrame());
+    this.viewerApp = v;
+    sceneNode = v.getSelectionManager().getDefaultSelection().getLastComponent();
     
-    putValue(SHORT_DESCRIPTION, "Load one or more files and merge IndexedFaceSets");
+    setShortDescription("Load one or more files and merge indexed face&line sets");
   }
 
   
+  @Override
   public void actionPerformed(ActionEvent e) {
   
     File[] files = FileLoaderDialog.loadFiles(frame);

@@ -38,48 +38,36 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.view;
+package de.jreality.ui.viewerapp.actions.camera;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.JFrame;
-import javax.swing.KeyStroke;
-
-import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
 /**
- * Toggles the navigator within the ViewerApp. 
+ * Abstract class for camera actions. Doesn't depend on the current selection. 
  * 
  * @author msommer
  */
-public class ToggleNavigator extends AbstractJrAction {
+public abstract class AbstractCameraAction extends AbstractJrAction {
 
-  private boolean attachNavigator = false;
-  private ViewerApp viewerApp;
+  protected Viewer viewer;
+  private double step = 1.0;  //for shift actions
   
   
-  public ToggleNavigator(String name, ViewerApp viewerApp) {
+  public AbstractCameraAction(String name, Viewer v) {
     super(name);
-    this.viewerApp = viewerApp;
-
-    setShortDescription("Toggle navigator visibility");
-    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+    viewer = v;
   }
-
   
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    attachNavigator = !viewerApp.isAttachNavigator();
-    viewerApp.setAttachNavigator(attachNavigator);
-    viewerApp.update();
-    JFrame frame = viewerApp.getFrame();
-    frame.getContentPane().removeAll();
-    frame.getContentPane().add(viewerApp.getComponent());
-    frame.validate();
+  /** Set the step of shift actions. */
+  public void setStep(double step) {
+    this.step = step;
+  }
+  
+  /** Get the step of shift actions. */
+  public double getStep() {
+    return step;
   }
   
 }

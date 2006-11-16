@@ -48,21 +48,22 @@ import javax.swing.KeyStroke;
 
 import de.jreality.scene.Camera;
 import de.jreality.scene.Viewer;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
 import de.jreality.util.CameraUtility;
 
 
-public class TogglePerspective extends AbstractAction {
+/**
+ * Toggles the camera's perspective property.
+ * 
+ * @author msommer
+ */
+public class TogglePerspective extends AbstractCameraAction {
 	
-	private Viewer viewer;
-
 
 	public TogglePerspective(String name, Viewer v) {
-		super(name);
-		viewer = v;
+		super(name, v);
 		
-		putValue(SHORT_DESCRIPTION, "Toggle perspective of the camera");
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F7, InputEvent.SHIFT_MASK));
+    setShortDescription("Toggle perspective of the camera");
+    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F7, InputEvent.SHIFT_MASK));
 	}
 	
 	

@@ -40,6 +40,11 @@
 
 package de.jreality.ui.viewerapp;
 
+import static de.jreality.ui.viewerapp.SelectionEvent.DEFAULT_SELECTION;
+import static de.jreality.ui.viewerapp.SelectionEvent.ENTITY_SELECTION;
+import static de.jreality.ui.viewerapp.SelectionEvent.NO_SELECTION;
+import static de.jreality.ui.viewerapp.SelectionEvent.TOOL_SELECTION;
+
 import java.util.Vector;
 
 import javax.swing.tree.TreePath;
@@ -138,8 +143,9 @@ public class SelectionManager implements TransformationListener {
         }
       };
       addSelectionListener(smListener);
+//      smListener.selectionChanged(new SelectionEvent(this, getSelection(), null, null, SelectionEvent.NO_SELECTION));
     }
-    else setSelection(null);  //navigator == null
+    else setSelection(null);  //select default selection (navigator == null)
   }
   
   public SceneGraphPath getDefaultSelection() {
@@ -197,7 +203,7 @@ public class SelectionManager implements TransformationListener {
     if (!listeners.isEmpty()) {
       for (int i = 0; i<listeners.size(); i++)  {
         SelectionListener l = listeners.get(i);
-        l.selectionChanged(new SelectionEvent(this, this.selection, tool, entity));
+        l.selectionChanged(new SelectionEvent(this, this.selection, tool, entity, getCurrentType()));
       }
     }
     
@@ -213,6 +219,19 @@ public class SelectionManager implements TransformationListener {
     }
   }
 
+  
+  /**
+   * Returns the current selection type (static field of {@link SelectionEvent})
+   */
+  public int getCurrentType() {
+    int type;
+    if (tool == null && entity == null) 
+      type = (nothingSelected) ? NO_SELECTION : DEFAULT_SELECTION; 
+    else type = (tool != null) ? TOOL_SELECTION : ENTITY_SELECTION;
+    
+    return type;
+  }
+  
 
   public void setAuxiliaryRoot(SceneGraphComponent aux) {
     auxiliaryRoot = aux;
@@ -296,6 +315,7 @@ public class SelectionManager implements TransformationListener {
     return tool;
   }
 
+  
   public boolean isNothingSelected() {
     return nothingSelected;
   }

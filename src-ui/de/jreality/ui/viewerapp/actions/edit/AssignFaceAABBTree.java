@@ -42,18 +42,27 @@ package de.jreality.ui.viewerapp.actions.edit;
 
 import java.awt.event.ActionEvent;
 
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 import de.jreality.util.PickUtility;
 
 
-public class AssignFaceAABBTree extends AbstractAction {
+/**
+ * Assigns a FaceAABBTree to a selected SceneGraphComponent (if no SceneGraphComponent is selected, this action is disabled).
+ * 
+ * @author msommer
+ */
+public class AssignFaceAABBTree extends AbstractSelectionListenerAction {
 
   public AssignFaceAABBTree(String name, SelectionManager sm) {
     super(name, sm);
-    putValue(SHORT_DESCRIPTION, "Assign AABBTree to faces");
+    setShortDescription("Assign AABBTree to faces");
+  }
+  
+  public AssignFaceAABBTree(String name, ViewerApp v) {
+    this(name, v.getSelectionManager());
   }
 
   @Override
@@ -62,8 +71,8 @@ public class AssignFaceAABBTree extends AbstractAction {
   }
 
   @Override
-  protected boolean isEnabled(SelectionEvent e) {
-    return (e.getType() == SelectionEvent.DEFAULT_SELECTION &&
-        selection.getLastElement() instanceof SceneGraphComponent);
+  public boolean isEnabled(SelectionEvent e) {
+    return e.componentSelected();
   }
+  
 }

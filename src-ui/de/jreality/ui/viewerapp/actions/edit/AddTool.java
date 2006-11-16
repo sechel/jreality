@@ -54,7 +54,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.tool.Tool;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.EncompassTool;
@@ -71,10 +70,16 @@ import de.jreality.tools.ShowPropertiesTool;
 import de.jreality.tools.TranslateTool;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.actions.AbstractAction;
+import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 
 
-public class AddTool extends AbstractAction {
+/**
+ * Adds tools to a selected SceneGraphComponent (if no SceneGraphComponent is selected, this action is disabled).
+ * 
+ * @author msommer
+ */
+public class AddTool extends AbstractSelectionListenerAction {
 
   private boolean initialized = false;
   private JList toolList = null;
@@ -85,7 +90,11 @@ public class AddTool extends AbstractAction {
   public AddTool(String name, SelectionManager sm, Component frame) {
     
     super(name, sm, frame);
-    putValue(SHORT_DESCRIPTION, "Add Tools");
+    setShortDescription("Add Tools");
+  }
+
+  public AddTool(String name, ViewerApp v) {
+    this(name, v.getSelectionManager(), v.getFrame());
   }
   
 
@@ -114,7 +123,13 @@ public class AddTool extends AbstractAction {
     toolList.clearSelection();
   }
   
+  
+  @Override
+  public boolean isEnabled(SelectionEvent e) {
+    return e.componentSelected();
+  }
  
+  
   private void initializeToolList() {
     
     List<String> tools = new LinkedList<String>();
@@ -159,11 +174,5 @@ public class AddTool extends AbstractAction {
 
     initialized = true;
   }
-  
-  
-  @Override
-  protected boolean isEnabled(SelectionEvent e) {
-    return (e.getType() == SelectionEvent.DEFAULT_SELECTION &&
-        selection.getLastElement() instanceof SceneGraphComponent);
-  }
+
 }
