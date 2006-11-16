@@ -67,6 +67,13 @@ public class PrimitiveCache {
     private static DoubleArrayArray[] cylinderVertices = new DoubleArrayArray[13];
 
     private static DoubleArrayArray[] cylinderNormals = new DoubleArrayArray[13];
+    
+    private static IntArrayArray[] tubeIndices = new IntArrayArray[13];
+
+    private static DoubleArrayArray[] tubeVertices = new DoubleArrayArray[13];
+    private static double[][] tubeVerticesDoubles = new double[13][];
+
+    private static DoubleArrayArray[] tubeNormals = new DoubleArrayArray[13];
 
     private static SkyboxPolygonShader skybox = new SkyboxPolygonShader();
 
@@ -148,6 +155,9 @@ public class PrimitiveCache {
             cylinderNormals[i] = cylinder[i].getVertexAttributes(
                     Attribute.NORMALS).toDoubleArrayArray();
         }
+        
+        
+        makeCylinders();
     }
 
     private PrimitiveCache() {
@@ -156,7 +166,7 @@ public class PrimitiveCache {
     }
 
     public static void renderSphere(TrianglePipeline pipeline, double lod) {
-        int i = (int) Math.min(4 * Math.pow(lod, 1 / 3.5), 4);
+        int i = (int) Math.min(4 * Math.pow(lod, 1 / 4.), 4);
         // i= 0;
         for (int j = 0, n = sphereIndices[i].size(); j < n; j++) {
             pipeline.processPolygon(sphereVertices[i], sphereIndices[i]
@@ -225,4 +235,51 @@ public class PrimitiveCache {
 
     }
 
+    public static void renderCylinder2(TrianglePipeline pipeline, double lod, double d, double e) {
+        int i = ((int) Math.min(12 * Math.pow(lod, 1 / 2.5), 12));
+
+        double[] v =  tubeVerticesDoubles[i];
+        double angle = 0, delta = Math.PI*2/(i+3);
+        for(int k = i+3; k<2*(i+3);k++) {
+            angle = k*delta;
+            v[4*k+0] = e*Math.cos(angle);
+            v[4*k+1] = e*Math.sin(angle);            
+            v[4*k+2] = d;
+            v[4*k+3] = e;
+        }
+        for (int j = 0, n = tubeIndices[i].size(); j < n; j++) {
+            pipeline.processPolygon(tubeVertices[i], tubeIndices[i]
+                    .getValueAt(j), tubeNormals[i], tubeIndices[i]
+                    .getValueAt(j), null, null, null, null);
+        }
+        
+    }
+
+    public static void makeCylinders() {
+        for(int n= 3; n<16; n++) {
+            int rn = n;
+            double[] verts = new double[2*4*rn];
+            double[] norms = new double[2*3*rn];
+            int[][] idx = new int[rn][4];
+            double angle = 0, delta = Math.PI*2/(n);
+            for (int i = 0 ;i<rn; ++i)  {
+                angle = i*delta;
+                verts[4*(i+rn)] = verts[4*i] = norms[3*(i+rn)] = norms[3*i] = Math.cos(angle);
+                verts[4*(i+rn)+1] = verts[4*i+1] =  norms[3*(i+rn)+1] = norms[3*i+1] = Math.sin(angle);
+                verts[4*i+2] = 0;
+                verts[4*(i+rn)+2] = 1;
+                verts[4*i+3] = verts[4*(i+rn)+3] = 1;
+                norms[3*i+2] = norms[3*(i+rn)+2] = 0;
+                idx[i][0] = i;
+                idx[i][1] = (i+1)%rn;
+                idx[i][2] = (i+1)%rn+rn;
+                idx[i][3] = (i+rn);
+            }   
+            
+            tubeVerticesDoubles[n-3] = verts;
+            tubeVertices[n-3] = new DoubleArrayArray.Inlined(verts,4);
+            tubeNormals[n-3] = new DoubleArrayArray.Inlined(norms,3);
+            tubeIndices[n-3] = new IntArrayArray.Array(idx);
+        }
+    }
 }

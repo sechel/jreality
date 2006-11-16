@@ -386,7 +386,8 @@ class VecMat {
       if(z*z +x*x -0.000001> 0.) {
           xrot =  Math.acos(y);
           yrot =  Math.atan2(x,z);
-      }
+      } else 
+          { xrot = y>0?0:Math.PI;}
       //e.set(xrot,yrot,zrot);
       r[i+0] = xrot;
       r[i+1] = yrot;

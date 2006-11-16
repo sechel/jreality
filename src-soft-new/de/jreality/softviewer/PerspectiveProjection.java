@@ -76,28 +76,12 @@ public class PerspectiveProjection extends CameraProjection {
 
 		double vz = (-v[Polygon.WZ]);
 
-//        double vzi = (focalLength*mh) / (vz);
-//		v[pos+Polygon.SX] = (wh + vzi  * v[pos+Polygon.SX]);
-//        v[pos+Polygon.SY] = (hh - vzi * v[pos+Polygon.SY]);
-//        v[pos+Polygon.SZ] = ( (nearclip + farclip) -(2* nearclip*farclip) *1/vz )/(farclip - nearclip );
-//		v[Polygon.SW] = 1;
-		
-        //we now keep thing in hom.coordinates so that the clipping in the 
-        //pipeline works:
-        
-//        double vzi = (focalLength*mh) ;        
-//        v[pos+Polygon.SX] = (wh*vz + vzi * v[pos+Polygon.SX]);
-//        v[pos+Polygon.SY] = (hh*vz - vzi * v[pos+Polygon.SY]);
-//        v[pos+Polygon.SZ] = ( (nearclip + farclip)*vz -(2* nearclip*farclip) )/(farclip - nearclip );
-//        v[pos+Polygon.SW] *= vz;
-
         //now we even moved the scaling to screen size into the rasterizer:
-              
+
         v[Polygon.SX] = v[Polygon.WX] *( focalLength );
         v[Polygon.SY] = v[Polygon.WY] *( focalLength );
-        v[Polygon.SZ] = ( (nearclip + farclip)*vz - v[Polygon.WW]*(2* nearclip*farclip) )/(farclip - nearclip );
-        v[Polygon.SW] = v[Polygon.WW] *vz;
-
+        v[Polygon.SZ] = (( (nearclip + farclip)*vz - v[Polygon.WW]*(2* nearclip*farclip) )/(farclip - nearclip )) ;
+        v[Polygon.SW] = vz;
 
 	}
 

@@ -75,10 +75,10 @@ public class OrthographicProjection extends CameraProjection {
 	public final void perspective(final double[] v) {
 
               
-        v[Polygon.SX] = v[Polygon.WX] *( 1 )/v[Polygon.WW];
-        v[Polygon.SY] = v[Polygon.WY] *( 1 )/v[Polygon.WW];
-        v[Polygon.SZ] = -((nearclip + farclip) + 2*v[Polygon.WZ]/v[Polygon.WW]  )/(farclip - nearclip );
-        v[Polygon.SW] = 1;
+        v[Polygon.SX] = v[Polygon.WX] *( 1.2 );
+        v[Polygon.SY] = v[Polygon.WY] *( 1.2);
+        v[Polygon.SZ] = -((nearclip + farclip)*v[Polygon.WW]+ 2*v[Polygon.WZ] )/(farclip - nearclip );
+        v[Polygon.SW] = v[Polygon.WW];
 	}
 
 	/**

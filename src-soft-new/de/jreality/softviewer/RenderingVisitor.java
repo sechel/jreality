@@ -311,7 +311,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
                             dps.setColor(cc.getValueAt(0), cc.getValueAt(1), cc.getValueAt(2));
                         }
                         pipeline.setFaceShader(dps);
-                        cylinder(p1, p2,radius);
+                        cylinder2(p1, p2,radius);
                         dps.setColor(red,green,blue);
                         pipeline.setFaceShader(polygonShader);
                         //eAppearance = apOld;
@@ -351,15 +351,25 @@ public class RenderingVisitor extends SceneGraphVisitor {
     double[] cmat = new double[16];
     double[] cnormal = new double[3];
     double[] ctrans = new double[3];
+    
+    /**
+     * tubes the line connecting p1 and p2
+     * This deals with tubes for which both endpoints are finite.
+     * @see cylinder2 for the other case
+     * @param p1 first end point
+     * @param p2 second endpoint
+     * @param radius the radius of the tube
+     */
     private void cylinder(DoubleArray p1, DoubleArray p2, double radius) {
         double w1 = (p1.size()==4)?1/p1.getValueAt(3):1;
         double w2 = (p2.size()==4)?1/p2.getValueAt(3):1;
-        cnormal[0] = .5*(p2.getValueAt(0)*w2-p1.getValueAt(0)*w2);
-        cnormal[1] = .5*(p2.getValueAt(1)*w2-p1.getValueAt(1)*w2);
-        cnormal[2] = .5*(p2.getValueAt(2)*w2-p1.getValueAt(2)*w2);
-        ctrans[0] = p1.getValueAt(0)*w2 + cnormal[0];
-        ctrans[1] = p1.getValueAt(1)*w2 + cnormal[1];
-        ctrans[2] = p1.getValueAt(2)*w2 + cnormal[2];
+       
+        cnormal[0] = .5*(p2.getValueAt(0)*w2-p1.getValueAt(0)*w1);
+        cnormal[1] = .5*(p2.getValueAt(1)*w2-p1.getValueAt(1)*w1);
+        cnormal[2] = .5*(p2.getValueAt(2)*w2-p1.getValueAt(2)*w1);
+        ctrans[0] = p1.getValueAt(0)*w1 + cnormal[0];
+        ctrans[1] = p1.getValueAt(1)*w1 + cnormal[1];
+        ctrans[2] = p1.getValueAt(2)*w1 + cnormal[2];
         double d = VecMat.norm(cnormal);
         if(d !=0) VecMat.normalize(cnormal);
         
@@ -386,10 +396,82 @@ public class RenderingVisitor extends SceneGraphVisitor {
         visit(CYLINDER);
         pipeline.setMatrix(currentTrafo);
     }
+    /**
+     * tubes the line connecting p1 and p2
+     * This deals with tubes fro which one of the endpoints lies at infinity
+     * @see cylinder for the case of both endpoints being finite
+     * @param p1 first end point
+     * @param p2 second endpoint
+     * @param radius the radius of the tube
+     */
+    private void cylinder2(DoubleArray p1, DoubleArray p2, double radius) {
+        double w1 = (p1.size()==4)?p1.getValueAt(3):1;
+        double w2 = (p2.size()==4)?p2.getValueAt(3):1;
+        if(w1!=0 && w2!= 0) cylinder(p1,p2,radius);
+        if(w1 == 0) {
+            //if both endpoints are at infinity there is nothing to do.
+            if(w2 == 0)
+                return;
+            w1 = w2;
+            w2 = 0;
+            DoubleArray tmp = p1;
+            p1 = p2;
+            p2 = tmp;
+        }
+        cnormal[0] = -(p2.getValueAt(0)*w1-p1.getValueAt(0)*w2);
+        cnormal[1] = -(p2.getValueAt(1)*w1-p1.getValueAt(1)*w2);
+        cnormal[2] = -(p2.getValueAt(2)*w1-p1.getValueAt(2)*w2);
+        ctrans[0] = p1.getValueAt(0)/w1;
+        ctrans[1] = p1.getValueAt(1)/w1;
+        ctrans[2] = p1.getValueAt(2)/w1;
+        
+        double d = VecMat.norm(cnormal);
+        if(d ==0)
+            return;
+        VecMat.normalize(cnormal);
+        VecMat.normalToEuler(cnormal,0);
 
-    private int[] fni = new int[Polygon.VERTEX_LENGTH];
+        VecMat.copyMatrix( currentTrafo,tmpTrafo);
+        
+        VecMat.assignTranslation(cmat, ctrans);
+        VecMat.multiplyFromRight(tmpTrafo, cmat);
 
-    private IntArray fnia = new IntArray(fni);
+ //       VecMat.assignRotationZ(cmat, cnormal[2]);
+ //       VecMat.multiplyFromRight(tmpTrafo, cmat);
+        
+        VecMat.assignRotationY(cmat, cnormal[1]);
+        VecMat.multiplyFromRight(tmpTrafo, cmat);
+        
+        VecMat.assignRotationX(cmat, cnormal[0]+Math.PI/2);
+        VecMat.multiplyFromRight(tmpTrafo, cmat);
+        
+        VecMat.assignScale(cmat, radius,radius,1);
+        VecMat.multiplyFromRight(tmpTrafo, cmat);
+
+        pipeline.setMatrix(tmpTrafo);
+        //visit(CYLINDER);
+        ////
+       
+       if (!shaderUptodate)
+           setupShader();
+       LineShader lso = lineShader;
+       lineShader = null;
+       PointShader pso = pointShader;
+       pointShader = null;
+       pipeline.startGeometry(CYLINDER);
+       double l = lod(1.);
+       PrimitiveCache.renderCylinder2(pipeline, l,d,w1*w2);
+       pointShader = pso;
+       lineShader = lso;
+       
+       ////
+        pipeline.setMatrix(currentTrafo);
+    }
+
+    
+ //   private int[] fni = new int[Polygon.VERTEX_LENGTH];
+
+//    private IntArray fnia = new IntArray(fni);
 
     public void visit(IndexedFaceSet ifs) {
         if (!shaderUptodate)

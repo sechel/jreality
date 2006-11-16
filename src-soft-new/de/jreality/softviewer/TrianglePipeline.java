@@ -251,7 +251,8 @@ public class TrianglePipeline {
         // TODO: debug clipPlanes
 
         if (clipFrustum())
-            return;
+           return;
+        for(int i = 0; i< polygon.getLength();i++)
 
         triangulateAndRaster();
     }
@@ -387,7 +388,7 @@ public class TrianglePipeline {
                         .getValueAt(1), vertex.getValueAt(2), vertex
                         .getValueAt(3), vertexData, Triangle.WX);
                 if (vertexData[Triangle.WW] != 0) {
-                    final double d = vertexData[AbstractPolygon.SW];
+                    final double d = vertexData[AbstractPolygon.WW];
                     vertexData[Triangle.WX] /= d;
                     vertexData[Triangle.WY] /= d;
                     vertexData[Triangle.WZ] /= d;

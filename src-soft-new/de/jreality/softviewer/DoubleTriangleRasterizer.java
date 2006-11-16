@@ -174,12 +174,12 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
             pi[Polygon.SY] = (hh - vertexData[Polygon.SY] * wxy);
             pi[Polygon.SZ] = (vertexData[Polygon.SZ] * w);
 
-            // TODO: reinsert special skybox handling
             if (t.isSkybox())
                 pi[Polygon.SZ] = 2 + 0 * Double.MAX_VALUE;
 
             final double iw = (interpolateW ? w : 1);
-
+            //final double iw = (interpolateW ?  1/pi[Polygon.SZ] : 1);
+            
             pi[Polygon.SW] = iw;
             pi[Polygon.U] = (vertexData[Polygon.U] * iw);
             pi[Polygon.V] = (vertexData[Polygon.V] * iw);
@@ -626,10 +626,12 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
             pixels[pos] = OPAQUE | ((int) r << 16) | ((int) g << 8) | (int) b;
             zBuffer[pos] = z;
         }
-        // blur(pos,1);
-        // blur(pos,-1);
-        // blur(pos,+w);
-        // blur(pos,-w);
+        /*
+         blur(pos,1);
+         blur(pos,-1);
+         blur(pos,+w);
+         blur(pos,-w);
+         */
     }
 
     //

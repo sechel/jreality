@@ -95,7 +95,8 @@ public class DefaultVertexShader extends VertexShader {
 		double nz = vd[Polygon.NZ];
 		double px = vd[Polygon.WX];
 		double py = vd[Polygon.WY];
-		double pz = vd[Polygon.WZ];
+        double pz = vd[Polygon.WZ];
+        double pw = vd[Polygon.WW];
 		double cdr = 0;
 		double cdg = 0;
 		double cdb = 0;
@@ -104,8 +105,8 @@ public class DefaultVertexShader extends VertexShader {
 		double csb = 0;
 
 		//double normalflip = nz<0?1:-1;
-        double normalflip = (px * nx + py * ny + pz * nz) <= 0 ? 1 : -1;
-        //normalflip = 1;
+        double normalflip = (px * nx + py * ny + pz * nz)*pw <= 0 ? 1 : -1;
+        //double normalflip = 1;
 		//
 		// iterate over all directional lights
 		//
