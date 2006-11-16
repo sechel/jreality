@@ -1065,8 +1065,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		geometryIsDirty = true,
 		boundIsDirty = true,
 		clipToCamera = true;
-		int geometryChanged = 0;
-		protected boolean flushCachedInfo  = false;
+		int geometryDirtyBits  = 0;
 		protected boolean renderRunnableDirty = true;
 		boolean[] matrixIsReflection = null;
 
@@ -1093,7 +1092,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 
 		protected void updateRenderRunnable() {
-			flushCachedInfo();
+			setDisplayListDirty();
 			updateShaders();
 			if (goBetween.peerGeometry == null) renderGeometry = null;
 			else	 renderGeometry = new Runnable() {
@@ -1147,8 +1146,7 @@ public class JOGLRenderer  implements AppearanceListener {
 				openGLState.flipped  = cumulativeIsReflection;
 			}
 			if (appearanceChanged)  	propagateAppearanceChanged();
-			if (geometryChanged != 0)	geometryChanged(geometryChanged);
-			if (flushCachedInfo)		flushCachedInfo();
+			if (geometryDirtyBits  != 0)	handleChangedGeometry();
 			if (goBetween != null && goBetween.peerGeometry != null && goBetween.peerGeometry.originalGeometry != null )	{
 				Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
 			}
@@ -1433,10 +1431,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 
 		public void propagateGeometryChanged(int changed) {
-//			if (goBetween != null && goBetween.getPeerGeometry() != null) 
-//			goBetween.getPeerGeometry().geometryChanged(changed);
-//			dlInfo.geometryChanged(changed);
-			geometryChanged = changed;
+			geometryDirtyBits  = changed;
 			//childlock.readLock();
 			int n = children.size();
 			for (int i = 0; i<n; ++i)	{		
@@ -1447,24 +1442,21 @@ public class JOGLRenderer  implements AppearanceListener {
 
 		}
 
-		private void geometryChanged(int changed) {
+		private void handleChangedGeometry() {
 			if (geometryShader != null)	{
-				if (geometryShader.pointShader != null && (changed & POINTS_CHANGED) != 0) geometryShader.pointShader.flushCachedState(JOGLRenderer.this);
-				if (geometryShader.lineShader != null && (changed & LINES_CHANGED) != 0) geometryShader.lineShader.flushCachedState(JOGLRenderer.this);
-				if (geometryShader.polygonShader != null && (changed & FACES_CHANGED) != 0) geometryShader.polygonShader.flushCachedState(JOGLRenderer.this);				
-				if ((changed & POINT_SHADER_CHANGED) != 0) geometryShader.pointShader = null;
-				if ((changed & LINE_SHADER_CHANGED) != 0) geometryShader.lineShader = null;
-				if ((changed & POLYGON_SHADER_CHANGED) != 0) geometryShader.polygonShader = null;
+				if (geometryShader.pointShader != null && (geometryDirtyBits  & POINTS_CHANGED) != 0) geometryShader.pointShader.flushCachedState(JOGLRenderer.this);
+				if (geometryShader.lineShader != null && (geometryDirtyBits  & LINES_CHANGED) != 0) geometryShader.lineShader.flushCachedState(JOGLRenderer.this);
+				if (geometryShader.polygonShader != null && (geometryDirtyBits  & FACES_CHANGED) != 0) geometryShader.polygonShader.flushCachedState(JOGLRenderer.this);				
+				if ((geometryDirtyBits  & POINT_SHADER_CHANGED) != 0) geometryShader.pointShader = null;
+				if ((geometryDirtyBits  & LINE_SHADER_CHANGED) != 0) geometryShader.lineShader = null;
+				if ((geometryDirtyBits  & POLYGON_SHADER_CHANGED) != 0) geometryShader.polygonShader = null;
+                // set the dirty flag to clean again
+                geometryDirtyBits  = 0;
 			}
 		}
 
 		private void setDisplayListDirty()	{
-			flushCachedInfo = true;
-		}
-
-		protected void flushCachedInfo() {
-			geometryChanged(POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
-			flushCachedInfo = false;
+            geometryDirtyBits = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
 		}
 
 		public SceneGraphComponent getOriginalComponent() {
