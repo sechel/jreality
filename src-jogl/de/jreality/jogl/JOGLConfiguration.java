@@ -62,7 +62,7 @@ import de.jreality.util.Secure;
 public class JOGLConfiguration {
 
 	public static Logger theLog;
-	static boolean debugGL = false;
+	static boolean debugGL = true;
 	static boolean sharedContexts = false;
 	static boolean isLinux = false;
 	static boolean multiSample = true;

@@ -222,15 +222,16 @@ public class JOGLRendererHelper {
 	}
 
 	public static void handleSkyBox(JOGLRenderer jr, Appearance topAp, Camera cam) {
-    GL gl = jr.getGL();
-    double[] w2c = jr.getContext().getWorldToCamera();
-		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
-				CommonAttributes.SKY_BOX, topAp)) {
-			CubeMap cm = (CubeMap) AttributeEntityUtility
-					.createAttributeEntity(CubeMap.class,
-							CommonAttributes.SKY_BOX, topAp, true);
-			JOGLSkyBox.render(gl, w2c, cm, cam);
-		}
+		if (topAp == null) return;
+	    GL gl = jr.getGL();
+	    double[] w2c = jr.getContext().getWorldToCamera();
+			if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
+					CommonAttributes.SKY_BOX, topAp)) {
+				CubeMap cm = (CubeMap) AttributeEntityUtility
+						.createAttributeEntity(CubeMap.class,
+								CommonAttributes.SKY_BOX, topAp, true);
+				JOGLSkyBox.render(gl, w2c, cm, cam);
+			}
 
 	}
 
@@ -1046,12 +1047,8 @@ public class JOGLRendererHelper {
 		ByteBuffer pixelsRGBA = BufferUtil.newByteBuffer(width * height
 				* channels);
 
-//		GL gl = drawable.getGL();
-
-//		if (drawable instanceof GLCanvas) {
-			gl.glReadBuffer(GL.GL_BACK);
-			gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
-//		}
+		gl.glReadBuffer(GL.GL_BACK);
+		gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
 
 		gl.glReadPixels(0, // GLint x
 				0, // GLint y
