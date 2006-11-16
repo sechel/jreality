@@ -309,7 +309,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 				double[] transVec = null;
 				gl.glPushMatrix();
 				if (radii != null)	{
-					double radius = da.getValueAt(i);
+					double radius = radii.toDoubleArray().getValueAt(i);
 					scale[0] = scale[5] = scale[10] = radius;
 				}
 				transVec =  vertices.item(i).toDoubleArray().toDoubleArray(null);	
