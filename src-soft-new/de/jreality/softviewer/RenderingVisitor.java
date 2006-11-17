@@ -407,7 +407,10 @@ public class RenderingVisitor extends SceneGraphVisitor {
     private void cylinder2(DoubleArray p1, DoubleArray p2, double radius) {
         double w1 = (p1.size()==4)?p1.getValueAt(3):1;
         double w2 = (p2.size()==4)?p2.getValueAt(3):1;
-        if(w1!=0 && w2!= 0) cylinder(p1,p2,radius);
+        if(w1!=0 && w2!= 0) {
+            cylinder(p1,p2,radius);
+            return;
+        }
         if(w1 == 0) {
             //if both endpoints are at infinity there is nothing to do.
             if(w2 == 0)
@@ -575,7 +578,9 @@ public class RenderingVisitor extends SceneGraphVisitor {
                     pmat[7] = da.getValueAt(1);
                     pmat[11] = da.getValueAt(2);
                     pmat[15] = da.size()==4?da.getValueAt(3):1;
-                    
+                    //points at infinity are not visible anyways
+                    if(pmat[15]== 0)
+                        return;
                     VecMat.copyMatrix( currentTrafo,tmpTrafo);
                     VecMat.multiplyFromRight(tmpTrafo, pmat);
                     pipeline.setMatrix(tmpTrafo);
