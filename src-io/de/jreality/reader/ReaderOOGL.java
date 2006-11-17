@@ -311,44 +311,46 @@ public class ReaderOOGL extends AbstractReader {
         
             else if ( st.sval.indexOf("VECT") != -1) {
               current =SceneGraphUtility.createFullSceneGraphComponent("VECT-node");
-                //LoggingSystem.getLogger().log(Level.FINER,"found object!");
+              int vLength = (st.sval.indexOf("4") != -1) ?  4 : 3;
+               //LoggingSystem.getLogger().log(Level.FINER,"found object!");
               st.nextToken();
               int numCurves = Integer.parseInt(st.sval);
               st.nextToken();
               int totalVerts = Integer.parseInt(st.sval);
+              st.nextToken();
+              int totalFolors = Integer.parseInt(st.sval);
               int[] sizes = new int[numCurves];
               int[] colors = new int[numCurves];
               boolean[] closed = new boolean[numCurves];
-              int vLength = 3;
               int[][] indices = new int[numCurves][];
               int vertCount = 0;
               for (int i = 0; i<numCurves; ++i) {
                 st.nextToken();
                 int realCount = 0;
-              //LoggingSystem.getLogger().log(Level.FINER,"Token is "+st.sval);
-              int val = Integer.parseInt(st.sval);  
+                //LoggingSystem.getLogger().log(Level.FINER,"Token is "+st.sval);
+                int val = Integer.parseInt(st.sval);  
                 if (val < 0) {
-                val = sizes[i] = -val;
-                realCount = sizes[i] + 1;
-                closed[i] = true;
-              } else {
-                sizes[i] = val;
-                closed[i] = false;
-                realCount = sizes[i];
-              }
-              indices[i] = new int[realCount];
-              for (int j =0; j< val; ++j) {
-                indices[i][j] = vertCount+j;
-              }
-              if (closed[i]) indices[i][val] = vertCount;
-              vertCount += val;
+	                val = sizes[i] = -val;
+	                realCount = sizes[i] + 1;
+	                closed[i] = true;
+                } else {
+	                sizes[i] = val;
+	                closed[i] = false;
+	                realCount = sizes[i];
+                }
+                indices[i] = new int[realCount];
+                for (int j =0; j< val; ++j) {
+                	indices[i][j] = vertCount+j;
+                }
+                if (closed[i]) indices[i][val] = vertCount;
+                vertCount += val;
               }
               int totalColors = 0;
               for (int i = 0; i<numCurves; ++i) {
-                st.nextToken();
-              //LoggingSystem.getLogger().log(Level.FINER,"Token is "+st.sval);
-              colors[i] = Integer.parseInt(st.sval);  
-              totalColors += colors[i];
+            	  st.nextToken();
+            	  //LoggingSystem.getLogger().log(Level.FINER,"Token is "+st.sval);
+            	  colors[i] = Integer.parseInt(st.sval);  
+            	  totalColors += colors[i];
               }
               verts = new double[totalVerts][vLength];
               vc = new double[totalVerts][4];
@@ -370,6 +372,7 @@ public class ReaderOOGL extends AbstractReader {
                   }
                   vertC++;
                 }
+                // fill in the remaining entries in the colors
                 for ( ; j< sizes[i]; ++j) {
                   for (int k = 0; k<4; ++k) {
                       vc[vertC][k] = vc[vertC-1][k];                    
