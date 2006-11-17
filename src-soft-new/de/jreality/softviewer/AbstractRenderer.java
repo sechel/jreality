@@ -233,5 +233,10 @@ public abstract class AbstractRenderer {
     public abstract void render();
     public abstract void update();
     
+    public void setBestQuality(boolean b) {
+        renderTraversal.setBestQuality(b);
+        
+    }
+
 
 }

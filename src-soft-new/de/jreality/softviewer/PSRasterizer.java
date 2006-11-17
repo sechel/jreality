@@ -54,7 +54,7 @@ import java.io.PrintWriter;
 public class PSRasterizer extends TriangleRasterizer {
     public static final String NONE = "none";
 
-    private boolean useGradients = false;
+    //private boolean useGradients = false;
 
     private int background;
 
@@ -226,7 +226,7 @@ public class PSRasterizer extends TriangleRasterizer {
 
     @Override
     public void setBackgroundColors(Color[] c) {
-        // TODO Auto-generated method stub
+        // TODO make a background color gradient
         
     }
 

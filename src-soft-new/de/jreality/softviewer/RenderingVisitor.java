@@ -66,11 +66,6 @@ import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.shader.*;
-import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.DefaultTextShader;
-import de.jreality.shader.EffectiveAppearance;
-import de.jreality.shader.ImageData;
-import de.jreality.shader.ShaderUtility;
 import de.jreality.softviewer.shader.DefaultPolygonShader;
 import de.jreality.softviewer.shader.LineShader;
 import de.jreality.softviewer.shader.PointShader;
@@ -92,7 +87,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
     // /*"faceShader."+*/CommonAttributes.POLYGON_SHADER;
     private static final boolean POINT_SPHERES = true;
     private static final boolean LINE_CYLINDERS = true;
-    private static final Cylinder CYLINDER = new Cylinder();;
+    private static final Cylinder CYLINDER = new Cylinder();
     
     private boolean shaderUptodate;
 
@@ -114,6 +109,16 @@ public class RenderingVisitor extends SceneGraphVisitor {
     protected PolygonShader polygonShader;
 
     protected RenderingVisitor reclaimableSubcontext;
+    private double levelOfDetail;
+    private boolean bestQuality = false;
+
+    public boolean isBestQuality() {
+        return bestQuality;
+    }
+
+    public void setBestQuality(boolean bestQuality) {
+        this.bestQuality = bestQuality;
+    }
 
     /**
      * 
@@ -157,6 +162,8 @@ public class RenderingVisitor extends SceneGraphVisitor {
         pipeline.setLineShader(lineShader = p.lineShader);
         pipeline.setPointShader(pointShader = p.pointShader);
         shaderUptodate = p.shaderUptodate;
+        levelOfDetail = p.levelOfDetail;
+        bestQuality = p.bestQuality;
         // pipeline.setPointOutlineShader(pointOutlineShader=p.pointOutlineShader);
         pipeline
                 .setMatrix(currentTrafo = initialTrafo = parentContext.currentTrafo);
@@ -201,6 +208,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
         else
             VecMat.assignIdentity(initialTrafo);
         currentTrafo = initialTrafo;
+        levelOfDetail = bestQuality?10000:CommonAttributes.LEVEL_OF_DETAIL_DEFAULT;
         environment.traverse(root);
         root.accept(this);
         pipeline.setMatrix(initialTrafo);
@@ -222,10 +230,15 @@ public class RenderingVisitor extends SceneGraphVisitor {
     public void visit(Appearance app) {
         eAppearance = eAppearance.create(app);
         shaderUptodate = false;
+        if(! bestQuality) {
+            Object lod =  app.getAttribute(CommonAttributes.LEVEL_OF_DETAIL, Double.class);
+            if(lod instanceof Double)
+                levelOfDetail = ((Double) lod).doubleValue();
+        }
     }
 
     private void setupShader() {
-
+        //levelOfDetail = eAppearance.getAttribute(CommonAttributes.LEVEL_OF_DETAIL, CommonAttributes.LEVEL_OF_DETAIL_DEFAULT);
         DefaultGeometryShader gs = ShaderUtility
                 .createDefaultGeometryShader(eAppearance);
         de.jreality.shader.PolygonShader pgs;
@@ -463,7 +476,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
        pointShader = null;
        pipeline.startGeometry(CYLINDER);
        double l = lod(1.);
-       PrimitiveCache.renderCylinder2(pipeline, l);
+       PrimitiveCache.renderCylinder2(pipeline, l*levelOfDetail);
        pointShader = pso;
        lineShader = lso;
        
@@ -742,7 +755,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
         pipeline.startGeometry(s);
         double l = lod(1.);
         //PrimitiveCache.getSphere(l).accept(this);
-        PrimitiveCache.renderSphere(pipeline, l);
+        PrimitiveCache.renderSphere(pipeline, l*levelOfDetail);
         pointShader = pso;
         lineShader = lso;
     }
@@ -756,7 +769,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
         pointShader = null;
         pipeline.startGeometry(c);
         double l = lod(1.);
-        PrimitiveCache.renderCylinder(pipeline, l);
+        PrimitiveCache.renderCylinder(pipeline, l*levelOfDetail);
         //PrimitiveCache.getCylinder().accept(this);
         pointShader = pso;
         lineShader = lso;

@@ -355,7 +355,7 @@ public class SVGRasterizer extends TriangleRasterizer {
 
     @Override
     public void setBackgroundColors(Color[] c) {
-        // TODO Auto-generated method stub
+        // TODO make a background color gradinet
         
     }
 }
