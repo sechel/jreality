@@ -139,7 +139,6 @@ public class Primitives {
 		}
 		public static IndexedFaceSet box(double width,double hight,double depth,boolean colored, int signature){
 			double w=width/2;	double h=hight/2;	double d=depth/2;
-			IndexedFaceSet cube = new IndexedFaceSet(8, 6);
 			double[][] points =  
 			 {{w,h,d},{w,h,-d},{w,-h,d},{w,-h,-d},
 			 {-w,h,d},{-w,h,-d},{-w,-h,d},{-w,-h,-d}};

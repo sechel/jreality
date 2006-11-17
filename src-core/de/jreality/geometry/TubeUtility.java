@@ -67,7 +67,7 @@ import de.jreality.util.LoggingSystem;
  */
 public class TubeUtility {
 
-		static int debug = 0;
+		static int debug = 127;
 		static Logger theLogger = null;
 		static TubeUtility tubeUtilityInstance = null;  // needed to create instances of the contained class FrameInfo
 		static {
@@ -204,6 +204,13 @@ public class TubeUtility {
 			else p1 = ip1;
 			if (ip2.length == 3) Pn.homogenize(p2, ip2);
 			else p2 = ip2;
+			boolean isValid1 = Pn.isValidCoordinate(p1, 3, signature);
+			boolean isValid2 = Pn.isValidCoordinate(p2, 3, signature);
+			if ( !isValid1 && !isValid2) return new SceneGraphComponent();
+			if (!isValid1)	
+				Rn.linearCombination(p1, .99, p1, .01, p2);//(p1, p1, p2, .999, signature);
+			else if (!isValid2) 
+				Rn.linearCombination(p2, .99, p2, .01, p1); //(p2, p2, p1, .999, signature);
 			Pn.normalize(p1, p1, signature);
 			Pn.normalize(p2, p2, signature);
 			
