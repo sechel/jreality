@@ -157,8 +157,8 @@ public class SimpleTexture implements Texture {
         //v = v<0?v -Math.floor(v/height):v;
         u = u<0?u -(Math.floor(u/width)-1)*width:u;
         v = v<0?v -(Math.floor(v/height)-1)*height:v;
-        if(u<0| v<0)
-            System.err.println("bad uv");
+//        if(u<0| v<0)
+//            System.err.println("bad uv");
         dam = (u);
         am  = (int)dam;
         dam = 1 - (dam-am);

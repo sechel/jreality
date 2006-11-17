@@ -39,6 +39,7 @@
 
 package de.jreality.softviewer;
 
+import java.awt.Color;
 import java.io.PrintWriter;
 
 /**
@@ -221,6 +222,12 @@ public class PSRasterizer extends TriangleRasterizer {
         hh = (height) / 2;
         mh = Math.min(wh, hh);
 
+    }
+
+    @Override
+    public void setBackgroundColors(Color[] c) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

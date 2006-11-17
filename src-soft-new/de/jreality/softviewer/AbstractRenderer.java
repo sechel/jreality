@@ -62,6 +62,10 @@ public abstract class AbstractRenderer {
     protected TrianglePipeline pipeline;
     protected TriangleRasterizer rasterizer;
     protected RenderingVisitor renderTraversal;
+    private Color leftlower;
+    private Color rightupper;
+    private Color leftupper;
+    private Color rightlower;
 
     public AbstractRenderer(TriangleRasterizer r,boolean intersecting) {
         super();
@@ -97,25 +101,34 @@ public abstract class AbstractRenderer {
           Color background;
           CubeMap sky= null;
           if(a != null) {
-              Object o = a.getAttribute(CommonAttributes.BACKGROUND_COLOR);
+              // if there is a sky box read it
+              if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
+                      CommonAttributes.SKY_BOX, a)) {
+                  sky = (CubeMap) AttributeEntityUtility
+                  .createAttributeEntity(CubeMap.class,
+                          CommonAttributes.SKY_BOX, a, true);
+              }
+              
+              Object o = a.getAttribute(CommonAttributes.BACKGROUND_COLORS);
+              if(o instanceof Color[] || sky != null) {
+                  Color[] colors = (Color[] ) o;
+                      rasterizer.setBackgroundColors(colors);
+              } else
+                  rasterizer.setBackgroundColors(null);
+              o = a.getAttribute(CommonAttributes.BACKGROUND_COLOR);
     
               if( o instanceof Color) background = (Color) o;
               //else background = Color.WHITE;
               else background = CommonAttributes.BACKGROUND_COLOR_DEFAULT;
               
-              // if there is a sky box read it
-              if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
-                    CommonAttributes.SKY_BOX, a)) {
-                sky = (CubeMap) AttributeEntityUtility
-                        .createAttributeEntity(CubeMap.class,
-                                CommonAttributes.SKY_BOX, a, true);
-              }
           } else {
               background = Color.WHITE;
+              rasterizer.setBackgroundColors(null);
           }
         rasterizer.setBackground(background.getRGB());
         // only clear screen if sky != null
-        rasterizer.clear(sky==null);
+        rasterizer.clear(sky== null);
+        //rasterizer.clear(true);
         rasterizer.start();
         //
         // set camera settings:
@@ -163,11 +176,11 @@ public abstract class AbstractRenderer {
           renderTraversal.traverse(root);
           if(auxiliaryRoot!= null)
               renderTraversal.traverse(auxiliaryRoot);
-        }
         
-        //finally if there is a sky box raster it
-        if(sky != null) {
-            PrimitiveCache.renderSky(pipeline,sky);
+          //finally if there is a sky box raster it
+          if(sky != null) {
+              PrimitiveCache.renderSky(pipeline,sky);
+          }
         }
         
         pipeline.finish();

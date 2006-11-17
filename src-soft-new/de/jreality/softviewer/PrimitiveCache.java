@@ -235,8 +235,11 @@ public class PrimitiveCache {
 
     }
 
-    public static void renderCylinder2(TrianglePipeline pipeline, double lod, double d, double e) {
+    public static void renderCylinder2(TrianglePipeline pipeline, double lod) {
         int i = ((int) Math.min(12 * Math.pow(lod, 1 / 2.5), 12));
+
+ /*
+ 
 
         double[] v =  tubeVerticesDoubles[i];
         double angle = 0, delta = Math.PI*2/(i+3);
@@ -247,6 +250,7 @@ public class PrimitiveCache {
             v[4*k+2] = d;
             v[4*k+3] = e;
         }
+        */
         for (int j = 0, n = tubeIndices[i].size(); j < n; j++) {
             pipeline.processPolygon(tubeVertices[i], tubeIndices[i]
                     .getValueAt(j), tubeNormals[i], tubeIndices[i]
@@ -264,11 +268,14 @@ public class PrimitiveCache {
             double angle = 0, delta = Math.PI*2/(n);
             for (int i = 0 ;i<rn; ++i)  {
                 angle = i*delta;
-                verts[4*(i+rn)] = verts[4*i] = norms[3*(i+rn)] = norms[3*i] = Math.cos(angle);
-                verts[4*(i+rn)+1] = verts[4*i+1] =  norms[3*(i+rn)+1] = norms[3*i+1] = Math.sin(angle);
+                verts[4*(i+rn)] = 0;
+                verts[4*i] = norms[3*(i+rn)] = norms[3*i] = Math.cos(angle);
+                verts[4*(i+rn)+1] = 0;
+                verts[4*i+1] =  norms[3*(i+rn)+1] = norms[3*i+1] = Math.sin(angle);
                 verts[4*i+2] = 0;
                 verts[4*(i+rn)+2] = 1;
-                verts[4*i+3] = verts[4*(i+rn)+3] = 1;
+                verts[4*i+3] = 1;
+                verts[4*(i+rn)+3] = 0;
                 norms[3*i+2] = norms[3*(i+rn)+2] = 0;
                 idx[i][0] = i;
                 idx[i][1] = (i+1)%rn;

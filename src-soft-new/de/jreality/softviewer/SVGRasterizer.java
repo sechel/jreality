@@ -40,6 +40,7 @@
 
 package de.jreality.softviewer;
 
+import java.awt.Color;
 import java.io.PrintWriter;
 
 /**
@@ -350,5 +351,11 @@ public class SVGRasterizer extends TriangleRasterizer {
     @Override
     public int getBackground() {
         return background;
+    }
+
+    @Override
+    public void setBackgroundColors(Color[] c) {
+        // TODO Auto-generated method stub
+        
     }
 }

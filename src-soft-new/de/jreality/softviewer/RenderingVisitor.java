@@ -463,7 +463,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
        pointShader = null;
        pipeline.startGeometry(CYLINDER);
        double l = lod(1.);
-       PrimitiveCache.renderCylinder2(pipeline, l,d,w1*w2);
+       PrimitiveCache.renderCylinder2(pipeline, l);
        pointShader = pso;
        lineShader = lso;
        

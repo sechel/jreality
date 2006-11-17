@@ -39,6 +39,7 @@
 
 package de.jreality.softviewer;
 
+import java.awt.Color;
 import java.util.Arrays;
 
 /*
@@ -553,6 +554,16 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
     }
 
     final double[] data = new double[Polygon.VERTEX_LENGTH];
+   
+    private int[] backgroundArray;
+
+    private int rightlower;
+
+    private int rightupper;
+
+    private int leftupper;
+
+    private int leftlower;
 
     private final void colorize(final int pos) {
 
@@ -683,6 +694,8 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
             h = nh;
             final int numPx = w * h;
             zBuffer = new double[numPx];
+            if(backgroundArray != null)
+                makeBackgroundArray();
         }
 
     }
@@ -708,7 +721,10 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
     public final void clear(boolean clearBackground) {
         Arrays.fill(zBuffer, Double.MAX_VALUE);
         if(clearBackground)
-            Arrays.fill(pixels, background);
+            if(backgroundArray!= null)
+                System.arraycopy(backgroundArray, 0, pixels, 0, pixels.length);
+            else
+                Arrays.fill(pixels, background);
 
     }
 
@@ -720,6 +736,45 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
 
     public boolean isInterpolateUV() {
         return interpolateUV;
+    }
+
+    @Override
+    public void setBackgroundColors(Color[] colors) {
+        if(colors == null) {
+            backgroundArray = null;
+            return;
+        }
+        
+        int lu = colors[0].getRGB();
+        int ru = colors[1].getRGB();
+        int ld = colors[2].getRGB();
+        int rd = colors[3].getRGB();;
+        if ( lu != leftupper || ru != rightupper || ld != leftlower || rd != rightlower) {
+            leftupper = lu;
+            rightupper = ru;
+            leftlower = ld;
+            rightlower = rd;
+            makeBackgroundArray();
+        }
+    }
+
+    private void makeBackgroundArray() {
+        backgroundArray = new int[w*h];
+        for(int i = 0; i<w; i++) {
+            double l = i/(double)w;
+            for(int j = 0;j<h;j++) {
+                double m = j/(double) h;
+                double r =(1-m)* ( (l) *(255&(leftupper>>16)) + (1-l)*(255&(rightupper>>16))) +
+                (m)* ( (l) *(255&(leftlower>>16)) + (1-l)*(255&(rightlower>>16)));
+                
+                double g =(1-m)* ( (l) *(255&(leftupper>>8)) + (1-l)*(255&(rightupper>>8))) +
+                (m)* ( (l) *(255&(leftlower>>8)) + (1-l)*(255&(rightlower>>8)));
+                
+                double b =(1-m)* ( (l) *(255&(leftupper>>0)) + (1-l)*(255&(rightupper>>0))) +
+                (m)* ( (l) *(255&(leftlower>>0)) + (1-l)*(255&(rightlower>>0)));
+                backgroundArray[i+ w*j] = 0xff000000 + (((int)r)<< 16)  + (((int)g)<<8) + ((int)b);
+            }
+        }
     }
 
 }

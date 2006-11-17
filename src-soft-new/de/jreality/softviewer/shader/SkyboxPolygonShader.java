@@ -51,6 +51,14 @@ import de.jreality.softviewer.Polygon;
  */
 public class SkyboxPolygonShader extends DefaultPolygonShader {
 
+    @Override
+    public boolean interpolateAlpha() {
+        return false;
+    }
+    @Override
+    public boolean needsSorting() {
+        return false;
+    }
     public SkyboxPolygonShader() {
         super(new ConstantVertexShader(1,1,1));
     }
