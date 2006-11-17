@@ -483,6 +483,22 @@ public class Pn {
 		return innerProduct(dst, src, sig);
 	}
 	 
+	public static boolean isValidCoordinate(double[] transVec, int dim, int sig) {
+		boolean ret = true;
+		if (sig == Pn.EUCLIDEAN && transVec.length == (dim+1) && transVec[dim] == 0.0) {
+			ret = false;
+		}
+		else if (sig == Pn.HYPERBOLIC)	{
+			if (transVec.length == (dim+1) && !(Pn.innerProduct(transVec, transVec, sig) < 0)) ret = false;
+			else if (transVec.length == dim && !(Rn.innerProduct(transVec, transVec) < 1)) ret = false;
+		}
+		if (!ret) {
+			System.err.println("Invalid coordinate: "+Rn.toString(transVec)+" sig: "+sig);
+		}
+		return ret;
+	}
+
+		
 	 /**
 	 * Linear interpolate respecting the given metric <i>sig</i>.  
 	 * That is, find the point <i>p</i> in the linear
@@ -859,5 +875,5 @@ public class Pn {
 		for (int i = 0; i<sl; ++i)	setToLength(dst[i], src[i], d, signature);
 		return dst;
 	}
-	
+
 }		

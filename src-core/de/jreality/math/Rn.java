@@ -540,6 +540,14 @@ final public class Rn {
 		return m;
 	}
 	
+	public static double[] diagonalMatrix(double[] dst, double[] entries) {
+		int n = entries.length;
+		if (dst == null) dst = identityMatrix(n);
+		
+		for(int i=0; i<n; ++i) dst[n*i+i] = entries[i];
+		return dst;
+	}
+	
 	/**
 	 * Calculate and return the euclidean inner product of the  two vectors.
 	 * @param u

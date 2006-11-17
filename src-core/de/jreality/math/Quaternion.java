@@ -92,6 +92,12 @@ final public class Quaternion implements Cloneable, Serializable {
 		"k: "+Double.toString(z);
 	}
 		
+	public static double[] asDouble(double[] dst, Quaternion q)	{
+		if (dst == null) dst = new double[4];
+		dst[0] = q.re; dst[1] = q.x; dst[2] = q.y; dst[3] = q.z;
+		return dst;
+	}
+	
 	public void setValue(double r, double dx, double dy, double dz)	{
 		re = r;
 		x = dx;
@@ -333,7 +339,7 @@ final public class Quaternion implements Cloneable, Serializable {
 	 * @param qt
 	 * @return
 	 */
-	public static double[] quaternionToRotationMatrix( double[] rot, Quaternion qt)	{		
+	public static double[] quaternionToRotationMatrixOld( double[] rot, Quaternion qt)	{		
 		if (rot == null) rot = new double[16];
 		double[] axis = new double[3];
 		Quaternion q = new Quaternion();
@@ -349,6 +355,23 @@ final public class Quaternion implements Cloneable, Serializable {
 		return P3.makeRotationMatrix(rot, axis, angle);
 	}
 
+	public static double[] quaternionToRotationMatrix( double[] rot, Quaternion qt)	{	
+		if (rot == null) rot = new double[16];
+		Rn.setToValue(rot, 0.0);
+		Quaternion.normalize(qt, qt);
+		rot[0] = qt.re*qt.re + qt.x*qt.x - qt.y*qt.y - qt.z*qt.z;
+		rot[1] =  2*(-qt.re*qt.z + qt.x*qt.y);
+		rot[2] =  2*( qt.re*qt.y + qt.x*qt.z);
+		rot[4] =  2*( qt.re*qt.z + qt.y*qt.x);
+		rot[5] = qt.re*qt.re - qt.x*qt.x + qt.y*qt.y - qt.z*qt.z;
+		rot[6] = 2*(-qt.re*qt.x + qt.y*qt.z);
+		rot[8] = 2*(-qt.re*qt.y + qt.x*qt.z);
+		rot[9] = 2*( qt.re*qt.x + qt.y*qt.z);
+		rot[10]= qt.re*qt.re - qt.x*qt.x - qt.y*qt.y + qt.z*qt.z;
+		rot[15] = 1.0;
+		return rot;
+		
+	}
 	/**
 	 * @param object
 	 * @param rot1
