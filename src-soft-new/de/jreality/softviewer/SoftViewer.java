@@ -163,7 +163,7 @@ public class SoftViewer extends Component implements Runnable, Viewer {
             // avoid deadlock
             return;
         }
-        renderImpl();
+        renderImpl(getSize());
         paintImmediately();
     }
 
@@ -226,7 +226,7 @@ public class SoftViewer extends Component implements Runnable, Viewer {
                             return;
                     }
                     upToDate = true;
-                    renderImpl();
+                    renderImpl(getSize());
 
                     // upToDate=true;
                     if (imageValid)
@@ -239,10 +239,10 @@ public class SoftViewer extends Component implements Runnable, Viewer {
 
     private boolean isRendering = false;
     
-    private void renderImpl() {
+    private void renderImpl(Dimension d) {
         synchronized (renderImplLock) {
         isRendering = true;
-        Dimension d = getSize();
+        //Dimension d = getSize();
         if (d.width > 0 && d.height > 0) {
             // System.out.println("render: off="+offscreen);
             if (offscreen == null || offscreen.getWidth() != d.width
@@ -443,5 +443,12 @@ public class SoftViewer extends Component implements Runnable, Viewer {
             disposed = true;
             renderAsyncLock.notify();
         }
+    }
+    
+    public BufferedImage renderOffscreen(int width, int height) {
+        renderImpl(new Dimension(width,height));
+        BufferedImage bi = offscreen;
+        //render();
+        return bi;
     }
 }
