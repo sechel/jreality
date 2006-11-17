@@ -369,17 +369,15 @@ public class ViewerVR {
 		// root appearance
 		rootAppearance.setName("root app");
 		ShaderUtility.createRootAppearance(rootAppearance);
-//		rootAppearance.setAttribute(CommonAttributes.LINE_SHADER + "."
-//				+ CommonAttributes.AMBIENT_COEFFICIENT, 0.03);
 		rootAppearance.setAttribute(CommonAttributes.OPAQUE_TUBES_AND_SPHERES, true);
 		rootAppearance.setAttribute(CommonAttributes.LINE_SHADER + "."
 				+ CommonAttributes.PICKABLE, false);
 		rootAppearance.setAttribute(CommonAttributes.POINT_SHADER + "."
 				+ CommonAttributes.PICKABLE, false);
 		
-    rootAppearance.setAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, true);
-    rootAppearance.setAttribute(CommonAttributes.RMAN_RAY_TRACING_REFLECTIONS,true);
-    //rootAppearance.setAttribute(CommonAttributes.RMAN_RAY_TRACING_VOLUMES,true);
+		rootAppearance.setAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, true);
+		rootAppearance.setAttribute(CommonAttributes.RMAN_RAY_TRACING_REFLECTIONS,true);
+		//rootAppearance.setAttribute(CommonAttributes.RMAN_RAY_TRACING_VOLUMES,true);
 		
 		sceneRoot.setAppearance(rootAppearance);
 		Camera cam = new Camera();
