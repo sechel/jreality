@@ -55,6 +55,7 @@ import java.util.TreeSet;
 import javax.imageio.ImageIO;
 
 import de.jreality.scene.Viewer;
+import de.jreality.softviewer.SoftViewer;
 import de.jreality.ui.viewerapp.FileFilter;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerApp;
@@ -93,8 +94,8 @@ public class ExportImage extends AbstractJrAction {
     
     // Hack
     Viewer realViewer = ((ViewerSwitch)viewer).getCurrentViewer();
-    de.jreality.jogl.Viewer joglViewer = (de.jreality.jogl.Viewer) realViewer;
-    Dimension d = joglViewer.getViewingComponentSize();
+    //de.jreality.jogl.Viewer joglViewer = (de.jreality.jogl.Viewer) realViewer;
+    Dimension d = realViewer.getViewingComponentSize();
     Dimension dim = DimensionDialog.selectDimension(d,frame);
     if (dim == null) return;
     
@@ -105,8 +106,11 @@ public class ExportImage extends AbstractJrAction {
       "Export aborted.");
       return;
     }
-    
-    BufferedImage img = joglViewer.renderOffscreen(4*dim.width, 4*dim.height);
+    BufferedImage img = null;;
+    if(realViewer instanceof de.jreality.jogl.Viewer)   
+        img = ((de.jreality.jogl.Viewer)realViewer).renderOffscreen(4*dim.width, 4*dim.height);
+    if(realViewer instanceof SoftViewer)
+        img = ((SoftViewer)realViewer).renderOffscreen(4*dim.width, 4*dim.height);
     BufferedImage img2 = new BufferedImage(dim.width, dim.height,BufferedImage.TYPE_INT_RGB);
     Graphics2D g = (Graphics2D) img2.getGraphics();
     g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
@@ -128,7 +132,7 @@ public class ExportImage extends AbstractJrAction {
   @Override
   public boolean isEnabled() {
     Viewer realViewer = ((ViewerSwitch)viewer).getCurrentViewer();
-    return realViewer instanceof de.jreality.jogl.Viewer;
+    return realViewer instanceof de.jreality.jogl.Viewer || realViewer instanceof SoftViewer;
   }
   
   
