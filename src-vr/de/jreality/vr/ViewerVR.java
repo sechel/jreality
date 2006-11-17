@@ -134,7 +134,6 @@ import de.jreality.ui.viewerapp.ViewerAppMenu;
 import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
 import de.jreality.util.Rectangle3D;
-import de.jreality.util.SceneGraphUtility;
 import de.jreality.util.Secure;
 import de.jtem.beans.SimpleColorChooser;
 
@@ -340,6 +339,7 @@ public class ViewerVR {
 
 	private HeadTransformationTool headTransformationTool;
 	
+	@SuppressWarnings("serial")
 	public ViewerVR() throws IOException {
 
 		// find out where we are running
@@ -1466,12 +1466,6 @@ public class ViewerVR {
 		sp.show(getSceneRoot(), new Matrix(avatarPath.getMatrix(null)));
 	}
 	
-	private void hidePanel() {
-		if (SceneGraphUtility.getIndexOfChild(getSceneRoot(), sp.getComponent()) != -1) {
-			getSceneRoot().removeChild(sp.getComponent());
-		}
-	}
-	
 	private void updateBackgroundColorChooser(boolean top, Color c) {
 		if (currentBackgroundColorTop == top) {
 			backgroundColorChooser.setColor(c);
@@ -2212,9 +2206,9 @@ public class ViewerVR {
     }
 
     //edit View menu
-		JMenu viewMenu = menu.getMenu(ViewerAppMenu.VIEW_MENU);
+	JMenu viewMenu = menu.getMenu(ViewerAppMenu.VIEW_MENU);
     if (viewMenu != null) {
-      for (int i=0; i<3; i++)
+      for (int i=0; i<2; i++)
         viewMenu.remove(viewMenu.getMenuComponentCount()-1);
     }
     
