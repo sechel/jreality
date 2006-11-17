@@ -2206,11 +2206,11 @@ public class ViewerVR {
     }
 
     //edit View menu
-	JMenu viewMenu = menu.getMenu(ViewerAppMenu.VIEW_MENU);
-    if (viewMenu != null) {
-      for (int i=0; i<2; i++)
-        viewMenu.remove(viewMenu.getMenuComponentCount()-1);
-    }
+//	JMenu viewMenu = menu.getMenu(ViewerAppMenu.VIEW_MENU);
+//    if (viewMenu != null) {
+//      for (int i=0; i<2; i++)
+//        viewMenu.remove(viewMenu.getMenuComponentCount()-1);
+//    }
     
     //setup ViewerVR menu
     JMenu settings = new JMenu("ViewerVR");
