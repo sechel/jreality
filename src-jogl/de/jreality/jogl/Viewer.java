@@ -245,14 +245,14 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		}
 		
 /****** listeners!  ************/
-		Vector listeners;
+		Vector<RenderListener> listeners;
 		
 		public interface RenderListener extends java.util.EventListener	{
 			public void renderPerformed(EventObject e);
 		}
 
 		public void addRenderListener(Viewer.RenderListener l)	{
-			if (listeners == null)	listeners = new Vector();
+			if (listeners == null)	listeners = new Vector<RenderListener>();
 			if (listeners.contains(l)) return;
 			listeners.add(l);
 			//JOGLConfiguration.theLog.log(Level.INFO,"Viewer: Adding geometry listener"+l+"to this:"+this);
@@ -338,11 +338,6 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		if (JOGLConfiguration.sharedContexts && firstOne == null) firstOne = canvas.getContext();
 	}
 
-	  public void renderScreen(File file)	{
-	  	if (renderer != null) renderer.saveScreenShot(file, canvas);
-	  	else JOGLConfiguration.getLogger().log(Level.WARNING,"Renderer not initialized");
-	  }
-
 	  public BufferedImage renderOffscreen(int w, int h) {
 		  if (renderer != null) {
 			  return renderer.renderOffscreen(w, h, canvas);
@@ -371,9 +366,6 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		JOGLConfiguration.theLog.log(Level.INFO,"JOGL Context initialization, creating new renderer");
 		renderer.setAuxiliaryRoot(auxiliaryRoot);
 		renderer.init(arg0);  
-//	      byte[] foo = new byte[4];
-//	        canvas.getGL().glGetBooleanv(GL.GL_STEREO, foo,0);
-//	        JOGLConfiguration.getLogger().log(Level.INFO, "Stereo is:"+foo[0]);
 	}
 
 	public void reshape(

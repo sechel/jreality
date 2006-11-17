@@ -51,6 +51,7 @@ import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.jogl.JOGLSphereHelper;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.math.P3;
+import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
@@ -307,12 +308,13 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			if (pickMode) gl.glPushName(JOGLPickAction.GEOMETRY_POINT);
 			for (int i = 0; i< length; ++i)	{
 				double[] transVec = null;
-				gl.glPushMatrix();
+				transVec =  vertices.item(i).toDoubleArray().toDoubleArray(null);
+				if (! Pn.isValidCoordinate(transVec, 3, sig)) continue;
 				if (radii != null)	{
-					double radius = radii.toDoubleArray().getValueAt(i);
+					double radius = da.getValueAt(i);
 					scale[0] = scale[5] = scale[10] = radius;
 				}
-				transVec =  vertices.item(i).toDoubleArray().toDoubleArray(null);	
+				gl.glPushMatrix();
 				P3.makeTranslationMatrix(mat, transVec,sig);
 				Rn.times(mat, mat, scale);
 				gl.glMultTransposeMatrixd(mat,0);
@@ -321,7 +323,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 					if (colorLength == 3) 	{
 						gl.glColor3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 					} else if (colorLength == 4) 	{
-						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), 1.0*da.getValueAt(3));
+						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
 					} 
 				}
 				if (pickMode) gl.glPushName(i);

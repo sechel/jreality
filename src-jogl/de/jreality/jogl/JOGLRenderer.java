@@ -1284,10 +1284,10 @@ public class JOGLRenderer  implements AppearanceListener {
 			case SceneGraphComponentEvent.CHILD_TYPE_COMPONENT:
 				SceneGraphComponent sgc = (SceneGraphComponent) ev.getNewChildElement();
 				JOGLPeerComponent pc = JOGLRenderer.this.constructPeerForSceneGraphComponent(sgc, this);
-				childlock.writeLock();
+				//childlock.writeLock();
 				//theLog.log(Level.FINE,"Before adding child count is "+children.size());
 				children.add(pc);						
-				childlock.writeUnlock();
+				//childlock.writeUnlock();
 				//theLog.log(Level.FINE,"After adding child count is "+children.size());
 				setIndexOfChildren();
 				lightListDirty = true;
@@ -1326,9 +1326,9 @@ public class JOGLRenderer  implements AppearanceListener {
 				SceneGraphComponent sgc = (SceneGraphComponent) ev.getOldChildElement();
 				JOGLPeerComponent jpc = getPeerForChildComponent(sgc);
 				if (jpc == null) return;
-				childlock.writeLock();
+				//childlock.writeLock();
 				children.remove(jpc);						
-				childlock.writeUnlock();
+				//childlock.writeUnlock();
 				//theLog.log(Level.FINE,"After removal child count is "+children.size());
 				jpc.dispose();		// there are no other references to this child
 				setIndexOfChildren();

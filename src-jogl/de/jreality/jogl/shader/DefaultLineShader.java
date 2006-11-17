@@ -315,12 +315,14 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 					l = da.size();
 					for (int xx=0; xx<l; ++xx) p2[xx] = da.getValueAt(xx);
 					SceneGraphComponent cc = TubeUtility.tubeOneEdge(p1, p2, rad, crossSection, sig);
-					if (pickMode) gl.glPushName(j);
-					gl.glPushMatrix();
-					gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix(mat),0);
-					gl.glCallList(tubeDL[sig+1]);
-					gl.glPopMatrix();
-					if (pickMode) 	gl.glPopName();					
+					if (cc.getGeometry() != null)	{
+						if (pickMode) gl.glPushName(j);
+						gl.glPushMatrix();
+						gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix(mat),0);
+						gl.glCallList(tubeDL[sig+1]);						
+						gl.glPopMatrix();
+						if (pickMode) 	gl.glPopName();					
+					}
 					
 				}
 			}
