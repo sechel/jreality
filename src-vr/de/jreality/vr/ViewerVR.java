@@ -192,7 +192,7 @@ public class ViewerVR {
 	
 	// defaults for light panel
 	private static final double DEFAULT_SUN_LIGHT_INTENSITY = 1;
-	private static final double DEFAULT_HEÀD_LIGHT_INTENSITY = .2;
+	private static final double DEFAULT_HEAD_LIGHT_INTENSITY = .2;
 	private static final double DEFAULT_SKY_LIGHT_INTENSITY = .2;
 	
 	
@@ -392,7 +392,9 @@ public class ViewerVR {
 		sunLight.setName("sun light");
 		lightNode.setLight(sunLight);
 		MatrixBuilder.euclidean().rotateFromTo(new double[] { 0, 0, 1 },
-				new double[] { 0, 1, 1 }).assignTo(lightNode);
+				//new double[] { 0, 1, 1 }).assignTo(lightNode);
+				//new double[] { 0.39, .24, 0.89 }).assignTo(lightNode);
+				new double[] { 0.39, Math.sqrt(.39*.39+0.89*0.89), 0.89 }).assignTo(lightNode);
 		sceneRoot.addChild(lightNode);
 		
 		SceneGraphComponent skyNode = new SceneGraphComponent();
@@ -495,6 +497,7 @@ public class ViewerVR {
 		terrainAppearance.setAttribute("showPoints", false);
 		terrainAppearance.setAttribute("diffuseColor", Color.white);
 		terrainAppearance.setAttribute(CommonAttributes.SPECULAR_COEFFICIENT, 0);
+		terrainAppearance.setAttribute(CommonAttributes.SPECULAR_COLOR, Color.black);
 		terrainNode.setAppearance(terrainAppearance);
 		sceneRoot.addChild(terrainNode);
 		sceneRoot.addChild(sceneNode);
@@ -512,7 +515,7 @@ public class ViewerVR {
 		makeTexTab();
 		makeHelpTab();
 		makeLightTab();
-		setHeadLightIntensity(DEFAULT_HEÀD_LIGHT_INTENSITY);
+		setHeadLightIntensity(DEFAULT_HEAD_LIGHT_INTENSITY);
 		setSunIntensity(DEFAULT_SUN_LIGHT_INTENSITY);
 		setSkyLightIntensity(DEFAULT_SKY_LIGHT_INTENSITY);
 		
