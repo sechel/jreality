@@ -192,7 +192,7 @@ public class ViewerVR {
 	
 	// defaults for light panel
 	private static final double DEFAULT_SUN_LIGHT_INTENSITY = 1;
-	private static final double DEFAULT_HEAD_LIGHT_INTENSITY = .2;
+	private static final double DEFAULT_HEAD_LIGHT_INTENSITY = .3;
 	private static final double DEFAULT_SKY_LIGHT_INTENSITY = .2;
 	
 	
