@@ -41,8 +41,11 @@ public class Landscape {
 		//{"mountain","textures/malrav11/malrav11sky_", sideNames, ".jpg", "textures/mxsnow0.jpg","10", "false", "80 80 120", "0 0 0"},
 		{"desert","textures/dragonvale_hc/dragonvale_hc_", sideNames, ".jpg","textures/dragonvale_hc/dragonvale_hc_dn_seamless.jpg","10", "false", "80 80 120", "0 0 0"},
 		{"night","textures/dragonmoon/dragonmoon_", sideNames, ".jpg","textures/dragonmoon/dragonmoon_dnSeamless.jpg","10", "false", "80 80 120", "0 0 0"},
-		{"tiles dark", null, null, null, "textures/recycfloor1_fin.png", "50", "true", "80 80 120", "0 0 0"},
-		{"tiles bright", null, null, null, "textures/recycfloor1_clean2.png", "50", "true", "225 225 245", "0 0 0"}
+		//{"tiles dark", null, null, null, "textures/recycfloor1_fin.png", "50", "true", "80 80 120", "0 0 0"},
+		//{"tiles bright", null, null, null, "textures/recycfloor1_clean2.png", "50", "true", "225 225 245", "0 0 0"}
+		{"St. Peter", "textures/stPeter/stpeters_cross_", sideNames, ".png", "textures/chainlinkfence.png", "50", "true", "225 225 245", "0 0 0"},
+		{"grace cross", "textures/grace_cross/grace_cross_", sideNames, ".jpg", "textures/outfactory3.png", "50", "true", "225 225 245", "0 0 0"}
+		//{"forest", "textures/forest/forest_", sideNames, ".jpg", "textures/outfactory3.png", "50", "true", "225 225 245", "0 0 0"}
 	};
 
 	private final transient ArrayList<ChangeListener> listeners=new ArrayList<ChangeListener>();
