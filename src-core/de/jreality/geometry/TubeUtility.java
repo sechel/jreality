@@ -67,7 +67,7 @@ import de.jreality.util.LoggingSystem;
  */
 public class TubeUtility {
 
-		static int debug = 127;
+		static int debug = 0;
 		static Logger theLogger = null;
 		static TubeUtility tubeUtilityInstance = null;  // needed to create instances of the contained class FrameInfo
 		static {
