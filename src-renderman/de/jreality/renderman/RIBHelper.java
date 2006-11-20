@@ -153,13 +153,12 @@ public class RIBHelper {
 //               if (byteArray[ptr + 3]==0) pix[3]=(byte) 0;                 
 //               else pix[3]=(byte) 255;                              
 //             }    
-             
-             pix[3]=byteArray[ptr + 3]; 
-             
+                          
              pix[0] = byteArray[ptr];
              pix[1] = byteArray[ptr + 1];
              pix[2] = byteArray[ptr + 2];
-             raster.setPixel(x, y, pix);
+             pix[3]=byteArray[ptr + 3]; 
+            raster.setPixel(x, y, pix);
            }
          }                      
 	  } else {
@@ -170,15 +169,13 @@ public class RIBHelper {
 	
 	  boolean worked=true;
 		try {
-					// TODO: !!!
-					//worked = ImageIO.write(img, "TIFF", new File(noSuffix+".tiff"));
-		  Method cm = Class.forName("javax.media.jai.JAI").getMethod("create", new Class[]{String.class, RenderedImage.class, Object.class, Object.class});
-		  cm.invoke(null, new Object[]{"filestore", img, noSuffix+".tiff", "tiff"});
-	//				Statement stm = new Statement(, "create", new Object[]{"filestore", img, noSuffix+".tiff", "tiff"});
-	//				stm.execute();
+			// TODO: !!!
+			//worked = ImageIO.write(img, "TIFF", new File(noSuffix+".tiff"));
+			Method cm = Class.forName("javax.media.jai.JAI").getMethod("create", new Class[]{String.class, RenderedImage.class, Object.class, Object.class});
+			cm.invoke(null, new Object[]{"filestore", img, noSuffix+".tiff", "tiff"});
 		} catch(Throwable e) {
-		worked=false;
-		LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write TIFF: "+noSuffix+".tiff", e);
+			worked=false;
+			LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write TIFF: "+noSuffix+".tiff", e);
 		}
 	  if (!worked) {
 	    try {

@@ -138,81 +138,56 @@ import de.jreality.util.CameraUtility;
  */
 public class RIBVisitor extends SceneGraphVisitor {
 	private SceneGraphComponent root;
-
 	private SceneGraphPath cameraPath;
-
-	private double[] world2Camera;
-
-	private SceneGraphPath object2world = new SceneGraphPath();
-
-	private Camera camera;
-
-	private int width = 640;
-
-	private int height = 480;
-
-	private String ribFileName;
-
-	private int[] maximumEyeSplits = { 10 };
-
-	boolean insidePointset = false; // life gets complicated with
-									// appearance-generated tubes and spheres
-
-	protected boolean shadowEnabled = false;
-  
-  private boolean fogEnabled=false;
-
-	protected boolean fullSpotLight = false;
-
-	protected boolean retainGeometry = false; // should geometry be saved
+	transient private double[] world2Camera;
+	transient private SceneGraphPath object2world = new SceneGraphPath();
+	transient private Camera camera;
+	transient private int width = 640;
+	transient private int height = 480;
+	transient private String ribFileName;
+	transient private int[] maximumEyeSplits = { 10 };
+	transient boolean insidePointset = false; 
+	transient protected boolean shadowEnabled = false;
+	transient private boolean fogEnabled=false;
+	transient protected boolean fullSpotLight = false;
+	transient protected boolean retainGeometry = false; // should geometry be saved
 												// using "Begin/EndArchive"?
-
-	protected boolean useProxyCommands = true;
-
+	transient protected boolean useProxyCommands = true;
 	// user can specify that tubes and spheres drawn by the appearances are to
-	// be opaque
-	// reqardless of the current transparency value
-	protected boolean opaqueTubes = false;
+	// be opaque reqardless of the current transparency value
+	transient protected boolean opaqueTubes = false;
+	transient private boolean writeShadersToFile = true;
+	transient private boolean hasPw = false;		// can the renderer handle "Pw" successfully?
 
-	protected String shaderPath = null;
-
-	protected boolean handlingProxyGeometry = false;
-
-	private boolean writeShadersToFile = true;
-
-	private String globalIncludeFile = "";
-
-	private int rendererType = RIBViewer.TYPE_PIXAR;
-
-	private int currentSignature = Pn.EUCLIDEAN;
-
-	private String outputDisplayFormat = "rgb";
-
-	protected String textureFileSuffix = "tex"; // When it's not prman, set to
+	transient private String globalIncludeFile = "";
+	transient private int rendererType = RIBViewer.TYPE_PIXAR;
+	transient private int currentSignature = Pn.EUCLIDEAN;
+	transient private String outputDisplayFormat = "rgb";
+	transient protected String textureFileSuffix = "tex"; // When it's not prman, set to
 												// "tiff" probably.
-
-	private boolean hasPw = false;
-
+	transient protected boolean handlingProxyGeometry = false;
+	transient String currentProxyCommand = null;
+	transient SceneGraphComponent currentProxySGC = null;
+	
+	transient protected String shaderPath = null;
 	transient protected EffectiveAppearance eAppearance = EffectiveAppearance.create();
-
 	transient private int textureCount = 0;
-
 	transient private Map<ImageData, String> textures = new HashMap<ImageData, String>();
-
 	transient private Hashtable<PointSet, String> pointsets = new Hashtable<PointSet, String>();
-
 	transient int pointsetCount = 0;
-
 	transient protected Ri ri = new Ri();
-
 	transient int whichEye = CameraUtility.MIDDLE_EYE;
-
+	private boolean raytracedReflectionsEnabled;
+	private boolean raytracedVolumesEnabled;
 	RenderScript renderScript;
 
-  private boolean raytracedReflectionsEnabled;
-
-  private boolean raytracedVolumesEnabled;
-
+	private float currentOpacity;
+	private Appearance rootAppearance;
+	private String outputFileName;
+	private boolean transparencyEnabled;
+	private HashMap<ImageData, String> cubeMaps = new HashMap<ImageData, String>();
+	private int cubeMapCount;
+	private String cubeMapFileSuffix = "env";
 
 	public void visit(Viewer viewer, String name) {
 		// handle the file name
@@ -320,11 +295,9 @@ public class RIBVisitor extends SceneGraphVisitor {
 						CameraUtility.getViewport(camera, aspectRatio), eyeP);
 				ri.comment("Testing left eye stereo");
 				// can a stereo camera be non-perspective?
-				ri.projection(camera.isPerspective() ? "perspective"
-						: "orthographic", null);
+				ri.projection(camera.isPerspective() ? "perspective": "orthographic", null);
 				ri.screenWindow(vp);
-				ri.concatTransform(RIBHelper.fTranspose(MatrixBuilder
-						.euclidean().scale(1, 1, -1).getArray()));
+				ri.concatTransform(RIBHelper.fTranspose(MatrixBuilder.euclidean().scale(1, 1, -1).getArray()));
 				double[] moveToEye = Rn.inverse(null, P3.makeTranslationMatrix(
 						null, eyeP, currentSignature));
 				ri.concatTransform(RIBHelper.fTranspose(moveToEye));
@@ -567,7 +540,11 @@ public class RIBVisitor extends SceneGraphVisitor {
 			eAppearance = eAppearance.create(a);
 		}
 		object2world.push(c);
-		c.childrenAccept(this);
+		if (hasProxy(c)) {
+			setupShader(eAppearance, CommonAttributes.POLYGON_SHADER);	// not perfect but better than nothing
+			handleCurrentProxy();
+		} else
+			c.childrenAccept(this);
 		object2world.pop();
 		ri.attributeEnd(c.getName());
 		// restore effective appearance
@@ -693,25 +670,53 @@ public class RIBVisitor extends SceneGraphVisitor {
 	 * @param g
 	 * @return
 	 */
-	public boolean hasProxy(Geometry g) {
-		if (!useProxyCommands)
-			return false;
-		Object proxy = g.getGeometryAttributes("rendermanProxyCommand");
-		if (proxy != null) {
-			if (proxy instanceof String) {
-				ri.verbatim((String) proxy);
-				// System.err.println("Found proxy "+proxy);
-			} else if (proxy instanceof SceneGraphComponent) {
-				visit((SceneGraphComponent) proxy);
-				// System.err.println("RIBVisitor: Found sgc proxy");
+	public void checkForProxy(Geometry g) {
+		if (!useProxyCommands) return;
+		Object proxy = g.getGeometryAttributes(CommonAttributes.RMAN_PROXY_COMMAND);
+		handleProxyObject(proxy);
+	}
+
+	private boolean hasProxy()	{
+		return currentProxyCommand != null || currentProxySGC != null;
+	}
+	
+	public boolean hasProxy(Geometry g)	{
+		checkForProxy(g);
+		return hasProxy();
+	}
+	
+	public boolean hasProxy(SceneGraphComponent g) {
+		if (!useProxyCommands || g.getAppearance() == null) return false;
+		Object obj = g.getAppearance().getAttribute(CommonAttributes.RMAN_PROXY_COMMAND);
+		handleProxyObject(obj);
+		return hasProxy();
+	}
+
+	private void handleProxyObject(Object obj) {
+		currentProxyCommand = null;
+		currentProxySGC = null;
+		if (obj != null) {
+			if (obj instanceof String) {
+				currentProxyCommand = (String) obj;
 			}
-			return true;
+			if (obj instanceof SceneGraphComponent)	{
+				currentProxySGC = (SceneGraphComponent) obj;
+			}
 		}
-		return false;
+	}
+
+	private void handleCurrentProxy() {
+		if (currentProxyCommand != null)	{
+			ri.verbatim(currentProxyCommand);
+			currentProxyCommand = null;			
+		} else if (currentProxySGC != null)	{
+			visit(currentProxySGC);
+			currentProxySGC = null;
+		}
 	}
 
 	public void visit(Geometry g) {
-		hasProxy(g);
+		if (hasProxy(g)) handleCurrentProxy();
 		super.visit(g);
 		// System.err.println("Visiting geometry RIBVisitor");
 	}
@@ -808,20 +813,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 		}
 	}
 
-	private float currentOpacity;
-
-	private Appearance rootAppearance;
-
-	private String outputFileName;
-
-	private boolean transparencyEnabled;
-
-	private HashMap<ImageData, String> cubeMaps = new HashMap<ImageData, String>();
-
-	private int cubeMapCount;
-
-	private String cubeMapFileSuffix = "env";
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -830,8 +821,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 	public void visit(IndexedLineSet g) {
 		ri.comment("IndexedLineSet " + g.getName());
 		ri.attributeBegin();
-		setupShader(eAppearance, CommonAttributes.POLYGON_SHADER);
+		setupShader(eAppearance, CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER);
+		checkForProxy(g);
 		if (hasProxy((Geometry) g)) {
+			handleCurrentProxy();
 			insidePointset = false;
 		} else {
 			if (!insidePointset) {
@@ -861,12 +854,12 @@ public class RIBVisitor extends SceneGraphVisitor {
 
 	private void _visit(IndexedLineSet g)	{
        String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
-         if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW),true)) {
+       if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW),true)) {
         
-        DataList dl = g.getEdgeAttributes(Attribute.INDICES);
-        if(dl!=null){
-            boolean tubesDraw = eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.TUBES_DRAW),CommonAttributes.TUBES_DRAW_DEFAULT);
-            if (tubesDraw)  {
+    	   DataList dl = g.getEdgeAttributes(Attribute.INDICES);
+    	   if(dl!=null){
+    		   boolean tubesDraw = eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.TUBES_DRAW),CommonAttributes.TUBES_DRAW_DEFAULT);
+    		   if (tubesDraw)  {
                float r = (float) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS,CommonAttributes.TUBE_RADIUS_DEFAULT);
                  Color cc = (Color) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,  CommonAttributes.DIFFUSE_COLOR_DEFAULT );
                  // TODO take into account alpha channel of cc
@@ -874,8 +867,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 					// of the color!
                 float[] raw = new float[4];
                 cc.getRGBComponents(raw);
-                if (!opaqueTubes) raw[3] *= currentOpacity;
-                cc = new Color(raw[0], raw[1], raw[2], raw[3]); 
+                 cc = new Color(raw[0], raw[1], raw[2], raw[3]); 
                 // System.err.println("opaque tubes is "+opaqueTubes);
                 // System.err.println("alpha channel is "+cc.getAlpha());
 
@@ -897,7 +889,8 @@ public class RIBVisitor extends SceneGraphVisitor {
         	   } else {
        				DataList edgec =  g.getEdgeAttributes(Attribute.COLORS);
         		   int n = g.getNumEdges();
-        		   ri.color(cc);
+                   if (!opaqueTubes) raw[3] *= currentOpacity;
+                   ri.color(cc);
         		   double[][] crossSection = TubeUtility.octagonalCrossSection;
         			Object foo = eAppearance.getAttribute("lineShader.crossSection", crossSection);
         			if (foo != crossSection)	{
@@ -968,7 +961,9 @@ public class RIBVisitor extends SceneGraphVisitor {
 		ri.comment("IndexedFaceSet " + g.getName());
 		ri.attributeBegin();
 		setupShader(eAppearance, CommonAttributes.POLYGON_SHADER);
+		checkForProxy(g);
 		if (hasProxy((Geometry) g)) {
+			handleCurrentProxy();
 			insidePointset = false;
 		} else {
 			if (!insidePointset) {
