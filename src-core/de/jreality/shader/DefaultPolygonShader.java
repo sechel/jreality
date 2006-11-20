@@ -91,7 +91,7 @@ public interface DefaultPolygonShader extends PolygonShader {
 
 	TextShader createTextShader(String name);
 	Texture2D createTexture2d();
-
+	CubeMap createReflectionMap();
 	Double getAmbientCoefficient();
 	Color getAmbientColor();
 
@@ -105,7 +105,8 @@ public interface DefaultPolygonShader extends PolygonShader {
 	Double getSpecularExponent();
 
 	TextShader getTextShader();
-	Texture2D getTexture2d();
+    Texture2D getTexture2d();
+    CubeMap getReflectionMap();
 
 	Double getTransparency();
 	void setAmbientCoefficient(Double d);
