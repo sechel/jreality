@@ -61,6 +61,8 @@ public class SimpleTexture implements Texture {
     protected final int incr;
     protected final boolean interpolate;
     
+    private final boolean transparent;
+    
     private static final double[] identity = new Matrix().getArray();
 	
 	public SimpleTexture(ImageData id) {
@@ -72,6 +74,7 @@ public class SimpleTexture implements Texture {
 	      this.clampV = true;
 		interpolate = true;
         incr =3*width*height== bytes.length?3:4;
+        transparent = incr ==4;
 	}
     public SimpleTexture(Texture2D texture) {
       this.bytes = (byte[]) texture.getImage().getByteArray();//.clone();
@@ -84,9 +87,10 @@ public class SimpleTexture implements Texture {
       this.clampV = texture.getRepeatT()==Texture2D.CLAMP;
       incr =3*width*height== bytes.length?3:4;
       interpolate =(texture.getMinFilter()==Texture2D.GL_LINEAR);
+      transparent = incr ==4;
   }
 
-    public void  getColor(double u, double v,int x, int y, int color[]) {
+    public void  getColor(double u, double v,double nx, double ny, double nz, int x, int y, double color[]) {
         //if(u!= 0)System.out.println(((int)(u*width*uscale+.5))%width);
         //int c = pixels[((int)(u*width*uscale+.5))%width +width*(((int)(v*height*vscale+.5))%height)];
         if(interpolate)
@@ -96,7 +100,7 @@ public class SimpleTexture implements Texture {
         
     }
 
-    protected final void getPixelNearest(final double uu, final double vv,  final int[] color) {
+    protected final void getPixelNearest(final double uu, final double vv,  final double[] color) {
         int a,b;
         double u = width*(uu*matrix[0] + vv*matrix[1] + matrix[3]);
         double v = height*(uu*matrix[4+0] + vv*matrix[4+1] + matrix[4+3]);
@@ -122,25 +126,20 @@ public class SimpleTexture implements Texture {
 //        color[0]   = ((255&bytes[pos+0])  *color[0]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
 //        color[1]   = ((255&bytes[pos+1])  *color[1]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
 //        color[2]   = ((255&bytes[pos+2])  *color[2]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
-        color[0]  *= 255&bytes[pos+0];
-        color[1]  *= 255&bytes[pos+1];
-        color[2]  *= 255&bytes[pos+2];
+        color[0]  *= (255&bytes[pos+0])/255.;
+        color[1]  *= (255&bytes[pos+1])/255.;
+        color[2]  *= (255&bytes[pos+2])/255.;
         
         if(incr == 4)
 //            color[3] = (255&bytes[pos+3]*color[3]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
-            color[3]  *= 255&bytes[pos+3];
-        else
-//            color[3] = (255*color[3]*NewPolygonRasterizer.COLOR_CH_SCALE)>>NewPolygonRasterizer.FIXP;
-            color[3] *= 255;
+            color[3]  *= (255&bytes[pos+3])/255.;
+       // else
+       //    color[3] *= 255;
     
         
-        //color[0]  =255;
-        //color[1]  =255;
-        //color[2]  =255;
-        //color[3]  =255;
     }
     
-    protected final void getPixelInterpolate(final double uu, final double vv,  final int[] color) {
+    protected final void getPixelInterpolate(final double uu, final double vv,  final double[] color) {
         int ap,am, bp, bm;
         //double[] tmpColor =new double[4];
         double r=0;
@@ -195,7 +194,7 @@ public class SimpleTexture implements Texture {
         
         
         int pos =incr *(am +width*bm);
-        double fac=dam*dbm;
+        double fac=dam*dbm/255.;
         r  += fac*(255&bytes[pos+0]);
         g  += fac*(255&bytes[pos+1]);
         b  += fac*(255&bytes[pos+2]);
@@ -203,7 +202,7 @@ public class SimpleTexture implements Texture {
             a  += fac*(255&bytes[pos+3]);
         
         pos =incr *(ap +width*bm);
-        fac=dap*dbm;
+        fac=dap*dbm/255;
         r  += fac*(255&bytes[pos+0]);
         g  += fac*(255&bytes[pos+1]);
         b  += fac*(255&bytes[pos+2]);
@@ -211,7 +210,7 @@ public class SimpleTexture implements Texture {
             a  += fac*(255&bytes[pos+3]);
 
         pos =incr *(ap +width*bp);
-        fac=dap*dbp;
+        fac=dap*dbp/255.;
         r  += fac*(255&bytes[pos+0]);
         g  += fac*(255&bytes[pos+1]);
         b  += fac*(255&bytes[pos+2]);
@@ -219,7 +218,7 @@ public class SimpleTexture implements Texture {
             a  += fac*(255&bytes[pos+3]);
         
         pos =incr *(am +width*bp);
-        fac=dam*dbp;
+        fac=dam*dbp/255.;
         r  += fac*(255&bytes[pos+0]);
         g  += fac*(255&bytes[pos+1]);
         b  += fac*(255&bytes[pos+2]);
@@ -227,7 +226,7 @@ public class SimpleTexture implements Texture {
             a  += fac*(255&bytes[pos+3]);
         
         
-        
+        /*
         color[0] *=255&((int)r);
         color[1] *=255&((int)g);
         color[2] *=255&((int)b);
@@ -236,7 +235,19 @@ public class SimpleTexture implements Texture {
         
         else
             color[3] *= 255;
+        */
+        color[0] *= r;
+        color[1] *= g;
+        color[2] *= b;
+        if(incr==4)
+            color[3] *= a;
         
+    }
+    public boolean needsNormals() {
+        return false;
+    }
+    public boolean isTransparent() {
+        return transparent;
     }
 
     /*

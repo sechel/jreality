@@ -60,7 +60,6 @@ public abstract class PolygonShader {
     public abstract boolean hasTexture();
     public abstract boolean interpolateAlpha();
     public abstract boolean needsSorting();
-
     public abstract void setColor(double r, double g, double b);
     public abstract double getRed();
     public abstract double getGreen();

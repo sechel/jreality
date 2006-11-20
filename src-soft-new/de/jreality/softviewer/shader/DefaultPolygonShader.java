@@ -43,13 +43,11 @@ package de.jreality.softviewer.shader;
 
 import de.jreality.scene.Geometry;
 import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.shader.CubeMap;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
-import de.jreality.softviewer.Environment;
-import de.jreality.softviewer.Polygon;
-import de.jreality.softviewer.SimpleTexture;
-import de.jreality.softviewer.Texture;
+import de.jreality.softviewer.*;
 
 /**
  * 
@@ -62,6 +60,7 @@ public class DefaultPolygonShader extends PolygonShader {
     private VertexShader vertexShader;
     protected boolean outline = false;
     private final boolean smooth;
+    private final boolean needsNormals;
     
     final private double[] d1;
     final private double[] d2;
@@ -81,6 +80,7 @@ public class DefaultPolygonShader extends PolygonShader {
         d3 = null;
         //v = null;
         ps = null;
+        needsNormals = false;
     }
     
     public DefaultPolygonShader(de.jreality.shader.DefaultPolygonShader ps) {
@@ -88,7 +88,17 @@ public class DefaultPolygonShader extends PolygonShader {
 		vertexShader = new DefaultVertexShader(ps.getDiffuseColor(),ps.getSpecularCoefficient(),ps.getSpecularExponent(),ps.getTransparency());
         this.ps = ps;
         Texture2D tex = ps.getTexture2d();
-        if (tex != null && tex.getImage() != null) texture = new SimpleTexture(tex);
+        if (tex != null && tex.getImage() != null) {
+            texture = new SimpleTexture(tex);
+        }
+        CubeMap cm = ps.getReflectionMap();
+        if(cm != null) {
+            
+            texture = new EnvironmentTexture(cm,texture);
+            needsNormals = true;
+        } else {
+            needsNormals = false;
+        }
         //outline = eAppearance.getAttribute(ShaderUtility.nameSpace(name, "outline"), outline);
         if(smooth = ps.getSmoothShading()) {
             d1 = null;
@@ -114,7 +124,17 @@ public class DefaultPolygonShader extends PolygonShader {
         int n = p.getLength();
 		if(smooth) {
             for(int i = 0; i< n;i++) {
-                vertexShader.shadeVertex(p.getPoint(i),environment,vertexColors);
+                double v[] = p.getPoint(i);
+                vertexShader.shadeVertex(v,environment,vertexColors);
+                //if there is a reflection map we prepare the normals:
+                if(needsNormals) {
+                    double ff =( v[Polygon.WX]*v[Polygon.NX] + v[Polygon.WY]*v[Polygon.NY] + v[Polygon.WZ]*v[Polygon.NZ])/
+                    (v[Polygon.NX]*v[Polygon.NX] + v[Polygon.NY]*v[Polygon.NY] + v[Polygon.NZ]*v[Polygon.NZ]);
+                    v[Polygon.NX] = -2*ff * v[Polygon.NX] + v[Polygon.WX];
+                    v[Polygon.NY] = -2*ff * v[Polygon.NY] + v[Polygon.WY];
+                    v[Polygon.NZ] = -2*ff * v[Polygon.NZ] + v[Polygon.WZ];
+
+                }
             }
         } else {
             double[] v = p.getCenter();
@@ -199,7 +219,9 @@ public class DefaultPolygonShader extends PolygonShader {
     }
 
     public boolean needsSorting() {
-        return (vertexShader.getTransparency() != 0.)||hasTexture()||interpolateAlpha(); 
+        return (vertexShader.getTransparency() != 0.)||
+        (hasTexture() &&texture.isTransparent())||
+        interpolateAlpha(); 
     }
 
     @Override
@@ -222,5 +244,6 @@ public class DefaultPolygonShader extends PolygonShader {
     public double getRed() {
         return vertexShader.getRed();
     }
+
 
 }

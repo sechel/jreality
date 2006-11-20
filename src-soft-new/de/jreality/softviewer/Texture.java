@@ -47,5 +47,7 @@ package de.jreality.softviewer;
  *
  */
 public interface Texture {
-    public void  getColor(double u, double v,int x, int y,  int[] color);
+    public void  getColor(double u, double v,double nx, double ny, double nz, int x, int y,  double[] color);
+    public boolean needsNormals();
+    public boolean isTransparent();
 }

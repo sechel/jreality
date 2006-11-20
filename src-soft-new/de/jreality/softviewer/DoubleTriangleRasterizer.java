@@ -64,7 +64,9 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
 
     private static final boolean correctInterpolation = true;
 
-    private final Colorizer colorizer;
+    private  boolean interpolateNormals = false;
+    
+    //private final Colorizer colorizer;
 
     // dimensions of the image to render into:
 
@@ -108,6 +110,12 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
 
     private final Quantity vvv = new Quantity();
 
+    private final Quantity nnx = new Quantity();
+
+    private final Quantity nny = new Quantity();
+
+    private final Quantity nnz = new Quantity();
+
     private final boolean interpolateY;
 
     private final boolean interpolateFullX;
@@ -140,7 +148,7 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
     public DoubleTriangleRasterizer(int[] pixelBuf, boolean interpolateY,
             boolean interpolateFullX, Colorizer colorizer) {
         super();
-        this.colorizer = colorizer;
+        //this.colorizer = colorizer;
         this.interpolateY = interpolateY;
         this.interpolateFullX = interpolateFullX;
         pixels = pixelBuf;
@@ -161,6 +169,7 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
         interpolateUV = texture != null;
 
         interpolateColor = t.isInterpolateColor();
+        interpolateNormals = texture!= null && texture.needsNormals();
         
         
         interpolateW = correctInterpolation
@@ -193,6 +202,12 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
                         : (vertexData[Polygon.G])) * iw);
                 pi[Polygon.B] = ((vertexData[Polygon.B] >= 1 ? 1
                         : (vertexData[Polygon.B])) * iw);
+            }
+            
+            if(interpolateNormals) {
+                pi[Polygon.NX] = (vertexData[Polygon.NX] * iw);
+                pi[Polygon.NY] = (vertexData[Polygon.NY] * iw);
+                pi[Polygon.NZ] = (vertexData[Polygon.NZ] * iw);
             }
         } 
         if (!interpolateColor) {
@@ -377,6 +392,11 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
                     uuu.incrementY();
                     vvv.incrementY();
                 }
+                if(interpolateNormals) {
+                    nnx.incrementY();
+                    nny.incrementY();
+                    nnz.incrementY();
+                }
             }
         }
     }
@@ -412,6 +432,11 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
                 uuu.makeLeftYIncrement(p1[Polygon.U], p2[Polygon.U], dy, frac);
                 vvv.makeLeftYIncrement(p1[Polygon.V], p2[Polygon.V], dy, frac);
             }
+            if(interpolateNormals) {
+                nnx.makeLeftYIncrement(p1[Polygon.NX], p2[Polygon.NX], dy, frac);
+                nny.makeLeftYIncrement(p1[Polygon.NY], p2[Polygon.NY], dy, frac);
+                nnz.makeLeftYIncrement(p1[Polygon.NZ], p2[Polygon.NZ], dy, frac);
+            }
         } else {
             xxx.makeRightYIncrement(p1[Polygon.SX], p2[Polygon.SX], dy, frac);
             if (interpolateY)
@@ -431,6 +456,11 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
             if (interpolateUV) {
                 uuu.makeRightYIncrement(p1[Polygon.U], p2[Polygon.U], dy, frac);
                 vvv.makeRightYIncrement(p1[Polygon.V], p2[Polygon.V], dy, frac);
+            }
+            if(interpolateNormals) {
+                nnx.makeRightYIncrement(p1[Polygon.NX], p2[Polygon.NX], dy, frac);
+                nny.makeRightYIncrement(p1[Polygon.NY], p2[Polygon.NY], dy, frac);
+                nnz.makeRightYIncrement(p1[Polygon.NZ], p2[Polygon.NZ], dy, frac);
             }
         }
     }
@@ -486,6 +516,11 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
             if (interpolateUV) {
                 uuu.incrementX();
                 vvv.incrementX();
+            }
+            if(interpolateNormals) {
+                nnx.incrementX();
+                nny.incrementX();
+                nnz.incrementX();
             }
             colorize(x/* +posOff */);
             // blur(x,+inc);
@@ -544,9 +579,14 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
             uuu.makeXIncrement(dx, frac);
             vvv.makeXIncrement(dx, frac);
         }
+        if(interpolateNormals) {
+            nnx.makeXIncrement(dx,frac);
+            nny.makeXIncrement(dx,frac);
+            nnz.makeXIncrement(dx,frac);
+        }
     }
 
-    private final int[] color = new int[4];
+    private final double[] color = new double[4];
 
     public static abstract class Colorizer {
         public abstract void colorize(final int[] pixels, final double[] zBuff,
@@ -582,28 +622,31 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
         if (interpolateA)
             omt = (omt * aaa.value) / ww;
 
-        // if(r<0||r>255) System.out.println("R: "+r+" W "+ww);
-        // if(g<0||g>255) System.out.println("G: "+r);
-        // if(b<0||b>255) System.out.println("B: "+r);
-        // if(r<0||r>255) www.dump();
-
         if (interpolateUV) {
-            final int[] color = this.color;
-            final double WW = ww;
-            color[0] = (int) r;
-            color[1] = (int) g;
-            color[2] = (int) b;
-            color[3] = (int) omt*255;
-            texture.getColor(uuu.value / WW, vvv.value / WW, pos % w, pos / w,
-                    color);
+            //final double[] color = this.color;
+            final double WW = 1/ww;
+            color[0] = r;
+            color[1] = g;
+            color[2] = b;
+            color[3] = (omt*255);
+            if(interpolateNormals)
+                texture.getColor(uuu.value * WW, vvv.value * WW,
+                        nnx.value * WW, nny.value * WW, nnz.value * WW,
+                        pos % w, pos / w,
+                        color);
+            else 
+                texture.getColor(uuu.value * WW, vvv.value * WW,
+                        0,0,0,
+                        pos % w, pos / w,
+                        color);
             // omt *= color[3]*COLOR_CH_SCALE;
             // r *= color[0]*COLOR_CH_SCALE;
             // g *= color[1]*COLOR_CH_SCALE;
             // b *= color[2]*COLOR_CH_SCALE;
-            omt = color[3] * COLOR_CH_SCALE;
-            r = color[0] * COLOR_CH_SCALE;
-            g = color[1] * COLOR_CH_SCALE;
-            b = color[2] * COLOR_CH_SCALE;
+            omt = color[3]/255. ;
+            r = color[0];
+            g = color[1];
+            b = color[2];
         }
 
         if (omt < 1.D) {
@@ -622,21 +665,21 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
         // System.out.println("r "+r);
         // System.out.println("g "+g);
         // System.out.println("b "+b);
-        if (colorizer != null) {
-            data[Polygon.SX] = xxx.value / ww;
-            data[Polygon.SY] = yyy.value / ww;
-            data[Polygon.SZ] = z;
-            data[Polygon.R] = r;
-            data[Polygon.G] = g;
-            data[Polygon.B] = b;
-            data[Polygon.A] = aaa.value / ww;
-            data[Polygon.U] = uuu.value / ww;
-            data[Polygon.V] = vvv.value / ww;
-            colorizer.colorize(pixels, zBuffer, pos, data, interpolateUV);
-        } else {
+//        if (colorizer != null) {
+//            data[Polygon.SX] = xxx.value / ww;
+//            data[Polygon.SY] = yyy.value / ww;
+//            data[Polygon.SZ] = z;
+//            data[Polygon.R] = r;
+//            data[Polygon.G] = g;
+//            data[Polygon.B] = b;
+//            data[Polygon.A] = aaa.value / ww;
+//            data[Polygon.U] = uuu.value / ww;
+//            data[Polygon.V] = vvv.value / ww;
+//            colorizer.colorize(pixels, zBuffer, pos, data, interpolateUV);
+//        } else {
             pixels[pos] = OPAQUE | ((int) r << 16) | ((int) g << 8) | (int) b;
             zBuffer[pos] = z;
-        }
+//        }
         /*
          blur(pos,1);
          blur(pos,-1);

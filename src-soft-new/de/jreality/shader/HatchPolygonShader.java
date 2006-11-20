@@ -63,6 +63,7 @@ import java.awt.Color;
 
     TextShader createTextShader(String name);
     Texture2D createTexture2d();
+    CubeMap createReflectionMap();
 
     Double getAmbientCoefficient();
     Color getAmbientColor();
@@ -78,7 +79,7 @@ import java.awt.Color;
 
     TextShader getTextShader();
     Texture2D getTexture2d();
-
+    CubeMap getReflectionMap();
     Double getTransparency();
     void setAmbientCoefficient(Double d);
 
