@@ -111,7 +111,13 @@ public class ShaderUtility {
     if (PolygonShader.class.isAssignableFrom(type)) {
       if (name.equals("twoSide")) return TwoSidePolygonShader.class;
       if (name.equals("default")) return DefaultPolygonShader.class;
-      if (name.equals("hatch")) return HatchPolygonShader.class;
+      if (name.equals("hatch"))
+		try {
+			return Class.forName("de.jreality.shader.HatchPolygonShader");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
       throw new IllegalArgumentException(" no such polygon shader ["+name+"]");
     }
     throw new IllegalArgumentException("unhandled entity class "+type);
