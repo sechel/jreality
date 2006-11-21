@@ -73,7 +73,7 @@ import de.jreality.shader.Texture2D;
 public class DefaultPointShader  extends AbstractPrimitiveShader implements PointShader {
 	double pointSize = 1.0;
 	// on my mac, the only value for the following array that seems to "work" is {1,0,0}.  WHY?
-	float[] pointAttenuation = {1.0f, .0f, 0.00000f};
+	float[] pointAttenuation = {0f, 0f, 1f};
 	double	pointRadius = .1;		
 	Color diffuseColor = java.awt.Color.RED;
 	float[] diffuseColorAsFloat;
