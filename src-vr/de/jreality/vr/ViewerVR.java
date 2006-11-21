@@ -1468,7 +1468,7 @@ public class ViewerVR {
 
 	public void setInvertMouse(boolean b) {
 		invertMouse.setSelected(b);
-		headTransformationTool.setInvert(b);
+		if (headTransformationTool != null) headTransformationTool.setInvert(b);
 	}
 	
 	public boolean isInvertMouse() {
