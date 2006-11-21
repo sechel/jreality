@@ -1835,6 +1835,7 @@ public class ViewerVR {
 	private void updateBounds() {
 		
 	}
+  
 	private void alignContent(final double diam, final double offset,
 			final Matrix rotation) {
 		Scene.executeWriter(sceneNode, new Runnable() {
@@ -2385,7 +2386,7 @@ public class ViewerVR {
 	private void tweakMenu(ViewerAppMenu menu) {
     
     //remove Edit and Appearance menu
-    menu.removeMenu(ViewerAppMenu.EDIT_MENU);
+//    menu.removeMenu(ViewerAppMenu.EDIT_MENU);
 
     //edit File menu
 		JMenu fileMenu = menu.getMenu(ViewerAppMenu.FILE_MENU);
