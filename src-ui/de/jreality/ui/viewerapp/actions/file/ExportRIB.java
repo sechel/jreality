@@ -44,6 +44,12 @@ import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.io.File;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.border.TitledBorder;
+
 import de.jreality.renderman.RIBViewer;
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
@@ -59,13 +65,13 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 public class ExportRIB extends AbstractJrAction {
 
   private Viewer viewer;
-  private int type;
+  private JComponent options; 
+  private JComboBox type;
   
 
-  public ExportRIB(String name, int type, Viewer viewer, Frame frame) {
+  public ExportRIB(String name, Viewer viewer, Frame frame) {
     super(name);
     this.frame = frame;
-    this.type = type;
     setShortDescription("Export Renderman file");
     
     if (viewer == null) 
@@ -73,21 +79,40 @@ public class ExportRIB extends AbstractJrAction {
     this.viewer = viewer;
   }
 
-  public ExportRIB(String name, int type, ViewerApp v) {
-    this(name, type, v.getViewerSwitch(), v.getFrame());
+  public ExportRIB(String name, ViewerApp v) {
+    this(name, v.getViewerSwitch(), v.getFrame());
   }
   
   
   @Override
   public void actionPerformed(ActionEvent e) {
-    File file = FileLoaderDialog.selectTargetFile(frame, "rib", "RIB files");
+    
+    if (options == null) options = createAccessory();
+    
+    File file = FileLoaderDialog.selectTargetFile(frame, options, "rib", "RIB files");
     if (file == null) return;
 
     RIBViewer rv = new RIBViewer(); 
     rv.initializeFrom(viewer);   
-    rv.setRendererType(type);    
+    rv.setRendererType(type.getSelectedIndex()+1);    
     rv.setFileName(file.getPath());
     rv.render();
+  }
+  
+  
+  private JComponent createAccessory() {
+    Box box = Box.createVerticalBox();
+    TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Options");
+    box.setBorder(title);
+
+    type = new JComboBox(new String[]{
+        "PIXAR", "3DELIGHT", "AQSIS", "PIXIE",  //order of static fields in RIBViewer
+    });
+    type.setMaximumSize(type.getPreferredSize());
+    type.setLightWeightPopupEnabled(false);
+    box.add(type);
+    
+    return box;
   }
 
 }

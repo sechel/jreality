@@ -43,6 +43,7 @@ package de.jreality.ui.viewerapp;
 import java.awt.Component;
 import java.io.File;
 
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileSystemView;
 
@@ -90,7 +91,13 @@ public class FileLoaderDialog {
   
   
   public static File[] loadFiles(Component parent) {
-    JFileChooser chooser = createFileChooser();
+    return loadFiles(parent, (JComponent)null);
+  }
+  
+  
+  public static File[] loadFiles(Component parent, JComponent accessory) {
+    JFileChooser chooser = createFileChooser();  //adds default file filter for jReality 3D data files
+    if (accessory != null) chooser.setAccessory(accessory);
     chooser.setMultiSelectionEnabled(true);
     chooser.showOpenDialog(parent);
     File[] files = chooser.getSelectedFiles();
@@ -99,13 +106,14 @@ public class FileLoaderDialog {
   }
   
   
-  private static File selectTargetFile(Component parent, JFileChooser chooser) {
+  private static File selectTargetFile(Component parent, JFileChooser chooser, JComponent accessory) {
+    if (accessory != null) chooser.setAccessory(accessory);
     chooser.setMultiSelectionEnabled(false);
     chooser.showSaveDialog(parent);
     lastDir = chooser.getCurrentDirectory();
     File file = chooser.getSelectedFile();
     
-    //append preferred extension if existing and user did not specify one
+    //append preferred extension of used file filter if existing and user did not specify one
     try {
       FileFilter filter = (FileFilter) chooser.getFileFilter();
       if (!filter.accept(file)) {  //invalid extension
@@ -119,20 +127,32 @@ public class FileLoaderDialog {
   
   
   public static File selectTargetFile(Component parent) {
-      JFileChooser chooser = createFileChooser();
-      return selectTargetFile(parent, chooser);
+      return selectTargetFile(parent, (JComponent)null);
   }
   
+  public static File selectTargetFile(Component parent, JComponent accessory) {
+    JFileChooser chooser = createFileChooser();
+    return selectTargetFile(parent, chooser, accessory);
+  }
+
   
   public static File selectTargetFile(Component parent, String extension, String description) {
+    return selectTargetFile(parent, (JComponent)null, extension, description);
+  }
+  
+  public static File selectTargetFile(Component parent, JComponent accessory, String extension, String description) {
       JFileChooser chooser = createFileChooser(extension, description);
-      return selectTargetFile(parent, chooser);
+      return selectTargetFile(parent, chooser, accessory);
   }
   
   
   public static File selectTargetFile(Component parent, boolean useAcceptAllFileFilter, FileFilter... ff) {
+    return selectTargetFile(parent, (JComponent)null, useAcceptAllFileFilter, ff);
+  }
+  
+  public static File selectTargetFile(Component parent, JComponent accessory, boolean useAcceptAllFileFilter, FileFilter... ff) {
     JFileChooser chooser = createFileChooser(useAcceptAllFileFilter, ff);
-    return selectTargetFile(parent, chooser);
+    return selectTargetFile(parent, chooser, accessory);
   }
   
 }

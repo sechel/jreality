@@ -57,7 +57,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 
-import de.jreality.renderman.RIBViewer;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFieldOfView;
@@ -69,12 +68,12 @@ import de.jreality.ui.viewerapp.actions.edit.Remove;
 import de.jreality.ui.viewerapp.actions.edit.SwitchBackgroundColor;
 import de.jreality.ui.viewerapp.actions.edit.ToggleAppearance;
 import de.jreality.ui.viewerapp.actions.edit.TogglePickable;
+import de.jreality.ui.viewerapp.actions.edit.ToggleRenderSelection;
 import de.jreality.ui.viewerapp.actions.file.ExportImage;
 import de.jreality.ui.viewerapp.actions.file.ExportPS;
 import de.jreality.ui.viewerapp.actions.file.ExportRIB;
 import de.jreality.ui.viewerapp.actions.file.ExportSVG;
 import de.jreality.ui.viewerapp.actions.file.LoadFile;
-import de.jreality.ui.viewerapp.actions.file.LoadFileMerged;
 import de.jreality.ui.viewerapp.actions.file.LoadScene;
 import de.jreality.ui.viewerapp.actions.file.Quit;
 import de.jreality.ui.viewerapp.actions.file.SaveScene;
@@ -83,7 +82,6 @@ import de.jreality.ui.viewerapp.actions.view.ToggleBeanShell;
 import de.jreality.ui.viewerapp.actions.view.ToggleFullScreen;
 import de.jreality.ui.viewerapp.actions.view.ToggleMenu;
 import de.jreality.ui.viewerapp.actions.view.ToggleNavigator;
-import de.jreality.ui.viewerapp.actions.view.ToggleRenderSelection;
 import de.jreality.ui.viewerapp.actions.view.ToggleViewerFullScreen;
 
 
@@ -148,6 +146,7 @@ public class ViewerAppMenu {
   private JCheckBoxMenuItem beanShellCheckBox;
   private JCheckBoxMenuItem renderSelectionCheckbox;
   private ExportImage exportImageAction;
+  private JMenu editMenu;  //setInvisible(isAttachNavigator)
 
 
   protected ViewerAppMenu(ViewerApp v) {
@@ -165,7 +164,8 @@ public class ViewerAppMenu {
     menuBar = new JMenuBar();
     
     menuBar.add(getFileMenu());
-    menuBar.add(getEditMenu());
+    editMenu = getEditMenu();
+    menuBar.add(editMenu);
     menuBar.add(getCameraMenu());
     menuBar.add(getViewMenu());
   }
@@ -176,24 +176,20 @@ public class ViewerAppMenu {
     fileMenu.setMnemonic(KeyEvent.VK_F);
     
     fileMenu.add(new JMenuItem(new LoadFile(LOAD_FILE, viewerApp)));
-    fileMenu.add(new JMenuItem(new LoadFileMerged(LOAD_FILE_MERGED, viewerApp)));
     fileMenu.add(new JMenuItem(new LoadScene(LOAD_SCENE, viewerApp)));
     fileMenu.addSeparator();
     fileMenu.add(new JMenuItem(new SaveScene(SAVE_SCENE, viewerApp.getViewer(), frame)));
     fileMenu.add(new JMenuItem(new SaveSelected(SAVE_SELECTED, sm, frame)));
     fileMenu.addSeparator();
+    
     JMenu export = new JMenu(EXPORT);
     fileMenu.add(export);
-    JMenu rib = new JMenu("RIB");
-    export.add(rib);
-    rib.add(new JMenuItem(new ExportRIB("Pixar", RIBViewer.TYPE_PIXAR, viewerSwitch, frame)));
-    rib.add(new JMenuItem(new ExportRIB("3DLight", RIBViewer.TYPE_3DELIGHT, viewerSwitch, frame)));
-    rib.add(new JMenuItem(new ExportRIB("Aqsis", RIBViewer.TYPE_AQSIS, viewerSwitch, frame)));
-
+    export.add(new JMenuItem(new ExportRIB("RIB", viewerSwitch, frame)));
     export.add(new JMenuItem(new ExportSVG("SVG", viewerSwitch, frame)));
     export.add(new JMenuItem(new ExportPS("PS", viewerSwitch, frame)));
     exportImageAction = new ExportImage("Image", viewerSwitch, frame);
     export.add(new JMenuItem(exportImageAction));
+    
     if (!Beans.isDesignTime()) {
     	fileMenu.addSeparator();
     	fileMenu.add(new JMenuItem(new Quit(QUIT)));    
@@ -268,7 +264,7 @@ public class ViewerAppMenu {
     JMenu viewMenu = new JMenu(VIEW_MENU);
     viewMenu.setMnemonic(KeyEvent.VK_V);
     
-    navigatorCheckBox = new JCheckBoxMenuItem(new ToggleNavigator(TOGGLE_NAVIGATOR, viewerApp));
+    navigatorCheckBox = new JCheckBoxMenuItem(new ToggleNavigator(TOGGLE_NAVIGATOR, viewerApp, editMenu));
     beanShellCheckBox = new JCheckBoxMenuItem(new ToggleBeanShell(TOGGLE_BEANSHELL, viewerApp));
     viewMenu.add(navigatorCheckBox);
     viewMenu.add(beanShellCheckBox);
@@ -315,6 +311,7 @@ public class ViewerAppMenu {
     navigatorCheckBox.setSelected(viewerApp.isAttachNavigator());
     beanShellCheckBox.setSelected(viewerApp.isAttachBeanShell());
     renderSelectionCheckbox.setSelected(sm.isRenderSelection());  //sm!=null if viewerApp!=null
+    editMenu.setVisible(viewerApp.isAttachNavigator());
   }
   
   

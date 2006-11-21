@@ -46,9 +46,15 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
+import javax.swing.border.TitledBorder;
 
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
@@ -59,7 +65,7 @@ import de.jreality.util.PickUtility;
 
 
 /**
- * Loads one or several files into the scene 
+ * Loads one or several files into the scene and optionally merges indexed face & line sets
  * (adds the files as children to the selection managers default selection, 
  * which is usually the scene node).
  * 
@@ -70,7 +76,11 @@ public class LoadFile extends AbstractJrAction {
 
   private ViewerApp viewerApp;
   private SceneGraphComponent sceneNode;
-
+  
+  private JComponent options; 
+  private JCheckBox mergeLineSets;
+  private JCheckBox mergeFaceSets;
+  
 
   public LoadFile(String name, ViewerApp v) {
     super(name, v.getSelectionManager(), v.getFrame());
@@ -81,30 +91,51 @@ public class LoadFile extends AbstractJrAction {
     setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
 
-  
   @Override
   public void actionPerformed(ActionEvent e) {
-  
-    File[] files = FileLoaderDialog.loadFiles(frame);
+
+    if (options == null) options = createAccessory();
+    mergeLineSets.setSelected(false);
+    mergeFaceSets.setSelected(false);
+    
+    File[] files = FileLoaderDialog.loadFiles(frame, options);
     for (int i = 0; i < files.length; i++) {
       try {
-        final SceneGraphComponent sgc = Readers.read(files[i]);
+        SceneGraphComponent sgc = Readers.read(files[i]);
+        if (mergeFaceSets.isSelected()) 
+          sgc = IndexedFaceSetUtility.mergeIndexedFaceSets(sgc);
+        if (mergeLineSets.isSelected()) 
+          sgc = IndexedFaceSetUtility.mergeIndexedLineSets(sgc);
         sgc.setName(files[i].getName());
         System.out.println("READ finished.");
         sceneNode.addChild(sgc);
         
         PickUtility.assignFaceAABBTrees(sgc);
-
+        
         CameraUtility.encompass(viewerApp.getViewer().getAvatarPath(),
-        						viewerApp.getViewer().getEmptyPickPath(),
-        						viewerApp.getViewer().getCameraPath(),
-        						1.75, viewerApp.getViewer().getSignature());
+            viewerApp.getViewer().getEmptyPickPath(),
+            viewerApp.getViewer().getCameraPath(),
+            1.75, viewerApp.getViewer().getSignature());
         
       } 
       catch (IOException ioe) {
         JOptionPane.showMessageDialog(frame, "Failed to load file: "+ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
       }
     }
+  }
+
+  
+  private JComponent createAccessory() {
+    Box box = Box.createVerticalBox();
+    TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Options");
+    box.setBorder(title);
+
+    mergeLineSets = new JCheckBox("merge IndexedLineSets");
+    mergeFaceSets = new JCheckBox("merge IndexedFaceSets");
+    box.add(mergeLineSets);
+    box.add(mergeFaceSets);
+    
+    return box;
   }
 
 }
