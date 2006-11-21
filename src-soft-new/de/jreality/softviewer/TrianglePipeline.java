@@ -260,7 +260,8 @@ public class TrianglePipeline {
     Triangle[] trisFromPoly = new Triangle[6];
 
     private void triangulateAndRaster() {
-        boolean isTransparent = shader.needsSorting();
+        boolean isTransparent = transparencyEnabled && shader.needsSorting();
+        //boolean isTransparent = shader.needsSorting();
 
         int n = polygon.getLength() - 2;
         trisFromPoly = polygon.triangulate(trisFromPoly, freeTriangles);
@@ -647,6 +648,7 @@ private final void rasterRemaining() {
         // polygons[i].setShader(null);
         // }
         sortTriangles();
+        rasterizer.setTransparencyEnabled(true);
         while(! triangles.isEmpty()) {
             Triangle tri = triangles.pop();
             rasterizer.renderTriangle(tri,false);
@@ -687,7 +689,7 @@ private final void rasterRemaining() {
         double w = 1;
         if (da.size() == 4)
             w = da.getValueAt(3);
-        DataList vertexColorsOld;
+       // DataList vertexColorsOld;
         if (vertexColors!=null) {
             DoubleArray color = vertexColors.item(index).toDoubleArray();
             for (int i = 0; i < 16; i++) {
@@ -864,6 +866,8 @@ private final void rasterRemaining() {
     private DoubleArray tda4 = new DoubleArray(test4);
 */
     private double[] zzNormal = new double[3];
+
+private boolean transparencyEnabled;
 
     
     public final void processPseudoTube(DoubleArray from, DoubleArray to, double lineWidth,DoubleArray colors) {
@@ -1065,6 +1069,12 @@ private final void rasterRemaining() {
         perspective.perspective(p2);
     }
 
+    public void setTransparencyEnabled(boolean transparencyEnabled) {
+        this.transparencyEnabled = transparencyEnabled;
+        rasterizer.setTransparencyEnabled(transparencyEnabled);
+    }
+
+    
     /**
      * @return PolygonShader
      */

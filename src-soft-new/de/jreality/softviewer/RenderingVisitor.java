@@ -111,7 +111,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
     protected RenderingVisitor reclaimableSubcontext;
     private double levelOfDetail;
     private boolean bestQuality = false;
-
+    private boolean transparencyEnabled = false;
     public boolean isBestQuality() {
         return bestQuality;
     }
@@ -164,6 +164,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
         shaderUptodate = p.shaderUptodate;
         levelOfDetail = p.levelOfDetail;
         bestQuality = p.bestQuality;
+        transparencyEnabled = p.transparencyEnabled;
         // pipeline.setPointOutlineShader(pointOutlineShader=p.pointOutlineShader);
         pipeline
                 .setMatrix(currentTrafo = initialTrafo = parentContext.currentTrafo);
@@ -235,9 +236,13 @@ public class RenderingVisitor extends SceneGraphVisitor {
             if(lod instanceof Double)
                 levelOfDetail = ((Double) lod).doubleValue();
         }
+        Object te = app.getAttribute(CommonAttributes.TRANSPARENCY_ENABLED, Boolean.class);
+        if( te instanceof Boolean) transparencyEnabled = ((Boolean) te).booleanValue();
+
     }
 
     private void setupShader() {
+        pipeline.setTransparencyEnabled(transparencyEnabled);
         //levelOfDetail = eAppearance.getAttribute(CommonAttributes.LEVEL_OF_DETAIL, CommonAttributes.LEVEL_OF_DETAIL_DEFAULT);
         DefaultGeometryShader gs = ShaderUtility
                 .createDefaultGeometryShader(eAppearance);

@@ -230,4 +230,10 @@ public class PSRasterizer extends TriangleRasterizer {
         
     }
 
+    @Override
+    public void setTransparencyEnabled(boolean transparencyEnabled) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

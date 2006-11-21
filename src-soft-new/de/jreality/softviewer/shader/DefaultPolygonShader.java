@@ -130,10 +130,14 @@ public class DefaultPolygonShader extends PolygonShader {
                 if(needsNormals) {
                     double ff =( v[Polygon.WX]*v[Polygon.NX] + v[Polygon.WY]*v[Polygon.NY] + v[Polygon.WZ]*v[Polygon.NZ])/
                     (v[Polygon.NX]*v[Polygon.NX] + v[Polygon.NY]*v[Polygon.NY] + v[Polygon.NZ]*v[Polygon.NZ]);
-                    v[Polygon.NX] = -2*ff * v[Polygon.NX] + v[Polygon.WX];
-                    v[Polygon.NY] = -2*ff * v[Polygon.NY] + v[Polygon.WY];
-                    v[Polygon.NZ] = -2*ff * v[Polygon.NZ] + v[Polygon.WZ];
-
+                    //v[Polygon.NX] = -2*ff * v[Polygon.NX] + v[Polygon.WX];
+                    //v[Polygon.NY] = -2*ff * v[Polygon.NY] + v[Polygon.WY];
+                    //v[Polygon.NZ] = -2*ff * v[Polygon.NZ] + v[Polygon.WZ];
+                    double[] m = environment.getCameraWorld();
+                    VecMat.transformUnNormalized(m, -2*ff * v[Polygon.NX] + v[Polygon.WX],
+                            -2*ff * v[Polygon.NY] + v[Polygon.WY],
+                            -2*ff * v[Polygon.NZ] + v[Polygon.WZ],
+                            v, Polygon.NX);
                 }
             }
         } else {

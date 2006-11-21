@@ -42,6 +42,7 @@ package de.jreality.softviewer;
 
 import java.awt.Color;
 
+import de.jreality.math.Rn;
 import de.jreality.scene.*;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
@@ -68,7 +69,8 @@ public final class Environment extends SceneGraphVisitor {
     private double[] matrix;
     //private double[] inverseCameraMatrix= new double[16];
 
-    private Globals globals; 
+    private Globals globals;
+    private double[] cameraWolrd = new double[16]; 
 
     /**
      * 
@@ -170,6 +172,7 @@ public final class Environment extends SceneGraphVisitor {
      */
     public void setInitialTransformation(Transformation initialTransformation) {
         this.initialTransformation= initialTransformation;
+        Rn.inverse(cameraWolrd, initialTransformation.getMatrix());
     }
 
     Environment subContext() {
@@ -499,5 +502,12 @@ public final class Environment extends SceneGraphVisitor {
         }
         
         
+    }
+
+    public double[] getInitialTrafo() {
+        return initialTrafo;
+    }
+    public double[] getCameraWorld() {
+        return cameraWolrd;
     }
 }

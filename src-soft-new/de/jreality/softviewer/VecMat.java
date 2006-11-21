@@ -47,7 +47,7 @@ package de.jreality.softviewer;
  * @author <a href="mailto:timh@math.umass.edu">Tim Hoffmann</a>
  *
  */
-class VecMat {
+public class VecMat {
 
   public static final void vecAssign(double[] to, double[] from) {
     to[0]= from[0];

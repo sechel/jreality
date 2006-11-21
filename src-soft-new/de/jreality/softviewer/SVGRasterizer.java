@@ -72,6 +72,7 @@ public class SVGRasterizer extends TriangleRasterizer {
     private double wh;
     private double hh;
     private double mh;
+    private boolean transparencyEnabled;
     /**
      * 
      */
@@ -86,6 +87,8 @@ public class SVGRasterizer extends TriangleRasterizer {
      */
     public void renderTriangle(Triangle t,boolean outline) {
         transparency = t.getTransparency();
+        if(!transparencyEnabled)
+            transparency = (transparency < 1 ? 0:1);
         oneMinusTransparency = 1 - transparency;
 
       
@@ -356,6 +359,12 @@ public class SVGRasterizer extends TriangleRasterizer {
     @Override
     public void setBackgroundColors(Color[] c) {
         // TODO make a background color gradinet
+        
+    }
+
+    @Override
+    public void setTransparencyEnabled(boolean transparencyEnabled) {
+        this.transparencyEnabled = transparencyEnabled;
         
     }
 }

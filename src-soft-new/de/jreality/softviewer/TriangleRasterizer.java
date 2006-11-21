@@ -56,4 +56,6 @@ public abstract class TriangleRasterizer {
     public abstract void setWindow(final int xmin, final int xmax, final int ymin, final int ymax);
     public abstract void setSize(final double width, final double height);
     public abstract void setBackgroundColors(Color[] c);
+    public abstract void setTransparencyEnabled(boolean transparencyEnabled);
+
 }

@@ -605,6 +605,8 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
 
     private int leftlower;
 
+    private boolean transparencyEnabled;
+
     private final void colorize(final int pos) {
 
         final double z = zzz.value;
@@ -621,7 +623,7 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
         double omt = (1 - transparency);
         if (interpolateA)
             omt = (omt * aaa.value) / ww;
-
+       
         if (interpolateUV) {
             //final double[] color = this.color;
             final double WW = 1/ww;
@@ -648,8 +650,12 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
             g = color[1];
             b = color[2];
         }
+        if(omt <=0)
+            return;
+       //if ( omt < 1.D) {
+            if ( transparencyEnabled && omt < 1.D) {
 
-        if (omt < 1.D) {
+
             final int sample = pixels[pos];
 
             final double t = (1. - omt);
@@ -818,6 +824,10 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
                 backgroundArray[i+ w*j] = 0xff000000 + (((int)r)<< 16)  + (((int)g)<<8) + ((int)b);
             }
         }
+    }
+
+    public void setTransparencyEnabled(boolean transparencyEnabled) {
+        this.transparencyEnabled = transparencyEnabled;
     }
 
 }

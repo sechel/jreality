@@ -80,10 +80,52 @@ public class EnvironmentTexture implements Texture {
     
     private void cubeMapColor(double u, double v, double nx, double ny, double nz,
             double[] color) {
-        double l = Math.sqrt(nx*nx + ny*ny + nz*nz);
-        nx/=l;
-        ny/=l;
-        nz/=l;
+       
+        int s = (int) Math.signum(nx);
+        double p = s*nx;
+        int i = 1;
+        if(p<Math.abs(ny)) {
+            s = (int) Math.signum(ny);
+            p = s*ny;
+            i=2;
+        }
+        if(p<Math.abs(nz)) {
+            s = (int) Math.signum(nz);
+            i=3;
+        }
+        switch (s*i) {
+        case -3: //z<0
+            double xx = 0.5*(1+nx/nz);
+            double yy = 0.5*(1+ny/nz);
+            right.getColor(xx, yy, 0, 0, 0, 0, 0, color);
+            return;
+        case -2: //y<0
+            xx = 0.5*(1-nx/ny);
+            yy = 0.5*(1+nz/ny);
+            top.getColor(xx, yy, 0, 0, 0,0,0, color);
+            return;
+        case -1: // x<0
+            xx = 0.5*(1-nz/nx);
+            yy = 0.5*(1+ny/nx);
+            front.getColor(xx, yy, 0, 0, 0, 0,0,color);
+            return;
+        case 1: //x>0
+            xx = 0.5*(1-nz/nx);
+            yy = 0.5*(1-ny/nx);
+            back.getColor(xx, yy, 0, 0, 0, 0, 0, color);
+            return;
+        case 2: //y>0
+            xx = 0.5*(1+nx/ny);
+            yy = 0.5*(1+nz/ny);
+            bot.getColor(xx, yy, 0, 0, 0, 0,0,color);
+            return;
+        default:
+            xx = 0.5*(1+nx/nz);
+            yy = 0.5*(1-ny/nz);
+            left.getColor(xx, yy, 0, 0, 0, 0, 0, color);
+            return;
+        }
+        /*
         if(nz>0) {
             double xx = 0.5*(1+nx/nz);
             double yy = 0.5*(1-ny/nz);
@@ -133,7 +175,7 @@ public class EnvironmentTexture implements Texture {
                 return;
             }
         }
-        
+        */
          
     }
     public boolean needsNormals() {
