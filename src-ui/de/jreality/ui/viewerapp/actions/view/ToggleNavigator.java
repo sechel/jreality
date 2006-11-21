@@ -45,6 +45,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JFrame;
+import javax.swing.JMenu;
 import javax.swing.KeyStroke;
 
 import de.jreality.ui.viewerapp.ViewerApp;
@@ -58,14 +59,18 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
  */
 public class ToggleNavigator extends AbstractJrAction {
 
-  private boolean attachNavigator = false;
   private ViewerApp viewerApp;
+  private JMenu[] menus;
   
   
-  public ToggleNavigator(String name, ViewerApp viewerApp) {
+  /**
+   * @param menus list of menus which should change their (visibility) state when performing this action
+   */
+  public ToggleNavigator(String name, ViewerApp viewerApp, JMenu... menus) {
     super(name);
     this.viewerApp = viewerApp;
-
+    this.menus = menus;
+    
     setShortDescription("Toggle navigator visibility");
     setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
@@ -73,9 +78,15 @@ public class ToggleNavigator extends AbstractJrAction {
   
   @Override
   public void actionPerformed(ActionEvent e) {
-    attachNavigator = !viewerApp.isAttachNavigator();
+    boolean attachNavigator = !viewerApp.isAttachNavigator();
     viewerApp.setAttachNavigator(attachNavigator);
     viewerApp.update();
+    
+    if (menus != null) {  //change visibility of menus
+      for (int i = 0; i < menus.length; i++)
+        menus[i].setVisible(attachNavigator);
+    }
+    
     JFrame frame = viewerApp.getFrame();
     frame.getContentPane().removeAll();
     frame.getContentPane().add(viewerApp.getComponent());
