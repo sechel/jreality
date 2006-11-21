@@ -12,5 +12,6 @@ de/jreality/examples/MouseButtonTrak.java
 de/jreality/examples/VulptureGPUApp.java
 
 **/SwtExample.java
+**/PathLineShader.java
 
 **/TestSoft.java
