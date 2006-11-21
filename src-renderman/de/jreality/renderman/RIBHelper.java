@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
+import java.awt.image.renderable.ParameterBlock;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -19,6 +20,9 @@ import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
+import javax.media.jai.JAI;
+
+import com.sun.media.jai.codec.TIFFEncodeParam;
 
 import de.jreality.math.Rn;
 import de.jreality.renderman.shader.DefaultPolygonShader;
@@ -145,20 +149,18 @@ public class RIBHelper {
 	   WritableRaster raster = img.getRaster();
 	   int[] pix = new int[4];
          for (int y = 0, ptr = 0; y < dataHeight; y++) {
-           for (int x = 0; x < dataWidth; x++, ptr += 4) {
-             
+           for (int x = 0; x < dataWidth; x++, ptr += 4) {             
 //             if (transparencyEnabled)
 //               pix[3]=byteArray[ptr + 3]; 
 //             else{
 //               if (byteArray[ptr + 3]==0) pix[3]=(byte) 0;                 
 //               else pix[3]=(byte) 255;                              
 //             }    
-                          
              pix[0] = byteArray[ptr];
              pix[1] = byteArray[ptr + 1];
              pix[2] = byteArray[ptr + 2];
-             pix[3]=byteArray[ptr + 3]; 
-            raster.setPixel(x, y, pix);
+             pix[3] = byteArray[ptr + 3]; 
+             raster.setPixel(x, y, pix);
            }
          }                      
 	  } else {
@@ -169,13 +171,20 @@ public class RIBHelper {
 	
 	  boolean worked=true;
 		try {
-			// TODO: !!!
-			//worked = ImageIO.write(img, "TIFF", new File(noSuffix+".tiff"));
-			Method cm = Class.forName("javax.media.jai.JAI").getMethod("create", new Class[]{String.class, RenderedImage.class, Object.class, Object.class});
-			cm.invoke(null, new Object[]{"filestore", img, noSuffix+".tiff", "tiff"});
+		  //Method cm = Class.forName("javax.media.jai.JAI").getMethod("create", new Class[]{String.class, RenderedImage.class, Object.class, Object.class});
+		 // cm.invoke(null, new Object[]{"filestore", img, noSuffix+".tiff", "tiff"});      
+      TIFFEncodeParam encodeParam = new TIFFEncodeParam();
+      encodeParam.setCompression(TIFFEncodeParam.COMPRESSION_DEFLATE);
+      encodeParam.setDeflateLevel(9);
+      ParameterBlock pb = new ParameterBlock();
+      pb.addSource(img);
+      pb.add(new FileOutputStream(noSuffix+".tiff"));
+      pb.add("tiff");
+      pb.add(encodeParam);
+      JAI.create("encode", pb);      
 		} catch(Throwable e) {
-			worked=false;
-			LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write TIFF: "+noSuffix+".tiff", e);
+		  worked=false;
+		  LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write TIFF: "+noSuffix+".tiff", e);
 		}
 	  if (!worked) {
 	    try {
