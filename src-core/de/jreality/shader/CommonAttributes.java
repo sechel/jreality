@@ -88,7 +88,7 @@ import de.jreality.scene.Appearance;
 	public final static double LEVEL_OF_DETAIL_DEFAULT = 			1.0;
 	public final static String OPAQUE_TUBES_AND_SPHERES = "opaqueTubesAndSpheres";
 	public final static boolean OPAQUE_TUBES_AND_SPHERES_DEFAULT = false;
-	
+	public final static String CENTER_ON_BOUNDING_BOX = "centerOnBoundingBox";
 	// these hints are heavily OpenGL specific
 	public final static String DEPTH_FUDGE_FACTOR = 		"depthFudgeFactor";
 	public final static String IGNORE_ALPHA0	=			"ignoreAlpha0";	// reject pixel writes for pixels with alpha == 0
