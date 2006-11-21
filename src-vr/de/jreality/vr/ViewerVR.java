@@ -350,6 +350,8 @@ public class ViewerVR {
 		}
 	};
 
+	private JButton bottomColorButton;
+
 	
 	@SuppressWarnings("serial")
 	public ViewerVR() throws IOException {
@@ -629,7 +631,6 @@ public class ViewerVR {
 
 	private void updateLandscape() {
 		cubeMap = landscape.getCubeMap();
-		updateEnablingOfBackgroundEdit();
 		updateBackground();
 //		Geometry last = terrainNode.getGeometry();
 		flat = landscape.isTerrainFlat();
@@ -751,7 +752,7 @@ public class ViewerVR {
 			}
 		});
 		backgroundColorPanel.add(topColorButton);
-		JButton bottomColorButton = new JButton("bottom");
+		bottomColorButton = new JButton("bottom");
 		bottomColorButton.setMargin(insets);
 		bottomColorButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -762,21 +763,13 @@ public class ViewerVR {
 		backgroundFlat = new JCheckBox("flat");
 		backgroundFlat.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				updateEnablingOfBackgroundEdit();
-				updateBackground();
+				setBackgroundFlat(backgroundFlat.isSelected());
 			}
 		});
 		backgroundColorPanel.add(backgroundFlat);
 		
 		envControlBox.add(backgroundColorPanel);
 		envPanel.add(envControlBox, BorderLayout.SOUTH);
-	}
-
-	private void updateEnablingOfBackgroundEdit() {
-//		backgroundLabel.setEnabled(cubeMap == null);
-//		topColorButton.setEnabled(cubeMap == null);
-//		backGroundFlat.setEnabled(cubeMap == null);
-//		bottomColorButton.setEnabled(cubeMap == null && !backGroundFlat.isSelected());
 	}
 	
 	public boolean isTerrainTransparent() {
@@ -1839,6 +1832,9 @@ public class ViewerVR {
 		groundSlider.setValue((int) (offset/MAX_OFFSET * 100));
 	}
 
+	private void updateBounds() {
+		
+	}
 	private void alignContent(final double diam, final double offset,
 			final Matrix rotation) {
 		Scene.executeWriter(sceneNode, new Runnable() {
@@ -2219,7 +2215,8 @@ public class ViewerVR {
 	
 	public void setBackgroundFlat(boolean b) {
 		backgroundFlat.setSelected(b);
-		updateEnablingOfBackgroundEdit();
+		bottomColorButton.setEnabled(!backgroundFlat.isSelected());
+		updateBackground();
 	}
 	
 	public Color getPointColor() {

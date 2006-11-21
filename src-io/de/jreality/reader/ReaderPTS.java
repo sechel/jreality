@@ -44,11 +44,13 @@ import java.awt.Color;
 import java.io.IOException;
 import java.io.LineNumberReader;
 
+import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.PointSetFactory;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.util.Input;
+import de.jreality.util.Rectangle3D;
 
 /**
  *
@@ -63,6 +65,10 @@ public class ReaderPTS extends AbstractReader {
     root = new SceneGraphComponent();
     Appearance app = new Appearance();
     app.setAttribute(CommonAttributes.SPHERES_DRAW, false);
+    app.setAttribute(CommonAttributes.PICKABLE, false);
+    app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE, false);
+    app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_SIZE, 30.);
+    app.setAttribute(CommonAttributes.VERTEX_DRAW, true);
     app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.white);
     root.setAppearance(app);
   }
@@ -73,20 +79,20 @@ public class ReaderPTS extends AbstractReader {
   }
 
   private void load() throws IOException {
-	int skip=10;
+	int skip=2;
     LineNumberReader r = new LineNumberReader(input.getReader());
     
     String l = null;
     while ((l=r.readLine().trim()).startsWith("#"));
     
-    int pointCount = Integer.parseInt(l)/skip;
+    int pointCount = Integer.parseInt(l)/(skip+1);
     double[] points = new double[pointCount*3];
     double[] colors = new double[pointCount*3];
     
     int index=0;
     while ((l=r.readLine())!=null) {
     	if (index==pointCount) break;
-    	for (int i = 0; i < skip-1; i++) r.readLine(); 
+    	for (int i = 0; i < skip; i++) r.readLine(); 
     	String[] split = l.split(" ");
     	if (split.length!=7) continue;
     	points[3*index]=Double.parseDouble(split[0]);
@@ -104,6 +110,8 @@ public class ReaderPTS extends AbstractReader {
     psf.setVertexCoordinates(points);
     psf.setVertexColors(colors);
     psf.update();
+    Rectangle3D bb = GeometryUtility.calculateBoundingBox(psf.getPointSet());
+    psf.getPointSet().setGeometryAttributes(GeometryUtility.BOUNDING_BOX, bb);
     root.setGeometry(psf.getPointSet());
   }
 
