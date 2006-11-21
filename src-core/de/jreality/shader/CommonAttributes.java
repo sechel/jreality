@@ -122,7 +122,7 @@ import de.jreality.scene.Appearance;
 	public final static String POINT_RADIUS = 	"pointRadius";			// object coordinates
     public final static double POINT_RADIUS_DEFAULT = 0.025;
 	public final static String POINT_SIZE = 	"pointSize";				// pixel coordinates
-    public final static double POINT_SIZE_DEFAULT = 3.0;
+    public final static double POINT_SIZE_DEFAULT = 30.0;
 	public static final Color POINT_DIFFUSE_COLOR_DEFAULT = Color.RED;
 	public final static String SPHERE_RESOLUTION = "sphereResolution";
   // default line shader
