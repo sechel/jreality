@@ -300,9 +300,9 @@ public class SelectionManager implements TransformationListener {
     if (renderSelection) {
       updateBoundingBox();
       transformationMatrixChanged(null);  //update transformation matrix
-      if (viewer != null) viewer.render();  //render auxiliary root
     }
     if (selectionKit != null) selectionKit.setVisible(renderSelection);
+    if (viewer != null) viewer.render();  //render auxiliary root
   }
 
   
