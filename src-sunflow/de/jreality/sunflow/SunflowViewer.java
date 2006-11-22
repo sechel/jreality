@@ -1,0 +1,153 @@
+/**
+ *
+ * This file is part of jReality. jReality is open source software, made
+ * available under a BSD license:
+ *
+ * Copyright (c) 2003-2006, jReality Group: Charles Gunn, Tim Hoffmann, Markus
+ * Schmies, Steffen Weissmann.
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * - Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * - Neither the name of jReality nor the names of its contributors nor the
+ *   names of their associated organizations may be used to endorse or promote
+ *   products derived from this software without specific prior written
+ *   permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
+
+package de.jreality.sunflow;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+
+import org.sunflow.core.Display;
+import org.sunflow.core.display.FrameDisplay;
+import org.sunflow.system.ImagePanel;
+
+import de.jreality.scene.Appearance;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Sphere;
+import de.jreality.scene.Viewer;
+import de.jreality.ui.viewerapp.ViewerApp;
+
+/**
+ * 
+ * @version 1.0
+ * @author <a href="mailto:pinkall@math.tu-berlin.de">Ulrich Pinkall</a>
+ *
+ */
+public class SunflowViewer implements Viewer {
+	private SceneGraphPath cameraPath;
+	private SceneGraphComponent sceneRoot;
+	private Display display = new FrameDisplay();
+
+	public Component getViewingComponent() {
+		return (Component) display;
+	}
+
+	public void setSceneRoot(SceneGraphComponent c) {
+		sceneRoot =c;
+	}
+
+	public SceneGraphComponent getSceneRoot() {
+		return sceneRoot;
+	}
+
+	public void render() {
+		SunflowRenderer sv =new SunflowRenderer();
+		sv.render(sceneRoot,cameraPath,display);
+	}
+
+	public SceneGraphPath getCameraPath() {
+		return cameraPath;
+	}
+
+	public void setCameraPath(SceneGraphPath p) {
+		cameraPath = p;        
+	}
+
+	public boolean hasViewingComponent() {
+		return false;
+	}
+
+	public void initializeFrom(Viewer v) {
+		cameraPath = v.getCameraPath();
+		sceneRoot = v.getSceneRoot();
+		if (v.hasViewingComponent()){
+			getViewingComponent().setSize((int) v.getViewingComponentSize().getHeight(),
+							   (int) v.getViewingComponentSize().getWidth());
+		}
+	}
+
+	public int getSignature() {
+		return 0;
+	}
+
+	public void setSignature(int sig) {
+	}
+
+	public void setAuxiliaryRoot(SceneGraphComponent ar) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	public SceneGraphComponent getAuxiliaryRoot() {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	public int getHeight() {
+		return getViewingComponent().getHeight();
+	}
+
+	public int getWidth() {
+		return getViewingComponent().getWidth();
+	}
+
+	public Dimension getViewingComponentSize() {
+		return getViewingComponent().getSize();
+	}
+
+	public boolean canRenderAsync() {
+		return false;
+	}
+
+	public void renderAsync() {
+		throw new UnsupportedOperationException();
+	}
+	
+	public static void main(String[] args) {
+		SceneGraphComponent cmp = new SceneGraphComponent();
+		cmp.setAppearance(new Appearance());
+		cmp.getAppearance().setAttribute("diffuseColor", Color.red);
+		cmp.setGeometry(new Sphere());
+		ViewerApp va = ViewerApp.display(cmp);
+		SunflowViewer sv = new SunflowViewer();
+		sv.setCameraPath(va.getViewer().getCameraPath());
+		sv.setSceneRoot(va.getViewer().getSceneRoot());
+		sv.render();
+	}
+}
