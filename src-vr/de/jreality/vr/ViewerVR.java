@@ -461,7 +461,7 @@ public class ViewerVR {
 		});
 		
 		terrain = (IndexedFaceSet) terrainNode.getGeometry();
-		MatrixBuilder.euclidean().scale(1 / 3.).translate(0, 7, 0).assignTo(terrainNode);
+		MatrixBuilder.euclidean().scale(1.1 / 3.).translate(0, 7, 0).assignTo(terrainNode);
 		terrainNode.setName("terrain");
 		IndexedFaceSet terrainGeom = (IndexedFaceSet) terrainNode.getGeometry();
 		terrainPoints = terrainGeom.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
