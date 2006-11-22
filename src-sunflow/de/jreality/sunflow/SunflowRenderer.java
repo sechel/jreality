@@ -125,13 +125,14 @@ public class SunflowRenderer extends SunflowAPI {
 		}
 	}
 	
-	public void render(SceneGraphComponent sceneRoot, SceneGraphPath cameraPath, Display display) {
+	public void render(SceneGraphComponent sceneRoot, SceneGraphPath cameraPath, Display display, int width, int height) {
+		
+		// camera
+		float aspect = width/(float)height;
+		parameter("aspect",aspect);
 		Camera c = (Camera) cameraPath.getLastElement();
 		Matrix m = new Matrix(cameraPath.getMatrix(null));
-		parameterPoint("eye", m.getColumn(3));
-		double[] target = Rn.subtract(null, m.getColumn(3), m.getColumn(2));
-		parameterPoint("target", target);
-		parameterVector("up", m.getColumn(1));
+		parameter("transform",m);
 		parameter("fov", c.getFieldOfView());
 		String name = getUniqueName("camera");
 		camera(name, new PinholeLens());
@@ -139,8 +140,14 @@ public class SunflowRenderer extends SunflowAPI {
 		options(SunflowAPI.DEFAULT_OPTIONS);
 		CornellBox box = new CornellBox();
         box.init(getUniqueName("cornellbox"), this);
-		new Visitor().visit(sceneRoot);
+		
+        // visit
+        new Visitor().visit(sceneRoot);
+        
+		// sunflow rendering
 		parameter("sampler", "bucket");
+		parameter("resolutionX", width);
+        parameter("resolutionY", height);
         options(SunflowAPI.DEFAULT_OPTIONS);
         render(SunflowAPI.DEFAULT_OPTIONS, display);
 	}
@@ -217,7 +224,7 @@ public class SunflowRenderer extends SunflowAPI {
         String name = getUniqueName("camera");
         camera(name, new PinholeLens());
         parameter("camera", name);
-        options(SunflowAPI.DEFAULT_OPTIONS);
+        //options(SunflowAPI.DEFAULT_OPTIONS);
         // cornell box
         Color grey = new Color(0.70f, 0.70f, 0.70f);
         Color blue = new Color(0.25f, 0.25f, 0.80f);
@@ -236,8 +243,8 @@ public class SunflowRenderer extends SunflowAPI {
 
 //        parameter("diffuse", grey);
 //        shader("grey_shader", new DiffuseShader());
-        parameter("diffuse", red);
-        shader("red_shader", new DiffuseShader());
+//        parameter("diffuse", red);
+//        shader("red_shader", new DiffuseShader());
 //        parameter("diffuse", blue);
 //        shader("blue_shader", new DiffuseShader());
 //

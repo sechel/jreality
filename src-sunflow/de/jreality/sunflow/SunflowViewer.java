@@ -65,6 +65,8 @@ public class SunflowViewer implements Viewer {
 	private SceneGraphPath cameraPath;
 	private SceneGraphComponent sceneRoot;
 	private Display display = new FrameDisplay();
+	private int width;
+	private int height;
 
 	public Component getViewingComponent() {
 		return (Component) display;
@@ -80,7 +82,7 @@ public class SunflowViewer implements Viewer {
 
 	public void render() {
 		SunflowRenderer sv =new SunflowRenderer();
-		sv.render(sceneRoot,cameraPath,display);
+		sv.render(sceneRoot,cameraPath,display,width,height);
 	}
 
 	public SceneGraphPath getCameraPath() {
@@ -99,8 +101,9 @@ public class SunflowViewer implements Viewer {
 		cameraPath = v.getCameraPath();
 		sceneRoot = v.getSceneRoot();
 		if (v.hasViewingComponent()){
-			getViewingComponent().setSize((int) v.getViewingComponentSize().getHeight(),
-							   (int) v.getViewingComponentSize().getWidth());
+			Component c = (Component)v.getViewingComponent();
+			setWidth(c.getWidth());
+			setHeight(c.getHeight());
 		}
 	}
 
@@ -120,11 +123,19 @@ public class SunflowViewer implements Viewer {
 	}
 
 	public int getHeight() {
-		return getViewingComponent().getHeight();
+		return width;
+	}
+	
+	public void setHeight(int h) {
+		height = h;
 	}
 
 	public int getWidth() {
-		return getViewingComponent().getWidth();
+		return height;
+	}
+	
+	public void setWidth(int w) {
+		width = w;
 	}
 
 	public Dimension getViewingComponentSize() {
@@ -146,8 +157,7 @@ public class SunflowViewer implements Viewer {
 		cmp.setGeometry(new Sphere());
 		ViewerApp va = ViewerApp.display(cmp);
 		SunflowViewer sv = new SunflowViewer();
-		sv.setCameraPath(va.getViewer().getCameraPath());
-		sv.setSceneRoot(va.getViewer().getSceneRoot());
+		sv.initializeFrom(va.getViewer());
 		sv.render();
 	}
 }
