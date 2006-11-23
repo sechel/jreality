@@ -49,6 +49,7 @@ import org.sunflow.SunflowAPI;
 import org.sunflow.core.Display;
 import org.sunflow.core.camera.PinholeLens;
 import org.sunflow.core.display.FrameDisplay;
+import org.sunflow.core.light.ImageBasedLight;
 import org.sunflow.core.light.MeshLight;
 import org.sunflow.core.primitive.CornellBox;
 import org.sunflow.core.primitive.Mesh;
@@ -125,9 +126,25 @@ public class SunflowRenderer extends SunflowAPI {
 		}
 	}
 	
+	public SunflowRenderer() {
+		String dataDir = System.getProperty("jreality.data","/net/MathVis/data/testData3D");
+		addTextureSearchPath(dataDir+"/textures");
+	}
+	
 	public void render(SceneGraphComponent sceneRoot, SceneGraphPath cameraPath, Display display, int width, int height) {
 		
-		// camera
+		// light
+		parameter("texture", "sky_small.hdr");
+		parameter("center", new Vector3( 1,0, -1));
+		parameter("up", new Vector3(0, 1, 0));
+		parameter("samples", 200);
+		ImageBasedLight light = new ImageBasedLight();
+		light.init("skylight", this);
+		
+        // visit
+        new Visitor().visit(sceneRoot);
+        
+        // camera
 		float aspect = width/(float)height;
 		parameter("aspect",aspect);
 		Camera c = (Camera) cameraPath.getLastElement();
@@ -137,13 +154,7 @@ public class SunflowRenderer extends SunflowAPI {
 		String name = getUniqueName("camera");
 		camera(name, new PinholeLens());
 		parameter("camera", name);
-		options(SunflowAPI.DEFAULT_OPTIONS);
-		CornellBox box = new CornellBox();
-        box.init(getUniqueName("cornellbox"), this);
 		
-        // visit
-        new Visitor().visit(sceneRoot);
-        
 		// sunflow rendering
 		parameter("sampler", "bucket");
 		parameter("resolutionX", width);
@@ -214,85 +225,4 @@ public class SunflowRenderer extends SunflowAPI {
 	public void parameter(String name, double val) {
 		parameter(name, (float) val);
 	}
-
-	public void test() {
-        // camera
-        parameter("eye", new Point3(0, 0, -16));
-        parameter("target", new Point3(0, 0, 0));
-        parameter("up", new Vector3(0, 1, 0));
-        parameter("fov", 45.0f);
-        String name = getUniqueName("camera");
-        camera(name, new PinholeLens());
-        parameter("camera", name);
-        //options(SunflowAPI.DEFAULT_OPTIONS);
-        // cornell box
-        Color grey = new Color(0.70f, 0.70f, 0.70f);
-        Color blue = new Color(0.25f, 0.25f, 0.80f);
-        Color red = new Color(0.80f, 0.25f, 0.25f);
-        Color emit = new Color(15, 15, 15);
-
-        float minX = -200;
-        float maxX = 200;
-        float minY = -160;
-        float maxY = minY + 400;
-        float minZ = -250;
-        float maxZ = 200;
-
-        float[] verts = new float[] { minX, minY, minZ, maxX, minY, minZ, maxX, minY, maxZ, minX, minY, maxZ, minX, maxY, minZ, maxX, maxY, minZ, maxX, maxY, maxZ, minX, maxY, maxZ, };
-        int[] indices = new int[] { 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4, 1, 2, 5, 5, 6, 2, 2, 3, 6, 6, 7, 3, 0, 3, 4, 4, 7, 3 };
-
-//        parameter("diffuse", grey);
-//        shader("grey_shader", new DiffuseShader());
-//        parameter("diffuse", red);
-//        shader("red_shader", new DiffuseShader());
-//        parameter("diffuse", blue);
-//        shader("blue_shader", new DiffuseShader());
-//
-//        // build walls
-//        parameter("triangles", indices);
-//        parameter("points", "point", "vertex", verts);
-//        parameter("faceshaders", new int[] { 0, 0, 0, 0, 1, 1, 0, 0, 2, 2 });
-//        geometry("walls", new Mesh());
-//
-//        // instance walls
-//        parameter("shaders", new String[] { "grey_shader", "red_shader", "blue_shader" });
-//        instance("walls.instance", "walls");
-
-//        // create mesh light
-//        parameter("points", "point", "vertex", new float[] { -50, maxY - 1, -50, 50, maxY - 1, -50, 50, maxY - 1, 50, -50, maxY - 1, 50 });
-//        parameter("triangles", new int[] { 0, 1, 2, 2, 3, 0 });
-//        parameter("radiance", emit);
-//        parameter("samples", 16);
-//        MeshLight light = new MeshLight();
-//        light.init("light", this);
-
-        new CornellBox().init(getUniqueName("cornellBox"), this);
-        
-        geometry("foo", new org.sunflow.core.primitive.Sphere());
-        parameter("shaders", "red_shader");
-		instance("foo.instance", "foo");
-		
-        // spheres
-        parameter("eta", 1.6f);
-        shader("Glass", new GlassShader());
-        sphere("glass_sphere", "Glass", -60, minY + 100, -100, 50);
-        parameter("color", new Color(0.70f, 0.70f, 0.70f));
-        shader("Mirror", new MirrorShader());
-        sphere("mirror_sphere", "Mirror", 100, minY + 60, -50, 50);
-	}
-
-    private void sphere(String name, String shaderName, float x, float y, float z, float radius) {
-        geometry(name, new org.sunflow.core.primitive.Sphere());
-        parameter("transform", Matrix4.translation(x, y, z).multiply(Matrix4.scale(radius)));
-        parameter("shaders", shaderName);
-        instance(name + ".instance", name);
-    }
-    
-    public static void main(String[] args) {
-		SunflowRenderer sr = new SunflowRenderer();
-		Display d = new FrameDisplay();
-		sr.test();
-		sr.render(SunflowAPI.DEFAULT_OPTIONS, d);
-	}
-
 }

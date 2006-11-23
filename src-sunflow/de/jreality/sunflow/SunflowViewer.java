@@ -156,6 +156,8 @@ public class SunflowViewer implements Viewer {
 		cmp.getAppearance().setAttribute("diffuseColor", Color.red);
 		cmp.setGeometry(new Sphere());
 		ViewerApp va = ViewerApp.display(cmp);
+		va.getFrame().setSize(400,300);
+		va.getFrame().validate();
 		SunflowViewer sv = new SunflowViewer();
 		sv.initializeFrom(va.getViewer());
 		sv.render();
