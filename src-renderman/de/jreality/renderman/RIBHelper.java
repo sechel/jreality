@@ -5,6 +5,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.awt.image.renderable.ParameterBlock;
+import java.beans.Expression;
+import java.beans.Statement;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -20,9 +22,6 @@ import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
-import javax.media.jai.JAI;
-
-import com.sun.media.jai.codec.TIFFEncodeParam;
 
 import de.jreality.math.Rn;
 import de.jreality.renderman.shader.DefaultPolygonShader;
@@ -171,17 +170,25 @@ public class RIBHelper {
 	
 	  boolean worked=true;
 		try {
-		  //Method cm = Class.forName("javax.media.jai.JAI").getMethod("create", new Class[]{String.class, RenderedImage.class, Object.class, Object.class});
-		 // cm.invoke(null, new Object[]{"filestore", img, noSuffix+".tiff", "tiff"});      
-      TIFFEncodeParam encodeParam = new TIFFEncodeParam();
-      encodeParam.setCompression(TIFFEncodeParam.COMPRESSION_DEFLATE);
-      encodeParam.setDeflateLevel(9);
+		  Class encParamClass = Class.forName("com.sun.media.jai.codec.TIFFEncodeParam");
+		  
+      Object encodeParam = encParamClass.newInstance();
+      Object compField = encParamClass.getField("COMPRESSION_DEFLATE").get(null);
+      
+      new Statement(encodeParam, "setCompression", new Object[]{compField});
+      //encodeParam.setCompression(TIFFEncodeParam.COMPRESSION_DEFLATE);
+      new Statement(encodeParam, "setDeflateLevel", new Object[]{9});
+      //encodeParam.setDeflateLevel(9);
+      
       ParameterBlock pb = new ParameterBlock();
       pb.addSource(img);
       pb.add(new FileOutputStream(noSuffix+".tiff"));
       pb.add("tiff");
       pb.add(encodeParam);
-      JAI.create("encode", pb);      
+      
+	  new Statement(Class.forName("javax.media.jai.JAI"), "create", new Object[]{pb});
+      //JAI.create("encode", pb);
+
 		} catch(Throwable e) {
 		  worked=false;
 		  LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write TIFF: "+noSuffix+".tiff", e);
