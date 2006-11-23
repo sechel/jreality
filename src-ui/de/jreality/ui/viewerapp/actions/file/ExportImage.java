@@ -53,6 +53,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.border.TitledBorder;
 
 import de.jreality.scene.Viewer;
 import de.jreality.softviewer.SoftViewer;
@@ -61,7 +63,7 @@ import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.ViewerSwitch;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
-import de.jtem.beans.DimensionDialog;
+import de.jtem.beans.DimensionPanel;
 
 
 /**
@@ -72,6 +74,7 @@ import de.jtem.beans.DimensionDialog;
 public class ExportImage extends AbstractJrAction {
   
   private Viewer viewer;
+  private DimensionPanel dimPanel;
   
   
   public ExportImage(String name, Viewer viewer, Frame frame) {
@@ -92,20 +95,29 @@ public class ExportImage extends AbstractJrAction {
   @Override
   public void actionPerformed(ActionEvent e) {
     
+    if (dimPanel == null) {
+      dimPanel = new DimensionPanel();
+      TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Dimension");
+      dimPanel.setBorder(title);
+    }
+    
     // Hack
     Viewer realViewer = ((ViewerSwitch)viewer).getCurrentViewer();
-    //de.jreality.jogl.Viewer joglViewer = (de.jreality.jogl.Viewer) realViewer;
+//    de.jreality.jogl.Viewer joglViewer = (de.jreality.jogl.Viewer) realViewer;
     Dimension d = realViewer.getViewingComponentSize();
-    Dimension dim = DimensionDialog.selectDimension(d,frame);
-    if (dim == null) return;
+    dimPanel.setDimension(d);
     
-    File file = FileLoaderDialog.selectTargetFile(frame, false, createFileFilters());
-    if (file == null) return;  //dialog cancelled 
+    File file = FileLoaderDialog.selectTargetFile(frame, dimPanel, false, createFileFilters());
+    Dimension dim = dimPanel.getDimension();
+//    Dimension dim = DimensionDialog.selectDimension(d,frame);
+    if (file == null || dim == null) return;
+
     if (FileFilter.getFileExtension(file) == null) {  //no extension specified
       System.err.println("Please specify a valid file extension.\n" +
       "Export aborted.");
       return;
     }
+    //render offscreen
     BufferedImage img = null;;
     if(realViewer instanceof de.jreality.jogl.Viewer)   
         img = ((de.jreality.jogl.Viewer)realViewer).renderOffscreen(4*dim.width, 4*dim.height);
