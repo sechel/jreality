@@ -43,16 +43,19 @@ package de.jreality.sunflow;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.io.IOException;
 
 import org.sunflow.core.Display;
 import org.sunflow.core.display.FrameDisplay;
 import org.sunflow.system.ImagePanel;
 
+import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.Viewer;
+import de.jreality.shader.TextureUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 /**
@@ -150,11 +153,13 @@ public class SunflowViewer implements Viewer {
 		throw new UnsupportedOperationException();
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		SceneGraphComponent cmp = new SceneGraphComponent();
 		cmp.setAppearance(new Appearance());
-		cmp.getAppearance().setAttribute("diffuseColor", Color.red);
-		cmp.setGeometry(new Sphere());
+		TextureUtility.createTexture(cmp.getAppearance(), "polygonShader", "textures/grid.jpeg");
+		//cmp.getAppearance().setAttribute("diffuseColor", Color.red);
+		//cmp.setGeometry(new Sphere());
+		cmp.setGeometry(new CatenoidHelicoid(20));
 		ViewerApp va = ViewerApp.display(cmp);
 		va.getFrame().setSize(400,300);
 		va.getFrame().validate();

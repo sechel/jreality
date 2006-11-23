@@ -39,23 +39,36 @@
 
 package de.jreality.sunflow;
 
+import java.awt.image.RenderedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Stack;
 
+import javax.imageio.ImageIO;
+
 import org.sunflow.SunflowAPI;
 import org.sunflow.core.Display;
+import org.sunflow.core.TextureCache;
 import org.sunflow.core.camera.PinholeLens;
 import org.sunflow.core.display.FrameDisplay;
 import org.sunflow.core.light.ImageBasedLight;
 import org.sunflow.core.light.MeshLight;
 import org.sunflow.core.primitive.CornellBox;
 import org.sunflow.core.primitive.Mesh;
+import org.sunflow.core.shader.AmbientOcclusionShader;
+import org.sunflow.core.shader.AnisotropicWardShader;
 import org.sunflow.core.shader.DiffuseShader;
 import org.sunflow.core.shader.GlassShader;
 import org.sunflow.core.shader.MirrorShader;
+import org.sunflow.core.shader.PhongShader;
+import org.sunflow.core.shader.TexturedPhongShader;
+import org.sunflow.core.shader.UberShader;
 import org.sunflow.image.Color;
 import org.sunflow.math.Matrix4;
 import org.sunflow.math.Point3;
@@ -67,20 +80,28 @@ import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Geometry;
+import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.DataList;
+import de.jreality.scene.data.DoubleArrayArray;
+import de.jreality.scene.data.IntArray;
+import de.jreality.scene.data.IntArrayArray;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 
 
 public class SunflowRenderer extends SunflowAPI {
 
-	IdentityHashMap<Geometry, String> geom2name = new IdentityHashMap<Geometry, String>();
-	HashMap<String, Geometry> name2geom = new HashMap<String, Geometry>();
+	IdentityHashMap<Object, String> geom2name = new IdentityHashMap<Object, String>();
+	HashMap<String, Object> name2geom = new HashMap<String, Object>();
+	ArrayList<File> tmpFiles = new ArrayList<File>();
 	
 	private class Visitor extends SceneGraphVisitor {
 		
@@ -122,7 +143,35 @@ public class SunflowRenderer extends SunflowAPI {
 			dgs = ShaderUtility.createDefaultGeometryShader(eapp);
 			dps = (DefaultPolygonShader) dgs.getPolygonShader();
 			parameter("diffuse", dps.getDiffuseColor());
-			shader("default-shader"+appCount, new DiffuseShader());
+			parameter("reflection", dps.getSpecularColor());
+			if  (dps.getTexture2d() != null) {
+				parameter("texture", getName(dps.getTexture2d().getImage()));
+			}
+			parameter("power", dps.getSpecularExponent());
+			//parameter("samples", 4);
+			shader("default-shader"+appCount, dps.getTexture2d() != null ? new TexturedPhongShader() : new PhongShader());
+		}
+		
+		@Override
+		public void visit(IndexedFaceSet ifs) {
+			float[] points = convert(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), 3);
+			float[] normals = null;
+			if (ifs.getVertexAttributes(Attribute.NORMALS) != null) {
+				normals = convert(ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(), 3);
+				parameter("normals", "vector", "vertex", normals);
+			} else if (ifs.getFaceAttributes(Attribute.NORMALS) != null) {
+				normals = convert(ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArrayArray(), 3);
+				//parameter("normals", "vector", "vertex", normals);
+			}
+			DataList tex = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+			float[] texCoords = tex != null ? convert(tex.toDoubleArrayArray(), 2) : null;
+			int[] faces = convert(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray());
+			parameter("triangles", faces);
+			parameter("points", "point", "vertex", points);
+			if (texCoords != null) {
+				parameter("uvs", "texcoord", "vertex", texCoords);				
+			}
+			geometry(getName(ifs), new Mesh());
 		}
 	}
 	
@@ -131,6 +180,35 @@ public class SunflowRenderer extends SunflowAPI {
 		addTextureSearchPath(dataDir+"/textures");
 	}
 	
+	public int[] convert(IntArrayArray faces) {
+		int triCnt=0;
+		for (int i=0; i<faces.getLength(); i++) {
+			triCnt+=(faces.getLengthAt(i)-2);
+		}
+		int[] tris = new int[triCnt*3];
+		int ind=0;
+		for (int i=0; i<faces.getLength(); i++) {
+			IntArray face = faces.getValueAt(i);
+			for (int k=0; k<face.getLength()-2; k++) {
+				tris[ind++]=face.getValueAt(0);
+				tris[ind++]=face.getValueAt(k+1);
+				tris[ind++]=face.getValueAt(k+2);
+			}
+		}
+		return tris;
+	}
+
+	public float[] convert(DoubleArrayArray array, int slotLen) {
+		float[] ret = new float[array.getLength()*slotLen];
+		int ind=0;
+		for (int i=0; i<array.getLength(); i++) {
+			for (int j=0; j<slotLen; j++) {
+				ret[ind++]=(float) array.getValueAt(i, j);
+			}
+		}
+		return ret;
+	}
+
 	public void render(SceneGraphComponent sceneRoot, SceneGraphPath cameraPath, Display display, int width, int height) {
 		
 		// light
@@ -140,6 +218,17 @@ public class SunflowRenderer extends SunflowAPI {
 		parameter("samples", 200);
 		ImageBasedLight light = new ImageBasedLight();
 		light.init("skylight", this);
+		
+		// add texture path
+        try {
+			File tmpF = File.createTempFile("foo", ".png");
+			addTextureSearchPath(tmpF.getParentFile().getAbsolutePath());
+			if (!tmpF.delete()) tmpF.deleteOnExit();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
 		
         // visit
         new Visitor().visit(sceneRoot);
@@ -164,15 +253,34 @@ public class SunflowRenderer extends SunflowAPI {
 	}
 	
 	public String getName(Geometry geom) {
+		String prefix=geom.getName();
+		return getName(prefix, geom);
+	}
+
+	int imgCnt;
+	public String getName(ImageData img) {
+		if (geom2name.containsKey(img)) return geom2name.get(img);
+		File tmp;
+		try {
+			tmp = File.createTempFile("texture", ".png");
+			ImageIO.write((RenderedImage) img.getImage(), "PNG", tmp);
+			tmpFiles.add(tmp);
+		} catch (IOException e) {
+			throw new Error();
+		}
+		return getName(tmp.getName(), img);
+	}
+
+	private String getName(String prefix, Object geom) {
 		String ret;
 		if (geom2name.containsKey(geom)) ret = geom2name.get(geom);
 		else {
-			if (!name2geom.containsKey(geom.getName())) {
-				geom2name.put(geom, geom.getName());
-				ret = geom.getName();
+			if (!name2geom.containsKey(prefix)) {
+				geom2name.put(geom, prefix);
+				ret = prefix;
 			} else {
 		        int counter = 1;
-		        String name, prefix=geom.getName();
+		        String name;
 		        do {
 		            name = String.format("%s_%d", prefix, counter);
 		            counter++;
@@ -182,8 +290,9 @@ public class SunflowRenderer extends SunflowAPI {
 		        ret = name;
 			}
 		}
-		System.out.println("geomName="+ret);
+		System.out.println("name="+ret);
 		return ret;
+
 	}
 
 	public void parameter(String string, java.awt.Color c) {
