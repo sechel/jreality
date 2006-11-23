@@ -44,7 +44,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.IOException;
 
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
@@ -79,22 +78,23 @@ public class LoadScene extends AbstractJrAction {
   
   @Override
   public void actionPerformed(ActionEvent e) {
-    File[] fs = FileLoaderDialog.loadFiles(frame);
-    if (fs == null || fs.length == 0) return;
-    File f = fs[0];
+    File f = FileLoaderDialog.loadFile(frame, "jrs", "jReality scene files");
+    if (f == null) return;
+    
     JrScene scene = null;
     try {
       ReaderJRS r = new ReaderJRS();
       r.setInput(new Input(f));
       scene = r.getScene();
+      if (scene == null) throw new NullPointerException("couldn't read scene");
       ViewerApp v = new ViewerApp(scene);
       v.setAttachNavigator(viewerApp.isAttachNavigator());
       v.setAttachBeanShell(viewerApp.isAttachBeanShell());
       v.update();
       viewerApp.dispose();
       v.display();
-    } catch (IOException ioe) {
-      JOptionPane.showMessageDialog(frame, "Load failed: "+ioe.getMessage());
+    } catch (Exception exc) {
+      JOptionPane.showMessageDialog(frame, "Load failed: "+exc.getMessage());
     }
   }
 
