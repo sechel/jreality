@@ -175,7 +175,7 @@ public class ImageData implements Serializable {
         pix[3] = byteArray[ptr + 2];
         raster.setPixel(x, y, pix);
       }
-    return new ROImage(bi);
+    return bi;//new ROImage(bi);
   }
 
   private void readBytes(Image theImage, double[] channelArithmeticMatrix) {

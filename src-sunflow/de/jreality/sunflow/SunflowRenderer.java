@@ -39,6 +39,7 @@
 
 package de.jreality.sunflow;
 
+import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
@@ -56,6 +57,7 @@ import org.sunflow.SunflowAPI;
 import org.sunflow.core.Display;
 import org.sunflow.core.TextureCache;
 import org.sunflow.core.camera.PinholeLens;
+import org.sunflow.core.camera.ThinLens;
 import org.sunflow.core.display.FrameDisplay;
 import org.sunflow.core.light.ImageBasedLight;
 import org.sunflow.core.light.MeshLight;
@@ -66,9 +68,18 @@ import org.sunflow.core.shader.AnisotropicWardShader;
 import org.sunflow.core.shader.DiffuseShader;
 import org.sunflow.core.shader.GlassShader;
 import org.sunflow.core.shader.MirrorShader;
+import org.sunflow.core.shader.NormalShader;
 import org.sunflow.core.shader.PhongShader;
+import org.sunflow.core.shader.ShinyDiffuseShader;
+import org.sunflow.core.shader.SimpleShader;
 import org.sunflow.core.shader.TexturedPhongShader;
+import org.sunflow.core.shader.TexturedWardShader;
+import org.sunflow.core.shader.UVShader;
 import org.sunflow.core.shader.UberShader;
+import org.sunflow.core.shader.ViewCausticsShader;
+import org.sunflow.core.shader.ViewGlobalPhotonsShader;
+import org.sunflow.core.shader.ViewIrradianceShader;
+import org.sunflow.image.Bitmap;
 import org.sunflow.image.Color;
 import org.sunflow.math.Matrix4;
 import org.sunflow.math.Point3;
@@ -79,6 +90,7 @@ import de.jreality.math.Matrix;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
+import de.jreality.scene.Cylinder;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -118,8 +130,8 @@ public class SunflowRenderer extends SunflowAPI {
 			Geometry g = c.getGeometry();
 			if (c.getAppearance() != null) c.getAppearance().accept(this);
 			if (g != null) {
-			  parameter("transform", new Matrix(path.getMatrix(null)));
 			  g.accept(this);
+			  parameter("transform", new Matrix(path.getMatrix(null)));
 			  parameter("shaders", "default-shader"+appCount);
 			  String geomName = getName(g);
 			  instance(geomName+".instance", geomName);
@@ -136,6 +148,11 @@ public class SunflowRenderer extends SunflowAPI {
 		}
 		
 		@Override
+		public void visit(Cylinder c) {
+			geometry(getName(c), new org.sunflow.core.primitive.Cylinder());
+		}
+
+		@Override
 		public void visit(Appearance a) {
 			appCount++;
 			System.out.println("Visitor.visit(Appearance)");
@@ -149,7 +166,7 @@ public class SunflowRenderer extends SunflowAPI {
 			}
 			parameter("power", dps.getSpecularExponent());
 			//parameter("samples", 4);
-			shader("default-shader"+appCount, dps.getTexture2d() != null ? new TexturedPhongShader() : new PhongShader());
+			shader("default-shader"+appCount, new UberShader());//dps.getTexture2d() != null ? new TexturedWardShader() : new AnisotropicWardShader());
 		}
 		
 		@Override
@@ -213,7 +230,7 @@ public class SunflowRenderer extends SunflowAPI {
 		
 		// light
 		parameter("texture", "sky_small.hdr");
-		parameter("center", new Vector3( 1,0, -1));
+		parameter("center", new Vector3(1, 0, -1));
 		parameter("up", new Vector3(0, 1, 0));
 		parameter("samples", 200);
 		ImageBasedLight light = new ImageBasedLight();
@@ -239,7 +256,13 @@ public class SunflowRenderer extends SunflowAPI {
 		Camera c = (Camera) cameraPath.getLastElement();
 		Matrix m = new Matrix(cameraPath.getMatrix(null));
 		parameter("transform",m);
-		parameter("fov", c.getFieldOfView());
+		double fov = c.getFieldOfView();
+		System.out.println("cam fov="+fov);
+		if (width>height) {
+			fov = Math.atan(((double)width)/((double)height)*Math.tan(fov/360*Math.PI))/Math.PI*360;
+			System.out.println("adjusted fov="+fov);
+		}
+		parameter("fov", fov);
 		String name = getUniqueName("camera");
 		camera(name, new PinholeLens());
 		parameter("camera", name);
@@ -263,7 +286,8 @@ public class SunflowRenderer extends SunflowAPI {
 		File tmp;
 		try {
 			tmp = File.createTempFile("texture", ".png");
-			ImageIO.write((RenderedImage) img.getImage(), "PNG", tmp);
+			//ImageIO.write((RenderedImage) img.getImage(), "PNG", tmp);
+			Bitmap.save((BufferedImage) img.getImage(), tmp.getAbsolutePath());
 			tmpFiles.add(tmp);
 		} catch (IOException e) {
 			throw new Error();

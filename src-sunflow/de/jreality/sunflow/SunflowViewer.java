@@ -50,7 +50,9 @@ import org.sunflow.core.display.FrameDisplay;
 import org.sunflow.system.ImagePanel;
 
 import de.jreality.examples.CatenoidHelicoid;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.Cylinder;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Sphere;
@@ -156,10 +158,12 @@ public class SunflowViewer implements Viewer {
 	public static void main(String[] args) throws IOException {
 		SceneGraphComponent cmp = new SceneGraphComponent();
 		cmp.setAppearance(new Appearance());
-		TextureUtility.createTexture(cmp.getAppearance(), "polygonShader", "textures/grid.jpeg");
+		MatrixBuilder.euclidean().rotateZ(Math.PI/3).rotateX(Math.PI/6).scale(0.2, 0.3, 4.).assignTo(cmp);
+		//TextureUtility.createTexture(cmp.getAppearance(), "polygonShader", "textures/grid.jpeg");
 		//cmp.getAppearance().setAttribute("diffuseColor", Color.red);
-		//cmp.setGeometry(new Sphere());
-		cmp.setGeometry(new CatenoidHelicoid(20));
+		cmp.setGeometry(new Sphere());
+		cmp.setGeometry(new Cylinder());
+		//cmp.setGeometry(new CatenoidHelicoid(20));
 		ViewerApp va = ViewerApp.display(cmp);
 		va.getFrame().setSize(400,300);
 		va.getFrame().validate();
