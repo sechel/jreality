@@ -14,6 +14,7 @@ public class SunflowMenu extends JMenu {
 	private ViewerApp va;
 	
 	public SunflowMenu(ViewerApp vapp) {
+		super("Sunflow");
 		va = vapp;
 		add(new AbstractAction("preview") {
 			public void actionPerformed(ActionEvent arg0) {
