@@ -90,13 +90,10 @@ public class FileLoaderDialog {
   }
   
   
-  public static File[] loadFiles(Component parent) {
-    return loadFiles(parent, (JComponent)null);
-  }
   
+  //-- OPEN FILE DIALOGS ----------------------------------
   
-  public static File[] loadFiles(Component parent, JComponent accessory) {
-    JFileChooser chooser = createFileChooser();  //adds default file filter for jReality 3D data files
+  private static File[] loadFiles(Component parent, JFileChooser chooser, JComponent accessory) {
     if (accessory != null) chooser.setAccessory(accessory);
     chooser.setMultiSelectionEnabled(true);
     chooser.showOpenDialog(parent);
@@ -105,6 +102,33 @@ public class FileLoaderDialog {
     return files;
   }
   
+  private static File loadFile(Component parent, JFileChooser chooser, JComponent accessory) {
+    if (accessory != null) chooser.setAccessory(accessory);
+    chooser.setMultiSelectionEnabled(false);
+    chooser.showOpenDialog(parent);
+    File file = chooser.getSelectedFile();
+    lastDir = chooser.getCurrentDirectory();
+    return file;
+  }
+  
+  
+  public static File[] loadFiles(Component parent) {
+    return loadFiles(parent, (JComponent)null);
+  }
+  
+  public static File[] loadFiles(Component parent, JComponent accessory) {
+    JFileChooser chooser = createFileChooser();  //adds default file filter for jReality 3D data files
+    return loadFiles(parent, chooser, accessory); 
+  }
+  
+  public static File loadFile(Component parent, String extension, String description) {
+    JFileChooser chooser = createFileChooser(extension, description);
+    return loadFile(parent, chooser, (JComponent)null);
+  }
+  
+  
+  
+  //-- SAVE FILE DIALOGS ----------------------------------
   
   private static File selectTargetFile(Component parent, JFileChooser chooser, JComponent accessory) {
     if (accessory != null) chooser.setAccessory(accessory);
@@ -135,7 +159,6 @@ public class FileLoaderDialog {
     return selectTargetFile(parent, chooser, accessory);
   }
 
-  
   public static File selectTargetFile(Component parent, String extension, String description) {
     return selectTargetFile(parent, (JComponent)null, extension, description);
   }
@@ -144,7 +167,6 @@ public class FileLoaderDialog {
       JFileChooser chooser = createFileChooser(extension, description);
       return selectTargetFile(parent, chooser, accessory);
   }
-  
   
   public static File selectTargetFile(Component parent, boolean useAcceptAllFileFilter, FileFilter... ff) {
     return selectTargetFile(parent, (JComponent)null, useAcceptAllFileFilter, ff);
