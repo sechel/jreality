@@ -41,6 +41,7 @@
 package de.jreality.ui.viewerapp.actions.file;
 
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -55,6 +56,8 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
 import de.jreality.renderman.RIBViewer;
@@ -120,9 +123,12 @@ public class ExportRIB extends AbstractJrAction {
   }  
   
   private JComponent createAccessory() {
-    Box box = Box.createVerticalBox();
+    
+    JPanel panel = new JPanel(new BorderLayout());
     TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Options");
-    box.setBorder(title);
+    panel.setBorder(title);
+    Box box = Box.createVerticalBox();
+    box.setBorder(new EmptyBorder(5,10,5,10));
     
     JLabel typeLabel=new JLabel("\n renderer Type:");
     box.add(typeLabel);
@@ -181,7 +187,8 @@ public class ExportRIB extends AbstractJrAction {
     
     box.add(includeFileLabel);
     
-    return box;
+    panel.add(box);
+    return panel;
   }
 
 }
