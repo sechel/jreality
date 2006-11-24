@@ -40,54 +40,26 @@
 package de.jreality.sunflow;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.Stack;
-
-import javax.imageio.ImageIO;
 
 import org.sunflow.SunflowAPI;
 import org.sunflow.core.Display;
-import org.sunflow.core.TextureCache;
 import org.sunflow.core.camera.PinholeLens;
-import org.sunflow.core.camera.ThinLens;
-import org.sunflow.core.display.FrameDisplay;
-import org.sunflow.core.light.ImageBasedLight;
-import org.sunflow.core.light.MeshLight;
-import org.sunflow.core.primitive.CornellBox;
 import org.sunflow.core.primitive.Mesh;
-import org.sunflow.core.shader.AmbientOcclusionShader;
-import org.sunflow.core.shader.AnisotropicWardShader;
-import org.sunflow.core.shader.DiffuseShader;
-import org.sunflow.core.shader.GlassShader;
-import org.sunflow.core.shader.MirrorShader;
-import org.sunflow.core.shader.NormalShader;
-import org.sunflow.core.shader.PhongShader;
-import org.sunflow.core.shader.ShinyDiffuseShader;
-import org.sunflow.core.shader.SimpleShader;
-import org.sunflow.core.shader.TexturedPhongShader;
-import org.sunflow.core.shader.TexturedWardShader;
-import org.sunflow.core.shader.UVShader;
+import org.sunflow.core.primitive.SkyBox;
 import org.sunflow.core.shader.UberShader;
-import org.sunflow.core.shader.ViewCausticsShader;
-import org.sunflow.core.shader.ViewGlobalPhotonsShader;
-import org.sunflow.core.shader.ViewIrradianceShader;
 import org.sunflow.image.Bitmap;
 import org.sunflow.image.Color;
 import org.sunflow.math.Matrix4;
 import org.sunflow.math.Point3;
 import org.sunflow.math.Vector3;
-import org.sunflow.system.ImagePanel;
 
 import de.jreality.math.Matrix;
-import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Cylinder;
@@ -98,10 +70,13 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.CubeMap;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.EffectiveAppearance;
@@ -159,8 +134,22 @@ public class SunflowRenderer extends SunflowAPI {
 			eapp = EffectiveAppearance.create(path);
 			dgs = ShaderUtility.createDefaultGeometryShader(eapp);
 			dps = (DefaultPolygonShader) dgs.getPolygonShader();
-			parameter("diffuse", dps.getDiffuseColor());
-			parameter("reflection", dps.getSpecularColor());
+			java.awt.Color c = dps.getDiffuseColor();
+			double diffuseCoefficient = dps.getDiffuseCoefficient();
+			Color diffuseColor = new Color(
+					(float)(c.getRed()*diffuseCoefficient/255),
+					(float)(c.getGreen()*diffuseCoefficient/255),
+					(float)(c.getBlue()*diffuseCoefficient/255)
+			);
+			parameter("diffuse", diffuseColor);
+			c = dps.getSpecularColor();
+			double specularCoefficient = dps.getSpecularCoefficient();
+			Color specularColor = new Color(
+					(float)(c.getRed()*specularCoefficient/255),
+					(float)(c.getGreen()*specularCoefficient/255),
+					(float)(c.getBlue()*specularCoefficient/255)
+			);
+			parameter("reflection", specularColor);
 			if  (dps.getTexture2d() != null) {
 				parameter("texture", getName(dps.getTexture2d().getImage()));
 			}
@@ -229,13 +218,31 @@ public class SunflowRenderer extends SunflowAPI {
 	public void render(SceneGraphComponent sceneRoot, SceneGraphPath cameraPath, Display display, int width, int height) {
 		
 		// light
-		parameter("texture", "sky_small.hdr");
-		parameter("center", new Vector3(1, 0, -1));
-		parameter("up", new Vector3(0, 1, 0));
-		parameter("samples", 200);
-		ImageBasedLight light = new ImageBasedLight();
-		light.init("skylight", this);
+//		parameter("texture", "sky_small.hdr");
+//		parameter("center", new Vector3(1, 0, -1));
+//		parameter("up", new Vector3(0, 1, 0));
+//		parameter("samples", 200);
+//		ImageBasedLight light = new ImageBasedLight();
+//		light.init("skylight", this);
 		
+//		parameter("dir",new Vector3(0,1,1));
+//		DirectionalLight sun = new DirectionalLight();
+//		light("sun", sun);
+
+		Appearance rootApp = sceneRoot.getAppearance();
+		if(rootApp != null) {
+			if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
+					CommonAttributes.SKY_BOX, rootApp)) {
+				CubeMap cm = (CubeMap) AttributeEntityUtility
+				.createAttributeEntity(CubeMap.class,
+						CommonAttributes.SKY_BOX, rootApp, true);
+				SkyBox skyBox = new SkyBox(cm);
+				parameter("center", new Vector3(1, 0, -1));
+				parameter("up", new Vector3(0, 1, 0));
+				skyBox.init("skyBox", this);
+			}
+		}
+
 		// add texture path
         try {
 			File tmpF = File.createTempFile("foo", ".png");
