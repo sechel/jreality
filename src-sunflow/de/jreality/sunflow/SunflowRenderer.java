@@ -237,8 +237,8 @@ public class SunflowRenderer extends SunflowAPI {
 				.createAttributeEntity(CubeMap.class,
 						CommonAttributes.SKY_BOX, rootApp, true);
 				SkyBox skyBox = new SkyBox(cm);
-				parameter("center", new Vector3(1, 0, -1));
-				parameter("up", new Vector3(0, 1, 0));
+				parameter("center", new Vector3(1, 0, 0));
+				parameter("up", new Vector3(0, -1, 0));
 				skyBox.init("skyBox", this);
 			}
 		}
