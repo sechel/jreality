@@ -175,9 +175,9 @@ public class RIBHelper {
       Object encodeParam = encParamClass.newInstance();
       Object compField = encParamClass.getField("COMPRESSION_DEFLATE").get(null);
       
-      new Statement(encodeParam, "setCompression", new Object[]{compField});
+      new Statement(encodeParam, "setCompression", new Object[]{compField}).execute();
       //encodeParam.setCompression(TIFFEncodeParam.COMPRESSION_DEFLATE);
-      new Statement(encodeParam, "setDeflateLevel", new Object[]{9});
+      new Statement(encodeParam, "setDeflateLevel", new Object[]{9}).execute();
       //encodeParam.setDeflateLevel(9);
       
       ParameterBlock pb = new ParameterBlock();
@@ -186,7 +186,7 @@ public class RIBHelper {
       pb.add("tiff");
       pb.add(encodeParam);
       
-	  new Statement(Class.forName("javax.media.jai.JAI"), "create", new Object[]{pb});
+	  new Statement(Class.forName("javax.media.jai.JAI"), "create", new Object[]{"encode", pb}).execute();
       //JAI.create("encode", pb);
 
 		} catch(Throwable e) {
