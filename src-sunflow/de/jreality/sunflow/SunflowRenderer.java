@@ -426,8 +426,17 @@ public class SunflowRenderer extends SunflowAPI {
 		parameter("sampler", "bucket");
 		parameter("resolutionX", width);
         parameter("resolutionY", height);
+        
+        //giEngine(new AmbientOcclusionGIEngine(Color.WHITE, Color.BLACK, 120, 100));
+        //giEngine(new PathTracingGIEngine(200));
+        //giEngine(new InstantGI(128, 1, .01f, 0));
         options(SunflowAPI.DEFAULT_OPTIONS);
         render(SunflowAPI.DEFAULT_OPTIONS, display);
+        
+        // delete tmp texture files
+        for (File f : tmpFiles) {
+        	if (!f.delete()) f.deleteOnExit();
+        }
 	}
 	
 	public String getName(Geometry geom) {
@@ -465,7 +474,6 @@ public class SunflowRenderer extends SunflowAPI {
 		           }
 		         }                      
 			ImageIO.write((BufferedImage) img, "PNG", tmp);
-			//Bitmap.save((BufferedImage) img.getImage(), tmp.getAbsolutePath());
 			tmpFiles.add(tmp);
 		} catch (IOException e) {
 			throw new Error();
