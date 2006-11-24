@@ -91,7 +91,7 @@ import de.jreality.geometry.FrameFieldType;
 	 public final static int LINE_FACTOR_DEFAULT = 	1;
 	 public static final Color DIFFUSE_COLOR_DEFAULT = Color.BLACK;
 
-	 public abstract Boolean isTubeDraw();
+	 public abstract Boolean getTubeDraw();
 	 public abstract void setTubeDraw(Boolean b);
 	 public abstract Double getTubeRadius();
 	 public abstract void setTubeRadius(Double d);
