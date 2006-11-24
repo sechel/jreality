@@ -104,33 +104,25 @@ import de.jreality.util.CameraUtility;
  * <b>TODO list and Known issues</b>:
  * <ul>
  * <li> "twoSided", "implode", "flat" polygon shaders not supported</li>
- * <li> volume shaders not supported, image shaders not supported
- * <li> Toplevel {@link de.jreality.scene.Appearance} fog attributes not
- * implemented</li>
+ * <li> imager shaders not supported
  * <li> Clipping planes written but not tested</li>
  * <li> Add control over global options using (something like) "renderingHints"
  * shader {@link de.jreality.shader.RenderingHintsShader}</li>
- * <li> Add support for the differences between the various RenderMan renderers
- * (Pixar, 3DLight, Asis)</li>
- * <li> Use the
- * {@link de.jreality.shader.CommonAttributes#RMAN_GLOBAL_INCLUDE_FILE} to set
- * global options: this is rib file that is read in at the top of the output rib
- * file, and can be used to set all kinds of global variables. We should
- * minimize trying to handle all these possibilities in this backend.</li>
- * <li> Writing ordinary texture files:
- * <ul>
- * <li>Currently tries to write TIFF, if can't then writes PNG.</li>
- * <li> When TIFF is written, then it should be compressed (isn't currently)</li>
- * <li> Figure out how to write out the right filename suffix as a shader
- * parameter: prman for example expects .tex format, even though the file we
- * write out is a .tiff file (which gets converted later to .tex)</li>
- * </ul>
- * <li>Writing reflection maps: </li>
+ * <li> Test support for the differences between the various RenderMan renderers
+ * (Pixar, 3DLight, Asis, Pixie)</li>
+ * <li>Writing ordinary texture files: Currently tries to write TIFF, if can't then writes PNG.</li>
  * <li>Make sure users understand what the "rgba" output format implies (no
  * background)</li>
- * <li>Resolve issue with the alpha channel of colors appearing in shaders (see
- * jReality Talk)</li>
  * </ul>
+ * <p>
+ * <b>comments:</b>:
+ * <ul>
+ * <li> Use the {@link de.jreality.shader.CommonAttributes#RMAN_GLOBAL_INCLUDE_FILE} to set
+ * global options: this is rib file that is read in at the top of the output rib
+ * file, and can be used to set all kinds of global variables.</li>
+ * </ul>
+ * 
+ * 
  * 
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>,
  *         Charles Gunn
@@ -608,7 +600,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		if ((handlingProxyGeometry && opaqueTubes))
 			currentOpacity = 1f;
 		ri.opacity(currentOpacity);
-		// System.err.println("currentOpacity is "+currentOpacity);
+		
 		Object obj = eap.getAttribute(CommonAttributes.RMAN_DISPLACEMENT_SHADER, Appearance.INHERITED,
 				SLShader.class);
 		if (obj != Appearance.INHERITED) {
@@ -616,6 +608,12 @@ public class RIBVisitor extends SceneGraphVisitor {
 			ri.displacement(slShader.getName(), slShader.getParameters());
       
 		}
+    obj = eap.getAttribute(CommonAttributes.RMAN_IMAGER_SHADER, Appearance.INHERITED,
+        SLShader.class);
+    if (obj != Appearance.INHERITED) {
+      SLShader slShader = (SLShader) obj;
+      ri.imager(slShader.getName(), slShader.getParameters());
+    }
 		
     obj = eap.getAttribute(CommonAttributes.RMAN_VOLUME_EXTERIOR_SHADER, Appearance.INHERITED,
         SLShader.class);
