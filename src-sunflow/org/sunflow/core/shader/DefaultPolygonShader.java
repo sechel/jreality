@@ -6,9 +6,7 @@ import org.sunflow.core.Shader;
 import org.sunflow.core.ShadingState;
 import org.sunflow.image.Color;
 import org.sunflow.math.Point2;
-import org.sunflow.math.Vector3;
 
-import de.jreality.softviewer.EnvironmentTexture;
 import de.jreality.softviewer.SimpleTexture;
 import de.jreality.softviewer.Texture;
 
@@ -22,7 +20,7 @@ public class DefaultPolygonShader implements Shader {
 	public DefaultPolygonShader(de.jreality.shader.DefaultPolygonShader dps) {
 		this.dps=dps;
 		if (dps.getTexture2d() != null) tex = new SimpleTexture(dps.getTexture2d());
-		if (dps.getReflectionMap() != null)	tex = new EnvironmentTexture(dps.getReflectionMap(), tex);
+		//if (dps.getReflectionMap() != null)	tex = new EnvironmentTexture(dps.getReflectionMap(), tex);
 	}
 	
 	public Color getRadiance(ShadingState state) {
@@ -39,8 +37,7 @@ public class DefaultPolygonShader implements Shader {
 		getColor(color, dps.getDiffuseColor(), dps.getDiffuseCoefficient());
 		if (tex != null) {
 			Point2 uv = state.getUV();
-			Vector3 n = state.getNormal();
-			tex.getColor(uv.x, uv.y, n.x, n.y, n.z, -1, -1, color);
+			tex.getColor(uv.x, uv.y, 0, 0, 0, 0, 0, color);
 		}
 		return new Color((float) color[0], (float) color[1], (float) color[2]);
 	}
