@@ -137,6 +137,7 @@ public class SunflowViewer implements Viewer {
 	
 	public void setHeight(int h) {
 		height = h;
+		display.setPreferredSize(new Dimension(width,height));
 	}
 
 	public int getWidth() {
@@ -145,6 +146,7 @@ public class SunflowViewer implements Viewer {
 	
 	public void setWidth(int w) {
 		width = w;
+		display.setPreferredSize(new Dimension(width,height));
 	}
 
 	public Dimension getViewingComponentSize() {
