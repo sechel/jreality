@@ -72,7 +72,7 @@ public class DefaultPolygonShader implements Shader {
 	}
 
 	private Color convert(java.awt.Color c, double f) {
-		float ff = (float) (dps.getDiffuseCoefficient()/255);
+		float ff = (float) (f/255);
 		return new Color(c.getRed()*ff, c.getGreen()*ff, c.getBlue()*ff);
 	}
 
