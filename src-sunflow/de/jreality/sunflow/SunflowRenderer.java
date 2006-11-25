@@ -239,43 +239,43 @@ public class SunflowRenderer extends SunflowAPI {
 		}
 
 		private void applyShader(DefaultGeometryShader dgs) {
-			java.awt.Color c = dps.getDiffuseColor();
-			double diffuseCoefficient = dps.getDiffuseCoefficient();
-			Color diffuseColor = new Color(
-					(float)(c.getRed()*diffuseCoefficient/255),
-					(float)(c.getGreen()*diffuseCoefficient/255),
-					(float)(c.getBlue()*diffuseCoefficient/255)
-			);
-			parameter("diffuse", diffuseColor);
-			c = dps.getSpecularColor();
-			double specularCoefficient = dps.getSpecularCoefficient();
-			Color specularColor = new Color(
-					(float)(c.getRed()*specularCoefficient/255),
-					(float)(c.getGreen()*specularCoefficient/255),
-					(float)(c.getBlue()*specularCoefficient/255)
-			);
-			parameter("reflection", specularColor);
-			if  (dps.getTexture2d() != null) {
-				parameter("texture", getName(dps.getTexture2d().getImage()));
-				//parameter("blend", dps.getTexture2d().getBlendColor().getAlpha()/255f);
-			}
-			parameter("power", dps.getSpecularExponent());
-			//parameter("samples", 4);
-			String shaderCN = "DiffuseShader";
-			if (dps.getReflectionMap() != null) shaderCN = "Shiny"+shaderCN;
-			if (dps.getTexture2d() != null) shaderCN = "Textured"+shaderCN;
-			Shader shader = new DiffuseShader();
-			try {
-				Class<Shader> clazz = (Class<Shader>) Class.forName("org.sunflow.core.shader."+shaderCN);
-				shader = clazz.newInstance();
-				System.out.println("using "+clazz.getName());
-			} catch (ClassNotFoundException cnfe) {
-				System.out.println("WARNING: shader not found: "+shaderCN);
-			} catch (InstantiationException e) {
-			} catch (IllegalAccessException e) {
-			}
-			shader("default-shader"+appCount, shader);
-//			shader("default-shader"+appCount, new org.sunflow.core.shader.DefaultPolygonShader(dps));
+//			java.awt.Color c = dps.getDiffuseColor();
+//			double diffuseCoefficient = dps.getDiffuseCoefficient();
+//			Color diffuseColor = new Color(
+//					(float)(c.getRed()*diffuseCoefficient/255),
+//					(float)(c.getGreen()*diffuseCoefficient/255),
+//					(float)(c.getBlue()*diffuseCoefficient/255)
+//			);
+//			parameter("diffuse", diffuseColor);
+//			c = dps.getSpecularColor();
+//			double specularCoefficient = dps.getSpecularCoefficient();
+//			Color specularColor = new Color(
+//					(float)(c.getRed()*specularCoefficient/255),
+//					(float)(c.getGreen()*specularCoefficient/255),
+//					(float)(c.getBlue()*specularCoefficient/255)
+//			);
+//			parameter("reflection", specularColor);
+//			if  (dps.getTexture2d() != null) {
+//				parameter("texture", getName(dps.getTexture2d().getImage()));
+//				//parameter("blend", dps.getTexture2d().getBlendColor().getAlpha()/255f);
+//			}
+//			parameter("power", dps.getSpecularExponent());
+//			//parameter("samples", 4);
+//			String shaderCN = "DiffuseShader";
+//			if (dps.getReflectionMap() != null) shaderCN = "Shiny"+shaderCN;
+//			if (dps.getTexture2d() != null) shaderCN = "Textured"+shaderCN;
+//			Shader shader = new DiffuseShader();
+//			try {
+//				Class<Shader> clazz = (Class<Shader>) Class.forName("org.sunflow.core.shader."+shaderCN);
+//				shader = clazz.newInstance();
+//				System.out.println("using "+clazz.getName());
+//			} catch (ClassNotFoundException cnfe) {
+//				System.out.println("WARNING: shader not found: "+shaderCN);
+//			} catch (InstantiationException e) {
+//			} catch (IllegalAccessException e) {
+//			}
+//			shader("default-shader"+appCount, shader);
+			shader("default-shader"+appCount, new org.sunflow.core.shader.DefaultPolygonShader(dps));
 		}
 		
 		@Override
