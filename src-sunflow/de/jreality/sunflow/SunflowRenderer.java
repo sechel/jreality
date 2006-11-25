@@ -217,6 +217,7 @@ public class SunflowRenderer extends SunflowAPI {
 			java.awt.Color c = l.getColor();
 			float i = (float) l.getIntensity();
 			Color col = new Color(c.getRed()/255f*i, c.getGreen()/255f*i, c.getBlue()/255f*i);
+			System.out.println("light color "+Arrays.toString(col.getRGB()));
 			parameter("power", col);
 			light("directionalLight"+lightID++, sun);
 		}
