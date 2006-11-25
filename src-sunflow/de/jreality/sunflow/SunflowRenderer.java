@@ -239,42 +239,43 @@ public class SunflowRenderer extends SunflowAPI {
 		}
 
 		private void applyShader(DefaultGeometryShader dgs) {
-			java.awt.Color c = dps.getDiffuseColor();
-			double diffuseCoefficient = dps.getDiffuseCoefficient();
-			Color diffuseColor = new Color(
-					(float)(c.getRed()*diffuseCoefficient/255),
-					(float)(c.getGreen()*diffuseCoefficient/255),
-					(float)(c.getBlue()*diffuseCoefficient/255)
-			);
-			parameter("diffuse", diffuseColor);
-			c = dps.getSpecularColor();
-			double specularCoefficient = dps.getSpecularCoefficient();
-			Color specularColor = new Color(
-					(float)(c.getRed()*specularCoefficient/255),
-					(float)(c.getGreen()*specularCoefficient/255),
-					(float)(c.getBlue()*specularCoefficient/255)
-			);
-			parameter("reflection", specularColor);
-			if  (dps.getTexture2d() != null) {
-				parameter("texture", getName(dps.getTexture2d().getImage()));
-				//parameter("blend", dps.getTexture2d().getBlendColor().getAlpha()/255f);
-			}
-			parameter("power", dps.getSpecularExponent());
-			//parameter("samples", 4);
-			String shaderCN = "DiffuseShader";
-			if (dps.getReflectionMap() != null) shaderCN = "Shiny"+shaderCN;
-			if (dps.getTexture2d() != null) shaderCN = "Textured"+shaderCN;
-			Shader shader = new DiffuseShader();
-			try {
-				Class<Shader> clazz = (Class<Shader>) Class.forName("org.sunflow.core.shader."+shaderCN);
-				shader = clazz.newInstance();
-				System.out.println("using "+clazz.getName());
-			} catch (ClassNotFoundException cnfe) {
-				System.out.println("WARNING: shader not found: "+shaderCN);
-			} catch (InstantiationException e) {
-			} catch (IllegalAccessException e) {
-			}
-			shader("default-shader"+appCount, shader);
+//			java.awt.Color c = dps.getDiffuseColor();
+//			double diffuseCoefficient = dps.getDiffuseCoefficient();
+//			Color diffuseColor = new Color(
+//					(float)(c.getRed()*diffuseCoefficient/255),
+//					(float)(c.getGreen()*diffuseCoefficient/255),
+//					(float)(c.getBlue()*diffuseCoefficient/255)
+//			);
+//			parameter("diffuse", diffuseColor);
+//			c = dps.getSpecularColor();
+//			double specularCoefficient = dps.getSpecularCoefficient();
+//			Color specularColor = new Color(
+//					(float)(c.getRed()*specularCoefficient/255),
+//					(float)(c.getGreen()*specularCoefficient/255),
+//					(float)(c.getBlue()*specularCoefficient/255)
+//			);
+//			parameter("reflection", specularColor);
+//			if  (dps.getTexture2d() != null) {
+//				parameter("texture", getName(dps.getTexture2d().getImage()));
+//				//parameter("blend", dps.getTexture2d().getBlendColor().getAlpha()/255f);
+//			}
+//			parameter("power", dps.getSpecularExponent());
+//			//parameter("samples", 4);
+//			String shaderCN = "DiffuseShader";
+//			if (dps.getReflectionMap() != null) shaderCN = "Shiny"+shaderCN;
+//			if (dps.getTexture2d() != null) shaderCN = "Textured"+shaderCN;
+//			Shader shader = new DiffuseShader();
+//			try {
+//				Class<Shader> clazz = (Class<Shader>) Class.forName("org.sunflow.core.shader."+shaderCN);
+//				shader = clazz.newInstance();
+//				System.out.println("using "+clazz.getName());
+//			} catch (ClassNotFoundException cnfe) {
+//				System.out.println("WARNING: shader not found: "+shaderCN);
+//			} catch (InstantiationException e) {
+//			} catch (IllegalAccessException e) {
+//			}
+//			shader("default-shader"+appCount, shader);
+			shader("default-shader"+appCount, new org.sunflow.core.shader.DefaultPolygonShader(dps));
 		}
 		
 		@Override
@@ -295,8 +296,8 @@ public class SunflowRenderer extends SunflowAPI {
 			Texture2D tex2d = dps.getTexture2d();
 			float[] texCoords = null;
 			if (tex != null && tex2d != null) {
-				Matrix texMat = MatrixBuilder.euclidean().scale(1,-1,1).getMatrix();
-				texMat.multiplyOnRight(tex2d.getTextureMatrix());
+				Matrix texMat = null;//MatrixBuilder.euclidean().scale(1,-1,1).getMatrix();
+				//texMat.multiplyOnRight(tex2d.getTextureMatrix());
 				texCoords = convert(tex.toDoubleArrayArray(), 2, texMat);
 			}
 			int[] faces = convert(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray());
@@ -429,7 +430,7 @@ public class SunflowRenderer extends SunflowAPI {
 		parameter("resolutionX", width);
         parameter("resolutionY", height);
         
-        //giEngine(new AmbientOcclusionGIEngine(Color.WHITE, Color.BLACK, 120, 100));
+        giEngine(new AmbientOcclusionGIEngine(Color.WHITE, Color.BLACK, 120, 100));
         //giEngine(new FakeGIEngine(new Vector3(0,1,0), Color.WHITE, Color.BLACK));
         //giEngine(new InstantGI(128, 1, .01f, 0));
         //giEngine(new PathTracingGIEngine(200));
