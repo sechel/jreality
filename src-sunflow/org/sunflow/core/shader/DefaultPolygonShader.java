@@ -2,10 +2,12 @@ package org.sunflow.core.shader;
 
 import org.sunflow.SunflowAPI;
 import org.sunflow.core.ParameterList;
+import org.sunflow.core.Ray;
 import org.sunflow.core.Shader;
 import org.sunflow.core.ShadingState;
 import org.sunflow.image.Color;
 import org.sunflow.math.Point2;
+import org.sunflow.math.Vector3;
 
 import de.jreality.softviewer.SimpleTexture;
 import de.jreality.softviewer.Texture;
@@ -29,8 +31,28 @@ public class DefaultPolygonShader implements Shader {
         // setup lighting
         state.initLightSamples();
         state.initCausticSamples();
-        return state.diffuse(getDiffuse(state));
+        Color d = getDiffuse(state);
+        Color lr = state.diffuse(d);
+        if (!state.includeSpecular())
+            return lr;
+        float cos = state.getCosND();
+        float dn = 2 * cos;
+        Vector3 refDir = new Vector3();
+        refDir.x = (dn * state.getNormal().x) + state.getRay().getDirection().x;
+        refDir.y = (dn * state.getNormal().y) + state.getRay().getDirection().y;
+        refDir.z = (dn * state.getNormal().z) + state.getRay().getDirection().z;
+        Ray refRay = new Ray(state.getPoint(), refDir);
+        // compute Fresnel term
+        cos = 1 - cos;
+        float cos2 = cos * cos;
+        float cos5 = cos2 * cos2 * cos;
 
+        Color ret = Color.white();
+        Color r = d.copy().mul(convert(dps.getSpecularColor(), dps.getSpecularCoefficient()));
+        ret.sub(r);
+        ret.mul(cos5);
+        ret.add(r);
+        return (dps.getReflectionMap() != null) ? lr.add(ret.mul(state.traceReflection(refRay, 0))) : lr;
 	}
 
 	private Color getDiffuse(ShadingState state) {
