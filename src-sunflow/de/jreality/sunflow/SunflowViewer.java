@@ -45,6 +45,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.io.IOException;
 
+import javax.swing.JFrame;
+
 import org.sunflow.core.Display;
 import org.sunflow.core.display.FrameDisplay;
 import org.sunflow.system.ImagePanel;
@@ -59,6 +61,7 @@ import de.jreality.scene.Sphere;
 import de.jreality.scene.Viewer;
 import de.jreality.shader.TextureUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.vr.ViewerVR;
 
 /**
  * 
@@ -69,7 +72,7 @@ import de.jreality.ui.viewerapp.ViewerApp;
 public class SunflowViewer implements Viewer {
 	private SceneGraphPath cameraPath;
 	private SceneGraphComponent sceneRoot;
-	private Display display = new FrameDisplay();
+	private ImagePanel display = new ImagePanel();
 	private int width;
 	private int height;
 
@@ -110,6 +113,7 @@ public class SunflowViewer implements Viewer {
 			setWidth(c.getWidth());
 			setHeight(c.getHeight());
 		}
+		display.setPreferredSize(new Dimension(width,height));
 	}
 
 	public int getSignature() {
@@ -156,19 +160,34 @@ public class SunflowViewer implements Viewer {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		SceneGraphComponent cmp = new SceneGraphComponent();
-		cmp.setAppearance(new Appearance());
-		MatrixBuilder.euclidean().rotateZ(Math.PI/3).rotateX(Math.PI/6).scale(0.2, 0.3, 4.).assignTo(cmp);
-		//TextureUtility.createTexture(cmp.getAppearance(), "polygonShader", "textures/grid.jpeg");
-		//cmp.getAppearance().setAttribute("diffuseColor", Color.red);
-		cmp.setGeometry(new Sphere());
-		cmp.setGeometry(new Cylinder());
-		//cmp.setGeometry(new CatenoidHelicoid(20));
-		ViewerApp va = ViewerApp.display(cmp);
-		va.getFrame().setSize(400,300);
-		va.getFrame().validate();
-		SunflowViewer sv = new SunflowViewer();
-		sv.initializeFrom(va.getViewer());
-		sv.render();
+		ViewerVR vr = new ViewerVR();
+		final String[][] examples = new String[][] {
+				{ "Boy surface", "jrs/boy.jrs" },
+				{ "Chen-Gackstatter surface", "obj/Chen-Gackstatter-4.obj" },
+				{ "helicoid with 2 handles", "jrs/He2WithBoundary.jrs" },
+				{ "tetranoid", "jrs/tetranoid.jrs" },
+				{ "Wente torus", "jrs/wente.jrs" },
+				{ "Schwarz P", "jrs/schwarz.jrs" },
+				{ "Matheon baer", "jrs/baer.jrs" }
+		};
+		vr.addLoadTab(examples);
+		vr.addAlignTab();
+		vr.addAppTab();
+		vr.addEnvTab();
+		vr.addToolTab();
+		vr.addTexTab();
+		//vr.addHelpTab();
+		vr.addLightTab();
+		vr.setGeneratePickTrees(true);
+		vr.showPanel(false);
+		ViewerApp vApp = vr.display();
+		vApp.getMenu().addMenu(new SunflowMenu(vApp));
+		vApp.update();
+		
+		JFrame f = vApp.display();
+		f.setSize(800, 600);
+		f.validate();
+		JFrame external = vr.getExternalFrame();
+		external.setLocationRelativeTo(f);
 	}
 }
