@@ -58,6 +58,7 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 
 import de.jreality.shader.CommonAttributes;
+import de.jreality.sunflow.ExportSunflow;
 import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFieldOfView;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFocus;
@@ -187,6 +188,7 @@ public class ViewerAppMenu {
     export.add(new JMenuItem(new ExportRIB("RIB", viewerSwitch, frame)));
     export.add(new JMenuItem(new ExportSVG("SVG", viewerSwitch, frame)));
     export.add(new JMenuItem(new ExportPS("PS", viewerSwitch, frame)));
+    //export.add(new JMenuItem(new ExportSunflow("Sunflow", viewerSwitch, frame)));
     exportImageAction = new ExportImage("Image", viewerSwitch, frame);
     export.add(new JMenuItem(exportImageAction));
     

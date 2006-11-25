@@ -179,7 +179,7 @@ public class SunflowViewer implements Viewer {
 		//vr.addHelpTab();
 		vr.addLightTab();
 		vr.setGeneratePickTrees(true);
-		//vr.showPanel(false);
+		vr.showPanel(false);
 		ViewerApp vApp = vr.display();
 		vApp.getMenu().addMenu(new SunflowMenu(vApp));
 		vApp.update();

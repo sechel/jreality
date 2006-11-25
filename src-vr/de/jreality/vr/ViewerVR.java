@@ -1587,7 +1587,7 @@ public class ViewerVR {
 		sp.getFrame().setVisible(true);
 	}
 
-	protected void showPanel(boolean showFileChooser) {
+	public void showPanel(boolean showFileChooser) {
 		if (showFileChooser) {
 			sp.setPanelWidth(1.9);
 			sp.getFrame().setContentPane(fileChooserPanel);
