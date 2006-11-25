@@ -56,7 +56,9 @@ import org.sunflow.core.GIEngine;
 import org.sunflow.core.Shader;
 import org.sunflow.core.camera.PinholeLens;
 import org.sunflow.core.gi.AmbientOcclusionGIEngine;
+import org.sunflow.core.gi.FakeGIEngine;
 import org.sunflow.core.gi.InstantGI;
+import org.sunflow.core.gi.IrradianceCacheGIEngine;
 import org.sunflow.core.gi.PathTracingGIEngine;
 import org.sunflow.core.light.DirectionalLight;
 import org.sunflow.core.primitive.Mesh;
@@ -428,8 +430,9 @@ public class SunflowRenderer extends SunflowAPI {
         parameter("resolutionY", height);
         
         //giEngine(new AmbientOcclusionGIEngine(Color.WHITE, Color.BLACK, 120, 100));
-        //giEngine(new PathTracingGIEngine(200));
+        //giEngine(new FakeGIEngine(new Vector3(0,1,0), Color.WHITE, Color.BLACK));
         //giEngine(new InstantGI(128, 1, .01f, 0));
+        //giEngine(new PathTracingGIEngine(200));
         options(SunflowAPI.DEFAULT_OPTIONS);
         render(SunflowAPI.DEFAULT_OPTIONS, display);
         
