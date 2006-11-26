@@ -84,7 +84,7 @@ public class DefaultPolygonShader implements Shader {
         if (diff[3] != 1) {
         	float t=(float) diff[3];
         	Color refl = state.traceTransparency();
-        	ret.mul(1-t).madd(t, refl);
+        	ret.mul(t).madd(1-t, refl);
         }
                 
         return ret;
