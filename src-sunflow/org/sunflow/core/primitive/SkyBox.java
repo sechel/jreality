@@ -71,7 +71,7 @@ public class SkyBox implements PrimitiveList, Shader {
 	private Color getColor(Vector3 dir) {
 		final double[] color = new double[4];
 		envTex.getColor(0, 0, dir.x, dir.y, dir.z, 0, 0, color);
-		return new Color((float)(color[0]/255), (float)(color[1]/255), (float)(color[2]/255));
+		return new Color((float)(color[0]/255), (float)(color[1]/255), (float)(color[2]/255)).toLinear().mul(3.14f);
 	}
 	
     private void updateBasis(Vector3 center, Vector3 up) {

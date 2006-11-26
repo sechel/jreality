@@ -1,5 +1,7 @@
 package org.sunflow.core.shader;
 
+import java.util.Arrays;
+
 import org.sunflow.SunflowAPI;
 import org.sunflow.core.ParameterList;
 import org.sunflow.core.Ray;
@@ -52,7 +54,14 @@ public class DefaultPolygonShader implements Shader {
         ret.sub(r);
         ret.mul(cos5);
         ret.add(r);
-        return (dps.getReflectionMap() != null) ? lr.add(ret.mul(state.traceReflection(refRay, 0))) : lr;
+        if (dps.getReflectionMap() != null) {
+        	float blend = (float)(dps.getReflectionMap().getBlendColor().getAlpha())/255;
+        	lr.mul(1-blend);
+        	Color reflection = ret.mul(state.traceReflection(refRay, 0));
+        	return lr.add(reflection.mul(blend));
+        } else {
+        	return lr;
+        }
 	}
 
 	private Color getDiffuse(ShadingState state) {

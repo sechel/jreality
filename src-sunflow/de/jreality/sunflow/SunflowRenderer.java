@@ -115,6 +115,7 @@ public class SunflowRenderer extends SunflowAPI {
 
 	private String POINT_SPHERE="point";
 	private String LINE_CYLINDER="line";
+	public boolean includeLights = false;
 
 	private class Visitor extends SceneGraphVisitor {
 		
@@ -211,17 +212,18 @@ public class SunflowRenderer extends SunflowAPI {
 		int lightID;
 		@Override
 		public void visit(de.jreality.scene.DirectionalLight l) {
-			double[] dir = currentMatrix.multiplyVector(new double[]{0,0,1,0});
-			parameterVector("dir", dir);
-			DirectionalLight sun = new DirectionalLight();
-			java.awt.Color c = l.getColor();
-			float i = (float) l.getIntensity();
-			Color col = new Color(c.getRed()/255f*i, c.getGreen()/255f*i, c.getBlue()/255f*i);
-			System.out.println("light color "+Arrays.toString(col.getRGB()));
-			parameter("power", col);
-			light("directionalLight"+lightID++, sun);
+			if (includeLights) {
+				double[] dir = currentMatrix.multiplyVector(new double[]{0,0,1,0});
+				parameterVector("dir", dir);
+				DirectionalLight sun = new DirectionalLight();
+				java.awt.Color c = l.getColor();
+				float i = (float) l.getIntensity()*(float)Math.PI;
+				Color col = new Color(c.getRed()/255f*i, c.getGreen()/255f*i, c.getBlue()/255f*i);
+				parameter("power", col);
+				light("directionalLight"+lightID++, sun);
+			}
 		}
-		
+
 		@Override
 		public void visit(Sphere s) {
 			geometry(getName(s), new org.sunflow.core.primitive.Sphere());
@@ -431,7 +433,8 @@ public class SunflowRenderer extends SunflowAPI {
 		parameter("resolutionX", width);
         parameter("resolutionY", height);
         
-        giEngine(new AmbientOcclusionGIEngine(Color.WHITE, Color.BLACK, 120, 100));
+        float bright = 1f;
+        giEngine(new AmbientOcclusionGIEngine(new Color(bright, bright, bright), Color.BLACK, 120, 100));
         //giEngine(new FakeGIEngine(new Vector3(0,1,0), Color.WHITE, Color.BLACK));
         //giEngine(new InstantGI(128, 1, .01f, 0));
         //giEngine(new PathTracingGIEngine(200));
