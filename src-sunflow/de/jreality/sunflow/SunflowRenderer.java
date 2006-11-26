@@ -116,7 +116,7 @@ public class SunflowRenderer extends SunflowAPI {
 
 	private String POINT_SPHERE="point";
 	private String LINE_CYLINDER="line";
-	public boolean includeLights = false;
+	public boolean includeLights = true;
 
 	private class Visitor extends SceneGraphVisitor {
 		
@@ -437,7 +437,7 @@ public class SunflowRenderer extends SunflowAPI {
         parameter("resolutionY", height);
         
         float bright = 1f;
-        giEngine(new AmbientOcclusionGIEngine(new Color(bright, bright, bright), Color.BLACK, 120, 100));
+        if (!includeLights) giEngine(new AmbientOcclusionGIEngine(new Color(bright, bright, bright), Color.BLACK, 120, 100));
         //giEngine(new FakeGIEngine(new Vector3(0,1,0), Color.WHITE, Color.BLACK));
         //giEngine(new InstantGI(128, 1, .01f, 0));
         //giEngine(new PathTracingGIEngine(200));
