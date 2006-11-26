@@ -44,7 +44,9 @@ import de.jreality.scene.data.AttributeEntity;
 
 public interface RenderingHintsShader extends AttributeEntity {
 
+	  static final Class DEFAULT_ENTITY=RenderingHintsShader.class;
 	  Object CREATE_DEFAULT=new Object();
+	  
 	  final static boolean LIGHTING_ENABLED_DEFAULT = true;			// do lighting or not
 	  final static boolean TRANSPARENCY_ENABLED_DEFAULT = false;		// do transparency or not
 	  final static boolean Z_BUFFER_ENABLED_DEFAULT = false;			// can help to switch this in transparency mode
