@@ -21,10 +21,9 @@ public class DefaultPolygonShader implements Shader {
 	private de.jreality.shader.DefaultPolygonShader dps;
 	private Texture tex;
 
-	double[] color=new double[4];
 	private RenderingHintsShader rhs;
 	private CubeMap cm;
-
+	
 	public DefaultPolygonShader(de.jreality.shader.DefaultPolygonShader dps, RenderingHintsShader rhs) {
 		this.dps=dps;
 		if (dps.getTexture2d() != null) tex = new SimpleTexture(dps.getTexture2d());
@@ -39,8 +38,17 @@ public class DefaultPolygonShader implements Shader {
         state.initLightSamples();
         state.initCausticSamples();
         
-        Color d = getDiffuse(state);
-        Color ret = rhs.getLightingEnabled() ? state.diffuse(d) : d.toLinear();
+        double[] diff = getDiffuse(state);
+        
+        if (diff[3] == 0) {
+        	return state.traceTransparency();
+        }
+        
+        Color d = new Color((float)diff[0], (float)diff[1], (float)diff[2]).toLinear();
+        
+        if (!rhs.getLightingEnabled()) return d;
+
+        Color ret = state.diffuse(d);
         
         if (false && state.includeSpecular()) {
         	Color spec = state.specularPhong(convert(dps.getSpecularColor(), dps.getSpecularCoefficient()), dps.getSpecularExponent().floatValue(), 4);
@@ -68,26 +76,35 @@ public class DefaultPolygonShader implements Shader {
 //            ret.add(r);
 
             
-        	Color ref = state.traceRefraction(refRay, 0).toLinear();
+        	Color ref = state.traceRefraction(refRay, 0);
         	float l = cm.getBlendColor().getAlpha()/255f;
         	ret.mul(1-l).madd(l, ref);
         }
         
-        if (rhs.getTransparencyEnabled() && dps.getTransparency() != 0) {
-        	double t=dps.getTransparency();
-        	ret.mul((float)(1-t)).madd((float)t, state.traceReflection(new Ray(state.getPoint(), state.getRay().getDirection()), 0));
+        if (diff[3] != 1) {
+        	float t=(float) diff[3];
+        	Color refl = state.traceTransparency();
+        	ret.mul(1-t).madd(t, refl);
         }
                 
         return ret;
 	}
 
-	private Color getDiffuse(ShadingState state) {
+	private double[] getDiffuse(ShadingState state) {
+		double[] color=new double[4];
 		getColor(color, dps.getDiffuseColor(), dps.getDiffuseCoefficient());
+		if (rhs.getTransparencyEnabled()) {
+			color[3] = 1-dps.getTransparency();
+		}
+		else if (dps.getTransparency() == 1) color[3] = 0;
 		if (tex != null) {
 			Point2 uv = state.getUV();
 			tex.getColor(uv.x, uv.y, 0, 0, 0, 0, 0, color);
 		}
-		return new Color((float) color[0], (float) color[1], (float) color[2]);
+		if (!rhs.getTransparencyEnabled() && color[3] > 0) {
+			color[3]=1;
+		}
+		return color;
 	}
 
 	private void getColor(double[] d, java.awt.Color c, double f) {
