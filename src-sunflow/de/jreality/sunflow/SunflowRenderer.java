@@ -103,6 +103,7 @@ import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
+import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 
@@ -210,6 +211,7 @@ public class SunflowRenderer extends SunflowAPI {
 		}
 		
 		int lightID;
+		private RenderingHintsShader rhs;
 		@Override
 		public void visit(de.jreality.scene.DirectionalLight l) {
 			if (includeLights) {
@@ -239,6 +241,7 @@ public class SunflowRenderer extends SunflowAPI {
 			appCount++;
 			eapp = EffectiveAppearance.create(path);
 			dgs = ShaderUtility.createDefaultGeometryShader(eapp);
+			rhs = ShaderUtility.createRenderingHintsShader(eapp);
 		}
 
 		private void applyShader(DefaultGeometryShader dgs) {
@@ -278,7 +281,7 @@ public class SunflowRenderer extends SunflowAPI {
 //			} catch (IllegalAccessException e) {
 //			}
 //			shader("default-shader"+appCount, shader);
-			shader("default-shader"+appCount, new org.sunflow.core.shader.DefaultPolygonShader(dps));
+			shader("default-shader"+appCount, new org.sunflow.core.shader.DefaultPolygonShader(dps, rhs));
 		}
 		
 		@Override

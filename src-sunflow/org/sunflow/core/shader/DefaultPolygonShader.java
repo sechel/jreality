@@ -11,6 +11,8 @@ import org.sunflow.image.Color;
 import org.sunflow.math.Point2;
 import org.sunflow.math.Vector3;
 
+import de.jreality.shader.CubeMap;
+import de.jreality.shader.RenderingHintsShader;
 import de.jreality.softviewer.SimpleTexture;
 import de.jreality.softviewer.Texture;
 
@@ -20,11 +22,14 @@ public class DefaultPolygonShader implements Shader {
 	private Texture tex;
 
 	double[] color=new double[4];
+	private RenderingHintsShader rhs;
+	private CubeMap cm;
 
-	public DefaultPolygonShader(de.jreality.shader.DefaultPolygonShader dps) {
+	public DefaultPolygonShader(de.jreality.shader.DefaultPolygonShader dps, RenderingHintsShader rhs) {
 		this.dps=dps;
 		if (dps.getTexture2d() != null) tex = new SimpleTexture(dps.getTexture2d());
-		//if (dps.getReflectionMap() != null)	tex = new EnvironmentTexture(dps.getReflectionMap(), tex);
+		this.rhs=rhs;
+		this.cm = dps.getReflectionMap();
 	}
 	
 	public Color getRadiance(ShadingState state) {
@@ -33,35 +38,47 @@ public class DefaultPolygonShader implements Shader {
         // setup lighting
         state.initLightSamples();
         state.initCausticSamples();
+        
         Color d = getDiffuse(state);
-        Color lr = state.diffuse(d);
-        if (!state.includeSpecular())
-            return lr;
-        float cos = state.getCosND();
-        float dn = 2 * cos;
-        Vector3 refDir = new Vector3();
-        refDir.x = (dn * state.getNormal().x) + state.getRay().getDirection().x;
-        refDir.y = (dn * state.getNormal().y) + state.getRay().getDirection().y;
-        refDir.z = (dn * state.getNormal().z) + state.getRay().getDirection().z;
-        Ray refRay = new Ray(state.getPoint(), refDir);
-        // compute Fresnel term
-        cos = 1 - cos;
-        float cos2 = cos * cos;
-        float cos5 = cos2 * cos2 * cos;
-
-        Color ret = Color.white();
-        Color r = d.copy().mul(convert(dps.getSpecularColor(), dps.getSpecularCoefficient()));
-        ret.sub(r);
-        ret.mul(cos5);
-        ret.add(r);
-        if (dps.getReflectionMap() != null) {
-        	float blend = (float)(dps.getReflectionMap().getBlendColor().getAlpha())/255;
-        	lr.mul(1-blend);
-        	Color reflection = ret.mul(state.traceReflection(refRay, 0));
-        	return lr.add(reflection.mul(blend));
-        } else {
-        	return lr;
+        Color ret = rhs.getLightingEnabled() ? state.diffuse(d) : d.toLinear();
+        
+        if (false && state.includeSpecular()) {
+        	Color spec = state.specularPhong(convert(dps.getSpecularColor(), dps.getSpecularCoefficient()), dps.getSpecularExponent().floatValue(), 4);
+        	ret.add(spec);
         }
+        
+        if (cm != null) {
+            float cos = state.getCosND();
+            float dn = 2 * cos;
+            Vector3 refDir = new Vector3();
+            refDir.x = (dn * state.getNormal().x) + state.getRay().getDirection().x;
+            refDir.y = (dn * state.getNormal().y) + state.getRay().getDirection().y;
+            refDir.z = (dn * state.getNormal().z) + state.getRay().getDirection().z;
+            Ray refRay = new Ray(state.getPoint(), refDir);
+            
+//            // compute Fresnel term
+//            cos = 1 - cos;
+//            float cos2 = cos * cos;
+//            float cos5 = cos2 * cos2 * cos;
+//
+//            Color ret = Color.white();
+//            Color r = d.copy().mul(convert(dps.getSpecularColor(), dps.getSpecularCoefficient()));
+//            ret.sub(r);
+//            ret.mul(cos5);
+//            ret.add(r);
+
+            
+        	Color ref = state.traceRefraction(refRay, 0).toLinear();
+        	float l = cm.getBlendColor().getAlpha()/255f;
+        	ret.mul(1-l).madd(l, ref);
+        }
+        
+        if (rhs.getTransparencyEnabled() && dps.getTransparency() != 0) {
+        	double t=dps.getTransparency();
+        	ret.mul((float)(1-t)).madd((float)t, state.traceReflection(new Ray(state.getPoint(), state.getRay().getDirection()), 0));
+        }
+                
+        return ret;
 	}
 
 	private Color getDiffuse(ShadingState state) {
