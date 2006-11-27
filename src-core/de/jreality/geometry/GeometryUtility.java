@@ -420,7 +420,7 @@ public class GeometryUtility {
             	i.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
                 double[] cmp = null;
          	    if (i instanceof IndexedFaceSet)	{
-            	    IndexedFaceSet ifs = (IndexedFaceSet) SceneGraphUtility.copy(i); //(IndexedFaceSet) i;
+            	    IndexedFaceSet ifs = (IndexedFaceSet) i; //(IndexedFaceSet) SceneGraphUtility.copy(i); //
                     double[] mat = Rn.transpose(null, currentMatrix);          	
                     mat[12] = mat[13] = mat[14] = 0.0;
                     Rn.inverse(mat, mat);
