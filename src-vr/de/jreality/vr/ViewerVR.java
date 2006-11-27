@@ -402,6 +402,7 @@ public class ViewerVR {
 		
 		SceneGraphComponent skyNode = new SceneGraphComponent();
 		skyLight = new DirectionalLight();
+		skyLight.setAmbientFake(true);
 		skyLight.setName("sky light");
 		skyNode.setLight(skyLight);
 		MatrixBuilder.euclidean().rotateFromTo(new double[] { 0, 0, 1 },
@@ -409,6 +410,7 @@ public class ViewerVR {
 		sceneRoot.addChild(skyNode);
 		
 		headLight = new PointLight();
+		headLight.setAmbientFake(true);
 		headLight.setFalloff(1, 0, 0);
 		headLight.setName("camera light");
 		headLight.setColor(new Color(255,255,255,255));

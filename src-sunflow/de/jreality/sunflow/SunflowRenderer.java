@@ -118,15 +118,7 @@ public class SunflowRenderer extends SunflowAPI {
 	private String POINT_SPHERE="point";
 	private String LINE_CYLINDER="line";
 	
-//	private int resolutionX;
-//	private int resolutionY;
-//	private int aaMin = -3;
-//	private int aaMax = 0;
-//	private int depthsDiffuse = 1;
-//	private int depthsReflection = 4;
-//	private int depthsRefraction = 4;
-	
-	public boolean includeLights = true;
+	private RenderOptions options = new RenderOptions();
 
 	private class Visitor extends SceneGraphVisitor {
 		
@@ -224,12 +216,12 @@ public class SunflowRenderer extends SunflowAPI {
 		private RenderingHintsShader rhs;
 		@Override
 		public void visit(de.jreality.scene.DirectionalLight l) {
-			if (includeLights) {
+			if (options.isUseOriginalLights() || !l.isAmbientFake()) {
 				double[] dir = currentMatrix.multiplyVector(new double[]{0,0,1,0});
 				parameterVector("dir", dir);
 				DirectionalLight sun = new DirectionalLight();
 				java.awt.Color c = l.getColor();
-				float i = (float) l.getIntensity()*(float)Math.PI;
+				float i = (1-options.getGlobalIllumination())*(float) l.getIntensity()*(float)Math.PI;
 				Color col = new Color(c.getRed()/255f*i, c.getGreen()/255f*i, c.getBlue()/255f*i);
 				parameter("power", col);
 				light("directionalLight"+lightID++, sun);
@@ -238,12 +230,12 @@ public class SunflowRenderer extends SunflowAPI {
 		
 		@Override
 		public void visit(de.jreality.scene.PointLight l) {
-			if (includeLights) {
+			if (options.isUseOriginalLights() || !l.isAmbientFake()) {
 				double[] point = currentMatrix.multiplyVector(new double[]{0,0,0,1});
 				parameterPoint("center", point);
 				GlPointLight light = new GlPointLight();
 				java.awt.Color c = l.getColor();
-				float i = (float) l.getIntensity()*(float)Math.PI*4;
+				float i = (1-options.getGlobalIllumination())*(float) l.getIntensity()*(float)Math.PI*4;
 				Color col = new Color(c.getRed()/255f*i, c.getGreen()/255f*i, c.getBlue()/255f*i);
 				parameter("power", col);
 				parameter("fallOffA0", l.getFalloffA0());
@@ -462,14 +454,13 @@ public class SunflowRenderer extends SunflowAPI {
 		parameter("sampler", "bucket");
 		parameter("resolutionX", width);
         parameter("resolutionY", height);
-//        parameter("aa.min", aaMin);
-//        parameter("aa.max", aaMax);
-//        parameter("depths.diffuse", depthsDiffuse);
-//        parameter("depths.reflection", depthsReflection);
-//        parameter("depths.refraction", depthsRefraction);
-        
-        float bright = 1f;
-        if (!includeLights) giEngine(new AmbientOcclusionGIEngine(new Color(bright, bright, bright), Color.BLACK, 120, 100));
+        parameter("aa.min", options.getAaMin());
+        parameter("aa.max", options.getAaMax());
+        parameter("depths.diffuse", options.getDepthsDiffuse());
+        parameter("depths.reflection", options.getDepthsReflection());
+        parameter("depths.refraction", options.getDepthsRefraction());
+        float ambient = options.getGlobalIllumination();
+        if (!options.isUseOriginalLights()) giEngine(new AmbientOcclusionGIEngine(new Color(ambient, ambient, ambient), Color.BLACK, 120, 100));
         //giEngine(new FakeGIEngine(new Vector3(0,1,0), Color.WHITE, Color.BLACK));
         //giEngine(new InstantGI(128, 1, .01f, 0));
         //giEngine(new PathTracingGIEngine(200));
@@ -582,5 +573,13 @@ public class SunflowRenderer extends SunflowAPI {
 
 	public void parameter(String name, double val) {
 		parameter(name, (float) val);
+	}
+
+	public RenderOptions getOptions() {
+		return options;
+	}
+
+	public void setOptions(RenderOptions options) {
+		this.options = options;
 	}
 }
