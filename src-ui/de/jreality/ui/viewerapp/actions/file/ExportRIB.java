@@ -42,6 +42,7 @@ package de.jreality.ui.viewerapp.actions.file;
 
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -54,7 +55,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -76,17 +76,18 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
  */
 public class ExportRIB extends AbstractJrAction {
 
-  private static final long serialVersionUID = -6195623242916502756L;
   private Viewer viewer;
+  
   private JComponent options; 
   private JComboBox type;
   private JCheckBox shadowsDialog;
   private JCheckBox reflectionDialog;
   private JCheckBox volumeDialog;
   private JButton includeFileDialog;
-  private String includeFilePath="";
-  private JLabel includeFileLabel=new JLabel(" ");  
+  private String includeFilePath = "";
+  private JLabel includeFileLabel = new JLabel(" ");  
 
+  
   public ExportRIB(String name, Viewer viewer, Frame frame) {
     super(name);
     this.frame = frame;
@@ -101,6 +102,7 @@ public class ExportRIB extends AbstractJrAction {
     this(name, v.getViewerSwitch(), v.getFrame());
   }
     
+  
   @Override
   public void actionPerformed(ActionEvent e) {
     
@@ -122,6 +124,7 @@ public class ExportRIB extends AbstractJrAction {
     rv.render();
   }  
   
+  
   private JComponent createAccessory() {
     
     JPanel panel = new JPanel(new BorderLayout());
@@ -130,57 +133,48 @@ public class ExportRIB extends AbstractJrAction {
     Box box = Box.createVerticalBox();
     box.setBorder(new EmptyBorder(5,10,5,10));
     
-    JLabel typeLabel=new JLabel("\n renderer Type:");
+    JLabel typeLabel = new JLabel(" renderer type:");
     box.add(typeLabel);
     
     type = new JComboBox(new String[]{
         "Pixar", "3DeLight", "Aqsis", "Pixie",  //order of static fields in RIBViewer
     });
-    type.setMaximumSize(new Dimension(1000,(int)(type.getPreferredSize().getHeight())));   
-    type.setLightWeightPopupEnabled(false);
-    type.setAlignmentX(box.getAlignmentX());  
+    type.setMaximumSize(new Dimension(1000, (int)(type.getPreferredSize().getHeight())));   
+    type.setAlignmentX(Component.LEFT_ALIGNMENT);
     box.add(type);
    
-    JLabel l1=new JLabel(" ");
-    box.add(l1);
+    box.add(Box.createRigidArea(new Dimension(0,15)));
     
-    shadowsDialog=new JCheckBox("ray-traced shadows",false);
-    shadowsDialog.setAlignmentX(box.getAlignmentX());
+    shadowsDialog = new JCheckBox("ray-traced shadows", false);
     box.add(shadowsDialog);
     
-    reflectionDialog=new JCheckBox("ray-traced reflections    ",false);
-    reflectionDialog.setAlignmentX(box.getAlignmentX());
+    reflectionDialog = new JCheckBox("ray-traced reflections", false);
     box.add(reflectionDialog);
     
-    volumeDialog=new JCheckBox("ray-traced volumes",false);
-    volumeDialog.setAlignmentX(box.getAlignmentX());
+    volumeDialog = new JCheckBox("ray-traced volumes", false);
     box.add(volumeDialog);
     
-    JLabel l2=new JLabel(" ");
-    box.add(l2);
+    box.add(Box.createRigidArea(new Dimension(0,15)));
     
-    includeFileDialog=new JButton("global include rib-file");
-    includeFileDialog.setMaximumSize(new Dimension(1000,(int)(includeFileDialog.getPreferredSize().getHeight())));    
-    includeFileDialog.setAlignmentX(box.getAlignmentX());  
+    includeFileDialog = new JButton("global include rib-file");
+    includeFileDialog.setMaximumSize(new Dimension(1000, (int)(includeFileDialog.getPreferredSize().getHeight())));    
     box.add(includeFileDialog);     
     includeFileDialog.setActionCommand("openIncludeFile");
     includeFileDialog.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent event){  
-        if(!event.getActionCommand().equals(includeFileDialog.getActionCommand())) return; 
-        if(includeFilePath.equals("")){
-          JFileChooser chooser = FileLoaderDialog.createFileChooser("rib","RIB-file");
-          chooser.setMultiSelectionEnabled(false);
-          chooser.showOpenDialog(includeFileDialog);
-          File file = chooser.getSelectedFile();          
-          if(file!=null) {
-            includeFilePath=file.getAbsolutePath(); 
+        if (!event.getActionCommand().equals(includeFileDialog.getActionCommand())) return; 
+        if (includeFilePath.equals("")){
+          File file = FileLoaderDialog.loadFile(includeFileDialog, "rib", "RIB files");          
+          if (file != null) {
+            includeFilePath = file.getAbsolutePath(); 
             includeFileDialog.setText("remove included file");
             includeFileLabel.setText("  > include "+file.getName());
           }  
-        }else{
+        } 
+        else {
           includeFileDialog.setText("global include rib-file");
           includeFileLabel.setText(" ");
-          includeFilePath="";
+          includeFilePath = "";
         }
       }
     });
