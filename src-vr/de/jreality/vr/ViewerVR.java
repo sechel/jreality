@@ -107,6 +107,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.PointLight;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -312,7 +313,7 @@ public class ViewerVR {
 	// light tab
 	private JPanel lightPanel;
 	private DirectionalLight sunLight = new DirectionalLight();
-	private DirectionalLight headLight;
+	private PointLight headLight;
 	private DirectionalLight skyLight;
 	private SimpleColorChooser sunLightColorChooser;
 	private SimpleColorChooser headLightColorChooser;
@@ -407,7 +408,8 @@ public class ViewerVR {
 				new double[] { 0, 1, 0 }).assignTo(skyNode);
 		sceneRoot.addChild(skyNode);
 		
-		headLight = new DirectionalLight();
+		headLight = new PointLight();
+		headLight.setFalloff(1, 0, 0);
 		headLight.setName("camera light");
 		headLight.setColor(new Color(255,255,255,255));
 	    camNode.setLight(headLight);
