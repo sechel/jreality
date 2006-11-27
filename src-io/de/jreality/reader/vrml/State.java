@@ -238,17 +238,57 @@ public class State {
 	 * @param app
 	 */ 
 	public void assignTexture(Appearance app, IndexedFaceSet f){
-		if (textureFile.equals(""))return ;
+		ImageData id;
+		if (textureFile.equals("")){
+			if (textureData.length==0||textureData[0].length==0||
+					textureData[0][0].length==0)	return;
+			
+			// uebersetze die Int[][][] nach byte[][]
+			int w= textureData.length;
+			int h= textureData[0].length;
+			int dim= textureData[0][0].length;
+			byte[] cols=new byte[w*h*4];
+			for(int i=0;i<w;i++)
+				for(int j=0;j<h;j++){
+					if(dim==1){//grayscale
+						cols[i*h*4+j*4+0]=(byte)textureData[i][j][0];
+						cols[i*h*4+j*4+1]=(byte)textureData[i][j][0];
+						cols[i*h*4+j*4+2]=(byte)textureData[i][j][0];
+						cols[i*h*4+j*4+3]=(byte)1;
+					}						
+					if(dim==2){//grayscale-Alpha
+						cols[i*h*4+j*4+0]=(byte)textureData[i][j][0];
+						cols[i*h*4+j*4+1]=(byte)textureData[i][j][0];
+						cols[i*h*4+j*4+2]=(byte)textureData[i][j][0];
+						cols[i*h*4+j*4+3]=(byte)textureData[i][j][1];
+					}
+					if(dim==3){//rgb
+						cols[i*h*4+j*4+0]=(byte)textureData[i][j][0];
+						cols[i*h*4+j*4+1]=(byte)textureData[i][j][1];
+						cols[i*h*4+j*4+2]=(byte)textureData[i][j][2];
+						cols[i*h*4+j*4+3]=(byte)1;
+					}
+					if(dim==4){//rgb-Alpha
+						cols[i*h*4+j*4+0]=(byte)textureData[i][j][0];
+						cols[i*h*4+j*4+1]=(byte)textureData[i][j][1];
+						cols[i*h*4+j*4+2]=(byte)textureData[i][j][2];
+						cols[i*h*4+j*4+3]=(byte)textureData[i][j][3];						
+					}
+				}
+			id=new ImageData(cols,w,h);
+		}
+		else{
+			id=null;
+			try {id = ImageData.load(Input.getInput(textureFile));}
+			catch (Exception e) {}
+	    }
 		double[][] texCoord = new double [f.getNumPoints()][];
 		System.arraycopy(textureCoords,0,texCoord,0,f.getNumPoints());
 		f.setVertexAttributes( Attribute.TEXTURE_COORDINATES,
 				new DoubleArrayArray.Array( texCoord));
 		app.setAttribute(CommonAttributes.DIFFUSE_COLOR,new Color(1f,1f,1f));
 		app.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false);
-		ImageData id=null;
-		try {id = ImageData.load(Input.getInput(textureFile));}
-		catch (Exception e) {}
-	    Texture2D tex = TextureUtility.createTexture(app, CommonAttributes.POLYGON_SHADER,id);
+		Texture2D tex = TextureUtility.createTexture(app, CommonAttributes.POLYGON_SHADER,id);
 	    tex.setTextureMatrix(textureTrafo);
 	    tex.setApplyMode(Texture2D.GL_MODULATE);
 	}
