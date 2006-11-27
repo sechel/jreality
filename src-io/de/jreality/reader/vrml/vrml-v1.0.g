@@ -118,8 +118,6 @@ options {
 
 //	int currentNormalBinding = VRMLHelper.DEFAULT;
 //	int currentMaterialBinding = VRMLHelper.DEFAULT;
-
-
 	
 	// we use a dynamic allocation scheme, beginning with arrays of length 10000
 	final int INITIAL_SIZE = 10000;
@@ -133,6 +131,7 @@ options {
 //	boolean collectingMFVec3 = false;		
 	
 	DefUseData defs= new DefUseData(); // class that manages the Def & Use
+	int numOfSwitchNodes=0;
 }
 
 /// __________________________________________________________________________
@@ -240,11 +239,12 @@ private
 groupNode [State state] 
  {if (VRMLHelper.verbose) System.err.print("group Node: ");}
 	:(  separatorNode   [state]
-	  |	"Switch"		egal // TODO3
+	  |	switchNode		[state]
 	  |	"WWWAnchor"		egal // TODO3
 	  |	"LOD"			egal // TODO3
 	 )
  	;
+
 
 private
 separatorNode[State state]
@@ -272,6 +272,36 @@ separatorNode[State state]
 		CLOSE_BRACE	
 		{ if (VRMLHelper.verbose) System.err.println(state.history+"/"); }
 		
+	;
+	
+private
+switchNode[State state]
+{
+ if (VRMLHelper.verbose) System.err.println("switch"); 
+ State state2= new State(state);
+ Transformation t= state2.trafo;
+ state2.trafo=null;
+ state2.history=state.history+"-";
+ { if (VRMLHelper.verbose) System.err.println(state.history+"\\"); }
+		
+}:
+		g:"Switch"
+			{
+				SceneGraphComponent sgc = new SceneGraphComponent();
+				if (t!=null)
+					sgc.setTransformation(t);
+				state2.currNode.addChild(sgc);
+				state2.currNode=sgc;
+				state2.camPath.push(sgc);
+				if (numOfSwitchNodes>0) 
+					sgc.setVisible(false);
+				numOfSwitchNodes++;
+				sgc.setName("Switch Nr "+numOfSwitchNodes);
+			}
+		OPEN_BRACE	
+			(statement[state2])?
+		CLOSE_BRACE	
+		{ if (VRMLHelper.verbose) System.err.println(state.history+"/"); }
 	;
 
 // ------------------------------ shape Nodes ------------------------------

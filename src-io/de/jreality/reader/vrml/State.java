@@ -346,5 +346,7 @@ public class State {
 	//ViewerApp.display(cmp);
 	fac.setGenerateVertexNormals(true);
 	fac.update();
+	
+	
 	}
 }
