@@ -61,6 +61,7 @@ import org.sunflow.core.gi.InstantGI;
 import org.sunflow.core.gi.IrradianceCacheGIEngine;
 import org.sunflow.core.gi.PathTracingGIEngine;
 import org.sunflow.core.light.DirectionalLight;
+import org.sunflow.core.light.GlPointLight;
 import org.sunflow.core.primitive.Mesh;
 import org.sunflow.core.primitive.SkyBox;
 import org.sunflow.core.shader.AnisotropicWardShader;
@@ -116,6 +117,15 @@ public class SunflowRenderer extends SunflowAPI {
 
 	private String POINT_SPHERE="point";
 	private String LINE_CYLINDER="line";
+	
+//	private int resolutionX;
+//	private int resolutionY;
+//	private int aaMin = -3;
+//	private int aaMax = 0;
+//	private int depthsDiffuse = 1;
+//	private int depthsReflection = 4;
+//	private int depthsRefraction = 4;
+	
 	public boolean includeLights = true;
 
 	private class Visitor extends SceneGraphVisitor {
@@ -223,6 +233,23 @@ public class SunflowRenderer extends SunflowAPI {
 				Color col = new Color(c.getRed()/255f*i, c.getGreen()/255f*i, c.getBlue()/255f*i);
 				parameter("power", col);
 				light("directionalLight"+lightID++, sun);
+			}
+		}
+		
+		@Override
+		public void visit(de.jreality.scene.PointLight l) {
+			if (includeLights) {
+				double[] point = currentMatrix.multiplyVector(new double[]{0,0,0,1});
+				parameterPoint("center", point);
+				GlPointLight light = new GlPointLight();
+				java.awt.Color c = l.getColor();
+				float i = (float) l.getIntensity()*(float)Math.PI*4;
+				Color col = new Color(c.getRed()/255f*i, c.getGreen()/255f*i, c.getBlue()/255f*i);
+				parameter("power", col);
+				parameter("fallOffA0", l.getFalloffA0());
+				parameter("fallOffA1", l.getFalloffA1());
+				parameter("fallOffA2", l.getFalloffA2());
+				light("pointLight"+lightID++, light);
 			}
 		}
 
@@ -435,6 +462,11 @@ public class SunflowRenderer extends SunflowAPI {
 		parameter("sampler", "bucket");
 		parameter("resolutionX", width);
         parameter("resolutionY", height);
+//        parameter("aa.min", aaMin);
+//        parameter("aa.max", aaMax);
+//        parameter("depths.diffuse", depthsDiffuse);
+//        parameter("depths.reflection", depthsReflection);
+//        parameter("depths.refraction", depthsRefraction);
         
         float bright = 1f;
         if (!includeLights) giEngine(new AmbientOcclusionGIEngine(new Color(bright, bright, bright), Color.BLACK, 120, 100));
