@@ -78,8 +78,6 @@ options {
 	// - sfbitmaskValue werden eine Liste mit zulaessigen Namen uebergeben
 	//		zurueckgegebewn wird ein neuer BooleanArray der fuer die  
 	//		geparsten Namen den entsprechenden Flag auf true gesetzt hat
-	// - werde zunaechst die Bindings als Attribute zwar parsen, aber ignorieren.
-	// - ebenso Texturen
 	// - Erkennungs-Problem zwischen double(float) und int(long):
 	//		betrachte filefragment: " 2   .5    1.5 "
 	//		der Lexer erkennt entweder [2] [.5] [1.5] als  Double-Double-Double
@@ -110,9 +108,7 @@ options {
 	// 	- Weil '.' als Teil einer Zahl gelext wird kann es nicht als Token zur verfuegung stehen!
 
 	// TODO: 
-	// normals & co
 	// Texture
-	// Def & Use
 
 
 	// TODO: mehrerfache Kameras(-Pfade)
