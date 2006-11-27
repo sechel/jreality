@@ -65,6 +65,7 @@ public abstract class Light extends SceneGraphNode {
   private Color color= new Color(1f, 1f, 1f);
   private double intensity = 0.75;
   private boolean global =true;
+private boolean ambientFake;
 
 	public Color getColor() {
     startReader();
@@ -134,6 +135,30 @@ public abstract class Light extends SceneGraphNode {
       startWriter();
       if (this.global != global) fireLightChanged();
       this.global = global;
+      finishWriter();
+    }
+    
+    /**
+     * @return Returns wether the light should be considered as a fake for
+     * ambient light (so sophisticated renderers might ignore it).
+     */
+    public boolean isAmbientFake() {
+      startReader();
+      try {
+        return ambientFake;
+      } finally {
+        finishReader();
+      }
+    }
+    
+    /**
+     * @param global: setting wether the light should be considered as a fake for
+     * ambient light (so sophisticated renderers might ignore it).
+     */
+    public void setAmbientFake(boolean b) {
+      startWriter();
+      if (ambientFake != b) fireLightChanged();
+      ambientFake = b;
       finishWriter();
     }
  
