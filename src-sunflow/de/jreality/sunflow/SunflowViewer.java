@@ -63,7 +63,7 @@ import de.jreality.vr.ViewerVR;
 public class SunflowViewer implements Viewer {
 	private SceneGraphPath cameraPath;
 	private SceneGraphComponent sceneRoot;
-	private ImagePanel display = new ImagePanel();
+	private CancelableImagePanel display = new CancelableImagePanel();
 	private int width;
 	private int height;
 	private RenderOptions options;
@@ -192,5 +192,9 @@ public class SunflowViewer implements Viewer {
 
 	public void setOptions(RenderOptions options) {
 		this.options = options;
+	}
+	
+	public void cancel() {
+		display.cancel();
 	}
 }

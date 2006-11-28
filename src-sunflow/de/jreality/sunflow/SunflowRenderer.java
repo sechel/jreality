@@ -126,6 +126,9 @@ public class SunflowRenderer extends SunflowAPI {
 			currentMatrix=new Matrix(path.getMatrix(null));
 			Geometry g = c.getGeometry();
 			if (c.getAppearance() != null) c.getAppearance().accept(this);
+			appCount++;
+			dgs = ShaderUtility.createDefaultGeometryShader(eapp);
+			rhs = ShaderUtility.createRenderingHintsShader(eapp);
 			if (c.getLight() != null) c.getLight().accept(this);
 			if (g != null) {
 				if (g instanceof PointSet) {
@@ -245,10 +248,7 @@ public class SunflowRenderer extends SunflowAPI {
 
 		@Override
 		public void visit(Appearance a) {
-			appCount++;
 			eapp = EffectiveAppearance.create(path);
-			dgs = ShaderUtility.createDefaultGeometryShader(eapp);
-			rhs = ShaderUtility.createRenderingHintsShader(eapp);
 		}
 
 		private void applyShader(DefaultGeometryShader dgs) {
@@ -444,7 +444,7 @@ public class SunflowRenderer extends SunflowAPI {
         parameter("resolutionY", height);
         parameter("aa.min", options.getAaMin());
         parameter("aa.max", options.getAaMax());
-        parameter("aa.samples", options.getDirectionalLightSamplesMin());
+        parameter("aa.samples", options.getAaSamples());
         parameter("depths.diffuse", options.getDepthsDiffuse());
         parameter("depths.reflection", options.getDepthsReflection());
         parameter("depths.refraction", options.getDepthsRefraction());

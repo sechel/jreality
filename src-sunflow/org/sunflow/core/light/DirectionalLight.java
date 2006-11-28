@@ -17,7 +17,7 @@ public class DirectionalLight implements LightSource {
 	
 	private double distortion=0.000089;
 	
-	private int samples=16;
+	private int samples=8;
 
     OrthoNormalBasis onb;
 
@@ -29,6 +29,7 @@ public class DirectionalLight implements LightSource {
 
 	public boolean update(ParameterList pl, SunflowAPI api) {
 		dir = pl.getVector("dir", dir);
+		samples = pl.getInt("samples", 8);
 		dir.normalize();
 		onb = OrthoNormalBasis.makeFromW(dir);
 		power = pl.getColor("power", power);
