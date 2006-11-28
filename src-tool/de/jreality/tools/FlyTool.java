@@ -44,12 +44,14 @@ import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.toolsystem.ToolUtility;
+import de.jreality.util.LoggingSystem;
 
 /**
  * @author weissman
@@ -63,6 +65,7 @@ public class FlyTool extends AbstractTool {
   private transient double velocity;
   private transient boolean isFlying;
   
+  private double[] olddir = {0,0,-1,0};
   private double gain=1;
   private boolean raiseToThirdPower = true;
   
@@ -92,19 +95,20 @@ public class FlyTool extends AbstractTool {
         eap = EffectiveAppearance.create(tc.getRootToToolComponent());
       }
     int signature = eap.getAttribute("signature", Pn.EUCLIDEAN);
-
+    LoggingSystem.getLogger(this).info("signature is "+signature);
     SceneGraphComponent ship = tc.getRootToToolComponent().getLastComponent();
 
     Matrix pointerMatrix = new Matrix(tc.getTransformationMatrix(InputSlot.getDevice("PointerTransformation")));
     Matrix localPointer = ToolUtility.worldToTool(tc, pointerMatrix);
     double[] dir = localPointer.getColumn(2); // z-axis ( modulo +/- )
     //System.out.println("");
-    //System.out.println("FlyTool: dir is "+Rn.toString(dir));
- //   if (dir[3]*dir[2] > 0) for (int i = 0; i<3; ++i) dir[i] = -dir[i];
+    if (signature != Pn.EUCLIDEAN) {
+    	Pn.normalize(dir, dir, signature);
+        // have to be careful in non-euclidean case that we don't flip the direction inadvertantly
+        if (Rn.innerProduct(dir, olddir) < 0) for (int i = 0; i<4; ++i) dir[i] = -dir[i];
+    }
     double[] shipPosition = localPointer.getColumn(3);
    //System.out.println("FlyTool: dir is "+Rn.toString(dir));
-        // don't need the following correction anymore
-    //    if (signature == Pn.EUCLIDEAN) dir[3] = 1.0;
    
     Matrix shipMatrix = new Matrix();
     if (ship.getTransformation() != null) shipMatrix.assignFrom(ship.getTransformation());
@@ -121,7 +125,8 @@ public class FlyTool extends AbstractTool {
     MatrixBuilder.init(shipMatrix, signature).translateFromTo(shipPosition,newShipPosition).assignTo(ship);
     // demo madness: can't get render trigger to work, so do it by hand.  
     // TODO remove when demo is over
-    tc.getViewer().render();
+    ship.getTransformation().setMatrix(P3.orthonormalizeMatrix(null, ship.getTransformation().getMatrix(), 10E-10, signature));    tc.getViewer().render();
+    System.arraycopy(dir, 0, olddir, 0, 4);
   }
 
   public double getGain() {
