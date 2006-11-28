@@ -65,6 +65,14 @@ public class RenderOptionsBeanInfo extends SimpleBeanInfo {
 				PropertyDescriptor aaMax =
 					new PropertyDescriptor("aaMax", beanClass);
 				aaMax.setPropertyEditorClass(PositiveIntEditor.class);
+				
+				PropertyDescriptor aaSamples =
+					new PropertyDescriptor("aaSamples", beanClass);
+				aaSamples.setPropertyEditorClass(PositiveIntEditor.class);
+				
+				PropertyDescriptor directionalLightSamplesMin =
+					new PropertyDescriptor("directionalLightSamplesMin", beanClass);
+				directionalLightSamplesMin.setPropertyEditorClass(PositiveIntEditor.class);
 
 				PropertyDescriptor depthsDiffuse =
 					new PropertyDescriptor("depthsDiffuse", beanClass);
@@ -83,6 +91,8 @@ public class RenderOptionsBeanInfo extends SimpleBeanInfo {
 						globalIllumination,
 						aaMin,
 						aaMax,
+						aaSamples,
+						directionalLightSamplesMin,
 						depthsDiffuse,
 						depthsReflection,
 						depthsRefraction

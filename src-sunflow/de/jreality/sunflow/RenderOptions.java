@@ -5,6 +5,8 @@ public class RenderOptions {
 	private double globalIllumination = .2f;
 	private int aaMin = -2;
 	private int aaMax = 0;
+	private int aaSamples = 1;
+	private int directionalLightSamplesMin = 1;
 	private int depthsDiffuse = 1;
 	private int depthsReflection = 4;
 	private int depthsRefraction = 4;
@@ -62,5 +64,21 @@ public class RenderOptions {
 	
 	public void setUseOriginalLights(boolean useOriginalLights) {
 		this.useOriginalLights = useOriginalLights;
+	}
+
+	public int getDirectionalLightSamplesMin() {
+		return directionalLightSamplesMin;
+	}
+
+	public void setDirectionalLightSamplesMin(int aaSamples) {
+		this.directionalLightSamplesMin = aaSamples;
+	}
+
+	public int getAaSamples() {
+		return aaSamples;
+	}
+
+	public void setAaSamples(int aaSamples) {
+		this.aaSamples = aaSamples;
 	}
 }

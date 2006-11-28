@@ -105,6 +105,7 @@ public class SunflowRenderer extends SunflowAPI {
 	private String LINE_CYLINDER="line";
 	
 	private RenderOptions options = new RenderOptions();
+	private int directionalLightSamplesMin;
 
 	private class Visitor extends SceneGraphVisitor {
 		
@@ -209,6 +210,7 @@ public class SunflowRenderer extends SunflowAPI {
 				java.awt.Color c = l.getColor();
 				float i = (1-(float)options.getGlobalIllumination())*(float) l.getIntensity()*(float)Math.PI;
 				Color col = new Color(c.getRed()/255f*i, c.getGreen()/255f*i, c.getBlue()/255f*i);
+				parameter("samples", options.getDirectionalLightSamplesMin());
 				parameter("power", col);
 				light("directionalLight"+lightID++, sun);
 			}
@@ -442,6 +444,7 @@ public class SunflowRenderer extends SunflowAPI {
         parameter("resolutionY", height);
         parameter("aa.min", options.getAaMin());
         parameter("aa.max", options.getAaMax());
+        parameter("aa.samples", options.getDirectionalLightSamplesMin());
         parameter("depths.diffuse", options.getDepthsDiffuse());
         parameter("depths.reflection", options.getDepthsReflection());
         parameter("depths.refraction", options.getDepthsRefraction());
