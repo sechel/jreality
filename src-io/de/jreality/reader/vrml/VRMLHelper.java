@@ -524,20 +524,25 @@ public class VRMLHelper {
 	break;
 	case 2:// per part
 	case 4:// per face
-	{	System.arraycopy(state.diffuse,0,fColors,0,faceCount);
-		ifsf.setFaceColors(fColors);
+	{   if (state.diffuse.length>=faceCount){
+			System.arraycopy(state.diffuse,0,fColors,0,faceCount);
+			ifsf.setFaceColors(fColors);
+	}	else System.err.println("wrong material Binding"); 
 	}
 	break;
 	case 3:// per part indexed
 	case 5:// per face indexed
-	{	for (int i=0;i<faceCount;i++){
-			fColors[i]=state.diffuse[(colorIndex[0][i])];
-			}
-		ifsf.setFaceColors(fColors);
-	}
-	break;
+	{	if (state.diffuse.length>=faceCount){
+			for (int i=0;i<faceCount;i++){
+				fColors[i]=state.diffuse[(colorIndex[0][i])];
+				}
+			ifsf.setFaceColors(fColors);
+			break;
+	}	System.err.println("wrong material Binding");
+	break;}
 	case 6:// per Vertex
 	{
+		if (state.diffuse.length>=faceCount){
 		int m=0;
 		for (int i=0;i<faceCount;i++){
 			int k=faceCount-i-1;
@@ -549,11 +554,13 @@ public class VRMLHelper {
 			}
 		}
 		ifsf.setVertexColors(vColors);
+		break;}
 	}
 		break;
 	case 7:// per Vertex indexed 
 	{
-		for (int i=0;i<faceCount;i++){
+		if (state.diffuse.length>=faceCount){
+			for (int i=0;i<faceCount;i++){
 			int k=faceCount-i-1;
 			int faceLength=coordIndex[k].length;
 			for (int j=0;j<faceLength;j++){
@@ -562,6 +569,7 @@ public class VRMLHelper {
 			}
 		}
 		ifsf.setVertexColors(vColors);
+		break;}
 	}
 		break;
 		default:
