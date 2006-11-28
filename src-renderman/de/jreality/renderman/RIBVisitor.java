@@ -1010,6 +1010,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			// setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
 			DataList colors = i.getFaceAttributes(Attribute.COLORS);
 			// if (colors !=null && currentOpacity != 1.0) {
+			// the bug occurs when one attempts to set uniform colors or opacity
 			boolean opaqueColors = true;
 			if (colors != null && GeometryUtility.getVectorLength(colors) == 4) {
 				double[][] colorArray = colors.toDoubleArrayArray(null);
@@ -1112,15 +1113,13 @@ public class RIBVisitor extends SceneGraphVisitor {
 				}
 				map.put("vertex hpoint P", fcoords);
 			}
-			DataList normals = i.getVertexAttributes(Attribute.NORMALS);
-			String type;
+			DataList normals = null;
+			boolean vertexNormals = true;
+			if (smooth && i.getVertexAttributes(Attribute.NORMALS) != null)
+				normals = i.getVertexAttributes(Attribute.NORMALS);
+			else if (i.getFaceAttributes(Attribute.NORMALS) != null)
+				{vertexNormals = false; normals = i.getFaceAttributes(Attribute.NORMALS);}
 			int n;
-			if (smooth && normals != null) {
-				type = "N";//"vertex";
-			} else { // face normals
-				normals = i.getFaceAttributes(Attribute.NORMALS);
-				type = "Np";//"uniform";
-			}
 			if (normals != null) {
 				da = normals.toDoubleArrayArray();
 				n = da.getLengthAt(0);
@@ -1135,28 +1134,18 @@ public class RIBVisitor extends SceneGraphVisitor {
 						fnormals[n * j + 1] = (float) da.getValueAt(j, 1);
 						fnormals[n * j + 2] = (float) da.getValueAt(j, 2);
 					}
-          
-          /////////////////////////////////////////////////////////////////////////////////
-          map.put(type, fnormals);
+					map.put(vertexNormals ? "N" : "Np", fnormals);
 					//map.put(type + "vector N", fnormals);
-          
-          
-          
 				} else {
-					// in noneuclidean case we have to use 4D vectors and
-					// transform the values
-					// to camera coords ourselves before shipping them over as
+					// in noneuclidean case we have to use 4D vectors and ship them over as
 					// float[] type.
 					double[][] dnormals = da.toDoubleArrayArray(null);
 					for (int ii = 0, j = 0; j < dnormals.length; ++j) {
 						for (int k = 0; k < 4; ++k)
 							fnormals[ii++] = (float) dnormals[j][k];
 					}
-          
-          
-					/////////////////////////////////////////////////////////////////////////////////
-					//map.put(type + " float[4] Nw", fnormals);
-          map.put(type + " float[4] Nw", fnormals);
+          			/////////////////////////////////////////////////////////////////////////////////
+					map.put(((vertexNormals) ? "vertex" : "uniform") + " float[4] Nw", fnormals);
           
           
           

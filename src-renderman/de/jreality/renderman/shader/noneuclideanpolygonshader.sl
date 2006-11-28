@@ -10,14 +10,19 @@
  *	are projective transformations that preserve the unit sphere and map the interior to 
  *	itself.  These are represented by 4x4 matrices hence can be implemented using the 
  *	regular geometry/viewing pipeline provided by Renderman (and other rendering systems).
- *  Features:
- *	It would be much easier to implement if there were more general datatypes in the 
- *	shading language.  I mean if I could use 4-tuples as points instead of just 3-tuples
- *	the code would be much more compact.  As it is, I have to drag around a "w" coordinate
- *	for each point through all the computations. Ugly.
  */
 
 
+    void
+    printArray(string label; float v[4]) {
+        float i = 0;
+        printf("%s %f %f %f %f\n", label, v[0], v[1], v[2], v[3]);
+    }
+    void
+    printArray3(string label; float v[4]) {
+        float i = 0;
+        printf("%s %f %f %f\n", label, v[0]/v[3], v[1]/v[3], v[2]/v[3]);
+    }
     void
     matrixTimesVector(output float dst[4] ; float m[16] ; float v[4])  {
        dst[0] = m[0]*v[0]+m[4]*v[1]+m[8]*v[2]+m[12]*v[3];
@@ -44,11 +49,11 @@
 
 surface
 noneuclideanpolygonshader ( 
-    varying float Nw[4] = {0,0,0,1};
+    varying float Nw[4] = {0,0,0,23};
     float Ka = 0, 
 	    Kd = .5, 
 	    Ks = .5, 
-	    roughness = .1, 
+	    roughness = .001, 
 	reflectionBlend = .6;
     uniform float objectToCamera[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
     uniform float tm[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
@@ -63,6 +68,7 @@ noneuclideanpolygonshader (
     color Ct, Cr;
     float tr = 1;
     float Pa[4] = {xcomp(P), ycomp(P), zcomp(P), 1};
+    float debug = 0;
 
 	float 
 	dot(float v1[4], v2[4]; ) {
@@ -74,6 +80,7 @@ noneuclideanpolygonshader (
 	hnormalize(output float v[4])   {
 	    float t = dot(v,v);
 	    t = 1.0/sqrt(abs(t));
+        if (v[3] < 0) t = -t;
         times(v,t,v);
 	}
 
@@ -97,10 +104,6 @@ noneuclideanpolygonshader (
         if (texturename != ""){
             matrix textureMatrix = matrix "current" (tm[0],tm[1],tm[2],tm[3],tm[4],tm[5],tm[6],tm[7],tm[8],tm[9],tm[10],tm[11],tm[12],tm[13],tm[14],tm[15]);
 	        point a = point (s,t,0);
-	        //point b = transform("shader", "current",a); 	 
-	        //point p = transform( textureMatrix , a);
-            //printf("tex matrix: %m\n",textureMatrix);
-            //point p = a;
 	        point p = transform( textureMatrix , a);
 	        float ss = xcomp(p);
 	        float tt = ycomp(p);
@@ -115,27 +118,40 @@ noneuclideanpolygonshader (
         // normalize the point
         float Pw = 1.0/sqrt(abs(PP));
         times(Pa, Pw, Pa);
+        if (debug != 0) printArray3("P",Pa);
         //printf("P.P = %f\n",dot(Pa,Pa));
 
         // calculate the normal
         float tN[4];
-        matrixTimesVector(tN, objectToCamera, Nw);
-        hmaketangent(tN);
-        hnormalize(tN);
-        //printf("N.P = %f\n",dot(Nh,Ph,Nw3,Pw));
+        if (Nw[3] == 23)    {   
+            //printf("No Nw\n");
+            tN[0] = xcomp(N); tN[1] = ycomp(N); tN[2] = zcomp(N); tN[3] = 0;
+            hmaketangent(tN);
+            hnormalize(tN);
+            }
+        else {
+            if (debug != 0) printArray3("Normal",Nw);
+            matrixTimesVector(tN, objectToCamera, Nw);
+        }
+        if (debug != 0) 
+            printf("N.P = %f\n",dot(tN,Pa));
+        if (debug != 0) 
+            printArray3("Normal2",tN);
+        if (debug != 0) printArray3("Normal3",tN);
+        //printf("N.P = %f\n",dot(tN,Pa));
     
 	    /* as a difference vector, I has w cord = 0 */
-	    /* also, we want the L which points at the eye, not the surface */
-        float Ia[4] = {-xcomp(I), -ycomp(I), -zcomp(I), 1};
+	    /* also, we want the I which points at the eye, not the surface */
+        float Ia[4] = {-xcomp(I), -ycomp(I), -zcomp(I), 0};
+        if (debug != 0) printArray3("Eye",Ia);
         hmaketangent(Ia);
         hnormalize(Ia);
+        if (debug != 0) printArray3("Eye2",Ia);
 
         float ndi = dot(Ia,tN);
-        // flip the normal to be on same side as eye
-        if (ndi < 0) times(Ia, -1, Ia); 
+        // flip the normal to have acute angle with eye vector
+        if (ndi < 0) times(tN, -1, tN); 
 
-        //printf("point %p %f\nnormal %p %f\neye %p %f\n",Ph,Pw,Nh,Nw3,Ih,Iw);
-        //printf("N.I %f\n",dot(Ih,Nh,Iw,Nw3));
         // and add in the reflection map (like a specular highlight, without modulating by shading)
         // TODO implement non-euclidean reflection
         //if (reflectionmap != "") {
@@ -146,6 +162,7 @@ noneuclideanpolygonshader (
 
         total = 0;
 	    uniform float spec = 1.0/roughness;
+       
         illuminance(P)
         {
 	        /* first adjust light vector to be tangent at P */
@@ -153,45 +170,28 @@ noneuclideanpolygonshader (
             float La[4] = {xcomp(L), ycomp(L), zcomp(L), 0};
             hmaketangent(La);
             hnormalize(La);
-	        //if ( abs(1-dot(La,La)) > .001)
-                //printf("Normalized L has length squared = %f\n",dot(Lh,Lh,Lw,Lw));
+            if (debug != 0) printArray3("L",La);
     
-	        float d = dot(La, tN);
-	        if (d > 1.01)	{       // shouldn't happen
-                //printf("big d: %f\n",d); 
-		        d = 1.0;
-            }
+	        float diffuse = dot(La, tN);
+            if (diffuse < 0) diffuse  *=  -1;
 
 	        /* now compute bisector of angle between L and I */
-	        /* important for Lh, Ih to be unit length */
+	        /* important for La, Ia to be unit length */
             float M[4];
             linearCombination(M, Ia, 1, La);
-	        /* compute cos(angle between normal and mid-vector H) */
-	        float ss = dot(M,tN)/sqrt(dot(M,M));
+            if (debug != 0) printArray3("M",M);
+	        /* compute cos(angle between normal and mid-vector M) */
+	        float ss = dot(M,tN)/sqrt(abs(dot(M,M)));
 
-	        if (ss < 0.0)	ss = -ss;
-	        if (ss > 1.0)	ss = 1.0;
-        
-            //printf("Cl: %c\td: %f\n",Cl,d);
-	        total = total + Os * Cl * (Ct *  (Ka*ambient() + Kd*d)+
+            if (debug != 0) printf("cos of spec angle is %f\n",ss);
+	        if (ss < 0.0)	ss =  0; // -ss;
+
+	        total = total + Os * Cl * (Ct *  (Ka*ambient() + Kd*diffuse)+
 	                specularcolor * Ks*pow(ss,spec)); // 0;
         }
 	    Ci = total;
     }
 	Oi = Os; 
 }		
-// old code for calculating specular
-	        //float a = -dot(Ih, M, Iw, Mw)/dot(Lh,M,Lw, Mw);
-	        //M = Ih + a*Lh;
-	        //Mw = Iw + a*Lw;	
-	        /* detect very small vectors, reject them */
-	        //if (abs(M.M - Mw*Mw) < .0001)	{
-	            //M = Lh;
-	            //Mw = Lw;
-	        //}
-	        //if (Mw < 0.0)	{
-	            //M = -M;
-	            //Mw = -Mw;
-	        //}
 	
 
