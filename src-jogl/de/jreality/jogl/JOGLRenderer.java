@@ -216,10 +216,13 @@ public class JOGLRenderer  implements AppearanceListener {
 			if (ap != null) ap.removeAppearanceListener(this);
 		}
 		theRoot = sgc;
+		if (theRoot.getAppearance() != null) theRoot.getAppearance().addAppearanceListener(this);
 		thePeerRoot = constructPeerForSceneGraphComponent(theRoot, null);   
 		// some top-level appearance attributes determine how we render; 
 		// TODO set up a separate mechanism for controlling these top-level attributes
+
 		theLog.info("setSceneRoot");
+		extractGlobalParameters();
 	}
 
 	public void appearanceChanged(AppearanceEvent ev) {
@@ -229,13 +232,18 @@ public class JOGLRenderer  implements AppearanceListener {
 
 	public void extractGlobalParameters()	{
 		Appearance ap = theRoot.getAppearance();
+		if (ap == null) return;
+		theLog.finer("In extractGlobalParameters");
 		Object obj = ap.getAttribute(CommonAttributes.FORCE_RESIDENT_TEXTURES, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) forceResidentTextures = ((Boolean)obj).booleanValue();
 		obj = ap.getAttribute(CommonAttributes.MANY_DISPLAY_LISTS, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) manyDisplayLists = ((Boolean)obj).booleanValue();
 		obj = ap.getAttribute(CommonAttributes.ANY_DISPLAY_LISTS, Boolean.class);		// assume the best ...
 		obj = ap.getAttribute(CommonAttributes.CLEAR_COLOR_BUFFER, Boolean.class);		// assume the best ...
-		if (obj instanceof Boolean) openGLState.clearColorBuffer = ((Boolean)obj).booleanValue();
+		if (obj instanceof Boolean) {
+			openGLState.clearColorBuffer = ((Boolean)obj).booleanValue();
+			theLog.fine("Setting clear color buffer to "+openGLState.clearColorBuffer);
+		}
 		theLog.fine("forceResTex = "+forceResidentTextures);
 		theLog.fine("many display lists = "+manyDisplayLists);
 	}
@@ -405,24 +413,27 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 
 	public void init(GL gl) {
-		openGLState = new JOGLRenderingState(this);
-
 		globalGL = gl;
+		
+		openGLState = new JOGLRenderingState(this);
 
 		String vv = globalGL.glGetString(GL.GL_VERSION);
 		theLog.log(Level.FINE,"version: "+vv);			
-		int[] tu = new int[1];
-		globalGL.glGetIntegerv(GL.GL_MAX_TEXTURE_UNITS, tu,0);
-		theLog.info("# of texture units: "+tu[0]);			
-		if (thePeerRoot != null) thePeerRoot.propagateGeometryChanged(ALL_GEOMETRY_CHANGED);
-		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.propagateGeometryChanged(ALL_GEOMETRY_CHANGED);
+//		int[] tu = new int[1];
+//		globalGL.glGetIntegerv(GL.GL_MAX_TEXTURE_UNITS, tu,0);
+//		theLog.info("# of texture units: "+tu[0]);	
+		// force new display lists
 		Texture2DLoaderJOGL.deleteAllTextures(globalGL);
-		theLog.log(Level.FINE,"Got new sphere display lists for context "+globalGL);
+		JOGLCylinderUtility.setupCylinderDLists(this);
+		JOGLSphereHelper.setupSphereDLists(this);
+		// traverse tree and delete all display lists
+		if (thePeerRoot != null) thePeerRoot.propagateGeometryChanged(ALL_GEOMETRY_CHANGED, true);
+		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.propagateGeometryChanged(ALL_GEOMETRY_CHANGED, true);
 	}
 	
 	public void display(GLAutoDrawable drawable) {
 		if (theViewer.getSceneRoot() == null || theViewer.getCameraPath() == null) {
-			LoggingSystem.getLogger(this).info("display called w/o scene root or camera path");
+			theLog.info("display called w/o scene root or camera path");
 		}
 		display(drawable.getGL());
 	}
@@ -430,14 +441,14 @@ public class JOGLRenderer  implements AppearanceListener {
 	public void display(GL gl) {
 		globalGL=gl;
 		openGLState.initializeGLState();
-
 		long beginTime = 0;
 		if (collectFrameRate) beginTime = System.currentTimeMillis();
 		Camera theCamera = CameraUtility.getCamera(theViewer);
 		clearColorBits = (openGLState.clearColorBuffer ? GL.GL_COLOR_BUFFER_BIT : 0);
+//		theLog.fine("JOGLRR ccb = "+clearColorBits);
 		if (offscreenMode) {
 			if (theCamera.isStereo() && getStereoType() != de.jreality.jogl.Viewer.CROSS_EYED_STEREO) {
-				LoggingSystem.getLogger(this).warning("Can only save cross-eyed stereo offscreen");
+				theLog.warning("Can only save cross-eyed stereo offscreen");
 				offscreenMode = false;
 				return;
 			}
@@ -707,10 +718,10 @@ public class JOGLRenderer  implements AppearanceListener {
 		public void dispose()		{
 			refCount--;
 			if (refCount < 0)	{
-				JOGLConfiguration.theLog.log(Level.WARNING,"Negative reference count!");
+				theLog.log(Level.WARNING,"Negative reference count!");
 			}
 			if (refCount == 0)	{
-				JOGLConfiguration.theLog.log(Level.FINER,"Geometry is no longer referenced");
+				theLog.log(Level.FINER,"Geometry is no longer referenced");
 				originalGeometry.removeGeometryListener(this);
 				geometries.remove(originalGeometry);
 			}
@@ -886,6 +897,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			//theLog.log(Level.FINER,"setting display list dirty flag: "+changed);
 		}
 		public void childAdded(SceneGraphComponentEvent ev) {
+			theLog.log(Level.FINE,"GoBetween: Container Child added to: "+originalComponent.getName());
 			if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY) {
 				if (peerGeometry != null)	{
 					((Geometry) ev.getOldChildElement()).removeGeometryListener(this);						
@@ -979,6 +991,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			if (topLevel) thePeerRoot = peer;
 			else if (myParent != null) {
 				int n = myParent.children.size();
+				//String space = (new char[2*sgp.getLength()]).toString();
 				myParent.children.add(peer);
 				peer.childIndex = n;
 			}
@@ -1110,8 +1123,8 @@ public class JOGLRenderer  implements AppearanceListener {
 				globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
 				openGLState.flipped  = cumulativeIsReflection;
 			}
-			if (appearanceChanged)  	propagateAppearanceChanged();
 			if (geometryDirtyBits  != 0)	handleChangedGeometry();
+			if (appearanceChanged)  	propagateAppearanceChanged();
 			if (goBetween != null && goBetween.peerGeometry != null && goBetween.peerGeometry.originalGeometry != null )	{
 				Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
 			}
@@ -1199,9 +1212,7 @@ public class JOGLRenderer  implements AppearanceListener {
 
 		private JOGLPeerComponent getPeerForChildComponent(SceneGraphComponent sgc) {
 			childlock.readLock();
-			int n = children.size();
-			for (int i = 0; i<n; ++i)	{
-				JOGLPeerComponent jpc = (JOGLPeerComponent) children.get(i);
+			for (JOGLPeerComponent jpc : children)	{
 				if ( jpc.goBetween.getOriginalComponent() == sgc) { // found!
 					return jpc;
 				}
@@ -1239,9 +1250,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			}
 			updateShaders();
 
-			int n = children.size();
-			for (int i = 0; i<n; ++i)	{		
-				JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
+			for (JOGLPeerComponent child : children) {
 				child.propagateAppearanceChanged();
 			}	
 			//childlock.readUnlock();
@@ -1260,7 +1269,7 @@ public class JOGLRenderer  implements AppearanceListener {
 				renderingHints = parent.renderingHints;
 
 			} else  {		
-//				theLog.log(Level.FINER,"Updating shaders for "+goBetween.originalComponent.getName());
+				//theLog.log(Level.FINER,"Updating shaders for "+goBetween.originalComponent.getName());
 				if (geometryShader == null)
 					geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
 				else 
@@ -1274,7 +1283,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 
 		public void childAdded(SceneGraphComponentEvent ev) {
-			theLog.log(Level.FINE,"Container Child added to: "+goBetween.getOriginalComponent().getName());
+			theLog.log(Level.FINE,"JOGLPeerComponent: Container Child added to: "+goBetween.getOriginalComponent().getName());
 			//theLog.log(Level.FINE,"Event is: "+ev.toString());
 			switch (ev.getChildType() )	{
 			case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
@@ -1391,20 +1400,25 @@ public class JOGLRenderer  implements AppearanceListener {
 			}
 		}
 
-		public void propagateGeometryChanged(int changed) {
+		public void propagateGeometryChanged(int changed)	{
+			propagateGeometryChanged(changed, false);
+		}
+		
+		public void propagateGeometryChanged(int changed, boolean doitnow) {
+//			theLog.finer("set bits to "+changed);
 			geometryDirtyBits  = changed;
 			childlock.readLock();
-			int n = children.size();
-			for (int i = 0; i<n; ++i)	{		
-				JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
-				child.propagateGeometryChanged(changed);
+			for (JOGLPeerComponent child: children){		
+				child.propagateGeometryChanged(changed, doitnow);
 			}	
+			if (doitnow) handleChangedGeometry();
 			childlock.readUnlock();
 
 		}
 
 		private void handleChangedGeometry() {
 			if (geometryShader != null)	{
+//				theLog.fine("Handling bits: "+geometryDirtyBits+" for "+goBetween.originalComponent.getName());
 				if (geometryShader.pointShader != null && (geometryDirtyBits  & POINTS_CHANGED) != 0) geometryShader.pointShader.flushCachedState(JOGLRenderer.this);
 				if (geometryShader.lineShader != null && (geometryDirtyBits  & LINES_CHANGED) != 0) geometryShader.lineShader.flushCachedState(JOGLRenderer.this);
 				if (geometryShader.polygonShader != null && (geometryDirtyBits  & FACES_CHANGED) != 0) geometryShader.polygonShader.flushCachedState(JOGLRenderer.this);				

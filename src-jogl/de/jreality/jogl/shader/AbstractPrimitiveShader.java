@@ -40,6 +40,8 @@
 
 package de.jreality.jogl.shader;
 
+import javax.media.opengl.GL;
+
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.scene.data.AttributeEntityUtility;
@@ -49,6 +51,7 @@ import de.jreality.shader.ShaderUtility;
 
 public abstract class AbstractPrimitiveShader implements PrimitiveShader {
 	public DefaultTextShader textShader = null;
+	protected GL currentGL = null;
 	
 	public boolean providesProxyGeometry() {
 		return false;

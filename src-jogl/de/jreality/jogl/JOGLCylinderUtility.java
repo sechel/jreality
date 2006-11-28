@@ -50,6 +50,7 @@ import de.jreality.geometry.Primitives;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.util.LoggingSystem;
 
 /**
  * @author gunn
@@ -86,6 +87,7 @@ public class JOGLCylinderUtility  {
 		int nv = 4;
 		for (int i = 0; i<n; ++i)	{
 			dlists[i] = gl.glGenLists(1);
+			LoggingSystem.getLogger(JOGLCylinderUtility.class).fine("Allocating new dlist "+dlists[i]);
 			gl.glNewList(dlists[i], GL.GL_COMPILE);
 			//gl.glDisable(GL.GL_SMOOTH);
 			IndexedFaceSet cyl = Primitives.cylinder(nv);
@@ -94,8 +96,10 @@ public class JOGLCylinderUtility  {
 			gl.glEndList();
 		}
 		//if (!sharedDisplayLists) 
-		cylinderDListsTable.put(jr.getGL(), dlists);
+		//cylinderDListsTable.put(jr.getGL(), dlists);
 		//else globalSharedCylinderDisplayLists = dlists;
+		if (!sharedDisplayLists) cylinderDListsTable.put(jr.getGL(), dlists);
+		else globalSharedCylinderDisplayLists = dlists;
 	}
 	
 	/**

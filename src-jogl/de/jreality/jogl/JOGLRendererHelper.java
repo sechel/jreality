@@ -94,6 +94,7 @@ import de.jreality.shader.CubeMap;
 import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
+import de.jreality.util.LoggingSystem;
 
 /**
  * @author gunn
@@ -134,8 +135,10 @@ public class JOGLRendererHelper {
 		//System.err.println("clearbufferbits = "+jr.openGLState.clearBufferBits);
 		//System.err.println("colormask = "+jr.openGLState.colorMask);
 		// first set the color mask for the clear
+		LoggingSystem.getLogger(JOGLRendererHelper.class).fine("JOGLRRH cbb = "+ openGLState.clearBufferBits);
 		if ((openGLState.clearBufferBits & GL.GL_COLOR_BUFFER_BIT) != 0) gl.glColorMask(true, true, true, true);
-		if (openGLState.clearBufferBits != 0) gl.glClear (openGLState.clearBufferBits);
+		//if (openGLState.clearBufferBits != 0) 
+				gl.glClear (openGLState.clearBufferBits);
 		// now set the color mask for pixel writing
 		int cm = openGLState.colorMask;
 		gl.glColorMask((cm&1) !=0, (cm&2) != 0, (cm&4) != 0, (cm&8) != 0);

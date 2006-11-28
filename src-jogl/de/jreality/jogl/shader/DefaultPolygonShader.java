@@ -63,6 +63,7 @@ import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
+import de.jreality.util.LoggingSystem;
 
 /**
  * @author Charles Gunn
@@ -76,8 +77,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	
 	boolean		smoothShading = true;		// interpolate shaded values between vertices
 	Texture2D texture2Dnew;
-  Texture2D lightMapNew;
-   CubeMap reflectionMapNew;
+	Texture2D lightMapNew;
+	CubeMap reflectionMapNew;
 	int frontBack = FRONT_AND_BACK;
 	public VertexShader vertexShader = null;
 	boolean useGLSL = false;
@@ -274,6 +275,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 					if (!jr.isPickMode() && useDisplayLists)	{
 						if (dList == -1)	{
 							dList = jr.getGL().glGenLists(1);
+							LoggingSystem.getLogger(this).fine("PolygonShader: Allocating new dlist "+dList+" for gl "+jr.getGL());
 							jr.getGL().glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
 							JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);
 							jr.getGL().glEndList();	
@@ -336,6 +338,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 
     }
 	public void flushCachedState(JOGLRenderer jr) {
+		LoggingSystem.getLogger(this).fine("PolygonShader: Flushing display lists "+dList+" : "+dListProxy);
 		if (dList != -1) jr.getGL().glDeleteLists(dList, 1);
 		if (dListProxy != -1) jr.getGL().glDeleteLists(dListProxy,1);
 		dList = dListProxy = -1;

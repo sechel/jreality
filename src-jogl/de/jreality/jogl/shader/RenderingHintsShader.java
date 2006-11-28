@@ -134,23 +134,23 @@ public class RenderingHintsShader  {
 	public void render(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.getRenderer();
 		GL gl = jr.getGL();
-			if (transparencyEnabled)	{
-			  gl.glEnable (GL.GL_BLEND);
-			  gl.glDepthMask(zBufferEnabled);
-			  gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-			} else	{
-			  gl.glDepthMask(true);
-			  gl.glDisable(GL.GL_BLEND);
-			}
-			jr.getRenderingState().transparencyEnabled = transparencyEnabled;
-			if (lightingEnabled)			gl.glEnable(GL.GL_LIGHTING);
-			else							gl.glDisable(GL.GL_LIGHTING);
-			if (backFaceCullingEnabled)  {
-				gl.glEnable(GL.GL_CULL_FACE);
-				gl.glCullFace(GL.GL_BACK);
-			} else
-				gl.glDisable(GL.GL_CULL_FACE);
-			jr.getRenderingState().levelOfDetail = levelOfDetail;
+		if (transparencyEnabled)	{
+		  gl.glEnable (GL.GL_BLEND);
+		  gl.glDepthMask(zBufferEnabled);
+		  gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		} else	{
+		  gl.glDepthMask(true);
+		  gl.glDisable(GL.GL_BLEND);
+		}
+		jr.getRenderingState().transparencyEnabled = transparencyEnabled;
+		if (lightingEnabled)			gl.glEnable(GL.GL_LIGHTING);
+		else							gl.glDisable(GL.GL_LIGHTING);
+		if (backFaceCullingEnabled)  {
+			gl.glEnable(GL.GL_CULL_FACE);
+			gl.glCullFace(GL.GL_BACK);
+		} else
+			gl.glDisable(GL.GL_CULL_FACE);
+		jr.getRenderingState().levelOfDetail = levelOfDetail;
 
 	}
 

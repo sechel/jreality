@@ -45,6 +45,7 @@ import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.util.LoggingSystem;
 
 /**
  * @author Charles Gunn
@@ -82,8 +83,10 @@ public class DefaultGeometryShader  implements Shader {
 		edgeDraw = eap.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT );
 		faceDraw = eap.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
 		if(faceDraw) {
-	        	if (polygonShader == null) 
+	        	if (polygonShader == null) {
+	        		LoggingSystem.getLogger(this).finer("null polygonshader");
 	        		polygonShader =(PolygonShader) ShaderLookup.getShaderAttr(eap, geomShaderName, CommonAttributes.POLYGON_SHADER);
+	        	}
 	        	else 
 	        		polygonShader.setFromEffectiveAppearance(eap, ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER));
 	    } else {

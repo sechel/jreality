@@ -49,6 +49,7 @@ import de.jreality.geometry.SphereUtility;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.util.LoggingSystem;
 
 /**
  * @author gunn
@@ -71,11 +72,12 @@ public class JOGLSphereHelper extends SphereUtility {
 		dlists = null;
 		//if (!sharedDisplayLists)	dlists = (int[] ) sphereDListsTable.get(gl);
 		//else 
-				dlists = new int[n];
-				JOGLConfiguration.theLog.log(Level.INFO,"Setting up sphere display lists for context "+gl);
+		dlists = new int[n];
+		JOGLConfiguration.theLog.log(Level.INFO,"Setting up sphere display lists for context "+gl);
 		for (int i = 0; i<n; ++i)	{
 			tessellatedCubeSphere(i);
 			dlists[i] = gl.glGenLists(1);
+			LoggingSystem.getLogger(JOGLCylinderUtility.class).fine("Allocating new dlist "+dlists[i]);
 			gl.glNewList(dlists[i], GL.GL_COMPILE);
 			//gl.glDisable(GL.GL_SMOOTH);
 			IndexedFaceSet qms = SphereUtility.cubePanels[i];

@@ -65,6 +65,7 @@ import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
+import de.jreality.util.LoggingSystem;
 
 /**
  * @author Charles Gunn
@@ -73,7 +74,7 @@ import de.jreality.shader.Texture2D;
 public class DefaultPointShader  extends AbstractPrimitiveShader implements PointShader {
 	double pointSize = 1.0;
 	// on my mac, the only value for the following array that seems to "work" is {1,0,0}.  WHY?
-	float[] pointAttenuation = {0f, 0f, 1f};
+	float[] pointAttenuation = {0.0f, 0f, 1.00000f};
 	double	pointRadius = .1;		
 	Color diffuseColor = java.awt.Color.RED;
 	float[] diffuseColorAsFloat;
@@ -375,6 +376,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	}
 
 	public void flushCachedState(JOGLRenderer jr) {
+		LoggingSystem.getLogger(this).fine("PointShader: Flushing display lists "+dList+" : "+dListProxy);
 		if (dList != -1) jr.getGL().glDeleteLists(dList, 1);
 		//TODO !!!
     //if (dListProxy != -1) jr.getGL().glDeleteLists(dListProxy,1);

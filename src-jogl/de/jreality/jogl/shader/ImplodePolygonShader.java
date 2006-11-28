@@ -53,6 +53,7 @@ import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.util.LoggingSystem;
 
 /**
  * @author gunn
@@ -98,6 +99,7 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 
 	public void flushCachedState(JOGLRenderer jr) {
 		super.flushCachedState(jr);
+		LoggingSystem.getLogger(this).fine("ImplodePolygonShader: Flushing display lists "+implodeDL+" : "+dListProxy);
 		if (implodeDL != -1) { jr.getGL().glDeleteLists(implodeDL, 1);  implodeDL = -1; }
 	}
 }

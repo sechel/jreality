@@ -71,6 +71,7 @@ import de.jreality.scene.data.IntArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.util.LoggingSystem;
 
 /**
  * @author Charles Gunn
@@ -275,6 +276,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		}
 		if (tubeDL[sig+1] == 0)	{
 			tubeDL[sig+1] = gl.glGenLists(1);
+			LoggingSystem.getLogger(this).fine("PolygonShader: Allocating new dlist "+tubeDL[sig+1]+" for gl "+jr.getGL());
 			gl.glNewList(tubeDL[sig+1], GL.GL_COMPILE);
 			JOGLRendererHelper.drawFaces(jr, TubeUtility.urTube[sig+1], smoothShading , alpha );
 			gl.glEndList();	
@@ -282,6 +284,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		int nextDL = -1;
 		if (useDisplayLists) {
 			nextDL = gl.glGenLists(1);
+			LoggingSystem.getLogger(this).fine("PolygonShader: Allocating new dlist "+nextDL+" for gl "+jr.getGL());
 			gl.glNewList(nextDL, GL.GL_COMPILE);
 		}
 			int  k, l;
@@ -371,6 +374,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				} else {
 					if (useDisplayLists && dList == -1)	{
 						dList = jr.getGL().glGenLists(1);
+						LoggingSystem.getLogger(this).fine("LineShader: Allocating new dlist "+dList+" for gl "+jr.getGL());
 						jr.getGL().glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
 						JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  smoothLineShading, jr.getRenderingState().diffuseColor[3]);
 						jr.getGL().glEndList();	
@@ -382,15 +386,19 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	}
 
 	public void flushCachedState(JOGLRenderer jr) {
+		LoggingSystem.getLogger(this).fine("LineShader: Flushing display lists "+dList+" : "+dListProxy);
 		if (dList != -1) jr.getGL().glDeleteLists(dList, 1);
 		if (dListProxy != -1) jr.getGL().glDeleteLists(dListProxy,1);
 		dList = dListProxy = -1;
-		if (tubeDL != null)
-			for (int i = 0; i<3; ++i)
+		if (tubeDL != null) {
+			LoggingSystem.getLogger(this).fine("LineShader: Flushing display lists "+tubeDL[0]+" : "+tubeDL[1]+" : "+tubeDL[2]);
+					for (int i = 0; i<3; ++i)
 				if (tubeDL[i] != 0)	{
 					jr.getGL().glDeleteLists(tubeDL[i], 1);
 					tubeDL[i] = 0;
 				}
+				tubeDL = null;
+		}
 	}
 	
 
