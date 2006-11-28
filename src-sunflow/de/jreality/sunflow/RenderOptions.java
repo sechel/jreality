@@ -6,9 +6,9 @@ public class RenderOptions {
 	private int aaMin = -2;
 	private int aaMax = 0;
 	private int aaSamples = 1;
-	private int directionalLightSamplesMin = 1;
+	private int directionalLightSamplesMin = 8;
 	private int depthsDiffuse = 1;
-	private int depthsReflection = 4;
+	private int depthsReflection = 0;
 	private int depthsRefraction = 4;
 	
 	public int getAaMax() {
