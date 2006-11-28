@@ -304,8 +304,9 @@ public final class MatrixBuilder {
    * @param p1
    * @param p2
    * @return
-   * @see P3#makeTranslationMatrix(double[], double[], int)
-   */public MatrixBuilder translateFromTo(double[] p1, double[] p2) {
+   * @see P3#makeTranslationMatrix(double[], double[], double[], int)
+   */
+   public MatrixBuilder translateFromTo(double[] p1, double[] p2) {
     P3.makeTranslationMatrix(tmp, p1, p2, signature);
     matrix.multiplyOnRight(tmp);
     return this;

@@ -1117,8 +1117,20 @@ public class IndexedFaceSetUtility {
         return i;
     }
     
+    /**
+     * 
+     * @param ifs
+     * @return
+     * @author gonska
+     */
     public static IndexedFaceSet [] splitIfsToPrimitiveFaces(IndexedFaceSet ifs){
-	   	// Author Bernd Gonska
+	   	// TODO:
+    	// This code doesn't really handle the vertex attributes correctly
+    	// it uses the ith vertex attribute as the face attribute for the resulting object
+    	// To be correct it should read out the vertex attributes for the ith face and
+    	// set the vertex attributes of the new ifs accordingly
+    	// But this has low priority since the whole misthafen is a result of a RenderMan
+    	// bug which has been fixed in the current release (which we don't have) --gunn
 	   	int num=ifs.getNumFaces();
 	   	IndexedFaceSet [] parts= new IndexedFaceSet[num];
 	   	for (int i=0;i<num;i++){
@@ -1152,6 +1164,13 @@ public class IndexedFaceSetUtility {
 	   					new StringArray(newLabelsArray));
 	   		}
 	   		temp= ifs.getVertexAttributes( Attribute.NORMALS );
+	   		if (temp!=null){
+	   			oldNormalsArray 	= temp.toDoubleArrayArray(null);
+	   			newNormalsArray[0] = oldNormalsArray[i]; 
+	   			parts[i].setFaceAttributes(Attribute.NORMALS,
+	   					new DoubleArrayArray.Array(newNormalsArray));
+	   		}
+	   		temp= ifs.getFaceAttributes( Attribute.NORMALS );
 	   		if (temp!=null){
 	   			oldNormalsArray 	= temp.toDoubleArrayArray(null);
 	   			newNormalsArray[0] = oldNormalsArray[i]; 
