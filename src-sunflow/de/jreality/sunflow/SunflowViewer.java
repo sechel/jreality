@@ -40,26 +40,17 @@
 
 package de.jreality.sunflow;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.io.IOException;
 
 import javax.swing.JFrame;
 
-import org.sunflow.core.Display;
-import org.sunflow.core.display.FrameDisplay;
 import org.sunflow.system.ImagePanel;
 
-import de.jreality.examples.CatenoidHelicoid;
-import de.jreality.math.MatrixBuilder;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.Cylinder;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Sphere;
 import de.jreality.scene.Viewer;
-import de.jreality.shader.TextureUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.vr.ViewerVR;
 
@@ -75,6 +66,7 @@ public class SunflowViewer implements Viewer {
 	private ImagePanel display = new ImagePanel();
 	private int width;
 	private int height;
+	private RenderOptions options;
 
 	public Component getViewingComponent() {
 		return (Component) display;
@@ -90,6 +82,7 @@ public class SunflowViewer implements Viewer {
 
 	public void render() {
 		SunflowRenderer sv =new SunflowRenderer();
+		sv.setOptions(options);
 		sv.render(sceneRoot,cameraPath,display,width,height);
 	}
 
@@ -191,5 +184,13 @@ public class SunflowViewer implements Viewer {
 		f.validate();
 		JFrame external = vr.getExternalFrame();
 		external.setLocationRelativeTo(f);
+	}
+
+	public RenderOptions getOptions() {
+		return options;
+	}
+
+	public void setOptions(RenderOptions options) {
+		this.options = options;
 	}
 }
