@@ -68,8 +68,8 @@ public class SunflowViewer implements Viewer {
 	private int height;
 	private RenderOptions options;
 
-	public Component getViewingComponent() {
-		return (Component) display;
+	public ImagePanel getViewingComponent() {
+		return display;
 	}
 
 	public void setSceneRoot(SceneGraphComponent c) {
@@ -79,7 +79,7 @@ public class SunflowViewer implements Viewer {
 	public SceneGraphComponent getSceneRoot() {
 		return sceneRoot;
 	}
-
+	
 	public void render() {
 		SunflowRenderer sv =new SunflowRenderer();
 		sv.setOptions(options);
