@@ -72,15 +72,18 @@ public abstract class VertexShader {
     public void startGeometry(Geometry geom)
     {
         DataList colors=null;
+        
         vertexColors=
                 (geom instanceof PointSet)
           &&((colors=((PointSet)geom).getVertexAttributes(Attribute.COLORS))!=null
                   );
         //interpolateAlpha=vertexColors&&colors.getStorageModel().getDimensions()[1]!=3;
         interpolateAlpha=vertexColors&&colors.item(0).size()!=3;
-                
-        vertexColors |= (
-                          (geom instanceof IndexedFaceSet) && ((IndexedFaceSet)geom).getFaceAttributes(Attribute.COLORS)!=null);
+        
+        if((geom instanceof IndexedFaceSet) && (colors =  ((IndexedFaceSet)geom).getFaceAttributes(Attribute.COLORS))!=null) {
+            vertexColors |= true;
+            interpolateAlpha |= colors.item(0).size()!=3;
+        }
         //System.out.println(vertexColors+": colors: "+colors+" interpolate alpha: "+interpolateAlpha);
     }
     public boolean isVertexColors() {
