@@ -77,6 +77,7 @@ public class JRWindowManager implements ActionListener{
         windowList.get(windowNum).setCornerPos(newPoints);
       }
       public void pointDragEnd(PointDragEvent e) {
+        windowList.get(windowNum).updateFrameSize();
       }});   
     dragTool.addLineDragListener(new LineDragListener(){
       private int windowNum;
@@ -112,6 +113,7 @@ public class JRWindowManager implements ActionListener{
         windowList.get(windowNum).setCornerPos(newPoints);
         }
       public void lineDragEnd(LineDragEvent e) {
+        windowList.get(windowNum).updateFrameSize();
     }});    
     dragTool.addFaceDragListener(new FaceDragListener(){ 
       private int windowNum;
@@ -214,7 +216,12 @@ public class JRWindowManager implements ActionListener{
   public void pack(){
     for(JRWindow win : windowList)
       win.getFrame().pack();
-  }    
+  }  
+  public void validate(){
+    for(JRWindow win : windowList){
+      win.updateFrameSize();
+    }
+  }
   
   public void setBorderRadius(double r){
     defaultDesktopBorderRadius=r;

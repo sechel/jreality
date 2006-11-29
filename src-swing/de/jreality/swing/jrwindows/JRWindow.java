@@ -2,6 +2,7 @@ package de.jreality.swing.jrwindows;
 
 import java.awt.Color;
 import java.awt.event.ActionListener;
+
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -47,6 +48,8 @@ class JRWindow {
   private double decoBorderRadius=0.0033;
   private double translateFactor;
   
+  private double windowFrameFactor=200;
+  
   private double decoSize=0.08;
   private final double decoControlSizeFactor=4;
   private double decoControlSize;
@@ -76,6 +79,9 @@ class JRWindow {
     initSgc();
     initFrame();
     initDecoration();    
+    
+    windowSize=calculateWindowSize();
+    frameSize=setFrameSize(windowSize,windowFrameFactor);
   }  
   
   private void initSgc(){
@@ -100,7 +106,7 @@ class JRWindow {
     face.update();
     this.frameFace=face.getIndexedFaceSet();     
     frame=new JFakeFrame();
-    frame.setVisible(true);    
+    frame.setVisible(true);      
     frameSgc.addTool(frame.getTool());
     frameSgc.setAppearance(frame.getAppearance());  
     frameSgc.setGeometry(frameFace); 
@@ -232,8 +238,41 @@ class JRWindow {
     calculateDecoDragCorners(decoDragCorners,cornerPos);
     decoDragFace.setVertexAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(decoDragCorners));    
     borders.setVertexAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(cornerPos));    
+  }    
+  
+  double[] windowSize;
+  double[] frameSize;
+  
+  private double[] setFrameSize(double[] windowSize, double factor){
+    double[] frameSize=new double[2];
+    frameSize[0]=windowSize[0]*factor;
+    frameSize[1]=windowSize[1]*factor;
+    frame.setSize((int)frameSize[0],(int)frameSize[1]);
+    frame.validate();
+    return frameSize;
+  }
+  
+  protected void updateFrameSize(){     
+    double[] newWindowSize=calculateWindowSize();
+
+    double factorWidth=newWindowSize[0]/windowSize[0];
+    double factorHeight=newWindowSize[1]/windowSize[1];  
+    double frameWidth=frameSize[0]*factorWidth;
+    double frameHeight=frameSize[1]*factorHeight;
+    if(frameWidth<1) frameWidth=1;
+    if(frameHeight<1) frameHeight=1;    
     
-  }  
+    frame.setSize((int)frameWidth,(int)frameHeight); 
+    frame.validate();
+  }
+  
+  private double[] calculateWindowSize(){
+    double width=Rn.euclideanNorm(Rn.subtract(null,faceCorners[0],faceCorners[3]));
+    double height=Rn.euclideanNorm(Rn.subtract(null,faceCorners[0],faceCorners[1]));
+    return new double[] {width,height};
+  }
+  
+  
   double[] dirX;
   double[] dirY;
   private void preCalculateFaceCorners(){
