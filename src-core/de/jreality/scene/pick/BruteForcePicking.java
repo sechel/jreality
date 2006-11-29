@@ -159,25 +159,39 @@ class BruteForcePicking {
     boolean vec3 = point.getLength() == 3;
     double[] vertex1 = new double[3];
     double[] vertex2 = new double[3];
-    double[] vecRaw=vec3?null:new double[4];
+    double[] vecRaw1 = vec3?null:new double[4];
+    double[] vecRaw2 = vec3?null:new double[4];
+    //double[] vecRaw=vec3?null:new double[4];
 //    if(edge.getLength()>=2){
 //      points.getValueAt(edge.getValueAt(0)).toDoubleArray(vertex1);
 //      points.getValueAt(edge.getValueAt(1)).toDoubleArray(vertex2);
 //    }
     
     LinkedList MY_HITS = new LinkedList();
-    
+    DoubleArray edgeRadii = getRadii(ils);
     for(int i=0, m=edges.getLength();i<m;i++){
       edge = edges.getValueAt(i);
+      tubeRadius = edgeRadii==null?tubeRadius:edgeRadii.getValueAt(i);
       for(int j=0, n=edge.getLength()-1;j<n;j++){
         if (vec3) {
           points.getValueAt(edge.getValueAt(j)).toDoubleArray(vertex1);
           points.getValueAt(edge.getValueAt(j+1)).toDoubleArray(vertex2);
         } else {
-          points.getValueAt(edge.getValueAt(j)).toDoubleArray(vecRaw);
-          Pn.dehomogenize(vertex1, vecRaw);
-          points.getValueAt(edge.getValueAt(j+1)).toDoubleArray(vecRaw);
-          Pn.dehomogenize(vertex2, vecRaw);
+          points.getValueAt(edge.getValueAt(j)).toDoubleArray(vecRaw1);
+          points.getValueAt(edge.getValueAt(j+1)).toDoubleArray(vecRaw2);
+          if(vecRaw1[3]== 0) {
+              vecRaw1[0] = .99 *vecRaw1[0]+ .01*vecRaw2[0];
+              vecRaw1[1] = .99 *vecRaw1[1]+ .01*vecRaw2[1];
+              vecRaw1[2] = .99 *vecRaw1[2]+ .01*vecRaw2[2];
+              vecRaw1[3] = .99 *vecRaw1[3]+ .01*vecRaw2[3];
+          } else if(vecRaw2[3]== 0) {
+              vecRaw2[0] = .99 *vecRaw2[0]+ .01*vecRaw1[0];
+              vecRaw2[1] = .99 *vecRaw2[1]+ .01*vecRaw1[1];
+              vecRaw2[2] = .99 *vecRaw2[2]+ .01*vecRaw1[2];
+              vecRaw2[3] = .99 *vecRaw2[3]+ .01*vecRaw1[3];
+          }
+          Pn.dehomogenize(vertex1, vecRaw1);
+          Pn.dehomogenize(vertex2, vecRaw2);
         }
         intersectCylinder(MY_HITS,fromOb3,dirOb3,vertex1,vertex2,tubeRadius);
         for (Iterator it = MY_HITS.iterator(); it.hasNext(); ) {
@@ -196,6 +210,18 @@ class BruteForcePicking {
     DataList dl = ils.getVertexAttributes(Attribute.COORDINATES);
     if (dl == null) return null;
     return dl.toDoubleArrayArray();
+  }
+  
+  private static DoubleArray getRadii(PointSet ps) {
+      DataList dl = ps.getVertexAttributes(Attribute.RADII);
+      if (dl == null) return null;
+      return dl.toDoubleArray();
+  }
+  
+  private static DoubleArray getRadii(IndexedLineSet ls) {
+      DataList dl = ls.getEdgeAttributes(Attribute.RADII);
+      if (dl == null) return null;
+      return dl.toDoubleArray();
   }
   
   private static IntArrayArray getEdges(IndexedLineSet ils) {
@@ -240,7 +266,7 @@ class BruteForcePicking {
     double[] vertex = new double[3];
     
     LinkedList MY_HITS = new LinkedList();
-    
+    DoubleArray pointRadii = getRadii(ps);
     for (int j = 0, n=points.getLength(); j<n; j++) {
       if (!vec3) {
         points.getValueAt(j).toDoubleArray(vertexRaw);  
@@ -249,7 +275,7 @@ class BruteForcePicking {
       } else {
         points.getValueAt(j).toDoubleArray(vertex);  
       }
-      intersectSphere(MY_HITS, vertex, fromOb3, dirOb3, pointRadius);
+      intersectSphere(MY_HITS, vertex, fromOb3, dirOb3, pointRadii == null?pointRadius:pointRadii.getValueAt(j));
       for (Iterator i = MY_HITS.iterator(); i.hasNext(); ) {
         double[] hitPoint = (double[]) i.next();
         hitPoint = m.multiplyVector(hitPoint);
