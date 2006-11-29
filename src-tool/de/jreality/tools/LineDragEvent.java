@@ -11,15 +11,17 @@ public class LineDragEvent extends EventObject {
 
     private final int index;
     private final double[] translation;
+    private final double[] position;
 	private final IndexedLineSet lineSet;
 	private int[] lineIndices;
 	private double[][] lineVertices;
   
-	public LineDragEvent(IndexedLineSet lineSet, int index, double[] translation) {
+	public LineDragEvent(IndexedLineSet lineSet, int index, double[] translation,double[] position) {
 		super(lineSet);
     this.lineSet=lineSet;
     this.index=index;
     this.translation = (double[])translation.clone();
+    this.position  = (double[])position.clone();
     this.lineIndices = lineSet.getEdgeAttributes(Attribute.INDICES).toIntArrayArray().getValueAt(index).toIntArray(null);
 	this.lineVertices=new double[lineIndices.length][];
 	for(int i=0;i<lineIndices.length;i++)
@@ -44,6 +46,10 @@ public class LineDragEvent extends EventObject {
   public double[] getTranslation() {
     return (double[]) translation.clone();
   }
+  
+  public double[] getPosition() {
+      return (double[]) position.clone();
+    }
   
   public int getIndex() {
 	  return index;

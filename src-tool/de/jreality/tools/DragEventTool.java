@@ -90,7 +90,7 @@ public class DragEventTool extends AbstractTool {
       if(pickPointTemp.length==3) Pn.homogenize(pickPoint,pickPointTemp);
       else Pn.dehomogenize(pickPoint,pickPointTemp);
 	    MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint);	            
-	    fireLineDragStart(new double[]{0,0,0,1});        
+	    fireLineDragStart(new double[]{0,0,0,1},pickPoint);        
 	  }else if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_FACE) {
       if (faceDragListener == null) {
         active=false;
@@ -139,11 +139,11 @@ public class DragEventTool extends AbstractTool {
       Rn.times(translation3,factor,dir);
     }   
     double[] translation={translation3[0],translation3[1],translation3[2],1};
-    
+    double[] position = new double[4];
 	  if (pickType == PickResult.PICK_TYPE_POINT) {      
 	    firePointDragged(Rn.add(translation,translation,pickPoint));
 	  }else if (pickType == PickResult.PICK_TYPE_LINE) {
-	    fireLineDragged(translation);    	
+	    fireLineDragged(translation,Rn.add(position,translation,pickPoint));    	
 	  }else if (pickType == PickResult.PICK_TYPE_FACE) {
       fireFaceDragged(translation);	    	
 	  }
@@ -152,7 +152,7 @@ public class DragEventTool extends AbstractTool {
 	public void deactivate(ToolContext tc) {
 		  if (!active) return;   
 	      if (pickType == PickResult.PICK_TYPE_POINT) firePointDragEnd(new double[]{0,0,0,1});
-	      else if (pickType == PickResult.PICK_TYPE_LINE) fireLineDragEnd(new double[]{0,0,0,1});
+	      else if (pickType == PickResult.PICK_TYPE_LINE) fireLineDragEnd(new double[]{0,0,0,1},new double[]{0,0,0,1});
 	      else if (pickType == PickResult.PICK_TYPE_FACE) fireFaceDragEnd(new double[]{0,0,0,1});
 	      index=-1;
 	      pointSet=null;
@@ -195,17 +195,17 @@ public class DragEventTool extends AbstractTool {
         if (l != null) l.pointDragEnd(new PointDragEvent(pointSet, index, location));
     }
     
-	protected void fireLineDragStart(double[] translation) {
+	protected void fireLineDragStart(double[] translation, double[] position) {
 	    final LineDragListener l=lineDragListener;
-		if (l != null) l.lineDragStart(new LineDragEvent(lineSet, index, translation));
+		if (l != null) l.lineDragStart(new LineDragEvent(lineSet, index, translation, position));
 	}
-    protected void fireLineDragged(double[] translation) {
+    protected void fireLineDragged(double[] translation, double[] position) {
 		final LineDragListener l=lineDragListener;
-		if (l != null) l.lineDragged(new LineDragEvent(lineSet, index, translation));
+		if (l != null) l.lineDragged(new LineDragEvent(lineSet, index, translation,position));
 	}
-	protected void fireLineDragEnd(double[] translation) {
+	protected void fireLineDragEnd(double[] translation, double[] position) {
 		final LineDragListener l=lineDragListener;
-		if (l != null) l.lineDragEnd(new LineDragEvent(lineSet, index, translation));
+		if (l != null) l.lineDragEnd(new LineDragEvent(lineSet, index, translation, position));
 	}
 		   
 	protected void fireFaceDragStart(double[] translation) {
