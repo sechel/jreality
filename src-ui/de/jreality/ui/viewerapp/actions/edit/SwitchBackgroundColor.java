@@ -43,6 +43,7 @@ package de.jreality.ui.viewerapp.actions.edit;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 
+import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.ViewerApp;
@@ -68,34 +69,49 @@ public class SwitchBackgroundColor extends AbstractJrAction {
   /**
    * Sets the scene root's background color.
    * @param name name of the action
-   * @param colors array of colors with length = 1|4
    * @param sceneRoot the root of the scene graph
+   * @param colors list of colors with length = 1 or 4
    */
-  public SwitchBackgroundColor(String name, Color[] colors, SceneGraphComponent sceneRoot) {
+  public SwitchBackgroundColor(String name, SceneGraphComponent sceneRoot, Color... colors) {
     super(name);
+    
+    if (colors == null || (colors.length!=1 && colors.length!=4)) 
+      throw new IllegalArgumentException("illegal length of colors[]");
+    if (sceneRoot == null) 
+      throw new IllegalArgumentException("no scene root");
+    
     this.colors = colors;
     this.sceneRoot = sceneRoot;
+    
     setShortDescription("Set the viewer's background color");
   }
   
   /** @see SwitchBackgroundColor#SwitchBackgroundColor(String, Color[], SceneGraphComponent) */
-  public SwitchBackgroundColor(String name, Color[] colors, ViewerApp viewerApp) {
-    this(name, colors, viewerApp.getViewer().getSceneRoot());
+  public SwitchBackgroundColor(String name, ViewerApp viewerApp, Color... colors) {
+    this(name, viewerApp.getViewer().getSceneRoot(), colors);
   }
   
   /** @see SwitchBackgroundColor#SwitchBackgroundColor(String, Color[], SceneGraphComponent) */
-  public SwitchBackgroundColor(String name, Color[] colors, Viewer viewer) {
-    this(name, colors, viewer.getSceneRoot());
+  public SwitchBackgroundColor(String name, Viewer viewer, Color... colors) {
+    this(name, viewer.getSceneRoot(), colors);
   }
   
   
   @Override
   public void actionPerformed(ActionEvent e) {
-    if (sceneRoot.getAppearance() != null) {
-      if (colors.length == 1)
-        colors = new Color[]{colors[0], colors[0], colors[0], colors[0]};
-      sceneRoot.getAppearance().setAttribute("backgroundColors", colors);
+    if (sceneRoot.getAppearance() == null) 
+      sceneRoot.setAppearance(new Appearance());
+    
+    //trim colors[] if it contains the same 4 colors
+    if (colors.length == 4) {
+      boolean equal = true;
+      for (int i = 1; i < colors.length; i++)
+        if (colors[i] != colors[0]) equal = false;
+      if (equal) colors = new Color[]{ colors[0] };
     }
+    
+    sceneRoot.getAppearance().setAttribute("backgroundColor", (colors.length==1)? colors[0] : Appearance.INHERITED);
+    sceneRoot.getAppearance().setAttribute("backgroundColors", (colors.length==4)? colors : Appearance.INHERITED);
   }
   
 }
