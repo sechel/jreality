@@ -41,10 +41,14 @@
 package de.jreality.ui.viewerapp;
 
 import java.awt.Component;
+import java.util.HashMap;
+import java.util.LinkedList;
+
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTree;
 import javax.swing.border.Border;
 
@@ -54,17 +58,19 @@ import javax.swing.border.Border;
  */
 class UIFactory {
   
-  private Component viewer;
-  private Component beanShell;
-  private Component inspector;
-  private JTree sceneTree;
+  private Component viewer = null;
+  private Component beanShell = null;
+  private Component inspector = null;
+  private JTree sceneTree = null;
+  private LinkedList<Component> accessory = new LinkedList<Component>();
+  private HashMap<Component, String> accessoryTitles = new HashMap<Component, String>();
   private final Border emptyBorder = BorderFactory.createEmptyBorder();
   
   private boolean attachNavigator = false;  //default
   private boolean attachBeanShell = false;  //default
   
 
-  protected Component getViewer() {
+  protected Component getComponent() {
     if (!attachNavigator && !attachBeanShell)
       return viewer;
     
@@ -80,11 +86,29 @@ class UIFactory {
       right = jsp;
     }
     
-    if (attachNavigator) {
-      JSplitPane left = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-          scroll(sceneTree), scroll(inspector));
-      left.setContinuousLayout(true);
-      left.setResizeWeight(.1);
+    if (attachNavigator || !accessory.isEmpty()) {
+      Component left;
+      JTabbedPane jtb = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+      
+      if (attachNavigator) {  //create split pane for scene tree and inspector
+        JSplitPane navigator = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+            scroll(sceneTree), scroll(inspector));
+        navigator.setContinuousLayout(true);
+        navigator.setResizeWeight(.1);
+        if (accessory.isEmpty()) left = navigator;  //only add navigator
+        else {  //create tabbed pane
+          jtb.addTab("Navigator", navigator);
+          for (Component c : accessory) jtb.addTab(accessoryTitles.get(c), c);
+          left = jtb;
+        }
+      }
+      else {  //add single accessory or create tabbed pane
+        if (accessory.size() == 1) left = accessory.getFirst();
+        else {
+          for (Component c : accessory) jtb.addTab(accessoryTitles.get(c), c);
+          left = jtb;
+        }
+      }
       
       JSplitPane content = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, 
           left, right);
@@ -135,5 +159,16 @@ class UIFactory {
   protected void setAttachBeanShell(boolean b) {
     attachBeanShell = b;
   }
+  
+  
+  protected void addAccessory(Component c) {
+    addAccessory(c, null);
+  }
 
+  
+  protected void addAccessory(Component c, String title) {
+    accessory.add(c);
+    accessoryTitles.put(c, title);
+  }
+  
 }

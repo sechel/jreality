@@ -47,6 +47,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -130,6 +131,9 @@ public class ViewerApp {
 
   private boolean autoRender = true;
   private boolean synchRender = false;
+  
+  private LinkedList<Component> accessory = new LinkedList<Component>();
+  private HashMap<Component, String> accessoryTitles = new HashMap<Component, String>();
 
   
   /**
@@ -338,6 +342,10 @@ public class ViewerApp {
     uiFactory.setAttachNavigator(attachNavigator);
     uiFactory.setAttachBeanShell(attachBeanShell);
 
+    //add accessory
+    for (Component c : accessory) 
+      uiFactory.addAccessory(c, accessoryTitles.get(c));
+    
     //update menu (depends on attachNavigator/BeanShell, SelectionManager)
     menu.update();
   }
@@ -575,7 +583,7 @@ private Viewer createViewer(String viewer)
     if (uiFactory == null)
       throw new UnsupportedOperationException("No viewer instantiated, call update()!");
     
-    return uiFactory.getViewer();
+    return uiFactory.getComponent();
   }
   
    
@@ -652,6 +660,17 @@ private Viewer createViewer(String viewer)
     return selectionManager;
   }
 
+  
+  public void addAccessory(Component c) {
+    addAccessory(c, null);
+  }
+
+  
+  public void addAccessory(Component c, String title) {
+    accessory.add(c);
+    accessoryTitles.put(c, title);
+  }
+  
   
   public void dispose() {
     if (autoRender) {
