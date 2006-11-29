@@ -40,6 +40,7 @@
 
 package de.jreality.ui.viewerapp;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.beans.Beans;
@@ -669,6 +670,19 @@ private Viewer createViewer(String viewer)
   public void addAccessory(Component c, String title) {
     accessory.add(c);
     accessoryTitles.put(c, title);
+  }
+  
+  
+  /**
+   * Sets the scene root's background color.
+   * @param colors array of colors with length = 1 or 4
+   */
+  public void setBackgroundColor(Color[] colors) {
+    if (sceneRoot.getAppearance() == null)
+      sceneRoot.setAppearance(new Appearance());
+    if (colors.length == 1)
+      colors = new Color[]{colors[0], colors[0], colors[0], colors[0]};
+    sceneRoot.getAppearance().setAttribute("backgroundColors", colors);
   }
   
   

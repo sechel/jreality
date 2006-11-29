@@ -86,7 +86,7 @@ class UIFactory {
       right = jsp;
     }
     
-    if (attachNavigator || !accessory.isEmpty()) {
+    if (attachNavigator) {  //|| !accessory.isEmpty()
       Component left;
       JTabbedPane jtb = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
       
@@ -95,20 +95,13 @@ class UIFactory {
             scroll(sceneTree), scroll(inspector));
         navigator.setContinuousLayout(true);
         navigator.setResizeWeight(.1);
-        if (accessory.isEmpty()) left = navigator;  //only add navigator
-        else {  //create tabbed pane
-          jtb.addTab("Navigator", navigator);
-          for (Component c : accessory) jtb.addTab(accessoryTitles.get(c), c);
-          left = jtb;
-        }
+        jtb.addTab("Navigator", navigator);
       }
-      else {  //add single accessory or create tabbed pane
-        if (accessory.size() == 1) left = accessory.getFirst();
-        else {
-          for (Component c : accessory) jtb.addTab(accessoryTitles.get(c), c);
-          left = jtb;
-        }
-      }
+      for (Component c : accessory)  //add accessories 
+        jtb.addTab(accessoryTitles.get(c), scroll(c));
+      
+      left = jtb;
+      if (jtb.getTabCount() == 1) left = jtb.getComponentAt(0);
       
       JSplitPane content = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, 
           left, right);

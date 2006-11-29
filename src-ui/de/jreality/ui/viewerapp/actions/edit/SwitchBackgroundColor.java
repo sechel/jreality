@@ -78,10 +78,12 @@ public class SwitchBackgroundColor extends AbstractJrAction {
     setShortDescription("Set the viewer's background color");
   }
   
+  /** @see SwitchBackgroundColor#SwitchBackgroundColor(String, Color[], SceneGraphComponent) */
   public SwitchBackgroundColor(String name, Color[] colors, ViewerApp viewerApp) {
     this(name, colors, viewerApp.getViewer().getSceneRoot());
   }
   
+  /** @see SwitchBackgroundColor#SwitchBackgroundColor(String, Color[], SceneGraphComponent) */
   public SwitchBackgroundColor(String name, Color[] colors, Viewer viewer) {
     this(name, colors, viewer.getSceneRoot());
   }
