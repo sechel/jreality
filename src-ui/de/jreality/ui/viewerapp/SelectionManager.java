@@ -233,13 +233,28 @@ public class SelectionManager implements TransformationListener {
   }
   
 
+  /**
+   * Set the auxiliary root, which is used for holding the selection's bounding box.
+   * @param aux the auxiliary root or <code>null</code> 
+   * if an auxiliary root does not exist (e.g. software viewer)
+   */
   public void setAuxiliaryRoot(SceneGraphComponent aux) {
+    if (auxiliaryRoot != null && selectionKit != null &&
+        auxiliaryRoot.isDirectAncestor(selectionKit))
+      auxiliaryRoot.removeChild(selectionKit);
+    
     auxiliaryRoot = aux;
+    
     if (auxiliaryRoot != null && selectionKit != null) 
       auxiliaryRoot.addChild(selectionKit);
   }
 
 
+  /**
+   * Set the viewer which displays the corresponding scene 
+   * (used to force rendering of the bounding box).
+   * @param viewer the viewer
+   */
   public void setViewer(Viewer viewer) {
     this.viewer = viewer;
   }
