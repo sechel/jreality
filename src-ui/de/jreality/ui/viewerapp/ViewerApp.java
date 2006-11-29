@@ -203,7 +203,13 @@ public class ViewerApp {
     
     frame = new JFrame();
     selectionManager = new SelectionManager(jrScene.getPath("emptyPickPath")); //default selection = scene node
-    selectionManager.setAuxiliaryRoot(viewerSwitch.getAuxiliaryRoot());
+    
+    try {
+    	selectionManager.setAuxiliaryRoot(viewerSwitch.getAuxiliaryRoot());
+    } catch (Exception e) {
+    	e.printStackTrace();
+    }
+    
     selectionManager.setViewer(viewerSwitch);  //used to force rendering
     menu = new ViewerAppMenu(this);  //uses frame, viewerSwitch, selectionManager and viewerApp itself
   }
