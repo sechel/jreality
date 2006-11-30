@@ -6,6 +6,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import org.sunflow.SunflowAPI;
 import org.sunflow.core.Display;
@@ -31,8 +32,14 @@ public class RenderDisplay implements Display {
 			frame.addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosing(WindowEvent e) {
-					
-					imagePanel.cancel();
+					if (JOptionPane.showConfirmDialog(
+							frame,
+							"Do you want to continue rendering in background?",
+							"Sunflow",
+							JOptionPane.YES_NO_OPTION
+					) == JOptionPane.NO_OPTION) {
+						imagePanel.cancel();
+					}
 				}
 			});
 			imagePanel = new CancelableImagePanel();

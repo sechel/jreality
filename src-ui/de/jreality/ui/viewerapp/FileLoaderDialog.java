@@ -76,7 +76,7 @@ public class FileLoaderDialog {
   }
 
   
-  public static JFileChooser createFileChooser(boolean useAcceptAllFileFilter, FileFilter... ff) {
+  public static JFileChooser createFileChooser(boolean useAcceptAllFileFilter, javax.swing.filechooser.FileFilter... ff) {
     FileSystemView view = FileSystemView.getFileSystemView();
     JFileChooser chooser = new JFileChooser(!lastDir.exists() ? view.getHomeDirectory() : lastDir, view);
     
@@ -186,11 +186,11 @@ public class FileLoaderDialog {
       return selectTargetFile(parent, chooser, accessory);
   }
   
-  public static File selectTargetFile(Component parent, boolean useAcceptAllFileFilter, FileFilter... ff) {
+  public static File selectTargetFile(Component parent, boolean useAcceptAllFileFilter, javax.swing.filechooser.FileFilter... ff) {
     return selectTargetFile(parent, (JComponent)null, useAcceptAllFileFilter, ff);
   }
   
-  public static File selectTargetFile(Component parent, JComponent accessory, boolean useAcceptAllFileFilter, FileFilter... ff) {
+  public static File selectTargetFile(Component parent, JComponent accessory, boolean useAcceptAllFileFilter, javax.swing.filechooser.FileFilter... ff) {
     JFileChooser chooser = createFileChooser(useAcceptAllFileFilter, ff);
     return selectTargetFile(parent, chooser, accessory);
   }

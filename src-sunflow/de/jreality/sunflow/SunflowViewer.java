@@ -42,17 +42,10 @@ package de.jreality.sunflow;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.io.IOException;
-
-import javax.swing.JFrame;
-
-import org.sunflow.system.ImagePanel;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.vr.ViewerVR;
 
 /**
  * 
@@ -68,7 +61,7 @@ public class SunflowViewer implements Viewer {
 	private int height;
 	private RenderOptions options;
 
-	public ImagePanel getViewingComponent() {
+	public CancelableImagePanel getViewingComponent() {
 		return display;
 	}
 
@@ -153,7 +146,7 @@ public class SunflowViewer implements Viewer {
 	public void renderAsync() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	public RenderOptions getOptions() {
 		return options;
 	}
@@ -165,37 +158,4 @@ public class SunflowViewer implements Viewer {
 	public void cancel() {
 		display.cancel();
 	}
-	
-	public static void main(String[] args) throws IOException {
-		ViewerVR vr = new ViewerVR();
-		final String[][] examples = new String[][] {
-				{ "Boy surface", "jrs/boy.jrs" },
-				{ "Chen-Gackstatter surface", "obj/Chen-Gackstatter-4.obj" },
-				{ "helicoid with 2 handles", "jrs/He2WithBoundary.jrs" },
-				{ "tetranoid", "jrs/tetranoid.jrs" },
-				{ "Wente torus", "jrs/wente.jrs" },
-				{ "Schwarz P", "jrs/schwarz.jrs" },
-				{ "Matheon baer", "jrs/baer.jrs" }
-		};
-		vr.addLoadTab(examples);
-		vr.addAlignTab();
-		vr.addAppTab();
-		vr.addEnvTab();
-		vr.addToolTab();
-		vr.addTexTab();
-		//vr.addHelpTab();
-		vr.addLightTab();
-		vr.setGeneratePickTrees(true);
-		vr.showPanel(false);
-		ViewerApp vApp = vr.display();
-		vApp.getMenu().addMenu(new SunflowMenu(vApp));
-		vApp.update();
-		
-		JFrame f = vApp.display();
-		f.setSize(800, 600);
-		f.validate();
-		JFrame external = vr.getExternalFrame();
-		external.setLocationRelativeTo(f);
-	}
-
 }

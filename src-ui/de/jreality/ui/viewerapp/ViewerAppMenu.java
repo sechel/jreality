@@ -46,6 +46,7 @@ import java.awt.event.KeyEvent;
 import java.beans.Beans;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
@@ -84,6 +85,7 @@ import de.jreality.ui.viewerapp.actions.view.ToggleMenu;
 import de.jreality.ui.viewerapp.actions.view.ToggleNavigator;
 import de.jreality.ui.viewerapp.actions.view.ToggleViewerFullScreen;
 import de.jreality.ui.viewerapp.actions.view.ViewerAspect4To3;
+import de.jreality.util.LoggingSystem;
 
 
 /**
@@ -186,10 +188,14 @@ public class ViewerAppMenu {
     
     JMenu export = new JMenu(EXPORT);
     fileMenu.add(export);
+    try {
+    	export.add(new SunflowMenu(viewerApp));
+    } catch (Exception e) {
+    	LoggingSystem.getLogger(this).log(Level.CONFIG, "no sunflow", e);
+    }
     export.add(new JMenuItem(new ExportRIB("RIB", viewerSwitch, frame)));
     export.add(new JMenuItem(new ExportSVG("SVG", viewerSwitch, frame)));
     export.add(new JMenuItem(new ExportPS("PS", viewerSwitch, frame)));
-    //export.add(new JMenuItem(new ExportSunflow("Sunflow", viewerSwitch, frame)));
     exportImageAction = new ExportImage("Image", viewerSwitch, frame);
     export.add(new JMenuItem(exportImageAction));
     
