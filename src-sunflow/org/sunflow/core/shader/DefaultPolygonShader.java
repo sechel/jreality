@@ -1,7 +1,5 @@
 package org.sunflow.core.shader;
 
-import java.util.Arrays;
-
 import org.sunflow.SunflowAPI;
 import org.sunflow.core.ParameterList;
 import org.sunflow.core.Ray;
