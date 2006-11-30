@@ -83,6 +83,7 @@ import de.jreality.ui.viewerapp.actions.view.ToggleFullScreen;
 import de.jreality.ui.viewerapp.actions.view.ToggleMenu;
 import de.jreality.ui.viewerapp.actions.view.ToggleNavigator;
 import de.jreality.ui.viewerapp.actions.view.ToggleViewerFullScreen;
+import de.jreality.ui.viewerapp.actions.view.ViewerAspect4To3;
 
 
 /**
@@ -134,6 +135,7 @@ public class ViewerAppMenu {
   public static String TOGGLE_RENDER_SELECTION = "Show selection";
   public static String TOGGLE_FULL_VIEWER = "Toggle viewer full screen";
   public static String TOGGLE_FULL_SCREEN = "Toggle full screen";
+  public static String VIEWER_ASPECT_4_TO_3 ="Viewer aspect ratio 4:3";
   public static String RENDER = "Force Rendering";
   
   private JFrame frame = null;
@@ -270,6 +272,7 @@ public class ViewerAppMenu {
     viewMenu.addSeparator();
     viewMenu.add(new JMenuItem(new ToggleMenu(TOGGLE_MENU, menuBar)));
     viewMenu.addSeparator();
+    viewMenu.add(new JMenuItem(ViewerAspect4To3.sharedInstance(VIEWER_ASPECT_4_TO_3, viewerApp)));
     viewMenu.add(new JMenuItem(ToggleViewerFullScreen.sharedInstance(TOGGLE_FULL_VIEWER, viewerApp)));
     viewMenu.add(new JMenuItem(ToggleFullScreen.sharedInstance(TOGGLE_FULL_SCREEN, frame)));      
     viewMenu.addSeparator();
