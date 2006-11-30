@@ -63,7 +63,7 @@
   <path id="sunflow.classpath">
     <path refid="backend.classpath"/>
     <fileset dir="dist">
-        <include name="jReality-soft-new.jar"/>
+        <include name="jReality-soft.jar"/>
     </fileset>
     <fileset dir="lib">
         <include name="sunflow.jar"/>
@@ -448,7 +448,7 @@
     </javadoc>
   </target>
 	
-  <target name="dist" depends="core,io,jogl,soft,renderman,portal,gpgpu,examples" description="generate the distribution">
+  <target name="dist" depends="core,io,jogl,soft,renderman,portal,gpgpu,examples,sunflow" description="generate the distribution">
   </target>
 
   <target name="release" depends="release-jar, release-src, release-javadoc, release-3rdparty, release-tutorial" description="generate a big jar that contains all classes needed for the tutorial">
@@ -465,6 +465,7 @@
 	      
 	      <fileset dir="${build}/soft" />
 	      <fileset dir="${build}/renderman" />
+	      <fileset dir="${build}/sunflow" />
 	      <fileset dir="${build}/jogl" />
 	    	
 	      <fileset dir="${build}/proxies" />
@@ -495,6 +496,7 @@
 	  		<fileset dir="${soft}" />
 	  		<fileset dir="${soft-new}" />
 	        <fileset dir="${renderman}" />
+	        <fileset dir="${sunflow}" />
 	        <fileset dir="${jogl}" />
 
 	  		<fileset dir="${proxies}" />
@@ -543,6 +545,7 @@
 	  	<copy file="${lib}/smrj.jar" todir="release/tmp/lib" />
 	  	<copy file="${lib}/xstream-1.2.jar" todir="release/tmp/lib" />
 	  	<copy file="${lib}/xpp3-1.1.3.4.O.jar" todir="release/tmp/lib" />
+	  	<copy file="${lib}/sunflow.jar" todir="release/tmp/lib" />
 	  	<copy todir="release/tmp/lib">
 	  		<fileset dir="3rd-party" />
 	  	</copy>
