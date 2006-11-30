@@ -42,10 +42,7 @@ package de.jreality.ui.viewerapp.actions.view;
 
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.util.HashMap;
-
-import javax.swing.KeyStroke;
 
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
@@ -69,7 +66,7 @@ public class ToggleFullScreen extends AbstractJrAction {
     this.frame = frame;
     
     setShortDescription("Toggle full screen");
-    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0));
+//    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0));
   }
 
   
