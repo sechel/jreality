@@ -47,7 +47,7 @@ import de.jreality.scene.event.TransformationEventMulticaster;
 import de.jreality.scene.event.TransformationListener;
 /**
  * A simple transformation class which wraps a 4x4 real matrix. Access is read-only.
- * When contained as a field in an instance of {@link de.jreality.scene.SceneGraphComponent},
+ * When contained as a field in an instance of {@link SceneGraphComponent},
  * this transformation is applied to any geometry contained in the component as well as 
  * to all children.
  * <p>
@@ -59,7 +59,7 @@ import de.jreality.scene.event.TransformationListener;
  * For other support, see {@link de.jreality.util.DefaultMatrixSupport}.
  * @author Charles Gunn, Steffen Weissman
  */
-public class Transformation extends SceneGraphNode implements Cloneable {
+public class Transformation extends SceneGraphNode {
 
   private transient TransformationListener transformationListener;
   
@@ -96,6 +96,7 @@ public class Transformation extends SceneGraphNode implements Cloneable {
 	/**
 	 * A copy constructor.
 	 * @param t
+	 * @deprecated use <code>new Transformation(oldTrafo.getMatrix())</code> instead
 	 */
 	public Transformation(Transformation t)	{
 		this(t.theMatrix);
