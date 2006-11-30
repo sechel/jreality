@@ -45,6 +45,7 @@ import java.io.File;
 
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileSystemView;
 
 import de.jreality.reader.Readers;
@@ -133,19 +134,36 @@ public class FileLoaderDialog {
   private static File selectTargetFile(Component parent, JFileChooser chooser, JComponent accessory) {
     if (accessory != null) chooser.setAccessory(accessory);
     chooser.setMultiSelectionEnabled(false);
-    chooser.showSaveDialog(parent);
-    lastDir = chooser.getCurrentDirectory();
-    File file = chooser.getSelectedFile();
     
-    //append preferred extension of used file filter if existing and user did not specify one
-    try {
-      FileFilter filter = (FileFilter) chooser.getFileFilter();
-      if (!filter.accept(file)) {  //invalid extension
-        String extension = filter.getPreferredExtension();
-        if (extension != null) file = new File(file.getPath()+"."+extension);
-      }
-    } catch (Exception e) {}
-   
+    //get target file and let user confirm an overwriting
+    File file = null;
+    while (true) {
+      int choice = chooser.showSaveDialog(parent);
+      if (choice == JFileChooser.APPROVE_OPTION) {
+        File chosen = chooser.getSelectedFile();
+        try {  //append preferred extension of used file filter if existing and user did not specify one
+          FileFilter filter = (FileFilter) chooser.getFileFilter();
+          if (!filter.accept(chosen)) {  //invalid extension
+            String extension = filter.getPreferredExtension();
+            if (extension != null) chosen = new File(chosen.getPath()+"."+extension);
+          }
+        } catch (Exception e) {}
+        
+        if (!chosen.exists()) {
+          file = chosen; break;
+        } 
+        else {  //file exists
+          int confirm = JOptionPane.showConfirmDialog(parent, "Overwrite file "+chosen.getName()+"?");
+          if (confirm == JOptionPane.OK_OPTION) {
+            file = chosen; break;
+          } 
+          else if (confirm == JOptionPane.NO_OPTION) continue;
+          break;  //confirm == CANCEL_OPTION
+        }
+      } else break;  //choice == CANCEL_OPTION
+    }
+    lastDir = chooser.getCurrentDirectory();
+    
     return file;
   }
   
