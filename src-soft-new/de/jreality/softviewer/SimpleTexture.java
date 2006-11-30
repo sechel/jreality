@@ -86,7 +86,8 @@ public class SimpleTexture implements Texture {
       this.clampU = texture.getRepeatS()==Texture2D.CLAMP;
       this.clampV = texture.getRepeatT()==Texture2D.CLAMP;
       incr =3*width*height== bytes.length?3:4;
-      interpolate =(texture.getMinFilter()==Texture2D.GL_LINEAR);
+      int minFilter = texture.getMinFilter();
+      interpolate =(minFilter==Texture2D.GL_LINEAR || minFilter==Texture2D.GL_LINEAR_MIPMAP_LINEAR);
       transparent = incr ==4;
   }
 
