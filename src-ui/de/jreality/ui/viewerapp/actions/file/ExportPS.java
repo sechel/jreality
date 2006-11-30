@@ -72,7 +72,6 @@ public class ExportPS extends AbstractJrAction {
     super(name);
     this.frame = frame;
     setShortDescription("Export the current scene as PostScript file");
-    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK));
     
     if (viewer == null)
       throw new IllegalArgumentException("Viewer is null!");

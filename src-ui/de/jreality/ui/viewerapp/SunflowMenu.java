@@ -2,15 +2,19 @@ package de.jreality.ui.viewerapp;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.beans.Statement;
 import java.io.File;
 import java.util.Collections;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JTabbedPane;
+import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
@@ -73,11 +77,16 @@ public class SunflowMenu extends JMenu {
 		settingsFrame.add(tabs);
 		settingsFrame.pack();
 
-		add(new AbstractAction("preview") {
+		Action previewAction = new AbstractAction("preview") {
 			public void actionPerformed(ActionEvent arg0) {
 				render(va.getViewer(), va.getViewer().getViewingComponentSize(), getRenderSameOptions());
 			}
-		});
+		};
+		previewAction.putValue(
+				Action.ACCELERATOR_KEY,
+				KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK)
+		);
+		add(previewAction);
 		
 		add(new AbstractAction("thumb") {
 			public void actionPerformed(ActionEvent arg0) {
