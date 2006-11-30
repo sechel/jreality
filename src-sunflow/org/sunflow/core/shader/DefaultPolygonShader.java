@@ -51,7 +51,7 @@ public class DefaultPolygonShader implements Shader {
         Color ret = state.diffuse(d);
         
         if (state.includeSpecular()) {
-        	Color spec = state.specularPhong(convert(dps.getSpecularColor(), dps.getSpecularCoefficient()), dps.getSpecularExponent().floatValue(), 4);
+        	Color spec = state.specularPhong(convert(dps.getSpecularColor(), dps.getSpecularCoefficient()), dps.getSpecularExponent().floatValue(), 0);
         	ret.add(spec);
         }
         
