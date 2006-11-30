@@ -105,7 +105,7 @@ public class DefUseData {
 		defUseNode.addChild(c);
 		givenState.currNode.addChild(defUseNode);
 		if (givenState.trafo==null) return;
-		defUseNode.setTransformation(new Transformation(givenState.trafo));
+		defUseNode.setTransformation(new Transformation(givenState.trafo.getMatrix()));
 	}
 	private static void useMaterial(State givenState,State defState){
 		State s=new State(defState);
@@ -127,7 +127,7 @@ public class DefUseData {
 		State s=new State(defState);
 		if (defState.trafo==null) return;
 		if (givenState.trafo==null)
-			givenState.trafo= new Transformation(defState.trafo);
+			givenState.trafo= new Transformation(defState.trafo.getMatrix());
 		else 
 		givenState.trafo.multiplyOnRight(
 				new State(defState).trafo.getMatrix());	
