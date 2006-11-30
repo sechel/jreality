@@ -640,7 +640,7 @@ public class ViewerVR {
 		flat = landscape.isTerrainFlat();
 		terrainNode.setGeometry(flat ? flatTerrain : terrain);
 		//if (last != terrainNode.getGeometry()) computeShadow();
-		
+		terrainAppearance.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, flat);
 		updateSkyBox();
 		
 		ImageData terrainTex = landscape.getTerrainTexture();
