@@ -53,6 +53,16 @@ package de.jreality.scene;
  */
 public class ClippingPlane extends Geometry {
 
+	  private static int UNNAMED_ID;
+
+	  public ClippingPlane(String name) {
+	    super(name);
+	  }
+	  
+	  public ClippingPlane() {
+		  this("clippingPlane "+(UNNAMED_ID++));
+	  }
+
     public void accept(SceneGraphVisitor v) {
         v.visit(this);
     }

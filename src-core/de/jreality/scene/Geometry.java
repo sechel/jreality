@@ -83,6 +83,10 @@ public abstract class Geometry extends SceneGraphNode {
   protected transient Set<Attribute> changedFaceAttributes=new HashSet<Attribute>();
   protected transient Map<String,DataListSet> geometryAttributeCategory=new HashMap<String,DataListSet>();
   
+  public Geometry(String name) {
+    super(name);
+  }
+    
   /**
    * Returns a read-only view to all currently defined geometry attributes.
    * You can copy all currently defined geometry attributes to another

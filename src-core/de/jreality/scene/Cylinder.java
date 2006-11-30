@@ -37,7 +37,6 @@
  *
  */
 
-
 package de.jreality.scene;
 
 /**
@@ -47,15 +46,27 @@ package de.jreality.scene;
  * TODO: Resolve the fact that backends differ on whether it is a closed or an open cylinder.
  * 
  */
-public class Cylinder extends Geometry
-{
-  public void accept(SceneGraphVisitor v) {
-    v.visit(this);
-  }
-  static void superAccept(Cylinder u, SceneGraphVisitor v) {
-    u.superAccept(v);
-  }
-  private void superAccept(SceneGraphVisitor v) {
-    super.accept(v);
-  }
+public class Cylinder extends Geometry {
+
+	private static int UNNAMED_ID;
+
+	public Cylinder(String name) {
+		super(name);
+	}
+
+	public Cylinder() {
+		this("cylinder " + (UNNAMED_ID++));
+	}
+
+	public void accept(SceneGraphVisitor v) {
+		v.visit(this);
+	}
+
+	static void superAccept(Cylinder u, SceneGraphVisitor v) {
+		u.superAccept(v);
+	}
+
+	private void superAccept(SceneGraphVisitor v) {
+		super.accept(v);
+	}
 }

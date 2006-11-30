@@ -37,23 +37,32 @@
  *
  */
 
-
 package de.jreality.scene;
-
 
 /**
  * Sphere cented at (0, 0, 0) with radius 1. Use scene graph transformations to
  * change size and position.
  */
-public class Sphere extends Geometry
-{
-  public void accept(SceneGraphVisitor v) {
-    v.visit(this);
-  }
-  static void superAccept(Sphere u, SceneGraphVisitor v) {
-    u.superAccept(v);
-  }
-  private void superAccept(SceneGraphVisitor v) {
-    super.accept(v);
-  }
+public class Sphere extends Geometry {
+	private static int UNNAMED_ID;
+
+	public Sphere(String name) {
+		super(name);
+	}
+
+	public Sphere() {
+		this("sphere " + (UNNAMED_ID++));
+	}
+
+	public void accept(SceneGraphVisitor v) {
+		v.visit(this);
+	}
+
+	static void superAccept(Sphere u, SceneGraphVisitor v) {
+		u.superAccept(v);
+	}
+
+	private void superAccept(SceneGraphVisitor v) {
+		super.accept(v);
+	}
 }

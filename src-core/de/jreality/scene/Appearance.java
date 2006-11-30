@@ -80,6 +80,16 @@ public class Appearance extends SceneGraphNode
   
   private transient HashMap<String, Object> changedAttributes=new HashMap<String, Object>();
   
+  private static int UNNAMED_ID;
+
+  public Appearance(String name) {
+	  super(name);
+  }
+  
+  public Appearance() {
+	  super("app "+(UNNAMED_ID++));
+  }
+  
   public Object getAttribute(String key)
   {
     startReader();

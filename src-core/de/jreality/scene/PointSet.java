@@ -40,8 +40,6 @@
 
 package de.jreality.scene;
 
-import java.util.Collections;
-
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
@@ -58,7 +56,9 @@ import de.jreality.scene.data.DataListSet;
  */
 public class PointSet extends Geometry //implements GeometryListener
 {
-  protected DataListSet vertexAttributes;
+protected DataListSet vertexAttributes;
+  
+  private static int UNNAMED_ID;
   
   public PointSet()
   {
@@ -67,7 +67,17 @@ public class PointSet extends Geometry //implements GeometryListener
 
   public PointSet(int numPoints)
   {
-	super();
+	this("point-set "+(UNNAMED_ID), numPoints);
+ }
+
+  public PointSet(String name)
+  {
+	this(name, 0);
+  }
+
+  public PointSet(String name, int numPoints)
+  {
+	super(name);
 	vertexAttributes= new DataListSet(numPoints);
 	geometryAttributeCategory.put( Geometry.CATEGORY_VERTEX, vertexAttributes );
  }

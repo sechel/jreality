@@ -67,18 +67,28 @@ public class Transformation extends SceneGraphNode implements Cloneable {
   
   private transient boolean matrixChanged;
 
+  private static int UNNAMED_ID;
+  
 	/**
 	 * Generate a new transform with given matrix
 	 * If <i>m</i> is null, use identity matrix.  
 	 * @param signature		See {@link Pn}.
 	 * @param m
 	 */
-	public Transformation(double[] m) {
+	public Transformation(String name, double[] m) {
+		super(name);
 		if (m == null)	theMatrix = Rn.identityMatrix(4);
 		else theMatrix = (double[]) m.clone();
 	}
 	
+	public Transformation(double[] matrix) {
+		this("trafo "+(UNNAMED_ID++), matrix);
+	}
 	
+	public Transformation(String name) {
+		this(name, null);
+	}
+
 	public Transformation()	{
 		this((double[]) null);
 	}

@@ -87,6 +87,17 @@ public class SceneGraphComponent extends SceneGraphNode {
   
   private transient List<SceneEvent> cachedEvents=new LinkedList<SceneEvent>();
 
+	private static int UNNAMED_ID;
+
+	public SceneGraphComponent(String name) {
+		super(name);
+	}
+
+	public SceneGraphComponent() {
+		this("sgc " + (UNNAMED_ID++));
+	}
+
+
   public List getChildNodes() {
     startReader();
     try {

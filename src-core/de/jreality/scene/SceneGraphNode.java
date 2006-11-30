@@ -59,7 +59,6 @@ import de.jreality.util.LoggingSystem;
  * of any change in state of the node.  See the specific subclasses for details.
  */
 public class SceneGraphNode {
-  private static int UNNAMED_ID;
   /** PENDING: <b>work in progress</b>, the lock for this component,
    * subclasses should always use try{}finally{} statements when
    * executing guarded code.
@@ -69,6 +68,10 @@ public class SceneGraphNode {
   private boolean readOnly;
   private String  name;
     
+  public SceneGraphNode(String name) {
+	  this.name=name;
+  }
+  
   /**
    * Returns the readOnly flag
    * @return boolean
@@ -99,7 +102,7 @@ public class SceneGraphNode {
   public String getName() {
     nodeLock.readLock();
     try {
-      return name!=null? name: (name="Unnamed "+(UNNAMED_ID++));
+      return name;
     } finally {
       nodeLock.readUnlock();
     }

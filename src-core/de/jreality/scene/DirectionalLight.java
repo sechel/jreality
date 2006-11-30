@@ -51,6 +51,16 @@ package de.jreality.scene;
  */
 public class DirectionalLight extends Light {
 
+	private static int UNNAMED_ID;
+	
+	public DirectionalLight(String name) {
+		super(name);
+	}
+	
+	public DirectionalLight() {
+		this("dir-light " + (UNNAMED_ID++));
+	}
+
   public void accept(SceneGraphVisitor v) {
     v.visit(this);
   }

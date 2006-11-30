@@ -56,16 +56,25 @@ import de.jreality.scene.data.DataListSet;
  *
  */
 public class IndexedFaceSet extends IndexedLineSet {
+  private static int UNNAMED_ID;
   protected DataListSet faceAttributes;
 
   public IndexedFaceSet(int numVertices, int numFaces) {
-    super(numVertices);
+    this("face-set "+(UNNAMED_ID++), numVertices, numFaces);
+  }
+  
+  public IndexedFaceSet(String name, int numVertices, int numFaces) {
+    super(name, numVertices);
     faceAttributes= new DataListSet(numFaces);
     geometryAttributeCategory.put( Geometry.CATEGORY_FACE, faceAttributes );
   }
 
   public IndexedFaceSet() {
-	  this(0,0);
+	  this("face-set "+(UNNAMED_ID++));
+  }
+
+  public IndexedFaceSet(String name) {
+	  this(name,0,0);
   }
 
   public int getNumFaces() {

@@ -54,6 +54,16 @@ package de.jreality.scene;
  */
 public class SpotLight extends PointLight {
 
+	private static int UNNAMED_ID;
+	
+	public SpotLight() {
+		super("spot-light "+(UNNAMED_ID++));
+	}
+	
+	public SpotLight(String name) {
+		super(name);
+	}
+
     private double coneAngle = Math.PI / 6;
     private double coneDeltaAngle = coneAngle / 3.;
     private double distribution = 2;

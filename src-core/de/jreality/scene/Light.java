@@ -65,8 +65,12 @@ public abstract class Light extends SceneGraphNode {
   private Color color= new Color(1f, 1f, 1f);
   private double intensity = 0.75;
   private boolean global =true;
-private boolean ambientFake;
+  private boolean ambientFake;
 
+	public Light(String name) {
+		super(name);
+	}
+	
 	public Color getColor() {
     startReader();
     try {

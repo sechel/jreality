@@ -116,15 +116,21 @@ public class Camera extends SceneGraphNode {
 	
   private CameraListener cameraListener;
 
+  private static int UNNAMED_ID;
 
-	public Camera() {
-		super();
-		near = .5;
-		far = 50.0;
-		fieldOfView = Math.toRadians(60.0);
-		focus = 3.0;
-	}
-	
+  public Camera(String name) {
+    super(name);
+	near = .5;
+	far = 50.0;
+	fieldOfView = Math.toRadians(60.0);
+	focus = 3.0;
+  }
+  
+  public Camera() {
+	  this("camera "+(UNNAMED_ID++));
+  }
+
+
 	public double getNear() {
 		return near;
 	}

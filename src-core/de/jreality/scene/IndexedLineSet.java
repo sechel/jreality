@@ -57,19 +57,37 @@ import de.jreality.scene.data.DataListSet;
  */
 public class IndexedLineSet extends PointSet
 {
+  private static int UNNAMED_ID;
   protected DataListSet edgeAttributes;
 
   public IndexedLineSet()
   {
-    this(0, 0);
+    this("line-set ["+(UNNAMED_ID++)+"]");
   }
+  
+  public IndexedLineSet(String name)
+  {
+    this(name, 0, 0);
+  }
+  
   public IndexedLineSet(int numPoints)
   {
-    this(numPoints, 0);
+    this("line-set "+(UNNAMED_ID++), numPoints);
   }
+  
+  public IndexedLineSet(String name, int numPoints)
+  {
+    this(name, numPoints, 0);
+  }
+
   public IndexedLineSet(int numPoints, int numEdges)
   {
-    super(numPoints);
+    this("line-set "+(UNNAMED_ID++), numPoints, numEdges);
+  }
+
+  public IndexedLineSet(String name, int numPoints, int numEdges)
+  {
+    super(name, numPoints);
     edgeAttributes=new DataListSet(numEdges);
     geometryAttributeCategory.put( Geometry.CATEGORY_EDGE, edgeAttributes );
   }

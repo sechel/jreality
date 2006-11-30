@@ -68,6 +68,16 @@ public class PointLight extends Light {
 	private int shadowMapX = 512;
 	private int shadowMapY = 512;
 
+	private static int UNNAMED_ID;
+	
+	public PointLight() {
+		super("point-light "+(UNNAMED_ID++));
+	}
+	
+	public PointLight(String name) {
+		super(name);
+	}
+	
   public double getFalloffA0() {
     startReader();
     try {
