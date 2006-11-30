@@ -40,28 +40,22 @@
 
 package de.jreality.ui.viewerapp.actions.view;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.util.HashMap;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.KeyStroke;
 
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
 /**
- * Toggles full screen of the ViewerApp's viewer component (where the scene is displayed).<br>
+ * Sets the viewer aspect ratio to 4:3.<br>
  * There is only one instance of this action.
  * 
- * @author msommer
+ * @author pinkall
  */
 @SuppressWarnings("serial")
 public class ViewerAspect4To3 extends AbstractJrAction {
