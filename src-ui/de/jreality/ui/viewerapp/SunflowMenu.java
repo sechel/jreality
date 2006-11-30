@@ -57,7 +57,7 @@ public class SunflowMenu extends JMenu {
 					return Class.forName("de.jreality.sunflow.Sunflow");
 				}
 			});
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			throw new RuntimeException("sunflow init failed", e); 
 		}
 		
