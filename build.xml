@@ -11,9 +11,10 @@
   <property name="ui" location="src-ui" />
 
   <!-- backends (dependencies from top to bottom) -->
-	  <property name="soft" location="src-soft" />
-	  <property name="soft-new" location="src-soft-new" />
+  <property name="soft" location="src-soft" />
+  <property name="soft-new" location="src-soft-new" />
   <property name="renderman" location="src-renderman" />
+  <property name="sunflow" location="src-sunflow" />
   <property name="jogl" location="src-jogl" />
   <property name="gpgpu" location="src-gpgpu" />
   <property name="portal" location="src-portal" />
@@ -56,6 +57,16 @@
     <path refid="backends-share.classpath"/>
     <fileset dir="dist">
         <include name="jReality-backends-share.jar"/>
+    </fileset>
+  </path>
+
+  <path id="sunflow.classpath">
+    <path refid="backend.classpath"/>
+    <fileset dir="dist">
+        <include name="jReality-soft-new.jar"/>
+    </fileset>
+    <fileset dir="lib">
+        <include name="sunflow.jar"/>
     </fileset>
   </path>
 
@@ -382,13 +393,26 @@
     <jar jarfile="${dist}/jReality-swt.jar" basedir="${build}/swt" />
   </target>
 
-  <target name="renderman" depends="core,soft" description="build renderman backend">
+  <target name="renderman" depends="core" description="build renderman backend">
     <mkdir dir="${build}/renderman" />
     <javac excludesfile="excludes.txt" srcdir="${renderman}" destdir="${build}/renderman" debug="true">
       <compilerarg line="-source 1.5"/>
       <classpath refid="backend.classpath"/>
     </javac>
     <jar jarfile="${dist}/jReality-renderman.jar" basedir="${build}/renderman" />
+  </target>
+
+  <target name="sunflow-deps" unless="env.NO_FETCH_DEPS">
+    <get dest="lib/sunflow.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/sunflow.jar" usetimestamp="true" verbose="true"/>
+  </target>
+
+  <target name="sunflow" depends="core,soft,sunflow-deps" description="build sunflow backend">
+    <mkdir dir="${build}/sunflow" />
+    <javac excludesfile="excludes.txt" srcdir="${sunflow}" destdir="${build}/sunflow" debug="true">
+      <compilerarg line="-source 1.5"/>
+      <classpath refid="sunflow.classpath"/>
+    </javac>
+    <jar jarfile="${dist}/jReality-sunflow.jar" basedir="${build}/sunflow" />
   </target>
 
   <target name="portal" depends="ui,jogl,soft,proxies" description="build portal backend">
@@ -552,15 +576,6 @@
     <get dest="lib/kunststoff.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/kunststoff.jar" usetimestamp="true" verbose="true"/>
   </target>
 
-  <target name="viewer" depends="dist,viewer-deps" description="launch a standalone viewer">
-    <java classname="de.jreality.ui.viewerapp.ViewerAppOld" maxmemory="1024M" failonerror="true" fork="true">
-      <classpath>
-      	<path refid="apps.classpath"/>
-      	<pathelement path="${java.class.path}"/>
-      </classpath>
-    </java>
-  </target>
-  
   <target name="tutorial-src" description="create a zip file containing tutorial src">
 	<zip destfile="${dist}/tutorial.zip" basedir="." includes="src-tutorial/**/*" defaultexcludes="yes"/>
   </target>
