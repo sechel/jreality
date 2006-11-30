@@ -6,6 +6,10 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.beans.Statement;
 import java.io.File;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Collections;
 
 import javax.swing.AbstractAction;
@@ -26,6 +30,7 @@ import de.jtem.beans.InspectorPanel;
 @SuppressWarnings("serial")
 public class SunflowMenu extends JMenu {
 
+	private static Class<?> SUNFLOW;
 	private static FileFilter[] fileFilters;
 
 	static {
@@ -46,6 +51,15 @@ public class SunflowMenu extends JMenu {
 	public SunflowMenu(ViewerApp vapp) {
 		super("Sunflow");
 		va = vapp;
+		try {
+			SUNFLOW = AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>() {
+				public Class<?> run() throws ClassNotFoundException {
+					return Class.forName("de.jreality.sunflow.Sunflow");
+				}
+			});
+		} catch (Exception e) {
+			throw new RuntimeException("sunflow init failed", e); 
+		}
 		
 		settingsFrame = new JFrame("Sunflow Settings");
 		JTabbedPane tabs = new JTabbedPane();
@@ -129,7 +143,7 @@ public class SunflowMenu extends JMenu {
 		File file = FileLoaderDialog.selectTargetFile(null, dimPanel, false, fileFilters);
 		final Dimension dim = dimPanel.getDimension();
 		try {
-			new Statement(Class.forName("de.jreality.sunflow.Sunflow"), "renderAndSave", new Object[]{viewer, opts, dim, file}).execute();
+			new Statement(SUNFLOW, "renderAndSave", new Object[]{viewer, opts, dim, file}).execute();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -137,7 +151,7 @@ public class SunflowMenu extends JMenu {
 
 	protected void render(Viewer viewer, Dimension dim, Object opts) {
 		try {
-			new Statement(Class.forName("de.jreality.sunflow.Sunflow"), "render", new Object[]{viewer, dim, opts}).execute();
+			new Statement(SUNFLOW, "render", new Object[]{viewer, dim, opts}).execute();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
