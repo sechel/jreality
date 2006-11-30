@@ -154,6 +154,18 @@ public class SunflowViewer implements Viewer {
 		throw new UnsupportedOperationException();
 	}
 	
+	public RenderOptions getOptions() {
+		return options;
+	}
+
+	public void setOptions(RenderOptions options) {
+		this.options = options;
+	}
+	
+	public void cancel() {
+		display.cancel();
+	}
+	
 	public static void main(String[] args) throws IOException {
 		ViewerVR vr = new ViewerVR();
 		final String[][] examples = new String[][] {
@@ -186,15 +198,4 @@ public class SunflowViewer implements Viewer {
 		external.setLocationRelativeTo(f);
 	}
 
-	public RenderOptions getOptions() {
-		return options;
-	}
-
-	public void setOptions(RenderOptions options) {
-		this.options = options;
-	}
-	
-	public void cancel() {
-		display.cancel();
-	}
 }
