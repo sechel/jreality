@@ -55,6 +55,8 @@ public class SunflowPlugin {
 		tabs.add("preview", renderSameSettings);
 
 		renderOptions = new RenderOptions();
+		renderOptions.setAaMin(0);
+		renderOptions.setAaMax(2);
 		InspectorPanel renderSettings = new InspectorPanel(false);
 		renderSettings.setBorder(border);
 		renderSettings.setObject(renderOptions, Collections
