@@ -756,8 +756,11 @@ public class RIBVisitor extends SceneGraphVisitor {
         return;
       ri.attributeBegin();
       
-      //setupShader(eAppearance, CommonAttributes.POINT_SHADER);
-      setupShader(eAppearance, CommonAttributes.POINT_SHADER+"."+CommonAttributes.POLYGON_SHADER);
+      if(eAppearance.getAttribute(CommonAttributes.SPHERES_DRAW,true))
+        setupShader(eAppearance, CommonAttributes.POINT_SHADER+"."+CommonAttributes.POLYGON_SHADER);
+      else
+        setupShader(eAppearance, CommonAttributes.POINT_SHADER);
+     
       
       float r = (float) eAppearance.getAttribute(ShaderUtility.nameSpace(
           CommonAttributes.POINT_SHADER,
@@ -854,7 +857,10 @@ public class RIBVisitor extends SceneGraphVisitor {
     String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
     if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW),true)) {
       
-      setupShader(eAppearance, CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER);
+      if(eAppearance.getAttribute(CommonAttributes.TUBES_DRAW,true))
+        setupShader(eAppearance, CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER);
+      else
+        setupShader(eAppearance, CommonAttributes.LINE_SHADER);
       
       DataList dl = g.getEdgeAttributes(Attribute.INDICES);
       if(dl!=null){
