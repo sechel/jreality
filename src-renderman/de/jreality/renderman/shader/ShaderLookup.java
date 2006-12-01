@@ -54,49 +54,56 @@ import de.jreality.util.LoggingSystem;
  */
 public class ShaderLookup
 {
-			
+  
   private ShaderLookup(){}
   private static Object lookup2(String shaderName, String type) {
-	    Object ps;
-	    try
-	    {
-	      final String clName="de.jreality.renderman.shader."+Character.toUpperCase(
-	        shaderName.charAt(0))+shaderName.substring(1)+Character.toUpperCase(type.charAt(0))+type.substring(1);
-	      LoggingSystem.getLogger(ShaderLookup.class).log(Level.FINEST, "attempt to load {0}", clName);
-	      final Class cl= Class.forName(clName);
-	      LoggingSystem.getLogger(ShaderLookup.class).log(Level.FINEST, "loaded {0}", cl);
-	      ps=cl.newInstance();
-	      LoggingSystem.getLogger(ShaderLookup.class).log(Level.FINEST, "instantiated {0}", cl);
-	    }
-	    catch(ClassNotFoundException ex)
-	    {
-	      type=Character.toUpperCase(type.charAt(0))+type.substring(1);
-	      LoggingSystem.getLogger(ShaderLookup.class).warning("unsupported shader "+shaderName);
-	      ps=new DefaultPolygonShader();
-	    }
-	    catch(Exception ex)
-	    {
-	      type=Character.toUpperCase(type.charAt(0))+type.substring(1);
-	    	  LoggingSystem.getLogger(ShaderLookup.class).warning("shader "+shaderName+" failed");
-	      ps=new DefaultPolygonShader();
-	    }
-	    return ps;
-	  }
-	  public static RendermanShader getShaderAttr(RIBVisitor ribv,
-  	          EffectiveAppearance eAppearance, String base,  String type) {
-		  return getShaderAttr(ribv, eAppearance, base, type, type);
-	  }
-	  
- 	  public static RendermanShader getShaderAttr(RIBVisitor ribv,
-  	          EffectiveAppearance eAppearance, String base,  String type, String attr) {
-   	      // This returns the value of the string base+attr in the current effective appearance, or "default" if not set
- 		  String vShader = (String)eAppearance.getAttribute(ShaderUtility.nameSpace(base, attr), "default");
-  	      RendermanShader vShaderImpl= (RendermanShader) ShaderLookup.lookup2(vShader, type );
-		  // Returns the value of base+attr+name, if it's set, or if not, gives base+attr  back.
-  	      String vShaderName = (String)eAppearance.getAttribute(ShaderUtility.nameSpace(base, attr+"name"),
-  	              ShaderUtility.nameSpace(base, attr));
-  	      // initialize the shader with the prefix stem vShaderName
-  	      vShaderImpl.setFromEffectiveAppearance(ribv, eAppearance, vShaderName);
-  	      return vShaderImpl;
-  	  }
+    
+    String basicType;
+    if(type.lastIndexOf(".")>-1)
+      basicType=type.substring(type.lastIndexOf(".")+1,type.length());
+    else 
+      basicType=type;
+    
+    Object ps;
+    try
+    {
+      final String clName="de.jreality.renderman.shader."+Character.toUpperCase(
+          shaderName.charAt(0))+shaderName.substring(1)+Character.toUpperCase(basicType.charAt(0))+basicType.substring(1);
+      LoggingSystem.getLogger(ShaderLookup.class).log(Level.FINEST, "attempt to load {0}", clName);
+      final Class cl= Class.forName(clName);
+      LoggingSystem.getLogger(ShaderLookup.class).log(Level.FINEST, "loaded {0}", cl);
+      ps=cl.newInstance();
+      LoggingSystem.getLogger(ShaderLookup.class).log(Level.FINEST, "instantiated {0}", cl);
+    }
+    catch(ClassNotFoundException ex)
+    {
+      basicType=Character.toUpperCase(basicType.charAt(0))+basicType.substring(1);
+      LoggingSystem.getLogger(ShaderLookup.class).warning("unsupported shader "+shaderName);
+      ps=new DefaultPolygonShader();
+    }
+    catch(Exception ex)
+    {
+      basicType=Character.toUpperCase(basicType.charAt(0))+basicType.substring(1);
+      LoggingSystem.getLogger(ShaderLookup.class).warning("shader "+shaderName+" failed");
+      ps=new DefaultPolygonShader();
+    }
+    return ps;
+  }
+  public static RendermanShader getShaderAttr(RIBVisitor ribv,
+      EffectiveAppearance eAppearance, String base,  String type) {
+    return getShaderAttr(ribv, eAppearance, base, type, type);
+  }
+  
+  public static RendermanShader getShaderAttr(RIBVisitor ribv,
+      EffectiveAppearance eAppearance, String base,  String type, String attr) {
+    // This returns the value of the string base+attr in the current effective appearance, or "default" if not set
+    String vShader = (String)eAppearance.getAttribute(ShaderUtility.nameSpace(base, attr), "default");
+    RendermanShader vShaderImpl= (RendermanShader) ShaderLookup.lookup2(vShader, type );
+    // Returns the value of base+attr+name, if it's set, or if not, gives base+attr  back.
+    String vShaderName = (String)eAppearance.getAttribute(ShaderUtility.nameSpace(base, attr+"name"),
+        ShaderUtility.nameSpace(base, attr));
+    // initialize the shader with the prefix stem vShaderName
+    vShaderImpl.setFromEffectiveAppearance(ribv, eAppearance, vShaderName);
+    return vShaderImpl;
+  }
 }
