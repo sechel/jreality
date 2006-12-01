@@ -631,12 +631,10 @@ public class RIBVisitor extends SceneGraphVisitor {
       if(!raytracedVolumesEnabled) ri.verbatim("Attribute \"shade\" \"strategy\" [\"vpvolumes\"]"); 
       ri.interior(slShader.getName(), slShader.getParameters());
     }
-
     
 		RendermanShader polygonShader = (RendermanShader) ShaderLookup
-				.getShaderAttr(this, eap, "", CommonAttributes.POLYGON_SHADER);
+				.getShaderAttr(this, eap, "", type);
 		ri.shader(polygonShader);
-
 	}
 
 	/**
@@ -763,7 +761,12 @@ public class RIBVisitor extends SceneGraphVisitor {
 					CommonAttributes.POINT_RADIUS),
 					CommonAttributes.POINT_RADIUS_DEFAULT);
 			// System.out.println("point radius is "+r);
-			setupShader(eAppearance, CommonAttributes.POINT_SHADER);
+      
+      if(eAppearance.getAttribute(CommonAttributes.SPHERES_DRAW,true))
+        setupShader(eAppearance, CommonAttributes.POINT_SHADER+"."+CommonAttributes.POLYGON_SHADER);
+      else
+        setupShader(eAppearance, CommonAttributes.POINT_SHADER);
+      
 			boolean drawSpheres = eAppearance.getAttribute(
 					CommonAttributes.SPHERES_DRAW,
 					CommonAttributes.SPHERES_DRAW_DEFAULT);
@@ -821,9 +824,12 @@ public class RIBVisitor extends SceneGraphVisitor {
 	public void visit(IndexedLineSet g) {
 		ri.comment("IndexedLineSet " + g.getName());
 		ri.attributeBegin();
-		setupShader(eAppearance, CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER);
-		checkForProxy(g);
+		
+    //setupShader(eAppearance, CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER);
+		
+    checkForProxy(g);
 		if (hasProxy((Geometry) g)) {
+      setupShader(eAppearance, CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER);
 			handleCurrentProxy();
 			insidePointset = false;
 		} else {
@@ -856,6 +862,11 @@ public class RIBVisitor extends SceneGraphVisitor {
        String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
        if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW),true)) {
         
+         if(eAppearance.getAttribute(CommonAttributes.TUBES_DRAW,true))
+           setupShader(eAppearance, CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER);
+         else
+           setupShader(eAppearance, CommonAttributes.LINE_SHADER);
+         
     	   DataList dl = g.getEdgeAttributes(Attribute.INDICES);
     	   if(dl!=null){
     		   boolean tubesDraw = eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.TUBES_DRAW),CommonAttributes.TUBES_DRAW_DEFAULT);
@@ -960,10 +971,15 @@ public class RIBVisitor extends SceneGraphVisitor {
 	public void visit(IndexedFaceSet g) {
 		ri.comment("IndexedFaceSet " + g.getName());
 		ri.attributeBegin();
-		setupShader(eAppearance, CommonAttributes.POLYGON_SHADER);
-		checkForProxy(g);
+    
+		//setupShader(eAppearance, CommonAttributes.POLYGON_SHADER);
+		
+    checkForProxy(g);
 		if (hasProxy((Geometry) g)) {
-			handleCurrentProxy();
+      
+      setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
+			
+      handleCurrentProxy();
 			insidePointset = false;
 		} else {
 			if (!insidePointset) {
@@ -1009,8 +1025,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 		if (eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName,
 				CommonAttributes.FACE_DRAW), true)) {
 			// ribHelper.attributeBegin();
-			// setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
-			DataList colors = i.getFaceAttributes(Attribute.COLORS);
+			
+      setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
+			
+      DataList colors = i.getFaceAttributes(Attribute.COLORS);
 			// if (colors !=null && currentOpacity != 1.0) {
 			// the bug occurs when one attempts to set uniform colors or opacity
 			boolean opaqueColors = true;
