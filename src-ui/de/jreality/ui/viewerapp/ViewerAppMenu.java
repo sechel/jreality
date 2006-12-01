@@ -191,6 +191,7 @@ public class ViewerAppMenu {
     try {
     	export.add(new SunflowMenu(viewerApp));
     } catch (Exception e) {
+    	e.printStackTrace();
     	LoggingSystem.getLogger(this).log(Level.CONFIG, "no sunflow", e);
     }
     export.add(new JMenuItem(new ExportRIB("RIB", viewerSwitch, frame)));
