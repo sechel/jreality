@@ -30,7 +30,6 @@ import de.jtem.beans.InspectorPanel;
 @SuppressWarnings("serial")
 public class SunflowMenu extends JMenu {
 
-	private static Class<?> SUNFLOW;
 	private static FileFilter[] fileFilters;
 
 	static {
@@ -51,16 +50,6 @@ public class SunflowMenu extends JMenu {
 	public SunflowMenu(ViewerApp vapp) {
 		super("Sunflow");
 		va = vapp;
-		try {
-			SUNFLOW = AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>() {
-				public Class<?> run() throws ClassNotFoundException {
-					return Class.forName("de.jreality.sunflow.Sunflow");
-				}
-			});
-		} catch (Throwable e) {
-			throw new RuntimeException("sunflow init failed", e); 
-		}
-		
 		settingsFrame = new JFrame("Sunflow Settings");
 		JTabbedPane tabs = new JTabbedPane();
 
@@ -93,7 +82,12 @@ public class SunflowMenu extends JMenu {
 
 		Action previewAction = new AbstractAction("preview") {
 			public void actionPerformed(ActionEvent arg0) {
-				render(va.getViewer(), va.getViewer().getViewingComponentSize(), getRenderSameOptions());
+				AccessController.doPrivileged(new PrivilegedAction<Object>() {
+					public Object run() {
+						render(va.getViewer(), va.getViewer().getViewingComponentSize(), getRenderSameOptions());
+						return null;
+					}
+				});
 			}
 		};
 		previewAction.putValue(
@@ -104,14 +98,24 @@ public class SunflowMenu extends JMenu {
 		
 		add(new AbstractAction("thumb") {
 			public void actionPerformed(ActionEvent arg0) {
-				Dimension d = va.getViewer().getViewingComponentSize();
-				render(va.getViewer(), new Dimension(d.width/3, d.height/3), getPreviewOptions());
+				final Dimension d = va.getViewer().getViewingComponentSize();
+				AccessController.doPrivileged(new PrivilegedAction<Object>() {
+					public Object run() {
+						render(va.getViewer(), new Dimension(d.width/3, d.height/3), getPreviewOptions());
+						return null;
+					}
+				});
 			}
 		});
 
 		add(new AbstractAction("render") {
 			public void actionPerformed(ActionEvent arg0) {
-				renderAndSave(va.getViewer(), getRenderOptions());
+				AccessController.doPrivileged(new PrivilegedAction<Object>() {
+					public Object run() {
+						renderAndSave(va.getViewer(), getRenderOptions());
+						return null;
+					}
+				});
 			}
 		});
 
@@ -143,7 +147,7 @@ public class SunflowMenu extends JMenu {
 		File file = FileLoaderDialog.selectTargetFile(null, dimPanel, false, fileFilters);
 		final Dimension dim = dimPanel.getDimension();
 		try {
-			new Statement(SUNFLOW, "renderAndSave", new Object[]{viewer, opts, dim, file}).execute();
+			new Statement(Class.forName("de.jreality.sunflow.Sunflow"), "renderAndSave", new Object[]{viewer, opts, dim, file}).execute();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -151,7 +155,7 @@ public class SunflowMenu extends JMenu {
 
 	protected void render(Viewer viewer, Dimension dim, Object opts) {
 		try {
-			new Statement(SUNFLOW, "render", new Object[]{viewer, dim, opts}).execute();
+			new Statement(Class.forName("de.jreality.sunflow.Sunflow"), "render", new Object[]{viewer, dim, opts}).execute();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
