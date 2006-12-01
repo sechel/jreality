@@ -1282,7 +1282,12 @@ public class ViewerVR {
 	}
 
 	public void addLoadTab(final String[][] examples) {
-		makeContentFileChooser();
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+			public Object run() {
+				makeContentFileChooser();
+				return null;
+			}
+		});
 		loadPanel = new JPanel(new BorderLayout());
 		loadPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		
@@ -1495,7 +1500,12 @@ public class ViewerVR {
 	}
 
 	public void addTexTab() {
-		makeTextureFileChooser();
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+			public Object run() {
+				makeTextureFileChooser();
+				return null;
+			}
+		});
 		appearanceTabs.add("tex", textureButtonPanel);
 		sp.getFrame().pack();
 	}
