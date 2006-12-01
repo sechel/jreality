@@ -49,3 +49,8 @@ jTerm
     - java terminal - license still unclear
     - used as a terminal for the beanshell in the ViewerApp
     - http://www.jtem.de
+
+Sunflow
+    - java rendering system for photo-realistic image synthesis - MIT License
+    - uses janino (http://www.janino.net/) - BSD License
+    - http://sunflow.sourceforge.net
