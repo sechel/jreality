@@ -42,7 +42,10 @@ package de.jreality.renderman;
 
 import java.util.HashMap;
 
+import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.Light;
@@ -81,15 +84,15 @@ public class LightCollector extends SceneGraphVisitor {
     int signature = Pn.EUCLIDEAN;
     SceneGraphPath currentPath = null;
     Ri ri = null;
-    private int rendererType;
-    /**
+    String lightname;
+	private double[] dfrom, dto;
+   /**
      * 
      */
     public LightCollector(SceneGraphComponent root, RIBVisitor v) {
         super();
         ribv = v;
         this.ri = v.ri;
-        this.rendererType=v.getRendererType();
         currentTrafo = new double[16];
         eAppearance=EffectiveAppearance.create();
         currentPath = new SceneGraphPath();
@@ -128,8 +131,9 @@ public class LightCollector extends SceneGraphVisitor {
         ri.transformBegin();
         HashMap<String, Object> map =new HashMap<String, Object>();
         handleCommon(l, map);
-        ri.concatTransform(fCurrentTrafo);
-        map.put("to",zdirection);
+//        ri.concatTransform(fCurrentTrafo);
+//        map.put("to",zdirection);
+        map.put("to",new float[] {(float)dto[0], (float) dto[1], (float) dto[2]});
         if (signature == Pn.EUCLIDEAN)
         	lightname = shadowEnabled ? "shadowdistant": "distantlight";
          ri.lightSource(lightname,map);
@@ -137,10 +141,17 @@ public class LightCollector extends SceneGraphVisitor {
      }
 	private void handleCommon(Light l, HashMap<String, Object> map) {
 		currentPath.getMatrix(currentTrafo);
-        fCurrentTrafo = RIBHelper.fTranspose(currentTrafo);
+	    Matrix mm = new Matrix(currentTrafo);
+	    mm.multiplyOnLeft(ribv.world2Camera);
+	    dfrom = mm.getColumn(3);
+	    Pn.dehomogenize(dfrom, dfrom);
+	    dto = mm.getColumn(2);
+	    Rn.times(dto, -1, dto);
+	    Pn.dehomogenize(dto, dto);
+		fCurrentTrafo = RIBHelper.fTranspose(currentTrafo);
 		map.put("intensity",new Float(l.getIntensity()));
         map.put("lightcolor",l.getColor().getRGBColorComponents(null));
-        map.put("from",new float[] {0f,0f,0f});
+//        map.put("from",new float[] {0f,0f,0f});
         if (signature != Pn.EUCLIDEAN)	{
         	map.put("signature", new Float(signature));
      	   lightname = "noneuclideanlight";
@@ -149,13 +160,12 @@ public class LightCollector extends SceneGraphVisitor {
         	map.put("string shadowname", "raytrace");
         }
 	}
-	String lightname;
     public void visit(PointLight l) {
        ri.transformBegin();
        HashMap<String, Object> map =new HashMap<String, Object>();
        handleCommon(l, map);
-       map.put("from",new float[] {0f,0f,0f});
-       ri.concatTransform(fCurrentTrafo);
+       map.put("from",new float[] {(float)dfrom[0], (float) dfrom[1], (float) dfrom[2]});
+//       ri.concatTransform(fCurrentTrafo);
        if (signature == Pn.EUCLIDEAN)	
     	   lightname = shadowEnabled ? "shadowpoint": "pointlight";
        ri.lightSource(lightname,map);
@@ -166,8 +176,10 @@ public class LightCollector extends SceneGraphVisitor {
         ri.transformBegin();
         HashMap<String, Object> map =new HashMap<String, Object>();
         handleCommon(l, map);
-        ri.concatTransform(fCurrentTrafo);
-        map.put("from",new float[] {0f,0f,0f});
+//        ri.concatTransform(fCurrentTrafo);
+//        map.put("from",new float[] {0f,0f,0f});
+        map.put("from",new float[] {(float)dfrom[0], (float) dfrom[1], (float) dfrom[2]});
+        map.put("to",new float[] {(float)dto[0], (float) dto[1], (float) dto[2]});
         map.put("coneangle",new Float(l.getConeAngle()));
         map.put("conedeltaangle",new Float(l.getConeDeltaAngle()));
         map.put("beamdistribution",new Float(l.getDistribution()));
