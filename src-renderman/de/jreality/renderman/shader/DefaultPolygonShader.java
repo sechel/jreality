@@ -101,7 +101,6 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
       shaderName = "noneuclideanpolygonshader";
     }
     else shaderName ="defaultpolygonshader" ;
-    //shaderName = "defaultpolygonshader";
     boolean ignoreTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name,"ignoreTexture2d"), false);	
     if (!ignoreTexture2d && AttributeEntityUtility.hasAttributeEntity(Texture2D.class, name+".texture2d", eap)) {
       Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap);
@@ -141,8 +140,7 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
         map.put("string reflectionmap", fname);
       }
       map.put("float reflectionBlend", new Float(reflectionMap.getBlendColor().getAlpha()/255.0));
-    }
-    
+    }    
     
     //volume shaders
     Object obj1 = eap.getAttribute(CommonAttributes.RMAN_VOLUME_INTERIOR_SHADER, Appearance.INHERITED,SLShader.class);
