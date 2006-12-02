@@ -2,11 +2,10 @@ package de.jreality.sunflow;
 
 public class RenderOptions {
 	private boolean useOriginalLights = false;
-	private double globalIllumination = .2f;
+	private double ambientOcclusionBright = .2f;
 	private int aaMin = -2;
 	private int aaMax = 0;
-	private int aaSamples = 1;
-	private int directionalLightSamplesMin = 8;
+	private int ambientOcclusionSamples = 120;
 	private int depthsDiffuse = 1;
 	private int depthsReflection = 0;
 	private int depthsRefraction = 4;
@@ -50,12 +49,12 @@ public class RenderOptions {
 		this.depthsRefraction = depthsRefraction;
 	}
 	
-	public double getGlobalIllumination() {
-		return globalIllumination;
+	public double getAmbientOcclusionBright() {
+		return ambientOcclusionBright;
 	}
 	
-	public void setGlobalIllumination(double globalIllumination) {
-		this.globalIllumination = globalIllumination;
+	public void setAmbientOcclusionBright(double globalIllumination) {
+		this.ambientOcclusionBright = globalIllumination;
 	}
 
 	public boolean isUseOriginalLights() {
@@ -66,19 +65,11 @@ public class RenderOptions {
 		this.useOriginalLights = useOriginalLights;
 	}
 
-	public int getDirectionalLightSamplesMin() {
-		return directionalLightSamplesMin;
+	public int getAmbientOcclusionSamples() {
+		return ambientOcclusionSamples;
 	}
 
-	public void setDirectionalLightSamplesMin(int aaSamples) {
-		this.directionalLightSamplesMin = aaSamples;
-	}
-
-	public int getAaSamples() {
-		return aaSamples;
-	}
-
-	public void setAaSamples(int aaSamples) {
-		this.aaSamples = aaSamples;
+	public void setAmbientOcclusionSamples(int aaSamples) {
+		this.ambientOcclusionSamples = aaSamples;
 	}
 }

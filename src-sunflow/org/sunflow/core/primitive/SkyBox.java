@@ -63,6 +63,7 @@ public class SkyBox implements PrimitiveList, Shader {
 	public Color getRadiance(ShadingState state) {
 		// lookup texture based on ray direction
         return state.includeLights() ? getColor(basis.untransform(state.getRay().getDirection(), new Vector3())) : Color.BLACK;
+		//return getColor(basis.untransform(state.getRay().getDirection()));
 	}
 
 	public void scatterPhoton(ShadingState state, Color power) {

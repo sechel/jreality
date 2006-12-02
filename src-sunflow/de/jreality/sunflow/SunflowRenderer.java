@@ -105,7 +105,6 @@ public class SunflowRenderer extends SunflowAPI {
 	private String LINE_CYLINDER="line";
 	
 	private RenderOptions options = new RenderOptions();
-	private int directionalLightSamplesMin;
 
 	private class Visitor extends SceneGraphVisitor {
 		
@@ -211,9 +210,8 @@ public class SunflowRenderer extends SunflowAPI {
 				parameterVector("dir", dir);
 				DirectionalLight sun = new DirectionalLight();
 				java.awt.Color c = l.getColor();
-				float i = (1-(float)options.getGlobalIllumination())*(float) l.getIntensity()*(float)Math.PI;
+				float i = (float)l.getIntensity() *(float)Math.PI;
 				Color col = new Color(c.getRed()/255f*i, c.getGreen()/255f*i, c.getBlue()/255f*i);
-				parameter("samples", options.getDirectionalLightSamplesMin());
 				parameter("power", col);
 				light("directionalLight"+lightID++, sun);
 			}
@@ -226,7 +224,7 @@ public class SunflowRenderer extends SunflowAPI {
 				parameterPoint("center", point);
 				GlPointLight light = new GlPointLight();
 				java.awt.Color c = l.getColor();
-				float i = (1-(float)options.getGlobalIllumination())*(float) l.getIntensity()*(float)Math.PI*4;
+				float i = (float)l.getIntensity() *(float)Math.PI;
 				Color col = new Color(c.getRed()/255f*i, c.getGreen()/255f*i, c.getBlue()/255f*i);
 				parameter("power", col);
 				parameter("fallOffA0", l.getFalloffA0());
@@ -439,12 +437,12 @@ public class SunflowRenderer extends SunflowAPI {
         parameter("resolutionY", height);
         parameter("aa.min", options.getAaMin());
         parameter("aa.max", options.getAaMax());
-        parameter("aa.samples", options.getAaSamples());
         parameter("depths.diffuse", options.getDepthsDiffuse());
         parameter("depths.reflection", options.getDepthsReflection());
         parameter("depths.refraction", options.getDepthsRefraction());
-        float ambient = (float)options.getGlobalIllumination();
-        if (!options.isUseOriginalLights() && ambient >0) giEngine(new AmbientOcclusionGIEngine(new Color(ambient, ambient, ambient), Color.BLACK, 120, 100));
+        float ambient = (float)options.getAmbientOcclusionBright();
+        int ambientOcclusionSamples = options.getAmbientOcclusionSamples();
+        if (!options.isUseOriginalLights() && ambient >0) giEngine(new AmbientOcclusionGIEngine(new Color(ambient, ambient, ambient), Color.BLACK, ambientOcclusionSamples, 100));
         //giEngine(new FakeGIEngine(new Vector3(0,1,0), Color.WHITE, Color.BLACK));
         //giEngine(new InstantGI(128, 1, .01f, 0));
         //giEngine(new PathTracingGIEngine(200));
