@@ -125,7 +125,7 @@ public class SunflowRenderer extends SunflowAPI {
 			path.push(c);
 			currentMatrix=new Matrix(path.getMatrix(null));
 			Geometry g = c.getGeometry();
-			if (c.getAppearance() != null) c.getAppearance().accept(this);
+			eapp = EffectiveAppearance.create(path);
 			appCount++;
 			dgs = ShaderUtility.createDefaultGeometryShader(eapp);
 			rhs = ShaderUtility.createRenderingHintsShader(eapp);
@@ -244,11 +244,6 @@ public class SunflowRenderer extends SunflowAPI {
 		@Override
 		public void visit(Cylinder c) {
 			geometry(getName(c), new org.sunflow.core.primitive.Cylinder());
-		}
-
-		@Override
-		public void visit(Appearance a) {
-			eapp = EffectiveAppearance.create(path);
 		}
 
 		private void applyShader(DefaultGeometryShader dgs) {
