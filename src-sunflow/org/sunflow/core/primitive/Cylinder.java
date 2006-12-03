@@ -71,15 +71,12 @@ public class Cylinder implements PrimitiveList {
         float qc = ((r.ox * r.ox) + (r.oy * r.oy)) - 1;
         double[] t = Solvers.solveQuadric(qa, qb, qc);
         if (t != null) {
-            // early rejection
-            if (t[0] >= r.getMax() || t[1] <= r.getMin())
-                return;
             double z=r.oz+t[0]*r.dz;
-            if (z<=1 && z>=-1 && t[0] > r.getMin())
+            if (z<=1 && z>=-1 && t[0] > r.getMin() && t[0] < r.getMax())
                 r.setMax((float) t[0]);
             else {
                 z=r.oz+t[1]*r.dz;
-                if (z<=1 && z>=-1) r.setMax((float) t[1]);
+                if (z<=1 && z>=-1 && t[1] > r.getMin() && t[1] < r.getMax()) r.setMax((float) t[1]);
                 else return;
             }
             state.setIntersection(0, 0, 0);

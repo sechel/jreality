@@ -79,6 +79,7 @@ import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.DataList;
+import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
@@ -125,80 +126,161 @@ public class SunflowRenderer extends SunflowAPI {
 			currentMatrix=new Matrix(path.getMatrix(null));
 			Geometry g = c.getGeometry();
 			eapp = EffectiveAppearance.create(path);
-			appCount++;
 			dgs = ShaderUtility.createDefaultGeometryShader(eapp);
 			rhs = ShaderUtility.createRenderingHintsShader(eapp);
 			if (c.getLight() != null) c.getLight().accept(this);
 			if (g != null) {
 				if (g instanceof PointSet) {
-					DefaultPointShader ps = (DefaultPointShader) dgs.getPointShader();
-					if (dgs.getShowPoints() && ps.getSpheresDraw() && ((PointSet) g).getNumPoints() > 0) {
-						dps = (DefaultPolygonShader) ps.getPolygonShader();
-						applyShader(dgs);
-						double r = ps.getPointRadius();
-						DoubleArrayArray pts = ((PointSet)g).getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
-						for (int i=0; i<pts.getLength(); i++) {
-							Matrix m = Matrix.times(currentMatrix, MatrixBuilder.euclidean().translate(
-									pts.getValueAt(i, 0),
-									pts.getValueAt(i, 1),
-									pts.getValueAt(i, 2)
-									).scale(r).getMatrix());
-							parameter("transform", m);
-							parameter("shaders", "default-shader" + appCount);
-							instance(POINT_SPHERE + ".instance"+instanceCnt++, POINT_SPHERE);
-						}
-						appCount++;
-					}
+					renderPoints((PointSet)g);
 					if (g instanceof IndexedLineSet && dgs.getShowLines()  && ((IndexedLineSet) g).getNumEdges() > 0) {
-						DefaultLineShader ls = (DefaultLineShader) dgs.getLineShader();
-						if (ls.getTubeDraw()) {
-							dps = (DefaultPolygonShader) ls.getPolygonShader();
-							applyShader(dgs);
-							double r = ls.getTubeRadius();
-							DoubleArrayArray pts = ((PointSet)g).getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
-							IntArrayArray lines = ((IndexedLineSet)g).getEdgeAttributes(Attribute.INDICES).toIntArrayArray();
-							double[] zAxis = pts.getLengthAt(0) == 3 ? new double[]{0,0,-1} : new double[]{0,0,-1,1};
-							for (int i=0; i<lines.getLength(); i++) {
-								for (int j=0; j<lines.getLengthAt(i)-1; j++) {
-									double[] p1 = pts.getValueAt(lines.getValueAt(i, j)).toDoubleArray(null);
-									double[] p2 = pts.getValueAt(lines.getValueAt(i, j+1)).toDoubleArray(null);
-									double[] seg = Rn.subtract(null, p2, p1);
-									double[] center = Rn.linearCombination(null, 0.5, p1, 0.5, p2);
-									double len=Rn.euclideanNorm(seg);
-									Matrix m = Matrix.times(currentMatrix, MatrixBuilder.euclidean()
-											.translate(
-													center[0],
-													center[1],
-													center[2]
-											).rotateFromTo(zAxis, seg)
-											.scale(r, r, len/2).getMatrix());
-									parameter("transform", m);
-									parameter("shaders", "default-shader" + appCount);
-									instance(LINE_CYLINDER + ".instance"+instanceCnt++, LINE_CYLINDER);
-								}
-							}
-							appCount++;
-						}
+						renderLines((IndexedLineSet) g);
 					}
 					if (g instanceof IndexedFaceSet && ((IndexedFaceSet) g).getNumFaces() > 0 && dgs.getShowFaces()) {
 						dps = (DefaultPolygonShader) dgs.getPolygonShader();
-						applyShader(dgs);
-						visit((IndexedFaceSet) g);
+						applyShader(dps);
+						renderFaces((IndexedFaceSet) g);
 					}
 				} else {
 					dps = (DefaultPolygonShader) dgs.getPolygonShader();
-					applyShader(dgs);
+					applyShader(dps);
 					g.accept(this);
+					parameter("transform", currentMatrix);
+					parameter("shaders", "default-shader" + appCount);
+					String geomName = getName(g);
+					instance(geomName + ".instance"+instanceCnt++, geomName);
 				}
-				parameter("transform", currentMatrix);
-				parameter("shaders", "default-shader" + appCount);
-				String geomName = getName(g);
-				instance(geomName + ".instance"+instanceCnt++, geomName);
 			}
 			  for (int i=0; i < c.getChildComponentCount(); i++) {
 				  c.getChildComponent(i).accept(this);
 			  }
 			path.pop();
+		}
+
+		public void renderFaces(IndexedFaceSet ifs) {
+			float[] points = convert(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), 3, null);
+			float[] normals = null;
+			if (dps.getSmoothShading() && ifs.getVertexAttributes(Attribute.NORMALS) != null) {
+				normals = convert(ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(), 3, null);
+				parameter("normals", "vector", "vertex", normals);
+			} else {
+				// sunflow calculates the face normal from the triangle points...
+			}
+			DataList tex = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+			Texture2D tex2d = dps.getTexture2d();
+			float[] texCoords = null;
+			if (tex != null && tex2d != null) {
+				Matrix texMat = null;
+				// this is needed for sunflow build-in shaders:
+				//MatrixBuilder.euclidean().scale(1,-1,1).getMatrix();
+				//texMat.multiplyOnRight(tex2d.getTextureMatrix());
+				texCoords = convert(tex.toDoubleArrayArray(), 2, texMat);
+			}
+			int[] faces = convert(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray());
+			parameter("triangles", faces);
+			parameter("points", "point", "vertex", points);
+			if (texCoords != null) {
+				parameter("uvs", "texcoord", "vertex", texCoords);				
+			}
+			geometry(getName(ifs), new Mesh());
+			parameter("transform", currentMatrix);
+			parameter("shaders", "default-shader" + appCount);
+			String geomName = getName(ifs);
+			instance(geomName + ".instance"+instanceCnt++, geomName);
+		}
+		
+		private void renderLines(IndexedLineSet indexedLineSet) {
+			DefaultLineShader ls = (DefaultLineShader) dgs.getLineShader();
+			if (ls.getTubeDraw()) {
+				dps = (DefaultPolygonShader) ls.getPolygonShader();
+				double r = ls.getTubeRadius();
+				DoubleArrayArray pts = indexedLineSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
+				IntArrayArray lines = indexedLineSet.getEdgeAttributes(Attribute.INDICES).toIntArrayArray();
+				DataList radiiAttributes = indexedLineSet.getEdgeAttributes(Attribute.RADII);
+				DoubleArray radii = radiiAttributes != null ? radiiAttributes.toDoubleArray() : null;
+				double[] zAxis = pts.getLengthAt(0) == 3 ? new double[]{0,0,-1} : new double[]{0,0,-1,1};
+				DataList colorAttributes = indexedLineSet.getEdgeAttributes(Attribute.COLORS);
+				boolean lineColors = colorAttributes != null;
+				DoubleArrayArray colors = lineColors ? colorAttributes.toDoubleArrayArray() : null;
+				if (!lineColors) {
+					applyShader(dps);
+				}
+				for (int i=0; i<lines.getLength(); i++) {
+					double radius = radii != null ? radii.getValueAt(i) : r;
+					if (lineColors) {
+						Appearance app = new Appearance("fake app");
+						EffectiveAppearance ea = eapp.create(app);
+						dgs = ShaderUtility.createDefaultGeometryShader(ea);
+						dps = (DefaultPolygonShader) ((DefaultLineShader) dgs.getLineShader()).getPolygonShader();
+						double[] vc = colors.getValueAt(i).toDoubleArray(null);
+						java.awt.Color vcc = new java.awt.Color((float) vc[0], (float) vc[1], (float) vc[2]);
+						app.setAttribute("lineShader.polygonShader.diffuseColor", vcc);
+						if (vc.length == 4) {
+							app.setAttribute("lineShader.polygonShader.transparency", dps.getTransparency()*vc[3]);
+						}
+						applyShader(dps);
+					}
+					for (int j=0; j<lines.getLengthAt(i)-1; j++) {
+						double[] p1 = pts.getValueAt(lines.getValueAt(i, j)).toDoubleArray(null);
+						double[] p2 = pts.getValueAt(lines.getValueAt(i, j+1)).toDoubleArray(null);
+						double[] seg = Rn.subtract(null, p2, p1);
+						double[] center = Rn.linearCombination(null, 0.5, p1, 0.5, p2);
+						double len=Rn.euclideanNorm(seg);
+						Matrix m = Matrix.times(currentMatrix, MatrixBuilder.euclidean()
+								.translate(
+										center[0],
+										center[1],
+										center[2]
+								).rotateFromTo(zAxis, seg)
+								.scale(radius, radius, len/2).getMatrix());
+						parameter("transform", m);
+						parameter("shaders", "default-shader" + appCount);
+						instance(LINE_CYLINDER + ".instance"+instanceCnt++, LINE_CYLINDER);
+					}
+				}
+			}
+		}
+
+		private void renderPoints(PointSet pointSet) {
+			DefaultPointShader ps = (DefaultPointShader) dgs.getPointShader();
+			if (dgs.getShowPoints() && ps.getSpheresDraw() && pointSet.getNumPoints() > 0) {
+				dps = (DefaultPolygonShader) ps.getPolygonShader();
+				double r = ps.getPointRadius();
+				DoubleArrayArray pts = pointSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
+				DataList radiiAttributes = pointSet.getVertexAttributes(Attribute.RADII);
+				DoubleArray radii = radiiAttributes != null ? radiiAttributes.toDoubleArray() : null;
+				DataList colorAttributes = pointSet.getVertexAttributes(Attribute.COLORS);
+				boolean vertexColors = colorAttributes != null;
+				DoubleArrayArray colors = vertexColors ? colorAttributes.toDoubleArrayArray() : null;
+				if (!vertexColors) {
+					applyShader(dps);
+				}
+				for (int i=0; i<pts.getLength(); i++) {
+					if (vertexColors) {
+						Appearance app = new Appearance("fake app");
+						EffectiveAppearance ea = eapp.create(app);
+						dgs = ShaderUtility.createDefaultGeometryShader(ea);
+						dps = (DefaultPolygonShader) ((DefaultPointShader) dgs.getPointShader()).getPolygonShader();
+						double[] vc = colors.getValueAt(i).toDoubleArray(null);
+						java.awt.Color vcc = new java.awt.Color((float) vc[0], (float) vc[1], (float) vc[2]);
+						app.setAttribute("pointShader.polygonShader.diffuseColor", vcc);
+						if (vc.length == 4) {
+							app.setAttribute("pointShader.polygonShader.transparency", dps.getTransparency()*vc[3]);
+						}
+						applyShader(dps);
+					}
+					double w = pts.getLengthAt(i) == 3 ? 1 : pts.getValueAt(i, 3);
+					if (w != 0) {
+						Matrix m = Matrix.times(currentMatrix, MatrixBuilder.euclidean().translate(
+								pts.getValueAt(i, 0)/w,
+								pts.getValueAt(i, 1)/w,
+								pts.getValueAt(i, 2)/w
+								).scale(radii != null ? radii.getValueAt(i) : r).getMatrix());
+						parameter("transform", m);
+						parameter("shaders", "default-shader" + appCount);
+						instance(POINT_SPHERE + ".instance"+instanceCnt++, POINT_SPHERE);
+					}
+				}
+			}
 		}
 		
 		int lightID;
@@ -244,88 +326,11 @@ public class SunflowRenderer extends SunflowAPI {
 			geometry(getName(c), new org.sunflow.core.primitive.Cylinder());
 		}
 
-		private void applyShader(DefaultGeometryShader dgs) {
-//			java.awt.Color c = dps.getDiffuseColor();
-//			double diffuseCoefficient = dps.getDiffuseCoefficient();
-//			Color diffuseColor = new Color(
-//					(float)(c.getRed()*diffuseCoefficient/255),
-//					(float)(c.getGreen()*diffuseCoefficient/255),
-//					(float)(c.getBlue()*diffuseCoefficient/255)
-//			);
-//			parameter("diffuse", diffuseColor);
-//			c = dps.getSpecularColor();
-//			double specularCoefficient = dps.getSpecularCoefficient();
-//			Color specularColor = new Color(
-//					(float)(c.getRed()*specularCoefficient/255),
-//					(float)(c.getGreen()*specularCoefficient/255),
-//					(float)(c.getBlue()*specularCoefficient/255)
-//			);
-//			parameter("reflection", specularColor);
-//			if  (dps.getTexture2d() != null) {
-//				parameter("texture", getName(dps.getTexture2d().getImage()));
-//				//parameter("blend", dps.getTexture2d().getBlendColor().getAlpha()/255f);
-//			}
-//			parameter("power", dps.getSpecularExponent());
-//			//parameter("samples", 4);
-//			String shaderCN = "DiffuseShader";
-//			if (dps.getReflectionMap() != null) shaderCN = "Shiny"+shaderCN;
-//			if (dps.getTexture2d() != null) shaderCN = "Textured"+shaderCN;
-//			Shader shader = new DiffuseShader();
-//			try {
-//				Class<Shader> clazz = (Class<Shader>) Class.forName("org.sunflow.core.shader."+shaderCN);
-//				shader = clazz.newInstance();
-//				System.out.println("using "+clazz.getName());
-//			} catch (ClassNotFoundException cnfe) {
-//				System.out.println("WARNING: shader not found: "+shaderCN);
-//			} catch (InstantiationException e) {
-//			} catch (IllegalAccessException e) {
-//			}
-//			shader("default-shader"+appCount, shader);
-			shader("default-shader"+appCount, new org.sunflow.core.shader.DefaultPolygonShader(dps, rhs));
+		private void applyShader(DefaultPolygonShader ps) {
+			appCount++;
+			shader("default-shader"+appCount, new org.sunflow.core.shader.DefaultPolygonShader(ps, rhs));
 		}
 		
-		@Override
-		public void visit(IndexedFaceSet ifs) {
-			float[] points = convert(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), 3, null);
-			float[] normals = null;
-			if (ifs.getVertexAttributes(Attribute.NORMALS) != null) {
-				normals = convert(ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(), 3, null);
-				parameter("normals", "vector", "vertex", normals);
-			} else if (ifs.getFaceAttributes(Attribute.NORMALS) != null) {
-				//normals = convert(ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArrayArray(), 3);
-				// TODO: convert face normals to vertex normals
-				// -> needs inlining points as well
-				// or maybe sunflow calculates normals itself?
-				//parameter("normals", "vector", "vertex", normals);
-			}
-			DataList tex = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
-			Texture2D tex2d = dps.getTexture2d();
-			float[] texCoords = null;
-			if (tex != null && tex2d != null) {
-				Matrix texMat = null;//MatrixBuilder.euclidean().scale(1,-1,1).getMatrix();
-				//texMat.multiplyOnRight(tex2d.getTextureMatrix());
-				texCoords = convert(tex.toDoubleArrayArray(), 2, texMat);
-			}
-			int[] faces = convert(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray());
-			parameter("triangles", faces);
-			parameter("points", "point", "vertex", points);
-			if (texCoords != null) {
-				parameter("uvs", "texcoord", "vertex", texCoords);				
-			}
-			geometry(getName(ifs), new Mesh());
-		}
-		
-		@Override
-		public void visit(IndexedLineSet g) {
-			// TODO Auto-generated method stub
-			super.visit(g);
-		}
-		
-		@Override
-		public void visit(PointSet p) {
-			// TODO Auto-generated method stub
-			super.visit(p);
-		}
 	}
 	
 	public SunflowRenderer() {
