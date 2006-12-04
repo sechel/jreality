@@ -533,6 +533,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		if (a != null) {
 			eAppearance = eAppearance.create(a);
 		}
+		// possibly here call evaluateEffectiveAppearance()
 		object2world.push(c);
 		if (hasProxy(c)) {
 			setupShader(eAppearance, CommonAttributes.POLYGON_SHADER);	// not perfect but better than nothing
@@ -553,8 +554,17 @@ public class RIBVisitor extends SceneGraphVisitor {
 	public void visit(Appearance a) {
 	}
 
-	private void setupShader(EffectiveAppearance eap, String type) {
-    
+private void setupShader(EffectiveAppearance eap, String type) {
+    // TODO
+	// split this up into at least two methods.  
+	// One ("evaluateEffectiveAppearance") 
+	// is called when the SGComp is visited and sets all the variables that don't depend on
+	// polygon, line, or point shader
+	// The second should be called from inside the rendering of face sets, line sets, and point sets
+	// and should create and/or return an instance of a shader class, like DefaultPolygonShader,
+	// which then has all the information needed to render correctly.
+	// Goal: RIBVisitor should no longer evaluate effectiveAppearance's to find out values of
+	// attributes which begin with "polygonShader", "lineShader", or "pointShader".
 //    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(type,"reflectionMap"), eap))
 //    {
 //    ri.verbatim("Attribute \"visibility\"  \"int diffuse\" [1]");
@@ -631,10 +641,12 @@ public class RIBVisitor extends SceneGraphVisitor {
       if(!raytracedVolumesEnabled) ri.verbatim("Attribute \"shade\" \"strategy\" [\"vpvolumes\"]"); 
       ri.interior(slShader.getName(), slShader.getParameters());
     }
+
     
 		RendermanShader polygonShader = (RendermanShader) ShaderLookup
-				.getShaderAttr(this, eap, "", type);
+				.getShaderAttr(this, eap, "", CommonAttributes.POLYGON_SHADER);
 		ri.shader(polygonShader);
+
 	}
 
 	/**
@@ -761,12 +773,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 					CommonAttributes.POINT_RADIUS),
 					CommonAttributes.POINT_RADIUS_DEFAULT);
 			// System.out.println("point radius is "+r);
-      
-      if(eAppearance.getAttribute(CommonAttributes.SPHERES_DRAW,true))
-        setupShader(eAppearance, CommonAttributes.POINT_SHADER+"."+CommonAttributes.POLYGON_SHADER);
-      else
-        setupShader(eAppearance, CommonAttributes.POINT_SHADER);
-      
+			setupShader(eAppearance, CommonAttributes.POINT_SHADER);
 			boolean drawSpheres = eAppearance.getAttribute(
 					CommonAttributes.SPHERES_DRAW,
 					CommonAttributes.SPHERES_DRAW_DEFAULT);
@@ -824,12 +831,9 @@ public class RIBVisitor extends SceneGraphVisitor {
 	public void visit(IndexedLineSet g) {
 		ri.comment("IndexedLineSet " + g.getName());
 		ri.attributeBegin();
-		
-    //setupShader(eAppearance, CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER);
-		
-    checkForProxy(g);
+		setupShader(eAppearance, CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER);
+		checkForProxy(g);
 		if (hasProxy((Geometry) g)) {
-      setupShader(eAppearance, CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER);
 			handleCurrentProxy();
 			insidePointset = false;
 		} else {
@@ -862,11 +866,6 @@ public class RIBVisitor extends SceneGraphVisitor {
        String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
        if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW),true)) {
         
-         if(eAppearance.getAttribute(CommonAttributes.TUBES_DRAW,true))
-           setupShader(eAppearance, CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER);
-         else
-           setupShader(eAppearance, CommonAttributes.LINE_SHADER);
-         
     	   DataList dl = g.getEdgeAttributes(Attribute.INDICES);
     	   if(dl!=null){
     		   boolean tubesDraw = eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.TUBES_DRAW),CommonAttributes.TUBES_DRAW_DEFAULT);
@@ -886,6 +885,7 @@ public class RIBVisitor extends SceneGraphVisitor {
  //               System.err.println(object2world.getLastComponent().getName()+" Current sig = "+currentSignature);
                 if (ga != null) System.err.println("GA = "+ga.toString());
                 if (ga == null || !( ga instanceof Dimension))	{
+                	// TODO make sure texture coordinates are not generated here!
                     BallAndStickFactory bsf = new BallAndStickFactory(g);
                	  	bsf.setSignature(currentSignature);
                	  	bsf.setStickRadius(r);
@@ -971,15 +971,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 	public void visit(IndexedFaceSet g) {
 		ri.comment("IndexedFaceSet " + g.getName());
 		ri.attributeBegin();
-    
-		//setupShader(eAppearance, CommonAttributes.POLYGON_SHADER);
-		
-    checkForProxy(g);
+		setupShader(eAppearance, CommonAttributes.POLYGON_SHADER);
+		checkForProxy(g);
 		if (hasProxy((Geometry) g)) {
-      
-      setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
-			
-      handleCurrentProxy();
+			handleCurrentProxy();
 			insidePointset = false;
 		} else {
 			if (!insidePointset) {
@@ -1025,10 +1020,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 		if (eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName,
 				CommonAttributes.FACE_DRAW), true)) {
 			// ribHelper.attributeBegin();
-			
-      setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
-			
-      DataList colors = i.getFaceAttributes(Attribute.COLORS);
+			// setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
+			DataList colors = i.getFaceAttributes(Attribute.COLORS);
 			// if (colors !=null && currentOpacity != 1.0) {
 			// the bug occurs when one attempts to set uniform colors or opacity
 			boolean opaqueColors = true;
