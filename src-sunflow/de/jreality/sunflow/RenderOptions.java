@@ -1,5 +1,7 @@
 package de.jreality.sunflow;
 
+import java.util.prefs.Preferences;
+
 public class RenderOptions {
 	private boolean progessiveRender = true;
 	private boolean useOriginalLights = false;
@@ -80,5 +82,29 @@ public class RenderOptions {
 
 	public void setProgessiveRender(boolean progessiveRender) {
 		this.progessiveRender = progessiveRender;
+	}
+	
+	public void savePreferences(Preferences prefs, String prefix) {
+		prefs.putBoolean(prefix+"progressiveRender", progessiveRender);
+		prefs.putBoolean(prefix+"useOriginalLights", useOriginalLights);
+		prefs.putInt(prefix+"aaMin", aaMin);
+		prefs.putInt(prefix+"aaMax", aaMax);
+		prefs.putInt(prefix+"depthsDiffuse", depthsDiffuse);
+		prefs.putInt(prefix+"depthsReflection", depthsReflection);
+		prefs.putInt(prefix+"depthsRefraction", depthsRefraction);
+		prefs.putInt(prefix+"ambientOcclusionSamples", ambientOcclusionSamples);
+		prefs.putDouble(prefix+"ambientOcclusionBright", ambientOcclusionBright);
+	}
+	
+	public void restoreFromPreferences(Preferences prefs, String prefix, RenderOptions defaults) {
+		setProgessiveRender(prefs.getBoolean(prefix+"progressiveRender", defaults.isProgessiveRender()));
+		setUseOriginalLights(prefs.getBoolean(prefix+"useOriginalLights", defaults.isUseOriginalLights()));
+		setAaMin(prefs.getInt(prefix+"aaMin", defaults.getAaMin()));
+		setAaMax(prefs.getInt(prefix+"aaMax", defaults.getAaMax()));
+		setDepthsDiffuse(prefs.getInt(prefix+"depthsDiffuse", defaults.getDepthsDiffuse()));
+		setDepthsReflection(prefs.getInt(prefix+"depthsReflection", defaults.getDepthsReflection()));
+		setDepthsRefraction(prefs.getInt(prefix+"depthsRefraction", defaults.getDepthsRefraction()));
+		setAmbientOcclusionSamples(prefs.getInt(prefix+"ambientOcclusionSamples", defaults.getAmbientOcclusionSamples()));
+		setAmbientOcclusionBright(prefs.getDouble(prefix+"ambientOcclusionBright", defaults.getAmbientOcclusionBright()));
 	}
 }
