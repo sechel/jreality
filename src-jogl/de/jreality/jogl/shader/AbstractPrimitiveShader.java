@@ -45,6 +45,7 @@ import javax.media.opengl.GL;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
@@ -66,7 +67,7 @@ public abstract class AbstractPrimitiveShader implements PrimitiveShader {
 	}
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
-	    if (AttributeEntityUtility.hasAttributeEntity(DefaultTextShader.class, ShaderUtility.nameSpace(name,"textShader"), eap));
+	    if (AttributeEntityUtility.hasAttributeEntity(DefaultTextShader.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXT_SHADER), eap));
 	    	textShader = (DefaultTextShader) AttributeEntityUtility.createAttributeEntity(DefaultTextShader.class, ShaderUtility.nameSpace(name,"textShader"), eap);
 	}
 

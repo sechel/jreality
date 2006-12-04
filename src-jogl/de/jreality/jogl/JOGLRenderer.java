@@ -83,7 +83,6 @@ import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.pick.PickPoint;
 import de.jreality.jogl.shader.DefaultGeometryShader;
 import de.jreality.jogl.shader.DefaultPolygonShader;
-import de.jreality.jogl.shader.DefaultVertexShader;
 import de.jreality.jogl.shader.RenderingHintsShader;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.MatrixBuilder;
