@@ -1,6 +1,7 @@
 package de.jreality.sunflow;
 
 public class RenderOptions {
+	private boolean progessiveRender = true;
 	private boolean useOriginalLights = false;
 	private double ambientOcclusionBright = .2f;
 	private int aaMin = -2;
@@ -71,5 +72,13 @@ public class RenderOptions {
 
 	public void setAmbientOcclusionSamples(int aaSamples) {
 		this.ambientOcclusionSamples = aaSamples;
+	}
+
+	public boolean isProgessiveRender() {
+		return progessiveRender;
+	}
+
+	public void setProgessiveRender(boolean progessiveRender) {
+		this.progessiveRender = progessiveRender;
 	}
 }

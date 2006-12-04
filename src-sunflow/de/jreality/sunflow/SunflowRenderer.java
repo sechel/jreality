@@ -437,7 +437,7 @@ public class SunflowRenderer extends SunflowAPI {
 		parameter("camera", name);
 		
 		// sunflow rendering
-		parameter("sampler", "bucket");
+		parameter("sampler", options.isProgessiveRender() ? "ipr" : "bucket");
 		parameter("resolutionX", width);
         parameter("resolutionY", height);
         parameter("aa.min", options.getAaMin());
