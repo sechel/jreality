@@ -43,13 +43,9 @@ package de.jreality.ui.viewerapp.actions.file;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-
-import javax.swing.KeyStroke;
 
 import de.jreality.scene.Viewer;
 import de.jreality.softviewer.PSRenderer;

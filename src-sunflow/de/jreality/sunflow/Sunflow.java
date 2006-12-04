@@ -63,6 +63,8 @@ import de.jreality.scene.Viewer;
 @SuppressWarnings("serial")
 public class Sunflow {
 
+  private static String[] filters = {"png", "tga", "hdr"};
+  
 	private Sunflow() {}
 	
 	public static void renderAndSave(final Viewer v, RenderOptions options, final Dimension dim, File file) {
@@ -125,18 +127,17 @@ public class Sunflow {
     chooser.setAcceptAllFileFilterUsed(false);
     
     //create file filters
-    final String[] ff = {"png", "tga", "hdr"};
-    for (int i = 0; i < ff.length; i++) {
+    for (int i = 0; i < filters.length; i++) {
       final int ind = i;
       chooser.addChoosableFileFilter(new FileFilter() {
         @Override
         public boolean accept(File f) {
           return (f.isDirectory() || 
-              f.getName().toLowerCase().endsWith("."+ff[ind]));
+              f.getName().toLowerCase().endsWith("."+filters[ind]));
         }
         @Override
         public String getDescription() {
-          return ff[ind].toUpperCase()+" Image (*."+ff[ind]+")";
+          return filters[ind].toUpperCase()+" Image (*."+filters[ind]+")";
         }
       });
     }
