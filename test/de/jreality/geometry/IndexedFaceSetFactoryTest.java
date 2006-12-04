@@ -50,6 +50,7 @@ import java.util.logging.Logger;
 
 import junit.framework.TestCase;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.ui.viewerapp.ViewerApp;
 
@@ -101,6 +102,57 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		
 	}
 	
+	public void testFaceLabels()	{
+		
+		//factory.debug = true;
+		
+		factory.setVertexCount( vertices.length );
+		factory.setVertexCoordinates( vertices );	
+		
+		factory.setFaceCount( indices.length );
+		factory.setFaceIndices( indices );
+		factory.setGenerateFaceLabels( true );
+		factory.update();
+		
+		IndexedFaceSet ifs = factory.getIndexedFaceSet();
+		
+		String [] labels = ifs.getFaceAttributes(Attribute.LABELS).toStringArray(null);
+		
+		for( int i=0; i<labels.length; i++ ) {
+			assertEquals( labels[i], new Integer( i ).toString());
+		}
+		
+		factory.setGenerateFaceLabels( false );
+		
+		factory.update();
+		
+		assertEquals( ifs.getFaceAttributes(Attribute.LABELS), null );
+		
+		labels[0] = "gaga";
+		
+		factory.setFaceLabels( labels );
+		
+		factory.update();
+		
+		labels = ifs.getFaceAttributes(Attribute.LABELS).toStringArray(null);
+		
+		assertEquals( labels[0],  "gaga" );
+		for( int i=1; i<labels.length; i++ ) {
+			assertEquals( labels[i], new Integer( i ).toString());
+		}
+		
+		// this should work
+		factory.setGenerateFaceLabels( false );
+		
+		//this should fail
+		try {
+			factory.setGenerateFaceLabels( true );
+		} catch( UnsupportedOperationException e ) {
+		}
+		
+		factory.setFaceLabels( (String[])null );
+		factory.setGenerateFaceLabels( true );
+	}
 	
 	public void testFaceColors()	{
 		double[][] jitterbugEdgeVerts = new double[][] {{0,0,0,1},{1,0,0,1},{1,1,0,1},{0,1,0,1}};
@@ -147,6 +199,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		factory.setFaceCount( indices.length );
 		factory.setFaceIndices( indices );
 		
+		factory.setGenerateEdgeLabels(true);
 		factory.setGenerateEdgesFromFaces( true );
 		factory.update();
 		
@@ -160,14 +213,43 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		factory.setLineCount( edges.length );
 		} catch( UnsupportedOperationException e ) {	
 		}
+		assertEquals( 12, ifs.getNumEdges() );
+		factory.update();
+		
+		assertEquals( 12, ifs.getNumEdges() );
+		
 		try {
 			factory.setEdgeIndices( edges );
-		} catch( ArrayIndexOutOfBoundsException e ) {		
+		} catch( UnsupportedOperationException e ) {		
 		}
 		
 		factory.update();
 		
 		assertEquals( 12, ifs.getNumEdges() );
+		
+		factory.setGenerateEdgesFromFaces( false );
+		
+		factory.update();
+		
+		assertEquals( 0, ifs.getNumEdges() );
+		
+		factory.setGenerateEdgesFromFaces( true );		
+		factory.setGenerateEdgesFromFaces( false );
+		
+		factory.update();
+		
+		assertEquals( 0, ifs.getNumEdges() );
+		
+		factory.setGenerateEdgesFromFaces( true );		
+		
+		factory.update();
+		
+		assertEquals( 12, ifs.getNumEdges() );
+		
+		String [] edgeLabels = ifs.getEdgeAttributes(Attribute.LABELS).toStringArray(null);
+		assertEquals( 12, edgeLabels.length );
+		for( int i=0; i<edgeLabels.length; i++ )
+				assertEquals( i+"", edgeLabels[i] );	
 		
 		factory.setGenerateEdgesFromFaces( false );
 		
@@ -194,13 +276,14 @@ public class IndexedFaceSetFactoryTest extends TestCase {
          ifsf.setVertexCount(8);
 //       ifsf.setLineCount(12);
 //       ifsf.setVertexAttributes(ifs.getVertexAttributes());
+         ifsf.setGenerateFaceNormals(false);
          ifsf.setFaceAttributes(ifs.getFaceAttributes());
 //       ifsf.setEdgeAttributes(ifs.getEdgeAttributes());
 
          ifsf.setFaceIndices(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null));
 
          ifsf.setVertexCoordinates(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null));
-
+         ifsf.setFaceNormals( (double[])null );
          ifsf.setGenerateFaceNormals(true);
          ifsf.update();
  }

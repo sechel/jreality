@@ -17,15 +17,20 @@ public class GeometryAttributeListSet {
 
 	final DataListSet DLS = new DataListSet(0);
 
-	final HashMap attributeNode = new HashMap();
+	final HashMap  attributeNode = new HashMap();
 	
-	final HashSet blockAttribute = new HashSet();
+	private final HashSet<Attribute> blockAttribute = new HashSet<Attribute>();
 	
-	final String cathegory;
+	final String category;
 
+	boolean blockAllAttributes = false;
+	
+	
+	boolean blockAttributeCount = false;
+	
 	GeometryAttributeListSet( AbstractGeometryFactory factory, String cathegory) {
 		this.factory = factory;
-		this.cathegory = cathegory;
+		this.category = cathegory;
 	}
 
 	int noa() {
@@ -40,6 +45,10 @@ public class GeometryAttributeListSet {
 		if (count == noa())
 			return;
 
+		if( blockAttributeCount )
+			throw new UnsupportedOperationException
+			( "The current state does not allow to change the count of the attribute category " + category  );
+		
 		DLS.reset(count);
 	}
 
@@ -47,7 +56,7 @@ public class GeometryAttributeListSet {
 		if (attributeNode.containsKey(attr))
 			return (OoNode) attributeNode.get(attr);
 
-		OoNode node = factory.node(cathegory + "." + attr);
+		OoNode node = factory.node(category + "." + attr);
 
 		attributeNode.put(attr, node);
 
@@ -66,16 +75,21 @@ public class GeometryAttributeListSet {
 	}
 
 	void setAttribute(Attribute attr, DataList data) {
-		if( blockAttribute.contains(attr))
+		if( isBlockedAttribute(attr))
 			throw new UnsupportedOperationException( "cannot set attribute " + attr );
 		setAttrImpl(DLS, attr, data);
 		attributeNode(attr).setObject(data);
 	}
 
+	boolean isBlockedAttribute(Attribute attr) {
+		//System.out.println( "Category: " + category +  "  Attribute: " + attr +  "  " +blockAttribute.contains(attr) );
+		return blockAllAttributes || blockAttribute.contains(attr);
+	}
+
 	void setAttributes(DataListSet dls) {
 		for( Iterator iter = dls.storedAttributes().iterator(); iter.hasNext(); ) {
 			Attribute attr = (Attribute)iter.next();
-			if( blockAttribute.contains(attr))
+			if( isBlockedAttribute(attr))
 				throw new UnsupportedOperationException( "cannot set attribute " + attr );
 		}
 		setAttrImpl(DLS, dls);
@@ -111,5 +125,34 @@ public class GeometryAttributeListSet {
 		}
 	}
 
+	public void blockAttribute( Attribute attr ) {
+		blockAttribute.add(attr);
+		//System.out.println( "  block Category: " + category +  "  Attribute: " + attr +  "  " +blockAttribute.contains(attr) );
+	}
+	
+	public void unblockAttribute( Attribute attr ) {
+		blockAttribute.remove(attr);
+		//System.out.println( "unblock Category: " + category +  "  Attribute: " + attr +  "  " +blockAttribute.contains(attr) );
+	}
+
+	public boolean isBlockAllAttributes() {
+		return blockAllAttributes;
+	}
+
+	public void setBlockAllAttributes(boolean blockAllAttributes) {
+		this.blockAllAttributes = blockAllAttributes;
+	}
+
+	public boolean isBlockAttributeCount() {
+		return blockAttributeCount;
+	}
+
+	public void setBlockAttributeCount(boolean blockAttributeCount) {
+		this.blockAttributeCount = blockAttributeCount;
+	}
+
+	public boolean hasEntries() {
+		return DLS.getNumAttributes() != 0 ;
+	}
 }
 

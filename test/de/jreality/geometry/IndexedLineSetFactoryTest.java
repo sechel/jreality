@@ -49,6 +49,9 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import junit.framework.TestCase;
+import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.PointSet;
+import de.jreality.scene.data.Attribute;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class IndexedLineSetFactoryTest extends TestCase {
@@ -114,6 +117,57 @@ public class IndexedLineSetFactoryTest extends TestCase {
 		
 	}
 	
+	public void testEdgeLabels()	{
+		
+		//factory.debug = true;
+		
+		factory.setVertexCount( 8 );
+		factory.setVertexCoordinates( vertices );
+		factory.setLineCount(6);
+		factory.setEdgeIndices( indices );
+		
+		factory.setGenerateEdgeLabels( true );
+		factory.update();
+		
+		IndexedLineSet ils = factory.getIndexedLineSet();
+		
+		String [] labels = ils.getEdgeAttributes(Attribute.LABELS).toStringArray(null);
+		
+		for( int i=0; i<labels.length; i++ ) {
+			assertEquals( labels[i], new Integer( i ).toString());
+		}
+		
+		factory.setGenerateEdgeLabels( false );
+		
+		factory.update();
+		
+		assertEquals( ils.getEdgeAttributes(Attribute.LABELS), null );
+		
+		labels[0] = "gaga";
+		
+		factory.setEdgeLabels( labels );
+		
+		factory.update();
+		
+		labels = ils.getEdgeAttributes(Attribute.LABELS).toStringArray(null);
+		
+		assertEquals( labels[0],  "gaga" );
+		for( int i=1; i<labels.length; i++ ) {
+			assertEquals( labels[i], new Integer( i ).toString());
+		}
+		
+		// this should work
+		factory.setGenerateEdgeLabels( false );
+		
+		//this should fail
+		try {
+			factory.setGenerateEdgeLabels( true );
+		} catch( UnsupportedOperationException e ) {
+		}
+		
+		factory.setEdgeLabels( (String[])null );
+		factory.setGenerateEdgeLabels( true );
+	}
 	
 	public static void main( String [] arg ) {
 

@@ -63,6 +63,8 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 		setVMax( vMax );
 		
 		setImmersion( immersion );
+		
+		vertexCoordinates.setGenerate(true);
 	}
 	
 	ParametricSurfaceFactory( Immersion immersion ) {
@@ -191,20 +193,14 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 
 		super.recompute();
 
-		
+		vertexCoordinates.update();
 	}
 	
 	protected void updateImpl() {
 	
 		super.updateImpl();
 	
-		if( nodeWasUpdated(vertexCoordinates) ) { 
-			log( "set", Attribute.COORDINATES, "vertex" );
-			ifs.setVertexAttributes(Attribute.COORDINATES, new DoubleArrayArray.Array(vertexCoordinates()));
-		}
-		// TODO figure out why I had to put this here (not getting done in super -- gunn
-		ifs.setGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE, new Dimension( getULineCount(), getVLineCount() ));
-		
+		vertexCoordinates.updateArray();
 	}
 
   /**

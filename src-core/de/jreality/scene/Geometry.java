@@ -71,7 +71,7 @@ public abstract class Geometry extends SceneGraphNode {
 //  };
   
   public static final String CATEGORY_VERTEX = "VERTEX";
-  public static final String CATEGORY_EDGE = "DGE";
+  public static final String CATEGORY_EDGE = "EDGE";
   public static final String CATEGORY_FACE = "FACE";
 	
   protected Map<String, Object> geometryAttributes=Collections.emptyMap();

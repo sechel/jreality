@@ -9,6 +9,7 @@ import de.jreality.geometry.OoNode.IsUpdateCounter;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.Scene;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.StorageModel;
 
 public class AbstractGeometryFactory {
@@ -92,40 +93,44 @@ public class AbstractGeometryFactory {
 	}
 
 	void updateGeometryAttributeCathegory( GeometryAttributeListSet gals ) {
-		Geometry geometry = gals.factory.geometry;
-		String cathegory = gals.cathegory;
+		if( !gals.hasEntries())
+			return;
 		
-		if( geometry.getNumEntries( cathegory ) == gals.noa() ) {
+		Geometry geometry = gals.factory.geometry;
+		String category = gals.category;
+		
+		if( geometry.getNumEntries( category ) == gals.noa() ) {
 			
 			for( Iterator iter = gals.DLS.storedAttributes().iterator(); iter.hasNext(); ) {
 				Attribute attr = (Attribute)iter.next();
 				
 				gals.attributeNode( attr ).update();
 				if(  nodeWasUpdated(gals.attributeNode( attr ))  ) {
-					log( "set", attr, cathegory);
-					geometry.setAttributes( cathegory, attr, gals.DLS.getWritableList(attr));
+					log( "set", attr, category);
+					geometry.setAttributes( category, attr, gals.DLS.getWritableList(attr));
 				}
 			}
 		} else {
 			gals.updateAttributes();
-			geometry.setCountAndAttributes( cathegory, gals.DLS);		
+			geometry.setCountAndAttributes( category, gals.DLS);		
 		}
 	}
 	
-	void updateStringArray( GeometryAttributeListSet gals, Attribute attr, boolean generate, OoNode node ) {
+	void updateNode( GeometryAttributeListSet gals, Attribute attr, boolean generate, OoNode node ) {
 		Geometry geometry = gals.factory.geometry;
-		String cathegory = gals.cathegory;
+		String category = gals.category;
 			
-		if( generate ) { 
-			if( nodeWasUpdated( node ) ) { 
-				log( "set", attr,  attr.toString());
-				geometry.setAttributes( cathegory, attr, StorageModel.STRING_ARRAY.createReadOnly( (String[])(node.getObject())));
-			} 
-		} else if( !gals.DLS.containsAttribute( attr ) ) {
-			log( "cancle", attr, attr.toString());
-			geometry.setAttributes( cathegory, attr, null );
-		}
-	
+		if (generate) {
+			if (nodeWasUpdated(node)) {
+				log("set", attr, category);
+				DataList dl = node.createDataList();
+				geometry.setAttributes(category, attr, dl );
+			}
+		} else if (!gals.DLS.containsAttribute(attr)
+				&& geometry.getAttributes(gals.category, attr) != null) {
+			log("cancle", attr, category);
+			geometry.setAttributes(category, attr, null);
+		}	
 	}
 	
 	String logMessage(String action, String attr, String cathegory) {

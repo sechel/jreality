@@ -45,6 +45,9 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import de.jreality.scene.data.DataList;
+import de.jreality.scene.data.StorageModel;
+
 class OoNode {
 
 	interface IsUpdateCounter {
@@ -58,11 +61,14 @@ class OoNode {
 	
 	private Object object;
 	
+	private Class type;
+	
 	private String name;
 	
 	private long counterOfLastUpdate = System.currentTimeMillis();
 	
 	private boolean currentlyUpdating = false;
+	private boolean currentlyOutdating = false;
 	
 	private boolean outOfDate = true;
 	
@@ -78,14 +84,24 @@ class OoNode {
 	}
 	
 	public OoNode( String name, IsUpdateCounter updateCounter  ) {
+		this( name, (Class)null, updateCounter );
+	}
+	
+	public OoNode( String name, Class type, IsUpdateCounter updateCounter  ) {
 		this.updateCounter = updateCounter; 
 		setObject(object);
+		this.type = type;
 		setName( name );
 	}
 
 	public OoNode( Object object, String name, IsUpdateCounter updateCounter ) {
+		this( object, object.getClass(), name, updateCounter );
+	}
+	
+	public OoNode( Object object, Class type, String name, IsUpdateCounter updateCounter ) {
 		this.updateCounter = updateCounter; 
 		setObject(object);
+		this.type = type;
 		setName( name );
 	}
 
@@ -95,6 +111,9 @@ class OoNode {
 	}
 	
 	public void setObject( Object object ) {
+		if( type != null && ! type.isAssignableFrom(object.getClass()) )
+			throw new IllegalArgumentException( "object of incompatible type" );
+		
 		if( this.object == object ) //&& this.object.equals( object))  //overhead too big
 			return;
 		this.object=object;
@@ -130,11 +149,18 @@ class OoNode {
 	}
 	
 	public void outdate() {
-		if( outOfDate )
-			return;
-		//outdateLog.info(name);
-		outOfDate=true;
-		outdateDeps();
+		if( currentlyOutdating ) {
+			throw new IllegalStateException("encounterd loop in update graph: " + name );
+		}
+		currentlyOutdating = true;
+		
+		try {
+			outOfDate=true;
+			outdateDeps();
+			
+		} finally {
+			currentlyOutdating = false;
+		}		
 	}
 	
 	public void update() {
@@ -194,5 +220,41 @@ class OoNode {
 
 	public long getCounterOfLastUpdate() {
 		return counterOfLastUpdate;
+	}
+	
+	DataList createDataList() {
+		Object currentObject = getObject();
+		
+		if( currentObject==null)
+				return null;
+		
+		if( type.equals(  int[][].class ) ) {
+			int[][] array = (int[][])(currentObject);
+			return StorageModel.INT_ARRAY_ARRAY.createReadOnly(array);		
+		} else if( type == double[].class ) {
+			double[] array = (double[])(currentObject);
+			return StorageModel.DOUBLE_ARRAY.createReadOnly(array);		
+		} else if( type == double[][].class ) {
+			double[][] array = (double[][])(currentObject);
+			return StorageModel.DOUBLE_ARRAY_ARRAY.createReadOnly(array);		
+		} else if( type.equals( String[].class ) ) {
+			String[] array = (String[])currentObject;
+			return StorageModel.STRING_ARRAY.createReadOnly( array );
+		}
+		
+		throw new IllegalStateException( "do not support type " + type );		
+	}
+	
+	Object converteDataListToArray( DataList dl ) {
+		if( type.equals(  int[][].class ) ) {
+			return dl.toIntArrayArray(null);			
+		} else if( type == double[][].class ) {
+			return dl.toDoubleArrayArray(null);		
+		} else if( type.equals( String[].class ) ) {
+			return dl.toStringArray(null);		
+		}
+		
+		throw new IllegalStateException( "do not support type " + type );	
+		
 	}
 }

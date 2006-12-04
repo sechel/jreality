@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import de.jreality.geometry.AbstractPointSetFactory.AttributeGenerator;
 import de.jreality.math.Pn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedLineSet;
@@ -60,13 +61,13 @@ import de.jreality.scene.data.StringArray;
 
 class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 	
-	final OoNode edgeLabels  = node( "edge.labels" );
-
-	boolean generateEdgeLabels	      = false;
-	
 	final IndexedLineSet ils;
 	
 	GeometryAttributeListSet edge = new GeometryAttributeListSet( this, Geometry.CATEGORY_EDGE );
+	
+	OoNode edgeCount = node( "edgeCount", Integer.class );
+		
+	AttributeGenerator edgeLabels = attributeGeneratorNode( edge, String[].class, Attribute.LABELS );
 	
 	AbstractIndexedLineSetFactory( IndexedLineSet ils, int signature ) {
 		super( ils, signature );	
@@ -87,7 +88,7 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 	}
 	
 	protected int noe(){
-		return edge.getCount();
+		return (Integer)edgeCount.getObject();
 	}
 	
 	public int getLineCount() {
@@ -96,6 +97,7 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 	
 	void setLineCount( int count ) {
 		edge.setCount(count);
+		edgeCount.setObject(new Integer(count));
 	}
 	
 	protected void setEdgeAttribute( Attribute attr, DataList data ) {
@@ -115,9 +117,9 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 	}
 	
 	protected void setEdgeIndices( int[] data, int pointCountPerLine ) {
-		if( data.length != pointCountPerLine * noe() )
+		if( data != null && data.length != pointCountPerLine * noe() )
 			throw new IllegalArgumentException( "array has wrong length" );
-		setEdgeAttribute( Attribute.INDICES, new IntArrayArray.Inlined( data, pointCountPerLine ) );
+		setEdgeAttribute( Attribute.INDICES, data == null ? null : new IntArrayArray.Inlined( data, pointCountPerLine ) );
 	}
 	
 	protected void setEdgeIndices( int[] data ) {
@@ -129,9 +131,9 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 //	}
 //	
 //	protected void setEdgeNormals( double [] data ) {
-//		if( data.length % noe() != 0 )
+//		if( data != null && data.length % noe() != 0 )
 //			throw new IllegalArgumentException( "array has wrong length" );	
-//		setEdgeAttribute( Attribute.NORMALS, new DoubleArrayArray.Inlined( data, data.length / noe() ) );
+//		setEdgeAttribute( Attribute.NORMALS, data == null ? null : new DoubleArrayArray.Inlined( data, data.length / noe() ) );
 //	}
 //	
 //	protected void setEdgeNormals( double [][] data ) {
@@ -143,9 +145,9 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 	}
 	
 	protected void setEdgeColors( double [] data ) {
-		if( data.length % noe() != 0 )
+		if( data != null && data.length % noe() != 0 )
 			throw new IllegalArgumentException( "array has wrong length" );	
-		setEdgeAttribute( Attribute.COLORS, new DoubleArrayArray.Inlined( data, data.length / noe() ) );
+		setEdgeAttribute( Attribute.COLORS, data == null ? null : new DoubleArrayArray.Inlined( data, data.length / noe() ) );
 	}
 	
 	protected void setEdgeColors( Color [] data ) {
@@ -163,31 +165,18 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 	
 	
 	protected void setEdgeLabels( String[] data ) {
-		if( data.length != noe() )
+		if( data != null && data.length != noe() )
 			throw new IllegalArgumentException( "array has wrong length" );
-		setEdgeAttribute( Attribute.LABELS, new StringArray(data));
+		setEdgeAttribute( Attribute.LABELS, data == null ? null : new StringArray(data));
 	}
 
-	String [] edgeLabels() {
-		return (String[])edgeLabels.getObject();
-	}
-	
-	String [] generateEdgeLabels( String [] edgeLabels ) {
-		if( edge.DLS.containsAttribute(Attribute.LABELS)) {
-			return edge.DLS.getList(Attribute.LABELS)
-			.toStringArray(edgeLabels);
-		} else {
-			log( "compute", Attribute.LABELS, "edge");
-			return indexString(noe());
-		}
-	}
-	
 
 	{
+		edgeLabels.addIngr(edgeCount);
 		edgeLabels.setUpdateMethod(
 				new OoNode.UpdateMethod() {
 					public Object update( Object object) {					
-						return generateEdgeLabels( (String[]) object );		
+						return indexString( (Integer)(edgeCount.getObject()) );		
 					}					
 				}
 		);
@@ -204,42 +193,27 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 	
 	
 	protected void updateImpl() {
+		
 		super.updateImpl();
 		
-		updateImplIndexedLineSet();
-	}
-	
-	final protected void updateImplIndexedLineSet() {
+		if( ils.getNumEdges() != getLineCount() )
+			ils.setNumEdges( getLineCount() );
 		
 		updateGeometryAttributeCathegory( edge );
 
-		updateImplGenerateEdgeLabels();
-		
+		edgeLabels.updateArray();
 	}
-
-	protected void updateImplGenerateEdgeLabels() {
-		if( generateEdgeLabels ) { 
-			if( nodeWasUpdated(edgeLabels) ) { 
-				log( "set", Attribute.LABELS, "labels");
-				ils.setEdgeAttributes(Attribute.LABELS, StorageModel.STRING_ARRAY.createReadOnly(edgeLabels()));
-			} 
-		} else if( ils.getEdgeAttributes().containsAttribute(Attribute.LABELS ) ) {
-			log( "cancle", Attribute.LABELS, "labels");
-			ils.setEdgeAttributes(Attribute.LABELS, null );
-		}
-	}
-
 	
 	public IndexedLineSet getIndexedLineSet() {
 		return ils;
 	}
 
 	public boolean isGenerateEdgeLabels() {
-		return generateEdgeLabels;
+		return edgeLabels.isGenerate();
 	}
 
 	public void setGenerateEdgeLabels(boolean generateEdgeLabels) {
-		this.generateEdgeLabels = generateEdgeLabels;
+		edgeLabels.setGenerate(generateEdgeLabels);
 	}
 
 }

@@ -43,6 +43,7 @@ package de.jreality.geometry;
 import java.awt.Dimension;
 import java.util.logging.Level;
 
+import de.jreality.geometry.AbstractPointSetFactory.AttributeGenerator;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
@@ -59,7 +60,7 @@ import de.jreality.util.LoggingSystem;
  */
 class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 	
-	final OoNode textureCoordinates = node( "vertex.texture" );
+	AttributeGenerator textureCoordinates = attributeGeneratorNode( vertex, double[][].class, Attribute.TEXTURE_COORDINATES);
 	
 	final OoNode closedInVDirection = node( new Boolean(false),"closed in v" );
 	final OoNode closedInUDirection = node( new Boolean(false),"closed in u" );
@@ -68,9 +69,7 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 	final OoNode uLineCount = node( new Integer(-1), "u-line count" );
 	
 	private int uLineCount_;
-	
-	boolean generateTextureCoordinates = false;
-	
+		
 	double uTextureScale = 1;
 	double vTextureScale = 1;
 	
@@ -102,7 +101,9 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		setClosedInUDirection(closeU);
 		setClosedInVDirection(closeV);
 		
-		generateTextureCoordinates = true;
+		faceIndices.setGenerate(true);
+		
+		setGenerateTextureCoordinates(true);
 	}
 	
 	void setMeshSize(int maxU2, int maxV2) {
@@ -137,7 +138,7 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		super.setFaceAttribute( attr, data );
 	}
 	
-	IntArrayArray generateEdgeIndices() {
+	/*int [][] generateEdgeIndices() {
 		int uLineCount = getULineCount();
 		int vLineCount = getVLineCount();
 		
@@ -155,11 +156,11 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 			indices[i+numUCurves] = new int[sizeVCurve];
 			for (int j = 0; j< sizeVCurve; ++j)	  indices[i+numUCurves][j] = (i*uLineCount + (j%uLineCount))%numVerts;
 		}	
-		return new IntArrayArray.Array(indices);
+		return indices;
 	}
-	
+	*/
 	{
-		faceIndices.addIngr( (OoNode)face.attributeNode.get( Attribute.INDICES )); //allready in superclass
+		//faceIndices.addIngr( face); //allready in superclass
 		faceIndices.addIngr( uLineCount );
 		faceIndices.addIngr( vLineCount );
 		faceIndices.setUpdateMethod(
@@ -231,29 +232,24 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 	}
 
 	{
-		textureCoordinates.addIngr( vertex.attributeNode( Attribute.TEXTURE_COORDINATES ));
 		textureCoordinates.addIngr( uLineCount );
 		textureCoordinates.addIngr( vLineCount );
 		textureCoordinates.setUpdateMethod(
 				new OoNode.UpdateMethod() {
 					public Object update( Object object) {					
-						return generateTextureCoordinates( (double[])object);					
+						return generateTextureCoordinates( (double[][])object);					
 					}					
 				}
 		);
 	}
 	
-	double [] textureCoordinates() {
-		return (double[])(textureCoordinates.getObject());
-	}
-	
-	double [] generateTextureCoordinates( double [] textureCoordinates ) {
+	double [][] generateTextureCoordinates( double [][] textureCoordinates ) {
 		
 		if( vertex.DLS.containsAttribute(Attribute.TEXTURE_COORDINATES))
 			return null;
 		
-		if( textureCoordinates == null || textureCoordinates.length != 2*nov() )
-			textureCoordinates = new double[2*nov()];
+		if( textureCoordinates == null || textureCoordinates.length != nov() )
+			textureCoordinates = new double[nov()][2];
 		
 		final int vLineCount = getVLineCount();
 		final int uLineCount = getULineCount();
@@ -267,9 +263,9 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		iv++, v+=dv, firstIndexInULine+=uLineCount) {
 			double u=0;
 			for(int iu=0; iu < uLineCount; iu++, u+=du) {
-				final int indexOfUV=firstIndexInULine + iu;
-				textureCoordinates[2*indexOfUV+0] = u + uTextureShift;
-				textureCoordinates[2*indexOfUV+1] = v + vTextureShift;
+				final double [] xy = textureCoordinates[firstIndexInULine + iu];
+				xy[0] = u + uTextureShift;
+				xy[1] = v + vTextureShift;
 			}
 		}
 				
@@ -279,49 +275,30 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 	void recompute() {
 		
 		super.recompute();
+	
+		faceIndices.update();
+		textureCoordinates.update();
 		
-		if( generateTextureCoordinates ) {
-			textureCoordinates.update();
-		}
 	}
 	
 	protected void updateImpl() {
 	
 		super.updateImpl();
+	
+		log( "set", GeometryUtility.QUAD_MESH_SHAPE, "vertex");
+			
+		ifs.setGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE, new Dimension( getULineCount(), getVLineCount() ));
 
-		if( nodeWasUpdated( faceIndices) ) { 
-			log( "set", Attribute.INDICES, "face");
-			ifs.setFaceAttributes( Attribute.INDICES, 
-					new IntArrayArray.Array( faceIndices() ) );
-		}
-		
-		if( !vertex.DLS.containsAttribute(Attribute.TEXTURE_COORDINATES) ) {
-			if( generateTextureCoordinates ) {
-				if( nodeWasUpdated(textureCoordinates) ) { 
-					log( "set", Attribute.TEXTURE_COORDINATES, "vertex");
-					ifs.setVertexAttributes(Attribute.TEXTURE_COORDINATES, 
-							new DoubleArrayArray.Inlined(textureCoordinates(),2));
-				}
-			} else {
-				if( ifs.getVertexAttributes().containsAttribute(Attribute.TEXTURE_COORDINATES) ) {
-					log( "cancle", Attribute.TEXTURE_COORDINATES, "vertex");
-					ifs.setVertexAttributes(Attribute.TEXTURE_COORDINATES, null);
-				}
-			}
-		}
-		
-//		if( nodeWasUpdated(uLineCount)|| nodeWasUpdated(vLineCount) ) {
-			log( "set", GeometryUtility.QUAD_MESH_SHAPE, "vertex");
-			ifs.setGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE, new Dimension( getULineCount(), getVLineCount() ));
-//		}
+		faceIndices.updateArray();
+		textureCoordinates.updateArray();
 	}
 
 	public boolean isGenerateTextureCoordinates() {
-		return generateTextureCoordinates;
+		return textureCoordinates.isGenerate();
 	}
 
 	public void setGenerateTextureCoordinates(boolean generateTextureCoordinates) {
-		this.generateTextureCoordinates = generateTextureCoordinates;
+		textureCoordinates.setGenerate(generateTextureCoordinates);
 	}
 
 	final private int index( int u, int v ) {

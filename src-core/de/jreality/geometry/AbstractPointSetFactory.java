@@ -47,6 +47,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.jreality.geometry.OoNode.IsUpdateCounter;
+import de.jreality.geometry.OoNode.UpdateMethod;
 import de.jreality.math.Pn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.PointSet;
@@ -61,14 +62,14 @@ import de.jreality.scene.data.WritableDataList;
 
 class AbstractPointSetFactory extends AbstractGeometryFactory {
 	
-	boolean generateVertexLabels = false;
-	
-	final OoNode vertexLabels = new OoNode( "vertex.labels", update );
-	
 	final PointSet ps;
 
 	final GeometryAttributeListSet vertex = new GeometryAttributeListSet( this, Geometry.CATEGORY_VERTEX );
 
+	OoNode vertexCount = node( "vertexCount", Integer.class );
+	
+	AttributeGenerator vertexLabels = attributeGeneratorNode( vertex, String[].class, Attribute.LABELS );
+	
 	AbstractPointSetFactory( PointSet ps, int signature ) {
 		
 		super( ps, signature );
@@ -81,7 +82,7 @@ class AbstractPointSetFactory extends AbstractGeometryFactory {
 	}
 	
 	int nov(){
-		return vertex.getCount();
+		return (Integer)vertexCount.getObject();
 	}
 	
 	public int getVertexCount() {
@@ -90,6 +91,7 @@ class AbstractPointSetFactory extends AbstractGeometryFactory {
 	
 	public void setVertexCount( int count ) {
 		vertex.setCount( count );
+		vertexCount.setObject(new Integer(count));
 	}
 	
 	protected void setVertexAttribute( Attribute attr, DataList data ) {
@@ -105,9 +107,9 @@ class AbstractPointSetFactory extends AbstractGeometryFactory {
 	}
 	
 	protected void setVertexCoordinates( double [] data ) {
-		if( nov() == 0 && data.length != 0 || data.length % nov() != 0 )
+		if( data != null && (nov() == 0 && data.length != 0 || data.length % nov() != 0) )
 			throw new IllegalArgumentException( "array has wrong length" );
-		setVertexAttribute( Attribute.COORDINATES, new DoubleArrayArray.Inlined( data, data.length / nov() ) );
+		setVertexAttribute( Attribute.COORDINATES, data==null ? null : new DoubleArrayArray.Inlined( data, data.length / nov() ) );
 	}
 	
 	protected void setVertexCoordinates( double [][] data ) {
@@ -121,9 +123,9 @@ class AbstractPointSetFactory extends AbstractGeometryFactory {
 	}
 	
 	protected void setVertexNormals( double [] data ) {
-		if( data.length % nov() != 0 )
+		if( data != null && data.length % nov() != 0 )
 			throw new IllegalArgumentException( "array has wrong length" );
-		setVertexAttribute( Attribute.NORMALS, new DoubleArrayArray.Inlined( data,  data.length / nov() ) );
+		setVertexAttribute( Attribute.NORMALS, data == null ? null : new DoubleArrayArray.Inlined( data,  data.length / nov() ) );
 	}
 	
 	protected void setVertexNormals( double [][] data ) {
@@ -135,9 +137,9 @@ class AbstractPointSetFactory extends AbstractGeometryFactory {
 	}
 	
 	protected void setVertexColors( double [] data ) {
-		if( data.length % nov() != 0 )
+		if( data != null && data.length % nov() != 0 )
 			throw new IllegalArgumentException( "array has wrong length" );
-		setVertexAttribute( Attribute.COLORS, new DoubleArrayArray.Inlined( data, data.length / nov() )  );
+		setVertexAttribute( Attribute.COLORS, data == null ? null : new DoubleArrayArray.Inlined( data, data.length / nov() )  );
 	}
 	
 	protected void setVertexColors( Color [] data ) {
@@ -153,9 +155,9 @@ class AbstractPointSetFactory extends AbstractGeometryFactory {
 	}
 	
 	protected void setVertexTextureCoordinates( double [] data ) {
-		if( data.length % nov() != 0 )
+		if( data != null && data.length % nov() != 0 )
 			throw new IllegalArgumentException( "array has wrong length" );
-		setVertexAttribute( Attribute.TEXTURE_COORDINATES, new DoubleArrayArray.Inlined( data, data.length / nov() ) );
+		setVertexAttribute( Attribute.TEXTURE_COORDINATES, data==null ? null : new DoubleArrayArray.Inlined( data, data.length / nov() ) );
 	}
 	
 	protected void setVertexTextureCoordinates( double [][] data ) {
@@ -173,21 +175,8 @@ class AbstractPointSetFactory extends AbstractGeometryFactory {
 	}
 	
 
-	String [] vertexLabels() {
-		return (String[])vertexLabels.getObject();
-	}
-	
-	String [] generateVertexLabels() {
-		if( vertex.DLS.containsAttribute(Attribute.LABELS)) {
-			return vertex.DLS.getList(Attribute.LABELS)
-			.toStringArray((String[])vertexLabels.getObject());
-		} else {
-			log( "compute", Attribute.LABELS, "vertex");
-			return indexString(nov());
-		}
-	}
-	
 	String [] indexString(int nov) {
+		if( nov == 0 ) return null;
 		String [] labels = new String[nov];
 		for( int i=0; i<nov; i++ ) {
 			labels[i]=Integer.toString(i);
@@ -196,27 +185,27 @@ class AbstractPointSetFactory extends AbstractGeometryFactory {
 	}
 
 	{
+		vertexLabels.addIngr(vertexCount);
 		vertexLabels.setUpdateMethod(
 				new OoNode.UpdateMethod() {
 					public Object update( Object object) {					
-						return generateVertexLabels();		
+						return indexString(nov());		
 					}					
 				}
 		);
 	}
 	
-	void recompute() {
-		
-		super.recompute();
-		
-		if( isGenerateVertexLabels() ) 
-			vertexLabels.update();
-		
+	void recompute() {	
+		super.recompute();				
+		vertexLabels.update();	
 	}
 
 	
 	void updateImpl() {
 		super.updateImpl();
+		
+		if( ps.getNumPoints() != getVertexCount() )	
+			ps.setNumPoints( getVertexCount());
 		
 		updatePointSet();
 	}
@@ -225,7 +214,7 @@ class AbstractPointSetFactory extends AbstractGeometryFactory {
 		
 		updateGeometryAttributeCathegory( vertex );
 		
-		updateStringArray( vertex, Attribute.LABELS, generateVertexLabels, vertexLabels );
+		vertexLabels.updateArray();
 		
 	}
 	
@@ -234,19 +223,88 @@ class AbstractPointSetFactory extends AbstractGeometryFactory {
 	}
 	
 	public boolean isGenerateVertexLabels() {
-		return generateVertexLabels;
+		return vertexLabels.isGenerate();
 	}
 
 	public void setGenerateVertexLabels(boolean generateVertexLabels) {
-		this.generateVertexLabels = generateVertexLabels;
+		vertexLabels.setGenerate(generateVertexLabels);
+	}
+	
+	OoNode node( String name, Class type ) {
+		return new OoNode(name, type, this.update);
+	}
+	
+	AttributeGenerator attributeGeneratorNode( GeometryAttributeListSet gals, Class type, Attribute attr ) {
+		return new AttributeGenerator(  gals, type, attr, this );
+	}
+	
+	
+	
+	static class AttributeGenerator extends OoNode {
+	
+		final GeometryAttributeListSet gals;
+		final Attribute attr;
+		final AbstractGeometryFactory factory;
 		
-		if( generateVertexLabels ) {
-			if( vertex.DLS.containsAttribute( Attribute.LABELS))
-				throw new UnsupportedOperationException( "you cannot not generate the attribute " + Attribute.LABELS +
-						"because it is explicitly set. Unset it first." );
-			vertex.blockAttribute.add( Attribute.LABELS );
-		} else {
-			vertex.blockAttribute.remove( Attribute.LABELS );
+		boolean generate=false;
+		
+		AttributeGenerator( GeometryAttributeListSet gals, Class type, Attribute attr, AbstractGeometryFactory factory ) {
+			super(gals.category.toLowerCase()+"."+attr.getName(), type, factory.update );
+			
+			this.gals = gals;
+			this.attr = attr;
+			this.factory = factory;
+			
+			setUpdateMethod(null);
+		}
+		
+		public void updateArray() {
+			factory.updateNode( gals, attr, generate, this );
+		}
+		
+		public void update() {
+			//if( generate ) 
+				super.update();
+			
+		}
+
+		public void setUpdateMethod(final UpdateMethod method) {
+			super.setUpdateMethod(
+					new OoNode.UpdateMethod() {
+
+						public Object update(Object object) {
+							if( generate && method != null )
+								return method.update(object);
+							
+							DataList dl = AttributeGenerator.this.gals.DLS.getList(AttributeGenerator.this.attr);
+							
+							return dl==null?null:converteDataListToArray(dl);
+						}
+						
+					}
+			);	
+		}
+
+		boolean isGenerate() {
+			return generate;
+		}
+		
+		void setGenerate(boolean generate) {
+			if( this.generate==generate)
+				return;
+			
+			this.outdate();
+			
+			this.generate = generate;
+			
+			if( generate ) {
+				if( gals.DLS.containsAttribute( attr))
+					throw new UnsupportedOperationException( "you cannot not generate the attribute " + attr +
+							"because it is explicitly set. Unset it first." );
+				gals.blockAttribute( attr );
+			} else {
+				gals.unblockAttribute( attr );
+			}
 		}
 	}
 	

@@ -113,13 +113,12 @@ import de.jreality.util.SceneGraphUtility;
 	}
 
 	double [][] generateFaceNormals() {
-		if( face.DLS.containsAttribute(Attribute.NORMALS)) {
-			return face.DLS.getList(Attribute.NORMALS)
-			.toDoubleArrayArray((double[][])faceNormals.getObject());
-		} else {
-			log( "compute", Attribute.NORMALS, "face");
-			return calculateFaceNormals( faceIndices(), vertexCoordinates(), getSignature() );
-		}
+		int [][] fi = (int[][])faceIndices.getObject();
+		double [][] vc = (double[][])vertexCoordinates.getObject();
+		if( fi==null || vc==null)
+			return null;
+		return calculateFaceNormals( fi, vc, getSignature() );
+		
 	}
 	
 	private double[][] calculateFaceNormals(int[][] is, double[][] ds, int signature) {
