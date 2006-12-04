@@ -1,4 +1,4 @@
-package org.sunflow.core.shader;
+package de.jreality.sunflow.core.shader;
 
 import org.sunflow.SunflowAPI;
 import org.sunflow.core.ParameterList;

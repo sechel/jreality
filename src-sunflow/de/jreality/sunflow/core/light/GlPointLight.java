@@ -1,4 +1,4 @@
-package org.sunflow.core.light;
+package de.jreality.sunflow.core.light;
 
 import org.sunflow.SunflowAPI;
 import org.sunflow.core.LightSample;

@@ -1,4 +1,4 @@
-package org.sunflow.core.primitive;
+package de.jreality.sunflow.core.primitive;
 
 import org.sunflow.SunflowAPI;
 import org.sunflow.core.IntersectionState;

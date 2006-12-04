@@ -53,10 +53,7 @@ import org.sunflow.SunflowAPI;
 import org.sunflow.core.Display;
 import org.sunflow.core.camera.PinholeLens;
 import org.sunflow.core.gi.AmbientOcclusionGIEngine;
-import org.sunflow.core.light.DirectionalLight;
-import org.sunflow.core.light.GlPointLight;
 import org.sunflow.core.primitive.Mesh;
-import org.sunflow.core.primitive.SkyBox;
 import org.sunflow.image.Color;
 import org.sunflow.math.Matrix4;
 import org.sunflow.math.Point3;
@@ -94,6 +91,9 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
+import de.jreality.sunflow.core.light.DirectionalLight;
+import de.jreality.sunflow.core.light.GlPointLight;
+import de.jreality.sunflow.core.primitive.SkyBox;
 
 
 public class SunflowRenderer extends SunflowAPI {
@@ -323,12 +323,12 @@ public class SunflowRenderer extends SunflowAPI {
 		
 		@Override
 		public void visit(Cylinder c) {
-			geometry(getName(c), new org.sunflow.core.primitive.Cylinder());
+			geometry(getName(c), new de.jreality.sunflow.core.primitive.Cylinder());
 		}
 
 		private void applyShader(DefaultPolygonShader ps) {
 			appCount++;
-			shader("default-shader"+appCount, new org.sunflow.core.shader.DefaultPolygonShader(ps, rhs));
+			shader("default-shader"+appCount, new de.jreality.sunflow.core.shader.DefaultPolygonShader(ps, rhs));
 		}
 		
 	}
@@ -413,7 +413,7 @@ public class SunflowRenderer extends SunflowAPI {
 
 		// init default primitives
 		geometry(POINT_SPHERE, new org.sunflow.core.primitive.Sphere());
-		geometry(LINE_CYLINDER, new org.sunflow.core.primitive.Cylinder());
+		geometry(LINE_CYLINDER, new de.jreality.sunflow.core.primitive.Cylinder());
 
 		
         // visit
