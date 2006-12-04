@@ -113,12 +113,14 @@ import de.jreality.scene.Appearance;
 	public final static String POLYGON = 	"polygon";
 	public final static String VERTEX = 	"vertex";
 	public final static String VOLUME = 	"volume";
+	public final static String TEXT =		"text";
 	private final static String SHADER = "Shader";
 	public final static String POINT_SHADER = 		POINT+SHADER;
 	public final static String LINE_SHADER = 		LINE+SHADER;
 	public final static String POLYGON_SHADER = 	POLYGON+SHADER;
 	public final static String VERTEX_SHADER = 	VERTEX+SHADER;
 	public final static String VOLUME_SHADER = 	VOLUME+SHADER;
+	public final static String TEXT_SHADER = 	TEXT+SHADER;
 	// default point shader
 	public final static String SPHERES_DRAW = 	"spheresDraw";
 	public final static boolean SPHERES_DRAW_DEFAULT = true;
@@ -172,6 +174,12 @@ import de.jreality.scene.Appearance;
 	public static final String IMPLODE = "implode";
 	public static final String IMPLODE_FACTOR = "implodeFactor";
 	public static final double IMPLODE_FACTOR_DEFAULT = 0.6;
+	
+	// default text shader
+	public static final String SCALE = "scale";
+	public static final String OFFSET = "offset";
+	public static final String ALIGNMENT = "alignment";
+	public static final String FONT	= "font";
 	
 	// miscellaneous
 	public static final String PICKABLE = "pickable";
