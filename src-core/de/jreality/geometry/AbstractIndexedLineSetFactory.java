@@ -65,7 +65,7 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 	
 	GeometryAttributeListSet edge = new GeometryAttributeListSet( this, Geometry.CATEGORY_EDGE );
 	
-	OoNode edgeCount = node( "edgeCount", Integer.class );
+	OoNode edgeCount = node( "edgeCount", Integer.class, 0 );
 		
 	AttributeGenerator edgeLabels = attributeGeneratorNode( edge, String[].class, Attribute.LABELS );
 	

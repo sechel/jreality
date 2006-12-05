@@ -59,7 +59,7 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	
 	GeometryAttributeListSet face = new GeometryAttributeListSet( this, Geometry.CATEGORY_FACE );
 	
-	OoNode faceCount = node( "faceCount", Integer.class );
+	OoNode faceCount = node( "faceCount", Integer.class, 0 );
 	
 	AttributeGenerator vertexCoordinates = attributeGeneratorNode( vertex, double[][].class, Attribute.COORDINATES);
 	AttributeGenerator vertexNormals     = attributeGeneratorNode( vertex, double[][].class, Attribute.NORMALS );

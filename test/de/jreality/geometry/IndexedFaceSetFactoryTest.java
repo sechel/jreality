@@ -102,6 +102,10 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		
 	}
 	
+	public void testBugInitialGetVertexCount() {
+		factory.getFaceCount();
+	}
+	
 	public void testFaceLabels()	{
 		
 		//factory.debug = true;

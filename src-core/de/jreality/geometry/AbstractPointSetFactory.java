@@ -66,7 +66,7 @@ class AbstractPointSetFactory extends AbstractGeometryFactory {
 
 	final GeometryAttributeListSet vertex = new GeometryAttributeListSet( this, Geometry.CATEGORY_VERTEX );
 
-	OoNode vertexCount = node( "vertexCount", Integer.class );
+	OoNode vertexCount = node( "vertexCount", Integer.class, 0 );
 	
 	AttributeGenerator vertexLabels = attributeGeneratorNode( vertex, String[].class, Attribute.LABELS );
 	
@@ -228,6 +228,12 @@ class AbstractPointSetFactory extends AbstractGeometryFactory {
 
 	public void setGenerateVertexLabels(boolean generateVertexLabels) {
 		vertexLabels.setGenerate(generateVertexLabels);
+	}
+	
+	OoNode node( String name, Class type, Object value ) {
+		OoNode node = new OoNode(name, type, this.update);
+		node.setObject(value);
+		return node;
 	}
 	
 	OoNode node( String name, Class type ) {
