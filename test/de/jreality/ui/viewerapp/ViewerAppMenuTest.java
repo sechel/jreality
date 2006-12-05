@@ -57,15 +57,12 @@ public class ViewerAppMenuTest {
   
   public static void main(String[] args) {
     
-    SceneGraphComponent cmp = new SceneGraphComponent();
-    cmp.setName("father");
+    SceneGraphComponent cmp = new SceneGraphComponent("father");
     cmp.setAppearance(new Appearance());
     cmp.setTransformation(new Transformation());
-    SceneGraphComponent cmp1 = new SceneGraphComponent();
-    cmp1.setName("Icosahedron");
+    SceneGraphComponent cmp1 = new SceneGraphComponent("Icosahedron");
     cmp1.setGeometry(Primitives.icosahedron());
-    SceneGraphComponent cmp2 = new SceneGraphComponent();
-    cmp2.setName("Cube");
+    SceneGraphComponent cmp2 = new SceneGraphComponent("Cube");
     cmp2.setGeometry(Primitives.coloredCube());
     cmp2.setAppearance(new Appearance());
     FactoredMatrix m = new FactoredMatrix();
@@ -76,10 +73,12 @@ public class ViewerAppMenuTest {
     
     ViewerApp viewerApp = new ViewerApp(cmp);
     viewerApp.setAttachNavigator(true);
-//    viewerApp.setAttachBeanShell(true);
+    viewerApp.setAttachBeanShell(true);
 //    viewerApp.setShowMenu(false);
     
-//    viewerApp.getMenu().removeMenu(ViewerAppMenu.APP_MENU);
+//    JPanel p = new JPanel();
+//    p.add( new JCheckBox("test component", true) );
+//    viewerApp.addAccessory(p, "test tab");
     
     viewerApp.update();
     viewerApp.display();
