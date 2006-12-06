@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src-backends-share"/>
+	<classpathentry kind="src" path="src-core"/>
+	<classpathentry excluding="de/jreality/examples/SwtExample.java" kind="src" path="src-examples"/>
+	<classpathentry kind="src" path="src-gpgpu"/>
+	<classpathentry kind="src" path="src-io"/>
+	<classpathentry kind="src" path="src-jogl"/>
+	<classpathentry kind="src" path="src-portal"/>
+	<classpathentry kind="src" path="src-proxies"/>
+	<classpathentry kind="src" path="src-renderman"/>
+	<classpathentry kind="src" path="src-soft"/>
+	<classpathentry kind="src" path="src-soft-new"/>
+	<classpathentry kind="src" path="src-sunflow"/>
+	<classpathentry kind="src" path="src-swing"/>
+	<classpathentry kind="src" path="src-tool"/>
+	<classpathentry kind="src" path="src-tutorial"/>
+	<classpathentry kind="src" path="src-ui"/>
+	<classpathentry kind="src" path="src-vr"/>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="src" path="test-backends-share"/>
+	<classpathentry kind="src" path="test-io"/>
+	<classpathentry kind="src" path="test-portal"/>
+	<classpathentry kind="src" path="test-proxies"/>
+	<classpathentry kind="src" path="test-swing"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/antlr.jar"/>
+	<classpathentry kind="lib" path="lib/bsh.jar"/>
+	<classpathentry kind="lib" path="lib/jogl.jar"/>
+	<classpathentry kind="lib" path="lib/jtem-beans.jar"/>
+	<classpathentry kind="lib" path="lib/jterm.jar"/>
+	<classpathentry kind="lib" path="lib/smrj.jar"/>
+	<classpathentry kind="lib" path="lib/sunflow.jar"/>
+	<classpathentry kind="lib" path="lib/xpp3.jar"/>
+	<classpathentry kind="lib" path="lib/xstream.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3.8.1"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
