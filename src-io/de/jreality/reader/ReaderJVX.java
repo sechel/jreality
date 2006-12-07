@@ -41,6 +41,7 @@
 package de.jreality.reader;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Stack;
@@ -50,7 +51,10 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.Attributes;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 import de.jreality.scene.Appearance;
@@ -63,6 +67,7 @@ import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
+import de.jreality.util.Secure;
 
 
 /**
@@ -80,8 +85,12 @@ public class ReaderJVX extends AbstractReader {
     parserFactory.setValidating(false);
     try {
         SAXParser parser = parserFactory.newSAXParser();
+        XMLReader reader= parser.getXMLReader(); 
+        reader.setEntityResolver(new Resolver());
         Handler handler = new Handler();
-        parser.parse(input.getInputStream(), handler);
+		reader.setContentHandler(handler);
+		InputSource src=new InputSource(input.getInputStream());
+        reader.parse(src); 
         root = handler.getRoot();
     } catch (ParserConfigurationException e) {
         IOException ie = new IOException(e.getMessage());
@@ -92,6 +101,31 @@ public class ReaderJVX extends AbstractReader {
       ie.initCause(e);
       throw ie;
     }
+  }
+  
+  static class Resolver implements EntityResolver {
+	    public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+	    	System.out.println("pubID="+publicId+"   sysID="+systemId);
+	    	Input dtd = null;
+	    	try {
+	    		dtd = Input.getInput("jvx.dtd");
+	    	} catch (Exception e) {
+	    		// not found
+	    	}
+//	    	if (dtd == null) try {
+//	    		dtd = Input.getInput(ReaderJVX.class.getResource("jvx.dtd"));
+//	    		System.out.println("found via class");
+//	    	} catch (Exception e) {
+//	    		// not found
+//	    	}
+	    	if (dtd == null) try {
+	    		dtd = Input.getInput(new URL(systemId));
+	    	} catch (Exception e) {
+	    		// not found
+	    	}
+	    	if (dtd == null) throw new RuntimeException("could not find jvx.dtd");
+	    	return new InputSource(dtd.getInputStream());
+	    }
   }
   
   static class Handler extends DefaultHandler {
