@@ -67,6 +67,7 @@ import de.jreality.ui.viewerapp.actions.edit.AddTool;
 import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
 import de.jreality.ui.viewerapp.actions.edit.ExportOBJ;
 import de.jreality.ui.viewerapp.actions.edit.Remove;
+import de.jreality.ui.viewerapp.actions.edit.SaveSelected;
 import de.jreality.ui.viewerapp.actions.edit.SwitchBackgroundColor;
 import de.jreality.ui.viewerapp.actions.edit.ToggleAppearance;
 import de.jreality.ui.viewerapp.actions.edit.TogglePickable;
@@ -79,7 +80,6 @@ import de.jreality.ui.viewerapp.actions.file.LoadFile;
 import de.jreality.ui.viewerapp.actions.file.LoadScene;
 import de.jreality.ui.viewerapp.actions.file.Quit;
 import de.jreality.ui.viewerapp.actions.file.SaveScene;
-import de.jreality.ui.viewerapp.actions.file.SaveSelected;
 import de.jreality.ui.viewerapp.actions.view.ToggleBeanShell;
 import de.jreality.ui.viewerapp.actions.view.ToggleFullScreen;
 import de.jreality.ui.viewerapp.actions.view.ToggleMenu;
@@ -108,12 +108,13 @@ public class ViewerAppMenu {
   public static String LOAD_FILE_MERGED = "Load merged files";
   public static String LOAD_SCENE = "Load scene";
   public static String SAVE_SCENE = "Save scene";
-  public static String SAVE_SELECTED = "Save selected";
   public static String EXPORT = "Export";
   public static String QUIT = "Quit";
   
   //EDIT MENU
   public static String TOGGLE_RENDER_SELECTION = "Show selection";
+  public static String SAVE_SELECTED = "Save selected";
+  public static String EXPORT_OBJ = "Write OBJ";
   public static String REMOVE = "Remove";
   public static String APPEARANCE = "Appearance";
   public static String TOGGLE_VERTEX_DRAWING = "Toggle vertex drawing";
@@ -121,7 +122,6 @@ public class ViewerAppMenu {
   public static String TOGGLE_FACE_DRAWING = "Toggle face drawing";
   public static String BACKGROUND_COLOR = "Set background color";
   public static String ADD_TOOL = "Add Tools";
-  public static String EXPORT_OBJ = "Write OBJ";
   public static String TOGGLE_PICKABLE = "Toggle pickable";
   public static String ASSIGN_FACE_AABBTREE = "Assign AABBTree";
   
@@ -187,7 +187,6 @@ public class ViewerAppMenu {
     fileMenu.add(new JMenuItem(new LoadScene(LOAD_SCENE, viewerApp)));
     fileMenu.addSeparator();
     fileMenu.add(new JMenuItem(new SaveScene(SAVE_SCENE, viewerApp.getViewer(), frame)));
-    fileMenu.add(new JMenuItem(new SaveSelected(SAVE_SELECTED, sm, frame)));
     fileMenu.addSeparator();
     
     JMenu export = new JMenu(EXPORT);
@@ -221,6 +220,10 @@ public class ViewerAppMenu {
     editMenu.add(renderSelectionCheckbox);
     editMenu.addSeparator();
     
+    editMenu.add(new JMenuItem(new SaveSelected(SAVE_SELECTED, sm, frame)));
+    editMenu.add(new JMenuItem(new ExportOBJ(EXPORT_OBJ, sm, frame)));
+    editMenu.addSeparator();
+    
     editMenu.add(new JMenuItem(new Remove(REMOVE, sm)));
     editMenu.addSeparator();
     
@@ -245,9 +248,6 @@ public class ViewerAppMenu {
     editMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, frame)));
     editMenu.addSeparator();
 
-    editMenu.add(new JMenuItem(new ExportOBJ(EXPORT_OBJ, sm, frame)));
-    editMenu.addSeparator();
-    
     editMenu.add(new JMenuItem(new TogglePickable(TOGGLE_PICKABLE, sm)));
     editMenu.add(new JMenuItem(new AssignFaceAABBTree(ASSIGN_FACE_AABBTREE, sm)));
     
