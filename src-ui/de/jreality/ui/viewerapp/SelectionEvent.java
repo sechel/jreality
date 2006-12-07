@@ -41,6 +41,7 @@
 package de.jreality.ui.viewerapp;
 
 import de.jreality.scene.Appearance;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
@@ -133,6 +134,12 @@ public class SelectionEvent extends java.util.EventObject {
   public boolean componentSelected() {
     return (nodeSelected() && 
         selection.getLastElement() instanceof SceneGraphComponent);
+  }
+  
+  /** Returns true iff a {@link Geometry} was selected */
+  public boolean geometrySelected() {
+    return (nodeSelected() && 
+        selection.getLastElement() instanceof Geometry);
   }
   
   /** Returns true iff an {@link Appearance} was selected */

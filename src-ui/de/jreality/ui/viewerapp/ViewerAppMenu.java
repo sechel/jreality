@@ -65,6 +65,7 @@ import de.jreality.ui.viewerapp.actions.camera.ShiftFocus;
 import de.jreality.ui.viewerapp.actions.camera.ToggleStereo;
 import de.jreality.ui.viewerapp.actions.edit.AddTool;
 import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
+import de.jreality.ui.viewerapp.actions.edit.ExportOBJ;
 import de.jreality.ui.viewerapp.actions.edit.Remove;
 import de.jreality.ui.viewerapp.actions.edit.SwitchBackgroundColor;
 import de.jreality.ui.viewerapp.actions.edit.ToggleAppearance;
@@ -110,14 +111,17 @@ public class ViewerAppMenu {
   public static String SAVE_SELECTED = "Save selected";
   public static String EXPORT = "Export";
   public static String QUIT = "Quit";
+  
   //EDIT MENU
+  public static String TOGGLE_RENDER_SELECTION = "Show selection";
   public static String REMOVE = "Remove";
-  public static String ADD_TOOL = "Add Tools";
   public static String APPEARANCE = "Appearance";
   public static String TOGGLE_VERTEX_DRAWING = "Toggle vertex drawing";
   public static String TOGGLE_EDGE_DRAWING = "Toggle egde drawing";
   public static String TOGGLE_FACE_DRAWING = "Toggle face drawing";
   public static String BACKGROUND_COLOR = "Set background color";
+  public static String ADD_TOOL = "Add Tools";
+  public static String EXPORT_OBJ = "Write OBJ";
   public static String TOGGLE_PICKABLE = "Toggle pickable";
   public static String ASSIGN_FACE_AABBTREE = "Assign AABBTree";
   
@@ -130,11 +134,11 @@ public class ViewerAppMenu {
   public static String INCREASE_EYE_SEPARATION = "Increase eyeSeparation";
   public static String TOGGLE_PERSPECTIVE = "Toggle perspective";
   public static String TOGGLE_STEREO = "Toggle stereo";
+  
   //VIEW MENU
   public static String TOGGLE_NAVIGATOR = "Show navigator";
   public static String TOGGLE_BEANSHELL = "Show bean shell"; 
   public static String TOGGLE_MENU = "Hide menu bar";
-  public static String TOGGLE_RENDER_SELECTION = "Show selection";
   public static String TOGGLE_FULL_VIEWER = "Toggle viewer full screen";
   public static String TOGGLE_FULL_SCREEN = "Toggle full screen";
   public static String VIEWER_ASPECT_4_TO_3 ="Viewer aspect ratio 4:3";
@@ -241,6 +245,9 @@ public class ViewerAppMenu {
     editMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, frame)));
     editMenu.addSeparator();
 
+    editMenu.add(new JMenuItem(new ExportOBJ(EXPORT_OBJ, sm, frame)));
+    editMenu.addSeparator();
+    
     editMenu.add(new JMenuItem(new TogglePickable(TOGGLE_PICKABLE, sm)));
     editMenu.add(new JMenuItem(new AssignFaceAABBTree(ASSIGN_FACE_AABBTREE, sm)));
     
