@@ -123,7 +123,7 @@ public class ReaderJVX extends AbstractReader {
 	    	} catch (Exception e) {
 	    		// not found
 	    	}
-	    	if (dtd == null) throw new RuntimeException("could not find jvx.dtd");
+	    	if (dtd == null) throw new RuntimeException("could not find jvx.dtd - download http://www.javaview.de/rsrc/jvx.dtd into the execution dir");
 	    	return new InputSource(dtd.getInputStream());
 	    }
   }
