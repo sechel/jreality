@@ -1,10 +1,9 @@
 package de.jreality.sunflow;
 
-import java.awt.Image;
-
 import org.sunflow.image.Color;
 import org.sunflow.system.ImagePanel;
 
+@SuppressWarnings("serial")
 public class CancelableImagePanel extends ImagePanel {
 
 	private boolean cancel;
