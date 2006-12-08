@@ -82,4 +82,8 @@ public class SkyBox implements PrimitiveList, Shader {
             basis.flipV();
         }
     }
+
+	public PrimitiveList getBakingPrimitives() {
+		return null;
+	}
 }

@@ -32,13 +32,15 @@ public class RenderDisplay implements Display {
 			frame.addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosing(WindowEvent e) {
-					if (JOptionPane.showConfirmDialog(
-							frame,
-							"Do you want to continue rendering in background?",
-							"Sunflow",
-							JOptionPane.YES_NO_OPTION
-					) == JOptionPane.NO_OPTION) {
-						imagePanel.cancel();
+					if (!imagePanel.isDone()) {
+						if (JOptionPane.showConfirmDialog(
+								frame,
+								"Do you want to continue rendering in background?",
+								"Sunflow",
+								JOptionPane.YES_NO_OPTION
+						) == JOptionPane.NO_OPTION) {
+							imagePanel.cancel();
+						}
 					}
 				}
 			});

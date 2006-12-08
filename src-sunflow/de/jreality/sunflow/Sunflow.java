@@ -63,10 +63,10 @@ import de.jreality.scene.Viewer;
 @SuppressWarnings("serial")
 public class Sunflow {
 
-  private static String[] filters = {"png", "tga", "hdr"};
-  
+	private static String[] filters = {"png", "tga", "hdr"};
+
 	private Sunflow() {}
-	
+
 	public static void renderAndSave(final Viewer v, RenderOptions options, final Dimension dim, File file) {
 		final RenderDisplay renderDisplay = new RenderDisplay(file.getAbsolutePath());
 
@@ -111,58 +111,58 @@ public class Sunflow {
 		frame.setContentPane((Container) viewer.getViewingComponent());
 		frame.pack();
 		frame.setVisible(true);
-		
+
 		new Thread(new Runnable() {
 			public void run() {
 				viewer.render();
 			}
 		}).start();
 	}
-	
-  
+
+
 	private static void save(SunflowViewer v, JFrame frame) {
-    FileSystemView view = FileSystemView.getFileSystemView();
-    JFileChooser chooser = new JFileChooser(view.getHomeDirectory(), view);
-    chooser.setMultiSelectionEnabled(false);
-    chooser.setAcceptAllFileFilterUsed(false);
-    
-    //create file filters
-    for (int i = 0; i < filters.length; i++) {
-      final int ind = i;
-      chooser.addChoosableFileFilter(new FileFilter() {
-        @Override
-        public boolean accept(File f) {
-          return (f.isDirectory() || 
-              f.getName().toLowerCase().endsWith("."+filters[ind]));
-        }
-        @Override
-        public String getDescription() {
-          return filters[ind].toUpperCase()+" Image (*."+filters[ind]+")";
-        }
-      });
-    }
-    chooser.setFileFilter(chooser.getChoosableFileFilters()[0]);
-    
-    //get target file and let user confirm an overwriting
-    File file = null;
-    while (true) {
-      int choice = chooser.showSaveDialog(frame);
-      if (choice == JFileChooser.APPROVE_OPTION) {
-        File chosen = chooser.getSelectedFile();
-        if (!chosen.exists()) {
-          file = chosen; break;
-        } 
-        else {  //file exists
-          int confirm = JOptionPane.showConfirmDialog(frame, "Overwrite file "+chosen.getName()+"?");
-          if (confirm == JOptionPane.OK_OPTION) {
-            file = chosen; break;
-          } 
-          else if (confirm == JOptionPane.NO_OPTION) continue;
-          break;  //confirm == CANCEL_OPTION
-        }
-      } else break;  //choice == CANCEL_OPTION
-    }
-    
+		FileSystemView view = FileSystemView.getFileSystemView();
+		JFileChooser chooser = new JFileChooser(view.getHomeDirectory(), view);
+		chooser.setMultiSelectionEnabled(false);
+		chooser.setAcceptAllFileFilterUsed(false);
+
+		//create file filters
+		for (int i = 0; i < filters.length; i++) {
+			final int ind = i;
+			chooser.addChoosableFileFilter(new FileFilter() {
+				@Override
+				public boolean accept(File f) {
+					return (f.isDirectory() || 
+							f.getName().toLowerCase().endsWith("."+filters[ind]));
+				}
+				@Override
+				public String getDescription() {
+					return filters[ind].toUpperCase()+" Image (*."+filters[ind]+")";
+				}
+			});
+		}
+		chooser.setFileFilter(chooser.getChoosableFileFilters()[0]);
+
+		//get target file and let user confirm an overwriting
+		File file = null;
+		while (true) {
+			int choice = chooser.showSaveDialog(frame);
+			if (choice == JFileChooser.APPROVE_OPTION) {
+				File chosen = chooser.getSelectedFile();
+				if (!chosen.exists()) {
+					file = chosen; break;
+				} 
+				else {  //file exists
+					int confirm = JOptionPane.showConfirmDialog(frame, "Overwrite file "+chosen.getName()+"?");
+					if (confirm == JOptionPane.OK_OPTION) {
+						file = chosen; break;
+					} 
+					else if (confirm == JOptionPane.NO_OPTION) continue;
+					break;  //confirm == CANCEL_OPTION
+				}
+			} else break;  //choice == CANCEL_OPTION
+		}
+
 		if (file != null) v.getViewingComponent().save(file.getAbsolutePath());
 	}
 
