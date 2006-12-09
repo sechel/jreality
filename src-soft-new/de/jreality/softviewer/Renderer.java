@@ -65,7 +65,7 @@ public class Renderer  extends AbstractRenderer {
         this(bi,new int[bi.getWidth()* bi.getHeight()]);
     }
   private Renderer(BufferedImage bi,int[] pixels ) {
-    super(new DoubleTriangleRasterizer(pixels),false);
+    super(new DoubleTriangleRasterizer(pixels), false, false);
     //pixels = new int[bi.getWidth()* bi.getHeight()];
     this.pixels = pixels;
     img = bi;

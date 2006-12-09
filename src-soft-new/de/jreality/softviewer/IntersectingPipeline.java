@@ -47,9 +47,8 @@ import java.util.Vector;
 
 public class IntersectingPipeline extends TrianglePipeline {
 
-    public IntersectingPipeline(TriangleRasterizer rasterizer) {
-        super(rasterizer, true);
-        // TODO Auto-generated constructor stub
+    public IntersectingPipeline(TriangleRasterizer rasterizer, boolean sortAll) {
+        super(rasterizer, sortAll);
     }
 
     private int count;
@@ -108,6 +107,7 @@ public class IntersectingPipeline extends TrianglePipeline {
      * new
      */
     private void rasterRemaining_new() {
+        rasterizer.setTransparencyEnabled(true);
         ignore.clear();
         obstruct.clear();
         // we need to dehomogenize for the intersection to work

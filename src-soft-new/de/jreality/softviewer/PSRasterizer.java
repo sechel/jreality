@@ -135,7 +135,8 @@ public class PSRasterizer extends TriangleRasterizer {
         writer.print("[");
         for (int i = 0; i < 3; i++) {
             writer.print(" 0");
-            writer.print(" " + polygon[i][Polygon.SX]);
+           //writer.printf(" %3f", polygon[i][Polygon.SX]);
+           writer.print(" " + polygon[i][Polygon.SX]);
             writer.print(" " + ((ymax - ymin) - polygon[i][Polygon.SY]));
             writer.print(" " + polygon[i][Polygon.R] / 255.);
             writer.print(" " + polygon[i][Polygon.G] / 255.);

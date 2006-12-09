@@ -63,7 +63,7 @@ public class SVGRenderer  extends AbstractRenderer {
     private final  PrintWriter writer;
     
     public SVGRenderer(PrintWriter writer, int width, int height ) throws FileNotFoundException {
-        super(new SVGRasterizer(writer),true);
+        super(new SVGRasterizer(writer), true, true);
         d = new Dimension (width,height);
         this.writer = writer;
     } 

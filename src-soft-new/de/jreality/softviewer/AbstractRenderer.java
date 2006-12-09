@@ -67,13 +67,15 @@ public abstract class AbstractRenderer {
     private Color leftupper;
     private Color rightlower;
 
-    public AbstractRenderer(TriangleRasterizer r,boolean intersecting) {
+    public AbstractRenderer(TriangleRasterizer r,boolean intersecting,boolean sortAll) {
         super();
         rasterizer = r;
         if(intersecting)
-            pipeline = new IntersectingPipeline(rasterizer);
+            pipeline = new IntersectingPipeline(rasterizer,sortAll);
+        //    pipeline = new CutTrianglesPipeline(rasterizer);
         else
             pipeline = new TrianglePipeline(rasterizer);
+            //pipeline = new IntersectingPipeline(rasterizer,sortAll);
         renderTraversal = new RenderingVisitor();
         renderTraversal.setPipeline(pipeline);
     }
@@ -234,6 +236,7 @@ public abstract class AbstractRenderer {
     public abstract void update();
     
     public void setBestQuality(boolean b) {
+        
         renderTraversal.setBestQuality(b);
         
     }

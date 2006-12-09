@@ -63,7 +63,7 @@ public class PSRenderer  extends AbstractRenderer {
     private final  PrintWriter writer;
     
     public PSRenderer(PrintWriter writer, int width, int height ) throws FileNotFoundException {
-        super(new PSRasterizer(writer),true);
+        super(new PSRasterizer(writer), true, true);
         d = new Dimension (width,height);
         this.writer = writer;
     } 

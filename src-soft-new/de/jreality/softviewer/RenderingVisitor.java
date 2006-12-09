@@ -526,7 +526,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
                 // faceColors
                 DataList faceColors = ifs.getFaceAttributes(Attribute.COLORS);
 
-                for (int i = 0; i < ifs.getNumFaces(); i++) {
+                for (int i = 0, im = ifs.getNumFaces(); i < im; i++) {
                     IntArray faceIndices = indices.item(i).toIntArray();
                     DoubleArray faceNormal = null;
                     if (fndl != null)

@@ -252,7 +252,6 @@ public class TrianglePipeline {
 
         if (clipFrustum())
            return;
-        for(int i = 0; i< polygon.getLength();i++)
 
         triangulateAndRaster();
     }
