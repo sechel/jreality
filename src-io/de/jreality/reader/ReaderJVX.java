@@ -105,7 +105,6 @@ public class ReaderJVX extends AbstractReader {
   
   static class Resolver implements EntityResolver {
 	    public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-	    	System.out.println("pubID="+publicId+"   sysID="+systemId);
 	    	Input dtd = null;
 	    	try {
 	    		dtd = Input.getInput("jvx.dtd");
@@ -123,8 +122,12 @@ public class ReaderJVX extends AbstractReader {
 	    	} catch (Exception e) {
 	    		// not found
 	    	}
-	    	if (dtd == null) throw new RuntimeException("could not find jvx.dtd - download http://www.javaview.de/rsrc/jvx.dtd into the execution dir");
-	    	return new InputSource(dtd.getInputStream());
+	    	if (dtd != null) try {
+	    		return new InputSource(dtd.getInputStream());
+	    	} catch (Exception e) {
+	    		// jvx.dtd not available...
+	    	}
+    		throw new RuntimeException("could not find jvx.dtd - download http://www.javaview.de/rsrc/jvx.dtd into the execution dir");
 	    }
   }
   
