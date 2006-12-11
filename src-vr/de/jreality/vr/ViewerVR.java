@@ -66,6 +66,7 @@ import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -156,7 +157,7 @@ public class ViewerVR {
 	private static final Color DEFAULT_TOP_COLOR = new Color(80,80,120);
 	private static final Color DEFAULT_BOTTOM_COLOR = Color.black;
 	private static final boolean DEFAULT_BACKGROUND_FLAT = false;
-	
+
 	// defaults for app panel
 	private static final boolean DEFAULT_SHOW_POINTS = false;
 	private static final boolean DEFAULT_POINTS_REFLECTING = false;
@@ -284,6 +285,9 @@ public class ViewerVR {
 	private SimpleColorChooser bottomColorChooser;
 	private SimpleColorChooser topColorChooser;
 	private JButton shadowButton;
+
+	// terrain tab
+	private JSlider terrainTexScaleSlider;
 	
 	// app tab
 	private JPanel appearancePanel;
@@ -329,9 +333,10 @@ public class ViewerVR {
 	private Container defaultPanel;
 	
 	private Landscape landscape;
+	private Terrain terrain;
 	private AABBPickSystem pickSystem;
 	private double[][] terrainPoints;
-	private IndexedFaceSet terrain;
+	private IndexedFaceSet nonflatTerrain;
 	private IndexedFaceSet flatTerrain = Primitives.plainQuadMesh(3, 3, 100, 100);
 	private double[][] flatTerrainPoints;
 	private boolean flat;
@@ -352,6 +357,11 @@ public class ViewerVR {
 	};
 
 	private JButton bottomColorButton;
+
+	private JPanel terrainPanel;
+	private Texture2D terrainTex;
+	private JFileChooser terrainTexFileChooser;
+	private File terrainTexFile;
 
 	
 	@SuppressWarnings("serial")
@@ -464,7 +474,7 @@ public class ViewerVR {
 			}
 		});
 		
-		terrain = (IndexedFaceSet) terrainNode.getGeometry();
+		nonflatTerrain = (IndexedFaceSet) terrainNode.getGeometry();
 		MatrixBuilder.euclidean().scale(1.1 / 3.).translate(0, 7, 0).assignTo(terrainNode);
 		terrainNode.setName("terrain");
 		IndexedFaceSet terrainGeom = (IndexedFaceSet) terrainNode.getGeometry();
@@ -512,11 +522,15 @@ public class ViewerVR {
 		// landscape
 		landscape = new Landscape();
 
+		// terrain
+		terrain = new Terrain();
+		
 		// swing widgets
 		makeControlPanel();
 		makeAlignTab();
 		makeAppTab();
 		makeEnvTab();
+		makeTerrainTab();
 		makeToolTab();
 		makeTexTab();
 		makeHelpTab();
@@ -633,21 +647,40 @@ public class ViewerVR {
 		});
 	}
 
+	private void makeTerrainTextureFileChooser() {
+		FileSystemView view = FileSystemView.getFileSystemView();
+		String texDir = ".";
+		String dataDir = Secure.getProperty("jreality.data");
+		if (dataDir!= null) texDir = dataDir+"/textures";
+		File defaultDir = new File(texDir);
+		terrainTexFileChooser = new JFileChooser(!defaultDir.exists() ? view.getHomeDirectory() : defaultDir, view);
+		terrainTexFileChooser.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ev) {
+				File file = terrainTexFileChooser.getSelectedFile();
+				try {
+					if (ev.getActionCommand() == JFileChooser.APPROVE_SELECTION
+							&& file != null) {
+						terrainTexFile = file;
+						ImageData img = ImageData.load(Input.getInput(terrainTexFile));
+						//tex = TextureUtility.createTexture(contentAppearance, "polygonShader", img, false);
+						setTerrainTexture(img);
+						setTerrainTextureScale(terrainTexScaleSlider.getValue()*0.1);
+						
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				switchToDefaultPanel();
+			}
+		});
+	}
+
 	private void updateLandscape() {
 		cubeMap = landscape.getCubeMap();
 		updateBackground();
 //		Geometry last = terrainNode.getGeometry();
-		flat = landscape.isTerrainFlat();
-		terrainNode.setGeometry(flat ? flatTerrain : terrain);
-		//if (last != terrainNode.getGeometry()) computeShadow();
-		terrainAppearance.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, flat);
 		updateSkyBox();
-		
-		ImageData terrainTex = landscape.getTerrainTexture();
-		setTerrainTexture(
-				terrainTex,
-				landscape.getTerrainTextureScale()
-		);
+		updateTerrain();
 
 		Matrix m = new Matrix(avatarNode.getTransformation());
 		AABBPickSystem ps = new AABBPickSystem();
@@ -661,6 +694,52 @@ public class ViewerVR {
 		}
 		if (!picks.isEmpty()) {
 			setAvatarHeight(picks.get(0).getWorldCoordinates()[1]);
+		}
+	}
+
+	private void updateTerrain() {
+		switch (terrain.getGeometryType()) {
+		case FLAT:
+			flat = true;
+			break;
+		case NON_FLAT:
+			flat = false;
+			break;
+		default:
+			flat = landscape.isTerrainFlat();
+		}
+		terrainNode.setGeometry(flat ? flatTerrain : nonflatTerrain);
+		//if (last != terrainNode.getGeometry()) computeShadow();
+		
+		// XXX:
+		terrainAppearance.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, flat);
+		
+		switch (terrain.getTextureType()) {
+		case NONE:
+			setTerrainTexture(null);
+			break;
+		case TILES:
+			try {
+				setTerrainTexture(ImageData.load(Input.getInput("textures/recycfloor1_fin.png")));
+				setTerrainTextureScale(50.);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			break;
+		case CUSTOM:
+			try {
+					setTerrainTexture(terrainTexFile == null ? null : ImageData.load(Input.getInput(terrainTexFile)));
+					setTerrainTextureScale(getTerrainTextureScale());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			break;
+		default:
+		ImageData terrainTex = landscape.getTerrainTexture();
+		setTerrainTexture(terrainTex);
+		setTerrainTextureScale(landscape.getTerrainTextureScale());
 		}
 	}
 	
@@ -774,6 +853,67 @@ public class ViewerVR {
 		
 		envControlBox.add(backgroundColorPanel);
 		envPanel.add(envControlBox, BorderLayout.SOUTH);
+	}
+
+	public void addTerrainTab() {
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+			public Object run() {
+				makeTerrainTextureFileChooser();
+				return null;
+			}
+		});
+		appearanceTabs.add("terrain", terrainPanel);
+		sp.getFrame().pack();
+	}
+	
+	private void makeTerrainTab() {
+		terrainPanel = new JPanel(new BorderLayout());
+		Box terrainBox = new Box(BoxLayout.X_AXIS);
+		JPanel geom = terrain.getGeometrySelection();
+		TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Geometry");
+		geom.setBorder(title);
+		terrainBox.add(geom);
+		JPanel tex = new JPanel(new BorderLayout());
+		tex.add(BorderLayout.CENTER, terrain.getTexureSelection());
+		title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Texture");
+		tex.setBorder(title);
+		terrainBox.add(tex);
+		
+		final JButton textureLoadButton = new JButton("load ...");
+		textureLoadButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				switchToTerrainTextureBrowser();
+			}
+		});
+
+		textureLoadButton.setEnabled(terrain.getTextureType() == Terrain.TextureType.CUSTOM);
+		
+		terrain.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				updateTerrain();
+				textureLoadButton.setEnabled(terrain.getTextureType() == Terrain.TextureType.CUSTOM);
+			}
+		});
+		
+		tex.add(BorderLayout.SOUTH, textureLoadButton);
+		
+		terrainPanel.add(BorderLayout.WEST, geom);
+		terrainPanel.add(BorderLayout.EAST, tex);
+		
+		Box texScaleBox = new Box(BoxLayout.X_AXIS);
+		texScaleBox.setBorder(new EmptyBorder(70, 5, 5, 0));
+		JLabel texScaleLabel = new JLabel("scale");
+		terrainTexScaleSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100,0);
+		terrainTexScaleSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				double d = .01 * terrainTexScaleSlider.getValue();
+				setTerrainTextureScale(Math.exp(Math.log(TEX_SCALE_RANGE) * d)/TEX_SCALE_RANGE * MAX_TEX_SCALE);
+			}
+		});
+		texScaleBox.add(texScaleLabel);
+		texScaleBox.add(terrainTexScaleSlider);
+
+		terrainPanel.add(BorderLayout.SOUTH, texScaleBox);
 	}
 	
 	public boolean isTerrainTransparent() {
@@ -1543,8 +1683,7 @@ public class ViewerVR {
 		texScaleSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100,0);
 		texScaleSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
-				double d = .01 * texScaleSlider.getValue();
-				setTextureScale(Math.exp(Math.log(TEX_SCALE_RANGE) * d)/TEX_SCALE_RANGE * MAX_TEX_SCALE);
+				setTextureScale(getTerrainTextureScale());
 			}
 		});
 		texScaleBox.add(texScaleLabel);
@@ -1589,6 +1728,20 @@ public class ViewerVR {
 			);
 		if (tex != null) {
 			tex.setTextureMatrix(MatrixBuilder.euclidean().scale(d).getMatrix());
+		}
+	}
+
+	public double getTerrainTextureScale() {
+		double d = .01 * terrainTexScaleSlider.getValue();
+		return Math.exp(Math.log(TEX_SCALE_RANGE) * d)/TEX_SCALE_RANGE * MAX_TEX_SCALE;
+	}
+
+	public void setTerrainTextureScale(double d) {
+		terrainTexScaleSlider.setValue(
+				(int)(Math.log(d / MAX_TEX_SCALE * TEX_SCALE_RANGE)/Math.log(TEX_SCALE_RANGE)*100)
+			);
+		if (terrainTex != null) {
+			terrainTex.setTextureMatrix(MatrixBuilder.euclidean().scale(d).getMatrix());
 		}
 	}
 
@@ -1783,10 +1936,22 @@ public class ViewerVR {
 		sp.getFrame().setVisible(true);
 	}
 
-	private void setTerrainTexture(ImageData tex, double scale) {
-		Texture2D t = TextureUtility.createTexture(terrainAppearance,
-				"polygonShader", tex);
-		t.setTextureMatrix(MatrixBuilder.euclidean().scale(scale).getMatrix());
+	public void switchToTerrainTextureBrowser() {
+		//currentAppearance = app;
+		sp.getFrame().setVisible(false);
+		sp.setPanelWidth(FILE_CHOOSER_PANEL_WIDTH);
+		sp.setAboveGround(FILE_CHOOSER_ABOVE_GROUND);
+		sp.getFrame().setContentPane(terrainTexFileChooser);
+		sp.getFrame().pack();
+		sp.getFrame().setVisible(true);
+	}
+
+	private void setTerrainTexture(ImageData tex) {
+		if (tex != null) {
+			terrainTex = TextureUtility.createTexture(terrainAppearance, "polygonShader", tex);
+		} else {
+			TextureUtility.removeTexture(terrainAppearance, "polygonShader");
+		}
 	}
 
 	private void updateSkyBox() {
@@ -1930,14 +2095,14 @@ public class ViewerVR {
 			List<PickResult> hits = pickSystem.computePick((flat ? flatTerrainPoints : terrainPoints)[j], sun);
 			color[j] = hits.size() > 0 ? shadowColor : white;
 		}
-		(flat ? flatTerrain : terrain).setVertexAttributes(
+		(flat ? flatTerrain : nonflatTerrain).setVertexAttributes(
 				Attribute.COLORS,
 				new DoubleArrayArray.Array(color)
 		);
 	}
 	
 	private void clearShadow() {
-		(flat ? flatTerrain : terrain).setVertexAttributes(
+		(flat ? flatTerrain : nonflatTerrain).setVertexAttributes(
 				Attribute.COLORS,
 				null
 		);
@@ -2528,6 +2693,7 @@ public class ViewerVR {
 		vr.addAlignTab();
 		vr.addAppTab();
 		vr.addEnvTab();
+		vr.addTerrainTab();
 		vr.addToolTab();
 		vr.addTexTab();
 		//vr.addHelpTab();
