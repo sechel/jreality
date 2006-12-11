@@ -391,6 +391,16 @@ public class TextureUtility {
 			cm.setBlendColor(null);
 		}
 	}
+
+	public static void removeTexture(Appearance app, String shader) {
+		String key = (shader == null || shader.equals("")) ? "texture2d" : shader+".texture2d";
+		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, key, app)) {
+			Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, key, app, false);
+			app.setAttribute(key, Appearance.INHERITED);
+			tex.setImage(null);
+			tex.setTextureMatrix(null);
+		}		
+	}
   
   
 }
