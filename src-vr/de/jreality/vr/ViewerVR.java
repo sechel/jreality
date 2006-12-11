@@ -551,6 +551,32 @@ public class ViewerVR {
 
 	}
 
+	public SceneGraphComponent getTerrain() {
+		return terrainNode;
+	}
+	
+	public void setTerrain(SceneGraphComponent c) {
+		sceneRoot.removeChild(terrainNode);
+		terrainNode.removeTool(sp.getPanelTool());
+		terrainNode = c;
+		terrainNode.addTool(sp.getPanelTool());
+		sceneRoot.addChild(terrainNode);
+	}
+	
+	public ImageData[] getSkyBox() {
+		return cubeMap;
+	}
+	
+	public void setSkyBox(ImageData[] c) {
+		cubeMap = c;
+		ImageData[] imgs = skyBoxHidden.isSelected() ? null : cubeMap;
+		TextureUtility.createSkyBox(rootAppearance, imgs);
+		
+		setPointsReflecting(isPointsReflecting());
+		setLinesReflecting(isLinesReflecting());
+		setFacesReflecting(isFacesReflecting());
+		setFaceReflection(getFaceReflection());
+	}
 	private void makeControlPanel() {
 		sp = AccessController.doPrivileged(new PrivilegedAction<ScenePanel>() {
 			public ScenePanel run() {
@@ -2009,10 +2035,6 @@ public class ViewerVR {
 
 	public void setOffset(double offset) {
 		groundSlider.setValue((int) (offset/MAX_OFFSET * 100));
-	}
-
-	private void updateBounds() {
-		
 	}
   
 	private void alignContent(final double diam, final double offset,
