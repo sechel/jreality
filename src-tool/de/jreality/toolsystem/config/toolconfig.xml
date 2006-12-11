@@ -26,6 +26,10 @@
     <mapping device="Keyboard" src="VK_A" target="left"/>
     <mapping device="Keyboard" src="VK_S" target="backward"/>
     <mapping device="Keyboard" src="VK_D" target="right"/>
+    <mapping device="Keyboard" src="VK_UP" target="forward"/>
+    <mapping device="Keyboard" src="VK_LEFT" target="left"/>
+    <mapping device="Keyboard" src="VK_DOWN" target="backward"/>
+    <mapping device="Keyboard" src="VK_RIGHT" target="right"/>
     <mapping device="KeyboardSWT" src="119" target="forward"/>
     <mapping device="KeyboardSWT" src="97" target="left"/>
     <mapping device="KeyboardSWT" src="115" target="backward"/>
