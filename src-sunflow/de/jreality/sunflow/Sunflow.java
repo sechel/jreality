@@ -46,6 +46,8 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 
 import javax.swing.AbstractAction;
@@ -56,6 +58,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileSystemView;
+import javax.swing.plaf.basic.BasicFileChooserUI;
 
 import de.jreality.scene.Viewer;
 
@@ -122,7 +125,7 @@ public class Sunflow {
 
 	private static void save(SunflowViewer v, JFrame frame) {
 		FileSystemView view = FileSystemView.getFileSystemView();
-		JFileChooser chooser = new JFileChooser(view.getHomeDirectory(), view);
+		final JFileChooser chooser = new JFileChooser(view.getHomeDirectory(), view);
 		chooser.setMultiSelectionEnabled(false);
 		chooser.setAcceptAllFileFilterUsed(false);
 
@@ -143,6 +146,18 @@ public class Sunflow {
 		}
 		chooser.setFileFilter(chooser.getChoosableFileFilters()[0]);
 
+		//don't clear filename text field when changing the filter
+	    chooser.addPropertyChangeListener(
+	    		JFileChooser.FILE_FILTER_CHANGED_PROPERTY, 
+	    		new PropertyChangeListener(){
+	    			public void propertyChange(PropertyChangeEvent e) {
+	    				try {
+	    					BasicFileChooserUI ui = (BasicFileChooserUI)chooser.getUI(); 
+	    					chooser.setSelectedFile(new File( ui.getFileName() ));
+	    					chooser.updateUI();
+	    				} catch (Exception exc) {}
+	    			}});
+	    
 		//get target file and let user confirm an overwriting
 		File file = null;
 		while (true) {
