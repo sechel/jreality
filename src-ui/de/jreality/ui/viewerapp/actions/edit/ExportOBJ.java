@@ -46,6 +46,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
+import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.SelectionEvent;
@@ -56,42 +57,49 @@ import de.jreality.writer.WriterOBJ;
 
 
 /**
- * Exports a selected IndexedFaceSet as an OBJ file (if no IndexedFaceSet is selected, this action is disabled).
+ * Exports a selected IndexedFaceSet as an OBJ file 
+ * (if no IndexedFaceSet is selected, this action is disabled).
  * 
  * @author msommer
  */
 public class ExportOBJ extends AbstractSelectionListenerAction {
 
-  public ExportOBJ(String name, SelectionManager sm, Component frame) {
-    super(name, sm, frame);
-    setShortDescription("Export selected IndexedFaceSet as OBJ file");
-  }
+	public ExportOBJ(String name, SelectionManager sm, Component frame) {
+		super(name, sm, frame);
+		setShortDescription("Export selected IndexedFaceSet as OBJ file");
+	}
 
-  public ExportOBJ(String name, ViewerApp v) {
-    this(name, v.getSelectionManager(), v.getFrame());
-  }
-  
+	public ExportOBJ(String name, ViewerApp v) {
+		this(name, v.getSelectionManager(), v.getFrame());
+	}
 
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    
-	  File file = FileLoaderDialog.selectTargetFile(frame, "obj", "OBJ files");
-	  if (file == null) return;
-	  
-	  try {
-		WriterOBJ.write(
-				(IndexedFaceSet)selection.getLastElement(), 
-				new FileOutputStream(file));
-	  } catch (FileNotFoundException exc) {
-		  exc.printStackTrace();
-	  }
-  }
-  
-  
-  @Override
-  public boolean isEnabled(SelectionEvent e) {
-    return (e.geometrySelected() && 
-    		e.getSelection().getLastElement() instanceof IndexedFaceSet);
-  }
- 
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		File file = FileLoaderDialog.selectTargetFile(frame, "obj", "OBJ files");
+		if (file == null) return;
+
+		IndexedFaceSet ifs = (selection.getLastElement() instanceof Geometry)?
+				(IndexedFaceSet)selection.getLastElement() :
+				(IndexedFaceSet)selection.getLastComponent().getGeometry();
+		try {
+			WriterOBJ.write(ifs, new FileOutputStream(file));
+		} catch (FileNotFoundException exc) {
+			exc.printStackTrace();
+		}
+	}
+
+
+	@Override
+	public boolean isEnabled(SelectionEvent e) {
+		if (e.geometrySelected() && e.getSelection().getLastElement() instanceof IndexedFaceSet)
+			return true;  //IndexedFaceSet selected
+
+		Geometry g = null;
+		if (e.componentSelected())
+			g = e.getSelection().getLastComponent().getGeometry();
+		return (g instanceof IndexedFaceSet);
+	}
+
 }

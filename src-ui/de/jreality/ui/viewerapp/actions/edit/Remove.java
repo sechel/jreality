@@ -48,7 +48,6 @@ import javax.swing.KeyStroke;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.tool.Tool;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.ViewerApp;
@@ -64,9 +63,6 @@ import de.jreality.util.SceneGraphUtility;
  */
 public class Remove extends AbstractSelectionListenerAction {
 
-  private Tool tool = null;
-  
-  
   public Remove(String name, SelectionManager sm) {
     super(name, sm);
 
@@ -84,31 +80,24 @@ public class Remove extends AbstractSelectionListenerAction {
     SceneGraphNode node = selection.getLastElement();  //the node to be removed
     SceneGraphPath parentPath = selection.popNew();  //selection.getLength() > 1
     final SceneGraphComponent parent = parentPath.getLastComponent();
-    
-    if (tool == null) {  //DEFAULT_SELECTION
+
+    if (selectionManager.getTool() == null) {  //no tool selected
       SceneGraphUtility.removeChildNode(parent, node);
       selectionManager.setSelection(parentPath);
     }
-    else {  //TOOL_SELECTION
-      selection.getLastComponent().removeTool(tool);
+    else {  //tool selected
+      selection.getLastComponent().removeTool(selectionManager.getTool());
       selectionManager.setSelection(selection);
     }
   }
 
   
   @Override
-  public void selectionChanged(SelectionEvent e) {
-    super.selectionChanged(e);
-    
-    tool = (e.getType()==SelectionEvent.TOOL_SELECTION) ? e.getTool() : null;
-  }
-  
-  
-  @Override
   public boolean isEnabled(SelectionEvent e) {
     return (!e.entitySelected() &&
         !e.rootSelected() &&  //don't allow to remove the sceneRoot
         !e.nothingSelected());
+    //true iff node!=root or tool selected
   }
   
 }
