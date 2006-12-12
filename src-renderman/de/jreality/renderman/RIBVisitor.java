@@ -772,6 +772,9 @@ private void setupShader(EffectiveAppearance eap, String type) {
 					CommonAttributes.POINT_SHADER,
 					CommonAttributes.POINT_RADIUS),
 					CommonAttributes.POINT_RADIUS_DEFAULT);
+			DataList radii = p.getVertexAttributes(Attribute.RADII);
+			DoubleArray da = null;
+			if (radii != null) da = radii.toDoubleArray();
 			// System.out.println("point radius is "+r);
 			setupShader(eAppearance, CommonAttributes.POINT_SHADER);
 			boolean drawSpheres = eAppearance.getAttribute(
@@ -793,12 +796,14 @@ private void setupShader(EffectiveAppearance eap, String type) {
 				ri.color(raw);
 				double[] trns = new double[16];
 				for (int i = 0; i < n; i++) {
+					float realR = r;
+					if (radii != null) realR = (float) (realR*da.getValueAt(i));
 					trns = MatrixBuilder.init(null, sig).translate(a[i])
 							.getArray();
 					ri.transformBegin();
 					ri.concatTransform(RIBHelper.fTranspose(trns));
 					HashMap map = new HashMap();
-					ri.sphere(r, -r, r, 360f, map);
+					ri.sphere(realR, -realR, realR, 360f, map);
 					ri.transformEnd();
 				}
 			} else {
@@ -1141,8 +1146,8 @@ private void setupShader(EffectiveAppearance eap, String type) {
 					throw new IllegalStateException(
 							"4D normals only valid with non-euclidean signature");
 				}
-				float[] fnormals = new float[n * da.getLength()];
 				if (currentSignature == Pn.EUCLIDEAN) {
+					float[] fnormals = new float[3 * da.getLength()];
 					for (int j = 0; j < da.getLength(); j++) {
 						fnormals[n * j + 0] = (float) da.getValueAt(j, 0);
 						fnormals[n * j + 1] = (float) da.getValueAt(j, 1);
@@ -1153,10 +1158,13 @@ private void setupShader(EffectiveAppearance eap, String type) {
 				} else {
 					// in noneuclidean case we have to use 4D vectors and ship them over as
 					// float[] type.
+					float[] fnormals = new float[4 * da.getLength()];
 					double[][] dnormals = da.toDoubleArrayArray(null);
+					int nn = dnormals[0].length;
 					for (int ii = 0, j = 0; j < dnormals.length; ++j) {
 						for (int k = 0; k < 4; ++k)
-							fnormals[ii++] = (float) dnormals[j][k];
+							if (k < nn) fnormals[ii++] = (float) dnormals[j][k];
+							else fnormals[ii++] = 0f;
 					}
           			/////////////////////////////////////////////////////////////////////////////////
 					map.put(((vertexNormals) ? "vertex" : "uniform") + " float[4] Nw", fnormals);
