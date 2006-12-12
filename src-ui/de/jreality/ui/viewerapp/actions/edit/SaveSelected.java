@@ -40,7 +40,7 @@
 
 package de.jreality.ui.viewerapp.actions.edit;
 
-import java.awt.Frame;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -67,7 +67,7 @@ import de.jreality.writer.WriterJRS;
  */
 public class SaveSelected extends AbstractSelectionListenerAction {
 
-  public SaveSelected(String name, SelectionManager sm, Frame frame) {
+  public SaveSelected(String name, SelectionManager sm, Component frame) {
     super(name, sm, frame);
     setShortDescription("Save selected SceneGraphComponent as a file");
     setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));

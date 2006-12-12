@@ -44,7 +44,6 @@ package de.jreality.ui.viewerapp.actions.file;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -88,7 +87,7 @@ public class ExportRIB extends AbstractJrAction {
   private JLabel includeFileLabel = new JLabel(" ");  
 
   
-  public ExportRIB(String name, Viewer viewer, Frame frame) {
+  public ExportRIB(String name, Viewer viewer, Component frame) {
     super(name);
     this.frame = frame;
     setShortDescription("Export Renderman file");

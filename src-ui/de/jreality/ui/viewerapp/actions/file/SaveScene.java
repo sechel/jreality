@@ -40,7 +40,7 @@
 
 package de.jreality.ui.viewerapp.actions.file;
 
-import java.awt.Frame;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -69,7 +69,7 @@ public class SaveScene extends AbstractJrAction {
   private ToolSystemViewer viewer;
   
 
-  public SaveScene(String name, ToolSystemViewer viewer, Frame frame) {
+  public SaveScene(String name, ToolSystemViewer viewer, Component frame) {
     super(name);
     this.frame = frame;
     

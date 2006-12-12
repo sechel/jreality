@@ -40,20 +40,22 @@
 
 package de.jreality.ui.viewerapp.actions.file;
 
+import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.KeyStroke;
 import javax.swing.border.TitledBorder;
 
 import de.jreality.scene.Viewer;
@@ -77,14 +79,16 @@ public class ExportImage extends AbstractJrAction {
   private DimensionPanel dimPanel;
   
   
-  public ExportImage(String name, Viewer viewer, Frame frame) {
+  public ExportImage(String name, Viewer viewer, Component frame) {
     super(name);
     this.frame = frame;
-    setShortDescription("Export image file");
     
     if (viewer == null) 
       throw new IllegalArgumentException("Viewer is null!");
     this.viewer = viewer;
+    
+    setShortDescription("Export image file");
+    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_MASK));
   }
   
   public ExportImage(String name, ViewerApp v) {
@@ -148,7 +152,7 @@ public class ExportImage extends AbstractJrAction {
   }
   
   
-  private FileFilter[] createFileFilters() {
+  private javax.swing.filechooser.FileFilter[] createFileFilters() {
     
     //get existing writer formats
     String writerFormats[] = ImageIO.getWriterFormatNames();
@@ -164,26 +168,21 @@ public class ExportImage extends AbstractJrAction {
       special.add(ext);
     }
     
-    //ordered set of file filters (lexicographically order of preferred extension)
-    Set<FileFilter> filters = new TreeSet<FileFilter>( new Comparator<FileFilter>(){
-      public int compare(FileFilter f1, FileFilter f2) {
-        return f1.getPreferredExtension().compareTo(f2.getPreferredExtension());
-      }});
-    
+    Set<FileFilter> filters = new LinkedHashSet<FileFilter>();
     //add known filter
-    filters.add(new FileFilter("BMP Image", "bmp"));
-    filters.add(new FileFilter("Wireless BMP Image", "wbmp"));
-    filters.add(new FileFilter("JPEG Image", "jpg", "jpeg"));
     filters.add(new FileFilter("PNG Image", "png"));
+    filters.add(new FileFilter("JPEG Image", "jpg", "jpeg"));
     //add tiff filter if writer exists
     try { Class.forName("javax.media.jai.JAI");
     filters.add(new FileFilter("TIFF Image", "tiff", "tif"));
     } catch (ClassNotFoundException e) {}
+    filters.add(new FileFilter("BMP Image", "bmp"));
+    filters.add(new FileFilter("Wireless BMP Image", "wbmp"));
     //add filters for special writer formats
     for (String s : special)
       filters.add(new FileFilter(s.toUpperCase()+" Image", s));
     
-    //convert to (ordered) array
+    //convert to array
     FileFilter[] ff = new FileFilter[filters.size()];
     return filters.toArray(ff);
   }

@@ -39,8 +39,8 @@
 
 package de.jreality.ui.viewerapp.actions.file;
 
+import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -62,7 +62,7 @@ public class ExportSVG extends AbstractJrAction {
 
     private Viewer viewer;
 
-    public ExportSVG(String name, Viewer viewer, Frame frame) {
+    public ExportSVG(String name, Viewer viewer, Component frame) {
         super(name);
         this.frame = frame;
         setShortDescription("Export SVG file");

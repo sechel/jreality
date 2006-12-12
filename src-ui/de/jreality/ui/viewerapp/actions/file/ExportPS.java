@@ -40,8 +40,8 @@
 
 package de.jreality.ui.viewerapp.actions.file;
 
+import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -64,7 +64,7 @@ public class ExportPS extends AbstractJrAction {
   private Viewer viewer;
   
   
-  public ExportPS(String name, Viewer viewer, Frame frame) {
+  public ExportPS(String name, Viewer viewer, Component frame) {
     super(name);
     this.frame = frame;
     setShortDescription("Export the current scene as PostScript file");
