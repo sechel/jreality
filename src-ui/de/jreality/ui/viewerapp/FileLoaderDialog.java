@@ -41,14 +41,16 @@
 package de.jreality.ui.viewerapp;
 
 import java.awt.Component;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileSystemView;
+import javax.swing.plaf.basic.BasicFileChooserUI;
 
-import de.jreality.reader.Readers;
 import de.jreality.util.Secure;
 
 
@@ -58,16 +60,7 @@ public class FileLoaderDialog {
   
   
   public static JFileChooser createFileChooser() {
-    FileFilter ff = new FileFilter("jReality 3D data files") {
-      @Override
-      public boolean accept(File f) {
-        if (f.isDirectory()) return true;
-        String filename = f.getName().toLowerCase();
-        return (Readers.findFormat(filename) != null);
-      }
-    };
-    ff.setShowExtensionList(false);
-    return createFileChooser(true, ff);
+    return createFileChooser(true, FileFilter.getJRealityDataFilter());
   }
   
   
@@ -131,9 +124,21 @@ public class FileLoaderDialog {
   
   //-- SAVE FILE DIALOGS ----------------------------------
   
-  private static File selectTargetFile(Component parent, JFileChooser chooser, JComponent accessory) {
+  private static File selectTargetFile(Component parent, final JFileChooser chooser, JComponent accessory) {
     if (accessory != null) chooser.setAccessory(accessory);
     chooser.setMultiSelectionEnabled(false);
+
+    //don't clear filename text field when changing the filter
+    chooser.addPropertyChangeListener(
+    		JFileChooser.FILE_FILTER_CHANGED_PROPERTY, 
+    		new PropertyChangeListener(){
+    			public void propertyChange(PropertyChangeEvent e) {
+    				try {
+    					BasicFileChooserUI ui = (BasicFileChooserUI)chooser.getUI(); 
+        				chooser.setSelectedFile(new File( ui.getFileName() ));
+        				chooser.updateUI();
+					} catch (Exception exc) {}
+    			}});
     
     //get target file and let user confirm an overwriting
     File file = null;

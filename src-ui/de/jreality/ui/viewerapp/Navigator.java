@@ -67,19 +67,20 @@ import de.jtem.beans.NumberSpinnerEditor;
  * 
  * @author msommer
  */
-public class Navigator {
+public class Navigator implements SelectionListener {
 
 	private InspectorPanel inspector;
 	private JTree sceneTree;
+	private SceneTreeModel treeModel;
 	private TreeSelectionModel tsm;
-	private BeanShell beanShell;
 
 	private SceneGraphComponent sceneRoot;  //the scene root
-
 	private Object currentSelection;
 
-	public Navigator(SceneGraphComponent sceneRoot) {
+	public Navigator(SceneGraphComponent sceneRoot, final SelectionManager sm) {
 
+		sm.addSelectionListener(this);
+		
 		inspector = new InspectorPanel(false);
 		BooleanEditor.setNameOfNull("inherit");
 		EditorSpawner.setNameOfNull("inherit");
@@ -89,9 +90,11 @@ public class Navigator {
 		//EditorManager.registerEditor(Texture2D.class, ObjectEditor.class);
 
 		sceneTree = new JTree();
-		SceneTreeModel model = new SceneTreeModel(sceneRoot);
-		sceneTree.setModel(model);
-		sceneTree.setAnchorSelectionPath(new TreePath(model.getRoot()));
+		treeModel = new SceneTreeModel(sceneRoot);
+		
+		sceneTree.setModel(treeModel);
+		//set default selection (use the selection manager's default)
+		sceneTree.setAnchorSelectionPath(new TreePath(treeModel.convertSceneGraphPath(sm.getDefaultSelection())));
 		sceneTree.setCellRenderer(new JTreeRenderer());
 		sceneTree.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "toggle");  //collaps/expand nodes with ENTER
 
@@ -102,18 +105,32 @@ public class Navigator {
 
 			public void selectionChanged(SelectionEvent e) {
 
+				//update inspector
 				if (e.selectionIsSGNode()) currentSelection = e.selectionAsSGNode();
 				else if (e.selectionIsTool()) currentSelection = e.selectionAsTool();
-				else currentSelection = e.getSelection();  //e.g. shader
-
+				else currentSelection = e.getSelection();  //attribute entity or null
 				inspector.setObject(currentSelection);
-				if (beanShell != null) beanShell.setSelf(currentSelection);
+				
+				//update selection manager
+		        Tool tool = e.selectionAsTool();  //null if no tool
+		        AttributeEntity entity = e.selectionAsAttributeEntity();  //null if no attribute entity
+		        sm.setSelection(e.getSGPath(), tool, entity);  //does nothing if already selected
 			}
 		});
 
-		tsm.setSelectionPath(sceneTree.getAnchorSelectionPath());  //select sceneRoot in tree by default
+		tsm.setSelectionPath(new TreePath(treeModel.convertSceneGraphPath(sm.getSelection())));  //select current selection
 
 		this.sceneRoot = sceneRoot;
+	}
+
+	
+	public void selectionChanged(de.jreality.ui.viewerapp.SelectionEvent e) {
+		//convert selection of manager into TreePath
+        Object[] selection = treeModel.convertSceneGraphPath(e.getSelection());
+        TreePath path = new TreePath(selection);
+        
+        if (e.nodeSelected() && !path.equals(tsm.getSelectionPath()))  //compare paths only if a node is selected  
+        	tsm.setSelectionPath(path);
 	}
 
 
@@ -130,22 +147,18 @@ public class Navigator {
 	public TreeSelectionModel getTreeSelectionModel() {
 		return tsm;
 	}
-
-
-	public void setBeanShell(BeanShell beanShell) {
-		this.beanShell = beanShell;
-	}
-
+	
 
 	public SceneGraphComponent getRoot() {
 		return sceneRoot;
 	}
 
-  
-  public Object getCurrentSelection() {
-    return currentSelection;
-  }
 
+	public Object getCurrentSelection() {
+		return currentSelection;
+	}
+
+	
 
 	public static abstract class SelectionListener implements TreeSelectionListener {
 

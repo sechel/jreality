@@ -320,26 +320,16 @@ public class ViewerApp {
     //set up beanShell and uiFactory.beanShell
     if (attachBeanShell && beanShell == null) setupBeanShell();
     
-    //setup navigator, uiFactory.inspector and uiFactory.sceneTree
+    //set up navigator, uiFactory.inspector and uiFactory.sceneTree
     if (attachNavigator && navigator == null) setupNavigator();
     
     if (attachBeanShell) {
       uiFactory.setBeanShell(beanShell.getJTerm());
-      Object self = getViewer().getSceneRoot();
-      if (attachNavigator) {
-        navigator.setBeanShell(beanShell);
-        self = navigator.getCurrentSelection();
-      }
-      beanShell.setSelf(self);
     }
     
     if (attachNavigator) {
       uiFactory.setInspector(navigator.getInspector());
       uiFactory.setSceneTree(navigator.getSceneTree());
-      selectionManager.setNavigator(navigator);
-      if (!attachBeanShell) navigator.setBeanShell(null);
-    } else {
-      selectionManager.setNavigator(null);
     }
     
     uiFactory.setAttachNavigator(attachNavigator);
@@ -509,7 +499,7 @@ public class ViewerApp {
    */
   private void setupBeanShell() {
     
-    beanShell = new BeanShell();
+    beanShell = new BeanShell(selectionManager);
     
     beanShell.eval("import de.jreality.geometry.*;");
     beanShell.eval("import de.jreality.math.*;");    
@@ -527,7 +517,7 @@ public class ViewerApp {
     } 
     catch (EvalError error) { error.printStackTrace(); }
     
-    beanShell.setSelf(sceneRoot);
+//    beanShell.setSelf(sceneRoot);  //already set default in constructor
   }
   
   
@@ -535,7 +525,7 @@ public class ViewerApp {
    * Set up the navigator (sceneTree and inspector).
    */
   private void setupNavigator() {
-    navigator = new Navigator(sceneRoot);
+    navigator = new Navigator(sceneRoot, selectionManager);
   }
   
   

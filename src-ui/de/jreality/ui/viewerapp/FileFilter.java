@@ -44,6 +44,8 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 
+import de.jreality.reader.Readers;
+
 
 /**
  * @author msommer
@@ -141,6 +143,21 @@ public class FileFilter extends javax.swing.filechooser.FileFilter {
 
   public void setShowExtensionList(boolean showExtensionList) {
     this.showExtensionList = showExtensionList;
+  }
+  
+  
+  public static FileFilter getJRealityDataFilter() {
+	  FileFilter f = new FileFilter("jReality 3D data files") {
+		  @Override
+		  public boolean accept(File f) {
+			  if (f.isDirectory()) return true;
+			  String filename = f.getName().toLowerCase();
+			  return (Readers.findFormat(filename) != null);
+		  }
+	  };
+	  f.setShowExtensionList(false);
+	  
+	  return f;
   }
   
 }

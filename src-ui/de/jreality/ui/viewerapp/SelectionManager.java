@@ -47,14 +47,12 @@ import static de.jreality.ui.viewerapp.SelectionEvent.TOOL_SELECTION;
 
 import java.util.Vector;
 
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
-
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphPathObserver;
 import de.jreality.scene.Transformation;
@@ -64,7 +62,6 @@ import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
 import de.jreality.scene.tool.Tool;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.ui.treeview.SceneTreeModel;
 import de.jreality.util.Rectangle3D;
 
 
@@ -80,7 +77,7 @@ public class SelectionManager implements TransformationListener {
   private SceneGraphPathObserver selectionObserver;
 
   private Vector<SelectionListener> listeners;
-  private SelectionListener smListener = null;
+  private int type;  //current selection type (static field of SelectionEvent)
   private Tool tool = null;               //currently selected tool
   private AttributeEntity entity = null;  //currently selected attribute entity
   private boolean nothingSelected = true;  //true if default selection is selected by manager, e.g. setSelection(null)
@@ -98,55 +95,16 @@ public class SelectionManager implements TransformationListener {
     //listen to changes of the selection's transformation matrix
     selectionObserver = new SceneGraphPathObserver();
     selectionObserver.addTransformationListener(this);
-    selectionObserver.setPath(selection);
+//    selectionObserver.setPath(selection);
     
     listeners = new Vector<SelectionListener>();
     
     //set default selection
     setDefaultSelection(defaultSelection);
+    type = Integer.MIN_VALUE;  //initial value
     setSelection(null);
   }
   
-  
-  final Navigator.SelectionListener navigatorListener = new Navigator.SelectionListener(){
-      public void selectionChanged(Navigator.SelectionEvent e) {
-        removeSelectionListener(smListener);  //avoid listener cycle
-        tool = e.selectionAsTool();  //null if no tool
-        entity = e.selectionAsAttributeEntity();  //null if no attribute entity
-        setSelection(e.getSGPath());
-        addSelectionListener(smListener);
-      }
-    };
-    
-    private TreeSelectionModel tsm;
-
-  /**
-   * Add communication between the viewerApps navigator and the SelectionManager.
-   * @param navigator the navigator
-   */
-  public void setNavigator(final Navigator navigator) {
-    // clean up previous
-    if (tsm != null) tsm.removeTreeSelectionListener(navigatorListener);
-    if (smListener != null) removeSelectionListener(smListener);
-    if (navigator != null) {	  
-      tsm = navigator.getTreeSelectionModel();
-      //add listener to Navigator
-      tsm.addTreeSelectionListener(navigatorListener);
-      //add listener to SelectionManager
-      smListener = new SelectionListener() {
-        public void selectionChanged(SelectionEvent e) {
-          //convert selection into TreePath
-          TreePath path = getTreePath((SceneTreeModel) navigator.getSceneTree().getModel());
-          tsm.removeTreeSelectionListener(navigatorListener);  //avoid listener cycle
-          tsm.setSelectionPath(path);
-          tsm.addTreeSelectionListener(navigatorListener);
-        }
-      };
-      addSelectionListener(smListener);
-//      smListener.selectionChanged(new SelectionEvent(this, getSelection(), null, null, SelectionEvent.NO_SELECTION));
-    }
-    else setSelection(null);  //select default selection (navigator == null)
-  }
   
   public SceneGraphPath getDefaultSelection() {
     return defaultSelection;
@@ -162,29 +120,67 @@ public class SelectionManager implements TransformationListener {
     return selection;
   }
   
-  
+
+  /**
+   * Set the current selection. <br> 
+   * (use this method if a {@link SceneGraphNode} is selected)
+   * @param selection scene graph path to the current selection, 
+   * <code>null</code> if nothing is selected (then the current selection is set to the default selection, 
+   * but the selection's type is set to {@link SelectionEvent#NO_SELECTION})
+   * @see SelectionManager#setSelection(SceneGraphPath, Tool, AttributeEntity)
+   */
   public void setSelection(SceneGraphPath selection) {
-    if (selection == null)  //nothing selected
-      this.selection = defaultSelection;
-    else this.selection = selection;
-    
-    nothingSelected = (selection == null);
-    
-    selectionChanged();
+	  setSelection(selection, null, null);
   }
 
 
   /**
-   * converts the path of the current selection into the 
-   * corresponding treepath in the scene tree model
-   * (model of the viewerApp's navigator)
+   * Set the current selection. <br>
+   * (use this method if a tool or an attribute entity is selected, 
+   * i.e. the selection's path does not consist of {@link SceneGraphNode}s only)
+   * @param selection scene graph path to the current selection 
+   * (subpath of the selection's path if a tool or an attribute entity is selected), 
+   * <code>null</code> if nothing is selected (then the current selection is set to the default selection, 
+   * but the selection's type is set to {@link SelectionEvent#NO_SELECTION})
+   * @param tool a selected tool (<code>selection.getLastElement()</code> is an instance of {@link SceneGraphComponent}), 
+   * <code>null</code> if no tool is selected
+   * @param entity a selected attribute entity (<code>selection.getLastElement()</code> is an instance of {@link Appearance})
+   * <code>null</code> if no attribute entity is selected
+   * @see SelectionManager#setSelection(SceneGraphPath)
    */
-  private TreePath getTreePath(SceneTreeModel model) {
-    Object[] newPath = model.convertSceneGraphPath(selection);
-    return new TreePath(newPath);
+  public void setSelection(SceneGraphPath selection, Tool tool, AttributeEntity entity) {
+	  if (isSelected(selection, tool, entity)) return;  //already selected
+	  
+	  if (selection == null)  //nothing selected
+		  this.selection = defaultSelection;
+	  else this.selection = selection;
+
+	  nothingSelected = (selection == null);
+
+	  this.tool = tool;
+	  this.entity = entity;
+	  //determine current selection type
+	  if (tool == null && entity == null) 
+		  type = (nothingSelected) ? NO_SELECTION : DEFAULT_SELECTION; 
+	  else type = (tool != null) ? TOOL_SELECTION : ENTITY_SELECTION;
+
+	  selectionChanged();
   }
+
   
-  
+  public boolean isSelected(SceneGraphPath selection, Tool tool, AttributeEntity entity) {
+
+	  switch (type) {
+	  case NO_SELECTION: return (selection == null);
+	  case TOOL_SELECTION: return (this.tool == tool);
+	  case ENTITY_SELECTION: return (this.entity == entity);
+	  case DEFAULT_SELECTION: return (tool==null && entity==null && this.selection.equals(selection));
+	  }
+
+	  return false;
+  }
+
+
   public void addSelectionListener(SelectionListener listener)  {
     if (listeners.contains(listener)) return;
     listeners.add(listener);
@@ -198,12 +194,12 @@ public class SelectionManager implements TransformationListener {
   
   public void selectionChanged() {
     
-    selectionObserver.setPath(this.selection);  //update observed path
+    selectionObserver.setPath(selection);  //update observed path
     
     if (!listeners.isEmpty()) {
       for (int i = 0; i<listeners.size(); i++)  {
         SelectionListener l = listeners.get(i);
-        l.selectionChanged(new SelectionEvent(this, this.selection, tool, entity, getCurrentType()));
+        l.selectionChanged(new SelectionEvent(this, selection, tool, entity, type));
       }
     }
     
@@ -223,12 +219,7 @@ public class SelectionManager implements TransformationListener {
   /**
    * Returns the current selection type (static field of {@link SelectionEvent})
    */
-  public int getCurrentType() {
-    int type;
-    if (tool == null && entity == null) 
-      type = (nothingSelected) ? NO_SELECTION : DEFAULT_SELECTION; 
-    else type = (tool != null) ? TOOL_SELECTION : ENTITY_SELECTION;
-    
+  public int getType() {
     return type;
   }
   

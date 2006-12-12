@@ -80,7 +80,7 @@ public abstract class AbstractSelectionListenerAction extends AbstractJrAction i
         sm.getSelection(), 
         sm.getTool(), 
         sm.getEntity(), 
-        sm.getCurrentType()));
+        sm.getType()));
     
     selectionManager.addSelectionListener(this);
   }

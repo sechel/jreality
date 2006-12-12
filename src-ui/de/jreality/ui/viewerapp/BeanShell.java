@@ -58,15 +58,19 @@ import de.jreality.scene.SceneGraphNode;
 /**
  * @author msommer
  */
-public class BeanShell {
+public class BeanShell implements SelectionListener {
 
   private BshEvaluator bshEval;
   private JTerm jterm;
   private SimpleAttributeSet infoStyle;
+  private Object defaultSelection;
   
   
-  public BeanShell() {
-    
+  public BeanShell(SelectionManager sm) {
+
+	sm.addSelectionListener(this);
+	defaultSelection = sm.getDefaultSelection().getLastElement();
+	  
     bshEval = new BshEvaluator();
 
     jterm = new JTerm(new Session(bshEval));
@@ -77,8 +81,27 @@ public class BeanShell {
     StyleConstants.setFontFamily(infoStyle, "Monospaced");
     StyleConstants.setBold(infoStyle, true);
     StyleConstants.setFontSize(infoStyle, 12);
+    
+    setSelf(sm.getSelection().getLastElement());  //select current selection
   }
   
+  
+  public void selectionChanged(SelectionEvent e) {
+	switch (e.getType()) {
+	case SelectionEvent.DEFAULT_SELECTION:
+		setSelf(e.getSelection().getLastElement());
+		break;
+	case SelectionEvent.TOOL_SELECTION:
+		setSelf(e.getTool());
+		break;
+	case SelectionEvent.ENTITY_SELECTION:
+		setSelf(e.getEntity());
+		break;
+	case SelectionEvent.NO_SELECTION:
+		setSelf(defaultSelection);
+	}
+  }
+
   
   public void eval(String arg) {
     
@@ -98,6 +121,7 @@ public class BeanShell {
     if (obj == null) return;
     
     try {
+      if (obj.equals(bshEval.getInterpreter().get("self"))) return;
       bshEval.getInterpreter().set("self", obj);
       String name = (obj instanceof SceneGraphNode) ? ((SceneGraphNode)obj).getName() : "";
       String type = Proxy.isProxyClass(obj.getClass()) ? obj.getClass().getInterfaces()[0].getName() : obj.getClass().getName();
@@ -119,5 +143,5 @@ public class BeanShell {
   public BshEvaluator getBshEval() {
     return bshEval;
   }
- 
+
 }
