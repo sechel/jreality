@@ -1,7 +1,10 @@
 package de.jreality.vr;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -42,6 +45,7 @@ import de.jreality.shader.TextureUtility;
 import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
 import de.jreality.util.Secure;
+import de.jtem.beans.SimpleColorChooser;
 
 public class TerrainPluginVR extends AbstractPluginVR {
 
@@ -75,6 +79,8 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	protected File terrainFile;
 
 	private JPanel rotatePanel;
+
+	private SimpleColorChooser colorChooser;
 
 	public TerrainPluginVR() {
 		super("terrain");
@@ -141,6 +147,21 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	
 	private void makeTerrainTab() {
 		
+		colorChooser = new SimpleColorChooser();
+		colorChooser.setBorder(new EmptyBorder(8,8,8,8));
+		colorChooser.addChangeListener( new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setColor(colorChooser.getColor());
+			}
+		});
+		colorChooser.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				getViewerVR().switchToDefaultPanel();
+			}
+		});
+
+		Insets insets = new Insets(0, 5, 0, 5);
+		
 		// create rotate panel
 		rotatePanel = new JPanel(new BorderLayout());
 		rotatePanel.setBorder(new EmptyBorder(40, 40, 40, 40));
@@ -154,26 +175,29 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		rotatePanel.add(BorderLayout.SOUTH, okButton);
 		
 		terrainPanel = new JPanel(new BorderLayout());
+		Box selections = new Box(BoxLayout.X_AXIS);
 		JPanel geomPanel = new JPanel(new BorderLayout());
 		JPanel geom = terrain.getGeometrySelection();
 		TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Geometry");
 		geomPanel.setBorder(title);
 		geomPanel.add(BorderLayout.CENTER, geom);
-		final JButton terrainLoadButton = new JButton("load ...");
+		final JButton terrainLoadButton = new JButton("load");
+		terrainLoadButton.setMargin(insets);
 		terrainLoadButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				switchToTerrainBrowser();
 			}
 		});
 
-		final JButton rotateButton = new JButton("rotate ...");
+		final JButton rotateButton = new JButton("rotate");
+		rotateButton.setMargin(insets);
 		rotateButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				switchToRotateBrowser();
 			}
 		});
 
-		Box terrainLoadPanel = new Box(BoxLayout.Y_AXIS);
+		JPanel terrainLoadPanel = new JPanel(new FlowLayout());
 		terrainLoadPanel.add(rotateButton);
 		terrainLoadPanel.add(terrainLoadButton);
 		terrainLoadButton.setEnabled(terrain.getGeometryType() == Terrain.GeometryType.CUSTOM);
@@ -184,8 +208,10 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		tex.add(BorderLayout.CENTER, terrain.getTexureSelection());
 		title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Texture");
 		tex.setBorder(title);
-		
-		final JButton textureLoadButton = new JButton("load ...");
+
+		JPanel texLoadPanel = new JPanel(new FlowLayout());
+		final JButton textureLoadButton = new JButton("load");
+		textureLoadButton.setMargin(insets);
 		textureLoadButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				switchToTerrainTextureBrowser();
@@ -193,6 +219,23 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		});
 
 		textureLoadButton.setEnabled(terrain.getTextureType() == Terrain.TextureType.CUSTOM);
+		
+		texLoadPanel.add(textureLoadButton);
+
+		final JButton colorButton = new JButton("color");
+		colorButton.setMargin(insets);
+		colorButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				switchToColorBrowser();
+			}
+		});
+		
+		
+		tex.add(BorderLayout.SOUTH, texLoadPanel);
+		texLoadPanel.add(colorButton);
+		
+		selections.add(geomPanel);
+		selections.add(tex);
 		
 		terrain.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -202,12 +245,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 				rotateButton.setEnabled(terrain.getGeometryType() == Terrain.GeometryType.CUSTOM);
 			}
 		});
-		
-		tex.add(BorderLayout.SOUTH, textureLoadButton);
-		
-		terrainPanel.add(BorderLayout.WEST, geomPanel);
-		terrainPanel.add(BorderLayout.EAST, tex);
-		
+
 		Box texScaleBox = new Box(BoxLayout.X_AXIS);
 		texScaleBox.setBorder(new EmptyBorder(10, 5, 5, 0));
 		JLabel texScaleLabel = new JLabel("scale");
@@ -221,9 +259,20 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		texScaleBox.add(texScaleLabel);
 		texScaleBox.add(terrainTexScaleSlider);
 
+		terrainPanel.add(selections);
 		terrainPanel.add(BorderLayout.SOUTH, texScaleBox);
 	}
 	
+	protected void setColor(Color color) {
+		colorChooser.setColor(color);
+		String attribute = CommonAttributes.POLYGON_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR;
+		getViewerVR().getTerrainAppearance().setAttribute(attribute,color);
+	}
+
+	protected void switchToColorBrowser() {
+		getViewerVR().switchTo(colorChooser);
+	}
+
 	private void makeTerrainTextureFileChooser() {
 		FileSystemView view = FileSystemView.getFileSystemView();
 		String texDir = ".";
