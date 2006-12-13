@@ -48,7 +48,7 @@ public class TexturePluginVR extends AbstractPluginVR {
 	private static final double TEX_SCALE_RANGE = 400;
 
 	// tex tab
-	private JPanel textureButtonPanel;
+	private JPanel texturePanel;
 	private ButtonGroup textureGroup;
 	private JSlider texScaleSlider;
 	
@@ -71,6 +71,10 @@ public class TexturePluginVR extends AbstractPluginVR {
 		makeTexTab();
 	}
 	
+	@Override
+	public JPanel getPanel() {
+		return texturePanel;
+	}
 	private void makeTexTab() {
 		textureNameToTexture.put("none", null);
 		textureNameToTexture.put("metal grid", "textures/boysurface.png");
@@ -84,8 +88,8 @@ public class TexturePluginVR extends AbstractPluginVR {
 				setTexture(e.getActionCommand());
 			}
 		};
-		textureButtonPanel = new JPanel(new BorderLayout());
-		textureButtonPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+		texturePanel = new JPanel(new BorderLayout());
+		texturePanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		Box textureButtonBox = new Box(BoxLayout.Y_AXIS);
 		textureGroup = new ButtonGroup();
 		for (String name : textureNameToTexture.keySet()) {
@@ -96,7 +100,7 @@ public class TexturePluginVR extends AbstractPluginVR {
 			textureButtonBox.add(button);
 			textureGroup.add(button);
 		}
-		textureButtonPanel.add("Center", textureButtonBox);
+		texturePanel.add("Center", textureButtonBox);
 		
 		Box texScaleBox = new Box(BoxLayout.X_AXIS);
 		texScaleBox.setBorder(new EmptyBorder(70, 5, 5, 0));
@@ -118,7 +122,7 @@ public class TexturePluginVR extends AbstractPluginVR {
 				switchToTextureBrowser();
 			}
 		});
-		textureButtonPanel.add("South", textureLoadButton);
+		texturePanel.add("South", textureLoadButton);
 	}
 
 	private void makeTextureFileChooser() {
