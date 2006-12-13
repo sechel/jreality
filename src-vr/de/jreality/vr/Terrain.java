@@ -18,8 +18,8 @@ public class Terrain {
 	public enum GeometryType {
 		DEFAULT("Default"),
 		FLAT("Flat"),
-		NON_FLAT("Non-flat");
-//		CUSTOM
+		NON_FLAT("Non-flat"),
+		CUSTOM("Custom");
 		private String name;
 		GeometryType(String name) {
 			this.name=name;
@@ -73,6 +73,7 @@ public class Terrain {
 		terrainGeometrySelection.add(button);
 		geometrySelection.add(button);
 		geometryButtons.put(GeometryType.FLAT, button.getModel());
+		
 		button = new JRadioButton(GeometryType.NON_FLAT.getName());
 		button.getModel().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -83,8 +84,17 @@ public class Terrain {
 		geometrySelection.add(button);
 		geometryButtons.put(GeometryType.NON_FLAT, button.getModel());
 		
+		button = new JRadioButton(GeometryType.CUSTOM.getName());
+		button.getModel().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				setGeometryType(GeometryType.CUSTOM);
+			}
+		});
+		terrainGeometrySelection.add(button);
+		geometrySelection.add(button);
+		geometryButtons.put(GeometryType.CUSTOM, button.getModel());
 				
-		texureSelection = new JPanel(new GridLayout(3, 1));
+		texureSelection = new JPanel(new GridLayout(4, 1));
 		ButtonGroup terrainTextureSelection = new ButtonGroup();
 		button = new JRadioButton(TextureType.DEFAULT.getName());
 		button.getModel().addActionListener(new ActionListener() {

@@ -65,9 +65,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 
 import de.jreality.geometry.GeometryUtility;
@@ -118,6 +116,8 @@ public class ViewerVR {
 	// width of file browser panel in meters
 	private static final int FILE_CHOOSER_PANEL_WIDTH = 2;
 	
+	// diam of the terrain
+	private static final double TERRAIN_SIZE=100;
 	
 	// parts of the scene that do not change
 	private SceneGraphComponent sceneRoot = new SceneGraphComponent("root"),
@@ -132,18 +132,30 @@ public class ViewerVR {
 	private SceneGraphComponent alignmentComponent, currentContent;
 	
 	private SceneGraphPath cameraPath, avatarPath, emptyPickPath;
-
+	
+	// the scale of the currently loaded content
+	private double objectScale=1;
+	
 	private ScenePanel sp;
 	
-	private double objectScale=1;
+	// the default panel content - the tabs containing plugin panels
 	private Container defaultPanel;
 	
+	// macosx hack - split panels into two groups
+	// such that for each group the tabs fit into one row
 	private JTabbedPane geomTabs;
 	private JTabbedPane appearanceTabs;
 
+	// the current environment
 	private Environment environment;
+	
+	// flag indicating wether aabb-trees will be generated
+	// when content is set
 	private boolean generatePickTrees;
+	
 	private JCheckBoxMenuItem panelInSceneCheckBox;
+	
+	// navigation tools
 	private ShipNavigationTool shipNavigationTool;
 	private HeadTransformationTool headTransformationTool;
 	
@@ -152,6 +164,7 @@ public class ViewerVR {
 	private double contentOffset=1;
 	private Matrix contentMatrix=null;
 	
+	// list of registered plugins
 	private List<PluginVR> plugins=new ArrayList<PluginVR>();
 	
 	@SuppressWarnings("serial")
@@ -253,6 +266,27 @@ public class ViewerVR {
 	public void setTerrain(SceneGraphComponent c) {
 		while (terrainNode.getChildComponentCount() > 0) terrainNode.removeChild(terrainNode.getChildComponent(0));
 		terrainNode.addChild(c);
+		Scene.executeWriter(terrainNode, new Runnable() {
+			public void run() {
+				Rectangle3D bounds = GeometryUtility.calculateBoundingBox(terrainNode);
+				// scale
+				double[] extent = bounds.getExtent();
+				double maxExtent = Math.max(extent[0], extent[2]);
+				if (maxExtent != 0) {
+					double scale = TERRAIN_SIZE / maxExtent;
+					double[] translation = bounds.getCenter();
+					translation[1] = -scale * bounds.getMinY();
+					translation[0] *= -scale;
+					translation[2] *= -scale;
+
+					MatrixBuilder mb = MatrixBuilder.euclidean().translate(
+							translation).scale(scale);
+					if (terrainNode.getTransformation() != null)
+						mb.times(terrainNode.getTransformation().getMatrix());
+					mb.assignTo(terrainNode);
+				}
+			}
+		});
 		Matrix m = new Matrix(avatarNode.getTransformation());
 		AABBPickSystem ps = new AABBPickSystem();
 		ps.setSceneRoot(terrainNode);
@@ -266,7 +300,6 @@ public class ViewerVR {
 		if (!picks.isEmpty()) {
 			setAvatarHeight(picks.get(0).getWorldCoordinates()[1]);
 		}
-		
 	}
 	
 	public Environment getEnvironment() {

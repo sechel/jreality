@@ -39,8 +39,6 @@ public class AlignPluginVR extends AbstractPluginVR {
 	// maximal horizontal diameter of content in meters
 	private static final double MAX_CONTENT_SIZE = 100;
 
-	private static final double PI2 = Math.PI / 2;
-	
 	// defaults for align panel
 	private static final double DEFAULT_SIZE = 22;
 	private static final double DEFAULT_OFFSET = -.5;
@@ -49,8 +47,6 @@ public class AlignPluginVR extends AbstractPluginVR {
 	private JPanel alignPanel;
 	private JSlider sizeSlider;
 	private JSlider groundSlider;
-
-	Matrix rotation = new Matrix();
 
 	public AlignPluginVR() {
 		super("align");
@@ -89,103 +85,13 @@ public class AlignPluginVR extends AbstractPluginVR {
 		groundBox.add(groundLabel);
 		groundBox.add(groundSlider);
 
-		ImageIcon rotateLeft = AccessController.doPrivileged(new PrivilegedAction<ImageIcon>() {
-			public ImageIcon run() {
-				URL imgURL = ViewerVR.class.getResource("rotleft.gif");
-				return new ImageIcon(imgURL);
+		final RotateBox rotateBox = new RotateBox();
+		rotateBox.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				getViewerVR().setContentMatrix(rotateBox.getMatrix());
 			}
 		});
-
-		ImageIcon rotateRight = AccessController.doPrivileged(new PrivilegedAction<ImageIcon>() {
-			public ImageIcon run() {
-				URL imgURL = ViewerVR.class.getResource("rotright.gif");
-				return new ImageIcon(imgURL);
-			}
-		});
-
-		JPanel rotateBox = new JPanel(new GridLayout(3, 3));
-		rotateBox.setBorder(new EmptyBorder(20, 0, 20, 0));
-
-		JButton xRotateLeft = new JButton(rotateLeft);
-		xRotateLeft.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				rotation.multiplyOnLeft(MatrixBuilder.euclidean().rotateX(
-						-PI2).getMatrix());
-				getViewerVR().setContentMatrix(new Matrix(rotation));
-			}
-		});
-		Insets insets = new Insets(0, 0, 0, 0);
-		Dimension dim = new Dimension(25, 22);
-		xRotateLeft.setMargin(insets);
-		xRotateLeft.setMaximumSize(dim);
-		rotateBox.add(xRotateLeft);
-		JLabel label = new JLabel("x");
-		label.setHorizontalAlignment(SwingConstants.CENTER);
-		rotateBox.add(label);
-		JButton xRotateRight = new JButton(rotateRight);
-		xRotateRight.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				rotation.multiplyOnLeft(MatrixBuilder.euclidean().rotateX(
-						PI2).getMatrix());
-				getViewerVR().setContentMatrix(new Matrix(rotation));
-			}
-		});
-		xRotateRight.setMargin(insets);
-		xRotateRight.setMaximumSize(dim);
-		rotateBox.add(xRotateRight);
-
-		JButton yRotateLeft = new JButton(rotateLeft);
-		yRotateLeft.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				rotation.multiplyOnLeft(MatrixBuilder.euclidean().rotateY(
-						-PI2).getMatrix());
-				getViewerVR().setContentMatrix(new Matrix(rotation));
-			}
-		});
-		yRotateLeft.setMargin(insets);
-		yRotateLeft.setMaximumSize(dim);
-		rotateBox.add(yRotateLeft);
-		label = new JLabel("y");
-		label.setHorizontalAlignment(SwingConstants.CENTER);
-		rotateBox.add(label);
-		JButton yRotateRight = new JButton(rotateRight);
-		yRotateRight.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				rotation.multiplyOnLeft(MatrixBuilder.euclidean().rotateY(
-						PI2).getMatrix());
-				getViewerVR().setContentMatrix(new Matrix(rotation));
-			}
-		});
-		yRotateRight.setMargin(insets);
-		yRotateRight.setMaximumSize(dim);
-		rotateBox.add(yRotateRight);
-
-		JButton zRotateLeft = new JButton(rotateLeft);
-		zRotateLeft.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				rotation.multiplyOnLeft(MatrixBuilder.euclidean().rotateZ(
-						-PI2).getMatrix());
-				getViewerVR().setContentMatrix(new Matrix(rotation));
-			}
-		});
-		zRotateLeft.setMargin(insets);
-		zRotateLeft.setMaximumSize(dim);
-		rotateBox.add(zRotateLeft);
-		label = new JLabel("z");
-		label.setHorizontalAlignment(SwingConstants.CENTER);
-		rotateBox.add(label);
-		JButton zRotateRight = new JButton(rotateRight);
-		zRotateRight.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				rotation.multiplyOnLeft(MatrixBuilder.euclidean().rotateZ(
-						PI2).getMatrix());
-				getViewerVR().setContentMatrix(new Matrix(rotation));
-			}
-		});
-		zRotateRight.setMargin(insets);
-		zRotateRight.setMaximumSize(dim);
-		rotateBox.add(zRotateRight);
-
+		
 		JPanel p = new JPanel(new BorderLayout());
 		p.setBorder(new EmptyBorder(5, 30, 5, 20));
 		p.add("Center", rotateBox);

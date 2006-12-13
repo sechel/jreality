@@ -1,6 +1,7 @@
 package de.jreality.vr;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -26,10 +27,12 @@ import javax.swing.filechooser.FileSystemView;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.Primitives;
+import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.Readers;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.shader.CommonAttributes;
@@ -56,13 +59,22 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	private JFileChooser terrainTexFileChooser;
 	private File terrainTexFile;
 
-	private IndexedFaceSet nonflatTerrain;
-	private IndexedFaceSet flatTerrain = Primitives.plainQuadMesh(3, 3, 100, 100);
-	private double[][] flatTerrainPoints;
+	private SceneGraphComponent nonflatTerrain;
+	private SceneGraphComponent flatTerrain;
 	
-	private SceneGraphComponent terrainNode;
-
 	private Terrain terrain;
+
+	private JFileChooser terrainFileChooser;
+
+	protected SceneGraphComponent customTerrain;
+
+	protected SceneGraphComponent terrainNode = new SceneGraphComponent("terrain alignment");
+	
+	private RotateBox rotateBox = new RotateBox();
+	
+	protected File terrainFile;
+
+	private JPanel rotatePanel;
 
 	public TerrainPluginVR() {
 		super("terrain");
@@ -73,56 +85,48 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		AccessController.doPrivileged(new PrivilegedAction<Object>() {
 			public Object run() {
 				makeTerrainTextureFileChooser();
+				makeTerrainFileChooser();
 				return null;
 			}
 		});
 		
 		// terrain
-		terrainNode = AccessController.doPrivileged(new PrivilegedAction<SceneGraphComponent>() {
+		nonflatTerrain = AccessController.doPrivileged(new PrivilegedAction<SceneGraphComponent>() {
 			public SceneGraphComponent run() {
 				try {
-					return Readers.read(Input.getInput(ViewerVR.class.getResource("terrain.3ds"))).getChildComponent(0);
+					return Readers.read(Input.getInput(ViewerVR.class.getResource("terrain.3ds")));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 				return null;
 			}
 		});
+		PickUtility.assignFaceAABBTrees(nonflatTerrain);
+		nonflatTerrain.accept(new SceneGraphVisitor() {
+			public void visit(SceneGraphComponent c) {
+				c.childrenWriteAccept(this, false, false, false, false, true, false);
+			}
+			public void visit(IndexedFaceSet i) {
+				GeometryUtility.calculateAndSetVertexNormals(i);		
+			}
+		});
+		flatTerrain = new SceneGraphComponent("flat terrain");
+		MatrixBuilder.euclidean().translate(0,0,20).rotateX(-Math.PI/2).assignTo(flatTerrain);
+		flatTerrain.setGeometry(Primitives.plainQuadMesh(0.1, 0.1, 100, 100));
+		PickUtility.assignFaceAABBTrees(flatTerrain);
 		
-		nonflatTerrain = (IndexedFaceSet) terrainNode.getGeometry();
-		MatrixBuilder.euclidean().scale(1.1 / 3.).translate(0, 7, 0).assignTo(terrainNode);
-		terrainNode.setName("terrain");
-		IndexedFaceSet terrainGeom = (IndexedFaceSet) terrainNode.getGeometry();
-		GeometryUtility.calculateAndSetNormals(terrainGeom);
-		terrainGeom.setName("terrain Geometry");
-		PickUtility.assignFaceAABBTree(terrainGeom);
-		flatTerrainPoints = flatTerrain.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
-		int n = flatTerrainPoints.length;
-		for (int j=0; j<n; j++) {
-			double y = flatTerrainPoints[j][1];
-			//double z = flatTerrainPoints[j][2];
-			flatTerrainPoints[j][1] = -8.5;
-			flatTerrainPoints[j][2] = y;
-		}
-		flatTerrain.setVertexAttributes(Attribute.COORDINATES, new DoubleArrayArray.Array(flatTerrainPoints, 3));
-		Random r = new Random();
-		for (int j=0; j<n; j++) {			
-			flatTerrainPoints[j][0] /= 3;
-			flatTerrainPoints[j][0] += (-.5+r.nextDouble())*1E-1;
-			flatTerrainPoints[j][1] = -1.5;
-			flatTerrainPoints[j][2] /= 3;
-			flatTerrainPoints[j][2] += (-.5+r.nextDouble())*1E-1;
-		}
-		GeometryUtility.calculateAndSetNormals(flatTerrain);
-		flatTerrain.setName("flat terrain Geometry");
-		PickUtility.assignFaceAABBTree(flatTerrain);
+		rotateBox.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				rotateBox.getMatrix().assignTo(terrainNode);
+				updateTerrain();
+			}
+		});
 		makeTerrainTab();
 	}
 
 	@Override
 	public void setViewerVR(ViewerVR vvr) {
 		super.setViewerVR(vvr);
-		getViewerVR().setTerrain(terrainNode);
 	}
 	
 	@Override
@@ -136,17 +140,50 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	}
 	
 	private void makeTerrainTab() {
+		
+		// create rotate panel
+		rotatePanel = new JPanel(new BorderLayout());
+		rotatePanel.setBorder(new EmptyBorder(40, 40, 40, 40));
+		rotatePanel.add(rotateBox);
+		final JButton okButton = new JButton("Ok");
+		okButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				getViewerVR().switchToDefaultPanel();
+			}
+		});
+		rotatePanel.add(BorderLayout.SOUTH, okButton);
+		
 		terrainPanel = new JPanel(new BorderLayout());
-		Box terrainBox = new Box(BoxLayout.X_AXIS);
+		JPanel geomPanel = new JPanel(new BorderLayout());
 		JPanel geom = terrain.getGeometrySelection();
 		TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Geometry");
-		geom.setBorder(title);
-		terrainBox.add(geom);
+		geomPanel.setBorder(title);
+		geomPanel.add(BorderLayout.CENTER, geom);
+		final JButton terrainLoadButton = new JButton("load ...");
+		terrainLoadButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				switchToTerrainBrowser();
+			}
+		});
+
+		final JButton rotateButton = new JButton("rotate ...");
+		rotateButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				switchToRotateBrowser();
+			}
+		});
+
+		Box terrainLoadPanel = new Box(BoxLayout.Y_AXIS);
+		terrainLoadPanel.add(rotateButton);
+		terrainLoadPanel.add(terrainLoadButton);
+		terrainLoadButton.setEnabled(terrain.getGeometryType() == Terrain.GeometryType.CUSTOM);
+		rotateButton.setEnabled(terrain.getGeometryType() == Terrain.GeometryType.CUSTOM);
+		geomPanel.add(BorderLayout.SOUTH, terrainLoadPanel);
+		
 		JPanel tex = new JPanel(new BorderLayout());
 		tex.add(BorderLayout.CENTER, terrain.getTexureSelection());
 		title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Texture");
 		tex.setBorder(title);
-		terrainBox.add(tex);
 		
 		final JButton textureLoadButton = new JButton("load ...");
 		textureLoadButton.addActionListener(new ActionListener() {
@@ -161,16 +198,18 @@ public class TerrainPluginVR extends AbstractPluginVR {
 			public void stateChanged(ChangeEvent e) {
 				updateTerrain();
 				textureLoadButton.setEnabled(terrain.getTextureType() == Terrain.TextureType.CUSTOM);
+				terrainLoadButton.setEnabled(terrain.getGeometryType() == Terrain.GeometryType.CUSTOM);
+				rotateButton.setEnabled(terrain.getGeometryType() == Terrain.GeometryType.CUSTOM);
 			}
 		});
 		
 		tex.add(BorderLayout.SOUTH, textureLoadButton);
 		
-		terrainPanel.add(BorderLayout.WEST, geom);
+		terrainPanel.add(BorderLayout.WEST, geomPanel);
 		terrainPanel.add(BorderLayout.EAST, tex);
 		
 		Box texScaleBox = new Box(BoxLayout.X_AXIS);
-		texScaleBox.setBorder(new EmptyBorder(70, 5, 5, 0));
+		texScaleBox.setBorder(new EmptyBorder(10, 5, 5, 0));
 		JLabel texScaleLabel = new JLabel("scale");
 		terrainTexScaleSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100,0);
 		terrainTexScaleSlider.addChangeListener(new ChangeListener() {
@@ -213,6 +252,31 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		});
 	}
 
+	private void makeTerrainFileChooser() {
+		FileSystemView view = FileSystemView.getFileSystemView();
+		String texDir = ".";
+		String dataDir = Secure.getProperty("jreality.data");
+		if (dataDir!= null) texDir = dataDir;
+		File defaultDir = new File(texDir);
+		terrainFileChooser = new JFileChooser(!defaultDir.exists() ? view.getHomeDirectory() : defaultDir, view);
+		terrainFileChooser.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ev) {
+				File file = terrainFileChooser.getSelectedFile();
+				try {
+					if (ev.getActionCommand() == JFileChooser.APPROVE_SELECTION
+							&& file != null) {
+						terrainFile = file;
+						customTerrain = Readers.read(Input.getInput(terrainFile));
+						getViewerVR().setTerrain(customTerrain);
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				getViewerVR().switchToDefaultPanel();
+			}
+		});
+	}
+
 	public double getTerrainTextureScale() {
 		double d = .01 * terrainTexScaleSlider.getValue();
 		return Math.exp(Math.log(TEX_SCALE_RANGE) * d)/TEX_SCALE_RANGE * MAX_TEX_SCALE;
@@ -231,6 +295,15 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		getViewerVR().switchToFileChooser(terrainTexFileChooser);
 	}
 
+	protected void switchToTerrainBrowser() {
+		getViewerVR().switchToFileChooser(terrainFileChooser);
+	}
+
+	protected void switchToRotateBrowser() {
+		getViewerVR().switchTo(rotatePanel);
+	}
+
+
 	private void setTerrainTexture(ImageData tex) {
 		if (tex != null) {
 			terrainTex = TextureUtility.createTexture(getViewerVR().getTerrainAppearance(), "polygonShader", tex);
@@ -240,23 +313,31 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	}
 
 	private void updateTerrain() {
-		boolean flat;
+		boolean flat=false;
+		// remove last terrain
+		while (terrainNode.getChildComponentCount() > 0) terrainNode.removeChild(terrainNode.getChildComponent(0));
 		switch (terrain.getGeometryType()) {
 		case FLAT:
+			terrainNode.addChild(flatTerrain);
 			flat = true;
+			new Matrix().assignTo(terrainNode);
 			break;
 		case NON_FLAT:
-			flat = false;
+			terrainNode.addChild(nonflatTerrain);
+			new Matrix().assignTo(terrainNode);
+			break;
+		case CUSTOM:
+			if (customTerrain != null) terrainNode.addChild(customTerrain);
 			break;
 		default:
 			flat = getViewerVR().getEnvironment().isFlatTerrain();
+			new Matrix().assignTo(terrainNode);
+			terrainNode.addChild(flat ? flatTerrain : nonflatTerrain);
 		}
-		terrainNode.setGeometry(flat ? flatTerrain : nonflatTerrain);
-		//if (last != terrainNode.getGeometry()) computeShadow();
-		
-		// XXX:
+
+		getViewerVR().setTerrain(terrainNode);
 		getViewerVR().getTerrainAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, flat);
-		
+
 		Environment env = getViewerVR().getEnvironment();
 		switch (terrain.getTextureType()) {
 		case NONE:
