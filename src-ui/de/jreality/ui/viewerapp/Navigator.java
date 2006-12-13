@@ -40,6 +40,15 @@
 
 package de.jreality.ui.viewerapp;
 
+import java.awt.Component;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.BorderFactory;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.event.TreeSelectionEvent;
@@ -53,9 +62,17 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.data.AttributeEntity;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.scene.tool.Tool;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.treeview.JTreeRenderer;
 import de.jreality.ui.treeview.SceneTreeModel;
 import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
+import de.jreality.ui.viewerapp.actions.edit.AddTool;
+import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
+import de.jreality.ui.viewerapp.actions.edit.ExportOBJ;
+import de.jreality.ui.viewerapp.actions.edit.Remove;
+import de.jreality.ui.viewerapp.actions.edit.SaveSelected;
+import de.jreality.ui.viewerapp.actions.edit.ToggleAppearance;
+import de.jreality.ui.viewerapp.actions.edit.TogglePickable;
 import de.jtem.beans.BooleanEditor;
 import de.jtem.beans.EditorSpawner;
 import de.jtem.beans.InspectorPanel;
@@ -73,12 +90,14 @@ public class Navigator implements SelectionListener {
 	private JTree sceneTree;
 	private SceneTreeModel treeModel;
 	private TreeSelectionModel tsm;
-
+	
+	private SelectionManager sm;
 	private SceneGraphComponent sceneRoot;  //the scene root
 	private Object currentSelection;
 
-	public Navigator(SceneGraphComponent sceneRoot, final SelectionManager sm) {
+	public Navigator(SceneGraphComponent sceneRoot, SelectionManager selectionManager) {
 
+		sm = selectionManager;
 		sm.addSelectionListener(this);
 		
 		inspector = new InspectorPanel(false);
@@ -118,9 +137,10 @@ public class Navigator implements SelectionListener {
 			}
 		});
 
-		tsm.setSelectionPath(new TreePath(treeModel.convertSceneGraphPath(sm.getSelection())));  //select current selection
-
 		this.sceneRoot = sceneRoot;
+		
+		tsm.setSelectionPath(new TreePath(treeModel.convertSceneGraphPath(sm.getSelection())));  //select current selection
+		setupContextMenu();
 	}
 
 	
@@ -149,7 +169,7 @@ public class Navigator implements SelectionListener {
 	}
 	
 
-	public SceneGraphComponent getRoot() {
+	public SceneGraphComponent getSceneRoot() {
 		return sceneRoot;
 	}
 
@@ -159,6 +179,78 @@ public class Navigator implements SelectionListener {
 	}
 
 	
+	private void setupContextMenu() {
+
+		final JPopupMenu cm = new JPopupMenu();
+		cm.setLightWeightPopupEnabled(false);
+		
+		//create content of context menu
+		Component parent = sceneTree;
+		cm.add(new JMenuItem(new SaveSelected(ViewerAppMenu.SAVE_SELECTED, sm, parent)));
+	    cm.add(new JMenuItem(new ExportOBJ(ViewerAppMenu.EXPORT_OBJ, sm, parent)));
+	    cm.addSeparator();
+	    cm.add(new JMenuItem(new Remove(ViewerAppMenu.REMOVE, sm)));
+	    cm.addSeparator();
+	    cm.add(new JMenuItem(new AddTool(ViewerAppMenu.ADD_TOOL, sm, parent)));
+	    cm.addSeparator();
+	    cm.add(new JMenuItem(new ToggleAppearance(ViewerAppMenu.TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm)));
+	    cm.add(new JMenuItem(new ToggleAppearance(ViewerAppMenu.TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm)));
+	    cm.add(new JMenuItem(new ToggleAppearance(ViewerAppMenu.TOGGLE_FACE_DRAWING, CommonAttributes.FACE_DRAW, sm)));
+	    cm.addSeparator();
+	    cm.add(new JMenuItem(new TogglePickable(ViewerAppMenu.TOGGLE_PICKABLE, sm)));
+	    cm.add(new JMenuItem(new AssignFaceAABBTree(ViewerAppMenu.ASSIGN_FACE_AABBTREE, sm)));
+
+		    
+		//add listener to the navigator's tree
+		sceneTree.addMouseListener(new MouseAdapter() {
+
+			public void mousePressed( MouseEvent e ) {
+				handlePopup( e );
+			}
+
+			public void mouseReleased( MouseEvent e ) {
+				handlePopup( e );
+			}
+
+			private void handlePopup( MouseEvent e ) {
+				if ( e.isPopupTrigger() ) {
+					TreePath path = sceneTree.getPathForLocation( e.getX(), e.getY() );
+					if ( path != null ) {
+						tsm.clearSelection();  //ensures that SelectionListeners are notified even if path did not change
+						tsm.setSelectionPath( path );
+						cm.show( e.getComponent(), e.getX(), e.getY()+10 );
+					}
+				}
+			}
+		});
+	}
+
+	
+	/**
+	 * Get the navigator as a Component.
+	 * @return the navigator
+	 */
+	public Component getComponent() {
+		
+		sceneTree.setBorder(BorderFactory.createEmptyBorder(4,4,4,4));
+		JScrollPane top = new JScrollPane(sceneTree);
+		top.setBorder(BorderFactory.createEmptyBorder());
+		
+		inspector.setBorder(BorderFactory.createEmptyBorder(4,4,4,4));
+		JScrollPane bottom = new JScrollPane(inspector);
+		bottom.setBorder(BorderFactory.createEmptyBorder());
+        
+		JSplitPane navigator = new JSplitPane(
+				JSplitPane.VERTICAL_SPLIT, top, bottom);
+		navigator.setContinuousLayout(true);
+		navigator.setResizeWeight(.1);
+		navigator.setBorder(BorderFactory.createEmptyBorder());
+		
+		return navigator;
+	}
+
+	
+//	-- INNER CLASSES -----------------------------------
 
 	public static abstract class SelectionListener implements TreeSelectionListener {
 

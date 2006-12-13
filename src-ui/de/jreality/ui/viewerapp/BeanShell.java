@@ -41,10 +41,12 @@
 package de.jreality.ui.viewerapp;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.lang.reflect.Proxy;
 
-import javax.swing.JComponent;
+import javax.swing.BorderFactory;
+import javax.swing.JScrollPane;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
@@ -110,9 +112,15 @@ public class BeanShell implements SelectionListener {
   }
   
   
-  public JComponent getJTerm() {
+  /**
+   * Get the bean shell as a Component.
+   * @return the bean shell
+   */
+  public Component getComponent() {
     
-    return jterm;
+	  JScrollPane beanShell = new JScrollPane(jterm);
+	  beanShell.setBorder(BorderFactory.createEmptyBorder());
+	  return beanShell;
   }
   
 

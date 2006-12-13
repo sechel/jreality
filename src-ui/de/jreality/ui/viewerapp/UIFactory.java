@@ -45,11 +45,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import javax.swing.BorderFactory;
-import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTree;
 import javax.swing.border.Border;
 
 
@@ -57,111 +55,99 @@ import javax.swing.border.Border;
  * @author msommer
  */
 class UIFactory {
-  
-  private Component viewer = null;
-  private Component beanShell = null;
-  private Component inspector = null;
-  private JTree sceneTree = null;
-  private LinkedList<Component> accessory = new LinkedList<Component>();
-  private HashMap<Component, String> accessoryTitles = new HashMap<Component, String>();
-  private final Border emptyBorder = BorderFactory.createEmptyBorder();
-  
-  private boolean attachNavigator = false;  //default
-  private boolean attachBeanShell = false;  //default
-  
 
-  protected Component getComponent() {
-    if (!attachNavigator && !attachBeanShell)
-      return viewer;
-    
-    Component right = viewer;
-    if (attachBeanShell) {
-      JSplitPane jsp = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-          viewer, scroll(beanShell));
-      jsp.setContinuousLayout(true);
-      jsp.setOneTouchExpandable(true);
-      jsp.setResizeWeight(.01);
-      jsp.setDividerLocation(420);
-      //jsp.setDividerLocation(Integer.MAX_VALUE);
-      right = jsp;
-    }
-    
-    if (attachNavigator) {  //|| !accessory.isEmpty()
-      Component left;
-      JTabbedPane jtb = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
-      
-      if (attachNavigator) {  //create split pane for scene tree and inspector
-        JSplitPane navigator = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-            scroll(sceneTree), scroll(inspector));
-        navigator.setContinuousLayout(true);
-        navigator.setResizeWeight(.1);
-        jtb.addTab("Navigator", navigator);
-      }
-      for (Component c : accessory)  //add accessories 
-        jtb.addTab(accessoryTitles.get(c), scroll(c));
-      
-      left = jtb;
-      if (jtb.getTabCount() == 1) left = jtb.getComponentAt(0);
-      
-      JSplitPane content = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, 
-          left, right);
-      content.setContinuousLayout(true);
-      content.setOneTouchExpandable(true);
-      content.setDividerLocation(260);
-      
-      return content;
-    }
+	private Component viewer = null;
+	private Component beanShell = null;
+	private Component navigator = null;
+	private LinkedList<Component> accessory = new LinkedList<Component>();
+	private HashMap<Component, String> accessoryTitles = new HashMap<Component, String>();
+	private final Border emptyBorder = BorderFactory.createEmptyBorder();
 
-    return right;
-  }
-  
-  
-  protected JScrollPane scroll(Component comp) {
-    JScrollPane scroll = new JScrollPane(comp);
-    scroll.setBorder(emptyBorder);
-    return scroll;
-  }
-
-  
-  protected void setViewer(Component component) {
-    viewer = component;
-  }
-
-  
-  protected void setBeanShell(Component component) {
-    beanShell = component;
-  }
+	private boolean attachNavigator = false;  //default
+	private boolean attachBeanShell = false;  //default
 
 
-  protected void setInspector(JComponent component) {
-    component.setBorder(BorderFactory.createEmptyBorder(1,1,1,1));
-    inspector = component;
-  }
+	protected Component createUI() {
+		if (!attachNavigator && !attachBeanShell)
+			return viewer;
 
-  
-  protected void setSceneTree(JTree sceneTree) {
-    this.sceneTree = sceneTree;
-  }
-  
-  
-  protected void setAttachNavigator(boolean b) {
-    attachNavigator = b;
-  }
+		Component right = viewer;
+		if (attachBeanShell) {
+			JSplitPane jsp = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+					viewer, beanShell);
+			jsp.setContinuousLayout(true);
+			jsp.setOneTouchExpandable(true);
+			jsp.setResizeWeight(.01);
+			jsp.setDividerLocation(420);
+			//jsp.setDividerLocation(Integer.MAX_VALUE);
+			right = jsp;
+		}
 
-  
-  protected void setAttachBeanShell(boolean b) {
-    attachBeanShell = b;
-  }
-  
-  
-  protected void addAccessory(Component c) {
-    addAccessory(c, null);
-  }
+		if (attachNavigator) {  //|| !accessory.isEmpty()
+			Component left;
+			JTabbedPane jtb = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 
-  
-  protected void addAccessory(Component c, String title) {
-    accessory.add(c);
-    accessoryTitles.put(c, title);
-  }
-  
+			if (attachNavigator) 
+				jtb.addTab("Navigator", navigator);
+			for (Component c : accessory)  //add accessories 
+				jtb.addTab(accessoryTitles.get(c), scroll(c));
+
+			left = jtb;
+			if (jtb.getTabCount() == 1) left = jtb.getComponentAt(0);
+
+			JSplitPane content = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, 
+					left, right);
+			content.setContinuousLayout(true);
+			content.setOneTouchExpandable(true);
+			content.setDividerLocation(260);
+
+			return content;
+		}
+
+		return right;
+	}
+
+
+	private Component scroll(Component comp) {
+		JScrollPane scroll = new JScrollPane(comp);
+		scroll.setBorder(emptyBorder);
+		return scroll;
+	}
+
+
+	protected void setViewer(Component component) {
+		viewer = component;
+	}
+
+
+	protected void setBeanShell(Component component) {
+		beanShell = component;
+	}
+
+
+	protected void setNavigator(Component component) {
+		navigator = component;
+	}
+
+
+	protected void setAttachNavigator(boolean b) {
+		attachNavigator = b;
+	}
+
+
+	protected void setAttachBeanShell(boolean b) {
+		attachBeanShell = b;
+	}
+
+
+	protected void addAccessory(Component c) {
+		addAccessory(c, null);
+	}
+
+
+	protected void addAccessory(Component c, String title) {
+		accessory.add(c);
+		accessoryTitles.put(c, title);
+	}
+
 }

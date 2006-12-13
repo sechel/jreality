@@ -318,18 +318,15 @@ public class ViewerApp {
     uiFactory.setViewer((Component) currViewer.getViewingComponent());
     
     //set up beanShell and uiFactory.beanShell
-    if (attachBeanShell && beanShell == null) setupBeanShell();
-    
-    //set up navigator, uiFactory.inspector and uiFactory.sceneTree
-    if (attachNavigator && navigator == null) setupNavigator();
-    
     if (attachBeanShell) {
-      uiFactory.setBeanShell(beanShell.getJTerm());
+    	if (beanShell == null) setupBeanShell();
+    	uiFactory.setBeanShell(beanShell.getComponent());
     }
     
+    //set up navigator, uiFactory.navigator
     if (attachNavigator) {
-      uiFactory.setInspector(navigator.getInspector());
-      uiFactory.setSceneTree(navigator.getSceneTree());
+    	if (navigator == null) setupNavigator();
+    	uiFactory.setNavigator(navigator.getComponent());
     }
     
     uiFactory.setAttachNavigator(attachNavigator);
@@ -569,14 +566,14 @@ public class ViewerApp {
   
   
   /**
-   * Get the viewer as a component.
-   * @return the viewer component
+   * Get the ViewerApp's content.
+   * @return the content
    */
   public Component getComponent() {
     if (uiFactory == null)
       throw new UnsupportedOperationException("No viewer instantiated, call update()!");
     
-    return uiFactory.getComponent();
+    return uiFactory.createUI();
   }
   
   
