@@ -194,6 +194,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 
 		// register standard shaders for render script
 		renderScript.addShader("defaultpolygonshader.sl");
+    renderScript.addShader("twosidepolygonshader.sl");
 		renderScript.addShader("constantTexture.sl");
 
 		int index = ribFileName.lastIndexOf(File.separatorChar);
@@ -509,6 +510,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 
 	private static void writeStandardShaders(String name) {
 		RIBHelper.writeShader(name, "defaultpolygonshader.sl");
+    RIBHelper.writeShader(name, "twosidepolygonshader.sl");
 		RIBHelper.writeShader(name, "noneuclideanpolygonshader.sl");
 		RIBHelper.writeShader(name, "noneuclideanlight.sl");
 		RIBHelper.writeShader(name, "constantTexture.sl");
