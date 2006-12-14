@@ -161,7 +161,7 @@ public class ViewerVR {
 	
 	// content alignment
 	private double contentSize=20;
-	private double contentOffset=1;
+	private double contentOffset=.3;
 	private Matrix contentMatrix=null;
 	
 	// list of registered plugins

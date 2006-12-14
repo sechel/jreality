@@ -41,7 +41,7 @@ public class AlignPluginVR extends AbstractPluginVR {
 
 	// defaults for align panel
 	private static final double DEFAULT_SIZE = 22;
-	private static final double DEFAULT_OFFSET = -.5;
+	private static final double DEFAULT_OFFSET = .3;
 	
 	// align panel
 	private JPanel alignPanel;
