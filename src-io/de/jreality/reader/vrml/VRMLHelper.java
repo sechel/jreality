@@ -142,12 +142,6 @@ public class VRMLHelper {
 		}
 		return output;
 	}
-	
-	public void foo()	{
-		FactoredMatrix fm = new FactoredMatrix();
-
-		IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
-	}
 
 	public static int[] reallocate(int[] array)	{
 		int n = array.length;
