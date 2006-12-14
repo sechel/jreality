@@ -263,11 +263,14 @@ public class ViewerVR {
 		return terrainNode.getChildNodes().size() > 0 ? terrainNode.getChildComponent(0) : null;
 	}
 	
-	public void setTerrain(SceneGraphComponent c) {
-		while (terrainNode.getChildComponentCount() > 0) terrainNode.removeChild(terrainNode.getChildComponent(0));
-		terrainNode.addChild(c);
+	public void setTerrain(final SceneGraphComponent c) {
+			while (terrainNode.getChildComponentCount() > 0) terrainNode.removeChild(terrainNode.getChildComponent(0));
+			if (c==null) return;
 		Scene.executeWriter(terrainNode, new Runnable() {
 			public void run() {
+				//while (terrainNode.getChildComponentCount() > 0) terrainNode.removeChild(terrainNode.getChildComponent(0));
+				MatrixBuilder.euclidean().assignTo(terrainNode);
+				terrainNode.addChild(c);
 				Rectangle3D bounds = GeometryUtility.calculateBoundingBox(terrainNode);
 				// scale
 				double[] extent = bounds.getExtent();
@@ -275,7 +278,20 @@ public class ViewerVR {
 				if (maxExtent != 0) {
 					double scale = TERRAIN_SIZE / maxExtent;
 					double[] translation = bounds.getCenter();
-					translation[1] = -scale * bounds.getMinY();
+					
+					// determine offset in y-direction (up/down)
+					AABBPickSystem ps = new AABBPickSystem();
+					ps.setSceneRoot(terrainNode);
+					List<PickResult> picks = ps.computePick(translation, new double[]{0,-1,0,0});
+					if (picks.isEmpty()) {
+						picks = ps.computePick(translation, new double[]{0,1,0,0});
+					}
+					final double offset=picks.isEmpty() ? bounds.getMinY() : picks.get(0).getWorldCoordinates()[1];
+//					System.out.println("offset="+offset);
+//					System.out.println("min-y="+bounds.getMinY());
+//					System.out.println("scale="+scale);
+					
+					translation[1] = -scale * offset;
 					translation[0] *= -scale;
 					translation[2] *= -scale;
 
