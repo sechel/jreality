@@ -106,10 +106,10 @@ public class SceneGraphPath implements Cloneable {
 
   // TODO write own Iterator classes...
   
-  public ListIterator iterator() {
+  public ListIterator<SceneGraphNode> iterator() {
     return Collections.unmodifiableList(path).listIterator();
   }
-  public ListIterator iterator(int start) {
+  public ListIterator<SceneGraphNode> iterator(int start) {
     return Collections.unmodifiableList(path).listIterator(start);
   }
   
