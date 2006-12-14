@@ -2,7 +2,6 @@ package de.jreality.vr;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -11,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -36,8 +34,6 @@ import de.jreality.reader.Readers;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphVisitor;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
@@ -117,7 +113,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		});
 		flatTerrain = new SceneGraphComponent("flat terrain");
 		MatrixBuilder.euclidean().translate(0,0,20).rotateX(-Math.PI/2).assignTo(flatTerrain);
-		flatTerrain.setGeometry(Primitives.plainQuadMesh(0.1, 0.1, 100, 100));
+		flatTerrain.setGeometry(Primitives.plainQuadMesh(100, 100, 1, 1));
 		PickUtility.assignFaceAABBTrees(flatTerrain);
 		
 		rotateBox.addChangeListener(new ChangeListener() {
