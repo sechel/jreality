@@ -96,7 +96,6 @@ public class TerrainPluginVR extends AbstractPluginVR {
 			}
 		});
 		
-		// terrain
 		nonflatTerrain = AccessController.doPrivileged(new PrivilegedAction<SceneGraphComponent>() {
 			public SceneGraphComponent run() {
 				try {
@@ -198,8 +197,9 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		});
 
 		JPanel terrainLoadPanel = new JPanel(new FlowLayout());
-		terrainLoadPanel.add(rotateButton);
 		terrainLoadPanel.add(terrainLoadButton);
+		terrainLoadPanel.add(rotateButton);
+
 		terrainLoadButton.setEnabled(terrain.getGeometryType() == Terrain.GeometryType.CUSTOM);
 		rotateButton.setEnabled(terrain.getGeometryType() == Terrain.GeometryType.CUSTOM);
 		geomPanel.add(BorderLayout.SOUTH, terrainLoadPanel);

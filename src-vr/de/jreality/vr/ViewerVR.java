@@ -307,9 +307,7 @@ public class ViewerVR {
 		AABBPickSystem ps = new AABBPickSystem();
 		ps.setSceneRoot(terrainNode);
 		double[] pos = m.getColumn(3);
-		double[] dest = pos.clone();
-		dest[1]-=1.5;
-		List<PickResult> picks = ps.computePick(pos, dest);
+		List<PickResult> picks = ps.computePick(pos, new double[]{0,-1,0,0});
 		if (picks.isEmpty()) {
 			picks = ps.computePick(pos, new double[]{0,1,0,0});
 		}

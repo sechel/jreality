@@ -33,6 +33,7 @@ public class Terrain {
 		DEFAULT("Default"),
 		CUSTOM("Custom"),
 		TILES("Tiles"),
+		RUBBER_FLOOR("Rubber floor"),
 		NONE("None");
 		private String name;
 		TextureType(String name) {
@@ -106,16 +107,6 @@ public class Terrain {
 		texureSelection.add(button);
 		textureButtons.put(TextureType.DEFAULT, button.getModel());
 		
-		button = new JRadioButton(TextureType.CUSTOM.getName());
-		button.getModel().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				setTextureType(TextureType.CUSTOM);
-			}
-		});
-		terrainTextureSelection.add(button);
-		texureSelection.add(button);
-		textureButtons.put(TextureType.CUSTOM, button.getModel());
-
 		button = new JRadioButton(TextureType.TILES.getName());
 		button.getModel().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -136,7 +127,15 @@ public class Terrain {
 		texureSelection.add(button);
 		textureButtons.put(TextureType.NONE, button.getModel());
 
-		
+		button = new JRadioButton(TextureType.CUSTOM.getName());
+		button.getModel().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				setTextureType(TextureType.CUSTOM);
+			}
+		});
+		terrainTextureSelection.add(button);
+		texureSelection.add(button);
+		textureButtons.put(TextureType.CUSTOM, button.getModel());
 		
 		setGeometryType(GeometryType.DEFAULT);
 		setTextureType(TextureType.DEFAULT);
