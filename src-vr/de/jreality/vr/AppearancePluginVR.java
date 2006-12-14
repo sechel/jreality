@@ -140,14 +140,73 @@ public class AppearancePluginVR extends AbstractPluginVR {
 		appearancePanel.setTransparency(prefs.getDouble("transparency", DEFAULT_TRANSPARENCY));
 		appearancePanel.setFacesFlat(prefs.getBoolean("facesFlat", DEFAULT_FACES_FLAT));
 	}
-	
-	/**
-	 * Use the appearance panel to edit the inital values for
-	 * the content appearance.
-	 * 
-	 * @return the appearance panel.
-	 */
-	public AppearancePanel getAppearancePanel() {
-		return appearancePanel;
+
+	public void setFaceColor(Color c) {
+		appearancePanel.setFaceColor(c);
 	}
+
+	public void setFaceReflection(double d) {
+		appearancePanel.setFaceReflection(d);
+	}
+
+	public void setFacesFlat(boolean b) {
+		appearancePanel.setFacesFlat(b);
+	}
+
+	public void setFacesReflecting(boolean b) {
+		appearancePanel.setFacesReflecting(b);
+	}
+
+	public void setLineColor(Color c) {
+		appearancePanel.setLineColor(c);
+	}
+
+	public void setLineReflection(double d) {
+		appearancePanel.setLineReflection(d);
+	}
+
+	public void setLinesReflecting(boolean b) {
+		appearancePanel.setLinesReflecting(b);
+	}
+
+	public void setPointColor(Color c) {
+		appearancePanel.setPointColor(c);
+	}
+
+	public void setPointRadius(double d) {
+		appearancePanel.setPointRadius(d);
+	}
+
+	public void setPointReflection(double d) {
+		appearancePanel.setPointReflection(d);
+	}
+
+	public void setPointsReflecting(boolean b) {
+		appearancePanel.setPointsReflecting(b);
+	}
+
+	public void setShowFaces(boolean selected) {
+		appearancePanel.setShowFaces(selected);
+	}
+
+	public void setShowLines(boolean selected) {
+		appearancePanel.setShowLines(selected);
+	}
+
+	public void setShowPoints(boolean selected) {
+		appearancePanel.setShowPoints(selected);
+	}
+
+	public void setTransparency(double d) {
+		appearancePanel.setTransparency(d);
+	}
+
+	public void setTransparencyEnabled(boolean b) {
+		appearancePanel.setTransparencyEnabled(b);
+	}
+
+	public void setTubeRadius(double d) {
+		appearancePanel.setTubeRadius(d);
+	}
+	
 }
