@@ -78,9 +78,8 @@ public class SunflowMenu extends JMenu {
   }
   
   private JFrame settingsFrame;
-  private Object previewOptions;
   private Object renderOptions;
-  private Object renderSameOptions;
+  private Object previewOptions;
   private DimensionPanel dimPanel;
   
   private ViewerApp va;
@@ -94,16 +93,9 @@ public class SunflowMenu extends JMenu {
     EmptyBorder border = new EmptyBorder(10, 10, 10, 10);
     
     previewOptions = createRenderOptions(-2, 0);
-    InspectorPanel previewSettings = new InspectorPanel(false);
-    previewSettings.setBorder(border);
-    previewSettings.setObject(previewOptions, Collections
-        .singleton("nothing"));
-    tabs.add("thumb", previewSettings);
-    
-    renderSameOptions = createRenderOptions(-2, 0);
     InspectorPanel renderSameSettings = new InspectorPanel(false);
     renderSameSettings.setBorder(border);
-    renderSameSettings.setObject(renderSameOptions, Collections
+    renderSameSettings.setObject(previewOptions, Collections
         .singleton("nothing"));
     tabs.add("preview", renderSameSettings);
     
@@ -122,7 +114,7 @@ public class SunflowMenu extends JMenu {
       public void actionPerformed(ActionEvent arg0) {
         AccessController.doPrivileged(new PrivilegedAction<Object>() {
           public Object run() {
-            render(va.getViewer(), va.getViewer().getViewingComponentSize(), getRenderSameOptions());
+            render(va.getViewer(), va.getViewer().getViewingComponentSize(), getPreviewOptions());
             return null;
           }
         });
@@ -133,18 +125,6 @@ public class SunflowMenu extends JMenu {
         KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK)
     );
     add(previewAction);
-    
-    add(new AbstractAction("thumb") {
-      public void actionPerformed(ActionEvent arg0) {
-        final Dimension d = va.getViewer().getViewingComponentSize();
-        AccessController.doPrivileged(new PrivilegedAction<Object>() {
-          public Object run() {
-            render(va.getViewer(), new Dimension(d.width/3, d.height/3), getPreviewOptions());
-            return null;
-          }
-        });
-      }
-    });
     
     add(new AbstractAction("render") {
       public void actionPerformed(ActionEvent arg0) {
@@ -204,16 +184,12 @@ public class SunflowMenu extends JMenu {
     settingsFrame.toFront();
   }
   
-  public Object getPreviewOptions() {
-    return previewOptions;
-  }
-  
   public Object getRenderOptions() {
     return renderOptions;
   }
   
-  public Object getRenderSameOptions() {
-    return renderSameOptions;
+  public Object getPreviewOptions() {
+    return previewOptions;
   }
   
 }
