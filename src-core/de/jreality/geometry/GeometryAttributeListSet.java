@@ -52,7 +52,7 @@ public class GeometryAttributeListSet {
 		DLS.reset(count);
 	}
 
-	OoNode geometryAttributeNode(Map attributeNode, Attribute attr) {
+	private OoNode geometryAttributeNode(Map attributeNode, Attribute attr) {
 		if (attributeNode.containsKey(attr))
 			return (OoNode) attributeNode.get(attr);
 

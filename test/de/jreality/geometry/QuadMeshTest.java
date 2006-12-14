@@ -2,9 +2,9 @@ package de.jreality.geometry;
 
 import junit.framework.TestCase;
 
-public class QuadMeshBugTest extends TestCase {
+public class QuadMeshTest extends TestCase {
 
-	public void testBug() {
+	public void testSetCoordinatesBug() {
 		double[][][] grid1 = new double[][][]{
 				{{0,0,0}, {1,0,0}, {2,0,0}},	
 				{{0,1,0}, {1,1,0}, {2,1,0}},	
@@ -24,10 +24,16 @@ public class QuadMeshBugTest extends TestCase {
 		qmf.setGenerateVertexNormals(true);
 		qmf.setGenerateFaceNormals(true);
 		qmf.setGenerateEdgesFromFaces(true);
+		qmf.setULineCount(2);
+		qmf.setVLineCount(3);
 		qmf.setVertexCoordinates(grid1);
 		qmf.update();
+		qmf.setULineCount(3);
+		qmf.setVLineCount(3);
 		qmf.setVertexCoordinates(grid2);
 		qmf.update();
+		qmf.setULineCount(3);
+		qmf.setVLineCount(2);
 		qmf.setVertexCoordinates(grid3);
 		qmf.update();
 	}

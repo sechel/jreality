@@ -97,17 +97,17 @@ public class QuadMeshFactory extends AbstractQuadMeshFactory {
 	 * @return
 	 */
 	private double[][] convertDDDtoDD(double[][][] points) {
-		int lengthv = points.length;
-		int lengthu = points[0].length;
-		setMeshSize(lengthu, lengthv);
+		int lengthu = points.length;
+		int lengthv = points[0].length;
+		//setMeshSize(lengthu, lengthv);
 		int lengthf = points[0][0].length;
 		if (lengthv != getVLineCount() || lengthu != getULineCount() ) {
 			throw new IllegalArgumentException("Bad dimension for 3D array");
 		}
 		double[][] npoints = new double[lengthv * lengthu][points[0][0].length];
-		for (int i = 0; i<lengthv; ++i)	{
-			for (int j = 0; j<lengthu; ++j)	{
-				System.arraycopy(points[i][j], 0, npoints[i*lengthu+j],0,lengthf);
+		for (int i = 0; i<lengthu; ++i)	{
+			for (int j = 0; j<lengthv; ++j)	{
+				System.arraycopy(points[i][j], 0, npoints[j*lengthu+i],0,lengthf);
 			}
 		}
 		return npoints;

@@ -256,10 +256,12 @@ class AbstractPointSetFactory extends AbstractGeometryFactory {
 		
 		AttributeGenerator( GeometryAttributeListSet gals, Class type, Attribute attr, AbstractGeometryFactory factory ) {
 			super(gals.category.toLowerCase()+"."+attr.getName(), type, factory.update );
-			
+			//super(gals.category+"."+attr.getName(), type, factory.update );
 			this.gals = gals;
 			this.attr = attr;
 			this.factory = factory;
+
+			this.addIngr( this.gals.attributeNode(attr) );
 			
 			setUpdateMethod(null);
 		}
