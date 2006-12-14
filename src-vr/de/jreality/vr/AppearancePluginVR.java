@@ -1,35 +1,9 @@
 package de.jreality.vr;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.prefs.Preferences;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.SwingConstants;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
-import de.jreality.scene.Appearance;
-import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.CubeMap;
-import de.jreality.shader.ImageData;
-import de.jreality.shader.TextureUtility;
-import de.jtem.beans.SimpleColorChooser;
 
 public class AppearancePluginVR extends AbstractPluginVR {
 
@@ -165,5 +139,15 @@ public class AppearancePluginVR extends AbstractPluginVR {
 		appearancePanel.setTransparencyEnabled(prefs.getBoolean("transparencyEnabled", DEFAULT_TRANSPARENCY_ENABLED));
 		appearancePanel.setTransparency(prefs.getDouble("transparency", DEFAULT_TRANSPARENCY));
 		appearancePanel.setFacesFlat(prefs.getBoolean("facesFlat", DEFAULT_FACES_FLAT));
+	}
+	
+	/**
+	 * Use the appearance panel to edit the inital values for
+	 * the content appearance.
+	 * 
+	 * @return the appearance panel.
+	 */
+	public AppearancePanel getAppearancePanel() {
+		return appearancePanel;
 	}
 }

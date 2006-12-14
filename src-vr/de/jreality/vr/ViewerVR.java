@@ -452,11 +452,25 @@ public class ViewerVR {
 		});
 	}
 
-	public ViewerApp display() {
+	/**
+	 * Initializes a ViewerApp to display the scene. Restores
+	 * preferences for all plugins. Set custom values after
+	 * calling this method!
+	 * 
+	 * @return A ViewerApp to display the scene.
+	 */
+	public ViewerApp initialize() {
 		restorePreferences();
 		ViewerApp viewerApp = new ViewerApp(sceneRoot, cameraPath, emptyPickPath, avatarPath);
 		tweakMenu(viewerApp.getMenu());
 		return viewerApp;
+	}
+	
+	/**
+	 * @deprecated use {@link ViewerVR.initialize()}
+	 */
+	public ViewerApp display() {
+		return initialize();
 	}
 
 	public void setAvatarPosition(double x, double y, double z) {
@@ -694,6 +708,10 @@ public class ViewerVR {
 		registerPlugin(new AppearancePluginVR());
 	}
 	
+	public void addTerrainAppTab() {
+		registerPlugin(new TerrainAppearancePluginVR());
+	}
+	
 	public void addLightTab() {
 		registerPlugin(new LightPluginVR());
 	}
@@ -736,6 +754,7 @@ public class ViewerVR {
 		vr.addAppTab();
 		vr.addEnvTab();
 		vr.addTerrainTab();
+		vr.addTerrainAppTab();
 		vr.addToolTab();
 		vr.addTexTab();
 		vr.addLightTab();

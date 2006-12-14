@@ -76,8 +76,6 @@ public class TerrainPluginVR extends AbstractPluginVR {
 
 	private JPanel rotatePanel;
 
-	private SimpleColorChooser colorChooser;
-
 	public TerrainPluginVR() {
 		super("terrain");
 
@@ -142,19 +140,6 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	
 	private void makeTerrainTab() {
 		
-		colorChooser = new SimpleColorChooser();
-		colorChooser.setBorder(new EmptyBorder(8,8,8,8));
-		colorChooser.addChangeListener( new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				setColor(colorChooser.getColor());
-			}
-		});
-		colorChooser.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				getViewerVR().switchToDefaultPanel();
-			}
-		});
-
 		Insets insets = new Insets(0, 5, 0, 5);
 		
 		// create rotate panel
@@ -217,18 +202,8 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		textureLoadButton.setEnabled(terrain.getTextureType() == Terrain.TextureType.CUSTOM);
 		
 		texLoadPanel.add(textureLoadButton);
-
-		final JButton colorButton = new JButton("color");
-		colorButton.setMargin(insets);
-		colorButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				switchToColorBrowser();
-			}
-		});
-		
 		
 		tex.add(BorderLayout.SOUTH, texLoadPanel);
-		texLoadPanel.add(colorButton);
 		
 		selections.add(geomPanel);
 		selections.add(tex);
@@ -242,6 +217,8 @@ public class TerrainPluginVR extends AbstractPluginVR {
 			}
 		});
 
+		JPanel bottom = new JPanel(new BorderLayout());
+		
 		Box texScaleBox = new Box(BoxLayout.X_AXIS);
 		texScaleBox.setBorder(new EmptyBorder(10, 5, 5, 0));
 		JLabel texScaleLabel = new JLabel("scale");
@@ -255,20 +232,12 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		texScaleBox.add(texScaleLabel);
 		texScaleBox.add(terrainTexScaleSlider);
 
+		bottom.add(texScaleBox);
+		
 		terrainPanel.add(selections);
-		terrainPanel.add(BorderLayout.SOUTH, texScaleBox);
+		terrainPanel.add(BorderLayout.SOUTH, bottom);
 	}
 	
-	protected void setColor(Color color) {
-		colorChooser.setColor(color);
-		String attribute = CommonAttributes.POLYGON_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR;
-		getViewerVR().getTerrainAppearance().setAttribute(attribute,color);
-	}
-
-	protected void switchToColorBrowser() {
-		getViewerVR().switchTo(colorChooser);
-	}
-
 	private void makeTerrainTextureFileChooser() {
 		FileSystemView view = FileSystemView.getFileSystemView();
 		String texDir = ".";
@@ -381,7 +350,6 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		}
 
 		getViewerVR().setTerrain(terrainNode);
-		getViewerVR().getTerrainAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, flat);
 
 		Environment env = getViewerVR().getEnvironment();
 		switch (terrain.getTextureType()) {
