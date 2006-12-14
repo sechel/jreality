@@ -495,9 +495,9 @@ indexedFaceSetNode [State state, Appearance app] returns [IndexedFaceSet ifs=nul
 {//TODO3: texture
   if (VRMLHelper.verbose) System.err.print("IndexedFaceSet( "); 
   int[] coordIndex	= new int[]{0};
-  int[] materialIndex	= new int[]{-1};
-  int[] normalIndex	= new int[]{-1};
-  int[] textureCoordIndex	= new int[]{-1};
+  int[] materialIndex	= new int[]{};
+  int[] normalIndex	= new int[]{};
+  int[] textureCoordIndex	= new int[]{};
  }
 	:
 	"IndexedFaceSet"		OPEN_BRACE	
@@ -578,9 +578,9 @@ indexedLineSetNode[State state, Appearance app] returns [IndexedLineSet ils=null
   State state2= new State(state);
   if (VRMLHelper.verbose) System.err.print("IndexedLineSet( "); 
   int[] coordIndex	= new int[]{0};
-  int[] materialIndex	= new int[]{-1};
-  int[] normalIndex	= new int[]{-1};
-  int[] textureCoordIndex	= new int[]{-1};
+  int[] materialIndex	= new int[]{};
+  int[] normalIndex	= new int[]{};
+  int[] textureCoordIndex	= new int[]{};
 }
 	:
 	"IndexedLineSet"		OPEN_BRACE	
