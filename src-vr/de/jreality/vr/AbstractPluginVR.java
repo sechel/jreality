@@ -27,6 +27,9 @@ public class AbstractPluginVR implements PluginVR {
 	public void environmentChanged() {
 	}
 
+	public void terrainChanged() {
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -43,4 +46,5 @@ public class AbstractPluginVR implements PluginVR {
 
 	public void restorePreferences(Preferences prefs) {
 	}
+
 }

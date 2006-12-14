@@ -51,6 +51,11 @@ public class TerrainAppearancePluginVR extends AbstractPluginVR {
 	public void environmentChanged() {
 		appearancePanel.setSkyBox(getViewerVR().getEnvironment().getCubeMap());
 	}
+	
+	@Override
+	public void terrainChanged() {
+		appearancePanel.setObjectScale(getViewerVR().getTerrainScale());
+	}
 
 	@Override
 	public void storePreferences(Preferences prefs) {

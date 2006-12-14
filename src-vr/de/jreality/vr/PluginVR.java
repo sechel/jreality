@@ -21,5 +21,6 @@ public interface PluginVR {
 	void restoreDefaults();
 	void restorePreferences(Preferences prefs);
 	void environmentChanged();
+	void terrainChanged();
 	
 }

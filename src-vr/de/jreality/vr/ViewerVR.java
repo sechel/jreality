@@ -136,6 +136,9 @@ public class ViewerVR {
 	// the scale of the currently loaded content
 	private double objectScale=1;
 	
+	// the scale of the currently loaded terrain
+	private double terrainScale=1;
+
 	private ScenePanel sp;
 	
 	// the default panel content - the tabs containing plugin panels
@@ -276,7 +279,7 @@ public class ViewerVR {
 				double[] extent = bounds.getExtent();
 				double maxExtent = Math.max(extent[0], extent[2]);
 				if (maxExtent != 0) {
-					double scale = TERRAIN_SIZE / maxExtent;
+					terrainScale = TERRAIN_SIZE / maxExtent;
 					double[] translation = bounds.getCenter();
 					
 					// determine offset in y-direction (up/down)
@@ -291,12 +294,12 @@ public class ViewerVR {
 //					System.out.println("min-y="+bounds.getMinY());
 //					System.out.println("scale="+scale);
 					
-					translation[1] = -scale * offset;
-					translation[0] *= -scale;
-					translation[2] *= -scale;
+					translation[1] = -terrainScale * offset;
+					translation[0] *= -terrainScale;
+					translation[2] *= -terrainScale;
 
 					MatrixBuilder mb = MatrixBuilder.euclidean().translate(
-							translation).scale(scale);
+							translation).scale(terrainScale);
 					if (terrainNode.getTransformation() != null)
 						mb.times(terrainNode.getTransformation().getMatrix());
 					mb.assignTo(terrainNode);
@@ -314,6 +317,7 @@ public class ViewerVR {
 		if (!picks.isEmpty()) {
 			setAvatarHeight(picks.get(0).getWorldCoordinates()[1]);
 		}
+		for (PluginVR plugin : plugins) plugin.terrainChanged();
 	}
 	
 	public Environment getEnvironment() {
@@ -519,6 +523,10 @@ public class ViewerVR {
 	
 	public double getObjectScale() {
 		return objectScale;
+	}
+	
+	public double getTerrainScale() {
+		return terrainScale;
 	}
 	
 	public boolean isGeneratePickTrees() {
