@@ -73,6 +73,8 @@ import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
+import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.PointLight;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -80,6 +82,7 @@ import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.pick.PickResult;
 import de.jreality.scene.tool.Tool;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.swing.ScenePanel;
 import de.jreality.tools.DuplicateTriplyPeriodicTool;
@@ -95,6 +98,11 @@ import de.jreality.util.Secure;
 
 public class ViewerVR {
 	
+	// defaults for light panel
+	private static final double DEFAULT_SUN_LIGHT_INTENSITY = 1;
+	private static final double DEFAULT_HEAD_LIGHT_INTENSITY = .3;
+	private static final double DEFAULT_SKY_LIGHT_INTENSITY = .2;
+
 	// defaults for preferences:
 	private static final boolean DEFAULT_PANEL_IN_SCENE = true;
 				
@@ -133,6 +141,11 @@ public class ViewerVR {
 	
 	private SceneGraphPath cameraPath, avatarPath, emptyPickPath;
 	
+	// default lights
+	private DirectionalLight sunLight = new DirectionalLight();
+	private PointLight headLight = new PointLight();
+	private DirectionalLight skyLight = new DirectionalLight();
+
 	// the scale of the currently loaded content
 	private double objectScale=1;
 	
@@ -150,7 +163,7 @@ public class ViewerVR {
 	private JTabbedPane appearanceTabs;
 
 	// the current environment
-	private Environment environment;
+	private ImageData[] environment;
 	
 	// flag indicating wether aabb-trees will be generated
 	// when content is set
@@ -260,6 +273,39 @@ public class ViewerVR {
 		    setPanelInScene(panelInSceneCheckBox.getState());
 		  }
 		});
+		
+		//		 lights
+		sunLight = new DirectionalLight();
+		sunLight.setName("sun light");
+		SceneGraphComponent lightNode = new SceneGraphComponent("sun");
+		lightNode.setLight(sunLight);
+		MatrixBuilder.euclidean().rotateFromTo(new double[] { 0, 0, 1 },
+				//new double[] { 0, 1, 1 }).assignTo(lightNode);
+				//new double[] { 0.39, .24, 0.89 }).assignTo(lightNode);
+				new double[] { 0.39, Math.sqrt(.39*.39+0.89*0.89), 0.89 }).assignTo(lightNode);
+		getSceneRoot().addChild(lightNode);
+		
+		SceneGraphComponent skyNode = new SceneGraphComponent();
+		skyLight = new DirectionalLight();
+		skyLight.setAmbientFake(true);
+		skyLight.setName("sky light");
+		skyNode.setLight(skyLight);
+		MatrixBuilder.euclidean().rotateFromTo(new double[] { 0, 0, 1 },
+				new double[] { 0, 1, 0 }).assignTo(skyNode);
+		getSceneRoot().addChild(skyNode);
+		
+		headLight.setAmbientFake(true);
+		headLight.setFalloff(1, 0, 0);
+		headLight.setName("camera light");
+		headLight.setColor(new Color(255,255,255,255));
+		getCameraPath().getLastComponent().setLight(headLight);
+	    
+		setHeadLightIntensity(DEFAULT_HEAD_LIGHT_INTENSITY);
+		setSunIntensity(DEFAULT_SUN_LIGHT_INTENSITY);
+		setSkyLightIntensity(DEFAULT_SKY_LIGHT_INTENSITY);
+		
+		setAvatarPosition(0, 0, 25);
+
 	}
 
 	public SceneGraphComponent getTerrain() {
@@ -306,26 +352,29 @@ public class ViewerVR {
 				}
 			}
 		});
-		Matrix m = new Matrix(avatarNode.getTransformation());
-		AABBPickSystem ps = new AABBPickSystem();
-		ps.setSceneRoot(terrainNode);
-		double[] pos = m.getColumn(3);
-		List<PickResult> picks = ps.computePick(pos, new double[]{0,-1,0,0});
-		if (picks.isEmpty()) {
-			picks = ps.computePick(pos, new double[]{0,1,0,0});
-		}
-		if (!picks.isEmpty()) {
-			setAvatarHeight(picks.get(0).getWorldCoordinates()[1]);
+		if (getShipNavigationTool().getGravity() != 0) {
+			// move the avatar onto the next floor
+			Matrix m = new Matrix(avatarNode.getTransformation());
+			AABBPickSystem ps = new AABBPickSystem();
+			ps.setSceneRoot(terrainNode);
+			double[] pos = m.getColumn(3);
+			List<PickResult> picks = ps.computePick(pos, new double[]{0,-1,0,0});
+			if (picks.isEmpty()) {
+				picks = ps.computePick(pos, new double[]{0,1,0,0});
+			}
+			if (!picks.isEmpty()) {
+				setAvatarHeight(picks.get(0).getWorldCoordinates()[1]);
+			}
 		}
 		for (PluginVR plugin : plugins) plugin.terrainChanged();
 	}
 	
-	public Environment getEnvironment() {
+	public ImageData[] getEnvironment() {
 		return environment;
 	}
 	
-	public void setEnvironment(Environment env) {
-		environment = env;
+	public void setEnvironment(ImageData[] datas) {
+		environment = datas;
 		for (PluginVR plugin : plugins) plugin.environmentChanged();
 	}
 	
@@ -337,6 +386,7 @@ public class ViewerVR {
 		});
 		sp.setPanelWidth(PANEL_WIDTH);
 		sp.setAboveGround(PANEL_ABOVE_GROUND);
+		sp.setBelowGround(0);
 		sp.setZOffset(PANEL_Z_OFFSET);
 		
 		JTabbedPane tabs = new JTabbedPane();
@@ -704,6 +754,62 @@ public class ViewerVR {
 		alignContent();
 	}
 	
+	public Color getSunLightColor() {
+		return sunLight.getColor();
+	}
+	
+	public void setSunLightColor(Color c) {
+		sunLight.setColor(c);
+	}
+	
+	public Color getHeadLightColor() {
+		return headLight.getColor();
+	}
+	
+	public void setHeadLightColor(Color c) {
+		headLight.setColor(c);
+	}
+	
+	public Color getSkyLightColor() {
+		return skyLight.getColor();
+	}
+	
+	public void setSkyLightColor(Color c) {
+		skyLight.setColor(c);
+	}
+	
+	public double getSunIntensity() {
+		return sunLight.getIntensity();
+	}
+	
+	public void setSunIntensity(double x) {
+		sunLight.setIntensity(x);
+	}
+	
+	public double getHeadLightIntensity() {
+		return headLight.getIntensity();
+	}
+	
+	public void setHeadLightIntensity(double x) {
+		headLight.setIntensity(x);
+	}
+	
+	public double getSkyLightIntensity() {
+		return skyLight.getIntensity();
+	}
+	
+	public void setSkyLightIntensity(double x) {
+		skyLight.setIntensity(x);
+	}
+	
+	public void setLightIntensity(double intensity) {
+		sunLight.setIntensity(intensity);
+	}
+
+	public double getLightIntensity() {
+		return sunLight.getIntensity();
+	}
+
 	public void addEnvTab() {
 		registerPlugin(new EnvironmentPluginVR());
 	}
@@ -762,13 +868,12 @@ public class ViewerVR {
 		vr.addAppTab();
 		vr.addEnvTab();
 		vr.addTerrainTab();
-		vr.addTerrainAppTab();
 		vr.addToolTab();
 		vr.addTexTab();
-		vr.addLightTab();
+		//vr.addLightTab();
 		vr.setGeneratePickTrees(true);
 		vr.showPanel();
-		ViewerApp vApp = vr.display();
+		ViewerApp vApp = vr.initialize();
 		vApp.update();
 		
 		JFrame f = vApp.display();

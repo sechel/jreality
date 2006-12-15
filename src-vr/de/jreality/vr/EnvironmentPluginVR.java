@@ -18,7 +18,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import de.jreality.scene.Appearance;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.TextureUtility;
@@ -28,7 +27,6 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 
 	// defaults for env panel
 	private static final String DEFAULT_ENVIRONMENT = "snow";
-	private static final boolean DEFAULT_TERRAIN_TRANSPARENT = false;
 	private static final boolean DEFAULT_SKYBOX_HIDDEN = false;
 	private static final Color DEFAULT_TOP_COLOR = new Color(80,80,120);
 	private static final Color DEFAULT_BOTTOM_COLOR = Color.black;
@@ -36,7 +34,6 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 
 	// env tab
 	private JPanel envPanel;
-	private JCheckBox terrainTransparent;
 	private JCheckBox skyBoxHidden;
 	private JCheckBox backgroundFlat;
 	private SimpleColorChooser bottomColorChooser;
@@ -53,15 +50,13 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 		
 	public EnvironmentPluginVR() {
 		super("env");
-		// landscape
 		landscape = new Landscape();
+		makeEnvTab();
 	}
 	
 	@Override
 	public void setViewerVR(ViewerVR vvr) {
 		super.setViewerVR(vvr);
-		makeEnvTab();
-		getViewerVR().setAvatarPosition(0, landscape.isTerrainFlat() ? -.5 : -.13, 28);
 	}
 	
 	private void makeEnvTab() {
@@ -83,8 +78,7 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 		bottomColorChooser.addActionListener(closeListener);
 		landscape.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
-				Environment env = new Environment(landscape.getCubeMap(), landscape.getTerrainTexture(), landscape.getTerrainTextureScale(), landscape.isTerrainFlat());
-				getViewerVR().setEnvironment(env);
+				getViewerVR().setEnvironment(landscape.getCubeMap());
 				updateEnv();
 			}
 		});	
@@ -99,24 +93,13 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 		envPanel.add(selectionPanel, BorderLayout.CENTER);
 		
 		Box envControlBox = new Box(BoxLayout.Y_AXIS);
-		JPanel terrainTransparentPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		terrainTransparent = new JCheckBox("transparent terrain");
-		terrainTransparent.addChangeListener(new ChangeListener() {
-			
-			public void stateChanged(ChangeEvent e) {
-				setTerrainTransparent(terrainTransparent.isSelected());
-			}
-		});
-		terrainTransparentPanel.add(terrainTransparent);
 		skyBoxHidden = new JCheckBox("no sky");
 		skyBoxHidden.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				updateEnv();
 			}
 		});
-		terrainTransparentPanel.add(skyBoxHidden);
-		
-		envControlBox.add(terrainTransparentPanel);
+		envControlBox.add(skyBoxHidden);
 		
 		JPanel backgroundColorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		
@@ -157,7 +140,7 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 	}
 	
 	public void updateEnv() {
-		ImageData[] imgs = skyBoxHidden.isSelected() ? null : getViewerVR().getEnvironment().getCubeMap();
+		ImageData[] imgs = skyBoxHidden.isSelected() ? null : getViewerVR().getEnvironment();
 		TextureUtility.createSkyBox(getViewerVR().getRootAppearance(), imgs);
 	}
 
@@ -226,20 +209,10 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 		updateBackground();
 	}
 	
-	public boolean isTerrainTransparent() {
-		return terrainTransparent.isSelected();
-	}
-	
-	public void setTerrainTransparent(boolean b) {
-		terrainTransparent.setSelected(b);
-		getViewerVR().getTerrainAppearance().setAttribute(CommonAttributes.TRANSPARENCY, b ? 1.0 : 0.0);
-	}
-	
 	@Override
 	public void storePreferences(Preferences prefs) {
 		// env panel
 		prefs.put("environment", getEnvironment());
-		prefs.putBoolean("terrainTransparent", isTerrainTransparent());
 		prefs.putBoolean("skyBoxHidden", isSkyBoxHidden());
 		Color c = getTopColor();
 		prefs.putInt("topColorRed", c.getRed());
@@ -256,7 +229,6 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 	public void restoreDefaults() {
 		// env panel
 		setEnvironment(DEFAULT_ENVIRONMENT);
-		setTerrainTransparent(DEFAULT_TERRAIN_TRANSPARENT);
 		setSkyBoxHidden(DEFAULT_SKYBOX_HIDDEN);
 		setTopColor(DEFAULT_TOP_COLOR);
 		setBottomColor(DEFAULT_BOTTOM_COLOR);
@@ -267,7 +239,6 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 	public void restorePreferences(Preferences prefs) {
 		// env panel
 		setEnvironment(prefs.get("environment", DEFAULT_ENVIRONMENT));
-		setTerrainTransparent(prefs.getBoolean("terrainTransparent", DEFAULT_TERRAIN_TRANSPARENT));
 		setSkyBoxHidden(prefs.getBoolean("skyBoxHidden", DEFAULT_SKYBOX_HIDDEN));
 		int r = prefs.getInt("topColorRed", DEFAULT_TOP_COLOR.getRed());
 		int g = prefs.getInt("topColorGreen", DEFAULT_TOP_COLOR.getGreen());

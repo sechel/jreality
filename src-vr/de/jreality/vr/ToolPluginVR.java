@@ -52,9 +52,6 @@ public class ToolPluginVR extends AbstractPluginVR {
 
 	private Tool rotateTool = new RotateTool(), dragTool = new DraggingTool();
 	
-	private ShipNavigationTool shipNavigationTool;
-	private HeadTransformationTool headTransformationTool;
-
 
 	public ToolPluginVR() {
 		super("tool");
@@ -63,8 +60,6 @@ public class ToolPluginVR extends AbstractPluginVR {
 	
 	@Override
 	public void setViewerVR(ViewerVR vvr) {
-		shipNavigationTool=vvr.getShipNavigationTool();
-		headTransformationTool=vvr.getHeadTransformationTool();
 		super.setViewerVR(vvr);
 	}
 
@@ -197,7 +192,7 @@ public class ToolPluginVR extends AbstractPluginVR {
 	protected void setNavigationSpeed(double navigationSpeed) {
 		int speed = (int)(100*navigationSpeed);
 		gain.setValue(speed);
-		shipNavigationTool.setGain(navigationSpeed);
+		getViewerVR().getShipNavigationTool().setGain(navigationSpeed);
 	}
 
 	protected double getNavigationSpeed() {
@@ -208,7 +203,7 @@ public class ToolPluginVR extends AbstractPluginVR {
 	protected void setGravity(double g) {
 		int grav = (int)(100*g);
 		gravity.setValue(grav);
-		shipNavigationTool.setGravity(g);
+		getViewerVR().getShipNavigationTool().setGravity(g);
 	}
 
 	protected double getGravity() {
@@ -218,6 +213,7 @@ public class ToolPluginVR extends AbstractPluginVR {
 
 	public void setInvertMouse(boolean b) {
 		invertMouse.setSelected(b);
+		HeadTransformationTool headTransformationTool = getViewerVR().getHeadTransformationTool();
 		if (headTransformationTool != null) headTransformationTool.setInvert(b);
 	}
 	

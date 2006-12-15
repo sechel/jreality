@@ -2,6 +2,7 @@ package de.jreality.vr;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -10,17 +11,22 @@ import java.io.File;
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -31,10 +37,12 @@ import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.Readers;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.CubeMap;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
@@ -51,6 +59,16 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	// ratio of maximal value and minimal value of texture scale
 	private static final double TEX_SCALE_RANGE = 400;
 
+	// defaults
+	private static final double DEFAULT_TEX_SCALE = 20;
+	private static final String DEFAULT_TEXTURE = "grid";
+	private static final Color DEFAULT_FACE_COLOR=Color.white;
+	private static final boolean DEFAULT_REFLECTING=true;
+	private static final double DEFAULT_REFLECTION=0.2;
+	private static final boolean DEFAULT_TRANSPARENT=true;
+	private static final double DEFAULT_TRANSPARENCY=0.2;
+
+	
 	// terrain tab
 	private JSlider terrainTexScaleSlider;
 	private JPanel terrainPanel;
@@ -65,16 +83,26 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	private Terrain terrain;
 
 	private JFileChooser terrainFileChooser;
+	private JPanel rotatePanel;
+	private RotateBox rotateBox = new RotateBox();
 
 	protected SceneGraphComponent customTerrain;
-
+	
 	protected SceneGraphComponent terrainNode = new SceneGraphComponent("terrain alignment");
 	
-	private RotateBox rotateBox = new RotateBox();
 	
 	protected File terrainFile;
 
-	private JPanel rotatePanel;
+	
+	
+	private SimpleColorChooser faceColorChooser;
+	private JCheckBox facesReflecting;
+	private JSlider faceReflectionSlider;
+	private JCheckBox transparency;
+	private JSlider transparencySlider;
+
+	private CubeMap cmFaces;
+	private ImageData[] cubeMap;
 
 	public TerrainPluginVR() {
 		super("terrain");
@@ -110,8 +138,8 @@ public class TerrainPluginVR extends AbstractPluginVR {
 			}
 		});
 		flatTerrain = new SceneGraphComponent("flat terrain");
-		MatrixBuilder.euclidean().translate(0,0,20).rotateX(-Math.PI/2).assignTo(flatTerrain);
-		flatTerrain.setGeometry(Primitives.plainQuadMesh(100, 100, 1, 1));
+		MatrixBuilder.euclidean().rotateX(Math.PI/2).assignTo(flatTerrain);
+		flatTerrain.setGeometry(Primitives.plainQuadMesh(1, 1, 100, 100));
 		PickUtility.assignFaceAABBTrees(flatTerrain);
 		
 		rotateBox.addChangeListener(new ChangeListener() {
@@ -135,6 +163,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	
 	@Override
 	public void environmentChanged() {
+		cubeMap=getViewerVR().getEnvironment();
 		updateTerrain();
 	}
 	
@@ -199,7 +228,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 			}
 		});
 
-		textureLoadButton.setEnabled(terrain.getTextureType() == Terrain.TextureType.CUSTOM);
+		textureLoadButton.setEnabled(terrain.isCustomTexture());
 		
 		texLoadPanel.add(textureLoadButton);
 		
@@ -211,7 +240,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		terrain.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				updateTerrain();
-				textureLoadButton.setEnabled(terrain.getTextureType() == Terrain.TextureType.CUSTOM);
+				textureLoadButton.setEnabled(terrain.isCustomTexture());
 				terrainLoadButton.setEnabled(terrain.getGeometryType() == Terrain.GeometryType.CUSTOM);
 				rotateButton.setEnabled(terrain.getGeometryType() == Terrain.GeometryType.CUSTOM);
 			}
@@ -222,7 +251,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		Box texScaleBox = new Box(BoxLayout.X_AXIS);
 		texScaleBox.setBorder(new EmptyBorder(10, 5, 5, 0));
 		JLabel texScaleLabel = new JLabel("scale");
-		terrainTexScaleSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100,0);
+		terrainTexScaleSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
 		terrainTexScaleSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
 				double d = .01 * terrainTexScaleSlider.getValue();
@@ -232,12 +261,143 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		texScaleBox.add(texScaleLabel);
 		texScaleBox.add(terrainTexScaleSlider);
 
-		bottom.add(texScaleBox);
+		bottom.add(BorderLayout.SOUTH, texScaleBox);
 		
 		terrainPanel.add(selections);
 		terrainPanel.add(BorderLayout.SOUTH, bottom);
+		
+		
+		// faces
+		faceColorChooser = new SimpleColorChooser();
+		faceColorChooser.setBorder(new EmptyBorder(8,8,8,8));
+		faceColorChooser.addChangeListener( new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setFaceColor(faceColorChooser.getColor());
+			}
+		});
+		faceColorChooser.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				getViewerVR().switchToDefaultPanel();
+			}
+		});
+		Box faceBox = new Box(BoxLayout.Y_AXIS);
+		faceBox.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
+				LineBorder.createGrayLineBorder()));
+		Box faceButtonBox = new Box(BoxLayout.X_AXIS);
+		//faceButtonBox.setBorder(boxBorder);
+		facesReflecting = new JCheckBox("reflecting");
+		facesReflecting.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				setFacesReflecting(isFacesReflecting());
+			}
+		});
+		faceButtonBox.add(facesReflecting);
+		faceReflectionSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
+		faceReflectionSlider.setPreferredSize(new Dimension(70,20));
+		faceReflectionSlider.setBorder(new EmptyBorder(0,5,0,0));
+		faceReflectionSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setFaceReflection(getFaceReflection());
+			}
+		});
+		faceButtonBox.add(faceReflectionSlider);
+		JButton faceColorButton = new JButton("color");
+		faceColorButton.setMargin(new Insets(0,5,0,5));
+		faceColorButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				switchToColorChooser();
+			}
+		});
+		faceBox.add(faceButtonBox);
+
+		Box transparencyBox = new Box(BoxLayout.X_AXIS);
+		transparencyBox.setBorder(new EmptyBorder(0,5,0,10));
+		transparency = new JCheckBox("transp");
+		transparency.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setTransparencyEnabled(transparency.isSelected());
+			}
+		});
+		transparencySlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 1);
+		transparencySlider.setPreferredSize(new Dimension(70,20));
+		transparencySlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				setTransparency(getTransparency());
+			}
+		});
+		transparencyBox.add(transparency);
+		transparencyBox.add(transparencySlider);
+		transparencyBox.add(faceColorButton);
+		faceBox.add(transparencyBox);
+		
+		bottom.add(faceBox);
+
 	}
 	
+	protected void switchToColorChooser() {
+		getViewerVR().switchTo(faceColorChooser);
+	}
+
+	private Appearance getAppearance() {
+		return getViewerVR().getTerrainAppearance();
+	}
+	
+	public double getFaceReflection() {
+		return .01 * faceReflectionSlider.getValue();
+	}
+	
+	public void setFaceReflection(double d) {
+		faceReflectionSlider.setValue((int)(100*d));
+		if (cmFaces != null) cmFaces.setBlendColor(new Color(1f, 1f, 1f, (float) d));
+	}
+	
+	public double getTransparency() {
+		return .01 * transparencySlider.getValue();
+	}
+	
+	public void setTransparency(double d) {
+		transparencySlider.setValue((int)(100 * d));
+		getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY, d);
+	}
+		
+	public boolean isFacesReflecting() {
+		return facesReflecting.isSelected();
+	}
+	
+	public void setFacesReflecting(boolean b) {
+		facesReflecting.setSelected(b);
+		if (!isFacesReflecting()) {
+			if (cmFaces != null) {
+				TextureUtility.removeReflectionMap(getAppearance(), CommonAttributes.POLYGON_SHADER);
+				cmFaces = null;
+			}
+		} else {
+			cmFaces = TextureUtility.createReflectionMap(getAppearance(), CommonAttributes.POLYGON_SHADER, cubeMap);
+			setFaceReflection(getFaceReflection());
+		}
+	}
+	
+	public Color getFaceColor() {
+		return (Color) getAppearance().getAttribute(
+				CommonAttributes.POLYGON_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR
+		);
+	}
+	
+	public void setFaceColor(Color c) {
+		faceColorChooser.setColor(c);
+		String attribute = CommonAttributes.POLYGON_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR;
+		getAppearance().setAttribute(attribute,c);
+	}
+	
+	public boolean isTransparencyEnabled() {
+		return transparency.isSelected();
+	}
+	
+	public void setTransparencyEnabled(boolean b) {
+		transparency.setSelected(b);
+		getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, b);
+	}
+
 	private void makeTerrainTextureFileChooser() {
 		FileSystemView view = FileSystemView.getFileSystemView();
 		String texDir = ".";
@@ -255,7 +415,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 						ImageData img = ImageData.load(Input.getInput(terrainTexFile));
 						//tex = TextureUtility.createTexture(contentAppearance, "polygonShader", img, false);
 						setTerrainTexture(img);
-						setTerrainTextureScale(terrainTexScaleSlider.getValue()*0.1);
+						setTerrainTextureScale(getTerrainTextureScale());
 						
 					}
 				} catch (IOException e) {
@@ -327,57 +487,90 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	}
 
 	private void updateTerrain() {
-		boolean flat=false;
 		// remove last terrain
 		while (terrainNode.getChildComponentCount() > 0) terrainNode.removeChild(terrainNode.getChildComponent(0));
 		switch (terrain.getGeometryType()) {
 		case FLAT:
 			terrainNode.addChild(flatTerrain);
-			flat = true;
 			new Matrix().assignTo(terrainNode);
 			break;
 		case NON_FLAT:
 			terrainNode.addChild(nonflatTerrain);
 			new Matrix().assignTo(terrainNode);
 			break;
-		case CUSTOM:
-			if (customTerrain != null) terrainNode.addChild(customTerrain);
-			break;
 		default:
-			flat = getViewerVR().getEnvironment().isFlatTerrain();
-			new Matrix().assignTo(terrainNode);
-			terrainNode.addChild(flat ? flatTerrain : nonflatTerrain);
+			if (customTerrain != null) terrainNode.addChild(customTerrain);
 		}
 
 		getViewerVR().setTerrain(terrainNode);
 
-		Environment env = getViewerVR().getEnvironment();
-		switch (terrain.getTextureType()) {
-		case NONE:
-			setTerrainTexture(null);
-			break;
-		case TILES:
+		if (terrain.isCustomTexture()) { 
 			try {
-				setTerrainTexture(ImageData.load(Input.getInput("textures/recycfloor1_fin.png")));
-				setTerrainTextureScale(50.);
+				setTerrainTexture(terrainTexFile == null ? null : ImageData.load(Input.getInput(terrainTexFile)));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			break;
-		case CUSTOM:
-			try {
-					setTerrainTexture(terrainTexFile == null ? null : ImageData.load(Input.getInput(terrainTexFile)));
-					setTerrainTextureScale(getTerrainTextureScale());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			break;
-		default:
-		ImageData terrainTex = env.getTexture();
-		setTerrainTexture(terrainTex);
-		setTerrainTextureScale(env.getTextureScale());
+		} else {
+			setTerrainTexture(terrain.getTexture());
 		}
+		setTerrainTextureScale(getTerrainTextureScale());
 	}
+	
+	@Override
+	public void storePreferences(Preferences prefs) {
+		prefs.putDouble("terrain.texScale", getTerrainTextureScale());
+		prefs.put("terrain.texture", terrain.getTextureName());
+		if (terrain.isCustomTexture() && terrainTexFile != null) {
+			prefs.put("terrain.customTex", terrainTexFile.getAbsolutePath());
+		}
+		
+		prefs.putInt("terrain.colorRed", getFaceColor().getRed());
+		prefs.putInt("terrain.colorGreen", getFaceColor().getGreen());
+		prefs.putInt("terrain.colorBlue", getFaceColor().getBlue());
+
+		prefs.putDouble("terrain.reflection", getFaceReflection());
+		prefs.putBoolean("terrain.reflecting", isFacesReflecting());
+		prefs.putBoolean("terrain.transparencyEnabled", isTransparencyEnabled());
+		prefs.putDouble("terrain.transparency", getTransparency());
+
+	}
+	
+	@Override
+	public void restoreDefaults() {
+		setTerrainTextureScale(DEFAULT_TEX_SCALE);
+		terrain.setTextureName(DEFAULT_TEXTURE);
+		terrainTexFile = null;
+		
+		setFaceColor(DEFAULT_FACE_COLOR);
+		setFaceReflection(DEFAULT_REFLECTION);
+		setFacesReflecting(DEFAULT_REFLECTING);
+		setTransparencyEnabled(DEFAULT_TRANSPARENT);
+		setTransparency(DEFAULT_TRANSPARENCY);
+
+	}
+	
+	@Override
+	public void restorePreferences(Preferences prefs) {
+		setTerrainTextureScale(prefs.getDouble("terrain.texScale", DEFAULT_TEX_SCALE));
+		String texName = prefs.get("terrain.texture", DEFAULT_TEXTURE);
+		if ("custom".equals(texName)) {
+			String fileName = prefs.get("terrain.customTex", null);
+			if (fileName != null) {
+				terrainTexFile = new File(fileName);
+				if (!terrainTexFile.exists()) terrainTexFile = null;
+			}
+		}
+		terrain.setTextureName(texName);
+
+		int r = prefs.getInt("terrain.colorRed", DEFAULT_FACE_COLOR.getRed());
+		int g = prefs.getInt("terrain.colorGreen", DEFAULT_FACE_COLOR.getGreen());
+		int b = prefs.getInt("terrain.colorBlue", DEFAULT_FACE_COLOR.getBlue());
+		setFaceColor(new Color(r,g,b));
+
+		setFaceReflection(prefs.getDouble("terrain.reflection", DEFAULT_REFLECTION));
+		setFacesReflecting(prefs.getBoolean("terrain.reflecting", DEFAULT_REFLECTING));
+		setTransparencyEnabled(prefs.getBoolean("terrain.transparencyEnabled", DEFAULT_TRANSPARENT));
+		setTransparency(prefs.getDouble("terrain.transparency", DEFAULT_TRANSPARENCY));
+    }
 }

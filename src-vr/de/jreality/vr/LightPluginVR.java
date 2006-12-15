@@ -27,11 +27,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jtem.beans.SimpleColorChooser;
 
 public class LightPluginVR extends AbstractPluginVR {
-
-	// defaults for light panel
-	private static final double DEFAULT_SUN_LIGHT_INTENSITY = 1;
-	private static final double DEFAULT_HEAD_LIGHT_INTENSITY = .3;
-	private static final double DEFAULT_SKY_LIGHT_INTENSITY = .2;
 	
 	// light tab
 	private JPanel lightPanel;
@@ -41,11 +36,6 @@ public class LightPluginVR extends AbstractPluginVR {
 	private JSlider sunLightIntensitySlider;
 	private JSlider headLightIntensitySlider;
 	private JSlider skyLightIntensitySlider;
-
-	// default lights
-	private DirectionalLight sunLight = new DirectionalLight();
-	private PointLight headLight;
-	private DirectionalLight skyLight;
 
 	private ActionListener closeListener = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
@@ -61,37 +51,6 @@ public class LightPluginVR extends AbstractPluginVR {
 	@Override
 	public void setViewerVR(ViewerVR vvr) {
 		super.setViewerVR(vvr);
-		
-//		 lights
-		sunLight = new DirectionalLight();
-		sunLight.setName("sun light");
-		SceneGraphComponent lightNode = new SceneGraphComponent("sun");
-		lightNode.setLight(sunLight);
-		MatrixBuilder.euclidean().rotateFromTo(new double[] { 0, 0, 1 },
-				//new double[] { 0, 1, 1 }).assignTo(lightNode);
-				//new double[] { 0.39, .24, 0.89 }).assignTo(lightNode);
-				new double[] { 0.39, Math.sqrt(.39*.39+0.89*0.89), 0.89 }).assignTo(lightNode);
-		getViewerVR().getSceneRoot().addChild(lightNode);
-		
-		SceneGraphComponent skyNode = new SceneGraphComponent();
-		skyLight = new DirectionalLight();
-		skyLight.setAmbientFake(true);
-		skyLight.setName("sky light");
-		skyNode.setLight(skyLight);
-		MatrixBuilder.euclidean().rotateFromTo(new double[] { 0, 0, 1 },
-				new double[] { 0, 1, 0 }).assignTo(skyNode);
-		getViewerVR().getSceneRoot().addChild(skyNode);
-		
-		headLight = new PointLight();
-		headLight.setAmbientFake(true);
-		headLight.setFalloff(1, 0, 0);
-		headLight.setName("camera light");
-		headLight.setColor(new Color(255,255,255,255));
-		getViewerVR().getCameraPath().getLastComponent().setLight(headLight);
-	    
-		setHeadLightIntensity(DEFAULT_HEAD_LIGHT_INTENSITY);
-		setSunIntensity(DEFAULT_SUN_LIGHT_INTENSITY);
-		setSkyLightIntensity(DEFAULT_SKY_LIGHT_INTENSITY);
 	}
 	
 	private void makeLightTab() {
@@ -102,14 +61,14 @@ public class LightPluginVR extends AbstractPluginVR {
 		sunLightColorChooser.setBorder(new EmptyBorder(8,8,8,8));
 		sunLightColorChooser.addChangeListener( new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				setSunLightColor(sunLightColorChooser.getColor());
+				getViewerVR().setSunLightColor(sunLightColorChooser.getColor());
 			}
 		});
 		headLightColorChooser = new SimpleColorChooser();
 		headLightColorChooser.setBorder(new EmptyBorder(8,8,8,8));
 		headLightColorChooser.addChangeListener( new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				setHeadLightColor(headLightColorChooser.getColor());
+				getViewerVR().setHeadLightColor(headLightColorChooser.getColor());
 			}
 		});
 		headLightColorChooser.addActionListener(closeListener);
@@ -118,7 +77,7 @@ public class LightPluginVR extends AbstractPluginVR {
 		skyLightColorChooser.setBorder(new EmptyBorder(8,8,8,8));
 		skyLightColorChooser.addChangeListener( new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				setSkyLightColor(skyLightColorChooser.getColor());
+				getViewerVR().setSkyLightColor(skyLightColorChooser.getColor());
 			}
 		});
 		skyLightColorChooser.addActionListener(closeListener);
@@ -218,64 +177,21 @@ public class LightPluginVR extends AbstractPluginVR {
 		getViewerVR().switchTo(skyLightColorChooser);
 	}
 		
-	public Color getSunLightColor() {
-		return sunLight.getColor();
-	}
-	
-	public void setSunLightColor(Color c) {
-		sunLight.setColor(c);
-	}
-	
-	public Color getHeadLightColor() {
-		return headLight.getColor();
-	}
-	
-	public void setHeadLightColor(Color c) {
-		headLight.setColor(c);
-	}
-	
-	public Color getSkyLightColor() {
-		return skyLight.getColor();
-	}
-	
-	public void setSkyLightColor(Color c) {
-		skyLight.setColor(c);
-	}
-	
-	public double getSunIntensity() {
-		return sunLight.getIntensity();
-	}
-	
 	public void setSunIntensity(double x) {
 		sunLightIntensitySlider.setValue((int) (100*x));
-		sunLight.setIntensity(x);
+		getViewerVR().setSunIntensity(x);
 	}
-	
-	public double getHeadLightIntensity() {
-		return headLight.getIntensity();
-	}
-	
+
 	public void setHeadLightIntensity(double x) {
 		headLightIntensitySlider.setValue((int) (100*x));
-		headLight.setIntensity(x);
-	}
-	
-	public double getSkyLightIntensity() {
-		return skyLight.getIntensity();
+		getViewerVR().setHeadLightIntensity(x);
 	}
 	
 	public void setSkyLightIntensity(double x) {
 		skyLightIntensitySlider.setValue((int) (100*x));
-		skyLight.setIntensity(x);
+		getViewerVR().setSkyLightIntensity(x);
 	}
 	
-	public void setLightIntensity(double intensity) {
-		sunLight.setIntensity(intensity);
-	}
-
-	public double getLightIntensity() {
-		return sunLight.getIntensity();
-	}
 
 
 	
