@@ -53,6 +53,8 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Level;
 
 import de.jreality.scene.Appearance;
@@ -471,10 +473,12 @@ public class AttributeEntityUtility {
       	subEntityWriter = new HashMap<Method, PropertyDescriptor>();
       HashSet<PropertyDescriptor> pds = new HashSet<PropertyDescriptor>();
       BeanInfo bi = Introspector.getBeanInfo(clazz, Introspector.IGNORE_ALL_BEANINFO);
-      PropertyDescriptor[] pd = bi.getPropertyDescriptors();
-      pds.addAll(Arrays.asList(pd));
-      for (int ix = 0; ix < pd.length; ix++) {
-        PropertyDescriptor descriptor = pd[ix];
+	  pds.addAll(Arrays.asList(bi.getPropertyDescriptors()));
+	  for (Class<? extends AttributeEntity> type : clazz.getInterfaces()) {
+    	  bi = Introspector.getBeanInfo(type, Introspector.IGNORE_ALL_BEANINFO);
+    	  pds.addAll(Arrays.asList(bi.getPropertyDescriptors()));
+      }
+      for (PropertyDescriptor descriptor : pds) {
         String attrName = descriptor.getName();
         if (prop.put(attrName, descriptor) != null)
             throw new IllegalArgumentException("conflicts on property \""

@@ -41,6 +41,11 @@
 package de.jreality.shader;
 
 import java.awt.Color;
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
 
 import junit.framework.TestCase;
 import de.jreality.scene.Appearance;
@@ -95,7 +100,7 @@ public class SubEntityTest extends TestCase {
     DefaultPolygonShader ps = (DefaultPolygonShader) gs.getPolygonShader();
     
     ps.setAmbientCoefficient(new Double(1.2));
-    ps.setSmoothShading(Boolean.FALSE);  
+    ps.setSmoothShading(Boolean.FALSE);
 
     DefaultPointShader dps = (DefaultPointShader)gs.getPointShader();
     
@@ -150,20 +155,51 @@ public class SubEntityTest extends TestCase {
     System.out.println(gs);
   }
   
-  public void testNonDefaultShaders() {
+  public void testNonDefaultShaders() throws Exception {
 	    System.out.println("\n***********");
 	    System.out.println("\n***********");
 	  
 	  Appearance app = new Appearance();
+	  Appearance app2 = new Appearance();
+	  
+	  DefaultPolygonShader def = (DefaultPolygonShader) ShaderUtility.createDefaultGeometryShader(app, true).getPolygonShader();
+	  
 	  EffectiveAppearance eapp = EffectiveAppearance.create().create(app);
 	  
-	  DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(app, false);
-	  TwoSidePolygonShader tps = (TwoSidePolygonShader) dgs.createPolygonShader("twoSide");
+	  DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(app, true);
+	  HatchPolygonShader hatch = (HatchPolygonShader) dgs.createPolygonShader("hatch");
 	  
 	  DefaultGeometryShader dgsEap = ShaderUtility.createDefaultGeometryShader(eapp);
 	  PolygonShader ps = dgsEap.getPolygonShader();
-	  assertTrue(tps instanceof TwoSidePolygonShader);
+	  assertTrue(hatch instanceof HatchPolygonShader);
 	  System.out.println(ps);
-	  assertTrue(ps instanceof TwoSidePolygonShader);
+	  assertTrue(ps instanceof HatchPolygonShader);
+
+	  	System.out.println("\n***********");
+	    System.out.println("\n***********");
+	  
+      BeanInfo bi = Introspector.getBeanInfo(DefaultPolygonShader.class, Introspector.IGNORE_ALL_BEANINFO);
+	  for (PropertyDescriptor descriptor : bi.getPropertyDescriptors()) {
+		  
+		  System.out.println(descriptor.getName()+":");
+		  // check defaults
+		  Method r = descriptor.getReadMethod();
+		  Object o1 = r.invoke(def, null);
+		  Object o2 = r.invoke(hatch, null);
+		  System.out.println("\t read: "+equals(o1, o2));
+		  
+		  // check writing
+		  Method w = descriptor.getWriteMethod();
+		  if (w==null) continue;
+		  w.invoke(def, o1);
+		  w.invoke(hatch, o2);
+		  System.out.println("\t write: OK");
+	  }
   }
+
+	private boolean equals(Object o1, Object o2) {
+		if (o1 == null) return o2 == null;
+		if (o2 == null) return false;
+		return o1.equals(o2);
+	}
 }
