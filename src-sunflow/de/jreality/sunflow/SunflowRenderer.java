@@ -124,73 +124,56 @@ public class SunflowRenderer extends SunflowAPI {
 			if (!c.isVisible()) return;
 			path.push(c);
 			currentMatrix=new Matrix(path.getMatrix(null));
-			Geometry g = c.getGeometry();
 			eapp = EffectiveAppearance.create(path);
 			dgs = ShaderUtility.createDefaultGeometryShader(eapp);
-			rhs = ShaderUtility.createRenderingHintsShader(eapp);
-			if (c.getLight() != null) c.getLight().accept(this);
-			if (g != null) {
-				if (g instanceof PointSet) {
-					renderPoints((PointSet)g);
-					if (g instanceof IndexedLineSet && dgs.getShowLines()  && ((IndexedLineSet) g).getNumEdges() > 0) {
-						renderLines((IndexedLineSet) g);
-					}
-					if (g instanceof IndexedFaceSet && ((IndexedFaceSet) g).getNumFaces() > 0 && dgs.getShowFaces()) {
-						dps = (DefaultPolygonShader) dgs.getPolygonShader();
-						applyShader(dps);
-						renderFaces((IndexedFaceSet) g);
-					}
-				} else {
-					dps = (DefaultPolygonShader) dgs.getPolygonShader();
-					applyShader(dps);
-					g.accept(this);
-					parameter("transform", currentMatrix);
-					parameter("shaders", "default-shader" + appCount);
-					String geomName = getName(g);
-					instance(geomName + ".instance"+instanceCnt++, geomName);
-				}
-			}
-			  for (int i=0; i < c.getChildComponentCount(); i++) {
-				  c.getChildComponent(i).accept(this);
-			  }
+			rhs = ShaderUtility.createRenderingHintsShader(eapp);			
+			c.childrenAccept(this);
 			path.pop();
 		}
 
-		public void renderFaces(IndexedFaceSet ifs) {
-			float[] points = convert(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), 3, null);
-			float[] normals = null;
-			if (dps.getSmoothShading() && ifs.getVertexAttributes(Attribute.NORMALS) != null) {
-				normals = convert(ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(), 3, null);
-				parameter("normals", "vector", "vertex", normals);
-			} else {
-				// sunflow calculates the face normal from the triangle points...
+		@Override
+		public void visit(IndexedFaceSet ifs) {
+			visit((IndexedLineSet)ifs);
+			if (ifs.getNumFaces() > 0 && dgs.getShowFaces()) {
+				dps = (DefaultPolygonShader) dgs.getPolygonShader();
+				applyShader(dps);
+				float[] points = convert(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), 3, null);
+				float[] normals = null;
+				if (dps.getSmoothShading() && ifs.getVertexAttributes(Attribute.NORMALS) != null) {
+					normals = convert(ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(), 3, null);
+					parameter("normals", "vector", "vertex", normals);
+				} else {
+					// sunflow calculates the face normal from the triangle points...
+				}
+				DataList tex = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+				Texture2D tex2d = dps.getTexture2d();
+				float[] texCoords = null;
+				if (tex != null && tex2d != null) {
+					Matrix texMat = null;
+					// this is needed for sunflow build-in shaders:
+					//MatrixBuilder.euclidean().scale(1,-1,1).getMatrix();
+					//texMat.multiplyOnRight(tex2d.getTextureMatrix());
+					texCoords = convert(tex.toDoubleArrayArray(), 2, texMat);
+				}
+				int[] faces = convert(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray());
+				parameter("triangles", faces);
+				parameter("points", "point", "vertex", points);
+				if (texCoords != null) {
+					parameter("uvs", "texcoord", "vertex", texCoords);				
+				}
+				geometry(getName(ifs), new Mesh());
+				parameter("transform", currentMatrix);
+				parameter("shaders", "default-shader" + appCount);
+				String geomName = getName(ifs);
+				instance(geomName + ".instance"+instanceCnt++, geomName);
 			}
-			DataList tex = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
-			Texture2D tex2d = dps.getTexture2d();
-			float[] texCoords = null;
-			if (tex != null && tex2d != null) {
-				Matrix texMat = null;
-				// this is needed for sunflow build-in shaders:
-				//MatrixBuilder.euclidean().scale(1,-1,1).getMatrix();
-				//texMat.multiplyOnRight(tex2d.getTextureMatrix());
-				texCoords = convert(tex.toDoubleArrayArray(), 2, texMat);
-			}
-			int[] faces = convert(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray());
-			parameter("triangles", faces);
-			parameter("points", "point", "vertex", points);
-			if (texCoords != null) {
-				parameter("uvs", "texcoord", "vertex", texCoords);				
-			}
-			geometry(getName(ifs), new Mesh());
-			parameter("transform", currentMatrix);
-			parameter("shaders", "default-shader" + appCount);
-			String geomName = getName(ifs);
-			instance(geomName + ".instance"+instanceCnt++, geomName);
 		}
 		
-		private void renderLines(IndexedLineSet indexedLineSet) {
+		@Override
+		public void visit(IndexedLineSet indexedLineSet) {
+			visit((PointSet)indexedLineSet);
 			DefaultLineShader ls = (DefaultLineShader) dgs.getLineShader();
-			if (ls.getTubeDraw()) {
+			if (dgs.getShowLines() && ls.getTubeDraw() && indexedLineSet.getNumEdges() > 0 && indexedLineSet.getNumPoints() > 0) {
 				dps = (DefaultPolygonShader) ls.getPolygonShader();
 				double r = ls.getTubeRadius();
 				DoubleArrayArray pts = indexedLineSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
@@ -240,7 +223,8 @@ public class SunflowRenderer extends SunflowAPI {
 			}
 		}
 
-		private void renderPoints(PointSet pointSet) {
+		@Override
+		public void visit(PointSet pointSet) {
 			DefaultPointShader ps = (DefaultPointShader) dgs.getPointShader();
 			if (dgs.getShowPoints() && ps.getSpheresDraw() && pointSet.getNumPoints() > 0) {
 				dps = (DefaultPolygonShader) ps.getPolygonShader();
@@ -329,8 +313,7 @@ public class SunflowRenderer extends SunflowAPI {
 		private void applyShader(DefaultPolygonShader ps) {
 			appCount++;
 			shader("default-shader"+appCount, new de.jreality.sunflow.core.shader.DefaultPolygonShader(ps, rhs));
-		}
-		
+		}		
 	}
 	
 	public SunflowRenderer() {
