@@ -42,8 +42,8 @@ package de.jreality.shader;
 
 
 /**
- * The default point shader for jReality. 
- * @author Charles Gunn
+ * Tagging interface for hatch shader
+ * @author Tim Hoffmann
  * @see DefaultPolygonShader  for general remarks on these shader interfaces.
  *
  */public interface HatchPolygonShader extends DefaultPolygonShader {
