@@ -42,7 +42,6 @@ package de.jreality.reader;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Stack;
 
@@ -57,28 +56,31 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
+import de.jreality.geometry.GeometryUtility;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
-import de.jreality.util.Secure;
 
 
 /**
  *
  * Simple reader for JVX files (JavaView format).
  *
- * @author timh
+ * @author timh, Steffen Weissmann
  *
  */
 public class ReaderJVX extends AbstractReader {
-
+	
   public void setInput(Input input) throws IOException {
     super.setInput(input);
     SAXParserFactory parserFactory = SAXParserFactory.newInstance();
@@ -90,7 +92,7 @@ public class ReaderJVX extends AbstractReader {
         Handler handler = new Handler();
 		reader.setContentHandler(handler);
 		InputSource src=new InputSource(input.getInputStream());
-        reader.parse(src); 
+		reader.parse(src); 
         root = handler.getRoot();
     } catch (ParserConfigurationException e) {
         IOException ie = new IOException(e.getMessage());
@@ -132,208 +134,84 @@ public class ReaderJVX extends AbstractReader {
   }
   
   static class Handler extends DefaultHandler {
-    SceneGraphComponent root = new SceneGraphComponent();
-    Stack componentStack = new Stack();
+		private enum CharData {
+			NONE, POINT, LINE, FACE, COLOR, NORMAL;
+		}
+
+	SceneGraphComponent root = new SceneGraphComponent();
+    Stack<SceneGraphComponent> componentStack = new Stack<SceneGraphComponent>();
     SceneGraphComponent currentComponent;
+
     DataListSet vertexAttributes;
     DataListSet edgeAttributes;
     DataListSet faceAttributes;
-    double[][] currentPoints;
-    double[] currentPoint;
-    int currentPointNum;
-    int[][] currentLines;
-    int[] currentLine;
-    int[][] currentFaces;
-    private IndexedFaceSet currentIndexedFaceSet;
-    private int pointLength;
-    // TODO find out wether this is allways true:
-    private int lineLength = 2;
-    private int currentLineNum;
-    private double[][] currentColors;
-    private String[] currentPointLabels;
-    private int currentColorNum;
     
-    public Handler() {
-        
-    }
+    private CharData currentCharData=CharData.NONE;
+
+    LinkedList<double[]> currentPoints;
+    
+    LinkedList<double[]> currentNormals;
+    
+    LinkedList<double[]> currentColors;
+
+    LinkedList<int[]> currentEdges;
+    LinkedList<int[]> currentFaces;
+
+    LinkedList<String> currentLabels; // reference to one of the following:
+    
     public SceneGraphComponent getRoot() {
         return root;
     }
     
-    public void endDocument() throws SAXException {
-        if(componentStack.size()!= 0) throw new RuntimeException(" nonempty stack at end of jvx file.");
-        super.endDocument();
-    }
-    /* (non-Javadoc)
-     * @see org.xml.sax.ContentHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
-     */
-    public void endElement(String uri, String localName, String qName)
-            throws SAXException {
-    	charactersImpl();
-        LoggingSystem.getLogger(this).fine("end elem: qName "+qName);
-        if(qName.equals("geometry")) {
-            if(currentPoints != null) {
-                currentIndexedFaceSet.setVertexCountAndAttributes(vertexAttributes);
-                LoggingSystem.getLogger(this).fine("added coordinates");
-            }
-            if(currentLines != null)
-                //currentIndexedFaceSet.setEdgeCountAndAttributes(edgeAttributes);
-            
-            currentIndexedFaceSet = null;
-            currentComponent = (SceneGraphComponent) componentStack.pop();
-            return;
-        }
-        //
-        // a pointSet
-        //
-        if(qName.equals("pointSet")) {
-            pointLength= -1;
-            vertexAttributes = new DataListSet(currentPoints.length);
-            //vertexAttributes.add(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY_ARRAY.createReadOnly(currentPoints));
-            vertexAttributes.addWritable(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY_ARRAY,currentPoints);
-            vertexAttributes.addWritable(Attribute.LABELS, StorageModel.STRING_ARRAY, currentPointLabels);
-            if(currentColors!= null) {
-                vertexAttributes.addWritable(Attribute.COLORS,StorageModel.DOUBLE3_ARRAY, currentColors);
-                currentColors = null;
-            }
-            return;
-        }
-        //
-        // points
-        //
-        if(qName.equals("points")) {
-            //currentPoints = null;
-            currentPointNum = -1;
-            return;
-        }
-        //
-        // p
-        //
-        if(qName.equals("p")) {
-            currentPoint = null;
-            currentPointNum++;
-            return;
-        }
-        //
-        // lineSet
-        //
-        if(qName.equals("lineSet")) {
-            //pointLength= -1;
-//            edgeAttributes = new DataListSet(currentPoints.length);
-//            //edgeAttributes.add(Attribute.INDICES,StorageModel.INT_ARRAY_ARRAY.createReadOnly(currentLines));
-//            edgeAttributes.addWritable(Attribute.INDICES,StorageModel.INT_ARRAY_ARRAY,currentLines);
-//            if(currentColors!= null) {
-//                //vertexAttributes.addWritable(Attribute.COLORS,StorageModel.primitive(Color.class),currentColors);
-//                currentColors = null;
-//            }
-            //TODO the above does not work! probably some bug in the DataList stuff...
-            currentIndexedFaceSet.setEdgeCountAndAttributes(Attribute.INDICES,StorageModel.INT_ARRAY_ARRAY.createReadOnly(currentLines));
-            if(currentColors!= null) {
-                LoggingSystem.getLogger(this).finest("pre  dl");
-                DataList dl = StorageModel.DOUBLE_ARRAY_ARRAY.createReadOnly(currentColors);
-                LoggingSystem.getLogger(this).finest("dl done");
-                currentIndexedFaceSet.setEdgeAttributes(Attribute.COLORS,dl);
-                currentColors = null;
-            }
-            return;
-        }
-        //
-        // lines
-        //
-        if(qName.equals("lines")) {
-            //currentLines = null;
-            currentLineNum = -1;
-            return;
-        }
-        //
-        // l
-        //
-        if(qName.equals("l")) {
-            currentLine = null;
-            currentLineNum++;
-            return;
-        }
-        //
-        // colors
-        //
-        if(qName.equals("colors")) {
-            //currentLines = null;
-            currentColorNum = -1;
-            return;
-        }
-        //
-        // c
-        //
-        if(qName.equals("c")) {
-            currentColorNum++;
-            return;
-        }
-        
-        
-        super.endElement(uri, localName, qName);
-    }
-    /* (non-Javadoc)
-     * @see org.xml.sax.ContentHandler#startDocument()
-     */
+    @Override
     public void startDocument() throws SAXException {
         currentComponent = root;
         super.startDocument();
     }
-    /* (non-Javadoc)
-     * @see org.xml.sax.ContentHandler#startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
-     */
+    
+    @Override
+    public void endDocument() throws SAXException {
+        if(componentStack.size()!= 0) throw new RuntimeException(" nonempty stack at end of jvx file.");
+        super.endDocument();
+    }
+    
+    @Override
     public void startElement(String uri, String localName, String qName,
             Attributes attributes) throws SAXException {
         LoggingSystem.getLogger(this).fine("start elem: qName "+qName);
-        //
-        // a geometry
-        //
+
         if(qName.equals("geometry")) {
-            currentIndexedFaceSet = new IndexedFaceSet();
-            currentIndexedFaceSet.setFaceCountAndAttributes(new DataListSet(0));
             SceneGraphComponent c = new SceneGraphComponent();
             Appearance ap = new Appearance();
             c.setAppearance(ap);
             if(currentComponent!= null) currentComponent.addChild(c);
             componentStack.push(currentComponent);
             currentComponent = c;
-            c.setGeometry(currentIndexedFaceSet);
             return;
         }
-        //
-        // a pointSet
-        //
+
         if(qName.equals("pointSet")) {
-            String point = attributes.getValue("point");
+        	String point = attributes.getValue("point");
             if(point!= null && point.equals("show")) 
                 currentComponent.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, "true");
             else
                 currentComponent.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, "false");
-            pointLength= Integer.parseInt(attributes.getValue("dim"));
             return;
         }
-        //
-        // points
-        //
+
         if(qName.equals("points")) {
-            int pointNum= Integer.parseInt(attributes.getValue("num"));
-            currentPoints = new double[pointNum][];
-            currentPointLabels = new String[pointNum];
-            currentPointNum = 0;
+        	currentPoints = new LinkedList<double[]>();
+        	currentLabels = new LinkedList<String>();
             return;
         }
-        //
-        // p
-        //
+
         if(qName.equals("p")) {
-        	if (currentPointNum == -1 || pointLength == -1) return;
-            currentPointLabels[currentPointNum]=attributes.getValue("name");
-            currentPoints[currentPointNum] = currentPoint = new double[pointLength];
+        	if (currentPoints == null) return;
+        	currentLabels.add(attributes.getValue("name"));
+        	currentCharData = CharData.POINT;
             return;
         }
-        //
-        // a lineSet
-        //
+
         if(qName.equals("lineSet")) {
             String point = attributes.getValue("line");
             if(point!= null && point.equals("show")) 
@@ -342,52 +220,222 @@ public class ReaderJVX extends AbstractReader {
                 currentComponent.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, "false");
             return;
         }
-        //
-        // lines
-        //
-        if(qName.equals("lines")) {
-            int lineNum= Integer.parseInt(attributes.getValue("num"));
-            currentLines = new int[lineNum][];
-            currentLineNum = 0;
-            return;
+ 
+       if(qName.equals("lines")) {
+    	   System.out.println("lines");
+    	   currentEdges = new LinkedList<int[]>();
+    	   currentLabels = new LinkedList<String>();
+           return;
         }
-        //
-        // l
-        //
+
         if(qName.equals("l")) {
-            String name = attributes.getValue("name");
-            currentLines[currentLineNum] = currentLine = new int[lineLength];
+        	if (currentEdges == null) return;
+        	currentLabels.add(attributes.getValue("name"));
+        	currentCharData = CharData.LINE;
+        	return;
+        }
+
+        if(qName.equals("faceSet")) {
+        	String point = attributes.getValue("face");
+            if(point!= null && point.equals("show")) 
+                currentComponent.getAppearance().setAttribute(CommonAttributes.FACE_DRAW, "true");
+            else 
+                currentComponent.getAppearance().setAttribute(CommonAttributes.FACE_DRAW, "false");
             return;
         }
-        //
-        // colors
-        //
+
+        if(qName.equals("faces")) {
+        	currentFaces = new LinkedList<int[]>();
+        	currentLabels = new LinkedList<String>();
+        	return;
+        }
+
+        if(qName.equals("f")) {
+        	if (currentFaces == null) return;
+        	currentLabels.add(attributes.getValue("name"));
+        	currentCharData = CharData.FACE;
+        	return;
+        }
+
         if(qName.equals("colors")) {
-            int colorNum= Integer.parseInt(attributes.getValue("num"));
-            currentColors = new double[colorNum][3];
-            currentColorNum = 0;
+        	currentColors = new LinkedList<double[]>();
             return;
         }
-        //
-        // c
-        //
+
         if(qName.equals("c")) {
-            
+        	if (currentColors == null) return;
+        	currentCharData = CharData.COLOR;
             return;
         }
-        super.startElement(uri, localName, qName, attributes);
+
+        if(qName.equals("normals")) {
+        	currentNormals = new LinkedList<double[]>();
+            return;
+        }
+
+        if(qName.equals("n")) {
+        	if (currentNormals == null) return;
+        	currentCharData = CharData.NORMAL;
+            return;
+        }
+        
+        // unhandled elements
+        currentCharData = CharData.NONE;
+        // if (!"nb".equals(qName)) System.out.println("unhandled element: "+qName);
     }
 
-    
+    @Override
+    public void endElement(String uri, String localName, String qName)
+            throws SAXException {
+    	charactersImpl();
+        currentCharData = CharData.NONE;
+        LoggingSystem.getLogger(this).fine("end elem: qName "+qName);
+        if(qName.equals("geometry")) {
+        	Geometry geom = faceAttributes != null ? new IndexedFaceSet() : edgeAttributes != null ? new IndexedLineSet() : new PointSet();
+            currentComponent.setGeometry(geom);           
+            currentComponent.childrenWriteAccept(new SceneGraphVisitor() {
+            	@Override
+            	public void visit(IndexedFaceSet i) {
+            		visit((IndexedLineSet)i);
+            		i.setFaceCountAndAttributes(faceAttributes);
+            		if (!faceAttributes.containsAttribute(Attribute.NORMALS)
+            			&& (edgeAttributes == null || !edgeAttributes.containsAttribute(Attribute.NORMALS))) {
+            			GeometryUtility.calculateAndSetFaceNormals(i);
+            		}
+            	}
+            	@Override
+            	public void visit(IndexedLineSet g) {
+            		visit((PointSet)g);
+            		if (edgeAttributes != null) g.setEdgeCountAndAttributes(edgeAttributes);
+            	}
+            	@Override
+            	public void visit(PointSet p) {
+            		p.setVertexCountAndAttributes(vertexAttributes);
+            	}
+            }, false, false, false, false, true, false);
+            vertexAttributes = edgeAttributes = faceAttributes = null;
+            currentComponent = (SceneGraphComponent) componentStack.pop();
+        }
+        
+        if(qName.equals("pointSet")) {
+    		double[][] points = currentPoints.toArray(new double[0][]);
+        	vertexAttributes = new DataListSet(points.length);
+    		vertexAttributes.addReadOnly(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY_ARRAY, points);
+    		if (currentNormals != null && !currentNormals.isEmpty()) {
+    			double[][] normals = currentNormals.toArray(new double[0][]);
+    			vertexAttributes.addReadOnly(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY_ARRAY, normals);
+    		}
+    		if (currentColors != null && !currentColors.isEmpty()) {
+    			double[][] colors = currentColors.toArray(new double[0][]);
+    			vertexAttributes.addReadOnly(Attribute.COLORS, StorageModel.DOUBLE_ARRAY_ARRAY, colors);
+    		}
+    		if (!currentLabels.isEmpty()) {
+    			String[] labels = currentLabels.toArray(new String[0]);
+    			vertexAttributes.addReadOnly(Attribute.LABELS, StorageModel.STRING_ARRAY, labels);
+    		}
+    		currentPoints = currentColors = currentNormals = null;
+    		currentLabels = null;
+    		
+            return;
+        }
+
+        if(qName.equals("points")) {
+            return;
+        }
+
+        if(qName.equals("p")) {
+            return;
+        }
+
+        if(qName.equals("lineSet")) {
+        	if (currentEdges == null || currentEdges.size() == 0) return;
+    		int[][] edges = currentEdges.toArray(new int[0][]);
+        	edgeAttributes = new DataListSet(edges.length);
+        	edgeAttributes.addReadOnly(Attribute.INDICES, StorageModel.INT_ARRAY_ARRAY, edges);
+    		if (currentColors != null && !currentColors.isEmpty()) {
+    			double[][] colors = currentColors.toArray(new double[0][]);
+    			edgeAttributes.addReadOnly(Attribute.COLORS, StorageModel.DOUBLE_ARRAY_ARRAY, colors);
+    		}
+    		if (!currentLabels.isEmpty()) {
+    			String[] labels = currentLabels.toArray(new String[0]);
+    			edgeAttributes.addReadOnly(Attribute.LABELS, StorageModel.STRING_ARRAY, labels);
+    		}
+    		
+    		currentEdges = null;
+    		currentColors = currentNormals = null;
+    		currentLabels = null;
+
+    		System.out.println("Edges: "+edgeAttributes);
+    		
+    		return;
+        }
+ 
+       if(qName.equals("lines")) {
+           return;
+        }
+
+        if(qName.equals("l")) {
+        	return;
+        }
+
+        if(qName.equals("faceSet")) {
+        	if (currentFaces.size() == 0) return;
+    		int[][] faces = currentFaces.toArray(new int[0][]);
+    		faceAttributes = new DataListSet(faces.length);
+    		faceAttributes.addReadOnly(Attribute.INDICES, StorageModel.INT_ARRAY_ARRAY, faces);
+    		if (currentNormals != null && !currentNormals.isEmpty()) {
+    			double[][] normals = currentNormals.toArray(new double[0][]);
+    			faceAttributes.addReadOnly(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY_ARRAY, normals);
+    		}
+    		if (currentColors != null && !currentColors.isEmpty()) {
+    			double[][] colors = currentColors.toArray(new double[0][]);
+    			faceAttributes.addReadOnly(Attribute.COLORS, StorageModel.DOUBLE_ARRAY_ARRAY, colors);
+    		}
+    		if (!currentLabels.isEmpty()) {
+    			String[] labels = currentLabels.toArray(new String[0]);
+    			faceAttributes.addReadOnly(Attribute.LABELS, StorageModel.STRING_ARRAY, labels);
+    		}
+
+    		currentFaces = null;
+    		currentColors = currentNormals = null;
+    		currentLabels = null;
+
+    		return;
+        }
+
+        if(qName.equals("faces")) {
+        	return;
+        }
+
+        if(qName.equals("f")) {
+        	return;
+        }
+
+        if(qName.equals("colors")) {
+            return;
+        }
+
+        if(qName.equals("c")) {
+            return;
+        }
+
+        if(qName.equals("normals")) {
+            return;
+        }
+
+        if(qName.equals("n")) {
+            return;
+        }
+
+    }
     
     LinkedList<char[]> chars = new LinkedList<char[]>();
     public void characters(char[] ch, int start, int length) throws SAXException {
 		// QUICK FIX: sax parser sometimes splits char content into two calls of characters(..)
-    	if (currentColors != null || currentFaces != null || currentPoints != null) {
-	    	char[] read = new char[length];
-	    	System.arraycopy(ch, start, read, 0, length);
-	    	chars.add(read);
-    	} else super.characters(ch, start, length);
+    	if (currentCharData == CharData.NONE) return;
+    	char[] read = new char[length];
+    	System.arraycopy(ch, start, read, 0, length);
+    	chars.add(read);
     }
 
     public void charactersImpl() {
@@ -408,37 +456,53 @@ public class ReaderJVX extends AbstractReader {
     		ch=chars.get(0);
     	}
     	chars.clear();
-    	int start=0, length=ch.length;
-        if(currentPoint != null) {
-            // read point coords...
-            String s = String.valueOf(ch,start,length);
-            String[] nums = s.split("\\s");
-            for(int i = 0; i<nums.length;i++) {
-                currentPoint[i] = Double.parseDouble(nums[i]);
-            }
+        String s = new String(ch);
+        s=s.trim();
+
+        switch (currentCharData) {
+        case NONE:
+        	return;
+		case FACE:
+		case LINE:
+            String[] nums = s.split("\\s+");
+			int[] data = new int[nums.length];
+			for (int i = 0; i < data.length; i++) {
+				data[i] = Integer.parseInt(nums[i]);
+			}
+			if (currentCharData == CharData.FACE) currentFaces.add(data);
+			else {
+				currentEdges.add(data);
+			}
+			return;
+		case COLOR:
+            nums = s.split("\\s+");
+			double[] doubles = new double[nums.length];
+			for (int i = 0; i < doubles.length; i++) {
+				doubles[i] = Double.parseDouble(nums[i]);
+			}
+			for (int i = 0; i < doubles.length; i++) {
+				doubles[i]/=255.;
+			}
+			currentColors.add(doubles);
             return;
-        }
-        if(currentLine != null) {
-            // read lineIndices...
-            String s = String.valueOf(ch,start,length);
-            String[] nums = s.split("\\s");
-            for(int i = 0; i<nums.length;i++) {
-                currentLine[i] = Integer.parseInt(nums[i]);
-            }
+		case NORMAL:
+            nums = s.split("\\s+");
+			doubles = new double[nums.length];
+			for (int i = 0; i < doubles.length; i++) {
+				doubles[i] = Double.parseDouble(nums[i]);
+			}
+			currentNormals.add(doubles);
             return;
-        }
-        if(currentColors != null) {
-            // read Colors...
-            String s = String.valueOf(ch,start,length);
-            String[] nums = s.split("\\s");
-            int r = Integer.parseInt(nums[0]);
-            int g = Integer.parseInt(nums[1]);
-            int b = Integer.parseInt(nums[2]);
-            currentColors[currentColorNum][0] = r/255.;
-            currentColors[currentColorNum][1] = g/255.;
-            currentColors[currentColorNum][2] = b/255.;
+		case POINT:
+			if (currentPoints == null) return;
+				nums = s.split("\\s+");
+				doubles = new double[nums.length];
+				for (int i = 0; i < doubles.length; i++) {
+					doubles[i] = Double.parseDouble(nums[i]);
+				}
+			currentPoints.add(doubles);
             return;
-        }
+		}
     }
 }
 
