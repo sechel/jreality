@@ -192,37 +192,27 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		geomPanel.setBorder(title);
 		JPanel geom = terrain.getGeometrySelection();
 		geomPanel.add(BorderLayout.NORTH,geom);
-		JPanel buttonPanel = new JPanel(new GridLayout(2,1));
+		JPanel buttonPanel = new JPanel(new GridLayout(2,1,0,5));
+		buttonPanel.setBorder(new EmptyBorder(5,5,5,5));
+		
 		final JButton terrainLoadButton = new JButton("load");
-		terrainLoadButton.setBorder(
-				new CompoundBorder(
-						new EmptyBorder(5,5,5,5),
-						terrainLoadButton.getBorder()
-						
-				));
 		terrainLoadButton.setMargin(insets);
 		terrainLoadButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				switchToTerrainBrowser();
 			}
 		});
+		buttonPanel.add(terrainLoadButton);
 
 		final JButton rotateButton = new JButton("rotate");
-		rotateButton.setBorder(
-				new CompoundBorder(
-						new EmptyBorder(5,5,5,5),
-						rotateButton.getBorder()
-						
-				));
 		rotateButton.setMargin(insets);
 		rotateButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				switchToRotateBrowser();
 			}
 		});
-
-		buttonPanel.add(terrainLoadButton);
 		buttonPanel.add(rotateButton);
+		
 		geomPanel.add(BorderLayout.CENTER, buttonPanel);
 
 		terrainLoadButton.setEnabled(terrain.getGeometryType() == Terrain.GeometryType.CUSTOM);
@@ -234,13 +224,9 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		tex.add(terrain.getTexureSelection());
 		
 		JPanel texLoadPanel = new JPanel(new GridLayout(1,1));
+		texLoadPanel.setBorder(new EmptyBorder(5,5,0,5));
+		
 		final JButton textureLoadButton = new JButton("load");
-		textureLoadButton.setBorder(
-				new CompoundBorder(
-						new EmptyBorder(5,5,5,5),
-						textureLoadButton.getBorder()
-						
-				));
 		textureLoadButton.setMargin(insets);
 		textureLoadButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -249,6 +235,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		});
 		textureLoadButton.setEnabled(terrain.isCustomTexture());
 		texLoadPanel.add(textureLoadButton);
+		
 		tex.add(texLoadPanel);
 		
 		Box texScaleBox = new Box(BoxLayout.X_AXIS);

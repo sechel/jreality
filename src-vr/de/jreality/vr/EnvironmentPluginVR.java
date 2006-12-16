@@ -102,22 +102,25 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 				)
 		);
 		skyBoxHidden = new JCheckBox("flat background");
-		skyBoxHidden.setBorder(new EmptyBorder(0,5,0,10));
+		skyBoxHidden.setBorder(new EmptyBorder(0,5,5,10));
 		skyBoxHidden.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				updateEnv();
+				setSkyBoxHidden(isSkyBoxHidden());
 			}
 		});
 		envControlBox.add(skyBoxHidden);
 		
 		backgroundColorButton = new JButton("color");
 		backgroundColorButton.setMargin(insets);
+		Box colorBox = new Box(BoxLayout.X_AXIS);
+		colorBox.setBorder(new EmptyBorder(0,0,5,0));
 		backgroundColorButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				switchToTopColorChooser();
 			}
 		});
-		envControlBox.add(backgroundColorButton);
+		colorBox.add(backgroundColorButton);
+		envControlBox.add(colorBox);
 		envPanel.add(envControlBox, BorderLayout.SOUTH);
 	}
 
@@ -153,6 +156,8 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 	
 	public void setSkyBoxHidden(boolean b) {
 		skyBoxHidden.setSelected(b);
+		backgroundColorButton.setEnabled(b);
+		updateEnv();
 	}
 	
 	public String getEnvironment() {
