@@ -58,7 +58,7 @@ public class Terrain {
 	private ImageData texture;
 	
 	public Terrain() {
-		geometrySelection = new JPanel(new GridLayout(4, 1));
+		geometrySelection = new JPanel(new GridLayout(3, 1));
 		ButtonGroup terrainGeometrySelection = new ButtonGroup();
 		JRadioButton button = new JRadioButton(GeometryType.FLAT.getName());
 		button.getModel().addActionListener(new ActionListener() {
@@ -109,7 +109,8 @@ public class Terrain {
 			buttons.add(button);
 		}
 		
-		texureSelection = new JPanel(new GridLayout(imageMap.size()+2, 1));
+		int numRows = Math.round(.1f+(imageMap.size()+2)*.5f);
+		texureSelection = new JPanel(new GridLayout(numRows, 2));
 		
 		for (JRadioButton b : buttons) {
 			texureSelection.add(b);

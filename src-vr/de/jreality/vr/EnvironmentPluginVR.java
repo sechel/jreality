@@ -8,12 +8,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.prefs.Preferences;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -28,17 +30,13 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 	// defaults for env panel
 	private static final String DEFAULT_ENVIRONMENT = "snow";
 	private static final boolean DEFAULT_SKYBOX_HIDDEN = false;
-	private static final Color DEFAULT_TOP_COLOR = new Color(80,80,120);
-	private static final Color DEFAULT_BOTTOM_COLOR = Color.black;
-	private static final boolean DEFAULT_BACKGROUND_FLAT = false;
+	private static final Color DEFAULT_BACKGROUND_COLOR = Color.white;
 
 	// env tab
 	private JPanel envPanel;
 	private JCheckBox skyBoxHidden;
-	private JCheckBox backgroundFlat;
-	private SimpleColorChooser bottomColorChooser;
-	private SimpleColorChooser topColorChooser;
-	private JButton bottomColorButton;
+	private SimpleColorChooser backgroundColorChooser;
+	private JButton backgroundColorButton;
 
 	private Landscape landscape;
 	
@@ -60,22 +58,15 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 	}
 	
 	private void makeEnvTab() {
-		topColorChooser = new SimpleColorChooser();
-		topColorChooser.setBorder(new EmptyBorder(8,8,8,8));
-		topColorChooser.addChangeListener( new ChangeListener() {
+		backgroundColorChooser = new SimpleColorChooser();
+		backgroundColorChooser.setBorder(new EmptyBorder(8,8,8,8));
+		backgroundColorChooser.addChangeListener( new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				setTopColor(topColorChooser.getColor());
+				setBackgroundColor(backgroundColorChooser.getColor());
 			}
 		});
-		topColorChooser.addActionListener(closeListener);
-		bottomColorChooser = new SimpleColorChooser();
-		bottomColorChooser.setBorder(new EmptyBorder(8,8,8,8));
-		bottomColorChooser.addChangeListener( new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				setBottomColor(bottomColorChooser.getColor());
-			}
-		});
-		bottomColorChooser.addActionListener(closeListener);
+		backgroundColorChooser.addActionListener(closeListener);
+
 		landscape.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
 				getViewerVR().setEnvironment(landscape.getCubeMap());
@@ -83,17 +74,35 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 			}
 		});	
 		
-		Insets insets = new Insets(0,2,0,2);
+		Insets insets = new Insets(0,5,0,5);
 		
 		envPanel = new JPanel(new BorderLayout());
 		envPanel.setBorder(new EmptyBorder(0,0,0,0));
 		JPanel selectionPanel = new JPanel(new BorderLayout());
-		selectionPanel.setBorder(new EmptyBorder(0,5,0,5));
+		selectionPanel.setBorder(
+				new CompoundBorder(
+						new EmptyBorder(0, 5, 2, 3),
+						BorderFactory.createTitledBorder(
+								BorderFactory.createEtchedBorder(),
+								"Cube map"
+						)
+				)
+		);
 		selectionPanel.add(landscape.getSelectionComponent(), BorderLayout.CENTER);
 		envPanel.add(selectionPanel, BorderLayout.CENTER);
 		
-		Box envControlBox = new Box(BoxLayout.Y_AXIS);
-		skyBoxHidden = new JCheckBox("no sky");
+		Box envControlBox = new Box(BoxLayout.X_AXIS);
+		envControlBox.setBorder(
+				new CompoundBorder(
+						new EmptyBorder(0, 5, 2, 3),
+						BorderFactory.createTitledBorder(
+								BorderFactory.createEtchedBorder(),
+								"Background"
+						)
+				)
+		);
+		skyBoxHidden = new JCheckBox("flat background");
+		skyBoxHidden.setBorder(new EmptyBorder(0,5,0,10));
 		skyBoxHidden.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				updateEnv();
@@ -101,36 +110,14 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 		});
 		envControlBox.add(skyBoxHidden);
 		
-		JPanel backgroundColorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		
-		JLabel backgroundLabel = new JLabel("background:");
-		backgroundLabel.setBorder(new EmptyBorder(0,5,0,10));
-		backgroundColorPanel.add(backgroundLabel);
-		
-		JButton topColorButton = new JButton("top");
-		topColorButton.setMargin(insets);
-		topColorButton.addActionListener(new ActionListener() {
+		backgroundColorButton = new JButton("color");
+		backgroundColorButton.setMargin(insets);
+		backgroundColorButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				switchToTopColorChooser();
 			}
 		});
-		backgroundColorPanel.add(topColorButton);
-		bottomColorButton = new JButton("bottom");
-		bottomColorButton.setMargin(insets);
-		bottomColorButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				switchToBottomColorChooser();
-			}
-		});
-		backgroundColorPanel.add(bottomColorButton);
-		backgroundFlat = new JCheckBox("flat");
-		backgroundFlat.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				setBackgroundFlat(backgroundFlat.isSelected());
-			}
-		});
-		backgroundColorPanel.add(backgroundFlat);
-		envControlBox.add(backgroundColorPanel);
+		envControlBox.add(backgroundColorButton);
 		envPanel.add(envControlBox, BorderLayout.SOUTH);
 	}
 
@@ -145,29 +132,19 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 	}
 
 	private void switchToTopColorChooser() {
-		getViewerVR().switchTo(topColorChooser);
-	}
-	
-	private void switchToBottomColorChooser() {
-		getViewerVR().switchTo(bottomColorChooser);
-	}
-		
-	private void updateBackground() {
-		Color topColor = getTopColor();
-		Color bottomColor = getBottomColor();
-		Color down = backgroundFlat.isSelected() ? topColor : bottomColor;
-		getViewerVR().getRootAppearance().setAttribute(CommonAttributes.BACKGROUND_COLORS, new Color[]{
-				topColor, topColor, down, down
-		});
+		getViewerVR().switchTo(backgroundColorChooser);
 	}
 
-	public Color getTopColor() {
-		return topColorChooser.getColor();
+	public Color getBackgroundColor() {
+		return backgroundColorChooser.getColor();
 	}
 
-	public void setTopColor(Color color) {
-		topColorChooser.setColor(color);
-		updateBackground();
+	public void setBackgroundColor(Color color) {
+		backgroundColorChooser.setColor(color);
+		getViewerVR().getRootAppearance().setAttribute(
+				CommonAttributes.BACKGROUND_COLOR,
+				getBackgroundColor()
+		);
 	}
 
 	public boolean isSkyBoxHidden() {
@@ -185,69 +162,31 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 	public void setEnvironment(String environment) {
 		landscape.setEvironment(environment);
 	}
-
-	public boolean getBackgroundFlat() {
-		return backgroundFlat.isSelected();
-	}
-	
-	public Color getBottomColor() {
-		return bottomColorChooser.getColor();
-	}
-
-	public void setBottomColor(Color color) {
-		bottomColorChooser.setColor(color);
-		updateBackground();
-	}
-	
-	public boolean isBackgroundFlat() {
-		return backgroundFlat.isSelected();
-	}
-	
-	public void setBackgroundFlat(boolean b) {
-		backgroundFlat.setSelected(b);
-		bottomColorButton.setEnabled(!backgroundFlat.isSelected());
-		updateBackground();
-	}
 	
 	@Override
 	public void storePreferences(Preferences prefs) {
-		// env panel
 		prefs.put("environment", getEnvironment());
 		prefs.putBoolean("skyBoxHidden", isSkyBoxHidden());
-		Color c = getTopColor();
-		prefs.putInt("topColorRed", c.getRed());
-		prefs.putInt("topColorGreen", c.getGreen());
-		prefs.putInt("topColorBlue", c.getBlue());
-		c = getBottomColor();
-		prefs.putInt("bottomColorRed", c.getRed());
-		prefs.putInt("bottomColorGreen", c.getGreen());
-		prefs.putInt("bottomColorBlue", c.getBlue());
-		prefs.putBoolean("backgroundFlat", isBackgroundFlat());		
+		Color c = getBackgroundColor();
+		prefs.putInt("backgroundColorRed", c.getRed());
+		prefs.putInt("backgroundColorGreen", c.getGreen());
+		prefs.putInt("backgroundColorBlue", c.getBlue());	
 	}
 	
 	@Override
 	public void restoreDefaults() {
-		// env panel
 		setEnvironment(DEFAULT_ENVIRONMENT);
 		setSkyBoxHidden(DEFAULT_SKYBOX_HIDDEN);
-		setTopColor(DEFAULT_TOP_COLOR);
-		setBottomColor(DEFAULT_BOTTOM_COLOR);
-		setBackgroundFlat(DEFAULT_BACKGROUND_FLAT);
+		setBackgroundColor(DEFAULT_BACKGROUND_COLOR);
 	}
 	
 	@Override
 	public void restorePreferences(Preferences prefs) {
-		// env panel
 		setEnvironment(prefs.get("environment", DEFAULT_ENVIRONMENT));
 		setSkyBoxHidden(prefs.getBoolean("skyBoxHidden", DEFAULT_SKYBOX_HIDDEN));
-		int r = prefs.getInt("topColorRed", DEFAULT_TOP_COLOR.getRed());
-		int g = prefs.getInt("topColorGreen", DEFAULT_TOP_COLOR.getGreen());
-		int b = prefs.getInt("topColorBlue", DEFAULT_TOP_COLOR.getBlue());
-		setTopColor(new Color(r,g,b));
-		r = prefs.getInt("bottomColorRed", DEFAULT_BOTTOM_COLOR.getRed());
-		g = prefs.getInt("bottomColorGreen", DEFAULT_BOTTOM_COLOR.getGreen());
-		b = prefs.getInt("bottomColorBlue", DEFAULT_BOTTOM_COLOR.getBlue());
-		setBottomColor(new Color(r,g,b));
-		setBackgroundFlat(prefs.getBoolean("backgroundFlat", DEFAULT_BACKGROUND_FLAT));		
+		int r = prefs.getInt("backgroundColorRed", DEFAULT_BACKGROUND_COLOR.getRed());
+		int g = prefs.getInt("backgroundColorGreen", DEFAULT_BACKGROUND_COLOR.getGreen());
+		int b = prefs.getInt("backgroundColorBlue", DEFAULT_BACKGROUND_COLOR.getBlue());
+		setBackgroundColor(new Color(r,g,b));
 	}
 }

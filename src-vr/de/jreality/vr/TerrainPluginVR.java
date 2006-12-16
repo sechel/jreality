@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,7 +19,6 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -66,7 +66,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	private static final boolean DEFAULT_REFLECTING=true;
 	private static final double DEFAULT_REFLECTION=0.2;
 	private static final boolean DEFAULT_TRANSPARENT=true;
-	private static final double DEFAULT_TRANSPARENCY=0.2;
+	private static final double DEFAULT_TRANSPARENCY=0.3;
 
 	
 	// terrain tab
@@ -139,7 +139,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		});
 		flatTerrain = new SceneGraphComponent("flat terrain");
 		MatrixBuilder.euclidean().rotateX(Math.PI/2).assignTo(flatTerrain);
-		flatTerrain.setGeometry(Primitives.plainQuadMesh(1, 1, 100, 100));
+		flatTerrain.setGeometry(Primitives.plainQuadMesh(1, 1, 50, 50));
 		PickUtility.assignFaceAABBTrees(flatTerrain);
 		
 		rotateBox.addChangeListener(new ChangeListener() {
@@ -185,12 +185,21 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		
 		terrainPanel = new JPanel(new BorderLayout());
 		Box selections = new Box(BoxLayout.X_AXIS);
+		selections.setBorder(new EmptyBorder(0,5,0,2));
+		
 		JPanel geomPanel = new JPanel(new BorderLayout());
-		JPanel geom = terrain.getGeometrySelection();
 		TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Geometry");
 		geomPanel.setBorder(title);
-		geomPanel.add(BorderLayout.CENTER, geom);
+		JPanel geom = terrain.getGeometrySelection();
+		geomPanel.add(BorderLayout.NORTH,geom);
+		JPanel buttonPanel = new JPanel(new GridLayout(2,1));
 		final JButton terrainLoadButton = new JButton("load");
+		terrainLoadButton.setBorder(
+				new CompoundBorder(
+						new EmptyBorder(5,5,5,5),
+						terrainLoadButton.getBorder()
+						
+				));
 		terrainLoadButton.setMargin(insets);
 		terrainLoadButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -199,6 +208,12 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		});
 
 		final JButton rotateButton = new JButton("rotate");
+		rotateButton.setBorder(
+				new CompoundBorder(
+						new EmptyBorder(5,5,5,5),
+						rotateButton.getBorder()
+						
+				));
 		rotateButton.setMargin(insets);
 		rotateButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -206,33 +221,50 @@ public class TerrainPluginVR extends AbstractPluginVR {
 			}
 		});
 
-		JPanel terrainLoadPanel = new JPanel(new FlowLayout());
-		terrainLoadPanel.add(terrainLoadButton);
-		terrainLoadPanel.add(rotateButton);
+		buttonPanel.add(terrainLoadButton);
+		buttonPanel.add(rotateButton);
+		geomPanel.add(BorderLayout.CENTER, buttonPanel);
 
 		terrainLoadButton.setEnabled(terrain.getGeometryType() == Terrain.GeometryType.CUSTOM);
 		rotateButton.setEnabled(terrain.getGeometryType() == Terrain.GeometryType.CUSTOM);
-		geomPanel.add(BorderLayout.SOUTH, terrainLoadPanel);
 		
-		JPanel tex = new JPanel(new BorderLayout());
-		tex.add(BorderLayout.CENTER, terrain.getTexureSelection());
+		Box tex = new Box(BoxLayout.Y_AXIS);
 		title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Texture");
 		tex.setBorder(title);
-
-		JPanel texLoadPanel = new JPanel(new FlowLayout());
+		tex.add(terrain.getTexureSelection());
+		
+		JPanel texLoadPanel = new JPanel(new GridLayout(1,1));
 		final JButton textureLoadButton = new JButton("load");
+		textureLoadButton.setBorder(
+				new CompoundBorder(
+						new EmptyBorder(5,5,5,5),
+						textureLoadButton.getBorder()
+						
+				));
 		textureLoadButton.setMargin(insets);
 		textureLoadButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				switchToTerrainTextureBrowser();
 			}
 		});
-
 		textureLoadButton.setEnabled(terrain.isCustomTexture());
-		
 		texLoadPanel.add(textureLoadButton);
+		tex.add(texLoadPanel);
 		
-		tex.add(BorderLayout.SOUTH, texLoadPanel);
+		Box texScaleBox = new Box(BoxLayout.X_AXIS);
+		texScaleBox.setBorder(new EmptyBorder(10, 5, 5, 0));
+		JLabel texScaleLabel = new JLabel("scale");
+		terrainTexScaleSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
+		terrainTexScaleSlider.setPreferredSize(new Dimension(70,20));
+		terrainTexScaleSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				double d = .01 * terrainTexScaleSlider.getValue();
+				setTerrainTextureScale(Math.exp(Math.log(TEX_SCALE_RANGE) * d)/TEX_SCALE_RANGE * MAX_TEX_SCALE);
+			}
+		});
+		texScaleBox.add(texScaleLabel);
+		texScaleBox.add(terrainTexScaleSlider);
+		tex.add(texScaleBox);
 		
 		selections.add(geomPanel);
 		selections.add(tex);
@@ -247,21 +279,6 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		});
 
 		JPanel bottom = new JPanel(new BorderLayout());
-		
-		Box texScaleBox = new Box(BoxLayout.X_AXIS);
-		texScaleBox.setBorder(new EmptyBorder(10, 5, 5, 0));
-		JLabel texScaleLabel = new JLabel("scale");
-		terrainTexScaleSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
-		terrainTexScaleSlider.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent arg0) {
-				double d = .01 * terrainTexScaleSlider.getValue();
-				setTerrainTextureScale(Math.exp(Math.log(TEX_SCALE_RANGE) * d)/TEX_SCALE_RANGE * MAX_TEX_SCALE);
-			}
-		});
-		texScaleBox.add(texScaleLabel);
-		texScaleBox.add(terrainTexScaleSlider);
-
-		bottom.add(BorderLayout.SOUTH, texScaleBox);
 		
 		terrainPanel.add(selections);
 		terrainPanel.add(BorderLayout.SOUTH, bottom);
@@ -280,12 +297,20 @@ public class TerrainPluginVR extends AbstractPluginVR {
 				getViewerVR().switchToDefaultPanel();
 			}
 		});
+		
 		Box faceBox = new Box(BoxLayout.Y_AXIS);
-		faceBox.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
-				LineBorder.createGrayLineBorder()));
+		faceBox.setBorder(
+				new CompoundBorder(
+						new EmptyBorder(0, 5, 2, 3),
+						BorderFactory.createTitledBorder(
+								BorderFactory.createEtchedBorder(),
+								"Appearance"
+						)
+				)
+		);
 		Box faceButtonBox = new Box(BoxLayout.X_AXIS);
 		//faceButtonBox.setBorder(boxBorder);
-		facesReflecting = new JCheckBox("reflecting");
+		facesReflecting = new JCheckBox("reflect");
 		facesReflecting.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				setFacesReflecting(isFacesReflecting());
@@ -293,8 +318,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		});
 		faceButtonBox.add(facesReflecting);
 		faceReflectionSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
-		faceReflectionSlider.setPreferredSize(new Dimension(70,20));
-		faceReflectionSlider.setBorder(new EmptyBorder(0,5,0,0));
+		faceReflectionSlider.setPreferredSize(new Dimension(100,20));
 		faceReflectionSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setFaceReflection(getFaceReflection());
@@ -302,16 +326,10 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		});
 		faceButtonBox.add(faceReflectionSlider);
 		JButton faceColorButton = new JButton("color");
-		faceColorButton.setMargin(new Insets(0,5,0,5));
-		faceColorButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				switchToColorChooser();
-			}
-		});
 		faceBox.add(faceButtonBox);
 
 		Box transparencyBox = new Box(BoxLayout.X_AXIS);
-		transparencyBox.setBorder(new EmptyBorder(0,5,0,10));
+		transparencyBox.setBorder(new EmptyBorder(0,0,0,8));
 		transparency = new JCheckBox("transp");
 		transparency.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -327,6 +345,12 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		});
 		transparencyBox.add(transparency);
 		transparencyBox.add(transparencySlider);
+		faceColorButton.setMargin(new Insets(0,5,0,5));
+		faceColorButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				switchToColorChooser();
+			}
+		});
 		transparencyBox.add(faceColorButton);
 		faceBox.add(transparencyBox);
 		

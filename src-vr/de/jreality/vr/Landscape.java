@@ -33,8 +33,8 @@ public class Landscape {
 
 	private static String[][] defaultLandscapes = {
 		{"snow","textures/jms_hc/jms_hc_", sideNames, ".png",},
-		{"dusk","textures/dragonvale_hc/dragonvale_hc_", sideNames, ".jpg",},
-		{"St. Peter", "textures/stPeter/stpeters_cross_", sideNames, ".png",},
+		//{"dusk","textures/dragonvale_hc/dragonvale_hc_", sideNames, ".jpg",},
+		//{"St. Peter", "textures/stPeter/stpeters_cross_", sideNames, ".png",},
 		{"grace cross", "textures/grace_cross/grace_cross_", sideNames, ".jpg",},
 		{"desert","textures/desert/desert_", sideNames, ".jpg",},
 		{"emerald","textures/emerald/emerald_", sideNames, ".jpg",},
@@ -63,12 +63,13 @@ public class Landscape {
 	 */
 	public Landscape(String[][] skyboxes, String selected) {
 		this.skyboxes=(String[][])skyboxes.clone();
-		JPanel buttonGroupComponent = new JPanel(new GridLayout(skyboxes.length/2,2));
+		//JPanel buttonGroupComponent = new JPanel(new GridLayout(skyboxes.length/2,2));
+		JPanel buttonGroupComponent = new JPanel(new GridLayout(skyboxes.length,1));
 		buttonGroupComponent.setBorder(new EmptyBorder(5,5,5,5));
 		selectionComponent = new JPanel(new BorderLayout());
 		selectionComponent.add("Center", buttonGroupComponent);
-		selectionComponent.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
-				LineBorder.createGrayLineBorder()));
+//		selectionComponent.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
+//				LineBorder.createGrayLineBorder()));
 		group = new ButtonGroup();
 		for (int i = 0; i < skyboxes.length; i++) {
 			final String name = skyboxes[i][0];
