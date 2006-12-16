@@ -149,15 +149,13 @@ public class ReaderJVX extends AbstractReader {
     private CharData currentCharData=CharData.NONE;
 
     LinkedList<double[]> currentPoints;
-    
     LinkedList<double[]> currentNormals;
-    
     LinkedList<double[]> currentColors;
 
     LinkedList<int[]> currentEdges;
     LinkedList<int[]> currentFaces;
 
-    LinkedList<String> currentLabels; // reference to one of the following:
+    LinkedList<String> currentLabels;
     
     public SceneGraphComponent getRoot() {
         return root;
@@ -331,7 +329,11 @@ public class ReaderJVX extends AbstractReader {
     		}
     		if (!currentLabels.isEmpty()) {
     			String[] labels = currentLabels.toArray(new String[0]);
-    			vertexAttributes.addReadOnly(Attribute.LABELS, StorageModel.STRING_ARRAY, labels);
+    			boolean empty = true;
+    			for (String l : labels) {
+    				if (l != null && !"".equals(l.trim())) empty = false;
+    			}
+    			if (!empty) vertexAttributes.addReadOnly(Attribute.LABELS, StorageModel.STRING_ARRAY, labels);
     		}
     		currentPoints = currentColors = currentNormals = null;
     		currentLabels = null;
@@ -358,7 +360,11 @@ public class ReaderJVX extends AbstractReader {
     		}
     		if (!currentLabels.isEmpty()) {
     			String[] labels = currentLabels.toArray(new String[0]);
-    			edgeAttributes.addReadOnly(Attribute.LABELS, StorageModel.STRING_ARRAY, labels);
+    			boolean empty = true;
+    			for (String l : labels) {
+    				if (l != null && !"".equals(l.trim())) empty = false;
+    			}
+    			if (!empty) edgeAttributes.addReadOnly(Attribute.LABELS, StorageModel.STRING_ARRAY, labels);
     		}
     		
     		currentEdges = null;
@@ -393,7 +399,11 @@ public class ReaderJVX extends AbstractReader {
     		}
     		if (!currentLabels.isEmpty()) {
     			String[] labels = currentLabels.toArray(new String[0]);
-    			faceAttributes.addReadOnly(Attribute.LABELS, StorageModel.STRING_ARRAY, labels);
+    			boolean empty = true;
+    			for (String l : labels) {
+    				if (l != null && !"".equals(l.trim())) empty = false;
+    			}
+    			if (!empty) faceAttributes.addReadOnly(Attribute.LABELS, StorageModel.STRING_ARRAY, labels);
     		}
 
     		currentFaces = null;
