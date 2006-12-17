@@ -24,9 +24,9 @@ import de.jreality.util.Input;
 public class Terrain {
 
 	public enum GeometryType {
-		FLAT("Flat"),
-		NON_FLAT("Non-flat"),
-		CUSTOM("Custom");
+		FLAT("flat"),
+		NON_FLAT("non-flat"),
+		CUSTOM("custom");
 		private String name;
 		GeometryType(String name) {
 			this.name=name;
@@ -47,20 +47,23 @@ public class Terrain {
 	private HashMap<GeometryType, ButtonModel> geometryButtons = new HashMap<GeometryType, ButtonModel>();
 	private HashMap<String, ImageData> imageMap = new HashMap<String, ImageData>();
 	
-	private HashMap<String, JRadioButton> nameToButton = new HashMap<String, JRadioButton>();
+	private HashMap<String, JRadioButton> texNameToButton = new HashMap<String, JRadioButton>();
 	
-	private Vector<ChangeListener> listeners = new Vector<ChangeListener>();
+	private List<ChangeListener> listeners = new LinkedList<ChangeListener>();
 	private JPanel texureSelection;
 	private JPanel geometrySelection;
 
 	private boolean customTexture;
 
 	private ImageData texture;
+
+	private HashMap<String, JRadioButton> geomNameToButton=new HashMap<String, JRadioButton>();
 	
 	public Terrain() {
 		geometrySelection = new JPanel(new GridLayout(3, 1));
 		ButtonGroup terrainGeometrySelection = new ButtonGroup();
 		JRadioButton button = new JRadioButton(GeometryType.FLAT.getName());
+		geomNameToButton.put(GeometryType.FLAT.getName(), button);
 		button.getModel().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				setGeometryType(GeometryType.FLAT);
@@ -71,6 +74,7 @@ public class Terrain {
 		geometryButtons.put(GeometryType.FLAT, button.getModel());
 		
 		button = new JRadioButton(GeometryType.NON_FLAT.getName());
+		geomNameToButton.put(GeometryType.NON_FLAT.getName(), button);
 		button.getModel().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				setGeometryType(GeometryType.NON_FLAT);
@@ -81,6 +85,7 @@ public class Terrain {
 		geometryButtons.put(GeometryType.NON_FLAT, button.getModel());
 		
 		button = new JRadioButton(GeometryType.CUSTOM.getName());
+		geomNameToButton.put(GeometryType.CUSTOM.getName(), button);
 		button.getModel().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				setGeometryType(GeometryType.CUSTOM);
@@ -99,7 +104,7 @@ public class Terrain {
 			if (id == null) continue;
 			imageMap.put(tex[0], id);
 			button = new JRadioButton(tex[0]);
-			nameToButton.put(tex[0], button);
+			texNameToButton.put(tex[0], button);
 			button.getModel().addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					setTexture(id);
@@ -124,7 +129,7 @@ public class Terrain {
 		});
 		terrainTextureSelection.add(button);
 		texureSelection.add(button);
-		nameToButton.put("none", button);
+		texNameToButton.put("none", button);
 
 		button = new JRadioButton("custom");
 		button.getModel().addActionListener(new ActionListener() {
@@ -134,7 +139,7 @@ public class Terrain {
 		});
 		terrainTextureSelection.add(button);
 		texureSelection.add(button);
-		nameToButton.put("custom", button);
+		texNameToButton.put("custom", button);
 	}
 	
 	protected void setCustomTexture() {
@@ -210,19 +215,9 @@ public class Terrain {
 		return customTexture;
 	}
 
-	public void setTextureName(String name) {
-		JRadioButton b = nameToButton.get(name);
-		if (b!=null) b.getModel().setSelected(true);
-		if ("none".equals(name)) {
-			setTexture(null);
-			return;
-		}
-		if (("custom".equals(name))) {
-			setCustomTexture();
-			return;
-		}
-		ImageData id = imageMap.get(name);
-		setTexture(id);
+	public void setTextureByName(String name) {
+		JRadioButton b = texNameToButton.get(name);
+		if (b!=null) b.doClick();
 	}
 	
 	public String getTextureName() {
@@ -232,4 +227,12 @@ public class Terrain {
 		return "none";
 	}
 
+	public void setGeometryByName(String name) {
+		JRadioButton b = geomNameToButton.get(name);
+		if (b!=null) b.doClick();
+	}
+	
+	public String getGeometryName() {
+		return geometryType.getName();
+	}
 }

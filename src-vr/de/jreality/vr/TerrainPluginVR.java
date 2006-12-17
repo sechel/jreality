@@ -49,6 +49,7 @@ import de.jreality.shader.TextureUtility;
 import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
 import de.jreality.util.Secure;
+import de.jreality.vr.Terrain.GeometryType;
 import de.jtem.beans.SimpleColorChooser;
 
 public class TerrainPluginVR extends AbstractPluginVR {
@@ -62,6 +63,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	// defaults
 	private static final double DEFAULT_TEX_SCALE = 20;
 	private static final String DEFAULT_TEXTURE = "grid";
+	private static final String DEFAULT_TERRAIN = "flat";
 	private static final Color DEFAULT_FACE_COLOR=Color.white;
 	private static final boolean DEFAULT_REFLECTING=true;
 	private static final double DEFAULT_REFLECTION=0.2;
@@ -167,7 +169,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	@Override
 	public void environmentChanged() {
 		cubeMap=getViewerVR().getEnvironment();
-		updateTerrain();
+		setFacesReflecting(isFacesReflecting());
 	}
 	
 	private void makeTerrainTab() {
@@ -539,6 +541,11 @@ public class TerrainPluginVR extends AbstractPluginVR {
 			prefs.put("terrain.customTex", terrainTexFile.getAbsolutePath());
 		}
 		
+		prefs.put("terrain.geometry", terrain.getGeometryName());
+		if (terrain.getGeometryType() == GeometryType.CUSTOM && terrainFile != null) {
+			prefs.put("terrain.customTerrain", terrainFile.getAbsolutePath());
+		}
+		
 		prefs.putInt("terrain.colorRed", getFaceColor().getRed());
 		prefs.putInt("terrain.colorGreen", getFaceColor().getGreen());
 		prefs.putInt("terrain.colorBlue", getFaceColor().getBlue());
@@ -553,8 +560,12 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	@Override
 	public void restoreDefaults() {
 		setTerrainTextureScale(DEFAULT_TEX_SCALE);
-		terrain.setTextureName(DEFAULT_TEXTURE);
+		
+		terrain.setTextureByName(DEFAULT_TEXTURE);
 		terrainTexFile = null;
+		
+		terrain.setGeometryByName(DEFAULT_TERRAIN);
+		terrainFile = null;
 		
 		setFaceColor(DEFAULT_FACE_COLOR);
 		setFaceReflection(DEFAULT_REFLECTION);
@@ -567,6 +578,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	@Override
 	public void restorePreferences(Preferences prefs) {
 		setTerrainTextureScale(prefs.getDouble("terrain.texScale", DEFAULT_TEX_SCALE));
+		
 		String texName = prefs.get("terrain.texture", DEFAULT_TEXTURE);
 		if ("custom".equals(texName)) {
 			String fileName = prefs.get("terrain.customTex", null);
@@ -575,8 +587,26 @@ public class TerrainPluginVR extends AbstractPluginVR {
 				if (!terrainTexFile.exists()) terrainTexFile = null;
 			}
 		}
-		terrain.setTextureName(texName);
+		terrain.setTextureByName(texName);
 
+		String terrainName = prefs.get("terrain.geometry", DEFAULT_TERRAIN);
+		if ("custom".equals(terrainName)) {
+			String fileName = prefs.get("terrain.customTerrain", null);
+			System.out.println("terrainFile="+fileName);
+			if (fileName != null) {
+				terrainFile = new File(fileName);
+				if (!terrainFile.exists()) terrainFile = null;
+				else
+					try {
+						customTerrain = Readers.read(terrainFile);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+			}
+		}
+		terrain.setGeometryByName(terrainName);
+		
 		int r = prefs.getInt("terrain.colorRed", DEFAULT_FACE_COLOR.getRed());
 		int g = prefs.getInt("terrain.colorGreen", DEFAULT_FACE_COLOR.getGreen());
 		int b = prefs.getInt("terrain.colorBlue", DEFAULT_FACE_COLOR.getBlue());
