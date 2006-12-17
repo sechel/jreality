@@ -30,6 +30,7 @@ public class Landscape {
 	private HashMap<String,Integer> boxes=new HashMap<String,Integer>();
 
 	private static String sideNames= "rt,lf,up,dn,bk,ft";
+	private static String nvidia= "posx,negx,posy,negy,posz,negz";
 
 	private static String[][] defaultLandscapes = {
 		{"snow","textures/jms_hc/jms_hc_", sideNames, ".png",},
@@ -38,6 +39,9 @@ public class Landscape {
 		{"grace cross", "textures/grace_cross/grace_cross_", sideNames, ".jpg",},
 		{"desert","textures/desert/desert_", sideNames, ".jpg",},
 		{"emerald","textures/emerald/emerald_", sideNames, ".jpg",},
+		{"lobby","textures/nvlobby_new_cubemap/nvlobby_new_", nvidia, ".png",},
+		//{"city","textures/city_cubemap/city_", nvidia, ".png",},
+		{"arch","textures/arch_cubemap/arch_", nvidia, ".jpg",},
 	};
 
 	private final transient ArrayList<ChangeListener> listeners=new ArrayList<ChangeListener>();
