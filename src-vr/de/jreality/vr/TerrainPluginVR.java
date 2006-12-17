@@ -78,7 +78,14 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	private File terrainTexFile;
 
 	private SceneGraphComponent nonflatTerrain;
-	private SceneGraphComponent flatTerrain;
+	
+	static final SceneGraphComponent FLAT_TERRAIN;
+	static {
+		FLAT_TERRAIN = new SceneGraphComponent("flat terrain");
+		MatrixBuilder.euclidean().rotateX(Math.PI/2).assignTo(FLAT_TERRAIN);
+		FLAT_TERRAIN.setGeometry(Primitives.plainQuadMesh(1, 1, 50, 50));
+		PickUtility.assignFaceAABBTrees(FLAT_TERRAIN);
+	}
 	
 	private Terrain terrain;
 
@@ -137,10 +144,6 @@ public class TerrainPluginVR extends AbstractPluginVR {
 				GeometryUtility.calculateAndSetVertexNormals(i);		
 			}
 		});
-		flatTerrain = new SceneGraphComponent("flat terrain");
-		MatrixBuilder.euclidean().rotateX(Math.PI/2).assignTo(flatTerrain);
-		flatTerrain.setGeometry(Primitives.plainQuadMesh(1, 1, 50, 50));
-		PickUtility.assignFaceAABBTrees(flatTerrain);
 		
 		rotateBox.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -502,7 +505,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		while (terrainNode.getChildComponentCount() > 0) terrainNode.removeChild(terrainNode.getChildComponent(0));
 		switch (terrain.getGeometryType()) {
 		case FLAT:
-			terrainNode.addChild(flatTerrain);
+			terrainNode.addChild(FLAT_TERRAIN);
 			new Matrix().assignTo(terrainNode);
 			break;
 		case NON_FLAT:

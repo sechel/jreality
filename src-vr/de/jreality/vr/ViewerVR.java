@@ -306,6 +306,7 @@ public class ViewerVR {
 
 		setAvatarPosition(0, 0, 25);
 
+		setTerrain(TerrainPluginVR.FLAT_TERRAIN);
 	}
 
 	public SceneGraphComponent getTerrain() {
