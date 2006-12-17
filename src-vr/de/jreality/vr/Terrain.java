@@ -38,6 +38,7 @@ public class Terrain {
 	
 	private static String[][] defaultLandscapes = {
 		{"grid","textures/grid.jpeg"},
+		{"tiles","textures/recycfloor1_clean2.png"},
 		{"tech","textures/kf_techfloor10c.png"},
 		{"rust","textures/outfactory3.png"},
 	};
