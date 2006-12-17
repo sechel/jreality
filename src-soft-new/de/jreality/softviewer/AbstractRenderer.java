@@ -112,7 +112,7 @@ public abstract class AbstractRenderer {
               }
               
               Object o = a.getAttribute(CommonAttributes.BACKGROUND_COLORS);
-              if(o instanceof Color[] || sky != null) {
+              if(o instanceof Color[]) {
                   Color[] colors = (Color[] ) o;
                       rasterizer.setBackgroundColors(colors);
               } else
