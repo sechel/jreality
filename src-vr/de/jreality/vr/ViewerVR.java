@@ -42,7 +42,6 @@ package de.jreality.vr;
 
 import java.awt.Color;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -85,8 +84,6 @@ import de.jreality.scene.tool.Tool;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.sunflow.RenderOptions;
-import de.jreality.sunflow.Sunflow;
 import de.jreality.swing.ScenePanel;
 import de.jreality.tools.DuplicateTriplyPeriodicTool;
 import de.jreality.tools.HeadTransformationTool;
@@ -622,24 +619,24 @@ public class ViewerVR {
 		};
 		settings.add(panelPopup);
 
-		Action bakeTerrain = new AbstractAction("Bake") {
-			private static final long serialVersionUID = -4212517852052390335L;
-			{
-				putValue(SHORT_DESCRIPTION, "Bake terrain lightmap");
-				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK));
-			}
-			public void actionPerformed(ActionEvent e) {
-				RenderOptions opts = new RenderOptions();
-				opts.setThreadsLowPriority(true);
-				Sunflow.renderToTexture(
-						vapp.getViewer(),
-						new Dimension(256,256),
-						opts,
-						getTerrainAppearance()
-				);
-			}
-		};
-		settings.add(bakeTerrain);
+//		Action bakeTerrain = new AbstractAction("Bake") {
+//			private static final long serialVersionUID = -4212517852052390335L;
+//			{
+//				putValue(SHORT_DESCRIPTION, "Bake terrain lightmap");
+//				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK));
+//			}
+//			public void actionPerformed(ActionEvent e) {
+//				RenderOptions opts = new RenderOptions();
+//				opts.setThreadsLowPriority(true);
+//				Sunflow.renderToTexture(
+//						vapp.getViewer(),
+//						new Dimension(256,256),
+//						opts,
+//						getTerrainAppearance()
+//				);
+//			}
+//		};
+//		settings.add(bakeTerrain);
 
 		settings.add(panelInSceneCheckBox);
 
