@@ -184,7 +184,7 @@ public class ViewerVR {
 	private List<PluginVR> plugins=new ArrayList<PluginVR>();
 
 	@SuppressWarnings("serial")
-	public ViewerVR() throws IOException {
+	public ViewerVR() {
 
 		// find out where we are running
 		boolean portal = "portal".equals(Secure.getProperty("de.jreality.scene.tool.Config"));
@@ -875,7 +875,7 @@ public class ViewerVR {
 	public void addHelpTab() {
 	}
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 		ViewerVR vr = new ViewerVR();
 		final String[][] examples = new String[][] {
 				{ "Boy surface", "jrs/boy.jrs" },
