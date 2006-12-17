@@ -16,9 +16,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -39,9 +37,10 @@ public class Landscape {
 		{"grace cross", "textures/grace_cross/grace_cross_", sideNames, ".jpg",},
 		{"desert","textures/desert/desert_", sideNames, ".jpg",},
 		{"emerald","textures/emerald/emerald_", sideNames, ".jpg",},
-		{"lobby","textures/nvlobby_new_cubemap/nvlobby_new_", nvidia, ".png",},
+//		{"lobby","textures/nvlobby_new_cubemap/nvlobby_new_", nvidia, ".png",},
 		//{"city","textures/city_cubemap/city_", nvidia, ".png",},
-		{"arch","textures/arch_cubemap/arch_", nvidia, ".jpg",},
+//		{"arch","textures/arch_cubemap/arch_", nvidia, ".jpg",},
+		{"custom", null}
 	};
 
 	private final transient ArrayList<ChangeListener> listeners=new ArrayList<ChangeListener>();
@@ -166,8 +165,13 @@ public class Landscape {
 	
 	public void setEvironment(String environment) {
 		ButtonModel model = envToButton.get(environment);
-			group.setSelected(model, true);
-			load(environment);
-			fireChange();
+		group.setSelected(model, true);
+		load(environment);
+		fireChange();
 	}
+	
+	public boolean isCustomEnvironment() {
+		return "custom".equals(getEnvironment());
+	}
+
 }

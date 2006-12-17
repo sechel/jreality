@@ -2,10 +2,13 @@ package de.jreality.vr;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
@@ -13,16 +16,19 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileSystemView;
 
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.TextureUtility;
+import de.jreality.util.Input;
+import de.jreality.util.Secure;
 import de.jtem.beans.SimpleColorChooser;
 
 public class EnvironmentPluginVR extends AbstractPluginVR {
@@ -32,12 +38,18 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 	private static final boolean DEFAULT_SKYBOX_HIDDEN = false;
 	private static final Color DEFAULT_BACKGROUND_COLOR = Color.white;
 
+	private File customCubeMapFile;
+	private ImageData[] customCubeMap;
+	
 	// env tab
 	private JPanel envPanel;
 	private JCheckBox skyBoxHidden;
 	private SimpleColorChooser backgroundColorChooser;
 	private JButton backgroundColorButton;
+	private JButton envLoadButton;
 
+	private JFileChooser cubeMapFileChooser;
+	
 	private Landscape landscape;
 	
 	private ActionListener closeListener = new ActionListener() {
@@ -50,8 +62,40 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 		super("env");
 		landscape = new Landscape();
 		makeEnvTab();
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+			public Object run() {
+				makeCubeMapFileChooser();
+				return null;
+			}
+		});
 	}
 	
+	private void makeCubeMapFileChooser() {
+		FileSystemView view = FileSystemView.getFileSystemView();
+		String texDir = ".";
+		String dataDir = Secure.getProperty("jreality.data");
+		if (dataDir!= null) texDir = dataDir;
+		File defaultDir = new File(texDir);
+		cubeMapFileChooser = new JFileChooser(!defaultDir.exists() ? view.getHomeDirectory() : defaultDir, view);
+		cubeMapFileChooser.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ev) {
+				File file = cubeMapFileChooser.getSelectedFile();
+				try {
+					if (ev.getActionCommand() == JFileChooser.APPROVE_SELECTION
+							&& file != null) {
+						customCubeMapFile = file;
+						customCubeMap = TextureUtility.createCubeMapData(Input.getInput(customCubeMapFile));
+						getViewerVR().setEnvironment(customCubeMap);
+						updateEnv();
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				getViewerVR().switchToDefaultPanel();
+			}
+		});
+	}
+
 	@Override
 	public void setViewerVR(ViewerVR vvr) {
 		super.setViewerVR(vvr);
@@ -69,7 +113,10 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 
 		landscape.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
-				getViewerVR().setEnvironment(landscape.getCubeMap());
+				getViewerVR().setEnvironment(
+						landscape.isCustomEnvironment() ? customCubeMap : landscape.getCubeMap()
+						);
+				envLoadButton.setEnabled(landscape.isCustomEnvironment());
 				updateEnv();
 			}
 		});	
@@ -89,6 +136,15 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 				)
 		);
 		selectionPanel.add(landscape.getSelectionComponent(), BorderLayout.CENTER);
+		
+		envLoadButton = new JButton("load");
+		selectionPanel.add(BorderLayout.SOUTH, envLoadButton);
+		envLoadButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				switchToEnvLoadPanel();
+			}
+		});
+		
 		envPanel.add(selectionPanel, BorderLayout.CENTER);
 		
 		Box envControlBox = new Box(BoxLayout.X_AXIS);
@@ -122,6 +178,10 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 		colorBox.add(backgroundColorButton);
 		envControlBox.add(colorBox);
 		envPanel.add(envControlBox, BorderLayout.SOUTH);
+	}
+
+	protected void switchToEnvLoadPanel() {
+		getViewerVR().switchToFileChooser(cubeMapFileChooser);
 	}
 
 	@Override
@@ -166,11 +226,18 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 
 	public void setEnvironment(String environment) {
 		landscape.setEvironment(environment);
+		envLoadButton.setEnabled(landscape.isCustomEnvironment());
 	}
 	
 	@Override
 	public void storePreferences(Preferences prefs) {
 		prefs.put("environment", getEnvironment());
+		System.out.println("storing env: "+getEnvironment());
+		if ("custom".equals(getEnvironment())) {
+			if (customCubeMapFile != null) {
+				prefs.put("environmentFile", customCubeMapFile.getAbsolutePath());
+			}
+		}		
 		prefs.putBoolean("skyBoxHidden", isSkyBoxHidden());
 		Color c = getBackgroundColor();
 		prefs.putInt("backgroundColorRed", c.getRed());
@@ -180,6 +247,8 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 	
 	@Override
 	public void restoreDefaults() {
+		customCubeMapFile = null;
+		customCubeMap = null;
 		setEnvironment(DEFAULT_ENVIRONMENT);
 		setSkyBoxHidden(DEFAULT_SKYBOX_HIDDEN);
 		setBackgroundColor(DEFAULT_BACKGROUND_COLOR);
@@ -187,6 +256,18 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 	
 	@Override
 	public void restorePreferences(Preferences prefs) {
+		String customFile = prefs.get("environmentFile", null);
+		if (customFile != null) {
+			File f = new File(customFile);
+			if (f.exists()) customCubeMapFile = f;
+			try {
+				customCubeMap = TextureUtility.createCubeMapData(Input.getInput(f));
+			} catch (IOException e) {
+				e.printStackTrace();
+				customCubeMapFile = null;
+			}
+		}
+
 		setEnvironment(prefs.get("environment", DEFAULT_ENVIRONMENT));
 		setSkyBoxHidden(prefs.getBoolean("skyBoxHidden", DEFAULT_SKYBOX_HIDDEN));
 		int r = prefs.getInt("backgroundColorRed", DEFAULT_BACKGROUND_COLOR.getRed());
@@ -194,4 +275,5 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 		int b = prefs.getInt("backgroundColorBlue", DEFAULT_BACKGROUND_COLOR.getBlue());
 		setBackgroundColor(new Color(r,g,b));
 	}
+	
 }

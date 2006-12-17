@@ -42,6 +42,8 @@ package de.jreality.shader;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -321,8 +323,29 @@ public class TextureUtility {
    }
     return imgs;
   }
+  
+  public static ImageData[] createCubeMapData(Input zipFile) throws IOException {
+	  ZipInputStream zis = new ZipInputStream(zipFile.getInputStream());
+	  ImageData[] id = new ImageData[6];
+	  for (ZipEntry ze = zis.getNextEntry(); ze != null; ze = zis.getNextEntry()) {
+		  if (ze.isDirectory()) continue;
+		  int index = findIndex(ze.getName());
+		  if (index != -1) id[index]=ImageData.load(Input.getInput("zip entry", zis));
+	  }
+	  return id;
+  }
 
-  // TODO: colors seem to have no effect!
+  private static int findIndex(String name) {
+		if (name.contains("posx")) return 0;
+		if (name.contains("negx")) return 1;
+		if (name.contains("posy")) return 2;
+		if (name.contains("negy")) return 3;
+		if (name.contains("posz")) return 4;
+		if (name.contains("negz")) return 5;
+		return -1;
+}
+
+// TODO: colors seem to have no effect!
   public static ImageData createPointSprite(int textureSize, double[] lightDirection, Color diffuseColor, Color specularColor, double specularExponent) {
       if (lightDirection == null) lightDirection = new double[]{1,-1,2};
     double[][] sphereVertices = new double[textureSize * textureSize][3];
@@ -402,5 +425,7 @@ public class TextureUtility {
 		}		
 	}
   
-  
+	public static void main(String[] args) throws IOException {
+		createCubeMapData(Input.getInput("/home/weissman/Desktop/test_cubemap.zip"));
+	}
 }

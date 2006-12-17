@@ -106,7 +106,7 @@ public class ImageData implements Serializable {
         return Toolkit.getDefaultToolkit().getImage(in.toURL());
     LoggingSystem.getLogger(ImageData.class).log(Level.INFO,
         "loading " + in + " trying ImageIO");
-    Image img = ImageIO.read(in.toURL());
+    Image img = ImageIO.read(in.getInputStream());
     if (img == null)
       throw new IOException("read failed: " + in);
     else
