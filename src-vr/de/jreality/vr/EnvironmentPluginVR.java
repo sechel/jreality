@@ -22,6 +22,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileSystemView;
 
 import de.jreality.shader.CommonAttributes;
@@ -72,11 +73,22 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 	
 	private void makeCubeMapFileChooser() {
 		FileSystemView view = FileSystemView.getFileSystemView();
+		FileFilter ff = new FileFilter() {
+			@Override
+			public boolean accept(File f) {
+				return f.isDirectory() || f.getName().toLowerCase().endsWith(".zip");
+			}
+			@Override
+			public String getDescription() {
+				return "ZIP archives";
+			}
+		};
 		String texDir = ".";
 		String dataDir = Secure.getProperty("jreality.data");
 		if (dataDir!= null) texDir = dataDir;
 		File defaultDir = new File(texDir);
 		cubeMapFileChooser = new JFileChooser(!defaultDir.exists() ? view.getHomeDirectory() : defaultDir, view);
+		cubeMapFileChooser.setFileFilter(ff);
 		cubeMapFileChooser.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ev) {
 				File file = cubeMapFileChooser.getSelectedFile();
