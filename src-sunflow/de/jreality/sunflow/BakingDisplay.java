@@ -11,6 +11,7 @@ import org.sunflow.system.ui.ConsoleInterface;
 
 import de.jreality.scene.Appearance;
 import de.jreality.shader.ImageData;
+import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 
 public class BakingDisplay implements Display, UserInterface {
@@ -23,7 +24,7 @@ public class BakingDisplay implements Display, UserInterface {
     private int max;
     private float invP;
     private int lastP;
-    private int frameCount = 100;
+    private int frameCount = 10;
 
     public BakingDisplay(Appearance app) {
 		this.app = app;
@@ -57,9 +58,10 @@ public class BakingDisplay implements Display, UserInterface {
 	}
 
 	private void updateTexture() {
-		System.out.println("BakingDisplay.updateTexture()");
+		image.setRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
 		ImageData img = new ImageData(image);
-		TextureUtility.createTexture(app, "polygonShader", img, false);
+		Texture2D tex = TextureUtility.createTexture(app, "polygonShader", img, false);
+		tex.setTextureMatrix(null);
 	}
 	
     public synchronized void imageBegin(int w, int h, int bucketSize) {
@@ -70,8 +72,6 @@ public class BakingDisplay implements Display, UserInterface {
             pixels = new int[w * h];
             image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         }
-System.out.println("BakingDisplay.imageBegin()");
-
     }
 
     public void imagePrepare(int x, int y, int w, int h, int id) {
@@ -97,8 +97,6 @@ System.out.println("BakingDisplay.imageBegin()");
     }
 
     public synchronized void imageEnd() {
-        image.setRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
-        updateTexture();
     }
 
 	public int getFrameCount() {

@@ -626,10 +626,17 @@ public class ViewerVR {
 			private static final long serialVersionUID = -4212517852052390335L;
 			{
 				putValue(SHORT_DESCRIPTION, "Bake terrain lightmap");
-				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK));
 			}
 			public void actionPerformed(ActionEvent e) {
-				Sunflow.renderToTexture(vapp.getViewer(), new Dimension(512,512), new RenderOptions(), getTerrainAppearance());
+				RenderOptions opts = new RenderOptions();
+				opts.setThreadsLowPriority(true);
+				Sunflow.renderToTexture(
+						vapp.getViewer(),
+						new Dimension(256,256),
+						opts,
+						getTerrainAppearance()
+				);
 			}
 		};
 		settings.add(bakeTerrain);

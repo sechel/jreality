@@ -370,7 +370,7 @@ public class SunflowRenderer extends SunflowAPI {
 				parameter("up", new Vector3(0, -1, 0));
 				skyBox.init("skyBox", this);
 			} else {
-				Color backColor = (Color) rootApp.getAttribute(CommonAttributes.BACKGROUND_COLOR);
+				java.awt.Color backColor = (java.awt.Color) rootApp.getAttribute(CommonAttributes.BACKGROUND_COLOR);
 				if (backColor != null) {
 			        parameter("color", backColor);
 			        shader("background.shader", new ConstantShader());
@@ -426,6 +426,7 @@ public class SunflowRenderer extends SunflowAPI {
 		}
 		parameter("resolutionX", width);
         parameter("resolutionY", height);
+        parameter("threads.lowPriority", options.isThreadsLowPriority());
         parameter("aa.min", options.getAaMin());
         parameter("aa.max", options.getAaMax());
         parameter("depths.diffuse", options.getDepthsDiffuse());

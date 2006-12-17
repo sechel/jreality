@@ -6,6 +6,7 @@ public class RenderOptions {
 	private String bakingInstance = "";
 	private boolean progessiveRender = true;
 	private boolean useOriginalLights = false;
+	private boolean threadsLowPriority = false;
 	private double ambientOcclusionBright = .2f;
 	private int aaMin = -2;
 	private int aaMax = 0;
@@ -115,5 +116,13 @@ public class RenderOptions {
 
 	public void setBakingInstance(String bakingInstance) {
 		this.bakingInstance = bakingInstance;
+	}
+
+	public boolean isThreadsLowPriority() {
+		return threadsLowPriority;
+	}
+
+	public void setThreadsLowPriority(boolean threadsLowPriority) {
+		this.threadsLowPriority = threadsLowPriority;
 	}
 }
