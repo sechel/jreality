@@ -3,12 +3,13 @@ package de.jreality.sunflow;
 import java.util.prefs.Preferences;
 
 public class RenderOptions {
+	private String bakingInstance = "";
 	private boolean progessiveRender = true;
 	private boolean useOriginalLights = false;
 	private double ambientOcclusionBright = .2f;
 	private int aaMin = -2;
 	private int aaMax = 0;
-	private int ambientOcclusionSamples = 120;
+	private int ambientOcclusionSamples = 16;
 	private int depthsDiffuse = 1;
 	private int depthsReflection = 0;
 	private int depthsRefraction = 4;
@@ -106,5 +107,13 @@ public class RenderOptions {
 		setDepthsRefraction(prefs.getInt(prefix+"depthsRefraction", defaults.getDepthsRefraction()));
 		setAmbientOcclusionSamples(prefs.getInt(prefix+"ambientOcclusionSamples", defaults.getAmbientOcclusionSamples()));
 		setAmbientOcclusionBright(prefs.getDouble(prefix+"ambientOcclusionBright", defaults.getAmbientOcclusionBright()));
+	}
+
+	public String getBakingInstance() {
+		return bakingInstance;
+	}
+
+	public void setBakingInstance(String bakingInstance) {
+		this.bakingInstance = bakingInstance;
 	}
 }

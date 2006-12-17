@@ -48,20 +48,29 @@ public class RenderDisplay implements Display {
 			imagePanel.imageBegin(w, h, bucketSize);
 			Dimension screenRes = Toolkit.getDefaultToolkit().getScreenSize();
 			boolean needFit = false;
-			if (w >= (screenRes.getWidth() - 200) || h >= (screenRes.getHeight() - 200)) {
-				imagePanel.setPreferredSize(new Dimension((int) screenRes.getWidth() - 200, (int) screenRes.getHeight() - 200));
+			double width = w;
+			double height = h;
+			if (w >= (screenRes.getWidth() - 200)) {
+				width = screenRes.getWidth() - 200;
+				height *= width/w;
 				needFit = true;
-			} else
-				imagePanel.setPreferredSize(new Dimension(w, h));
+			}
+			if (height >= (screenRes.getHeight() - 200)) {
+				double newHeight = screenRes.getHeight() - 200;
+				width *= newHeight/height;
+				height = newHeight;
+				needFit = true;
+			}
+			imagePanel.setPreferredSize(new Dimension((int) width, (int) height));
+				
 			System.out.println("dimension "+w+", "+h);
 			frame.setContentPane(imagePanel);
 			frame.pack();
 			frame.setLocationRelativeTo(null);
 			frame.setVisible(true);
-			if (needFit)
-				imagePanel.fit();
-		} else
+			if (needFit) imagePanel.fit();
 			imagePanel.imageBegin(w, h, bucketSize);
+		}
 	}
 
 	public void imagePrepare(int x, int y, int w, int h, int id) {

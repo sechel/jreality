@@ -60,6 +60,10 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.plaf.basic.BasicFileChooserUI;
 
+import org.sunflow.system.UI;
+import org.sunflow.system.ui.ConsoleInterface;
+
+import de.jreality.scene.Appearance;
 import de.jreality.scene.Viewer;
 
 
@@ -70,6 +74,30 @@ public class Sunflow {
 
 	private Sunflow() {}
 
+	public static void renderToTexture(
+			final Viewer v,
+			final Dimension dim,
+			RenderOptions options,
+			final Appearance app
+	) {
+		new Thread(new Runnable() {
+			public void run() {
+				BakingDisplay baker = new BakingDisplay(app);
+				UI.set(baker);
+				SunflowRenderer renderer = new SunflowRenderer();
+				renderer.render(
+						v.getSceneRoot(),
+						v.getCameraPath(),
+						baker,
+						dim.width,
+						dim.height
+				);
+				UI.set(new ConsoleInterface());
+			}
+		}).start();
+		
+	}
+	
 	public static void renderAndSave(final Viewer v, RenderOptions options, final Dimension dim, File file) {
 		final RenderDisplay renderDisplay = new RenderDisplay(file.getAbsolutePath());
 
@@ -86,13 +114,15 @@ public class Sunflow {
 			}
 		}).start();
 	}
-
+	
 	public static void render(Viewer v, Dimension dim, RenderOptions options) {
 		final SunflowViewer viewer = new SunflowViewer();
 		viewer.setWidth(dim.width);
 		viewer.setHeight(dim.height);
 		viewer.setSceneRoot(v.getSceneRoot());
 		viewer.setCameraPath(v.getCameraPath());
+		viewer.setOptions(options);
+		
 		final JFrame frame = new JFrame("Sunflow");
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
@@ -110,7 +140,6 @@ public class Sunflow {
 		});
 		bar.add(fileMenu);
 		frame.setJMenuBar(bar);
-		viewer.setOptions(options);
 		frame.setContentPane((Container) viewer.getViewingComponent());
 		frame.pack();
 		frame.setVisible(true);

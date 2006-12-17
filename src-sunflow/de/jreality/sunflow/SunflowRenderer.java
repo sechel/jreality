@@ -53,7 +53,9 @@ import org.sunflow.SunflowAPI;
 import org.sunflow.core.Display;
 import org.sunflow.core.camera.PinholeLens;
 import org.sunflow.core.gi.AmbientOcclusionGIEngine;
+import org.sunflow.core.primitive.Background;
 import org.sunflow.core.primitive.Mesh;
+import org.sunflow.core.shader.ConstantShader;
 import org.sunflow.image.Color;
 import org.sunflow.math.Matrix4;
 import org.sunflow.math.Point3;
@@ -90,7 +92,6 @@ import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.shader.Texture2D;
 import de.jreality.sunflow.core.light.DirectionalLight;
 import de.jreality.sunflow.core.light.GlPointLight;
 import de.jreality.sunflow.core.primitive.SkyBox;
@@ -146,9 +147,8 @@ public class SunflowRenderer extends SunflowAPI {
 					// sunflow calculates the face normal from the triangle points...
 				}
 				DataList tex = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
-				Texture2D tex2d = dps.getTexture2d();
 				float[] texCoords = null;
-				if (tex != null && tex2d != null) {
+				if (tex != null) {
 					Matrix texMat = null;
 					// this is needed for sunflow build-in shaders:
 					//MatrixBuilder.euclidean().scale(1,-1,1).getMatrix();
@@ -357,18 +357,6 @@ public class SunflowRenderer extends SunflowAPI {
 	}
 
 	public void render(SceneGraphComponent sceneRoot, SceneGraphPath cameraPath, Display display, int width, int height) {
-		
-		// light
-//		parameter("texture", "sky_small.hdr");
-//		parameter("center", new Vector3(1, 0, -1));
-//		parameter("up", new Vector3(0, 1, 0));
-//		parameter("samples", 200);
-//		ImageBasedLight light = new ImageBasedLight();
-//		light.init("skylight", this);
-		
-//		parameter("dir",new Vector3(0,1,1));
-//		DirectionalLight sun = new DirectionalLight();
-//		light("sun", sun);
 
 		Appearance rootApp = sceneRoot.getAppearance();
 		if(rootApp != null) {
@@ -381,6 +369,15 @@ public class SunflowRenderer extends SunflowAPI {
 				parameter("center", new Vector3(1, 0, 0));
 				parameter("up", new Vector3(0, -1, 0));
 				skyBox.init("skyBox", this);
+			} else {
+				Color backColor = (Color) rootApp.getAttribute(CommonAttributes.BACKGROUND_COLOR);
+				if (backColor != null) {
+			        parameter("color", backColor);
+			        shader("background.shader", new ConstantShader());
+			        geometry("background", new Background());
+			        parameter("shaders", "background.shader");
+			        instance("background.instance", "background");
+				}
 			}
 		}
 
@@ -409,10 +406,10 @@ public class SunflowRenderer extends SunflowAPI {
 		Matrix m = new Matrix(cameraPath.getMatrix(null));
 		parameter("transform",m);
 		double fov = c.getFieldOfView();
-		System.out.println("cam fov="+fov);
+		//System.out.println("cam fov="+fov);
 		if (width>height) {
 			fov = Math.atan(((double)width)/((double)height)*Math.tan(fov/360*Math.PI))/Math.PI*360;
-			System.out.println("adjusted fov="+fov);
+			//System.out.println("adjusted fov="+fov);
 		}
 		parameter("fov", fov);
 		String name = getUniqueName("camera");
@@ -421,6 +418,12 @@ public class SunflowRenderer extends SunflowAPI {
 		
 		// sunflow rendering
 		parameter("sampler", options.isProgessiveRender() ? "ipr" : "bucket");
+		String bakingInstance = options.getBakingInstance();
+		//System.out.println("got bakingInstance "+bakingInstance);
+		if (!bakingInstance.equals("")) {
+			//System.out.println("setting baking.instance to "+bakingInstance);
+			parameter("baking.instance", bakingInstance);
+		}
 		parameter("resolutionX", width);
         parameter("resolutionY", height);
         parameter("aa.min", options.getAaMin());
@@ -431,6 +434,7 @@ public class SunflowRenderer extends SunflowAPI {
         float ambient = (float)options.getAmbientOcclusionBright();
         int ambientOcclusionSamples = options.getAmbientOcclusionSamples();
         if (!options.isUseOriginalLights() && ambient >0) giEngine(new AmbientOcclusionGIEngine(new Color(ambient, ambient, ambient), Color.BLACK, ambientOcclusionSamples, 100));
+        //if (!options.isUseOriginalLights() && ambient >0) giEngine(new PathTracingGIEngine(100));
         //giEngine(new FakeGIEngine(new Vector3(0,1,0), Color.WHITE, Color.BLACK));
         //giEngine(new InstantGI(128, 1, .01f, 0));
         //giEngine(new PathTracingGIEngine(200));

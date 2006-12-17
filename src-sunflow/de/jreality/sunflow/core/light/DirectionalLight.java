@@ -32,7 +32,7 @@ public class DirectionalLight implements LightSource {
 		samples = pl.getInt("samples", 8);
 		float radius = pl.getFloat("radius", (float)(.542*Math.PI/180));
 		distortion = 1-Math.cos(radius);
-		System.out.println("distortion "+distortion);
+		//System.out.println("distortion "+distortion);
 		dir.normalize();
 		onb = OrthoNormalBasis.makeFromW(dir);
 		power = pl.getColor("power", power);
