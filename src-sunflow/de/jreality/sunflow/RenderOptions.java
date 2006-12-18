@@ -12,8 +12,8 @@ public class RenderOptions {
 	private int aaMax = 0;
 	private int ambientOcclusionSamples = 16;
 	private int depthsDiffuse = 1;
-	private int depthsReflection = 0;
-	private int depthsRefraction = 4;
+	private int depthsReflection = 2;
+	private int depthsRefraction = 2;
 	
 	public int getAaMax() {
 		return aaMax;
