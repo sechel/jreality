@@ -56,12 +56,6 @@ import de.jreality.scene.Appearance;
  *
  */public class CommonAttributes {
     
-	
-
-
-  
-
-
   private CommonAttributes() {}
 
 	// goes in root appearance: first set controls how the background of generated image appears
@@ -186,22 +180,23 @@ import de.jreality.scene.Appearance;
 	public static final String SIGNATURE= "signature";
 	
 	// RenderMan backend attributes
+	public final static String RMAN_ATTRIBUTE = "rendermanAttribute";
 	public final static String RMAN_SHADOWS_ENABLED = "rendermanShadowsEnabled";
-  public static final String RMAN_RAY_TRACING_REFLECTIONS = "rendermanRayTracingReflectionsEnabled";
-  public static final String RMAN_RAY_TRACING_VOLUMES="rendermanRayTracingVolumesEnabled";
+    public static final String RMAN_RAY_TRACING_REFLECTIONS = "rendermanRayTracingReflectionsEnabled";
+    public static final String RMAN_RAY_TRACING_VOLUMES="rendermanRayTracingVolumesEnabled";
   
-  public final static String RMAN_SURFACE_SHADER = "rendermanSurfaceShader";
-  public static final String RMAN_SL_SHADER = "rendermanSLShader";	
+    public final static String RMAN_SURFACE_SHADER = "rendermanSurfaceShader";
+    public static final String RMAN_SL_SHADER = "rendermanSLShader";	
 	public final static String RMAN_DISPLACEMENT_SHADER = "rendermanDisplacementShader";
-  public final static String RMAN_IMAGER_SHADER = "rendermanImagerShader";
-  public static final String RMAN_VOLUME_EXTERIOR_SHADER = "rendermanVolumeExteriorShader"; 
-  public static final String RMAN_VOLUME_INTERIOR_SHADER = "rendermanVolumeInteriorShader"; 
-  public static final String RMAN_VOLUME_ATMOSPHERE_SHADER = "rendermanVolumeAtmosphereShader"; 
-  public final static String RMAN_LIGHT_SHADER = "rendermanLightShader";
-  public final static String RMAN_SEARCHPATH_SHADER = "rendermanSearchpathShader";
+    public final static String RMAN_IMAGER_SHADER = "rendermanImagerShader";
+    public static final String RMAN_VOLUME_EXTERIOR_SHADER = "rendermanVolumeExteriorShader"; 
+    public static final String RMAN_VOLUME_INTERIOR_SHADER = "rendermanVolumeInteriorShader"; 
+    public static final String RMAN_VOLUME_ATMOSPHERE_SHADER = "rendermanVolumeAtmosphereShader"; 
+    public final static String RMAN_LIGHT_SHADER = "rendermanLightShader";
+    public final static String RMAN_SEARCHPATH_SHADER = "rendermanSearchpathShader";
   
 	public final static String RMAN_TEXTURE_FILE = "rendermanTexFile";
-  public static final String RMAN_TEXTURE_FILE_SUFFIX = "rendermanTextureFileSuffix";
+    public static final String RMAN_TEXTURE_FILE_SUFFIX = "rendermanTextureFileSuffix";
 	public static final String RMAN_REFLECTIONMAP_FILE = "rendermanReflectionmapFile";
 	public final static String RMAN_GLOBAL_INCLUDE_FILE = "rendermanGlobalIncludeFile";	
 	public static final String RMAN_OUTPUT_DISPLAY_FORMAT = "rendermanOutputDisplayFormat";
@@ -210,7 +205,6 @@ import de.jreality.scene.Appearance;
 	public static final String RMAN_MAX_EYE_SPLITS  = "rendermanMaxEyeSplits";
 
   
-   
 	/* 
      * @deprecated
      */
