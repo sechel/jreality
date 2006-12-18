@@ -1476,5 +1476,14 @@ final public class Rn {
 	}
 
 
+	public static double[] bilinearInterpolation(double[] ds, double u, double v, double[] vb, double[] vt, double[] cb, double[] ct) {
+		if (ds == null) ds = new double[vb.length];
+		double[] vv = linearCombination(null, 1-u, vb, u, vt);
+		double[] cc = linearCombination(null, 1-u, cb, u, ct);
+		linearCombination(ds, 1-v, vv, v, cc);
+		return ds;
+	}
+
+
 }
 
