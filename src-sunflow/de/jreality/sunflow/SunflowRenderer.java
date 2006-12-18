@@ -370,14 +370,16 @@ public class SunflowRenderer extends SunflowAPI {
 				parameter("up", new Vector3(0, -1, 0));
 				skyBox.init("skyBox", this);
 			} else {
-				java.awt.Color backColor = (java.awt.Color) rootApp.getAttribute(CommonAttributes.BACKGROUND_COLOR);
-				if (backColor != null) {
-			        parameter("color", backColor);
-			        shader("background.shader", new ConstantShader());
-			        geometry("background", new Background());
-			        parameter("shaders", "background.shader");
-			        instance("background.instance", "background");
-				}
+        try{  
+          java.awt.Color backColor = (java.awt.Color) rootApp.getAttribute(CommonAttributes.BACKGROUND_COLOR);
+          if (backColor != null) {
+            parameter("color", backColor);
+            shader("background.shader", new ConstantShader());
+            geometry("background", new Background());
+            parameter("shaders", "background.shader");
+            instance("background.instance", "background");
+          }
+        }catch(ClassCastException e){System.err.println("\nonly uniform background colors supported yet");}
 			}
 		}
 
