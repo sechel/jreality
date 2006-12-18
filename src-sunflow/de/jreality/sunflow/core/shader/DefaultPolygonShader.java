@@ -39,7 +39,8 @@ public class DefaultPolygonShader implements Shader {
         double[] diff = getDiffuse(state);
         
         if (diff[3] == 0) {
-        	return state.traceTransparency();
+        	return state.traceRefraction(new Ray(state.getPoint(), state.getRay().getDirection()), 0); 
+        	//return state.traceTransparency();
         }
         
         Color d = new Color((float)diff[0], (float)diff[1], (float)diff[2]).toLinear();
@@ -74,16 +75,20 @@ public class DefaultPolygonShader implements Shader {
 //            ret.add(r);
 
             
-        	Color ref = state.traceRefraction(refRay, 0);
+        	Color ref = state.traceReflection(refRay, 0);
         	float l = cm.getBlendColor().getAlpha()/255f;
         	ret.mul(1-l).madd(l, ref);
+        	
+            
+            if (diff[3] != 1) {
+            	float t=(float) diff[3];
+            	Color refl = state.traceRefraction(new Ray(state.getPoint(), state.getRay().getDirection()), 0); 
+            	//Color refl = state.traceTransparency();
+            	ret.mul(t).madd(1-t, refl);
+            }
         }
         
-        if (diff[3] != 1) {
-        	float t=(float) diff[3];
-        	Color refl = state.traceTransparency();
-        	ret.mul(t).madd(1-t, refl);
-        }
+
                 
         return ret;
 	}

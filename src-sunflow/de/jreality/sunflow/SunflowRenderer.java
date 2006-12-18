@@ -432,6 +432,7 @@ public class SunflowRenderer extends SunflowAPI {
         parameter("depths.diffuse", options.getDepthsDiffuse());
         parameter("depths.reflection", options.getDepthsReflection());
         parameter("depths.refraction", options.getDepthsRefraction());
+        parameter("accel", "bih"); 
         float ambient = (float)options.getAmbientOcclusionBright();
         int ambientOcclusionSamples = options.getAmbientOcclusionSamples();
         if (!options.isUseOriginalLights() && ambient >0) giEngine(new AmbientOcclusionGIEngine(new Color(ambient, ambient, ambient), Color.BLACK, ambientOcclusionSamples, 100));
