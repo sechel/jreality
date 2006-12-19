@@ -295,7 +295,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 			glslShader.postRender(jrs);
 		if (!inheritTexture2d) {
 			for (int i = GL.GL_TEXTURE0; i < texUnit; ++i) {
-				gl.glActiveTexture(i);
+				gl.glActiveTexture(GL.GL_TEXTURE0+i);
 				gl.glDisable(GL.GL_TEXTURE_2D);
 			      //System.err.println("deactivating texture");
 			      			}
