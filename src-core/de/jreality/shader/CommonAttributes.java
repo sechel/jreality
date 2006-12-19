@@ -89,13 +89,13 @@ import de.jreality.scene.Appearance;
 	// these hints are heavily OpenGL specific
 	public final static String DEPTH_FUDGE_FACTOR = 		"depthFudgeFactor";
 	public final static String IGNORE_ALPHA0	=			"ignoreAlpha0";	// reject pixel writes for pixels with alpha == 0
-	public final static boolean IGNORE_ALPHA0_DEFAULT = true;
 	public final static String BACK_FACE_CULLING_ENABLED = 		"backFaceCulling";
 	public final static String FORCE_RESIDENT_TEXTURES = "forceResidentTextures";
 	public final static String MANY_DISPLAY_LISTS = "manyDisplayLists";		// if true, one display list per scene graph path
 	public final static String ANY_DISPLAY_LISTS = "anyDisplayLists";		// if true, use Display lists.
 	public static final String CLEAR_COLOR_BUFFER = "clearColorBuffer";
-   // default geometry shader
+	public final static String LOCAL_LIGHT_MODEL = "localLightModel";
+	// default geometry shader
 	public final static String FACE_DRAW = 		"showFaces";
 	public final static boolean FACE_DRAW_DEFAULT = true;
 	public final static String EDGE_DRAW = 		"showLines";

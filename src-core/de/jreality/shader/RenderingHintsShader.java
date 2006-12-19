@@ -57,8 +57,9 @@ public interface RenderingHintsShader extends AttributeEntity {
 	  final static boolean BACK_FACE_CULLING_DEFAULT = false;	
 	  final static boolean CLEAR_COLOR_BUFFER = true;
 	  final static boolean OPAQUE_TUBES_AND_SPHERES = false;
-	final static double LEVEL_OF_DETAIL_DEFAULT = 			1.0;
-	final static double DEPTH_FUDGE_FACTOR_DEFAULT = 1.0;
+	  final static double LEVEL_OF_DETAIL_DEFAULT = 			1.0;
+	  final static double DEPTH_FUDGE_FACTOR_DEFAULT = 1.0;
+	  final static boolean LOCAL_LIGHT_MODEL_DEFAULT = false;		
 
 	  Boolean getLightingEnabled();
 	  void setLightingEnabled(Boolean b);
@@ -74,6 +75,9 @@ public interface RenderingHintsShader extends AttributeEntity {
 
 	  Boolean getIgnoreAlpha0();
 	  void setIgnoreAlpha0(Boolean d);
+
+	  Boolean getLocalLightModel();
+	  void setLocalLightModel(Boolean d);
 
 	  Boolean getAnyDisplayLists();
 	  void setAnyDisplayLists(Boolean d);
