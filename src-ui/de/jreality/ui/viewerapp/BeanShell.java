@@ -67,12 +67,12 @@ public class BeanShell implements SelectionListener {
   private SimpleAttributeSet infoStyle;
   private Object defaultSelection;
   
+  public BeanShell() {
+	  this(null);
+  }
   
   public BeanShell(SelectionManager sm) {
 
-	sm.addSelectionListener(this);
-	defaultSelection = sm.getDefaultSelection().getLastElement();
-	  
     bshEval = new BshEvaluator();
 
     jterm = new JTerm(new Session(bshEval));
@@ -84,8 +84,13 @@ public class BeanShell implements SelectionListener {
     StyleConstants.setBold(infoStyle, true);
     StyleConstants.setFontSize(infoStyle, 12);
     
-    setSelf(sm.getSelection().getLastElement());  //select current selection
-  }
+	if ( sm!= null) {
+		sm.addSelectionListener(this);
+		defaultSelection = sm.getDefaultSelection().getLastElement();
+	    setSelf(sm.getSelection().getLastElement());  //select current selection
+	}
+	  
+ }
   
   
   public void selectionChanged(SelectionEvent e) {
