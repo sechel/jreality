@@ -74,6 +74,7 @@ public class JOGLRenderingState {
 	public int clearBufferBits = GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT;
 	public int colorMask = 0xf;
 	public float[][] subWindowTform = {{1,0,0},{0,1,0}};
+	public boolean localLightModel = false;
 	
 	
 	public JOGLRenderingState(JOGLRenderer jr) {
@@ -107,7 +108,6 @@ public class JOGLRenderingState {
 			gl.glEnable(GL.GL_NORMALIZE);
 			gl.glEnable(GL.GL_MULTISAMPLE);	
 			gl.glEnable(GL.GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
-			gl.glLightModeli(GL.GL_LIGHT_MODEL_LOCAL_VIEWER, GL.GL_TRUE);
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE);
 			float[] white = {1f, 1f, 1f, 1f};
 			gl.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, white,0 );

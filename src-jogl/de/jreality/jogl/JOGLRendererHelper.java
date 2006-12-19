@@ -443,6 +443,7 @@ public class JOGLRendererHelper {
 		gl.glColor3d(1, 1, 1);
 		double[] c2o = jr.getContext().getCameraToObject();
 		gl.glEnable(GL.GL_TEXTURE_2D);
+		gl.glActiveTexture(GL.GL_TEXTURE0);
 		double[] bbm = new double[16];
 		// float[] glc2o = new float[16];
 		// double[] dglc2o = new double[16];
@@ -459,7 +460,6 @@ public class JOGLRendererHelper {
 					offset, alignment,
 					c2o, 
 					LabelUtility.positionFor(i, vertices,indices), Pn.EUCLIDEAN);
-			gl.glActiveTexture(GL.GL_TEXTURE0);
 			Texture2DLoaderJOGL.render(jr.getGL(), tex2d, true);
 			gl.glPushMatrix();
 			gl.glMultTransposeMatrixd(bbm, 0);
