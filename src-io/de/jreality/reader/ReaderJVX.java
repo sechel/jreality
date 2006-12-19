@@ -220,7 +220,6 @@ public class ReaderJVX extends AbstractReader {
         }
  
        if(qName.equals("lines")) {
-    	   System.out.println("lines");
     	   currentEdges = new LinkedList<int[]>();
     	   currentLabels = new LinkedList<String>();
            return;
@@ -371,8 +370,6 @@ public class ReaderJVX extends AbstractReader {
     		currentColors = currentNormals = null;
     		currentLabels = null;
 
-    		System.out.println("Edges: "+edgeAttributes);
-    		
     		return;
         }
  
