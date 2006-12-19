@@ -157,7 +157,7 @@ import de.jreality.scene.Appearance;
     public final static Color SPECULAR_COLOR_DEFAULT = Color.WHITE;    
     public final static String SPECULAR_EXPONENT =  "specularExponent";
     public final static double SPECULAR_EXPONENT_DEFAULT =  60.;
-    public final static String SEPARATE_SPECULAR_COLOAMBIENT_COEFFICIENT =  "ambientCoefficient";
+    public final static String AMBIENT_COEFFICIENT =  "ambientCoefficient";
     public final static double AMBIENT_COEFFICIENT_DEFAULT =  .0;
     public final static String DIFFUSE_COEFFICIENT =  "diffuseCoefficient";
     public final static double DIFFUSE_COEFFICIENT_DEFAULT =  1.0;
