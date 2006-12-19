@@ -70,7 +70,7 @@ import de.jreality.util.Rectangle3D;
  * 
  * @author msommer
  */
-public class SelectionManager implements TransformationListener {
+public class SelectionManager implements TransformationListener, SelectionManagerInterface {
   
   private SceneGraphPath defaultSelection;
   private SceneGraphPath selection;
