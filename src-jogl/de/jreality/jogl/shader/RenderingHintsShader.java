@@ -62,7 +62,8 @@ public class RenderingHintsShader  {
 	   backFaceCullingEnabled = false,
 	   isFastAndDirty = false,
 	   useDisplayLists = true,
-	   clearColorBuffer = true; 
+	   clearColorBuffer = true,
+	   localLightModel = false;
 	   
 
 	/**
@@ -88,6 +89,7 @@ public class RenderingHintsShader  {
 		useDisplayLists = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.ANY_DISPLAY_LISTS), true);
 		levelOfDetail = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LEVEL_OF_DETAIL),CommonAttributes.LEVEL_OF_DETAIL_DEFAULT);
 		clearColorBuffer = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.CLEAR_COLOR_BUFFER),true);
+		localLightModel = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LOCAL_LIGHT_MODEL),false);
 		//if (isFastAndDirty) levelOfDetail = 0.0;
 	}
 
@@ -151,7 +153,10 @@ public class RenderingHintsShader  {
 		} else
 			gl.glDisable(GL.GL_CULL_FACE);
 		jr.getRenderingState().levelOfDetail = levelOfDetail;
-
+		if (localLightModel != jr.getRenderingState().localLightModel) {
+			gl.glLightModeli(GL.GL_LIGHT_MODEL_LOCAL_VIEWER, localLightModel ? GL.GL_TRUE : GL.GL_FALSE);
+			jr.getRenderingState().localLightModel = localLightModel;			
+		}
 	}
 
 	public void postRender(JOGLRenderingState jrs)	{
