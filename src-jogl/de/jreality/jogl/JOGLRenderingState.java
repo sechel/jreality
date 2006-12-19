@@ -44,6 +44,7 @@ import javax.media.opengl.GL;
 
 import de.jreality.math.Pn;
 import de.jreality.scene.Geometry;
+import de.jreality.shader.RenderingHintsShader;
 
 /**
  * @author gunn
@@ -75,6 +76,7 @@ public class JOGLRenderingState {
 	public int colorMask = 0xf;
 	public float[][] subWindowTform = {{1,0,0},{0,1,0}};
 	public boolean localLightModel = false;
+	public int lightModelColorControl = RenderingHintsShader.SINGLE_COLOR;
 	
 	
 	public JOGLRenderingState(JOGLRenderer jr) {

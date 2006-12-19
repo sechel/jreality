@@ -64,6 +64,7 @@ public class RenderingHintsShader  {
 	   useDisplayLists = true,
 	   clearColorBuffer = true,
 	   localLightModel = false;
+	 int  lightModelColorControl = de.jreality.shader.RenderingHintsShader.SINGLE_COLOR;
 	   
 
 	/**
@@ -90,6 +91,8 @@ public class RenderingHintsShader  {
 		levelOfDetail = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LEVEL_OF_DETAIL),CommonAttributes.LEVEL_OF_DETAIL_DEFAULT);
 		clearColorBuffer = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.CLEAR_COLOR_BUFFER),true);
 		localLightModel = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LOCAL_LIGHT_MODEL),false);
+		lightModelColorControl = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHT_MODEL_COLOR_CONTROL), 
+				de.jreality.shader.RenderingHintsShader.SINGLE_COLOR);
 		//if (isFastAndDirty) levelOfDetail = 0.0;
 	}
 
@@ -156,6 +159,10 @@ public class RenderingHintsShader  {
 		if (localLightModel != jr.getRenderingState().localLightModel) {
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_LOCAL_VIEWER, localLightModel ? GL.GL_TRUE : GL.GL_FALSE);
 			jr.getRenderingState().localLightModel = localLightModel;			
+		}
+		if (lightModelColorControl != jr.getRenderingState().lightModelColorControl) {
+			gl.glLightModeli(GL.GL_LIGHT_MODEL_COLOR_CONTROL, lightModelColorControl);
+			jr.getRenderingState().lightModelColorControl = lightModelColorControl;			
 		}
 	}
 

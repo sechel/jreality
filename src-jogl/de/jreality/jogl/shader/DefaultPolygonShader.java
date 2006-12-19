@@ -108,7 +108,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		ignoreTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name,"ignoreTexture2d"), false);	
 	    texture2Dnew = null;
 		if (!inheritTexture2d)	{
-		    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap))
+		    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap))
 		    	texture2Dnew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap);			
 //		    System.err.println("Got texture 2d");
 		}
