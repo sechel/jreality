@@ -59,6 +59,8 @@ import de.jreality.scene.data.IntArrayArray;
 	IndexedFaceSet thickSurface;
 	double thickness;
 	boolean makeHoles = false;
+	boolean curvedEdges = false;
+	boolean linearHole = false;
 	double holeFactor = 1.0;
 	int stepsPerEdge = 3;
 	int signature = Pn.EUCLIDEAN;
@@ -173,6 +175,22 @@ import de.jreality.scene.data.IntArrayArray;
 		}
 	}
 
+	public boolean isCurvedEdges() {
+		return curvedEdges;
+	}
+
+	public void setCurvedEdges(boolean curvedEdges) {
+		this.curvedEdges = curvedEdges;
+	}
+
+	public boolean isLinearHole() {
+		return linearHole;
+	}
+
+	public void setLinearHole(boolean linearHole) {
+		this.linearHole = linearHole;
+	}
+
 	/**
 	 * This has to be called after each set of edits to the state of the factory, in order to update the
 	 * result.
@@ -209,17 +227,21 @@ import de.jreality.scene.data.IntArrayArray;
 		else oldN = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
 		int n = oldV.length;
 		int fiberlength = oldV[0].length;
-		double[][] newV = new double[n*2][fiberlength];
-		if (fiberlength == 4 && oldN[0].length == 3)	{
+		double[][] newV = new double[n*2][4];
+		if (oldN[0].length == 3)	{
 			oldN = Pn.homogenize(null, oldN);
 			for (int i = 0; i<oldN.length; ++i) oldN[i][3] = 0.0;
 		}
+		double[][] newN = doubleIt(oldN);
+
 		for (int i = 0; i<n; ++i)	{
 			System.arraycopy(oldV[i], 0, newV[i], 0, fiberlength);
+			if (fiberlength == 3) newV[i][3] = 1.0;
 			// TODO make this correct for noneuclidean case too
 			//Pn.dragTowards(newV[i+n], oldV[i], oldN[i], thickness, Pn.EUCLIDEAN);
-			Rn.linearCombination(newV[i+n], 1.0, oldV[i], thickness, oldN[i]);
+			Rn.linearCombination(newV[i+n], 1.0, newV[i], thickness, oldN[i]);
 		}
+		
 		oldIndices = ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
 		int m = oldIndices.length;
 		int nm = edgelist.size();
@@ -250,7 +272,7 @@ import de.jreality.scene.data.IntArrayArray;
 			}
 			if (ifs.getVertexAttributes(Attribute.NORMALS) != null)	{
 				thickSurfaceIFSF.setGenerateVertexNormals(false);
-				thickSurfaceIFSF.setVertexNormals( doubleIt(ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArray(null)));
+				thickSurfaceIFSF.setVertexNormals(newN );
 			}
 			if (ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES) != null)	{
 				thickSurfaceIFSF.setVertexTextureCoordinates( doubleIt(ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArray(null)));
@@ -279,24 +301,23 @@ import de.jreality.scene.data.IntArrayArray;
 		//stepsPerEdge = 1;
 		int allVerts = totalVerts * stepsPerEdge * p + 2*n;
 		int allFaces = totalVerts * stepsPerEdge * (p-1) + nm;
-		double[][] allVertices = new double[allVerts][fiberlength];
+		double[][] allVertices = new double[allVerts][4];
 		int[][] allIndices = new int[allFaces][4];
 		DoubleArrayArray oldFaceColors = null;
 		double[][] newFaceColors = null;
+		double[][] faceColorsWithoutHoles = null;
 		if (keepFaceColors)	{
 			oldFaceColors = ifs.getFaceAttributes(Attribute.COLORS).toDoubleArrayArray();
 			newFaceColors = new double[allFaces][];
+			faceColorsWithoutHoles = doubleIt(ifs.getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null), edgelist);
 		}
 		// copy over original vertices and boundary faces
 		for (int i = 0; i<2*n; ++i)	{
 			allVertices[i] = newV[i];
 		}
-		double[][] faceColors = null;
-		if (keepFaceColors)
-				faceColors = doubleIt(ifs.getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null), edgelist);
 		for (int i = 0; i<nm; ++i)	{
 			allIndices[i] = newIndices[2*m+i];
-			if (keepFaceColors) newFaceColors[i] = faceColors[2*m+i];
+			if (keepFaceColors) newFaceColors[i] = faceColorsWithoutHoles[2*m+i];
 		}
 		// now go through the original faces and generate "holes"
 		int allVertCount = 2*n;
@@ -311,10 +332,22 @@ import de.jreality.scene.data.IntArrayArray;
 			int vertexCount = 0;
 			int totalVerticesPerLoop = stepsPerEdge * fsize;
 			int totalVertsThisFace = p * totalVerticesPerLoop;
-			double[][] borderTop = linearHole(topface, newV, stepsPerEdge);
-			double[][] borderBottom = linearHole(bottomface, newV, stepsPerEdge);
-			double[][] tangentQuadricTop = quadricHole(topface, newV, stepsPerEdge);
-			double[][] tangentQuadricBottom = quadricHole(bottomface, newV, stepsPerEdge);
+			double[][] borderBottom = linearHole(bottomface, newV, newN, stepsPerEdge, curvedEdges);
+			double[][] borderTop = linearHole(topface, newV, newN, stepsPerEdge, curvedEdges);
+			double[][] tangentQuadricBottom = null;
+			double[][] tangentQuadricTop = null;
+			if (linearHole)	{
+				tangentQuadricBottom = borderBottom;
+				tangentQuadricTop = borderTop;				
+			} else if (curvedEdges)	{
+				double[][] controlpoints = linearHole(bottomface, newV, newN, 2, curvedEdges);
+				tangentQuadricBottom = quadricHole(bottomface, stepsPerEdge, controlpoints);
+				controlpoints = linearHole(topface, newV, newN, 2, curvedEdges);
+				tangentQuadricTop = quadricHole(topface, stepsPerEdge, controlpoints);				
+		} else {
+				tangentQuadricBottom = linearHole ? borderBottom : quadricHole(bottomface, newV, stepsPerEdge);
+				tangentQuadricTop = linearHole ? borderTop : quadricHole(topface, newV, stepsPerEdge);								
+			}
 			int[] nonDuplicateVertexIndicesForThisHole = new int[totalVertsThisFace];
 			// for each element of the profile curve ...
 			for (int k = 0; k<p; ++k)	{
@@ -403,28 +436,56 @@ import de.jreality.scene.data.IntArrayArray;
 		
 	}
 
-	private static double[][] linearHole(int[] face, double[][] vv, int stepsPerEdge) {
+	private double[][] linearHole(int[] face, double[][] vv, double[][] nv, int stepsPerEdge, boolean curvedEdges) {
 		double[][] values = new double[face.length * stepsPerEdge][vv[0].length];
 		int fsize = face.length;
 		for (int j = 0; j<fsize; ++j)	{
 			double[] vb1 = vv[face[j]];
 			double[] vb2 = vv[face[(j+1)%fsize]];
-			for (int jj = 0; jj<stepsPerEdge; ++jj)	{
-				double t = jj/(stepsPerEdge*1.0);
-				Rn.linearCombination(values[j*stepsPerEdge+jj], 1-t, vb1, t,vb2);
+			if (!curvedEdges) {
+				for (int jj = 0; jj<stepsPerEdge; ++jj)	{
+					double t = jj/(stepsPerEdge*1.0);
+					Rn.linearCombination(values[j*stepsPerEdge+jj], 1-t, vb1, t,vb2);
+				}
+			} else {
+				if (vb1.length == 3)	{
+					vb1 = Pn.homogenize(vb1, vb1);
+					vb2 = Pn.homogenize(vb2, vb2);
+				}
+				double[] dv = Rn.subtract(null, vb2, vb1);
+				double length = Pn.norm(dv, signature);
+				double[] t1 = Pn.projectOntoComplement(null, nv[face[j]], dv, signature);
+				double ip = Pn.innerProduct(nv[j], t1, signature);
+//				System.err.println("Inner product is "+ip);
+				Pn.setToLength(t1, t1, length/3, signature);
+				dv = Rn.subtract(null, vb1, vb2);
+				double[] t2 = Pn.projectOntoComplement(null, nv[face[(j+1)%fsize]], dv, signature);
+				Pn.setToLength(t2, t2, length/3, signature);
+				double[] m1 = Rn.add(null, vb1, t1);
+				double[] m2 = Rn.add(null, vb2, t2);
+				for (int jj = 0; jj<stepsPerEdge; ++jj)	{
+					double t = jj/(stepsPerEdge*1.0);
+					Rn.bezierCombination(values[j*stepsPerEdge+jj], t, vb1, m1, m2, vb2);
+				}				
+				
 			}
 		}
 		return values;
 	}
 
 	private static double[][] quadricHole(int[] face, double[][] vv, int stepsPerEdge) {
-		double[][] values = new double[face.length * stepsPerEdge][vv[0].length];
 		int fsize = face.length;
 		double[][] controlpoints = new double[2*fsize][vv[0].length];
 		for (int j = 0; j<fsize; ++j)	{
 			controlpoints[2*j] = vv[face[j]];
 			Rn.linearCombination(controlpoints[2*j+1], .5, vv[face[j]], .5, vv[face[((j+1)%fsize)]]);
 		}
+		return quadricHole(face, stepsPerEdge, controlpoints );
+	}
+	
+	private static double[][] quadricHole(int[] face, int stepsPerEdge, double[][] controlpoints) {
+		double[][] values = new double[face.length * stepsPerEdge][controlpoints[0].length];
+		int fsize = face.length;
 		for (int j = 0; j<fsize; ++j)	{
 			int i0 = (2*j+1)%(2*fsize);
 			int i1 = (2*j+2)%(2*fsize);
@@ -437,7 +498,7 @@ import de.jreality.scene.data.IntArrayArray;
 				double a1 = 2*(1-t)*t;
 				double a2 = t*t;
 				int index = (j*stepsPerEdge + (stepsPerEdge + 1)/2 +  jj+values.length) % values.length;
-				for (int k = 0; k<vv[0].length; ++k)	{
+				for (int k = 0; k<controlpoints[0].length; ++k)	{
 					values[index][k] = a0*controlpoints[i0][k];
 					values[index][k] += a1*controlpoints[i1][k];
 					values[index][k] += a2*controlpoints[i2][k];
@@ -462,6 +523,12 @@ import de.jreality.scene.data.IntArrayArray;
 		return newD;
 	}
 
+	private static double[][] doubleIt(double[][] data)	{
+		double[][] newD = new double[data.length*2][data[0].length];
+		System.arraycopy(data, 0, newD, 0, data.length);
+		System.arraycopy(data, 0, newD, data.length, data.length);
+		return newD;
+	}
 	private static double[][] doubleIt(double[][] data,  List<Pair> edges)	{
 		double[][] newD = new double[data.length*2 + edges.size()][];
 		for (int i = 0; i < data.length; ++i)	{

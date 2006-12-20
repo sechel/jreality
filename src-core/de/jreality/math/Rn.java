@@ -1485,5 +1485,21 @@ final public class Rn {
 	}
 
 
+	public static double[] bezierCombination(double[] dst, double t, double[] v0, double[] v1, double[] v2, double[] v3) {
+		double t1 = (1-t);
+		double t2 = t1*t1;
+		double c0 = t2*t1;
+		double c1 = 3*t2*t;
+		double c2 = 3*t1*t*t;
+		double c3 = t*t*t;
+		dst = Rn.add(dst, 
+				Rn.add(null, Rn.times(null, c0, v0), Rn.times(null, c1, v1)), 
+				Rn.add(null, Rn.times(null, c2, v2), Rn.times(null, c3, v3))
+				);
+		return dst;
+		
+	}
+
+
 }
 
