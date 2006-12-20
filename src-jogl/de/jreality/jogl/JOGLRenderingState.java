@@ -76,7 +76,7 @@ public class JOGLRenderingState {
 	public int colorMask = 0xf;
 	public float[][] subWindowTform = {{1,0,0},{0,1,0}};
 	public boolean localLightModel = false;
-	public int lightModelColorControl = RenderingHintsShader.SINGLE_COLOR;
+	public boolean separateSpecularColor = false;
 	
 	
 	public JOGLRenderingState(JOGLRenderer jr) {

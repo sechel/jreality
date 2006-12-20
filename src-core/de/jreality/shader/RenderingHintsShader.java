@@ -60,9 +60,7 @@ public interface RenderingHintsShader extends AttributeEntity {
 	  final static double LEVEL_OF_DETAIL_DEFAULT = 			1.0;
 	  final static double DEPTH_FUDGE_FACTOR_DEFAULT = 1.0;
 	  final static boolean LOCAL_LIGHT_MODEL_DEFAULT = false;		
-	  final static int SINGLE_COLOR                   = 0x81F9;
-	  final static int SEPARATE_SPECULAR_COLOR        = 0x81FA;
-	  final static int LIGHT_MODEL_COLOR_CONTROL_DEFAULT = SINGLE_COLOR;
+	  final static boolean SEPARATE_SPECULAR_DEFAULT = false;
  
 	  Boolean getLightingEnabled();
 	  void setLightingEnabled(Boolean b);
@@ -82,8 +80,8 @@ public interface RenderingHintsShader extends AttributeEntity {
 	  Boolean getLocalLightModel();
 	  void setLocalLightModel(Boolean d);
 
-	  Integer getLightModelColorControl();
-	  void setLightModelColorControll(Integer d);
+	  Boolean getSeparateSpecularColor();
+	  void setSeparateSpecularColor(Boolean b);
 
 	  Boolean getAnyDisplayLists();
 	  void setAnyDisplayLists(Boolean d);

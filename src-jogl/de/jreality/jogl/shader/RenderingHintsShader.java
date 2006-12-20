@@ -54,6 +54,8 @@ import de.jreality.shader.ShaderUtility;
  */
 public class RenderingHintsShader  {
 	double levelOfDetail = 0.0;			// a number between 0= min and 1=max level and detail.
+	 final static int SINGLE_COLOR                   = 0x81F9;
+	 final static int SEPARATE_SPECULAR_COLOR        = 0x81FA;
 	boolean 
 	   transparencyEnabled = false, 
 	   zBufferEnabled = false,					// this only matters when transparencyEnabled == true
@@ -63,8 +65,8 @@ public class RenderingHintsShader  {
 	   isFastAndDirty = false,
 	   useDisplayLists = true,
 	   clearColorBuffer = true,
-	   localLightModel = false;
-	 int  lightModelColorControl = de.jreality.shader.RenderingHintsShader.SINGLE_COLOR;
+	   localLightModel = false,
+	   separateSpecularColor = false;
 	   
 
 	/**
@@ -91,8 +93,8 @@ public class RenderingHintsShader  {
 		levelOfDetail = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LEVEL_OF_DETAIL),CommonAttributes.LEVEL_OF_DETAIL_DEFAULT);
 		clearColorBuffer = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.CLEAR_COLOR_BUFFER),true);
 		localLightModel = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LOCAL_LIGHT_MODEL),false);
-		lightModelColorControl = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHT_MODEL_COLOR_CONTROL), 
-				de.jreality.shader.RenderingHintsShader.SINGLE_COLOR);
+		separateSpecularColor = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHT_MODEL_COLOR_CONTROL), 
+				false);
 		//if (isFastAndDirty) levelOfDetail = 0.0;
 	}
 
@@ -160,9 +162,10 @@ public class RenderingHintsShader  {
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_LOCAL_VIEWER, localLightModel ? GL.GL_TRUE : GL.GL_FALSE);
 			jr.getRenderingState().localLightModel = localLightModel;			
 		}
-		if (lightModelColorControl != jr.getRenderingState().lightModelColorControl) {
-			gl.glLightModeli(GL.GL_LIGHT_MODEL_COLOR_CONTROL, lightModelColorControl);
-			jr.getRenderingState().lightModelColorControl = lightModelColorControl;			
+		if (separateSpecularColor != jr.getRenderingState().separateSpecularColor) {
+			gl.glLightModeli(GL.GL_LIGHT_MODEL_COLOR_CONTROL, separateSpecularColor ?	
+			GL.GL_SEPARATE_SPECULAR_COLOR : GL.GL_SINGLE_COLOR);
+			jr.getRenderingState().separateSpecularColor = separateSpecularColor;			
 		}
 	}
 
