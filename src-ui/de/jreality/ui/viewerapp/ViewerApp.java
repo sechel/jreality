@@ -487,7 +487,16 @@ public class ViewerApp {
   private Viewer createViewer(String viewer) 
   throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
   {
-    return (Viewer)Class.forName(viewer).newInstance();
+	try {
+		return (Viewer) Class.forName(viewer).newInstance();
+		// if we are in eclipse catch the compilation error...
+	} catch (Error e) {
+		if (e.getMessage().startsWith("Unresolved compilation prob")) {
+			throw new InstantiationException();
+		} else {
+			throw e;
+		}
+	}
   }
   
   

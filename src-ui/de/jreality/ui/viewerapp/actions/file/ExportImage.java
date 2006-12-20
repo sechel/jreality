@@ -48,6 +48,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.beans.Expression;
+import java.beans.Statement;
 import java.io.File;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -58,8 +60,9 @@ import javax.swing.BorderFactory;
 import javax.swing.KeyStroke;
 import javax.swing.border.TitledBorder;
 
+import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.Viewer;
-import de.jreality.softviewer.SoftViewer;
+import de.jreality.shader.TextureUtility;
 import de.jreality.ui.viewerapp.FileFilter;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerApp;
@@ -122,11 +125,19 @@ public class ExportImage extends AbstractJrAction {
       return;
     }
     //render offscreen
-    BufferedImage img = null;;
-    if(realViewer instanceof de.jreality.jogl.Viewer)   
-        img = ((de.jreality.jogl.Viewer)realViewer).renderOffscreen(4*dim.width, 4*dim.height);
-    if(realViewer instanceof SoftViewer)
-        img = ((SoftViewer)realViewer).renderOffscreen(4*dim.width, 4*dim.height);
+    BufferedImage img = null;
+    try {
+        Expression expr = new Expression(realViewer, "renderOffscreen", new Object[]{4*dim.width, 4*dim.height});
+		expr.execute();
+		img = (BufferedImage) expr.getValue();
+	} catch (Exception e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}
+//    if(realViewer instanceof de.jreality.jogl.Viewer)   
+//        img = ((de.jreality.jogl.Viewer)realViewer).renderOffscreen(4*dim.width, 4*dim.height);
+//    if(realViewer instanceof SoftViewer)
+//        img = ((SoftViewer)realViewer).renderOffscreen(4*dim.width, 4*dim.height);
     BufferedImage img2 = new BufferedImage(dim.width, dim.height,BufferedImage.TYPE_INT_RGB);
     Graphics2D g = (Graphics2D) img2.getGraphics();
     g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
@@ -141,14 +152,31 @@ public class ExportImage extends AbstractJrAction {
         null
     );
 //    System.out.println("\nWriting to file "+file.getPath());
-    de.jreality.jogl.JOGLRenderer.writeBufferedImage(file,img2);
+    
+    //JOGLRenderer.writeBufferedImage(file,img2); :
+    try {
+    	// TODO: move writeBufferedImage to core!!!
+    	new Statement(Class.forName("de.jreality.jogl.JOGLRenderer"), "writeBufferedImage", new Object[]{file, img2}).execute();
+    } catch (Exception ex) {
+    	// and now?
+    }
   }
   
   
   @Override
   public boolean isEnabled() {
-    Viewer realViewer = ((ViewerSwitch)viewer).getCurrentViewer();
-    return realViewer instanceof de.jreality.jogl.Viewer || realViewer instanceof SoftViewer;
+    Class<? extends Viewer> viewerType = ((ViewerSwitch)viewer).getCurrentViewer().getClass();
+    try {
+		viewerType.getMethod("renderOffscreen", new Class[]{Integer.TYPE, Integer.TYPE});
+		return true;
+	} catch (SecurityException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} catch (NoSuchMethodException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	return false;
   }
   
   
