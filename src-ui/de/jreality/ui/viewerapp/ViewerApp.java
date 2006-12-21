@@ -80,7 +80,6 @@ import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
 import de.jreality.util.Secure;
 
-
 /**
  * Factory for the jReality Viewer application, which displays a 
  * {@link de.jreality.io.JrScene} in a frame.<br>
@@ -487,16 +486,7 @@ public class ViewerApp {
   private Viewer createViewer(String viewer) 
   throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
   {
-	try {
-		return (Viewer) Class.forName(viewer).newInstance();
-		// if we are in eclipse catch the compilation error...
-	} catch (Error e) {
-		if (e.getMessage().startsWith("Unresolved compilation prob")) {
-			throw new InstantiationException();
-		} else {
-			throw e;
-		}
-	}
+	return (Viewer) Class.forName(viewer).newInstance();
   }
   
   

@@ -60,9 +60,7 @@ import javax.swing.BorderFactory;
 import javax.swing.KeyStroke;
 import javax.swing.border.TitledBorder;
 
-import de.jreality.jogl.JOGLRenderer;
 import de.jreality.scene.Viewer;
-import de.jreality.shader.TextureUtility;
 import de.jreality.ui.viewerapp.FileFilter;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerApp;
