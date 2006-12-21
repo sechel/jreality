@@ -76,6 +76,7 @@ import de.jtem.beans.DimensionPanel;
  * 
  * @author pinkall
  */
+@SuppressWarnings("serial")
 public class ExportImage extends AbstractJrAction {
   
   private Viewer viewer;
@@ -155,10 +156,10 @@ public class ExportImage extends AbstractJrAction {
     
     //JOGLRenderer.writeBufferedImage(file,img2); :
     try {
-    	// TODO: move writeBufferedImage to core!!!
-    	new Statement(Class.forName("de.jreality.jogl.JOGLRenderer"), "writeBufferedImage", new Object[]{file, img2}).execute();
+    	new Statement(Class.forName("de.jreality.util.ImageUtility"), "writeBufferedImage", new Object[]{file, img2}).execute();
     } catch (Exception ex) {
     	// and now?
+    	throw new RuntimeException("writing image failed", ex);
     }
   }
   

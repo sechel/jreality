@@ -15,30 +15,22 @@ public class ImageUtility {
 	private ImageUtility() {}
 	
 	public static void writeBufferedImage(File file, BufferedImage img) {
-		//boolean worked=true;
-		System.err.println("Writing to file "+file.getPath());
-		if (file.getName().endsWith(".tiff") || file.getName().endsWith(".tif")) {
+		String suffix = getFileSuffix(file);
+		if ("tiff".equals(suffix) || "tif".equals(suffix)) {
 			try {
-				// TODO: !!!
-				//worked = ImageIO.write(img, "TIFF", new File(noSuffix+".tiff"));
 				Method cm = Class.forName("javax.media.jai.JAI").getMethod("create", new Class[]{String.class, RenderedImage.class, Object.class, Object.class});
 				cm.invoke(null, new Object[]{"filestore", img, file.getPath(), "tiff"});
 			} catch(Throwable e) {
-//				//worked=false;
-//				LoggingSystem.getLogger(this).log(Level.CONFIG, "could not write TIFF: "+file.getPath(), e);
-				e.printStackTrace();
+				throw new RuntimeException("need JAI for tiff writing", e);
 			}
 		} else {
-			//if (!worked)
 			try {
-				String suffix = getFileSuffix(file);
-				System.err.println("suffix is "+suffix);
 				if (suffix != "")
 				    if (!ImageIO.write(img, getFileSuffix(file), file)) {
 					    LoggingSystem.getLogger(ImageUtility.class).log(Level.WARNING,"Error writing file using ImageIO (unsupported file format?)");
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				throw new RuntimeException("image writing failed", e);
 			}
 		}
 	}
