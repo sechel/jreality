@@ -55,7 +55,9 @@ import org.sunflow.core.camera.PinholeLens;
 import org.sunflow.core.gi.AmbientOcclusionGIEngine;
 import org.sunflow.core.primitive.Background;
 import org.sunflow.core.primitive.Mesh;
+import org.sunflow.core.shader.AmbientOcclusionShader;
 import org.sunflow.core.shader.ConstantShader;
+import org.sunflow.core.shader.DiffuseShader;
 import org.sunflow.image.Color;
 import org.sunflow.math.Matrix4;
 import org.sunflow.math.Point3;
@@ -89,7 +91,6 @@ import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.EffectiveAppearance;
-import de.jreality.shader.ImageData;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.sunflow.core.light.DirectionalLight;
@@ -99,13 +100,13 @@ import de.jreality.sunflow.core.primitive.SkyBox;
 
 public class SunflowRenderer extends SunflowAPI {
 
-	IdentityHashMap<Object, String> geom2name = new IdentityHashMap<Object, String>();
-	HashMap<String, Object> name2geom = new HashMap<String, Object>();
-	ArrayList<File> tmpFiles = new ArrayList<File>();
+	private IdentityHashMap<Object, String> geom2name = new IdentityHashMap<Object, String>();
+	private HashMap<String, Object> name2geom = new HashMap<String, Object>();
 
 	private String POINT_SPHERE="point";
 	private String LINE_CYLINDER="line";
-	
+	private SceneGraphPath bakingPath;
+	private String bakingInstance;
 	private RenderOptions options = new RenderOptions();
 
 	private class Visitor extends SceneGraphVisitor {
@@ -163,9 +164,23 @@ public class SunflowRenderer extends SunflowAPI {
 				}
 				geometry(getName(ifs), new Mesh());
 				parameter("transform", currentMatrix);
-				parameter("shaders", "default-shader" + appCount);
+				
 				String geomName = getName(ifs);
-				instance(geomName + ".instance"+instanceCnt++, geomName);
+				String instanceName = geomName + ".instance"+instanceCnt++;
+				if (!options.isBaking()) {
+					parameter("shaders", "default-shader" + appCount);
+				} else {
+					//System.out.println("path is "+path.getLastElement().getName());
+					//System.out.println("bakingPath is "+bakingPath.getLastElement().getName());
+					if (path.isEqual(bakingPath)) {
+						bakingInstance = instanceName;
+						//parameter("shaders", "constantWhite");
+						parameter("shaders", "ambientOcclusion");
+					} else {
+						parameter("shaders", "constantWhite");
+					}
+				}
+				instance(instanceName, geomName);
 			}
 		}
 		
@@ -216,7 +231,11 @@ public class SunflowRenderer extends SunflowAPI {
 								).rotateFromTo(zAxis, seg)
 								.scale(radius, radius, len/2).getMatrix());
 						parameter("transform", m);
-						parameter("shaders", "default-shader" + appCount);
+						if (!options.isBaking()) {
+							parameter("shaders", "default-shader" + appCount);
+						} else {
+							parameter("shaders", "constantWhite");
+						}
 						instance(LINE_CYLINDER + ".instance"+instanceCnt++, LINE_CYLINDER);
 					}
 				}
@@ -260,7 +279,11 @@ public class SunflowRenderer extends SunflowAPI {
 								pts.getValueAt(i, 2)/w
 								).scale(radii != null ? radii.getValueAt(i) : r).getMatrix());
 						parameter("transform", m);
-						parameter("shaders", "default-shader" + appCount);
+						if (!options.isBaking()) {
+							parameter("shaders", "default-shader" + appCount);
+						} else {
+							parameter("shaders", "constantWhite");
+						}
 						instance(POINT_SPHERE + ".instance"+instanceCnt++, POINT_SPHERE);
 					}
 				}
@@ -269,6 +292,7 @@ public class SunflowRenderer extends SunflowAPI {
 		
 		int lightID;
 		private RenderingHintsShader rhs;
+
 		@Override
 		public void visit(de.jreality.scene.DirectionalLight l) {
 			if (options.isUseOriginalLights() || !l.isAmbientFake()) {
@@ -316,11 +340,6 @@ public class SunflowRenderer extends SunflowAPI {
 		}		
 	}
 	
-	public SunflowRenderer() {
-		String dataDir = System.getProperty("jreality.data","/net/MathVis/data/testData3D");
-		addTextureSearchPath(dataDir+"/textures");
-	}
-	
 	public int[] convert(IntArrayArray faces) {
 		int triCnt=0;
 		for (int i=0; i<faces.getLength(); i++) {
@@ -356,8 +375,31 @@ public class SunflowRenderer extends SunflowAPI {
 		return ret;
 	}
 
-	public void render(SceneGraphComponent sceneRoot, SceneGraphPath cameraPath, Display display, int width, int height) {
+	public void render(
+			SceneGraphComponent sceneRoot,
+			SceneGraphPath cameraPath,
+			SceneGraphPath bakingPath,
+			Display display,
+			int width,
+			int height
+	) {
+		this.bakingPath = bakingPath;
+		options.setBaking(true);
+		render(sceneRoot, cameraPath, display, width, height);
+		bakingPath = null;
+	}
 
+	public void render(
+			SceneGraphComponent sceneRoot,
+			SceneGraphPath cameraPath,
+			Display display,
+			int width,
+			int height
+	) {
+		shader("constantWhite", new ConstantShader());
+		shader("ambientOcclusion", new DiffuseShader());
+		
+		// skybox or background color
 		Appearance rootApp = sceneRoot.getAppearance();
 		if(rootApp != null) {
 			if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
@@ -370,6 +412,14 @@ public class SunflowRenderer extends SunflowAPI {
 				parameter("up", new Vector3(0, -1, 0));
 				skyBox.init("skyBox", this);
 			} else {
+				Object backColor = rootApp.getAttribute(CommonAttributes.BACKGROUND_COLOR);
+				if (backColor != Appearance.INHERITED) {
+			        parameter("color", (java.awt.Color)backColor);
+			        shader("background.shader", new ConstantShader());
+			        geometry("background", new Background());
+			        parameter("shaders", "background.shader");
+			        instance("background.instance", "background");
+				}
         try{  
           java.awt.Color backColor = (java.awt.Color) rootApp.getAttribute(CommonAttributes.BACKGROUND_COLOR);
           if (backColor != null) {
@@ -383,21 +433,10 @@ public class SunflowRenderer extends SunflowAPI {
 			}
 		}
 
-		// add texture path
-        try {
-			File tmpF = File.createTempFile("foo", ".png");
-			addTextureSearchPath(tmpF.getParentFile().getAbsolutePath());
-			if (!tmpF.delete()) tmpF.deleteOnExit();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		// init default primitives
+		// initialize default primitives
 		geometry(POINT_SPHERE, new org.sunflow.core.primitive.Sphere());
 		geometry(LINE_CYLINDER, new de.jreality.sunflow.core.primitive.Cylinder());
 
-		
         // visit
         new Visitor().visit(sceneRoot);
         
@@ -408,10 +447,8 @@ public class SunflowRenderer extends SunflowAPI {
 		Matrix m = new Matrix(cameraPath.getMatrix(null));
 		parameter("transform",m);
 		double fov = c.getFieldOfView();
-		//System.out.println("cam fov="+fov);
 		if (width>height) {
 			fov = Math.atan(((double)width)/((double)height)*Math.tan(fov/360*Math.PI))/Math.PI*360;
-			//System.out.println("adjusted fov="+fov);
 		}
 		parameter("fov", fov);
 		String name = getUniqueName("camera");
@@ -420,10 +457,7 @@ public class SunflowRenderer extends SunflowAPI {
 		
 		// sunflow rendering
 		parameter("sampler", options.isProgessiveRender() ? "ipr" : "bucket");
-		String bakingInstance = options.getBakingInstance();
-		//System.out.println("got bakingInstance "+bakingInstance);
-		if (!bakingInstance.equals("")) {
-			//System.out.println("setting baking.instance to "+bakingInstance);
+		if (bakingInstance != null) {
 			parameter("baking.instance", bakingInstance);
 		}
 		parameter("resolutionX", width);
@@ -434,7 +468,6 @@ public class SunflowRenderer extends SunflowAPI {
         parameter("depths.diffuse", options.getDepthsDiffuse());
         parameter("depths.reflection", options.getDepthsReflection());
         parameter("depths.refraction", options.getDepthsRefraction());
-        parameter("accel", "bih"); 
         float ambient = (float)options.getAmbientOcclusionBright();
         int ambientOcclusionSamples = options.getAmbientOcclusionSamples();
         if (!options.isUseOriginalLights() && ambient >0) giEngine(new AmbientOcclusionGIEngine(new Color(ambient, ambient, ambient), Color.BLACK, ambientOcclusionSamples, 100));
@@ -444,11 +477,6 @@ public class SunflowRenderer extends SunflowAPI {
         //giEngine(new PathTracingGIEngine(200));
         options(SunflowAPI.DEFAULT_OPTIONS);
         render(SunflowAPI.DEFAULT_OPTIONS, display);
-        
-        // delete tmp texture files
-        for (File f : tmpFiles) {
-        	if (!f.delete()) f.deleteOnExit();
-        }
 	}
 	
 	public String getName(Geometry geom) {
@@ -513,7 +541,6 @@ public class SunflowRenderer extends SunflowAPI {
 			}
 		}
 		return ret;
-
 	}
 
 	public void parameter(String string, java.awt.Color c) {

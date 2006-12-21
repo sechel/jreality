@@ -17,7 +17,7 @@ import de.jreality.softviewer.Texture;
 public class DefaultPolygonShader implements Shader {
 
 	private de.jreality.shader.DefaultPolygonShader dps;
-	private Texture tex;
+	private SimpleTexture tex;
 
 	private RenderingHintsShader rhs;
 	private CubeMap cm;

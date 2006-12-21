@@ -3,7 +3,7 @@ package de.jreality.sunflow;
 import java.util.prefs.Preferences;
 
 public class RenderOptions {
-	private String bakingInstance = "";
+	private boolean baking = false;
 	private boolean progessiveRender = true;
 	private boolean useOriginalLights = false;
 	private boolean threadsLowPriority = false;
@@ -110,19 +110,19 @@ public class RenderOptions {
 		setAmbientOcclusionBright(prefs.getDouble(prefix+"ambientOcclusionBright", defaults.getAmbientOcclusionBright()));
 	}
 
-	public String getBakingInstance() {
-		return bakingInstance;
-	}
-
-	public void setBakingInstance(String bakingInstance) {
-		this.bakingInstance = bakingInstance;
-	}
-
 	public boolean isThreadsLowPriority() {
 		return threadsLowPriority;
 	}
 
 	public void setThreadsLowPriority(boolean threadsLowPriority) {
 		this.threadsLowPriority = threadsLowPriority;
+	}
+
+	public boolean isBaking() {
+		return baking;
+	}
+
+	public void setBaking(boolean baking) {
+		this.baking = baking;
 	}
 }

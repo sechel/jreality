@@ -10,6 +10,7 @@ import org.sunflow.system.UI.PrintLevel;
 import org.sunflow.system.ui.ConsoleInterface;
 
 import de.jreality.scene.Appearance;
+import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
@@ -58,9 +59,13 @@ public class BakingDisplay implements Display, UserInterface {
 	}
 
 	private void updateTexture() {
+		System.out.println("BakingDisplay.updateTexture()");
 		image.setRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
 		ImageData img = new ImageData(image);
-		Texture2D tex = TextureUtility.createTexture(app, "polygonShader", img, false);
+		//Texture2D tex = TextureUtility.createTexture(app, "polygonShader", img, false);
+		Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "lightMap", app, false);
+		tex.setApplyMode(Texture2D.GL_REPLACE);
+	    tex.setImage(img);
 		tex.setTextureMatrix(null);
 	}
 	

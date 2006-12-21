@@ -106,6 +106,7 @@ public interface DefaultPolygonShader extends PolygonShader {
 
 	TextShader getTextShader();
     Texture2D getTexture2d();
+    //Texture2D getLightMap();
     CubeMap getReflectionMap();
 
 	Double getTransparency();

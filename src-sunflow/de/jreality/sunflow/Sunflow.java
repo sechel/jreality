@@ -64,6 +64,7 @@ import org.sunflow.system.UI;
 import org.sunflow.system.ui.ConsoleInterface;
 
 import de.jreality.scene.Appearance;
+import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 
 
@@ -77,7 +78,8 @@ public class Sunflow {
 	public static void renderToTexture(
 			final Viewer v,
 			final Dimension dim,
-			RenderOptions options,
+			final RenderOptions options,
+			final SceneGraphPath bakingPath,
 			final Appearance app
 	) {
 		new Thread(new Runnable() {
@@ -85,9 +87,11 @@ public class Sunflow {
 				BakingDisplay baker = new BakingDisplay(app);
 				UI.set(baker);
 				SunflowRenderer renderer = new SunflowRenderer();
+				renderer.setOptions(options);
 				renderer.render(
 						v.getSceneRoot(),
 						v.getCameraPath(),
+						bakingPath,
 						baker,
 						dim.width,
 						dim.height
