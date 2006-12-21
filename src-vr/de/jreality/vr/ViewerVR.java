@@ -42,11 +42,11 @@ package de.jreality.vr;
 
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.beans.Statement;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
@@ -78,12 +78,15 @@ import de.jreality.scene.PointLight;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.pick.PickResult;
 import de.jreality.scene.tool.Tool;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
+//import de.jreality.sunflow.RenderOptions;
+//import de.jreality.sunflow.Sunflow;
 import de.jreality.swing.ScenePanel;
 import de.jreality.tools.DuplicateTriplyPeriodicTool;
 import de.jreality.tools.HeadTransformationTool;
@@ -93,6 +96,7 @@ import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.ViewerAppMenu;
 import de.jreality.util.PickUtility;
 import de.jreality.util.Rectangle3D;
+import de.jreality.util.SceneGraphUtility;
 import de.jreality.util.Secure;
 
 
@@ -628,14 +632,7 @@ public class ViewerVR {
 //				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK));
 //			}
 //			public void actionPerformed(ActionEvent e) {
-//				RenderOptions opts = new RenderOptions();
-//				opts.setThreadsLowPriority(true);
-//				Sunflow.renderToTexture(
-//						vapp.getViewer(),
-//						new Dimension(256,256),
-//						opts,
-//						getTerrainAppearance()
-//				);
+//				bakeTerrain(vapp.getViewer());
 //			}
 //		};
 //		settings.add(bakeTerrain);
@@ -701,6 +698,23 @@ public class ViewerVR {
 		menu.addMenu(helpMenu);
 	}
 
+//	public void bakeTerrain(Viewer v) {
+//		RenderOptions opts = new RenderOptions();
+//		opts.setThreadsLowPriority(true);
+//		List<SceneGraphPath> paths = SceneGraphUtility.getPathsBetween(
+//				getSceneRoot(),
+//				getTerrain().getChildComponent(0)
+//		);
+//		SceneGraphPath bakingPath = paths.get(0);
+//		Sunflow.renderToTexture(
+//				v,
+//				new Dimension(256,256),
+//				opts,
+//				bakingPath,
+//				getTerrainAppearance()
+//		);
+//	}
+	
 	public JFrame getExternalFrame() {
 		return sp.getExternalFrame();
 	}
