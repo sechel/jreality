@@ -39,22 +39,16 @@
 
 package de.jreality.sunflow;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
-
-import javax.imageio.ImageIO;
 
 import org.sunflow.SunflowAPI;
 import org.sunflow.core.Display;
 import org.sunflow.core.camera.PinholeLens;
-import org.sunflow.core.gi.AmbientOcclusionGIEngine;
 import org.sunflow.core.primitive.Background;
-import org.sunflow.core.primitive.Mesh;
+import org.sunflow.core.primitive.TriangleMesh;
 import org.sunflow.core.shader.ConstantShader;
 import org.sunflow.core.shader.DiffuseShader;
 import org.sunflow.image.Color;
@@ -90,7 +84,6 @@ import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.EffectiveAppearance;
-import de.jreality.shader.ImageData;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.sunflow.core.light.DirectionalLight;
@@ -102,7 +95,6 @@ public class SunflowRenderer extends SunflowAPI {
 
 	IdentityHashMap<Object, String> geom2name = new IdentityHashMap<Object, String>();
 	HashMap<String, Object> name2geom = new HashMap<String, Object>();
-	ArrayList<File> tmpFiles = new ArrayList<File>();
 
 	private String POINT_SPHERE="point";
 	private String LINE_CYLINDER="line";
@@ -163,7 +155,7 @@ public class SunflowRenderer extends SunflowAPI {
 				if (texCoords != null) {
 					parameter("uvs", "texcoord", "vertex", texCoords);				
 				}
-				geometry(getName(ifs), new Mesh());
+				geometry(getName(ifs), new TriangleMesh());
 				parameter("transform", currentMatrix);
 				
 				String geomName = getName(ifs);
@@ -473,64 +465,25 @@ public class SunflowRenderer extends SunflowAPI {
         parameter("depths.diffuse", options.getDepthsDiffuse());
         parameter("depths.reflection", options.getDepthsReflection());
         parameter("depths.refraction", options.getDepthsRefraction());
+        
         float ambient = (float)options.getAmbientOcclusionBright();
         int ambientOcclusionSamples = options.getAmbientOcclusionSamples();
-        if (!options.isUseOriginalLights() && ambient >0) giEngine(new AmbientOcclusionGIEngine(new Color(ambient, ambient, ambient), Color.BLACK, ambientOcclusionSamples, 100));
-        //if (!options.isUseOriginalLights() && ambient >0) giEngine(new PathTracingGIEngine(100));
-        //giEngine(new FakeGIEngine(new Vector3(0,1,0), Color.WHITE, Color.BLACK));
-        //giEngine(new InstantGI(128, 1, .01f, 0));
-        //giEngine(new PathTracingGIEngine(200));
+        
+        parameter("gi.engine", "ambocc");
+        parameter("gi.ambocc.bright", new Color(ambient, ambient, ambient));
+        parameter("gi.ambocc.dark", Color.BLACK);
+        parameter("gi.ambocc.samples", ambientOcclusionSamples);
+        parameter("gi.ambocc.maxdist", 100f);
+        
         options(SunflowAPI.DEFAULT_OPTIONS);
         render(SunflowAPI.DEFAULT_OPTIONS, display);
-        
-        // delete tmp texture files
-        for (File f : tmpFiles) {
-        	if (!f.delete()) f.deleteOnExit();
-        }
-	}
+    }
 	
 	public String getName(Geometry geom) {
 		String prefix=geom.getName();
 		return getName(prefix, geom);
 	}
-
-	int imgCnt;
-	public String getName(ImageData data) {
-		if (geom2name.containsKey(data)) return geom2name.get(data);
-		File tmp;
-		try {
-			BufferedImage img;
-			tmp = File.createTempFile("texture", ".png");
-			   byte[] byteArray = data.getByteArray();
-			   int dataHeight = data.getHeight();
-			   int dataWidth = data.getWidth();
-			   img = new BufferedImage(dataWidth, dataHeight,
-			   BufferedImage.TYPE_INT_ARGB);
-			   WritableRaster raster = img.getRaster();
-			   int[] pix = new int[4];
-		         for (int y = 0, ptr = 0; y < dataHeight; y++) {
-		           for (int x = 0; x < dataWidth; x++, ptr += 4) {             
-//		             if (transparencyEnabled)
-//		               pix[3]=byteArray[ptr + 3]; 
-//		             else{
-//		               if (byteArray[ptr + 3]==0) pix[3]=(byte) 0;                 
-//		               else pix[3]=(byte) 255;                              
-//		             }    
-		             pix[0] = byteArray[ptr];
-		             pix[1] = byteArray[ptr + 1];
-		             pix[2] = byteArray[ptr + 2];
-		             pix[3] = byteArray[ptr + 3]; 
-		             raster.setPixel(x, y, pix);
-		           }
-		         }                      
-			ImageIO.write((BufferedImage) img, "PNG", tmp);
-			tmpFiles.add(tmp);
-		} catch (IOException e) {
-			throw new Error();
-		}
-		return getName(tmp.getName(), data);
-	}
-
+	
 	private String getName(String prefix, Object geom) {
 		String ret;
 		if (geom2name.containsKey(geom)) ret = geom2name.get(geom);
@@ -597,4 +550,5 @@ public class SunflowRenderer extends SunflowAPI {
 	public void setOptions(RenderOptions options) {
 		this.options = options;
 	}
+	
 }
