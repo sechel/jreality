@@ -55,7 +55,6 @@ import org.sunflow.core.camera.PinholeLens;
 import org.sunflow.core.gi.AmbientOcclusionGIEngine;
 import org.sunflow.core.primitive.Background;
 import org.sunflow.core.primitive.Mesh;
-import org.sunflow.core.shader.AmbientOcclusionShader;
 import org.sunflow.core.shader.ConstantShader;
 import org.sunflow.core.shader.DiffuseShader;
 import org.sunflow.image.Color;
@@ -91,6 +90,7 @@ import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.sunflow.core.light.DirectionalLight;
@@ -100,8 +100,9 @@ import de.jreality.sunflow.core.primitive.SkyBox;
 
 public class SunflowRenderer extends SunflowAPI {
 
-	private IdentityHashMap<Object, String> geom2name = new IdentityHashMap<Object, String>();
-	private HashMap<String, Object> name2geom = new HashMap<String, Object>();
+	IdentityHashMap<Object, String> geom2name = new IdentityHashMap<Object, String>();
+	HashMap<String, Object> name2geom = new HashMap<String, Object>();
+	ArrayList<File> tmpFiles = new ArrayList<File>();
 
 	private String POINT_SPHERE="point";
 	private String LINE_CYLINDER="line";
@@ -340,6 +341,7 @@ public class SunflowRenderer extends SunflowAPI {
 		}		
 	}
 	
+	
 	public int[] convert(IntArrayArray faces) {
 		int triCnt=0;
 		for (int i=0; i<faces.getLength(); i++) {
@@ -412,28 +414,31 @@ public class SunflowRenderer extends SunflowAPI {
 				parameter("up", new Vector3(0, -1, 0));
 				skyBox.init("skyBox", this);
 			} else {
-				Object backColor = rootApp.getAttribute(CommonAttributes.BACKGROUND_COLOR);
-				if (backColor != Appearance.INHERITED) {
-			        parameter("color", (java.awt.Color)backColor);
-			        shader("background.shader", new ConstantShader());
-			        geometry("background", new Background());
-			        parameter("shaders", "background.shader");
-			        instance("background.instance", "background");
-				}
-        try{  
-          java.awt.Color backColor = (java.awt.Color) rootApp.getAttribute(CommonAttributes.BACKGROUND_COLOR);
-          if (backColor != null) {
-            parameter("color", backColor);
-            shader("background.shader", new ConstantShader());
-            geometry("background", new Background());
-            parameter("shaders", "background.shader");
-            instance("background.instance", "background");
-          }
-        }catch(ClassCastException e){System.err.println("\nonly uniform background colors supported yet");}
+
+				try{  
+					java.awt.Color backColor = (java.awt.Color) rootApp.getAttribute(CommonAttributes.BACKGROUND_COLOR);
+					if (backColor != null) {
+						parameter("color", backColor);
+						shader("background.shader", new ConstantShader());
+						geometry("background", new Background());
+						parameter("shaders", "background.shader");
+						instance("background.instance", "background");
+					}
+				}catch(ClassCastException e){System.err.println("\nonly uniform background colors supported yet");}
 			}
 		}
 
-		// initialize default primitives
+		// add texture path
+        try {
+			File tmpF = File.createTempFile("foo", ".png");
+			addTextureSearchPath(tmpF.getParentFile().getAbsolutePath());
+			if (!tmpF.delete()) tmpF.deleteOnExit();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// init default primitives
 		geometry(POINT_SPHERE, new org.sunflow.core.primitive.Sphere());
 		geometry(LINE_CYLINDER, new de.jreality.sunflow.core.primitive.Cylinder());
 
@@ -477,6 +482,11 @@ public class SunflowRenderer extends SunflowAPI {
         //giEngine(new PathTracingGIEngine(200));
         options(SunflowAPI.DEFAULT_OPTIONS);
         render(SunflowAPI.DEFAULT_OPTIONS, display);
+        
+        // delete tmp texture files
+        for (File f : tmpFiles) {
+        	if (!f.delete()) f.deleteOnExit();
+        }
 	}
 	
 	public String getName(Geometry geom) {
