@@ -1487,14 +1487,24 @@ public class JOGLRenderer  implements AppearanceListener {
 		} else {
 			//if (!worked)
 			try {
-				if (!ImageIO.write(img, FileUtil.getFileSuffix(file), file)) {
-					JOGLConfiguration.getLogger().log(Level.WARNING,"Error writing file using ImageIO (unsupported file format?)");
+				String suffix = getFileSuffix(file);
+				System.err.println("suffix is "+suffix);
+				if (suffix != "")
+				    if (!ImageIO.write(img, getFileSuffix(file), file)) {
+					    JOGLConfiguration.getLogger().log(Level.WARNING,"Error writing file using ImageIO (unsupported file format?)");
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
+
+	private static String getFileSuffix(File file) {
+		int lastDot = file.getName().lastIndexOf('.');
+		if (lastDot == -1) return "png";
+		return file.getName().substring(lastDot+1);
+	}
+
 
 	public BufferedImage renderOffscreen(int imageWidth, int imageHeight, GLCanvas canvas) {
 		if (!GLDrawableFactory.getFactory().canCreateGLPbuffer()) {
