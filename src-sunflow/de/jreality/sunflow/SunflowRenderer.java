@@ -469,11 +469,13 @@ public class SunflowRenderer extends SunflowAPI {
         float ambient = (float)options.getAmbientOcclusionBright();
         int ambientOcclusionSamples = options.getAmbientOcclusionSamples();
         
-        parameter("gi.engine", "ambocc");
-        parameter("gi.ambocc.bright", new Color(ambient, ambient, ambient));
-        parameter("gi.ambocc.dark", Color.BLACK);
-        parameter("gi.ambocc.samples", ambientOcclusionSamples);
-        parameter("gi.ambocc.maxdist", 100f);
+        if (ambient > 0) {
+	        parameter("gi.engine", "ambocc");
+	        parameter("gi.ambocc.bright", new Color(ambient, ambient, ambient));
+	        parameter("gi.ambocc.dark", Color.BLACK);
+	        parameter("gi.ambocc.samples", ambientOcclusionSamples);
+	        parameter("gi.ambocc.maxdist", 100f);
+        }
         
         options(SunflowAPI.DEFAULT_OPTIONS);
         render(SunflowAPI.DEFAULT_OPTIONS, display);
