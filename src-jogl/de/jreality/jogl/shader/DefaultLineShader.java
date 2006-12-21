@@ -81,7 +81,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	FrameFieldType 	tubeStyle = FrameFieldType.PARALLEL;
 	double	tubeRadius = 0.05,
 		 	lineWidth = 1.0,
-			depthFudgeFactor = 0.999999d;
+			depthFudgeFactor = 0.99999d;
 	boolean smoothLineShading = false, lighting;
 	boolean smoothShading = true;		// this applies to the tubes, not the edges
 	int	lineFactor = 1;
