@@ -110,7 +110,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		if (!inheritTexture2d && !name.startsWith("lineShader") && !name.startsWith("pointShader") )	{
 		    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap))
 		    	texture2Dnew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap);			
-		    System.err.println("Got texture 2d for name "+name);
+		    //System.err.println("Got texture 2d for name "+name);
 		}
 //		JOGLConfiguration.theLog.log(Level.INFO,"Current text2d "+texture2Dnew);
 	    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))

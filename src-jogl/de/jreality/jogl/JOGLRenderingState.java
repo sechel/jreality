@@ -77,6 +77,7 @@ public class JOGLRenderingState {
 	public float[][] subWindowTform = {{1,0,0},{0,1,0}};
 	public boolean localLightModel = false;
 	public boolean separateSpecularColor = false;
+	public boolean ignoreAlpha0 = true;
 	
 	
 	public JOGLRenderingState(JOGLRenderer jr) {

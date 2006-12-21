@@ -74,12 +74,14 @@ import de.jreality.util.LoggingSystem;
 public class DefaultPointShader  extends AbstractPrimitiveShader implements PointShader {
 	double pointSize = 1.0;
 	// on my mac, the only value for the following array that seems to "work" is {1,0,0}.  WHY?
-	float[] pointAttenuation = {0.0f, 0f, 1.00000f};
+	float[] pointAttenuation = {0.0f, 0f, 1.00000f},
+		noPointAttentuation = {1f, 0f, 0f};
 	double	pointRadius = .1;		
 	Color diffuseColor = java.awt.Color.RED;
 	float[] diffuseColorAsFloat;
 	float[] specularColorAsFloat = {0f,1f,1f,1f};		// for texturing point sprite to simulate sphere
 	boolean sphereDraw = false, lighting = true;
+	boolean attenuatePointSize = true;
 	PolygonShader polygonShader = null;
 	Appearance a=new Appearance();
 	Texture2D tex=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a, true);
@@ -99,13 +101,14 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		lightDirection = (double[]) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHT_DIRECTION),lightDirection);
 		lighting = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHTING_ENABLED), true);
 		pointSize = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POINT_SIZE), CommonAttributes.POINT_SIZE_DEFAULT);
+		attenuatePointSize = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.ATTENUATE_POINT_SIZE), CommonAttributes.ATTENUATE_POINT_SIZE_DEFAULT);
 		pointRadius = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
 		diffuseColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.POINT_DIFFUSE_COLOR_DEFAULT);	
 		double t = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
 		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, t);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
 		polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
-
+		//System.err.println("Attenuate point size is "+attenuatePointSize);
 		if (!sphereDraw)	{
 	      if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "pointSprite"), eap))
 	    	  currentTex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "pointSprite"), eap);
@@ -163,6 +166,8 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			ImageData id = new ImageData(sphereTex, textureSize, textureSize) ;
 			tex.setImage(id);
 			tex.setApplyMode(Texture2D.GL_MODULATE);
+			// use nearest filter to avoid corrupting the alpha = 0 transparency trick
+			tex.setMinFilter(Texture2D.GL_NEAREST);
 	}
 
 	/**
@@ -229,12 +234,14 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			lighting = false;
 			gl.glPointSize((float) getPointSize());
 			try {
-				gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, pointAttenuation,0);
+				gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, 
+						attenuatePointSize ? pointAttenuation : noPointAttentuation, 0);
 			} catch (Exception e){
 				//TODO: i dont know - got error on ati radeon 9800
 			}
 			gl.glEnable(GL.GL_POINT_SMOOTH);
 			gl.glEnable(GL.GL_POINT_SPRITE_ARB);
+			// TODO make sure this is OK; perhaps add field to JOGLRenderingState: nextAvailableTextureUnit?
 			gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
 			if (currentTex == tex && (jrs.getCurrentGeometry() instanceof PointSet) && 

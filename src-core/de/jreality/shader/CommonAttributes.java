@@ -125,6 +125,9 @@ import de.jreality.scene.Appearance;
     public final static double POINT_SIZE_DEFAULT = 30.0;
 	public static final Color POINT_DIFFUSE_COLOR_DEFAULT = Color.RED;
 	public final static String SPHERE_RESOLUTION = "sphereResolution";
+	public final static String ATTENUATE_POINT_SIZE = "attenuatePointSize"; // perhaps belongs in rendering hints
+	public final static boolean ATTENUATE_POINT_SIZE_DEFAULT = true;
+	
   // default line shader
 	public final static String TUBES_DRAW = 		"tubeDraw";
 	public final static boolean TUBES_DRAW_DEFAULT = true;

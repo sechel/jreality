@@ -66,7 +66,8 @@ public class RenderingHintsShader  {
 	   useDisplayLists = true,
 	   clearColorBuffer = true,
 	   localLightModel = false,
-	   separateSpecularColor = false;
+	   separateSpecularColor = false,
+	   ignoreAlpha0 = true;
 	   
 
 	/**
@@ -86,6 +87,7 @@ public class RenderingHintsShader  {
 		lightingEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHTING_ENABLED), true);
 		transparencyEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY_ENABLED), false);
 		zBufferEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.Z_BUFFER_ENABLED), false);
+		ignoreAlpha0 = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.IGNORE_ALPHA0), true);
 		antiAliasingEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.ANTIALIASING_ENABLED), false);
 		backFaceCullingEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.BACK_FACE_CULLING_ENABLED), false);
 		isFastAndDirty = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.FAST_AND_DIRTY_ENABLED), false);
@@ -158,6 +160,10 @@ public class RenderingHintsShader  {
 		} else
 			gl.glDisable(GL.GL_CULL_FACE);
 		jr.getRenderingState().levelOfDetail = levelOfDetail;
+		if (ignoreAlpha0 != jr.getRenderingState().ignoreAlpha0)	{
+			gl.glAlphaFunc(ignoreAlpha0 ? GL.GL_GREATER : GL.GL_ALWAYS, 0f);				// alpha = 0 gets ignored in fragment shader: cheap transparency
+			jr.getRenderingState().ignoreAlpha0 = ignoreAlpha0;
+		}
 		if (localLightModel != jr.getRenderingState().localLightModel) {
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_LOCAL_VIEWER, localLightModel ? GL.GL_TRUE : GL.GL_FALSE);
 			jr.getRenderingState().localLightModel = localLightModel;			

@@ -72,6 +72,9 @@ import java.awt.Color;
   Double getPointSize();
   void setPointSize(Double size);
   
+  Boolean getAttenuatePointSize();
+  void setAttenuatePointSize(Boolean b);
+  
   PolygonShader getPolygonShader();
   PolygonShader createPolygonShader(String shaderName);
   
