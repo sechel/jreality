@@ -107,10 +107,10 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		inheritTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name,"inheritTexture2d"), false);	
 		ignoreTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name,"ignoreTexture2d"), false);	
 	    texture2Dnew = null;
-		if (!inheritTexture2d)	{
+		if (!inheritTexture2d && !name.startsWith("lineShader") && !name.startsWith("pointShader") )	{
 		    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap))
 		    	texture2Dnew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap);			
-//		    System.err.println("Got texture 2d");
+		    System.err.println("Got texture 2d for name "+name);
 		}
 //		JOGLConfiguration.theLog.log(Level.INFO,"Current text2d "+texture2Dnew);
 	    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))
@@ -209,11 +209,11 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
     if (reflectionMapNew != null)  {
 	      gl.glActiveTexture(texUnit);
 	      refMapUnit = texUnit;
+	      if (useGLSL) glslShader.reflectionTextureUnit = texUnit;
 	      texUnit++;
 	      Texture2DLoaderJOGL.render(jr, reflectionMapNew);
 	      //testTextureResident(jr, gl);
 	      gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
-	      if (useGLSL) glslShader.reflectionTextureUnit = texUnit;
      } else
     	 if (useGLSL) glslShader.reflectionTextureUnit = -1;
     
@@ -295,13 +295,13 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 			glslShader.postRender(jrs);
 		if (!inheritTexture2d) {
 			for (int i = GL.GL_TEXTURE0; i < texUnit; ++i) {
-				gl.glActiveTexture(GL.GL_TEXTURE0+i);
+				gl.glActiveTexture(i);
 				gl.glDisable(GL.GL_TEXTURE_2D);
 			      //System.err.println("deactivating texture");
 			      			}
 		}
 	    if (ignoreTexture2d) {
-    			gl.glActiveTexture(0);
+    			gl.glActiveTexture(GL.GL_TEXTURE0);
     			gl.glEnable(GL.GL_TEXTURE_2D);
 	    }
 		if (reflectionMapNew != null) {
