@@ -434,16 +434,16 @@ public class JOGLRendererHelper {
 	}
 
 	private static void renderLabels(JOGLRenderer jr, ImageData[] labels, DoubleArrayArray vertices,
-			IntArrayArray indices, double[] offset, int alignment,  double scale) {
-    GL gl = jr.getGL();
+		IntArrayArray indices, double[] offset, int alignment,  double scale) {
+        GL gl = jr.getGL();
 		gl.glEnable(GL.GL_BLEND);
 		gl.glDisable(GL.GL_LIGHTING);
 		gl.glDepthMask(true);
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glColor3d(1, 1, 1);
 		double[] c2o = jr.getContext().getCameraToObject();
-		gl.glEnable(GL.GL_TEXTURE_2D);
 		gl.glActiveTexture(GL.GL_TEXTURE0);
+		gl.glEnable(GL.GL_TEXTURE_2D);
 		double[] bbm = new double[16];
 		// float[] glc2o = new float[16];
 		// double[] dglc2o = new double[16];
@@ -460,7 +460,7 @@ public class JOGLRendererHelper {
 					offset, alignment,
 					c2o, 
 					LabelUtility.positionFor(i, vertices,indices), Pn.EUCLIDEAN);
-			Texture2DLoaderJOGL.render(jr.getGL(), tex2d, true);
+			Texture2DLoaderJOGL.render(gl, tex2d, true);
 			gl.glPushMatrix();
 			gl.glMultTransposeMatrixd(bbm, 0);
 			drawFaces(jr, bb, true, 1.0);
