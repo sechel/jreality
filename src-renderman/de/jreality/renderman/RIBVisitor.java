@@ -532,6 +532,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 		// possibly here call evaluateEffectiveAppearance()
 		object2world.push(c);
 		if (hasProxy(c)) {
+			RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "polygonShader");
+			ri.shader(rs);
 			handleCurrentProxy();
 		} else
 			c.childrenAccept(this);
@@ -983,6 +985,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 		ri.attributeBegin();
 		checkForProxy(g);
 		if (hasProxy((Geometry) g)) {
+			RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "polygonShader");
+			ri.shader(rs);
 			handleCurrentProxy();
 			insidePointset = false;
 		} else {
@@ -1034,7 +1038,7 @@ public class RIBVisitor extends SceneGraphVisitor {
    	        	cc = new Color(raw[0], raw[1], raw[2]); 
    	        	ri.color(cc);  	        		
         	}
-			RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "lineShader.polygonShader");
+			RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "polygonShader");
 			ri.shader(rs);
 //			DefaultPolygonShader xxx = new DefaultPolygonShader(dps);
 //			xxx.setFromEffectiveAppearance(this, eAppearance, "polygonShader");
@@ -1295,14 +1299,14 @@ public class RIBVisitor extends SceneGraphVisitor {
 
 	public void visit(Sphere s) {
 		if (hasProxy(s))return;
-		RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "lineShader.polygonShader");
+		RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "polygonShader");
 		ri.shader(rs);
 		ri.sphere(1f, -1f, 1f, 360f, null);
 	}
 
 	public void visit(Cylinder c) {
 		if (hasProxy(c))return;
-		RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "lineShader.polygonShader");
+		RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "polygonShader");
 		ri.shader(rs);
 		ri.cylinder(1f, -1f, 1f, 360f, null);
 		// TODO Decide whether a jReality Cylinder is closed or not!
