@@ -2,10 +2,8 @@ package de.jreality.renderman;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.awt.image.renderable.ParameterBlock;
-import java.beans.Expression;
 import java.beans.Statement;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -26,10 +23,10 @@ import javax.imageio.ImageWriter;
 import de.jreality.math.Rn;
 import de.jreality.renderman.shader.DefaultPolygonShader;
 import de.jreality.renderman.shader.RendermanShader;
-import de.jreality.renderman.shader.ShaderUtility;
 import de.jreality.renderman.shader.TwoSidePolygonShader;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.PolygonShader;
+import de.jreality.shader.ShaderUtility;
 import de.jreality.util.LoggingSystem;
 
 public class RIBHelper {

@@ -44,9 +44,15 @@ import java.awt.Color;
 
 import de.jreality.math.Rn;
 import de.jreality.renderman.RIBVisitor;
+import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.EffectiveAppearance;
 
-public class RopePolygonShader extends DefaultPolygonShader {
+public class RopePolygonShader extends de.jreality.renderman.shader.DefaultPolygonShader {
+	public RopePolygonShader(DefaultPolygonShader attent) {
+		super(attent);
+		// TODO Auto-generated constructor stub
+	}
+
 	Color band1color = new Color(1f,1f,1f), 
 		band2color = new Color(.8f, .8f, .8f), 
 		shadowcolor = new Color(0f,0f,0f), 
