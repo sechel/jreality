@@ -859,14 +859,6 @@ public class ViewerVR {
 		registerPlugin(new AppearancePluginVR());
 	}
 
-	public void addTerrainAppTab() {
-		registerPlugin(new TerrainAppearancePluginVR());
-	}
-
-	public void addLightTab() {
-		registerPlugin(new LightPluginVR());
-	}
-
 	public void addAlignTab() {
 		registerPlugin(new AlignPluginVR());
 	}
@@ -902,15 +894,18 @@ public class ViewerVR {
 		};
 		vr.addLoadTab(examples);
 		vr.addAlignTab();
-		vr.addAppTab();
+		AppearancePluginVR appPlugin = new AppearancePluginVR();
+		vr.registerPlugin(appPlugin);
 		vr.addEnvTab();
 		vr.addTerrainTab();
 		vr.addToolTab();
 		vr.addTexTab();
-		//vr.addLightTab();
 		vr.setGeneratePickTrees(true);
 		vr.showPanel();
 		ViewerApp vApp = vr.initialize();
+		
+		appPlugin.setFaceColor(new Color(64, 222, 64));
+		
 		vApp.update();
 
 		JFrame f = vApp.display();

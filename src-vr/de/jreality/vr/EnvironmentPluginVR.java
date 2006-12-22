@@ -268,19 +268,21 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 	
 	@Override
 	public void restorePreferences(Preferences prefs) {
-		String customFile = prefs.get("environmentFile", null);
-		if (customFile != null) {
-			File f = new File(customFile);
-			if (f.exists()) customCubeMapFile = f;
-			try {
-				customCubeMap = TextureUtility.createCubeMapData(Input.getInput(f));
-			} catch (IOException e) {
-				e.printStackTrace();
-				customCubeMapFile = null;
+		String env = prefs.get("environment", DEFAULT_ENVIRONMENT);
+		if ("custom".equals(env)) {
+			String customFile = prefs.get("environmentFile", null);
+			if (customFile != null) {
+				File f = new File(customFile);
+				if (f.exists()) customCubeMapFile = f;
+				try {
+					customCubeMap = TextureUtility.createCubeMapData(Input.getInput(f));
+				} catch (IOException e) {
+					e.printStackTrace();
+					customCubeMapFile = null;
+				}
 			}
 		}
-
-		setEnvironment(prefs.get("environment", DEFAULT_ENVIRONMENT));
+		setEnvironment(env);
 		setSkyBoxHidden(prefs.getBoolean("skyBoxHidden", DEFAULT_SKYBOX_HIDDEN));
 		int r = prefs.getInt("backgroundColorRed", DEFAULT_BACKGROUND_COLOR.getRed());
 		int g = prefs.getInt("backgroundColorGreen", DEFAULT_BACKGROUND_COLOR.getGreen());
