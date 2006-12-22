@@ -321,14 +321,13 @@ public class Texture2DLoaderJOGL {
     
     if (tex.getApplyMode() == Texture2D.GL_COMBINE) 
     {
-      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_COMBINE);
-      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, tex.getCombineMode());
-      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE0_RGB, GL.GL_TEXTURE);
-      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND0_RGB, GL.GL_SRC_COLOR);
-      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE1_RGB, GL.GL_PREVIOUS);
-      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND1_RGB, GL.GL_SRC_COLOR);
-      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE2_RGB, GL.GL_CONSTANT);
-      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND2_RGB, GL.GL_SRC_ALPHA);
+      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, tex.getCombineModeColor());
+      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE0_RGB, tex.getSource0Color()); //GL.GL_TEXTURE);
+      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND0_RGB, tex.getOperand0Color()); // GL.GL_SRC_COLOR);
+      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE1_RGB, tex.getSource1Color()); //GL.GL_PREVIOUS);
+      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND1_RGB, tex.getOperand1Color()); //GL.GL_SRC_COLOR);
+      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE2_RGB, tex.getSource2Color()); // GL.GL_CONSTANT);
+      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND2_RGB,tex.getOperand2Color()); // GL.GL_SRC_ALPHA);
       
     }    
     gl.glMatrixMode(GL.GL_TEXTURE);

@@ -77,8 +77,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	
 	boolean		smoothShading = true;		// interpolate shaded values between vertices
 	Texture2D texture2Dnew;
-	Texture2D lightMapNew;
-	CubeMap reflectionMapNew;
+	Texture2D lightMap;
+	CubeMap reflectionMap;
 	int frontBack = FRONT_AND_BACK;
 	public VertexShader vertexShader = null;
 	boolean useGLSL = false;
@@ -87,9 +87,9 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	Appearance ap = new Appearance();
 	GlslDefaultPolygonShader glslShader;
 	EffectiveAppearance myEap = null;
-	boolean inheritTexture2d = false;
 	boolean inheritGLSL = false;
-	boolean ignoreTexture2d = false;
+//	boolean inheritTexture2d = false;
+//	boolean ignoreTexture2d = false;
 	/**
 		 * 
 		 */
@@ -104,21 +104,21 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		super.setFromEffectiveAppearance(eap,name);
 		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);	
 		useGLSL = eap.getAttribute(ShaderUtility.nameSpace(name,"useGLSL"), false);	
-		inheritTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name,"inheritTexture2d"), false);	
-		ignoreTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name,"ignoreTexture2d"), false);	
+//		inheritTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name,"inheritTexture2d"), false);	
+//		ignoreTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name,"ignoreTexture2d"), false);	
 	    texture2Dnew = null;
-		if (!inheritTexture2d && !name.startsWith("lineShader") && !name.startsWith("pointShader") )	{
-		    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap))
-		    	texture2Dnew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap);			
+//		if (!inheritTexture2d && !name.startsWith("lineShader") && !name.startsWith("pointShader") )	{
+		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap))
+		    	texture2Dnew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap);			
 		    //System.err.println("Got texture 2d for name "+name);
-		}
+//		}
 //		JOGLConfiguration.theLog.log(Level.INFO,"Current text2d "+texture2Dnew);
 	    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))
-	    	reflectionMapNew = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));
-	    else reflectionMapNew = null;
+	    	reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));
+	    else reflectionMap = null;
 	    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap))
-	    	lightMapNew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap);
-	    else lightMapNew = null;
+	    	lightMap = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap);
+	    else lightMap = null;
       
 		inheritGLSL= eap.getAttribute(ShaderUtility.nameSpace(name,"inheritGLSL"), false);	
 	    if (!inheritGLSL)		{
@@ -185,44 +185,44 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 //		}
 		texUnit = GL.GL_TEXTURE0;
 
-    if (texture2Dnew != null) {
+	    if (lightMap != null) {
+		      gl.glActiveTexture(texUnit);
+		      gl.glEnable(GL.GL_TEXTURE_2D);
+		      Texture2DLoaderJOGL.render(gl, lightMap);
+		      texUnit++;
+	    }
+	    
+	    if (texture2Dnew != null) {
 	      gl.glActiveTexture(texUnit);
-		  texUnit++;
 	      Texture2DLoaderJOGL.render(gl, texture2Dnew);
-	      testTextureResident(jr, gl);
 	      gl.glEnable(GL.GL_TEXTURE_2D);
+		  texUnit++;
 //	      System.err.println("activating texture");
-    }
-    if (ignoreTexture2d) {
-    		gl.glActiveTexture(0);
-    	    gl.glDisable(GL.GL_TEXTURE_2D);
-    }
+	    }
+//    if (ignoreTexture2d) {
+//    		gl.glActiveTexture(0);
+//    	    gl.glDisable(GL.GL_TEXTURE_2D);
+//    }
 
-    if (lightMapNew != null) {
-	      gl.glActiveTexture(texUnit);
-	      texUnit++;
-	      Texture2DLoaderJOGL.render(gl, lightMapNew);
-	      testTextureResident(jr, gl);
-	      gl.glEnable(GL.GL_TEXTURE_2D);
-    }
+	    if (reflectionMap != null)  {
+	      	gl.glActiveTexture(texUnit);
+			gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
+			refMapUnit = texUnit;
+			if (useGLSL) glslShader.reflectionTextureUnit = texUnit;
+			Texture2DLoaderJOGL.render(jr, reflectionMap);
+			// testTextureResident(jr, gl);
+			texUnit++;
+		} else if (useGLSL)
+			glslShader.reflectionTextureUnit = -1;
     
-    if (reflectionMapNew != null)  {
-	      gl.glActiveTexture(texUnit);
-	      refMapUnit = texUnit;
-	      if (useGLSL) glslShader.reflectionTextureUnit = texUnit;
-	      texUnit++;
-	      Texture2DLoaderJOGL.render(jr, reflectionMapNew);
-	      //testTextureResident(jr, gl);
-	      gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
-     } else
-    	 if (useGLSL) glslShader.reflectionTextureUnit = -1;
-    
+	if (texUnit > 0) testTextureResident(jr, gl);
+	jr.getRenderingState().texUnitCount = texUnit - GL.GL_TEXTURE0;
     vertexShader.setFrontBack(frontBack);
 	vertexShader.render(jrs);    	
     if (useGLSL)		{
     	//if (frontBack == FRONT_AND_BACK)	gl.glDisable(GL.GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
     	//else gl.glEnable(GL.GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
-    		glslShader.render(jrs);
+    	glslShader.render(jrs);
     } //else {
    // }
     jrs.setCurrentAlpha(vertexShader.getDiffuseColorAsFloat()[3]);
@@ -293,18 +293,18 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		GL gl = jrs.getGL();
 		if (useGLSL)
 			glslShader.postRender(jrs);
-		if (!inheritTexture2d) {
+//		if (!inheritTexture2d) {
 			for (int i = GL.GL_TEXTURE0; i < texUnit; ++i) {
 				gl.glActiveTexture(i);
 				gl.glDisable(GL.GL_TEXTURE_2D);
 			      //System.err.println("deactivating texture");
 			      			}
-		}
-	    if (ignoreTexture2d) {
-    			gl.glActiveTexture(GL.GL_TEXTURE0);
-    			gl.glEnable(GL.GL_TEXTURE_2D);
-	    }
-		if (reflectionMapNew != null) {
+//		}
+//	    if (ignoreTexture2d) {
+//    			gl.glActiveTexture(GL.GL_TEXTURE0);
+//    			gl.glEnable(GL.GL_TEXTURE_2D);
+//	    }
+		if (reflectionMap != null) {
 			gl.glActiveTexture(refMapUnit);
 			gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
 			gl.glDisable(GL.GL_TEXTURE_GEN_S);

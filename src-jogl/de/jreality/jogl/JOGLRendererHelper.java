@@ -613,7 +613,6 @@ public class JOGLRendererHelper {
 			return;
 		GL gl = jr.getGL();
 		boolean pickMode = jr.isPickMode();
-
 		int colorBind = -1, normalBind, colorLength = 3;
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		DataList vertexNormals = sg.getVertexAttributes(Attribute.NORMALS);
@@ -666,7 +665,7 @@ public class JOGLRendererHelper {
 		// JOGLConfiguration.theLog.log(Level.INFO,("Normals have length
 		// "+vlength);
 		// }
-		DoubleArray da;
+		DoubleArray da = null;
 		boolean isQuadMesh = false;
 		boolean isRegularDomainQuadMesh = false;
 		Rectangle2D theDomain = null;
@@ -745,21 +744,19 @@ public class JOGLRendererHelper {
 										alpha * da.getValueAt(3));
 							}
 						}
-						if (texCoords != null) {
-							da = texCoords.item(vnn).toDoubleArray();
-							gl.glMultiTexCoord2d(GL.GL_TEXTURE0, da
-									.getValueAt(0), da.getValueAt(1));
-						}
-						if (lightMapCoords != null) {
-							da = lightMapCoords.item(vnn).toDoubleArray();
-							gl.glMultiTexCoord2d(GL.GL_TEXTURE1, da
-									.getValueAt(0), da.getValueAt(1));
+						for (int nn = 0; nn<jr.getRenderingState().texUnitCount; ++nn)	{
+							int texunit = GL.GL_TEXTURE0+nn;
+							if (nn == 0 && lightMapCoords != null) {
+								da = lightMapCoords.item(vnn).toDoubleArray();
+							}
+							else if (texCoords != null) {
+								da = texCoords.item(vnn).toDoubleArray();
+							}
+							gl.glMultiTexCoord2d(texunit, da.getValueAt(0), da.getValueAt(1));
 						}
 						da = vertices.item(vnn).toDoubleArray();
-						if (vertexLength == 1 && isRegularDomainQuadMesh) { // Regular
-																			// domain
-																			// quad
-																			// mesh
+						if (vertexLength == 1 && isRegularDomainQuadMesh) {
+																			
 							double z = da.getValueAt(0);
 							HeightFieldFactory.getCoordinatesForUV(pt,
 									theDomain, u, v, maxU, maxV);
@@ -818,16 +815,15 @@ public class JOGLRendererHelper {
 									.getValueAt(2), alpha * da.getValueAt(3));
 						}
 					}
-					if (texCoords != null) {
-						da = texCoords.item(k).toDoubleArray();
-						gl.glMultiTexCoord2d(GL.GL_TEXTURE0, da.getValueAt(0),
-								da.getValueAt(1));
-						// gl.glTexCoord2d(da.getValueAt(0), da.getValueAt(1));
-					}
-					if (lightMapCoords != null) {
-						da = lightMapCoords.item(k).toDoubleArray();
-						gl.glMultiTexCoord2d(GL.GL_TEXTURE1, da.getValueAt(0),
-								da.getValueAt(1));
+					for (int nn = 0; nn<jr.getRenderingState().texUnitCount; ++nn)	{
+						int texunit = GL.GL_TEXTURE0+nn;
+						if (nn == 0 && lightMapCoords != null) {
+							da = lightMapCoords.item(k).toDoubleArray();
+						}
+						else if (texCoords != null) {
+							da = texCoords.item(k).toDoubleArray();
+						}
+						gl.glMultiTexCoord2d(texunit, da.getValueAt(0), da.getValueAt(1));
 					}
 					da = vertices.item(k).toDoubleArray();
 					if (vertexLength == 3)

@@ -78,6 +78,7 @@ public class JOGLRenderingState {
 	public boolean localLightModel = false;
 	public boolean separateSpecularColor = false;
 	public boolean ignoreAlpha0 = true;
+	public int texUnitCount = 0;
 	
 	
 	public JOGLRenderingState(JOGLRenderer jr) {
