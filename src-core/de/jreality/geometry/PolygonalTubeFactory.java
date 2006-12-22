@@ -183,6 +183,7 @@ import de.jreality.scene.data.StorageModel;
 		qmf = new QuadMeshFactory();
 		qmf.setSignature(signature);
 //		System.err.println("PTF: sig = "+signature);
+		qmf.setGenerateTextureCoordinates(generateTextureCoordinates && !arcLengthTextureCoordinates);
 		qmf.setULineCount(crossSection.length);
 		qmf.setVLineCount(theTubeVertices.length/crossSection.length);
 		qmf.setClosedInUDirection(true);
@@ -196,7 +197,6 @@ import de.jreality.scene.data.StorageModel;
 				qmf.setVertexTextureCoordinates(arcLengthTextureCoordinates(theCurve, crossSection, signature));
 			}
 		}
-		qmf.setGenerateTextureCoordinates(generateTextureCoordinates && !arcLengthTextureCoordinates);
 		qmf.update();
 		theTube = qmf.getIndexedFaceSet();
 		if (vertexColors != null || edgeColors != null)	{
