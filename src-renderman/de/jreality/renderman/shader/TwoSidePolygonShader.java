@@ -54,6 +54,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
+import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
@@ -68,94 +69,106 @@ public class TwoSidePolygonShader extends AbstractRendermanShader {
   CubeMap reflectionMap;  
   
   static int count = 0;
-  public Map getAttributes() {
-    return map;
+  de.jreality.shader.TwoSidePolygonShader tsps;
+  DefaultPolygonShader front, back;
+  de.jreality.renderman.shader.DefaultPolygonShader rfront, rback;
+  
+  public TwoSidePolygonShader(de.jreality.shader.TwoSidePolygonShader xxx)	{
+	  super();
+	  tsps = xxx;
+	  front = (DefaultPolygonShader) tsps.getFront();
+	  back = (DefaultPolygonShader) tsps.getBack();
+	  rfront = new de.jreality.renderman.shader.DefaultPolygonShader(front);
+	  rback = new de.jreality.renderman.shader.DefaultPolygonShader(back);
   }
   
+
   public void setFromEffectiveAppearance(RIBVisitor ribv, EffectiveAppearance eap, String name) {    
     map.clear();
-    setFromEffectiveAppearance(ribv, eap, name, "front");
-    setFromEffectiveAppearance(ribv, eap, name, "back");
+    rfront.setFromEffectiveAppearance(ribv, eap, name, "front");
+    rback.setFromEffectiveAppearance(ribv, eap, name, "back");
+    map.putAll(rfront.getAttributes());
+    map.putAll(rback.getAttributes());
   }
   
   
-  public void setFromEffectiveAppearance(RIBVisitor ribv, EffectiveAppearance eap, String name, String side) {
-
-    int signature = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-    boolean lighting = (boolean) eap.getAttribute(name+"."+side+"."+CommonAttributes.LIGHTING_ENABLED, true);
-    float specularExponent =(float) eap.getAttribute(name+"."+side+"."+CommonAttributes.SPECULAR_EXPONENT,CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
-    float Ks =(float) eap.getAttribute(name+"."+side+"."+CommonAttributes.SPECULAR_COEFFICIENT,CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);
-    float Kd =(float) eap.getAttribute(name+"."+side+"."+CommonAttributes.DIFFUSE_COEFFICIENT,CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
-    float Ka =(float) eap.getAttribute(name+"."+side+"."+CommonAttributes.AMBIENT_COEFFICIENT,CommonAttributes.AMBIENT_COEFFICIENT_DEFAULT);
-    Color diffusecolor =(Color) eap.getAttribute(name+"."+side+"."+CommonAttributes.DIFFUSE_COLOR, CommonAttributes.DIFFUSE_COLOR_DEFAULT);
-    Color specularcolor =(Color) eap.getAttribute(name+"."+side+"."+CommonAttributes.SPECULAR_COLOR, CommonAttributes.SPECULAR_COLOR_DEFAULT);
-    map.put("float roughness"+side,new Float(1/specularExponent));
-    map.put("float Ks"+side,new Float(Ks));
-    map.put("float Kd"+side,new Float(Kd));
-    map.put("float Ka"+side,new Float(Ka));
-    
-    map.put("color diffusecolor"+side,diffusecolor);
-    map.put("color specularcolor"+side,specularcolor);
-    map.put("float lighting"+side, new Float( lighting ? 1 : 0));
-    
-    if((boolean) eap.getAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false))
-      map.put("float transparencyenabled"+side,new Float(1));
-    else
-      map.put("float transparencyenabled"+side,new Float(0));    
-    
-    if (signature != Pn.EUCLIDEAN) {
-      map.put("signature", signature);
-      map.put("objectToCamera", RIBHelper.fTranspose(ribv.getCurrentObjectToCamera()));
-      shaderName = "noneuclideantwosidepolygonshader";
-    }
-    else shaderName ="twosidepolygonshader" ;
-    boolean ignoreTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name+"."+side,"ignoreTexture2d"), false);	
-    if (!ignoreTexture2d && AttributeEntityUtility.hasAttributeEntity(Texture2D.class, name+"."+side+".texture2d", eap)) {
-      Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name+"."+side,"texture2d"), eap);
-      
-      String fname = null;
-      fname = (String) eap.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE,"");
-      if (fname == "")	{
-        fname = null;
-      } 
-      if (fname == null) {
-        fname = new File(ribv.writeTexture(tex)).getName();
-      }
-      // removed texfile path stripping -> is just the filename without path now. 
-      map.put("string texturename",fname);
-      Matrix textureMatrix = tex.getTextureMatrix();
-      double[] mat = textureMatrix.getArray();
-      if(mat != null && !Rn.isIdentityMatrix(mat, 10E-8)) {
-        map.put("float[16] tm", RIBHelper.fTranspose(mat));
-      }
-    }
-    
-    
-    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name+"."+side,"reflectionMap"), eap))
-    {
-      reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name+"."+side,"reflectionMap"));
-      if((boolean) eap.getAttribute(CommonAttributes.RMAN_RAY_TRACING_REFLECTIONS,false))
-        map.put("float raytracedreflections", new Float(1));
-      else{
-        map.put("float raytracedreflections", new Float(0));
-        String fname = (String) eap.getAttribute(CommonAttributes.RMAN_REFLECTIONMAP_FILE,"");
-        if (fname == "") {
-          fname = null;
-        }
-        if (fname == null) {
-          fname = new File(ribv.writeCubeMap(reflectionMap)).getName();
-        }
-        map.put("string reflectionmap", fname);
-      }
-      map.put("float reflectionBlend"+side, new Float(reflectionMap.getBlendColor().getAlpha()/255.0));
-    }    
-    
-    //volume shaders
-    Object obj1 = eap.getAttribute(CommonAttributes.RMAN_VOLUME_INTERIOR_SHADER, Appearance.INHERITED,SLShader.class);
-    Object obj2 = eap.getAttribute(CommonAttributes.RMAN_VOLUME_EXTERIOR_SHADER, Appearance.INHERITED,SLShader.class);     
-    if((obj1 != Appearance.INHERITED && (boolean) eap.getAttribute(CommonAttributes.RMAN_RAY_TRACING_VOLUMES,false))||obj2 != Appearance.INHERITED)
-      map.put("float raytracedvolumes", new Float(1));    
-  }
+//  public void setFromEffectiveAppearance(RIBVisitor ribv, EffectiveAppearance eap, String name, String side) {
+//
+//    int signature = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
+//    boolean lighting = (boolean) eap.getAttribute(name+"."+side+"."+CommonAttributes.LIGHTING_ENABLED, true);
+//    float specularExponent =(float) eap.getAttribute(name+"."+side+"."+CommonAttributes.SPECULAR_EXPONENT,CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
+//    float Ks =(float) eap.getAttribute(name+"."+side+"."+CommonAttributes.SPECULAR_COEFFICIENT,CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);
+//    float Kd =(float) eap.getAttribute(name+"."+side+"."+CommonAttributes.DIFFUSE_COEFFICIENT,CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
+//    float Ka =(float) eap.getAttribute(name+"."+side+"."+CommonAttributes.AMBIENT_COEFFICIENT,CommonAttributes.AMBIENT_COEFFICIENT_DEFAULT);
+//    Color diffusecolor =(Color) eap.getAttribute(name+"."+side+"."+CommonAttributes.DIFFUSE_COLOR, CommonAttributes.DIFFUSE_COLOR_DEFAULT);
+//    Color specularcolor =(Color) eap.getAttribute(name+"."+side+"."+CommonAttributes.SPECULAR_COLOR, CommonAttributes.SPECULAR_COLOR_DEFAULT);
+//    map.put("float roughness"+side,new Float(1/specularExponent));
+//    map.put("float Ks"+side,new Float(Ks));
+//    map.put("float Kd"+side,new Float(Kd));
+//    map.put("float Ka"+side,new Float(Ka));
+//    
+//    map.put("color diffusecolor"+side,diffusecolor);
+//    map.put("color specularcolor"+side,specularcolor);
+//    map.put("float lighting"+side, new Float( lighting ? 1 : 0));
+//    
+//    if((boolean) eap.getAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false))
+//      map.put("float transparencyenabled"+side,new Float(1));
+//    else
+//      map.put("float transparencyenabled"+side,new Float(0));    
+//    
+//    if (signature != Pn.EUCLIDEAN) {
+//      map.put("signature", signature);
+//      map.put("objectToCamera", RIBHelper.fTranspose(ribv.getCurrentObjectToCamera()));
+//      shaderName = "noneuclideantwosidepolygonshader";
+//    }
+//    else shaderName ="twosidepolygonshader" ;
+//    boolean ignoreTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name+"."+side,"ignoreTexture2d"), false);	
+//    if (!ignoreTexture2d && AttributeEntityUtility.hasAttributeEntity(Texture2D.class, name+"."+side+".texture2d", eap)) {
+//      Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name+"."+side,"texture2d"), eap);
+//      
+//      String fname = null;
+//      fname = (String) eap.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE,"");
+//      if (fname == "")	{
+//        fname = null;
+//      } 
+//      if (fname == null) {
+//        fname = new File(ribv.writeTexture(tex)).getName();
+//      }
+//      // removed texfile path stripping -> is just the filename without path now. 
+//      map.put("string texturename",fname);
+//      Matrix textureMatrix = tex.getTextureMatrix();
+//      double[] mat = textureMatrix.getArray();
+//      if(mat != null && !Rn.isIdentityMatrix(mat, 10E-8)) {
+//        map.put("float[16] tm", RIBHelper.fTranspose(mat));
+//      }
+//    }
+//    
+//    
+//    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name+"."+side,"reflectionMap"), eap))
+//    {
+//      reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name+"."+side,"reflectionMap"));
+//      if((boolean) eap.getAttribute(CommonAttributes.RMAN_RAY_TRACING_REFLECTIONS,false))
+//        map.put("float raytracedreflections", new Float(1));
+//      else{
+//        map.put("float raytracedreflections", new Float(0));
+//        String fname = (String) eap.getAttribute(CommonAttributes.RMAN_REFLECTIONMAP_FILE,"");
+//        if (fname == "") {
+//          fname = null;
+//        }
+//        if (fname == null) {
+//          fname = new File(ribv.writeCubeMap(reflectionMap)).getName();
+//        }
+//        map.put("string reflectionmap", fname);
+//      }
+//      map.put("float reflectionBlend"+side, new Float(reflectionMap.getBlendColor().getAlpha()/255.0));
+//    }    
+//    
+//    //volume shaders
+//    Object obj1 = eap.getAttribute(CommonAttributes.RMAN_VOLUME_INTERIOR_SHADER, Appearance.INHERITED,SLShader.class);
+//    Object obj2 = eap.getAttribute(CommonAttributes.RMAN_VOLUME_EXTERIOR_SHADER, Appearance.INHERITED,SLShader.class);     
+//    if((obj1 != Appearance.INHERITED && (boolean) eap.getAttribute(CommonAttributes.RMAN_RAY_TRACING_VOLUMES,false))||obj2 != Appearance.INHERITED)
+//      map.put("float raytracedvolumes", new Float(1));    
+//  }
   
   public String getType() {
     return "Surface";

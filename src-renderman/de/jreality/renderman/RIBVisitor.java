@@ -43,10 +43,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -62,9 +58,7 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
-import de.jreality.renderman.shader.DefaultPolygonShader;
 import de.jreality.renderman.shader.RendermanShader;
-import de.jreality.renderman.shader.ShaderLookup;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.ClippingPlane;
@@ -85,16 +79,20 @@ import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
-import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
+import de.jreality.shader.DefaultGeometryShader;
+import de.jreality.shader.DefaultLineShader;
+import de.jreality.shader.DefaultPointShader;
+import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
+import de.jreality.shader.PolygonShader;
+import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
-import de.jreality.shader.TextureUtility;
 import de.jreality.util.CameraUtility;
 
 /**
@@ -103,7 +101,7 @@ import de.jreality.util.CameraUtility;
  * <p>
  * <b>TODO list and Known issues</b>:
  * <ul>
- * <li> "twoSided", "implode", "flat" polygon shaders not supported</li>
+ * <li> "implode", "flat" polygon shaders not supported</li>
  * <li> imager shaders not supported
  * <li> Clipping planes written but not tested</li>
  * <li> Add control over global options using (something like) "renderingHints"
@@ -138,7 +136,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 	transient private int height = 480;
 	transient private String ribFileName;
 	transient private int[] maximumEyeSplits = { 10 };
-	transient boolean insidePointset = false; 
 	transient protected boolean shadowEnabled = false;
 	transient private boolean fogEnabled=false;
 	transient protected boolean fullSpotLight = false;
@@ -162,7 +159,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	transient SceneGraphComponent currentProxySGC = null;
 	
 	transient protected String shaderPath = null;
-	transient protected EffectiveAppearance eAppearance = EffectiveAppearance.create();
+	transient public EffectiveAppearance eAppearance = EffectiveAppearance.create();
 	transient private int textureCount = 0;
 	transient private Map<ImageData, String> textures = new HashMap<ImageData, String>();
 	transient private Hashtable<PointSet, String> pointsets = new Hashtable<PointSet, String>();
@@ -180,6 +177,11 @@ public class RIBVisitor extends SceneGraphVisitor {
 	private HashMap<ImageData, String> cubeMaps = new HashMap<ImageData, String>();
 	private int cubeMapCount;
 	private String cubeMapFileSuffix = "env";
+	protected DefaultGeometryShader dgs;
+	protected RenderingHintsShader rhs;
+	protected DefaultPolygonShader dps;
+	protected DefaultLineShader dls;
+	protected DefaultPointShader dvs;
 
 	public void visit(Viewer viewer, String name) {
 		// handle the file name
@@ -194,7 +196,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 
 		// register standard shaders for render script
 		renderScript.addShader("defaultpolygonshader.sl");
-    renderScript.addShader("twosidepolygonshader.sl");
+        renderScript.addShader("twosidepolygonshader.sl");
 		renderScript.addShader("constantTexture.sl");
 
 		int index = ribFileName.lastIndexOf(File.separatorChar);
@@ -225,16 +227,12 @@ public class RIBVisitor extends SceneGraphVisitor {
 			// first!
 			whichEye = CameraUtility.LEFT_EYE;
 			index = ribFileName.lastIndexOf(File.separator);
-			outputFileName = ribFileName.substring(index + 1, ribFileName
-					.length() - 4)
-					+ "L.tif";
+			outputFileName = ribFileName.substring(index + 1, ribFileName.length() - 4)+ "L.tif";
 			ri.frameBegin(0);
 			render();
 			ri.frameEnd();
 			whichEye = CameraUtility.RIGHT_EYE;
-			outputFileName = ribFileName.substring(index + 1, ribFileName
-					.length() - 4)
-					+ "R.tif";
+			outputFileName = ribFileName.substring(index + 1, ribFileName.length() - 4)+ "R.tif";
 			ri.frameBegin(1);
 			render();
 			ri.frameEnd();
@@ -259,10 +257,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 		// (OpenGL supports this) (can we do this here by generating our own
 		// matrices?)
 		// TODO figure out how to specify RI_INFINITY in a RIB file
-		ri.clipping(camera.getNear(), (camera.getFar() > 0) ? camera.getFar()
-				: 1000.0);
-		ri.depthOfField(camera.getFStop(), camera.getFocalLength(), camera
-				.getFocus());
+		ri.clipping(camera.getNear(), (camera.getFar() > 0) ? camera.getFar(): 1000.0);
+		ri.depthOfField(camera.getFStop(), camera.getFocalLength(), camera.getFocus());
 		boolean testCameraExplicit = false;
 		double aspectRatio = ((double) width) / height;
 		if (testCameraExplicit) {
@@ -334,8 +330,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 		if (outputDisplayFormat != "rgba")
 			handleBackground();   
     
-    if(fogEnabled)
-      handleFog();    
+        if(fogEnabled)
+             handleFog();    
     
 		// finally render the scene graph
 		root.accept(this);
@@ -356,10 +352,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 				CommonAttributes.RMAN_TEXTURE_FILE_SUFFIX, "tex");
 		shadowEnabled = eAppearance.getAttribute(
 				CommonAttributes.RMAN_SHADOWS_ENABLED, false);
-    raytracedReflectionsEnabled = eAppearance.getAttribute(
-        CommonAttributes.RMAN_RAY_TRACING_REFLECTIONS, false);
-    raytracedVolumesEnabled = eAppearance.getAttribute(
-        CommonAttributes.RMAN_RAY_TRACING_VOLUMES, false);
+		raytracedReflectionsEnabled = eAppearance.getAttribute(
+				CommonAttributes.RMAN_RAY_TRACING_REFLECTIONS, false);
+		raytracedVolumesEnabled = eAppearance.getAttribute(
+				CommonAttributes.RMAN_RAY_TRACING_VOLUMES, false);
 		currentSignature = eAppearance.getAttribute(CommonAttributes.SIGNATURE,
 				Pn.EUCLIDEAN);
 		outputDisplayFormat = (String) eAppearance.getAttribute(
@@ -367,9 +363,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		globalIncludeFile = (String) eAppearance.getAttribute(
 				CommonAttributes.RMAN_GLOBAL_INCLUDE_FILE, "");
 		if(!globalIncludeFile.equals("")) System.err.println("Preamble is " + globalIncludeFile);    
-    fogEnabled=(boolean)eAppearance.getAttribute(CommonAttributes.FOG_ENABLED, CommonAttributes.FOG_ENABLED_DEFAULT);   
-	
-
+		fogEnabled=(boolean)eAppearance.getAttribute(CommonAttributes.FOG_ENABLED, CommonAttributes.FOG_ENABLED_DEFAULT);   
   }
 
 	/**
@@ -433,6 +427,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	private void handleBackground() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		Appearance ap = root.getAppearance();
+		updateShaders(eAppearance);
 		if (ap != null) {
 			if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
 					CommonAttributes.SKY_BOX, ap)) {
@@ -510,7 +505,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 
 	private static void writeStandardShaders(String name) {
 		RIBHelper.writeShader(name, "defaultpolygonshader.sl");
-    RIBHelper.writeShader(name, "twosidepolygonshader.sl");
+		RIBHelper.writeShader(name, "twosidepolygonshader.sl");
 		RIBHelper.writeShader(name, "noneuclideanpolygonshader.sl");
 		RIBHelper.writeShader(name, "noneuclideanlight.sl");
 		RIBHelper.writeShader(name, "constantTexture.sl");
@@ -527,18 +522,16 @@ public class RIBVisitor extends SceneGraphVisitor {
 	 * Visit methods start here
 	 */
 	public void visit(SceneGraphComponent c) {
-		if (!c.isVisible())
-			return;
+		if (!c.isVisible())    return;
+		
 		EffectiveAppearance tmp = eAppearance;
 		Appearance a = c.getAppearance();
 		ri.attributeBegin(c.getName());
-		if (a != null) {
-			eAppearance = eAppearance.create(a);
-		}
+		if (a != null) 	eAppearance = eAppearance.create(a);
+		readAttributesFromEffectiveAppearance(eAppearance);
 		// possibly here call evaluateEffectiveAppearance()
 		object2world.push(c);
 		if (hasProxy(c)) {
-			setupShader(eAppearance, CommonAttributes.POLYGON_SHADER);	// not perfect but better than nothing
 			handleCurrentProxy();
 		} else
 			c.childrenAccept(this);
@@ -556,7 +549,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	public void visit(Appearance a) {
 	}
 
-private void setupShader(EffectiveAppearance eap, String type) {
+	private void readAttributesFromEffectiveAppearance(EffectiveAppearance eap) {
     // TODO
 	// split this up into at least two methods.  
 	// One ("evaluateEffectiveAppearance") 
@@ -573,7 +566,7 @@ private void setupShader(EffectiveAppearance eap, String type) {
 //    ri.verbatim("Attribute \"visibility\"  \"int specular\" [1]");
 //    }
     
-		Map m = (Map) eap.getAttribute("rendermanAttribute", null, Map.class);
+		Map m = (Map) eap.getAttribute(CommonAttributes.RMAN_ATTRIBUTE, null, Map.class);
 		if (m != null) {
 			for (Iterator i = m.keySet().iterator(); i.hasNext();) {
 				String key = (String) i.next();
@@ -581,74 +574,74 @@ private void setupShader(EffectiveAppearance eap, String type) {
 			}
 		}
 		// read current values from the effective appearance
-		currentSignature = eap.getAttribute(CommonAttributes.SIGNATURE,
-				Pn.EUCLIDEAN);
-		opaqueTubes = eap.getAttribute(
-				CommonAttributes.OPAQUE_TUBES_AND_SPHERES,
-				CommonAttributes.OPAQUE_TUBES_AND_SPHERES_DEFAULT);
-		retainGeometry = eap.getAttribute(
-				CommonAttributes.RMAN_RETAIN_GEOMETRY, false); 
-
-		transparencyEnabled = (boolean) eap.getAttribute(type + "."
-				+ CommonAttributes.TRANSPARENCY_ENABLED, true);
+		currentSignature = eap.getAttribute(CommonAttributes.SIGNATURE,Pn.EUCLIDEAN);
+		retainGeometry = eap.getAttribute(CommonAttributes.RMAN_RETAIN_GEOMETRY, false); 
+		opaqueTubes = rhs.getOpaqueTubesAndSpheres();
+		transparencyEnabled = rhs.getTransparencyEnabled();
 		double transparency = 0.0;
 		if (transparencyEnabled)
-			transparency = eap.getAttribute(type + "."
-					+ CommonAttributes.TRANSPARENCY,
-					CommonAttributes.TRANSPARENCY_DEFAULT);
+			transparency = eap.getAttribute(CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
 
-		Object color = eap.getAttribute(type + "."
-				+ CommonAttributes.DIFFUSE_COLOR,
-				CommonAttributes.DIFFUSE_COLOR_DEFAULT);
+		Object color = eap.getAttribute(CommonAttributes.DIFFUSE_COLOR,CommonAttributes.DIFFUSE_COLOR_DEFAULT);
 		float colorAlpha = 1.0f;
 		if (color != Appearance.INHERITED) {
 			float[] c = ((Color) color).getRGBComponents(null);
 			if (c.length == 4)
 				colorAlpha = c[3];
 			float[] rgb = new float[] { c[0], c[1], c[2] };
-			ri.color(rgb);
+//			ri.color(rgb);
 		}
 
 		currentOpacity = 1f - (float) transparency;
 		currentOpacity *= colorAlpha;
 		if ((handlingProxyGeometry && opaqueTubes))
 			currentOpacity = 1f;
-		ri.opacity(currentOpacity);
+//		ri.opacity(currentOpacity);
 		
-		Object obj = eap.getAttribute(CommonAttributes.RMAN_DISPLACEMENT_SHADER, Appearance.INHERITED,
-				SLShader.class);
+		/** 
+		 * evaluate the special shaders which might be specified in the effective appearance:
+		 * displacement, imager, and interior and exterior volume shaders
+		 * The values of the attributes are instances of de.jreality.renderman.shader.SLShader
+		**/
+		Object obj = eap.getAttribute(CommonAttributes.RMAN_DISPLACEMENT_SHADER, Appearance.INHERITED,SLShader.class);
 		if (obj != Appearance.INHERITED) {
 			SLShader slShader = (SLShader) obj;
 			ri.displacement(slShader.getName(), slShader.getParameters());
-      
 		}
-    obj = eap.getAttribute(CommonAttributes.RMAN_IMAGER_SHADER, Appearance.INHERITED,
-        SLShader.class);
-    if (obj != Appearance.INHERITED) {
-      SLShader slShader = (SLShader) obj;
-      ri.imager(slShader.getName(), slShader.getParameters());
-    }
-		
-    obj = eap.getAttribute(CommonAttributes.RMAN_VOLUME_EXTERIOR_SHADER, Appearance.INHERITED,
-        SLShader.class);
-    if (obj != Appearance.INHERITED) {
-      SLShader slShader = (SLShader) obj;
-      if(!raytracedVolumesEnabled) System.err.println("CommonAttributes.RMAN_RAY_TRACING_VOLUMES must be set true for Exterior volume shaders"); //ri.verbatim("Attribute \"shade\" \"strategy\" [\"vpvolumes\"]");  
-      ri.exterior(slShader.getName(), slShader.getParameters());
-    }
-    obj = eap.getAttribute(CommonAttributes.RMAN_VOLUME_INTERIOR_SHADER, Appearance.INHERITED,
-        SLShader.class);
-    if (obj != Appearance.INHERITED) {
-      SLShader slShader = (SLShader) obj;
-      if(!raytracedVolumesEnabled) ri.verbatim("Attribute \"shade\" \"strategy\" [\"vpvolumes\"]"); 
-      ri.interior(slShader.getName(), slShader.getParameters());
-    }
+		obj = eap.getAttribute(CommonAttributes.RMAN_IMAGER_SHADER, Appearance.INHERITED,
+				SLShader.class);
+		if (obj != Appearance.INHERITED) {
+			SLShader slShader = (SLShader) obj;
+			ri.imager(slShader.getName(), slShader.getParameters());
+		}
+		obj = eap.getAttribute(CommonAttributes.RMAN_VOLUME_EXTERIOR_SHADER, Appearance.INHERITED,
+				SLShader.class);
+		if (obj != Appearance.INHERITED) {
+			SLShader slShader = (SLShader) obj;
+			if(!raytracedVolumesEnabled) System.err.println("CommonAttributes.RMAN_RAY_TRACING_VOLUMES must be set true for Exterior volume shaders"); //ri.verbatim("Attribute \"shade\" \"strategy\" [\"vpvolumes\"]");  
+			ri.exterior(slShader.getName(), slShader.getParameters());
+		}
+		obj = eap.getAttribute(CommonAttributes.RMAN_VOLUME_INTERIOR_SHADER, Appearance.INHERITED,
+				SLShader.class);
+		if (obj != Appearance.INHERITED) {
+			SLShader slShader = (SLShader) obj;
+			if(!raytracedVolumesEnabled) ri.verbatim("Attribute \"shade\" \"strategy\" [\"vpvolumes\"]"); 
+			ri.interior(slShader.getName(), slShader.getParameters());
+		}
+	
+		// finally, evaluate the core jreality shaders
+		updateShaders(eap);
+	}
 
-    
-		RendermanShader polygonShader = (RendermanShader) ShaderLookup
-				.getShaderAttr(this, eap, "", CommonAttributes.POLYGON_SHADER);
-		ri.shader(polygonShader);
-
+	private void updateShaders(EffectiveAppearance eap) {
+		dgs = ShaderUtility.createDefaultGeometryShader(eap);
+		rhs = ShaderUtility.createRenderingHintsShader(eap);
+		if (dgs.getPointShader() instanceof DefaultPointShader)	dvs = (DefaultPointShader) dgs.getPointShader();
+		else dvs = null;
+		if (dgs.getLineShader() instanceof DefaultLineShader) dls = (DefaultLineShader) dgs.getLineShader();
+		else dls = null;
+		if (dgs.getPolygonShader() instanceof DefaultPolygonShader) dps = (DefaultPolygonShader) dgs.getPolygonShader();
+		else dps = null;
 	}
 
 	/**
@@ -730,9 +723,10 @@ private void setupShader(EffectiveAppearance eap, String type) {
 	public void visit(Geometry g) {
 		if (hasProxy(g)) handleCurrentProxy();
 		super.visit(g);
-		// System.err.println("Visiting geometry RIBVisitor");
 	}
 
+	// we need this to know whether we're generating tubes and spheres; if so, we don't generate more
+	transient boolean insidePointset = false;
 	public void visit(PointSet g) {
 		ri.comment("PointSet " + g.getName());
 		if (!insidePointset) {
@@ -758,50 +752,51 @@ private void setupShader(EffectiveAppearance eap, String type) {
 			_visit(g);
 		insidePointset = false;
 	}
-
+	Color cc = null;;
+	float[] raw = new float[4];
 	private void _visit(PointSet p) {
-		String geomShaderName = (String) eAppearance.getAttribute(
-				"geometryShader.name", "");
-		if (eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName,
-				CommonAttributes.VERTEX_DRAW),
-				CommonAttributes.VERTEX_DRAW_DEFAULT)) {
+		boolean vertexDraw = dgs.getShowPoints();
+		if (vertexDraw) {
 			int n = p.getNumPoints();
 			DataList coord = p.getVertexAttributes(Attribute.COORDINATES);
-			if (coord == null)
-				return;
+			if (coord == null)return;
 			ri.attributeBegin();
-			float r = (float) eAppearance.getAttribute(ShaderUtility.nameSpace(
-					CommonAttributes.POINT_SHADER,
-					CommonAttributes.POINT_RADIUS),
-					CommonAttributes.POINT_RADIUS_DEFAULT);
+			System.err.println("Visiting point set");
+			if (dgs.getPointShader() instanceof DefaultPointShader) {
+				cc = (Color) dps.getDiffuseColor();
+	   	        raw = new float[4];
+	   	        cc.getRGBComponents(raw);
+	   	        cc = new Color(raw[0], raw[1], raw[2]); 
+	   	        ri.color(cc);				
+			}
+ 			dvs = (DefaultPointShader) dgs.getPointShader();
+			float r = dvs.getPointRadius().floatValue();
 			DataList radii = p.getVertexAttributes(Attribute.RADII);
 			DoubleArray da = null;
 			if (radii != null) da = radii.toDoubleArray();
 			// System.out.println("point radius is "+r);
-			setupShader(eAppearance, CommonAttributes.POINT_SHADER);
-			boolean drawSpheres = eAppearance.getAttribute(
-					CommonAttributes.SPHERES_DRAW,
-					CommonAttributes.SPHERES_DRAW_DEFAULT);
+			boolean drawSpheres = dvs.getSpheresDraw();
 			if (drawSpheres) {
-				int sig = eAppearance.getAttribute("signature", Pn.EUCLIDEAN);
-				Color cc = (Color) eAppearance.getAttribute(
-						CommonAttributes.POINT_SHADER + "."
-								+ CommonAttributes.POLYGON_SHADER + "."
-								+ CommonAttributes.DIFFUSE_COLOR,
-						CommonAttributes.DIFFUSE_COLOR_DEFAULT);
-				// DoubleArrayArray a=coord.toDoubleArrayArray();
+				// process the polygon shader associated to this point shader
+				// This is something of a hack since we don't really know what the associated string is
+				PolygonShader vps = (PolygonShader) dvs.getPolygonShader();
+				if (vps instanceof DefaultPolygonShader) {
+					cc = ((DefaultPolygonShader) vps).getDiffuseColor();
+					// DoubleArrayArray a=coord.toDoubleArrayArray();
+					raw = new float[4];
+					cc.getRGBComponents(raw);
+					if (!opaqueTubes)
+						raw[3] = raw[3] * currentOpacity;
+					ri.color(raw);
+				}
+				RendermanShader rs = RIBHelper.convertToRenderman(dvs.getPolygonShader(), this, "pointShader.polygonShader");
+				ri.shader(rs);
 				double[][] a = coord.toDoubleArrayArray(null);
-				float[] raw = new float[4];
-				cc.getRGBComponents(raw);
-				if (!opaqueTubes)
-					raw[3] = raw[3] * currentOpacity;
-				ri.color(raw);
 				double[] trns = new double[16];
 				for (int i = 0; i < n; i++) {
 					float realR = r;
 					if (radii != null) realR = (float) (realR*da.getValueAt(i));
-					trns = MatrixBuilder.init(null, sig).translate(a[i])
-							.getArray();
+					trns = MatrixBuilder.init(null, currentSignature).translate(a[i]).getArray();
 					ri.transformBegin();
 					ri.concatTransform(RIBHelper.fTranspose(trns));
 					HashMap map = new HashMap();
@@ -809,6 +804,7 @@ private void setupShader(EffectiveAppearance eap, String type) {
 					ri.transformEnd();
 				}
 			} else {
+				// use the RenderMan "points" command to draw the points
 				HashMap<String, Object> map = new HashMap();
 				int fiber = GeometryUtility.getVectorLength(coord);
 				double[][] pc = new double[n][3];
@@ -838,7 +834,6 @@ private void setupShader(EffectiveAppearance eap, String type) {
 	public void visit(IndexedLineSet g) {
 		ri.comment("IndexedLineSet " + g.getName());
 		ri.attributeBegin();
-		setupShader(eAppearance, CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER);
 		checkForProxy(g);
 		if (hasProxy((Geometry) g)) {
 			handleCurrentProxy();
@@ -870,81 +865,85 @@ private void setupShader(EffectiveAppearance eap, String type) {
 	}
 
 	private void _visit(IndexedLineSet g)	{
-       String geomShaderName = (String)eAppearance.getAttribute("geometryShader.name", "");
-       if(eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW),true)) {
-        
-    	   DataList dl = g.getEdgeAttributes(Attribute.INDICES);
-    	   if(dl!=null){
-    		   boolean tubesDraw = eAppearance.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.TUBES_DRAW),CommonAttributes.TUBES_DRAW_DEFAULT);
-    		   if (tubesDraw)  {
-               float r = (float) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS,CommonAttributes.TUBE_RADIUS_DEFAULT);
-                 Color cc = (Color) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,  CommonAttributes.DIFFUSE_COLOR_DEFAULT );
-                 // TODO take into account alpha channel of cc
-                 // Following is an attempt to do so, but ignores the alpha
-					// of the color!
-                float[] raw = new float[4];
-                cc.getRGBComponents(raw);
-                 cc = new Color(raw[0], raw[1], raw[2], raw[3]); 
-                // System.err.println("opaque tubes is "+opaqueTubes);
-                // System.err.println("alpha channel is "+cc.getAlpha());
-
-                Object ga = g.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
- //               System.err.println(object2world.getLastComponent().getName()+" Current sig = "+currentSignature);
-                if (ga != null) System.err.println("GA = "+ga.toString());
-                if (ga == null || !( ga instanceof Dimension))	{
-                	// TODO make sure texture coordinates are not generated here!
-                    BallAndStickFactory bsf = new BallAndStickFactory(g);
-               	  	bsf.setSignature(currentSignature);
-               	  	bsf.setStickRadius(r);
-                	bsf.setShowBalls(false);	// need to actually omit the
-												// balls
-               	  	bsf.setStickColor(cc);
-                	bsf.update();
-                	handlingProxyGeometry = true;
-                	// there are inheritance problems here!
-               	  	visit(bsf.getSceneGraphComponent());
-               	  	handlingProxyGeometry = false;
-        	   } else {
-       				DataList edgec =  g.getEdgeAttributes(Attribute.COLORS);
-        		   int n = g.getNumEdges();
-                   if (!opaqueTubes) raw[3] *= currentOpacity;
-                   ri.color(cc);
-        		   double[][] crossSection = TubeUtility.octagonalCrossSection;
-        			Object foo = eAppearance.getAttribute("lineShader.crossSection", crossSection);
-        			if (foo != crossSection)	{
-        				crossSection = (double[][]) foo;
-        			}
-        			for (int i = 0; i<n; ++i)	{
-         				if (edgec != null) {
-           					double[] edgecolor = edgec.item(i).toDoubleArray(null);
-           					ri.comment("Edge color");
-           					ri.color(edgecolor);
-           				}
-         				double[][] oneCurve = null;
-        				oneCurve = IndexedLineSetUtility.extractCurve(oneCurve, g, i);
-        				PolygonalTubeFactory ptf = new PolygonalTubeFactory(oneCurve);
-        				ptf.setCrossSection(crossSection);
-        				ptf.setSignature(currentSignature);
-        				ptf.setRadius(r);
-        				ptf.update();
-        				IndexedFaceSet tube = ptf.getTube();
-        				// System.err.println("Tube is "+tube.toString());
-        				handlingProxyGeometry = true;
-        				pointPolygon(tube, null);    
-        				handlingProxyGeometry = false;
-        		   }
-          	   }
+         
+		boolean lineDraw = dgs.getShowLines();
+		if (lineDraw)	{
+   	        DataList dl = g.getEdgeAttributes(Attribute.INDICES);
+   	        if(dl != null){
+   	        	if (dls != null)	{
+   	    	        Color cc = (Color) dls.getDiffuseColor();
+   	   	        	float[] raw = new float[4];
+   	   	        	cc.getRGBComponents(raw);
+   	   	        	cc = new Color(raw[0], raw[1], raw[2]); 
+   	   	        	ri.color(cc);  	        		
+   	        	}
+   	        	boolean tubesDraw = false;
+   	        	if (dls != null) tubesDraw = dls.getTubeDraw();
+   	        	if (tubesDraw)  {
+  					PolygonShader vps = (PolygonShader) dls.getPolygonShader();
+   					cc = null;
+   					if (vps instanceof DefaultPolygonShader) {
+   						ri.comment("Setting tube color");
+   						cc = ((DefaultPolygonShader) vps).getDiffuseColor();
+   						cc.getRGBComponents(raw);
+   						if (!opaqueTubes)
+   							raw[3] = raw[3] * currentOpacity;
+   						ri.color(raw);
+   						System.err.println("Tube color is "+cc);
+   					}
+   					RendermanShader rs = RIBHelper.convertToRenderman(dls.getPolygonShader(), this, "lineShader.polygonShader");
+   					ri.shader(rs);
+ 
+   					float r = dls.getTubeRadius().floatValue(); //(float) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS,CommonAttributes.TUBE_RADIUS_DEFAULT);
+   					Object ga = g.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
+   					if (ga != null) System.err.println("GA = "+ga.toString());
+   					if (ga == null || !( ga instanceof Dimension))	{
+	                	// TODO make sure texture coordinates are not generated here!
+	                    BallAndStickFactory bsf = new BallAndStickFactory(g);
+	               	  	bsf.setSignature(currentSignature);
+	               	  	bsf.setStickRadius(r);
+	                	bsf.setShowBalls(false);	// need to actually omit the
+													// balls
+	               	  	if (cc != null) bsf.setStickColor(cc);
+	                	bsf.update();
+	                	handlingProxyGeometry = true;
+	                	visit(bsf.getSceneGraphComponent());
+	               	  	handlingProxyGeometry = false;
+	                 } else {
+	       				DataList edgec =  g.getEdgeAttributes(Attribute.COLORS);
+	        		    int n = g.getNumEdges();
+	        		    double[][] crossSection = TubeUtility.octagonalCrossSection;
+	        		   // TODO make this official or get rid of it.
+	        			Object foo = eAppearance.getAttribute("lineShader.crossSection", crossSection);
+	        			if (foo != crossSection)	{
+	        				crossSection = (double[][]) foo;
+	        			}
+	        			for (int i = 0; i<n; ++i)	{
+	         				if (edgec != null) {
+	           					double[] edgecolor = edgec.item(i).toDoubleArray(null);
+	           					ri.comment("Edge color");
+	           					ri.color(edgecolor);
+	           				}
+	         				double[][] oneCurve = null;
+	        				oneCurve = IndexedLineSetUtility.extractCurve(oneCurve, g, i);
+	        				PolygonalTubeFactory ptf = new PolygonalTubeFactory(oneCurve);
+	        				ptf.setCrossSection(crossSection);
+	        				ptf.setSignature(currentSignature);
+	        				ptf.setRadius(r);
+	        				ptf.update();
+	        				IndexedFaceSet tube = ptf.getTube();
+	        				// System.err.println("Tube is "+tube.toString());
+	        				handlingProxyGeometry = true;
+	        				pointPolygon(tube, null);    
+	        				handlingProxyGeometry = false;
+	        		   }
+	          	   }
             } else {
             	// use "Curves" command to simulate no tubes
             	// Renderman expects object coordinates for width of "Curves" so use tube parameter
-                float r = (float) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS,CommonAttributes.TUBE_RADIUS_DEFAULT);
+                float r = dls.getTubeRadius().floatValue(); //(float) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS,CommonAttributes.TUBE_RADIUS_DEFAULT);
     			HashMap<String, Object> mappo = new HashMap<String, Object>();
     			mappo.put("constantwidth", r);
-                Color cc = (Color) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,  CommonAttributes.DIFFUSE_COLOR_DEFAULT );
-               float[] raw = new float[4];
-               cc.getRGBComponents(raw);
-               cc = new Color(raw[0], raw[1], raw[2]); 
-               ri.color(cc);
                 int[][] ei = g.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
   				int numEdges = ei.length;
             	int[] nvertices = new int[numEdges];
@@ -954,6 +953,10 @@ private void setupShader(EffectiveAppearance eap, String type) {
     			for (int i = 0; i<numEdges; ++i)	{
     				nvertices[i] = ei[i].length;
     				totalV += nvertices[i];
+    			}
+       			if (fiber == 4)	{
+    				dv = Pn.dehomogenize(new double[dv.length][3], dv);
+    				fiber = 3;
     			}
     			float[] vertices = new float[fiber*totalV];
     			int counter = 0;
@@ -965,20 +968,19 @@ private void setupShader(EffectiveAppearance eap, String type) {
     					counter += fiber;
     				}
     			}
-     			mappo.put(fiber == 3 ? "P" : "vertex hpoint P",  vertices);
+      			mappo.put(fiber == 3 ? "P" : "vertex hpoint P",  vertices);
      			ri.curves("linear", nvertices, "nonperiodic", mappo);
-            }
- 
+            }   	        
          }
         }
  // super.visit(g);
+		System.err.println("leaving line set");
          _visit((PointSet) g);
      }
 
 	public void visit(IndexedFaceSet g) {
 		ri.comment("IndexedFaceSet " + g.getName());
 		ri.attributeBegin();
-		setupShader(eAppearance, CommonAttributes.POLYGON_SHADER);
 		checkForProxy(g);
 		if (hasProxy((Geometry) g)) {
 			handleCurrentProxy();
@@ -1022,17 +1024,26 @@ private void setupShader(EffectiveAppearance eap, String type) {
 	 * @param color
 	 */
 	protected void _visit(IndexedFaceSet i) {
-		String geomShaderName = (String) eAppearance.getAttribute(
-				"geometryShader.name", "");
-		if (eAppearance.getAttribute(ShaderUtility.nameSpace(geomShaderName,
-				CommonAttributes.FACE_DRAW), true)) {
-			// ribHelper.attributeBegin();
-			// setupShader(eAppearance,CommonAttributes.POLYGON_SHADER);
+		boolean faceDraw = dgs.getShowFaces();
+		if (faceDraw)	{
+			//dps = (DefaultPolygonShader) dgs.getPolygonShader();
+        	if (dps != null)	{
+    	        Color cc = (Color) dps.getDiffuseColor();
+   	        	float[] raw = new float[4];
+   	        	cc.getRGBComponents(raw);
+   	        	cc = new Color(raw[0], raw[1], raw[2]); 
+   	        	ri.color(cc);  	        		
+        	}
+			RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "lineShader.polygonShader");
+			ri.shader(rs);
+//			DefaultPolygonShader xxx = new DefaultPolygonShader(dps);
+//			xxx.setFromEffectiveAppearance(this, eAppearance, "polygonShader");
+//			ri.shader(xxx);
 			DataList colors = i.getFaceAttributes(Attribute.COLORS);
 			// if (colors !=null && currentOpacity != 1.0) {
 			// the bug occurs when one attempts to set uniform colors or opacity
 			boolean opaqueColors = true;
-			if (colors != null && GeometryUtility.getVectorLength(colors) == 4) {
+			if (colors != null && GeometryUtility.getVectorLength(colors) >= 3) {
 				double[][] colorArray = colors.toDoubleArrayArray(null);
 //				for (double[] cc : colorArray) {
 //					if (cc[3] != 1.0)
@@ -1079,13 +1090,10 @@ private void setupShader(EffectiveAppearance eap, String type) {
 		int npolys = i.getNumFaces();
 		if (npolys != 0) {
 			HashMap<String, Object> map = new HashMap<String, Object>();
-			boolean smooth = eAppearance.getAttribute(
-					CommonAttributes.POLYGON_SHADER + "."
-							+ CommonAttributes.SMOOTH_SHADING, true);
+			boolean smooth = dps.getSmoothShading();
 			DataList coords = i.getVertexAttributes(Attribute.COORDINATES);
 			DoubleArrayArray da = coords.toDoubleArrayArray();
 			int pointlength = GeometryUtility.getVectorLength(coords);
-			double[][] thePoints;
 			// We'd like to be able to use the "Pw" attribute which accepts
 			// 4-vectors for point coordinates, but 3Delight-5.0.1
 			// does not support it ...
@@ -1098,8 +1106,7 @@ private void setupShader(EffectiveAppearance eap, String type) {
 			// As a result, we set hasPw to false.
 			double[] o2w = object2world.getMatrix(null);
 			double[] rmanc = P3.makeScaleMatrix(null, 1, 1, -1);
-			double[] o2c = Rn.times(null, Rn.times(null, rmanc, world2Camera),
-					o2w);
+			double[] o2c = Rn.times(null, Rn.times(null, rmanc, world2Camera),o2w);
 			// System.err.println("O2C: "+Rn.matrixToString(o2c));
 			// P3.orthonormalizeMatrix(null, o2c, 10E-8,currentSignature);
 			if (!hasPw || pointlength == 3) {
@@ -1122,7 +1129,6 @@ private void setupShader(EffectiveAppearance eap, String type) {
 				}
 				map.put("P", fcoords);
 				double[][] dpoints = da.toDoubleArrayArray(null);
-				thePoints = Rn.matrixTimesVector(null, o2c, dpoints);
 				// System.err.println(Rn.toString(thePoints));
 			} else if (pointlength == 4) {
 				float[] fcoords = new float[4 * da.getLength()];
@@ -1155,6 +1161,7 @@ private void setupShader(EffectiveAppearance eap, String type) {
 						fnormals[n * j + 1] = (float) da.getValueAt(j, 1);
 						fnormals[n * j + 2] = (float) da.getValueAt(j, 2);
 					}
+					// Note: using "Np" for uniform normal here causes problems in some files.
 					map.put(vertexNormals ? "N" : "uniform normal N", fnormals);
 					//map.put(type + "vector N", fnormals);
 				} else {
@@ -1168,16 +1175,11 @@ private void setupShader(EffectiveAppearance eap, String type) {
 							if (k < nn) fnormals[ii++] = (float) dnormals[j][k];
 							else fnormals[ii++] = 0f;
 					}
-          			/////////////////////////////////////////////////////////////////////////////////
 					map.put(((vertexNormals) ? "vertex" : "uniform") + " float[4] Nw", fnormals);
-          
-          
-          
 				}
 			}
 			// texture coords:
-			DataList texCoords = i
-					.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+			DataList texCoords = i.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
 			if (texCoords != null) {
 				float[] ftex = new float[2 * texCoords.size()];
 				for (int j = 0; j < texCoords.size(); j++) {
@@ -1252,8 +1254,7 @@ private void setupShader(EffectiveAppearance eap, String type) {
 			int[] nvertices = new int[npolys];
 			int verticesLength = 0;
 			for (int k = 0; k < npolys; k++) {
-				IntArray fi = i.getFaceAttributes(Attribute.INDICES).item(k)
-						.toIntArray();
+				IntArray fi = i.getFaceAttributes(Attribute.INDICES).item(k).toIntArray();
 				nvertices[k] = fi.getLength();
 				verticesLength += nvertices[k];
 			}
@@ -1261,8 +1262,7 @@ private void setupShader(EffectiveAppearance eap, String type) {
 			int l = 0;
 			for (int k = 0; k < npolys; k++) {
 				for (int m = 0; m < nvertices[k]; m++, l++) {
-					IntArray fi = i.getFaceAttributes(Attribute.INDICES)
-							.item(k).toIntArray();
+					IntArray fi = i.getFaceAttributes(Attribute.INDICES).item(k).toIntArray();
 					vertices[l] = fi.getValueAt(m);
 				}
 			}
@@ -1294,16 +1294,16 @@ private void setupShader(EffectiveAppearance eap, String type) {
 	}
 
 	public void visit(Sphere s) {
-		if (hasProxy(s))
-			return;
-		setupShader(eAppearance, CommonAttributes.POLYGON_SHADER);
+		if (hasProxy(s))return;
+		RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "lineShader.polygonShader");
+		ri.shader(rs);
 		ri.sphere(1f, -1f, 1f, 360f, null);
 	}
 
 	public void visit(Cylinder c) {
-		if (hasProxy(c))
-			return;
-		setupShader(eAppearance, CommonAttributes.POLYGON_SHADER);
+		if (hasProxy(c))return;
+		RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "lineShader.polygonShader");
+		ri.shader(rs);
 		ri.cylinder(1f, -1f, 1f, 360f, null);
 		// TODO Decide whether a jReality Cylinder is closed or not!
 		ri.disk(-1f, 1f, 360f, null);

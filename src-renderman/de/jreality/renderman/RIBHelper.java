@@ -25,11 +25,37 @@ import javax.imageio.ImageWriter;
 
 import de.jreality.math.Rn;
 import de.jreality.renderman.shader.DefaultPolygonShader;
+import de.jreality.renderman.shader.RendermanShader;
+import de.jreality.renderman.shader.ShaderUtility;
+import de.jreality.renderman.shader.TwoSidePolygonShader;
 import de.jreality.shader.ImageData;
+import de.jreality.shader.PolygonShader;
 import de.jreality.util.LoggingSystem;
 
 public class RIBHelper {
 
+	public static RendermanShader convertToRenderman(PolygonShader ps, RIBVisitor ribv, String name)	{
+		RendermanShader rs = null;
+		if (ps instanceof de.jreality.shader.DefaultPolygonShader)	{
+			System.err.println("processing defaultpolygonshader");
+			de.jreality.shader.DefaultPolygonShader dps = (de.jreality.shader.DefaultPolygonShader) ps;
+			DefaultPolygonShader rdps = new DefaultPolygonShader(dps);
+			rdps.setFromEffectiveAppearance(ribv, ribv.eAppearance, name);
+			rs = rdps;
+		} 
+		else if (ps instanceof de.jreality.shader.TwoSidePolygonShader)	{
+			System.err.println("processing twosidepolygonshader");
+			de.jreality.shader.TwoSidePolygonShader dps = (de.jreality.shader.TwoSidePolygonShader) ps;
+			TwoSidePolygonShader rdps = new TwoSidePolygonShader(dps);
+			rdps.setFromEffectiveAppearance(ribv, ribv.eAppearance, name);
+			rs = rdps;
+		}
+		else {
+			LoggingSystem.getLogger(ShaderUtility.class).warning("Unknown shader class "+ps.getClass());
+		}
+		
+		return rs;
+	}
 	public static void writeShader(String name, String shaderName ) {
 		try {
 		    File file = new File(name);

@@ -40,7 +40,6 @@
 
 package de.jreality.renderman.shader;
 
-import java.awt.Color;
 import java.io.File;
 import java.util.Map;
 
@@ -51,13 +50,11 @@ import de.jreality.renderman.RIBHelper;
 import de.jreality.renderman.RIBVisitor;
 import de.jreality.renderman.SLShader;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
-import de.jreality.shader.TextureUtility;
 
 /**
  * @author Charles Gunn
@@ -68,32 +65,43 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
   CubeMap reflectionMap;  
   
   static int count = 0;
+  de.jreality.shader.DefaultPolygonShader attent;
+  
+  public DefaultPolygonShader(de.jreality.shader.DefaultPolygonShader attent)	{
+	  super();
+	  this.attent = attent;
+  }
+  
   public Map getAttributes() {
     return map;
   }
-  
   public void setFromEffectiveAppearance(RIBVisitor ribv, EffectiveAppearance eap, String name) {
-    
+	  setFromEffectiveAppearance(ribv, eap, name, "");
+  }
+  
+  /**
+   * To avoid having to keep all this code up-to-date for two sided shader, we allow an extra string
+   * here
+   * @param ribv
+   * @param eap
+   * @param name
+   * @param side
+   */
+  public void setFromEffectiveAppearance(RIBVisitor ribv, EffectiveAppearance eap, String name, String side) {
     map.clear();
+    String realName =  (side != "") ? name+"."+side : name;
+    
     int signature = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-    boolean lighting = (boolean) eap.getAttribute(name+"."+CommonAttributes.LIGHTING_ENABLED, true);
-    float specularExponent =(float) eap.getAttribute(name+"."+CommonAttributes.SPECULAR_EXPONENT,CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
-    float Ks =(float) eap.getAttribute(name+"."+CommonAttributes.SPECULAR_COEFFICIENT,CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);
-    float Kd =(float) eap.getAttribute(name+"."+CommonAttributes.DIFFUSE_COEFFICIENT,CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
-    float Ka =(float) eap.getAttribute(name+"."+CommonAttributes.AMBIENT_COEFFICIENT,CommonAttributes.AMBIENT_COEFFICIENT_DEFAULT);
-    Color specularcolor =(Color) eap.getAttribute(name+"."+CommonAttributes.SPECULAR_COLOR, CommonAttributes.SPECULAR_COLOR_DEFAULT);
-    map.put("float roughness",new Float(1/specularExponent));
-    map.put("float Ks",new Float(Ks));
-    map.put("float Kd",new Float(Kd));
-    map.put("float Ka",new Float(Ka));
-    map.put("color specularcolor",specularcolor);
-    map.put("float lighting", new Float( lighting ? 1 : 0));
+    boolean lighting = (boolean) eap.getAttribute(realName+CommonAttributes.LIGHTING_ENABLED, true);
+    map.put("float roughness"+side,new Float(1/attent.getSpecularExponent().floatValue()));
+    map.put("float Ks"+side,new Float(attent.getSpecularCoefficient()));
+    map.put("float Kd"+side,new Float(attent.getDiffuseCoefficient()));
+    map.put("float Ka"+side,new Float(attent.getAmbientCoefficient()));
+    map.put("color specularcolor"+side,attent.getSpecularColor());
+    map.put("float lighting"+side, new Float( lighting ? 1 : 0));
     
-    if((boolean) eap.getAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false))
-      map.put("float transparencyenabled",new Float(1));
-    else
-      map.put("float transparencyenabled",new Float(0));
-    
+    boolean transp = (boolean) eap.getAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false);
+    map.put("float transparencyenabled",new Float(transp ? 1 : 0));    
     
     if (signature != Pn.EUCLIDEAN) {
       map.put("signature", signature);
@@ -102,8 +110,8 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
     }
     else shaderName ="defaultpolygonshader" ;
     boolean ignoreTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name,"ignoreTexture2d"), false);	
-    if (!ignoreTexture2d && AttributeEntityUtility.hasAttributeEntity(Texture2D.class, name+".texture2d", eap)) {
-      Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap);
+    if (!ignoreTexture2d && attent.getTexture2d() != null) { //AttributeEntityUtility.hasAttributeEntity(Texture2D.class, name+".texture2d", eap)) {
+      Texture2D tex = attent.getTexture2d(); //AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"texture2d"), eap);
       
       String fname = null;
       fname = (String) eap.getAttribute(CommonAttributes.RMAN_TEXTURE_FILE,"");
@@ -123,9 +131,8 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
     }
     
     
-    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))
-    {
-      reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));
+    if (attent.getReflectionMap() != null) { //AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))
+      reflectionMap = attent.getReflectionMap(); //TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));
       if((boolean) eap.getAttribute(CommonAttributes.RMAN_RAY_TRACING_REFLECTIONS,false))
         map.put("float raytracedreflections", new Float(1));
       else{
