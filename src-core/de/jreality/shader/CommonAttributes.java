@@ -95,7 +95,7 @@ import de.jreality.scene.Appearance;
 	public final static String ANY_DISPLAY_LISTS = "anyDisplayLists";		// if true, use Display lists.
 	public static final String CLEAR_COLOR_BUFFER = "clearColorBuffer";
 	public final static String LOCAL_LIGHT_MODEL = "localLightModel";
-	public final static String LIGHT_MODEL_COLOR_CONTROL = "lightModelColorControl";
+	public final static String SEPARATE_SPECULAR_COLOR = "separateSpecularColor";
 	// default geometry shader
 	public final static String FACE_DRAW = 		"showFaces";
 	public final static boolean FACE_DRAW_DEFAULT = true;
