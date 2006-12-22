@@ -1,10 +1,21 @@
 package de.jreality.backends.label;
+import java.awt.Color;
+import java.io.IOException;
+
 import de.jreality.geometry.IndexedLineSetFactory;
+import de.jreality.math.Matrix;
+import de.jreality.math.P3;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.CubeMap;
+import de.jreality.shader.ImageData;
+import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.util.Input;
 
 
 public class TestLabelBug {
@@ -50,6 +61,18 @@ public class TestLabelBug {
 		  "lineShader.diffuseColor",
 		  new java.awt.Color((float)0 ,(float)0,(float)0)
 		);
+		   appearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
+		   try {
+		  			CubeMap rm = TextureUtility.createReflectionMap(
+			                  appearance,
+			                  "polygonShader",
+			                  "textures/desertstorm/desertstorm_",
+			                  new String[]{"rt","lf","up", "dn","bk","ft"},
+			                  ".JPG");
+					rm.setBlendColor(new java.awt.Color(1f, 1f, 1f, .6f));
+		    } catch (IOException e) {
+		      e.printStackTrace();
+		    }
 		IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
 		ilsf.setLineCount(12);
 		ilsf.setVertexCount(8);
