@@ -95,7 +95,7 @@ public class RenderingHintsShader  {
 		levelOfDetail = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LEVEL_OF_DETAIL),CommonAttributes.LEVEL_OF_DETAIL_DEFAULT);
 		clearColorBuffer = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.CLEAR_COLOR_BUFFER),true);
 		localLightModel = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LOCAL_LIGHT_MODEL),false);
-		separateSpecularColor = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHT_MODEL_COLOR_CONTROL), 
+		separateSpecularColor = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SEPARATE_SPECULAR_COLOR), 
 				false);
 		//if (isFastAndDirty) levelOfDetail = 0.0;
 	}

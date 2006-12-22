@@ -215,7 +215,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		} else if (useGLSL)
 			glslShader.reflectionTextureUnit = -1;
     
-	if (texUnit > 0) testTextureResident(jr, gl);
+	if (texUnit > GL.GL_TEXTURE0) testTextureResident(jr, gl);
 	jr.getRenderingState().texUnitCount = texUnit - GL.GL_TEXTURE0;
     vertexShader.setFrontBack(frontBack);
 	vertexShader.render(jrs);    	
