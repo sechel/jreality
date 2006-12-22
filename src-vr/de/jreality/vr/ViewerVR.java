@@ -904,7 +904,7 @@ public class ViewerVR {
 		vr.showPanel();
 		ViewerApp vApp = vr.initialize();
 		
-		appPlugin.setFaceColor(new Color(64, 222, 64));
+//		appPlugin.setFaceColor(new Color(64, 222, 64));
 		
 		vApp.update();
 
