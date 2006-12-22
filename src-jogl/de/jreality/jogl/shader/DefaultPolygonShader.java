@@ -177,7 +177,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	public void preRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.getRenderer();
 		GL gl = jr.getGL();
-		
+		int texunitcoords = 0;
 //		if (smoothShading != jr.openGLState.smoothShading)	{
 			if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
 			else		gl.glShadeModel(GL.GL_FLAT);
@@ -189,14 +189,18 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		      gl.glActiveTexture(texUnit);
 		      gl.glEnable(GL.GL_TEXTURE_2D);
 		      Texture2DLoaderJOGL.render(gl, lightMap);
+				testTextureResident(jr, gl);
 		      texUnit++;
+		      texunitcoords++;
 	    }
 	    
 	    if (texture2Dnew != null) {
 	      gl.glActiveTexture(texUnit);
-	      Texture2DLoaderJOGL.render(gl, texture2Dnew);
 	      gl.glEnable(GL.GL_TEXTURE_2D);
+	      Texture2DLoaderJOGL.render(gl, texture2Dnew);
+			testTextureResident(jr, gl);
 		  texUnit++;
+	      texunitcoords++;
 //	      System.err.println("activating texture");
 	    }
 //    if (ignoreTexture2d) {
@@ -210,13 +214,13 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 			refMapUnit = texUnit;
 			if (useGLSL) glslShader.reflectionTextureUnit = texUnit;
 			Texture2DLoaderJOGL.render(jr, reflectionMap);
-			// testTextureResident(jr, gl);
+			testTextureResident(jr, gl);
 			texUnit++;
 		} else if (useGLSL)
 			glslShader.reflectionTextureUnit = -1;
     
-	if (texUnit > GL.GL_TEXTURE0) testTextureResident(jr, gl);
-	jr.getRenderingState().texUnitCount = texUnit - GL.GL_TEXTURE0;
+//	if (texUnit > GL.GL_TEXTURE0) testTextureResident(jr, gl);
+	jr.getRenderingState().texUnitCount = texunitcoords; //texUnit - GL.GL_TEXTURE0;
     vertexShader.setFrontBack(frontBack);
 	vertexShader.render(jrs);    	
     if (useGLSL)		{
