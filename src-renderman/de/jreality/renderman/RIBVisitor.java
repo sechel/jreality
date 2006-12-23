@@ -541,6 +541,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		ri.attributeEnd(c.getName());
 		// restore effective appearance
 		eAppearance = tmp;
+		readAttributesFromEffectiveAppearance(eAppearance);
 	}
 
 	public void visit(Transformation t) {
@@ -552,17 +553,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	}
 
 	private void readAttributesFromEffectiveAppearance(EffectiveAppearance eap) {
-    // TODO
-	// split this up into at least two methods.  
-	// One ("evaluateEffectiveAppearance") 
-	// is called when the SGComp is visited and sets all the variables that don't depend on
-	// polygon, line, or point shader
-	// The second should be called from inside the rendering of face sets, line sets, and point sets
-	// and should create and/or return an instance of a shader class, like DefaultPolygonShader,
-	// which then has all the information needed to render correctly.
-	// Goal: RIBVisitor should no longer evaluate effectiveAppearance's to find out values of
-	// attributes which begin with "polygonShader", "lineShader", or "pointShader".
-//    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(type,"reflectionMap"), eap))
+ //    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(type,"reflectionMap"), eap))
 //    {
 //    ri.verbatim("Attribute \"visibility\"  \"int diffuse\" [1]");
 //    ri.verbatim("Attribute \"visibility\"  \"int specular\" [1]");
@@ -781,7 +772,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			if (drawSpheres) {
 				// process the polygon shader associated to this point shader
 				// This is something of a hack since we don't really know what the associated string is
-				PolygonShader vps = (PolygonShader) dvs.getPolygonShader();
+				PolygonShader vps = dvs.getPolygonShader();
 				if (vps instanceof DefaultPolygonShader) {
 					cc = ((DefaultPolygonShader) vps).getDiffuseColor();
 					// DoubleArrayArray a=coord.toDoubleArrayArray();
@@ -798,6 +789,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 				for (int i = 0; i < n; i++) {
 					float realR = r;
 					if (radii != null) realR = (float) (realR*da.getValueAt(i));
+					if (a[i].length == 4 && a[i][3] == 0.0) continue;
 					trns = MatrixBuilder.init(null, currentSignature).translate(a[i]).getArray();
 					ri.transformBegin();
 					ri.concatTransform(RIBHelper.fTranspose(trns));
@@ -807,7 +799,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 				}
 			} else {
 				// use the RenderMan "points" command to draw the points
-				HashMap<String, Object> map = new HashMap();
+				HashMap<String, Object> map = new HashMap<String, Object>();
 				int fiber = GeometryUtility.getVectorLength(coord);
 				double[][] pc = new double[n][3];
 				coord.toDoubleArrayArray(pc);
@@ -837,7 +829,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		ri.comment("IndexedLineSet " + g.getName());
 		ri.attributeBegin();
 		checkForProxy(g);
-		if (hasProxy((Geometry) g)) {
+		if (hasProxy(g)) {
 			handleCurrentProxy();
 			insidePointset = false;
 		} else {
@@ -873,8 +865,7 @@ public class RIBVisitor extends SceneGraphVisitor {
    	        DataList dl = g.getEdgeAttributes(Attribute.INDICES);
    	        if(dl != null){
    	        	if (dls != null)	{
-   	    	        Color cc = (Color) dls.getDiffuseColor();
-   	   	        	float[] raw = new float[4];
+   	    	        cc = dls.getDiffuseColor();
    	   	        	cc.getRGBComponents(raw);
    	   	        	cc = new Color(raw[0], raw[1], raw[2]); 
    	   	        	ri.color(cc);  	        		
@@ -882,7 +873,7 @@ public class RIBVisitor extends SceneGraphVisitor {
    	        	boolean tubesDraw = false;
    	        	if (dls != null) tubesDraw = dls.getTubeDraw();
    	        	if (tubesDraw)  {
-  					PolygonShader vps = (PolygonShader) dls.getPolygonShader();
+  					PolygonShader vps = dls.getPolygonShader();
    					cc = null;
    					if (vps instanceof DefaultPolygonShader) {
    						ri.comment("Setting tube color");
