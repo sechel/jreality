@@ -214,7 +214,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 			refMapUnit = texUnit;
 			if (useGLSL) glslShader.reflectionTextureUnit = texUnit;
 			Texture2DLoaderJOGL.render(jr, reflectionMap);
-			testTextureResident(jr, gl);
+			//testTextureResident(jr, gl);
 			texUnit++;
 		} else if (useGLSL)
 			glslShader.reflectionTextureUnit = -1;
