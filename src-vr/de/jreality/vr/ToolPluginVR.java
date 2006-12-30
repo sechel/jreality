@@ -25,6 +25,7 @@ import de.jreality.tools.DraggingTool;
 import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.tools.ShipNavigationTool;
+import de.jreality.tools.AxisTranslationTool;
 
 public class ToolPluginVR extends AbstractPluginVR {
 	
@@ -50,7 +51,7 @@ public class ToolPluginVR extends AbstractPluginVR {
 	private JSlider gain;
 	private JCheckBox invertMouse;
 
-	private Tool rotateTool = new RotateTool(), dragTool = new DraggingTool();
+	private Tool rotateTool = new RotateTool(), dragTool = new AxisTranslationTool();
 	
 
 	public ToolPluginVR() {

@@ -2,6 +2,7 @@ package de.jreality.vr;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,7 +18,10 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.SwingConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
@@ -25,9 +29,11 @@ import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileSystemView;
 
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.TextureUtility;
+import de.jreality.sunflow.PerezSky;
 import de.jreality.util.Input;
 import de.jreality.util.Secure;
 import de.jtem.beans.SimpleColorChooser;
@@ -53,15 +59,19 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 	
 	private Landscape landscape;
 	
+	private PerezSky perezBox;
+	
 	private ActionListener closeListener = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 			getViewerVR().switchToDefaultPanel();
 		}
 	};
+	private JSlider sunHeightSlider;
 		
 	public EnvironmentPluginVR() {
 		super("env");
 		landscape = new Landscape();
+		perezBox = new PerezSky();
 		makeEnvTab();
 		AccessController.doPrivileged(new PrivilegedAction<Object>() {
 			public Object run() {
@@ -125,11 +135,7 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 
 		landscape.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
-				getViewerVR().setEnvironment(
-						landscape.isCustomEnvironment() ? customCubeMap : landscape.getCubeMap()
-						);
-				envLoadButton.setEnabled(landscape.isCustomEnvironment());
-				updateEnv();
+				setEnvironment(landscape.getEnvironment());
 			}
 		});	
 		
@@ -159,16 +165,17 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 		
 		envPanel.add(selectionPanel, BorderLayout.CENTER);
 		
-		Box envControlBox = new Box(BoxLayout.X_AXIS);
-		envControlBox.setBorder(
+		Box proceduralBox = new Box(BoxLayout.Y_AXIS);
+		proceduralBox.setBorder(
 				new CompoundBorder(
 						new EmptyBorder(0, 5, 2, 3),
 						BorderFactory.createTitledBorder(
 								BorderFactory.createEtchedBorder(),
-								"Background"
+								"Procedural"
 						)
 				)
 		);
+		Box envControlBox = new Box(BoxLayout.X_AXIS);
 		skyBoxHidden = new JCheckBox("flat background");
 		skyBoxHidden.setBorder(new EmptyBorder(0,5,5,10));
 		skyBoxHidden.addChangeListener(new ChangeListener() {
@@ -189,11 +196,29 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 		});
 		colorBox.add(backgroundColorButton);
 		envControlBox.add(colorBox);
-		envPanel.add(envControlBox, BorderLayout.SOUTH);
+		proceduralBox.add(envControlBox);
+		
+		Box sunHeightBox = new Box(BoxLayout.X_AXIS);
+		JLabel heightLabel = new JLabel("sun height");
+		sunHeightBox.add(heightLabel);
+		sunHeightSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 90, 45);
+		sunHeightSlider.setPreferredSize(new Dimension(70,20));
+		sunHeightSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setSunHeight(getSunHeight());
+			}
+		});
+		sunHeightBox.add(sunHeightSlider);
+		proceduralBox.add(sunHeightBox);
+		envPanel.add(proceduralBox, BorderLayout.SOUTH);
 	}
 
 	protected void switchToEnvLoadPanel() {
 		getViewerVR().switchToFileChooser(cubeMapFileChooser);
+	}
+	
+	public double getSunHeight() {
+		return sunHeightSlider.getValue();
 	}
 
 	@Override
@@ -201,7 +226,15 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 		return envPanel;
 	}
 	
-	public void updateEnv() {
+	public void setSunHeight(double angle) {
+		double t = angle * Math.PI/180;
+		perezBox.setSunDirection(new double[]{Math.cos(Math.PI/3)*Math.cos(t), Math.sin(t),Math.sin(Math.PI/3)*Math.cos(t)});
+		getViewerVR().setEnvironment(perezBox.getCubeMap());
+		updateEnv();
+	}
+	
+	private void updateEnv() {
+		getViewerVR().setSkyLightNode(getSkyLightNode());
 		ImageData[] imgs = skyBoxHidden.isSelected() ? null : getViewerVR().getEnvironment();
 		TextureUtility.createSkyBox(getViewerVR().getRootAppearance(), imgs);
 	}
@@ -238,13 +271,29 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 
 	public void setEnvironment(String environment) {
 		landscape.setEvironment(environment);
+		ImageData[] cm;
+		if (landscape.isCustomEnvironment()) {
+			cm = customCubeMap;
+		} else if (landscape.isProceduralEnvironment()) {
+			cm = perezBox.getCubeMap();
+		} else {
+			cm = landscape.getCubeMap();
+		}
+		getViewerVR().setEnvironment(cm);
 		envLoadButton.setEnabled(landscape.isCustomEnvironment());
+
+		boolean proc = landscape.isProceduralEnvironment();
+		sunHeightSlider.setEnabled(proc);
+		// TODO: uncomment when SunSkyLight works
+//		getViewerVR().getSceneRoot().setGeometry(
+//				proc ? perezBox : null
+//		);
+		updateEnv();
 	}
 	
 	@Override
 	public void storePreferences(Preferences prefs) {
 		prefs.put("environment", getEnvironment());
-		System.out.println("storing env: "+getEnvironment());
 		if ("custom".equals(getEnvironment())) {
 			if (customCubeMapFile != null) {
 				prefs.put("environmentFile", customCubeMapFile.getAbsolutePath());
@@ -290,4 +339,7 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 		setBackgroundColor(new Color(r,g,b));
 	}
 	
+	public SceneGraphComponent getSkyLightNode() {
+		return landscape.isProceduralEnvironment() ? perezBox.getLightComponent() : null;
+	}
 }

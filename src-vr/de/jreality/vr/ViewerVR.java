@@ -87,6 +87,8 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 //import de.jreality.sunflow.RenderOptions;
 //import de.jreality.sunflow.Sunflow;
+import de.jreality.sunflow.RenderOptions;
+import de.jreality.sunflow.Sunflow;
 import de.jreality.swing.ScenePanel;
 import de.jreality.tools.DuplicateTriplyPeriodicTool;
 import de.jreality.tools.HeadTransformationTool;
@@ -136,7 +138,8 @@ public class ViewerVR {
 	sceneNode = new SceneGraphComponent("scene"),
 	avatarNode = new SceneGraphComponent("avatar"),
 	camNode = new SceneGraphComponent("cam"),
-	lightNode = new SceneGraphComponent("sun"),
+	defaultSkyLightNode = new SceneGraphComponent("skyLight"),
+	skyLightNode,
 	terrainNode = new SceneGraphComponent("terrain");
 	private Appearance rootAppearance = new Appearance("app"),
 	terrainAppearance = new Appearance("terrain app"),
@@ -148,7 +151,7 @@ public class ViewerVR {
 	// default lights
 	private DirectionalLight sunLight = new DirectionalLight();
 	private PointLight headLight = new PointLight();
-	private DirectionalLight skyLight = new DirectionalLight();
+	private DirectionalLight skyAmbientLight = new DirectionalLight();
 
 	// the scale of the currently loaded content
 	private double objectScale=1;
@@ -198,7 +201,6 @@ public class ViewerVR {
 		sceneNode.setName("scene");
 		avatarNode.setName("avatar");
 		camNode.setName("camNode");
-		lightNode.setName("sun");
 		MatrixBuilder.euclidean().rotateX(-Math.PI/2).assignTo(sceneNode);
 		sceneNode.getTransformation().setName("alignment");
 
@@ -279,25 +281,25 @@ public class ViewerVR {
 			}
 		});
 
-		//		 lights
+		defaultSkyLightNode = new SceneGraphComponent();
 		sunLight = new DirectionalLight();
 		sunLight.setName("sun light");
-		SceneGraphComponent lightNode = new SceneGraphComponent("sun");
-		lightNode.setLight(sunLight);
+		SceneGraphComponent sunNode = new SceneGraphComponent("sun");
+		sunNode.setLight(sunLight);
 		MatrixBuilder.euclidean().rotateFromTo(new double[] { 0, 0, 1 },
-				//new double[] { 0, 1, 1 }).assignTo(lightNode);
-				//new double[] { 0.39, .24, 0.89 }).assignTo(lightNode);
-				new double[] { 0.39, Math.sqrt(.39*.39+0.89*0.89), 0.89 }).assignTo(lightNode);
-		getSceneRoot().addChild(lightNode);
+				new double[] { 0, 1, 1 }).assignTo(sunNode);
+		defaultSkyLightNode.addChild(sunNode);
 
-		SceneGraphComponent skyNode = new SceneGraphComponent();
-		skyLight = new DirectionalLight();
-		skyLight.setAmbientFake(true);
-		skyLight.setName("sky light");
-		skyNode.setLight(skyLight);
+		SceneGraphComponent skyAmbientNode = new SceneGraphComponent();
+		skyAmbientLight = new DirectionalLight();
+		skyAmbientLight.setAmbientFake(true);
+		skyAmbientLight.setName("sky light");
+		skyAmbientNode.setLight(skyAmbientLight);
 		MatrixBuilder.euclidean().rotateFromTo(new double[] { 0, 0, 1 },
-				new double[] { 0, 1, 0 }).assignTo(skyNode);
-		getSceneRoot().addChild(skyNode);
+				new double[] { 0, 1, 0 }).assignTo(skyAmbientNode);
+		defaultSkyLightNode.addChild(skyAmbientNode);
+		
+		setSkyLightNode(defaultSkyLightNode);
 
 		headLight.setAmbientFake(true);
 		headLight.setFalloff(1, 0, 0);
@@ -625,17 +627,17 @@ public class ViewerVR {
 		};
 		settings.add(panelPopup);
 
-//		Action bakeTerrain = new AbstractAction("Bake") {
-//			private static final long serialVersionUID = -4212517852052390335L;
-//			{
-//				putValue(SHORT_DESCRIPTION, "Bake terrain lightmap");
-//				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK));
-//			}
-//			public void actionPerformed(ActionEvent e) {
-//				bakeTerrain(vapp.getViewer());
-//			}
-//		};
-//		settings.add(bakeTerrain);
+		Action bakeTerrain = new AbstractAction("Bake") {
+			private static final long serialVersionUID = -4212517852052390335L;
+			{
+				putValue(SHORT_DESCRIPTION, "Bake terrain lightmap");
+				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK));
+			}
+			public void actionPerformed(ActionEvent e) {
+				bakeTerrain(vapp.getViewer());
+			}
+		};
+		settings.add(bakeTerrain);
 
 		settings.add(panelInSceneCheckBox);
 
@@ -698,22 +700,22 @@ public class ViewerVR {
 		menu.addMenu(helpMenu);
 	}
 
-//	public void bakeTerrain(Viewer v) {
-//		RenderOptions opts = new RenderOptions();
-//		opts.setThreadsLowPriority(true);
-//		List<SceneGraphPath> paths = SceneGraphUtility.getPathsBetween(
-//				getSceneRoot(),
-//				getTerrain().getChildComponent(0)
-//		);
-//		SceneGraphPath bakingPath = paths.get(0);
-//		Sunflow.renderToTexture(
-//				v,
-//				new Dimension(256,256),
-//				opts,
-//				bakingPath,
-//				getTerrainAppearance()
-//		);
-//	}
+	public void bakeTerrain(Viewer v) {
+		RenderOptions opts = new RenderOptions();
+		opts.setThreadsLowPriority(true);
+		List<SceneGraphPath> paths = SceneGraphUtility.getPathsBetween(
+				getSceneRoot(),
+				getTerrain().getChildComponent(0)
+		);
+		SceneGraphPath bakingPath = paths.get(0);
+		Sunflow.renderToTexture(
+				v,
+				new Dimension(1024,1024),
+				opts,
+				bakingPath,
+				getTerrainAppearance()
+		);
+	}
 	
 	public JFrame getExternalFrame() {
 		return sp.getExternalFrame();
@@ -808,11 +810,11 @@ public class ViewerVR {
 	}
 
 	public Color getSkyLightColor() {
-		return skyLight.getColor();
+		return skyAmbientLight.getColor();
 	}
 
 	public void setSkyLightColor(Color c) {
-		skyLight.setColor(c);
+		skyAmbientLight.setColor(c);
 	}
 
 	public double getSunIntensity() {
@@ -832,11 +834,11 @@ public class ViewerVR {
 	}
 
 	public double getSkyLightIntensity() {
-		return skyLight.getIntensity();
+		return skyAmbientLight.getIntensity();
 	}
 
 	public void setSkyLightIntensity(double x) {
-		skyLight.setIntensity(x);
+		skyAmbientLight.setIntensity(x);
 	}
 
 	public void setLightIntensity(double intensity) {
@@ -915,4 +917,16 @@ public class ViewerVR {
 		external.setLocationRelativeTo(f);
 	}
 
+	public SceneGraphComponent getSkyLightNode() {
+		return skyLightNode;
+	}
+
+	public void setSkyLightNode(SceneGraphComponent s) {
+		if (s == null) s = defaultSkyLightNode;
+		if (s != skyLightNode) {
+			if (skyLightNode != null) sceneRoot.removeChild(skyLightNode);
+			skyLightNode = s;
+			sceneRoot.addChild(s);
+		}
+	}
 }

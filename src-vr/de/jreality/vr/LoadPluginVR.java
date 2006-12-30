@@ -136,6 +136,4 @@ public class LoadPluginVR extends AbstractPluginVR {
 	public void switchToFileBrowser() {
 		getViewerVR().switchToFileChooser(fileChooserPanel);
 	}
-
-
 }

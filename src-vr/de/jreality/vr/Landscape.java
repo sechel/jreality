@@ -40,7 +40,8 @@ public class Landscape {
 //		{"lobby","textures/nvlobby_new_cubemap/nvlobby_new_", nvidia, ".png",},
 		//{"city","textures/city_cubemap/city_", nvidia, ".png",},
 //		{"arch","textures/arch_cubemap/arch_", nvidia, ".jpg",},
-		{"custom", null}
+		{"custom", null},
+		{"procedural", null}
 	};
 
 	private final transient ArrayList<ChangeListener> listeners=new ArrayList<ChangeListener>();
@@ -67,7 +68,9 @@ public class Landscape {
 	public Landscape(String[][] skyboxes, String selected) {
 		this.skyboxes=(String[][])skyboxes.clone();
 		//JPanel buttonGroupComponent = new JPanel(new GridLayout(skyboxes.length/2,2));
-		JPanel buttonGroupComponent = new JPanel(new GridLayout(skyboxes.length,1));
+		int n = skyboxes.length;
+		int numRows = n%2 == 1 ? (n+1)/2 : n/2;
+		JPanel buttonGroupComponent = new JPanel(new GridLayout(numRows,2));
 		buttonGroupComponent.setBorder(new EmptyBorder(5,5,5,5));
 		selectionComponent = new JPanel(new BorderLayout());
 		selectionComponent.add("Center", buttonGroupComponent);
@@ -162,16 +165,20 @@ public class Landscape {
 	public String getEnvironment() {
 		return skyboxes[selectionIndex][0];
 	}
-	
+
 	public void setEvironment(String environment) {
-		ButtonModel model = envToButton.get(environment);
-		group.setSelected(model, true);
-		load(environment);
-		fireChange();
+		if (environment != getEnvironment()) {
+			ButtonModel model = envToButton.get(environment);
+			group.setSelected(model, true);
+			load(environment);
+			fireChange();
+		}
 	}
 	
 	public boolean isCustomEnvironment() {
 		return "custom".equals(getEnvironment());
 	}
-
+	public boolean isProceduralEnvironment() {
+		return "procedural".equals(getEnvironment());
+	}
 }
