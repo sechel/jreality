@@ -9,6 +9,8 @@ import org.sunflow.system.UI.Module;
 import org.sunflow.system.UI.PrintLevel;
 import org.sunflow.system.ui.ConsoleInterface;
 
+import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.ImageData;
@@ -37,10 +39,9 @@ public class BakingDisplay implements Display, UserInterface {
 	}
 
 	public void taskStart(String s, int min, int max) {
-		System.out.println("BakingDisplay.taskStart()");
 		this.min = min;
         this.max = max;
-        lastP = -1;
+        //lastP = -1;
         invP = ((float)frameCount) / (max - min);
         console.taskStart(s, min, max);
 	}
@@ -59,14 +60,13 @@ public class BakingDisplay implements Display, UserInterface {
 	}
 
 	private void updateTexture() {
-		System.out.println("BakingDisplay.updateTexture()");
 		image.setRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
 		ImageData img = new ImageData(image);
-		//Texture2D tex = TextureUtility.createTexture(app, "polygonShader", img, false);
 		Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "lightMap", app, false);
-		tex.setApplyMode(Texture2D.GL_REPLACE);
+		tex.setApplyMode(Texture2D.GL_MODULATE);
 	    tex.setImage(img);
-		tex.setTextureMatrix(null);
+		Matrix texMat = MatrixBuilder.euclidean().scale(1,-1,1).getMatrix();
+		tex.setTextureMatrix(texMat);
 	}
 	
     public synchronized void imageBegin(int w, int h, int bucketSize) {

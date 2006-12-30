@@ -46,11 +46,15 @@ import java.util.IdentityHashMap;
 
 import org.sunflow.SunflowAPI;
 import org.sunflow.core.Display;
+import org.sunflow.core.ParameterList;
+import org.sunflow.core.ParameterList.InterpolationType;
 import org.sunflow.core.camera.PinholeLens;
+import org.sunflow.core.light.SunSkyLight;
 import org.sunflow.core.primitive.Background;
 import org.sunflow.core.primitive.TriangleMesh;
 import org.sunflow.core.shader.ConstantShader;
 import org.sunflow.core.shader.DiffuseShader;
+import org.sunflow.core.shader.GlassShader;
 import org.sunflow.image.Color;
 import org.sunflow.math.Matrix4;
 import org.sunflow.math.Point3;
@@ -109,6 +113,10 @@ public class SunflowRenderer extends SunflowAPI {
 		DefaultGeometryShader dgs;
 		DefaultPolygonShader dps;
 		
+		int lightID;
+		private RenderingHintsShader rhs;
+		private String shader;
+		
 		int appCount=0;
 		private Matrix currentMatrix;
 		
@@ -120,8 +128,10 @@ public class SunflowRenderer extends SunflowAPI {
 			path.push(c);
 			currentMatrix=new Matrix(path.getMatrix(null));
 			eapp = EffectiveAppearance.create(path);
+			shader = (String) eapp.getAttribute("sunflowShader", "default");
+
 			dgs = ShaderUtility.createDefaultGeometryShader(eapp);
-			rhs = ShaderUtility.createRenderingHintsShader(eapp);			
+			rhs = ShaderUtility.createRenderingHintsShader(eapp);
 			c.childrenAccept(this);
 			path.pop();
 		}
@@ -282,9 +292,6 @@ public class SunflowRenderer extends SunflowAPI {
 				}
 			}
 		}
-		
-		int lightID;
-		private RenderingHintsShader rhs;
 
 		@Override
 		public void visit(de.jreality.scene.DirectionalLight l) {
@@ -329,7 +336,13 @@ public class SunflowRenderer extends SunflowAPI {
 
 		private void applyShader(DefaultPolygonShader ps) {
 			appCount++;
-			shader("default-shader"+appCount, new de.jreality.sunflow.core.shader.DefaultPolygonShader(ps, rhs));
+			if ("default".equals(shader)) {
+				shader("default-shader"+appCount, new de.jreality.sunflow.core.shader.DefaultPolygonShader(ps, rhs));
+			} else if ("glass".equals(shader)) {
+				System.out.println("applying glass shader");
+				//parameter("color", ps.getDiffuseColor());
+				shader("default-shader"+appCount, new GlassShader());
+			}
 		}		
 	}
 	
@@ -394,8 +407,27 @@ public class SunflowRenderer extends SunflowAPI {
 		shader("ambientOcclusion", new DiffuseShader());
 		
 		// skybox or background color
+		
 		Appearance rootApp = sceneRoot.getAppearance();
-		if(rootApp != null) {
+		Geometry rootGeom = sceneRoot.getGeometry();
+		if (rootGeom instanceof PerezSky) {
+			PerezSky perezSky = (PerezSky) rootGeom;
+			ParameterList pl = new ParameterList();
+			double[] dir = perezSky.getSunDirection();
+			pl.addVectors(
+					"up",
+					InterpolationType.NONE,
+					new float[] {0,1,0}
+			);
+			pl.addVectors(
+					"sundir",
+					InterpolationType.NONE,
+					new float[] {(float)dir[0], (float)dir[2], (float)dir[1]}
+			);
+			SunSkyLight skyLight = new SunSkyLight();
+			skyLight.update(pl, this);
+			skyLight.init("sunSky", this);
+		} else if(rootApp != null) {
 			if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
 					CommonAttributes.SKY_BOX, rootApp)) {
 				CubeMap cm = (CubeMap) AttributeEntityUtility
