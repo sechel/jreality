@@ -93,11 +93,11 @@ public class SunflowMenu extends JMenu {
     EmptyBorder border = new EmptyBorder(10, 10, 10, 10);
     
     previewOptions = createRenderOptions(-2, 0);
-    InspectorPanel renderSameSettings = new InspectorPanel(false);
-    renderSameSettings.setBorder(border);
-    renderSameSettings.setObject(previewOptions, Collections
+    InspectorPanel previewSettings = new InspectorPanel(false);
+    previewSettings.setBorder(border);
+    previewSettings.setObject(previewOptions, Collections
         .singleton("nothing"));
-    tabs.add("preview", renderSameSettings);
+    tabs.add("preview", previewSettings);
     
     renderOptions = createRenderOptions(0, 2);
     
