@@ -285,9 +285,9 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 		boolean proc = landscape.isProceduralEnvironment();
 		sunHeightSlider.setEnabled(proc);
 		// TODO: uncomment when SunSkyLight works
-//		getViewerVR().getSceneRoot().setGeometry(
-//				proc ? perezBox : null
-//		);
+		getViewerVR().getSceneRoot().setGeometry(
+				proc ? perezBox : null
+		);
 		updateEnv();
 	}
 	
