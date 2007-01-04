@@ -102,12 +102,13 @@ public class Sunflow {
 		
 	}
 	
-	public static void renderAndSave(final Viewer v, RenderOptions options, final Dimension dim, File file) {
+	public static void renderAndSave(final Viewer v, final RenderOptions options, final Dimension dim, File file) {
 		final RenderDisplay renderDisplay = new RenderDisplay(file.getAbsolutePath());
 
 		new Thread(new Runnable() {
 			public void run() {
 				SunflowRenderer renderer = new SunflowRenderer();
+				renderer.setOptions(options);
 				renderer.render(
 						v.getSceneRoot(),
 						v.getCameraPath(),

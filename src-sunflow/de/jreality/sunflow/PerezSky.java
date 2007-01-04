@@ -36,7 +36,7 @@ public class PerezSky extends Geometry {
 		lightComponent = new SceneGraphComponent();
 		sunLight = new DirectionalLight();
 		// TODO: uncomment when SunSkyLight works	
-		//sunLight.setAmbientFake(true);
+		sunLight.setAmbientFake(true);
 		sunLight.setName("sun light");
 		sunLightNode = new SceneGraphComponent("sun");
 		sunLightNode.setLight(sunLight);
