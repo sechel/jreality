@@ -43,7 +43,6 @@ package de.jreality.tools;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
-import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.tool.AbstractTool;
@@ -51,14 +50,6 @@ import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.shader.EffectiveAppearance;
 
-
-/**
- *
- * TODO: document this
- *
- * @author brinkman
- *
- */
 public class AxisTranslationTool extends AbstractTool {
 
 	private boolean moveChildren;
