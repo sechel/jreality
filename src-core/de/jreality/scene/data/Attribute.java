@@ -65,10 +65,10 @@ public class Attribute implements Serializable {
    */
   public static Attribute attributeForName(String name) {
 	Attribute aa = KNOWN_ATTRIBUTES.get(name);
-    if (KNOWN_ATTRIBUTES.get(name) != null) return aa;
-    Attribute att = new Attribute(name);
-    KNOWN_ATTRIBUTES.put(name, att);
-    return att;
+    if (aa != null) return aa;
+    aa = new Attribute(name);
+    KNOWN_ATTRIBUTES.put(name, aa);
+    return aa;
   }
 
   private final String attrName;
