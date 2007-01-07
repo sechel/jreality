@@ -329,6 +329,25 @@ public class P3 {
 	     }
 	     return dst; 
 	}
+	
+	/**
+	 * Similar to {@link P3#makeHarmonicHarmology(double[], double[], double[])} but maps all points
+	 * onto the <i>axis</i> plane.
+	 * @param dst
+	 * @param center
+	 * @param axis
+	 * @return
+	 */public static double[] makeFlattenProjection(double[] dst, double[] center, double[] axis)	{
+		if (dst == null) dst = new double[center.length*center.length];
+	     double f = 1.0/Rn.innerProduct(center, axis); 
+	     for (int i = 0; i<3; ++i)  {    
+	         for (int j = 0; j<3; ++j) {
+	              dst[3*i+j] = (i==j? 1 : 0) - f * center[i] * axis[j];
+	         }
+	     }
+	     return dst; 
+		
+	}
 
 	/**
 	 * Creates an isometry that carries the <i>from</i> vector to the origin; and takes the 

@@ -40,14 +40,22 @@
 
 package de.jreality.geometry;
 
+import java.awt.Color;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.jreality.geometry.TubeUtility.FrameInfo;
+import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Transformation;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.util.LoggingSystem;
 
 /**
@@ -106,15 +114,25 @@ public  class TubeFactory {
 		static int debug = 0;
 		static Logger theLogger = LoggingSystem.getLogger(TubeFactory.class);
 		
-		public double[][] theCurve, vertexColors, edgeColors, crossSection = TubeUtility.octagonalCrossSection;
+		public double[][] theCurve, 
+			userTangents = null,
+			userBinormals = null,
+			vertexColors, 
+			edgeColors, 
+			crossSection = TubeUtility.octagonalCrossSection;
+		public double[] radii = null;
 		public double radius = .05;
 		public FrameFieldType frameFieldType = FrameFieldType.PARALLEL;
 		public int signature = Pn.EUCLIDEAN;
 		public int twists = 0;
 		public boolean generateTextureCoordinates = false;
 		boolean arcLengthTextureCoordinates = false;
+		public boolean extendAtEnds = false;
 		boolean removeDuplicates = false;
-		private boolean duplicatesRemoved = false;
+		boolean duplicatesRemoved = false;
+		public boolean framesDirty = true;
+		protected FrameInfo[] frames = null;
+		protected double[] radiiField = null;
 		
 		public boolean closedCurve = false,
 			vertexColorsEnabled = false;
@@ -128,12 +146,20 @@ public  class TubeFactory {
 			theCurve = curve;
 		}
 		
+		public  void updateFrames() {
+			
+		}
+		
+		public FrameInfo[] getFrameField()	{
+			return frames;
+		}
 		/**
 		 * Set whether the curve should be considered a closed loop. Default: false.
 		 * @param closedCurve
 		 */
 		public void setClosed(boolean closedCurve) {
 			this.closedCurve = closedCurve;
+			framesDirty = true;
 		}
 
 		/**
@@ -145,6 +171,22 @@ public  class TubeFactory {
 		 */
 		public void setCrossSection(double[][] crossSection) {
 			this.crossSection = crossSection;
+		}
+
+		public double[][] getTangents() {
+			return userTangents;
+		}
+
+		public void setTangents(double[][] tangents) {
+			this.userTangents = tangents;
+		}
+
+		public double[][] getUserBinormals() {
+			return userBinormals;
+		}
+
+		public void setUserBinormals(double[][] userBinormals) {
+			this.userBinormals = userBinormals;
 		}
 
 		/**
@@ -164,12 +206,16 @@ public  class TubeFactory {
 			this.radius = radius;
 		}
 
+		 public void setRadii( double[] radii)	{
+			 this.radii = radii;
+		 }
 		/**
 		 * Set the signature of the ambient space. See {@link Pn}.
 		 * @param signature
 		 */
 		 public void setSignature(int signature) {
 			this.signature = signature;
+			framesDirty = true;
 		}
 
 		/**
@@ -236,6 +282,15 @@ public  class TubeFactory {
 			this.arcLengthTextureCoordinates = arcLengthTextureCoordinates;
 		}
 			
+		public boolean isExtendAtEnds() {
+			return extendAtEnds;
+		}
+
+		public void setExtendAtEnds(boolean extendAtEnds) {
+			this.extendAtEnds = extendAtEnds;
+			framesDirty = true;
+		}
+
 		public boolean isRemoveDuplicates() {
 			return removeDuplicates;
 		}
@@ -244,6 +299,10 @@ public  class TubeFactory {
 			this.removeDuplicates = removeDuplicates;
 		}
 
+		public SceneGraphComponent getFramesSceneGraphRepresentation()	{
+			return TubeFactory.getSceneGraphRepresentation(frames);
+		}
+		
 		public  void update()		{
 			if (removeDuplicates && !duplicatesRemoved)	{
 				theCurve = removeDuplicates(theCurve);
@@ -251,6 +310,11 @@ public  class TubeFactory {
 			}
 		}
 		
+		/**
+		 * A hack to deal with a situation where vertices were repeated.
+		 * @param cc
+		 * @return
+		 */
 		protected static double[][] removeDuplicates(double[][] cc)	{
 			int n = cc.length;
 			Vector<double[]> v = new Vector<double[]>();
@@ -365,6 +429,7 @@ public  class TubeFactory {
 		 * @return	an array of length (n-2) of type {@link TubeUtility.FrameInfo} containing an orthonormal frame for each internal point in the initial polygon array.
 		 */
 		public  FrameInfo[] makeFrameField(double[][] polygon, FrameFieldType type, int signature)		{
+			if (!framesDirty) return frames;
 		 	int n = polygon.length;
 		 	double[][] polygonh;
 		 	// to simplify life, convert all points to homogeneous coordinates
@@ -379,7 +444,7 @@ public  class TubeFactory {
 			}
 		 	if ((debug & 1) != 0)	
 		 		theLogger.log(Level.FINER,"Generating frame field for signature "+signature);
-		 	if (tangentField == null || tangentField.length < (n-2))	{
+		 	if (tangentField == null || tangentField.length != (n-2))	{
 				tangentField = new double[n-2][4];
 				frenetNormalField = new double[n-2][4];
 				parallelNormalField = new double[n-2][4];
@@ -419,7 +484,9 @@ public  class TubeFactory {
 					if (i == 1)		binormalField[i-1] = getInitialBinormal(polygonh, signature);
 					else Pn.projectToTangentSpace(binormalField[i-1], polygonh[i], binormalField[i-2], signature);
 				} else
-					Pn.polarizePlane(binormalField[i-1], osculatingPlane,signature);					
+					Pn.polarizePlane(binormalField[i-1], osculatingPlane,signature);
+				if (userBinormals != null) 
+					System.arraycopy(userBinormals[i-1], 0, binormalField[i-1], 0, userBinormals[i-1].length);
 				Pn.setToLength(binormalField[i-1], binormalField[i-1], 1.0, signature);
 				if ((debug & 2) != 0) theLogger.log(Level.FINER,"Binormal is "+Rn.toString(binormalField[i-1]));
 
@@ -427,51 +494,62 @@ public  class TubeFactory {
 				 * Next try to calculate the tangent as a "mid-plane" if the three points are not collinear
 				 */
 				double[] midPlane = null, plane1 = null, plane2 = null;
-				if (!collinear)	{
-					plane1 = P3.planeFromPoints(null, binormalField[i-1], polygonh[i], polygonh[i-1]);
-					plane2 = P3.planeFromPoints(null, binormalField[i-1], polygonh[i], polygonh[i+1]);
-					midPlane = Pn.midPlane(null, plane1, plane2, signature);
-					size = Rn.euclideanNormSquared(midPlane);
-					if ((debug & 2) != 0) theLogger.log(Level.FINER,"tangent norm squared is "+size);					
-					theta = Pn.angleBetween(plane1, plane2, signature);
+					if (!collinear)	{
+						plane1 = P3.planeFromPoints(null, binormalField[i-1], polygonh[i], polygonh[i-1]);
+						plane2 = P3.planeFromPoints(null, binormalField[i-1], polygonh[i], polygonh[i+1]);
+						midPlane = Pn.midPlane(null, plane1, plane2, signature);
+						size = Rn.euclideanNormSquared(midPlane);
+						if ((debug & 2) != 0) theLogger.log(Level.FINER,"tangent norm squared is "+size);					
+						theta = Pn.angleBetween(plane1, plane2, signature);
+					}
+					/*
+					 * if this is degenerate, then the curve must be collinear at this node
+					 * get the tangent by projecting the line into the tangent space at this point
+					 */ 
+					if (collinear || size < 10E-16)	{
+						// the three points must be collinear
+						if ((debug & 2) != 0) theLogger.log(Level.FINER,"degenerate Tangent vector");
+						// TODO figure out why much breaks 
+						// if the two vertices in the following call are swapped
+						double[] pseudoT = P3.lineIntersectPlane(null, polygonh[i-1], polygonh[i+1], polarPlane);	
+						if ((debug & 2) != 0) theLogger.log(Level.FINE,"pseudo-Tangent vector is "+Rn.toString(pseudoT));
+						// more euclidean/noneuclidean trouble
+						// we want the plane equation of the midplane 
+						if (signature != Pn.EUCLIDEAN)	{
+							midPlane = Pn.polarizePoint(null, pseudoT, signature);
+						} else {
+							// TODO figure out why the vector (the output of lineIntersectPlane)
+							// has to be flipped in this case but not in the non-euclidean case
+							//midPlane = Rn.times(null, -1.0, pseudoT);
+							midPlane = pseudoT;
+							// the eucliean polar of a point is the plane at infinity: we want something
+							// much more specific: 
+							// we assume the polygonal data is dehomogenized (last coord = 1)
+							midPlane[3] = -Rn.innerProduct(midPlane, polygonh[i], 3);						
+						}	
+						// TODO detect case where the angle is 0, also
+						theta = Math.PI;
+					}
+					//System.err.println("calc'ed midplane is "+Rn.toString(midPlane));
+					if ((debug & 2) != 0) theLogger.log(Level.FINE,"Midplane is "+Rn.toString(midPlane));
+						Pn.polarizePlane(tangentField[i-1], midPlane, signature);						
+				if (userTangents == null){
+				} else {
+					System.arraycopy(userTangents[i-1], 0, tangentField[i-1], 0, userTangents[i-1].length);
+					midPlane = Rn.planeParallelToPassingThrough(null, userTangents[i-1], polygonh[i]);
+					//System.err.println("given midplane is "+Rn.toString(midPlane));
+					if (i>1) theta = Pn.angleBetween(userTangents[i-2], userTangents[i-1], signature);
+					else theta = 0;
 				}
-				/*
-				 * if this is degenerate, then the curve must be collinear at this node
-				 * get the tangent by projecting the line into the tangent space at this point
-				 */ 
-				if (collinear || size < 10E-16)	{
-					// the three points must be collinear
-					if ((debug & 2) != 0) theLogger.log(Level.FINER,"degenerate Tangent vector");
-					// TODO figure out why much breaks 
-					// if the two vertices in the following call are swapped
-					double[] pseudoT = P3.lineIntersectPlane(null, polygonh[i-1], polygonh[i+1], polarPlane);	
-					if ((debug & 2) != 0) theLogger.log(Level.FINE,"pseudo-Tangent vector is "+Rn.toString(pseudoT));
-					// more euclidean/noneuclidean trouble
-					// we want the plane equation of the midplane 
-					if (signature != Pn.EUCLIDEAN)	{
-						midPlane = Pn.polarizePoint(null, pseudoT, signature);
-					} else {
-						// TODO figure out why the vector (the output of lineIntersectPlane)
-						// has to be flipped in this case but not in the non-euclidean case
-						//midPlane = Rn.times(null, -1.0, pseudoT);
-						midPlane = pseudoT;
-						// the eucliean polar of a point is the plane at infinity: we want something
-						// much more specific: 
-						// we assume the polygonal data is dehomogenized (last coord = 1)
-						midPlane[3] = -Rn.innerProduct(midPlane, polygonh[i], 3);						
-					}	
-					// TODO detect case where the angle is 0, also
-					theta = Math.PI;
-				}
-				if ((debug & 2) != 0) theLogger.log(Level.FINE,"Midplane is "+Rn.toString(midPlane));
-				Pn.polarizePlane(tangentField[i-1], midPlane, signature);	
 				// This is a hack to try to choose the correct version of the tangent vector:
 				// since we're in projective space, t and -t are equivalent but only one
 				// "points" in the correct direction.  Deserves further study!
 				double[] diff = Rn.subtract(null, polygonh[i], polygonh[i-1]);
-				if (Rn.innerProduct(diff, tangentField[i-1]) < 0.0)  Rn.times(tangentField[i-1], -1.0, tangentField[i-1]);
+				if (Rn.innerProduct(diff, tangentField[i-1]) < 0.0)  
+					Rn.times(tangentField[i-1], -1.0, tangentField[i-1]);
 
 				Pn.setToLength(tangentField[i-1], tangentField[i-1], 1.0, signature);
+				//System.err.println("tangent is "+Rn.toString(tangentField[i-1]));
 				// finally calculate the normal vector
 				Pn.polarizePlane(frenetNormalField[i-1], P3.planeFromPoints(null,binormalField[i-1], tangentField[i-1],  polygonh[i]),signature);					
 				Pn.setToLength(frenetNormalField[i-1], frenetNormalField[i-1], 1.0, signature);
@@ -515,6 +593,7 @@ public  class TubeFactory {
 				frameInfo[i-1] = new FrameInfo(Rn.transpose(null, frame),d[i-1],theta, phi);
 				if ((debug & 16) != 0) theLogger.log(Level.FINE,"Frame "+(i-1)+": "+frameInfo[i-1].toString());
 			}
+			framesDirty = false;
 			return frameInfo;
 		 }
 
@@ -542,4 +621,51 @@ public  class TubeFactory {
 			return Pn.polarizePlane(null, P3.planeFromPoints(null, B, polygon[1], polygon[2]),signature);
 		}
 
+		 static double[][] axes = {{0,0,0},{1,0,0},{0,1,0},{0,0,1}};
+		 static int[][] axesIndices = {{0,1},{0,2},{0,3}};
+		 static Color[] axesColors = {Color.red, Color.green, Color.blue};
+		 
+		public static SceneGraphComponent getSceneGraphRepresentation(FrameInfo[] frames)	{
+			SceneGraphComponent result = new SceneGraphComponent();
+			IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
+			ilsf.setVertexCount(4);
+			ilsf.setVertexCoordinates(axes);
+			ilsf.setLineCount(3);
+			ilsf.setEdgeIndices(axesIndices);
+			ilsf.setEdgeColors(axesColors);
+			ilsf.update();
+			IndexedLineSet ils = ilsf.getIndexedLineSet();
+			BallAndStickFactory basf = new BallAndStickFactory(ils);
+			basf.setDrawArrows(true);
+			basf.setArrowPosition(1.2);
+			basf.setStickRadius(.05);
+			basf.setArrowScale(.15);
+			basf.setArrowSlope(2.0);
+			basf.setShowBalls(false);
+			basf.setShowSticks(true);
+			basf.update();
+			SceneGraphComponent geometry = basf.getSceneGraphComponent();
+			MatrixBuilder.euclidean().scale(.2).assignTo(geometry);
+			double[][] verts = new double[frames.length][];
+			int i = 0;
+			for (FrameInfo f : frames)	{
+				SceneGraphComponent foo = new SceneGraphComponent();
+				Transformation t = new Transformation(f.frame);
+				foo.setTransformation(t);
+				foo.addChild(geometry);
+				result.addChild(foo);
+				verts[i++] = (new Matrix(f.frame)).getColumn(3);
+			}
+			SceneGraphComponent sgc = new SceneGraphComponent();
+			Appearance ap = new Appearance();
+			ap.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, .005);
+			ap.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
+			ap.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new Color(100, 200, 200));
+			ap.setAttribute(CommonAttributes.LINE_SHADER+"."+"polygonShader.diffuseColor", new Color(100, 200, 200));
+			sgc.setAppearance(ap);
+			ils = IndexedLineSetUtility.createCurveFromPoints(verts, false);
+			sgc.setGeometry(ils);
+			result.addChild(sgc);
+			return result;
+		}
 }

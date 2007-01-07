@@ -272,5 +272,11 @@ import de.jreality.scene.data.StorageModel;
 		return theTube;
 	}
 
+	@Override
+	public void updateFrames() {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }
