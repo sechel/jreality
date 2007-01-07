@@ -401,9 +401,11 @@ public class JOGLRendererHelper {
 	}
 
 	public static void drawEdgeLabels(JOGLRenderer jr, IndexedLineSet ils, DefaultTextShader ts) {
+		//System.err.println("In draw edge labels 1");
 		if (!ts.getShowLabels().booleanValue())
 			return;
 
+		//System.err.println("In draw edge labels 2");
 		Font font = ts.getFont();
 		Color c = ts.getDiffuseColor();
 		double scale = ts.getScale().doubleValue();
@@ -444,6 +446,7 @@ public class JOGLRendererHelper {
 		double[] c2o = jr.getContext().getCameraToObject();
 		gl.glActiveTexture(GL.GL_TEXTURE0);
 		gl.glEnable(GL.GL_TEXTURE_2D);
+		jr.getRenderingState().texUnitCount = 1;
 		double[] bbm = new double[16];
 		// float[] glc2o = new float[16];
 		// double[] dglc2o = new double[16];
@@ -468,6 +471,7 @@ public class JOGLRendererHelper {
 		}
 		gl.glDisable(GL.GL_BLEND);
 		gl.glDisable(GL.GL_TEXTURE_2D);
+		jr.getRenderingState().texUnitCount = 0;
 	}
 
 	/**

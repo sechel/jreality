@@ -302,7 +302,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				gl.glActiveTexture(i);
 				gl.glDisable(GL.GL_TEXTURE_2D);
 			      //System.err.println("deactivating texture");
-			      			}
+		}
+		jr.getRenderingState().texUnitCount=0;
 //		}
 //	    if (ignoreTexture2d) {
 //    			gl.glActiveTexture(GL.GL_TEXTURE0);
