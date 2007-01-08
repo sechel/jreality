@@ -869,6 +869,7 @@ public class JOGLRenderer  implements AppearanceListener {
 
 		public void appearanceChanged(AppearanceEvent ev) {
 			String key = ev.getKey();
+			System.err.println("Appearance changed "+key);
 			int changed = 0;
 			boolean propagates = true;
 			// TODO shaders should register keywords somehow and which geometries might be changed
@@ -880,6 +881,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			else if (key.indexOf("anyDisplayLists") != -1) changed |= (POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
 			else if (key.endsWith("Shader")) changed |= LINE_SHADER_CHANGED | POINT_SHADER_CHANGED | POLYGON_SHADER_CHANGED;
 			// there are some appearances which we know aren't inherited, so don't propagate change event.
+			else if (key.indexOf("texture2d") != -1) changed |= (FACES_CHANGED);
 			if (key.indexOf(CommonAttributes.BACKGROUND_COLOR) != -1	||
 					key.indexOf("fog") != -1) propagates = false;
 
