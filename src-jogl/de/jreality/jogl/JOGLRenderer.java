@@ -882,6 +882,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			else if (key.endsWith("Shader")) changed |= LINE_SHADER_CHANGED | POINT_SHADER_CHANGED | POLYGON_SHADER_CHANGED;
 			// there are some appearances which we know aren't inherited, so don't propagate change event.
 			else if (key.indexOf("texture2d") != -1) changed |= (FACES_CHANGED);
+			else if (key.indexOf("lightMap") != -1) changed |= (FACES_CHANGED);
 			if (key.indexOf(CommonAttributes.BACKGROUND_COLOR) != -1	||
 					key.indexOf("fog") != -1) propagates = false;
 
