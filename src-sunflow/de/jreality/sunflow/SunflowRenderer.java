@@ -117,6 +117,7 @@ public class SunflowRenderer extends SunflowAPI {
 	private SceneGraphPath bakingPath;
 	private String bakingInstance;
 	private RenderOptions options = new RenderOptions();
+	private boolean ignoreSunLight;
 
 	private class Visitor extends SceneGraphVisitor {
 
@@ -314,7 +315,7 @@ public class SunflowRenderer extends SunflowAPI {
 
 		@Override
 		public void visit(de.jreality.scene.DirectionalLight l) {
-			if (!l.isAmbientFake()) {
+			if (!l.isAmbientFake() || ("sun light".equals(l.getName()) && !ignoreSunLight)) {
 				double[] d = currentMatrix.multiplyVector(new double[]{0,0,-1,0});
 				Vector3 dir = new Vector3((float)d[0], (float)d[1], (float)d[2]);
 				Point3 src = new Point3(
@@ -463,8 +464,8 @@ public class SunflowRenderer extends SunflowAPI {
 			// skybox or background color
 			Appearance rootApp = sceneRoot.getAppearance();
 			Geometry rootGeom = sceneRoot.getGeometry();
-			//if (rootGeom instanceof PerezSky) {
-			if (false) {
+			if (options.isUseSunSkyLight() && rootGeom instanceof PerezSky) {
+				ignoreSunLight = true;
 				PerezSky perezSky = (PerezSky) rootGeom;
 				ParameterList pl = new ParameterList();
 				double[] dir = perezSky.getSunDirection();

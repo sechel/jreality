@@ -17,6 +17,7 @@ public class RenderOptions {
 	private int causticsGather = 50;
 	private double causticsRadius = 0.5;
 	private double causticsFilter = 1.1;
+	private boolean useSunSkyLight = false;
 	
 	private String shaderOverride;
 	
@@ -129,6 +130,7 @@ public class RenderOptions {
 		prefs.putInt(prefix+"causticsGather", causticsGather);
 		prefs.putDouble(prefix+"causticsRadius", causticsRadius);
 		prefs.putDouble(prefix+"causticsFilter", causticsFilter);
+		prefs.putBoolean(prefix+"useSunSkyLight", useSunSkyLight);
 	}
 	
 	public void restoreFromPreferences(Preferences prefs, String prefix, RenderOptions defaults) {
@@ -145,6 +147,7 @@ public class RenderOptions {
 		setCausticsGather(prefs.getInt(prefix+"causticsGather", defaults.getCausticsGather()));
 		setCausticsRadius(prefs.getDouble(prefix+"causticsRadius", defaults.getCausticsRadius()));
 		setCausticsFilter(prefs.getDouble(prefix+"causticsFilter", defaults.getCausticsFilter()));
+		setUseSunSkyLight(prefs.getBoolean(prefix+"useSunSkyLight", defaults.isUseSunSkyLight()));
 	}
 
 	public boolean isThreadsLowPriority() {
@@ -169,5 +172,13 @@ public class RenderOptions {
 
 	public void setCausticsFilter(double causticFilter) {
 		this.causticsFilter = causticFilter;
+	}
+
+	public boolean isUseSunSkyLight() {
+		return useSunSkyLight;
+	}
+
+	public void setUseSunSkyLight(boolean useSunSkyLight) {
+		this.useSunSkyLight = useSunSkyLight;
 	}
 }
