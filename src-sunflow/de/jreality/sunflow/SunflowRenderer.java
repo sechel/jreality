@@ -463,7 +463,8 @@ public class SunflowRenderer extends SunflowAPI {
 			// skybox or background color
 			Appearance rootApp = sceneRoot.getAppearance();
 			Geometry rootGeom = sceneRoot.getGeometry();
-			if (rootGeom instanceof PerezSky) {
+			//if (rootGeom instanceof PerezSky) {
+			if (false) {
 				PerezSky perezSky = (PerezSky) rootGeom;
 				ParameterList pl = new ParameterList();
 				double[] dir = perezSky.getSunDirection();
