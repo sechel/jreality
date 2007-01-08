@@ -47,10 +47,11 @@ import java.awt.event.ActionEvent;
 
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
+import de.jtem.beans.DimensionDialog;
 
 
 /**
- * Allows to set the viewer size via a dimension panel.<br>
+ * Allows to set the viewer size via a dimension panel.
  * 
  * @author msommer
  */
@@ -71,23 +72,13 @@ public class SetViewerSize extends AbstractJrAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Dimension d = viewer.getViewingComponentSize();
-		System.out.println(d);
-//		Dimension dim = DimensionDialog.selectDimension(d, parentComp);
-//		System.out.println(dim);	
+		Dimension dim = DimensionDialog.selectDimension(d, parentComp);
+
 		Component v = (Component) viewer.getViewingComponent();
-//		
-		v.setPreferredSize(new Dimension(300, 200));
-		v.setSize(new Dimension(300, 200));
-		v.setMaximumSize(new Dimension(300, 200));
-		v.setMinimumSize(new Dimension(300, 200));
-////		v.setPreferredSize(dim);
-//		
-		((Frame)parentComp).pack();
-//		v.requestFocusInWindow();
+		v.setPreferredSize(dim);
 		
-		System.out.println(v.getPreferredSize());
-		System.out.println(((Component)viewer.getViewingComponent()).getSize());
-		Dimension dim = viewer.getViewingComponentSize();
-		System.out.println(dim);
+		((Frame)parentComp).pack();
+		v.requestFocusInWindow();
 	}
+	
 }

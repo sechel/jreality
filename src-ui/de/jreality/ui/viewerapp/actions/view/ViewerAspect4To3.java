@@ -40,71 +40,42 @@
 
 package de.jreality.ui.viewerapp.actions.view;
 
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
-import java.util.HashMap;
 
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-
-import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
 /**
- * Sets the viewer aspect ratio to 4:3.<br>
- * There is only one instance of this action.
+ * Sets the viewer aspect ratio to 4:3.
  * 
  * @author pinkall
  */
-@SuppressWarnings("serial")
 public class ViewerAspect4To3 extends AbstractJrAction {
 	
-	private ViewerApp viewerApp;
+	private Viewer viewer;
 
-	private static HashMap <ViewerApp, ViewerAspect4To3> sharedInstances = new HashMap <ViewerApp, ViewerAspect4To3>();
-
-
-	private ViewerAspect4To3(String name, ViewerApp viewerApp) {
-		super(name);
-		this.viewerApp = viewerApp;
-		this.parentComp = viewerApp.getFrame();
+	public ViewerAspect4To3(String name, Viewer viewer, Frame parentComp) {
+		super(name, parentComp);
+		
+		if (viewer == null) 
+			throw new UnsupportedOperationException("Viewer not allowed to be null!");
+		this.viewer = viewer;
 
 		setShortDescription("Set viewer aspect ratio to 4:3");
 	}
 
-
-	/**
-	 * Returns a shared instance of this action depending on the specified viewerApp
-	 * (i.e. there is a shared instance for each viewerApp). 
-	 * The action's name is overwritten by the specified name.
-	 * @param name name of the action
-	 * @param viewerApp the viewerApp displaying the viewer
-	 * @throws UnsupportedOperationException if viewerApp equals null
-	 * @return shared instance of ViewerAspect with specified name
-	 */
-	public static ViewerAspect4To3 sharedInstance(String name, ViewerApp viewerApp) {
-		if (viewerApp == null) 
-			throw new UnsupportedOperationException("ViewerApp not allowed to be null!");
-
-		ViewerAspect4To3 sharedInstance = sharedInstances.get(viewerApp);
-		if (sharedInstance == null) {
-			sharedInstance = new ViewerAspect4To3(name, viewerApp);
-			sharedInstances.put(viewerApp, sharedInstance);
-		}
-
-		sharedInstance.setName(name);
-		return sharedInstance;
-	}
-
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		JFrame frame = viewerApp.getFrame();
-		JComponent v = (JComponent) viewerApp.getViewer().getViewingComponent();
+		Component v = (Component) viewer.getViewingComponent();
 		int height = v.getHeight();
 		v.setPreferredSize(new Dimension((int)(height/3.*4.),height));
-		frame.pack();
+		
+		((Frame)parentComp).pack();
 		v.requestFocusInWindow();
 	}
+
 }
