@@ -62,99 +62,101 @@ import de.jreality.scene.SceneGraphNode;
  */
 public class BeanShell implements SelectionListener {
 
-  private BshEvaluator bshEval;
-  private JTerm jterm;
-  private SimpleAttributeSet infoStyle;
-  private Object defaultSelection;
-  
-  public BeanShell() {
-	  this(null);
-  }
-  
-  public BeanShell(SelectionManager sm) {
+	private BshEvaluator bshEval;
+	private JTerm jterm;
+	private SimpleAttributeSet infoStyle;
+	private Object defaultSelection;
 
-    bshEval = new BshEvaluator();
-
-    jterm = new JTerm(new Session(bshEval));
-    jterm.setMaximumSize(new Dimension(10, 10));
-    
-    infoStyle = new SimpleAttributeSet();
-    StyleConstants.setForeground(infoStyle, new Color(165, 204, 0));
-    StyleConstants.setFontFamily(infoStyle, "Monospaced");
-    StyleConstants.setBold(infoStyle, true);
-    StyleConstants.setFontSize(infoStyle, 12);
-    
-	if ( sm!= null) {
-		sm.addSelectionListener(this);
-		defaultSelection = sm.getDefaultSelection().getLastElement();
-	    setSelf(sm.getSelection().getLastElement());  //select current selection
+	
+	public BeanShell() {
+		this(null);
 	}
-	  
- }
-  
-  
-  public void selectionChanged(SelectionEvent e) {
-	switch (e.getType()) {
-	case SelectionEvent.DEFAULT_SELECTION:
-		setSelf(e.getSelection().getLastElement());
-		break;
-	case SelectionEvent.TOOL_SELECTION:
-		setSelf(e.getTool());
-		break;
-	case SelectionEvent.ENTITY_SELECTION:
-		setSelf(e.getEntity());
-		break;
-	case SelectionEvent.NO_SELECTION:
-		setSelf(defaultSelection);
+
+	public BeanShell(SelectionManager sm) {
+
+		bshEval = new BshEvaluator();
+
+		jterm = new JTerm(new Session(bshEval));
+		jterm.setMaximumSize(new Dimension(10, 10));
+
+		infoStyle = new SimpleAttributeSet();
+		StyleConstants.setForeground(infoStyle, new Color(165, 204, 0));
+		StyleConstants.setFontFamily(infoStyle, "Monospaced");
+		StyleConstants.setBold(infoStyle, true);
+		StyleConstants.setFontSize(infoStyle, 12);
+
+		if ( sm!= null) {
+			sm.addSelectionListener(this);
+			defaultSelection = sm.getDefaultSelection().getLastElement();
+			setSelf(sm.getSelection().getLastElement());  //select current selection
+		}
+
 	}
-  }
-
-  
-  public void eval(String arg) {
-    
-    try { bshEval.getInterpreter().eval(arg); } 
-    catch (EvalError error) { error.printStackTrace(); }
-  }
-  
-  
-  /**
-   * Get the bean shell as a Component.
-   * @return the bean shell
-   */
-  public Component getComponent() {
-    
-	  JScrollPane beanShell = new JScrollPane(jterm);
-	  beanShell.setBorder(BorderFactory.createEmptyBorder());
-	  return beanShell;
-  }
-  
-
-  public void setSelf(Object obj) {
-    
-    if (obj == null) return;
-    
-    try {
-      if (obj.equals(bshEval.getInterpreter().get("self"))) return;
-      bshEval.getInterpreter().set("self", obj);
-      String name = (obj instanceof SceneGraphNode) ? ((SceneGraphNode)obj).getName() : "";
-      String type = Proxy.isProxyClass(obj.getClass()) ? obj.getClass().getInterfaces()[0].getName() : obj.getClass().getName();
-      String info="\nself="+name+"["+type+"]\n";
-      try {
-        jterm.getSession().displayAndPrompt(info, infoStyle);
-        jterm.setCaretPosition(jterm.getDocument().getLength());
-      } 
-      catch (Exception exc) {
-        // unpatched jterm 
-      }
-    } 
-    catch (EvalError error) { 
-      error.printStackTrace();
-    }
-  }
 
 
-  public BshEvaluator getBshEval() {
-    return bshEval;
-  }
+	public void selectionChanged(SelectionEvent e) {
+		switch (e.getType()) {
+		case SelectionEvent.DEFAULT_SELECTION:
+			setSelf(e.getSelection().getLastElement());
+			break;
+		case SelectionEvent.TOOL_SELECTION:
+			setSelf(e.getTool());
+			break;
+		case SelectionEvent.ENTITY_SELECTION:
+			setSelf(e.getEntity());
+			break;
+		case SelectionEvent.NO_SELECTION:
+			setSelf(defaultSelection);
+		}
+	}
+
+
+	public void eval(String arg) {
+
+		try { bshEval.getInterpreter().eval(arg); } 
+		catch (EvalError error) { error.printStackTrace(); }
+	}
+
+
+	/**
+	 * Get the bean shell as a Component.
+	 * @return the bean shell
+	 */
+	public Component getComponent() {
+
+		JScrollPane beanShell = new JScrollPane(jterm);
+		beanShell.setBorder(BorderFactory.createEmptyBorder());
+
+		return beanShell;
+	}
+
+
+	public void setSelf(Object obj) {
+
+		if (obj == null) return;
+
+		try {
+			if (obj.equals(bshEval.getInterpreter().get("self"))) return;
+			bshEval.getInterpreter().set("self", obj);
+			String name = (obj instanceof SceneGraphNode) ? ((SceneGraphNode)obj).getName() : "";
+			String type = Proxy.isProxyClass(obj.getClass()) ? obj.getClass().getInterfaces()[0].getName() : obj.getClass().getName();
+			String info="\nself="+name+"["+type+"]\n";
+			try {
+				jterm.getSession().displayAndPrompt(info, infoStyle);
+				jterm.setCaretPosition(jterm.getDocument().getLength());
+			} 
+			catch (Exception exc) {
+				// unpatched jterm 
+			}
+		} 
+		catch (EvalError error) { 
+			error.printStackTrace();
+		}
+	}
+
+
+	public BshEvaluator getBshEval() {
+		return bshEval;
+	}
 
 }
