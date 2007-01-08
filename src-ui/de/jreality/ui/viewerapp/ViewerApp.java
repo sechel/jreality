@@ -255,7 +255,7 @@ public class ViewerApp {
       for (int i = 0; i < menuBar.getComponentCount(); i++)
         menuBar.getMenu(i).setVisible(false);
     }
-    
+
     frame.validate();
     
     //encompass scene before displaying
@@ -565,7 +565,7 @@ public class ViewerApp {
   
   
   /**
-   * Get the ViewerApp's content.
+   * Get the ViewerApp frame's content.
    * @return the content
    */
   public Component getComponent() {
