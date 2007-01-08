@@ -64,8 +64,8 @@ import de.jreality.writer.WriterOBJ;
  */
 public class ExportOBJ extends AbstractSelectionListenerAction {
 
-	public ExportOBJ(String name, SelectionManager sm, Component frame) {
-		super(name, sm, frame);
+	public ExportOBJ(String name, SelectionManager sm, Component parentComp) {
+		super(name, sm, parentComp);
 		setShortDescription("Export selected IndexedFaceSet as OBJ file");
 	}
 
@@ -77,12 +77,12 @@ public class ExportOBJ extends AbstractSelectionListenerAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		File file = FileLoaderDialog.selectTargetFile(frame, "obj", "OBJ files");
+		File file = FileLoaderDialog.selectTargetFile(parentComp, "obj", "OBJ files");
 		if (file == null) return;
 
-		IndexedFaceSet ifs = (selection.getLastElement() instanceof Geometry)?
-				(IndexedFaceSet)selection.getLastElement() :
-				(IndexedFaceSet)selection.getLastComponent().getGeometry();
+		IndexedFaceSet ifs = (getSelection().getLastElement() instanceof Geometry)?
+				(IndexedFaceSet)getSelection().getLastElement() :
+				(IndexedFaceSet)getSelection().getLastComponent().getGeometry();
 		try {
 			WriterOBJ.write(ifs, new FileOutputStream(file));
 		} catch (FileNotFoundException exc) {

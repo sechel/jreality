@@ -64,7 +64,6 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
@@ -77,6 +76,7 @@ public class ExportRIB extends AbstractJrAction {
 
   private Viewer viewer;
   
+  //needed for options in export dialog
   private JComponent options; 
   private JComboBox type;
   private JCheckBox shadowsDialog;
@@ -87,19 +87,19 @@ public class ExportRIB extends AbstractJrAction {
   private JLabel includeFileLabel = new JLabel(" ");  
 
   
-  public ExportRIB(String name, Viewer viewer, Component frame) {
-    super(name);
-    this.frame = frame;
-    setShortDescription("Export Renderman file");
+  public ExportRIB(String name, Viewer viewer, Component parentComp) {
+    super(name, parentComp);
     
     if (viewer == null) 
       throw new IllegalArgumentException("Viewer is null!");
     this.viewer = viewer;
+    
+    setShortDescription("Export Renderman file");
   }
 
-  public ExportRIB(String name, ViewerApp v) {
-    this(name, v.getViewerSwitch(), v.getFrame());
-  }
+//  public ExportRIB(String name, ViewerApp v) {
+//    this(name, v.getViewerSwitch(), v.getFrame());
+//  }
     
   
   @Override
@@ -107,7 +107,7 @@ public class ExportRIB extends AbstractJrAction {
     
     if (options == null) options = createAccessory();
     
-    File file = FileLoaderDialog.selectTargetFile(frame, options, "rib", "RIB files");
+    File file = FileLoaderDialog.selectTargetFile(parentComp, options, "rib", "RIB files");
     if (file == null) return;
 
     if(viewer.getSceneRoot().getAppearance()==null) viewer.getSceneRoot().setAppearance(new Appearance());

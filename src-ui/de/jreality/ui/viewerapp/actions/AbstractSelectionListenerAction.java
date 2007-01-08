@@ -46,89 +46,108 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionListener;
 import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.ViewerApp;
 
 
 /**
  * Abstract class for actions used in jReality applications 
- * (usually used in the {@link de.jreality.ui.viewerapp.ViewerAppMenu}) 
  * which do something if the selection given by the underlying selection manager changes 
- * (e.g. which only act on specific scene tree or scene graph nodes
- * and have to disable or enable themselves based on the current selection).
+ * (e.g. which act on specific scene tree or scene graph nodes
+ * and need to disable or enable themselves based on the current selection).
  * 
  * @author msommer
  */
 public abstract class AbstractSelectionListenerAction extends AbstractJrAction implements SelectionListener {
 
-  protected SceneGraphPath selection;
-  
-  
-  /**
-   * Constructor for actions which act on a selection,
-   * i.e. which have an underlying selection manager, 
-   * and may need a parent component e.g. for displaying dialogs.
-   * @param name the name of the action
-   * @param sm the underlying selection manager
-   * @param frame the parent component (e.g. for dialogs)
-   * @throws IllegalArgumentException if sm is <code>null</code>
-   */
-  public AbstractSelectionListenerAction(String name, final SelectionManager sm, Component frame) {
-    super(name, sm, frame);
-    
-    //set initial selection
-    selectionChanged(new SelectionEvent(this, 
-        sm.getSelection(), 
-        sm.getTool(), 
-        sm.getEntity(), 
-        sm.getType()));
-    
-    selectionManager.addSelectionListener(this);
-  }
-  
-  
-  /**
-   * Constructor for actions which act on a selection,
-   * i.e. which have an underlying selection manager.
-   * @param name the name of the action
-   * @param sm the underlying selection manager
-   * @throws IllegalArgumentException if sm is <code>null</code>
-   */
-  public AbstractSelectionListenerAction(String name, SelectionManager sm) {
-    this(name, sm, null);
-  }
-  
-  
-  /**
-   * Uses the ViewerApp's selection manager and frame.
-   * @see AbstractSelectionListenerAction#AbstractSelectionListenerAction(String, SelectionManager, Component)
-   */
-  public AbstractSelectionListenerAction(String name, ViewerApp viewerApp) {
-    this(name, viewerApp.getSelectionManager(), viewerApp.getFrame());
-  }
-  
-  
-  /**
-   * Override this method to specify what to do when the selection changes.
-   * @param e the selection event
-   * @see AbstractSelectionListenerAction#isEnabled(SelectionEvent)
-   */
-  public void selectionChanged(SelectionEvent e) {
-    selection = e.getSelection();
-    
-    setEnabled( isEnabled(e) );
-  }
-  
-  
-  /**
-   * Override this method to specify when to disable or enable the action 
-   * based on the current selection. <br>
-   * This method is called in {@link AbstractSelectionListenerAction#selectionChanged(SelectionEvent)}.
-   * @param e the selection event
-   * @return true iff the action is enabled based on the current selection
-   * @see AbstractSelectionListenerAction#selectionChanged(SelectionEvent)
-   */
-  public boolean isEnabled(SelectionEvent e) {
-    return true;
-  }
-  
+	private SelectionManager selectionManager;
+	private SceneGraphPath selection;
+
+
+	/**
+	 * Default constructor.
+	 * @param name the name of the action
+	 * @param sm the underlying selection manager
+	 * @throws IllegalArgumentException if sm is <code>null</code>
+	 */
+	public AbstractSelectionListenerAction(String name, SelectionManager sm) {
+		this(name, sm, null);
+	}
+	
+	
+	/**
+	 * Constructor for actions which need a parent component 
+	 * e.g. for displaying dialogs.
+	 * @param name the name of the action
+	 * @param sm the underlying selection manager
+	 * @param parentComp the parent component
+	 * @throws IllegalArgumentException if sm is <code>null</code>
+	 */
+	public AbstractSelectionListenerAction(String name, SelectionManager sm, Component parentComp) {
+		super(name, parentComp);
+
+		if (sm == null)
+			throw new IllegalArgumentException("SelectionManager is null");
+		selectionManager = sm;
+		
+		//set initial selection
+		selectionChanged(new SelectionEvent(this, 
+				selectionManager.getSelection(), 
+				selectionManager.getTool(), 
+				selectionManager.getEntity(), 
+				selectionManager.getType()));
+
+		selectionManager.addSelectionListener(this);
+	}
+
+
+//	/**
+//	 * Uses the ViewerApp's selection manager and frame.
+//	 * @see AbstractSelectionListenerAction#AbstractSelectionListenerAction(String, SelectionManager, Component)
+//	 */
+//	public AbstractSelectionListenerAction(String name, ViewerApp viewerApp) {
+//		this(name, viewerApp.getSelectionManager(), viewerApp.getFrame());
+//	}
+
+
+	/**
+	 * Override this method to specify what to do when the selection changes.
+	 * @param e the selection event
+	 * @see AbstractSelectionListenerAction#isEnabled(SelectionEvent)
+	 */
+	public void selectionChanged(SelectionEvent e) {
+		selection = e.getSelection();
+
+		setEnabled( isEnabled(e) );
+	}
+
+
+	/**
+	 * Override this method to specify when to disable or enable the action 
+	 * based on the current selection. <br>
+	 * This method is called in {@link AbstractSelectionListenerAction#selectionChanged(SelectionEvent)}.
+	 * @param e the selection event
+	 * @return true iff the action is enabled based on the current selection
+	 * @see AbstractSelectionListenerAction#selectionChanged(SelectionEvent)
+	 */
+	public boolean isEnabled(SelectionEvent e) {
+		return true;
+	}
+
+
+	/**
+	 * Get the current selection.
+	 * @return the selection
+	 */
+	public SceneGraphPath getSelection() {
+		return selection;
+	}
+
+
+	/**
+	 * Get the underlying selection manager.
+	 * @return the selection manager
+	 */
+	public SelectionManager getSelectionManager() {
+		return selectionManager;
+	}
+
 }

@@ -44,7 +44,6 @@ import java.awt.event.ActionEvent;
 
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 import de.jreality.util.PickUtility;
 
@@ -61,13 +60,13 @@ public class AssignFaceAABBTree extends AbstractSelectionListenerAction {
     setShortDescription("Assign AABBTree to faces");
   }
   
-  public AssignFaceAABBTree(String name, ViewerApp v) {
-    this(name, v.getSelectionManager());
-  }
+//  public AssignFaceAABBTree(String name, ViewerApp v) {
+//    this(name, v.getSelectionManager());
+//  }
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    PickUtility.assignFaceAABBTrees(selection.getLastComponent());
+    PickUtility.assignFaceAABBTrees(getSelection().getLastComponent());
   }
 
   @Override

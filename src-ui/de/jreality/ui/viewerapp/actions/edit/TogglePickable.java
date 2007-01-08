@@ -46,7 +46,6 @@ import de.jreality.scene.Geometry;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 import de.jreality.util.PickUtility;
 
@@ -64,13 +63,13 @@ public class TogglePickable extends AbstractSelectionListenerAction {
     setShortDescription("Toggle pickability of selection");
   }
   
-  public TogglePickable(String name, ViewerApp v) {
-    this(name, v.getSelectionManager());
-  }
+//  public TogglePickable(String name, ViewerApp v) {
+//    this(name, v.getSelectionManager());
+//  }
   
   @Override
   public void actionPerformed(ActionEvent e) {
-    Geometry g = selection.getLastComponent().getGeometry();
+    Geometry g = getSelection().getLastComponent().getGeometry();
     if (g!=null) {
       Boolean b = (Boolean)g.getGeometryAttributes(CommonAttributes.PICKABLE);
       if (b==null) b = true;  //default

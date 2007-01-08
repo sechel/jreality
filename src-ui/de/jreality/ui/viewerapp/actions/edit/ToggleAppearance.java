@@ -106,7 +106,7 @@ public class ToggleAppearance extends AbstractSelectionListenerAction {
     SceneGraphComponent cmp;
     Appearance a, app = null;
     //get responsible appearance app and (inherited) value
-    for (Iterator it = selection.reverseIterator(); it.hasNext(); ) {
+    for (Iterator it = getSelection().reverseIterator(); it.hasNext(); ) {
       cmp = (SceneGraphComponent) it.next();
       a = cmp.getAppearance();
       if (a != null) {

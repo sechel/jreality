@@ -54,7 +54,6 @@ import javax.swing.KeyStroke;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 import de.jreality.writer.WriterJRS;
 
@@ -67,32 +66,33 @@ import de.jreality.writer.WriterJRS;
  */
 public class SaveSelected extends AbstractSelectionListenerAction {
 
-  public SaveSelected(String name, SelectionManager sm, Component frame) {
-    super(name, sm, frame);
+  public SaveSelected(String name, SelectionManager sm, Component parentComp) {
+    super(name, sm, parentComp);
+    
     setShortDescription("Save selected SceneGraphComponent as a file");
     setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
 
-  public SaveSelected(String name, ViewerApp v) {
-    this(name, v.getSelectionManager(), v.getFrame());
-  }
+//  public SaveSelected(String name, ViewerApp v) {
+//    this(name, v.getSelectionManager(), v.getFrame());
+//  }
   
   
   @Override
   public void actionPerformed(ActionEvent e) {
-    File file = FileLoaderDialog.selectTargetFile(frame);
+    File file = FileLoaderDialog.selectTargetFile(parentComp);
     if (file == null) return;
     if (!file.getName().endsWith(".jrs")) {
-    	JOptionPane.showMessageDialog(frame, "can only safe .jrs files", "unsupported format", JOptionPane.ERROR_MESSAGE);
+    	JOptionPane.showMessageDialog(parentComp, "can only safe .jrs files", "unsupported format", JOptionPane.ERROR_MESSAGE);
     	return;
     }
     try {
       FileWriter fw = new FileWriter(file);
       WriterJRS writer = new WriterJRS();
-      writer.write(selection.getLastComponent(), fw);
+      writer.write(getSelection().getLastComponent(), fw);
       fw.close();
     } catch (IOException ioe) {
-      JOptionPane.showMessageDialog(frame, "Save failed: "+ioe.getMessage(), "IO Error", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(parentComp, "Save failed: "+ioe.getMessage(), "IO Error", JOptionPane.ERROR_MESSAGE);
     }
   }
 

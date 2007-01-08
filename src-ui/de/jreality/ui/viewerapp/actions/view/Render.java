@@ -47,7 +47,6 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import de.jreality.scene.Viewer;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
@@ -72,9 +71,9 @@ public class Render extends AbstractJrAction {
     setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
   
-  public Render(String name, ViewerApp v) {
-    this(name, v.getViewerSwitch());
-  }
+//  public Render(String name, ViewerApp v) {
+//    this(name, v.getViewerSwitch());
+//  }
   
     
   @Override

@@ -68,7 +68,7 @@ public class LoadScene extends AbstractJrAction {
 
   public LoadScene(String name, ViewerApp v) {
     super(name);
-    this.frame = v.getFrame();
+    this.parentComp = v.getFrame();
     this.viewerApp = v;
     
     setShortDescription("Open saved scene");
@@ -78,7 +78,7 @@ public class LoadScene extends AbstractJrAction {
   
   @Override
   public void actionPerformed(ActionEvent e) {
-    File f = FileLoaderDialog.loadFile(frame, "jrs", "jReality scene files");
+    File f = FileLoaderDialog.loadFile(parentComp, "jrs", "jReality scene files");
     if (f == null) return;
     
     JrScene scene = null;
@@ -94,7 +94,7 @@ public class LoadScene extends AbstractJrAction {
       viewerApp.dispose();
       v.display();
     } catch (Exception exc) {
-      JOptionPane.showMessageDialog(frame, "Load failed: "+exc.getMessage());
+      JOptionPane.showMessageDialog(parentComp, "Load failed: "+exc.getMessage());
     }
   }
 

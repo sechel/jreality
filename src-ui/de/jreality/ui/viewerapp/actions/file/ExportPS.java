@@ -50,7 +50,6 @@ import java.io.PrintWriter;
 import de.jreality.scene.Viewer;
 import de.jreality.softviewer.PSRenderer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
@@ -64,25 +63,24 @@ public class ExportPS extends AbstractJrAction {
   private Viewer viewer;
   
   
-  public ExportPS(String name, Viewer viewer, Component frame) {
-    super(name);
-    this.frame = frame;
-    setShortDescription("Export the current scene as PostScript file");
+  public ExportPS(String name, Viewer viewer, Component parentComp) {
+    super(name, parentComp);
     
     if (viewer == null)
       throw new IllegalArgumentException("Viewer is null!");
-    
     this.viewer = viewer;
+    
+    setShortDescription("Export the current scene as PostScript file");
   }
   
-  public ExportPS(String name, ViewerApp v) {
-    this(name, v.getViewerSwitch(), v.getFrame());
-  }
+//  public ExportPS(String name, ViewerApp v) {
+//    this(name, v.getViewerSwitch(), v.getFrame());
+//  }
   
   
   @Override
   public void actionPerformed(ActionEvent e) {
-    File file = FileLoaderDialog.selectTargetFile(frame, "ps", "PostScript Files");
+    File file = FileLoaderDialog.selectTargetFile(parentComp, "ps", "PostScript Files");
     if (file == null)
       return;
     // try {

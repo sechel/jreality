@@ -68,7 +68,7 @@ public class ViewerAspect4To3 extends AbstractJrAction {
 	private ViewerAspect4To3(String name, ViewerApp viewerApp) {
 		super(name);
 		this.viewerApp = viewerApp;
-		this.frame = viewerApp.getFrame();
+		this.parentComp = viewerApp.getFrame();
 
 		setShortDescription("Set viewer aspect ratio to 4:3");
 	}

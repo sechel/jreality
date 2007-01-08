@@ -45,73 +45,47 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.KeyStroke;
 
-import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.ViewerApp;
-
 
 /**
- * Abstract class for actions used in jReality applications 
- * (usually used in the {@link de.jreality.ui.viewerapp.ViewerAppMenu}).
+ * Abstract class for actions used in jReality applications. 
  * 
  * @author msommer
  */
 public abstract class AbstractJrAction extends javax.swing.AbstractAction {
 
-  protected Component frame;
-  protected SelectionManager selectionManager;
-  
+  protected Component parentComp;
+ 
   
   /**
-   * Constructor for actions which act on a selection,
-   * i.e. which have an underlying selection manager, 
-   * and may need a parent component e.g. for displaying dialogs.
+   * Default constructor.
    * @param name the name of the action
-   * @param sm the underlying selection manager
-   * @param frame the parent component (e.g. for dialogs)
-   * @throws IllegalArgumentException if sm is <code>null</code>
-   */
-  public AbstractJrAction(String name, SelectionManager sm, Component frame) {
-    super(name);
-    
-    if (sm == null) 
-      throw new IllegalArgumentException("SelectionManager is null!");
-    
-    this.frame = frame;
-    selectionManager = sm;
-  }
-  
-  
-  /**
-   * Constructor for actions which act on a selection,
-   * i.e. which have an underlying selection manager.
-   * @param name the name of the action
-   * @param sm the underlying selection manager
-   * @throws IllegalArgumentException if sm is <code>null</code>
-   */
-  public AbstractJrAction(String name, SelectionManager sm) {
-    this(name, sm, null);
-  }
-  
-  
-  /**
-   * Uses the ViewerApp's selection manager and frame.
-   * @see AbstractJrAction#AbstractAction(String, SelectionManager, Component)
-   */
-  public AbstractJrAction(String name, ViewerApp viewerApp) {
-    this(name, viewerApp.getSelectionManager(), viewerApp.getFrame());
-  }
-  
-  
-  /**
-   * Constructor for actions which don't act on a selection, 
-   * i.e. which don't need an underlying selection manager.
-   * @param name the actions' name
    */
   public AbstractJrAction(String name) {
+    this(name, (Component)null);
+  }
+
+  
+  /**
+   * Constructor for actions which need a parent component 
+   * e.g. for displaying dialogs.
+   * @param name the name of the action
+   * @param parentComp the parent component
+   */
+  public AbstractJrAction(String name, Component parentComp) {
     super(name);
+    this.parentComp = parentComp;
   }
   
+    
+//  /**
+//   * Uses the ViewerApp's frame.
+//   * @see AbstractJrAction#AbstractAction(String, Component)
+//   */
+//  public AbstractJrAction(String name, ViewerApp viewerApp) {
+//    this(name, viewerApp.getFrame());
+//  }
   
+    
   public abstract void actionPerformed(ActionEvent e);
   
   

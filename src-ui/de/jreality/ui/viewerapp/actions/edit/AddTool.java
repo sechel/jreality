@@ -70,7 +70,6 @@ import de.jreality.tools.ShowPropertiesTool;
 import de.jreality.tools.TranslateTool;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 
 
@@ -93,9 +92,9 @@ public class AddTool extends AbstractSelectionListenerAction {
     setShortDescription("Add Tools");
   }
 
-  public AddTool(String name, ViewerApp v) {
-    this(name, v.getSelectionManager(), v.getFrame());
-  }
+//  public AddTool(String name, ViewerApp v) {
+//    this(name, v.getSelectionManager(), v.getFrame());
+//  }
   
 
   public void actionPerformed(ActionEvent e) {
@@ -103,7 +102,7 @@ public class AddTool extends AbstractSelectionListenerAction {
     if (!initialized) initializeToolList();
     
     //show dialog
-    dialog.setLocationRelativeTo(frame);
+    dialog.setLocationRelativeTo(parentComp);
     dialog.setVisible(true);
     
     //add selected tools
@@ -113,7 +112,7 @@ public class AddTool extends AbstractSelectionListenerAction {
       for (int i=0; i<selectedTools.length; i++) {
         try {
           final Tool t = (Tool) Class.forName((String)selectedTools[i]).newInstance();
-          selection.getLastComponent().addTool(t);
+          getSelection().getLastComponent().addTool(t);
         } catch (Exception exc) {
           exc.printStackTrace();
           //System.out.println("Could not add tool!");
@@ -160,7 +159,7 @@ public class AddTool extends AbstractSelectionListenerAction {
     toolList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     
     pane = new JOptionPane(new JScrollPane(toolList), JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
-    dialog = pane.createDialog(frame, "Add Tools");
+    dialog = pane.createDialog(parentComp, "Add Tools");
     
     //enable choice by double-click without pressing OK
     toolList.addMouseListener(new MouseAdapter() {

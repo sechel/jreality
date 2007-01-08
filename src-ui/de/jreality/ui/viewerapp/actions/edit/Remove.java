@@ -50,7 +50,6 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 import de.jreality.util.SceneGraphUtility;
 
@@ -70,24 +69,24 @@ public class Remove extends AbstractSelectionListenerAction {
     setShortDescription("Delete");
   }
   
-  public Remove(String name, ViewerApp v) {
-    this(name, v.getSelectionManager());
-  }
+//  public Remove(String name, ViewerApp v) {
+//    this(name, v.getSelectionManager());
+//  }
   
   
   public void actionPerformed(ActionEvent e) {
     
-    SceneGraphNode node = selection.getLastElement();  //the node to be removed
-    SceneGraphPath parentPath = selection.popNew();  //selection.getLength() > 1
+    SceneGraphNode node = getSelection().getLastElement();  //the node to be removed
+    SceneGraphPath parentPath = getSelection().popNew();  //selection.getLength() > 1
     final SceneGraphComponent parent = parentPath.getLastComponent();
 
-    if (selectionManager.getTool() == null) {  //no tool selected
+    if (getSelectionManager().getTool() == null) {  //no tool selected
       SceneGraphUtility.removeChildNode(parent, node);
-      selectionManager.setSelection(parentPath);
+      getSelectionManager().setSelection(parentPath);
     }
     else {  //tool selected
-      selection.getLastComponent().removeTool(selectionManager.getTool());
-      selectionManager.setSelection(selection);
+    	getSelection().getLastComponent().removeTool(getSelectionManager().getTool());
+    	getSelectionManager().setSelection(getSelection());
     }
   }
 

@@ -40,6 +40,7 @@
 
 package de.jreality.ui.viewerapp.actions.file;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -57,8 +58,8 @@ import javax.swing.border.TitledBorder;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.PickUtility;
@@ -74,23 +75,43 @@ import de.jreality.util.PickUtility;
 public class LoadFile extends AbstractJrAction {
 
 
-  private ViewerApp viewerApp;
-  private SceneGraphComponent sceneNode;
+  private SceneGraphComponent parentNode;
+  private ToolSystemViewer viewer;
   
   private JComponent options; 
   private JCheckBox mergeLineSets;
   private JCheckBox mergeFaceSets;
   
 
-  public LoadFile(String name, ViewerApp v) {
-    super(name, v.getSelectionManager(), v.getFrame());
-    this.viewerApp = v;
-    sceneNode = v.getSelectionManager().getDefaultSelection().getLastComponent();
-    
+  public LoadFile(String name, SceneGraphComponent parentNode, ToolSystemViewer viewer, Component parentComp) {
+    super(name, parentComp);
+    this.parentNode = parentNode;
+    this.viewer = viewer;
+
     setShortDescription("Load one or more files");
     setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
 
+  public LoadFile(String name, SceneGraphComponent parentNode, ToolSystemViewer viewer) {
+	  this(name, parentNode, viewer, null);
+  }
+  
+  public LoadFile(String name, SceneGraphComponent parentNode, Component parentComp) {
+	  this(name, parentNode, null, parentComp);
+  }
+  
+  public LoadFile(String name, SceneGraphComponent parentNode) {
+	  this(name, parentNode, null, null);
+  }
+  
+//  public LoadFile(String name, ViewerApp v) {
+//	  this(name, 
+//			  v.getSelectionManager().getDefaultSelection().getLastComponent(), 
+//			  v.getViewer(), 
+//			  v.getFrame());
+//  }
+  
+  
   @Override
   public void actionPerformed(ActionEvent e) {
 
@@ -98,7 +119,7 @@ public class LoadFile extends AbstractJrAction {
     mergeLineSets.setSelected(false);
     mergeFaceSets.setSelected(false);
     
-    File[] files = FileLoaderDialog.loadFiles(frame, options);
+    File[] files = FileLoaderDialog.loadFiles(parentComp, options);
     for (int i = 0; i < files.length; i++) {
       try {
         SceneGraphComponent sgc = Readers.read(files[i]);
@@ -108,18 +129,19 @@ public class LoadFile extends AbstractJrAction {
           sgc = IndexedFaceSetUtility.mergeIndexedLineSets(sgc);
         sgc.setName(files[i].getName());
         System.out.println("READ finished.");
-        sceneNode.addChild(sgc);
+        parentNode.addChild(sgc);
         
         PickUtility.assignFaceAABBTrees(sgc);
         
-        CameraUtility.encompass(viewerApp.getViewer().getAvatarPath(),
-            viewerApp.getViewer().getEmptyPickPath(),
-            viewerApp.getViewer().getCameraPath(),
-            1.75, viewerApp.getViewer().getSignature());
-        
+        if (viewer != null) {
+        	CameraUtility.encompass(viewer.getAvatarPath(),
+        			viewer.getEmptyPickPath(),
+        			viewer.getCameraPath(),
+        			1.75, viewer.getSignature());
+        }
       } 
       catch (IOException ioe) {
-        JOptionPane.showMessageDialog(frame, "Failed to load file: "+ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(parentComp, "Failed to load file: "+ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
       }
     }
   }

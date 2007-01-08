@@ -49,7 +49,6 @@ import java.io.PrintWriter;
 import de.jreality.scene.Viewer;
 import de.jreality.softviewer.SVGRenderer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
@@ -60,40 +59,40 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
  */
 public class ExportSVG extends AbstractJrAction {
 
-    private Viewer viewer;
+	private Viewer viewer;
 
-    public ExportSVG(String name, Viewer viewer, Component frame) {
-        super(name);
-        this.frame = frame;
-        setShortDescription("Export SVG file");
+	public ExportSVG(String name, Viewer viewer, Component parentComp) {
+		super(name, parentComp);
 
-        if (viewer == null)
-            throw new IllegalArgumentException("Viewer is null!");
-        this.viewer = viewer;
-    }
+		if (viewer == null)
+			throw new IllegalArgumentException("Viewer is null!");
+		this.viewer = viewer;
+		
+		setShortDescription("Export SVG file");
+	}
 
-    public ExportSVG(String name, ViewerApp v) {
-      this(name, v.getViewerSwitch(), v.getFrame());
-    }
-    
-    
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        File file = FileLoaderDialog
-                .selectTargetFile(frame, "svg", "SVG files");
-        if (file == null)
-            return;
-        Dimension d = viewer.getViewingComponentSize();
-        SVGRenderer rv;
-        try {
-            rv = new SVGRenderer(new PrintWriter(file), d.width, d.height);
-            rv.setCameraPath(viewer.getCameraPath());
-            rv.setSceneRoot(viewer.getSceneRoot());
-            rv.setAuxiliaryRoot(viewer.getAuxiliaryRoot());
-            rv.render();
-        } catch (FileNotFoundException e1) {
-            e1.printStackTrace();
-        }
-    }
+//	public ExportSVG(String name, ViewerApp v) {
+//		this(name, v.getViewerSwitch(), v.getFrame());
+//	}
+
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		File file = FileLoaderDialog
+		.selectTargetFile(parentComp, "svg", "SVG files");
+		if (file == null)
+			return;
+		Dimension d = viewer.getViewingComponentSize();
+		SVGRenderer rv;
+		try {
+			rv = new SVGRenderer(new PrintWriter(file), d.width, d.height);
+			rv.setCameraPath(viewer.getCameraPath());
+			rv.setSceneRoot(viewer.getSceneRoot());
+			rv.setAuxiliaryRoot(viewer.getAuxiliaryRoot());
+			rv.render();
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		}
+	}
 
 }

@@ -54,7 +54,6 @@ import javax.swing.KeyStroke;
 import de.jreality.io.JrScene;
 import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jreality.writer.WriterJRS;
 
@@ -69,27 +68,25 @@ public class SaveScene extends AbstractJrAction {
   private ToolSystemViewer viewer;
   
 
-  public SaveScene(String name, ToolSystemViewer viewer, Component frame) {
-    super(name);
-    this.frame = frame;
+  public SaveScene(String name, ToolSystemViewer viewer, Component parentComp) {
+    super(name, parentComp);
     
     if (viewer == null) 
       throw new IllegalArgumentException("Viewer is null!");
-    
     this.viewer = viewer;
     
     setShortDescription("Save scene as a file");
     setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
   }
 
-  public SaveScene(String name, ViewerApp v) {
-    this(name, v.getViewer(), v.getFrame());
-  }
+//  public SaveScene(String name, ViewerApp v) {
+//    this(name, v.getViewer(), v.getFrame());
+//  }
   
   
   @Override
   public void actionPerformed(ActionEvent e) {
-    File file = FileLoaderDialog.selectTargetFile(frame, "jrs", "jReality scene files");
+    File file = FileLoaderDialog.selectTargetFile(parentComp, "jrs", "jReality scene files");
     if (file == null) return;
    
     try {
@@ -102,7 +99,7 @@ public class SaveScene extends AbstractJrAction {
       writer.writeScene(s, fw);
       fw.close();
     } catch (IOException ioe) {
-      JOptionPane.showMessageDialog(frame, "Save failed: "+ioe.getMessage());
+      JOptionPane.showMessageDialog(parentComp, "Save failed: "+ioe.getMessage());
     }
   }
 
