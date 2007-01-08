@@ -41,6 +41,8 @@
 package de.jreality.ui.viewerapp;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.beans.Beans;
@@ -51,7 +53,6 @@ import java.util.logging.Level;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -67,6 +68,7 @@ import de.jreality.ui.viewerapp.actions.edit.AddTool;
 import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
 import de.jreality.ui.viewerapp.actions.edit.ExportOBJ;
 import de.jreality.ui.viewerapp.actions.edit.Remove;
+import de.jreality.ui.viewerapp.actions.edit.Rename;
 import de.jreality.ui.viewerapp.actions.edit.SaveSelected;
 import de.jreality.ui.viewerapp.actions.edit.SwitchBackgroundColor;
 import de.jreality.ui.viewerapp.actions.edit.ToggleAppearance;
@@ -80,12 +82,12 @@ import de.jreality.ui.viewerapp.actions.file.LoadFile;
 import de.jreality.ui.viewerapp.actions.file.LoadScene;
 import de.jreality.ui.viewerapp.actions.file.Quit;
 import de.jreality.ui.viewerapp.actions.file.SaveScene;
+import de.jreality.ui.viewerapp.actions.view.SetViewerSize;
 import de.jreality.ui.viewerapp.actions.view.ToggleBeanShell;
 import de.jreality.ui.viewerapp.actions.view.ToggleFullScreen;
 import de.jreality.ui.viewerapp.actions.view.ToggleMenu;
 import de.jreality.ui.viewerapp.actions.view.ToggleNavigator;
 import de.jreality.ui.viewerapp.actions.view.ToggleViewerFullScreen;
-import de.jreality.ui.viewerapp.actions.view.ViewerAspect4To3;
 import de.jreality.util.LoggingSystem;
 
 
@@ -116,6 +118,7 @@ public class ViewerAppMenu {
   public static String SAVE_SELECTED = "Save selected";
   public static String EXPORT_OBJ = "Write OBJ";
   public static String REMOVE = "Remove";
+  public static String RENAME = "Rename";
   public static String APPEARANCE = "Appearance";
   public static String TOGGLE_VERTEX_DRAWING = "Toggle vertex drawing";
   public static String TOGGLE_EDGE_DRAWING = "Toggle egde drawing";
@@ -141,10 +144,10 @@ public class ViewerAppMenu {
   public static String TOGGLE_MENU = "Hide menu bar";
   public static String TOGGLE_FULL_VIEWER = "Toggle viewer full screen";
   public static String TOGGLE_FULL_SCREEN = "Toggle full screen";
-  public static String VIEWER_ASPECT_4_TO_3 ="Viewer aspect ratio 4:3";
+  public static String SET_VIEWER_SIZE ="Set viewer size";
   public static String RENDER = "Force Rendering";
   
-  private JFrame frame = null;
+  private Component parentComp = null;
   private ViewerApp viewerApp = null;
   private SelectionManager sm = null;
   private ViewerSwitch viewerSwitch = null;
@@ -159,7 +162,7 @@ public class ViewerAppMenu {
 
   protected ViewerAppMenu(ViewerApp v) {
     viewerApp = v;
-    frame = v.getFrame();
+    parentComp = v.getFrame();
     sm = v.getSelectionManager();
     viewerSwitch = v.getViewerSwitch();
     
@@ -183,10 +186,12 @@ public class ViewerAppMenu {
     JMenu fileMenu = new JMenu(FILE_MENU);
     fileMenu.setMnemonic(KeyEvent.VK_F);
     
-    fileMenu.add(new JMenuItem(new LoadFile(LOAD_FILE, viewerApp)));
+    fileMenu.add(new JMenuItem(new LoadFile(LOAD_FILE, 
+    		sm.getDefaultSelection().getLastComponent(), 
+    		viewerApp.getViewer(), parentComp)));
     fileMenu.add(new JMenuItem(new LoadScene(LOAD_SCENE, viewerApp)));
     fileMenu.addSeparator();
-    fileMenu.add(new JMenuItem(new SaveScene(SAVE_SCENE, viewerApp.getViewer(), frame)));
+    fileMenu.add(new JMenuItem(new SaveScene(SAVE_SCENE, viewerApp.getViewer(), parentComp)));
     fileMenu.addSeparator();
     
     JMenu export = new JMenu(EXPORT);
@@ -197,10 +202,10 @@ public class ViewerAppMenu {
     	e.printStackTrace();
     	LoggingSystem.getLogger(this).log(Level.CONFIG, "no sunflow", e);
     }
-    export.add(new JMenuItem(new ExportRIB("RIB", viewerSwitch, frame)));
-    export.add(new JMenuItem(new ExportSVG("SVG", viewerSwitch, frame)));
-    export.add(new JMenuItem(new ExportPS("PS", viewerSwitch, frame)));
-    exportImageAction = new ExportImage("Image", viewerSwitch, frame);
+    export.add(new JMenuItem(new ExportRIB("RIB", viewerSwitch, parentComp)));
+    export.add(new JMenuItem(new ExportSVG("SVG", viewerSwitch, parentComp)));
+    export.add(new JMenuItem(new ExportPS("PS", viewerSwitch, parentComp)));
+    exportImageAction = new ExportImage("Image", viewerSwitch, parentComp);
     export.add(new JMenuItem(exportImageAction));
     
     if (!Beans.isDesignTime()) {
@@ -220,11 +225,12 @@ public class ViewerAppMenu {
     editMenu.add(renderSelectionCheckbox);
     editMenu.addSeparator();
     
-    editMenu.add(new JMenuItem(new SaveSelected(SAVE_SELECTED, sm, frame)));
-    editMenu.add(new JMenuItem(new ExportOBJ(EXPORT_OBJ, sm, frame)));
+    editMenu.add(new JMenuItem(new SaveSelected(SAVE_SELECTED, sm, parentComp)));
+    editMenu.add(new JMenuItem(new ExportOBJ(EXPORT_OBJ, sm, parentComp)));
     editMenu.addSeparator();
     
     editMenu.add(new JMenuItem(new Remove(REMOVE, sm)));
+    editMenu.add(new JMenuItem(new Rename(RENAME, sm, parentComp)));
     editMenu.addSeparator();
     
     JMenu appearance = new JMenu(APPEARANCE);
@@ -245,7 +251,7 @@ public class ViewerAppMenu {
     }
     appearance.add(bgColors);
     
-    editMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, frame)));
+    editMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, parentComp)));
     editMenu.addSeparator();
 
     editMenu.add(new JMenuItem(new TogglePickable(TOGGLE_PICKABLE, sm)));
@@ -286,9 +292,9 @@ public class ViewerAppMenu {
     viewMenu.addSeparator();
     viewMenu.add(new JMenuItem(new ToggleMenu(TOGGLE_MENU, menuBar)));
     viewMenu.addSeparator();
-    viewMenu.add(new JMenuItem(ViewerAspect4To3.sharedInstance(VIEWER_ASPECT_4_TO_3, viewerApp)));
+    viewMenu.add(new JMenuItem(new SetViewerSize(SET_VIEWER_SIZE, viewerSwitch, (Frame)parentComp)));
     viewMenu.add(new JMenuItem(ToggleViewerFullScreen.sharedInstance(TOGGLE_FULL_VIEWER, viewerApp)));
-    viewMenu.add(new JMenuItem(ToggleFullScreen.sharedInstance(TOGGLE_FULL_SCREEN, frame)));      
+    viewMenu.add(new JMenuItem(ToggleFullScreen.sharedInstance(TOGGLE_FULL_SCREEN, (Frame)parentComp)));      
     viewMenu.addSeparator();
     
     String[] viewerNames = viewerSwitch.getViewerNames();
