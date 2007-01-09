@@ -76,6 +76,8 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 	double uTextureShift = 0;
 	double vTextureShift = 0;
 	
+	final OoNode edgeFromQuadMesh = node( new Boolean(false),"one edge per parametric curve" );
+	
 	AbstractQuadMeshFactory() {
 		this( Pn.EUCLIDEAN, 10, 10, false, false );
 	}
@@ -102,7 +104,9 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		setClosedInVDirection(closeV);
 		
 		faceIndices.setGenerate(true);
-		
+		edgeIndices.addIngr( faceIndices );
+		edgeIndices.addIngr( edgeFromQuadMesh );
+
 		setGenerateTextureCoordinates(true);
 	}
 	
@@ -138,7 +142,9 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		super.setFaceAttribute( attr, data );
 	}
 	
-	/*int [][] generateEdgeIndices() {
+	int [][] generateEdgeIndices( ) {
+		if (!((Boolean) edgeFromQuadMesh.getObject()).booleanValue()) 
+			return super.generateEdgeIndices();
 		int uLineCount = getULineCount();
 		int vLineCount = getVLineCount();
 		
@@ -158,7 +164,7 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		}	
 		return indices;
 	}
-	*/
+	
 	{
 		//faceIndices.addIngr( face); //allready in superclass
 		faceIndices.addIngr( uLineCount );
@@ -289,6 +295,7 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 			
 		ifs.setGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE, new Dimension( getULineCount(), getVLineCount() ));
 
+		edgeIndices.updateArray();
 		faceIndices.updateArray();
 		textureCoordinates.updateArray();
 	}
@@ -407,6 +414,15 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		vTextureShift = textureShift;
 		
 		vertexCoordinates.outdate();
+	}
+
+	public boolean isEdgeFromQuadMesh() {
+		return ((Boolean)edgeFromQuadMesh.getObject()).booleanValue();
+
+	}
+
+	public void setEdgeFromQuadMesh(boolean b) {
+		edgeFromQuadMesh.setObject( new Boolean(b));
 	}
 
 }
