@@ -130,7 +130,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	private SceneGraphComponent theRoot, auxiliaryRoot;
 	private JOGLPeerComponent thePeerRoot = null;
 	private JOGLPeerComponent thePeerAuxilliaryRoot = null;
-	private JOGLRenderingState openGLState;
+	private JOGLRenderingState renderingState;
 
 	private int width, height;		// GLDrawable.getSize() isnt' implemented for GLPBuffer!
 	private int whichEye = CameraUtility.MIDDLE_EYE;
@@ -155,7 +155,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	// an exotic mode: render the back hemisphere of the 3-sphere (currently disabled)
 	private boolean backSphere = false;
 	private double framerate;
-	private int nodeCount = 0;
+	protected int nodeCount = 0;
 
 	WeakHashMap<Geometry, JOGLPeerGeometry> geometries = new WeakHashMap<Geometry, JOGLPeerGeometry>();
 	boolean geometryRemoved = false, lightListDirty = true;
@@ -178,7 +178,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 
 	public JOGLRenderingState getRenderingState() {
-		return openGLState;
+		return renderingState;
 	}
 
 	public void setTextureResident(boolean b) {
@@ -236,8 +236,8 @@ public class JOGLRenderer  implements AppearanceListener {
 		obj = ap.getAttribute(CommonAttributes.ANY_DISPLAY_LISTS, Boolean.class);		// assume the best ...
 		obj = ap.getAttribute(CommonAttributes.CLEAR_COLOR_BUFFER, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) {
-			openGLState.clearColorBuffer = ((Boolean)obj).booleanValue();
-			theLog.fine("Setting clear color buffer to "+openGLState.clearColorBuffer);
+			renderingState.clearColorBuffer = ((Boolean)obj).booleanValue();
+			theLog.fine("Setting clear color buffer to "+renderingState.clearColorBuffer);
 		}
 		theLog.fine("forceResTex = "+forceResidentTextures);
 		theLog.fine("many display lists = "+manyDisplayLists);
@@ -255,7 +255,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 
 	public Object render() {
-		openGLState.setCurrentPickMode(pickMode);
+		renderingState.setCurrentPickMode(pickMode);
 
 		if (thePeerRoot == null || theViewer.getSceneRoot() != thePeerRoot.getOriginalComponent())	{
 			if (thePeerRoot != null) thePeerRoot.dispose();
@@ -294,7 +294,7 @@ public class JOGLRenderer  implements AppearanceListener {
 
 		processClippingPlanes();
 
-		nodeCount = 0;			// for profiling info
+		nodeCount = renderingState.polygonCount = 0;			// for profiling info
 		texResident=true;
 		currentPath.clear();
 		thePeerRoot.render();		
@@ -321,7 +321,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			lights = SceneGraphUtility.collectLights(theRoot);
 			JOGLRendererHelper.resetLights(globalGL, lights);
 			lightListDirty = false;
-			openGLState.numLights = lights.size();
+			renderingState.numLights = lights.size();
 		}
 		JOGLRendererHelper.processLights(globalGL, lights);
 	}
@@ -373,6 +373,10 @@ public class JOGLRenderer  implements AppearanceListener {
 
 	}
 
+	public int getPolygonCount()	{
+		return renderingState.polygonCount;
+	}
+	
 	private static  int bufsize =16384;
 	double[] pickPoint = new double[2];
 	public PickPoint[] performPick(double[] p)	{
@@ -410,7 +414,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	public void init(GL gl) {
 		globalGL = gl;
 		
-		openGLState = new JOGLRenderingState(this);
+		renderingState = new JOGLRenderingState(this);
 
 		String vv = globalGL.glGetString(GL.GL_VERSION);
 		theLog.log(Level.FINE,"version: "+vv);			
@@ -435,11 +439,11 @@ public class JOGLRenderer  implements AppearanceListener {
 
 	public void display(GL gl) {
 		globalGL=gl;
-		openGLState.initializeGLState();
+		renderingState.initializeGLState();
 		long beginTime = 0;
 		if (collectFrameRate) beginTime = System.currentTimeMillis();
 		Camera theCamera = CameraUtility.getCamera(theViewer);
-		clearColorBits = (openGLState.clearColorBuffer ? GL.GL_COLOR_BUFFER_BIT : 0);
+		clearColorBits = (renderingState.clearColorBuffer ? GL.GL_COLOR_BUFFER_BIT : 0);
 //		theLog.fine("JOGLRR ccb = "+clearColorBits);
 		if (offscreenMode) {
 			if (theCamera.isStereo() && getStereoType() != de.jreality.jogl.Viewer.CROSS_EYED_STEREO) {
@@ -455,7 +459,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			}
 			globalGL = offscreenPBuffer.getGL();
 			forceNewDisplayLists();
-			openGLState.initializeGLState();
+			renderingState.initializeGLState();
 
 			Color[] bg=null;
 			float[][] bgColors=null;
@@ -485,7 +489,7 @@ public class JOGLRenderer  implements AppearanceListener {
 				else whichEye = CameraUtility.MIDDLE_EYE;
 				for (int i = 0; i<numTiles; ++i)	{
 					for (int j = 0; j<numTiles; ++j)	{
-						openGLState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
+						renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 						Rectangle2D lr = new Rectangle2D.Double(vp.getX()+j*dx, vp.getY()+i*dy, dx, dy);
 						System.err.println("Setting vp to "+lr.toString());
 						theCamera.setViewPort(lr);
@@ -524,10 +528,10 @@ public class JOGLRenderer  implements AppearanceListener {
 			render();
 			setupLeftEye(width, height);
 			render();
-			openGLState.colorMask =15; //globalGL.glColorMask(true, true, true, true);
+			renderingState.colorMask =15; //globalGL.glColorMask(true, true, true, true);
 		} 
 		else {
-			openGLState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
+			renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 			myglViewport(0,0,width, height);
 			whichEye=CameraUtility.MIDDLE_EYE;
 			if (pickMode)	{
@@ -578,7 +582,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		int which = getStereoType();
 		switch(which)	{
 		case de.jreality.jogl.Viewer.CROSS_EYED_STEREO:
-			openGLState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
+			renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 			//globalGL.glClear (clearColorBits | GL.GL_DEPTH_BUFFER_BIT);
 			int w = width/2;
 			int h = height;
@@ -589,15 +593,15 @@ public class JOGLRenderer  implements AppearanceListener {
 		case de.jreality.jogl.Viewer.RED_CYAN_STEREO:
 		case de.jreality.jogl.Viewer.RED_GREEN_STEREO:
 			myglViewport(0,0, width, height);
-			openGLState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
-			if (which == de.jreality.jogl.Viewer.RED_GREEN_STEREO) openGLState.colorMask = 10; //globalGL.glColorMask(false, true, false, true);
-			else if (which == de.jreality.jogl.Viewer.RED_BLUE_STEREO) openGLState.colorMask = 12; //globalGL.glColorMask(false, false, true, true);
-			else if (which == de.jreality.jogl.Viewer.RED_CYAN_STEREO) openGLState.colorMask = 14; //globalGL.glColorMask(false, true, true, true);
+			renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
+			if (which == de.jreality.jogl.Viewer.RED_GREEN_STEREO) renderingState.colorMask = 10; //globalGL.glColorMask(false, true, false, true);
+			else if (which == de.jreality.jogl.Viewer.RED_BLUE_STEREO) renderingState.colorMask = 12; //globalGL.glColorMask(false, false, true, true);
+			else if (which == de.jreality.jogl.Viewer.RED_CYAN_STEREO) renderingState.colorMask = 14; //globalGL.glColorMask(false, true, true, true);
 			break;
 
 		case de.jreality.jogl.Viewer.HARDWARE_BUFFER_STEREO:
 			myglViewport(0,0, width, height);
-			openGLState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
+			renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 			globalGL.glDrawBuffer(GL.GL_BACK_RIGHT);
 			break;			
 		}
@@ -610,20 +614,20 @@ public class JOGLRenderer  implements AppearanceListener {
 		case de.jreality.jogl.Viewer.CROSS_EYED_STEREO:
 			int w = width/2;
 			int h = height;
-			openGLState.clearBufferBits = 0;
+			renderingState.clearBufferBits = 0;
 			myglViewport(w, 0, w,h);
 			break;
 
 		case de.jreality.jogl.Viewer.RED_BLUE_STEREO:
 		case de.jreality.jogl.Viewer.RED_CYAN_STEREO:
 		case de.jreality.jogl.Viewer.RED_GREEN_STEREO:
-			openGLState.colorMask = 9; //globalGL.glColorMask(true, false, false, true);
-			openGLState.clearBufferBits = GL.GL_DEPTH_BUFFER_BIT;
+			renderingState.colorMask = 9; //globalGL.glColorMask(true, false, false, true);
+			renderingState.clearBufferBits = GL.GL_DEPTH_BUFFER_BIT;
 			break;
 
 		case de.jreality.jogl.Viewer.HARDWARE_BUFFER_STEREO:
 			globalGL.glDrawBuffer(GL.GL_BACK_LEFT);
-			openGLState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
+			renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 //			globalGL.glClear (clearColorBits | GL.GL_DEPTH_BUFFER_BIT);
 			break;
 		}
@@ -725,28 +729,28 @@ public class JOGLRenderer  implements AppearanceListener {
 		public void render(JOGLPeerComponent jpc) {
 			RenderingHintsShader renderingHints = jpc.renderingHints;
 			DefaultGeometryShader geometryShader = jpc.geometryShader;
-			openGLState.setUseDisplayLists(renderingHints.isUseDisplayLists()); //(); //useDisplayLists(activeDL, jpc);
-			openGLState.setCurrentGeometry(originalGeometry);
+			renderingState.setUseDisplayLists(renderingHints.isUseDisplayLists()); //(); //useDisplayLists(activeDL, jpc);
+			renderingState.setCurrentGeometry(originalGeometry);
 //			openGLState.setCurrentSignature(signature);
 			if (preRender && geometryShader.polygonShader instanceof DefaultPolygonShader)	{
-				((DefaultPolygonShader) geometryShader.polygonShader).preRender(openGLState);		
+				((DefaultPolygonShader) geometryShader.polygonShader).preRender(renderingState);		
 				return;
 			}
-			renderingHints.render(openGLState);
+			renderingHints.render(renderingState);
 			//theLog.fine("Rendering sgc "+jpc.getOriginalComponent().getName());
 			//theLog.fine("vertex:edge:face:"+geometryShader.isVertexDraw()+geometryShader.isEdgeDraw()+geometryShader.isFaceDraw());
 			if (geometryShader.isEdgeDraw() && ils != null)	{
-				geometryShader.lineShader.render(openGLState);
-				geometryShader.lineShader.postRender(openGLState);
+				geometryShader.lineShader.render(renderingState);
+				geometryShader.lineShader.postRender(renderingState);
 			}
 			if (geometryShader.isVertexDraw() && ps != null)	{
-				geometryShader.pointShader.render(openGLState);
-				geometryShader.pointShader.postRender(openGLState);
+				geometryShader.pointShader.render(renderingState);
+				geometryShader.pointShader.postRender(renderingState);
 			}
-			renderingHints.render(openGLState);
+			renderingHints.render(renderingState);
 			if (geometryShader.isFaceDraw() && isSurface) {
-				geometryShader.polygonShader.render(openGLState);
-				geometryShader.polygonShader.postRender(openGLState);
+				geometryShader.polygonShader.render(renderingState);
+				geometryShader.polygonShader.postRender(renderingState);
 			}	
 			if (geometryShader.isVertexDraw() && ps!=null && ps.getVertexAttributes(Attribute.LABELS) != null) {
 				JOGLRendererHelper.drawPointLabels(JOGLRenderer.this, ps,  jpc.geometryShader.pointShader.getTextShader());
@@ -757,7 +761,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			if (geometryShader.isFaceDraw() &&ifs != null && ifs.getFaceAttributes(Attribute.LABELS) != null) {
 				JOGLRendererHelper.drawFaceLabels(JOGLRenderer.this, ifs,  jpc.geometryShader.polygonShader.getTextShader());
 			}
-			renderingHints.postRender(openGLState);
+			renderingHints.postRender(renderingState);
 		}
 
 		public void geometryChanged(GeometryEvent ev) {
@@ -1036,7 +1040,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		final JOGLPeerComponent self = this;
 		double[][] matrices = null;
 		double minDistance = -1, maxDistance = -1;
-		protected boolean appearanceChanged = true;
+		protected boolean appearanceDirty = true;
 		boolean effectiveAppearanceDirty = true,
 		geometryIsDirty = true,
 		boundIsDirty = true,
@@ -1099,12 +1103,13 @@ public class JOGLRenderer  implements AppearanceListener {
 
 
 		private Transformation preRender() {
-			Transformation thisT = null;						
+			if (goBetween.originalComponent.getAppearance() != null) 
+				theLog.finer("Processing appearance "+goBetween.originalComponent.getAppearance().getName());
 			nodeCount++;
 			if (renderRunnableDirty) updateRenderRunnable();
 			currentPath.push(goBetween.getOriginalComponent());
 			context.setCurrentPath(currentPath);
-			thisT = goBetween.getOriginalComponent().getTransformation();
+			Transformation thisT = goBetween.getOriginalComponent().getTransformation();
 
 			if (thisT != null) {
 				pushTransformation(thisT.getMatrix());
@@ -1112,17 +1117,17 @@ public class JOGLRenderer  implements AppearanceListener {
 
 			if (eAp != null) {
 				currentSignature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-				openGLState.setCurrentSignature(currentSignature);
+				renderingState.setCurrentSignature(currentSignature);
 				//System.err.println(goBetween.getOriginalComponent().getName()+" Setting sig to "+currentSignature);
 			}
 			if (parent != null) cumulativeIsReflection = (isReflection != parent.cumulativeIsReflection);
 			else cumulativeIsReflection = (isReflection != globalIsReflection);
-			if (cumulativeIsReflection != openGLState.flipped)	{
+			if (cumulativeIsReflection != renderingState.flipped)	{
 				globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
-				openGLState.flipped  = cumulativeIsReflection;
+				renderingState.flipped  = cumulativeIsReflection;
 			}
 			if (geometryDirtyBits  != 0)	handleChangedGeometry();
-			if (appearanceChanged)  	propagateAppearanceChanged();
+			if (appearanceDirty || effectiveAppearanceDirty)  	propagateAppearanceChanged();
 			if (goBetween != null && goBetween.peerGeometry != null && goBetween.peerGeometry.originalGeometry != null )	{
 				Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
 			}
@@ -1146,9 +1151,9 @@ public class JOGLRenderer  implements AppearanceListener {
 						if (clipToCamera && !JOGLRendererHelper.accept(o2ndc, o2c, minDistance, maxDistance, matrices[j], currentSignature)) continue;
 					count++;
 					cumulativeIsReflection = (isReflectionBefore != matrixIsReflection[j]);
-					if (cumulativeIsReflection != openGLState.flipped)	{
+					if (cumulativeIsReflection != renderingState.flipped)	{
 						globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
-						openGLState.flipped  = cumulativeIsReflection;
+						renderingState.flipped  = cumulativeIsReflection;
 					}
 					pushTransformation(matrices[j]);
 
@@ -1220,10 +1225,23 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 
 		public void appearanceChanged(AppearanceEvent ev) {
-			appearanceChanged = true;
+			appearanceDirty = true;
 		}
 
 		protected void propagateAppearanceChanged()	{
+			boolean ed = effectiveAppearanceDirty;
+			handleAppearanceChanged();
+			updateShaders();
+
+			for (JOGLPeerComponent child : children) {
+				if (ed) child.effectiveAppearanceDirty=true;
+				child.propagateAppearanceChanged();
+			}	
+			//childlock.readUnlock();
+			appearanceDirty=false;
+		}
+
+		private void handleAppearanceChanged() {
 			Appearance thisAp = goBetween.getOriginalComponent().getAppearance(); 
 			if (parent == null)	{
 				if (eAp == null || eAp.getAppearanceHierarchy().indexOf(thisAp) == -1) {
@@ -1234,10 +1252,9 @@ public class JOGLRenderer  implements AppearanceListener {
 			} else {
 				if ( parent.eAp == null)	{
 					throw new IllegalStateException("Parent must have effective appearance");
-					//return;
 				}
-				// TODO when Appearance's are added or removed, have to set eAp to null
 				if (effectiveAppearanceDirty || eAp == null)	{
+					theLog.finer("updating eap for "+goBetween.getOriginalComponent().getName());
 					if (thisAp != null )	{
 						eAp = parent.eAp.create(thisAp);
 					} else {
@@ -1246,13 +1263,6 @@ public class JOGLRenderer  implements AppearanceListener {
 					effectiveAppearanceDirty = false;
 				}
 			}
-			updateShaders();
-
-			for (JOGLPeerComponent child : children) {
-				child.propagateAppearanceChanged();
-			}	
-			//childlock.readUnlock();
-			appearanceChanged=false;
 		}
 
 		/**
@@ -1260,14 +1270,14 @@ public class JOGLRenderer  implements AppearanceListener {
 		 */
 		private void updateShaders() {
 //			can happen that the effective appearance isn't initialized yet; skip
-			if (eAp == null) return;
+			if (eAp == null) return; 
 			Appearance thisAp = goBetween.getOriginalComponent().getAppearance(); 
 			if (thisAp == null && goBetween.getOriginalComponent().getGeometry() == null && parent != null)	{
 				geometryShader = parent.geometryShader;
 				renderingHints = parent.renderingHints;
 
 			} else  {		
-				//theLog.log(Level.FINER,"Updating shaders for "+goBetween.originalComponent.getName());
+				theLog.log(Level.FINER,"Updating shaders for "+goBetween.originalComponent.getName());
 				if (geometryShader == null)
 					geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
 				else 
@@ -1316,14 +1326,15 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 
 		private void handleNewAppearance() {
+    		LoggingSystem.getLogger(this).finer("handle new appearance "+goBetween.originalComponent.getName());
 			int changed = ALL_CHANGED;
 			propagateGeometryChanged(changed);	
-			appearanceChanged = true;
+			appearanceDirty = true;
 			effectiveAppearanceDirty=true;
 		}
 
 		public void childRemoved(SceneGraphComponentEvent ev) {
-			//theLog.log(Level.FINE,"Container Child removed from: "+goBetween.getOriginalComponent().getName());
+			theLog.log(Level.FINE,"Container Child removed from: "+goBetween.getOriginalComponent().getName());
 			switch (ev.getChildType() )	{
 			case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
 				updateRenderRunnable();
@@ -1343,7 +1354,7 @@ public class JOGLRenderer  implements AppearanceListener {
 				break;
 			case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
 				handleNewAppearance();
-				theLog.log(Level.INFO,"Propagating geometry change due to removed appearance");
+				theLog.log(Level.FINE,"Propagating geometry change due to removed appearance");
 				break;				
 			case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
 				lightListDirty = true;
@@ -1358,7 +1369,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 
 		public void childReplaced(SceneGraphComponentEvent ev) {
-			//theLog.log(Level.FINE,"Container Child replaced at: "+goBetween.getOriginalComponent().getName());
+			theLog.log(Level.FINE,"Container Child replaced at: "+goBetween.getOriginalComponent().getName());
 			switch(ev.getChildType())	{
 			case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
 				renderRunnableDirty = true; 
@@ -1423,7 +1434,8 @@ public class JOGLRenderer  implements AppearanceListener {
 				if ((geometryDirtyBits  & POINT_SHADER_CHANGED) != 0) geometryShader.pointShader = null;
 				if ((geometryDirtyBits  & LINE_SHADER_CHANGED) != 0) geometryShader.lineShader = null;
 				if ((geometryDirtyBits  & POLYGON_SHADER_CHANGED) != 0) geometryShader.polygonShader = null;
-                // set the dirty flag to clean again
+				if ((geometryDirtyBits  & ALL_SHADERS_CHANGED) != 0)updateShaders();
+				// set the dirty flag to clean again
                 geometryDirtyBits  = 0;
 			}
 		}
