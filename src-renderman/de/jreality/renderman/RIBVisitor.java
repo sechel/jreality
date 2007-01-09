@@ -569,7 +569,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		// read current values from the effective appearance
 		currentSignature = eap.getAttribute(CommonAttributes.SIGNATURE,Pn.EUCLIDEAN);
 		retainGeometry = eap.getAttribute(CommonAttributes.RMAN_RETAIN_GEOMETRY, false); 
-		if(rhs.getOpaqueTubesAndSpheres()!=null)  
+		//if(rhs.getOpaqueTubesAndSpheres()!=null)  
 		  opaqueTubes = rhs.getOpaqueTubesAndSpheres();
 		transparencyEnabled = rhs.getTransparencyEnabled();
 		double transparency = 0.0;
@@ -784,13 +784,11 @@ public class RIBVisitor extends SceneGraphVisitor {
 					ri.color(raw);
 				}
 				RendermanShader rs = RIBHelper.convertToRenderman(dvs.getPolygonShader(), this, "pointShader.polygonShader");
-				ri.shader(rs);
+				ri.shader(rs);        
         
-        
-        double[][] vColData=new double[n][];
+        double[][] vColData=null;
         if( p.getVertexAttributes(Attribute.COLORS)!=null)
-          p.getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(vColData);  
-        
+          vColData= p.getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null);          
 				double[][] a = coord.toDoubleArrayArray(null);
 				double[] trns = new double[16];
 				for (int i = 0; i < n; i++) {
@@ -799,15 +797,15 @@ public class RIBVisitor extends SceneGraphVisitor {
 					if (a[i].length == 4 && a[i][3] == 0.0) continue;
 					trns = MatrixBuilder.init(null, currentSignature).translate(a[i]).getArray();
 					ri.transformBegin();
-					ri.concatTransform(RIBHelper.fTranspose(trns));
-          
+					ri.concatTransform(RIBHelper.fTranspose(trns));          
           //varying vertexColors
-          if(vColData[0]!=null){
-            if(vColData[0].length==4&&!opaqueTubes)
-              vColData[i][3]*=currentOpacity;
-            ri.color(vColData[i]);
-          }
-          
+          if(vColData!=null){
+            if(vColData[0]!=null){
+              if(vColData[0].length==4&&!opaqueTubes)
+                vColData[i][3]*=currentOpacity;
+              ri.color(vColData[i]);
+            }
+          }          
 					HashMap map = new HashMap();
 					ri.sphere(realR, -realR, realR, 360f, map);
 					ri.transformEnd();
