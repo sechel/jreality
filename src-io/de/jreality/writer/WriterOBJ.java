@@ -45,6 +45,7 @@ import java.io.PrintWriter;
 import java.util.logging.Level;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.math.Pn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -122,8 +123,13 @@ public class WriterOBJ {
 		    out.println();
 		}
 
-		final double [][] points = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray().toDoubleArrayArray(null);
-		
+		double [][] points = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray().toDoubleArrayArray(null);
+		if (points[0].length == 4)	{
+			// dehomogenize!
+			double[][] points3 = new double[points.length][3];
+			Pn.dehomogenize(points3, points);
+			points = points3;
+		}
         final double [][] normals;
 		if( ifs.getVertexAttributes( Attribute.NORMALS ) != null ) {
 			normals = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray().toDoubleArrayArray(null);
