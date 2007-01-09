@@ -569,7 +569,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 		// read current values from the effective appearance
 		currentSignature = eap.getAttribute(CommonAttributes.SIGNATURE,Pn.EUCLIDEAN);
 		retainGeometry = eap.getAttribute(CommonAttributes.RMAN_RETAIN_GEOMETRY, false); 
-		opaqueTubes = rhs.getOpaqueTubesAndSpheres();
+		//if(rhs.getOpaqueTubesAndSpheres()!=null)  
+		  opaqueTubes = rhs.getOpaqueTubesAndSpheres();
 		transparencyEnabled = rhs.getTransparencyEnabled();
 		double transparency = 0.0;
 		if (transparencyEnabled)
@@ -784,6 +785,12 @@ public class RIBVisitor extends SceneGraphVisitor {
 				}
 				RendermanShader rs = RIBHelper.convertToRenderman(dvs.getPolygonShader(), this, "pointShader.polygonShader");
 				ri.shader(rs);
+        
+        
+        double[][] vColData=null;
+        if( p.getVertexAttributes(Attribute.COLORS)!=null)
+          p.getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(vColData);  
+        
 				double[][] a = coord.toDoubleArrayArray(null);
 				double[] trns = new double[16];
 				for (int i = 0; i < n; i++) {
@@ -793,6 +800,14 @@ public class RIBVisitor extends SceneGraphVisitor {
 					trns = MatrixBuilder.init(null, currentSignature).translate(a[i]).getArray();
 					ri.transformBegin();
 					ri.concatTransform(RIBHelper.fTranspose(trns));
+          
+          //varying vertexColors
+          if(vColData[0]!=null){
+            if(vColData[0].length==4&&!opaqueTubes)
+              vColData[i][3]*=currentOpacity;
+            ri.color(vColData[i]);
+          }
+          
 					HashMap map = new HashMap();
 					ri.sphere(realR, -realR, realR, 360f, map);
 					ri.transformEnd();
