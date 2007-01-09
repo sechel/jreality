@@ -710,6 +710,7 @@ public class IndexedFaceSetUtility {
 	 * 
 	 * @param sgc
 	 * @return
+	 * @deprecated This method is broken. 
 	 */
 	public static SceneGraphComponent mergeIndexedFaceSets(SceneGraphComponent sgc)	{
 		
@@ -739,7 +740,8 @@ public class IndexedFaceSetUtility {
 		SceneGraphComponent result=null;
 		while (iter.hasNext())	{
 			SceneGraphComponent next = (SceneGraphComponent) iter.next();
-			result=_mergeIndexedFaceSets(next);
+			// XXX this makes no sense to me -gunn
+			result = _mergeIndexedFaceSets(next);
 		}
 		
 		// HACK continued
@@ -749,6 +751,80 @@ public class IndexedFaceSetUtility {
 		result.addChild(mergedIFS);
 		return sgc;
 	}
+
+	public static SceneGraphComponent _mergeIndexedFaceSets(SceneGraphComponent sgc)	{
+    	Vector<IndexedFaceSet> ifslist = new Vector<IndexedFaceSet>();
+    	Vector colorList = new Vector();
+    	Vector lengths = new Vector();
+    	Vector toRemove = new Vector();
+    	int n = sgc.getChildComponentCount();
+    	Appearance ap = sgc.getAppearance();
+    	EffectiveAppearance eap = EffectiveAppearance.create();
+    	if (ap != null) eap = eap.create(ap);
+    	IndexedFaceSet ifs;
+    	int vcount = 0;
+    	if (sgc.getGeometry()!= null && sgc.getGeometry() instanceof IndexedFaceSet) {
+    		ifs = (IndexedFaceSet) sgc.getGeometry(); 
+    		ifslist.add(ifs);
+    		lengths.add(new Integer(ifs.getNumPoints()));
+    		vcount += ifs.getNumPoints();
+        	Object dc =  eap.getAttribute("polygonShader.diffuseColor",Color.WHITE, Color.class);
+        	if (dc instanceof Color)		{
+        		colorList.add(dc);
+        	}  else 
+        		colorList.add(Color.WHITE);
+        	 
+    	}
+    	for (int i = 0; i<n; ++i)	{
+    		SceneGraphComponent child = sgc.getChildComponent(i);
+    		if (child.getTransformation() != null) continue;
+    		if (child.getChildComponentCount() != 0) continue;
+    		if (child.getGeometry() == null) continue;
+    		Geometry geom = child.getGeometry();
+     		if (geom instanceof IndexedFaceSet)	{
+     			System.err.println("merging indexfaceset "+geom.getName());
+     			ifslist.add((IndexedFaceSet) geom);
+     			toRemove.add(child);
+     			ifs = (IndexedFaceSet) geom;
+           		lengths.add(new Integer(ifs.getNumPoints()));
+           		vcount += ifs.getNumPoints();
+          		ap = child.getAppearance();
+          		if (ap != null)	{
+          			EffectiveAppearance ceap = eap.create(ap);
+          			Object dc =  ceap.getAttribute("polygonShader.diffuseColor",Color.WHITE, Color.class);
+          			if (dc instanceof Color)		{
+          				colorList.add(dc);
+          			}  else 
+          				colorList.add(Color.WHITE);	
+        		}
+    		}
+    	}
+    	Iterator iter = toRemove.iterator();
+    	while (iter.hasNext())	{ sgc.removeChild( (SceneGraphComponent) iter.next()); }
+    	
+    	n = ifslist.size();
+    	if (n == 0) return null; //ifslist.get(0);
+    	IndexedFaceSet[] list = new IndexedFaceSet[ifslist.size()];
+    	list = (IndexedFaceSet[]) ifslist.toArray(list);
+    	ifs = mergeIndexedFaceSets(list);
+    	// construct vertex color list
+    	double[] carray = new double[vcount*4];
+    	iter = colorList.iterator();
+    	int i = 0;
+    	int cptr = 0;
+    	while (iter.hasNext())	{
+    		Color c = (Color) iter.next();
+    		int howMany = ((Integer) lengths.get(i++)).intValue();
+    		float[] rgba = c.getRGBComponents(null);
+    		for (int j= 0; j<howMany; ++j)	{
+    			for (int k=0; k<4; ++k)		carray[cptr++] = rgba[k];
+    		}
+    	}
+    	ifs.setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.inlined(4).createReadOnly(carray));
+    	sgc.setGeometry(ifs);
+    	return sgc;
+    }
+	
 	// Anfang Bernd 
 	public static SceneGraphComponent mergeIndexedLineSets(SceneGraphComponent sgc)	{	
 		// collects sgc's which themselves have children
@@ -786,78 +862,6 @@ public class IndexedFaceSetUtility {
 		result.addChild(mergedIFS);
 		return sgc;
 	} // ende Bernd
-
-	private static SceneGraphComponent _mergeIndexedFaceSets(SceneGraphComponent sgc)	{
-    	Vector ifslist = new Vector();
-    	Vector colorList = new Vector();
-    	Vector lengths = new Vector();
-    	Vector toRemove = new Vector();
-    	int n = sgc.getChildComponentCount();
-    	Appearance ap = sgc.getAppearance();
-    	EffectiveAppearance eap = EffectiveAppearance.create();
-    	if (ap != null) eap = eap.create(ap);
-    	IndexedFaceSet ifs;
-    	int vcount = 0;
-    	if (sgc.getGeometry()!= null && sgc.getGeometry() instanceof IndexedFaceSet) {
-    		ifs = (IndexedFaceSet) sgc.getGeometry(); 
-    		ifslist.add(ifs);
-    		lengths.add(new Integer(ifs.getNumPoints()));
-    		vcount += ifs.getNumPoints();
-        	Object dc =  eap.getAttribute("polygonShader.diffuseColor",Color.WHITE, Color.class);
-        	if (dc instanceof Color)		{
-        		colorList.add(dc);
-        	}  else 
-        		colorList.add(Color.WHITE);
-        	 
-    	}
-    	for (int i = 0; i<n; ++i)	{
-    		SceneGraphComponent child = sgc.getChildComponent(i);
-    		if (child.getTransformation() != null) continue;
-    		if (child.getChildComponentCount() != 0) continue;
-    		if (child.getGeometry() == null) continue;
-    		Geometry geom = child.getGeometry();
-     		if (geom instanceof IndexedFaceSet)	{
-     			ifslist.add(geom);
-     			toRemove.add(child);
-     			ifs = (IndexedFaceSet) geom;
-           		lengths.add(new Integer(ifs.getNumPoints()));
-           		vcount += ifs.getNumPoints();
-          		ap = child.getAppearance();
-          		if (ap != null)	{
-          			EffectiveAppearance ceap = eap.create(ap);
-          			Object dc =  ceap.getAttribute("polygonShader.diffuseColor",Color.WHITE, Color.class);
-          			if (dc instanceof Color)		{
-          				colorList.add(dc);
-          			}  else 
-          				colorList.add(Color.WHITE);	
-        		}
-    		}
-    	}
-    	Iterator iter = toRemove.iterator();
-    	while (iter.hasNext())	{ sgc.removeChild( (SceneGraphComponent) iter.next()); }
-    	
-    	n = ifslist.size();
-    	if (n <= 1) return sgc;
-    	IndexedFaceSet[] list = new IndexedFaceSet[ifslist.size()];
-    	list = (IndexedFaceSet[]) ifslist.toArray(list);
-    	ifs = mergeIndexedFaceSets(list);
-    	// construct vertex color list
-    	double[] carray = new double[vcount*4];
-    	iter = colorList.iterator();
-    	int i = 0;
-    	int cptr = 0;
-    	while (iter.hasNext())	{
-    		Color c = (Color) iter.next();
-    		int howMany = ((Integer) lengths.get(i++)).intValue();
-    		float[] rgba = c.getRGBComponents(null);
-    		for (int j= 0; j<howMany; ++j)	{
-    			for (int k=0; k<4; ++k)		carray[cptr++] = rgba[k];
-    		}
-    	}
-    	ifs.setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.inlined(4).createReadOnly(carray));
-    	sgc.setGeometry(ifs);
-    	return sgc;
-    }
 	// XXX: reads specular (!) color as vertex colors for IndexedLineSets - bug in VRML reader? 
 	// Anfang Bernd 
 	private static SceneGraphComponent _mergeIndexedLineSets(SceneGraphComponent sgc)	{
