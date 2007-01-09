@@ -108,10 +108,10 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 //		ignoreTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name,"ignoreTexture2d"), false);	
 	    texture2Dnew = null;
 //		if (!inheritTexture2d && !name.startsWith("lineShader") && !name.startsWith("pointShader") )	{
-		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap))
+		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap)) {
 		    	texture2Dnew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap);			
-		    //System.err.println("Got texture 2d for name "+name);
-//		}
+		    System.err.println("Got texture 2d for eap "+((Appearance) eap.getAppearanceHierarchy().get(0)).getName());
+		}
 //		JOGLConfiguration.theLog.log(Level.INFO,"Current text2d "+texture2Dnew);
 	    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))
 	    	reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));
@@ -260,8 +260,14 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 //					i = JOGLSphereHelper.getResolutionLevel(jr.context.getObjectToNDC(), lod);
 //				}
 				int dlist;
-				if (g instanceof Sphere) dlist = jr.getRenderingState().getSphereDisplayLists(i);
-				else 			 dlist = jr.getRenderingState().getCylinderDisplayLists(i);
+				if (g instanceof Sphere) {
+					jr.getRenderingState().polygonCount += 24*(i*(i+1)+3);
+					dlist = jr.getRenderingState().getSphereDisplayLists(i);
+				}
+				else 			{
+					jr.getRenderingState().polygonCount += 4*Math.pow(2, i);
+					dlist = jr.getRenderingState().getCylinderDisplayLists(i);
+				}
 				if (jr.isPickMode()) jr.getGL().glPushName(JOGLPickAction.GEOMETRY_BASE);
 //				if (jr.debugGL) 
 //					jr.getGL().glColor4fv(cdbg[i].getRGBComponents(null));
@@ -269,6 +275,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				if (jr.isPickMode()) jr.getGL().glPopName();
 			}
 			else if ( g instanceof IndexedFaceSet)	{
+				jr.getRenderingState().polygonCount += ((IndexedFaceSet) g).getNumFaces();
 				if (providesProxyGeometry())	{
 					if (!useDisplayLists || jr.isPickMode() || dListProxy == -1) {
 						dListProxy  = proxyGeometryFor(jrs);

@@ -90,7 +90,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	boolean lineStipple = false;
 	boolean tubeDraw = false;
 	boolean opaqueTubes = false;
-			
+	int faceCount = 0;		
 	Color diffuseColor = java.awt.Color.BLACK;
 	private PolygonShader polygonShader;
 	 
@@ -281,16 +281,18 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			JOGLRendererHelper.drawFaces(jr, TubeUtility.urTube[sig+1], smoothShading , alpha );
 			gl.glEndList();	
 		}
+		faceCount = 0;
+		int tubeFaces = TubeUtility.urTube[sig+1].getNumFaces();
 		int nextDL = -1;
 		if (useDisplayLists) {
 			nextDL = gl.glGenLists(1);
 			LoggingSystem.getLogger(this).fine("PolygonShader: Allocating new dlist "+nextDL+" for gl "+jr.getGL());
 			gl.glNewList(nextDL, GL.GL_COMPILE);
 		}
-			int  k, l;
-			DoubleArray da;
-			double[] mat = new double[16];
-			for (int i = 0; i<n; ++i)	{
+		int  k, l;
+		DoubleArray da;
+		double[] mat = new double[16];
+		for (int i = 0; i<n; ++i)	{
 			IntArray ia = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray();
 			DataList edgec =  ils.getEdgeAttributes(Attribute.COLORS);
 			int m = ia.size();
@@ -306,8 +308,10 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				if (clength == 3) gl.glColor3d(edgecolor.getValueAt(0), edgecolor.getValueAt(1), edgecolor.getValueAt(2));
 				else gl.glColor4d(edgecolor.getValueAt(0), edgecolor.getValueAt(1), edgecolor.getValueAt(2), edgecolor.getValueAt(3));
 			}
+		    System.err.println(m+" edges");
 			if (m == 2 || pickMode)	{		// probably an IndexedFaceSet 
-				
+				faceCount += (m-1)*tubeFaces;
+
 				for (int j = 0; j<m-1; ++j)	{
 					k = ia.getValueAt(j);
 					da = vertices.item(k).toDoubleArray();
@@ -341,6 +345,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				ptf.update();
 				IndexedFaceSet tube = ptf.getTube();
 				if (tube != null)	{
+					faceCount += tube.getNumFaces();
 					JOGLRendererHelper.drawFaces(jr, tube, smoothShading, alpha);			
 				}
 			}
@@ -362,7 +367,9 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		}
 		preRender(jrs);
 		if (g != null)	{
+
 			if (providesProxyGeometry())	{
+				jr.getRenderingState().polygonCount += faceCount;
 				if (!useDisplayLists || jr.isPickMode() || dListProxy == -1) {
 					dListProxy  = proxyGeometryFor(jrs);
 				}

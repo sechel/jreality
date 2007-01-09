@@ -79,6 +79,7 @@ public class JOGLRenderingState {
 	public boolean separateSpecularColor = false;
 	public boolean ignoreAlpha0 = true;
 	public int texUnitCount = 0;
+	public int polygonCount = 0;
 	
 	
 	public JOGLRenderingState(JOGLRenderer jr) {

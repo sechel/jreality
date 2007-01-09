@@ -93,8 +93,10 @@ public class DefaultGeometryShader  implements Shader {
 	    		polygonShader = null;
 	    }
 	    if(edgeDraw) {
-	    	if (lineShader == null)
+	    	if (lineShader == null) {
+        		LoggingSystem.getLogger(this).finer("null lineshader");
 	    		lineShader =(LineShader) ShaderLookup.getShaderAttr(eap, geomShaderName, CommonAttributes.LINE_SHADER);
+	    	}
 	    	else
 	    		lineShader.setFromEffectiveAppearance( eap,ShaderUtility.nameSpace(name,CommonAttributes.LINE_SHADER) );
 	    } else {

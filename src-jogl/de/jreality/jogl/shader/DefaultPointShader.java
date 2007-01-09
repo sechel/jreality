@@ -87,7 +87,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	Texture2D tex=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a, true);
 	Texture2D currentTex;
 	double specularExponent = 60.0;
-	
+	int polygonCount = 0;
 	/**
 	 * 
 	 */
@@ -301,6 +301,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			int resolution = 1;
 			if (jr.getRenderingState().levelOfDetail == 0.0) resolution = 0;
 			int dlist = JOGLSphereHelper.getSphereDLists(resolution, jr);
+			polygonCount += n*24*resolution*(resolution+1)+6;
 			int nextDL = -1;
 			if (useDisplayLists)	{
 				nextDL = gl.glGenLists(1);
@@ -363,6 +364,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		preRender(jrs);
 		if (g != null)	{
 			if (providesProxyGeometry())	{
+				jr.getRenderingState().polygonCount += polygonCount;
 				if (!useDisplayLists || jr.isPickMode() || dListProxy == -1) {
 					dListProxy  = proxyGeometryFor(jrs);
 				}
