@@ -46,6 +46,7 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.data.StorageModel;
 
 /**
  * Static methods applicable to quad meshes. In
@@ -115,6 +116,31 @@ public class QuadMeshUtility {
 			}
 		}
 		return curve;
+	}
+
+	public static void generateAndSetEdgesFromQuadMesh(IndexedFaceSet qm)	{
+	{
+		Object obj = qm.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
+		if (obj == null || !( obj instanceof Dimension))
+			throw new IllegalStateException("Not a quad mesh");
+		int uLineCount = ((Dimension)obj).width;
+		int vLineCount = ((Dimension)obj).height;
+		
+		int sizeUCurve = vLineCount; 
+		int sizeVCurve = uLineCount; 
+		int numVerts = uLineCount*vLineCount;
+		int[][] indices = new int[uLineCount +vLineCount][];
+		for (int i = 0; i<uLineCount; ++i)	{
+			indices[i] = new int[sizeUCurve];
+			for (int j = 0; j< sizeUCurve; ++j)	  indices[i][j] = ((j)*uLineCount + (i%uLineCount))%numVerts;
+		}
+		for (int i = 0; i<vLineCount; ++i)	{
+			indices[i+uLineCount] = new int[sizeVCurve];
+			for (int j = 0; j< sizeVCurve; ++j)	  indices[i+uLineCount][j] = (i*uLineCount + (j%uLineCount))%numVerts;
+		}	
+		qm.setEdgeCountAndAttributes(Attribute.INDICES,StorageModel.INT_ARRAY_ARRAY.createReadOnly(indices));
+	}
+		
 	}
 
 }
