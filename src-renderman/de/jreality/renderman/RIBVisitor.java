@@ -569,7 +569,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		// read current values from the effective appearance
 		currentSignature = eap.getAttribute(CommonAttributes.SIGNATURE,Pn.EUCLIDEAN);
 		retainGeometry = eap.getAttribute(CommonAttributes.RMAN_RETAIN_GEOMETRY, false); 
-		//if(rhs.getOpaqueTubesAndSpheres()!=null)  
+		if(rhs.getOpaqueTubesAndSpheres()!=null)  
 		  opaqueTubes = rhs.getOpaqueTubesAndSpheres();
 		transparencyEnabled = rhs.getTransparencyEnabled();
 		double transparency = 0.0;
@@ -787,7 +787,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 				ri.shader(rs);
         
         
-        double[][] vColData=null;
+        double[][] vColData=new double[n][];
         if( p.getVertexAttributes(Attribute.COLORS)!=null)
           p.getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(vColData);  
         
