@@ -870,6 +870,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 		}
 		ri.attributeEnd();
 	}
+  
+  private boolean handlingTubes=false;
 
 	private void _visit(IndexedLineSet g)	{
          
@@ -913,8 +915,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 	               	  	if (cc != null) bsf.setStickColor(cc);
 	                	bsf.update();
 	                	handlingProxyGeometry = true;
+                    handlingTubes=true;                    
 	                	visit(bsf.getSceneGraphComponent());
-	               	  	handlingProxyGeometry = false;
+                    handlingTubes=false;
+	               	  handlingProxyGeometry = false;
 	                 } else {
 	       				DataList edgec =  g.getEdgeAttributes(Attribute.COLORS);
 	        		    int n = g.getNumEdges();
@@ -990,7 +994,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 		checkForProxy(g);
 		if (hasProxy((Geometry) g)) {
 			RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "polygonShader");
-			ri.shader(rs);
+			if(!handlingTubes)
+			  ri.shader(rs);
 			handleCurrentProxy();
 			insidePointset = false;
 		} else {
