@@ -1073,7 +1073,7 @@ public class JOGLRenderer  implements AppearanceListener {
 
 		protected void updateRenderRunnable() {
 			setDisplayListDirty();
-			updateShaders();
+//			updateShaders();
 			if (goBetween.peerGeometry == null) renderGeometry = null;
 			else	 renderGeometry = new Runnable() {
 				public void run() {
@@ -1127,7 +1127,7 @@ public class JOGLRenderer  implements AppearanceListener {
 				renderingState.flipped  = cumulativeIsReflection;
 			}
 			if (geometryDirtyBits  != 0)	handleChangedGeometry();
-			if (appearanceDirty || effectiveAppearanceDirty)  	propagateAppearanceChanged();
+			if (appearanceDirty || effectiveAppearanceDirty)  	handleAppearanceChanged();
 			if (goBetween != null && goBetween.peerGeometry != null && goBetween.peerGeometry.originalGeometry != null )	{
 				Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
 			}
@@ -1226,15 +1226,13 @@ public class JOGLRenderer  implements AppearanceListener {
 
 		public void appearanceChanged(AppearanceEvent ev) {
 			appearanceDirty = true;
+			propagateAppearanceChanged();
 		}
 
 		protected void propagateAppearanceChanged()	{
-			boolean ed = effectiveAppearanceDirty;
-			handleAppearanceChanged();
-			updateShaders();
 
 			for (JOGLPeerComponent child : children) {
-				if (ed) child.effectiveAppearanceDirty=true;
+				if (effectiveAppearanceDirty) child.effectiveAppearanceDirty=true;
 				child.propagateAppearanceChanged();
 			}	
 			//childlock.readUnlock();
@@ -1261,6 +1259,7 @@ public class JOGLRenderer  implements AppearanceListener {
 						eAp = parent.eAp;	
 					}
 					effectiveAppearanceDirty = false;
+					updateShaders();
 				}
 			}
 		}
