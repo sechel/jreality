@@ -729,6 +729,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		public void render(JOGLPeerComponent jpc) {
 			RenderingHintsShader renderingHints = jpc.renderingHints;
 			DefaultGeometryShader geometryShader = jpc.geometryShader;
+			if (renderingHints == null) return;
 			renderingState.setUseDisplayLists(renderingHints.isUseDisplayLists()); //(); //useDisplayLists(activeDL, jpc);
 			renderingState.setCurrentGeometry(originalGeometry);
 //			openGLState.setCurrentSignature(signature);
@@ -860,6 +861,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			for ( JOGLPeerComponent peer: peers)	{
 				peer.setDisplayListDirty();
 			}
+			peersLock.readLock();
 			peersLock.readUnlock();
 		}
 
