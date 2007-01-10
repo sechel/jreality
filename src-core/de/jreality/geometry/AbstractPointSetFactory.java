@@ -41,24 +41,16 @@
 package de.jreality.geometry;
 
 import java.awt.Color;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import de.jreality.geometry.OoNode.IsUpdateCounter;
-import de.jreality.geometry.OoNode.UpdateMethod;
 import de.jreality.math.Pn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.PointSet;
-import de.jreality.scene.Scene;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.data.StringArray;
-import de.jreality.scene.data.WritableDataList;
 
 class AbstractPointSetFactory extends AbstractGeometryFactory {
 	
