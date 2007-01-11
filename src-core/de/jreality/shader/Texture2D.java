@@ -42,8 +42,6 @@ package de.jreality.shader;
 
 import java.awt.Color;
 
-import javax.media.opengl.GL;
-
 import de.jreality.math.Matrix;
 import de.jreality.scene.data.AttributeEntity;
 
