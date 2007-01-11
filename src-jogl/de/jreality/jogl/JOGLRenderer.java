@@ -426,8 +426,8 @@ public class JOGLRenderer  implements AppearanceListener {
 		JOGLCylinderUtility.setupCylinderDLists(this);
 		JOGLSphereHelper.setupSphereDLists(this);
 		// traverse tree and delete all display lists
-		if (thePeerRoot != null) thePeerRoot.propagateGeometryChanged(ALL_GEOMETRY_CHANGED, true);
-		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.propagateGeometryChanged(ALL_GEOMETRY_CHANGED, true);
+		if (thePeerRoot != null) thePeerRoot.propagateGeometryChanged(ALL_GEOMETRY_CHANGED);
+		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.propagateGeometryChanged(ALL_GEOMETRY_CHANGED);
 	}
 	
 	public void display(GLAutoDrawable drawable) {
@@ -1232,13 +1232,14 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 
 		protected void propagateAppearanceChanged()	{
+			appearanceDirty = true;
 
 			for (JOGLPeerComponent child : children) {
 				if (effectiveAppearanceDirty) child.effectiveAppearanceDirty=true;
 				child.propagateAppearanceChanged();
 			}	
 			//childlock.readUnlock();
-			appearanceDirty=false;
+			//appearanceDirty=false;
 		}
 
 		private void handleAppearanceChanged() {
@@ -1261,9 +1262,10 @@ public class JOGLRenderer  implements AppearanceListener {
 						eAp = parent.eAp;	
 					}
 					effectiveAppearanceDirty = false;
-					updateShaders();
 				}
 			}
+			updateShaders();
+			appearanceDirty = false;
 		}
 
 		/**
@@ -1410,18 +1412,13 @@ public class JOGLRenderer  implements AppearanceListener {
 			}
 		}
 
-		public void propagateGeometryChanged(int changed)	{
-			propagateGeometryChanged(changed, false);
-		}
-		
-		public void propagateGeometryChanged(int changed, boolean doitnow) {
+		public void propagateGeometryChanged(int changed) {
 //			theLog.finer("set bits to "+changed);
 			geometryDirtyBits  = changed;
 			childlock.readLock();
 			for (JOGLPeerComponent child: children){		
-				child.propagateGeometryChanged(changed, doitnow);
+				child.propagateGeometryChanged(changed);
 			}	
-			if (doitnow) handleChangedGeometry();
 			childlock.readUnlock();
 
 		}
