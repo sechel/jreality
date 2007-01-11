@@ -104,6 +104,10 @@
     <fileset dir="dist">
         <include name="jReality-ui.jar"/>
         <include name="jReality-swing.jar"/>
+        <include name="jReality-sunflow.jar"/>
+    </fileset>
+    <fileset dir="lib">
+        <include name="sunflow.jar"/>
     </fileset>
   </path>
 
@@ -264,7 +268,7 @@
     <jar jarfile="${dist}/jReality-io.jar" basedir="${build}/io"/>
   </target>
 	  
-  <target name="ui" depends="core, tools, io" description="compile the ui">
+  <target name="ui" depends="core, tools, io, jogl, soft" description="compile the ui">
     <mkdir dir="${build}/ui" />
     <javac excludesfile="excludes.txt" srcdir="${ui}" destdir="${build}/ui" debug="true">
       <compilerarg line="-source 1.5" />
@@ -278,7 +282,7 @@
     <jar jarfile="${dist}/jReality-ui.jar" basedir="${build}/ui" />
   </target>
 
-  <target name="vr" depends="core, ui, swing" description="compile vr">
+  <target name="vr" depends="core, ui, swing, sunflow" description="compile vr">
     <mkdir dir="${build}/vr" />
     <javac excludesfile="excludes.txt" srcdir="${vr}" destdir="${build}/vr" debug="true">
       <compilerarg line="-source 1.5" />
