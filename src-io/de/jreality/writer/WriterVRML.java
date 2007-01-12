@@ -123,15 +123,14 @@ public class WriterVRML {
 		if (g instanceof IndexedFaceSet)
 			writeGeoFaces((IndexedFaceSet) g,eApp,hist);		
 		else if (g instanceof IndexedLineSet)
-			writeGeoLines((IndexedLineSet) g,hist);
+			writeGeoLines((IndexedLineSet) g,eApp,hist);
 		else if (g instanceof PointSet)
-			writeGeoPoints((PointSet) g,hist);
+			writeGeoPoints((PointSet) g,eApp,hist);
 		else System.err.println("WriterVRML.writeComp() Failure");
 	}
 	private static void writeGeoFaces(IndexedFaceSet f,EffectiveAppearance eApp,String hist){
 		// writes an Indexed Faceset
 		
-		System.out.println("WriterVRML.writeGeoFaces()");
 		// write the coordinates:
 		writeCoordinates(f.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null),hist);
 		// writes the Normals depending on smooth or flat shading:
@@ -170,11 +169,48 @@ public class WriterVRML {
 		writeIndices(f.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), hist+spacing);
 		out.println(hist+"}");
 	}
-	private static void writeGeoLines(IndexedLineSet l,String hist){
-		System.out.println("WriterVRML.writeGeoLines()");
+	private static void writeGeoLines(IndexedLineSet l,EffectiveAppearance eApp,String hist){
+		// write coords
+		writeCoordinates(l.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null),hist);
+		// writes Edge Colors if given:
+		if(l.getEdgeAttributes(Attribute.COLORS)!=null){
+			writeMaterialBinding(PER_FACE,hist);
+			writeColors(l.getEdgeAttributes(Attribute.COLORS).toDoubleArrayArray(null),eApp,hist);
+		}
+		else if(l.getVertexAttributes(Attribute.COLORS)!=null){
+			writeMaterialBinding(PER_VERTEX,hist);
+			writeColors(l.getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null),eApp,hist);
+		}
+		// write object
+//		   IndexedLineSet {
+//		          coordIndex         0  # ok
+//		          materialIndex      -1 # egal
+//		          normalIndex        -1 # egal
+//		          textureCoordIndex  -1 # egal
+//		     }
+		out.print(hist+"IndexedLineSet {");
+		out.println(" # "+ l.getName());
+		// writes the edgeIndices
+		writeIndices(l.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null), hist+spacing);
+		out.println(hist+"}");
 	}
-	private static void writeGeoPoints(PointSet p,String hist){
-		System.out.println("WriterVRML.writeGeoPoints()");
+	private static void writeGeoPoints(PointSet p,EffectiveAppearance eApp,String hist){
+		// write coords
+		writeCoordinates(p.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null),hist);
+		// writes Edge Colors if given:
+		if(p.getVertexAttributes(Attribute.COLORS)!=null){
+			writeMaterialBinding(PER_VERTEX,hist);
+			writeColors(p.getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null),eApp,hist);
+		}
+		// write object
+//		  PointSet {
+//	          startIndex  0 	# deafault ok
+//	          numPoints   -1    # ok
+//	     }
+		out.print(hist+"PointSet {");
+		out.println(" # "+ p.getName());
+		out.println(hist+ spacing + "numPoints "+ p.getNumPoints());
+		out.println(hist+"}");
 	}
 	private static void writeLight(Light li,EffectiveAppearance app,String hist){
 		if (li instanceof PointLight)
@@ -289,8 +325,8 @@ public class WriterVRML {
 		//String loadFile="/homes/geometer/gonska/VrmlFiles/lasertrk.wrl";
 		//String loadFile="/homes/geometer/gonska/VrmlFiles/test.wrl";
 		//String loadFile="/homes/geometer/gonska/VrmlFiles/BindingMTest.wrl";
-		//String loadFile="/homes/geometer/gonska/VrmlFiles/geoTest.wrl";
-		String loadFile="/homes/geometer/gonska/VrmlFiles/hangglider.wrl";
+		String loadFile="/homes/geometer/gonska/VrmlFiles/geoTest.wrl";
+		//String loadFile="/homes/geometer/gonska/VrmlFiles/hangglider.wrl";
 		
 		String saveFile="/homes/geometer/gonska/VrmlFiles/ich.wrl";
 		//String saveFile="/homes/geometer/gonska/VrmlFiles/hangglider.wrl";
