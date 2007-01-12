@@ -42,8 +42,7 @@ import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.LoggingSystem;
+
 
 public class WriterVRML {
 	private static final int PER_VERTEX=0,PER_FACE=1;
@@ -321,34 +320,34 @@ public class WriterVRML {
 		out.println(hist+"]");
 	}
 // -----------------------------
-	public static void main(String[] args) {
-		//String loadFile="/homes/geometer/gonska/VrmlFiles/lasertrk.wrl";
-		//String loadFile="/homes/geometer/gonska/VrmlFiles/test.wrl";
-		//String loadFile="/homes/geometer/gonska/VrmlFiles/BindingMTest.wrl";
-		String loadFile="/homes/geometer/gonska/VrmlFiles/geoTest.wrl";
-		//String loadFile="/homes/geometer/gonska/VrmlFiles/hangglider.wrl";
-		
-		String saveFile="/homes/geometer/gonska/VrmlFiles/ich.wrl";
-		//String saveFile="/homes/geometer/gonska/VrmlFiles/hangglider.wrl";
-		
-		FileReader in=null;
-		PrintWriter outs=null;
-		VRMLV1Parser v=null;
-		SceneGraphComponent comp=null;
-		
-		try {
-			in=new FileReader(new File(loadFile));
-			v=new VRMLV1Parser(new VRMLV1Lexer(in));
-			comp=v.vrmlFile();
-
-			outs= new PrintWriter(new FileWriter(saveFile));
-			WriterVRML.write(comp, outs);
-
-			in=new FileReader(new File(saveFile));
-			v=new VRMLV1Parser(new VRMLV1Lexer(in));
-			comp=v.vrmlFile();
-			
-			ViewerApp.display(comp);
-		} catch (Exception e) {e.printStackTrace();}
-	}
+//	public static void main(String[] args) {
+//		//String loadFile="/homes/geometer/gonska/VrmlFiles/lasertrk.wrl";
+//		//String loadFile="/homes/geometer/gonska/VrmlFiles/test.wrl";
+//		//String loadFile="/homes/geometer/gonska/VrmlFiles/BindingMTest.wrl";
+//		String loadFile="/homes/geometer/gonska/VrmlFiles/geoTest.wrl";
+//		//String loadFile="/homes/geometer/gonska/VrmlFiles/hangglider.wrl";
+//		
+//		String saveFile="/homes/geometer/gonska/VrmlFiles/ich.wrl";
+//		//String saveFile="/homes/geometer/gonska/VrmlFiles/hangglider.wrl";
+//		
+//		FileReader in=null;
+//		PrintWriter outs=null;
+//		VRMLV1Parser v=null;
+//		SceneGraphComponent comp=null;
+//		
+//		try {
+//			in=new FileReader(new File(loadFile));
+//			v=new VRMLV1Parser(new VRMLV1Lexer(in));
+//			comp=v.vrmlFile();
+//
+//			outs= new PrintWriter(new FileWriter(saveFile));
+//			WriterVRML.write(comp, outs);
+//
+//			in=new FileReader(new File(saveFile));
+//			v=new VRMLV1Parser(new VRMLV1Lexer(in));
+//			comp=v.vrmlFile();
+//			
+//			ViewerApp.display(comp);
+//		} catch (Exception e) {e.printStackTrace();}
+//	}
 }
