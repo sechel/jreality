@@ -455,14 +455,12 @@ public class VRMLHelper {
 	{
 		int m=0;
 		for (int i=0;i<faceCount;i++){
-			int k=faceCount-i-1;
-			int faceLength=cIndex[k].length;
+			int faceLength=cIndex[i].length;
 			for (int j=0;j<faceLength;j++){
-				int l=faceLength-1-j;
 				double [] n=state.normals[m];
-				vNormals[cIndex[k][l]][0]=n[0];
-				vNormals[cIndex[k][l]][1]=n[1];
-				vNormals[cIndex[k][l]][2]=n[2];
+				vNormals[cIndex[i][j]][0]=n[0];
+				vNormals[cIndex[i][j]][1]=n[1];
+				vNormals[cIndex[i][j]][2]=n[2];
 				m++;
 			}
 		}
@@ -479,14 +477,14 @@ public class VRMLHelper {
 			break;
 		}
 		for (int i=0;i<faceCount;i++){
-			int k=faceCount-i-1;
-			int faceLength=cIndex[k].length;
+//			int k=faceCount-i-1;
+			int faceLength=cIndex[i].length;
 			for (int j=0;j<faceLength;j++){
-				int l=faceLength-1-j;
-				double [] n=state.normals[nIndex[k][l]];
-				vNormals[cIndex[k][l]][0]=n[0];
-				vNormals[cIndex[k][l]][1]=n[1];
-				vNormals[cIndex[k][l]][2]=n[2];
+//				int l=faceLength-1-j;
+				double [] n=state.normals[nIndex[i][j]];
+				vNormals[cIndex[i][j]][0]=n[0];
+				vNormals[cIndex[i][j]][1]=n[1];
+				vNormals[cIndex[i][j]][2]=n[2];
 			}
 		}
 		ifsf.setVertexNormals(vNormals);
@@ -539,11 +537,11 @@ public class VRMLHelper {
 		if (state.diffuse.length>=faceCount){
 		int m=0;
 		for (int i=0;i<faceCount;i++){
-			int k=faceCount-i-1;
-			int faceLength=coordIndex[k].length;
+//			int k=faceCount-i-1;
+			int faceLength=coordIndex[i].length;
 			for (int j=0;j<faceLength;j++){
-				int l=faceLength-1-j;
-				vColors[coordIndex[k][l]]=state.diffuse[m];
+//				int l=faceLength-1-j;
+				vColors[coordIndex[i][j]]=state.diffuse[m];
 				m++;
 			}
 		}
@@ -555,11 +553,11 @@ public class VRMLHelper {
 	{
 		if (state.diffuse.length>=faceCount){
 			for (int i=0;i<faceCount;i++){
-			int k=faceCount-i-1;
-			int faceLength=coordIndex[k].length;
+//			int k=faceCount-i-1;
+			int faceLength=coordIndex[i].length;
 			for (int j=0;j<faceLength;j++){
-				int l=faceLength-1-j;
-				vColors[coordIndex[k][l]]=state.diffuse[colorIndex[k][l]];
+//				int l=faceLength-1-j;
+				vColors[coordIndex[i][j]]=state.diffuse[colorIndex[i][j]];
 			}
 		}
 		ifsf.setVertexColors(vColors);
@@ -765,15 +763,22 @@ public class VRMLHelper {
 	 * @param coords
 	 * @return a possible refferenceTable
 	 */
-	public static int[] separateVertices(int[][] faces, State state){
+	public static int[] separateVerticesAndVNormals(int[][] faces, State state){
 		int faceC=faces.length;
 		int totalVC=0;
 		for (int i=0;i<faceC;i++)	totalVC+=faces[i].length;
 		double [][] newCoords=new double[totalVC][3];
+		double [][] newVNormals=new double[totalVC][3];
 		int count=0;
 		int[] refferenceTable= new int[totalVC];
 		for(int f=0;f<faceC;f++){
 			for(int v=0;v<faces[f].length;v++){
+				if(state.normalBinding==PER_VERTEX){
+					newVNormals[count]=new double []{
+							state.normals[faces[f][v]][0],
+							state.normals[faces[f][v]][1],
+							state.normals[faces[f][v]][2]};	
+				}
 				newCoords[count]=new double []{
 					state.coords[faces[f][v]][0],
 					state.coords[faces[f][v]][1],
@@ -784,6 +789,9 @@ public class VRMLHelper {
 			}
 		}
 		state.coords=newCoords;
+		if(state.normalBinding==PER_VERTEX){
+			state.normals=newVNormals;
+		}
 		return refferenceTable;
 	}
 }

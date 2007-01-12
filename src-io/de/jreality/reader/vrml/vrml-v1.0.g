@@ -537,7 +537,7 @@ indexedFaceSetNode [State state, Appearance app] returns [IndexedFaceSet ifs=nul
 		//	.toDoubleArrayArray(null);
 		
 			//	separate vertices
-		int[] reffTab=VRMLHelper.separateVertices(coordIndex2,state);
+		int[] reffTab=VRMLHelper.separateVerticesAndVNormals(coordIndex2,state);
 			// make new Factory
 		ifsf = new IndexedFaceSetFactory();
 		ifsf.setVertexCount(reffTab.length);//(new)
