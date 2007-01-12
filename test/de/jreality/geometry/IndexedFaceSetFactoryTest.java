@@ -321,6 +321,10 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 			System.err.println("IFS edgecount: "+n);
 			for (int i = 0; i<n; ++i)	{
 				IntArray ia = ifs.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray();
+				System.err.print("Edge "+i+":\t");
+				for (int k = 0; k<ia.getLength(); ++k)	
+					System.err.print(ia.item(k)+"\t");
+				System.err.println("");
 			}			
 			System.err.println("Created ifs "+(j==0 ? "without" : "with")+" edge colors");
 		}
