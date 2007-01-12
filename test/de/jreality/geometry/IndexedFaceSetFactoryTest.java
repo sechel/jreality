@@ -52,6 +52,7 @@ import junit.framework.TestCase;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.IntArray;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class IndexedFaceSetFactoryTest extends TestCase {
@@ -291,6 +292,39 @@ public class IndexedFaceSetFactoryTest extends TestCase {
          ifsf.setGenerateFaceNormals(true);
          ifsf.update();
  }
+
+	public void testWeirdProblemWithEdgeColors()	{
+		double y = .25, z = 9/24.0, a = .16666;
+		double[][] verts = {
+				{-1,1,1}, {-1,1,0}, {-1,y,1}, {-1,y,z}, {-a,-a,a},{0,0,0}, {y,-z,1}
+		};
+		int[][] faceI =  {{2,3,4,6}, {5,4,3,1}};  
+		Color[] fc = {new Color(.7f, .7f, 0, .6f), new Color(.5f, 0, .8f,.3f)}; 
+		int[][] edgeI = {{1,3},{3,2},{3,4},{4,6}, {4,5}};
+		Color edge1 = new Color(1f, 0, 0), edge2 = new Color(0,0,1f);
+		Color[] edgeC = {edge2, edge1, edge1, edge1, edge2};
+		for (int j = 0; j<2; ++j)	{
+			IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
+			ifsf.setVertexCount(verts.length);
+			ifsf.setVertexCoordinates(verts);
+			ifsf.setFaceCount(faceI.length);
+			ifsf.setFaceIndices(faceI);
+			ifsf.setFaceColors(fc);
+			ifsf.setLineCount(edgeI.length);
+			ifsf.setEdgeIndices(edgeI);
+			if (j == 1) ifsf.setEdgeColors(edgeC);
+			ifsf.setGenerateEdgesFromFaces(false);
+			ifsf.setGenerateFaceNormals(true);
+			ifsf.update();
+			IndexedFaceSet ifs = ifsf.getIndexedFaceSet();
+			int n = ifs.getNumEdges();
+			System.err.println("IFS edgecount: "+n);
+			for (int i = 0; i<n; ++i)	{
+				IntArray ia = ifs.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray();
+			}			
+			System.err.println("Created ifs "+(j==0 ? "without" : "with")+" edge colors");
+		}
+	}
 
 	
 	public static void main( String [] arg ) {
