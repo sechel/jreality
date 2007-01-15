@@ -45,7 +45,6 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 
-import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jtem.beans.DimensionDialog;
 
@@ -57,13 +56,13 @@ import de.jtem.beans.DimensionDialog;
  */
 public class SetViewerSize extends AbstractJrAction {
 	
-	private Viewer viewer;
+	private Component viewer;
 
-	public SetViewerSize(String name, Viewer viewer, Frame parentComp) {
+	public SetViewerSize(String name, Component viewer, Frame parentComp) {
 		super(name, parentComp);
 
 		if (viewer == null) 
-			throw new UnsupportedOperationException("Viewer not allowed to be null!");
+			throw new IllegalArgumentException("Viewer not allowed to be null!");
 		this.viewer = viewer;
 
 		setShortDescription("Set the viewer size.");
@@ -71,14 +70,15 @@ public class SetViewerSize extends AbstractJrAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		Dimension d = viewer.getViewingComponentSize();
+		Dimension d = viewer.getSize();
 		Dimension dim = DimensionDialog.selectDimension(d, parentComp);
-
-		Component v = (Component) viewer.getViewingComponent();
-		v.setPreferredSize(dim);
+		if (dim == null) return;  //dialog cancelled
 		
-		((Frame)parentComp).pack();
-		v.requestFocusInWindow();
+		viewer.setPreferredSize(null);  //need change of preferredSize (PropertyChangeEvent)
+		viewer.setPreferredSize(dim);
+		
+		if (parentComp != null) ((Frame)parentComp).pack();
+		viewer.requestFocusInWindow();
 	}
 	
 }

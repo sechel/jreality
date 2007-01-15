@@ -97,15 +97,16 @@ public class ToggleFullScreen extends AbstractJrAction {
   @Override
   public void actionPerformed(ActionEvent e) {
    
-    if (isFullscreen) {
+    if (isFullscreen) {  //exit full screen
       frame.dispose();
       frame.setUndecorated(false);
       frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(null);
       frame.validate();
+      frame.pack();  //reset to preferred sizes
       frame.setVisible(true);
       isFullscreen=false;
     } 
-    else {
+    else {  //switch to full screen
       frame.dispose();
       frame.setUndecorated(true);
       frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(frame);

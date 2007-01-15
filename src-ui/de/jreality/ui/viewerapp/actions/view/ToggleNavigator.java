@@ -45,7 +45,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JFrame;
-import javax.swing.JMenu;
 import javax.swing.KeyStroke;
 
 import de.jreality.ui.viewerapp.ViewerApp;
@@ -60,13 +59,14 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 public class ToggleNavigator extends AbstractJrAction {
 
   private ViewerApp viewerApp;
-  private JMenu[] menus;
+  private String[] menus;
   
   
   /**
-   * @param menus list of menus which should change their (visibility) state when performing this action
+   * @param menus list of menus specified by their names, 
+   * which should change their (visibility) state when performing this action
    */
-  public ToggleNavigator(String name, ViewerApp viewerApp, JMenu... menus) {
+  public ToggleNavigator(String name, ViewerApp viewerApp, String... menus) {
     super(name);
     this.viewerApp = viewerApp;
     this.menus = menus;
@@ -84,13 +84,13 @@ public class ToggleNavigator extends AbstractJrAction {
     
     if (menus != null) {  //change visibility of menus
       for (int i = 0; i < menus.length; i++)
-        menus[i].setVisible(attachNavigator);
+        viewerApp.getMenu().showMenu(menus[i], attachNavigator);
     }
     
-    JFrame frame = viewerApp.getFrame();
-    frame.getContentPane().removeAll();
-    frame.getContentPane().add(viewerApp.getComponent());
-    frame.validate();
+    JFrame parentComp = viewerApp.getFrame();
+    parentComp.getContentPane().removeAll();
+    parentComp.getContentPane().add(viewerApp.getComponent());
+    parentComp.validate();
   }
   
 }

@@ -46,6 +46,7 @@ import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.beans.Beans;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -157,7 +158,8 @@ public class ViewerAppMenu {
   private JCheckBoxMenuItem beanShellCheckBox;
   private JCheckBoxMenuItem renderSelectionCheckbox;
   private ExportImage exportImageAction;
-  private JMenu editMenu;  //setInvisible(isAttachNavigator)
+	private boolean showMenuBar = true;
+	private HashMap<String, Boolean> showMenu = new HashMap<String, Boolean>();
 
 
   protected ViewerAppMenu(ViewerApp v) {
@@ -166,19 +168,12 @@ public class ViewerAppMenu {
     sm = v.getSelectionManager();
     viewerSwitch = v.getViewerSwitch();
     
-    setupMenuBar();
-  }
-  
-
-  private void setupMenuBar() {
-    
     menuBar = new JMenuBar();
     
-    menuBar.add(getFileMenu());
-    editMenu = getEditMenu();
-    menuBar.add(editMenu);
-    menuBar.add(getCameraMenu());
-    menuBar.add(getViewMenu());
+    addMenu(getFileMenu());
+    addMenu(getEditMenu());
+    addMenu(getCameraMenu());
+    addMenu(getViewMenu());
   }
 
 
@@ -285,14 +280,14 @@ public class ViewerAppMenu {
     JMenu viewMenu = new JMenu(VIEW_MENU);
     viewMenu.setMnemonic(KeyEvent.VK_V);
     
-    navigatorCheckBox = new JCheckBoxMenuItem(new ToggleNavigator(TOGGLE_NAVIGATOR, viewerApp, editMenu));
+    navigatorCheckBox = new JCheckBoxMenuItem(new ToggleNavigator(TOGGLE_NAVIGATOR, viewerApp, EDIT_MENU));
     beanShellCheckBox = new JCheckBoxMenuItem(new ToggleBeanShell(TOGGLE_BEANSHELL, viewerApp));
     viewMenu.add(navigatorCheckBox);
     viewMenu.add(beanShellCheckBox);
     viewMenu.addSeparator();
-    viewMenu.add(new JMenuItem(new ToggleMenu(TOGGLE_MENU, menuBar)));
+    viewMenu.add(new JMenuItem(new ToggleMenu(TOGGLE_MENU, this)));
     viewMenu.addSeparator();
-    viewMenu.add(new JMenuItem(new SetViewerSize(SET_VIEWER_SIZE, viewerSwitch, (Frame)parentComp)));
+    viewMenu.add(new JMenuItem(new SetViewerSize(SET_VIEWER_SIZE, viewerSwitch.getViewingComponent(), (Frame)parentComp)));
     viewMenu.add(new JMenuItem(ToggleViewerFullScreen.sharedInstance(TOGGLE_FULL_VIEWER, viewerApp)));
     viewMenu.add(new JMenuItem(ToggleFullScreen.sharedInstance(TOGGLE_FULL_SCREEN, (Frame)parentComp)));      
     viewMenu.addSeparator();
@@ -333,7 +328,7 @@ public class ViewerAppMenu {
     navigatorCheckBox.setSelected(viewerApp.isAttachNavigator());
     beanShellCheckBox.setSelected(viewerApp.isAttachBeanShell());
     renderSelectionCheckbox.setSelected(sm.isRenderSelection());  //sm!=null if viewerApp!=null
-    editMenu.setVisible(viewerApp.isAttachNavigator());
+    showMenu(EDIT_MENU, viewerApp.isAttachNavigator());
   }
   
   
@@ -364,6 +359,7 @@ public class ViewerAppMenu {
    */
   public void addMenu(JMenu menu, int index) {
     menuBar.add(menu, index);
+    showMenu.put(menu.getText(), menu.isVisible());
   }
   
   
@@ -492,6 +488,38 @@ public class ViewerAppMenu {
     JMenu menu = getMenu(menuName);
     if (menu != null) menu.insertSeparator(index);
     return (menu != null);
+  }
+
+  
+  /**
+   * Show or hide the menu bar.<br>
+   * When hiding the menu bar, the visibility of all contained menus is set to false 
+   * (defined keystrokes for actions are still working then).
+   */
+  public void showMenuBar(boolean show) {
+
+  	for (int i = 0; i < menuBar.getComponentCount(); i++)
+      menuBar.getMenu(i).setVisible(
+      		show ? this.showMenu.get(menuBar.getMenu(i).getText()) : false 
+      );
+
+  	showMenuBar  = show;
+  }
+  
+  
+  public boolean isShowMenuBar() {
+  	return showMenuBar;
+  }
+  
+  
+  /**
+   * Show or hide the menu with the specified name.
+   * @param menuName the menu's name (use static fields of {@link de.jreality.ui.viewerapp.ViewerAppMenu})
+   * @param show true iff specified menu should be visible
+   */
+  public void showMenu(String menuName, boolean show) {
+  	getMenu(menuName).setVisible(show);
+  	showMenu.put(menuName, show);
   }
   
 }

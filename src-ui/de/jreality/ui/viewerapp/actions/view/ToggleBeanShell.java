@@ -76,10 +76,10 @@ public class ToggleBeanShell extends AbstractJrAction {
     attachBeanShell = !viewerApp.isAttachBeanShell();
     viewerApp.setAttachBeanShell(attachBeanShell);
     viewerApp.update();
-    JFrame frame = viewerApp.getFrame();
-    frame.getContentPane().removeAll();
-    frame.getContentPane().add(viewerApp.getComponent());
-    frame.validate();
+    JFrame parentComp = viewerApp.getFrame();
+    parentComp.getContentPane().removeAll();
+    parentComp.getContentPane().add(viewerApp.getComponent());
+    parentComp.validate();
   }
   
 }

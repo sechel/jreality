@@ -47,11 +47,10 @@ import java.awt.event.KeyEvent;
 import java.util.HashMap;
 
 import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.KeyStroke;
 
 import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.ui.viewerapp.ViewerAppMenu;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
@@ -69,7 +68,8 @@ public class ToggleViewerFullScreen extends AbstractJrAction {
   private ViewerApp viewerApp;
   private JFrame fsf;  //full screen frame
   private JFrame frame;  //the viewerApp's frame
-  private JMenuBar menuBar;
+  private ViewerAppMenu menu;
+  private Component viewer;
   
   private static HashMap <ViewerApp, ToggleViewerFullScreen> sharedInstances = new HashMap <ViewerApp, ToggleViewerFullScreen>();
   
@@ -77,8 +77,8 @@ public class ToggleViewerFullScreen extends AbstractJrAction {
   private ToggleViewerFullScreen(String name, ViewerApp viewerApp) {
     super(name);
     this.viewerApp = viewerApp;
-    this.frame = viewerApp.getFrame();
-    this.fsf = new JFrame("jReality Viewer");
+    frame = viewerApp.getFrame();
+    fsf = new JFrame("jReality Viewer");
     fsf.setUndecorated(true);
    
     setShortDescription("Toggle viewer full screen");
@@ -113,38 +113,44 @@ public class ToggleViewerFullScreen extends AbstractJrAction {
   @Override
   public void actionPerformed(ActionEvent e) {
 
-    menuBar = frame.getJMenuBar();
-    
+  	if (menu == null) menu = viewerApp.getMenu();
+  	
     if (isFullscreen) {  //exit full screen
-      frame.getContentPane().removeAll();
+      
+    	frame.getContentPane().removeAll();
       frame.getContentPane().add(viewerApp.getComponent());
-      if (showMenu) showMenuBar(true);  //restore menu state
-      frame.setJMenuBar(menuBar);
+
+      //restore menu state
+      if (showMenu) menu.showMenuBar(true);
+      frame.setJMenuBar(menu.getMenuBar());
+
       frame.validate();
+//      frame.pack();
       frame.setVisible(true);
       fsf.dispose();
       fsf.getGraphicsConfiguration().getDevice().setFullScreenWindow(null);
       isFullscreen = false;
-    } else {  //switch to full screen
-      fsf.getContentPane().removeAll();
-      fsf.getContentPane().add(viewerApp.getViewerSwitch().getViewingComponent());
-      showMenu = menuBar.getMenu(0).isVisible();  //remember menu state
-      if (showMenu) showMenuBar(false);  //hide menu bar
-      fsf.setJMenuBar(menuBar);
+    } 
+    else {  //switch to full screen
+    
+    	fsf.getContentPane().removeAll();
+      viewer = viewerApp.getViewerSwitch().getViewingComponent();  //viewerApp.getViewer() ??
+//      viewer.setPreferredSize(viewer.getSize());  //might be needed when frame.pack() is used above
+      fsf.getContentPane().add(viewer);
+      
+      //remember menu state and hide
+      ViewerAppMenu menu = viewerApp.getMenu();
+      showMenu = menu.isShowMenuBar();
+      if (showMenu) menu.showMenuBar(false);
+      fsf.setJMenuBar(menu.getMenuBar());
+      
       fsf.validate();
       fsf.getGraphicsConfiguration().getDevice().setFullScreenWindow(fsf);
       frame.setVisible(false);
       isFullscreen = true;
     }
-    ((Component) viewerApp.getViewer().getViewingComponent()).requestFocusInWindow();
+    
+    if (viewer != null) viewer.requestFocusInWindow();
   }
   
-  
-  private void showMenuBar(boolean b) {
-    JMenu menu;
-    for (int i = 0; i < menuBar.getComponentCount(); i++) {
-      menu = menuBar.getMenu(i);
-      menu.setVisible(b);
-    }
-  }
 }
