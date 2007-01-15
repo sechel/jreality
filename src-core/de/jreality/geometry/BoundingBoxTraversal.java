@@ -148,6 +148,14 @@ class BoundingBoxTraversal extends SceneGraphVisitor {
   }
 
   public void visit(SceneGraphComponent c) {
+	  if (c.getAppearance() != null) {
+		  Object obj = c.getAppearance().getAttribute(GeometryUtility.BOUNDING_BOX);
+		  if (obj != null && obj instanceof Rectangle3D)	{
+		  		Rectangle3D box = (Rectangle3D) obj;
+		     	unionBox(box);
+		     	return;
+		  }
+	  }
       if(c.isVisible())
           c.childrenAccept(subContext());
   }
