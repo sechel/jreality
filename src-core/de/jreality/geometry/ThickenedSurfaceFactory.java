@@ -67,6 +67,7 @@ import de.jreality.scene.data.IntArrayArray;
 	int signature = Pn.EUCLIDEAN;
 	boolean keepFaceColors = false;
 	double[][] profileCurve = {{0,0}, {.5,1}, {1,0}};
+	boolean getGoodTextureCoordinates = true;
 	
 	public ThickenedSurfaceFactory(IndexedFaceSet ifs)	{
 		theSurface = ifs;
@@ -271,7 +272,8 @@ import de.jreality.scene.data.IntArrayArray;
 			//System.err.println("cos of angle is "+factor);
 			// TODO make this correct for noneuclidean case too
 			//Pn.dragTowards(newV[i+n], oldV[i], oldN[i], thickness, Pn.EUCLIDEAN);
-			Rn.linearCombination(newV[i+n], 1.0, newV[i], thickness, oldVN[i]);
+			Rn.linearCombination(newV[i+n], 1.0, newV[i], .5*thickness, oldVN[i]);
+			Rn.linearCombination(newV[i], 1.0, newV[i], -.5*thickness, oldVN[i]);
 		}
 		
 		int m = oldIndices.length;
@@ -323,16 +325,16 @@ import de.jreality.scene.data.IntArrayArray;
 		}
 		sharedVertices = new HashMap<SharedVertex, Integer>();
 		int p = profile.length;
-		int totalVerts = 0;
+		int totalEdges = 0;
 		for (int i = 0; i<m; ++i)	{
-			totalVerts += oldIndices[i].length;
+			totalEdges += oldIndices[i].length;
 		}
-		System.err.println("Found "+totalVerts+" verts");
+		System.err.println("Found "+totalEdges+" verts");
 		// we leave the original vertices so we can retain to original boundary faces
 		//stepsPerEdge = 1;
-		int allVerts = totalVerts * stepsPerEdge * p + 2*n;
-		int allFaces = totalVerts * stepsPerEdge * (p-1) + nm;
-		double[][] allVertices = new double[allVerts][4];
+		int allVerts = (totalEdges * stepsPerEdge + m) * p + 2*n;
+		int allFaces = totalEdges * stepsPerEdge * (p-1) + nm;
+		double[][] allVertices = new double[allVerts][4], allTexCoords = new double[allVerts][2];
 		int[][] allIndices = new int[allFaces][4];
 		DoubleArrayArray oldFaceColors = null;
 		double[][] newFaceColors = null;
@@ -361,7 +363,7 @@ import de.jreality.scene.data.IntArrayArray;
 			double[] ct = centroid(topface, newV);
 			int fsize = bottomface.length;
 			int vertexCount = 0;
-			int totalVerticesPerLoop = stepsPerEdge * fsize;
+			int totalVerticesPerLoop = stepsPerEdge * fsize+1;
 			int totalVertsThisFace = p * totalVerticesPerLoop;
 			double[][] borderBottom = linearHole(bottomface, newV, newVN, stepsPerEdge, curvedEdges);
 			double[][] borderTop = linearHole(topface, newV, newVN, stepsPerEdge, curvedEdges);
@@ -375,17 +377,19 @@ import de.jreality.scene.data.IntArrayArray;
 				tangentQuadricBottom = quadraticHole(bottomface, stepsPerEdge, controlpoints);
 				controlpoints = linearHole(topface, newV, newVN, 2, curvedEdges);
 				tangentQuadricTop = quadraticHole(topface, stepsPerEdge, controlpoints);				
-		} else {
+			} else {
 				tangentQuadricBottom = linearHole ? borderBottom : quadraticHole(bottomface, newV, stepsPerEdge);
 				tangentQuadricTop = linearHole ? borderTop : quadraticHole(topface, newV, stepsPerEdge);								
 			}
 			int[] nonDuplicateVertexIndicesForThisHole = new int[totalVertsThisFace];
 			// for each element of the profile curve ...
 			for (int k = 0; k<p; ++k)	{
+				double tu = k/(p-1.0);
 				double u = profile[k][0];
 				double v = profile[k][1] * holeSize;
 				// for each point of the "hole curve"
 				for (int j = 0; j<totalVerticesPerLoop; ++j)	{
+					double tv = j/(totalVerticesPerLoop-1.0);
 					double[] vb = null, vt = null;
 					if (k == 0 || k == (p-1))	{
 						vb = borderBottom[j];
@@ -395,42 +399,44 @@ import de.jreality.scene.data.IntArrayArray;
 						vt = tangentQuadricTop[j]; //Rn.linearCombination(null, 1-t, vt1, t,vt2);
 					}
 					// look for shared vertices along edges
-					int vertexIndex = -1;
-					SharedVertex sv = null;
-					if (v == 0 && (u==0 || u==1)) {
-						int onCorner = j % stepsPerEdge;
-						if (onCorner == 0)	{
-							if (u == 0) vertexIndex = bottomface[j/stepsPerEdge];
-							else if (u == 1) vertexIndex = topface[j/stepsPerEdge];
-						} else {
-							int v0 = 0, v1 = 0;
-							if (u == 0)	{		// possible shared vertex on bottom 
-								v0 = bottomface[ j / stepsPerEdge];
-								v1 = bottomface[ ((j/stepsPerEdge)+1) % bottomface.length];
-							}
-							else if (u == 1)	{		// possible shared vertex on bottom 
-								v0 = topface[ j / stepsPerEdge];
-								v1 = topface[ ((j/stepsPerEdge)+1) % topface.length];
-							}
-							sv = new SharedVertex(v0, v1, j % stepsPerEdge, stepsPerEdge);
-							if (sharedVertices.get(sv) != null)
-								vertexIndex = sharedVertices.get(sv).intValue();
-							//System.err.println("Getting vertex "+v0+":"+v1+":"+j%stepsPerEdge);						
-						}
-					}
-					if (vertexIndex != -1) {
-						nonDuplicateVertexIndicesForThisHole[vertexCount] = vertexIndex;
-						//if (sv != null) System.err.println("Found vertex "+sv.v0+":"+sv.v1+":"+sv.step);
-						foundSharedVerts++;
-					}
-					else {
+//					int vertexIndex = -1;
+//					SharedVertex sv = null;
+//					if (v == 0 && (u==0 || u==1)) {
+//						int onCorner = j % stepsPerEdge;
+//						if (onCorner == 0)	{
+//							if (u == 0) vertexIndex = bottomface[j/stepsPerEdge];
+//							else if (u == 1) vertexIndex = topface[j/stepsPerEdge];
+//						} else {
+//							int v0 = 0, v1 = 0;
+//							if (u == 0)	{		// possible shared vertex on bottom 
+//								v0 = bottomface[ j / stepsPerEdge];
+//								v1 = bottomface[ ((j/stepsPerEdge)+1) % bottomface.length];
+//							}
+//							else if (u == 1)	{		// possible shared vertex on bottom 
+//								v0 = topface[ j / stepsPerEdge];
+//								v1 = topface[ ((j/stepsPerEdge)+1) % topface.length];
+//							}
+//							sv = new SharedVertex(v0, v1, j % stepsPerEdge, stepsPerEdge);
+//							if (sharedVertices.get(sv) != null)
+//								vertexIndex = sharedVertices.get(sv).intValue();
+//							//System.err.println("Getting vertex "+v0+":"+v1+":"+j%stepsPerEdge);						
+//						}
+//					}
+//					if (vertexIndex != -1) {
+//						nonDuplicateVertexIndicesForThisHole[vertexCount] = vertexIndex;
+//						//if (sv != null) System.err.println("Found vertex "+sv.v0+":"+sv.v1+":"+sv.step);
+//						foundSharedVerts++;
+//					}
+//					else {
 						Rn.bilinearInterpolation(allVertices[allVertCount+vertexCount], u, v, vb, vt, cb, ct);
+						allTexCoords[allVertCount+vertexCount][0] = tu;
+						allTexCoords[allVertCount+vertexCount][1] = tv;
 						nonDuplicateVertexIndicesForThisHole[vertexCount] = allVertCount+vertexCount;
-						if (sv != null) {
-							sharedVertices.put(sv, allVertCount+vertexCount);
-							//System.err.println("Putting vertex "+sv.v0+":"+sv.v1+":"+sv.step);
-						}
-					}
+//						if (sv != null) {
+//							sharedVertices.put(sv, allVertCount+vertexCount);
+//							//System.err.println("Putting vertex "+sv.v0+":"+sv.v1+":"+sv.step);
+////						}
+//					}
 					vertexCount++;
 					}				
 			}
@@ -439,7 +445,7 @@ import de.jreality.scene.data.IntArrayArray;
 			if (keepFaceColors)	
 				oldFaceColor = oldFaceColors.item(i).toDoubleArray(null);
 			for (int k = 0; k<p-1; ++k)	{
-				for (int j = 0; j<totalVerticesPerLoop; ++j)	{
+				for (int j = 0; j<totalVerticesPerLoop-1; ++j)	{
 						int[] ndvi = nonDuplicateVertexIndicesForThisHole;
 						int[] thisF = allIndices[allFaceCount];
 						thisF[0] = ndvi[k*totalVerticesPerLoop + j];
@@ -456,6 +462,7 @@ import de.jreality.scene.data.IntArrayArray;
 		thickSurfaceIFSF.setVertexCount(allVerts);
 		thickSurfaceIFSF.setFaceCount(allFaces);
 		thickSurfaceIFSF.setVertexCoordinates(allVertices);
+		thickSurfaceIFSF.setVertexTextureCoordinates(allTexCoords);
 		thickSurfaceIFSF.setFaceIndices(allIndices);
 		if (keepFaceColors && newFaceColors != null) thickSurfaceIFSF.setFaceColors(newFaceColors);
 		thickSurfaceIFSF.setGenerateEdgesFromFaces(true);
@@ -468,7 +475,7 @@ import de.jreality.scene.data.IntArrayArray;
 	}
 
 	private double[][] linearHole(int[] face, double[][] vv, double[][] nv, int stepsPerEdge, boolean curvedEdges) {
-		double[][] values = new double[face.length * stepsPerEdge][vv[0].length];
+		double[][] values = new double[face.length * stepsPerEdge+1][vv[0].length];
 		int fsize = face.length;
 		for (int j = 0; j<fsize; ++j)	{
 			double[] vb1 = vv[face[j]];
@@ -498,9 +505,10 @@ import de.jreality.scene.data.IntArrayArray;
 					double t = jj/(stepsPerEdge*1.0);
 					Rn.bezierCombination(values[j*stepsPerEdge+jj], t, vb1, m1, m2, vb2);
 				}				
-				
 			}
 		}
+		System.arraycopy(values[0], 0, values[values.length-1], 0, values[0].length);
+		//values[0] = values[values.length-1];
 		return values;
 	}
 
@@ -515,7 +523,7 @@ import de.jreality.scene.data.IntArrayArray;
 	}
 	
 	private static double[][] quadraticHole(int[] face, int stepsPerEdge, double[][] controlpoints) {
-		double[][] values = new double[face.length * stepsPerEdge][controlpoints[0].length];
+		double[][] values = new double[face.length * stepsPerEdge+1][controlpoints[0].length];
 		int fsize = face.length;
 		for (int j = 0; j<fsize; ++j)	{
 			int i0 = (2*j+1)%(2*fsize);
@@ -528,7 +536,8 @@ import de.jreality.scene.data.IntArrayArray;
 				double a0 = (1-t)*(1-t);
 				double a1 = 2*(1-t)*t;
 				double a2 = t*t;
-				int index = (j*stepsPerEdge + (stepsPerEdge + 1)/2 +  jj+values.length) % values.length;
+				// don't ask!
+				int index = (j*stepsPerEdge + (stepsPerEdge + 1)/2 +  jj+values.length-1) % (values.length-1);
 				for (int k = 0; k<controlpoints[0].length; ++k)	{
 					values[index][k] = a0*controlpoints[i0][k];
 					values[index][k] += a1*controlpoints[i1][k];
@@ -536,6 +545,8 @@ import de.jreality.scene.data.IntArrayArray;
 				}
 			}
 		}
+		System.arraycopy(values[0], 0, values[values.length-1], 0, values[0].length);
+		//values[0] = values[values.length-1];
 		return values;
 	}
 
