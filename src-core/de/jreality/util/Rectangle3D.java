@@ -308,5 +308,19 @@ public class Rectangle3D {
         System.arraycopy(bounds[1], 0, store[1], 0, 3);
         return store;
     }
+
+	public void scale(double d) {
+		
+		for (int i =0; i<3; ++i)
+			for (int j = 0; j<2; ++j)	bounds[j][i] *= d;
+		
+	}
+
+	public void add(double d) {
+		
+		for (int i =0; i<3; ++i)
+			for (int j = 0; j<2; ++j)	bounds[j][i] += (j == 0 ? -d : d);
+		
+	}
 }
 
