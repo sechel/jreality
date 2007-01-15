@@ -41,6 +41,9 @@
 package de.jreality.ui.viewerapp;
 
 import java.awt.Component;
+import java.awt.Dimension;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -65,22 +68,56 @@ class UIFactory {
 
 	private boolean attachNavigator = false;  //default
 	private boolean attachBeanShell = false;  //default
+	
+	private PropertyChangeListener sizeListener;
+	
+	private JSplitPane beanShellJSP;
+	private JSplitPane navigatorJSP;
 
 
-	protected Component createUI() {
-		if (!attachNavigator && !attachBeanShell)
+	protected UIFactory() {
+		//needed for SetViewerSize action
+		sizeListener = new PropertyChangeListener(){
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (beanShell != null) 
+					beanShell.setPreferredSize( new Dimension(0, beanShell.getSize().height) );
+				if (beanShellJSP != null) beanShellJSP.resetToPreferredSizes();
+				if (navigator != null) 
+					navigator.setPreferredSize( new Dimension(navigator.getSize().width, 0) );				
+				if (navigatorJSP != null) navigatorJSP.resetToPreferredSizes();
+			}
+		};
+	}
+	
+	
+	protected Component getDefaultUI() throws UnsupportedOperationException {
+
+		if (viewer == null) 
+			throw new UnsupportedOperationException("No viewer instantiated");
+		viewer.removePropertyChangeListener("preferredSize", sizeListener);		
+		
+		if (!attachNavigator && !attachBeanShell) {  //only viewer
 			return viewer;
-
+		}
+		
 		Component right = viewer;
+		viewer.addPropertyChangeListener("preferredSize", sizeListener);
+		
+		
 		if (attachBeanShell) {
-			JSplitPane jsp = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+			int dividerLocation = -1;  //default = honor preferred size of viewer
+			if (beanShellJSP != null)	dividerLocation = beanShellJSP.getDividerLocation();
+			if (dividerLocation==1) dividerLocation = beanShellJSP.getLastDividerLocation();  //==1 after using (viewer) full screen mode
+			
+			beanShellJSP = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 					viewer, beanShell);
-			jsp.setContinuousLayout(true);
-			jsp.setOneTouchExpandable(true);
-			jsp.setResizeWeight(.01);
-			jsp.setDividerLocation(420);
-			//jsp.setDividerLocation(Integer.MAX_VALUE);
-			right = jsp;
+			beanShellJSP.setContinuousLayout(true);
+			beanShellJSP.setOneTouchExpandable(true);
+			beanShellJSP.setResizeWeight(1.0);  //use extra space for viewer
+			beanShellJSP.setDividerLocation(dividerLocation);
+			//jsp.preferredSize = sum of preferred component sizes
+
+			right = beanShellJSP;
 		}
 
 		if (attachNavigator) {  //|| !accessory.isEmpty()
@@ -95,13 +132,19 @@ class UIFactory {
 			left = jtb;
 			if (jtb.getTabCount() == 1) left = jtb.getComponentAt(0);
 
-			JSplitPane content = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, 
+			int dividerLocation = -1;  //default = honor preferred size of scene tree
+			if (navigatorJSP != null)	dividerLocation = navigatorJSP.getDividerLocation();
+			else ((JSplitPane)navigator).setDividerLocation(350);  //init divider location within navigator
+			
+			navigatorJSP = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, 
 					left, right);
-			content.setContinuousLayout(true);
-			content.setOneTouchExpandable(true);
-			content.setDividerLocation(260);
-
-			return content;
+			navigatorJSP.setContinuousLayout(true);
+			navigatorJSP.setOneTouchExpandable(true);
+			navigatorJSP.setResizeWeight(0.0);  //use extra space for viewer
+			navigatorJSP.setDividerLocation(dividerLocation);
+			//jsp.preferredSize = sum of preferred component sizes
+			
+			return navigatorJSP;
 		}
 
 		return right;
@@ -117,16 +160,32 @@ class UIFactory {
 
 	protected void setViewer(Component component) {
 		viewer = component;
+		
+		//initialize preferred size
+		if ( new Dimension(0,0).equals(viewer.getPreferredSize()) )
+			viewer.setPreferredSize(new Dimension(800, 600));
+		viewer.setMinimumSize(new Dimension(10, 10));
 	}
-
-
+	
+	
 	protected void setBeanShell(Component component) {
+		
 		beanShell = component;
+
+		//initialize sizes
+		if ( new Dimension(0,0).equals(beanShell.getPreferredSize()) )
+			beanShell.setPreferredSize(new Dimension(0, 100));
+		beanShell.setMinimumSize(new Dimension(10, 100));
 	}
 
 
 	protected void setNavigator(Component component) {
 		navigator = component;
+		
+		//initialize sizes
+		if ( new Dimension(0,0).equals(navigator.getPreferredSize()) )
+			navigator.setPreferredSize(new Dimension(200, 0));
+		navigator.setMinimumSize(new Dimension(200, 10));
 	}
 
 
@@ -148,6 +207,11 @@ class UIFactory {
 	protected void addAccessory(Component c, String title) {
 		accessory.add(c);
 		accessoryTitles.put(c, title);
+	}
+	
+	
+	protected void removeAccessories() {
+		accessory.clear();
 	}
 
 }

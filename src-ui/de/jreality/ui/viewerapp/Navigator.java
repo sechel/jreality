@@ -41,6 +41,7 @@
 package de.jreality.ui.viewerapp;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -70,6 +71,7 @@ import de.jreality.ui.viewerapp.actions.edit.AddTool;
 import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
 import de.jreality.ui.viewerapp.actions.edit.ExportOBJ;
 import de.jreality.ui.viewerapp.actions.edit.Remove;
+import de.jreality.ui.viewerapp.actions.edit.Rename;
 import de.jreality.ui.viewerapp.actions.edit.SaveSelected;
 import de.jreality.ui.viewerapp.actions.edit.ToggleAppearance;
 import de.jreality.ui.viewerapp.actions.edit.TogglePickable;
@@ -94,6 +96,9 @@ public class Navigator implements SelectionListener {
 	private SelectionManager sm;
 	private SceneGraphComponent sceneRoot;  //the scene root
 	private Object currentSelection;
+	
+	private Component navigator;
+	
 
 	public Navigator(SceneGraphComponent sceneRoot, SelectionManager selectionManager) {
 
@@ -129,14 +134,14 @@ public class Navigator implements SelectionListener {
 				else if (e.selectionIsTool()) currentSelection = e.selectionAsTool();
 				else currentSelection = e.getSelection();  //attribute entity or null
 				inspector.setObject(currentSelection);
-				
+
 				//update selection manager
-		        Tool tool = e.selectionAsTool();  //null if no tool
-		        AttributeEntity entity = e.selectionAsAttributeEntity();  //null if no attribute entity
-		        sm.setSelection(e.getSGPath(), tool, entity);  //does nothing if already selected
+				Tool tool = e.selectionAsTool();  //null if no tool
+				AttributeEntity entity = e.selectionAsAttributeEntity();  //null if no attribute entity
+				sm.setSelection(e.getSGPath(), tool, entity);  //does nothing if already selected
 			}
 		});
-
+		
 		this.sceneRoot = sceneRoot;
 		
 		tsm.setSelectionPath(new TreePath(treeModel.convertSceneGraphPath(sm.getSelection())));  //select current selection
@@ -185,13 +190,14 @@ public class Navigator implements SelectionListener {
 		cm.setLightWeightPopupEnabled(false);
 		
 		//create content of context menu
-		Component parent = sceneTree;
-		cm.add(new JMenuItem(new SaveSelected(ViewerAppMenu.SAVE_SELECTED, sm, parent)));
-	    cm.add(new JMenuItem(new ExportOBJ(ViewerAppMenu.EXPORT_OBJ, sm, parent)));
+		Component parentComp = sceneTree;
+		cm.add(new JMenuItem(new SaveSelected(ViewerAppMenu.SAVE_SELECTED, sm, parentComp)));
+	    cm.add(new JMenuItem(new ExportOBJ(ViewerAppMenu.EXPORT_OBJ, sm, parentComp)));
 	    cm.addSeparator();
 	    cm.add(new JMenuItem(new Remove(ViewerAppMenu.REMOVE, sm)));
+	    cm.add(new JMenuItem(new Rename(ViewerAppMenu.RENAME, sm, parentComp)));
 	    cm.addSeparator();
-	    cm.add(new JMenuItem(new AddTool(ViewerAppMenu.ADD_TOOL, sm, parent)));
+	    cm.add(new JMenuItem(new AddTool(ViewerAppMenu.ADD_TOOL, sm, parentComp)));
 	    cm.addSeparator();
 	    cm.add(new JMenuItem(new ToggleAppearance(ViewerAppMenu.TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm)));
 	    cm.add(new JMenuItem(new ToggleAppearance(ViewerAppMenu.TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm)));
@@ -232,19 +238,25 @@ public class Navigator implements SelectionListener {
 	 */
 	public Component getComponent() {
 		
-		sceneTree.setBorder(BorderFactory.createEmptyBorder(4,4,4,4));
-		JScrollPane top = new JScrollPane(sceneTree);
-		top.setBorder(BorderFactory.createEmptyBorder());
-		
-		inspector.setBorder(BorderFactory.createEmptyBorder(4,4,4,4));
-		JScrollPane bottom = new JScrollPane(inspector);
-		bottom.setBorder(BorderFactory.createEmptyBorder());
-        
-		JSplitPane navigator = new JSplitPane(
-				JSplitPane.VERTICAL_SPLIT, top, bottom);
-		navigator.setContinuousLayout(true);
-		navigator.setResizeWeight(.1);
-		navigator.setBorder(BorderFactory.createEmptyBorder());
+		if (navigator == null) {
+			sceneTree.setBorder(BorderFactory.createEmptyBorder(4,4,4,4));
+			JScrollPane top = new JScrollPane(sceneTree);
+			top.setBorder(BorderFactory.createEmptyBorder());
+
+			inspector.setBorder(BorderFactory.createEmptyBorder(4,4,4,4));
+			JScrollPane bottom = new JScrollPane(inspector);
+			bottom.setBorder(BorderFactory.createEmptyBorder());
+
+			JSplitPane navigator = new JSplitPane(
+					JSplitPane.VERTICAL_SPLIT, top, bottom);
+			navigator.setContinuousLayout(true);
+			navigator.setOneTouchExpandable(true);
+			navigator.setResizeWeight(1.0);  //use extra space for sceneTree
+			navigator.setBorder(BorderFactory.createEmptyBorder());
+
+			navigator.setPreferredSize(new Dimension(0,0));  //let user set the size
+			this.navigator = navigator;
+		}
 		
 		return navigator;
 	}

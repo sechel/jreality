@@ -42,7 +42,6 @@ package de.jreality.ui.viewerapp;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.beans.Beans;
 import java.io.IOException;
 import java.net.URL;
@@ -202,6 +201,7 @@ public class ViewerApp {
     
     frame = new JFrame();
 
+    uiFactory = new UIFactory();
     selectionManager = new SelectionManager(jrScene.getPath("emptyPickPath")); //default selection = scene node
     selectionManager.setViewer(viewerSwitch);  //used to force rendering
     try {	selectionManager.setAuxiliaryRoot(viewerSwitch.getAuxiliaryRoot()); } 
@@ -236,11 +236,12 @@ public class ViewerApp {
     frame.setTitle("jReality Viewer");
     if (!Beans.isDesignTime()) 
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    
-    Dimension size = frame.getToolkit().getScreenSize();
-    size.width*=.7;
-    size.height*=.7;
-    frame.setSize(size);
+
+    //VIEWER SIZE IS SET TO 800x600 by UIFactory
+//    Dimension size = frame.getToolkit().getScreenSize();
+//    size.width*=.7;
+//    size.height = (int) (size.width*3./4.);
+//    ((Component) currViewer.getViewingComponent()).setPreferredSize(size);
     
     //set content of frame
     frame.getContentPane().add(content);
@@ -248,15 +249,11 @@ public class ViewerApp {
     //add menu bar
     JMenuBar menuBar = menu.getMenuBar();
     frame.setJMenuBar(menuBar);
-    menuBar.setBorder(BorderFactory.createEmptyBorder());
-    if (!showMenu) {
-      //hide all menus, then keystrokes for actions are still working,
-      //which is not the case when hiding menuBar
-      for (int i = 0; i < menuBar.getComponentCount(); i++)
-        menuBar.getMenu(i).setVisible(false);
-    }
+    menuBar.setBorder(BorderFactory.createEmptyBorder());  //needed for full scrren mode
+    if (!showMenu) menu.showMenuBar(false);
 
     frame.validate();
+    frame.pack();  //size frame to fit preferred sizes of subcomponents
     
     //encompass scene before displaying
 //  CameraUtility.encompass(currViewer.getAvatarPath(),
@@ -313,7 +310,6 @@ public class ViewerApp {
    */
   public void update() {
     
-    uiFactory = new UIFactory();
     uiFactory.setViewer((Component) currViewer.getViewingComponent());
     
     //set up beanShell and uiFactory.beanShell
@@ -331,7 +327,8 @@ public class ViewerApp {
     uiFactory.setAttachNavigator(attachNavigator);
     uiFactory.setAttachBeanShell(attachBeanShell);
     
-    //add accessory
+    //add accessories
+    if (!accessory.isEmpty()) uiFactory.removeAccessories();
     for (Component c : accessory) 
       uiFactory.addAccessory(c, accessoryTitles.get(c));
     
@@ -371,8 +368,6 @@ public class ViewerApp {
       }
       currViewer.dispose();
     }
-    
-//  uiFactory = new UIFactory();
     
     currViewer = AccessController.doPrivileged(new PrivilegedAction<ToolSystemViewer>() {
       public ToolSystemViewer run() {
@@ -569,10 +564,16 @@ public class ViewerApp {
    * @return the content
    */
   public Component getComponent() {
-    if (uiFactory == null)
-      throw new UnsupportedOperationException("No viewer instantiated, call update()!");
     
-    return uiFactory.createUI();
+  	Component cmp;
+  	
+  	try {
+			cmp = uiFactory.getDefaultUI();
+		} catch (UnsupportedOperationException e) {
+			throw new UnsupportedOperationException("No viewer instantiated, call update()");
+		}
+    
+    return cmp;
   }
   
   
@@ -589,16 +590,6 @@ public class ViewerApp {
    */
   public boolean isAttachNavigator() {
     return attachNavigator;
-  }
-  
-  
-  /**
-   * @return the navigator
-   */
-  public Navigator getNavigator() {
-    if (navigator == null)
-      throw new UnsupportedOperationException("No navigator attached!");  //TODO: reasonable?
-    return navigator;
   }
   
   

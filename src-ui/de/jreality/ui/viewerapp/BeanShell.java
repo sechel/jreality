@@ -66,6 +66,8 @@ public class BeanShell implements SelectionListener {
 	private JTerm jterm;
 	private SimpleAttributeSet infoStyle;
 	private Object defaultSelection;
+	
+	private Component beanShell;
 
 	
 	public BeanShell() {
@@ -124,9 +126,12 @@ public class BeanShell implements SelectionListener {
 	 */
 	public Component getComponent() {
 
-		JScrollPane beanShell = new JScrollPane(jterm);
-		beanShell.setBorder(BorderFactory.createEmptyBorder());
-
+		if (beanShell == null) {
+			beanShell = new JScrollPane(jterm);
+			((JScrollPane)beanShell).setBorder(BorderFactory.createEmptyBorder());
+			beanShell.setPreferredSize(new Dimension(0,0));  //let user set the size
+		}
+		
 		return beanShell;
 	}
 
