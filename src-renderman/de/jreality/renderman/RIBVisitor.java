@@ -171,6 +171,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	RenderScript renderScript;
 
 	private float currentOpacity;
+	private float[] currentCs = new float[3], currentOs = new float[3];
 	private Appearance rootAppearance;
 	private String outputFileName;
 	private boolean transparencyEnabled;
@@ -533,6 +534,9 @@ public class RIBVisitor extends SceneGraphVisitor {
 		object2world.push(c);
 		if (hasProxy(c)) {
 			RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "polygonShader");
+			updateCurrentCsAndOs(eAppearance, "polygonShader");
+			ri.color(currentCs);
+			ri.opacity(currentOpacity);
 			ri.shader(rs);
 			handleCurrentProxy();
 		} else
@@ -570,28 +574,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 		currentSignature = eap.getAttribute(CommonAttributes.SIGNATURE,Pn.EUCLIDEAN);
 		retainGeometry = eap.getAttribute(CommonAttributes.RMAN_RETAIN_GEOMETRY, false); 
 		//if(rhs.getOpaqueTubesAndSpheres()!=null)  
-		  opaqueTubes = rhs.getOpaqueTubesAndSpheres();
-		transparencyEnabled = rhs.getTransparencyEnabled();
-		double transparency = 0.0;
-		if (transparencyEnabled)
-			transparency = eap.getAttribute(CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
-
-		Object color = eap.getAttribute(CommonAttributes.DIFFUSE_COLOR,CommonAttributes.DIFFUSE_COLOR_DEFAULT);
-		float colorAlpha = 1.0f;
-		if (color != Appearance.INHERITED) {
-			float[] c = ((Color) color).getRGBComponents(null);
-			if (c.length == 4)
-				colorAlpha = c[3];
-			float[] rgb = new float[] { c[0], c[1], c[2] };
-//			ri.color(rgb);
-		}
-
-		currentOpacity = 1f - (float) transparency;
-		currentOpacity *= colorAlpha;
-		if ((handlingProxyGeometry && opaqueTubes))
-			currentOpacity = 1f;
-//		ri.opacity(currentOpacity);
-		
+		opaqueTubes = rhs.getOpaqueTubesAndSpheres();
+		updateCurrentCsAndOs(eap, CommonAttributes.POLYGON_SHADER);
 		/** 
 		 * evaluate the special shaders which might be specified in the effective appearance:
 		 * displacement, imager, and interior and exterior volume shaders
@@ -625,6 +609,30 @@ public class RIBVisitor extends SceneGraphVisitor {
 	
 		// finally, evaluate the core jreality shaders
 		updateShaders(eap);
+	}
+
+	private void updateCurrentCsAndOs(EffectiveAppearance eap, String prefix) {
+		transparencyEnabled = rhs.getTransparencyEnabled();
+		double transparency = 0.0;
+		if (transparencyEnabled)
+			transparency = eap.getAttribute(prefix+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
+
+		Object color = eap.getAttribute(prefix+"."+CommonAttributes.DIFFUSE_COLOR,CommonAttributes.DIFFUSE_COLOR_DEFAULT);
+		float colorAlpha = 1.0f;
+		if (color != Appearance.INHERITED) {
+			float[] c = ((Color) color).getRGBComponents(null);
+			if (c.length == 4)
+				colorAlpha = c[3];
+			currentCs[0] = c[0];
+			currentCs[1] = c[1];
+			currentCs[2] = c[2];
+		}
+
+		currentOpacity = 1f - (float) transparency;
+		currentOpacity *= colorAlpha;
+		if ((handlingProxyGeometry && opaqueTubes))
+			currentOpacity = 1f;
+		currentOs[0] = currentOs[1] = currentOs[2]  = currentOpacity;
 	}
 
 	private void updateShaders(EffectiveAppearance eap) {
@@ -768,6 +776,9 @@ public class RIBVisitor extends SceneGraphVisitor {
 			DataList radii = p.getVertexAttributes(Attribute.RADII);
 			DoubleArray da = null;
 			if (radii != null) da = radii.toDoubleArray();
+			DataList ind = p.getVertexAttributes(Attribute.INDICES);
+			int[] vind = null;
+			if (ind != null) vind = ind.toIntArray(null);
 			// System.out.println("point radius is "+r);
 			boolean drawSpheres = dvs.getSpheresDraw();
 			if (drawSpheres) {
@@ -786,26 +797,25 @@ public class RIBVisitor extends SceneGraphVisitor {
 				RendermanShader rs = RIBHelper.convertToRenderman(dvs.getPolygonShader(), this, "pointShader.polygonShader");
 				ri.shader(rs);        
         
-        double[][] vColData=null;
-        if( p.getVertexAttributes(Attribute.COLORS)!=null)
-          vColData= p.getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null);          
+				double[][] vColData=null;
+				if( p.getVertexAttributes(Attribute.COLORS)!=null)
+				vColData= p.getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null);          
 				double[][] a = coord.toDoubleArrayArray(null);
 				double[] trns = new double[16];
 				for (int i = 0; i < n; i++) {
+					if (vind != null && vind[i] == 0) continue;		
 					float realR = r;
 					if (radii != null) realR = (float) (realR*da.getValueAt(i));
 					if (a[i].length == 4 && a[i][3] == 0.0) continue;
 					trns = MatrixBuilder.init(null, currentSignature).translate(a[i]).getArray();
 					ri.transformBegin();
 					ri.concatTransform(RIBHelper.fTranspose(trns));          
-          //varying vertexColors
-          if(vColData!=null){
-            if(vColData[0]!=null){
-              if(vColData[0].length==4&&!opaqueTubes)
-                vColData[i][3]*=currentOpacity;
-              ri.color(vColData[i]);
-            }
-          }          
+					//varying vertexColors
+					if (vColData != null && vColData[0]!=null){
+							if(vColData[0].length==4&&!opaqueTubes)
+								vColData[i][3]*=currentOpacity;
+							ri.color(vColData[i]);
+					}          
 					HashMap map = new HashMap();
 					ri.sphere(realR, -realR, realR, 360f, map);
 					ri.transformEnd();
@@ -879,12 +889,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 		if (lineDraw)	{
    	        DataList dl = g.getEdgeAttributes(Attribute.INDICES);
    	        if(dl != null){
-   	        	if (dls != null)	{
-   	    	        cc = dls.getDiffuseColor();
-   	   	        	cc.getRGBComponents(raw);
-   	   	        	cc = new Color(raw[0], raw[1], raw[2]); 
-   	   	        	ri.color(cc);  	        		
-   	        	}
    	        	boolean tubesDraw = false;
    	        	if (dls != null) tubesDraw = dls.getTubeDraw();
    	        	if (tubesDraw)  {
@@ -902,7 +906,8 @@ public class RIBVisitor extends SceneGraphVisitor {
    					RendermanShader rs = RIBHelper.convertToRenderman(dls.getPolygonShader(), this, "lineShader.polygonShader");
    					ri.shader(rs);
  
-   					float r = dls.getTubeRadius().floatValue(); //(float) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS,CommonAttributes.TUBE_RADIUS_DEFAULT);
+       				DataList edgec =  g.getEdgeAttributes(Attribute.COLORS);
+  					float r = dls.getTubeRadius().floatValue(); //(float) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS,CommonAttributes.TUBE_RADIUS_DEFAULT);
    					Object ga = g.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
    					if (ga != null) System.err.println("GA = "+ga.toString());
    					if (ga == null || !( ga instanceof Dimension))	{
@@ -915,12 +920,11 @@ public class RIBVisitor extends SceneGraphVisitor {
 	               	  	if (cc != null) bsf.setStickColor(cc);
 	                	bsf.update();
 	                	handlingProxyGeometry = true;
-                    handlingTubes=true;                    
+	                	handlingTubes=true;                    
 	                	visit(bsf.getSceneGraphComponent());
-                    handlingTubes=false;
-	               	  handlingProxyGeometry = false;
+	                	handlingTubes=false;
+	               	  	handlingProxyGeometry = false;
 	                 } else {
-	       				DataList edgec =  g.getEdgeAttributes(Attribute.COLORS);
 	        		    int n = g.getNumEdges();
 	        		    double[][] crossSection = TubeUtility.octagonalCrossSection;
 	        		   // TODO make this official or get rid of it.
@@ -942,7 +946,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	        				ptf.setRadius(r);
 	        				ptf.update();
 	        				IndexedFaceSet tube = ptf.getTube();
-	        				// System.err.println("Tube is "+tube.toString());
+	        				// System.ea.ribrr.println("Tube is "+tube.toString());
 	        				handlingProxyGeometry = true;
 	        				pointPolygon(tube, null);    
 	        				handlingProxyGeometry = false;
@@ -951,7 +955,13 @@ public class RIBVisitor extends SceneGraphVisitor {
             } else {
             	// use "Curves" command to simulate no tubes
             	// Renderman expects object coordinates for width of "Curves" so use tube parameter
-                float r = dls.getTubeRadius().floatValue(); //(float) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS,CommonAttributes.TUBE_RADIUS_DEFAULT);
+   	        	if (dls != null)	{
+   	    	        cc = dls.getDiffuseColor();
+   	   	        	cc.getRGBComponents(raw);
+   	   	        	cc = new Color(raw[0], raw[1], raw[2]); 
+   	   	        	ri.color(cc);  	        		
+   	        	}
+               float r = dls.getTubeRadius().floatValue(); //(float) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS,CommonAttributes.TUBE_RADIUS_DEFAULT);
     			HashMap<String, Object> mappo = new HashMap<String, Object>();
     			mappo.put("constantwidth", r);
                 int[][] ei = g.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
@@ -994,8 +1004,12 @@ public class RIBVisitor extends SceneGraphVisitor {
 		checkForProxy(g);
 		if (hasProxy((Geometry) g)) {
 			RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "polygonShader");
-			if(!handlingTubes)
-			  ri.shader(rs);
+//			if(!handlingTubes)
+			// Cs and Os are actually part of the jreality shader but aren't handled with it
+			updateCurrentCsAndOs(eAppearance, "polygonShader");
+			ri.color(currentCs);
+			ri.opacity(currentOpacity);
+			ri.shader(rs);
 			handleCurrentProxy();
 			insidePointset = false;
 		} else {
