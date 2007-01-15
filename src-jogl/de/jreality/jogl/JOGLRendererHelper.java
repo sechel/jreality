@@ -135,7 +135,7 @@ public class JOGLRendererHelper {
 		//System.err.println("clearbufferbits = "+jr.openGLState.clearBufferBits);
 		//System.err.println("colormask = "+jr.openGLState.colorMask);
 		// first set the color mask for the clear
-		LoggingSystem.getLogger(JOGLRendererHelper.class).fine("JOGLRRH cbb = "+ openGLState.clearBufferBits);
+		LoggingSystem.getLogger(JOGLRendererHelper.class).finest("JOGLRRH cbb = "+ openGLState.clearBufferBits);
 		if ((openGLState.clearBufferBits & GL.GL_COLOR_BUFFER_BIT) != 0) gl.glColorMask(true, true, true, true);
 		//if (openGLState.clearBufferBits != 0) 
 				gl.glClear (openGLState.clearBufferBits);
@@ -251,6 +251,9 @@ public class JOGLRendererHelper {
 		// gl.glPointSize((float)
 		// currentGeometryShader.pointShader.getPointSize());
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
+		DataList piDL = sg.getVertexAttributes(Attribute.INDICES);
+		IntArray vind = null;
+		if (piDL != null) vind = piDL.toIntArray();
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
 		DataList pointSize = sg.getVertexAttributes(Attribute.POINT_SIZE);
 		int vertexLength = GeometryUtility.getVectorLength(vertices);
@@ -273,6 +276,7 @@ public class JOGLRendererHelper {
 			gl.glBegin(GL.GL_POINTS);
 		for (int i = 0; i < sg.getNumPoints(); ++i) {
 			// double vv;
+			if (vind != null && vind.getValueAt(i) == 0) continue;
 			if (pickMode)
 				gl.glPushName(i);
 			if (pickMode)

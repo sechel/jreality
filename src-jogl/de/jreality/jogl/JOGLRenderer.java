@@ -122,47 +122,47 @@ public class JOGLRenderer  implements AppearanceListener {
 
 	private final  Logger theLog = LoggingSystem.getLogger(this);
 	private static boolean collectFrameRate = true;
-	private final static int MAX_STACK_DEPTH = 28;
-	private int stackDepth;
+	protected final static int MAX_STACK_DEPTH = 28;
+	protected int stackDepth;
 
-	private SceneGraphPath currentPath = new SceneGraphPath();
+	SceneGraphPath currentPath = new SceneGraphPath();
 
-	private SceneGraphComponent theRoot, auxiliaryRoot;
-	private JOGLPeerComponent thePeerRoot = null;
-	private JOGLPeerComponent thePeerAuxilliaryRoot = null;
-	private JOGLRenderingState renderingState;
+	protected SceneGraphComponent theRoot, auxiliaryRoot;
+	protected JOGLPeerComponent thePeerRoot = null;
+	protected JOGLPeerComponent thePeerAuxilliaryRoot = null;
+	JOGLRenderingState renderingState;
 
-	private int width, height;		// GLDrawable.getSize() isnt' implemented for GLPBuffer!
-	private int whichEye = CameraUtility.MIDDLE_EYE;
-	private int[] currentViewport = new int[4];
-	private Graphics3D context;
+	protected int width, height;		// GLDrawable.getSize() isnt' implemented for GLPBuffer!
+	protected int whichEye = CameraUtility.MIDDLE_EYE;
+	protected int[] currentViewport = new int[4];
+	protected Graphics3D context;
 
-	private GL globalGL;
-	private boolean  manyDisplayLists = false;
+	protected GL globalGL;
+	protected boolean  manyDisplayLists = false;
 
-	private boolean texResident = true;
-	private int numberTries = 0;		// how many times we have tried to make textures resident
-	private boolean forceResidentTextures = true;
+	protected boolean texResident = true;
+	protected int numberTries = 0;		// how many times we have tried to make textures resident
+	protected boolean forceResidentTextures = true;
 
-	private boolean globalIsReflection = false;
-	private int currentSignature = Pn.EUCLIDEAN;
+	protected boolean globalIsReflection = false;
+	protected int currentSignature = Pn.EUCLIDEAN;
 
 	// pick-related stuff
-	private boolean pickMode = false, offscreenMode = false;
-	private final double pickScale = 10000.0;
-	private Transformation pickT = new Transformation();
-	private PickPoint[] hits;
+	protected boolean pickMode = false, offscreenMode = false;
+	protected final double pickScale = 10000.0;
+	protected Transformation pickT = new Transformation();
+	protected PickPoint[] hits;
 	// an exotic mode: render the back hemisphere of the 3-sphere (currently disabled)
-	private boolean backSphere = false;
-	private double framerate;
+	protected boolean backSphere = false;
+	protected double framerate;
 	protected int nodeCount = 0;
 
 	WeakHashMap<Geometry, JOGLPeerGeometry> geometries = new WeakHashMap<Geometry, JOGLPeerGeometry>();
 	boolean geometryRemoved = false, lightListDirty = true;
-	private Viewer theViewer;
+	protected Viewer theViewer;
 
-	private int stereoType;
-	private boolean flipped;
+	protected int stereoType;
+	protected boolean flipped;
 
 	public JOGLRenderer(Viewer viewer) {
 		theViewer=viewer;
@@ -426,8 +426,8 @@ public class JOGLRenderer  implements AppearanceListener {
 		JOGLCylinderUtility.setupCylinderDLists(this);
 		JOGLSphereHelper.setupSphereDLists(this);
 		// traverse tree and delete all display lists
-		if (thePeerRoot != null) thePeerRoot.propagateGeometryChanged(ALL_GEOMETRY_CHANGED);
-		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.propagateGeometryChanged(ALL_GEOMETRY_CHANGED);
+		if (thePeerRoot != null) thePeerRoot.propagateGeometryChanged(JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
+		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.propagateGeometryChanged(JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
 	}
 	
 	public void display(GLAutoDrawable drawable) {
@@ -541,14 +541,14 @@ public class JOGLRenderer  implements AppearanceListener {
 				double[] pp3 = new double[3];
 				pp3[0] = -pickScale * pickPoint[0]; pp3[1] = -pickScale * pickPoint[1]; pp3[2] = 0.0;
 				MatrixBuilder.euclidean().translate(pp3).scale(pickScale, pickScale, 1.0).assignTo(pickT);
-				thePeerRoot.propagateGeometryChanged(POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
+				thePeerRoot.propagateGeometryChanged(JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
 				globalGL.glSelectBuffer(bufsize, selectBuffer);		
 				globalGL.glRenderMode(GL.GL_SELECT);
 				globalGL.glInitNames();
 				globalGL.glPushName(0);
 				render();
 				pickMode = false;
-				thePeerRoot.propagateGeometryChanged(POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
+				thePeerRoot.propagateGeometryChanged(JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
 				//int numberHits = globalGL.glRenderMode(GL.GL_RENDER);
 				// HACK
 				//hits = JOGLPickAction.processOpenGLSelectionBuffer(numberHits, selectBuffer, pickPoint,theViewer);
@@ -643,15 +643,6 @@ public class JOGLRenderer  implements AppearanceListener {
 		myglViewport(0,0, width, height);
 	}
 
-	private final static int POINTS_CHANGED = 1;
-	private final static int LINES_CHANGED = 2;
-	private final static int FACES_CHANGED = 4;
-	private final static int ALL_GEOMETRY_CHANGED = 7;
-	private final static int POINT_SHADER_CHANGED = 8;
-	private final static int LINE_SHADER_CHANGED = 16;
-	private final static int POLYGON_SHADER_CHANGED = 32;
-	private final static int ALL_SHADERS_CHANGED = POINT_SHADER_CHANGED | LINE_SHADER_CHANGED | POLYGON_SHADER_CHANGED;
-	private final static int ALL_CHANGED = ALL_GEOMETRY_CHANGED | ALL_SHADERS_CHANGED;
 
 	int geomDiff = 0;
 	protected void updateGeometryHashtable() {
@@ -677,778 +668,816 @@ public class JOGLRenderer  implements AppearanceListener {
 		return;
 	}
 
-	protected class JOGLPeerNode	{
-		String name;
-
-		public String getName()	{
-			return name;
-		}
-
-		public void setName(String n)	{
-			name = n;
-		}
-	}
-
-	protected class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
-		public Geometry originalGeometry;
-		Geometry[] tubeGeometry, proxyPolygonGeometry;
-		IndexedFaceSet ifs;
-		IndexedLineSet ils;
-		PointSet ps;
-		int refCount = 0;
-		int signature = Pn.EUCLIDEAN;
-		boolean isSurface = false;
-		boolean preRender = false;
-
-		protected JOGLPeerGeometry(Geometry g)	{
-			super();
-			originalGeometry = g;
-			name = "JOGLPeer:"+g.getName();
-			ifs = null; ils = null; ps = null;
-			if (g instanceof IndexedFaceSet) ifs = (IndexedFaceSet) g;
-			if (g instanceof IndexedLineSet) ils = (IndexedLineSet) g;
-			if (g instanceof PointSet) ps = (PointSet) g;
-			originalGeometry.addGeometryListener(this);
-			if (ifs != null || g instanceof Sphere || g instanceof Cylinder) isSurface = true;
-			Object foo = originalGeometry.getGeometryAttributes(JOGLConfiguration.PRE_RENDER);
-			if (foo != null) preRender = true;
-		}
-
-		public void dispose()		{
-			refCount--;
-			if (refCount < 0)	{
-				theLog.log(Level.WARNING,"Negative reference count!");
-			}
-			if (refCount == 0)	{
-				theLog.log(Level.FINER,"Geometry is no longer referenced");
-				originalGeometry.removeGeometryListener(this);
-				geometries.remove(originalGeometry);
-			}
-		}
-
-		public void render(JOGLPeerComponent jpc) {
-			RenderingHintsShader renderingHints = jpc.renderingHints;
-			DefaultGeometryShader geometryShader = jpc.geometryShader;
-			if (renderingHints == null) return;
-			renderingState.setUseDisplayLists(renderingHints.isUseDisplayLists()); //(); //useDisplayLists(activeDL, jpc);
-			renderingState.setCurrentGeometry(originalGeometry);
-//			openGLState.setCurrentSignature(signature);
-			if (preRender && geometryShader.polygonShader instanceof DefaultPolygonShader)	{
-				((DefaultPolygonShader) geometryShader.polygonShader).preRender(renderingState);		
-				return;
-			}
-			renderingHints.render(renderingState);
-			//theLog.fine("Rendering sgc "+jpc.getOriginalComponent().getName());
-			//theLog.fine("vertex:edge:face:"+geometryShader.isVertexDraw()+geometryShader.isEdgeDraw()+geometryShader.isFaceDraw());
-			if (geometryShader.isEdgeDraw() && ils != null)	{
-				geometryShader.lineShader.render(renderingState);
-				geometryShader.lineShader.postRender(renderingState);
-			}
-			if (geometryShader.isVertexDraw() && ps != null)	{
-				geometryShader.pointShader.render(renderingState);
-				geometryShader.pointShader.postRender(renderingState);
-			}
-			renderingHints.render(renderingState);
-			if (geometryShader.isFaceDraw() && isSurface) {
-				geometryShader.polygonShader.render(renderingState);
-				geometryShader.polygonShader.postRender(renderingState);
-			}	
-			if (geometryShader.isVertexDraw() && ps!=null && ps.getVertexAttributes(Attribute.LABELS) != null) {
-				JOGLRendererHelper.drawPointLabels(JOGLRenderer.this, ps,  jpc.geometryShader.pointShader.getTextShader());
-			}
-			if (geometryShader.isEdgeDraw() &&ils != null && ils.getEdgeAttributes(Attribute.LABELS) != null) {
-				JOGLRendererHelper.drawEdgeLabels(JOGLRenderer.this, ils, jpc.geometryShader.lineShader.getTextShader());
-			}
-			if (geometryShader.isFaceDraw() &&ifs != null && ifs.getFaceAttributes(Attribute.LABELS) != null) {
-				JOGLRendererHelper.drawFaceLabels(JOGLRenderer.this, ifs,  jpc.geometryShader.polygonShader.getTextShader());
-			}
-			renderingHints.postRender(renderingState);
-		}
-
-		public void geometryChanged(GeometryEvent ev) {
-			if (ev.getChangedGeometryAttributes().size() > 0)	{
-				Object foo = originalGeometry.getGeometryAttributes(GeometryUtility.SIGNATURE);
-				if (foo != null) {
-					Integer foo2 = (Integer) foo;
-					signature = foo2.intValue();
-				}				
-			}
-
-		}
-	}
-
-	public  JOGLPeerGeometry getJOGLPeerGeometryFor(Geometry g)	{
-		JOGLPeerGeometry pg;
-		synchronized(geometries)	{
-			pg = (JOGLPeerGeometry) geometries.get(g);
-			if (pg != null) return pg;
-			pg = new JOGLPeerGeometry(g);
-			geometries.put(g, pg);			
-		}
-		return pg;
-	}
-
-	// register for geometry change events
-	//static Hashtable goBetweenTable = new Hashtable();
 	WeakHashMap<SceneGraphComponent, GoBetween> goBetweenTable = new WeakHashMap<SceneGraphComponent, GoBetween>();
-	public  GoBetween goBetweenFor(SceneGraphComponent sgc)	{
+	public   GoBetween goBetweenFor(SceneGraphComponent sgc)	{
 		if (sgc == null) return null;
 		GoBetween gb = null;
 		Object foo = goBetweenTable.get(sgc);
 		if (foo == null)	{
-			gb = JOGLRenderer.this.new GoBetween(sgc);
+			//gb = JOGLRenderer.this.new GoBetween(sgc);
+			gb = new GoBetween(sgc, this);
 			goBetweenTable.put(sgc, gb);
 			return gb;
 		}
 		return ((GoBetween) foo);
 	}
 
-	protected class GoBetween implements GeometryListener, TransformationListener, AppearanceListener,SceneGraphComponentListener	{
-		SceneGraphComponent originalComponent;
-		ArrayList<JOGLPeerComponent> peers = new ArrayList<JOGLPeerComponent>();
-		JOGLPeerGeometry peerGeometry;
-		Lock peersLock = new Lock();
-
-		protected GoBetween(SceneGraphComponent sgc)	{
-			super();
-			originalComponent = sgc;
-			if (originalComponent.getGeometry() != null)  {
-				peerGeometry = getJOGLPeerGeometryFor(originalComponent.getGeometry());
-				peerGeometry.refCount++;
-				originalComponent.getGeometry().addGeometryListener(this);
-			} else peerGeometry = null;
-			originalComponent.addSceneGraphComponentListener(this);
-			if (originalComponent.getAppearance() != null) 
-				originalComponent.getAppearance().addAppearanceListener(this);				
-		}
-
-		public void dispose()	{
-			originalComponent.removeSceneGraphComponentListener(this);
-			if (originalComponent.getAppearance() != null) originalComponent.getAppearance().removeAppearanceListener(this);
-			if (peerGeometry != null)		{
-				originalComponent.getGeometry().removeGeometryListener(this);
-				peerGeometry.dispose();
-			}
-		}
-
-
-		public void addJOGLPeer(JOGLPeerComponent jpc)	{
-			if (peers.contains(jpc)) return;
-			peersLock.writeLock();
-			peers.add(jpc);
-			peersLock.writeUnlock();
-		}
-
-		public void removeJOGLPeer(JOGLPeerComponent jpc)	{
-			if (!peers.contains(jpc)) return;
-			peersLock.writeLock();
-			peers.remove(jpc);
-			peersLock.writeUnlock();
-
-			if (peers.size() == 0)	{
-				theLog.log(Level.FINE,"GoBetween for "+originalComponent.getName()+" has no peers left");
-				goBetweenTable.remove(originalComponent);
-				dispose();
-			}
-		}
-
-		public JOGLPeerGeometry getPeerGeometry() {
-			return peerGeometry;
-		}
-
-		public void geometryChanged(GeometryEvent ev) {
-			peersLock.readLock();
-			for ( JOGLPeerComponent peer: peers)	{
-				peer.setDisplayListDirty();
-			}
-			peersLock.readLock();
-			peersLock.readUnlock();
-		}
-
-		public void transformationMatrixChanged(TransformationEvent ev) {
-			peersLock.readLock();
-			for (JOGLPeerComponent peer : peers)	{
-				peer.transformationMatrixChanged(ev);				
-			}
-			peersLock.readUnlock();
-		}
-
-		public void appearanceChanged(AppearanceEvent ev) {
-			String key = ev.getKey();
-			System.err.println("Appearance changed "+key);
-			int changed = 0;
-			boolean propagates = true;
-			// TODO shaders should register keywords somehow and which geometries might be changed
-			if (key.indexOf("implodeFactor") != -1 ) changed |= (FACES_CHANGED);
-			else if (key.indexOf("transparency") != -1) changed |= (POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
-			else if (key.indexOf(CommonAttributes.SMOOTH_SHADING) != -1) changed |= (POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
-			else if (key.indexOf("tubeRadius") != -1) changed |= (LINES_CHANGED);
-			else if (key.indexOf("pointRadius") != -1) changed |= (POINTS_CHANGED);
-			else if (key.indexOf("anyDisplayLists") != -1) changed |= (POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
-			else if (key.endsWith("Shader")) changed |= LINE_SHADER_CHANGED | POINT_SHADER_CHANGED | POLYGON_SHADER_CHANGED;
-			// there are some appearances which we know aren't inherited, so don't propagate change event.
-			else if (key.indexOf("texture2d") != -1) changed |= (FACES_CHANGED);
-			else if (key.indexOf("lightMap") != -1) changed |= (FACES_CHANGED);
-			if (key.indexOf(CommonAttributes.BACKGROUND_COLOR) != -1	||
-					key.indexOf("fog") != -1) propagates = false;
-
-			peersLock.readLock();
-			for ( JOGLPeerComponent peer: peers)	{
-				if (propagates) peer.appearanceChanged(ev);
-				if (changed != 0) peer.propagateGeometryChanged(changed);
-			}
-			peersLock.readUnlock();
-			//theLog.log(Level.FINER,"setting display list dirty flag: "+changed);
-		}
-		public void childAdded(SceneGraphComponentEvent ev) {
-			theLog.log(Level.FINE,"GoBetween: Container Child added to: "+originalComponent.getName());
-			if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY) {
-				if (peerGeometry != null)	{
-					((Geometry) ev.getOldChildElement()).removeGeometryListener(this);						
-					peerGeometry.dispose();
-					geometryRemoved = true;
-					theLog.log(Level.WARNING, "Adding geometry while old one still valid");
-					peerGeometry=null;
-				}
-				if (originalComponent.getGeometry() != null)  {
-					peerGeometry = getJOGLPeerGeometryFor(originalComponent.getGeometry());
-					originalComponent.getGeometry().addGeometryListener(this);
-					peerGeometry.refCount++;
-				} 
-			}
-			peersLock.readLock();
-			for ( JOGLPeerComponent peer: peers)	{
-				peer.childAdded(ev);
-			}
-			peersLock.readUnlock();
-		}
-		public void childRemoved(SceneGraphComponentEvent ev) {
-			if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY) {
-				if (peerGeometry != null) {
-					((Geometry) ev.getOldChildElement()).removeGeometryListener(this);						
-					peerGeometry.dispose();		// really decreases reference count
-					peerGeometry = null;
-					geometryRemoved = true;
-				}
+//	protected class JOGLPeerNode	{
+//		String name;
+//
+//		public String getName()	{
+//			return name;
+//		}
+//
+//		public void setName(String n)	{
+//			name = n;
+//		}
+//	}
+//
+//	protected class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
+//		public Geometry originalGeometry;
+//		Geometry[] tubeGeometry, proxyPolygonGeometry;
+//		IndexedFaceSet ifs;
+//		IndexedLineSet ils;
+//		PointSet ps;
+//		int refCount = 0;
+//		int signature = Pn.EUCLIDEAN;
+//		boolean isSurface = false;
+//		boolean preRender = false;
+//
+//		protected JOGLPeerGeometry(Geometry g)	{
+//			super();
+//			originalGeometry = g;
+//			name = "JOGLPeer:"+g.getName();
+//			ifs = null; ils = null; ps = null;
+//			if (g instanceof IndexedFaceSet) ifs = (IndexedFaceSet) g;
+//			if (g instanceof IndexedLineSet) ils = (IndexedLineSet) g;
+//			if (g instanceof PointSet) ps = (PointSet) g;
+//			originalGeometry.addGeometryListener(this);
+//			if (ifs != null || g instanceof Sphere || g instanceof Cylinder) isSurface = true;
+//			Object foo = originalGeometry.getGeometryAttributes(JOGLConfiguration.PRE_RENDER);
+//			if (foo != null) preRender = true;
+//		}
+//
+//		public void dispose()		{
+//			refCount--;
+//			if (refCount < 0)	{
+//				theLog.log(Level.WARNING,"Negative reference count!");
+//			}
+//			if (refCount == 0)	{
+//				theLog.log(Level.FINER,"Geometry is no longer referenced");
+//				originalGeometry.removeGeometryListener(this);
+//				geometries.remove(originalGeometry);
+//			}
+//		}
+//
+//		public void render(JOGLPeerComponent jpc) {
+//			RenderingHintsShader renderingHints = jpc.renderingHints;
+//			DefaultGeometryShader geometryShader = jpc.geometryShader;
+//			if (renderingHints == null) return;
+//			renderingState.setUseDisplayLists(renderingHints.isUseDisplayLists()); //(); //useDisplayLists(activeDL, jpc);
+//			renderingState.setCurrentGeometry(originalGeometry);
+//			//System.err.println("Rendering geometry "+originalGeometry.getName());
+////			openGLState.setCurrentSignature(signature);
+//			if (preRender && geometryShader.polygonShader instanceof DefaultPolygonShader)	{
+//				((DefaultPolygonShader) geometryShader.polygonShader).preRender(renderingState);		
 //				return;
-			}
-			peersLock.readLock();
-			for ( JOGLPeerComponent peer: peers)	{
-				peer.childRemoved(ev);
-			}
-			peersLock.readUnlock();
-		}
+//			}
+//			renderingHints.render(renderingState);
+//			//theLog.fine("Rendering sgc "+jpc.getOriginalComponent().getName());
+//			//theLog.fine("vertex:edge:face:"+geometryShader.isVertexDraw()+geometryShader.isEdgeDraw()+geometryShader.isFaceDraw());
+//			if (geometryShader.isEdgeDraw() && ils != null)	{
+//				geometryShader.lineShader.render(renderingState);
+//				geometryShader.lineShader.postRender(renderingState);
+//			}
+//			if (geometryShader.isVertexDraw() && ps != null)	{
+//				geometryShader.pointShader.render(renderingState);
+//				geometryShader.pointShader.postRender(renderingState);
+//			}
+//			renderingHints.render(renderingState);
+//			if (geometryShader.isFaceDraw() && isSurface) {
+//				geometryShader.polygonShader.render(renderingState);
+//				geometryShader.polygonShader.postRender(renderingState);
+//			}	
+//			if (geometryShader.isVertexDraw() && ps!=null && ps.getVertexAttributes(Attribute.LABELS) != null) {
+//				JOGLRendererHelper.drawPointLabels(JOGLRenderer.this, ps,  jpc.geometryShader.pointShader.getTextShader());
+//			}
+//			if (geometryShader.isEdgeDraw() &&ils != null && ils.getEdgeAttributes(Attribute.LABELS) != null) {
+//				JOGLRendererHelper.drawEdgeLabels(JOGLRenderer.this, ils, jpc.geometryShader.lineShader.getTextShader());
+//			}
+//			if (geometryShader.isFaceDraw() &&ifs != null && ifs.getFaceAttributes(Attribute.LABELS) != null) {
+//				JOGLRendererHelper.drawFaceLabels(JOGLRenderer.this, ifs,  jpc.geometryShader.polygonShader.getTextShader());
+//			}
+//			renderingHints.postRender(renderingState);
+//		}
+//
+//		public void geometryChanged(GeometryEvent ev) {
+//			if (ev.getChangedGeometryAttributes().size() > 0)	{
+//				Object foo = originalGeometry.getGeometryAttributes(GeometryUtility.SIGNATURE);
+//				if (foo != null) {
+//					Integer foo2 = (Integer) foo;
+//					signature = foo2.intValue();
+//				}				
+//			}
+//
+//		}
+//	}
 
-		public void childReplaced(SceneGraphComponentEvent ev) {
-			if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY) {
-				if (peerGeometry != null && peerGeometry.originalGeometry == originalComponent.getGeometry()) return;		// no change, really
-				if (peerGeometry != null) {
-					((Geometry) ev.getOldChildElement()).removeGeometryListener(this);						
-					peerGeometry.dispose();
-					geometryRemoved=true;
-					peerGeometry = null;
-				}
-				if (originalComponent.getGeometry() != null)  {
-					originalComponent.getGeometry().addGeometryListener(this);
-					peerGeometry = getJOGLPeerGeometryFor(originalComponent.getGeometry());
-					peerGeometry.refCount++;
-				} 
-			}
-			peersLock.readLock();
-			for ( JOGLPeerComponent peer: peers)	{
-				peer.childReplaced(ev);
-			}				
-			peersLock.readUnlock();
+	public  JOGLPeerGeometry getJOGLPeerGeometryFor(Geometry g)	{
+		JOGLPeerGeometry pg;
+		synchronized(geometries)	{
+			pg = (JOGLPeerGeometry) geometries.get(g);
+			if (pg != null) return pg;
+			pg = new JOGLPeerGeometry(g, this);
+			geometries.put(g, pg);			
 		}
-
-		public SceneGraphComponent getOriginalComponent() {
-			return originalComponent;
-		}
-
-		public void visibilityChanged(SceneGraphComponentEvent ev) {
-		}
-
+		return pg;
 	}
 
-	private class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
-		SceneGraphComponent myRoot;
-		JOGLPeerComponent thePeerRoot, myParent;
-		SceneGraphPath sgp;
-		boolean topLevel = true;
-		public ConstructPeerGraphVisitor(SceneGraphComponent r, JOGLPeerComponent p)	{
-			super();
-			myRoot = r;
-			sgp = new SceneGraphPath();
-			myParent = p;
-		}
+//	// register for geometry change events
+//	//static Hashtable goBetweenTable = new Hashtable();
+//	WeakHashMap<SceneGraphComponent, GoBetween> goBetweenTable = new WeakHashMap<SceneGraphComponent, GoBetween>();
+//	public  GoBetween goBetweenFor(SceneGraphComponent sgc)	{
+//		if (sgc == null) return null;
+//		GoBetween gb = null;
+//		Object foo = goBetweenTable.get(sgc);
+//		if (foo == null)	{
+//			//gb = JOGLRenderer.this.new GoBetween(sgc);
+//			gb = new GoBetween(sgc);
+//			goBetweenTable.put(sgc, gb);
+//			return gb;
+//		}
+//		return ((GoBetween) foo);
+//	}
+//
+//	protected class GoBetween implements GeometryListener, TransformationListener, AppearanceListener,SceneGraphComponentListener	{
+//		SceneGraphComponent originalComponent;
+//		ArrayList<JOGLPeerComponent> peers = new ArrayList<JOGLPeerComponent>();
+//		JOGLPeerGeometry peerGeometry;
+//		Lock peersLock = new Lock();
+//
+//		protected GoBetween(SceneGraphComponent sgc)	{
+//			super();
+//			originalComponent = sgc;
+//			if (originalComponent.getGeometry() != null)  {
+//				peerGeometry = getJOGLPeerGeometryFor(originalComponent.getGeometry());
+//				peerGeometry.refCount++;
+//				originalComponent.getGeometry().addGeometryListener(this);
+//			} else peerGeometry = null;
+//			originalComponent.addSceneGraphComponentListener(this);
+//			if (originalComponent.getAppearance() != null) 
+//				originalComponent.getAppearance().addAppearanceListener(this);				
+//		}
+//
+//		public void dispose()	{
+//			originalComponent.removeSceneGraphComponentListener(this);
+//			if (originalComponent.getAppearance() != null) originalComponent.getAppearance().removeAppearanceListener(this);
+//			if (peerGeometry != null)		{
+//				originalComponent.getGeometry().removeGeometryListener(this);
+//				peerGeometry.dispose();
+//			}
+//		}
+//
+//
+//		public void addJOGLPeer(JOGLPeerComponent jpc)	{
+//			if (peers.contains(jpc)) return;
+//			peersLock.writeLock();
+//			peers.add(jpc);
+//			peersLock.writeUnlock();
+//		}
+//
+//		public void removeJOGLPeer(JOGLPeerComponent jpc)	{
+//			if (!peers.contains(jpc)) return;
+//			peersLock.writeLock();
+//			peers.remove(jpc);
+//			peersLock.writeUnlock();
+//
+//			if (peers.size() == 0)	{
+//				theLog.log(Level.FINE,"GoBetween for "+originalComponent.getName()+" has no peers left");
+//				goBetweenTable.remove(originalComponent);
+//				dispose();
+//			}
+//		}
+//
+//		public JOGLPeerGeometry getPeerGeometry() {
+//			return peerGeometry;
+//		}
+//
+//		public void geometryChanged(GeometryEvent ev) {
+//			peersLock.readLock();
+//			for ( JOGLPeerComponent peer: peers)	{
+//				peer.setDisplayListDirty();
+//			}
+//			peersLock.readLock();
+//			peersLock.readUnlock();
+//		}
+//
+//		public void transformationMatrixChanged(TransformationEvent ev) {
+//			peersLock.readLock();
+//			for (JOGLPeerComponent peer : peers)	{
+//				peer.transformationMatrixChanged(ev);				
+//			}
+//			peersLock.readUnlock();
+//		}
+//
+//		public void appearanceChanged(AppearanceEvent ev) {
+//			String key = ev.getKey();
+//			System.err.println("Appearance changed "+key);
+//			int changed = 0;
+//			boolean propagates = true;
+//			// TODO shaders should register keywords somehow and which geometries might be changed
+//			if (key.indexOf("implodeFactor") != -1 ) changed |= (FACES_CHANGED);
+//			else if (key.indexOf("transparency") != -1) changed |= (POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
+//			else if (key.indexOf(CommonAttributes.SMOOTH_SHADING) != -1) changed |= (POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
+//			else if (key.indexOf("tubeRadius") != -1) changed |= (LINES_CHANGED);
+//			else if (key.indexOf("pointRadius") != -1) changed |= (POINTS_CHANGED);
+//			else if (key.indexOf("anyDisplayLists") != -1) changed |= (POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED);
+//			else if (key.endsWith("Shader")) changed |= LINE_SHADER_CHANGED | POINT_SHADER_CHANGED | POLYGON_SHADER_CHANGED;
+//			// there are some appearances which we know aren't inherited, so don't propagate change event.
+//			else if (key.indexOf("texture2d") != -1) changed |= (FACES_CHANGED);
+//			else if (key.indexOf("lightMap") != -1) changed |= (FACES_CHANGED);
+//			if (key.indexOf(CommonAttributes.BACKGROUND_COLOR) != -1	||
+//					key.indexOf("fog") != -1) propagates = false;
+//
+//			peersLock.readLock();
+//			for ( JOGLPeerComponent peer: peers)	{
+//				if (propagates) peer.appearanceChanged(ev);
+//				if (changed != 0) peer.propagateGeometryChanged(changed);
+//			}
+//			peersLock.readUnlock();
+//			//theLog.log(Level.FINER,"setting display list dirty flag: "+changed);
+//		}
+//		public void childAdded(SceneGraphComponentEvent ev) {
+//			theLog.log(Level.FINE,"GoBetween: Container Child added to: "+originalComponent.getName());
+//			if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY) {
+//				if (peerGeometry != null)	{
+//					((Geometry) ev.getOldChildElement()).removeGeometryListener(this);						
+//					peerGeometry.dispose();
+//					geometryRemoved = true;
+//					theLog.log(Level.WARNING, "Adding geometry while old one still valid");
+//					peerGeometry=null;
+//				}
+//				if (originalComponent.getGeometry() != null)  {
+//					peerGeometry = getJOGLPeerGeometryFor(originalComponent.getGeometry());
+//					originalComponent.getGeometry().addGeometryListener(this);
+//					peerGeometry.refCount++;
+//				} 
+//			}
+//			peersLock.readLock();
+//			for ( JOGLPeerComponent peer: peers)	{
+//				//peer.addSceneGraphComponentEvent(ev);
+//				peer.childAdded(ev);
+//			}
+//			peersLock.readUnlock();
+//		}
+//		public void childRemoved(SceneGraphComponentEvent ev) {
+//			if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY) {
+//				if (peerGeometry != null) {
+//					((Geometry) ev.getOldChildElement()).removeGeometryListener(this);						
+//					peerGeometry.dispose();		// really decreases reference count
+//					peerGeometry = null;
+//					geometryRemoved = true;
+//				}
+////				return;
+//			}
+//			peersLock.readLock();
+//			for ( JOGLPeerComponent peer: peers)	{
+//				peer.childRemoved(ev);
+//				//peer.addSceneGraphComponentEvent(ev);
+//			}
+//			peersLock.readUnlock();
+//		}
+//
+//		public void childReplaced(SceneGraphComponentEvent ev) {
+//			if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY) {
+//				if (peerGeometry != null && peerGeometry.originalGeometry == originalComponent.getGeometry()) return;		// no change, really
+//				if (peerGeometry != null) {
+//					((Geometry) ev.getOldChildElement()).removeGeometryListener(this);						
+//					peerGeometry.dispose();
+//					geometryRemoved=true;
+//					peerGeometry = null;
+//				}
+//				if (originalComponent.getGeometry() != null)  {
+//					originalComponent.getGeometry().addGeometryListener(this);
+//					peerGeometry = getJOGLPeerGeometryFor(originalComponent.getGeometry());
+//					peerGeometry.refCount++;
+//				} 
+//			}
+//			peersLock.readLock();
+//			for ( JOGLPeerComponent peer: peers)	{
+//				//peer.addSceneGraphComponentEvent(ev);
+//				peer.childReplaced(ev);
+//			}				
+//			peersLock.readUnlock();
+//		}
+//
+//		public SceneGraphComponent getOriginalComponent() {
+//			return originalComponent;
+//		}
+//
+//		public void visibilityChanged(SceneGraphComponentEvent ev) {
+//		}
+//
+//	}
 
-		private ConstructPeerGraphVisitor(ConstructPeerGraphVisitor pv, JOGLPeerComponent p)	{
-			super();
-			sgp = (SceneGraphPath) pv.sgp.clone();
-			myParent = p;
-			topLevel = false;
-		}
-
-		public void visit(SceneGraphComponent c) {
-			sgp.push(c);
-			JOGLPeerComponent peer = new JOGLPeerComponent(sgp, myParent);
-			if (topLevel) thePeerRoot = peer;
-			else if (myParent != null) {
-				int n = myParent.children.size();
-				//String space = (new char[2*sgp.getLength()]).toString();
-				myParent.children.add(peer);
-				peer.childIndex = n;
-			}
-			c.childrenAccept(new ConstructPeerGraphVisitor(this, peer));
-			sgp.pop();
-		}
-
-		public Object visit()	{
-			visit(myRoot);
-			return thePeerRoot;
-		}
-
-	}
-
+//	private class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
+//		SceneGraphComponent myRoot;
+//		JOGLPeerComponent thePeerRoot, myParent;
+//		SceneGraphPath sgp;
+//		boolean topLevel = true;
+//		public ConstructPeerGraphVisitor(SceneGraphComponent r, JOGLPeerComponent p)	{
+//			super();
+//			myRoot = r;
+//			sgp = new SceneGraphPath();
+//			myParent = p;
+//		}
+//
+//		private ConstructPeerGraphVisitor(ConstructPeerGraphVisitor pv, JOGLPeerComponent p)	{
+//			super();
+//			sgp = (SceneGraphPath) pv.sgp.clone();
+//			myParent = p;
+//			topLevel = false;
+//		}
+//
+//		public void visit(SceneGraphComponent c) {
+//			sgp.push(c);
+//			JOGLPeerComponent peer = new JOGLPeerComponent(sgp, myParent);
+//			if (topLevel) thePeerRoot = peer;
+//			else if (myParent != null) {
+//				int n = myParent.children.size();
+//				//String space = (new char[2*sgp.getLength()]).toString();
+//				myParent.children.add(peer);
+//				peer.childIndex = n;
+//			}
+//			c.childrenAccept(new ConstructPeerGraphVisitor(this, peer));
+//			sgp.pop();
+//		}
+//
+//		public Object visit()	{
+//			visit(myRoot);
+//			return thePeerRoot;
+//		}
+//
+//	}
+//
 	protected JOGLPeerComponent constructPeerForSceneGraphComponent(final SceneGraphComponent sgc, final JOGLPeerComponent p) {
 		if (sgc == null) return null;
 		final JOGLPeerComponent[] peer = new JOGLPeerComponent[1];
-		ConstructPeerGraphVisitor constructPeer = new ConstructPeerGraphVisitor( sgc, p);
+		ConstructPeerGraphVisitor constructPeer = new ConstructPeerGraphVisitor( sgc, p, this);
 		peer[0] = (JOGLPeerComponent) constructPeer.visit();
 		return peer[0];
 	}
-
-	public class JOGLPeerComponent extends JOGLPeerNode implements TransformationListener, AppearanceListener,SceneGraphComponentListener {
-
-		public int[] bindings = new int[2];
-		protected EffectiveAppearance eAp;
-		protected Vector<JOGLPeerComponent> children;
-		protected JOGLPeerComponent parent;
-		protected int childIndex;
-		protected GoBetween goBetween;
-
-		protected boolean isReflection = false;
-		boolean isCopyCat = false;
-		protected boolean cumulativeIsReflection = false;
-		double determinant = 0.0;
-
-
-		RenderingHintsShader renderingHints;
-		DefaultGeometryShader geometryShader;
-
-		//Object childLock = new Object();
-		Lock childlock = new Lock();
-		protected Runnable renderGeometry = null;
-		final JOGLPeerComponent self = this;
-		double[][] matrices = null;
-		double minDistance = -1, maxDistance = -1;
-		protected boolean appearanceDirty = true;
-		boolean effectiveAppearanceDirty = true,
-		geometryIsDirty = true,
-		boundIsDirty = true,
-		clipToCamera = true;
-		int geometryDirtyBits  = 0;
-		protected boolean renderRunnableDirty = true;
-		boolean[] matrixIsReflection = null;
-
-		double[] tform = new double[16];		// for optimized access to matrix
-		public JOGLPeerComponent(SceneGraphPath sgp, JOGLPeerComponent p)		{
-			super();
-			if (sgp == null || !(sgp.getLastElement() instanceof SceneGraphComponent))  {
-				throw new IllegalArgumentException("Not a valid SceneGraphComponenet");
-			}
-			goBetween = goBetweenFor(sgp.getLastComponent());
-			goBetween.addJOGLPeer(this);
-			name = "JOGLPeer:"+goBetween.getOriginalComponent().getName();
-//			isCopyCat = goBetween.getOriginalComponent() instanceof JOGLMultipleComponent;
-			Geometry foo = goBetween.getOriginalComponent().getGeometry();
-			isCopyCat = (foo != null &&  foo instanceof PointSet && foo.getGeometryAttributes(JOGLConfiguration.COPY_CAT) != null);
-			if (isCopyCat)	{
-				matrices = ((PointSet) foo).getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null);
-				matrixIsReflection = new boolean[matrices.length];
-				for (int i = 0; i<matrices.length; ++i)	matrixIsReflection[i] = Rn.determinant(matrices[i]) < 0.0;
-			}
-			children = new Vector<JOGLPeerComponent>();		// always have a child list, even if it's empty
-			parent = p;
-			updateTransformationInfo();
-		}
-
-		protected void updateRenderRunnable() {
-			setDisplayListDirty();
+//
+//	
+//	public class JOGLPeerComponent extends JOGLPeerNode implements TransformationListener, AppearanceListener,SceneGraphComponentListener {
+//
+//		public int[] bindings = new int[2];
+//		protected EffectiveAppearance eAp;
+//		protected Vector<JOGLPeerComponent> children;
+//		protected JOGLPeerComponent parent;
+//		protected int childIndex;
+//		protected GoBetween goBetween;
+//
+//		protected boolean isReflection = false;
+//		boolean isCopyCat = false;
+//		protected boolean cumulativeIsReflection = false;
+//		double determinant = 0.0;
+//
+//		RenderingHintsShader renderingHints;
+//		DefaultGeometryShader geometryShader;
+//
+//		Lock childlock = new Lock();
+//		protected Runnable renderGeometry = null;
+//		final JOGLPeerComponent self = this;
+//		double[][] matrices = null;
+//		double minDistance = -1, maxDistance = -1;
+//		protected boolean appearanceDirty = true, originalAppearanceDirty = false;
+//		boolean effectiveAppearanceDirty = true,
+//		geometryIsDirty = true,
+//		boundIsDirty = true,
+//		clipToCamera = true;
+//		int geometryDirtyBits  = 0;
+//		protected boolean renderRunnableDirty = true;
+//		boolean[] matrixIsReflection = null;
+//		double[] tform = new double[16];		// for optimized access to matrix
+//		Vector<SceneGraphComponentEvent> newSGCEvents = new Vector<SceneGraphComponentEvent>();
+//
+//		public JOGLPeerComponent(SceneGraphPath sgp, JOGLPeerComponent p)		{
+//			super();
+//			if (sgp == null || !(sgp.getLastElement() instanceof SceneGraphComponent))  {
+//				throw new IllegalArgumentException("Not a valid SceneGraphComponenet");
+//			}
+//			goBetween = goBetweenFor(sgp.getLastComponent());
+//			goBetween.addJOGLPeer(this);
+//			name = "JOGLPeer:"+goBetween.getOriginalComponent().getName();
+////			isCopyCat = goBetween.getOriginalComponent() instanceof JOGLMultipleComponent;
+//			Geometry foo = goBetween.getOriginalComponent().getGeometry();
+//			isCopyCat = (foo != null &&  foo instanceof PointSet && foo.getGeometryAttributes(JOGLConfiguration.COPY_CAT) != null);
+//			if (isCopyCat)	{
+//				matrices = ((PointSet) foo).getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null);
+//				matrixIsReflection = new boolean[matrices.length];
+//				for (int i = 0; i<matrices.length; ++i)	matrixIsReflection[i] = Rn.determinant(matrices[i]) < 0.0;
+//			}
+//			children = new Vector<JOGLPeerComponent>();		// always have a child list, even if it's empty
+//			parent = p;
+//			updateTransformationInfo();
+//		}
+//
+//		protected void addSceneGraphComponentEvent(SceneGraphComponentEvent ev)	{
+//			newSGCEvents.add(ev);
+//		}
+//		
+//		protected void updateRenderRunnable() {
+//			setDisplayListDirty();
+////			updateShaders();
+//			if (goBetween.peerGeometry == null) renderGeometry = null;
+//			else	 renderGeometry = new Runnable() {
+//				public void run() {
+//					goBetween.peerGeometry.render(self);
+//				}
+//			};
+//			renderRunnableDirty = false;
+//		}
+//
+//		public void dispose()	{
+//
+//			int n = children.size();
+//			for (int i = n-1; i>=0; --i)	{
+//				JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
+//				child.dispose();
+//			}	
+//			goBetween.removeJOGLPeer(this);
+//		}
+//
+//		public void render()		{
+//			if (!goBetween.getOriginalComponent().isVisible()) return;
+//			Transformation thisT = preRender();
+//			//System.err.println(goBetween.getOriginalComponent().getName()+"Signature is "+currentSignature);
+//			renderChildren();
+//			postRender(thisT);
+//		}
+//
+//
+//		private Transformation preRender() {
+//			if (goBetween.originalComponent.getAppearance() != null) 
+//				theLog.finest("Processing appearance "+goBetween.originalComponent.getAppearance().getName());
+//			nodeCount++;
+//			if (renderRunnableDirty) updateRenderRunnable();
+//			currentPath.push(goBetween.getOriginalComponent());
+//			context.setCurrentPath(currentPath);
+//			Transformation thisT = goBetween.getOriginalComponent().getTransformation();
+//
+//			if (thisT != null) {
+//				pushTransformation(thisT.getMatrix());
+//			}
+//
+//			if (eAp != null) {
+//				currentSignature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
+//				renderingState.setCurrentSignature(currentSignature);
+//				//System.err.println(goBetween.getOriginalComponent().getName()+" Setting sig to "+currentSignature);
+//			}
+//			if (parent != null) cumulativeIsReflection = (isReflection != parent.cumulativeIsReflection);
+//			else cumulativeIsReflection = (isReflection != globalIsReflection);
+//			if (cumulativeIsReflection != renderingState.flipped)	{
+//				globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
+//				renderingState.flipped  = cumulativeIsReflection;
+//			}
+//			if (geometryDirtyBits  != 0)	handleChangedGeometry();
+//			if (originalAppearanceDirty) propagateAppearanceChanged();
+//			if (appearanceDirty || effectiveAppearanceDirty)  	handleAppearanceChanged();
+//			if (!isCopyCat && goBetween != null && goBetween.peerGeometry != null && goBetween.peerGeometry.originalGeometry != null )	{
+//				Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
+//			}
+//			return thisT;
+//		}
+//		protected void renderChildren() {
+//			if (newSGCEvents.size() != 0)	{
+//				for (SceneGraphComponentEvent ev : newSGCEvents)	{
+//					int type = ev.getEventType();
+//					if (type == SceneGraphComponentEvent.EVENT_TYPE_ADDED)
+//						childAdded(ev);
+//					else if (type == SceneGraphComponentEvent.EVENT_TYPE_REMOVED)
+//						childRemoved(ev);
+//					else if (type == SceneGraphComponentEvent.EVENT_TYPE_REPLACED)
+//						childReplaced(ev);
+//				}
+//				newSGCEvents.clear();
+//			}
+//			int n = children.size();
+//
+//			if (isCopyCat)		{
+//				boolean isReflectionBefore = cumulativeIsReflection;
+//				if (JOGLConfiguration.testMatrices) {
+//					minDistance = eAp.getAttribute("discreteGroup.minDistance", minDistance);
+//					maxDistance = eAp.getAttribute("discreteGroup.maxDistance", maxDistance);
+//					clipToCamera = eAp.getAttribute("discreteGroup.clipToCamera", clipToCamera);					
+//				}
+//
+//				int nn = matrices.length;
+//				double[] o2ndc = context.getObjectToNDC();
+//				double[] o2c = context.getObjectToCamera();
+//				int count = 0;
+//				for (int j = 0; j<nn; ++j)	{
+//					if (JOGLConfiguration.testMatrices) 
+//						if (clipToCamera && !JOGLRendererHelper.accept(o2ndc, o2c, minDistance, maxDistance, matrices[j], currentSignature)) continue;
+//					count++;
+//					cumulativeIsReflection = (isReflectionBefore != matrixIsReflection[j]);
+//					if (cumulativeIsReflection != renderingState.flipped)	{
+//						globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
+//						renderingState.flipped  = cumulativeIsReflection;
+//					}
+//					pushTransformation(matrices[j]);
+//
+//					for (int i = 0; i<n; ++i)	{		
+//						JOGLPeerComponent child = children.get(i);					
+//						child.render();
+//					}				
+//					popTransformation();
+//				}
+//				//System.err.println("Matrix count: "+count);
+//			} else {
+//				for (int i = 0; i<n; ++i)	{		
+//					JOGLPeerComponent child = children.get(i);					
+//					if (pickMode)	globalGL.glPushName(JOGLPickAction.SGCOMP_BASE+child.childIndex);
+//					child.render();
+//					if (pickMode)	globalGL.glPopName();
+//				}								
+//			}
+//		}
+//
+//		private void postRender(Transformation thisT) {
+//			if (thisT != null) popTransformation();			
+//			currentPath.pop();
+//		}
+//
+//
+//		protected void popTransformation() {
+//			if (stackDepth <= MAX_STACK_DEPTH) {
+//				globalGL.glPopMatrix();			
+//				stackDepth--;
+//			}
+//		}
+//
+//		protected void pushTransformation(double[] m) {
+//			if ( stackDepth <= MAX_STACK_DEPTH) {
+//				globalGL.glPushMatrix();
+//				globalGL.glMultTransposeMatrixd(m,0);
+//				stackDepth++;
+//			}
+//			else {
+//				globalGL.glLoadTransposeMatrixd(context.getObjectToCamera(),0);	
+//			}
+//		}
+//
+//		protected void setIndexOfChildren()	{
+//			childlock.readLock();
+//			int n = goBetween.getOriginalComponent().getChildComponentCount();
+//			for (int i = 0; i<n; ++i)	{
+//				SceneGraphComponent sgc = goBetween.getOriginalComponent().getChildComponent(i);
+//				JOGLPeerComponent jpc = getPeerForChildComponent(sgc);
+//				if (jpc == null)	{
+//					theLog.log(Level.WARNING,"No peer for sgc "+sgc.getName());
+//					jpc.childIndex = -1;
+//				} else jpc.childIndex = i;
+//			}									
+//			childlock.readUnlock();
+//
+//		}
+//
+//		private JOGLPeerComponent getPeerForChildComponent(SceneGraphComponent sgc) {
+//			childlock.readLock();
+//			for (JOGLPeerComponent jpc : children)	{
+//				if ( jpc.goBetween.getOriginalComponent() == sgc) { // found!
+//					return jpc;
+//				}
+//			}
+//			childlock.readUnlock();
+//			return null;
+//		}
+//
+//		public void appearanceChanged(AppearanceEvent ev) {
+//			originalAppearanceDirty = true;
+//		}
+//
+//		protected void propagateAppearanceChanged()	{
+//			appearanceDirty = true;
+//
+//			for (JOGLPeerComponent child : children) {
+//				if (effectiveAppearanceDirty) child.effectiveAppearanceDirty=true;
+//				child.propagateAppearanceChanged();
+//			}	
+//			//childlock.readUnlock();
+//			//appearanceDirty=false;
+//			originalAppearanceDirty = false;
+//		}
+//
+//		private void handleAppearanceChanged() {
+//			Appearance thisAp = goBetween.getOriginalComponent().getAppearance(); 
+//			if (parent == null)	{
+//				if (eAp == null || eAp.getAppearanceHierarchy().indexOf(thisAp) == -1) {
+//					eAp = EffectiveAppearance.create();
+//					if (goBetween.getOriginalComponent().getAppearance() != null )	
+//						eAp = eAp.create(goBetween.getOriginalComponent().getAppearance());
+//				} 
+//			} else {
+//				if ( parent.eAp == null)	{
+//					throw new IllegalStateException("Parent must have effective appearance");
+//				}
+//				if (effectiveAppearanceDirty || eAp == null)	{
+//					theLog.finer("updating eap for "+goBetween.getOriginalComponent().getName());
+//					if (thisAp != null )	{
+//						eAp = parent.eAp.create(thisAp);
+//					} else {
+//						eAp = parent.eAp;	
+//					}
+//				}
+//			}
 //			updateShaders();
-			if (goBetween.peerGeometry == null) renderGeometry = null;
-			else	 renderGeometry = new Runnable() {
-				public void run() {
-					goBetween.peerGeometry.render(self);
-				}
-			};
-			renderRunnableDirty = false;
-		}
-
-		public void dispose()	{
-
-			int n = children.size();
-			for (int i = n-1; i>=0; --i)	{
-				JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
-				child.dispose();
-			}	
-			goBetween.removeJOGLPeer(this);
-		}
-
-		public void render()		{
-			if (!goBetween.getOriginalComponent().isVisible()) return;
-			Transformation thisT = preRender();
-			//System.err.println(goBetween.getOriginalComponent().getName()+"Signature is "+currentSignature);
-			renderChildren();
-			postRender(thisT);
-		}
-
-
-		private Transformation preRender() {
-			if (goBetween.originalComponent.getAppearance() != null) 
-				theLog.finer("Processing appearance "+goBetween.originalComponent.getAppearance().getName());
-			nodeCount++;
-			if (renderRunnableDirty) updateRenderRunnable();
-			currentPath.push(goBetween.getOriginalComponent());
-			context.setCurrentPath(currentPath);
-			Transformation thisT = goBetween.getOriginalComponent().getTransformation();
-
-			if (thisT != null) {
-				pushTransformation(thisT.getMatrix());
-			}
-
-			if (eAp != null) {
-				currentSignature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-				renderingState.setCurrentSignature(currentSignature);
-				//System.err.println(goBetween.getOriginalComponent().getName()+" Setting sig to "+currentSignature);
-			}
-			if (parent != null) cumulativeIsReflection = (isReflection != parent.cumulativeIsReflection);
-			else cumulativeIsReflection = (isReflection != globalIsReflection);
-			if (cumulativeIsReflection != renderingState.flipped)	{
-				globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
-				renderingState.flipped  = cumulativeIsReflection;
-			}
-			if (geometryDirtyBits  != 0)	handleChangedGeometry();
-			if (appearanceDirty || effectiveAppearanceDirty)  	handleAppearanceChanged();
-			if (goBetween != null && goBetween.peerGeometry != null && goBetween.peerGeometry.originalGeometry != null )	{
-				Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
-			}
-			return thisT;
-		}
-		protected void renderChildren() {
-			int n = children.size();
-
-			if (isCopyCat)		{
-				boolean isReflectionBefore = cumulativeIsReflection;
-				minDistance = eAp.getAttribute("discreteGroup.minDistance", minDistance);
-				maxDistance = eAp.getAttribute("discreteGroup.maxDistance", maxDistance);
-				clipToCamera = eAp.getAttribute("discreteGroup.clipToCamera", clipToCamera);
-
-				int nn = matrices.length;
-				double[] o2ndc = context.getObjectToNDC();
-				double[] o2c = context.getObjectToCamera();
-				int count = 0;
-				for (int j = 0; j<nn; ++j)	{
-					if (JOGLConfiguration.testMatrices)
-						if (clipToCamera && !JOGLRendererHelper.accept(o2ndc, o2c, minDistance, maxDistance, matrices[j], currentSignature)) continue;
-					count++;
-					cumulativeIsReflection = (isReflectionBefore != matrixIsReflection[j]);
-					if (cumulativeIsReflection != renderingState.flipped)	{
-						globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
-						renderingState.flipped  = cumulativeIsReflection;
-					}
-					pushTransformation(matrices[j]);
-
-					for (int i = 0; i<n; ++i)	{		
-						JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);					
-						child.render();
-					}				
-					popTransformation();
-				}
-				//System.err.println("Matrix count: "+count);
-			} else {
-				for (int i = 0; i<n; ++i)	{		
-					JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);					
-					if (pickMode)	globalGL.glPushName(JOGLPickAction.SGCOMP_BASE+child.childIndex);
-					child.render();
-					if (pickMode)	globalGL.glPopName();
-				}								
-			}
-		}
-
-		private void postRender(Transformation thisT) {
-			if (thisT != null) popTransformation();			
-			currentPath.pop();
-		}
-
-
-		protected void popTransformation() {
-			if (stackDepth <= MAX_STACK_DEPTH) {
-				globalGL.glPopMatrix();			
-				stackDepth--;
-			}
-		}
-
-		protected void pushTransformation(double[] m) {
-			if ( stackDepth <= MAX_STACK_DEPTH) {
-				globalGL.glPushMatrix();
-				globalGL.glMultTransposeMatrixd(m,0);
-				stackDepth++;
-			}
-			else {
-				globalGL.glLoadTransposeMatrixd(context.getObjectToCamera(),0);	
-			}
-		}
-
-		protected void setIndexOfChildren()	{
-			childlock.readLock();
-			int n = goBetween.getOriginalComponent().getChildComponentCount();
-			for (int i = 0; i<n; ++i)	{
-				SceneGraphComponent sgc = goBetween.getOriginalComponent().getChildComponent(i);
-				JOGLPeerComponent jpc = getPeerForChildComponent(sgc);
-				if (jpc == null)	{
-					theLog.log(Level.WARNING,"No peer for sgc "+sgc.getName());
-					jpc.childIndex = -1;
-				} else jpc.childIndex = i;
-			}									
-			childlock.readUnlock();
-
-		}
-
-		private JOGLPeerComponent getPeerForChildComponent(SceneGraphComponent sgc) {
-			childlock.readLock();
-			for (JOGLPeerComponent jpc : children)	{
-				if ( jpc.goBetween.getOriginalComponent() == sgc) { // found!
-					return jpc;
-				}
-			}
-			childlock.readUnlock();
-			return null;
-		}
-
-		public void appearanceChanged(AppearanceEvent ev) {
-			appearanceDirty = true;
-			propagateAppearanceChanged();
-		}
-
-		protected void propagateAppearanceChanged()	{
-			appearanceDirty = true;
-
-			for (JOGLPeerComponent child : children) {
-				if (effectiveAppearanceDirty) child.effectiveAppearanceDirty=true;
-				child.propagateAppearanceChanged();
-			}	
-			//childlock.readUnlock();
-			//appearanceDirty=false;
-		}
-
-		private void handleAppearanceChanged() {
-			Appearance thisAp = goBetween.getOriginalComponent().getAppearance(); 
-			if (parent == null)	{
-				if (eAp == null || eAp.getAppearanceHierarchy().indexOf(thisAp) == -1) {
-					eAp = EffectiveAppearance.create();
-					if (goBetween.getOriginalComponent().getAppearance() != null )	
-						eAp = eAp.create(goBetween.getOriginalComponent().getAppearance());
-				} 
-			} else {
-				if ( parent.eAp == null)	{
-					throw new IllegalStateException("Parent must have effective appearance");
-				}
-				if (effectiveAppearanceDirty || eAp == null)	{
-					theLog.finer("updating eap for "+goBetween.getOriginalComponent().getName());
-					if (thisAp != null )	{
-						eAp = parent.eAp.create(thisAp);
-					} else {
-						eAp = parent.eAp;	
-					}
-					effectiveAppearanceDirty = false;
-				}
-			}
-			updateShaders();
-			appearanceDirty = false;
-		}
-
-		/**
-		 * @param thisAp
-		 */
-		private void updateShaders() {
-//			can happen that the effective appearance isn't initialized yet; skip
-			if (eAp == null) return; 
-			Appearance thisAp = goBetween.getOriginalComponent().getAppearance(); 
-			if (thisAp == null && goBetween.getOriginalComponent().getGeometry() == null && parent != null)	{
-				geometryShader = parent.geometryShader;
-				renderingHints = parent.renderingHints;
-
-			} else  {		
-				theLog.log(Level.FINER,"Updating shaders for "+goBetween.originalComponent.getName());
-				if (geometryShader == null)
-					geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
-				else 
-					geometryShader.setFromEffectiveAppearance(eAp, "");
-
-				if (renderingHints == null)
-					renderingHints = RenderingHintsShader.createFromEffectiveAppearance(eAp, "");
-				else
-					renderingHints.setFromEffectiveAppearance(eAp, "");								
-			}
-		}
-
-		public void childAdded(SceneGraphComponentEvent ev) {
-			theLog.log(Level.FINE,"JOGLPeerComponent: Container Child added to: "+goBetween.getOriginalComponent().getName());
-			//theLog.log(Level.FINE,"Event is: "+ev.toString());
-			switch (ev.getChildType() )	{
-			case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
-				updateRenderRunnable();
-				break;
-
-			case SceneGraphComponentEvent.CHILD_TYPE_COMPONENT:
-				SceneGraphComponent sgc = (SceneGraphComponent) ev.getNewChildElement();
-				JOGLPeerComponent pc = JOGLRenderer.this.constructPeerForSceneGraphComponent(sgc, this);
-				//childlock.writeLock();
-				//theLog.log(Level.FINE,"Before adding child count is "+children.size());
-				children.add(pc);						
-				//childlock.writeUnlock();
-				//theLog.log(Level.FINE,"After adding child count is "+children.size());
-				setIndexOfChildren();
-				lightListDirty = true;
-				break;
-			case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
-				handleNewAppearance();
-				theLog.log(Level.FINE,"Propagating geometry change due to added appearance");
-				break;				
-			case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
-				lightListDirty = true;
-				break;
-			case SceneGraphComponentEvent.CHILD_TYPE_TRANSFORMATION:
-				updateTransformationInfo();
-				break;
-			default:
-				theLog.log(Level.INFO,"Taking no action for addition of child type "+ev.getChildType());
-			break;
-			}
-		}
-
-		private void handleNewAppearance() {
-    		LoggingSystem.getLogger(this).finer("handle new appearance "+goBetween.originalComponent.getName());
-			int changed = ALL_CHANGED;
-			propagateGeometryChanged(changed);	
-			appearanceDirty = true;
-			effectiveAppearanceDirty=true;
-		}
-
-		public void childRemoved(SceneGraphComponentEvent ev) {
-			theLog.log(Level.FINE,"Container Child removed from: "+goBetween.getOriginalComponent().getName());
-			switch (ev.getChildType() )	{
-			case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
-				updateRenderRunnable();
-				break;
-
-			case SceneGraphComponentEvent.CHILD_TYPE_COMPONENT:
-				SceneGraphComponent sgc = (SceneGraphComponent) ev.getOldChildElement();
-				JOGLPeerComponent jpc = getPeerForChildComponent(sgc);
-				if (jpc == null) return;
-				//childlock.writeLock();
-				children.remove(jpc);						
-				//childlock.writeUnlock();
-				//theLog.log(Level.FINE,"After removal child count is "+children.size());
-				jpc.dispose();		// there are no other references to this child
-				setIndexOfChildren();
-				lightListDirty = true;
-				break;
-			case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
-				handleNewAppearance();
-				theLog.log(Level.FINE,"Propagating geometry change due to removed appearance");
-				break;				
-			case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
-				lightListDirty = true;
-				break;
-			case SceneGraphComponentEvent.CHILD_TYPE_TRANSFORMATION:
-				updateTransformationInfo();
-				break;			
-			default:
-				theLog.log(Level.INFO,"Taking no action for removal of child type "+ev.getChildType());
-			break;
-			}
-		}
-
-		public void childReplaced(SceneGraphComponentEvent ev) {
-			theLog.log(Level.FINE,"Container Child replaced at: "+goBetween.getOriginalComponent().getName());
-			switch(ev.getChildType())	{
-			case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
-				renderRunnableDirty = true; 
-				break;
-
-			case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
-				handleNewAppearance();
-				theLog.log(Level.INFO,"Propagating geometry change due to replaced appearance");
-				break;
-			case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
-				lightListDirty = true;
-				break;
-			case SceneGraphComponentEvent.CHILD_TYPE_TRANSFORMATION:
-				updateTransformationInfo();
-				break;
-			default:
-				theLog.log(Level.INFO,"Taking no action for replacement of child type "+ev.getChildType());
-			break;
-			}
-		}
-
-		public void transformationMatrixChanged(TransformationEvent ev) {
-			// TODO notify ancestors that their bounds are no longer valid
-			updateTransformationInfo();
-		}
-
-		/**
-		 * 
-		 */
-		private void updateTransformationInfo() {
-			if (goBetween.getOriginalComponent().getTransformation() != null) {
-//				isReflection = goBetween.getOriginalComponent().getTransformation().getIsReflection();
-				isReflection = Rn.determinant(goBetween.getOriginalComponent().getTransformation().getMatrix()) < 0;
-			} else {
-				determinant  = 0.0;
-				isReflection = false;
-			}
-		}
-
-		public void propagateGeometryChanged(int changed) {
-//			theLog.finer("set bits to "+changed);
-			geometryDirtyBits  = changed;
-			childlock.readLock();
-			for (JOGLPeerComponent child: children){		
-				child.propagateGeometryChanged(changed);
-			}	
-			childlock.readUnlock();
-
-		}
-
-		private void handleChangedGeometry() {
-			if (geometryShader != null)	{
-//				theLog.fine("Handling bits: "+geometryDirtyBits+" for "+goBetween.originalComponent.getName());
-				if (geometryShader.pointShader != null && (geometryDirtyBits  & POINTS_CHANGED) != 0) geometryShader.pointShader.flushCachedState(JOGLRenderer.this);
-				if (geometryShader.lineShader != null && (geometryDirtyBits  & LINES_CHANGED) != 0) geometryShader.lineShader.flushCachedState(JOGLRenderer.this);
-				if (geometryShader.polygonShader != null && (geometryDirtyBits  & FACES_CHANGED) != 0) geometryShader.polygonShader.flushCachedState(JOGLRenderer.this);				
-				if ((geometryDirtyBits  & POINT_SHADER_CHANGED) != 0) geometryShader.pointShader = null;
-				if ((geometryDirtyBits  & LINE_SHADER_CHANGED) != 0) geometryShader.lineShader = null;
-				if ((geometryDirtyBits  & POLYGON_SHADER_CHANGED) != 0) geometryShader.polygonShader = null;
-				if ((geometryDirtyBits  & ALL_SHADERS_CHANGED) != 0)updateShaders();
-				// set the dirty flag to clean again
-                geometryDirtyBits  = 0;
-			}
-		}
-
-		private void setDisplayListDirty()	{
-            geometryDirtyBits = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
-		}
-
-		public SceneGraphComponent getOriginalComponent() {
-			return goBetween.getOriginalComponent();
-		}
-
-		public void visibilityChanged(SceneGraphComponentEvent ev) {
-		}
-	}
+//			effectiveAppearanceDirty = false;
+//			appearanceDirty = false;
+//		}
+//
+//		/**
+//		 * @param thisAp
+//		 */
+//		private void updateShaders() {
+////			can happen that the effective appearance isn't initialized yet; skip
+//			if (eAp == null) return; 
+//			Appearance thisAp = goBetween.getOriginalComponent().getAppearance(); 
+//			if (thisAp == null && goBetween.getOriginalComponent().getGeometry() == null && parent != null)	{
+//				geometryShader = parent.geometryShader;
+//				renderingHints = parent.renderingHints;
+//
+//			} else  {		
+//				theLog.log(Level.FINER,"Updating shaders for "+goBetween.originalComponent.getName());
+//				if (geometryShader == null)
+//					geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
+//				else 
+//					geometryShader.setFromEffectiveAppearance(eAp, "");
+//
+//				if (renderingHints == null)
+//					renderingHints = RenderingHintsShader.createFromEffectiveAppearance(eAp, "");
+//				else
+//					renderingHints.setFromEffectiveAppearance(eAp, "");								
+//			}
+//		}
+//
+//		public void childAdded(SceneGraphComponentEvent ev) {
+//			theLog.log(Level.FINE,"JOGLPeerComponent: Container Child added to: "+goBetween.getOriginalComponent().getName());
+//			//theLog.log(Level.FINE,"Event is: "+ev.toString());
+//			switch (ev.getChildType() )	{
+//			case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
+//				updateRenderRunnable();
+//				break;
+//
+//			case SceneGraphComponentEvent.CHILD_TYPE_COMPONENT:
+//				SceneGraphComponent sgc = (SceneGraphComponent) ev.getNewChildElement();
+//				JOGLPeerComponent pc = JOGLRenderer.this.constructPeerForSceneGraphComponent(sgc, this);
+//				//childlock.writeLock();
+//				//theLog.log(Level.FINE,"Before adding child count is "+children.size());
+//				children.add(pc);						
+//				//childlock.writeUnlock();
+//				//theLog.log(Level.FINE,"After adding child count is "+children.size());
+//				setIndexOfChildren();
+//				lightListDirty = true;
+//				break;
+//			case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
+//				handleNewAppearance();
+//				theLog.log(Level.FINE,"Propagating geometry change due to added appearance");
+//				break;				
+//			case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
+//				lightListDirty = true;
+//				break;
+//			case SceneGraphComponentEvent.CHILD_TYPE_TRANSFORMATION:
+//				updateTransformationInfo();
+//				break;
+//			default:
+//				theLog.log(Level.INFO,"Taking no action for addition of child type "+ev.getChildType());
+//			break;
+//			}
+//		}
+//
+//		private void handleNewAppearance() {
+//    		LoggingSystem.getLogger(this).finer("handle new appearance "+goBetween.originalComponent.getName());
+//			int changed = ALL_CHANGED;
+//			propagateGeometryChanged(changed);	
+//			appearanceDirty = true;
+//			effectiveAppearanceDirty=true;
+//		}
+//
+//		public void childRemoved(SceneGraphComponentEvent ev) {
+//			theLog.log(Level.FINE,"Container Child removed from: "+goBetween.getOriginalComponent().getName());
+//			switch (ev.getChildType() )	{
+//			case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
+//				updateRenderRunnable();
+//				break;
+//
+//			case SceneGraphComponentEvent.CHILD_TYPE_COMPONENT:
+//				SceneGraphComponent sgc = (SceneGraphComponent) ev.getOldChildElement();
+//				JOGLPeerComponent jpc = getPeerForChildComponent(sgc);
+//				if (jpc == null) return;
+//				//childlock.writeLock();
+//				children.remove(jpc);						
+//				//childlock.writeUnlock();
+//				//theLog.log(Level.FINE,"After removal child count is "+children.size());
+//				jpc.dispose();		// there are no other references to this child
+//				setIndexOfChildren();
+//				lightListDirty = true;
+//				break;
+//			case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
+//				handleNewAppearance();
+//				theLog.log(Level.FINE,"Propagating geometry change due to removed appearance");
+//				break;				
+//			case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
+//				lightListDirty = true;
+//				break;
+//			case SceneGraphComponentEvent.CHILD_TYPE_TRANSFORMATION:
+//				updateTransformationInfo();
+//				break;			
+//			default:
+//				theLog.log(Level.INFO,"Taking no action for removal of child type "+ev.getChildType());
+//			break;
+//			}
+//		}
+//
+//		public void childReplaced(SceneGraphComponentEvent ev) {
+//			theLog.log(Level.FINE,"Container Child replaced at: "+goBetween.getOriginalComponent().getName());
+//			switch(ev.getChildType())	{
+//			case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
+//				renderRunnableDirty = true; 
+//				break;
+//
+//			case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
+//				handleNewAppearance();
+//				theLog.log(Level.INFO,"Propagating geometry change due to replaced appearance");
+//				break;
+//			case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
+//				lightListDirty = true;
+//				break;
+//			case SceneGraphComponentEvent.CHILD_TYPE_TRANSFORMATION:
+//				updateTransformationInfo();
+//				break;
+//			default:
+//				theLog.log(Level.INFO,"Taking no action for replacement of child type "+ev.getChildType());
+//			break;
+//			}
+//		}
+//
+//		public void transformationMatrixChanged(TransformationEvent ev) {
+//			// TODO notify ancestors that their bounds are no longer valid
+//			updateTransformationInfo();
+//		}
+//
+//		/**
+//		 * 
+//		 */
+//		private void updateTransformationInfo() {
+//			if (goBetween.getOriginalComponent().getTransformation() != null) {
+////				isReflection = goBetween.getOriginalComponent().getTransformation().getIsReflection();
+//				isReflection = Rn.determinant(goBetween.getOriginalComponent().getTransformation().getMatrix()) < 0;
+//			} else {
+//				determinant  = 0.0;
+//				isReflection = false;
+//			}
+//		}
+//
+//		public void propagateGeometryChanged(int changed) {
+////			theLog.finer("set bits to "+changed);
+//			geometryDirtyBits  = changed;
+//			childlock.readLock();
+//			for (JOGLPeerComponent child: children){		
+//				child.propagateGeometryChanged(changed);
+//			}	
+//			childlock.readUnlock();
+//
+//		}
+//
+//		private void handleChangedGeometry() {
+//			if (geometryShader != null)	{
+////				theLog.fine("Handling bits: "+geometryDirtyBits+" for "+goBetween.originalComponent.getName());
+//				if (geometryShader.pointShader != null && (geometryDirtyBits  & POINTS_CHANGED) != 0) geometryShader.pointShader.flushCachedState(JOGLRenderer.this);
+//				if (geometryShader.lineShader != null && (geometryDirtyBits  & LINES_CHANGED) != 0) geometryShader.lineShader.flushCachedState(JOGLRenderer.this);
+//				if (geometryShader.polygonShader != null && (geometryDirtyBits  & FACES_CHANGED) != 0) geometryShader.polygonShader.flushCachedState(JOGLRenderer.this);				
+//				if ((geometryDirtyBits  & POINT_SHADER_CHANGED) != 0) geometryShader.pointShader = null;
+//				if ((geometryDirtyBits  & LINE_SHADER_CHANGED) != 0) geometryShader.lineShader = null;
+//				if ((geometryDirtyBits  & POLYGON_SHADER_CHANGED) != 0) geometryShader.polygonShader = null;
+//				if ((geometryDirtyBits  & ALL_SHADERS_CHANGED) != 0)updateShaders();
+//				// set the dirty flag to clean again
+//                geometryDirtyBits  = 0;
+//			}
+//		}
+//
+//		private void setDisplayListDirty()	{
+//            geometryDirtyBits = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
+//		}
+//
+//		public SceneGraphComponent getOriginalComponent() {
+//			return goBetween.getOriginalComponent();
+//		}
+//
+//		public void visibilityChanged(SceneGraphComponentEvent ev) {
+//		}
+//	}
 
 	private int clearColorBits;
 	private GLPbuffer offscreenPBuffer;
