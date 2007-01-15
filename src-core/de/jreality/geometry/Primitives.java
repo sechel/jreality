@@ -344,27 +344,33 @@ public class Primitives {
 		 * @return
 		 * @see Cylinder  
 		 */
-		 public static IndexedFaceSet cylinder(int n) {
+		 public static IndexedFaceSet cylinder(int n )	{
+			 return cylinder(n, 1, -1, 1, Math.PI*2);
+		 }
+		 
+		 public static IndexedFaceSet cylinder(int n,   double r, double zmin, double zmax, double thetamax) {
 			int rn = n+1;
 			double[] verts = new double[2*3*rn];
-			double angle = 0, delta = Math.PI*2/(n);
+			double angle = 0, delta = thetamax/(n);
 			for (int i = 0 ;i<rn; ++i)	{
 				angle = i*delta;
-				verts[3*(i+rn)] = verts[3*i] = Math.cos(angle);
-				verts[3*(i+rn)+1] = verts[3*i+1] = Math.sin(angle);
-				verts[3*i+2] = 1;
-				verts[3*(i+rn)+2] = -1;
+				verts[3*(i+rn)] = verts[3*i] = r*Math.cos(angle);
+				verts[3*(i+rn)+1] = verts[3*i+1] = r*Math.sin(angle);
+				verts[3*i+2] = zmax;
+				verts[3*(i+rn)+2] = zmin;
 			}
 			QuadMeshFactory qmf = new QuadMeshFactory();//Pn.EUCLIDEAN, n+1, 2, true, false);
 			qmf.setULineCount(n+1);
 			qmf.setVLineCount(2);
-			qmf.setClosedInUDirection(true);
+			qmf.setClosedInUDirection(Math.abs(Math.PI*2-thetamax) < 10E-8);
 			qmf.setVertexCoordinates(verts);
 			qmf.setGenerateEdgesFromFaces(true);
 			qmf.setGenerateFaceNormals(true);
 			qmf.setGenerateVertexNormals(true);
 			qmf.update();
-			return qmf.getIndexedFaceSet();
+			IndexedFaceSet ifs = qmf.getIndexedFaceSet();
+			ifs.setGeometryAttributes(CommonAttributes.RMAN_PROXY_COMMAND, "Cylinder "+r+" "+zmin+" "+zmax+" "+180.0/Math.PI * thetamax);
+			return ifs;
 		}
 		
 		/**
