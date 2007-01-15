@@ -34,14 +34,14 @@ public class RIBHelper {
 	public static RendermanShader convertToRenderman(PolygonShader ps, RIBVisitor ribv, String name)	{
 		RendermanShader rs = null;
 		if (ps instanceof de.jreality.shader.DefaultPolygonShader)	{
-			System.err.println("processing defaultpolygonshader");
+//			System.err.println("processing defaultpolygonshader");
 			de.jreality.shader.DefaultPolygonShader dps = (de.jreality.shader.DefaultPolygonShader) ps;
 			DefaultPolygonShader rdps = new DefaultPolygonShader(dps);
 			rdps.setFromEffectiveAppearance(ribv, ribv.eAppearance, name);
 			rs = rdps;
 		} 
 		else if (ps instanceof de.jreality.shader.TwoSidePolygonShader)	{
-			System.err.println("processing twosidepolygonshader");
+//			System.err.println("processing twosidepolygonshader");
 			de.jreality.shader.TwoSidePolygonShader dps = (de.jreality.shader.TwoSidePolygonShader) ps;
 			TwoSidePolygonShader rdps = new TwoSidePolygonShader(dps);
 			rdps.setFromEffectiveAppearance(ribv, ribv.eAppearance, name);
