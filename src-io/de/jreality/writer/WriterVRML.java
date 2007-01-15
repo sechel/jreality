@@ -24,6 +24,7 @@ import java.util.logging.Level;
 import javax.imageio.stream.FileImageInputStream;
 
 import de.jreality.math.Matrix;
+import de.jreality.math.Pn;
 import de.jreality.reader.vrml.VRMLParser;
 import de.jreality.reader.vrml.VRMLV1Lexer;
 import de.jreality.reader.vrml.VRMLV1Parser;
@@ -249,6 +250,7 @@ public class WriterVRML {
 	private static void writeCoordinates(double[][] points,String hist){
 		out.println(hist+"Coordinate3 { point [");
 		String hist2=hist+spacing;
+		if (points[0].length == 4) points = Pn.dehomogenize(points, points);
 		for(int i=0;i<points.length;i++)
 			writeDoubleArray(points[i],hist2,",",3);
 		out.println(hist+"]}");
@@ -256,6 +258,7 @@ public class WriterVRML {
 	private static void writeNormals(double[][] normals,String hist){
 		out.println(hist+"Normal { vector  [");
 		String hist2=hist+spacing;
+		if (normals[0].length == 4) normals = Pn.dehomogenize(normals, normals);
 		for(int i=0;i<normals.length;i++)
 			writeDoubleArray(normals[i],hist2,",",3);
 		out.println(hist+"]}");	
