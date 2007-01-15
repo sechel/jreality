@@ -60,6 +60,7 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.data.IntArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
@@ -233,21 +234,24 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		if (!sphereDraw)	{
 			lighting = false;
 			gl.glPointSize((float) getPointSize());
-			try {
-				gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, 
-						attenuatePointSize ? pointAttenuation : noPointAttentuation, 0);
-			} catch (Exception e){
-				//TODO: i dont know - got error on ati radeon 9800
-			}
-			gl.glEnable(GL.GL_POINT_SMOOTH);
+			// temporarily commented out since this doesn't work on my powerbook with ati radeon
+			// (no exception, but the points don't show up no matter what the arguments given
+//			try {
+//				gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, 
+//						attenuatePointSize ? pointAttenuation : noPointAttentuation, 0);
+//			} catch (Exception e){
+//				//TODO: i dont know - got error on ati radeon 9800
+//			}
+//			gl.glEnable(GL.GL_POINT_SMOOTH);
 			gl.glEnable(GL.GL_POINT_SPRITE_ARB);
-			// TODO make sure this is OK; perhaps add field to JOGLRenderingState: nextAvailableTextureUnit?
+//			// TODO make sure this is OK; perhaps add field to JOGLRenderingState: nextAvailableTextureUnit?
 			gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
 			if (currentTex == tex && (jrs.getCurrentGeometry() instanceof PointSet) && 
 					((PointSet)jrs.getCurrentGeometry()).getVertexAttributes(Attribute.COLORS) != null)
 				tex.setApplyMode(Texture2D.GL_MODULATE);
-			else tex.setApplyMode(Texture2D.GL_REPLACE);
+			else 
+				tex.setApplyMode(Texture2D.GL_REPLACE);
 			Texture2DLoaderJOGL.render(gl, currentTex);
 			gl.glEnable(GL.GL_TEXTURE_2D);
 		} else	{
@@ -258,9 +262,9 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			jrs.setCurrentGeometry(g);
 		}
 		
-			jr.getRenderingState().lighting = lighting;
-			if (lighting) gl.glEnable(GL.GL_LIGHTING);
-			else gl.glDisable(GL.GL_LIGHTING);
+		jr.getRenderingState().lighting = lighting;
+		if (lighting) gl.glEnable(GL.GL_LIGHTING);
+		else gl.glDisable(GL.GL_LIGHTING);
 		
 	}
 
@@ -290,10 +294,15 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		if (original instanceof PointSet)	{
 			PointSet ps = (PointSet) original;
 			DataList vertices = ps.getVertexAttributes(Attribute.COORDINATES);
+			if (vertices == null)	
+				return -1; //throw new IllegalStateException("No vertex coordinates for "+ps.getName());
+			DataList piDL = ps.getVertexAttributes(Attribute.INDICES);
+			IntArray vind = null;
+			if (piDL != null) vind = piDL.toIntArray();
 			DataList vertexColors = ps.getVertexAttributes(Attribute.COLORS);
 			DataList radii = ps.getVertexAttributes(Attribute.RADII);
-			DoubleArray da = null;
-			if (radii != null) da = radii.toDoubleArray();
+			DoubleArray da = null, ra = null;
+			if (radii != null) ra = radii.toDoubleArray();
 			//JOGLConfiguration.theLog.log(Level.INFO,"VC is "+vertexColors);
 			int colorLength = 0;
 			if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
@@ -310,19 +319,16 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			double[] mat = Rn.identityMatrix(4);
 			double[] scale = Rn.identityMatrix(4);
 			scale[0] = scale[5] = scale[10] = pointRadius;
-			int length = n;
-			//JOGLConfiguration.theLog.log(Level.INFO,"Signature is "+sig);
-			//sig = Pn.EUCLIDEAN;
+			int length = n; //vind == null ? n : vind.getLength();
 			boolean pickMode = jr.isPickMode();
 			if (pickMode) gl.glPushName(JOGLPickAction.GEOMETRY_POINT);
 			for (int i = 0; i< length; ++i)	{
-				double[] transVec = null;
-				transVec =  vertices.item(i).toDoubleArray().toDoubleArray(null);
+				if (vind != null && vind.getValueAt(i) == 0) continue;
+				int index = i;
+				double[] transVec =  vertices.item(index).toDoubleArray(null);
 				if (! Pn.isValidCoordinate(transVec, 3, sig)) continue;
-				if (radii != null)	{
-                    //Tim:
-				    //double radius = da.getValueAt(i);
-                    double radius = radii.toDoubleArray().getValueAt(i);
+				if (ra != null)	{
+                    double radius = ra.getValueAt(i);
 					scale[0] = scale[5] = scale[10] = radius;
 				}
 				gl.glPushMatrix();
@@ -330,14 +336,14 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 				Rn.times(mat, mat, scale);
 				gl.glMultTransposeMatrixd(mat,0);
 				if (vertexColors != null)	{
-					da = vertexColors.item(i).toDoubleArray();
+					da = vertexColors.item(index).toDoubleArray();
 					if (colorLength == 3) 	{
 						gl.glColor3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 					} else if (colorLength == 4) 	{
 						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
 					} 
 				}
-				if (pickMode) gl.glPushName(i);
+				if (pickMode) gl.glPushName(index);
 				gl.glCallList(dlist);
 				if (pickMode) gl.glPopName();
 				gl.glPopMatrix();

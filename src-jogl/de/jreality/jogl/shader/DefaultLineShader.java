@@ -264,7 +264,6 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		double[][] oneCurve = null;
 		double[][] crossSection = TubeUtility.octagonalCrossSection;
 		if (jr.getRenderingState().levelOfDetail == 0.0) crossSection = TubeUtility.diamondCrossSection;
-		int n = ils.getNumEdges();
 		DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
 		DataList radiidl = ils.getEdgeAttributes(Attribute.RADII);
 		DoubleArray radii = null;
@@ -292,9 +291,10 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		int  k, l;
 		DoubleArray da;
 		double[] mat = new double[16];
+		DataList edgec =  ils.getEdgeAttributes(Attribute.COLORS);
+		int n = ils.getNumEdges();
 		for (int i = 0; i<n; ++i)	{
 			IntArray ia = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray();
-			DataList edgec =  ils.getEdgeAttributes(Attribute.COLORS);
 			int m = ia.size();
 			if (radii != null)	{
 				rad = radii.getValueAt(i);
@@ -308,7 +308,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				if (clength == 3) gl.glColor3d(edgecolor.getValueAt(0), edgecolor.getValueAt(1), edgecolor.getValueAt(2));
 				else gl.glColor4d(edgecolor.getValueAt(0), edgecolor.getValueAt(1), edgecolor.getValueAt(2), edgecolor.getValueAt(3));
 			}
-		    System.err.println(m+" edges");
+		    //System.err.println(m+" edges");
 			if (m == 2 || pickMode)	{		// probably an IndexedFaceSet 
 				faceCount += (m-1)*tubeFaces;
 
