@@ -25,7 +25,6 @@ import de.jreality.util.LoggingSystem;
 
 public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 	public Geometry originalGeometry;
-	Geometry[] tubeGeometry, proxyPolygonGeometry;
 	IndexedFaceSet ifs;
 	IndexedLineSet ils;
 	PointSet ps;

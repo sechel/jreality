@@ -293,7 +293,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 						}
 						jr.getGL().glCallList(dList);
 					} else
-            JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);			
+						JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);			
 				}	
 			}
 		}

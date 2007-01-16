@@ -236,13 +236,13 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			gl.glPointSize((float) getPointSize());
 			// temporarily commented out since this doesn't work on my powerbook with ati radeon
 			// (no exception, but the points don't show up no matter what the arguments given
-//			try {
-//				gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, 
-//						attenuatePointSize ? pointAttenuation : noPointAttentuation, 0);
-//			} catch (Exception e){
-//				//TODO: i dont know - got error on ati radeon 9800
-//			}
-//			gl.glEnable(GL.GL_POINT_SMOOTH);
+			try {
+				gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, 
+						attenuatePointSize ? pointAttenuation : noPointAttentuation, 0);
+			} catch (Exception e){
+				//TODO: i dont know - got error on ati radeon 9800
+			}
+			gl.glEnable(GL.GL_POINT_SMOOTH);
 			gl.glEnable(GL.GL_POINT_SPRITE_ARB);
 //			// TODO make sure this is OK; perhaps add field to JOGLRenderingState: nextAvailableTextureUnit?
 			gl.glActiveTexture(GL.GL_TEXTURE0);
@@ -310,7 +310,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			int resolution = 1;
 			if (jr.getRenderingState().levelOfDetail == 0.0) resolution = 0;
 			int dlist = JOGLSphereHelper.getSphereDLists(resolution, jr);
-			polygonCount += n*24*resolution*(resolution+1)+6;
+			polygonCount = n*24*resolution*(resolution+1)+6;
 			int nextDL = -1;
 			if (useDisplayLists)	{
 				nextDL = gl.glGenLists(1);
@@ -370,21 +370,39 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		preRender(jrs);
 		if (g != null)	{
 			if (providesProxyGeometry())	{
-				jr.getRenderingState().polygonCount += polygonCount;
 				if (!useDisplayLists || jr.isPickMode() || dListProxy == -1) {
-					dListProxy  = proxyGeometryFor(jrs);
+					boolean alreadyThere = jrs.getRenderer().pointProxyDisplayLists.get(g) != null;
+					if (!jrs.manyDisplayLists && alreadyThere) {
+						dListProxy = jrs.getRenderer().pointProxyDisplayLists.get(g);
+					} else {
+						dListProxy  = proxyGeometryFor(jrs);						
+					}
+			        if (!jrs.manyDisplayLists && !alreadyThere) {
+			        	jrs.getRenderer().pointProxyDisplayLists.put(g, dListProxy);
+			        	LoggingSystem.getLogger(this).fine("hash table has "+jrs.getRenderer().pointProxyDisplayLists.size()+" entries");
+			        	LoggingSystem.getLogger(this).fine("Adding entry for "+g.getName());
+			        }
 				}
 				jr.getGL().glCallList(dListProxy);
+				jr.getRenderingState().polygonCount += polygonCount;
 			}
 			else {
 				if (!useDisplayLists || jr.isPickMode()) {
 					JOGLRendererHelper.drawVertices(jr, (PointSet) g,   jr.getRenderingState().diffuseColor[3]);
 				} else {
 					if (useDisplayLists && dList == -1)	{
-						dList = jr.getGL().glGenLists(1);
-						jr.getGL().glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
-						JOGLRendererHelper.drawVertices(jr, (PointSet) g,  jr.getRenderingState().diffuseColor[3]);
-						jr.getGL().glEndList();	
+						if (!jrs.manyDisplayLists && jrs.getRenderer().pointDisplayLists.get(g) != null) 
+							dList = jrs.getRenderer().pointDisplayLists.get(g);
+						else {
+							dList = jr.getGL().glGenLists(1);
+							jr.getGL().glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
+							JOGLRendererHelper.drawVertices(jr, (PointSet) g,  jr.getRenderingState().diffuseColor[3]);
+							jr.getGL().glEndList();	
+					        if (!jrs.manyDisplayLists) {
+					        	jrs.getRenderer().pointDisplayLists.put(g, dList);
+					        	LoggingSystem.getLogger(this).fine("hash table has "+jrs.getRenderer().pointDisplayLists.size()+" entries");
+					        }
+						}
 					}
 					jr.getGL().glCallList(dList);
 				} 

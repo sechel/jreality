@@ -20,6 +20,7 @@ import de.jreality.scene.event.SceneGraphComponentListener;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.util.LoggingSystem;
 
 // register for geometry change events
 //static Hashtable goBetweenTable = new Hashtable();
@@ -97,7 +98,7 @@ public class GoBetween extends JOGLPeerNode implements GeometryListener, Transfo
 
 	public void appearanceChanged(AppearanceEvent ev) {
 		String key = ev.getKey();
-		System.err.println("Appearance changed "+key);
+		LoggingSystem.getLogger(this).fine("Appearance changed "+key);
 		int changed = 0;
 		boolean propagates = true;
 		// TODO shaders should register keywords somehow and which geometries might be changed
