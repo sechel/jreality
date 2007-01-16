@@ -125,6 +125,11 @@ public class QuadMeshFactory extends AbstractQuadMeshFactory {
 		super.setVertexNormals( data );
 	}
 	
+	public void setVertexNormals(double[][][] data) {
+		double[][] ncs = convertDDDtoDD(data);
+		setVertexNormals(ncs);
+	}
+	
 	public void setVertexColors( DataList data ) {
 		super.setVertexColors( data );
 	}
@@ -147,6 +152,11 @@ public class QuadMeshFactory extends AbstractQuadMeshFactory {
 	
 	public void setVertexTextureCoordinates( double [][] data ) {
 		super.setVertexTextureCoordinates( data );
+	}
+	
+	public void setVertexTextureCoordinates(double[][][] data) {
+		double[][] ncs = convertDDDtoDD(data);
+		setVertexTextureCoordinates(ncs);
 	}
 
 	public void setVertexLabels( String [] data ) {
