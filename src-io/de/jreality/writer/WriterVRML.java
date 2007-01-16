@@ -12,14 +12,10 @@ package de.jreality.writer;
  * 
  */
 import java.awt.Color;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileReader;
+import java.awt.image.BufferedImage;
 import java.io.FileWriter;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.logging.Level;
 
 import javax.imageio.stream.FileImageInputStream;
 
@@ -41,16 +37,20 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ImageData;
+import de.jreality.shader.ShaderUtility;
+import de.jreality.shader.Texture2D;
 
 
 public class WriterVRML {
 	private static final int PER_VERTEX=0,PER_FACE=1;
-	
+
 	private static PrintWriter out=null;
 	private static final String spacing="  ";// for outlay
-	
+
 	public static void write( SceneGraphComponent sgc, OutputStream outS ) {
 		write( sgc, new PrintWriter( outS ));
 	}
@@ -64,8 +64,8 @@ public class WriterVRML {
 		out.flush();
 	}
 	static int count=0; // counts component depth in the tree 
-	
-// ---------------------------- start writing --------------------
+
+//	---------------------------- start writing --------------------
 	private static void writeComp(SceneGraphComponent c,String hist,EffectiveAppearance parentEA){
 		count++;
 		int co=	count;
@@ -76,48 +76,48 @@ public class WriterVRML {
 		Light li = c.getLight();
 		EffectiveAppearance eApp=(c.getAppearance()!=null)?
 				parentEA.create(c.getAppearance()):
-				parentEA;
-		Appearance app =c.getAppearance();
-		Transformation t= c.getTransformation();
-		out.print(""+hist+"Separator { ");
-		out.println("# "+c.getName());
-		String hist2= hist+spacing;
-		if (t!=null)		writeTrafo(t,hist2);
-		if (app!=null)		writeAppColorAndTrans(app,eApp,hist2);
-		for (int i=0;i<c.getChildComponentCount();i++)
-			writeComp(c.getChildComponent(i),hist2,eApp);
-		if (g!=null)		writeGeo(g,eApp,hist2);	//TODO
-		if (li!=null)		writeLight(li,eApp,hist2);//TODO
-		if (cam!=null)		writeCam(cam,hist2);//TODO 3
-		out.println(""+hist+"}");
-		System.out.println("WriterVRML.Ende"+co);
-		
+					parentEA;
+				Appearance app =c.getAppearance();
+				Transformation t= c.getTransformation();
+				out.print(""+hist+"Separator { ");
+				out.println("# "+c.getName());
+				String hist2= hist+spacing;
+				if (t!=null)		writeTrafo(t,hist2);
+				if (app!=null)		writeAppColorAndTrans(app,eApp,hist2);
+				for (int i=0;i<c.getChildComponentCount();i++)
+					writeComp(c.getChildComponent(i),hist2,eApp);
+				if (g!=null)		writeGeo(g,eApp,hist2);	//TODO
+				if (li!=null)		writeLight(li,eApp,hist2);//TODO
+				if (cam!=null)		writeCam(cam,hist2);//TODO 3
+				out.println(""+hist+"}");
+				System.out.println("WriterVRML.Ende"+co);
+
 	}
 	private static void writeAppColorAndTrans(Appearance app,EffectiveAppearance eApp,String hist){
 		// single color ,transparency
-	if (app.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.AMBIENT_COLOR)!=null
-		||app.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR)!=null
-		||app.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COLOR)!=null
-		||app.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY)!=null){
-		String hist2=hist+spacing;
-		Color c;
-		out.println(hist+"Material { ");
-		// have to set all colors simultaniusly, otherwise not set colors return to defaultValue
-		c=(Color)eApp.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.AMBIENT_COLOR, Color.BLUE);
-		out.println(hist2+"ambientColor " + ColorToString(c) );
-		
-		c=(Color)eApp.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.BLUE);
-		out.println(hist2+"diffuseColor " + ColorToString(c) );
-		
-		c=(Color)eApp.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COLOR, Color.BLACK);
-		out.println(hist2+"specularColor " + ColorToString(c) );
-		
-		if(eApp.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY_ENABLED,false)){
-			double tr =(double)eApp.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY,0.0);
-			out.println(hist2+"transparency " + tr );
-		}
-		
-		out.println(hist+"}");}
+		if (app.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.AMBIENT_COLOR)!=null
+				||app.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR)!=null
+				||app.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COLOR)!=null
+				||app.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY)!=null){
+			String hist2=hist+spacing;
+			Color c;
+			out.println(hist+"Material { ");
+			// have to set all colors simultaniusly, otherwise not set colors return to defaultValue
+			c=(Color)eApp.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.AMBIENT_COLOR, Color.BLUE);
+			out.println(hist2+"ambientColor " + ColorToString(c) );
+
+			c=(Color)eApp.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.BLUE);
+			out.println(hist2+"diffuseColor " + ColorToString(c) );
+
+			c=(Color)eApp.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COLOR, Color.BLACK);
+			out.println(hist2+"specularColor " + ColorToString(c) );
+
+			if(eApp.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY_ENABLED,false)){
+				double tr =(double)eApp.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY,0.0);
+				out.println(hist2+"transparency " + tr );
+			}
+
+			out.println(hist+"}");}
 	}
 	private static void writeGeo(Geometry g,EffectiveAppearance eApp,String hist){
 		if (g instanceof IndexedFaceSet)
@@ -130,7 +130,7 @@ public class WriterVRML {
 	}
 	private static void writeGeoFaces(IndexedFaceSet f,EffectiveAppearance eApp,String hist){
 		// writes an Indexed Faceset
-		
+
 		// write the coordinates:
 		writeCoordinates(f.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null),hist);
 		// writes the Normals depending on smooth or flat shading:
@@ -155,14 +155,16 @@ public class WriterVRML {
 			writeMaterialBinding(PER_VERTEX,hist);
 			writeColors(f.getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null),eApp,hist);
 		}
-		
-		
-//		   IndexedFaceSet {
-//		          coordIndex         0  # MFLong indies
-//		          materialIndex      -1 # MFLong egal
-//		          normalIndex        -1 # MFLong egal
-//		          textureCoordIndex  -1 # MFLong spaeter
-//		     }
+
+		// write face texture
+		writeTexture(hist, eApp);
+
+//		IndexedFaceSet {
+//		coordIndex         0  # MFLong indies
+//		materialIndex      -1 # MFLong egal
+//		normalIndex        -1 # MFLong egal
+//		textureCoordIndex  -1 # MFLong spaeter
+//		}
 		out.print(hist+"IndexedFaceSet {");
 		out.println(" # "+ f.getName());
 		// writes the FaceIndices
@@ -182,12 +184,12 @@ public class WriterVRML {
 			writeColors(l.getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null),eApp,hist);
 		}
 		// write object
-//		   IndexedLineSet {
-//		          coordIndex         0  # ok
-//		          materialIndex      -1 # egal
-//		          normalIndex        -1 # egal
-//		          textureCoordIndex  -1 # egal
-//		     }
+//		IndexedLineSet {
+//		coordIndex         0  # ok
+//		materialIndex      -1 # egal
+//		normalIndex        -1 # egal
+//		textureCoordIndex  -1 # egal
+//		}
 		out.print(hist+"IndexedLineSet {");
 		out.println(" # "+ l.getName());
 		// writes the edgeIndices
@@ -203,10 +205,10 @@ public class WriterVRML {
 			writeColors(p.getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null),eApp,hist);
 		}
 		// write object
-//		  PointSet {
-//	          startIndex  0 	# deafault ok
-//	          numPoints   -1    # ok
-//	     }
+//		PointSet {
+//		startIndex  0 	# deafault ok
+//		numPoints   -1    # ok
+//		}
 		out.print(hist+"PointSet {");
 		out.println(" # "+ p.getName());
 		out.println(hist+ spacing + "numPoints "+ p.getNumPoints());
@@ -266,7 +268,7 @@ public class WriterVRML {
 	private static void writeColors(double[][] Colors,EffectiveAppearance eApp,String hist){
 		out.println(hist+"Material { ");
 		out.println(hist+spacing+"diffuseColor  [");
-		String hist2=hist+spacing;
+		String hist2=hist+spacing+spacing;
 		for(int i=0;i<Colors.length;i++){
 			writeDoubleArray(Colors[i],hist2,",",3);
 		}
@@ -310,6 +312,72 @@ public class WriterVRML {
 			writeDoubleArray(n,hist,"",n.length);
 		}
 	}
+	public static void writeTexture(String hist,EffectiveAppearance eApp){
+//		WRAP ENUM
+//		REPEAT  Repeats texture outside 0-1 texture coordinate range
+//		CLAMP   Clamps texture coordinates to lie within 0-1 range
+//		FILE FORMAT/DEFAULTS
+//		Texture2 {
+//		filename    ""        # SFString egal
+//		image       0 0 0     # SFImage
+//		wrapS       REPEAT    # SFEnum later 
+//		wrapT       REPEAT    # SFEnum later
+//		}
+//		Texture2Transform {
+//		translation  0 0      # SFVec2f
+//		rotation     0        # SFFloat
+//		scaleFactor  1 1      # SFVec2f
+//		center       0 0      # SFVec2f
+//		}
+//		TextureCoordinate2 {
+//		point  0 0    # MFVec2f
+//		}
+		String hist2=hist+spacing;
+		String hist3=hist2+spacing;
+
+//		image to data
+		if (eApp!=null){
+			Texture2D texture=null;
+			texture =(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("", CommonAttributes.TEXTURE_2D), eApp);
+			
+			//texture=(Texture2D)eApp.getAttribute(CommonAttributes.TEXTURE_2D,texture,Texture2D.class);
+						
+			out.println(hist+"Texture2 {");
+			if (texture!=null){
+				System.out.println("jaeaeaeaeaeaeaes");
+			writeImage(texture,hist+spacing);
+			}
+//			texture.getRepeatS()
+//			texture.getRepeatT()
+			out.println(hist+"}");
+
+
+
+//			texture.getTextureMatrix()
+		}
+
+	}
+
+	public static void writeImage(Texture2D tex,String hist){
+		ImageData id=tex.getImage();
+		String hist2=hist+spacing;
+		byte[] data= id.getByteArray();
+		int w=id.getWidth();
+		int h=id.getHeight();
+		int dim= data.length/(w*h);
+
+		out.print(hist+"image ");
+		out.println(""+w+" "+h+" "+dim);
+		for (int i = 0; i < w*h; i++) {
+			int mergeVal=0;
+			for (int k = 0; k < dim; k++) {
+				mergeVal*=256;
+				mergeVal+=data[i*4+k];
+			}
+			out.println(hist2+""+ Integer.toHexString(mergeVal));
+		}
+
+	}
 	public static void writeIndices(int[][] in,String hist){
 		out.println(hist+"coordIndex ["); 		
 		for (int i=0;i<in.length;i++){
@@ -322,35 +390,6 @@ public class WriterVRML {
 		}
 		out.println(hist+"]");
 	}
-// -----------------------------
-//	public static void main(String[] args) {
-//		//String loadFile="/homes/geometer/gonska/VrmlFiles/lasertrk.wrl";
-//		//String loadFile="/homes/geometer/gonska/VrmlFiles/test.wrl";
-//		//String loadFile="/homes/geometer/gonska/VrmlFiles/BindingMTest.wrl";
-//		String loadFile="/homes/geometer/gonska/VrmlFiles/geoTest.wrl";
-//		//String loadFile="/homes/geometer/gonska/VrmlFiles/hangglider.wrl";
-//		
-//		String saveFile="/homes/geometer/gonska/VrmlFiles/ich.wrl";
-//		//String saveFile="/homes/geometer/gonska/VrmlFiles/hangglider.wrl";
-//		
-//		FileReader in=null;
-//		PrintWriter outs=null;
-//		VRMLV1Parser v=null;
-//		SceneGraphComponent comp=null;
-//		
-//		try {
-//			in=new FileReader(new File(loadFile));
-//			v=new VRMLV1Parser(new VRMLV1Lexer(in));
-//			comp=v.vrmlFile();
-//
-//			outs= new PrintWriter(new FileWriter(saveFile));
-//			WriterVRML.write(comp, outs);
-//
-//			in=new FileReader(new File(saveFile));
-//			v=new VRMLV1Parser(new VRMLV1Lexer(in));
-//			comp=v.vrmlFile();
-//			
-//			ViewerApp.display(comp);
-//		} catch (Exception e) {e.printStackTrace();}
-//	}
+//	-----------------------------
+
 }
