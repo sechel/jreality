@@ -84,7 +84,6 @@ public class GoBetween extends JOGLPeerNode implements GeometryListener, Transfo
 		for ( JOGLPeerComponent peer: peers)	{
 			peer.setDisplayListDirty();
 		}
-		peersLock.readLock();
 		peersLock.readUnlock();
 	}
 
