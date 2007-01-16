@@ -168,7 +168,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			jr.globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
 			jr.renderingState.flipped  = cumulativeIsReflection;
 		}
-//		if (geometryDirtyBits  != 0)	handleChangedGeometry();
+		if (geometryDirtyBits  != 0)	handleChangedGeometry();
 		if (originalAppearanceDirty) propagateAppearanceChanged();
 		if (appearanceDirty || effectiveAppearanceDirty)  	handleAppearanceChanged();
 		if (!isCopyCat && goBetween != null && goBetween.peerGeometry != null && goBetween.peerGeometry.originalGeometry != null )	{
@@ -498,7 +498,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			if ((geometryDirtyBits  & LINE_SHADER_CHANGED) != 0) geometryShader.lineShader = null;
 			if ((geometryDirtyBits  & POLYGON_SHADER_CHANGED) != 0) geometryShader.polygonShader = null;
 			if ((geometryDirtyBits  & ALL_SHADERS_CHANGED) != 0)updateShaders();
-			if (goBetween.originalComponent.getGeometry() != null) {
+			if (!jr.renderingState.manyDisplayLists && goBetween.originalComponent.getGeometry() != null) {
 				jr.removeGeometryDisplayLists(goBetween.originalComponent.getGeometry());
 			}
             geometryDirtyBits  = 0;
