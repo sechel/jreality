@@ -268,6 +268,8 @@ public class ViewerVR {
 
 		// content appearearance
 		contentAppearance.setName("contentApp");
+		
+//		contentAppearance.setAttribute("sunflowShader", "glass");
 		sceneNode.setAppearance(contentAppearance);
 
 		sceneRoot.addChild(sceneNode);
@@ -333,7 +335,8 @@ public class ViewerVR {
 				double[] extent = bounds.getExtent();
 				double maxExtent = Math.max(extent[0], extent[2]);
 				if (maxExtent != 0) {
-					terrainScale = TERRAIN_SIZE / maxExtent;
+					//terrainScale = TERRAIN_SIZE / maxExtent;
+					terrainScale=1;
 					double[] translation = bounds.getCenter();
 
 					// determine offset in y-direction (up/down)

@@ -55,13 +55,13 @@ import de.jtem.beans.SimpleColorChooser;
 public class TerrainPluginVR extends AbstractPluginVR {
 
 	// maximal value of texture scale
-	private static final double MAX_TEX_SCALE = 400;
+	private static final double MAX_TEX_SCALE = 10;
 	
 	// ratio of maximal value and minimal value of texture scale
 	private static final double TEX_SCALE_RANGE = 400;
 
 	// defaults
-	private static final double DEFAULT_TEX_SCALE = 20;
+	private static final double DEFAULT_TEX_SCALE = .5;
 	private static final String DEFAULT_TEXTURE = "grid";
 	private static final String DEFAULT_TERRAIN = "flat";
 	private static final Color DEFAULT_FACE_COLOR=Color.white;
@@ -85,7 +85,9 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	static {
 		FLAT_TERRAIN = new SceneGraphComponent("flat terrain");
 		MatrixBuilder.euclidean().rotateX(Math.PI/2).assignTo(FLAT_TERRAIN);
-		FLAT_TERRAIN.setGeometry(Primitives.plainQuadMesh(1, 1, 50, 50));
+		//FLAT_TERRAIN.setGeometry(Primitives.plainQuadMesh(1, 1, 50, 50));
+		FLAT_TERRAIN.setGeometry(BigMesh.bigMesh(50, 50, 2000));
+		FLAT_TERRAIN.getGeometry().setGeometryAttributes("infinite plane", Boolean.TRUE);
 		PickUtility.assignFaceAABBTrees(FLAT_TERRAIN);
 	}
 	
