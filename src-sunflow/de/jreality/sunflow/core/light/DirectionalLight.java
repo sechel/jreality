@@ -52,7 +52,7 @@ public class DirectionalLight implements LightSource {
 		return (Vector3.dot(dir, n) > 0.0);
 	}
 
-	public void getSample(int i, ShadingState state, LightSample dest) {
+	public void getSample(int i, int n, ShadingState state, LightSample dest) {
 		// prepare shadow ray
 		Vector3 lightDir=dir;
 		if (distortion != 0) {
@@ -108,5 +108,9 @@ public class DirectionalLight implements LightSource {
 
 	public float getPower() {
 		return power.getLuminance();
+	}
+
+	public int getLowSamples() {
+		return 1;
 	}
 }

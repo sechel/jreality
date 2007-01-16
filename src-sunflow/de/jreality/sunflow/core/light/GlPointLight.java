@@ -38,13 +38,17 @@ public class GlPointLight implements LightSource {
         return 1;
     }
 
+	public int getLowSamples() {
+		return 1;
+	}
+
     public boolean isVisible(ShadingState state) {
         Point3 p = state.getPoint();
         Vector3 n = state.getNormal();
         return (Vector3.dot(Point3.sub(lightPoint, p, new Vector3()), n) > 0.0);
     }
 
-    public void getSample(int i, ShadingState state, LightSample dest) {
+    public void getSample(int i, int n, ShadingState state, LightSample dest) {
         // prepare shadow ray
         dest.setShadowRay(new Ray(state.getPoint(), lightPoint));
         float dist = lightPoint.distanceTo(state.getPoint());
