@@ -55,13 +55,13 @@ public interface RenderingHintsShader extends AttributeEntity {
 	  final static boolean ANY_DISPLAY_LISTS_DEFAULT = true;			// use display lists at all?
 	  final static boolean MANY_DISPLAY_LISTS_DEFAULT = true;			// if so, one display list per instance?
 	  final static boolean BACK_FACE_CULLING_DEFAULT = false;	
-	  final static boolean CLEAR_COLOR_BUFFER = true;
-	  final static boolean OPAQUE_TUBES_AND_SPHERES = false;
+	  final static boolean CLEAR_COLOR_BUFFER_DEFAULT = true;
+	  final static boolean OPAQUE_TUBES_AND_SPHERES_DEFAULT = false;
 	  final static double LEVEL_OF_DETAIL_DEFAULT = 			1.0;
 	  final static double DEPTH_FUDGE_FACTOR_DEFAULT = 1.0;
 	  final static boolean LOCAL_LIGHT_MODEL_DEFAULT = false;		
 	  final static boolean SEPARATE_SPECULAR_DEFAULT = false;
- 
+	  
 	  Boolean getLightingEnabled();
 	  void setLightingEnabled(Boolean b);
 
