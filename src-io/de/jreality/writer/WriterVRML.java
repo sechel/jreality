@@ -157,7 +157,7 @@ public class WriterVRML {
 		}
 
 		// write face texture
-		writeTexture(hist, eApp);
+		//writeTexture(hist, eApp);
 
 //		IndexedFaceSet {
 //		coordIndex         0  # MFLong indies
