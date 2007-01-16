@@ -49,6 +49,7 @@ defaultpolygonshader ( float Ka = 0,
 	
 	// look for optional transparency channel
 	tr = float texture(texturename[3],ss,tt, "fill",1);
+   
     Ct = color texture (texturename,ss, tt);
     // the following code should depend on an option such
     // as the OpenGL blend, modulate, replace, decal, etc options!
@@ -57,15 +58,15 @@ defaultpolygonshader ( float Ka = 0,
   }
   else Ct = Cs;
 
-  // modulate the opacity by the alpha channel of the texture
-  if(transparencyenabled==1)
-  	Oi = Os*tr;
-  else{
-    if(tr==0)
-       Oi=0;
-    else
-       Oi=Os;  
-  }
+    // modulate the opacity by the alpha channel of the texture
+    if (transparencyenabled != 0.0)
+  	    Oi = Os*tr;
+    else {
+        if (tr==0)
+            Oi=0;
+        else
+            Oi=1; //Os;  
+    }
 
   if (lighting != 0)  {
         Nf = faceforward (normalize(N),I);
