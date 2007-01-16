@@ -49,6 +49,7 @@ import java.io.File;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Collections;
+import java.util.HashSet;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -62,6 +63,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 
 import de.jreality.scene.Viewer;
+import de.jreality.sunflow.RenderOptions;
 import de.jtem.beans.DimensionPanel;
 import de.jtem.beans.InspectorPanel;
 
@@ -92,19 +94,24 @@ public class SunflowMenu extends JMenu {
     
     EmptyBorder border = new EmptyBorder(10, 10, 10, 10);
     
-    previewOptions = createRenderOptions(-2, 0);
+    previewOptions = createPreviewOptions();
     InspectorPanel previewSettings = new InspectorPanel(false);
     previewSettings.setBorder(border);
-    previewSettings.setObject(previewOptions, Collections
-        .singleton("nothing"));
+    HashSet<String> previewExcludes = new HashSet<String>();
+    previewExcludes.add("progressiveRender");
+    previewExcludes.add("threadsLowPriority");
+    previewExcludes.add("aaMax");
+    previewExcludes.add("aaMin");
+    previewExcludes.add("filter");
+    previewExcludes.add("contrastThreshold");
+    previewSettings.setObject(previewOptions,previewExcludes);
     tabs.add("preview", previewSettings);
     
-    renderOptions = createRenderOptions(0, 2);
-    
+    renderOptions = createRenderOptions();
     InspectorPanel renderSettings = new InspectorPanel(false);
     renderSettings.setBorder(border);
     renderSettings.setObject(renderOptions, Collections
-        .singleton("nothing"));
+        .singleton("progressiveRender"));
     tabs.add("render", renderSettings);
     
     settingsFrame.add(tabs);
@@ -144,16 +151,27 @@ public class SunflowMenu extends JMenu {
     });
   }
   
-  private Object createRenderOptions(int aaMin, int aaMax) {
+  private Object createPreviewOptions() {
     try {
       Object renderOptions = Class.forName("de.jreality.sunflow.RenderOptions").newInstance();
-      new Statement(renderOptions, "setAaMin", new Object[]{aaMin}).execute();
-      new Statement(renderOptions, "setAaMax", new Object[]{aaMax}).execute();
       return renderOptions;
     } catch (Throwable e) {
       throw new RuntimeException("sunflow missing", e);
     }
   }
+  
+  private Object createRenderOptions() {
+	    try {
+	      Object renderOptions = Class.forName("de.jreality.sunflow.RenderOptions").newInstance();
+	      new Statement(renderOptions, "setAaMin", new Object[]{0}).execute();
+	      new Statement(renderOptions, "setAaMax", new Object[]{2}).execute();
+	      new Statement(renderOptions, "setProgressiveRender", new Object[]{false}).execute();
+	      new Statement(renderOptions, "setFilter", new Object[]{"gaussian"}).execute();
+	      return renderOptions;
+	    } catch (Throwable e) {
+	      throw new RuntimeException("sunflow missing", e);
+	    }
+	  }
   
   protected void renderAndSave(Viewer viewer, Object opts) {
     if (dimPanel == null) {
