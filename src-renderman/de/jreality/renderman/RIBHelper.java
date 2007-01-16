@@ -24,6 +24,8 @@ import de.jreality.math.Rn;
 import de.jreality.renderman.shader.DefaultPolygonShader;
 import de.jreality.renderman.shader.RendermanShader;
 import de.jreality.renderman.shader.TwoSidePolygonShader;
+import de.jreality.scene.Appearance;
+import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.PolygonShader;
 import de.jreality.shader.ShaderUtility;
@@ -31,14 +33,18 @@ import de.jreality.util.LoggingSystem;
 
 public class RIBHelper {
 
-	public static RendermanShader convertToRenderman(PolygonShader ps, RIBVisitor ribv, String name)	{
+	public static RendermanShader processPolygonShader(PolygonShader ps, RIBVisitor ribv, String name)	{
 		RendermanShader rs = null;
+		Color Cs = null;
+		double transparency = 0.0;
 		if (ps instanceof de.jreality.shader.DefaultPolygonShader)	{
 //			System.err.println("processing defaultpolygonshader");
 			de.jreality.shader.DefaultPolygonShader dps = (de.jreality.shader.DefaultPolygonShader) ps;
 			DefaultPolygonShader rdps = new DefaultPolygonShader(dps);
 			rdps.setFromEffectiveAppearance(ribv, ribv.eAppearance, name);
 			rs = rdps;
+			Cs = dps.getDiffuseColor();
+			transparency = (float)dps.getTransparency().floatValue();
 		} 
 		else if (ps instanceof de.jreality.shader.TwoSidePolygonShader)	{
 //			System.err.println("processing twosidepolygonshader");
@@ -46,13 +52,37 @@ public class RIBHelper {
 			TwoSidePolygonShader rdps = new TwoSidePolygonShader(dps);
 			rdps.setFromEffectiveAppearance(ribv, ribv.eAppearance, name);
 			rs = rdps;
+			de.jreality.shader.DefaultPolygonShader dpss = ((de.jreality.shader.DefaultPolygonShader)dps.getFront());
+			Cs = dpss.getDiffuseColor();
+			transparency = (float)dpss.getTransparency().floatValue();
 		}
 		else {
 			LoggingSystem.getLogger(ShaderUtility.class).warning("Unknown shader class "+ps.getClass());
 		}
+		float[] csos = extractCsOs(Cs, (!(ribv.handlingProxyGeometry && ribv.opaqueTubes) && ribv.transparencyEnabled) ? transparency : 0f);
+		ribv.ri.color(csos);
+		ribv.ri.shader(rs);
 		
 		return rs;
 	}
+	protected static float[] extractCsOs(Color color, double transparency)	{
+		float[] csos = new float[4];
+		float colorAlpha = 1.0f;
+		if (color != Appearance.INHERITED) {
+			float[] c = ((Color) color).getRGBComponents(null);
+			if (c.length == 4)
+				colorAlpha = c[3];
+			csos[0] = c[0];
+			csos[1] = c[1];
+			csos[2] = c[2];
+		}
+
+		csos[3] = 1f - (float) transparency;
+		// TODO remove this if we decide finally to not allow transparency control via alpha channel of Color
+		csos[3] *= colorAlpha;
+		return csos;
+	}
+
 	public static void writeShader(String name, String shaderName ) {
 		try {
 		    File file = new File(name);

@@ -174,7 +174,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	private float[] currentCs = new float[3], currentOs = new float[3];
 	private Appearance rootAppearance;
 	private String outputFileName;
-	private boolean transparencyEnabled;
+	protected boolean transparencyEnabled;
 	private HashMap<ImageData, String> cubeMaps = new HashMap<ImageData, String>();
 	private int cubeMapCount;
 	private String cubeMapFileSuffix = "env";
@@ -533,11 +533,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		// possibly here call evaluateEffectiveAppearance()
 		object2world.push(c);
 		if (hasProxy(c)) {
-			RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "polygonShader");
-			updateCurrentCsAndOs(eAppearance, "polygonShader");
-			ri.color(currentCs);
-			ri.opacity(currentOpacity);
-			ri.shader(rs);
+			RendermanShader rs = RIBHelper.processPolygonShader(dgs.getPolygonShader(), this, "polygonShader");
 			handleCurrentProxy();
 		} else
 			c.childrenAccept(this);
@@ -575,7 +571,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		retainGeometry = eap.getAttribute(CommonAttributes.RMAN_RETAIN_GEOMETRY, false); 
 		//if(rhs.getOpaqueTubesAndSpheres()!=null)  
 		opaqueTubes = rhs.getOpaqueTubesAndSpheres();
-		updateCurrentCsAndOs(eap, CommonAttributes.POLYGON_SHADER);
+		transparencyEnabled = rhs.getTransparencyEnabled();
 		/** 
 		 * evaluate the special shaders which might be specified in the effective appearance:
 		 * displacement, imager, and interior and exterior volume shaders
@@ -611,29 +607,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 		updateShaders(eap);
 	}
 
-	private void updateCurrentCsAndOs(EffectiveAppearance eap, String prefix) {
-		transparencyEnabled = rhs.getTransparencyEnabled();
-		double transparency = 0.0;
-		if (transparencyEnabled)
-			transparency = eap.getAttribute(prefix+"."+CommonAttributes.TRANSPARENCY,CommonAttributes.TRANSPARENCY_DEFAULT);
-
-		Object color = eap.getAttribute(prefix+"."+CommonAttributes.DIFFUSE_COLOR,CommonAttributes.DIFFUSE_COLOR_DEFAULT);
-		float colorAlpha = 1.0f;
-		if (color != Appearance.INHERITED) {
-			float[] c = ((Color) color).getRGBComponents(null);
-			if (c.length == 4)
-				colorAlpha = c[3];
-			currentCs[0] = c[0];
-			currentCs[1] = c[1];
-			currentCs[2] = c[2];
-		}
-
-		currentOpacity = 1f - (float) transparency;
-		currentOpacity *= colorAlpha;
-		if ((handlingProxyGeometry && opaqueTubes))
-			currentOpacity = 1f;
-		currentOs[0] = currentOs[1] = currentOs[2]  = currentOpacity;
-	}
 
 	private void updateShaders(EffectiveAppearance eap) {
 		dgs = ShaderUtility.createDefaultGeometryShader(eap);
@@ -644,6 +617,12 @@ public class RIBVisitor extends SceneGraphVisitor {
 		else dls = null;
 		if (dgs.getPolygonShader() instanceof DefaultPolygonShader) dps = (DefaultPolygonShader) dgs.getPolygonShader();
 		else dps = null;
+		// we need to know the current opacity to workaround a renderman prman bug in pointsPolygon ... see below
+		currentOpacity = 0f;
+		if (!(handlingProxyGeometry && opaqueTubes) && transparencyEnabled) {
+			double d = eap.getAttribute(CommonAttributes.TRANSPARENCY, CommonAttributes.TRANSPARENCY_DEFAULT);
+			currentOpacity = 1f - (float) d;
+		}
 	}
 
 	/**
@@ -785,17 +764,17 @@ public class RIBVisitor extends SceneGraphVisitor {
 				// process the polygon shader associated to this point shader
 				// This is something of a hack since we don't really know what the associated string is
 				PolygonShader vps = dvs.getPolygonShader();
-				if (vps instanceof DefaultPolygonShader) {
-					cc = ((DefaultPolygonShader) vps).getDiffuseColor();
-					// DoubleArrayArray a=coord.toDoubleArrayArray();
-					raw = new float[4];
-					cc.getRGBComponents(raw);
-					if (!opaqueTubes)
-						raw[3] = raw[3] * currentOpacity;
-					ri.color(raw);
-				}
-				RendermanShader rs = RIBHelper.convertToRenderman(dvs.getPolygonShader(), this, "pointShader.polygonShader");
-				ri.shader(rs);        
+//				if (vps instanceof DefaultPolygonShader) {
+//					cc = ((DefaultPolygonShader) vps).getDiffuseColor();
+//					// DoubleArrayArray a=coord.toDoubleArrayArray();
+//					raw = new float[4];
+//					cc.getRGBComponents(raw);
+//					if (!opaqueTubes)
+//						raw[3] = raw[3] * currentOpacity;
+//					ri.color(raw);
+//				}
+				RendermanShader rs = RIBHelper.processPolygonShader(vps, this, "pointShader.polygonShader");
+//				ri.shader(rs);        
         
 				double[][] vColData=null;
 				if( p.getVertexAttributes(Attribute.COLORS)!=null)
@@ -894,17 +873,17 @@ public class RIBVisitor extends SceneGraphVisitor {
    	        	if (tubesDraw)  {
   					PolygonShader vps = dls.getPolygonShader();
    					cc = null;
-   					if (vps instanceof DefaultPolygonShader) {
-   						ri.comment("Setting tube color");
-   						cc = ((DefaultPolygonShader) vps).getDiffuseColor();
-   						cc.getRGBComponents(raw);
-   						if (!opaqueTubes)
-   							raw[3] = raw[3] * currentOpacity;
-   						ri.color(raw);
-   						System.err.println("Tube color is "+cc);
-   					}
-   					RendermanShader rs = RIBHelper.convertToRenderman(dls.getPolygonShader(), this, "lineShader.polygonShader");
-   					ri.shader(rs);
+//   					if (vps instanceof DefaultPolygonShader) {
+//   						ri.comment("Setting tube color");
+//   						cc = ((DefaultPolygonShader) vps).getDiffuseColor();
+//   						cc.getRGBComponents(raw);
+//   						if (!opaqueTubes)
+//   							raw[3] = raw[3] * currentOpacity;
+//   						ri.color(raw);
+//   						System.err.println("Tube color is "+cc);
+//   					}
+   					RendermanShader rs = RIBHelper.processPolygonShader(vps, this, "lineShader.polygonShader");
+ //  					ri.shader(rs);
  
        				DataList edgec =  g.getEdgeAttributes(Attribute.COLORS);
   					float r = dls.getTubeRadius().floatValue(); //(float) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS,CommonAttributes.TUBE_RADIUS_DEFAULT);
@@ -1003,13 +982,13 @@ public class RIBVisitor extends SceneGraphVisitor {
 		ri.attributeBegin();
 		checkForProxy(g);
 		if (hasProxy((Geometry) g)) {
-			RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "polygonShader");
+			RendermanShader rs = RIBHelper.processPolygonShader(dgs.getPolygonShader(), this, "polygonShader");
 //			if(!handlingTubes)
 			// Cs and Os are actually part of the jreality shader but aren't handled with it
-			updateCurrentCsAndOs(eAppearance, "polygonShader");
-			ri.color(currentCs);
-			ri.opacity(currentOpacity);
-			ri.shader(rs);
+//			updateCurrentCsAndOs(eAppearance, "polygonShader");
+//			ri.color(currentCs);
+//			ri.opacity(currentOpacity);
+//			ri.shader(rs);
 			handleCurrentProxy();
 			insidePointset = false;
 		} else {
@@ -1054,15 +1033,15 @@ public class RIBVisitor extends SceneGraphVisitor {
 		boolean faceDraw = dgs.getShowFaces();
 		if (faceDraw)	{
 			//dps = (DefaultPolygonShader) dgs.getPolygonShader();
-        	if (dps != null)	{
-    	        Color cc = (Color) dps.getDiffuseColor();
-   	        	float[] raw = new float[4];
-   	        	cc.getRGBComponents(raw);
-   	        	cc = new Color(raw[0], raw[1], raw[2]); 
-   	        	ri.color(cc);  	        		
-        	}
-			RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "polygonShader");
-			ri.shader(rs);
+//        	if (dps != null)	{
+//    	        Color cc = (Color) dps.getDiffuseColor();
+//   	        	float[] raw = new float[4];
+//   	        	cc.getRGBComponents(raw);
+//   	        	cc = new Color(raw[0], raw[1], raw[2]); 
+//   	        	ri.color(cc);  	        		
+//        	}
+			RendermanShader rs = RIBHelper.processPolygonShader(dgs.getPolygonShader(), this, "polygonShader");
+//			ri.shader(rs);
 //			DefaultPolygonShader xxx = new DefaultPolygonShader(dps);
 //			xxx.setFromEffectiveAppearance(this, eAppearance, "polygonShader");
 //			ri.shader(xxx);
@@ -1322,15 +1301,15 @@ public class RIBVisitor extends SceneGraphVisitor {
 
 	public void visit(Sphere s) {
 		if (hasProxy(s))return;
-		RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "polygonShader");
-		ri.shader(rs);
+		RendermanShader rs = RIBHelper.processPolygonShader(dgs.getPolygonShader(), this, "polygonShader");
+//		ri.shader(rs);
 		ri.sphere(1f, -1f, 1f, 360f, null);
 	}
 
 	public void visit(Cylinder c) {
 		if (hasProxy(c))return;
-		RendermanShader rs = RIBHelper.convertToRenderman(dgs.getPolygonShader(), this, "polygonShader");
-		ri.shader(rs);
+		RendermanShader rs = RIBHelper.processPolygonShader(dgs.getPolygonShader(), this, "polygonShader");
+//		ri.shader(rs);
 		ri.cylinder(1f, -1f, 1f, 360f, null);
 		// TODO Decide whether a jReality Cylinder is closed or not!
 		ri.disk(-1f, 1f, 360f, null);
