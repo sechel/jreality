@@ -523,37 +523,16 @@ indexedFaceSetNode [State state, Appearance app] returns [IndexedFaceSet ifs=nul
 	ifsf.setVertexAttribute(Attribute.COORDINATES,new DoubleArrayArray.Array(state.coords) );
 	ifsf.setFaceIndices(coordIndex2);
 	if (state.normalBinding >=6 | state.materialBinding>=6 
-		| state.textureFile.equals("")	|state.textureData.length!=0 ){
+		| state.textureFile.equals("")	|state.textureData.length!=0 )
+		{
 		// have to separate the vertices!
-		double[][] vnormals=null;
-		
-			// make Normals now!		
-		//TODO:
-		//	 do we support this?: ifsf.setGenerateVertexNormals(true);
-		// see also: VRMLHelper.setNormals
-		//ifsf.update();
-		//vnormals=ifsf.getIndexedFaceSet()
-		//	.getVertexAttributes(Attribute.NORMALS)
-		//	.toDoubleArrayArray(null);
-		
-			//	separate vertices
 		int[] reffTab=VRMLHelper.separateVerticesAndVNormals(coordIndex2,state);
-			// make new Factory
+		// make new Factory
 		ifsf = new IndexedFaceSetFactory();
 		ifsf.setVertexCount(reffTab.length);//(new)
 		ifsf.setFaceCount(coordIndex2.length);//(new)
 		ifsf.setVertexAttribute(Attribute.COORDINATES,new DoubleArrayArray.Array(state.coords) );//new
 		ifsf.setFaceIndices(coordIndex2);//new
-			// set modified old normals
-		//double[][] vnormalsNew= new double[reffTab.length][];
-		//for(int i=0;i<reffTab.length;i++){
-		//	vnormalsNew[i]=new double[]{
-		//		vnormals[reffTab[i]][0],
-		//		vnormals[reffTab[i]][1],
-		//		vnormals[reffTab[i]][2]};
-		//}
-		// ifsf.setVertexAttribute(Attribute.NORMALS,new DoubleArrayArray.Array(vnormalsNew) );//new
-		
 		// now all indices of texture, color, normals, ect are unique because 
 		// they are based on face indices and coords
 	}
