@@ -53,6 +53,7 @@ import org.sunflow.core.camera.PinholeLens;
 import org.sunflow.core.light.DirectionalSpotlight;
 import org.sunflow.core.light.SunSkyLight;
 import org.sunflow.core.primitive.Background;
+import org.sunflow.core.primitive.Plane;
 import org.sunflow.core.primitive.TriangleMesh;
 import org.sunflow.core.shader.ConstantShader;
 import org.sunflow.core.shader.DiffuseShader;
@@ -101,7 +102,6 @@ import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.sunflow.core.light.DirectionalLight;
 import de.jreality.sunflow.core.light.GlPointLight;
 import de.jreality.sunflow.core.primitive.SkyBox;
 import de.jreality.util.Rectangle3D;
@@ -141,7 +141,7 @@ public class SunflowRenderer extends SunflowAPI {
 			this.sceneCenter = sceneCenter;
 			this.sceneRadius = sceneRadius;
 		}
-		
+
 		@Override
 		public void visit(SceneGraphComponent c) {
 			if (!c.isVisible()) return;
@@ -158,53 +158,62 @@ public class SunflowRenderer extends SunflowAPI {
 
 		@Override
 		public void visit(IndexedFaceSet ifs) {
-			visit((IndexedLineSet)ifs);
-			if (ifs.getNumFaces() > 0 && dgs.getShowFaces()) {
+			Boolean infPlane = (Boolean)ifs.getGeometryAttributes("infinite plane");
+			if (infPlane!= null && infPlane.booleanValue()) {
 				dps = (DefaultPolygonShader) dgs.getPolygonShader();
 				applyShader(dps);
-				float[] points = convert(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), 3, null);
-				float[] normals = null;
-				if (dps.getSmoothShading() && ifs.getVertexAttributes(Attribute.NORMALS) != null) {
-					normals = convert(ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(), 3, null);
-					parameter("normals", "vector", "vertex", normals);
-				} else {
-					// sunflow calculates the face normal from the triangle points...
-				}
-				DataList tex = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
-				float[] texCoords = null;
-				if (tex != null) {
-					Matrix texMat = null;
-					// this is needed for sunflow build-in shaders:
-					//MatrixBuilder.euclidean().scale(1,-1,1).getMatrix();
-					//texMat.multiplyOnRight(tex2d.getTextureMatrix());
-					texCoords = convert(tex.toDoubleArrayArray(), 2, texMat);
-				}
-				int[] faces = convert(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray());
-				parameter("triangles", faces);
-				parameter("points", "point", "vertex", points);
-				if (texCoords != null) {
-					parameter("uvs", "texcoord", "vertex", texCoords);				
-				}
-				geometry(getName(ifs), new TriangleMesh());
-				parameter("transform", currentMatrix);
-
-				String geomName = getName(ifs);
-				String instanceName = geomName + ".instance"+instanceCnt++;
-				if (bakingPath == null) {
-					parameter("shaders", "default-shader" + appCount);
-				} else {
-					//System.out.println("path is "+path.getLastElement().getName());
-					//System.out.println("bakingPath is "+bakingPath.getLastElement().getName());
-					if (path.isEqual(bakingPath)) {
-						bakingInstance = instanceName;
-						//parameter("shaders", "constantWhite");
-						parameter("shaders", "ambientOcclusion");
+				parameter("point1", new Point3(1,0,0));
+				parameter("point2", new Point3(0,1,0));
+				geometry(getName(ifs), new Plane());
+			}  else {
+				visit((IndexedLineSet)ifs);
+				if (ifs.getNumFaces() > 0 && dgs.getShowFaces()) {
+					dps = (DefaultPolygonShader) dgs.getPolygonShader();
+					applyShader(dps);
+					float[] points = convert(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), 3, null);
+					float[] normals = null;
+					if (dps.getSmoothShading() && ifs.getVertexAttributes(Attribute.NORMALS) != null) {
+						normals = convert(ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(), 3, null);
+						parameter("normals", "vector", "vertex", normals);
 					} else {
-						parameter("shaders", "constantWhite");
+						// sunflow calculates the face normal from the triangle points...
 					}
+					DataList tex = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+					float[] texCoords = null;
+					if (tex != null) {
+						Matrix texMat = null;
+						// this is needed for sunflow build-in shaders:
+						//MatrixBuilder.euclidean().scale(1,-1,1).getMatrix();
+						//texMat.multiplyOnRight(tex2d.getTextureMatrix());
+						texCoords = convert(tex.toDoubleArrayArray(), 2, texMat);
+					}
+					int[] faces = convert(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray());
+					parameter("triangles", faces);
+					parameter("points", "point", "vertex", points);
+					if (texCoords != null) {
+						parameter("uvs", "texcoord", "vertex", texCoords);				
+					}
+					geometry(getName(ifs), new TriangleMesh());
 				}
-				instance(instanceName, geomName);
 			}
+			parameter("transform", currentMatrix);
+
+			String geomName = getName(ifs);
+			String instanceName = geomName + ".instance"+instanceCnt++;
+			if (bakingPath == null) {
+				parameter("shaders", "default-shader" + appCount);
+			} else {
+				//System.out.println("path is "+path.getLastElement().getName());
+				//System.out.println("bakingPath is "+bakingPath.getLastElement().getName());
+				if (path.isEqual(bakingPath)) {
+					bakingInstance = instanceName;
+					//parameter("shaders", "constantWhite");
+					parameter("shaders", "ambientOcclusion");
+				} else {
+					parameter("shaders", "constantWhite");
+				}
+			}
+			instance(instanceName, geomName);
 		}
 
 		@Override
@@ -326,7 +335,7 @@ public class SunflowRenderer extends SunflowAPI {
 				System.out.println("source at "+src);
 				System.out.println("direction "+dir);
 				System.out.println("radius "+sceneRadius);
-				
+
 				parameter("source", src);
 				parameter("radius", sceneRadius);
 				parameter("dir", dir);
@@ -464,7 +473,7 @@ public class SunflowRenderer extends SunflowAPI {
 			// skybox or background color
 			Appearance rootApp = sceneRoot.getAppearance();
 			Geometry rootGeom = sceneRoot.getGeometry();
-			if (options.isUseSunSkyLight() && rootGeom instanceof PerezSky) {
+			if (rootGeom instanceof PerezSky) {
 				ignoreSunLight = true;
 				PerezSky perezSky = (PerezSky) rootGeom;
 				ParameterList pl = new ParameterList();
@@ -546,7 +555,7 @@ public class SunflowRenderer extends SunflowAPI {
 
 		// sunflow rendering
 
-		parameter("sampler", options.isProgessiveRender() ? "ipr" : "bucket");
+		parameter("sampler", options.isProgressiveRender() ? "ipr" : "bucket");
 		if (bakingInstance != null) {
 			parameter("baking.instance", bakingInstance);
 		}
@@ -555,9 +564,12 @@ public class SunflowRenderer extends SunflowAPI {
 		parameter("threads.lowPriority", options.isThreadsLowPriority());
 		parameter("aa.min", options.getAaMin());
 		parameter("aa.max", options.getAaMax());
+		System.out.println("antialiasing "+options.getAaMin()+", "+options.getAaMax());
 		parameter("depths.diffuse", options.getDepthsDiffuse());
 		parameter("depths.reflection", options.getDepthsReflection());
 		parameter("depths.refraction", options.getDepthsRefraction());
+		parameter("filter", options.getFilter());
+		parameter("aa.contrast", options.getContrastThreshold());
 
 		int causticPhotons = options.getCausticsEmit();
 		if (causticPhotons > 0) {

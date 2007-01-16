@@ -3,21 +3,22 @@ package de.jreality.sunflow;
 import java.util.prefs.Preferences;
 
 public class RenderOptions {
-	private boolean progessiveRender = true;
+	private boolean progressiveRender = true;
 	private boolean threadsLowPriority = false;
 	private double ambientOcclusionBright = .2f;
 	private int aaMin = -2;
 	private int aaMax = 0;
+	private double contrastThreshold = .1;
 	private int ambientOcclusionSamples = 16;
 	private int depthsDiffuse = 1;
 	private int depthsReflection = 2;
 	private int depthsRefraction = 2;
 	private String giEngine = "ambocc";
+	private String filter = "box";
 	private int causticsEmit = 0;
 	private int causticsGather = 50;
 	private double causticsRadius = 0.5;
 	private double causticsFilter = 1.1;
-	private boolean useSunSkyLight = false;
 	
 	private String shaderOverride;
 	
@@ -108,17 +109,18 @@ public class RenderOptions {
 		this.ambientOcclusionSamples = aaSamples;
 	}
 
-	public boolean isProgessiveRender() {
-		return progessiveRender;
+	public boolean isProgressiveRender() {
+		return progressiveRender;
 	}
 
-	public void setProgessiveRender(boolean progessiveRender) {
-		this.progessiveRender = progessiveRender;
+	public void setProgressiveRender(boolean progressiveRender) {
+		this.progressiveRender = progressiveRender;
 	}
 	
 	public void savePreferences(Preferences prefs, String prefix) {
 		prefs.put(prefix+"giEngine", giEngine);
-		prefs.putBoolean(prefix+"progressiveRender", progessiveRender);
+		prefs.put(prefix+"filter", filter);
+		prefs.putBoolean(prefix+"progressiveRender", progressiveRender);
 		prefs.putInt(prefix+"aaMin", aaMin);
 		prefs.putInt(prefix+"aaMax", aaMax);
 		prefs.putInt(prefix+"depthsDiffuse", depthsDiffuse);
@@ -130,11 +132,10 @@ public class RenderOptions {
 		prefs.putInt(prefix+"causticsGather", causticsGather);
 		prefs.putDouble(prefix+"causticsRadius", causticsRadius);
 		prefs.putDouble(prefix+"causticsFilter", causticsFilter);
-		prefs.putBoolean(prefix+"useSunSkyLight", useSunSkyLight);
 	}
 	
 	public void restoreFromPreferences(Preferences prefs, String prefix, RenderOptions defaults) {
-		setProgessiveRender(prefs.getBoolean(prefix+"progressiveRender", defaults.isProgessiveRender()));
+		setProgressiveRender(prefs.getBoolean(prefix+"progressiveRender", defaults.isProgressiveRender()));
 		setAaMin(prefs.getInt(prefix+"aaMin", defaults.getAaMin()));
 		setAaMax(prefs.getInt(prefix+"aaMax", defaults.getAaMax()));
 		setDepthsDiffuse(prefs.getInt(prefix+"depthsDiffuse", defaults.getDepthsDiffuse()));
@@ -143,11 +144,11 @@ public class RenderOptions {
 		setAmbientOcclusionSamples(prefs.getInt(prefix+"ambientOcclusionSamples", defaults.getAmbientOcclusionSamples()));
 		setAmbientOcclusionBright(prefs.getDouble(prefix+"ambientOcclusionBright", defaults.getAmbientOcclusionBright()));
 		setGiEngine(prefs.get(prefix+"giEngine", defaults.getGiEngine()));
+		setGiEngine(prefs.get(prefix+"filter", defaults.getFilter()));
 		setCausticsEmit(prefs.getInt(prefix+"causticsEmit", defaults.getCausticsEmit()));
 		setCausticsGather(prefs.getInt(prefix+"causticsGather", defaults.getCausticsGather()));
 		setCausticsRadius(prefs.getDouble(prefix+"causticsRadius", defaults.getCausticsRadius()));
 		setCausticsFilter(prefs.getDouble(prefix+"causticsFilter", defaults.getCausticsFilter()));
-		setUseSunSkyLight(prefs.getBoolean(prefix+"useSunSkyLight", defaults.isUseSunSkyLight()));
 	}
 
 	public boolean isThreadsLowPriority() {
@@ -174,11 +175,19 @@ public class RenderOptions {
 		this.causticsFilter = causticFilter;
 	}
 
-	public boolean isUseSunSkyLight() {
-		return useSunSkyLight;
+	public String getFilter() {
+		return filter;
 	}
 
-	public void setUseSunSkyLight(boolean useSunSkyLight) {
-		this.useSunSkyLight = useSunSkyLight;
+	public void setFilter(String filter) {
+		this.filter = filter;
+	}
+
+	public double getContrastThreshold() {
+		return contrastThreshold;
+	}
+
+	public void setContrastThreshold(double contrastThreshold) {
+		this.contrastThreshold = contrastThreshold;
 	}
 }

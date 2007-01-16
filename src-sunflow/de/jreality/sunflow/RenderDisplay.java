@@ -10,23 +10,35 @@ import javax.swing.JOptionPane;
 
 import org.sunflow.SunflowAPI;
 import org.sunflow.core.Display;
+import org.sunflow.core.display.FileDisplay;
+import org.sunflow.core.display.OpenExrDisplay;
 import org.sunflow.image.Color;
+import org.sunflow.system.UI;
 
 public class RenderDisplay implements Display {
-	private String filename;
 	private JFrame frame;
 	private CancelableImagePanel imagePanel;
+	private Display fileDisplay;
 
 	public RenderDisplay() {
 		this(null);
 	}
 
 	public RenderDisplay(String filename) {
-		this.filename = filename;
+		if (filename != null) {
+			if (filename.endsWith(".exr")) {
+				fileDisplay = new OpenExrDisplay(filename, null, null);
+			} else {
+				fileDisplay = new FileDisplay(filename);
+			}
+		}
 		frame = null;
 	}
 
 	public void imageBegin(int w, int h, int bucketSize) {
+		if (fileDisplay != null) {
+			fileDisplay.imageBegin(w, h, bucketSize);
+		}
 		if (frame == null) {
 			frame = new JFrame("Sunflow v" + SunflowAPI.VERSION);
 			frame.addWindowListener(new WindowAdapter() {
@@ -35,11 +47,11 @@ public class RenderDisplay implements Display {
 					if (!imagePanel.isDone()) {
 						if (JOptionPane.showConfirmDialog(
 								frame,
-								"Do you want to continue rendering in background?",
+								"Really abort all ongoing rendering jobs?",
 								"Sunflow",
 								JOptionPane.YES_NO_OPTION
-						) == JOptionPane.NO_OPTION) {
-							imagePanel.cancel();
+						) == JOptionPane.YES_OPTION) {
+							UI.taskCancel();
 						}
 					}
 				}
@@ -74,21 +86,31 @@ public class RenderDisplay implements Display {
 	}
 
 	public void imagePrepare(int x, int y, int w, int h, int id) {
+		if (fileDisplay != null) {
+			fileDisplay.imagePrepare(x, y, w, h, id);
+		}
 		imagePanel.imagePrepare(x, y, w, h, id);
 	}
 
 	public void imageUpdate(int x, int y, int w, int h, Color[] data) {
+		if (fileDisplay != null) {
+			fileDisplay.imageUpdate(x, y, w, h, data);
+		}
 		imagePanel.imageUpdate(x, y, w, h, data);
 	}
 
 	public void imageFill(int x, int y, int w, int h, Color c) {
+		if (fileDisplay != null) {
+			fileDisplay.imageFill(x, y, w, h, c);
+		}
 		imagePanel.imageFill(x, y, w, h, c);
 	}
 
 	public void imageEnd() {
+		if (fileDisplay != null) {
+			fileDisplay.imageEnd();
+		}
 		imagePanel.imageEnd();
-		if (filename != null)
-			imagePanel.save(filename);
 	}
 
 	public JFrame getFrame() {

@@ -33,6 +33,7 @@ public class PerezSky extends Geometry {
 		super("perezSky");
 		this.resolution = resolution;
 		this.turbidity = turbidity;
+		//skyLight.setThreshold(2f/resolution);
 		lightComponent = new SceneGraphComponent();
 		sunLight = new DirectionalLight();
 		// TODO: uncomment when SunSkyLight works	

@@ -31,6 +31,7 @@ public class SkyLight  {
 	private final double[] perezx = new double[5];
 	private final double[] perezy = new double[5];
 	private int downColor = new java.awt.Color(36,36,36).getRGB();
+	private float threshold;
 	
 	// constant data
 	private static final float[] solAmplitudes = { 165.5f, 162.3f, 211.2f,
@@ -167,7 +168,7 @@ public class SkyLight  {
 
 	private Color getSkyRGB(Vector3 dir) {
 		dir = basis.untransform(dir, new Vector3());
-		if (dir.z < 0)
+		if (dir.z < -threshold)
 			return Color.BLACK ;
 		if (dir.z < 0.001f)
 			dir.z = 0.001f;
@@ -184,9 +185,29 @@ public class SkyLight  {
 	}
 
 	public int getRadiance(double dirX, double dirY, double dirZ) {
-		if (dirY <0) return downColor;
+		//if (dirY <0) return downColor;
 		Color c = getSkyRGB(new Vector3((float)dirX, (float)dirY, (float)dirZ));
 		c.mul(scalingFactor/4); // simple tone mapping
 		return c.constrainRGB().toNonLinear().toRGB();
+	}
+
+	public float getThreshold() {
+		return threshold;
+	}
+
+	public void setThreshold(float threshold) {
+		this.threshold = threshold;
+	}
+
+	public int getDownColor() {
+		return downColor;
+	}
+
+	public void setDownColor(int downColor) {
+		this.downColor = downColor;
+	}
+
+	public Color getSunColor() {
+		return sunColor;
 	}
 }
