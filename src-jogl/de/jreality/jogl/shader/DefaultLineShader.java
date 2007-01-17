@@ -371,16 +371,16 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				//System.err.println("count is: "+jr.getRenderingState().polygonCount);
 				if (!useDisplayLists || jr.isPickMode() || dListProxy == -1) {
 					boolean alreadyThere = jrs.getRenderer().lineProxyDisplayLists.get(g) != null;
-					if (!jrs.manyDisplayLists && alreadyThere) {
-						dListProxy = jrs.getRenderer().lineProxyDisplayLists.get(g);
-					} else {
+//					if (!jrs.manyDisplayLists && alreadyThere) {
+//						dListProxy = jrs.getRenderer().lineProxyDisplayLists.get(g);
+//					} else {
 						dListProxy  = proxyGeometryFor(jrs);						
-					}
-			        if (!jrs.manyDisplayLists && !alreadyThere) {
-			        	jrs.getRenderer().lineProxyDisplayLists.put(g, dListProxy);
-			        	LoggingSystem.getLogger(this).fine("hash table has "+jrs.getRenderer().lineProxyDisplayLists.size()+" entries");
-			        	LoggingSystem.getLogger(this).fine("Adding entry for "+g.getName());
-			        }
+//					}
+//			        if (!jrs.manyDisplayLists && !alreadyThere) {
+//			        	jrs.getRenderer().lineProxyDisplayLists.put(g, dListProxy);
+//			        	LoggingSystem.getLogger(this).fine("hash table has "+jrs.getRenderer().lineProxyDisplayLists.size()+" entries");
+//			        	LoggingSystem.getLogger(this).fine("Adding entry for "+g.getName());
+//			        }
 				}
 				jr.getGL().glCallList(dListProxy);
 				jr.getRenderingState().polygonCount += faceCount;
@@ -390,19 +390,19 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 					JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  smoothLineShading, jr.getRenderingState().diffuseColor[3]);
 				} else {
 					if (useDisplayLists && dList == -1)	{
-						if (!jrs.manyDisplayLists && jr.lineDisplayLists.get(g) != null)
-								dList = jr.lineDisplayLists.get(g).intValue();
-						else {
+//						if (!jrs.manyDisplayLists && jr.lineDisplayLists.get(g) != null)
+//								dList = jr.lineDisplayLists.get(g).intValue();
+//						else {
 							dList = jr.getGL().glGenLists(1);
 							LoggingSystem.getLogger(this).fine("LineShader: Allocating new dlist "+dList+" for gl "+jr.getGL());
 							jr.getGL().glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
 							JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  smoothLineShading, jr.getRenderingState().diffuseColor[3]);
 							jr.getGL().glEndList();									
-					        if (!jrs.manyDisplayLists) {
-					        	jrs.getRenderer().lineDisplayLists.put(g, dList);
-					        	LoggingSystem.getLogger(this).fine("hash table has "+jrs.getRenderer().lineDisplayLists.size()+" entries");
-					        }
-						}
+//					        if (!jrs.manyDisplayLists) {
+//					        	jrs.getRenderer().lineDisplayLists.put(g, dList);
+//					        	LoggingSystem.getLogger(this).fine("hash table has "+jrs.getRenderer().lineDisplayLists.size()+" entries");
+//					        }
+//						}
 					}
 					jr.getGL().glCallList(dList);
 				} 
