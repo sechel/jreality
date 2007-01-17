@@ -665,6 +665,7 @@ propertyGeoNAppNode [State state]
 	  |	"FontStyle"				egal 		// TODO2
 	  |	infoNode				[state]
 	  |	materialNode			[state]{state.defTyp=DefUseData.MATERIAL;}
+	  |	baseColorNode			[state]{state.defTyp=DefUseData.MATERIAL;}
 	  |	materialBindingNode		[state]{state.defTyp=DefUseData.BIND_M;}
 	  								// nur fuer IFS & ILS implementiert TODO3: rest
 	  |	normalNode				[state]{state.defTyp=DefUseData.NORMALS;}
@@ -744,6 +745,23 @@ materialNode [State state]
 		  state.emissive=emi; 
 		  state.shininess=shi;
 		  state.transparency=tra;
+	      if (VRMLHelper.verbose) System.err.println(")");
+	   }
+	;
+private
+baseColorNode [State state]
+{ 
+ if (VRMLHelper.verbose) System.err.print("BaseColor( ");
+ Color[] c=null;
+ Color[] rgb=new Color[]{new Color(0.8f,0.8f,0.8f)};
+}	:
+	"BaseColor" OPEN_BRACE
+	  (	"rgb"		{ if (VRMLHelper.verbose) System.err.print("rgb ");}
+	  			c = mfcolorValue {rgb=c;}
+	  	| wrongAttribute
+	  )*
+	  CLOSE_BRACE 	{
+		  state.diffuse=rgb;
 	      if (VRMLHelper.verbose) System.err.println(")");
 	   }
 	;
