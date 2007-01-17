@@ -565,6 +565,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 				ri.attribute(key, (Map) m.get(key));
 			}
 		}
+		updateShaders(eap);
 		// read current values from the effective appearance
 		currentSignature = eap.getAttribute(CommonAttributes.SIGNATURE,Pn.EUCLIDEAN);
 		retainGeometry = eap.getAttribute(CommonAttributes.RMAN_RETAIN_GEOMETRY, false); 
@@ -603,7 +604,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 		}
 	
 		// finally, evaluate the core jreality shaders
-		updateShaders(eap);
 	}
 
 
@@ -618,7 +618,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		else dps = null;
 		// we need to know the current opacity to workaround a renderman prman bug in pointsPolygon ... see below
 		currentOpacity = 0f;
-		if (!(handlingProxyGeometry && opaqueTubes) && transparencyEnabled) {
+		if (!(handlingProxyGeometry && rhs.getOpaqueTubesAndSpheres()) && rhs.getTransparencyEnabled()) {
 			double d = eap.getAttribute(CommonAttributes.TRANSPARENCY, CommonAttributes.TRANSPARENCY_DEFAULT);
 			currentOpacity = 1f - (float) d;
 		}
