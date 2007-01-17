@@ -231,8 +231,8 @@ public class JOGLRenderer  implements AppearanceListener {
 		theLog.finer("In extractGlobalParameters");
 		Object obj = ap.getAttribute(CommonAttributes.FORCE_RESIDENT_TEXTURES, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) forceResidentTextures = ((Boolean)obj).booleanValue();
-		obj = ap.getAttribute(CommonAttributes.MANY_DISPLAY_LISTS, Boolean.class);		// assume the best ...
-		if (obj instanceof Boolean) renderingState.manyDisplayLists = ((Boolean)obj).booleanValue();
+//		obj = ap.getAttribute(CommonAttributes.MANY_DISPLAY_LISTS, Boolean.class);		// assume the best ...
+//		if (obj instanceof Boolean) renderingState.manyDisplayLists = ((Boolean)obj).booleanValue();
 		obj = ap.getAttribute(CommonAttributes.ANY_DISPLAY_LISTS, Boolean.class);		// assume the best ...
 		obj = ap.getAttribute(CommonAttributes.CLEAR_COLOR_BUFFER, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) {
@@ -240,7 +240,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			theLog.fine("Setting clear color buffer to "+renderingState.clearColorBuffer);
 		}
 		theLog.fine("forceResTex = "+forceResidentTextures);
-		theLog.fine("many display lists = "+renderingState.manyDisplayLists);
+//		theLog.fine("many display lists = "+renderingState.manyDisplayLists);
 		clearGeometryDisplayLists();
 	}
 
@@ -262,10 +262,10 @@ public class JOGLRenderer  implements AppearanceListener {
 //			testClean.run();
 //			testClean = null;
 //		}
-		if (displayListsDirty && !renderingState.manyDisplayLists)	{
-			thePeerRoot._propagateGeometryChanged(JOGLPeerComponent.ALL_CHANGED);
-			displayListsDirty = false;
-		}
+//		if (displayListsDirty && !renderingState.manyDisplayLists)	{
+//			thePeerRoot._propagateGeometryChanged(JOGLPeerComponent.ALL_CHANGED);
+//			displayListsDirty = false;
+//		}
 		renderingState.setCurrentPickMode(pickMode);
 
 		if (thePeerRoot == null || theViewer.getSceneRoot() != thePeerRoot.getOriginalComponent())	{

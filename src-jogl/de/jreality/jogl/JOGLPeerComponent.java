@@ -465,24 +465,16 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void propagateGeometryChanged(int changed) {
-//		theLog.finer("set bits to "+changed);
-//		jr.testClean = new Runnable()	{
-//
-//			public void run() {
-//				_propagateGeometryChanged(ALL_CHANGED);	
-//			}
-//			
-//		};
-		if (jr.renderingState.manyDisplayLists) _propagateGeometryChanged(ALL_CHANGED);
-		else jr.displayListsDirty=true;
-	}
-	
-	public void _propagateGeometryChanged(int changed)	{
+//		if (jr.renderingState.manyDisplayLists) _propagateGeometryChanged(ALL_CHANGED);
+//		else jr.displayListsDirty=true;
+//	}
+//	
+//	public void _propagateGeometryChanged(int changed)	{
 		geometryDirtyBits  = changed;
-		handleChangedGeometry();
+//		handleChangedGeometry();
 		childlock.readLock();
 		for (JOGLPeerComponent child: children){		
-			child._propagateGeometryChanged(changed);
+			child.propagateGeometryChanged(changed);
 		}	
 		childlock.readUnlock();
 
@@ -498,9 +490,9 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			if ((geometryDirtyBits  & LINE_SHADER_CHANGED) != 0) geometryShader.lineShader = null;
 			if ((geometryDirtyBits  & POLYGON_SHADER_CHANGED) != 0) geometryShader.polygonShader = null;
 			if ((geometryDirtyBits  & ALL_SHADERS_CHANGED) != 0)updateShaders();
-			if (!jr.renderingState.manyDisplayLists && goBetween.originalComponent.getGeometry() != null) {
-				jr.removeGeometryDisplayLists(goBetween.originalComponent.getGeometry());
-			}
+//			if (!jr.renderingState.manyDisplayLists && goBetween.originalComponent.getGeometry() != null) {
+//				jr.removeGeometryDisplayLists(goBetween.originalComponent.getGeometry());
+//			}
             geometryDirtyBits  = 0;
 		}
 	}
