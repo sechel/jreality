@@ -12,18 +12,11 @@ package de.jreality.writer;
  * 
  */
 import java.awt.Color;
-import java.awt.image.BufferedImage;
 import java.io.FileWriter;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
-import javax.imageio.stream.FileImageInputStream;
-
-import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
-import de.jreality.reader.vrml.VRMLParser;
-import de.jreality.reader.vrml.VRMLV1Lexer;
-import de.jreality.reader.vrml.VRMLV1Parser;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
