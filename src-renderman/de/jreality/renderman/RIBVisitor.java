@@ -602,8 +602,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 			if(!raytracedVolumesEnabled) ri.verbatim("Attribute \"shade\" \"strategy\" [\"vpvolumes\"]"); 
 			ri.interior(slShader.getName(), slShader.getParameters());
 		}
-	
-		// finally, evaluate the core jreality shaders
 	}
 
 
@@ -861,7 +859,7 @@ public class RIBVisitor extends SceneGraphVisitor {
    	        	if (dls != null) tubesDraw = dls.getTubeDraw();
    	        	if (tubesDraw)  {
   					PolygonShader vps = dls.getPolygonShader();
-   					cc = null;
+   					cc = ((de.jreality.shader.DefaultPolygonShader)vps).getDiffuseColor();
    					RendermanShader rs = RIBHelper.processPolygonShader(vps, this, "lineShader.polygonShader");
   
        				DataList edgec =  g.getEdgeAttributes(Attribute.COLORS);
@@ -1176,9 +1174,9 @@ public class RIBVisitor extends SceneGraphVisitor {
 					vCol[3 * j + 1] = (float) rgba.getValueAt(1);
 					vCol[3 * j + 2] = (float) rgba.getValueAt(2);
 					if (vertexColorLength == 4) {
-						vOp[3 * j] = (float) rgba.getValueAt(3);
-						vOp[3 * j + 1] = (float) rgba.getValueAt(3);
-						vOp[3 * j + 2] = (float) rgba.getValueAt(3);
+						vOp[3 * j] = (float) rgba.getValueAt(3)*currentOpacity;
+						vOp[3 * j + 1] = (float) rgba.getValueAt(3)*currentOpacity;
+						vOp[3 * j + 2] = (float) rgba.getValueAt(3)*currentOpacity;
 					}
 					// ftex[2*j] =(float)d.getValueAt(j,0);
 					// ftex[2*j+1] =(float)d.getValueAt(j,1);
