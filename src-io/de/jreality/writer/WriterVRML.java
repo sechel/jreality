@@ -60,6 +60,7 @@ public class WriterVRML {
 
 //	---------------------------- start writing --------------------
 	private static void writeComp(SceneGraphComponent c,String hist,EffectiveAppearance parentEA){
+		if (!c.isVisible()) return;
 		count++;
 		int co=	count;
 		System.out.println("WriterVRML."+co);
