@@ -72,15 +72,9 @@ public class JOGLConfiguration {
 	public static String resourceDir = null, saveResourceDir = null;
 	public static String localScratchDisk = null;
 	public static boolean quadBufferedStereo = false;
-	 public static String COPY_CAT, PRE_RENDER;
-	 static {
-	  	COPY_CAT = "copyCat";
-	  	PRE_RENDER= "preRender";	  
-	 }
-	/**
-	 * 
-	 */
-	static JOGLConfiguration sharedInstance = new JOGLConfiguration();
+	 public static String COPY_CAT = "copyCat", FORCE_RENDER = "preRender";
+
+	 static JOGLConfiguration sharedInstance = new JOGLConfiguration();
 	private JOGLConfiguration() { 
 		super(); 
 		theLog	= LoggingSystem.getLogger(this);

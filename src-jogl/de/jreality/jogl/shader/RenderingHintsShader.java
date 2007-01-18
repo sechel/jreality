@@ -173,6 +173,7 @@ public class RenderingHintsShader  {
 			GL.GL_SEPARATE_SPECULAR_COLOR : GL.GL_SINGLE_COLOR);
 			jr.getRenderingState().separateSpecularColor = separateSpecularColor;			
 		}
+		jr.getRenderingState().setUseDisplayLists(isUseDisplayLists()); //(); //useDisplayLists(activeDL, jpc);
 	}
 
 	public void postRender(JOGLRenderingState jrs)	{

@@ -31,7 +31,7 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 	int refCount = 0;
 	int signature = Pn.EUCLIDEAN;
 	boolean isSurface = false;
-	boolean preRender = false;
+	boolean forceRender = false;
 	public JOGLPeerGeometry(Geometry g, JOGLRenderer jr)	{
 		super(jr);
 		originalGeometry = g;
@@ -42,8 +42,8 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 		if (g instanceof PointSet) ps = (PointSet) g;
 		originalGeometry.addGeometryListener(this);
 		if (ifs != null || g instanceof Sphere || g instanceof Cylinder) isSurface = true;
-		Object foo = originalGeometry.getGeometryAttributes(JOGLConfiguration.PRE_RENDER);
-		if (foo != null) preRender = true;
+		Object foo = originalGeometry.getGeometryAttributes(JOGLConfiguration.FORCE_RENDER);
+		if (foo != null) forceRender = true;
 	}
 
 	public void dispose()		{
@@ -62,15 +62,12 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 		RenderingHintsShader renderingHints = jpc.renderingHints;
 		DefaultGeometryShader geometryShader = jpc.geometryShader;
 		if (renderingHints == null) return;
-		jr.renderingState.setUseDisplayLists(renderingHints.isUseDisplayLists()); //(); //useDisplayLists(activeDL, jpc);
+		renderingHints.render(jr.renderingState);
 		jr.renderingState.setCurrentGeometry(originalGeometry);
-		//System.err.println("Rendering geometry "+originalGeometry.getName());
-//		openGLState.setCurrentSignature(signature);
-		if (preRender && geometryShader.polygonShader instanceof DefaultPolygonShader)	{
+		if (forceRender && geometryShader.polygonShader instanceof DefaultPolygonShader)	{
 			((DefaultPolygonShader) geometryShader.polygonShader).preRender(jr.renderingState);		
 			return;
 		}
-		renderingHints.render(jr.renderingState);
 		//theLog.fine("Rendering sgc "+jpc.getOriginalComponent().getName());
 		//theLog.fine("vertex:edge:face:"+geometryShader.isVertexDraw()+geometryShader.isEdgeDraw()+geometryShader.isFaceDraw());
 		if (geometryShader.isEdgeDraw() && ils != null)	{

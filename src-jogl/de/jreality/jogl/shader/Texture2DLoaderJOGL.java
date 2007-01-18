@@ -150,12 +150,14 @@ public class Texture2DLoaderJOGL {
         LoggingSystem.getLogger(Texture2DLoaderJOGL.class).fine("creating texture... ");
       }
       // create the texture ID for this texture
-      if (textureID == -1) textureID = createTextureID(gl);
-      Integer id = new Integer(textureID);
-      ht.put(tex.getImage(), id);
+      if (textureID == -1) {
+    	  textureID = createTextureID(gl);
+          texid = new Integer(textureID);
+          ht.put(tex.getImage(), texid);
+      }
       // register reference for refQueue
       WeakReference<ImageData> ref = new WeakReference<ImageData>(tex.getImage(), refQueue);
-      refToID.put(ref, id);
+      refToID.put(ref, texid);
       refToGL.put(ref, gl);
       refToDim.put(ref, new Dimension(tex.getImage().getWidth(), tex.getImage().getHeight()));
     }

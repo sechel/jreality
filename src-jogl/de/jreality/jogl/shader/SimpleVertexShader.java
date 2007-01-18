@@ -84,6 +84,7 @@ public class SimpleVertexShader implements VertexShader {
 		}
 //		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
 			gl.glColor4fv( diffuseColorAsFloat,0);
+//			System.err.println("Setting diffuse color to "+diffuseColor);
 //			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
 //		}
 	}

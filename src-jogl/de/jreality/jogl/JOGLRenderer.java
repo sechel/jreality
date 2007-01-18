@@ -212,7 +212,8 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 		theRoot = sgc;
 		if (theRoot.getAppearance() != null) theRoot.getAppearance().addAppearanceListener(this);
-		thePeerRoot = constructPeerForSceneGraphComponent(theRoot, null);   
+		if (thePeerRoot != null) thePeerRoot.dispose();
+		thePeerRoot = null;
 		// some top-level appearance attributes determine how we render; 
 		// TODO set up a separate mechanism for controlling these top-level attributes
 
@@ -256,22 +257,13 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
     protected Runnable testClean = null;
 	public Object render() {
-		
-//		if (testClean != null)	{
-//			System.err.println("Running test clean runnable");
-//			testClean.run();
-//			testClean = null;
-//		}
-//		if (displayListsDirty && !renderingState.manyDisplayLists)	{
-//			thePeerRoot._propagateGeometryChanged(JOGLPeerComponent.ALL_CHANGED);
-//			displayListsDirty = false;
-//		}
-		renderingState.setCurrentPickMode(pickMode);
-
 		if (thePeerRoot == null || theViewer.getSceneRoot() != thePeerRoot.getOriginalComponent())	{
-			if (thePeerRoot != null) thePeerRoot.dispose();
 			setSceneRoot(theViewer.getSceneRoot());
+			thePeerRoot = constructPeerForSceneGraphComponent(theRoot, null); 
 		}
+		if (auxiliaryRoot != null && thePeerAuxilliaryRoot == null)
+			thePeerAuxilliaryRoot = constructPeerForSceneGraphComponent(auxiliaryRoot, null);
+
 		context  = new Graphics3D(theViewer.getCameraPath(), null, CameraUtility.getAspectRatio(theViewer));
 
 		globalGL.glMatrixMode(GL.GL_PROJECTION);
@@ -397,6 +389,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 		pickPoint[0] = p[0];  pickPoint[1] = p[1];
 		pickMode = true;
+		renderingState.currentPickMode = true;
 		// TODO!!!
 		//theCanvas.display();	// this calls our display() method  directly
 		return hits;

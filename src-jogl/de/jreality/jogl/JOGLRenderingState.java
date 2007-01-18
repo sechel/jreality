@@ -40,11 +40,14 @@
 
 package de.jreality.jogl;
 
+import java.util.WeakHashMap;
+
 import javax.media.opengl.GL;
 
 import de.jreality.math.Pn;
 import de.jreality.scene.Geometry;
 import de.jreality.shader.RenderingHintsShader;
+import de.jreality.shader.Texture2D;
 
 /**
  * @author gunn
@@ -78,11 +81,13 @@ public class JOGLRenderingState {
 	public boolean localLightModel = false;
 	public boolean separateSpecularColor = false;
 	public boolean ignoreAlpha0 = true;
-//	public boolean  manyDisplayLists = true;
+	public boolean renderGeometryOnly = false;
+	public boolean insideDisplayList = false;
 
 	public int texUnitCount = 0;
 	public int polygonCount = 0;
 	
+	public  WeakHashMap<Texture2D, Integer> boundToTextureUnit = new WeakHashMap<Texture2D, Integer>();
 	
 	public JOGLRenderingState(JOGLRenderer jr) {
 		super();

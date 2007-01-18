@@ -46,10 +46,12 @@ import javax.media.opengl.GL;
 
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
+import de.jreality.math.Rn;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.GlslProgram;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.util.LoggingSystem;
 
 
 /**
@@ -161,7 +163,7 @@ public class DefaultVertexShader implements VertexShader {
 		gl.glMaterialfv(frontBack, GL.GL_AMBIENT, ambientColorAsFloat,0);
 		gl.glMaterialfv(frontBack, GL.GL_SPECULAR, specularColorAsFloat,0);
 		gl.glMaterialf(frontBack, GL.GL_SHININESS, (float) getSpecularExponent());
-//		JOGLConfiguration.theLog.log(Level.FINEST,"VertexShader: Setting diffuse color to: "+Rn.toString(getDiffuseColorAsFloat()));
+		LoggingSystem.getLogger(this).finer("VertexShader: Setting diffuse color to: "+Rn.toString(getDiffuseColorAsFloat()));
 	}
 
 	public void postRender(JOGLRenderingState jrs) {

@@ -17,6 +17,7 @@ import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
+import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Lock;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.Scene;
@@ -72,11 +73,10 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	geometryIsDirty = true,
 	boundIsDirty = true,
 	clipToCamera = true;
-	int geometryDirtyBits  = 0;
+	int geometryDirtyBits  = 0, displayList = -5;
 	protected boolean renderRunnableDirty = true;
 	boolean[] matrixIsReflection = null;
 	double[] tform = new double[16];		// for optimized access to matrix
-	Vector<SceneGraphComponentEvent> newSGCEvents = new Vector<SceneGraphComponentEvent>();
 
 	protected final static int POINTS_CHANGED = 1;
 	protected final static int LINES_CHANGED = 2;
@@ -96,7 +96,6 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		goBetween = jr.goBetweenFor(sgp.getLastComponent());
 		goBetween.addJOGLPeer(this);
 		name = "JOGLPeer:"+goBetween.getOriginalComponent().getName();
-//		isCopyCat = goBetween.getOriginalComponent() instanceof JOGLMultipleComponent;
 		Geometry foo = goBetween.getOriginalComponent().getGeometry();
 		isCopyCat = (foo != null &&  foo instanceof PointSet && foo.getGeometryAttributes(JOGLConfiguration.COPY_CAT) != null);
 		if (isCopyCat)	{
@@ -104,15 +103,11 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			matrixIsReflection = new boolean[matrices.length];
 			for (int i = 0; i<matrices.length; ++i)	matrixIsReflection[i] = Rn.determinant(matrices[i]) < 0.0;
 		}
-		children = new Vector<JOGLPeerComponent>();		// always have a child list, even if it's empty
+		children = new Vector<JOGLPeerComponent>();
 		parent = p;
 		updateTransformationInfo();
 	}
 
-	protected void addSceneGraphComponentEvent(SceneGraphComponentEvent ev)	{
-		newSGCEvents.add(ev);
-	}
-	
 	protected void updateRenderRunnable() {
 		setDisplayListDirty();
 //		updateShaders();
@@ -140,7 +135,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		Transformation thisT = preRender();
 		//System.err.println(goBetween.getOriginalComponent().getName()+"Signature is "+currentSignature);
 		renderChildren();
-		postRender(thisT);
+		postRender();
 	}
 
 
@@ -171,41 +166,56 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		if (geometryDirtyBits  != 0)	handleChangedGeometry();
 		if (originalAppearanceDirty) propagateAppearanceChanged();
 		if (appearanceDirty || effectiveAppearanceDirty)  	handleAppearanceChanged();
-		if (!isCopyCat && goBetween != null && goBetween.peerGeometry != null && goBetween.peerGeometry.originalGeometry != null )	{
+		if (goBetween != null && goBetween.peerGeometry != null && goBetween.peerGeometry.originalGeometry != null )	{
 			Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
 		}
 		return thisT;
 	}
 	protected void renderChildren() {
-		if (newSGCEvents.size() != 0)	{
-			for (SceneGraphComponentEvent ev : newSGCEvents)	{
-				int type = ev.getEventType();
-				if (type == SceneGraphComponentEvent.EVENT_TYPE_ADDED)
-					childAdded(ev);
-				else if (type == SceneGraphComponentEvent.EVENT_TYPE_REMOVED)
-					childRemoved(ev);
-				else if (type == SceneGraphComponentEvent.EVENT_TYPE_REPLACED)
-					childReplaced(ev);
-			}
-			newSGCEvents.clear();
-		}
 		int n = children.size();
 
+		// to make this work in general, need to only activate display lists when all my childrne
+		// have valid display lists.  
+//		if (jr.frameCount % 10 == 5 && displayList > 0) {
+//			jr.globalGL.glDeleteLists(displayList, 0);
+//			displayList = -1;
+//		}
+//		if (displayList >= 1) {
+//			jr.globalGL.glCallList(displayList);
+//			return;
+//		}
+//		if (jr.renderingState.useDisplayLists && !jr.renderingState.insideDisplayList)	{
+//			displayList = jr.globalGL.glGenLists(1);
+//			System.err.println("Got display list "+displayList);
+//			jr.getGL().glNewList(displayList, GL.GL_COMPILE); //_AND_EXECUTE);
+//			jr.renderingState.insideDisplayList = true;
+//		}
 		if (isCopyCat)		{
+//			if (jr.frameCount % 10 == 5 && displayList > 0) {
+//				jr.globalGL.glDeleteLists(displayList, 0);
+//				displayList = -3;
+//			}
+//			if (displayList >= 1) {
+//				jr.globalGL.glCallList(displayList);
+//				return;
+//			}
+//			if (displayList == 0 && jr.renderingState.useDisplayLists)	{
+//				displayList = jr.globalGL.glGenLists(1);
+//				System.err.println("Got display list "+displayList);
+//				jr.getGL().glNewList(displayList, GL.GL_COMPILE); //_AND_EXECUTE);
+//				jr.renderingState.insideDisplayList = true;
+//			}
 			boolean isReflectionBefore = cumulativeIsReflection;
-			if (JOGLConfiguration.testMatrices) {
-				minDistance = eAp.getAttribute("discreteGroup.minDistance", minDistance);
-				maxDistance = eAp.getAttribute("discreteGroup.maxDistance", maxDistance);
-				clipToCamera = eAp.getAttribute("discreteGroup.clipToCamera", clipToCamera);					
-			}
+			minDistance = eAp.getAttribute("discreteGroup.minDistance", minDistance);
+			maxDistance = eAp.getAttribute("discreteGroup.maxDistance", maxDistance);
+			clipToCamera = eAp.getAttribute("discreteGroup.clipToCamera", clipToCamera);	
 
 			int nn = matrices.length;
 			double[] o2ndc = jr.context.getObjectToNDC();
 			double[] o2c = jr.context.getObjectToCamera();
 			int count = 0;
 			for (int j = 0; j<nn; ++j)	{
-				if (JOGLConfiguration.testMatrices) 
-					if (clipToCamera && !JOGLRendererHelper.accept(o2ndc, o2c, minDistance, maxDistance, matrices[j], jr.currentSignature)) continue;
+				if (clipToCamera && !JOGLRendererHelper.accept(o2ndc, o2c, minDistance, maxDistance, matrices[j], jr.currentSignature)) continue;
 				count++;
 				cumulativeIsReflection = (isReflectionBefore != matrixIsReflection[j]);
 				if (cumulativeIsReflection != jr.renderingState.flipped)	{
@@ -214,13 +224,14 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 				}
 				pushTransformation(matrices[j]);
 
-				for (int i = 0; i<n; ++i)	{		
-					JOGLPeerComponent child = children.get(i);					
-					child.render();
-				}				
+				children.get(0).render();
 				popTransformation();
 			}
-			//System.err.println("Matrix count: "+count);
+//			if (displayList >= 1 && jr.renderingState.useDisplayLists)	{
+//				jr.getGL().glEndList();	
+//				jr.renderingState.insideDisplayList = false;
+//				jr.getGL().glCallList(displayList);
+//			} else displayList++;
 		} else {
 			for (int i = 0; i<n; ++i)	{		
 				JOGLPeerComponent child = children.get(i);					
@@ -231,8 +242,9 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		}
 	}
 
-	private void postRender(Transformation thisT) {
-		if (thisT != null) popTransformation();			
+	private void postRender() {
+		if (goBetween.getOriginalComponent().getTransformation() != null) 
+			popTransformation();			
 		jr.currentPath.pop();
 	}
 
