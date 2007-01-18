@@ -385,11 +385,13 @@ import de.jreality.scene.data.IntArrayArray;
 			// for each element of the profile curve ...
 			for (int k = 0; k<p; ++k)	{
 				double tu = k/(p-1.0);
+				if (tu > 1) tu = 1;
 				double u = profile[k][0];
 				double v = profile[k][1] * holeSize;
 				// for each point of the "hole curve"
 				for (int j = 0; j<totalVerticesPerLoop; ++j)	{
 					double tv = j/(totalVerticesPerLoop-1.0);
+					if (tv > 1) tv = 1.0;
 					double[] vb = null, vt = null;
 					if (k == 0 || k == (p-1))	{
 						vb = borderBottom[j];
