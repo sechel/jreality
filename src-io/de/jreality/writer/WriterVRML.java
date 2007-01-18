@@ -16,6 +16,7 @@ import java.io.FileWriter;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
+import de.jreality.jogl.shader.DefaultPolygonShader;
 import de.jreality.math.Pn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -332,6 +333,10 @@ public class WriterVRML {
 //		image to data
 		if (eApp!=null){
 			Texture2D texture=null;
+//			IndexedFaceSet faceSet= new IndexedFaceSet();
+//			DefaultPolygonShader polysh= new DefaultPolygonShader();
+//			polysh.setFromEffectiveAppearance(eApp, "");
+		
 			texture =(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace("", CommonAttributes.TEXTURE_2D), eApp);
 			
 			//texture=(Texture2D)eApp.getAttribute(CommonAttributes.TEXTURE_2D,texture,Texture2D.class);
