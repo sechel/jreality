@@ -177,12 +177,12 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    if (lightMap != null) {
 		    gl.glActiveTexture(texUnit);
 		    gl.glEnable(GL.GL_TEXTURE_2D);
-		    Integer bound = jrs.boundToTextureUnit.get(lightMap);
-		    if (bound == null || bound.intValue() != texUnit) {
+//		    Integer bound = jrs.boundToTextureUnit.get(lightMap);
+//		    if (bound == null || bound.intValue() != texUnit) {
 			    Texture2DLoaderJOGL.render(gl, lightMap);
 				testTextureResident(jr, gl);
-				jrs.boundToTextureUnit.put(lightMap, new Integer(texUnit));
-		    }
+//				jrs.boundToTextureUnit.put(lightMap, new Integer(texUnit));
+//		    }
 		    texUnit++;
 		    texunitcoords++;
 	    }
@@ -190,12 +190,12 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    if (texture2Dnew != null) {
 	    	gl.glActiveTexture(texUnit);
 	      	gl.glEnable(GL.GL_TEXTURE_2D);
-		    Integer bound = jrs.boundToTextureUnit.get(texture2Dnew);
-		    if (bound == null || bound.intValue() != texUnit) {
+//		    Integer bound = jrs.boundToTextureUnit.get(texture2Dnew);
+//		    if (bound == null || bound.intValue() != texUnit) {
 			    Texture2DLoaderJOGL.render(gl, texture2Dnew);
 				testTextureResident(jr, gl);
-				jrs.boundToTextureUnit.put(texture2Dnew, new Integer(texUnit));
-		    }
+//				jrs.boundToTextureUnit.put(texture2Dnew, new Integer(texUnit));
+//		    }
 		    texUnit++;
 		    texunitcoords++;
 	    }
