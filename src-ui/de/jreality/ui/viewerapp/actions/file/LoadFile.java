@@ -120,6 +120,8 @@ public class LoadFile extends AbstractJrAction {
     mergeFaceSets.setSelected(false);
     
     File[] files = FileLoaderDialog.loadFiles(parentComp, options);
+    if (files == null) return;  //dialog cancelled
+    
     for (int i = 0; i < files.length; i++) {
       try {
         SceneGraphComponent sgc = Readers.read(files[i]);

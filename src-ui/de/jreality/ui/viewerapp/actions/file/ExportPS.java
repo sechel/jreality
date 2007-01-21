@@ -59,47 +59,47 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
  * @author hoffmann
  */
 public class ExportPS extends AbstractJrAction {
-  
-  private Viewer viewer;
-  
-  
-  public ExportPS(String name, Viewer viewer, Component parentComp) {
-    super(name, parentComp);
-    
-    if (viewer == null)
-      throw new IllegalArgumentException("Viewer is null!");
-    this.viewer = viewer;
-    
-    setShortDescription("Export the current scene as PostScript file");
-  }
-  
-//  public ExportPS(String name, ViewerApp v) {
-//    this(name, v.getViewerSwitch(), v.getFrame());
-//  }
-  
-  
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    File file = FileLoaderDialog.selectTargetFile(parentComp, "ps", "PostScript Files");
-    if (file == null)
-      return;
-    // try {
-    Dimension d = viewer.getViewingComponentSize();
-    PSRenderer rv;
-    try {
-      rv = new PSRenderer(new PrintWriter(file), d.width, d.height);
-      rv.setCameraPath(viewer.getCameraPath());
-      rv.setSceneRoot(viewer.getSceneRoot());
-      rv.setAuxiliaryRoot(viewer.getAuxiliaryRoot());
-      // rv.initializeFrom(viewer);
-      rv.render();
-    } catch (FileNotFoundException e1) {
-      e1.printStackTrace();
-    }
-    // } catch (IOException ioe) {
-    // JOptionPane.showMessageDialog(frame, "Save failed:
-    // "+ioe.getMessage());
-    // }
-  }
-  
+
+	private Viewer viewer;
+
+
+	public ExportPS(String name, Viewer viewer, Component parentComp) {
+		super(name, parentComp);
+
+		if (viewer == null)
+			throw new IllegalArgumentException("Viewer is null!");
+		this.viewer = viewer;
+
+		setShortDescription("Export the current scene as PostScript file");
+	}
+
+//	public ExportPS(String name, ViewerApp v) {
+//	this(name, v.getViewerSwitch(), v.getFrame());
+//	}
+
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		File file = FileLoaderDialog.selectTargetFile(parentComp, "ps", "PostScript Files");
+		if (file == null) return;  //dialog cancelled
+
+		// try {
+		Dimension d = viewer.getViewingComponentSize();
+		PSRenderer rv;
+		try {
+			rv = new PSRenderer(new PrintWriter(file), d.width, d.height);
+			rv.setCameraPath(viewer.getCameraPath());
+			rv.setSceneRoot(viewer.getSceneRoot());
+			rv.setAuxiliaryRoot(viewer.getAuxiliaryRoot());
+			// rv.initializeFrom(viewer);
+			rv.render();
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		}
+		// } catch (IOException ioe) {
+		// JOptionPane.showMessageDialog(frame, "Save failed:
+		// "+ioe.getMessage());
+		// }
+	}
+
 }

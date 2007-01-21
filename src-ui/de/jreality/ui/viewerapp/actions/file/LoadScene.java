@@ -79,7 +79,7 @@ public class LoadScene extends AbstractJrAction {
   @Override
   public void actionPerformed(ActionEvent e) {
     File f = FileLoaderDialog.loadFile(parentComp, "jrs", "jReality scene files");
-    if (f == null) return;
+    if (f == null) return;  //dialog cancelled
     
     JrScene scene = null;
     try {

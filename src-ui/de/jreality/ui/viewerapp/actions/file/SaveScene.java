@@ -87,7 +87,7 @@ public class SaveScene extends AbstractJrAction {
   @Override
   public void actionPerformed(ActionEvent e) {
     File file = FileLoaderDialog.selectTargetFile(parentComp, "jrs", "jReality scene files");
-    if (file == null) return;
+    if (file == null) return;  //dialog cancelled
    
     try {
       FileWriter fw = new FileWriter(file);

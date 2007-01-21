@@ -108,7 +108,7 @@ public class ExportRIB extends AbstractJrAction {
     if (options == null) options = createAccessory();
     
     File file = FileLoaderDialog.selectTargetFile(parentComp, options, "rib", "RIB files");
-    if (file == null) return;
+    if (file == null) return;  //dialog cancelled
 
     if(viewer.getSceneRoot().getAppearance()==null) viewer.getSceneRoot().setAppearance(new Appearance());
     viewer.getSceneRoot().getAppearance().setAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED,shadowsDialog.isSelected()); 

@@ -67,21 +67,20 @@ public class ExportSVG extends AbstractJrAction {
 		if (viewer == null)
 			throw new IllegalArgumentException("Viewer is null!");
 		this.viewer = viewer;
-		
+
 		setShortDescription("Export SVG file");
 	}
 
 //	public ExportSVG(String name, ViewerApp v) {
-//		this(name, v.getViewerSwitch(), v.getFrame());
+//	this(name, v.getViewerSwitch(), v.getFrame());
 //	}
 
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		File file = FileLoaderDialog
-		.selectTargetFile(parentComp, "svg", "SVG files");
-		if (file == null)
-			return;
+		File file = FileLoaderDialog.selectTargetFile(parentComp, "svg", "SVG files");
+		if (file == null) return;  //dialog cancelled
+
 		Dimension d = viewer.getViewingComponentSize();
 		SVGRenderer rv;
 		try {
