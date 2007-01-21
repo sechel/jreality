@@ -90,7 +90,7 @@ public class FileLoaderDialog {
   private static File[] loadFiles(Component parent, JFileChooser chooser, JComponent accessory) {
     if (accessory != null) chooser.setAccessory(accessory);
     chooser.setMultiSelectionEnabled(true);
-    chooser.showOpenDialog(parent);
+    if (chooser.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION) return null;
     File[] files = chooser.getSelectedFiles();
     lastDir = chooser.getCurrentDirectory();
     return files;
@@ -99,7 +99,7 @@ public class FileLoaderDialog {
   private static File loadFile(Component parent, JFileChooser chooser, JComponent accessory) {
     if (accessory != null) chooser.setAccessory(accessory);
     chooser.setMultiSelectionEnabled(false);
-    chooser.showOpenDialog(parent);
+    if (chooser.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION) return null;
     File file = chooser.getSelectedFile();
     lastDir = chooser.getCurrentDirectory();
     return file;
