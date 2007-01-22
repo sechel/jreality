@@ -675,7 +675,6 @@ public class VRMLHelper {
 	break;
 	case 6:// per Vertex 
 		//TODO: eine Farbe pro Punkt! weitere Farben gehen verloren
-		// Arbeite deshalb rueckwaerts.
 	{
 		int m=0;
 		for (int i=0;i<edgeCount;i++){
