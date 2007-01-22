@@ -15,7 +15,9 @@ import java.awt.Color;
 import java.io.FileWriter;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.LinkedList;
 
+import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
@@ -61,7 +63,7 @@ public class WriterVRML
 	private static DefaultLineShader dls;
 	private static DefaultPointShader dvs;
 //	private static DefaultTextShader dts;
-	private static final int PER_VERTEX=0,PER_FACE=1,OVERALL=2;
+	private static final int PER_VERTEX=0,PER_PART=1,PER_FACE=2,OVERALL=3;
 
 	private static PrintWriter out=null;
 	private static final String spacing="  ";// for outlay
@@ -90,7 +92,7 @@ public class WriterVRML
 	private static void updateShaders(EffectiveAppearance eap) {
 		dgs = ShaderUtility.createDefaultGeometryShader(eap);
 		rhs = ShaderUtility.createRenderingHintsShader(eap);
-		
+
 		if (dgs.getPointShader() instanceof DefaultPointShader)	dvs = (DefaultPointShader) dgs.getPointShader();
 		else dvs = null;
 		if (dgs.getLineShader() instanceof DefaultLineShader) dls = (DefaultLineShader) dgs.getLineShader();
@@ -99,7 +101,7 @@ public class WriterVRML
 		else dps = null;
 //		if (dps.getTextShader() instanceof DefaultPolygonShader) dps = (DefaultPolygonShader) dgs.getPolygonShader();
 //		else dts = null;
-		
+
 	}
 //	---------------------------- start writing --------------------
 
@@ -128,13 +130,44 @@ public class WriterVRML
 		out.println(""+hist+"}");
 	}
 	private static void writeGeo(Geometry g,String hist){
-		if (g instanceof IndexedFaceSet)
+		if (g instanceof Sphere)
+			writeSphere((Sphere)g,hist);
+		else if (g instanceof Cylinder )
+			writeCylinder((Cylinder)g,hist);
+		else if (g instanceof IndexedFaceSet)
 			writeGeoFaces((IndexedFaceSet) g,hist);		
 		else if (g instanceof IndexedLineSet)
 			writeGeoLines((IndexedLineSet) g,hist);
 		else if (g instanceof PointSet)
 			writeGeoPoints((PointSet) g,hist);
 		else System.err.println("WriterVRML.writeComp() Failure");
+	}
+	private static void writeSphere(Sphere s,String hist){
+		/**	Sphere {
+		 *    radius  1     # SFFloat
+		 *	}		*/
+		out.println(hist+"Sphere { radius  1}");
+	}
+	private static void writeCylinder(Cylinder c,String hist){
+	/**	PARTS
+	*     SIDES   The cylindrical part
+	*     TOP     The top circular face
+	*     BOTTOM  The bottom circular face
+	*     ALL     All parts
+	*FILE FORMAT/DEFAULTS
+	*     Cylinder {
+	*          parts   ALL   # SFBitMask
+	*          radius  1     # SFFloat
+	*          height  2     # SFFloat
+	*     }		*/
+		out.print(hist+"Cylinder { ");
+		out.print("radius  1 ");
+		out.print("height  2 ");
+		out.print("}");
+		
+		
+		
+		System.out.println("WriterVRML.writeCylinder()");
 	}
 	private static void writeGeoFaces(IndexedFaceSet f,String hist){
 		// write the coordinates:
@@ -171,16 +204,17 @@ public class WriterVRML
 				writeMaterial(amb,diff,spec,tra,hist);
 			}
 		}
-
+		// write texturecoords
+		writeTexCoords(f,hist);			
 		// write face texture
 		writeTexture(hist);
-/**	IndexedFaceSet {
- * 	coordIndex         0  # MFLong indies
- * 	materialIndex      -1 # MFLong egal
- * 	normalIndex        -1 # MFLong egal
- * 	textureCoordIndex  -1 # MFLong spaeter
- * 	} */
-		
+		/**	IndexedFaceSet {
+		 * 	coordIndex         0  # MFLong indies
+		 * 	materialIndex      -1 # MFLong egal
+		 * 	normalIndex        -1 # MFLong egal
+		 * 	textureCoordIndex  -1 # MFLong spaeter
+		 * 	} */
+
 		out.print(hist+"IndexedFaceSet {");
 		out.println(" # "+ f.getName());
 		// writes the FaceIndices
@@ -188,17 +222,22 @@ public class WriterVRML
 		out.println(hist+"}");
 	}
 	private static void writeGeoLines(IndexedLineSet l,String hist){
-		// write coords
-		writeCoordinates(l.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null),hist);
-		// writes Edge Colors if given:
+		double[][] lcoords=l.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+		int[][] lindices=l.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
 		
+		// write coords
+		writeCoordinates(lcoords,hist);
+		// writes Edge Colors if given:
+
 		if(l.getEdgeAttributes(Attribute.COLORS)!=null){
-			writeMaterialBinding(PER_FACE,hist);
+			writeMaterialBinding(PER_PART,hist);
 			writeColors(l.getEdgeAttributes(Attribute.COLORS).toDoubleArrayArray(null),hist);
 		}
 		else if(l.getVertexAttributes(Attribute.COLORS)!=null){
 			writeMaterialBinding(PER_VERTEX,hist);
-			writeColors(l.getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null),hist);
+			double[][] c=l.getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null);
+			c=convertLineVertexColors(c,lindices);
+			writeColors(c,hist);
 		}
 		else {
 			writeMaterialBinding(OVERALL,hist);
@@ -209,12 +248,12 @@ public class WriterVRML
 		}
 
 		// write object
-/**		IndexedLineSet {
- *		coordIndex         0  # ok
- *		materialIndex      -1 # egal
- *		normalIndex        -1 # egal
- *		textureCoordIndex  -1 # egal
- *		} */
+		/**		IndexedLineSet {
+		 *		coordIndex         0  # ok
+		 *		materialIndex      -1 # egal
+		 *		normalIndex        -1 # egal
+		 *		textureCoordIndex  -1 # egal
+		 *		} */
 		out.print(hist+"IndexedLineSet {");
 		out.println(" # "+ l.getName());
 		// writes the edgeIndices
@@ -237,10 +276,10 @@ public class WriterVRML
 			}
 		}
 		// write object
-/**		PointSet {
- *		startIndex  0 	# default ok
- *		numPoints   -1    # ok
- *		} */
+		/**		PointSet {
+		 *		startIndex  0 	# default ok
+		 *		numPoints   -1    # ok
+		 *		} */
 		out.print(hist+"PointSet {");
 		out.println(" # "+ p.getName());
 		out.println(hist+ spacing + "numPoints "+ p.getNumPoints());
@@ -314,6 +353,8 @@ public class WriterVRML
 			out.println("PER_VERTEX }");
 		else if(binding==PER_FACE)
 			out.println("PER_FACE }");
+		else if(binding==PER_PART)
+			out.println("PER_PART }");
 		else if(binding==OVERALL)
 			out.println("OVERALL }");
 		else out.println("DEFAULT }");
@@ -327,53 +368,36 @@ public class WriterVRML
 		else out.println("DEFAULT }");
 	} 
 	public static void writeTexture(String hist){
-/**		WRAP ENUM
-*		REPEAT  Repeats texture outside 0-1 texture coordinate range
-*		CLAMP   Clamps texture coordinates to lie within 0-1 range
-*		FILE FORMAT/DEFAULTS
-*		Texture2 {
-*		filename    ""        # SFString egal
-*		image       0 0 0     # SFImage
-*		wrapS       REPEAT    # SFEnum later 
-*		wrapT       REPEAT    # SFEnum later
-*		}
-*
-*		Texture2Transform {
-*		translation  0 0      # SFVec2f
-*		rotation     0        # SFFloat
-*		scaleFactor  1 1      # SFVec2f
-*		center       0 0      # SFVec2f
-*		}
-*		TextureCoordinate2 {
-*		point  0 0    # MFVec2f
-*		} */
-
+		/**		WRAP ENUM
+		 *		REPEAT  Repeats texture outside 0-1 texture coordinate range
+		 *		CLAMP   Clamps texture coordinates to lie within 0-1 range
+		 *		FILE FORMAT/DEFAULTS
+		 *		Texture2 {
+		 *		filename    ""        # SFString egal
+		 *		image       0 0 0     # SFImage
+		 *		wrapS       REPEAT    # SFEnum later 
+		 *		wrapT       REPEAT    # SFEnum later
+		 *		}		*/
 		String hist2=hist+spacing;
-
-//		image to data
 		Texture2D tex=dps.getTexture2d();
+
 		if (tex!=null){
 			out.println(hist+"Texture2 {");{
 				writeImage(tex,hist2);
-//			    texture.getRepeatS()
-//			    texture.getRepeatT()
-			}
-//			out.println(hist+"}");
-//			out.println(hist+"Texture2Transform {");{
-//				writeTexTrans(hist2,tex);
-//			}
-//			out.println(hist+"}");
-			out.println(hist+"TextureCoordinate2 {");{
-				writeTexCoords(tex,hist2);
+//				texture.getRepeatS()
+//				texture.getRepeatT()
 			}
 			out.println(hist+"}");
-			
+			writeTexTrans(hist2,tex);
 		}
 
 	}
-
 	//	-----------------------------	
-	public static void writeImage(Texture2D tex,String hist){
+
+	private static double[] colorToDoubleArray(Color c){
+		return new double[]{(double)c.getRed(),(double)c.getGreen(),(double)c.getBlue()};
+	}
+	private static void writeImage(Texture2D tex,String hist){
 		String hist2=hist+spacing;
 		ImageData id=tex.getImage();
 		byte[] data= id.getByteArray();
@@ -390,11 +414,8 @@ public class WriterVRML
 				mergeVal*=256;
 				mergeVal+=data[i*4+k];
 			}
-			out.println(hist2+""+ Integer.toHexString(mergeVal));
+			out.println(hist2+"0x"+ Integer.toHexString(mergeVal).toUpperCase());
 		}
-	}
-	private static double[] colorToDoubleArray(Color c){
-		return new double[]{(double)c.getRed(),(double)c.getGreen(),(double)c.getBlue()};
 	}
 	private static String ColorToString(Color c){
 		return ""+((double)c.getRed())/255+" "+((double)c.getGreen())/255+" "+((double)c.getBlue())/255;
@@ -434,26 +455,50 @@ public class WriterVRML
 		if(t!=0){ out.println(hist2+"transparency " + t );	}
 		out.println(hist+"}");
 	}
-//	private static void writeTexTrans(String hist,Texture2D tex){
-//		String hist2=hist+spacing;
-//		/**     translation  0 0      # SFVec2f
-//		*		rotation     0        # SFFloat
-//		*		scaleFactor  1 1      # SFVec2f
-//		*		center       0 0      # SFVec2f*/
-//		Matrix mat=tex.getTextureMatrix();
-//		Transformation t= new Transformation();
-//
-//		
-//	}
-	private static void writeTexCoords(Texture2D tex,String hist){
-		/**
-		 *		point  0 0    # MFVec2f
-		 */
+	private static void writeTexTrans(String hist,Texture2D tex){
+		String hist2=hist+spacing;
+		/**		Texture2Transform {
+		 *		translation  0 0      # SFVec2f
+		 *		rotation     0        # SFFloat
+		 *		scaleFactor  1 1      # SFVec2f
+		 *		center       0 0      # SFVec2f
+		 *		}		*/
 		Matrix mat= tex.getTextureMatrix();
-		
-		//double [][] texCoords=new double[]
-		out.println(hist+"point");
+		FactoredMatrix matrix= new FactoredMatrix(mat.getArray());
+		double[] trans=matrix.getTranslation();
+		double ang=matrix.getRotationAngle();
+		double[] rotA=matrix.getRotationAxis();
+		double[] scale = matrix.getStretch();
 
-}	
-//----------------------------- vistor? ------------------------
+		out.println(hist+"Texture2Transform {");
+		out.println(hist2+"translation  "+trans[0]/trans[3]+" "+trans[1]/trans[3]);
+		out.println(hist2+"rotation  "+ang);
+		out.println(hist2+"scaleFactor "+scale[0]+" "+scale[1]);
+		out.println(hist2+"center 0 0");
+		out.println(hist+"}");
+	}
+	private static void writeTexCoords(IndexedFaceSet f,String hist){
+		/**		TextureCoordinate2 {
+		 *		point  0 0    # MFVec2f
+		 *		} */
+		String hist2=hist+spacing;
+		double [][] texcoords= null;
+		if (f.getVertexAttributes(Attribute.TEXTURE_COORDINATES)!=null){
+			texcoords=f.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null);
+			out.println(hist+"TextureCoordinate2 { point [");
+			for(int i=0;i<texcoords.length;i++)
+				writeDoubleArray(texcoords[i],hist2,",",2);
+			out.println(hist+"]}");
+		}
+	}	
+	private static double[][] convertLineVertexColors(double[][] colors,int[][] lindis){
+		LinkedList list= new LinkedList<double[]>();
+		for (int i = 0; i < lindis.length; i++) 
+			for (int j = 0; j < lindis[i].length; j++) 
+				list.add(colors[lindis[i][j]]);
+		double[][] newCol=new double[list.size()][];
+		for (int i = 0; i < newCol.length; i++) 
+			newCol[i]=(double[])list.get(i);
+		return newCol;
+	}
 }
