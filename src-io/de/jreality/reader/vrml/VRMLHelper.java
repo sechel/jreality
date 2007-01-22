@@ -716,9 +716,9 @@ public class VRMLHelper {
 	 */
 	public static int[]decodeColorFromString(int dim,String s){
 		int[] c= new int[dim];
-		int dec = Integer.decode(s);// to int
+		long dec = Long.decode(s);// to int
 		for (int i=0;i<dim;i++){
-			int t= dec%256;
+			int t= (int)dec%256;
 			c[dim-i-1]=t;
 			dec -= t;
 			dec /= 256;
