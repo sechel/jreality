@@ -63,7 +63,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 
 import de.jreality.scene.Viewer;
-import de.jreality.sunflow.RenderOptions;
 import de.jtem.beans.DimensionPanel;
 import de.jtem.beans.InspectorPanel;
 
