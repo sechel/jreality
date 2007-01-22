@@ -847,9 +847,9 @@ texture2TransformNode[State state]
 				trans=sfvec2fValue
 		| "rotation" 	{ if (VRMLHelper.verbose) System.err.print("rotation ");}
 				rot=sffloatValue
-		| "ScaleFactor"	{ if (VRMLHelper.verbose) System.err.print("ScaleFactor ");}
+		| "scaleFactor"	{ if (VRMLHelper.verbose) System.err.print("scaleFactor ");}
 				scale=sfvec2fValue
-		| "Center"	{ if (VRMLHelper.verbose) System.err.print("Center ");}
+		| "center"	{ if (VRMLHelper.verbose) System.err.print("center ");}
 				center=sfvec2fValue
 		| wrongAttribute )*
 	CLOSE_BRACE
@@ -1643,6 +1643,7 @@ protected
 HEXDIGIT
 	: ('0'..'9')
 	| ('A'..'F')
+	| ('a'..'f')
 	;
 
 protected
