@@ -132,7 +132,6 @@ import de.jreality.shader.CommonAttributes;
 				sticksAp.setAttribute(CommonAttributes.EDGE_DRAW, false);
 				sticksAp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
 				if (stickColor != null) sticksAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, stickColor);
-//       	  	System.err.println("Setting polygon color to "+stickColor);
 				sticks.setAppearance(sticksAp);
 				if (arrowsAp == null) arrowsAp = new Appearance();
 				if (arrowColor != null) arrowsAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, arrowColor);
@@ -156,7 +155,6 @@ import de.jreality.shader.CommonAttributes;
 							Appearance ap = new Appearance();
 							ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ccc);
               ap.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ccc);
-               	  	System.err.println("Setting polygon color to "+ccc);
 							cc.setAppearance(ap);
 						}
 						if (cc != null) sticks.addChild(cc);
