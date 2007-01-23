@@ -527,6 +527,10 @@ public class ViewerVR {
 	public ViewerApp initialize() {
 		restorePreferences();
 		ViewerApp viewerApp = new ViewerApp(sceneRoot, cameraPath, emptyPickPath, avatarPath);
+		viewerApp.setAttachNavigator(false);
+		viewerApp.setExternalNavigator(true);
+		viewerApp.setAttachBeanShell(false);
+		viewerApp.setExternalBeanShell(true);
 		tweakMenu(viewerApp);
 		return viewerApp;
 	}
