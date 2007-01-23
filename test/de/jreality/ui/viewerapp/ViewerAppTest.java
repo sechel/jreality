@@ -52,12 +52,34 @@ import de.jreality.scene.Transformation;
  * 
  * @author msommer
  */
-public class ViewerAppMenuTest {
+public class ViewerAppTest {
   
   
   public static void main(String[] args) {
     
-    SceneGraphComponent cmp = new SceneGraphComponent("father");
+  	SceneGraphComponent cmp = getSGC();
+    ViewerApp viewerApp = new ViewerApp(cmp);
+    viewerApp.setAttachNavigator(true);
+    viewerApp.setExternalNavigator(false);
+    viewerApp.setAttachBeanShell(true);
+    viewerApp.setExternalBeanShell(false);
+    
+    
+//    JPanel p = new JPanel();
+//    p.add( new JCheckBox("test component", true) );
+//    viewerApp.addAccessory(p, "test tab");
+    
+    viewerApp.update();
+    viewerApp.display();
+    
+    cmp.addTool(new SelectionTool(viewerApp));
+
+  }
+  
+  
+  private static SceneGraphComponent getSGC() {
+  	
+  	SceneGraphComponent cmp = new SceneGraphComponent("father");
     cmp.setAppearance(new Appearance());
     cmp.setTransformation(new Transformation());
     SceneGraphComponent cmp1 = new SceneGraphComponent("Icosahedron");
@@ -71,20 +93,7 @@ public class ViewerAppMenuTest {
     cmp.addChild(cmp1);
     cmp.addChild(cmp2);
     
-    ViewerApp viewerApp = new ViewerApp(cmp);
-    viewerApp.setAttachNavigator(true);
-    viewerApp.setAttachBeanShell(true);
-//    viewerApp.setShowMenu(false);
-    
-//    JPanel p = new JPanel();
-//    p.add( new JCheckBox("test component", true) );
-//    viewerApp.addAccessory(p, "test tab");
-    
-    viewerApp.update();
-    viewerApp.display();
-    
-    cmp.addTool(new SelectionTool(viewerApp));
-
+    return cmp;
   }
   
 }
