@@ -52,12 +52,13 @@ public class DirectionalLight implements LightSource {
 		return (Vector3.dot(dir, n) > 0.0);
 	}
 
-	public void getSample(int i, int n, ShadingState state, LightSample dest) {
-		// prepare shadow ray
+	public void getSamples(ShadingState state) {
 		Vector3 lightDir=dir;
+		int samples = state.getDiffuseDepth() > 0 ? 1 : getNumSamples();
+		for (int i = 0; i < samples; i++) {
 		if (distortion != 0) {
-	        double h = 1-state.getRandom(i, 0)*distortion;
-	        double theta = 2*state.getRandom(i, 1)*Math.PI;
+	        double h = 1-state.getRandom(i, 0, samples)*distortion;
+	        double theta = 2*state.getRandom(i, 1, samples)*Math.PI;
 	        double us=Math.sqrt(1-h*h);
 	        
 	        float l1 = (float)(us*Math.cos(theta));
@@ -68,10 +69,12 @@ public class DirectionalLight implements LightSource {
 	                
 	        onb.transform(lightDir);
 		}
+		LightSample dest = new LightSample();
 		dest.setShadowRay(new Ray(state.getPoint(), lightDir));
         dest.getShadowRay().setMax(Float.MAX_VALUE);
 		dest.setRadiance(power, power);
 		dest.traceShadow(state);
+		}
 	}
 
 	public void getPhoton(double randX1, double randY1, double randX2, double randY2, Point3 p, Vector3 dir, Color power) {

@@ -48,8 +48,8 @@ public class GlPointLight implements LightSource {
         return (Vector3.dot(Point3.sub(lightPoint, p, new Vector3()), n) > 0.0);
     }
 
-    public void getSample(int i, int n, ShadingState state, LightSample dest) {
-        // prepare shadow ray
+    public void getSamples(ShadingState state) {
+    	LightSample dest = new LightSample();
         dest.setShadowRay(new Ray(state.getPoint(), lightPoint));
         float dist = lightPoint.distanceTo(state.getPoint());
         float fallOff = fallOffA0 + dist * fallOffA1 + dist * dist * fallOffA2;
