@@ -21,8 +21,14 @@ public class RendermanTestScene {
   static final int testNr=6;   //testNr: 0..7
   static final int rendererType = RIBViewer.TYPE_PIXAR;
   static final String ribPath = "";
+  static final String ribFileName = "";
+  static final String globalIncludeFile = "";
   
-  public static void main(String[] args) {
+  public static void main(String[] args) {    
+    if(ribPath.equals("") || ribFileName.equals("")){
+      System.err.println("RendermanTestScene: ribPath and/or ribFileName not set\n-> set them in the global fields at the top of the class");
+      return;
+    }
     
     SceneGraphComponent sgc=new SceneGraphComponent();
     
@@ -136,7 +142,9 @@ public class RendermanTestScene {
     RIBViewer ribv=new RIBViewer();
     ribv.initializeFrom(va.getViewer());
     ribv.setRendererType(rendererType);
-    ribv.setFileName(ribPath);
+    ribv.setFileName(ribPath+ribFileName);
+    if(ribv.getSceneRoot().getAppearance()==null)  ribv.getSceneRoot().setAppearance(new Appearance());
+    if(!globalIncludeFile.equals(""))  ribv.getSceneRoot().getAppearance().setAttribute(CommonAttributes.RMAN_GLOBAL_INCLUDE_FILE, globalIncludeFile);
     ribv.render();
   }
 }
