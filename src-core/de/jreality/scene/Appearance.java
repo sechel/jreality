@@ -135,7 +135,7 @@ public class Appearance extends SceneGraphNode
           throw new IllegalArgumentException("no proxies allowed");
         old=attributes.put(key, value);
       }
-      fireAppearanceChanged(key, old);
+      if (old != value ) fireAppearanceChanged(key, old);
     } finally {
       finishWriter();
     }
