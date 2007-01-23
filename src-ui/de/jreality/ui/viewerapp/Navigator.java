@@ -41,7 +41,6 @@
 package de.jreality.ui.viewerapp;
 
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -254,7 +253,7 @@ public class Navigator implements SelectionListener {
 			navigator.setResizeWeight(1.0);  //use extra space for sceneTree
 			navigator.setBorder(BorderFactory.createEmptyBorder());
 
-			navigator.setPreferredSize(new Dimension(0,0));  //let user set the size
+//			navigator.setPreferredSize(new Dimension(0,0));  //let user set the size
 			this.navigator = navigator;
 		}
 		

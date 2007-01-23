@@ -129,7 +129,7 @@ public class BeanShell implements SelectionListener {
 		if (beanShell == null) {
 			beanShell = new JScrollPane(jterm);
 			((JScrollPane)beanShell).setBorder(BorderFactory.createEmptyBorder());
-			beanShell.setPreferredSize(new Dimension(0,0));  //let user set the size
+//			beanShell.setPreferredSize(new Dimension(0,0));  //let user set the size
 		}
 		
 		return beanShell;

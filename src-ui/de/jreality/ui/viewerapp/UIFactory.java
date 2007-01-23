@@ -44,13 +44,10 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.HashMap;
-import java.util.LinkedList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
 import javax.swing.border.Border;
 
 
@@ -62,8 +59,8 @@ class UIFactory {
 	private Component viewer = null;
 	private Component beanShell = null;
 	private Component navigator = null;
-	private LinkedList<Component> accessory = new LinkedList<Component>();
-	private HashMap<Component, String> accessoryTitles = new HashMap<Component, String>();
+//	private LinkedList<Component> accessory = new LinkedList<Component>();
+//	private HashMap<Component, String> accessoryTitles = new HashMap<Component, String>();
 	private final Border emptyBorder = BorderFactory.createEmptyBorder();
 
 	private boolean attachNavigator = false;  //default
@@ -121,20 +118,19 @@ class UIFactory {
 		}
 
 		if (attachNavigator) {  //|| !accessory.isEmpty()
-			Component left;
-			JTabbedPane jtb = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
-
-			if (attachNavigator) 
-				jtb.addTab("Navigator", navigator);
-			for (Component c : accessory)  //add accessories 
-				jtb.addTab(accessoryTitles.get(c), scroll(c));
-
-			left = jtb;
-			if (jtb.getTabCount() == 1) left = jtb.getComponentAt(0);
+			Component left = navigator;
+//			JTabbedPane jtb = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+//
+//			if (attachNavigator) 
+//				jtb.addTab("Navigator", navigator);
+//			for (Component c : accessory)  //add accessories 
+//				jtb.addTab(accessoryTitles.get(c), scroll(c));
+//
+//			left = jtb;
+//			if (jtb.getTabCount() == 1) left = jtb.getComponentAt(0);
 
 			int dividerLocation = -1;  //default = honor preferred size of scene tree
 			if (navigatorJSP != null)	dividerLocation = navigatorJSP.getDividerLocation();
-			else ((JSplitPane)navigator).setDividerLocation(350);  //init divider location within navigator
 			
 			navigatorJSP = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, 
 					left, right);
@@ -151,7 +147,7 @@ class UIFactory {
 	}
 
 
-	private Component scroll(Component comp) {
+	protected Component scroll(Component comp) {
 		JScrollPane scroll = new JScrollPane(comp);
 		scroll.setBorder(emptyBorder);
 		return scroll;
@@ -161,7 +157,7 @@ class UIFactory {
 	protected void setViewer(Component component) {
 		viewer = component;
 		
-		//initialize preferred size
+		//initialize sizes
 		if ( new Dimension(0,0).equals(viewer.getPreferredSize()) )
 			viewer.setPreferredSize(new Dimension(800, 600));
 		viewer.setMinimumSize(new Dimension(10, 10));
@@ -169,23 +165,12 @@ class UIFactory {
 	
 	
 	protected void setBeanShell(Component component) {
-		
 		beanShell = component;
-
-		//initialize sizes
-		if ( new Dimension(0,0).equals(beanShell.getPreferredSize()) )
-			beanShell.setPreferredSize(new Dimension(0, 100));
-		beanShell.setMinimumSize(new Dimension(10, 100));
 	}
 
 
 	protected void setNavigator(Component component) {
 		navigator = component;
-		
-		//initialize sizes
-		if ( new Dimension(0,0).equals(navigator.getPreferredSize()) )
-			navigator.setPreferredSize(new Dimension(200, 0));
-		navigator.setMinimumSize(new Dimension(200, 10));
 	}
 
 
@@ -199,19 +184,19 @@ class UIFactory {
 	}
 
 
-	protected void addAccessory(Component c) {
-		addAccessory(c, null);
-	}
-
-
-	protected void addAccessory(Component c, String title) {
-		accessory.add(c);
-		accessoryTitles.put(c, title);
-	}
-	
-	
-	protected void removeAccessories() {
-		accessory.clear();
-	}
+//	protected void addAccessory(Component c) {
+//		addAccessory(c, null);
+//	}
+//
+//
+//	protected void addAccessory(Component c, String title) {
+//		accessory.add(c);
+//		accessoryTitles.put(c, title);
+//	}
+//	
+//	
+//	protected void removeAccessories() {
+//		accessory.clear();
+//	}
 
 }

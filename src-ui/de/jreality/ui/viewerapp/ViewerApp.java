@@ -42,6 +42,9 @@ package de.jreality.ui.viewerapp;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.beans.Beans;
 import java.io.IOException;
 import java.net.URL;
@@ -55,6 +58,9 @@ import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 
@@ -79,6 +85,7 @@ import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
 import de.jreality.util.Secure;
 
+
 /**
  * Factory for the jReality Viewer application, which displays a 
  * {@link de.jreality.io.JrScene} in a frame.<br>
@@ -102,37 +109,40 @@ import de.jreality.util.Secure;
  * @author weissman, msommer
  */
 public class ViewerApp {
-  
-  private SceneGraphNode displayedNode;  //the node which is displayed in viewer
-  
-  private UIFactory uiFactory;  //frame layout factory depending on viewer
-  
-  private RenderTrigger renderTrigger;
-  
-  private Viewer[] viewers;  //containing possible viewers (jogl, soft, portal)
+
+	private Viewer[] viewers;  //containing possible viewers (jogl, soft, portal)
   private ViewerSwitch viewerSwitch;
-  private ToolSystemViewer currViewer;  //the current viewer
-  private JFrame frame;
-  
-  private SceneGraphComponent sceneRoot;
-  private SceneGraphComponent scene;
-  
-  private boolean attachNavigator = false;  //default
-  private boolean attachBeanShell = false;  //default
-  private BeanShell beanShell;
-  private Navigator navigator;
-  private SelectionManager selectionManager;
-  
-  private boolean showMenu = true;  //default
-  private ViewerAppMenu menu;
-  
-  private JrScene jrScene;
-  
+  private ToolSystemViewer viewer;  //the viewer used (viewer.getDelegateViewer() = viewerSwitch)
+  private RenderTrigger renderTrigger;
   private boolean autoRender = true;
   private boolean synchRender = false;
   
+  private JrScene jrScene;
+  private SceneGraphComponent sceneRoot;
+  private SceneGraphComponent scene;
+  private SceneGraphNode displayedNode;  //the node which is displayed in viewer
+  
+  private SelectionManager selectionManager;
+  private BeanShell beanShell;
+  private Navigator navigator;
+  
+	private JFrame frame;
+  private UIFactory uiFactory = new UIFactory();  //creates the default viewerApp layout
+  
+  private boolean attachNavigator = false;  //default
+  private boolean attachBeanShell = false;  //default
+  
+  private boolean externalBeanShell = false;  //default
+  private JFrame externalBeanShellFrame;
+  private boolean externalNavigator = false;  //default
+  private JFrame externalNavigatorFrame;
+  
   private LinkedList<Component> accessory = new LinkedList<Component>();
   private HashMap<Component, String> accessoryTitles = new HashMap<Component, String>();
+  private JTabbedPane navigatorTabs;
+
+  private boolean showMenu = true;  //default
+  private ViewerAppMenu menu;
   
   
   /**
@@ -163,7 +173,7 @@ public class ViewerApp {
   
   
   private ViewerApp(SceneGraphNode contentNode, SceneGraphComponent root, SceneGraphPath cameraPath, SceneGraphPath emptyPick, SceneGraphPath avatar) {
-    
+
     if (contentNode != null)  //create default scene if null
       if (!(contentNode instanceof Geometry) && !(contentNode instanceof SceneGraphComponent))
         throw new IllegalArgumentException("Only Geometry or SceneGraphComponent allowed!");
@@ -196,18 +206,27 @@ public class ViewerApp {
     }
     
     //load the scene depending on environment (desktop | portal)
-    //instantiates currViewer, viewers, viewerSwitch, sceneRoot, scene, uiFactory
     setupViewer(jrScene);
-    
-    frame = new JFrame();
 
-    uiFactory = new UIFactory();
     selectionManager = new SelectionManager(jrScene.getPath("emptyPickPath")); //default selection = scene node
-    selectionManager.setViewer(viewerSwitch);  //used to force rendering
+    selectionManager.setViewer(getViewer());  //used to force rendering
     try {	selectionManager.setAuxiliaryRoot(viewerSwitch.getAuxiliaryRoot()); } 
     catch (Exception e) { selectionManager.setAuxiliaryRoot(null); }  //e.g. software viewer
+  	
+  	frame = new JFrame();
+  	menu = new ViewerAppMenu(this);  //uses frame, viewer, selectionManager and this
+  	
+  }
     
-    menu = new ViewerAppMenu(this);  //uses frame, viewerSwitch, selectionManager and viewerApp itself
+  
+  public static void main(String[] args) {
+    ViewerApp va = new ViewerApp(null, null, null, null, null);
+    va.setAttachNavigator(true);
+    va.setExternalNavigator(false);
+    va.setAttachBeanShell(false);
+    va.setExternalBeanShell(false);
+    va.update();
+    va.display();
   }
   
   
@@ -216,8 +235,6 @@ public class ViewerApp {
    * @return the frame
    */
   public JFrame display() {
-    
-    Component content = getComponent();
     
     //set general properties of UI
     try {
@@ -229,7 +246,9 @@ public class ViewerApp {
     frame.setLocationByPlatform(true);
     
     //set viewer background color if not specified already
-    if (sceneRoot.getAppearance() != null && (sceneRoot.getAppearance().getAttribute(CommonAttributes.BACKGROUND_COLORS) == Appearance.INHERITED && sceneRoot.getAppearance().getAttribute(CommonAttributes.BACKGROUND_COLOR) == Appearance.INHERITED))
+    if (getSceneRoot().getAppearance() != null && 
+    		(getSceneRoot().getAppearance().getAttribute(CommonAttributes.BACKGROUND_COLORS) == Appearance.INHERITED 
+    				&& getSceneRoot().getAppearance().getAttribute(CommonAttributes.BACKGROUND_COLOR) == Appearance.INHERITED))
       setBackgroundColor(SwitchBackgroundColor.defaultColor);
     
     //frame properties
@@ -242,9 +261,6 @@ public class ViewerApp {
 //    size.width*=.7;
 //    size.height = (int) (size.width*3./4.);
 //    ((Component) currViewer.getViewingComponent()).setPreferredSize(size);
-    
-    //set content of frame
-    frame.getContentPane().add(content);
     
     //add menu bar
     JMenuBar menuBar = menu.getMenuBar();
@@ -274,13 +290,15 @@ public class ViewerApp {
    */
   public static ViewerApp display(SceneGraphNode node) {
     
-    ViewerApp app = new ViewerApp(node);
-    app.setAttachNavigator(false);
-    app.setAttachBeanShell(false);
-    app.update();
-    app.display();
+    ViewerApp va = new ViewerApp(node);
+    va.setAttachNavigator(false);
+    va.setExternalNavigator(false);
+    va.setAttachBeanShell(false);
+    va.setExternalBeanShell(false);
+    va.update();
+    va.display();
     
-    return app;
+    return va;
   }
   
   /**
@@ -293,47 +311,35 @@ public class ViewerApp {
    */
   public static ViewerApp display(SceneGraphComponent root, SceneGraphPath cameraPath, SceneGraphPath emptyPick, SceneGraphPath avatar) {
     
-    ViewerApp app = new ViewerApp(null, root, cameraPath, emptyPick, avatar);
-    app.setAttachNavigator(false);
-    app.setAttachBeanShell(false);
-    app.update();
-    app.display();
+    ViewerApp va = new ViewerApp(null, root, cameraPath, emptyPick, avatar);
+    va.setAttachNavigator(false);
+    va.setExternalNavigator(false);
+    va.setAttachBeanShell(false);
+    va.setExternalBeanShell(false);
+    va.update();
+    va.display();
     
-    return app;
+    return va;
     
   }
   
   
   /**
-   * Update the viewer factory.<br>
+   * Update the viewer application.<br>
    * Needs to be invoked before calling display or getter methods. 
    */
   public void update() {
-    
-    uiFactory.setViewer((Component) currViewer.getViewingComponent());
-    
-    //set up beanShell and uiFactory.beanShell
-    if (attachBeanShell) {
-    	if (beanShell == null) setupBeanShell();
-    	uiFactory.setBeanShell(beanShell.getComponent());
-    }
-    
-    //set up navigator, uiFactory.navigator
-    if (attachNavigator) {
-    	if (navigator == null) setupNavigator();
-    	uiFactory.setNavigator(navigator.getComponent());
-    }
-    
-    uiFactory.setAttachNavigator(attachNavigator);
-    uiFactory.setAttachBeanShell(attachBeanShell);
-    
-    //add accessories
-    if (!accessory.isEmpty()) uiFactory.removeAccessories();
-    for (Component c : accessory) 
-      uiFactory.addAccessory(c, accessoryTitles.get(c));
-    
-    //update menu (depends on attachNavigator/BeanShell, SelectionManager)
+
+  	showExternalBeanShell(attachBeanShell && externalBeanShell);
+  	showExternalNavigator(attachNavigator && externalNavigator);
+  	
+    //update menu (e.g. checkboxes whose selection state depends on viewerApp properties)
     menu.update();
+    
+    //update content of frame
+    frame.getContentPane().removeAll();
+    frame.getContentPane().add(getContent());
+    frame.validate();
   }
   
   
@@ -355,24 +361,23 @@ public class ViewerApp {
   
   
   /**
-   * Set up the viewer depending on chosen properties.<br>
-   * (Creates ToolSystemViewer, Navigator, BeanShell and UIFactory.)
+   * Set up the viewer.
    * @param sc the scene to load
    */  
   private void setupViewer(JrScene sc) {
-    if (currViewer != null) {
+    if (viewer != null) {
       if (autoRender) {
-        renderTrigger.removeViewer(currViewer);
-        if (currViewer.getSceneRoot() != null)
-          renderTrigger.removeSceneGraphComponent(currViewer.getSceneRoot());
+        renderTrigger.removeViewer(viewer);
+        if (viewer.getSceneRoot() != null)
+          renderTrigger.removeSceneGraphComponent(viewer.getSceneRoot());
       }
-      currViewer.dispose();
+      viewer.dispose();
     }
     
-    currViewer = AccessController.doPrivileged(new PrivilegedAction<ToolSystemViewer>() {
+    viewer = AccessController.doPrivileged(new PrivilegedAction<ToolSystemViewer>() {
       public ToolSystemViewer run() {
         try {
-          return createViewer();
+          return createToolSystemViewer();
         } catch (Exception exc) { exc.printStackTrace(); }
         return null;
       }
@@ -380,27 +385,24 @@ public class ViewerApp {
     
     //set sceneRoot and paths of viewer
     sceneRoot = sc.getSceneRoot();
-    currViewer.setSceneRoot(sceneRoot);
+    viewer.setSceneRoot(sceneRoot);
     
     if (autoRender) {
-      renderTrigger.addViewer(currViewer);
+      renderTrigger.addViewer(viewer);
       renderTrigger.addSceneGraphComponent(sceneRoot);
     }
     
     SceneGraphPath path = sc.getPath("cameraPath");
-    if (path != null) currViewer.setCameraPath(path);
+    if (path != null) viewer.setCameraPath(path);
     path = sc.getPath("avatarPath");
-    if (path != null) currViewer.setAvatarPath(path);
+    if (path != null) viewer.setAvatarPath(path);
     path = sc.getPath("emptyPickPath");
     if (path != null) {
       //init scene 
       scene = path.getLastComponent();
-      currViewer.setEmptyPickPath(path);
+      viewer.setEmptyPickPath(path);
     }
-    currViewer.initializeTools();
-    
-    //set viewer and sceneRoot of uiFactory
-//  uiFactory.setViewer((Component) currViewer.getViewingComponent());
+    viewer.initializeTools();
     
     //add node to this scene depending on its type
     if (displayedNode != null) {  //show scene even if displayedNode=null
@@ -418,7 +420,7 @@ public class ViewerApp {
   }
   
   
-  private ToolSystemViewer createViewer() throws IOException {
+  private ToolSystemViewer createToolSystemViewer() throws IOException {
     if (viewers == null) {
       
       String viewer = Secure.getProperty( "de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.softviewer.SoftViewer" ); // de.jreality.portal.DesktopPortalViewer");
@@ -504,11 +506,16 @@ public class ViewerApp {
     BshEvaluator bshEval = beanShell.getBshEval();
     try { 
       bshEval.getInterpreter().set("_viewer", viewerSwitch);
-      bshEval.getInterpreter().set("_toolSystemViewer", currViewer);      
+      bshEval.getInterpreter().set("_toolSystemViewer", viewer);      
     } 
     catch (EvalError error) { error.printStackTrace(); }
     
 //    beanShell.setSelf(sceneRoot);  //already set default in constructor
+    
+    Component beanShell = this.beanShell.getComponent();
+    //init sizes
+    beanShell.setPreferredSize(new Dimension(0, 100));
+		beanShell.setMinimumSize(new Dimension(10, 100));
   }
   
   
@@ -517,8 +524,80 @@ public class ViewerApp {
    */
   private void setupNavigator() {
     navigator = new Navigator(sceneRoot, selectionManager);
+    
+    Component navigator = this.navigator.getComponent();
+    //init sizes
+    navigator.setPreferredSize(new Dimension(200, 0));
+		navigator.setMinimumSize(new Dimension(200, 10));
+    //init divider location within navigator
+		try { ((JSplitPane)navigator).setDividerLocation(350); }
+		catch (ClassCastException e) {}
   }
   
+  
+  public void showExternalNavigator(boolean show) {
+  	
+  	if (externalNavigatorFrame == null) {
+  		externalNavigatorFrame = new JFrame("jReality Navigator");
+    	externalNavigatorFrame.setSize(new Dimension(300, 800));
+//    	try {	externalNavigatorFrame.setAlwaysOnTop(true); }
+//    	catch (SecurityException se) {}  //webstart
+    	externalNavigatorFrame.addComponentListener(new ComponentAdapter(){
+    		public void componentHidden(ComponentEvent e) {
+    			if (externalNavigator) {
+    				setAttachNavigator(false);
+    				menu.update();
+    			}
+    		}
+    	});
+  	}
+  	
+  	
+  	if (show == externalNavigatorFrame.isVisible()) 
+  		return;  //nothing to do
+  	
+  	if (show) {
+  		externalNavigatorFrame.getContentPane().add(getNavigatorWithAccessories());
+  		externalNavigatorFrame.setVisible(true);
+  	}
+  	else {
+  		externalNavigatorFrame.remove(externalNavigatorFrame.getContentPane());
+  		externalNavigatorFrame.setVisible(false);
+  	}
+  }
+  
+  
+  public void showExternalBeanShell(boolean show) {
+  	
+  	if (externalBeanShellFrame == null) {
+  		externalBeanShellFrame = new JFrame("jReality BeanShell");
+    	externalBeanShellFrame.setSize(new Dimension(800, 150));
+//    	try {	externalBeanShellFrame.setAlwaysOnTop(true); }
+//    	catch (SecurityException se) {}  //webstart
+    	externalBeanShellFrame.addComponentListener(new ComponentAdapter(){
+    		public void componentHidden(ComponentEvent e) {
+    			if (externalBeanShell) {
+    				setAttachBeanShell(false);
+    				menu.update();
+    			}
+    		}
+    	});
+  	}
+  	
+  	
+  	if (show == externalBeanShellFrame.isVisible()) 
+  		return;  //nothing to do
+  	
+  	if (show) {
+  		externalBeanShellFrame.getContentPane().add(getBeanShell());
+  		externalBeanShellFrame.setVisible(true);
+  	}
+  	else {
+  		externalBeanShellFrame.remove(externalBeanShellFrame.getContentPane());
+  		externalBeanShellFrame.setVisible(false);
+  	}
+  }
+
   
   /**
    * Use to attach a navigator (sceneTree and inspector) to the viewer.
@@ -539,18 +618,6 @@ public class ViewerApp {
   
   
   /**
-   * Get current ToolSystemViewer.
-   * @return the viewer
-   */
-  public ToolSystemViewer getViewer() {
-    if (currViewer == null)
-      throw new UnsupportedOperationException("No viewer instantiated, call update()!");
-    
-    return currViewer;
-  }
-  
-  
-  /**
    * Get current frame displaying the scene.
    * @return the frame
    */
@@ -563,17 +630,121 @@ public class ViewerApp {
    * Get the ViewerApp frame's content.
    * @return the content
    */
-  public Component getComponent() {
+  public Component getContent() {
     
+  	uiFactory.setViewer(getViewingComponent());
+
+  	boolean includeNavigator = attachNavigator && !externalNavigator;
+  	uiFactory.setAttachNavigator(includeNavigator);
+  	if (includeNavigator) uiFactory.setNavigator(getNavigatorWithAccessories());
+
+  	boolean includeBeanShell = attachBeanShell && !externalBeanShell;
+  	uiFactory.setAttachBeanShell(includeBeanShell);
+  	if (includeBeanShell) uiFactory.setBeanShell(getBeanShell());
+    
+//    //add accessories
+//    if (!accessory.isEmpty()) uiFactory.removeAccessories();
+//    for (Component c : accessory) 
+//      uiFactory.addAccessory(c, accessoryTitles.get(c));
+
   	Component cmp;
   	
-  	try {
-			cmp = uiFactory.getDefaultUI();
-		} catch (UnsupportedOperationException e) {
+  	try {	cmp = uiFactory.getDefaultUI(); } 
+  	catch (UnsupportedOperationException e) {
 			throw new UnsupportedOperationException("No viewer instantiated, call update()");
 		}
     
     return cmp;
+  }
+  
+  
+  /**
+   * Get the navigator. 
+   */
+  public Component getNavigator() {
+  	if (navigator == null) setupNavigator();
+
+  	return navigator.getComponent();
+  }
+  
+  
+  /**
+   * Get the bean shell. 
+   */
+  public Component getBeanShell() {
+  	if (beanShell == null) setupBeanShell();
+  	
+  	return beanShell.getComponent();
+  }
+
+  
+  /**
+   * Add accessory components as tabs to navigator component.
+   * @return tabbed pane with navigator and accessory components
+   * @see ViewerApp#addAccessory(Component, String) 
+   */
+  public Component getNavigatorWithAccessories() {
+  	
+  	if (accessory.isEmpty()) return getNavigator();
+  	
+  	if (navigatorTabs == null) {
+  		navigatorTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+  		navigatorTabs.add("Navigator", getNavigator());
+  		for (Component c : accessory) {  //add accessories 
+  			JScrollPane scroll = new JScrollPane(c);
+  			scroll.setBorder(BorderFactory.createEmptyBorder());
+  			navigatorTabs.addTab(accessoryTitles.get(c), scroll);
+  		}
+  	}
+
+  	return navigatorTabs;
+  }
+  
+  
+  /**
+   * Get current ToolSystemViewer.
+   * @return the viewer
+   */
+  public ToolSystemViewer getViewer() {
+    if (viewer == null)
+      throw new UnsupportedOperationException("No viewer instantiated, call update()!");
+    
+    return viewer;
+  }
+  
+  
+  /**
+   * Get the viewer component.
+   */
+  public Component getViewingComponent() {
+  	return (Component) getViewer().getViewingComponent();  //returns viewerSwitch.getViewingComponent()
+  }
+  
+  
+  /**
+   * Get the scene displayed.
+   * @return the JrScene
+   */
+  public JrScene getJrScene() {
+    return jrScene;
+  }
+  
+  
+  /**
+   * Get the scene's root node.
+   * @return the root
+   */
+  public SceneGraphComponent getSceneRoot() {
+    return sceneRoot;
+  }
+  
+  
+  /**
+   * Get the SelectionManager managing selections in the ViewerApp
+   * @return the SelectionManager
+   */
+  public SelectionManager getSelectionManager() {
+    return selectionManager;
   }
   
   
@@ -592,23 +763,7 @@ public class ViewerApp {
     return attachNavigator;
   }
   
-  
-  /**
-   * @return the viewer switch
-   */
-  public ViewerSwitch getViewerSwitch() {
-    return viewerSwitch;
-  }
-  
-  
-  /**
-   * @return the JrScene
-   */
-  public JrScene getJrScene() {
-    return jrScene;
-  }
-  
-  
+
   /**
    * Use to include a menu bar and context menus in ViewerApp.
    * @param b true iff menu is to be shown
@@ -632,15 +787,6 @@ public class ViewerApp {
   }
   
   
-  /**
-   * Get the SelectionManager managing selections in the ViewerApp
-   * @return the SelectionManager
-   */
-  public SelectionManager getSelectionManager() {
-    return selectionManager;
-  }
-  
-  
   public void addAccessory(Component c) {
     addAccessory(c, null);
   }
@@ -652,6 +798,36 @@ public class ViewerApp {
   }
   
   
+  public boolean isExternalNavigator() {
+		return externalNavigator;
+	}
+
+
+	/**
+	 * Specify whether to display the navigator in the viewerApp's frame 
+	 * or in an external frame.
+	 * @param externalBeanShell true iff navigator is to be displayed in an external frame
+	 */
+	public void setExternalNavigator(boolean externalNavigator) {
+		this.externalNavigator = externalNavigator;
+	}
+	
+
+	public boolean isExternalBeanShell() {
+		return externalBeanShell;
+	}
+
+
+	/**
+	 * Specify whether to display the bean shell in the viewerApp's frame 
+	 * or in an external frame.
+	 * @param externalBeanShell true iff bean shell is to be displayed in an external frame
+	 */
+	public void setExternalBeanShell(boolean externalBeanShell) {
+		this.externalBeanShell = externalBeanShell;
+	}
+	
+	
   /**
    * Sets the scene root's background color.
    * @param colors list of colors with length = 1 or 4
@@ -677,20 +853,11 @@ public class ViewerApp {
   public void dispose() {
     if (autoRender) {
       renderTrigger.removeSceneGraphComponent(sceneRoot);
-      renderTrigger.removeViewer(currViewer);
+      renderTrigger.removeViewer(viewer);
     }
-    if (currViewer != null) currViewer.dispose();
+    if (viewer != null) viewer.dispose();
     
     frame.dispose();
-  }
-  
-  
-  public static void main(String[] args) {
-    ViewerApp va = new ViewerApp(null, null, null, null, null);
-    va.setAttachNavigator(true);
-    va.setAttachBeanShell(true);
-    va.update();
-    va.display();
   }
   
 }

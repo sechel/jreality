@@ -61,6 +61,7 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 
 import de.jreality.shader.CommonAttributes;
+import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFieldOfView;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFocus;
@@ -85,6 +86,8 @@ import de.jreality.ui.viewerapp.actions.file.Quit;
 import de.jreality.ui.viewerapp.actions.file.SaveScene;
 import de.jreality.ui.viewerapp.actions.view.SetViewerSize;
 import de.jreality.ui.viewerapp.actions.view.ToggleBeanShell;
+import de.jreality.ui.viewerapp.actions.view.ToggleExternalBeanShell;
+import de.jreality.ui.viewerapp.actions.view.ToggleExternalNavigator;
 import de.jreality.ui.viewerapp.actions.view.ToggleFullScreen;
 import de.jreality.ui.viewerapp.actions.view.ToggleMenu;
 import de.jreality.ui.viewerapp.actions.view.ToggleNavigator;
@@ -141,7 +144,9 @@ public class ViewerAppMenu {
   
   //VIEW MENU
   public static String TOGGLE_NAVIGATOR = "Show navigator";
+  public static String TOGGLE_EXTERNAL_NAVIGATOR = "Open navigator in separate frame";
   public static String TOGGLE_BEANSHELL = "Show bean shell"; 
+  public static String TOGGLE_EXTERNAL_BEANSHELL = "Open bean shell in separate frame";
   public static String TOGGLE_MENU = "Hide menu bar";
   public static String TOGGLE_FULL_VIEWER = "Toggle viewer full screen";
   public static String TOGGLE_FULL_SCREEN = "Toggle full screen";
@@ -151,11 +156,13 @@ public class ViewerAppMenu {
   private Component parentComp = null;
   private ViewerApp viewerApp = null;
   private SelectionManager sm = null;
-  private ViewerSwitch viewerSwitch = null;
+  private ToolSystemViewer viewer = null;
   private JMenuBar menuBar;
   
   private JCheckBoxMenuItem navigatorCheckBox;
+  private JCheckBoxMenuItem externalNavigatorCheckBox;
   private JCheckBoxMenuItem beanShellCheckBox;
+  private JCheckBoxMenuItem externalBeanShellCheckBox;
   private JCheckBoxMenuItem renderSelectionCheckbox;
   private ExportImage exportImageAction;
 	private boolean showMenuBar = true;
@@ -166,7 +173,7 @@ public class ViewerAppMenu {
     viewerApp = v;
     parentComp = v.getFrame();
     sm = v.getSelectionManager();
-    viewerSwitch = v.getViewerSwitch();
+    viewer = v.getViewer();
     
     menuBar = new JMenuBar();
     
@@ -197,10 +204,10 @@ public class ViewerAppMenu {
     	e.printStackTrace();
     	LoggingSystem.getLogger(this).log(Level.CONFIG, "no sunflow", e);
     }
-    export.add(new JMenuItem(new ExportRIB("RIB", viewerSwitch, parentComp)));
-    export.add(new JMenuItem(new ExportSVG("SVG", viewerSwitch, parentComp)));
-    export.add(new JMenuItem(new ExportPS("PS", viewerSwitch, parentComp)));
-    exportImageAction = new ExportImage("Image", viewerSwitch, parentComp);
+    export.add(new JMenuItem(new ExportRIB("RIB", viewer, parentComp)));
+    export.add(new JMenuItem(new ExportSVG("SVG", viewer, parentComp)));
+    export.add(new JMenuItem(new ExportPS("PS", viewer, parentComp)));
+    exportImageAction = new ExportImage("Image", (ViewerSwitch) viewer.getDelegatedViewer(), parentComp);
     export.add(new JMenuItem(exportImageAction));
     
     if (!Beans.isDesignTime()) {
@@ -260,17 +267,17 @@ public class ViewerAppMenu {
     JMenu cameraMenu = new JMenu(CAMERA_MENU);
     cameraMenu.setMnemonic(KeyEvent.VK_C);
 
-    cameraMenu.add(new JMenuItem(new ShiftFieldOfView(DECREASE_FIELD_OF_VIEW, viewerSwitch, true)));
-    cameraMenu.add(new JMenuItem(new ShiftFieldOfView(INCREASE_FIELD_OF_VIEW, viewerSwitch, false)));
+    cameraMenu.add(new JMenuItem(new ShiftFieldOfView(DECREASE_FIELD_OF_VIEW, viewer, true)));
+    cameraMenu.add(new JMenuItem(new ShiftFieldOfView(INCREASE_FIELD_OF_VIEW, viewer, false)));
     cameraMenu.addSeparator();
-    cameraMenu.add(new JMenuItem(new ShiftFocus(DECREASE_FOCUS, viewerSwitch, true)));
-    cameraMenu.add(new JMenuItem(new ShiftFocus(INCREASE_FOCUS, viewerSwitch, false)));
+    cameraMenu.add(new JMenuItem(new ShiftFocus(DECREASE_FOCUS, viewer, true)));
+    cameraMenu.add(new JMenuItem(new ShiftFocus(INCREASE_FOCUS, viewer, false)));
     cameraMenu.addSeparator();
-    cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(DECREASE_EYE_SEPARATION, viewerSwitch, true)));
-    cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(INCREASE_EYE_SEPARATION, viewerSwitch, false)));
+    cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(DECREASE_EYE_SEPARATION, viewer, true)));
+    cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(INCREASE_EYE_SEPARATION, viewer, false)));
     cameraMenu.addSeparator();
 //    cameraMenu.add(new JMenuItem(new TogglePerspective(TOGGLE_PERSPECTIVE, viewerSwitch)));
-    cameraMenu.add(new JMenuItem(new ToggleStereo(TOGGLE_STEREO, viewerSwitch)));
+    cameraMenu.add(new JMenuItem(new ToggleStereo(TOGGLE_STEREO, viewer)));
     
     return cameraMenu;
   }
@@ -281,17 +288,22 @@ public class ViewerAppMenu {
     viewMenu.setMnemonic(KeyEvent.VK_V);
     
     navigatorCheckBox = new JCheckBoxMenuItem(new ToggleNavigator(TOGGLE_NAVIGATOR, viewerApp, EDIT_MENU));
+    externalNavigatorCheckBox = new JCheckBoxMenuItem(new ToggleExternalNavigator(TOGGLE_EXTERNAL_NAVIGATOR, viewerApp));
     beanShellCheckBox = new JCheckBoxMenuItem(new ToggleBeanShell(TOGGLE_BEANSHELL, viewerApp));
+    externalBeanShellCheckBox = new JCheckBoxMenuItem(new ToggleExternalBeanShell(TOGGLE_EXTERNAL_BEANSHELL, viewerApp));
     viewMenu.add(navigatorCheckBox);
+    viewMenu.add(externalNavigatorCheckBox);
     viewMenu.add(beanShellCheckBox);
+    viewMenu.add(externalBeanShellCheckBox);
     viewMenu.addSeparator();
     viewMenu.add(new JMenuItem(new ToggleMenu(TOGGLE_MENU, this)));
     viewMenu.addSeparator();
-    viewMenu.add(new JMenuItem(new SetViewerSize(SET_VIEWER_SIZE, viewerSwitch.getViewingComponent(), (Frame)parentComp)));
+    viewMenu.add(new JMenuItem(new SetViewerSize(SET_VIEWER_SIZE, viewerApp.getViewingComponent(), (Frame)parentComp)));
     viewMenu.add(new JMenuItem(ToggleViewerFullScreen.sharedInstance(TOGGLE_FULL_VIEWER, viewerApp)));
     viewMenu.add(new JMenuItem(ToggleFullScreen.sharedInstance(TOGGLE_FULL_SCREEN, (Frame)parentComp)));      
     viewMenu.addSeparator();
     
+    final ViewerSwitch viewerSwitch = (ViewerSwitch) viewer.getDelegatedViewer();
     String[] viewerNames = viewerSwitch.getViewerNames();
     ButtonGroup bg = new ButtonGroup();
     for (int i=0; i<viewerSwitch.getNumViewers(); i++) {
@@ -320,13 +332,14 @@ public class ViewerAppMenu {
   
   
   //update menu items which depend on viewerApp properties
-  //(isAttachNavigator/BeanShell, isShowMenu)
   //setupMenuBar() has to be called before
   public void update() {
     if (viewerApp == null) return;
     
     navigatorCheckBox.setSelected(viewerApp.isAttachNavigator());
+    externalNavigatorCheckBox.setSelected(viewerApp.isExternalNavigator());
     beanShellCheckBox.setSelected(viewerApp.isAttachBeanShell());
+    externalBeanShellCheckBox.setSelected(viewerApp.isExternalBeanShell());
     renderSelectionCheckbox.setSelected(sm.isRenderSelection());  //sm!=null if viewerApp!=null
     showMenu(EDIT_MENU, viewerApp.isAttachNavigator());
   }
