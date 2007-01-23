@@ -44,7 +44,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.JFrame;
 import javax.swing.KeyStroke;
 
 import de.jreality.ui.viewerapp.ViewerApp;
@@ -58,39 +57,36 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
  */
 public class ToggleNavigator extends AbstractJrAction {
 
-  private ViewerApp viewerApp;
-  private String[] menus;
-  
-  
-  /**
-   * @param menus list of menus specified by their names, 
-   * which should change their (visibility) state when performing this action
-   */
-  public ToggleNavigator(String name, ViewerApp viewerApp, String... menus) {
-    super(name);
-    this.viewerApp = viewerApp;
-    this.menus = menus;
-    
-    setShortDescription("Toggle navigator visibility");
-    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
-  }
+	private ViewerApp viewerApp;
+	private String[] menus;
 
-  
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    boolean attachNavigator = !viewerApp.isAttachNavigator();
-    viewerApp.setAttachNavigator(attachNavigator);
-    viewerApp.update();
-    
-    if (menus != null) {  //change visibility of menus
-      for (int i = 0; i < menus.length; i++)
-        viewerApp.getMenu().showMenu(menus[i], attachNavigator);
-    }
-    
-    JFrame parentComp = viewerApp.getFrame();
-    parentComp.getContentPane().removeAll();
-    parentComp.getContentPane().add(viewerApp.getComponent());
-    parentComp.validate();
-  }
-  
+
+	/**
+	 * @param menus list of menus specified by their names, 
+	 * which should change their (visibility) state when performing this action
+	 */
+	public ToggleNavigator(String name, ViewerApp viewerApp, String... menus) {
+		super(name);
+		this.viewerApp = viewerApp;
+		this.menus = menus;
+
+		setShortDescription("Toggle navigator visibility");
+		setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+	}
+
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		boolean attachNavigator = !viewerApp.isAttachNavigator();
+		viewerApp.setAttachNavigator(attachNavigator);
+		if (!viewerApp.isExternalNavigator()) viewerApp.update();  //updates the frame's content
+		else viewerApp.showExternalNavigator(attachNavigator);
+
+		if (menus != null) {  //change visibility of menus
+			for (int i = 0; i < menus.length; i++)
+				viewerApp.getMenu().showMenu(menus[i], attachNavigator);
+		}
+	}
+
 }

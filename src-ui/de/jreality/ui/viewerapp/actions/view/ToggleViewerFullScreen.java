@@ -113,18 +113,15 @@ public class ToggleViewerFullScreen extends AbstractJrAction {
   @Override
   public void actionPerformed(ActionEvent e) {
 
-  	if (menu == null) menu = viewerApp.getMenu();
+  	if (menu == null) menu = viewerApp.getMenu();  //init menu
   	
     if (isFullscreen) {  //exit full screen
       
-    	frame.getContentPane().removeAll();
-      frame.getContentPane().add(viewerApp.getComponent());
-
       //restore menu state
       if (showMenu) menu.showMenuBar(true);
       frame.setJMenuBar(menu.getMenuBar());
 
-      frame.validate();
+      viewerApp.update();  //restores the frame's content
 //      frame.pack();
       frame.setVisible(true);
       fsf.dispose();
@@ -134,7 +131,7 @@ public class ToggleViewerFullScreen extends AbstractJrAction {
     else {  //switch to full screen
     
     	fsf.getContentPane().removeAll();
-      viewer = viewerApp.getViewerSwitch().getViewingComponent();  //viewerApp.getViewer() ??
+      viewer = viewerApp.getViewingComponent();
 //      viewer.setPreferredSize(viewer.getSize());  //might be needed when frame.pack() is used above
       fsf.getContentPane().add(viewer);
       

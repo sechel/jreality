@@ -41,41 +41,36 @@
 package de.jreality.ui.viewerapp.actions.view;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.KeyStroke;
 
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
 /**
- * Toggles the bean shell within the ViewerApp. 
+ * Toggles the ViewerApp's property externalBeanShell
+ * (specifies whether the bean shell is displayed in the viewerApp's frame 
+ * or in an external frame). 
  * 
  * @author msommer
  */
-public class ToggleBeanShell extends AbstractJrAction {
+public class ToggleExternalBeanShell extends AbstractJrAction {
 
-	private ViewerApp viewerApp;
+  private ViewerApp viewerApp;
+  
+  
+  public ToggleExternalBeanShell(String name, ViewerApp viewerApp) {
+    super(name);
+    this.viewerApp = viewerApp;
+    
+    setShortDescription("Show bean shell in within ViewerApp or separately");
+//    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+  }
 
-
-	public ToggleBeanShell(String name, ViewerApp viewerApp) {
-		super(name);
-		this.viewerApp = viewerApp;
-
-		setShortDescription("Toggle bean shell visibility");
-		setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
-	}
-
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-
-		boolean attachBeanShell = !viewerApp.isAttachBeanShell();
-		viewerApp.setAttachBeanShell(attachBeanShell);
-		if (!viewerApp.isExternalBeanShell()) viewerApp.update();  //updates the frame's content
-		else viewerApp.showExternalBeanShell(attachBeanShell);
-	}
-
+  
+  @Override
+  public void actionPerformed(ActionEvent e) {
+  	viewerApp.setExternalBeanShell(!viewerApp.isExternalBeanShell());
+    if (viewerApp.isAttachBeanShell()) viewerApp.update();  //updates the frame's content
+  }
+  
 }

@@ -75,11 +75,11 @@ import de.jtem.beans.DimensionPanel;
  */
 public class ExportImage extends AbstractJrAction {
 
-	private Viewer viewer;
+	private ViewerSwitch viewer;
 	private DimensionPanel dimPanel;
 
 
-	public ExportImage(String name, Viewer viewer, Component parentComp) {
+	public ExportImage(String name, ViewerSwitch viewer, Component parentComp) {
 		super(name, parentComp);
 
 		if (viewer == null) 
@@ -105,7 +105,7 @@ public class ExportImage extends AbstractJrAction {
 		}
 
 		// Hack
-		Viewer realViewer = ((ViewerSwitch)viewer).getCurrentViewer();
+		Viewer realViewer = viewer.getCurrentViewer();
 //		de.jreality.jogl.Viewer joglViewer = (de.jreality.jogl.Viewer) realViewer;
 		Dimension d = realViewer.getViewingComponentSize();
 		dimPanel.setDimension(d);
@@ -160,7 +160,7 @@ public class ExportImage extends AbstractJrAction {
 
 	@Override
 	public boolean isEnabled() {
-		Class<? extends Viewer> viewerType = ((ViewerSwitch)viewer).getCurrentViewer().getClass();
+		Class<? extends Viewer> viewerType = viewer.getCurrentViewer().getClass();
 		try {
 			viewerType.getMethod("renderOffscreen", new Class[]{Integer.TYPE, Integer.TYPE});
 			return true;
