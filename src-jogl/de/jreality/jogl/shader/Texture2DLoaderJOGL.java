@@ -123,11 +123,9 @@ public class Texture2DLoaderJOGL {
     
     WeakHashMap<ImageData, Integer> ht = getTextureTableForGL(gl);
 
-    Integer texid = (Integer) ht.get(tex.getImage());
-    int textureID = -1;
+    Integer texid = ht.get(tex.getImage());
     if (texid != null) {
       first = false;
-      textureID = texid.intValue();
     } else {
       Dimension dim = new Dimension(tex.getImage().getWidth(), tex.getImage().getHeight());
       { // delete garbage collected textures or reuse if possible
@@ -139,7 +137,7 @@ public class Texture2DLoaderJOGL {
           if (REPLACE_TEXTURES && g == gl && dim.equals(d) && !replace) {
             // replace texture
             LoggingSystem.getLogger(Texture2DLoaderJOGL.class).fine("replacing texture...");
-            textureID = id.intValue();
+            texid = id;
             replace = true;
             first = false;
           } else {
@@ -150,9 +148,8 @@ public class Texture2DLoaderJOGL {
         LoggingSystem.getLogger(Texture2DLoaderJOGL.class).fine("creating texture... ");
       }
       // create the texture ID for this texture
-      if (textureID == -1) {
-    	  textureID = createTextureID(gl);
-          texid = new Integer(textureID);
+      if (texid == null) {
+    	  texid = createTextureID(gl);
           ht.put(tex.getImage(), texid);
       }
       // register reference for refQueue
@@ -162,7 +159,7 @@ public class Texture2DLoaderJOGL {
       refToDim.put(ref, new Dimension(tex.getImage().getWidth(), tex.getImage().getHeight()));
     }
 
-    gl.glBindTexture(GL.GL_TEXTURE_2D, textureID);
+    gl.glBindTexture(GL.GL_TEXTURE_2D, texid);
     int srcPixelFormat = GL.GL_RGBA;
     handleTextureParameters(tex, gl);
 
