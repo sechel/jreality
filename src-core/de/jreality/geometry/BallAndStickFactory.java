@@ -155,7 +155,8 @@ import de.jreality.shader.CommonAttributes;
 							else ccc = new Color((float) dcc[0], (float) dcc[1], (float) dcc[2]);
 							Appearance ap = new Appearance();
 							ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ccc);
-			         	  	System.err.println("Setting polygon color to "+ccc);
+              ap.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ccc);
+               	  	System.err.println("Setting polygon color to "+ccc);
 							cc.setAppearance(ap);
 						}
 						if (cc != null) sticks.addChild(cc);
