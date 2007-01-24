@@ -211,7 +211,7 @@ public class GlslSource implements Serializable {
         s = Integer.parseInt(type.substring(type.length()-1));
       } catch (Exception e) {}
       primitiveSize = s;
-	  if (type.startsWith("i") || type.startsWith("sampler"))
+	  if (type.startsWith("i") || type.startsWith("sampler") || type.startsWith("bool"))
 	        primitiveType =  int.class;
 		  else 
 			  primitiveType = float.class;
@@ -221,8 +221,9 @@ public class GlslSource implements Serializable {
       if (isMatrix()) sb.append("Matrix");
       sb.append(getPrimitiveSize());
       sb.append(getPrimitiveType() == float.class ? 'f' : 'i');
+      System.out.println("name="+name+" type="+type+" primitiveType="+getPrimitiveType());
       sb.append('v');
-      sb.append("ARB");
+      //sb.append("ARB");
       stringRep = sb.toString();
    }
     

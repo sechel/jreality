@@ -112,7 +112,7 @@ public class GlslProgram {
   public void setUniform(String name, boolean value) {
     checkWrite();
     checkParam(name, "bool", false, false);
-    assign(name, new float[]{value ? 1 : 0});
+    assign(name, new int[]{value ? 1 : 0});
   }
 
   public void setUniform(String name, float value) {
