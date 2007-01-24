@@ -629,6 +629,17 @@ public class ViewerApp {
   /**
    * Get the ViewerApp frame's content.
    * @return the content
+   * @deprecated renamed to {@link ViewerApp#getContent()}
+   */
+  public Component getComponent() {
+	  return getContent();
+  }
+  
+  
+  /**
+   * Get the ViewerApp frame's content.
+   * @return the content
+   * @see ViewerApp#getViewingComponent()
    */
   public Component getContent() {
     
@@ -714,7 +725,9 @@ public class ViewerApp {
   
   
   /**
-   * Get the viewer component.
+   * Get the viewing component only.
+   * @return the viewing component
+   * @see ViewerApp#getContent()
    */
   public Component getViewingComponent() {
   	return (Component) getViewer().getViewingComponent();  //returns viewerSwitch.getViewingComponent()
