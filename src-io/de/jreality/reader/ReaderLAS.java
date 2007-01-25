@@ -65,8 +65,12 @@ public class ReaderLAS extends AbstractReader {
 	public final int z = 1;  //tvd (total vertical depth)
 	public final int x = 4;  //coordNS
 	public final int y = 5;  //coordEW
+	public final int phi = 2;  //inclination
+	public final int theta = 3;  //azimuth
 	
+	private boolean hasHeader = true;
 	
+
 	public ReaderLAS() {
 		root = new SceneGraphComponent("borehole");
 		Appearance app = new Appearance();
@@ -94,11 +98,13 @@ public class ReaderLAS extends AbstractReader {
 	private void read() throws IOException {
 		
 		LineNumberReader r = new LineNumberReader(input.getReader());
-		String line = r.readLine();  //header
+		String line = hasHeader? r.readLine() : "";  //skip header if existing
 		
-		List<Double> xx = new ArrayList<Double>();
-		List<Double> yy = new ArrayList<Double>();
-		List<Double> zz = new ArrayList<Double>();
+		List<Double> lx = new ArrayList<Double>();
+		List<Double> ly = new ArrayList<Double>();
+		List<Double> lz = new ArrayList<Double>();
+		List<Double> lphi = new ArrayList<Double>();
+		List<Double> ltheta = new ArrayList<Double>();
 		
 		StringTokenizer st = new StringTokenizer(line);
 		
@@ -113,23 +119,33 @@ public class ReaderLAS extends AbstractReader {
 			for (int i = 0; st.hasMoreTokens(); i++) {
 				String token = st.nextToken();
 				switch (i) {
-				case x: xx.add(Double.parseDouble(token)); break;
-				case y: yy.add(Double.parseDouble(token)); break;
-				case z: zz.add(Double.parseDouble(token)); break;
+				case x: lx.add(Double.parseDouble(token)); break;
+				case y: ly.add(Double.parseDouble(token)); break;
+				case z: lz.add(Double.parseDouble(token)); break;
+				case phi: lphi.add(Double.parseDouble(token)); break;
+				case theta: ltheta.add(Double.parseDouble(token)); break;
 				}
 			}
 		}
 		
-		double[][] vertices = new double[xx.size()][3];
-		for (int i = 1; i < xx.size(); i++)
-			vertices[i] = new double[]{xx.get(i), yy.get(i), zz.get(i)};
+		double[][] vertices = new double[lx.size()][3];
+		for (int i = 1; i < lx.size(); i++)
+			vertices[i] = new double[]{lx.get(i), ly.get(i), lz.get(i)};
 //		for (int i = 0; i < vertices.length; i++) System.out.println(Arrays.toString(vertices[i]));
 		
+		//TODO: create cross-section around vertices and rotate with phi&theta
+		
+
 		PointSetFactory f = new PointSetFactory();
 		f.setVertexCount(vertices.length);
 		f.setVertexCoordinates(vertices);
 		f.update();
 		root.setGeometry(f.getPointSet());
+	}
+	
+	
+	public void setHasHeader(boolean hasHeader) {
+		this.hasHeader = hasHeader;
 	}
 	
 }
