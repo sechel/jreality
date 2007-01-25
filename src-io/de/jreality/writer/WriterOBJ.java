@@ -60,8 +60,21 @@ import de.jreality.util.LoggingSystem;
  */
 public class WriterOBJ {
 
-	public static void write( IndexedFaceSet ifs, OutputStream out ) {
-		write( ifs, null, new PrintWriter( out ));
+	public static int write( IndexedFaceSet ifs, OutputStream out, int startVertex ) {
+		return write( ifs, null, new PrintWriter( out ), startVertex);
+	}
+	
+	public static int write( IndexedFaceSet ifs, OutputStream out) {
+		return write( ifs, null, new PrintWriter( out ), 0);
+	}
+	
+	static void write( PrintWriter out, double [] array, String seperator ) {
+		if( array==null || array.length==0) return;
+		out.print(array[0]);
+		for( int i=1; i<array.length; i++ ) {
+			out.print(seperator);
+			out.print(array[i]);
+		}
 	}
 	
 	static void write( PrintWriter out, double [][] array, String prefix ) {
@@ -70,24 +83,25 @@ public class WriterOBJ {
 		for( int i=0; i<array.length; i++ ) {
 			out.print(prefix);
 			out.print( seperator );
-			WriterSTL.write(out, array[i], seperator );
+			write(out, array[i], seperator );
 			out.println();
 		}
 	}
 
-	static void write( Geometry geom, String groupName, PrintWriter out ) {
-		if( geom == null ) return;
+	static int write( Geometry geom, String groupName, PrintWriter out, int startVertex ) {
+		if( geom == null ) return 0;
 		
 		if( geom instanceof IndexedFaceSet ) {
-			write( ((IndexedFaceSet)geom), groupName, out);
+			return write( ((IndexedFaceSet)geom), groupName, out, startVertex);
 		} else {
 			 LoggingSystem.getLogger(GeometryUtility.class).log(Level.WARNING, 
 					 	"ignoring scene graph component " + groupName );
 		}
+		return 0;
 	}
 	
 
-	public static void write( SceneGraphComponent sgc, OutputStream out ) {
+	public static void write( SceneGraphComponent sgc, OutputStream out) {
 		write( sgc, new PrintWriter( out ));
 	}
 	
@@ -95,13 +109,13 @@ public class WriterOBJ {
 		
 		SceneGraphComponent flat = GeometryUtility.flatten(sgc);
 		
-		write( flat.getGeometry(), flat.getName(), out );
+		int vertex = write( flat.getGeometry(), flat.getName(), out, 0);
 		
 		final int noc = flat.getChildComponentCount();
 			
 		for( int i=0; i<noc; i++ ) {
 			SceneGraphComponent child=flat.getChildComponent(i);
-			write( child.getGeometry(), child.getName(), out );
+			vertex += write( child.getGeometry(), child.getName(), out, vertex);
 		}
 	}
 	
@@ -115,7 +129,7 @@ public class WriterOBJ {
 		out.print(index+1);
 	}
 
-	static void write( IndexedFaceSet ifs, String groupName, PrintWriter out ) {
+	static int write( IndexedFaceSet ifs, String groupName, PrintWriter out, int startVertex ) {
 		
 		if( groupName != null ) {
 			out.println();	
@@ -154,16 +168,17 @@ public class WriterOBJ {
 		for (int i= 0; i < ifs.getNumFaces(); i++) {
 			out.print( "f  ");
 			IntArray faceIndices=indices.item(i).toIntArray();
-			writeFaceIndex( out, faceIndices.getValueAt(0), texture!=null, normals!=null );	
+			writeFaceIndex( out, startVertex + faceIndices.getValueAt(0), texture!=null, normals!=null );	
 			for (int j= 1; j < faceIndices.size(); j++) {
 				out.print( " " );
-				writeFaceIndex( out, faceIndices.getValueAt(j), texture!=null, normals!=null );
+				writeFaceIndex( out, startVertex + faceIndices.getValueAt(j), texture!=null, normals!=null );
 			}
 
 			out.println();	
 		}
 
 		out.flush();
+		return ifs.getNumPoints();
 	}
 	
 	
