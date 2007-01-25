@@ -45,6 +45,7 @@ import java.io.IOException;
 
 import junit.framework.TestCase;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Secure;
 
 
@@ -61,7 +62,10 @@ public class LASReaderTest extends TestCase {
 
 		String fileName = Secure.getProperty("jreality.data", "/net/MathVis/data/testData3D") + "/gfz/Mallik3L.las";
         SceneGraphComponent sgc = new ReaderLAS().read(new File(fileName)); 
-//        System.out.println(sgc);
+        ViewerApp va = new ViewerApp(sgc);
+        va.setAttachNavigator(true);
+        va.update();
+        va.display();
 	}
 
 }

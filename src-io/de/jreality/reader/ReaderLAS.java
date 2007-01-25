@@ -42,10 +42,15 @@ package de.jreality.reader;
 
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
+import de.jreality.geometry.PointSetFactory;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.util.Input;
 
 
@@ -56,16 +61,26 @@ import de.jreality.util.Input;
  */
 public class ReaderLAS extends AbstractReader {
 
+	//column index starting with 0
+	public final int z = 1;  //tvd (total vertical depth)
+	public final int x = 4;  //coordNS
+	public final int y = 5;  //coordEW
+	
+	
 	public ReaderLAS() {
 		root = new SceneGraphComponent("borehole");
 		Appearance app = new Appearance();
-//		app.setAttribute(CommonAttributes.SPHERES_DRAW, false);
+		app.setAttribute(CommonAttributes.SPHERES_DRAW, true);
+		app.setAttribute(CommonAttributes.POINT_RADIUS, 2.0);
 //		app.setAttribute(CommonAttributes.PICKABLE, false);
 //		app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE, false);
 //		app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_SIZE, 30.);
-//		app.setAttribute(CommonAttributes.VERTEX_DRAW, true);
+		app.setAttribute(CommonAttributes.VERTEX_DRAW, true);
+//		app.setAttribute(CommonAttributes.EDGE_DRAW, true);
 //		app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.white);
 		root.setAppearance(app);
+		MatrixBuilder.euclidean().rotate(Math.PI, 0, 1, 0).assignTo(root);
+		MatrixBuilder.euclidean(root).rotate(Math.PI/2.0, 0, 0, 1).assignTo(root);
 	}
 
 	
@@ -81,21 +96,40 @@ public class ReaderLAS extends AbstractReader {
 		LineNumberReader r = new LineNumberReader(input.getReader());
 		String line = r.readLine();  //header
 		
-		StringTokenizer st = new StringTokenizer(line);
-		final int n = st.countTokens();  //number of columns
+		List<Double> xx = new ArrayList<Double>();
+		List<Double> yy = new ArrayList<Double>();
+		List<Double> zz = new ArrayList<Double>();
 		
-		for (int i = 0; i < 3; i++) {
-//		while ( (line=r.readLine())!=null ) {
-			line = r.readLine();
+		StringTokenizer st = new StringTokenizer(line);
+		
+//		for (int j = 0; j < 3; j++) {
+		while ( (line=r.readLine())!=null ) {
+
 			if (line.equals("")) continue;  //skip empty lines
 			
+			line = line.replace(',', '.');
 			st = new StringTokenizer(line);
 		    
-			while (st.hasMoreTokens())  
-		    	System.out.println(st.nextToken());
-		    System.out.println();
-		    System.out.println();
+			for (int i = 0; st.hasMoreTokens(); i++) {
+				String token = st.nextToken();
+				switch (i) {
+				case x: xx.add(Double.parseDouble(token)); break;
+				case y: yy.add(Double.parseDouble(token)); break;
+				case z: zz.add(Double.parseDouble(token)); break;
+				}
+			}
 		}
+		
+		double[][] vertices = new double[xx.size()][3];
+		for (int i = 1; i < xx.size(); i++)
+			vertices[i] = new double[]{xx.get(i), yy.get(i), zz.get(i)};
+//		for (int i = 0; i < vertices.length; i++) System.out.println(Arrays.toString(vertices[i]));
+		
+		PointSetFactory f = new PointSetFactory();
+		f.setVertexCount(vertices.length);
+		f.setVertexCoordinates(vertices);
+		f.update();
+		root.setGeometry(f.getPointSet());
 	}
 	
 }
