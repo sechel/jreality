@@ -37,11 +37,11 @@ public class ScenePanel {
 	double[][] tcs = { { 1, 1 }, { 1, 0 }, { 0, 0 }, { 0, 1 } };
 	int[][] rackEdgeIndices = { { 4, 0 }, { 0, 1 }, { 1, 5 }, { 5, 4 }, { 0, 3 }, { 1, 2 }, { 4, 7 }, { 5, 6 } };
 
-	double aboveGround = 1.6;
+	double aboveGround = 1.8;
 	double belowGround = -.2;
 	double panelWidth = 1;
 	double angle = .8 * Math.PI / 2;
-	double zOffset = -3.5;
+	double zOffset = -2.5;
 
 	ActionTool myActionTool=new ActionTool("PanelActivation");
 
@@ -88,6 +88,7 @@ public class ScenePanel {
 		myActionTool.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				toggle((ToolContext) e.getSource());
+				System.out.println(".actionPerformed()");
 			}
 		});
 
