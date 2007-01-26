@@ -889,9 +889,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 
 						if(cubeMap==null)
 							ap.setAttribute("polygonShader."+CommonAttributes.REFLECTION_MAP,  Appearance.DEFAULT);
-						else                      
-							TextureUtility.createReflectionMap(ap, "polygonShader", TextureUtility.getCubeMapImages(cubeMap));
-
+						else{                      
+							CubeMap lineCubeMap=TextureUtility.createReflectionMap(ap, "polygonShader", TextureUtility.getCubeMapImages(cubeMap));
+							lineCubeMap.setBlendColor(cubeMap.getBlendColor());
+						}
 						sgc.setAppearance(ap);
 						visit(sgc);
 						handlingProxyGeometry = false;
