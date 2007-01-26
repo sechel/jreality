@@ -178,7 +178,7 @@ public class TubeUtility {
 				qmf.setGenerateEdgesFromFaces(true);
 				qmf.setGenerateFaceNormals(true);
 				qmf.setGenerateVertexNormals(true);
-				qmf.setGenerateTextureCoordinates(false);
+				qmf.setGenerateTextureCoordinates(true);
 				qmf.update();
 				urTube[k] = qmf.getIndexedFaceSet();
 				if (k == 1) urTube[k].setGeometryAttributes(CommonAttributes.RMAN_PROXY_COMMAND,"Cylinder 1.0 -.5 .5 360");
