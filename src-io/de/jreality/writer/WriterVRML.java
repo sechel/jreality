@@ -15,6 +15,7 @@ import java.awt.Color;
 import java.io.FileWriter;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 import de.jreality.math.FactoredMatrix;
@@ -50,6 +51,9 @@ import de.jreality.shader.Texture2D;
 public class WriterVRML 
 //extends SceneGraphVisitor 
 {
+	// for  DEF & USE
+	private static HashMap<Integer, SceneGraphComponent> cmpMap = new HashMap<Integer, SceneGraphComponent>();
+	
 	private static DefaultGeometryShader dgs;
 	private static RenderingHintsShader rhs;
 	private static DefaultPolygonShader dps;
@@ -96,10 +100,19 @@ public class WriterVRML
 //		else dts = null;
 
 	}
+// ---------------------
 //	---------------------------- start writing --------------------
 
 	private static void writeComp(SceneGraphComponent c,String hist,EffectiveAppearance parentEA){
 		if (!c.isVisible()) return;
+		// check if allready defined
+		if (cmpMap.containsKey(c.toString())){
+			out.println(""+hist+"USE \""+c.hashCode()+"\"");
+			return;
+		}
+		cmpMap.put(c.hashCode(), c);
+		
+		// write 
 		String hist2= hist+spacing;
 
 		Geometry g = c.getGeometry();
@@ -112,6 +125,7 @@ public class WriterVRML
 		Transformation t= c.getTransformation();
 
 		// write content
+		out.println(""+hist+"DEF \""+c.hashCode()+"\"");
 		out.print(""+hist+"Separator { ");
 		out.println("# "+c.getName());
 		if (t!=null)		writeTrafo(t,hist2);
@@ -308,6 +322,7 @@ public class WriterVRML
 		}
 		else {System.out.println("WriterVRML.writeCam()");}
 	}
+
 	private static void writeTrafo(Transformation t,String hist){
 		out.println(hist+"MatrixTransform { matrix");
 		writeDoubleMatrix(t.getMatrix(),4,4,hist+spacing);
