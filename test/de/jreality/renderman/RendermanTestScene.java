@@ -18,15 +18,19 @@ import de.jreality.util.Input;
 
 public class RendermanTestScene {
   
-  static final int testNr=6;   //testNr: 0..7
+  static final int testNr=11;   //testNr: 0..11
   static final int rendererType = RIBViewer.TYPE_PIXAR;
-  static final String ribPath = "";
-  static final String ribFileName = "";
-  static final String globalIncludeFile = "";
+  static String ribPath = "";
+  static String ribFileName = "";
+  static String globalIncludeFile = "";;
   
   public static void main(String[] args) {    
+	if(args.length>0) ribPath=args[0];
+	if(args.length>1) ribFileName=args[1];
+	if(args.length>2) globalIncludeFile=args[2];
+	
     if(ribPath.equals("") || ribFileName.equals("")){
-      System.err.println("RendermanTestScene: ribPath and/or ribFileName not set\n-> set them in the global fields at the top of the class");
+      System.err.println("RendermanTestScene: ribPath and/or ribFileName not set");
       return;
     }
     
@@ -64,7 +68,7 @@ public class RendermanTestScene {
     ils.setLineCount(8);
     ils.setEdgeIndices(new int[][]{{0,1},{1,2},{2,3},{3,0},{4,5},{5,6},{6,7},{7,4}});
     ils.setVertexTextureCoordinates(new double[][] {{0,0},{0,1},{1,1},{1,0},{0,0},{0,1},{1,1},{1,0}});
-    ils.setVertexColors(new Color[] {Color.BLACK,Color.BLUE,Color.CYAN,Color.GRAY,Color.GREEN,Color.MAGENTA,Color.ORANGE,Color.PINK});
+    ils.setVertexColors(new Color[] {Color.CYAN,Color.GRAY,Color.BLACK,Color.MAGENTA,Color.BLUE,Color.ORANGE,Color.PINK,Color.GREEN});
     ils.setEdgeColors(new Color[] {Color.RED,Color.BLUE,Color.CYAN,Color.GRAY,Color.GREEN,Color.MAGENTA,Color.ORANGE,Color.PINK});
     ils.update();
     
@@ -132,7 +136,46 @@ public class RendermanTestScene {
           TextureUtility.createReflectionMap(faceSetNode.getAppearance(), "polygonShader", "textures/emerald/emerald_", new String[]{"rt","lf","up","dn","bk","ft"},".jpg");
         } catch (IOException e) {e.printStackTrace();}
         break;
-    }    
+    }  
+    case 8:{
+      faceSetNode.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, true);
+      faceSetNode.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY, 0.7);
+      faceSetNode.getAppearance().setAttribute(CommonAttributes.OPAQUE_TUBES_AND_SPHERES, true);  
+      faceSetNode.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS, 0.35);
+      faceSetNode.getAppearance().setAttribute(CommonAttributes.TUBE_RADIUS, 0.3);
+      faceSetNode.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.MAGENTA);
+      break;
+    }
+    case 9:{
+      faceSetNode.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
+      faceSetNode.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY, 0.7);
+      faceSetNode.getAppearance().setAttribute(CommonAttributes.OPAQUE_TUBES_AND_SPHERES, true);  
+      faceSetNode.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS, 0.35);
+      faceSetNode.getAppearance().setAttribute(CommonAttributes.TUBE_RADIUS, 0.3);
+      Texture2D tex = TextureUtility.createTexture(faceSetNode.getAppearance(), "lineShader.polygonShader", img, false);
+      break;
+    }
+    case 10:{
+        faceSetNode.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, true);
+        faceSetNode.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY, 0.7);
+        faceSetNode.getAppearance().setAttribute(CommonAttributes.OPAQUE_TUBES_AND_SPHERES, false);  
+        faceSetNode.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS, 0.35);
+        faceSetNode.getAppearance().setAttribute(CommonAttributes.TUBE_RADIUS, 0.3);
+        Texture2D tex = TextureUtility.createTexture(faceSetNode.getAppearance(), "lineShader.polygonShader", img, false);
+        break;
+      }
+    case 11:{
+      faceSetNode.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
+      faceSetNode.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY, 0.7);
+      faceSetNode.getAppearance().setAttribute(CommonAttributes.OPAQUE_TUBES_AND_SPHERES, true);
+      faceSetNode.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS, 0.35);
+      faceSetNode.getAppearance().setAttribute(CommonAttributes.TUBE_RADIUS, 0.3);
+      faceSetNode.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
+      try {
+          TextureUtility.createReflectionMap(faceSetNode.getAppearance(), "lineShader.polygonShader", "textures/emerald/emerald_", new String[]{"rt","lf","up","dn","bk","ft"},".jpg");
+        } catch (IOException e) {e.printStackTrace();}
+      break;
+    }  
     }
     
     ViewerApp va=new ViewerApp(sgc);
