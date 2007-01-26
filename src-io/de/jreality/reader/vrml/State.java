@@ -283,6 +283,7 @@ public class State {
 			catch (Exception e) {}
 	    }
 		double[][] texCoord = new double [f.getNumPoints()][];
+		if (textureCoords.length<f.getNumPoints()) System.out.println("State.assignTexture() not enough Texturecoords");
 		System.arraycopy(textureCoords,0,texCoord,0,f.getNumPoints());
 		f.setVertexAttributes( Attribute.TEXTURE_COORDINATES,
 				new DoubleArrayArray.Array( texCoord));

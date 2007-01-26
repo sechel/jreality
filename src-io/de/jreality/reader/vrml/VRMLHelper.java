@@ -762,6 +762,7 @@ public class VRMLHelper {
 		int totalVC=0;
 		for (int i=0;i<faceC;i++)	totalVC+=faces[i].length;
 		double [][] newCoords=new double[totalVC][3];
+		double [][] newTexCoords=new double[totalVC][2];
 		double [][] newVNormals=new double[totalVC][3];
 		int count=0;
 		int[] refferenceTable= new int[totalVC];
@@ -777,11 +778,19 @@ public class VRMLHelper {
 					state.coords[faces[f][v]][0],
 					state.coords[faces[f][v]][1],
 					state.coords[faces[f][v]][2]};
+				if(state.textureCoords!=null &&
+						state.textureCoords.length==state.coords.length)
+					newTexCoords[count]=new double[]{
+						state.textureCoords[faces[f][v]][0],
+						state.textureCoords[faces[f][v]][1] };
 				refferenceTable[count]=faces[f][v];
 				faces[f][v]=count;
 				count++;
 			}
 		}
+		if(state.textureCoords!=null &&
+				state.textureCoords.length==state.coords.length)
+			state.textureCoords=newTexCoords;
 		state.coords=newCoords;
 		if(state.normalBinding==PER_VERTEX){
 			state.normals=newVNormals;
