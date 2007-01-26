@@ -69,6 +69,7 @@ public class ShipNavigationTool extends AbstractTool {
   private final InputSlot run = InputSlot.getDevice("RunActivation");
 
   private final InputSlot gravityToggle = InputSlot.getDevice("GravityToggle");
+  private final InputSlot groundToggle = InputSlot.getDevice("GroundToggle");
 
   private double[] velocity = {0,0,0};
   private boolean touchGround;
@@ -82,6 +83,7 @@ public class ShipNavigationTool extends AbstractTool {
   private boolean rotate=false;
 
   private boolean pollingDevice=true; // should be true for mouse look, false for some axis/button device TODO!!
+private boolean fall;
   
   public ShipNavigationTool() {
     addCurrentSlot(forwardBackward);
@@ -89,12 +91,13 @@ public class ShipNavigationTool extends AbstractTool {
     addCurrentSlot(rotateActivation);
     addCurrentSlot(jump);
     addCurrentSlot(gravityToggle);
+    addCurrentSlot(groundToggle);
   }
 
   public void perform(ToolContext tc) {
 	  
 	  if (tc.getSource() == gravityToggle) {
-		  if (tc.getAxisState(tc.getSource()).isReleased()) return;
+		  if (tc.getAxisState(gravityToggle).isReleased()) return;
 		  double lg = gravity;
 		  gravity=lastGravity;
 		  lastGravity=lg;
@@ -102,6 +105,11 @@ public class ShipNavigationTool extends AbstractTool {
 		  touchGround=gravity==0;
 	  }
 	  
+	  if (tc.getSource() == groundToggle) {
+		  fall=tc.getAxisState(groundToggle).isPressed();
+		  if (fall) touchGround=false;
+	  }
+
     if (rotate) {
       if (!tc.getAxisState(rotateActivation).isPressed()) {
         removeCurrentSlot(horizontalRotation);
@@ -150,11 +158,13 @@ public class ShipNavigationTool extends AbstractTool {
         double[] pickStart = new double[]{dest[0], dest[1]+1.7, dest[2], 1};
         List picks = Collections.EMPTY_LIST;
         if (gravity != 0) {
-          try {
-            picks = tc.getPickSystem().computePick(pickStart, dest);
-          } catch (Exception e) {
-            LoggingSystem.getLogger(this).warning("pick system error");
-            return;
+          if (!fall) {
+	          try {
+	            picks = tc.getPickSystem().computePick(pickStart, dest);
+	          } catch (Exception e) {
+	            LoggingSystem.getLogger(this).warning("pick system error");
+	            return;
+	          }
           }
           if (!picks.isEmpty()) {
             PickResult pr = (PickResult) picks.get(0);
