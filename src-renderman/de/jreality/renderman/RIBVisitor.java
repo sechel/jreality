@@ -93,6 +93,7 @@ import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
 import de.jreality.util.CameraUtility;
 
 /**
@@ -171,10 +172,9 @@ public class RIBVisitor extends SceneGraphVisitor {
 	RenderScript renderScript;
 
 	private float currentOpacity;
-	private float[] currentCs = new float[3], currentOs = new float[3];
 	private Appearance rootAppearance;
 	private String outputFileName;
-	protected boolean transparencyEnabled;
+	protected boolean transparencyEnabled, ignoreAlpha0 = true;
 	private int cubeMapCount;
 	private String cubeMapFileSuffix = "env";
 	protected DefaultGeometryShader dgs;
@@ -529,6 +529,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		ri.attributeBegin(c.getName());
 		if (a != null) 	eAppearance = eAppearance.create(a);
 		readAttributesFromEffectiveAppearance(eAppearance);
+		System.err.println("Updating shaders for "+c.getName());
 		// possibly here call evaluateEffectiveAppearance()
 		object2world.push(c);
 		if (hasProxy(c)) {
@@ -572,6 +573,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		//if(rhs.getOpaqueTubesAndSpheres()!=null)  
 		opaqueTubes = rhs.getOpaqueTubesAndSpheres();
 		transparencyEnabled = rhs.getTransparencyEnabled();
+		ignoreAlpha0 = rhs.getIgnoreAlpha0();
 		/** 
 		 * evaluate the special shaders which might be specified in the effective appearance:
 		 * displacement, imager, and interior and exterior volume shaders
@@ -615,7 +617,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		if (dgs.getPolygonShader() instanceof DefaultPolygonShader) dps = (DefaultPolygonShader) dgs.getPolygonShader();
 		else dps = null;
 		// we need to know the current opacity to workaround a renderman prman bug in pointsPolygon ... see below
-		currentOpacity = 0f;
+		currentOpacity = 1f;
 		if (!(handlingProxyGeometry && rhs.getOpaqueTubesAndSpheres()) && rhs.getTransparencyEnabled()) {
 			double d = eap.getAttribute(CommonAttributes.TRANSPARENCY, CommonAttributes.TRANSPARENCY_DEFAULT);
 			currentOpacity = 1f - (float) d;
@@ -876,8 +878,19 @@ public class RIBVisitor extends SceneGraphVisitor {
 	               	  	if (cc != null) bsf.setStickColor(cc);
 	                	bsf.update();
 	                	handlingProxyGeometry = true;
-	                	handlingTubes=true;                    
-	                	visit(bsf.getSceneGraphComponent());
+	                	handlingTubes=true;    
+	                	SceneGraphComponent sgc = bsf.getSceneGraphComponent();
+	                	Appearance ap = new Appearance();
+	                	Texture2D tex2d = ((de.jreality.shader.DefaultPolygonShader)vps).getTexture2d();
+	                	// TODO figure out how to "transfer" the texture map properties of "lineShader.polygonShader"
+	                	// to "polygonShader" in the ball-and-stick component appearance.
+	                	// For now we don't allow such textures on tubes (although JOGL backend does allow it)
+	                	ap.setAttribute("polygonShader.texture2d", tex2d == null ?  Appearance.DEFAULT : tex2d);
+	                	CubeMap cubeMap = ((de.jreality.shader.DefaultPolygonShader)vps).getReflectionMap();
+	                	ap.setAttribute("polygonShader."+CommonAttributes.REFLECTION_MAP,cubeMap == null ?  Appearance.DEFAULT : cubeMap);
+	                	sgc.setAppearance(ap);
+	                	//TextureUtility.removeTexture(sgc.getAppearance(), )
+	                	visit(sgc);
 	                	handlingTubes=false;
 	               	  	handlingProxyGeometry = false;
 	                 } else {
@@ -1053,6 +1066,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	 */
 	private void pointPolygon(IndexedFaceSet i, float[] color) {
 		int npolys = i.getNumFaces();
+		if (color != null && color[3] == 0.0 && ignoreAlpha0) return;
 		if (npolys != 0) {
 			HashMap<String, Object> map = new HashMap<String, Object>();
 			boolean smooth = dps.getSmoothShading();
