@@ -86,6 +86,7 @@ import de.jreality.scene.Appearance;
 	public final static String OPAQUE_TUBES_AND_SPHERES = "opaqueTubesAndSpheres";
 	public final static boolean OPAQUE_TUBES_AND_SPHERES_DEFAULT = false;
 	public final static String CENTER_ON_BOUNDING_BOX = "centerOnBoundingBox";
+
 	// these hints are heavily OpenGL specific
 	public final static String DEPTH_FUDGE_FACTOR = 		"depthFudgeFactor";
 	public final static String IGNORE_ALPHA0	=			"ignoreAlpha0";	// reject pixel writes for pixels with alpha == 0
@@ -96,6 +97,7 @@ import de.jreality.scene.Appearance;
 	public static final String CLEAR_COLOR_BUFFER = "clearColorBuffer";
 	public final static String LOCAL_LIGHT_MODEL = "localLightModel";
 	public final static String SEPARATE_SPECULAR_COLOR = "separateSpecularColor";
+	public final static String COMPONENT_DISPLAY_LISTS = "componentDisplayLists";
 	// default geometry shader
 	public final static String FACE_DRAW = 		"showFaces";
 	public final static boolean FACE_DRAW_DEFAULT = true;
@@ -150,6 +152,7 @@ import de.jreality.scene.Appearance;
 	public final static String SMOOTH_SHADING = 	"smoothShading";		// interpolate vertex shading values?
 	public final static boolean SMOOTH_SHADING_DEFAULT = true;
 	public final static String TEXTURE_2D = 		"texture2d";		
+	public static final String REFLECTION_MAP = "reflectionMap";
 	public final static String TRANSPARENCY = 		"transparency";		
     public final static double TRANSPARENCY_DEFAULT =  0.0;
 	public final static String AMBIENT_COLOR = 	"ambientColor";
@@ -167,7 +170,6 @@ import de.jreality.scene.Appearance;
     public final static String SPECULAR_COEFFICIENT =  "specularCoefficient";
     public final static double SPECULAR_COEFFICIENT_DEFAULT =  .7;
 	public static final String LIGHT_DIRECTION = "lightDirection";
-
 	// implode polygon shader
 	public static final String IMPLODE = "implode";
 	public static final String IMPLODE_FACTOR = "implodeFactor";
