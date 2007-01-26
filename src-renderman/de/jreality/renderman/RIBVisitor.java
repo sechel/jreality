@@ -530,7 +530,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 		ri.attributeBegin(c.getName());
 		if (a != null) 	eAppearance = eAppearance.create(a);
 		readAttributesFromEffectiveAppearance(eAppearance);
-		System.err.println("Updating shaders for "+c.getName());
 		// possibly here call evaluateEffectiveAppearance()
 		object2world.push(c);
 		if (hasProxy(c)) {
