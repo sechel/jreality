@@ -39,7 +39,6 @@
 
 
 package de.jreality.geometry;
-
 import java.awt.Color;
 
 import de.jreality.geometry.OoNode.UpdateMethod;
@@ -207,7 +206,8 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 
 	{
 		edgeIndices.addIngr( faceIndices );
-		edgeIndices.addDeps( edgeCount );
+		if( isGenerateEdgesFromFaces() )
+			edgeIndices.addDeps( edgeCount );
 		edgeIndices.setUpdateMethod(
 				new OoNode.UpdateMethod() {
 					public Object update( Object object) {					
@@ -345,6 +345,11 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 			
 		edgeIndices.setGenerate(generateEdgesFromFaces);
 		
+		if( isGenerateEdgesFromFaces() ) {
+			edgeIndices.addDeps( edgeCount );
+		} else {
+			edgeIndices.removeDeps( edgeCount );
+		}
 		edge.blockAttributeCount = generateEdgesFromFaces;
 	}
 	

@@ -103,7 +103,6 @@ public class AbstractGeometryFactory {
 			
 			for( Iterator iter = gals.DLS.storedAttributes().iterator(); iter.hasNext(); ) {
 				Attribute attr = (Attribute)iter.next();
-				
 				gals.attributeNode( attr ).update();
 				if(  nodeWasUpdated(gals.attributeNode( attr ))  ) {
 					log( "set", attr, category);

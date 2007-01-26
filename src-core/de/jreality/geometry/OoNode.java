@@ -65,7 +65,7 @@ class OoNode {
 	
 	private String name;
 	
-	private long counterOfLastUpdate = System.currentTimeMillis();
+	private long counterOfLastUpdate = -1; //System.currentTimeMillis();
 	
 	private boolean currentlyUpdating = false;
 	private boolean currentlyOutdating = false;
@@ -104,7 +104,7 @@ class OoNode {
 		this.type = type;
 		setName( name );
 	}
-
+	
 	public Object getObject() {
 		update();
 		return object;
@@ -129,19 +129,35 @@ class OoNode {
 	}
 	
 	public void addIngr( OoNode node ) {
-		if( node == this )
-			throw new IllegalArgumentException( "node must not equal this" );
-		ingr.add(node);
-		node.deps.add(this);
+		node.addDeps(this);
+//		if( node == this )
+//			throw new IllegalArgumentException( "node must not equal this" );
+//		ingr.add(node);
+//		node.deps.add(this);
 	}
 
+	public void removeIngr( OoNode node ) {
+		node.removeDeps(this);
+	}
+	
 	public void addDeps( OoNode node ) {
 	if( node == this )
 			throw new IllegalArgumentException( "node must not equal this" );
 		deps.add(node);
+		
+		if( this.isOutOfDate() )
+			node.outdate();
+		
 		node.ingr.add(this);
 	}
 	
+	public void removeDeps( OoNode node ) {
+		if( node == this )
+				throw new IllegalArgumentException( "node must not equal this" );
+			deps.remove(node);
+			node.ingr.remove(this);
+		}
+
 	void outdateDeps() {
 		for( Iterator iter=deps.iterator(); iter.hasNext(); ) {
 			((OoNode)iter.next()).outdate();
@@ -189,7 +205,7 @@ class OoNode {
 				object = newObject;
 			}
 			
-			counterOfLastUpdate = System.currentTimeMillis();
+			//counterOfLastUpdate = System.currentTimeMillis();
 			
 		} finally {
 			currentlyUpdating=false;
