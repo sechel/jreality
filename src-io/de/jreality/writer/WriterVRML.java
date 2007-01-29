@@ -146,16 +146,22 @@ public class WriterVRML
 		out.println(""+hist+"}");
 	}
 	private static void writeGeo(Geometry g,String hist)throws IOException{
-		if (g instanceof Sphere)
+		if (g instanceof Sphere){
 			writeSphere((Sphere)g,hist);
-		else if (g instanceof Cylinder )
+			return;
+		}
+		if (g instanceof Cylinder ){
 			writeCylinder((Cylinder)g,hist);
-		else if (g instanceof IndexedFaceSet)
+			return;
+		}
+		if (g instanceof IndexedFaceSet)
 			writeGeoFaces((IndexedFaceSet) g,hist);		
-		else if (g instanceof IndexedLineSet)
+		if (g instanceof IndexedLineSet)
 			writeGeoLines((IndexedLineSet) g,hist);
-		else if (g instanceof PointSet)
+		if (g instanceof PointSet){
 			writeGeoPoints((PointSet) g,hist);
+			return;
+		}
 		else System.err.println("WriterVRML.writeComp() unknown geometrytype");
 	}
 	private static void writeSphere(Sphere s,String hist){
@@ -257,7 +263,7 @@ public class WriterVRML
 		if (l.getVertexAttributes(Attribute.COORDINATES)==null) 
 			throw new IOException("missing coordinates");
 		if (l.getEdgeAttributes(Attribute.INDICES)==null) 
-			throw new IOException("missing lineIndices");
+			return;
 		double[][] lcoords=l.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 		int[][] lindices=l.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
 		
