@@ -55,8 +55,8 @@ public class State {
 	public Transformation extraGeoTrans=null;// fuer die Abmessungen der Geometrie
 	public String textureFile="";				// TexturDaten
 	public int[][][] textureData= new int[][][]{{{}}};
-	public boolean wrapS=true; 
-	public boolean wrapT=true; 
+	public int wrapS=0; // 0=Repeat 1=clamp
+	public int wrapT=0; 
 	public Matrix textureTrafo = MatrixBuilder.euclidean().getMatrix(); 
 	public double [][] textureCoords=new double[][]{{0,0}};
 	public int vertexDraw=0;// visibility // 0= inherit, 1= true, 2= false; 
@@ -291,6 +291,12 @@ public class State {
 		app.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false);
 		Texture2D tex = TextureUtility.createTexture(app, CommonAttributes.POLYGON_SHADER,id);
 	    tex.setTextureMatrix(textureTrafo);
+	    if (wrapS==0)
+	    	tex.setRepeatS(Texture2D.REPEAT);
+	    else tex.setRepeatS(Texture2D.CLAMP);
+	    if (wrapT==0)
+	    	tex.setRepeatT(Texture2D.REPEAT);
+	    else tex.setRepeatT(Texture2D.CLAMP);
 	    tex.setApplyMode(Texture2D.GL_MODULATE);
 	}
 }

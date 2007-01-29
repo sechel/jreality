@@ -828,8 +828,9 @@ texture2Node[State state]
 	{
 	 state.textureFile=file;
 	 state.textureData=image;
-	 state.wrapS=(VRMLHelper.getEnum(code,wrapS)!=0);
-	 state.wrapT=(VRMLHelper.getEnum(code,wrapT)!=0);
+	 // wrap: 0=repeat 1= clamp
+	 state.wrapS=VRMLHelper.getEnum(code,wrapS);
+	 state.wrapT=VRMLHelper.getEnum(code,wrapT);
 	 if (VRMLHelper.verbose) System.err.println(")");
 	 }
 ;
