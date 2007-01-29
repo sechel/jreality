@@ -485,7 +485,7 @@ public class WriterVRML
 		out.print(""+hist);
 		if (d.length<size)throw new IOException("Invalid Data");
 		for (int i=0;i<size;i++)
-			out.print(d[i]);
+			out.print(String.format(" %13.7g",d[i]));
 		out.println(append);
 	}
 	private static void writeDoubleMatrix(double[] d,int width, int depth, String hist)throws IOException{
