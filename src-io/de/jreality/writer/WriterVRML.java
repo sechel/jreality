@@ -147,19 +147,24 @@ public class WriterVRML
 	}
 	private static void writeGeo(Geometry g,String hist)throws IOException{
 		if (g instanceof Sphere){
-			writeSphere((Sphere)g,hist);
+			if (dgs.getShowFaces())
+				writeSphere((Sphere)g,hist);
 			return;
 		}
 		if (g instanceof Cylinder ){
-			writeCylinder((Cylinder)g,hist);
+			if (dgs.getShowFaces())
+				writeCylinder((Cylinder)g,hist);
 			return;
 		}
 		if (g instanceof IndexedFaceSet)
-			writeGeoFaces((IndexedFaceSet) g,hist);		
+			if (dgs.getShowFaces())
+				writeGeoFaces((IndexedFaceSet) g,hist);		
 		if (g instanceof IndexedLineSet)
-			writeGeoLines((IndexedLineSet) g,hist);
+			if(dls.getTubeDraw()&& dgs.getShowLines())
+				writeGeoLines((IndexedLineSet) g,hist);
 		if (g instanceof PointSet){
-			writeGeoPoints((PointSet) g,hist);
+			if(dvs.getSpheresDraw()&& dgs.getShowPoints())
+			    writeGeoPoints((PointSet) g,hist);
 			return;
 		}
 		else System.err.println("WriterVRML.writeComp() unknown geometrytype");
