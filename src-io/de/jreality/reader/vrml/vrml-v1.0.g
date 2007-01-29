@@ -1386,7 +1386,7 @@ hexList [int size, int dim] returns [int[][] cL= new int[size][dim]]
 	((g : HEXDEC {s=g.getText();}
 	 |k : NUMBER {s=k.getText();} )
 	 {	if(i<size)
-		 	cL[i]=VRMLHelper.decodeColorFromString(dim,g.getText());
+		 	cL[i]=VRMLHelper.decodeColorFromString(dim,s);
 	 	i++; }
 	)*
 	;
