@@ -16,8 +16,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.text.Format;
 import java.util.HashMap;
 import java.util.LinkedList;
+
+import org.w3c.dom.Text;
 
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
@@ -421,15 +424,33 @@ public class WriterVRML
 		String hist2=hist+spacing;
 		out.println(hist+"Texture2 {");
 		writeImage(tex,hist2);
-//		texture.getRepeatS()
-//		texture.getRepeatT()
+		out.print(hist+"wrapS ");
+		writeTexWrap(tex.getRepeatS());
+		out.print(hist+"wrapT ");
+		writeTexWrap(tex.getRepeatT());
 		out.println(hist+"}");
-
 		writeTexTrans(hist2,tex);
 
 	}
+	private static void writeTexWrap(int wrap)throws IOException{
+		switch (wrap) {
+		case Texture2D.GL_CLAMP:
+		case Texture2D.GL_CLAMP_TO_EDGE:
+			System.out.println("texture wrap:only clamp & repeat are supported");
+		case Texture2D.CLAMP:
+			out.println("CLAMP");				
+			break;
+		case Texture2D.GL_REPEAT:
+		case Texture2D.GL_MIRRORED_REPEAT:
+			System.out.println("texture wrap:only clamp & repeat are supported");
+		case Texture2D.REPEAT:
+			out.println("REPEAT");				
+			break;
+		default:
+			throw new IOException("unknown Texture wrapping");
+		}
+	}
 	//	-----------------------------	
-
 	private static double[] colorToDoubleArray(Color c){
 		return new double[]{(double)c.getRed(),(double)c.getGreen(),(double)c.getBlue()};
 	}
@@ -464,7 +485,7 @@ public class WriterVRML
 		out.print(""+hist);
 		if (d.length<size)throw new IOException("Invalid Data");
 		for (int i=0;i<size;i++)
-			out.print(d[i]+" ");
+			out.print(d[i]);
 		out.println(append);
 	}
 	private static void writeDoubleMatrix(double[] d,int width, int depth, String hist)throws IOException{
