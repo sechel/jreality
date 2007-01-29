@@ -130,6 +130,7 @@ public class State {
 		double[] temp= new double[16];	// texture -trafo
 		for (int i=0;i<16;i++)
 			temp[i]=orig.textureTrafo.getArray()[i];
+		textureTrafo=new Matrix(temp);
 		if (orig.textureCoords.length>0 	// texture -coords
 				&& orig.textureCoords[0].length>0){
 			int a=orig.textureCoords.length;
