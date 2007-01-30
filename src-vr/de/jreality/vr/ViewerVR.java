@@ -73,7 +73,6 @@ import javax.swing.KeyStroke;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.reader.ReaderJRS;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -89,8 +88,6 @@ import de.jreality.scene.tool.Tool;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
-//import de.jreality.sunflow.RenderOptions;
-//import de.jreality.sunflow.Sunflow;
 import de.jreality.sunflow.RenderOptions;
 import de.jreality.sunflow.Sunflow;
 import de.jreality.swing.ScenePanel;
@@ -136,7 +133,7 @@ public class ViewerVR {
 	private static final int FILE_CHOOSER_PANEL_WIDTH = 2;
 
 	// diam of the terrain
-	private static final double TERRAIN_SIZE=100;
+	private static final double TERRAIN_SIZE = 100;
 
 	// parts of the scene that do not change
 	private SceneGraphComponent sceneRoot = new SceneGraphComponent("root"),
@@ -532,10 +529,6 @@ public class ViewerVR {
 	public ViewerApp initialize() {
 		restorePreferences();
 		ViewerApp viewerApp = new ViewerApp(sceneRoot, cameraPath, emptyPickPath, avatarPath);
-		viewerApp.setAttachNavigator(false);
-		viewerApp.setExternalNavigator(true);
-		viewerApp.setAttachBeanShell(false);
-		viewerApp.setExternalBeanShell(true);
 		tweakMenu(viewerApp);
 		return viewerApp;
 	}
@@ -896,33 +889,38 @@ public class ViewerVR {
 	}
 
 	public static void main(String[] args) {
-		
-		ViewerApp va;
-		boolean navigator = true;
+
+		boolean navigator = false;
 		boolean beanshell = false;
 		boolean external = true;
-		
-		LinkedList<String> params = new LinkedList<String>();
-		for (String p : args) params.add(p);
-		
-		if (params.contains("-h") || params.contains("--help")) {
-			System.out.println("parameters:");
-			System.out.println("\t -n \t show navigator");
-			System.out.println("\t -b \t show beanshell");
-			System.out.println("\t -i \t show navigator and/or beanshell in the main frame");
-			System.exit(0);
-		}
-		
-		navigator = params.remove("-n");
-		beanshell = params.remove("-b");
-		external = !params.remove("-i");
-		
-		SceneGraphComponent cmp = new SceneGraphComponent();
-		for (String file : params) {
-			try {
-				cmp.addChild(Readers.read(Input.getInput(file)));
-			} catch (IOException e) {
-				// TODO:
+		SceneGraphComponent cmp = null;
+
+		if (args.length != 0) {  //params given
+			LinkedList<String> params = new LinkedList<String>();
+			for (String p : args) params.add(p);
+
+			if (params.contains("-h") || params.contains("--help")) {
+				System.out.println("Usage:  ViewerVR [-options] [file list]");
+				System.out.println("\t -s \t the (single) file given is a .jrs file containing a whole scene\n" +
+				"\t\t (otherwise all specified files are loaded into the default scene)");
+				System.out.println("\t -n \t show navigator");
+				System.out.println("\t -b \t show beanshell");
+				System.out.println("\t -i \t show navigator and/or beanshell in the main frame\n" +
+				"\t\t (otherwise they are opened in separate frames)");
+				System.exit(0);
+			}
+
+			navigator = params.remove("-n");
+			beanshell = params.remove("-b");
+			external = !params.remove("-i");
+
+			if (params.size() != 0) cmp = new SceneGraphComponent();
+			for (String file : params) {
+				try {
+					cmp.addChild(Readers.read(Input.getInput(file)));
+				} catch (IOException e) {
+					System.out.println(e.getMessage());
+				}
 			}
 		}
 		
@@ -950,6 +948,10 @@ public class ViewerVR {
 		if (cmp != null) vr.setContent(cmp);
 		
 		ViewerApp vApp = vr.initialize();
+		vApp.setAttachNavigator(navigator);
+		vApp.setExternalNavigator(external);
+		vApp.setAttachBeanShell(beanshell);
+		vApp.setExternalBeanShell(external);
 		
 //		appPlugin.setFaceColor(new Color(64, 222, 64));
 		
