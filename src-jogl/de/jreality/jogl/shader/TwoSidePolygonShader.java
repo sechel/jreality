@@ -79,6 +79,7 @@ public class TwoSidePolygonShader extends AbstractPrimitiveShader implements Pol
 	public void postRender(JOGLRenderingState jrs) {
 		if (front != null) front.postRender(jrs);
 		if (back != null) back.postRender(jrs);
+		displayListsDirty = front.displayListsDirty() || back.displayListsDirty();
 	}
 	
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String shaderName) {

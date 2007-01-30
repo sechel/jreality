@@ -106,7 +106,10 @@ public class Texture2DLoaderJOGL {
   }
 
     /******************* new Textures *******************/
-  
+    public static void activate(GL gl, Texture2D tex)	{
+    	int texid = getTextureTableForGL(gl).get(tex.getImage());
+        gl.glBindTexture(GL.GL_TEXTURE_2D, texid);
+    }
     public static void render(GL gl, Texture2D tex) {
       render(gl, tex, true);
     }

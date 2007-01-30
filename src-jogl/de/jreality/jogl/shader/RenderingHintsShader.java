@@ -67,7 +67,8 @@ public class RenderingHintsShader  {
 	   clearColorBuffer = true,
 	   localLightModel = false,
 	   separateSpecularColor = false,
-	   ignoreAlpha0 = true;
+	   ignoreAlpha0 = true,
+	   componentDisplayLists = false;
 	   
 
 	/**

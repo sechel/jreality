@@ -108,13 +108,12 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		inheritTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name,"inheritTexture2d"), false);	
 		ignoreTexture2d = eap.getAttribute(ShaderUtility.nameSpace(name,"ignoreTexture2d"), false);	
 	    texture2Dnew = null;
-		if (!name.startsWith("lineShader") && !name.startsWith("pointShader") )	{
+		//if (!name.startsWith("lineShader") && !name.startsWith("pointShader") )	{
 			if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap)) {
 				texture2Dnew = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap);			
 		    	LoggingSystem.getLogger(this).fine("Got texture 2d for eap "+((Appearance) eap.getAppearanceHierarchy().get(0)).getName());
 			}
-		}
-		LoggingSystem.getLogger(this).info("Current text2d "+texture2Dnew);
+		//}
 	    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))
 	    	reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));
 	    else reflectionMap = null;
@@ -177,12 +176,13 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    if (lightMap != null) {
 		    gl.glActiveTexture(texUnit);
 		    gl.glEnable(GL.GL_TEXTURE_2D);
-//		    Integer bound = jrs.boundToTextureUnit.get(lightMap);
-//		    if (bound == null || bound.intValue() != texUnit) {
+		    Integer bound = jrs.boundToTextureUnit.get(lightMap);
+		    if (bound == null || bound.intValue() != texUnit) {
 			    Texture2DLoaderJOGL.render(gl, lightMap);
 				testTextureResident(jr, gl);
-//				jrs.boundToTextureUnit.put(lightMap, new Integer(texUnit));
-//		    }
+				jrs.boundToTextureUnit.put(lightMap, new Integer(texUnit));
+		    } else if (jrs.boundToTextureUnit.size() > 1)
+		    	Texture2DLoaderJOGL.activate(gl, lightMap);
 		    texUnit++;
 		    texunitcoords++;
 	    }
@@ -190,12 +190,14 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    if (texture2Dnew != null) {
 	    	gl.glActiveTexture(texUnit);
 	      	gl.glEnable(GL.GL_TEXTURE_2D);
-//		    Integer bound = jrs.boundToTextureUnit.get(texture2Dnew);
-//		    if (bound == null || bound.intValue() != texUnit) {
+		    Integer bound = jrs.boundToTextureUnit.get(texture2Dnew);
+		    if (bound == null || bound.intValue() != texUnit) {
 			    Texture2DLoaderJOGL.render(gl, texture2Dnew);
 				testTextureResident(jr, gl);
-//				jrs.boundToTextureUnit.put(texture2Dnew, new Integer(texUnit));
-//		    }
+				jrs.boundToTextureUnit.put(texture2Dnew, new Integer(texUnit));
+				System.err.println("BoundToTextureUnit size: "+jrs.boundToTextureUnit.size());
+		    }  else if (jrs.boundToTextureUnit.size() > 1)
+		    	Texture2DLoaderJOGL.activate(gl, texture2Dnew);
 		    texUnit++;
 		    texunitcoords++;
 	    }
@@ -248,7 +250,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	}
 
 	static Color[] cdbg = {Color.BLUE, Color.GREEN, Color.YELLOW,  Color.RED,Color.GRAY, Color.WHITE};
-	int dList = -1, dListProxy = -1;
 	public void render(JOGLRenderingState jrs)	{
 		Geometry g = jrs.getCurrentGeometry();
 		JOGLRenderer jr = jrs.getRenderer();
@@ -274,6 +275,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 //				if (jr.debugGL) 
 //					jr.getGL().glColor4fv(cdbg[i].getRGBComponents(null));
 				jr.getGL().glCallList(dlist);
+				displayListsDirty = false;
 				if (jr.isPickMode()) jr.getGL().glPopName();
 			}
 			else if ( g instanceof IndexedFaceSet)	{
@@ -281,6 +283,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				if (providesProxyGeometry())	{
 					if (!useDisplayLists || jr.isPickMode() || dListProxy == -1) {
 						dListProxy  = proxyGeometryFor(jrs);
+						displayListsDirty = false;
 					}
 					jr.getGL().glCallList(dListProxy);
 				}
@@ -292,6 +295,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 							jr.getGL().glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
 							JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);
 							jr.getGL().glEndList();	
+							displayListsDirty = false;
 						}
 						jr.getGL().glCallList(dList);
 					} else
@@ -356,5 +360,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		if (dList != -1) jr.getGL().glDeleteLists(dList, 1);
 		if (dListProxy != -1) jr.getGL().glDeleteLists(dListProxy,1);
 		dList = dListProxy = -1;
+		displayListsDirty = true;
 	}
 }

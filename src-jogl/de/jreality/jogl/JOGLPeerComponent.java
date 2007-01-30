@@ -4,11 +4,16 @@
  */
 package de.jreality.jogl;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
+import javax.swing.Timer;
+
+import sun.awt.PeerEvent;
 
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultGeometryShader;
@@ -48,16 +53,11 @@ import de.jreality.util.LoggingSystem;
 
 public class JOGLPeerComponent extends JOGLPeerNode implements TransformationListener, AppearanceListener,SceneGraphComponentListener {
 
-	public int[] bindings = new int[2];
 	protected EffectiveAppearance eAp;
 	protected Vector<JOGLPeerComponent> children;
 	protected JOGLPeerComponent parent;
 	protected int childIndex;
 	protected GoBetween goBetween;
-
-	protected boolean isReflection = false;
-	boolean isCopyCat = false;
-	protected boolean cumulativeIsReflection = false;
 	double determinant = 0.0;
 
 	RenderingHintsShader renderingHints;
@@ -66,18 +66,16 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	Lock childlock = new Lock();
 	protected Runnable renderGeometry = null;
 	final JOGLPeerComponent self = this;
-	double[][] matrices = null;
-	double minDistance = -1, maxDistance = -1;
 	protected boolean appearanceDirty = true, originalAppearanceDirty = false;
-	boolean effectiveAppearanceDirty = true,
-	geometryIsDirty = true,
-	boundIsDirty = true,
-	clipToCamera = true;
-	int geometryDirtyBits  = 0, displayList = -5;
-	protected boolean renderRunnableDirty = true;
-	boolean[] matrixIsReflection = null;
-	double[] tform = new double[16];		// for optimized access to matrix
-
+	boolean isReflection = false,
+		cumulativeIsReflection = false,
+		effectiveAppearanceDirty = true,
+		geometryIsDirty = true,
+		boundIsDirty = true,
+		renderRunnableDirty = true;
+	int geometryDirtyBits  = 0, displayList = -1;
+	// copycat related fields
+	long currentTime = 0;
 	protected final static int POINTS_CHANGED = 1;
 	protected final static int LINES_CHANGED = 2;
 	protected final static int FACES_CHANGED = 4;
@@ -88,8 +86,18 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	protected final static int ALL_SHADERS_CHANGED = POINT_SHADER_CHANGED | LINE_SHADER_CHANGED | POLYGON_SHADER_CHANGED;
 	protected final static int ALL_CHANGED = ALL_GEOMETRY_CHANGED | ALL_SHADERS_CHANGED;
 
+	// need an empty constructor in order to allow 
+	public JOGLPeerComponent()	{
+		super();
+	}
+
 	public JOGLPeerComponent(SceneGraphPath sgp, JOGLPeerComponent p, JOGLRenderer jr)		{
-		super(jr);
+		super();
+		init(sgp, p, jr);
+	}
+	
+	public void init(SceneGraphPath sgp, JOGLPeerComponent p, JOGLRenderer jr) {
+		this.jr = jr;
 		if (sgp == null || !(sgp.getLastElement() instanceof SceneGraphComponent))  {
 			throw new IllegalArgumentException("Not a valid SceneGraphComponenet");
 		}
@@ -97,20 +105,13 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		goBetween.addJOGLPeer(this);
 		name = "JOGLPeer:"+goBetween.getOriginalComponent().getName();
 		Geometry foo = goBetween.getOriginalComponent().getGeometry();
-		isCopyCat = (foo != null &&  foo instanceof PointSet && foo.getGeometryAttributes(JOGLConfiguration.COPY_CAT) != null);
-		if (isCopyCat)	{
-			matrices = ((PointSet) foo).getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null);
-			matrixIsReflection = new boolean[matrices.length];
-			for (int i = 0; i<matrices.length; ++i)	matrixIsReflection[i] = Rn.determinant(matrices[i]) < 0.0;
-		}
 		children = new Vector<JOGLPeerComponent>();
 		parent = p;
 		updateTransformationInfo();
 	}
-
+	
 	protected void updateRenderRunnable() {
 		setDisplayListDirty();
-//		updateShaders();
 		if (goBetween.peerGeometry == null) renderGeometry = null;
 		else	 renderGeometry = new Runnable() {
 			public void run() {
@@ -131,31 +132,26 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void render()		{
-		if (!goBetween.getOriginalComponent().isVisible()) return;
-		Transformation thisT = preRender();
-		//System.err.println(goBetween.getOriginalComponent().getName()+"Signature is "+currentSignature);
+		if (!goBetween.getOriginalComponent().isVisible()) {
+			return;
+		}
+		preRender();
 		renderChildren();
 		postRender();
 	}
 
 
-	private Transformation preRender() {
-		if (goBetween.originalComponent.getAppearance() != null) 
-			theLog.finest("Processing appearance "+goBetween.originalComponent.getAppearance().getName());
-		jr.nodeCount++;
+	private void preRender() {
 		if (renderRunnableDirty) updateRenderRunnable();
 		jr.currentPath.push(goBetween.getOriginalComponent());
 		jr.context.setCurrentPath(jr.currentPath);
 		Transformation thisT = goBetween.getOriginalComponent().getTransformation();
 
-		if (thisT != null) {
-			pushTransformation(thisT.getMatrix());
-		}
+		if (thisT != null)pushTransformation(thisT.getMatrix());
 
 		if (eAp != null) {
 			jr.currentSignature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
 			jr.renderingState.setCurrentSignature(jr.currentSignature);
-			//System.err.println(goBetween.getOriginalComponent().getName()+" Setting sig to "+currentSignature);
 		}
 		if (parent != null) cumulativeIsReflection = (isReflection != parent.cumulativeIsReflection);
 		else cumulativeIsReflection = (isReflection != jr.globalIsReflection);
@@ -163,82 +159,25 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			jr.globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
 			jr.renderingState.flipped  = cumulativeIsReflection;
 		}
+
 		if (geometryDirtyBits  != 0)	handleChangedGeometry();
 		if (originalAppearanceDirty) propagateAppearanceChanged();
 		if (appearanceDirty || effectiveAppearanceDirty)  	handleAppearanceChanged();
 		if (goBetween != null && goBetween.peerGeometry != null && goBetween.peerGeometry.originalGeometry != null )	{
 			Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
+//			if (jr.renderingState.insideDisplayList) 
+//				theLog.finer("rendering geometry: "+goBetween.peerGeometry.originalGeometry.getName());
 		}
-		return thisT;
 	}
 	protected void renderChildren() {
+//		theLog.finest("Processing sgc, clipToCamera is "+goBetween.originalComponent.getName()+" "+clipToCamera);
 		int n = children.size();
 
-		// to make this work in general, need to only activate display lists when all my childrne
-		// have valid display lists.  
-//		if (jr.frameCount % 10 == 5 && displayList > 0) {
-//			jr.globalGL.glDeleteLists(displayList, 0);
-//			displayList = -1;
-//		}
-//		if (displayList >= 1) {
-//			jr.globalGL.glCallList(displayList);
-//			return;
-//		}
-//		if (jr.renderingState.useDisplayLists && !jr.renderingState.insideDisplayList)	{
-//			displayList = jr.globalGL.glGenLists(1);
-//			System.err.println("Got display list "+displayList);
-//			jr.getGL().glNewList(displayList, GL.GL_COMPILE); //_AND_EXECUTE);
-//			jr.renderingState.insideDisplayList = true;
-//		}
-		if (isCopyCat)		{
-//			if (jr.frameCount % 10 == 5 && displayList > 0) {
-//				jr.globalGL.glDeleteLists(displayList, 0);
-//				displayList = -3;
-//			}
-//			if (displayList >= 1) {
-//				jr.globalGL.glCallList(displayList);
-//				return;
-//			}
-//			if (displayList == 0 && jr.renderingState.useDisplayLists)	{
-//				displayList = jr.globalGL.glGenLists(1);
-//				System.err.println("Got display list "+displayList);
-//				jr.getGL().glNewList(displayList, GL.GL_COMPILE); //_AND_EXECUTE);
-//				jr.renderingState.insideDisplayList = true;
-//			}
-			boolean isReflectionBefore = cumulativeIsReflection;
-			minDistance = eAp.getAttribute("discreteGroup.minDistance", minDistance);
-			maxDistance = eAp.getAttribute("discreteGroup.maxDistance", maxDistance);
-			clipToCamera = eAp.getAttribute("discreteGroup.clipToCamera", clipToCamera);	
-
-			int nn = matrices.length;
-			double[] o2ndc = jr.context.getObjectToNDC();
-			double[] o2c = jr.context.getObjectToCamera();
-			int count = 0;
-			for (int j = 0; j<nn; ++j)	{
-				if (clipToCamera && !JOGLRendererHelper.accept(o2ndc, o2c, minDistance, maxDistance, matrices[j], jr.currentSignature)) continue;
-				count++;
-				cumulativeIsReflection = (isReflectionBefore != matrixIsReflection[j]);
-				if (cumulativeIsReflection != jr.renderingState.flipped)	{
-					jr.globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
-					jr.renderingState.flipped  = cumulativeIsReflection;
-				}
-				pushTransformation(matrices[j]);
-
-				children.get(0).render();
-				popTransformation();
-			}
-//			if (displayList >= 1 && jr.renderingState.useDisplayLists)	{
-//				jr.getGL().glEndList();	
-//				jr.renderingState.insideDisplayList = false;
-//				jr.getGL().glCallList(displayList);
-//			} else displayList++;
-		} else {
-			for (int i = 0; i<n; ++i)	{		
-				JOGLPeerComponent child = children.get(i);					
-				if (jr.pickMode)	jr.globalGL.glPushName(JOGLPickAction.SGCOMP_BASE+child.childIndex);
-				child.render();
-				if (jr.pickMode)	jr.globalGL.glPopName();
-			}								
+		for (int i = 0; i<n; ++i)	{	
+			JOGLPeerComponent child = children.get(i);					
+			if (jr.pickMode)	jr.globalGL.glPushName(JOGLPickAction.SGCOMP_BASE+child.childIndex);
+			child.render();
+			if (jr.pickMode)	jr.globalGL.glPopName();
 		}
 	}
 
@@ -246,14 +185,6 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		if (goBetween.getOriginalComponent().getTransformation() != null) 
 			popTransformation();			
 		jr.currentPath.pop();
-	}
-
-
-	protected void popTransformation() {
-		if (jr.stackDepth <= JOGLRenderer.MAX_STACK_DEPTH) {
-			jr.globalGL.glPopMatrix();			
-			jr.stackDepth--;
-		}
 	}
 
 	protected void pushTransformation(double[] m) {
@@ -264,6 +195,13 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		}
 		else {
 			jr.globalGL.glLoadTransposeMatrixd(jr.context.getObjectToCamera(),0);	
+		}
+	}
+
+	protected void popTransformation() {
+		if (jr.stackDepth <= JOGLRenderer.MAX_STACK_DEPTH) {
+			jr.globalGL.glPopMatrix();			
+			jr.stackDepth--;
 		}
 	}
 
@@ -299,7 +237,6 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 
 	protected void propagateAppearanceChanged()	{
 		appearanceDirty = true;
-
 		for (JOGLPeerComponent child : children) {
 			if (effectiveAppearanceDirty) child.effectiveAppearanceDirty=true;
 			child.propagateAppearanceChanged();
@@ -336,7 +273,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	/**
 	 * @param thisAp
 	 */
-	private void updateShaders() {
+	protected void updateShaders() {
 //		can happen that the effective appearance isn't initialized yet; skip
 		if (eAp == null) return; 
 		Appearance thisAp = goBetween.getOriginalComponent().getAppearance(); 
@@ -356,6 +293,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			else
 				renderingHints.setFromEffectiveAppearance(eAp, "");								
 		}
+//		System.err.println("Clip to camera is "+clipToCamera);
 	}
 
 	public void childAdded(SceneGraphComponentEvent ev) {
@@ -452,14 +390,13 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void transformationMatrixChanged(TransformationEvent ev) {
-		// TODO notify ancestors that their bounds are no longer valid
 		updateTransformationInfo();
 	}
 
 	/**
 	 * 
 	 */
-	private void updateTransformationInfo() {
+	protected void updateTransformationInfo() {
 		if (goBetween.getOriginalComponent().getTransformation() != null) {
 //			isReflection = goBetween.getOriginalComponent().getTransformation().getIsReflection();
 			isReflection = Rn.determinant(goBetween.getOriginalComponent().getTransformation().getMatrix()) < 0;
@@ -492,26 +429,26 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 
 	}
 
-	private void handleChangedGeometry() {
+	protected void handleChangedGeometry() {
 		if (geometryShader != null)	{
 //			theLog.fine("Handling bits: "+geometryDirtyBits+" for "+goBetween.originalComponent.getName());
-			if (geometryShader.pointShader != null && (geometryDirtyBits  & POINTS_CHANGED) != 0) geometryShader.pointShader.flushCachedState(jr);
-			if (geometryShader.lineShader != null && (geometryDirtyBits  & LINES_CHANGED) != 0) geometryShader.lineShader.flushCachedState(jr);
-			if (geometryShader.polygonShader != null && (geometryDirtyBits  & FACES_CHANGED) != 0) geometryShader.polygonShader.flushCachedState(jr);				
+			if (geometryShader.pointShader != null && (geometryDirtyBits  & POINTS_CHANGED) != 0) 
+				geometryShader.pointShader.flushCachedState(jr);
+			if (geometryShader.lineShader != null && (geometryDirtyBits  & LINES_CHANGED) != 0) 
+				geometryShader.lineShader.flushCachedState(jr);
+			if (geometryShader.polygonShader != null && (geometryDirtyBits  & FACES_CHANGED) != 0) 
+				geometryShader.polygonShader.flushCachedState(jr);				
 			if ((geometryDirtyBits  & POINT_SHADER_CHANGED) != 0)geometryShader.pointShader = null;
 			if ((geometryDirtyBits  & LINE_SHADER_CHANGED) != 0) geometryShader.lineShader = null;
 			if ((geometryDirtyBits  & POLYGON_SHADER_CHANGED) != 0) geometryShader.polygonShader = null;
 			if ((geometryDirtyBits  & ALL_SHADERS_CHANGED) != 0)updateShaders();
-//			if (!jr.renderingState.manyDisplayLists && goBetween.originalComponent.getGeometry() != null) {
-//				jr.removeGeometryDisplayLists(goBetween.originalComponent.getGeometry());
-//			}
             geometryDirtyBits  = 0;
 		}
 	}
 
 	void setDisplayListDirty()	{
         geometryDirtyBits = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
-	}
+ 	}
 
 	public SceneGraphComponent getOriginalComponent() {
 		return goBetween.getOriginalComponent();

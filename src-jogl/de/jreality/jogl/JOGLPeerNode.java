@@ -13,6 +13,9 @@ public class JOGLPeerNode	{
 	JOGLRenderer jr;
 	static Logger theLog = LoggingSystem.getLogger(JOGLPeerNode.class);
 
+	public JOGLPeerNode()	{
+		super();
+	}
 	public JOGLPeerNode(JOGLRenderer jr)	{
 		super();
 		this.jr =  jr;

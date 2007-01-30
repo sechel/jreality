@@ -53,6 +53,8 @@ import de.jreality.shader.ShaderUtility;
 public abstract class AbstractPrimitiveShader implements PrimitiveShader {
 	public DefaultTextShader textShader = null;
 	protected GL currentGL = null;
+	protected boolean displayListsDirty = true;
+	protected int dList = -1, dListProxy = -1;
 	
 	public boolean providesProxyGeometry() {
 		return false;
@@ -79,4 +81,9 @@ public abstract class AbstractPrimitiveShader implements PrimitiveShader {
 
 	public void render(JOGLRenderingState jrs) {
 	}
+	
+	public boolean displayListsDirty() {
+		return displayListsDirty;
+	}
+
 }

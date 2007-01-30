@@ -67,33 +67,28 @@ public class JOGLConfiguration {
 	static boolean sharedContexts = false;
 	static boolean isLinux = false;
 	static boolean multiSample = true;
-	public static boolean testMatrices = false;
 	static boolean portalUsage = false;
 	public static String resourceDir = null, saveResourceDir = null;
 	public static String localScratchDisk = null;
 	public static boolean quadBufferedStereo = false;
 	 public static String COPY_CAT = "copyCat", FORCE_RENDER = "preRender";
-
-	 static JOGLConfiguration sharedInstance = new JOGLConfiguration();
+	 static String gbName = "GoBetween", pcName = "JOGLPeerComponent";
+	static JOGLConfiguration ss = new JOGLConfiguration();
+	static Class<? extends GoBetween> goBetweenClass = null;
+	static Class<? extends JOGLPeerComponent> peerClass = null;
 	private JOGLConfiguration() { 
 		super(); 
 		theLog	= LoggingSystem.getLogger(this);
-//	    AccessController.doPrivileged(new PrivilegedAction() {
-//	        public Object run() {
-//	          if (Secure.getProperty("os.name").indexOf("Linux") != -1) isLinux = true; else isLinux = false;
-//	          return null;
-//	        }
-//	      });
 	    JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		try {
 		    System.setProperty("sun.awt.noerasebackground", "true");
 			//theLog.setLevel(Level.INFO);
 			String foo = Secure.getProperty("jreality.jogl.debugGL");
 			if (foo != null) { if (foo.equals("false")) debugGL = false; else debugGL =true;}
-			foo = Secure.getProperty("jreality.jogl.testMatrices");
-			if (foo != null) 
-				if (foo.indexOf("false") != -1) testMatrices = false;
-				else testMatrices = true;
+			foo = Secure.getProperty("jreality.jogl.peerClass");
+			if (foo != null) { pcName = foo; }
+			foo = Secure.getProperty("jreality.jogl.goBetweenClass");
+			if (foo != null) { gbName = foo; }
 			foo = Secure.getProperty("jreality.jogl.portalUsage");
 			if (foo != null) 
 				if (foo.indexOf("true") != -1) portalUsage = true;
@@ -129,17 +124,27 @@ public class JOGLConfiguration {
 		} catch(SecurityException se)	{
 			theLog.log(Level.WARNING,"Security exception in setting configuration options",se);
 		}
+//		try {
+//			peerClass = (Class<? extends JOGLPeerComponent>) Class.forName(pcName);
+//			goBetweenClass = (Class<? extends GoBetween>) Class.forName(gbName);
+//			System.err.println("JOGLConfiguation: peer class is "+peerClass);
+//		} catch (ClassNotFoundException e) {
+//			e.printStackTrace();
+//		}
+
 	}
 
-	public static JOGLConfiguration sharedInstance()	{
-		if (sharedInstance == null) {
-			sharedInstance = new JOGLConfiguration();
-		}
-		return sharedInstance;
-	}
-	
 	public static Logger getLogger()	{
 		return theLog;
+	}
+
+	public static Class<? extends JOGLPeerComponent> getPeerClass() {
+		System.err.println("JOGLConfiguation 2: peer class is "+peerClass);
+		return peerClass;
+	}
+
+	public static Class<? extends GoBetween> getGoBetweenClass() {
+		return goBetweenClass;
 	}
 
 }

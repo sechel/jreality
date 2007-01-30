@@ -359,7 +359,6 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		return polygonShader;
 	}
 
-	int dList = -1, dListProxy =- 1;
 	public void render(JOGLRenderingState jrs)	{
 		Geometry g = jrs.getCurrentGeometry();
 		JOGLRenderer jr = jrs.getRenderer();
@@ -371,17 +370,8 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		if (g != null)	{
 			if (providesProxyGeometry())	{
 				if (!useDisplayLists || jr.isPickMode() || dListProxy == -1) {
-					boolean alreadyThere = jrs.getRenderer().pointProxyDisplayLists.get(g) != null;
-//					if (!jrs.manyDisplayLists && alreadyThere) {
-//						dListProxy = jrs.getRenderer().pointProxyDisplayLists.get(g);
-//					} else {
-						dListProxy  = proxyGeometryFor(jrs);						
-//					}
-//			        if (!jrs.manyDisplayLists && !alreadyThere) {
-//			        	jrs.getRenderer().pointProxyDisplayLists.put(g, dListProxy);
-//			        	LoggingSystem.getLogger(this).fine("hash table has "+jrs.getRenderer().pointProxyDisplayLists.size()+" entries");
-//			        	LoggingSystem.getLogger(this).fine("Adding entry for "+g.getName());
-//			        }
+					dListProxy  = proxyGeometryFor(jrs);						
+					displayListsDirty = false;
 				}
 				jr.getGL().glCallList(dListProxy);
 				jr.getRenderingState().polygonCount += polygonCount;
@@ -391,18 +381,11 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 					JOGLRendererHelper.drawVertices(jr, (PointSet) g,   jr.getRenderingState().diffuseColor[3]);
 				} else {
 					if (useDisplayLists && dList == -1)	{
-//						if (!jrs.manyDisplayLists && jrs.getRenderer().pointDisplayLists.get(g) != null) 
-//							dList = jrs.getRenderer().pointDisplayLists.get(g);
-//						else {
-							dList = jr.getGL().glGenLists(1);
-							jr.getGL().glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
-							JOGLRendererHelper.drawVertices(jr, (PointSet) g,  jr.getRenderingState().diffuseColor[3]);
-							jr.getGL().glEndList();	
-//					        if (!jrs.manyDisplayLists) {
-//					        	jrs.getRenderer().pointDisplayLists.put(g, dList);
-//					        	LoggingSystem.getLogger(this).fine("hash table has "+jrs.getRenderer().pointDisplayLists.size()+" entries");
-//					        }
-//						}
+						dList = jr.getGL().glGenLists(1);
+						jr.getGL().glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
+						JOGLRendererHelper.drawVertices(jr, (PointSet) g,  jr.getRenderingState().diffuseColor[3]);
+						jr.getGL().glEndList();	
+						displayListsDirty = false;
 					}
 					jr.getGL().glCallList(dList);
 				} 
@@ -416,6 +399,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		//TODO !!!
     //if (dListProxy != -1) jr.getGL().glDeleteLists(dListProxy,1);
 		dList = dListProxy = -1;
+		displayListsDirty = true;
     //dList = -1;
 	}
 	

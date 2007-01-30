@@ -32,6 +32,7 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 	int signature = Pn.EUCLIDEAN;
 	boolean isSurface = false;
 	boolean forceRender = false;
+	boolean displayListsDirty =  true;
 	public JOGLPeerGeometry(Geometry g, JOGLRenderer jr)	{
 		super(jr);
 		originalGeometry = g;
@@ -70,18 +71,22 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 		}
 		//theLog.fine("Rendering sgc "+jpc.getOriginalComponent().getName());
 		//theLog.fine("vertex:edge:face:"+geometryShader.isVertexDraw()+geometryShader.isEdgeDraw()+geometryShader.isFaceDraw());
+		displayListsDirty = false;			// think positive!
 		if (geometryShader.isEdgeDraw() && ils != null)	{
 			geometryShader.lineShader.render(jr.renderingState);
 			geometryShader.lineShader.postRender(jr.renderingState);
+			if (geometryShader.lineShader.displayListsDirty()) displayListsDirty = true;
 		}
 		if (geometryShader.isVertexDraw() && ps != null)	{
 			geometryShader.pointShader.render(jr.renderingState);
 			geometryShader.pointShader.postRender(jr.renderingState);
+			if (geometryShader.pointShader.displayListsDirty()) displayListsDirty = true;
 		}
 		renderingHints.render(jr.renderingState);
 		if (geometryShader.isFaceDraw() && isSurface) {
 			geometryShader.polygonShader.render(jr.renderingState);
 			geometryShader.polygonShader.postRender(jr.renderingState);
+			if (geometryShader.polygonShader.displayListsDirty()) displayListsDirty = true;
 		}	
 		if (geometryShader.isVertexDraw() && ps!=null && ps.getVertexAttributes(Attribute.LABELS) != null) {
 			JOGLRendererHelper.drawPointLabels(jr, ps,  jpc.geometryShader.pointShader.getTextShader());
@@ -96,6 +101,8 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 	}
 
 	public void geometryChanged(GeometryEvent ev) {
+		// todo: this needs to be pushed up the tree to the possible copycat component
+		displayListsDirty = true;
 		if (ev.getChangedGeometryAttributes().size() > 0)	{
 			Object foo = originalGeometry.getGeometryAttributes(GeometryUtility.SIGNATURE);
 			if (foo != null) {

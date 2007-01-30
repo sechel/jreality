@@ -115,6 +115,7 @@ import de.jreality.util.CameraUtility;
 import de.jreality.util.ImageUtility;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.SceneGraphUtility;
+import de.jreality.util.Secure;
 /**
  * @author gunn
  *
@@ -162,7 +163,7 @@ public class JOGLRenderer  implements AppearanceListener {
 
 	protected int stereoType;
 	protected boolean flipped;
-	protected boolean displayListsDirty = false;
+//	public boolean SGCDisplayListsDirty = false, triggerDLD = true;
 
 	public JOGLRenderer(Viewer viewer) {
 		theViewer=viewer;
@@ -232,17 +233,16 @@ public class JOGLRenderer  implements AppearanceListener {
 		theLog.finer("In extractGlobalParameters");
 		Object obj = ap.getAttribute(CommonAttributes.FORCE_RESIDENT_TEXTURES, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) forceResidentTextures = ((Boolean)obj).booleanValue();
-//		obj = ap.getAttribute(CommonAttributes.MANY_DISPLAY_LISTS, Boolean.class);		// assume the best ...
-//		if (obj instanceof Boolean) renderingState.manyDisplayLists = ((Boolean)obj).booleanValue();
+		obj = ap.getAttribute(CommonAttributes.COMPONENT_DISPLAY_LISTS, Boolean.class);		// assume the best ...
+		if (obj instanceof Boolean) renderingState.componentDisplayLists = ((Boolean)obj).booleanValue();
 		obj = ap.getAttribute(CommonAttributes.ANY_DISPLAY_LISTS, Boolean.class);		// assume the best ...
 		obj = ap.getAttribute(CommonAttributes.CLEAR_COLOR_BUFFER, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) {
 			renderingState.clearColorBuffer = ((Boolean)obj).booleanValue();
 			theLog.fine("Setting clear color buffer to "+renderingState.clearColorBuffer);
 		}
-		theLog.fine("forceResTex = "+forceResidentTextures);
-//		theLog.fine("many display lists = "+renderingState.manyDisplayLists);
-		clearGeometryDisplayLists();
+		theLog.info("forceResTex = "+forceResidentTextures);
+		theLog.info("component display lists = "+renderingState.componentDisplayLists);
 	}
 
 	public SceneGraphComponent getAuxiliaryRoot() {
@@ -263,6 +263,10 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 		if (auxiliaryRoot != null && thePeerAuxilliaryRoot == null)
 			thePeerAuxilliaryRoot = constructPeerForSceneGraphComponent(auxiliaryRoot, null);
+//		if (triggerDLD)	{
+//			thePeerRoot.propagateSGCDisplayListDirty();
+//			triggerDLD = false;
+//		}
 
 		context  = new Graphics3D(theViewer.getCameraPath(), null, CameraUtility.getAspectRatio(theViewer));
 
@@ -648,7 +652,17 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 
 
-	// Here are some methods which do bookkeeping on instances of auxilliary classes
+	static Class<? extends GoBetween> gbClass = GoBetween.class;
+	static {
+		String foo = Secure.getProperty("jreality.jogl.goBetweenClass");
+		if (foo != null)
+			try {
+				gbClass = (Class<? extends GoBetween>) Class.forName(foo);
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	}
 	WeakHashMap<SceneGraphComponent, GoBetween> goBetweenTable = new WeakHashMap<SceneGraphComponent, GoBetween>();
 	public   GoBetween goBetweenFor(SceneGraphComponent sgc)	{
 		if (sgc == null) return null;
@@ -656,7 +670,16 @@ public class JOGLRenderer  implements AppearanceListener {
 		Object foo = goBetweenTable.get(sgc);
 		if (foo == null)	{
 			//gb = JOGLRenderer.this.new GoBetween(sgc);
-			gb = new GoBetween(sgc, this);
+			try {
+				gb = gbClass.newInstance();
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} //new GoBetween(); //sgc, this);
+			gb.init(sgc, this);
 			goBetweenTable.put(sgc, gb);
 			return gb;
 		}
@@ -707,38 +730,38 @@ public class JOGLRenderer  implements AppearanceListener {
 		return peer[0];
 	}
 
-	public WeakHashMap<Geometry, Integer> 
-		pointDisplayLists = new WeakHashMap<Geometry, Integer>(),
-		lineDisplayLists = new WeakHashMap<Geometry, Integer>(),
-		polygonDisplayLists = new WeakHashMap<Geometry, Integer>(),
-		pointProxyDisplayLists = new WeakHashMap<Geometry, Integer>(),
-		lineProxyDisplayLists = new WeakHashMap<Geometry, Integer>(),
-		polygonProxyDisplayLists = new WeakHashMap<Geometry, Integer>();
-	
-	public WeakHashMap[] maps = {pointDisplayLists,
-			lineDisplayLists,
-			polygonDisplayLists,
-			pointProxyDisplayLists,
-			lineProxyDisplayLists,
-			polygonProxyDisplayLists
-	};
-	
-	public void removeGeometryDisplayLists(Geometry g)	{
-		for (WeakHashMap<Geometry, Integer> whm : maps)	{
-			Integer dlist = whm.get(g);
-			if (dlist != null) {
-				globalGL.glDeleteLists(dlist.intValue(), 0);
-				whm.remove(g);
-			}			
-		}
-	}
-	
-	public void clearGeometryDisplayLists()	{
-		for (WeakHashMap<Geometry, Integer> whm : maps)	{
-			whm.clear();
-		}
-		
-	}
+//	public WeakHashMap<Geometry, Integer> 
+//		pointDisplayLists = new WeakHashMap<Geometry, Integer>(),
+//		lineDisplayLists = new WeakHashMap<Geometry, Integer>(),
+//		polygonDisplayLists = new WeakHashMap<Geometry, Integer>(),
+//		pointProxyDisplayLists = new WeakHashMap<Geometry, Integer>(),
+//		lineProxyDisplayLists = new WeakHashMap<Geometry, Integer>(),
+//		polygonProxyDisplayLists = new WeakHashMap<Geometry, Integer>();
+//	
+//	public WeakHashMap[] maps = {pointDisplayLists,
+//			lineDisplayLists,
+//			polygonDisplayLists,
+//			pointProxyDisplayLists,
+//			lineProxyDisplayLists,
+//			polygonProxyDisplayLists
+//	};
+//	
+//	public void removeGeometryDisplayLists(Geometry g)	{
+//		for (WeakHashMap<Geometry, Integer> whm : maps)	{
+//			Integer dlist = whm.get(g);
+//			if (dlist != null) {
+//				globalGL.glDeleteLists(dlist.intValue(), 0);
+//				whm.remove(g);
+//			}			
+//		}
+//	}
+//	
+//	public void clearGeometryDisplayLists()	{
+//		for (WeakHashMap<Geometry, Integer> whm : maps)	{
+//			whm.clear();
+//		}
+//		
+//	}
 	// miscellaneous fields and methods
 	private int clearColorBits;
 	private GLPbuffer offscreenPBuffer;
