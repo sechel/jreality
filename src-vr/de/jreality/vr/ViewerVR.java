@@ -901,8 +901,6 @@ public class ViewerVR {
 
 			if (params.contains("-h") || params.contains("--help")) {
 				System.out.println("Usage:  ViewerVR [-options] [file list]");
-				System.out.println("\t -s \t the (single) file given is a .jrs file containing a whole scene\n" +
-				"\t\t (otherwise all specified files are loaded into the default scene)");
 				System.out.println("\t -n \t show navigator");
 				System.out.println("\t -b \t show beanshell");
 				System.out.println("\t -i \t show navigator and/or beanshell in the main frame\n" +
