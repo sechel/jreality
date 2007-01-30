@@ -255,7 +255,7 @@ public class State {
 						cols[i*h*4+j*4+0]=(byte)textureData[i][j][0];
 						cols[i*h*4+j*4+1]=(byte)textureData[i][j][0];
 						cols[i*h*4+j*4+2]=(byte)textureData[i][j][0];
-						cols[i*h*4+j*4+3]=(byte)1;
+						cols[i*h*4+j*4+3]=(byte)-1;
 					}						
 					if(dim==2){//grayscale-Alpha
 						cols[i*h*4+j*4+0]=(byte)textureData[i][j][0];
@@ -267,7 +267,7 @@ public class State {
 						cols[i*h*4+j*4+0]=(byte)textureData[i][j][0];
 						cols[i*h*4+j*4+1]=(byte)textureData[i][j][1];
 						cols[i*h*4+j*4+2]=(byte)textureData[i][j][2];
-						cols[i*h*4+j*4+3]=(byte)1;
+						cols[i*h*4+j*4+3]=(byte)-1;
 					}
 					if(dim==4){//rgb-Alpha
 						cols[i*h*4+j*4+0]=(byte)textureData[i][j][0];
