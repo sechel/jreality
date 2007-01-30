@@ -191,6 +191,8 @@ import de.jreality.scene.data.StorageModel;
 		qmf.setVertexCoordinates(theTubeVertices);
 		qmf.setGenerateFaceNormals(true);
 		qmf.setGenerateVertexNormals(true);
+		qmf.setEdgeFromQuadMesh(true);
+		qmf.setGenerateEdgesFromFaces(true);
 		if (generateTextureCoordinates)	{
 			if (!arcLengthTextureCoordinates) qmf.setGenerateTextureCoordinates(true);
 			else {
