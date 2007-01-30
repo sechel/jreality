@@ -743,7 +743,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			ri.attributeBegin();
 			System.err.println("Visiting point set");
 			if (dgs.getPointShader() instanceof DefaultPointShader) {
-				cc = (Color) dps.getDiffuseColor();
+				cc = (Color) dvs.getDiffuseColor();
 				raw = new float[4];
 				cc.getRGBComponents(raw);
 				cc = new Color(raw[0], raw[1], raw[2]); 
