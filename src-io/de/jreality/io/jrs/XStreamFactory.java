@@ -85,6 +85,7 @@ import de.jreality.tools.DraggingTool;
 import de.jreality.tools.EncompassTool;
 import de.jreality.tools.FlyTool;
 import de.jreality.tools.HeadTransformationTool;
+import de.jreality.tools.PickShowTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.tools.ShipNavigationTool;
 
@@ -119,11 +120,13 @@ public class XStreamFactory {
     knownClasses.add(DraggingTool.class);
     knownClasses.add(ShipNavigationTool.class);
     knownClasses.add(HeadTransformationTool.class);
+    knownClasses.add(PickShowTool.class);
     knownClasses.add(FlyTool.class);
     
     try {
-		knownClasses.add(Class.forName("de.jreality.toolsystem.tools.PortalHeadMoveTool"));
+		knownClasses.add(Class.forName("de.jreality.tools.PortalHeadMoveTool"));
 	} catch (ClassNotFoundException e) {
+		System.out.println("portal head move tool not found");
 	}
   }
   

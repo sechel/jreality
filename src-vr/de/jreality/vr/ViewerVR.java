@@ -47,7 +47,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.beans.Statement;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
@@ -56,6 +62,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.prefs.BackingStoreException;
+import java.util.prefs.InvalidPreferencesFormatException;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
@@ -91,10 +98,10 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.sunflow.RenderOptions;
 import de.jreality.sunflow.Sunflow;
 import de.jreality.swing.ScenePanel;
-import de.jreality.tools.DuplicateTriplyPeriodicTool;
 import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.PickShowTool;
 import de.jreality.tools.ShipNavigationTool;
+import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.ViewerAppMenu;
 import de.jreality.util.Input;
@@ -196,7 +203,7 @@ public class ViewerVR {
 	public ViewerVR() {
 
 		// find out where we are running
-		boolean portal = "portal".equals(Secure.getProperty("de.jreality.scene.tool.Config"));
+		boolean portal = "portal".equals(Secure.getProperty("de.jreality.viewerapp.env"));
 
 		// build basic scene graph
 		sceneRoot.setName("root");
@@ -479,9 +486,6 @@ public class ViewerVR {
 		.calculateChildrenBoundingBox(alignmentComponent);
 		// scale
 		double[] extent = bounds.getExtent();
-		double[] center = bounds.getCenter();
-		content.addTool(new DuplicateTriplyPeriodicTool(
-				extent[0],extent[1],extent[2],center[0],center[1],center[2]));
 		objectScale = Math.max(Math.max(extent[0], extent[2]), extent[1]);
 		sceneNode.addChild(alignmentComponent);
 		alignContent();
@@ -581,9 +585,41 @@ public class ViewerVR {
 		Preferences prefs = getPreferences();
 		setPanelInScene(prefs.getBoolean("panelInScene", DEFAULT_PANEL_IN_SCENE));
 		for (PluginVR plugin : plugins) plugin.restorePreferences(prefs);
-
 	}
 
+	public void exportPreferences(File file) {
+		savePreferences();
+		Preferences prefs = getPreferences();
+		try {
+			prefs.exportSubtree(new FileOutputStream(file));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (BackingStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void importPreferences(File file) {
+		try {
+			Preferences.importPreferences(new FileInputStream(file));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidPreferencesFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		restorePreferences();
+	}
+	
 	public double getObjectScale() {
 		return objectScale;
 	}
@@ -600,6 +636,7 @@ public class ViewerVR {
 		this.generatePickTrees = generatePickTrees;
 	}
 
+	@SuppressWarnings("serial")
 	private void tweakMenu(final ViewerApp vapp) {
 		ViewerAppMenu menu = vapp.getMenu();
 		//edit File menu
@@ -621,7 +658,6 @@ public class ViewerVR {
 		JMenu settings = new JMenu("ViewerVR");
 
 		Action panelPopup = new AbstractAction("Toggle panel") {
-			private static final long serialVersionUID = -4212517852052390335L;
 			{
 				putValue(SHORT_DESCRIPTION, "Toggle the ViewerVR panel");
 				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
@@ -633,7 +669,6 @@ public class ViewerVR {
 		settings.add(panelPopup);
 
 		Action bakeTerrain = new AbstractAction("Bake") {
-			private static final long serialVersionUID = -4212517852052390335L;
 			{
 				putValue(SHORT_DESCRIPTION, "Bake terrain lightmap");
 				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK));
@@ -649,29 +684,40 @@ public class ViewerVR {
 		settings.addSeparator();
 
 		Action defaults = new AbstractAction("Restore defaults") {
-			private static final long serialVersionUID = 1834896899901782677L;
-
 			public void actionPerformed(ActionEvent e) {
 				restoreDefaults();
 			}
 		};
 		settings.add(defaults);
 		Action restorePrefs = new AbstractAction("Restore preferences") {
-			private static final long serialVersionUID = 629286193877652699L;
-
 			public void actionPerformed(ActionEvent e) {
 				restorePreferences();
 			}
 		};
 		settings.add(restorePrefs);
 		Action savePrefs = new AbstractAction("Save preferences") {
-			private static final long serialVersionUID = -3242879996093277296L;
-
 			public void actionPerformed(ActionEvent e) {
 				savePreferences();
 			}
 		};
 		settings.add(savePrefs);
+		
+		Action exportPrefs = new AbstractAction("Export preferences...") {
+			public void actionPerformed(ActionEvent e) {
+				File f=FileLoaderDialog.selectTargetFile(null, "xml", "Preferences files");
+				exportPreferences(f);
+			}
+		};
+		settings.add(exportPrefs);
+		
+		Action importPrefs = new AbstractAction("Import preferences...") {
+			public void actionPerformed(ActionEvent e) {
+				File f=FileLoaderDialog.loadFile(null, "xml", "Preferences file");
+				importPreferences(f);
+			}
+		};
+		settings.add(importPrefs);
+		
 		menu.addMenu(settings);
 
 		//setup Help menu
@@ -932,7 +978,7 @@ public class ViewerVR {
 				{ "Schwarz P", "jrs/schwarz.jrs" },
 				{ "Matheon baer", "jrs/baer.jrs" }
 		};
-		if (cmp == null) vr.addLoadTab(examples);
+		vr.addLoadTab(examples);
 		vr.addAlignTab();
 		AppearancePluginVR appPlugin = new AppearancePluginVR();
 		vr.registerPlugin(appPlugin);

@@ -21,11 +21,10 @@ import javax.swing.event.ChangeListener;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.tool.Tool;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.tools.AxisTranslationTool;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.RotateTool;
-import de.jreality.tools.ShipNavigationTool;
-import de.jreality.tools.AxisTranslationTool;
 
 public class ToolPluginVR extends AbstractPluginVR {
 	
@@ -36,6 +35,7 @@ public class ToolPluginVR extends AbstractPluginVR {
 	// defaults for tool panel
 	private static final boolean DEFAULT_ROTATION_ENABLED = false;
 	private static final boolean DEFAULT_DRAG_ENABLED = false;
+	private static final boolean DEFAULT_SNAP_TO_GRID = false;
 	private static final boolean DEFAULT_INVERT_MOUSE = false;
 	private static final double DEFAULT_SPEED = 4;
 	private static final double DEFAULT_GRAVITY = 9.81;
@@ -44,6 +44,7 @@ public class ToolPluginVR extends AbstractPluginVR {
 	private JPanel toolPanel;
 	private JCheckBox rotate;
 	private JCheckBox drag;
+	private JCheckBox snapToGrid;
 	private JCheckBox pickFaces;
 	private JCheckBox pickEdges;
 	private JCheckBox pickVertices;
@@ -51,7 +52,7 @@ public class ToolPluginVR extends AbstractPluginVR {
 	private JSlider gain;
 	private JCheckBox invertMouse;
 
-	private Tool rotateTool = new RotateTool(), dragTool = new AxisTranslationTool();
+	private Tool rotateTool = new RotateTool(), dragTool = new DraggingTool(), snapDragTool = new AxisTranslationTool();
 	
 
 	public ToolPluginVR() {
@@ -68,8 +69,10 @@ public class ToolPluginVR extends AbstractPluginVR {
 	public void contentChanged() {
 		setToolEnabled(rotateTool, false);
 		setToolEnabled(dragTool, false);
+		setToolEnabled(snapDragTool, false);
 		setToolEnabled(rotateTool, rotate.isSelected());
-		setToolEnabled(dragTool, drag.isSelected());
+		setToolEnabled(dragTool, drag.isSelected() && !snapToGrid.isSelected());
+		setToolEnabled(snapDragTool, drag.isSelected() && snapToGrid.isSelected());
 	}
 	
 	@Override
@@ -97,6 +100,14 @@ public class ToolPluginVR extends AbstractPluginVR {
 			}
 		});
 		toolButtonBox.add(drag);
+		toolButtonBox.add(Box.createHorizontalGlue());
+		snapToGrid = new JCheckBox("snap");
+		snapToGrid.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setSnapToGrid(snapToGrid.isSelected());
+			}
+		});
+		toolButtonBox.add(snapToGrid);
 		toolButtonBox.add(Box.createHorizontalGlue());
 		toolBox.add(toolButtonBox);
 
@@ -190,6 +201,16 @@ public class ToolPluginVR extends AbstractPluginVR {
 		toolPanel.add(BorderLayout.SOUTH, buttonPanel);
 	}
 
+	protected void setSnapToGrid(boolean b) {
+		snapToGrid.setSelected(b);
+		setToolEnabled(dragTool, drag.isSelected() && !snapToGrid.isSelected());
+		setToolEnabled(snapDragTool, drag.isSelected() && snapToGrid.isSelected());
+	}
+
+	private boolean isSnapTogrid() {
+		return snapToGrid.isSelected();
+	}
+	
 	protected void setNavigationSpeed(double navigationSpeed) {
 		int speed = (int)(100*navigationSpeed);
 		gain.setValue(speed);
@@ -242,8 +263,9 @@ public class ToolPluginVR extends AbstractPluginVR {
 	}
 	
 	public void setDragEnabled(boolean b) {
-		setToolEnabled(dragTool, b);
 		drag.setSelected(b);
+		setToolEnabled(dragTool, drag.isSelected() && !snapToGrid.isSelected());
+		setToolEnabled(snapDragTool, drag.isSelected() && snapToGrid.isSelected());
 	}
 
 	public boolean isRotationEnabled() {
@@ -293,6 +315,7 @@ public class ToolPluginVR extends AbstractPluginVR {
 		setInvertMouse(DEFAULT_INVERT_MOUSE);
 		setGravity(DEFAULT_GRAVITY);
 		setNavigationSpeed(DEFAULT_SPEED);
+		setSnapToGrid(DEFAULT_SNAP_TO_GRID);
 	}
 	
 	@Override
@@ -306,6 +329,7 @@ public class ToolPluginVR extends AbstractPluginVR {
 		prefs.putBoolean("invertMouse", isInvertMouse());
 		prefs.putDouble("gravity", getGravity());
 		prefs.putDouble("navSpeed", getNavigationSpeed());
+		prefs.putBoolean("snapToGrid", isSnapTogrid());
 	}
 	
 	@Override
@@ -319,7 +343,7 @@ public class ToolPluginVR extends AbstractPluginVR {
 		setInvertMouse(prefs.getBoolean("invertMouse", DEFAULT_INVERT_MOUSE));
 		setGravity(prefs.getDouble("gravity", DEFAULT_GRAVITY));
 		setNavigationSpeed(prefs.getDouble("navSpeed", DEFAULT_SPEED));
-
+		setSnapToGrid(prefs.getBoolean("snapToGrid", DEFAULT_SNAP_TO_GRID));
 	}
 
 }
