@@ -88,7 +88,6 @@ public class ScenePanel {
 		myActionTool.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				toggle((ToolContext) e.getSource());
-				System.out.println(".actionPerformed()");
 			}
 		});
 
