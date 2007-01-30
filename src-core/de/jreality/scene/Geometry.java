@@ -188,8 +188,8 @@ public abstract class Geometry extends SceneGraphNode {
   protected void fireGeometryDataChanged(String category, Set<Attribute> attributeKeys) {
 	if (attributeKeys == null) return;
     if (category == CATEGORY_VERTEX) changedVertexAttributes.addAll(attributeKeys);
-    if (category == CATEGORY_VERTEX) changedEdgeAttributes.addAll(attributeKeys);
-    if (category == CATEGORY_VERTEX) changedFaceAttributes.addAll(attributeKeys);
+    if (category == CATEGORY_EDGE) changedEdgeAttributes.addAll(attributeKeys);
+    if (category == CATEGORY_FACE) changedFaceAttributes.addAll(attributeKeys);
   }
   
   protected void fireGeometryAttributesChanged(Set<String> attributeKeys) {
