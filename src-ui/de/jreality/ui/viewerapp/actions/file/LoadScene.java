@@ -89,7 +89,9 @@ public class LoadScene extends AbstractJrAction {
       if (scene == null) throw new NullPointerException("couldn't read scene");
       ViewerApp v = new ViewerApp(scene);
       v.setAttachNavigator(viewerApp.isAttachNavigator());
+      v.setExternalNavigator(viewerApp.isExternalNavigator());
       v.setAttachBeanShell(viewerApp.isAttachBeanShell());
+      v.setExternalBeanShell(viewerApp.isExternalBeanShell());
       v.update();
       viewerApp.dispose();
       v.display();
