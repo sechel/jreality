@@ -107,14 +107,18 @@ public class DeviceTrackd implements RawDevice, PollingDevice {
 
 	public void poll() {
 		for (Entry<Integer, double[]> e : matrix.entrySet()) {
-			// for now don't check matrices
 			int i = e.getKey();
 			double[] val = e.getValue();
 			InputSlot slot = matrixSlot.get(i);
 			trackd.getMatrix(tmpMatrix, i);
 			copy(tmpMatrix, val);
 			calibrate(val, i);
-			ToolEvent te = new ToolEvent(this, slot, null, new DoubleArray(val));
+			ToolEvent te = new ToolEvent(this, slot, null, new DoubleArray(val)) {
+				@Override
+				protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
+					return true;
+				}
+			};
 			if (queue != null) queue.addEvent(te);
 			else System.out.println(te);
 		}
