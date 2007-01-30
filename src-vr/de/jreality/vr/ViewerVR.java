@@ -47,11 +47,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.beans.Statement;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -71,6 +73,8 @@ import javax.swing.KeyStroke;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.reader.ReaderJRS;
+import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
@@ -96,6 +100,7 @@ import de.jreality.tools.PickShowTool;
 import de.jreality.tools.ShipNavigationTool;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.ViewerAppMenu;
+import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
@@ -891,6 +896,36 @@ public class ViewerVR {
 	}
 
 	public static void main(String[] args) {
+		
+		ViewerApp va;
+		boolean navigator = true;
+		boolean beanshell = false;
+		boolean external = true;
+		
+		LinkedList<String> params = new LinkedList<String>();
+		for (String p : args) params.add(p);
+		
+		if (params.contains("-h") || params.contains("--help")) {
+			System.out.println("parameters:");
+			System.out.println("\t -n \t show navigator");
+			System.out.println("\t -b \t show beanshell");
+			System.out.println("\t -i \t show navigator and/or beanshell in the main frame");
+			System.exit(0);
+		}
+		
+		navigator = params.remove("-n");
+		beanshell = params.remove("-b");
+		external = !params.remove("-i");
+		
+		SceneGraphComponent cmp = new SceneGraphComponent();
+		for (String file : params) {
+			try {
+				cmp.addChild(Readers.read(Input.getInput(file)));
+			} catch (IOException e) {
+				// TODO:
+			}
+		}
+		
 		ViewerVR vr = new ViewerVR();
 		final String[][] examples = new String[][] {
 				{ "Boy surface", "jrs/boy.jrs" },
@@ -901,7 +936,7 @@ public class ViewerVR {
 				{ "Schwarz P", "jrs/schwarz.jrs" },
 				{ "Matheon baer", "jrs/baer.jrs" }
 		};
-		vr.addLoadTab(examples);
+		if (cmp == null) vr.addLoadTab(examples);
 		vr.addAlignTab();
 		AppearancePluginVR appPlugin = new AppearancePluginVR();
 		vr.registerPlugin(appPlugin);
@@ -911,6 +946,9 @@ public class ViewerVR {
 		vr.addTexTab();
 		vr.setGeneratePickTrees(true);
 		vr.showPanel();
+		
+		if (cmp != null) vr.setContent(cmp);
+		
 		ViewerApp vApp = vr.initialize();
 		
 //		appPlugin.setFaceColor(new Color(64, 222, 64));
@@ -920,8 +958,8 @@ public class ViewerVR {
 		JFrame f = vApp.display();
 		f.setSize(800, 600);
 		f.validate();
-		JFrame external = vr.getExternalFrame();
-		external.setLocationRelativeTo(f);
+		JFrame externalFrame = vr.getExternalFrame();
+		externalFrame.setLocationRelativeTo(f);
 	}
 
 	public SceneGraphComponent getSkyLightNode() {

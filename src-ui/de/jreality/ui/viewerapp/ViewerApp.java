@@ -51,6 +51,7 @@ import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -68,6 +69,8 @@ import jterm.BshEvaluator;
 import bsh.EvalError;
 import de.jreality.io.JrScene;
 import de.jreality.io.JrSceneFactory;
+import de.jreality.reader.ReaderJRS;
+import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
@@ -80,6 +83,7 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.ui.viewerapp.actions.edit.SwitchBackgroundColor;
+import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
@@ -219,13 +223,63 @@ public class ViewerApp {
   }
     
   
-  public static void main(String[] args) {
-    ViewerApp va = new ViewerApp(null, null, null, null, null);
-    va.setAttachNavigator(true);
-    va.setExternalNavigator(false);
-    va.setAttachBeanShell(false);
-    va.setExternalBeanShell(false);
+  public static void main(String[] args) throws IOException {
+	ViewerApp va;
+	boolean navigator = true;
+	boolean beanshell = false;
+	boolean external = true;
+	
+	boolean callEncompass=false;
+	
+	if (args.length != 0) {
+		LinkedList<String> params = new LinkedList<String>();
+		for (String p : args) params.add(p);
+		
+		if (params.contains("-h") || params.contains("--help")) {
+			System.out.println("parameters:");
+			System.out.println("\t -s \t the file given is a .jrs file containing a whole scene");
+			System.out.println("\t -n \t show navigator");
+			System.out.println("\t -b \t show beanshell");
+			System.out.println("\t -i \t show navigator and/or beanshell in the main frame");
+			System.exit(0);
+		}
+		
+		boolean scene = params.remove("-s");
+		navigator = params.remove("-n");
+		beanshell = params.remove("-b");
+		external = !params.remove("-i");
+		
+		if (scene) {  //load scene
+			if (params.size() != 1) throw new IllegalArgumentException("exactly one scene file allowed");
+			ReaderJRS r = new ReaderJRS();
+			r.setInput(Input.getInput(params.getLast()));
+			va = new ViewerApp(r.getScene());
+		} else {
+			SceneGraphComponent cmp = new SceneGraphComponent();
+			for (String file : params) {
+				try {
+					cmp.addChild(Readers.read(Input.getInput(file)));
+					callEncompass = true;
+				} catch (IOException e) {
+					// TODO:
+				}
+			}
+			va = new ViewerApp(cmp);
+		}
+	} else {
+		va = new ViewerApp(null, null, null, null, null);
+	}
+    va.setAttachNavigator(navigator);
+    va.setExternalNavigator(external);
+    va.setAttachBeanShell(beanshell);
+    va.setExternalBeanShell(external);
     va.update();
+    if (callEncompass) {
+    	CameraUtility.encompass(va.getViewer().getAvatarPath(),
+    			va.getViewer().getEmptyPickPath(),
+    			va.getViewer().getCameraPath(),
+    			1.75, va.getViewer().getSignature());
+    }
     va.display();
   }
   
