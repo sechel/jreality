@@ -80,12 +80,12 @@ public class SaveSelected extends AbstractSelectionListenerAction {
   
   @Override
   public void actionPerformed(ActionEvent e) {
-    File file = FileLoaderDialog.selectTargetFile(parentComp);
+    File file = FileLoaderDialog.selectTargetFile(parentComp, "jrs", "JRS files");
     if (file == null) return;
-    if (!file.getName().endsWith(".jrs")) {
-    	JOptionPane.showMessageDialog(parentComp, "can only safe .jrs files", "unsupported format", JOptionPane.ERROR_MESSAGE);
-    	return;
-    }
+//    if (!file.getName().endsWith(".jrs")) {
+//    	JOptionPane.showMessageDialog(parentComp, "can only safe .jrs files", "unsupported format", JOptionPane.ERROR_MESSAGE);
+//    	return;
+//    }
     try {
       FileWriter fw = new FileWriter(file);
       WriterJRS writer = new WriterJRS();
