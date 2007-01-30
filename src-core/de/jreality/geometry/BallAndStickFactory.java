@@ -125,7 +125,7 @@ import de.jreality.shader.CommonAttributes;
 
 	 public void update()	{
 		 	// create sticks on edges
-			SceneGraphComponent sticks = new SceneGraphComponent();
+			SceneGraphComponent sticks = new SceneGraphComponent("sticks");
 			if (showSticks)	{
 				if (sticksAp == null) sticksAp =  new Appearance();
 				sticksAp.setAttribute(CommonAttributes.FACE_DRAW, true);
@@ -154,7 +154,6 @@ import de.jreality.shader.CommonAttributes;
 							else ccc = new Color((float) dcc[0], (float) dcc[1], (float) dcc[2]);
 							Appearance ap = new Appearance();
 							ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ccc);
-              ap.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ccc);
 							cc.setAppearance(ap);
 						}
 						if (cc != null) sticks.addChild(cc);
@@ -167,7 +166,7 @@ import de.jreality.shader.CommonAttributes;
 							double stretch = arrowScale/stickRadius;
 							arrowM.setStretch(stretch, stretch, arrowScale*flatten);
 							arrowM.setTranslation(0,0,arrowPosition-.5);
-							SceneGraphComponent arrow = new SceneGraphComponent();
+							SceneGraphComponent arrow = new SceneGraphComponent("Arrows");
 							arrow.setAppearance(arrowsAp);
 							arrowM.update();
 							arrowM.assignTo(arrow);
@@ -177,7 +176,7 @@ import de.jreality.shader.CommonAttributes;
 					}
 				}				
 			}
-			SceneGraphComponent balls = new SceneGraphComponent();
+			SceneGraphComponent balls = new SceneGraphComponent("balls");
 			if (showBalls)	{
 				// we should allow the user to specify "real" balls, not via the appearance.
 				balls.setGeometry(ils);
@@ -192,7 +191,7 @@ import de.jreality.shader.CommonAttributes;
 			}
 			if (topAp == null) topAp =  new Appearance();
 			topAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING, true);
-			theResult = new SceneGraphComponent();
+			theResult = new SceneGraphComponent("BAS");
 			theResult.setAppearance(topAp);
 			topAp.setAttribute("signature", signature);
 			if (showSticks) theResult.addChild(sticks);
