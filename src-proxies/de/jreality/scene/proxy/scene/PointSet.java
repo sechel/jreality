@@ -56,7 +56,7 @@ public class PointSet extends de.jreality.scene.PointSet implements RemotePointS
     startWriter();
     try {
       PointSet.setAttrImp(vertexAttributes, dls, true);
-      fireGeometryChanged(dls.storedAttributes(), null, null, null);
+      fireGeometryDataChanged(CATEGORY_VERTEX, dls.storedAttributes());
     } finally {
       finishWriter();
     }
@@ -66,7 +66,7 @@ public class PointSet extends de.jreality.scene.PointSet implements RemotePointS
     startWriter();
     try {
       PointSet.setAttrImp(vertexAttributes, dls, dls.getListLength() != vertexAttributes.getListLength());
-      fireGeometryChanged(dls.storedAttributes(), null, null, null);
+      fireGeometryDataChanged(CATEGORY_VERTEX, dls.storedAttributes());
     } finally {
       finishWriter();
     }
@@ -81,7 +81,7 @@ public class PointSet extends de.jreality.scene.PointSet implements RemotePointS
 	      int length = (dl instanceof ByteBufferList) ? ((ByteBufferList)dl).getCoveredLength() : dl.size();
 	      PointSet.setAttrImp(vertexAttributes, attr, dl, length != vertexAttributes.getListLength());
     	}
-      fireGeometryChanged(Collections.singleton(attr), null, null, null);
+        fireGeometryDataChanged(CATEGORY_VERTEX, Collections.singleton(attr));
     } finally {
       finishWriter();
     }
@@ -91,7 +91,7 @@ public class PointSet extends de.jreality.scene.PointSet implements RemotePointS
     startWriter();
     try {
       PointSet.setAttrImp(vertexAttributes, attr, dl, true);
-      fireGeometryChanged(Collections.singleton(attr), null, null, null);
+      fireGeometryDataChanged(CATEGORY_VERTEX, Collections.singleton(attr));
     } finally {
       finishWriter();
     }

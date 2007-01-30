@@ -118,19 +118,19 @@ protected DataListSet vertexAttributes;
   }
 
   public void setVertexAttributes(DataListSet dls) {
-	  setAttributes(vertexAttributes,dls);
+	  setAttributes(CATEGORY_VERTEX, vertexAttributes,dls);
   }
 
   public void setVertexAttributes(Attribute attr, DataList dl) {
-	  setAttributes( vertexAttributes, attr, dl );
+	  setAttributes(CATEGORY_VERTEX, vertexAttributes, attr, dl );
   }
 
   public void setVertexCountAndAttributes(Attribute attr, DataList dl) {
-    setCountAndAttributes(vertexAttributes, attr, dl );
+    setCountAndAttributes(CATEGORY_VERTEX, vertexAttributes, attr, dl );
   }
 
   public void setVertexCountAndAttributes(DataListSet dls) {
-    setCountAndAttributes(vertexAttributes,dls);
+    setCountAndAttributes(CATEGORY_VERTEX, vertexAttributes,dls);
   }
 
   

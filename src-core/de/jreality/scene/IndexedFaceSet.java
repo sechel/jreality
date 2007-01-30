@@ -111,19 +111,19 @@ public class IndexedFaceSet extends IndexedLineSet {
   }
 
   public void setFaceAttributes(DataListSet dls) {
-    setAttributes(faceAttributes, dls );
+    setAttributes(CATEGORY_FACE, faceAttributes, dls );
   }
 
   public void setFaceAttributes(Attribute attr, DataList dl) {
-	  setAttributes(faceAttributes, attr, dl);
+	  setAttributes(CATEGORY_FACE, faceAttributes, attr, dl);
   }
 
   public void setFaceCountAndAttributes(Attribute attr, DataList dl) {
-    setCountAndAttributes(faceAttributes,attr,dl);
+    setCountAndAttributes(CATEGORY_FACE, faceAttributes,attr,dl);
   }
 
   public void setFaceCountAndAttributes(DataListSet dls) {
-	  setCountAndAttributes(faceAttributes, dls);
+	  setCountAndAttributes(CATEGORY_FACE, faceAttributes, dls);
   }
 
   public void accept(SceneGraphVisitor v) {

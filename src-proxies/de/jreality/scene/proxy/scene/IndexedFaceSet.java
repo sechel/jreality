@@ -54,7 +54,7 @@ public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
       startWriter();
       try {
         PointSet.setAttrImp(faceAttributes, dls, true);
-        fireGeometryChanged(null, null, dls.storedAttributes(), null);
+        fireGeometryDataChanged(CATEGORY_FACE, dls.storedAttributes());
       } finally {
         finishWriter();
       }
@@ -64,7 +64,7 @@ public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
       startWriter();
       try {
         PointSet.setAttrImp(faceAttributes, dls, dls.getListLength() != faceAttributes.getListLength());
-        fireGeometryChanged(null, null, dls.storedAttributes(), null);
+        fireGeometryDataChanged(CATEGORY_FACE, dls.storedAttributes());
       } finally {
         finishWriter();
       }
@@ -79,7 +79,7 @@ public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
 	        int length = (dl instanceof ByteBufferList) ? ((ByteBufferList)dl).getCoveredLength() : dl.size();
 	        PointSet.setAttrImp(faceAttributes, attr, dl, length != faceAttributes.getListLength());
     	}
-        fireGeometryChanged(null, null, Collections.singleton(attr), null);
+        fireGeometryDataChanged(CATEGORY_FACE, Collections.singleton(attr));
       } finally {
         finishWriter();
       }
@@ -89,7 +89,7 @@ public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
       startWriter();
       try {
         PointSet.setAttrImp(faceAttributes, attr, dl, true);
-        fireGeometryChanged(null, null, Collections.singleton(attr), null);
+        fireGeometryDataChanged(CATEGORY_FACE, Collections.singleton(attr));
       } finally {
         finishWriter();
       }
@@ -99,7 +99,7 @@ public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
       startWriter();
       try {
         PointSet.setAttrImp(edgeAttributes, dls, true);
-        fireGeometryChanged(null, dls.storedAttributes(), null, null);
+        fireGeometryDataChanged(CATEGORY_EDGE, dls.storedAttributes());
       } finally {
         finishWriter();
       }
@@ -109,7 +109,7 @@ public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
       startWriter();
       try {
         PointSet.setAttrImp(edgeAttributes, dls, dls.getListLength() != edgeAttributes.getListLength());
-        fireGeometryChanged(null, dls.storedAttributes(), null, null);
+        fireGeometryDataChanged(CATEGORY_EDGE, dls.storedAttributes());
       } finally {
         finishWriter();
       }
@@ -124,7 +124,7 @@ public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
     		int length = (dl instanceof ByteBufferList) ? ((ByteBufferList)dl).getCoveredLength() : dl.size();
     		PointSet.setAttrImp(edgeAttributes, attr, dl, length != edgeAttributes.getListLength());
     	}
-        fireGeometryChanged(null, Collections.singleton(attr), null, null);
+        fireGeometryDataChanged(CATEGORY_EDGE, Collections.singleton(attr));
       } finally {
         finishWriter();
       }
@@ -134,7 +134,7 @@ public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
       startWriter();
       try {
         PointSet.setAttrImp(edgeAttributes, attr, dl, true);
-        fireGeometryChanged(null, Collections.singleton(attr), null, null);
+        fireGeometryDataChanged(CATEGORY_EDGE, Collections.singleton(attr));
       } finally {
         finishWriter();
       }
@@ -144,7 +144,7 @@ public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
       startWriter();
       try {
         PointSet.setAttrImp(vertexAttributes, dls, true);
-        fireGeometryChanged(dls.storedAttributes(), null, null, null);
+        fireGeometryDataChanged(CATEGORY_VERTEX, dls.storedAttributes());
       } finally {
         finishWriter();
       }
@@ -154,7 +154,7 @@ public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
       startWriter();
       try {
         PointSet.setAttrImp(vertexAttributes, dls, dls.getListLength() != vertexAttributes.getListLength());
-        fireGeometryChanged(dls.storedAttributes(), null, null, null);
+        fireGeometryDataChanged(CATEGORY_VERTEX, dls.storedAttributes());
       } finally {
         finishWriter();
       }
@@ -169,7 +169,7 @@ public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
     		int length = (dl instanceof ByteBufferList) ? ((ByteBufferList)dl).getCoveredLength() : dl.size();
     		PointSet.setAttrImp(vertexAttributes, attr, dl, length != vertexAttributes.getListLength());
     	}
-        fireGeometryChanged(Collections.singleton(attr), null, null, null);
+        fireGeometryDataChanged(CATEGORY_VERTEX, Collections.singleton(attr));
       } finally {
         finishWriter();
       }
@@ -179,7 +179,7 @@ public class IndexedFaceSet extends de.jreality.scene.IndexedFaceSet implements
       startWriter();
       try {
         PointSet.setAttrImp( vertexAttributes, attr, dl, true);
-        fireGeometryChanged(Collections.singleton(attr), null, null, null);
+        fireGeometryDataChanged(CATEGORY_VERTEX, Collections.singleton(attr));
       } finally {
         finishWriter();
       }

@@ -132,19 +132,19 @@ public class IndexedLineSet extends PointSet
   }
 
   public void setEdgeAttributes(DataListSet dls) {
-	  setAttributes(edgeAttributes,dls);
+	  setAttributes(CATEGORY_EDGE, edgeAttributes,dls);
   }
 
   public void setEdgeAttributes(Attribute attr, DataList dl) {
-	  setAttributes(edgeAttributes, attr, dl );
+	  setAttributes(CATEGORY_EDGE, edgeAttributes, attr, dl );
   }
 
   public void setEdgeCountAndAttributes(Attribute attr, DataList dl) {
-	  setCountAndAttributes(edgeAttributes,attr,dl);
+	  setCountAndAttributes(CATEGORY_EDGE, edgeAttributes,attr,dl);
   }
 
   public void setEdgeCountAndAttributes(DataListSet dls) {
-    setCountAndAttributes(edgeAttributes, dls);
+    setCountAndAttributes(CATEGORY_EDGE, edgeAttributes, dls);
   }
 
   public void accept(SceneGraphVisitor v)

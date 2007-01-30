@@ -128,7 +128,6 @@ public abstract class Geometry extends SceneGraphNode {
         else
           geometryAttributes.remove(e.getKey());
       }
-      fireGeometryChanged(null, null, null, attrSet.keySet());
     } finally {
       finishWriter();
     }
@@ -144,7 +143,7 @@ public abstract class Geometry extends SceneGraphNode {
 	        geometryAttributes.put(attr, value);
 	      else
 	        geometryAttributes.remove(attr);
-	      fireGeometryChanged(null, null, null, Collections.singleton(attr));
+	      fireGeometryAttributesChanged(Collections.singleton(attr));
 	    } finally {
 	      finishWriter();
 	    }
@@ -185,6 +184,20 @@ public abstract class Geometry extends SceneGraphNode {
 
   /**
    * collect changed attributes
+   */
+  protected void fireGeometryDataChanged(String category, Set<Attribute> attributeKeys) {
+	if (attributeKeys == null) return;
+    if (category == CATEGORY_VERTEX) changedVertexAttributes.addAll(attributeKeys);
+    if (category == CATEGORY_VERTEX) changedEdgeAttributes.addAll(attributeKeys);
+    if (category == CATEGORY_VERTEX) changedFaceAttributes.addAll(attributeKeys);
+  }
+  
+  protected void fireGeometryAttributesChanged(Set<String> attributeKeys) {
+	  if (attributeKeys != null) changedGeometryAttributes.addAll(attributeKeys);
+  }
+
+  /**
+   * @depecated use fireGeometryData/AttributesChanged instead!
    */
   protected void fireGeometryChanged(Set<Attribute> vertexAttributeKeys,
     Set<Attribute> edgeAttributeKeys, Set<Attribute> faceAttributeKeys, Set<String> geomAttributeKeys) {
@@ -259,35 +272,35 @@ public abstract class Geometry extends SceneGraphNode {
     }
   }
 
-  protected void setAttributes( DataListSet geometryAttributes, DataListSet dls) {
+  protected void setAttributes(String category, DataListSet geometryAttributes, DataListSet dls) {
     checkReadOnly();
     startWriter();
     setAttrImpl(geometryAttributes, dls, false);
-    fireGeometryChanged(dls.storedAttributes(), null, null, null);
+    fireGeometryDataChanged(category, dls.storedAttributes());
     finishWriter();
   }
 
-  protected void setAttributes( DataListSet geometryAttributes, Attribute attr, DataList dl) {
+  protected void setAttributes(String category, DataListSet geometryAttributes, Attribute attr, DataList dl) {
     checkReadOnly();
     startWriter();
     setAttrImpl( geometryAttributes, attr, dl, false);
-    fireGeometryChanged(Collections.singleton(attr), null, null, null);
+    fireGeometryDataChanged(category, Collections.singleton(attr));
     finishWriter();
   }
 
-  protected void setCountAndAttributes( DataListSet geometryAttributes, Attribute attr, DataList dl) {
+  protected void setCountAndAttributes(String category, DataListSet geometryAttributes, Attribute attr, DataList dl) {
     checkReadOnly();
     startWriter();
     setAttrImpl( geometryAttributes, attr, dl, true);
-    fireGeometryChanged(Collections.singleton(attr), null, null, null);
+    fireGeometryDataChanged(category, Collections.singleton(attr));
     finishWriter();
   }
 
-  protected void setCountAndAttributes( DataListSet geometryAttributes, DataListSet dls) {
+  protected void setCountAndAttributes(String category, DataListSet geometryAttributes, DataListSet dls) {
     checkReadOnly();
     startWriter();
     setAttrImpl( geometryAttributes, dls, true);
-    fireGeometryChanged(dls.storedAttributes(), null, null, null);
+    fireGeometryDataChanged(category, dls.storedAttributes());
     finishWriter();
   }
 
@@ -328,19 +341,19 @@ public abstract class Geometry extends SceneGraphNode {
   }
 
   public void setAttributes( String attributeCategory, DataListSet dls) {
-	  setAttributes(geometryAttributeCategory.get( attributeCategory),dls);
+	  setAttributes(attributeCategory, geometryAttributeCategory.get( attributeCategory),dls);
   }
 
   public void setAttributes( String attributeCategory, Attribute attr, DataList dl) {
-	  setAttributes(geometryAttributeCategory.get( attributeCategory), attr, dl );
+	  setAttributes(attributeCategory, geometryAttributeCategory.get( attributeCategory), attr, dl );
   }
 
   public void setCountAndAttributes( String attributeCategory, Attribute attr, DataList dl) {
-	  setCountAndAttributes(geometryAttributeCategory.get( attributeCategory),attr,dl);
+	  setCountAndAttributes(attributeCategory, geometryAttributeCategory.get( attributeCategory),attr,dl);
   }
 
   public void setCountAndAttributes( String attributeCategory, DataListSet dls) {
-	  setCountAndAttributes(geometryAttributeCategory.get( attributeCategory),dls);
+	  setCountAndAttributes(attributeCategory, geometryAttributeCategory.get( attributeCategory),dls);
   }
 
   /**

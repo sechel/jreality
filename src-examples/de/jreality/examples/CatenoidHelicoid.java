@@ -171,7 +171,7 @@ private int[][] faceIndices;
           vert[pos + 2]= u * cosalpha + v * sinalpha;
         }
       }
-      fireGeometryChanged(Collections.singleton(Attribute.COORDINATES), null, null, null);
+      fireGeometryDataChanged(CATEGORY_VERTEX, Collections.singleton(Attribute.COORDINATES));
     } finally {
       finishWriter();
     }	
@@ -197,7 +197,7 @@ private int[][] faceIndices;
           normals[pos+2] = nn[2];
         }
       }
-      fireGeometryChanged(Collections.singleton(Attribute.NORMALS), null, null, null);
+      fireGeometryDataChanged(CATEGORY_VERTEX, Collections.singleton(Attribute.NORMALS));
     } finally {
       finishWriter();
     }
