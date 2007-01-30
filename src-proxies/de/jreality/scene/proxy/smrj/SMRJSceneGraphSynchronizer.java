@@ -144,23 +144,10 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
     Appearance src = (Appearance) ev.getSourceNode();
     RemoteAppearance dst = (RemoteAppearance) rmc.getProxy(src);
     Object aa = src.getAttribute(ev.getKey());
-    boolean measure = (aa instanceof Matrix);
-    long t, dt;
-    t = System.currentTimeMillis(); 
     rmc.writeLock.writeLock();
-    if (measure) {
-    	dt = System.currentTimeMillis()-t;
-    	System.out.println("Matrix measure: waiting for lock="+dt);
-        t = System.currentTimeMillis(); 
-    }
     if (aa == Appearance.INHERITED) aa = de.jreality.scene.proxy.scene.Appearance.INHERITED;
     if (aa == Appearance.DEFAULT) aa = de.jreality.scene.proxy.scene.Appearance.DEFAULT;
     dst.setAttribute(ev.getKey(), aa);
-    if (measure) {
-    	dt = System.currentTimeMillis()-t;
-    	System.out.println("Matrix measure: writing="+dt);
-        t = System.currentTimeMillis(); 
-    }
     rmc.writeLock.writeUnlock();
   }
 
