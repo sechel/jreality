@@ -288,8 +288,10 @@ public class State {
 		System.arraycopy(textureCoords,0,texCoord,0,f.getNumPoints());
 		f.setVertexAttributes( Attribute.TEXTURE_COORDINATES,
 				new DoubleArrayArray.Array( texCoord));
-		app.setAttribute(CommonAttributes.DIFFUSE_COLOR,new Color(1f,1f,1f));
-		app.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false);
+		app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,new Color(1f,1f,1f));
+		//app.setAttribute(CommonAttributes.DIFFUSE_COLOR,new Color(1f,1f,1f));
+		app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY_ENABLED,false);
+		//app.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false);
 		Texture2D tex = TextureUtility.createTexture(app, CommonAttributes.POLYGON_SHADER,id);
 	    tex.setTextureMatrix(textureTrafo);
 	    if (wrapS==0)
