@@ -60,17 +60,19 @@ import de.jreality.util.LoggingSystem;
 public class FlyTool extends AbstractTool {
   
   private final transient InputSlot forwardBackwardSlot = InputSlot.getDevice("ForwardBackwardAxis");
+  private final transient InputSlot leftRightSlot = InputSlot.getDevice("LeftRightAxis");
   private final transient InputSlot timerSlot = InputSlot.getDevice("SystemTime");
   
   private transient double velocity;
   private transient boolean isFlying;
   
   private double[] olddir = {0,0,-1,0};
-  private double gain=1;
+  private double gain=1, dGain = 1.1;
   private boolean raiseToThirdPower = true;
   
   public FlyTool() {
 	  addCurrentSlot(forwardBackwardSlot);
+	  addCurrentSlot(leftRightSlot);
   }
   
   EffectiveAppearance eap;
@@ -89,6 +91,13 @@ public class FlyTool extends AbstractTool {
 			isFlying = true;
 			addCurrentSlot(timerSlot);
 		}
+		return;
+	}
+	if (tc.getSource() == leftRightSlot)	{
+		double changer = tc.getAxisState(leftRightSlot).doubleValue();
+		if (changer == 0.0) return;
+		gain *= (changer < 0 ? 1.0/dGain : dGain);
+		System.err.println("Gain is "+gain);
 		return;
 	}
     if (eap == null || !EffectiveAppearance.matches(eap, tc.getRootToToolComponent())) {
