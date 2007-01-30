@@ -189,7 +189,7 @@ public class Navigator implements SelectionListener {
 		cm.setLightWeightPopupEnabled(false);
 		
 		//create content of context menu
-		Component parentComp = sceneTree;
+		Component parentComp = null; //sceneTree;
 		cm.add(new JMenuItem(new SaveSelected(ViewerAppMenu.SAVE_SELECTED, sm, parentComp)));
 	    cm.add(new JMenuItem(new ExportOBJ(ViewerAppMenu.EXPORT_OBJ, sm, parentComp)));
 	    cm.addSeparator();
