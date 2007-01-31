@@ -46,6 +46,7 @@ import javax.media.opengl.GL;
 
 import de.jreality.math.Pn;
 import de.jreality.scene.Geometry;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.Texture2D;
 
@@ -88,7 +89,7 @@ public class JOGLRenderingState {
 	public int texUnitCount = 0;
 	public int polygonCount = 0;
 	
-	public  WeakHashMap<Texture2D, Integer> boundToTextureUnit = new WeakHashMap<Texture2D, Integer>();
+	public  WeakHashMap<ImageData, Integer> boundToTextureUnit = new WeakHashMap<ImageData, Integer>();
 	
 	public JOGLRenderingState(JOGLRenderer jr) {
 		super();

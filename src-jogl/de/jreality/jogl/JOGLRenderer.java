@@ -233,8 +233,8 @@ public class JOGLRenderer  implements AppearanceListener {
 		theLog.finer("In extractGlobalParameters");
 		Object obj = ap.getAttribute(CommonAttributes.FORCE_RESIDENT_TEXTURES, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) forceResidentTextures = ((Boolean)obj).booleanValue();
-		obj = ap.getAttribute(CommonAttributes.COMPONENT_DISPLAY_LISTS, Boolean.class);		// assume the best ...
-		if (obj instanceof Boolean) renderingState.componentDisplayLists = ((Boolean)obj).booleanValue();
+//		obj = ap.getAttribute(CommonAttributes.COMPONENT_DISPLAY_LISTS, Boolean.class);		// assume the best ...
+//		if (obj instanceof Boolean) renderingState.componentDisplayLists = ((Boolean)obj).booleanValue();
 		obj = ap.getAttribute(CommonAttributes.ANY_DISPLAY_LISTS, Boolean.class);		// assume the best ...
 		obj = ap.getAttribute(CommonAttributes.CLEAR_COLOR_BUFFER, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) {
@@ -242,7 +242,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			theLog.fine("Setting clear color buffer to "+renderingState.clearColorBuffer);
 		}
 		theLog.info("forceResTex = "+forceResidentTextures);
-		theLog.info("component display lists = "+renderingState.componentDisplayLists);
+//		theLog.info("component display lists = "+renderingState.componentDisplayLists);
 	}
 
 	public SceneGraphComponent getAuxiliaryRoot() {
