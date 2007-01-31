@@ -68,6 +68,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	final JOGLPeerComponent self = this;
 	protected boolean appearanceDirty = true, originalAppearanceDirty = false;
 	boolean isReflection = false,
+		isIdentity = false,
 		cumulativeIsReflection = false,
 		effectiveAppearanceDirty = true,
 		geometryIsDirty = true,
@@ -147,7 +148,8 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		jr.context.setCurrentPath(jr.currentPath);
 		Transformation thisT = goBetween.getOriginalComponent().getTransformation();
 
-		if (thisT != null)pushTransformation(thisT.getMatrix());
+		if (thisT != null && !isIdentity)
+			pushTransformation(thisT.getMatrix());
 
 		if (eAp != null) {
 			jr.currentSignature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
@@ -182,7 +184,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	private void postRender() {
-		if (goBetween.getOriginalComponent().getTransformation() != null) 
+		if (goBetween.getOriginalComponent().getTransformation() != null && !isIdentity) 
 			popTransformation();			
 		jr.currentPath.pop();
 	}
@@ -400,6 +402,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		if (goBetween.getOriginalComponent().getTransformation() != null) {
 //			isReflection = goBetween.getOriginalComponent().getTransformation().getIsReflection();
 			isReflection = Rn.determinant(goBetween.getOriginalComponent().getTransformation().getMatrix()) < 0;
+			isIdentity = Rn.isIdentityMatrix(goBetween.getOriginalComponent().getTransformation().getMatrix(), 10E-8);
 		} else {
 			determinant  = 0.0;
 			isReflection = false;
