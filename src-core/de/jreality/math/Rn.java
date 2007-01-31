@@ -152,14 +152,10 @@ final public class Rn {
 	 * @return	dst
 	 */
 	public static double[]  add(double[]  dst, double[]  src1, double[]  src2)	{
-		double[] ddst;
-		// assert dim check
 		if (dst == null) dst = new double[src1.length];
 		int n = Math.min(Math.min(dst.length, src1.length), src2.length);
-		if (dst == null)	ddst = new double[n];
-		else				ddst = dst;
-		for (int i=0; i<n; ++i)	ddst[i] = src1[i] + src2[i];
-		return ddst;
+		for (int i=0; i<n; ++i)	dst[i] = src1[i] + src2[i];
+		return dst;
 	}
 		
 	/**
