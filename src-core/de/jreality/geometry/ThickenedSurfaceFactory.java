@@ -272,8 +272,8 @@ import de.jreality.scene.data.IntArrayArray;
 			//System.err.println("cos of angle is "+factor);
 			// TODO make this correct for noneuclidean case too
 			//Pn.dragTowards(newV[i+n], oldV[i], oldN[i], thickness, Pn.EUCLIDEAN);
-			Rn.linearCombination(newV[i+n], 1.0, newV[i], .5*thickness, oldVN[i]);
-			Rn.linearCombination(newV[i], 1.0, newV[i], -.5*thickness, oldVN[i]);
+			Rn.linearCombination(newV[i], 1.0, newV[i], .5*thickness, oldVN[i]);
+			Rn.linearCombination(newV[i+n], 1.0, newV[i], -.5*thickness, oldVN[i]);
 		}
 		
 		int m = oldIndices.length;
