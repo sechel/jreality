@@ -178,32 +178,37 @@ public class State {
 
 	public void setColorApp(Appearance a,boolean useEmissive){
 		//TODO: calculate shininess
-		if (ambient.length>0)
-			a.setAttribute(CommonAttributes.AMBIENT_COLOR,ambient[0]);
-		if (specular.length>0)
-			a.setAttribute(CommonAttributes.SPECULAR_COLOR,specular[0]);
-
-		// TODO emissive Color vs diffuse Color
-//		if( useEmissive){
-//		if (emissive.length>0)
-//			a.setAttribute(CommonAttributes.DIFFUSE_COLOR,emissive[0]);
-//	}
-//	else{
-//		if (diffuse.length>0)
-//			a.setAttribute(CommonAttributes.DIFFUSE_COLOR,diffuse[0]);
-//	}
-		
+		if (ambient.length>0){
+			a.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.AMBIENT_COLOR,ambient[0]);
+			a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.AMBIENT_COLOR,ambient[0]);
+			a.setAttribute(CommonAttributes.VERTEX_SHADER+"."+CommonAttributes.AMBIENT_COLOR,ambient[0]);
+			}
+		if (specular.length>0){
+			a.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COLOR,specular[0]);
+			a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.SPECULAR_COLOR,specular[0]);
+			a.setAttribute(CommonAttributes.VERTEX_SHADER+"."+CommonAttributes.SPECULAR_COLOR,specular[0]);
+		}
 		// VRML diffuse & emissive definition, if emissive is not supported:
 		// take diffuse as base Color, take emissive if all others colors are empty
-		if (diffuse.length>0)
-				a.setAttribute(CommonAttributes.DIFFUSE_COLOR,diffuse[0]);
+		if (diffuse.length>0){
+			a.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,diffuse[0]);
+			a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,diffuse[0]);
+			a.setAttribute(CommonAttributes.VERTEX_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,diffuse[0]);
+		}
 		else
-			if (emissive.length>0)
-				a.setAttribute(CommonAttributes.DIFFUSE_COLOR,emissive[0]);
+			if (emissive.length>0){
+				a.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,emissive[0]);
+				a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,emissive[0]);
+				a.setAttribute(CommonAttributes.VERTEX_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,emissive[0]);
+			}
 		// 
 		if (transparency.length>0)
-			if (transparency[0]!=1)
-				a.setAttribute(CommonAttributes.TRANSPARENCY,transparency[0]);
+			if (transparency[0]!=1){
+				a.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY,transparency[0]);
+				a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TRANSPARENCY,transparency[0]);
+				a.setAttribute(CommonAttributes.VERTEX_SHADER+"."+CommonAttributes.TRANSPARENCY,transparency[0]);
+			}
+
 		if (vertexDraw==1)
 			a.setAttribute(CommonAttributes.VERTEX_DRAW,true);
 		if (vertexDraw==2)
@@ -289,9 +294,7 @@ public class State {
 		f.setVertexAttributes( Attribute.TEXTURE_COORDINATES,
 				new DoubleArrayArray.Array( texCoord));
 		app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,new Color(1f,1f,1f));
-		//app.setAttribute(CommonAttributes.DIFFUSE_COLOR,new Color(1f,1f,1f));
 		app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY_ENABLED,false);
-		//app.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false);
 		Texture2D tex = TextureUtility.createTexture(app, CommonAttributes.POLYGON_SHADER,id);
 	    tex.setTextureMatrix(textureTrafo);
 	    if (wrapS==0)
