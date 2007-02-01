@@ -264,7 +264,7 @@ public class ViewerVR {
 				t.printStackTrace();
 			}
 		}
-		sceneRoot.addTool(new PickShowTool(null, 0.005));
+		sceneRoot.addTool(new PickShowTool());
 
 		terrainAppearance.setAttribute("showLines", false);
 		terrainAppearance.setAttribute("showPoints", false);
@@ -705,7 +705,7 @@ public class ViewerVR {
 		Action exportPrefs = new AbstractAction("Export preferences...") {
 			public void actionPerformed(ActionEvent e) {
 				File f=FileLoaderDialog.selectTargetFile(null, "xml", "Preferences files");
-				exportPreferences(f);
+				if (f!=null) exportPreferences(f);
 			}
 		};
 		settings.add(exportPrefs);
@@ -713,7 +713,7 @@ public class ViewerVR {
 		Action importPrefs = new AbstractAction("Import preferences...") {
 			public void actionPerformed(ActionEvent e) {
 				File f=FileLoaderDialog.loadFile(null, "xml", "Preferences file");
-				importPreferences(f);
+				if (f!=null) importPreferences(f);
 			}
 		};
 		settings.add(importPrefs);
