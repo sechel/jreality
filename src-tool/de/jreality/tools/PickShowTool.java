@@ -57,15 +57,14 @@ import de.jreality.util.PickUtility;
 
 public class PickShowTool extends AbstractTool {
 
-  SceneGraphComponent c = new SceneGraphComponent();
-  Appearance a = new Appearance();
+  private transient SceneGraphComponent c = new SceneGraphComponent();
+  private transient Appearance a = new Appearance();
   
-  private boolean attached;
-  private double radius;
+  private transient boolean attached;
+  private double radius=0.005;
   
-  public PickShowTool(String activationAxis, double radius) {
-    super(activationAxis == null ? null : InputSlot.getDevice(activationAxis));
-    this.radius=radius;
+  public PickShowTool() {
+    super();
     addCurrentSlot(InputSlot.getDevice("PointerTransformation"));
     c.addChild(Primitives.sphere(1, 0, 0, 0));
     c.setName("pick display");
@@ -73,10 +72,7 @@ public class PickShowTool extends AbstractTool {
     PickUtility.setPickable(c, false);
     a.setAttribute(CommonAttributes.FACE_DRAW, true);
   }
-  public PickShowTool(String activationAxis) {
-    this(activationAxis, 0.05);
-  }
-  
+
   public void activate(ToolContext tc) {
     perform(tc);
   }
@@ -123,5 +119,13 @@ public class PickShowTool extends AbstractTool {
   private void assureDetached(ToolContext tc) {
     c.setVisible(false);
   }
+
+public double getRadius() {
+	return radius;
+}
+
+public void setRadius(double radius) {
+	this.radius = radius;
+}
 
 }

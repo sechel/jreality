@@ -60,19 +60,19 @@ import de.jreality.util.LoggingSystem;
  */
 public class ShipNavigationTool extends AbstractTool {
 
-  private final InputSlot forwardBackward = InputSlot.getDevice("ForwardBackwardAxis");
-  private final InputSlot leftRight = InputSlot.getDevice("LeftRightAxis");
-  private final InputSlot jump = InputSlot.getDevice("JumpActivation");
-  private final InputSlot rotateActivation = InputSlot.getDevice("ShipRotateActivation");
-  private final InputSlot horizontalRotation = InputSlot.getDevice("HorizontalShipRotationAngleEvolution");
-  private final InputSlot timer = InputSlot.getDevice("SystemTime");
-  private final InputSlot run = InputSlot.getDevice("RunActivation");
+  private transient final InputSlot forwardBackward = InputSlot.getDevice("ForwardBackwardAxis");
+  private transient final InputSlot leftRight = InputSlot.getDevice("LeftRightAxis");
+  private transient final InputSlot jump = InputSlot.getDevice("JumpActivation");
+  private transient final InputSlot rotateActivation = InputSlot.getDevice("ShipRotateActivation");
+  private transient final InputSlot horizontalRotation = InputSlot.getDevice("HorizontalShipRotationAngleEvolution");
+  private transient final InputSlot timer = InputSlot.getDevice("SystemTime");
+  private transient final InputSlot run = InputSlot.getDevice("RunActivation");
 
-  private final InputSlot gravityToggle = InputSlot.getDevice("GravityToggle");
-  private final InputSlot groundToggle = InputSlot.getDevice("GroundToggle");
+  private transient final InputSlot gravityToggle = InputSlot.getDevice("GravityToggle");
+  private transient final InputSlot groundToggle = InputSlot.getDevice("GroundToggle");
 
-  private double[] velocity = {0,0,0};
-  private boolean touchGround;
+  private transient double[] velocity = {0,0,0};
+  private transient boolean touchGround;
   
   double gain = 4;
   private double runFactor=2;
@@ -83,7 +83,7 @@ public class ShipNavigationTool extends AbstractTool {
   private boolean rotate=false;
 
   private boolean pollingDevice=true; // should be true for mouse look, false for some axis/button device TODO!!
-private boolean fall;
+  private transient boolean fall;
   
   public ShipNavigationTool() {
     addCurrentSlot(forwardBackward);

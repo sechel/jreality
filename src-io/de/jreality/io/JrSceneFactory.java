@@ -176,7 +176,7 @@ public class JrSceneFactory {
 			}
 		}
 
-		sceneRoot.addTool(new PickShowTool(null, 0.005));
+		sceneRoot.addTool(new PickShowTool());
 		
 		avatarNode.addTool(new PointerDisplayTool());
 

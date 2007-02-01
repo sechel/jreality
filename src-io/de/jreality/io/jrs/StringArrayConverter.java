@@ -65,7 +65,7 @@ class StringArrayConverter implements Converter {
     String[] data = (String[]) source;
     for (int i = 0, n=data.length; i<n; i++) {
       writer.startNode(mapper.serializedClass(String.class));
-      context.convertAnother(data[i]);
+      if (data[i] != null) context.convertAnother(data[i]);
       writer.endNode();
     }
   }
@@ -75,6 +75,7 @@ class StringArrayConverter implements Converter {
     while (reader.hasMoreChildren()) {
       reader.moveDown();
       String str = (String) context.convertAnother(null, String.class);
+      if (str == null) System.out.println("null string read");
       ll.add(str);
       reader.moveUp();
     }

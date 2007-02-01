@@ -54,22 +54,20 @@ import de.jreality.scene.tool.ToolContext;
  */
 public class HeadTransformationTool extends AbstractTool {
 
-  private InputSlot rotateActivation = InputSlot.getDevice("ShipRotateActivation");
-  private final InputSlot verticalRotation = InputSlot.getDevice("VerticalHeadRotationAngleEvolution");
+  private transient InputSlot rotateActivation = InputSlot.getDevice("ShipRotateActivation");
+  private transient final InputSlot verticalRotation = InputSlot.getDevice("VerticalHeadRotationAngleEvolution");
 
   private double maxAngle = Math.PI*0.35;
   private double minAngle = -Math.PI*0.35;
   
   private boolean invert;
   
-  private double[] headTranslation;
+  private transient double[] headTranslation;
   
-  private double currentAngle;
-  private boolean rotate;
+  private transient double currentAngle;
+  private transient boolean rotate;
   
   private final transient Matrix m=new Matrix();
-  
-  private boolean init=true;
   
   public HeadTransformationTool() {
     addCurrentSlot(rotateActivation);
@@ -90,12 +88,11 @@ public class HeadTransformationTool extends AbstractTool {
     if (tc.getSource() == rotateActivation) return;
     if (tc.getRootToToolComponent().getLastComponent().getTransformation() != null) {
       tc.getRootToToolComponent().getLastComponent().getTransformation().getMatrix(m.getArray());
-      headTranslation=m.getColumn(3);
-      if (init) {
+      if (headTranslation == null) {
 	      FactoredMatrix fm = new FactoredMatrix(m.getArray());
 	      currentAngle=fm.getRotationAngle();
-	      init=false;
       }
+      headTranslation=m.getColumn(3);
     } else {
       headTranslation=new double[]{0,1.7,0};
     }
