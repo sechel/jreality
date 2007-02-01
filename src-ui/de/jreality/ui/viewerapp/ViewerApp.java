@@ -56,6 +56,7 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -389,10 +390,22 @@ public class ViewerApp {
 
 		showExternalBeanShell(attachBeanShell && externalBeanShell);
 		showExternalNavigator(attachNavigator && externalNavigator);
-
+		
 		//update menu (e.g. checkboxes whose selection state depends on viewerApp properties)
 		menu.update();
 
+//		//update location of EDIT_MENU
+//		JMenuBar mb = externalNavigatorFrame.getJMenuBar();
+//		if (attachNavigator && mb!= null) { 
+//			if (externalNavigator && mb.getMenuCount()==0) {
+//				mb.add(menu.getMenu(ViewerAppMenu.EDIT_MENU));  //move EDIT_MENU to externalNavigatorFrame
+//				System.out.println(mb.getMenu(0).getText()+ mb.getMenu(0).isVisible());
+//				externalNavigatorFrame.validate();
+//			}
+//			if (!externalNavigator && mb.getMenuCount()!=0)
+//				menu.addMenu(mb.getMenu(0), 1);  //move viewerApp.frame
+//		}
+		
 		//update content of frame
 		frame.getContentPane().removeAll();
 		frame.getContentPane().add(getContent());
@@ -595,18 +608,23 @@ public class ViewerApp {
 	public void showExternalNavigator(boolean show) {
 
 		if (externalNavigatorFrame == null) {
+			if (show == false) return;
 			externalNavigatorFrame = new JFrame("jReality Navigator");
 			externalNavigatorFrame.setSize(new Dimension(300, 800));
 //			try {	externalNavigatorFrame.setAlwaysOnTop(true); }
 //			catch (SecurityException se) {}  //webstart
+			
 			externalNavigatorFrame.addComponentListener(new ComponentAdapter(){
-				public void componentHidden(ComponentEvent e) {
-					if (externalNavigator) {
-						setAttachNavigator(false);
-						menu.update();
-					}
+				public void componentHidden(ComponentEvent e) {  //externalNavigatorFrame is closed or set to invisible
+					menu.addMenu(externalNavigatorFrame.getJMenuBar().getMenu(0), 1);  //move EDIT_MENU to viewerApp.frame
+					if (externalNavigator) setAttachNavigator(false);
+					menu.update();  //update navigatorCheckBox & visibility of EDIT_MENU
+					frame.validate();  //repaint menuBar
 				}
 			});
+			
+			externalNavigatorFrame.setJMenuBar(new JMenuBar());
+			externalNavigatorFrame.getJMenuBar().setBorder(BorderFactory.createEmptyBorder());
 		}
 
 		if (show == externalNavigatorFrame.isVisible()) 
@@ -615,15 +633,24 @@ public class ViewerApp {
 		if (show) {
 			externalNavigatorFrame.remove(externalNavigatorFrame.getContentPane());
 			externalNavigatorFrame.getContentPane().add(getNavigatorWithAccessories());
+
+			//move EDIT_MENU to externalNavigatorFrame
+			JMenu editMenu = menu.getMenu(ViewerAppMenu.EDIT_MENU); 
+			editMenu.setVisible(true);
+			externalNavigatorFrame.getJMenuBar().add(editMenu);
+
+			externalNavigatorFrame.validate();  //repaint mb
 			externalNavigatorFrame.setVisible(true);
 		}
 		else externalNavigatorFrame.setVisible(false);
+		//EDIT_MENU is moved to viewerApp.frame by ComponentAdapter above
 	}
 
 
 	public void showExternalBeanShell(boolean show) {
 
 		if (externalBeanShellFrame == null) {
+			if (show == false) return;
 			externalBeanShellFrame = new JFrame("jReality BeanShell");
 			externalBeanShellFrame.setSize(new Dimension(800, 150));
 //			try {	externalBeanShellFrame.setAlwaysOnTop(true); }
