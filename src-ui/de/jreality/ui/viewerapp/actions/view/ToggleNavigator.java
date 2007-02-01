@@ -58,17 +58,14 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 public class ToggleNavigator extends AbstractJrAction {
 
 	private ViewerApp viewerApp;
-	private String[] menus;
-
 
 	/**
 	 * @param menus list of menus specified by their names, 
 	 * which should change their (visibility) state when performing this action
 	 */
-	public ToggleNavigator(String name, ViewerApp viewerApp, String... menus) {
+	public ToggleNavigator(String name, ViewerApp viewerApp) {
 		super(name);
 		this.viewerApp = viewerApp;
-		this.menus = menus;
 
 		setShortDescription("Toggle navigator visibility");
 		setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
@@ -80,13 +77,8 @@ public class ToggleNavigator extends AbstractJrAction {
 
 		boolean attachNavigator = !viewerApp.isAttachNavigator();
 		viewerApp.setAttachNavigator(attachNavigator);
-		if (!viewerApp.isExternalNavigator()) viewerApp.update();  //updates the frame's content
+		if (!viewerApp.isExternalNavigator()) viewerApp.update();  //updates the frame's content and the menuBar
 		else viewerApp.showExternalNavigator(attachNavigator);
-
-		if (menus != null) {  //change visibility of menus
-			for (int i = 0; i < menus.length; i++)
-				viewerApp.getMenu().showMenu(menus[i], attachNavigator);
-		}
 	}
 
 }
