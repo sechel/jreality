@@ -8,9 +8,11 @@ import java.util.ArrayList;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 
+import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.Lock;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
 import de.jreality.scene.event.GeometryEvent;
@@ -105,6 +107,7 @@ public class GoBetween extends JOGLPeerNode implements
 	}
 
 	public void transformationMatrixChanged(TransformationEvent ev) {
+		System.err.println("TForm event for "+originalComponent.getName());
 		peersLock.readLock();
 		for (JOGLPeerComponent peer : peers)	{
 			peer.transformationMatrixChanged(ev);				
@@ -155,6 +158,14 @@ public class GoBetween extends JOGLPeerNode implements
 				peerGeometry.refCount++;
 			} 
 		}
+		else if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_TRANSFORMATION) {
+			if (originalComponent.getTransformation() != null)
+				originalComponent.getTransformation().addTransformationListener(this);
+		}
+		else if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE) {
+			if (originalComponent.getAppearance() != null)
+				originalComponent.getAppearance().addAppearanceListener(this);
+		}
 		peersLock.readLock();
 		for ( JOGLPeerComponent peer: peers)	{
 			//peer.addSceneGraphComponentEvent(ev);
@@ -172,6 +183,14 @@ public class GoBetween extends JOGLPeerNode implements
 				jr.geometryRemoved = true;
 			}
 //			return;
+		}
+		else if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_TRANSFORMATION) {
+			if (originalComponent.getTransformation() != null)
+				((Transformation) ev.getOldChildElement()).removeTransformationListener(this);
+		}
+		else if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE) {
+			if (originalComponent.getAppearance() != null)
+				((Appearance) ev.getOldChildElement()).removeAppearanceListener(this);
 		}
 		peersLock.readLock();
 		for ( JOGLPeerComponent peer: peers)	{
@@ -195,6 +214,14 @@ public class GoBetween extends JOGLPeerNode implements
 				peerGeometry = jr.getJOGLPeerGeometryFor(originalComponent.getGeometry());
 				peerGeometry.refCount++;
 			} 
+		}
+		else if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_TRANSFORMATION) {
+			if (originalComponent.getTransformation() != null)
+				originalComponent.getTransformation().addTransformationListener(this);
+		}
+		else if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE) {
+			if (originalComponent.getAppearance() != null)
+				originalComponent.getAppearance().addAppearanceListener(this);
 		}
 		peersLock.readLock();
 		for ( JOGLPeerComponent peer: peers)	{

@@ -141,16 +141,17 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		postRender();
 	}
 
-
+	boolean mustPop = false;
 	private void preRender() {
 		if (renderRunnableDirty) updateRenderRunnable();
 		jr.currentPath.push(goBetween.getOriginalComponent());
 		jr.context.setCurrentPath(jr.currentPath);
 		Transformation thisT = goBetween.getOriginalComponent().getTransformation();
-
-		if (thisT != null && !isIdentity)
+//		System.err.println("prerender: Matrix for "+goBetween.originalComponent.getName()+" is identity: "+isIdentity);
+		if (thisT != null && !isIdentity)  {
 			pushTransformation(thisT.getMatrix());
-
+			mustPop = true;
+		}
 		if (eAp != null) {
 			jr.currentSignature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
 			jr.renderingState.setCurrentSignature(jr.currentSignature);
@@ -184,13 +185,15 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	private void postRender() {
-		if (goBetween.getOriginalComponent().getTransformation() != null && !isIdentity) 
+		if (mustPop) {
 			popTransformation();			
+			mustPop = false;
+		}
 		jr.currentPath.pop();
 	}
 
 	protected void pushTransformation(double[] m) {
-		if ( jr.stackDepth <= JOGLRenderer.MAX_STACK_DEPTH) {
+		if ( jr.stackDepth < JOGLRenderer.MAX_STACK_DEPTH) {
 			jr.globalGL.glPushMatrix();
 			jr.globalGL.glMultTransposeMatrixd(m,0);
 			jr.stackDepth++;
@@ -406,6 +409,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		} else {
 			determinant  = 0.0;
 			isReflection = false;
+			isIdentity = true;
 		}
 	}
 
