@@ -107,7 +107,7 @@ public class GoBetween extends JOGLPeerNode implements
 	}
 
 	public void transformationMatrixChanged(TransformationEvent ev) {
-		System.err.println("TForm event for "+originalComponent.getName());
+//		System.err.println("TForm event for "+originalComponent.getName());
 		peersLock.readLock();
 		for (JOGLPeerComponent peer : peers)	{
 			peer.transformationMatrixChanged(ev);				
