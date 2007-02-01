@@ -158,7 +158,9 @@ static private int[][] icoIndices = {
 		geoNode.addChild(cmpSp);
 		geoNode.addChild(cmpCyl);
 		
-    geoNode.addTool(new PickShowTool("PrimarySelection", 0.07));
+	PickShowTool pst = new PickShowTool();
+	pst.setRadius(0.07);
+    geoNode.addTool(pst);
     geoNode.setAppearance(new Appearance());
     geoNode.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
     geoNode.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS, 0.04);
