@@ -76,6 +76,7 @@ import de.jreality.ui.viewerapp.actions.edit.SwitchBackgroundColor;
 import de.jreality.ui.viewerapp.actions.edit.ToggleAppearance;
 import de.jreality.ui.viewerapp.actions.edit.TogglePickable;
 import de.jreality.ui.viewerapp.actions.edit.ToggleRenderSelection;
+import de.jreality.ui.viewerapp.actions.edit.ToggleVisibility;
 import de.jreality.ui.viewerapp.actions.file.ExportImage;
 import de.jreality.ui.viewerapp.actions.file.ExportPS;
 import de.jreality.ui.viewerapp.actions.file.ExportRIB;
@@ -111,6 +112,7 @@ public class ViewerAppMenu {
   
   //FILE MENU
   public static String LOAD_FILE = "Load files";
+  public static String LOAD_FILE_TO_NODE = "Load files into node";
   public static String LOAD_FILE_MERGED = "Load merged files";
   public static String LOAD_SCENE = "Load scene";
   public static String SAVE_SCENE = "Save scene";
@@ -123,6 +125,7 @@ public class ViewerAppMenu {
   public static String EXPORT_OBJ = "Write OBJ";
   public static String REMOVE = "Remove";
   public static String RENAME = "Rename";
+  public static String TOGGLE_VISIBILITY = "Toggle visibility";
   public static String APPEARANCE = "Appearance";
   public static String TOGGLE_VERTEX_DRAWING = "Toggle vertex drawing";
   public static String TOGGLE_EDGE_DRAWING = "Toggle egde drawing";
@@ -235,6 +238,7 @@ public class ViewerAppMenu {
     editMenu.add(new JMenuItem(new Rename(RENAME, sm, parentComp)));
     editMenu.addSeparator();
     
+    editMenu.add(new JMenuItem(new ToggleVisibility(TOGGLE_VISIBILITY, sm)));
     JMenu appearance = new JMenu(APPEARANCE);
     editMenu.add(appearance);
     appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm)));
@@ -287,7 +291,7 @@ public class ViewerAppMenu {
     JMenu viewMenu = new JMenu(VIEW_MENU);
     viewMenu.setMnemonic(KeyEvent.VK_V);
     
-    navigatorCheckBox = new JCheckBoxMenuItem(new ToggleNavigator(TOGGLE_NAVIGATOR, viewerApp, EDIT_MENU));
+    navigatorCheckBox = new JCheckBoxMenuItem(new ToggleNavigator(TOGGLE_NAVIGATOR, viewerApp));
     externalNavigatorCheckBox = new JCheckBoxMenuItem(new ToggleExternalNavigator(TOGGLE_EXTERNAL_NAVIGATOR, viewerApp));
     beanShellCheckBox = new JCheckBoxMenuItem(new ToggleBeanShell(TOGGLE_BEANSHELL, viewerApp));
     externalBeanShellCheckBox = new JCheckBoxMenuItem(new ToggleExternalBeanShell(TOGGLE_EXTERNAL_BEANSHELL, viewerApp));
@@ -531,7 +535,9 @@ public class ViewerAppMenu {
    * @param show true iff specified menu should be visible
    */
   public void showMenu(String menuName, boolean show) {
-  	getMenu(menuName).setVisible(show);
+	if (getMenu(menuName) == null) return;
+	
+	getMenu(menuName).setVisible(show);
   	showMenu.put(menuName, show);
   }
   

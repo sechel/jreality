@@ -69,11 +69,13 @@ import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
 import de.jreality.ui.viewerapp.actions.edit.AddTool;
 import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
 import de.jreality.ui.viewerapp.actions.edit.ExportOBJ;
+import de.jreality.ui.viewerapp.actions.edit.LoadFileToNode;
 import de.jreality.ui.viewerapp.actions.edit.Remove;
 import de.jreality.ui.viewerapp.actions.edit.Rename;
 import de.jreality.ui.viewerapp.actions.edit.SaveSelected;
 import de.jreality.ui.viewerapp.actions.edit.ToggleAppearance;
 import de.jreality.ui.viewerapp.actions.edit.TogglePickable;
+import de.jreality.ui.viewerapp.actions.edit.ToggleVisibility;
 import de.jtem.beans.BooleanEditor;
 import de.jtem.beans.EditorSpawner;
 import de.jtem.beans.InspectorPanel;
@@ -190,6 +192,7 @@ public class Navigator implements SelectionListener {
 		
 		//create content of context menu
 		Component parentComp = null; //sceneTree;
+		cm.add(new JMenuItem(new LoadFileToNode(ViewerAppMenu.LOAD_FILE_TO_NODE, sm, parentComp)));
 		cm.add(new JMenuItem(new SaveSelected(ViewerAppMenu.SAVE_SELECTED, sm, parentComp)));
 	    cm.add(new JMenuItem(new ExportOBJ(ViewerAppMenu.EXPORT_OBJ, sm, parentComp)));
 	    cm.addSeparator();
@@ -198,6 +201,7 @@ public class Navigator implements SelectionListener {
 	    cm.addSeparator();
 	    cm.add(new JMenuItem(new AddTool(ViewerAppMenu.ADD_TOOL, sm, parentComp)));
 	    cm.addSeparator();
+	    cm.add(new JMenuItem(new ToggleVisibility(ViewerAppMenu.TOGGLE_VISIBILITY, sm)));
 	    cm.add(new JMenuItem(new ToggleAppearance(ViewerAppMenu.TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm)));
 	    cm.add(new JMenuItem(new ToggleAppearance(ViewerAppMenu.TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm)));
 	    cm.add(new JMenuItem(new ToggleAppearance(ViewerAppMenu.TOGGLE_FACE_DRAWING, CommonAttributes.FACE_DRAW, sm)));
