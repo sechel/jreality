@@ -370,7 +370,7 @@ public class WriterVRML
 		if(dlts.getShowLabels())
 			if (l.getEdgeAttributes(Attribute.LABELS)!=null){
 				String[] labels=l.getEdgeAttributes(Attribute.LABELS).toStringArray(null);
-				writeFaceLabels(lcoords,lindices,labels,hist);	
+				writeEdgeLabels(lcoords,lindices,labels,hist);	
 			}
 	}
 	private static void writeGeoPoints(PointSet p,String hist)throws IOException{
