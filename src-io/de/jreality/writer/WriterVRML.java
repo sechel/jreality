@@ -110,6 +110,49 @@ public class WriterVRML
 // ---------------------
 //	---------------------------- start writing --------------------
 
+	private static void writeFirstComp(SceneGraphComponent c,String hist,
+			EffectiveAppearance parentEA)throws IOException{
+		if (c==null)throw new IOException("A SceneGraphComponent is null");
+		if (!c.isVisible()) return;
+		// write 
+		String hist2= hist+spacing;
+
+		Geometry g = c.getGeometry();
+		Camera cam = c.getCamera();
+		Light li = c.getLight();
+		Appearance app =c.getAppearance();
+		EffectiveAppearance	eApp=parentEA;
+		if (app!=null) eApp=parentEA.create(app);
+		updateShaders(eApp);
+		Transformation t= c.getTransformation();
+
+		// write content
+		out.print(""+hist+"Separator { ");
+		// defaults:
+		/*		ShapeHints {
+	          vertexOrdering  UNKNOWN_ORDERING      # SFEnum
+	          shapeType       UNKNOWN_SHAPE_TYPE    # SFEnum
+	          faceType        CONVEX                # SFEnum
+	          creaseAngle     0.5                   # SFFloat
+	     }*/
+		out.println(""+hist+"ShapeHints { ");
+		out.println(""+hist2+"vertexOrdering  UNKNOWN_ORDERING");
+		out.println(""+hist2+"shapeType       UNKNOWN_SHAPE_TYPE");
+		out.println(""+hist2+"faceType        CONVEX");
+		out.println(""+hist+"}");
+		//
+		
+		
+		out.println("# "+c.getName());
+		if (t!=null)		writeTrafo(t,hist2);
+		for (int i=0;i<c.getChildComponentCount();i++)
+			writeComp(c.getChildComponent(i),hist2,eApp);
+		if (g!=null)		writeGeo(g,hist2);// use Appearance
+		if (li!=null)		writeLight(li,hist2);// use Appearance
+		if (cam!=null)		writeCam(cam,hist2);
+		out.println(""+hist+"}");
+	}
+
 	private static void writeComp(SceneGraphComponent c,String hist,
 			EffectiveAppearance parentEA)throws IOException{
 		if (c==null)throw new IOException("A SceneGraphComponent is null");
