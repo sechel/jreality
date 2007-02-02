@@ -10,6 +10,22 @@
  * Author: Hoffmann, Gunn
  */
 
+// replace the standard specular function with one that matches the other jreality backends
+float 
+myspecularbrdf(vector L, N, V; float roughness)
+{
+    vector H = normalize(L+V);
+    return pow(max(0, N.H), 1/roughness);
+}
+
+color myspecular( normal N; vector V; float roughness )
+{
+    color C = 0;
+    illuminance( P, N, PI/2 ) 
+    C += Cl * myspecularbrdf(normalize(L), N, V, roughness);
+    return C;
+}
+
 
 surface
 defaultpolygonshader ( float Ka = 0, 
@@ -91,7 +107,7 @@ defaultpolygonshader ( float Ka = 0,
 
   // the surface color is a sum of ambient, diffuse, specular
   if (lighting != 0)
-        Ci = Oi * ( Ct + specularcolor * Ks*specular(Nf,V,roughness) );
+        Ci = Oi * ( Ct + specularcolor * Ks*myspecular(Nf,V,roughness) );
   else 
         Ci = Oi * Ct;
 
