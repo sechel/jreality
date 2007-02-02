@@ -7,21 +7,15 @@ package de.jreality.writer;
 
 
 /**TODO 
- * Texturen
  * Labels
- * 
  */
 import java.awt.Color;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.text.Format;
 import java.util.HashMap;
 import java.util.LinkedList;
-
-import org.w3c.dom.Text;
-
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
@@ -40,10 +34,12 @@ import de.jreality.scene.Sphere;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.DefaultPolygonShader;
+import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.RenderingHintsShader;
@@ -63,7 +59,10 @@ public class WriterVRML
 	private static DefaultPolygonShader dps;
 	private static DefaultLineShader dls;
 	private static DefaultPointShader dvs;
-//	private static DefaultTextShader dts;
+	private static DefaultTextShader dpts;
+	private static DefaultTextShader dlts;
+	private static DefaultTextShader dvts;
+
 	private static final int PER_VERTEX=0,PER_PART=1,PER_FACE=2,OVERALL=3;
 
 	private static PrintWriter out=null;
@@ -97,15 +96,31 @@ public class WriterVRML
 		dgs = ShaderUtility.createDefaultGeometryShader(eap);
 		rhs = ShaderUtility.createRenderingHintsShader(eap);
 
-		if (dgs.getPointShader() instanceof DefaultPointShader)	
+		if (dgs.getPointShader() instanceof DefaultPointShader){	
 			dvs = (DefaultPointShader) dgs.getPointShader();
+			if (dvs.getTextShader() instanceof DefaultTextShader){
+				dvts=(DefaultTextShader)dvs.getTextShader();
+			}
+			else dvts=null;
+		}
 		else dvs = null;
-		if (dgs.getLineShader() instanceof DefaultLineShader) 
+		if (dgs.getLineShader() instanceof DefaultLineShader){ 
 			dls = (DefaultLineShader) dgs.getLineShader();
+			if (dls.getTextShader() instanceof DefaultTextShader){
+				dlts=(DefaultTextShader)dls.getTextShader();
+			}
+			else dlts=null;
+		}
 		else dls = null;
-		if (dgs.getPolygonShader() instanceof DefaultPolygonShader) 
+		if (dgs.getPolygonShader() instanceof DefaultPolygonShader){
 			dps = (DefaultPolygonShader) dgs.getPolygonShader();
+			if (dps.getTextShader() instanceof DefaultTextShader)
+				dpts=(DefaultTextShader) dps.getTextShader();
+			else dpts=null;
+		}
 		else dps = null;
+		
+		
 	}
 // ---------------------
 //	---------------------------- start writing --------------------
@@ -189,18 +204,11 @@ public class WriterVRML
 	}
 	private static void writeGeo(Geometry g,String hist)throws IOException{
 		if (g instanceof Sphere){
-			if (dgs.getShowFaces())
-				writeSphere((Sphere)g,hist);
-			return;
-		}
+			if (dgs.getShowFaces())	writeSphere((Sphere)g,hist);return;}
 		if (g instanceof Cylinder ){
-			if (dgs.getShowFaces())
-				writeCylinder((Cylinder)g,hist);
-			return;
-		}
+			if (dgs.getShowFaces())	writeCylinder((Cylinder)g,hist);return;}
 		if (g instanceof IndexedFaceSet)
-			if (dgs.getShowFaces())
-				writeGeoFaces((IndexedFaceSet) g,hist);		
+			if (dgs.getShowFaces())	writeGeoFaces((IndexedFaceSet) g,hist);		
 		if (g instanceof IndexedLineSet)
 			if(dls.getTubeDraw()&& dgs.getShowLines())
 				writeGeoLines((IndexedLineSet) g,hist);
@@ -238,7 +246,8 @@ public class WriterVRML
 	private static void writeGeoFaces(IndexedFaceSet f,String hist)throws IOException{
 		// write the coordinates:
 		if (f.getVertexAttributes(Attribute.COORDINATES)==null)throw new IOException("no Coordinates");
-		writeCoordinates(f.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null),hist);
+		double[][] coords=f.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+		writeCoordinates(coords,hist);
 		// writes the Normals depending on smooth or flat shading:
 		
 		if(dps.getSmoothShading()){
@@ -283,6 +292,7 @@ public class WriterVRML
 			if (mat==null) throw new IOException("missing texture component");
 			ImageData id=tex.getImage();
 			if (id==null) throw new IOException("missing texture component");
+			
 			// write texture
 			writeTexCoords(texcords,hist);	
 			writeTexture(tex,hist);
@@ -292,21 +302,31 @@ public class WriterVRML
 			if (!e.getMessage().equals("missing texture component"))
 			throw e;
 		}
+			
 		/**	IndexedFaceSet {
 		 * 	coordIndex         0  # MFLong indies
 		 * 	materialIndex      -1 # MFLong egal
 		 * 	normalIndex        -1 # MFLong egal
 		 * 	textureCoordIndex  -1 # MFLong spaeter
-		 * 	} */
-
+		 * 	} */	
+		
 		out.println(hist+"IndexedFaceSet { # "+ f.getName());
 		// writes the FaceIndices
 		if (f.getFaceAttributes(Attribute.INDICES)==null) throw new IOException("no FaceIndices");
-		writeIndices(f.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), hist+spacing);
+		int[][] indices=f.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
+		writeIndices(indices, hist+spacing);
 		out.println(hist+"}");
+		
+		// write Labels
+		if(dpts.getShowLabels())
+			if (f.getFaceAttributes(Attribute.LABELS)!=null){
+				String[] labels=f.getFaceAttributes(Attribute.LABELS).toStringArray(null);
+				writeFaceLabels(coords,indices,labels,hist);	
+			}
+			
 	}
 	private static void writeGeoLines(IndexedLineSet l,String hist)throws IOException{
-		if (l.getVertexAttributes(Attribute.COORDINATES)==null) 
+		if (l.getVertexAttributes(Attribute.COORDINATES)==null)
 			throw new IOException("missing coordinates");
 		if (l.getEdgeAttributes(Attribute.INDICES)==null) 
 			return;
@@ -346,11 +366,18 @@ public class WriterVRML
 		// writes the edgeIndices
 		writeIndices(lindices, hist+spacing);
 		out.println(hist+"}");
+		// write labels
+		if(dlts.getShowLabels())
+			if (l.getEdgeAttributes(Attribute.LABELS)!=null){
+				String[] labels=l.getEdgeAttributes(Attribute.LABELS).toStringArray(null);
+				writeFaceLabels(lcoords,lindices,labels,hist);	
+			}
 	}
 	private static void writeGeoPoints(PointSet p,String hist)throws IOException{
 		// write coords
 		if(p.getVertexAttributes(Attribute.COORDINATES)==null)throw new IOException("missing coordinates");
-		writeCoordinates(p.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null),hist);
+		double[][] coords=p.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+		writeCoordinates(coords,hist);
 		// writes Vertex Colors
 		if(p.getVertexAttributes(Attribute.COLORS)!=null){
 			writeMaterialBinding(PER_VERTEX,hist);
@@ -371,6 +398,12 @@ public class WriterVRML
 		out.println(hist+"PointSet { # "+ p.getName());
 		out.println(hist+ spacing + "numPoints "+ p.getNumPoints());
 		out.println(hist+"}");
+		// write labels
+		if(dvts.getShowLabels())
+			if (p.getVertexAttributes(Attribute.LABELS)!=null){
+				String[] labels=p.getVertexAttributes(Attribute.LABELS).toStringArray(null);
+				writeLabelsAtPoints(coords, labels, hist);
+			}
 	}
 	private static void writeLight(Light li,String hist)throws IOException{
 		
@@ -549,6 +582,56 @@ public class WriterVRML
 		default:
 			throw new IOException("unknown Texture wrapping");
 		}
+	}
+	
+	private static void writeFaceLabels(double[][]coords,int[][]indis,String[]labs,String hist)throws IOException{
+		if (labs==null||indis==null||coords==null)throw new IOException("Labels impossible");
+		double[][] centers= new double[indis.length][3];// coords for the labels
+		double[] midpoint;
+		int[] face;
+		for (int i = 0; i < indis.length; i++) {// all faces
+			face=indis[i];
+			midpoint=new double[]{0,0,0};
+			int j;
+			for (j = 0; j < face.length; j++)// add vertices
+				for (int k = 0; k < 3; k++)
+					midpoint[k]+=coords[face[j]][k];
+			for (int k = 0; k < 3; k++) // calc the mean
+				centers[i][k]=midpoint[k]/j;
+		}
+		writeLabelsAtPoints(centers,labs,hist);
+	}
+	
+	private static void writeEdgeLabels(double[][]coords,int[][]indis,String[]labs,String hist)throws IOException{
+		if (labs==null||indis==null||coords==null)throw new IOException("Labels impossible");
+		double[][] centers= new double[indis.length][3];// coords for the labels
+		int[] firstEdge;
+		for (int i = 0; i < indis.length; i++) {// all line-Objects
+			firstEdge=indis[i];
+			if (firstEdge.length<2)throw new IOException("bad Lines");
+			for (int k = 0; k < 3; k++) // calc the mean of the first segment
+				centers[i][k]=coords[indis[i][0]][k]/2+coords[indis[i][1]][k]/2;
+		}
+		writeLabelsAtPoints(centers,labs,hist);
+	}
+	private static void writeLabelsAtPoints(double[][]centers,String[] labs,String hist)throws IOException{
+		 /*AsciiText {
+        	string         ""    # MFString
+        	spacing        1     # SFFloat
+        	justification  LEFT  # SFEnum
+        	width          0     # MFFloat
+   		}*/
+		/*Translation {
+        	translation  0 0 0    # SFVec3f
+   		} */
+		for (int i = 0; i < centers.length; i++) {
+			out.println(hist+"Translation { translation ");
+			writeDoubleArray(centers[i], "", " }", 3);
+			out.println(hist+"AsciiText { width 1 string "+labs[i]+"}");
+			out.println(hist+"Translation { translation ");
+			writeDoubleArray(new double[]{-centers[i][0],-centers[i][1],-centers[i][2]}, "", " }", 3);
+		}
+		
 	}
 	//	-----------------------------	
 	private static double[] colorToDoubleArray(Color c){
