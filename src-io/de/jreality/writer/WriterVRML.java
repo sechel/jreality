@@ -89,7 +89,7 @@ public class WriterVRML
 		// init shaders
 		updateShaders(eApp);
 		// start writing scene
-		writeComp(sgc,"",eApp);
+		writeFirstComp(sgc,"",eApp);
 		out.flush();
 	}
 //	------------------ 
