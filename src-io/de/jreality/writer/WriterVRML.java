@@ -178,8 +178,7 @@ public class WriterVRML
 
 		// write content
 		out.println(""+hist+"DEF \""+c.hashCode()+"\"");
-		out.print(""+hist+"Separator { ");
-		out.println("# "+c.getName());
+		out.println(""+hist+"Separator { # "+c.getName());
 		if (t!=null)		writeTrafo(t,hist2);
 		for (int i=0;i<c.getChildComponentCount();i++)
 			writeComp(c.getChildComponent(i),hist2,eApp);
@@ -300,8 +299,7 @@ public class WriterVRML
 		 * 	textureCoordIndex  -1 # MFLong spaeter
 		 * 	} */
 
-		out.print(hist+"IndexedFaceSet {");
-		out.println(" # "+ f.getName());
+		out.println(hist+"IndexedFaceSet { # "+ f.getName());
 		// writes the FaceIndices
 		if (f.getFaceAttributes(Attribute.INDICES)==null) throw new IOException("no FaceIndices");
 		writeIndices(f.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), hist+spacing);
@@ -344,8 +342,7 @@ public class WriterVRML
 		 *		normalIndex        -1 # egal
 		 *		textureCoordIndex  -1 # egal
 		 *		} */
-		out.print(hist+"IndexedLineSet {");
-		out.println(" # "+ l.getName());
+		out.println(hist+"IndexedLineSet { # "+ l.getName());
 		// writes the edgeIndices
 		writeIndices(lindices, hist+spacing);
 		out.println(hist+"}");
@@ -371,28 +368,77 @@ public class WriterVRML
 		 *		startIndex  0 	# default ok
 		 *		numPoints   -1    # ok
 		 *		} */
-		out.print(hist+"PointSet {");
-		out.println(" # "+ p.getName());
+		out.println(hist+"PointSet { # "+ p.getName());
 		out.println(hist+ spacing + "numPoints "+ p.getNumPoints());
 		out.println(hist+"}");
 	}
-	private static void writeLight(Light li,String hist){
-		if (li instanceof PointLight)
+	private static void writeLight(Light li,String hist)throws IOException{
+		
+		if (li instanceof SpotLight)
+			writeSpotLight((SpotLight) li,hist);
+		else if (li instanceof PointLight)
 			writePointLight((PointLight) li,hist);				
 		else if (li instanceof DirectionalLight)
 			writeDirLight((DirectionalLight) li,hist);
-		else if (li instanceof SpotLight)
-			writeSpotLight((SpotLight) li,hist);
 		else System.err.println("WriterVRML.writeLight() unknown Lighttype");
 	}
-	private static void writePointLight(Light li,String hist){
-		System.out.println("WriterVRML.writeLightPoint(not completely implemented)");
+	private static void writePointLight(PointLight li,String hist)throws IOException{
+		String hist2= hist+spacing;
+		/* PointLight {
+	          on         TRUE       # SFBool
+	          intensity  1          # SFFloat
+	          color      1 1 1      # SFColor
+	          location   0 0 1      # SFVec3f
+	     }  */
+		double di=li.getIntensity();
+		double[] dc=colorToDoubleArray(li.getColor());
+		out.println(hist+"PointLight { # "+ li.getName());
+		out.println(hist2 + "intensity " +di);
+		out.print(hist2 + "color " );
+		writeDoubleArray(dc, "", "", 3);
+		out.println(hist2 + "location   0 0 0");
+		out.println(hist+"}");
 	}
-	private static void writeDirLight(Light li,String hist){
-		System.out.println("WriterVRML.writeLightDir(not completely implemented)");
+	private static void writeDirLight(DirectionalLight li,String hist)throws IOException{
+		String hist2= hist+spacing;
+		/*	DirectionalLight {
+	          on         TRUE       # SFBool
+	          intensity  1          # SFFloat
+	          color      1 1 1      # SFColor
+	          direction  0 0 -1     # SFVec3f
+	     } */
+		double di=li.getIntensity();
+		double[] dc=colorToDoubleArray(li.getColor());
+		out.println(hist+"DirectionalLight { # "+ li.getName());
+		out.println(hist2 + "intensity " +di);
+		out.print(hist2 + "color " );
+		writeDoubleArray(dc, "", "", 3);
+		out.println(hist2 + "direction  0 0 1");
+		out.println(hist+"}");
 	}
-	private static void writeSpotLight(Light li,String hist){
-		System.out.println("WriterVRML.writeLightSpot(not completely implemented)");
+	private static void writeSpotLight(SpotLight li,String hist)throws IOException{
+		String hist2= hist+spacing;
+		/*  SpotLight {
+	          on           TRUE     # SFBool
+	          intensity    1        # SFFloat
+	          color        1 1 1    # SFVec3f
+	          location     0 0 1    # SFVec3f
+	          direction    0 0 -1   # SFVec3f
+	          dropOffRate  0        # SFFloat
+	          cutOffAngle  0.785398 # SFFloat
+	     }  */
+		double di=li.getIntensity();
+		double[] dc=colorToDoubleArray(li.getColor());
+		
+		out.println(hist+"SpotLight { # "+ li.getName());
+		out.println(hist2 + "intensity " +di);
+		out.print(hist2 + "color " );
+		writeDoubleArray(dc, "", "", 3);
+		out.println(hist2 + "location 0 0 0 ");
+		out.println(hist2 + "dropOffRate 0" );
+		out.println(hist2 + "direction  0 0 1");
+		out.println(hist2 + "cutOffAngle "+li.getConeAngle() );
+		out.println(hist+"}");
 	}
 	private static void writeCam(Camera c,String hist){
 		if (c.isPerspective()){
@@ -506,7 +552,8 @@ public class WriterVRML
 	}
 	//	-----------------------------	
 	private static double[] colorToDoubleArray(Color c){
-		return new double[]{(double)c.getRed(),(double)c.getGreen(),(double)c.getBlue()};
+		double[] d=new double[]{(double)c.getRed()/255,(double)c.getGreen()/255,(double)c.getBlue()/255};
+		return d;
 	}
 	private static void writeImage(Texture2D tex,String hist)throws IOException{
 		String hist2=hist+spacing;
