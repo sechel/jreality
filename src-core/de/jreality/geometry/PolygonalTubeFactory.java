@@ -50,6 +50,7 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.util.LoggingSystem;
 
 /**
  * This subclass of {@link TubeFactory} implements a simple tubing strategy
@@ -150,17 +151,22 @@ import de.jreality.scene.data.StorageModel;
 			
 		}
 		FrameInfo[] frames = makeFrameField(polygon2, type, signature);
+		LoggingSystem.getLogger(PolygonalTubeFactory.class).fine("Last phi is "+frames[frames.length-1].phi);
+		if (frames == null) 
+			throw new NullPointerException("No frames!");
 //		System.err.println("makeTube: sig = "+signature);
 		double[] rad = Rn.identityMatrix(4);
 		rad[0] = rad[5] = radius;
 		int nn = frames.length;
+		double lastphi = frames[frames.length-1].phi;
+		double correction = (closed && matchClosedTwist) ? ( lastphi > Math.PI ? (2*Math.PI-lastphi) : -lastphi) / nn : 0.0;
 		for (int i = 0; i<nn; ++i)	{
 			// scale normal vector
 			double sangle = Math.sin( frames[i].theta/2.0);
 			double factor = 1.0;
 			if (sangle != 0) factor = 1.0/sangle;
 			rad[0] = radius *factor;
-			double[] zrot = P3.makeRotationMatrixZ(null,frames[i].phi+ twists*2*Math.PI*frames[i].length);
+			double[] zrot = P3.makeRotationMatrixZ(null,frames[i].phi + i*correction+ twists*2*Math.PI*frames[i].length);
 			double[] scaledFrame = Rn.times(null, frames[i].frame, Rn.times(null, rad, zrot));
 			//LoggingSystem.getLogger().log(Level.FINE,"Theta is "+frames[i].theta);
 			int m = xsec.length;
@@ -168,6 +174,15 @@ import de.jreality.scene.data.StorageModel;
 				int p = j; //m - j - 1;
 				Rn.matrixTimesVector(vals[(i) * m + j], scaledFrame, xsec[p]);
 			}
+		}
+		if (closed && matchClosedTwist)	{		// copy the last cross section over as the first
+			System.err.println("Closing the tube");
+			int m = xsec.length;
+			for (int j = 0; j < m; ++j) {
+				int p = j; //m - j - 1;
+				vals[(nn-1)*m+j] = vals[j];
+			}
+			
 		}
 		return vals;
 	}
@@ -192,7 +207,7 @@ import de.jreality.scene.data.StorageModel;
 		qmf.setGenerateFaceNormals(true);
 		qmf.setGenerateVertexNormals(true);
 		qmf.setEdgeFromQuadMesh(true);
-		qmf.setGenerateEdgesFromFaces(true);
+		qmf.setGenerateEdgesFromFaces(generateEdges);
 		if (generateTextureCoordinates)	{
 			if (!arcLengthTextureCoordinates) qmf.setGenerateTextureCoordinates(true);
 			else {

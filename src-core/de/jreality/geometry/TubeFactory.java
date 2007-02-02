@@ -127,6 +127,8 @@ public  class TubeFactory {
 		public int twists = 0;
 		public boolean generateTextureCoordinates = false;
 		boolean arcLengthTextureCoordinates = false;
+		boolean generateEdges = false;
+		boolean matchClosedTwist = false;
 		public boolean extendAtEnds = false;
 		boolean removeDuplicates = false;
 		boolean duplicatesRemoved = false;
@@ -299,6 +301,22 @@ public  class TubeFactory {
 			this.removeDuplicates = removeDuplicates;
 		}
 
+		public boolean isGenerateEdges() {
+			return generateEdges;
+		}
+
+		public void setGenerateEdges(boolean generateEdges) {
+			this.generateEdges = generateEdges;
+		}
+
+		public boolean isMatchClosedTwist() {
+			return matchClosedTwist;
+		}
+
+		public void setMatchClosedTwist(boolean matchClosedTwist) {
+			this.matchClosedTwist = matchClosedTwist;
+		}
+
 		public SceneGraphComponent getFramesSceneGraphRepresentation()	{
 			return TubeFactory.getSceneGraphRepresentation(frames);
 		}
@@ -429,7 +447,7 @@ public  class TubeFactory {
 		 * @return	an array of length (n-2) of type {@link TubeUtility.FrameInfo} containing an orthonormal frame for each internal point in the initial polygon array.
 		 */
 		public  FrameInfo[] makeFrameField(double[][] polygon, FrameFieldType type, int signature)		{
-			if (!framesDirty) return frames;
+			if (frames!= null && !framesDirty) return frames;
 		 	int n = polygon.length;
 		 	double[][] polygonh;
 		 	// to simplify life, convert all points to homogeneous coordinates
