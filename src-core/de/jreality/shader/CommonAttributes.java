@@ -207,6 +207,7 @@ import de.jreality.scene.Appearance;
 	public final static String RMAN_GLOBAL_INCLUDE_FILE = "rendermanGlobalIncludeFile";	
 	public static final String RMAN_OUTPUT_DISPLAY_FORMAT = "rendermanOutputDisplayFormat";
 	public static final String RMAN_PROXY_COMMAND = "rendermanProxyCommand";
+	public static final String RMAN_ARCHIVE_CURRENT_NODE = "rendermanArchiveCurrentNode";
 	public static final String RMAN_RETAIN_GEOMETRY = "rendermanRetainGeometry";
 	public static final String RMAN_MAX_EYE_SPLITS  = "rendermanMaxEyeSplits";
 
