@@ -940,6 +940,7 @@ public class ViewerVR {
 		boolean beanshell = false;
 		boolean external = true;
 		SceneGraphComponent cmp = null;
+		File prefsFile=null;
 
 		if (args.length != 0) {  //params given
 			LinkedList<String> params = new LinkedList<String>();
@@ -951,17 +952,19 @@ public class ViewerVR {
 				System.out.println("\t -b \t show beanshell");
 				System.out.println("\t -i \t show navigator and/or beanshell in the main frame\n" +
 				"\t\t (otherwise they are opened in separate frames)");
+				System.out.println("\t [file list] \t a list of 3D data files and an optional xml preferences file");
 				System.exit(0);
 			}
 
 			navigator = params.remove("-n");
 			beanshell = params.remove("-b");
 			external = !params.remove("-i");
-
+			
 			if (params.size() != 0) cmp = new SceneGraphComponent();
 			for (String file : params) {
 				try {
-					cmp.addChild(Readers.read(Input.getInput(file)));
+					if (file.toLowerCase().endsWith(".xml")) prefsFile = new File(file);
+					else cmp.addChild(Readers.read(Input.getInput(file)));
 				} catch (IOException e) {
 					System.out.println(e.getMessage());
 				}
@@ -992,6 +995,7 @@ public class ViewerVR {
 		if (cmp != null) vr.setContent(cmp);
 		
 		ViewerApp vApp = vr.initialize();
+		if (prefsFile != null) vr.importPreferences(prefsFile);
 		vApp.setAttachNavigator(navigator);
 		vApp.setExternalNavigator(external);
 		vApp.setAttachBeanShell(beanshell);
