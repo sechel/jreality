@@ -543,7 +543,7 @@ public class WriterVRML
 			out.println("PER_FACE }");
 		else out.println("DEFAULT }");
 	} 
-	public static void writeTexture(Texture2D tex,String hist)throws IOException{
+	private static void writeTexture(Texture2D tex,String hist)throws IOException{
 		/**		WRAP ENUM
 		 *		REPEAT  Repeats texture outside 0-1 texture coordinate range
 		 *		CLAMP   Clamps texture coordinates to lie within 0-1 range
