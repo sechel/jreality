@@ -169,6 +169,8 @@ public final class Readers {
 			format = "JRS";
 		} else if (lcName.endsWith(".pts")) {
 			format = "PTS";
+		} else if (lcName.endsWith(".stl")) {
+			format = "STL";
 		} else if (lcName.endsWith(".wrl") || lcName.endsWith(".vrml")) {
 			format = "VRML";
 		} else if (lcName.endsWith(".m")) {
