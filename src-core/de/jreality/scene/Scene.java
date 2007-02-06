@@ -45,6 +45,8 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.TreeSet;
 
+import de.jreality.geometry.AbstractGeometryFactory;
+
 /**
  * A utility class providing static methods 
  * for applying a set of changes simultaneously to an element of the
@@ -118,5 +120,24 @@ public class Scene
    */
   public static void executeWriter(Collection toRead, Runnable writer) {
     if (true) throw new UnsupportedOperationException("not yet implemented");
+  }
+  
+  /**
+   * not yet tested...
+   * @param factories
+   */
+  public static void updateFactories(AbstractGeometryFactory... factories) {
+	  for (AbstractGeometryFactory factory : factories) {
+		  factory.getGeometry().startWriter();
+	  }
+	  try {
+		  for (AbstractGeometryFactory factory : factories) {
+			  factory.update();
+		  }
+	  } finally {
+		  for (AbstractGeometryFactory factory : factories) {
+			  factory.getGeometry().finishWriter();
+		  }
+	  }
   }
 }
