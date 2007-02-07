@@ -10,7 +10,9 @@ import de.jreality.renderman.RIBViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.ImageData;
+import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
@@ -18,7 +20,7 @@ import de.jreality.util.Input;
 
 public class RendermanTestScene {
   
-  static final int testNr=11;   //testNr: 0..11
+  static final int testNr=13;   //testNr: 0..12
   static final int rendererType = RIBViewer.TYPE_PIXAR;
   static String ribPath = "";
   static String ribFileName = "";
@@ -176,6 +178,56 @@ public class RendermanTestScene {
         } catch (IOException e) {e.printStackTrace();}
       break;
     }  
+    case 12:{
+        IndexedFaceSetFactory twoSideFace=new IndexedFaceSetFactory();
+        twoSideFace.setVertexCount(8);
+        twoSideFace.setVertexCoordinates(new double[][]{{1,0.5,0},{-1,0.5,0},{-1,-0.5,0},{1,-0.5,0},{0,-0.2,1},{-1,-0.2,1},{-1,0.2,1},{0,0.2,1}});
+        twoSideFace.setFaceCount(3);
+        twoSideFace.setFaceIndices(new int[][]{{0,1,2,3},{2,3,4,5},{4,5,6,7}});
+        twoSideFace.setGenerateEdgesFromFaces(true);
+        twoSideFace.setVertexTextureCoordinates(new double[][] {{2,2},{0,2},{0,0},{2,0},{0,0},{1,0},{1,0},{0,2}});
+        twoSideFace.setGenerateFaceNormals(true);
+        twoSideFace.setGenerateVertexNormals(true);
+        twoSideFace.update();
+        faceSetNode.setGeometry(twoSideFace.getGeometry());
+    	faceSetNode.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
+        faceSetNode.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS, 0.05);
+        faceSetNode.getAppearance().setAttribute(CommonAttributes.TUBE_RADIUS, 0.03);
+        
+        DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(faceSetNode.getAppearance(), false);
+        dgs.createPolygonShader("twoSide");
+    	
+    	faceSetNode.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"front"+"."+CommonAttributes.DIFFUSE_COLOR,Color.CYAN);
+    	faceSetNode.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+"back"+"."+CommonAttributes.DIFFUSE_COLOR,Color.MAGENTA);
+    	MatrixBuilder.euclidean().scale(3).assignTo(faceSetNode);
+    	faceSetNode.removeChild(lineSetNode);
+    	break;
+    }
+    case 13:{
+        IndexedFaceSetFactory ifs2=new IndexedFaceSetFactory();
+        ifs2.setVertexCount(8);
+        ifs2.setVertexCoordinates(new double[][]{{1,0.5,0},{-1,0.5,0},{-1,-0.5,0},{1,-0.5,0},{0,-0.2,1},{-1,-0.2,1},{-1,0.2,1},{0,0.2,1}});
+        ifs2.setFaceCount(3);
+        ifs2.setFaceIndices(new int[][]{{0,1,2,3},{2,3,4,5},{4,5,6,7}});
+        ifs2.setGenerateEdgesFromFaces(true);
+        ifs2.setVertexTextureCoordinates(new double[][] {{2,2},{0,2},{0,0},{2,0},{0,0},{1,0},{1,0},{0,2}});
+        ifs2.setGenerateFaceNormals(true);
+        ifs2.setGenerateVertexNormals(true);
+        ifs2.update();
+        faceSetNode.setGeometry(ifs2.getGeometry());
+    	faceSetNode.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, false);
+    	faceSetNode.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW, false);
+    	//faceSetNode.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
+    	faceSetNode.getAppearance().setAttribute(CommonAttributes.POINT_SIZE, 400); 
+    	faceSetNode.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS, 0.2);     
+    	faceSetNode.getAppearance().setAttribute(CommonAttributes.ATTENUATE_POINT_SIZE,false);
+        faceSetNode.getAppearance().setAttribute(CommonAttributes.TUBE_RADIUS, 0.03);
+        faceSetNode.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,Color.MAGENTA);
+        
+        MatrixBuilder.euclidean().scale(3).assignTo(faceSetNode);
+    	faceSetNode.removeChild(lineSetNode);
+    	break;
+    }
     }
     
     ViewerApp va=new ViewerApp(sgc);
