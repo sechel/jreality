@@ -921,19 +921,20 @@ public class RIBVisitor extends SceneGraphVisitor {
 						handlingProxyGeometry = true;  
 						SceneGraphComponent sgc = bsf.getSceneGraphComponent();
 						Appearance ap = new Appearance();
-						Texture2D tex2d = ((de.jreality.shader.DefaultPolygonShader)vps).getTexture2d();
-						CubeMap cubeMap = ((de.jreality.shader.DefaultPolygonShader)vps).getReflectionMap();
-
-						if(tex2d==null)
-							ap.setAttribute("polygonShader.texture2d",  Appearance.DEFAULT);
-						else
-							TextureUtility.createTexture(ap, "polygonShader", tex2d.getImage(), false);
-
-						if(cubeMap==null)
-							ap.setAttribute("polygonShader."+CommonAttributes.REFLECTION_MAP,  Appearance.DEFAULT);
-						else{                      
-							CubeMap lineCubeMap=TextureUtility.createReflectionMap(ap, "polygonShader", TextureUtility.getCubeMapImages(cubeMap));
-							lineCubeMap.setBlendColor(cubeMap.getBlendColor());
+						// TODO figure out if there's a better way to do this
+						if (vps instanceof DefaultPolygonShader)	{
+							Texture2D tex2d = ((de.jreality.shader.DefaultPolygonShader)vps).getTexture2d();
+							CubeMap cubeMap = ((de.jreality.shader.DefaultPolygonShader)vps).getReflectionMap();
+							if(tex2d==null)
+								ap.setAttribute("polygonShader.texture2d",  Appearance.DEFAULT);
+							else
+								TextureUtility.createTexture(ap, "polygonShader", tex2d.getImage(), false);
+							if(cubeMap==null)
+								ap.setAttribute("polygonShader."+CommonAttributes.REFLECTION_MAP,  Appearance.DEFAULT);
+							else{                      
+								CubeMap lineCubeMap=TextureUtility.createReflectionMap(ap, "polygonShader", TextureUtility.getCubeMapImages(cubeMap));
+								lineCubeMap.setBlendColor(cubeMap.getBlendColor());
+							}							
 						}
 						sgc.setAppearance(ap);
 						visit(sgc);
