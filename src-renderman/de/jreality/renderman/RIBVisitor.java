@@ -148,6 +148,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	// user can specify that tubes and spheres drawn by the appearances are to
 	// be opaque reqardless of the current transparency value
 	transient protected boolean opaqueTubes = false;
+	transient protected boolean smooth = true;
 	transient private boolean writeShadersToFile = true;
 	transient private boolean hasPw = false;		// can the renderer handle "Pw" successfully?
 
@@ -181,6 +182,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	private String cubeMapFileSuffix = "env";
 	protected DefaultGeometryShader dgs;
 	protected RenderingHintsShader rhs;
+	// TODO remove these references.
 	protected DefaultPolygonShader dps;
 	protected DefaultLineShader dls;
 	protected DefaultPointShader dvs;
@@ -801,7 +803,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 				// This is something of a hack since we don't really know what the associated string is
 				handlingProxyGeometry = true;  
 				PolygonShader vps = dvs.getPolygonShader();
-				RendermanShader rs = RIBHelper.processPolygonShader(vps, this, "pointShader.polygonShader");
+				RIBHelper.processPolygonShader(vps, this, "pointShader.polygonShader");
 
 				double[][] vColData=null;
 				if( p.getVertexAttributes(Attribute.COLORS)!=null)
@@ -1112,7 +1114,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 		if (color != null && color.length == 4 && color[3] == 0.0 && ignoreAlpha0) return;
 		if (npolys != 0) {
 			HashMap<String, Object> map = new HashMap<String, Object>();
-			boolean smooth = dps.getSmoothShading();
 			DataList coords = i.getVertexAttributes(Attribute.COORDINATES);
 			DoubleArrayArray da = coords.toDoubleArrayArray();
 			int pointlength = GeometryUtility.getVectorLength(coords);

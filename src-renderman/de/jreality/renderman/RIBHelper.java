@@ -45,6 +45,7 @@ public class RIBHelper {
 			rs = rdps;
 			Cs = dps.getDiffuseColor();
 			transparency = (float)dps.getTransparency().floatValue();
+			ribv.smooth = dps.getSmoothShading();
 		} 
 		else if (ps instanceof de.jreality.shader.TwoSidePolygonShader)	{
 //			System.err.println("processing twosidepolygonshader");
@@ -55,6 +56,7 @@ public class RIBHelper {
 			de.jreality.shader.DefaultPolygonShader dpss = ((de.jreality.shader.DefaultPolygonShader)dps.getFront());
 			Cs = dpss.getDiffuseColor();
 			transparency = (float)dpss.getTransparency().floatValue();
+			// TODO figure out how to read out a reasonable "smooth" value from this shader
 		}
 		else {
 			LoggingSystem.getLogger(ShaderUtility.class).warning("Unknown shader class "+ps.getClass());
