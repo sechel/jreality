@@ -63,14 +63,24 @@ public class PickShowTool extends AbstractTool {
   private transient boolean attached;
   private double radius=0.005;
   
+  public PickShowTool(String activationAxis, double radius) {
+	    super(activationAxis == null ? null : InputSlot.getDevice(activationAxis));
+	    this.radius=radius;
+	    init();
+	  }
+
+private void init() {
+	addCurrentSlot(InputSlot.getDevice("PointerTransformation"));
+	c.addChild(Primitives.sphere(1, 0, 0, 0));
+	c.setName("pick display");
+	c.setAppearance(a);
+	PickUtility.setPickable(c, false);
+	a.setAttribute(CommonAttributes.FACE_DRAW, true);
+}
+
   public PickShowTool() {
     super();
-    addCurrentSlot(InputSlot.getDevice("PointerTransformation"));
-    c.addChild(Primitives.sphere(1, 0, 0, 0));
-    c.setName("pick display");
-    c.setAppearance(a);
-    PickUtility.setPickable(c, false);
-    a.setAttribute(CommonAttributes.FACE_DRAW, true);
+    init();
   }
 
   public void activate(ToolContext tc) {
