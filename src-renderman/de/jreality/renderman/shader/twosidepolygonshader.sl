@@ -11,6 +11,22 @@
  */
 
 
+// replace the standard specular function with one that matches the other jreality backends
+float 
+myspecularbrdf(vector L, N, V; float roughness)
+{
+    vector H = normalize(L+V);
+    return pow(max(0, N.H), 1/roughness);
+}
+
+color myspecular( normal N; vector V; float roughness )
+{
+    color C = 0;
+    illuminance( P, N, PI/2 ) 
+    C += Cl * myspecularbrdf(normalize(L), N, V, roughness);
+    return C;
+}
+
 surface
 twosidepolygonshader ( 
     float Kafront = 0, 
@@ -75,7 +91,6 @@ twosidepolygonshader (
     transparencyenabled = transparencyenabledback;   
   }
   
-  
   matrix textureMatrix = matrix "current" (tm[0],tm[1],tm[2],tm[3],tm[4],tm[5],tm[6],tm[7],tm[8],tm[9],tm[10],tm[11],tm[12],tm[13],tm[14],tm[15]);
 
   // evaluate the texture map, if any
@@ -92,23 +107,24 @@ twosidepolygonshader (
 	
 	// look for optional transparency channel
 	tr = float texture(texturename[3],ss,tt, "fill",1);
+   
     Ct = color texture (texturename,ss, tt);
     // the following code should depend on an option such
     // as the OpenGL blend, modulate, replace, decal, etc options!
     // the following is possibly none of the openGL options.
-    Ct = diffusecolor * Ct; 
+    Ct = Cs * Ct; 
   }
-  else Ct = diffusecolor;
+  else Ct = Cs;
 
-  // modulate the opacity by the alpha channel of the texture
-  if(transparencyenabled==1)
-  	Oi = Os*tr;
-  else{
-    if(tr==0)
-       Oi=0;
-    else
-       Oi=Os;  
-  }
+    // modulate the opacity by the alpha channel of the texture
+    if (transparencyenabled != 0.0)
+  	    Oi = Os*tr;
+    else {
+        if (tr==0)
+            Oi=0;
+        else
+            Oi=1; //Os;  
+    }
 
   if (lighting != 0)  {
         Nf = faceforward (normalize(N),I);
@@ -133,7 +149,7 @@ twosidepolygonshader (
 
   // the surface color is a sum of ambient, diffuse, specular
   if (lighting != 0)
-        Ci = Oi * ( Ct + specularcolor * Ks*specular(Nf,V,roughness) );
+        Ci = Oi * ( Ct + specularcolor * Ks*myspecular(Nf,V,roughness) );
   else 
         Ci = Oi * Ct;
 
