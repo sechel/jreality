@@ -12,18 +12,12 @@ public class FaceDragEvent extends EventObject {
     private final int index;
     private final double[] translation;
 	private final IndexedFaceSet faceSet;
-	private int[] faceIndices;
-	private double[][] faceVertices;
   
 	public FaceDragEvent(IndexedFaceSet faceSet, int index, double[] translation) {
 		super(faceSet);
     this.faceSet=faceSet;
     this.index=index;
     this.translation = (double[])translation.clone();
-    this.faceIndices = faceSet.getFaceAttributes(Attribute.INDICES).toIntArrayArray().getValueAt(index).toIntArray(null);
-	this.faceVertices=new double[faceIndices.length][];
-	for(int i=0;i<faceIndices.length;i++)
-		faceVertices[i]=faceSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray().getValueAt(faceIndices[i]).toDoubleArray(null);
 	}
 	
 	/** The x-coordinate of this event's translation. */
@@ -48,11 +42,29 @@ public class FaceDragEvent extends EventObject {
   public int getIndex() {
 	  return index;
   }
+  
+  /**
+   * BE CAREFUL: this method uses the face index when the drag started. So it makes only sense to use it
+   * when the combinatorics of the indexed face set was not changed while dragging.
+   * @return an array containing the indices of the face vertices
+   * @throws ArrayIndexOutOfBoundsException
+   */
   public int[] getFaceIndices() {
-	  return faceIndices;
+	  return faceSet.getFaceAttributes(Attribute.INDICES).toIntArrayArray().getValueAt(index).toIntArray(null);
   }  
+
+  /**
+   * BE CAREFUL: this method uses the face index when the drag started. So it makes only sense to use it
+   * when the combinatorics of the indexed face set was not changed while dragging.
+   * @return an array containing the face vertices
+   * @throws ArrayIndexOutOfBoundsException
+   */
   public double[][] getFaceVertices(){
-	  return faceVertices;
+	  int []faceIndices = getFaceIndices();
+	  double[][] faceVertices=new double[faceIndices.length][];
+			for(int i=0;i<faceIndices.length;i++)
+				faceVertices[i]=faceSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray().getValueAt(faceIndices[i]).toDoubleArray(null);
+			return faceVertices;
   }  
   public IndexedFaceSet getIndexedFaceSet() {
     return faceSet;

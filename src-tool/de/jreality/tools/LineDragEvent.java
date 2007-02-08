@@ -13,8 +13,6 @@ public class LineDragEvent extends EventObject {
     private final double[] translation;
     private final double[] position;
 	private final IndexedLineSet lineSet;
-	private int[] lineIndices;
-	private double[][] lineVertices;
   
 	public LineDragEvent(IndexedLineSet lineSet, int index, double[] translation,double[] position) {
 		super(lineSet);
@@ -22,10 +20,6 @@ public class LineDragEvent extends EventObject {
     this.index=index;
     this.translation = (double[])translation.clone();
     this.position  = (double[])position.clone();
-    this.lineIndices = lineSet.getEdgeAttributes(Attribute.INDICES).toIntArrayArray().getValueAt(index).toIntArray(null);
-	this.lineVertices=new double[lineIndices.length][];
-	for(int i=0;i<lineIndices.length;i++)
-		lineVertices[i]=lineSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray().getValueAt(lineIndices[i]).toDoubleArray(null);
 	}
 	
 	/** The x-coordinate of this event's translation. */
@@ -54,10 +48,28 @@ public class LineDragEvent extends EventObject {
   public int getIndex() {
 	  return index;
   }
+
+  /**
+   * BE CAREFUL: this method uses the line index when the drag started. So it makes only sense to use it
+   * when the combinatorics of the indexed line set was not changed while dragging.
+   * @return an array containing the indices of the line vertices
+   * @throws ArrayIndexOutOfBoundsException
+   */
   public int[] getLineIndices() {
-	  return lineIndices;
+	  return lineSet.getEdgeAttributes(Attribute.INDICES).toIntArrayArray().getValueAt(index).toIntArray(null);
   }  
+  
+  /**
+   * BE CAREFUL: this method uses the line index when the drag started. So it makes only sense to use it
+   * when the combinatorics of the indexed line set was not changed while dragging.
+   * @return an array containing the line vertices
+   * @throws ArrayIndexOutOfBoundsException
+   */
   public double[][] getLineVertices(){
+	    int[] lineIndices = getLineIndices();
+		double[][] lineVertices=new double[lineIndices.length][];
+		for(int i=0;i<lineIndices.length;i++)
+			lineVertices[i]=lineSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray().getValueAt(lineIndices[i]).toDoubleArray(null);
 	  return lineVertices;
   }  
   public IndexedLineSet getIndexedLineSet() {
