@@ -143,6 +143,17 @@ public class WriterVRML
 
 		// write content
 		out.print(""+hist+"Separator { ");
+		out.println("# "+c.getName());
+		
+		// write INFO STRING
+		if (c.getAppearance()!=null){
+			Appearance a=c.getAppearance();
+			if(a.getAttribute("infoString", String.class)!=null){
+				String info= (String)a.getAttribute("infoString", String.class);
+				writeInfoString(info, hist+spacing);
+			}
+		};
+		
 		// defaults:
 		/*		ShapeHints {
 	          vertexOrdering  UNKNOWN_ORDERING      # SFEnum
@@ -150,7 +161,7 @@ public class WriterVRML
 	          faceType        CONVEX                # SFEnum
 	          creaseAngle     0.5                   # SFFloat
 	     }*/
-		out.println(""+hist+"ShapeHints { ");
+		out.println(""+hist+"ShapeHints { # some default Parameters ");
 		out.println(""+hist2+"vertexOrdering  UNKNOWN_ORDERING");
 		out.println(""+hist2+"shapeType       UNKNOWN_SHAPE_TYPE");
 		out.println(""+hist2+"faceType        CONVEX");
@@ -158,7 +169,6 @@ public class WriterVRML
 		//
 		
 		
-		out.println("# "+c.getName());
 		if (t!=null)		writeTrafo(t,hist2);
 		for (int i=0;i<c.getChildComponentCount();i++)
 			writeComp(c.getChildComponent(i),hist2,eApp);
@@ -679,6 +689,12 @@ public class WriterVRML
 			System.arraycopy(d,i*width,n,0,4);
 			writeDoubleArray(n,hist,"",n.length);
 		}
+	}
+	private static void writeInfoString(String info,String hist)throws IOException{
+		 /*Info {
+	          string  "<Undefined info>"      # SFString
+	     }	*/
+		out.println(hist+"Info { string \"" +info+ "\" }");	
 	}
 	private static void writeIndices(int[][] in,String hist)throws IOException{
 		if (in==null)throw new IOException("no coordinate Indices");
