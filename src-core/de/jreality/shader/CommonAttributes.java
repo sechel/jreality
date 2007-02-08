@@ -72,10 +72,9 @@ import de.jreality.scene.Appearance;
     public final static boolean  FOG_ENABLED_DEFAULT = false;
     public final static String FOG_COLOR = "fogColor";
     public final static String FOG_DENSITY = "fogDensity";
-    public final static double FOG_DENSITY_DEFAULT = 0.1;
-    
-    public final static String NAME ="name";
-	// rendering hints
+    public final static double FOG_DENSITY_DEFAULT = 0.1;  
+
+    // rendering hints
 	public final static String LIGHTING_ENABLED 	= 		"lightingEnabled";
 	public final static String ANTIALIASING_ENABLED = 	"antiAliasing";
 	public final static String FAST_AND_DIRTY_ENABLED = 	"isFastAndDirty";
@@ -98,6 +97,7 @@ import de.jreality.scene.Appearance;
 	public final static String LOCAL_LIGHT_MODEL = "localLightModel";
 	public final static String SEPARATE_SPECULAR_COLOR = "separateSpecularColor";
 	public final static String COMPONENT_DISPLAY_LISTS = "componentDisplayLists";
+
 	// default geometry shader
 	public final static String FACE_DRAW = 		"showFaces";
 	public final static boolean FACE_DRAW_DEFAULT = true;
@@ -148,6 +148,7 @@ import de.jreality.scene.Appearance;
 	public final static String LINE_FACTOR = 		"lineFactor";
 	public final static String LINE_STIPPLE_PATTERN = "lineStipplePattern";
 	public static final Color LINE_DIFFUSE_COLOR_DEFAULT = Color.BLACK;
+
 	// default polygon shader
 	public final static String SMOOTH_SHADING = 	"smoothShading";		// interpolate vertex shading values?
 	public final static boolean SMOOTH_SHADING_DEFAULT = true;
@@ -184,6 +185,7 @@ import de.jreality.scene.Appearance;
 	// miscellaneous
 	public static final String PICKABLE = "pickable";
 	public static final String SIGNATURE= "signature";
+	public static final String INFO_STRING = "infoString";
 	
 	// RenderMan backend attributes
 	public final static String RMAN_ATTRIBUTE = "rendermanAttribute";
