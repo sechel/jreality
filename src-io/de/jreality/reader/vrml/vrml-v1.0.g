@@ -1673,7 +1673,7 @@ RESTLINE:
 	 ;
 	
 protected
-HEADER1:	"#VRML V1.0 ascii";
+HEADER1:	"#VRML V1.0 ascii" | "#Inventor V2.1 ascii";
 
 
 HEADER:	{getLine()==1}?	HEADER1 RESTLINE

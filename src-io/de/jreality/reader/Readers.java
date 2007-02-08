@@ -171,7 +171,7 @@ public final class Readers {
 			format = "PTS";
 		} else if (lcName.endsWith(".stl")) {
 			format = "STL";
-		} else if (lcName.endsWith(".wrl") || lcName.endsWith(".vrml")) {
+		} else if (lcName.endsWith(".wrl") || lcName.endsWith(".vrml") || lcName.endsWith(".iv")) {
 			format = "VRML";
 		} else if (lcName.endsWith(".m")) {
 			format = "MATHEMATICA";
