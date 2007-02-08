@@ -583,7 +583,8 @@ public class Primitives {
 		    
 		    factory.setGenerateFaceNormals(true);
 		    factory.setGenerateVertexNormals(true);
-        
+		    factory.setGenerateEdgesFromFaces(true);
+		    factory.setEdgeFromQuadMesh(true);
 		    factory.update();
 		    String rmanproxy = String.format("TransformBegin\n"+
 		    		"Rotate 90 1 0 0\n"+

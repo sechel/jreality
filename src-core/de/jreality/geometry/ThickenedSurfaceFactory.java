@@ -106,7 +106,8 @@ import de.jreality.scene.data.IntArrayArray;
 	 * For example, the triple <code>{{0,0},{.5,1},{1,0}}</code> results in a profile curve that
 	 * begins on the bottom surface (x = 0) at the original edge (y=0), moves to the middle between top and bottom
 	 * (x = .5) at the center of the hole (y=1), and ends at the top surface (x = 0) at the original edge
-	 * there (y = 0).
+	 * there (y = 0).			examples.put("borromean ring",surface);
+
 	 * @param profileCurve
 	 */public void setProfileCurve(double[][] profileCurve) {
 		this.profileCurve = profileCurve;
@@ -253,7 +254,7 @@ import de.jreality.scene.data.IntArrayArray;
 					}
 				}
 			}
-			if (anyFace[i] == -1) throw new IllegalStateException("Can't find face for this vertex");
+//			if (anyFace[i] == -1) throw new IllegalStateException("Can't find face for this vertex");
 		}
 		int n = oldV.length;
 		int fiberlength = oldV[0].length;
@@ -372,14 +373,16 @@ import de.jreality.scene.data.IntArrayArray;
 			if (linearHole)	{
 				tangentQuadricBottom = borderBottom;
 				tangentQuadricTop = borderTop;				
-			} else if (curvedEdges)	{
-				double[][] controlpoints = linearHole(bottomface, newV, newVN, 2, curvedEdges);
-				tangentQuadricBottom = quadraticHole(bottomface, stepsPerEdge, controlpoints);
-				controlpoints = linearHole(topface, newV, newVN, 2, curvedEdges);
-				tangentQuadricTop = quadraticHole(topface, stepsPerEdge, controlpoints);				
 			} else {
-				tangentQuadricBottom = linearHole ? borderBottom : quadraticHole(bottomface, newV, stepsPerEdge);
-				tangentQuadricTop = linearHole ? borderTop : quadraticHole(topface, newV, stepsPerEdge);								
+				if (curvedEdges)	{
+					double[][] controlpoints = linearHole(bottomface, newV, newVN, 2*stepsPerEdge, curvedEdges);
+					tangentQuadricBottom = quadraticCurvedHole(bottomface, stepsPerEdge, controlpoints);
+					controlpoints = linearHole(topface, newV, newVN, 2*stepsPerEdge, curvedEdges);
+					tangentQuadricTop = quadraticCurvedHole(topface, stepsPerEdge, controlpoints);				
+				} else { 
+					tangentQuadricBottom = linearHole ? borderBottom : quadraticHole(bottomface, newV, stepsPerEdge);
+					tangentQuadricTop = linearHole ? borderTop : quadraticHole(topface, newV, stepsPerEdge);								
+				}
 			}
 			int[] nonDuplicateVertexIndicesForThisHole = new int[totalVertsThisFace];
 			// for each element of the profile curve ...
@@ -400,6 +403,7 @@ import de.jreality.scene.data.IntArrayArray;
 						vb = tangentQuadricBottom[j]; //Rn.linearCombination(null, 1-t, vb1, t,vb2);
 						vt = tangentQuadricTop[j]; //Rn.linearCombination(null, 1-t, vt1, t,vt2);
 					}
+					// omit following code since it's not compatible with assigning texture coordinates to vertices
 					// look for shared vertices along edges
 //					int vertexIndex = -1;
 //					SharedVertex sv = null;
@@ -460,7 +464,7 @@ import de.jreality.scene.data.IntArrayArray;
 			}
 			allVertCount += totalVertsThisFace;
 		}
-		System.err.println("Found "+foundSharedVerts+" shared vertices");
+//		System.err.println("Found "+foundSharedVerts+" shared vertices");
 		thickSurfaceIFSF.setVertexCount(allVerts);
 		thickSurfaceIFSF.setFaceCount(allFaces);
 		thickSurfaceIFSF.setVertexCoordinates(allVertices);
@@ -495,8 +499,6 @@ import de.jreality.scene.data.IntArrayArray;
 				double[] dv = Rn.subtract(null, vb2, vb1);
 				double length = Pn.norm(dv, signature);
 				double[] t1 = Pn.projectOntoComplement(null, nv[face[j]], dv, signature);
-				double ip = Pn.innerProduct(nv[j], t1, signature);
-//				System.err.println("Inner product is "+ip);
 				Pn.setToLength(t1, t1, length/3, signature);
 				dv = Rn.subtract(null, vb1, vb2);
 				double[] t2 = Pn.projectOntoComplement(null, nv[face[(j+1)%fsize]], dv, signature);
@@ -549,6 +551,36 @@ import de.jreality.scene.data.IntArrayArray;
 		}
 		System.arraycopy(values[0], 0, values[values.length-1], 0, values[0].length);
 		//values[0] = values[values.length-1];
+		return values;
+	}
+	private static double[][] quadraticCurvedHole(int[] face, int stepsPerEdge, double[][] lch) {
+		double[][] values = new double[face.length * stepsPerEdge+1][lch[0].length];
+		int lchl = lch.length;
+		int fsize = face.length;
+		for (int j = 0; j<fsize; ++j)	{
+			int i0 = (2*stepsPerEdge*j+stepsPerEdge)%(lchl);
+			int i1 = (2*stepsPerEdge*(j+1))%(lchl);
+//			int i2 = (2*j+3)%(2*fsize);
+//			boolean even = (stepsPerEdge % 2) == 0;
+			for (int jj = 0; jj<stepsPerEdge; ++jj)	{
+				double t = jj/(stepsPerEdge*1.0);
+				double[] p1 = Rn.linearCombination(null, 1-t, lch[(i0+jj)%lchl], t, lch[(i1+jj)%lchl]);
+//				double a0 = (1-t)*(1-t);
+//				double a1 = 2*(1-t)*t;
+//				double a2 = t*t;
+//				// don't ask!
+				int index = (j*stepsPerEdge + (stepsPerEdge + 1)/2 +  jj+values.length-1) % (values.length-1);
+//				System.err.println("Index is "+index);
+				values[index] = p1;
+//				for (int k = 0; k<controlpoints[0].length; ++k)	{
+//					values[index][k] = a0*controlpoints[i0][k];
+//					values[index][k] += a1*controlpoints[i1][k];
+//					values[index][k] += a2*controlpoints[i2][k];
+//				}
+			}
+		}
+		System.arraycopy(values[0], 0, values[values.length-1], 0, values[0].length);
+//		//values[0] = values[values.length-1];
 		return values;
 	}
 
