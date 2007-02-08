@@ -52,7 +52,9 @@ public class WriterVRML
 //extends SceneGraphVisitor 
 {
 	// for  DEF & USE
-	private static HashMap<Integer, SceneGraphComponent> cmpMap = new HashMap<Integer, SceneGraphComponent>();
+	//private static HashMap<Integer, SceneGraphComponent> cmpMap = new HashMap<Integer, SceneGraphComponent>();
+	private static HashMap<Integer, Geometry> geoMap = new HashMap<Integer, Geometry>();
+	
 	
 	private static DefaultGeometryShader dgs;
 	private static RenderingHintsShader rhs;
@@ -147,13 +149,13 @@ public class WriterVRML
 		
 		// write INFO STRING
 		if (c.getAppearance()!=null){
-			Appearance a=c.getAppearance();
-			if(a.getAttribute("infoString", String.class)!=null){
-				String info= (String)a.getAttribute("infoString", String.class);
+			Object obj = c.getAppearance().getAttribute(
+					CommonAttributes.INFO_STRING, String.class);
+			if (obj instanceof String && obj!=null){
+				String info= (String)obj;
 				writeInfoString(info, hist+spacing);
 			}
-		};
-		
+		}
 		// defaults:
 		/*		ShapeHints {
 	          vertexOrdering  UNKNOWN_ORDERING      # SFEnum
@@ -167,8 +169,6 @@ public class WriterVRML
 		out.println(""+hist2+"faceType        CONVEX");
 		out.println(""+hist+"}");
 		//
-		
-		
 		if (t!=null)		writeTrafo(t,hist2);
 		for (int i=0;i<c.getChildComponentCount();i++)
 			writeComp(c.getChildComponent(i),hist2,eApp);
@@ -182,13 +182,6 @@ public class WriterVRML
 			EffectiveAppearance parentEA)throws IOException{
 		if (c==null)throw new IOException("A SceneGraphComponent is null");
 		if (!c.isVisible()) return;
-		// check if allready defined
-		if (cmpMap.containsKey(c.toString())){
-			out.println(""+hist+"USE \""+c.hashCode()+"\"");
-			return;
-		}
-		cmpMap.put(c.hashCode(), c);
-		
 		// write 
 		String hist2= hist+spacing;
 
@@ -202,7 +195,6 @@ public class WriterVRML
 		Transformation t= c.getTransformation();
 
 		// write content
-		out.println(""+hist+"DEF \""+c.hashCode()+"\"");
 		out.println(""+hist+"Separator { # "+c.getName());
 		if (t!=null)		writeTrafo(t,hist2);
 		for (int i=0;i<c.getChildComponentCount();i++)
@@ -213,21 +205,36 @@ public class WriterVRML
 		out.println(""+hist+"}");
 	}
 	private static void writeGeo(Geometry g,String hist)throws IOException{
+		String hist2= hist+spacing;
+// Geom Primitives
 		if (g instanceof Sphere){
 			if (dgs.getShowFaces())	writeSphere((Sphere)g,hist);return;}
 		if (g instanceof Cylinder ){
 			if (dgs.getShowFaces())	writeCylinder((Cylinder)g,hist);return;}
-		if (g instanceof IndexedFaceSet)
-			if (dgs.getShowFaces())	writeGeoFaces((IndexedFaceSet) g,hist);		
-		if (g instanceof IndexedLineSet)
-			if(dls.getTubeDraw()&& dgs.getShowLines())
-				writeGeoLines((IndexedLineSet) g,hist);
-		if (g instanceof PointSet){
-			if(dvs.getSpheresDraw()&& dgs.getShowPoints())
-			    writeGeoPoints((PointSet) g,hist);
+// check if allready defined
+		if (geoMap.containsKey(g.hashCode())){
+			out.println(""+hist+"USE \""+g.hashCode()+"\"");
 			return;
 		}
-		else System.err.println("WriterVRML.writeComp() unknown geometrytype");
+// put in Map
+		geoMap.put(g.hashCode(), g);
+// Define & write Geo
+		out.print(""+hist+"DEF \""+g.hashCode()+"\"");
+		out.println(" Separator { ");
+		if (g instanceof IndexedFaceSet)
+			if (dgs.getShowFaces())	writeGeoFaces((IndexedFaceSet) g,hist2);		
+		if (g instanceof IndexedLineSet)
+			if(dls.getTubeDraw()&& dgs.getShowLines())
+				writeGeoLines((IndexedLineSet) g,hist2);
+		if (g instanceof PointSet){
+			if(dvs.getSpheresDraw()&& dgs.getShowPoints())
+			    writeGeoPoints((PointSet) g,hist2);
+			out.println(""+hist+"} ");
+			return;
+		}
+		out.println(""+hist+"# unknown Geometry ");
+		out.println(""+hist+"} ");
+		System.err.println("WriterVRML.writeComp() unknown geometrytype");
 	}
 	private static void writeSphere(Sphere s,String hist){
 		/**	Sphere {
