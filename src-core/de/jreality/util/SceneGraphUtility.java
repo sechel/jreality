@@ -273,4 +273,31 @@ public class SceneGraphUtility {
       template.accept(cv);
       return cv.getCopy();
     }
+
+	public static Geometry getFirstGeometry(SceneGraphComponent sgc) {
+		class GetFirstGeometryVisitor extends SceneGraphVisitor {
+			boolean found = false;
+			Geometry geom = null;
+			@Override
+			public void visit(Geometry g) {
+				if (found) return;
+				geom = g;
+				found = true;
+			}
+
+			@Override
+			public void visit(SceneGraphComponent c) {
+				if (found) return;
+				c.childrenAccept(this);	
+			}
+			Geometry getGeometry()	{
+				return geom;
+			}
+			
+		}
+		
+		GetFirstGeometryVisitor gfgv = new GetFirstGeometryVisitor();
+		gfgv.visit(sgc);
+		return gfgv.getGeometry();
+	}
  }
