@@ -147,7 +147,7 @@ vrmlFile returns [SceneGraphComponent r=null]
 			p.push(root);
 			Transformation t = null;
 			State state = new State();
-			state.diffuse=new Color[]{new Color(0,0,1f)};
+			state.diffuse=new Color[]{};
 			state.trafo=t;
 			state.currNode=root;
 			state.camPath=p;

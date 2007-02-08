@@ -40,7 +40,7 @@ public class State {
 	// data
 	String history="";			// Info History String
 	public Color[] ambient=new Color[]{};	// color 
-	public Color[] diffuse= new Color[]{new Color(0,0,1)};
+	public Color[] diffuse= new Color[]{};
 	public Color[] specular= new Color[]{};
 	public Color[] emissive= new Color[]{}; 
 	public double[] shininess= new double[]{};
