@@ -329,7 +329,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 				if (! Pn.isValidCoordinate(transVec, 3, sig)) continue;
 				if (ra != null)	{
                     double radius = ra.getValueAt(i);
-					scale[0] = scale[5] = scale[10] = radius;
+					scale[0] = scale[5] = scale[10] = pointRadius*radius;
 				}
 				gl.glPushMatrix();
 				P3.makeTranslationMatrix(mat, transVec,sig);

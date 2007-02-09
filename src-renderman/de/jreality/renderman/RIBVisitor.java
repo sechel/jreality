@@ -523,9 +523,11 @@ public class RIBVisitor extends SceneGraphVisitor {
 		if (!fogEnabled) return;
 		HashMap<String, Object> fogMap=new HashMap<String, Object>();  
 		// if no fog color is set, use background color
-		Color fogcolor = (Color)eAppearance.getAttribute(CommonAttributes.FOG_COLOR, Appearance.INHERITED);
-		if (fogcolor == Appearance.INHERITED) 
+		Color fogcolor;
+		obj =  eAppearance.getAttribute(CommonAttributes.FOG_COLOR, Appearance.INHERITED);
+		if (obj == Appearance.INHERITED) 
 			fogcolor = (Color)eAppearance.getAttribute(CommonAttributes.BACKGROUND_COLOR,RootAppearance.BACKGROUND_COLOR_DEFAULT);
+		else fogcolor = (Color) obj;
 		fogMap.put("background",fogcolor);
 		fogMap.put("distance",new Float(1/(double)eAppearance.getAttribute(CommonAttributes.FOG_DENSITY, CommonAttributes.FOG_DENSITY_DEFAULT)));
 		ri.atmosphere("fog", fogMap);    
@@ -1298,7 +1300,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			if (color != null) {
 				float[] f = new float[3];
 				ri.color(new float[] { color[0], color[1], color[2] });
-				float thisOpacity = 1.0f;
+				float thisOpacity = currentOpacity;
 				if (color.length == 4) {
 					thisOpacity = color[3] * currentOpacity;
 					f[0] = f[1] = f[2] = thisOpacity;
