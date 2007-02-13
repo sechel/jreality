@@ -144,6 +144,37 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 		return vertexCoordinates;
 	}
 
+	public double [][] getDomainVertices( double [][] uvpoints ) {
+		
+		final Immersion immersion = getImmersion();
+		if (uvpoints == null || uvpoints.length != nov() || uvpoints[0].length != 2)
+			uvpoints = new double[nov()][2];
+			
+		final int vLineCount = getVLineCount();
+		final int uLineCount = getULineCount();
+		
+		final double dv=(getVMax() - getVMin()) / (vLineCount - 1);
+		final double du=(getUMax() - getUMin()) / (uLineCount - 1);
+		
+		final double uMin = getUMin();
+		final double vMin = getVMin();
+		
+		double v=vMin;
+		for(int iv=0, firstIndexInULine=0;
+		iv < vLineCount;
+		iv++, v+=dv, firstIndexInULine+=uLineCount) {
+			double u=uMin;
+			for(int iu=0; iu < uLineCount; iu++, u+=du) {
+				int i = uLineCount*iv + iu;
+				uvpoints[ i ][0] = u;
+				uvpoints[ i ][1] = v;
+			}
+		}
+			
+		
+		return uvpoints;
+	}
+
 	public Immersion getImmersion() {
 		return (Immersion)immersion.getObject();
 	}
