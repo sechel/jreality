@@ -33,8 +33,6 @@
 	<classpathentry kind="lib" path="lib/sunflow.jar"/>
 	<classpathentry kind="lib" path="lib/xpp3.jar"/>
 	<classpathentry kind="lib" path="lib/xstream.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/vrData.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/vrExamples.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3.8.1"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
