@@ -67,7 +67,8 @@ public class SceneGraphNode {
   
   private boolean readOnly;
   private String  name;
-    
+  private Object owner = null;
+  
   public SceneGraphNode(String name) {
 	  this.name=name;
   }
@@ -115,7 +116,15 @@ public class SceneGraphNode {
     nodeLock.writeUnlock();
   }
 
-  /**
+  public Object getOwner() {
+	return owner;
+}
+
+public void setOwner(Object owner) {
+	this.owner = owner;
+}
+
+/**
    * this method is called berfore a sequence of write operations
    * are executed. So the changed object can collect the changed information
    * and broadcast changes via events when calling @see finishWriter;
