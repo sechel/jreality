@@ -89,10 +89,8 @@ public class TwoSidePolygonShader extends AbstractRendermanShader {
     rback.setFromEffectiveAppearance(ribv, eap, name, "back");
     map.putAll(rfront.getAttributes());
     map.putAll(rback.getAttributes());
-    Color diffuseColorFront =(Color) eap.getAttribute(name+".front."+CommonAttributes.DIFFUSE_COLOR, CommonAttributes.DIFFUSE_COLOR_DEFAULT);   
-    map.put("color diffusecolorfront", diffuseColorFront);
-    Color diffuseColorBack =(Color) eap.getAttribute(name+".back."+CommonAttributes.DIFFUSE_COLOR, CommonAttributes.DIFFUSE_COLOR_DEFAULT);
-    map.put("color diffusecolorback", diffuseColorBack);
+    map.put("color diffusecolorfront", front.getDiffuseColor());
+    map.put("color diffusecolorback", back.getDiffuseColor());
   }
   
   public String getType() {
