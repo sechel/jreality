@@ -91,6 +91,7 @@ twosidepolygonshader (
     transparencyenabled = transparencyenabledback;   
   }
   
+ 
   matrix textureMatrix = matrix "current" (tm[0],tm[1],tm[2],tm[3],tm[4],tm[5],tm[6],tm[7],tm[8],tm[9],tm[10],tm[11],tm[12],tm[13],tm[14],tm[15]);
 
   // evaluate the texture map, if any
@@ -112,9 +113,9 @@ twosidepolygonshader (
     // the following code should depend on an option such
     // as the OpenGL blend, modulate, replace, decal, etc options!
     // the following is possibly none of the openGL options.
-    Ct = Cs * Ct; 
+    Ct = diffusecolor * Ct; 
   }
-  else Ct = Cs;
+  else Ct = diffusecolor;
 
     // modulate the opacity by the alpha channel of the texture
     if (transparencyenabled != 0.0)

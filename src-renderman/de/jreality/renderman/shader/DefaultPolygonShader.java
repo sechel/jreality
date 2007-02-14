@@ -101,7 +101,7 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
     map.put("float lighting"+side, new Float( lighting ? 1 : 0));
     
     boolean transp = (boolean) eap.getAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false);
-    map.put("float transparencyenabled",new Float(transp ? 1 : 0));    
+    map.put("float transparencyenabled"+side,new Float(transp ? 1 : 0));    
     
     if (signature != Pn.EUCLIDEAN) {
       map.put("signature", signature);
