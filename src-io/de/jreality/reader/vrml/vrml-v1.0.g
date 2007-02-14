@@ -1375,7 +1375,7 @@ sfimageValue returns[int[][][] colors = new int[][][]{{{}}} ]
 		 for (int i=0;i<width;i++)
 		 	for (int j=0;j<height;j++)
 		 		for (int k=0;k<colorDim;k++)
-		 			colors[i][j][k]=colL[i*width+j][k];
+		 			colors[i][j][k]=colL[i*height+j][k];
 		}
 	;
 
