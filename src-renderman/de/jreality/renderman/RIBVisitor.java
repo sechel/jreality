@@ -147,8 +147,13 @@ public class RIBVisitor extends SceneGraphVisitor {
 	transient protected boolean useProxyCommands = true;
 	// user can specify that tubes and spheres drawn by the appearances are to
 	// be opaque reqardless of the current transparency value
+	transient protected Color cs = null;
 	transient protected boolean opaqueTubes = false;
 	transient protected boolean smooth = true;
+	transient protected boolean drawSpheres=true;
+	transient protected boolean drawTubes=true;
+	transient protected float tubeRadius = 0.1f;
+	transient protected float pointRadius = 0.1f;
 	transient private boolean writeShadersToFile = true;
 	transient private boolean hasPw = false;		// can the renderer handle "Pw" successfully?
 
@@ -183,9 +188,9 @@ public class RIBVisitor extends SceneGraphVisitor {
 	protected DefaultGeometryShader dgs;
 	protected RenderingHintsShader rhs;
 	// TODO remove these references.
-	protected DefaultPolygonShader dps;
+/*	protected DefaultPolygonShader dps;
 	protected DefaultLineShader dls;
-	protected DefaultPointShader dvs;
+	protected DefaultPointShader dvs;*/
 
 	public void visit(Viewer viewer, String name) {
 		// handle the file name
@@ -567,7 +572,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		// possibly here call evaluateEffectiveAppearance()
 		object2world.push(c);
 		if (hasProxy(c)) {
-			RIBHelper.processPolygonShader(dgs.getPolygonShader(), this, "polygonShader");
+			RIBHelper.processShader(dgs.getPolygonShader(), this, "polygonShader");
 			handleCurrentProxy();
 		} else
 			c.childrenAccept(this);
@@ -651,12 +656,12 @@ public class RIBVisitor extends SceneGraphVisitor {
 	private void updateShaders(EffectiveAppearance eap) {
 		dgs = ShaderUtility.createDefaultGeometryShader(eap);
 		rhs = ShaderUtility.createRenderingHintsShader(eap);
-		if (dgs.getPointShader() instanceof DefaultPointShader)	dvs = (DefaultPointShader) dgs.getPointShader();
-		else dvs = null;
-		if (dgs.getLineShader() instanceof DefaultLineShader) dls = (DefaultLineShader) dgs.getLineShader();
-		else dls = null;
-		if (dgs.getPolygonShader() instanceof DefaultPolygonShader) dps = (DefaultPolygonShader) dgs.getPolygonShader();
-		else dps = null;
+//		if (dgs.getPointShader() instanceof DefaultPointShader)	dvs = (DefaultPointShader) dgs.getPointShader();
+//		else dvs = null;
+//		if (dgs.getLineShader() instanceof DefaultLineShader) dls = (DefaultLineShader) dgs.getLineShader();
+//		else dls = null;
+//		if (dgs.getPolygonShader() instanceof DefaultPolygonShader) dps = (DefaultPolygonShader) dgs.getPolygonShader();
+//		else dps = null;
 		// we need to know the current opacity to workaround a renderman prman bug in pointsPolygon ... see below
 		currentOpacity = 1f;
 		if (!(handlingProxyGeometry && rhs.getOpaqueTubesAndSpheres()) && rhs.getTransparencyEnabled()) {
@@ -773,25 +778,27 @@ public class RIBVisitor extends SceneGraphVisitor {
 			_visit(g);
 		insidePointset = false;
 	}
-	Color cc = null;;
+	
 	float[] raw = new float[4];
-	private void _visit(PointSet p) {
+	private void _visit(PointSet p) {		
 		boolean vertexDraw = dgs.getShowPoints();
-		if (vertexDraw) {
+		if (vertexDraw) {			
 			int n = p.getNumPoints();
 			DataList coord = p.getVertexAttributes(Attribute.COORDINATES);
 			if (coord == null)return;
 			ri.attributeBegin();
-			System.err.println("Visiting point set");
-			if (dgs.getPointShader() instanceof DefaultPointShader) {
-				cc = (Color) dvs.getDiffuseColor();
-				raw = new float[4];
-				cc.getRGBComponents(raw);
-				cc = new Color(raw[0], raw[1], raw[2]); 
-				ri.color(cc);				
-			}
-			dvs = (DefaultPointShader) dgs.getPointShader();
-			float r = dvs.getPointRadius().floatValue();
+			RIBHelper.processShader(dgs.getPointShader(), this, "pointShader");
+//			if (dgs.getPointShader() instanceof DefaultPointShader) {
+//				cc = (Color) dvs.getDiffuseColor();
+//				raw = new float[4];
+//				cc.getRGBComponents(raw);
+//				cc = new Color(raw[0], raw[1], raw[2]); 
+//				ri.color(cc);				
+//			}
+			//dvs = (DefaultPointShader) dgs.getPointShader();
+			
+			//pointRadius = (float)eAppearance.getAttribute(CommonAttributes.POINT_RADIUS, CommonAttributes.POINT_RADIUS_DEFAULT);
+			
 			DataList radii = p.getVertexAttributes(Attribute.RADII);
 			DoubleArray da = null;
 			if (radii != null) da = radii.toDoubleArray();
@@ -799,13 +806,12 @@ public class RIBVisitor extends SceneGraphVisitor {
 			int[] vind = null;
 			if (ind != null) vind = ind.toIntArray(null);
 			// System.out.println("point radius is "+r);
-			boolean drawSpheres = dvs.getSpheresDraw();
+			//boolean drawSpheres = eAppearance.getAttribute(CommonAttributes.SPHERES_DRAW, CommonAttributes.SPHERES_DRAW_DEFAULT);	
 			if (drawSpheres) {
 				// process the polygon shader associated to this point shader
 				// This is something of a hack since we don't really know what the associated string is
 				handlingProxyGeometry = true;  
-				PolygonShader vps = dvs.getPolygonShader();
-				RIBHelper.processPolygonShader(vps, this, "pointShader.polygonShader");
+				//RIBHelper.processShader(dgs.getPointShader(), this, "pointShader.polygonShader");
 
 				double[][] vColData=null;
 				if( p.getVertexAttributes(Attribute.COLORS)!=null)
@@ -814,7 +820,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 				double[] trns = new double[16];
 				for (int i = 0; i < n; i++) {
 					if (vind != null && vind[i] == 0) continue;		
-					float realR = r;
+					float realR = pointRadius;
 					if (radii != null) realR = (float) (realR*da.getValueAt(i));
 					if (a[i].length == 4 && a[i][3] == 0.0) continue;
 					trns = MatrixBuilder.init(null, currentSignature).translate(a[i]).getArray();
@@ -833,7 +839,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 				handlingProxyGeometry = false;  
 
 			} else {
-				// use the RenderMan "points" command to draw the points
+				// use the RenderMan "points" command to draw the points				
 				HashMap<String, Object> map = new HashMap<String, Object>();
 				int fiber = GeometryUtility.getVectorLength(coord);
 				double[][] pc = new double[n][3];
@@ -848,7 +854,30 @@ public class RIBVisitor extends SceneGraphVisitor {
 					for (int k = 0; k<3; ++k)	pcf[i*3+k] = (float) vector[k];
 				}
 				map.put("P", pcf);
-				map.put("constant float constantwidth", new Float(r));
+				map.put("constant float constantwidth", new Float(pointRadius));
+				
+				DataList vCol=p.getVertexAttributes(Attribute.COLORS);
+		        if(vCol!=null){
+		        	int vColLength=GeometryUtility.getVectorLength(vCol);
+		        	float[] vCs=new float[3*vCol.size()];
+		        	float[] vOs=new float[3*vCol.size()];
+		        	for(int i=0;i<vCol.size();i++){
+		        		DoubleArray rgba = vCol.item(i).toDoubleArray();
+		        		System.out.println(new Color((int)rgba.getValueAt(0),(int)rgba.getValueAt(1),(int)rgba.getValueAt(2)));
+		        		vCs[3*i] = (float) rgba.getValueAt(0);
+		        		vCs[3*i+1] = (float) rgba.getValueAt(1);
+		        		vCs[3*i+2] = (float) rgba.getValueAt(2);
+		        		if (vColLength == 4) {
+		        			vOs[3*i] = (float) rgba.getValueAt(3);
+		        			vOs[3*i+1] = (float) rgba.getValueAt(3);
+		        			vOs[3*i+2] = (float) rgba.getValueAt(3);
+		        		}
+		        	}
+		        	map.put("varying color Cs", vCs);
+		        	if (vColLength == 4)
+		        		map.put("varying color Os", vOs);
+		        }
+		        
 				ri.points(n, map);
 			}
 			ri.attributeEnd();
@@ -862,7 +891,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	 */
 	public void visit(IndexedLineSet g) {
 		ri.comment("IndexedLineSet " + g.getName());
-		ri.attributeBegin();
+		ri.attributeBegin();				
 		checkForProxy(g);
 		if (hasProxy(g)) {
 			handleCurrentProxy();
@@ -894,49 +923,57 @@ public class RIBVisitor extends SceneGraphVisitor {
 	}
 
 
+	
+	 
 	private void _visit(IndexedLineSet g)	{
 
 		boolean lineDraw = dgs.getShowLines();
 		if (lineDraw)	{
+			RIBHelper.processShader(dgs.getLineShader(), this, "lineShader");
 			DataList dl = g.getEdgeAttributes(Attribute.INDICES);
 			if(dl != null){
-				boolean tubesDraw = false;
-				if (dls != null) tubesDraw = dls.getTubeDraw();
-				if (tubesDraw)  {
-					PolygonShader vps = dls.getPolygonShader();
-					cc = ((de.jreality.shader.DefaultPolygonShader)vps).getDiffuseColor();
-					RendermanShader rs = RIBHelper.processPolygonShader(vps, this, "lineShader.polygonShader");
-
+				//boolean tubesDraw = eAppearance.getAttribute(CommonAttributes.TUBES_DRAW, CommonAttributes.TUBES_DRAW_DEFAULT);
+				if (drawTubes)  {
+					//RIBHelper.processShader(dgs.getLineShader(), this, "lineShader.polygonShader");
+					
+					//cs=(Color)eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, CommonAttributes.DIFFUSE_COLOR_DEFAULT);
+					//float tubeRadius = (float) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS,CommonAttributes.TUBE_RADIUS_DEFAULT);
+					
 					DataList edgec =  g.getEdgeAttributes(Attribute.COLORS);
-					float r = dls.getTubeRadius().floatValue(); //(float) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS,CommonAttributes.TUBE_RADIUS_DEFAULT);
 					Object ga = g.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
 					if (ga != null) System.err.println("GA = "+ga.toString());
 					if (ga == null || !( ga instanceof Dimension))	{
 						// TODO make sure texture coordinates are not generated here!
 						BallAndStickFactory bsf = new BallAndStickFactory(g);
 						bsf.setSignature(currentSignature);
-						bsf.setStickRadius(r);
+						bsf.setStickRadius(tubeRadius);
 						bsf.setShowBalls(false);	// need to actually omit the
 						// balls
-						if (cc != null) bsf.setStickColor(cc);
+						if (cs != null) bsf.setStickColor(cs);
 						bsf.update();
 						handlingProxyGeometry = true;  
 						SceneGraphComponent sgc = bsf.getSceneGraphComponent();
 						Appearance ap = new Appearance();
+						
 						// TODO figure out if there's a better way to do this
-						if (vps instanceof DefaultPolygonShader)	{
-							Texture2D tex2d = ((de.jreality.shader.DefaultPolygonShader)vps).getTexture2d();
-							CubeMap cubeMap = ((de.jreality.shader.DefaultPolygonShader)vps).getReflectionMap();
-							if(tex2d==null)
-								ap.setAttribute("polygonShader.texture2d",  Appearance.DEFAULT);
-							else
-								TextureUtility.createTexture(ap, "polygonShader", tex2d.getImage(), false);
-							if(cubeMap==null)
-								ap.setAttribute("polygonShader."+CommonAttributes.REFLECTION_MAP,  Appearance.DEFAULT);
-							else{                      
-								CubeMap lineCubeMap=TextureUtility.createReflectionMap(ap, "polygonShader", TextureUtility.getCubeMapImages(cubeMap));
-								lineCubeMap.setBlendColor(cubeMap.getBlendColor());
-							}							
+						Texture2D tex2d = null;
+						CubeMap cubeMap = null;					
+						if (dgs.getLineShader() instanceof DefaultLineShader)	{
+							if(((DefaultLineShader)dgs.getLineShader()).getPolygonShader() instanceof DefaultPolygonShader){
+								DefaultPolygonShader lsps =(DefaultPolygonShader)((DefaultLineShader)dgs.getLineShader()).getPolygonShader();
+								tex2d = lsps.getTexture2d();
+								cubeMap = lsps.getReflectionMap();
+							}
+						}
+						if(tex2d==null)
+							ap.setAttribute("polygonShader.texture2d",  Appearance.DEFAULT);
+						else
+							TextureUtility.createTexture(ap, "polygonShader", tex2d.getImage(), false);
+						if(cubeMap==null)
+							ap.setAttribute("polygonShader."+CommonAttributes.REFLECTION_MAP,  Appearance.DEFAULT);
+						else{                      
+							CubeMap lineCubeMap=TextureUtility.createReflectionMap(ap, "polygonShader", TextureUtility.getCubeMapImages(cubeMap));
+							lineCubeMap.setBlendColor(cubeMap.getBlendColor());
 						}
 						sgc.setAppearance(ap);
 						visit(sgc);
@@ -945,9 +982,9 @@ public class RIBVisitor extends SceneGraphVisitor {
 						int n = g.getNumEdges();
 						double[][] crossSection = TubeUtility.octagonalCrossSection;
 						// TODO make this official or get rid of it.
-						Object foo = eAppearance.getAttribute("lineShader.crossSection", crossSection);
-						if (foo != crossSection)	{
-							crossSection = (double[][]) foo;
+						Object lineShaderCrossSection = eAppearance.getAttribute("lineShader.crossSection", crossSection);
+						if (lineShaderCrossSection  != crossSection)	{
+							crossSection = (double[][]) lineShaderCrossSection;
 						}
 						for (int i = 0; i<n; ++i)	{
 							if (edgec != null) {
@@ -960,7 +997,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 							PolygonalTubeFactory ptf = new PolygonalTubeFactory(oneCurve);
 							ptf.setCrossSection(crossSection);
 							ptf.setSignature(currentSignature);
-							ptf.setRadius(r);
+							ptf.setRadius(tubeRadius);
 							ptf.update();
 							IndexedFaceSet tube = ptf.getTube();
 							// System.ea.ribrr.println("Tube is "+tube.toString());
@@ -972,15 +1009,15 @@ public class RIBVisitor extends SceneGraphVisitor {
 				} else {
 					// use "Curves" command to simulate no tubes
 					// Renderman expects object coordinates for width of "Curves" so use tube parameter
-					if (dls != null)	{
-						cc = dls.getDiffuseColor();
-						cc.getRGBComponents(raw);
-						cc = new Color(raw[0], raw[1], raw[2]); 
-						ri.color(cc);  	        		
-					}
-					float r = dls.getTubeRadius().floatValue(); //(float) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS,CommonAttributes.TUBE_RADIUS_DEFAULT);
+					
+					//cs = (Color)eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, CommonAttributes.DIFFUSE_COLOR_DEFAULT);
+					//cs.getRGBComponents(raw);
+					//cs = new Color(raw[0], raw[1], raw[2]); 
+					//ri.color(cs);  	        		
+					
+					//float r = (float) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS,CommonAttributes.TUBE_RADIUS_DEFAULT);
 					HashMap<String, Object> mappo = new HashMap<String, Object>();
-					mappo.put("constantwidth", r);
+					mappo.put("constantwidth", tubeRadius);
 					int[][] ei = g.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
 					int numEdges = ei.length;
 					int[] nvertices = new int[numEdges];
@@ -1005,13 +1042,34 @@ public class RIBVisitor extends SceneGraphVisitor {
 							counter += fiber;
 						}
 					}
-					mappo.put(fiber == 3 ? "P" : "vertex hpoint P",  vertices);
+					mappo.put(fiber == 3 ? "P" : "vertex hpoint P",  vertices);					
+					
+					DataList eCol=g.getEdgeAttributes(Attribute.COLORS);
+			        if(eCol!=null){
+			        	int eColLength=GeometryUtility.getVectorLength(eCol);
+			        	float[] eCs=new float[3*eCol.size()];
+			        	float[] eOs=new float[3*eCol.size()];
+			        	for(int i=0;i<eCol.size();i++){
+			        		DoubleArray rgba = eCol.item(i).toDoubleArray();
+			        		eCs[3*i] = (float) rgba.getValueAt(0);
+			        		eCs[3*i+1] = (float) rgba.getValueAt(1);
+			        		eCs[3*i+2] = (float) rgba.getValueAt(2);
+			        		if (eColLength == 4) {
+			        			eOs[3*i] = (float) rgba.getValueAt(3);
+			        			eOs[3*i+1] = (float) rgba.getValueAt(3);
+			        			eOs[3*i+2] = (float) rgba.getValueAt(3);
+			        		}
+			        	}
+			        	mappo.put("uniform color Cs", eCs);
+			        	if (eColLength == 4)
+			        		mappo.put("uniform color Os", eOs);
+			        }
+					
 					ri.curves("linear", nvertices, "nonperiodic", mappo);
 				}   	        
 			}
 		}
 		// super.visit(g);
-		System.err.println("leaving line set");
 		_visit((PointSet) g);
 	}
 
@@ -1020,7 +1078,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		ri.attributeBegin();
 		checkForProxy(g);
 		if (hasProxy((Geometry) g)) {
-			RIBHelper.processPolygonShader(dgs.getPolygonShader(), this, "polygonShader");
+			RIBHelper.processShader(dgs.getPolygonShader(), this, "polygonShader");
 			handleCurrentProxy();
 			insidePointset = false;
 		} else {
@@ -1064,7 +1122,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	protected void _visit(IndexedFaceSet i) {
 		boolean faceDraw = dgs.getShowFaces();
 		if (faceDraw)	{
-			RIBHelper.processPolygonShader(dgs.getPolygonShader(), this, "polygonShader");
+			RIBHelper.processShader(dgs.getPolygonShader(), this, "polygonShader");
 			DataList colors = i.getFaceAttributes(Attribute.COLORS);
 			// if (colors !=null && currentOpacity != 1.0) {
 			// the bug occurs when one attempts to set uniform colors or opacity
@@ -1318,13 +1376,13 @@ public class RIBVisitor extends SceneGraphVisitor {
 
 	public void visit(Sphere s) {
 		if (hasProxy(s))return;
-		RIBHelper.processPolygonShader(dgs.getPolygonShader(), this, "polygonShader");
+		RIBHelper.processShader(dgs.getPolygonShader(), this, "polygonShader");
 		ri.sphere(1f, -1f, 1f, 360f, null);
 	}
 
 	public void visit(Cylinder c) {
 		if (hasProxy(c))return;
-		RIBHelper.processPolygonShader(dgs.getPolygonShader(), this, "polygonShader");
+		RIBHelper.processShader(dgs.getPolygonShader(), this, "polygonShader");
 		ri.cylinder(1f, -1f, 1f, 360f, null);
 		// TODO Decide whether a jReality Cylinder is closed or not!
 		ri.disk(-1f, 1f, 360f, null);
@@ -1375,7 +1433,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	}
 
 	private HashMap<ImageData, String> cubeMaps = new HashMap<ImageData, String>();
-	public String writeCubeMap(CubeMap reflectionMap) {
+	public String writeCubeMap(CubeMap reflectionMap) {		
 		String noSuffix = cubeMaps.get(reflectionMap.getTop());
 		if (noSuffix == null) {
 			String cubeMapFileName = "_cubeMap" + (cubeMapCount++);

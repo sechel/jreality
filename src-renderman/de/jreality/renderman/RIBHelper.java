@@ -25,15 +25,32 @@ import de.jreality.renderman.shader.DefaultPolygonShader;
 import de.jreality.renderman.shader.RendermanShader;
 import de.jreality.renderman.shader.TwoSidePolygonShader;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.data.AttributeCollection;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
+import de.jreality.shader.LineShader;
+import de.jreality.shader.PointShader;
 import de.jreality.shader.PolygonShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.util.LoggingSystem;
 
 public class RIBHelper {
+	
+	
+	public static RendermanShader processShader(AttributeCollection shader, RIBVisitor ribv, String name){
+		if(shader instanceof PolygonShader)
+			return processPolygonShader((PolygonShader)shader, ribv, name);
+		if(shader instanceof LineShader)
+			return processLineShader((LineShader)shader, ribv, name);
+		if(shader instanceof PointShader)
+			return processPointShader((PointShader)shader, ribv, name);		
+		else return null;
+	}
+	
+	
+	
 
-	public static RendermanShader processPolygonShader(PolygonShader ps, RIBVisitor ribv, String name)	{
+	private static RendermanShader processPolygonShader(PolygonShader ps, RIBVisitor ribv, String name)	{
 		RendermanShader rs = null;
 		Color Cs = null;
 		double transparency = 0.0;
@@ -45,6 +62,7 @@ public class RIBHelper {
 			rs = rdps;
 			Cs = dps.getDiffuseColor();
 			transparency = (float)dps.getTransparency().floatValue();
+			ribv.cs=dps.getDiffuseColor();
 			ribv.smooth = dps.getSmoothShading();
 		} 
 		else if (ps instanceof de.jreality.shader.TwoSidePolygonShader)	{
@@ -56,7 +74,9 @@ public class RIBHelper {
 			de.jreality.shader.DefaultPolygonShader dpss = ((de.jreality.shader.DefaultPolygonShader)dps.getFront());
 			Cs = dpss.getDiffuseColor();
 			transparency = (float)dpss.getTransparency().floatValue();
-			// TODO figure out how to read out a reasonable "smooth" value from this shader
+			ribv.cs=dpss.getDiffuseColor();
+			ribv.smooth = dpss.getSmoothShading();
+			// TODO figure out how to read out a reasonable "smooth" and "cs" value from this shader
 		}
 		else {
 			LoggingSystem.getLogger(ShaderUtility.class).warning("Unknown shader class "+ps.getClass());
@@ -67,6 +87,61 @@ public class RIBHelper {
 		
 		return rs;
 	}
+	
+	private static RendermanShader processLineShader(LineShader ls, RIBVisitor ribv, String name)	{
+		RendermanShader rs = null;
+		Color Cs = null;
+		double transparency = 0.0;
+		if (ls instanceof de.jreality.shader.DefaultLineShader)	{
+			de.jreality.shader.DefaultLineShader dls=(de.jreality.shader.DefaultLineShader)ls;
+			ribv.drawTubes=dls.getTubeDraw();
+			ribv.tubeRadius=new Float(dls.getTubeRadius()).floatValue();
+			ribv.cs=dls.getDiffuseColor();
+			if(dls.getTubeDraw()){				
+				return processPolygonShader(dls.getPolygonShader(), ribv, name+".polygonShader");
+			}
+			else{
+				Cs=dls.getDiffuseColor();
+				//ribv.tubeRadius=new Float(dls.getLineWidth()).floatValue();
+				//TODO: line shader
+			}
+		}else {
+			LoggingSystem.getLogger(ShaderUtility.class).warning("Unknown shader class "+ls.getClass());
+		}
+		float[] csos = extractCsOs(Cs, (!(ribv.handlingProxyGeometry && ribv.opaqueTubes) && ribv.transparencyEnabled) ? transparency : 0f);
+		ribv.ri.color(csos);
+		//ribv.ri.shader(rs);
+		
+		return rs;
+	}
+	
+	private static RendermanShader processPointShader(PointShader vs, RIBVisitor ribv, String name)	{
+		RendermanShader rs = null;
+		Color Cs = null;
+		double transparency = 0.0;
+		if (vs instanceof de.jreality.shader.DefaultPointShader)	{
+			de.jreality.shader.DefaultPointShader dvs=(de.jreality.shader.DefaultPointShader)vs;			
+			ribv.drawSpheres=dvs.getSpheresDraw();
+			ribv.pointRadius=new Float(dvs.getPointRadius()).floatValue();
+			ribv.cs=dvs.getDiffuseColor();
+			if(dvs.getSpheresDraw()){			
+				return processPolygonShader(dvs.getPolygonShader(), ribv, name+".polygonShader");
+			}else{
+				Cs=dvs.getDiffuseColor();
+				//ribv.pointRadius=new Float(dvs.getPointSize()).floatValue();
+				//TODO: point shader
+			}
+		}else {
+			LoggingSystem.getLogger(ShaderUtility.class).warning("Unknown shader class "+vs.getClass());
+		}
+		float[] csos = extractCsOs(Cs, (!(ribv.handlingProxyGeometry && ribv.opaqueTubes) && ribv.transparencyEnabled) ? transparency : 0f);
+		ribv.ri.color(csos);
+		//ribv.ri.shader(rs);
+		
+		return rs;
+	}
+	
+	
 	protected static float[] extractCsOs(Color color, double transparency)	{
 		float[] csos = new float[4];
 		float colorAlpha = 1.0f;
