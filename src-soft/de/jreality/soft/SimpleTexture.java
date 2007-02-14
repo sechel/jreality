@@ -80,8 +80,8 @@ public class SimpleTexture implements Texture {
       //this.uscale = texture.getSScale();
       //this.vscale = texture.getTScale();
       this.matrix = texture.getTextureMatrix().getArray();
-      this.clampU = texture.getRepeatS()==Texture2D.CLAMP;
-      this.clampV = texture.getRepeatT()==Texture2D.CLAMP;
+      this.clampU = texture.getRepeatS()==Texture2D.GL_CLAMP;
+      this.clampV = texture.getRepeatT()==Texture2D.GL_CLAMP;
       incr =3*width*height== bytes.length?3:4;
       interpolate =(texture.getMinFilter()==Texture2D.GL_LINEAR);
   }

@@ -584,16 +584,14 @@ public class WriterVRML
 	}
 	private static void writeTexWrap(int wrap)throws IOException{
 		switch (wrap) {
-		case Texture2D.GL_CLAMP:
 		case Texture2D.GL_CLAMP_TO_EDGE:
 			System.out.println("texture wrap:only clamp & repeat are supported");
-		case Texture2D.CLAMP:
+		case Texture2D.GL_CLAMP:
 			out.println("CLAMP");				
 			break;
-		case Texture2D.GL_REPEAT:
 		case Texture2D.GL_MIRRORED_REPEAT:
 			System.out.println("texture wrap:only clamp & repeat are supported");
-		case Texture2D.REPEAT:
+		case Texture2D.GL_REPEAT:
 			out.println("REPEAT");				
 			break;
 		default:

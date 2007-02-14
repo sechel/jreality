@@ -298,11 +298,11 @@ public class State {
 		Texture2D tex = TextureUtility.createTexture(app, CommonAttributes.POLYGON_SHADER,id);
 	    tex.setTextureMatrix(textureTrafo);
 	    if (wrapS==0)
-	    	tex.setRepeatS(Texture2D.REPEAT);
-	    else tex.setRepeatS(Texture2D.CLAMP);
+	    	tex.setRepeatS(Texture2D.GL_REPEAT);
+	    else tex.setRepeatS(Texture2D.GL_CLAMP);
 	    if (wrapT==0)
-	    	tex.setRepeatT(Texture2D.REPEAT);
-	    else tex.setRepeatT(Texture2D.CLAMP);
+	    	tex.setRepeatT(Texture2D.GL_REPEAT);
+	    else tex.setRepeatT(Texture2D.GL_CLAMP);
 	    tex.setApplyMode(Texture2D.GL_MODULATE);
 	}
 }

@@ -117,9 +117,7 @@ public interface Texture2D extends AttributeEntity {
   public static final int GL_REPEAT = 0x2901;
   public static final int GL_CLAMP = 0x2900;
   public static final int GL_CLAMP_TO_EDGE = 0x812F;
-  public static final int CLAMP = 0;
-  public static final int REPEAT = 1;
-
+  
   // default values
   public static final double SSCALE_DEFAULT=1;
   public static final double TSCALE_DEFAULT=1;
