@@ -24,7 +24,6 @@ import javax.imageio.ImageWriter;
 
 import de.jreality.backends.label.LabelUtility;
 import de.jreality.geometry.Primitives;
-import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
