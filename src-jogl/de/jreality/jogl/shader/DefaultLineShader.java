@@ -297,7 +297,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			IntArray ia = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray();
 			int m = ia.size();
 			if (radii != null)	{
-				rad = radii.getValueAt(i);
+				rad = rad*radii.getValueAt(i);
 			}
 			if (pickMode)	gl.glPushName(i);
 			DoubleArray edgecolor = null;
