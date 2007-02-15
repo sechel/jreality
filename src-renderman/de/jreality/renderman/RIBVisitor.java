@@ -88,6 +88,7 @@ import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.DefaultPolygonShader;
+import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.PolygonShader;
@@ -133,6 +134,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	private SceneGraphComponent root;
 	private SceneGraphPath cameraPath;
 	transient protected double[] world2Camera;
+	transient protected double[] object2worldTrafo;
 	transient private SceneGraphPath object2world = new SceneGraphPath();
 	transient private Camera camera;
 	transient private int width = 640;
@@ -571,6 +573,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		readAttributesFromEffectiveAppearance(eAppearance);
 		// possibly here call evaluateEffectiveAppearance()
 		object2world.push(c);
+		object2world.getMatrix(object2worldTrafo);
 		if (hasProxy(c)) {
 			RIBHelper.processShader(dgs.getPolygonShader(), this, "polygonShader");
 			handleCurrentProxy();
@@ -880,7 +883,18 @@ public class RIBVisitor extends SceneGraphVisitor {
 		        
 				ri.points(n, map);
 			}
+			
 			ri.attributeEnd();
+			
+			DataList labelsList=p.getVertexAttributes(Attribute.LABELS);
+			if(labelsList!=null){
+				if(dgs.getPointShader() instanceof DefaultPointShader){
+					RIBHelper.createRIBLabel(p, (DefaultTextShader)((DefaultPointShader)dgs.getPointShader()).getTextShader(), this);
+				}else 
+					System.err.println("textshaders only for defaultshaders");
+			}
+			
+			
 		}
 	}
 
@@ -1068,6 +1082,17 @@ public class RIBVisitor extends SceneGraphVisitor {
 					ri.curves("linear", nvertices, "nonperiodic", mappo);
 				}   	        
 			}
+			
+			DataList labelsList=g.getEdgeAttributes(Attribute.LABELS);
+			if(labelsList!=null){
+				if(dgs.getLineShader() instanceof DefaultLineShader){
+					RIBHelper.createRIBLabel(g, (DefaultTextShader)((DefaultLineShader)dgs.getLineShader()).getTextShader(), this);
+				}else 
+					System.err.println("textshaders only for defaultshaders");
+			}
+
+			
+			
 		}
 		// super.visit(g);
 		_visit((PointSet) g);
@@ -1157,6 +1182,14 @@ public class RIBVisitor extends SceneGraphVisitor {
 			}
 			// ribHelper.attributeEnd();
 
+			DataList labelsList=i.getFaceAttributes(Attribute.LABELS);
+			if(labelsList!=null){
+				if(dgs.getPolygonShader() instanceof DefaultPolygonShader){
+					RIBHelper.createRIBLabel(i, (DefaultTextShader)((DefaultPolygonShader)dgs.getPolygonShader()).getTextShader(), this);
+				}else 
+					System.err.println("textshaders only for defaultshaders");
+			}
+			
 		}
 		if (insidePointset)
 			_visit((IndexedLineSet) i);
@@ -1170,7 +1203,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	 * @param i
 	 * @param color
 	 */
-	private void pointPolygon(IndexedFaceSet i, float[] color) {
+	protected void pointPolygon(IndexedFaceSet i, float[] color) {
 		int npolys = i.getNumFaces();
 		if (color != null && color.length == 4 && color[3] == 0.0 && ignoreAlpha0) return;
 		if (npolys != 0) {

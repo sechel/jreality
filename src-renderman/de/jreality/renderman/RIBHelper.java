@@ -1,6 +1,7 @@
 package de.jreality.renderman;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.awt.image.renderable.ParameterBlock;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -20,18 +22,34 @@ import java.util.logging.Level;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
 
+import de.jreality.backends.label.LabelUtility;
+import de.jreality.geometry.Primitives;
+import de.jreality.jogl.shader.Texture2DLoaderJOGL;
+import de.jreality.math.Matrix;
+import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.renderman.shader.DefaultPolygonShader;
 import de.jreality.renderman.shader.RendermanShader;
 import de.jreality.renderman.shader.TwoSidePolygonShader;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.PointSet;
+import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeCollection;
+import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.scene.data.DoubleArrayArray;
+import de.jreality.scene.data.IntArrayArray;
+import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.LineShader;
 import de.jreality.shader.PointShader;
 import de.jreality.shader.PolygonShader;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.shader.TextShader;
+import de.jreality.shader.Texture2D;
+import de.jreality.util.CameraUtility;
 import de.jreality.util.LoggingSystem;
 
 public class RIBHelper {
@@ -327,6 +345,74 @@ public class RIBHelper {
 	    if (!worked) 
 	     LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write PNG: {0}.png", noSuffix);
 	  }
+	}
+  
+  
+  	public static void createRIBLabel(PointSet ps, DefaultTextShader ts, RIBVisitor ribv){
+		if (!ts.getShowLabels().booleanValue())
+			return;
+		Font font = ts.getFont();
+		Color c = ts.getDiffuseColor();
+		double scale = ts.getScale().doubleValue();
+		double[] offset = ts.getOffset();
+		int alignment = ts.getAlignment();
+		ImageData[] img = LabelUtility.createPointImages(ps, font, c);
+		DoubleArrayArray coords=ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
+  		
+  		writeLabel(ribv, img, coords, null, offset, alignment, scale);
+  	}
+  	
+  	public static void createRIBLabel(IndexedLineSet ils, DefaultTextShader ts, RIBVisitor ribv){
+		if (!ts.getShowLabels().booleanValue())
+			return;
+		Font font = ts.getFont();
+		Color c = ts.getDiffuseColor();
+		double scale = ts.getScale().doubleValue();
+		double[] offset = ts.getOffset();
+		int alignment = ts.getAlignment();
+		ImageData[] img = LabelUtility.createEdgeImages(ils, font, c);
+		DoubleArrayArray coords=ils.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
+  		IntArrayArray inds=ils.getEdgeAttributes(Attribute.INDICES).toIntArrayArray();
+  		writeLabel(ribv, img, coords, inds, offset, alignment, scale);
+  	}
+
+  	public static void createRIBLabel(IndexedFaceSet ifs, DefaultTextShader ts, RIBVisitor ribv){
+		if (!ts.getShowLabels().booleanValue())
+			return;
+		Font font = ts.getFont();
+		Color c = ts.getDiffuseColor();
+		double scale = ts.getScale().doubleValue();
+		double[] offset = ts.getOffset();
+		int alignment = ts.getAlignment();
+		ImageData[] img = LabelUtility.createFaceImages(ifs, font, c);
+		DoubleArrayArray coords=ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
+  		IntArrayArray inds=ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray();
+  		writeLabel(ribv, img, coords, inds, offset, alignment, scale);
+  	}
+  	
+	private static IndexedFaceSet bb = Primitives.texturedQuadrilateral(new double[] { 0, 1,
+			0, 1, 1, 0, 1, 0, 0, 0, 0, 0 });
+
+	private static void writeLabel(RIBVisitor ribv, ImageData[] labels, DoubleArrayArray vertices, IntArrayArray indices, double[] offset, int alignment, double scale) {
+		
+		Matrix c2o=new Matrix(ribv.world2Camera).getInverse();
+		c2o.multiplyOnLeft(new Matrix(ribv.object2worldTrafo));
+
+		double[] bbm = new double[16];
+		for (int i = 0, n = labels.length; i < n; i++) {
+			ImageData img = labels[i];
+			String labelName = new File(ribv.writeTexture(img,Texture2D.GL_CLAMP_TO_EDGE, Texture2D.GL_CLAMP_TO_EDGE)).getName();	
+			LabelUtility.calculateBillboardMatrix(bbm, img.getWidth() * scale, img.getHeight()* scale, offset, alignment, c2o.getArray(), LabelUtility.positionFor(i, vertices,indices), Pn.EUCLIDEAN);	
+			ribv.ri.transformBegin();
+			ribv.ri.concatTransform(fTranspose(bbm));
+			ribv.ri.color(Color.WHITE);
+			ribv.ri.opacity(new Float(0.0));
+			HashMap<String, Object> shaderMap = new HashMap<String, Object>();
+			shaderMap.put("string texturename", labelName);
+			ribv.ri.surface("constantTexture", shaderMap);
+			ribv.pointPolygon(bb, null);
+			ribv.ri.transformEnd();
+		}
 	}
 
 }
