@@ -1278,7 +1278,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 
 			DataList vertexColors = i.getVertexAttributes(Attribute.COLORS);
 			DataList faceColors = i.getFaceAttributes(Attribute.COLORS);
-			if ((smooth || faceColors == null) && vertexColors != null) {
+			if ((smooth || (color == null && faceColors == null)) && vertexColors != null) {
 				int vertexColorLength = GeometryUtility
 				.getVectorLength(vertexColors);
 				float[] vCol = new float[3 * vertexColors.size()];
