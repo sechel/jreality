@@ -135,7 +135,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	private SceneGraphPath cameraPath;
 	transient protected double[] world2Camera;
 	transient protected double[] object2worldTrafo;
-	transient private SceneGraphPath object2world = new SceneGraphPath();
+	transient protected SceneGraphPath object2world = new SceneGraphPath();
 	transient private Camera camera;
 	transient private int width = 640;
 	transient private int height = 480;
