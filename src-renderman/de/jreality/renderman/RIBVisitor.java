@@ -134,7 +134,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 	private SceneGraphComponent root;
 	private SceneGraphPath cameraPath;
 	transient protected double[] world2Camera;
-	transient protected double[] object2worldTrafo;
 	transient protected SceneGraphPath object2world = new SceneGraphPath();
 	transient private Camera camera;
 	transient private int width = 640;
@@ -573,7 +572,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 		readAttributesFromEffectiveAppearance(eAppearance);
 		// possibly here call evaluateEffectiveAppearance()
 		object2world.push(c);
-		object2world.getMatrix(object2worldTrafo);
 		if (hasProxy(c)) {
 			RIBHelper.processShader(dgs.getPolygonShader(), this, "polygonShader");
 			handleCurrentProxy();
