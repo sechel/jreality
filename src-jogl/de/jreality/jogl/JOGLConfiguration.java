@@ -76,6 +76,22 @@ public class JOGLConfiguration {
 	static JOGLConfiguration ss = new JOGLConfiguration();
 	static Class<? extends GoBetween> goBetweenClass = null;
 	static Class<? extends JOGLPeerComponent> peerClass = null;
+//	static {
+//		try {
+//			String 	foo = Secure.getProperty("jreality.jogl.peerClass");
+//			if (foo != null) { 
+//				pcName = foo; 
+//				ConstructPeerGraphVisitor.setPeerClass(pcName);
+//			}
+//			foo = Secure.getProperty("jreality.jogl.goBetweenClass");
+//			if (foo != null) { 
+//				gbName = foo; 
+//				JOGLRenderer.setGoBetweenClass(gbName);
+//			}
+//		}	catch (ClassNotFoundException e) {
+//			e.printStackTrace();
+//		}
+//	}
 	private JOGLConfiguration() { 
 		super(); 
 		theLog	= LoggingSystem.getLogger(this);
@@ -85,10 +101,6 @@ public class JOGLConfiguration {
 			//theLog.setLevel(Level.INFO);
 			String foo = Secure.getProperty("jreality.jogl.debugGL");
 			if (foo != null) { if (foo.equals("false")) debugGL = false; else debugGL =true;}
-			foo = Secure.getProperty("jreality.jogl.peerClass");
-			if (foo != null) { pcName = foo; }
-			foo = Secure.getProperty("jreality.jogl.goBetweenClass");
-			if (foo != null) { gbName = foo; }
 			foo = Secure.getProperty("jreality.jogl.portalUsage");
 			if (foo != null) 
 				if (foo.indexOf("true") != -1) portalUsage = true;
@@ -121,14 +133,31 @@ public class JOGLConfiguration {
 				// only for windows
 				Secure.setProperty("sun.java2d.noddraw", "true");
 			}
+			foo = Secure.getProperty("jreality.jogl.peerClass");
+			if (foo != null)
+				try {
+					peerClass = (Class<? extends JOGLPeerComponent>) Class.forName(foo);
+					ConstructPeerGraphVisitor.setPeerClass(peerClass);
+					System.err.println("Got peer class "+peerClass);
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				foo = Secure.getProperty("jreality.jogl.goBetweenClass");
+				if (foo != null)
+					try {
+						goBetweenClass = (Class<? extends GoBetween>) Class.forName(foo);
+						JOGLRenderer.setGoBetweenClass(goBetweenClass);
+						System.err.println("Got go betwen class "+goBetweenClass);
+					} catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 		} catch(SecurityException se)	{
 			theLog.log(Level.WARNING,"Security exception in setting configuration options",se);
 		}
-//		try {
-//			peerClass = (Class<? extends JOGLPeerComponent>) Class.forName(pcName);
-//			goBetweenClass = (Class<? extends GoBetween>) Class.forName(gbName);
-//			System.err.println("JOGLConfiguation: peer class is "+peerClass);
-//		} catch (ClassNotFoundException e) {
+//		catch (ClassNotFoundException e) {
+//			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
 

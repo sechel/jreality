@@ -51,9 +51,11 @@ import java.io.File;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.PropertyPermission;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -149,7 +151,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	protected int currentSignature = Pn.EUCLIDEAN;
 
 	// pick-related stuff
-	protected boolean pickMode = false, offscreenMode = false;
+	public boolean pickMode = false, offscreenMode = false;
 	protected final double pickScale = 10000.0;
 	protected Transformation pickT = new Transformation();
 	protected PickPoint[] hits;
@@ -653,16 +655,30 @@ public class JOGLRenderer  implements AppearanceListener {
 
 
 	static Class<? extends GoBetween> gbClass = GoBetween.class;
-	static {
-		String foo = Secure.getProperty("jreality.jogl.goBetweenClass");
-		if (foo != null)
-			try {
-				gbClass = (Class<? extends GoBetween>) Class.forName(foo);
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+	public static void setGoBetweenClass(Class<? extends GoBetween> c)	{
+		gbClass = c; 
 	}
+
+	public static void setGoBetweenClass(String name) throws ClassNotFoundException	{
+		gbClass = (Class<? extends GoBetween>) Class.forName(name); 
+	}
+
+//	static {
+//		try {
+//			String foo = Secure.getProperty("jreality.jogl.goBetweenClass");
+//			if (foo != null)
+//				try {
+//					gbClass = (Class<? extends GoBetween>) Class.forName(foo);
+//				} catch (ClassNotFoundException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//		} catch (AccessControlException e) {
+//			e.printStackTrace();
+//		} catch(SecurityException se)	{
+//			LoggingSystem.getLogger(JOGLRenderer.class).warning("Security exception in setting configuration options");
+//		}	
+//	}
 	WeakHashMap<SceneGraphComponent, GoBetween> goBetweenTable = new WeakHashMap<SceneGraphComponent, GoBetween>();
 	public   GoBetween goBetweenFor(SceneGraphComponent sgc)	{
 		if (sgc == null) return null;
