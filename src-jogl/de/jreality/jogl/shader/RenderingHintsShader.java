@@ -161,10 +161,10 @@ public class RenderingHintsShader  {
 		} else
 			gl.glDisable(GL.GL_CULL_FACE);
 		jr.getRenderingState().levelOfDetail = levelOfDetail;
-		if (ignoreAlpha0 != jr.getRenderingState().ignoreAlpha0)	{
+//		if (ignoreAlpha0 != jr.getRenderingState().ignoreAlpha0)	{
 			gl.glAlphaFunc(ignoreAlpha0 ? GL.GL_GREATER : GL.GL_ALWAYS, 0f);				// alpha = 0 gets ignored in fragment shader: cheap transparency
 			jr.getRenderingState().ignoreAlpha0 = ignoreAlpha0;
-		}
+//		}
 		if (localLightModel != jr.getRenderingState().localLightModel) {
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_LOCAL_VIEWER, localLightModel ? GL.GL_TRUE : GL.GL_FALSE);
 			jr.getRenderingState().localLightModel = localLightModel;			
