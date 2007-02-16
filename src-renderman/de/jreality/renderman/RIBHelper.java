@@ -394,9 +394,9 @@ public class RIBHelper {
 
 	private static void writeLabel(RIBVisitor ribv, ImageData[] labels, DoubleArrayArray vertices, IntArrayArray indices, double[] offset, int alignment, double scale) {
 		
-		Matrix c2o=new Matrix(ribv.world2Camera).getInverse();
-		c2o.multiplyOnLeft(new Matrix(ribv.object2worldTrafo));
-
+//		Matrix c2o=new Matrix(ribv.world2Camera).getInverse();
+//		c2o.multiplyOnLeft(new Matrix(ribv.object2worldTrafo));
+		Matrix c2o = new Matrix(ribv.getCurrentObjectToCamera()).getInverse();
 		double[] bbm = new double[16];
 		for (int i = 0, n = labels.length; i < n; i++) {
 			ImageData img = labels[i];
