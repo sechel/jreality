@@ -393,14 +393,11 @@ public class RIBHelper {
 			0, 1, 1, 0, 1, 0, 0, 0, 0, 0 });
 
 	private static void writeLabel(RIBVisitor ribv, ImageData[] labels, DoubleArrayArray vertices, IntArrayArray indices, double[] offset, int alignment, double scale) {
-		
-//		Matrix c2o=new Matrix(ribv.world2Camera).getInverse();
-//		c2o.multiplyOnLeft(new Matrix(ribv.object2worldTrafo));
 		Matrix c2o = new Matrix(Rn.times(null,ribv.world2Camera, ribv.object2world.getMatrix(null))).getInverse();
 		double[] bbm = new double[16];
 		for (int i = 0, n = labels.length; i < n; i++) {
 			ImageData img = labels[i];
-			String labelName = new File(ribv.writeTexture(img,Texture2D.GL_CLAMP_TO_EDGE, Texture2D.GL_CLAMP_TO_EDGE)).getName();	
+			String labelName = new File(ribv.writeTexture(img,Texture2D.GL_CLAMP, Texture2D.GL_CLAMP)).getName();	
 			LabelUtility.calculateBillboardMatrix(bbm, img.getWidth() * scale, img.getHeight()* scale, offset, alignment, c2o.getArray(), LabelUtility.positionFor(i, vertices,indices), Pn.EUCLIDEAN);	
 			ribv.ri.transformBegin();
 			ribv.ri.concatTransform(fTranspose(bbm));
