@@ -42,13 +42,9 @@ package de.jreality.backends.label;
 
 import java.awt.Color;
 
-import de.jreality.geometry.GeometryUtility;
-import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.geometry.IndexedLineSetUtility;
-import de.jreality.geometry.Primitives;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
@@ -126,7 +122,7 @@ public class LabelsOnIndexedLineSet {
     
     dgs.setShowPoints(Boolean.TRUE);
     
-		String viewer=System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer  de.jreality.jogl.Viewer"); // de.jreality.portal.DesktopPortalViewer");
+    System.setProperty("de.jreality.scene.Viewer", "de.jreality.softviewer.SoftViewer de.jreality.jogl.Viewer" ); // de.jreality.portal.DesktopPortalViewer");
 
 		ViewerApp.display(cmp);
 

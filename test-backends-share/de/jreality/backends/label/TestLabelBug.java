@@ -1,21 +1,14 @@
 package de.jreality.backends.label;
-import java.awt.Color;
 import java.io.IOException;
 
 import de.jreality.geometry.IndexedLineSetFactory;
-import de.jreality.math.Matrix;
-import de.jreality.math.P3;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
-import de.jreality.shader.ImageData;
-import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.Input;
 
 
 public class TestLabelBug {
@@ -108,7 +101,7 @@ public class TestLabelBug {
 		part1.setName("LineSet 0");
 		geom.addChild(part1);
 		
-		String viewer=System.setProperty("de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.soft.DefaultViewer  "); // de.jreality.portal.DesktopPortalViewer");
+		System.setProperty("de.jreality.scene.Viewer", "de.jreality.softviewer.SoftViewer de.jreality.jogl.Viewer" ); // de.jreality.portal.DesktopPortalViewer");
 
 		ViewerApp.display(root);
 
