@@ -167,7 +167,9 @@ public class ExportImage extends AbstractJrAction {
 		} catch (SecurityException e) {
 			e.printStackTrace();
 		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
+			System.err.println("used viewer does'n have method renderOffscreen(int w, int h)\n" +
+					"this just disables action \"Export Image\"\n");
+			//e.printStackTrace();
 		}
 		return false;
 	}
