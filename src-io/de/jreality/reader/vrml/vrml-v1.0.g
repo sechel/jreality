@@ -6,33 +6,17 @@ header {
 /*
  *	@author gonska
  *  Nov. october 12 2006
- */
-/* TODO: 
- * 	Read over vrml1.0 spec and figure out exactly what it says
- *		Replace calls to System.err.println to de.jreality.util.LoggingSystem.getLogger(this).log()
- *		Implement the unimplemented nodes/properties
- *			Priority: Implement  DEF and USE.  That means all node rules need to return an
- *				instance of a jReality object that can be put into a hash map for later lookup.
- *				That is not yet the case.
- *		Move as much of the Java code into separate classes where eclipse can help
- *			Keep an eye on Antlr Studio (www.antlrstudio.com) for direct editing of .g file in eclipse.
- *		Some tricky areas:
- *			Difference between Group and Separator: Separator requires that we stack the state
- *				(Leaving a separator should pop this stack)
- *				The state is kept by fields in the parser beginning with "current"
- *			Appearance currently accumulates within a Separator clause. It's then assigned to each 
- *				child that is created within the Separator (such as for each geometric primitive).
- *				I don't think that's correct; the state of the appearance should be copied to a new
- *				instance before being assigned to a child, so later changes to the appearance don't 
- *				effect this child.
- *		 	We need a Material class to store all the info in a Material node.  If MaterialBinding 
- *				is per face or per vertex, then we have a problem, since currently only the diffuse
- *				color can be easily assigned per face or per vertex in jReality.
- *	General comment:
- *		This parser probably needs to be rewritten from the ground up to be a two-stage process.
- *		First, parse the VRML into a parse tree which knows nothing of specific keywords, but
- *		works purely with key-value pairs.  The big problem here is to dis-ambiguate all the possible
- *		value types.  
+ *
+ * TODO: 
+ * USE-Problems:
+ *  Maybe a DEF statement can be saved as special "State"
+ *   instead of "SceneGraphComponent".
+ *  Then you need to make a compare betwen the current "State"
+ *   and the "DEF-State" in "USE".
+ *  Then you generate the geometry from the merged "State".
+ * TODO: 
+ * mehrerfache Kameras(-Pfade)
+ *   hier : die erste Kamera gilt.
  */
 package de.jreality.reader.vrml;
 import java.awt.Color;
@@ -107,12 +91,7 @@ options {
 	//				geparst: [12.3*10^4] [0.3]
 	// 	- Weil '.' als Teil einer Zahl gelext wird kann es nicht als Token zur verfuegung stehen!
 
-	// TODO: 
-	// Texture
 
-
-	// TODO: mehrerfache Kameras(-Pfade)
-	// hier : die erste Kamera gilt
 	SceneGraphPath camPath = null;
 	SceneGraphComponent root = null;
 
