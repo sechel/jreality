@@ -197,7 +197,8 @@ useNode [State state]
 		{if (VRMLHelper.verbose) System.err.print(name);}
 	{
 		defs.use(state,name);
-		if (VRMLHelper.verbose) System.err.println(")");
+		if (VRMLHelper.verbose) System.err.println(")")
+		System.out.println("Attention: The USE-Statement is not completely supported and may be read incorrect!");
 	}
 	;
 
