@@ -85,6 +85,7 @@ import de.jreality.scene.Appearance;
 	public final static String OPAQUE_TUBES_AND_SPHERES = "opaqueTubesAndSpheres";
 	public final static boolean OPAQUE_TUBES_AND_SPHERES_DEFAULT = false;
 	public final static String CENTER_ON_BOUNDING_BOX = "centerOnBoundingBox";
+	public static final String BACKEND_RETAIN_GEOMETRY = "rendermanRetainGeometry"; // a hint to backends to write one copy of geometry and re-use it
 
 	// these hints are heavily OpenGL specific
 	public final static String DEPTH_FUDGE_FACTOR = 		"depthFudgeFactor";
@@ -210,7 +211,6 @@ import de.jreality.scene.Appearance;
 	public static final String RMAN_OUTPUT_DISPLAY_FORMAT = "rendermanOutputDisplayFormat";
 	public static final String RMAN_PROXY_COMMAND = "rendermanProxyCommand";
 	public static final String RMAN_ARCHIVE_CURRENT_NODE = "rendermanArchiveCurrentNode";
-	public static final String RMAN_RETAIN_GEOMETRY = "rendermanRetainGeometry";
 	public static final String RMAN_MAX_EYE_SPLITS  = "rendermanMaxEyeSplits";
 
   
