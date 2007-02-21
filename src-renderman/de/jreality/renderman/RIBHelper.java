@@ -401,8 +401,8 @@ public class RIBHelper {
 			LabelUtility.calculateBillboardMatrix(bbm, img.getWidth() * scale, img.getHeight()* scale, offset, alignment, c2o.getArray(), LabelUtility.positionFor(i, vertices,indices), Pn.EUCLIDEAN);	
 			ribv.ri.transformBegin();
 			ribv.ri.concatTransform(fTranspose(bbm));
-			ribv.ri.color(Color.WHITE);
-			ribv.ri.opacity(new Float(0.0));
+			//ribv.ri.color(Color.WHITE);
+			//ribv.ri.opacity(new Float(0.0));
 			HashMap<String, Object> shaderMap = new HashMap<String, Object>();
 			shaderMap.put("string texturename", labelName);
 			ribv.ri.surface("constantTexture", shaderMap);
