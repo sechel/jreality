@@ -141,6 +141,8 @@ public class LightCollector extends SceneGraphVisitor {
      }
 	private void handleCommon(Light l, HashMap<String, Object> map) {
 		currentPath.getMatrix(currentTrafo);
+		// Unfortunately, Renderman PRMan doesn't transform lights correctly when
+		// non-euclidean matrices are involved. We explicitly multiply out. -gunn
 	    Matrix mm = new Matrix(currentTrafo);
 	    mm.multiplyOnLeft(ribv.world2Camera);
 	    dfrom = mm.getColumn(3);
