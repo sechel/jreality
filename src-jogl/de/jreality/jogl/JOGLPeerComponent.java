@@ -226,13 +226,13 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	private JOGLPeerComponent getPeerForChildComponent(SceneGraphComponent sgc) {
-		childlock.readLock();
+//		childlock.readLock();
 		for (JOGLPeerComponent jpc : children)	{
 			if ( jpc.goBetween.getOriginalComponent() == sgc) { // found!
 				return jpc;
 			}
 		}
-		childlock.readUnlock();
+//		childlock.readUnlock();
 		return null;
 	}
 
