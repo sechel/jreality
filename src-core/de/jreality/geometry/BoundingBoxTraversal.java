@@ -170,12 +170,7 @@ class BoundingBoxTraversal extends SceneGraphVisitor {
 
 
   public void visit(Geometry g) {
-  	Object bbox = g.getGeometryAttributes(GeometryUtility.BOUNDING_BOX);
-  	if (bbox != null && bbox instanceof Rectangle3D)	{
-  		Rectangle3D box = (Rectangle3D) bbox;
-     	 unionBox(box);		
-  	}
-    //System.err.println("Warning: unknown geometry type " + g);
+  	checkForBoundingBox(g);
   }
   
   public void visit(ClippingPlane p) {
@@ -187,15 +182,20 @@ class BoundingBoxTraversal extends SceneGraphVisitor {
  	 unionBox(Rectangle3D.unitCube);
   }
   
+  private boolean checkForBoundingBox(Geometry g)	{
+	Object bbox = g.getGeometryAttributes(GeometryUtility.BOUNDING_BOX);
+	if (bbox != null && bbox instanceof Rectangle3D)	{
+			Rectangle3D box = (Rectangle3D) bbox;
+			if (box == Rectangle3D.EMPTY_BOX) return true;
+    	 	unionBox(box);		
+    	 	return true;
+  	}
+	return false;
+  }
   public void visit(PointSet p) {
   // Following code should only be activated if we have listeners installed to update 
   // the bounding box when it goes out of date.
-  	Object bbox = p.getGeometryAttributes(GeometryUtility.BOUNDING_BOX);
-	if (bbox != null && bbox instanceof Rectangle3D)	{
-  		Rectangle3D box = (Rectangle3D) bbox;
-    	 	unionBox(box);		
-    	 	return;
-  	}
+	  if (checkForBoundingBox(p)) return;
   	Object domain = p.getGeometryAttributes(GeometryUtility.HEIGHT_FIELD_SHAPE);
 	if (domain != null && domain instanceof Rectangle2D)	{
  		Rectangle2D box = (Rectangle2D) domain;
