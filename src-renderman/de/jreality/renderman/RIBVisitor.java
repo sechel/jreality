@@ -134,6 +134,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	private SceneGraphComponent root;
 	private SceneGraphPath cameraPath;
 	transient protected double[] world2Camera;
+	transient protected double[] object2worldTrafo;
 	transient protected SceneGraphPath object2world = new SceneGraphPath();
 	transient private Camera camera;
 	transient private int width = 640;
@@ -572,6 +573,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		readAttributesFromEffectiveAppearance(eAppearance);
 		// possibly here call evaluateEffectiveAppearance()
 		object2world.push(c);
+		object2world.getMatrix(object2worldTrafo);
 		if (hasProxy(c)) {
 			RIBHelper.processShader(dgs.getPolygonShader(), this, "polygonShader");
 			handleCurrentProxy();
@@ -616,7 +618,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		updateShaders(eap);
 		// read current values from the effective appearance
 		currentSignature = eap.getAttribute(CommonAttributes.SIGNATURE,Pn.EUCLIDEAN);
-		retainGeometry = eap.getAttribute(CommonAttributes.RMAN_RETAIN_GEOMETRY, false); 
+		retainGeometry = eap.getAttribute(CommonAttributes.BACKEND_RETAIN_GEOMETRY, false); 
 		//if(rhs.getOpaqueTubesAndSpheres()!=null)  
 		opaqueTubes = rhs.getOpaqueTubesAndSpheres();
 		transparencyEnabled = rhs.getTransparencyEnabled();
