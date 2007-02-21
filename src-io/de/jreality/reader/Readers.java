@@ -175,6 +175,8 @@ public final class Readers {
 			format = "VRML";
 		} else if (lcName.endsWith(".m")) {
 			format = "MATHEMATICA";
+		} else if (lcName.endsWith(".msms")) {
+			format = "MSMS";
 		} else  {//if (lcName.endsWith(".off") || lcName.endsWith(".quad") || lcName.endsWith(".mesh") || lcName.endsWith(".vect") || lcName.endsWith(".bez") 
 				//|| lcName.endsWith(".grp") || lcName.endsWith(".oogl") || lcName.endsWith(".list") || lcName.endsWith(".inst")){
 			format = "OOGL";

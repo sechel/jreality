@@ -40,6 +40,7 @@
 
 package de.jreality.reader;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -450,7 +451,34 @@ public class ReaderOOGL extends AbstractReader {
                 cc.addChild(geom);
               }
 
+            }  else if ( st.sval.indexOf("XYZR") != -1) {
+                current =SceneGraphUtility.createFullSceneGraphComponent("XYZR-node");
+                 Color[] testcolors = {Color.red, Color.blue, Color.white, Color.green};
+                st.nextToken();
+                double scale = Double.parseDouble(st.sval);
+                st.nextToken();
+                do {
+                    double x = Double.parseDouble(st.sval);
+                	st.nextToken();
+                	double y = Double.parseDouble(st.sval);
+                	st.nextToken();
+                	double z = Double.parseDouble(st.sval);
+                	st.nextToken();
+                	double r = Double.parseDouble(st.sval);
+                	SceneGraphComponent sphere = Primitives.sphere(scale*r, x, y, z);
+                    st.eolIsSignificant(true);
+                  	st.nextToken();
+                    if (st.ttype != StreamTokenizer.TT_EOL && st.ttype != StreamTokenizer.TT_EOF) {
+                    	int index = Integer.parseInt(st.sval);
+                    	sphere.getAppearance().setAttribute("polygonShader.diffuseColor", testcolors[index % testcolors.length]);
+                    }
+                    st.eolIsSignificant(false);
+                 	st.nextToken();
+                 	current.addChild(sphere);
+                }  while (st.ttype != StreamTokenizer.TT_EOF);
+                        	
             }
+
           //current.setName(name);
            }
        } catch (IOException e) {
