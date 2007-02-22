@@ -47,6 +47,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StreamTokenizer;
+import java.util.HashMap;
 import java.util.logging.Level;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
@@ -452,6 +453,7 @@ public class ReaderOOGL extends AbstractReader {
               }
 
             }  else if ( st.sval.indexOf("XYZR") != -1) {
+            	HashMap<Double, Integer> radii = new HashMap<Double,Integer>();
                 current =SceneGraphUtility.createFullSceneGraphComponent("XYZR-node");
                  Color[] testcolors = {Color.red, Color.blue, Color.white, Color.green};
                 st.nextToken();
@@ -468,11 +470,20 @@ public class ReaderOOGL extends AbstractReader {
                 	SceneGraphComponent sphere = Primitives.sphere(scale*r, x, y, z);
                     st.eolIsSignificant(true);
                   	st.nextToken();
+                  	int index = 0;
                     if (st.ttype != StreamTokenizer.TT_EOL && st.ttype != StreamTokenizer.TT_EOF) {
-                    	int index = Integer.parseInt(st.sval);
-                    	sphere.getAppearance().setAttribute("polygonShader.diffuseColor", testcolors[index % testcolors.length]);
+                    	index = Integer.parseInt(st.sval);
+                    } else {
+                    	Double rr = new Double(r);
+                    	if (radii.get(rr) != null)	{
+                    		index = radii.get(rr).intValue();
+                    	} else {
+                    		index = radii.size();
+                    		radii.put(rr, index);
+                    	}
                     }
-                    st.eolIsSignificant(false);
+                	sphere.getAppearance().setAttribute("polygonShader.diffuseColor", testcolors[index % testcolors.length]);
+                   st.eolIsSignificant(false);
                  	st.nextToken();
                  	current.addChild(sphere);
                 }  while (st.ttype != StreamTokenizer.TT_EOF);
