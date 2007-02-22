@@ -86,10 +86,17 @@ public class Primitives {
 		static private int[][] cubeIndices = {
 				{0,2,3,1},
 				{1,5,4,0},
-				{3,7,5,1},
 				{5,7,6,4},
 				{2,6,7,3},
-				{0,4,6,2}};
+				{0,4,6,2},
+				{3,7,5,1}};
+		
+		static private int[][] openCubeIndices = {
+			{0,2,3,1},
+			{1,5,4,0},
+			{5,7,6,4},
+			{2,6,7,3},
+			{0,4,6,2}};
 		
 		static private double[][] cubeColors = {
 			{0d, 1d, 0d},
@@ -101,7 +108,17 @@ public class Primitives {
 			
 		public static IndexedFaceSet cube()	{return cube(false);}
 		public static IndexedFaceSet coloredCube()	{return cube(true);}
-		
+		public static IndexedFaceSet openCube() {
+			
+			IndexedFaceSet cube = new IndexedFaceSet(8, 5);
+
+			cube.setFaceAttributes(Attribute.INDICES, new IntArrayArray.Array(openCubeIndices));
+			cube.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(cubeVerts3));
+			IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(cube);
+			GeometryUtility.calculateAndSetFaceNormals(cube);		
+			return cube;
+			
+		}
 		/**
 		 * A cube.  If <i>colored</i> is true, then it has face colors.
 		 * @param colored
