@@ -79,6 +79,15 @@ public class Rectangle3D {
 		this.initialize();
 	}
 	
+	public Rectangle3D(double w, double h, double d)	{
+		this();
+		bounds[0][0] = 0;
+		bounds[0][1] = 0;
+		bounds[0][2] = 0;
+		bounds[1][0] = w;
+		bounds[1][1] = h;
+		bounds[1][2] = d;
+	}
 	public Rectangle3D(double[][] vlist)	{
 		//assert dim checks
 		this();
