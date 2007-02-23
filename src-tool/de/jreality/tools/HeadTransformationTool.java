@@ -99,7 +99,6 @@ public class HeadTransformationTool extends AbstractTool {
     }
     double dAngle = (invert ? -1 : 1) * tc.getAxisState(verticalRotation).doubleValue();
     if (currentAngle + dAngle > maxAngle || currentAngle + dAngle < minAngle) {
-    	System.out.println("currentAngle + dAngle="+(currentAngle + dAngle)+" ["+minAngle+", "+maxAngle+"]");
     	return;
     }
     SceneGraphComponent myComponent = tc.getRootToToolComponent().getLastComponent();
