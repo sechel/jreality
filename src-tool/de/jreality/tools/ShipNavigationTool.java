@@ -40,11 +40,13 @@
 
 package de.jreality.tools;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.pick.PickResult;
@@ -77,10 +79,12 @@ public class ShipNavigationTool extends AbstractTool {
   double gain = 4;
   private double runFactor=2;
   private double gravity = 9.81;
-  private double lastGravity = 0;
+  private transient double lastGravity = 0;
   private double jumpSpeed = 8;
-  private double lastJumpSpeed;
-  private boolean rotate=false;
+  private transient double lastJumpSpeed;
+  private transient boolean rotate=false;
+  
+  private boolean center = false;
 
   private boolean pollingDevice=true; // should be true for mouse look, false for some axis/button device TODO!!
   private transient boolean fall;
@@ -155,7 +159,16 @@ public class ShipNavigationTool extends AbstractTool {
         double[] trans = new double[]{sec*velocity[0], sec*velocity[1], sec*velocity[2], 1};
         double[] dest = myMatrix.multiplyVector(trans);
 
-        double[] pickStart = new double[]{dest[0], dest[1]+1.7, dest[2], 1};
+        if (myMatrix.containsNanOrInfinite()) System.out.println("NAN!!! 1");
+        
+        double[] pickStart;
+        if (!center) pickStart = new double[]{dest[0], dest[1]+1.7, dest[2], 1};
+        else {
+        	double n = Math.sqrt(dest[0]*dest[0]+dest[1]*dest[1]+dest[2]*dest[2]);
+        	if (n != 0) n=1.7/n;
+        	n+=1;
+        	pickStart = new double[]{dest[0]*n, dest[1]*n, dest[2]*n, 1};
+        }
         List picks = Collections.EMPTY_LIST;
         if (gravity != 0) {
           if (!fall) {
@@ -173,9 +186,14 @@ public class ShipNavigationTool extends AbstractTool {
             velocity[1] = 0;
             touchGround = true;
           } else {
-            velocity[1] -= sec*gravity ;
+            velocity[1] -= sec*gravity;
             touchGround = false;
           }
+        }
+        if (center)	{
+        	Matrix rotation = MatrixBuilder.euclidean().rotateFromTo(myMatrix.getColumn(3), dest).getMatrix();
+        	if (!rotation.containsNanOrInfinite()) myMatrix.multiplyOnLeft(rotation);
+        	else System.out.println("rotation NAN: from="+Arrays.toString(myMatrix.getColumn(3))+" to="+Arrays.toString(dest));
         }
         myMatrix.setColumn(3, dest);
         myMatrix.assignTo(myComponent);
@@ -183,7 +201,7 @@ public class ShipNavigationTool extends AbstractTool {
     }
   }
 
-  boolean timerOnline;
+  transient boolean timerOnline;
   
   private void checkNeedTimer(ToolContext tc) {
     boolean needTimer = false;
@@ -259,5 +277,13 @@ public class ShipNavigationTool extends AbstractTool {
 
   public void setRunFactor(double runFactor) {
     this.runFactor = runFactor;
+  }
+
+  public boolean isCenter() {
+    return center;
+  }
+
+  public void setCenter(boolean center) {
+	  this.center = center;
   }
 }
