@@ -91,13 +91,17 @@ public class HeadTransformationTool extends AbstractTool {
       if (headTranslation == null) {
 	      FactoredMatrix fm = new FactoredMatrix(m.getArray());
 	      currentAngle=fm.getRotationAngle();
+	      if (currentAngle > Math.PI) currentAngle-=2*Math.PI;
       }
       headTranslation=m.getColumn(3);
     } else {
       headTranslation=new double[]{0,1.7,0};
     }
     double dAngle = (invert ? -1 : 1) * tc.getAxisState(verticalRotation).doubleValue();
-    if (currentAngle + dAngle > maxAngle || currentAngle + dAngle < minAngle) return;
+    if (currentAngle + dAngle > maxAngle || currentAngle + dAngle < minAngle) {
+    	System.out.println("currentAngle + dAngle="+(currentAngle + dAngle)+" ["+minAngle+", "+maxAngle+"]");
+    	return;
+    }
     SceneGraphComponent myComponent = tc.getRootToToolComponent().getLastComponent();
     MatrixBuilder.euclidean().translate(headTranslation).rotateX(currentAngle).assignTo(myComponent);
     currentAngle+=dAngle;
