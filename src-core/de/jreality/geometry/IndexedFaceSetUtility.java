@@ -42,16 +42,15 @@ package de.jreality.geometry;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 
-import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -1606,5 +1605,98 @@ public class IndexedFaceSetUtility {
   		System.out.println("merged "+total+" points");
   		ifs.setVertexAttributes(Attribute.NORMALS, new DoubleArrayArray.Array(na, na[0].length));
   	}
+  	
+  	/**
+     * Generates a triangulated sphere from a given set of equally spaced longitude (theta) circles.
+     * The data for each circle (levels[i]) starts at phi=0 and ends at phi=2PI and is also equally
+     * spaced. Computes texture coordinates and smoothes vertex normals along the "cut" phi=0/2*PI.
+     * 
+     * It is assumed that levels contains the following data:
+     * 
+     *   levels[i][j] = f(i*PI/(levels.length-1), j*2*PI/(levels[i].length-1),
+     * 
+     * where f is a function of longitude and lattitude.
+     * 
+     * NOTE: currently for a pole you need to give 2 points, for phi=0 and phi=2PI.
+     */
+  	public static IndexedFaceSet generateSphere(double[][][] levels) {
+  		double dTheta = 1./(levels.length-1);
+  		List<double[]> points = new LinkedList<double[]>();
+  		List<double[]> texCoords = new LinkedList<double[]>();
+		List<int[]> tris = new LinkedList<int[]>();
+		LinkedList<Integer> associatedPoints = new LinkedList<Integer>();
+		int lastCnt=0, lastIndex=0;
+		int i=0;
+		for (double[][] level : levels) {
+			int cnt = level.length-1;
+			
+			// tex coords:
+			double theta = dTheta*i;
+			double dPhi=1./cnt;
+			for (int k=0; k<=cnt; k++) {
+				texCoords.add(new double[]{theta, k*dPhi});
+			}
+			associatedPoints.add(points.size());
+			for (double[] p : level) points.add(p);
+			associatedPoints.add(points.size()-1);
+			if (i>0) {
+				tris.addAll(calculateTris(lastCnt, cnt, lastIndex, points.size()-cnt-1));
+			}
+			i++;
+			lastCnt=cnt;
+			lastIndex=points.size()-cnt-1;
+		}
+		IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
+		ifsf.setVertexCount(points.size());
+		ifsf.setFaceCount(tris.size());
+		ifsf.setGenerateVertexNormals(true);
+		ifsf.setGenerateFaceNormals(true);
+		ifsf.setVertexCoordinates(points.toArray(new double[0][]));
+		ifsf.setVertexTextureCoordinates(texCoords.toArray(new double[0][]));
+		ifsf.setFaceIndices(tris.toArray(new int[0][]));
+		ifsf.update();
+		
+		// average normals:
+		double[][] normals = ifsf.getIndexedFaceSet().getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+		while (!associatedPoints.isEmpty()) {
+			int p1=associatedPoints.removeFirst();
+			int p2=associatedPoints.removeFirst();
+			normals[p1]=normals[p2]=Rn.times(normals[p1], 0.5, Rn.add(normals[p1], normals[p1], normals[p2]));
+		}
+		ifsf.getIndexedFaceSet().setVertexAttributes(Attribute.NORMALS, new DoubleArrayArray.Array(normals));
+		return ifsf.getIndexedFaceSet();
+  	}
+  	
+  	/**
+     * auxilary method for generateSphere
+     */
+	private static List<int[]> calculateTris(int cntInner, int cntOuter, int iInner, int iOuter) {
+		int i=0, j=0;
+		double phi1=0, phi2=0, dp1=2*Math.PI/cntInner, dp2=2*Math.PI/cntOuter;
+		LinkedList<int[]> tris = new LinkedList<int[]>();
+		while (true) {
+			if (Math.abs(((phi1+dp1)-phi2)) > Math.abs(((phi2+dp2)-phi1))) {
+				// increase outer circle
+				tris.add(new int[]{iInner+i, iOuter+j, iOuter+j+1});
+				j++;
+				phi2+=dp2;
+			} else {
+				// increase inner circle
+				tris.add(new int[]{iInner+i, iOuter+j, iInner+i+1});
+				i++;
+				phi1+=dp1;
+			}
+			if (i==cntInner && j==(cntOuter-1)) {
+				tris.add(new int[]{iInner+i, iOuter+j, iOuter+j+1});
+				break;
+			}
+			if (j==cntOuter && i==(cntInner-1)){
+				tris.add(new int[]{iInner+i, iOuter+j, iInner+i+1});
+				break;
+			}
+		}
+		return tris;
+	}
 
+  	
 }

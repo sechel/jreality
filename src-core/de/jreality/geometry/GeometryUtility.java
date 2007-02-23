@@ -40,6 +40,7 @@
 
 package de.jreality.geometry;
 
+import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,7 +60,9 @@ import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
+import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.util.ColorGradient;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
@@ -546,6 +549,40 @@ public class GeometryUtility {
 		}
 		g.setGeometryAttributes(SIGNATURE, new Integer(s));
 	}
+
+  	/**
+  	 * Calculated the distance from center ( [0,0,0] if center is null ) for each vertex and sets vertex
+  	 * colors from the given Color Gradient (d_min->0, d_max-_1).
+  	 * @param ps the PointSet to set vertex colors
+  	 * @param center optional center
+  	 * @param cg optional color color gradient
+  	 * 
+  	 * TODO: adapt to homogenious coordinates
+  	 */
+  	public static void colorizeSphere(PointSet ps, double[] center, ColorGradient cg) {
+  		if (cg==null) cg=new ColorGradient();
+		double[][] colors = ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+		
+		// calculate min/max
+		double min=Double.MAX_VALUE, max=0;
+		for (int i=0; i<colors.length; i++) {
+			if (center != null) Rn.subtract(colors[i], colors[i], center);
+			double n = Rn.euclideanNorm(colors[i]);
+			if (n<min) min=n;
+			if (n>max) max=n;
+		}
+		
+		// calculate colors
+		for (int i=0; i<colors.length; i++) {
+			double n = Rn.euclideanNorm(colors[i]);
+			double cc = (n-min)/(max-min);
+			Color c = cg.getColor(cc);
+			colors[i][0]=c.getRed()/255.;
+			colors[i][1]=c.getGreen()/255.;
+			colors[i][2]=c.getBlue()/255.;
+		}
+		ps.setVertexAttributes(Attribute.COLORS, new DoubleArrayArray.Array(colors));
+  	}
 
 }
 
