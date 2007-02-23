@@ -81,13 +81,14 @@ public class LoadFile extends AbstractJrAction {
   private JComponent options; 
   private JCheckBox mergeLineSets;
   private JCheckBox mergeFaceSets;
+  private JCheckBox callEncompass;
   
 
   public LoadFile(String name, SceneGraphComponent parentNode, ToolSystemViewer viewer, Component parentComp) {
     super(name, parentComp);
     this.parentNode = parentNode;
     this.viewer = viewer;
-
+    
     setShortDescription("Load one or more files");
     setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
@@ -135,7 +136,7 @@ public class LoadFile extends AbstractJrAction {
         
         PickUtility.assignFaceAABBTrees(sgc);
         
-        if (viewer != null) {
+        if (callEncompass.isSelected() && viewer != null) {
         	CameraUtility.encompass(viewer.getAvatarPath(),
         			viewer.getEmptyPickPath(),
         			viewer.getCameraPath(),
@@ -156,8 +157,11 @@ public class LoadFile extends AbstractJrAction {
 
     mergeLineSets = new JCheckBox("merge IndexedLineSets");
     mergeFaceSets = new JCheckBox("merge IndexedFaceSets");
+    callEncompass = new JCheckBox("encompass scene");
+    callEncompass.setSelected(true);
     box.add(mergeLineSets);
     box.add(mergeFaceSets);
+    box.add(callEncompass);
     
     return box;
   }
