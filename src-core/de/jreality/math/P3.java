@@ -541,7 +541,12 @@ public class P3 {
 			System.arraycopy(to,0,vecs[1],0,3);
 			Rn.normalize(vecs[0], vecs[0]);
 			Rn.normalize(vecs[1], vecs[1]);
-			double angle = Math.acos(Rn.innerProduct(vecs[0], vecs[1]));
+			double cosAngle = Rn.innerProduct(vecs[0], vecs[1]);
+			double angle = Math.acos(cosAngle);
+			if (Double.isNaN(angle)) {
+				// inner product is out of [-1,1] for numerical reasons
+				angle=cosAngle>0?0:Math.PI;
+			}
 			Rn.crossProduct(vecs[2], vecs[0], vecs[1]);
 			Rn.normalize(vecs[2], vecs[2]);
 			return P3.makeRotationMatrix(m, vecs[2], angle);

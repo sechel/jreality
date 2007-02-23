@@ -392,5 +392,10 @@ public class Matrix implements Serializable {
   public String toString() {
     return Rn.matrixToString(matrix);
   }
+  
+  public boolean containsNanOrInfinite() {
+	  for (double v : matrix) if (Double.isNaN(v) || Double.isInfinite(v)) return true;
+	  return false;
+  }
 
 }
