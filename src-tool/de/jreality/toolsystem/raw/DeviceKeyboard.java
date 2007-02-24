@@ -41,10 +41,10 @@
 package de.jreality.toolsystem.raw;
 
 import java.awt.Component;
-import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import de.jreality.scene.Viewer;
 import de.jreality.scene.tool.AxisState;
@@ -56,12 +56,16 @@ import de.jreality.util.LoggingSystem;
 /**
  * @author weissman
  **/
-public class DeviceKeyboard implements RawDevice, KeyListener {
+public class DeviceKeyboard implements RawDevice, KeyListener, PollingDevice {
   
+	private HashMap<Integer, Boolean> keyState = new HashMap<Integer, Boolean>();
+	
     private HashMap<Integer, InputSlot> keysToVirtual = new HashMap<Integer, InputSlot>();
     
     private ToolEventQueue queue;
     private Component component;
+    
+    private LinkedList<ToolEvent> myQueue = new LinkedList<ToolEvent>();
     
     public void initialize(Viewer viewer) {
       if (!viewer.hasViewingComponent() || !(viewer.getViewingComponent() instanceof Component) ) throw new UnsupportedOperationException("need AWT component");
@@ -70,26 +74,42 @@ public class DeviceKeyboard implements RawDevice, KeyListener {
     }
 
     public synchronized void keyPressed(KeyEvent e) {
-    	if (e.isConsumed()) return;
-        InputSlot id = (InputSlot) keysToVirtual.get(new Integer(e.getKeyCode()));
+    	InputSlot id = (InputSlot) keysToVirtual.get(new Integer(e.getKeyCode()));
         if (id != null) {
-          ToolEvent ev = new ToolEvent(this, id, AxisState.PRESSED);
-          queue.addEvent(ev);
-          LoggingSystem.getLogger(this).fine(this.hashCode()+" added key pressed ["+id+"] "+e.getWhen());
+          ToolEvent ev = new ToolEvent(e, id, AxisState.PRESSED);
+          handleEvent(ev);
+      	  LoggingSystem.getLogger(this).fine(this.hashCode()+" added key pressed ["+id+"] "+e.getWhen());
         }
     }
     
-    public synchronized void keyReleased(final KeyEvent e) {
+	private synchronized void handleEvent(ToolEvent ev) {
+		//System.out.print("DeviceKeyboard.handleEvent(): ");
+		if (ev.getAxisState() == AxisState.ORIGIN) {
+			//System.out.println("RELEASED");
+			myQueue.addLast(ev);
+			return;
+		} else {
+			//System.out.println("PRESSED, "+myQueue.size());
+			// released
+			if (myQueue.size() == 0) myQueue.addLast(ev);
+			else {
+				long dt = ev.getTimeStamp()-myQueue.getLast().getTimeStamp();
+				if (dt<10) {
+					myQueue.removeLast();
+					//System.out.println("skipping");
+				}
+				else {
+					myQueue.addLast(ev);
+				}
+			}
+		}
+	}
+
+	public synchronized void keyReleased(final KeyEvent e) {
         InputSlot id = (InputSlot) keysToVirtual.get(e.getKeyCode());
         if (id != null) {
-        	// check for a next key-pressed
-        	KeyEvent nextEvent = (KeyEvent) Toolkit.getDefaultToolkit().getSystemEventQueue().peekEvent(KeyEvent.KEY_PRESSED);
-        	if (nextEvent != null && nextEvent.getKeyCode() == e.getKeyCode()) {
-        		nextEvent.consume();
-        		return;
-        	}
-        	queue.addEvent(new ToolEvent(this, id, AxisState.ORIGIN));
-            LoggingSystem.getLogger(this).finer("added key released ["+id+"] "+e.getWhen());
+            handleEvent(new ToolEvent(e, id, AxisState.ORIGIN));
+        	LoggingSystem.getLogger(this).finer("added key released ["+id+"] "+e.getWhen());
         }
     }
 
@@ -128,4 +148,16 @@ public class DeviceKeyboard implements RawDevice, KeyListener {
       return "RawDevice: Keyboard";
     }
 
+	public synchronized void poll() {
+		long ct = System.currentTimeMillis();
+		while (!myQueue.isEmpty()) {
+			if (ct - myQueue.getFirst().getTimeStamp() < 4) return;
+			ToolEvent event = myQueue.removeFirst();
+			KeyEvent awtEvent = (KeyEvent) event.getSource();
+			if (keyState.get(awtEvent.getKeyCode()) != Boolean.valueOf(event.getAxisState().isPressed())) {
+					keyState.put((awtEvent).getKeyCode(), event.getAxisState().isPressed());
+					queue.addEvent(event);
+			}
+		}
+	}
 }
