@@ -250,6 +250,7 @@ public class ViewerAppMenu {
     List<JRadioButtonMenuItem> items = new LinkedList<JRadioButtonMenuItem>();
     items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("default", viewerApp, SwitchBackgroundColor.defaultColor)) );
     items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("white", viewerApp, Color.WHITE)) );
+    items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("black", viewerApp, Color.black)) );
     items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("gray", viewerApp, new Color(225, 225, 225))) );
     for (JRadioButtonMenuItem item : items) {
       bg.add(item);
