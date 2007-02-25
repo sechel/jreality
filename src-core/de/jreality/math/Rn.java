@@ -292,17 +292,20 @@ final public class Rn {
 		return dst;
 	}
 	
+	  public static double[] convertArray3DToArray1D(double[][][] V) {
+		  return convertArray3DToArray1D(V, 1, 1);
+	  }
 	/**
 	   * @param V
 	   * @return
 	   */
-	  public static double[] convertArray3DToArray1D(double[][][] V) {
+	  public static double[] convertArray3DToArray1D(double[][][] V, int usample, int vsample) {
 	    int n = V.length;
 	    int m = V[0].length;
 	    int p = V[0][0].length;
-	    double[] newV = new double[n*m*p];
-	    for (int i = 0, ind=0; i< n; i++)  {
-	      for (int j = 0; j<m; ++j) {
+	    double[] newV = new double[((n+vsample-1)/vsample)*((m+usample-1)/usample)*p];
+	    for (int i = 0, ind=0; i< n; i+= vsample)  {
+	      for (int j = 0; j<m; j += usample) {
 	        for (int k = 0; k < p; k++, ind++)
 	          newV[ind] = V[i][j][k];
 	      }
