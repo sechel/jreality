@@ -96,7 +96,7 @@ public class Primitives {
 			{1,5,4,0},
 			{5,7,6,4},
 			{2,6,7,3},
-			{0,4,6,2}};
+			{3,7,5,1}};
 		
 		static private double[][] cubeColors = {
 			{0d, 1d, 0d},
