@@ -251,6 +251,10 @@ public class LabelUtility {
   }
 
   public static BufferedImage createImageFromString(String s, Font f, Color color) {
+	  return createImageFromString(s, f, color, TRANSPARENT);
+  }
+  
+  public static BufferedImage createImageFromString(String s, Font f, Color foreground, Color background) {
 	  //Rectangle r = f.getStringBounds(s,frc).getBounds();
 	  if (s==null || s.length()==0) return bi;
 	  TextLayout tl = new TextLayout(s,f,frc);
@@ -263,9 +267,9 @@ public class LabelUtility {
     
     BufferedImage img = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
 	  Graphics2D g = (Graphics2D) img.getGraphics();
-	  g.setBackground(TRANSPARENT);
+	  g.setBackground(background);
 	  g.clearRect(0,0,width,height);
-	  g.setColor(color);
+	  g.setColor(foreground);
 	  g.setFont(f);
 //	  LineMetrics lineMetrics = f.getLineMetrics(s,frc).getHeight();
 		
