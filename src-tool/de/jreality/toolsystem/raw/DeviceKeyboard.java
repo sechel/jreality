@@ -69,7 +69,10 @@ import de.jreality.util.LoggingSystem;
  * key-released event occurs, we check if there is a matching key-pressed event
  * in the queue - if yes ignore both events. Happens in handleEvent(..).
  * 
- * MacOS/Solaris/...:
+ * MacOS:
+ * Seems to work!
+ * 
+ * Solaris etc.:
  * TODO!
  * 
  * @author Steffen Weissmann
