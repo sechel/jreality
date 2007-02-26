@@ -110,10 +110,11 @@ public class TargaFile {
         for(int i = 0; i < width; i++) {
           int  index = ((height - 1 - j) * width + i) * bytePerPixel;
           byte alpha = (bytePerPixel == 4) ? imageData[index + 3] : (byte)255;
+          // switched index 0 <-> 2...
           int color  = (       alpha         & 0xFF) << 24|
-                       (imageData[index + 2] & 0xFF) << 16|
+                       (imageData[index + 0] & 0xFF) << 16|
                        (imageData[index + 1] & 0xFF) <<  8|
-                       (imageData[index + 0] & 0xFF);
+                       (imageData[index + 2] & 0xFF);
           bufferedImage.setRGB(i,j, color);
       }
       return bufferedImage;

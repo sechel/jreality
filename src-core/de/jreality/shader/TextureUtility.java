@@ -352,12 +352,13 @@ public class TextureUtility {
 		if (name.contains("posz")) return 4;
 		if (name.contains("negz")) return 5;
 
-		if (name.contains("lf.")) return 0;
-		if (name.contains("rt.")) return 1;
+		// Quake 3 order:
+		if (name.contains("lf.")) return 5;
+		if (name.contains("rt.")) return 4;
 		if (name.contains("up.")) return 2;
 		if (name.contains("dn.")) return 3;
-		if (name.contains("bk.")) return 4;
-		if (name.contains("ft.")) return 5;
+		if (name.contains("bk.")) return 1;
+		if (name.contains("ft.")) return 0;
 		return -1;
 }
 
