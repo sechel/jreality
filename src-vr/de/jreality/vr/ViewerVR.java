@@ -52,8 +52,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
@@ -138,9 +136,6 @@ public class ViewerVR {
 
 	// width of file browser panel in meters
 	private static final int FILE_CHOOSER_PANEL_WIDTH = 2;
-
-	// diam of the terrain
-	private static final double TERRAIN_SIZE = 100;
 
 	// parts of the scene that do not change
 	private SceneGraphComponent sceneRoot = new SceneGraphComponent("root"),
