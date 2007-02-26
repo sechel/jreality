@@ -41,6 +41,7 @@
 package de.jreality.shader;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -51,6 +52,7 @@ import de.jreality.scene.Scene;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.util.Input;
+import de.jreality.util.TargaFile;
 
 
 /**
@@ -330,7 +332,14 @@ public class TextureUtility {
 	  for (ZipEntry ze = zis.getNextEntry(); ze != null; ze = zis.getNextEntry()) {
 		  if (ze.isDirectory()) continue;
 		  int index = findIndex(ze.getName());
-		  if (index != -1) id[index]=ImageData.load(Input.getInput("zip entry", zis));
+		  if (index != -1) {
+			  if (ze.getName().toLowerCase().endsWith(".tga")) {
+				  id[index]=new ImageData(TargaFile.getBufferedImage(zis));
+			  }
+			  else {
+				  id[index]=ImageData.load(Input.getInput("zip entry", zis));
+			  }
+		  }
 	  }
 	  return id;
   }
@@ -342,6 +351,13 @@ public class TextureUtility {
 		if (name.contains("negy")) return 3;
 		if (name.contains("posz")) return 4;
 		if (name.contains("negz")) return 5;
+
+		if (name.contains("lf.")) return 0;
+		if (name.contains("rt.")) return 1;
+		if (name.contains("up.")) return 2;
+		if (name.contains("dn.")) return 3;
+		if (name.contains("bk.")) return 4;
+		if (name.contains("ft.")) return 5;
 		return -1;
 }
 
