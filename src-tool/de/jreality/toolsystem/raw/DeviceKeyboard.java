@@ -41,6 +41,7 @@
 package de.jreality.toolsystem.raw;
 
 import java.awt.Component;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.HashMap;
@@ -54,7 +55,24 @@ import de.jreality.toolsystem.ToolEventQueue;
 import de.jreality.util.LoggingSystem;
 
 /**
- * @author weissman
+ * This driver mainly consists of a woraround for the keyboard auto-repeat:
+ * 
+ * Windows:
+ * The auto-repeat on windows triggers repeating key-pressed events, and also
+ * key-typed events which we ignore. So the only thing to do is to check the
+ * last state of the key and only handle a key-pressed if the key was not
+ * pressed before. This happens in poll().
+ * 
+ * Linux:
+ * The auto-repeat on linux triggers repeating key-released/key-pressed events,
+ * so we enqueue the occuring events and merge them if possible: When a
+ * key-released event occurs, we check if there is a matching key-pressed event
+ * in the queue - if yes ignore both events. Happens in handleEvent(..).
+ * 
+ * MacOS/Solaris/...:
+ * TODO!
+ * 
+ * @author Steffen Weissmann
  **/
 public class DeviceKeyboard implements RawDevice, KeyListener, PollingDevice {
   
@@ -65,7 +83,7 @@ public class DeviceKeyboard implements RawDevice, KeyListener, PollingDevice {
     private ToolEventQueue queue;
     private Component component;
     
-    private LinkedList<ToolEvent> myQueue = new LinkedList<ToolEvent>();
+    private LinkedList<KeyEvent> myQueue = new LinkedList<KeyEvent>();
     
     public void initialize(Viewer viewer) {
       if (!viewer.hasViewingComponent() || !(viewer.getViewingComponent() instanceof Component) ) throw new UnsupportedOperationException("need AWT component");
@@ -74,46 +92,47 @@ public class DeviceKeyboard implements RawDevice, KeyListener, PollingDevice {
     }
 
     public synchronized void keyPressed(KeyEvent e) {
-    	InputSlot id = (InputSlot) keysToVirtual.get(new Integer(e.getKeyCode()));
+    	InputSlot id = keysToVirtual.get(e.getKeyCode());
         if (id != null) {
-          ToolEvent ev = new ToolEvent(e, id, AxisState.PRESSED);
-          handleEvent(ev);
+          handleEvent(e);
       	  LoggingSystem.getLogger(this).fine(this.hashCode()+" added key pressed ["+id+"] "+e.getWhen());
         }
     }
     
-	private synchronized void handleEvent(ToolEvent ev) {
-		//System.out.print("DeviceKeyboard.handleEvent(): ");
-		if (ev.getAxisState() == AxisState.ORIGIN) {
-			//System.out.println("RELEASED");
+	private synchronized void handleEvent(KeyEvent ev) {
+		if (ev.getID() == KeyEvent.KEY_RELEASED) {
+			try {
+				Thread.sleep(3);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+//			KeyEvent next = (KeyEvent) Toolkit.getDefaultToolkit().getSystemEventQueue().peekEvent(KeyEvent.KEY_PRESSED);
+//			if (next != null && (next.getWhen() - ev.getWhen()) < 5) {
+//				next.consume();
+//				return;
+//			}
 			myQueue.addLast(ev);
-			return;
 		} else {
-			//System.out.println("PRESSED, "+myQueue.size());
-			// released
 			if (myQueue.size() == 0) myQueue.addLast(ev);
 			else {
-				long dt = ev.getTimeStamp()-myQueue.getLast().getTimeStamp();
-				if (dt<10) {
-					myQueue.removeLast();
-					//System.out.println("skipping");
-				}
-				else {
-					myQueue.addLast(ev);
-				}
+				// two associated RELEASED/PRESSED events seem to differ at most +-1
+				if ((ev.getWhen()-myQueue.getLast().getWhen())<2) myQueue.removeLast();
+				else myQueue.addLast(ev);
 			}
 		}
 	}
 
 	public synchronized void keyReleased(final KeyEvent e) {
-        InputSlot id = (InputSlot) keysToVirtual.get(e.getKeyCode());
+        InputSlot id = keysToVirtual.get(e.getKeyCode());
         if (id != null) {
-            handleEvent(new ToolEvent(e, id, AxisState.ORIGIN));
+            handleEvent(e);
         	LoggingSystem.getLogger(this).finer("added key released ["+id+"] "+e.getWhen());
         }
     }
 
 	public void keyTyped(KeyEvent e) {
+		//System.out.println("DeviceKeyboard.keyTyped()");
 	}
 
 	public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
@@ -122,10 +141,10 @@ public class DeviceKeyboard implements RawDevice, KeyListener, PollingDevice {
         return new ToolEvent(this, inputDevice, AxisState.ORIGIN);
     }
     
-    private Integer resolveKeyCode(String fieldName) {
+    private int resolveKeyCode(String fieldName) {
       try {
         int val = KeyEvent.class.getField(fieldName).getInt(KeyEvent.class);
-        return new Integer(val);
+        return val;
       } catch (Exception e) {
         throw new IllegalArgumentException("no such key "+fieldName);
       }
@@ -151,12 +170,29 @@ public class DeviceKeyboard implements RawDevice, KeyListener, PollingDevice {
 	public synchronized void poll() {
 		long ct = System.currentTimeMillis();
 		while (!myQueue.isEmpty()) {
-			if (ct - myQueue.getFirst().getTimeStamp() < 4) return;
-			ToolEvent event = myQueue.removeFirst();
-			KeyEvent awtEvent = (KeyEvent) event.getSource();
-			if (keyState.get(awtEvent.getKeyCode()) != Boolean.valueOf(event.getAxisState().isPressed())) {
-					keyState.put((awtEvent).getKeyCode(), event.getAxisState().isPressed());
-					queue.addEvent(event);
+
+			// heuristic min age 3 ms
+			long dt = ct - myQueue.getFirst().getWhen();
+			if (dt < 3) return;
+
+			KeyEvent ev = myQueue.removeFirst();
+			boolean pressed = ev.getID() == KeyEvent.KEY_PRESSED;
+			if (!pressed) {
+				KeyEvent next = (KeyEvent) Toolkit.getDefaultToolkit().getSystemEventQueue().peekEvent(KeyEvent.KEY_PRESSED);
+				if (next != null && next.getKeyCode() == ev.getKeyCode()) {
+					//two associated RELEASED/PRESSED events seem to differ at most +-1
+					if (next.getWhen() - ev.getWhen() < 2) {
+						next.consume();
+						continue;
+					}
+				}
+			}
+			if (keyState.get(ev.getKeyCode()) != Boolean.valueOf(pressed)) {
+				AxisState state = pressed ? AxisState.PRESSED : AxisState.ORIGIN;
+				ToolEvent event = new ToolEvent(ev, keysToVirtual.get(ev.getKeyCode()), state);
+				System.out.println("dt="+dt+"  ["+ev.getWhen()+"] "+event);
+				keyState.put((ev).getKeyCode(), pressed);
+				queue.addEvent(event);
 			}
 		}
 	}
