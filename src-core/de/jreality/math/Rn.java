@@ -258,6 +258,8 @@ final public class Rn {
 		for (int i=0; i< vlist.length; ++i)		{
 			max(bounds[1], bounds[1], vlist[i]);
 			min(bounds[0], bounds[0], vlist[i]);
+			if (Double.isNaN(bounds[0][0]))
+				throw new IllegalStateException("calculate bounds: nan");
 		}
 		return bounds;
 	}
@@ -1497,6 +1499,15 @@ final public class Rn {
 				);
 		return dst;
 		
+	}
+
+
+	public static boolean isNan(double[] ds) {
+		int n  = ds.length;
+		for (int i = 0; i<n; ++i)	{
+			if (Double.isNaN(ds[i])) return true;
+		}
+		return false;
 	}
 
 
