@@ -334,6 +334,8 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			theLog.log(Level.INFO,"Taking no action for addition of child type "+ev.getChildType());
 		break;
 		}
+		// to be safe, we turn on clipping planes dirty
+		jr.clippingPlanesDirty = true;
 	}
 
 	public void childRemoved(SceneGraphComponentEvent ev) {
@@ -369,6 +371,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			theLog.log(Level.INFO,"Taking no action for removal of child type "+ev.getChildType());
 		break;
 		}
+		jr.clippingPlanesDirty = true;
 	}
 
 	public void childReplaced(SceneGraphComponentEvent ev) {
@@ -392,6 +395,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			theLog.log(Level.INFO,"Taking no action for replacement of child type "+ev.getChildType());
 		break;
 		}
+		jr.clippingPlanesDirty = true;
 	}
 
 	public void transformationMatrixChanged(TransformationEvent ev) {

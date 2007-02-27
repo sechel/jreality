@@ -160,7 +160,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	protected double framerate;
 	protected int nodeCount = 0;
 
-	boolean geometryRemoved = false, lightListDirty = true;
+	boolean geometryRemoved = false, lightListDirty = true, clippingPlanesDirty = true;
 	protected Viewer theViewer;
 
 	protected int stereoType;
@@ -316,12 +316,13 @@ public class JOGLRenderer  implements AppearanceListener {
 		return null;
 	}
 
+	List clipPlanes = null;
 	private void processClippingPlanes() {
-		List clipPlanes = null;
-		if (clipPlanes == null)	{
+		if (clipPlanes == null  || clippingPlanesDirty) {
 			clipPlanes = SceneGraphUtility.collectClippingPlanes(theRoot);
 		}
 		JOGLRendererHelper.processClippingPlanes(globalGL, clipPlanes);
+		clippingPlanesDirty = false;
 	}
 
 	List lights = null;

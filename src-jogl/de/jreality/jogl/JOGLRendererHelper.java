@@ -989,10 +989,6 @@ public class JOGLRendererHelper {
 	public static void processClippingPlanes(GL globalGL, List clipPlanes) {
 
 		int clipBase = GL.GL_CLIP_PLANE0;
-		// collect and process the lights
-		// with a peer structure we don't do this but once, and then
-		// use event listening to keep our list up-to-date
-		// DEBUG: see what happens if we always reuse the light list
 		int n = clipPlanes.size();
 		// globalGL.glDisable(GL.GL_CLIP_PLANE0);
 		for (int i = 0; i < n; ++i) {
