@@ -133,26 +133,22 @@ public class JOGLConfiguration {
 				// only for windows
 				Secure.setProperty("sun.java2d.noddraw", "true");
 			}
-			foo = Secure.getProperty("jreality.jogl.peerClass");
-			if (foo != null)
+			// this doesn't really belong here but it's important that it gets evaluated
+			// before jogl backend classes begin to be instantiated, and this is the best place to guarantee that.
+			boolean copycat = "true".equals(Secure.getProperty("discreteGroup.copycat"));
+			if (copycat)
 				try {
-					peerClass = (Class<? extends JOGLPeerComponent>) Class.forName(foo);
+					peerClass = (Class<? extends JOGLPeerComponent>) Class.forName("de.jreality.jogl.DiscreteGroupJOGLPeerComponent");
 					ConstructPeerGraphVisitor.setPeerClass(peerClass);
 					System.err.println("Got peer class "+peerClass);
+					goBetweenClass = (Class<? extends GoBetween>) Class.forName("de.jreality.jogl.DiscreteGroupGoBetween");
+					JOGLRenderer.setGoBetweenClass(goBetweenClass);
+					System.err.println("Got go betwen class "+goBetweenClass);
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				foo = Secure.getProperty("jreality.jogl.goBetweenClass");
-				if (foo != null)
-					try {
-						goBetweenClass = (Class<? extends GoBetween>) Class.forName(foo);
-						JOGLRenderer.setGoBetweenClass(goBetweenClass);
-						System.err.println("Got go betwen class "+goBetweenClass);
-					} catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
 		} catch(SecurityException se)	{
 			theLog.log(Level.WARNING,"Security exception in setting configuration options",se);
 		}
