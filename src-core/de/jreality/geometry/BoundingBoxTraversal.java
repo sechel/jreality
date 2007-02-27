@@ -209,6 +209,8 @@ class BoundingBoxTraversal extends SceneGraphVisitor {
 		xyzbnds[1][1] = box.getMaxY();
 		xyzbnds[0][2] = zbnds[0][0];
 		xyzbnds[1][2] = zbnds[1][0];
+		if (Double.isNaN(xyzbnds[0][0]))
+			throw new IllegalStateException("Nan");
 		Rectangle3D box3 = new Rectangle3D(xyzbnds);		
 	 	unionBox(box3);		
 	 	return;
@@ -333,6 +335,9 @@ private class Bound {
 		bnds[0][2] = getZmin();
 		bnds[1][2] = getZmax();
 		rect3d.setBounds(bnds);
+		if (Rn.isNan(bnds[0]) || Rn.isNan(bnds[1]))
+			return Rectangle3D.EMPTY_BOX;
+
 		return rect3d;
 	}
 
