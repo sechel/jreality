@@ -176,7 +176,7 @@ useNode [State state]
 		{if (VRMLHelper.verbose) System.err.print(name);}
 	{
 		defs.use(state,name);
-		if (VRMLHelper.verbose) System.err.println(")")
+		if (VRMLHelper.verbose) System.err.println(")");
 		System.out.println("Attention: The USE-Statement is not completely supported and may be read incorrect!");
 	}
 	;
@@ -291,7 +291,7 @@ shapeNode [State state]
 {
 if (VRMLHelper.verbose) System.err.print("Shape Node: ");
 State state2= new State(state);
-PointSet geo=null;
+Geometry geo=null;
 Appearance app= new Appearance();
 SceneGraphComponent sgc= new SceneGraphComponent();
 }	:
@@ -612,7 +612,7 @@ pointSetNode [State state, Appearance app] returns[PointSet ps=null]
 	;
 
 private
-sphereNode [State state, Appearance app] returns [IndexedFaceSet sphere=null]
+sphereNode [State state, Appearance app] returns [Geometry sphere=null]
 {//TODO3:texture
  if (VRMLHelper.verbose) System.err.print("Sphere( ");
  double r=1;
@@ -624,7 +624,7 @@ sphereNode [State state, Appearance app] returns [IndexedFaceSet sphere=null]
 		| wrongAttribute 
 		)* CLOSE_BRACE
 	{
-		sphere = Primitives.sphere(20);
+		sphere = new Sphere(); //Primitives.sphere(20);
 		sphere.setName("Sphere");
 		state.extraGeoTrans=new Transformation();
 		MatrixBuilder.euclidean().scale(r).assignTo(state.extraGeoTrans);
