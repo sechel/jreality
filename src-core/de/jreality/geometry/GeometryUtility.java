@@ -148,6 +148,9 @@ public class GeometryUtility {
 		BoundingBoxTraversal bbt = new BoundingBoxTraversal();
 		if (initialMatrix!=null) bbt.setInitialMatrix(initialMatrix);
 		bbt.traverse(sgc);
+		if (Double.isNaN(bbt.getBoundingBox().getBounds()[0][0]))
+			throw new IllegalStateException("NaN in calculateBoundingBox");
+			//return Rectangle3D.EMPTY_BOX;
 		return bbt.getBoundingBox();
     }
 	
