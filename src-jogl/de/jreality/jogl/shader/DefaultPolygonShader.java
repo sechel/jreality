@@ -190,14 +190,14 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    if (texture2Dnew != null) {
 	    	gl.glActiveTexture(texUnit);
 	      	gl.glEnable(GL.GL_TEXTURE_2D);
-//		    Integer bound = jrs.boundToTextureUnit.get(texture2Dnew.getImage());
-//		    if (bound == null || bound.intValue() != texUnit) {
+		    Integer bound = jrs.boundToTextureUnit.get(texture2Dnew.getImage());
+		    if (bound == null || bound.intValue() != texUnit) {
 			    Texture2DLoaderJOGL.render(gl, texture2Dnew);
 				testTextureResident(jr, gl);
-//				jrs.boundToTextureUnit.put(texture2Dnew.getImage(), new Integer(texUnit));
-//				System.err.println("BoundToTextureUnit size: "+jrs.boundToTextureUnit.size());
-//		    }  else if (jrs.boundToTextureUnit.size() > 1)
-//		    	Texture2DLoaderJOGL.activate(gl, texture2Dnew);
+				jrs.boundToTextureUnit.put(texture2Dnew.getImage(), new Integer(texUnit));
+				System.err.println("BoundToTextureUnit size: "+jrs.boundToTextureUnit.size());
+		    }  else //if (jrs.boundToTextureUnit.size() > 1)
+		    	Texture2DLoaderJOGL.activate(gl, texture2Dnew);
 		    texUnit++;
 		    texunitcoords++;
 	    }
