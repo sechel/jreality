@@ -41,11 +41,6 @@
 package de.jreality.scene;
 
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.logging.Level;
-
-import de.jreality.util.LoggingSystem;
 
 /**
  * Base class for scene graph member nodes.
@@ -59,183 +54,184 @@ import de.jreality.util.LoggingSystem;
  * of any change in state of the node.  See the specific subclasses for details.
  */
 public class SceneGraphNode {
-  /** PENDING: <b>work in progress</b>, the lock for this component,
-   * subclasses should always use try{}finally{} statements when
-   * executing guarded code.
-   **/
-  private final transient Lock nodeLock= new Lock();
-  
-  private boolean readOnly;
-  private String  name;
-  private Object owner = null;
-  
-  public SceneGraphNode(String name) {
-	  this.name=name;
-  }
-  
-  /**
-   * Returns the readOnly flag
-   * @return boolean
-   */
-  public boolean isReadOnly() {
-    startReader();
-    try {
-      return readOnly;
-    } finally {
-      finishReader();
-    }
-  }
+	/** PENDING: <b>work in progress</b>, the lock for this component,
+	 * subclasses should always use try{}finally{} statements when
+	 * executing guarded code.
+	 **/
+	private final transient Lock nodeLock= new Lock();
 
-  /**
-   * Sets the readOnly flag
-   * @param newReadOnlyState the desired readOnly flag value
-   */
-  public void setReadOnly(boolean newReadOnlyState) {
-    startWriter();
-    readOnly=newReadOnlyState;
-    finishWriter();
-  }
+	private boolean readOnly;
+	private String  name;
+	private Object owner = null;
 
-  protected final void checkReadOnly() {
-    if(readOnly) throw new IllegalStateException("readOnly");
-  }
+	public SceneGraphNode(String name) {
+		this.name=name;
+	}
 
-  public String getName() {
-    nodeLock.readLock();
-    try {
-      return name;
-    } finally {
-      nodeLock.readUnlock();
-    }
-  }
+	/**
+	 * Returns the readOnly flag
+	 * @return boolean
+	 */
+	public boolean isReadOnly() {
+		startReader();
+		try {
+			return readOnly;
+		} finally {
+			finishReader();
+		}
+	}
 
-  public void setName(String string) {
-    checkReadOnly();
-    nodeLock.writeLock();
-    name= string;
-    nodeLock.writeUnlock();
-  }
+	/**
+	 * Sets the readOnly flag
+	 * @param newReadOnlyState the desired readOnly flag value
+	 */
+	public void setReadOnly(boolean newReadOnlyState) {
+		startWriter();
+		readOnly=newReadOnlyState;
+		finishWriter();
+	}
 
-  public Object getOwner() {
-	return owner;
-}
+	protected final void checkReadOnly() {
+		if(readOnly) throw new IllegalStateException("readOnly");
+	}
 
-public void setOwner(Object owner) {
-	this.owner = owner;
-}
+	public String getName() {
+		nodeLock.readLock();
+		try {
+			return name;
+		} finally {
+			nodeLock.readUnlock();
+		}
+	}
 
-/**
-   * this method is called berfore a sequence of write operations
-   * are executed. So the changed object can collect the changed information
-   * and broadcast changes via events when calling @see finishWriter;
-   */
-  protected final void startWriter() {
-    nodeLock.writeLock();
-  }
-  
-  /**
-   * this method is called after a sequence of write operations
-   * are executed. in this call the corresponding events should 
-   * be generated
-   */
-  protected final void finishWriter() {
-    if (!nodeLock.canSwitch()) {
-      nodeLock.writeUnlock();
-      return;
-    }
-    nodeLock.switchToReadLock();
-    try {
-      writingFinished(); // broadcast events
-    } finally {
-      nodeLock.readUnlock();
-    }
-  }
-  
-  protected void writingFinished() {
-  }
+	public void setName(String string) {
+		checkReadOnly();
+		nodeLock.writeLock();
+		name = string;
+		nodeLock.writeUnlock();
+	}
 
-  /**
-   * This method is called before a sequence of read operations
-   * are executed, so the state of the node will not be changed
-   * during the read operation @see finishReader;
-   */
-  protected final void startReader() {
-	  if (!threadsafe)   return;
-      nodeLock.readLock();
-  }
-  
-  /**
-   * this method is called after a sequence of read operations
-   * are executed.
-   */
-  protected final void finishReader() {
-	if (!threadsafe)   return;
-    nodeLock.readUnlock();
-  }
-  
-  /** 
-   * The accept method for a SceneGraphVisitor.
-   * @param a visitor {@see SceneGraphVisitor}
-   */
-  public void accept(SceneGraphVisitor v) {
-    v.visit(this);
-  }
-  
-  /**
-   * Return a string representation of the current state. Only for debugging
-   * purposes.
-   */
-  /* old: Emit an XML representation, subject of further discussions.*/
-  public String toString() {
-    StringBuffer sb= new StringBuffer(200);
-    toStringImpl(sb, new HashSet());
-    return sb.toString();
-  }
+	public Object getOwner() {
+		return owner;
+	}
 
-  private void toStringImpl(StringBuffer sb, HashSet trace) {
-    trace.add(this);
-    nodeLock.readLock();
-    try {
-      Class idClass= getClass();
-      sb.append(idClass.getName()).append('[');
-      for(Class cl= idClass; cl != null; cl= cl.getSuperclass()) {
-        java.lang.reflect.Field[] f= cl.getDeclaredFields();
-        java.lang.reflect.AccessibleObject.setAccessible(f, true);
-        for(int i= 0, n= f.length; i < n; i++) try {
-          final java.lang.reflect.Field field= f[i];
-          if(java.lang.reflect.Modifier.isStatic(field.getModifiers()) || java.lang.reflect.Modifier.isTransient(field.getModifiers())) continue;
-          final Object value=field.get(this);
-          if(!trace.contains(value)) {
-            sb.append(field.getName()).append(" = ");
-            if(value instanceof SceneGraphNode)
-              ((SceneGraphNode)value).toStringImpl(sb, trace);
-            else sb.append(value);
-            sb.append(", ");
-          }
-        } catch (IllegalAccessException e) {} // will never happen
-      }
-      int l= sb.length();
-      if(sb.charAt(l - 1) == ' ' && sb.charAt(l - 2) == ',')
-        sb.setLength(l - 2);
-      sb.append(']');
-      trace.remove(this);
-    } finally {
-      nodeLock.readUnlock();
-    }
-  }
-  
-  private static boolean threadsafe = true;
-  /**
-   * Allow thread-unsafe access to all scene graph nodes, to optimize performance
-   * in case there are no threading issues. Default is true.
-   * @deprecated
-   * @param b
-   */
-  public static void setThreadSafe(boolean b)	{
-	  threadsafe = b;
-  }
-  public static boolean getThreadSafe()	{
-	  return threadsafe;
-  }
+	public void setOwner(Object owner) {
+		this.owner = owner;
+	}
+
+	/**
+	 * this method is called berfore a sequence of write operations
+	 * are executed. So the changed object can collect the changed information
+	 * and broadcast changes via events when calling @see finishWriter;
+	 */
+	protected final void startWriter() {
+		nodeLock.writeLock();
+	}
+
+	/**
+	 * this method is called after a sequence of write operations
+	 * are executed. in this call the corresponding events should 
+	 * be generated
+	 */
+	protected final void finishWriter() {
+		if (!nodeLock.canSwitch()) {
+			nodeLock.writeUnlock();
+			return;
+		}
+		nodeLock.switchToReadLock();
+		try {
+			writingFinished(); // broadcast events
+		} finally {
+			nodeLock.readUnlock();
+		}
+	}
+
+	protected void writingFinished() {
+	}
+
+	/**
+	 * This method is called before a sequence of read operations
+	 * are executed, so the state of the node will not be changed
+	 * during the read operation @see finishReader;
+	 */
+	protected final void startReader() {
+		if (!threadsafe)   return;
+		nodeLock.readLock();
+	}
+
+	/**
+	 * this method is called after a sequence of read operations
+	 * are executed.
+	 */
+	protected final void finishReader() {
+		if (!threadsafe)   return;
+		nodeLock.readUnlock();
+	}
+
+	/** 
+	 * The accept method for a SceneGraphVisitor.
+	 * @param a visitor {@see SceneGraphVisitor}
+	 */
+	public void accept(SceneGraphVisitor v) {
+		v.visit(this);
+	}
+
+	/**
+	 * Return a string representation of the current state. Only for debugging
+	 * purposes.
+	 */
+	/* old: Emit an XML representation, subject of further discussions.*/
+	public String toString() {
+		StringBuffer sb= new StringBuffer(200);
+		toStringImpl(sb, new HashSet<SceneGraphNode>());
+		return sb.toString();
+	}
+
+	private void toStringImpl(StringBuffer sb, HashSet<SceneGraphNode> trace) {
+		trace.add(this);
+		nodeLock.readLock();
+		try {
+			Class idClass= getClass();
+			sb.append(idClass.getName()).append('[');
+			for(Class cl= idClass; cl != null; cl= cl.getSuperclass()) {
+				java.lang.reflect.Field[] f= cl.getDeclaredFields();
+				java.lang.reflect.AccessibleObject.setAccessible(f, true);
+				for(int i= 0, n= f.length; i < n; i++) try {
+					final java.lang.reflect.Field field= f[i];
+					if(java.lang.reflect.Modifier.isStatic(field.getModifiers()) || java.lang.reflect.Modifier.isTransient(field.getModifiers())) continue;
+					final Object value=field.get(this);
+					if(!trace.contains(value)) {
+						sb.append(field.getName()).append(" = ");
+						if(value instanceof SceneGraphNode)
+							((SceneGraphNode)value).toStringImpl(sb, trace);
+						else sb.append(value);
+						sb.append(", ");
+					}
+				} catch (IllegalAccessException e) {} // will never happen
+			}
+			int l= sb.length();
+			if(sb.charAt(l - 1) == ' ' && sb.charAt(l - 2) == ',')
+				sb.setLength(l - 2);
+			sb.append(']');
+			trace.remove(this);
+		} finally {
+			nodeLock.readUnlock();
+		}
+	}
+
+	private static boolean threadsafe = true;
+	/**
+	 * Allow thread-unsafe access to all scene graph nodes, to optimize performance
+	 * in case there are no threading issues. Default is true.
+	 * @deprecated
+	 * @param b
+	 */
+	public static void setThreadSafe(boolean b)	{
+		threadsafe = b;
+	}
+	
+	public static boolean getThreadSafe()	{
+		return threadsafe;
+	}
 
 }
