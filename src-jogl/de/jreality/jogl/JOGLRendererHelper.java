@@ -227,15 +227,13 @@ public class JOGLRendererHelper {
 	public static void handleSkyBox(JOGLRenderer jr, Appearance topAp, Camera cam) {
 		if (topAp == null) return;
 	    GL gl = jr.getGL();
-	    double[] w2c = jr.getContext().getWorldToCamera();
-			if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
+		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
 					CommonAttributes.SKY_BOX, topAp)) {
-				CubeMap cm = (CubeMap) AttributeEntityUtility
-						.createAttributeEntity(CubeMap.class,
-								CommonAttributes.SKY_BOX, topAp, true);
-				JOGLSkyBox.render(gl, w2c, cm, cam);
-			}
-
+			CubeMap cm = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class,
+					CommonAttributes.SKY_BOX, topAp, true);
+			double[] w2c = jr.getContext().getWorldToCamera();
+			JOGLSkyBox.render(gl, w2c, cm, cam);
+		}
 	}
 
 	private static ByteBuffer vBuffer, vcBuffer, vnBuffer, fcBuffer, fnBuffer, tcBuffer;

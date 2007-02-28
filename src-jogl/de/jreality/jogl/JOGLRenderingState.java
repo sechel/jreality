@@ -89,7 +89,6 @@ public class JOGLRenderingState {
 	public int texUnitCount = 0;
 	public int polygonCount = 0;
 	
-	public  WeakHashMap<ImageData, Integer> boundToTextureUnit = new WeakHashMap<ImageData, Integer>();
 	
 	public JOGLRenderingState(JOGLRenderer jr) {
 		super();

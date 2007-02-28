@@ -68,6 +68,7 @@ import de.jreality.util.LoggingSystem;
  */
 public class Texture2DLoaderJOGL {
 	private static WeakHashMap<GL, WeakHashMap<ImageData, Integer>> lookupTextures = new WeakHashMap<GL, WeakHashMap<ImageData,Integer>>();
+	private static WeakHashMap<GL, WeakHashMap<ImageData, Integer>> lookupBoundTextures = new WeakHashMap<GL, WeakHashMap<ImageData,Integer>>();
 	private static WeakHashMap<GL, WeakHashMap<ImageData, Integer>> lookupCubemaps = new WeakHashMap<GL, WeakHashMap<ImageData,Integer>>();
 
   private static ReferenceQueue<ImageData> refQueue = new ReferenceQueue<ImageData>();
@@ -80,6 +81,11 @@ public class Texture2DLoaderJOGL {
 	private Texture2DLoaderJOGL() {
 	}
 
+	public static void flushBoundTextureTable(GL gl)	{
+		   WeakHashMap<ImageData, Integer> ht = getBoundTextureTableForGL(gl);
+		   if (ht != null) ht.clear();
+	}
+	
 	private static int createTextureID(GL gl) 
 	{ 
 	   int[] tmp = new int[1]; 
@@ -87,7 +93,18 @@ public class Texture2DLoaderJOGL {
 	   return tmp[0]; 
 	} 
        
-    private static WeakHashMap<ImageData, Integer> getTextureTableForGL(GL gl)	{
+//	public  WeakHashMap<ImageData, Integer> boundToTextureUnit = new WeakHashMap<ImageData, Integer>();
+ 
+	private static WeakHashMap<ImageData, Integer> getBoundTextureTableForGL(GL gl)	{
+	      WeakHashMap<ImageData, Integer> ht = lookupBoundTextures.get(gl);
+	  		if (ht == null)	{
+	    			ht = new WeakHashMap<ImageData, Integer>();
+	    			lookupBoundTextures.put(gl, ht);
+	      } 
+	  		return ht;
+	  }
+
+	private static WeakHashMap<ImageData, Integer> getTextureTableForGL(GL gl)	{
       WeakHashMap<ImageData, Integer> ht = lookupTextures.get(gl);
   		if (ht == null)	{
     			ht = new WeakHashMap<ImageData, Integer>();
@@ -111,9 +128,10 @@ public class Texture2DLoaderJOGL {
     		throw new IllegalStateException("Null gl");
     	if (tex == null)	
     		throw new IllegalStateException("Null tex");
-    	if (tex.getImage() == null)	
+    	ImageData im = tex.getImage();
+    	if (im == null)	
     		throw new IllegalStateException("Null image");
-   	int texid = getTextureTableForGL(gl).get(tex.getImage());
+    	int texid = getTextureTableForGL(gl).get(im);
         gl.glBindTexture(GL.GL_TEXTURE_2D, texid);
     }
     public static void render(GL gl, Texture2D tex) {
@@ -169,6 +187,14 @@ public class Texture2DLoaderJOGL {
     }
 
     gl.glBindTexture(GL.GL_TEXTURE_2D, texid);
+    
+    // see if this texture has already been handled in this render cycle
+    ht = getBoundTextureTableForGL(gl);
+    Integer boundTexid = ht.get(tex.getImage());
+    if (boundTexid != null)	{
+    	return;
+    } 
+    ht.put(tex.getImage(), texid);
     int srcPixelFormat = GL.GL_RGBA;
     handleTextureParameters(tex, gl);
 

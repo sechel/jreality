@@ -259,6 +259,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
     protected Runnable testClean = null;
 	public Object render() {
+		Texture2DLoaderJOGL.flushBoundTextureTable(globalGL);
 		if (thePeerRoot == null || theViewer.getSceneRoot() != thePeerRoot.getOriginalComponent())	{
 			setSceneRoot(theViewer.getSceneRoot());
 			thePeerRoot = constructPeerForSceneGraphComponent(theRoot, null); 
