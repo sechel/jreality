@@ -54,12 +54,7 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.SceneGraphPathObserver;
-import de.jreality.scene.Transformation;
-import de.jreality.scene.Viewer;
 import de.jreality.scene.data.AttributeEntity;
-import de.jreality.scene.event.TransformationEvent;
-import de.jreality.scene.event.TransformationListener;
 import de.jreality.scene.tool.Tool;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.util.Rectangle3D;
@@ -70,11 +65,10 @@ import de.jreality.util.Rectangle3D;
  * 
  * @author msommer
  */
-public class SelectionManager implements TransformationListener, SelectionManagerInterface {
+public class SelectionManager implements SelectionManagerInterface {
   
   private SceneGraphPath defaultSelection;
   private SceneGraphPath selection;
-  private SceneGraphPathObserver selectionObserver;
 
   private Vector<SelectionListener> listeners;
   private int type;  //current selection type (static field of SelectionEvent)
@@ -83,19 +77,12 @@ public class SelectionManager implements TransformationListener, SelectionManage
   private boolean nothingSelected = true;  //true if default selection is selected by manager, e.g. setSelection(null)
   
   private boolean renderSelection = false;  //default
-  private Viewer viewer = null;
-  private SceneGraphComponent auxiliaryRoot;
   private SceneGraphComponent selectionKit;
-  
+  private SceneGraphComponent selectionKitOwner;
   
   public SelectionManager(SceneGraphPath defaultSelection) {
     if (defaultSelection == null)
       throw new IllegalArgumentException("Default selection is null!");
-    
-    //listen to changes of the selection's transformation matrix
-    selectionObserver = new SceneGraphPathObserver();
-    selectionObserver.addTransformationListener(this);
-//    selectionObserver.setPath(selection);
     
     listeners = new Vector<SelectionListener>();
     
@@ -194,8 +181,6 @@ public class SelectionManager implements TransformationListener, SelectionManage
   
   public void selectionChanged() {
     
-    selectionObserver.setPath(selection);  //update observed path
-    
     if (!listeners.isEmpty()) {
       for (int i = 0; i<listeners.size(); i++)  {
         SelectionListener l = listeners.get(i);
@@ -210,7 +195,6 @@ public class SelectionManager implements TransformationListener, SelectionManage
       else {  //something selected
         updateBoundingBox();
         selectionKit.setVisible(true);
-        if (viewer != null) viewer.render();  //render auxiliary root
       }
     }
   }
@@ -224,49 +208,13 @@ public class SelectionManager implements TransformationListener, SelectionManage
   }
   
 
-  /**
-   * Set the auxiliary root, which is used for holding the selection's bounding box.
-   * @param aux the auxiliary root or <code>null</code> 
-   * if an auxiliary root does not exist (e.g. software viewer)
-   */
-  public void setAuxiliaryRoot(SceneGraphComponent aux) {
-    if (auxiliaryRoot != null && selectionKit != null &&
-        auxiliaryRoot.isDirectAncestor(selectionKit))
-      auxiliaryRoot.removeChild(selectionKit);
-    
-    auxiliaryRoot = aux;
-    
-    if (auxiliaryRoot != null && selectionKit != null) 
-      auxiliaryRoot.addChild(selectionKit);
-  }
-
-
-  /**
-   * Set the viewer which displays the corresponding scene 
-   * (used to force rendering of the bounding box).
-   * @param viewer the viewer
-   */
-  public void setViewer(Viewer viewer) {
-    this.viewer = viewer;
-  }
-  
-  
-  public void transformationMatrixChanged(TransformationEvent ev) {
-    if (!renderSelection || selectionKit == null) 
-      return; 
-    
-    if (selectionKit.getTransformation() != null)
-      selectionKit.getTransformation().setMatrix(selection.getMatrix(null));
-  }
-
-  
   private void updateBoundingBox() {
     
     if (selectionKit == null) {
       //set up representation of selection in scene graph
-      selectionKit = new SceneGraphComponent();
-      selectionKit.setName("selection");
-      Appearance app = new Appearance();
+      selectionKit = new SceneGraphComponent("boundingBox");
+      selectionKit.setOwner(this);
+      Appearance app = new Appearance("app");
       app.setAttribute(CommonAttributes.EDGE_DRAW,true);
       app.setAttribute(CommonAttributes.FACE_DRAW,false);
       app.setAttribute(CommonAttributes.VERTEX_DRAW,false);
@@ -280,19 +228,21 @@ public class SelectionManager implements TransformationListener, SelectionManage
       app.setAttribute(CommonAttributes.LEVEL_OF_DETAIL,0.0);
       app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
       selectionKit.setAppearance(app);
-      selectionKit.setTransformation(new Transformation());
-      
-      if (auxiliaryRoot != null) auxiliaryRoot.addChild(selectionKit);
     }
+    
+    if (selection.getLastComponent() == selectionKit) 
+    	return;  //bounding box selected
     
     Rectangle3D bbox = GeometryUtility.calculateChildrenBoundingBox( selection.getLastComponent() ); 
     
     IndexedFaceSet box = null;
     box = IndexedFaceSetUtility.representAsSceneGraph(box, bbox);
+    box.setGeometryAttributes(CommonAttributes.PICKABLE, false);
     
     selectionKit.setGeometry(box);
-    transformationMatrixChanged(null);  //selectionKit.setTransformation()
-    if (viewer != null) viewer.render();  //render auxiliary root
+    if (selectionKitOwner!=null) selectionKitOwner.removeChild(selectionKit);
+    selectionKitOwner = selection.getLastComponent();
+    selectionKitOwner.addChild(selectionKit);
   }
   
   
@@ -303,12 +253,8 @@ public class SelectionManager implements TransformationListener, SelectionManage
   
   public void setRenderSelection(boolean renderSelection) {
     this.renderSelection = renderSelection;
-    if (renderSelection) {
-      updateBoundingBox();
-      transformationMatrixChanged(null);  //update transformation matrix
-    }
+    if (renderSelection) updateBoundingBox();
     if (selectionKit != null) selectionKit.setVisible(renderSelection);
-    if (viewer != null) viewer.render();  //render auxiliary root
   }
 
   

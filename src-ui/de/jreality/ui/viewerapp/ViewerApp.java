@@ -212,10 +212,7 @@ public class ViewerApp {
 		//load the scene depending on environment (desktop | portal)
 		setupViewer(jrScene);
 
-		selectionManager = new SelectionManager(jrScene.getPath("emptyPickPath")); //default selection = scene node
-		selectionManager.setViewer(getViewer());  //used to force rendering
-		try {	selectionManager.setAuxiliaryRoot(viewerSwitch.getAuxiliaryRoot()); } 
-		catch (Exception e) { selectionManager.setAuxiliaryRoot(null); }  //e.g. software viewer
+		selectionManager = new SelectionManager(jrScene.getPath("emptyPickPath")); //defaultSelection = emptyPick
 
 		frame = new JFrame();
 		menu = new ViewerAppMenu(this);  //uses frame, viewer, selectionManager and this
@@ -948,8 +945,7 @@ public class ViewerApp {
 		}
 		if (viewer != null) viewer.dispose();
 
-		//dispose frames
-		if (frame!=null) frame.dispose();
+		frame.dispose();
 		if (externalNavigatorFrame!=null) externalNavigatorFrame.dispose();
 		if (externalBeanShellFrame!=null) externalBeanShellFrame.dispose();
 	}
