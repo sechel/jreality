@@ -105,19 +105,18 @@ public class CameraUtility {
 		if (cp.getLength() < 3)	{
 		  throw new IllegalStateException("can't encompass: possibly Camera attached to root");
 		}
-		boolean removedCamera = false;
+		boolean visible = false;
 		SceneGraphComponent cameraBranch = (SceneGraphComponent) cp.iterator(1).next();
 		SceneGraphComponent root = viewer.getSceneRoot();
 		try {
 			// TODO this is always true if camerapath starts at root
 			if(root.isDirectAncestor(cameraBranch)) {
-				root.removeChild(cameraBranch);
-				removedCamera = true;
+				visible = cameraBranch.isVisible();
+				cameraBranch.setVisible(false);
 			} 
   		encompass(viewer, root, true);
 		} finally {
-			// if we miss that the camera path is invalid!
-			if (removedCamera) root.addChild(cameraBranch);
+			cameraBranch.setVisible(visible);
 		}
 	}
 	
@@ -136,7 +135,8 @@ public class CameraUtility {
 			return;	
 		}
 		
-		if (debug) LoggingSystem.getLogger(CameraUtility.class).log(Level.FINER,"BBox: "+worldBox.toString());
+//		if (debug) 
+			LoggingSystem.getLogger(CameraUtility.class).log(Level.FINER,"BBox: "+worldBox.toString());
 		
 		Camera cam = getCamera(viewer);
 		// the extent in camera coordinates
@@ -233,7 +233,8 @@ public class CameraUtility {
 			* This method won't be called if the value of \IT{isOnAxis} is FALSE;
 			* instead the view port should be directly set using \mlink{setViewPort:}.
 			*/
-		LoggingSystem.getLogger(CameraUtility.class).log(Level.FINER,"Aspect ratio is "+aspectRatio);
+		// comment out the log statement: it actually shows up in the profiler!
+//		LoggingSystem.getLogger(CameraUtility.class).log(Level.FINER,"Aspect ratio is "+aspectRatio);
 //		System.out.println("Aspect ratio is "+aspectRatio);
 		Rectangle2D viewPort = getViewport(cam, aspectRatio);
 		if (which == CameraUtility.MIDDLE_EYE)		{
