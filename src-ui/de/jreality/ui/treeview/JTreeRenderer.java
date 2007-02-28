@@ -81,6 +81,7 @@ public class JTreeRenderer extends DefaultTreeCellRenderer
   static final ImageIcon camIcon = createImageIcon("icons/CamIcon.jpg");
   static final ImageIcon geomIcon = createImageIcon("icons/GeometryIcon.jpg");
   static final ImageIcon sgcIcon = createImageIcon("icons/SceneGraphComponentIcon.jpg");
+  static final ImageIcon sgcOwnedIcon = createImageIcon("icons/SceneGraphComponentOwnedIcon.jpg");
   static final ImageIcon sgcInvisibleIcon = createImageIcon("icons/SceneGraphComponentInvisibleIcon.jpg");
   static final ImageIcon appIcon = createImageIcon("icons/AppearanceIcon.jpg");
   static final ImageIcon lightIcon = createImageIcon("icons/LightIcon.jpg");
@@ -95,7 +96,8 @@ public class JTreeRenderer extends DefaultTreeCellRenderer
       setIcon(geomIcon);
     }
     public void visit(SceneGraphComponent c) {
-      if (c.isVisible()) setIcon(sgcIcon);
+    	if (c.getOwner()!=null) setIcon(sgcOwnedIcon);
+    	else if (c.isVisible()) setIcon(sgcIcon);
       else setIcon(sgcInvisibleIcon);
     }
     public void visit(Transformation t) {
