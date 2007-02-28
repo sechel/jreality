@@ -257,7 +257,7 @@ public class ViewerApp {
 				va = new ViewerApp(r.getScene());
 			} 
 			else {  //load node(s)
-				SceneGraphComponent cmp = new SceneGraphComponent();
+				SceneGraphComponent cmp = new SceneGraphComponent("content");
 				for (String file : params) {
 					try {
 						cmp.addChild(Readers.read(Input.getInput(file)));
@@ -948,7 +948,10 @@ public class ViewerApp {
 		}
 		if (viewer != null) viewer.dispose();
 
-		frame.dispose();
+		//dispose frames
+		if (frame!=null) frame.dispose();
+		if (externalNavigatorFrame!=null) externalNavigatorFrame.dispose();
+		if (externalBeanShellFrame!=null) externalBeanShellFrame.dispose();
 	}
 
 }

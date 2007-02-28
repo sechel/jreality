@@ -92,8 +92,8 @@ public class LoadScene extends AbstractJrAction {
       v.setExternalNavigator(viewerApp.isExternalNavigator());
       v.setAttachBeanShell(viewerApp.isAttachBeanShell());
       v.setExternalBeanShell(viewerApp.isExternalBeanShell());
-      v.update();
       viewerApp.dispose();
+      v.update();
       v.display();
     } catch (Exception exc) {
       JOptionPane.showMessageDialog(parentComp, "Load failed: "+exc.getMessage());
