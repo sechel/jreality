@@ -47,7 +47,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+
+import javax.media.opengl.GL;
 
 import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.GeometryUtility;
@@ -55,6 +59,8 @@ import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.PolygonalTubeFactory;
 import de.jreality.geometry.TubeUtility;
+import de.jreality.jogl.JOGLRendererHelper;
+import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
@@ -98,6 +104,8 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.LoggingSystem;
+import de.jreality.util.SceneGraphUtility;
 
 /**
  * A {@link de.jreality.scene.SceneGraphVisitor} for writing RenderMan<sup>TM</sup>
@@ -189,6 +197,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 	private String cubeMapFileSuffix = "env";
 	protected DefaultGeometryShader dgs;
 	protected RenderingHintsShader rhs;
+	private HashMap<ImageData, String> cubeMaps = new HashMap<ImageData, String>();
+	private double[] zFlipMatrix;
 	// TODO remove these references.
 /*	protected DefaultPolygonShader dps;
 	protected DefaultLineShader dls;
@@ -272,6 +282,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		ri.depthOfField(camera.getFStop(), camera.getFocalLength(), camera.getFocus());
 		boolean testCameraExplicit = false;
 		double aspectRatio = ((double) width) / height;
+		zFlipMatrix = MatrixBuilder.euclidean().scale(1, 1, -1).getArray();
 		if (testCameraExplicit) {
 			// following experiment to set the camera to NDC transformation
 			// explicitly without
@@ -280,7 +291,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			// camera.setNear( camera.getNear() * -1);
 			// camera.setFar(camera.getFar() * -1);
 			// flip the z-direction
-			ri.transform(RIBHelper.fTranspose(MatrixBuilder.euclidean().scale(1, 1, -1).getArray()));
+			ri.transform(RIBHelper.fTranspose(zFlipMatrix));
 			ri.comment("Home-grown camera transformation");
 			double[] c2ndc = CameraUtility.getCameraToNDC(camera, 1.0,
 					currentSignature);
@@ -296,7 +307,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 				// can a stereo camera be non-perspective?
 				ri.projection(camera.isPerspective() ? "perspective": "orthographic", null);
 				ri.screenWindow(vp);
-				ri.concatTransform(RIBHelper.fTranspose(MatrixBuilder.euclidean().scale(1, 1, -1).getArray()));
+				ri.concatTransform(RIBHelper.fTranspose(zFlipMatrix));
 				double[] moveToEye = Rn.inverse(null, P3.makeTranslationMatrix(
 						null, eyeP, currentSignature));
 				ri.concatTransform(RIBHelper.fTranspose(moveToEye));
@@ -315,8 +326,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 					ri.concatTransform(new float[] { a, 0, 0, 0, 0, a, 0, 0, 0,
 							0, 1, 0, 0, 0, 0, 1 });
 				}
-				ri.concatTransform(RIBHelper.fTranspose(MatrixBuilder
-						.euclidean().scale(1, 1, -1).getArray()));
+				ri.concatTransform(RIBHelper.fTranspose(zFlipMatrix));
 			}
 		}
 
@@ -332,9 +342,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 		new LightCollector(root, this);
 		// handle the world
 		ri.comment("world to camera");
-		// world2Camera =
-		// MatrixBuilder.euclidean().scale(1,1,-1).times(world2Camera).getArray();
 		ri.concatTransform(RIBHelper.fTranspose(world2Camera));
+		processClippingPlanes();
+		
+		
 		ri.worldBegin();
 		// alpha in the output format means skip over any background settings
 		if (outputDisplayFormat != "rgba")
@@ -540,6 +551,29 @@ public class RIBVisitor extends SceneGraphVisitor {
 		ri.atmosphere("fog", fogMap);    
 	}
 
+	private void processClippingPlanes() {
+		List clipPlanes = SceneGraphUtility.collectClippingPlanes(root);
+		int n = clipPlanes.size();
+		for (int i = 0; i < n; ++i) {
+			SceneGraphPath lp = (SceneGraphPath) clipPlanes.get(i);
+			SceneGraphNode cp = lp.getLastElement();
+			if (!(cp instanceof ClippingPlane))
+				LoggingSystem.getLogger(RIBHelper.class).log(Level.WARNING,
+						"Invalid clipplane class " + cp.getClass().toString());
+			else {
+				double[] mat = lp.getMatrix(null);
+				Matrix m = new Matrix(mat);
+				// find the image of (0,0,0,1) and (0,0,1,0) under object to world transform
+				double[] point = m.getColumn(3), point3 = new double[3];
+				double[] normal = m.getColumn(2), normal3 = new double[3];
+				Pn.dehomogenize(point3, point);
+				Pn.dehomogenize(normal3, normal);
+				Rn.times( normal3, -1, Pn.dehomogenize(normal3, normal));
+				ri.clippingPlane((float) normal3[0], (float) normal3[1], (float) normal3[2],
+						(float)  point3[0], (float) point3[1], (float) point3[2]);
+			}
+		}
+	}
 	/*
 	 * Visit methods start here
 	 */
@@ -802,7 +836,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			
 			//pointRadius = (float)eAppearance.getAttribute(CommonAttributes.POINT_RADIUS, CommonAttributes.POINT_RADIUS_DEFAULT);
 			
-			DataList radii = p.getVertexAttributes(Attribute.RADII);
+			DataList radii = p.getVertexAttributes(Attribute.RELATIVE_RADII);
 			DoubleArray da = null;
 			if (radii != null) da = radii.toDoubleArray();
 			DataList ind = p.getVertexAttributes(Attribute.INDICES);
@@ -1404,7 +1438,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 
 	// TODO figure out if this works!
 	public void visit(ClippingPlane p) {
-		ri.clippingPlane(0, 0, 1, 0, 0, 0);
+//		ri.clippingPlane(0, 0, 1, 0, 0, 0);
 	}
 
 	public void visit(Sphere s) {
@@ -1465,7 +1499,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 		return rendererType;
 	}
 
-	private HashMap<ImageData, String> cubeMaps = new HashMap<ImageData, String>();
 	public String writeCubeMap(CubeMap reflectionMap) {		
 		String noSuffix = cubeMaps.get(reflectionMap.getTop());
 		if (noSuffix == null) {

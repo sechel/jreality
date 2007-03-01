@@ -15,15 +15,18 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
+import javax.media.opengl.GL;
 
 import de.jreality.backends.label.LabelUtility;
 import de.jreality.geometry.Primitives;
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
@@ -31,9 +34,12 @@ import de.jreality.renderman.shader.DefaultPolygonShader;
 import de.jreality.renderman.shader.RendermanShader;
 import de.jreality.renderman.shader.TwoSidePolygonShader;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.PointSet;
+import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeCollection;
 import de.jreality.scene.data.AttributeEntityUtility;
@@ -121,12 +127,13 @@ public class RIBHelper {
 				Cs=dls.getDiffuseColor();
 				//ribv.tubeRadius=new Float(dls.getLineWidth()).floatValue();
 				//TODO: line shader
+				float[] csos = extractCsOs(Cs, (!(ribv.handlingProxyGeometry && ribv.opaqueTubes) && ribv.transparencyEnabled) ? transparency : 0f);
+				ribv.ri.color(csos);
+				ribv.ri.surface("constant", null);
 			}
 		}else {
 			LoggingSystem.getLogger(ShaderUtility.class).warning("Unknown shader class "+ls.getClass());
 		}
-		float[] csos = extractCsOs(Cs, (!(ribv.handlingProxyGeometry && ribv.opaqueTubes) && ribv.transparencyEnabled) ? transparency : 0f);
-		ribv.ri.color(csos);
 		//ribv.ri.shader(rs);
 		
 		return rs;
@@ -217,6 +224,7 @@ public class RIBHelper {
 	public static String str(String name) {
 	    return "\""+name+"\"";
 	}
+
 
 	/**
 	 * @param w2
