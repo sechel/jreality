@@ -40,6 +40,7 @@
 
 package de.jreality.util;
 
+import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -85,6 +86,7 @@ public class PickUtility {
    * 
    * @param cmp the root node
    * TODO: decide if this belongs in SceneGraphUtility
+   *@deprecated	Isn't it preferable to set the PICKABLE attribute in cmp's Appearance?
    */
   public static void setPickable(SceneGraphComponent cmp, final boolean pickable) {
     cmp.accept(new SceneGraphVisitor() {
@@ -97,6 +99,14 @@ public class PickUtility {
     });
   }
 
+  public static void setPickableNew(SceneGraphComponent cmp, final boolean pickable)	{
+	if (cmp.getAppearance() ==null) cmp.setAppearance(new Appearance());
+	  
+	cmp.getAppearance().setAttribute("pointShader."+CommonAttributes.PICKABLE, pickable);
+	cmp.getAppearance().setAttribute("lineShader."+CommonAttributes.PICKABLE, pickable);
+	cmp.getAppearance().setAttribute("polygonShader."+CommonAttributes.PICKABLE, pickable);
+
+  }
   public static void setPickable(Geometry g, boolean pickable) {
     g.setGeometryAttributes(CommonAttributes.PICKABLE, pickable);
   }
