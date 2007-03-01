@@ -94,13 +94,14 @@ public class ShaderLookup
  	  public static Shader getShaderAttr(
   	          EffectiveAppearance eAppearance, String base,  String type, String attr) {
    	      // This returns the value of the string base+attr in the current effective appearance, or "default" if not set
- 		  String vShader = (String)eAppearance.getAttribute(ShaderUtility.nameSpace(base, attr), "default");
+ 		  String vShader = (String)eAppearance.getAttribute(ShaderUtility.nameSpace(base, attr)+"name", "default");
   	      Shader vShaderImpl= (Shader) ShaderLookup.lookup2(vShader, type );
-		  // Returns the value of base+attr+name, if it's set, or if not, gives base+attr  back.
-  	      String vShaderName = (String)eAppearance.getAttribute(ShaderUtility.nameSpace(base, attr+"name"),
-  	              ShaderUtility.nameSpace(base, attr));
+		  String foo = ShaderUtility.nameSpace(base, attr);
+		// Returns the value of base+attr+name, if it's set, or if not, gives base+attr  back.
+  	      //String vShaderName = (String)eAppearance.getAttribute(foo+"name",foo);
   	      // initialize the shader with the prefix stem vShaderName
-  	      vShaderImpl.setFromEffectiveAppearance(eAppearance, vShaderName);
+  	      //System.err.println("Vshader name is "+vShaderName);
+  	      vShaderImpl.setFromEffectiveAppearance(eAppearance, foo);
   	      return vShaderImpl;
   	  }
 }

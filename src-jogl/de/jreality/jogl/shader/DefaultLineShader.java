@@ -265,7 +265,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		double[][] crossSection = TubeUtility.octagonalCrossSection;
 		if (jr.getRenderingState().levelOfDetail == 0.0) crossSection = TubeUtility.diamondCrossSection;
 		DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
-		DataList radiidl = ils.getEdgeAttributes(Attribute.RADII);
+		DataList radiidl = ils.getEdgeAttributes(Attribute.RELATIVE_RADII);
 		DoubleArray radii = null;
 		if (radiidl != null) radii = radiidl.toDoubleArray();
 		if (ils.getNumPoints() <= 1) return -1;

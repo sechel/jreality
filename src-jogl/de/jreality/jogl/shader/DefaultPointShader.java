@@ -300,7 +300,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			IntArray vind = null;
 			if (piDL != null) vind = piDL.toIntArray();
 			DataList vertexColors = ps.getVertexAttributes(Attribute.COLORS);
-			DataList radii = ps.getVertexAttributes(Attribute.RADII);
+			DataList radii = ps.getVertexAttributes(Attribute.RELATIVE_RADII);
 			DoubleArray da = null, ra = null;
 			if (radii != null) ra = radii.toDoubleArray();
 			//JOGLConfiguration.theLog.log(Level.INFO,"VC is "+vertexColors);
