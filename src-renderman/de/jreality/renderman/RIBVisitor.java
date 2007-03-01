@@ -723,7 +723,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		if (noSuffix == null) {
 			String texFileName = "_texture" + (textureCount++);
 			noSuffix = ribFileName + texFileName;
-			RIBHelper.writeTexture(data, noSuffix, transparencyEnabled);
+			RIBHelper.writeTexture(data, noSuffix);
 			textures.put(data, noSuffix);
 			renderScript.addTexture(texFileName, repeatS, repeatT);
 		}
