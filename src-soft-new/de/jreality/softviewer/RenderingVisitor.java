@@ -281,7 +281,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
             IntArrayArray edgeIndices = dl.toIntArrayArray();
             DoubleArrayArray vertices = g.getVertexAttributes(
                     Attribute.COORDINATES).toDoubleArrayArray();
-            DataList radii = g.getEdgeAttributes(Attribute.RADII);
+            DataList radii = g.getEdgeAttributes(Attribute.RELATIVE_RADII);
             DataList colors = g.getEdgeAttributes(Attribute.COLORS);
             DoubleArray radiiArray = null;
             if(radii != null) radiiArray = radii.toDoubleArray();
@@ -583,7 +583,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
                 return;
             pipeline.startGeometry(p);
             DataList vertexColors = p.getVertexAttributes(Attribute.COLORS);
-            DataList vertexRadii = p.getVertexAttributes(Attribute.RADII);
+            DataList vertexRadii = p.getVertexAttributes(Attribute.RELATIVE_RADII);
             if(!POINT_SPHERES)
                     for (int i = 0; i < n; i++)
                         pipeline.processPoint(a, i,vertexColors,vertexRadii);
