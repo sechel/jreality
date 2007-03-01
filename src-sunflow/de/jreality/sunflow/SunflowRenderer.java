@@ -39,6 +39,7 @@
 
 package de.jreality.sunflow;
 
+import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -71,10 +72,15 @@ import org.sunflow.math.Matrix4;
 import org.sunflow.math.Point3;
 import org.sunflow.math.Vector3;
 
+import de.jreality.backends.label.LabelUtility;
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Pn;
 import de.jreality.math.Rn;
+import de.jreality.renderman.RIBHelper;
+import de.jreality.renderman.RIBVisitor;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Cylinder;
@@ -99,9 +105,15 @@ import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.DefaultPolygonShader;
+import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.shader.TextShader;
+import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
+import de.jreality.soft.SimpleTexture;
 import de.jreality.sunflow.core.light.GlPointLight;
 import de.jreality.sunflow.core.primitive.SkyBox;
 import de.jreality.util.Rectangle3D;
@@ -118,7 +130,10 @@ public class SunflowRenderer extends SunflowAPI {
 	private String bakingInstance;
 	private RenderOptions options = new RenderOptions();
 	private boolean ignoreSunLight;
-
+	
+	private double[] world2Camera;
+	
+	
 	private class Visitor extends SceneGraphVisitor {
 
 		SceneGraphPath path=new SceneGraphPath();
@@ -127,6 +142,7 @@ public class SunflowRenderer extends SunflowAPI {
 		DefaultPolygonShader dps;
 		Point3 sceneCenter;
 		float sceneRadius;
+		SceneGraphPath cameraPath;	
 
 		int lightID;
 		private RenderingHintsShader rhs;
@@ -137,23 +153,24 @@ public class SunflowRenderer extends SunflowAPI {
 
 		int instanceCnt=0;
 
-		Visitor(Point3 sceneCenter, float sceneRadius) {
+		Visitor(Point3 sceneCenter, float sceneRadius, SceneGraphPath cameraPath) {
 			this.sceneCenter = sceneCenter;
 			this.sceneRadius = sceneRadius;
+			this.cameraPath = cameraPath;
 		}
 
 		@Override
 		public void visit(SceneGraphComponent c) {
 			if (!c.isVisible()) return;
 			path.push(c);
-			currentMatrix=new Matrix(path.getMatrix(null));
+		    currentMatrix=new Matrix(path.getMatrix(null));
 			eapp = EffectiveAppearance.create(path);
 			shader = (String) eapp.getAttribute("sunflowShader", "default");
 
 			dgs = ShaderUtility.createDefaultGeometryShader(eapp);
 			rhs = ShaderUtility.createRenderingHintsShader(eapp);
-			c.childrenAccept(this);
-			path.pop();
+			c.childrenAccept(this);			
+		    path.pop();
 		}
 
 		@Override
@@ -214,12 +231,31 @@ public class SunflowRenderer extends SunflowAPI {
 				}
 			}
 			instance(instanceName, geomName);
+			
+			
+			DataList labelsList=ifs.getFaceAttributes(Attribute.LABELS);
+			if(labelsList!=null){
+				DefaultTextShader ts=(DefaultTextShader)dps.getTextShader();
+				if (ts.getShowLabels().booleanValue()){
+					Font font = ts.getFont();
+					java.awt.Color c = ts.getDiffuseColor();
+					double scale = ts.getScale().doubleValue();
+					double[] offset = ts.getOffset();
+					int alignment = ts.getAlignment();
+					ImageData[] img = LabelUtility.createFaceImages(ifs, font, c);
+					DoubleArrayArray coords=ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
+					IntArrayArray inds=ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray();
+					writeLabels(img, coords, inds, offset, alignment, scale);
+				}
+			}	
+			
 		}
 
 		@Override
 		public void visit(IndexedLineSet indexedLineSet) {
 			visit((PointSet)indexedLineSet);
 			DefaultLineShader ls = (DefaultLineShader) dgs.getLineShader();
+			Matrix m=null;
 			if (dgs.getShowLines() && ls.getTubeDraw() && indexedLineSet.getNumEdges() > 0 && indexedLineSet.getNumPoints() > 0) {
 				dps = (DefaultPolygonShader) ls.getPolygonShader();
 				double r = ls.getTubeRadius();
@@ -255,7 +291,7 @@ public class SunflowRenderer extends SunflowAPI {
 						double[] seg = Rn.subtract(null, p2, p1);
 						double[] center = Rn.linearCombination(null, 0.5, p1, 0.5, p2);
 						double len=Rn.euclideanNorm(seg);
-						Matrix m = Matrix.times(currentMatrix, MatrixBuilder.euclidean()
+						m = Matrix.times(currentMatrix, MatrixBuilder.euclidean()
 								.translate(
 										center[0],
 										center[1],
@@ -269,6 +305,22 @@ public class SunflowRenderer extends SunflowAPI {
 							parameter("shaders", "constantWhite");
 						}
 						instance(LINE_CYLINDER + ".instance"+instanceCnt++, LINE_CYLINDER);
+					}
+				}
+				
+				DataList labelsList=indexedLineSet.getEdgeAttributes(Attribute.LABELS);
+				if(labelsList!=null){
+					DefaultTextShader ts=(DefaultTextShader)dps.getTextShader();
+					if (ts.getShowLabels().booleanValue()){
+						Font font = ts.getFont();
+						java.awt.Color c = ts.getDiffuseColor();
+						double scale = ts.getScale().doubleValue();
+						double[] offset = ts.getOffset();
+						int alignment = ts.getAlignment();
+						ImageData[] img = LabelUtility.createEdgeImages(indexedLineSet, font, c);
+						DoubleArrayArray coords=indexedLineSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
+						IntArrayArray inds=indexedLineSet.getEdgeAttributes(Attribute.INDICES).toIntArrayArray();
+						writeLabels(img, coords, inds, offset, alignment, scale);
 					}
 				}
 			}
@@ -319,7 +371,23 @@ public class SunflowRenderer extends SunflowAPI {
 						instance(POINT_SPHERE + ".instance"+instanceCnt++, POINT_SPHERE);
 					}
 				}
-			}
+				
+				DataList labelsList=pointSet.getVertexAttributes(Attribute.LABELS);
+				if(labelsList!=null){
+					DefaultTextShader ts=(DefaultTextShader)dps.getTextShader();
+					if (ts.getShowLabels().booleanValue()){
+						Font font = ts.getFont();
+						java.awt.Color c = ts.getDiffuseColor();
+						double scale = ts.getScale().doubleValue();
+						double[] offset = ts.getOffset();
+						int alignment = ts.getAlignment();
+						ImageData[] img = LabelUtility.createPointImages(pointSet, font, c);
+						DoubleArrayArray coords=pointSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
+						writeLabels(img, coords, null, offset, alignment, scale);
+					}
+				}
+			}	
+	
 		}
 
 		@Override
@@ -384,7 +452,46 @@ public class SunflowRenderer extends SunflowAPI {
 				parameter("color", ps.getDiffuseColor());
 				shader("default-shader"+appCount, new GlassShader());
 			}
-		}		
+		}	
+		
+		
+		private final Texture2D tex2d = (Texture2D) AttributeEntityUtility
+		.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
+		{
+			tex2d.setRepeatS(Texture2D.GL_CLAMP);
+			tex2d.setRepeatT(Texture2D.GL_CLAMP);
+		}
+		private IndexedFaceSet labelFace = Primitives.texturedQuadrilateral(new double[] { 0, 1,
+				0, 1, 1, 0, 1, 0, 0, 0, 0, 0 });
+
+		private void writeLabels(ImageData[] labels, DoubleArrayArray vertices, IntArrayArray indices, double[] offset, int alignment, double scale) {
+			//there are problems with transparency on textures in sunflow..
+			//we have to wait until this will be fixed
+			
+			double[] cam2obj = new Matrix(Rn.times(null,cameraPath.getInverseMatrix(null), currentMatrix.getArray())).getInverse().getArray();
+			Matrix bbm=new Matrix();
+			Matrix tempTrafo;
+			for (int i = 0, n = labels.length; i < n; i++) {
+				ImageData img = labels[i];				
+				LabelUtility.calculateBillboardMatrix(bbm.getArray(), img.getWidth() * scale, img.getHeight()* scale, offset, alignment, cam2obj, LabelUtility.positionFor(i, vertices,indices), Pn.EUCLIDEAN);	
+										
+			    Appearance labelApp=new Appearance();					
+			    labelApp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+			    labelApp.setAttribute(CommonAttributes.EDGE_DRAW, false);
+			    labelApp.setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
+			    TextureUtility.createTexture(labelApp, "polygonShader", img, false);
+				dgs=ShaderUtility.createDefaultGeometryShader(labelApp,true);
+				dps=(DefaultPolygonShader)dgs.getPolygonShader();
+				applyShader(dps);
+				
+				tempTrafo=new Matrix();	tempTrafo.multiplyOnRight(currentMatrix);
+				currentMatrix.multiplyOnRight(bbm);
+				visit(labelFace);
+				currentMatrix=tempTrafo;
+				dgs=ShaderUtility.createDefaultGeometryShader(eapp);
+				dps=(DefaultPolygonShader)dgs.getPolygonShader();
+			}
+		}
 	}
 
 
@@ -536,13 +643,17 @@ public class SunflowRenderer extends SunflowAPI {
 		double[] e = sceneBounds.getExtent();
 		float sceneRadius = (float)Math.sqrt(e[0]*e[0] + e[1]*e[1] + e[2]*e[2])/2;
 		// visit
-		new Visitor(sceneCenter, sceneRadius).visit(sceneRoot);
+		new Visitor(sceneCenter, sceneRadius, cameraPath).visit(sceneRoot);
 
 		// camera
 		float aspect = width/(float)height;
 		parameter("aspect",aspect);
 		Camera camera = (Camera) cameraPath.getLastElement();
 		Matrix m = new Matrix(cameraPath.getMatrix(null));
+		world2Camera = cameraPath.getInverseMatrix(null);
+		
+		System.out.println("world2camera="+world2Camera);
+		
 		parameter("transform",m);
 		double fov = camera.getFieldOfView();
 		if (width>height) {
@@ -675,5 +786,4 @@ public class SunflowRenderer extends SunflowAPI {
 	public void setOptions(RenderOptions options) {
 		this.options = options;
 	}
-
 }
