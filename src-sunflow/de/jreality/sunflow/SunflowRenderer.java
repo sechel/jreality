@@ -225,7 +225,7 @@ public class SunflowRenderer extends SunflowAPI {
 				double r = ls.getTubeRadius();
 				DoubleArrayArray pts = indexedLineSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
 				IntArrayArray lines = indexedLineSet.getEdgeAttributes(Attribute.INDICES).toIntArrayArray();
-				DataList radiiAttributes = indexedLineSet.getEdgeAttributes(Attribute.RADII);
+				DataList radiiAttributes = indexedLineSet.getEdgeAttributes(Attribute.RELATIVE_RADII);
 				DoubleArray radii = radiiAttributes != null ? radiiAttributes.toDoubleArray() : null;
 				double[] zAxis = pts.getLengthAt(0) == 3 ? new double[]{0,0,-1} : new double[]{0,0,-1,1};
 				DataList colorAttributes = indexedLineSet.getEdgeAttributes(Attribute.COLORS);
@@ -281,7 +281,7 @@ public class SunflowRenderer extends SunflowAPI {
 				dps = (DefaultPolygonShader) ps.getPolygonShader();
 				double r = ps.getPointRadius();
 				DoubleArrayArray pts = pointSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
-				DataList radiiAttributes = pointSet.getVertexAttributes(Attribute.RADII);
+				DataList radiiAttributes = pointSet.getVertexAttributes(Attribute.RELATIVE_RADII);
 				DoubleArray radii = radiiAttributes != null ? radiiAttributes.toDoubleArray() : null;
 				DataList colorAttributes = pointSet.getVertexAttributes(Attribute.COLORS);
 				boolean vertexColors = colorAttributes != null;
