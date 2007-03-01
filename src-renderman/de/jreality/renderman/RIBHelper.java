@@ -15,36 +15,31 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
-import javax.media.opengl.GL;
 
 import de.jreality.backends.label.LabelUtility;
 import de.jreality.geometry.Primitives;
-import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.renderman.shader.DefaultPolygonShader;
+import de.jreality.renderman.shader.FreePolygonShader;
 import de.jreality.renderman.shader.RendermanShader;
 import de.jreality.renderman.shader.TwoSidePolygonShader;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.PointSet;
-import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeCollection;
-import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
@@ -52,9 +47,7 @@ import de.jreality.shader.LineShader;
 import de.jreality.shader.PointShader;
 import de.jreality.shader.PolygonShader;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.shader.TextShader;
 import de.jreality.shader.Texture2D;
-import de.jreality.util.CameraUtility;
 import de.jreality.util.LoggingSystem;
 
 public class RIBHelper {
@@ -123,18 +116,29 @@ public class RIBHelper {
 			if(dls.getTubeDraw()){				
 				return processPolygonShader(dls.getPolygonShader(), ribv, name+".polygonShader");
 			}
-			else{
+			else{				
 				Cs=dls.getDiffuseColor();
 				//ribv.tubeRadius=new Float(dls.getLineWidth()).floatValue();
-				//TODO: line shader
-				float[] csos = extractCsOs(Cs, (!(ribv.handlingProxyGeometry && ribv.opaqueTubes) && ribv.transparencyEnabled) ? transparency : 0f);
-				ribv.ri.color(csos);
-				ribv.ri.surface("constant", null);
+				
+				Appearance slApp=new Appearance();
+				SLShader sls=new SLShader("constant");				
+				slApp.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER,"free");
+				slApp.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.RMAN_SURFACE_SHADER, sls);
+				EffectiveAppearance slEApp=EffectiveAppearance.create();
+				slEApp=slEApp.create(slApp);
+				rs=new FreePolygonShader();
+				rs.setFromEffectiveAppearance(ribv, slEApp, "lineShader");
+				
+//				float[] csos = extractCsOs(Cs, (!(ribv.handlingProxyGeometry && ribv.opaqueTubes) && ribv.transparencyEnabled) ? transparency : 0f);
+//				ribv.ri.color(csos);
+//				ribv.ri.surface("constant", null);
 			}
 		}else {
 			LoggingSystem.getLogger(ShaderUtility.class).warning("Unknown shader class "+ls.getClass());
 		}
-		//ribv.ri.shader(rs);
+		float[] csos = extractCsOs(Cs, (!(ribv.handlingProxyGeometry && ribv.opaqueTubes) && ribv.transparencyEnabled) ? transparency : 0f);
+		ribv.ri.color(csos);
+		ribv.ri.shader(rs);
 		
 		return rs;
 	}
@@ -153,14 +157,22 @@ public class RIBHelper {
 			}else{
 				Cs=dvs.getDiffuseColor();
 				//ribv.pointRadius=new Float(dvs.getPointSize()).floatValue();
-				//TODO: point shader
+				
+				Appearance slApp=new Appearance();
+				SLShader sls=new SLShader("constant");				
+				slApp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POLYGON_SHADER,"free");
+				slApp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.RMAN_SURFACE_SHADER, sls);
+				EffectiveAppearance slEApp=EffectiveAppearance.create();
+				slEApp=slEApp.create(slApp);
+				rs=new FreePolygonShader();
+				rs.setFromEffectiveAppearance(ribv, slEApp, "pointShader");
 			}
 		}else {
 			LoggingSystem.getLogger(ShaderUtility.class).warning("Unknown shader class "+vs.getClass());
 		}
 		float[] csos = extractCsOs(Cs, (!(ribv.handlingProxyGeometry && ribv.opaqueTubes) && ribv.transparencyEnabled) ? transparency : 0f);
 		ribv.ri.color(csos);
-		//ribv.ri.shader(rs);
+		ribv.ri.shader(rs);
 		
 		return rs;
 	}
@@ -286,7 +298,7 @@ public class RIBHelper {
 	}
   
   
-  public static void writeTexture(ImageData data, String noSuffix, boolean transparencyEnabled){
+  public static void writeTexture(ImageData data, String noSuffix){
     
     BufferedImage img;
 	  for (Iterator iter = ImageIO.getImageWritersByMIMEType("image/tiff"); iter.hasNext(); ) {
