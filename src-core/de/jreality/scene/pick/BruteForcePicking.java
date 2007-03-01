@@ -171,7 +171,9 @@ class BruteForcePicking {
     DoubleArray edgeRadii = getRadii(ils);
     for(int i=0, m=edges.getLength();i<m;i++){
       edge = edges.getValueAt(i);
-      tubeRadius = edgeRadii==null?tubeRadius:edgeRadii.getValueAt(i);
+//      tubeRadius = edgeRadii==null?tubeRadius:edgeRadii.getValueAt(i);
+      double realRad =  tubeRadius;
+      if (edgeRadii != null) realRad = realRad*edgeRadii.getValueAt(i);
       for(int j=0, n=edge.getLength()-1;j<n;j++){
         if (vec3) {
           points.getValueAt(edge.getValueAt(j)).toDoubleArray(vertex1);
@@ -213,13 +215,13 @@ class BruteForcePicking {
   }
   
   private static DoubleArray getRadii(PointSet ps) {
-      DataList dl = ps.getVertexAttributes(Attribute.RADII);
+      DataList dl = ps.getVertexAttributes(Attribute.RELATIVE_RADII);
       if (dl == null) return null;
       return dl.toDoubleArray();
   }
   
   private static DoubleArray getRadii(IndexedLineSet ls) {
-      DataList dl = ls.getEdgeAttributes(Attribute.RADII);
+      DataList dl = ls.getEdgeAttributes(Attribute.RELATIVE_RADII);
       if (dl == null) return null;
       return dl.toDoubleArray();
   }
@@ -275,7 +277,9 @@ class BruteForcePicking {
       } else {
         points.getValueAt(j).toDoubleArray(vertex);  
       }
-      intersectSphere(MY_HITS, vertex, fromOb3, dirOb3, pointRadii == null?pointRadius:pointRadii.getValueAt(j));
+      double realRad =  pointRadius;
+      if (pointRadii != null) realRad = pointRadius*pointRadii.getValueAt(j);
+      intersectSphere(MY_HITS, vertex, fromOb3, dirOb3, realRad);
       for (Iterator i = MY_HITS.iterator(); i.hasNext(); ) {
         double[] hitPoint = (double[]) i.next();
         hitPoint = m.multiplyVector(hitPoint);
@@ -384,11 +388,11 @@ class BruteForcePicking {
     
     
     intersectCylinder(CYLINDER_HIT_LIST, fromOb3, dirOb3, new double[] {0,0,1} , new double[] {0,0,-1}, 1);
-    
+    double[] tmp = new double[from.length];
     for (Iterator i = CYLINDER_HIT_LIST.iterator(); i.hasNext(); ) {
       double[] hitPoint = (double[]) i.next();
       i.remove();
-        double dist=Rn.euclideanNorm(Rn.subtract(null,hitPoint,from));
+        double dist=Rn.euclideanNorm(Rn.subtract(tmp,hitPoint,from));
       Hit h = new Hit(path.pushNew(cylinder), hitPoint, dist ,0 , PickResult.PICK_TYPE_OBJECT, -1,-1);
       localHits.add(h);
     }  
