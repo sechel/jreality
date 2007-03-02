@@ -437,65 +437,59 @@ public class RIBHelper {
 	 * 
 	 * @param DefaultGeometryShader dgs
 	 * @return the shifted Appearance
-	 */
-	
+	 */	
 	public static Appearance shiftTubesAppearance(DefaultGeometryShader dgs){
-		Appearance ap = new Appearance();
-		Texture2D tex2d = null;
-		CubeMap cubeMap = null;					
-		if (dgs.getLineShader() instanceof de.jreality.shader.DefaultLineShader)	{						
-			de.jreality.shader.DefaultPolygonShader lsps=null;
+		Appearance ap = new Appearance();				
+		if (dgs.getLineShader() instanceof de.jreality.shader.DefaultLineShader)	{		
 			if(((de.jreality.shader.DefaultLineShader)dgs.getLineShader()).getPolygonShader() instanceof de.jreality.shader.DefaultPolygonShader){								
 				ap.setAttribute("polygonShader", de.jreality.shader.DefaultPolygonShader.class);								
-				lsps =(de.jreality.shader.DefaultPolygonShader)((de.jreality.shader.DefaultLineShader)dgs.getLineShader()).getPolygonShader();
+				de.jreality.shader.DefaultPolygonShader lsps =(de.jreality.shader.DefaultPolygonShader)((de.jreality.shader.DefaultLineShader)dgs.getLineShader()).getPolygonShader();
+				evaluateShader(ap, lsps, "");
 			}
 			else if(((de.jreality.shader.DefaultLineShader)dgs.getLineShader()).getPolygonShader() instanceof de.jreality.shader.TwoSidePolygonShader){
 				ap.setAttribute("polygonShader", de.jreality.shader.TwoSidePolygonShader.class);
-				lsps =(de.jreality.shader.DefaultPolygonShader)((de.jreality.shader.TwoSidePolygonShader)((de.jreality.shader.DefaultLineShader)dgs.getLineShader()).getPolygonShader()).getFront();
+				de.jreality.shader.DefaultPolygonShader lspsf =(de.jreality.shader.DefaultPolygonShader)((de.jreality.shader.TwoSidePolygonShader)((de.jreality.shader.DefaultLineShader)dgs.getLineShader()).getPolygonShader()).getFront();
 				de.jreality.shader.DefaultPolygonShader lspsb=(de.jreality.shader.DefaultPolygonShader)((de.jreality.shader.TwoSidePolygonShader)((de.jreality.shader.DefaultLineShader)dgs.getLineShader()).getPolygonShader()).getBack();
-				de.jreality.shader.DefaultPolygonShader[] sideShaders={lsps,lspsb};				
-				String side="front";
-				for(int s=0;s<2;s++){
-					if(s==1) side="back";										
-					ap.setAttribute("polygonShader."+side+".diffuseColor",sideShaders[s].getDiffuseColor());									
-					ap.setAttribute("polygonShader."+side+".ambientCoefficient",sideShaders[s].getAmbientCoefficient());									
-					ap.setAttribute("polygonShader."+side+".ambientColor",sideShaders[s].getAmbientColor());									
-					ap.setAttribute("polygonShader."+side+".diffuseCoefficient",sideShaders[s].getDiffuseCoefficient());									
-					ap.setAttribute("polygonShader."+side+".specularCoefficient",sideShaders[s].getSpecularCoefficient());									
-					ap.setAttribute("polygonShader."+side+".smoothShading",sideShaders[s].getSmoothShading());									
-					ap.setAttribute("polygonShader."+side+".specularColor",sideShaders[s].getSpecularColor());									
-					ap.setAttribute("polygonShader."+side+".specularExponent",sideShaders[s].getSpecularExponent());
-					ap.setAttribute("polygonShader."+side+".transparency",sideShaders[s].getTransparency());
-					if(sideShaders[s].getTexture2d()==null)
-						ap.setAttribute("polygonShader."+side+".texture2d",  Appearance.DEFAULT);
-					else
-						TextureUtility.createTexture(ap, "polygonShader."+side, sideShaders[s].getTexture2d().getImage(), false);
-					if(sideShaders[s].getReflectionMap()==null)
-						ap.setAttribute("polygonShader."+side+"."+CommonAttributes.REFLECTION_MAP,  Appearance.DEFAULT);
-					else{                      
-						CubeMap lineCubeMap=TextureUtility.createReflectionMap(ap, "polygonShader."+side, TextureUtility.getCubeMapImages(sideShaders[s].getReflectionMap()));
-						lineCubeMap.setBlendColor(sideShaders[s].getReflectionMap().getBlendColor());
-					}
-				}					
+				evaluateShader(ap, lspsf, ".front");
+				evaluateShader(ap, lspsb, ".back");
 			}
-			else LoggingSystem.getLogger(ShaderUtility.class).warning("the following shader-type of lineShader.polygonShader is not supported in RIBHelper.shiftTubesAppearance(DefaultGeometryShader):\n"+((de.jreality.shader.DefaultLineShader)dgs.getLineShader()).getPolygonShader()); 
-			
-			tex2d = lsps.getTexture2d();
-			cubeMap = lsps.getReflectionMap();
+			else LoggingSystem.getLogger(ShaderUtility.class).warning("the following instance of lineShader.polygonShader is not supported in RIBHelper.shiftTubesAppearance(DefaultGeometryShader):\n"+((de.jreality.shader.DefaultLineShader)dgs.getLineShader()).getPolygonShader()); 
 		}
-		else LoggingSystem.getLogger(ShaderUtility.class).warning("the following shader-type of lineShader not supported in RIBHelper.shiftTubesAppearance(DefaultGeometryShader):\n"+dgs.getLineShader());
-		
-		if(tex2d==null)
-			ap.setAttribute("polygonShader.texture2d",  Appearance.DEFAULT);
-		else
-			TextureUtility.createTexture(ap, "polygonShader", tex2d.getImage(), false);
-		if(cubeMap==null)
-			ap.setAttribute("polygonShader."+CommonAttributes.REFLECTION_MAP,  Appearance.DEFAULT);
-		else{                      
-			CubeMap lineCubeMap=TextureUtility.createReflectionMap(ap, "polygonShader", TextureUtility.getCubeMapImages(cubeMap));
-			lineCubeMap.setBlendColor(cubeMap.getBlendColor());
-		}
-		
+		else LoggingSystem.getLogger(ShaderUtility.class).warning("the following instance of lineShader is not supported in RIBHelper.shiftTubesAppearance(DefaultGeometryShader):\n"+dgs.getLineShader()); 
 		return ap;
 	}
+	
+	/**
+	 * method for shiftTubesAppearance(DefaultGeometryShader)
+	 * sets Attributes
+	 * 
+	 * @param evalToApp
+	 * @param shader
+	 * @param side
+	 * @return
+	 */	
+	private static Appearance evaluateShader(Appearance evalToApp, de.jreality.shader.DefaultPolygonShader shader, String side){			
+		evalToApp.setAttribute("polygonShader"+side+".diffuseColor",shader.getDiffuseColor());									
+		evalToApp.setAttribute("polygonShader"+side+".ambientCoefficient",shader.getAmbientCoefficient());									
+		evalToApp.setAttribute("polygonShader"+side+".ambientColor",shader.getAmbientColor());									
+		evalToApp.setAttribute("polygonShader"+side+".diffuseCoefficient",shader.getDiffuseCoefficient());									
+		evalToApp.setAttribute("polygonShader"+side+".specularCoefficient",shader.getSpecularCoefficient());									
+		evalToApp.setAttribute("polygonShader"+side+".smoothShading",shader.getSmoothShading());									
+		evalToApp.setAttribute("polygonShader"+side+".specularColor",shader.getSpecularColor());									
+		evalToApp.setAttribute("polygonShader"+side+".specularExponent",shader.getSpecularExponent());
+		evalToApp.setAttribute("polygonShader"+side+".transparency",shader.getTransparency());
+		if(shader.getTexture2d()==null)
+			evalToApp.setAttribute("polygonShader"+side+".texture2d",  Appearance.DEFAULT);
+		else
+			TextureUtility.createTexture(evalToApp, "polygonShader"+side, shader.getTexture2d().getImage(), false);
+		if(shader.getReflectionMap()==null)
+			evalToApp.setAttribute("polygonShader"+side+"."+CommonAttributes.REFLECTION_MAP,  Appearance.DEFAULT);
+		else{                      
+			CubeMap lineCubeMap=TextureUtility.createReflectionMap(evalToApp, "polygonShader"+side, TextureUtility.getCubeMapImages(shader.getReflectionMap()));
+			lineCubeMap.setBlendColor(shader.getReflectionMap().getBlendColor());
+		}
+		return evalToApp;
+	}
+	
+	
 }

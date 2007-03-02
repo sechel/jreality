@@ -39,6 +39,9 @@ twosidepolygonshader (
 	color specularcolorfront = 1;
     float lightingfront = 1;   
     float transparencyenabledfront = 1;
+    float tmfront[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+	string texturenamefront = ""; 
+	string reflectionmapfront = ""; 
     
     float Kaback = 0, 
 	Kdback = .5, 
@@ -50,11 +53,10 @@ twosidepolygonshader (
 	color specularcolorback = 1;
     float lightingback = 1;
     float transparencyenabledback = 1; 
-    
-    
-    float tm[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
-	string texturename = ""; 
-	string reflectionmap = ""; 
+    float tmback[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+	string texturenameback = ""; 
+	string reflectionmapback = ""; 
+
     float raytracedreflections = 0;
     float raytracedvolumes = 0;
     
@@ -76,7 +78,10 @@ twosidepolygonshader (
   color diffusecolor = diffusecolorfront;
   color specularcolor = specularcolorfront; 
   float lighting= lightingfront;
-  float transparencyenabled = transparencyenabledfront;
+  float transparencyenabled = transparencyenabledfront;  
+  matrix textureMatrix = matrix "current" (tmfront[0],tmfront[1],tmfront[2],tmfront[3],tmfront[4],tmfront[5],tmfront[6],tmfront[7],tmfront[8],tmfront[9],tmfront[10],tmfront[11],tmfront[12],tmfront[13],tmfront[14],tmfront[15]);
+  string texturename = texturenamefront; 
+  string reflectionmap = reflectionmapfront; 
   
   if(N.I>0){  
     Ka = Kaback; 
@@ -89,11 +94,15 @@ twosidepolygonshader (
 	specularcolor = specularcolorback;
     lighting= lightingback;
     transparencyenabled = transparencyenabledback;   
+    textureMatrix = matrix "current" (tmback[0],tmback[1],tmback[2],tmback[3],tmback[4],tmback[5],tmback[6],tmback[7],tmback[8],tmback[9],tmback[10],tmback[11],tmback[12],tmback[13],tmback[14],tmback[15]);
+    texturename = texturenameback; 
+    reflectionmap = reflectionmapback; 
   }
   
  
-  matrix textureMatrix = matrix "current" (tm[0],tm[1],tm[2],tm[3],tm[4],tm[5],tm[6],tm[7],tm[8],tm[9],tm[10],tm[11],tm[12],tm[13],tm[14],tm[15]);
-
+  //from here like in defaultpolygonshader.sl
+  
+  
   // evaluate the texture map, if any
   if (texturename != ""){
 	point a = point (s,t,0);

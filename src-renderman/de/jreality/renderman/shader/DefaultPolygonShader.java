@@ -122,11 +122,11 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
         fname = new File(ribv.writeTexture(tex)).getName();
       }
       // removed texfile path stripping -> is just the filename without path now. 
-      map.put("string texturename",fname);
+      map.put("string texturename"+side,fname);
       Matrix textureMatrix = tex.getTextureMatrix();
       double[] mat = textureMatrix.getArray();
       if(mat != null && !Rn.isIdentityMatrix(mat, 10E-8)) {
-        map.put("float[16] tm", RIBHelper.fTranspose(mat));
+        map.put("float[16] tm"+side, RIBHelper.fTranspose(mat));
       }
     }
     
@@ -144,9 +144,9 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
         if (fname == null) {
           fname = new File(ribv.writeCubeMap(reflectionMap)).getName();
         }
-        map.put("string reflectionmap", fname);
+        map.put("string reflectionmap"+side, fname);
       }
-      map.put("float reflectionBlend", new Float(reflectionMap.getBlendColor().getAlpha()/255.0));
+      map.put("float reflectionBlend"+side, new Float(reflectionMap.getBlendColor().getAlpha()/255.0));
     }    
     
     //volume shaders
