@@ -96,7 +96,6 @@ import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
-import de.jreality.shader.TextureUtility;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.SceneGraphUtility;
@@ -995,29 +994,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 						bsf.update();
 						handlingProxyGeometry = true;  
 						SceneGraphComponent sgc = bsf.getSceneGraphComponent();
-						Appearance ap = new Appearance();
-						
-						// TODO figure out if there's a better way to do this
-						Texture2D tex2d = null;
-						CubeMap cubeMap = null;					
-						if (dgs.getLineShader() instanceof DefaultLineShader)	{
-							if(((DefaultLineShader)dgs.getLineShader()).getPolygonShader() instanceof DefaultPolygonShader){
-								DefaultPolygonShader lsps =(DefaultPolygonShader)((DefaultLineShader)dgs.getLineShader()).getPolygonShader();
-								tex2d = lsps.getTexture2d();
-								cubeMap = lsps.getReflectionMap();
-							}
-						}
-						if(tex2d==null)
-							ap.setAttribute("polygonShader.texture2d",  Appearance.DEFAULT);
-						else
-							TextureUtility.createTexture(ap, "polygonShader", tex2d.getImage(), false);
-						if(cubeMap==null)
-							ap.setAttribute("polygonShader."+CommonAttributes.REFLECTION_MAP,  Appearance.DEFAULT);
-						else{                      
-							CubeMap lineCubeMap=TextureUtility.createReflectionMap(ap, "polygonShader", TextureUtility.getCubeMapImages(cubeMap));
-							lineCubeMap.setBlendColor(cubeMap.getBlendColor());
-						}
-						sgc.setAppearance(ap);
+						sgc.setAppearance(RIBHelper.shiftTubesAppearance(dgs));
 						visit(sgc);
 						handlingProxyGeometry = false;
 					} else {
