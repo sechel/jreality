@@ -74,7 +74,6 @@ public class RIBHelper {
 		Color Cs = null;
 		double transparency = 0.0;
 		if (ps instanceof de.jreality.shader.DefaultPolygonShader)	{
-//			System.err.println("processing defaultpolygonshader");
 			de.jreality.shader.DefaultPolygonShader dps = (de.jreality.shader.DefaultPolygonShader) ps;
 			DefaultPolygonShader rdps = new DefaultPolygonShader(dps);
 			rdps.setFromEffectiveAppearance(ribv, ribv.eAppearance, name);
@@ -85,7 +84,6 @@ public class RIBHelper {
 			ribv.smooth = dps.getSmoothShading();
 		} 
 		else if (ps instanceof de.jreality.shader.TwoSidePolygonShader)	{
-//			System.err.println("processing twosidepolygonshader");
 			de.jreality.shader.TwoSidePolygonShader dps = (de.jreality.shader.TwoSidePolygonShader) ps;
 			TwoSidePolygonShader rdps = new TwoSidePolygonShader(dps);
 			rdps.setFromEffectiveAppearance(ribv, ribv.eAppearance, name);
@@ -121,8 +119,7 @@ public class RIBHelper {
 			}
 			else{				
 				Cs=dls.getDiffuseColor();
-				//ribv.tubeRadius=new Float(dls.getLineWidth()).floatValue();
-				
+				//ribv.tubeRadius=new Float(dls.getLineWidth()).floatValue();				
 				Appearance slApp=new Appearance();
 				SLShader sls=new SLShader("constant");				
 				slApp.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER,"free");
@@ -130,8 +127,7 @@ public class RIBHelper {
 				EffectiveAppearance slEApp=EffectiveAppearance.create();
 				slEApp=slEApp.create(slApp);
 				rs=new FreePolygonShader();
-				rs.setFromEffectiveAppearance(ribv, slEApp, "lineShader");
-				
+				rs.setFromEffectiveAppearance(ribv, slEApp, "lineShader");				
 //				float[] csos = extractCsOs(Cs, (!(ribv.handlingProxyGeometry && ribv.opaqueTubes) && ribv.transparencyEnabled) ? transparency : 0f);
 //				ribv.ri.color(csos);
 //				ribv.ri.surface("constant", null);
@@ -159,8 +155,7 @@ public class RIBHelper {
 				return processPolygonShader(dvs.getPolygonShader(), ribv, name+".polygonShader");
 			}else{
 				Cs=dvs.getDiffuseColor();
-				//ribv.pointRadius=new Float(dvs.getPointSize()).floatValue();
-				
+				//ribv.pointRadius=new Float(dvs.getPointSize()).floatValue();				
 				Appearance slApp=new Appearance();
 				SLShader sls=new SLShader("constant");				
 				slApp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POLYGON_SHADER,"free");
@@ -483,12 +478,12 @@ public class RIBHelper {
 					}
 				}					
 			}
-			else System.err.println("the following shader-type of lineShader.polygonShader not supported in RIBHelper.shiftTubesAppearance(DefaultGeometryShader):\n"+((de.jreality.shader.DefaultLineShader)dgs.getLineShader()).getPolygonShader());
+			else LoggingSystem.getLogger(ShaderUtility.class).warning("the following shader-type of lineShader.polygonShader is not supported in RIBHelper.shiftTubesAppearance(DefaultGeometryShader):\n"+((de.jreality.shader.DefaultLineShader)dgs.getLineShader()).getPolygonShader()); 
 			
 			tex2d = lsps.getTexture2d();
 			cubeMap = lsps.getReflectionMap();
 		}
-		else System.err.println("the following shader-type of lineShader not supported in RIBHelper.shiftTubesAppearance(DefaultGeometryShader):\n"+dgs.getLineShader());
+		else LoggingSystem.getLogger(ShaderUtility.class).warning("the following shader-type of lineShader not supported in RIBHelper.shiftTubesAppearance(DefaultGeometryShader):\n"+dgs.getLineShader());
 		
 		if(tex2d==null)
 			ap.setAttribute("polygonShader.texture2d",  Appearance.DEFAULT);
