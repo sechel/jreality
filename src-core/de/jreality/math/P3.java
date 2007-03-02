@@ -409,7 +409,7 @@ public class P3 {
 		m[0] = 2/(r-l);
 		m[5] = 2/(t-b);
 		m[10] = -2/(far-near);
-		m[3] = -(r+l)/(r-1);
+		m[3] = -(r+l)/(r-l);
 		m[7] = -(t+b)/(t-b);
 		m[11] = -(far+near)/(far-near);
 		return m;
