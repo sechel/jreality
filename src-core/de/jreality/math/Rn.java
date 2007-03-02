@@ -1379,7 +1379,7 @@ final public class Rn {
 		int n = v.length;
 		StringBuffer strb = new StringBuffer();
 		for (int i =0 ; i<n;++i)	{
-			strb.append(toString(v[i]));
+			strb.append(toString(v[i])+"\t");
 			strb.append("\n");
 		}
 		return (new String(strb));
