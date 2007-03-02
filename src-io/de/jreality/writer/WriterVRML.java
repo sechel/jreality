@@ -20,6 +20,7 @@ import java.util.LinkedList;
 
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -326,7 +327,8 @@ public class WriterVRML
 		 *	}		*/
 		out.println(hist+"Sphere { radius  1}");
 	}
-	private   void writeCylinder(Cylinder c,String hist){
+	private   void writeCylinder(Cylinder c,String hist)throws IOException{
+		String hist2= hist+spacing;
 	/**	PARTS
 	*     SIDES   The cylindrical part
 	*     TOP     The top circular face
@@ -338,11 +340,19 @@ public class WriterVRML
 	*          radius  1     # SFFloat
 	*          height  2     # SFFloat
 	*     }		*/
-		out.print(hist+"Cylinder { ");
+		double[] r=MatrixBuilder.euclidean().rotateFromTo(new double[]{0,1,0}, new double[]{1,0,0}).getArray();
+		
+		out.println(" Separator { # Cylinder");
+		out.println(hist2+"MatrixTransform { matrix");
+		writeDoubleMatrix(r,4,4,hist+spacing);
+		out.println(hist+"}");
+		out.print(hist2+"Cylinder { ");
 		out.print("parts SIDES ");
 		out.print("radius  1 ");
 		out.print("height  1 ");
 		out.println("}");
+		out.println(""+hist+"} ");
+		
 	}
 	private   void writeGeoFaces(IndexedFaceSet f,String hist)throws IOException{
 		// write the coordinates:
@@ -681,7 +691,7 @@ public class WriterVRML
 		for (int i = 0; i < centers.length; i++) {
 			out.println(hist+"Translation { translation ");
 			writeDoubleArray(centers[i], "", " }", 3);
-			out.println(hist+"AsciiText { width 1 string "+labs[i]+"}");
+			out.println(hist+"AsciiText { width 1 string \""+labs[i]+"\"}");
 			out.println(hist+"Translation { translation ");
 			writeDoubleArray(new double[]{-centers[i][0],-centers[i][1],-centers[i][2]}, "", " }", 3);
 		}
