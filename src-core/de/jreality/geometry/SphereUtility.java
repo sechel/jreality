@@ -40,12 +40,19 @@
 
 package de.jreality.geometry;
 
+import java.awt.Color;
+
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.scene.data.DoubleArrayArray.Array;
+import de.jreality.scene.data.DoubleArrayArray.Inlined;
+import de.jreality.util.ColorGradient;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rectangle3D;
 
@@ -265,6 +272,53 @@ public class SphereUtility {
 //		GeometryUtility.calculateAndSetFaceNormals(qms);
 //		GeometryUtility.calculateAndSetTextureCoordinates(qms);
 //		return  qms;
+	}
+
+	/**
+	 * Calculated the distance from center ( [0,0,0] if center is null ) for each vertex and sets vertex
+	 * colors from the given Color Gradient (d_min->0, d_max-_1).
+	 * @param ps the PointSet to set vertex colors
+	 * @param center optional center
+	 * @param cg optional color color gradient
+	 * 
+	 * TODO: adapt to homogenious coordinates
+	 */
+	public static void colorizeSphere(PointSet ps, double[] center, ColorGradient cg) {
+		if (cg==null) cg=new ColorGradient();
+		double[][] colors = ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+		
+		// calculate min/max
+		double min=Double.MAX_VALUE, max=0;
+		for (int i=0; i<colors.length; i++) {
+			if (center != null) Rn.subtract(colors[i], colors[i], center);
+			double n = Rn.euclideanNorm(colors[i]);
+			if (n<min) min=n;
+			if (n>max) max=n;
+		}
+		
+		// calculate colors
+		for (int i=0; i<colors.length; i++) {
+			double n = Rn.euclideanNorm(colors[i]);
+			double cc = (n-min)/(max-min);
+			Color c = cg.getColor(cc);
+			colors[i][0]=c.getRed()/255.;
+			colors[i][1]=c.getGreen()/255.;
+			colors[i][2]=c.getBlue()/255.;
+		}
+		ps.setVertexAttributes(Attribute.COLORS, new DoubleArrayArray.Array(colors));
+	}
+
+	public static void assignSphericalUVs(PointSet ps, double[] center) {
+		double[][] points = ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+		double [] tc = new double[2*points.length];
+		int i=0;
+		for (double[] p : points) {
+			if (center != null) Rn.subtract(p, p, center);
+			Rn.normalize(p, p);
+		    tc[i++] = 0.5+Math.atan2(p[1], p[0])/(Math.PI*2.);
+		    tc[i++] = Math.acos(p[2])/Math.PI;
+		}
+		ps.setVertexAttributes(Attribute.TEXTURE_COORDINATES, new DoubleArrayArray.Inlined(tc, 2));
 	}
 	
 }

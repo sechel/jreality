@@ -42,6 +42,7 @@ package de.jreality.geometry;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -1606,6 +1607,49 @@ public class IndexedFaceSetUtility {
   		ifs.setVertexAttributes(Attribute.NORMALS, new DoubleArrayArray.Array(na, na[0].length));
   	}
   	
+  	public static void triangulateBarycentric(IndexedFaceSet ifs) {
+  		int[][] f = ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
+  		DoubleArrayArray points = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
+  		LinkedList<double[]> barycenters = new LinkedList<double[]>();
+  		int pc = points.size();
+  		LinkedList<int[]> faces = new LinkedList<int[]>();
+  		LinkedList<int[]> tris = new LinkedList<int[]>();
+  		faces.addAll(Arrays.asList(f));
+  		int fiberLength=points.getLengthAt(0);
+  		double[] tmp = new double[fiberLength];
+  		for (Iterator<int[]> it = faces.iterator(); it.hasNext(); ) {
+  			int[] face = it.next();
+  			if (face.length == 3) tris.add(face);
+  			else {
+  				double[] barycenter = new double[fiberLength];
+  				for (int i : face) {
+  					points.getValueAt(i).toDoubleArray(tmp);
+  					Rn.add(barycenter, barycenter, tmp);
+  				}
+  				Rn.times(barycenter, 1./face.length, barycenter);
+  				for (int i=0, n=face.length; i<n; i++) {
+  					int[] tri = new int[3];
+  					tri[0]=pc+barycenters.size();
+  					tri[1]=face[i];
+  					tri[2]=face[(i+1)%n];
+  					tris.add(tri);
+  				}
+  				barycenters.add(barycenter);
+  			}
+  		}
+  		if (!barycenters.isEmpty()) {
+  			double[][] newPoints = points.toDoubleArrayArray(new double[pc+barycenters.size()][]);
+  			for (int i = pc; i<newPoints.length; i++) {
+  				newPoints[i]=barycenters.removeFirst();
+  			}
+  			ifs.setVertexCountAndAttributes(Attribute.COORDINATES, new DoubleArrayArray.Array(newPoints));
+  		}
+  		if (tris.size() > faces.size()) {
+  			int[][] newFaces = tris.toArray(new int[0][]);
+  			ifs.setFaceCountAndAttributes(Attribute.INDICES, new IntArrayArray.Array(newFaces));
+  		}
+  	}
+  	
   	/**
      * Generates a triangulated sphere from a given set of equally spaced longitude (theta) circles.
      * The data for each circle (levels[i]) starts at phi=0 and ends at phi=2PI and is also equally
@@ -1619,7 +1663,7 @@ public class IndexedFaceSetUtility {
      * 
      * NOTE: currently for a pole you need to give 2 points, for phi=0 and phi=2PI.
      */
-  	public static IndexedFaceSet generateSphere(double[][][] levels) {
+  	public static IndexedFaceSet triangulateRectangularPatch(double[][][] levels) {
   		double dTheta = 1./(levels.length-1);
   		List<double[]> points = new LinkedList<double[]>();
   		List<double[]> texCoords = new LinkedList<double[]>();
