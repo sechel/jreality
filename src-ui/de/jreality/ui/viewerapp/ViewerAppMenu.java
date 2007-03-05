@@ -69,6 +69,9 @@ import de.jreality.ui.viewerapp.actions.camera.ToggleStereo;
 import de.jreality.ui.viewerapp.actions.edit.AddTool;
 import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
 import de.jreality.ui.viewerapp.actions.edit.ExportOBJ;
+import de.jreality.ui.viewerapp.actions.edit.LoadReflectionMap;
+import de.jreality.ui.viewerapp.actions.edit.LoadFileToNode;
+import de.jreality.ui.viewerapp.actions.edit.LoadTexture;
 import de.jreality.ui.viewerapp.actions.edit.Remove;
 import de.jreality.ui.viewerapp.actions.edit.Rename;
 import de.jreality.ui.viewerapp.actions.edit.SaveSelected;
@@ -125,13 +128,15 @@ public class ViewerAppMenu {
   public static String EXPORT_OBJ = "Write OBJ";
   public static String REMOVE = "Remove";
   public static String RENAME = "Rename";
+  public static String ADD_TOOL = "Add Tools";
   public static String TOGGLE_VISIBILITY = "Toggle visibility";
   public static String APPEARANCE = "Appearance";
   public static String TOGGLE_VERTEX_DRAWING = "Toggle vertex drawing";
   public static String TOGGLE_EDGE_DRAWING = "Toggle egde drawing";
   public static String TOGGLE_FACE_DRAWING = "Toggle face drawing";
+  public static String LOAD_TEXTURE = "Load texture";
+  public static String LOAD_CUBE_MAP = "Load cube map";
   public static String BACKGROUND_COLOR = "Set background color";
-  public static String ADD_TOOL = "Add Tools";
   public static String TOGGLE_PICKABLE = "Toggle pickable";
   public static String ASSIGN_FACE_AABBTREE = "Assign AABBTree";
   
@@ -230,6 +235,7 @@ public class ViewerAppMenu {
     editMenu.add(renderSelectionCheckbox);
     editMenu.addSeparator();
     
+    editMenu.add(new JMenuItem(new LoadFileToNode(LOAD_FILE_TO_NODE, sm, parentComp)));
     editMenu.add(new JMenuItem(new SaveSelected(SAVE_SELECTED, sm, parentComp)));
     editMenu.add(new JMenuItem(new ExportOBJ(EXPORT_OBJ, sm, parentComp)));
     editMenu.addSeparator();
@@ -238,12 +244,18 @@ public class ViewerAppMenu {
     editMenu.add(new JMenuItem(new Rename(RENAME, sm, parentComp)));
     editMenu.addSeparator();
     
+    editMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, parentComp)));
+    editMenu.addSeparator();
+    
     editMenu.add(new JMenuItem(new ToggleVisibility(TOGGLE_VISIBILITY, sm)));
     JMenu appearance = new JMenu(APPEARANCE);
     editMenu.add(appearance);
     appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm)));
     appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm)));
     appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_FACE_DRAWING, CommonAttributes.FACE_DRAW, sm)));
+    appearance.addSeparator();
+    appearance.add(new JMenuItem(new LoadTexture(LOAD_TEXTURE, sm, parentComp)));
+    appearance.add(new JMenuItem(new LoadReflectionMap(LOAD_CUBE_MAP, sm, parentComp)));
     appearance.addSeparator();
     JMenu bgColors = new JMenu(BACKGROUND_COLOR);  //background color of viewerApp
     ButtonGroup bg = new ButtonGroup();
@@ -257,8 +269,6 @@ public class ViewerAppMenu {
       bgColors.add(item);
     }
     appearance.add(bgColors);
-    
-    editMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, parentComp)));
     editMenu.addSeparator();
 
     editMenu.add(new JMenuItem(new TogglePickable(TOGGLE_PICKABLE, sm)));

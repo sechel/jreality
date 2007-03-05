@@ -45,6 +45,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.BorderFactory;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -69,7 +70,9 @@ import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
 import de.jreality.ui.viewerapp.actions.edit.AddTool;
 import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
 import de.jreality.ui.viewerapp.actions.edit.ExportOBJ;
+import de.jreality.ui.viewerapp.actions.edit.LoadReflectionMap;
 import de.jreality.ui.viewerapp.actions.edit.LoadFileToNode;
+import de.jreality.ui.viewerapp.actions.edit.LoadTexture;
 import de.jreality.ui.viewerapp.actions.edit.Remove;
 import de.jreality.ui.viewerapp.actions.edit.Rename;
 import de.jreality.ui.viewerapp.actions.edit.SaveSelected;
@@ -194,20 +197,25 @@ public class Navigator implements SelectionListener {
 		Component parentComp = null; //sceneTree;
 		cm.add(new JMenuItem(new LoadFileToNode(ViewerAppMenu.LOAD_FILE_TO_NODE, sm, parentComp)));
 		cm.add(new JMenuItem(new SaveSelected(ViewerAppMenu.SAVE_SELECTED, sm, parentComp)));
-	    cm.add(new JMenuItem(new ExportOBJ(ViewerAppMenu.EXPORT_OBJ, sm, parentComp)));
-	    cm.addSeparator();
-	    cm.add(new JMenuItem(new Remove(ViewerAppMenu.REMOVE, sm)));
-	    cm.add(new JMenuItem(new Rename(ViewerAppMenu.RENAME, sm, parentComp)));
-	    cm.addSeparator();
-	    cm.add(new JMenuItem(new AddTool(ViewerAppMenu.ADD_TOOL, sm, parentComp)));
-	    cm.addSeparator();
-	    cm.add(new JMenuItem(new ToggleVisibility(ViewerAppMenu.TOGGLE_VISIBILITY, sm)));
-	    cm.add(new JMenuItem(new ToggleAppearance(ViewerAppMenu.TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm)));
-	    cm.add(new JMenuItem(new ToggleAppearance(ViewerAppMenu.TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm)));
-	    cm.add(new JMenuItem(new ToggleAppearance(ViewerAppMenu.TOGGLE_FACE_DRAWING, CommonAttributes.FACE_DRAW, sm)));
-	    cm.addSeparator();
-	    cm.add(new JMenuItem(new TogglePickable(ViewerAppMenu.TOGGLE_PICKABLE, sm)));
-	    cm.add(new JMenuItem(new AssignFaceAABBTree(ViewerAppMenu.ASSIGN_FACE_AABBTREE, sm)));
+		cm.add(new JMenuItem(new ExportOBJ(ViewerAppMenu.EXPORT_OBJ, sm, parentComp)));
+		cm.addSeparator();
+		cm.add(new JMenuItem(new Remove(ViewerAppMenu.REMOVE, sm)));
+		cm.add(new JMenuItem(new Rename(ViewerAppMenu.RENAME, sm, parentComp)));
+		cm.addSeparator();
+		cm.add(new JMenuItem(new AddTool(ViewerAppMenu.ADD_TOOL, sm, parentComp)));
+		cm.addSeparator();
+		cm.add(new JMenuItem(new ToggleVisibility(ViewerAppMenu.TOGGLE_VISIBILITY, sm)));
+    JMenu appearance = new JMenu(ViewerAppMenu.APPEARANCE);
+    cm.add(appearance);
+    appearance.add(new JMenuItem(new ToggleAppearance(ViewerAppMenu.TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm)));
+    appearance.add(new JMenuItem(new ToggleAppearance(ViewerAppMenu.TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm)));
+    appearance.add(new JMenuItem(new ToggleAppearance(ViewerAppMenu.TOGGLE_FACE_DRAWING, CommonAttributes.FACE_DRAW, sm)));
+    appearance.addSeparator();
+    appearance.add(new JMenuItem(new LoadTexture(ViewerAppMenu.LOAD_TEXTURE, sm, parentComp)));
+    appearance.add(new JMenuItem(new LoadReflectionMap(ViewerAppMenu.LOAD_CUBE_MAP, sm, parentComp)));
+		cm.addSeparator();
+		cm.add(new JMenuItem(new TogglePickable(ViewerAppMenu.TOGGLE_PICKABLE, sm)));
+		cm.add(new JMenuItem(new AssignFaceAABBTree(ViewerAppMenu.ASSIGN_FACE_AABBTREE, sm)));
 
 		    
 		//add listener to the navigator's tree
