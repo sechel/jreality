@@ -222,7 +222,7 @@ public class TextureUtility {
    * {"bk","ft","dn","up","lf","rt"}
    * 
    * @param app the appearance where to create the ReflectionMap 
-   * @param shader the name of the shader, should be null, "", "polygonShader" maybe "lineShader" works also
+   * @param prefix the prefix, i. e. "polygonShader.reflectionMap" or "skyBox", ...
    * @param imgs
    * @return a proxy implementation of ReflectionMap
    */
