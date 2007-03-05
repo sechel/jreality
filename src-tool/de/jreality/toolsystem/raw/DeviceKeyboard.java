@@ -44,15 +44,10 @@ import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Toolkit;
-import java.awt.Window;
 import java.awt.event.AWTEventListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.LinkedList;
-
-import javax.swing.JPanel;
 
 import de.jreality.scene.Viewer;
 import de.jreality.scene.tool.AxisState;
@@ -85,31 +80,31 @@ import de.jreality.util.LoggingSystem;
  * @author Steffen Weissmann
  **/
 public class DeviceKeyboard implements RawDevice, AWTEventListener, PollingDevice {
-  
-	private HashMap<Integer, Boolean> keyState = new HashMap<Integer, Boolean>();
-	
-    private HashMap<Integer, InputSlot> keysToVirtual = new HashMap<Integer, InputSlot>();
-    
-    private ToolEventQueue queue;
-    private Component component;
-    
-    private LinkedList<KeyEvent> myQueue = new LinkedList<KeyEvent>();
-    
-    public void initialize(Viewer viewer) {
-      if (!viewer.hasViewingComponent() || !(viewer.getViewingComponent() instanceof Component) ) throw new UnsupportedOperationException("need AWT component");
-      this.component = (Component) viewer.getViewingComponent();
-      //this.component.addKeyListener(this);
-      Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.KEY_EVENT_MASK);
-    }
 
-    public synchronized void keyPressed(KeyEvent e) {
-    	InputSlot id = keysToVirtual.get(e.getKeyCode());
-        if (id != null) {
-          handleEvent(e);
-      	  LoggingSystem.getLogger(this).fine(this.hashCode()+" added key pressed ["+id+"] "+e.getWhen());
-        }
-    }
-    
+	private HashMap<Integer, Boolean> keyState = new HashMap<Integer, Boolean>();
+
+	private HashMap<Integer, InputSlot> keysToVirtual = new HashMap<Integer, InputSlot>();
+
+	private ToolEventQueue queue;
+	private Component component;
+
+	private LinkedList<KeyEvent> myQueue = new LinkedList<KeyEvent>();
+
+	public void initialize(Viewer viewer) {
+		if (!viewer.hasViewingComponent() || !(viewer.getViewingComponent() instanceof Component) ) throw new UnsupportedOperationException("need AWT component");
+		this.component = (Component) viewer.getViewingComponent();
+		//this.component.addKeyListener(this);
+		Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.KEY_EVENT_MASK);
+	}
+
+	public synchronized void keyPressed(KeyEvent e) {
+		InputSlot id = keysToVirtual.get(e.getKeyCode());
+		if (id != null) {
+			handleEvent(e);
+			LoggingSystem.getLogger(this).fine(this.hashCode()+" added key pressed ["+id+"] "+e.getWhen());
+		}
+	}
+
 	private synchronized void handleEvent(KeyEvent ev) {
 		if (ev.getID() == KeyEvent.KEY_RELEASED) {
 			try {
@@ -120,8 +115,8 @@ public class DeviceKeyboard implements RawDevice, AWTEventListener, PollingDevic
 			}
 //			KeyEvent next = (KeyEvent) Toolkit.getDefaultToolkit().getSystemEventQueue().peekEvent(KeyEvent.KEY_PRESSED);
 //			if (next != null && (next.getWhen() - ev.getWhen()) < 5) {
-//				next.consume();
-//				return;
+//			next.consume();
+//			return;
 //			}
 			myQueue.addLast(ev);
 		} else {
@@ -135,49 +130,49 @@ public class DeviceKeyboard implements RawDevice, AWTEventListener, PollingDevic
 	}
 
 	public synchronized void keyReleased(final KeyEvent e) {
-        InputSlot id = keysToVirtual.get(e.getKeyCode());
-        if (id != null) {
-            handleEvent(e);
-        	LoggingSystem.getLogger(this).finer("added key released ["+id+"] "+e.getWhen());
-        }
-    }
+		InputSlot id = keysToVirtual.get(e.getKeyCode());
+		if (id != null) {
+			handleEvent(e);
+			LoggingSystem.getLogger(this).finer("added key released ["+id+"] "+e.getWhen());
+		}
+	}
 
 	public void keyTyped(KeyEvent e) {
 		//System.out.println("DeviceKeyboard.keyTyped()");
 	}
 
 	public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
-        // rawDeviceName = VK_W (e.g.)
-        keysToVirtual.put(resolveKeyCode(rawDeviceName), inputDevice);
-        return new ToolEvent(this, inputDevice, AxisState.ORIGIN);
-    }
-    
-    private int resolveKeyCode(String fieldName) {
-      try {
-        int val = KeyEvent.class.getField(fieldName).getInt(KeyEvent.class);
-        return val;
-      } catch (Exception e) {
-        throw new IllegalArgumentException("no such key "+fieldName);
-      }
-      
-    }
+		// rawDeviceName = VK_W (e.g.)
+		keysToVirtual.put(resolveKeyCode(rawDeviceName), inputDevice);
+		return new ToolEvent(this, inputDevice, AxisState.ORIGIN);
+	}
 
-    public void setEventQueue(ToolEventQueue queue) {
-        this.queue = queue; 
-    }
+	private int resolveKeyCode(String fieldName) {
+		try {
+			int val = KeyEvent.class.getField(fieldName).getInt(KeyEvent.class);
+			return val;
+		} catch (Exception e) {
+			throw new IllegalArgumentException("no such key "+fieldName);
+		}
 
-    public void dispose() {
-    	//component.removeKeyListener(this);
-    	Toolkit.getDefaultToolkit().removeAWTEventListener(this);
-    }
-    
-    public String getName() {
-        return "Keyboard";
-    }
-    
-    public String toString() {
-      return "RawDevice: Keyboard";
-    }
+	}
+
+	public void setEventQueue(ToolEventQueue queue) {
+		this.queue = queue; 
+	}
+
+	public void dispose() {
+		//component.removeKeyListener(this);
+		Toolkit.getDefaultToolkit().removeAWTEventListener(this);
+	}
+
+	public String getName() {
+		return "Keyboard";
+	}
+
+	public String toString() {
+		return "RawDevice: Keyboard";
+	}
 
 	public synchronized void poll() {
 		long ct = System.currentTimeMillis();
@@ -212,18 +207,20 @@ public class DeviceKeyboard implements RawDevice, AWTEventListener, PollingDevic
 	public void eventDispatched(AWTEvent event) {
 		switch (event.getID()) {
 		case KeyEvent.KEY_PRESSED:
-			hasFocus=false;
+			//only process event if this.component or one of its children is focus owner
 			checkFocus();
 			if (hasFocus) keyPressed((KeyEvent) event);
 			break;
 		case KeyEvent.KEY_RELEASED:
+			//process event even if this.component has no focus
 			keyReleased((KeyEvent) event);
-		default:
-			break;
 		}
 	}
 
+	boolean hasFocus=false;
+
 	private void checkFocus() {
+		hasFocus=false;
 		if (component instanceof Container) {
 			checkFocus((Container) component);
 		} else {
@@ -231,12 +228,11 @@ public class DeviceKeyboard implements RawDevice, AWTEventListener, PollingDevic
 		}
 	}
 
-	boolean hasFocus=false;
-	
 	private void checkFocus(Container cc) {
 		for (Component c : cc.getComponents()) {
 			if (c instanceof Container) checkFocus((Container) c);
 			if (c.isFocusOwner()) hasFocus=true;
 		}
 	}
+
 }
