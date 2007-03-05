@@ -58,7 +58,8 @@ import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 
 /**
  * Toggles appearance atributes of a selected SceneGraphComponent or Appearance 
- * (if something different is selected, this action is disabled).
+ * (if something different is selected, this action is disabled).<br>
+ * Note that this action does not create new Appearances in the scene tree.
  * 
  * @author msommer
  */
@@ -98,16 +99,20 @@ public class ToggleAppearance extends AbstractSelectionListenerAction {
    * Toggles the specified appearance attribute of the responsible appearance 
    * - the first one existing along the path from the selected component to the scene root. 
    * If there is no appearance along the path, nothing is toggled.
+   * In particular, no new Appearances are created in the scene tree.
    */
   @Override
   public void actionPerformed(ActionEvent e) {
     
     Object value = null;
-    SceneGraphComponent cmp;
+    SceneGraphComponent cmp = null;
     Appearance a, app = null;
     //get responsible appearance app and (inherited) value
     for (Iterator it = getSelection().reverseIterator(); it.hasNext(); ) {
-      cmp = (SceneGraphComponent) it.next();
+      try { cmp = (SceneGraphComponent) it.next(); } 
+      catch (ClassCastException cce) {
+				continue;  //appearance selected
+			}
       a = cmp.getAppearance();
       if (a != null) {
         value = a.getAttribute(attribute);
