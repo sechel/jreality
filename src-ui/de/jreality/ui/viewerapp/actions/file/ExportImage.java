@@ -51,11 +51,7 @@ import java.awt.image.BufferedImage;
 import java.beans.Expression;
 import java.beans.Statement;
 import java.io.File;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.KeyStroke;
 import javax.swing.border.TitledBorder;
@@ -110,7 +106,7 @@ public class ExportImage extends AbstractJrAction {
 		Dimension d = realViewer.getViewingComponentSize();
 		dimPanel.setDimension(d);
 
-		File file = FileLoaderDialog.selectTargetFile(parentComp, dimPanel, false, createFileFilters());
+		File file = FileLoaderDialog.selectTargetFile(parentComp, dimPanel, false, FileFilter.getImageWriterFilters());
 		Dimension dim = dimPanel.getDimension();
 //		Dimension dim = DimensionDialog.selectDimension(d,frame);
 		if (file == null || dim == null) return;
@@ -172,42 +168,6 @@ public class ExportImage extends AbstractJrAction {
 			//e.printStackTrace();
 		}
 		return false;
-	}
-
-
-	private javax.swing.filechooser.FileFilter[] createFileFilters() {
-
-		//get existing writer formats
-		String writerFormats[] = ImageIO.getWriterFormatNames();
-		//usually [bmp, jpeg, jpg, png, wbmp]
-		String[] known = new String[]{"bmp","jpeg","jpg","png", "wbmp"};
-		//get remaining formats ignoring case
-		Set<String> special = new HashSet<String>();
-		outer: for (int i = 0; i < writerFormats.length; i++) {
-			final String ext = writerFormats[i].toLowerCase();
-			for (int j = 0; j < known.length; j++) {
-				if (known[j].equals(ext)) continue outer;
-			}
-			special.add(ext);
-		}
-
-		Set<FileFilter> filters = new LinkedHashSet<FileFilter>();
-		//add known filter
-		filters.add(new FileFilter("PNG Image", "png"));
-		filters.add(new FileFilter("JPEG Image", "jpg", "jpeg"));
-		//add tiff filter if writer exists
-		try { Class.forName("javax.media.jai.JAI");
-		filters.add(new FileFilter("TIFF Image", "tiff", "tif"));
-		} catch (ClassNotFoundException e) {}
-		filters.add(new FileFilter("BMP Image", "bmp"));
-		filters.add(new FileFilter("Wireless BMP Image", "wbmp"));
-		//add filters for special writer formats
-		for (String s : special)
-			filters.add(new FileFilter(s.toUpperCase()+" Image", s));
-
-		//convert to array
-		FileFilter[] ff = new FileFilter[filters.size()];
-		return filters.toArray(ff);
 	}
 
 }
