@@ -120,6 +120,11 @@ public class FileLoaderDialog {
     return loadFile(parent, chooser, (JComponent)null);
   }
   
+  public static File loadFile(Component parent, boolean useAcceptAllFileFilter, javax.swing.filechooser.FileFilter... ff) {
+  	JFileChooser chooser = createFileChooser(useAcceptAllFileFilter, ff);
+    return loadFile(parent, chooser, (JComponent)null);
+  }
+  
   public static File loadFile(Component parent, JComponent accessory) {
     JFileChooser chooser = createFileChooser(true);
     return loadFile(parent, chooser, accessory);

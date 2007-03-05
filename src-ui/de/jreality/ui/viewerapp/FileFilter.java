@@ -43,6 +43,9 @@ package de.jreality.ui.viewerapp;
 import java.io.File;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Set;
+
+import javax.imageio.ImageIO;
 
 import de.jreality.reader.Readers;
 
@@ -158,6 +161,89 @@ public class FileFilter extends javax.swing.filechooser.FileFilter {
 	  f.setShowExtensionList(false);
 	  
 	  return f;
+  }
+  
+  
+  public static javax.swing.filechooser.FileFilter[] getImageWriterFilters() {
+  	
+  	//get existing writer formats
+		String writerFormats[] = ImageIO.getWriterFormatNames();
+		//usually [bmp, jpg, jpeg, png, wbmp]
+		String[] known = new String[]{"bmp","jpg","jpeg","png", "wbmp"};
+		//get remaining formats ignoring case
+		Set<String> special = new HashSet<String>();
+		outer: for (int i = 0; i < writerFormats.length; i++) {
+			final String ext = writerFormats[i].toLowerCase();
+			for (int j = 0; j < known.length; j++) {
+				if (known[j].equals(ext)) continue outer;
+			}
+			special.add(ext);
+		}
+
+		Set<FileFilter> filters = new LinkedHashSet<FileFilter>();
+		//add general filter
+		FileFilter general = new FileFilter("All Image Files", known);
+		for (String s : special) general.addExtension(s);
+		general.setPreferredExtension("png");
+		filters.add(general);
+		//add known filter
+		filters.add(new FileFilter("PNG Image", "png"));
+		filters.add(new FileFilter("JPEG Image", "jpg", "jpeg"));
+		//add tiff filter if writer exists
+		try { Class.forName("javax.media.jai.JAI");
+		filters.add(new FileFilter("TIFF Image", "tiff", "tif"));
+		} catch (ClassNotFoundException e) {}
+		filters.add(new FileFilter("BMP Image", "bmp"));
+		filters.add(new FileFilter("Wireless BMP Image", "wbmp"));
+		//add filters for special writer formats
+		for (String s : special)
+			filters.add(new FileFilter(s.toUpperCase()+" Image", s));
+
+		//convert to array
+		FileFilter[] ff = new FileFilter[filters.size()];
+		return filters.toArray(ff);
+  }
+  
+  
+  public static javax.swing.filechooser.FileFilter[] getImageReaderFilters() {
+  	
+  	//get existing reader formats
+		String readerFormats[] = ImageIO.getReaderFormatNames();
+		//usually [bmp, gif, jpg, jpeg, png, wbmp]
+		String[] known = new String[]{"bmp", "gif", "jpg","jpeg","png", "wbmp"};
+		//get remaining formats ignoring case
+		Set<String> special = new HashSet<String>();
+		outer: for (int i = 0; i < readerFormats.length; i++) {
+			final String ext = readerFormats[i].toLowerCase();
+			for (int j = 0; j < known.length; j++) {
+				if (known[j].equals(ext)) continue outer;
+			}
+			special.add(ext);
+		}
+
+		Set<FileFilter> filters = new LinkedHashSet<FileFilter>();
+		//add general filter
+		FileFilter general = new FileFilter("All Image Files", known);
+		for (String s : special) general.addExtension(s);
+		general.setPreferredExtension("png");
+		filters.add(general);
+		//add known filter
+		filters.add(new FileFilter("PNG Image", "png"));
+		filters.add(new FileFilter("JPEG Image", "jpg", "jpeg"));
+		filters.add(new FileFilter("GIF Image", "gif"));
+//		//add tiff filter if writer exists
+//		try { Class.forName("javax.media.jai.JAI");
+//		filters.add(new FileFilter("TIFF Image", "tiff", "tif"));
+//		} catch (ClassNotFoundException e) {}
+		filters.add(new FileFilter("BMP Image", "bmp"));
+		filters.add(new FileFilter("Wireless BMP Image", "wbmp"));
+		//add filters for special writer formats
+		for (String s : special)
+			filters.add(new FileFilter(s.toUpperCase()+" Image", s));
+
+		//convert to array
+		FileFilter[] ff = new FileFilter[filters.size()];
+		return filters.toArray(ff);
   }
   
 }
