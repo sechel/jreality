@@ -238,7 +238,7 @@ public class GeometryUtility {
 			if (signature == Pn.EUCLIDEAN)	{		
 				// not necessary but probably a bit faster
 				// have to find a non-degenerate set of 3 vertices
-				int count = 0;
+				int count = 1;
 				double[] v1 = null;
 				do {
 					v1 = Rn.subtract(null, verts[indices[i][count++]], verts[indices[i][0]]);
