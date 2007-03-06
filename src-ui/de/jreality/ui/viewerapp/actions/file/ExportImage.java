@@ -106,7 +106,7 @@ public class ExportImage extends AbstractJrAction {
 		Dimension d = realViewer.getViewingComponentSize();
 		dimPanel.setDimension(d);
 
-		File file = FileLoaderDialog.selectTargetFile(parentComp, dimPanel, false, FileFilter.getImageWriterFilters());
+		File file = FileLoaderDialog.selectTargetFile(parentComp, dimPanel, false, FileFilter.createImageWriterFilters());
 		Dimension dim = dimPanel.getDimension();
 //		Dimension dim = DimensionDialog.selectDimension(d,frame);
 		if (file == null || dim == null) return;

@@ -149,7 +149,7 @@ public class FileFilter extends javax.swing.filechooser.FileFilter {
   }
   
   
-  public static FileFilter getJRealityDataFilter() {
+  public static FileFilter createJRealityDataFilter() {
 	  FileFilter f = new FileFilter("jReality 3D data files") {
 		  @Override
 		  public boolean accept(File f) {
@@ -164,7 +164,7 @@ public class FileFilter extends javax.swing.filechooser.FileFilter {
   }
   
   
-  public static javax.swing.filechooser.FileFilter[] getImageWriterFilters() {
+  public static javax.swing.filechooser.FileFilter[] createImageWriterFilters() {
   	
   	//get existing writer formats
 		String writerFormats[] = ImageIO.getWriterFormatNames();
@@ -205,7 +205,7 @@ public class FileFilter extends javax.swing.filechooser.FileFilter {
   }
   
   
-  public static javax.swing.filechooser.FileFilter[] getImageReaderFilters() {
+  public static javax.swing.filechooser.FileFilter[] createImageReaderFilters() {
   	
   	//get existing reader formats
 		String readerFormats[] = ImageIO.getReaderFormatNames();
