@@ -238,7 +238,7 @@ public class GeometryUtility {
 			if (signature == Pn.EUCLIDEAN)	{		
 				// not necessary but probably a bit faster
 				// have to find a non-degenerate set of 3 vertices
-				int count = 1;
+				int count = 0;
 				double[] v1 = null;
 				do {
 					v1 = Rn.subtract(null, verts[indices[i][count++]], verts[indices[i][0]]);
@@ -246,12 +246,14 @@ public class GeometryUtility {
 				double[] v2 = null;
 				while (true) {
 					do {
+						if (count > n-1) break;
 						v2 = Rn.subtract(null, verts[indices[i][count++]], verts[indices[i][0]]);
 					} while (Rn.euclideanNorm(v2) < 10E-16 && count < (n));
-					if (count > n) break;
 					Rn.crossProduct(fn[i], v1,v2);
 					double norm = Rn.euclideanNorm(fn[i]);
-					if (norm < 1E-16) continue;
+					if (norm < 1E-16) 
+						if(count < n) 
+							continue;
 					Rn.times(fn[i], 1./norm, fn[i]);
 					break;
 				}
