@@ -60,7 +60,7 @@ public class FileLoaderDialog {
   
   
   public static JFileChooser createFileChooser() {
-    return createFileChooser(true, FileFilter.getJRealityDataFilter());
+    return createFileChooser(true, FileFilter.createJRealityDataFilter());
   }
   
   
