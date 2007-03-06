@@ -60,7 +60,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 
-import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.toolsystem.ToolSystemViewer;
@@ -259,11 +258,7 @@ public class ViewerAppMenu {
 			public void actionPerformed(ActionEvent e) {}
 			@Override
 			public boolean isEnabled(SelectionEvent e) {
-				if (e.appearanceSelected()) return true;
-				Appearance a = null;
-				if (e.componentSelected())
-					a = e.getSelection().getLastComponent().getAppearance();
-				return (a instanceof Appearance);
+				return (e.componentSelected() || e.appearanceSelected());
 			}
     });
     editMenu.add(appearance);
