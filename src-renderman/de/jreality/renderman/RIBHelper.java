@@ -127,10 +127,7 @@ public class RIBHelper {
 				EffectiveAppearance slEApp=EffectiveAppearance.create();
 				slEApp=slEApp.create(slApp);
 				rs=new FreePolygonShader();
-				rs.setFromEffectiveAppearance(ribv, slEApp, "lineShader");				
-//				float[] csos = extractCsOs(Cs, (!(ribv.handlingProxyGeometry && ribv.opaqueTubes) && ribv.transparencyEnabled) ? transparency : 0f);
-//				ribv.ri.color(csos);
-//				ribv.ri.surface("constant", null);
+				rs.setFromEffectiveAppearance(ribv, slEApp, "lineShader");		
 			}
 		}else {
 			LoggingSystem.getLogger(ShaderUtility.class).warning("Unknown shader class "+ls.getClass());
@@ -335,9 +332,7 @@ public class RIBHelper {
       Object compField = encParamClass.getField("COMPRESSION_DEFLATE").get(null);
       
       new Statement(encodeParam, "setCompression", new Object[]{compField}).execute();
-      //encodeParam.setCompression(TIFFEncodeParam.COMPRESSION_DEFLATE);
       new Statement(encodeParam, "setDeflateLevel", new Object[]{9}).execute();
-      //encodeParam.setDeflateLevel(9);
       
       ParameterBlock pb = new ParameterBlock();
       pb.addSource(img);
@@ -346,7 +341,6 @@ public class RIBHelper {
       pb.add(encodeParam);
       
 	  new Statement(Class.forName("javax.media.jai.JAI"), "create", new Object[]{"encode", pb}).execute();
-      //JAI.create("encode", pb);
 
 		} catch(Throwable e) {
 		  worked=false;
@@ -356,7 +350,6 @@ public class RIBHelper {
 	    try {
 			 worked =ImageIO.write(img, "PNG", new File(noSuffix+".png"));
 	    } catch (IOException e) {
-					// TODO Auto-generated catch block
 	      e.printStackTrace();
 			}
 	    if (!worked) 
@@ -419,8 +412,6 @@ public class RIBHelper {
 			LabelUtility.calculateBillboardMatrix(bbm, img.getWidth() * scale, img.getHeight()* scale, offset, alignment, c2o.getArray(), LabelUtility.positionFor(i, vertices,indices), Pn.EUCLIDEAN);	
 			ribv.ri.transformBegin();
 			ribv.ri.concatTransform(fTranspose(bbm));
-			//ribv.ri.color(Color.WHITE);
-			//ribv.ri.opacity(new Float(0.0));
 			HashMap<String, Object> shaderMap = new HashMap<String, Object>();
 			shaderMap.put("string texturename", labelName);
 			ribv.ri.surface("constantTexture", shaderMap);

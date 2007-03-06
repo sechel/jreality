@@ -107,13 +107,11 @@ import de.jreality.util.SceneGraphUtility;
  * <b>TODO list and Known issues</b>:
  * <ul>
  * <li> "implode", "flat" polygon shaders not supported</li>
- * <li> imager shaders not supported
  * <li> Clipping planes written but not tested</li>
  * <li> Add control over global options using (something like) "renderingHints"
  * shader {@link de.jreality.shader.RenderingHintsShader}</li>
  * <li> Test support for the differences between the various RenderMan renderers
- * (Pixar, 3DLight, Asis, Pixie)</li>
- * <li>Writing ordinary texture files: Currently tries to write TIFF, if can't then writes PNG.</li>
+ * (Pixar, 3DLight, Aqsis, Pixie)</li>
  * <li>Make sure users understand what the "rgba" output format implies (no
  * background)</li>
  * </ul>
@@ -123,6 +121,7 @@ import de.jreality.util.SceneGraphUtility;
  * <li> Use the {@link de.jreality.shader.CommonAttributes#RMAN_GLOBAL_INCLUDE_FILE} to set
  * global options: this is rib file that is read in at the top of the output rib
  * file, and can be used to set all kinds of global variables.</li>
+ * <li>Writing ordinary texture files: Currently tries to write TIFF, if can't then writes PNG.</li>
  * </ul>
  * 
  * 
@@ -164,8 +163,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	transient private int rendererType = RIBViewer.TYPE_PIXAR;
 	transient private int currentSignature = Pn.EUCLIDEAN;
 	transient private String outputDisplayFormat = "rgb";
-	transient protected String textureFileSuffix = "tex"; // When it's not prman, set to
-	// "tiff" probably.
+	transient protected String textureFileSuffix = "tex"; 
 	transient protected boolean handlingProxyGeometry = false;
 	transient String currentProxyCommand = null;
 	transient SceneGraphComponent currentProxySGC = null;
@@ -192,10 +190,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 	protected RenderingHintsShader rhs;
 	private HashMap<ImageData, String> cubeMaps = new HashMap<ImageData, String>();
 	private double[] zFlipMatrix;
-	// TODO remove these references.
-/*	protected DefaultPolygonShader dps;
-	protected DefaultLineShader dls;
-	protected DefaultPointShader dvs;*/
 
 	public void visit(Viewer viewer, String name) {
 		// handle the file name
@@ -344,7 +338,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		if (outputDisplayFormat != "rgba")
 			handleBackground();   
 
-		handleFog();    
+		handleFog();    //<- should be in handleGlobalSettings() but is here since the jogl-viewer doesn't make fog on background (bug in jogl-viewer?)
 
 		// finally render the scene graph
 		root.accept(this);
@@ -595,19 +589,21 @@ public class RIBVisitor extends SceneGraphVisitor {
 			}			
 		}
 		EffectiveAppearance tmp = eAppearance;
-		ri.attributeBegin(c.getName());
+		boolean hasProxy=hasProxy(c);
+		if(c.getGeometry()!=null || hasProxy)
+			ri.attributeBegin(c.getName());
 		if (a != null) 	eAppearance = eAppearance.create(a);
 		readAttributesFromEffectiveAppearance(eAppearance);
-		// possibly here call evaluateEffectiveAppearance()
 		object2world.push(c);
 		object2world.getMatrix(object2worldTrafo);
-		if (hasProxy(c)) {
+		if (hasProxy) {
 			RIBHelper.processShader(dgs.getPolygonShader(), this, "polygonShader");
 			handleCurrentProxy();
 		} else
 			c.childrenAccept(this);
 		object2world.pop();
-		ri.attributeEnd(c.getName());
+		if(c.getGeometry()!=null || hasProxy)
+			ri.attributeEnd(c.getName());
 		if (archive)	{
 			ri.archiveEnd();
 			ri.readArchive(archiveName);
@@ -629,12 +625,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 	}
 
 	private void readAttributesFromEffectiveAppearance(EffectiveAppearance eap) {
-		//    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(type,"reflectionMap"), eap))
-//		{
-//		ri.verbatim("Attribute \"visibility\"  \"int diffuse\" [1]");
-//		ri.verbatim("Attribute \"visibility\"  \"int specular\" [1]");
-//		}
-
 		Map m = (Map) eap.getAttribute(CommonAttributes.RMAN_ATTRIBUTE, null, Map.class);
 		if (m != null) {
 			for (Iterator i = m.keySet().iterator(); i.hasNext();) {
@@ -646,15 +636,14 @@ public class RIBVisitor extends SceneGraphVisitor {
 		// read current values from the effective appearance
 		currentSignature = eap.getAttribute(CommonAttributes.SIGNATURE,Pn.EUCLIDEAN);
 		retainGeometry = eap.getAttribute(CommonAttributes.BACKEND_RETAIN_GEOMETRY, false); 
-		//if(rhs.getOpaqueTubesAndSpheres()!=null)  
 		opaqueTubes = rhs.getOpaqueTubesAndSpheres();
 		transparencyEnabled = rhs.getTransparencyEnabled();
 		ignoreAlpha0 = rhs.getIgnoreAlpha0();
-		/** 
+		/* 
 		 * evaluate the special shaders which might be specified in the effective appearance:
 		 * displacement, imager, and interior and exterior volume shaders
 		 * The values of the attributes are instances of de.jreality.renderman.shader.SLShader
-		 **/
+		 */
 		Object obj = eap.getAttribute(CommonAttributes.RMAN_DISPLACEMENT_SHADER, Appearance.INHERITED,SLShader.class);
 		if (obj != Appearance.INHERITED) {
 			SLShader slShader = (SLShader) obj;
@@ -686,12 +675,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 	private void updateShaders(EffectiveAppearance eap) {
 		dgs = ShaderUtility.createDefaultGeometryShader(eap);
 		rhs = ShaderUtility.createRenderingHintsShader(eap);
-//		if (dgs.getPointShader() instanceof DefaultPointShader)	dvs = (DefaultPointShader) dgs.getPointShader();
-//		else dvs = null;
-//		if (dgs.getLineShader() instanceof DefaultLineShader) dls = (DefaultLineShader) dgs.getLineShader();
-//		else dls = null;
-//		if (dgs.getPolygonShader() instanceof DefaultPolygonShader) dps = (DefaultPolygonShader) dgs.getPolygonShader();
-//		else dps = null;
 		// we need to know the current opacity to workaround a renderman prman bug in pointsPolygon ... see below
 		currentOpacity = 1f;
 		if (!(handlingProxyGeometry && rhs.getOpaqueTubesAndSpheres()) && rhs.getTransparencyEnabled()) {
@@ -721,8 +704,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			renderScript.addTexture(texFileName, repeatS, repeatT);
 		}
 		return noSuffix + "." + textureFileSuffix; // should be dependent on
-		// the final renderman
-		// renderer
+		// the final renderman renderer
 	}
 
 	/**
@@ -818,16 +800,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 			if (coord == null)return;
 			ri.attributeBegin();
 			RIBHelper.processShader(dgs.getPointShader(), this, "pointShader");
-//			if (dgs.getPointShader() instanceof DefaultPointShader) {
-//				cc = (Color) dvs.getDiffuseColor();
-//				raw = new float[4];
-//				cc.getRGBComponents(raw);
-//				cc = new Color(raw[0], raw[1], raw[2]); 
-//				ri.color(cc);				
-//			}
-			//dvs = (DefaultPointShader) dgs.getPointShader();
-			
-			//pointRadius = (float)eAppearance.getAttribute(CommonAttributes.POINT_RADIUS, CommonAttributes.POINT_RADIUS_DEFAULT);
 			
 			DataList radii = p.getVertexAttributes(Attribute.RELATIVE_RADII);
 			DoubleArray da = null;
@@ -835,14 +807,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 			DataList ind = p.getVertexAttributes(Attribute.INDICES);
 			int[] vind = null;
 			if (ind != null) vind = ind.toIntArray(null);
-			// System.out.println("point radius is "+r);
-			//boolean drawSpheres = eAppearance.getAttribute(CommonAttributes.SPHERES_DRAW, CommonAttributes.SPHERES_DRAW_DEFAULT);	
 			if (drawSpheres) {
 				// process the polygon shader associated to this point shader
 				// This is something of a hack since we don't really know what the associated string is
 				handlingProxyGeometry = true;  
-				//RIBHelper.processShader(dgs.getPointShader(), this, "pointShader.polygonShader");
-
 				double[][] vColData=null;
 				if( p.getVertexAttributes(Attribute.COLORS)!=null)
 					vColData= p.getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null);          
@@ -973,13 +941,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			RIBHelper.processShader(dgs.getLineShader(), this, "lineShader");
 			DataList dl = g.getEdgeAttributes(Attribute.INDICES);
 			if(dl != null){
-				//boolean tubesDraw = eAppearance.getAttribute(CommonAttributes.TUBES_DRAW, CommonAttributes.TUBES_DRAW_DEFAULT);
 				if (drawTubes)  {
-					//RIBHelper.processShader(dgs.getLineShader(), this, "lineShader.polygonShader");
-					
-					//cs=(Color)eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, CommonAttributes.DIFFUSE_COLOR_DEFAULT);
-					//float tubeRadius = (float) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS,CommonAttributes.TUBE_RADIUS_DEFAULT);
-					
 					DataList edgec =  g.getEdgeAttributes(Attribute.COLORS);
 					Object ga = g.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
 					if (ga != null) System.err.println("GA = "+ga.toString());
@@ -988,8 +950,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 						BallAndStickFactory bsf = new BallAndStickFactory(g);
 						bsf.setSignature(currentSignature);
 						bsf.setStickRadius(tubeRadius);
-						bsf.setShowBalls(false);	// need to actually omit the
-						// balls
+						bsf.setShowBalls(false);	// need to actually omit the balls
 						if (cs != null) bsf.setStickColor(cs);
 						bsf.update();
 						handlingProxyGeometry = true;  
@@ -1019,7 +980,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 							ptf.setRadius(tubeRadius);
 							ptf.update();
 							IndexedFaceSet tube = ptf.getTube();
-							// System.ea.ribrr.println("Tube is "+tube.toString());
 							handlingProxyGeometry = true;
 							pointPolygon(tube, null);    
 							handlingProxyGeometry = false;
@@ -1028,13 +988,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 				} else {
 					// use "Curves" command to simulate no tubes
 					// Renderman expects object coordinates for width of "Curves" so use tube parameter
-					
-					//cs = (Color)eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, CommonAttributes.DIFFUSE_COLOR_DEFAULT);
-					//cs.getRGBComponents(raw);
-					//cs = new Color(raw[0], raw[1], raw[2]); 
-					//ri.color(cs);  	        		
-					
-					//float r = (float) eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS,CommonAttributes.TUBE_RADIUS_DEFAULT);
 					HashMap<String, Object> mappo = new HashMap<String, Object>();
 					mappo.put("constantwidth", tubeRadius);
 					int[][] ei = g.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
@@ -1099,7 +1052,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 			
 			
 		}
-		// super.visit(g);
 		_visit((PointSet) g);
 	}
 
@@ -1185,7 +1137,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 				} else
 					pointPolygon(i, null);
 			}
-			// ribHelper.attributeEnd();
 
 			DataList labelsList=i.getFaceAttributes(Attribute.LABELS);
 			if(labelsList!=null){
@@ -1219,16 +1170,15 @@ public class RIBVisitor extends SceneGraphVisitor {
 			// We'd like to be able to use the "Pw" attribute which accepts
 			// 4-vectors for point coordinates, but 3Delight-5.0.1
 			// does not support it ...
-			// As of now, the prman renderer seems unable to handle the "Pw"
-			// parameter
-			// correctly.
+			// As of now, the prman renderer seems unable to handle the "Pw" 
+			// parameter correctly.
 			// See
 			// https://renderman.pixar.com/forum/showthread.php?s=&threadid=5935&highlight=tuberlin
 			// for a bug description
 			// As a result, we set hasPw to false.
-			double[] o2w = object2world.getMatrix(null);
-			double[] rmanc = P3.makeScaleMatrix(null, 1, 1, -1);
-			double[] o2c = Rn.times(null, Rn.times(null, rmanc, world2Camera),o2w);
+			//double[] o2w = object2world.getMatrix(null);
+			//double[] rmanc = P3.makeScaleMatrix(null, 1, 1, -1);
+			//double[] o2c = Rn.times(null, Rn.times(null, rmanc, world2Camera),o2w);
 			if (!hasPw || pointlength == 3) {
 				float[] fcoords = new float[3 * da.getLength()];
 				for (int j = 0; j < da.getLength(); j++) {
@@ -1248,8 +1198,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 					}
 				}
 				map.put("P", fcoords);
-				double[][] dpoints = da.toDoubleArrayArray(null);
-				// System.err.println(Rn.toString(thePoints));
+				//double[][] dpoints = da.toDoubleArrayArray(null);
 			} else if (pointlength == 4) {
 				float[] fcoords = new float[4 * da.getLength()];
 				for (int j = 0; j < da.getLength(); j++) {
@@ -1283,7 +1232,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 					}
 					// Note: using "Np" for uniform normal here causes problems in some files.
 					map.put(vertexNormals ? "N" : "uniform normal N", fnormals);
-					//map.put(type + "vector N", fnormals);
 				} else {
 					// in noneuclidean case we have to use 4D vectors and ship them over as
 					// float[] type.
@@ -1303,13 +1251,9 @@ public class RIBVisitor extends SceneGraphVisitor {
 			if (texCoords != null) {
 				float[] ftex = new float[2 * texCoords.size()];
 				for (int j = 0; j < texCoords.size(); j++) {
-					// ftex[j] =(float)d.getValueAt(j);
 					DoubleArray l = texCoords.item(j).toDoubleArray();
-
 					ftex[2 * j] = (float) l.getValueAt(0);
 					ftex[2 * j + 1] = (float) l.getValueAt(1);
-					// ftex[2*j] =(float)d.getValueAt(j,0);
-					// ftex[2*j+1] =(float)d.getValueAt(j,1);
 				}
 				map.put("st", ftex);
 			}
@@ -1324,7 +1268,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 				if (vertexColorLength == 4)
 					vOp = new float[3 * vertexColors.size()];
 				for (int j = 0; j < vertexColors.size(); j++) {
-					// ftex[j] =(float)d.getValueAt(j);
 					DoubleArray rgba = vertexColors.item(j).toDoubleArray();
 
 					vCol[3 * j] = (float) rgba.getValueAt(0);
@@ -1335,8 +1278,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 						vOp[3 * j + 1] = (float) rgba.getValueAt(3)*currentOpacity;
 						vOp[3 * j + 2] = (float) rgba.getValueAt(3)*currentOpacity;
 					}
-					// ftex[2*j] =(float)d.getValueAt(j,0);
-					// ftex[2*j+1] =(float)d.getValueAt(j,1);
 				}
 				map.put("varying color Cs", vCol);
 				if (vertexColorLength == 4)
@@ -1349,7 +1290,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 				if (faceColorLength == 4)
 					vOp = new float[3 * faceColors.size()];
 				for (int j = 0; j < faceColors.size(); j++) {
-					// ftex[j] =(float)d.getValueAt(j);
 					DoubleArray rgba = faceColors.item(j).toDoubleArray();
 
 					vCol[3 * j] = (float) rgba.getValueAt(0);
