@@ -38,7 +38,7 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.edit;
+package de.jreality.ui.viewerapp.actions.view;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;

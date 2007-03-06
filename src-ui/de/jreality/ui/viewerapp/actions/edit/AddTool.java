@@ -92,10 +92,6 @@ public class AddTool extends AbstractSelectionListenerAction {
     setShortDescription("Add Tools");
   }
 
-//  public AddTool(String name, ViewerApp v) {
-//    this(name, v.getSelectionManager(), v.getFrame());
-//  }
-  
 
   public void actionPerformed(ActionEvent e) {
     

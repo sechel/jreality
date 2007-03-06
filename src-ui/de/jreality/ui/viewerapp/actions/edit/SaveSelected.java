@@ -73,10 +73,6 @@ public class SaveSelected extends AbstractSelectionListenerAction {
     setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
 
-//  public SaveSelected(String name, ViewerApp v) {
-//    this(name, v.getSelectionManager(), v.getFrame());
-//  }
-  
   
   @Override
   public void actionPerformed(ActionEvent e) {

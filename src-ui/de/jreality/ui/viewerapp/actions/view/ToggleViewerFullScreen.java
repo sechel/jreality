@@ -81,7 +81,7 @@ public class ToggleViewerFullScreen extends AbstractJrAction {
     fsf = new JFrame("jReality Viewer");
     fsf.setUndecorated(true);
    
-    setShortDescription("Toggle viewer full screen");
+    setShortDescription("Toggle full screen of viewing component");
     setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
 

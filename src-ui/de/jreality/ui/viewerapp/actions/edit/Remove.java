@@ -69,10 +69,6 @@ public class Remove extends AbstractSelectionListenerAction {
     setShortDescription("Delete");
   }
   
-//  public Remove(String name, ViewerApp v) {
-//    this(name, v.getSelectionManager());
-//  }
-  
   
   public void actionPerformed(ActionEvent e) {
     

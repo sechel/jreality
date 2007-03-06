@@ -82,7 +82,7 @@ import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
-import de.jreality.ui.viewerapp.actions.edit.SwitchBackgroundColor;
+import de.jreality.ui.viewerapp.actions.view.SwitchBackgroundColor;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
@@ -391,18 +391,6 @@ public class ViewerApp {
 		//update menu (e.g. checkboxes whose selection state depends on viewerApp properties)
 		menu.update();
 
-//		//update location of EDIT_MENU
-//		JMenuBar mb = externalNavigatorFrame.getJMenuBar();
-//		if (attachNavigator && mb!= null) { 
-//			if (externalNavigator && mb.getMenuCount()==0) {
-//				mb.add(menu.getMenu(ViewerAppMenu.EDIT_MENU));  //move EDIT_MENU to externalNavigatorFrame
-//				System.out.println(mb.getMenu(0).getText()+ mb.getMenu(0).isVisible());
-//				externalNavigatorFrame.validate();
-//			}
-//			if (!externalNavigator && mb.getMenuCount()!=0)
-//				menu.addMenu(mb.getMenu(0), 1);  //move viewerApp.frame
-//		}
-		
 		//update content of frame
 		frame.getContentPane().removeAll();
 		frame.getContentPane().add(getContent());
@@ -590,7 +578,7 @@ public class ViewerApp {
 	 * Set up the navigator (sceneTree and inspector).
 	 */
 	private void setupNavigator() {
-		navigator = new Navigator(sceneRoot, selectionManager);
+		navigator = new Navigator(sceneRoot, selectionManager, frame);
 
 		Component navigator = this.navigator.getComponent();
 		//init sizes

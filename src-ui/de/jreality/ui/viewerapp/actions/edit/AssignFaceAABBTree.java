@@ -60,10 +60,6 @@ public class AssignFaceAABBTree extends AbstractSelectionListenerAction {
     setShortDescription("Assign AABBTree to faces");
   }
   
-//  public AssignFaceAABBTree(String name, ViewerApp v) {
-//    this(name, v.getSelectionManager());
-//  }
-
   @Override
   public void actionPerformed(ActionEvent e) {
     PickUtility.assignFaceAABBTrees(getSelection().getLastComponent());

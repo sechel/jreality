@@ -60,8 +60,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 
+import de.jreality.scene.Appearance;
+import de.jreality.scene.Geometry;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.toolsystem.ToolSystemViewer;
+import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFieldOfView;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFocus;
@@ -69,16 +72,14 @@ import de.jreality.ui.viewerapp.actions.camera.ToggleStereo;
 import de.jreality.ui.viewerapp.actions.edit.AddTool;
 import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
 import de.jreality.ui.viewerapp.actions.edit.ExportOBJ;
-import de.jreality.ui.viewerapp.actions.edit.LoadReflectionMap;
 import de.jreality.ui.viewerapp.actions.edit.LoadFileToNode;
+import de.jreality.ui.viewerapp.actions.edit.LoadReflectionMap;
 import de.jreality.ui.viewerapp.actions.edit.LoadTexture;
 import de.jreality.ui.viewerapp.actions.edit.Remove;
 import de.jreality.ui.viewerapp.actions.edit.Rename;
 import de.jreality.ui.viewerapp.actions.edit.SaveSelected;
-import de.jreality.ui.viewerapp.actions.edit.SwitchBackgroundColor;
 import de.jreality.ui.viewerapp.actions.edit.ToggleAppearance;
 import de.jreality.ui.viewerapp.actions.edit.TogglePickable;
-import de.jreality.ui.viewerapp.actions.edit.ToggleRenderSelection;
 import de.jreality.ui.viewerapp.actions.edit.ToggleVisibility;
 import de.jreality.ui.viewerapp.actions.file.ExportImage;
 import de.jreality.ui.viewerapp.actions.file.ExportPS;
@@ -88,13 +89,16 @@ import de.jreality.ui.viewerapp.actions.file.LoadFile;
 import de.jreality.ui.viewerapp.actions.file.LoadScene;
 import de.jreality.ui.viewerapp.actions.file.Quit;
 import de.jreality.ui.viewerapp.actions.file.SaveScene;
+import de.jreality.ui.viewerapp.actions.view.LoadSkyBox;
+import de.jreality.ui.viewerapp.actions.view.Maximize;
 import de.jreality.ui.viewerapp.actions.view.SetViewerSize;
+import de.jreality.ui.viewerapp.actions.view.SwitchBackgroundColor;
 import de.jreality.ui.viewerapp.actions.view.ToggleBeanShell;
 import de.jreality.ui.viewerapp.actions.view.ToggleExternalBeanShell;
 import de.jreality.ui.viewerapp.actions.view.ToggleExternalNavigator;
-import de.jreality.ui.viewerapp.actions.view.ToggleFullScreen;
 import de.jreality.ui.viewerapp.actions.view.ToggleMenu;
 import de.jreality.ui.viewerapp.actions.view.ToggleNavigator;
+import de.jreality.ui.viewerapp.actions.view.ToggleRenderSelection;
 import de.jreality.ui.viewerapp.actions.view.ToggleViewerFullScreen;
 import de.jreality.util.LoggingSystem;
 
@@ -115,7 +119,6 @@ public class ViewerAppMenu {
   
   //FILE MENU
   public static String LOAD_FILE = "Load files";
-  public static String LOAD_FILE_TO_NODE = "Load files into node";
   public static String LOAD_FILE_MERGED = "Load merged files";
   public static String LOAD_SCENE = "Load scene";
   public static String SAVE_SCENE = "Save scene";
@@ -123,22 +126,22 @@ public class ViewerAppMenu {
   public static String QUIT = "Quit";
   
   //EDIT MENU
-  public static String TOGGLE_RENDER_SELECTION = "Show selection";
   public static String SAVE_SELECTED = "Save selected";
-  public static String EXPORT_OBJ = "Write OBJ";
+  public static String LOAD_FILE_TO_NODE = "Load files into node";
   public static String REMOVE = "Remove";
   public static String RENAME = "Rename";
-  public static String ADD_TOOL = "Add Tools";
   public static String TOGGLE_VISIBILITY = "Toggle visibility";
+  public static String ASSIGN_FACE_AABBTREE = "Assign AABBTree";
   public static String APPEARANCE = "Appearance";
   public static String TOGGLE_VERTEX_DRAWING = "Toggle vertex drawing";
   public static String TOGGLE_EDGE_DRAWING = "Toggle egde drawing";
   public static String TOGGLE_FACE_DRAWING = "Toggle face drawing";
   public static String LOAD_TEXTURE = "Load texture";
-  public static String LOAD_CUBE_MAP = "Load cube map";
-  public static String BACKGROUND_COLOR = "Set background color";
+  public static String LOAD_CUBE_MAP = "Load reflection map";
+  public static String GEOMETRY = "Geometry";
+  public static String EXPORT_OBJ = "Write OBJ";
   public static String TOGGLE_PICKABLE = "Toggle pickable";
-  public static String ASSIGN_FACE_AABBTREE = "Assign AABBTree";
+  public static String ADD_TOOL = "Add Tools";
   
   //CAMERA MENU
   public static String DECREASE_FIELD_OF_VIEW = "Decrease fieldOfView";
@@ -155,11 +158,14 @@ public class ViewerAppMenu {
   public static String TOGGLE_EXTERNAL_NAVIGATOR = "Open navigator in separate frame";
   public static String TOGGLE_BEANSHELL = "Show bean shell"; 
   public static String TOGGLE_EXTERNAL_BEANSHELL = "Open bean shell in separate frame";
+  public static String TOGGLE_RENDER_SELECTION = "Show selection";
   public static String TOGGLE_MENU = "Hide menu bar";
-  public static String TOGGLE_FULL_VIEWER = "Toggle viewer full screen";
-  public static String TOGGLE_FULL_SCREEN = "Toggle full screen";
+  public static String SET_BACKGROUND_COLOR = "Set background color";
+  public static String LOAD_SKYBOX ="Load Skybox";
+  public static String TOGGLE_VIEWER_FULL_SCREEN = "Toggle full screen";
+  public static String MAXIMIZE = "Maximize frame size";
+  public static String RESTORE = "Restore frame size";
   public static String SET_VIEWER_SIZE ="Set viewer size";
-  public static String RENDER = "Force Rendering";
   
   private Component parentComp = null;
   private ViewerApp viewerApp = null;
@@ -185,14 +191,14 @@ public class ViewerAppMenu {
     
     menuBar = new JMenuBar();
     
-    addMenu(getFileMenu());
-    addMenu(getEditMenu());
-    addMenu(getCameraMenu());
-    addMenu(getViewMenu());
+    addMenu(createFileMenu());
+    addMenu(createEditMenu(parentComp, sm));
+    addMenu(createCameraMenu());
+    addMenu(createViewMenu());
   }
 
 
-  private JMenu getFileMenu() {
+  private JMenu createFileMenu() {
     JMenu fileMenu = new JMenu(FILE_MENU);
     fileMenu.setMnemonic(KeyEvent.VK_F);
     
@@ -227,28 +233,39 @@ public class ViewerAppMenu {
   }
   
   
-  private JMenu getEditMenu() {
+  /**
+   * Creates an edit menu containing all appropriate actions.<br>
+   * Also used for creating the navigator's context menu. 
+   * @param parentComp use as parent component for dialogs
+   */
+  protected static JMenu createEditMenu(Component parentComp, SelectionManager sm) {
     JMenu editMenu = new JMenu(EDIT_MENU);
     editMenu.setMnemonic(KeyEvent.VK_E);
     
-    renderSelectionCheckbox = new JCheckBoxMenuItem(new ToggleRenderSelection(TOGGLE_RENDER_SELECTION, sm));
-    editMenu.add(renderSelectionCheckbox);
-    editMenu.addSeparator();
-    
     editMenu.add(new JMenuItem(new LoadFileToNode(LOAD_FILE_TO_NODE, sm, parentComp)));
     editMenu.add(new JMenuItem(new SaveSelected(SAVE_SELECTED, sm, parentComp)));
-    editMenu.add(new JMenuItem(new ExportOBJ(EXPORT_OBJ, sm, parentComp)));
     editMenu.addSeparator();
-    
     editMenu.add(new JMenuItem(new Remove(REMOVE, sm)));
     editMenu.add(new JMenuItem(new Rename(RENAME, sm, parentComp)));
     editMenu.addSeparator();
-    
-    editMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, parentComp)));
+    editMenu.add(new JMenuItem(new ToggleVisibility(TOGGLE_VISIBILITY, sm)));
+    editMenu.add(new JMenuItem(new AssignFaceAABBTree(ASSIGN_FACE_AABBTREE, sm)));
     editMenu.addSeparator();
     
-    editMenu.add(new JMenuItem(new ToggleVisibility(TOGGLE_VISIBILITY, sm)));
-    JMenu appearance = new JMenu(APPEARANCE);
+    //appearance actions
+    JMenu appearance = new JMenu(new AbstractSelectionListenerAction(APPEARANCE, sm){
+    	{this.setShortDescription(APPEARANCE+" options");}
+    	@Override
+			public void actionPerformed(ActionEvent e) {}
+			@Override
+			public boolean isEnabled(SelectionEvent e) {
+				if (e.appearanceSelected()) return true;
+				Appearance a = null;
+				if (e.componentSelected())
+					a = e.getSelection().getLastComponent().getAppearance();
+				return (a instanceof Appearance);
+			}
+    });
     editMenu.add(appearance);
     appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm)));
     appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm)));
@@ -256,29 +273,33 @@ public class ViewerAppMenu {
     appearance.addSeparator();
     appearance.add(new JMenuItem(new LoadTexture(LOAD_TEXTURE, sm, parentComp)));
     appearance.add(new JMenuItem(new LoadReflectionMap(LOAD_CUBE_MAP, sm, parentComp)));
-    appearance.addSeparator();
-    JMenu bgColors = new JMenu(BACKGROUND_COLOR);  //background color of viewerApp
-    ButtonGroup bg = new ButtonGroup();
-    List<JRadioButtonMenuItem> items = new LinkedList<JRadioButtonMenuItem>();
-    items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("default", viewerApp, SwitchBackgroundColor.defaultColor)) );
-    items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("white", viewerApp, Color.WHITE)) );
-    items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("black", viewerApp, Color.black)) );
-    items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("gray", viewerApp, new Color(225, 225, 225))) );
-    for (JRadioButtonMenuItem item : items) {
-      bg.add(item);
-      bgColors.add(item);
-    }
-    appearance.add(bgColors);
-    editMenu.addSeparator();
 
-    editMenu.add(new JMenuItem(new TogglePickable(TOGGLE_PICKABLE, sm)));
-    editMenu.add(new JMenuItem(new AssignFaceAABBTree(ASSIGN_FACE_AABBTREE, sm)));
+    //geometry actions
+    JMenu geometry = new JMenu(new AbstractSelectionListenerAction(GEOMETRY, sm){
+    	{this.setShortDescription(GEOMETRY+" options");}
+    	@Override
+			public void actionPerformed(ActionEvent e) {}
+			@Override
+			public boolean isEnabled(SelectionEvent e) {
+				if (e.geometrySelected()) return true;
+				Geometry g = null;
+				if (e.componentSelected())
+					g = e.getSelection().getLastComponent().getGeometry();
+				return (g instanceof Geometry);
+			}
+    });
+    editMenu.add(geometry);
+    geometry.add(new JMenuItem(new ExportOBJ(EXPORT_OBJ, sm, parentComp)));
+    geometry.add(new JMenuItem(new TogglePickable(TOGGLE_PICKABLE, sm)));
+    editMenu.addSeparator();
+    
+    editMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, parentComp)));
     
     return editMenu;
   }
 
   
-  private JMenu getCameraMenu() {
+  private JMenu createCameraMenu() {
     JMenu cameraMenu = new JMenu(CAMERA_MENU);
     cameraMenu.setMnemonic(KeyEvent.VK_C);
 
@@ -298,7 +319,7 @@ public class ViewerAppMenu {
   }
   
   
-  private JMenu getViewMenu() {
+  private JMenu createViewMenu() {
     JMenu viewMenu = new JMenu(VIEW_MENU);
     viewMenu.setMnemonic(KeyEvent.VK_V);
     
@@ -311,16 +332,36 @@ public class ViewerAppMenu {
     viewMenu.add(beanShellCheckBox);
     viewMenu.add(externalBeanShellCheckBox);
     viewMenu.addSeparator();
+    
+    renderSelectionCheckbox = new JCheckBoxMenuItem(new ToggleRenderSelection(TOGGLE_RENDER_SELECTION, sm));
+    viewMenu.add(renderSelectionCheckbox);
     viewMenu.add(new JMenuItem(new ToggleMenu(TOGGLE_MENU, this)));
     viewMenu.addSeparator();
+
+    //create background color list
+    JMenu bgColors = new JMenu(SET_BACKGROUND_COLOR);  //background color of viewerApp
+    ButtonGroup bg = new ButtonGroup();
+    List<JRadioButtonMenuItem> items = new LinkedList<JRadioButtonMenuItem>();
+    items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("default", viewerApp, SwitchBackgroundColor.defaultColor)) );
+    items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("white", viewerApp, Color.WHITE)) );
+    items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("gray", viewerApp, new Color(225, 225, 225))) );
+    items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("black", viewerApp, Color.BLACK)) );
+    for (JRadioButtonMenuItem item : items) {
+    	bg.add(item);
+    	bgColors.add(item);
+    }
+    viewMenu.add(bgColors);
+    viewMenu.add(new JMenuItem(new LoadSkyBox(LOAD_SKYBOX, viewerApp.getViewer().getSceneRoot(), parentComp)));
+    viewMenu.addSeparator();
+    
+    viewMenu.add(new JMenuItem(ToggleViewerFullScreen.sharedInstance(TOGGLE_VIEWER_FULL_SCREEN, viewerApp)));
+    viewMenu.add(new JMenuItem(Maximize.sharedInstance(MAXIMIZE, (Frame)parentComp)));
     viewMenu.add(new JMenuItem(new SetViewerSize(SET_VIEWER_SIZE, viewerApp.getViewingComponent(), (Frame)parentComp)));
-    viewMenu.add(new JMenuItem(ToggleViewerFullScreen.sharedInstance(TOGGLE_FULL_VIEWER, viewerApp)));
-    viewMenu.add(new JMenuItem(ToggleFullScreen.sharedInstance(TOGGLE_FULL_SCREEN, (Frame)parentComp)));      
     viewMenu.addSeparator();
     
     final ViewerSwitch viewerSwitch = (ViewerSwitch) viewer.getDelegatedViewer();
     String[] viewerNames = viewerSwitch.getViewerNames();
-    ButtonGroup bg = new ButtonGroup();
+    ButtonGroup bgr = new ButtonGroup();
     for (int i=0; i<viewerSwitch.getNumViewers(); i++) {
       final int index = i;
       final JRadioButtonMenuItem item = new JRadioButtonMenuItem(
@@ -335,7 +376,7 @@ public class ViewerAppMenu {
           });
       item.setSelected(index==0);
       item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1 + index, 0));
-      bg.add(item);
+      bgr.add(item);
       viewMenu.add(item);
     }
     

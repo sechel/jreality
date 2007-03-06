@@ -51,8 +51,8 @@ import de.jreality.util.PickUtility;
 
 
 /**
- * Toggles the pickable property of a selected SceneGraphComponent 
- * (if no SceneGraphComponent is selected, this action is disabled).
+ * Toggles the pickable property of a selected SceneGraphComponent or Geometry.
+ * (if no SceneGraphComponent or Geometry is selected, this action is disabled).
  * 
  * @author msommer
  */
@@ -63,13 +63,13 @@ public class TogglePickable extends AbstractSelectionListenerAction {
     setShortDescription("Toggle pickability of selection");
   }
   
-//  public TogglePickable(String name, ViewerApp v) {
-//    this(name, v.getSelectionManager());
-//  }
   
   @Override
   public void actionPerformed(ActionEvent e) {
-    Geometry g = getSelection().getLastComponent().getGeometry();
+    
+  	Geometry g = (getSelection().getLastElement() instanceof Geometry)?
+				(Geometry) getSelection().getLastElement() :
+				getSelection().getLastComponent().getGeometry();
     if (g!=null) {
       Boolean b = (Boolean)g.getGeometryAttributes(CommonAttributes.PICKABLE);
       if (b==null) b = true;  //default
@@ -79,7 +79,7 @@ public class TogglePickable extends AbstractSelectionListenerAction {
 
   @Override
   public boolean isEnabled(SelectionEvent e) {
-    return e.componentSelected();
+    return (e.componentSelected() || e.geometrySelected());
   }
   
 }

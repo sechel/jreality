@@ -74,7 +74,7 @@ public class LoadTexture extends AbstractSelectionListenerAction {
 
   public void actionPerformed(ActionEvent e) {
     
-  	File file = FileLoaderDialog.loadFile(parentComp, true, FileFilter.getImageReaderFilters());
+  	File file = FileLoaderDialog.loadFile(parentComp, true, FileFilter.createImageReaderFilters());
     if (file == null) return;  //dialog cancelled
   	
   	ImageData img = null;

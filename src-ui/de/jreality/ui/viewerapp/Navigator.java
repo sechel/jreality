@@ -46,7 +46,6 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -63,22 +62,9 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.data.AttributeEntity;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.scene.tool.Tool;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.treeview.JTreeRenderer;
 import de.jreality.ui.treeview.SceneTreeModel;
 import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
-import de.jreality.ui.viewerapp.actions.edit.AddTool;
-import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
-import de.jreality.ui.viewerapp.actions.edit.ExportOBJ;
-import de.jreality.ui.viewerapp.actions.edit.LoadReflectionMap;
-import de.jreality.ui.viewerapp.actions.edit.LoadFileToNode;
-import de.jreality.ui.viewerapp.actions.edit.LoadTexture;
-import de.jreality.ui.viewerapp.actions.edit.Remove;
-import de.jreality.ui.viewerapp.actions.edit.Rename;
-import de.jreality.ui.viewerapp.actions.edit.SaveSelected;
-import de.jreality.ui.viewerapp.actions.edit.ToggleAppearance;
-import de.jreality.ui.viewerapp.actions.edit.TogglePickable;
-import de.jreality.ui.viewerapp.actions.edit.ToggleVisibility;
 import de.jtem.beans.BooleanEditor;
 import de.jtem.beans.EditorSpawner;
 import de.jtem.beans.InspectorPanel;
@@ -102,12 +88,29 @@ public class Navigator implements SelectionListener {
 	private Object currentSelection;
 	
 	private Component navigator;
-	
+	private Component parentComp;
 
+
+	/**
+	 * @param sceneRoot the scene root
+	 * @param selectionManager the underlying selection manager
+	 */
 	public Navigator(SceneGraphComponent sceneRoot, SelectionManager selectionManager) {
+		this(sceneRoot, selectionManager, null);
+	}
+
+	
+	/**
+	 * @param sceneRoot the scene root
+	 * @param selectionManager the underlying selection manager
+	 * @param parentComp used by dialogs from the context menu (<code>null</code> allowed)
+	 */
+	public Navigator(SceneGraphComponent sceneRoot, SelectionManager selectionManager, Component parentComp) {
 
 		sm = selectionManager;
 		sm.addSelectionListener(this);
+		
+		this.parentComp = parentComp;
 		
 		inspector = new InspectorPanel(false);
 		BooleanEditor.setNameOfNull("inherit");
@@ -194,30 +197,9 @@ public class Navigator implements SelectionListener {
 		cm.setLightWeightPopupEnabled(false);
 		
 		//create content of context menu
-		Component parentComp = null; //sceneTree;
-		cm.add(new JMenuItem(new LoadFileToNode(ViewerAppMenu.LOAD_FILE_TO_NODE, sm, parentComp)));
-		cm.add(new JMenuItem(new SaveSelected(ViewerAppMenu.SAVE_SELECTED, sm, parentComp)));
-		cm.add(new JMenuItem(new ExportOBJ(ViewerAppMenu.EXPORT_OBJ, sm, parentComp)));
-		cm.addSeparator();
-		cm.add(new JMenuItem(new Remove(ViewerAppMenu.REMOVE, sm)));
-		cm.add(new JMenuItem(new Rename(ViewerAppMenu.RENAME, sm, parentComp)));
-		cm.addSeparator();
-		cm.add(new JMenuItem(new AddTool(ViewerAppMenu.ADD_TOOL, sm, parentComp)));
-		cm.addSeparator();
-		cm.add(new JMenuItem(new ToggleVisibility(ViewerAppMenu.TOGGLE_VISIBILITY, sm)));
-    JMenu appearance = new JMenu(ViewerAppMenu.APPEARANCE);
-    cm.add(appearance);
-    appearance.add(new JMenuItem(new ToggleAppearance(ViewerAppMenu.TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm)));
-    appearance.add(new JMenuItem(new ToggleAppearance(ViewerAppMenu.TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm)));
-    appearance.add(new JMenuItem(new ToggleAppearance(ViewerAppMenu.TOGGLE_FACE_DRAWING, CommonAttributes.FACE_DRAW, sm)));
-    appearance.addSeparator();
-    appearance.add(new JMenuItem(new LoadTexture(ViewerAppMenu.LOAD_TEXTURE, sm, parentComp)));
-    appearance.add(new JMenuItem(new LoadReflectionMap(ViewerAppMenu.LOAD_CUBE_MAP, sm, parentComp)));
-		cm.addSeparator();
-		cm.add(new JMenuItem(new TogglePickable(ViewerAppMenu.TOGGLE_PICKABLE, sm)));
-		cm.add(new JMenuItem(new AssignFaceAABBTree(ViewerAppMenu.ASSIGN_FACE_AABBTREE, sm)));
-
-		    
+		JMenu editMenu = ViewerAppMenu.createEditMenu(parentComp, sm);
+		for (Component c : editMenu.getMenuComponents()) cm.add(c);
+		
 		//add listener to the navigator's tree
 		sceneTree.addMouseListener(new MouseAdapter() {
 

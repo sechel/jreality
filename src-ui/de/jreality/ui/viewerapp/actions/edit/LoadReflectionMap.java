@@ -58,7 +58,7 @@ import de.jreality.util.Input;
 
 
 /**
- * Loads a cube map for a selected SceneGraphComponent or Appearance.
+ * Loads a reflection map for a selected SceneGraphComponent or Appearance.
  * 
  * @author msommer
  */
@@ -73,13 +73,13 @@ public class LoadReflectionMap extends AbstractSelectionListenerAction {
 
   public void actionPerformed(ActionEvent e) {
     
-  	File file = FileLoaderDialog.loadFile(parentComp, false, new FileFilter("ZIP file", "zip"));
+  	File file = FileLoaderDialog.loadFile(parentComp, false, new FileFilter("ZIP archives", "zip"));
     if (file == null) return;  //dialog cancelled
   	
     //get image data
-  	ImageData[] img;
+  	ImageData[] imgs;
 		try {
-			img = TextureUtility.createCubeMapData(Input.getInput(file));
+			imgs = TextureUtility.createCubeMapData(Input.getInput(file));
 		} catch (Exception ex) {
 			System.err.println("Couldn't create cube map data from zip-file");
 			ex.printStackTrace();
@@ -97,8 +97,8 @@ public class LoadReflectionMap extends AbstractSelectionListenerAction {
   	}
   	else app = (Appearance) getSelection().getLastElement();
   	
-  	//create cube map
-  	TextureUtility.createReflectionMap(app, CommonAttributes.POLYGON_SHADER, img);
+  	//create reflection map
+  	TextureUtility.createReflectionMap(app, CommonAttributes.POLYGON_SHADER, imgs);
   }
   
   

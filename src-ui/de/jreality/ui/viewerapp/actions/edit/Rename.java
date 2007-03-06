@@ -65,10 +65,6 @@ public class Rename extends AbstractSelectionListenerAction {
     setShortDescription("Rename selected node");
   }
   
-//  public Rename(String name, ViewerApp v) {
-//    this(name, v.getSelectionManager(), v.getFrame());
-//  }
-  
   
   public void actionPerformed(ActionEvent e) {
     

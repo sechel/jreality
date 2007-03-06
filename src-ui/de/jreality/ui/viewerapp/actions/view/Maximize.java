@@ -40,45 +40,81 @@
 
 package de.jreality.ui.viewerapp.actions.view;
 
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
+import java.util.HashMap;
 
-import javax.swing.KeyStroke;
-
-import de.jreality.scene.Viewer;
+import de.jreality.ui.viewerapp.ViewerAppMenu;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
 /**
- * Forces rendering.
+ * Toggles full screen of the ViewerApp.<br>
+ * There is only one instance of this action.
  * 
  * @author msommer
  */
-public class Render extends AbstractJrAction {
+public class Maximize extends AbstractJrAction {
 
-  private Viewer viewer;
+  private boolean isFullscreen = false;
+  private Frame frame;
+
+  private static HashMap <Frame, Maximize> sharedInstances = new HashMap <Frame, Maximize>();
   
   
-  public Render(String name, Viewer viewer) {
+  private Maximize(String name, Frame frame) {
     super(name);
+    this.frame = frame;
     
-    if (viewer == null) 
-      throw new IllegalArgumentException("Viewer is null!");
-    this.viewer = viewer;
+    setShortDescription("Maximize/Restore size of ViewerApp's frame");
+  }
+
+  
+  /**
+   * Returns a shared instance of this action depending on the specified frame
+   * (i.e. there is a shared instance for each frame). 
+   * The action's name is overwritten by the specified name.
+   * @param name name of the action
+   * @param frame the frame to toggle
+   * @throws UnsupportedOperationException if frame equals null
+   * @return shared instance of ToggleFullScreen with specified name
+   */
+  public static Maximize sharedInstance(String name, Frame frame) {
+    if (frame == null) 
+      throw new UnsupportedOperationException("Frame not allowed to be null!");
     
-    setShortDescription("Render");
-    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+    Maximize sharedInstance = sharedInstances.get(frame);
+    if (sharedInstance == null) {
+      sharedInstance = new Maximize(name, frame);
+      sharedInstances.put(frame, sharedInstance);
+    }
+     
+    sharedInstance.setName(name);
+    return sharedInstance;
   }
   
-//  public Render(String name, ViewerApp v) {
-//    this(name, v.getViewerSwitch());
-//  }
   
-    
   @Override
   public void actionPerformed(ActionEvent e) {
-    viewer.render();
+   
+    if (isFullscreen) {  //exit full screen
+      frame.dispose();
+      frame.setUndecorated(false);
+      frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(null);
+      setName(ViewerAppMenu.MAXIMIZE);
+      frame.validate();
+      frame.pack();  //reset to preferred sizes
+      frame.setVisible(true);
+      isFullscreen=false;
+    } 
+    else {  //switch to full screen
+      frame.dispose();
+      frame.setUndecorated(true);
+      frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(frame);
+      setName(ViewerAppMenu.RESTORE);
+      frame.validate();
+      isFullscreen=true;
+    }
   }
-
+  
 }

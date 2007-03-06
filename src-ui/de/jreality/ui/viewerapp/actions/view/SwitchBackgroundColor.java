@@ -38,7 +38,7 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.edit;
+package de.jreality.ui.viewerapp.actions.view;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -46,6 +46,7 @@ import java.awt.event.ActionEvent;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
+import de.jreality.shader.ShaderUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
@@ -86,12 +87,12 @@ public class SwitchBackgroundColor extends AbstractJrAction {
     setShortDescription("Set the viewer's background color");
   }
   
-  /** @see SwitchBackgroundColor#SwitchBackgroundColor(String, Color[], SceneGraphComponent) */
+  /** @see SwitchBackgroundColor#SwitchBackgroundColor(String, SceneGraphComponent, Color[]) */
   public SwitchBackgroundColor(String name, ViewerApp viewerApp, Color... colors) {
     this(name, viewerApp.getViewer().getSceneRoot(), colors);
   }
   
-  /** @see SwitchBackgroundColor#SwitchBackgroundColor(String, Color[], SceneGraphComponent) */
+  /** @see SwitchBackgroundColor#SwitchBackgroundColor(String, SceneGraphComponent, Color[]) */
   public SwitchBackgroundColor(String name, Viewer viewer, Color... colors) {
     this(name, viewer.getSceneRoot(), colors);
   }
@@ -99,8 +100,12 @@ public class SwitchBackgroundColor extends AbstractJrAction {
   
   @Override
   public void actionPerformed(ActionEvent e) {
-    if (sceneRoot.getAppearance() == null) 
-      sceneRoot.setAppearance(new Appearance());
+  	Appearance app = sceneRoot.getAppearance();
+  	if (app == null) {
+  		app = new Appearance("root appearance");
+  		ShaderUtility.createRootAppearance(app);
+  		sceneRoot.setAppearance(app);
+  	}
     
     //trim colors[] if it contains the same 4 colors
     if (colors.length == 4) {
@@ -110,8 +115,8 @@ public class SwitchBackgroundColor extends AbstractJrAction {
       if (equal) colors = new Color[]{ colors[0] };
     }
     
-    sceneRoot.getAppearance().setAttribute("backgroundColor", (colors.length==1)? colors[0] : Appearance.INHERITED);
-    sceneRoot.getAppearance().setAttribute("backgroundColors", (colors.length==4)? colors : Appearance.INHERITED);
+    app.setAttribute("backgroundColor", (colors.length==1)? colors[0] : Appearance.INHERITED);
+    app.setAttribute("backgroundColors", (colors.length==4)? colors : Appearance.INHERITED);
   }
   
 }
