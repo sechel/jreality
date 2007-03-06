@@ -251,7 +251,7 @@ public class GeometryUtility {
 					if (count > n) break;
 					Rn.crossProduct(fn[i], v1,v2);
 					double norm = Rn.euclideanNorm(fn[i]);
-					if (norm < 1E-9) continue;
+					if (norm < 1E-16) continue;
 					Rn.times(fn[i], 1./norm, fn[i]);
 					break;
 				}
