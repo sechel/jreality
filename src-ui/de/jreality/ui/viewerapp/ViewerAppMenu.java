@@ -70,6 +70,7 @@ import de.jreality.ui.viewerapp.actions.camera.ShiftFocus;
 import de.jreality.ui.viewerapp.actions.camera.ToggleStereo;
 import de.jreality.ui.viewerapp.actions.edit.AddTool;
 import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
+import de.jreality.ui.viewerapp.actions.edit.CreateAppearance;
 import de.jreality.ui.viewerapp.actions.edit.ExportOBJ;
 import de.jreality.ui.viewerapp.actions.edit.LoadFileToNode;
 import de.jreality.ui.viewerapp.actions.edit.LoadReflectionMap;
@@ -132,6 +133,7 @@ public class ViewerAppMenu {
   public static String TOGGLE_VISIBILITY = "Toggle visibility";
   public static String ASSIGN_FACE_AABBTREE = "Assign AABBTree";
   public static String APPEARANCE = "Appearance";
+  public static String CREATE_APPEARANCE = "Create new Appearance";
   public static String TOGGLE_VERTEX_DRAWING = "Toggle vertex drawing";
   public static String TOGGLE_EDGE_DRAWING = "Toggle egde drawing";
   public static String TOGGLE_FACE_DRAWING = "Toggle face drawing";
@@ -262,6 +264,8 @@ public class ViewerAppMenu {
 			}
     });
     editMenu.add(appearance);
+    appearance.add(new JMenuItem(new CreateAppearance(CREATE_APPEARANCE, sm)));
+    appearance.addSeparator();
     appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm)));
     appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm)));
     appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_FACE_DRAWING, CommonAttributes.FACE_DRAW, sm)));
