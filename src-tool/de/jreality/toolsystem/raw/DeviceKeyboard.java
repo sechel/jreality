@@ -45,7 +45,9 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Toolkit;
 import java.awt.event.AWTEventListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -94,7 +96,7 @@ public class DeviceKeyboard implements RawDevice, AWTEventListener, PollingDevic
 		if (!viewer.hasViewingComponent() || !(viewer.getViewingComponent() instanceof Component) ) throw new UnsupportedOperationException("need AWT component");
 		this.component = (Component) viewer.getViewingComponent();
 		//this.component.addKeyListener(this);
-		Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.KEY_EVENT_MASK);
+		Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.KEY_EVENT_MASK | AWTEvent.MOUSE_EVENT_MASK);
 	}
 
 	public synchronized void keyPressed(KeyEvent e) {
@@ -204,16 +206,82 @@ public class DeviceKeyboard implements RawDevice, AWTEventListener, PollingDevic
 		}
 	}
 
+	AWTEvent last = null;
 	public void eventDispatched(AWTEvent event) {
-		switch (event.getID()) {
-		case KeyEvent.KEY_PRESSED:
-			//only process event if this.component or one of its children is focus owner
-			checkFocus();
-			if (hasFocus) keyPressed((KeyEvent) event);
-			break;
-		case KeyEvent.KEY_RELEASED:
-			//process event even if this.component has no focus
-			keyReleased((KeyEvent) event);
+		if (event == last) return;
+		last = event;
+		if (event instanceof KeyEvent) {
+			KeyEvent e = (KeyEvent) event;
+			switch (event.getID()) {
+			case KeyEvent.KEY_PRESSED:
+				//only process event if this.component or one of its children is focus owner
+				checkFocus();
+				if (hasFocus) keyPressed(e);
+				break;
+			case KeyEvent.KEY_RELEASED:
+				//process event even if this.component has no focus
+				checkModifiers(e);
+				keyReleased(e);
+			}
+		} else {
+			switch (event.getID()) {
+			case MouseEvent.MOUSE_ENTERED:
+			case MouseEvent.MOUSE_EXITED:
+			case MouseEvent.MOUSE_CLICKED:
+				return;
+			default:
+				checkModifiers((InputEvent) event);
+			}
+		}
+	}
+
+	private void checkModifiers(InputEvent e) {
+		int keyCode;
+		if (!e.isShiftDown()) {
+			keyCode = KeyEvent.VK_SHIFT;
+			if (e instanceof KeyEvent) {
+				KeyEvent ke = (KeyEvent) e;
+				if (ke.getKeyCode() != keyCode) checkModifier(keyCode);
+			} else checkModifier(keyCode);
+		}
+		if (!e.isControlDown()) {
+			keyCode = KeyEvent.VK_CONTROL;
+			if (e instanceof KeyEvent) {
+				KeyEvent ke = (KeyEvent) e;
+				if (ke.getKeyCode() != keyCode) checkModifier(keyCode);
+			} else checkModifier(keyCode);
+		}
+		if (!e.isAltDown()) {
+			keyCode = KeyEvent.VK_ALT;
+			if (e instanceof KeyEvent) {
+				KeyEvent ke = (KeyEvent) e;
+				if (ke.getKeyCode() != keyCode) checkModifier(keyCode);
+			} else checkModifier(keyCode);
+		}
+		if (!e.isAltGraphDown()) {
+			keyCode = KeyEvent.VK_ALT_GRAPH;
+			if (e instanceof KeyEvent) {
+				KeyEvent ke = (KeyEvent) e;
+				if (ke.getKeyCode() != keyCode) checkModifier(keyCode);
+			} else checkModifier(keyCode);
+		}
+		if (!e.isMetaDown()) {
+			keyCode = KeyEvent.VK_META;
+			if (e instanceof KeyEvent) {
+				KeyEvent ke = (KeyEvent) e;
+				if (ke.getKeyCode() != keyCode) checkModifier(keyCode);
+			} else checkModifier(keyCode);
+		}
+	}
+
+	private void checkModifier(int keyCode) {
+		InputSlot modKey = keysToVirtual.get(keyCode);
+		if (modKey != null) {
+			if (keyState.get(keyCode) == Boolean.TRUE) {
+				queue.addEvent(new ToolEvent(this, modKey, AxisState.ORIGIN));
+				keyState.put(keyCode, Boolean.FALSE);
+				System.out.println("added missing mod key released!");
+			}
 		}
 	}
 
