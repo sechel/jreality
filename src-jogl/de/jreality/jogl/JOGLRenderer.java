@@ -459,7 +459,7 @@ public class JOGLRenderer  implements AppearanceListener {
 //		theLog.fine("JOGLRR ccb = "+clearColorBits);
 		if (offscreenMode) {
 			if (theCamera.isStereo() && getStereoType() != de.jreality.jogl.Viewer.CROSS_EYED_STEREO) {
-				theLog.warning("Can only save cross-eyed stereo offscreen");
+				theLog.warning("Invalid stereo mode: Can only save cross-eyed stereo offscreen");
 				offscreenMode = false;
 				return;
 			}
@@ -485,12 +485,17 @@ public class JOGLRenderer  implements AppearanceListener {
 					bgColors[3]=bg[3].getColorComponents(null);
 				}
 			}
+			double[] c2ndc = CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), 
+					CameraUtility.getAspectRatio(theViewer),
+					CameraUtility.MIDDLE_EYE);
+			System.err.println("c2ndc is "+Rn.matrixToString(c2ndc));
 			int numImages = theCamera.isStereo() ? 2 : 1;
 			tileSizeX = tileSizeX / numImages;
 			myglViewport(0,0,tileSizeX, tileSizeY);
 			Rectangle2D vp = CameraUtility.getViewport(theCamera, getAspectRatio()); //CameraUtility.getAspectRatio(theViewer));
 			double dx = vp.getWidth()/numTiles;
 			double dy = vp.getHeight()/numTiles;
+			boolean perspective = theCamera.isPerspective();
 			boolean isOnAxis = theCamera.isOnAxis();
 			theCamera.setOnAxis(false);
 			for (int st = 0; st < numImages; ++st)	{
@@ -505,6 +510,10 @@ public class JOGLRenderer  implements AppearanceListener {
 						Rectangle2D lr = new Rectangle2D.Double(vp.getX()+j*dx, vp.getY()+i*dy, dx, dy);
 						System.err.println("Setting vp to "+lr.toString());
 						theCamera.setViewPort(lr);
+						c2ndc = CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), 
+								CameraUtility.getAspectRatio(theViewer),
+								CameraUtility.MIDDLE_EYE);
+						System.err.println(i+j+"c2ndc is "+Rn.matrixToString(c2ndc));
 						
 						if (bgColors != null) {
 							Color[] currentBg = new Color[4];

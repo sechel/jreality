@@ -148,7 +148,6 @@ public class JOGLConfiguration {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				foo = Secure.getProperty("jreality.jogl.goBetweenClass");
 		} catch(SecurityException se)	{
 			theLog.log(Level.WARNING,"Security exception in setting configuration options",se);
 		}
