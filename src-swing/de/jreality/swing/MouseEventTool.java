@@ -125,7 +125,7 @@ class MouseEventTool extends AbstractTool {
 
   public void perform(ToolContext e) {
     try {
-      if (current == (Geometry) e.getCurrentPick().getPickPath().getLastElement()) {
+      if (e.getCurrentPick() != null && current == (Geometry) e.getCurrentPick().getPickPath().getLastElement()) {
         Point newPoint = generatePoint(e.getCurrentPick());
         dispatchMouseEvent(newPoint, MouseEvent.MOUSE_DRAGGED, currentButton);
       }
@@ -136,7 +136,7 @@ class MouseEventTool extends AbstractTool {
 
   public void deactivate(ToolContext e) {
     // TODO: maybe adapt click count to "real" AWT behavior - also in perform()
-    boolean sameGeom = (current == (Geometry) e.getCurrentPick().getPickPath().getLastElement());
+    boolean sameGeom = (e.getCurrentPick() != null && current == (Geometry) e.getCurrentPick().getPickPath().getLastElement());
     Point newPoint = sameGeom ? generatePoint(e.getCurrentPick()) : null;
     dispatchMouseEvent(sameGeom ? newPoint : oldPoint, MouseEvent.MOUSE_RELEASED, currentButton);
     if(oldPoint.equals(newPoint)) {

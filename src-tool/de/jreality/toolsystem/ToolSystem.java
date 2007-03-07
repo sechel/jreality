@@ -180,6 +180,9 @@ public class ToolSystem implements ToolEventReceiver {
       return ToolSystem.this.getPickSystem();
     }
 
+    /**
+     * @deprecated why is this method here?
+     */
     public Iterator getSelection() {
       // TODO Auto-generated method stub
       return null;
@@ -248,6 +251,7 @@ public class ToolSystem implements ToolEventReceiver {
 //          event.axis=new AxisState(event.getAxisState().intValue()+dt);
 //        }
 //      }
+    }
 	    compQueue.add(event);
       int itarCnt=0;
 	    do {
@@ -260,6 +264,7 @@ public class ToolSystem implements ToolEventReceiver {
         if (itarCnt > 5000) throw new IllegalStateException("recursion in tool system!");
       } while (true);
       // handle newly added/removed tools
+      synchronized (mutex) {
       if (!toolsChanging.isEmpty()) {
         final List<Pair> l = new LinkedList<Pair>(toolsChanging);
         toolsChanging.clear();
@@ -274,7 +279,7 @@ public class ToolSystem implements ToolEventReceiver {
         }
       }
 	    executing=false;
-    }
+      }
     if (renderTrigger != null && event.getSource() instanceof DeviceSystemTimer) {
       renderTrigger.finishCollect();
       renderTrigger.startCollect();
