@@ -75,17 +75,17 @@ public class ToggleAppearance extends AbstractSelectionListenerAction {
     
     if (attribute.equals(CommonAttributes.VERTEX_DRAW)) {
       defaultValue = CommonAttributes.VERTEX_DRAW_DEFAULT;
-      setShortDescription("Toggle vertex drawing");
+      setShortDescription("Toggle vertex drawing of responsible appearance");
       setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK));
     }
     else if (attribute.equals(CommonAttributes.EDGE_DRAW)) {
       defaultValue = CommonAttributes.EDGE_DRAW_DEFAULT;
-      setShortDescription("Toggle edge drawing");
+      setShortDescription("Toggle edge drawing of responsible appearance");
       setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
     }
     else if (attribute.equals(CommonAttributes.FACE_DRAW)) {
       defaultValue = CommonAttributes.FACE_DRAW_DEFAULT;
-      setShortDescription("Toggle face drawing");
+      setShortDescription("Toggle face drawing of responsible appearance");
       setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK));
     }
   }
