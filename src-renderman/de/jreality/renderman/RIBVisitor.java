@@ -1178,9 +1178,9 @@ public class RIBVisitor extends SceneGraphVisitor {
 			// https://renderman.pixar.com/forum/showthread.php?s=&threadid=5935&highlight=tuberlin
 			// for a bug description
 			// As a result, we set hasPw to false.
-			//double[] o2w = object2world.getMatrix(null);
-			//double[] rmanc = P3.makeScaleMatrix(null, 1, 1, -1);
-			//double[] o2c = Rn.times(null, Rn.times(null, rmanc, world2Camera),o2w);
+			double[] o2w = object2world.getMatrix(null);
+			double[] rmanc = P3.makeScaleMatrix(null, 1, 1, -1);
+			double[] o2c = Rn.times(null, Rn.times(null, rmanc, world2Camera),o2w);
 			if (!hasPw || pointlength == 3) {
 				float[] fcoords = new float[3 * da.getLength()];
 				for (int j = 0; j < da.getLength(); j++) {
