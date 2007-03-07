@@ -590,7 +590,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 		}
 		EffectiveAppearance tmp = eAppearance;
 		boolean hasProxy=hasProxy(c);
-		if(c.getGeometry()!=null || hasProxy)
+		/**TODO: do something like this:
+		//if(c.getGeometry()!=null || hasProxy)*/
 			ri.attributeBegin(c.getName());
 		if (a != null) 	eAppearance = eAppearance.create(a);
 		readAttributesFromEffectiveAppearance(eAppearance);
@@ -602,7 +603,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 		} else
 			c.childrenAccept(this);
 		object2world.pop();
-		if(c.getGeometry()!=null || hasProxy)
+		/**TODO: do something like this:
+		//if(c.getGeometry()!=null || hasProxy)*/
 			ri.attributeEnd(c.getName());
 		if (archive)	{
 			ri.archiveEnd();
