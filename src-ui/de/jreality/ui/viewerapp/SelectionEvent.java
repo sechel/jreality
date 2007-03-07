@@ -122,7 +122,7 @@ public class SelectionEvent extends java.util.EventObject {
   
   /** Returns true iff the scene graph's root was selected */
   public boolean rootSelected() {
-    return selection.getLength() == 1;
+    return (selection.getLength()==1 && type==DEFAULT_SELECTION);
   }
   
   /** Returns true iff a {@link de.jreality.scene.SceneGraphNode} was selected */

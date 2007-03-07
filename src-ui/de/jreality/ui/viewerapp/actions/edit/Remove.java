@@ -72,9 +72,11 @@ public class Remove extends AbstractSelectionListenerAction {
   
   public void actionPerformed(ActionEvent e) {
     
-    SceneGraphNode node = getSelection().getLastElement();  //the node to be removed
-    SceneGraphPath parentPath = getSelection().popNew();  //selection.getLength() > 1
-    final SceneGraphComponent parent = parentPath.getLastComponent();
+    SceneGraphNode node = getSelection().getLastElement();  //the node to be removed or from which to remove a tool
+    SceneGraphPath parentPath = getSelection().popNew();  //empty if node==root
+    SceneGraphComponent parent;
+    if (getSelection().getLength() > 1) parent=parentPath.getLastComponent();
+    else parent = getSelection().getLastComponent();  //node==root
 
     if (getSelectionManager().getTool() == null) {  //no tool selected
       SceneGraphUtility.removeChildNode(parent, node);
@@ -89,10 +91,10 @@ public class Remove extends AbstractSelectionListenerAction {
   
   @Override
   public boolean isEnabled(SelectionEvent e) {
+  	//returns true iff a node!=root or a tool is selected
     return (!e.entitySelected() &&
         !e.rootSelected() &&  //don't allow to remove the sceneRoot
         !e.nothingSelected());
-    //true iff node!=root or tool selected
   }
   
 }
