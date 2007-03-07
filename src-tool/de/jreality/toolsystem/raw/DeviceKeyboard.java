@@ -59,7 +59,7 @@ import de.jreality.toolsystem.ToolEventQueue;
 import de.jreality.util.LoggingSystem;
 
 /**
- * This driver mainly consists of a woraround for the keyboard auto-repeat:
+ * This driver mainly consists of a workaround for the keyboard auto-repeat:
  * 
  * Windows:
  * The auto-repeat on windows triggers repeating key-pressed events, and also
@@ -78,6 +78,9 @@ import de.jreality.util.LoggingSystem;
  * 
  * Solaris etc.:
  * TODO!
+ * 
+ * Now this class also listens to mouse events and always checks if the status of
+ * shift/ctrl/alt/algt_graph/meta has changed without a corresponding event.
  * 
  * @author Steffen Weissmann
  **/
