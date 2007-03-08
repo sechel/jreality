@@ -81,30 +81,17 @@ public class PickUtility {
     });
   }
 
-  /**
-   * sets the pickable flag for the whole sub-tree of <code>cmp</code>.
-   * 
-   * @param cmp the root node
-   * TODO: decide if this belongs in SceneGraphUtility
-   *@deprecated	Isn't it preferable to set the PICKABLE attribute in cmp's Appearance?
-   */
   public static void setPickable(SceneGraphComponent cmp, final boolean pickable) {
-    cmp.accept(new SceneGraphVisitor() {
-      public void visit(SceneGraphComponent c) {
-        c.childrenWriteAccept(this, false, false, false, false, true, false);
-      };
-      public void visit(de.jreality.scene.Geometry g) {
-        setPickable(g, pickable);
-      };
-    });
+	  if (cmp.getAppearance() ==null) cmp.setAppearance(new Appearance());
+      cmp.getAppearance().setAttribute(CommonAttributes.PICKABLE, pickable);
   }
-
-  public static void setPickableNew(SceneGraphComponent cmp, final boolean pickable)	{
+  
+  public static void setPickable(SceneGraphComponent cmp, final boolean pickPoints, boolean pickEdges, boolean pickFaces) {
 	if (cmp.getAppearance() ==null) cmp.setAppearance(new Appearance());
 	  
-	cmp.getAppearance().setAttribute("pointShader."+CommonAttributes.PICKABLE, pickable);
-	cmp.getAppearance().setAttribute("lineShader."+CommonAttributes.PICKABLE, pickable);
-	cmp.getAppearance().setAttribute("polygonShader."+CommonAttributes.PICKABLE, pickable);
+	cmp.getAppearance().setAttribute("pointShader."+CommonAttributes.PICKABLE, pickPoints);
+	cmp.getAppearance().setAttribute("lineShader."+CommonAttributes.PICKABLE, pickEdges);
+	cmp.getAppearance().setAttribute("polygonShader."+CommonAttributes.PICKABLE, pickFaces);
 
   }
   public static void setPickable(Geometry g, boolean pickable) {
