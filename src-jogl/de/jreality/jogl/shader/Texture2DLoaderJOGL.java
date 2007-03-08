@@ -81,9 +81,16 @@ public class Texture2DLoaderJOGL {
 	private Texture2DLoaderJOGL() {
 	}
 
-	public static void flushBoundTextureTable(GL gl)	{
-		   WeakHashMap<ImageData, Integer> ht = getBoundTextureTableForGL(gl);
-		   if (ht != null) ht.clear();
+	public static void setupBoundTextureTable(GL gl, boolean activate)	{
+		if (!activate) lookupBoundTextures.remove(gl);
+		else {
+			WeakHashMap<ImageData, Integer> ht = getBoundTextureTableForGL(gl);
+		  	if (ht == null)	{
+	    			ht = new WeakHashMap<ImageData, Integer>();
+	    			lookupBoundTextures.put(gl, ht);
+	      } 
+			  ht.clear();			
+		}
 	}
 	
 	private static int createTextureID(GL gl) 
@@ -97,10 +104,10 @@ public class Texture2DLoaderJOGL {
  
 	private static WeakHashMap<ImageData, Integer> getBoundTextureTableForGL(GL gl)	{
 	      WeakHashMap<ImageData, Integer> ht = lookupBoundTextures.get(gl);
-	  		if (ht == null)	{
-	    			ht = new WeakHashMap<ImageData, Integer>();
-	    			lookupBoundTextures.put(gl, ht);
-	      } 
+//	  		if (ht == null)	{
+//	    			ht = new WeakHashMap<ImageData, Integer>();
+//	    			lookupBoundTextures.put(gl, ht);
+//	      } 
 	  		return ht;
 	  }
 
@@ -123,17 +130,6 @@ public class Texture2DLoaderJOGL {
   }
 
     /******************* new Textures *******************/
-    public static void activate(GL gl, Texture2D tex)	{
-    	if (gl == null)	
-    		throw new IllegalStateException("Null gl");
-    	if (tex == null)	
-    		throw new IllegalStateException("Null tex");
-    	ImageData im = tex.getImage();
-    	if (im == null)	
-    		throw new IllegalStateException("Null image");
-    	int texid = getTextureTableForGL(gl).get(im);
-        gl.glBindTexture(GL.GL_TEXTURE_2D, texid);
-    }
     public static void render(GL gl, Texture2D tex) {
       render(gl, tex, true);
     }
@@ -190,11 +186,13 @@ public class Texture2DLoaderJOGL {
     
     // see if this texture has already been handled in this render cycle
     ht = getBoundTextureTableForGL(gl);
-    Integer boundTexid = ht.get(tex.getImage());
-    if (boundTexid != null)	{
-    	return;
-    } 
-    ht.put(tex.getImage(), texid);
+    if (ht != null)	{
+        Integer boundTexid = ht.get(tex.getImage());
+        if (boundTexid != null)	{
+        	return;
+        }    	
+        ht.put(tex.getImage(), texid);
+   }
     int srcPixelFormat = GL.GL_RGBA;
     handleTextureParameters(tex, gl);
 

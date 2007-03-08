@@ -72,12 +72,15 @@ import de.jreality.scene.Appearance;
     public final static boolean  FOG_ENABLED_DEFAULT = false;
     public final static String FOG_COLOR = "fogColor";
     public final static String FOG_DENSITY = "fogDensity";
-    public final static double FOG_DENSITY_DEFAULT = 0.1;  
+    public final static double FOG_DENSITY_DEFAULT = 0.1; 
+    // rendering hints that have to be in the root appearance to take effect
+	public static final String ONE_TEXTURE2D_PER_IMAGE = "oneTexture2DPerImage";	// allows optimizing performance if true; default: false
+	public static final String CLEAR_COLOR_BUFFER = "clearColorBuffer";
+	public final static String FORCE_RESIDENT_TEXTURES = "forceResidentTextures";
 
-    // rendering hints
+    // rendering hints that can appear anywhere in the scene graph
 	public final static String LIGHTING_ENABLED 	= 		"lightingEnabled";
 	public final static String ANTIALIASING_ENABLED = 	"antiAliasing";
-	public final static String FAST_AND_DIRTY_ENABLED = 	"isFastAndDirty";
 	public final static String TRANSPARENCY_ENABLED = 	"transparencyEnabled";
 	public final static String Z_BUFFER_ENABLED = 		"zBufferEnabled";
 	public final static String LEVEL_OF_DETAIL = 			"levelOfDetail";
@@ -86,16 +89,13 @@ import de.jreality.scene.Appearance;
 	public final static boolean OPAQUE_TUBES_AND_SPHERES_DEFAULT = false;
 	public final static String CENTER_ON_BOUNDING_BOX = "centerOnBoundingBox";
 	public static final String BACKEND_RETAIN_GEOMETRY = "rendermanRetainGeometry"; // a hint to backends to write one copy of geometry and re-use it
-
+	public final static String LOCAL_LIGHT_MODEL = "localLightModel";
 	// these hints are heavily OpenGL specific
 	public final static String DEPTH_FUDGE_FACTOR = 		"depthFudgeFactor";
 	public final static String IGNORE_ALPHA0	=			"ignoreAlpha0";	// reject pixel writes for pixels with alpha == 0
 	public final static String BACK_FACE_CULLING_ENABLED = 		"backFaceCulling";
-	public final static String FORCE_RESIDENT_TEXTURES = "forceResidentTextures";
 	public final static String MANY_DISPLAY_LISTS = "manyDisplayLists";		// if true, one display list per scene graph path
 	public final static String ANY_DISPLAY_LISTS = "anyDisplayLists";		// if true, use Display lists.
-	public static final String CLEAR_COLOR_BUFFER = "clearColorBuffer";
-	public final static String LOCAL_LIGHT_MODEL = "localLightModel";
 	public final static String SEPARATE_SPECULAR_COLOR = "separateSpecularColor";
 	public final static String COMPONENT_DISPLAY_LISTS = "componentDisplayLists";
 
@@ -214,49 +214,5 @@ import de.jreality.scene.Appearance;
 	public static final String RMAN_MAX_EYE_SPLITS  = "rendermanMaxEyeSplits";
 
   
-	/* 
-     * @deprecated
-     */
-	public static void setDefaultValues(Appearance ap)	{
-		ap.setAttribute(BACKGROUND_COLOR,BACKGROUND_COLOR_DEFAULT);
-		// rendering hints
-		ap.setAttribute(LEVEL_OF_DETAIL,LEVEL_OF_DETAIL_DEFAULT);
-		ap.setAttribute(ANTIALIASING_ENABLED,false);
-		ap.setAttribute(TRANSPARENCY_ENABLED,true);
-		ap.setAttribute(LIGHTING_ENABLED,true);
-		ap.setAttribute(FAST_AND_DIRTY_ENABLED,true);
-		
-		ap.setAttribute(TRANSPARENCY, TRANSPARENCY_DEFAULT);
-		// default geometry shader
-		ap.setAttribute(FACE_DRAW,FACE_DRAW_DEFAULT);
-		ap.setAttribute(EDGE_DRAW,EDGE_DRAW_DEFAULT);
-		ap.setAttribute(VERTEX_DRAW,VERTEX_DRAW_DEFAULT);
-		// default point shader
-		// drawing normals is being phased out -cg
-		ap.setAttribute(SPHERES_DRAW,SPHERES_DRAW_DEFAULT);
-	    ap.setAttribute(POINT_RADIUS,POINT_RADIUS_DEFAULT);
-	    ap.setAttribute(POINT_SIZE,POINT_SIZE_DEFAULT);
-		ap.setAttribute(POINT_SHADER+"."+DIFFUSE_COLOR,Color.RED);
-       // TODO: discuss wether such a big point radius makes sense!
-        // it might be that jogl renderer uses this as pixels (like linewidth
-        // and unlike tubeRadius...)
-        // ap.setAttribute(POINT_RADIUS,POINT_RADIUS_VALUE);
-        // default line shader
-		ap.setAttribute(TUBES_DRAW,TUBES_DRAW_DEFAULT);
-        ap.setAttribute(TUBE_RADIUS,TUBE_RADIUS_DEFAULT);
-		ap.setAttribute(LINE_WIDTH,LINE_WIDTH_DEFAULT);
-		ap.setAttribute(LINE_STIPPLE,false);
-		ap.setAttribute(LINE_STIPPLE_PATTERN,0x1c47);
-		//ap.setAttribute(LINE_SHADER+"."+DIFFUSE_COLOR,Color.BLACK);
-		ap.setAttribute(LINE_SHADER+"."+LIGHTING_ENABLED,false);
-		ap.setAttribute(LINE_SHADER+"."+POLYGON_SHADER+"."+DIFFUSE_COLOR,Color.BLUE);
-		ap.setAttribute(LINE_SHADER+"."+SMOOTH_LINE_SHADING, SMOOTH_LINE_SHADING_DEFAULT);
-		// default polygon shader
-		ap.setAttribute(POLYGON_SHADER+"."+SMOOTH_SHADING, SMOOTH_SHADING_DEFAULT);
-		ap.setAttribute(POLYGON_SHADER+"."+AMBIENT_COLOR,AMBIENT_COLOR_DEFAULT);
-		//ap.setAttribute(POLYGON_SHADER+"."+DIFFUSE_COLOR,DIFFUSE_COLOR_DEFAULT);
-		ap.setAttribute(POLYGON_SHADER+"."+SPECULAR_COLOR,SPECULAR_COLOR_DEFAULT);
-		ap.setAttribute(POLYGON_SHADER+"."+SPECULAR_EXPONENT,SPECULAR_EXPONENT_DEFAULT);
-	}
 
 }

@@ -62,7 +62,6 @@ public class RenderingHintsShader  {
 	   lightingEnabled = true, 
 	   antiAliasingEnabled = false,				// do we need this anymore?
 	   backFaceCullingEnabled = false,
-	   isFastAndDirty = false,
 	   useDisplayLists = true,
 	   clearColorBuffer = true,
 	   localLightModel = false,
@@ -91,14 +90,12 @@ public class RenderingHintsShader  {
 		ignoreAlpha0 = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.IGNORE_ALPHA0), true);
 		antiAliasingEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.ANTIALIASING_ENABLED), false);
 		backFaceCullingEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.BACK_FACE_CULLING_ENABLED), false);
-		isFastAndDirty = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.FAST_AND_DIRTY_ENABLED), false);
 		useDisplayLists = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.ANY_DISPLAY_LISTS), true);
 		levelOfDetail = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LEVEL_OF_DETAIL),CommonAttributes.LEVEL_OF_DETAIL_DEFAULT);
 		clearColorBuffer = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.CLEAR_COLOR_BUFFER),true);
 		localLightModel = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LOCAL_LIGHT_MODEL),false);
 		separateSpecularColor = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SEPARATE_SPECULAR_COLOR), 
 				false);
-		//if (isFastAndDirty) levelOfDetail = 0.0;
 	}
 
 	public boolean isAntiAliasingEnabled() {
@@ -126,12 +123,6 @@ public class RenderingHintsShader  {
 		return transparencyEnabled;
 	}
 
-	/**
-	 * @return
-	 */
-	public boolean isFastAndDirty() {
-		return isFastAndDirty;
-	}
 
 	public boolean isBackFaceCullingEnabled() {
 		return backFaceCullingEnabled;
@@ -174,7 +165,7 @@ public class RenderingHintsShader  {
 			GL.GL_SEPARATE_SPECULAR_COLOR : GL.GL_SINGLE_COLOR);
 			jr.getRenderingState().separateSpecularColor = separateSpecularColor;			
 		}
-		jr.getRenderingState().setUseDisplayLists(isUseDisplayLists()); //(); //useDisplayLists(activeDL, jpc);
+		jr.getRenderingState().setUseDisplayLists(useDisplayLists); //(); //useDisplayLists(activeDL, jpc);
 	}
 
 	public void postRender(JOGLRenderingState jrs)	{
@@ -184,9 +175,5 @@ public class RenderingHintsShader  {
 			  gl.glDepthMask(true);
 			  gl.glDisable(GL.GL_BLEND);
 			}
-	}
-
-	public boolean isUseDisplayLists() {
-		return useDisplayLists;
 	}
 }

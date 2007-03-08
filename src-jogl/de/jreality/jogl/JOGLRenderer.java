@@ -146,7 +146,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	protected boolean texResident = true;
 	protected int numberTries = 0;		// how many times we have tried to make textures resident
 	protected boolean forceResidentTextures = true;
-
+	protected boolean oneTexture2DPerImage = false;
 	protected boolean globalIsReflection = false;
 	protected int currentSignature = Pn.EUCLIDEAN;
 
@@ -165,7 +165,6 @@ public class JOGLRenderer  implements AppearanceListener {
 
 	protected int stereoType;
 	protected boolean flipped;
-//	public boolean SGCDisplayListsDirty = false, triggerDLD = true;
 
 	public JOGLRenderer(Viewer viewer) {
 		theViewer=viewer;
@@ -235,9 +234,8 @@ public class JOGLRenderer  implements AppearanceListener {
 		theLog.finer("In extractGlobalParameters");
 		Object obj = ap.getAttribute(CommonAttributes.FORCE_RESIDENT_TEXTURES, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) forceResidentTextures = ((Boolean)obj).booleanValue();
-//		obj = ap.getAttribute(CommonAttributes.COMPONENT_DISPLAY_LISTS, Boolean.class);		// assume the best ...
-//		if (obj instanceof Boolean) renderingState.componentDisplayLists = ((Boolean)obj).booleanValue();
-		obj = ap.getAttribute(CommonAttributes.ANY_DISPLAY_LISTS, Boolean.class);		// assume the best ...
+		obj = ap.getAttribute(CommonAttributes.ONE_TEXTURE2D_PER_IMAGE, Boolean.class);		// assume the best ...
+		if (obj instanceof Boolean) oneTexture2DPerImage = ((Boolean)obj).booleanValue();
 		obj = ap.getAttribute(CommonAttributes.CLEAR_COLOR_BUFFER, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) {
 			renderingState.clearColorBuffer = ((Boolean)obj).booleanValue();
@@ -259,7 +257,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
     protected Runnable testClean = null;
 	public Object render() {
-		Texture2DLoaderJOGL.flushBoundTextureTable(globalGL);
+		Texture2DLoaderJOGL.setupBoundTextureTable(globalGL, oneTexture2DPerImage);
 		if (thePeerRoot == null || theViewer.getSceneRoot() != thePeerRoot.getOriginalComponent())	{
 			setSceneRoot(theViewer.getSceneRoot());
 			thePeerRoot = constructPeerForSceneGraphComponent(theRoot, null); 
