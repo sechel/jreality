@@ -70,6 +70,10 @@ import de.jreality.math.Rn;
  * <p>
  * This class does not allow specifying a path that begins somewhere in a scene graph,
  * goes <b>up</b> to the root, and then descends again.  All paths go <b>down</b> from the root.
+ * <p>
+ * <b>The methods equal() and hashCode() always represent the current state of the path,
+ * so make sure you do not change paths that are put into some sort of HashMap etc.!</b>
+ * 
  * @author Tim Hoffman, Charles Gunn, Steffen Weissmann
  *
  */
@@ -215,6 +219,22 @@ public class SceneGraphPath implements Cloneable {
 		return true;
 	}
 
+	@Override
+	public boolean equals(Object p) {
+		if (p instanceof SceneGraphPath)
+    		return isEqual((SceneGraphPath) p);
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		int result = 1;
+		for (Object element : path) {
+            result = 31 * result + element.hashCode();
+        }
+		return result;
+	}
+	
 	public boolean isEqual(SceneGraphPath anotherPath)
 	{
 		if (anotherPath == null || path.size() != anotherPath.getLength())	return false;
