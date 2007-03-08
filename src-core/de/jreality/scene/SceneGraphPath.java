@@ -215,15 +215,6 @@ public class SceneGraphPath implements Cloneable {
 		return true;
 	}
 
-	/**
-	 * !!! TODO: This does NOT work - hashCode is not overwritten !!!
-	 */
-	public boolean equals(Object p) {
-		if (p instanceof SceneGraphPath)
-    		return isEqual((SceneGraphPath) p);
-		return false;
-	}
-	
 	public boolean isEqual(SceneGraphPath anotherPath)
 	{
 		if (anotherPath == null || path.size() != anotherPath.getLength())	return false;
