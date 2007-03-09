@@ -82,8 +82,8 @@ public class PortalServerViewer implements Viewer {
 		int port = 8844;
 		int cpPort = 8845;
 		JarServer js = new JarServer(new ServerSocket(cpPort));
-		Broadcaster bc = new TCPBroadcasterNIO(port);
-		Local.sendStart(port, cpPort, ClientFactory.class);
+		Broadcaster bc = new TCPBroadcasterNIO(port, Broadcaster.RESPONSE_TYPE_EXCEPTION);
+		Local.sendStart(port, cpPort, Broadcaster.RESPONSE_TYPE_EXCEPTION, ClientFactory.class);
 		js.waitForDownloads();
 		
     clients = bc.getRemoteFactory().createRemoteViaStaticMethod(
