@@ -121,7 +121,7 @@ public class ToolEvent extends EventObject {
 
   protected boolean compareAxisStates(AxisState axis1, AxisState axis2) {
         if (axis1 == axis2) return true;
-        if (axis1 == null || axis2 == null) return false;
+        if (axis1 == null || axis2 == null) return axis1 == axis2;
         // sign changed
         if ( (axis1.doubleValue() * axis2.doubleValue()) <= 0 ) return false;
         // one state changed
@@ -135,10 +135,9 @@ public class ToolEvent extends EventObject {
     
   protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
         if (trafo1 == trafo2) return true;
-        if (trafo1 == null || trafo1 == null) return false;
+        if (trafo1 == null || trafo1 == null) return trafo1 == trafo2;
         //return Rn.equals(trafo1.toDoubleArray(null), trafo2.toDoubleArray(null), 0.00000001);
         return false;
-        //return true;
     }
 
     public void consume() {
