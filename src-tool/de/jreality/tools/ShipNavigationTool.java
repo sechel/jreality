@@ -46,6 +46,8 @@ import java.util.List;
 
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.pick.PickResult;
@@ -80,9 +82,9 @@ public class ShipNavigationTool extends AbstractTool {
 	private double gravity = 9.81;
 	private boolean gravitEnabled=true;
 	private double jumpSpeed = 8;
-	private boolean center = false;
-
-
+	private boolean hasCenter = false;
+	private double[] center={0,0,0,1};
+	
 	private boolean pollingDevice=true; // should be true for mouse look, false for some axis/button device TODO!!
 
 	private transient boolean rotate=false;
@@ -124,12 +126,14 @@ public class ShipNavigationTool extends AbstractTool {
 		checkNeedTimer(tc);
 		SceneGraphPath path = tc.getRootToLocal();
 		SceneGraphComponent myComponent = path.getLastComponent();
-		Matrix myMatrix = myComponent.getTransformation() != null ? new Matrix(myComponent.getTransformation()) : new Matrix();
+		Matrix myMatrix = myComponent.getTransformation() != null ? new Matrix(myComponent.getTransformation()) : new Matrix();	
+		
 		if (pollingDevice && tc.getSource() == horizontalRotation) {
 			MatrixBuilder.euclidean(myMatrix).rotateY(-tc.getAxisState(horizontalRotation).doubleValue());
 			myMatrix.assignTo(myComponent);
 			return;
 		}
+		
 		if (isGravitEnabled()) {
 			if (tc.getSource() == jump && tc.getAxisState(jump).isPressed()) {
 				velocity[1] = jumpSpeed;
@@ -156,40 +160,74 @@ public class ShipNavigationTool extends AbstractTool {
 			}
 			double[] trans = new double[]{sec*velocity[0], sec*velocity[1], sec*velocity[2], 1};
 			double[] dest = myMatrix.multiplyVector(trans);
-
+			Pn.dehomogenize(dest,dest);
+			
 			if (myMatrix.containsNanOrInfinite()) System.out.println("NAN!!! 1");
 
 			double[] pickStart;
-			if (!center) pickStart = new double[]{dest[0], dest[1]+1.7, dest[2], 1};
+			double[] upDir4=new double[4];
+			if (!hasCenter) pickStart = new double[]{dest[0], dest[1]+1.7, dest[2], 1};
 			else {
-				double n = Math.sqrt(dest[0]*dest[0]+dest[1]*dest[1]+dest[2]*dest[2]);
-				if (n != 0) n=1.7/n;
-				n+=1;
-				pickStart = new double[]{dest[0]*n, dest[1]*n, dest[2]*n, 1};
+				Rn.subtract(upDir4, dest, center);
+				double[] upDir={upDir4[0],upDir4[1],upDir4[2]};
+				pickStart= Rn.times(null,1+1.7/Rn.euclideanNorm(upDir),upDir);
+				pickStart[0]+=center[0];  pickStart[1]+=center[1];  pickStart[2]+=center[2];				
+//				pickStart=Rn.subtract(null, dest, center);
 			}
 			List picks = Collections.EMPTY_LIST;
 			if (isGravitEnabled()) {
 				if (!fall) {
 					try {
-						picks = tc.getPickSystem().computePick(pickStart, dest);
+						if(!hasCenter)
+							picks = tc.getPickSystem().computePick(pickStart, dest);
+						else{
+							picks = tc.getPickSystem().computePick(pickStart, center);
+							if(picks.isEmpty())
+								picks=tc.getPickSystem().computePick(center,upDir4);
+//							picks=tc.getPickSystem().computePick(center,pickStart);							
+						}					
 					} catch (Exception e) {
 						LoggingSystem.getLogger(this).warning("pick system error");
 						return;
 					}
 				}
+				
 				if (!picks.isEmpty()) {
 					PickResult pr = (PickResult) picks.get(0);
 					double[] hit = pr.getWorldCoordinates();
-					dest[1] = hit[1];
-					velocity[1] = 0;
-					touchGround = true;
+
+					if(!hasCenter){
+						dest[1] = hit[1];
+						velocity[1] = 0;
+						touchGround = true;
+					}else{
+						Pn.dehomogenize(hit, hit);
+						double dist1=Math.sqrt(Math.pow(pickStart[0]-hit[0],2)+Math.pow(pickStart[1]-hit[1],2)+Math.pow(pickStart[2]-hit[2],2));
+						double dist2=Math.sqrt(Math.pow(dest[0]-center[0],2)+Math.pow(dest[1]-center[1],2)+Math.pow(dest[2]-center[2],2));
+						double dist3=Math.sqrt(Math.pow(hit[0]-center[0],2)+Math.pow(hit[1]-center[1],2)+Math.pow(hit[2]-center[2],2));
+												
+						if(dist1<1.7 || dist2<dist3){
+							dest=hit;
+							velocity[1] = 0;
+							touchGround = true;
+						}else{
+							velocity[1] -= sec*gravity;
+							touchGround = false;
+						}
+					}
 				} else {
 					velocity[1] -= sec*gravity;
 					touchGround = false;
 				}
 			}
-			if (center)	{
-				Matrix rotation = MatrixBuilder.euclidean().rotateFromTo(myMatrix.getColumn(3), dest).getMatrix();
+			if (hasCenter)	{
+				double[] rotateFrom4=Rn.subtract(null, Pn.dehomogenize(null,myMatrix.getColumn(3)), center);
+				double[] rotateFrom={rotateFrom4[0],rotateFrom4[1],rotateFrom4[2]};
+				Rn.normalize(rotateFrom, rotateFrom);
+				double[] rotateTo4=Rn.subtract(null,Pn.dehomogenize(null,dest),center);
+				double[] rotateTo={rotateTo4[0],rotateTo4[1],rotateTo4[2]};
+				Rn.normalize(rotateTo, rotateTo);
+				Matrix rotation = MatrixBuilder.euclidean().rotateFromTo(rotateFrom, rotateTo).getMatrix();
 				if (!rotation.containsNanOrInfinite()) myMatrix.multiplyOnLeft(rotation);
 				else System.out.println("rotation NAN: from="+Arrays.toString(myMatrix.getColumn(3))+" to="+Arrays.toString(dest));
 			}
@@ -268,11 +306,22 @@ public class ShipNavigationTool extends AbstractTool {
 	}
 
 	public boolean isCenter() {
+		return hasCenter;
+	}
+	public void setCenter(boolean center) {
+		this.hasCenter = center;
+	}
+	public double[] getCenter(){
 		return center;
 	}
-
-	public void setCenter(boolean center) {
-		this.center = center;
+	public void setCenter(double[] center){
+		if(center.length==4)
+			Pn.dehomogenize(this.center,center);
+		else{
+			for(int i=0;i<3;i++)
+				this.center[i]=center[i];
+			this.center[3]=1;
+		}		
 	}
 
 	public boolean isGravitEnabled() {
