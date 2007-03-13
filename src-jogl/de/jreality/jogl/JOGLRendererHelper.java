@@ -902,9 +902,12 @@ public class JOGLRendererHelper {
 		}
 	}
 
-	public static void processLights(GL globalGL, List lights) {
-		for (int i = 0; i < lights.size(); ++i)
+	public static void enableLights(GL globalGL, int num) {
+		for (int i = 0; i < num; ++i)
 			globalGL.glEnable(GL.GL_LIGHT0 + i);
+	}
+	
+	public static void processLights(GL globalGL, List lights) {
 		lightCount = GL.GL_LIGHT0;
 		lightGL = globalGL;
 		int n = lights.size();

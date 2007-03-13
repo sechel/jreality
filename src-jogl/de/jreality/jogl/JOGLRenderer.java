@@ -334,6 +334,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			renderingState.numLights = lights.size();
 			lightsChanged = true;
 		}
+		JOGLRendererHelper.enableLights(globalGL, lights.size());
 		if (lightsChanged) {
 			JOGLRendererHelper.processLights(globalGL, lights);
 			lightsChanged = false;
