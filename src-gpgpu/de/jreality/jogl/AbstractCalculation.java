@@ -53,6 +53,7 @@ import javax.media.opengl.glu.GLU;
 import javax.swing.JOptionPane;
 
 import de.jreality.jogl.shader.GlslLoader;
+import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.shader.GlslProgram;
 
@@ -65,6 +66,8 @@ public abstract class AbstractCalculation implements GLEventListener {
   "  vec4 col = textureRect(values, pos);" +
   "  gl_FragColor = abs(col/col.w); //vec4(scale*rescale*a, 1.);\n" + 
   "}\n";
+
+private static final double[] ID = Rn.identityMatrix(4);
 
   protected boolean doIntegrate;
   
@@ -127,7 +130,9 @@ public abstract class AbstractCalculation implements GLEventListener {
     if (doIntegrate && hasValues) {
       
       gl.glEnable(TEX_TARGET);
-      
+      gl.glMatrixMode(GL.GL_TEXTURE);
+      gl.glLoadTransposeMatrixd(ID,0);
+
       initPrograms(gl);
       initFBO(gl);
       if (!readData) initVBO(gl);
