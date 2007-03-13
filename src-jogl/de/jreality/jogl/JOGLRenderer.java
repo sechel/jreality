@@ -42,6 +42,7 @@ package de.jreality.jogl;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
@@ -160,7 +161,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	protected double framerate;
 	protected int nodeCount = 0;
 
-	boolean geometryRemoved = false, lightListDirty = true, clippingPlanesDirty = true;
+	boolean geometryRemoved = false, lightListDirty = true, lightsChanged = true, clippingPlanesDirty = true;
 	protected Viewer theViewer;
 
 	protected int stereoType;
@@ -331,8 +332,12 @@ public class JOGLRenderer  implements AppearanceListener {
 			JOGLRendererHelper.resetLights(globalGL, lights);
 			lightListDirty = false;
 			renderingState.numLights = lights.size();
+			lightsChanged = true;
 		}
-		JOGLRendererHelper.processLights(globalGL, lights);
+		if (lightsChanged) {
+			JOGLRendererHelper.processLights(globalGL, lights);
+			lightsChanged = false;
+		}
 	}
 
 	private void forceResidentTextures() {

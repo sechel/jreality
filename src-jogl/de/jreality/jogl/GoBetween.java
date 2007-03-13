@@ -17,6 +17,8 @@ import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
 import de.jreality.scene.event.GeometryEvent;
 import de.jreality.scene.event.GeometryListener;
+import de.jreality.scene.event.LightEvent;
+import de.jreality.scene.event.LightListener;
 import de.jreality.scene.event.SceneGraphComponentEvent;
 import de.jreality.scene.event.SceneGraphComponentListener;
 import de.jreality.scene.event.TransformationEvent;
@@ -31,7 +33,7 @@ public class GoBetween extends JOGLPeerNode implements
 	GeometryListener, 
 	TransformationListener, 
 	AppearanceListener,
-	SceneGraphComponentListener	{
+	SceneGraphComponentListener, LightListener	{
 	SceneGraphComponent originalComponent;
 	ArrayList<JOGLPeerComponent> peers = new ArrayList<JOGLPeerComponent>();
 	JOGLPeerGeometry peerGeometry;
@@ -58,6 +60,8 @@ public class GoBetween extends JOGLPeerNode implements
 			originalComponent.getAppearance().addAppearanceListener(this);
 		if (originalComponent.getTransformation() != null)
 			originalComponent.getTransformation().addTransformationListener(this);
+		if (originalComponent.getLight() != null)
+			originalComponent.getLight().addLightListener(this);
 	}
 
 
@@ -71,6 +75,8 @@ public class GoBetween extends JOGLPeerNode implements
 		}
 		if (originalComponent.getTransformation() != null)
 			originalComponent.getTransformation().removeTransformationListener(this);
+		if (originalComponent.getLight() != null)
+			originalComponent.getLight().removeLightListener(this);
 	}
 
 
@@ -241,6 +247,13 @@ public class GoBetween extends JOGLPeerNode implements
 			//peer.addSceneGraphComponentEvent(ev);
 			peer.visibilityChanged(ev);
 		}				
+		peersLock.readUnlock();
+	}
+	public void lightChanged(LightEvent ev) {
+		peersLock.readLock();
+		for (JOGLPeerComponent peer : peers) {
+			peer.lightChanged(ev);
+		}
 		peersLock.readUnlock();
 	}
 

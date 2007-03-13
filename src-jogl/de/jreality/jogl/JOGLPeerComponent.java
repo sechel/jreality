@@ -33,6 +33,8 @@ import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
+import de.jreality.scene.event.LightEvent;
+import de.jreality.scene.event.LightListener;
 import de.jreality.scene.event.SceneGraphComponentEvent;
 import de.jreality.scene.event.SceneGraphComponentListener;
 import de.jreality.scene.event.TransformationEvent;
@@ -51,7 +53,7 @@ import de.jreality.util.LoggingSystem;
 //}
 //
 
-public class JOGLPeerComponent extends JOGLPeerNode implements TransformationListener, AppearanceListener,SceneGraphComponentListener {
+public class JOGLPeerComponent extends JOGLPeerNode implements TransformationListener, AppearanceListener,SceneGraphComponentListener, LightListener {
 
 	protected EffectiveAppearance eAp;
 	protected Vector<JOGLPeerComponent> children;
@@ -466,5 +468,9 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void visibilityChanged(SceneGraphComponentEvent ev) {
+	}
+
+	public void lightChanged(LightEvent ev) {
+		jr.lightsChanged = true;
 	}
 }
