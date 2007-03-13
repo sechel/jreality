@@ -73,6 +73,7 @@ public class GpgpuViewer extends Viewer {
       arg0.getGL().glPopAttrib();
     }
     arg0.getGL().glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
+    super.renderer.lightsChanged=true;
     super.display(arg0);
     arg0.getGL().glPopAttrib();
   }

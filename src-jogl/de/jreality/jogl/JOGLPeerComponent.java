@@ -53,7 +53,7 @@ import de.jreality.util.LoggingSystem;
 //}
 //
 
-public class JOGLPeerComponent extends JOGLPeerNode implements TransformationListener, AppearanceListener,SceneGraphComponentListener, LightListener {
+public class JOGLPeerComponent extends JOGLPeerNode implements TransformationListener, AppearanceListener,SceneGraphComponentListener {
 
 	protected EffectiveAppearance eAp;
 	protected Vector<JOGLPeerComponent> children;
@@ -470,7 +470,4 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	public void visibilityChanged(SceneGraphComponentEvent ev) {
 	}
 
-	public void lightChanged(LightEvent ev) {
-		jr.lightsChanged = true;
-	}
 }

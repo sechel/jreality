@@ -250,11 +250,7 @@ public class GoBetween extends JOGLPeerNode implements
 		peersLock.readUnlock();
 	}
 	public void lightChanged(LightEvent ev) {
-		peersLock.readLock();
-		for (JOGLPeerComponent peer : peers) {
-			peer.lightChanged(ev);
-		}
-		peersLock.readUnlock();
+		jr.lightsChanged=true;
 	}
 
 }
