@@ -164,28 +164,20 @@ public class ShipNavigationTool extends AbstractTool {
 			
 			if (myMatrix.containsNanOrInfinite()) System.out.println("NAN!!! 1");
 
-			double[] pickStart;
 			double[] upDir4=new double[4];
-			if (!hasCenter) pickStart = new double[]{dest[0], dest[1]+1.7, dest[2], 1};
+			if (!hasCenter) upDir4=new double[]{0, 1, 0, 0};
 			else {
 				Rn.subtract(upDir4, dest, center);
-				double[] upDir={upDir4[0],upDir4[1],upDir4[2]};
-				pickStart= Rn.times(null,1+1.7/Rn.euclideanNorm(upDir),upDir);
-				pickStart[0]+=center[0];  pickStart[1]+=center[1];  pickStart[2]+=center[2];				
-//				pickStart=Rn.subtract(null, dest, center);
+				upDir4[3]=0;
+				Rn.normalize(upDir4, upDir4);
 			}
+			double[] pickStart= Rn.linearCombination(null, 1, dest, 1.7, upDir4);
+
 			List picks = Collections.EMPTY_LIST;
 			if (isGravitEnabled()) {
 				if (!fall) {
 					try {
-						if(!hasCenter)
-							picks = tc.getPickSystem().computePick(pickStart, dest);
-						else{
-							picks = tc.getPickSystem().computePick(pickStart, center);
-							if(picks.isEmpty())
-								picks=tc.getPickSystem().computePick(center,upDir4);
-//							picks=tc.getPickSystem().computePick(center,pickStart);							
-						}					
+						picks = tc.getPickSystem().computePick(pickStart, dest);
 					} catch (Exception e) {
 						LoggingSystem.getLogger(this).warning("pick system error");
 						return;
@@ -195,26 +187,9 @@ public class ShipNavigationTool extends AbstractTool {
 				if (!picks.isEmpty()) {
 					PickResult pr = (PickResult) picks.get(0);
 					double[] hit = pr.getWorldCoordinates();
-
-					if(!hasCenter){
-						dest[1] = hit[1];
-						velocity[1] = 0;
-						touchGround = true;
-					}else{
-						Pn.dehomogenize(hit, hit);
-						double dist1=Math.sqrt(Math.pow(pickStart[0]-hit[0],2)+Math.pow(pickStart[1]-hit[1],2)+Math.pow(pickStart[2]-hit[2],2));
-						double dist2=Math.sqrt(Math.pow(dest[0]-center[0],2)+Math.pow(dest[1]-center[1],2)+Math.pow(dest[2]-center[2],2));
-						double dist3=Math.sqrt(Math.pow(hit[0]-center[0],2)+Math.pow(hit[1]-center[1],2)+Math.pow(hit[2]-center[2],2));
-												
-						if(dist1<1.7 || dist2<dist3){
-							dest=hit;
-							velocity[1] = 0;
-							touchGround = true;
-						}else{
-							velocity[1] -= sec*gravity;
-							touchGround = false;
-						}
-					}
+					dest = hit;
+					velocity[1] = 0;
+					touchGround = true;
 				} else {
 					velocity[1] -= sec*gravity;
 					touchGround = false;
@@ -222,12 +197,8 @@ public class ShipNavigationTool extends AbstractTool {
 			}
 			if (hasCenter)	{
 				double[] rotateFrom4=Rn.subtract(null, Pn.dehomogenize(null,myMatrix.getColumn(3)), center);
-				double[] rotateFrom={rotateFrom4[0],rotateFrom4[1],rotateFrom4[2]};
-				Rn.normalize(rotateFrom, rotateFrom);
-				double[] rotateTo4=Rn.subtract(null,Pn.dehomogenize(null,dest),center);
-				double[] rotateTo={rotateTo4[0],rotateTo4[1],rotateTo4[2]};
-				Rn.normalize(rotateTo, rotateTo);
-				Matrix rotation = MatrixBuilder.euclidean().rotateFromTo(rotateFrom, rotateTo).getMatrix();
+				double[] rotateTo4=Rn.subtract(null,dest,center);
+				Matrix rotation = MatrixBuilder.euclidean().rotateFromTo(rotateFrom4, rotateTo4).getMatrix();
 				if (!rotation.containsNanOrInfinite()) myMatrix.multiplyOnLeft(rotation);
 				else System.out.println("rotation NAN: from="+Arrays.toString(myMatrix.getColumn(3))+" to="+Arrays.toString(dest));
 			}
