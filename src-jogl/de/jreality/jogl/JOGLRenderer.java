@@ -458,7 +458,13 @@ public class JOGLRenderer  implements AppearanceListener {
 		renderingState.initializeGLState();
 		long beginTime = 0;
 		if (collectFrameRate) beginTime = System.currentTimeMillis();
-		Camera theCamera = CameraUtility.getCamera(theViewer);
+		Camera theCamera;
+		try {
+			theCamera = CameraUtility.getCamera(theViewer);
+		} catch (IllegalStateException ise) {
+			// no camera (yet):
+			return;
+		}
 		clearColorBits = (renderingState.clearColorBuffer ? GL.GL_COLOR_BUFFER_BIT : 0);
 //		theLog.fine("JOGLRR ccb = "+clearColorBits);
 		if (offscreenMode) {
