@@ -415,6 +415,7 @@ private static final double[] ID = Rn.identityMatrix(4);
    */
   public void setValues(float[] values) {
     System.out.println("AbstractCalculation.setParticles()");
+    if (values == null || values.length == 0) return;
     if (numValues != values.length) {
       int texSize = GpgpuUtility.texSize(values.length/4);
       if (valueTextureSize!=texSize) {
