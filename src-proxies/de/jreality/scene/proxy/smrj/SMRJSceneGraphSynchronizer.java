@@ -40,6 +40,7 @@
 
 package de.jreality.scene.proxy.smrj;
 
+import java.io.NotSerializableException;
 import java.io.Serializable;
 import java.util.Iterator;
 
@@ -147,7 +148,11 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
     rmc.writeLock.writeLock();
     if (aa == Appearance.INHERITED) aa = de.jreality.scene.proxy.scene.Appearance.INHERITED;
     if (aa == Appearance.DEFAULT) aa = de.jreality.scene.proxy.scene.Appearance.DEFAULT;
-    dst.setAttribute(ev.getKey(), aa);
+    try {
+    	dst.setAttribute(ev.getKey(), aa);
+    } catch (Exception nse) {
+    	System.out.println("Object in appearance not serializable: "+ev.getKey()+"  "+aa);
+    }
     rmc.writeLock.writeUnlock();
   }
 
