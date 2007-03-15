@@ -45,6 +45,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.Statement;
 import java.util.List;
@@ -56,12 +57,14 @@ import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
 
+import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
+import de.jreality.shader.GlslProgram;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.LoggingSystem;
@@ -88,6 +91,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
   SceneGraphPath cameraPath;
 
   Camera cam;
+private GlslProgram cylProg;
 
   // this field moves the sensor from the middle
   // of the glasses to its real position - rotate and translate to the left... 
@@ -133,6 +137,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     try {
       viewer = (Viewer) Class.forName(delegated).newInstance();
     } catch (Exception e) {
+    	e.printStackTrace();
       throw new Error("Viewer creation failed!");
     }
 //    try {
@@ -197,6 +202,13 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
 
   public void render() {
     if (!hasSceneRoot || !hasCamPath) return;
+    if (cylProg == null) {
+    	SceneGraphComponent r = getSceneRoot();
+    	if (r!=null && r.getAppearance() != null && GlslProgram.hasGlslProgram(r.getAppearance(), "polygonShader")) {
+    		cylProg=new GlslProgram(r.getAppearance(), "polygonShader");
+    		System.out.println("FOUND PROG : HTV");
+    	}
+    }
     setHeadMatrix(headComponent.getTransformation().getMatrix(tmpHead));
     viewer.render();
   }
@@ -259,6 +271,10 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
 
   public void setSceneRoot(SceneGraphComponent r) {
 	hasSceneRoot = !(r == null);
+	if (r!=null && r.getAppearance() != null && GlslProgram.hasGlslProgram(r.getAppearance(), "polygonShader")) {
+		cylProg=new GlslProgram(r.getAppearance(), "polygonShader");
+	}
+	cylProg=null;
     viewer.setSceneRoot(r);
   }
 
@@ -275,6 +291,11 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
   Matrix world2cam = new Matrix();
 
   private void setHeadMatrix(double[] head) {
+	  
+	  // this sets the translation in the camera path; and sets the
+	  // orientation matrix for the camera (for detection of eye positions)
+	  // and the cameras viewport.
+	  
     headMatrix.assignFrom(head);
     headTranslation.setTranslation(headMatrix.getTranslation());
 
@@ -290,6 +311,15 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     portalMatrix.assignFrom(portalPath.getMatrix(tmp1));
     world2cam.assignFrom(viewer.getCameraPath().getInverseMatrix(tmp2));
     PortalCoordinateSystem.setPORTALViewport(world2cam, portalMatrix, cam);
+    
+    if (cylProg != null) {
+    	Rectangle2D cv = cam.getViewPort();
+    	//System.out.println("setting viewport: "+cv);
+    	cylProg.setUniform("cv", new double[]{cv.getMinX(), cv.getMaxX(), cv.getMinY(), cv.getMaxY()});
+    	cylProg.setUniform("d", cam.getFocus());
+    	cylProg.setUniform("near", cam.getNear());
+    	cylProg.setUniform("far", cam.getFar());
+    }
   }
 
   Statement waitStatement;

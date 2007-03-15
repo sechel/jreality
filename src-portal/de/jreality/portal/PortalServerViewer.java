@@ -76,6 +76,7 @@ public class PortalServerViewer implements Viewer {
   
   public PortalServerViewer() throws IOException {
     this(de.jreality.jogl.Viewer.class);
+    //this(CylindricalPerspectiveViewer.class);
   }
   
 	public PortalServerViewer(Class viewerClass) throws IOException {	
