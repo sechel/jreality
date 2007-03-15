@@ -80,7 +80,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	SceneGraphPath cameraPath;
 	SceneGraphComponent cameraNode;
 	public GLCanvas canvas;
-	JOGLRenderer renderer;
+	protected JOGLRenderer renderer;
 	int signature;
 	boolean isFlipped = false;
 	static GLContext firstOne = null;		// for now, all display lists shared with this one

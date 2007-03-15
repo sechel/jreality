@@ -609,7 +609,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		else return new Color(col[0], col[1], col[2], col[3]);
 	}
 
-	private void setupRightEye(int width, int height) {
+	protected void setupRightEye(int width, int height) {
 		int which = getStereoType();
 		switch(which)	{
 		case de.jreality.jogl.Viewer.CROSS_EYED_STEREO:
@@ -639,7 +639,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		whichEye=CameraUtility.RIGHT_EYE;
 	}
 
-	private void setupLeftEye(int width, int height) {
+	protected void setupLeftEye(int width, int height) {
 		int which = getStereoType();
 		switch(which)	{
 		case de.jreality.jogl.Viewer.CROSS_EYED_STEREO:
