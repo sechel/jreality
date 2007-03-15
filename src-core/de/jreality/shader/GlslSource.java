@@ -41,6 +41,7 @@
 package de.jreality.shader;
 
 import java.io.IOException;
+import java.io.ObjectStreamException;
 import java.io.Reader;
 import java.io.Serializable;
 import java.util.Collection;
@@ -66,10 +67,10 @@ public class GlslSource implements Serializable {
   private String[] vertexProgs;
   private String[] fragmentProgs;
   
-  private final HashMap<String, UniformParameter> uniforms = new HashMap<String, UniformParameter>();
-  private final HashMap<String, AttributeParameter> attribs = new HashMap<String, AttributeParameter>();
-  private final Collection<UniformParameter> UNIFORMS = Collections.unmodifiableCollection(uniforms.values());
-  private final Collection<AttributeParameter> ATTRIBUTES = Collections.unmodifiableCollection(attribs.values());
+  private transient final HashMap<String, UniformParameter> uniforms = new HashMap<String, UniformParameter>();
+  private transient final HashMap<String, AttributeParameter> attribs = new HashMap<String, AttributeParameter>();
+  private transient final Collection<UniformParameter> UNIFORMS = Collections.unmodifiableCollection(uniforms.values());
+  private transient final Collection<AttributeParameter> ATTRIBUTES = Collections.unmodifiableCollection(attribs.values());
   
   private static final Pattern uniformPattern = Pattern.compile(
     "^[\\w]*uniform[\\s]+([\\w]+)[\\s]+([\\w,\t ]+)[\\s]*\\[?[\\s]*([0-9]*)[\\s]*\\]?[\\s;]+", Pattern.MULTILINE
@@ -268,6 +269,14 @@ public class GlslSource implements Serializable {
 		// TODO Auto-generated method stub
 		return stringRep;
 	}
+  }
+  
+  private void readObject(java.io.ObjectInputStream stream) throws IOException, ClassNotFoundException {
+	 stream.defaultReadObject();
+  }
+  
+  protected Object readResolve() throws ObjectStreamException {
+	  return new GlslSource(vertexProgs, fragmentProgs);
   }
   
   public static void main(String[] args) throws Exception {

@@ -58,10 +58,15 @@ public class GlslProgram {
   private final String pre;
   
   public static boolean hasGlslProgram(EffectiveAppearance eap, String prefix) {
-    Object prog = eap.getAttribute(prefix+"::glsl-source", EMPTY, Object.class);
-    return !(prog == EMPTY);
-  }
-  
+	    Object prog = eap.getAttribute(prefix+"::glsl-source", EMPTY, Object.class);
+	    return (prog != EMPTY);
+	  }
+	  
+  public static boolean hasGlslProgram(Appearance eap, String prefix) {
+	    Object prog = eap.getAttribute(prefix+"::glsl-source");
+	    return (prog instanceof GlslSource);
+	  }
+	  
   public GlslProgram(Appearance app, String prefix, Input vertexProgram, Input fragmentProgram) throws IOException {
 		 this(app, prefix,   new GlslSource(vertexProgram, fragmentProgram));
   }
@@ -71,7 +76,7 @@ public class GlslProgram {
 	    this.app = app;
 	    this.eApp = EffectiveAppearance.create().create(app);
 	    pre = prefix+"::glsl-";
-	    app.setAttribute(pre+"source", source);	  
+	    app.setAttribute(pre+"source", source);
   }
  
   public GlslProgram(Appearance app, String prefix, String vertexProgram, String fragmentProgram) {
@@ -99,6 +104,14 @@ public class GlslProgram {
     source = (GlslSource) eap.getAttribute(pre+"source", EMPTY, Object.class);
   }
   
+  public GlslProgram(Appearance app, String prefix) {
+	  	this.app = app;
+	    this.eApp = EffectiveAppearance.create().create(app);
+	    pre = prefix+"::"+"glsl-";
+	    if (!hasGlslProgram(app, prefix)) throw new IllegalStateException("no program!");
+	    source = (GlslSource) app.getAttribute(pre+"source");
+  }
+
   private void checkWrite() {
     if (app == null) throw new IllegalStateException("not writable!");
   }
