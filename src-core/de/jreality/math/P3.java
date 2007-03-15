@@ -1039,4 +1039,12 @@ public class P3 {
 		return dst;
 	}
 
+	public static double pluckerInnerProduct(double[] l0, double[] l1) {
+		double sum = 0;
+		for (int i = 0; i<6; ++i)	{
+			sum += l0[i] * l1[5-i];
+		}
+		return sum;
+	}
+
 }
