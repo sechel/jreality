@@ -1,0 +1,3 @@
+#!/bin/sh
+execute -clr killall java 
+execute -clr killall -9 java 
