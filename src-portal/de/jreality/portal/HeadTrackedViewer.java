@@ -89,6 +89,8 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
   private SceneGraphComponent headComponent;
   SceneGraphPath portalPath;
   SceneGraphPath cameraPath;
+  
+  CylindricalPerspectiveViewer cv = null;
 
   Camera cam;
 private GlslProgram cylProg;
@@ -140,6 +142,7 @@ private GlslProgram cylProg;
     	e.printStackTrace();
       throw new Error("Viewer creation failed!");
     }
+    if (viewer instanceof CylindricalPerspectiveViewer) cv = (CylindricalPerspectiveViewer) viewer;
 //    try {
 //      Statement configStatement = new Statement(viewer, "setAutoSwapMode", new Object[]{Boolean.FALSE});
 //      configStatement.execute();
@@ -312,14 +315,8 @@ private GlslProgram cylProg;
     world2cam.assignFrom(viewer.getCameraPath().getInverseMatrix(tmp2));
     PortalCoordinateSystem.setPORTALViewport(world2cam, portalMatrix, cam);
     
-    if (cylProg != null) {
-    	Rectangle2D cv = cam.getViewPort();
-    	//System.out.println("setting viewport: "+cv);
-    	cylProg.setUniform("cv", new double[]{cv.getMinX(), cv.getMaxX(), cv.getMinY(), cv.getMaxY()});
-    	cylProg.setUniform("d", cam.getFocus());
-    	cylProg.setUniform("near", cam.getNear());
-    	cylProg.setUniform("far", cam.getFar());
-    }
+    if (cv != null) cv.setParameters(cam);
+    
   }
 
   Statement waitStatement;

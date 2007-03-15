@@ -12,6 +12,7 @@ uniform float d; // distance to the screen plane
 uniform float near;
 uniform float far;
 uniform float eye;
+uniform float eyeSep;
 
 const float PI2 = 1.5707963267948966;
 
@@ -123,13 +124,17 @@ void flight(in vec3 normal, in vec3 ecPosition3, in vec3 eye, float alphaFade, f
 
     directionalLight(1, normal, eye, ecPosition3);
 
+    directionalLight(2, normal, eye, ecPosition3);
+
+    directionalLight(3, normal, eye, ecPosition3);
+
 	vec4 dc = vec4(0., 0., 0., 1.);
 	if (theta>0.) dc.x= theta/2./PI2;
 	else dc.y=-theta/2./PI2;
 
     color = gl_FrontLightModelProduct.sceneColor +
       Ambient  * gl_FrontMaterial.ambient +
-      Diffuse  * dc; //gl_FrontMaterial.diffuse;
+      Diffuse  * gl_FrontMaterial.diffuse;
     color += Specular * gl_FrontMaterial.specular;
 
 	//color = dc;
@@ -153,13 +158,17 @@ void blight(in vec3 normal, in vec3 ecPosition3, in vec3 eye, float alphaFade, f
 
     directionalLight(1, normal, eye, ecPosition3);
 
+    directionalLight(2, normal, eye, ecPosition3);
+
+    directionalLight(3, normal, eye, ecPosition3);
+
 	vec4 dc = vec4(0., 0., 0., 1.);
 	if (theta>0.) dc.x= theta/2./PI2;
 	else dc.y=-theta/2./PI2;
 
     color = gl_BackLightModelProduct.sceneColor +
       Ambient  * gl_BackMaterial.ambient +
-      Diffuse  * dc; //gl_BackMaterial.diffuse;
+      Diffuse  * gl_BackMaterial.diffuse;
     color += Specular * gl_BackMaterial.specular;
 
 	//color = dc;
@@ -259,7 +268,7 @@ void main (void)
     
     p /= p.w;
 
-	float a = 0.035; // half eye separation, 7 cm
+	float a = eyeSep/2.; // half eye separation
 
 	// the point in eye coords (projected in the y=0-plane)
 	vec3 pp = p.xyz;
@@ -273,8 +282,8 @@ void main (void)
     float thetaR = beta-alpha;
   
 // camera on antipodal points of eye circle:
-//	thetaL = -PI2-beta;
-//	thetaR = PI2+beta;
+	thetaR = -PI2-beta;
+	thetaL = PI2+beta;
 
     float theta = (eye == 0.) ? thetaL : thetaR;
     
