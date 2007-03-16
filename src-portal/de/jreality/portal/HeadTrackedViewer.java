@@ -45,7 +45,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.Statement;
 import java.util.List;
@@ -56,15 +55,12 @@ import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
-
-import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
-import de.jreality.shader.GlslProgram;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.LoggingSystem;
@@ -93,7 +89,6 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
   CylindricalPerspectiveViewer cv = null;
 
   Camera cam;
-private GlslProgram cylProg;
 
   // this field moves the sensor from the middle
   // of the glasses to its real position - rotate and translate to the left... 
@@ -142,7 +137,6 @@ private GlslProgram cylProg;
     	e.printStackTrace();
       throw new Error("Viewer creation failed!");
     }
-    if (viewer instanceof CylindricalPerspectiveViewer) cv = (CylindricalPerspectiveViewer) viewer;
 //    try {
 //      Statement configStatement = new Statement(viewer, "setAutoSwapMode", new Object[]{Boolean.FALSE});
 //      configStatement.execute();
@@ -173,10 +167,16 @@ private GlslProgram cylProg;
     // set camera orientation to value from config file...
     double[] rot = config.getDoubleArray("camera.orientation");
     MatrixBuilder mb = MatrixBuilder.euclidean();
-    if (rot != null)  mb.rotate(rot[0] * ((Math.PI * 2.0) / 360.), new double[] { rot[1], rot[2], rot[3] });
+    double screenRotation = 0;
+    if (rot != null) {
+    	screenRotation = rot[0] * ((Math.PI * 2.0) / 360.);
+		mb.rotate(screenRotation, new double[] { rot[1], rot[2], rot[3] });
+	}
     mb.assignTo(cameraOrientationNode);
-
     cameraTranslationNode.addChild(cameraOrientationNode);
+    if (viewer instanceof CylindricalPerspectiveViewer) {
+    	cv = (CylindricalPerspectiveViewer) viewer;
+    }
   }
 
   public SceneGraphComponent getAuxiliaryRoot() {
@@ -205,13 +205,6 @@ private GlslProgram cylProg;
 
   public void render() {
     if (!hasSceneRoot || !hasCamPath) return;
-    if (cylProg == null) {
-    	SceneGraphComponent r = getSceneRoot();
-    	if (r!=null && r.getAppearance() != null && GlslProgram.hasGlslProgram(r.getAppearance(), "polygonShader")) {
-    		cylProg=new GlslProgram(r.getAppearance(), "polygonShader");
-    		System.out.println("FOUND PROG : HTV");
-    	}
-    }
     setHeadMatrix(headComponent.getTransformation().getMatrix(tmpHead));
     viewer.render();
   }
@@ -274,10 +267,6 @@ private GlslProgram cylProg;
 
   public void setSceneRoot(SceneGraphComponent r) {
 	hasSceneRoot = !(r == null);
-	if (r!=null && r.getAppearance() != null && GlslProgram.hasGlslProgram(r.getAppearance(), "polygonShader")) {
-		cylProg=new GlslProgram(r.getAppearance(), "polygonShader");
-	}
-	cylProg=null;
     viewer.setSceneRoot(r);
   }
 

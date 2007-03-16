@@ -407,7 +407,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		return hits;
 	}
 
-	private void myglViewport(int lx, int ly, int rx, int ry)	{
+	protected void myglViewport(int lx, int ly, int rx, int ry)	{
 		globalGL.glViewport(lx, ly, rx, ry);
 		currentViewport[0] = lx;
 		currentViewport[1] = ly;

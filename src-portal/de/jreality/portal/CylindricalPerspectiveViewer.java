@@ -29,6 +29,7 @@ public class CylindricalPerspectiveViewer extends Viewer {
 			}
 			@Override
 			protected void setupLeftEye(int width, int height) {
+				myglViewport(0, 0, width, height);
 				globalGL.glDrawBuffer(GL.GL_BACK_LEFT);
 				renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 				if (cylProg != null) cylProg.setUniform("eye", 0.);
@@ -37,6 +38,7 @@ public class CylindricalPerspectiveViewer extends Viewer {
 			}
 			@Override
 			protected void setupRightEye(int width, int height) {
+				myglViewport(0,0, width, height);
 				globalGL.glDrawBuffer(GL.GL_BACK_RIGHT);
 				renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 				if (cylProg != null) cylProg.setUniform("eye", 1.);
@@ -78,7 +80,7 @@ public class CylindricalPerspectiveViewer extends Viewer {
 	    if (cylProg != null) {
 	    	Rectangle2D cv = cam.getViewPort();
 	    	//System.out.println("setting viewport: "+cv);
-	    	//cylProg.setUniform("cv", new double[]{cv.getMinX(), cv.getMaxX(), cv.getMinY(), cv.getMaxY()});
+	    	cylProg.setUniform("cv", new double[]{cv.getMinX(), cv.getMaxX(), cv.getMinY(), cv.getMaxY()});
 	    	cylProg.setUniform("d", cam.getFocus());
 	    	cylProg.setUniform("eyeSep", cam.getEyeSeparation());
 	    	cylProg.setUniform("near", cam.getNear());
