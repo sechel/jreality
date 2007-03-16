@@ -78,6 +78,7 @@ import javax.swing.KeyStroke;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Rn;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -86,6 +87,7 @@ import de.jreality.scene.PointLight;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.pick.PickResult;
@@ -329,6 +331,15 @@ public class ViewerVR {
 	public void setTerrain(final SceneGraphComponent c) {
 		while (terrainNode.getChildComponentCount() > 0) terrainNode.removeChild(terrainNode.getChildComponent(0));
 		if (c==null) return;
+		
+		Rectangle3D bounds = GeometryUtility.calculateBoundingBox(c);
+		if(Math.min(Math.min(bounds.getExtent()[0],bounds.getExtent()[1]),bounds.getExtent()[2]) /
+				Math.max(Math.max(bounds.getExtent()[0],bounds.getExtent()[1]),bounds.getExtent()[2])
+				>0.5){
+			setTerrainWithCenter(c);
+			return;
+		}			
+		
 		Scene.executeWriter(terrainNode, new Runnable() {
 			public void run() {
 				//while (terrainNode.getChildComponentCount() > 0) terrainNode.removeChild(terrainNode.getChildComponent(0));
@@ -351,9 +362,6 @@ public class ViewerVR {
 						picks = ps.computePick(translation, new double[]{0,1,0,0});
 					}
 					final double offset=picks.isEmpty() ? bounds.getMinY() : picks.get(0).getWorldCoordinates()[1];
-//					System.out.println("offset="+offset);
-//					System.out.println("min-y="+bounds.getMinY());
-//					System.out.println("scale="+scale);
 
 					translation[1] = -terrainScale * offset;
 					translation[0] *= -terrainScale;
@@ -380,6 +388,57 @@ public class ViewerVR {
 			if (!picks.isEmpty()) {
 				setAvatarHeight(picks.get(0).getWorldCoordinates()[1]);
 			}
+		}
+		for (PluginVR plugin : plugins) plugin.terrainChanged();
+	}
+	
+	public void setTerrainWithCenter(final SceneGraphComponent c) {
+		while (terrainNode.getChildComponentCount() > 0) terrainNode.removeChild(terrainNode.getChildComponent(0));
+		if (c==null) return;		
+		Scene.executeWriter(terrainNode, new Runnable() {
+			public void run() {
+				MatrixBuilder.euclidean().assignTo(terrainNode);
+				terrainNode.addChild(c);
+				Rectangle3D bounds = GeometryUtility.calculateBoundingBox(terrainNode);
+				// scale
+				double[] extent = bounds.getExtent();
+				double maxExtent = Math.max(extent[0], extent[2]);
+				if (maxExtent != 0) {
+					terrainScale=1;
+					double[] translation = bounds.getCenter();
+					// determine offset in y-direction (up/down)
+					AABBPickSystem ps = new AABBPickSystem();
+					ps.setSceneRoot(terrainNode);
+					List<PickResult> picks = ps.computePick(translation, new double[]{0,bounds.getMaxY(),0,1});
+					double sign=1;
+					if (picks.isEmpty()) {
+						picks = ps.computePick(translation, new double[]{0,bounds.getMinY(),0,1});
+						sign=-1;
+					}
+					final double offset=picks.isEmpty() ? bounds.getMaxY() : picks.get(0).getWorldCoordinates()[1];
+					translation[1] = -terrainScale * offset;
+					translation[0] *= -terrainScale;
+					translation[2] *= -terrainScale;
+					
+					MatrixBuilder mb = MatrixBuilder.euclidean().scale(1,sign,1).translate(
+							translation).scale(terrainScale);
+					if (terrainNode.getTransformation() != null)
+						mb.times(terrainNode.getTransformation().getMatrix());
+					mb.assignTo(terrainNode);	
+				}
+			}
+		});
+		if (getShipNavigationTool().getGravity() != 0) {
+			// move the terrain under avatar
+			Matrix avatarTrans = new Matrix(avatarNode.getTransformation());
+			Matrix terrainTrans = new Matrix(terrainNode.getTransformation());
+			
+			terrainTrans.multiplyOnLeft(avatarTrans);				
+			terrainNode.setTransformation(new Transformation(terrainTrans.getArray()));	
+			
+			Rectangle3D bounds = GeometryUtility.calculateBoundingBox(terrainNode);	
+			shipNavigationTool.setCenter(true);
+			shipNavigationTool.setCenter(bounds.getCenter());
 		}
 		for (PluginVR plugin : plugins) plugin.terrainChanged();
 	}
