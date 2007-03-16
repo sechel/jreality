@@ -322,23 +322,16 @@ void main (void)
 		
 		gl_Position = proj*ecPosition;
 	} else { // noe working...
-		float c1 = (far+c.z)/far;
-		float c2 = -1./(far*near);
-		float c3 = (far*near+c.z*near-c.z)/(far*near);
-			
-		mat4 correction = mat4(	c1, 0., 0., 0.,
-								0., c1, 0., 0.,
-								c2*c.x, c2*c.y, 1., 0.,
-								-c3*c.x, -c3*c.y, -c.z, 1.);
-								
+		float c1 = (d+c.z)/d;
+		float c2 = -1./(d*near);
+		float c3 = -(d*near+c.z*near-c.z)/(d*near);
+
+		vec4 P = vec4(	c1*ecPosition.x + c2*c.x*ecPosition.z +c3*c.x,
+						c1*ecPosition.y + c2*c.y*ecPosition.z +c3*c.y,
+						ecPosition.z - c.z,
+						1.);
 		
-		vec4 P = correction*ecPosition;
-		
-		// test:
-		mat4 proj = makePerspectiveProjectionMatrix(cv, vec4(0., 0., 0., 1.));
-		
-		//gl_Position = gl_ProjectionMatrix*P;
-		gl_Position = proj*P;
+		gl_Position = gl_ProjectionMatrix*P;
 	}
 }
 
