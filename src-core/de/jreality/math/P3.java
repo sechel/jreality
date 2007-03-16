@@ -243,50 +243,6 @@ public class P3 {
 	}
 
 
-	/**
-	 * Calculate the intersection point of the line determined by <i>p1</i> and <i>p2</i> with <i> plane</i>.
-	 * @param point
-	 * @param p1
-	 * @param p2
-	 * @param plane
-	 * @return The intersection point
-	 */public static double[] lineIntersectPlane(double[] dst, double[] p1, double[] p2, double[] plane)	{
-		if (plane.length != 4)	{
-			throw new IllegalArgumentException("lineIntersectPlane: plane has invalid dimension");
-		}
-		double[] point1 , point2;
-		if (dst == null || dst.length != 4)	dst = new double[4];
-		if (p1.length == 3) 	{
-			point1 = new double[4];
-			System.arraycopy(p1, 0, point1, 0, 3);
-			point1[3] = 1.0;
-		} else point1 = p1;
-		if (p2.length == 3) 	{
-			point2 = new double[4];
-			System.arraycopy(p2, 0, point2, 0, 3);
-			point2[3] = 1.0;
-		} else point2 = p2;
-		double k1 = Rn.innerProduct(point1, plane);
-		double k2 = Rn.innerProduct(point2, plane);
-		// both points lie in the plane!
-		if (k1 == 0.0 && k2 == 0.0)	{
-//			LoggingSystem.getLogger(P3.class).log(Level.WARNING,"lineIntersectPlane: Line lies in plane");
-			System.arraycopy(p1, 0, dst, 0, Math.min(p1.length,dst.length));
-		} else {
-			double[] tmp = new double[4];
-			Rn.linearCombination(tmp, k2, point1, -k1, point2);
-			Pn.dehomogenize(dst, tmp);
-		}
-//		LoggingSystem.getLogger(P3.class).log(Level.FINER,"k1 is "+k1+" and k2 is "+k2);
-//		LoggingSystem.getLogger(P3.class).log(Level.FINER,"p1 is "+Rn.toString(p1)+" and p2 is "+Rn.toString(p2));
-//		LoggingSystem.getLogger(P3.class).log(Level.FINER,"result is "+Rn.toString(dst));
-		return dst;
-	}
-
-	public static double[] lineJoinPoint (double[] plane, double[] p1, double[] p2, double[] point)	{
-		return lineIntersectPlane(plane, p1, p2, point);
-	}
-
 
 	/**
 	 * Generate a glide reflection in the plane through the origin whose normal vector is given by vec
@@ -915,16 +871,6 @@ public class P3 {
 		double[] plane;
 		if (planeIn == null) 	plane = new double[4];
 		else					plane = planeIn;
-//		double[] mat = new double[16];
-//		mat[3] = mat[7] = mat[11] = 1.0;
-//		System.arraycopy(p1, 0, mat, 0, p1.length);
-//		System.arraycopy(p2, 0, mat, 4, p2.length);
-//		System.arraycopy(p3, 0, mat, 8, p3.length);
-//		for (int i =0; i<4; ++i)	{
-//			int scale = (i%2 == 0) ? 1 : -1;
-//			plane[i] = scale * Rn.determinant(Rn.submatrix(mat, 3, i));
-//		} 
-		//dehomogenize(plane, plane);
 		if (p1.length == 3 || p2.length == 3 || p3.length == 3)	{
 			plane[0] = p1[1]*(p2[2]-p3[2]) - p1[2]*(p2[1]-p3[1]) + (p2[1]*p3[2]-p2[2]*p3[1]);
 			plane[1] = p1[0]*(p2[2]-p3[2]) - p1[2]*(p2[0]-p3[0]) + (p2[0]*p3[2]-p2[2]*p3[0]);
@@ -942,27 +888,57 @@ public class P3 {
 		return plane;
 	}
 	
-	/**
-	 * Find the intersection point of <i>plane</i> with the line spanned by <i>p1</i> and <i>p2</i>.
-	 * The result can be invalid if the inputs are not linearly independent.
-	 * @param point
-	 * @param plane
-	 * @param p1
-	 * @param p2
-	 * @return
-	 */
-	 public static double[] planeIntersectLine(double[] point, double[] plane, double[] p1, double[] p2)	{
-		if (point == null) point = new double[4];
-		double s1 = -Rn.innerProduct(plane, p1);
-		double s2 = Rn.innerProduct(plane, p2);
-		Rn.linearCombination(point, s2, p1, s1, p2);
-		return point;
-	}
+	 
+		/**
+		 * Calculate the intersection point of the line determined by <i>p1</i> and <i>p2</i> with <i> plane</i>.
+		 * @param point
+		 * @param p1
+		 * @param p2
+		 * @param plane
+		 * @return The intersection point
+		 */
+	 public static double[] lineIntersectPlane(double[] dst, double[] p1, double[] p2, double[] plane)	{
+			if (plane.length != 4)	{
+				throw new IllegalArgumentException("lineIntersectPlane: plane has invalid dimension");
+			}
+			double[] point1 , point2;
+			if (dst == null || dst.length != 4)	dst = new double[4];
+			if (p1.length == 3)  point1 = Pn.homogenize(null, p1);
+			else point1 = p1;
+			if (p2.length == 3)  point2 = Pn.homogenize(null, p2);
+			else point2 = p2;
+			double k1 = Rn.innerProduct(point1, plane);
+			double k2 = Rn.innerProduct(point2, plane);
+			// both points lie in the plane!
+			if (k1 == 0.0 && k2 == 0.0)	{
+//				LoggingSystem.getLogger(P3.class).log(Level.WARNING,"lineIntersectPlane: Line lies in plane");
+				System.arraycopy(p1, 0, dst, 0, Math.min(p1.length,dst.length));
+			} else {
+				double[] tmp = new double[4];
+				Rn.linearCombination(tmp, k2, point1, -k1, point2);
+				Pn.dehomogenize(dst, tmp);
+			}
+//			LoggingSystem.getLogger(P3.class).log(Level.FINER,"k1 is "+k1+" and k2 is "+k2);
+//			LoggingSystem.getLogger(P3.class).log(Level.FINER,"p1 is "+Rn.toString(p1)+" and p2 is "+Rn.toString(p2));
+//			LoggingSystem.getLogger(P3.class).log(Level.FINER,"result is "+Rn.toString(dst));
+			return dst;
+		}
 
-	 public static double[] planeIntersectLine(double[] point, double[] plane, double[] pluckerLine)	{
-		return Rn.matrixTimesVector(point, pluckerToMatrix(null, pluckerLine), plane); 
+
+	 public static double[] lineIntersectPlane(double[] point,double[] pluckerLine, double[] plane )	{
+		return Rn.matrixTimesVector(point, 
+				lineToSkewMatrix(null, dualizeLine(null, pluckerLine)), 
+				plane); 
 	 }
-	 /**
+
+	public static double[] lineJoinPoint (double[] plane, double[] p1, double[] p2, double[] point)	{
+			return lineIntersectPlane(plane, p1, p2, point);
+		}
+
+	 public static double[] lineJoinPoint(double[] dst, double[] pluckerLine, double[] point)	{
+			return Rn.matrixTimesVector(dst, lineToSkewMatrix(null, pluckerLine), point); 
+		 }
+/**
 	  * Calculate Pluecker coordinates for the line spanned by <i>p0</i> and <i>p1</i>.
 	  * These are basically the six 2x2 minors of the 2x4 matrix formed by the two points.
 	  * @param dst
@@ -970,7 +946,7 @@ public class P3 {
 	  * @param p1
 	  * @return
 	  */
-	 public static double[] pluckerCoordinates(double[] dst, double[] p0, double[] p1)	{
+	 public static double[] lineFromPoints(double[] dst, double[] p0, double[] p1)	{
 		if (p0.length != 4 || p1.length != 4) {
 			throw new IllegalArgumentException("Input points must be homogeneous vectors");
 		}
@@ -986,6 +962,24 @@ public class P3 {
 		return coords;
 	}
 
+	 public static double[] lineFromPlanes(double[] dst, double[] plane0, double[] plane1)	{
+		 dst = lineFromPoints(dst, plane0, plane1);
+		 return dualizeLine(dst, dst);
+	 }
+	 public static double[] lineIntersectLine(double[] dst, double[] line0, double[] line1) {
+		 if (dst == null) dst = new double[4];
+		 if (Math.abs(pluckerInnerProduct(line0, line1)) > 10E-8) 
+			 throw new IllegalArgumentException("These two lines do not intersect");
+		 double[] mm = Rn.times(null,
+				 lineToSkewMatrix(null, dualizeLine(null, line0)),
+				 lineToSkewMatrix(null, line1));
+		 // every column of mm should be the same point, the intersection point of the two lines
+		 dst[0] = mm[0];
+		 dst[1] = mm[4];
+		 dst[2] = mm[8];
+		 dst[3] = mm[12];
+		 return dst;
+	 }
 	/**
 	 * Plucker line coordinates can be arranged in a 4x4 skew symmetric matrix <i>M</i> such
 	 * that <i>M</i> is the polarizing operator: if the original line was produced by two points,
@@ -996,7 +990,7 @@ public class P3 {
 	 * @param pl
 	 * @return
 	 */
-	 public static double[] pluckerToMatrix(double[] m, double[] pl) {
+	 public static double[] lineToSkewMatrix(double[] m, double[] pl) {
 		if (m == null) m = new double[16];
 		m[0] = m[5] = m[10] = m[15] = 0.0;
 		m[4] = -(m[1] = pl[5]);
@@ -1029,7 +1023,7 @@ public class P3 {
 	 * @param src
 	 * @return
 	 */
-	 public static double[] polarizePlucker(double[] dst, double[] src) {
+	 public static double[] dualizeLine(double[] dst, double[] src) {
 		if (dst == null) dst = new double[6];
 		double[] tmp = null;
 		if (dst == src)  tmp = new double[6];
