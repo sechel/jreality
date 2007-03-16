@@ -3,11 +3,14 @@ package de.jreality.portal;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 
+import javax.media.opengl.GL;
+
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.Viewer;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.GlslProgram;
+import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 
 public class CylindricalPerspectiveViewer extends Viewer {
@@ -20,15 +23,24 @@ public class CylindricalPerspectiveViewer extends Viewer {
 		System.out.println("CYLINDRICAL PERSPECTIVE VIEWER");
 		renderer=new JOGLRenderer(this) {
 			@Override
+			public void display(GL gl) {
+				whichEye=CameraUtility.MIDDLE_EYE;
+				super.display(gl);
+			}
+			@Override
 			protected void setupLeftEye(int width, int height) {
-				super.setupLeftEye(width, height);
+				globalGL.glDrawBuffer(GL.GL_BACK_LEFT);
+				renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 				if (cylProg != null) cylProg.setUniform("eye", 0.);
+				else whichEye=CameraUtility.LEFT_EYE;
 				//System.out.println("\tLEFT EYE");
 			}
 			@Override
 			protected void setupRightEye(int width, int height) {
-				super.setupRightEye(width, height);
+				globalGL.glDrawBuffer(GL.GL_BACK_RIGHT);
+				renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 				if (cylProg != null) cylProg.setUniform("eye", 1.);
+				else whichEye=CameraUtility.RIGHT_EYE;
 				//System.out.println("\tRIGHT EYE");
 			}
 		};
@@ -66,7 +78,7 @@ public class CylindricalPerspectiveViewer extends Viewer {
 	    if (cylProg != null) {
 	    	Rectangle2D cv = cam.getViewPort();
 	    	//System.out.println("setting viewport: "+cv);
-	    	cylProg.setUniform("cv", new double[]{cv.getMinX(), cv.getMaxX(), cv.getMinY(), cv.getMaxY()});
+	    	//cylProg.setUniform("cv", new double[]{cv.getMinX(), cv.getMaxX(), cv.getMinY(), cv.getMaxY()});
 	    	cylProg.setUniform("d", cam.getFocus());
 	    	cylProg.setUniform("eyeSep", cam.getEyeSeparation());
 	    	cylProg.setUniform("near", cam.getNear());

@@ -135,7 +135,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	protected SceneGraphComponent theRoot, auxiliaryRoot;
 	protected JOGLPeerComponent thePeerRoot = null;
 	protected JOGLPeerComponent thePeerAuxilliaryRoot = null;
-	JOGLRenderingState renderingState;
+	protected JOGLRenderingState renderingState;
 
 	protected int width, height;		// GLDrawable.getSize() isnt' implemented for GLPBuffer!
 	protected int whichEye = CameraUtility.MIDDLE_EYE;
@@ -800,7 +800,7 @@ public class JOGLRenderer  implements AppearanceListener {
 //		
 //	}
 	// miscellaneous fields and methods
-	private int clearColorBits;
+	protected int clearColorBits;
 	private GLPbuffer offscreenPBuffer;
 	private Buffer offscreenBuffer;
 
