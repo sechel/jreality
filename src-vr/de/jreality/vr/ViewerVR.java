@@ -340,6 +340,11 @@ public class ViewerVR {
 			return;
 		}			
 		
+		shipNavigationTool.setCenter(false);
+		Matrix avatarTrans=new Matrix();
+		avatarTrans.setColumn(3, new Matrix(avatarNode.getTransformation()).getColumn(3));
+		avatarNode.setTransformation(new Transformation(avatarTrans.getArray()));
+		
 		Scene.executeWriter(terrainNode, new Runnable() {
 			public void run() {
 				//while (terrainNode.getChildComponentCount() > 0) terrainNode.removeChild(terrainNode.getChildComponent(0));
