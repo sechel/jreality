@@ -79,7 +79,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	private JFileChooser terrainTexFileChooser;
 	private File terrainTexFile;
 
-	private SceneGraphComponent nonflatTerrain;
+	private SceneGraphComponent nonflatTerrain;	
 	
 	static final SceneGraphComponent FLAT_TERRAIN;
 	static {
@@ -516,6 +516,9 @@ public class TerrainPluginVR extends AbstractPluginVR {
 			terrainNode.addChild(nonflatTerrain);
 			new Matrix().assignTo(terrainNode);
 			break;
+		case PLANET:
+			setPlanetTerrain();
+			break;
 		default:
 			if (customTerrain != null) terrainNode.addChild(customTerrain);
 		}
@@ -534,6 +537,23 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		}
 		setTerrainTextureScale(getTerrainTextureScale());
 	}
+	
+	private void setPlanetTerrain(){
+		SceneGraphComponent planetTerrain=new SceneGraphComponent();
+		planetTerrain=TerrainPlanet.createPlanet(10,150,0.1,true,true);
+		PickUtility.assignFaceAABBTrees(planetTerrain);
+		planetTerrain.accept(new SceneGraphVisitor() {
+			public void visit(SceneGraphComponent c) {
+				c.childrenWriteAccept(this, false, false, false, false, true, false);
+			}
+			public void visit(IndexedFaceSet i) {
+				GeometryUtility.calculateAndSetVertexNormals(i);		
+			}
+		});
+		terrainNode.addChild(planetTerrain);
+		new Matrix().assignTo(terrainNode);
+	}
+	
 	
 	@Override
 	public void storePreferences(Preferences prefs) {
