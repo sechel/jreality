@@ -552,6 +552,7 @@ public class ViewerVR {
 	}
 
 	public void alignContent() {
+		if (alignmentComponent == null) return;
 		final double diam=getContentSize();
 		final double offset=getContentOffset();
 		final Matrix rotation=getContentMatrix();
