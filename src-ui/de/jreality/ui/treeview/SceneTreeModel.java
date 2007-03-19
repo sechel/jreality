@@ -45,6 +45,7 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -263,11 +264,12 @@ public class SceneTreeModel extends AbstractTreeModel {
       };
       if (EventQueue.isDispatchThread()) runner.run();
       else try {
-        EventQueue.invokeAndWait(runner);
-//      EventQueue.invokeLater(runner);
-      } catch (Exception e) {
-        throw new Error(";-(");
-      }
+			EventQueue.invokeAndWait(runner);
+		} catch (InterruptedException e) {
+			throw new Error(e);
+		} catch (InvocationTargetException e) {
+			throw new Error(e);
+		}
       return ret[0];
     }
     
