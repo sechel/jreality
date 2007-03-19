@@ -319,18 +319,9 @@ void main (void)
 	if (!fast) {
 		vec4 vpn=transformViewport(c);
 		mat4 proj = makePerspectiveProjectionMatrix(vpn, c);
-		
 		gl_Position = proj*ecPosition;
-	} else { // noe working...
-		float c1 = (d+c.z)/d;
-		float c2 = -1./(d*near);
-		float c3 = -(d*near+c.z*near-c.z)/(d*near);
-
-		vec4 P = vec4(	c1*ecPosition.x + c2*c.x*ecPosition.z +c3*c.x,
-						c1*ecPosition.y + c2*c.y*ecPosition.z +c3*c.y,
-						ecPosition.z - c.z,
-						1.);
-		
+	} else {
+		vec4 P = vec4(p.x-c.x+(p.x*c.z-c.x*p.z)/d, p.y-c.y+(p.y*c.z-c.y-p.z)/d, p.z-c.z, 1.);
 		gl_Position = gl_ProjectionMatrix*P;
 	}
 }
