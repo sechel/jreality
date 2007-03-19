@@ -14,8 +14,11 @@ uniform float far;
 uniform float eye;
 uniform float eyeSep;
 uniform float screenRotation;
+uniform bool lightingEnabled;
+uniform float transparency;
 
 const float PI2 = 1.5707963267948966;
+const bool fast=true;
 
 void pointLight(in int i, in vec3 normal, in vec3 eye, in vec3 ecPosition3)
 {
@@ -110,74 +113,83 @@ void ftexgen(in vec3 normal, in vec4 ecPosition)
 
     gl_TexCoord[0] = gl_TextureMatrix[0]*gl_MultiTexCoord0;
     gl_TexCoord[1] = gl_TextureMatrix[1]*gl_MultiTexCoord1;
+    
+    // environment mapping:
+    gl_TexCoord[2] = gl_TextureMatrix[2]*vec4(reflect(ecPosition.xyz, normal), 1.);
 }
 
 void flight(in vec3 normal, in vec3 ecPosition3, in vec3 eye, float alphaFade, float theta)
 {
-    vec4 color;
+	if (lightingEnabled) {
+	    vec4 color;
 
-    // Clear the light intensity accumulators
-    Ambient  = vec4 (0.0);
-    Diffuse  = vec4 (0.0);
-    Specular = vec4 (0.0);
-
-    directionalLight(0, normal, eye, ecPosition3);
-
-    directionalLight(1, normal, eye, ecPosition3);
-
-    directionalLight(2, normal, eye, ecPosition3);
-
-    directionalLight(3, normal, eye, ecPosition3);
-
-	vec4 dc = vec4(0., 0., 0., 1.);
-	if (theta>0.) dc.x= theta/2./PI2;
-	else dc.y=-theta/2./PI2;
-
-    color = gl_FrontLightModelProduct.sceneColor +
-      Ambient  * gl_FrontMaterial.ambient +
-      Diffuse  * gl_FrontMaterial.diffuse;
-    color += Specular * gl_FrontMaterial.specular;
-
-	//color = dc;
-    
-    color = clamp( color, 0.0, 1.0 );
-    gl_FrontColor = color;
-
-    //gl_FrontColor.a *= alphaFade;
+      // Clear the light intensity accumulators
+	    Ambient  = vec4 (0.0);
+	    Diffuse  = vec4 (0.0);
+	    Specular = vec4 (0.0);
+	
+	    directionalLight(0, normal, eye, ecPosition3);
+	
+	    directionalLight(1, normal, eye, ecPosition3);
+	
+	    directionalLight(2, normal, eye, ecPosition3);
+	
+	    directionalLight(3, normal, eye, ecPosition3);
+	
+		vec4 dc = vec4(0., 0., 0., 1.);
+		if (theta>0.) dc.x= theta/2./PI2;
+		else dc.y=-theta/2./PI2;
+	
+	    color = gl_FrontLightModelProduct.sceneColor +
+	      Ambient  * gl_FrontMaterial.ambient +
+	      Diffuse  * gl_FrontMaterial.diffuse;
+	    color += Specular * gl_FrontMaterial.specular;
+	
+		//color = dc;
+	    
+	    color = clamp( color, 0.0, 1.0 );
+	    gl_FrontColor = color;
+		gl_FrontColor.a *= alphaFade;
+	} else {
+		gl_FrontColor = gl_FrontMaterial.diffuse;
+	}
 }
 
 void blight(in vec3 normal, in vec3 ecPosition3, in vec3 eye, float alphaFade, float theta)
 {
-    vec4 color;
- 
-    // Clear the light intensity accumulators
-    Ambient  = vec4 (0.0);
-    Diffuse  = vec4 (0.0);
-    Specular = vec4 (0.0);
-
-    directionalLight(0, normal, eye, ecPosition3);
-
-    directionalLight(1, normal, eye, ecPosition3);
-
-    directionalLight(2, normal, eye, ecPosition3);
-
-    directionalLight(3, normal, eye, ecPosition3);
-
-	vec4 dc = vec4(0., 0., 0., 1.);
-	if (theta>0.) dc.x= theta/2./PI2;
-	else dc.y=-theta/2./PI2;
-
-    color = gl_BackLightModelProduct.sceneColor +
-      Ambient  * gl_BackMaterial.ambient +
-      Diffuse  * gl_BackMaterial.diffuse;
-    color += Specular * gl_BackMaterial.specular;
-
-	//color = dc;
+	if (lightingEnabled) {
+	    vec4 color;
+	 
+	    // Clear the light intensity accumulators
+	    Ambient  = vec4 (0.0);
+	    Diffuse  = vec4 (0.0);
+	    Specular = vec4 (0.0);
 	
-    color = clamp( color, 0.0, 1.0 );
-    gl_BackColor = color;
-
-    //gl_BackColor.a *= alphaFade;
+	    directionalLight(0, normal, eye, ecPosition3);
+	
+	    directionalLight(1, normal, eye, ecPosition3);
+	
+	    directionalLight(2, normal, eye, ecPosition3);
+	
+	    directionalLight(3, normal, eye, ecPosition3);
+	
+		vec4 dc = vec4(0., 0., 0., 1.);
+		if (theta>0.) dc.x= theta/2./PI2;
+		else dc.y=-theta/2./PI2;
+	
+	    color = gl_BackLightModelProduct.sceneColor +
+	      Ambient  * gl_BackMaterial.ambient +
+	      Diffuse  * gl_BackMaterial.diffuse;
+	    color += Specular * gl_BackMaterial.specular;
+	
+		//color = dc;
+		
+	    color = clamp( color, 0.0, 1.0 );
+	    gl_BackColor = color;
+		gl_BackColor.a *= alphaFade;
+    } else {
+    	gl_BackColor = gl_BackMaterial.diffuse;
+    }
 }
 
 mat3 rotMat3(in vec3 axis, in float angle) {
@@ -203,20 +215,20 @@ mat3 rotMat3(in vec3 axis, in float angle) {
 }
 
 mat4 makePerspectiveProjectionMatrix(in vec4 viewport, in vec4 c)	{
-	float an = abs(near);
-	float l = viewport[0] * an;
-	float r = viewport[1] * an;
-	float b = viewport[2] * an;
-	float t = viewport[3] * an;
+    // assume near > 0!!!
+	float l = viewport[0];
+	float r = viewport[1];
+	float b = viewport[2];
+	float t = viewport[3];
 	
-	mat4 m = mat4(
-	2.*near/(r-l),
+	return mat4(
+	2./(r-l),
 	0.,
 	0.,
 	0.,
 	
 	0.,
-	2.*near/(t-b),
+	2./(t-b),
 	0.,
 	0.,
 	
@@ -229,18 +241,31 @@ mat4 makePerspectiveProjectionMatrix(in vec4 viewport, in vec4 c)	{
 	0.,
 	2.*near*far/(near-far),
 	0.);
-	
-	mat4 cc = mat4(
-	1.,	0.,	0.,	0.,
-	
-	0.,	1.,	0.,	0.,
-	
-	0.,	0.,	1.,	0.,
-	
-	-c.x, -c.y,	-c.y, 1.);
-	
-	return m*cc;
 }
+	
+mat4 makeTransformMatrix(in vec4 c)	{
+	return mat4(
+	(d+c.z)/d,
+	0.,
+	0.,
+	0.,
+	
+	0.,
+	(d+c.z)/d,
+	0.,
+	0.,
+	
+	-c.x/d,
+	-c.y/d,
+	1.,
+	0.,
+	
+	-c.x,
+	-c.y,
+	-c.z,
+	1.);
+}
+
 	
 vec4 transformViewport(in vec4 c) {
 	float fscale = 1./(d+c.z);
@@ -263,8 +288,6 @@ vec4 transformViewport(in vec4 c) {
 	
 void main (void)
 {
-
-    bool fast=false;
 
     // Eye-coordinate position of vertex, needed in various calculations
     vec4 p = gl_ModelViewMatrix * gl_Vertex;
@@ -300,7 +323,7 @@ void main (void)
     vec3  transformedNormal;
     transformedNormal = fnormal();
     
-    float alphaFade = 1.0;
+    float alphaFade = 1.0-transparency;
     
 
     // local lighting for new cam position        
@@ -309,19 +332,22 @@ void main (void)
 // lighting from untransformed camera and non-local light model
     vec3 ecPosition3 = p.xyz;
 	vec3 eye = vec3(0., 0., 1.);
-        
+
     flight(transformedNormal, ecPosition3, eye, alphaFade, theta);
-    transformedNormal = -transformedNormal;
-    blight(transformedNormal, ecPosition3, eye, alphaFade, theta);
-    gl_FogFragCoord = ffog(ecPosition.z);
     ftexgen(transformedNormal, ecPosition);
+   	transformedNormal = -transformedNormal;
+   	blight(transformedNormal, ecPosition3, eye, alphaFade, theta);
+	
+	gl_FogFragCoord = ffog(ecPosition.z);
 
 	if (!fast) {
 		vec4 vpn=transformViewport(c);
 		mat4 proj = makePerspectiveProjectionMatrix(vpn, c);
 		gl_Position = proj*ecPosition;
 	} else {
-		vec4 P = vec4(p.x-c.x+(p.x*c.z-c.x*p.z)/d, p.y-c.y+(p.y*c.z-c.y-p.z)/d, p.z-c.z, 1.);
+//	    vec4 P = makeTransformMatrix(c)*p;
+	    float c1 = (d+c.z)/d;
+	    vec4 P = vec4(c1*p.x-c.x*p.z/d-c.x, c1*p.y-c.y*p.z/d-c.y, p.z-c.z, 1.);
 		gl_Position = gl_ProjectionMatrix*P;
 	}
 }

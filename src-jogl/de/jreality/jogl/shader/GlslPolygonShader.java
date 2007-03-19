@@ -55,6 +55,7 @@ import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.jogl.JOGLSphereHelper;
 import de.jreality.jogl.pick.JOGLPickAction;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.Cylinder;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
@@ -94,31 +95,34 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	private VertexShader vertexShader;
 	private boolean smoothShading;
 	private int frontBack=DefaultPolygonShader.FRONT_AND_BACK;
+	RenderingHintsShader rhsShader=new RenderingHintsShader();
 	
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
 		super.setFromEffectiveAppearance(eap, name);
 		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);
-		try {
-			program = new GlslProgram(eap, name);
-		} catch (IllegalStateException e) {
-			System.out.println("GLSL shader without program!");
-		}
+		if (GlslProgram.hasGlslProgram(eap, name)) {
+			// dummy to write glsl values like "lightingEnabled"
+			Appearance app = new Appearance();
+			EffectiveAppearance eap2 = eap.create(app);
+			program = new GlslProgram(app, eap2, name);
+		} else program = null;
 		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "normalMap"), eap)) {
 			normalTex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "normalMap"), eap);
-		}
+		} else normalTex = null;
 		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, CommonAttributes.TEXTURE_2D), eap)) {
 			diffuseTex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, CommonAttributes.TEXTURE_2D), eap);
-		}
+		} else diffuseTex = null;
 		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, "reflectionMap"), eap)) {
 			environmentMap = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, "reflectionMap"), eap);
-		}
+		} else environmentMap = null;
 		vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);
+		rhsShader.setFromEffectiveAppearance(eap, "");
 	}
 
 	public void render(JOGLRenderingState jrs) {
+		rhsShader.render(jrs);
 		JOGLRenderer jr = jrs.getRenderer();
 		GL gl = jr.getGL();
-		
 		if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
 		else gl.glShadeModel(GL.GL_FLAT);
 		jrs.smoothShading = smoothShading;
@@ -141,7 +145,15 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			Texture2DLoaderJOGL.render(jr, environmentMap);
 			gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
 		}
-		if (program != null) GlslLoader.render(program, jr);
+		if (program != null) {
+			if (program.getSource().getUniformParameter("lightingEnabled") != null) {
+				program.setUniform("lightingEnabled", rhsShader.isLightingEnabled());
+			}
+			if (program.getSource().getUniformParameter("transparency") != null) {
+				program.setUniform("transparency", rhsShader.isTransparencyEnabled() ? vertexShader.getDiffuseColorAsFloat()[3] : 0f);
+			}
+			GlslLoader.render(program, jr);
+		}
 		Geometry g = jrs.getCurrentGeometry();
 		if (g != null)	{
 			if (g instanceof Sphere || g instanceof Cylinder)	{	

@@ -112,6 +112,17 @@ public class GlslProgram {
 	    source = (GlslSource) app.getAttribute(pre+"source");
   }
 
+  /**
+   * this makes only sense if app is the last appearance pushed on the EffectiveAppearance stack!
+   */
+  public GlslProgram(Appearance app, EffectiveAppearance eap, String prefix) {
+	    this.eApp = eap;
+	  	this.app = app;
+	    pre = prefix+"::"+"glsl-";
+	    if (!hasGlslProgram(eap, prefix)) throw new IllegalStateException("no program!");
+	    source = (GlslSource) eap.getAttribute(pre+"source", EMPTY, Object.class);
+  }
+	  
   private void checkWrite() {
     if (app == null) throw new IllegalStateException("not writable!");
   }
