@@ -92,7 +92,7 @@ public class JFakeFrame extends JFrame {
     }
     public void addNotify() {
         super.addNotify();
-        ((FakeToolKit.FakeFramePeer)getPeer()).setRepaintAction(new Runnable() {
+        ((FakeFramePeer)getPeer()).setRepaintAction(new Runnable() {
 
             public void run() {
                 fire();
@@ -108,7 +108,7 @@ public class JFakeFrame extends JFrame {
     }
     private void fire() {
       if (isMute()) return;
-        FakeToolKit.FakeFramePeer peer = (FakeToolKit.FakeFramePeer)getPeer();
+        FakeFramePeer peer = (FakeFramePeer)getPeer();
         if(peer != null) {
             bufferedImage = peer.getRootImage();
             graphics = bufferedImage.createGraphics();

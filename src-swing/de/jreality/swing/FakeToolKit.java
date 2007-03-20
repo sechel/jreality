@@ -40,16 +40,11 @@
 
 package de.jreality.swing;
 
-import java.awt.AWTEvent;
-import java.awt.AWTException;
-import java.awt.BufferCapabilities;
 import java.awt.Button;
 import java.awt.Canvas;
 import java.awt.Checkbox;
 import java.awt.CheckboxMenuItem;
 import java.awt.Choice;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -57,49 +52,38 @@ import java.awt.FileDialog;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Frame;
-import java.awt.Graphics;
-import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
 import java.awt.Image;
-import java.awt.Insets;
 import java.awt.Label;
 import java.awt.List;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
 import java.awt.Panel;
-import java.awt.Point;
 import java.awt.PopupMenu;
 import java.awt.PrintJob;
-import java.awt.Rectangle;
 import java.awt.ScrollPane;
 import java.awt.Scrollbar;
 import java.awt.TextArea;
 import java.awt.TextField;
 import java.awt.Toolkit;
 import java.awt.Window;
-import java.awt.BufferCapabilities.FlipContents;
 import java.awt.datatransfer.Clipboard;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.InvalidDnDOperationException;
 import java.awt.dnd.peer.DragSourceContextPeer;
-import java.awt.event.PaintEvent;
 import java.awt.im.InputMethodHighlight;
-import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageObserver;
 import java.awt.image.ImageProducer;
-import java.awt.image.VolatileImage;
 import java.awt.peer.ButtonPeer;
 import java.awt.peer.CanvasPeer;
 import java.awt.peer.CheckboxMenuItemPeer;
 import java.awt.peer.CheckboxPeer;
 import java.awt.peer.ChoicePeer;
-import java.awt.peer.ContainerPeer;
 import java.awt.peer.DialogPeer;
 import java.awt.peer.FileDialogPeer;
 import java.awt.peer.FontPeer;
-import java.awt.peer.FramePeer;
 import java.awt.peer.LabelPeer;
 import java.awt.peer.ListPeer;
 import java.awt.peer.MenuBarPeer;
@@ -116,18 +100,29 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
 
-class FakeToolKit extends Toolkit {
+abstract class FakeToolKit extends Toolkit {
 	
-    private static final boolean DUMP = false;
-
-    private static  FakeToolKit ftk = new FakeToolKit();
+    protected static  FakeToolKit ftk;
+    
+    static {
+    	try {
+			ftk = (FakeToolKit) Class.forName("de.jreality.swing.FakeToolKit6").newInstance();
+    	} catch (Throwable t) {
+    		try {
+				ftk = (FakeToolKit) Class.forName("de.jreality.swing.FakeToolKit5").newInstance();
+			} catch (Exception e) {
+				throw  new ExceptionInInitializerError(e);
+			}
+    	}
+    	System.out.println("created Toolkit: "+ftk);
+	}
+    
     public static Toolkit getDefaultToolkit() {
         return ftk;
     }
-    private Toolkit tk = Toolkit.getDefaultToolkit();
+    protected Toolkit tk = Toolkit.getDefaultToolkit();
     public FakeToolKit() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     public int getScreenResolution() throws HeadlessException {
@@ -241,11 +236,6 @@ class FakeToolKit extends Toolkit {
         return null;
     }
 
-    protected FramePeer createFrame(Frame target) throws HeadlessException {
-        if (DUMP) System.out.println("new Frame peer");
-        return new FakeFramePeer(target) ;
-        }
-
     protected LabelPeer createLabel(Label target) throws HeadlessException {
         // TODO Auto-generated method stub
         return null;
@@ -323,296 +313,22 @@ class FakeToolKit extends Toolkit {
         // TODO Auto-generated method stub
         return null;
     }
+    
+    /*
+	@Override
+	protected DesktopPeer createDesktopPeer(Desktop target) throws HeadlessException {
+		return null;
+	}
 
-    public class FakeFramePeer implements FramePeer {
-        private BufferedImage bi;
-        private Frame frame;
-        private Runnable repaintAction;
-        Rectangle bounds;
-        
-        FakeFramePeer(Frame f) {
-            frame = f;
-            Dimension d = f.getSize();
-            //TODO this is ugly probably it is better to not crate the image
-            // and check on existence in the getGraphics etc.
-            if(d.width==0) d.width=1;
-            if(d.height==0) d.height=1;
-            bounds = new Rectangle(d.width, d.height);
-            bi= new BufferedImage(d.width,d.height,BufferedImage.TYPE_INT_ARGB);
-        }
-        public int getState() {
-            return 0;
-        }
+	@Override
+	public boolean isModalExclusionTypeSupported(ModalExclusionType modalExclusionType) {
+		return false;
+	}
 
-        public void setState(int state) {
-        }
-
-        public void setResizable(boolean resizeable) {
-        }
-
-        public void setIconImage(Image im) {
-        }
-
-        public void setMenuBar(MenuBar mb) {
-        }
-
-        public void setMaximizedBounds(Rectangle bounds) {
-        }
-
-        public void setTitle(String title) {
-        }
-
-        public void toBack() {
-        }
-
-        public void toFront() {
-        }
-
-        public void beginLayout() {
-        }
-
-        public void beginValidate() {
-        }
-
-        public void endLayout() {
-            if (DUMP) System.err.println("JFakeFramePeer end layout");
-            frame.paint(bi.getGraphics());
-            if(repaintAction != null)
-                repaintAction.run();
-        }
-
-        public void endValidate() {
-          if (DUMP) System.err.println("JFakeFramePeer end validate");
-            frame.paint(bi.getGraphics());
-            if(repaintAction != null)
-                repaintAction.run();
-
-        }
-
-        public boolean isPaintPending() {
-            return false;
-        }
-
-        public Insets getInsets() {
-            return null;
-        }
-
-        public Insets insets() {
-            return new Insets(0,0,0,0);
-        }
-
-        public void destroyBuffers() {
-        }
-
-        public void disable() {
-        }
-
-        public void dispose() {
-        }
-
-        public void enable() {
-        }
-
-        public void hide() {
-        }
-
-        public void show() {
-        }
-
-        public void updateCursorImmediately() {
-        }
-
-        public boolean canDetermineObscurity() {
-            return false;
-        }
-
-        public boolean handlesWheelScrolling() {
-            return true;
-        }
-
-        public boolean isFocusable() {
-            return false;
-        }
-
-        public boolean isObscured() {
-            return false;
-        }
-
-        public void reshape(int x, int y, int width, int height) {
-          if (DUMP) System.err.println("JFakeFramePeer reshape");
-        }
-
-        public void setBounds(int x, int y, int width, int height) {
-          if (DUMP) System.out.println("JFakeFrame set Bounds "+x+" "+y+" "+width+" "+height);
-            bounds.setBounds(x, y, width, height);
-            if(bi.getWidth()!=width || bi.getHeight()!= height) {
-                bi =new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
-            }
-        }
-
-        public void repaint(long tm, int x, int y, int width, int height) {
-          if (DUMP) System.err.println("JFakeFramePeer repaint");
-        }
-
-        public void setEnabled(boolean b) {
-        }
-
-        public void setVisible(boolean b) {
-        }
-
-        public void handleEvent(AWTEvent e) {
-            //System.out.println("JFakeFramePeer handle event "+e);
-        }
-
-        public void createBuffers(int numBuffers, BufferCapabilities caps) throws AWTException {
-        }
-
-        public void flip(FlipContents flipAction) {
-        }
-
-        public void setBackground(Color c) {
-        }
-
-        public void setForeground(Color c) {
-        }
-
-        public boolean requestFocus(Component lightweightChild, boolean temporary, boolean focusedWindowChangeAllowed, long time) {
-            return false;
-        }
-
-        public Dimension getMinimumSize() {
-            return new Dimension(0,0);
-        }
-
-        public Dimension getPreferredSize() {
-            return new Dimension(256,256);
-        }
-
-        public Dimension minimumSize() {
-            return getMinimumSize();
-        }
-
-        public Dimension preferredSize() {
-            return getPreferredSize();
-        }
-
-        public void setFont(Font f) {
-        }
-
-        public Graphics getGraphics() {
-           // System.err.println("JFakeFramePeer getGraphics");
-            //TODO why does this work???
-            // repaint BEFORE graphics is handed away!
-            // Turns out: Does not Work on 1.5: so we "invokeLater"...
-            // gives a little performance penalty but what can we do?
-            if(repaintAction != null)
-                //repaintAction.run();
-                EventQueue.invokeLater(repaintAction);
-            return bi.createGraphics();
-        }
-
-        public void paint(Graphics g) {
-            g.drawImage(bi,0,0,null);
-        }
-
-        public void print(Graphics g) {
-            g.drawImage(bi,0,0,null);
-        }
-
-        public GraphicsConfiguration getGraphicsConfiguration() {
-            return null;
-        }
-
-        public Image getBackBuffer() {
-          if (DUMP) System.out.println("FakeFramePeer.getBackBuffer()");
-          return null;
-        }
-
-        public Image createImage(int width, int height) {
-            return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        }
-
-        public Point getLocationOnScreen() {
-            return new Point(0,0);
-        }
-
-        public Toolkit getToolkit() {
-            return FakeToolKit.getDefaultToolkit();
-        }
-
-        public void coalescePaintEvent(PaintEvent e) {
-          if (DUMP) System.err.println("JFakeFramePeer coalescePaintEvent");
-            frame.paint(bi.getGraphics());
-            if(repaintAction != null)
-                repaintAction.run();
-        }
-
-        public ColorModel getColorModel() {
-            return ColorModel.getRGBdefault();
-        }
-
-        public VolatileImage createVolatileImage(int width, int height) {
-            return null;
-        }
-
-        public FontMetrics getFontMetrics(Font font) {
-            return Toolkit.getDefaultToolkit().getFontMetrics(font);
-        }
-
-        public Image createImage(ImageProducer producer) {
-            return Toolkit.getDefaultToolkit().createImage(producer);
-        }
-
-        public int checkImage(Image img, int w, int h, ImageObserver o) {
-            return 0;
-        }
-
-        public boolean prepareImage(Image img, int w, int h, ImageObserver o) {
-            return false;
-        }
-        
-        public BufferedImage getRootImage() {
-            return bi;
-        }
-        public void setRepaintAction(Runnable r) {
-            repaintAction = r;
-        }
-
-        public void setBoundsPrivate(int x, int y, int width, int height) {
-          if (DUMP) System.out.println("FakeFramePeer.setBoundsPrivate()");
-        }
-        public void updateAlwaysOnTop() {
-        }
-        public boolean requestWindowFocus() {
-          return true;
-        }
-        public void cancelPendingPaint(int x, int y, int w, int h) {
-        }
-        public void restack() {
-        }
-        public boolean isRestackSupported() {
-          return false;
-        }
-        public void setBounds(int x, int y, int width, int height, int op) {
-          if (DUMP) System.out.println("FakeFramePeer.setBounds() op="+op);
-          setBounds(x, y, width, height);
-        }
-        public void reparent(ContainerPeer newContainer) {
-        }
-        public boolean isReparentSupported() {
-          return false;
-        }
-        public void layout() {
-        }
-        public Rectangle getBounds() {
-          return bounds;
-        }
-        public void updateFocusableWindowState() {
-          // TODO Auto-generated method stub
-          
-        }
-
-    };
-
+	@Override
+	public boolean isModalityTypeSupported(ModalityType modalityType) {
+		return false;
+	};
+	*/
     
 }

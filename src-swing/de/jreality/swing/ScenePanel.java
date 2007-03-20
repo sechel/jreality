@@ -75,6 +75,7 @@ public class ScenePanel {
 			}
 
 			public void componentShown(ComponentEvent e) {
+				update();
 				rootNode.setVisible(true);
 				frame.setMute(false);
 			}
