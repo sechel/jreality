@@ -233,7 +233,8 @@ public class Texture2DLoaderJOGL {
     GLU glu = new GLU();
     WeakHashMap<ImageData, Integer> ht = getCubeMapTableForGL(gl);
     
-    Integer texid = (Integer) ht.get(ref.getTop());
+    //hash one side of the cube map and do only render sides when hashed image data changed
+    Integer texid = (Integer) ht.get(ref.getLeft());
     int textureID;
     if (texid != null) {
       first = false;
@@ -241,7 +242,7 @@ public class Texture2DLoaderJOGL {
     } else {
       // create the texture ID for this texture 
       textureID = createTextureID(gl); 
-      ht.put(ref.getTop(), new Integer(textureID));
+      ht.put(ref.getLeft(), new Integer(textureID));
     }
     gl.glBindTexture(GL.GL_TEXTURE_CUBE_MAP, textureID); 
     
