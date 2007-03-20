@@ -94,7 +94,7 @@ public abstract class AbstractTool implements Tool {
   }
   public void deactivate(ToolContext tc) {
   }
-  public String getFullDescription() {
+  public String fullDescription() {
     StringBuffer sb = new StringBuffer();
     sb.append(getClass().getName()).append(": ").append(getDescription()).append('\n');
     sb.append(": always active=").append(activationSlots==null).append('\n');
