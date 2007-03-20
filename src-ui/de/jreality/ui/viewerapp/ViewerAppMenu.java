@@ -77,6 +77,7 @@ import de.jreality.ui.viewerapp.actions.edit.LoadReflectionMap;
 import de.jreality.ui.viewerapp.actions.edit.LoadTexture;
 import de.jreality.ui.viewerapp.actions.edit.Remove;
 import de.jreality.ui.viewerapp.actions.edit.Rename;
+import de.jreality.ui.viewerapp.actions.edit.RotateReflectionMapSides;
 import de.jreality.ui.viewerapp.actions.edit.SaveSelected;
 import de.jreality.ui.viewerapp.actions.edit.ToggleAppearance;
 import de.jreality.ui.viewerapp.actions.edit.TogglePickable;
@@ -91,6 +92,7 @@ import de.jreality.ui.viewerapp.actions.file.Quit;
 import de.jreality.ui.viewerapp.actions.file.SaveScene;
 import de.jreality.ui.viewerapp.actions.view.LoadSkyBox;
 import de.jreality.ui.viewerapp.actions.view.Maximize;
+import de.jreality.ui.viewerapp.actions.view.RotateSkyboxSides;
 import de.jreality.ui.viewerapp.actions.view.SetViewerSize;
 import de.jreality.ui.viewerapp.actions.view.SwitchBackgroundColor;
 import de.jreality.ui.viewerapp.actions.view.ToggleBeanShell;
@@ -138,7 +140,9 @@ public class ViewerAppMenu {
   public static String TOGGLE_EDGE_DRAWING = "Toggle egde drawing";
   public static String TOGGLE_FACE_DRAWING = "Toggle face drawing";
   public static String LOAD_TEXTURE = "Load texture";
-  public static String LOAD_CUBE_MAP = "Load reflection map";
+  public static String REFLECTIONMAP = "Reflection map";
+  public static String LOAD_REFLECTIONMAP = "Load reflection map";
+  public static String ROTATE_REFLECTIONMAP_SIDES = "Rotate reflection map sides";
   public static String GEOMETRY = "Geometry";
   public static String EXPORT_OBJ = "Write OBJ";
   public static String TOGGLE_PICKABLE = "Toggle pickable";
@@ -162,7 +166,9 @@ public class ViewerAppMenu {
   public static String TOGGLE_RENDER_SELECTION = "Show selection";
   public static String TOGGLE_MENU = "Hide menu bar";
   public static String SET_BACKGROUND_COLOR = "Set background color";
-  public static String LOAD_SKYBOX ="Load Skybox";
+  public static String SKYBOX ="Skybox";
+  public static String LOAD_SKYBOX ="Load skybox";
+  public static String ROTATE_SKYBOX_SIDES ="Rotate skybox sides";
   public static String TOGGLE_VIEWER_FULL_SCREEN = "Toggle full screen";
   public static String MAXIMIZE = "Maximize frame size";
   public static String RESTORE = "Restore frame size";
@@ -271,7 +277,10 @@ public class ViewerAppMenu {
     appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_FACE_DRAWING, CommonAttributes.FACE_DRAW, sm)));
     appearance.addSeparator();
     appearance.add(new JMenuItem(new LoadTexture(LOAD_TEXTURE, sm, parentComp)));
-    appearance.add(new JMenuItem(new LoadReflectionMap(LOAD_CUBE_MAP, sm, parentComp)));
+    JMenu reflectionmap = new JMenu(REFLECTIONMAP);
+    appearance.add(reflectionmap);
+    reflectionmap.add(new JMenuItem(new LoadReflectionMap(LOAD_REFLECTIONMAP, sm, parentComp)));
+    reflectionmap.add(new JMenuItem(new RotateReflectionMapSides(ROTATE_REFLECTIONMAP_SIDES, sm, parentComp)));
 
     //geometry actions
     JMenu geometry = new JMenu(new AbstractSelectionListenerAction(GEOMETRY, sm){
@@ -350,7 +359,10 @@ public class ViewerAppMenu {
     	bgColors.add(item);
     }
     viewMenu.add(bgColors);
-    viewMenu.add(new JMenuItem(new LoadSkyBox(LOAD_SKYBOX, viewerApp.getViewer().getSceneRoot(), parentComp)));
+    JMenu skybox = new JMenu(SKYBOX);
+    viewMenu.add(skybox);
+    skybox.add(new JMenuItem(new LoadSkyBox(LOAD_SKYBOX, viewerApp.getViewer().getSceneRoot(), parentComp)));
+    skybox.add(new JMenuItem(new RotateSkyboxSides(ROTATE_SKYBOX_SIDES, viewerApp.getViewer().getSceneRoot(), parentComp)));
     viewMenu.addSeparator();
     
     viewMenu.add(new JMenuItem(ToggleViewerFullScreen.sharedInstance(TOGGLE_VIEWER_FULL_SCREEN, viewerApp)));
