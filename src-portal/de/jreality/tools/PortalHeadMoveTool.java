@@ -58,20 +58,15 @@ public class PortalHeadMoveTool extends AbstractTool {
   final transient InputSlot headSlot = InputSlot.getDevice("ShipHeadTransformation");
   
   transient double[] tmp = new double[16];
-  transient Viewer viewer;
 
   public PortalHeadMoveTool() {
-    addCurrentSlot(headSlot, "the current head matrix");
+    addCurrentSlot(headSlot, "the current head matrix in PORTAL coordinates");
   }
   
   public void perform(ToolContext tc) {
-    if (viewer == null) {
-      viewer = tc.getViewer();
-    }
     SceneGraphComponent head = tc.getRootToToolComponent().getLastComponent();
     if (head.getTransformation() == null) head.setTransformation(new Transformation());
     head.getTransformation().setMatrix(tc.getTransformationMatrix(headSlot).toDoubleArray(tmp));
-    //viewer.render();
   }
 
 }

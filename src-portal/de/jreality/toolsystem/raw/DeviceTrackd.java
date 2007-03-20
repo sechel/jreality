@@ -1,13 +1,9 @@
 package de.jreality.toolsystem.raw;
 
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map.Entry;
-
-import javax.swing.Timer;
 
 import de.jreality.devicedriver.TrackdJNI;
 import de.jreality.scene.Viewer;

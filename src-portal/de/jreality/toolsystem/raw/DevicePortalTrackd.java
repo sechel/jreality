@@ -23,9 +23,6 @@ public class DevicePortalTrackd extends DeviceTrackd {
 		return deg*Math.PI/180.;
 	}
 	
-	/**
-	 * IN PROGRESS
-	 */
 	@Override
 	protected void calibrate(double[] sensorMatrix, int index) {
 		Matrix m = new Matrix(sensorMatrix);
