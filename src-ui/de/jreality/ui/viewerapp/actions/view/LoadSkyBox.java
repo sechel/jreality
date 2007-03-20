@@ -69,7 +69,7 @@ public class LoadSkyBox extends AbstractJrAction {
     super(name, frame);
     this.sceneRoot = sceneRoot;
     
-    setShortDescription("Load Skybox");
+    setShortDescription("Load skybox");
   }
 
 
