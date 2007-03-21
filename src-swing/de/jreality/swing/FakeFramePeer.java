@@ -27,6 +27,15 @@ import java.awt.image.ImageProducer;
 import java.awt.image.VolatileImage;
 import java.awt.peer.ContainerPeer;
 
+/**
+ * 
+ * There are many changes between java 5 and java 6, including many new classes not available in java 5.
+ * So it is not possible to maintain one Fake Toolkit class for both versions.
+ * Therefore, only one of the FakeToolkit5/6 and FakeFramePeer5/6 will compile depending on the used JDK.
+ * 
+ * @author Steffen Weissmann
+ *
+ */
 class FakeFramePeer {
     private static final boolean DUMP = false;
 	private BufferedImage bi;
