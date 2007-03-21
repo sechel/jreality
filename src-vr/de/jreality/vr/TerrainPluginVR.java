@@ -69,7 +69,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	private static final double DEFAULT_REFLECTION=0.2;
 	private static final boolean DEFAULT_TRANSPARENT=true;
 	private static final double DEFAULT_TRANSPARENCY=0.3;
-
+	private static final boolean DEFAULT_SPHERICAL_TERRAIN=false;
 	
 	// terrain tab
 	private JSlider terrainTexScaleSlider;
@@ -93,7 +93,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	
 	private Terrain terrain;
 
-	private JFileChooser terrainFileChooser;
+	private JPanel terrainFileChooserPanel;
 	private JPanel rotatePanel;
 	private RotateBox rotateBox = new RotateBox();
 
@@ -114,6 +114,8 @@ public class TerrainPluginVR extends AbstractPluginVR {
 
 	private CubeMap cmFaces;
 	private ImageData[] cubeMap;
+
+	private JCheckBox sphericalTerrainBox;
 
 	public TerrainPluginVR() {
 		super("terrain");
@@ -450,7 +452,9 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		String dataDir = Secure.getProperty("jreality.data");
 		if (dataDir!= null) texDir = dataDir;
 		File defaultDir = new File(texDir);
-		terrainFileChooser = new JFileChooser(!defaultDir.exists() ? view.getHomeDirectory() : defaultDir, view);
+		terrainFileChooserPanel = new JPanel(new BorderLayout());
+		sphericalTerrainBox = new JCheckBox("spherical");
+		final JFileChooser terrainFileChooser = new JFileChooser(!defaultDir.exists() ? view.getHomeDirectory() : defaultDir, view);
 		terrainFileChooser.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ev) {
 				File file = terrainFileChooser.getSelectedFile();
@@ -459,7 +463,9 @@ public class TerrainPluginVR extends AbstractPluginVR {
 							&& file != null) {
 						terrainFile = file;
 						customTerrain = Readers.read(Input.getInput(terrainFile));
-						getViewerVR().setTerrain(customTerrain);
+						PickUtility.assignFaceAABBTrees(customTerrain);
+						if (!sphericalTerrainBox.isSelected()) getViewerVR().setTerrain(customTerrain);
+						else getViewerVR().setTerrainWithCenter(customTerrain);
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -467,6 +473,8 @@ public class TerrainPluginVR extends AbstractPluginVR {
 				getViewerVR().switchToDefaultPanel();
 			}
 		});
+		terrainFileChooserPanel.add(BorderLayout.SOUTH, sphericalTerrainBox);
+		terrainFileChooserPanel.add(BorderLayout.CENTER, terrainFileChooser);
 	}
 
 	public double getTerrainTextureScale() {
@@ -488,7 +496,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	}
 
 	protected void switchToTerrainBrowser() {
-		getViewerVR().switchToFileChooser(terrainFileChooser);
+		getViewerVR().switchToFileChooser(terrainFileChooserPanel);
 	}
 
 	protected void switchToRotateBrowser() {
@@ -507,6 +515,8 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	private void updateTerrain() {
 		// remove last terrain
 		while (terrainNode.getChildComponentCount() > 0) terrainNode.removeChild(terrainNode.getChildComponent(0));
+		// allow spherical only for custom terrain:
+		boolean spherical=false;
 		switch (terrain.getGeometryType()) {
 		case FLAT:
 			terrainNode.addChild(FLAT_TERRAIN);
@@ -516,14 +526,15 @@ public class TerrainPluginVR extends AbstractPluginVR {
 			terrainNode.addChild(nonflatTerrain);
 			new Matrix().assignTo(terrainNode);
 			break;
-		case PLANET:
-			setPlanetTerrain();
-			break;
 		default:
-			if (customTerrain != null) terrainNode.addChild(customTerrain);
+			if (customTerrain != null) {
+				spherical=sphericalTerrainBox.isSelected();
+				terrainNode.addChild(customTerrain);
+			}
 		}
 
-		getViewerVR().setTerrain(terrainNode);
+		if (spherical) getViewerVR().setTerrainWithCenter(terrainNode);
+		else getViewerVR().setTerrain(terrainNode);
 
 		if (terrain.isCustomTexture()) { 
 			try {
@@ -537,23 +548,6 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		}
 		setTerrainTextureScale(getTerrainTextureScale());
 	}
-	
-	private void setPlanetTerrain(){
-		SceneGraphComponent planetTerrain=new SceneGraphComponent();
-		planetTerrain=TerrainPlanet.createPlanet(10,150,0.1,true,true);
-		PickUtility.assignFaceAABBTrees(planetTerrain);
-		planetTerrain.accept(new SceneGraphVisitor() {
-			public void visit(SceneGraphComponent c) {
-				c.childrenWriteAccept(this, false, false, false, false, true, false);
-			}
-			public void visit(IndexedFaceSet i) {
-				GeometryUtility.calculateAndSetVertexNormals(i);		
-			}
-		});
-		terrainNode.addChild(planetTerrain);
-		new Matrix().assignTo(terrainNode);
-	}
-	
 	
 	@Override
 	public void storePreferences(Preferences prefs) {
@@ -614,6 +608,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		String terrainName = prefs.get("terrain.geometry", DEFAULT_TERRAIN);
 		if ("custom".equals(terrainName)) {
 			String fileName = prefs.get("terrain.customTerrain", null);
+			boolean center = prefs.getBoolean("terrain.customTerrainCenter", false);
 			System.out.println("terrainFile="+fileName);
 			if (fileName != null) {
 				terrainFile = new File(fileName);
@@ -621,6 +616,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 				else
 					try {
 						customTerrain = Readers.read(terrainFile);
+						PickUtility.assignFaceAABBTrees(customTerrain);
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

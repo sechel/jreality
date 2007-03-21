@@ -26,7 +26,6 @@ public class Terrain {
 	public enum GeometryType {
 		FLAT("flat"),
 		NON_FLAT("non-flat"),
-		PLANET("planet"),
 		CUSTOM("custom");
 		private String name;
 		GeometryType(String name) {
@@ -86,18 +85,7 @@ public class Terrain {
 		terrainGeometrySelection.add(button);
 		geometrySelection.add(button);
 		geometryButtons.put(GeometryType.NON_FLAT, button.getModel());
-		
-		button = new JRadioButton(GeometryType.PLANET.getName());
-		geomNameToButton.put(GeometryType.PLANET.getName(), button);
-		button.getModel().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				setGeometryType(GeometryType.PLANET);
-			}
-		});
-		terrainGeometrySelection.add(button);
-		geometrySelection.add(button);
-		geometryButtons.put(GeometryType.PLANET, button.getModel());
-		
+				
 		button = new JRadioButton(GeometryType.CUSTOM.getName());
 		geomNameToButton.put(GeometryType.CUSTOM.getName(), button);
 		button.getModel().addActionListener(new ActionListener() {
