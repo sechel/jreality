@@ -3,6 +3,7 @@ package de.jreality.toolsystem.raw;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map.Entry;
 
 import de.jreality.devicedriver.TrackdJNI;
@@ -25,7 +26,7 @@ public class DeviceTrackd implements RawDevice, PollingDevice {
 
 	private static TrackdJNI trackd;
 	int numSensors;
-	private ToolEventQueue queue;
+	protected ToolEventQueue queue;
 
 	private HashMap<Integer, double[]> matrix = new HashMap<Integer, double[]>(); 
 	private HashMap<Integer, Integer> button = new HashMap<Integer, Integer>(); 
@@ -34,6 +35,8 @@ public class DeviceTrackd implements RawDevice, PollingDevice {
 	private HashMap<Integer, InputSlot> matrixSlot = new HashMap<Integer, InputSlot>(); 
 	private HashMap<Integer, InputSlot> buttonSlot = new HashMap<Integer, InputSlot>(); 
 	private HashMap<Integer, InputSlot> valuatorSlot = new HashMap<Integer, InputSlot>(); 
+	
+	private HashSet<Integer> disabledSensors = new HashSet<Integer>();
 	
 	private final float[] tmpMatrix = new float[16];
 	
@@ -101,20 +104,16 @@ public class DeviceTrackd implements RawDevice, PollingDevice {
 		this.queue=queue;
 	}
 
-	public void poll() {
+	public synchronized void poll() {
 		for (Entry<Integer, double[]> e : matrix.entrySet()) {
 			int i = e.getKey();
+			if (disabledSensors.contains(i)) continue;
 			double[] val = e.getValue();
 			InputSlot slot = matrixSlot.get(i);
 			trackd.getMatrix(tmpMatrix, i);
 			copy(tmpMatrix, val);
 			calibrate(val, i);
-			ToolEvent te = new ToolEvent(this, slot, null, new DoubleArray(val)) {
-				@Override
-				protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
-					return true;
-				}
-			};
+			ToolEvent te = new MyToolEvent(this, slot, null, new DoubleArray(val));
 			if (queue != null) queue.addEvent(te);
 			else System.out.println(te);
 		}
@@ -147,4 +146,28 @@ public class DeviceTrackd implements RawDevice, PollingDevice {
 	protected void calibrate(double[] sensorMatrix, int index) {	
 	}
 	
+	protected synchronized void disableSensor(int sensorID) {
+		disabledSensors.add(sensorID);
+	}
+
+	protected synchronized void enableSensor(int sensorID) {
+		disabledSensors.remove(sensorID);
+	}
+	
+	protected InputSlot sensorSlot(int sensorID) {
+		return matrixSlot.get(sensorID);
+	}
+	
+	static class MyToolEvent extends ToolEvent {
+		
+		private static final long serialVersionUID = -8503410127439268525L;
+
+		public MyToolEvent(Object source, InputSlot device, AxisState axis, DoubleArray trafo) {
+			super(source, device, axis, trafo);
+		}
+
+		protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
+			return true;
+		}
+	}
 }

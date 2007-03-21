@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 
 import de.jreality.scene.proxy.smrj.ClientFactory;
 import de.jreality.toolsystem.DeviceManager;
+import de.jreality.toolsystem.ToolEvent;
 import de.jreality.toolsystem.ToolEventQueue;
 import de.jreality.toolsystem.ToolEventReceiver;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
@@ -19,9 +20,17 @@ public class MasterApplication {
 	DeviceManager deviceManager;
 	ToolEventQueue eventQueue;
 	
-	public MasterApplication(ToolEventReceiver receiver) throws IOException {
+	public MasterApplication(final ToolEventReceiver receiver) throws IOException {
+		
+		
+		
 		ToolSystemConfiguration config = ToolSystemConfiguration.loadRemotePortalMasterConfiguration();
-		eventQueue = new ToolEventQueue(receiver);
+		eventQueue = new ToolEventQueue(new ToolEventReceiver() {
+			public void processToolEvent(ToolEvent event) {
+				System.out.println("Sending: "+event);
+				receiver.processToolEvent(event);
+			}
+		});
 		//eventQueue.getThread().setDaemon(true);
 		deviceManager = new DeviceManager(config, eventQueue, null);
 		eventQueue.start();
@@ -40,6 +49,6 @@ public class MasterApplication {
 		ToolEventReceiver tr = bc.getRemoteFactory().createRemoteViaStaticMethod(
 				ToolEventReceiver.class, RemoteExecutor.class,
 				"startRemote", new Class[]{Class.class, String[].class}, new Object[]{appClass, null});
-		
+		new MasterApplication(tr);
 	}
 }

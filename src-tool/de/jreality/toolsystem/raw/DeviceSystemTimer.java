@@ -52,7 +52,23 @@ import de.jreality.toolsystem.ToolEventQueue;
  **/
 public class DeviceSystemTimer implements RawDevice, PollingDevice {
 
-    private ToolEventQueue queue;
+    static class MyToolEvent extends ToolEvent {
+    	private static final long serialVersionUID = -1752817756822635827L;
+		
+    	public MyToolEvent(Object source, InputSlot device, AxisState axis) {
+			super(source, device, axis);
+		}
+			protected boolean compareAxisStates(AxisState axis1, AxisState axis2) {
+                 return true;
+             }
+             protected void replaceWith(ToolEvent replacement) {
+               this.axis = new AxisState(this.axis.intValue() + replacement.getAxisState().intValue());
+               this.trafo = replacement.getTransformation();
+               this.time = replacement.getTimeStamp();
+           }
+	}
+
+	private ToolEventQueue queue;
     
     String myDeviceName = "tick";
     
@@ -71,16 +87,7 @@ public class DeviceSystemTimer implements RawDevice, PollingDevice {
       long ct = System.currentTimeMillis();
       int delta = (int)(lastEvent == -1l ? 0 : ct - lastEvent);
       lastEvent = ct;
-      ToolEvent e = new ToolEvent(this, device, new AxisState(delta)) {
-          protected boolean compareAxisStates(AxisState axis1, AxisState axis2) {
-              return true;
-          }
-          protected void replaceWith(ToolEvent replacement) {
-            this.axis = new AxisState(this.axis.intValue() + replacement.getAxisState().intValue());
-            this.trafo = replacement.getTransformation();
-            this.time = replacement.getTimeStamp();
-        }
-      };
+      ToolEvent e = new MyToolEvent(this, device, new AxisState(delta));
       queue.addEvent(e);
     }
 

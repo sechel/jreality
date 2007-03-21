@@ -993,6 +993,13 @@ public class ViewerVR {
 	
 	public static ToolEventReceiver remoteMain(String[] args) {
 		ViewerApp va = mainImpl(args);
+		
+		JFrame fsf = new JFrame("jReality Viewer");
+	    fsf.setUndecorated(true);
+	    fsf.getContentPane().add(va.getViewingComponent());
+	    fsf.validate();
+	    fsf.getGraphicsConfiguration().getDevice().setFullScreenWindow(fsf);
+		
 		return va.getViewer().getToolSystem();
 	}
 	

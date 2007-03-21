@@ -1,10 +1,20 @@
 package de.jreality.toolsystem.raw;
 
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JFrame;
+import javax.swing.JRadioButton;
+
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.scene.data.DoubleArray;
+import de.jreality.toolsystem.ToolEvent;
 
 public class DevicePortalTrackd extends DeviceTrackd {
-
+	
 	static final Matrix HEAD_CALIB = MatrixBuilder.euclidean()
 										.rotateY(-Math.PI/2)
 										.rotateX(Math.PI/2)
@@ -13,12 +23,58 @@ public class DevicePortalTrackd extends DeviceTrackd {
 										.rotateZ(rad(-7))
 										.rotateY(rad(12))
 										.rotateX(rad(-5))
+										.translate(0.08, 0., 0.)
 										.getMatrix();
 	static final Matrix WAND_CALIB = MatrixBuilder.euclidean()
 										.rotateZ(Math.PI)
 										.rotateX(rad(-5))
 										.getMatrix();
 	
+	static final double[] FIXED_HEAD = MatrixBuilder.euclidean().translate(0, 1.7, 0).getArray();
+	
+	public DevicePortalTrackd() {
+		JFrame f = new JFrame("Head tracking:");
+		ButtonGroup bg = new ButtonGroup();
+		JRadioButton b1 = new JRadioButton("enabled");
+		b1.setSelected(true);
+		b1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				freeHead();
+			}
+		});
+		JRadioButton b2 = new JRadioButton("disabled");
+		b2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				fixHead();
+			}
+		});
+		bg.add(b1);
+		bg.add(b2);
+		f.getContentPane().setLayout(new GridLayout(1, 2));
+		f.getContentPane().add(b1);
+		f.getContentPane().add(b2);
+		f.pack();
+		f.show();
+	}
+	
+	@SuppressWarnings("serial")
+	protected void fixHead() {
+		disableSensor(0);
+		if (queue != null) {
+			ToolEvent te = new ToolEvent(this, sensorSlot(0), null, new DoubleArray(FIXED_HEAD)) {
+				@Override
+				protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
+					return false;
+				}
+			};
+			queue.addEvent(te);
+		}
+	}
+
+	protected void freeHead() {
+		enableSensor(0);
+	}
+
 	private static double rad(double deg) {
 		return deg*Math.PI/180.;
 	}

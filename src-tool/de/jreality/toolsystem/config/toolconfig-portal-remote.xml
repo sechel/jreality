@@ -1,8 +1,22 @@
 <toolconfig>  
   
-   <rawdevices />
+   <rawdevices>
+   <rawdevice id="Remote" type="de.jreality.toolsystem.raw.DevicePortalRemote"/>
+   </rawdevices>
+   
+  <rawslots>
+  <!-- map slots of raw devices to InputSlots -->
+    <mapping device="Remote" src="tick" target="SystemTime"/>
 
-  <rawslots />
+    <mapping device="Remote" src="button_0" target="PrimaryAction"/>
+    <mapping device="Remote" src="button_1" target="PrimaryMenu"/>
+    <mapping device="Remote" src="button_2" target="PrimarySelection"/>
+    <mapping device="Remote" src="valuator_0" target="PrimaryNavigationNDC_X"/>
+    <mapping device="Remote" src="valuator_1" target="PrimaryNavigationNDC_Y"/>
+    <mapping device="Remote" src="sensor_1" target="PointerShipTransformation"/>
+    <mapping device="Remote" src="sensor_0" target="ShipHeadTransformation"/>
+    
+  </rawslots>
   
   <virtualdevices>
 

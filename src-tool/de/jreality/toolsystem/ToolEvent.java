@@ -40,6 +40,7 @@
 
 package de.jreality.toolsystem;
 
+import java.io.IOException;
 import java.util.EventObject;
 
 import de.jreality.scene.data.DoubleArray;
@@ -72,7 +73,7 @@ public class ToolEvent extends EventObject {
     }
     
     public ToolEvent(Object source, InputSlot device, AxisState axis, DoubleArray trafo) {
-    	super(source);
+    	super(device);
     	time=System.currentTimeMillis();
     	this.device=device;
       this.axis=axis;
@@ -147,4 +148,21 @@ public class ToolEvent extends EventObject {
     public boolean isConsumed() {
       return consumed;
     }
+    
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        out.writeUTF(device.getName());
+        out.writeObject(axis);
+        if (trafo != null) out.writeObject(trafo.toDoubleArray(null));
+        else out.writeObject(null);
+        out.writeLong(time);
+      }
+    
+      private void readObject(java.io.ObjectInputStream in)
+        throws IOException, ClassNotFoundException {
+    	  device = InputSlot.getDevice(in.readUTF());
+    	  axis = (AxisState) in.readObject();
+    	  double[] m = (double[]) in.readObject();
+    	  if (m!=null) trafo=new DoubleArray(m);
+    	  time=in.readLong();
+      }
 }

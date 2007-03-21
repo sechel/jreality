@@ -348,7 +348,7 @@ public class DeviceManager {
  * to camera utilities
  */
 public List<ToolEvent> updateImplicitDevices() {
-	    boolean worldToCamChanged=false, camToNDCChanged=false, avatarChanged = false;
+    boolean worldToCamChanged=false, camToNDCChanged=false, avatarChanged = false;
       double[] matrix = null;
       if (viewer.getCameraPath() != null) {
         matrix = viewer.getCameraPath().getInverseMatrix(null);
