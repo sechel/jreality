@@ -101,6 +101,7 @@ import de.jreality.swing.ScenePanel;
 import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.PickShowTool;
 import de.jreality.tools.ShipNavigationTool;
+import de.jreality.toolsystem.ToolEventReceiver;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.ViewerAppMenu;
@@ -331,18 +332,10 @@ public class ViewerVR {
 	public void setTerrain(final SceneGraphComponent c) {
 		while (terrainNode.getChildComponentCount() > 0) terrainNode.removeChild(terrainNode.getChildComponent(0));
 		if (c==null) return;
-		
-		Rectangle3D bounds = GeometryUtility.calculateBoundingBox(c);
-		if(Math.min(Math.min(bounds.getExtent()[0],bounds.getExtent()[1]),bounds.getExtent()[2]) /
-				Math.max(Math.max(bounds.getExtent()[0],bounds.getExtent()[1]),bounds.getExtent()[2])
-				>0.5){
-			setTerrainWithCenter(c);
-			return;
-		}			
-		
 		shipNavigationTool.setCenter(false);
-		Matrix avatarTrans=new Matrix();
-		avatarTrans.setColumn(3, new Matrix(avatarNode.getTransformation()).getColumn(3));
+		Matrix avatarTrans=new Matrix(avatarNode.getTransformation());
+		MatrixBuilder.euclidean().rotateFromTo(avatarTrans.getColumn(1), new double[]{0,1,0,0}).times(avatarTrans).assignTo(avatarTrans);
+		avatarTrans.setEntry(1, 3, 0); // lift to zero level
 		avatarNode.setTransformation(new Transformation(avatarTrans.getArray()));
 		
 		Scene.executeWriter(terrainNode, new Runnable() {
@@ -995,6 +988,15 @@ public class ViewerVR {
 	}
 
 	public static void main(String[] args) {
+		mainImpl(args);
+	}
+	
+	public static ToolEventReceiver remoteMain(String[] args) {
+		ViewerApp va = mainImpl(args);
+		return va.getViewer().getToolSystem();
+	}
+	
+	public static ViewerApp mainImpl(String[] args) {
 
 		boolean navigator = false;
 		boolean beanshell = false;
@@ -1070,6 +1072,8 @@ public class ViewerVR {
 		f.validate();
 		JFrame externalFrame = vr.getExternalFrame();
 		externalFrame.setLocationRelativeTo(f);
+		
+		return vApp;
 	}
 
 	public SceneGraphComponent getSkyLightNode() {

@@ -104,6 +104,14 @@ public class ToolSystemConfiguration {
     return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig-portal.xml")));
   }
   
+  public static ToolSystemConfiguration loadRemotePortalConfiguration() throws IOException {
+    return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig-portal-remote.xml")));
+  }
+	  
+  public static ToolSystemConfiguration loadRemotePortalMasterConfiguration() throws IOException {
+    return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig-portal-remote-master.xml")));
+  }
+		  
   public static ToolSystemConfiguration loadDefaultPortalConfiguration(List<Input> additionalInputs) throws IOException {
     if (additionalInputs.isEmpty()) return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig-portal.xml")));
     List<ToolSystemConfiguration> all = new LinkedList<ToolSystemConfiguration>();

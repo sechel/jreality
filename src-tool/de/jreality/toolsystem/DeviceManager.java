@@ -80,7 +80,7 @@ import de.jreality.util.LoggingSystem;
  * @author weissman
  *
  */
-class DeviceManager {
+public class DeviceManager {
   
   Viewer viewer;
   
@@ -148,7 +148,7 @@ class DeviceManager {
 
   private SceneGraphPath avatarPath;
 
-  DeviceManager(ToolSystemConfiguration config, ToolEventQueue queue, Viewer viewer) {
+  public DeviceManager(ToolSystemConfiguration config, ToolEventQueue queue, Viewer viewer) {
 
       //debugSlots.add(InputSlot.getDevice("ForwardBackwardAxis"));
       //debugSlots.add(InputSlot.getDevice("JumpActivation"));

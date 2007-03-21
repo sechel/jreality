@@ -81,7 +81,7 @@ public class ToolEventQueue {
         }    
     };
     
-    ToolEventQueue(ToolEventReceiver receiver) {
+    public ToolEventQueue(ToolEventReceiver receiver) {
         this.receiver = receiver;
     }
 
@@ -90,7 +90,7 @@ public class ToolEventQueue {
     {
       thread.setName("jReality ToolSystem EventQueue");
     }
-    void start() {
+    public void start() {
       if (started) throw new IllegalStateException("already started");
       started = true;
       thread.start();

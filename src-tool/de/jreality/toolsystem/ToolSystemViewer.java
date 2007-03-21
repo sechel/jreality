@@ -222,4 +222,8 @@ public class ToolSystemViewer implements Viewer {
   public void renderAsync() {
     viewer.renderAsync();
   }
+  
+  public ToolSystem getToolSystem() {
+	  return toolSystem;
+  }
 }
