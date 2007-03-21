@@ -522,6 +522,7 @@ public class ViewerApp {
 					} else {
 						if (config.equals("default")) cfg = ToolSystemConfiguration.loadDefaultDesktopConfiguration();
 						if (config.equals("portal")) cfg = ToolSystemConfiguration.loadDefaultPortalConfiguration();
+						if (config.equals("portal-remote")) cfg = ToolSystemConfiguration.loadRemotePortalConfiguration();
 						if (config.equals("default+portal")) cfg = ToolSystemConfiguration.loadDefaultDesktopAndPortalConfiguration();
 					}
 				} catch (IOException e) {
