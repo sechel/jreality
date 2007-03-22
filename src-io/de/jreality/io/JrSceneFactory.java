@@ -73,6 +73,14 @@ public class JrSceneFactory {
 	}
 	
 	public static JrScene getDefaultPortalScene() {
+		return getDefaultPortalScene(false);
+	}
+	
+	public static JrScene getDefaultPortalRemoteScene() {
+		return getDefaultPortalScene(true);
+	}
+
+	private static JrScene getDefaultPortalScene(boolean remote) {
 		//return getDefaultScene(true);
 		SceneGraphComponent sceneRoot=new SceneGraphComponent(),
 		sceneNode=new SceneGraphComponent(),
@@ -89,8 +97,6 @@ public class JrSceneFactory {
 		DirectionalLight light = new DirectionalLight();
 
 		SceneGraphPath cameraPath, avatarPath, emptyPickPath;
-
-		boolean portal = true;
 
 		sceneRoot.setName("root");
 		sceneNode.setName("scene");
@@ -112,10 +118,8 @@ public class JrSceneFactory {
 		cam.setNear(0.01);
 		cam.setFar(1500);
 
-		if (portal) {
-			cam.setOnAxis(false);
-			cam.setStereo(true);
-		}
+		cam.setOnAxis(false);
+		cam.setStereo(true);
 
 //		lights
 		light.setIntensity(0.4);
@@ -164,16 +168,14 @@ public class JrSceneFactory {
 //		add tools
 		ShipNavigationTool shipNavigationTool = new ShipNavigationTool();
 		//avatarNode.addTool(shipNavigationTool);
-		if (portal) shipNavigationTool.setPollingDevice(false);
+		shipNavigationTool.setPollingDevice(false);
 
-		if (!portal) camNode.addTool(new HeadTransformationTool());
-		else {
-			try {
-				Tool t = (Tool) Class.forName("de.jreality.tools.PortalHeadMoveTool").newInstance();
-				camNode.addTool(t);
-			} catch (Throwable t) {
+		String headMoveTool = remote ? "de.jreality.tools.RemotePortalHeadMoveTool" : "de.jreality.tools.PortalHeadMoveTool";
+		try {
+			Tool t = (Tool) Class.forName(headMoveTool).newInstance();
+			camNode.addTool(t);
+		} catch (Throwable t) {
 //				XXX
-			}
 		}
 
 		sceneRoot.addTool(new PickShowTool());

@@ -76,8 +76,8 @@ public class ToolEvent extends EventObject {
     	super(device);
     	time=System.currentTimeMillis();
     	this.device=device;
-      this.axis=axis;
-      this.trafo=trafo;
+    	this.axis=axis;
+    	this.trafo=trafo;
     }
 
     public InputSlot getInputSlot() {

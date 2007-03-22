@@ -399,19 +399,22 @@ public class ViewerApp {
 
 
 	/**
-	 * Get the default Scene depending on the environment (desktop or portal).
+	 * Get the default Scene depending on the environment (desktop or portal or portal-remote).
+	 * 
 	 * @return the default scene
 	 */
 	private JrScene getDefaultScene() {
 		String environment = Secure.getProperty( "de.jreality.viewerapp.env", "desktop" );
 
-		if (!environment.equals("desktop") && !environment.equals("portal"))
-			throw new IllegalArgumentException("unknown environment!");
-
 		if (environment.equals("desktop"))
 			return JrSceneFactory.getDefaultDesktopScene();
-		else
+		if (environment.equals("portal"))
 			return JrSceneFactory.getDefaultPortalScene();
+		if (environment.equals("portal-remote"))
+			return JrSceneFactory.getDefaultPortalRemoteScene();
+		
+		throw new IllegalStateException("unknown environment: "+environment);
+		
 	}
 
 

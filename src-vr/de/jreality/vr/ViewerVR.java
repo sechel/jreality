@@ -78,7 +78,6 @@ import javax.swing.KeyStroke;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.math.Rn;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -201,6 +200,7 @@ public class ViewerVR {
 	public ViewerVR() {
 
 		// find out where we are running
+		boolean portalRemote = "portal-remote".equals(Secure.getProperty("de.jreality.viewerapp.env"));
 		boolean portal = "portal".equals(Secure.getProperty("de.jreality.viewerapp.env"));
 
 		// build basic scene graph
@@ -228,7 +228,7 @@ public class ViewerVR {
 		Camera cam = new Camera();
 		cam.setNear(0.01);
 		cam.setFar(1500);
-		if (portal) {
+		if (portal || portalRemote) {
 			cam.setOnAxis(false);
 			cam.setStereo(true);
 		}
@@ -249,14 +249,23 @@ public class ViewerVR {
 
 		shipNavigationTool = new ShipNavigationTool();
 		avatarNode.addTool(shipNavigationTool);
-		if (portal)
+		if (portal || portalRemote)
 			shipNavigationTool.setPollingDevice(false);
-		if (!portal) {
+		if (!portal && !portalRemote) {
 			headTransformationTool = new HeadTransformationTool();
 			camNode.addTool(headTransformationTool);
-		} else {
+		} 
+		if (portal) {
 			try {
 				Tool t = (Tool) Class.forName("de.jreality.tools.PortalHeadMoveTool").newInstance();
+				camNode.addTool(t);
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}
+		}
+		if (portalRemote) {
+			try {
+				Tool t = (Tool) Class.forName("de.jreality.tools.RemotePortalHeadMoveTool").newInstance();
 				camNode.addTool(t);
 			} catch (Throwable t) {
 				t.printStackTrace();

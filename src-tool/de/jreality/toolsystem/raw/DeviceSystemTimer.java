@@ -82,7 +82,7 @@ public class DeviceSystemTimer implements RawDevice, PollingDevice {
         return new ToolEvent(this, inputDevice, AxisState.ORIGIN);
     }
 
-    public void poll() {
+    public synchronized void poll() {
       if (queue == null) return;
       long ct = System.currentTimeMillis();
       int delta = (int)(lastEvent == -1l ? 0 : ct - lastEvent);
