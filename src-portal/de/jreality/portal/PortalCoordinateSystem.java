@@ -108,7 +108,7 @@ public class PortalCoordinateSystem {
 	//TODO read values and correction from ConfigurationAttributes
 		//TODO change to multiplication with correction matrix
 		//TODO think about moving this to a different class (PORTALUtilities)
-		public static void setPORTALViewport(Matrix world2cam, FactoredMatrix portalMatrix, Camera cam) {
+		public static void setPORTALViewport(double[] portalOriginInCamCoordinates, Camera cam) {
 	    
 			double xmin=0, xmax=0, ymin=0, ymax=0;
 	//		double x0 = -PortalCoordinateSystem.xDimPORTAL/2;
@@ -120,8 +120,6 @@ public class PortalCoordinateSystem {
 			double y0 = wallport.getMinY();
 			double x1 = wallport.getMaxX();
 			double y1 = wallport.getMaxY();
-			double[] portalOriginInCamCoordinates = world2cam.multiplyVector(portalMatrix.getTranslation());
-			Pn.dehomogenize(portalOriginInCamCoordinates, portalOriginInCamCoordinates);
 			
 			double x = -portalOriginInCamCoordinates[0];
 			double y = -portalOriginInCamCoordinates[1];

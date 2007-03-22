@@ -54,6 +54,7 @@ import javax.swing.JFrame;
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
@@ -90,15 +91,6 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
 
   Camera cam;
 
-  // this field moves the sensor from the middle
-  // of the glasses to its real position - rotate and translate to the left... 
-  static double[] sensorCorrection;
-  static {
-    double angle = -Math.PI/2;
-    //sensorOrientationCorrection = P3.makeRotationMatrix(null, axis, angle);
-    sensorCorrection = MatrixBuilder.euclidean().rotateX(angle).translate(-0.08, 0, 0).getMatrix().getArray();
-  }
-  
   public static HeadTrackedViewer createFullscreen(Class viewerClass) {
     System.setProperty("de.jreality.portal.HeadTrackedViewer", viewerClass.getName());
     return createFullscreen();
@@ -292,9 +284,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     headTranslation.setTranslation(headMatrix.getTranslation());
 
     headTranslation.assignTo(cameraTranslationNode);
-    
-    headTranslation.multiplyOnRight(sensorCorrection);
-    headMatrix.multiplyOnRight(sensorCorrection); // tmp = headMatrix
+
     totalOrientation.assignFrom(cameraOrientationNode.getTransformation());
     totalOrientation.invert();
     totalOrientation.multiplyOnRight(headMatrix);
@@ -302,7 +292,11 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     
     portalMatrix.assignFrom(portalPath.getMatrix(tmp1));
     world2cam.assignFrom(viewer.getCameraPath().getInverseMatrix(tmp2));
-    PortalCoordinateSystem.setPORTALViewport(world2cam, portalMatrix, cam);
+    
+    double[] portalOriginInCamCoordinates = world2cam.multiplyVector(portalMatrix.getTranslation());
+	Pn.dehomogenize(portalOriginInCamCoordinates, portalOriginInCamCoordinates);
+	
+    PortalCoordinateSystem.setPORTALViewport(portalOriginInCamCoordinates, cam);
     
     if (cv != null) cv.setParameters(cam);
     

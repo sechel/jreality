@@ -78,7 +78,7 @@ public class RemotePortalHeadMoveTool extends AbstractTool {
 
   Matrix headMatrix = new Matrix();
   Matrix worldToCamera = new Matrix();
-  FactoredMatrix worldToPortal = new FactoredMatrix();
+  FactoredMatrix portal = new FactoredMatrix();
     
   public RemotePortalHeadMoveTool() {
     addCurrentSlot(headSlot, "the current head matrix in PORTAL coordinates");
@@ -98,14 +98,17 @@ public class RemotePortalHeadMoveTool extends AbstractTool {
 		
 	// calculate and set camera orientation matrix:
 	head.setColumn(3, Pn.originP3);
-	Matrix camOrientationMatrix = MatrixBuilder.euclidean(new Matrix(inverseCameraOrientation)).times(head).getMatrix();
+	Matrix camOrientationMatrix = MatrixBuilder.euclidean().times(inverseCameraOrientation).times(head).getMatrix();
 	camera.setOrientationMatrix(camOrientationMatrix.getArray());
     
     // assign camera viewport
-	cameraPath.getMatrix(worldToCamera.getArray());
-	portalPath.getMatrix(worldToPortal.getArray());
-	worldToPortal.update();
-    PortalCoordinateSystem.setPORTALViewport(worldToCamera, worldToPortal, camera);
+	cameraPath.getInverseMatrix(worldToCamera.getArray());
+	portal.assignFrom(portalPath.getMatrix(portal.getArray()));
+	
+	double[] portalOriginInCamCoordinates = worldToCamera.multiplyVector(portal.getTranslation());
+	Pn.dehomogenize(portalOriginInCamCoordinates, portalOriginInCamCoordinates);
+
+    PortalCoordinateSystem.setPORTALViewport(portalOriginInCamCoordinates, camera);
   }
 
 

@@ -27,7 +27,7 @@ public class MasterApplication {
 		ToolSystemConfiguration config = ToolSystemConfiguration.loadRemotePortalMasterConfiguration();
 		eventQueue = new ToolEventQueue(new ToolEventReceiver() {
 			public void processToolEvent(ToolEvent event) {
-				System.out.println("Sending: "+event);
+				//System.out.println("Sending: "+event);
 				receiver.processToolEvent(event);
 			}
 		});

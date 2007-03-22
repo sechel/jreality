@@ -46,6 +46,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.geom.Rectangle2D;
 import java.beans.Statement;
 import java.io.File;
 import java.io.FileInputStream;
@@ -231,6 +232,7 @@ public class ViewerVR {
 		if (portal || portalRemote) {
 			cam.setOnAxis(false);
 			cam.setStereo(true);
+			cam.setViewPort(new Rectangle2D.Double(-1, -1, 2, 2));
 		}
 
 		// paths
