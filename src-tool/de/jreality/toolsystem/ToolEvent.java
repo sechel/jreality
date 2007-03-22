@@ -41,7 +41,7 @@
 package de.jreality.toolsystem;
 
 import java.io.IOException;
-import java.util.EventObject;
+import java.io.Serializable;
 
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.tool.AxisState;
@@ -51,7 +51,7 @@ import de.jreality.scene.tool.InputSlot;
  * @author weissman
  *
  **/
-public class ToolEvent extends EventObject {
+public class ToolEvent implements Serializable {
     
 	private static final long serialVersionUID = -574219336588808514L;
 
@@ -64,6 +64,8 @@ public class ToolEvent extends EventObject {
 
     private boolean consumed;
 
+	private transient Object source;
+
     public ToolEvent(Object source, InputSlot device, AxisState axis) {
         this(source, device, axis, null);
     }
@@ -73,7 +75,7 @@ public class ToolEvent extends EventObject {
     }
     
     public ToolEvent(Object source, InputSlot device, AxisState axis, DoubleArray trafo) {
-    	super(source);
+    	this.source=source;
     	time=System.currentTimeMillis();
     	this.device=device;
     	this.axis=axis;
@@ -100,7 +102,11 @@ public class ToolEvent extends EventObject {
     return "ToolEvent source="+getSource()+" device="+device+" "+axis+" trafo="+trafo;
   }
   
-  /**
+  public Object getSource() {
+	return source;
+}
+
+/**
    * sets the 
    * @param replacement
    */
@@ -164,5 +170,6 @@ public class ToolEvent extends EventObject {
     	  double[] m = (double[]) in.readObject();
     	  if (m!=null) trafo=new DoubleArray(m);
     	  time=in.readLong();
+    	  source = "REMOTE";
       }
 }
