@@ -43,6 +43,7 @@ package de.jreality.util;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.pick.AABBTree;
@@ -97,5 +98,29 @@ public class PickUtility {
   public static void setPickable(Geometry g, boolean pickable) {
     g.setGeometryAttributes(CommonAttributes.PICKABLE, pickable);
   }
+
+  /**
+   * recursively clears all pickable appearance attributes
+   */
+  public static void clearPickableAttributes(final SceneGraphComponent cmp) {
+	  Scene.executeWriter(cmp, new Runnable() {
+		 public void run() {
+			cmp.accept(new SceneGraphVisitor() {
+				@Override
+				public void visit(Appearance a) {
+					a.setAttribute("pointShader."+CommonAttributes.PICKABLE, Appearance.INHERITED);
+					a.setAttribute("lineShader."+CommonAttributes.PICKABLE, Appearance.INHERITED);
+					a.setAttribute("polygonShader."+CommonAttributes.PICKABLE, Appearance.INHERITED);
+					a.setAttribute(CommonAttributes.PICKABLE, Appearance.INHERITED);
+				}
+				@Override
+				public void visit(SceneGraphComponent c) {
+					c.childrenWriteAccept(this, false, true, false, false, false, false);
+				}
+			});
+		} 
+	  });
+  }
+  
 
 }
