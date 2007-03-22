@@ -1,0 +1,1 @@
+execute -clrf  'DISPLAY=:0.0 /central/java/jdk1.5.0_11/bin/java -Djava.library.path=/central/home/demo/.jnilib -Dde.jreality.viewerapp.env=portal-remote -Dde.jreality.scene.tool.Config=portal-remote -Djreality.jogl.quadBufferedStereo=true -Djreality.config='$PWD'/portal.$HOSTNAME -jar '$PWD'/../lib/smrj-client.jar'
