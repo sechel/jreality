@@ -73,7 +73,7 @@ public class ToolEvent extends EventObject {
     }
     
     public ToolEvent(Object source, InputSlot device, AxisState axis, DoubleArray trafo) {
-    	super(device);
+    	super(source);
     	time=System.currentTimeMillis();
     	this.device=device;
     	this.axis=axis;
