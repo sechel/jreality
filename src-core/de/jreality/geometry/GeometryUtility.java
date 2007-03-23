@@ -244,19 +244,12 @@ public class GeometryUtility {
 					v1 = Rn.subtract(null, verts[indices[i][count++]], verts[indices[i][0]]);
 				} while (Rn.euclideanNorm(v1) < 10E-16 && count < (n-1));
 				double[] v2 = null;
-				while (true) {
-					do {
-						if (count > n-1) break;
-						v2 = Rn.subtract(null, verts[indices[i][count++]], verts[indices[i][0]]);
-					} while (Rn.euclideanNorm(v2) < 10E-16 && count < (n));
-					Rn.crossProduct(fn[i], v1,v2);
-					double norm = Rn.euclideanNorm(fn[i]);
-					if (norm < 1E-16) 
-						if(count < n) 
-							continue;
-					Rn.times(fn[i], 1./norm, fn[i]);
-					break;
-				}
+				do {
+					v2 = Rn.subtract(null, verts[indices[i][count++]], verts[indices[i][0]]);
+				} while (Rn.euclideanNorm(v2) < 10E-16 && count < (n));
+				if (count > n) continue;
+				Rn.crossProduct(fn[i], v1,v2);
+				Rn.normalize(fn[i], fn[i]);
 			} else {
 				// TODO find non-degenerate set of 3 vertices here also
 				double[] osculatingPlane = P3.planeFromPoints(null, verts[indices[i][0]], verts[indices[i][1]], verts[indices[i][2]]);
