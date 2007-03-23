@@ -89,6 +89,7 @@ public class ShipNavigationTool extends AbstractTool {
 
 	private transient boolean rotate=false;
 	private transient boolean fall;
+	private double minHeight;
 
 	public ShipNavigationTool() {
 		addCurrentSlot(forwardBackward);
@@ -191,8 +192,27 @@ public class ShipNavigationTool extends AbstractTool {
 					velocity[1] = 0;
 					touchGround = true;
 				} else {
-					velocity[1] -= sec*gravity;
-					touchGround = false;
+					if (isCenter()) {
+						double h = Math.sqrt(dest[0]*dest[0]+dest[1]*dest[1]+dest[2]*dest[2]);
+						if (h<minHeight) {
+							dest=Rn.times(dest, minHeight/h, dest);
+							dest[3]=1;
+							velocity[1] = 0;
+							touchGround = true;
+						} else {
+							velocity[1] -= sec*gravity;
+							touchGround = false;	
+						}
+					}else {
+						if (dest[1]<minHeight) {
+							dest[1]=minHeight;
+							velocity[1] = 0;
+							touchGround = true;
+						} else {
+							velocity[1] -= sec*gravity;
+							touchGround = false;
+						}
+					}
 				}
 			}
 			if (hasCenter)	{
@@ -301,5 +321,13 @@ public class ShipNavigationTool extends AbstractTool {
 
 	public void setGravitEnabled(boolean gravitEnabled) {
 		this.gravitEnabled = gravitEnabled;
+	}
+
+	public double getMinHeight() {
+		return minHeight;
+	}
+
+	public void setMinHeight(double minHeight) {
+		this.minHeight = minHeight;
 	}
 }
