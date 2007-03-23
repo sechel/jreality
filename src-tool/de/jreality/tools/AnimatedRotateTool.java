@@ -94,16 +94,16 @@ public class AnimatedRotateTool  extends AbstractTool {
 		if (tc.getAxisState(deactSlot).isPressed()) {
 			removeCurrentSlot(deactSlot);
       removeCurrentSlot(pause);
-			AnimatorTool.getInstance().deschedule(cmp);
+			AnimatorTool.getInstance(tc).deschedule(cmp);
 			cmp.removeTool(this);
 			return; 
 		}
     
 		//pause
     if (tc.getAxisState(pause).isReleased())
-      AnimatorTool.getInstance().schedule(cmp, task);
+      AnimatorTool.getInstance(tc).schedule(cmp, task);
     if (tc.getAxisState(pause).isPressed())
-      AnimatorTool.getInstance().deschedule(cmp);
+      AnimatorTool.getInstance(tc).deschedule(cmp);
 	}
 	
 	

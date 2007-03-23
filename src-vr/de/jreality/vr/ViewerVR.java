@@ -101,7 +101,6 @@ import de.jreality.swing.ScenePanel;
 import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.PickShowTool;
 import de.jreality.tools.ShipNavigationTool;
-import de.jreality.toolsystem.ToolEventReceiver;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.ViewerAppMenu;
@@ -1002,16 +1001,8 @@ public class ViewerVR {
 		mainImpl(args);
 	}
 	
-	public static ToolEventReceiver remoteMain(String[] args) {
-		ViewerApp va = mainImpl(args);
-		
-		JFrame fsf = new JFrame("jReality Viewer");
-	    fsf.setUndecorated(true);
-	    fsf.getContentPane().add(va.getViewingComponent());
-	    fsf.validate();
-	    fsf.getGraphicsConfiguration().getDevice().setFullScreenWindow(fsf);
-		
-		return va.getViewer().getToolSystem();
+	public static ViewerApp remoteMain(String[] args) {
+		return mainImpl(args);
 	}
 	
 	public static ViewerApp mainImpl(String[] args) {

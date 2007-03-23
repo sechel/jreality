@@ -63,7 +63,6 @@ import de.jreality.scene.tool.Tool;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.tools.AnimatorTool;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
-import de.jreality.toolsystem.raw.DeviceSystemTimer;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
 
@@ -78,7 +77,7 @@ public class ToolSystem implements ToolEventReceiver {
 
   private RenderTrigger renderTrigger;
   
-  private final LinkedList<ToolEvent> compQueue = new LinkedList<ToolEvent>();
+  protected final LinkedList<ToolEvent> compQueue = new LinkedList<ToolEvent>();
 
   private final LinkedList<ToolEvent> triggerQueue = new LinkedList<ToolEvent>();
   private final HashMap<Tool, List<SceneGraphPath>> toolToPath = new HashMap<Tool, List<SceneGraphPath>>();
@@ -86,16 +85,16 @@ public class ToolSystem implements ToolEventReceiver {
   
   private SceneGraphPath emptyPickPath=new SceneGraphPath();
   
-  private Viewer viewer;
+  protected Viewer viewer;
   private ToolContextImpl toolContext;
-  private DeviceManager deviceManager;
+  protected DeviceManager deviceManager;
   private ToolManager toolManager;
   private SlotManager slotManager;
   private PickSystem pickSystem;
   private ToolUpdateProxy updater;
   private ToolEventQueue eventQueue;
   
-  private boolean executing;
+  protected boolean executing;
   
   private class ToolContextImpl implements ToolContext {
 
@@ -187,17 +186,12 @@ public class ToolSystem implements ToolEventReceiver {
       // TODO Auto-generated method stub
       return null;
     }
+    
+    public Object getKey() {
+    	return ToolSystem.this;
+    }
   };
 
-  /**
-   * TODO: receive scene root / cam path change from viewer!!
-   * TODO: make this constructor package level 
-   * @param viewer
-   */
-  public ToolSystem(Viewer viewer, ToolSystemConfiguration config) {
-    this(viewer, config, null);
-  }
-  
   /**
    * 
    * @param viewer the viewer
@@ -229,7 +223,7 @@ public class ToolSystem implements ToolEventReceiver {
     // register animator
     SceneGraphPath rootPath = new SceneGraphPath();
     rootPath.push(viewer.getSceneRoot());
-    addTool(AnimatorTool.getInstance(eventQueue.getThread()), rootPath);
+    addTool(AnimatorTool.getInstanceImpl(this), rootPath);
     if (emptyPickPath.getLength() == 0) {
       emptyPickPath.push(viewer.getSceneRoot());
     }
@@ -280,13 +274,13 @@ public class ToolSystem implements ToolEventReceiver {
       }
 	    executing=false;
       }
-    if (renderTrigger != null && event.getSource() instanceof DeviceSystemTimer) {
+    if (renderTrigger != null && event.getInputSlot() == InputSlot.getDevice("SystemTime")) {
       renderTrigger.finishCollect();
       renderTrigger.startCollect();
     }
   }
 
-  private void processComputationalQueue() {
+  protected void processComputationalQueue() {
     while (!compQueue.isEmpty()) {
       ToolEvent event = (ToolEvent) compQueue.removeFirst();
       deviceManager.evaluateEvent(event, compQueue);
@@ -300,7 +294,7 @@ public class ToolSystem implements ToolEventReceiver {
     return ret;
   }
 
-  private void processTriggerQueue() {
+  protected void processTriggerQueue() {
     if (triggerQueue.isEmpty())
       return;
     HashSet<Tool> activatedTools = new HashSet<Tool>();
@@ -379,7 +373,7 @@ public class ToolSystem implements ToolEventReceiver {
 
   private double[] currentPointer = new double[16];
 
-private final Object mutex=new Object();
+protected final Object mutex=new Object();
 
 private SceneGraphPath avatarPath;
 
@@ -518,7 +512,7 @@ private SceneGraphPath avatarPath;
   
   final List<Pair> toolsChanging = new LinkedList<Pair>();
   
-  private static class Pair {
+  protected static class Pair {
 	  final Tool tool;
 	  final SceneGraphPath path;
     final boolean added;

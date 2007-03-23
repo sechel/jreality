@@ -47,6 +47,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.beans.Beans;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -479,26 +480,42 @@ public class ViewerApp {
 
 
 	private ToolSystemViewer createToolSystemViewer() throws IOException {
+		String config = Secure.getProperty( "de.jreality.scene.tool.Config", "default" );
+		boolean remotePortal = config.equals("portal-remote");
 		if (viewers == null) {
-
-			String viewer = Secure.getProperty( "de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.softviewer.SoftViewer" ); // de.jreality.portal.DesktopPortalViewer");
-			String[] vrs = viewer.split(" ");
-			List<Viewer> viewerList = new LinkedList<Viewer>();
-			String viewerClassName;
-			for (int i = 0; i < vrs.length; i++) {
-				viewerClassName = vrs[i];
+			if (remotePortal) {
 				try {
-					Viewer v = createViewer(viewerClassName);
-					viewerList.add(v);
-				} catch (Exception e) { // catches creation problems - i. e. no jogl in classpath
-					LoggingSystem.getLogger(this).info("could not create viewer instance of ["+viewerClassName+"]");
-				} catch (NoClassDefFoundError ndfe) {
-					System.out.println("Possibly no jogl in classpath!");
-				} catch (UnsatisfiedLinkError le) {
-					System.out.println("Possibly no jogl libraries in java.library.path!");
+					viewers = new Viewer[]{createViewer("de.jreality.jogl.Viewer")};
+				} catch (InstantiationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
+			} else {
+				String viewer = Secure.getProperty( "de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.softviewer.SoftViewer" ); // de.jreality.portal.DesktopPortalViewer");
+				String[] vrs = viewer.split(" ");
+				List<Viewer> viewerList = new LinkedList<Viewer>();
+				String viewerClassName;
+				for (int i = 0; i < vrs.length; i++) {
+					viewerClassName = vrs[i];
+					try {
+						Viewer v = createViewer(viewerClassName);
+						viewerList.add(v);
+					} catch (Exception e) { // catches creation problems - i. e. no jogl in classpath
+						LoggingSystem.getLogger(this).info("could not create viewer instance of ["+viewerClassName+"]");
+					} catch (NoClassDefFoundError ndfe) {
+						System.out.println("Possibly no jogl in classpath!");
+					} catch (UnsatisfiedLinkError le) {
+						System.out.println("Possibly no jogl libraries in java.library.path!");
+					}
+				}
+				viewers = viewerList.toArray(new Viewer[viewerList.size()]);
 			}
-			viewers = viewerList.toArray(new Viewer[viewerList.size()]);
 			viewerSwitch = new ViewerSwitch(viewers);
 		}
 
@@ -506,7 +523,18 @@ public class ViewerApp {
 		ToolSystemConfiguration cfg = loadToolSystemConfiguration();
 
 
-		ToolSystemViewer viewer = new ToolSystemViewer(viewerSwitch, cfg, synchRender ? renderTrigger : null);
+		ToolSystemViewer viewer=null;
+		
+		if (!remotePortal) viewer = new ToolSystemViewer(viewerSwitch, cfg, synchRender ? renderTrigger : null);
+		else {
+			try {
+				Class portalToolSystemViewer = Class.forName("de.jreality.toolsystem.PortalToolSystemViewer");
+				Constructor<? extends ToolSystemViewer> cc = portalToolSystemViewer.getConstructor(new Class[]{ViewerSwitch.class, ToolSystemConfiguration.class});
+				viewer = cc.newInstance(new Object[]{viewerSwitch, cfg});
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}
+		}
 		viewer.setPickSystem(new AABBPickSystem());
 
 		return viewer;

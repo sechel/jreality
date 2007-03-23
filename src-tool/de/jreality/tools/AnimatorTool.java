@@ -62,29 +62,20 @@ public class AnimatorTool extends AbstractTool {
 
   private static WeakHashMap instances=new WeakHashMap();
   
-  /**
-   * Use this only from inside a Tool's activate/perform/dectivate method!
-   * There is exactly one instance for each ToolSystem, mapped to the
-   * corresponding thread. Calling this from any other Thread will result in
-   * an IllegalStateException.
-   * 
-   * @return the AnimatorTool instance for the current ToolSystem
-   */
-  public static AnimatorTool getInstance() {
-    if (!instances.containsKey(Thread.currentThread())) throw new IllegalStateException("wrong thread");
-    return getInstance(Thread.currentThread());
+  public static AnimatorTool getInstance(ToolContext context) {
+	  return getInstanceImpl((Object) context.getKey());
   }
   
   /**
    * WARNING: do not use this unless you write a tool system!!
    */
-  public static AnimatorTool getInstance(Thread thread) {
-    if (!thread.getName().equals("jReality ToolSystem EventQueue"))
-        throw new RuntimeException("no tool system event thread!");
-    AnimatorTool instance = (AnimatorTool) instances.get(thread);
+  public static AnimatorTool getInstanceImpl(Object key) {
+    //if (!thread.getName().equals("jReality ToolSystem EventQueue"))
+    //    throw new RuntimeException("no tool system event thread!");
+    AnimatorTool instance = (AnimatorTool) instances.get(key);
     if (instance == null) {
       instance = new AnimatorTool();
-      instances.put(thread, instance);
+      instances.put(key, instance);
     }
     return instance;
   }

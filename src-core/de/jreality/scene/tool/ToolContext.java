@@ -92,4 +92,6 @@ public interface ToolContext
      */
     public void reject();
     
+    public Object getKey();
+    
 }

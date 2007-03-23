@@ -84,7 +84,7 @@ public class RotateTool extends AbstractTool {
     startTime = tc.getTime();
     comp = (moveChildren ? tc.getRootToLocal():tc.getRootToToolComponent()).getLastComponent();
     // stop possible animation
-    AnimatorTool.getInstance().deschedule(comp);
+    AnimatorTool.getInstance(tc).deschedule(comp);
     // TODO is this legitimate?  perhaps we should introduce a boolean "forceNewTransformation"
     if (comp.getTransformation() == null)
       comp.setTransformation(new Transformation());
@@ -169,7 +169,7 @@ public class RotateTool extends AbstractTool {
           return true;
         }
       };
-      AnimatorTool.getInstance().schedule(comp, task);
+      AnimatorTool.getInstance(tc).schedule(comp, task);
     }
   }
   

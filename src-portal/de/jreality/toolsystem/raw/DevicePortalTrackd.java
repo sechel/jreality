@@ -61,12 +61,7 @@ public class DevicePortalTrackd extends DeviceTrackd {
 	protected void fixHead() {
 		disableSensor(0);
 		if (queue != null) {
-			ToolEvent te = new ToolEvent(this, sensorSlot(0), null, new DoubleArray(FIXED_HEAD)) {
-				@Override
-				protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
-					return false;
-				}
-			};
+			ToolEvent te = new ToolEvent(this, sensorSlot(0), null, new DoubleArray(FIXED_HEAD));
 			queue.addEvent(te);
 		}
 	}

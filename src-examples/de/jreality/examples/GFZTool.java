@@ -159,9 +159,9 @@ public class GFZTool  extends AbstractTool {
 		
 		//pause
 		if (tc.getAxisState(pause).isReleased())
-			AnimatorTool.getInstance().schedule(cmp, task);
+			AnimatorTool.getInstance(tc).schedule(cmp, task);
 		if (tc.getAxisState(pause).isPressed())
-			AnimatorTool.getInstance().deschedule(cmp);
+			AnimatorTool.getInstance(tc).deschedule(cmp);
 	}
 	
 	

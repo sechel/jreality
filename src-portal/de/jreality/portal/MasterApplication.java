@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 import de.jreality.scene.proxy.smrj.ClientFactory;
+import de.jreality.scene.tool.InputSlot;
 import de.jreality.toolsystem.DeviceManager;
+import de.jreality.toolsystem.PortalToolSystem;
 import de.jreality.toolsystem.ToolEvent;
 import de.jreality.toolsystem.ToolEventQueue;
 import de.jreality.toolsystem.ToolEventReceiver;
@@ -17,21 +19,36 @@ import de.smrj.tcp.management.Local;
 
 public class MasterApplication {
 	
+	protected static final InputSlot SYSTEM_TIME = InputSlot.getDevice("SystemTime");
 	DeviceManager deviceManager;
 	ToolEventQueue eventQueue;
 	
-	public MasterApplication(final ToolEventReceiver receiver) throws IOException {
-		
-		
-		
+	public MasterApplication(final PortalToolSystem receiver) throws IOException {
 		ToolSystemConfiguration config = ToolSystemConfiguration.loadRemotePortalMasterConfiguration();
 		eventQueue = new ToolEventQueue(new ToolEventReceiver() {
+			long st;
 			public void processToolEvent(ToolEvent event) {
-				//System.out.println("Sending: "+event);
+				//st = -System.currentTimeMillis();
 				receiver.processToolEvent(event);
+				//st+=System.currentTimeMillis();
+				//System.out.println("send took "+st+" ms: "+event.getInputSlot());
+
+				if (event.getInputSlot() == SYSTEM_TIME) {
+					
+					
+					st = -System.currentTimeMillis();
+					receiver.render();
+					st+=System.currentTimeMillis();
+					System.out.println("render took "+st+" ms");
+					
+//					st = -System.currentTimeMillis();
+//					receiver.swapBuffers();
+//					st+=System.currentTimeMillis();
+//					System.out.println("swapBuffers took "+st+" ms");
+
+				}
 			}
 		});
-		//eventQueue.getThread().setDaemon(true);
 		deviceManager = new DeviceManager(config, eventQueue, null);
 		eventQueue.start();
 	}
@@ -46,8 +63,8 @@ public class MasterApplication {
 		Class appClass;
 		if (args.length == 0) appClass=ViewerVR.class;
 		else appClass = Class.forName(args[0]);
-		ToolEventReceiver tr = bc.getRemoteFactory().createRemoteViaStaticMethod(
-				ToolEventReceiver.class, RemoteExecutor.class,
+		PortalToolSystem tr = bc.getRemoteFactory().createRemoteViaStaticMethod(
+				PortalToolSystem.class, RemoteExecutor.class,
 				"startRemote", new Class[]{Class.class, String[].class}, new Object[]{appClass, null});
 		new MasterApplication(tr);
 	}
