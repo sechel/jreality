@@ -314,7 +314,7 @@ public class Ri {
     public  void curves(String type, int[] nvertices, String wrap, Map map) {
         w.print("Curves "+RIBHelper.str(type)+" ");
         RIBHelper.writeObject(w,nvertices);
-        w.print(" "+RIBHelper.str(type)+" ");
+        w.print(" "+RIBHelper.str(wrap)+" ");
         RIBHelper.writeMap(w,map);
     }
     
