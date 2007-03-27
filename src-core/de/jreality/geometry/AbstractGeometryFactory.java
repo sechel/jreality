@@ -3,14 +3,12 @@ package de.jreality.geometry;
 import java.util.Iterator;
 import java.util.Map;
 
-import com.sun.org.apache.bcel.internal.generic.ISUB;
-
 import de.jreality.geometry.OoNode.IsUpdateCounter;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.Scene;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
-import de.jreality.scene.data.StorageModel;
+
 
 public class AbstractGeometryFactory {
 
