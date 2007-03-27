@@ -11,12 +11,25 @@ import de.jreality.toolsystem.ToolEvent;
 import de.jreality.toolsystem.ToolEventQueue;
 import de.jreality.toolsystem.ToolEventReceiver;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
+import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.vr.ViewerVR;
 import de.smrj.Broadcaster;
 import de.smrj.tcp.TCPBroadcasterNIO;
 import de.smrj.tcp.management.JarServer;
 import de.smrj.tcp.management.Local;
 
+/**
+ * Starts a ToolSystem with Trackd device and a remote application on the different walls of the portal.
+ * Default is to start ViewerVR, but you can give another classname. The given class needs at least one
+ * static method called remoteMain:
+ * 
+ * public static ViewerApp remoteMain(String[] args) { ... }
+ * 
+ * 
+ * 
+ * @author weissman
+ *
+ */
 public class MasterApplication {
 	
 	protected static final InputSlot SYSTEM_TIME = InputSlot.getDevice("SystemTime");

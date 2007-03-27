@@ -27,6 +27,7 @@
     <mapping src="PrimarySelection" target="ShowPanel"/>
     <mapping src="PrimaryAction" target="RotateActivation"/>
     <mapping src="PrimarySelection" target="JumpActivation"/>
+    <mapping src="PrimaryAction" target="AllDragActivation"/>
     <mapping src="PrimaryMenu" target="DragActivation"/>
     <mapping src="PrimaryAction" target="PointDragActivation"/>
     
