@@ -413,6 +413,7 @@ public class ViewerVR {
 				double maxExtent = Math.max(extent[0], extent[2]);
 				if (maxExtent != 0) {
 					terrainScale=1;
+					if(maxExtent>10000) terrainScale=10000/maxExtent;
 					double[] translation = bounds.getCenter();
 					// determine offset in y-direction (up/down)
 					AABBPickSystem ps = new AABBPickSystem();
