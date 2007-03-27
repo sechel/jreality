@@ -105,7 +105,7 @@ public class CoordinateSystemFactory {
 	public final static int Z = 2;
 	
 	private double[][][] axesVertices, boxVertices;
-	private SceneGraphComponent coordinateSystem;
+	private SceneGraphComponent coordinateSystem, component;
 	
 	private final String[] axesNames = {"x", "y", "z"};
 	
@@ -238,7 +238,7 @@ public class CoordinateSystemFactory {
 		}
     
     this.axisScale = axisScale;
-    
+    	this.component = component;
 		//create the coordinate system
 		coordinateSystem = createCoordinateSystem();
 		component.addChild(coordinateSystem);
@@ -256,7 +256,10 @@ public class CoordinateSystemFactory {
   }
 	
   
-	
+	public void dispose()	{
+		if (component!= null && component.isDirectAncestor(coordinateSystem))
+			component.removeChild(coordinateSystem);
+	}
 //-------------------------------------------------------------
 //PRIVATE METHODS FOR CALCULATING THE SYSTEM
 //-------------------------------------------------------------
