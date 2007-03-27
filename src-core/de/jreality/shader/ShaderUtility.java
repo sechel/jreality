@@ -42,6 +42,8 @@ package de.jreality.shader;
 
 import java.awt.Color;
 
+import de.jreality.jogl.JOGLConfiguration;
+import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.data.AttributeEntityUtility;
 
@@ -54,21 +56,22 @@ public class ShaderUtility {
   private ShaderUtility() {
   }
 
-  public static Color combineDiffuseColorWithTransparency(Color diffuseColor,
-      double transparency) {
+  public static Color combineDiffuseColorWithTransparency(Color diffuseColor, double transparency) {
     // LoggingSystem.getLogger().log(Level.FINE,"Input: c3, transparency:
     // "+diffuseColor.getAlpha()/255.0f+" "+transparency);
-    double alpha = diffuseColor.getAlpha() / 255.0f;
-    double alpha2 = 1.0 - transparency;
-    alpha = alpha * alpha2;
-    if (alpha < 0.0)
-      alpha = 0.0;
-    if (alpha > 1.0)
-      alpha = 1.0;
-    float[] f = diffuseColor.getRGBComponents(null);
-    f[3] = (float) alpha;
-    // LoggingSystem.getLogger().log(Level.FINE,"Alpha is "+alpha);
-    Color ret = new Color(f[0], f[1], f[2], f[3]);
+	  Color ret;
+	  double alpha = 1.0-transparency;
+	  if (JOGLRenderingState.useOldTransparency)	{
+		   double alpha2 = diffuseColor.getAlpha() / 255.0f;
+		   alpha = alpha * alpha2;
+		   if (alpha < 0.0)
+		      alpha = 0.0;
+		   if (alpha > 1.0)
+		      alpha = 1.0;
+	  }
+	  float[] f = diffuseColor.getRGBComponents(null);
+	  // LoggingSystem.getLogger().log(Level.FINE,"Alpha is "+alpha);		  
+	  ret = new Color(f[0], f[1], f[2], (float) alpha);
     // LoggingSystem.getLogger().log(Level.FINE,"f[3] is "+f[3]);
     // LoggingSystem.getLogger().log(Level.FINE,"Output: c3, alpha:
     // "+ret.getAlpha()/255.0f+" "+alpha);
