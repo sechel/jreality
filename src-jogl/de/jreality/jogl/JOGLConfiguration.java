@@ -72,26 +72,9 @@ public class JOGLConfiguration {
 	public static String localScratchDisk = null;
 	public static boolean quadBufferedStereo = false;
 	 public static String COPY_CAT = "copyCat", FORCE_RENDER = "preRender";
-	 static String gbName = "GoBetween", pcName = "JOGLPeerComponent";
 	static JOGLConfiguration ss = new JOGLConfiguration();
 	static Class<? extends GoBetween> goBetweenClass = null;
 	static Class<? extends JOGLPeerComponent> peerClass = null;
-//	static {
-//		try {
-//			String 	foo = Secure.getProperty("jreality.jogl.peerClass");
-//			if (foo != null) { 
-//				pcName = foo; 
-//				ConstructPeerGraphVisitor.setPeerClass(pcName);
-//			}
-//			foo = Secure.getProperty("jreality.jogl.goBetweenClass");
-//			if (foo != null) { 
-//				gbName = foo; 
-//				JOGLRenderer.setGoBetweenClass(gbName);
-//			}
-//		}	catch (ClassNotFoundException e) {
-//			e.printStackTrace();
-//		}
-//	}
 	private JOGLConfiguration() { 
 		super(); 
 		theLog	= LoggingSystem.getLogger(this);
