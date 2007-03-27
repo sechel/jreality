@@ -274,7 +274,7 @@ public class CoordinateSystemFactory {
 		
 		coordinateSystem = new SceneGraphComponent();
 		coordinateSystem.setName("CoordinateSystem");
-		
+		coordinateSystem.setOwner(this);
 		coordinateSystem.addChild(calculateBox());  //invisible child, use displayBox(boolean)
 		coordinateSystem.addChild(calculateAxes()); //invisible child, use displayBox(boolean)
 		
