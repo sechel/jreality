@@ -42,8 +42,6 @@ package de.jreality.shader;
 
 import java.awt.Color;
 
-import de.jreality.jogl.JOGLConfiguration;
-import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.data.AttributeEntityUtility;
 
@@ -56,12 +54,12 @@ public class ShaderUtility {
   private ShaderUtility() {
   }
 
-  public static Color combineDiffuseColorWithTransparency(Color diffuseColor, double transparency) {
+  public static Color combineDiffuseColorWithTransparency(Color diffuseColor, double transparency, boolean useOldTransparency) {
     // LoggingSystem.getLogger().log(Level.FINE,"Input: c3, transparency:
     // "+diffuseColor.getAlpha()/255.0f+" "+transparency);
 	  Color ret;
 	  double alpha = 1.0-transparency;
-	  if (JOGLRenderingState.useOldTransparency)	{
+	  if (useOldTransparency)	{
 		   double alpha2 = diffuseColor.getAlpha() / 255.0f;
 		   alpha = alpha * alpha2;
 		   if (alpha < 0.0)

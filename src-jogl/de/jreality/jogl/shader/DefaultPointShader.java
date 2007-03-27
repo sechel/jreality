@@ -106,7 +106,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		pointRadius = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
 		diffuseColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.POINT_DIFFUSE_COLOR_DEFAULT);	
 		double t = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
-		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, t);
+		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, t, JOGLRenderingState.useOldTransparency);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
 		polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
 		//System.err.println("Attenuate point size is "+attenuatePointSize);

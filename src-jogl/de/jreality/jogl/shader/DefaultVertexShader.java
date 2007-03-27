@@ -85,7 +85,7 @@ public class DefaultVertexShader implements VertexShader {
 		diffuseColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.DIFFUSE_COLOR_DEFAULT);
 		transparency= eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
 		//JOGLConfiguration.theLog.log(Level.INFO,"Name is "+name+" transparency is "+transparency);
-		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transparency);
+		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transparency, JOGLRenderingState.useOldTransparency);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
 		specularColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SPECULAR_COLOR), CommonAttributes.SPECULAR_COLOR_DEFAULT);
 		specularColorAsFloat = specularColor.getRGBComponents(null);
