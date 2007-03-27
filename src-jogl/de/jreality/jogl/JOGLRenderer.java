@@ -215,6 +215,9 @@ public class JOGLRenderer  implements AppearanceListener {
 			renderingState.clearColorBuffer = ((Boolean)obj).booleanValue();
 			theLog.fine("Setting clear color buffer to "+renderingState.clearColorBuffer);
 		}
+		obj = ap.getAttribute(CommonAttributes.USE_OLD_TRANSPARENCY, Boolean.class);		
+		// a bit ugly: we make this a static variable so shaders can access it easily
+		if (obj instanceof Boolean) JOGLRenderingState.useOldTransparency = ((Boolean)obj).booleanValue();
 		theLog.info("forceResTex = "+forceResidentTextures);
 //		theLog.info("component display lists = "+renderingState.componentDisplayLists);
 	}
@@ -238,10 +241,6 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 		if (auxiliaryRoot != null && thePeerAuxilliaryRoot == null)
 			thePeerAuxilliaryRoot = constructPeerForSceneGraphComponent(auxiliaryRoot, null);
-//		if (triggerDLD)	{
-//			thePeerRoot.propagateSGCDisplayListDirty();
-//			triggerDLD = false;
-//		}
 
 		context  = new Graphics3D(theViewer.getCameraPath(), null, CameraUtility.getAspectRatio(theViewer));
 

@@ -147,6 +147,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	transient protected boolean retainGeometry = false; // should geometry be saved
 	// using "Begin/EndArchive"?
 	transient protected boolean useProxyCommands = true;
+	transient protected boolean useOldTransparency = false;
 	// user can specify that tubes and spheres drawn by the appearances are to
 	// be opaque reqardless of the current transparency value
 	transient protected Color cs = null;
@@ -369,6 +370,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 				CommonAttributes.RMAN_OUTPUT_DISPLAY_FORMAT, "rgb");
 		globalIncludeFile = (String) eAppearance.getAttribute(
 				CommonAttributes.RMAN_GLOBAL_INCLUDE_FILE, "");
+		useOldTransparency = eAppearance.getAttribute(
+				CommonAttributes.USE_OLD_TRANSPARENCY, false);
 		if(!globalIncludeFile.equals("")) System.err.println("Preamble is " + globalIncludeFile);    
 		fogEnabled=(boolean)eAppearance.getAttribute(CommonAttributes.FOG_ENABLED, CommonAttributes.FOG_ENABLED_DEFAULT);   
 	}

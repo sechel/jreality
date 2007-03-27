@@ -85,6 +85,7 @@ public class JOGLRenderingState {
 	public boolean renderGeometryOnly = false;
 	public boolean insideDisplayList = false;
 	public boolean componentDisplayLists = true;
+	public static boolean useOldTransparency = false;
 
 	public int texUnitCount = 0;
 	public int polygonCount = 0;

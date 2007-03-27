@@ -28,7 +28,7 @@ import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.renderman.shader.DefaultPolygonShader;
-import de.jreality.renderman.shader.FreePolygonShader;
+import de.jreality.renderman.shader.CustomPolygonShader;
 import de.jreality.renderman.shader.RendermanShader;
 import de.jreality.renderman.shader.TwoSidePolygonShader;
 import de.jreality.scene.Appearance;
@@ -80,6 +80,10 @@ public class RIBHelper {
 			rs = rdps;
 			Cs = dps.getDiffuseColor();
 			transparency = (float)dps.getTransparency().floatValue();
+//			if (ribv.useOldTransparency)	{
+//				double alpha = Cs.getAlpha()/255.0;
+//				transparency = (1-alpha) * transparency;
+//			}
 			ribv.cs=dps.getDiffuseColor();
 			ribv.smooth = dps.getSmoothShading();
 		} 
@@ -91,6 +95,10 @@ public class RIBHelper {
 			de.jreality.shader.DefaultPolygonShader dpss = ((de.jreality.shader.DefaultPolygonShader)dps.getFront());
 			Cs = dpss.getDiffuseColor();
 			transparency = (float)dpss.getTransparency().floatValue();
+//			if (ribv.useOldTransparency)	{
+//				double alpha = Cs.getAlpha()/255.0;
+//				transparency = (1-alpha) * transparency;
+//			}
 			ribv.cs=dpss.getDiffuseColor();
 			ribv.smooth = dpss.getSmoothShading();
 			// TODO figure out how to read out a reasonable "smooth" and "cs" value from this shader
@@ -98,7 +106,9 @@ public class RIBHelper {
 		else {
 			LoggingSystem.getLogger(ShaderUtility.class).warning("Unknown shader class "+ps.getClass());
 		}
-		float[] csos = extractCsOs(Cs, (!(ribv.handlingProxyGeometry && ribv.opaqueTubes) && ribv.transparencyEnabled) ? transparency : 0f);
+		float[] csos = extractCsOs(Cs, 
+				(!(ribv.handlingProxyGeometry && ribv.opaqueTubes) && ribv.transparencyEnabled) ? transparency : 0f,
+				ribv.useOldTransparency);
 		ribv.ri.color(csos);
 		ribv.ri.shader(rs);
 		
@@ -126,13 +136,15 @@ public class RIBHelper {
 				slApp.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.RMAN_SURFACE_SHADER, sls);
 				EffectiveAppearance slEApp=EffectiveAppearance.create();
 				slEApp=slEApp.create(slApp);
-				rs=new FreePolygonShader();
+				rs=new CustomPolygonShader();
 				rs.setFromEffectiveAppearance(ribv, slEApp, "lineShader");		
 			}
 		}else {
 			LoggingSystem.getLogger(ShaderUtility.class).warning("Unknown shader class "+ls.getClass());
 		}
-		float[] csos = extractCsOs(Cs, (!(ribv.handlingProxyGeometry && ribv.opaqueTubes) && ribv.transparencyEnabled) ? transparency : 0f);
+		float[] csos = extractCsOs(Cs, 
+				(!(ribv.handlingProxyGeometry && ribv.opaqueTubes) && ribv.transparencyEnabled) ? transparency : 0f,
+				ribv.useOldTransparency);
 		ribv.ri.color(csos);
 		ribv.ri.shader(rs);
 		
@@ -159,13 +171,15 @@ public class RIBHelper {
 				slApp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.RMAN_SURFACE_SHADER, sls);
 				EffectiveAppearance slEApp=EffectiveAppearance.create();
 				slEApp=slEApp.create(slApp);
-				rs=new FreePolygonShader();
+				rs=new CustomPolygonShader();
 				rs.setFromEffectiveAppearance(ribv, slEApp, "pointShader");
 			}
 		}else {
 			LoggingSystem.getLogger(ShaderUtility.class).warning("Unknown shader class "+vs.getClass());
 		}
-		float[] csos = extractCsOs(Cs, (!(ribv.handlingProxyGeometry && ribv.opaqueTubes) && ribv.transparencyEnabled) ? transparency : 0f);
+		float[] csos = extractCsOs(Cs, 
+				(!(ribv.handlingProxyGeometry && ribv.opaqueTubes) && ribv.transparencyEnabled) ? transparency : 0f,
+				ribv.useOldTransparency);
 		ribv.ri.color(csos);
 		ribv.ri.shader(rs);
 		
@@ -173,7 +187,7 @@ public class RIBHelper {
 	}
 	
 	
-	protected static float[] extractCsOs(Color color, double transparency)	{
+	protected static float[] extractCsOs(Color color, double transparency, boolean useOldTransparency)	{
 		float[] csos = new float[4];
 		float colorAlpha = 1.0f;
 		if (color != Appearance.INHERITED) {
@@ -187,7 +201,7 @@ public class RIBHelper {
 
 		csos[3] = 1f - (float) transparency;
 		// TODO remove this if we decide finally to not allow transparency control via alpha channel of Color
-		csos[3] *= colorAlpha;
+		if (useOldTransparency) csos[3] *= colorAlpha;
 		return csos;
 	}
 
