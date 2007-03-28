@@ -66,13 +66,13 @@ import de.jreality.scene.data.IntArrayArray;
 
 class BruteForcePicking {
 
-  private static Matrix m=new Matrix();
-  private static Matrix mInv=new Matrix();
+//  private static Matrix m=new Matrix();
+//  private static Matrix mInv=new Matrix();
   
   //private static double[] bary = new double[4], p1=new double[4], p2=new double[4], p3=new double[4], plane=new double[4], pobj=new double[4];
-  public static void intersectPolygons(IndexedFaceSet ifs, int signature, SceneGraphPath path, double[] from, double[] to, ArrayList<Hit> hits) {
-    path.getMatrix(m.getArray());
-    path.getInverseMatrix(mInv.getArray());
+  public static void intersectPolygons(IndexedFaceSet ifs, int signature, SceneGraphPath path, Matrix m, Matrix mInv, double[] from, double[] to, ArrayList<Hit> hits) {
+//    path.getMatrix(m.getArray());
+//    path.getInverseMatrix(mInv.getArray());
     
     double[] fromLocal=mInv.multiplyVector(from);
     double[] toLocal=mInv.multiplyVector(to);
@@ -127,9 +127,9 @@ class BruteForcePicking {
 
   }
 
-  public static void intersectEdges(IndexedLineSet ils, int signature, SceneGraphPath path, double[] from, double[] to, double tubeRadius, ArrayList localHits) {
-    path.getMatrix(m.getArray());
-    path.getInverseMatrix(mInv.getArray()); 
+  public static void intersectEdges(IndexedLineSet ils, int signature, SceneGraphPath path, Matrix m, Matrix mInv, double[] from, double[] to, double tubeRadius, ArrayList localHits) {
+//    path.getMatrix(m.getArray());
+//    path.getInverseMatrix(mInv.getArray()); 
     
     double[] fromOb=mInv.multiplyVector(from);
     double[] toOb=mInv.multiplyVector(to);
@@ -169,7 +169,8 @@ class BruteForcePicking {
     
     LinkedList MY_HITS = new LinkedList();
     DoubleArray edgeRadii = getRadii(ils);
-    for(int i=0, m=edges.getLength();i<m;i++){
+    int mm = edges.getLength();
+    for(int i=0;i<mm;i++){
       edge = edges.getValueAt(i);
 //      tubeRadius = edgeRadii==null?tubeRadius:edgeRadii.getValueAt(i);
       double realRad =  tubeRadius;
@@ -195,7 +196,7 @@ class BruteForcePicking {
           Pn.dehomogenize(vertex1, vecRaw1);
           Pn.dehomogenize(vertex2, vecRaw2);
         }
-        intersectCylinder(MY_HITS,fromOb3,dirOb3,vertex1,vertex2,tubeRadius);
+        intersectCylinder(MY_HITS, m, fromOb3,dirOb3,vertex1,vertex2,tubeRadius);
         for (Iterator it = MY_HITS.iterator(); it.hasNext(); ) {
           double[] hitPoint = (double[]) it.next();
           it.remove();
@@ -238,9 +239,9 @@ class BruteForcePicking {
     return dl.toIntArrayArray();
   }
 
-  public static void intersectPoints(PointSet ps, int signature, SceneGraphPath path, double[] from, double[] to, double pointRadius, ArrayList localHits) {
-    path.getMatrix(m.getArray());
-    path.getInverseMatrix(mInv.getArray()); 
+  public static void intersectPoints(PointSet ps, int signature, SceneGraphPath path, Matrix m, Matrix mInv, double[] from, double[] to, double pointRadius, ArrayList localHits) {
+//    path.getMatrix(m.getArray());
+//    path.getInverseMatrix(mInv.getArray()); 
     
     double[] fromOb=mInv.multiplyVector(from);
     double[] toOb=mInv.multiplyVector(to);
@@ -294,10 +295,10 @@ class BruteForcePicking {
 
 
   private static final List SPHERE_HIT_LIST=new LinkedList();
-  public static void intersectSphere(Sphere sphere, int signature, SceneGraphPath path, double[] from, double[] to, ArrayList localHits) {
+  public static void intersectSphere(Sphere sphere, int signature, SceneGraphPath path, Matrix m, Matrix mInv, double[] from, double[] to, ArrayList localHits) {
     
-    path.getMatrix(m.getArray());
-    path.getInverseMatrix(mInv.getArray());   
+//    path.getMatrix(m.getArray());
+//    path.getInverseMatrix(mInv.getArray());   
     double[] fromOb=mInv.multiplyVector(from);
     double[] toOb=mInv.multiplyVector(to);
     
@@ -364,9 +365,9 @@ class BruteForcePicking {
   }
   
   private static final List CYLINDER_HIT_LIST=new LinkedList();
-  public static void intersectCylinder(Cylinder cylinder, int signature, SceneGraphPath path, double[] from, double[] to, ArrayList localHits) {
-    path.getMatrix(m.getArray());
-    path.getInverseMatrix(mInv.getArray());
+  public static void intersectCylinder(Cylinder cylinder, int signature, SceneGraphPath path, Matrix m, Matrix mInv, double[] from, double[] to, ArrayList localHits) {
+//    path.getMatrix(m.getArray());
+//    path.getInverseMatrix(mInv.getArray());
     
     double[] fromOb=mInv.multiplyVector(from);
     double[] toOb=mInv.multiplyVector(to);
@@ -387,7 +388,7 @@ class BruteForcePicking {
     }
     
     
-    intersectCylinder(CYLINDER_HIT_LIST, fromOb3, dirOb3, new double[] {0,0,1} , new double[] {0,0,-1}, 1);
+    intersectCylinder(CYLINDER_HIT_LIST, m, fromOb3, dirOb3, new double[] {0,0,1} , new double[] {0,0,-1}, 1);
     double[] tmp = new double[from.length];
     for (Iterator i = CYLINDER_HIT_LIST.iterator(); i.hasNext(); ) {
       double[] hitPoint = (double[]) i.next();
@@ -407,7 +408,7 @@ class BruteForcePicking {
    * @param v2 lower point of cylinder-axis
    * @param r in local coordinates, radius
    */
-  private static void intersectCylinder(List hits, final double[] f, final double[] d, final double[] v1, final double[] v2, double r) {
+  private static void intersectCylinder(List hits, Matrix m, final double[] f, final double[] d, final double[] v1, final double[] v2, double r) {
 
     
     boolean debug=false;
