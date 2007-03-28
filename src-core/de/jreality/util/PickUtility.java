@@ -90,9 +90,9 @@ public class PickUtility {
   public static void setPickable(SceneGraphComponent cmp, final boolean pickPoints, boolean pickEdges, boolean pickFaces) {
 	if (cmp.getAppearance() ==null) cmp.setAppearance(new Appearance());
 	  
-	cmp.getAppearance().setAttribute("pointShader."+CommonAttributes.PICKABLE, pickPoints);
-	cmp.getAppearance().setAttribute("lineShader."+CommonAttributes.PICKABLE, pickEdges);
-	cmp.getAppearance().setAttribute("polygonShader."+CommonAttributes.PICKABLE, pickFaces);
+	cmp.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE, pickPoints);
+	cmp.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.PICKABLE, pickEdges);
+	cmp.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.PICKABLE, pickFaces);
 
   }
   public static void setPickable(Geometry g, boolean pickable) {
