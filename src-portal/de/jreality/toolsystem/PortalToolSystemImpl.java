@@ -1,11 +1,20 @@
 package de.jreality.toolsystem;
 
+import java.awt.Toolkit;
+
 import de.jreality.jogl.Viewer;
+import de.jreality.portal.awt.SynchEventQueue;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
 
 public class PortalToolSystemImpl extends ToolSystem implements PortalToolSystem {
 
+	private static final SynchEventQueue SYNCH_EVENT_QUEUE = new SynchEventQueue();
+	private static final boolean DO_SYNCH=false;
 	Viewer joglViewer;
+	
+	static {
+		if (DO_SYNCH) Toolkit.getDefaultToolkit().getSystemEventQueue().push(SYNCH_EVENT_QUEUE);
+	}
 	
 	  public PortalToolSystemImpl(Viewer joglViewer, ToolSystemConfiguration config) {
 		  super(joglViewer, config, null);
@@ -16,7 +25,8 @@ public class PortalToolSystemImpl extends ToolSystem implements PortalToolSystem
 	 * @see de.jreality.toolsystem.PortalToolSystem#render()
 	 */
 	public void render() {
-		  joglViewer.render();
+		if (DO_SYNCH) SYNCH_EVENT_QUEUE.unlock();
+		joglViewer.render();
 	  }
 	  
 	  /* (non-Javadoc)
