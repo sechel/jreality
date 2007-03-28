@@ -43,6 +43,7 @@ package de.jreality.scene.pick;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
@@ -79,9 +80,9 @@ public class AABBPickSystem implements PickSystem {
   private double maxDist;
   
   private ArrayList<Hit> hits = new ArrayList<Hit>();
-  
+  private HashMap<IndexedFaceSet, AABBTree> aabbTreeExists = new HashMap<IndexedFaceSet, AABBTree>();
+  private HashMap<Geometry, Boolean> isPickableMap = new HashMap<Geometry, Boolean>();
   private Comparator<Hit> cmp = new Hit.HitComparator();
-  
   private double[] from;
   private double[] to;
 //  private double[] dir;
@@ -198,6 +199,11 @@ public class AABBPickSystem implements PickSystem {
     
     // TODO simplify this to only read appearances
     private void readEApp() {
+    	// test to see how fast picking is without having to access effective appearance
+//    	pickPoints = pickEdges = false;
+//    	pickFaces = true;
+//    	pointRadius = .02;
+//    	tubeRadius = .02;
       pickPoints=eap.getAttribute(CommonAttributes.VERTEX_DRAW, true)
         && eap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE, true);
       pickEdges=eap.getAttribute(CommonAttributes.EDGE_DRAW, true)
@@ -209,14 +215,21 @@ public class AABBPickSystem implements PickSystem {
     }
     
     private boolean isPickable(Geometry g) {
-      Object o = g.getGeometryAttributes(CommonAttributes.PICKABLE);
-      return !(o != null && o.equals(Boolean.FALSE));
+    	Boolean boo = isPickableMap.get(g);
+    	if (boo == null) {
+    	    Object o = g.getGeometryAttributes(CommonAttributes.PICKABLE);
+    	    boo =  !(o != null && o.equals(Boolean.FALSE));
+    		isPickableMap.put(g, boo);
+    	}
+      return boo.booleanValue();
     }
 
     public void visit() {
     	stackCounter = 0;
     	matrixStack[0] = new Matrix();
-      visit(root);
+    	aabbTreeExists.clear();
+    	isPickableMap.clear();
+    	visit(root);
     }
 
     public void visit(Sphere s) {
@@ -230,7 +243,7 @@ public class AABBPickSystem implements PickSystem {
     }
     
     public void visit(Cylinder c) {
-      if (!pickFaces || !isPickable(c)) return;
+       if (!pickFaces || !isPickable(c)) return;
       
       localHits.clear();
       
@@ -240,16 +253,22 @@ public class AABBPickSystem implements PickSystem {
     }
     
     public void visit(IndexedFaceSet ifs) {
-      
+      if (!isPickable(ifs)) return;
       visit((IndexedLineSet)ifs);
 
-      if (!pickFaces || !isPickable(ifs)) return;      
-
-      AABBTree tree = (AABBTree) ifs.getGeometryAttributes("AABBTree");
+      if (!pickFaces) return;      
+      
+      AABBTree tree = aabbTreeExists.get(ifs);
+      if (tree == null) {
+    	  // not yet processed
+    	  tree = (AABBTree) ifs.getGeometryAttributes("AABBTree");
+    	  if (tree == null) tree = AABBTree.nullTree;
+    	  aabbTreeExists.put(ifs, tree);
+      }
       
       localHits.clear();
       
-        if (tree == null) {
+        if (tree == AABBTree.nullTree) {
           BruteForcePicking.intersectPolygons(ifs, signature, path, m, mInv, from, to, localHits);
         } else {
           tree.intersect(ifs, signature, path, from, to, localHits);
@@ -258,8 +277,9 @@ public class AABBPickSystem implements PickSystem {
     }
     
     public void visit(IndexedLineSet ils) {
+      if (!isPickable(ils)) return;
       visit((PointSet)ils);
-      if (!pickEdges || !isPickable(ils)) return;
+      if (!pickEdges) return;
 
       localHits.clear();
 
@@ -269,7 +289,7 @@ public class AABBPickSystem implements PickSystem {
     }
 
     public void visit(PointSet ps) {
-      
+     
       if (!pickPoints || !isPickable(ps)) return;
 
       localHits.clear();

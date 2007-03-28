@@ -95,6 +95,7 @@ public class AABBTree {
     private int myStart, myEnd;
 
     private boolean debug;
+    public static AABBTree nullTree = new AABBTree(null, 0, 1, 0, false);
     
     private AABBTree(TreePolygon[] polygons, int maxPolysPerLeaf, int start, int end, boolean debug) {
       this.debug = debug;
@@ -152,6 +153,7 @@ public class AABBTree {
      *            The end index of the tris array, exclusive.
      */
     private void createTree(int start, int end) {
+    	if (start > end) return;
         myStart = start;
         myEnd = end;
   			bounds = new AABB();
