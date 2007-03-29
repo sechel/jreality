@@ -124,9 +124,9 @@ public class RotateTool extends AbstractTool {
     if (!fixOrigin && updateCenter) center = getCenter(comp);
     
 	result.assignFrom(comp.getTransformation());
-    result.multiplyOnRight(center);
+    if (!fixOrigin) result.multiplyOnRight(center);
     result.multiplyOnRight(evolution);
-    result.multiplyOnRight(center.getInverse());
+    if (!fixOrigin) result.multiplyOnRight(center.getInverse());
     comp.getTransformation().setMatrix(result.getArray());
   }
 
