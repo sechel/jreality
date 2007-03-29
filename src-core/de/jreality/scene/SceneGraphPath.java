@@ -79,223 +79,236 @@ import de.jreality.math.Rn;
  */
 public class SceneGraphPath implements Cloneable {
 
-  protected LinkedList<SceneGraphNode> path = new LinkedList<SceneGraphNode>();			// a list of SceneGraphComponents
+	protected LinkedList<SceneGraphNode> path = new LinkedList<SceneGraphNode>();			// a list of SceneGraphComponents
 
-  public static SceneGraphPath fromList(List<SceneGraphNode> list) {
-    SceneGraphPath path=new SceneGraphPath();
-    path.path.addAll(list);
-    return path;
-  }
+	public SceneGraphPath() {}
+
+	public SceneGraphPath(SceneGraphPath path) {
+		this();
+		this.path.addAll(path.path);
+	}
+
+	public static SceneGraphPath fromList(List<SceneGraphNode> list) {
+		SceneGraphPath path = new SceneGraphPath();
+		path.path.addAll(list);
+		return path;
+	}
 
 	public String toString() {
-    if(path.isEmpty()) return "<< empty path >>";
-    StringBuffer sb = new StringBuffer();
-    for(int ix=0, n=path.size(); ix < n; ix++)
-    {
-      sb.append(((SceneGraphNode)path.get(ix)).getName()).append(" : ");
-    }
-    sb.setLength(sb.length()-3);
-    return sb.toString();
-  }
-  
-  public Object clone() {
-    SceneGraphPath path=new SceneGraphPath();
-    path.path.addAll(this.path);
-    return path;
-  }
-  
-  public List<SceneGraphNode> toList() {
-    return new ArrayList<SceneGraphNode>(path);
-  }
+		if(path.isEmpty()) return "<< empty path >>";
+		StringBuffer sb = new StringBuffer();
+		for(int ix=0, n=path.size(); ix < n; ix++)
+		{
+			sb.append(((SceneGraphNode)path.get(ix)).getName()).append(" : ");
+		}
+		sb.setLength(sb.length()-3);
+		return sb.toString();
+	}
 
-  // TODO write own Iterator classes...
-  
-  public ListIterator<SceneGraphNode> iterator() {
-    return Collections.unmodifiableList(path).listIterator();
-  }
-  public ListIterator<SceneGraphNode> iterator(int start) {
-    return Collections.unmodifiableList(path).listIterator(start);
-  }
-  
-  /**
-   * 
-   * @param start how many knodes from the end of the path should we leave out?
-   * i.e.: p.reverseIterator(p.getLength()) gives the same result as p.reverseIterator()
-   * @return a reverse iterator from the given position
-   */
-  public Iterator reverseIterator(int start) {
-    final ListIterator iter = iterator(start);
-    return new Iterator() {
+	/**
+	 * @deprecated use {@link SceneGraphPath#SceneGraphPath(SceneGraphPath)} instead
+	 */
+	public Object clone() {
+		SceneGraphPath path=new SceneGraphPath();
+		path.path.addAll(this.path);
+		return path;
+	}
 
-      public void remove() {
-          iter.remove();
-      }
+	public List<SceneGraphNode> toList() {
+		return new ArrayList<SceneGraphNode>(path);
+	}
 
-      public boolean hasNext() {
-          return iter.hasPrevious();
-      }
+	// TODO write own Iterator classes...
 
-      public Object next() {
-          return iter.previous();
-      }
-    };
-  }
+	public ListIterator<SceneGraphNode> iterator() {
+		return Collections.unmodifiableList(path).listIterator();
+	}
+	public ListIterator<SceneGraphNode> iterator(int start) {
+		return Collections.unmodifiableList(path).listIterator(start);
+	}
 
-  public Iterator reverseIterator() {
-    return reverseIterator(path.size());
-  }
+	/**
+	 * 
+	 * @param start how many knodes from the end of the path should we leave out?
+	 * i.e.: p.reverseIterator(p.getLength()) gives the same result as p.reverseIterator()
+	 * @return a reverse iterator from the given position
+	 */
+	public Iterator reverseIterator(int start) {
+		final ListIterator iter = iterator(start);
+		return new Iterator() {
 
-  /**
+			public void remove() {
+				iter.remove();
+			}
+
+			public boolean hasNext() {
+				return iter.hasPrevious();
+			}
+
+			public Object next() {
+				return iter.previous();
+			}
+		};
+	}
+
+	public Iterator reverseIterator() {
+		return reverseIterator(path.size());
+	}
+
+	/**
 	 * Gives the length of the path
 	 * @return int
 	 */
 	public int getLength() {
 		return path.size();
 	}
-  
-  public final void push(final SceneGraphNode c) {
-    path.add(c);
-  }
-  /**
-   * lets this path unchanged
-   * @return a new path that is equal to this path after calling path.push(c)
-   */
-  public final SceneGraphPath pushNew(final SceneGraphNode c) {
-    SceneGraphPath ret = SceneGraphPath.fromList(path);
-    ret.path.add(c);
-    return ret;
-  }
 
-  public final void pop() {
-    path.removeLast();
-  }
-  /**
-   * lets this path unchanged
-   * @return a new path that is equal to this path after calling path.pop()
-   */
-  public final SceneGraphPath popNew() {
-    SceneGraphPath ret = SceneGraphPath.fromList(path);
-    ret.path.removeLast();
-    return ret;
-  }
-    
-  public SceneGraphNode getFirstElement() {
-    return (SceneGraphNode) path.getFirst();
-  }
+	public final void push(final SceneGraphNode c) {
+		path.add(c);
+	}
+	
+	/**
+	 * lets this path unchanged
+	 * @return a new path that is equal to this path after calling path.push(c)
+	 */
+	public final SceneGraphPath pushNew(final SceneGraphNode c) {
+		SceneGraphPath ret = SceneGraphPath.fromList(path);
+		ret.push(c);
+		return ret;
+	}
 
-  public SceneGraphNode getLastElement() {
-    return (SceneGraphNode) path.getLast();
-  }
+	public final void pop() {
+		path.removeLast();
+	}
+	
+	/**
+	 * lets this path unchanged
+	 * @return a new path that is equal to this path after calling path.pop()
+	 */
+	public final SceneGraphPath popNew() {
+		SceneGraphPath ret = SceneGraphPath.fromList(path);
+		ret.path.removeLast();
+		return ret;
+	}
 
-  public SceneGraphComponent getLastComponent() {
-    if (!(path.getLast() instanceof SceneGraphComponent)) return (SceneGraphComponent) path.get(path.size()-2);
-    return (SceneGraphComponent) path.getLast();
-  }
+	public SceneGraphNode getFirstElement() {
+		return (SceneGraphNode) path.getFirst();
+	}
+
+	public SceneGraphNode getLastElement() {
+		return (SceneGraphNode) path.getLast();
+	}
+
+	public SceneGraphComponent getLastComponent() {
+		if (!(path.getLast() instanceof SceneGraphComponent)) return (SceneGraphComponent) path.get(path.size()-2);
+		return (SceneGraphComponent) path.getLast();
+	}
 
 	public void clear()	{
 		path.clear();
 	}
-	
-  /**
-   * checks if the path is really an existing path in the scenegraph.
-   * 
-   * @return true if the path exists
-   */
+
+	/**
+	 * Checks if the path is really an existing path in the scenegraph.
+	 * 
+	 * @return true if the path exists
+	 */
 	public boolean isValid()
-  {
-    if (path.size()==0) return true;
-    Iterator i = path.iterator();
-    SceneGraphNode parent = (SceneGraphNode) i.next();
-    try {
-  		for ( ; i.hasNext(); )	{
-  			SceneGraphNode child = (SceneGraphNode) i.next();
-  			if(!((SceneGraphComponent)parent).isDirectAncestor(child)) return false;
-        if (i.hasNext()) parent = child;
-  		}
-    } catch (ClassCastException cce) {
-      // this happens if a non-component node is somwhere IN the path
-      return false;
-    }
+	{
+		if (path.size()==0) return true;
+		Iterator<SceneGraphNode> i = path.iterator();
+		SceneGraphNode parent = i.next();
+		if (!(parent instanceof SceneGraphComponent)) return false;
+		try {
+			while(i.hasNext())	{
+				SceneGraphNode child = i.next();
+				if(!((SceneGraphComponent)parent).isDirectAncestor(child)) return false;
+				if (i.hasNext()) parent = child;
+			}
+		} catch (ClassCastException cce) {
+			// this happens if a non-component node is somwhere IN the path
+			return false;
+		}
 		return true;
 	}
 
 	@Override
 	public boolean equals(Object p) {
 		if (p instanceof SceneGraphPath)
-    		return isEqual((SceneGraphPath) p);
+			return isEqual((SceneGraphPath) p);
 		return false;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		int result = 1;
 		for (Object element : path) {
-            result = 31 * result + element.hashCode();
-        }
+			result = 31 * result + element.hashCode();
+		}
 		return result;
 	}
-	
+
 	public boolean isEqual(SceneGraphPath anotherPath)
 	{
 		if (anotherPath == null || path.size() != anotherPath.getLength())	return false;
 
 		for (int i=0; i<path.size(); ++i)	{
-				if (!path.get(i).equals(anotherPath.path.get(i))) return false;
+			if (!path.get(i).equals(anotherPath.path.get(i))) return false;
 		}
 		return true;
 	}
 
-  public boolean startsWith(SceneGraphPath potentialPrefix) {
-      if (getLength() < potentialPrefix.getLength()) return false;
-      Iterator i1 = iterator();
-      Iterator i2 = potentialPrefix.iterator();
-      for (; i2.hasNext();) {
-          if (i1.next() != i2.next()) return false;
-      }
-      return true;
-  }
-  /*** matrix calculations ***/
-	
+	public boolean startsWith(SceneGraphPath potentialPrefix) {
+		if (getLength() < potentialPrefix.getLength()) return false;
+		Iterator i1 = iterator();
+		Iterator i2 = potentialPrefix.iterator();
+		for (; i2.hasNext();) {
+			if (i1.next() != i2.next()) return false;
+		}
+		return true;
+	}
+	/*** matrix calculations ***/
+
 	public double[] getMatrix(double[] aMatrix)
 	{
 		return getMatrix(aMatrix, 0, path.size()-1);
 	}
 
-  public double[] getMatrix(double[] aMatrix, int begin)
-  {
-    return getMatrix(aMatrix, begin, path.size()-1);
-  }
+	public double[] getMatrix(double[] aMatrix, int begin)
+	{
+		return getMatrix(aMatrix, begin, path.size()-1);
+	}
 
-  public double[] getInverseMatrix(double[] invMatrix)
+	public double[] getInverseMatrix(double[] invMatrix)
 	{
 		return getInverseMatrix(invMatrix, 0, path.size()-1);
 	}
 
-  public double[] getInverseMatrix(double[] invMatrix, int begin)
-  {
-    return getInverseMatrix(invMatrix, begin, path.size()-1);
-  }
+	public double[] getInverseMatrix(double[] invMatrix, int begin)
+	{
+		return getInverseMatrix(invMatrix, begin, path.size()-1);
+	}
 
-  public double[] getMatrix(double[] aMatrix, int begin, int end)
+	public double[] getMatrix(double[] aMatrix, int begin, int end)
 	{
 		final double[] myMatrix;
 		if (aMatrix == null) myMatrix = new double[16];
 		else myMatrix = aMatrix;
 		Rn.setIdentityMatrix(myMatrix);
 
-    for (ListIterator it = path.listIterator(begin); it.nextIndex() <= end; )  
-    {
-      Object currObj = it.next();
-      if (currObj instanceof SceneGraphComponent) {
-        SceneGraphComponent currComp = (SceneGraphComponent)currObj;
-        Transformation tt = currComp.getTransformation();
-        if (tt == null) continue;
-        Rn.times(myMatrix, myMatrix, tt.getMatrix());         
-      }
-    }
+		for (ListIterator it = path.listIterator(begin); it.nextIndex() <= end; )  
+		{
+			Object currObj = it.next();
+			if (currObj instanceof SceneGraphComponent) {
+				SceneGraphComponent currComp = (SceneGraphComponent)currObj;
+				Transformation tt = currComp.getTransformation();
+				if (tt == null) continue;
+				Rn.times(myMatrix, myMatrix, tt.getMatrix());         
+			}
+		}
 		return myMatrix;
 	}
-	
+
 	public double[] getInverseMatrix(double[] aMatrix, int begin, int end)
 	{
 		double[] mat = getMatrix(aMatrix, begin, end);
