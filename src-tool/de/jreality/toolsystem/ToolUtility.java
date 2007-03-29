@@ -41,6 +41,7 @@
 package de.jreality.toolsystem;
 
 import de.jreality.math.Matrix;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
@@ -120,6 +121,24 @@ public class ToolUtility {
     Matrix local2world = new Matrix();
     rootToLocal.getMatrix(local2world.getArray());
     return local2world.multiplyVector(localVector);
+  }
+  public static void attachTimer(javax.swing.Timer timer, ToolContext tc) {
+	  if (timer instanceof de.jreality.tools.Timer) {
+		de.jreality.tools.Timer tt = (de.jreality.tools.Timer) timer;
+		tt.attach(tc);
+	}
+  }
+  public static void attachTimer(javax.swing.Timer timer, ToolSystemViewer tc) {
+	  if (timer instanceof de.jreality.tools.Timer) {
+		de.jreality.tools.Timer tt = (de.jreality.tools.Timer) timer;
+		tt.attach(tc);
+	}
+  }
+  public static void attachTimer(javax.swing.Timer timer, SceneGraphComponent tc) {
+	  if (timer instanceof de.jreality.tools.Timer) {
+		de.jreality.tools.Timer tt = (de.jreality.tools.Timer) timer;
+		tt.attach(tc);
+	}
   }
 
 }

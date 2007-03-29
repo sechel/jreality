@@ -77,7 +77,7 @@ public class Timer extends javax.swing.Timer {
 		super(delay, listener);
 	}
 	
-	void attach(ToolSystemViewer tsv) {
+	public void attach(ToolSystemViewer tsv) {
 		attach(tsv.getToolSystem());
 	}
 
@@ -85,16 +85,16 @@ public class Timer extends javax.swing.Timer {
 		attach(AnimatorTool.getInstanceImpl(ts));
 	}
 	
-	void attach(ToolContext tc) {
+	public void attach(ToolContext tc) {
 		attach(AnimatorTool.getInstance(tc));
 	}
 
-	void attach(AnimatorTool at) {
+	public void attach(AnimatorTool at) {
 		if (timerQueue != null) return;
 		timerQueue = at.getTimerQueue();
 	}
 	
-	void attach(SceneGraphComponent cmp) {
+	public void attach(SceneGraphComponent cmp) {
 		if (timerQueue != null) return;
 		cmp.addTool(new AbstractTool() {
 			{
