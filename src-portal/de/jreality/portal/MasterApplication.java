@@ -11,8 +11,6 @@ import de.jreality.toolsystem.ToolEvent;
 import de.jreality.toolsystem.ToolEventQueue;
 import de.jreality.toolsystem.ToolEventReceiver;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.vr.ViewerVR;
 import de.smrj.Broadcaster;
 import de.smrj.tcp.TCPBroadcasterNIO;
 import de.smrj.tcp.management.JarServer;
@@ -36,6 +34,8 @@ public class MasterApplication {
 	DeviceManager deviceManager;
 	ToolEventQueue eventQueue;
 	
+	static final boolean DUMP_RENDER=false;
+	
 	public MasterApplication(final PortalToolSystem receiver) throws IOException {
 		ToolSystemConfiguration config = ToolSystemConfiguration.loadRemotePortalMasterConfiguration();
 		eventQueue = new ToolEventQueue(new ToolEventReceiver() {
@@ -49,10 +49,12 @@ public class MasterApplication {
 				if (event.getInputSlot() == SYSTEM_TIME) {
 					
 					
-					st = -System.currentTimeMillis();
+					if (DUMP_RENDER) st = -System.currentTimeMillis();
 					receiver.render();
-					st+=System.currentTimeMillis();
-					System.out.println("render took "+st+" ms");
+					if (DUMP_RENDER) {
+						st+=System.currentTimeMillis();
+						System.out.println("render took "+st+" ms");
+					}
 					
 //					st = -System.currentTimeMillis();
 //					receiver.swapBuffers();
@@ -73,9 +75,7 @@ public class MasterApplication {
 		Broadcaster bc = new TCPBroadcasterNIO(port, Broadcaster.RESPONSE_TYPE_EXCEPTION);
 		Local.sendStart(port, cpPort, Broadcaster.RESPONSE_TYPE_EXCEPTION, ClientFactory.class);
 		js.waitForDownloads();
-		Class appClass;
-		if (args.length == 0) appClass=ViewerVR.class;
-		else appClass = Class.forName(args[0]);
+		Class appClass = Class.forName(args.length == 0 ? "de.jreality.vr.ViewerVR" : args[0]);
 		PortalToolSystem tr = bc.getRemoteFactory().createRemoteViaStaticMethod(
 				PortalToolSystem.class, RemoteExecutor.class,
 				"startRemote", new Class[]{Class.class, String[].class}, new Object[]{appClass, null});
