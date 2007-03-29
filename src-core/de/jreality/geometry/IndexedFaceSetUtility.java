@@ -420,6 +420,11 @@ public class IndexedFaceSetUtility {
 	 * @param factor
 	 * @return
 	 */public static IndexedFaceSet implode(IndexedFaceSet ifs, double factor)	{
+		 
+		 	// steffen: changed so that edges are only created when the
+			// given isf had edges
+			boolean makeEdges = ifs.getEdgeAttributes().containsAttribute(Attribute.INDICES);
+			
 		int vertcount = 0;
 		int[][] ind = ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
 		//int[][] ind = ifs.getIndices();
@@ -476,9 +481,7 @@ public class IndexedFaceSetUtility {
 			if (fn != null)   ifsf.setFaceNormals(fn);
 			else ifsf.setGenerateFaceNormals(true);
 			if (fc != null)   ifsf.setFaceColors(fc);
-			// steffen: changed so that edges are only created when the
-			// given isf had edges
-			boolean makeEdges = ifs.getEdgeAttributes().containsAttribute(Attribute.INDICES);
+			
 			ifsf.setGenerateEdgesFromFaces(makeEdges);
 			ifsf.update();
 			imploded = ifsf.getIndexedFaceSet();
@@ -520,7 +523,7 @@ public class IndexedFaceSetUtility {
 			ifsf.setVertexCoordinates(newverts);
 			ifsf.setFaceIndices(newind);
 			ifsf.setGenerateFaceNormals(true);
-			ifsf.setGenerateEdgesFromFaces(true);
+			ifsf.setGenerateEdgesFromFaces(makeEdges);
 			ifsf.update();
 			imploded = ifsf.getIndexedFaceSet();
 
