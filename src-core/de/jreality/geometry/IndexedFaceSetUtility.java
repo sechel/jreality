@@ -476,7 +476,10 @@ public class IndexedFaceSetUtility {
 			if (fn != null)   ifsf.setFaceNormals(fn);
 			else ifsf.setGenerateFaceNormals(true);
 			if (fc != null)   ifsf.setFaceColors(fc);
-			ifsf.setGenerateEdgesFromFaces(true);
+			// steffen: changed so that edges are only created when the
+			// given isf had edges
+			boolean makeEdges = ifs.getEdgeAttributes().containsAttribute(Attribute.INDICES);
+			ifsf.setGenerateEdgesFromFaces(makeEdges);
 			ifsf.update();
 			imploded = ifsf.getIndexedFaceSet();
 
