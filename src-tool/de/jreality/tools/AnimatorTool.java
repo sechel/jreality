@@ -80,18 +80,25 @@ public class AnimatorTool extends AbstractTool {
     return instance;
   }
   
+  private TimerQueue timerQueue;
+  
   private IdentityHashMap animators = new IdentityHashMap();
   private final Object mutex = new Object();
 
+  private double totalTime;
+  
   private AnimatorTool() {
-    addCurrentSlot(timer);
+    addCurrentSlot(timer, "Triggers the animator tasks.");
+    timerQueue = new TimerQueue(this);
   }
 
   public void perform(ToolContext tc) {
     synchronized (mutex) {
+    	int dt = tc.getAxisState(timer).intValue();
+    	totalTime+=dt;
       for (Iterator i = animators.values().iterator(); i.hasNext(); ) {
         AnimatorTask task = (AnimatorTask)i.next();
-        if (!task.run(System.currentTimeMillis(), tc.getAxisState(timer).intValue())) {
+        if (!task.run(totalTime, dt)) {
           i.remove();
         }
       }
@@ -108,6 +115,10 @@ public class AnimatorTool extends AbstractTool {
     synchronized (mutex) {
       animators.remove(key);
     }
+  }
+  
+  public TimerQueue getTimerQueue() {
+	  return timerQueue;
   }
 
 }
