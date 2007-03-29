@@ -65,9 +65,6 @@ public class RIBHelper {
 			return processPointShader((PointShader)shader, ribv, name);		
 		else return null;
 	}
-	
-	
-	
 
 	private static RendermanShader processPolygonShader(PolygonShader ps, RIBVisitor ribv, String name)	{
 		RendermanShader rs = null;
@@ -106,6 +103,15 @@ public class RIBHelper {
 		else {
 			LoggingSystem.getLogger(ShaderUtility.class).warning("Unknown shader class "+ps.getClass());
 		}
+		
+		//overwrite DefaultPolygonShader if there is a surface-SLShader set
+		SLShader orig = new SLShader("orig");
+	    Object foo = ribv.eAppearance.getAttribute(name+"."+CommonAttributes.RMAN_SURFACE_SHADER,orig);
+	    if (!(foo == Appearance.DEFAULT || !(foo instanceof SLShader) || foo == orig)){
+	    	rs=new CustomPolygonShader();
+	    	rs.setFromEffectiveAppearance(ribv,ribv.eAppearance, name);	    	
+	    }		
+		
 		float[] csos = extractCsOs(Cs, 
 				(!(ribv.handlingProxyGeometry && ribv.opaqueTubes) && ribv.transparencyEnabled) ? transparency : 0f,
 				ribv.useOldTransparency);
