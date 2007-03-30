@@ -962,6 +962,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 						handlingProxyGeometry = true;  
 						SceneGraphComponent sgc = bsf.getSceneGraphComponent();
 						sgc.setAppearance(RIBHelper.shiftTubesAppearance(dgs));
+						sgc.getAppearance().setAttribute(CommonAttributes.RMAN_SURFACE_SHADER, eAppearance.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.RMAN_SURFACE_SHADER, Appearance.DEFAULT));
 						visit(sgc);
 						handlingProxyGeometry = false;
 					} else {
