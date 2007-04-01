@@ -73,6 +73,7 @@ import com.sun.opengl.util.ImageUtil;
 import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.PickPoint;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
+import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
@@ -102,6 +103,8 @@ public class JOGLRenderer  implements AppearanceListener {
 	private static boolean collectFrameRate = true;
 	protected final static int MAX_STACK_DEPTH = 28;
 	protected int stackDepth;
+    protected Matrix[] matrixStack = new Matrix[128];
+    protected int stackCounter = 0;
 
 	SceneGraphPath currentPath = new SceneGraphPath();
 
@@ -242,8 +245,8 @@ public class JOGLRenderer  implements AppearanceListener {
 		if (auxiliaryRoot != null && thePeerAuxilliaryRoot == null)
 			thePeerAuxilliaryRoot = constructPeerForSceneGraphComponent(auxiliaryRoot, null);
 
-		context  = new Graphics3D(theViewer.getCameraPath(), null, CameraUtility.getAspectRatio(theViewer));
-
+		context  = new Graphics3D(theViewer.getCameraPath(), currentPath, CameraUtility.getAspectRatio(theViewer));
+		//context.setCurrentPath(currentPath);
 		globalGL.glMatrixMode(GL.GL_PROJECTION);
 		globalGL.glLoadIdentity();
 
