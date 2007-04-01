@@ -297,8 +297,9 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		for (int i = 0; i<n; ++i)	{
 			IntArray ia = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray();
 			int m = ia.size();
+			double effectiveRadius = rad;
 			if (radii != null)	{
-				rad = rad*radii.getValueAt(i);
+				effectiveRadius = rad*radii.getValueAt(i);
 			}
 			if (pickMode)	gl.glPushName(i);
 			DoubleArray edgecolor = null;
@@ -322,7 +323,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 					da = vertices.item(k).toDoubleArray();
 					l = da.size();
 					for (int xx=0; xx<l; ++xx) p2[xx] = da.getValueAt(xx);
-					SceneGraphComponent cc = TubeUtility.tubeOneEdge(p1, p2, rad, crossSection, sig);
+					SceneGraphComponent cc = TubeUtility.tubeOneEdge(p1, p2, effectiveRadius, crossSection, sig);
 					if (cc.getGeometry() != null)	{
 						if (pickMode) gl.glPushName(j);
 						gl.glPushMatrix();
@@ -342,7 +343,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				ptf.setCrossSection(crossSection);
 				ptf.setFrameFieldType(tubeStyle);
 				ptf.setSignature(sig);
-				ptf.setRadius(rad);
+				ptf.setRadius(effectiveRadius);
 				ptf.update();
 				IndexedFaceSet tube = ptf.getTube();
 				if (tube != null)	{
