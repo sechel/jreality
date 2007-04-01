@@ -241,7 +241,8 @@ public class Graphics3D {
 	 */
 	public void setCurrentPath(SceneGraphPath path) {
 		//if (path != null) currentPath = ((SceneGraphPath) path.clone());
-		if (path != null && path.getLength() > 0)currentPath = path;
+		//if (path != null && path.getLength() > 0)
+			currentPath = path;
 	}
 
 	/**
