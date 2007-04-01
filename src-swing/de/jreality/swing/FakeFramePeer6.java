@@ -2,7 +2,6 @@ package de.jreality.swing;
 
 import java.awt.Component;
 import java.awt.Dialog;
-import java.awt.Frame;
 import java.awt.Rectangle;
 import java.awt.peer.FramePeer;
 
@@ -10,7 +9,7 @@ import sun.awt.CausedFocusEvent.Cause;
 
 class FakeFramePeer6 extends FakeFramePeer implements FramePeer {
 
-	FakeFramePeer6(Frame f) {
+	FakeFramePeer6(JFakeFrame f) {
 		super(f);
 	}
 

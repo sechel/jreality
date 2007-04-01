@@ -54,67 +54,65 @@ public class JRWindowManager implements ActionListener{
     dragTool=new DragEventTool("PrimaryAction");
     dragTool.addPointDragListener(new PointDragListener(){
       private int windowNum;
-      private double[][] points;
+      private int cornerIndex;
+      private double[] point;
       public void pointDragStart(PointDragEvent e) {
         windowNum=searchWindowNum(e.getPointSet());
         if(windowNum==-1) return;
         if(windowList.get(windowNum).isSmall()) return;
+        cornerIndex=e.getIndex();
         setWindowInFront(windowNum);
-        points=windowList.get(windowNum).getCornerPos();
+        point=windowList.get(windowNum).getCornerPos()[cornerIndex];
       }
       public void pointDragged(PointDragEvent e) { 
         if(windowNum==-1) return;
         if(windowList.get(windowNum).isSmall()) return;
-        double[] translation={e.getPosition()[0]-points[e.getIndex()][0],e.getPosition()[1]-points[e.getIndex()][1],0,0};    //stimmt nicht ganz..
-        double[][] newPoints=new double[points.length][points[0].length];
-        for(int i=0; i<points.length;i++){
-          for(int j=0;j<points[0].length;j++)
-            if((points[i][j]==points[e.getIndex()][j]))
-              newPoints[i][j]=points[i][j]+translation[j];
-            else
-              newPoints[i][j]=points[i][j];
-        }   
-        windowList.get(windowNum).setCornerPos(newPoints);
+        double[] translation={e.getPosition()[0]-point[0],e.getPosition()[1]-point[1],0,0};    //stimmt nicht ganz..
+        double[] newPoint=new double[3];
+        newPoint[0]=point[0]+translation[0];
+        newPoint[1]=point[1]+translation[1];
+        newPoint[2]=point[2]+translation[2];
+        windowList.get(windowNum).setCorner(cornerIndex, newPoint);
       }
       public void pointDragEnd(PointDragEvent e) {
-        windowList.get(windowNum).updateFrameSize();
+        //windowList.get(windowNum).updateFrameSize();
       }});   
-    dragTool.addLineDragListener(new LineDragListener(){
-      private int windowNum;
-      private double[][] points;
-      private int[] lineIndices;
-      private double[][] line;      
-      public void lineDragStart(LineDragEvent e) {
-        windowNum=searchWindowNum(e.getIndexedLineSet());
-        if(windowNum==-1) return;
-        if(windowList.get(windowNum).isSmall()) return;
-        setWindowInFront(windowNum);
-        points=windowList.get(windowNum).getCornerPos();        
-        lineIndices=e.getLineIndices();
-        line=e.getLineVertices();        
-      }
-      public void lineDragged(LineDragEvent e) {
-        if(windowNum==-1) return;
-        if(windowList.get(windowNum).isSmall()) return;       
-        double[][] newPoints=new double[points.length][points[0].length];
-        for(int n=0;n<newPoints.length;n++)
-          for(int c=0;c<newPoints[0].length;c++)
-            newPoints[n][c]=points[n][c];
-        double[] translation=Pn.dehomogenize(new double[]{0,0,0},e.getTranslation());
-        if(Math.abs(points[lineIndices[0]][0]-points[lineIndices[1]][0])==0){
-          for(int i=0;i<lineIndices.length;i++){
-            newPoints[lineIndices[i]][0]=line[i][0]+translation[0];
-          }
-        }else if(Math.abs(points[lineIndices[0]][1]-points[lineIndices[1]][1])==0){
-          for(int i=0;i<lineIndices.length;i++){
-            newPoints[lineIndices[i]][1]=line[i][1]+translation[1];
-          }
-        }
-        windowList.get(windowNum).setCornerPos(newPoints);
-        }
-      public void lineDragEnd(LineDragEvent e) {
-        windowList.get(windowNum).updateFrameSize();
-    }});    
+//    dragTool.addLineDragListener(new LineDragListener(){
+//      private int windowNum;
+//      private double[][] points;
+//      private int[] lineIndices;
+//      private double[][] line;      
+//      public void lineDragStart(LineDragEvent e) {
+//        windowNum=searchWindowNum(e.getIndexedLineSet());
+//        if(windowNum==-1) return;
+//        if(windowList.get(windowNum).isSmall()) return;
+//        setWindowInFront(windowNum);
+//        points=windowList.get(windowNum).getCornerPos();        
+//        lineIndices=e.getLineIndices();
+//        line=e.getLineVertices();        
+//      }
+//      public void lineDragged(LineDragEvent e) {
+//        if(windowNum==-1) return;
+//        if(windowList.get(windowNum).isSmall()) return;       
+//        double[][] newPoints=new double[points.length][points[0].length];
+//        for(int n=0;n<newPoints.length;n++)
+//          for(int c=0;c<newPoints[0].length;c++)
+//            newPoints[n][c]=points[n][c];
+//        double[] translation=Pn.dehomogenize(new double[]{0,0,0},e.getTranslation());
+//        if(Math.abs(points[lineIndices[0]][0]-points[lineIndices[1]][0])==0){
+//          for(int i=0;i<lineIndices.length;i++){
+//            newPoints[lineIndices[i]][0]=line[i][0]+translation[0];
+//          }
+//        }else if(Math.abs(points[lineIndices[0]][1]-points[lineIndices[1]][1])==0){
+//          for(int i=0;i<lineIndices.length;i++){
+//            newPoints[lineIndices[i]][1]=line[i][1]+translation[1];
+//          }
+//        }
+//        windowList.get(windowNum).setCornerPos(newPoints);
+//        }
+//      public void lineDragEnd(LineDragEvent e) {
+//        windowList.get(windowNum).updateFrameSize();
+//    }});    
     dragTool.addFaceDragListener(new FaceDragListener(){ 
       private int windowNum;
       private double[][] points;   
@@ -213,15 +211,15 @@ public class JRWindowManager implements ActionListener{
   public int getWindowCount(){
     return windowList.size();
   }
-  public void pack(){
-    for(JRWindow win : windowList)
-      win.getFrame().pack();
-  }  
-  public void validate(){
-    for(JRWindow win : windowList){
-      win.updateFrameSize();
-    }
-  }
+//  public void pack(){
+//    for(JRWindow win : windowList)
+//      win.getFrame().pack();
+//  }  
+//  public void validate(){
+//    for(JRWindow win : windowList){
+//      win.updateFrameSize();
+//    }
+//  }
   
   public void setBorderRadius(double r){
     defaultDesktopBorderRadius=r;

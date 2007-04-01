@@ -52,7 +52,7 @@ class FakeToolKit6 extends FakeToolKit {
 
 	@Override
 	protected FramePeer createFrame(Frame target) throws HeadlessException {
-		return new FakeFramePeer6(target);
+		return new FakeFramePeer6((JFakeFrame) target);
 	}
 
 	@Override

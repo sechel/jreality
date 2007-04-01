@@ -1,11 +1,19 @@
 package de.jreality.swing.jrwindows;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
+import de.jreality.backends.label.LabelUtility;
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.math.MatrixBuilder;
@@ -17,6 +25,9 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.ImageData;
+import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
 import de.jreality.swing.JFakeFrame;
 
 /**
@@ -24,8 +35,11 @@ import de.jreality.swing.JFakeFrame;
  *
  */
 
-class JRWindow {    
-  private int windowNumber;  
+class JRWindow {
+	
+  private static final Font TITLE_FONT = new Font("Sans Serif", Font.BOLD, 24);
+
+private int windowNumber;  
 
   private IndexedFaceSet frameFace;
   private IndexedLineSet borders;
@@ -48,7 +62,7 @@ class JRWindow {
   private double decoBorderRadius=0.0033;
   private double translateFactor;
   
-  private double windowFrameFactor=200;
+//  private double windowFrameFactor=200;
   
   private double decoSize=0.08;
   private final double decoControlSizeFactor=4;
@@ -65,6 +79,8 @@ class JRWindow {
   private final Color borderLineColor=activeColor;
   private final Color borderEdgeColor=inactiveColor;
   
+  private double aspectRatio=1;
+  
   protected JRWindow(int windowNumber){    
     super();  
     this.windowNumber=windowNumber; 
@@ -78,14 +94,18 @@ class JRWindow {
     cornerPosBak=new double[cornerPos.length][cornerPos[0].length];
     initSgc();
     initFrame();
-    initDecoration();    
-    
-    windowSize=calculateWindowSize();
-    frameSize=setFrameSize(windowSize,windowFrameFactor);
+    initDecoration();
+
+//    windowSize=calculateWindowSize();
+//    frameSize=setFrameSize(windowSize,windowFrameFactor);
   }  
   
   private void initSgc(){
     positionSgc=new SceneGraphComponent();
+    positionSgc.setAppearance(new Appearance());
+    positionSgc.getAppearance().setAttribute("pointShader.pickable", true);
+    positionSgc.getAppearance().setAttribute("lineShader.pickable", true);
+    positionSgc.getAppearance().setAttribute("polygonShader.pickable", true);
     orientationSgc=new SceneGraphComponent();
     positionSgc.addChild(orientationSgc);         
   }   
@@ -106,7 +126,38 @@ class JRWindow {
     face.update();
     this.frameFace=face.getIndexedFaceSet();     
     frame=new JFakeFrame();
-    frame.setVisible(true);      
+    frame.addComponentListener(new ComponentListener() {
+		public void componentHidden(ComponentEvent e) {
+		}
+		public void componentMoved(ComponentEvent e) {
+		}
+		public void componentResized(ComponentEvent e) {
+			updateAspectRatio();
+			setCorner(0, cornerPos[0]);
+		}
+
+		public void componentShown(ComponentEvent e) {
+			updateAspectRatio();
+			setCorner(0, cornerPos[0]);
+		}
+		
+		void updateAspectRatio() {
+			double newAspectRatio=(double)frame.getWidth()/(double)frame.getHeight();
+			if (newAspectRatio == 0 || Double.isNaN(newAspectRatio) || Double.isInfinite(newAspectRatio)) {
+				System.out.println("ignoring new aspectRatio: "+newAspectRatio);				
+				return;
+			}
+			aspectRatio=newAspectRatio;
+		}
+    	
+    });
+
+    frame.addPropertyChangeListener("title", new PropertyChangeListener() {
+		public void propertyChange(PropertyChangeEvent evt) {
+			updateFrameTitle();
+		}
+    });
+    
     frameSgc.addTool(frame.getTool());
     frameSgc.setAppearance(frame.getAppearance());  
     frameSgc.setGeometry(frameFace); 
@@ -115,7 +166,8 @@ class JRWindow {
     frameSgc.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW,false);
     frameSgc.getAppearance().setAttribute(CommonAttributes.TUBES_DRAW,false);
     frameSgc.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
-  }  
+  }
+  
   private void initDecoration(){
     decoControlSgc=new SceneGraphComponent();    
     orientationSgc.addChild(decoControlSgc);      
@@ -147,12 +199,13 @@ class JRWindow {
     panel=new JPanel();
     panel.setBackground(inactiveColor);
     killButton=new JButton("X");
+    killButton.setEnabled(false);
     maxButton=new JButton("O");
     minButton=new JButton("_");
     panel.add(minButton);
     panel.add(maxButton);
     panel.add(killButton);
-    decoControlFrame.getContentPane().add(panel);    
+    decoControlFrame.getContentPane().add(panel);
     decoControlFrame.pack();
     decoControlFrame.setVisible(true);
     
@@ -190,9 +243,8 @@ class JRWindow {
     borders.setVertexCoordinates(cornerPos);
     borders.setLineCount(4);
     borders.setEdgeIndices(new int[][] {{0,1},{1,2},{2,3},{3,0}});
-    borders.setVertexNormals(cornerPos);
     borders.update();
-    this.borders=borders.getIndexedLineSet();    
+    this.borders=borders.getIndexedLineSet();
     borderSgc.setGeometry(this.borders);
     borderSgc.setAppearance(new Appearance());
     borderSgc.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW,true);
@@ -205,7 +257,28 @@ class JRWindow {
     borderSgc.getAppearance().setAttribute(CommonAttributes.TUBE_RADIUS,borderRadius);
     borderSgc.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
   }   
-    
+   
+  protected void updateFrameTitle() {
+	  BufferedImage img = LabelUtility.createImageFromString(frame.getTitle(), TITLE_FONT, Color.black, Color.white);
+	  
+	  double w = img.getWidth();
+	  double h = img.getHeight()*1.5;
+	  
+	  double width = decoDragCorners[0][0]-decoDragCorners[2][0];
+	  double height = decoDragCorners[0][1]-decoDragCorners[2][1];
+	  
+	  double lambda = h/height;
+	  
+	  double effW = lambda*width;
+	  	  
+	  if (effW <= w) effW=w+h/3;
+	  BufferedImage effImg = new BufferedImage((int)effW, (int)h, BufferedImage.TYPE_INT_ARGB);
+	  effImg.getGraphics().fillRect(0, 0, effImg.getWidth(), effImg.getHeight());
+	  effImg.getGraphics().drawImage(img, (int) (int)(h/6), (int)(h/6), null);
+	  
+	  TextureUtility.createTexture(decoDragSgc.getAppearance(), "polygonShader", new ImageData(effImg));
+  }
+
   protected void addActionListeners(ActionListener actionListener){
     killButton.addActionListener(actionListener);    
     maxButton.addActionListener(actionListener);    
@@ -220,7 +293,7 @@ class JRWindow {
   
   protected void setCornerPos(double[][] newCornerPos){ 
     if(newCornerPos[0][0]-newCornerPos[3][0]>=decoControlSize+borderRadius&&newCornerPos[0][1]-newCornerPos[1][1]>=decoSize+borderRadius){
-      cornerPos=newCornerPos;    
+      cornerPos=newCornerPos;
     }else if(newCornerPos[0][0]-newCornerPos[3][0]>=decoControlSize+borderRadius||newCornerPos[0][1]-newCornerPos[1][1]>=decoSize+borderRadius){ 
       if(newCornerPos[0][0]-newCornerPos[3][0]>decoControlSize+borderRadius){ //copy x   
         for(int n=0;n<cornerPos.length;n++)
@@ -229,7 +302,7 @@ class JRWindow {
         for(int n=0;n<cornerPos.length;n++)
           cornerPos[n][1]=newCornerPos[n][1];
       }
-    }else return;   
+    }else return;
     
     calculateFaceCorners(faceCorners,cornerPos);
     frameFace.setVertexAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(faceCorners));
@@ -237,40 +310,71 @@ class JRWindow {
     decoControlFace.setVertexAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(decoControlCorners));  
     calculateDecoDragCorners(decoDragCorners,cornerPos);
     decoDragFace.setVertexAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(decoDragCorners));    
-    borders.setVertexAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(cornerPos));    
+    borders.setVertexAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(cornerPos));
+    updateFrameTitle();
   }    
   
-  double[] windowSize;
-  double[] frameSize;
+  public void setCorner(int cornerIndex, double[] newPoint) {
+		int oppositeCorner = (cornerIndex+2)%4;
+		newPoint[1]-=decoSize; newPoint[2]=0;
+		double[] diag = Rn.subtract(null, newPoint, cornerPos[oppositeCorner]);
+		double newAsp = Math.abs(diag[0]/diag[1]);
+		if (newAsp > aspectRatio) {
+			// adapt width to height:
+			diag[0] = Math.signum(diag[0])*aspectRatio*Math.abs(diag[1]);
+		} else {
+//			 adapt height to width:
+			diag[1] = Math.signum(diag[1])*Math.abs(diag[0])/aspectRatio;
+		}
+		Rn.add(cornerPos[cornerIndex], cornerPos[oppositeCorner], diag);
+		
+		cornerPos[cornerIndex][1]+=decoSize;
+		
+		// adjust other two corners:
+		int nextCorner = (cornerIndex+1)%4;
+		int prevCorner = (cornerIndex-1+4)%4;
+		if (cornerIndex%2 == 0) {
+			cornerPos[nextCorner][0]=cornerPos[cornerIndex][0];
+			cornerPos[prevCorner][1]=cornerPos[cornerIndex][1];
+		} else {
+			cornerPos[nextCorner][1]=cornerPos[cornerIndex][1];
+			cornerPos[prevCorner][0]=cornerPos[cornerIndex][0];
+		}
+		
+		setCornerPos(cornerPos);
+  }  
   
-  private double[] setFrameSize(double[] windowSize, double factor){
-    double[] frameSize=new double[2];
-    frameSize[0]=windowSize[0]*factor;
-    frameSize[1]=windowSize[1]*factor;
-    frame.setSize((int)frameSize[0],(int)frameSize[1]);
-    frame.validate();
-    return frameSize;
-  }
-  
-  protected void updateFrameSize(){     
-    double[] newWindowSize=calculateWindowSize();
-
-    double factorWidth=newWindowSize[0]/windowSize[0];
-    double factorHeight=newWindowSize[1]/windowSize[1];  
-    double frameWidth=frameSize[0]*factorWidth;
-    double frameHeight=frameSize[1]*factorHeight;
-    if(frameWidth<1) frameWidth=1;
-    if(frameHeight<1) frameHeight=1;    
-    
-    frame.setSize((int)frameWidth,(int)frameHeight); 
-    frame.validate();
-  }
-  
-  private double[] calculateWindowSize(){
-    double width=Rn.euclideanNorm(Rn.subtract(null,faceCorners[0],faceCorners[3]));
-    double height=Rn.euclideanNorm(Rn.subtract(null,faceCorners[0],faceCorners[1]));
-    return new double[] {width,height};
-  }
+//  double[] windowSize;
+//  double[] frameSize;
+//  
+//  private double[] setFrameSize(double[] windowSize, double factor){
+//    double[] frameSize=new double[2];
+//    frameSize[0]=windowSize[0]*factor;
+//    frameSize[1]=windowSize[1]*factor;
+//    frame.setSize((int)frameSize[0],(int)frameSize[1]);
+//    frame.validate();
+//    return frameSize;
+//  }
+//  
+//  protected void updateFrameSize(){     
+//    double[] newWindowSize=calculateWindowSize();
+//
+//    double factorWidth=newWindowSize[0]/windowSize[0];
+//    double factorHeight=newWindowSize[1]/windowSize[1];  
+//    double frameWidth=frameSize[0]*factorWidth;
+//    double frameHeight=frameSize[1]*factorHeight;
+//    if(frameWidth<1) frameWidth=1;
+//    if(frameHeight<1) frameHeight=1;
+//    
+//    frame.setSize((int)frameWidth,(int)frameHeight); 
+//    frame.validate();
+//  }
+//  
+//  private double[] calculateWindowSize(){
+//    double width=Rn.euclideanNorm(Rn.subtract(null,faceCorners[0],faceCorners[3]));
+//    double height=Rn.euclideanNorm(Rn.subtract(null,faceCorners[0],faceCorners[1]));
+//    return new double[] {width,height};
+//  }
   
   
   double[] dirX;
@@ -367,7 +471,8 @@ class JRWindow {
       }
       isSmall=false;
     }
-    setCornerPos(cornerPos);    
+    frame.setVisible(!isSmall);
+    setCornerPos(cornerPos);
   }
   private double[] getCenter(double[][] box){
     double[] center={0,0,0};
@@ -394,7 +499,7 @@ class JRWindow {
 
   protected void setBorderRadius(double r) {
     borderRadius=r;
-    cornerRadius=borderRadius*1.5;
+    cornerRadius=borderRadius*1.75;
     translateFactor=1.1*cornerRadius;
     if(borderSgc!=null){
       borderSgc.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS,cornerRadius);
@@ -436,5 +541,6 @@ class JRWindow {
   }
   protected IndexedLineSet getBorders(){
     return borders;
-  }  
+  }
+
 }

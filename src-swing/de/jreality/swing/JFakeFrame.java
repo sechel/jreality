@@ -102,10 +102,6 @@ public class JFakeFrame extends JFrame {
 
         //fire();
     }
-    public void setVisible(boolean b) {
-        super.setVisible(b);
-        fire();
-    }
     private void fire() {
       if (isMute()) return;
         FakeFramePeer peer = (FakeFramePeer)getPeer();
@@ -176,5 +172,4 @@ public class JFakeFrame extends JFrame {
       this.mute = mute;
       fire();
     }
-
 }

@@ -40,11 +40,11 @@ class FakeFramePeer {
     private static final boolean DUMP = false;
 	private BufferedImage bi;
     private VolatileImage vi;
-    private Frame frame;
+    private JFakeFrame frame;
     private Runnable repaintAction;
     Rectangle bounds;
     
-    FakeFramePeer(Frame f) {
+    FakeFramePeer(JFakeFrame f) {
         frame = f;
         Dimension d = f.getSize();
         //TODO this is ugly probably it is better to not crate the image
@@ -350,8 +350,7 @@ class FakeFramePeer {
 	}
 
 	public void hide() {
-		// TODO Auto-generated method stub
-		
+		frame.setMute(true);
 	}
 
 	public boolean isFocusable() {
@@ -425,8 +424,7 @@ class FakeFramePeer {
 	}
 
 	public void show() {
-		// TODO Auto-generated method stub
-		
+		frame.setMute(false);
 	}
 
 	public void updateCursorImmediately() {
