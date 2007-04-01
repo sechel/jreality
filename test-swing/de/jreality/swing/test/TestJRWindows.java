@@ -91,7 +91,7 @@ public class TestJRWindows {
 //    frame7.getContentPane().add(new JLabel("labellabellabel"));   
     
     //wm.pack(); 
-    wm.validate();
+    //wm.validate();
     
     
     System.out.println("nach: panelSize = "+panel.getWidth()+" ,"+panel.getHeight());
