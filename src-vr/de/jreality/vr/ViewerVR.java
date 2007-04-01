@@ -1098,4 +1098,8 @@ public class ViewerVR {
 			sceneRoot.addChild(s);
 		}
 	}
+	
+	public SceneGraphPath getAvatarPath() {
+		return avatarPath;
+	}
 }
