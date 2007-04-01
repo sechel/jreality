@@ -232,9 +232,9 @@ public class Selection {
 
 	@Override
 	public String toString() {
-		String str = sgPath.toString();
-		for (Object t : tail)	str.concat(" : " + t.toString());
-		return str;
+		StringBuilder str = new StringBuilder(sgPath.toString());
+		for (Object t : tail)	str.append(" : ").append(t.toString());
+		return str.toString();
 	}
 
 }
