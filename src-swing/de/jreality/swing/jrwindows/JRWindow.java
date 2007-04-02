@@ -72,9 +72,6 @@ public class JRWindow {
   private double decoBorderRadius=0.0033;
   private double translateFactor;
   
-//  private double windowFrameFactor=200;   windowSize=calculateWindowSize();
-//frameSize=setFrameSize(windowSize,
-  
   private double decoSize=0.08;
   private final double decoControlSizeFactor=4;
   private double decoControlSize;
@@ -110,9 +107,6 @@ public class JRWindow {
     initSgc();
     initFrame();
     initDecoration();
-
-//    windowSize=calculateWindowSize();
-//    frameSize=setFrameSize(windowSize,windowFrameFactor);
   }  
   
   private void initSgc(){
@@ -140,6 +134,7 @@ public class JRWindow {
     face.update();
     this.frameFace=face.getIndexedFaceSet();     
     frame=new JFakeFrame();
+    
     ComponentListener componentListener = new ComponentListener() {
 			public void componentHidden(ComponentEvent e) {
 				getSgc().setVisible(false);
@@ -153,7 +148,8 @@ public class JRWindow {
 	
 			public void componentShown(ComponentEvent e) {
 				updateAspectRatio();
-				setCorner(0, cornerPos[0]);
+				if (!isSmall) setCorner(0, cornerPos[0]);
+				else setSmall(true);
 				getSgc().setVisible(true);
 			}
 			
@@ -338,7 +334,7 @@ public class JRWindow {
     updateFrameTitle();
   }    
   
-  public void setCorner(int cornerIndex, double[] newPoint) {
+  void setCorner(int cornerIndex, double[] newPoint) {
 		int oppositeCorner = (cornerIndex+2)%4;
 		newPoint[1]-=decoSize; newPoint[2]=0;
 		double[] diag = Rn.subtract(null, newPoint, cornerPos[oppositeCorner]);

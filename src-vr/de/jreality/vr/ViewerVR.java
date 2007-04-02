@@ -293,6 +293,14 @@ public class ViewerVR {
 
 		sceneRoot.addChild(sceneNode);
 
+		if (portal || portalRemote) {
+			wm = new JRWindowManager(avatarNode);
+			wm.setPosition(new double[]{0, 0, -1.24});
+		} else {
+			wm = new JRWindowManager(camNode);
+			wm.setPosition(new double[]{0, 0, -2});
+		}
+		
 		// swing widgets
 		makeControlPanel();
 
@@ -465,7 +473,6 @@ public class ViewerVR {
 
 	private void makeControlPanel() {
 		
-		wm = new JRWindowManager(camNode);
 		sp = wm.createFrame();
 		
 		

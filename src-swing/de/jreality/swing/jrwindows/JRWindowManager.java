@@ -151,13 +151,13 @@ public class JRWindowManager implements ActionListener{
   }
   
   public void actionPerformed(ActionEvent e) {    
-    if(e.getActionCommand().startsWith("X")){
+    /* if(e.getActionCommand().startsWith("X")){
       String command=e.getActionCommand();
       command=command.replaceFirst(String.valueOf(command.charAt(0)),"");
       int windowNum=Integer.parseInt(command); 
       kill(windowNum);  
     }
-    else if(e.getActionCommand().startsWith("O")){
+    else */ if(e.getActionCommand().startsWith("O")){
       String command=e.getActionCommand();
       command=command.replaceFirst(String.valueOf(command.charAt(0)),"");
       int windowNum=Integer.parseInt(command);    
