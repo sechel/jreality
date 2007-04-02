@@ -1034,7 +1034,6 @@ public class ViewerVR {
 		vr.addToolTab();
 		vr.addTexTab();
 		vr.setGeneratePickTrees(true);
-		vr.showPanel();
 		return vr;
 	}
 	
@@ -1088,6 +1087,8 @@ public class ViewerVR {
 		ViewerVR vr = createDefaultViewerVR(examples);
 		
 		if (cmp != null) vr.setContent(cmp);
+		
+		vr.showPanel();
 		
 		ViewerApp vApp = vr.initialize();
 		if (prefsFile != null) vr.importPreferences(prefsFile);
