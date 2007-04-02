@@ -187,6 +187,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		System.arraycopy(diffuseColorAsFloat, 0, jr.getRenderingState().diffuseColor, 0, 4);
 	
 		gl.glLineWidth((float) getLineWidth());
+		jrs.lineWidth = getLineWidth();
 		if (isLineStipple()) {
 			gl.glEnable(GL.GL_LINE_STIPPLE);
 			gl.glLineStipple(getLineFactor(), (short) getLineStipplePattern());

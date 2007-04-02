@@ -123,7 +123,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
       
 		inheritGLSL= eap.getAttribute(ShaderUtility.nameSpace(name,"inheritGLSL"), false);	
 	    if (!inheritGLSL)		{
-		    	if (useGLSL)		{
+		    if (useGLSL)		{
 				if (glslShader == null)	{
 					String vertShader = (String) eap.getAttribute(ShaderUtility.nameSpace(name,"glslVertexShader"), "standard3dlabs.vert");	
 					String fragmentShader = (String) eap.getAttribute(ShaderUtility.nameSpace(name,"glslFragmentShader"), "");	
@@ -132,7 +132,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 					glslShader  = new GlslDefaultPolygonShader(vertShader, fragmentShader);
 				}
 			glslShader.setFromEffectiveAppearance(eap,name+".vertexShader");
-		    	}
+		    }
 	    }  else useGLSL = false;
 	    
 		vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);

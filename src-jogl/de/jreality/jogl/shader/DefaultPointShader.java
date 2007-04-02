@@ -127,14 +127,21 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 
 	byte[] sphereTex;
 	double[] lightDirection = {1,-1,2};
-	
+	float[] oldDiffuseColorAsFloat = new float[4];
 	private void setupTexture() {
 		int I = 0, II = 0;
 		double[] reflected = new double[3];
-		if (sphereTex != null) return;
-		//System.out.println("specular color is "+specularColor.toString());
-		//if (sphereTex == null) 
-			sphereTex = new byte[textureSize * textureSize * 4];
+//		if (sphereTex != null) return;
+		// TODO check here to see if it's possible to avoid recomputing by comparing to old values
+		// for diffuse color, specular color, and exponent.
+		if (sphereTex == null) sphereTex = new byte[textureSize * textureSize * 4];
+		float sum = 0;
+		for (int i = 0; i<4; ++i) {
+			float diff = diffuseColorAsFloat[i] - oldDiffuseColorAsFloat[i];
+			oldDiffuseColorAsFloat[i] = diffuseColorAsFloat[i];
+			sum += Math.abs(diff);
+		}
+		if (sum < 10E-4) return;
 		for (int i = 0; i<textureSize; ++i)	{
 			for (int j = 0; j< textureSize; ++j)	{
 				if (sphereVertices[I][0] != -1)	{	
@@ -234,6 +241,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		if (!sphereDraw)	{
 			lighting = false;
 			gl.glPointSize((float) getPointSize());
+			jrs.pointSize = getPointSize();
 			// temporarily commented out since this doesn't work on my powerbook with ati radeon
 			// (no exception, but the points don't show up no matter what the arguments given
 			try {

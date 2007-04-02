@@ -253,7 +253,7 @@ public class JOGLRendererHelper {
 		IntArray vind = null;
 		if (piDL != null) vind = piDL.toIntArray();
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
-		DataList pointSize = sg.getVertexAttributes(Attribute.POINT_SIZE);
+		DataList pointSize = sg.getVertexAttributes(Attribute.RELATIVE_RADII);
 		int vertexLength = GeometryUtility.getVectorLength(vertices);
 		int colorLength = 0;
 		if (vertexColors != null) {
@@ -265,27 +265,25 @@ public class JOGLRendererHelper {
 			}
 		}
 
-		DoubleArray da;
+		DoubleArray da, ra=null;
+		if (pointSize != null) ra = pointSize.toDoubleArray();
 		if (pickMode)
 			gl.glPushName(JOGLPickAction.GEOMETRY_POINT);
 		// if (pickMode) JOGLConfiguration.theLog.log(Level.INFO,"Rendering
 		// vertices in picking mode");
-		if (!pickMode)
+		if (!pickMode && pointSize == null)
 			gl.glBegin(GL.GL_POINTS);
 		for (int i = 0; i < sg.getNumPoints(); ++i) {
 			// double vv;
 			if (vind != null && vind.getValueAt(i) == 0) continue;
 			if (pickMode)
 				gl.glPushName(i);
-			if (pickMode)
-				gl.glBegin(GL.GL_POINTS);
 			if (pointSize != null) {
-				float ps = (float) pointSize.item(i).toDoubleArray()
-						.getValueAt(0);
+				float ps = (float) (jr.renderingState.pointSize * ra.getValueAt(i));
 				gl.glPointSize(ps);
-				// vv = (ps < 1) ? ps : (1d - (Math.ceil(ps) - ps) * 0.25d);
-
 			}
+			if (pickMode || pointSize != null)
+				gl.glBegin(GL.GL_POINTS);
 			// if (pointSize != null) gl.glBegin(GL.GL_POINTS);
 			if (vertexColors != null) {
 				da = vertexColors.item(i).toDoubleArray();
@@ -300,7 +298,7 @@ public class JOGLRendererHelper {
 				gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 			else if (vertexLength == 4)
 				gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
-			if (pickMode)
+			if (pickMode || pointSize != null) 
 				gl.glEnd();
 			if (pickMode)
 				gl.glPopName();
@@ -375,106 +373,6 @@ public class JOGLRendererHelper {
 	// // gl.glPopAttrib();
 	// }
 
-	private static final Texture2D tex2d = (Texture2D) AttributeEntityUtility
-			.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
-	static {
-		tex2d.setRepeatS(Texture2D.GL_CLAMP);
-		tex2d.setRepeatT(Texture2D.GL_CLAMP);
-	}
-
-	public static void drawPointLabels(JOGLRenderer jr, PointSet ps, DefaultTextShader ts) {
-		if (!ts.getShowLabels().booleanValue())
-			return;
-
-		Font font = ts.getFont();
-		Color c = ts.getDiffuseColor();
-		double scale = ts.getScale().doubleValue();
-//		System.err.println("Scale is "+scale);
-		double[] offset = ts.getOffset();
-		int alignment = ts.getAlignment();
-		ImageData[] img = LabelUtility.createPointImages(ps, font, c);
-
-		renderLabels(jr, img, 
-				ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), 
-				null, 
-				offset, alignment,
-				scale);
-
-	}
-
-	public static void drawEdgeLabels(JOGLRenderer jr, IndexedLineSet ils, DefaultTextShader ts) {
-		//System.err.println("In draw edge labels 1");
-		if (!ts.getShowLabels().booleanValue())
-			return;
-
-		//System.err.println("In draw edge labels 2");
-		Font font = ts.getFont();
-		Color c = ts.getDiffuseColor();
-		double scale = ts.getScale().doubleValue();
-		double[] offset = ts.getOffset();
-		int alignment = ts.getAlignment();
-		ImageData[] img = LabelUtility.createEdgeImages(ils, font, c);
-
-		renderLabels(jr, img, ils.getVertexAttributes(Attribute.COORDINATES)
-				.toDoubleArrayArray(), ils.getEdgeAttributes(Attribute.INDICES)
-				.toIntArrayArray(), offset, alignment, scale);
-
-	}
-
-	public static void drawFaceLabels(JOGLRenderer jr, IndexedFaceSet ifs, DefaultTextShader ts) {
-		if (!ts.getShowLabels().booleanValue())
-			return;
-		Font font = ts.getFont();
-		Color c = ts.getDiffuseColor();
-		double scale = ts.getScale().doubleValue();
-		double[] offset = ts.getOffset();
-		int alignment = ts.getAlignment();
-		ImageData[] img = LabelUtility.createFaceImages(ifs, font, c);
-
-		renderLabels(jr, img, ifs.getVertexAttributes(Attribute.COORDINATES)
-				.toDoubleArrayArray(), ifs.getFaceAttributes(Attribute.INDICES)
-				.toIntArrayArray(), offset, alignment, scale);
-
-	}
-
-	private static void renderLabels(JOGLRenderer jr, ImageData[] labels, DoubleArrayArray vertices,
-		IntArrayArray indices, double[] offset, int alignment,  double scale) {
-        GL gl = jr.getGL();
-		gl.glEnable(GL.GL_BLEND);
-		gl.glDisable(GL.GL_LIGHTING);
-		gl.glDepthMask(true);
-		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-		gl.glColor3d(1, 1, 1);
-		double[] c2o = jr.getContext().getCameraToObject();
-		gl.glActiveTexture(GL.GL_TEXTURE0);
-		gl.glEnable(GL.GL_TEXTURE_2D);
-		jr.getRenderingState().texUnitCount = 1;
-		double[] bbm = new double[16];
-		// float[] glc2o = new float[16];
-		// double[] dglc2o = new double[16];
-		// gl.glGetFloatv(GL.GL_TRANSPOSE_MODELVIEW_MATRIX, glc2o);
-		// for (int i = 0; i<16; ++i) dglc2o[i]=glc2o[i];
-		// System.err.println("glc2o
-		// is"+Rn.matrixToString(Rn.inverse(dglc2o,dglc2o)));
-		for (int i = 0, n = labels.length; i < n; i++) {
-			ImageData img = labels[i];
-			tex2d.setImage(img);
-			LabelUtility.calculateBillboardMatrix(bbm, 
-					img.getWidth() * scale, 
-					img.getHeight()* scale, 
-					offset, alignment,
-					c2o, 
-					LabelUtility.positionFor(i, vertices,indices), Pn.EUCLIDEAN);
-			Texture2DLoaderJOGL.render(gl, tex2d, true);
-			gl.glPushMatrix();
-			gl.glMultTransposeMatrixd(bbm, 0);
-			drawFaces(jr, bb, true, 1.0);
-			gl.glPopMatrix();
-		}
-		gl.glDisable(GL.GL_BLEND);
-		gl.glDisable(GL.GL_TEXTURE_2D);
-		jr.getRenderingState().texUnitCount = 0;
-	}
 
 	/**
 	 * @param sg
@@ -491,6 +389,9 @@ public class JOGLRendererHelper {
 		DataList edgeColors = sg.getEdgeAttributes(Attribute.COLORS);
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
 		DataList vertexNormals = sg.getVertexAttributes(Attribute.NORMALS);
+		DataList lineWidth = sg.getVertexAttributes(Attribute.RELATIVE_RADII);
+		DoubleArray ra=null;
+		if (lineWidth != null) ra = lineWidth.toDoubleArray();
 		boolean hasNormals = vertexNormals == null ? false : true;
 		DoubleArray da;
 		// SJOGLConfiguration.theLog.log(Level.INFO,"Processing ILS");
@@ -544,19 +445,20 @@ public class JOGLRendererHelper {
 		for (int i = 0; i < numEdges; ++i) {
 			if (pickMode)
 				gl.glPushName(i);
+			if (lineWidth != null) {
+				float ps = (float) (jr.renderingState.lineWidth * ra.getValueAt(i));
+				gl.glLineWidth(ps);
+			}
 			if (!pickMode)
 				gl.glBegin(GL.GL_LINE_STRIP);
-			int[] ed = sg.getEdgeAttributes(Attribute.INDICES).item(i)
-					.toIntArray(null);
+			int[] ed = sg.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
 			int m = ed.length;
 			if (!pickMode && colorBind == PER_EDGE) {
 				da = edgeColors.item(i).toDoubleArray();
 				if (colorLength == 3) {
-					gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da
-							.getValueAt(2), alpha);
+					gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
 				} else if (colorLength == 4) {
-					gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da
-							.getValueAt(2), alpha * da.getValueAt(3));
+					gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha * da.getValueAt(3));
 				}
 			}
 
@@ -849,6 +751,105 @@ public class JOGLRendererHelper {
 		}
 	}
 
+	private static final Texture2D tex2d = (Texture2D) AttributeEntityUtility
+	.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
+	static {
+		tex2d.setRepeatS(Texture2D.GL_CLAMP);
+		tex2d.setRepeatT(Texture2D.GL_CLAMP);
+	}
+
+	public static void drawPointLabels(JOGLRenderer jr, PointSet ps,
+			DefaultTextShader ts) {
+		if (!ts.getShowLabels().booleanValue())
+			return;
+
+		Font font = ts.getFont();
+		Color c = ts.getDiffuseColor();
+		double scale = ts.getScale().doubleValue();
+		// System.err.println("Scale is "+scale);
+		double[] offset = ts.getOffset();
+		int alignment = ts.getAlignment();
+		ImageData[] img = LabelUtility.createPointImages(ps, font, c);
+
+		renderLabels(jr, img, ps.getVertexAttributes(Attribute.COORDINATES)
+				.toDoubleArrayArray(), null, offset, alignment, scale);
+
+	}
+
+	public static void drawEdgeLabels(JOGLRenderer jr, IndexedLineSet ils,
+			DefaultTextShader ts) {
+		// System.err.println("In draw edge labels 1");
+		if (!ts.getShowLabels().booleanValue())
+			return;
+
+		// System.err.println("In draw edge labels 2");
+		Font font = ts.getFont();
+		Color c = ts.getDiffuseColor();
+		double scale = ts.getScale().doubleValue();
+		double[] offset = ts.getOffset();
+		int alignment = ts.getAlignment();
+		ImageData[] img = LabelUtility.createEdgeImages(ils, font, c);
+
+		renderLabels(jr, img, ils.getVertexAttributes(Attribute.COORDINATES)
+				.toDoubleArrayArray(), ils.getEdgeAttributes(Attribute.INDICES)
+				.toIntArrayArray(), offset, alignment, scale);
+
+	}
+
+	public static void drawFaceLabels(JOGLRenderer jr, IndexedFaceSet ifs,
+			DefaultTextShader ts) {
+		if (!ts.getShowLabels().booleanValue())
+			return;
+		Font font = ts.getFont();
+		Color c = ts.getDiffuseColor();
+		double scale = ts.getScale().doubleValue();
+		double[] offset = ts.getOffset();
+		int alignment = ts.getAlignment();
+		ImageData[] img = LabelUtility.createFaceImages(ifs, font, c);
+
+		renderLabels(jr, img, ifs.getVertexAttributes(Attribute.COORDINATES)
+				.toDoubleArrayArray(), ifs.getFaceAttributes(Attribute.INDICES)
+				.toIntArrayArray(), offset, alignment, scale);
+
+	}
+
+	private static void renderLabels(JOGLRenderer jr, ImageData[] labels,
+			DoubleArrayArray vertices, IntArrayArray indices, double[] offset,
+			int alignment, double scale) {
+		GL gl = jr.getGL();
+		gl.glEnable(GL.GL_BLEND);
+		gl.glDisable(GL.GL_LIGHTING);
+		gl.glDepthMask(true);
+		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		gl.glColor3d(1, 1, 1);
+		double[] c2o = jr.getContext().getCameraToObject();
+		gl.glActiveTexture(GL.GL_TEXTURE0);
+		gl.glEnable(GL.GL_TEXTURE_2D);
+		jr.getRenderingState().texUnitCount = 1;
+		double[] bbm = new double[16];
+		// float[] glc2o = new float[16];
+		// double[] dglc2o = new double[16];
+		// gl.glGetFloatv(GL.GL_TRANSPOSE_MODELVIEW_MATRIX, glc2o);
+		// for (int i = 0; i<16; ++i) dglc2o[i]=glc2o[i];
+		// System.err.println("glc2o
+		// is"+Rn.matrixToString(Rn.inverse(dglc2o,dglc2o)));
+		for (int i = 0, n = labels.length; i < n; i++) {
+			ImageData img = labels[i];
+			tex2d.setImage(img);
+			LabelUtility.calculateBillboardMatrix(bbm, img.getWidth() * scale,
+					img.getHeight() * scale, offset, alignment, c2o,
+					LabelUtility.positionFor(i, vertices, indices),
+					Pn.EUCLIDEAN);
+			Texture2DLoaderJOGL.render(gl, tex2d, true);
+			gl.glPushMatrix();
+			gl.glMultTransposeMatrixd(bbm, 0);
+			drawFaces(jr, bb, true, 1.0);
+			gl.glPopMatrix();
+		}
+		gl.glDisable(GL.GL_BLEND);
+		gl.glDisable(GL.GL_TEXTURE_2D);
+		jr.getRenderingState().texUnitCount = 0;
+	}
 	private static double[] correctionNDC = null;
 	static {
 		correctionNDC = Rn.identityMatrix(4);
@@ -883,15 +884,7 @@ public class JOGLRendererHelper {
 
 	public static void resetLights(GL globalGL, List lights) {
 		for (int i = 0; i < maxLights; ++i) {
-			globalGL.glLightf(GL.GL_LIGHT0 + i, GL.GL_SPOT_CUTOFF, 0f); // use
-																		// this
-																		// as a
-																		// marker
-																		// for
-																		// disabled
-																		// lights
-																		// in
-																		// glsl
+			globalGL.glLightf(GL.GL_LIGHT0 + i, GL.GL_SPOT_CUTOFF, 0f); 
 			globalGL.glLightf(GL.GL_LIGHT0 + i, GL.GL_SPOT_EXPONENT, (float) 0);
 			globalGL.glLightf(GL.GL_LIGHT0 + i, GL.GL_CONSTANT_ATTENUATION,
 					1.0f);

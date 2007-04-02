@@ -62,7 +62,6 @@ public class JOGLRenderingState {
 	public boolean flipped = false;
 	public boolean transparencyEnabled = false;
 	public float[] diffuseColor = new float[4];
-	public double lineWidth;
 	public int activeTexture;
 	public int frontBack = GL.GL_FRONT_AND_BACK;
 	public double levelOfDetail;
@@ -89,6 +88,8 @@ public class JOGLRenderingState {
 
 	public int texUnitCount = 0;
 	public int polygonCount = 0;
+	public double pointSize = 1.0,
+		lineWidth = 1.0;
 	
 	
 	public JOGLRenderingState(JOGLRenderer jr) {
