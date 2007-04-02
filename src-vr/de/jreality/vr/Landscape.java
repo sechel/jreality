@@ -52,7 +52,7 @@ public class Landscape {
 	private HashMap<String,ButtonModel> envToButton = new HashMap<String,ButtonModel>();
 	JPanel selectionComponent;
 
-	private int selectionIndex;
+	private int selectionIndex=-1;
 
 	private String[][] skyboxes;
 
@@ -167,7 +167,7 @@ public class Landscape {
 	}
 
 	public void setEvironment(String environment) {
-		if (environment != getEnvironment()) {
+		if (selectionIndex == -1 || environment != getEnvironment()) {
 			ButtonModel model = envToButton.get(environment);
 			group.setSelected(model, true);
 			load(environment);
