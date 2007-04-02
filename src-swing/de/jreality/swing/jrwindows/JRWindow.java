@@ -338,6 +338,7 @@ public class JRWindow {
 		int oppositeCorner = (cornerIndex+2)%4;
 		newPoint[1]-=decoSize; newPoint[2]=0;
 		double[] diag = Rn.subtract(null, newPoint, cornerPos[oppositeCorner]);
+		
 		double newAsp = Math.abs(diag[0]/diag[1]);
 		if (newAsp > aspectRatio) {
 			// adapt width to height:
@@ -346,9 +347,26 @@ public class JRWindow {
 //			 adapt height to width:
 			diag[1] = Math.signum(diag[1])*Math.abs(diag[0])/aspectRatio;
 		}
+		
+		// do not allow less width than the deco needs:
+		double decoWidth = Math.abs(decoControlCorners[2][0]-decoControlCorners[0][0]);
+		if (Math.abs(diag[0]) < decoWidth) {
+			double f = decoWidth/Math.abs(diag[0]);
+			diag[0]*=f;
+			diag[1]*=f;
+		}
+		
+		// cancel if window would be flipped:
+		if ((cornerIndex == 0) && (diag[0]<=0 || diag[1]<=0)) return;
+		if ((cornerIndex == 1) && (diag[0]<=0 || diag[1]>=0)) return;
+		if ((cornerIndex == 2) && (diag[0]>=0 || diag[1]>=0)) return;
+		if ((cornerIndex == 3) && (diag[0]>=0 || diag[1]<=0)) return;
+		
+		
 		Rn.add(cornerPos[cornerIndex], cornerPos[oppositeCorner], diag);
 		
-		cornerPos[cornerIndex][1]+=decoSize;
+		if (cornerIndex == 3 || cornerIndex == 0) cornerPos[cornerIndex][1]+=decoSize;
+		else cornerPos[cornerIndex][1]-=decoSize;
 		
 		// adjust other two corners:
 		int nextCorner = (cornerIndex+1)%4;
