@@ -49,6 +49,7 @@
   <path id="swing.classpath">
     <fileset dir="dist">
       <include name="jReality-core.jar"/>
+      <include name="jReality-backends-share.jar"/>
       <include name="jReality-tools.jar"/>
     </fileset>
   </path>

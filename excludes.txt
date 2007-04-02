@@ -16,5 +16,7 @@ de/jreality/examples/VulptureGPUApp.java
 
 **/TestSoft.java
 
+**/Fake*6.java
+
 **/RenderOptionsBeanInfo.java
 
