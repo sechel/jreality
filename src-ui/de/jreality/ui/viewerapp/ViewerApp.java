@@ -484,8 +484,9 @@ public class ViewerApp {
 		boolean remotePortal = config.equals("portal-remote");
 		if (viewers == null) {
 			if (remotePortal) {
+				String viewer = Secure.getProperty( "de.jreality.scene.Viewer", "de.jreality.jogl.Viewer");
 				try {
-					viewers = new Viewer[]{createViewer("de.jreality.jogl.Viewer")};
+					viewers = new Viewer[]{createViewer(viewer)};
 				} catch (InstantiationException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

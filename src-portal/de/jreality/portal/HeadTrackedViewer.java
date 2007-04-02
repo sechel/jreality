@@ -87,8 +87,6 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
   SceneGraphPath portalPath;
   SceneGraphPath cameraPath;
   
-  CylindricalPerspectiveViewer cv = null;
-
   Camera cam;
 
   public static HeadTrackedViewer createFullscreen(Class viewerClass) {
@@ -166,9 +164,6 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
 	}
     mb.assignTo(cameraOrientationNode);
     cameraTranslationNode.addChild(cameraOrientationNode);
-    if (viewer instanceof CylindricalPerspectiveViewer) {
-    	cv = (CylindricalPerspectiveViewer) viewer;
-    }
   }
 
   public SceneGraphComponent getAuxiliaryRoot() {
@@ -297,8 +292,6 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
 	Pn.dehomogenize(portalOriginInCamCoordinates, portalOriginInCamCoordinates);
 	
     PortalCoordinateSystem.setPORTALViewport(portalOriginInCamCoordinates, cam);
-    
-    if (cv != null) cv.setParameters(cam);
     
   }
 

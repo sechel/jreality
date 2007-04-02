@@ -9,6 +9,7 @@ import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.Viewer;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
 import de.jreality.shader.GlslProgram;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
@@ -16,6 +17,7 @@ import de.jreality.util.Input;
 public class CylindricalPerspectiveViewer extends Viewer {
 
 	GlslProgram cylProg;
+	Camera cam;
 	
 	public CylindricalPerspectiveViewer() {
 		super();
@@ -49,6 +51,12 @@ public class CylindricalPerspectiveViewer extends Viewer {
 	}
 	
 	@Override
+	public void setCameraPath(SceneGraphPath p) {
+		super.setCameraPath(p);
+		cam = p == null ? null : (Camera) p.getLastElement();
+	}
+	
+	@Override
 	public void setSceneRoot(SceneGraphComponent r) {
 		checkProgram(r);
 		super.setSceneRoot(r);
@@ -72,6 +80,7 @@ public class CylindricalPerspectiveViewer extends Viewer {
 	@Override
 	public void render() {
 		if (cylProg == null) checkProgram(getSceneRoot());
+		if (cam != null) setParameters(cam);
 		if (getStereoType() != HARDWARE_BUFFER_STEREO) setStereoType(HARDWARE_BUFFER_STEREO);
 		super.render();
 	}
