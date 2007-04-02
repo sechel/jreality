@@ -97,7 +97,8 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.sunflow.RenderOptions;
 import de.jreality.sunflow.Sunflow;
-import de.jreality.swing.ScenePanel;
+import de.jreality.swing.jrwindows.JRWindow;
+import de.jreality.swing.jrwindows.JRWindowManager;
 import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.PickShowTool;
 import de.jreality.tools.ShipNavigationTool;
@@ -124,20 +125,20 @@ public class ViewerVR {
 
 	// other static constants:
 
-	// width of control panel in meters
-	private static final double PANEL_WIDTH = 1;
-
-	// distance of all panels from avatar in meters
-	private static final double PANEL_Z_OFFSET = -2.2;
-
-	// height of upper edge of control panel in meters
-	private static final double PANEL_ABOVE_GROUND = 1.8;
-
-	// height of upper edge of file browser panel in meters
-	private static final int FILE_CHOOSER_ABOVE_GROUND = 2;
-
-	// width of file browser panel in meters
-	private static final int FILE_CHOOSER_PANEL_WIDTH = 2;
+//	// width of control panel in meters
+//	private static final double PANEL_WIDTH = 1;
+//
+//	// distance of all panels from avatar in meters
+//	private static final double PANEL_Z_OFFSET = -2.2;
+//
+//	// height of upper edge of control panel in meters
+//	private static final double PANEL_ABOVE_GROUND = 1.8;
+//
+//	// height of upper edge of file browser panel in meters
+//	private static final int FILE_CHOOSER_ABOVE_GROUND = 2;
+//
+//	// width of file browser panel in meters
+//	private static final int FILE_CHOOSER_PANEL_WIDTH = 2;
 
 	// parts of the scene that do not change
 	private SceneGraphComponent sceneRoot = new SceneGraphComponent("root"),
@@ -165,7 +166,8 @@ public class ViewerVR {
 	// the scale of the currently loaded terrain
 	private double terrainScale=1;
 
-	private ScenePanel sp;
+	private JRWindowManager wm;
+	private JRWindow sp;
 
 	// the default panel content - the tabs containing plugin panels
 	private Container defaultPanel;
@@ -462,15 +464,20 @@ public class ViewerVR {
 	}
 
 	private void makeControlPanel() {
-		sp = AccessController.doPrivileged(new PrivilegedAction<ScenePanel>() {
-			public ScenePanel run() {
-				return new ScenePanel();
-			}
-		});
-		sp.setPanelWidth(PANEL_WIDTH);
-		sp.setAboveGround(PANEL_ABOVE_GROUND);
-		sp.setBelowGround(0);
-		sp.setZOffset(PANEL_Z_OFFSET);
+		
+		wm = new JRWindowManager(camNode);
+		sp = wm.createFrame();
+		
+		
+//		sp = AccessController.doPrivileged(new PrivilegedAction<ScenePanel>() {
+//			public ScenePanel run() {
+//				return new ScenePanel();
+//			}
+//		});
+//		sp.setPanelWidth(PANEL_WIDTH);
+//		sp.setAboveGround(PANEL_ABOVE_GROUND);
+//		sp.setBelowGround(0);
+//		sp.setZOffset(PANEL_Z_OFFSET);
 
 		JTabbedPane tabs = new JTabbedPane();
 
@@ -485,6 +492,7 @@ public class ViewerVR {
 			geomTabs = tabs;
 			appearanceTabs = tabs;
 		}
+		sp.getFrame().setTitle("VR settings");
 		sp.getFrame().getContentPane().add(tabs);
 		getTerrainNode().addTool(sp.getPanelTool());
 		defaultPanel = sp.getFrame().getContentPane();
@@ -503,8 +511,8 @@ public class ViewerVR {
 
 	public void switchToDefaultPanel() {
 		sp.getFrame().setVisible(false);
-		sp.setPanelWidth(PANEL_WIDTH);
-		sp.setAboveGround(PANEL_ABOVE_GROUND);
+//		sp.setPanelWidth(PANEL_WIDTH);
+//		sp.setAboveGround(PANEL_ABOVE_GROUND);
 		sp.getFrame().setContentPane(defaultPanel);
 		sp.getFrame().pack();
 		sp.getFrame().setVisible(true);
@@ -513,8 +521,8 @@ public class ViewerVR {
 	public void switchTo(JPanel panel) {
 		sp.getFrame().setVisible(false);
 		sp.getFrame().setVisible(false);
-		sp.setPanelWidth(PANEL_WIDTH);
-		sp.setAboveGround(PANEL_ABOVE_GROUND);
+//		sp.setPanelWidth(PANEL_WIDTH);
+//		sp.setAboveGround(PANEL_ABOVE_GROUND);
 		sp.getFrame().setContentPane(panel);
 		sp.getFrame().pack();
 		sp.getFrame().setVisible(true);
@@ -523,15 +531,16 @@ public class ViewerVR {
 	public void switchToFileChooser(JComponent fileChooser) {
 		sp.getFrame().setVisible(false);
 		sp.getFrame().setVisible(false);
-		sp.setPanelWidth(FILE_CHOOSER_PANEL_WIDTH);
-		sp.setAboveGround(FILE_CHOOSER_ABOVE_GROUND);
+//		sp.setPanelWidth(FILE_CHOOSER_PANEL_WIDTH);
+//		sp.setAboveGround(FILE_CHOOSER_ABOVE_GROUND);
 		sp.getFrame().setContentPane(fileChooser);
 		sp.getFrame().pack();
 		sp.getFrame().setVisible(true);
 	}
 
 	public void showPanel() {
-		sp.show(getSceneRoot(), new Matrix(avatarPath.getMatrix(null)));
+		//sp.show(getSceneRoot(), new Matrix(avatarPath.getMatrix(null)));
+		sp.getFrame().setVisible(true);
 	}
 
 	public void setContent(SceneGraphComponent content) {
@@ -614,10 +623,10 @@ public class ViewerVR {
 
 	public void setAvatarHeight(double y) {
 		Matrix m = new Matrix(avatarNode.getTransformation());
-		double delta = y-m.getEntry(1, 3);
+		//double delta = y-m.getEntry(1, 3);
 		m.setEntry(1, 3, y);
 		m.assignTo(avatarNode);
-		sp.adjustHeight(delta);
+		//sp.adjustHeight(delta);
 	}
 
 	public void restoreDefaults() {
@@ -727,7 +736,8 @@ public class ViewerVR {
 				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
 			}
 			public void actionPerformed(ActionEvent e) {
-				sp.toggle(sceneRoot, new Matrix(avatarPath.getMatrix(null)));
+				//sp.toggle(sceneRoot, new Matrix(avatarPath.getMatrix(null)));
+				sp.getFrame().setVisible(sp.getFrame().isVisible());
 			}
 		};
 		settings.add(panelPopup);
@@ -832,9 +842,9 @@ public class ViewerVR {
 		);
 	}
 	
-	public JFrame getExternalFrame() {
-		return sp.getExternalFrame();
-	}
+//	public JFrame getExternalFrame() {
+//		return sp.getExternalFrame();
+//	}
 
 	public boolean isPanelInScene() {
 		return panelInSceneCheckBox.isSelected();
@@ -842,7 +852,7 @@ public class ViewerVR {
 
 	public void setPanelInScene(boolean b) {
 		panelInSceneCheckBox.setState(b);
-		sp.setInScene(b, sceneRoot,  new Matrix(avatarPath.getMatrix(null)));
+		wm.setWindowsInScene(b);//, sceneRoot,  new Matrix(avatarPath.getMatrix(null)));
 	}
 
 	public SceneGraphComponent getSceneRoot() {
@@ -1006,6 +1016,21 @@ public class ViewerVR {
 		return mainImpl(args);
 	}
 	
+	public static ViewerVR createDefaultViewerVR(String[][] loadableResources) {
+		ViewerVR vr = new ViewerVR();
+		if (loadableResources != null) vr.addLoadTab(loadableResources);
+		vr.addAlignTab();
+		AppearancePluginVR appPlugin = new AppearancePluginVR();
+		vr.registerPlugin(appPlugin);
+		vr.addEnvTab();
+		vr.addTerrainTab();
+		vr.addToolTab();
+		vr.addTexTab();
+		vr.setGeneratePickTrees(true);
+		vr.showPanel();
+		return vr;
+	}
+	
 	public static ViewerApp mainImpl(String[] args) {
 
 		boolean navigator = false;
@@ -1043,8 +1068,7 @@ public class ViewerVR {
 			}
 		}
 		
-		ViewerVR vr = new ViewerVR();
-		final String[][] examples = new String[][] {
+		String[][] examples = new String[][] {
 				{ "Boy surface", "jrs/boy.jrs" },
 				{ "Chen-Gackstatter surface", "obj/Chen-Gackstatter-4.obj" },
 				{ "helicoid with 2 handles", "jrs/He2WithBoundary.jrs" },
@@ -1053,16 +1077,8 @@ public class ViewerVR {
 				{ "Schwarz P", "jrs/schwarz.jrs" },
 				{ "Matheon baer", "jrs/baer.jrs" }
 		};
-		vr.addLoadTab(examples);
-		vr.addAlignTab();
-		AppearancePluginVR appPlugin = new AppearancePluginVR();
-		vr.registerPlugin(appPlugin);
-		vr.addEnvTab();
-		vr.addTerrainTab();
-		vr.addToolTab();
-		vr.addTexTab();
-		vr.setGeneratePickTrees(true);
-		vr.showPanel();
+		
+		ViewerVR vr = createDefaultViewerVR(examples);
 		
 		if (cmp != null) vr.setContent(cmp);
 		
@@ -1080,8 +1096,8 @@ public class ViewerVR {
 		JFrame f = vApp.display();
 		f.setSize(800, 600);
 		f.validate();
-		JFrame externalFrame = vr.getExternalFrame();
-		externalFrame.setLocationRelativeTo(f);
+//		JFrame externalFrame = vr.getExternalFrame();
+//		externalFrame.setLocationRelativeTo(f);
 		
 		return vApp;
 	}
@@ -1101,5 +1117,9 @@ public class ViewerVR {
 	
 	public SceneGraphPath getAvatarPath() {
 		return avatarPath;
+	}
+	
+	public JRWindowManager getWindowManager() {
+		return wm;
 	}
 }

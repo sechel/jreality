@@ -2,6 +2,7 @@ package de.jreality.swing.jrwindows;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
@@ -26,28 +27,37 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
-import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.swing.JFakeFrame;
+import de.jreality.tools.ActionTool;
 
 /**
- * @author bleicher
+ * 
+ * Manages a JFrame that may be immersed in the scene or an external JFrame on the
+ * Desktop. Do not hold any reference to the given JFrame, but always get the reference
+ * via getFrame().
+ * 
+ * @author bleicher, Steffen Weissmann
  *
  */
 
-class JRWindow {
+public class JRWindow {
 	
   private static final Font TITLE_FONT = new Font("Sans Serif", Font.BOLD, 24);
 
-private int windowNumber;  
+  private int windowNumber;
 
   private IndexedFaceSet frameFace;
   private IndexedLineSet borders;
   private IndexedFaceSet decoControlFace;
   private IndexedFaceSet decoDragFace;
   private JFakeFrame frame;
+  
+  private JFrame externalFrame = new JFrame();
+  private boolean inScene=true;
+  ActionTool myActionTool=new ActionTool("PanelActivation");
+
   private SceneGraphComponent positionSgc;
-  private SceneGraphComponent orientationSgc; 
   private SceneGraphComponent frameSgc;
   private SceneGraphComponent borderSgc;
   private SceneGraphComponent decoControlSgc;  
@@ -62,7 +72,8 @@ private int windowNumber;
   private double decoBorderRadius=0.0033;
   private double translateFactor;
   
-//  private double windowFrameFactor=200;
+//  private double windowFrameFactor=200;   windowSize=calculateWindowSize();
+//frameSize=setFrameSize(windowSize,
   
   private double decoSize=0.08;
   private final double decoControlSizeFactor=4;
@@ -82,7 +93,11 @@ private int windowNumber;
   private double aspectRatio=1;
   
   protected JRWindow(int windowNumber){    
-    super();  
+    myActionTool.addActionListener(new ActionListener() {
+    	public void actionPerformed(ActionEvent e) {
+    		getFrame().setVisible(!getFrame().isVisible());
+    	}
+    });
     this.windowNumber=windowNumber; 
     setBorderRadius(borderRadius);   
     setDecoSize(decoSize);
@@ -101,17 +116,16 @@ private int windowNumber;
   }  
   
   private void initSgc(){
-    positionSgc=new SceneGraphComponent();
+    positionSgc=new SceneGraphComponent("frame ["+windowNumber+"]");
+    positionSgc.setVisible(false); // until the frame is visible
     positionSgc.setAppearance(new Appearance());
     positionSgc.getAppearance().setAttribute("pointShader.pickable", true);
     positionSgc.getAppearance().setAttribute("lineShader.pickable", true);
-    positionSgc.getAppearance().setAttribute("polygonShader.pickable", true);
-    orientationSgc=new SceneGraphComponent();
-    positionSgc.addChild(orientationSgc);         
+    positionSgc.getAppearance().setAttribute("polygonShader.pickable", true);         
   }   
   private void initFrame(){
-    frameSgc=new SceneGraphComponent();
-    orientationSgc.addChild(frameSgc);    
+    frameSgc=new SceneGraphComponent("content");
+    positionSgc.addChild(frameSgc);    
     faceCorners=new double[cornerPos.length][cornerPos[0].length];
     calculateFaceCorners(faceCorners,cornerPos);    
     IndexedFaceSetFactory face=new IndexedFaceSetFactory();
@@ -120,47 +134,52 @@ private int windowNumber;
     face.setVertexTextureCoordinates(new double[][] {{1,0},{1,1},{0,1},{0,0}});
     face.setFaceCount(1);
     face.setFaceIndices(new int[][] {{0,1,2,3}});
-    face.setGenerateEdgesFromFaces(true);
+    face.setGenerateEdgesFromFaces(false);
     face.setGenerateFaceNormals(true);
     face.setGenerateVertexNormals(true);
     face.update();
     this.frameFace=face.getIndexedFaceSet();     
     frame=new JFakeFrame();
-    frame.addComponentListener(new ComponentListener() {
-		public void componentHidden(ComponentEvent e) {
-		}
-		public void componentMoved(ComponentEvent e) {
-		}
-		public void componentResized(ComponentEvent e) {
-			updateAspectRatio();
-			setCorner(0, cornerPos[0]);
-		}
-
-		public void componentShown(ComponentEvent e) {
-			updateAspectRatio();
-			setCorner(0, cornerPos[0]);
-		}
-		
-		void updateAspectRatio() {
-			double newAspectRatio=(double)frame.getWidth()/(double)frame.getHeight();
-			if (newAspectRatio == 0 || Double.isNaN(newAspectRatio) || Double.isInfinite(newAspectRatio)) {
-				System.out.println("ignoring new aspectRatio: "+newAspectRatio);				
-				return;
+    ComponentListener componentListener = new ComponentListener() {
+			public void componentHidden(ComponentEvent e) {
+				getSgc().setVisible(false);
 			}
-			aspectRatio=newAspectRatio;
-		}
-    	
-    });
-
+			public void componentMoved(ComponentEvent e) {
+			}
+			public void componentResized(ComponentEvent e) {
+				updateAspectRatio();
+				setCorner(0, cornerPos[0]);
+			}
+	
+			public void componentShown(ComponentEvent e) {
+				updateAspectRatio();
+				setCorner(0, cornerPos[0]);
+				getSgc().setVisible(true);
+			}
+			
+			void updateAspectRatio() {
+				double newAspectRatio=(double)frame.getWidth()/(double)frame.getHeight();
+				if (newAspectRatio == 0 || Double.isNaN(newAspectRatio) || Double.isInfinite(newAspectRatio)) {
+					System.out.println("ignoring new aspectRatio: "+newAspectRatio);				
+					return;
+				}
+				aspectRatio=newAspectRatio;
+			}
+	    	
+	    };
+	frame.addComponentListener(componentListener);
+	
     frame.addPropertyChangeListener("title", new PropertyChangeListener() {
 		public void propertyChange(PropertyChangeEvent evt) {
 			updateFrameTitle();
+			externalFrame.setTitle(frame.getTitle());
 		}
     });
     
+    frameSgc.setGeometry(frameFace);
     frameSgc.addTool(frame.getTool());
-    frameSgc.setAppearance(frame.getAppearance());  
-    frameSgc.setGeometry(frameFace); 
+    frameSgc.setAppearance(frame.getAppearance());
+    
     frameSgc.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW,false);
     frameSgc.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW,false);
     frameSgc.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW,false);
@@ -169,8 +188,8 @@ private int windowNumber;
   }
   
   private void initDecoration(){
-    decoControlSgc=new SceneGraphComponent();    
-    orientationSgc.addChild(decoControlSgc);      
+    decoControlSgc=new SceneGraphComponent("controls");    
+    positionSgc.addChild(decoControlSgc);      
     decoControlCorners=new double[cornerPos.length][cornerPos[0].length];
     calculateDecoControlCorners(decoControlCorners,cornerPos);    
     IndexedFaceSetFactory decoControlFace=new IndexedFaceSetFactory();
@@ -179,7 +198,7 @@ private int windowNumber;
     decoControlFace.setVertexTextureCoordinates(new double[][] {{1,0},{1,1},{0,1},{0,0}});
     decoControlFace.setFaceCount(1);
     decoControlFace.setFaceIndices(new int[][] {{0,1,2,3}});
-    decoControlFace.setGenerateEdgesFromFaces(true);
+    decoControlFace.setGenerateEdgesFromFaces(false);
     decoControlFace.setGenerateFaceNormals(true);
     decoControlFace.setGenerateVertexNormals(true);
     decoControlFace.update();
@@ -199,7 +218,12 @@ private int windowNumber;
     panel=new JPanel();
     panel.setBackground(inactiveColor);
     killButton=new JButton("X");
-    killButton.setEnabled(false);
+    killButton.addActionListener(new ActionListener() {
+    	public void actionPerformed(ActionEvent e) {
+    		frame.setVisible(false);
+    	}
+    });
+    //killButton.setEnabled(false);
     maxButton=new JButton("O");
     minButton=new JButton("_");
     panel.add(minButton);
@@ -210,8 +234,8 @@ private int windowNumber;
     decoControlFrame.setVisible(true);
     
     ////decoDragFace////////////////////////////////////
-    decoDragSgc=new SceneGraphComponent();
-    orientationSgc.addChild(decoDragSgc);     
+    decoDragSgc=new SceneGraphComponent("title");
+    positionSgc.addChild(decoDragSgc);     
     decoDragCorners=new double[cornerPos.length][cornerPos[0].length];
     calculateDecoDragCorners(decoDragCorners,cornerPos);    
     IndexedFaceSetFactory decoDragFace=new IndexedFaceSetFactory();
@@ -220,7 +244,7 @@ private int windowNumber;
     decoDragFace.setVertexTextureCoordinates(new double[][] {{1,0},{1,1},{0,1},{0,0}});
     decoDragFace.setFaceCount(1);
     decoDragFace.setFaceIndices(new int[][] {{0,1,2,3}});
-    decoDragFace.setGenerateEdgesFromFaces(true);
+    decoDragFace.setGenerateEdgesFromFaces(false);
     decoDragFace.setGenerateFaceNormals(true);
     decoDragFace.setGenerateVertexNormals(true);
     decoDragFace.update();
@@ -236,8 +260,8 @@ private int windowNumber;
     decoDragSgc.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
     
     ////borders///////////////////////
-    borderSgc=new SceneGraphComponent();
-    orientationSgc.addChild(borderSgc);    
+    borderSgc=new SceneGraphComponent("border");
+    positionSgc.addChild(borderSgc);
     IndexedLineSetFactory borders=new IndexedLineSetFactory();
     borders.setVertexCount(4);
     borders.setVertexCoordinates(cornerPos);
@@ -255,7 +279,7 @@ private int windowNumber;
     borderSgc.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,borderEdgeColor);
     borderSgc.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS,cornerRadius);
     borderSgc.getAppearance().setAttribute(CommonAttributes.TUBE_RADIUS,borderRadius);
-    borderSgc.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
+    borderSgc.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, true);
   }   
    
   protected void updateFrameTitle() {
@@ -271,7 +295,7 @@ private int windowNumber;
 	  
 	  double effW = lambda*width;
 	  	  
-	  if (effW <= w) effW=w+h/3;
+	  if (effW <= w+h/3) effW=w+h/3;
 	  BufferedImage effImg = new BufferedImage((int)effW, (int)h, BufferedImage.TYPE_INT_ARGB);
 	  effImg.getGraphics().fillRect(0, 0, effImg.getWidth(), effImg.getHeight());
 	  effImg.getGraphics().drawImage(img, (int) (int)(h/6), (int)(h/6), null);
@@ -280,7 +304,7 @@ private int windowNumber;
   }
 
   protected void addActionListeners(ActionListener actionListener){
-    killButton.addActionListener(actionListener);    
+    //killButton.addActionListener(actionListener);    
     maxButton.addActionListener(actionListener);    
     minButton.addActionListener(actionListener);
     updateActionCommands();
@@ -471,7 +495,6 @@ private int windowNumber;
       }
       isSmall=false;
     }
-    frame.setVisible(!isSmall);
     setCornerPos(cornerPos);
   }
   private double[] getCenter(double[][] box){
@@ -527,9 +550,9 @@ private int windowNumber;
   protected SceneGraphComponent getSgc(){
     return positionSgc;
   }  
-  protected JFrame getFrame(){
-    return frame;
-  }  
+  public JFrame getFrame() {
+	  return inScene ? frame : externalFrame;
+  }
   protected IndexedFaceSet getFrameFace(){
     return frameFace;
   }  
@@ -542,5 +565,30 @@ private int windowNumber;
   protected IndexedLineSet getBorders(){
     return borders;
   }
+  public void setInScene(boolean b) {
+	  if (b==inScene) return;
+	  if (b) {
+			inScene = b;
+			boolean visible = externalFrame.isVisible();
+			externalFrame.setVisible(false);
+			frame.setContentPane(externalFrame.getContentPane());
+			externalFrame.remove(externalFrame.getContentPane());
+			frame.pack();
+			frame.setVisible(visible);
+		} else {
+			getSgc().setVisible(false);
+			boolean visible = frame.isVisible();
+			frame.setVisible(false);
+			inScene = b;
+			externalFrame.setContentPane(frame.getContentPane());
+			frame.remove(frame.getContentPane());
+			externalFrame.pack();
+			externalFrame.setVisible(visible);
+		}
+  }
 
+	public ActionTool getPanelTool() {
+		return myActionTool;
+	}
+  
 }

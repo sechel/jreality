@@ -85,7 +85,7 @@ class FakeFramePeer {
       if (DUMP) System.out.println("JFakeFrame set Bounds "+x+" "+y+" "+width+" "+height);
         bounds.setBounds(x, y, width, height);
         if(bi.getWidth()!=width || bi.getHeight()!= height) {
-            bi =new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
+            bi =new BufferedImage(Math.max(1, width), Math.max(1, height),BufferedImage.TYPE_INT_ARGB);
             vi=new FakeVolatileImage(bi);
         }
     }

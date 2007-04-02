@@ -256,7 +256,10 @@ public class LabelUtility {
   
   public static BufferedImage createImageFromString(String s, Font f, Color foreground, Color background) {
 	  //Rectangle r = f.getStringBounds(s,frc).getBounds();
-	  if (s==null || s.length()==0) return bi;
+	  if (s==null || s.length()==0) {
+		  if (background.equals(TRANSPARENT)) return bi;
+		  else s = " ";
+	  }
 	  TextLayout tl = new TextLayout(s,f,frc);
 	  Rectangle r = tl.getBounds().getBounds();
 	  

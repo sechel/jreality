@@ -36,14 +36,11 @@ public class TestJRWindows {
     
     JRWindowManager wm=new JRWindowManager(avatarPath.getLastComponent());   
     
-    wm.setDesktopDefaultValues();
-    //wm.setPortalDefaultValues();
-    
-    JFrame frame2=wm.createFrame();
+    JFrame frame2=wm.createFrame().getFrame();
     frame2.getContentPane().add(new JTextArea("testareatestareatestareatestarea \n testareatestareatestareatestarea \n testareatestareatestareatestarea \n testareatestareatestareatestareatestarea \n testareatestareatestareatestareatestarea \n testareatestareatestareatestareatestarea \n testareatestareatestareatestareatestarea",10,50));
 //
 //    
-    JFrame frame3=wm.createFrame();
+    JFrame frame3=wm.createFrame().getFrame();
     frame3.getContentPane().add("North",new JButton("test"));
     PaintComponent pc=new PaintComponent();
     pc.setSize(400,180);
@@ -51,7 +48,7 @@ public class TestJRWindows {
     frame3.getContentPane().add(pc);
 
 //  
-    JFrame frame4=wm.createFrame();
+    JFrame frame4=wm.createFrame().getFrame();
     //frame4.getContentPane().setSize(100,50);
 //    JCheckBox checkBox=new JCheckBox();
     JPanel panel=new JPanel();
@@ -79,7 +76,7 @@ public class TestJRWindows {
     //frame4.getContentPane().add(new JCheckBox());
     //frame4.getContentPane().add("South",new JCheckBox());    
   
-    JFrame frame5=wm.createFrame();
+    JFrame frame5=wm.createFrame().getFrame();
     frame5.getContentPane().add("North",new JCheckBox());
     //frame5.getContentPane().add("South",new JCheckBox());    
     
@@ -93,6 +90,15 @@ public class TestJRWindows {
     //wm.pack(); 
     //wm.validate();
     
+    frame2.pack();
+    frame3.pack();
+    frame4.pack();
+    frame5.pack();
+
+    frame2.show();
+    frame3.show();
+    frame4.show();
+    frame5.show();
     
     System.out.println("nach: panelSize = "+panel.getWidth()+" ,"+panel.getHeight());
     System.out.println("nach: frameSize = "+frame4.getWidth()+" ,"+frame4.getHeight());

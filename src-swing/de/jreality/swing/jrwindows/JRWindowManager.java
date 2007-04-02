@@ -3,7 +3,6 @@ package de.jreality.swing.jrwindows;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import javax.swing.JFrame;
 
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
@@ -13,11 +12,8 @@ import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.tools.DragEventTool;
-import de.jreality.tools.DraggingTool;
 import de.jreality.tools.FaceDragEvent;
 import de.jreality.tools.FaceDragListener;
-import de.jreality.tools.LineDragEvent;
-import de.jreality.tools.LineDragListener;
 import de.jreality.tools.PointDragEvent;
 import de.jreality.tools.PointDragListener;
 
@@ -28,26 +24,21 @@ import de.jreality.tools.PointDragListener;
 
 public class JRWindowManager implements ActionListener{
   
-  private final double[] defaultDesktopWindowPos={0,0,-5};
-  private double defaultDesktopBorderRadius=0.01;
-  private double defaultDesktopDecoSize=0.08;
-  
-  private final double[] defaultPortalWindowPos={0,1.5,-1.2};
-  private double defaultPortalBorderRadius=0.05;
-  private double defaultPortalDecoSize=0.15;
+  private final double[] defaultDesktopWindowPos={0,0,-2};
   
   private SceneGraphComponent sgc;
-  private ArrayList<JRWindow> windowList;
+  private ArrayList<JRWindow> windowList=new ArrayList<JRWindow>();
   private DragEventTool dragTool;
   
+  private boolean windowsInScene=true;
+  
   public JRWindowManager(SceneGraphComponent avatar){
-    sgc=new SceneGraphComponent();
+    sgc=new SceneGraphComponent("window manager");
     sgc.setAppearance(new Appearance());
     sgc.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, false);    
     avatar.addChild(sgc);
-    windowList=new ArrayList<JRWindow>();
     setPosition(defaultDesktopWindowPos);
-    initDragTool(); 
+    initDragTool();
   } 
   
   private void initDragTool(){
@@ -193,21 +184,31 @@ public class JRWindowManager implements ActionListener{
       }
       windowCount++;
     }      
-    windowList.remove(windowNum); 
+    windowList.remove(windowNum);
     win2kill=null;
   }
   
-  public JFrame createFrame(){ 
+  public JRWindow createFrame(){ 
     JRWindow window=new JRWindow(getWindowCount());
-    window.addActionListeners(this);    
-    sgc.addChild(window.getSgc());     
+    window.addActionListeners(this);
+    window.setInFront(getWindowsInScene());
+    sgc.addChild(window.getSgc());
     windowList.add(window);
     setWindowInFront(getWindowCount()-1);
-    return window.getFrame();
+    return window;
   }   
-  public JFrame getFrame(int i){
-    return (JFrame)(windowList.get(i).getFrame());
+  
+  public boolean getWindowsInScene() {
+	  return windowsInScene;
   }
+
+  public void setWindowsInScene(boolean b) {
+	  windowsInScene = b;
+	  for (JRWindow w : windowList) w.setInScene(windowsInScene);
+  }
+//  JFrame getFrame(int i){
+//    return (JFrame)(windowList.get(i).getFrame());
+//  }
   public int getWindowCount(){
     return windowList.size();
   }
@@ -220,32 +221,19 @@ public class JRWindowManager implements ActionListener{
 //      win.updateFrameSize();
 //    }
 //  }
+//  
+//  public void setBorderRadius(double r){
+//    defaultDesktopBorderRadius=r;
+//    for(JRWindow win : windowList)
+//      win.setBorderRadius(r);
+//  }
+//  public void setDecoSize(double s){
+//    defaultDesktopDecoSize=s;
+//    for(JRWindow win : windowList)
+//      win.setDecoSize(s);
+//  }  
   
-  public void setBorderRadius(double r){
-    defaultDesktopBorderRadius=r;
-    for(JRWindow win : windowList)
-      win.setBorderRadius(r);
-  }
-  public void setDecoSize(double s){
-    defaultDesktopDecoSize=s;
-    for(JRWindow win : windowList)
-      win.setDecoSize(s);
-  }  
   public void setPosition(double[] pos){
     MatrixBuilder.euclidean().translate(pos).assignTo(sgc);
-  }
-  public void setDragAllWindowsTool(){
-    sgc.addTool(new DraggingTool());
-  }
-  public void setDesktopDefaultValues(){
-    setBorderRadius(defaultDesktopBorderRadius);
-    setDecoSize(defaultDesktopDecoSize);
-    setPosition(defaultDesktopWindowPos);
-  }  
-  public void setPortalDefaultValues(){
-    setBorderRadius(defaultPortalBorderRadius);
-    setDecoSize(defaultPortalDecoSize);
-    setPosition(defaultPortalWindowPos);
-    setDragAllWindowsTool();
   }
 }
