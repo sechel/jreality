@@ -295,7 +295,7 @@ public class ViewerVR {
 
 		if (portal || portalRemote) {
 			wm = new JRWindowManager(avatarNode);
-			wm.setPosition(new double[]{0, 0, -1.24});
+			wm.setPosition(new double[]{0, 1.24, -1.24});
 		} else {
 			wm = new JRWindowManager(camNode);
 			wm.setPosition(new double[]{0, 0, -2});
