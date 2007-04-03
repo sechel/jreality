@@ -93,6 +93,7 @@ import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.pick.PickResult;
 import de.jreality.scene.tool.Tool;
+import de.jreality.scene.tool.ToolContext;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
@@ -102,6 +103,7 @@ import de.jreality.swing.jrwindows.JRWindow;
 import de.jreality.swing.jrwindows.JRWindowManager;
 import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.PickShowTool;
+import de.jreality.tools.PointerDisplayTool;
 import de.jreality.tools.ShipNavigationTool;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerApp;
@@ -253,8 +255,22 @@ public class ViewerVR {
 
 		shipNavigationTool = new ShipNavigationTool();
 		avatarNode.addTool(shipNavigationTool);
-		if (portal || portalRemote)
+		if (portal || portalRemote) {
+			avatarNode.addTool(new PointerDisplayTool() {
+				{
+					setVisible(false);
+				}
+				@Override
+				public void perform(ToolContext tc) {
+					PickResult currentPick = tc.getCurrentPick();
+					boolean visible = currentPick != null && currentPick.getPickPath().startsWith(tc.getAvatarPath());
+					setVisible(visible);
+					if (visible) super.perform(tc);
+				}
+			});
+			
 			shipNavigationTool.setPollingDevice(false);
+		}
 		if (!portal && !portalRemote) {
 			headTransformationTool = new HeadTransformationTool();
 			camNode.addTool(headTransformationTool);
@@ -424,7 +440,7 @@ public class ViewerVR {
 				double maxExtent = Math.max(extent[0], extent[2]);
 				if (maxExtent != 0) {
 					terrainScale=1;
-					if(maxExtent>10000) terrainScale=10000/maxExtent;
+					if(maxExtent>1000) terrainScale=1000/maxExtent;
 					double[] translation = bounds.getCenter();
 					// determine offset in y-direction (up/down)
 					AABBPickSystem ps = new AABBPickSystem();

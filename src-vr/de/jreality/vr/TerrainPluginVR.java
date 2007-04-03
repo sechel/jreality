@@ -3,7 +3,6 @@ package de.jreality.vr;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -26,14 +25,12 @@ import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileSystemView;
 
 import de.jreality.geometry.GeometryUtility;
-import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.Readers;
@@ -70,9 +67,11 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	private static final boolean DEFAULT_TRANSPARENT=false;
 	private static final double DEFAULT_TRANSPARENCY=0.3;
 	private static final boolean DEFAULT_SPHERICAL_TERRAIN=false;
+	private static final boolean DEFAULT_TEX_SCALE_ENABLED=true;
 	
 	// terrain tab
 	private JSlider terrainTexScaleSlider;
+	private JCheckBox terrainTexScaleEnabled;
 	private JPanel terrainPanel;
 
 	private Texture2D terrainTex;
@@ -116,6 +115,8 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	private ImageData[] cubeMap;
 
 	private JCheckBox sphericalTerrainBox;
+
+	private JLabel texScaleLabel;
 
 	public TerrainPluginVR() {
 		super("terrain");
@@ -249,7 +250,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		
 		Box texScaleBox = new Box(BoxLayout.X_AXIS);
 		texScaleBox.setBorder(new EmptyBorder(10, 5, 5, 0));
-		JLabel texScaleLabel = new JLabel("scale");
+		texScaleLabel = new JLabel("scale");
 		terrainTexScaleSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
 		terrainTexScaleSlider.setPreferredSize(new Dimension(70,20));
 		terrainTexScaleSlider.addChangeListener(new ChangeListener() {
@@ -258,6 +259,13 @@ public class TerrainPluginVR extends AbstractPluginVR {
 				setTerrainTextureScale(Math.exp(Math.log(TEX_SCALE_RANGE) * d)/TEX_SCALE_RANGE * MAX_TEX_SCALE);
 			}
 		});
+		terrainTexScaleEnabled = new JCheckBox();
+		terrainTexScaleEnabled.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setTexScaleEnabled(terrainTexScaleEnabled.isSelected());
+			}
+		});
+		texScaleBox.add(terrainTexScaleEnabled);
 		texScaleBox.add(texScaleLabel);
 		texScaleBox.add(terrainTexScaleSlider);
 		tex.add(texScaleBox);
@@ -354,6 +362,21 @@ public class TerrainPluginVR extends AbstractPluginVR {
 
 	}
 	
+	public void setTexScaleEnabled(boolean b) {
+		terrainTexScaleEnabled.setSelected(b);
+		if (b) {
+			setTerrainTextureScale(getTerrainTextureScale());
+		} else {
+			if (terrainTex != null) terrainTex.setTextureMatrix(null);
+		}
+		terrainTexScaleSlider.setEnabled(b);
+		texScaleLabel.setEnabled(b);
+	}
+	
+	public boolean isTexScaleEnabled() {
+		return terrainTexScaleEnabled.isSelected();
+	}
+
 	protected void switchToColorChooser() {
 		getViewerVR().switchTo(faceColorChooser);
 	}
@@ -540,7 +563,6 @@ public class TerrainPluginVR extends AbstractPluginVR {
 			try {
 				setTerrainTexture(terrainTexFile == null ? null : ImageData.load(Input.getInput(terrainTexFile)));
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} else {
@@ -573,6 +595,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		prefs.putBoolean("transparencyEnabled", isTransparencyEnabled());
 		prefs.putDouble("transparency", getTransparency());
 
+		prefs.putBoolean("texScaleEnabled", isTexScaleEnabled());
 	}
 	
 	private boolean isSphericalTerrain() {
@@ -596,7 +619,8 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		setFacesReflecting(DEFAULT_REFLECTING);
 		setTransparencyEnabled(DEFAULT_TRANSPARENT);
 		setTransparency(DEFAULT_TRANSPARENCY);
-
+		
+		setTexScaleEnabled(DEFAULT_TEX_SCALE_ENABLED);
 	}
 	
 	private void setSphericalTerrain(boolean b) {
@@ -630,7 +654,6 @@ public class TerrainPluginVR extends AbstractPluginVR {
 						customTerrain = Readers.read(terrainFile);
 						PickUtility.assignFaceAABBTrees(customTerrain);
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 			}
@@ -648,5 +671,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		setFacesReflecting(prefs.getBoolean("reflecting", DEFAULT_REFLECTING));
 		setTransparencyEnabled(prefs.getBoolean("transparencyEnabled", DEFAULT_TRANSPARENT));
 		setTransparency(prefs.getDouble("transparency", DEFAULT_TRANSPARENCY));
+		
+		setTexScaleEnabled(prefs.getBoolean("texScaleEnabled", DEFAULT_TEX_SCALE_ENABLED));
     }
 }

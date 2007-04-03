@@ -42,12 +42,9 @@ package de.jreality.tools;
 
 import java.awt.Color;
 
-import de.jreality.geometry.GeometryUtility;
-import de.jreality.geometry.Primitives;
+import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.math.Matrix;
-import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.tool.AbstractTool;
@@ -62,23 +59,27 @@ public class PointerDisplayTool extends AbstractTool {
   
   public PointerDisplayTool(double radius) {
     addCurrentSlot(pointer);
-    SceneGraphComponent stick=new SceneGraphComponent();
-    MatrixBuilder.euclidean().translate(0,0,-1).scale(radius, radius, 1).assignTo(stick);
-    IndexedFaceSet cube = Primitives.cube();
-    GeometryUtility.calculateAndSetFaceNormals(cube);
-	stick.setGeometry(cube);
     c.setAppearance(new Appearance());
-    c.getAppearance().setAttribute("diffuseColor", Color.yellow);
+    c.getAppearance().setAttribute("diffuseColor", new Color(160, 160, 160));
     c.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
     c.getAppearance().setAttribute("showPoints", false);
-    c.getAppearance().setAttribute("showFaces", true);
-    c.getAppearance().setAttribute("showLines", false);
+    c.getAppearance().setAttribute("showFaces", false);
+    c.getAppearance().setAttribute("showLines", true);
+    c.getAppearance().setAttribute("lineShader.tubeDraw", true);
+    c.getAppearance().setAttribute("lineShader.tubeRadius", radius);
     c.getAppearance().setAttribute(CommonAttributes.PICKABLE, false);
     c.setTransformation(new Transformation());
-    c.addChild(stick);
+
+    IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
+    ilsf.setVertexCount(2);
+    ilsf.setVertexCoordinates(new double[][]{{0, 0, 0}, {0, 0, -2}});
+    ilsf.setLineCount(1);
+    ilsf.setEdgeIndices(new int[]{0, 1});
+    ilsf.update();
+    c.setGeometry(ilsf.getGeometry());
   }
   public PointerDisplayTool() {
-    this(0.01);
+    this(0.003);
   }
   
   boolean isAssigned;
@@ -92,4 +93,13 @@ public class PointerDisplayTool extends AbstractTool {
     m.assignFrom(tc.getTransformationMatrix(pointer));
     m.assignTo(c.getTransformation());
   }
+  
+  public void setVisible(boolean v) {
+	  c.setVisible(v);
+  }
+  
+  public boolean isVisible() {
+	  return c.isVisible();
+  }
+  
 }

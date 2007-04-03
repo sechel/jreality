@@ -158,7 +158,7 @@ public class ToolPluginVR extends AbstractPluginVR {
 		gainBox.setBorder(new EmptyBorder(10,5,10,5));
 		JLabel gainLabel = new JLabel("navigation speed");
 		gainBox.add(gainLabel);
-		gain = new JSlider(0, 1000, (int) (100*DEFAULT_SPEED));
+		gain = new JSlider(0, 3000, (int) (100*DEFAULT_SPEED));
 		gain.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
 				setNavigationSpeed(getNavigationSpeed());
