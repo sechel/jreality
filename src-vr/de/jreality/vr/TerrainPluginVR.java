@@ -67,7 +67,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	private static final Color DEFAULT_FACE_COLOR=Color.white;
 	private static final boolean DEFAULT_REFLECTING=true;
 	private static final double DEFAULT_REFLECTION=0.2;
-	private static final boolean DEFAULT_TRANSPARENT=true;
+	private static final boolean DEFAULT_TRANSPARENT=false;
 	private static final double DEFAULT_TRANSPARENCY=0.3;
 	private static final boolean DEFAULT_SPHERICAL_TERRAIN=false;
 	
@@ -551,28 +551,34 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	
 	@Override
 	public void storePreferences(Preferences prefs) {
-		prefs.putDouble("terrain.texScale", getTerrainTextureScale());
-		prefs.put("terrain.texture", terrain.getTextureName());
+		prefs.putDouble("texScale", getTerrainTextureScale());
+		prefs.put("texture", terrain.getTextureName());
 		if (terrain.isCustomTexture() && terrainTexFile != null) {
-			prefs.put("terrain.customTex", terrainTexFile.getAbsolutePath());
+			prefs.put("customTex", terrainTexFile.getAbsolutePath());
 		}
 		
-		prefs.put("terrain.geometry", terrain.getGeometryName());
+		prefs.put("geometry", terrain.getGeometryName());
 		if (terrain.getGeometryType() == GeometryType.CUSTOM && terrainFile != null) {
-			prefs.put("terrain.customTerrain", terrainFile.getAbsolutePath());
+			prefs.put("customTerrain", terrainFile.getAbsolutePath());
 		}
-		
-		prefs.putInt("terrain.colorRed", getFaceColor().getRed());
-		prefs.putInt("terrain.colorGreen", getFaceColor().getGreen());
-		prefs.putInt("terrain.colorBlue", getFaceColor().getBlue());
 
-		prefs.putDouble("terrain.reflection", getFaceReflection());
-		prefs.putBoolean("terrain.reflecting", isFacesReflecting());
-		prefs.putBoolean("terrain.transparencyEnabled", isTransparencyEnabled());
-		prefs.putDouble("terrain.transparency", getTransparency());
+		prefs.putBoolean("sphericalTerrain", isSphericalTerrain());
+		
+		prefs.putInt("colorRed", getFaceColor().getRed());
+		prefs.putInt("colorGreen", getFaceColor().getGreen());
+		prefs.putInt("colorBlue", getFaceColor().getBlue());
+
+		prefs.putDouble("reflection", getFaceReflection());
+		prefs.putBoolean("reflecting", isFacesReflecting());
+		prefs.putBoolean("transparencyEnabled", isTransparencyEnabled());
+		prefs.putDouble("transparency", getTransparency());
 
 	}
 	
+	private boolean isSphericalTerrain() {
+		return sphericalTerrainBox.isSelected();
+	}
+
 	@Override
 	public void restoreDefaults() {
 		setTerrainTextureScale(DEFAULT_TEX_SCALE);
@@ -583,6 +589,8 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		terrain.setGeometryByName(DEFAULT_TERRAIN);
 		terrainFile = null;
 		
+		setSphericalTerrain(DEFAULT_SPHERICAL_TERRAIN);
+		
 		setFaceColor(DEFAULT_FACE_COLOR);
 		setFaceReflection(DEFAULT_REFLECTION);
 		setFacesReflecting(DEFAULT_REFLECTING);
@@ -591,13 +599,17 @@ public class TerrainPluginVR extends AbstractPluginVR {
 
 	}
 	
+	private void setSphericalTerrain(boolean b) {
+		sphericalTerrainBox.setSelected(b);
+	}
+
 	@Override
 	public void restorePreferences(Preferences prefs) {
-		setTerrainTextureScale(prefs.getDouble("terrain.texScale", DEFAULT_TEX_SCALE));
+		setTerrainTextureScale(prefs.getDouble("texScale", DEFAULT_TEX_SCALE));
 		
-		String texName = prefs.get("terrain.texture", DEFAULT_TEXTURE);
+		String texName = prefs.get("texture", DEFAULT_TEXTURE);
 		if ("custom".equals(texName)) {
-			String fileName = prefs.get("terrain.customTex", null);
+			String fileName = prefs.get("customTex", null);
 			if (fileName != null) {
 				terrainTexFile = new File(fileName);
 				if (!terrainTexFile.exists()) terrainTexFile = null;
@@ -625,14 +637,16 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		}
 		terrain.setGeometryByName(terrainName);
 		
-		int r = prefs.getInt("terrain.colorRed", DEFAULT_FACE_COLOR.getRed());
-		int g = prefs.getInt("terrain.colorGreen", DEFAULT_FACE_COLOR.getGreen());
-		int b = prefs.getInt("terrain.colorBlue", DEFAULT_FACE_COLOR.getBlue());
+		setSphericalTerrain(prefs.getBoolean("terrain.sphericalTerrain", DEFAULT_SPHERICAL_TERRAIN));
+		
+		int r = prefs.getInt("colorRed", DEFAULT_FACE_COLOR.getRed());
+		int g = prefs.getInt("colorGreen", DEFAULT_FACE_COLOR.getGreen());
+		int b = prefs.getInt("colorBlue", DEFAULT_FACE_COLOR.getBlue());
 		setFaceColor(new Color(r,g,b));
 
-		setFaceReflection(prefs.getDouble("terrain.reflection", DEFAULT_REFLECTION));
-		setFacesReflecting(prefs.getBoolean("terrain.reflecting", DEFAULT_REFLECTING));
-		setTransparencyEnabled(prefs.getBoolean("terrain.transparencyEnabled", DEFAULT_TRANSPARENT));
-		setTransparency(prefs.getDouble("terrain.transparency", DEFAULT_TRANSPARENCY));
+		setFaceReflection(prefs.getDouble("reflection", DEFAULT_REFLECTION));
+		setFacesReflecting(prefs.getBoolean("reflecting", DEFAULT_REFLECTING));
+		setTransparencyEnabled(prefs.getBoolean("transparencyEnabled", DEFAULT_TRANSPARENT));
+		setTransparency(prefs.getDouble("transparency", DEFAULT_TRANSPARENCY));
     }
 }

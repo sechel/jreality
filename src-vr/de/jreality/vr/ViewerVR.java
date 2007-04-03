@@ -53,6 +53,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
@@ -120,7 +121,7 @@ public class ViewerVR {
 	private static final double DEFAULT_SKY_LIGHT_INTENSITY = .2;
 
 	// defaults for preferences:
-	private static final boolean DEFAULT_PANEL_IN_SCENE = true;
+	private static final boolean DEFAULT_PANEL_IN_SCENE = false;
 
 
 	// other static constants:
@@ -304,7 +305,7 @@ public class ViewerVR {
 		// swing widgets
 		makeControlPanel();
 
-		panelInSceneCheckBox = new JCheckBoxMenuItem( new AbstractAction("Show panel in scene") {
+		panelInSceneCheckBox = new JCheckBoxMenuItem( new AbstractAction("Show frames in scene") {
 			public void actionPerformed(ActionEvent e) {
 				setPanelInScene(panelInSceneCheckBox.getState());
 			}
@@ -611,7 +612,7 @@ public class ViewerVR {
 	 * @return A ViewerApp to display the scene.
 	 */
 	public ViewerApp initialize() {
-		restorePreferences();
+		restorePreferences(getPreferences());
 		ViewerApp viewerApp = new ViewerApp(sceneRoot, cameraPath, emptyPickPath, avatarPath);
 		tweakMenu(viewerApp);
 		return viewerApp;
@@ -642,10 +643,12 @@ public class ViewerVR {
 
 	}
 
-	public void savePreferences() {
-		Preferences prefs = getPreferences();
+	public void savePreferences(Preferences prefs) {
 		prefs.putBoolean("panelInScene", isPanelInScene());
-		for (PluginVR plugin : plugins) plugin.storePreferences(prefs);
+		for (PluginVR plugin : plugins) {
+			Preferences p = prefs.node(plugin.getName());
+			plugin.storePreferences(p);
+		}
 		try {
 			prefs.flush();
 		} catch(BackingStoreException e){
@@ -661,15 +664,17 @@ public class ViewerVR {
 		});
 	}
 
-	public void restorePreferences() {
-		Preferences prefs = getPreferences();
+	public void restorePreferences(Preferences prefs) {
 		setPanelInScene(prefs.getBoolean("panelInScene", DEFAULT_PANEL_IN_SCENE));
-		for (PluginVR plugin : plugins) plugin.restorePreferences(prefs);
+		for (PluginVR plugin : plugins) {
+			Preferences p = prefs.node(plugin.getName());
+			plugin.restorePreferences(p);
+		}
 	}
 
 	public void exportPreferences(File file) {
-		savePreferences();
-		Preferences prefs = getPreferences();
+		UnboundPreferences prefs = UnboundPreferences.createRoot();
+		savePreferences(prefs);
 		try {
 			prefs.exportSubtree(new FileOutputStream(file));
 		} catch (FileNotFoundException e) {
@@ -684,20 +689,14 @@ public class ViewerVR {
 		}
 	}
 	
-	public void importPreferences(File file) {
-		try {
-			Preferences.importPreferences(new FileInputStream(file));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidPreferencesFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		restorePreferences();
+	public void importPreferences(File file) throws IOException, InvalidPreferencesFormatException {
+		importPreferences(new FileInputStream(file));
+	}
+	
+	public void importPreferences(InputStream is) throws IOException, InvalidPreferencesFormatException {
+		UnboundPreferences prefs = UnboundPreferences.createRoot();
+		prefs.localImportPreferences(is);
+		restorePreferences(prefs);
 	}
 	
 	public double getObjectScale() {
@@ -772,13 +771,13 @@ public class ViewerVR {
 		settings.add(defaults);
 		Action restorePrefs = new AbstractAction("Restore preferences") {
 			public void actionPerformed(ActionEvent e) {
-				restorePreferences();
+				restorePreferences(getPreferences());
 			}
 		};
 		settings.add(restorePrefs);
 		Action savePrefs = new AbstractAction("Save preferences") {
 			public void actionPerformed(ActionEvent e) {
-				savePreferences();
+				savePreferences(getPreferences());
 			}
 		};
 		settings.add(savePrefs);
@@ -794,7 +793,16 @@ public class ViewerVR {
 		Action importPrefs = new AbstractAction("Import preferences...") {
 			public void actionPerformed(ActionEvent e) {
 				File f=FileLoaderDialog.loadFile(null, "xml", "Preferences file");
-				if (f!=null) importPreferences(f);
+				if (f!=null)
+					try {
+						importPreferences(f);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (InvalidPreferencesFormatException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 			}
 		};
 		settings.add(importPrefs);
@@ -1091,7 +1099,16 @@ public class ViewerVR {
 		vr.showPanel();
 		
 		ViewerApp vApp = vr.initialize();
-		if (prefsFile != null) vr.importPreferences(prefsFile);
+		if (prefsFile != null)
+			try {
+				vr.importPreferences(prefsFile);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvalidPreferencesFormatException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		vApp.setAttachNavigator(navigator);
 		vApp.setExternalNavigator(external);
 		vApp.setAttachBeanShell(beanshell);
