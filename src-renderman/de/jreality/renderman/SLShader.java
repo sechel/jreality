@@ -51,7 +51,7 @@ import java.util.Map;
  */
 public class SLShader {
 final String name;
-HashMap parameters = new HashMap();
+HashMap<String, Object> parameters = new HashMap<String, Object>();
 public SLShader(String name) {
     this.name  = name;
 }
