@@ -30,6 +30,7 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.TextureUtility;
 import de.jreality.swing.JFakeFrame;
 import de.jreality.tools.ActionTool;
+import de.jreality.util.Secure;
 
 /**
  * 
@@ -89,6 +90,8 @@ public class JRWindow {
   
   private double aspectRatio=1;
   
+  private static final boolean FORBID_EXTERNAL_FRAME = "portal-remote".equals(Secure.getProperty("de.jreality.viewerapp.env"));
+
   protected JRWindow(int windowNumber){    
     myActionTool.addActionListener(new ActionListener() {
     	public void actionPerformed(ActionEvent e) {
@@ -580,6 +583,7 @@ public class JRWindow {
     return borders;
   }
   public void setInScene(boolean b) {
+	  if (FORBID_EXTERNAL_FRAME) return;
 	  if (b==inScene) return;
 	  if (b) {
 			inScene = b;
