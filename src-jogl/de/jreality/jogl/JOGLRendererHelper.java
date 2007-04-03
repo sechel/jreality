@@ -445,10 +445,10 @@ public class JOGLRendererHelper {
 		for (int i = 0; i < numEdges; ++i) {
 			if (pickMode)
 				gl.glPushName(i);
-			if (lineWidth != null) {
-				float ps = (float) (jr.renderingState.lineWidth * ra.getValueAt(i));
-				gl.glLineWidth(ps);
-			}
+//			if (ra != null) {
+//				float ps = (float) (jr.renderingState.lineWidth * ra.getValueAt(i));
+//				gl.glLineWidth(ps);
+//			}
 			if (!pickMode)
 				gl.glBegin(GL.GL_LINE_STRIP);
 			int[] ed = sg.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
