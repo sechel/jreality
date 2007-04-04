@@ -115,7 +115,7 @@ private void init() {
     double scale=Rn.euclideanDistance(cp, worldCoordinates);
     MatrixBuilder.euclidean().translate(worldCoordinates).assignTo(c);
     MatrixBuilder.euclidean().scale(scale*radius).assignTo(c.getChildComponent(0));
-  }
+   }
 
   public void deactivate(ToolContext tc) {
     assureDetached(tc);
