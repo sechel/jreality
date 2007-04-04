@@ -847,7 +847,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 				// use the RenderMan "points" command to draw the points				
 				HashMap<String, Object> map = new HashMap<String, Object>();
 				int fiber = GeometryUtility.getVectorLength(coord);
-				double[][] pc = new double[n][3];
+				double[][] pc = new double[n][fiber];
 				coord.toDoubleArrayArray(pc);
 				float[] pcf = new float[3 * n];
 				double[] vector = new double[3];
