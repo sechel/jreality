@@ -213,6 +213,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		if (obj instanceof Boolean) forceResidentTextures = ((Boolean)obj).booleanValue();
 		obj = ap.getAttribute(CommonAttributes.ONE_TEXTURE2D_PER_IMAGE, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) oneTexture2DPerImage = ((Boolean)obj).booleanValue();
+		theLog.info("one texture per image: "+oneTexture2DPerImage);
 		obj = ap.getAttribute(CommonAttributes.CLEAR_COLOR_BUFFER, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) {
 			renderingState.clearColorBuffer = ((Boolean)obj).booleanValue();

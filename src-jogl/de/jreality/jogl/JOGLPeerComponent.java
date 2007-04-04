@@ -59,7 +59,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	protected EffectiveAppearance eAp;
 	protected Vector<JOGLPeerComponent> children;
 	protected JOGLPeerComponent parent;
-	protected int childIndex;
+	protected int childIndex, signature = Pn.EUCLIDEAN;
 	protected GoBetween goBetween;
 	double determinant = 0.0;
 	double[] cachedTform = new double[16];
@@ -154,10 +154,11 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			pushTransformation(cachedTform); //thisT.getMatrix());
 			mustPop = true;
 		}
-		if (eAp != null) {
-			jr.currentSignature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-			jr.renderingState.setCurrentSignature(jr.currentSignature);
-		}
+//		if (eAp != null) {
+//			jr.currentSignature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
+//			jr.renderingState.setCurrentSignature(jr.currentSignature);
+//		}
+		jr.currentSignature = signature;
 		if (parent != null) cumulativeIsReflection = (isReflection != parent.cumulativeIsReflection);
 		else cumulativeIsReflection = (isReflection != jr.globalIsReflection);
 		if (cumulativeIsReflection != jr.renderingState.flipped)	{
@@ -309,6 +310,9 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			else
 				renderingHints.setFromEffectiveAppearance(eAp, "");								
 		}
+		jr.currentSignature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
+		jr.renderingState.setCurrentSignature(jr.currentSignature);
+		
 //		System.err.println("Clip to camera is "+clipToCamera);
 	}
 

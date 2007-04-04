@@ -82,14 +82,15 @@ public class Texture2DLoaderJOGL {
 	}
 
 	public static void setupBoundTextureTable(GL gl, boolean activate)	{
+//		System.err.println("bound texture: "+true);
 		if (!activate) lookupBoundTextures.remove(gl);
 		else {
 			WeakHashMap<ImageData, Integer> ht = getBoundTextureTableForGL(gl);
 		  	if (ht == null)	{
-	    			ht = new WeakHashMap<ImageData, Integer>();
-	    			lookupBoundTextures.put(gl, ht);
-	      } 
-			  ht.clear();			
+	    		ht = new WeakHashMap<ImageData, Integer>();
+	    		lookupBoundTextures.put(gl, ht);
+		  	} 
+		ht.clear();			
 		}
 	}
 	
@@ -193,6 +194,7 @@ public class Texture2DLoaderJOGL {
         }    	
         ht.put(tex.getImage(), texid);
    }
+//    System.err.println("Not yet bound ");
     int srcPixelFormat = GL.GL_RGBA;
     handleTextureParameters(tex, gl);
 
@@ -329,7 +331,7 @@ public class Texture2DLoaderJOGL {
   private static boolean canFilterAnisotropic=true;
   
   private static void handleTextureParameters(Texture2D tex, GL gl) {
-    
+//    System.err.println("In handle text parms");
     // TODO: maybe this should move to jogl configuration?
     if (canFilterAnisotropic)  {
       if (maxAnisotropy == null) {
