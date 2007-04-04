@@ -133,9 +133,9 @@ public class SceneGraphPath implements Cloneable {
 	 * i.e.: p.reverseIterator(p.getLength()) gives the same result as p.reverseIterator()
 	 * @return a reverse iterator from the given position
 	 */
-	public Iterator reverseIterator(int start) {
-		final ListIterator iter = iterator(start);
-		return new Iterator() {
+	public Iterator<SceneGraphNode> reverseIterator(int start) {
+		final ListIterator<SceneGraphNode> iter = iterator(start);
+		return new Iterator<SceneGraphNode>() {
 
 			public void remove() {
 				iter.remove();
@@ -145,7 +145,7 @@ public class SceneGraphPath implements Cloneable {
 				return iter.hasPrevious();
 			}
 
-			public Object next() {
+			public SceneGraphNode next() {
 				return iter.previous();
 			}
 		};
