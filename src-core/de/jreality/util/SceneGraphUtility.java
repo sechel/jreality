@@ -268,10 +268,10 @@ public class SceneGraphUtility {
      * @return
      * @see CopyVisitor
      */
-    public static SceneGraphNode copy(SceneGraphNode template) {
+    public static <T extends SceneGraphNode> T copy(T template) {
       CopyVisitor cv = new CopyVisitor();
       template.accept(cv);
-      return cv.getCopy();
+      return (T) cv.getCopy();
     }
 
 	public static Geometry getFirstGeometry(SceneGraphComponent sgc) {
