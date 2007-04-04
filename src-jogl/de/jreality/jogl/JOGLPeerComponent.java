@@ -159,6 +159,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 //			jr.renderingState.setCurrentSignature(jr.currentSignature);
 //		}
 		jr.currentSignature = signature;
+		jr.renderingState.setCurrentSignature(jr.currentSignature);
 		if (parent != null) cumulativeIsReflection = (isReflection != parent.cumulativeIsReflection);
 		else cumulativeIsReflection = (isReflection != jr.globalIsReflection);
 		if (cumulativeIsReflection != jr.renderingState.flipped)	{
@@ -310,8 +311,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			else
 				renderingHints.setFromEffectiveAppearance(eAp, "");								
 		}
-		jr.currentSignature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-		jr.renderingState.setCurrentSignature(jr.currentSignature);
+		signature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
 		
 //		System.err.println("Clip to camera is "+clipToCamera);
 	}
