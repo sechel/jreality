@@ -151,6 +151,8 @@ public class ViewerApp {
 
 
 	/**
+	 * Use this constructor to display a SceneGraphComponent or Geometry using the viewerApp's default JrScene.<br>
+	 * Note that the default scene already contains some standard tools.  
 	 * @param node the SceneGraphNode (SceneGraphComponent or Geometry) to be displayed with the viewer
 	 */
 	public ViewerApp(SceneGraphNode node) {
@@ -159,6 +161,7 @@ public class ViewerApp {
 
 
 	/**
+	 * Use this constructor to display an existing scene graph by creating a new JrScene with given parameters.
 	 * @param root the scene's root
 	 * @param cameraPath the scene's camera path
 	 * @param emptyPick the scene's empty pick path
@@ -170,6 +173,7 @@ public class ViewerApp {
 
 
 	/**
+	 * Use this constructor to display an existing JrScene.
 	 * @param scene the scene to be displayed with the viewer
 	 */
 	public ViewerApp(JrScene scene) {
@@ -213,7 +217,7 @@ public class ViewerApp {
 		//load the scene depending on environment (desktop | portal)
 		setupViewer(jrScene);
 
-		selectionManager = new SelectionManager(jrScene.getPath("emptyPickPath")); //defaultSelection = emptyPick
+		selectionManager = new SelectionManager(new Selection( jrScene.getPath("emptyPickPath") )); //defaultSelection = emptyPick
 
 		frame = new JFrame();
 		menu = new ViewerAppMenu(this);  //uses frame, viewer, selectionManager and this
@@ -235,11 +239,11 @@ public class ViewerApp {
 			if (params.contains("-h") || params.contains("--help")) {
 				System.out.println("Usage:  ViewerApp [-options] [file list]");
 				System.out.println("\t -s \t the (single) file given is a .jrs file containing a whole scene\n" +
-						"\t\t (otherwise all specified files are loaded into the default scene)");
+				"\t\t (otherwise all specified files are loaded into the default scene)");
 				System.out.println("\t -n \t show navigator");
 				System.out.println("\t -b \t show beanshell");
 				System.out.println("\t -i \t show navigator and/or beanshell in the main frame\n" +
-						"\t\t (otherwise they are opened in separate frames)");
+				"\t\t (otherwise they are opened in separate frames)");
 				System.exit(0);
 			}
 			//read params
@@ -388,7 +392,7 @@ public class ViewerApp {
 
 		showExternalBeanShell(attachBeanShell && externalBeanShell);
 		showExternalNavigator(attachNavigator && externalNavigator);
-		
+
 		//update menu (e.g. checkboxes whose selection state depends on viewerApp properties)
 		menu.update();
 
@@ -413,9 +417,9 @@ public class ViewerApp {
 			return JrSceneFactory.getDefaultPortalScene();
 		if (environment.equals("portal-remote"))
 			return JrSceneFactory.getDefaultPortalRemoteScene();
-		
+
 		throw new IllegalStateException("unknown environment: "+environment);
-		
+
 	}
 
 
@@ -488,13 +492,10 @@ public class ViewerApp {
 				try {
 					viewers = new Viewer[]{createViewer(viewer)};
 				} catch (InstantiationException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			} else {
@@ -525,7 +526,7 @@ public class ViewerApp {
 
 
 		ToolSystemViewer viewer=null;
-		
+
 		if (!remotePortal) viewer = new ToolSystemViewer(viewerSwitch, cfg, synchRender ? renderTrigger : null);
 		else {
 			try {
@@ -631,7 +632,7 @@ public class ViewerApp {
 			externalNavigatorFrame.setSize(new Dimension(300, 800));
 //			try {	externalNavigatorFrame.setAlwaysOnTop(true); }
 //			catch (SecurityException se) {}  //webstart
-			
+
 			externalNavigatorFrame.addComponentListener(new ComponentAdapter(){
 				public void componentHidden(ComponentEvent e) {  //externalNavigatorFrame is closed or set to invisible
 					menu.addMenu(externalNavigatorFrame.getJMenuBar().getMenu(0), 1);  //move EDIT_MENU to viewerApp.frame
@@ -640,7 +641,7 @@ public class ViewerApp {
 					frame.validate();  //repaint menuBar
 				}
 			});
-			
+
 			externalNavigatorFrame.setJMenuBar(new JMenuBar());
 			externalNavigatorFrame.getJMenuBar().setBorder(BorderFactory.createEmptyBorder());
 		}

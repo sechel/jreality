@@ -50,6 +50,8 @@ import java.util.ListIterator;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.data.AttributeEntity;
+import de.jreality.scene.tool.Tool;
 
 
 public class Selection {
@@ -77,6 +79,17 @@ public class Selection {
 		tail.clear();
 	}
 
+	public final void push(final Object o) {
+		if (tail.isEmpty() && o instanceof SceneGraphNode) 
+			sgPath.push((SceneGraphNode)o);
+		else tail.add(o);
+	}
+	
+	public final void pop() {
+		if (tail.isEmpty()) sgPath.pop();
+		else tail.removeLast();
+	}
+	
 	/**
 	 * Selections always start with a SceneGraphPath.
 	 * @return first SceneGraphNode of the contained path.
@@ -85,16 +98,35 @@ public class Selection {
 		return sgPath.getFirstElement();
 	}
 
+//	public double[] getMatrix(double[] aMatrix, int begin, int end) {
+//	return sgPath.getMatrix(aMatrix, begin, end);
+//	}
+//	public double[] getMatrix(double[] aMatrix, int begin) {
+//	return sgPath.getMatrix(aMatrix, begin);
+//	}
+//	public double[] getMatrix(double[] aMatrix) {
+//	return sgPath.getMatrix(aMatrix);
+//	}
 
-	public double[] getInverseMatrix(double[] aMatrix, int begin, int end) {
-		return sgPath.getInverseMatrix(aMatrix, begin, end);
-	}
-	public double[] getInverseMatrix(double[] invMatrix, int begin) {
-		return sgPath.getInverseMatrix(invMatrix, begin);
-	}
-	public double[] getInverseMatrix(double[] invMatrix) {
-		return sgPath.getInverseMatrix(invMatrix);
-	}
+
+//	public double[] getInverseMatrix(double[] aMatrix, int begin, int end) {
+//		return sgPath.getInverseMatrix(aMatrix, begin, end);
+//	}
+//	public double[] getInverseMatrix(double[] invMatrix, int begin) {
+//		return sgPath.getInverseMatrix(invMatrix, begin);
+//	}
+//	public double[] getInverseMatrix(double[] invMatrix) {
+//	return sgPath.getInverseMatrix(invMatrix);
+//	}
+
+//	public boolean startsWith(Selection potentialPrefix) {
+//	if (getLength() < potentialPrefix.getLength()) return false;
+//	Iterator i1 = iterator();
+//	Iterator i2 = potentialPrefix.iterator();
+//	while(i2.hasNext())
+//	if (i1.next() != i2.next()) return false;
+//	return true;
+//	}
 
 	
 	/**
@@ -122,6 +154,10 @@ public class Selection {
 	}
 
 
+	/**
+	 * Returns true iff the selection corresponds to a SceneGraphPath, 
+	 * i.e. consists of SceneGraphNodes.
+	 */
 	public boolean isSGPath() {
 		return tail.isEmpty();
 	}
@@ -129,17 +165,6 @@ public class Selection {
 	
 	public int getLength() {
 		return (sgPath.getLength() + tail.size());
-	}
-
-
-	public double[] getMatrix(double[] aMatrix, int begin, int end) {
-		return sgPath.getMatrix(aMatrix, begin, end);
-	}
-	public double[] getMatrix(double[] aMatrix, int begin) {
-		return sgPath.getMatrix(aMatrix, begin);
-	}
-	public double[] getMatrix(double[] aMatrix) {
-		return sgPath.getMatrix(aMatrix);
 	}
 
 
@@ -171,11 +196,6 @@ public class Selection {
 
 		return true;
 	}
-
-
-//	public boolean isValid() {
-//		return sgPath.isValid();
-//	}
 
 
 	public ListIterator<Object> iterator() {
@@ -212,16 +232,6 @@ public class Selection {
 	}
 
 
-	public boolean startsWith(Selection potentialPrefix) {
-		if (getLength() < potentialPrefix.getLength()) return false;
-		Iterator i1 = iterator();
-		Iterator i2 = potentialPrefix.iterator();
-		while(i2.hasNext())
-			if (i1.next() != i2.next()) return false;
-		return true;
-	}
-
-
 	public List<Object> toList() {
 		List<Object> list = new ArrayList<Object>(getLength());
 		list.addAll(sgPath.toList());
@@ -237,4 +247,44 @@ public class Selection {
 		return str.toString();
 	}
 
+	public boolean isTool() {
+		return (!tail.isEmpty() && tail.getLast() instanceof Tool);
+	}
+	
+	public Tool asTool() {
+		if (isTool())
+			return (Tool) getLastElement();
+		else return null;
+	}
+	
+	public boolean isComponent() {
+		return (isNode() && getLastNode() instanceof SceneGraphComponent);
+	}
+	
+	public SceneGraphComponent asComponent() {
+		if (isComponent())
+			return sgPath.getLastComponent();
+		else return null;
+	}
+	
+	public boolean isNode() {
+		return (tail.isEmpty() && sgPath.getLength()!=0);
+	}
+	
+	public SceneGraphNode asNode() {
+		if (isNode())
+			return getLastNode();
+		else return null;
+	}
+	
+	public boolean isEntity() {
+		return (!tail.isEmpty() && tail.getLast() instanceof AttributeEntity);
+	}
+	
+	public AttributeEntity asEntity() {
+		if (isEntity())
+			return (AttributeEntity) getLastElement();
+		else return null;
+	}
+	
 }

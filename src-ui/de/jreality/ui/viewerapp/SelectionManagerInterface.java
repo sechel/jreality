@@ -4,13 +4,21 @@ import de.jreality.scene.SceneGraphPath;
 
 public interface SelectionManagerInterface {
 
-	public abstract SceneGraphPath getDefaultSelection();
+	public abstract Selection getDefaultSelection();
 
-	public abstract void setDefaultSelection(SceneGraphPath defaultSelection);
+	public abstract void setDefaultSelection(Selection defaultSelection);
 
-	public abstract SceneGraphPath getSelection();
+	public abstract Selection getSelection();
 
-	public abstract void setSelection(SceneGraphPath selection);
+	public abstract void setSelection(Selection selection);
+
+	public abstract SceneGraphPath getDefaultSelectionPath();
+
+	public abstract void setDefaultSelectionPath(SceneGraphPath defaultSelection);
+
+	public abstract SceneGraphPath getSelectionPath();
+
+	public abstract void setSelectionPath(SceneGraphPath selection);
 
 	public abstract void addSelectionListener(SelectionListener listener);
 
@@ -19,6 +27,5 @@ public interface SelectionManagerInterface {
 	public abstract boolean isRenderSelection();
 
 	public abstract void setRenderSelection(boolean renderSelection);
-
 
 }

@@ -57,11 +57,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.data.AttributeEntity;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
-import de.jreality.scene.tool.Tool;
 import de.jreality.ui.treeview.JTreeRenderer;
 import de.jreality.ui.treeview.SceneTreeModel;
 import de.jreality.ui.treeview.SceneTreeModel.TreeTool;
@@ -82,11 +78,10 @@ public class Navigator implements SelectionListener {
 	private JTree sceneTree;
 	private SceneTreeModel treeModel;
 	private TreeSelectionModel tsm;
-	
+
 	private SelectionManager sm;
 	private SceneGraphComponent sceneRoot;  //the scene root
-	private Object currentSelection;
-	
+
 	private Component navigator;
 	private Component parentComp;
 
@@ -99,7 +94,7 @@ public class Navigator implements SelectionListener {
 		this(sceneRoot, selectionManager, null);
 	}
 
-	
+
 	/**
 	 * @param sceneRoot the scene root
 	 * @param selectionManager the underlying selection manager
@@ -109,9 +104,9 @@ public class Navigator implements SelectionListener {
 
 		sm = selectionManager;
 		sm.addSelectionListener(this);
-		
+
 		this.parentComp = parentComp;
-		
+
 		inspector = new InspectorPanel(false);
 		BooleanEditor.setNameOfNull("inherit");
 		EditorSpawner.setNameOfNull("inherit");
@@ -122,10 +117,10 @@ public class Navigator implements SelectionListener {
 
 		sceneTree = new JTree();
 		treeModel = new SceneTreeModel(sceneRoot);
-		
+
 		sceneTree.setModel(treeModel);
 		//set default selection (use the selection manager's default)
-		sceneTree.setAnchorSelectionPath(new TreePath(treeModel.convertSceneGraphPath(sm.getDefaultSelection())));
+		sceneTree.setAnchorSelectionPath(new TreePath(treeModel.convertSelection(sm.getDefaultSelection())));
 		sceneTree.setCellRenderer(new JTreeRenderer());
 		sceneTree.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "toggle");  //collaps/expand nodes with ENTER
 
@@ -136,33 +131,28 @@ public class Navigator implements SelectionListener {
 
 			public void selectionChanged(SelectionEvent e) {
 
+				Selection currentSelection = e.getSelection();
 				//update inspector
-				if (e.selectionIsSGNode()) currentSelection = e.selectionAsSGNode();
-				else if (e.selectionIsTool()) currentSelection = e.selectionAsTool();
-				else currentSelection = e.getSelection();  //attribute entity or null
-				inspector.setObject(currentSelection);
-
+				inspector.setObject(currentSelection.getLastElement());
 				//update selection manager
-				Tool tool = e.selectionAsTool();  //null if no tool
-				AttributeEntity entity = e.selectionAsAttributeEntity();  //null if no attribute entity
-				sm.setSelection(e.getSGPath(), tool, entity);  //does nothing if already selected
+				sm.setSelection(currentSelection);  //does nothing if already selected
 			}
 		});
-		
+
 		this.sceneRoot = sceneRoot;
-		
-		tsm.setSelectionPath(new TreePath(treeModel.convertSceneGraphPath(sm.getSelection())));  //select current selection
+
+		tsm.setSelectionPath(new TreePath(treeModel.convertSelection(sm.getSelection())));  //select current selection
 		setupContextMenu();
 	}
 
-	
+
 	public void selectionChanged(de.jreality.ui.viewerapp.SelectionEvent e) {
 		//convert selection of manager into TreePath
-        Object[] selection = treeModel.convertSceneGraphPath(e.getSelection());
-        TreePath path = new TreePath(selection);
-        
-        if (e.nodeSelected() && !path.equals(tsm.getSelectionPath()))  //compare paths only if a node is selected  
-        	tsm.setSelectionPath(path);
+		Object[] selection = treeModel.convertSelection(e.getSelection());
+		TreePath path = new TreePath(selection);
+
+		if (e.nodeSelected() && !path.equals(tsm.getSelectionPath()))  //compare paths only if a node is selected  
+			tsm.setSelectionPath(path);
 	}
 
 
@@ -179,27 +169,27 @@ public class Navigator implements SelectionListener {
 	public TreeSelectionModel getTreeSelectionModel() {
 		return tsm;
 	}
-	
+
 
 	public SceneGraphComponent getSceneRoot() {
 		return sceneRoot;
 	}
 
 
-	public Object getCurrentSelection() {
-		return currentSelection;
+	public Selection getSelection() {
+		return sm.getSelection();
 	}
 
-	
+
 	private void setupContextMenu() {
 
 		final JPopupMenu cm = new JPopupMenu();
 		cm.setLightWeightPopupEnabled(false);
-		
+
 		//create content of context menu
 		JMenu editMenu = ViewerAppMenu.createEditMenu(parentComp, sm);
 		for (Component c : editMenu.getMenuComponents()) cm.add(c);
-		
+
 		//add listener to the navigator's tree
 		sceneTree.addMouseListener(new MouseAdapter() {
 
@@ -224,13 +214,13 @@ public class Navigator implements SelectionListener {
 		});
 	}
 
-	
+
 	/**
 	 * Get the navigator as a Component.
 	 * @return the navigator
 	 */
 	public Component getComponent() {
-		
+
 		if (navigator == null) {
 			sceneTree.setBorder(BorderFactory.createEmptyBorder(4,4,4,4));
 			JScrollPane top = new JScrollPane(sceneTree);
@@ -250,11 +240,11 @@ public class Navigator implements SelectionListener {
 //			navigator.setPreferredSize(new Dimension(0,0));  //let user set the size
 			this.navigator = navigator;
 		}
-		
+
 		return navigator;
 	}
 
-	
+
 //	-- INNER CLASSES -----------------------------------
 
 	public static abstract class SelectionListener implements TreeSelectionListener {
@@ -278,87 +268,32 @@ public class Navigator implements SelectionListener {
 
 	public static class SelectionEvent extends TreeSelectionEvent {
 
-		private Object selection;
-
-
 		/** calls TreeSelectionEvent(...) */
 		public SelectionEvent(Object source, TreePath[] paths, boolean[] areNew, TreePath oldLeadSelectionPath, TreePath newLeadSelectionPath) {
 			super(source, paths, areNew, oldLeadSelectionPath, newLeadSelectionPath);
-
-			TreePath path = getNewLeadSelectionPath();
-			if (path != null) selection = path.getLastPathComponent();
 		}
 
+		private Object convert(Object o) {
+			if (o instanceof SceneTreeNode)
+				return ((SceneTreeNode) o).getNode();
+			else if (o instanceof TreeTool)
+				return ((TreeTool) o).getTool();
 
-		public Object getSelection() {
+			return o;
+		}
+
+		/**
+		 * Converts the TreePath of the current selection into a Selection object.  
+		 * @return the current selection
+		 */
+		public Selection getSelection() {
+			Selection selection = new Selection();
+			Object[] treePath = getPath().getPath();
+			for (int i = 0; i < treePath.length; i++)
+				selection.push( convert(treePath[i]) );
 			return selection;
 		}
 
-
-		public boolean selectionIsSGNode() {
-			return (selection instanceof SceneTreeNode);
-		}
-
-
-		public SceneGraphNode selectionAsSGNode() {
-			if (selectionIsSGNode())
-				return ((SceneTreeNode) selection).getNode();
-			else return null;
-		}
-
-
-		public boolean selectionIsSGComp() {
-			return (selectionAsSGNode() instanceof SceneGraphComponent);
-		}
-
-
-		public SceneGraphComponent selectionAsSGComp() {
-			if (selectionIsSGComp())
-				return (SceneGraphComponent) selectionAsSGNode();
-			else return null;
-		}
-
-
-		public boolean selectionIsTool() {
-			return (selection instanceof TreeTool);
-		}
-
-
-		public Tool selectionAsTool() {
-			if (selectionIsTool())
-				return ((TreeTool) selection).getTool();
-			else return null;
-		}
-
-
-		public boolean selectionIsAttributeEntity() {
-			return (!selectionIsSGNode() && !selectionIsTool());
-		}
-
-
-		public AttributeEntity selectionAsAttributeEntity() {
-			if (selectionIsAttributeEntity())
-				return (AttributeEntity) selection;
-			else return null;
-		}
-
-
-		/**
-		 * Converts the TreePath of the current selection into a SceneGraphPath.  
-		 * @return the path of the current selection
-		 */
-		public SceneGraphPath getSGPath() {
-			SceneGraphPath sgPath = new SceneGraphPath();
-			Object[] treePath = getPath().getPath();
-			for (int i = 0; i < treePath.length; i++) {
-				selection = treePath[i];
-				if (selectionIsSGNode())
-					sgPath.push(selectionAsSGNode());
-				else break;
-			}
-			return sgPath;
-		}
-    
 	}  //end of class SelectionEvent
 
 }

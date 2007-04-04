@@ -42,7 +42,7 @@ package de.jreality.ui.viewerapp.actions;
 
 import java.awt.Component;
 
-import de.jreality.scene.SceneGraphPath;
+import de.jreality.ui.viewerapp.Selection;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionListener;
 import de.jreality.ui.viewerapp.SelectionManager;
@@ -59,7 +59,7 @@ import de.jreality.ui.viewerapp.SelectionManager;
 public abstract class AbstractSelectionListenerAction extends AbstractJrAction implements SelectionListener {
 
 	private SelectionManager selectionManager;
-	private SceneGraphPath selection;
+	private Selection selection;
 
 
 	/**
@@ -71,8 +71,8 @@ public abstract class AbstractSelectionListenerAction extends AbstractJrAction i
 	public AbstractSelectionListenerAction(String name, SelectionManager sm) {
 		this(name, sm, null);
 	}
-	
-	
+
+
 	/**
 	 * Constructor for actions which need a parent component 
 	 * e.g. for displaying dialogs.
@@ -87,25 +87,13 @@ public abstract class AbstractSelectionListenerAction extends AbstractJrAction i
 		if (sm == null)
 			throw new IllegalArgumentException("SelectionManager is null");
 		selectionManager = sm;
-		
+
 		//set initial selection
 		selectionChanged(new SelectionEvent(this, 
-				selectionManager.getSelection(), 
-				selectionManager.getTool(), 
-				selectionManager.getEntity(), 
-				selectionManager.getType()));
+				selectionManager.getSelection()));
 
 		selectionManager.addSelectionListener(this);
 	}
-
-
-//	/**
-//	 * Uses the ViewerApp's selection manager and frame.
-//	 * @see AbstractSelectionListenerAction#AbstractSelectionListenerAction(String, SelectionManager, Component)
-//	 */
-//	public AbstractSelectionListenerAction(String name, ViewerApp viewerApp) {
-//		this(name, viewerApp.getSelectionManager(), viewerApp.getFrame());
-//	}
 
 
 	/**
@@ -135,9 +123,9 @@ public abstract class AbstractSelectionListenerAction extends AbstractJrAction i
 
 	/**
 	 * Get the current selection.
-	 * @return the selection
+	 * @return the current Selection object
 	 */
-	public SceneGraphPath getSelection() {
+	public Selection getSelection() {
 		return selection;
 	}
 

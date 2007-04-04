@@ -46,7 +46,6 @@ import java.io.File;
 import java.io.IOException;
 
 import de.jreality.scene.Appearance;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.TextureUtility;
@@ -65,41 +64,41 @@ import de.jreality.util.Input;
  */
 public class LoadTexture extends AbstractSelectionListenerAction {
 
-  public LoadTexture(String name, SelectionManager sm, Component frame) {
-    
-    super(name, sm, frame);
-    setShortDescription("Load texture");
-  }
+	public LoadTexture(String name, SelectionManager sm, Component frame) {
+
+		super(name, sm, frame);
+		setShortDescription("Load texture");
+	}
 
 
-  public void actionPerformed(ActionEvent e) {
-    
-  	File file = FileLoaderDialog.loadFile(parentComp, true, FileFilter.createImageReaderFilters());
-    if (file == null) return;  //dialog cancelled
-  	
-  	ImageData img = null;
-  	try { img = ImageData.load(Input.getInput(file)); } 
-  	catch (IOException exc) {	exc.printStackTrace(); }
-  	
-  	//get appearance
-  	Appearance app = null;
-  	if (getSelection().getLastElement() instanceof SceneGraphComponent) {
-  		app = getSelection().getLastComponent().getAppearance();
-  		if (app==null) {
-  			app = new Appearance();
-  			getSelection().getLastComponent().setAppearance(app);
-  		}
-  	}
-  	else app = (Appearance) getSelection().getLastElement();
-  	
-  	//create texture
-  	TextureUtility.createTexture(app, CommonAttributes.POLYGON_SHADER, img, false);
-  }
-  
-  
-  @Override
-  public boolean isEnabled(SelectionEvent e) {
-    return (e.componentSelected() || e.appearanceSelected());
-  }
+	public void actionPerformed(ActionEvent e) {
+
+		File file = FileLoaderDialog.loadFile(parentComp, true, FileFilter.createImageReaderFilters());
+		if (file == null) return;  //dialog cancelled
+
+		ImageData img = null;
+		try { img = ImageData.load(Input.getInput(file)); } 
+		catch (IOException exc) {	exc.printStackTrace(); }
+
+		//get appearance
+		Appearance app = null;
+		if (getSelection().isComponent()) {
+			app = getSelection().asComponent().getAppearance();
+			if (app==null) {
+				app = new Appearance();
+				getSelection().asComponent().setAppearance(app);
+			}
+		}
+		else app = (Appearance) getSelection().asNode();
+
+		//create texture
+		TextureUtility.createTexture(app, CommonAttributes.POLYGON_SHADER, img, false);
+	}
+
+
+	@Override
+	public boolean isEnabled(SelectionEvent e) {
+		return (e.componentSelected() || e.appearanceSelected());
+	}
 
 }

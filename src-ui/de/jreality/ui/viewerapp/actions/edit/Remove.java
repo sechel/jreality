@@ -48,6 +48,7 @@ import javax.swing.KeyStroke;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.ui.viewerapp.Selection;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
@@ -55,46 +56,44 @@ import de.jreality.util.SceneGraphUtility;
 
 
 /**
- * Removes selected scene tree or scene graph nodes if they are not attribute entities or the root 
- * (otherwise this action is disabled).
+ * Removes selected scene graph nodes (except the scene root) or tools.
  * 
  * @author msommer
  */
 public class Remove extends AbstractSelectionListenerAction {
 
-  public Remove(String name, SelectionManager sm) {
-    super(name, sm);
+	public Remove(String name, SelectionManager sm) {
+		super(name, sm);
 
-    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
-    setShortDescription("Delete");
-  }
-  
-  
-  public void actionPerformed(ActionEvent e) {
-    
-    SceneGraphNode node = getSelection().getLastElement();  //the node to be removed or from which to remove a tool
-    SceneGraphPath parentPath = getSelection().popNew();  //empty if node==root
-    SceneGraphComponent parent;
-    if (getSelection().getLength() > 1) parent=parentPath.getLastComponent();
-    else parent = getSelection().getLastComponent();  //node==root
+		setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
+		setShortDescription("Delete");
+	}
 
-    if (getSelectionManager().getTool() == null) {  //no tool selected
-      SceneGraphUtility.removeChildNode(parent, node);
-      getSelectionManager().setSelection(parentPath);
-    }
-    else {  //tool selected
-    	getSelection().getLastComponent().removeTool(getSelectionManager().getTool());
-    	getSelectionManager().setSelection(getSelection());
-    }
-  }
 
-  
-  @Override
-  public boolean isEnabled(SelectionEvent e) {
-  	//returns true iff a node!=root or a tool is selected
-    return (!e.entitySelected() &&
-        !e.rootSelected() &&  //don't allow to remove the sceneRoot
-        !e.nothingSelected());
-  }
-  
+	public void actionPerformed(ActionEvent e) {
+
+		SceneGraphNode node = getSelection().getLastNode();  //the node to be removed or from which to remove a tool
+		SceneGraphPath parentPath = getSelection().getSGPath().popNew();  //empty if node==root
+		SceneGraphComponent parent;
+		if (getSelection().getLength() > 1) parent=parentPath.getLastComponent();
+		else parent = getSelection().getLastComponent();  //node==root
+
+		if (getSelection().isNode()) {  //no tool selected
+			SceneGraphUtility.removeChildNode(parent, node);
+			getSelectionManager().setSelection(new Selection(parentPath));
+		}
+		else {  //tool selected
+			getSelection().getLastComponent().removeTool(getSelection().asTool());
+			getSelectionManager().setSelection(getSelection());
+		}
+	}
+
+
+	@Override
+	public boolean isEnabled(SelectionEvent e) {
+		//returns true iff a node!=root or a tool is selected
+		return (e.toolSelected() || 
+				(e.nodeSelected() && !e.rootSelected()) );
+	}
+
 }

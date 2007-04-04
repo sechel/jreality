@@ -59,24 +59,24 @@ import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
  */
 public class Rename extends AbstractSelectionListenerAction {
 
-  public Rename(String name, SelectionManager sm, Component parentComp) {
-    super(name, sm, parentComp);
+	public Rename(String name, SelectionManager sm, Component parentComp) {
+		super(name, sm, parentComp);
 
-    setShortDescription("Rename selected node");
-  }
-  
-  
-  public void actionPerformed(ActionEvent e) {
-    
-	SceneGraphNode node = getSelection().getLastElement();
-    String name = (String) JOptionPane.showInputDialog(parentComp, "New name:", "Rename", JOptionPane.PLAIN_MESSAGE, null, null, node.getName());
-    if (name!=null && !name.equals("")) node.setName(name);
-  }
+		setShortDescription("Rename selected node");
+	}
 
-  
-  @Override
-  public boolean isEnabled(SelectionEvent e) {
-    return e.nodeSelected();
-  }
-  
+
+	public void actionPerformed(ActionEvent e) {
+
+		SceneGraphNode node = getSelection().asNode();
+		String name = (String) JOptionPane.showInputDialog(parentComp, "New name:", "Rename", JOptionPane.PLAIN_MESSAGE, null, null, node.getName());
+		if (name!=null && !name.equals("")) node.setName(name);
+	}
+
+
+	@Override
+	public boolean isEnabled(SelectionEvent e) {
+		return e.nodeSelected();
+	}
+
 }

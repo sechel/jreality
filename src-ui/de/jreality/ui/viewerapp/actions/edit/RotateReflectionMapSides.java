@@ -44,7 +44,6 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 
 import de.jreality.scene.Appearance;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
@@ -75,9 +74,9 @@ public class RotateReflectionMapSides extends AbstractSelectionListenerAction {
   	
   	//get appearance
   	Appearance app = null;
-  	if (getSelection().getLastElement() instanceof SceneGraphComponent)
+  	if (getSelection().isComponent())
   		app = getSelection().getLastComponent().getAppearance();
-  	else app = (Appearance) getSelection().getLastElement();
+  	else app = (Appearance) getSelection().getLastNode();
   	if (app == null) {
   		System.err.println("No reflection map loaded.");
   		return;

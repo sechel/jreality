@@ -65,11 +65,10 @@ public class BeanShell implements SelectionListener {
 	private BshEvaluator bshEval;
 	private JTerm jterm;
 	private SimpleAttributeSet infoStyle;
-	private Object defaultSelection;
-	
+
 	private Component beanShell;
 
-	
+
 	public BeanShell() {
 		this(null);
 	}
@@ -89,7 +88,6 @@ public class BeanShell implements SelectionListener {
 
 		if ( sm!= null) {
 			sm.addSelectionListener(this);
-			defaultSelection = sm.getDefaultSelection().getLastElement();
 			setSelf(sm.getSelection().getLastElement());  //select current selection
 		}
 
@@ -97,19 +95,7 @@ public class BeanShell implements SelectionListener {
 
 
 	public void selectionChanged(SelectionEvent e) {
-		switch (e.getType()) {
-		case SelectionEvent.DEFAULT_SELECTION:
-			setSelf(e.getSelection().getLastElement());
-			break;
-		case SelectionEvent.TOOL_SELECTION:
-			setSelf(e.getTool());
-			break;
-		case SelectionEvent.ENTITY_SELECTION:
-			setSelf(e.getEntity());
-			break;
-		case SelectionEvent.NO_SELECTION:
-			setSelf(defaultSelection);
-		}
+		setSelf(e.getSelection().getLastElement());
 	}
 
 
@@ -131,7 +117,7 @@ public class BeanShell implements SelectionListener {
 			((JScrollPane)beanShell).setBorder(BorderFactory.createEmptyBorder());
 //			beanShell.setPreferredSize(new Dimension(0,0));  //let user set the size
 		}
-		
+
 		return beanShell;
 	}
 

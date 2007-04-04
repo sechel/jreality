@@ -67,8 +67,8 @@ public class TogglePickable extends AbstractSelectionListenerAction {
   @Override
   public void actionPerformed(ActionEvent e) {
     
-  	Geometry g = (getSelection().getLastElement() instanceof Geometry)?
-				(Geometry) getSelection().getLastElement() :
+  	Geometry g = (getSelection().getLastNode() instanceof Geometry)?
+				(Geometry) getSelection().getLastNode() :
 				getSelection().getLastComponent().getGeometry();
     if (g!=null) {
       Boolean b = (Boolean)g.getGeometryAttributes(CommonAttributes.PICKABLE);

@@ -63,11 +63,13 @@ import de.jreality.scene.event.SceneGraphComponentListener;
 import de.jreality.scene.event.ToolEvent;
 import de.jreality.scene.event.ToolListener;
 import de.jreality.scene.proxy.tree.ProxyTreeFactory;
+import de.jreality.scene.proxy.tree.SceneGraphNodeEntity;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.scene.proxy.tree.UpToDateSceneProxyBuilder;
 import de.jreality.scene.tool.Tool;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.ui.viewerapp.Selection;
 
 public class SceneTreeModel extends AbstractTreeModel {
   
@@ -154,7 +156,6 @@ public class SceneTreeModel extends AbstractTreeModel {
       try {
         bi = Introspector.getBeanInfo(parent.getClass());
       } catch (IntrospectionException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
       PropertyDescriptor[] pd=bi.getPropertyDescriptors();
@@ -308,7 +309,7 @@ public class SceneTreeModel extends AbstractTreeModel {
       }
     }
     
-    protected void dispose(ArrayList disposedEntities) {
+    protected void dispose(ArrayList<SceneGraphNodeEntity> disposedEntities) {
       super.dispose(disposedEntities);
       if (isComponent) {
         cmp.removeToolListener(this);
@@ -360,4 +361,7 @@ public class SceneTreeModel extends AbstractTreeModel {
 		return al.toArray(new SceneTreeNode[]{});
 	}
   
+	public SceneTreeNode[] convertSelection(Selection selection) {
+		return convertSceneGraphPath(selection.getSGPath());
+	}
 }

@@ -42,7 +42,6 @@ package de.jreality.ui.viewerapp;
 
 import java.util.logging.Level;
 
-import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.pick.PickResult;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
@@ -57,54 +56,48 @@ import de.jreality.util.LoggingSystem;
  */
 public class SelectionTool extends AbstractTool {
 
-  final static InputSlot activationSlot = InputSlot.getDevice("PrimaryAction");
-  private SelectionManager sm;
-  private SceneGraphPath selection;
-  
- 
-  public SelectionTool(SelectionManager sm) {
-    addCurrentSlot(activationSlot);
-    this.sm = sm;
-//    LoggingSystem.getLogger(SelectionTool.class).setLevel(Level.INFO);
-  }
- 
-  public SelectionTool() {
-    this((SelectionManager) null);
-  }
-  
-  public SelectionTool(ViewerApp v) {
-    this(v.getSelectionManager());
-  }
-  
-  
-  public void perform(ToolContext tc) {
-    //only perform when activationSlot is pressed
-    if (tc.getAxisState(activationSlot).isReleased()) return;
+	final static InputSlot activationSlot = InputSlot.getDevice("SelectionActivation");
+	private SelectionManager sm;
+	private Selection selection;
 
-    PickResult pr = tc.getCurrentPick();
-    
-//    if (pr != null) {
-//      double[] d = pr.getObjectCoordinates();
-//      for (int i = 0; i < d.length; i++) {
-//        System.out.print(d[i] + "  ");
-//      }
-//      System.out.println();
-//    }
-    
-    SceneGraphPath newSelection = null;
-    
-    if (pr == null)  // && sm != null)  //nothing picked
-      //newSelection = sm.getDefaultSelection();
-      return;  //do nothing
-    if (pr != null)
-      newSelection = pr.getPickPath().popNew();  //need only SGComponents, but geometry is picked
-    
-    selection = newSelection;
-    if (sm != null) sm.setSelection(selection);
 
-    LoggingSystem.getLogger(SelectionTool.class).log(Level.INFO, 
-        "SELECTED COMPONENT: " + (selection!=null ? selection.getLastComponent().getName() : "null") );
-    
-  }
+	public SelectionTool(SelectionManager sm) {
+		addCurrentSlot(activationSlot);
+		this.sm = sm;
+//		LoggingSystem.getLogger(SelectionTool.class).setLevel(Level.INFO);
+	}
+
+	public SelectionTool() {
+		this((SelectionManager) null);
+	}
+
+	public SelectionTool(ViewerApp v) {
+		this(v.getSelectionManager());
+	}
+
+
+	public void perform(ToolContext tc) {
+		//only perform when activationSlot is pressed
+		if (tc.getAxisState(activationSlot).isReleased()) return;
+
+		PickResult pr = tc.getCurrentPick();
+
+//		if (pr != null) {
+//		double[] d = pr.getObjectCoordinates();
+//		for (int i = 0; i < d.length; i++) {
+//		System.out.print(d[i] + "  ");
+//		}
+//		System.out.println();
+//		}
+
+		if (pr == null) //nothing picked
+			return;  //do nothing
+		else selection = new Selection(pr.getPickPath().popNew());  //select component instead of its geometry
+
+		if (sm != null) sm.setSelection(selection);
+
+		LoggingSystem.getLogger(SelectionTool.class).log(Level.INFO, 
+				"SELECTED COMPONENT: " + (selection!=null ? selection.getLastComponent().getName() : "default") );
+	}
 
 }

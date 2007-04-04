@@ -45,7 +45,6 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 
 import de.jreality.scene.Appearance;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.TextureUtility;
@@ -86,16 +85,16 @@ public class LoadReflectionMap extends AbstractSelectionListenerAction {
 			return;
 		}
   	
-  	//get appearance
-  	Appearance app = null;
-  	if (getSelection().getLastElement() instanceof SceneGraphComponent) {
-  		app = getSelection().getLastComponent().getAppearance();
-  		if (app==null) {
-  			app = new Appearance();
-  			getSelection().getLastComponent().setAppearance(app);
-  		}
-  	}
-  	else app = (Appearance) getSelection().getLastElement();
+		//get appearance
+		Appearance app = null;
+		if (getSelection().isComponent()) {
+			app = getSelection().asComponent().getAppearance();
+			if (app==null) {
+				app = new Appearance();
+				getSelection().asComponent().setAppearance(app);
+			}
+		}
+		else app = (Appearance) getSelection().asNode();
   	
   	//create reflection map
   	TextureUtility.createReflectionMap(app, CommonAttributes.POLYGON_SHADER, imgs);
