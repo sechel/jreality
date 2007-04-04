@@ -101,6 +101,11 @@
     <mapping src="PointerNdcYevolution" target="VerticalShipRotationAngleEvolution"/>
     <mapping src="PointerNdcYevolution" target="VerticalHeadRotationAngleEvolution"/>
 
+    <virtualdevice type="de.jreality.toolsystem.virtual.VirtualMap">
+      <inputslot>PrimaryAction</inputslot>
+      <outputslot>SelectionActivation</outputslot>
+    </virtualdevice>
+
     <virtualdevice type="de.jreality.toolsystem.virtual.VirtualDoubleClick">
       <inputslot>PrimaryAction</inputslot>
       <outputslot>PanelActivation</outputslot>
