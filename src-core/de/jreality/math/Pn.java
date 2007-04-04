@@ -40,6 +40,8 @@
 
 package de.jreality.math;
 
+import de.jreality.util.LoggingSystem;
+
 
 
 
@@ -493,7 +495,7 @@ public class Pn {
 			else if (transVec.length == dim && !(Rn.innerProduct(transVec, transVec) < 1)) ret = false;
 		}
 		if (!ret) {
-			System.err.println("Invalid coordinate: "+Rn.toString(transVec)+" sig: "+sig);
+			LoggingSystem.getLogger(Pn.class).warning("Invalid coordinate: "+Rn.toString(transVec)+" sig: "+sig);
 		}
 		return ret;
 	}
