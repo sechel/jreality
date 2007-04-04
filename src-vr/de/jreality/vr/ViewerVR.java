@@ -272,6 +272,11 @@ public class ViewerVR {
 						super.perform(tc);
 						// compute length:
 						 double[] pickAvatar = ToolUtility.worldToAvatar(tc, currentPick.getWorldCoordinates());
+						 Matrix pointer = new Matrix(tc.getTransformationMatrix(AVATAR_POINTER));
+						 double f = pointer.getEntry(3, 3);
+						 pickAvatar[0]-=pointer.getEntry(0, 3)/f;
+						 pickAvatar[1]-=pointer.getEntry(1, 3)/f;
+						 pickAvatar[2]-=pointer.getEntry(2, 3)/f;
 						 setLength(Rn.euclideanNorm(pickAvatar));
 					} 
 				}

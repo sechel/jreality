@@ -54,7 +54,7 @@ import de.jreality.shader.CommonAttributes;
 
 public class PointerDisplayTool extends AbstractTool {
 
-	InputSlot pointer = InputSlot.getDevice("PointerShipTransformation");
+	protected static final InputSlot AVATAR_POINTER = InputSlot.getDevice("PointerShipTransformation");
 	SceneGraphComponent cmp = new SceneGraphComponent();
 	private IndexedLineSetFactory ilsf;
 
@@ -64,7 +64,7 @@ public class PointerDisplayTool extends AbstractTool {
 	private transient boolean highlight = false;
 
 	public PointerDisplayTool(double radius) {
-		addCurrentSlot(pointer);
+		addCurrentSlot(AVATAR_POINTER);
 		cmp.setAppearance(new Appearance());
 		cmp.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
 		cmp.getAppearance().setAttribute("showPoints", false);
@@ -82,7 +82,7 @@ public class PointerDisplayTool extends AbstractTool {
 		ilsf.setLineCount(1);
 		ilsf.setEdgeIndices(new int[]{0, 1});
 		cmp.setGeometry(ilsf.getGeometry());
-		setLength(2);
+		setLength(1);
 	}
 	public PointerDisplayTool() {
 		this(0.003);
@@ -96,7 +96,7 @@ public class PointerDisplayTool extends AbstractTool {
 			tc.getAvatarPath().getLastComponent().addChild(cmp);
 			isAssigned=true;
 		}
-		m.assignFrom(tc.getTransformationMatrix(pointer));
+		m.assignFrom(tc.getTransformationMatrix(AVATAR_POINTER));
 		m.assignTo(cmp.getTransformation());
 	}
 
