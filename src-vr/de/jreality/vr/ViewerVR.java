@@ -80,6 +80,7 @@ import javax.swing.KeyStroke;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Rn;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -105,6 +106,7 @@ import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.PickShowTool;
 import de.jreality.tools.PointerDisplayTool;
 import de.jreality.tools.ShipNavigationTool;
+import de.jreality.toolsystem.ToolUtility;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.ViewerAppMenu;
@@ -259,13 +261,19 @@ public class ViewerVR {
 			avatarNode.addTool(new PointerDisplayTool() {
 				{
 					setVisible(false);
+					setHighlight(true);
 				}
 				@Override
 				public void perform(ToolContext tc) {
 					PickResult currentPick = tc.getCurrentPick();
 					boolean visible = currentPick != null && currentPick.getPickPath().startsWith(tc.getAvatarPath());
 					setVisible(visible);
-					if (visible) super.perform(tc);
+					if (visible) {
+						super.perform(tc);
+						// compute length:
+						 double[] pickAvatar = ToolUtility.worldToAvatar(tc, currentPick.getWorldCoordinates());
+						 setLength(Rn.euclideanNorm(pickAvatar));
+					} 
 				}
 			});
 			

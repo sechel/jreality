@@ -54,52 +54,82 @@ import de.jreality.shader.CommonAttributes;
 
 public class PointerDisplayTool extends AbstractTool {
 
-  InputSlot pointer = InputSlot.getDevice("PointerShipTransformation");
-  SceneGraphComponent c = new SceneGraphComponent();
-  
-  public PointerDisplayTool(double radius) {
-    addCurrentSlot(pointer);
-    c.setAppearance(new Appearance());
-    c.getAppearance().setAttribute("diffuseColor", new Color(160, 160, 160));
-    c.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
-    c.getAppearance().setAttribute("showPoints", false);
-    c.getAppearance().setAttribute("showFaces", false);
-    c.getAppearance().setAttribute("showLines", true);
-    c.getAppearance().setAttribute("lineShader.tubeDraw", true);
-    c.getAppearance().setAttribute("lineShader.tubeRadius", radius);
-    c.getAppearance().setAttribute(CommonAttributes.PICKABLE, false);
-    c.setTransformation(new Transformation());
+	InputSlot pointer = InputSlot.getDevice("PointerShipTransformation");
+	SceneGraphComponent cmp = new SceneGraphComponent();
+	private IndexedLineSetFactory ilsf;
 
-    IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
-    ilsf.setVertexCount(2);
-    ilsf.setVertexCoordinates(new double[][]{{0, 0, 0}, {0, 0, -2}});
-    ilsf.setLineCount(1);
-    ilsf.setEdgeIndices(new int[]{0, 1});
-    ilsf.update();
-    c.setGeometry(ilsf.getGeometry());
-  }
-  public PointerDisplayTool() {
-    this(0.003);
-  }
-  
-  boolean isAssigned;
-  Matrix m = new Matrix();
-  
-  public void perform(ToolContext tc) {
-	if (!isAssigned) {
-		tc.getAvatarPath().getLastComponent().addChild(c);
-		isAssigned=true;
+	private Color highlightColor = Color.orange;
+	private Color defaultColor = new Color(160, 160, 160);
+
+	private transient boolean highlight = false;
+
+	public PointerDisplayTool(double radius) {
+		addCurrentSlot(pointer);
+		cmp.setAppearance(new Appearance());
+		cmp.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
+		cmp.getAppearance().setAttribute("showPoints", false);
+		cmp.getAppearance().setAttribute("showFaces", false);
+		cmp.getAppearance().setAttribute("showLines", true);
+		cmp.getAppearance().setAttribute("lineShader.tubeDraw", true);
+		cmp.getAppearance().setAttribute("lineShader.tubeRadius", radius);
+		cmp.getAppearance().setAttribute(CommonAttributes.PICKABLE, false);
+		cmp.setTransformation(new Transformation());	
+		
+		setHighlight(false);
+		
+		ilsf = new IndexedLineSetFactory();
+		ilsf.setVertexCount(2);
+		ilsf.setLineCount(1);
+		ilsf.setEdgeIndices(new int[]{0, 1});
+		cmp.setGeometry(ilsf.getGeometry());
+		setLength(2);
 	}
-    m.assignFrom(tc.getTransformationMatrix(pointer));
-    m.assignTo(c.getTransformation());
-  }
-  
-  public void setVisible(boolean v) {
-	  c.setVisible(v);
-  }
-  
-  public boolean isVisible() {
-	  return c.isVisible();
-  }
-  
+	public PointerDisplayTool() {
+		this(0.003);
+	}
+
+	boolean isAssigned;
+	Matrix m = new Matrix();
+
+	public void perform(ToolContext tc) {
+		if (!isAssigned) {
+			tc.getAvatarPath().getLastComponent().addChild(cmp);
+			isAssigned=true;
+		}
+		m.assignFrom(tc.getTransformationMatrix(pointer));
+		m.assignTo(cmp.getTransformation());
+	}
+
+	public void setVisible(boolean v) {
+		cmp.setVisible(v);
+	}
+
+	public boolean isVisible() {
+		return cmp.isVisible();
+	}
+	public Color getHighlightColor() {
+		return highlightColor;
+	}
+	public void setHighlightColor(Color highlightColor) {
+		this.highlightColor = highlightColor;
+	}
+	public boolean isHighlight() {
+		return highlight;
+	}
+	public void setHighlight(boolean highlight) {
+		this.highlight = highlight;
+		cmp.getAppearance().setAttribute("diffuseColor", highlight ? getHighlightColor() : getDefaultColor());
+	}
+	public Color getDefaultColor() {
+		return defaultColor;
+	}
+	public void setDefaultColor(Color defaultColor) {
+		this.defaultColor = defaultColor;
+	}
+
+	public void setLength(double l) {
+		ilsf.setVertexCoordinates(new double[][]{{0, 0, 0}, {0, 0, -l}});
+		ilsf.update();
+	}
+
 }
