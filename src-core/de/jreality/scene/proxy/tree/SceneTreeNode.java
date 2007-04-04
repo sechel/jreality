@@ -73,199 +73,213 @@ import de.jreality.util.LoggingSystem;
  * @author weissman
  *
  */
- public class SceneTreeNode {
-  
-  private SceneTreeNode parent=null;
-  private SceneGraphNode node;
-  private IdentityHashMap<SceneGraphNode, SceneTreeNode> childrenMap = new IdentityHashMap<SceneGraphNode, SceneTreeNode>();
-  private List<SceneTreeNode> childList=Collections.emptyList();
-  private List<SceneTreeNode> childrenRO=Collections.unmodifiableList(childList);
-  private ProxyConnector connector;
-  private Object proxy;
-  private SceneGraphNodeEntity entity;
-  
-  protected final boolean isComponent;
-  private boolean hasTrafo;
-  private boolean hasApp;
-  private boolean hasCam;
-  private boolean hasLight;
-  private boolean hasGeom;
-  
-  protected SceneTreeNode(SceneGraphNode node) {
-    this.node = node;
-    isComponent = node instanceof SceneGraphComponent;
-    if (isComponent) {
-    	childList = new ArrayList<SceneTreeNode>(((SceneGraphComponent)node).getChildComponentCount()+5);
-    	childrenRO = Collections.unmodifiableList(childList);
-    }
-  }
-  
-  private void setParent(SceneTreeNode parent) {
-    if (this.parent != null) throw new IllegalStateException("parent already set!");
-    this.parent = parent;
-  }
+public class SceneTreeNode {
 
-  public boolean isLeaf() {
-    return childrenMap.isEmpty();
-  }
-  
-  public List<SceneTreeNode> getChildren() {
-    return childrenRO;
-  }
-  
-  public SceneGraphNode getNode() {
-    return node;
-  }
-  public SceneTreeNode getParent() {
-    return parent;
-  }
-  public Object getProxy() {
-    return proxy;
-  }
-  public void setProxy(Object proxy) {
-    this.proxy = proxy;
-  }
-  SceneTreeNode findNodeForPath(Iterator i) {
-    if (!i.hasNext()) return this;
-    Object nextSGN = i.next();
-    if (!isComponent || !childrenMap.containsKey(nextSGN)) throw new IllegalStateException("path doesn't match!");
-    return ((SceneTreeNode) childrenMap.get(nextSGN)).findNodeForPath(i);
-  }
-  public int addChild(SceneTreeNode child) {
-    int idx = 0;
-    childrenMap.put(child.getNode(), child);
-    child.setParent(this);
-    
-    //computeChildren();
-    if (child.getNode() instanceof SceneGraphComponent) {
-      childList.add(child);
-      idx=childList.size()-1;
-    } else {
-      SceneGraphNode ch = child.getNode();
-      if (ch instanceof Transformation) {
-        if (hasTrafo) {
-          childList.set(idx, child);
-        } else {
-          childList.add(idx, child);
-        }
-        hasTrafo = true;
-      } else if (ch instanceof Appearance) {
-        if (hasTrafo) idx++;
-        if (hasApp) {
-          childList.set(idx, child);
-        } else {
-          childList.add(idx, child);
-        }
-        hasApp = true;
-      } else if (ch instanceof Camera) {
-        if (hasTrafo) idx++;
-        if (hasApp) idx++;
-        if (hasCam) {
-          childList.set(idx, child);
-        } else {
-          childList.add(idx, child);
-        }
-        hasCam = true;
-      } else if (ch instanceof Light) {
-        if (hasTrafo) idx++;
-        if (hasApp) idx++;
-        if (hasCam) idx++;
-        if (hasLight) {
-          childList.set(idx, child);
-        } else {
-          childList.add(idx, child);
-        }
-        hasLight = true;
-      } else if (ch instanceof Geometry) {
-        if (hasTrafo) idx++;
-        if (hasApp) idx++;        
-        if (hasCam) idx++;
-        if (hasLight) idx++;
-        if (hasGeom) {
-          childList.set(idx, child);
-        } else {
-          childList.add(idx, child);
-        }
-        hasGeom = true;
-      }
-    }
-    connector.add(getProxy(), child.getProxy());
-    return idx;
-  }
-  public SceneGraphPath toPath() {
-    // fill list in reverse order
-    LinkedList<SceneGraphNode> ll = new LinkedList<SceneGraphNode>();
-    ll.add(this.getNode());
-    for (SceneTreeNode n = this; n.getParent()!= null; n = n.getParent())
-      ll.add(n.getParent().getNode());
-    // fill arraylist in correct oder
-    ArrayList<SceneGraphNode> al = new ArrayList<SceneGraphNode>(ll.size());
-    ListIterator<SceneGraphNode> litar = ll.listIterator(ll.size());
-    for (int i = 0; litar.hasPrevious(); i++) {
-    	al.add(i, litar.previous());
-    }
-    return SceneGraphPath.fromList(al);
-  }
-  void setConnector(ProxyConnector connector) {
-    this.connector = connector;
-  }
-  public SceneGraphNodeEntity getEntity() {
-    return entity;
-  }
-  void setEntity(SceneGraphNodeEntity entity) {
-    this.entity = entity;
-  }
-  SceneTreeNode removeChildForNode(SceneGraphNode prevChild) {
-    if (!childrenMap.containsKey(prevChild)) throw new IllegalStateException("unknown child!");
-    SceneTreeNode ret = getTreeNodeForChild(prevChild);
-    removeChild(ret);
-    if (prevChild instanceof Transformation) hasTrafo = false;
-    if (prevChild instanceof Appearance) hasApp = false;
-    if (prevChild instanceof Camera) hasCam = false;
-    if (prevChild instanceof Light) hasLight = false;
-    if (prevChild instanceof Geometry) hasGeom = false;
-    return ret;
-  }
-  protected int removeChild(SceneTreeNode prevChild) {
-	int ret = childList.indexOf(prevChild);
-    SceneTreeNode fromMap = childrenMap.remove(prevChild.getNode());
-    SceneTreeNode fromList = childList.remove(ret);
-	assert (fromMap == prevChild && fromList == prevChild);
-    return ret;
-  }
-  
-  public SceneTreeNode getTreeNodeForChild(SceneGraphNode prevChild) {
-    SceneTreeNode ret = (SceneTreeNode) childrenMap.get(prevChild);
-    return ret;
-  }
-  public SceneTreeNode getTransformationTreeNode() {
-    if (!isComponent) throw new UnsupportedOperationException("no component");
-    return getTreeNodeForChild(((SceneGraphComponent)node).getTransformation());
-  }
-  public SceneTreeNode getAppearanceTreeNode() {
-    if (!isComponent) throw new UnsupportedOperationException("no component");
-    return getTreeNodeForChild(((SceneGraphComponent)node).getAppearance());
-  }
-  public SceneTreeNode getGeometryTreeNode() {
-    if (!isComponent) throw new UnsupportedOperationException("no component");
-    return getTreeNodeForChild(((SceneGraphComponent)node).getGeometry());
-  }
+	private SceneTreeNode parent=null;
+	private SceneGraphNode node;
+	private IdentityHashMap<SceneGraphNode, SceneTreeNode> childrenMap = new IdentityHashMap<SceneGraphNode, SceneTreeNode>();
+	private List<SceneTreeNode> childList=Collections.emptyList();
+	private List<SceneTreeNode> childrenRO=Collections.unmodifiableList(childList);
+	private ProxyConnector connector;
+	private Object proxy;
+	private SceneGraphNodeEntity entity;
 
-  /**
-   * disposes the whole tree from this node on
-   * works recursively. also disposes the entity
-   * if it is impty
-   */
-  protected void dispose(ArrayList disposedEntities) {
-    for (Iterator i = getChildren().iterator(); i.hasNext(); ) {
-      ((SceneTreeNode)i.next()).dispose(disposedEntities);
-    }
-    int prevSize=getEntity().size();
-    getEntity().removeTreeNode(this);
-    LoggingSystem.getLogger(this).log(Level.FINE, "entity size: prev="+prevSize+" new="+getEntity().size());
-    if (getEntity().isEmpty()) {
-      disposedEntities.add(getEntity());
-    }
-  }
+	protected final boolean isComponent;
+	private boolean hasTrafo;
+	private boolean hasApp;
+	private boolean hasCam;
+	private boolean hasLight;
+	private boolean hasGeom;
+
+	protected SceneTreeNode(SceneGraphNode node) {
+		this.node = node;
+		isComponent = node instanceof SceneGraphComponent;
+		if (isComponent) {
+			childList = new ArrayList<SceneTreeNode>(((SceneGraphComponent)node).getChildComponentCount()+5);
+			childrenRO = Collections.unmodifiableList(childList);
+		}
+	}
+
+	private void setParent(SceneTreeNode parent) {
+		if (this.parent != null) throw new IllegalStateException("parent already set!");
+		this.parent = parent;
+	}
+
+	public boolean isLeaf() {
+		return childrenMap.isEmpty();
+	}
+
+	public List<SceneTreeNode> getChildren() {
+		return childrenRO;
+	}
+
+	public SceneGraphNode getNode() {
+		return node;
+	}
+	
+	public SceneTreeNode getParent() {
+		return parent;
+	}
+	
+	public Object getProxy() {
+		return proxy;
+	}
+	
+	public void setProxy(Object proxy) {
+		this.proxy = proxy;
+	}
+	
+	SceneTreeNode findNodeForPath(Iterator i) {
+		if (!i.hasNext()) return this;
+		Object nextSGN = i.next();
+		if (!isComponent || !childrenMap.containsKey(nextSGN)) throw new IllegalStateException("path doesn't match!");
+		return ((SceneTreeNode) childrenMap.get(nextSGN)).findNodeForPath(i);
+	}
+	
+	public int addChild(SceneTreeNode child) {
+		int idx = 0;
+		childrenMap.put(child.getNode(), child);
+		child.setParent(this);
+
+		//computeChildren();
+		if (child.getNode() instanceof SceneGraphComponent) {
+			childList.add(child);
+			idx=childList.size()-1;
+		} else {
+			SceneGraphNode ch = child.getNode();
+			if (ch instanceof Transformation) {
+				if (hasTrafo) {
+					childList.set(idx, child);
+				} else {
+					childList.add(idx, child);
+				}
+				hasTrafo = true;
+			} else if (ch instanceof Appearance) {
+				if (hasTrafo) idx++;
+				if (hasApp) {
+					childList.set(idx, child);
+				} else {
+					childList.add(idx, child);
+				}
+				hasApp = true;
+			} else if (ch instanceof Camera) {
+				if (hasTrafo) idx++;
+				if (hasApp) idx++;
+				if (hasCam) {
+					childList.set(idx, child);
+				} else {
+					childList.add(idx, child);
+				}
+				hasCam = true;
+			} else if (ch instanceof Light) {
+				if (hasTrafo) idx++;
+				if (hasApp) idx++;
+				if (hasCam) idx++;
+				if (hasLight) {
+					childList.set(idx, child);
+				} else {
+					childList.add(idx, child);
+				}
+				hasLight = true;
+			} else if (ch instanceof Geometry) {
+				if (hasTrafo) idx++;
+				if (hasApp) idx++;        
+				if (hasCam) idx++;
+				if (hasLight) idx++;
+				if (hasGeom) {
+					childList.set(idx, child);
+				} else {
+					childList.add(idx, child);
+				}
+				hasGeom = true;
+			}
+		}
+		connector.add(getProxy(), child.getProxy());
+		return idx;
+	}
+	
+	public SceneGraphPath toPath() {
+		// fill list in reverse order
+		LinkedList<SceneGraphNode> ll = new LinkedList<SceneGraphNode>();
+		ll.add(this.getNode());
+		for (SceneTreeNode n = this; n.getParent()!= null; n = n.getParent())
+			ll.add(n.getParent().getNode());
+		// fill arraylist in correct oder
+		ArrayList<SceneGraphNode> al = new ArrayList<SceneGraphNode>(ll.size());
+		ListIterator<SceneGraphNode> litar = ll.listIterator(ll.size());
+		for (int i = 0; litar.hasPrevious(); i++) {
+			al.add(i, litar.previous());
+		}
+		return SceneGraphPath.fromList(al);
+	}
+	
+	void setConnector(ProxyConnector connector) {
+		this.connector = connector;
+	}
+	
+	public SceneGraphNodeEntity getEntity() {
+		return entity;
+	}
+	
+	void setEntity(SceneGraphNodeEntity entity) {
+		this.entity = entity;
+	}
+	
+	SceneTreeNode removeChildForNode(SceneGraphNode prevChild) {
+		if (!childrenMap.containsKey(prevChild)) throw new IllegalStateException("unknown child!");
+		SceneTreeNode ret = getTreeNodeForChild(prevChild);
+		removeChild(ret);
+		if (prevChild instanceof Transformation) hasTrafo = false;
+		if (prevChild instanceof Appearance) hasApp = false;
+		if (prevChild instanceof Camera) hasCam = false;
+		if (prevChild instanceof Light) hasLight = false;
+		if (prevChild instanceof Geometry) hasGeom = false;
+		return ret;
+	}
+	
+	protected int removeChild(SceneTreeNode prevChild) {
+		int ret = childList.indexOf(prevChild);
+		SceneTreeNode fromMap = childrenMap.remove(prevChild.getNode());
+		SceneTreeNode fromList = childList.remove(ret);
+		assert (fromMap == prevChild && fromList == prevChild);
+		return ret;
+	}
+
+	public SceneTreeNode getTreeNodeForChild(SceneGraphNode prevChild) {
+		SceneTreeNode ret = (SceneTreeNode) childrenMap.get(prevChild);
+		return ret;
+	}
+	
+	public SceneTreeNode getTransformationTreeNode() {
+		if (!isComponent) throw new UnsupportedOperationException("no component");
+		return getTreeNodeForChild(((SceneGraphComponent)node).getTransformation());
+	}
+	
+	public SceneTreeNode getAppearanceTreeNode() {
+		if (!isComponent) throw new UnsupportedOperationException("no component");
+		return getTreeNodeForChild(((SceneGraphComponent)node).getAppearance());
+	}
+	
+	public SceneTreeNode getGeometryTreeNode() {
+		if (!isComponent) throw new UnsupportedOperationException("no component");
+		return getTreeNodeForChild(((SceneGraphComponent)node).getGeometry());
+	}
+
+	/**
+	 * disposes the whole tree from this node on
+	 * works recursively. also disposes the entity
+	 * if it is impty
+	 */
+	protected void dispose(ArrayList<SceneGraphNodeEntity> disposedEntities) {
+		for (SceneTreeNode node : getChildren())
+			node.dispose(disposedEntities);
+		
+		int prevSize=getEntity().size();
+		getEntity().removeTreeNode(this);
+		LoggingSystem.getLogger(this).log(Level.FINE, "entity size: prev="+prevSize+" new="+getEntity().size());
+		if (getEntity().isEmpty()) {
+			disposedEntities.add(getEntity());
+		}
+	}
 
 }
