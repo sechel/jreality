@@ -191,7 +191,7 @@ public class JRWindowManager implements ActionListener{
   public JRWindow createFrame(){ 
     JRWindow window=new JRWindow(getWindowCount());
     window.addActionListeners(this);
-    window.setInFront(getWindowsInScene());
+    window.setInScene(getWindowsInScene());
     sgc.addChild(window.getSgc());
     windowList.add(window);
     setWindowInFront(getWindowCount()-1);
