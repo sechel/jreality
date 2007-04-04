@@ -182,7 +182,7 @@ public class ToolSystem implements ToolEventReceiver {
 		/**
 		 * @deprecated why is this method here?
 		 */
-		 public Iterator getSelection() {
+		public Iterator getSelection() {
 			// TODO Auto-generated method stub
 			return null;
 		}
@@ -296,13 +296,13 @@ public class ToolSystem implements ToolEventReceiver {
 
 	protected void processTriggerQueue() {
 		if (triggerQueue.isEmpty())	return;
-		
+
 		HashSet<Tool> activatedTools = new HashSet<Tool>();
 		HashSet<Tool> deactivatedTools = new HashSet<Tool>();
 		HashSet<Tool> stillActiveTools = new HashSet<Tool>();
-		
+
 		SceneGraphPath pickPath = null;
-		
+
 		for (Iterator iter = triggerQueue.iterator(); iter.hasNext();) {
 			ToolEvent event = (ToolEvent) iter.next();
 			toolContext.event = event;
@@ -310,56 +310,50 @@ public class ToolSystem implements ToolEventReceiver {
 			toolContext.sourceSlot = slot;
 
 			AxisState axis = deviceManager.getAxisState(slot);
-			
-			if (axis != null && axis.isPressed()) { // possible activation:
-				
-				Set<Tool> candidates = new HashSet<Tool>(slotManager.getToolsActivatedBySlot(slot));
 
-				// contains the Tools sitting in the Scene that need a
-				// PickPath to get activated - we will choose the Tool(s) closest to
-				// the end of the path
-				HashSet<Tool> candidatesForPick = new HashSet<Tool>();
+			boolean noTrigger = true;
+
+			if (axis != null && axis.isPressed()) { // possible activation:
+
+				Set<Tool> candidatesForPick = new HashSet<Tool>(slotManager.getToolsActivatedBySlot(slot));
+
+				Set<Tool> candidates = new HashSet<Tool>();
 
 				// TODO: see if activating more than one Tool for an axis
 				// makes sense...
-				for (Iterator<Tool> i = candidates.iterator(); i.hasNext();) {
-					Tool candidate = i.next();
-					if (!toolManager.needsPick(candidate))
-						continue;
-					candidatesForPick.add(candidate);
-					i.remove();
+				for (Tool candidate : candidatesForPick) {
+					if (!toolManager.needsPick(candidate)) throw new Error();
 				}
 				if (!candidatesForPick.isEmpty()) {
 					// now we need a pick path
 					if (pickPath == null)
 						pickPath = calculatePickPath();
 					int level = pickPath.getLength();
-					boolean foundPossibleTools;
 					do {
 						Collection<Tool> selection = toolManager.selectToolsForPath(pickPath, level--, candidatesForPick);
-						foundPossibleTools=!selection.isEmpty();
-						LoggingSystem.getLogger(this).finer(
-								"selected pick tools:" + selection);
-						for (Iterator j = selection.iterator(); j.hasNext();) {
-							Tool tool = (Tool) j.next();
+						if (selection.isEmpty()) continue;
+						LoggingSystem.getLogger(this).finer("selected pick tools:" + selection);
+						for (Tool tool : selection)
 							registerActivePathForTool(pickPath, tool);
-						}
+
 						candidates.addAll(selection);
 						// now all Tools in the candidates list need to be
 						// processed=activated
 						activateToolSet(candidates);
-					} while (candidates.isEmpty() && foundPossibleTools && level > 0);
+					} while (candidates.isEmpty() && level > 0);
 					activatedTools.addAll(candidates);
+					noTrigger = candidates.isEmpty();
 				}
 			}
 			if (axis != null && axis.isReleased()) { // possible deactivation
 				Set<Tool> deactivated = findDeactivatedTools(slot);
 				deactivatedTools.addAll(deactivated);
 				deactivateToolSet(deactivated);
+				noTrigger = deactivated.isEmpty();
 			}
-			
+
 			// process all active tools NEW: only if no tool was (de)activated
-			if (activatedTools.isEmpty() && deactivatedTools.isEmpty()) {
+			if (noTrigger) {  //activatedTools.isEmpty() && deactivatedTools.isEmpty()
 				Set<Tool> active = slotManager.getActiveToolsForSlot(slot);
 				stillActiveTools.addAll(active);
 				processToolSet(active);

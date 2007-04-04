@@ -129,9 +129,9 @@ public class ToolManager {
         return null;
     }
 
-    Collection<Tool> selectToolsForPath(SceneGraphPath pickPath, int depth, HashSet candidates) {  
-        for(Iterator iter = pickPath.reverseIterator(depth); iter.hasNext();) {
-            SceneGraphNode node = (SceneGraphNode) iter.next();
+    Collection<Tool> selectToolsForPath(SceneGraphPath pickPath, int depth, Set<Tool> candidates) {  
+        for(Iterator<SceneGraphNode> iter = pickPath.reverseIterator(depth); iter.hasNext();) {
+            SceneGraphNode node = iter.next();
             List<Tool> tools;
             if (node instanceof SceneGraphComponent) {
               tools = ((SceneGraphComponent) node).getTools();
