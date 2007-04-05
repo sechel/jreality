@@ -54,11 +54,11 @@ public class JRWindowManager implements ActionListener{
         cornerIndex=e.getIndex();
         setWindowInFront(windowNum);
         point=windowList.get(windowNum).getCornerPos()[cornerIndex];
+        windowList.get(windowNum).setIsDragged(true);
       }
       public void pointDragged(PointDragEvent e) { 
         if(windowNum==-1) return;
         if(windowList.get(windowNum).isSmall()) return;
-        windowList.get(windowNum).setIsDragged(true);
         double[] translation={e.getPosition()[0]-point[0],e.getPosition()[1]-point[1],0,0};    //stimmt nicht ganz..
         double[] newPoint=new double[3];
         newPoint[0]=point[0]+translation[0];
@@ -69,7 +69,6 @@ public class JRWindowManager implements ActionListener{
       public void pointDragEnd(PointDragEvent e) { 
     	  windowList.get(windowNum).popUpDragVertices(false);
     	  windowList.get(windowNum).setIsDragged(false);
-        //windowList.get(windowNum).updateFrameSize();
       }});   
 //    dragTool.addLineDragListener(new LineDragListener(){
 //      private int windowNum;
@@ -115,6 +114,7 @@ public class JRWindowManager implements ActionListener{
         if(windowNum==-1) return;        
         setWindowInFront(windowNum);      
         points=windowList.get(windowNum).getCornerPos();
+        windowList.get(windowNum).setIsDragged(true);
       }
       public void faceDragged(FaceDragEvent e) {
         if(windowNum==-1) return;
@@ -128,7 +128,8 @@ public class JRWindowManager implements ActionListener{
         }          
         windowList.get(windowNum).setCornerPos(newPoints);
       }
-      public void faceDragEnd(FaceDragEvent e) {        
+      public void faceDragEnd(FaceDragEvent e) { 
+    	  windowList.get(windowNum).setIsDragged(false);
       }});
     
     sgc.addTool(dragTool);
@@ -154,13 +155,7 @@ public class JRWindowManager implements ActionListener{
   }
   
   public void actionPerformed(ActionEvent e) {    
-    /* if(e.getActionCommand().startsWith("X")){
-      String command=e.getActionCommand();
-      command=command.replaceFirst(String.valueOf(command.charAt(0)),"");
-      int windowNum=Integer.parseInt(command); 
-      kill(windowNum);  
-    }
-    else */ if(e.getActionCommand().startsWith("O")){
+    if(e.getActionCommand().startsWith("O")){
       String command=e.getActionCommand();
       command=command.replaceFirst(String.valueOf(command.charAt(0)),"");
       int windowNum=Integer.parseInt(command);    
@@ -177,19 +172,6 @@ public class JRWindowManager implements ActionListener{
         windowList.get(windowNum).setSmall(true);
     } 
   }  
-  private void kill(int windowNum){
-    JRWindow win2kill=windowList.get(windowNum);     
-    sgc.removeChild(win2kill.getSgc());    
-    int windowCount=0;
-    for(JRWindow win : windowList){
-      if(windowCount>windowNum){
-        win.setWindowNumber(windowCount-1);
-      }
-      windowCount++;
-    }      
-    windowList.remove(windowNum);
-    win2kill=null;
-  }
   
   public JRWindow createFrame(){ 
     JRWindow window=new JRWindow(getWindowCount());
@@ -209,32 +191,9 @@ public class JRWindowManager implements ActionListener{
 	  windowsInScene = b;
 	  for (JRWindow w : windowList) w.setInScene(windowsInScene);
   }
-//  JFrame getFrame(int i){
-//    return (JFrame)(windowList.get(i).getFrame());
-//  }
   public int getWindowCount(){
     return windowList.size();
   }
-//  public void pack(){
-//    for(JRWindow win : windowList)
-//      win.getFrame().pack();
-//  }  
-//  public void validate(){
-//    for(JRWindow win : windowList){
-//      win.updateFrameSize();
-//    }
-//  }
-//  
-//  public void setBorderRadius(double r){
-//    defaultDesktopBorderRadius=r;
-//    for(JRWindow win : windowList)
-//      win.setBorderRadius(r);
-//  }
-//  public void setDecoSize(double s){
-//    defaultDesktopDecoSize=s;
-//    for(JRWindow win : windowList)
-//      win.setDecoSize(s);
-//  }  
   
   public void setPosition(double[] pos){
     MatrixBuilder.euclidean().translate(pos).assignTo(sgc);
