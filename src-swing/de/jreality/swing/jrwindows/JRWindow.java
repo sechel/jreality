@@ -25,6 +25,11 @@ import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.scene.pick.PickResult;
+import de.jreality.scene.tool.AbstractTool;
+import de.jreality.scene.tool.InputSlot;
+import de.jreality.scene.tool.Tool;
+import de.jreality.scene.tool.ToolContext;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.TextureUtility;
@@ -44,6 +49,8 @@ import de.jreality.util.Secure;
 
 public class JRWindow {
 	
+  private boolean enableVertexPopUpTool=true;
+	
   private static final Font TITLE_FONT = new Font("Sans Serif", Font.BOLD, 24);
 
   private int windowNumber;
@@ -58,7 +65,7 @@ public class JRWindow {
   private boolean inScene=true;
   ActionTool myActionTool=new ActionTool("PanelActivation");
 
-  private SceneGraphComponent positionSgc;
+  private SceneGraphComponent positionSgc; 
   private SceneGraphComponent frameSgc;
   private SceneGraphComponent borderSgc;
   private SceneGraphComponent decoControlSgc;  
@@ -70,6 +77,7 @@ public class JRWindow {
   
   private double borderRadius=0.01;
   private double cornerRadius;
+  private double cornerRadiusPopUpFactor=3;
   private double decoBorderRadius=0.0033;
   private double translateFactor;
   
@@ -110,6 +118,12 @@ public class JRWindow {
     initSgc();
     initFrame();
     initDecoration();
+
+    /*TODO:
+     * fix bug: if the panel had been moved before calling setSmall(true) the first time, it can not be dragged properly
+     * hack:  */
+    setSmall(true);
+    setSmall(false);		
   }  
   
   private void initSgc(){
@@ -118,7 +132,7 @@ public class JRWindow {
     positionSgc.setAppearance(new Appearance());
     positionSgc.getAppearance().setAttribute("pointShader.pickable", true);
     positionSgc.getAppearance().setAttribute("lineShader.pickable", true);
-    positionSgc.getAppearance().setAttribute("polygonShader.pickable", true);         
+    positionSgc.getAppearance().setAttribute("polygonShader.pickable", true);  
   }   
   private void initFrame(){
     frameSgc=new SceneGraphComponent("content");
@@ -224,6 +238,7 @@ public class JRWindow {
     });
     //killButton.setEnabled(false);
     maxButton=new JButton("O");
+    maxButton.setEnabled(false);
     minButton=new JButton("_");
     panel.add(minButton);
     panel.add(maxButton);
@@ -279,6 +294,11 @@ public class JRWindow {
     borderSgc.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS,cornerRadius);
     borderSgc.getAppearance().setAttribute(CommonAttributes.TUBE_RADIUS,borderRadius);
     borderSgc.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, true);
+    
+    if(enableVertexPopUpTool){
+    	vertexPopUpTool=new VertexPopUpTool();
+    	borderSgc.addTool(vertexPopUpTool);
+    }
   }   
    
   protected void updateFrameTitle() {
@@ -489,30 +509,53 @@ public class JRWindow {
   }  
 
   private double[] smallCenter;
+  private Tool mouseEventTool;
+  private Tool vertexPopUpTool;
   
   protected void setSmall(boolean setSmall){    
-    if(setSmall&&!isSmall){
-      for(int i=0;i<cornerPos.length;i++)
-        Rn.copy(cornerPosBak[i],cornerPos[i]); 
-      if(smallCenter==null)
-        smallCenter=getCenter(cornerPos);
-      Rn.add(cornerPos[0],smallCenter,Rn.times(null,(decoControlSize+borderRadius)/borderRadius,dirX));
-      Rn.add(cornerPos[0],cornerPos[0],Rn.times(null,(decoSize/2+borderRadius)/borderRadius,dirY));
-      Rn.add(cornerPos[1],smallCenter,Rn.times(null,(decoControlSize+borderRadius)/borderRadius,dirX));
-      Rn.add(cornerPos[1],cornerPos[1],Rn.times(null,-((decoSize/2+borderRadius)/borderRadius),dirY));
-      Rn.add(cornerPos[2],smallCenter,Rn.times(null,-(decoControlSize+borderRadius)/borderRadius,dirX));
-      Rn.add(cornerPos[2],cornerPos[2],Rn.times(null,-(decoSize/2+borderRadius)/borderRadius,dirY));
-      Rn.add(cornerPos[3],smallCenter,Rn.times(null,-(decoControlSize+borderRadius)/borderRadius,dirX));
-      Rn.add(cornerPos[3],cornerPos[3],Rn.times(null,(decoSize/2+borderRadius)/borderRadius,dirY));
-      isSmall=true;
-    }else if((!setSmall)&&isSmall){
-      smallCenter=getCenter(cornerPos);      
-      for(int i=0;i<cornerPos.length;i++){
-       Rn.copy(cornerPos[i],cornerPosBak[i]);
-      }
-      isSmall=false;
-    }
-    setCornerPos(cornerPos);
+	  if(setSmall&&!isSmall){
+		  for(int i=0;i<cornerPos.length;i++)
+			  Rn.copy(cornerPosBak[i],cornerPos[i]); 
+		  if(smallCenter==null)
+			  smallCenter=getCenter(cornerPos);
+	  
+		  double factorX = (decoControlSize+borderRadius)/borderRadius/2;
+		  double factorY = factorX*Rn.euclideanDistance(cornerPos[0], cornerPos[1])/Rn.euclideanDistance(cornerPos[0], cornerPos[3]); 
+		  Rn.add(cornerPos[0],smallCenter,Rn.times(null,factorX,dirX));
+		  Rn.add(cornerPos[0],cornerPos[0],Rn.times(null,factorY,dirY));
+		  Rn.add(cornerPos[1],smallCenter,Rn.times(null,factorX,dirX));
+		  Rn.add(cornerPos[1],cornerPos[1],Rn.times(null,-factorY,dirY));
+		  Rn.add(cornerPos[2],smallCenter,Rn.times(null,-factorX,dirX));
+		  Rn.add(cornerPos[2],cornerPos[2],Rn.times(null,-factorY,dirY));
+		  Rn.add(cornerPos[3],smallCenter,Rn.times(null,-factorX,dirX));
+		  Rn.add(cornerPos[3],cornerPos[3],Rn.times(null,factorY,dirY));
+	
+		  mouseEventTool=frameSgc.getTools().get(0);
+		  frameSgc.removeTool(mouseEventTool);
+		  if(vertexPopUpTool!=null)
+			  borderSgc.removeTool(vertexPopUpTool);
+		  
+		  setActiveColor(false);
+		  minButton.setEnabled(false);
+		  maxButton.setEnabled(true);
+		  isSmall=true;
+	  }else if((!setSmall)&&isSmall){
+		  smallCenter=getCenter(cornerPos);      
+		  for(int i=0;i<cornerPos.length;i++){
+			  Rn.copy(cornerPos[i],cornerPosBak[i]);
+		  }
+		  
+		  if(mouseEventTool!=null)
+			  frameSgc.addTool(mouseEventTool);
+		  if(vertexPopUpTool!=null)
+			  borderSgc.addTool(vertexPopUpTool);
+		  
+		  setActiveColor(true);
+		  minButton.setEnabled(true);
+		  maxButton.setEnabled(false);
+		  isSmall=false;
+	  }
+	  setCornerPos(cornerPos);
   }
   private double[] getCenter(double[][] box){
     double[] center={0,0,0};
@@ -527,14 +570,28 @@ public class JRWindow {
   
   protected void setInFront(boolean setInFront){
     if(setInFront){
-      decoDragSgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,activeColor);
-      panel.setBackground(activeColor);
+      if(!isSmall)
+        setActiveColor(true);	
       MatrixBuilder.euclidean().assignTo(positionSgc); 
     }else{
-      decoDragSgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,inactiveColor);
-      panel.setBackground(inactiveColor);
+      if(!isSmall)
+        setActiveColor(false);	
       MatrixBuilder.euclidean().translate(0,0,-translateFactor*(windowNumber+1)).assignTo(positionSgc); 
     }
+  }
+  
+  private void setActiveColor(boolean active){
+	  if(active){
+		  decoDragSgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,activeColor);
+		  borderSgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,activeColor);
+		  borderSgc.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,activeColor);
+		  panel.setBackground(activeColor);
+	  }else{
+		  decoDragSgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,inactiveColor);
+		  borderSgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,inactiveColor);
+		  borderSgc.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,inactiveColor);
+		  panel.setBackground(inactiveColor);
+	  }
   }
 
   protected void setBorderRadius(double r) {
@@ -607,6 +664,36 @@ public class JRWindow {
 
 	public ActionTool getPanelTool() {
 		return myActionTool;
+	}
+	
+	protected void popUpDragVertices(boolean popUp){
+		borderSgc.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS, popUp ? cornerRadius*cornerRadiusPopUpFactor : cornerRadius);	
+	}
+	private boolean isDragged=false;
+	protected void setIsDragged(boolean isDragged){
+		this.isDragged=isDragged;
+	}
+	
+	private class VertexPopUpTool extends AbstractTool{
+		
+		private final InputSlot pointer = InputSlot.getDevice("PointerTransformation");
+		
+		protected VertexPopUpTool(){
+			super(new InputSlot[] {null});
+			addCurrentSlot(pointer);
+		}
+		
+		public void perform(ToolContext tc){
+			if(!isSmall){
+				if(tc.getCurrentPick()!=null){
+					if(tc.getCurrentPick().getPickPath().getLastComponent()==borderSgc){
+						if(tc.getCurrentPick().getPickType()==PickResult.PICK_TYPE_POINT){
+							popUpDragVertices(true);
+						}else if(!isDragged) popUpDragVertices(false);
+					}else if(!isDragged) popUpDragVertices(false);
+				}else if(!isDragged) popUpDragVertices(false);
+			}
+		}
 	}
   
 }

@@ -58,6 +58,7 @@ public class JRWindowManager implements ActionListener{
       public void pointDragged(PointDragEvent e) { 
         if(windowNum==-1) return;
         if(windowList.get(windowNum).isSmall()) return;
+        windowList.get(windowNum).setIsDragged(true);
         double[] translation={e.getPosition()[0]-point[0],e.getPosition()[1]-point[1],0,0};    //stimmt nicht ganz..
         double[] newPoint=new double[3];
         newPoint[0]=point[0]+translation[0];
@@ -65,7 +66,9 @@ public class JRWindowManager implements ActionListener{
         newPoint[2]=point[2]+translation[2];
         windowList.get(windowNum).setCorner(cornerIndex, newPoint);
       }
-      public void pointDragEnd(PointDragEvent e) {
+      public void pointDragEnd(PointDragEvent e) { 
+    	  windowList.get(windowNum).popUpDragVertices(false);
+    	  windowList.get(windowNum).setIsDragged(false);
         //windowList.get(windowNum).updateFrameSize();
       }});   
 //    dragTool.addLineDragListener(new LineDragListener(){
@@ -134,7 +137,7 @@ public class JRWindowManager implements ActionListener{
   private int searchWindowNum(Geometry matchedGeo){
     int matchedWindowNum=0;
     for(JRWindow win : windowList){      
-      if(matchedGeo.equals(win.getBorders())||matchedGeo.equals(win.getDecoDragFace())){
+      if(matchedGeo.equals(win.getFrameFace())||matchedGeo.equals(win.getBorders())||matchedGeo.equals(win.getDecoDragFace())){
         return matchedWindowNum; 
       }
       matchedWindowNum++;
