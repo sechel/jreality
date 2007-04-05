@@ -50,7 +50,7 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.ui.viewerapp.Selection;
 import de.jreality.ui.viewerapp.SelectionEvent;
-import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 import de.jreality.util.SceneGraphUtility;
 
@@ -62,7 +62,7 @@ import de.jreality.util.SceneGraphUtility;
  */
 public class Remove extends AbstractSelectionListenerAction {
 
-	public Remove(String name, SelectionManager sm) {
+	public Remove(String name, SelectionManagerInterface sm) {
 		super(name, sm);
 
 		setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));

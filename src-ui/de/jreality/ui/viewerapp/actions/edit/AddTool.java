@@ -69,7 +69,7 @@ import de.jreality.tools.ShipScaleTool;
 import de.jreality.tools.ShowPropertiesTool;
 import de.jreality.tools.TranslateTool;
 import de.jreality.ui.viewerapp.SelectionEvent;
-import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 
 
@@ -86,7 +86,7 @@ public class AddTool extends AbstractSelectionListenerAction {
   private JDialog dialog = null;
   
   
-  public AddTool(String name, SelectionManager sm, Component frame) {
+  public AddTool(String name, SelectionManagerInterface sm, Component frame) {
     
     super(name, sm, frame);
     setShortDescription("Add Tools");

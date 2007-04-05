@@ -46,7 +46,7 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
-import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
@@ -57,10 +57,10 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
  */
 public class ToggleRenderSelection extends AbstractJrAction {
 
-	private SelectionManager sm;
+	private SelectionManagerInterface sm;
 	
   
-  public ToggleRenderSelection(String name, SelectionManager sm) {
+  public ToggleRenderSelection(String name, SelectionManagerInterface sm) {
     super(name);
     this.sm = sm;
 

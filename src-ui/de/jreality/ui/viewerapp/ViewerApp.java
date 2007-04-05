@@ -92,24 +92,38 @@ import de.jreality.util.Secure;
 
 
 /**
- * Factory for the jReality Viewer application, which displays a 
- * {@link de.jreality.io.JrScene} in a frame.<br>
- * Use the factory as following:<br>
- * <code><b><pre>
- * ViewerApp viewer = new ViewerApp(...);
- * viewer.setAttachNavigator(true);
- * viewer.setAttachBeanShell(false);
- * [setting more properties]<br>
- * viewer.update();
- * viewer.display();
- * </pre></b></code>
- * Editing the viewerApp's menu:<br>
- * <code><b><pre>
- * ViewerAppMenu menu = viewerApp.getMenu();
+ * Factory class for jReality Viewer applications, which display a {@link de.jreality.io.JrScene}.<br>
+ * The scene is created from a given SceneGraphComponent or geometry, an existing scene graph or JrScene.<br>
+ * There are several constructors for this purpose.<br>
+ * Note that when using the default JrScene, some tools may already be included in the scene. 
+ * To avoid this use the appropriate constructors or static methods.<br>
+ * <br>
+ * The application's properties can be set the following way:
+ * <code><pre>
+ * ViewerApp va = new ViewerApp(...);
+ * va.setAttachNavigator(true);
+ * va.setExternalNavigator(false);
+ * va.setAttachBeanShell(false);
+ * va.setIncludeMenu(true);
+ * [setting more properties]
+ * </pre></code>
+ * 
+ * <b>After setting properties always call</b> {@link ViewerApp#update()}!</b><br>
+ * <br>
+ * To display the scene call {@link ViewerApp#display()}.<br>
+ * There are static methods to display a geometry or an existing scene graph easily.<br>
+ * <br>
+ * Editing the ViewerApp's default menu can be achieved after(!) calling <code>update()</code>
+ * via the appropriate menu methods:
+ * <code><pre>
+ * ViewerAppMenu menu = va.getMenu();
  * menu.removeMenu(ViewerAppMenu.APP_MENU);
  * menu.addAction(ViewerAppMenu.FILE_MENU, action);
- * [etc.]
- * </pre></b></code>
+ * [...]
+ * </pre></code>
+ * 
+ * To create your own viewer application use the factory to set up the viewer and additional features 
+ * and extract needed components for use in a different context.
  * 
  * @author weissman, msommer
  */
@@ -127,7 +141,7 @@ public class ViewerApp {
 	private SceneGraphComponent scene;
 	private SceneGraphNode displayedNode;  //the node which is displayed in viewer
 
-	private SelectionManager selectionManager;
+	private SelectionManagerInterface selectionManager;
 	private BeanShell beanShell;
 	private Navigator navigator;
 
@@ -147,12 +161,13 @@ public class ViewerApp {
 	private JTabbedPane navigatorTabs;
 
 	private boolean showMenu = true;  //default
+	private boolean includeMenu = true;  //default
 	private ViewerAppMenu menu;
 
 
 	/**
-	 * Use this constructor to display a SceneGraphComponent or Geometry using the viewerApp's default JrScene.<br>
-	 * Note that the default scene already contains some standard tools.  
+	 * Use this constructor to display a SceneGraphComponent or Geometry using the ViewerApp's default JrScene.<br>
+	 * Note that the default scene already includes some standard tools.  
 	 * @param node the SceneGraphNode (SceneGraphComponent or Geometry) to be displayed with the viewer
 	 */
 	public ViewerApp(SceneGraphNode node) {
@@ -217,11 +232,7 @@ public class ViewerApp {
 		//load the scene depending on environment (desktop | portal)
 		setupViewer(jrScene);
 
-		selectionManager = new SelectionManager(new Selection( jrScene.getPath("emptyPickPath") )); //defaultSelection = emptyPick
-
 		frame = new JFrame();
-		menu = new ViewerAppMenu(this);  //uses frame, viewer, selectionManager and this
-
 	}
 
 
@@ -322,12 +333,6 @@ public class ViewerApp {
 //		size.height = (int) (size.width*3./4.);
 //		((Component) currViewer.getViewingComponent()).setPreferredSize(size);
 
-		//add menu bar
-		JMenuBar menuBar = menu.getMenuBar();
-		frame.setJMenuBar(menuBar);
-		menuBar.setBorder(BorderFactory.createEmptyBorder());  //needed for full scrren mode
-		if (!showMenu) menu.showMenuBar(false);
-
 		frame.validate();
 		frame.pack();  //size frame to fit preferred sizes of subcomponents
 
@@ -344,7 +349,7 @@ public class ViewerApp {
 
 
 	/**
-	 * Displays a specified SceneGraphComponent or Geometry using the jReality viewer.
+	 * Displays a specified SceneGraphComponent or Geometry using the jReality viewer and the ViewerApp's default JrScene.
 	 * @param node the SceneGraphNode (SceneGraphComponent or Geometry) to be displayed in the viewer
 	 * @return the ViewerApp factory instantiated to display the node
 	 */
@@ -362,7 +367,7 @@ public class ViewerApp {
 	}
 
 	/**
-	 * Displays a scene specified by the following parameters.
+	 * Displays an existing scene graph by creating a new JrScene with given parameters.
 	 * @param root the scene's root
 	 * @param cameraPath the scene's camera path
 	 * @param emptyPick the scene's empty pick path
@@ -385,15 +390,27 @@ public class ViewerApp {
 
 
 	/**
-	 * Update the viewer application.<br>
-	 * Needs to be invoked before calling display or getter methods. 
+	 * Update the viewer application factory.<br>
+	 * Needs to be invoked before calling display, menu or getter methods. 
 	 */
 	public void update() {
 
+		if (selectionManager==null)  //instantiate default selection manager
+			selectionManager = new SelectionManager(new Selection( jrScene.getPath("emptyPickPath") )); //defaultSelection = emptyPick
+		
+		if (menu==null)  //create menu
+			menu = new ViewerAppMenu(this);  //uses frame, viewer, selectionManager and this
+		
 		showExternalBeanShell(attachBeanShell && externalBeanShell);
 		showExternalNavigator(attachNavigator && externalNavigator);
 
-		//update menu (e.g. checkboxes whose selection state depends on viewerApp properties)
+		//update menu (e.g. visibility and checkboxes whose selection state depends on viewerApp properties)
+		if (includeMenu && frame.getJMenuBar()==null) {
+			JMenuBar menuBar = menu.getMenuBar();
+			menuBar.setBorder(BorderFactory.createEmptyBorder());  //needed for full screen mode
+			frame.setJMenuBar(menuBar);
+		}
+		if (!includeMenu) frame.setJMenuBar(null);
 		menu.update();
 
 		//update content of frame
@@ -483,6 +500,7 @@ public class ViewerApp {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	private ToolSystemViewer createToolSystemViewer() throws IOException {
 		String config = Secure.getProperty( "de.jreality.scene.tool.Config", "default" );
 		boolean remotePortal = config.equals("portal-remote");
@@ -612,6 +630,7 @@ public class ViewerApp {
 	 * Set up the navigator (sceneTree and inspector).
 	 */
 	private void setupNavigator() {
+		
 		navigator = new Navigator(sceneRoot, selectionManager, frame);
 
 		Component navigator = this.navigator.getComponent();
@@ -850,11 +869,20 @@ public class ViewerApp {
 
 
 	/**
-	 * Get the SelectionManager managing selections in the ViewerApp
+	 * Get the SelectionManager managing selections in the ViewerApp.
 	 * @return the SelectionManager
 	 */
-	public SelectionManager getSelectionManager() {
+	public SelectionManagerInterface getSelectionManager() {
 		return selectionManager;
+	}
+	
+	
+	/**
+	 * Set the selection manager to use for managing selections within the scene displayed by the ViewerApp.
+	 * @param sm the selection manager.
+	 */
+	public void setSelectionManager(SelectionManagerInterface sm) {
+		selectionManager = sm;
 	}
 
 
@@ -875,8 +903,22 @@ public class ViewerApp {
 
 
 	/**
-	 * Use to include a menu bar and context menus in ViewerApp.
+	 * Specify whether to include a menu bar in the ViewerApp's frame.
 	 * @param b true iff menu is to be shown
+	 */
+	public void setIncludeMenu(boolean b) {
+		includeMenu = b;
+	}
+
+
+	public boolean isIncludeMenu() {
+		return includeMenu;
+	}
+
+
+	/**
+	 * Specify whether to show or to hide the ViewerApp's menu bar.
+	 * @param b true iff menu bar is to be shown
 	 */
 	public void setShowMenu(boolean b) {
 		showMenu = b;
@@ -889,7 +931,8 @@ public class ViewerApp {
 
 
 	/**
-	 * Use to edit the menu bar (add/remove menus, add/remove items or actions to special menus).
+	 * Use this method to edit the ViewerApp's menu bar (add/remove menus, add/remove items or actions to special menus)
+	 * after calling {@link ViewerApp#update()} (if called before this method returns <code>null</code>).
 	 * @return the viewerApp's menu
 	 */
 	public ViewerAppMenu getMenu() {

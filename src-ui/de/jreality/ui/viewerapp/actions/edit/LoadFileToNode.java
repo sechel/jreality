@@ -47,7 +47,7 @@ import javax.swing.AbstractAction;
 
 import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.ui.viewerapp.SelectionEvent;
-import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 import de.jreality.ui.viewerapp.actions.file.LoadFile;
 
@@ -62,7 +62,7 @@ public class LoadFileToNode extends AbstractSelectionListenerAction {
 
   private ToolSystemViewer viewer;
   
-  public LoadFileToNode(String name, SelectionManager sm, ToolSystemViewer viewer, Component parentComp) {
+  public LoadFileToNode(String name, SelectionManagerInterface sm, ToolSystemViewer viewer, Component parentComp) {
     super(name, sm, parentComp);
     this.viewer = viewer;
 
@@ -70,15 +70,15 @@ public class LoadFileToNode extends AbstractSelectionListenerAction {
 //    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
 
-  public LoadFileToNode(String name, SelectionManager sm, ToolSystemViewer viewer) {
+  public LoadFileToNode(String name, SelectionManagerInterface sm, ToolSystemViewer viewer) {
 	  this(name, sm, viewer, null);
   }
   
-  public LoadFileToNode(String name, SelectionManager sm, Component parentComp) {
+  public LoadFileToNode(String name, SelectionManagerInterface sm, Component parentComp) {
 	  this(name, sm, null, parentComp);
   }
   
-  public LoadFileToNode(String name, SelectionManager sm) {
+  public LoadFileToNode(String name, SelectionManagerInterface sm) {
 	  this(name, sm, null, null);
   }
   

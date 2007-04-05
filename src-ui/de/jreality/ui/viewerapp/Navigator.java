@@ -79,7 +79,7 @@ public class Navigator implements SelectionListener {
 	private SceneTreeModel treeModel;
 	private TreeSelectionModel tsm;
 
-	private SelectionManager sm;
+	private SelectionManagerInterface sm;
 	private SceneGraphComponent sceneRoot;  //the scene root
 
 	private Component navigator;
@@ -90,7 +90,7 @@ public class Navigator implements SelectionListener {
 	 * @param sceneRoot the scene root
 	 * @param selectionManager the underlying selection manager
 	 */
-	public Navigator(SceneGraphComponent sceneRoot, SelectionManager selectionManager) {
+	public Navigator(SceneGraphComponent sceneRoot, SelectionManagerInterface selectionManager) {
 		this(sceneRoot, selectionManager, null);
 	}
 
@@ -100,7 +100,7 @@ public class Navigator implements SelectionListener {
 	 * @param selectionManager the underlying selection manager
 	 * @param parentComp used by dialogs from the context menu (<code>null</code> allowed)
 	 */
-	public Navigator(SceneGraphComponent sceneRoot, SelectionManager selectionManager, Component parentComp) {
+	public Navigator(SceneGraphComponent sceneRoot, SelectionManagerInterface selectionManager, Component parentComp) {
 
 		sm = selectionManager;
 		sm.addSelectionListener(this);

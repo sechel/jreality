@@ -50,7 +50,7 @@ import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.SelectionEvent;
-import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 import de.jreality.writer.WriterOBJ;
 
@@ -63,7 +63,7 @@ import de.jreality.writer.WriterOBJ;
  */
 public class ExportOBJ extends AbstractSelectionListenerAction {
 
-	public ExportOBJ(String name, SelectionManager sm, Component parentComp) {
+	public ExportOBJ(String name, SelectionManagerInterface sm, Component parentComp) {
 		super(name, sm, parentComp);
 		setShortDescription("Export selected IndexedFaceSet as OBJ file");
 	}

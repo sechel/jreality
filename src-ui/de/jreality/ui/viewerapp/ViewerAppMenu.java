@@ -176,7 +176,7 @@ public class ViewerAppMenu {
   
   private Component parentComp = null;
   private ViewerApp viewerApp = null;
-  private SelectionManager sm = null;
+  private SelectionManagerInterface sm = null;
   private ToolSystemViewer viewer = null;
   private JMenuBar menuBar;
   
@@ -245,7 +245,7 @@ public class ViewerAppMenu {
    * Also used for creating the navigator's context menu. 
    * @param parentComp use as parent component for dialogs
    */
-  protected static JMenu createEditMenu(Component parentComp, SelectionManager sm) {
+  protected static JMenu createEditMenu(Component parentComp, SelectionManagerInterface sm) {
     JMenu editMenu = new JMenu(EDIT_MENU);
     editMenu.setMnemonic(KeyEvent.VK_E);
     
@@ -409,6 +409,7 @@ public class ViewerAppMenu {
     externalBeanShellCheckBox.setSelected(viewerApp.isExternalBeanShell());
     renderSelectionCheckbox.setSelected(sm.isRenderSelection());  //sm!=null if viewerApp!=null
     showMenu(EDIT_MENU, viewerApp.isAttachNavigator());
+    showMenuBar(viewerApp.isShowMenu());
   }
   
   
@@ -578,6 +579,8 @@ public class ViewerAppMenu {
    */
   public void showMenuBar(boolean show) {
 
+	if (showMenuBar==show) return;
+	  
   	for (int i = 0; i < menuBar.getComponentCount(); i++)
       menuBar.getMenu(i).setVisible(
       		show ? this.showMenu.get(menuBar.getMenu(i).getText()) : false 

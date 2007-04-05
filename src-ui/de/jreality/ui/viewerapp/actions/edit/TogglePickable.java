@@ -45,7 +45,7 @@ import java.awt.event.ActionEvent;
 import de.jreality.scene.Geometry;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.SelectionEvent;
-import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 import de.jreality.util.PickUtility;
 
@@ -58,7 +58,7 @@ import de.jreality.util.PickUtility;
  */
 public class TogglePickable extends AbstractSelectionListenerAction {
   
-  public TogglePickable(String name, SelectionManager sm) {
+  public TogglePickable(String name, SelectionManagerInterface sm) {
     super(name, sm);
     setShortDescription("Toggle pickability of selection");
   }

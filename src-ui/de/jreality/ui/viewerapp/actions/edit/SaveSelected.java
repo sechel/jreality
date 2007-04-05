@@ -53,7 +53,7 @@ import javax.swing.KeyStroke;
 
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.SelectionEvent;
-import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 import de.jreality.writer.WriterJRS;
 
@@ -66,7 +66,7 @@ import de.jreality.writer.WriterJRS;
  */
 public class SaveSelected extends AbstractSelectionListenerAction {
 
-  public SaveSelected(String name, SelectionManager sm, Component parentComp) {
+  public SaveSelected(String name, SelectionManagerInterface sm, Component parentComp) {
     super(name, sm, parentComp);
     
     setShortDescription("Save selected SceneGraphComponent as a file");

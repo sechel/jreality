@@ -50,25 +50,25 @@ import de.jreality.util.LoggingSystem;
 
 
 /**
- * Manages selections of scene graph components within the scene.
+ * Allows selections within the displayed JrScene via picking.
  * 
  * @author msommer
  */
 public class SelectionTool extends AbstractTool {
 
 	final static InputSlot activationSlot = InputSlot.getDevice("SelectionActivation");
-	private SelectionManager sm;
+	private SelectionManagerInterface sm;
 	private Selection selection;
 
 
-	public SelectionTool(SelectionManager sm) {
+	public SelectionTool(SelectionManagerInterface sm) {
 		addCurrentSlot(activationSlot);
 		this.sm = sm;
 //		LoggingSystem.getLogger(SelectionTool.class).setLevel(Level.INFO);
 	}
 
 	public SelectionTool() {
-		this((SelectionManager) null);
+		this((SelectionManagerInterface) null);
 	}
 
 	public SelectionTool(ViewerApp v) {

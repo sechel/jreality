@@ -44,7 +44,7 @@ import java.awt.event.ActionEvent;
 
 import de.jreality.scene.Appearance;
 import de.jreality.ui.viewerapp.SelectionEvent;
-import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 
 
@@ -55,7 +55,7 @@ import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
  */
 public class CreateAppearance extends AbstractSelectionListenerAction {
 
-  public CreateAppearance(String name, SelectionManager sm) {
+  public CreateAppearance(String name, SelectionManagerInterface sm) {
     super(name, sm);
     setShortDescription("Create a new Appearance");
   }

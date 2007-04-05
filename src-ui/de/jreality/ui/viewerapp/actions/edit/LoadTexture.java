@@ -52,7 +52,7 @@ import de.jreality.shader.TextureUtility;
 import de.jreality.ui.viewerapp.FileFilter;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.SelectionEvent;
-import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 import de.jreality.util.Input;
 
@@ -64,7 +64,7 @@ import de.jreality.util.Input;
  */
 public class LoadTexture extends AbstractSelectionListenerAction {
 
-	public LoadTexture(String name, SelectionManager sm, Component frame) {
+	public LoadTexture(String name, SelectionManagerInterface sm, Component frame) {
 
 		super(name, sm, frame);
 		setShortDescription("Load texture");

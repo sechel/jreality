@@ -73,7 +73,7 @@ public class BeanShell implements SelectionListener {
 		this(null);
 	}
 
-	public BeanShell(SelectionManager sm) {
+	public BeanShell(SelectionManagerInterface sm) {
 
 		bshEval = new BshEvaluator();
 

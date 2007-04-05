@@ -51,8 +51,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.SelectionEvent;
-import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 
 
@@ -69,7 +68,7 @@ public class ToggleAppearance extends AbstractSelectionListenerAction {
   private boolean defaultValue;
   
   
-  public ToggleAppearance(String name, String attribute, SelectionManager sm) {
+  public ToggleAppearance(String name, String attribute, SelectionManagerInterface sm) {
     super(name, sm);
     this.attribute = attribute;
     
@@ -90,9 +89,9 @@ public class ToggleAppearance extends AbstractSelectionListenerAction {
     }
   }
 
-  public ToggleAppearance(String name, String attribute, ViewerApp v) {
-    this(name, attribute, v.getSelectionManager());
-  }
+//  public ToggleAppearance(String name, String attribute, ViewerApp v) {
+//    this(name, attribute, v.getSelectionManager());
+//  }
   
   
   /**

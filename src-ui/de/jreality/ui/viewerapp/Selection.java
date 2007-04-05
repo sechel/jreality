@@ -53,32 +53,53 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.data.AttributeEntity;
 import de.jreality.scene.tool.Tool;
 
-
+/**
+ * Represents selections in a displayed scene. A selection is a list of objects representing a directed path 
+ * from a scene graph's root down to some node in the scene graph or arbitrary objects which are somehow linked to 
+ * nodes of the scene graph (e.g. tools or attribute entities visible in the scene graph's tree view).
+ * 
+ * In particular, every selection starts with a {@link SceneGraphPath}.
+ * Adding an object which is not an instance of SceneGraphNode to the selection's path defines the end of the contained
+ * SceneGraphPath, i.e any objects added subsequently are not treated as part of the SceneGraphPath.
+ * 
+ * Selections can be constructed from an existing SceneGraphPaths by using {@link Selection#Selection(SceneGraphPath)}
+ * and truncated to a SceneGraphPath using {@link Selection#getSGPath()}.
+ * 
+ * @author msommer
+ */
 public class Selection {
 
 	protected SceneGraphPath sgPath;
 	protected LinkedList<Object> tail;
 
+	/** Default constructor, starts with an empty selection path */
 	public Selection() {
 		sgPath = new SceneGraphPath();
 		tail = new LinkedList<Object>();
 	}
 
+	/** Copy constructor */
 	public Selection(Selection s) {
 		this(s.sgPath);
 		this.tail.addAll(s.tail);
 	}
 	
+	/** Constructs a selection object from the given SceneGraphPath */
 	public Selection(SceneGraphPath path) {
 		this();
 		sgPath = new SceneGraphPath(path);
 	}
 
+	/** Clear the selection's path */
 	public void clear() {
 		sgPath.clear();
 		tail.clear();
 	}
 
+	/**
+	 * When pushing a SceneGraphNode, this method treats it as part of the SceneGraphPath the selection's path starts with
+	 * if no other object was pushed before.
+	 */
 	public final void push(final Object o) {
 		if (tail.isEmpty() && o instanceof SceneGraphNode) 
 			sgPath.push((SceneGraphNode)o);
@@ -91,7 +112,8 @@ public class Selection {
 	}
 	
 	/**
-	 * Selections always start with a SceneGraphPath.
+	 * Get the first element of the selection's path.<br>
+	 * Note that selections always start with a {@link SceneGraphPath}.
 	 * @return first SceneGraphNode of the contained path.
 	 */
 	public SceneGraphNode getFirstElement() {
@@ -247,40 +269,48 @@ public class Selection {
 		return str.toString();
 	}
 
+	/** Returns true iff a {@link Tool} was selected */
 	public boolean isTool() {
 		return (!tail.isEmpty() && tail.getLast() instanceof Tool);
 	}
 	
+	/** Returns the selected tool if the current selection is a {@link Tool}, <code>null</code> otherwise */
 	public Tool asTool() {
 		if (isTool())
 			return (Tool) getLastElement();
 		else return null;
 	}
 	
+	/** Returns true iff a {@link SceneGraphComponent} was selected */
 	public boolean isComponent() {
 		return (isNode() && getLastNode() instanceof SceneGraphComponent);
 	}
 	
+	/** Returns the selected component if the current selection is a {@link SceneGraphComponent}, <code>null</code> otherwise */
 	public SceneGraphComponent asComponent() {
 		if (isComponent())
 			return sgPath.getLastComponent();
 		else return null;
 	}
 	
+	/** Returns true iff a {@link SceneGraphNode} was selected */
 	public boolean isNode() {
 		return (tail.isEmpty() && sgPath.getLength()!=0);
 	}
 	
+	/** Returns the selected node if the current selection is a {@link SceneGraphNode}, <code>null</code> otherwise */
 	public SceneGraphNode asNode() {
 		if (isNode())
 			return getLastNode();
 		else return null;
 	}
 	
+	/** Returns true iff an {@link AttributeEntity} was selected */
 	public boolean isEntity() {
 		return (!tail.isEmpty() && tail.getLast() instanceof AttributeEntity);
 	}
 	
+	/** Returns the selected entity if the current selection is an {@link AttributeEntity}, <code>null</code> otherwise */
 	public AttributeEntity asEntity() {
 		if (isEntity())
 			return (AttributeEntity) getLastElement();
