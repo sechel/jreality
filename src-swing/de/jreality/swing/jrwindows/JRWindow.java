@@ -78,7 +78,6 @@ public class JRWindow {
 	private double borderRadius=0.01;
 	private double cornerRadius;
 	private double cornerRadiusPopUpFactor=3;
-	private double decoBorderRadius=0.0033;
 	private double translateFactor;
 
 	private double decoHight=0.08;
@@ -216,9 +215,8 @@ public class JRWindow {
 		decoControlSgc.setGeometry(this.decoControlFace);  
 		decoControlSgc.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW,false);
 		decoControlSgc.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW,false);
-		decoControlSgc.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW,true);
-		decoControlSgc.getAppearance().setAttribute(CommonAttributes.TUBES_DRAW,true); 
-		decoControlSgc.getAppearance().setAttribute(CommonAttributes.TUBE_RADIUS,decoBorderRadius);
+		decoControlSgc.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW,false);
+		decoControlSgc.getAppearance().setAttribute(CommonAttributes.TUBES_DRAW,false); 
 		decoControlSgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,activeColor);
 		decoControlSgc.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
 
@@ -265,9 +263,8 @@ public class JRWindow {
 		decoDragSgc.setAppearance(new Appearance());
 		decoDragSgc.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW,false);
 		decoDragSgc.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW,false);
-		decoDragSgc.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW,true);
-		decoDragSgc.getAppearance().setAttribute(CommonAttributes.TUBES_DRAW,true);
-		decoDragSgc.getAppearance().setAttribute(CommonAttributes.TUBE_RADIUS,decoBorderRadius);
+		decoDragSgc.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW,false);
+		decoDragSgc.getAppearance().setAttribute(CommonAttributes.TUBES_DRAW,false);
 		decoDragSgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,activeColor);
 		decoDragSgc.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
 
