@@ -56,7 +56,7 @@ import de.jreality.shader.ShaderUtility;
  * @author gunn
  *
  */
-public class BumpmapPolygonShader extends SimpleJOGLShader {
+public class BumpmapPolygonShader extends SimpleGLSLShader {
 
 	float[] rtable = new float[1000];
 	Color surfaceColor = new Color(1f, .3f, .2f);

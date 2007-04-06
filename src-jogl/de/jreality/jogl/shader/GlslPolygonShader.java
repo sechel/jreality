@@ -52,6 +52,7 @@ import javax.media.opengl.GL;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.jogl.JOGLSphereHelper;
 import de.jreality.jogl.pick.JOGLPickAction;
@@ -171,6 +172,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			}
 			else if ( g instanceof IndexedFaceSet)	{
 				drawFaces(jr, (IndexedFaceSet) g, smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);
+//				JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);			
 			}
 		}
 	}

@@ -46,12 +46,12 @@ import java.io.IOException;
  * @author gunn
  *
  */
-public class SimpleJOGLShader extends AbstractJOGLShader {
+public class SimpleGLSLShader extends AbstractJOGLShader {
 
 	/**
 	 * @param c
 	 */
-	public SimpleJOGLShader(String VSFileName, String FSFileName) {
+	public SimpleGLSLShader(String VSFileName, String FSFileName) {
 		super();
 		try {
 			if (VSFileName != null)	{

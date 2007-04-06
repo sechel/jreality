@@ -47,7 +47,7 @@ import de.jreality.shader.EffectiveAppearance;
  * @author gunn
  * 
  */
-public class StandardOGLPolygonShader extends SimpleJOGLShader {
+public class StandardOGLPolygonShader extends SimpleGLSLShader {
 
 	boolean changed = true;
 	/**

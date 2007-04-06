@@ -83,7 +83,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	double	tubeRadius = 0.05,
 		 	lineWidth = 1.0,
 			depthFudgeFactor = 0.99999d;
-	boolean smoothLineShading = false, lighting;
+	boolean smoothLineShading = false, lighting, vertexColors;
 	boolean smoothShading = true;		// this applies to the tubes, not the edges
 	int	lineFactor = 1;
 	int 	lineStipplePattern = 0x1c47; 
@@ -111,6 +111,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		depthFudgeFactor = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DEPTH_FUDGE_FACTOR), depthFudgeFactor);
 		smoothLineShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_LINE_SHADING), CommonAttributes.SMOOTH_LINE_SHADING_DEFAULT);
 		lighting = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHTING_ENABLED), false);
+		vertexColors = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.VERTEX_COLORS_ENABLED), false);
 		lineStipple = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LINE_STIPPLE), lineStipple);
 		lineWidth = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LINE_WIDTH), CommonAttributes.LINE_WIDTH_DEFAULT);
 		lineFactor = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LINE_FACTOR),lineFactor);
@@ -199,8 +200,8 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			jrs.setCurrentGeometry(null);
 			polygonShader.render(jrs);
 			jrs.setCurrentGeometry(g);
-			lighting=true;
-		} //else lighting = false;
+//			lighting=true;
+		} else lighting = false;
 		//if (jr.openGLState.lighting != lighting)	{
 		//else {
 			jr.getRenderingState().lighting = lighting;
@@ -312,7 +313,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				else gl.glColor4d(edgecolor.getValueAt(0), edgecolor.getValueAt(1), edgecolor.getValueAt(2), edgecolor.getValueAt(3));
 			}
 		    //System.err.println(m+" edges");
-			if (m == 2 || pickMode)	{		// probably an IndexedFaceSet 
+			if ((m == 2  && !vertexColors)  || pickMode)	{		// probably an IndexedFaceSet 
 				faceCount += (m-1)*tubeFaces;
 
 				for (int j = 0; j<m-1; ++j)	{
@@ -340,7 +341,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				oneCurve = IndexedLineSetUtility.extractCurve(oneCurve, ils, i);
 				PolygonalTubeFactory ptf = new PolygonalTubeFactory(oneCurve);
 				ptf.setClosed(false);
-				ptf.setVertexColorsEnabled(true);
+//				ptf.setVertexColorsEnabled(true);
 				ptf.setCrossSection(crossSection);
 				ptf.setFrameFieldType(tubeStyle);
 				ptf.setSignature(sig);
@@ -348,6 +349,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				ptf.update();
 				IndexedFaceSet tube = ptf.getTube();
 				if (tube != null)	{
+//					System.err.println("Got tube");
 					faceCount += tube.getNumFaces();
 					JOGLRendererHelper.drawFaces(jr, tube, smoothShading, alpha);			
 				}

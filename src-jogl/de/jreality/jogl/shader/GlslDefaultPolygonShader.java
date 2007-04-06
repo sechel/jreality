@@ -48,7 +48,7 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 
-public class GlslDefaultPolygonShader extends SimpleJOGLShader {
+public class GlslDefaultPolygonShader extends SimpleGLSLShader {
 //		public Color	ambientColor,
 //		diffuseColor,
 //		specularColor;		

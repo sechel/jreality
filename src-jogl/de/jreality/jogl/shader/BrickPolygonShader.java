@@ -56,7 +56,7 @@ import de.jreality.shader.ShaderUtility;
  * @author gunn
  *
  */
-public class BrickPolygonShader extends SimpleJOGLShader {
+public class BrickPolygonShader extends SimpleGLSLShader {
 	float[] rtable = new float[1000];
 	Color brickColor = new Color(1f, .3f, .2f), 
 	mortarColor = new Color(.85f, .85f, .84f);
