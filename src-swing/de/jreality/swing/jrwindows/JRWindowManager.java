@@ -44,32 +44,28 @@ public class JRWindowManager implements ActionListener{
   private void initDragTool(){
     dragTool=new DragEventTool("PrimaryAction");
     dragTool.addPointDragListener(new PointDragListener(){
-      private int windowNum;
-      private int cornerIndex;
-      private double[] point;
-      public void pointDragStart(PointDragEvent e) {
-        windowNum=searchWindowNum(e.getPointSet());
-        if(windowNum==-1) return;
-        if(windowList.get(windowNum).isSmall()) return;
-        cornerIndex=e.getIndex();
-        setWindowInFront(windowNum);
-        point=windowList.get(windowNum).getCornerPos()[cornerIndex];
-        windowList.get(windowNum).setIsDragged(true);
-      }
-      public void pointDragged(PointDragEvent e) { 
-        if(windowNum==-1) return;
-        if(windowList.get(windowNum).isSmall()) return;
-        double[] translation={e.getPosition()[0]-point[0],e.getPosition()[1]-point[1],0,0};    //stimmt nicht ganz..
-        double[] newPoint=new double[3];
-        newPoint[0]=point[0]+translation[0];
-        newPoint[1]=point[1]+translation[1];
-        newPoint[2]=point[2]+translation[2];
-        windowList.get(windowNum).setCorner(cornerIndex, newPoint);
-      }
-      public void pointDragEnd(PointDragEvent e) { 
-    	  windowList.get(windowNum).popUpDragVertices(false);
-    	  windowList.get(windowNum).setIsDragged(false);
-      }});   
+    	private int windowNum;
+    	private int cornerIndex;
+    	public void pointDragStart(PointDragEvent e) {
+    		windowNum=searchWindowNum(e.getPointSet());
+    		if(windowNum==-1) return;
+    		if(windowList.get(windowNum).isSmall()) return;
+    		cornerIndex=e.getIndex();
+    		setWindowInFront(windowNum);
+    		windowList.get(windowNum).setIsDragged(true);
+    	}
+    	public void pointDragged(PointDragEvent e) { 
+    		if(windowNum==-1) return;
+    		if(windowList.get(windowNum).isSmall()) return;
+    		double[] point=new double[3];
+    		point[0]=e.getPosition()[0];
+    		point[1]=e.getPosition()[1];
+    		windowList.get(windowNum).setCorner(cornerIndex, point);
+    	}
+    	public void pointDragEnd(PointDragEvent e) { 
+    		windowList.get(windowNum).popUpDragVertices(false);
+    		windowList.get(windowNum).setIsDragged(false);
+    	}}); 
 //    dragTool.addLineDragListener(new LineDragListener(){
 //      private int windowNum;
 //      private double[][] points;
