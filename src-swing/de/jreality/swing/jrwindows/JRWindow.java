@@ -350,7 +350,22 @@ public class JRWindow {
 		decoControlFace.setVertexAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(decoControlCorners));  
 		calculateDecoDragCorners(decoDragCorners,cornerPos);
 		decoDragFace.setVertexAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(decoDragCorners));    
-		borders.setVertexAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(cornerPos));
+		
+		
+		/**TODO:
+		 * Why are the tubes not updated correctly by this?:
+		 */
+		//borders.setVertexAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(cornerPos));
+		
+	    IndexedLineSetFactory borders=new IndexedLineSetFactory();
+		borders.setVertexCount(4);
+		borders.setVertexCoordinates(cornerPos);
+		borders.setLineCount(4);
+		borders.setEdgeIndices(new int[][] {{0,1},{1,2},{2,3},{3,0}});
+		borders.update();
+		this.borders=borders.getIndexedLineSet();
+		borderSgc.setGeometry(this.borders);
+		
 		updateFrameTitle();
 	}    
 
