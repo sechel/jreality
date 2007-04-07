@@ -52,7 +52,7 @@ public class JRWindowManager implements ActionListener{
     		if(windowList.get(windowNum).isSmall()) return;
     		cornerIndex=e.getIndex();
     		setWindowInFront(windowNum);
-    		windowList.get(windowNum).setIsDragged(true);
+    		windowList.get(windowNum).setVertexDragged(true);
     	}
     	public void pointDragged(PointDragEvent e) { 
     		if(windowNum==-1) return;
@@ -64,8 +64,9 @@ public class JRWindowManager implements ActionListener{
     	}
     	public void pointDragEnd(PointDragEvent e) { 
     		windowList.get(windowNum).popUpDragVertices(false);
-    		windowList.get(windowNum).setIsDragged(false);
-    	}}); 
+    		windowList.get(windowNum).setVertexDragged(false);
+    	}
+    }); 
 //    dragTool.addLineDragListener(new LineDragListener(){
 //      private int windowNum;
 //      private double[][] points;
@@ -110,7 +111,6 @@ public class JRWindowManager implements ActionListener{
         if(windowNum==-1) return;        
         setWindowInFront(windowNum);      
         points=windowList.get(windowNum).getCornerPos();
-        windowList.get(windowNum).setIsDragged(true);
       }
       public void faceDragged(FaceDragEvent e) {
         if(windowNum==-1) return;
@@ -125,8 +125,8 @@ public class JRWindowManager implements ActionListener{
         windowList.get(windowNum).setCornerPos(newPoints);
       }
       public void faceDragEnd(FaceDragEvent e) { 
-    	  windowList.get(windowNum).setIsDragged(false);
-      }});
+      }
+    });
     
     sgc.addTool(dragTool);
   }

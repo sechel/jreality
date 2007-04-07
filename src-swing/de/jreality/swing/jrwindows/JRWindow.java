@@ -572,9 +572,9 @@ public class JRWindow {
 	protected void popUpDragVertices(boolean popUp){
 		borderSgc.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS, popUp ? cornerRadius*cornerRadiusPopUpFactor : cornerRadius);	
 	}
-	private boolean isDragged=false;
-	protected void setIsDragged(boolean isDragged){
-		this.isDragged=isDragged;
+	private boolean vertexDragged=false;
+	protected void setVertexDragged(boolean isDragged){
+		this.vertexDragged=isDragged;
 	}
 
 	private class VertexPopUpTool extends AbstractTool{
@@ -592,9 +592,9 @@ public class JRWindow {
 					if(tc.getCurrentPick().getPickPath().getLastComponent()==borderSgc){
 						if(tc.getCurrentPick().getPickType()==PickResult.PICK_TYPE_POINT){
 							popUpDragVertices(true);
-						}else if(!isDragged) popUpDragVertices(false);
-					}else if(!isDragged) popUpDragVertices(false);
-				}else if(!isDragged) popUpDragVertices(false);
+						}else if(!vertexDragged) popUpDragVertices(false);
+					}else if(!vertexDragged) popUpDragVertices(false);
+				}else if(!vertexDragged) popUpDragVertices(false);
 			}
 		}
 	}  
