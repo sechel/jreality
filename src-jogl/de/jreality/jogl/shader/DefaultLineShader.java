@@ -60,6 +60,7 @@ import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.jogl.pick.JOGLPickAction;
+import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -126,44 +127,6 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		//polygonShader.setDiffuseColor(diffuseColor);
 	}
 
-	public double getDepthFudgeFactor() {
-		return depthFudgeFactor;
-	}
-	/**
-	 * @return
-	 */
-	public double getLineWidth() {
-		return lineWidth;
-	}
-
-	/**
-	 * @return
-	 */
-	public boolean isLineStipple() {
-		return lineStipple;
-	}
-
-	/**
-	 * @return
-	 */
-	public int getLineStipplePattern() {
-		return lineStipplePattern;
-	}
-
-	/**
-	 * @return
-	 */
-	public int getLineFactor() {
-		return lineFactor;
-	}
-
-	/**
-	 * @return
-	 */
-	public boolean isTubeDraw() {
-		return tubeDraw;
-	}
-
 	public Color getDiffuseColor() {
 		return diffuseColor;
 	}
@@ -177,9 +140,6 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
 	}
 
-	public double getTubeRadius() {
-		return tubeRadius;
-	}
 	public void preRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.getRenderer();
 		GL gl = jrs.getGL();
@@ -187,11 +147,11 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		gl.glColor4fv( diffuseColorAsFloat,0);
 		System.arraycopy(diffuseColorAsFloat, 0, jr.getRenderingState().diffuseColor, 0, 4);
 	
-		gl.glLineWidth((float) getLineWidth());
-		jrs.lineWidth = getLineWidth();
-		if (isLineStipple()) {
+		gl.glLineWidth((float) lineWidth);
+		jrs.lineWidth = lineWidth;
+		if (lineStipple) {
 			gl.glEnable(GL.GL_LINE_STIPPLE);
-			gl.glLineStipple(getLineFactor(), (short) getLineStipplePattern());
+			gl.glLineStipple(lineFactor, (short) lineStipplePattern);
 		} 
 		else gl.glDisable(GL.GL_LINE_STIPPLE);
 
@@ -202,19 +162,13 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			jrs.setCurrentGeometry(g);
 //			lighting=true;
 		} else lighting = false;
-		//if (jr.openGLState.lighting != lighting)	{
-		//else {
-			jr.getRenderingState().lighting = lighting;
-			if (lighting) gl.glEnable(GL.GL_LIGHTING);
-			else gl.glDisable(GL.GL_LIGHTING);
-			
-		//}
+		jr.getRenderingState().lighting = lighting;
+		if (lighting) gl.glEnable(GL.GL_LIGHTING);
+		else gl.glDisable(GL.GL_LIGHTING);
 
 		// this little bit of code forces tubes to be opaque: could add
 		// transparency-enable flag to the line shader to allow this to be controlled
 		if (opaqueTubes)	{
-//			gl.glPushAttrib(GL.GL_ENABLE_BIT);
-//			gl.glPushAttrib(GL.GL_DEPTH_BUFFER_BIT);
 			gl.glDepthMask(true);
 			gl.glDisable(GL.GL_BLEND);			
 		}
@@ -224,10 +178,6 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 
 	public void postRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.getRenderer();
-		if (opaqueTubes)	{
-//			jr.getGL().glPopAttrib();
-//			jr.getGL().glPopAttrib();
-		}
 		if (!tubeDraw) {
 			jr.getGL().glDepthRange(0.0d, 1d);
 		} else 
@@ -349,9 +299,8 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				ptf.update();
 				IndexedFaceSet tube = ptf.getTube();
 				if (tube != null)	{
-//					System.err.println("Got tube");
-					faceCount += tube.getNumFaces();
 					JOGLRendererHelper.drawFaces(jr, tube, smoothShading, alpha);			
+					faceCount += tube.getNumFaces();
 				}
 			}
 			if (pickMode) 	gl.glPopName();					
