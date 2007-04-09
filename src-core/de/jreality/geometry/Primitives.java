@@ -82,6 +82,8 @@ public class Primitives {
 		}
 		static private double[][] cubeVerts3 =  
 		{{1,1,1},{1,1,-1},{1,-1,1},{1,-1,-1},{-1,1,1},{-1,1,-1},{-1,-1,1},{-1,-1,-1}};
+		static private double[][] cubeVerts4 =  
+		{{1,1,1,1},{1,1,-1,1},{1,-1,1,1},{1,-1,-1,1},{-1,1,1,1},{-1,1,-1,1},{-1,-1,1,1},{-1,-1,-1,1}};
 
 		static private int[][] cubeIndices = {
 				{0,2,3,1},
@@ -124,6 +126,19 @@ public class Primitives {
 		 * @param colored
 		 * @return
 		 */
+		public static IndexedFaceSet cube4(boolean colored)	{
+			
+			IndexedFaceSet cube = new IndexedFaceSet(8, 6);
+
+			cube.setFaceAttributes(Attribute.INDICES, new IntArrayArray.Array(cubeIndices));
+			cube.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(4).createReadOnly(cubeVerts4));
+			if (colored)	{
+				cube.setFaceAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(cubeColors));
+			}
+			IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(cube);
+			GeometryUtility.calculateAndSetFaceNormals(cube);		
+			return cube;
+	}
 		public static IndexedFaceSet cube(boolean colored)	{
 			
 			IndexedFaceSet cube = new IndexedFaceSet(8, 6);
