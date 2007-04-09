@@ -150,7 +150,8 @@ import de.jreality.util.LoggingSystem;
 			polygon2[n+1] = Rn.add(null, curve[n-1], Rn.subtract(null, curve[n-1], curve[n-2]));
 			
 		}
-		FrameInfo[] frames = makeFrameField(polygon2, type, signature);
+//		FrameInfo[] 
+		          frames = makeFrameField(polygon2, type, signature);
 		LoggingSystem.getLogger(PolygonalTubeFactory.class).fine("Last phi is "+frames[frames.length-1].phi);
 		if (frames == null) 
 			throw new NullPointerException("No frames!");
@@ -166,6 +167,7 @@ import de.jreality.util.LoggingSystem;
 			double factor = 1.0;
 			if (sangle != 0) factor = 1.0/sangle;
 			rad[0] = radius *factor;
+			//System.err.println("frame is "+Rn.matrixToString(frames[i].frame));
 			double[] zrot = P3.makeRotationMatrixZ(null,frames[i].phi + i*correction+ twists*2*Math.PI*frames[i].length);
 			double[] scaledFrame = Rn.times(null, frames[i].frame, Rn.times(null, rad, zrot));
 			//LoggingSystem.getLogger().log(Level.FINE,"Theta is "+frames[i].theta);

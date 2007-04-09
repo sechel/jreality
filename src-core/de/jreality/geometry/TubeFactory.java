@@ -448,7 +448,7 @@ public  class TubeFactory {
 		 */
 		public  FrameInfo[] makeFrameField(double[][] polygon, FrameFieldType type, int signature)		{
 			if (frames!= null && !framesDirty) return frames;
-		 	int n = polygon.length;
+		 	int numberJoints = polygon.length;
 		 	double[][] polygonh;
 		 	// to simplify life, convert all points to homogeneous coordinates
 		 	if (polygon[0].length == 3) {
@@ -462,29 +462,29 @@ public  class TubeFactory {
 			}
 		 	if ((debug & 1) != 0)	
 		 		theLogger.log(Level.FINER,"Generating frame field for signature "+signature);
-		 	if (tangentField == null || tangentField.length != (n-2))	{
-				tangentField = new double[n-2][4];
-				frenetNormalField = new double[n-2][4];
-				parallelNormalField = new double[n-2][4];
-				binormalField = new double[n-2][4];
+		 	if (tangentField == null || tangentField.length != (numberJoints-2))	{
+				tangentField = new double[numberJoints-2][4];
+				frenetNormalField = new double[numberJoints-2][4];
+				parallelNormalField = new double[numberJoints-2][4];
+				binormalField = new double[numberJoints-2][4];
 		 	}
-			frameInfo = new FrameInfo[n-2];		 		
-			double[] d  = new double[n-2];			// distances between adjacent points
+			frameInfo = new FrameInfo[numberJoints-2];		 		
+			double[] d  = new double[numberJoints-2];			// distances between adjacent points
 			if ((debug & 32) != 0)	{
-				for (int i = 0; i<n; ++i)	{
+				for (int i = 0; i<numberJoints; ++i)	{
 					theLogger.log(Level.FINER,"Vertex "+i+" : "+Rn.toString(polygonh[i]));
 				}
 			}
 			double[] frame = new double[16];
 			double totalLength = 0.0;
-			for (int i = 1; i<n-1; ++i)	{
+			for (int i = 1; i<numberJoints-1; ++i)	{
 				d[i-1] = (totalLength += Pn.distanceBetween(polygonh[i-1], polygonh[i], signature));
 			}
 			totalLength = 1.0/totalLength;
 			// Normalize the distances between points to have total sum 1.
-			for (int i = 1; i<n-1; ++i)	d[i-1] *= totalLength;
+			for (int i = 1; i<numberJoints-1; ++i)	d[i-1] *= totalLength;
 
-			for (int i = 1; i<n-1; ++i)	{
+			for (int i = 1; i<numberJoints-1; ++i)	{
 				
 				/*
 				 * calculate the binormal from the osculating plane
@@ -625,15 +625,16 @@ public  class TubeFactory {
 		 protected static double[] getInitialBinormal(double[][] polygon, int signature)	{
 			int n = polygon.length;
 			for (int i = 1; i<n-1; ++i)	{
-				Pn.polarize(B, P3.planeFromPoints(null, polygon[i-1], polygon[i], polygon[i+1]),signature);	
-				if (Rn.euclideanNormSquared(B) > 10E-16) {
-					Pn.dehomogenize(B,B);
+				double[] bloop = 
+				Pn.polarize(null, P3.planeFromPoints(null, polygon[i-1], polygon[i], polygon[i+1]),signature);	
+				if (Rn.euclideanNormSquared(bloop) > 10E-16) {
+					Pn.dehomogenize(bloop,bloop);
 					boolean flip = false;
-					if (B[0] <0) flip = true;
-					else if (B[0] == 0.0 && B[1] < 0) flip = true;
-					else if (B[1] == 0.0 && B[2] < 0) flip = true;
-					if (flip) for (int j = 0; j<3; ++j) B[j] = -B[j];
-					return B;
+					if (bloop[0] <0) flip = true;
+					else if (bloop[0] == 0.0 && bloop[1] < 0) flip = true;
+					else if (bloop[1] == 0.0 && bloop[2] < 0) flip = true;
+					if (flip) for (int j = 0; j<3; ++j) bloop[j] = -bloop[j];
+					return bloop;
 				}
 			}
 			return Pn.polarizePlane(null, P3.planeFromPoints(null, B, polygon[1], polygon[2]),signature);
