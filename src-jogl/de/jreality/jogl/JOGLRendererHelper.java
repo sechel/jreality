@@ -316,63 +316,6 @@ public class JOGLRendererHelper {
 	private static IndexedFaceSet bb = Primitives.texturedQuadrilateral(new double[] { 0, 1,
 			0, 1, 1, 0, 1, 0, 0, 0, 0, 0 });
 
-	// static {
-	// tex2d.setRepeatS(Texture2D.GL_CLAMP);
-	// tex2d.setRepeatT(Texture2D.GL_CLAMP);
-	// }
-
-	// public void drawLabels(PointSet ps, CachedGeometryInfo cginfo,
-	// DefaultTextShader ts) {
-	// GL gl = jr.globalGL;
-	// double[] c2o = jr.context.getCameraToObject();
-	// DataList dl = ps.getVertexAttributes(Attribute.LABELS);
-	// DoubleArrayArray vertices =
-	// ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray();
-	// int n = ps.getNumPoints();
-	// Texture2D tex2d;
-	// StringArray labels = dl.toStringArray();
-	// Font font = ts.getFont();
-	// Color c = ts.getDiffuseColor();
-	// double scale = ts.getScale().doubleValue();
-	// double[] offset = ts.getOffset();
-	//
-	// if (cginfo.labelTexs[0] == null) {
-	// cginfo.labelTexs[0] = new Texture2D[n];
-	// for (int i = 0; i<n ; ++i) {
-	// Appearance ap = new Appearance();
-	// tex2d = cginfo.labelTexs[0][i] =(Texture2D)
-	// AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", ap,
-	// true);
-	// tex2d.setRepeatS(Texture2D.GL_CLAMP);
-	// tex2d.setRepeatT(Texture2D.GL_CLAMP);
-	// String li = labels.getValueAt(i);
-	// BufferedImage img = LabelUtility.createImageFromString(li,font,c);
-	// tex2d.setImage(new ImageData(img));
-	// }
-	// }
-	// // gl.glPushAttrib(GL.GL_DEPTH_BUFFER_BIT | GL.GL_ENABLE_BIT);
-	// gl.glEnable (GL.GL_BLEND);
-	// gl.glDisable(GL.GL_LIGHTING);
-	// gl.glDepthMask(true);
-	// gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-	// gl.glColor3d(1,1,1);
-	// gl.glEnable(GL.GL_TEXTURE_2D);
-	// for(int i = 0; i<n;i++) {
-	// int w = cginfo.labelTexs[0][i].getImage().getWidth();
-	// int h = cginfo.labelTexs[0][i].getImage().getHeight();
-	// double[] mat = P3.calculateBillboardMatrix(null,w*scale, h*scale,offset,
-	// c2o,vertices.getValueAt(i).toDoubleArray(null), Pn.EUCLIDEAN);
-	// gl.glActiveTexture(GL.GL_TEXTURE0);
-	// Texture2DLoaderJOGL.render(jr.theCanvas, cginfo.labelTexs[0][i]);
-	// gl.glPushMatrix();
-	// gl.glMultTransposeMatrixd(mat);
-	// drawFaces(bb, true, 1.0, false);
-	// gl.glPopMatrix();
-	// }
-	// gl.glDisable(GL.GL_TEXTURE_2D);
-	// // gl.glPopAttrib();
-	// }
-
 
 	/**
 	 * @param sg
