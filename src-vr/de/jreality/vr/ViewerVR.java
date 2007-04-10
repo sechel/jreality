@@ -642,15 +642,7 @@ public class ViewerVR {
 	 */
 	public ViewerApp initialize() {
 		restorePreferences(getPreferences());
-		// HACK:
-		ViewerApp viewerApp = new ViewerApp(sceneRoot, cameraPath, emptyPickPath, avatarPath) {
-			@Override
-			public JFrame display() {
-				JFrame f = super.display();
-				tweakMenu(this);
-				return f;
-			}
-		};
+		ViewerApp viewerApp = new ViewerApp(sceneRoot, cameraPath, emptyPickPath, avatarPath);
 		return viewerApp;
 	}
 
@@ -1153,6 +1145,7 @@ public class ViewerVR {
 //		appPlugin.setFaceColor(new Color(64, 222, 64));
 		
 		vApp.update();
+		vr.tweakMenu(vApp);  //has to be called after updating viewerApp
 
 		JFrame f = vApp.display();
 		f.setSize(800, 600);
