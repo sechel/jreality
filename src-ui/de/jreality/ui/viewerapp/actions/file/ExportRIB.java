@@ -70,7 +70,7 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 /**
  * Exports the scene displayed in a viewer as a RIB file.
  * 
- * @author sommer
+ * @author sommer, bleicher
  */
 public class ExportRIB extends AbstractJrAction {
 
@@ -166,6 +166,18 @@ public class ExportRIB extends AbstractJrAction {
           File file = FileLoaderDialog.loadFile(includeFileDialog, "rib", "RIB files");          
           if (file != null) {
             includeFilePath = file.getAbsolutePath(); 
+            if(!File.separator.equals("/")){
+            	int ind;
+            	String newPath;
+            	while(includeFilePath.contains(File.separator)){
+            		ind=includeFilePath.indexOf(File.separator);
+            		if(ind>0) newPath=includeFilePath.substring(0, ind);
+            		else newPath="";
+            		newPath=newPath+"/";
+            		if(ind<includeFilePath.length()) newPath=newPath+includeFilePath.substring(ind+1);
+            		includeFilePath=newPath;
+            	}
+            }
             includeFileDialog.setText("remove included file");
             includeFileLabel.setText("  > include "+file.getName());
           }  
