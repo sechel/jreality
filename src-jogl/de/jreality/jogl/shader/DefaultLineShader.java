@@ -160,7 +160,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			jrs.setCurrentGeometry(null);
 			polygonShader.render(jrs);
 			jrs.setCurrentGeometry(g);
-//			lighting=true;
+			lighting=true;
 		} else lighting = false;
 		jr.getRenderingState().lighting = lighting;
 		if (lighting) gl.glEnable(GL.GL_LIGHTING);
