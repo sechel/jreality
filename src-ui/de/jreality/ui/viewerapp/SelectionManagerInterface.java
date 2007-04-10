@@ -12,14 +12,28 @@ public interface SelectionManagerInterface {
 
 	public abstract void setSelection(Selection selection);
 
+	
+	/**
+	 * @deprecated use {@link SelectionManagerInterface#getDefaultSelection()}
+	 */
 	public abstract SceneGraphPath getDefaultSelectionPath();
 
+	/**
+	 * @deprecated use {@link SelectionManagerInterface#setDefaultSelection(Selection)}
+	 */
 	public abstract void setDefaultSelectionPath(SceneGraphPath defaultSelection);
 
+	/**
+	 * @deprecated use {@link SelectionManagerInterface#getSelection()}
+	 */
 	public abstract SceneGraphPath getSelectionPath();
 
+	/**
+	 * @deprecated use {@link SelectionManagerInterface#setSelection(Selection)}
+	 */
 	public abstract void setSelectionPath(SceneGraphPath selection);
 
+	
 	public abstract void addSelectionListener(SelectionListener listener);
 
 	public abstract void removeSelectionListener(SelectionListener listener);
