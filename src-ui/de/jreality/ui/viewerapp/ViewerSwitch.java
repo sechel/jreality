@@ -147,6 +147,10 @@ public class ViewerSwitch implements Viewer {
     return viewers.length;
   }
   
+  public Viewer[] getViewers() {
+  	return (Viewer[]) viewers.clone();
+  }
+  
   public String[] getViewerNames() {
     return (String[]) viewerNames.clone();
   }
