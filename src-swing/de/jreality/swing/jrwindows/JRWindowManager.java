@@ -194,4 +194,8 @@ public class JRWindowManager implements ActionListener{
   public void setPosition(double[] pos){
     MatrixBuilder.euclidean().translate(pos).assignTo(sgc);
   }
+  
+  public void enableVertexPopUpTool(boolean enableVertexPopUpTool){
+	  for (JRWindow w : windowList) w.enableVertexPopUpTool(enableVertexPopUpTool);
+  }
 }

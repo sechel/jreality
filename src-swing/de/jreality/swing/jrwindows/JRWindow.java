@@ -226,7 +226,7 @@ public class JRWindow {
 		killButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				frame.setVisible(false);
-				if(vertexPopUpTool!=null && !borderSgc.getTools().isEmpty() && borderSgc.getTools().get(0)==vertexPopUpTool)
+				if(vertexPopUpTool!=null && !borderSgc.getTools().isEmpty() && borderSgc.getTools().contains(vertexPopUpTool))
 					borderSgc.removeTool(vertexPopUpTool);
 			}
 		});
@@ -295,10 +295,8 @@ public class JRWindow {
 		 */
 		borderSgc.getAppearance().setAttribute(CommonAttributes.ANY_DISPLAY_LISTS,false);
 
-		if(enableVertexPopUpTool){
-			vertexPopUpTool=new VertexPopUpTool();
-			borderSgc.addTool(vertexPopUpTool);
-		}
+		if(enableVertexPopUpTool)
+			enableVertexPopUpTool(true);
 	}   
 
 	protected void updateFrameTitle() {
@@ -580,6 +578,18 @@ public class JRWindow {
 	private boolean vertexDragged=false;
 	protected void setVertexDragged(boolean isDragged){
 		this.vertexDragged=isDragged;
+	}
+	
+	protected void enableVertexPopUpTool(boolean enableVertexPopUpTool){	
+		if(enableVertexPopUpTool){
+			if(vertexPopUpTool==null) vertexPopUpTool=new VertexPopUpTool();
+			if(!isSmall && !borderSgc.getTools().contains(vertexPopUpTool))
+				borderSgc.addTool(vertexPopUpTool);
+		}else{
+			if(vertexPopUpTool!=null && !borderSgc.getTools().isEmpty() && borderSgc.getTools().contains(vertexPopUpTool))
+				borderSgc.removeTool(vertexPopUpTool);		
+		}
+		this.enableVertexPopUpTool=enableVertexPopUpTool;		
 	}
 
 	private class VertexPopUpTool extends AbstractTool{
