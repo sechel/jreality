@@ -108,13 +108,7 @@ import de.jreality.util.Secure;
  * [setting more properties]
  * </pre></code>
  * 
- * <b>After setting properties always call</b> {@link ViewerApp#update()}!</b><br>
- * <br>
- * To display the scene call {@link ViewerApp#display()}.<br>
- * There are static methods to display a geometry or an existing scene graph easily.<br>
- * <br>
- * Editing the ViewerApp's default menu can be achieved after(!) calling <code>update()</code>
- * via the appropriate menu methods:
+ * Editing the ViewerApp's default menu can be achieved via the appropriate menu methods:
  * <code><pre>
  * ViewerAppMenu menu = va.getMenu();
  * menu.removeMenu(ViewerAppMenu.APP_MENU);
@@ -122,6 +116,11 @@ import de.jreality.util.Secure;
  * [...]
  * </pre></code>
  * 
+ * <b>After setting properties always call</b> {@link ViewerApp#update()}!</b><br>
+ * <br>
+ * To display the scene call {@link ViewerApp#display()}.<br>
+ * There are static methods to display a geometry or an existing scene graph easily.<br>
+ * <br>
  * To create your own viewer application use the factory to set up the viewer and additional features 
  * and extract needed components for use in a different context.
  * 
@@ -232,7 +231,9 @@ public class ViewerApp {
 		//load the scene depending on environment (desktop | portal)
 		setupViewer(jrScene);
 
+		selectionManager = SelectionManager.selectionManagerForViewer(getViewer());
 		frame = new JFrame();
+		menu = new ViewerAppMenu(this);  //uses frame, viewer, selectionManager and this
 	}
 
 
@@ -395,12 +396,6 @@ public class ViewerApp {
 	 */
 	public void update() {
 
-		if (selectionManager==null)  //instantiate default selection manager
-			selectionManager = new SelectionManager(new Selection( jrScene.getPath("emptyPickPath") )); //defaultSelection = emptyPick
-		
-		if (menu==null)  //create menu
-			menu = new ViewerAppMenu(this);  //uses frame, viewer, selectionManager and this
-		
 		showExternalBeanShell(attachBeanShell && externalBeanShell);
 		showExternalNavigator(attachNavigator && externalNavigator);
 
@@ -784,6 +779,15 @@ public class ViewerApp {
 		return cmp;
 	}
 
+	
+	/**
+	 * Get the SelectionManager managing selections in the ViewerApp.
+	 * @return the SelectionManager
+	 */
+	public SelectionManagerInterface getSelectionManager() {
+		return selectionManager;
+	}
+	
 
 	/**
 	 * Get the navigator. 
@@ -869,24 +873,6 @@ public class ViewerApp {
 
 
 	/**
-	 * Get the SelectionManager managing selections in the ViewerApp.
-	 * @return the SelectionManager
-	 */
-	public SelectionManagerInterface getSelectionManager() {
-		return selectionManager;
-	}
-	
-	
-	/**
-	 * Set the selection manager to use for managing selections within the scene displayed by the ViewerApp.
-	 * @param sm the selection manager.
-	 */
-	public void setSelectionManager(SelectionManagerInterface sm) {
-		selectionManager = sm;
-	}
-
-
-	/**
 	 * Returns true iff a bean shell is attached to the viewer.
 	 */
 	public boolean isAttachBeanShell() {
@@ -931,8 +917,8 @@ public class ViewerApp {
 
 
 	/**
-	 * Use this method to edit the ViewerApp's menu bar (add/remove menus, add/remove items or actions to special menus)
-	 * after calling {@link ViewerApp#update()} (if called before this method returns <code>null</code>).
+	 * Use this method to edit the ViewerApp's menu bar 
+	 * (add/remove menus, add/remove items or actions to special menus).
 	 * @return the viewerApp's menu
 	 */
 	public ViewerAppMenu getMenu() {
