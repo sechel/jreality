@@ -40,7 +40,10 @@
 
 package de.jreality.ui.viewerapp;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Vector;
+import java.util.WeakHashMap;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
@@ -48,8 +51,11 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.util.Rectangle3D;
+import de.jreality.util.Secure;
 
 
 /**
@@ -68,15 +74,68 @@ public class SelectionManager implements SelectionManagerInterface {
 	private SceneGraphComponent selectionKit;
 	private SceneGraphComponent selectionKitOwner;
 
+	
+	static WeakHashMap<Viewer, SelectionManagerInterface> globalTable = new WeakHashMap<Viewer, SelectionManagerInterface>();
+	
+	public static SelectionManagerInterface selectionManagerForViewer(Viewer viewer)	{
+		if (globalTable.get(viewer)!=null) 
+			return globalTable.get(viewer);
+		
+		SelectionManagerInterface sm = null;
+		
+		//get all depending viewers in hierarchy
+		List<Viewer> viewers = new LinkedList<Viewer>();
+		Viewer v = viewer;
+		viewers.add(v);
+		if (v instanceof ToolSystemViewer) {
+			v = ((ToolSystemViewer)v).getDelegatedViewer();
+			viewers.add(v);
+		}
+		if (v instanceof ViewerSwitch) {
+			Viewer[] vs = ((ViewerSwitch)v).getViewers();
+			for (int i = 0; i < vs.length; i++)
+				viewers.add(vs[i]);
+		}
+		
+		//get already existing selection manager
+		for (Viewer vw : viewers)
+			if (globalTable.get(vw)!=null) sm = globalTable.get(vw);
+		
+		if (sm == null) {  //create new
+			String selectionManager = Secure.getProperty("de.jreality.ui.viewerapp.SelectionManagerInterface", "de.jreality.ui.viewerapp.SelectionManager");		
+			try { sm = (SelectionManagerInterface) Class.forName(selectionManager).newInstance();	} 
+			catch (Exception e) {	e.printStackTrace(); } 
+		}
+
+		for (Viewer vw : viewers)
+			globalTable.put(vw, sm);
+		
+		if (viewer instanceof ToolSystemViewer) {  //used by ViewerApp
+			ToolSystemViewer tsv = (ToolSystemViewer) viewer; 
+			sm.setDefaultSelection(new Selection(tsv.getEmptyPickPath()));
+			sm.setSelection(sm.getDefaultSelection());
+		}
+		
+		return sm;
+	}
+	
+	
+	public SelectionManager() {
+		this(null);
+	}
+	
+	
 	public SelectionManager(Selection defaultSelection) {
-		if (defaultSelection == null)
-			throw new IllegalArgumentException("Default selection is null!");
+//		if (defaultSelection == null)
+//			throw new IllegalArgumentException("Default selection is null!");
 
 		listeners = new Vector<SelectionListener>();
 
-		//set default selection
-		setDefaultSelection(defaultSelection);
-		setSelection(null);
+		//set default selection and select it
+		if (defaultSelection!=null) {
+			setDefaultSelection(defaultSelection);
+			setSelection(null);
+		}
 	}
 
 
