@@ -642,13 +642,8 @@ public class ViewerVR {
 	 */
 	public ViewerApp initialize() {
 		restorePreferences(getPreferences());
-		ViewerApp viewerApp = new ViewerApp(sceneRoot, cameraPath, emptyPickPath, avatarPath) {
-			@Override
-			public void update() {
-				super.update();
-				tweakMenu(this);
-			}
-		};
+		ViewerApp viewerApp = new ViewerApp(sceneRoot, cameraPath, emptyPickPath, avatarPath);
+		tweakMenu(viewerApp);
 		return viewerApp;
 	}
 
