@@ -83,7 +83,7 @@ public class SelectionManager implements SelectionManagerInterface {
 		
 		SelectionManagerInterface sm = null;
 		
-		//get all depending viewers in hierarchy
+		//get all depending viewers in hierarchy and check if SelectionManager already exists
 		List<Viewer> viewers = new LinkedList<Viewer>();
 		Viewer v = viewer;
 		viewers.add(v);
@@ -93,26 +93,30 @@ public class SelectionManager implements SelectionManagerInterface {
 		}
 		if (v instanceof ViewerSwitch) {
 			Viewer[] vs = ((ViewerSwitch)v).getViewers();
-			for (int i = 0; i < vs.length; i++)
+			sm = globalTable.get((ViewerSwitch)v);  //should be null
+			for (int i = 0; i < vs.length; i++) {
 				viewers.add(vs[i]);
+				if (globalTable.get(vs[i]) != null) {  //SelectionManager exists for vs[i]
+					if (sm!=null && sm!=globalTable.get(vs[i])) 
+						System.err.println("Distinct SelectionManagers used in viewer hierarchy of "+v);
+					sm = globalTable.get(vs[i]);
+				}
+			}
 		}
 		
-		//get already existing selection manager
-		for (Viewer vw : viewers)
-			if (globalTable.get(vw)!=null) sm = globalTable.get(vw);
-		
-		if (sm == null) {  //create new
+		if (sm == null) {  //create new SelectionManager
 			String selectionManager = Secure.getProperty("de.jreality.ui.viewerapp.SelectionManagerInterface", "de.jreality.ui.viewerapp.SelectionManager");		
 			try { sm = (SelectionManagerInterface) Class.forName(selectionManager).newInstance();	} 
 			catch (Exception e) {	e.printStackTrace(); } 
 		}
+		
+//		System.err.println("using "+sm.getClass().getName());
 
-		for (Viewer vw : viewers)
-			globalTable.put(vw, sm);
+		//add mapping for viewer depending viewers
+		for (Viewer vw : viewers) globalTable.put(vw, sm);
 		
 		if (viewer instanceof ToolSystemViewer) {  //used by ViewerApp
-			ToolSystemViewer tsv = (ToolSystemViewer) viewer; 
-			sm.setDefaultSelection(new Selection(tsv.getEmptyPickPath()));
+			sm.setDefaultSelection( new Selection( ((ToolSystemViewer)viewer).getEmptyPickPath() ) );
 			sm.setSelection(sm.getDefaultSelection());
 		}
 		
