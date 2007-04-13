@@ -53,7 +53,9 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.IntArray;
+import de.jreality.scene.pick.AABBTree;
 import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.util.PickUtility;
 
 public class IndexedFaceSetFactoryTest extends TestCase {
 
@@ -70,26 +72,51 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 	
 	static double [] vertices  = new double[] {
 
-	 0,  0,  0,
-	 1,  0,  0,
-	 1,  1,  0,
-	 0,  1,  0,
+		 0,  0,  0,
+		 1,  0,  0,
+		 1,  1,  0,
+		 0,  1,  0,
 
-	 0,  0,  1,
-	 1,  0,  1,
-	 1,  1,  1,
-	 0,  1,  1,
+		 0,  0,  1,
+		 1,  0,  1,
+		 1,  1,  1,
+		 0,  1,  1,
 
-	};
+		};
+
+	static double [] vertices2  = new double[] {
+
+		 0,  0,  0,
+		 -1,  0,  0,
+		 -1,  -1,  0,
+		 0,  -1,  0,
+
+		 0,  0,  -1,
+		 -1,  0,  -1,
+		 -1,  -1,  -1,
+		 0,  -1,  -1,
+
+		};
 
 	static int [][] indices = new int [][] {
 
-	{ 0, 1, 2, 3 }, 
+		{ 0, 1, 2, 3 }, 
+		{ 7, 6, 5, 4 }, 
+		{ 0, 1, 5, 4 }, 
+		{ 1, 2, 6, 5 }, 
+		{ 2, 3, 7, 6 }, 
+		{ 3, 0, 4, 7 }, 
+
+	};
+
+	static int [][] indices2 = new int [][] {
+
 	{ 7, 6, 5, 4 }, 
-	{ 0, 1, 5, 4 }, 
+	{ 0, 1, 2, 3 }, 
 	{ 1, 2, 6, 5 }, 
-	{ 2, 3, 7, 6 }, 
+	{ 0, 1, 5, 4 }, 
 	{ 3, 0, 4, 7 }, 
+	{ 2, 3, 7, 6 }, 
 
 	};
 
@@ -145,7 +172,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 
 	
 	public void testBugInitialGetVertexCount() {
-		factory.getFaceCount();
+		assertEquals(factory.getFaceCount(), 0);
 	}
 	
 	public void testFaceLabels()	{
@@ -307,8 +334,55 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		factory.setEdgeIndices( edges );
 	}
 	
-	
-	
+	public void testGenerateAABBTrees() {
+		//factory.debug = true;
+		factory.setVertexCount( vertices.length/3);
+		factory.setVertexCoordinates( vertices );
+		factory.setFaceCount( indices.length );
+		factory.setFaceIndices( indices );
+		
+		factory.setGenerateEdgeLabels(true);
+		factory.setGenerateEdgesFromFaces( true );
+		factory.update();
+		
+		IndexedFaceSet ifs = factory.getIndexedFaceSet();
+		
+		AABBTree aabb = (AABBTree) ifs.getGeometryAttributes(PickUtility.AABB_TREE); 
+		assertNull(aabb);
+
+		factory.setGenerateAABBTree(true);
+		
+		factory.update();
+		
+		aabb = (AABBTree) ifs.getGeometryAttributes(PickUtility.AABB_TREE); 
+		assertNotNull(aabb);
+		
+		factory.setVertexCoordinates(vertices2);
+		factory.update();
+
+		AABBTree aabb2 = (AABBTree) ifs.getGeometryAttributes(PickUtility.AABB_TREE); 
+		assertFalse(aabb == aabb2);
+		
+		factory.setGenerateEdgeLabels(false);
+		factory.update();
+		
+		aabb = (AABBTree) ifs.getGeometryAttributes(PickUtility.AABB_TREE); 
+		assertTrue(aabb == aabb2);
+		
+		factory.setFaceIndices(indices2);
+		factory.update();
+
+		aabb = (AABBTree) ifs.getGeometryAttributes(PickUtility.AABB_TREE); 
+		assertFalse(aabb == aabb2);
+
+		factory.setGenerateAABBTree(false);
+		factory.update();
+
+		aabb = (AABBTree) ifs.getGeometryAttributes(PickUtility.AABB_TREE); 
+		assertNull(aabb);
+		
+
+	}	
 	
 	 public void testStrangeError() {
          IndexedFaceSet ifs = Primitives.cube();

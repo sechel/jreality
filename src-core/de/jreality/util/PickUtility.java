@@ -51,6 +51,8 @@ import de.jreality.shader.CommonAttributes;
 
 public class PickUtility {
 
+  public static String AABB_TREE = "AABBTree";
+	
   private static final int DEFAULT_TRIANGLES_PER_BOX = 10;
 
   private PickUtility() {}
@@ -64,7 +66,7 @@ public class PickUtility {
   
   public static void assignFaceAABBTree(IndexedFaceSet ifs, int maxTrianglesPerBox) {
 	if (ifs.getNumFaces() == 0) return;
-    ifs.setGeometryAttributes("AABBTree", AABBTree.construct(ifs, maxTrianglesPerBox));
+    ifs.setGeometryAttributes(AABB_TREE, AABBTree.construct(ifs, maxTrianglesPerBox));
   }
   public static void assignFaceAABBTrees(final SceneGraphComponent comp) {
     assignFaceAABBTrees(comp, DEFAULT_TRIANGLES_PER_BOX);

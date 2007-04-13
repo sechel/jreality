@@ -62,7 +62,6 @@ import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
-import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
 
 /**
@@ -76,6 +75,8 @@ import de.jreality.shader.CommonAttributes;
  */
 public class AABBTree {
 
+	private static final int DEFAULT_POLYS_PER_LEAF=5;
+	
     /** The max number of triangles in a leaf. */
     private final int maxPerLeaf;
 
@@ -94,38 +95,51 @@ public class AABBTree {
     /** Start and end triangle indexes that this node contains. */
     private int myStart, myEnd;
 
-    private boolean debug;
-    public static AABBTree nullTree = new AABBTree(null, 0, 1, 0, false);
+    /**
+     * more or less a hack to indicate that a geometry has no pick tree.
+     * AABB pick system uses it to avoid  
+     */
+    public static AABBTree nullTree = new AABBTree(null, 0, 1, 0);
     
-    private AABBTree(TreePolygon[] polygons, int maxPolysPerLeaf, int start, int end, boolean debug) {
-      this.debug = debug;
+    private AABBTree(TreePolygon[] polygons, int maxPolysPerLeaf, int start, int end) {
       this.maxPerLeaf = maxPolysPerLeaf;
       this.tris = polygons;
       createTree(start, end);
     }
     
-    public static AABBTree construct(IndexedFaceSet faceSet, int maxPolysPerLeaf) {
-      return construct(faceSet, maxPolysPerLeaf, false);
+    public static AABBTree construct(double[][] coords, int[][] faces) {
+    	return construct(coords, faces, DEFAULT_POLYS_PER_LEAF);
     }
 
-    /**
-     * Recreates this OBBTree's information for the given TriMesh.
-     *
-     * @param parent
-     *            The trimesh that this OBBTree should represent.
-     */
-    public static AABBTree construct(IndexedFaceSet faceSet, int maxPolysPerLeaf, boolean debug) {
+    public static AABBTree construct(double[][] coords, int[][] faces, int maxPolysPerLeaf) {
+        double[][][] polygons = getMeshAsPolygons(coords, faces);
+        return construct(maxPolysPerLeaf, polygons);
+    }
+    
+    public static AABBTree construct(IndexedFaceSet faceSet) {
+    	return construct(faceSet, DEFAULT_POLYS_PER_LEAF);
+    }
+
+    public static AABBTree construct(IndexedFaceSet faceSet, int maxPolysPerLeaf) {
         double[][][] polygons = getMeshAsPolygons(faceSet);
-        TreePolygon[] tris = new TreePolygon[polygons.length];
+        return construct(maxPolysPerLeaf, polygons);
+    }
+
+	private static AABBTree construct(int maxPolysPerLeaf, double[][][] polygons) {
+		TreePolygon[] tris = new TreePolygon[polygons.length];
         for (int i = 0; i < tris.length; i++) {
         	tris[i] = new TreePolygon(polygons[i], i);
         }
-        AABBTree ret = new AABBTree(tris, maxPolysPerLeaf, 0, tris.length-1, debug);
+        return construct(maxPolysPerLeaf, tris);
+	}
+
+	private static AABBTree construct(int maxPolysPerLeaf, TreePolygon[] tris) {
+		AABBTree ret = new AABBTree(tris, maxPolysPerLeaf, 0, tris.length-1);
         for (int i = 0; i < tris.length; i++) {
             tris[i].disposeCenter();
         }
         return ret;
-    }
+	}
     
     private static double[][][] getMeshAsPolygons(IndexedFaceSet faceSet) {
       int numFaces = faceSet.getNumFaces();
@@ -143,6 +157,20 @@ public class AABBTree {
       }
       return ret;
     }
+
+    private static double[][][] getMeshAsPolygons(double[][] coords, int[][] faces) {
+        int numFaces = faces.length;
+        double[][][] ret = new double[numFaces][][];
+        for (int i = 0; i < numFaces; i++) {
+          int[] face = faces[i];
+          int faceLength = face.length;
+          ret[i] = new double[faceLength][];
+          for (int j = 0; j < faceLength; j++) {
+            ret[i][j] = coords[face[j]];
+          }
+        }
+        return ret;
+      }
 
     /**
      * Creates an OBB tree recursivly from the tris's array of triangles.
@@ -162,8 +190,8 @@ public class AABBTree {
         else {
           splitTris(start, end);
 					int half = (start + end) / 2;
-          this.left = new AABBTree(tris, maxPerLeaf, start, half, debug);
-					if (half < end) this.right = new AABBTree(tris, maxPerLeaf, half + 1, end, debug);
+          this.left = new AABBTree(tris, maxPerLeaf, start, half);
+					if (half < end) this.right = new AABBTree(tris, maxPerLeaf, half + 1, end);
         }
     }
 

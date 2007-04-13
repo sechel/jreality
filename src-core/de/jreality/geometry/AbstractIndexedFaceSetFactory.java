@@ -51,6 +51,10 @@ import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StringArray;
+import de.jreality.scene.pick.AABBPickSystem;
+import de.jreality.scene.pick.AABBTree;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.util.PickUtility;
 
 class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	
@@ -59,6 +63,10 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	GeometryAttributeListSet face = new GeometryAttributeListSet( this, Geometry.CATEGORY_FACE );
 	
 	OoNode faceCount = node( "faceCount", Integer.class, 0 );
+	OoNode aabbTree  = node( "aabbTree", AABBTree.class, null );
+	
+	boolean generateAABBTree = false;
+	
 	
 	AttributeGenerator vertexCoordinates = attributeGeneratorNode( vertex, double[][].class, Attribute.COORDINATES);
 	AttributeGenerator vertexNormals     = attributeGeneratorNode( vertex, double[][].class, Attribute.NORMALS );
@@ -68,9 +76,7 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	AttributeGenerator faceIndices       = attributeGeneratorNode( face, int[][].class,      Attribute.INDICES );
 	AttributeGenerator faceLabels        = attributeGeneratorNode( face, String[].class,     Attribute.LABELS );
 	AttributeGenerator faceNormals       = attributeGeneratorNode( face, double[][].class,   Attribute.NORMALS );
-	
-	
-	
+
 	AbstractIndexedFaceSetFactory( IndexedFaceSet ifs, int signature, boolean generateEdgesFromFaces, boolean generateVertexNormals, boolean generateFaceNormals ) {
 		super( ifs, signature );	
 
@@ -203,6 +209,16 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		);
 	}
 
+	{
+		aabbTree.addIngr(vertexCoordinates);
+		aabbTree.addIngr(faceIndices);
+		aabbTree.setUpdateMethod(
+				new OoNode.UpdateMethod() {
+					public Object update( Object object) {					
+						return isGenerateAABBTree() ? AABBTree.construct((double[][])vertexCoordinates.getObject(), (int[][]) faceIndices.getObject()): null;
+					}					
+				});
+	}
 
 	{
 		edgeIndices.addIngr( faceIndices );
@@ -303,6 +319,8 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	void recompute() {		
 			
 		super.recompute();
+			
+		aabbTree.update();
 		
 		faceLabels.update();
 		edgeIndices.update();
@@ -320,6 +338,8 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		
 		updateGeometryAttributeCathegory( face );
 		
+		if( nodeWasUpdated(aabbTree))
+			ifs.setGeometryAttributes(PickUtility.AABB_TREE, aabbTree.getObject());
 		
 		edgeIndices.updateArray();
 		faceLabels.updateArray();
@@ -377,4 +397,18 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		faceLabels.setGenerate(generateFaceLabels);
 	}
 
+	public boolean isGenerateAABBTree() {
+		return generateAABBTree;
+	}
+	
+	public void setGenerateAABBTree( boolean generate ) {
+		if( generateAABBTree==generate)
+			return;
+		
+		aabbTree.outdate();
+		
+		generateAABBTree = generate;
+		
+		//TODO:
+	}
 }

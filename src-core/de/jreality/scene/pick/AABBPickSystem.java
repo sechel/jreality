@@ -63,6 +63,7 @@ import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.util.PickUtility;
 
 /**
  * 
@@ -261,7 +262,7 @@ public class AABBPickSystem implements PickSystem {
       AABBTree tree = aabbTreeExists.get(ifs);
       if (tree == null) {
     	  // not yet processed
-    	  tree = (AABBTree) ifs.getGeometryAttributes("AABBTree");
+    	  tree = (AABBTree) ifs.getGeometryAttributes(PickUtility.AABB_TREE);
     	  if (tree == null) tree = AABBTree.nullTree;
     	  aabbTreeExists.put(ifs, tree);
       }

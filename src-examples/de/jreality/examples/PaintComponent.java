@@ -62,6 +62,7 @@ import de.jreality.scene.Transformation;
 import de.jreality.scene.pick.AABBTree;
 import de.jreality.swing.JFakeFrame;
 import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.util.PickUtility;
 
 public class PaintComponent extends JPanel implements MouseListener, MouseMotionListener,ActionListener {
     BufferedImage myoff;
@@ -170,7 +171,7 @@ public class PaintComponent extends JPanel implements MouseListener, MouseMotion
       
       AABBTree aabb = AABBTree.construct(catenoid, 10);
       
-      catenoid.setGeometryAttributes("AABBTree", aabb);
+      catenoid.setGeometryAttributes(PickUtility.AABB_TREE, aabb);
       
       SceneGraphComponent catComp= new SceneGraphComponent();
       

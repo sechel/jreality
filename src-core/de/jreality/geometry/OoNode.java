@@ -111,7 +111,7 @@ class OoNode {
 	}
 	
 	public void setObject( Object object ) {
-		if( type != null && ! type.isAssignableFrom(object.getClass()) )
+		if( object != null && type != null && ! type.isAssignableFrom(object.getClass()) )
 			throw new IllegalArgumentException( "object of incompatible type" );
 		
 		if( this.object == object ) //&& this.object.equals( object))  //overhead too big
