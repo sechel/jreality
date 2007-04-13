@@ -974,6 +974,7 @@ public class P3 {
 				 lineToSkewMatrix(null, dualizeLine(null, line0)),
 				 lineToSkewMatrix(null, line1));
 		 // every column of mm should be the same point, the intersection point of the two lines
+		 //TODO reject columns which are the null vector (occurs when line lies in that coordinate plane)
 		 dst[0] = mm[0];
 		 dst[1] = mm[4];
 		 dst[2] = mm[8];

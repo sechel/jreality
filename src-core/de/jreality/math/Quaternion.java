@@ -395,15 +395,21 @@ final public class Quaternion implements Cloneable, Serializable {
 	 * Convert the quaternion into a 4-vector
 	 * @return
 	 */
+	static int[] chan = {0,1,2,3};
 	public double[] asDouble(double[] val) {
+		return asDouble(val, chan);
+	}
+  
+	public double[] asDouble(double[] val, int[] channels) {
 		if (val == null) val = new double[4];
-		val[0] = re;
-		val[1] = x;
-		val[2] = y;
-		val[3] = z;
+		val[channels[0]] = re;
+		val[channels[1]] = x;
+		val[channels[2]] = y;
+		val[channels[3]] = z;
 		return val;
 	}
   
+
 
 
 }
