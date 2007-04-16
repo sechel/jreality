@@ -4,16 +4,10 @@
  */
 package de.jreality.jogl;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Vector;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
-import javax.swing.Timer;
-
-import sun.awt.PeerEvent;
 
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultGeometryShader;
@@ -23,19 +17,12 @@ import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
-import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Lock;
-import de.jreality.scene.PointSet;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.SceneGraphVisitor;
-import de.jreality.scene.Transformation;
-import de.jreality.scene.data.Attribute;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
-import de.jreality.scene.event.LightEvent;
-import de.jreality.scene.event.LightListener;
 import de.jreality.scene.event.SceneGraphComponentEvent;
 import de.jreality.scene.event.SceneGraphComponentListener;
 import de.jreality.scene.event.TransformationEvent;
@@ -158,8 +145,6 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 //			jr.currentSignature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
 //			jr.renderingState.setCurrentSignature(jr.currentSignature);
 //		}
-		jr.currentSignature = signature;
-		jr.renderingState.setCurrentSignature(jr.currentSignature);
 		if (parent != null) cumulativeIsReflection = (isReflection != parent.cumulativeIsReflection);
 		else cumulativeIsReflection = (isReflection != jr.globalIsReflection);
 		if (cumulativeIsReflection != jr.renderingState.flipped)	{
@@ -170,6 +155,8 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		if (geometryDirtyBits  != 0)	handleChangedGeometry();
 		if (originalAppearanceDirty) propagateAppearanceChanged();
 		if (appearanceDirty || effectiveAppearanceDirty)  	handleAppearanceChanged();
+		jr.currentSignature = signature;
+		jr.renderingState.setCurrentSignature(jr.currentSignature);
 		if (goBetween != null && goBetween.peerGeometry != null && goBetween.peerGeometry.originalGeometry != null )	{
 			Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
 //			if (jr.renderingState.insideDisplayList) 
@@ -312,7 +299,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 				renderingHints.setFromEffectiveAppearance(eAp, "");								
 		}
 		signature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-		
+//		System.err.println(goBetween.getOriginalComponent().getName()+" signature is "+signature);
 //		System.err.println("Clip to camera is "+clipToCamera);
 	}
 
