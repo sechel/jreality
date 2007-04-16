@@ -197,6 +197,11 @@ public class ViewerApp {
 
 	private ViewerApp(SceneGraphNode contentNode, SceneGraphComponent root, SceneGraphPath cameraPath, SceneGraphPath emptyPick, SceneGraphPath avatar) {
 
+		init(contentNode, root, cameraPath, emptyPick, avatar);
+	}
+
+
+	private void init(SceneGraphNode contentNode, SceneGraphComponent root, SceneGraphPath cameraPath, SceneGraphPath emptyPick, SceneGraphPath avatar) {
 		if (contentNode != null)  //create default scene if null
 			if (!(contentNode instanceof Geometry) && !(contentNode instanceof SceneGraphComponent))
 				throw new IllegalArgumentException("Only Geometry or SceneGraphComponent allowed!");
@@ -232,11 +237,21 @@ public class ViewerApp {
 		setupViewer(jrScene);
 
 		selectionManager = SelectionManager.selectionManagerForViewer(getViewer());
+		
+		// have to do this here or ViewerAppMenu() hits null pointer exceptions
+		System.err.println("VA: Selection man is "+selectionManager);
+		SceneGraphPath sgp = new SceneGraphPath();
+		sgp.push(getViewer().getSceneRoot());
+		selectionManager.setDefaultSelectionPath(sgp);
+		selectionManager.setSelectionPath(sgp);
 		frame = new JFrame();
 		menu = new ViewerAppMenu(this);  //uses frame, viewer, selectionManager and this
 	}
 
-
+	public  ViewerApp(Viewer[] vs)	{
+		viewers = vs;
+		init(null, vs[0].getSceneRoot(), vs[0].getCameraPath(), null, null);
+	}
 	public static void main(String[] args) throws IOException {
 		ViewerApp va;
 		boolean navigator = true;
@@ -531,17 +546,22 @@ public class ViewerApp {
 				}
 				viewers = viewerList.toArray(new Viewer[viewerList.size()]);
 			}
-			viewerSwitch = new ViewerSwitch(viewers);
+		} else {
+			for (Viewer v : viewers)	
+				if ((viewer = ToolSystemViewer.toolSystemViewerForViewer(v)) != null) break;
 		}
+		if (viewer != null) System.err.println("Tool system viewer is "+viewer);
+
+		if (viewerSwitch == null) 
+			viewerSwitch = new ViewerSwitch(viewers);
 
 		//create ToolSystemViewer with configuration corresp. to environment
 		ToolSystemConfiguration cfg = loadToolSystemConfiguration();
 
-
-		ToolSystemViewer viewer=null;
-
-		if (!remotePortal) viewer = new ToolSystemViewer(viewerSwitch, cfg, synchRender ? renderTrigger : null);
-		else {
+		if (!remotePortal) {
+			if (viewer == null) viewer = new ToolSystemViewer(viewerSwitch, cfg, synchRender ? renderTrigger : null);
+		}
+		else  {
 			try {
 				Class portalToolSystemViewer = Class.forName("de.jreality.toolsystem.PortalToolSystemViewer");
 				Constructor<? extends ToolSystemViewer> cc = portalToolSystemViewer.getConstructor(new Class[]{ViewerSwitch.class, ToolSystemConfiguration.class});
