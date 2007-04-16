@@ -78,11 +78,14 @@ public class SelectionManager implements SelectionManagerInterface {
 	static WeakHashMap<Viewer, SelectionManagerInterface> globalTable = new WeakHashMap<Viewer, SelectionManagerInterface>();
 	
 	public static SelectionManagerInterface selectionManagerForViewer(Viewer viewer)	{
-		if (globalTable.get(viewer)!=null) 
-			return globalTable.get(viewer);
-		
 		SelectionManagerInterface sm = null;
+		if (globalTable.get(viewer)!=null) 
+			sm = globalTable.get(viewer);
 		
+		if (sm != null)	{
+			System.err.println("Selection manager is "+sm);
+			return sm;
+		}
 		//get all depending viewers in hierarchy and check if SelectionManager already exists
 		List<Viewer> viewers = new LinkedList<Viewer>();
 		Viewer v = viewer;
@@ -102,6 +105,12 @@ public class SelectionManager implements SelectionManagerInterface {
 					sm = globalTable.get(vs[i]);
 				}
 			}
+		} else {
+			if (globalTable.get(v) != null) {  //SelectionManager exists for vs[i]
+				if (sm!=null && sm!=globalTable.get(v)) 
+					System.err.println("Distinct SelectionManagers used in viewer hierarchy of "+v);
+				sm = globalTable.get(v);
+			}
 		}
 		
 		if (sm == null) {  //create new SelectionManager
@@ -110,11 +119,10 @@ public class SelectionManager implements SelectionManagerInterface {
 			catch (Exception e) {	e.printStackTrace(); } 
 		}
 		
-//		System.err.println("using "+sm.getClass().getName());
-
 		//add mapping for viewer depending viewers
 		for (Viewer vw : viewers) globalTable.put(vw, sm);
 		
+		// TODO shouldn't ViewerApp do this if it wants it done?
 		if (viewer instanceof ToolSystemViewer) {  //used by ViewerApp
 			sm.setDefaultSelection( new Selection( ((ToolSystemViewer)viewer).getEmptyPickPath() ) );
 			sm.setSelection(sm.getDefaultSelection());
