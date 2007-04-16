@@ -42,6 +42,7 @@ package de.jreality.toolsystem;
 
 import java.awt.Dimension;
 import java.beans.Statement;
+import java.util.WeakHashMap;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -80,12 +81,25 @@ import de.jreality.util.Secure;
  * @author Steffen Weissmann
  *
  */
+
+
 public class ToolSystemViewer implements Viewer {
 
   protected Viewer viewer;
   protected ToolSystem toolSystem;
   private SceneGraphPath emptyPickPath;
   private SceneGraphPath avatarPath;
+
+	static WeakHashMap<Viewer, ToolSystemViewer> globalTable = new WeakHashMap<Viewer, ToolSystemViewer>();
+	public static ToolSystemViewer toolSystemViewerForViewer(Viewer v)	{
+		
+		ToolSystemViewer sm = (ToolSystemViewer) globalTable.get(v);
+		if (sm != null) return sm;
+		sm = new ToolSystemViewer(v);
+		globalTable.put(v,sm);
+		return sm;
+	}
+	
 
   private static ToolSystemConfiguration loadConfiguration() {
     ToolSystemConfiguration config;
@@ -115,6 +129,10 @@ public class ToolSystemViewer implements Viewer {
     this.viewer = viewer;
     toolSystem = new ToolSystem(viewer, config, trigger);
     setPickSystem(new AABBPickSystem());
+    // provide a reasonable default empty pick path
+    emptyPickPath = new SceneGraphPath();
+    emptyPickPath.push(viewer.getSceneRoot());
+    System.err.println("initializing tool system viewer");
   }
   
   public SceneGraphPath getCameraPath() {
