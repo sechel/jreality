@@ -216,7 +216,7 @@ public class ToolSystem implements ToolEventReceiver {
 
 	private boolean initialized;
 	public void initializeSceneTools() {
-		if (initialized) throw new IllegalStateException("already initialized!");
+		if (initialized) return; //throw new IllegalStateException("already initialized!");
 		initialized=true;
 		toolManager.cleanUp();
 		updater.setSceneRoot(viewer.getSceneRoot());
