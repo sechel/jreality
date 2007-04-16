@@ -51,7 +51,7 @@ public class JRWindow {
 
 	private int windowNumber;
 
-	private boolean enableVertexPopUpTool=true;
+	private boolean enableVertexPopUpTool=false;
 
 	private IndexedFaceSet frameFace;
 	private IndexedLineSet borders;
@@ -102,7 +102,7 @@ public class JRWindow {
 	protected JRWindow(int windowNumber){    
 		myActionTool.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				getFrame().setVisible(!getFrame().isVisible());  
+				getFrame().setVisible(!getFrame().isVisible());
 				if(!isSmall && vertexPopUpTool!=null && !borderSgc.getTools().contains(vertexPopUpTool))
 					borderSgc.addTool(vertexPopUpTool);
 			}
@@ -117,7 +117,7 @@ public class JRWindow {
 		cornerPosBak=new double[cornerPos.length][cornerPos[0].length];
 		initSgc();
 		initFrame();
-		initDecoration();	
+		initDecoration();
 	}  
 
 	private void initSgc(){
@@ -589,7 +589,7 @@ public class JRWindow {
 			if(vertexPopUpTool!=null && !borderSgc.getTools().isEmpty() && borderSgc.getTools().contains(vertexPopUpTool))
 				borderSgc.removeTool(vertexPopUpTool);		
 		}
-		this.enableVertexPopUpTool=enableVertexPopUpTool;		
+		this.enableVertexPopUpTool=enableVertexPopUpTool;
 	}
 
 	private class VertexPopUpTool extends AbstractTool{
