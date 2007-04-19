@@ -125,7 +125,6 @@ public class JOGLRenderer  implements AppearanceListener {
 	protected boolean forceResidentTextures = true;
 	protected boolean oneTexture2DPerImage = false;
 	protected boolean globalIsReflection = false;
-	protected int currentSignature = Pn.EUCLIDEAN;
 
 	// pick-related stuff
 	public boolean pickMode = false, offscreenMode = false;

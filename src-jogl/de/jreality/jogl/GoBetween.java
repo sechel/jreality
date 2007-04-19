@@ -38,6 +38,7 @@ public class GoBetween extends JOGLPeerNode implements
 	ArrayList<JOGLPeerComponent> peers = new ArrayList<JOGLPeerComponent>();
 	JOGLPeerGeometry peerGeometry;
 	Lock peersLock = new Lock();
+	boolean singlePeer = false;
 
 	public GoBetween()	{
 		super();
@@ -56,8 +57,15 @@ public class GoBetween extends JOGLPeerNode implements
 			originalComponent.getGeometry().addGeometryListener(this);
 		} else peerGeometry = null;
 		originalComponent.addSceneGraphComponentListener(this);
-		if (originalComponent.getAppearance() != null) 
+		if (originalComponent.getAppearance() != null)  {
 			originalComponent.getAppearance().addAppearanceListener(this);
+			Object foo = originalComponent.getAppearance().getAttribute("singlePeer",Boolean.class);
+			if (foo != null && foo instanceof Boolean && ((Boolean)foo).booleanValue()) {
+				singlePeer = true;
+//				if (originalComponent.getChildComponentCount() > 1)
+//					throw new IllegalStateException("Don't allow single peer for many children");
+			}
+		}
 		if (originalComponent.getTransformation() != null)
 			originalComponent.getTransformation().addTransformationListener(this);
 		if (originalComponent.getLight() != null)
@@ -79,6 +87,13 @@ public class GoBetween extends JOGLPeerNode implements
 			originalComponent.getLight().removeLightListener(this);
 	}
 
+	public boolean isSinglePeer()	{
+		return singlePeer;
+	}
+	
+	public JOGLPeerComponent getSinglePeer()	{
+		return (peers.size() == 0 ? null : peers.get(0));
+	}
 
 	public void addJOGLPeer(JOGLPeerComponent jpc)	{
 		if (peers.contains(jpc)) return;
@@ -123,7 +138,7 @@ public class GoBetween extends JOGLPeerNode implements
 
 	public void appearanceChanged(AppearanceEvent ev) {
 		String key = ev.getKey();
-		LoggingSystem.getLogger(this).fine("Appearance changed "+key);
+		LoggingSystem.getLogger(this).info("sgc "+originalComponent.getName()+" Appearance changed "+key);
 		int changed = 0;
 		boolean propagates = true;
 		// TODO shaders should register keywords somehow and which geometries might be changed
@@ -138,8 +153,9 @@ public class GoBetween extends JOGLPeerNode implements
 		// there are some appearances which we know aren't inherited, so don't propagate change event.
 		else if (key.indexOf("texture2d") != -1) changed |= (JOGLPeerComponent.FACES_CHANGED);
 		else if (key.indexOf("lightMap") != -1) changed |= (JOGLPeerComponent.FACES_CHANGED);
-		if (key.indexOf(CommonAttributes.BACKGROUND_COLOR) != -1	||
-				key.indexOf("fog") != -1) propagates = false;
+		if (key.indexOf("pickable") != -1 || key.indexOf(CommonAttributes.BACKGROUND_COLOR) != -1	||
+				key.indexOf("fog") != -1 
+				) propagates = false;
 
 		peersLock.readLock();
 		for ( JOGLPeerComponent peer: peers)	{

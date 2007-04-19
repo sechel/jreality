@@ -62,34 +62,40 @@ public class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
 	}
 
 	public void visit(SceneGraphComponent c) {
-		sgp.push(c);
-//		JOGLPeerComponent peer = new JOGLPeerComponent(sgp, myParent, jr);
+		GoBetween gb = jr.goBetweenFor(c);
 		JOGLPeerComponent peer = null;
-		try {
+		boolean alreadySinglePeer = false;
+		if (gb.isSinglePeer() && (gb.getSinglePeer()) != null) {
+			peer = gb.getSinglePeer();
+			alreadySinglePeer = true;
+		} else {
 			try {
-				//peer = JOGLConfiguration.getPeerClass().getConstructor(null).newInstance(null);
-				peer = peerClass.getConstructor(null).newInstance(null);
-//				System.err.println("Got instance of class "+peer.getClass());
-			} catch (IllegalArgumentException e) {
+				try {
+					//peer = JOGLConfiguration.getPeerClass().getConstructor(null).newInstance(null);
+					peer = peerClass.getConstructor(null).newInstance(null);
+//					System.err.println("Got instance of class "+peer.getClass());
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				} catch (SecurityException e) {
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					e.printStackTrace();
+				} catch (NoSuchMethodException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} catch (InstantiationException e) {
 				e.printStackTrace();
-			} catch (SecurityException e) {
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				e.printStackTrace();
-			} catch (NoSuchMethodException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch(SecurityException se)	{
+				LoggingSystem.getLogger(this).warning("Security exception in setting configuration options");
 			}
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch(SecurityException se)	{
-			LoggingSystem.getLogger(this).warning("Security exception in setting configuration options");
+			sgp.push(c);
+			peer.init(sgp, myParent, jr);
 		}
-		peer.init(sgp, myParent, jr);
-//		System.err.println("Got sgc of class "+peer.getClass().getName());
-//		System.err.println("peerClass is "+JOGLConfiguration.peerClass.getName());
+//			System.err.println("Got sgc of class "+peer.getClass().getName());
+//			System.err.println("peerClass is "+JOGLConfiguration.peerClass.getName());
 		if (topLevel) thePeerRoot = peer;
 		else if (myParent != null) {
 			int n = myParent.children.size();
@@ -97,8 +103,10 @@ public class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
 			myParent.children.add(peer);
 			peer.childIndex = n;
 		}
-		c.childrenAccept(new ConstructPeerGraphVisitor(this, peer));
-		sgp.pop();
+		if (!alreadySinglePeer)	{
+			c.childrenAccept(new ConstructPeerGraphVisitor(this, peer));
+			sgp.pop();
+		}
 	}
 
 	public Object visit()	{
