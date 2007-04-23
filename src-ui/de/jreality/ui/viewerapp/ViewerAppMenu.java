@@ -228,9 +228,10 @@ public class ViewerAppMenu {
     export.add(new JMenuItem(new ExportRIB("RIB", viewer, parentComp)));
     export.add(new JMenuItem(new ExportSVG("SVG", viewer, parentComp)));
     export.add(new JMenuItem(new ExportPS("PS", viewer, parentComp)));
-    if (viewer.getDelegatedViewer() instanceof ViewerSwitch)
+    if (viewer.getDelegatedViewer() instanceof ViewerSwitch) {
     	exportImageAction = new ExportImage("Image", (ViewerSwitch) viewer.getDelegatedViewer(), parentComp);
-    export.add(new JMenuItem(exportImageAction));
+    	export.add(new JMenuItem(exportImageAction));
+    }
     
     if (!Beans.isDesignTime()) {
     	fileMenu.addSeparator();
@@ -384,7 +385,7 @@ public class ViewerAppMenu {
                 public void actionPerformed(ActionEvent e) {
                   viewerSwitch.selectViewer(index);
                   viewerSwitch.getCurrentViewer().renderAsync();
-                  exportImageAction.setEnabled(exportImageAction.isEnabled());
+                  if (exportImageAction!=null) exportImageAction.setEnabled(exportImageAction.isEnabled());
                 }
               });
           item.setSelected(index==0);
