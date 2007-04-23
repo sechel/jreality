@@ -201,6 +201,12 @@ public class ViewerApp {
 	}
 
 
+	public  ViewerApp(Viewer[] vs)	{
+		viewers = vs;
+		init(null, vs[0].getSceneRoot(), vs[0].getCameraPath(), null, null);
+	}
+	
+	
 	private void init(SceneGraphNode contentNode, SceneGraphComponent root, SceneGraphPath cameraPath, SceneGraphPath emptyPick, SceneGraphPath avatar) {
 		if (contentNode != null)  //create default scene if null
 			if (!(contentNode instanceof Geometry) && !(contentNode instanceof SceneGraphComponent))
@@ -237,21 +243,21 @@ public class ViewerApp {
 		setupViewer(jrScene);
 
 		selectionManager = SelectionManager.selectionManagerForViewer(getViewer());
+//		System.err.println("VApp: SelectionManager is "+selectionManager);
+		//set default selection
+		SceneGraphPath p = getViewer().getEmptyPickPath();
+//		if (p==null) {
+//			p = new SceneGraphPath();
+//			p.push(getViewer().getSceneRoot());
+//		}
+		selectionManager.setDefaultSelection(new Selection(p));
+		selectionManager.setSelection(selectionManager.getDefaultSelection());
 		
-		// have to do this here or ViewerAppMenu() hits null pointer exceptions
-		System.err.println("VA: Selection man is "+selectionManager);
-		SceneGraphPath sgp = new SceneGraphPath();
-		sgp.push(getViewer().getSceneRoot());
-		selectionManager.setDefaultSelectionPath(sgp);
-		selectionManager.setSelectionPath(sgp);
 		frame = new JFrame();
 		menu = new ViewerAppMenu(this);  //uses frame, viewer, selectionManager and this
 	}
 
-	public  ViewerApp(Viewer[] vs)	{
-		viewers = vs;
-		init(null, vs[0].getSceneRoot(), vs[0].getCameraPath(), null, null);
-	}
+	
 	public static void main(String[] args) throws IOException {
 		ViewerApp va;
 		boolean navigator = true;
@@ -550,7 +556,7 @@ public class ViewerApp {
 			for (Viewer v : viewers)	
 				if ((viewer = ToolSystemViewer.toolSystemViewerForViewer(v)) != null) break;
 		}
-		if (viewer != null) System.err.println("Tool system viewer is "+viewer);
+//		if (viewer != null) System.err.println("Tool system viewer is "+viewer);
 
 		if (viewerSwitch == null) 
 			viewerSwitch = new ViewerSwitch(viewers);
@@ -954,6 +960,13 @@ public class ViewerApp {
 	public void addAccessory(Component c, String title) {
 		accessory.add(c);
 		accessoryTitles.put(c, title);
+		navigatorTabs = null;  //create new TabbedPane in getNavigatorWithAccessories()
+	}
+	
+	
+	public boolean removeAccessory(Component c) {
+		navigatorTabs = null;  //create new TabbedPane in getNavigatorWithAccessories()
+		return accessory.remove(c);
 	}
 
 

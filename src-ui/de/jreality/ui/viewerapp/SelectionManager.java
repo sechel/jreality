@@ -122,11 +122,10 @@ public class SelectionManager implements SelectionManagerInterface {
 		//add mapping for viewer depending viewers
 		for (Viewer vw : viewers) globalTable.put(vw, sm);
 		
-		// TODO shouldn't ViewerApp do this if it wants it done?
-		if (viewer instanceof ToolSystemViewer) {  //used by ViewerApp
-			sm.setDefaultSelection( new Selection( ((ToolSystemViewer)viewer).getEmptyPickPath() ) );
-			sm.setSelection(sm.getDefaultSelection());
-		}
+//		if (viewer instanceof ToolSystemViewer) {  //used by ViewerApp
+//			sm.setDefaultSelection( new Selection( ((ToolSystemViewer)viewer).getEmptyPickPath() ) );
+//			sm.setSelection(sm.getDefaultSelection());
+//		}
 		
 		return sm;
 	}
