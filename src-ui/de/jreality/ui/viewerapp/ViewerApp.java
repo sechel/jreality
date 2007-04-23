@@ -842,7 +842,7 @@ public class ViewerApp {
 	 */
 	public Component getNavigatorWithAccessories() {
 
-		if (accessory.isEmpty()) return getNavigator();
+//		if (accessory.isEmpty()) return getNavigator();
 
 		if (navigatorTabs == null) {
 			navigatorTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);

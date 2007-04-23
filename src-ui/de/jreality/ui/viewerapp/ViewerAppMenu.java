@@ -370,12 +370,12 @@ public class ViewerAppMenu {
     viewMenu.add(new JMenuItem(ToggleViewerFullScreen.sharedInstance(TOGGLE_VIEWER_FULL_SCREEN, viewerApp)));
     viewMenu.add(new JMenuItem(Maximize.sharedInstance(MAXIMIZE, (Frame)parentComp)));
     viewMenu.add(new JMenuItem(new SetViewerSize(SET_VIEWER_SIZE, viewerApp.getViewingComponent(), (Frame)parentComp)));
-    viewMenu.addSeparator();
     
     if (viewer.getDelegatedViewer() instanceof ViewerSwitch) {
         final ViewerSwitch viewerSwitch = (ViewerSwitch) viewer.getDelegatedViewer();
         String[] viewerNames = viewerSwitch.getViewerNames();
         ButtonGroup bgr = new ButtonGroup();
+        viewMenu.addSeparator();
         for (int i=0; i<viewerSwitch.getNumViewers(); i++) {
           final int index = i;
           final JRadioButtonMenuItem item = new JRadioButtonMenuItem(
