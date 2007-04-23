@@ -132,7 +132,7 @@ public class ToolSystemViewer implements Viewer {
     // provide a reasonable default empty pick path
     emptyPickPath = new SceneGraphPath();
     emptyPickPath.push(viewer.getSceneRoot());
-    System.err.println("initializing tool system viewer");
+//    System.err.println("initializing tool system viewer");
   }
   
   public SceneGraphPath getCameraPath() {
