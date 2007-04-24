@@ -285,27 +285,29 @@ public class SimpleDepthFaceExtractor {
 		
 		for(int i=0;i<faceSize.length;i++){
 			if(faceSize[i]>minVertexCount){
-				System.out.println("creating face "+i);
-				IndexedFaceSetFactory ifsf=new IndexedFaceSetFactory();
-				ifsf.setVertexCount(faceSize[i]);
-				ifsf.setVertexCoordinates(getFaceVertices(i, faceSize[i], depth, faceId));
 				int[][] faceInds=triangulate(i);
-				ifsf.setFaceCount(faceInds.length);
-				ifsf.setFaceIndices(faceInds);
-				ifsf.setVertexTextureCoordinates(getTextureCoordinates(i, faceSize[i], texOffset));
-				ifsf.setGenerateEdgesFromFaces(true);
-				ifsf.setGenerateFaceNormals(true);
-				ifsf.setGenerateVertexNormals(true);
-				ifsf.update();
-				
-				SceneGraphComponent sgc=new SceneGraphComponent();
-				sgc.setGeometry(ifsf.getGeometry());
-				sgc.setAppearance(new Appearance());
-				TextureUtility.createTexture(sgc.getAppearance(),"polygonShader", img, false);
-				sceneRoot.addChild(sgc);
-				
-				System.out.println("vertexCount: "+faceSize[i]);
-				System.out.println("faceCount:   "+faceInds.length+"\n");
+				if(faceInds.length>0){
+					System.out.println("creating face "+i);
+					IndexedFaceSetFactory ifsf=new IndexedFaceSetFactory();
+					ifsf.setVertexCount(faceSize[i]);
+					ifsf.setVertexCoordinates(getFaceVertices(i, faceSize[i], depth, faceId));
+					ifsf.setFaceCount(faceInds.length);
+					ifsf.setFaceIndices(faceInds);
+					ifsf.setVertexTextureCoordinates(getTextureCoordinates(i, faceSize[i], texOffset));
+					ifsf.setGenerateEdgesFromFaces(true);
+					ifsf.setGenerateFaceNormals(true);
+					ifsf.setGenerateVertexNormals(true);
+					ifsf.update();
+
+					SceneGraphComponent sgc=new SceneGraphComponent();
+					sgc.setGeometry(ifsf.getGeometry());
+					sgc.setAppearance(new Appearance());
+					TextureUtility.createTexture(sgc.getAppearance(),"polygonShader", img, false);
+					sceneRoot.addChild(sgc);
+
+					System.out.println("vertexCount: "+faceSize[i]);
+					System.out.println("faceCount:   "+faceInds.length+"\n");
+				}
 			}			
 		}
 		

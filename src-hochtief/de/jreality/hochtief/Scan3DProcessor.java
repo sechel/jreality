@@ -73,7 +73,7 @@ public class Scan3DProcessor extends AbstractReader{
 //		String filePath=path+"INHOUSE_II_002_ss10.pts";
 //		String texturePath=path+"INHOUSE_II_002_color_quartersize.jpg";
 		String filePath=path+"INHOUSE_II_003_ss10.pts";
-		String texturePath=path+"INHOUSE_II_003_color_quartersize2.jpg";
+		String texturePath=path+"INHOUSE_II_003_color_quartersize.jpg";
 		Scan3DProcessor pcp=new Scan3DProcessor(filePath, texturePath);
 		pcp.process();
 	}
