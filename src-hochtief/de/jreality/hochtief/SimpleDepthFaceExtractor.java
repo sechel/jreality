@@ -8,6 +8,7 @@ import java.util.LinkedList;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.PointSetFactory;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
@@ -15,6 +16,8 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.TextureUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
+import de.jreality.util.PickUtility;
+import de.jreality.vr.ViewerVR;
 
 /**
  * @author Nils Bleicher
@@ -50,12 +53,12 @@ public class SimpleDepthFaceExtractor {
 			for(int j=0;j<N;j++){
 				connectI=false;
 				if(i-1>=0 && depth[i][j]!=0 && depth[i-1][j]!=0){
-					if(Math.abs(depth[i][j]-depth[i-1][j])<depthThreshold*0.5*(depth[i][j]+depth[i-1][j]))
+					if(Math.abs(depth[i][j]-depth[i-1][j])<depthThreshold*Math.min(depth[i][j],depth[i-1][j]))
 						connectI=true;					
 				}
 				connectJ=false;
 				if(j-1>=0 && depth[i][j]!=0 && depth[i][j-1]!=0){
-					if(Math.abs(depth[i][j]-depth[i][j-1])<depthThreshold*0.5*(depth[i][j]+depth[i][j-1]))
+					if(Math.abs(depth[i][j]-depth[i][j-1])<depthThreshold*Math.min(depth[i][j],depth[i-1][j]))
 						connectJ=true;					
 				}
 				
@@ -179,20 +182,20 @@ public class SimpleDepthFaceExtractor {
 				if(j_1<0) j_1=N-1;
 				if(faceId[i][j]==faceNr){
 					if(faceId[(i+1)%M][j]==faceNr){
-						if(Math.abs(depth[i][j]-depth[(i+1)%M][j])<depthThreshold*0.5*(depth[i][j]+depth[(i+1)%M][j])){
-							if(faceId[i][j_1]==faceNr){
-								int[] newTriangle={vertexLabel[i][j],vertexLabel[(i+1)%M][j],vertexLabel[i][j_1]};
-								if(triangleIsEquable(i, j, (i+1)%M, j, i, j_1)){
-									indices.add(newTriangle);			
-								}
-							}
-							if(faceId[(i+1)%M][(j+1)%N]==faceNr){
-								int[] newTriangle={vertexLabel[i][j],vertexLabel[(i+1)%M][(j+1)%N],vertexLabel[(i+1)%M][j]};
-								if(triangleIsEquable(i, j, (i+1)%M, j, (i+1)%M, (j+1)%N)){
-									indices.add(newTriangle);	
-								}
+						//if(Math.abs(depth[i][j]-depth[(i+1)%M][j])<depthThreshold*Math.min(depth[i][j],depth[(i+1)%M][j])){
+						if(faceId[i][j_1]==faceNr){
+							int[] newTriangle={vertexLabel[i][j],vertexLabel[(i+1)%M][j],vertexLabel[i][j_1]};
+							if(triangleIsEquable(i, j, (i+1)%M, j, i, j_1)){
+								indices.add(newTriangle);			
 							}
 						}
+						if(faceId[(i+1)%M][(j+1)%N]==faceNr){
+							int[] newTriangle={vertexLabel[i][j],vertexLabel[(i+1)%M][(j+1)%N],vertexLabel[(i+1)%M][j]};
+							if(triangleIsEquable(i, j, (i+1)%M, j, (i+1)%M, (j+1)%N)){
+								indices.add(newTriangle);	
+							}
+						}
+						//}
 					}
 					if(faceId[i_1][j]!=faceNr && faceId[i_1][(j+1)%N]==faceNr && faceId[i][(j+1)%N]==faceNr){
 						int[] newTriangle={vertexLabel[i][j],vertexLabel[i_1][(j+1)%N],vertexLabel[i][(j+1)%N]};
@@ -273,9 +276,12 @@ public class SimpleDepthFaceExtractor {
 		sceneRoot.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW, false);
 		sceneRoot.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, true);
 		sceneRoot.getAppearance().setAttribute(CommonAttributes.TUBES_DRAW, false);
+//		sceneRoot.getAppearance().setAttribute(CommonAttributes.LINE_WIDTH,0.001);
+		sceneRoot.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,Color.BLACK);
 		sceneRoot.getAppearance().setAttribute(CommonAttributes.FACE_DRAW, true);
 		sceneRoot.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,Color.WHITE);
 
+		
 		int[] faceSize=getFaceSizes();
 		
 		ImageData img=null;
@@ -297,6 +303,7 @@ public class SimpleDepthFaceExtractor {
 					ifsf.setGenerateEdgesFromFaces(true);
 					ifsf.setGenerateFaceNormals(true);
 					ifsf.setGenerateVertexNormals(true);
+					PickUtility.setPickable(ifsf.getGeometry(), false);
 					ifsf.update();
 
 					SceneGraphComponent sgc=new SceneGraphComponent();
@@ -311,7 +318,16 @@ public class SimpleDepthFaceExtractor {
 			}			
 		}
 		
-		ViewerApp.display(sceneRoot);
+		MatrixBuilder.euclidean().translate(0,0,2.4).assignTo(sceneRoot);
+		
+		ViewerApp vApp=ViewerVR.mainImpl(new String[]{});
+		int index=0;
+		while(vApp.getSceneRoot().getChildComponent(index).getName()!="scene")
+			index++;		
+		vApp.getSceneRoot().getChildComponent(index).addChild(sceneRoot);
+	
+		
+//		ViewerApp.display(sceneRoot);
 		
 	}
 
