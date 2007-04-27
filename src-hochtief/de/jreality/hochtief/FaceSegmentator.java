@@ -15,20 +15,18 @@ public class FaceSegmentator {
 		int N=depth[0].length;
 		double[][] smoothedDepth=new double[M][N];
 		
+		double maxMedianDist=0.5;		
+		int maxNeighborhood=7;
 		for(int i=0;i<M;i++){
 			for(int j=0;j<N;j++){
 				if(faceId[i][j]==faceNr){				
 					//smoothedDepth[i][j]=median(i,j,3,faceNr,depth,faceId);
-					smoothedDepth[i][j]=median(i,j,0.1,faceNr,depth,faceId);
+					smoothedDepth[i][j]=median(i,j,maxMedianDist,maxNeighborhood,faceNr,depth,faceId);
 					//smoothedDepth[i][j]=averageValue(i,j,6,faceNr,depth,faceId);
 				}else
 					smoothedDepth[i][j]=depth[i][j];
 			}
-		}
-		
-		System.out.println("minNeighborhood: "+minNeighborhood);
-		System.out.println("maxNeighborhood: "+maxNeighborhood);
-		
+		}		
 		return smoothedDepth;		
 	}
 	
@@ -61,44 +59,12 @@ public class FaceSegmentator {
 			return depthValues.get(0);
 	}
 	
-	
-	private static int minNeighborhood=-1;
-	private static int maxNeighborhood=-1;
-	
 	//median adapted to median-distance to surounding face-points 
-	private static double median(int i, int j, double neighborhoodThreshold, int faceNr, double[][] depth, int[][] faceId){
-		int neighborhood=(int)Math.ceil(neighborhoodThreshold/medianDistance(i, j, faceNr, depth, faceId));
-		
-		if(neighborhood<minNeighborhood || minNeighborhood==-1) minNeighborhood=neighborhood;
-		if(neighborhood>maxNeighborhood || maxNeighborhood==-1) maxNeighborhood=neighborhood;
-		
+	//maxDistance is the the distance from that all median-distances above will result a neighborhood=1 and all smaller median-distances will result a neighborhood>1
+	private static double median(int i, int j, double maxDistance, int maxNeighborhood, int faceNr, double[][] depth, int[][] faceId){
+		int neighborhood=(int)Math.ceil(maxDistance/medianDistance(i, j, faceNr, depth, faceId));
+		if(neighborhood>maxNeighborhood) neighborhood=maxNeighborhood;
 		return median(i, j, neighborhood, faceNr, depth, faceId);
-	}
-	
-	
-	private static double averageValue(int i, int j, int neighborhood, int faceNr, double[][] depth, int[][] faceId){
-		int M=depth.length;
-		int N=depth[0].length;
-		double averageValue=0;
-		int vertexCount=0;
-		int posI,posJ;
-		for(int ii=i-neighborhood;ii<i+neighborhood+1;ii++){
-			posI=ii; 
-			if(posI<0) posI=M+posI;
-			if(posI>=M) posI=posI-M;
-			for(int jj=j-neighborhood;jj<j+neighborhood+1;jj++){
-				posJ=jj; 
-				if(posJ<0) posJ=N+posJ;
-				if(posJ>=N) posJ=posJ-N;
-				if(faceId[posI][posJ]==faceNr){
-					
-					averageValue+=depth[posI][posJ];
-					vertexCount++;
-					
-				}
-			}
-		}
-		return averageValue/(double)vertexCount;
 	}
 	
 	public static double medianDistance(int i, int j, int faceNr, double[][] depth, int[][] faceId){
@@ -132,7 +98,33 @@ public class FaceSegmentator {
 		else
 			return distValues.get(0);
 
-
 	}
+	
+	private static double averageValue(int i, int j, int neighborhood, int faceNr, double[][] depth, int[][] faceId){
+		int M=depth.length;
+		int N=depth[0].length;
+		double averageValue=0;
+		int vertexCount=0;
+		int posI,posJ;
+		for(int ii=i-neighborhood;ii<i+neighborhood+1;ii++){
+			posI=ii; 
+			if(posI<0) posI=M+posI;
+			if(posI>=M) posI=posI-M;
+			for(int jj=j-neighborhood;jj<j+neighborhood+1;jj++){
+				posJ=jj; 
+				if(posJ<0) posJ=N+posJ;
+				if(posJ>=N) posJ=posJ-N;
+				if(faceId[posI][posJ]==faceNr){
+					
+					averageValue+=depth[posI][posJ];
+					vertexCount++;
+					
+				}
+			}
+		}
+		return averageValue/(double)vertexCount;
+	}
+	
+
 	
 }
