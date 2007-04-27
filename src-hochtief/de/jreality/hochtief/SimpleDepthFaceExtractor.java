@@ -217,8 +217,8 @@ public class SimpleDepthFaceExtractor {
 		return triangles;
 	}
 	
-	double minSideRatio=0.05;	
-	double depthTriangleThreshold=0.14;
+	private double minSideRatio=0.05;	
+	private double depthTriangleThreshold=depthThreshold;//0.14;
 	private boolean triangleIsEquable(int i1, int j1, int i2, int j2, int i3, int j3){	
 		double d1=Math.abs(depth[i1][j1]-depth[i2][j2]);
 		double d2=Math.abs(depth[i1][j1]-depth[i3][j3]);
