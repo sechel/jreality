@@ -150,7 +150,7 @@ public class AABBPickSystem implements PickSystem {
     private double tubeRadius=CommonAttributes.TUBE_RADIUS_DEFAULT;
     private double pointRadius=CommonAttributes.POINT_RADIUS_DEFAULT;
     private int signature=Pn.EUCLIDEAN;
-    private Matrix[] matrixStack = new Matrix[128];
+    private Matrix[] matrixStack = new Matrix[256];
     int stackCounter = 0;
     private boolean pickPoints=true, drawVertices = false;
     private boolean pickEdges=true, drawEdges = true;

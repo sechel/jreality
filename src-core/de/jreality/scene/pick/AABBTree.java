@@ -370,7 +370,7 @@ public class AABBTree {
 			double[] t = bounds.center;
 			double[] s = bounds.extent;
 			MatrixBuilder.euclidean().translate(t).getMatrix().assignTo(myComp);
-			IndexedFaceSet box = Primitives.cube(2*s[0], 2*s[1], 2*s[2]);
+			IndexedFaceSet box = Primitives.box(2*s[0], 2*s[1], 2*s[2], false);
 			myComp.setGeometry(box);
 			IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(box);
 			GeometryUtility.calculateAndSetNormals(box);
