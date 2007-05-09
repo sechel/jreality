@@ -531,14 +531,7 @@ public class IndexedFaceSetUtility {
 		return imploded;
 	}
 	
-	/**
-	 * Merges the data for a face attribute for an array of indexed face set into a single trivial type array.
-	 * If a single entry of the array fails to have the prescribed attribute a NullPointerException is
-	 * thrown.
-	 * @param ifs array of indexed face sets.
-	 * @param attr a face attribute, e.g., @link de.jreality.scene.data.Attribute.NORMALS
-	 * @return array containing all data of face attribute of an array of indexed face set.
-	 */
+	 /** @deprecated use <code>GeometryMergeFactory</code>*/
 		public static double [][] mergeDoubleArrayArrayFaceAttribute( IndexedFaceSet [] ifs , Attribute attr) {
 			
 			double [][] result = new double[getTotalNumFaces(ifs)][];
@@ -550,7 +543,7 @@ public class IndexedFaceSetUtility {
 			
 			return result;  
 		}
-		// Anfang Bernd
+		/** @deprecated use <code>GeometryMergeFactory</code>*/
 		public static double [][] mergeDoubleArrayArrayEdgeAttribute( IndexedLineSet [] ils , Attribute attr) {
 			
 			double [][] result = new double[getTotalNumLines(ils)][];
@@ -561,8 +554,8 @@ public class IndexedFaceSetUtility {
 			}
 			
 			return result;  
-		}// ende Bernd
-	
+		}
+		/** @deprecated use <code>GeometryMergeFactory</code>*/
 	private static void mergeDoubleArrayArrayFaceAttributes(IndexedFaceSet[] ifs, IndexedFaceSet result, boolean firstTime ) {
 		Object [] faceAttr = ifs[0].getFaceAttributes().storedAttributes().toArray();
 		for( int i=0; i<faceAttr.length; i++ ) {
@@ -581,7 +574,7 @@ public class IndexedFaceSetUtility {
 			}
 		}
 	}
-	// anfang Bernd
+	/** @deprecated use <code>GeometryMergeFactory</code>*/
 	private static void mergeDoubleArrayArrayEdgeAttributes(IndexedLineSet[] ils, IndexedLineSet result, boolean firstTime ) {
 		Object [] edgeAttr = ils[0].getEdgeAttributes().storedAttributes().toArray();
 		for( int i=0; i<edgeAttr.length; i++ ) {
@@ -601,14 +594,7 @@ public class IndexedFaceSetUtility {
 		}
 	}// ende Bernd
 	
-	/**
-	 * Merges the data for a vertex attribute for an array of point set into a single trivial type array.
-	 * If a single entry of the array fails to have the prescribed attribute a NullPointerException is
-	 * thrown.
-	 * @param ps array of point sets.
-	 * @param attr a vertex attribute, e.g., @link de.jreality.scene.data.Attribute.COORDINATES
-	 * @return array containing all data of vertex attribute of an array of point sets.
-	 */
+	/** @deprecated use <code>GeometryMergeFactory</code>*/
 	public static double [][] mergeDoubleArrayArrayVertexAttribute( PointSet [] ps , Attribute attr) {
 		
 		double [][] result = new double[getTotalNumPoints(ps)][];
@@ -620,7 +606,7 @@ public class IndexedFaceSetUtility {
 		
 		return result;  
 	}
-
+	/** @deprecated use <code>GeometryMergeFactory</code>*/
 	private static void mergeDoubleArrayArrayVertexAttributes( PointSet[] ps, PointSet result, boolean firstTime ) {
 		Object [] vertexAttr = ps[0].getVertexAttributes().storedAttributes().toArray();
 		
@@ -642,15 +628,7 @@ public class IndexedFaceSetUtility {
 		}
 	}
 	
-	/**
-	 * Merges an array of indexed face sets into a single.
-	 * Currently only vertex and face attributes associated to
-	 * {@link de.jreality.scene.data.DataList DataList} which are
-	 * instance of {@link de.jreality.scene.data.DoubleArrayArray DoubleArrayArray}
-	 * are taken into account. e.g. NORMALS, COLORS, TEXTRUE_COORDINATES, ...
-	 * @param ifs array of indexed face sets.
-	 * @return merger of all indexed face sets
-	 */
+	/** @deprecated use <code>GeometryMergeFactory</code>*/
 	public static IndexedFaceSet mergeIndexedFaceSets( IndexedFaceSet [] ifs ) {
 				
 		IndexedFaceSet result = new IndexedFaceSet();
@@ -678,7 +656,7 @@ public class IndexedFaceSetUtility {
 		return result;
 	}
 	
-	// bernd
+	/** @deprecated use <code>GeometryMergeFactory</code>*/
 	public static IndexedLineSet mergeIndexedLineSets( IndexedLineSet [] ils ) {
 		
 		IndexedLineSet result = new IndexedLineSet();
@@ -706,18 +684,7 @@ public class IndexedFaceSetUtility {
 		return result;
 	}// ende Bernd
 	
-	/**
-     * Merge all IndexedFaceSet's which occur as the geometry field of 
-	 * direct children of sgc which
-	 * do not have a transformation
-	 * and which do not themselves have children.
-	 * Useful as a compression strategy in case many tiny IndexedFaceSets are spread out over many
-	 * SceneGraphComponents when there is really no need to do so.
-	 * 
-	 * @param sgc
-	 * @return
-	 * @deprecated This method is broken. 
-	 */
+	/** @deprecated use <code>GeometryMergeFactory</code>*/
 	public static SceneGraphComponent mergeIndexedFaceSets(SceneGraphComponent sgc)	{
 		
 		// collects sgc's which themselves have children
@@ -757,7 +724,7 @@ public class IndexedFaceSetUtility {
 		result.addChild(mergedIFS);
 		return sgc;
 	}
-
+	/** @deprecated use <code>GeometryMergeFactory</code>*/
 	public static SceneGraphComponent _mergeIndexedFaceSets(SceneGraphComponent sgc)	{
     	Vector<IndexedFaceSet> ifslist = new Vector<IndexedFaceSet>();
     	Vector colorList = new Vector();
@@ -831,7 +798,7 @@ public class IndexedFaceSetUtility {
     	return sgc;
     }
 	
-	// Anfang Bernd 
+	/** @deprecated use <code>GeometryMergeFactory</code>*/ 
 	public static SceneGraphComponent mergeIndexedLineSets(SceneGraphComponent sgc)	{	
 		// collects sgc's which themselves have children
 		class CollectComponents extends SceneGraphVisitor {
@@ -942,14 +909,7 @@ public class IndexedFaceSetUtility {
     	sgc.setGeometry(ils);
     	return sgc;
     }// Ende Bernd
-    /**
-	 * Merges the data for a face attribute for an array of indexed face set into a single trivial type array.
-	 * If a single entry of the array fails to have the prescribed attribute a NullPointerException is
-	 * thrown.
-	 * @param ifs array of indexed face sets.
-	 * @param attr a face attribute, e.g., @link de.jreality.scene.data.Attribute.NORMALS
-	 * @return array containing all data of face attribute of an array of indexed face set.
-	 */
+	/** @deprecated use <code>GeometryMergeFactory</code>*/
 	public static int [][] mergeIntArrayArrayFaceAttribute( IndexedFaceSet [] ifs , Attribute attr) {
 		
 		int [][] result = new int[getTotalNumFaces(ifs)][];
@@ -961,7 +921,7 @@ public class IndexedFaceSetUtility {
 		
 		return result;  
 	}
-	// anfang Bernd
+	/** @deprecated use <code>GeometryMergeFactory</code>*/
 	public static int [][] mergeIntArrayArrayEdgeAttribute( IndexedLineSet [] ils , Attribute attr) {
 		
 		int [][] result = new int[getTotalNumLines(ils)][];
@@ -972,7 +932,7 @@ public class IndexedFaceSetUtility {
 		}
 		
 		return result;  
-	} // ende Bernd
+	} 
 
 	/**
 	 * A special purpose code for the Buddy-Baer project which might be useful for other situations
