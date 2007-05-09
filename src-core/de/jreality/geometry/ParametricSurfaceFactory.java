@@ -67,7 +67,7 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 		vertexCoordinates.setGenerate(true);
 	}
 	
-	ParametricSurfaceFactory( Immersion immersion ) {
+	public ParametricSurfaceFactory( Immersion immersion ) {
 		this( immersion, 0, 1, 0, 1 );
 	}
 	

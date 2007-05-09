@@ -46,8 +46,10 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
+import de.jreality.renderman.RIBViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.ClippingPlane;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.PointSet;
@@ -122,7 +124,7 @@ public class Primitives {
 			
 		}
 		/**
-		 * A cube.  If <i>colored</i> is true, then it has face colors.
+		 * A cube.  If <i>colored</i> is true, then it is given face colors. Has 4D vertices for using in non-euclidean settings.
 		 * @param colored
 		 * @return
 		 */
@@ -139,7 +141,12 @@ public class Primitives {
 			GeometryUtility.calculateAndSetFaceNormals(cube);		
 			return cube;
 	}
-		public static IndexedFaceSet cube(boolean colored)	{
+		/**
+		 * 
+		 * A cube.  If <i>colored</i> is true, then it is given face colors.
+		 * @param colored
+		 * @return
+		 */public static IndexedFaceSet cube(boolean colored)	{
 			
 			IndexedFaceSet cube = new IndexedFaceSet(8, 6);
 
@@ -154,23 +161,27 @@ public class Primitives {
 	}
 		/**
 		 * @deprecated	Use {@link #box(double, double, double, boolean)}.
-		 */public static IndexedFaceSet cube(double width,double hight,double depth,boolean colored){
-			return box(width, hight, depth, colored);
+		 */
+		 public static IndexedFaceSet cube(double width,double height,double depth,boolean colored){
+			return box(width, height, depth, colored);
 		}
 		/**
-		 * A dimensioned box.  If <i>colored</i> is true, then it has face colors.
-		 * @author Gonska
-		 * @param width: size in X-dimension 
-		 * @param higth: size in Y-dimension
-		 * @param depth: size in Z-dimension
-		 * @param colored
+		 * Same as {@link #box(double, double, double, boolean, Pn.EUCLIDEAN)}
 		 * @return
 		 */		
-		public static IndexedFaceSet box(double width,double hight,double depth,boolean colored){
-			return box (width, hight, depth, colored, Pn.EUCLIDEAN);
+		public static IndexedFaceSet box(double width,double height,double depth,boolean colored){
+			return box (width, height, depth, colored, Pn.EUCLIDEAN);
 		}
-		public static IndexedFaceSet box(double width,double hight,double depth,boolean colored, int signature){
-			double w=width/2;	double h=hight/2;	double d=depth/2;
+		/**
+		 * A box centered at the origin.
+		 * @param width		x-dim
+		 * @param height		y-dim
+		 * @param depth		z-dim
+		 * @param colored	provide face colors?
+		 * @param signature	the metric
+		 * @return
+		 */public static IndexedFaceSet box(double width,double height,double depth,boolean colored, int signature){
+			double w=width/2;	double h=height/2;	double d=depth/2;
 			double[][] points =  
 			 {{w,h,d},{w,h,-d},{w,-h,d},{w,-h,-d},
 			 {-w,h,d},{-w,h,-d},{-w,-h,d},{-w,-h,-d}};
@@ -186,11 +197,26 @@ public class Primitives {
 			ifsf.update();
 			return ifsf.getIndexedFaceSet();
 		}
-		public static IndexedFaceSet coloredCube(double width,double hight,double depth){
-			return box(width,hight,depth,true);
+		/**
+		 * 
+		 * @param width
+		 * @param height
+		 * @param depth
+		 * @return
+		 * @deprecated Use {@link #box(double, double, double, true)}
+		 */public static IndexedFaceSet coloredCube(double width,double height,double depth){
+			return box(width,height,depth,true);
 		}
-		public static IndexedFaceSet cube(double width,double hight,double depth){
-			return box(width,hight,depth,false);
+		/**
+		 * 
+		 * @param width
+		 * @param height
+		 * @param depth
+		 * @return
+		 * @deprecated Use {@link #box(double, double, double, false)}
+		 */
+		 public static IndexedFaceSet cube(double width,double height,double depth){
+			return box(width,height,depth,false);
 		}
 		static private double[][] tetrahedronVerts3 =  
 		{{1,1,1},{1,-1,-1},{-1,1,-1},{-1,-1,1}};
@@ -215,7 +241,8 @@ public class Primitives {
 		 * A tetrahedron.  If <i>colored</i> is true, then it has face colors.
 		 * @param colored
 		 * @return
-		 */public static IndexedFaceSet tetrahedron(boolean colored)	{
+		 */
+		public static IndexedFaceSet tetrahedron(boolean colored)	{
 			
 			IndexedFaceSet tetrahedron = new IndexedFaceSet(4, 4);
 
@@ -304,7 +331,7 @@ public class Primitives {
 			}
 		
 		/**
-		 * A single point.
+		 * A single point as a {@link PointSet}.
 		 * @param center
 		 * @return
 		 */
@@ -380,6 +407,15 @@ public class Primitives {
 			 return cylinder(n, 1, -1, 1, Math.PI*2);
 		 }
 		 
+		 /**
+		  * A renderMan-style cylinder specification
+		  * @param n
+		  * @param r
+		  * @param zmin
+		  * @param zmax
+		  * @param thetamax
+		  * @return
+		  */
 		 public static IndexedFaceSet cylinder(int n,   double r, double zmin, double zmax, double thetamax) {
 			int rn = n+1;
 			double[] verts = new double[2*3*rn];
@@ -406,13 +442,14 @@ public class Primitives {
 		}
 		
 		/**
-		 * Construct a pyramid with vertex <i>tip</i> over the polygon <i>base</i>.
+		 * A pyramid: a cone with vertex <i>tip</i> over the polygon <i>base</i>.
 		 * The polygon is assumed to be closed -- so the user need not set the last 
 		 * vertex to be the same as the first.
 		 * @param base
 		 * @param tip
 		 * @return
-		 */public static IndexedFaceSet pyramid(double[][] base, double[] tip)	{
+		 */
+		 public static IndexedFaceSet pyramid(double[][] base, double[] tip)	{
 			int n = base.length;
 			int l = base[0].length;
 			if (l != tip.length)	{
@@ -483,7 +520,6 @@ public class Primitives {
 		}
 		
 		/**
-		 * 
 		 * @return {@link #arrow(double, double, double, double, double, boolean)} with final parameter false.
 		 */
 		public static IndexedLineSet arrow(double x0, double y0, double x1, double y1, double tipSize)	{
@@ -498,7 +534,7 @@ public class Primitives {
 		 * @param y0
 		 * @param x1
 		 * @param y1
-		 * @param tipSize
+		 * @param tipSize	Scaling factor for the head of the arrow. Value of 1 makes it as big as the arrow itself.
 		 * @param halfArrow
 		 * @return
 		 */
@@ -536,9 +572,7 @@ public class Primitives {
 		}
 		
 		/**
-		 * Create a euclidean clipping plane with the given plane equation. 
-		 * @param plane	a 4-vector, the plane coordinates of the plane
-		 * @return
+		 * @return {@link #clippingPlane(double[], int)} with second argument = {@link Pn#EUCLIDEAN}.
 		 */
 		public static SceneGraphComponent clippingPlane(double[] plane)	{
 			return clippingPlane(plane, Pn.EUCLIDEAN);
@@ -572,7 +606,8 @@ public class Primitives {
 		}
    
 		/**
-		 * Create a torus with the given parameters.
+		 * Create a torus with the given parameters. The resulting instance also has a {@link Geometry} {@link Attribute}
+		 * so that the RenderMan viewer {@link RIBViewer} will produce an exact torus.
 		 * @param bR	Major radius
 		 * @param sR	Minor radius
 		 * @param bDetail	Number of sample points around major circle
@@ -632,7 +667,9 @@ public class Primitives {
          * in both directions.
          * @param detail
          * @return
-         */public static IndexedFaceSet sphere(final int detail ) {
+         * @See {@link Sphere}.
+         */
+		public static IndexedFaceSet sphere(final int detail ) {
 		    
 		    ParametricSurfaceFactory.Immersion immersion =
 		        new ParametricSurfaceFactory.Immersion() {
@@ -680,58 +717,23 @@ public class Primitives {
 	 * or not.
 	 * @param points
 	 * @return
-	 */public static IndexedFaceSet texturedQuadrilateral(double[] points) {
+	 */
+	public static IndexedFaceSet texturedQuadrilateral(double[] points) {
 		    
-		    IndexedFaceSetFactory factory = new IndexedFaceSetFactory();
-		    
-		    factory.setVertexCount( 4 );
-		    factory.setFaceCount(1);
-		    factory.setVertexCoordinates(points);
-		    factory.setFaceIndices(new int[][] {{ 0,1,2,3}});
-		    factory.setVertexTextureCoordinates(new double[] { 0,0,1,0,1,1,0,1});
-		    factory.setGenerateVertexNormals(true);
-		    factory.setGenerateFaceNormals(true);
-		    factory.setGenerateEdgesFromFaces(true);
-		    
-		    factory.update();
-		    
-		    return factory.getIndexedFaceSet();
-		}
+	    IndexedFaceSetFactory factory = new IndexedFaceSetFactory();
+	    
+	    factory.setVertexCount( 4 );
+	    factory.setFaceCount(1);
+	    factory.setVertexCoordinates(points);
+	    factory.setFaceIndices(new int[][] {{ 0,1,2,3}});
+	    factory.setVertexTextureCoordinates(new double[] { 0,0,1,0,1,1,0,1});
+	    factory.setGenerateVertexNormals(true);
+	    factory.setGenerateFaceNormals(true);
+	    factory.setGenerateEdgesFromFaces(true);
+	    
+	    factory.update();
+	    
+	    return factory.getIndexedFaceSet();
+	}
     
-    /**
-     * Generate a rectangular quad mesh centered at the origin with a mesh of dimension
-     * <i>(xDetail,yDetail)</i>.
-     * 
-     * @param xStep
-     * @param yStep
-     * @param xDetail
-     * @param yDetail
-     * @return
-     */public static IndexedFaceSet plainQuadMesh(double xStep, double yStep, int xDetail, int yDetail) {
-      ParametricSurfaceFactory factory = new ParametricSurfaceFactory(new ParametricSurfaceFactory.DefaultImmersion() {
-        public void evaluate(double u, double v) {
-          x=u;
-          y=v;
-          z=0;
-        }
-      });
-      
-      factory.setULineCount(xDetail+1);
-      factory.setVLineCount(yDetail+1);
-      
-      factory.setClosedInUDirection(false);
-      factory.setClosedInVDirection(false);
-      
-      factory.setUMin(-xStep*xDetail/2);
-      factory.setUMax(xStep*xDetail/2);
-      factory.setVMin(-yStep*yDetail/2);
-      factory.setVMax(yStep*yDetail/2);
-      
-      factory.setGenerateFaceNormals(true);
-      factory.setGenerateVertexNormals(false); // ??
-      
-      factory.update();
-      
-      return factory.getIndexedFaceSet();      
-    }
-}
+ }

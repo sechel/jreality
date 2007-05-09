@@ -250,6 +250,7 @@ public class P3 {
 	 * @param m
 	 * @param vec
 	 * @return
+	 * not referenced
 	 */
 	protected static double[] makeGlideReflectionMatrix(double[] m, double[] vector, double d)	{
 		// TODO finish writing this
@@ -656,7 +657,7 @@ public class P3 {
 			throw new IllegalArgumentException("Infinite euclidean translation vector");
 		}
 		Pn.normalize(toL, toL, sig);
-		LoggingSystem.getLogger(P3.class).finer("Translation vector is "+Rn.toString(toL));
+//		LoggingSystem.getLogger(P3.class).finer("Translation vector is "+Rn.toString(toL));
 		if (Double.isNaN(toL[0]))
 			throw new IllegalStateException("NaN");
 //		if (toL[3] < 0) Rn.times(toL, -1.0, toL);
