@@ -42,6 +42,7 @@ package de.jreality.geometry;
 
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.PointSet;
 import de.jreality.scene.Scene;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
@@ -187,6 +188,20 @@ public class IndexedLineSetUtility {
 		}
 		return createCurveFromPoints(verts, true);
 	}
-
+	public static PointSet indexedLineSetToPointSet(IndexedLineSet l){
+		PointSet p= new PointSet(l.getNumPoints());
+		p.setGeometryAttributes(l.getGeometryAttributes());
+		p.setVertexAttributes(l.getVertexAttributes());
+		return p;
+	}
+	
+	public static IndexedLineSet pointSetToIndexedLineSet(PointSet p){
+		if (p instanceof IndexedLineSet)
+			return (IndexedLineSet) p;
+		IndexedLineSet l= new IndexedLineSet(p.getNumPoints(),0);
+		l.setGeometryAttributes(p.getGeometryAttributes());
+		l.setVertexAttributes(p.getVertexAttributes());
+		return l;
+	}
 
 }

@@ -1707,6 +1707,38 @@ public class IndexedFaceSetUtility {
 		}
 		return tris;
 	}
-
+	public static PointSet indexedFaceSetToPointSet(IndexedFaceSet f){
+		PointSet p= new PointSet(f.getNumPoints());
+		p.setGeometryAttributes(f.getGeometryAttributes());
+		p.setVertexAttributes(f.getVertexAttributes());
+		return p;
+	}
+	public static IndexedLineSet indexedFaceSetToIndexedLineSet(IndexedFaceSet f){
+		IndexedLineSet l= new IndexedLineSet(f.getNumPoints(),f.getNumEdges());
+		l.setGeometryAttributes(f.getGeometryAttributes());
+		l.setVertexAttributes(f.getVertexAttributes());
+		l.setVertexAttributes(f.getEdgeAttributes());
+		return l;
+	}
+	public static IndexedFaceSet indexedLineSetToIndexedFaceSet(IndexedLineSet l){
+		if (l instanceof IndexedFaceSet)
+			return (IndexedFaceSet) l;
+		IndexedFaceSet f= new IndexedFaceSet(l.getNumPoints(),0);
+		f.setGeometryAttributes(l.getGeometryAttributes());
+		f.setVertexAttributes(l.getVertexAttributes());
+		f.setEdgeAttributes(l.getEdgeAttributes());
+		return f;
+	}
+	public static IndexedFaceSet pointSetToIndexedFaceSet(PointSet p){
+		if (p instanceof IndexedFaceSet)
+			return (IndexedFaceSet) p;
+		if (p instanceof IndexedLineSet)
+			return indexedLineSetToIndexedFaceSet((IndexedLineSet)p);
+		IndexedFaceSet f= new IndexedFaceSet(p.getNumPoints(),0);
+		f.setGeometryAttributes(p.getGeometryAttributes());
+		f.setVertexAttributes(p.getVertexAttributes());
+		return f;
+	}
+	
   	
 }
