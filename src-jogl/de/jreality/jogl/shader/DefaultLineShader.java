@@ -193,7 +193,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		final JOGLRenderer jr = jrs.getRenderer();
 		final int sig = jrs.getCurrentSignature();
 		final boolean useDisplayLists = jrs.isUseDisplayLists();
-		if ( !(original instanceof IndexedLineSet)) return -1;
+//		if ( !(original instanceof IndexedLineSet)) return -1;
 		if (tubeDraw && original instanceof IndexedLineSet)	{
 	        final int[] dlist = new int[1];
 	        Scene.executeReader(original, new Runnable() {

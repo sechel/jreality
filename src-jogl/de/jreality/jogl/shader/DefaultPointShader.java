@@ -239,9 +239,10 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 //		}
 		
 		if (!sphereDraw)	{
+			LoggingSystem.getLogger(JOGLRendererHelper.class).info("Rendering sprites");
 			lighting = false;
-			gl.glPointSize((float) getPointSize());
-			jrs.pointSize = getPointSize();
+			gl.glPointSize((float)pointSize);
+			jrs.pointSize = pointSize;
 			// temporarily commented out since this doesn't work on my powerbook with ati radeon
 			// (no exception, but the points don't show up no matter what the arguments given
 			try {
@@ -253,15 +254,15 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			gl.glEnable(GL.GL_POINT_SMOOTH);
 			gl.glEnable(GL.GL_POINT_SPRITE_ARB);
 //			// TODO make sure this is OK; perhaps add field to JOGLRenderingState: nextAvailableTextureUnit?
-			gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
-			if (currentTex == tex && (jrs.getCurrentGeometry() instanceof PointSet) && 
-					((PointSet)jrs.getCurrentGeometry()).getVertexAttributes(Attribute.COLORS) != null)
+			PointSet ps = (PointSet) jrs.getCurrentGeometry();
+			if (currentTex == tex && ps.getVertexAttributes(Attribute.COLORS) != null)
 				tex.setApplyMode(Texture2D.GL_MODULATE);
 			else 
 				tex.setApplyMode(Texture2D.GL_REPLACE);
-			Texture2DLoaderJOGL.render(gl, currentTex);
+			gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glEnable(GL.GL_TEXTURE_2D);
+			Texture2DLoaderJOGL.render(gl, currentTex);
 		} else	{
 			// really need to call the preRender() method on the polygonShader, but it doesn't exist.
 			Geometry g = jrs.getCurrentGeometry();
@@ -299,7 +300,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		int sig = jrs.getCurrentSignature();
 		boolean useDisplayLists = jrs.isUseDisplayLists();
 		GL gl = 	jr.getGL();
-		if (original instanceof PointSet)	{
+//		if (original instanceof PointSet)	{
 			PointSet ps = (PointSet) original;
 			DataList vertices = ps.getVertexAttributes(Attribute.COORDINATES);
 			if (vertices == null)	
@@ -359,8 +360,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			if (pickMode) gl.glPopName();
 			if (useDisplayLists) gl.glEndList();
 			return nextDL;
-		}
-		return -1;
+//		}
 	}
 	
 	public Shader getPolygonShader() {
