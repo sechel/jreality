@@ -64,19 +64,23 @@ public class TextureExample {
 	  SceneGraphComponent sgc = new SceneGraphComponent();
 	  sgc.setGeometry(ico);
       sgc.setAppearance(new Appearance());
-      sgc.getAppearance().setAttribute(CommonAttributes.DIFFUSE_COLOR, Color.YELLOW);
       sgc.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
       sgc.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, false);
       ImageData id = null;
       sgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.GREEN);
       double scale = 3;
-      if (args.length > 0) id =  ImageData.load(Input.getInput(args[0]));
+      if (args.length > 0) {
+    	  id =  ImageData.load(Input.getInput(args[0]));
+          sgc.getAppearance().setAttribute(CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
+          scale = 1;
+      }
       else  {
     	  SimpleTextureFactory stf = new SimpleTextureFactory();
     	  stf.update();
     	  id = stf.getImageData();
     	  scale = 10;
-      }
+          sgc.getAppearance().setAttribute(CommonAttributes.DIFFUSE_COLOR, Color.YELLOW);
+     }
       Texture2D tex = TextureUtility.createTexture(sgc.getAppearance(), CommonAttributes.POLYGON_SHADER,id);
       tex.setTextureMatrix(MatrixBuilder.euclidean().scale(scale).getMatrix());
       tex.setApplyMode(Texture2D.GL_MODULATE);
