@@ -200,6 +200,11 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			if (stackCounter == 0)	{
 				jr.matrixStack[0] = new Matrix(jr.context.getObjectToCamera());	
 			} else {
+				if (stackCounter >= jr.matrixStack.length)	{
+				Matrix[] newstack = new Matrix[jr.matrixStack.length*2];
+				System.arraycopy(jr.matrixStack, 0, newstack, 0, jr.matrixStack.length);
+				jr.matrixStack = newstack;
+			}
 				if (jr.matrixStack[stackCounter] == null) jr.matrixStack[stackCounter] = new Matrix();
 		    	Rn.times(jr.matrixStack[stackCounter].getArray(), jr.matrixStack[stackCounter-1].getArray(), cachedTform);				
 			}
