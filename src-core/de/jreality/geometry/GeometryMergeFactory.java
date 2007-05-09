@@ -1,11 +1,60 @@
 package de.jreality.geometry;
 
+/** this Factory merges IndexedFaceSets, Indexed Line Sets, PointSets
+ * or scenegraphs containing such things to a single geometry.
+ * <p>
+ * <ul>its default behavior:
+ * 	<li> only <code>doubleArrayArray</code> Attributes are supported 
+ *      other attributes will be ignored with
+ *      two exceptions : FaceIndices and EdgeIndices </li>
+ *  <li> an attribute which appears in every 'Set will be merged</li>
+ *  <li> the merged geometry has allways color and coordinates dimension 4
+ *       Problems may appear if the input dimension is not 3 or 4!;
+ *       and problems may appear if the default color dimension is not 4</li>  
+ *  <li> an attribute which do not appear in every 'Set wil be ignored</li>
+ * </ul>
+ * <p>
+ * <ul> special settings   
+ *  <li> with <code>respectFaces respectEdges</code> 
+ *       you can control to have no faceAttributes or edgeAttributes in the 
+ *       merged Geometry.
+ *       </li>
+ *  <li> with <code>generateFaceNormals generateVertexNormals</code>
+ *       you can fill the undefined holes of the Normal-Attributes </li>
+ *  <li> with <code>defaultFaceAttributes defaultFaceAttributeValues </code>
+ *  	you can enrich partialy(not totaly) undefined Attributes with 
+ *      default(per Attribute). This defaults can then be given per geometry
+ *      (as list) or vor all geomertys(a list with a single entry).
+ *      this defaults do not overwride allready defined Attributes,
+ *      and wil not be used if no geometry has this attribute.
+ *       </li>
+ *  <li> with <code>importantFaceDefaultAttributes</code> you can later garante
+ *  	that a defaultAttribute also is used if no geometry has this Attribute
+ *  	(not yet implemented)  </li>
+ *  <li>edge and vertex defaults analog</li>
+ *  <li>transformations in the scenegraph will not be ignored and change VertexCoordinates, 
+ *      EdgeNormals and FaceNormals</li>
+ *  <li>diffuseColors of appearances in the scenegraph will not be igored
+ *      and will be set in faceColors,EdgeColors and VertexColors</li>
+ * </ul>
+ * 
+ * excample:
+ * <code>
+   	comming soon 
+ * </code>
+ * 
+ * 
+ * TODO: merge only IndexedFaceSets of a SceneGraph
+ * TODO: merge FaceSets and linesets seperate to avoid "holes" in the AttributeList 
+ *       and gather in the end 
+ *  
+ * @author gonska
+ */
 import java.awt.Color;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import de.jreality.math.Matrix;
-import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -16,40 +65,40 @@ import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DataItem;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.ui.viewerapp.ViewerApp;
 
 public class GeometryMergeFactory {
-	private boolean respectFaces=true;//	[] more dificult 'cause of coordinates 
-	private boolean respectEdges=true;//	[v]
-	private boolean respectVertices=true;// [v]
+	private boolean respectFaces=true;// 
+	private boolean respectEdges=true;//	
+	private boolean respectVertices=true;// more dificult 'cause of coordinates 
 
-	private boolean generateFaceNormals=true;// [v]
-	private boolean generateVertexNormals=true;// [v]
+	private boolean generateFaceNormals=true;// 
+	private boolean generateVertexNormals=true;// 
 
 	// attribute-values which are set if the named 
 	// attribute is not supported in a geometry. 
 	// will be ignored if no geometry supports them.
-	private List<Attribute> defaultFaceAttributes=new LinkedList<Attribute>();//	[v]
-	private List<List<double[]>>defaultFaceAttributeValues=new LinkedList<List<double[]>>();// [v]
-	private List<Attribute> defaultEdgeAttributes=new LinkedList<Attribute>();//	[v]
-	private List<List<double[]>>defaultEdgeAttributeValues=new LinkedList<List<double[]>>();// [v]
-	private List<Attribute> defaultVertexAttributes=new LinkedList<Attribute>();//	[v]
-	private List<List<double[]>>defaultVertexAttributeValues=new LinkedList<List<double[]>>();// [v]
-	// defaults which have to be set even if no geometry supports them.
-	// must be listed above.
+	private List<Attribute> defaultFaceAttributes=new LinkedList<Attribute>();//	
+	private List<List<double[]>>defaultFaceAttributeValues=new LinkedList<List<double[]>>();// 
+	private List<Attribute> defaultEdgeAttributes=new LinkedList<Attribute>();//	
+	private List<List<double[]>>defaultEdgeAttributeValues=new LinkedList<List<double[]>>();// 
+	private List<Attribute> defaultVertexAttributes=new LinkedList<Attribute>();//	
+	private List<List<double[]>>defaultVertexAttributeValues=new LinkedList<List<double[]>>();// 
+	private final int FACE_ATTR=2,EDGE_ATTR=1,VERT_ATTR=0;
+
+	// TODO:	
+    // defaults which have to be set even if no geometry supports them.
+	// must allready be listed above.
 	private List<Attribute> importantFaceDefaultAttributes=null;// []
 	private List<Attribute> importantEdgeDefaultAttributes=null;// []
 	private List<Attribute> importantVertexDefaultAttributes=null;// []
@@ -58,54 +107,36 @@ public class GeometryMergeFactory {
 	private List<Attribute> onlyThisFaceAttributes=null;// []
 	private List<Attribute> onlyThisEdgeAttributes=null;// []
 	private List<Attribute> onlyThisVertexAttributes=null;// []
-
-	private final int FACE_ATTR=2,EDGE_ATTR=1,VERT_ATTR=0;
-	// TODO:
-
 	private boolean SpheresAsFacesSets;//	[]
 	private boolean tubesAsFaceSets;// 		[]
 	// END TODO
-
-	public GeometryMergeFactory() {
-
-	}
-
+	
 
 	private static List<Attribute> collectAttributes(List<List<Attribute>> atLists, List<Attribute> defAtt){
-//		unwichtige Defs merken(badDefaults)
+		// TODO attention: colors which are defined in appearances must be used
+		// to garanty that use <code>important_DefaultAttributes</code>
+				
+		//	keep in mind unnesscesary defaults 
 		List<Attribute> badDefaults= new LinkedList<Attribute>();
 		if(defAtt!=null)
 			for(Attribute defa :defAtt){
 				boolean hit=false;
-				for(List<Attribute> list : atLists){
-					for(Attribute at : list){
-						if (defa.getName().equals(at.getName())){
-							hit=true; break;
-						}	
-					}
-					if(hit) break;
-				}
+				for(List<Attribute> list : atLists)
+					if (list.contains(defa)) hit=true;
 				if(!hit) badDefaults.add(defa);
 			}
-		// nur voll definierte Attr merken(goodAttr)
+		// only remain everywhere defined attributes 
 		List<Attribute> goodAttr= new LinkedList<Attribute>();
-
-		// ersatz :
-//		for (int i = 0; i < atLists[0].length; i++)	goodAttr.add(atLists[0][i]);
-		// fuer:
 		List<Attribute> firstList=atLists.get(0);
 		for(Attribute firstA : firstList){
 			boolean hitAll=true;// everywhere defined attrib. ?
 			if(atLists!=null)
 				for(List<Attribute> list : atLists){	 
 					boolean hit=false; // in this list defined attr. ?
-					if(list!=null)
-						for(Attribute at: list){	
-							if(at.getName().equals(firstA.getName())){
-								hit=true;
-								break;
-							}
-						}
+					if(list!=null){
+						if(list.contains(firstA))
+							hit=true;
+					}
 					else hitAll=false;
 					if(!hit) {
 						hitAll=false;
@@ -113,33 +144,30 @@ public class GeometryMergeFactory {
 					}
 				}
 			else hitAll=false;
-			//	 remember only everywhere defined attr.:
 			if(hitAll) goodAttr.add((Attribute)firstA);
 		}
 		// gather:
 		if (defAtt!= null)
 			for(Attribute dAt : defAtt){
 				boolean isIn=false;
-				for (Attribute goodAt : goodAttr ) {
-					if (goodAt.getName().equals(dAt.getName())){
-						isIn=true;
-						break;
-					}
+				if(goodAttr.contains(dAt)){
+					isIn=true;
+					break;
 				}
 				if (!isIn)	goodAttr.add(dAt);
 			}
-
-		// unwichtige defaults (kein attribut da) loeschen:
-		//	<<=>-------- Achtung Farben !muessen! gesetzt werden da sie durch Appearances gesetzt sind! ----------<<
-
-		// genuegt das?
+		// eliminate unnescecary attributes
 		for (Attribute bad : badDefaults)
 			goodAttr.remove(bad);
-
-		// return:
 		return  goodAttr;
 	} 
-
+	/**
+	 * @param result The Pointset filled with attributes corresponding to <i>typ</i>
+	 * @param defaultAttributes  Attributes which have default values
+	 * @param defaultAttributeValues the default values to the Attributes
+	 * @param dls  a list of all AttributeSets of the corresponding <i>typ</i>
+	 * @param typ  0/1/2 works for Vertex/Edge/FaceAttributes
+	 */
 	private void mergeDoubleArrayArrayAttributes(PointSet result,
 			List<Attribute> defaultAttributes,List<List<double[]>>defaultAttributeValues, DataListSet[] dls ,int typ) {
 		// attr liste erstellen :
@@ -157,9 +185,7 @@ public class GeometryMergeFactory {
 			try {
 				int k=-1;
 				if( defaultAttributes!=null)
-					for (int j = 0; j < defaultAttributes.size(); j++) {
-						if (at.getName().equals(defaultAttributes.get(j).getName()))	k=j;
-					}
+					k=defaultAttributes.indexOf(at);
 				DataList dataList;
 				// default supportet:
 				if(k>=0)  dataList= new DoubleArrayArray.Array(mergeDoubleArrayArrayAttribute(dls, at, defaultAttributeValues.get(k)));
@@ -335,8 +361,8 @@ public class GeometryMergeFactory {
 				IndexedLineSet myLSet = (IndexedLineSet) myPs;	
 				if (myPs instanceof IndexedFaceSet) {
 					myface = (IndexedFaceSet) myPs;
-				}else myface=indexedLineSetToIndexedFaceSet(myLSet);
-			}else myface=pointSetToIndexedFaceSet(myPs); 
+				}else myface=IndexedFaceSetUtility.indexedLineSetToIndexedFaceSet(myLSet);
+			}else myface=IndexedFaceSetUtility.pointSetToIndexedFaceSet(myPs); 
 			g.add(myface);
 			// color
 			Color Mycol;
@@ -378,47 +404,14 @@ public class GeometryMergeFactory {
 		}
 		else dps = null;
 	}
+	// --------- public methods ------------
 
-	public static PointSet indexedLineSetToPointSet(IndexedLineSet l){
-		PointSet p= new PointSet(l.getNumPoints());
-		p.setGeometryAttributes(l.getGeometryAttributes());
-		p.setVertexAttributes(l.getVertexAttributes());
-		return p;
-	}
-	public static PointSet IndexedFaceSetToPointSet(IndexedFaceSet f){
-		PointSet p= new PointSet(f.getNumPoints());
-		p.setGeometryAttributes(f.getGeometryAttributes());
-		p.setVertexAttributes(f.getVertexAttributes());
-		return p;
-	}
-	public static IndexedLineSet pointSetToIndexedLineSet(PointSet p){
-		IndexedLineSet l= new IndexedLineSet(p.getNumPoints(),0);
-		l.setGeometryAttributes(p.getGeometryAttributes());
-		l.setVertexAttributes(p.getVertexAttributes());
-		return l;
-	}
-	public static IndexedLineSet indexedFaceSetToIndexedLineSet(IndexedFaceSet f){
-		IndexedLineSet l= new IndexedLineSet(f.getNumPoints(),f.getNumEdges());
-		l.setGeometryAttributes(f.getGeometryAttributes());
-		l.setVertexAttributes(f.getVertexAttributes());
-		l.setVertexAttributes(f.getEdgeAttributes());
-		return l;
-	}
-	public static IndexedFaceSet indexedLineSetToIndexedFaceSet(IndexedLineSet l){
-		IndexedFaceSet f= new IndexedFaceSet(l.getNumPoints(),0);
-		f.setGeometryAttributes(l.getGeometryAttributes());
-		f.setVertexAttributes(l.getVertexAttributes());
-		f.setEdgeAttributes(l.getEdgeAttributes());
-		return f;
-	}
-	public static IndexedFaceSet pointSetToIndexedFaceSet(PointSet p){
-		IndexedFaceSet f= new IndexedFaceSet(p.getNumPoints(),0);
-		f.setGeometryAttributes(p.getGeometryAttributes());
-		f.setVertexAttributes(p.getVertexAttributes());
-		return f;
-	}
-
-	// ------------ Start Method ------------------
+	
+	/** merges all IndexedFaceSets, IndexeedLineSets and PointSets
+	 *  of the given SceneGraph to one IndexedFaceSet
+	 *  Attention: several values can be set bevorhand
+	 * @param RootNode 
+	 */
 	public IndexedFaceSet mergeGeometrySets(SceneGraphComponent cmp){
 		// init Eap
 		Appearance app = cmp.getAppearance();
@@ -450,10 +443,18 @@ public class GeometryMergeFactory {
 		}		
 		//  mergen
 		IndexedFaceSet f= new IndexedFaceSet();
+		
+	//	<<=>----die faceColor defaults machen probleme----<<
+	// moeglicherweise 3 und 4 dimensionale Farben!!!
 		if(respectFaces)
 			if(!defaultFaceAttributes.contains(Attribute.COLORS)){
 				defaultFaceAttributes.add(Attribute.COLORS);
 				defaultFaceAttributeValues.add(fCol);
+			}
+		if(respectEdges)
+			if(!defaultEdgeAttributes.contains(Attribute.COLORS)){
+				defaultEdgeAttributes.add(Attribute.COLORS);
+				defaultEdgeAttributeValues.add(eCol);
 			}
 		if(!defaultVertexAttributes.contains(Attribute.COLORS)){
 			defaultVertexAttributes.add(Attribute.COLORS);
@@ -462,17 +463,18 @@ public class GeometryMergeFactory {
 		f=mergeIndexedFaceSets(faces);
 		return f;
 	}  
+	
+	/** merges all IndexedFaceSets to one IndexedFaceSet
+	 *  Attention: several values can be set bevorhand
+	 * @param IndexedFaceSets to merge 
+	 */
 	public IndexedFaceSet mergeIndexedFaceSets( PointSet[] geo) {
 		IndexedFaceSet[] ifs=new IndexedFaceSet[geo.length];
 		// convert entrys to IndexedFaceSets
-		for (int i = 0; i < geo.length; i++) {
-			if(geo[i] instanceof IndexedFaceSet)
-				ifs[i]=(IndexedFaceSet)geo[i];
-			else if (geo[i] instanceof IndexedLineSet)
-				ifs[i]=indexedLineSetToIndexedFaceSet((IndexedLineSet)geo[i]);
-			else ifs[i]=pointSetToIndexedFaceSet(geo[i]);
-		}
+		for (int i = 0; i < geo.length; i++) 
+			ifs[i]=IndexedFaceSetUtility.pointSetToIndexedFaceSet(geo[i]);
 		//
+		indexedFaceSetTo4DColorAndCoords(ifs);
 		IndexedFaceSet result = new IndexedFaceSet();
 		DataListSet[] faceDls= new DataListSet [ifs.length];
 		DataListSet[] edgeDls= new DataListSet [ifs.length];
@@ -517,42 +519,71 @@ public class GeometryMergeFactory {
 		if(respectFaces)mergeDoubleArrayArrayAttributes(result,defaultFaceAttributes,defaultFaceAttributeValues,faceDls,FACE_ATTR);
 		return result;
 	}
-
+	/** merges all IndexeedLineSets to one IndexedLineSet
+	 *  Attention: several values can be set bevorhand
+	 * @param IndexedLineSets to merge
+	 */
 	public IndexedLineSet mergeIndexedLineSets( IndexedLineSet [] ils){
 		boolean temp=respectFaces;
 		respectFaces=false;
 		IndexedFaceSet f=mergeIndexedFaceSets(ils);
-		IndexedLineSet l=indexedFaceSetToIndexedLineSet(f);
+		IndexedLineSet l=IndexedFaceSetUtility.indexedFaceSetToIndexedLineSet(f);
 		respectFaces=temp;
 		return l;
 	}
+	/** merges all PointSets to one PointSet
+	 *  Attention: several values can be set bevorhand
+	 * @param Pointsets to merge 
+	 */
 
 	public PointSet mergePointSets( PointSet [] ps){
 		boolean temp=respectFaces;
 		respectFaces=false;
 		IndexedFaceSet f=mergeIndexedFaceSets(ps);
-		PointSet p=IndexedFaceSetToPointSet(f);
+		PointSet p=IndexedFaceSetUtility.indexedFaceSetToPointSet(f);
 		respectFaces=temp;
 		return p;
 	}
-
-	public IndexedFaceSet mergeFaceSets(SceneGraphComponent cmp){
-		return mergeGeometrySets(cmp);
+	/** merges all IndexedFaceSets, IndexeedLineSets and PointSets
+	 *  of the given SceneGraph to one IndexedFaceSet
+	 *  EdgeAttributes will be ignored.
+	 *  Attention: several values can be set bevorhand
+	 * @param RootNode 
+	 */
+	public IndexedFaceSet mergeIndexedFaceSets(SceneGraphComponent cmp){
+		boolean temp=respectEdges;
+		respectEdges=false;
+		IndexedFaceSet f=mergeGeometrySets(cmp);
+		respectEdges=temp;
+		return f;
 	}
-	public IndexedLineSet mergeLineSets(SceneGraphComponent cmp){
+	/** merges all IndexedFaceSets, IndexeedLineSets and PointSets
+	 *  of the given SceneGraph to one IndexedLineSet
+	 *  FaceAttributes will be ignored.
+	 *  Attention: several values can be set bevorhand
+	 * @param RootNode 
+	 */
+	public IndexedLineSet mergeIndexedLineSets(SceneGraphComponent cmp){
 		boolean temp=respectFaces;
 		respectFaces= false;
-		IndexedLineSet l=indexedFaceSetToIndexedLineSet(mergeGeometrySets(cmp));
+		IndexedLineSet l=IndexedFaceSetUtility.indexedFaceSetToIndexedLineSet(mergeGeometrySets(cmp));
 		respectFaces=temp;
 		return l;
 	}
+	/** merges all IndexedFaceSets, IndexeedLineSets and PointSets
+	 *  of the given SceneGraph to one PointSet
+	 *  Face and Edge-Attributes will be ignored.
+	 *  Attention: several values can be set bevorhand
+	 * @param RootNode 
+	 */
 	public PointSet mergePointSets(SceneGraphComponent cmp){
 		boolean temp=respectFaces;	boolean temp2=respectEdges;
 		respectFaces= false;		respectEdges= false;
-		PointSet p=IndexedFaceSetToPointSet(mergeGeometrySets(cmp));
+		PointSet p=IndexedFaceSetUtility.indexedFaceSetToPointSet(mergeGeometrySets(cmp));
 		respectFaces=temp;			respectEdges=temp2;
 		return p;
 	}
+	// ------------- setters ----------
 
 	// -------------- setter --------------
 	/**Attributes which will be set to the given default, 
@@ -591,16 +622,18 @@ public class GeometryMergeFactory {
 	* Attributes which are also listed here will although be used.
 	* 
 	* @param importantDefaultAttributes
-	*  
+	* @deprecated use not implemented 
 	*/
 	public void setImportantFaceDefaultAttributes(
 	List<Attribute> importantFaceDefaultAttributes) {
 	this.importantFaceDefaultAttributes = importantFaceDefaultAttributes;
 	}
+	/** @deprecated use not implemented */
 	public void setImportantEdgeDefaultAttributes(
 	List<Attribute> importantEdgeDefaultAttributes) {
 	this.importantEdgeDefaultAttributes = importantEdgeDefaultAttributes;
 	}
+	/** @deprecated use not yet implemented */
 	public void setImportantVertexDefaultAttributes(
 	List<Attribute> importantVertexDefaultAttributes) {
 	this.importantVertexDefaultAttributes = importantVertexDefaultAttributes;
@@ -631,10 +664,12 @@ public class GeometryMergeFactory {
 	}
 	/**Verrtex Attributes will not be ignored  
 	* @param respectEdges
+	* @deprecated use not yet implemented 
 	*/
 	public void setRespectVertices(boolean respectVertices) {
 	this.respectVertices = respectVertices;
 	}
+	// ----------- getters ------------
 	// -------- getter --------------
 	public List<Attribute> getDefaultEdgeAttributes() {
 	return defaultEdgeAttributes;
@@ -666,69 +701,54 @@ public class GeometryMergeFactory {
 	public boolean isRespectFaces() {
 	return respectFaces;
 	}
+	/** @deprecated use not yet implemented */
 	public boolean isRespectVertices() {
 	return respectVertices;
 	}
-	//----------------Test - Main ---------------------
-
-	static ViewerApp vApp ;
-	static SceneGraphComponent root= new SceneGraphComponent();
-
-	public static void main(String[] args) {
-		IndexedFaceSet ico= Primitives.sharedIcosahedron;
-		IndexedFaceSet ico2= Primitives.sharedIcosahedron;
-		IndexedFaceSetUtility.assignSmoothVertexNormals(ico2, 20);
-		IndexedFaceSet box= Primitives.box(10, .5, .5, true);
-		IndexedFaceSet box2= Primitives.box(10, .6, 0.4, true);
-		IndexedFaceSet zyl= Primitives.cylinder(20,1,0,.5,5);
-
-		SceneGraphComponent root= new SceneGraphComponent();
-		Appearance app=new Appearance();
-		app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new Color(255,255,0));
-		app.setAttribute(CommonAttributes.VERTEX_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new Color(0,255,255));
-		root.setAppearance(app);
-
-		SceneGraphComponent A= new SceneGraphComponent();
-		SceneGraphComponent B= new SceneGraphComponent();
-
-		SceneGraphComponent C= new SceneGraphComponent();
-		SceneGraphComponent A1= new SceneGraphComponent();
-		MatrixBuilder.euclidean().translate(0,1,0).assignTo(A1);
-		SceneGraphComponent A11= new SceneGraphComponent();
-		MatrixBuilder.euclidean().rotate(Math.PI/2,0,0,1 ).assignTo(A11);
-		SceneGraphComponent B1= new SceneGraphComponent();
-		SceneGraphComponent B2= new SceneGraphComponent();
-		Appearance app2=new Appearance();
-		app2.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new Color(255,0,255));
-		B2.setAppearance(app2);
-
-		root.addChild(A); 	A.addChild(A1); A1.addChild(A11);
-		root.addChild(B); 	B.addChild(B1);
-		B.addChild(B2);
-		root.addChild(C);
-
-		A1.setGeometry(box);
-		A11.setGeometry(box2);
-		B1.setGeometry(zyl);
-		B2.setGeometry(ico);
-		//C.setGeometry(ico2);
-
-		IndexedFaceSet[] list= new IndexedFaceSet[]{ico};
-		//PointSet[] list= new PointSet[]{box,box2,zyl,ico2};
-		//IndexedLineSet[] list= new IndexedLineSet[]{box,box2,zyl,ico2};
-		//IndexedFaceSet i=mergeIndexedFaceSets(list,new Attribute[]{Attribute.COLORS},new double[][][]{{{0,1,1}}},null,null,null,null );
-
-		GeometryMergeFactory t= new GeometryMergeFactory();
-		//t.respectFaces=false;
-		//t.generateFaceNormals=false;
-		//t.generateVertexNormals=false;
-		//t.respectEdges=false;
+	
+	//---------problems with 3 and 4 dimensional Coordinates and colors-------
+	// soltion: generate the 4 netry with "1"
+	
+	private static void indexedFaceSetTo4DColorAndCoords(IndexedFaceSet[] list){
 		
-		IndexedFaceSet i=t.mergeGeometrySets(root);
-		//PointSet i=t.mergeIndexedLineSets(list);
-		//PointSet i=t.mergeIndexedFaceSets(list);
-		//System.out.println("Report:"+i);
-		vApp.display(i);
+		// TODO macht das probleme?
+		
+		for(IndexedFaceSet ifs: list){
+			DataList d= ifs.getFaceAttributes(Attribute.COLORS);
+			if(d!=null){
+				double[][] ds=d.toDoubleArrayArray(null);
+				equalizeTo4D(ds);
+				ifs.setFaceAttributes(Attribute.COLORS,null);
+				ifs.setFaceAttributes(Attribute.COLORS,new DoubleArrayArray.Array(ds));
+			}
+			d= ifs.getEdgeAttributes(Attribute.COLORS);
+			if(d!=null){
+				double[][] ds=d.toDoubleArrayArray(null);
+				equalizeTo4D(ds);
+				ifs.setEdgeAttributes(Attribute.COLORS,null);
+				ifs.setEdgeAttributes(Attribute.COLORS,new DoubleArrayArray.Array(ds));
+			}
+			d= ifs.getVertexAttributes(Attribute.COLORS);
+			if(d!=null){
+				double[][] ds=d.toDoubleArrayArray(null);
+				equalizeTo4D(ds);
+				ifs.setVertexAttributes(Attribute.COLORS,null);
+				ifs.setVertexAttributes(Attribute.COLORS,new DoubleArrayArray.Array(ds));
+			}
+			d= ifs.getVertexAttributes(Attribute.COORDINATES);
+			if(d!=null){
+				double[][] ds=d.toDoubleArrayArray(null);
+				equalizeTo4D(ds);
+				ifs.setVertexAttributes(Attribute.COORDINATES,null);
+				ifs.setVertexAttributes(Attribute.COORDINATES,new DoubleArrayArray.Array(ds));
+			}
+		}
 	}
-
+	private static void equalizeTo4D(double[][] d){
+		for (int i = 0; i < d.length; i++) 
+				if(d[i].length==3)
+					d[i]=new double[]{d[i][0],d[i][1],d[i][2],1};
+	}
+	
+	//----------------Test - Main ---------------------
 }
