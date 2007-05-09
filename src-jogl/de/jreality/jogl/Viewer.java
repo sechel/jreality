@@ -98,7 +98,6 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	}
 
 	public Viewer(SceneGraphPath camPath, SceneGraphComponent root) {
-		String foo = JOGLConfiguration.COPY_CAT;
 		renderer = new JOGLRenderer(this); 
 		setAuxiliaryRoot(SceneGraphUtility.createFullSceneGraphComponent("AuxiliaryRoot"));
 		initializeFrom(root, camPath);	
