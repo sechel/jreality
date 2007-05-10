@@ -40,7 +40,54 @@ package de.jreality.geometry;
  * 
  * excample:
  * <code>
-   	comming soon 
+ * import java.awt.Color;
+	import java.util.LinkedList;
+	import java.util.List;
+	import de.jreality.math.MatrixBuilder;
+	import de.jreality.scene.Appearance;
+	import de.jreality.scene.IndexedFaceSet;
+	import de.jreality.scene.SceneGraphComponent;
+	import de.jreality.scene.data.Attribute;
+	import de.jreality.shader.CommonAttributes;
+	import de.jreality.ui.viewerapp.ViewerApp;
+ * 
+ * // a little Scene (two boxes and a bangle, transfomation, appearance)
+   		IndexedFaceSet box= Primitives.box(2, .5, .5, false);
+		IndexedFaceSet box2= Primitives.box(2, .6, 0.4, true);
+		IndexedFaceSet zyl= Primitives.cylinder(20,1,0,.5,5);
+		SceneGraphComponent root= new SceneGraphComponent();
+		SceneGraphComponent childNode1= new SceneGraphComponent();
+		MatrixBuilder.euclidean().translate(0,0,1).assignTo(childNode1);
+		SceneGraphComponent childNode2= new SceneGraphComponent();
+		Appearance app= new Appearance();
+		app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new Color(255,255,0));
+		childNode2.setAppearance(app);
+		root.addChild(childNode1);
+		root.addChild(childNode2);
+		root.setGeometry(box2);
+		childNode1.setGeometry(box);
+		childNode2.setGeometry(zyl);
+	// the Factory:
+		GeometryMergeFactory mergeFact= new GeometryMergeFactory();		
+	// play with the following 3 optional settings (by default they are true)
+		mergeFact.setRespectFaces(true);
+		mergeFact.setRespectEdges(true);
+		mergeFact.setGenerateVertexNormals(true);			
+	// you can set some defaults:
+		List<Attribute> defaultAtts= new LinkedList<Attribute>();
+		List<List<double[]>> defaultAttValue= new LinkedList<List<double[]>>();
+		List<double[]> value= new LinkedList<double[]>();
+		defaultAtts.add(Attribute.COLORS);
+		defaultAttValue.add(value);
+		value.add(new double[]{0,1,0,1});// remember: only 4d colors
+		mergeFact.setDefaultFaceAttributes(defaultAtts,defaultAttValue );
+	// merge a list of geometrys:
+		//IndexedFaceSet[] list= new IndexedFaceSet[]{box2,zyl};
+		//IndexedFaceSet result=mergeFact.mergeIndexedFaceSets(list);
+	// or  a complete tree:
+		IndexedFaceSet result=mergeFact.mergeGeometrySets(root);
+	// take a look :
+		vApp.display(result);
  * </code>
  * 
  * TODO Problems:
@@ -57,6 +104,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -72,6 +120,7 @@ import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPointShader;
@@ -532,7 +581,7 @@ public class GeometryMergeFactory {
 		if(respectEdgesIntern){
 			for (int j = 0; j < edgeDls.length; j++) 
 				edgeDls[j]=ifs[j].getEdgeAttributes();
-			final int [][] edgeIndices = mergeIntArrayArrayAttribute(edgeDls, Attribute.INDICES );
+			int [][] edgeIndices = mergeIntArrayArrayAttribute(edgeDls, Attribute.INDICES );
 			int n=ifs[0].getNumPoints();
 			int k=ifs[0].getNumEdges();
 			for( int i=1; i<ifs.length; i++ ) {
