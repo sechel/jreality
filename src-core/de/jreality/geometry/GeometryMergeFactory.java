@@ -43,6 +43,8 @@ package de.jreality.geometry;
    	comming soon 
  * </code>
  * 
+ * TODO Problems:
+ * 	ifs and ils together
  * 
  * TODO: merge only IndexedFaceSets of a SceneGraph
  * TODO: merge FaceSets and linesets seperate to avoid "holes" in the AttributeList 
@@ -81,6 +83,10 @@ public class GeometryMergeFactory {
 	private boolean respectFaces=true;// 
 	private boolean respectEdges=true;//	
 	private boolean respectVertices=true;// more dificult 'cause of coordinates 
+
+	private boolean respectFacesIntern=true;// 
+	private boolean respectEdgesIntern=true;//	
+	private boolean respectVerticesIntern=true;// more dificult 'cause of coordinates 
 
 	private boolean generateFaceNormals=true;// 
 	private boolean generateVertexNormals=true;// 
@@ -127,7 +133,9 @@ public class GeometryMergeFactory {
 			}
 		// only remain everywhere defined attributes 
 		List<Attribute> goodAttr= new LinkedList<Attribute>();
-		List<Attribute> firstList=atLists.get(0);
+		List<Attribute> firstList=new LinkedList<Attribute>();
+		if(atLists.size()>0)firstList=atLists.get(0);
+		
 		for(Attribute firstA : firstList){
 			boolean hitAll=true;// everywhere defined attrib. ?
 			if(atLists!=null)
@@ -169,17 +177,23 @@ public class GeometryMergeFactory {
 	 * @param typ  0/1/2 works for Vertex/Edge/FaceAttributes
 	 */
 	private void mergeDoubleArrayArrayAttributes(PointSet result,
-			List<Attribute> defaultAttributes,List<List<double[]>>defaultAttributeValues, DataListSet[] dls ,int typ) {
+			List<Attribute> defaultAttributes,List<List<double[]>>defaultAttributeValues, 
+			DataListSet[] dls ,int typ) {
 		// attr liste erstellen :
+		// aber nur Attributenehmen 
 		List<List<Attribute>> Atts= new LinkedList<List<Attribute>>();
 		for (int i = 0; i < dls.length; i++) {
-			Object[] o= dls[i].storedAttributes().toArray();
-			LinkedList<Attribute> list=new LinkedList<Attribute>();
-			Atts.add(list);
-			if(o!=null)
-				for ( Object oo : o)
-					list.add((Attribute)oo);
+			if(dls[i]!=null && dls[i].getListLength()>0){
+				Object[] o= dls[i].storedAttributes().toArray();
+				LinkedList<Attribute> list=new LinkedList<Attribute>();
+				if(o!=null)
+					for ( Object oo : o)
+						list.add((Attribute)oo);
+				Atts.add(list);
+			}
 		}
+//		 liste bis auf wesentliche (!=null && len!=0 )
+		// kuerzen:		
 		List<Attribute> Attr= collectAttributes(Atts, defaultAttributes);
 		for ( Attribute at : Attr){
 			try {
@@ -231,40 +245,39 @@ public class GeometryMergeFactory {
 
 		int n=0;// current position 
 		for( int i=0; i < list.length; i++ ) {
-			double[][] values; // part of result
-			// if we have to less Data  
-			if (list[i].getList( attr )==null && (defaults==null||defaults.size()==0)){
-				return null; 
-			}
-			// if default values are nescesarry
-			DataList l=list[i].getList( attr );
-			if (l==null){
-				values= new double[list[i].getListLength()][];
-				double[] d;
-				if(defaults.size()>i){
-					d=defaults.get(i);
-				}
-				else d= defaults.get(0);
-				for (int j = 0; j < values.length; j++){
-					values[j]=d;
-				}
-			}
-			else{
-				// if datas are given
-				if (!(l instanceof DoubleArrayArray)){
+			if(list[i].getListLength()>0){
+				double[][] values; // part of result
+				// if we have to less Data  
+				if (list[i].getList( attr )==null && (defaults==null||defaults.size()==0)){
 					return null; 
 				}
-				values = l.toDoubleArrayArray(null);
+				// if default values are nescesarry
+				DataList l=list[i].getList( attr );
+				if (l==null){
+					values= new double[list[i].getListLength()][];
+					double[] d;
+					if(defaults.size()>i){
+						d=defaults.get(i);
+					}
+					else d= defaults.get(0);
+					for (int j = 0; j < values.length; j++){
+						values[j]=d;
+					}
+				}
+				else{
+					// if datas are given
+					if (!(l instanceof DoubleArrayArray)){
+						return null; 
+					}
+					values = l.toDoubleArrayArray(null);
+				}
+				System.arraycopy(values, 0, result, n, values.length ); 
+				n += list[i].getListLength();
 			}
-			System.arraycopy(values, 0, result, n, values.length ); 
-			n += list[i].getListLength();
 		}
 		return result;  
 	}
-	/**
-	 * Merges the data for a face attribute for an array of indexed face set into a single trivial type array.
-	 * If a single entry of the array fails to have the prescribed attribute a NullPointerException is
-	 * thrown.
+	/** if some entrys of dls have len=0 or are null they are not respected
 	 * @param ifs array of indexed face sets.
 	 * @param attr a face attribute, e.g., @link de.jreality.scene.data.Attribute.NORMALS
 	 * @return array containing all data of face attribute of an array of indexed face set.
@@ -273,18 +286,19 @@ public class GeometryMergeFactory {
 	private static int [][] mergeIntArrayArrayAttribute( DataListSet [] dls , Attribute attr) {
 		//  total len of list (all elements)
 		int totalLen=0;
-		for (int i=0;i<dls.length;i++)
-			totalLen+=dls[i].getListLength();
+		for (int i=0;i<dls.length;i++){
+			if(dls[i]!=null)
+				totalLen+=dls[i].getListLength();
+		}
 		// result
 		int [][] result = new int[totalLen][];
 		int n=0;// current position 
 		for( int i=0; i < dls.length; i++ ) {
-			if (dls[i].getList( attr )!=null){
+			if (dls[i]!=null && dls[i].getList( attr )!=null){
 				int[][] values = dls[i].getList( attr ).toIntArrayArray(null);
 				System.arraycopy(values, 0, result, n, values.length );
 				n += dls[i].getListLength();
 			}
-			else return null;
 		}
 		return result;
 	}
@@ -304,30 +318,34 @@ public class GeometryMergeFactory {
 		double[] mat = Rn.transpose(null, matrix);          	
 		mat[12] = mat[13] = mat[14] = 0.0;
 		Rn.inverse(mat, mat);
-		if (respectFaces){
-			if (ifs.getFaceAttributes(Attribute.NORMALS) != null)	{
-				v = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
-				nv = Rn.matrixTimesVector(null, mat, v);
-				if (Rn.determinant(matrix) < 0.0)
-					nv = Rn.matrixTimesVector(null, flipit, nv);
-				ifs.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
-			} 
-			else{
-				if(generateFaceNormals)
-					GeometryUtility.calculateAndSetFaceNormals(ifs);
+		if (respectFacesIntern){
+			if(ifs.getNumFaces()>0){
+				if (ifs.getFaceAttributes(Attribute.NORMALS) != null)	{
+					v = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+					nv = Rn.matrixTimesVector(null, mat, v);
+					if (Rn.determinant(matrix) < 0.0)
+						nv = Rn.matrixTimesVector(null, flipit, nv);
+					ifs.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
+				} 
+				else{
+					if(generateFaceNormals)
+						GeometryUtility.calculateAndSetFaceNormals(ifs);
+				}
 			}
 		}
-		if(respectVertices){
-			if (ifs.getVertexAttributes(Attribute.NORMALS) != null)	{
-				v = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
-				nv = Rn.matrixTimesVector(null, mat, v);
-				if (Rn.determinant(matrix) < 0.0)	
-					nv = Rn.matrixTimesVector(null, flipit, nv);
-				ifs.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
-			} 
-			else{
-				if(generateVertexNormals)
-					GeometryUtility.calculateAndSetVertexNormals(ifs);
+		if(respectVerticesIntern){
+			if(ifs.getNumPoints()>0){
+				if (ifs.getVertexAttributes(Attribute.NORMALS) != null)	{
+					v = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+					nv = Rn.matrixTimesVector(null, mat, v);
+					if (Rn.determinant(matrix) < 0.0)	
+						nv = Rn.matrixTimesVector(null, flipit, nv);
+					ifs.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
+				} 
+				else{
+					if(generateVertexNormals)
+						GeometryUtility.calculateAndSetVertexNormals(ifs);
+				}
 			}
 		}
 	}
@@ -446,12 +464,12 @@ public class GeometryMergeFactory {
 		
 	//	<<=>----die faceColor defaults machen probleme----<<
 	// moeglicherweise 3 und 4 dimensionale Farben!!!
-		if(respectFaces)
+		if(respectFacesIntern)
 			if(!defaultFaceAttributes.contains(Attribute.COLORS)){
 				defaultFaceAttributes.add(Attribute.COLORS);
 				defaultFaceAttributeValues.add(fCol);
 			}
-		if(respectEdges)
+		if(respectEdgesIntern)
 			if(!defaultEdgeAttributes.contains(Attribute.COLORS)){
 				defaultEdgeAttributes.add(Attribute.COLORS);
 				defaultEdgeAttributeValues.add(eCol);
@@ -479,35 +497,47 @@ public class GeometryMergeFactory {
 		DataListSet[] faceDls= new DataListSet [ifs.length];
 		DataListSet[] edgeDls= new DataListSet [ifs.length];
 		DataListSet[] vertDls= new DataListSet [ifs.length];
-		if (respectFaces){
+		if (respectFacesIntern){
 			for (int j = 0; j < faceDls.length; j++)
 				faceDls[j]=ifs[j].getFaceAttributes();
-			final int [][] faceIndices = mergeIntArrayArrayAttribute( faceDls, Attribute.INDICES );
-			for( int i=1, n=ifs[0].getNumPoints(), k=ifs[0].getNumFaces(); i<ifs.length; n += ifs[i].getNumPoints(), i++ ) {
-				final int nof = ifs[i].getNumFaces();
-				for( int f=0; f<nof; f++, k++ ) {
+			// evtl null (egal)
+			int [][] faceIndices = mergeIntArrayArrayAttribute( faceDls, Attribute.INDICES );
+			int n=ifs[0].getNumPoints();
+			int k=ifs[0].getNumFaces();
+			// angaben ok (keine Liste liefert 0)
+			for( int i=1 ; i<ifs.length;  i++ ) {
+				for( int f=0; f<ifs[i].getNumFaces(); f++ ) {
 					final int [] face = faceIndices[k];
-					for( int j=0; j<face.length; j++)	face[j] += n;
-				}	
+					for( int j=0; j<face.length; j++)	
+						face[j] += n;
+					k++;
+				}
+				n += ifs[i].getNumPoints();
 			}
-			if(faceIndices!=null)
+			if(faceIndices==null) {respectFacesIntern=false;} 
+			else
 				result.setFaceCountAndAttributes(
 						Attribute.INDICES,
 						new IntArrayArray.Array( faceIndices )
 				);
 		}
-		if(respectEdges){
+		if(respectEdgesIntern){
 			for (int j = 0; j < edgeDls.length; j++) 
 				edgeDls[j]=ifs[j].getEdgeAttributes();
 			final int [][] edgeIndices = mergeIntArrayArrayAttribute(edgeDls, Attribute.INDICES );
-			for( int i=1, n=ifs[0].getNumPoints(), k=ifs[0].getNumEdges(); i<ifs.length; n += ifs[i].getNumPoints(), i++ ) {
-				final int nof = ifs[i].getNumEdges();
-				for( int f=0; f<nof; f++, k++ ) {
+			int n=ifs[0].getNumPoints();
+			int k=ifs[0].getNumEdges();
+			for( int i=1; i<ifs.length; i++ ) {
+				for( int f=0; f<ifs[i].getNumEdges(); f++ ) {
 					final int [] edge = edgeIndices[k];
-					for( int j=0; j<edge.length; j++) edge[j] += n;
+					for( int j=0; j<edge.length; j++) 
+						edge[j] += n;
+					k++;;
 				}	
+				n += ifs[i].getNumPoints();
 			}
-			if(edgeIndices!=null)
+			if(edgeIndices==null) {respectEdgesIntern=false;}
+			else
 				result.setEdgeCountAndAttributes(
 					Attribute.INDICES,
 					new IntArrayArray.Array( edgeIndices )
@@ -517,8 +547,10 @@ public class GeometryMergeFactory {
 			vertDls[j]=ifs[j].getVertexAttributes();
 		
 		mergeDoubleArrayArrayAttributes(result,defaultVertexAttributes,defaultVertexAttributeValues,vertDls,VERT_ATTR);
-		if(respectEdges)mergeDoubleArrayArrayAttributes(result,defaultEdgeAttributes,defaultEdgeAttributeValues,edgeDls,EDGE_ATTR);
-		if(respectFaces)mergeDoubleArrayArrayAttributes(result,defaultFaceAttributes,defaultFaceAttributeValues,faceDls,FACE_ATTR);
+		if(respectEdgesIntern)mergeDoubleArrayArrayAttributes(result,defaultEdgeAttributes,defaultEdgeAttributeValues,edgeDls,EDGE_ATTR);
+		if(respectFacesIntern)mergeDoubleArrayArrayAttributes(result,defaultFaceAttributes,defaultFaceAttributeValues,faceDls,FACE_ATTR);
+		respectEdgesIntern=respectEdges;
+		respectFacesIntern=respectFaces;
 		return result;
 	}
 	/** merges all IndexeedLineSets to one IndexedLineSet
@@ -526,11 +558,9 @@ public class GeometryMergeFactory {
 	 * @param IndexedLineSets to merge
 	 */
 	public IndexedLineSet mergeIndexedLineSets( IndexedLineSet [] ils){
-		boolean temp=respectFaces;
-		respectFaces=false;
+		respectFacesIntern=false;
 		IndexedFaceSet f=mergeIndexedFaceSets(ils);
 		IndexedLineSet l=IndexedFaceSetUtility.indexedFaceSetToIndexedLineSet(f);
-		respectFaces=temp;
 		return l;
 	}
 	/** merges all PointSets to one PointSet
@@ -539,11 +569,9 @@ public class GeometryMergeFactory {
 	 */
 
 	public PointSet mergePointSets( PointSet [] ps){
-		boolean temp=respectFaces;
-		respectFaces=false;
+		respectFacesIntern=false;
 		IndexedFaceSet f=mergeIndexedFaceSets(ps);
 		PointSet p=IndexedFaceSetUtility.indexedFaceSetToPointSet(f);
-		respectFaces=temp;
 		return p;
 	}
 	/** merges all IndexedFaceSets, IndexeedLineSets and PointSets
@@ -553,10 +581,8 @@ public class GeometryMergeFactory {
 	 * @param RootNode 
 	 */
 	public IndexedFaceSet mergeIndexedFaceSets(SceneGraphComponent cmp){
-		boolean temp=respectEdges;
-		respectEdges=false;
+		respectEdgesIntern=false;
 		IndexedFaceSet f=mergeGeometrySets(cmp);
-		respectEdges=temp;
 		return f;
 	}
 	/** merges all IndexedFaceSets, IndexeedLineSets and PointSets
@@ -566,10 +592,8 @@ public class GeometryMergeFactory {
 	 * @param RootNode 
 	 */
 	public IndexedLineSet mergeIndexedLineSets(SceneGraphComponent cmp){
-		boolean temp=respectFaces;
-		respectFaces= false;
+		respectFacesIntern= false;
 		IndexedLineSet l=IndexedFaceSetUtility.indexedFaceSetToIndexedLineSet(mergeGeometrySets(cmp));
-		respectFaces=temp;
 		return l;
 	}
 	/** merges all IndexedFaceSets, IndexeedLineSets and PointSets
@@ -579,10 +603,8 @@ public class GeometryMergeFactory {
 	 * @param RootNode 
 	 */
 	public PointSet mergePointSets(SceneGraphComponent cmp){
-		boolean temp=respectFaces;	boolean temp2=respectEdges;
-		respectFaces= false;		respectEdges= false;
+		respectFacesIntern= false;		respectEdgesIntern= false;
 		PointSet p=IndexedFaceSetUtility.indexedFaceSetToPointSet(mergeGeometrySets(cmp));
-		respectFaces=temp;			respectEdges=temp2;
 		return p;
 	}
 	// ------------- setters ----------
@@ -656,21 +678,24 @@ public class GeometryMergeFactory {
 	* @param respectEdges
 	*/
 	public void setRespectEdges(boolean respectEdges) {
-	this.respectEdges = respectEdges;
-	}
+		this.respectEdges = respectEdges;
+		this.respectEdgesIntern = respectEdges;
+		}
 	/**Face Attributes will not be ignored  
 	* @param respectEdges
 	*/
 	public void setRespectFaces(boolean respectFaces) {
-	this.respectFaces = respectFaces;
-	}
+		this.respectFaces = respectFaces;
+		this.respectFacesIntern = respectFaces;
+		}
 	/**Verrtex Attributes will not be ignored  
 	* @param respectEdges
 	* @deprecated use not yet implemented 
 	*/
 	public void setRespectVertices(boolean respectVertices) {
-	this.respectVertices = respectVertices;
-	}
+		this.respectVertices = respectVertices;
+		this.respectVerticesIntern = respectVertices;
+		}
 	// ----------- getters ------------
 	// -------- getter --------------
 	public List<Attribute> getDefaultEdgeAttributes() {
