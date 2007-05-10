@@ -343,8 +343,16 @@ public class GeometryMergeFactory {
 					ifs.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
 				} 
 				else{
-					if(generateVertexNormals)
+					if(generateVertexNormals){
 						GeometryUtility.calculateAndSetVertexNormals(ifs);
+						if (!defaultVertexAttributes.contains(Attribute.NORMALS)){
+							defaultVertexAttributes.add(Attribute.NORMALS);
+							// avoid definition-holes by generating vertexnormals without faces: 
+							List<double[]> zeroNormals=new LinkedList<double[]>();
+							zeroNormals.add(new double[]{0,0,0});
+							defaultEdgeAttributeValues.add(zeroNormals);
+						}
+					}
 				}
 			}
 		}
