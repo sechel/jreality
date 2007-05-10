@@ -490,10 +490,11 @@ public class GeometryMergeFactory {
 					for( int j=0; j<face.length; j++)	face[j] += n;
 				}	
 			}
-			result.setFaceCountAndAttributes(
-					Attribute.INDICES,
-					new IntArrayArray.Array( faceIndices )
-			);
+			if(faceIndices!=null)
+				result.setFaceCountAndAttributes(
+						Attribute.INDICES,
+						new IntArrayArray.Array( faceIndices )
+				);
 		}
 		if(respectEdges){
 			for (int j = 0; j < edgeDls.length; j++) 
@@ -506,7 +507,8 @@ public class GeometryMergeFactory {
 					for( int j=0; j<edge.length; j++) edge[j] += n;
 				}	
 			}
-			result.setEdgeCountAndAttributes(
+			if(edgeIndices!=null)
+				result.setEdgeCountAndAttributes(
 					Attribute.INDICES,
 					new IntArrayArray.Array( edgeIndices )
 			);

@@ -1717,7 +1717,7 @@ public class IndexedFaceSetUtility {
 		IndexedLineSet l= new IndexedLineSet(f.getNumPoints(),f.getNumEdges());
 		l.setGeometryAttributes(f.getGeometryAttributes());
 		l.setVertexAttributes(f.getVertexAttributes());
-		l.setVertexAttributes(f.getEdgeAttributes());
+		l.setEdgeAttributes(f.getEdgeAttributes());
 		return l;
 	}
 	public static IndexedFaceSet indexedLineSetToIndexedFaceSet(IndexedLineSet l){
@@ -1726,7 +1726,7 @@ public class IndexedFaceSetUtility {
 		IndexedFaceSet f= new IndexedFaceSet(l.getNumPoints(),0);
 		f.setGeometryAttributes(l.getGeometryAttributes());
 		f.setVertexAttributes(l.getVertexAttributes());
-		f.setEdgeAttributes(l.getEdgeAttributes());
+		f.setEdgeCountAndAttributes(l.getEdgeAttributes());
 		return f;
 	}
 	public static IndexedFaceSet pointSetToIndexedFaceSet(PointSet p){
