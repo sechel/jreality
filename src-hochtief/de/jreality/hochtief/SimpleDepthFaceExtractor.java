@@ -117,7 +117,7 @@ public class SimpleDepthFaceExtractor {
 			for(int j=0;j<N;j++){
 				if(faceId[i][j]==faceNr){
 					
-					double[] p=convertDepthPoint(i, j, depth[i][j], M, N);
+					double[] p=Scan3DUtility.convertDepthValueTo3DCoordinate(i, j, depth[i][j], M, N);
 					
 					verts[vertexCount][0]=p[0];
 					verts[vertexCount][1]=p[1];
@@ -128,18 +128,6 @@ public class SimpleDepthFaceExtractor {
 		}
 		
 		return verts;
-	}
-	
-	public static double[] convertDepthPoint(int i, int j, double depth, int M, int N){
-		double phi = j * 2 * Math.PI / (N - 1);
-		double theta = -i
-				* (Math.PI - (Math.PI / 2 - 1.1306075316023216))
-				/ (M - 1) + Math.PI / 2;		
-		return new double[] {
-				depth * Math.cos(phi) * Math.cos(theta),
-				depth * Math.sin(phi) * Math.cos(theta),
-				depth * Math.sin(theta)
-		};
 	}
 	
 	public double[][] getTextureCoordinates(int faceNr, int faceSize, double offset){

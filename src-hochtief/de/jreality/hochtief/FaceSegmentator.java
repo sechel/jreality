@@ -77,7 +77,7 @@ public class FaceSegmentator {
 	public static double medianDistance(int i, int j, int faceNr, double[][] depth, int[][] faceId){
 		int M=depth.length;
 		int N=depth[0].length;
-		double[] p=SimpleDepthFaceExtractor.convertDepthPoint(i, j, depth[i][j], M, N);
+		double[] p=Scan3DUtility.convertDepthValueTo3DCoordinate(i, j, depth[i][j], M, N);
 		ArrayList<Double> distValues=new ArrayList<Double>();
 		int posI,posJ;		
 		for(int ii=i-1;ii<i+2;ii++){
@@ -90,7 +90,7 @@ public class FaceSegmentator {
 				if(posJ>=N) posJ=posJ-N;
 				if(faceId[posI][posJ]==faceNr && Math.abs(depth[posI][posJ]-depth[i][j])<=depthThreshold*Math.min(depth[posI][posJ],depth[i][j])){
 
-					double[] p2=SimpleDepthFaceExtractor.convertDepthPoint(posI, posJ, depth[posI][j], M, N);
+					double[] p2=Scan3DUtility.convertDepthValueTo3DCoordinate(posI, posJ, depth[posI][j], M, N);
 					double dist=Rn.euclideanDistance(p, p2);
 					int listPos=0;
 					while(listPos<distValues.size() && distValues.get(listPos)<dist)
@@ -107,6 +107,8 @@ public class FaceSegmentator {
 
 	}
 	
+	static double maxNB=0;
+	static double minNB=10000;
 	//averageValue adapted to average-distance to surounding face-points 
 	//maxDistance is the the distance from that all average-distances above will result a neighborhood=1 and all smaller average-distances will result a neighborhood>1
 	public static double averageValue(int i, int j, double maxDistance, int faceNr, double[][] depth, int[][] faceId){
@@ -118,9 +120,9 @@ public class FaceSegmentator {
 		return averageValue(i, j, neighborhood, faceNr, depth, faceId);
 	}
 	
-	public static double averageValue(int i, int j, int neighborhood, int faceNr, double[][] depth, int[][] faceId){
-		double smoothThreshold=0.01;
-		
+	private static double maxDistToAverageValue=0.01;
+	
+	public static double averageValue(int i, int j, int neighborhood, int faceNr, double[][] depth, int[][] faceId){		
 		int M=depth.length;
 		int N=depth[0].length;
 		double averageValue=0;
@@ -143,26 +145,18 @@ public class FaceSegmentator {
 			}
 		}
 		averageValue=averageValue/(double)vertexCount;
-		if(Math.abs(averageValue-depth[i][j])<smoothThreshold) //*depth[i][j])
+		if(Math.abs(averageValue-depth[i][j])<maxDistToAverageValue) //*depth[i][j])
 			return averageValue;
 		else
 			return depth[i][j];
 	}
 	
-	
-	static double maxNB=0;
-	static double minNB=10000;
-	
-
-	
 	public static double averageDistance(int i, int j, int faceNr, double[][] depth, int[][] faceId){
-		
-		
 		int M=depth.length;
 		int N=depth[0].length;
 		double averageValue=0;
 		int vertexCount=0;
-		double[] p=SimpleDepthFaceExtractor.convertDepthPoint(i, j, depth[i][j], M, N);
+		double[] p=Scan3DUtility.convertDepthValueTo3DCoordinate(i, j, depth[i][j], M, N);
 		int posI,posJ;		
 		for(int ii=i-1;ii<i+2;ii++){
 			posI=ii; 
@@ -173,17 +167,15 @@ public class FaceSegmentator {
 				if(posJ<0) posJ=N+posJ;
 				if(posJ>=N) posJ=posJ-N;
 				if(faceId[posI][posJ]==faceNr && Math.abs(depth[posI][posJ]-depth[i][j])<=depthThreshold*Math.min(depth[posI][posJ],depth[i][j])){
-
-					double[] p2=SimpleDepthFaceExtractor.convertDepthPoint(posI, posJ, depth[posI][j], M, N);
+					double[] p2=Scan3DUtility.convertDepthValueTo3DCoordinate(posI, posJ, depth[posI][j], M, N);
 					averageValue+=Rn.euclideanDistance(p, p2);
 					vertexCount++;
-
 				}
 			}
 		}
-
 		return averageValue/(double)vertexCount;
-
 	}
+	
+	
 	
 }
