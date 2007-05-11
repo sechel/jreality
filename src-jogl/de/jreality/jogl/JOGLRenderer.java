@@ -147,7 +147,9 @@ public class JOGLRenderer  implements AppearanceListener {
 		javax.swing.Timer followTimer = new javax.swing.Timer(1000, new ActionListener()	{
 			public void actionPerformed(ActionEvent e) {updateGeometryHashtable(); } } );
 		followTimer.start();
-		setAuxiliaryRoot(viewer.getAuxiliaryRoot());		
+		setAuxiliaryRoot(viewer.getAuxiliaryRoot());	
+		// have to make sure JOGLConfiguration is initialized before we do anything else
+		JOGLConfiguration.getLogger(); 
 	}
 
 
@@ -652,10 +654,6 @@ public class JOGLRenderer  implements AppearanceListener {
 		gbClass = c; 
 	}
 
-	public static void setGoBetweenClass(String name) throws ClassNotFoundException	{
-		gbClass = (Class<? extends GoBetween>) Class.forName(name); 
-	}
-
 //	static {
 //		try {
 //			String foo = Secure.getProperty("jreality.jogl.goBetweenClass");
@@ -678,7 +676,6 @@ public class JOGLRenderer  implements AppearanceListener {
 		GoBetween gb = null;
 		Object foo = goBetweenTable.get(sgc);
 		if (foo == null)	{
-			//gb = JOGLRenderer.this.new GoBetween(sgc);
 			try {
 				gb = gbClass.newInstance();
 			} catch (InstantiationException e) {

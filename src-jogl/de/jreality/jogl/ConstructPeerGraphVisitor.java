@@ -21,22 +21,6 @@ public class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
 	boolean topLevel = true;
 	JOGLRenderer jr;
 	static Class<? extends JOGLPeerComponent> peerClass = JOGLPeerComponent.class;
-//	static {
-//		try {
-//			String foo = Secure.getProperty("jreality.jogl.peerClass");
-//			if (foo != null)
-//				try {
-//					peerClass = (Class<? extends JOGLPeerComponent>) Class.forName(foo);
-//				} catch (ClassNotFoundException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//		} catch (AccessControlException e) {
-//			e.printStackTrace();
-//		} catch(SecurityException se)	{
-//			LoggingSystem.getLogger(ConstructPeerGraphVisitor.class).warning("Security exception in setting configuration options");
-//		}
-//	}
 	public static void setPeerClass(Class<? extends JOGLPeerComponent> c)	{
 		peerClass = c; 
 	}
@@ -55,7 +39,7 @@ public class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
 
 	private ConstructPeerGraphVisitor(ConstructPeerGraphVisitor pv, JOGLPeerComponent p)	{
 		super();
-		sgp = (SceneGraphPath) pv.sgp.clone();
+		sgp = new SceneGraphPath(pv.sgp);
 		myParent = p;
 		topLevel = false;
 		this.jr = pv.jr;
@@ -71,9 +55,7 @@ public class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
 		} else {
 			try {
 				try {
-					//peer = JOGLConfiguration.getPeerClass().getConstructor(null).newInstance(null);
 					peer = peerClass.getConstructor(null).newInstance(null);
-//					System.err.println("Got instance of class "+peer.getClass());
 				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
 				} catch (SecurityException e) {

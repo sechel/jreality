@@ -14,7 +14,7 @@ import de.jreality.scene.event.SceneGraphComponentEvent;
  * This is an alternative class for use in conjunction with special sorts of
  * scene graphs with many identical children, as one finds in discrete groups.
  * 
- * To activate use, run java with "-DdiscreteGroup.copycat" flag
+ * To activate use, run java with "-DdiscreteGroup.copycat=true" set
  * @author Charles Gunn
  *
  */
