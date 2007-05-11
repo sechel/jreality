@@ -409,10 +409,7 @@ public class JOGLRenderer  implements AppearanceListener {
 
 		String vv = globalGL.glGetString(GL.GL_VERSION);
 		theLog.log(Level.FINE,"version: "+vv);			
-//		int[] tu = new int[1];
-//		globalGL.glGetIntegerv(GL.GL_MAX_TEXTURE_UNITS, tu,0);
-//		theLog.info("# of texture units: "+tu[0]);	
-		// force new display lists
+		lightsChanged = true;
 		Texture2DLoaderJOGL.deleteAllTextures(globalGL);
 		JOGLCylinderUtility.setupCylinderDLists(this);
 		JOGLSphereHelper.setupSphereDLists(this);
