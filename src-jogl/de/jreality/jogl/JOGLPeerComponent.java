@@ -443,13 +443,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void propagateGeometryChanged(int changed) {
-//		if (jr.renderingState.manyDisplayLists) _propagateGeometryChanged(ALL_CHANGED);
-//		else jr.displayListsDirty=true;
-//	}
-//	
-//	public void _propagateGeometryChanged(int changed)	{
 		geometryDirtyBits  = changed;
-//		handleChangedGeometry();
 		childlock.readLock();
 		for (JOGLPeerComponent child: children){		
 			child.propagateGeometryChanged(changed);
@@ -470,7 +464,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			if ((geometryDirtyBits  & POINT_SHADER_CHANGED) != 0)geometryShader.pointShader = null;
 			if ((geometryDirtyBits  & LINE_SHADER_CHANGED) != 0) geometryShader.lineShader = null;
 			if ((geometryDirtyBits  & POLYGON_SHADER_CHANGED) != 0) geometryShader.polygonShader = null;
-//			if ((geometryDirtyBits  & ALL_SHADERS_CHANGED) != 0)updateShaders();
+			if ((geometryDirtyBits  & ALL_SHADERS_CHANGED) != 0)updateShaders();
             geometryDirtyBits  = 0;
 		}
 	}
