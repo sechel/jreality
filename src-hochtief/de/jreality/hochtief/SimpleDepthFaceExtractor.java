@@ -256,8 +256,11 @@ public class SimpleDepthFaceExtractor {
 		sceneRoot.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW, false);
 		ViewerApp.display(sceneRoot);
 	}
-	
 	public void showTriangulation(int minVertexCount, String texturePath, double texOffset){
+		showTriangulation(minVertexCount, texturePath, texOffset, null);
+	}
+	
+	public void showTriangulation(int minVertexCount, String texturePath, double texOffset, SceneGraphComponent child){
 		SceneGraphComponent sceneRoot=new SceneGraphComponent();
 		sceneRoot.setAppearance(new Appearance());
 		sceneRoot.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
@@ -269,6 +272,7 @@ public class SimpleDepthFaceExtractor {
 		sceneRoot.getAppearance().setAttribute(CommonAttributes.FACE_DRAW, true);
 		sceneRoot.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,Color.WHITE);
 
+		if(child!=null) sceneRoot.addChild(child);
 		
 		int[] faceSize=getFaceSizes();
 		
@@ -294,7 +298,7 @@ public class SimpleDepthFaceExtractor {
 					PickUtility.setPickable(ifsf.getGeometry(), false);
 					ifsf.update();
 
-					SceneGraphComponent sgc=new SceneGraphComponent();
+					SceneGraphComponent sgc=new SceneGraphComponent("face "+i);
 					sgc.setGeometry(ifsf.getGeometry());
 					sgc.setAppearance(new Appearance());
 					TextureUtility.createTexture(sgc.getAppearance(),"polygonShader", img, false);

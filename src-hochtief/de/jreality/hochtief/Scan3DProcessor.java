@@ -1,7 +1,12 @@
 package de.jreality.hochtief;
 
 import java.io.IOException;
+
+import de.jreality.geometry.PointSetFactory;
 import de.jreality.reader.AbstractReader;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.util.Input;
 
 /**
@@ -47,24 +52,36 @@ public class Scan3DProcessor extends AbstractReader{
 		sdfe.setDepthThreshold(0.05);
 		sdfe.process();
 		//sdfe.show(minVertexCount);
-		int[] faceSize=sdfe.getFaceSizes();
-		double[][] smoothedDepth;
-		for(int f=0;f<faceSize.length;f++){
-			if(faceSize[f]>minVertexCount){
-				smoothedDepth=FaceSegmentator.smoothFace(f, depth, sdfe.getFaceIds());
-				for(int i=0;i<M;i++){
-					for(int j=0;j<N;j++){
-						if(sdfe.getFaceIds()[i][j]==f)
-							depth[i][j]=smoothedDepth[i][j];
-					}
-				}
-			}
-		}
-
+//		int[] faceSize=sdfe.getFaceSizes();
+//		double[][] smoothedDepth;
+//		for(int f=0;f<faceSize.length;f++){
+//			if(faceSize[f]>minVertexCount){
+//				smoothedDepth=FaceSegmentator.smoothFace(f, depth, sdfe.getFaceIds());
+//				for(int i=0;i<M;i++){
+//					for(int j=0;j<N;j++){
+//						if(sdfe.getFaceIds()[i][j]==f)
+//							depth[i][j]=smoothedDepth[i][j];
+//					}
+//				}
+//			}
+//		}
 		
 		
 		
-		sdfe.showTriangulation(minVertexCount, texturePath, loader.getPhiOffset());
+//		int[] faceSize=sdfe.getFaceSizes();
+//		double[][][] normals=Scan3DUtility.getVertexNormals(0.05, depth, sdfe.getFaceIds());
+//		for(int f=0;f<faceSize.length;f++){
+//			if(faceSize[f]>minVertexCount){
+//				Scan3DShowUtility.showNormals(0.1, f, normals, depth, sdfe.getFaceIds());
+//			}
+//		}
+		
+		
+		
+		int[][] edgeId=EdgeDetector.detect(0.3, 0.05, 0.5 , depth, sdfe.getFaceIds());		
+		SceneGraphComponent edgeNode=EdgeDetector.getEdgePointsSgc(edgeId, sdfe.getFaceIds(), sdfe.getFaceSizes(), minVertexCount, depth);
+		
+		sdfe.showTriangulation(minVertexCount, texturePath, loader.getPhiOffset(),edgeNode);
 				
 	}
 
