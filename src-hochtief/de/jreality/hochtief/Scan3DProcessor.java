@@ -1,5 +1,6 @@
 package de.jreality.hochtief;
 
+import java.awt.Color;
 import java.io.IOException;
 
 import de.jreality.geometry.PointSetFactory;
@@ -78,10 +79,14 @@ public class Scan3DProcessor extends AbstractReader{
 		
 		
 		
-		int[][] edgeId=EdgeDetector.detect(0.3, 0.05, 0.5 , depth, sdfe.getFaceIds());		
-		SceneGraphComponent edgeNode=EdgeDetector.getEdgePointsSgc(edgeId, sdfe.getFaceIds(), sdfe.getFaceSizes(), minVertexCount, depth);
+		int[][] edgeId=EdgeDetector.detect(0.1, 0.05, 0.1 , depth, sdfe.getFaceIds());		
+		SceneGraphComponent innerEdgePointsNode=EdgeDetector.getEdgePointsSgc(EdgeDetector.EDGE_POINTS_TYPE_BEND,Color.RED,edgeId, sdfe.getFaceIds(), sdfe.getFaceSizes(), minVertexCount, depth);
+		SceneGraphComponent borderEdgePointsNode=EdgeDetector.getEdgePointsSgc(EdgeDetector.EDGE_POINTS_TYPE_FACEBORDER,Color.GREEN,edgeId, sdfe.getFaceIds(), sdfe.getFaceSizes(), minVertexCount, depth);
+		SceneGraphComponent edgePointsNode=new SceneGraphComponent();
+		edgePointsNode.addChild(innerEdgePointsNode);
+		edgePointsNode.addChild(borderEdgePointsNode);
 		
-		sdfe.showTriangulation(minVertexCount, texturePath, loader.getPhiOffset(),edgeNode);
+		sdfe.showTriangulation(minVertexCount, texturePath, loader.getPhiOffset(),edgePointsNode);
 				
 	}
 
