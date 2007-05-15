@@ -137,6 +137,9 @@ package de.jreality.geometry;
  *  
  * @author gonska
  */
+//  TODO Face Colors werden zu Grundfarben!!!! (wiso?)
+// 		  aehnliches passiert offensichtlich mit Normalen
+
 import java.awt.Color;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -490,11 +493,11 @@ public class GeometryMergeFactory {
 			// color
 			Color Mycol;
 			Mycol=dps.getDiffuseColor();
-			fCol.add(new double[]{Mycol.getRed(),Mycol.getGreen(),Mycol.getBlue(),Mycol.getAlpha()});
+			fCol.add(new double[]{((double)Mycol.getRed())/255,((double)Mycol.getGreen())/255,((double)Mycol.getBlue())/255,((double)Mycol.getAlpha())/255});
 			Mycol=dls.getDiffuseColor();
-			eCol.add(new double[]{Mycol.getRed(),Mycol.getGreen(),Mycol.getBlue(),Mycol.getAlpha()});
+			eCol.add(new double[]{((double)Mycol.getRed())/255,((double)Mycol.getGreen())/255,((double)Mycol.getBlue())/255,((double)Mycol.getAlpha())/255});
 			Mycol=dvs.getDiffuseColor();
-			vCol.add(new double[]{Mycol.getRed(),Mycol.getGreen(),Mycol.getBlue(),Mycol.getAlpha()});
+			vCol.add(new double[]{((double)Mycol.getRed())/255,((double)Mycol.getGreen())/255,((double)Mycol.getBlue())/255,((double)Mycol.getAlpha())/255});
 
 			// transformation
 			double[] mat=p.getMatrix(new Matrix().getArray());
