@@ -578,9 +578,13 @@ public class CoordinateSystemFactory {
 		int numOfTicks = 1;
 		for (double level=round(minLevel+axisScale); level<=maxLevel; level=round(level+axisScale) ) {
 			if (level==0) continue;  //no tick at origin
-			ticksGeom = IndexedFaceSetUtility.mergeIndexedFaceSets(
-				new IndexedFaceSet[]{ ticksGeom, 
-				Primitives.pyramid(octagonalCrossSection(level), new double[]{0,0,level}) });
+			// new:
+			GeometryMergeFactory gMFac= new GeometryMergeFactory();
+			ticksGeom=gMFac.mergeIndexedFaceSets(new PointSet[]{ ticksGeom, 
+					Primitives.pyramid(octagonalCrossSection(level), new double[]{0,0,level}) });
+			// old: 
+			// ticksGeom = IndexedFaceSetUtility.mergeIndexedFaceSets(new IndexedFaceSet[]{ ticksGeom, 
+			//	Primitives.pyramid(octagonalCrossSection(level), new double[]{0,0,level}) });
 			numOfTicks++;
 		}
 		//GeometryUtility.calculateAndSetVertexNormals(ticksIFS);
