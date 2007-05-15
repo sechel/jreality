@@ -55,15 +55,12 @@ import de.jreality.scene.data.StringArray;
 public class JoinGeometry {
 	public static double eps= 0.000001;
 	
-	
-		private static boolean compare(double[] p1,double[] p2,double eps){
-				// vergleicht Punkte bis auf sqrt(eps) als Tolleranz
-		
-		double delta = (p1[0]-p2[0])*(p1[0]-p2[0]) // quadrat der Differenz
-					  +(p1[1]-p2[1])*(p1[1]-p2[1])
-					  +(p1[2]-p2[2])*(p1[2]-p2[2]);
-		//System.out.println(" x:"+p1[0]+","+p1[1]+","+p1[2]+") y:"+p2[0]+","+p2[1]+","+p2[2]+")-> "+(delta<eps));
-		return (delta<eps);
+	private static boolean compare(double[] p1,double[] p2,double eps){
+				// vergleicht Punkte in R^n bis auf eps als Tolleranz
+		double delta= 0;
+		for (int i=0;i<p1.length;i++)
+			delta=(p1[i]-p2[i])*(p1[i]-p2[i]);
+		return (delta<eps*eps);
 	}
 	private static int[][] makeNewIndicees(int [][] indicesOld,int [] refference){
 		int len=indicesOld.length;
@@ -82,6 +79,28 @@ public class JoinGeometry {
 		}
 		return indicesNew;
 	}
+	
+	
+	
+	
+	
+	
+	
+	public static IndexedFaceSet removeRedundantGraphics(IndexedFaceSet ifs, Attribute ... atts){
+		// collect all double Attributes
+		// collect all int Attributes (without indices)
+		
+		
+		return null;
+		
+	}
+		
+	
+	
+	
+	
+	
+	
 	
 	/**
 	 * entfernt alle doppelt angegebenen Punkte

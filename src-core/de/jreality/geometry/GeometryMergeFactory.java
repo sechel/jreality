@@ -188,13 +188,13 @@ public class GeometryMergeFactory {
 	private List<Attribute> defaultVertexAttributes=new LinkedList<Attribute>();//	
 	private List<List<double[]>>defaultVertexAttributeValues=new LinkedList<List<double[]>>();// 
 	private final int FACE_ATTR=2,EDGE_ATTR=1,VERT_ATTR=0;
-
-	// TODO:	
     // defaults which have to be set even if no geometry supports them.
 	// must allready be listed above.
-	private List<Attribute> importantFaceDefaultAttributes=null;// []
-	private List<Attribute> importantEdgeDefaultAttributes=null;// []
-	private List<Attribute> importantVertexDefaultAttributes=null;// []
+	private List<Attribute> importantFaceDefaultAttributes= new LinkedList<Attribute>();
+	private List<Attribute> importantEdgeDefaultAttributes= new LinkedList<Attribute>();
+	private List<Attribute> importantVertexDefaultAttributes= new LinkedList<Attribute>();
+
+	// TODO:	
 	// will be used intern if only this attributes have to be respected
 	// wil be ignored if they are null
 	private List<Attribute> onlyThisFaceAttributes=null;// []
@@ -205,10 +205,14 @@ public class GeometryMergeFactory {
 	// END TODO
 	
 
-	private static List<Attribute> collectAttributes(List<List<Attribute>> atLists, List<Attribute> defAtt){
-		// TODO attention: colors which are defined in appearances must be used
-		// to garanty that use <code>important_DefaultAttributes</code>
-				
+	public GeometryMergeFactory() {
+		importantFaceDefaultAttributes.add(Attribute.COLORS);
+		importantEdgeDefaultAttributes.add(Attribute.COLORS);
+		importantVertexDefaultAttributes.add(Attribute.COLORS);
+	}
+	
+	
+	private static List<Attribute> collectAttributes(List<List<Attribute>> atLists, List<Attribute> defAtt, List<Attribute> impAtt){
 		//	keep in mind unnesscesary defaults 
 		List<Attribute> badDefaults= new LinkedList<Attribute>();
 		if(defAtt!=null)
@@ -254,6 +258,11 @@ public class GeometryMergeFactory {
 		// eliminate unnescecary attributes
 		for (Attribute bad : badDefaults)
 			goodAttr.remove(bad);
+		// add important attributes
+		for (Attribute imp : impAtt )
+			if(!goodAttr.contains(imp))
+				if(defAtt.contains(imp))
+					goodAttr.add(imp);
 		return  goodAttr;
 	} 
 	/**
@@ -264,7 +273,8 @@ public class GeometryMergeFactory {
 	 * @param typ  0/1/2 works for Vertex/Edge/FaceAttributes
 	 */
 	private void mergeDoubleArrayArrayAttributes(PointSet result,
-			List<Attribute> defaultAttributes,List<List<double[]>>defaultAttributeValues, 
+			List<Attribute> defaultAttributes,List<List<double[]>>defaultAttributeValues,
+			List<Attribute> impAtts,
 			DataListSet[] dls ,int typ) {
 		// attr liste erstellen :
 		// aber nur Attributenehmen 
@@ -281,7 +291,7 @@ public class GeometryMergeFactory {
 		}
 //		 liste bis auf wesentliche (!=null && len!=0 )
 		// kuerzen:		
-		List<Attribute> Attr= collectAttributes(Atts, defaultAttributes);
+		List<Attribute> Attr= collectAttributes(Atts, defaultAttributes, impAtts);
 		for ( Attribute at : Attr){
 			try {
 				int k=-1;
@@ -557,22 +567,26 @@ public class GeometryMergeFactory {
 		//  mergen
 		IndexedFaceSet f= new IndexedFaceSet();
 		
-	//	<<=>----die faceColor defaults machen probleme----<<
-	// moeglicherweise 3 und 4 dimensionale Farben!!!
 		if(respectFacesIntern)
 			if(!defaultFaceAttributes.contains(Attribute.COLORS)){
 				defaultFaceAttributes.add(Attribute.COLORS);
 				defaultFaceAttributeValues.add(fCol);
 			}
+			else defaultFaceAttributeValues.set(
+					defaultFaceAttributes.indexOf(Attribute.COLORS)	, fCol);
 		if(respectEdgesIntern)
 			if(!defaultEdgeAttributes.contains(Attribute.COLORS)){
 				defaultEdgeAttributes.add(Attribute.COLORS);
 				defaultEdgeAttributeValues.add(eCol);
 			}
+			else defaultEdgeAttributeValues.set(
+					defaultEdgeAttributes.indexOf(Attribute.COLORS)	, eCol);
 		if(!defaultVertexAttributes.contains(Attribute.COLORS)){
 			defaultVertexAttributes.add(Attribute.COLORS);
 			defaultVertexAttributeValues.add(vCol);
 		}
+		else defaultVertexAttributeValues.set(
+				defaultVertexAttributes.indexOf(Attribute.COLORS)	, vCol);
 		f=mergeIndexedFaceSets(faces);
 		return f;
 	}  
@@ -641,9 +655,9 @@ public class GeometryMergeFactory {
 		for (int j = 0; j < vertDls.length; j++) 
 			vertDls[j]=ifs[j].getVertexAttributes();
 		
-		mergeDoubleArrayArrayAttributes(result,defaultVertexAttributes,defaultVertexAttributeValues,vertDls,VERT_ATTR);
-		if(respectEdgesIntern)mergeDoubleArrayArrayAttributes(result,defaultEdgeAttributes,defaultEdgeAttributeValues,edgeDls,EDGE_ATTR);
-		if(respectFacesIntern)mergeDoubleArrayArrayAttributes(result,defaultFaceAttributes,defaultFaceAttributeValues,faceDls,FACE_ATTR);
+		mergeDoubleArrayArrayAttributes(result,defaultVertexAttributes,defaultVertexAttributeValues,importantVertexDefaultAttributes,vertDls,VERT_ATTR);
+		if(respectEdgesIntern)mergeDoubleArrayArrayAttributes(result,defaultEdgeAttributes,defaultEdgeAttributeValues,importantEdgeDefaultAttributes,edgeDls,EDGE_ATTR);
+		if(respectFacesIntern)mergeDoubleArrayArrayAttributes(result,defaultFaceAttributes,defaultFaceAttributeValues,importantFaceDefaultAttributes,faceDls,FACE_ATTR);
 		respectEdgesIntern=respectEdges;
 		respectFacesIntern=respectFaces;
 		return result;
