@@ -45,6 +45,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import de.jreality.geometry.GeometryMergeFactory;
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.IndexedLineSetFactory;
@@ -319,8 +320,9 @@ public class VRMLHelper {
 			}
 		if(geos.length==0)
 			return null; 
-		IndexedFaceSet result=IndexedFaceSetUtility.mergeIndexedFaceSets(geos);
-		return result;
+		
+		GeometryMergeFactory gmf= new GeometryMergeFactory();
+		return gmf.mergeIndexedFaceSets(geos);	
 		}
 	/**
 	 * Cone mit optionalem Mantel bzw Boden
@@ -379,9 +381,10 @@ public class VRMLHelper {
 			ifsf.update();
 			sides= ifsf.getIndexedFaceSet();
 		}
-		if (sidesdraw && bottomdraw)
-			return IndexedFaceSetUtility.mergeIndexedFaceSets(
-					new	IndexedFaceSet[]{bottom,sides});
+		if (sidesdraw && bottomdraw){
+			GeometryMergeFactory gmf= new GeometryMergeFactory();
+			return gmf.mergeIndexedFaceSets(new PointSet[]{bottom,sides});
+		}	
 		if (bottomdraw)
 			return bottom;
 		if (sidesdraw)
