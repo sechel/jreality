@@ -776,13 +776,14 @@ public class JOGLRendererHelper {
 		// for (int i = 0; i<16; ++i) dglc2o[i]=glc2o[i];
 		// System.err.println("glc2o
 		// is"+Rn.matrixToString(Rn.inverse(dglc2o,dglc2o)));
+//		System.err.println("Sig is "+jr.renderingState.currentSignature);
 		for (int i = 0, n = labels.length; i < n; i++) {
 			ImageData img = labels[i];
 			tex2d.setImage(img);
 			LabelUtility.calculateBillboardMatrix(bbm, img.getWidth() * scale,
 					img.getHeight() * scale, offset, alignment, c2o,
 					LabelUtility.positionFor(i, vertices, indices),
-					Pn.EUCLIDEAN);
+					jr.renderingState.currentSignature); //)Pn.EUCLIDEAN);
 			Texture2DLoaderJOGL.render(gl, tex2d, true);
 			gl.glPushMatrix();
 			gl.glMultTransposeMatrixd(bbm, 0);
