@@ -13,54 +13,7 @@ public class EdgeDetector {
 	public static int EDGE_POINTS_TYPE_NOEDGE=0;
 	public static int EDGE_POINTS_TYPE_BEND=1;
 	public static int EDGE_POINTS_TYPE_FACEBORDER=-1;
-	
-	
-//	public static int[][] detect(double varianzThreshold, double depthThreshold, double maxNbhDistance, double[][] depth, int[][] faceId){
-//		int M=depth.length; int N=depth[0].length;
-//		int[][] edgeId=new int[M][N]; 
-//		
-//		double maxNB=0;
-//		double minNB=10000;
-//	
-//		for(int i=0;i<M;i++){
-//			for(int j=0;j<N;j++){		
-//				
-//				if(Scan3DUtility.getNeighborhood(i, j, 1, depthThreshold, depth, faceId).length<8)
-//					edgeId[i][j]=1;
-//				else{
-//					int neighborhoodSize=Scan3DUtility.getNeighborhoodSize(i, j, depthThreshold, maxNbhDistance, depth, faceId);			
-//					if(neighborhoodSize>maxNB) maxNB=neighborhoodSize;
-//					if(neighborhoodSize<minNB) minNB=neighborhoodSize;
-//					
-//					int[][] nbh=Scan3DUtility.getNeighborhood(i, j, neighborhoodSize, depthThreshold, depth, faceId);
-//
-//
-//
-//					double[][] normals=new double[nbh.length][2];
-//					for(int n=0;n<nbh.length;n++)
-//						normals[n]=Scan3DUtility.getVertexNormal(i, j, depthThreshold, depth, faceId);
-//
-//
-//
-//					double[] cov=Scan3DUtility.getCovarianzMatrix(normals);
-//
-//					double max=0;
-//					for(int c=0;c<cov.length;c++){
-//						if(Math.abs(cov[c])>max)
-//							max=Math.abs(cov[c]);
-//					}
-//
-//					if(max>varianzThreshold)
-//						edgeId[i][j]=1;
-//				}
-//			}
-//		}
-//		
-//		System.out.println("maxNbhSize="+maxNB);
-//		System.out.println("minNbhSize="+minNB);
-//		
-//		return edgeId;
-//	}
+	public static int EDGE_POINTS_TYPE_SINGLEPOINT=-2;
 	
 	public static int[][] detect(double varianzThreshold, double depthThreshold, double maxNbhDistance, double[][] depth, int[][] faceId){
 		int M=depth.length; int N=depth[0].length;
@@ -81,7 +34,7 @@ public class EdgeDetector {
 				int adjacentPointsCount=Scan3DUtility.getNeighborhood(i, j, 1, depthThreshold, depth, faceId).length;
 				if(adjacentPointsCount>2 && adjacentPointsCount<8)
 					edgeId[i][j]=EDGE_POINTS_TYPE_FACEBORDER;
-				else{
+				else if(adjacentPointsCount>2){
 					int neighborhoodSize=Scan3DUtility.getNeighborhoodSize(i, j, depthThreshold, maxNbhDistance, depth, faceId);			
 
 					if(neighborhoodSize>maxNB) maxNB=neighborhoodSize;
@@ -122,9 +75,12 @@ public class EdgeDetector {
 						if(max>varianzThreshold)
 							edgeId[i][j]=EDGE_POINTS_TYPE_BEND;
 					}
+				}else{
+					edgeId[i][j]=EDGE_POINTS_TYPE_SINGLEPOINT;
 				}
 
 			}
+			//System.out.println("edge detection "+(int)(Math.ceil((double)i/(double)M*100))+"% finished");
 		}
 
 		System.out.println("maxNB="+maxNB);

@@ -1,11 +1,6 @@
 package de.jreality.hochtief;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-
-import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
-
-import de.jreality.math.Matrix;
 import de.jreality.math.Rn;
 
 public class Scan3DUtility {
@@ -51,22 +46,8 @@ public class Scan3DUtility {
 		int N=depth[0].length;
 		
 //		8-neighborhood -> which triangulation good for v-Ns?
-//		int[][] nbh={{i+1,j-1},{i+1,j},{i+1,j+1},{i,j+1},{i-1,j+1},{i-1,j},{i-1,j-1},{i,j-1},{i+1,j-1}};
-//		for(int ii=0;ii<nbh.length;ii++){
-//			if(nbh[ii][0]<0) nbh[ii][0]=M+nbh[ii][0];
-//			if(nbh[ii][0]>=M) nbh[ii][0]=nbh[ii][0]-M;
-//			if(nbh[ii][1]<0) nbh[ii][1]=N+nbh[ii][1];
-//			if(nbh[ii][1]>=N) nbh[ii][1]=nbh[ii][1]-N;
-//		}
-		
 		int[][] nbh=getSorted1Nbh(i, j, depthThreshold, depth, faceId);
-		
-//		System.out.println("\nnbh "+i+", "+j+" :");
-//		for(int v=0;v<nbh.length;v++){
-//			System.out.println(nbh[v][0]+", "+nbh[v][1]);
-//		}
-		
-	
+
 		if(nbh.length<2) return new double[] {0,0,0};
 		
 		double[][] edges=new double[nbh.length][];
@@ -83,24 +64,18 @@ public class Scan3DUtility {
 		double[] vNormal=new double[3];
 		double factor=1;
 		for(int ii=0;ii<fNormals.length;ii++){
-			//if(faceId[nbh[ii][0]][nbh[ii][1]]==faceId[i][j] && Math.abs(depth[nbh[ii][0]][nbh[ii][1]]-depth[i][j])<=depthThreshold*Math.min(depth[nbh[ii][0]][nbh[ii][1]],depth[i][j])){
-				//MWA
-				factor=Math.asin(Rn.euclideanNorm(Rn.crossProduct(null, edges[ii], edges[ii+1]))
-						/(Rn.euclideanNorm(edges[ii])*Rn.euclideanNorm(edges[ii+1])));
-				
-				//MWSELR
-//				factor=Rn.euclideanNorm(Rn.crossProduct(null, edges[ii], edges[ii+1]))
-//						/(Math.pow(Rn.euclideanNorm(edges[ii]),2)*Math.pow(Rn.euclideanNorm(edges[ii+1]),2));
-				
-				Rn.add(vNormal, vNormal, Rn.times(null, factor, fNormals[ii]));
-			//}
+			//MWA
+			factor=Math.asin(Rn.euclideanNorm(Rn.crossProduct(null, edges[ii], edges[ii+1]))
+					/(Rn.euclideanNorm(edges[ii])*Rn.euclideanNorm(edges[ii+1])));
+
+			//MWSELR
+//			factor=Rn.euclideanNorm(Rn.crossProduct(null, edges[ii], edges[ii+1]))
+//			/(Math.pow(Rn.euclideanNorm(edges[ii]),2)*Math.pow(Rn.euclideanNorm(edges[ii+1]),2));
+
+			Rn.add(vNormal, vNormal, Rn.times(null, factor, fNormals[ii]));
+
 		}
 		return Rn.normalize(vNormal,vNormal);	
-		
-//		Rn.normalize(vNormal,vNormal);
-//		double phi = Math.atan2(vNormal[1], vNormal[0]);
-//		double theta = Math.atan2(vNormal[2], Math.sqrt(vNormal[0] * vNormal[0] + vNormal[1] * vNormal[1]));
-//		return new double[] {phi,theta};
 	}
 	
 	public static double[] getCovarianzMatrix(double[][] data){
@@ -114,13 +89,12 @@ public class Scan3DUtility {
 		for(int i=0;i<count;i++)
 			Rn.subtract(centeredData[i], data[i], center);
 		double[] cov=new double[dim*dim];
-		double entry;
 		for(int d1=0;d1<dim;d1++){
 			for(int d2=0;d2<dim;d2++){
-				entry=0;
+				double entry=0;
 				for(int i=0;i<count;i++)
 					entry+=(centeredData[i][d1]*centeredData[i][d2]);
-				entry=entry/(count-1);
+				entry=entry/(double)count;
 				cov[d1*dim+d2]=entry;				
 			}
 		}
