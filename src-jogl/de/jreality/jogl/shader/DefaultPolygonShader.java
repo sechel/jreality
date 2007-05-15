@@ -57,6 +57,7 @@ import de.jreality.scene.Cylinder;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Sphere;
+import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
@@ -89,6 +90,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	GlslDefaultPolygonShader glslShader;
 	EffectiveAppearance myEap = null;
 	boolean inheritGLSL = false;
+	boolean geometryHasTextureCoordinates = false;
+	boolean needsChecked = true;
 	/**
 		 * 
 		 */
@@ -130,7 +133,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    }  else useGLSL = false;
 	    
 		vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);
-
+		geometryHasTextureCoordinates = false;
+		needsChecked = true;
  	}
 
 	public boolean isSmoothShading() {
@@ -162,8 +166,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
 		else		gl.glShadeModel(GL.GL_FLAT);
 		jrs.smoothShading = smoothShading;
-	int texunitcoords = 0;
-	texUnit = GL.GL_TEXTURE0; // jr.getRenderingState().texUnitCount + GL.GL_TEXTURE0; //
+		int texunitcoords = 0;
+		texUnit = GL.GL_TEXTURE0; // jr.getRenderingState().texUnitCount + GL.GL_TEXTURE0; //
 	    if (lightMap != null) {
 		    gl.glActiveTexture(texUnit);
 		    gl.glEnable(GL.GL_TEXTURE_2D);
@@ -172,14 +176,22 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		    texUnit++;
 		    texunitcoords++;
 	    }
-	    
 	    if (texture2D != null) {
-	    	gl.glActiveTexture(texUnit);
-	      	gl.glEnable(GL.GL_TEXTURE_2D);
-			Texture2DLoaderJOGL.render(gl, texture2D);
-			//testTextureResident(jr, gl);
-		    texUnit++;
-		    texunitcoords++;
+		    Geometry curgeom = jr.getRenderingState().currentGeometry;
+		    if (needsChecked)	// assume geometry stays constant between calls to setFromEffectiveAppearance() ...
+		    	if ((curgeom instanceof IndexedFaceSet) &&
+		    		((IndexedFaceSet) curgeom).getVertexAttributes(Attribute.TEXTURE_COORDINATES) != null) {
+		    			geometryHasTextureCoordinates = true; 
+		    			needsChecked = false;
+		    	}
+		    if (geometryHasTextureCoordinates) {
+		    	gl.glActiveTexture(texUnit);
+		      	gl.glEnable(GL.GL_TEXTURE_2D);
+				Texture2DLoaderJOGL.render(gl, texture2D);
+				//testTextureResident(jr, gl);
+			    texUnit++;
+			    texunitcoords++;		    	
+		    }
 	    }
 
 	    if (reflectionMap != null)  {
