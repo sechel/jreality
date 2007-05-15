@@ -73,6 +73,9 @@ public class AppearancePluginVR extends AbstractPluginVR {
 		prefs.putInt("lineColorGreen", c.getGreen());
 		prefs.putInt("lineColorBlue", c.getBlue());
 		prefs.putBoolean("showFaces", appearancePanel.isShowFaces());
+		prefs.putBoolean("facesReflecting", appearancePanel.isFacesReflecting());
+		prefs.putBoolean("linesReflecting", appearancePanel.isLinesReflecting());
+		prefs.putBoolean("pointsReflecting", appearancePanel.isPointsReflecting());
 		prefs.putDouble("faceReflection", appearancePanel.getFaceReflection());
 		prefs.putDouble("lineReflection", appearancePanel.getLineReflection());
 		prefs.putDouble("pointReflection", appearancePanel.getPointReflection());
